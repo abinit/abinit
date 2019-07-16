@@ -38,6 +38,7 @@ module m_spin_observables
   use m_multibinit_dataset, only: multibinit_dtset_type
 
   implicit none
+
   private
   !!***
   type, public :: spin_observable_t
@@ -212,9 +213,10 @@ contains
 
   subroutine ob_calc_traj_obs(self)
     class(spin_observable_t) :: self
+    ABI_UNUSED(self%avg_E_t)
   end subroutine ob_calc_traj_obs
 
-  subroutine ob_calc_thermo_obs(self )
+  subroutine ob_calc_thermo_obs(self)
     class(spin_observable_t) :: self
     real(dp) :: avgm
     ! Cv
@@ -242,12 +244,12 @@ contains
        self%chi = (self%avg_m2_t-self%avg_m_t**2)/self%temperature/kb_SI
     endif
 
-
   end subroutine ob_calc_thermo_obs
 
   subroutine ob_calc_correlation_obs(self)
 
     class(spin_observable_t) :: self
+    ABI_UNUSED(self%ntime)
   end subroutine ob_calc_correlation_obs
 
   subroutine ob_calc_observables(self, S, Snorm, energy)

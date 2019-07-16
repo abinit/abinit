@@ -134,8 +134,6 @@ contains
 
 subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,rprimd,comm_mpi)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, optional,intent(in) :: comm_mpi
@@ -674,8 +672,6 @@ end subroutine pspini
 
 subroutine pspcor(ecore,epsatm,natom,ntypat,typat,zion)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,ntypat
@@ -815,8 +811,6 @@ end subroutine pspcor
 
 subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 &  psps,vlspl,dvlspl,xcccrc,xccc1d,nctab,comm_mpi)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1435,7 +1429,6 @@ subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
  use m_errors
 
  use defs_datatypes, only : nctab_t
- implicit none
 
 !Arguments ------------------------------------
 !scalars

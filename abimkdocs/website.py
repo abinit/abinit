@@ -253,7 +253,10 @@ class Website(object):
         # Read mkdocs configuration file.
         # TODO: Should read Abinit version from a centralized file.
         with io.open(os.path.join(self.root, "..", "mkdocs.yml"), "rt", encoding="utf-8") as fh:
-            self.mkdocs_config = yaml.load(fh)
+            if hasattr(yaml, "FullLoader"):
+                self.mkdocs_config = yaml.load(fh, Loader=yaml.FullLoader)
+            else:
+                self.mkdocs_config = yaml.load(fh)
 
         # Build parser to convert Markdown to HTML.
         # The parser must support the same extensions as those used by mkdocs
@@ -329,7 +332,7 @@ class Website(object):
             #"conducti",
             "mrgscr",
             #"macroave",
-            "mrgdv",
+            "mrgdv", "tdep"
         ])
 
         for test in tests:
@@ -892,9 +895,10 @@ The bibtex file is available [here](../abiref.bib).
 
     Most of the tutorials do not rely on parallelism (except the specific tutorials on parallelism). 
     However you can run most of the tutorial examples in parallel.                  
-    With e.g. 2 MPI processes, to run abinit in parallel use *mpirun* (*mpiexec*) and the syntax:
+    With e.g. 10 MPI processes and 4 *openMP* threads, to run abinit in parallel use *mpirun* (*mpiexec*) and the syntax:
 
-        mpirun -n 2 abinit < files_file > log 2> err
+        export OMP_NUM_THREADS=4
+        mpirun -n 10 abinit -c 4 < files_file > log 2> err
 
     The standard output of the application is redirected to `log` while `err` collects the standard error
     (runtime error messages, if any, are written here).

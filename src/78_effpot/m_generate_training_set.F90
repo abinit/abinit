@@ -96,7 +96,6 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
  use m_supercell, only : supercell_type
  use m_geometry, only : xcart2xred
  use m_phonons ,only :thermal_supercell_make,thermal_supercell_free
-  implicit none
 
 !Arguments ------------------------------------
   !scalars
@@ -131,6 +130,8 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
   type(strain_type) :: strain
 
 ! *************************************************************************
+
+ ABI_UNUSED((/rprimd(1,1), xred(1,1)/))
 
   write(message,'(a,(80a),a)') ch10,('=',ii=1,80),ch10
   call wrtout(ab_out,message,'COLL')

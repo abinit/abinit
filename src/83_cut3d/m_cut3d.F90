@@ -1702,7 +1702,6 @@ end subroutine cut3d_volumeint
 !! nspinor= number of spinorial components of the wavefunctions
 !! nsppol= number of spin polarization
 !! ntypat = number of atom type
-!! paral_kgb= parallization option, it is set to 0 in the parent subroutine
 !! rprim = orientation of the unit cell axes
 !! xcart = cartesian coordinates
 !! typat= input variable typat(natom)
@@ -1727,12 +1726,12 @@ end subroutine cut3d_volumeint
 !! SOURCE
 
 subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npwarr,&
-&  nr1,nr2,nr3,nspinor,nsppol,ntypat,paral_kgb,rprimd,xcart,typat,znucl)
+&  nr1,nr2,nr3,nspinor,nsppol,ntypat,rprimd,xcart,typat,znucl)
 
 !Arguments -----------------------------------
 !scalars
  integer,intent(in) :: exchn2n3d,natom,nkpt,nr1,nr2,nr3,nspinor,nsppol
- integer,intent(in) :: ntypat,paral_kgb
+ integer,intent(in) :: ntypat
  real(dp),intent(in) :: ecut
  character(len=*),intent(in) :: wfk_fname
 !arrays
@@ -2144,7 +2143,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 &       ratsph_arr,rc_ylm,sum_1atom_1ll,sum_1atom_1lm,ucvol,ylm_k,znucl_atom)
 
        call dens_in_sph(cmax,cgcband(:,(cspinor-1)*npw_k+1:cspinor*npw_k),gmet,istwfk(ckpt),&
-&       kg_k,natom,ngfft,mpi_enreg,npw_k,paral_kgb,ph1d,ratsph_arr,ucvol)
+&       kg_k,natom,ngfft,mpi_enreg,npw_k,ph1d,ratsph_arr,ucvol)
 
        write(std_out,'(a)' )' Charge in the sphere around each atom '
        do iatom=1,natom

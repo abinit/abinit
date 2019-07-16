@@ -71,6 +71,8 @@ contains
 !!                        - k point direction in the case (choice=5, 51, 52 and signs=2)
 !!                        - strain component (1:6) in the case (choice=2,signs=2) or (choice=6,signs=1)
 !!                        - strain component (1:9) in the case (choice=33,signs=2) 
+!!                        - (1:9) components to specify the atom to be moved and the second q-gradient 
+!!                          direction in the case (choice=25,signs=2)
 !!  indlmn(6,nlmn)= array giving l,m,n,lm,ln,s for i=lmn
 !!  kpg(npw,nkpg)=(k+G) components (if nkpg=3).
 !!                (k+G) Cartesian components for choice=33
@@ -89,7 +91,7 @@ contains
 !!           paw_opt=3 : PAW overlap matrix (Sij)
 !!           paw_opt=4 : both PAW nonlocal part of H (Dij) and overlap matrix (Sij)
 !!  ph3d(2,npw,matblk)=three-dimensional phase factors
-!!  [qdir]= optional, direction of the q-gradient (only for choice=22 and choice=33)
+!!  [qdir]= optional, direction of the q-gradient (only for choice=22, choice=25 and choice=33)
 !!  ucvol=unit cell volume (bohr^3)
 !!
 !! OUTPUT
@@ -100,6 +102,7 @@ contains
 !!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
 !!                or one of its derivatives to the input vect.  
 !!      if (choice=22) <G|d2V_nonlocal/d(atm. pos)dq|vect_in> (at q=0)
+!!      if (choice=25) <G|d3V_nonlocal/d(atm. pos)dqdq|vect_in> (at q=0)
 !!      if (choice=33) <G|d2V_nonlocal/d(strain)dq|vect_in> (at q=0)
 !! --if (paw_opt=0, 1 or 4)
 !!    vect(2,npwout*nspinor)=result of the aplication of the concerned operator
@@ -182,7 +185,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 !Local variables-------------------------------
 !Arrays
 !scalars
- integer :: fdb,fdf,ia,iaph3d,ibeta,ic,idelta,idelgam,igamma
+ integer :: fdb,fdf,ia,ialpha,iaph3d,ibeta,ic,idelta,idelgam,igamma
  integer :: ii,il,ilmn,ipw,ipwshft,ispinor,jc,nthreads,ffnl_dir1,ffnl_dir(3)
  real(dp) :: scale,two_piinv,wt
  logical :: parity
@@ -240,16 +243,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
  end if
 
 #ifdef MR_DEV
-!For choice=33 will need kpg in Cartesian coordinates
- if (choice==33) then
-   two_piinv=1.0_dp/two_pi
-!   ABI_ALLOCATE(kpg,(npw,3))
-!   do ipw=1,npw
-!     kpg(ipw,1)=kpg(ipw,1)*gprimd(1,1)+kpg(ipw,2)*gprimd(1,2)+kpg(ipw,3)*gprimd(1,3)
-!     kpg(ipw,2)=kpg(ipw,1)*gprimd(2,1)+kpg(ipw,2)*gprimd(2,2)+kpg(ipw,3)*gprimd(2,3)
-!     kpg(ipw,3)=kpg(ipw,1)*gprimd(3,1)+kpg(ipw,2)*gprimd(3,2)+kpg(ipw,3)*gprimd(3,3)
-!   end do
- end if
+if (choice==33) two_piinv=1.0_dp/two_pi
 #endif
 
  ABI_ALLOCATE(ztab,(npw))
@@ -470,13 +464,40 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
            ffnl_dir1=2; if(dimffnl>2) ffnl_dir1=1+qdir
            if (idir==qdir) then
              do ilmn=1,nlmn
-               ztab(:)=ztab(:)+two_pi*ffnl(:,1,ilmn)*cmplx(gxfac_(2,ilmn),-gxfac_(1,ilmn),kind=dp)
+               ztab(:)=ztab(:)+ffnl(:,1,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
              end do
            end if
            do ilmn=1,nlmn
-             ztab(:)=ztab(:)+two_pi*kpg(:,idir)*ffnl(:,ffnl_dir1,ilmn)*cmplx(gxfac_(2,ilmn),-gxfac_(1,ilmn),kind=dp)
-             ztab(:)=ztab(:)+ffnl(:,ffnl_dir1,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
+             ztab(:)=ztab(:)+kpg(:,idir)*ffnl(:,ffnl_dir1,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
+             ztab(:)=ztab(:)-ffnl(:,ffnl_dir1,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
            end do
+           ztab(:)=ztab(:)*two_pi
+         end if
+#endif
+
+#ifdef MR_DEV
+!        ------
+         if (choice==25) then ! mixed derivative w.r.t. atm. pos and two q vectors (at q=0)
+           !Use same notation as the notes for clarity
+           ialpha=nalpha(idir)
+           idelta=nbeta(idir)
+           igamma=qdir
+           idelgam=gamma(idelta,igamma)
+           if (ialpha==igamma) then
+             do ilmn=1,nlmn
+               ztab(:)=ztab(:)+ffnl(:,1+idelta,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
+             end do
+           end if
+           if (ialpha==idelta) then
+             do ilmn=1,nlmn
+              ztab(:)=ztab(:)+ffnl(:,1+igamma,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
+             end do
+           end if
+           do ilmn=1,nlmn
+             ztab(:)=ztab(:)+kpg(:,ialpha)*ffnl(:,4+idelgam,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
+             ztab(:)=ztab(:)-ffnl(:,4+idelgam,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
+           end do
+           ztab(:)=ztab(:)*two_pi
          end if
 #endif
 
@@ -971,22 +992,51 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 #ifdef MR_DEV
 !        ------
          else if (choice==22) then ! mixed derivative w.r.t. atm. pos and q vector (at q=0)
-           ffnl_dir1=2
+           ffnl_dir1=2; if(dimffnl>2) ffnl_dir1=1+qdir
 !$OMP DO
            do ipw=1,npw
              if (idir==qdir) then
                do ilmn=1,nlmn
-                 ztab(ipw)=ztab(ipw)+two_pi*ffnl(ipw,1,ilmn)*cmplx(gxfac_(2,ilmn),-gxfac_(1,ilmn),kind=dp)
+                 ztab(ipw)=ztab(ipw)+ffnl(ipw,1,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
                end do
              end if
              do ilmn=1,nlmn
-               ztab(ipw)=ztab(ipw)+two_pi*kpg(ipw,idir)*ffnl(ipw,ffnl_dir1,ilmn)*cmplx(gxfac_(2,ilmn),-gxfac_(1,ilmn),kind=dp)
-               ztab(ipw)=ztab(ipw)+ffnl(ipw,ffnl_dir1,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
+               ztab(ipw)=ztab(ipw)+kpg(ipw,idir)*ffnl(ipw,ffnl_dir1,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
+               ztab(ipw)=ztab(ipw)-ffnl(ipw,ffnl_dir1,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
              end do
+             ztab(ipw)=ztab(ipw)*two_pi
            end do
 !$OMP END DO
 #endif
 
+#ifdef MR_DEV
+!        ------
+         else if (choice==25) then ! mixed derivative w.r.t. atm. pos and thwo q vectors (at q=0)
+           !Use same notation as the notes for clarity
+           ialpha=nalpha(idir)
+           idelta=nbeta(idir)
+           igamma=qdir
+           idelgam=gamma(idelta,igamma)
+!$OMP DO
+           do ipw=1,npw
+             if (ialpha==igamma) then
+               do ilmn=1,nlmn
+                 ztab(ipw)=ztab(ipw)+ffnl(ipw,1+idelta,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
+               end do
+             end if
+             if (ialpha==idelta) then
+               do ilmn=1,nlmn
+                 ztab(ipw)=ztab(ipw)+ffnl(ipw,1+igamma,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
+               end do
+             end if
+             do ilmn=1,nlmn
+               ztab(ipw)=ztab(ipw)+kpg(ipw,ialpha)*ffnl(ipw,4+idelgam,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
+               ztab(ipw)=ztab(ipw)-ffnl(ipw,4+idelgam,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
+             end do
+             ztab(ipw)=ztab(ipw)*two_pi
+           end do
+!$OMP END DO
+#endif
 !        ------
          else if (choice==3) then ! derivative w.r.t. strain
            ffnl_dir1=2; if(dimffnl>2) ffnl_dir1=1+idir
@@ -1015,7 +1065,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 
 #ifdef MR_DEV
 !        ------
-         if (choice==33) then ! mixed derivative w.r.t. strain and q vector (at q=0)
+         else if (choice==33) then ! mixed derivative w.r.t. strain and q vector (at q=0)
            !Use same notation as the notes for clarity
            ibeta=nalpha(idir)
            idelta=nbeta(idir)
@@ -1044,7 +1094,6 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
              ztab(ipw)=ztab(ipw)*two_piinv
            end do
 !$OMP END DO
-         end if
 #endif
 
 !        ------

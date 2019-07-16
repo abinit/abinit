@@ -2,6 +2,7 @@
 ndtset 4
 optdriver 7
 #nsppol  2
+prtvol 1  # This to activate the output of PHDOS in text format (slow!)
 
 # Common data
 ecut    6.0

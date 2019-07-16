@@ -69,15 +69,6 @@ fi
 test "${lib_fft_flavor}" = "none" -o "${lib_fft_flavor}" = "abinit" && \
   tmp_rep_fft_libs="ignored"
 
-# Math
-if test "${with_math_libs}" = ""; then
-  tmp_rep_math_libs="auto-detected"
-else
-  tmp_rep_math_libs="user-defined"
-fi
-test "${lib_math_flavor}" = "none" -o "${lib_math_flavor}" = "abinit" && \
-  tmp_rep_math_libs="ignored"
-
 # Display values of important configure options and ending message
 cat <<EOF
 
@@ -101,7 +92,6 @@ Summary of important options:
   * LINALG flavor = ${lib_linalg_flavor} (libs: ${tmp_rep_linalg_libs})
   * ALGO   flavor = ${lib_algo_flavor} (libs: ${tmp_rep_algo_libs})
   * FFT    flavor = ${lib_fft_flavor} (libs: ${tmp_rep_fft_libs})
-  * MATH   flavor = ${lib_math_flavor} (libs: ${tmp_rep_math_libs})
   * DFT    flavor = ${lib_dft_flavor}
 
 Configuration complete.

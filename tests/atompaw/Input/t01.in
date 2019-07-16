@@ -25,6 +25,7 @@ UPFDX 0.005d0   UPFXMIN -9.d0     UPFZMESH 1.d0
 #%% [setup]
 #%% executable = atompaw
 #%% test_chain = t01.in, t02.in
+#%% no_check = yes
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

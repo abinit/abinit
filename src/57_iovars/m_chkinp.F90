@@ -89,8 +89,6 @@ contains
 
 subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,ndtset,ndtset_alloc,npsp
@@ -470,14 +468,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
 !  dmatpuopt
-   if (dt%usepawu==1.or.dt%usepawu==2.or.dt%usepawu==3.or.dt%usepawu==4.or.dt%usepawu==10.or.dt%usepawu==14) then
-     cond_string(1)='usepawu' ; cond_values(1)=1
+   if (dt%usepawu>0) then
+     cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmatpuopt',dt%dmatpuopt,10,(/1,2,3,4,5,6,7,8,9,10/),iout)
    end if
 
 !  dmatudiag
-   if (dt%usepawu==1.or.dt%usepawu==2.or.dt%usepawu==3.or.dt%usepawu==4.or.dt%usepawu==10.or.dt%usepawu==14) then
-     cond_string(1)='usepawu' ; cond_values(1)=1
+   if (dt%usepawu>0) then
+     cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmatudiag',dt%dmatudiag,3,(/0,1,2/),iout)
    end if
 
@@ -500,6 +498,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_entropy',dt%dmft_entropy,0,iout)
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_iter',dt%dmft_iter,0,iout)
+       cond_string(1)='usedmft' ; cond_values(1)=1
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_kspectralfunc',dt%dmft_kspectralfunc,2,(/0,1/),iout)
+       if(dt%dmft_kspectralfunc==1) then
+         cond_string(1)='dmft_kspectralfunc' ; cond_values(1)=1
+         call chkint_eq(0,1,cond_string,cond_values,ierr,'iscf',dt%iscf,2,(/-2,-3/),iout)
+       endif
        if((dt%dmft_solv<6.or.dt%dmft_solv>7).and.dt%ucrpa==0) then
          cond_string(1)='usedmft' ; cond_values(1)=1
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwlo',dt%dmft_nwlo,1,iout)
@@ -527,7 +531,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_charge_prec',dt%dmft_charge_prec,1,tol20,iout)
        if(dt%usepawu==14) then
-         cond_string(1)='usepawu' ; cond_values(1)=14
+         cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,1,(/5/),iout)
        endif
        cond_string(1)='usedmft' ; cond_values(1)=1
@@ -544,6 +548,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        end if
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_t2g',dt%dmft_t2g,2,(/0,1/),iout)
+       cond_string(1)='usedmft' ; cond_values(1)=1
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_x2my2d',dt%dmft_x2my2d,2,(/0,1/),iout)
        if (dt%dmft_solv>=4.and.dt%ucrpa==0) then
          cond_string(1)='usedmft' ; cond_values(1)=1
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_l',dt%dmftqmc_l,1,iout)
@@ -722,7 +728,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      ! Avoid wasting CPUs if nsppol==2.
      if (dt%nsppol==2 .and. .not. iseven(nproc) .and. nproc > 1) then
        write(msg,'(3a)') "Spin-polarized GW calculations should be run with an even number of processors ",ch10,&
-&       " for achieving an optimal distribution of memory and CPU load. Change the number of processors."
+        " for achieving an optimal distribution of memory and CPU load. Change the number of processors."
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
    end if
@@ -748,6 +754,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &       'Action: adjust ecutwfn with ecut.'
        MSG_ERROR_NOSTOP(message,ierr)
      end if
+   end if
+
+   ! Check variables used to specify k-points in self-energy.
+   if (dt%nkptgw /= 0 .and. (any(dt%sigma_erange > zero .or. dt%gw_qprange /= 0))) then
+     MSG_ERROR_NOSTOP("nkptw cannot be used with sigma_erange or gw_qprange", ierr)
+   end if
+   if (any(dt%sigma_erange > zero) .and. dt%gw_qprange /= 0) then
+     MSG_ERROR_NOSTOP("sigma_erange and gw_qprange are mutually exclusive", ierr)
    end if
 
 !  efmas
@@ -804,24 +818,25 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=RUNL_EPH
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
-         10, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6], iout)
+         11, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7], iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        MSG_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
      end if
-     if (dt%eph_task==2 .and. dt%irdwfq==0 .and. dt%getwfq==0) then
+     if (dt%eph_task == 2 .and. dt%irdwfq == 0 .and. dt%getwfq == 0) then
        MSG_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
      end if
-     if (dt%eph_task==-5) then
+     if (dt%eph_task == -5) then
        ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task == -5")
      end if
 
-     !if (all(dt%eph_task /= [5, 6]) .and. any(dt%istwfk(1:nkpt) /= 1)) then
-     !  MSG_ERROR_NOSTOP('EPH code does not yet support istwfk != 1. Regenerate WFK with istwfk = *1', ierr)
-     !end if
-
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_frohlichm',dt%eph_frohlichm,2,[0,1],iout)
+
+     if (dt%eph_stern /= 0) then
+       MSG_ERROR_NOSTOP_IF(dt%tolwfr == zero, "tolwfr must be specified when eph_stern /= 0", ierr)
+       !if (dt%getpot_path == ABI_NOFILE)
+     end if
    end if
 
 !  exchmix
@@ -926,10 +941,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      end if
    end if
 
-!  gwmem
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gwmem',dt%gwmem,4,[0,1,10,11],iout)
 
-!  gwpara
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gwpara',dt%gwpara,3,[0,1,2],iout)
 
 !  gwrpacorr
@@ -1141,12 +1154,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='nspden'    ; cond_values(1)=nspden
      cond_string(2)='pawoptmix' ; cond_values(2)=dt%pawoptmix
      call chkint_ge(2,2,cond_string,cond_values,ierr,'iscf',dt%iscf,10,iout)
-   end if
-
-!  When usepawu=4, iscf must be <=9 (the reason needs to be studied)
-   if (dt%usepawu==4) then
-     cond_string(1)='usepawu' ; cond_values(1)=4
-     call chkint_le(1,1,cond_string,cond_values,ierr,'iscf',dt%iscf,9,iout)
    end if
 
 !  istatimg
@@ -1409,6 +1416,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  String method
    if(dt%imgmov==2) then
      cond_string(1)='imgmov'      ; cond_values(1)=dt%imgmov
+!    Some restriction for the solver
      if(dt%string_algo==0)then
        cond_string(2)='string_algo' ; cond_values(2)=dt%string_algo
        call chkint_eq(1,1,cond_string,cond_values,ierr,'mep_solver',dt%mep_solver,1,(/0/),iout)
@@ -1421,7 +1429,26 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  NEB
    if(dt%imgmov==5)then
      cond_string(1)='imgmov' ; cond_values(1)=dt%imgmov
+!    Some restriction for the solver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'mep_solver',dt%mep_solver,4,(/0,1,2,3/),iout)
+!    Static image energy is needed if spring constant is variable
+     if (abs(dt%neb_spring(1)-dt%neb_spring(2))>=tol8.and.dt%istatimg==0) then
+       write(message, '(7a)' )&
+&       'When using variable NEB spring constants (which is the default for CI-NEB),',ch10,&
+&       'all the energies of the cell images are needed (including static images!).',ch10,&
+&       'You cannot use istatimg=0!',ch10,&
+&       'Action: put istatimg=1 in input file.'
+       MSG_ERROR_NOSTOP(message,ierr)
+     end if
+!    Static image energy is needed for CI-NEB or improved tangent
+     if ((dt%neb_algo==1.or.dt%neb_algo==2).and.dt%istatimg==0) then
+       write(message, '(7a)' )&
+&       'When using Improved-tangent-NEB or CI-NEB,',ch10,&
+&       'all the energies of the cell images are needed (including static images!).',ch10,&
+&       'You cannot use istatimg=0!',ch10,&
+&       'Action: put istatimg=1 in input file.'
+       MSG_ERROR_NOSTOP(message,ierr)
+     end if
    end if
 
 !  mffmem
@@ -1835,9 +1862,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='rfstrs' ; cond_values(1)=dt%rfstrs
      call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',nspinor,1,(/1/),iout)
    end if
-!  When usepawu=2, nspinor must be 1
-   if(dt%usepawu==2)then
-     cond_string(1)='usepawu' ; cond_values(1)=2
+!  When usepawu=2 or -2, nspinor must be 1
+   if(abs(dt%usepawu)==2)then
+     cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
 !    Make sure that nspinor is 1
      call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',nspinor,1,(/1/),iout)
    end if
@@ -2143,10 +2170,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if(allow)then
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
-#ifdef MR_DEV
-     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,2,(/RUNL_NONLINEAR,RUNL_LONGWAVE/),iout)
-#endif
    end if
+
+#ifdef MR_DEV
+   !Long-wave DFPT calculation function only for LDA 
+   allow=(dt%ixc>=0).and.(dt%ixc>9)
+   if(allow)then
+     cond_string(1)='ixc' ; cond_values(1)=dt%ixc
+     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
+   end if
+#endif
 
 !  optforces
 !  When ionmov>0, optforces must be >0
@@ -2176,20 +2209,29 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
   ! only values of 0 (default) 1, 2, 3 are allowed
   call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,4,(/0,1,2,3/),iout)
   ! when orbmag /= 0, symmorphi must be 0 (no tnons)
-   if(dt%orbmag .NE. 0) then
+  if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'symmorphi',dt%symmorphi,1,(/0/),iout)
-   end if
-  ! only kptopt 4 and 3 are allowed
-   if(dt%orbmag .NE. 0) then
+  end if
+  ! only kptopt 4 and 3 are allowed for Chern number
+  if((dt%orbmag.EQ.1).OR.(dt%orbmag.EQ.3)) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,2,(/3,4/),iout)
-   end if
-  ! nproc > 1 implementation for chern_number but not for orbmag yet
-   if(dt%orbmag .GT. 1) then
+  end if
+  ! only kptopt 3 is allowed for orbmag
+  if(dt%orbmag.GT.1) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'nproc',nproc,1,(/1/),iout)
-   end if
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,1,(/3/),iout)
+  end if
+  ! only kpt parallelism is allowed at present
+  if(dt%orbmag .GT. 0) then
+     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
+  end if
+  if(dt%orbmag .GT. 0) then
+     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_kgb',dt%paral_kgb,1,(/0/),iout)
+  end if
   ! require usexcnhat 0
   if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
@@ -2264,7 +2306,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  pawcpxocc
    if (usepaw==1) then
      call chkint_eq(0,0,cond_string,cond_values,ierr,'pawcpxocc',dt%pawcpxocc,2,(/1,2/),iout)
-     if (dt%usepawu>=1.and.nspinor==2.and.dt%pawcpxocc==1) then
+     if (dt%usepawu/=0.and.nspinor==2.and.dt%pawcpxocc==1) then
        write(message, '(5a)' )&
 &       'When non-collinear magnetism is activated ,',ch10,&
 &       'and LDA+U activated ',ch10,&
@@ -3053,7 +3095,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
 !  usedmatpu
-   if (usepaw==1.and.dt%usepawu==1) then
+   if (usepaw==1.and.dt%usepawu>0) then
 !    abs(dt%usedmatpu)<=nstep
      cond_string(1)='nstep' ; cond_values(1)=dt%nstep
      call chkint_le(1,1,cond_string,cond_values,ierr,'abs(usedmatpu)',abs(dt%usedmatpu),dt%nstep,iout)
@@ -3068,6 +3110,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
          end if
        end do
      end if
+   end if
+   !usedmatpu not allowed with experimental usepawu<0
+   if (usepaw==1.and.dt%usepawu<0) then
+     cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'usedmatpu',dt%usedmatpu,1,(/0/),iout)
+   end if
+   !usedmatpu only allowed for GS
+   if (usepaw==1.and.dt%usedmatpu/=0.and.dt%optdriver/=RUNL_GSTATE) then
+     message='usedmatpu/=0 is only allowed for Ground-State calculations!'
+     MSG_ERROR_NOSTOP(message,ierr)
    end if
 
 !  usedmft
@@ -3133,7 +3185,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  usepawu and lpawu
 !  PAW+U and restrictions
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,9,(/0,1,2,3,4,5,6,10,14/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,11,(/-4,-3,-2,-1,0,1,2,3,4,10,14/),iout)
    if(dt%usepawu/=0)then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',usepaw,1,(/1/),iout)
@@ -3151,12 +3203,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  useexexch AND usepawu
 !  Restriction when use together
-   if(dt%useexexch>0.and.dt%usepawu>0)then
+   if(dt%useexexch/=0.and.dt%usepawu/=0)then
      do itypat=1,dt%ntypat
        if (dt%lpawu(itypat)/=dt%lexexch(itypat).and.&
 &       dt%lpawu(itypat)/=-1.and.dt%lexexch(itypat)/=-1) then
          write(message, '(5a,i2,3a)' )&
-&         'When PAW+U (usepawu>0) and local exact-exchange (useexexch>0)',ch10,&
+&         'When PAW+U (usepawu/=0) and local exact-exchange (useexexch/=0)',ch10,&
 &         'are selected together, they must apply on the same',ch10,&
 &         'angular momentum (lpawu/=lexexch forbidden, here for typat=',itypat,') !',ch10,&
 &         'Action: correct your input file.'
@@ -3167,7 +3219,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  usedmft/usepawu and lpawu
 !  Restriction when use together
-   if(dt%usedmft>0.or.dt%usepawu>0)then
+   if(dt%usedmft>0.or.dt%usepawu/=0)then
      nlpawu=0
      do itypat=1,dt%ntypat
        if (dt%lpawu(itypat)/=-1) then
@@ -3270,6 +3322,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if (dt%paral_kgb==1) then
      call chkint_eq(0,0,cond_string,cond_values,ierr,'use_slk',dt%use_slk,2,(/0,1/),iout)
    end if
+
+!  use_yaml
+   dt%use_yaml = 1
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'use_yaml',dt%use_yaml,2,(/0,1/),iout)
 
 !  vdw_xc
    call chkint_eq(0,1,cond_string,cond_values,ierr,'vdw_xc',dt%vdw_xc,9,(/0,1,2,5,6,7,10,11,14/),iout)

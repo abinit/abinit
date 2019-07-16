@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright (C) 2011-2019 ABINIT Group (Yann Pouillon)
 #
@@ -21,6 +21,10 @@ import sys
 
 py2 = sys.version_info[0] <= 2
 
+if sys.version[0:3] < "2.7":
+    sys.stderr.write("makemake requires Python version 2.7 or above. Exiting.")
+    sys.exit(1)
+
 from subprocess import Popen, PIPE
 import shlex
 
@@ -31,6 +35,18 @@ def getstatusoutput(command):
         process = Popen(command, shell=True, stdout=PIPE, stderr=PIPE, universal_newlines=True)
     out, _ = process.communicate()
     return (process.returncode, out)
+
+# ---------------------------------------------------------------------------- #
+
+#
+# ABINIT blocks (split of the source tree)
+#
+
+abinit_blocks = {
+  "common": "shared/common/src",
+  "core": "src",
+  "libpaw": "shared/libpaw",
+}
 
 # ---------------------------------------------------------------------------- #
 
@@ -228,26 +244,33 @@ if ( opts.run_clean ):
     "find . -depth -name 'tmp-*' -exec rm -rf {} \;")
   run_script(my_name, "Removing old files",
     "find src -name '*.old' -exec rm -f {} \;")
+  run_script(my_name, "Removing symbolic links in common",
+    "find shared/common/src -type l -exec rm -f {} \;")
+  run_script(my_name, "Removing symbolic links in core",
+    "find src -type l -exec rm -f {} \;")
 
   print_header(my_name, "Abinit scripts outputs")
-  run_script(my_name, "Removing abirules logs",
-    "rm -f src/abirules.log")
-  run_script(my_name, "Removing abirules outputs",
-    "find src -name '*.abirules' -exec rm -f {} \;")
-  run_script(my_name, "Removing abiauty outputs",
-    "find src -name '*.abiauty' -exec rm -f {} \;")
   run_script(my_name, "Removing file lists",
     "rm -f config/dist/*.lst")
   run_script(my_name, "Removing M4 macros",
     "rm -f config/m4/auto-*.m4")
   run_script(my_name, "Removing abilint outputs ",
     "rm -f .abilint abilint.log abilint.out")
-  run_script(my_name, "Removing abinit.dep files",
-    "find src -name 'abinit.dep' -exec rm {} \;")
-  run_script(my_name, "Removing abinit.dir files",
-    "find src -name 'abinit.dir' -exec rm {} \;")
   run_script(my_name, "Removing configuration dumper input",
     "rm -f config.dump.in")
+  run_script(my_name, "Removing source split scripts",
+    "rm -rf config/split")
+  for block in sorted(abinit_blocks.keys()):
+    run_script(my_name, "Removing abinit.dep files in %s" % block,
+      "find %s -name 'abinit.dep' -exec rm {} \;" % abinit_blocks[block])
+    run_script(my_name, "Removing abinit.dir files in %s" % block,
+      "find %s -name 'abinit.dir' -exec rm {} \;" % abinit_blocks[block])
+    run_script(my_name, "Removing abirules logs in %s" % block,
+      "rm -f %s/tmp-abirules.log" % abinit_blocks[block])
+    run_script(my_name, "Removing abirules outputs in %s" % block,
+      "find %s -name '*.abirules' -exec rm -f {} \;" % abinit_blocks[block])
+    run_script(my_name, "Removing abiauty outputs in %s" % block,
+      "find %s -name '*.abiauty' -exec rm -f {} \;" % abinit_blocks[block])
 
   print_header(my_name, "Core-managed documentation")
   run_script(my_name, "Removing certified build examples",
@@ -291,8 +314,9 @@ if ( opts.run_clean ):
         "find %s -name Makefile -exec rm -f {} \;" % dcln)
       run_script(my_name, "Removing libraries and object files in %s/" % dcln,
         "find %s -name '*.a' -o -name '*.o' -exec rm {} \;" % dcln)
-  run_script(my_name, "Removing binary Fortran modules in src/",
-    "find src -name '*.mod' -exec rm {} \;")
+  for block in sorted(abinit_blocks.keys()):
+    run_script(my_name, "Removing binary Fortran modules in %s" % block,
+      "find %s -name '*.mod' -exec rm {} \;" % abinit_blocks[block])
   abinit_bins = xcnf.sections()
   abinit_bins.sort()
   abinit_bins = "src/98_main/" + " src/98_main/".join(abinit_bins)
@@ -304,9 +328,9 @@ if ( opts.run_clean ):
     run_script(my_name, "Removing Fortran interfaces",
       "find src -name 'interfaces_*.F90' -exec rm {} \;")
     run_script(my_name, "Removing CPP options dumper routine",
-      "rm -f src/10_dumpinfo/m_cppopts_dumper.F90")
+      "rm -f shared/common/src/14_hidewrite/m_cppopts_dumper.F90")
     run_script(my_name, "Removing optimization flags dumper routine",
-      "rm -f src/10_dumpinfo/m_optim_dumper.F90")
+      "rm -f shared/common/src/14_hidewrite/m_optim_dumper.F90")
   else:
     print_message(my_name,
       "*** Skipping script-generated source file removal ***")
@@ -315,7 +339,7 @@ if ( opts.run_clean ):
   run_script(my_name, "Removing top config.* files",
     "rm -f config.dump config.mk config.optim config.pc config.py config.sh")
   run_script(my_name, "Removing Fortran modules containing package info",
-    "rm -f src/01manage_mpi/defs_info.F90 src/10_dumpinfo/m_build_info.F90")
+    "rm -f shared/common/src/14_hidewrite/m_build_info.F90")
 
   print_header(my_name, "Subsystems")
   for subsys in bcnf.sections():
@@ -324,6 +348,15 @@ if ( opts.run_clean ):
         run_script(my_name, "Sluicing out the %s subsystem (subdir: %s)" % \
           (subsys, subdir),
           "cd %s && ./wipeout.sh" % subdir, indent_output=False)
+
+  run_script(my_name, "Removing byte-compiled ABINIT files",
+    "find . -name 'abinit.srcc' -exec rm {} \;")
+  run_script(my_name, "Removing byte-compiled Python files",
+    "find . -name '*.py[co]' -exec rm {} \;")
+  run_script(my_name, "Removing Python cache dirs",
+    "find . -depth -name '__pycache__' -exec rm -r {} \;")
+  run_script(my_name, "Removing abisrc.py Pickle files",
+    "find . -depth -name '_project_py[23].pickle' -exec rm {} \;")
 
   now = strftime("%Y/%m/%d %H:%M:%S +0000", gmtime())
   print_message(my_name, "--------------------------------------")
@@ -432,6 +465,8 @@ if ( opts.run_buildsys ):
     "./config/scripts/make-macros-output")
   run_script(my_name, "Generating macros for include flags",
     "./config/scripts/make-macros-incflags")
+  run_script(my_name, "Generating source split symlink maker",
+    "./config/scripts/make-symlink-maker")
 else:
   print_message(my_name, "*** Skipping build system update ***")
 
@@ -446,10 +481,23 @@ if ( opts.run_source ):
   run_script(my_name, "Generating CPP option dumper",
     "./config/scripts/make-cppopts-dumper")
 
+  # Create a symlink to the sources of LibPAW, so that the same naming
+  # conventions can be used in the whole shared section of ABINIT
+  lcnf = MyConfigParser()
+  lcnf.read(os.path.join("config", "specs", "corelibs.conf"))
+  libpaw_dir = [item for item in lcnf.sections() \
+    if ( lcnf.get(item, "parent") == "libpaw" )][0]
+  src = os.path.join("..", "..", "libpaw", "src")
+  dst = os.path.join("shared", "common", "src", libpaw_dir)
+  if ( os.path.islink(dst) ):
+    os.remove(dst)
+  elif ( os.path.exists(dst) ):
+    raise OSError("a file is blocking the way: '%s' is not a symlink" % dst)
+  os.symlink(src, dst)
+
   # Call abisrc to build dependency graph and create files for buildsystem
-  #os.system("rm -rf ./src/*/interfaces_*.F90")
-  #abisrc_cmdline = "./src/abisrc.py validate" 
-  abisrc_cmdline = "./src/abisrc.py makemake" 
+  #abisrc_cmdline = "./abisrc.py validate"
+  abisrc_cmdline = "./abisrc.py makemake"
   print_message(my_name, "---> running %s" % (abisrc_cmdline))
   abisrc_exitcode = os.system(abisrc_cmdline)
 
@@ -458,11 +506,10 @@ if ( opts.run_source ):
        ****************************************************************
        ***                     FATAL ERROR!                         ***
        ****************************************************************
-       ***                                                          ***
-       *** The abisrc.py script returned an non-zero exit status.   ***
+       *** The abisrc.py script returned a non-zero exit status.    ***
        *** This usually means that the script found subroutines or  ***
        *** functions that are not declared inside modules or that   ***
-       *** there is a syntax error in the Fortran code.             ***
+       *** there is a syntax error in the Fortran code or a bug     ***
        *** See above error message.                                 ***
        *** Please note that procedures outside Fortran modules      ***
        *** are not allowed any longer.                              ***
@@ -470,6 +517,12 @@ if ( opts.run_source ):
     sys.stderr.write("[%s] Aborting now\n" % (my_name))
     sys.exit(1)
 
+  # Remove LibPAW symlink
+  if ( os.path.exists(dst) ):
+    if ( os.path.islink(dst) ):
+      os.remove(dst)
+    else:
+      raise OSError("a file is blocking the way: '%s' is not a symlink" % dst)
 
 else:
   print_message(my_name, "*** Skipping source tree update ***")

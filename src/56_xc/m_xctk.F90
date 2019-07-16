@@ -92,14 +92,12 @@ contains
 !!
 !! SOURCE
 
-subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kgb,qphon,rhor,rhonow, & !Mandatory arguments
+subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor,rhonow, & !Mandatory arguments
 &  lrhonow)              !Optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,ishift,nfft,ngrad,nspden,paral_kgb
+ integer,intent(in) :: cplex,ishift,nfft,ngrad,nspden
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -394,14 +392,12 @@ end subroutine xcden
 !! SOURCE
 
 subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden,&
-& nspgrad,paral_kgb,qphon,rhonow,vxc,&
+& nspgrad,qphon,rhonow,vxc,&
 & vxctau) ! optional argument
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,ishift,mgga,nfft,ngrad,nspden,nspgrad,paral_kgb
+ integer,intent(in) :: cplex,ishift,mgga,nfft,ngrad,nspden,nspgrad
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)

@@ -1,6 +1,6 @@
 
-.Version 8.11.0 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin16.7.0_gnu4.8 computer) 
+.Version 8.11.7 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 17 Oct 2018.
-- ( at 03h06 )
+.Starting date : Thu 30 May 2019.
+- ( at 17h43 )
   
 - input  file    -> t160.in
 - output file    -> t160.out
@@ -27,16 +27,16 @@
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
-     lnmax =       1     mgfft =      30  mpssoang =       2    mqgrid =    3001
+     lnmax =       1     mgfft =      16  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =          20        mffmem =           1         mkmem =           8
-       mpw =        1131          nfft =       27000          nkpt =           8
+       mpw =        1131          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                      11.270 Mbytes of memory.
+P This job should need less than                       4.937 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
+_ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
 
@@ -44,16 +44,16 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
-     lnmax =       1     mgfft =      30  mpssoang =       2    mqgrid =    3001
+     lnmax =       1     mgfft =      16  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =          20        mffmem =           1         mkmem =           8
-       mpw =        1131          nfft =       27000          nkpt =           8
+       mpw =        1131          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                      11.270 Mbytes of memory.
+P This job should need less than                       4.937 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
+_ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
 
@@ -61,16 +61,16 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
-     lnmax =       1     mgfft =      30  mpssoang =       2    mqgrid =    3001
+     lnmax =       1     mgfft =      16  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =          20        mffmem =           1         mkmem =           8
-       mpw =        1131          nfft =       27000          nkpt =           8
+       mpw =        1131          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                      11.270 Mbytes of memory.
+P This job should need less than                       4.937 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
+_ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
 
@@ -78,16 +78,16 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
-     lnmax =       1     mgfft =      30  mpssoang =       2    mqgrid =    3001
+     lnmax =       1     mgfft =      16  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =          20        mffmem =           1         mkmem =           8
-       mpw =        1131          nfft =       27000          nkpt =           8
+       mpw =        1131          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                      11.270 Mbytes of memory.
+P This job should need less than                       4.937 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
+_ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
 
@@ -95,16 +95,67 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
-     lnmax =       1     mgfft =      30  mpssoang =       2    mqgrid =    3001
+     lnmax =       1     mgfft =      16  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =          20        mffmem =           1         mkmem =           8
-       mpw =        1131          nfft =       27000          nkpt =           8
+       mpw =        1131          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                      11.270 Mbytes of memory.
+P This job should need less than                       4.937 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
+_ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET    6 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  6.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =      16  mpssoang =       2    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =          20        mffmem =           1         mkmem =           8
+       mpw =        1131          nfft =        4096          nkpt =           8
+================================================================================
+P This job should need less than                       4.937 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET    7 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  7.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =      16  mpssoang =       2    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =          20        mffmem =           1         mkmem =           8
+       mpw =        1131          nfft =        4096          nkpt =           8
+================================================================================
+P This job should need less than                       4.937 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET    8 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  8.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =      16  mpssoang =       2    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =          20        mffmem =           1         mkmem =           8
+       mpw =        1131          nfft =        4096          nkpt =           8
+================================================================================
+P This job should need less than                       4.937 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -120,28 +171,50 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      6.94100000E+00  1.89984032E+01
+        boxcutmin      1.10000000E+00
              ecut      3.50000000E+01 Hartree
+  eph_tols_idelta1     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta2     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta3     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta4     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta5     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta6     1.00000000E-06  1.00000000E-06
+  eph_tols_idelta7     1.00000000E-06  1.00000000E-06
+  eph_tols_idelta8     1.00000000E-12  1.00000000E-12
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
-      eph_intmeth4          1
+      eph_intmeth4          2
       eph_intmeth5          2
+      eph_intmeth6          2
+      eph_intmeth7          2
+      eph_intmeth8          1
+      eph_restart           1
          eph_task1          4
          eph_task2          5
          eph_task3          4
          eph_task4         -4
          eph_task5         -5
+         eph_task6         -4
+         eph_task7         -4
+         eph_task8          4
    eph_ngqpt_fine1       0    0    0
    eph_ngqpt_fine2       4    4    4
    eph_ngqpt_fine3       4    4    4
    eph_ngqpt_fine4       4    4    4
    eph_ngqpt_fine5       0    0    0
+   eph_ngqpt_fine6       4    4    4
+   eph_ngqpt_fine7       4    4    4
+   eph_ngqpt_fine8       4    4    4
         ddb_ngqpt        2    2    2
         ph_nqpath1          3
         ph_nqpath2          3
         ph_nqpath3          3
         ph_nqpath4          3
         ph_nqpath5          5
+        ph_nqpath6          3
+        ph_nqpath7          3
+        ph_nqpath8          3
 -          fftalg         312
         freqspmax      7.34986508E-02 Hartree
         freqspmin     -7.34986508E-02 Hartree
@@ -151,10 +224,20 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
           getdvdb3          2
           getdvdb4          2
           getdvdb5          2
+          getdvdb6          2
+          getdvdb7         20
+          getdvdb8         20
            getwfk          20
-       gw_qprange           4
+       gw_qprange1          4
+       gw_qprange2          0
+       gw_qprange3          4
+       gw_qprange4          4
+       gw_qprange5          0
+       gw_qprange6          0
+       gw_qprange7          0
+       gw_qprange8          4
            istwfk        2    0    3    0    0    0    7    0
-           jdtset        1    2    3    4    5
+           jdtset        1    2    3    4    5    6    7    8
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
@@ -169,9 +252,9 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 P           mkmem           8
             natom           2
             nband          20
-           ndtset           5
+           ndtset           8
           nfreqsp         100
-            ngfft          30      30      30
+            ngfft          16      16      16
              nkpt           8
              nsym          48
            ntypat           2
@@ -180,10 +263,35 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000
         optdriver           7
+        prteliash           1
+         prtphdos           0
             rprim      0.0000000000E+00  3.8515039575E+00  3.8515039575E+00
                        3.8515039575E+00  0.0000000000E+00  3.8515039575E+00
                        3.8515039575E+00  3.8515039575E+00  0.0000000000E+00
-      sigma_ngkpt        2    2    2
+ sigma_bsum_range1       0    0
+ sigma_bsum_range2       0    0
+ sigma_bsum_range3       2    4
+ sigma_bsum_range4       0    0
+ sigma_bsum_range5       0    0
+ sigma_bsum_range6       0    0
+ sigma_bsum_range7       0    0
+ sigma_bsum_range8       2    4
+     sigma_erange1    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange2    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange3    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange4    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange5    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange6     1.83746627E-02  1.83746627E-02 Hartree
+     sigma_erange7     1.83746627E-02  1.83746627E-02 Hartree
+     sigma_erange8    -1.00000000E+00 -1.00000000E+00 Hartree
+      sigma_ngkpt1       2    2    2
+      sigma_ngkpt2       0    0    0
+      sigma_ngkpt3       2    2    2
+      sigma_ngkpt4       2    2    2
+      sigma_ngkpt5       0    0    0
+      sigma_ngkpt6       2    2    2
+      sigma_ngkpt7       2    2    2
+      sigma_ngkpt8       2    2    2
           spgroup         225
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -210,6 +318,7 @@ P           mkmem           8
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
          symsigma        1
+         symv1scf        1
            tolwfr      1.00000000E-16
             tmesh      0.00000000E+00  3.00000000E+02  2.00000000E+00
             typat      1  2
@@ -234,6 +343,12 @@ P           mkmem           8
  chkinp: Checking input parameters for consistency, jdtset=   4.
 
  chkinp: Checking input parameters for consistency, jdtset=   5.
+
+ chkinp: Checking input parameters for consistency, jdtset=   6.
+
+ chkinp: Checking input parameters for consistency, jdtset=   7.
+
+ chkinp: Checking input parameters for consistency, jdtset=   8.
 
 ================================================================================
 == DATASET  1 ==================================================================
@@ -272,12 +387,12 @@ P           mkmem           8
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00    0.000000E+00    1.031373E-21
-         1         2    0.000000E+00    1.042939E+00    1.031373E-21
-         1         3    0.000000E+00    0.000000E+00    1.042939E+00
-         2         1   -1.038797E+00    0.000000E+00   -2.799257E-19
-         2         2    0.000000E+00   -1.038797E+00   -2.799257E-19
-         2         3    0.000000E+00    0.000000E+00   -1.038797E+00
+         1         1    1.042939E+00   -6.028390E-19   -6.035515E-19
+         1         2   -6.028390E-19    1.042939E+00    6.021265E-19
+         1         3    6.028390E-19    6.028390E-19    1.042939E+00
+         2         1   -1.038797E+00   -4.262070E-16   -4.267092E-16
+         2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
+         2         3    4.262070E-16    4.262070E-16   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t160o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -292,21 +407,6 @@ P           mkmem           8
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.2554508165E-02 (at units)
--                                   =           5.5885 [km/s]
-
- Debye frequency from partial sums:     0.2051873632E-02 (Ha)
--                                 =     0.1350067994E+02 (THz)
--Debye temperature from partial sums:     0.6479296780E+03 (K)
-
- Average speed of sound partial sums:     0.2554508165E-02 (at units)
--                                   =           5.5885 [km/s]
-
- Debye frequency from partial sums:     0.2051873632E-02 (Ha)
--                                 =     0.1350067994E+02 (THz)
--Debye temperature from partial sums:     0.6479296780E+03 (K)
-
-- Writing phonon DOS to file: t160o_DS1_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -370,25 +470,33 @@ All the independent perturbations are available
    2.47252491E-01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
-- Writing electron DOS to file: t160o_DS1_EDOS
-Number of bands in e-ph self-energy sum: 20
-From bmin: 1 to bmax: 20
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Both Real and Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
-Number of frequency in generalized Eliashberg functions: 841
-Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
-Number of q-points in the IBZ: 3
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 20
+ From bsum_start: 1 to bsum_stop: 20
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Both Real and Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequency in generalized Eliashberg functions: 841
+ Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Number of q-points in the IBZ: 3
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 3
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    9
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 20
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -402,56 +510,56 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1 -19.735  -19.851   -0.116   -0.154   -0.037    0.751   -0.463    0.310    0.000    0.000
-   2  -0.193   -0.096    0.097    0.147   -0.064    0.662   -0.305    0.452   19.542   19.755
-   3  -0.193   -0.096    0.097    0.147   -0.064    0.662   -0.305    0.452    0.000    0.000
-   4  -0.193   -0.096    0.097    0.147   -0.064    0.662   -0.305    0.452    0.000    0.000
-   5   8.342    8.258   -0.085   -0.086   -0.002    0.985   -0.021   -0.065    8.536    8.353
+   1 -19.735  -19.851   -0.116   -0.154   -0.037    0.751   -0.465    0.310    0.000    0.000
+   2  -0.193   -0.094    0.099    0.149   -0.064    0.661   -0.302    0.451   19.542   19.757
+   3  -0.193   -0.094    0.099    0.149   -0.064    0.661   -0.302    0.451    0.000    0.000
+   4  -0.193   -0.094    0.099    0.149   -0.064    0.661   -0.302    0.451    0.000    0.000
+   5   8.342    8.258   -0.085   -0.086   -0.002    0.985   -0.021   -0.065    8.536    8.352
    6  22.864   22.863   -0.001   -0.001   -0.028    0.789   -0.524    0.523   14.521   14.605
    7  22.864   22.863   -0.001   -0.001   -0.028    0.789   -0.524    0.523    0.000    0.000
    8  22.864   22.863   -0.001   -0.001   -0.028    0.789   -0.524    0.523    0.000    0.000
  
  KS gap:    8.536 (assuming bval:4 ==> bcond:5)
- QP gap:    8.353 (OTMS:    8.302)
- QP_gap - KS_gap:   -0.182 (OTMS:   -0.233)
+ QP gap:    8.352 (OTMS:    8.300)
+ QP_gap - KS_gap:   -0.183 (OTMS:   -0.235)
  
 ============================================================================================
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1 -19.234  -19.361   -0.127   -0.220   -0.137    0.578   -0.525    0.305    0.000    0.000
-   2  -2.697   -2.574    0.124    0.137   -0.012    0.901   -0.311    0.448   16.537   16.787
-   3  -0.415   -0.505   -0.090   -0.120   -0.079    0.746   -0.536    0.416    2.282    2.069
-   4  -0.415   -0.505   -0.090   -0.120   -0.079    0.746   -0.536    0.416    0.000    0.000
-   5  10.027   10.008   -0.018   -0.019   -0.003    0.976   -0.086    0.067   10.441   10.513
-   6  15.827   15.820   -0.007    0.020   -0.646   -0.333   -0.391    0.410    5.800    5.812
-   7  17.971   18.212    0.241    0.285   -0.018    0.849    0.040    0.245    2.144    2.392
-   8  17.971   18.212    0.241    0.285   -0.018    0.849    0.040    0.245    0.000    0.000
+   1 -19.234  -19.361   -0.127   -0.220   -0.137    0.578   -0.526    0.306    0.000    0.000
+   2  -2.697   -2.574    0.124    0.137   -0.012    0.902   -0.311    0.448   16.537   16.788
+   3  -0.415   -0.508   -0.093   -0.114   -0.094    0.817   -0.529    0.416    2.282    2.066
+   4  -0.415   -0.508   -0.093   -0.114   -0.094    0.817   -0.529    0.416    0.000    0.000
+   5  10.027   10.008   -0.018   -0.019   -0.002    0.976   -0.086    0.067   10.441   10.516
+   6  15.827   15.820   -0.007    0.020   -0.647   -0.332   -0.390    0.410    5.800    5.812
+   7  17.971   18.212    0.241    0.284   -0.018    0.849    0.040    0.245    2.144    2.392
+   8  17.971   18.212    0.241    0.284   -0.018    0.849    0.040    0.245    0.000    0.000
  
  KS gap:   10.441 (assuming bval:4 ==> bcond:5)
- QP gap:   10.513 (OTMS:   10.543)
- QP_gap - KS_gap:    0.071 (OTMS:    0.101)
+ QP gap:   10.516 (OTMS:   10.537)
+ QP_gap - KS_gap:    0.075 (OTMS:    0.095)
  
 ============================================================================================
-K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=  0.0 [K]
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1 -18.981  -18.864    0.118    0.178   -0.062    0.659   -0.128    0.307    0.000    0.000
-   2  -3.149   -3.188   -0.039   -0.047   -0.023    0.829   -0.406    0.359   15.833   15.676
-   3  -1.171   -1.332   -0.161   -0.184   -0.014    0.878   -0.523    0.339    1.978    1.856
-   4  -1.171   -1.332   -0.161   -0.184   -0.014    0.878   -0.523    0.339    0.000    0.000
-   5  13.987   14.047    0.060    0.068   -0.012    0.892   -0.611    0.679   15.158   15.379
-   6  15.747   15.438   -0.309   -0.534   -0.407    0.579   -0.405   -0.128    1.760    1.391
-   7  16.382   16.312   -0.071   -0.114   -0.065    0.619   -0.002   -0.112    0.635    0.874
-   8  19.258   19.479    0.220    0.249   -0.013    0.884   -0.227    0.477    2.876    3.167
-   9  19.258   19.479    0.220    0.249   -0.013    0.884   -0.227    0.477    0.000    0.000
+   1 -18.981  -18.864    0.117    0.178   -0.062    0.659   -0.129    0.307    0.000    0.000
+   2  -3.149   -3.188   -0.039   -0.048   -0.023    0.829   -0.406    0.358   15.833   15.676
+   3  -1.171   -1.340   -0.169   -0.181   -0.023    0.934   -0.520    0.339    1.978    1.848
+   4  -1.171   -1.340   -0.169   -0.181   -0.023    0.934   -0.520    0.339    0.000    0.000
+   5  13.987   14.047    0.060    0.067   -0.012    0.892   -0.611    0.678   15.158   15.387
+   6  15.747   15.438   -0.309   -0.534   -0.407    0.578   -0.406   -0.128    1.760    1.391
+   7  16.382   16.312   -0.070   -0.114   -0.065    0.619   -0.002   -0.112    0.635    0.874
+   8  19.258   19.480    0.222    0.249   -0.015    0.893   -0.228    0.477    2.876    3.169
+   9  19.258   19.480    0.222    0.249   -0.015    0.893   -0.228    0.477    0.000    0.000
  
  KS gap:   15.158 (assuming bval:4 ==> bcond:5)
- QP gap:   15.379 (OTMS:   15.409)
- QP_gap - KS_gap:    0.222 (OTMS:    0.251)
+ QP gap:   15.387 (OTMS:   15.406)
+ QP_gap - KS_gap:    0.229 (OTMS:    0.249)
  
 ============================================================================================
 
@@ -491,12 +599,12 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=  0.0 [K]
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00    0.000000E+00    1.031373E-21
-         1         2    0.000000E+00    1.042939E+00    1.031373E-21
-         1         3    0.000000E+00    0.000000E+00    1.042939E+00
-         2         1   -1.038797E+00    0.000000E+00   -2.799257E-19
-         2         2    0.000000E+00   -1.038797E+00   -2.799257E-19
-         2         3    0.000000E+00    0.000000E+00   -1.038797E+00
+         1         1    1.042939E+00   -6.028390E-19   -6.035515E-19
+         1         2   -6.028390E-19    1.042939E+00    6.021265E-19
+         1         3    6.028390E-19    6.028390E-19    1.042939E+00
+         2         1   -1.038797E+00   -4.262070E-16   -4.267092E-16
+         2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
+         2         3    4.262070E-16    4.262070E-16   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t160o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -511,21 +619,6 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=  0.0 [K]
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.2554508165E-02 (at units)
--                                   =           5.5885 [km/s]
-
- Debye frequency from partial sums:     0.2051873632E-02 (Ha)
--                                 =     0.1350067994E+02 (THz)
--Debye temperature from partial sums:     0.6479296780E+03 (K)
-
- Average speed of sound partial sums:     0.2554508165E-02 (at units)
--                                   =           5.5885 [km/s]
-
- Debye frequency from partial sums:     0.2051873632E-02 (Ha)
--                                 =     0.1350067994E+02 (THz)
--Debye temperature from partial sums:     0.6479296780E+03 (K)
-
-- Writing phonon DOS to file: t160o_DS2_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -559,7 +652,7 @@ All the independent perturbations are available
  Interpolation of the electron-phonon coupling potential
 
  From coarse q-mesh: [2,2,2] to: [4,4,4]
- Number of q-points found in input DVDB 3
+ Number of q-points found in input DVDB: 3
  Number of q-points requiring Fourier interpolation 5
 Interpolation of the electron-phonon coupling potential completed
 
@@ -603,12 +696,12 @@ Interpolation of the electron-phonon coupling potential completed
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00    0.000000E+00    1.031373E-21
-         1         2    0.000000E+00    1.042939E+00    1.031373E-21
-         1         3    0.000000E+00    0.000000E+00    1.042939E+00
-         2         1   -1.038797E+00    0.000000E+00   -2.799257E-19
-         2         2    0.000000E+00   -1.038797E+00   -2.799257E-19
-         2         3    0.000000E+00    0.000000E+00   -1.038797E+00
+         1         1    1.042939E+00   -6.028390E-19   -6.035515E-19
+         1         2   -6.028390E-19    1.042939E+00    6.021265E-19
+         1         3    6.028390E-19    6.028390E-19    1.042939E+00
+         2         1   -1.038797E+00   -4.262070E-16   -4.267092E-16
+         2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
+         2         3    4.262070E-16    4.262070E-16   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t160o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -623,21 +716,6 @@ Interpolation of the electron-phonon coupling potential completed
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.2554508165E-02 (at units)
--                                   =           5.5885 [km/s]
-
- Debye frequency from partial sums:     0.2051873632E-02 (Ha)
--                                 =     0.1350067994E+02 (THz)
--Debye temperature from partial sums:     0.6479296780E+03 (K)
-
- Average speed of sound partial sums:     0.2554508165E-02 (at units)
--                                   =           5.5885 [km/s]
-
- Debye frequency from partial sums:     0.2051873632E-02 (Ha)
--                                 =     0.1350067994E+02 (THz)
--Debye temperature from partial sums:     0.6479296780E+03 (K)
-
-- Writing phonon DOS to file: t160o_DS3_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -674,6 +752,7 @@ qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
+ More than 20 q-points with prtvol == 0. Only important messages will be printed...
 qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -683,55 +762,36 @@ qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
-
-qpoint: [-2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
-
-qpoint: [-2.5000E-01,  5.0000E-01,  2.5000E-01] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-- Writing electron DOS to file: t160o_DS3_EDOS
-Number of bands in e-ph self-energy sum: 20
-From bmin: 1 to bmax: 20
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Both Real and Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
-Number of frequency in generalized Eliashberg functions: 841
-Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
-Number of q-points in the IBZ: 8
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 3
+ From bsum_start: 2 to bsum_stop: 4
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Both Real and Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequency in generalized Eliashberg functions: 841
+ Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
+ Number of q-points in the IBZ: 8
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 3
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    9
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 2 up to my_bsum_stop: 4
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 8 of 8
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -745,56 +805,56 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1 -19.735  -19.931   -0.195   -0.381   -0.166    0.512   -0.738    0.357    0.000    0.000
-   2  -0.193   -0.031    0.162    0.271   -0.101    0.598   -0.249    0.520   19.542   19.900
-   3  -0.193   -0.031    0.162    0.271   -0.101    0.598   -0.249    0.520    0.000    0.000
-   4  -0.193   -0.031    0.162    0.271   -0.101    0.598   -0.249    0.520    0.000    0.000
-   5   8.342    8.205   -0.138   -0.144   -0.004    0.958   -0.069   -0.075    8.536    8.235
-   6  22.864   22.766   -0.098   -0.227   -0.234    0.430   -0.774    0.547   14.521   14.562
-   7  22.864   22.766   -0.098   -0.227   -0.234    0.430   -0.774    0.547    0.000    0.000
-   8  22.864   22.766   -0.098   -0.227   -0.234    0.430   -0.774    0.547    0.000    0.000
+   1 -19.735  -19.742   -0.006   -0.007   -0.002    0.982   -0.347    0.340    0.000    0.000
+   2  -0.193   -0.024    0.169    0.278   -0.099    0.608    0.278    0.000   19.542   19.718
+   3  -0.193   -0.024    0.169    0.278   -0.099    0.608    0.278    0.000    0.000    0.000
+   4  -0.193   -0.024    0.169    0.278   -0.099    0.608    0.278    0.000    0.000    0.000
+   5   8.342    8.293   -0.049   -0.050   -0.001    0.993    0.068   -0.118    8.536    8.317
+   6  22.864   22.865    0.001    0.001   -0.000    1.000    0.001   -0.000   14.521   14.572
+   7  22.864   22.865    0.001    0.001   -0.000    1.000    0.001   -0.000    0.000    0.000
+   8  22.864   22.865    0.001    0.001   -0.000    1.000    0.001   -0.000    0.000    0.000
  
  KS gap:    8.536 (assuming bval:4 ==> bcond:5)
- QP gap:    8.235 (OTMS:    8.120)
- QP_gap - KS_gap:   -0.300 (OTMS:   -0.415)
+ QP gap:    8.317 (OTMS:    8.208)
+ QP_gap - KS_gap:   -0.218 (OTMS:   -0.328)
  
 ============================================================================================
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1 -19.234  -19.184    0.050   -0.117   -0.739   -0.425   -0.469    0.352    0.000    0.000
-   2  -2.697   -2.811   -0.113   -0.103   -0.201    1.099   -0.618    0.515   16.537   16.374
-   3  -0.415   -2.400   -1.985    0.102   -0.261  -19.423   -0.377    0.479    2.282    0.411
-   4  -0.415   -2.400   -1.985    0.102   -0.261  -19.423   -0.377    0.479    0.000    0.000
-   5  10.027    9.969   -0.058   -0.066   -0.015    0.874   -0.129    0.063   10.441   12.369
-   6  15.827   15.858    0.031    0.027   -0.118    1.164   -0.447    0.474    5.800    5.889
-   7  17.971   18.020    0.050    0.123   -0.439    0.402   -0.124    0.248    2.144    2.163
-   8  17.971   18.020    0.050    0.123   -0.439    0.402   -0.124    0.248    0.000    0.000
+   1 -19.234  -19.239   -0.006   -0.006   -0.002    0.981   -0.354    0.348    0.000    0.000
+   2  -2.697   -2.978   -0.281   -0.250   -0.200    1.125   -0.250    0.000   16.537   16.261
+   3  -0.415   -1.968   -1.553    0.143   -0.262  -10.891    0.143   -0.000    2.282    1.010
+   4  -0.415   -1.968   -1.553    0.143   -0.262  -10.891    0.143   -0.000    0.000    0.000
+   5  10.027   10.025   -0.002   -0.002   -0.001    0.992    0.094   -0.096   10.441   11.993
+   6  15.827   15.830    0.003    0.003   -0.000    1.000    0.003   -0.000    5.800    5.805
+   7  17.971   17.978    0.008    0.008   -0.001    0.994    0.109   -0.101    2.144    2.149
+   8  17.971   17.978    0.008    0.008   -0.001    0.994    0.109   -0.101    0.000    0.000
  
  KS gap:   10.441 (assuming bval:4 ==> bcond:5)
- QP gap:   12.369 (OTMS:   10.273)
- QP_gap - KS_gap:    1.927 (OTMS:   -0.168)
+ QP gap:   11.993 (OTMS:   10.297)
+ QP_gap - KS_gap:    1.552 (OTMS:   -0.144)
  
 ============================================================================================
-K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=  0.0 [K]
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1 -18.981  -18.752    0.229    0.455   -0.259    0.504    0.101    0.354    0.000    0.000
-   2  -3.149   -3.209   -0.060   -0.073   -0.023    0.825   -0.487    0.414   15.833   15.543
-   3  -1.171   -1.236   -0.065   -0.115   -0.124    0.562   -0.505    0.390    1.978    1.974
-   4  -1.171   -1.236   -0.065   -0.115   -0.124    0.562   -0.505    0.390    0.000    0.000
-   5  13.987   13.994    0.007    0.010   -0.054    0.677   -0.748    0.758   15.158   15.229
-   6  15.747   15.819    0.072    0.112   -0.098    0.647    0.253   -0.141    1.760    1.825
-   7  16.382   16.209   -0.173   -0.286   -0.101    0.604   -0.160   -0.126    0.635    0.390
-   8  19.258   19.465    0.207    0.358   -0.078    0.579   -0.155    0.513    2.876    3.256
-   9  19.258   19.465    0.207    0.358   -0.078    0.579   -0.155    0.513    0.000    0.000
+   1 -18.981  -18.997   -0.015   -0.016   -0.002    0.980   -0.357    0.341    0.000    0.000
+   2  -3.149   -3.270   -0.121   -0.145   -0.021    0.838   -0.145    0.000   15.833   15.726
+   3  -1.171   -1.192   -0.021   -0.036   -0.123    0.571   -0.036   -0.000    1.978    2.079
+   4  -1.171   -1.192   -0.021   -0.036   -0.123    0.571   -0.036   -0.000    0.000    0.000
+   5  13.987   13.988    0.001    0.001   -0.000    1.000    0.001   -0.000   15.158   15.180
+   6  15.747   15.725   -0.022   -0.022   -0.001    0.992    0.130   -0.152    1.760    1.737
+   7  16.382   16.325   -0.057   -0.057   -0.001    0.993    0.125   -0.183    0.635    0.600
+   8  19.258   19.259    0.001    0.001   -0.000    1.000    0.001   -0.000    2.876    2.934
+   9  19.258   19.259    0.001    0.001   -0.000    1.000    0.001   -0.000    0.000    0.000
  
  KS gap:   15.158 (assuming bval:4 ==> bcond:5)
- QP gap:   15.229 (OTMS:   15.283)
- QP_gap - KS_gap:    0.071 (OTMS:    0.125)
+ QP gap:   15.180 (OTMS:   15.195)
+ QP_gap - KS_gap:    0.022 (OTMS:    0.037)
  
 ============================================================================================
 
@@ -837,12 +897,12 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=  0.0 [K]
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00    0.000000E+00    1.031373E-21
-         1         2    0.000000E+00    1.042939E+00    1.031373E-21
-         1         3    0.000000E+00    0.000000E+00    1.042939E+00
-         2         1   -1.038797E+00    0.000000E+00   -2.799257E-19
-         2         2    0.000000E+00   -1.038797E+00   -2.799257E-19
-         2         3    0.000000E+00    0.000000E+00   -1.038797E+00
+         1         1    1.042939E+00   -6.028390E-19   -6.035515E-19
+         1         2   -6.028390E-19    1.042939E+00    6.021265E-19
+         1         3    6.028390E-19    6.028390E-19    1.042939E+00
+         2         1   -1.038797E+00   -4.262070E-16   -4.267092E-16
+         2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
+         2         3    4.262070E-16    4.262070E-16   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t160o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -857,21 +917,6 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=  0.0 [K]
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.2554508165E-02 (at units)
--                                   =           5.5885 [km/s]
-
- Debye frequency from partial sums:     0.2051873632E-02 (Ha)
--                                 =     0.1350067994E+02 (THz)
--Debye temperature from partial sums:     0.6479296780E+03 (K)
-
- Average speed of sound partial sums:     0.2554508165E-02 (at units)
--                                   =           5.5885 [km/s]
-
- Debye frequency from partial sums:     0.2051873632E-02 (Ha)
--                                 =     0.1350067994E+02 (THz)
--Debye temperature from partial sums:     0.6479296780E+03 (K)
-
-- Writing phonon DOS to file: t160o_DS4_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -908,6 +953,7 @@ qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
+ More than 20 q-points with prtvol == 0. Only important messages will be printed...
 qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -917,55 +963,37 @@ qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
-
-qpoint: [-2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
-
-qpoint: [-2.5000E-01,  5.0000E-01,  2.5000E-01] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-- Writing electron DOS to file: t160o_DS4_EDOS
-Number of bands in e-ph self-energy sum: 20
-From bmin: 1 to bmax: 20
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Only the Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
-Number of frequency in generalized Eliashberg functions: 841
-Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
-Number of q-points in the IBZ: 8
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 9
+ From bsum_start: 1 to bsum_stop: 9
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Tetrahedron method
+ Tolerance for integration weights <     1.000000E-12     1.000000E-12
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequency in generalized Eliashberg functions: 841
+ Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
+ Number of q-points in the IBZ: 8
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 3
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    9
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 9
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 8 of 8
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -979,16 +1007,16 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   1 -19.735   -0.166      2.0    0.000
-   2  -0.193   -0.101      3.3   19.542
-   3  -0.193   -0.101      3.3    0.000
-   4  -0.193   -0.101      3.3    0.000
-   5   8.342   -0.004     74.4    8.536
-   6  22.864   -0.234      1.4   14.521
-   7  22.864   -0.234      1.4    0.000
-   8  22.864   -0.234      1.4    0.000
+   1 -19.735    0.002    139.7    0.000
+   2  -0.193    0.000 999999.0   19.542
+   3  -0.193    0.000 999999.0    0.000
+   4  -0.193    0.000 999999.0    0.000
+   5   8.342    0.000 999999.0    8.536
+   6  22.864    0.061      5.4   14.521
+   7  22.864    0.061      5.4    0.000
+   8  22.864    0.061      5.4    0.000
  
  KS gap:    8.536 (assuming bval:4 ==> bcond:5)
  
@@ -996,35 +1024,39 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   1 -19.234   -0.739      0.4    0.000
-   2  -2.697   -0.201      1.6   16.537
-   3  -0.415   -0.261      1.3    2.282
-   4  -0.415   -0.261      1.3    0.000
-   5  10.027   -0.015     21.3   10.441
-   6  15.827   -0.118      2.8    5.800
-   7  17.971   -0.439      0.8    2.144
-   8  17.971   -0.439      0.8    0.000
+   1 -19.234    1.772      0.2    0.000
+   2  -2.697    0.091      3.6   16.537
+   3  -0.415    0.156      2.1    2.282
+   4  -0.415    0.156      2.1    0.000
+   5  10.027    0.039      8.4   10.441
+   6  15.827    0.146      2.3    5.800
+   7  17.971    0.620      0.5    2.144
+   8  17.971    0.620      0.5    0.000
  
  KS gap:   10.441 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=  0.0 [K]
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   1 -18.981   -0.259      1.3    0.000
-   2  -3.149   -0.023     14.6   15.833
-   3  -1.171   -0.124      2.7    1.978
-   4  -1.171   -0.124      2.7    0.000
-   5  13.987   -0.054      6.1   15.158
-   6  15.747   -0.098      3.4    1.760
-   7  16.382   -0.101      3.3    0.635
-   8  19.258   -0.078      4.2    2.876
-   9  19.258   -0.078      4.2    0.000
+   1 -18.981    0.000 999999.0    0.000
+   2  -3.149    0.000   4163.1   15.833
+   3  -1.171    0.121      2.7    1.978
+   4  -1.171    0.121      2.7    0.000
+   5  13.987    0.005     60.5   15.158
+   6  15.747    0.202      1.6    1.760
+   7  16.382    0.104      3.2    0.635
+   8  19.258    0.194      1.7    2.876
+   9  19.258    0.194      1.7    0.000
  
  KS gap:   15.158 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
+Transport calculation results
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+          300.00        0.21E-64        0.00E+00            0.00            0.00
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1065,12 +1097,12 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=  0.0 [K]
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00    0.000000E+00    1.031373E-21
-         1         2    0.000000E+00    1.042939E+00    1.031373E-21
-         1         3    0.000000E+00    0.000000E+00    1.042939E+00
-         2         1   -1.038797E+00    0.000000E+00   -2.799257E-19
-         2         2    0.000000E+00   -1.038797E+00   -2.799257E-19
-         2         3    0.000000E+00    0.000000E+00   -1.038797E+00
+         1         1    1.042939E+00   -6.028390E-19   -6.035515E-19
+         1         2   -6.028390E-19    1.042939E+00    6.021265E-19
+         1         3    6.028390E-19    6.028390E-19    1.042939E+00
+         2         1   -1.038797E+00   -4.262070E-16   -4.267092E-16
+         2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
+         2         3    4.262070E-16    4.262070E-16   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t160o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -1085,21 +1117,6 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=  0.0 [K]
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.2554508165E-02 (at units)
--                                   =           5.5885 [km/s]
-
- Debye frequency from partial sums:     0.2051873632E-02 (Ha)
--                                 =     0.1350067994E+02 (THz)
--Debye temperature from partial sums:     0.6479296780E+03 (K)
-
- Average speed of sound partial sums:     0.2554508165E-02 (at units)
--                                   =           5.5885 [km/s]
-
- Debye frequency from partial sums:     0.2051873632E-02 (Ha)
--                                 =     0.1350067994E+02 (THz)
--Debye temperature from partial sums:     0.6479296780E+03 (K)
-
-- Writing phonon DOS to file: t160o_DS5_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1136,6 +1153,7 @@ qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
+ More than 20 q-points with prtvol == 0. Only important messages will be printed...
 qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1145,25 +1163,86 @@ qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
+All the independent perturbations are available
+--------------------------------------------------------------------------------
 
-qpoint: [-2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
+ Interpolation of the electron-phonon coupling potential
+
+ Using list of q-points specified by ph_qpath with 5 qpoints
+ Number of q-points found in input DVDB: 3
+ Number of q-points requiring Fourier interpolation 2
+Interpolation of the electron-phonon coupling potential completed
+
+
+================================================================================
+== DATASET  6 ==================================================================
+-   nproc =    1
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+
+ mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+
+ mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+- Reading GS states from WFK file: t160o_DS20_WFK
+- Reading DDB from file: t160o_DS20_DDB
+- Reading DVDB from file: t160o_DS2_DVDB
+- Reading EFMAS information from file: t160i_DS6_EFMAS.nc
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
+ R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
+ R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
+ Unit cell volume ucvol=  1.1426706E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ Effective charge tensors after 
+ imposition of the charge neutrality,
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    1.042939E+00   -6.028390E-19   -6.035515E-19
+         1         2   -6.028390E-19    1.042939E+00    6.021265E-19
+         1         3    6.028390E-19    6.028390E-19    1.042939E+00
+         2         1   -1.038797E+00   -4.262070E-16   -4.267092E-16
+         2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
+         2         3    4.262070E-16    4.262070E-16   -1.038797E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+- Found dielectric tensor and Born effective charges in DDB file: t160o_DS20_DDB
+       Homogeneous q point set in the B.Z.
+ Grid q points  :        8
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  3)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+  4)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+  5)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+  6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+  7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+  8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+
+ The interatomic forces have been obtained
+qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
 
-qpoint: [-2.5000E-01,  5.0000E-01,  2.5000E-01] is present in the DVDB file
+qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=independent, found=Yes
@@ -1172,16 +1251,443 @@ qpoint: [-2.5000E-01,  5.0000E-01,  2.5000E-01] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
+qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=independent, found=Yes
+    5)  idir= 2, ipert=   2, type=symmetric, found=No
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=independent, found=Yes
+    5)  idir= 2, ipert=   2, type=independent, found=Yes
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+ More than 20 q-points with prtvol == 0. Only important messages will be printed...
+qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=independent, found=Yes
+    5)  idir= 2, ipert=   2, type=symmetric, found=No
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
- Interpolation of the electron-phonon coupling potential
+ Number of bands in e-ph self-energy sum: 4
+ From bsum_start: 2 to bsum_stop: 5
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Tetrahedron method
+ Tolerance for integration weights <     1.000000E-06     1.000000E-06
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequency in generalized Eliashberg functions: 841
+ Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
+ Number of q-points in the IBZ: 8
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 2
+ sigma_erange:  0.500  0.500  (eV)
+ List of K-points for self-energy corrections:
+   1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   2    5
+   2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   3    4
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 2 up to my_bsum_stop: 5
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 8 of 8
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
+================================================================================
+Final results in eV.
+Notations:
+   eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+   eQP - eKS: Difference between the QP and the KS energy.
+   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+   Z(eKS): Renormalization factor.
+   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+ 
+ 
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   2  -0.193    0.000 999999.0    0.000
+   3  -0.193    0.000 999999.0    0.000
+   4  -0.193    0.000 999999.0    0.000
+   5   8.342    0.000 999999.0    8.536
+ 
+ KS gap:    8.536 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
+No more than 1 temperatures are written to the main output file.
+Please use SIGEPH.nc file and AbiPy to analyze the results.
 
- Using list of q-points specified by ph_qpath with 5 qpoints
- Number of q-points found in input DVDB 3
- Number of q-points requiring Fourier interpolation 2
-Interpolation of the electron-phonon coupling potential completed
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   3  -0.415    0.155      2.1    0.000
+   4  -0.415    0.155      2.1    0.000
+============================================================================================
+Transport calculation results
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+          300.00        0.21E-64        0.00E+00            0.00            0.00
 
+================================================================================
+== DATASET  7 ==================================================================
+-   nproc =    1
+
+--- !IterStart
+dtset:     7
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+
+ mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+
+ mkfilename : getdvdb/=0, take file _DVDB from output of DATASET  20.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+- Reading GS states from WFK file: t160o_DS20_WFK
+- Reading DDB from file: t160o_DS20_DDB
+- Reading DVDB from file: t160o_DS20_DVDB
+- Reading EFMAS information from file: t160i_DS7_EFMAS.nc
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
+ R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
+ R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
+ Unit cell volume ucvol=  1.1426706E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ Effective charge tensors after 
+ imposition of the charge neutrality,
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    1.042939E+00   -6.028390E-19   -6.035515E-19
+         1         2   -6.028390E-19    1.042939E+00    6.021265E-19
+         1         3    6.028390E-19    6.028390E-19    1.042939E+00
+         2         1   -1.038797E+00   -4.262070E-16   -4.267092E-16
+         2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
+         2         3    4.262070E-16    4.262070E-16   -1.038797E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+- Found dielectric tensor and Born effective charges in DDB file: t160o_DS20_DDB
+       Homogeneous q point set in the B.Z.
+ Grid q points  :        8
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  3)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+  4)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+  5)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+  6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+  7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+  8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+
+ The interatomic forces have been obtained
+qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=independent, found=Yes
+    5)  idir= 2, ipert=   2, type=symmetric, found=No
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=independent, found=Yes
+    5)  idir= 2, ipert=   2, type=independent, found=Yes
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=independent, found=Yes
+    5)  idir= 2, ipert=   2, type=symmetric, found=No
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+All the independent perturbations are available
+--------------------------------------------------------------------------------
+
+ Number of bands in e-ph self-energy sum: 4
+ From bsum_start: 2 to bsum_stop: 5
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Tetrahedron method
+ Tolerance for integration weights <     1.000000E-06     1.000000E-06
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequency in generalized Eliashberg functions: 841
+ Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
+ Number of q-points in the IBZ: 8
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 2
+ sigma_erange:  0.500  0.500  (eV)
+ List of K-points for self-energy corrections:
+   1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   2    5
+   2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   3    4
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 2 up to my_bsum_stop: 5
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 8 of 8
+P Number of CPUs for parallelism over bands: 1
+ Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
+================================================================================
+Final results in eV.
+Notations:
+   eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+   eQP - eKS: Difference between the QP and the KS energy.
+   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+   Z(eKS): Renormalization factor.
+   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+ 
+ 
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   2  -0.193    0.000 999999.0    0.000
+   3  -0.193    0.000 999999.0    0.000
+   4  -0.193    0.000 999999.0    0.000
+   5   8.342    0.000 999999.0    8.536
+ 
+ KS gap:    8.536 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
+No more than 1 temperatures are written to the main output file.
+Please use SIGEPH.nc file and AbiPy to analyze the results.
+
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   3  -0.415    0.155      2.1    0.000
+   4  -0.415    0.155      2.1    0.000
+============================================================================================
+Transport calculation results
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+          300.00        0.21E-64        0.00E+00            0.00            0.00
+
+================================================================================
+== DATASET  8 ==================================================================
+-   nproc =    1
+
+--- !IterStart
+dtset:     8
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+
+ mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+
+ mkfilename : getdvdb/=0, take file _DVDB from output of DATASET  20.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+- Reading GS states from WFK file: t160o_DS20_WFK
+- Reading DDB from file: t160o_DS20_DDB
+- Reading DVDB from file: t160o_DS20_DVDB
+- Reading EFMAS information from file: t160i_DS8_EFMAS.nc
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
+ R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
+ R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
+ Unit cell volume ucvol=  1.1426706E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ Effective charge tensors after 
+ imposition of the charge neutrality,
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    1.042939E+00   -6.028390E-19   -6.035515E-19
+         1         2   -6.028390E-19    1.042939E+00    6.021265E-19
+         1         3    6.028390E-19    6.028390E-19    1.042939E+00
+         2         1   -1.038797E+00   -4.262070E-16   -4.267092E-16
+         2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
+         2         3    4.262070E-16    4.262070E-16   -1.038797E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+- Found dielectric tensor and Born effective charges in DDB file: t160o_DS20_DDB
+       Homogeneous q point set in the B.Z.
+ Grid q points  :        8
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  3)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+  4)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+  5)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+  6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+  7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+  8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+
+ The interatomic forces have been obtained
+qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=independent, found=Yes
+    5)  idir= 2, ipert=   2, type=symmetric, found=No
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=independent, found=Yes
+    5)  idir= 2, ipert=   2, type=independent, found=Yes
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=independent, found=Yes
+    5)  idir= 2, ipert=   2, type=symmetric, found=No
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+All the independent perturbations are available
+--------------------------------------------------------------------------------
+
+ Number of bands in e-ph self-energy sum: 3
+ From bsum_start: 2 to bsum_stop: 4
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Both Real and Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequency in generalized Eliashberg functions: 841
+ Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
+ Number of q-points in the IBZ: 8
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 3
+ List of K-points for self-energy corrections:
+   1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
+   2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
+   3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    9
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 2 up to my_bsum_stop: 4
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 8 of 8
+P Number of CPUs for parallelism over bands: 1
+ Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
+================================================================================
+Final results in eV.
+Notations:
+   eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+   eQP - eKS: Difference between the QP and the KS energy.
+   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+   Z(eKS): Renormalization factor.
+   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+ 
+ 
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   1 -19.735  -19.742   -0.006   -0.006   -0.002    0.982   -0.347    0.340    0.000    0.000
+   2  -0.193   -0.024    0.169    0.279   -0.099    0.607    0.279    0.000   19.542   19.718
+   3  -0.193   -0.024    0.169    0.279   -0.099    0.607    0.279    0.000    0.000    0.000
+   4  -0.193   -0.024    0.169    0.279   -0.099    0.607    0.279    0.000    0.000    0.000
+   5   8.342    8.293   -0.049   -0.050   -0.001    0.993    0.068   -0.118    8.536    8.317
+   6  22.864   22.865    0.001    0.001   -0.000    1.000    0.001   -0.000   14.521   14.572
+   7  22.864   22.865    0.001    0.001   -0.000    1.000    0.001   -0.000    0.000    0.000
+   8  22.864   22.865    0.001    0.001   -0.000    1.000    0.001   -0.000    0.000    0.000
+ 
+ KS gap:    8.536 (assuming bval:4 ==> bcond:5)
+ QP gap:    8.317 (OTMS:    8.207)
+ QP_gap - KS_gap:   -0.219 (OTMS:   -0.329)
+ 
+============================================================================================
+No more than 1 temperatures are written to the main output file.
+Please use SIGEPH.nc file and AbiPy to analyze the results.
+
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   1 -19.234  -19.239   -0.005   -0.005   -0.002    0.981   -0.354    0.348    0.000    0.000
+   2  -2.697   -2.978   -0.281   -0.250   -0.200    1.125   -0.250    0.000   16.537   16.261
+   3  -0.415   -2.013   -1.598    0.144   -0.262  -11.103    0.144   -0.000    2.282    0.965
+   4  -0.415   -2.013   -1.598    0.144   -0.262  -11.103    0.144   -0.000    0.000    0.000
+   5  10.027   10.025   -0.002   -0.002   -0.001    0.992    0.094   -0.096   10.441   12.038
+   6  15.827   15.830    0.003    0.003   -0.000    1.000    0.003   -0.000    5.800    5.805
+   7  17.971   17.978    0.008    0.008   -0.001    0.994    0.109   -0.101    2.144    2.149
+   8  17.971   17.978    0.008    0.008   -0.001    0.994    0.109   -0.101    0.000    0.000
+ 
+ KS gap:   10.441 (assuming bval:4 ==> bcond:5)
+ QP gap:   12.038 (OTMS:   10.296)
+ QP_gap - KS_gap:    1.597 (OTMS:   -0.146)
+ 
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   1 -18.981  -18.997   -0.015   -0.015   -0.002    0.980   -0.357    0.342    0.000    0.000
+   2  -3.149   -3.270   -0.122   -0.145   -0.021    0.838   -0.145    0.000   15.833   15.726
+   3  -1.171   -1.191   -0.020   -0.036   -0.124    0.570   -0.036   -0.000    1.978    2.079
+   4  -1.171   -1.191   -0.020   -0.036   -0.124    0.570   -0.036   -0.000    0.000    0.000
+   5  13.987   13.988    0.001    0.001   -0.000    1.000    0.001   -0.000   15.158   15.179
+   6  15.747   15.725   -0.022   -0.022   -0.001    0.992    0.130   -0.152    1.760    1.737
+   7  16.382   16.325   -0.057   -0.057   -0.001    0.993    0.125   -0.183    0.635    0.600
+   8  19.258   19.259    0.001    0.001   -0.000    1.000    0.001   -0.000    2.876    2.934
+   9  19.258   19.259    0.001    0.001   -0.000    1.000    0.001   -0.000    0.000    0.000
+ 
+ KS gap:   15.158 (assuming bval:4 ==> bcond:5)
+ QP gap:   15.179 (OTMS:   15.195)
+ QP_gap - KS_gap:    0.021 (OTMS:    0.037)
+ 
+============================================================================================
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1189,33 +1695,58 @@ Interpolation of the electron-phonon coupling potential completed
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      6.94100000E+00  1.89984032E+01
+        boxcutmin      1.10000000E+00
              ecut      3.50000000E+01 Hartree
+  eph_tols_idelta1     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta2     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta3     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta4     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta5     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta6     1.00000000E-06  1.00000000E-06
+  eph_tols_idelta7     1.00000000E-06  1.00000000E-06
+  eph_tols_idelta8     1.00000000E-12  1.00000000E-12
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
-      eph_intmeth4          1
+      eph_intmeth4          2
       eph_intmeth5          2
+      eph_intmeth6          2
+      eph_intmeth7          2
+      eph_intmeth8          1
+      eph_restart           1
          eph_task1          4
          eph_task2          5
          eph_task3          4
          eph_task4         -4
          eph_task5         -5
+         eph_task6         -4
+         eph_task7         -4
+         eph_task8          4
    eph_ngqpt_fine1       0    0    0
    eph_ngqpt_fine2       4    4    4
    eph_ngqpt_fine3       4    4    4
    eph_ngqpt_fine4       4    4    4
    eph_ngqpt_fine5       0    0    0
+   eph_ngqpt_fine6       4    4    4
+   eph_ngqpt_fine7       4    4    4
+   eph_ngqpt_fine8       4    4    4
         ddb_ngqpt        2    2    2
         ph_nqpath1          3
         ph_nqpath2          3
         ph_nqpath3          3
         ph_nqpath4          3
         ph_nqpath5          5
+        ph_nqpath6          3
+        ph_nqpath7          3
+        ph_nqpath8          3
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
            etotal4     0.0000000000E+00
            etotal5     0.0000000000E+00
+           etotal6     0.0000000000E+00
+           etotal7     0.0000000000E+00
+           etotal8     0.0000000000E+00
             fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1226,6 +1757,12 @@ Interpolation of the electron-phonon coupling potential completed
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart7     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart8     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
         freqspmax      7.34986508E-02 Hartree
         freqspmin     -7.34986508E-02 Hartree
@@ -1235,27 +1772,28 @@ Interpolation of the electron-phonon coupling potential completed
           getdvdb3          2
           getdvdb4          2
           getdvdb5          2
+          getdvdb6          2
+          getdvdb7         20
+          getdvdb8         20
            getwfk          20
-       gw_qprange           4
-           istwfk        2    0    3    0    0    0    7    0
-           jdtset        1    2    3    4    5
-              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       2.50000000E-01  0.00000000E+00  0.00000000E+00
-                       5.00000000E-01  0.00000000E+00  0.00000000E+00
-                       2.50000000E-01  2.50000000E-01  0.00000000E+00
-                       5.00000000E-01  2.50000000E-01  0.00000000E+00
-                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
-                       5.00000000E-01  5.00000000E-01  0.00000000E+00
-                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
+       gw_qprange1          4
+       gw_qprange2          0
+       gw_qprange3          4
+       gw_qprange4          4
+       gw_qprange5          0
+       gw_qprange6          0
+       gw_qprange7          0
+       gw_qprange8          4
+           jdtset        1    2    3    4    5    6    7    8
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      2.17873965E+01
           mixprec        1
 P           mkmem           8
             natom           2
             nband          20
-           ndtset           5
+           ndtset           8
           nfreqsp         100
-            ngfft          30      30      30
+            ngfft          16      16      16
              nkpt           8
              nsym          48
            ntypat           2
@@ -1264,10 +1802,35 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000
         optdriver           7
+        prteliash           1
+         prtphdos           0
             rprim      0.0000000000E+00  3.8515039575E+00  3.8515039575E+00
                        3.8515039575E+00  0.0000000000E+00  3.8515039575E+00
                        3.8515039575E+00  3.8515039575E+00  0.0000000000E+00
-      sigma_ngkpt        2    2    2
+ sigma_bsum_range1       0    0
+ sigma_bsum_range2       0    0
+ sigma_bsum_range3       2    4
+ sigma_bsum_range4       0    0
+ sigma_bsum_range5       0    0
+ sigma_bsum_range6       0    0
+ sigma_bsum_range7       0    0
+ sigma_bsum_range8       2    4
+     sigma_erange1    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange2    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange3    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange4    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange5    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange6     1.83746627E-02  1.83746627E-02 Hartree
+     sigma_erange7     1.83746627E-02  1.83746627E-02 Hartree
+     sigma_erange8    -1.00000000E+00 -1.00000000E+00 Hartree
+      sigma_ngkpt1       2    2    2
+      sigma_ngkpt2       0    0    0
+      sigma_ngkpt3       2    2    2
+      sigma_ngkpt4       2    2    2
+      sigma_ngkpt5       0    0    0
+      sigma_ngkpt6       2    2    2
+      sigma_ngkpt7       2    2    2
+      sigma_ngkpt8       2    2    2
           spgroup         225
            strten1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1278,6 +1841,12 @@ P           mkmem           8
            strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten7     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten8     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -1304,11 +1873,10 @@ P           mkmem           8
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
          symsigma        1
+         symv1scf        1
            tolwfr      1.00000000E-16
             tmesh      0.00000000E+00  3.00000000E+02  2.00000000E+00
             typat      1  2
-              wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
-                         0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.0381281131E+00  2.0381281131E+00  2.0381281131E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1392,10 +1960,10 @@ P           mkmem           8
 - Comment : the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         60.3  wall=         65.4
+- Proc.   0 individual time (sec): cpu=         21.4  wall=         21.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         60.3  wall=         65.4
+.Delivered  11 WARNINGs and  12 COMMENTs to log file.
++Overall time at end (sec) : cpu=         21.4  wall=         21.4

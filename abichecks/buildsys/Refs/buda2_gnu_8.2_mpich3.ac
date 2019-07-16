@@ -885,29 +885,6 @@ with_linalg_libs="-L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_gf_lp64 -lmk
 #with_algo_libs="-L/usr/local/lib -llevmar"
 
 # ---------------------------------------------------------------------------- #
-# Mathematical library connector                                               #
-# ---------------------------------------------------------------------------- #
-
-# Flavor of the math library to use (default is none)
-#
-# Supported libraries:
-#
-#   * custom (bypass build-system checks)
-#   * gsl
-#   * mlib
-#   * none   (disable external math support)
-#
-#with_math_flavor="gsl"
-
-# Include flags for the math library (default is unset)
-#
-#with_math_incs="-I/usr/local/include/gsl"
-
-# Link flags for the math library (default is unset)
-#
-#with_math_libs="-L/usr/local/lib/gsl -lgsl"
-
-# ---------------------------------------------------------------------------- #
 # DFT library connector                                                        #
 # ---------------------------------------------------------------------------- #
 

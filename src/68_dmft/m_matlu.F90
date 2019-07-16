@@ -202,7 +202,7 @@ end subroutine init_matlu
 !!
 !! SOURCE
 
-subroutine zero_matlu(matlu,natom)
+subroutine zero_matlu(matlu,natom,onlynondiag)
 
  use defs_basis
  implicit none
@@ -211,14 +211,36 @@ subroutine zero_matlu(matlu,natom)
 !scalars
  integer, intent(in) :: natom
  type(matlu_type),intent(inout) :: matlu(natom)
+ integer, optional, intent(in) :: onlynondiag
 !Local variables-------------------------------
- integer :: iatom
+ integer :: iatom,im,im1,ispinor,ispinor1,isppol,ndim
 
 !*********************************************************************
 
- do iatom=1,natom
-  matlu(iatom)%mat=czero
- enddo
+ if(present(onlynondiag)) then
+   do iatom=1,natom
+     if(matlu(iatom)%lpawu.ne.-1) then
+       do ispinor=1,matlu(iatom)%nspinor
+         ndim=(2*matlu(iatom)%lpawu+1)
+         do im=1,ndim
+           do im1=1,ndim
+             do ispinor1=1,matlu(iatom)%nspinor
+               if(im/=im1.or.ispinor/=ispinor1) then
+                 do isppol=1,matlu(iatom)%nsppol
+                   matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)=czero
+                 enddo
+               end if
+             end do
+           end do
+         end do
+       end do
+     endif
+   enddo
+ else
+   do iatom=1,natom
+    matlu(iatom)%mat=czero
+   enddo
+ endif
 
 
 end subroutine zero_matlu
@@ -533,6 +555,7 @@ end subroutine print_matlu
 !!  cryst_struc <type(crystal_t)>=crystal structure data
 !!  gloc(natom) <type(matlu_type)>= density matrix in the local orbital basis and related variables
 !!  pawang <type(pawang)>=paw angular mesh and related data
+!!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!
 !! OUTPUT
 !!  gloc(natom) <type(matlu_type)>= density matrix symetrized in the local orbital basis and related variables
@@ -548,24 +571,28 @@ end subroutine print_matlu
 !! CHILDREN
 !!
 !! SOURCE
- subroutine sym_matlu(cryst_struc,gloc,pawang)
+ subroutine sym_matlu(cryst_struc,gloc,pawang,paw_dmft)
 
  use defs_basis
 ! use defs_wvltypes
  use m_pawang, only : pawang_type
  use m_crystal, only : crystal_t
+ use m_paw_dmft, only: paw_dmft_type
+
  implicit none
 
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst_struc
  type(pawang_type),intent(in) :: pawang
+ type(paw_dmft_type), intent(in) :: paw_dmft
 !arrays
  type(matlu_type),intent(inout) :: gloc(cryst_struc%natom)
+!scalars
 !Local variables-------------------------------
 !scalars
  integer :: at_indx,iatom,irot,ispinor,ispinor1,isppol,lpawu,m1,m2,m3,m4,mu
- integer :: natom,ndim,nsppol,nspinor,nu
+ integer :: natom,ndim,nsppol,nspinor,nu,t2g,m1s,m2s,m3s,m4s,lpawu_zarot,x2my2d
  complex(dpc) :: sumrho,summag(3),rotmag(3),ci
  real(dp) :: zarot2
 !arrays
@@ -575,6 +602,13 @@ end subroutine print_matlu
  type(matlu_type),allocatable :: glocnms(:)
  type(matlu_type),allocatable :: glocsym(:)
  real(dp),allocatable :: symrec_cart(:,:,:)
+ integer :: mt2g(3),mx2my2d
+ mt2g(1)=1
+ mt2g(2)=2
+ mt2g(3)=4
+ mx2my2d=5
+ t2g=paw_dmft%dmftqmc_t2g
+ x2my2d=paw_dmft%dmftqmc_x2my2d
 
 ! DBG_ENTER("COLL")
 
@@ -606,7 +640,26 @@ end subroutine print_matlu
         at_indx=cryst_struc%indsym(4,irot,iatom)
         do m3=1, 2*lpawu+1
          do m4=1, 2*lpawu+1
-          zarot2=pawang%zarot(m3,m1,lpawu+1,irot)*pawang%zarot(m4,m2,lpawu+1,irot)
+          if(t2g==1) then
+           m1s=mt2g(m1)
+           m2s=mt2g(m2)
+           m3s=mt2g(m3)
+           m4s=mt2g(m4)
+           lpawu_zarot=2
+          else if (x2my2d==1) then
+           m1s=mx2my2d
+           m2s=mx2my2d
+           m3s=mx2my2d
+           m4s=mx2my2d
+           lpawu_zarot=2
+          else
+           m1s=m1
+           m2s=m2
+           m3s=m3
+           m4s=m4
+           lpawu_zarot=lpawu
+          endif
+          zarot2=pawang%zarot(m3s,m1s,lpawu_zarot+1,irot)*pawang%zarot(m4s,m2s,lpawu_zarot+1,irot)
           glocsym(iatom)%mat(m1,m2,isppol,ispinor,ispinor1)=&
 &          glocsym(iatom)%mat(m1,m2,isppol,ispinor,ispinor1)&
 &          +gloc(at_indx)%mat(m3,m4,isppol,ispinor,ispinor1)*zarot2
@@ -673,7 +726,26 @@ end subroutine print_matlu
        at_indx=cryst_struc%indsym(4,irot,iatom)
        do m3=1, 2*lpawu+1
         do m4=1, 2*lpawu+1
-         zarot2=pawang%zarot(m3,m2,lpawu+1,irot)*pawang%zarot(m4,m1,lpawu+1,irot)
+          if(t2g==1) then
+           m1s=mt2g(m1)
+           m2s=mt2g(m2)
+           m3s=mt2g(m3)
+           m4s=mt2g(m4)
+           lpawu_zarot=2
+          else if (x2my2d==1) then
+           m1s=mx2my2d
+           m2s=mx2my2d
+           m3s=mx2my2d
+           m4s=mx2my2d
+           lpawu_zarot=2
+          else
+           m1s=m1
+           m2s=m2
+           m3s=m3
+           m4s=m4
+           lpawu_zarot=lpawu
+          endif
+         zarot2=pawang%zarot(m3s,m2s,lpawu_zarot+1,irot)*pawang%zarot(m4s,m1s,lpawu_zarot+1,irot)
          sumrho=sumrho +  glocnm(at_indx)%mat(m4,m3,isppol,1,1)  * zarot2
          do mu=1,3
           summag(mu)=summag(mu) + glocnm(at_indx)%mat(m4,m3,isppol,mu+1,1) * zarot2
@@ -844,7 +916,7 @@ end subroutine print_matlu
 !! CHILDREN
 !!
 !! SOURCE
-subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr)
+subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr,zero_or_one)
 
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
@@ -859,6 +931,7 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr)
  character(len=*), intent(in) :: char1,char2
  real(dp),intent(in) :: toldiff
  integer,intent(out), optional :: ierr
+ integer,intent(in), optional :: zero_or_one
 
 !local variables-------------------------------
  integer :: iatom,idiff,ispinor,ispinor1,isppol,m1,m,lpawu,nspinor,nsppol
@@ -892,7 +965,8 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr)
    enddo ! isppol
   endif ! lpawu/=1
  enddo ! natom
- matludiff=matludiff/float(idiff)
+ if(.not.present(zero_or_one)) matludiff=matludiff/float(idiff)
+
  if(option==1.or.option==0) then
   if( matludiff < toldiff ) then
    write(message,'(5a,6x,3a,4x,e12.4,a,e12.4)') ch10,&
@@ -900,7 +974,7 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr)
 &   ch10,matludiff,' is lower than',toldiff
    call wrtout(std_out,message,'COLL')
    if(present(ierr)) ierr=0
-  else
+  else 
    write(message,'(5a,3x,3a,3x,e12.4,a,e12.4)') ch10,&
 &   'Differences between ',trim(char1),' and ',ch10,trim(char2),' is too large:',&
 &   ch10,matludiff,' is larger than',toldiff
@@ -912,9 +986,19 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr)
    write(message,'(a,3x,a)') ch10,trim(char2)
    call wrtout(std_out,message,'COLL')
    call print_matlu(matlu2,natom,prtopt=1,opt_diag=-1)
-   if(option==1) then
-     call flush_unit(std_out)
-     MSG_ERROR("option==1, aborting now!")
+   if (present(zero_or_one).and.(mod(matludiff,1.d0)< toldiff)) then
+     write(message,'(a,3x,a)') ch10," The norm is not identity for this k-point but&
+    & is compatible with a high symmetry point"
+     call wrtout(std_out,message,'COLL')
+   else if(present(zero_or_one)) then
+     write(message,'(a,3x,a)') ch10," The norm is not identity for this k-point but&
+    & might be compatible with a high symmetry point: it should be checked"
+     call wrtout(std_out,message,'COLL')
+   else 
+     if(option==1) then
+       call flush_unit(std_out)
+       MSG_ERROR("option==1, aborting now!")
+     end if
    end if
    if(present(ierr)) ierr=-1
   endif
@@ -1609,7 +1693,7 @@ end subroutine add_matlu
 !           end do
 !           call dgemm('n','n',tndim,tndim,tndim,cone,valuer2,tndim,&
 !&            valuer4,tndim,czero,valuer                ,tndim)
-           write(6,*) "INFO",info
+           !write(6,*) "INFO",info
            gathermatlu(iatom)%value=cmplx(valuer,0.d0,kind=dp)
 !           write(message,'(a,i4,a,i4)')  "AFTER valuer for atom",iatom,"  and isppol",isppol
 !           call wrtout(std_out,message,'COLL')

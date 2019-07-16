@@ -14,7 +14,7 @@ fi
 
 # Shrink long lines in m_build_info
 ${1}/config/scripts/cut-long-lines \
-  <"${2}/src/10_dumpinfo/m_build_info.F90" \
-  >"${2}/src/10_dumpinfo/m_build_info.F90.tmp-${$}"
-mv "${2}/src/10_dumpinfo/m_build_info.F90.tmp-${$}" \
-  "${2}/src/10_dumpinfo/m_build_info.F90"
+  <"${2}/shared/common/src/14_hidewrite/m_build_info.F90" \
+  >"${2}/shared/common/src/14_hidewrite/m_build_info.F90.tmp-${$}"
+mv "${2}/shared/common/src/14_hidewrite/m_build_info.F90.tmp-${$}" \
+  "${2}/shared/common/src/14_hidewrite/m_build_info.F90"

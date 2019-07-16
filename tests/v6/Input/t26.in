@@ -10,9 +10,8 @@ ntimimage 15
 nimage 6
 imgmov 5
 chksymbreak 0
-fxcartfactor 10.0
+fxcartfactor 5.0
 tolimg 1.d-5
-istatimg 0
 
 dynimage  0 4*1 0   # Will do relaxation only for the four internal images
 

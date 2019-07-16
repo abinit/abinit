@@ -39,6 +39,10 @@ module m_nonlop
  use m_nonlop_pl,   only : nonlop_pl
  use m_nonlop_ylm,  only : nonlop_ylm
 
+#if defined HAVE_GPU_CUDA
+ use m_manage_cuda
+#endif
+
  implicit none
 
  private
@@ -75,6 +79,7 @@ contains
 !!          =2 => 1st derivative(s) with respect to atomic position(s)
 !!          =3 => 1st derivative(s) with respect to strain(s)
 !!          =22=> mixed 2nd derivative(s) with respect to atomic pos. and q vector (at q=0)
+!!          =25=> mixed 3rd derivative(s) with respect to atomic pos. and two q vectors (at q=0)
 !!          =23=> 1st derivative(s) with respect to atomic pos. and
 !!                1st derivative(s) with respect to atomic pos. and strains
 !!          =4 => 2nd derivative(s) with respect to 2 atomic pos.
@@ -102,7 +107,7 @@ contains
 !!                (derivative with respect to k of choice 51), typically
 !!                sum_ij [ |dp_i/dk1> D_ij <dp_j/dk2| + |p_i> D_ij < d2p_j/dk1dk2| ]
 !!    Only choices 1,2,3,23,4,5,6 are compatible with useylm=0.
-!!    Only choices 1,2,22,3,5,33,51,52,53,7,8,81 are compatible with signs=2
+!!    Only choices 1,2,22,25,3,5,33,51,52,53,7,8,81 are compatible with signs=2
 !!  cpopt=flag defining the status of cprjin%cp(:)=<Proj_i|Cnk> scalars (see below, side effects)
 !!  [enl]=optional (if not present, use hamk%ekb); non-local coeffs connecting projectors
 !!        see hamk%ekb description
@@ -160,6 +165,8 @@ contains
 !!                          for choice 53 signs=2, cross derivatives are in idir-1 and idir+1 directions
 !!                        - strain component (1:6) in the case (choice=3,signs=2) or (choice=6,signs=1)
 !!                        - strain component (1:9) in the case (choice=33,signs=2)
+!!                        - (1:9) components to specify the atom to be moved and the second q-gradient 
+!!                          direction in the case (choice=25,signs=2)
 !!  lambda=factor to be used when computing (Vln-lambda.S) - only for paw_opt=2
 !!         Typically lambda is the eigenvalue (or its guess)
 !!  mpi_enreg=informations about MPI parallelization
@@ -196,7 +203,7 @@ contains
 !!           paw_opt=2 : PAW: (Vnl-lambda.Sij) (Sij=overlap matrix)
 !!           paw_opt=3 : PAW overlap matrix (Sij)
 !!           paw_opt=4 : both PAW nonlocal part of H (Dij) and overlap matrix (Sij)
-!!  [qdir]= optional, direction of the q-gradient (only for choice=22 and choice=33)
+!!  [qdir]= optional, direction of the q-gradient (only for choice=22, choice=25 and choice=33)
 !!  [select_k]=optional, option governing the choice of k points to be used.
 !!             hamk datastructure contains quantities needed to apply NL operator
 !!             in reciprocal space between 2 kpoints, k and k^prime (equal in most cases);
@@ -248,6 +255,7 @@ contains
 !!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
 !!                or one of its derivatives to the input vect.  
 !!      if (choice=22) <G|d2V_nonlocal/d(atm. pos)dq|vect_in> (at q=0)
+!!      if (choice=25) <G|d3V_nonlocal/d(atm. pos)dqdq|vect_in> (at q=0)
 !!      if (choice=33) <G|d2V_nonlocal/d(strain)dq|vect_in> (at q=0)
 !! --if (paw_opt=0, 1 or 4)
 !!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
@@ -550,7 +558,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !and if <g|dVnl/dR|c> is required (signs=2), we only need to compute the
 !derivatives of the projectors associated with the displaced atom.
  iatom_only_=-1;if (present(iatom_only)) iatom_only_=iatom_only
- atom_pert=((signs==2).and.(choice==2.or.choice==4.or.choice==22.or.choice==24.or.choice==54))
+ atom_pert=((signs==2).and.(choice==2.or.choice==4.or.choice==22.or.choice==24.or.choice==25.or.choice==54))
 
  if (iatom_only_>0.and.atom_pert) then
 !   We consider only atom with index iatom_only

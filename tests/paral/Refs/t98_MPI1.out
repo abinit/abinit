@@ -63,6 +63,10 @@
 -Opening the file /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_isokinetic/tests/paral/Input/t98_sys.xml
 -Reading the file /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_isokinetic/tests/paral/Input/t98_sys.xml with Fortran
 
+ Bound for ifc SR:
+
+ x=[  0  1], y=[  0  1] and z=[ -1  1]
+
 ================================================================================
 
  Impose acoustic sum rule on total ifc

@@ -102,8 +102,6 @@ contains
 
 subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
- implicit none
-
 !Arguments ------------------------------------
 ! Scalars
  type(MPI_type),intent(in) :: mpi_enreg
@@ -793,8 +791,6 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 &  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,&
 &  ntypat,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,typat,usecprj,use_gpu_cuda,wtk,xred,ylm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,nfft,nkpt
@@ -1200,8 +1196,6 @@ end subroutine fock2ACE
 !! SOURCE
 
 subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
-
- implicit none
 
 !Arguments ------------------------------------
 ! Scalars

@@ -8,6 +8,8 @@ import os
 import re
 import sys
 
+from abirules_tools import find_src_dirs
+
 # Files that will be checked.
 re_srcfile = re.compile("\.([Ff]|[Ff]90|finc)$")
 
@@ -56,29 +58,24 @@ def wrong_string(string):
     else:
       return ""
 
-def abinit_test_generator():
-  def test_func(abenv):
-     """Search for inlined CPP macros in ABINIT src files"""
-     top = abenv.apath_of("src")
-     try:
-       return main(top)
-     except Exception:
-       import sys
-       raise sys.exc_info()[1] # Reraise current exception (py2.4 compliant)
-  return {"test_func" : test_func}
 
-def main(top):
+def main():
+  print("-------------------------------------------------------")
+  print(" Searching for inlined CPP macros in ABINIT src files  ")
+  print("-------------------------------------------------------")
   exit_status = 0
-  for dirpath, dirnames, files in os.walk(top):
-    for src in files:
-      if is_srcfile(dirpath, src):
-        fpath = os.path.join(dirpath,src)
-        with open(fpath, "rt") as fh:
-            for lno, line in enumerate(fh):
-              s = wrong_string(line)
-              if s:
-                print("(INLINED MACRO at %s:%d):  %s " % (src, lno+1, line))
-                exit_status += 1
+  for top in find_src_dirs():
+      assert os.path.isdir(top)
+      for dirpath, dirnames, files in os.walk(top):
+        for src in files:
+            if not is_srcfile(dirpath, src): continue
+            fpath = os.path.join(dirpath,src)
+            with open(fpath, "rt") as fh:
+                for lno, line in enumerate(fh):
+                    s = wrong_string(line)
+                    if s:
+                        print("(INLINED MACRO at %s:%d):  %s " % (src, lno+1, line))
+                        exit_status += 1
 
   if exit_status > 0:
     err_msg = """
@@ -109,14 +106,4 @@ def main(top):
   return exit_status
 
 if __name__ == "__main__":
-
-  if len(sys.argv) == 1: 
-    top = "../../../src"
-    print("-------------------------------------------------------")
-    print(" Searching for inlined CPP macros in ABINIT src files  ")
-    print("-------------------------------------------------------")
-  else:
-    top = sys.argv[1] 
-
-  exit_status = main(top)
-  sys.exit(exit_status)
+  sys.exit(main())

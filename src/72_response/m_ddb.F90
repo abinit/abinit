@@ -1531,7 +1531,7 @@ end subroutine nlopt
 !!
 !! SOURCE
 
-subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvol)
+subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, crystal, comm, prtvol)
 
 !Arguments ------------------------------------
 !scalars
@@ -2280,7 +2280,7 @@ end function ddb_get_etotal
 !!           3 if third order derivatives
 !!  chneut=(0 => no ASR, 1 => equal repartition,2 => weighted repartition )
 !!  selectz=selection of some parts of the effective charge tensor attached to one atom.
-!!    (0=> no selection, 1=> trace only, 2=> symmetric part only)                       !!
+!!    (0=> no selection, 1=> trace only, 2=> symmetric part only)
 !!
 !! SIDE EFFECTS
 !!  ddb<type(ddb_type)>=

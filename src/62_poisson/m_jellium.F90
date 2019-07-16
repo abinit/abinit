@@ -84,13 +84,11 @@ contains
 !! SOURCE
 
 subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
-&  option,paral_kgb,slabwsrad,rhog,rhor,rprimd,vjell,slabzstart,slabzend)
-
- implicit none
+&  option,slabwsrad,rhog,rhor,rprimd,vjell,slabzstart,slabzend)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft,nspden,option,paral_kgb
+ integer,intent(in) :: nfft,nspden,option
  real(dp),intent(in) :: gsqcut,slabwsrad,slabzend,slabzstart
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays

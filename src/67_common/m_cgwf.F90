@@ -282,8 +282,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  end if
 
  if (gen_eigenpb.and.(inonsc==1))  then
-   ABI_STAT_ALLOCATE(ghc_all,(2,nband*npw*nspinor), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in ghg_all")
+   ABI_MALLOC_OR_DIE(ghc_all,(2,nband*npw*nspinor), ierr)
  end if
 
  if (wfopta10==2.or.wfopta10==3)  then

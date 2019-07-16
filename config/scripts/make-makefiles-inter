@@ -81,7 +81,7 @@ my_name    = "make-makefiles-inter"
 my_configs = {
   "libs":"config/specs/corelibs.conf"}
 
-sep = "# ---------------------------------------------------------------------------- #\n\n"
+mf_sep = "\n# ---------------------------------------------------------------------------- #\n"
 
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
@@ -103,94 +103,185 @@ for cnf_file in my_configs.values():
 # What time is it?
 now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
 
-# Generate library lists
-src_list = "SUBDIRS ="
-opt_list = ""
-lib_list = ""
-sub_lib_list = "SUBDIRS ="
-pin_list = ""
-sub_pin_list = "SUBDIRS ="
-
-tgt_abirules = "# Enforce ABINIT Coding Style (the so-called ABIRULES)\n" + \
-  "abirules:\n\t@echo 'Reporting possible errors in the abirules procedure'" + \
-  " > tmp-abirules.log\n"
-
-# Preset lists
-src_list += " \\\n\tincs"
-src_list += " \\\n\tmods"
-
-# Core libraries
+# Parse configuration
 cnf = MyConfigParser()
 cnf.read(my_configs["libs"])
-abinit_corelibs = cnf.sections()
-abinit_corelibs.sort()
-for lib in abinit_corelibs:
-  lib_opt = cnf.get(lib,"optional")
-  lib_rul = cnf.get(lib,"abirules")
+abinit_parents = list(set([cnf.get(item, "parent") for item in cnf.sections()]))
 
-  if ( lib_opt == "yes" ):
-    src_list += " \\\n\t$(core_%s)" % (lib)
-    opt_list += "if DO_BUILD_%s\n core_%s = %s\nelse\n core_%s =\nendif\n" % \
-      (lib.upper(),lib,lib,lib)
+# Process available libraries, one parent at a time
+for parent in abinit_parents:
+
+  # Select parent dir
+  if ( parent == "common" ):
+    par_dir = os.path.join("shared", "common", "src")
+  elif ( parent == "libpaw" ):
+    par_dir = os.path.join("shared", "libpaw")
   else:
-    src_list += " \\\n\t"+lib
+    par_dir = "src"
 
-  if ( lib_rul == "yes" ):
-    tgt_abirules += "\t@$(PERL) ../developers/maintainers/abirules.pl -d %s >> abirules.log\n" % (lib)
+  # Select subdirs to process
+  abinit_libs = sorted([item for item in cnf.sections() \
+    if ( cnf.get(item, "parent") == parent )])
 
-opt_list += "\n" 
-src_list += " \\\n\t98_main\n"
-src_list += "if DO_BUILD_EXPORTS\n SUBDIRS += libs\nendif\n\n"
-tgt_abirules += "\t@$(PERL) ../developers/maintainers/abirules.pl -d 98_main >> abirules.log\n"
-tgt_abirules += "\tcd .. ; ./config/scripts/abilint . . > src/abilint.log ; cd src\n"
-tgt_abirules += "\t@grep 'Error' abirules.log \n\n"
+  # Extract information for each subdir
+  lib_specs = {
+    "abiauty": [],
+    "abirules": [],
+    "optional": [],
+    "subdirs": [],
+  }
+  if ( parent != "libpaw" ):
+    lib_specs["subdirs"] += ["incs", "mods"]
+  for lib in abinit_libs:
+    if ( parent == "libpaw" ):
+      subdir = "src"
+    else:
+      subdir = lib
+    if ( cnf.get(lib, "abirules") == "yes" ):
+      lib_specs["abirules"].append(subdir)
+      if ( cnf.get(lib, "abiauty") == "yes" ):
+        lib_specs["abiauty"].append(subdir)
+    if ( cnf.get(lib, "optional") == "yes" ):
+      lib_specs["optional"].append(subdir)
+      lib_specs["subdirs"].append("$(%s_%s)" % (parent, subdir))
+    else:
+      lib_specs["subdirs"].append(subdir)
+  if ( parent == "core" ):
+    #lib_specs["abiauty"].append("98_main")
+    lib_specs["abirules"].append("98_main")
+    lib_specs["subdirs"].append("98_main")
 
-# Write Makefile.am for includes
-tmpdir = re.compile("tmp-*")
-vimswp = re.compile("\..*\.swp")
-makefile  = "all-local:\n\t@echo \"There is no buildable file here\"\n\n"
-makefile += "EXTRA_DIST ="
-for root,dirs,files in os.walk("src/incs"):
-  for sub in dirs:
-    if ( tmpdir.match(sub) ):
-      dirs.remove(sub)
-  if ( "Makefile.am" in files ):
-    files.remove("Makefile.am")
-  if ( "Makefile.in" in files ):
-    files.remove("Makefile.in")
-  if ( "Makefile" in files ):
-    files.remove("Makefile")
-  for dat in files:
-    if ( vimswp.match(dat) ):
-      files.remove(dat)
-  dirs.sort()
-  files.sort()
-  for dat in files:
-    makefile += " \\\n\t%s" % (dat)
-makefile += "\n"
-mf = open("src/incs/Makefile.am", "wt")
-mf.write(makefile_header(my_name,now))
-mf.write(makefile)
-add = "config/makefiles/incs.am"
-if ( os.path.exists(add) ):
-  mf.write(sep + open(add,"rt").read())
-mf.close()
+  # Start Makefile.am
+  makefile = makefile_header(my_name, now)
 
-# Write Makefile.am for modules
-mf = open("src/mods/Makefile.am", "wt")
-mf.write(makefile_header(my_name,now))
-mf.write("all-local:\n\t@echo \"There is no buildable file here\"\n\n")
-add = "config/makefiles/mods.am"
-if ( os.path.exists(add) ):
-  mf.write(sep + open(add, "rt").read())
-mf.close()
+  # Declare optional subdirs
+  if ( len(lib_specs["optional"]) > 0):
+    makefile += "# Optional subdirectories\n"
+    for subdir in lib_specs["optional"]:
+      makefile += "if DO_BUILD_{NAME}\n  {parent}_{name} = {name}\nelse\n  {parent}_{name} =\nendif\n".format(NAME=subdir.upper(), name=subdir, parent=parent)
 
-# Write intermediate Makefile.am for core source
-mf = open("src/Makefile.am", "wt")
-mf.write(makefile_header(my_name,now))
-mf.write(opt_list+src_list)
-mf.write(sep+tgt_abirules)
-add = "config/makefiles/src.am"
-if ( os.path.exists(add) ):
-  mf.write(sep + open(add, "rt").read())
-mf.close()
+  # List all subdirectories
+  if ( len(lib_specs["subdirs"]) > 0 ):
+    makefile += "\n# Registered subdirectories\nSUBDIRS = \\\n  "
+    makefile += " \\\n  ".join(lib_specs["subdirs"]) + "\n"
+
+  # Add an abirules target
+  if ( len(lib_specs["abirules"]) > 0 ):
+    makefile += mf_sep
+    makefile += """
+# Enforce ABINIT Coding Style (the so-called ABIRULES)
+#
+# Note concerning abirules (as of 5.8.0)
+# The order of config.h vs abi_common.h is not preserved.
+# This should be corrected by hand. It is to be done, at present,
+# in get_irredg, merge_kgirr, setshells, sigma
+"""
+    makefile += "abirules:\n\t@echo 'Reporting possible errors in the abirules procedure' >tmp-abirules.log\n"
+    for subdir in lib_specs["abirules"]:
+      makefile += "\t@$(PERL) ../developers/maintainers/abirules.pl -d %s >>tmp-abirules.log\n" % (subdir)
+    makefile += "\t@grep 'Error' tmp-abirules.log\n"
+
+  # Add an abiauty target
+  if ( len(lib_specs["abiauty"]) > 0 ):
+    makefile += mf_sep
+    makefile += """
+# Beautify ABINIT sources (indentation)
+# Note : the _ext, _noabirule should not treated because they are not expected to follow the abirules
+# Note : 02_clib only includes C files
+# Note : 43_ptgroup should not be treated because the routines have been generated automatically
+# Note : 57_iopsp_parser should not be treated because it contains now routines from pwscf, not respecting abirules (XG20180623).
+# Note : 69_wfdesc, 70_gw and 71_bse  should not be treated due a special request of Matteo
+# Note : the "Warning" occurences have been eliminated on 10 May 2011.
+# Note : the "ERROR" occurences have been eliminated on 25 December 2011, also documenting the solution for each type of problem !!
+# Note : 26 Feb 2012 : error messages have been improved, recursive has been allowed.
+# Should write the documentation, so that to imitate the "make parents" treatment on shiva ...
+# The treatment of $omp is still incorrect !!
+#
+# 1) ERROR(41_geometry/prt_cif.F90): found end statement at line 273 for '' subroutine symrel2string '' before executable section
+#      The structuration between the declarations and the executable section was missing
+# 2) ERROR(67_common/mklocl_realspace.F90): found end statement at line 849 for '' subroutine createIonicPotential_new '' instead of '' if construct ''
+#      There was a (forbidden) on-line if ... call :
+#       if (condition)  call subroutine
+#      Solution : replace by
+#        if (condition) then
+#            call subroutine
+#        endif
+# 3) ERROR(67_common/rhotov.F90): found end statement at line 412 for '' subroutine rhotov '' instead of '' if construct ''
+#      There was a (forbidden) on-line secondary if construct
+#        command ; if( condition) command2
+#      Solution : replace by
+#        command
+#        if(condition) command2
+# 4) Similar message of error might be caused by sections of the code that start from the first column !! 
+#      Solution : by hand, insert a blank. Abiauty will do the rest ...
+# 
+# When happening in a module, ignore the problems (modules are not yet treated by abiauty).
+# 
+# 1) ERROR, executable section not found
+# 2) ERROR(10_defs/defs_datatypes.F90): found type at line 99 while expecting program/subroutine
+# 3) ERROR(10_defs/defs_datatypes.F90): end of file 10_defs/defs_datatypes.F90 hit prematurely while expecting:
+#  program/subroutine/function statement
+# 4) ERROR(10_defs/defs_wannier90.F90): found end statement at line 62 for '' subroutine wannier_setup '' before executable section
+abiauty:
+	@echo 'Reporting possible errors in the abiauty procedure' > tmp-abiauty.log
+"""
+    for subdir in lib_specs["abiauty"]:
+      makefile += "\t@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/{}/{} >>tmp-abiauty.log\n".format(par_dir, subdir)
+    makefile += "\t@grep 'ERROR' tmp-abiauty.log >error_make_abiauty || /bin/true\n"
+
+  # Add a help target
+  makefile += mf_sep
+  makefile += "\n# Help\n"
+  makefile += "help:\n\t@cat $(top_srcdir)/doc/help_make/help_make_{}.txt\n".format(parent)
+
+  # Add a parents target
+  makefile += mf_sep
+  makefile += "\n# Creation of parent subroutines\n"
+  makefile += "parents:\n\t$(PERL) $(top_srcdir)/developers/maintainers/parents.pl -s\n"
+  makefile +="\trm -f *.old */*.old\n"
+
+  # Add a local maintainer-clean target
+  makefile += mf_sep
+  makefile += "\n# Thorough clean-up\nmaintainer-clean-local:\n\trm -f tmp-abiauty.log tmp-abirules.log\n"
+  for file_ext in ["old", "orig", "rej"]:
+    makefile += "\tfind . -name '*.%s' -exec rm {} \\;\n" % file_ext
+
+  # Include additional information
+  mf_add = os.path.join("config", "makefiles", "{}.am".format(parent))
+  if ( os.path.exists(mf_add) ):
+    makefile += mf_sep
+    makefile += "\n"
+    makefile += open(mf_add, "r").read()
+
+  # Write down Makefile.am
+  with open(os.path.join(par_dir, "Makefile.am"), "w") as mf_parent:
+    mf_parent.write(makefile)
+
+  # Write Makefile.am for includes
+  if ( os.path.exists(os.path.join(par_dir, "incs")) ):
+    includes = []
+    inc_specs = os.path.join(par_dir, "incs", "abinit.src")
+    with open(inc_specs, "r") as src_cnf:
+      exec(compile(src_cnf.read(), inc_specs, 'exec'))
+    with open(os.path.join(par_dir, "incs", "Makefile.am"), "w") as mf_incs:
+      inc_text  = makefile_header(my_name, now)
+      inc_text += "all-local:\n\t@echo \"There is no buildable file here\"\n\n"
+      if ( len(includes) > 0 ):
+        inc_text += "EXTRA_DIST = \\\n\t" + " \\\n\t".join(includes) + "\n"
+      mf_incs.write(inc_text)
+
+  # Write Makefile.am for modules
+  if ( os.path.exists(os.path.join(par_dir, "mods")) ):
+    with open(os.path.join(par_dir, "mods", "Makefile.am"), "w") as mf_mods:
+      mod_text  = makefile_header(my_name, now)
+      mod_text += "all-local:\n\t@echo \"There is no buildable file here\"\n\n"
+      mod_text += "mostlyclean-local:\n\trm -f *.$(MODEXT) *.h\n"
+      mf_mods.write(mod_text)
+
+# Write shared intermediate Makefile.am files
+with open("shared/Makefile.am", "w") as mf_shared:
+  mf_shared.write(makefile_header(my_name, now))
+  mf_shared.write("SUBDIRS = common libpaw\n")
+with open("shared/common/Makefile.am", "w") as mf_common:
+  mf_common.write(makefile_header(my_name, now))
+  mf_common.write("SUBDIRS = src\n")

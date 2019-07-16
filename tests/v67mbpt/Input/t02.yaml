@@ -1,0 +1,8 @@
+GwSigmaPerturbative:
+    DeltaE^GW_gap:
+        tol_abs: 1.0e-4
+        tol_rel: 1.0e-3
+    
+    E^GW_gap:
+        tol_abs: 1.0e-4
+        tol_rel: 5.0e-5

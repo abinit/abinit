@@ -86,7 +86,7 @@ CONTAINS
     integer, intent(in)::  ilist(Nij), jlist(Nij)
     real(dp), intent(in) :: vallist(Nij), S(3,N), ms(N)
     real(dp), intent(out) :: Heff(3, N)
-    integer :: i, iatom, jatom, rowS=3
+    integer :: i, iatom, jatom !, rowS=3
     Heff(:,:)=0.0
 
     ! MKL version , which worked for S(N,3) , Heff(N,3).

@@ -22,26 +22,28 @@
  nkpt5 1 istwfk5 1
  ionmov5 3 ntime5 3 toldff5 1.0d-6 tolmxf5 1.0d-5
  iscf5 7  # Mixing on the potential
+ nline5 6
 
  occopt6 7 tsmear6 0.001
  nkpt6 1 istwfk6 1
  ionmov6 3 ntime6 3 toldff6 1.0d-6 tolmxf6 1.0d-5
+ nline6 6
 
  occopt7 0
  kptopt7 1 kptrlatt7 2 0 0 0 2 0 0 0 2 istwfk7 30*1
  nshiftk7 4 shiftk7 1/2 1/2 1/2 1/2 0.0 0.0 0.0 1/2 0.0 0.0 0.0 1/2
- ionmov7 3 ntime7 3 toldff7 1.0d-7 tolmxf7 1.0d-5
- optcell7 1 ecutsm7 0.5 dilatmx7 1.1
+ ionmov7 3 ntime7 3 toldff7 1.0d-8 tolmxf7 1.0d-5
+ optcell7 1 ecutsm7 0.5 dilatmx7 1.1 nline7 6
 
  occopt8 7 tsmear8 0.001
  kptopt8 1 kptrlatt8 2 0 0 0 2 0 0 0 2 istwfk8 30*1
  nshiftk8 4 shiftk8 1/2 1/2 1/2 1/2 0.0 0.0 0.0 1/2 0.0 0.0 0.0 1/2
- ionmov8 3 ntime8 3 toldff8 1.0d-7 tolmxf8 1.0d-5
- optcell8 1 ecutsm8 0.5 dilatmx8 1.1
+ ionmov8 3 ntime8 3 toldff8 1.0d-8 tolmxf8 1.0d-5
+ optcell8 1 ecutsm8 0.5 dilatmx8 1.1 nline8 6
 
  occopt9 1
  nkpt9 1 istwfk9 1 toldfe9 1.0d-10 
- nsppol9 2     
+ nsppol9 2
  spinmagntarget9 0.0d0
  ixc9 1
 
@@ -59,12 +61,8 @@
  nband 12 occ 4*2 8*0
  ntypat 1 typat 1 1  natom 2
  timopt 0
-# npkpt 1
-# npband 4
-# npfft 2
-# paral_kgb 1
- iomode 0 # Only for testing purposes 
 
+ iomode 0   # Only for testing purposes 
  fftalg 401 #only for testing purpose
 
  autoparal 1
@@ -80,7 +78,7 @@
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%%   files_to_test = t26_MPI4.out, tolnlines=   100,   tolabs=  2.00e-3,      tolrel= 3.0e-3, fld_options = -easy
+#%% files_to_test = t26_MPI4.out, tolnlines=   100,   tolabs=  1.01e-1,      tolrel= 9.0e-1, fld_options = -ridiculous
 #%% [extra_info]
 #%% keywords = PAW
 #%% authors = Unknown

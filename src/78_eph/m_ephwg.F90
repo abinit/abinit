@@ -12,7 +12,7 @@
 !!    2.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG)
+!!  Copyright (C) 2008-2019 ABINIT group (MG, HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,6 +22,8 @@
 !! CHILDREN
 !!
 !! SOURCE
+
+#define DEV_NEW_TETRA
 
 #if defined HAVE_CONFIG_H
 #include "config.h"
@@ -36,7 +38,11 @@ module m_ephwg
  use m_errors
  use m_xmpi
  use m_copy
+#ifdef DEV_NEW_TETRA
+ use m_htetrahedron
+#else
  use m_tetrahedron
+#endif
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
@@ -45,13 +51,14 @@ module m_ephwg
  use m_ifc
  use m_lgroup
  use m_ebands
+ use m_eph_double_grid
 
  use defs_datatypes,    only : ebands_t
  use defs_abitypes,     only : dataset_type
- use m_time,            only : cwtime, sec2str
+ use m_time,            only : cwtime, cwtime_report, sec2str
  use m_symtk,           only : matr3inv
- use m_numeric_tools,   only : arth, inrange
- use m_special_funcs,   only : dirac_delta
+ use m_numeric_tools,   only : arth, inrange, wrap2_pmhalf
+ use m_special_funcs,   only : gaussian
  use m_fstrings,        only : strcat, ltoa, itoa, ftoa, ktoa, sjoin
  use m_simtet,          only : sim0onei, SIM0TWOI
  use m_kpts,            only : kpts_timrev_from_kptopt, listkk, kpts_ibz_from_kptrlatt
@@ -100,8 +107,15 @@ type, public :: ephwg_t
   ! Number of q-points in IBZ and full BZ.
 
   integer :: nq_k
-  ! Nunber of points in IBZ(k) i.e. the irreducible wedge
+  ! Number of points in IBZ(k) i.e. the irreducible wedge
   ! defined by the operations of the little group of k.
+
+  integer :: frohl_model
+  ! Integer controling whether to compute and store the electron-phonon matrix elements
+  ! computed from generalized Frohlich model
+  ! C. Verdi and F. Giustino, Phys. Rev. Lett. 115, 176401 (2015).
+  ! 1,2: Unused (for compatibility with sigma_t)
+  ! 3: Compute Frohlich electron-phonon matrix elements in the IBZ for later integration
 
   integer, allocatable :: kq2ibz(:)
   ! kq2ibz(nq_k)
@@ -121,10 +135,16 @@ type, public :: ephwg_t
   integer,allocatable :: lgk2ibz(:)
   ! lgk2ibz(nq_k)
   ! Mapping Little-group IBZ_k --> initial IBZ
+  ! TODO: This should be generalized to have the symmetry indices as well so
+  ! that we can use it in sigmaph but then we have to implement similar algo for double grid.
 
   real(dp),allocatable :: phfrq_ibz(:,:)
   ! (nibz, natom3)
   ! Phonon frequencies in the IBZ
+
+  real(dp),allocatable :: frohl_ibz(:,:)
+  ! (nibz, natom3)
+  ! Frohlich matrix elements in the IBZ
 
   real(dp),allocatable :: eigkbs_ibz(:, :, :)
   ! (nibz, nbcount, nsppol)
@@ -137,19 +157,43 @@ type, public :: ephwg_t
   type(lgroup_t) :: lgk
   ! Little group of the k-point
 
+#ifdef DEV_NEW_TETRA
+  type(t_htetrahedron) :: tetra_k
+  ! Used to evaluate delta(w - e_{k+q} +/- phw_q) with tetrahedron method.
+#else
   type(t_tetrahedron) :: tetra_k
   ! Used to evaluate delta(w - e_{k+q} +/- phw_q) with tetrahedron method.
+#endif
 
+ contains
+
+     procedure :: setup_kpoint => ephwg_setup_kpoint
+     ! Prepare tetrahedron method for given external k-point.
+
+     procedure :: double_grid_setup_kpoint => ephwg_double_grid_setup_kpoint
+     ! Prepare tetrahedron method for given external k-point using double grid routines.
+
+     procedure :: report_stats => ephwg_report_stats
+     ! Report how much memory is being used by this object
+
+     procedure :: get_deltas => ephwg_get_deltas
+     ! Compute weights for $ \int \delta(\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
+
+     procedure :: get_deltas_wvals => ephwg_get_deltas_wvals
+     ! Compute weights for $ \int \delta(\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
+
+     procedure :: get_deltas_qibzk => ephwg_get_deltas_qibzk
+     ! Compute weights for $ \delta(\omega - \omega_{q\nu}} $ using IBZ(k) ordering
+
+     procedure :: get_zinv_weights => ephwg_get_zinv_weights
+     ! Compute weights for $ \int 1 / (\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
+
+     procedure :: free => ephwg_free
+     ! Free memory
  end type ephwg_t
 
  public :: ephwg_new             ! Basic Constructor
  public :: ephwg_from_ebands     ! Build object from ebands_t
- public :: ephwg_setup_kpoint    ! Prepare tetrahedron method for given external k-point.
- public :: ephwg_get_deltas      ! Compute weights for $ \int \delta(\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
- public :: ephwg_get_dweights    ! Compute weights for a set of frequencies.
- public :: ephwg_zinv_weights    ! Compute weights for $ \int 1 / (\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
- public :: ephwg_free            ! Free memory
- !public :: ephwg_test
 
 contains
 !!***
@@ -186,13 +230,15 @@ contains
 !! SOURCE
 
 type(ephwg_t) function ephwg_new( &
-&  cryst, ifc, bstart, nbcount, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, nsppol, eig_ibz, comm) result(new)
+&  cryst, ifc, bstart, nbcount, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, nsppol, eig_ibz, frohl_model, comm) result(new)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: kptopt, nshiftk, nkibz, bstart, nbcount, nsppol, comm
  type(crystal_t),target,intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
+ integer,intent(in) :: frohl_model
+
 !arrays
  integer,intent(in) :: kptrlatt(3,3)
  real(dp),intent(in) :: shiftk(3, nshiftk), kibz(3, nkibz)
@@ -201,10 +247,15 @@ type(ephwg_t) function ephwg_new( &
 !Local variables-------------------------------
 !scalars
  integer :: nprocs, my_rank, ik, ierr, out_nkibz
+ integer :: nu, iatom
+ real(dp) :: fqdamp, wqnu, inv_qepsq
+ complex(dp) :: cnum, cdd(3)
+ real(dp) :: cpu, wall, gflops
 !arrays
  real(dp) :: rlatt(3,3)
  integer :: out_kptrlatt(3,3)
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom), phfrq(3*cryst%natom)
+ real(dp) :: gkq2_lr(3*cryst%natom), qpt(3), qpt_cart(3)
  real(dp),allocatable :: out_kibz(:,:), out_wtk(:)
 
 !----------------------------------------------------------------------
@@ -219,11 +270,15 @@ type(ephwg_t) function ephwg_new( &
  new%timrev = kpts_timrev_from_kptopt(new%kptopt)
  new%nibz = nkibz
  new%cryst => cryst
+ new%frohl_model = frohl_model
  call alloc_copy(kibz, new%ibz)
+
+ call cwtime(cpu, wall, gflops, "start")
 
  ! Get full BZ (new%nbz, new%bz) and new kptrlatt for tetra.
  call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, out_nkibz, out_kibz, out_wtk, new%nbz, new%bz, &
    new_kptrlatt=out_kptrlatt)
+ call cwtime_report(" ephwg_new: kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
  rlatt = out_kptrlatt; call matr3inv(rlatt, new%klatt)
 
@@ -237,15 +292,44 @@ type(ephwg_t) function ephwg_new( &
    new%eigkbs_ibz(ik, :, :) = eig_ibz(:, ik, :)
  end do
 
- ! Fourier interpolate frequencies on the same mesh.
+ ! Fourier interpolate phonon frequencies on the same mesh.
  ABI_CALLOC(new%phfrq_ibz, (new%nibz, new%natom3))
+ if (frohl_model==3) then
+   ABI_CALLOC(new%frohl_ibz, (new%nibz, new%natom3))
+ end if
+
  do ik=1,new%nibz
    if (mod(ik, nprocs) /= my_rank) cycle ! mpi-parallelism
    call ifc_fourq(ifc, cryst, new%ibz(:, ik), phfrq, displ_cart)
    new%phfrq_ibz(ik, :) = phfrq
+
+   if (frohl_model/=3) cycle
+   ! Compute Frohlich matrix elements
+   qpt = new%ibz(:,ik)
+   qpt_cart = two_pi*matmul(cryst%gprimd, qpt)
+   if (sum(qpt_cart**2) < tol6) cycle
+   inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
+   fqdamp = (four_pi / cryst%ucvol) ** 2 * inv_qepsq ** 2 !* exp(-(qmod/sigma%qdamp) ** 2)
+
+   ! Compute gkq_{LR}. Note that in our approx the matrix element does not depend on ib_k.
+   gkq2_lr(:) = zero
+   do nu=1,new%natom3
+     wqnu = phfrq(nu); if (wqnu < tol8) cycle
+     cnum = zero
+     do iatom=1,cryst%natom
+       ! This is complex
+       cdd = cmplx(displ_cart(1,:, iatom, nu), displ_cart(2,:, iatom, nu), kind=dpc) * &
+             exp(-j_dpc * two_pi * dot_product(qpt, cryst%xred(:, iatom)))
+       cnum = cnum + dot_product(qpt_cart, matmul(ifc%zeff(:, :, iatom), cdd))
+     end do
+     gkq2_lr(nu) = (real(cnum) ** 2 + aimag(cnum) ** 2) / (two * wqnu)
+   end do
+   new%frohl_ibz(ik,:) = gkq2_lr * fqdamp
  end do
+ call cwtime_report(" ephwg_new: ifc_fourq", cpu, wall, gflops)
 
  call xmpi_sum(new%phfrq_ibz, comm, ierr)
+ if (frohl_model==3) call xmpi_sum(new%frohl_ibz, comm, ierr)
 
 end function ephwg_new
 !!***
@@ -259,7 +343,7 @@ end function ephwg_new
 !! FUNCTION
 !!  Convenience constructor to initialize the object from an ebands_t object
 
-type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, comm) result(new)
+type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, frohl_model, comm) result(new)
 
 !Arguments ------------------------------------
 !scalars
@@ -267,6 +351,7 @@ type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, co
  type(crystal_t),intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
  type(ebands_t),intent(in) :: ebands
+ integer,intent(in) :: frohl_model
 
 !Local variables-------------------------------
  real(dp),allocatable :: eig_ibz(:, :, :)
@@ -275,7 +360,7 @@ type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, co
 
  if (bstart == 1 .and. nbcount == ebands%mband) then
    new = ephwg_new(cryst, ifc, bstart, nbcount, ebands%kptopt, ebands%kptrlatt, ebands%nshiftk, ebands%shiftk, ebands%nkpt, &
-      ebands%kptns, ebands%nsppol, ebands%eig, comm)
+      ebands%kptns, ebands%nsppol, ebands%eig, frohl_model, comm)
  else
    ABI_CHECK(inrange(bstart, [1, ebands%mband]), "Wrong bstart")
    ABI_CHECK(inrange(bstart + nbcount - 1, [1, ebands%mband]), "Wrong nbcount")
@@ -283,7 +368,7 @@ type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, co
    ABI_MALLOC(eig_ibz, (nbcount, ebands%nkpt, ebands%nsppol))
    eig_ibz = ebands%eig(bstart:bstart+nbcount-1, : , :)
    new = ephwg_new(cryst, ifc, bstart, nbcount, ebands%kptopt, ebands%kptrlatt, ebands%nshiftk, ebands%shiftk, ebands%nkpt, &
-      ebands%kptns, ebands%nsppol, eig_ibz, comm)
+      ebands%kptns, ebands%nsppol, eig_ibz, frohl_model, comm)
    ABI_FREE(eig_ibz)
  end if
 
@@ -314,7 +399,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 
 !Arguments ------------------------------------
 !scalars
- type(ephwg_t),target,intent(inout) :: self
+ class(ephwg_t),target,intent(inout) :: self
  integer,intent(in) :: prtvol, comm
 !arrays
  real(dp),intent(in) :: kpoint(3)
@@ -323,7 +408,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 !scalars
  integer,parameter :: sppoldbl1=1
  integer :: ierr,ii
- real(dp) :: dksqmax
+ real(dp) :: dksqmax, cpu, wall, gflops
  character(len=80) :: errorstring
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
@@ -333,17 +418,26 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 !----------------------------------------------------------------------
 
  cryst => self%cryst
+ call cwtime(cpu, wall, gflops, "start")
 
- ! Get little group of the kpoint.
+ ! Get little group of the (external) kpoint.
  call self%lgk%free()
- self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz)
+ self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz, comm)
  if (prtvol > 0) call self%lgk%print()
  self%nq_k = self%lgk%nibz
 
- ! Get mapping IBZ_k --> initial IBZ (self%lgrp%ibz --> self%ibz)
+ call cwtime_report(" lgroup_new", cpu, wall, gflops)
+
+ ! TODO: Use symrec conventions although this means that we cannot reuse these tables
+ ! to symmetrize wavefunctions and potentials that require S-1 i.e. the symrel convention.
+
+ ! Get mapping IBZ_k --> initial IBZ (self%lgk%ibz --> self%ibz)
  ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
  call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
+    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.true., use_symrec=.False.)
+
+ !call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, self%lgk%nsym_lg,&
+ !   sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
 
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6)' ) &
@@ -353,6 +447,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  ABI_SFREE(self%lgk2ibz)
  call alloc_copy(indkk(:, 1), self%lgk2ibz)
  ABI_FREE(indkk)
+ call cwtime_report(" listkk1", cpu, wall, gflops)
 
  ! Get mapping (k + q) --> initial IBZ.
  do ii=1,self%nq_k
@@ -361,13 +456,14 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
 
  call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
+    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.true., use_symrec=.False.)
 
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6)' ) &
     "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
    MSG_ERROR(msg)
  end if
+ call cwtime_report(" listkk2", cpu, wall, gflops)
 
  ABI_SFREE(self%kq2ibz)
  call alloc_copy(indkk(:, 1), self%kq2ibz)
@@ -378,17 +474,311 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 
  ! Get mapping BZ --> IBZ_k (self%bz --> self%lgrp%ibz) required for tetrahedron method
  ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
- call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
-    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
+
+ ! Old version
+ !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
+ !   sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
+
+ ! Use symmetries of the little group
+ ! This version should be OK but now we used the symmetry tables computed in symkpt
+ ! tetra integration depends on the indkk mapping.
+ !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, self%lgk%nsym_lg,&
+ !   sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
+
+ !if (dksqmax > tol12) then
+ !  write(msg, '(a,es16.6)' ) &
+ !   "At least one of the points in BZ could not be generated from a symmetrical one. dksqmax: ",dksqmax
+ !  MSG_ERROR(msg)
+ !end if
+
+ !ABI_CHECK(all(self%lgk%bz2ibz_smap(1, :) == indkk(:, 1)), "bz2ibz_smap != indkk")
+ indkk(:, 1) = self%lgk%bz2ibz_smap(1, :)
 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
+#ifdef DEV_NEW_TETRA
+ call htetra_free(self%tetra_k)
+ call htetra_init(self%tetra_k, indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, &
+                  self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
+#else
  call destroy_tetra(self%tetra_k)
- call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring)
+ call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring, comm)
+#endif
+ !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_", ktoa(kpoint)))
  ABI_CHECK(ierr == 0, errorstring)
  ABI_FREE(indkk)
 
+ call cwtime_report(" init_tetra", cpu, wall, gflops)
+
 end subroutine ephwg_setup_kpoint
+!!***
+
+!!****f* m_ephwg/ephwg_double_grid_setup_kpoint
+!! NAME
+!! ephwg_setup_kpoint
+!!
+!! FUNCTION
+!!  Set internal tables and object required to compute integration weights for a given k-point
+!!  using the double grid routines to map the different k-points.
+!!  This version should be more efficient than its counterpart without the double grid.
+!!
+!! INPUTS
+!!  kpoint(3): k-point in reduced coordinates.
+!!  prtvol: Verbosity level
+!!  comm: MPI communicator
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, comm)
+
+!Arguments ------------------------------------
+!scalars
+ class(ephwg_t),target,intent(inout) :: self
+ type(eph_double_grid_t),intent(inout) :: eph_doublegrid
+ integer,intent(in) :: prtvol, comm
+!arrays
+ real(dp),intent(in) :: kpoint(3)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: sppoldbl1=1,timrev0=0
+ integer :: ierr,ii,ik_idx
+ !real(dp) :: dksqmax
+ character(len=80) :: errorstring
+ !character(len=500) :: msg
+ type(crystal_t),pointer :: cryst
+!arrays
+ integer,allocatable :: lgkibz2bz(:) !indkk(:,:),
+ integer,allocatable :: bz2lgkibz(:), bz2lgkibzkq(:) !, bz2bz(:), mapping(:,:)
+ !real(dp) :: kpt(3), wrap_kpt(3), shift
+!----------------------------------------------------------------------
+
+ cryst => self%cryst
+
+ ! Get little group of the (external) kpoint.
+ call self%lgk%free()
+ self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz, comm)
+ if (prtvol > 0) call self%lgk%print()
+ self%nq_k = self%lgk%nibz
+
+ ! get dg%bz --> self%lgrp%ibz
+ ABI_SFREE(eph_doublegrid%bz2lgkibz)
+ ABI_MALLOC(eph_doublegrid%bz2lgkibz,(eph_doublegrid%dense_nbz))
+
+ ! Old version using all crystal symmetries
+ !call eph_doublegrid%bz2ibz(self%lgk%ibz, self%lgk%nibz,&
+ !                            cryst%symrel, cryst%nsym, &
+ !                            eph_doublegrid%bz2lgkibz, has_timrev=1)
+ call eph_doublegrid%bz2ibz(self%lgk%ibz, self%lgk%nibz,&
+                            self%lgk%symrec_lg, self%lgk%nsym_lg, &
+                            eph_doublegrid%bz2lgkibz, timrev0, use_symrec=.true.)
+
+ ! self%lgrp%ibz --> dg%bz
+ ABI_CALLOC(lgkibz2bz,(self%lgk%nibz))
+ do ii=1,self%nbz
+   ik_idx = eph_doublegrid%bz2lgkibz(ii)
+   lgkibz2bz(ik_idx) = ii
+ enddo
+
+ ! get self%lgrp%ibz --> dg%bz --> self%ibz
+ ABI_SFREE(self%lgk2ibz)
+ ABI_MALLOC(self%lgk2ibz, (self%nq_k))
+ do ii=1,self%nq_k
+   ik_idx = lgkibz2bz(ii)
+   self%lgk2ibz(ii) = eph_doublegrid%bz2ibz_dense(ik_idx)
+ enddo
+
+#if 0
+   ! Get mapping IBZ_k --> initial IBZ (self%lgrp%ibz --> self%ibz)
+   ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
+   call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
+
+   if (dksqmax > tol12) then
+     write(msg, '(a,es16.6)' ) &
+      "At least one of the points in IBZ(k) could not be generated from a symmetrical one. dksqmax: ",dksqmax
+     MSG_ERROR(msg)
+   end if
+
+   !check if same results as listkk
+   do ii=1,self%nq_k
+      ABI_CHECK(self%lgk2ibz(ii)==indkk(ii,1),'Unmatching indexes')
+   enddo
+   ABI_FREE(indkk)
+#endif
+
+ ! calculate k+q
+ do ii=1,self%nq_k
+   self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) + kpoint
+ end do
+
+ ! get dg%bz --> lgk%ibz (k+q)
+ ABI_MALLOC(bz2lgkibzkq, (eph_doublegrid%dense_nbz))
+ ! Old version using all crystal symmetries
+ !call eph_doublegrid%bz2ibz(self%lgk%ibz, self%lgk%nibz,&
+ !                            cryst%symrel, cryst%nsym, &
+ !                            bz2lgkibzkq, has_timrev=1)
+ call eph_doublegrid%bz2ibz(self%lgk%ibz, self%lgk%nibz,&
+                            self%lgk%symrec_lg, self%lgk%nsym_lg, &
+                            bz2lgkibzkq, timrev0, use_symrec=.true.)
+
+ ! self%lgrp%ibz (k+q) --> dg%bz
+ do ii=1,self%nbz
+   ik_idx = bz2lgkibzkq(ii)
+   lgkibz2bz(ik_idx) = ii
+ enddo
+ ABI_FREE(bz2lgkibzkq)
+
+ ! get self%lgrp%ibz (k+q) --> dg%bz --> self%ibz
+ ABI_SFREE(self%kq2ibz)
+ ABI_MALLOC(self%kq2ibz, (self%nq_k))
+ do ii=1,self%nq_k
+   ik_idx = lgkibz2bz(ii)
+   self%kq2ibz(ii) = eph_doublegrid%bz2ibz_dense(ik_idx)
+ enddo
+ ABI_FREE(lgkibz2bz)
+
+#if 0
+   ! Get mapping (k + q) --> initial IBZ.
+   ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
+   call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
+
+   if (dksqmax > tol12) then
+     write(msg, '(a,es16.6)' ) &
+      "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
+     MSG_ERROR(msg)
+   end if
+
+   !check if same results as listkk
+   do ii=1,self%nq_k
+      ABI_CHECK(self%kq2ibz(ii)==indkk(ii,1),'Unmatching indexes')
+   enddo
+   ABI_FREE(indkk)
+#endif
+
+ ! revert change
+ do ii=1,self%nq_k
+   self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) - kpoint
+ end do
+
+ ! get self%bz --> dg%bz --> self%lgrp%ibz
+ ABI_MALLOC(bz2lgkibz,(self%nbz))
+
+#if 0
+   ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
+   ABI_MALLOC(bz2bz, (self%nbz * sppoldbl1))
+   call listkk(dksqmax, cryst%gmet, indkk, eph_doublegrid%kpts_dense, self%bz,&
+      eph_doublegrid%dense_nbz, self%nbz, cryst%nsym,&
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
+
+   do ii=1,self%nbz
+      ! get self%bz --> self%bz
+      bz2bz(ii) = eph_doublegrid%get_index(self%bz(:,ii),2)
+   end do
+
+   !check if same results as listkk
+   do ii=1,self%nbz
+      ABI_CHECK(indkk(ii,1)==bz2bz(ii),'Unmatching indexes')
+   enddo
+   ABI_FREE(indkk)
+   ABI_FREE(bz2bz)
+#endif
+
+ do ii=1,self%nbz
+    ! get self%bz --> dg%bz
+    ik_idx = eph_doublegrid%get_index(self%bz(:,ii),2)
+    ! dg%bz --> self%lgrp%ibz
+    bz2lgkibz(ii) = eph_doublegrid%bz2lgkibz(ik_idx)
+ end do
+
+#if 0
+   ! Get mapping BZ --> IBZ_k (self%bz --> self%lgrp%ibz) required for tetrahedron method
+   ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
+   call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
+
+   if (dksqmax > tol12) then
+     write(msg, '(a,es16.6)' ) &
+      "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
+     MSG_ERROR(msg)
+   end if
+
+   !check if same results as listkk
+   do ii=1,self%nbz
+      ABI_CHECK(indkk(ii,1)==bz2lgkibz(ii),'Unmatching indexes')
+   enddo
+   ABI_FREE(indkk)
+#endif
+
+ ! Build tetrahedron object using IBZ(k) as the effective IBZ
+ ! This means that input data for tetra routines must be provided in lgk%kibz_q
+#ifdef DEV_NEW_TETRA
+ call htetra_free(self%tetra_k)
+ call htetra_init(self%tetra_k, bz2lgkibz, cryst%gprimd, self%klatt, self%bz, self%nbz, &
+                  self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
+#else
+ call destroy_tetra(self%tetra_k)
+ call init_tetra(bz2lgkibz, cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring, comm)
+#endif
+ if (ierr /= 0) then
+   MSG_ERROR(errorstring)
+ end if
+ ABI_FREE(bz2lgkibz)
+
+end subroutine ephwg_double_grid_setup_kpoint
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ephwg/ephwg_report_stats
+!! NAME
+!! ephwg_report_stats
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ephwg_report_stats(self)
+
+!Arguments ------------------------------------
+!scalars
+ class(ephwg_t),intent(in) :: self
+
+!Variables
+ real(dp) :: mem_tot
+!----------------------------------------------------------------------
+
+ ! IBZ qpoints
+ mem_tot = 3 * self%nibz * dp
+ ! BZ qpoints
+ mem_tot = mem_tot + 3 * self%nbz * dp
+ ! lgk2ibz and kq2ibz
+ mem_tot = mem_tot + self%nq_k * 2 * 4
+ ! phonon frequencies
+ mem_tot = mem_tot + self%nibz * self%natom3 * dp
+ ! Frolich matrix elements
+ if (self%frohl_model == 3) mem_tot = mem_tot + self%nibz * self%natom3 * dp
+ ! eigenvalues
+ mem_tot = mem_tot + self%nibz * self%nbcount * self%nsppol * dp
+
+ write(std_out,"(a,f8.1,a)") " Memory allocated for ephwg:", mem_tot * b2Mb, " [Mb] <<< MEM"
+
+end subroutine ephwg_report_stats
 !!***
 
 !----------------------------------------------------------------------
@@ -413,6 +803,7 @@ end subroutine ephwg_setup_kpoint
 !!
 !! OUTPUT
 !!  deltaw_pm(nene, nq_k, 2)  (plus, minus) including the weights for BZ integration.
+!   These arrays have the same order as the little group used in sigmaph.
 !!
 !! PARENTS
 !!
@@ -426,10 +817,9 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band, spin, nu, nene, bcorr, comm
- type(ephwg_t),intent(in) :: self
+ class(ephwg_t),intent(in) :: self
  real(dp),optional,intent(in) :: broad
 !arrays
-! This arrays have the same order as the little group used in sigmaph.
  real(dp),intent(in) :: eminmax(2)
  real(dp),intent(out) :: deltaw_pm(nene, self%nq_k, 2)
 
@@ -445,7 +835,7 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
 
  ib = band - self%bstart + 1
 
- ! fill array for e_{k+q, b} +- w_{q,nu)
+ ! Fill array for e_{k+q, b} +- w_{q,nu)
  do iq=1,self%nq_k
    iq_ibz = self%lgk2ibz(iq)   ! IBZ_k --> IBZ
    ikpq_ibz = self%kq2ibz(iq)  ! k + q --> IBZ
@@ -460,7 +850,7 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
    do iq=1,self%nq_k
      do ie=1,2
        wme0 = thetaw(:, 1) - pme_k(iq, ie)
-       deltaw_pm(:, iq, ie) = dirac_delta(wme0, broad)
+       deltaw_pm(:, iq, ie) = gaussian(wme0, broad)
      end do
    end do
 
@@ -472,36 +862,45 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
 
  else
    ! TODO Add routine to compute only delta
+#ifdef DEV_NEW_TETRA
+   call htetra_blochl_weights(self%tetra_k, pme_k(:,1), eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
+     bcorr, thetaw, deltaw_pm(:,:,1), comm)
+   call htetra_blochl_weights(self%tetra_k, pme_k(:,2), eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
+     bcorr, thetaw, deltaw_pm(:,:,2), comm)
+#else
    call tetra_blochl_weights(self%tetra_k, pme_k(:,1), eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
      bcorr, thetaw, deltaw_pm(:,:,1), comm)
    call tetra_blochl_weights(self%tetra_k, pme_k(:,2), eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
      bcorr, thetaw, deltaw_pm(:,:,2), comm)
+#endif
  end if
 
 end subroutine ephwg_get_deltas
 !!***
 
-!!****f* m_ephwg/ephwg_get_dweights
+!----------------------------------------------------------------------
+
+!!****f* m_ephwg/ephwg_get_deltas_wvals
 !! NAME
-!! ephwg_get_dweights
+!! ephwg_get_deltas_wvals
 !!
 !! FUNCTION
-!! Compute weights for $ \delta(ww - \ee_{k+q, b} \pm \omega_{q\nu} $
-!! for a given (qpoint, band, spin) and all phonon modes.
+!! Compute weights for $ \delta(\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
+!! for a given (band, spin) and phonon mode nu.
 !!
 !! INPUTS
 !! band=band index (global index i.e. unshifted)
 !! spin=Spin index
-!! nw=number of energies for DOS
+!! nu=Phonon branch.
+!! nene=number of energies for DOS
+!! eminmax=min and  energy in delta (linear mesh)
 !! bcorr=1 to include Blochl correction else 0.
 !! comm=MPI communicator
-!! [use_bzsum]= By default the weights are multiplied by the Nstar(q) / Nq where
-!!   Nstar(q) is the number of points in the star of the q-point (using the symmetries of the little group of k)
-!!   If use_bzsum is set to True, the Nstar(q) coefficient is removed so that the caller can
-!!   integrate over the BZ without using symmetries.
+!! [broad]=Gaussian broadening
 !!
 !! OUTPUT
-!!  deltaw_pm(nw, nq_k, 2)  (plus, minus) including the weights for BZ integration.
+!!  deltaw_pm(nene, nq_k, 2)  (plus, minus) including the weights for BZ integration.
+!   These arrays have the same order as the little group used in sigmaph.
 !!
 !! PARENTS
 !!
@@ -509,64 +908,167 @@ end subroutine ephwg_get_deltas
 !!
 !! SOURCE
 
-subroutine ephwg_get_dweights(self, iqlk, nw, wvals, band, spin, bcorr, deltaw_pm, comm, use_bzsum)
+subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw_pm, comm, &
+                                  broad)  ! optional
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iqlk, band, spin, nw, bcorr, comm
- type(ephwg_t),intent(in) :: self
- logical, optional, intent(in) :: use_bzsum
+ integer,intent(in) :: band, spin, nu, neig, bcorr, comm
+ real(dp),intent(in) :: eig(neig)
+ class(ephwg_t),intent(in) :: self
+ real(dp),optional,intent(in) :: broad
 !arrays
- real(dp),intent(in) :: wvals(nw)
- real(dp),intent(out) :: deltaw_pm(nw, 2, self%natom3)
+ real(dp),intent(out) :: deltaw_pm(neig,self%nq_k, 2)
 
 !Local variables-------------------------------
 !scalars
- integer :: iq, iq_ibz, ikpq_ibz, ib, nu, ii
- logical :: use_bzsum_
+ integer :: iq,iq_ibz,ikpq_ibz,ib
+ integer :: nprocs, my_rank
+ real(dp),parameter :: max_occ1 = one
+ real(dp) :: wme0(neig)
 !arrays
- real(dp) :: pme_k(self%nq_k, 2), weights(nw, 2)
+ real(dp) :: pme_k(self%nq_k,2), weights(neig,2)
 
 !----------------------------------------------------------------------
+ ABI_UNUSED(weights)
 
  ib = band - self%bstart + 1
- use_bzsum_ = .False.; if (present(use_bzsum)) use_bzsum_ = use_bzsum
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ deltaw_pm = zero
 
- do nu = 1, self%natom3
-   ! Fill array for e_{k+q, b} +- w_{q,nu)
-   do iq=1,self%nq_k
-     iq_ibz = self%lgk2ibz(iq)   ! IBZ_k --> IBZ
-     ikpq_ibz = self%kq2ibz(iq)  ! k + q --> IBZ
-     pme_k(iq, 1) = self%eigkbs_ibz(ikpq_ibz, ib, spin) - self%phfrq_ibz(iq_ibz, nu)
-     pme_k(iq, 2) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
-   end do
-   do ii = 1, 2
-     call tetra_get_onewk_wvals(self%tetra_k, iqlk, bcorr, nw, wvals, self%nq_k, pme_k(:, ii), weights, wtol=tol12)
-     deltaw_pm(:, ii, nu) = weights(:, 1)
-   end do
+ ! Fill array for e_{k+q, b} +- w_{q,nu)
+ do iq=1,self%nq_k
+   iq_ibz = self%lgk2ibz(iq)   ! IBZ_k --> IBZ
+   ikpq_ibz = self%kq2ibz(iq)  ! k + q --> IBZ
+   pme_k(iq,1) = self%eigkbs_ibz(ikpq_ibz, ib, spin) - self%phfrq_ibz(iq_ibz, nu)
+   pme_k(iq,2) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
  end do
 
- ! Rescale weights so that caller can sum over the full BZ.
- if (use_bzsum_) deltaw_pm = deltaw_pm / ( self%lgk%weights(iqlk) * self%nbz )
+#ifdef DEV_NEW_TETRA
+ ! Compute the tetrahedron or gaussian weights
+ if (present(broad)) then
+   do iq_ibz=1,self%nq_k
+     if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
+     wme0 = eig - pme_k(iq_ibz, 1)
+     deltaw_pm(:,iq_ibz,1) = gaussian(wme0, broad) * self%lgk%weights(iq_ibz)
+     wme0 = eig - pme_k(iq_ibz, 2)
+     deltaw_pm(:,iq_ibz,2) = gaussian(wme0, broad) * self%lgk%weights(iq_ibz)
+   end do
+ else
+   call htetra_wvals_weights_delta(self%tetra_k,pme_k(:,1),neig,eig,max_occ1,self%nq_k,bcorr,deltaw_pm(:,:,1),comm)
+   call htetra_wvals_weights_delta(self%tetra_k,pme_k(:,2),neig,eig,max_occ1,self%nq_k,bcorr,deltaw_pm(:,:,2),comm)
+ end if
+#else
+ ! Compute the tetrahedron or gaussian weights
+ do iq_ibz=1,self%nq_k
+   if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
+   if (present(broad)) then
+     wme0 = eig - pme_k(iq_ibz, 1)
+     deltaw_pm(:,iq_ibz,1) = gaussian(wme0, broad) * self%lgk%weights(iq_ibz)
+     wme0 = eig - pme_k(iq_ibz, 2)
+     deltaw_pm(:,iq_ibz,2) = gaussian(wme0, broad) * self%lgk%weights(iq_ibz)
+   else
+     call tetra_get_onewk_wvals(self%tetra_k, iq_ibz, bcorr, neig, eig, self%nq_k, pme_k(:,1), weights, tol6)
+     deltaw_pm(:,iq_ibz,1) = weights(:,1)
+     call tetra_get_onewk_wvals(self%tetra_k, iq_ibz, bcorr, neig, eig, self%nq_k, pme_k(:,2), weights, tol6)
+     deltaw_pm(:,iq_ibz,2) = weights(:,1)
+   end if
+ end do
+ call xmpi_sum(deltaw_pm, comm, ierr)
+#endif
 
-end subroutine ephwg_get_dweights
+end subroutine ephwg_get_deltas_wvals
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_ephwg/ephwg_zinv_weights
+!!****f* m_ephwg/ephwg_get_deltas_qibzk
 !! NAME
-!! ephwg_zinv_weights
+!! ephwg_get_deltas_qibzk
+!!
+!! FUNCTION
+!! Compute weights for $ \delta(\omega - \omega_{q\nu} $ for given nu, using q-opints in the IBZ(k)
+!!
+!! INPUTS
+!! nu=Phonon branch.
+!! nene=number of energies for DOS
+!! eminmax=min and  energy in delta (linear mesh)
+!! bcorr=1 to include Blochl correction else 0.
+!! comm=MPI communicator
+!! [with_qweights]= .False. if q-point weights should not be included in dt_weights
+!!
+!! OUTPUT
+!!  dt_weights(nene, nq_k, 2)  weights for BZ integration (delta and theta function)
+!   These arrays have the same order as the q-points in the little group of the k-point.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ephwg_get_deltas_qibzk(self, nu, nene, eminmax, bcorr, dt_weights, comm, with_qweights)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nu, nene, bcorr, comm
+ class(ephwg_t),intent(in) :: self
+ logical,optional,intent(in) :: with_qweights
+!arrays
+ real(dp),intent(in) :: eminmax(2)
+ real(dp),intent(out) :: dt_weights(nene, self%nq_k, 2)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iq, iq_ibz, ie, ii
+ real(dp),parameter :: max_occ1 = one
+!arrays
+ real(dp) :: eigen_in(self%nq_k) !thetaw(nene, self%nq_k),
+
+!----------------------------------------------------------------------
+
+ ! Fill eigen_in
+ do iq=1,self%nq_k
+   iq_ibz = self%lgk2ibz(iq)  ! IBZ_k --> IBZ
+   eigen_in(iq) = self%phfrq_ibz(iq_ibz, nu)
+ end do
+
+#ifdef DEV_NEW_TETRA
+ call htetra_blochl_weights(self%tetra_k, eigen_in, eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
+   bcorr, dt_weights(:,:,2), dt_weights(:,:,1), comm)
+#else
+ call tetra_blochl_weights(self%tetra_k, eigen_in, eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
+   bcorr, dt_weights(:,:,2), dt_weights(:,:,1), comm)
+#endif
+
+ if (present(with_qweights)) then
+  if (.not. with_qweights) then
+    do ii=1,2
+      do ie=1,nene
+        dt_weights(ie, :, ii) = dt_weights(ie, :, ii) * self%lgk%weights
+      end do
+    end do
+   end if
+ end if
+
+end subroutine ephwg_get_deltas_qibzk
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ephwg/ephwg_get_zinv_weights
+!! NAME
+!! ephwg_get_zinv_weights
 !!
 !! FUNCTION
 !! Compute weights for a given (kpoint, qpoint, spin) for all phonon modes.
 !!
 !! INPUTS
 !! qpt(3)
-!! band=band index (global index i.e. unshifted)
+!! iband_sum=band index in self-energy sum. (global index i.e. unshifted)
 !! spin=Spin index
 !! nu=Phonon branch.
-!! nbsigma
+!! nbcalc=Number of bands in self-energy matrix elements.
 !! zvals
 !! comm=MPI communicator
 !! [use_bzsum]= By default the weights are multiplied by the Nstar(q) / Nq where
@@ -575,7 +1077,7 @@ end subroutine ephwg_get_dweights
 !!   integrate over the BZ without using symmetries.
 !!
 !! OUTPUT
-!!  cweights(nz, 2, nbsigma, %natom3)  (plus, minus)
+!!  cweights(nz, 2, nbcalc, %nq_k)  (plus, minus)
 !!  include weights for BZ integration.
 !!
 !! PARENTS
@@ -584,29 +1086,34 @@ end subroutine ephwg_get_dweights
 !!
 !! SOURCE
 
-subroutine ephwg_zinv_weights(self, iqlk, nz, nbsigma, zvals, band, spin, cweights, comm, use_bzsum)
+subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, cweights, comm, use_bzsum)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iqlk, band, spin, nz, nbsigma,comm
- type(ephwg_t),intent(in) :: self
+ integer,intent(in) :: iband_sum, spin, nu, nz, nbcalc, comm
+ class(ephwg_t),intent(in) :: self
  logical, optional, intent(in) :: use_bzsum
 !arraye
- complex(dpc),intent(in) :: zvals(nz, nbsigma)
- complex(dpc),intent(out) :: cweights(nz, 2, nbsigma, self%natom3)
+ complex(dpc),intent(in) :: zvals(nz, nbcalc)
+ complex(dpc),intent(out) :: cweights(nz, 2, nbcalc, self%nq_k)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iq_ibz,ikpq_ibz,ib,ii,jj,iz,itetra,nu,iq,nprocs, my_rank, ierr
- real(dp) :: volconst_mult
+ integer :: iq_ibz,ikpq_ibz,ib,ii,iq,nprocs, my_rank, ierr
+ real(dp),parameter :: max_occ1=one
  logical :: use_bzsum_
 !arrays
- real(dp) :: ework(4, 2)
- real(dp),allocatable :: pme_k(:,:,:)
- integer :: ind_ibz(4)
+ real(dp),allocatable :: pme_k(:,:)
+ complex(dp),allocatable :: cweights_tmp(:,:)
  !complex(dpc) :: SIM0, SIM0I
- complex(dpc) :: VERM(4), VERL(4), VERLI(4),  cint(nz,4)
+#ifndef DEV_NEW_TETRA
+ integer :: itetra, iqlk, jj, iz
+ integer :: ind_ibz(4)
+ real(dp) :: volconst_mult
+ real(dp) :: ework(4, 2)
+ complex(dpc) :: VERM(4), VERL(4), VERLI(4),  cint(4,nz)
+#endif
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -614,82 +1121,90 @@ subroutine ephwg_zinv_weights(self, iqlk, nz, nbsigma, zvals, band, spin, cweigh
  use_bzsum_ = .False.; if (present(use_bzsum)) use_bzsum_ = use_bzsum
 
  ! Allocate array for e_{k+q, b} +- w_{q,nu)
- ABI_MALLOC(pme_k, (self%nq_k, 2, self%natom3))
+ ABI_MALLOC(pme_k, (self%nq_k, 2))
 
- ib = band - self%bstart + 1
- do nu=1,self%natom3
-   do iq=1,self%nq_k
-     iq_ibz = self%lgk2ibz(iq)   ! IBZ_k --> IBZ
-     ikpq_ibz = self%kq2ibz(iq)  ! k + q --> IBZ
-     pme_k(iq, 1, nu) = self%eigkbs_ibz(ikpq_ibz, ib, spin) - self%phfrq_ibz(iq_ibz, nu)
-     pme_k(iq, 2, nu) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
-   end do
+ ib = iband_sum - self%bstart + 1
+ do iq=1,self%nq_k
+   iq_ibz = self%lgk2ibz(iq)   ! IBZ_k --> IBZ
+   ikpq_ibz = self%kq2ibz(iq)  ! k + q --> IBZ
+   pme_k(iq, 1) = self%eigkbs_ibz(ikpq_ibz, ib, spin) - self%phfrq_ibz(iq_ibz, nu)
+   pme_k(iq, 2) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
  end do
 
  cweights = zero
+#ifdef DEV_NEW_TETRA
+ ABI_MALLOC(cweights_tmp,(nz,self%nq_k))
+ do ib=1,nbcalc
+   do ii=1,2
+     call htetra_weights_wvals_zinv(self%tetra_k, pme_k(:, ii), nz, zvals(:,ib), &
+                                    max_occ1, self%nq_k, 1, cweights_tmp, comm)
+     do iq=1,self%nq_k
+       cweights(:,ii,ib,iq) = cweights_tmp(:,iq)
+     end do
+   end do
+ end do
+ ABI_FREE(cweights_tmp)
+#else
  do itetra = 1, self%tetra_k%ntetra
-   ! Here we need the original ordering to reference the correct irred kpoints
-   ! Cycle if this tetra does not contribute to this k-point.
-   ! See also tetra_get_onewk
-   if (all(self%tetra_k%tetra_full(:, 1, itetra) /= iqlk)) cycle
    if (mod(itetra, nprocs) /= my_rank) cycle ! MPI parallelism
+   ! Here we need the original ordering to reference the correct irred kpoints
+   ! See also tetra_get_onewk
+   !if (all(self%tetra_k%tetra_full(:, 1, itetra) /= iqlk)) cycle
    ind_ibz = self%tetra_k%tetra_full(:, 1, itetra)
    !volconst_mult = self%tetra_k%vv / 4.d0 !* dble(self%tetra_k%tetra_mult(itetra))
    volconst_mult = self%tetra_k%vv * dble(self%tetra_k%tetra_mult(itetra))
 
-   do nu=1,self%natom3
-     ework = pme_k(ind_ibz(:), :, nu)
-     do ib=1,nbsigma
-       do ii=1,2
-         ! Compute weights for nz points.
-         do iz=1,nz
-           verm = zvals(iz, ib) - ework(:, ii)
-           !verm = zvals(iz, ib) - pme_k(ind_ibz(:), ii, nu)
-           !call SIM0ONEI(SIM0, SIM0I, VERM)
-           !cint(iz,:) = SIM0I / 4.0_dp * volconst_mult
-           call SIM0TWOI(VERL, VERLI, VERM)
-           cint(iz,:) = verl(:) * volconst_mult
-         end do
+   ework = pme_k(ind_ibz(:), :)
+   do ib=1,nbcalc
+     do ii=1,2
+       ! Compute weights for nz points.
+       ! TODO: This is slow if nz >> 1
+       do iz=1,nz
+         verm = zvals(iz, ib) - ework(:, ii)
+         !verm = zvals(iz, ib) - pme_k(ind_ibz(:), ii)
+         !call SIM0ONEI(SIM0, SIM0I, VERM)
+         !cint(iz,:) = SIM0I / 4.0_dp * volconst_mult
+         call SIM0TWOI(VERL, VERLI, VERM)
+         cint(:, iz) = verl(:) * volconst_mult
+       end do
 
-         ! TODO
-         ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
-         do jj=1,4
-           if (ind_ibz(jj) == iqlk) then
-             !weights(:,1) = weights(:,1) + dtweightde_tmp(:,jj)
-             cweights(:, ii, ib, nu) = cweights(:, ii, ib, nu) + cint(:, jj)
-           end if
-         end do
-       end do  ! +-
-     end do ! ib
-   end do  ! nu
+       ! TODO
+       ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
+       do jj=1,4
+         iqlk = ind_ibz(jj)
+         cweights(:, ii, ib, iqlk) = cweights(:, ii, ib, iqlk) + cint(jj, :)
+       end do
+     end do  ! +-
+   end do ! ib
 
  end do ! itetra
+#endif
 
  ! Rescale weights so that the caller can sum over the full BZ.
- if (use_bzsum_) cweights = cweights / ( self%lgk%weights(iqlk) * self%nbz )
+ !if (use_bzsum_) cweights = cweights / ( self%lgk%weights(iqlk) * self%nbz )
 
  call xmpi_sum(cweights, comm, ierr)
 
  ! Compare results with naive one-point integration.
- if (.False. .and. my_rank == master) then
-   volconst_mult = one
-   volconst_mult = self%lgk%weights(iqlk)
-   do ib=1,nbsigma
-     do nu=1,self%natom3
-       write(std_out,*)"# naive vs tetra integration for band, nu", ib - 1 + self%bstart, nu
-       do iz=1,nz
-         write(std_out,"(5es16.8)") &
-           dble(zvals(iz, ib)), one / (zvals(iz, ib) - pme_k(iqlk, 1, nu)) * volconst_mult, cweights(iz, 1, ib, nu)
-         write(std_out,"(5es16.8)") &
-           dble(zvals(iz, ib)), one / (zvals(iz, ib) - pme_k(iqlk, 2, nu)) * volconst_mult, cweights(iz, 2, ib, nu)
-       end do
-     end do
-   end do
- end if
+ !if (.False. .and. my_rank == master) then
+ !  volconst_mult = one
+ !  volconst_mult = self%lgk%weights(iqlk)
+ !  do ib=1,nbcalc
+ !    !do nu=1,self%natom3
+ !      write(std_out,*)"# naive vs tetra integration for band, nu", ib - 1 + self%bstart, nu
+ !      do iz=1,nz
+ !        write(std_out,"(5es16.8)") &
+ !          dble(zvals(iz, ib)), one / (zvals(iz, ib) - pme_k(iqlk, 1)) * volconst_mult, cweights(iz, 1, ib, nu)
+ !        write(std_out,"(5es16.8)") &
+ !          dble(zvals(iz, ib)), one / (zvals(iz, ib) - pme_k(iqlk, 2)) * volconst_mult, cweights(iz, 2, ib, nu)
+ !      end do
+ !    !end do
+ !  end do
+ !end if
 
  ABI_FREE(pme_k)
 
-end subroutine ephwg_zinv_weights
+end subroutine ephwg_get_zinv_weights
 !!***
 
 !!****f* m_ephwg/ephwg_free
@@ -712,7 +1227,7 @@ end subroutine ephwg_zinv_weights
 subroutine ephwg_free(self)
 
 !Arguments ------------------------------------
- type(ephwg_t),intent(inout) :: self
+ class(ephwg_t),intent(inout) :: self
 
 !----------------------------------------------------------------------
 
@@ -724,10 +1239,15 @@ subroutine ephwg_free(self)
  ABI_SFREE(self%bz)
  ABI_SFREE(self%lgk2ibz)
  ABI_SFREE(self%phfrq_ibz)
+ ABI_SFREE(self%frohl_ibz)
  ABI_SFREE(self%eigkbs_ibz)
 
  ! types
+#ifdef DEV_NEW_TETRA
+ call htetra_free(self%tetra_k)
+#else
  call destroy_tetra(self%tetra_k)
+#endif
  call self%lgk%free()
 
  ! nullify pointers
@@ -735,226 +1255,6 @@ subroutine ephwg_free(self)
 
 end subroutine ephwg_free
 !!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_ephwg/ephwg_test
-!! NAME
-!! ephwg_test
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!! dtset<dataset_type>=All input variables for this dataset.
-!! ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-!! subroutine ephwg_test(dtset, cryst, ebands, ifc, prefix, comm)
-!!
-!!  implicit none
-!!
-!! !Arguments ------------------------------------
-!! !scalarster
-!!  integer,intent(in) :: comm
-!!  type(dataset_type),intent(in) :: dtset
-!!  type(crystal_t),intent(in) :: cryst
-!!  type(ebands_t),intent(in) :: ebands
-!!  type(ifc_type),intent(in) :: ifc
-!!  character(len=*),intent(in) :: prefix
-!!
-!! !Local variables-------------------------------
-!! !scalars
-!!  integer,parameter :: bcorr0 = 0, intp_nshiftk = 1, master = 0
-!!  integer,parameter :: nz = 2, nbsigma= 1
-!!  integer :: band, spin, nu, bstart, nbcount, ik_ibz, ii, it, nene, nprocs, my_rank, cnt, ierr, ntemp
-!!  integer :: iq, iq_ibz, ikpq_ibz
-!! #ifdef HAVE_NETCDF
-!!  integer :: ncid, ncerr
-!! #endif
-!!  real(dp) :: omega_step
-!!  real(dp) :: cpu, wall, gflops
-!!  character(len=500) :: msg
-!!  type(ephwg_t) :: ephwg
-!!  type(ebands_t) :: eb_dense
-!!  type(edos_t) :: edos
-!! !arrays
-!!  integer :: intp_kptrlatt(3, 3), band_block(2)
-!!  real(dp):: intp_shiftk(3, intp_nshiftk), eminmax(2)
-!!  real(dp),allocatable :: deltaw_pm(:,:,:), nq_list(:),fkq_list(:)
-!!  real(dp),allocatable :: sdelta(:,:,:,:,:), omega_mesh(:), ktmesh(:)
-!!  real(dp),allocatable :: ekq_list(:), phq_list(:)
-!!
-!!  !complex(dpc) :: zvals(nz, nbsigma)
-!!  !complex(dpc) :: cweights(nz, 2, cryst%natom * 3, nbsigma)
-!!
-!! !----------------------------------------------------------------------
-!!
-!!  ! Consistency check
-!!  ierr = 0
-!!  if (nint(dtset%einterp(1)) == 0) then
-!!    MSG_ERROR_NOSTOP("einterp must be specified in the input file", ierr)
-!!  end if
-!!  if (ierr /= 0) then
-!!    MSG_ERROR("Fatal error. See above warnings")
-!!  end if
-!!
-!!  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
-!!
-!!  ! Interpolate band energies with star-functions
-!!  ! FIXME: One should include all degenerate states from the energy window
-!!  ! but it seems there's a problem if I don't include all states.
-!!  band_block = [1, 7]
-!!  !intp_kptrlatt = reshape([8, 0, 0, 0, 8, 0, 0, 0, 8], [3, 3])
-!!  intp_kptrlatt = reshape([1, 0, 0, 0, 1, 0, 0, 0, 1], [3, 3]) * dtset%useria
-!!  !ABI_CHECK(all(dtset%bs_interp_kmult /= 0), "bs_interp_kmult == 0!")
-!!  !do ii = 1, 3
-!!  !  intp_kptrlatt(:, ii) = dtset%bs_interp_kmult(ii) * ebands%kptrlatt(:, ii)
-!!  !end do
-!!  !intp_nshiftk =
-!!  intp_shiftk = zero
-!!
-!!  call ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
-!!
-!!  eb_dense = ebands_interp_kmesh(ebands, cryst, dtset%einterp, intp_kptrlatt, intp_nshiftk, intp_shiftk, band_block, comm)
-!!  !call ebands_set_scheme(eb_dense, ebands%occopt, ebands%tsmear, dtset%spinmagntarget, dtset%prtvol)
-!!
-!!  ! Initalize object for eph weights.
-!!  bstart = band_block(1); nbcount = band_block(2) - band_block(1) + 1
-!!  ephwg = ephwg_new(cryst, ifc, bstart, nbcount, eb_dense%kptopt, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
-!!    eb_dense%nkpt, eb_dense%kptns, eb_dense%nsppol, eb_dense%eig, comm)
-!!
-!!  ! Frequency mesh for delta functions.
-!!  eminmax(1) = minval(eb_dense%eig(band_block(1):band_block(2), :, :))
-!!  eminmax(2) = maxval(eb_dense%eig(band_block(1):band_block(2), :, :))
-!!  omega_step = 0.1_dp * eV_Ha
-!!  nene = 1 + nint((eminmax(2) - eminmax(1)) / omega_step)
-!!  ABI_MALLOC(omega_mesh, (nene))
-!!  omega_mesh = arth(eminmax(1), omega_step, nene)
-!!
-!!  ! Temperature mesh.
-!!  ntemp = nint(dtset%tmesh(3))
-!!  ABI_CHECK(ntemp > 0, "ntemp <= 0")
-!!  ABI_MALLOC(ktmesh, (ntemp))
-!!  ktmesh = arth(dtset%tmesh(1), dtset%tmesh(2), ntemp) * kb_HaK
-!!
-!!  ! Print important parameters.
-!!  if (my_rank == master) then
-!!    write(std_out,"(2a)")ch10," === Parameters used to compute EPH weights ==="
-!!    write(std_out,"(a)")sjoin("Band block for SKW interpolation:", ltoa(band_block))
-!!    write(std_out,"(a)")sjoin("Number of points in the IBZ:", itoa(eb_dense%nkpt))
-!!    write(std_out,"(a)")sjoin("Dense k-mesh:", ltoa(pack(transpose(intp_kptrlatt), mask=.True.)))
-!!    write(std_out,"(a)")sjoin("Shifts:", ltoa(pack(intp_shiftk, mask=.True.)))
-!!    write(std_out,"(a)")sjoin("Number of frequencies in delta functions:", itoa(nene), &
-!!      "From:", ftoa(omega_mesh(1) * Ha_eV), "to", ftoa(omega_mesh(nene) * Ha_eV), "[eV]")
-!!    write(std_out,"(a)")sjoin("Number of temperatures:", itoa(ntemp), &
-!!      "From:", ftoa(kTmesh(1) / kb_HaK), "to", ftoa(kTmesh(ntemp) / kb_HaK), "[K]")
-!!    write(std_out,"(a)")ch10
-!!  end if
-!!
-!!  ! Compute electron DOS with tetra.
-!!  edos = ebands_get_edos(eb_dense, cryst, 2, omega_step, zero, comm)
-!!
-!!  ABI_CALLOC(sdelta, (nene, 2, ntemp, eb_dense%nkpt, eb_dense%nsppol))
-!!  cnt = 0
-!!  do ik_ibz=1,eb_dense%nkpt
-!!    cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! mpi-parallelism
-!!    call cwtime(cpu, wall, gflops, "start")
-!!    call ephwg_setup_kpoint(ephwg, eb_dense%kptns(:, ik_ibz), dtset%prtvol, xmpi_comm_self)
-!!
-!!    ABI_MALLOC(deltaw_pm, (nene, ephwg%nq_k, 2))
-!!    ABI_MALLOC(phq_list, (ephwg%nq_k))
-!!    ABI_MALLOC(nq_list, (ephwg%nq_k))
-!!    ABI_MALLOC(ekq_list, (ephwg%nq_k))
-!!    ABI_MALLOC(fkq_list, (ephwg%nq_k))
-!!
-!!    do nu = 1, ifc%natom * 3
-!!      ! Load phonons in IBZ(k)
-!!      do iq=1,ephwg%nq_k
-!!        iq_ibz = ephwg%lgk2ibz(iq)  ! IBZ_k --> IBZ
-!!        phq_list(iq) = ephwg%phfrq_ibz(iq_ibz, nu)
-!!      end do
-!!
-!!      do band = band_block(1), band_block(2)
-!!        do spin = 1, eb_dense%nsppol
-!!          call ephwg_get_deltas(ephwg, band, spin, nu, nene, eminmax, bcorr0, deltaw_pm, xmpi_comm_self)
-!!          !call ephwg_get_deltas(ephwg, band, spin, nu, nene, eminmax, bcorr0, deltaw_pm, xmpi_comm_self, broad=0.3 * eV_Ha)
-!!
-!!          ! Load e_{k+q} in IBZ(k)
-!!          do iq=1,ephwg%nq_k
-!!            ikpq_ibz = ephwg%kq2ibz(iq)  ! k + q --> IBZ
-!!            ekq_list(iq) = eb_dense%eig(band, ikpq_ibz, spin)
-!!          end do
-!!
-!!          ! TODO: Check conventions.
-!!          ! Note fermi level taken from ebands.
-!!          do it=1,ntemp
-!!            nq_list = occ_be(phq_list, ktmesh(it), zero)
-!!            fkq_list = occ_fd(ekq_list, ktmesh(it), ebands%fermie)
-!!            do iq=1,ephwg%nq_k
-!!              sdelta(:, 1, it, ik_ibz, spin) = sdelta(:, 1, it, ik_ibz, spin) +  &
-!!                (nq_list(iq) + fkq_list(iq)) * deltaw_pm(:, iq, 1)
-!!              sdelta(:, 2, it, ik_ibz, spin) = sdelta(:, 2, it, ik_ibz, spin) +  &
-!!                (nq_list(iq) + one - fkq_list(iq)) * deltaw_pm(:, iq, 2)
-!!            end do
-!!          end do
-!!
-!!        end do ! spin
-!!      end do ! band
-!!    end do ! nu
-!!
-!!    ABI_FREE(deltaw_pm)
-!!    ABI_FREE(phq_list)
-!!    ABI_FREE(nq_list)
-!!    ABI_FREE(ekq_list)
-!!    ABI_FREE(fkq_list)
-!!
-!!    call cwtime(cpu, wall, gflops, "stop")
-!!    write(msg,'(2(a,i0),2(a,f8.2))')"k-point [", ik_ibz, "/", eb_dense%nkpt, "] completed. cpu:",cpu,", wall:",wall
-!!    call wrtout(std_out, msg, do_flush=.True.)
-!!  end do
-!!
-!!  ! Collect data, then master writes data.
-!!  call xmpi_sum_master(sdelta, master, comm, ierr)
-!!  if (my_rank == master) then
-!! #ifdef HAVE_NETCDF
-!!    NCF_CHECK(nctk_open_create(ncid, strcat(prefix, "_SDELTA.nc"), xmpi_comm_self))
-!!    NCF_CHECK(crystal_ncwrite(cryst, ncid))
-!!    NCF_CHECK(ebands_ncwrite(eb_dense, ncid))
-!!    NCF_CHECK(edos_ncwrite(edos, ncid))
-!!    ! Add dimensions for SDELTA arrays.
-!!    NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("nomega", nene), nctkdim_t("ntemp", ntemp)], defmode=.True.))
-!!    ncerr = nctk_def_arrays(ncid, [ &
-!!      nctkarr_t("omega_mesh", "dp", "nomega"), &
-!!      nctkarr_t("kTmesh", "dp", "ntemp"), &
-!!      nctkarr_t("sdelta", "dp", "nomega, two, ntemp, number_of_kpoints, number_of_spins") &
-!!    ])
-!!    NCF_CHECK(ncerr)
-!!    ! Write data
-!!    NCF_CHECK(nctk_set_datamode(ncid))
-!!    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "omega_mesh"), omega_mesh))
-!!    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), ktmesh))
-!!    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sdelta"), sdelta))
-!!    NCF_CHECK(nf90_close(ncid))
-!! #endif
-!!  end if
-!!
-!!  ABI_FREE(omega_mesh)
-!!  ABI_FREE(ktmesh)
-!!  ABI_FREE(sdelta)
-!!
-!!  call ebands_free(eb_dense)
-!!  call edos_free(edos)
-!!  call ephwg_free(ephwg)
-!!
-!! end subroutine ephwg_test
-!! !!***
 
 end module m_ephwg
 !!***

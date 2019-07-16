@@ -70,6 +70,10 @@ module m_dft_energy
  use m_prep_kgb,         only : prep_getghc, prep_nonlop
  use m_psolver,          only : psolver_rhohxc
 
+#if defined HAVE_GPU_CUDA
+ use m_manage_cuda
+#endif
+
  implicit none
 
  private
@@ -227,8 +231,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 & taug,taur,usexcnhat,vhartr,vtrial,vpsp,vxc,vxctau,wfs,wvl,wvl_den,wvl_e,xccc3d,xred,ylm,&
 & add_tfw) ! optional argument
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mcg,my_natom,n3xccc,nfftf,nhatgrdim,optene,usexcnhat
@@ -280,8 +282,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  integer :: nband_k,nblockbd,nfftotf,nkpg,nkxc,nk3xc,nnlout,npw_k,nspden_rhoij,option
  integer :: option_rhoij,paw_opt,signs,spaceComm,tim_mkrho,tim_nonlop
  logical :: add_tfw_,paral_atom,usetimerev,with_vxctau
- logical :: wvlbigdft=.false.
- logical :: non_magnetic_xc
+ logical :: non_magnetic_xc,wvlbigdft=.false.
  real(dp) :: dotr,doti,eeigk,ekk,enlk,evxc,e_xcdc_vxctau,ucvol,ucvol_local,vxcavg
  !character(len=500) :: message
  type(gs_hamiltonian_type) :: gs_hamk
@@ -305,9 +306,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 ! *************************************************************************
 
  DBG_ENTER("COLL")
-
-! Create variable for non_magnetic_xc
- non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (dtset%usekden/=0)
@@ -353,12 +351,13 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  option=1;nkxc=0
  ipositron=electronpositron_calctype(electronpositron)
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
+ non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
  if (ipositron/=1) then
 
    if (dtset%icoulomb == 0) then
 !    Use the periodic solver to compute Hxc.
-     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,rhog,rprimd,vhartr)
+     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,rhog,rprimd,vhartr)
      call xcdata_init(xcdata,dtset=dtset)
      ABI_ALLOCATE(kxc,(1,nkxc))
 !    to be adjusted for the call to rhotoxc
@@ -366,13 +365,13 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
      if (ipositron==0) then
        call rhotoxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc, &
+&       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd,strsxc, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
      else
        call rhotoxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,rprimd,strsxc, &
+&       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd,strsxc, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
 &       electronpositron=electronpositron,taug=taug,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
@@ -951,8 +950,6 @@ end subroutine energy
 !! SOURCE
 
 subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,resid_k)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

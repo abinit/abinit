@@ -35,6 +35,7 @@
 #include "abi_common.h"
 
 module m_spin_model_primitive
+
   use iso_c_binding
   use m_dynmaic_array
   use m_mathfuncs
@@ -43,6 +44,7 @@ module m_spin_model_primitive
   use m_errors
   use m_supercell
   use m_spin_terms
+
   implicit none
 
 !!*** 
@@ -151,6 +153,7 @@ contains
 
     class(spin_model_primitive_t), intent(inout) :: self
    !TODO should something  be done here?
+    ABI_UNUSED(self%natoms)
   end subroutine spin_model_primitive_t_initialize
 
   subroutine spin_model_primitive_t_set_atoms(self, natoms, unitcell, positions, &
@@ -161,12 +164,12 @@ contains
     real(dp), intent(in):: unitcell(3, 3),  positions(3,natoms), &
          spinat(3,natoms), gyroratios(nspins), damping_factors(nspins)
 
-    !print *, "natoms",natoms
-    !print *, "nspins", nspins
-    !print *, "positions", positions
-    !print *, "spinat", spinat
-    !print *, "gyroratios", gyroratios
-    !print *, "damping_factors", damping_factors
+    !write(std_out,*) "natoms",natoms
+    !write(std_out,*) "nspins", nspins
+    !write(std_out,*) "positions", positions
+    !write(std_out,*) "spinat", spinat
+    !write(std_out,*) "gyroratios", gyroratios
+    !write(std_out,*) "damping_factors", damping_factors
     ABI_ALLOCATE(self%positions, (3, natoms))
     ABI_ALLOCATE(self%index_spin, (natoms))
     ABI_ALLOCATE(self%spinat, (3, natoms))
@@ -329,7 +332,7 @@ contains
     call c_f_pointer(p_bi_Rlist, bi_Rlist, [bi_nnz*3])
     call c_f_pointer(p_bi_vallist, bi_vallist, [bi_nnz*9])
 
-    print *, "Spin model: setting structure."
+    write(std_out,*) "Spin model: setting structure."
     uc(:,:)=transpose(reshape(unitcell, [3,3]))
     call spin_model_primitive_t_set_atoms(self,natoms,uc, & 
             & reshape(positions, [3, natoms]), &
@@ -349,12 +352,12 @@ contains
     end if
 
     if(uexc) then
-       print *, "Spin model: setting exchange terms."
+       write(std_out,*) "Spin model: setting exchange terms."
        call spin_model_primitive_t_set_exchange(self, exc_nnz,exc_ilist,exc_jlist,&
             reshape(exc_Rlist, (/3, exc_nnz /)), &
             reshape(exc_vallist, (/3, exc_nnz/)))
     else
-       print *, "Spin model: exchange term from xml file not used."
+       write(std_out,*) "Spin model: exchange term from xml file not used."
     endif
 
     if(.not. present(use_dmi))  then
@@ -363,16 +366,16 @@ contains
        udmi=use_dmi
     end if
     if (udmi) then
-       print *, "Spin model: setting dmi terms."
+       write(std_out,*) "Spin model: setting dmi terms."
        ! call self%set_dmi( n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
        !    Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
        !     vallist = reshape(dmi_vallist, (/3, dmi_nnz/)) )
        call spin_model_primitive_t_set_dmi(self, n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
             Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
             vallist = reshape(dmi_vallist, (/3, dmi_nnz/)))
-       print *, "Spin model: setting uniaxial SIA terms."
+       write(std_out,*) "Spin model: setting uniaxial SIA terms."
     else
-       print *, "Spin model: DMI term from xml file not used."
+       write(std_out,*) "Spin model: DMI term from xml file not used."
     end if
     !call self%set_uni(uni_nnz, uni_ilist, uni_amplitude_list, &
     !     reshape(uni_direction_list, [3, uni_nnz]) )
@@ -383,14 +386,14 @@ contains
        usia=use_sia
     end if
     if (usia) then
-       print *, "Spin model: setting SIA terms."
+       write(std_out,*) "Spin model: setting SIA terms."
        call spin_model_primitive_t_set_uni(self, uni_nnz, uni_ilist, uni_amplitude_list, &
             reshape(uni_direction_list, [3, uni_nnz]) )
     !call self%set_bilinear(bi_nnz, bi_ilist, bi_jlist,  &
     !     Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
     !     vallist = reshape(bi_vallist, (/3,3, bi_nnz/)) )
     else
-       print *, "Spin model: SIA term in xml file not used."
+       write(std_out,*) "Spin model: SIA term in xml file not used."
     end if
 
     if(.not. present(use_bi)) then
@@ -400,12 +403,12 @@ contains
     endif
 
     if (ubi) then
-       print *, "Spin model: setting bilinear terms."
+       write(std_out,*) "Spin model: setting bilinear terms."
        call spin_model_primitive_t_set_bilinear(self, bi_nnz, bi_ilist, bi_jlist,  &
             Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
             vallist = reshape(bi_vallist, (/3,3, bi_nnz/)))
     else
-       print *, "Spin model: Bilinear term in xml file not used."
+       write(std_out,*) "Spin model: Bilinear term in xml file not used."
     endif
 
     call xml_free_spin(xml_fname, ref_energy, p_unitcell,                 &
@@ -527,11 +530,10 @@ contains
     type(spin_model_primitive_t) , intent(inout) :: self
     integer, intent(in) :: nnz,  ilist(:), jlist(:), Rlist(:,:)
     real(dp), intent(in) :: vallist(:,:)
-    integer :: err
-    allocate(self%exc_ilist(nnz), stat=err)
-    allocate(self%exc_jlist(nnz), stat=err)
-    allocate(self%exc_Rlist(3,nnz), stat=err)
-    allocate(self%exc_vallist(3,nnz), stat=err)
+    ABI_MALLOC(self%exc_ilist, (nnz))
+    ABI_MALLOC(self%exc_jlist, (nnz))
+    ABI_MALLOC(self%exc_Rlist, (3,nnz))
+    ABI_MALLOC(self%exc_vallist, (3,nnz))
     self%exc_nnz=nnz
     self%exc_ilist=ilist
     self%exc_jlist=jlist
@@ -551,11 +553,11 @@ contains
     !call dgesv( n, nrhs, a, lda, ipiv, b, ldb, info )
     sc_mat(:,:)=scell%rlatt
     R_sc_d(:)=R(:)
-    !print *, sc_mat
-    !print *, R_sc_d
+    !write(std_out,*) sc_mat
+    !write(std_out,*) R_sc_d
     call dgesv(3, 1, sc_mat, 3, ipriv, R_sc_d, 3, info)
     if ( info/=0 ) then
-       print *, "Failed to find R_sc"
+       write(std_out,*) "Failed to find R_sc"
     end if
 
     ! if only diagonal of rlatt works.
@@ -588,7 +590,7 @@ contains
           return
        end if
     end do
-    print *, "cannot find iatom_prim, rvec pair", iatom_prim, rvec, "in supercell"
+    write(std_out,*) "cannot find iatom_prim, rvec pair", iatom_prim, rvec, "in supercell"
   end function find_supercell_index
 
   !i0, j0+R0 shifted by R to i1=i0+0+R->periodic, j1=j0+R0+R->periodic
@@ -611,7 +613,7 @@ contains
     integer ::  typat_primcell(self%natoms), sc_nspins,  i, counter, icell
     real(dp) :: znucl(self%natoms), tmp(3,3)
     type(supercell_type) :: scell
-    integer, allocatable ::sc_index_spin(:), sc_znucl(:), sc_iatoms(:)
+    integer, allocatable ::sc_index_spin(:), sc_iatoms(:) !sc_znucl(:), 
     integer, allocatable :: sc_ispin_prim(:), sc_rvec(:, :)
     real(dp), allocatable ::sc_spinat(:,:), sc_gyroratios(:), sc_damping_factors(:), sc_spinpos(:,:)
     integer :: ii, jj, icol, irow, rr(3), R_sc(3), iatom
@@ -737,8 +739,8 @@ contains
     class(spin_model_primitive_t) :: self
     integer :: i, ii, jj,  R(3)
     real(dp) :: tmp(3, 3)
-    print *, "==========spin terms==============="
-    print *, "Number of terms: ",  self%total_nnz
+    write(std_out,*) "==========spin terms==============="
+    write(std_out,*) "Number of terms: ",  self%total_nnz
     do i=1, self%total_nnz
        do ii=1,3
           R(ii)=self%total_Rlist(ii)%data(i)
@@ -746,13 +748,13 @@ contains
              tmp(jj, ii)=self%total_val_list(jj, ii)%data(i)
           enddo
        enddo
-       print *, 'i=',  self%total_ilist%data(i), '  j=', self%total_jlist%data(i), &
+       write(std_out,*) 'i=',  self%total_ilist%data(i), '  j=', self%total_jlist%data(i), &
             '  R=', R , ' Value= '
        do ii=1, 3
-          write(*, *) tmp(ii, :)
+          write(std_out, *) tmp(ii, :)
        end do
     end do
-    print *, "==================================="
+    write(std_out,*) "==================================="
   end subroutine spin_model_primitive_t_print_terms
 
 end module m_spin_model_primitive

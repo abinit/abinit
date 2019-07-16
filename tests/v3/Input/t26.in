@@ -7,15 +7,15 @@ spgroup: 16
 spgroup+ 1
 
 #This is for spgroup 16 to 46
-              natom1 4     natom2 4     natom3 4     natom4 4
-natom5  4     natom6 4     natom7 4     natom8 4     natom9 4
-natom10 4     natom11 4    natom12 4    natom13 4    natom14 4
-natom15 4     natom16 4    natom17 4    natom18 4    natom19 4
-natom20 4     natom21 4    natom22 4    natom23 4    natom24 4
-natom25 4     natom26 4    natom27 4    natom28 4    natom29 4
-natom30 4     natom31 4
-
-natom   8    # this is for spgroup 47 to 74
+#wyckoff multiplicity 4
+     natom1  12 natom2  12 natom3  12 natom4  12 natom5  12 natom6  12
+     natom7  12 natom8  12 natom9  12 natom10 12 natom11 12 natom12 12 
+     natom13 12 natom14 12 natom15 12 natom16 12 natom17 12 natom18 12
+     natom19 12 natom20 12 natom21 12 natom22 12 natom23 12 natom24 12
+     natom25 12 natom26 12 natom27 12 natom28 12 natom29 12 natom30 12
+     natom31 12 
+#wyckoff multiplicity 8
+    natom   24    # this is for spgroup 47 to 74
 
 # Common data
 prtvol -1          # stop in abinit (main program), before call driver.
@@ -25,11 +25,13 @@ acell 7 8 9
 angdeg  90 90 90
 ntypat 1
 znucl 1
-natrd 1
+natrd 3
 xred 0.17 0.15 0.11
-typat 1
+0.734 0.467 0.66
+0.44  0.824 0.31415
+typat *1
 ecut 1
-  kptopt 0
+kptopt 0
 nkpt 1
 nline 1
 nstep 1

@@ -58,7 +58,7 @@ module m_afterscfloop
  use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp
- use m_orbmag,           only : chern_number,mpi_chern_number,orbmag,orbmag_type
+ use m_orbmag,           only : chern_number,orbmag,orbmag_type
  use m_fock,             only : fock_type
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current
@@ -187,6 +187,8 @@ contains
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  tollist(12)=list of tolerances
 !!  usecprj=1 if cprj datastructure has been allocated
+!!  with_vectornd = 1 if nuclear dipole vector potential allocated
+!!  vectornd(with_vectornd*nfftf,3)
 !!  vhartr(nfftf)=Hartree potential
 !!  vpsp(nfftf)=array for holding local psp
 !!  vxc(nfftf,nspden)=exchange-correlation potential (hartree) in real space
@@ -292,16 +294,14 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
 & psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,taug,&
-& taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,&
+& taur,tollist,usecprj,vectornd,vhartr,vpsp,vtrial,vxc,vxcavg,with_vectornd,wvl,&
 & xccc3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istep,istep_fock_outer,istep_mix
  integer,intent(in) :: mcg,mcprj,mgfftf,moved_atm_inside,my_natom,n3xccc,nfftf,ngrvdw,nkxc
- integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj
+ integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj,with_vectornd
  integer,intent(inout) :: computed_forces
  real(dp),intent(in) :: cpus,deltae,gsqcut,res2,residm
  real(dp),intent(in) :: qvpotzero
@@ -333,7 +333,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp),intent(in) :: pwnsfac(2,pwind_alloc)
  real(dp),intent(in) :: resid(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: rprimd(3,3),tollist(12),vpsp(nfftf)
- real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
+ real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,3),vtrial(nfftf,dtset%nspden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(inout) :: cg(2,mcg)
@@ -538,18 +538,15 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !----------------------------------------------------------------------
 ! Orbital magnetization calculations
 !----------------------------------------------------------------------
- if(dtset%orbmag==1 .OR. dtset%orbmag==3) then
-    ! call chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
-    !      &            mcg,size(cprj,2),mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
-    !      &            rprimd,symrec,usecprj,psps%usepaw,xred)
-    call mpi_chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
-         &            mcg,size(cprj,2),mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
-         &            rprimd,symrec,usecprj,psps%usepaw,xred)
+ if(dtset%orbmag==1) then
+    call chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
+         & mcg,size(cprj,2),mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
+         & rprimd,symrec,usecprj,psps%usepaw,xred)
  end if
  if(dtset%orbmag==2 .OR. dtset%orbmag==3) then
-    call orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
-     &            mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
-     &            pwind,pwind_alloc,rprimd,symrec,usecprj,vhartr,vpsp,vxc,xred,ylm,ylmgr)
+    call orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,&
+         & paw_ij,pawang,pawfgr,pawrad,pawtab,psps,pwind,pwind_alloc,rprimd,symrec,usecprj,&
+         & vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
  end if
 
  call timab(252,2,tsec)
@@ -583,9 +580,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    ABI_ALLOCATE(qphon,(3))
    qphon(:)=zero
    if(dtset%prtlden/=0) then
-     call xcden (cplex,gprimd,ishift,mpi_enreg,nfftf,ngfftf,ngrad,dtset%nspden,dtset%paral_kgb,qphon,rhor,rhonow,lrhonow=lrhor)
+     call xcden (cplex,gprimd,ishift,mpi_enreg,nfftf,ngfftf,ngrad,dtset%nspden,qphon,rhor,rhonow,lrhonow=lrhor)
    else
-     call xcden (cplex,gprimd,ishift,mpi_enreg,nfftf,ngfftf,ngrad,dtset%nspden,dtset%paral_kgb,qphon,rhor,rhonow)
+     call xcden (cplex,gprimd,ishift,mpi_enreg,nfftf,ngfftf,ngrad,dtset%nspden,qphon,rhor,rhonow)
    end if
    ABI_DEALLOCATE(qphon)
 
@@ -715,7 +712,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
        call wrtout(ab_out,message,'COLL')
        ABI_ALLOCATE(qphon,(3))
        qphon(:)=zero
-       call xcden (cplex,gprimd,ishift,mpi_enreg,nfftf,ngfftf,ngrad,dtset%nspden,dtset%paral_kgb,qphon,rhor,rhonow)
+       call xcden (cplex,gprimd,ishift,mpi_enreg,nfftf,ngfftf,ngrad,dtset%nspden,qphon,rhor,rhonow)
        ABI_DEALLOCATE(qphon)
 !      Copy gradient which has been output in rhonow to grhor (and free rhonow)
        ABI_ALLOCATE(grhor,(nfftf,dtset%nspden,3))
@@ -978,7 +975,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  end if
 
 !If PAW+U and density mixing, has to update nocc_mmp
- if (psps%usepaw==1.and.dtset%usepawu>0.and.(dtset%iscf>0.or.dtset%iscf==-3)) then
+ if (psps%usepaw==1.and.dtset%usepawu/=0.and.(dtset%iscf>0.or.dtset%iscf==-3)) then
    call setnoccmmp(1,0,dmatdum,0,0,indsym,my_natom,dtset%natom,dtset%natpawu,&
 &   dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,paw_ij,pawang,dtset%pawprtvol,&
 &   pawrhoij,pawtab,dtset%spinat,dtset%symafm,dtset%typat,0,dtset%usepawu,&

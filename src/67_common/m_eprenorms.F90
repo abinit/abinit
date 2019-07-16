@@ -90,9 +90,9 @@ module m_eprenorms
   ! renorms(2,mband,nkpt,nsppol,ntemp)
   ! Renormalization of the eigenvalues for each temperature
 
-  real(dp), allocatable :: lifetimes(:,:,:,:,:)
-  ! lifetime(2,mband,nkpt,nsppol,ntemp)
-  ! Electron-phonon induced lifetime of the eigens
+  real(dp), allocatable :: linewidth(:,:,:,:,:)
+  ! linewidth(2,mband,nkpt,nsppol,ntemp)
+  ! Electron-phonon induced linewidth of the eigens
 
  end type eprenorms_t
 
@@ -155,7 +155,7 @@ subroutine eprenorms_init(Epren,nkpt,nsppol,mband,ntemp)
  ABI_MALLOC(Epren%eigens,(Epren%mband,Epren%nkpt,Epren%nsppol))
  ABI_MALLOC(Epren%occs,(Epren%mband,Epren%nkpt,Epren%nsppol))
  ABI_MALLOC(Epren%renorms,(2,Epren%mband,Epren%nkpt,Epren%nsppol,Epren%ntemp))
- ABI_MALLOC(Epren%lifetimes,(2,Epren%mband,Epren%nkpt,Epren%nsppol,Epren%ntemp))
+ ABI_MALLOC(Epren%linewidth,(2,Epren%mband,Epren%nkpt,Epren%nsppol,Epren%ntemp))
 
  DBG_EXIT("COLL")
 
@@ -207,8 +207,8 @@ subroutine eprenorms_free(Epren)
  if (allocated(Epren%renorms)) then
    ABI_FREE(Epren%renorms)
  end if
- if (allocated(Epren%lifetimes)) then
-   ABI_FREE(Epren%lifetimes)
+ if (allocated(Epren%linewidth)) then
+   ABI_FREE(Epren%linewidth)
  end if
 
 end subroutine eprenorms_free
@@ -270,7 +270,9 @@ subroutine eprenorms_from_epnc(Epren,filename)
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"eigenvalues"), Epren%eigens))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"occupations"), Epren%occs))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"zero_point_motion"), Epren%renorms))
- NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"lifetime"), Epren%lifetimes))
+ ! TODO: This should be changed. What is stored is a linewidth, not a lifetime,
+ ! we postone the change so as to not break compatibility
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"lifetime"), Epren%linewidth))
 
 #endif
 
@@ -332,7 +334,7 @@ subroutine eprenorms_bcast(Epren,master,comm)
  call xmpi_bcast(Epren%eigens, master, comm, ierr)
  call xmpi_bcast(Epren%occs, master, comm, ierr)
  call xmpi_bcast(Epren%renorms, master, comm, ierr)
- call xmpi_bcast(Epren%lifetimes, master, comm, ierr)
+ call xmpi_bcast(Epren%linewidth, master, comm, ierr)
 
 end subroutine eprenorms_bcast
 !!***
@@ -353,7 +355,7 @@ end subroutine eprenorms_bcast
 !!
 !! SIDE EFFECTS
 !!  Bst<bands_t> : eigens are changed according to epren
-!!                 lifetime is allocated and filled with data if do_lifetime
+!!                 linewidth is allocated and filled with data if do_linewidth
 !!
 !! PARENTS
 !!      m_exc_spectra,m_haydock,optic
@@ -394,7 +396,7 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
  comm = xmpi_comm_self
 
  if(do_lifetime) then
-   ABI_MALLOC(Bst%lifetime,(Bst%mband,Bst%nkpt,Bst%nsppol))
+   ABI_MALLOC(Bst%linewidth,(1,Bst%mband,Bst%nkpt,Bst%nsppol))
  end if
 
  check = .TRUE.
@@ -431,7 +433,7 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
      Bst%eig(1:nband_tmp,ikpt,isppol) = BSt%eig(1:nband_tmp,ikpt,isppol) + Epren%renorms(1,1:nband_tmp,ik_eph,isppol,itemp)
 
      if (do_lifetime) then
-       Bst%lifetime(1:nband_tmp,ikpt,isppol) = Epren%lifetimes(1,1:nband_tmp,ik_eph,isppol,itemp)
+       Bst%linewidth(1,1:nband_tmp,ikpt,isppol) = Epren%linewidth(1,1:nband_tmp,ik_eph,isppol,itemp)
      end if
    end do
  end do

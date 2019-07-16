@@ -18,6 +18,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
+ "m_manage_cuda.F90",
  "m_alloc_hamilt_gpu.F90",
  "cuda_rec.cu",
  "cuda_rec_cut.cu",

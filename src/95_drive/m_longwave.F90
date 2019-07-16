@@ -62,6 +62,7 @@ module m_longwave
  use m_ddb,         only : DDB_VERSION,dfpt_lw_doutput
  use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_dfpt_elt,    only : dfpt_ewalddq
+ use m_mkcore,      only : mkcore
 
  implicit none
 
@@ -136,7 +137,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Local variables-------------------------------
  !scalars
  integer,parameter :: cplex1=1,formeig=0,response=1
- integer :: ask_accurate,bantot,gscase,iatom,idir,ierr,indx,ipert,ireadwf0,iscf_eff,itypat
+ integer :: ask_accurate,bantot,coredens_method,gscase,iatom,idir,ierr,indx,ipert,ireadwf0,iscf_eff,itypat
  integer :: mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim,mk1mem
  integer :: mpert,my_natom,nkxc,nk3xc,ntypat,n3xccc
  integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,sumg0,timrev,tim_mkrho,usexcnhat
@@ -155,7 +156,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  type(wffile_type) :: wffgs,wfftgs
  !arrays
  integer :: ngfft(18),ngfftf(18)
- real(dp) :: gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),qphon(3),gprimd_for_kg(3,3)
+ real(dp) :: dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),qphon(3),gprimd_for_kg(3,3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3)
  real(dp) :: strsxc(6)
  integer,allocatable :: atindx(:),atindx1(:)
@@ -164,8 +165,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  integer,allocatable :: nattyp(:),npwarr(:),pertsy(:,:),rfpert(:),symrec(:,:,:) 
  real(dp),allocatable :: cg(:,:)
  real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),doccde(:),dyewdq(:,:,:,:,:,:)
- real(dp),allocatable :: eigen0(:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
- real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor(:,:)
+ real(dp),allocatable :: eigen0(:),grxc(:,:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
+ real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor(:,:),dummy_dyfrx2(:,:,:)
  real(dp),allocatable :: work(:),xccc3d(:)
  type(pawrhoij_type),allocatable :: pawrhoij(:),pawrhoij_read(:)
 ! *************************************************************************
@@ -197,10 +198,10 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  end if
 
 !Not usable with core electron density corrections
-! if (psps%n1xccc/=0) then
-!   msg='This routine cannot be used for n1xccc/=0'
-!   MSG_BUG(msg)
-! end if
+ if (psps%n1xccc/=0) then
+   msg='This routine cannot be used for n1xccc/=0'
+   MSG_BUG(msg)
+ end if
 
 !Define some data 
  ntypat=psps%ntypat
@@ -230,7 +231,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Set up for iterations
  call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
 & ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
-& natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
+& ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
 & response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
 
 !In some cases (e.g. getcell/=0), the plane wave vectors have
@@ -372,25 +373,45 @@ ecore=zero
 &     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
  end if ! getden
 
+!Pseudo core electron density by method 2
+!TODO: The code is not still adapted to consider n3xccc in the long-wave
+!driver. 
+ n3xccc=0;if (psps%n1xccc/=0) n3xccc=nfftf
+ ABI_ALLOCATE(xccc3d,(n3xccc))
+ coredens_method=2
+ if (coredens_method==2.and.psps%n1xccc/=0) then
+   option=1
+   ABI_ALLOCATE(dummy_dyfrx2,(3,3,natom)) ! dummy
+   ABI_ALLOCATE(vxc,(0,0)) ! dummy
+   ABI_ALLOCATE(grxc,(3,natom))
+   call mkcore(dummy6,dummy_dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
+&   ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
+&   psps%xcccrc,psps%xccc1d,xccc3d,xred)
+   ABI_DEALLOCATE(dummy_dyfrx2) ! dummy
+   ABI_DEALLOCATE(vxc) ! dummy
+   ABI_DEALLOCATE(grxc) ! dummy
+ end if
+
 !Set up xc potential. Compute kxc here.
+!TODO: Iclude nonlinear core corrections (see m_respfn_driver.F90)
  option=2 ; nk3xc=1
  nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=12*min(dtset%nspden,2)-5
  call check_kxc(dtset%ixc,dtset%optdriver)
  ABI_ALLOCATE(kxc,(nfftf,nkxc))
  ABI_ALLOCATE(vxc,(nfftf,dtset%nspden))
 
- call xcdata_init(xcdata,dtset=dtset)
-
  nhatgrdim=0;nhatdim=0
  ABI_ALLOCATE(nhat,(0,0))
  ABI_ALLOCATE(nhatgr,(0,0,0))
- n3xccc=0
- ABI_ALLOCATE(xccc3d,(n3xccc))
+! n3xccc=0
+! ABI_ALLOCATE(xccc3d,(n3xccc))
  non_magnetic_xc=.false.
  
  enxc=zero; usexcnhat=0
+
+ call xcdata_init(xcdata,dtset=dtset)
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,&
+& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata)
 
 !TODO: This part of the implementation does not work properly to select specific directions 
@@ -469,9 +490,6 @@ ecore=zero
    call dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
  end if
-
-!MR:tmp!!!!!!!!! 
-!dyewdq(:,:,:,:,:,:)=zero
 
 !Calculate the quadrupole tensor
  if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3) then

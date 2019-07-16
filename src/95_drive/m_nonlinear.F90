@@ -106,7 +106,6 @@ contains
 !!  dtfil <type(datafiles_type)> = variables related to files
 !!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  etotal = new total energy (no meaning at output)
-!!  iexit= exit flag
 !!  mpi_enreg=informations about MPI pnarallelization
 !!  occ(mband*nkpt*nsppol) = occupation number for each band and k
 !!  xred(3,natom) = reduced atomic coordinates
@@ -156,15 +155,10 @@ contains
 !!
 !! SOURCE
 
-subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
-&                    pawang,pawrad,pawtab,psps,xred)
-
- implicit none
+subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,psps,xred)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iexit
- logical :: non_magnetic_xc
  real(dp),intent(inout) :: etotal
  character(len=6),intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -193,6 +187,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  integer :: optatm,optdyfr,opteltfr,optgr,optstr,optv,optn,optn2
  integer :: psp_gencond,pead,qphase_rhoij,rdwr,rdwrpaw,spaceworld,tim_mkrho,timrev
  integer :: use_sym,usecprj,usexcnhat
+ logical :: is_dfpt=.true.,nmxc
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: boxcut,compch_fft,compch_sph,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,epaw,epawdc,enxc,etot,fermie
@@ -221,7 +216,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  integer,allocatable :: symq(:,:,:),symrec(:,:,:),symaf1(:),symrc1(:,:,:),symrl1(:,:,:)
  real(dp) :: dum_gauss(0),dum_dyfrn(0),dum_dyfrv(0),dum_eltfrxc(0)
  real(dp) :: dum_grn(0),dum_grv(0),dum_rhog(0),dum_vg(0)
- real(dp) :: dum_shiftk(3,MAX_NSHIFTK),dummy6(6),gmet(3,3),gprimd(3,3)
+ real(dp) :: dum_shiftk(3,MAX_NSHIFTK),dummy6(6),other_dummy6(6),gmet(3,3),gprimd(3,3)
  real(dp) :: qphon(3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
  real(dp),allocatable :: cg(:,:),d3cart(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),dum_kptns(:,:)
@@ -258,9 +253,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
    write(message,'(80a,a,a)')  ('=',ii=1,80),ch10,' nonlinear : enter , debug mode '
    call wrtout(std_out,message,'COLL')
  end if
-
-! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !Check if the perturbations asked in the input file can be computed
 
@@ -501,9 +493,9 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 
 !Set up for iterations
  call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
-& ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
-& natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
-& response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
+  ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
+   ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
+   response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
 
 !Set up the basis sphere of planewaves
  ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
@@ -560,8 +552,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  ireadwf0=1
 
  mcg=dtset%mpw*dtset%nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
- ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
- ABI_CHECK(ierr==0, "out-of-memory in cg")
+ ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
 
  ABI_ALLOCATE(eigen0,(dtset%mband*dtset%nkpt*dtset%nsppol))
  eigen0(:)=zero ; ask_accurate=1
@@ -697,11 +688,8 @@ end if
    end if
    psps%n1xccc=maxval(pawtab(1:psps%ntypat)%usetcore)
    call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
-   pawtab(:)%usepawu=0
-   pawtab(:)%useexexch=0
-   pawtab(:)%exchmix=zero
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
-&   dtset%jpawu,dtset%lexexch,dtset%lpawu,ntypat,pawang,dtset%pawprtvol,pawrad,&
+&   is_dfpt,dtset%jpawu,dtset%lexexch,dtset%lpawu,ntypat,pawang,dtset%pawprtvol,pawrad,&
 &   pawtab,dtset%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu)
    compch_fft=-1.d5;compch_sph=-1.d5
    usexcnhat=maxval(pawtab(:)%usexcnhat)
@@ -733,7 +721,7 @@ end if
    call paw_ij_nullify(paw_ij)
    has_kxc=0;nkxc1=0;cplex=1
    has_dijnd=0;if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
-   has_diju=0;if(dtset%usepawu==5.or.dtset%usepawu==6) has_diju=1
+   has_diju=merge(0,1,dtset%usepawu==0)
    has_kxc=1;nkxc1=2*dtset%nspden-1 ! LDA only
    call pawxc_get_nkxc(nkxc1,dtset%nspden,dtset%xclevel)
    has_k3xc=1; nk3xc1=3*min(dtset%nspden,2)-2 ! LDA only
@@ -858,7 +846,7 @@ end if
    call atm2fft(atindx1,xccc3d,vpsp,dum_dyfrn,dum_dyfrv,dum_eltfrxc,dum_gauss,gmet,gprimd,&
 &   dum_grn,dum_grv,gsqcut,mgfftf,psps%mqgrid_vl,natom,nattyp,nfftf,ngfftf,&
 &   ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1df,psps%qgrid_vl,&
-&   dtset%qprtrb,dum_rhog,dummy6,dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
+&   dtset%qprtrb,dum_rhog,dummy6,other_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
    call timab(562,2,tsec)
  else
 !  Norm-cons.: compute Vloc in reciprocal space and core charge in real space
@@ -884,7 +872,7 @@ end if
 
 !Set up hartree and xc potential. Compute kxc here.
  ABI_ALLOCATE(vhartr,(nfftf))
- call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,rhog,rprimd,vhartr)
+ call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,rhog,rprimd,vhartr)
 
  option=3
  nkxc=2*dtset%nspden-1 ! LDA
@@ -898,8 +886,9 @@ end if
  _IBM6("Before rhotoxc")
 
  call xcdata_init(xcdata,dtset=dtset)
+ nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,&
+& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,option,rhor,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,k3xc=k3xc,vhartr=vhartr)
 
 !Compute local + Hxc potential, and subtract mean potential.
@@ -1377,8 +1366,6 @@ end if
 
    subroutine print_chi2(d3cart0,msg,theunit)
 
-     implicit none
-
      integer,intent(in) :: theunit
      character(len=30) :: msg
      real(dp) :: elem1,elem2
@@ -1424,8 +1411,6 @@ end if
 !! SOURCE
 
    subroutine print_dchidtau(d3cart0,msg,theunit)
-
-     implicit none
 
      integer,intent(in) :: theunit
      character(len=30) :: msg
@@ -1503,8 +1488,6 @@ end subroutine nonlinear
 subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
 &  kpt3,mband,mkmem,mpi_enreg,mpw,nband,nkpt2,&
 &  nkpt3,nneigh,npwarr,nsppol,occ,pwind)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

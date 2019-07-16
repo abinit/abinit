@@ -5,7 +5,7 @@ ntimimage 15
 nimage 6
 imgmov 2
 chksymbreak 0
-fxcartfactor 10.0
+fxcartfactor 5.0
 tolimg 1.d-5
 istatimg 0
 

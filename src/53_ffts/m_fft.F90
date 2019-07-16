@@ -8,7 +8,7 @@
 !!  It also defines generic interfaces for single or double precision arrays.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MG, MM, GZ, MT, MF, XG)
+!! Copyright (C) 2009-2019 ABINIT group (MG, MM, GZ, MT, MF, XG, PT, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -54,6 +54,10 @@ MODULE m_fft
 &                            fftalg_info, fftalg_has_mpi, print_ngfft, getng, sphereboundary
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, ptabs_fourwf, initmpi_seq
  use m_distribfft,    only : distribfft_type, init_distribfft, destroy_distribfft
+
+#if defined HAVE_GPU_CUDA
+ use m_manage_cuda
+#endif
 
  implicit none
 
@@ -2206,13 +2210,6 @@ end function fftu_mpi_utests
 !! Also for better speed, it uses no F90 construct, except the allocate command
 !! and for zeroing arrays.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, FF)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !! cplex= if 1 , denpot is real, if 2 , denpot is complex
 !!    (cplex=2 only allowed for option=2, and istwf_k=1)
@@ -2906,13 +2903,6 @@ end subroutine fourwf
 !!  fftalgb=1 means using a real-to-complex FFT or a complex-to-complex FFT, depending on the value of cplex.
 !!  The only real-to-complex FFT available is from SGoedecker library.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !! cplex=1 if fofr is real, 2 if fofr is complex
 !! isign=sign of Fourier transform exponent: current convention uses
@@ -3029,7 +3019,7 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
    else
      !call wrtout(std_out,"FFTW3 MPIFOURDP")
      call fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
-&     fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
+      fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
    end if
    ! Accumulate timing and return
    call timab(260+tim_fourdp,2,tsec); return
@@ -3293,12 +3283,6 @@ end subroutine fourdp
 !! Carry out complex-to-complex Fourier transforms between real
 !! and reciprocal (G) space. Library of such routines.
 !! Include machine-dependent F90 routines used with fftalg=200.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2000-2019 ABINIT group (PT, XG, FF)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  fftalga=govern the choice of the fft routine to be used
@@ -4312,12 +4296,11 @@ end subroutine zerosym
 !!
 !! SOURCE
 
-subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,paral_kgb,tim_fourdp)
-
+subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,tim_fourdp)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,isign,nfft,paral_kgb,tim_fourdp
+ integer,intent(in) :: cplex,isign,nfft,tim_fourdp
  type(MPI_type),intent(in) :: MPI_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -4471,7 +4454,7 @@ subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,optio
    if (nd1<n1.or.nd2<n2.or.nd3<n3) then
      write(message,'(a,3i0,2a,3i0,a)')&
 &     'Each of nd1,nd2,nd3=',nd1,nd2,nd3,ch10,&
-&     'must be >=      n1, n2, n3 =',n1,n2,n3,'.'
+&     'must be >= n1, n2, n3 =',n1,n2,n3,'.'
      MSG_BUG(message)
    end if
  else

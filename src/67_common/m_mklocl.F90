@@ -61,7 +61,8 @@ module m_mklocl
  public :: vlocalstr             ! Compute strain derivatives of local ionic potential
 #ifdef MR_DEV
  public :: dfpt_vlocaldq         ! Compute the first q-gradient of the 1st-order potential due to atomic displacement. 
- public :: dfpt_vlocaldqdq       ! Compute the second q-gradient of the 1st-order potential due to a metric perturbation.
+ public :: dfpt_vlocaldqdq       ! Compute the second q-gradient of the 1st-order potential due to atomic displacement. 
+ public :: dfpt_vmetdqdq       ! Compute the second q-gradient of the 1st-order potential due to a metric perturbation.
 #endif
 !!***
 
@@ -143,8 +144,6 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 &  mpi_enreg,natom,nattyp,nfft,ngfft,nspden,ntypat,option,pawtab,ph1d,psps,qprtrb,&
 &  rhog,rhor,rprimd,ucvol,vprtrb,vpsp,wvl,wvl_den,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mgfft,natom,nfft,nspden,ntypat,option
@@ -200,7 +199,7 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    if (psps%vlspl_recipSpace) then
      call mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft, &
 &     mpi_enreg,psps%mqgrid_vl,natom,nattyp,nfft,ngfft, &
-&     ntypat,option,dtset%paral_kgb,ph1d,psps%qgrid_vl,qprtrb,rhog,ucvol, &
+&     ntypat,option,ph1d,psps%qgrid_vl,qprtrb,rhog,ucvol, &
 &     psps%vlspl,vprtrb,vpsp)
    else
      call mklocl_realspace(grtn,dtset%icoulomb,mpi_enreg,natom,nattyp,nfft, &
@@ -291,14 +290,12 @@ end subroutine mklocl
 !! SOURCE
 
 subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
-&  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,paral_kgb,ph1d,qgrid,qprtrb,&
+&  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,ph1d,qgrid,qprtrb,&
 &  rhog,ucvol,vlspl,vprtrb,vpsp)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mgfft,mqgrid,natom,nfft,ntypat,option,paral_kgb
+ integer,intent(in) :: mgfft,mqgrid,natom,nfft,ntypat,option
  real(dp),intent(in) :: eei,gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -559,10 +556,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
      work1(re,1)=zero
      work1(im,1)=zero
    end if
-
-!  DEBUG
 !  write(std_out,*) ' mklocl_recipspace : will add potential with strength vprtrb(:)=',vprtrb(:)
-!  ENDDEBUG
 
 !  Allow for the addition of a perturbing potential
    if ((vprtrb(1)**2+vprtrb(2)**2) > 1.d-30) then
@@ -752,14 +746,11 @@ end subroutine mklocl_recipspace
 
 subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,paral_kgb,ph1d,qgrid,qphon,ucvol,vlspl,vpsp1,xred)
-
- implicit none
+& ntypat,n1,n2,n3,ph1d,qgrid,qphon,ucvol,vlspl,vpsp1,xred)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
- integer,intent(in) :: paral_kgb
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -1018,14 +1009,12 @@ end subroutine dfpt_vlocal
 !! SOURCE
 
 subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
-&  mqgrid,natom,nattyp,nfft,ngfft,ntypat,paral_kgb,ph1d,qgrid,&
+&  mqgrid,natom,nattyp,nfft,ngfft,ntypat,ph1d,qgrid,&
 &  ucvol,vlspl,vpsp1,g0term)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: istr,mgfft,mqgrid,natom,nfft,ntypat,paral_kgb
+ integer,intent(in) :: istr,mgfft,mqgrid,natom,nfft,ntypat
  integer,optional,intent(in) :: g0term
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
@@ -1313,7 +1302,7 @@ end subroutine vlocalstr
 !! dfpt_vlocaldq
 !!
 !! FUNCTION
-!! Compute g-gradient (at q=0) of the local part of 1st-order 
+!! Compute q-gradient (at q=0) of the local part of 1st-order 
 !! atomic displacement potential from the appropriate
 !! atomic pseudopotential with structure and derivative factor.
 !!
@@ -1341,7 +1330,6 @@ end subroutine vlocalstr
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !!  ntypat=number of types of atoms in cell.
 !!  n1,n2,n3=fft grid.
-!!  paral_kgb= activate PARALelization over K-point, G-vectors and Bands
 !!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phase information.
 !!  qdir=direction of the q-gradient 
 !!  qgrid(mqgrid)=grid of q points from 0 to qmax.
@@ -1363,6 +1351,10 @@ end subroutine vlocalstr
 !!             here: e^{i q (R_l + \tau_{\kappa})}
 !!   rest of ABINIT: e^{i q R_l}  
 !!
+!!  **A -i factor has been factorized out in all the contributions of the first
+!!    q-gradient of the atomic displacement Hamiltonian. This is lately included 
+!!    in the matrix element calculation.
+!!
 !! PARENTS
 !!      dfpt_qdrpwf
 !!
@@ -1373,7 +1365,7 @@ end subroutine vlocalstr
 
 subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,paral_kgb,ph1d,qdir,qgrid,qphon,ucvol,vlspl,vpsp1dq,xred)
+& ntypat,n1,n2,n3,ph1d,qdir,qgrid,qphon,ucvol,vlspl,vpsp1dq,xred)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1387,7 +1379,7 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
- integer,intent(in) :: paral_kgb,qdir
+ integer,intent(in) :: qdir
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -1490,13 +1482,13 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
              gvec=(/ig1,ig2,ig3/)
              gfact=dot_product(gmet(qdir,:),gvec(:))/gmag
 
-!            Phase   G*xred  (complex conjugate) * -i *2*pi*(g_idir)*vion1dq*gfact
-             sfr=-phimag_vl3(ig1,ig2,ig3,iatom)*two_pi*gq(idir)*vion1dq(1)*gfact
-             sfi=-phre_vl3(ig1,ig2,ig3,iatom)*two_pi*gq(idir)*vion1dq(1)*gfact
-!            Phase   G*xred  (complex conjugate) * -i *2*pi*(\delta_{idir,qdir})*vion1
+!            Phase   G*xred  (complex conjugate) *2*pi*(g_idir)*vion1dq*gfact
+             sfr=phre_vl3(ig1,ig2,ig3,iatom)*two_pi*gq(idir)*vion1dq(1)*gfact
+             sfi=-phimag_vl3(ig1,ig2,ig3,iatom)*two_pi*gq(idir)*vion1dq(1)*gfact
+!            Phase   G*xred  (complex conjugate) *2*pi*(\delta_{idir,qdir})*vion1
              if (idir==qdir) then
-               sfr=sfr - phimag_vl3(ig1,ig2,ig3,iatom)*two_pi*vion1(1)
-               sfi=sfi - phre_vl3(ig1,ig2,ig3,iatom)*two_pi*vion1(1)
+               sfr=sfr + phre_vl3(ig1,ig2,ig3,iatom)*two_pi*vion1(1)
+               sfi=sfi - phimag_vl3(ig1,ig2,ig3,iatom)*two_pi*vion1(1)
              end if         
 
              work1(re,ii)=sfr
@@ -1646,9 +1638,371 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 end subroutine dfpt_vlocaldq
 !!***
 
-!!****f* ABINIT/dfpt_vlocaldqdq	
+!!****f* ABINIT/dfpt_vlocaldqdq
 !! NAME
 !! dfpt_vlocaldqdq
+!!
+!! FUNCTION
+!! Compute 2nd q-gradient (at q=0) of the local part of 1st-order 
+!! atomic displacement potential from the appropriate
+!! atomic pseudopotential with structure and derivative factor.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1999-2017 ABINIT group (MR,MS)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!!  atindx(natom)=index table for atoms (see gstate.f)
+!!  cplex: if 1, real space 1-order functions on FFT grid
+!!    are REAL, if 2, COMPLEX
+!!  gmet(3,3)=reciprocal space metric (Bohr**-2)
+!!  gsqcut=cutoff G**2 for included G s in fft box.
+!!  idir=direction of atomic displacement (=1,2 or 3 : displacement of
+!!    atom ipert along the 1st, 2nd or 3rd axis).
+!!  ipert=number of the atom being displaced in the frozen-phonon
+!!  mpi_enreg=information about MPI parallelization
+!!  mqgrid=dimension of q grid for pseudopotentials
+!!  natom=number of atoms in cell.
+!!  nattyp(ntypat)=number of atoms of each type in cell.
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  ntypat=number of types of atoms in cell.
+!!  n1,n2,n3=fft grid.
+!!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phase information.
+!!  qdir1=direction of the first q-gradient 
+!!  qdir2=direction of the second q-gradient 
+!!  qgrid(mqgrid)=grid of q points from 0 to qmax.
+!!  qphon(3)=wavevector of the phonon
+!!  ucvol=unit cell volume (Bohr**3).
+!!  vlspl(mqgrid,2,ntypat)=spline fit of q^2 V(q) for each type of atom.
+!!  xred(3,natom)=reduced atomic coordinates
+!!
+!! OUTPUT
+!!  vpsp1dqdq(cplex*nfft)=2nd q-gradient (at q=0) of the first-order local 
+!!  crystal pseudopotential in real space
+!!
+!! NOTES
+!! * IMPORTANT: the formalism followed in this routine
+!!   assumes a phase factor for the perturbation that 
+!!   is different to the one used elsewhere in the code (See M.Stengel paper):
+!!         
+!!             here: e^{i q (R_l + \tau_{\kappa})}
+!!   rest of ABINIT: e^{i q R_l}  
+!!
+!!  **A -i factor has been factorized out in all the contributions of the second
+!!    q-gradient of the atomic displacement Hamiltonian. This is lately included 
+!!    in the whole frozen contribution to the q-gradient of the 
+!!    2nd order energy wrt an atomic displacement and a strain:
+!!    \Delta E^{\tau_{\kappa\alpha}^* (\beta)}_{m\kvec,\gamma\delta}
+!!     
+!!
+!! PARENTS
+!!      dfpt_qdrpwf
+!!
+!! CHILDREN
+!!      fourdp,ptabs_fourdp,splfit
+!!
+!! SOURCE
+
+subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
+& mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
+& ntypat,n1,n2,n3,ph1d,qdir1,qdir2,qgrid,qphon,ucvol,vlspl,vpsp1dqdq,xred)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dfpt_vlocaldqdq'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
+ integer,intent(in) :: qdir1,qdir2
+ real(dp),intent(in) :: gsqcut,ucvol
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: atindx(natom),nattyp(ntypat),ngfft(18)
+ real(dp),intent(in) :: gmet(3,3),ph1d(2,(2*n1+1+2*n2+1+2*n3+1)*natom)
+ real(dp),intent(in) :: qgrid(mqgrid),qphon(3),vlspl(mqgrid,2,ntypat)
+ real(dp),intent(in) :: xred(3,natom)
+ real(dp),intent(out) :: vpsp1dqdq(cplex*nfft)
+
+!Local variables -------------------------
+!scalars
+ integer :: alpha, delta, gamma
+ integer :: i1,i2,i3,ia1,iatom,id1,id2,id3,ig1,ig2,ig3,ii,ii1,im=2
+ integer :: itypat,jj,re=1
+ real(dp),parameter :: tolfix=1.000000001_dp
+ real(dp) :: aa,bb,cc,cutoff,dd,delad,delag,deldg,diff,gfact,gfact1,gfact2,gmag,gq1
+ real(dp) :: gq2,gq3,gsquar
+ real(dp) :: sfi,sfr,term1,term2,xnorm
+ logical :: qeq0
+ character(len=500) :: msg
+!arrays
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ real(dp) :: gq(3),gvec(3),vion1(1),vion1dq(1),vion1dqdq(1)
+ real(dp),allocatable :: work1(:,:)
+
+! *********************************************************************
+
+ iatom=ipert
+
+ if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 .or. iatom==natom+5)then
+
+!  (In case of d/dk or an electric field, or magnetic (Zeeman) field->[natom+5] SPr deb )
+   vpsp1dqdq(1:cplex*nfft)=zero
+
+ else
+
+   alpha=idir; delta=qdir2; gamma=qdir1
+
+   !Kronecker deltas
+   delad=0.0_dp; delag=0.0_dp; deldg=0.0_dp
+   if (alpha==delta) delad=1.0_dp
+   if (alpha==gamma) delag=1.0_dp
+   if (delta==gamma) deldg=1.0_dp
+
+!  (In case of a phonon perturbation)
+   ABI_ALLOCATE(work1,(2,nfft))
+   work1(1:2,1:nfft)=0.0_dp
+
+   cutoff=gsqcut*tolfix
+   id1=n1/2+2
+   id2=n2/2+2
+   id3=n3/2+2
+
+   ! Get the distrib associated with this fft_grid
+   call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+!  This is to allow q=0
+   qeq0=.false.
+   if(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15) then 
+     qeq0=.true.
+   else
+     msg='This routine cannot be used for q/=0'
+     MSG_BUG(msg)
+   end if
+
+!  Determination of the atom type
+   ia1=0
+   itypat=0
+   do ii=1,ntypat
+     ia1=ia1+nattyp(ii)
+     if(atindx(iatom)<=ia1.and.itypat==0)itypat=ii
+   end do
+
+   ii=0
+
+   do i3=1,n3
+     ig3=i3-(i3/id3)*n3-1
+     gq3=dble(ig3)+qphon(3)
+     gq(3)=gq3
+     do i2=1,n2
+       if (fftn2_distrib(i2)==mpi_enreg%me_fft) then
+         ig2=i2-(i2/id2)*n2-1
+         gq2=dble(ig2)+qphon(2)
+         gq(2)=gq2
+
+!        Note the lower limit of the next loop
+         ii1=1
+         if(i3==1 .and. i2==1 .and. qeq0 .and. ig2==0 .and. ig3==0)then
+           ii1=2
+           ii=ii+1
+         end if
+         do i1=ii1,n1
+           ig1=i1-(i1/id1)*n1-1
+           gq1=dble(ig1)+qphon(1)
+           gq(1)=gq1
+           ii=ii+1
+           gsquar=gsq_vl3(gq1,gq2,gq3)
+!          Skip G**2 outside cutoff:
+           if (gsquar<=cutoff) then
+             gmag=sqrt(gsquar)
+
+!            Evaluate spline fit to get first V(q) and V(q)' and later V(q)'':
+             call splfit(qgrid,vion1dq,vlspl(:,:,itypat),1,(/gmag/),vion1,mqgrid,1)
+             vion1=vion1/gsquar
+             vion1dq=(vion1dq-2.0_dp*gmag*vion1)/gsquar
+
+             call splfit(qgrid,vion1dqdq,vlspl(:,:,itypat),2,(/gmag/),vion1,mqgrid,1)
+             vion1dqdq=(vion1dqdq-4.0_dp*gmag*vion1dq-2.0_dp*vion1)/gsquar
+
+             gvec=(/ig1,ig2,ig3/)
+             gfact1=dot_product(gmet(gamma,:),gvec(:))
+             gfact2=dot_product(gmet(delta,:),gvec(:))
+             gfact=gvec(alpha)*gfact1*gfact2/gsquar
+
+!             term1=delag*gfact2+delad*gfact1+deldg*gvec(alpha)*gmet(gamma,delta)
+             term1=delag*gfact2+delad*gfact1+gvec(alpha)*gmet(gamma,delta)
+             term1=term1-gfact
+             term1=term1*vion1dq(1)/gmag
+
+             term2=vion1dqdq(1)*gfact
+
+!            structure factors
+             sfr=phre_vl3(ig1,ig2,ig3,iatom)
+             sfi=-phimag_vl3(ig1,ig2,ig3,iatom)
+
+!            Multiply structure factor times vion derivatives:
+             work1(re,ii)=sfr*(term1+term2)*two_pi
+             work1(im,ii)=sfi*(term1+term2)*two_pi
+
+           end if
+
+         end do
+       end if
+     end do
+   end do
+
+!  Transform back to real space
+   call fourdp(cplex,work1,vpsp1dqdq,1,mpi_enreg,nfft,1,ngfft,0)
+
+   xnorm=1.0_dp/ucvol
+   vpsp1dqdq(1:cplex*nfft)=vpsp1dqdq(1:cplex*nfft)*xnorm
+
+   ABI_DEALLOCATE(work1)
+!   ABI_DEALLOCATE(vlspleff)
+
+!  End the condition of non-electric-field
+ end if
+
+ contains
+
+!Real and imaginary parts of phase.
+   function phr_vl3(x1,y1,x2,y2,x3,y3)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phr_vl3'
+!End of the abilint section
+
+   real(dp) :: phr_vl3
+   real(dp),intent(in) :: x1,x2,x3,y1,y2,y3
+   phr_vl3=(x1*x2-y1*y2)*x3-(y1*x2+x1*y2)*y3
+ end function phr_vl3
+
+   function phi_vl3(x1,y1,x2,y2,x3,y3)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phi_vl3'
+!End of the abilint section
+
+   real(dp) :: phi_vl3
+   real(dp),intent(in) :: x1,x2,x3,y1,y2,y3
+   phi_vl3=(x1*x2-y1*y2)*y3+(y1*x2+x1*y2)*x3
+ end function phi_vl3
+
+!  Warning : this function differ from similar ones for ground-state calculations : note the atindx !!
+   function ph1_vl3(nri,ig1,ia)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ph1_vl3'
+!End of the abilint section
+
+   real(dp) :: ph1_vl3
+   integer,intent(in) :: nri,ig1,ia
+   ph1_vl3=ph1d(nri,ig1+1+n1+(atindx(ia)-1)*(2*n1+1))
+ end function ph1_vl3
+
+!  Warning : this function differ from similar ones for ground-state calculations : note the atindx !!
+   function ph2_vl3(nri,ig2,ia)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ph2_vl3'
+!End of the abilint section
+
+   real(dp) :: ph2_vl3
+   integer,intent(in) :: nri,ig2,ia
+   ph2_vl3=ph1d(nri,ig2+1+n2+(atindx(ia)-1)*(2*n2+1)+natom*(2*n1+1))
+ end function ph2_vl3
+
+!  Warning : this function differ from similar ones for ground-state calculations : note the atindx !!
+   function ph3_vl3(nri,ig3,ia)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ph3_vl3'
+!End of the abilint section
+
+   real(dp) :: ph3_vl3
+   integer,intent(in) :: nri,ig3,ia
+   ph3_vl3=ph1d(nri,ig3+1+n3+(atindx(ia)-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1))
+ end function ph3_vl3
+
+   function phre_vl3(ig1,ig2,ig3,ia)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phre_vl3'
+!End of the abilint section
+
+   real(dp) :: phre_vl3
+   integer,intent(in) :: ig1,ig2,ig3,ia
+   phre_vl3=phr_vl3(ph1_vl3(re,ig1,ia),ph1_vl3(im,ig1,ia),&
+&   ph2_vl3(re,ig2,ia),ph2_vl3(im,ig2,ia),ph3_vl3(re,ig3,ia),ph3_vl3(im,ig3,ia))
+ end function phre_vl3
+
+   function phimag_vl3(ig1,ig2,ig3,ia)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phimag_vl3'
+!End of the abilint section
+
+   real(dp) :: phimag_vl3
+   integer,intent(in) :: ig1,ig2,ig3,ia
+   phimag_vl3=phi_vl3(ph1_vl3(re,ig1,ia),ph1_vl3(im,ig1,ia),&
+&   ph2_vl3(re,ig2,ia),ph2_vl3(im,ig2,ia),ph3_vl3(re,ig3,ia),ph3_vl3(im,ig3,ia))
+ end function phimag_vl3
+
+   function gsq_vl3(g1,g2,g3)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'gsq_vl3'
+!End of the abilint section
+
+   real(dp) :: gsq_vl3
+   real(dp),intent(in) :: g1,g2,g3 ! Note that they are real, unlike in other similar function definitions
+!Define G^2 based on G space metric gmet.
+   gsq_vl3=g1*g1*gmet(1,1)+g2*g2*gmet(2,2)+&
+&   g3*g3*gmet(3,3)+2.0_dp*g1*g2*gmet(1,2)+&
+&   2.0_dp*g2*g3*gmet(2,3)+2.0_dp*g3*g1*gmet(3,1)
+ end function gsq_vl3
+
+end subroutine dfpt_vlocaldqdq
+!!***
+
+
+!!****f* ABINIT/dfpt_vmetdqdq	
+!! NAME
+!! dfpt_vmetdqdq
 !!
 !! FUNCTION
 !! Compute second q-gradient (at q=0) of the local part of 1st-order 
@@ -1683,7 +2037,6 @@ end subroutine dfpt_vlocaldq
 !!  ntypat=number of types of atoms in cell.
 !!  n1,n2,n3=fft grid.
 !!  opthartdqdq= if 1 activates the calculation 2nd q-gradient of the Hartree potential 
-!!  paral_kgb= activate PARALelization over K-point, G-vectors and Bands
 !!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phase information.
 !!  qdir=direction of the q-gradient 
 !!  qgrid(mqgrid)=grid of q points from 0 to qmax.
@@ -1729,16 +2082,16 @@ end subroutine dfpt_vlocaldq
 !!
 !! SOURCE
 
-subroutine dfpt_vlocaldqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
+subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,opthartdqdq,paral_kgb,ph1d,qdir,qgrid,qphon,rhog,&
+& ntypat,n1,n2,n3,opthartdqdq,ph1d,qdir,qgrid,qphon,rhog,&
 & ucvol,vlspl,vhart1dqdq,vpsp1dqdq)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dfpt_vlocaldqdq'
+#define ABI_FUNC 'dfpt_vmetdqdq'
 !End of the abilint section
 
  implicit none
@@ -1746,7 +2099,7 @@ subroutine dfpt_vlocaldqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
- integer,intent(in) :: opthartdqdq,paral_kgb,qdir
+ integer,intent(in) :: opthartdqdq,qdir
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -2092,7 +2445,7 @@ subroutine dfpt_vlocaldqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
 &   dble(2*i2*i3)*gmet(2,3)+dble(2*i3*i1)*gmet(3,1)
  end function gsq_vl
 
-end subroutine dfpt_vlocaldqdq
+end subroutine dfpt_vmetdqdq
 #endif
 
 end module m_mklocl

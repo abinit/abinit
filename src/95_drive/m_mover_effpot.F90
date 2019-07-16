@@ -558,7 +558,6 @@ implicit none
      ncoeff = effective_potential%anharmonics_terms%ncoeff
      name_file='anharmonic_energy_terms.out' 
      unit_out = get_unit()
-     write(*,*) 'unit_out', unit_out 
      if(inp%analyze_anh_pot == 1)then 
        open(unit=unit_out,file=name_file,status='replace',form='formatted')
        write(unit_out,*) '#---------------------------------------------#'

@@ -4,7 +4,7 @@ optdriver   99
 irdwfk      1
 irdscr      1
 
-bs_calctype       1       # L0 is contstructed with KS orbitals and energies.
+bs_calctype       1       # L0 is constructed with KS orbitals and energies.
 mbpt_sciss        3.1 eV
 bs_exchange_term  1       # Exchange term included.
 #bs_coulomb_term   10      # Coulomb term included using the diagonal approximation W_GG

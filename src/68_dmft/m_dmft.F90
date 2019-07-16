@@ -277,7 +277,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 !== define Interaction from input upawu and jpawu
 !----------------------------------------------------------------------
  ABI_DATATYPE_ALLOCATE(hu,(cryst_struc%ntypat))
- call init_hu(cryst_struc,pawtab,hu,paw_dmft%dmftqmc_t2g)
+ call init_hu(cryst_struc,pawtab,hu,paw_dmft%dmftqmc_t2g,paw_dmft%dmftqmc_x2my2d)
  call initialize_self(self,paw_dmft)
 
  ! Set Hu in density representation for calculation of entropy if needed...
@@ -471,7 +471,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 !  == Save self on disk
 !  ---------------------------------------------------------------------
    call timab(627,1,tsec)
-   call rw_self(self,paw_dmft,prtopt=2,opt_rw=2)
+   call rw_self(self,paw_dmft,prtopt=2,opt_rw=2,pawang=pawang,cryst_struc=cryst_struc)
    call timab(627,2,tsec)
 
 !  == Test convergency
@@ -549,7 +549,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  call destroy_green(green)
 !todo_ab rotate back density matrix into unnormalized basis just for
 !printout
- call destroy_hu(hu,cryst_struc%ntypat,paw_dmft%dmftqmc_t2g)
+ call destroy_hu(hu,cryst_struc%ntypat,paw_dmft%dmftqmc_t2g,paw_dmft%dmftqmc_x2my2d)
  call destroy_self(self)
  call destroy_energy(energies_dmft,paw_dmft)
 

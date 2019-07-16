@@ -129,24 +129,27 @@ lst = ""
 for out in ac_abinit_outs:
   lst += "    %s\n" % (out)
 
-# List Makefiles
+# List specific Makefiles
 lst += "    Makefile\n"
+for add in ac_abinit_dirs:
+  lst += "    %s/Makefile\n" % (add)
 
 # Process core libraries
 cnf = MyConfigParser()
 cnf.read(my_configs["libs"])
 abinit_corelibs = cnf.sections()
 abinit_corelibs.sort()
-lst += "    src/Makefile\n"
 for lib in abinit_corelibs:
-  lst += "    src/%s/Makefile\n" % (lib)
+  if ( cnf.get(lib, "parent") == "common" ):
+    par_dir = "shared/common/src/%s" % lib
+  elif ( cnf.get(lib, "parent") == "libpaw" ):
+    par_dir = "shared/libpaw/src"
+  else:
+    par_dir = "src/%s" % lib
+  lst += "    %s/Makefile\n" % (par_dir)
 
+# Add binaries
 lst += "    src/98_main/Makefile\n"
-lst += "    src/libs/Makefile\n"
-
-# List additional Makefiles
-for add in ac_abinit_dirs:
-  lst += "    %s/Makefile\n" % (add)
 
 # Write list
 m4.write(lst+" ])\n\n  dnl Commands\n")

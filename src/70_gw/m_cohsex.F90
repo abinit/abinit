@@ -451,8 +451,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  call wrtout(std_out,msg,'COLL')
 
  ! TODO if single q (ex molecule) dont allocate epsm1q, avoid waste of memory
- ABI_STAT_MALLOC(epsm1_qbz, (npwc, npwc, 1), ierr)
- ABI_CHECK(ierr==0, "out-of-memory in epsm1_qbz")
+ ABI_MALLOC_OR_DIE(epsm1_qbz, (npwc, npwc, 1), ierr)
  ABI_MALLOC(igfftcg0,(Gsph_c%ng))
 
  ! Out-of-core solution for epsilon.

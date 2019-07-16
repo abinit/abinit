@@ -39,6 +39,7 @@ istwfk 8*1
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
+#%% no_check = yes
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_WANNIER90
 #%% [files]

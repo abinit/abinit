@@ -39,6 +39,8 @@ program testTransposer
   use m_xmpi
   use m_time
   use defs_basis
+  use m_profiling_abi
+  use m_errors
 
   implicit none
 
@@ -87,11 +89,17 @@ program testTransposer
     nCpuCols = 1
   end if
 
-
   std_out = 6+xmpi_comm_rank(xmpi_world)
 
-  allocate(cg(2,npw*nband))
-  allocate(cg0(2,npw*nband))
+ ! Initialize memory profiling if it is activated
+ ! if a full memocc.prc report is desired, set the argument of abimem_init to "2" instead of "0"
+ ! note that memocc.prc files can easily be multiple GB in size so don't use this option normally
+#ifdef HAVE_MEM_PROFILING
+ call abimem_init(0)
+#endif
+
+  ABI_MALLOC(cg, (2,npw*nband))
+  ABI_MALLOC(cg0, (2,npw*nband))
 
   call random_number(cg)
   cg0(:,:) = cg(:,:)
@@ -124,10 +132,14 @@ program testTransposer
   call xgTransposer_free(xgTransposer)
   call printTimes()
 
-  deallocate(cg)
-  deallocate(cg0)
+  ABI_FREE(cg)
+  ABI_FREE(cg0)
 
   call xg_finalize()
+
+
+ ! Writes information on file about the memory before ending mpi module, if memory profiling is enabled
+ call abinit_doctor("__testtransposer")
 
   call xmpi_end()
 

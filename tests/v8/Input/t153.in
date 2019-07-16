@@ -11,6 +11,7 @@ ecut   20
 ecutsm 0.5
 tolwfr 1e-16
 istwfk *1
+prtphdos 0
 
 # K-mesh (must equal the one used to produce the WFK file)
 ngkpt    4 4 4
@@ -44,7 +45,7 @@ znucl 6
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_1[89].0_.*
+#%% exclude_builders = .*_intel_1[789].0_.*
 #%% test_chain = t150.in, t151.in, t152.in, t153.in, t154.in, t155.in, t156.in
 #%% [files]
 #%% files_to_test = 

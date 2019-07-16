@@ -251,6 +251,7 @@ P           mkmem           8
            occopt5          3
            occopt6          1
         optdriver           7
+         prtphdos           0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -369,14 +370,6 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5482446053E-02 (at units)
--                                   =          11.9939 [km/s]
-
- Debye frequency from partial sums:     0.5060325864E-02 (Ha)
--                                 =     0.3329534472E+02 (THz)
--Debye temperature from partial sums:     0.1597922629E+04 (K)
-
-- Writing phonon DOS to file: t156o_DS1_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -425,23 +418,31 @@ All the independent perturbations are available
    1.48144565E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
-- Writing electron DOS to file: t156o_DS1_EDOS
-Number of bands in e-ph self-energy sum: 8
-From bmin: 1 to bmax: 8
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Only the Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 1749
-Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
-Number of q-points in the IBZ: 3
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 8
+ From bsum_start: 1 to bsum_stop: 8
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Number of q-points in the IBZ: 3
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 1
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -455,7 +456,7 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    557.2    0.000
    2  12.800   -0.333      1.0   21.589
@@ -472,6 +473,19 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
+Transport calculation results
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+           30.00        0.00E+00        0.00E+00            0.00            0.00
+           60.00        0.20-151        0.00E+00            0.00            0.00
+           90.00        0.55E-94        0.00E+00            0.00            0.00
+          120.00        0.28E-65        0.00E+00            0.00            0.00
+          150.00        0.48E-48        0.00E+00            0.00            0.00
+          180.00        0.15E-36        0.00E+00            0.00            0.00
+          210.00        0.23E-28        0.00E+00            0.00            0.00
+          240.00        0.33E-22        0.00E+00            0.00            0.00
+          270.00        0.20E-17        0.00E+00            0.00            0.00
+          300.00        0.14E-13        0.00E+00            0.00            0.00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -513,14 +527,6 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5482446053E-02 (at units)
--                                   =          11.9939 [km/s]
-
- Debye frequency from partial sums:     0.5060325864E-02 (Ha)
--                                 =     0.3329534472E+02 (THz)
--Debye temperature from partial sums:     0.1597922629E+04 (K)
-
-- Writing phonon DOS to file: t156o_DS2_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -551,23 +557,32 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-- Writing electron DOS to file: t156o_DS2_EDOS
-Number of bands in e-ph self-energy sum: 8
-From bmin: 1 to bmax: 8
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Only the Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 1749
-Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
-Number of q-points in the IBZ: 3
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 8
+ From bsum_start: 1 to bsum_stop: 8
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Using double grid technique with ndiv: 27
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Number of q-points in the IBZ: 3
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 1
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -581,7 +596,7 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    509.1    0.000
    2  12.800   -0.052      6.3   21.589
@@ -598,6 +613,19 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
+Transport calculation results
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+           30.00        0.00E+00        0.00E+00            0.00            0.00
+           60.00        0.98-112        0.00E+00            0.00            0.00
+           90.00        0.16E-67        0.00E+00            0.00            0.00
+          120.00        0.20E-45        0.00E+00            0.00            0.00
+          150.00        0.36E-32        0.00E+00            0.00            0.00
+          180.00        0.25E-23        0.00E+00            0.00            0.00
+          210.00        0.51E-17        0.00E+00            0.00            0.00
+          240.00        0.28E-12        0.00E+00            0.00            0.00
+          270.00        0.13E-08        0.00E+00            0.00            0.00
+          300.00        0.12E-05        0.00E+00            0.00            0.00
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -620,8 +648,8 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
 
-Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
-New fermi level:     6.422151E-01, with nelect:     8.200000E+00
+ Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
+ New fermi level:     6.422151E-01, with nelect:     8.200000E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
@@ -643,14 +671,6 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5482446053E-02 (at units)
--                                   =          11.9939 [km/s]
-
- Debye frequency from partial sums:     0.5060325864E-02 (Ha)
--                                 =     0.3329534472E+02 (THz)
--Debye temperature from partial sums:     0.1597922629E+04 (K)
-
-- Writing phonon DOS to file: t156o_DS3_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -681,23 +701,31 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-- Writing electron DOS to file: t156o_DS3_EDOS
-Number of bands in e-ph self-energy sum: 8
-From bmin: 1 to bmax: 8
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Only the Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 1749
-Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
-Number of q-points in the IBZ: 3
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 8
+ From bsum_start: 1 to bsum_stop: 8
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Number of q-points in the IBZ: 3
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 1
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -711,7 +739,7 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    557.1    0.000
    2  12.800   -0.333      1.0   21.589
@@ -728,6 +756,19 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
+Transport calculation results
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.25E+23        0.00E+00            0.00            0.00
+           30.00        0.18E+23        0.00E+00            0.00            0.00
+           60.00        0.18E+23        0.00E+00            0.00            0.00
+           90.00        0.18E+23        0.00E+00            0.00            0.00
+          120.00        0.18E+23        0.00E+00            0.00            0.00
+          150.00        0.18E+23        0.00E+00            0.00            0.00
+          180.00        0.18E+23        0.00E+00            0.00            0.00
+          210.00        0.18E+23        0.00E+00            0.00            0.00
+          240.00        0.18E+23        0.00E+00            0.00            0.00
+          270.00        0.18E+23        0.00E+00            0.00            0.00
+          300.00        0.18E+23        0.00E+00            0.00            0.00
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -752,8 +793,8 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
 
-Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
-New fermi level:     6.422151E-01, with nelect:     8.200000E+00
+ Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
+ New fermi level:     6.422151E-01, with nelect:     8.200000E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
@@ -775,14 +816,6 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5482446053E-02 (at units)
--                                   =          11.9939 [km/s]
-
- Debye frequency from partial sums:     0.5060325864E-02 (Ha)
--                                 =     0.3329534472E+02 (THz)
--Debye temperature from partial sums:     0.1597922629E+04 (K)
-
-- Writing phonon DOS to file: t156o_DS4_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -813,23 +846,32 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-- Writing electron DOS to file: t156o_DS4_EDOS
-Number of bands in e-ph self-energy sum: 8
-From bmin: 1 to bmax: 8
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Only the Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 1749
-Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
-Number of q-points in the IBZ: 3
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 8
+ From bsum_start: 1 to bsum_stop: 8
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Using double grid technique with ndiv: 27
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Number of q-points in the IBZ: 3
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 1
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -843,7 +885,7 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    509.1    0.000
    2  12.800   -0.052      6.3   21.589
@@ -860,6 +902,19 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
+Transport calculation results
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.34E+23        0.00E+00            0.00            0.00
+           30.00        0.34E+23        0.00E+00            0.00            0.00
+           60.00        0.34E+23        0.00E+00            0.00            0.00
+           90.00        0.34E+23        0.00E+00            0.00            0.00
+          120.00        0.34E+23        0.00E+00            0.00            0.00
+          150.00        0.34E+23        0.00E+00            0.00            0.00
+          180.00        0.34E+23        0.00E+00            0.00            0.00
+          210.00        0.34E+23        0.00E+00            0.00            0.00
+          240.00        0.34E+23        0.00E+00            0.00            0.00
+          270.00        0.34E+23        0.00E+00            0.00            0.00
+          300.00        0.34E+23        0.00E+00            0.00            0.00
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -906,14 +961,6 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5482446053E-02 (at units)
--                                   =          11.9939 [km/s]
-
- Debye frequency from partial sums:     0.5060325864E-02 (Ha)
--                                 =     0.3329534472E+02 (THz)
--Debye temperature from partial sums:     0.1597922629E+04 (K)
-
-- Writing phonon DOS to file: t156o_DS5_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -944,23 +991,31 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-- Writing electron DOS to file: t156o_DS5_EDOS
-Number of bands in e-ph self-energy sum: 8
-From bmin: 1 to bmax: 8
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Only the Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 1749
-Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
-Number of q-points in the IBZ: 3
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 8
+ From bsum_start: 1 to bsum_stop: 8
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Number of q-points in the IBZ: 3
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 1
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -974,7 +1029,7 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    557.2    0.000
    2  12.800   -0.333      1.0   21.589
@@ -991,6 +1046,19 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
+Transport calculation results
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.17E+23        0.00E+00            0.00            0.00
+           30.00        0.17E+23        0.00E+00            0.00            0.00
+           60.00        0.17E+23        0.00E+00            0.00            0.00
+           90.00        0.17E+23        0.00E+00            0.00            0.00
+          120.00        0.17E+23        0.00E+00            0.00            0.00
+          150.00        0.17E+23        0.00E+00            0.00            0.00
+          180.00        0.17E+23        0.00E+00            0.00            0.00
+          210.00        0.17E+23        0.00E+00            0.00            0.00
+          240.00        0.17E+23        0.00E+00            0.00            0.00
+          270.00        0.17E+23        0.00E+00            0.00            0.00
+          300.00        0.17E+23        0.00E+00            0.00            0.00
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1030,14 +1098,6 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5482446053E-02 (at units)
--                                   =          11.9939 [km/s]
-
- Debye frequency from partial sums:     0.5060325864E-02 (Ha)
--                                 =     0.3329534472E+02 (THz)
--Debye temperature from partial sums:     0.1597922629E+04 (K)
-
-- Writing phonon DOS to file: t156o_DS6_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1068,23 +1128,31 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-- Writing electron DOS to file: t156o_DS6_EDOS
-Number of bands in e-ph self-energy sum: 8
-From bmin: 1 to bmax: 8
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Only the Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 1749
-Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
-Number of q-points in the IBZ: 3
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 8
+ From bsum_start: 1 to bsum_stop: 8
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Number of q-points in the IBZ: 3
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 1
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -1098,7 +1166,7 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    557.2    0.000
    2  12.800   -0.333      1.0   21.589
@@ -1115,6 +1183,19 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
+Transport calculation results
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+           30.00        0.00E+00        0.00E+00            0.00            0.00
+           60.00        0.20-151        0.00E+00            0.00            0.00
+           90.00        0.55E-94        0.00E+00            0.00            0.00
+          120.00        0.28E-65        0.00E+00            0.00            0.00
+          150.00        0.48E-48        0.00E+00            0.00            0.00
+          180.00        0.15E-36        0.00E+00            0.00            0.00
+          210.00        0.23E-28        0.00E+00            0.00            0.00
+          240.00        0.33E-22        0.00E+00            0.00            0.00
+          270.00        0.20E-17        0.00E+00            0.00            0.00
+          300.00        0.14E-13        0.00E+00            0.00            0.00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1167,16 +1248,7 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
        getwfkfine4         20
        getwfkfine5          0
        getwfkfine6          0
-           istwfk        1    0    1    0    0    0    1    0
            jdtset        1    2    3    4    5    6
-              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       2.50000000E-01  0.00000000E+00  0.00000000E+00
-                       5.00000000E-01  0.00000000E+00  0.00000000E+00
-                       2.50000000E-01  2.50000000E-01  0.00000000E+00
-                       5.00000000E-01  2.50000000E-01  0.00000000E+00
-                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
-                       5.00000000E-01  5.00000000E-01  0.00000000E+00
-                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      1.89602709E+01
 P           mkmem           8
@@ -1254,6 +1326,7 @@ P           mkmem           8
            occopt5          3
            occopt6          1
         optdriver           7
+         prtphdos           0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -1322,8 +1395,6 @@ P           mkmem           8
            tolwfr      1.00000000E-16
             tmesh      0.00000000E+00  3.00000000E+01  1.10000000E+01
             typat      1  1
-              wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
-                         0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        8.8683062764E-01  8.8683062764E-01  8.8683062764E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1407,10 +1478,10 @@ P           mkmem           8
 - Comment : the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         19.8  wall=         19.8
+- Proc.   0 individual time (sec): cpu=          3.6  wall=          3.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   7 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         28.9  wall=         29.4
+.Delivered   9 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.6  wall=          3.8

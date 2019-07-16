@@ -8,7 +8,7 @@
 !!  Unlike the procedures in m_cgtools, the routines declared in this module can use mpi_type.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV)
+!!  Copyright (C) 2008-2019 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,6 +46,7 @@ module m_spacepar
 !!***
 
 public :: hartre            ! Given rho(G), compute Hartree potential (=FFT of rho(G)/pi/(G+q)**2)
+public :: make_vectornd     ! compute vector potential due to nuclear magnetic dipoles, in real space 
 public :: meanvalue_g       ! Compute <wf|op|wf> where op is real and diagonal in G-space.
 public :: laplacian         ! Compute the laplacian of a function defined in real space
 public :: redgr             ! Compute reduced gradients of a real function on the usual unshifted FFT grid.
@@ -62,6 +63,236 @@ public :: rotate_rho
 !!***
 
 contains
+!!***
+
+!!****f* m_spacepar/make_vectornd
+!! NAME
+!! make_vectornd
+!!
+!! FUNCTION
+!! For nuclear dipole moments m, compute vector potential A(r) = (m x (r-R))/|r-R|^3
+!! in r space. This is done by computing A(G) followed by FFT.
+!!
+!! NOTES
+!! This code is copied and modified from m_spacepar/hartre where a very similar loop
+!! over G is done followed by FFT to real space
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!  vectornd(3,nfft)=Vector potential in real space, along Cartesian directions
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom,&
+     & rprimd,vectornd,xred)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,izero,natom,nfft
+ real(dp),intent(in) :: gsqcut
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: nucdipmom(3,natom),rprimd(3,3),xred(3,natom)
+ real(dp),intent(out) :: vectornd(nfft,3)
+
+!Local variables-------------------------------
+ !scalars
+ integer,parameter :: im=2,re=1
+ integer :: i1,i2,i2_local,i23,i3,iatom,id1,id2,id3,ig,ig1,ig2,ig3,ig1max,ig2max,ig3max
+ integer :: ig1min,ig2min,ig3min
+ integer :: ii,ii1,ing,me_fft,n1,n2,n3,nd_atom,nd_atom_tot,nproc_fft
+ real(dp),parameter :: tolfix=1.000000001e0_dp
+ real(dp) :: cutoff,gqgm12,gqg2p3,gqgm23,gqgm13,gs2,gs3,gs
+ real(dp) :: phase,prefac,precosph,presinph,prefacgs,ucvol
+ !arrays
+ integer :: id(3)
+ integer,allocatable :: nd_list(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ real(dp) :: gcart(3),gmet(3,3),gprimd(3,3),gred(3),mcg_cart(3),rmet(3,3)
+ real(dp) :: AGre_red(3),AGre_cart(3),AGim_red(3),AGim_cart(3)
+ real(dp),allocatable :: gq(:,:),nd_m(:,:),ndvecr(:),work1(:,:),work2(:,:),work3(:,:)
+
+! *************************************************************************
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+
+ ! make list of atoms with nonzero nuclear dipole moments
+ ! in typical applications only 0 or 1 atoms have nonzero dipoles. This
+ ! code shouldn't even be called if all dipoles are zero.
+ nd_atom_tot = 0
+ do iatom = 1, natom
+    if (any(abs(nucdipmom(:,iatom))>tol8)) then
+       nd_atom_tot = nd_atom_tot + 1
+    end if
+ end do
+
+ ! note that nucdipmom is input as vectors in atomic units referenced
+ ! to cartesian coordinates
+ ABI_ALLOCATE(nd_list,(nd_atom_tot))
+ ABI_ALLOCATE(nd_m,(3,nd_atom_tot))
+ nd_atom_tot = 0
+ do iatom = 1, natom
+    if (any(abs(nucdipmom(:,iatom))>tol8)) then
+       nd_atom_tot = nd_atom_tot + 1
+       nd_list(nd_atom_tot) = iatom
+       nd_m(:,nd_atom_tot) = nucdipmom(:,iatom)
+    end if
+ end do
+ 
+ n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
+ nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
+
+ prefac = -four_pi/(ucvol*two_pi)
+
+ ! Get the distrib associated with this fft_grid
+ call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+ ! Initialize a few quantities
+ cutoff=gsqcut*tolfix
+
+ ! In order to speed the routine, precompute the components of g+q
+ ! Also check if the booked space was large enough...
+ ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
+ do ii=1,3
+   id(ii)=ngfft(ii)/2+2
+   do ing=1,ngfft(ii)
+     ig=ing-(ing/id(ii))*ngfft(ii)-1
+     gq(ii,ing)=ig
+   end do
+ end do
+ ig1max=-1;ig2max=-1;ig3max=-1
+ ig1min=n1;ig2min=n2;ig3min=n3
+
+ ABI_ALLOCATE(work1,(2,nfft))
+ ABI_ALLOCATE(work2,(2,nfft))
+ ABI_ALLOCATE(work3,(2,nfft))
+ work1=zero; work2=zero; work3=zero
+ id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
+
+ ! Triple loop on each dimension
+ do i3=1,n3
+   ig3=i3-(i3/id3)*n3-1
+   ! Precompute some products that do not depend on i2 and i1
+   gs3=gq(3,i3)*gq(3,i3)*gmet(3,3)
+   gqgm23=gq(3,i3)*gmet(2,3)*2
+   gqgm13=gq(3,i3)*gmet(1,3)*2
+
+   do i2=1,n2
+     ig2=i2-(i2/id2)*n2-1
+     if (fftn2_distrib(i2) == me_fft) then
+       gs2=gs3+ gq(2,i2)*(gq(2,i2)*gmet(2,2)+gqgm23)
+       gqgm12=gq(2,i2)*gmet(1,2)*2
+       gqg2p3=gqgm13+gqgm12
+
+       i2_local = ffti2_local(i2)
+       i23=n1*(i2_local-1 +(n2/nproc_fft)*(i3-1))
+       ! Do the test that eliminates the Gamma point outside of the inner loop
+       ii1=1
+       if(i23==0 .and. ig2==0 .and. ig3==0)then
+         ii1=2
+         work1(re,1+i23)=zero
+         work1(im,1+i23)=zero
+       end if
+
+       ! Final inner loop on the first dimension (note the lower limit)
+       do i1=ii1,n1
+          gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
+          ig1 = i1 - (i1/id1)*n1 -1 
+          ii=i1+i23
+
+          gred(1) = one*ig1; gred(2) = one*ig2; gred(3) = one*ig3
+          ! obtain \vec{G} in cartesian coordinates
+          gcart(1:3) = MATMUL(gprimd,gred)
+          gs = DOT_PRODUCT(gred,MATMUL(gmet,gred))
+
+         if(gs .LE. cutoff)then
+
+            prefacgs = prefac/gs
+            do iatom = 1, nd_atom_tot
+               nd_atom = nd_list(iatom)
+               phase = two_pi*DOT_PRODUCT(xred(:,nd_atom),gred(:))
+               presinph=prefacgs*sin(phase)
+               precosph=prefacgs*cos(phase)
+
+               ! cross product m x G
+               mcg_cart(1) =  nd_m(2,iatom)*gcart(3) - nd_m(3,iatom)*gcart(2)
+               mcg_cart(2) = -nd_m(1,iatom)*gcart(3) + nd_m(3,iatom)*gcart(1)
+               mcg_cart(3) =  nd_m(1,iatom)*gcart(2) - nd_m(2,iatom)*gcart(1)
+
+               ! Re(A(G)), in cartesian coordinates
+               AGre_cart = presinph*mcg_cart
+
+               ! refer back to recip space
+               AGre_red = MATMUL(TRANSPOSE(gprimd),AGre_cart)
+
+               ! Im(A(G)), in cartesian coordinates
+               AGim_cart = precosph*mcg_cart
+
+               ! refer back to recip space
+               AGim_red = MATMUL(TRANSPOSE(gprimd),AGim_cart)
+
+               work1(re,ii) = AGre_red(1)
+               work2(re,ii) = AGre_red(2)
+               work3(re,ii) = AGre_red(3)
+               work1(im,ii) = AGim_red(1)
+               work2(im,ii) = AGim_red(2)
+               work3(im,ii) = AGim_red(3)
+            end do
+         else
+           ! gs>cutoff
+           work1(re,ii)=zero
+           work1(im,ii)=zero
+           work2(re,ii)=zero
+           work2(im,ii)=zero
+           work3(re,ii)=zero
+           work3(im,ii)=zero
+         end if
+
+       end do ! End loop on i1
+     end if
+   end do ! End loop on i2
+ end do ! End loop on i3
+
+ ABI_DEALLOCATE(gq)
+ ABI_DEALLOCATE(nd_list)
+ ABI_DEALLOCATE(nd_m)
+
+ if ( izero .EQ. 1 ) then
+   ! Set contribution of unbalanced components to zero
+
+    call zerosym(work1,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+    call zerosym(work2,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+    call zerosym(work3,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+
+ end if
+
+ ! Fourier Transform
+ ABI_ALLOCATE(ndvecr,(cplex*nfft))
+ ndvecr=zero
+ call fourdp(cplex,work1,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
+ vectornd(:,1)=ndvecr(:)
+ ABI_DEALLOCATE(work1)
+ 
+ ndvecr=zero
+ call fourdp(cplex,work2,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
+ vectornd(:,2) = ndvecr(:)
+ ABI_DEALLOCATE(work2)
+ 
+ ndvecr=zero
+ call fourdp(cplex,work3,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
+ vectornd(:,3) = ndvecr(:)
+ ABI_DEALLOCATE(work3)
+ ABI_DEALLOCATE(ndvecr)
+
+end subroutine make_vectornd
 !!***
 
 !!****f* m_spacepar/hartre
@@ -106,12 +337,12 @@ contains
 !!
 !! SOURCE
 
-subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,vhartr,&
+subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
 &  divgq0,qpt) ! Optional argument
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,izero,nfft,paral_kgb
+ integer,intent(in) :: cplex,izero,nfft
  real(dp),intent(in) :: gsqcut
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -145,8 +376,8 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
  ! Check that cplex has an allowed value
  if(cplex/=1 .and. cplex/=2)then
    write(message, '(a,i0,a,a)' )&
-&   'From the calling routine, cplex=',cplex,ch10,&
-&   'but the only value allowed are 1 and 2.'
+   'From the calling routine, cplex=',cplex,ch10,&
+   'but the only value allowed are 1 and 2.'
    MSG_BUG(message)
  end if
 
@@ -169,23 +400,22 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
  if(qpt_(1)**2+qpt_(2)**2+qpt_(3)**2<1.d-15) qeq0=1
  qeq05=0
  if (qeq0==0) then
-   if (abs(abs(qpt_(1))-half)<tol12.or.abs(abs(qpt_(2))-half)<tol12.or. &
-&   abs(abs(qpt_(3))-half)<tol12) qeq05=1
+   if (abs(abs(qpt_(1))-half)<tol12.or.abs(abs(qpt_(2))-half)<tol12.or.abs(abs(qpt_(3))-half)<tol12) qeq05=1
  end if
 
  ! If cplex=1 then qpt_ should be 0 0 0
  if (cplex==1.and. qeq0/=1) then
    write(message,'(a,3e12.4,a,a)')&
-&   'cplex=1 but qpt=',qpt_,ch10,&
-&   'qpt should be 0 0 0.'
+   'cplex=1 but qpt=',qpt_,ch10,&
+   'qpt should be 0 0 0.'
    MSG_BUG(message)
  end if
 
  ! If FFT parallelism then qpt should not be 1/2
  if (nproc_fft>1.and.qeq05==1) then
    write(message, '(a,3e12.4,a,a)' )&
-&   'FFT parallelism selected but qpt',qpt_,ch10,&
-&   'qpt(i) should not be 1/2...'
+   'FFT parallelism selected but qpt',qpt_,ch10,&
+   'qpt(i) should not be 1/2...'
    MSG_ERROR(message)
  end if
 
@@ -290,7 +520,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
        if (abs(ig3min)>abs(ig3max)) ig3=n3-abs(ig3min)
      end if
      call zerosym(work1,2,n1,n2,n3,ig1=ig1,ig2=ig2,ig3=ig3,&
-&     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
    end if
  end if
 
@@ -368,7 +598,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
  end if
 
  if(use_ndo==1 .and. (istwf_k==2 .and.me_g0==1)) then
-   MSG_BUG('use_ndo==1, not tested')
+   MSG_BUG('use_ndo==1, not tested, use istwfk=1')
  end if
 
  ar=zero
@@ -532,7 +762,6 @@ end subroutine meanvalue_g
 !!  nfft=number of points of the fft grid
 !!  nfunc=number of functions on the grid for which the laplacian is to be calculated
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!!  paral_kgb=flag controlling (k,g,bands) parallelization
 !!  (optional) rdfuncr(nfft,nfunc)=real(dp) discretized functions in real space
 !!  rdfuncg_in TO BE DESCRIBED SB 090901
 !!  laplacerdfuncg_in TO BE DESCRIBED SB 090901
@@ -554,12 +783,12 @@ end subroutine meanvalue_g
 !!
 !! SOURCE
 
-subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,paral_kgb,rdfuncr,&
+subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,rdfuncr,&
 &  laplacerdfuncr,rdfuncg_out,laplacerdfuncg_out,g2cart_out,rdfuncg_in,g2cart_in)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft,nfunc,paral_kgb
+ integer,intent(in) :: nfft,nfunc
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -732,11 +961,11 @@ end subroutine laplacian
 !!
 !! SOURCE
 
-subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
+subroutine redgr(frin,frredgr,mpi_enreg,nfft,ngfft)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft,paral_kgb
+ integer,intent(in) :: nfft
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -882,12 +1111,11 @@ end subroutine redgr
 !!
 !! SOURCE
 
-subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
-&  paral_kgb,rhog,rprimd,vhartr1)
+subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,rhog,rprimd,vhartr1)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: idir,ipert,natom,nfft,paral_kgb
+ integer,intent(in) :: idir,ipert,natom,nfft
  real(dp),intent(in) :: gsqcut
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -1078,12 +1306,12 @@ end subroutine hartrestr
 !!
 !! SOURCE
 
-subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym,paral_kgb,&
+subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym,&
 &                 phnons,rhog,rhor,rprimd,symafm,symrel)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,nfft,nfftot,nspden,nsppol,nsym,paral_kgb
+ integer,intent(in) :: cplex,nfft,nfftot,nspden,nsppol,nsym
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: irrzon(nfftot**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4)),ngfft(18)

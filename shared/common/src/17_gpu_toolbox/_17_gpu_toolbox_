@@ -1,0 +1,20 @@
+!!****d* ABINIT/17_gpu_toolbox
+!! NAME
+!! 17_gpu_toolbox
+!!
+!! DESCRIPTION
+!!  FIXME: Description is missing
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2019 ABINIT group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! m_gpu_toolbox.F90
+!! m_gpu_detect.F90
+!! m_initcuda.F90
+!!
+!!***

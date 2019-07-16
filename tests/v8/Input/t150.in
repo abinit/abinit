@@ -81,7 +81,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_1[89].0_.*
+#%% exclude_builders = .*_intel_1[789].0_.*
 #%% test_chain = t150.in, t151.in, t152.in, t153.in, t154.in, t155.in, t156.in
 #%% [files]
 #%% files_to_test = 

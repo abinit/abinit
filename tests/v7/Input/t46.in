@@ -61,10 +61,10 @@
 #%% authors = Unknown
 #%% keywords = NC, DFPT
 #%% description = 
-#%% Si in diamond structure; 2 special points; low ecut.
-#%% With a 4x4x4 k point grid (!only one shift, but OK
-#%%    because symmetry is imposed), compute the
-#%%    dielectric constant with a scissor .
-#%% Note that the fulfilment of the charge neutrality sum rule, already broken without a scissor operator, is
-#%% strongly affected by a scissor
+#%%   Si in diamond structure; 2 special points; low ecut.
+#%%   With a 4x4x4 k point grid (!only one shift, but OK
+#%%   because symmetry is imposed), compute the
+#%%   dielectric constant with a scissor .
+#%%   Note that the fulfilment of the charge neutrality sum rule, already broken without a scissor operator, is
+#%%   strongly affected by a scissor
 #%%<END TEST_INFO>

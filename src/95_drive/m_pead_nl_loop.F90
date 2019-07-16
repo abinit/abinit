@@ -157,8 +157,6 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 & npwarr,occ,psps,pwind,&
 & rfpert,rprimd,ucvol,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mgfft,mk1mem,mkmem,mkmem_max,mpert,mpw,natom,nfft
@@ -186,9 +184,10 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 !scalars
  integer,parameter :: level=51
  integer :: ask_accurate,counter,cplex,formeig,i1dir
- integer :: i1pert,i2dir,i2pert,i3dir,i3pert,iatom,ierr,iexit,ifft,index,ir
+ integer :: i1pert,i2dir,i2pert,i3dir,i3pert,iatom,ierr,ifft,index,ir
  integer :: ireadwf,itypat,mcg,mpsang,n1,n2,n3,n3xccc,nfftot,nspden,option,optorth
  integer :: pert1case,pert2case,pert3case,rdwrpaw,timrev,comm_cell
+ logical :: nmxc
  real(dp) :: ecut_eff,exc3,valuei
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf3i
@@ -433,7 +432,7 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
                    if (i2pert <= natom) then
 
                      call dfpt_vlocal(atindx,cplex,gmet,gsqcut,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,natom,&
-&                     nattyp,nfft,dtset%ngfft,psps%ntypat,n1,n2,n3,dtset%paral_kgb,ph1d,psps%qgrid_vl,&
+&                     nattyp,nfft,dtset%ngfft,psps%ntypat,n1,n2,n3,ph1d,psps%qgrid_vl,&
 &                     dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
 
                      if (psps%n1xccc/=0) then
@@ -444,11 +443,11 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 
                    end if  ! i2pert <= natom
 
-                   call hartre(cplex,gsqcut,0,mpi_enreg,nfft,dtset%ngfft,dtset%paral_kgb,rho2g1,rprimd,vhartr1)
-                   option=1
+                   call hartre(cplex,gsqcut,0,mpi_enreg,nfft,dtset%ngfft,rho2g1,rprimd,vhartr1)
+                   option=1 ; nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
                    call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,dtset%ngfft,&
-&                   rho_dum,0,rho_dum,0,nkxc,dtset%nspden,n3xccc,option,&
-&                   dtset%paral_kgb,dtset%qptn,rho2r1,rprimd,0,vxc1,xccc3d2)
+&                   rho_dum,0,rho_dum,0,nkxc,nmxc,dtset%nspden,n3xccc,option,&
+&                   dtset%qptn,rho2r1,rprimd,0,vxc1,xccc3d2)
 
                    if(dtset%nsppol==1)then
                      if(cplex==1)then
@@ -747,8 +746,6 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 & mpert,mpi_enreg,mpsang,mpw,natom,nfft,nkpt,nspden,nspinor,nsppol,&
 & npwarr,occ,ph1d,psps,rprimd,vtrial1,xred,ylm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,mband,mgfft
@@ -771,7 +768,7 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=52
- integer :: bantot,choice,counter,cpopt,dimffnl,iband,icg0,ider,ierr,iexit
+ integer :: bantot,choice,counter,cpopt,dimffnl,iband,icg0,ider,ierr
  integer :: ii,ikg,ikpt,ilm,ipw,isppol,istwf_k,jband,jj
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,nkpg,nnlout,npw_k
  integer :: option,paw_opt,signs,spaceComm,tim_fourwf,tim_nonlop
@@ -788,6 +785,8 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
  type(pawtab_type) :: pawtab_dum(0)
 
 !***********************************************************************
+
+ ABI_UNUSED(dtfil%ireadwf)
 
  me = mpi_enreg%me
  spaceComm=mpi_enreg%comm_cell
@@ -1065,7 +1064,6 @@ subroutine pead_nl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 &                   nsppol,pwind)
 
  use m_hide_lapack, only : dzgedi, dzgefa
- implicit none
 
 !Arguments ------------------------------------
 !
@@ -1098,7 +1096,7 @@ subroutine pead_nl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 !
 !---- Local variables : integer scalars
  integer :: count,counter,count1,iband,icg
- integer :: ierr,iexit,ii,ikpt,ikpt_loc,ikpt2
+ integer :: ierr,ii,ikpt,ikpt_loc,ikpt2
  integer :: ikpt_rbz,ineigh,info,ipw,isppol,jband,jcg,jj,jkpt,job,jpw, jkpt2, jkpt_rbz
  integer :: lband,lpband,nband_occ,npw_k,npw_k1,my_source,his_source,dest,tag
  integer :: spaceComm
@@ -1125,11 +1123,13 @@ subroutine pead_nl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 !
 !---- Local variables : structured datatypes
 
+
 #if defined HAVE_MPI
 integer :: status1(MPI_STATUS_SIZE)
 spaceComm=mpi_enreg%comm_cell
 #endif
 
+ ABI_UNUSED(dtfil%ireadwf)
 
 ! ***********************************************************************
 
