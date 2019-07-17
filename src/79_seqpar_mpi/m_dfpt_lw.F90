@@ -4471,7 +4471,7 @@ end subroutine dfpt_flexoout
 
          end do
 
-         write(ab_out,'(4(i5,4x),2(1x,f20.10))') alpha,gamma,beta,delta       &
+         write(ab_out,'(4(i5,4x),2(1x,f20.10))') alpha,gamma,beta,delta, &
        & celastre, celastim
        end do
      end do
@@ -4557,7 +4557,6 @@ end subroutine dfpt_flexoout
  end do
 
  ABI_DEALLOCATE(isdqtens_red)
- ABI_DEALLOCATE(isdq_flg)
  ABI_DEALLOCATE(redflg)
 
  DBG_EXIT("COLL")
