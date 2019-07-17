@@ -3165,7 +3165,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
      sc_rprimd(:, 2) = nq2 * db%cryst%rprimd(:, 2)
      sc_rprimd(:, 3) = nq3 * db%cryst%rprimd(:, 3)
      sc_rmet = matmul(transpose(sc_rprimd), sc_rprimd)
-     call sort_rpts(nrtot, all_rpt, sc_rmet, iperm, rmod=all_rmod)
+     call sort_rpts(nrtot, all_rpt, db%cryst%rmet, iperm, rmod=all_rmod)
      if (open_file(outwr_path, msg, newunit=unt, form="formatted", action="write", status="unknown") /= 0) then
        MSG_ERROR(msg)
      end if
