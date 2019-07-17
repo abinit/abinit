@@ -1028,7 +1028,7 @@ subroutine print_zeff(unt, zeff, cryst, title)
      zeff(3,1,iatom), zeff(3,2,iatom), zeff(3,3,iatom), ch10
  end do
 
- write(unt,'(2a,3(/,3es16.6),a)')ch10,' Fulfillment of charge neutrality, F_{ij} = \sum_{atom} Z^*_{ij,atom} ', &
+ write(unt,'(2a,3(/,3es16.6),a)')ch10,' Fulfillment of charge neutrality, \sum_{atom} Z^*_{ij,atom} = 0', &
    sum(zeff(1,1,:)), sum(zeff(1,2,:)), sum(zeff(1,3,:)), &
    sum(zeff(2,1,:)), sum(zeff(2,2,:)), sum(zeff(2,3,:)), &
    sum(zeff(3,1,:)), sum(zeff(3,2,:)), sum(zeff(3,3,:)), ch10
@@ -2771,7 +2771,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0, qptopt1 = 1
- integer :: iq_ibz,nqibz,iq_bz,nqbz, timerev_q
+ integer :: iq_ibz,nqibz,iq_bz,nqbz !, timerev_q
  integer :: ii,jj,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc, unt
  integer :: iqst,itimrev,isym
  integer :: ifft, ierr, nrtot, my_rstart, my_rstop, iatom
@@ -2784,7 +2784,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  character(len=500) :: msg, sfmt
 !arrays
  integer :: g0q(3)
- integer :: symq(4,2,db%cryst%nsym)
+ !integer :: symq(4,2,db%cryst%nsym)
  integer,allocatable :: indqq(:,:),iperm(:), iperm_irpt(:), nqsts(:),iqs_dvdb(:),all_cell(:,:)
  real(dp) :: qpt_bz(3), sc_rprimd(3,3), sc_rmet(3, 3)
  real(dp),allocatable :: qibz(:,:),qbz(:,:),emiqr(:,:), all_rpt(:,:), all_wghatm(:,:,:)
@@ -2826,6 +2826,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  nqibz = size(qibz, dim=2); nqbz = size(qbz, dim=2); nrtot = size(all_rpt, dim=2)
  write(std_out, "(a, i0)")" Using method for integration weights: ", method
  write(std_out, "(a, i0)")" Number of R-points in real-space big box: ", nrtot
+ write(std_out, "(a, i0)")" dvdb_add_lr: ", db%add_lr
 
  ! Distribute R-points inside comm_rpt. In the unlikely case that nqbz > nprocs, my_nrpt is set to zero
  call xmpi_split_work(nrtot, db%comm_rpt, my_rstart, my_rstop)
@@ -2937,7 +2938,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
        !end do
 
        ! Multiply by e^{iqpt_bz.r}
-       call times_eikr(qpt_bz, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
+       call times_eikr(qpt_bz, ngfft, nfft, db%nspden * db%natom3, v1r_qbz)
 
        ! Substract the long-range part of the potential.
        if (db%add_lr /= 0) then
@@ -6476,12 +6477,12 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr)
 
 !Local variables-------------------------------
 !scalars
- integer :: n1, n2, n3, nfftot, ig, timerev_q !, ii !, jj, kk
+ integer :: n1, n2, n3, nfftot, ig !, timerev_q !, ii !, jj, kk
  real(dp) :: fac, qGZ, denom, denom_inv, qtau !, ll
  real(dp) :: re, im, phre, phim, qg_mod, gsq_max !, qdamp
  type(MPI_type) :: MPI_enreg_seq
 !arrays
- integer :: symq(4,2,db%cryst%nsym)
+ !integer :: symq(4,2,db%cryst%nsym)
  integer, allocatable :: gfft(:,:)
  real(dp) :: gprimd(3,3), rprimd(3,3)
  real(dp) :: dielt_red(3,3) !, quad_cart(3,3)
