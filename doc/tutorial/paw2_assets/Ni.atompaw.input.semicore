@@ -28,6 +28,6 @@ bessel                                      ! Scheme for pseudopotential (l_loc=
 1.7                                         ! r_c matching radius for second p partial wave
 2.0                                         ! r_c matching radius for first  d partial wave
 2.0                                         ! r_c matching radius for second d partial wave
-2                                           ! Option for ABINIT file creation
+ABINITOUT                                   ! Option for ABINIT file creation
 default                                     ! All parameters set to default for ABINIT file
 0                                           ! End of file
