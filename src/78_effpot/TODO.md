@@ -15,8 +15,6 @@ State:
 State: 
 
 ### [DONE] Make a example harmonic lattice potential. (hexu) [time: July, 2019]
-
-
 #### [DONE] implement primitive potentail (read from netcdf file). Tested.
 #### [DONE] implement supercell potential, fill_supercell
 #### [DONE] add the data structure to the manager.
@@ -36,7 +34,6 @@ State:
 ## Documenation
 ### [DONE] Document general data structure  (hexu) [time: July, 2019]
 
-State: ?
 
 #### [TODO] Make a developer's guide on how to add new things. (hexu) [time: July, 2019]
 

@@ -349,13 +349,12 @@ contains
   !-----------------------------------------------------------------------
   !> @brief generate a spin wave  quantity. rotate by theta(R) = 2pi * k.dot.R, around axis.
   !>  The A_sc will be allocated. size : (ndim, nA*ncells)
-  !>   NOTE: This generate a density wave. For a spin wave, use generate_Euler_wave.
   !> @param [in] A: a vector quantity. dimension (xyz, iA)
   !> @param [in] kpoint: the wave vector
   !> @param [in] axis: the axis to rotate around
   !> @param [out] A_sc: indices in supercell.
   !-----------------------------------------------------------------------
-  subroutine generate_rotate_wave_vectorlist(self, A, kpoint, axis, A_sc)
+  subroutine generate_spin_wave_vectorlist(self, A, kpoint, axis, A_sc)
     class(supercell_maker_t), intent(inout) :: self
     real(dp), intent(in) :: A(:, :)
     real(dp), intent(in) ::  kpoint(3)
@@ -376,7 +375,7 @@ contains
                & axis=axis, vec=A(:, iA))
        end do
     end do
-  end subroutine generate_rotate_wave_vectorlist
+  end subroutine generate_spin_wave_vectorlist
 
 
   !-----------------------------------------------------------------------
