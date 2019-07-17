@@ -3963,7 +3963,7 @@ end subroutine dfpt_flexoout
  integer :: iatdir,iatom,iatpert,ibuf,ii,iq1dir,iq1grad,istr1dir,istr2dir,istrpert
  integer :: q1pert,strcomp,strpert
  integer, parameter :: re=1,im=2
- real(dp) :: fac,tfrim,tfrre,t4im,tmpim,tmpre,t4re
+ real(dp) :: celastre,celastim,fac,tfrim,tfrre,t4im,tmpim,tmpre,t4re
  character(len=500) :: msg                   
 
 !arrays
@@ -4447,6 +4447,39 @@ end subroutine dfpt_flexoout
    close(78)
  end if
 
+!Write the elastic tensor
+ write(ab_out,*)' '
+ write(ab_out,*)' Elastic tensor, in cartesian coordinates '
+ write(ab_out,*)' (from q-gradient of internal strain),'
+ write(ab_out,*)'atdir  qgrdir  strdir1  strdir2         real part          imaginary part'
+ do istr2dir=1,3
+   delta=istr2dir
+   do istr1dir=1,3
+     beta=istr1dir
+     do iq1dir=1,3
+       gamma=iq1dir
+       do iatdir=1,3
+         alpha=iatdir
+         celastre=zero
+         celastim=zero
+         do iatom=1,matom
+           
+           if (isdq_flg(iatom,alpha,gamma,beta,delta)==1) then
+             celastre=celastre+isdqtens_cart(re,iatom,alpha,gamma,beta,delta)
+             celastim=celastim+isdqtens_cart(im,iatom,alpha,gamma,beta,delta)
+           end if
+
+         end do
+
+         write(ab_out,'(4(i5,4x),2(1x,f20.10))') alpha,gamma,beta,delta       &
+       & celastre, celastim
+       end do
+     end do
+   write(ab_out,*)' '
+   end do
+ end do
+ write(ab_out,'(80a)')('=',ii=1,80)
+
 !Calculate the contribution to the d3etot in mixed (reduced/cartesian) coordinates
  isdqtens_red=isdqtens_cart
  ABI_DEALLOCATE(isdqtens_cart) 
@@ -4524,6 +4557,7 @@ end subroutine dfpt_flexoout
  end do
 
  ABI_DEALLOCATE(isdqtens_red)
+ ABI_DEALLOCATE(isdq_flg)
  ABI_DEALLOCATE(redflg)
 
  DBG_EXIT("COLL")
