@@ -2786,7 +2786,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  integer :: g0q(3)
  !integer :: symq(4,2,db%cryst%nsym)
  integer,allocatable :: indqq(:,:),iperm(:), iperm_irpt(:), nqsts(:),iqs_dvdb(:),all_cell(:,:)
- real(dp) :: qpt_bz(3), sc_rprimd(3,3), sc_rmet(3, 3)
+ real(dp) :: qpt_bz(3), sc_rprimd(3,3) !, sc_rmet(3, 3)
  real(dp),allocatable :: qibz(:,:),qbz(:,:),emiqr(:,:), all_rpt(:,:), all_wghatm(:,:,:)
  real(dp),allocatable :: v1r_qibz(:,:,:,:),v1r_qbz(:,:,:,:), v1r_lr(:,:,:)
  real(dp),allocatable :: maxw(:,:), all_rmod(:)
@@ -3025,8 +3025,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
      sc_rprimd(:, 1) = ngqpt(1) * db%cryst%rprimd(:, 1)
      sc_rprimd(:, 2) = ngqpt(2) * db%cryst%rprimd(:, 2)
      sc_rprimd(:, 3) = ngqpt(3) * db%cryst%rprimd(:, 3)
-     sc_rmet = matmul(transpose(sc_rprimd), sc_rprimd)
-     call sort_rpts(nrtot, all_rpt, sc_rmet, iperm_irpt, rmod=all_rmod)
+     !sc_rmet = matmul(transpose(sc_rprimd), sc_rprimd)
+     call sort_rpts(nrtot, all_rpt, db%cryst%rmet, iperm, rmod=all_rmod)
      if (open_file(outwr_path, msg, newunit=unt, form="formatted", action="write", status="unknown") /= 0) then
        MSG_ERROR(msg)
      end if
