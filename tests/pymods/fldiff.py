@@ -1,5 +1,5 @@
 '''
-Object: compare 2 output files from ABINIT line by line with arithmetic
+Compare 2 output files from ABINIT line by line with arithmetic
 comparisons of floating point substrings
 
 The first character of each line in both files indicates the mode of
@@ -13,14 +13,16 @@ different, BOTH the absolute difference and the relative difference (difference
 divided by the sum of absolute values) must be bigger than the tolerance.
 
 Some special characters at the beginning of lines require a different handling:
--	mark lines as same regardless to their content (i. e. ignore lines) (can be be present in the 2 files or not, but must begin with -) 
-_       mark lines as same regardless to their content (must be present in the 2 files, but can begin with _ in only one of them) 
-+	mark lines as different regardless to their content 
-,	handle as + if ignore option is False and as - else 
-P	handle as + if ignoreP option is False and as - else 
-%	floating point comparisons are done with a tolerance of 1.01e-2 
-;	floating point comparisons are done irrespective of signs 
-:	ignore floating point numbers and do a characters comparison 
+-	mark lines as same regardless to their content (i.e. ignore lines)
+        (can be be present in the 2 files or not, but must begin with -)
+_       mark lines as same regardless to their content
+        (must be present in the 2 files, but can begin with _ in only one of them)
++	mark lines as different regardless to their content
+,	handle as + if ignore option is False and as - else
+P	handle as + if ignoreP option is False and as - else
+%	floating point comparisons are done with a tolerance of 1.01e-2
+;	floating point comparisons are done irrespective of signs
+:	ignore floating point numbers and do a characters comparison
 .	do a characters comparison, but do not count this line in the Summary
 
 Both files should have the same number of non - starting lines.
@@ -31,14 +33,13 @@ first column (see above)
 The ignoreP options affects the treatment of the 'P' special character in the
 first column (see above)
 
-The label option, if specified, is appended at the end of the summary
-
-the tolerance option set the tolerance for comparison of floats, the default
+The label option, if specified, is appended at the end of the summary.
+The tolerance option set the tolerance for comparison of floats, the default
 is 1.01e-10.  This modifications do not apply to the tolerance determined by
 the '%',and '.' first-column special signs.
 '''
-
 from __future__ import print_function, division, unicode_literals
+
 import re
 from math import floor
 from threading import Thread
@@ -49,13 +50,14 @@ from .yaml_tools import is_available as has_yaml
 if has_yaml:
     from .yaml_tools.driver_test_conf import DriverTestConf as YDriverConf
     from .yaml_tools.tester import Tester as YTester, Failure as YFailure
+
 # Match floats. Minimal float is .0 for historical reasons.
 # In consequence integers will be compared as strings
 float_re = re.compile(r'([+-]?[0-9]*\.[0-9]+(?:[eEdDfF][+-]?[0-9]+)?)')
 
 
 def norm_spaces(s):
-    '''
+    r'''
         Normalize all blanks ( \\n\\r\\t).
     '''
     # the join/split technic remove all blanks and put one space between
@@ -125,7 +127,7 @@ class LineDifference(object):
 
     def __repr__(self):
         '''
-            Default representation of difference is inspired by gnu diff tool.
+            Default representation of difference inspired by gnu diff tool.
         '''
         return (
             '{}\n'.format(*self.lines)
@@ -159,7 +161,7 @@ class LineCountDifference(LineDifference):
 
 class MetaCharDifference(LineDifference):
     '''
-        Represent a difference between themetacharacters of lines.
+        Represent a difference between two lines with different meta characters.
     '''
     def __init__(self, p1, p2, m1, m2):
         LineDifference.__init__(self, p1, p2, '', '')
@@ -194,7 +196,6 @@ class ForcedDifference(LineDifference):
     '''
         A difference is arbitrarly declared.
     '''
-    pass
 
 
 class Result(object):
@@ -224,10 +225,11 @@ class Result(object):
 
     def _analyse(self):
         '''
-            Analyse a difference list and extract summary informations and
-            details.  Sumary informations are
+            Analyse a difference list and extract summary information and
+            details.  Summary information is
+
             - self.max_abs_err: maximum absolute difference
-            - self.max_rel_err: maximu relative difference
+            - self.max_rel_err: maximum relative difference
             - self.max_abs_ln: line number where the maximum absolute
               difference is reached for the first time
             - self.max_rel_ln: line number where the maximum relative
@@ -280,8 +282,7 @@ class Result(object):
                     self.success = False
 
             else:  # any other Difference
-                assert isinstance(diff, LineDifference), \
-                    'Unknown type of Difference.'
+                assert isinstance(diff, LineDifference), 'Unknown type of Difference.'
                 if diff.lines[0] not in error_lines:
                     self.ndiff_lines += 1
                 self.success = False
@@ -381,6 +382,10 @@ class Result(object):
         isok = status in ('succeeded', 'passed')
         return isok, status, msg
 
+    def has_line_count_error(self):
+        return any(isinstance(diff, LineCountDifference)
+                   for diff in self.fl_diff)
+
 
 class Differ(object):
     def __init__(self, yaml_test=None, **options):
@@ -456,7 +461,9 @@ class Differ(object):
         corrupted = [None, None]
 
         def extractor(src, i):
-            dext = DataExtractor(self.use_yaml, xml_mode=self.xml_mode,
+            # Remark: self.options['use_yam'] -> explicit request for YAML
+            #         self.use_yaml -> explicit request AND availability of YAML
+            dext = DataExtractor(self.options['use_yaml'], xml_mode=self.xml_mode,
                                  ignore=self.options['ignore'],
                                  ignoreP=self.options['ignoreP'])
 
@@ -526,7 +533,7 @@ class Differ(object):
                     if meta1 == '_':  # ignore these lines
                         pass
 
-                    elif meta1 == '+':  # these lines are arbitrarly different
+                    elif meta1 == '+':  # these lines are arbitrarily different
                         differences.append(ForcedDifference(
                             i1, i2, line1, line2
                         ))

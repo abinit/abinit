@@ -25,7 +25,6 @@
 
 #include "abi_common.h"
 
-
 MODULE m_energies
 
  use defs_basis
@@ -302,7 +301,7 @@ end subroutine energies_init
  energies_out%e_fermie             = energies_in%e_fermie
  energies_out%e_fock               = energies_in%e_fock
  energies_out%e_fockdc             = energies_in%e_fockdc
- energies_out%e_fock0              = energies_in%e_fock0 
+ energies_out%e_fock0              = energies_in%e_fock0
  energies_out%e_hartree            = energies_in%e_hartree
  energies_out%e_hybcomp_E0         = energies_in%e_hybcomp_E0
  energies_out%e_hybcomp_v0         = energies_in%e_hybcomp_v0
@@ -381,7 +380,7 @@ end subroutine energies_copy
    energies_array(13)=energies%e_fermie
    energies_array(14)=energies%e_fock
    energies_array(15)=energies%e_fockdc
-   energies_array(16)=energies%e_fock0 
+   energies_array(16)=energies%e_fock0
    energies_array(17)=energies%e_hartree
    energies_array(18)=energies%e_hybcomp_E0
    energies_array(19)=energies%e_hybcomp_v0
@@ -556,7 +555,7 @@ end subroutine energies_eval_eint
 !! energies_ncwrite
 !!
 !! FUNCTION
-!!  Write the contenct of the datatype in a netcdf file.
+!!  Write the contenc of the datatype in a netcdf file.
 !!
 !! INPUTS
 !!  ncid=NC file handle

@@ -1,8 +1,13 @@
 '''
-    Define basic structures.
+Define basic structures.
 '''
 from __future__ import print_function, division, unicode_literals
 from ..register_tag import yaml_auto_map, yaml_implicit_scalar
+
+
+@yaml_auto_map
+class GenericMap(object):
+    """A generic tag definition for test and example."""
 
 
 @yaml_implicit_scalar
@@ -22,19 +27,19 @@ class YAMLComplex(complex):
     @classmethod
     def from_scalar(cls, scal):
         return cls(scal
-                   # python always use double and only recognise E and e
+                   # python always uses double and only recognise E and e
                    .replace('d', 'e')
                    .replace('D', 'e')
-                   # python use j instead of i (as in electro magnetism)
+                   # python uses j instead of i (as in electro magnetism)
                    .replace('i', 'j')
-                   # spaces have to be striped around the central + or -
+                   # spaces have to be stripped out around the central + or -
                    .replace(' ', '')
-                   # python expect only on + or - in string form
+                   # python expects only one + or - in string form
                    .replace('+-', '-')
                    .replace('-+', '-'))
 
     def to_scalar(self):
-        return repr(self)[1:-1]  # remove paranthesis
+        return repr(self)[1:-1]  # remove parentheses
 
 
 class AbinitMessage(object):
@@ -43,6 +48,7 @@ class AbinitMessage(object):
 
 @yaml_auto_map
 class AbinitError(AbinitMessage):
+    """Base class for Abinit messages."""
     __yaml_tag = 'ERROR'
 
 
@@ -51,8 +57,9 @@ class AbinitWarning(AbinitMessage):
     __yaml_tag = 'WARNING'
 
 
+# MG: Is this uses somewhere?
 @yaml_auto_map
-class AbinitInfo(object):
+class AbinitInfo(AbinitMessage):
     __yaml_tag = 'INFO'
 
 

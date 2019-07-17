@@ -81,6 +81,10 @@ MODULE m_paw_dmft
   integer :: dmft_iter
   ! Nb of iterations for dmft
 
+  integer :: dmft_kspectralfunc
+  ! =0 Default
+  ! =1 Activate calculation of k-resolved spectral function
+
   integer :: dmft_solv
   ! choice of solver for DMFT
 
@@ -630,6 +634,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
  paw_dmft%natom=dtset%natom
  paw_dmft%temp=dtset%tsmear!*unit_e
  paw_dmft%dmft_iter=dtset%dmft_iter
+ paw_dmft%dmft_kspectralfunc=dtset%dmft_kspectralfunc
  paw_dmft%dmft_dc=dtset%dmft_dc
  !paw_dmft%idmftloop=0
  paw_dmft%prtvol = dtset%prtvol
