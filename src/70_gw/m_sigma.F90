@@ -34,7 +34,7 @@ MODULE m_sigma
  use m_errors
  use iso_c_binding
  use m_nctk
- use m_yaml_out
+ use m_yaml
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -411,11 +411,11 @@ end subroutine write_sigma_header
 !! SOURCE
 !!
 
-subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
+subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt,use_yaml)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ikcalc,ikibz
+ integer,intent(in) :: ikcalc,ikibz, use_yaml
  type(ebands_t),intent(in) :: KS_BSt
  type(sigparams_t),intent(in) :: Sigp
  type(sigma_t),intent(in) :: Sr
@@ -425,10 +425,9 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
  integer :: ib,io,is
  integer :: gwcalctyp,mod10
  character(len=500) :: msg
+ type(yamldoc_t) :: ydoc
 !arrays
  character(len=12) :: tag_spin(2)
-!types
- type(stream_string) :: stream
 
 ! *************************************************************************
 
@@ -460,14 +459,15 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
 
-   call yaml_open_doc('SelfEnergy_ee', "", stream=stream)
-   call yaml_add_real1d('kpoint', Sigp%kptgw(:,ikcalc), stream=stream, real_fmt='(3f8.3)')
-   call yaml_add_intfield('spin', is, int_fmt="(i1)", stream=stream)
-   call yaml_add_realfield('KS_gap', Sr%e0gap(ikibz,is)*Ha_eV, stream=stream, width=11, real_fmt="(f8.3)")
-   call yaml_add_realfield('QP_gap', Sr%egwgap(ikibz,is)*Ha_eV, stream=stream, width=11, real_fmt="(f8.3)")
-   call yaml_add_realfield('Delta_QP_KS', Sr%degwgap(ikibz,is)*Ha_eV, stream=stream, width=11, real_fmt="(f8.3)")
-   call yaml_open_tabular('data', stream=stream, tag='SigmaeeData')
-   call yaml_add_tabular_line(msg, stream=stream)
+   ydoc = yamldoc_open('SelfEnergy_ee', "", width=11, real_fmt='(3f8.3)')
+   ydoc%use_yaml = use_yaml
+   call ydoc%add_real1d('kpoint', Sigp%kptgw(:,ikcalc))
+   call ydoc%add_int('spin', is, int_fmt="(i1)")
+   call ydoc%add_real('KS_gap', Sr%e0gap(ikibz,is)*Ha_eV)
+   call ydoc%add_real('QP_gap', Sr%egwgap(ikibz,is)*Ha_eV)
+   call ydoc%add_real('Delta_QP_KS', Sr%degwgap(ikibz,is)*Ha_eV)
+   call ydoc%open_tabular('data', tag='SigmaeeData')
+   call ydoc%add_tabular_line(msg)
 
    write(unt_gw,'(3f10.6)')Sigp%kptgw(:,ikcalc)
    write(unt_gw,'(i4)')Sigp%maxbnd(ikcalc,is)-Sigp%minbnd(ikcalc,is)+1
@@ -483,10 +483,10 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
 
    do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
      if (gwcalctyp>=10) then
-       call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=ab_out, stream=stream)
+       call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=ab_out, ydoc=ydoc)
        call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=std_out,prtvol=1)
 
-       write(unt_gwdiag,'(i6,3f9.4)')                                  &
+       write(unt_gwdiag,'(i6,3f9.4)')                                 &
         ib,                                                           &
         Sr%en_qp_diago(ib,ikibz,is)*Ha_eV,                            &
         (Sr%en_qp_diago(ib,ikibz,is) - KS_BSt%eig(ib,ikibz,is))*Ha_eV,&
@@ -496,9 +496,9 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
        ! If not ppmodel, write out also the imaginary part in ab_out
        SELECT CASE(mod10)
        CASE(1,2)
-         call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=ab_out,stream=stream,prtvol=1)
+         call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=ab_out,ydoc=ydoc,prtvol=1)
        CASE DEFAULT
-         call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=ab_out,stream=stream)
+         call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=ab_out,ydoc=ydoc)
        END SELECT
        call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=std_out,prtvol=1)
      end if
@@ -524,10 +524,9 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
      call wrtout(ab_out,msg,'COLL')
    end if
 
-   call yaml_close_doc(stream=stream)
-   call stream%dump(ab_out)
+   call ydoc%write_and_free(ab_out)
 
-   ! === Output of the spectral function ===
+   ! Output of the spectral function
    do io=1,Sr%nomega_r
      write(unt_sig,'(100(e12.5,2x))')&
       REAL(Sr%omega_r(io))*Ha_eV,&
@@ -621,7 +620,7 @@ end function gw_spectral_function
 !!
 !! SOURCE
 
-subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,witheader,stream)
+subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,witheader,ydoc)
 
 !Arguments ------------------------------------
 !scalars
@@ -630,7 +629,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
  character(len=*),optional,intent(in) :: mode_paral
  logical,optional,intent(in) :: witheader
  type(sigma_t),intent(in) :: Sr
- type(stream_string),intent(inout),optional :: stream
+ type(yamldoc_t),intent(inout),optional :: ydoc
 
 !Local variables-------------------------------
 !scalars
@@ -665,9 +664,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
       REAL(Sr%degw        (iband,ik_ibz,1))*Ha_eV, &
       REAL(Sr%egw         (iband,ik_ibz,1))*Ha_eV
        call wrtout(my_unt,msg,my_mode)
-     if(present(stream)) then
-       call yaml_add_tabular_line(msg, stream=stream)
-     end if
+     if (present(ydoc)) call ydoc%add_tabular_line(msg)
      if (verbose/=0) then
        write(msg,'(i5,9f8.3)')                        &
               iband,                                  &
@@ -681,9 +678,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
         AIMAG(Sr%degw        (iband,ik_ibz,1))*Ha_eV, &
         AIMAG(Sr%egw         (iband,ik_ibz,1))*Ha_eV
        call wrtout(my_unt,msg,my_mode)
-       if(present(stream)) then
-         call yaml_add_tabular_line(msg, stream=stream)
-       end if
+       if(present(ydoc)) call ydoc%add_tabular_line(msg)
      end if
   else
     write(msg,'(i5,9f8.3)')                    &
@@ -698,9 +693,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
      REAL(Sr%degw    (iband,ik_ibz,isp))*Ha_eV,&
      REAL(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
     call wrtout(my_unt,msg,my_mode)
-    if(present(stream)) then
-      call yaml_add_tabular_line(msg, stream=stream)
-    end if
+    if (present(ydoc)) call ydoc%add_tabular_line(msg)
 
     if (verbose/=0) then
       write(msg,'(i5,9f8.3)')                      &
@@ -715,9 +708,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
         AIMAG(Sr%degw    (iband,ik_ibz,isp))*Ha_eV,&
         AIMAG(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
        call wrtout(my_unt,msg,my_mode)
-       if(present(stream)) then
-         call yaml_add_tabular_line(msg, stream=stream)
-       end if
+       if (present(ydoc)) call ydoc%add_tabular_line(msg)
     end if
   end if
 
@@ -736,9 +727,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
     REAL(Sr%degw    (iband,ik_ibz,isp))*Ha_eV,&
     REAL(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
    call wrtout(my_unt,msg,my_mode)
-   if(present(stream)) then
-     call yaml_add_tabular_line(msg, stream=stream)
-   end if
+   if(present(ydoc)) call ydoc%add_tabular_line(msg)
 
    if (verbose/=0) then
      write(msg,'(i5,10f8.3)')                   &
@@ -754,9 +743,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
      AIMAG(Sr%degw    (iband,ik_ibz,isp))*Ha_eV,&
      AIMAG(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
       call wrtout(my_unt,msg,my_mode)
-     if(present(stream)) then
-       call yaml_add_tabular_line(msg, stream=stream)
-     end if
+     if(present(ydoc)) call ydoc%add_tabular_line(msg)
    end if
  end if
 
@@ -784,7 +771,7 @@ end subroutine print_Sigma_perturbative
 !!
 !! SOURCE
 
-subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,stream)
+subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,ydoc)
 
 !Arguments ------------------------------------
 !scalars
@@ -793,7 +780,7 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,st
  character(len=*),intent(in),optional :: mode_paral
  type(sigma_t),intent(in) :: Sr
  type(ebands_t),intent(in) :: KS_BSt
- type(stream_string),intent(inout),optional :: stream
+ type(yamldoc_t),intent(inout),optional :: ydoc
 
 !Local variables-------------------------------
 !scalars
@@ -828,9 +815,7 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,st
       REAL(Sr%egw         (iband,ik_ibz,1))*Ha_eV,       &
            Sr%en_qp_diago (iband,ik_ibz,1)*Ha_eV
      call wrtout(my_unt,msg,my_mode)
-     if(present(stream)) then
-       call yaml_add_tabular_line(msg, stream=stream)
-     end if
+     if (present(ydoc)) call ydoc%add_tabular_line(msg)
 
      write(msg,'(i5,12(2x,f8.3))')                        &
             iband,                                        &
@@ -848,9 +833,7 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,st
             zero
      if (verbose/=0) then
        call wrtout(my_unt,msg,my_mode)
-       if(present(stream)) then
-         call yaml_add_tabular_line(msg, stream=stream)
-       end if
+       if( present(ydoc)) call ydoc%add_tabular_line(msg)
      end if
    else
      write(msg,'(i5,12(2x,f8.3))')                       &
@@ -868,9 +851,7 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,st
       REAL(Sr%egw        (iband,ik_ibz,isp))*Ha_eV,      &
            Sr%en_qp_diago(iband,ik_ibz,isp)*Ha_eV
      call wrtout(my_unt,msg,my_mode)
-     if(present(stream)) then
-       call yaml_add_tabular_line(msg, stream=stream)
-     end if
+     if (present(ydoc)) call ydoc%add_tabular_line(msg)
 
      write(msg,'(i5,12(2x,f8.3))')                       &
             iband,                                       &
@@ -888,9 +869,7 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,st
             zero
      if (verbose/=0) then
        call wrtout(my_unt,msg,my_mode)
-       if(present(stream)) then
-         call yaml_add_tabular_line(msg, stream=stream)
-       end if
+       if (present(ydoc)) call ydoc%add_tabular_line(msg)
      end if
    end if
 

@@ -32,7 +32,7 @@ MODULE m_results_gs
  use m_xmpi
  use m_energies
  use m_errors
- use m_yaml_out
+ use m_yaml
  use m_crystal
  use m_stream_string
  use m_pair_list
@@ -204,7 +204,6 @@ MODULE m_results_gs
  public :: destroy_results_gs_array
  public :: copy_results_gs
  public :: results_gs_ncwrite
- public :: results_gs_yaml_write
 !!***
 
 CONTAINS
@@ -711,7 +710,7 @@ end subroutine copy_results_gs
 !!
 !! SOURCE
 
-integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
+integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 
 !Arguments ------------------------------------
 !scalars
@@ -823,44 +822,44 @@ subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
 !Local variables-------------------------------
  integer,parameter :: width=10
  integer :: ii
- type(stream_string) :: stream
+ type(yamldoc_t) :: ydoc
  type(pair_list) :: dict
  real(dp) :: strten(3,3), abc(3)
 
 !************************************************************************
 
  if (present(comment)) then
-   call yaml_open_doc('ResultsGS', comment, width=width, stream=stream)
+   ydoc = yamldoc_open('ResultsGS', comment, width=width)
  else
-   call yaml_open_doc('ResultsGS', '', width=width, stream=stream)
+   ydoc = yamldoc_open('ResultsGS', '', width=width)
  end if
+ ydoc%use_yaml = dtset%use_yaml
 
- call yaml_add_intfield('natom', results%natom, width=width, stream=stream)
- call yaml_add_intfield('nsppol', results%nsppol, width=width, stream=stream)
- call yaml_add_intfield('nspinor', dtset%nspinor, width=width, stream=stream)
- call yaml_add_intfield('nspden', dtset%nspden, width=width, stream=stream)
- call yaml_add_realfield("nelect", dtset%nelect, width=width, stream=stream)
- call yaml_add_realfield("charge", dtset%charge, width=width, stream=stream)
+ call ydoc%add_int('natom', results%natom)
+ call ydoc%add_int('nsppol', results%nsppol)
+ call ydoc%add_int('nspinor', dtset%nspinor)
+ call ydoc%add_int('nspden', dtset%nspden)
+ call ydoc%add_real("nelect", dtset%nelect)
+ call ydoc%add_real("charge", dtset%charge)
 
  call dict%set('ecut', r=dtset%ecut)
  call dict%set('pawecutdg', r=dtset%pawecutdg)
- call yaml_add_dict('cutoff_energies', dict, width=width, stream=stream)
+ call ydoc%add_dict('cutoff_energies', dict)
  call dict%free()
 
  call dict%set('deltae', r=results%deltae)
  call dict%set('res2', r=results%res2)
  call dict%set('residm', r=results%residm)
  call dict%set('diffor', r=results%diffor)
- call yaml_add_dict('convergence', dict, width=width, multiline_trig=2, stream=stream)
+ call ydoc%add_dict('convergence', dict, multiline_trig=2)
  call dict%free()
 
  abc(:) = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
- call yaml_add_real1d('abc', cryst%angdeg, width=width, stream=stream)
- call yaml_add_real1d('alpha_beta_gamma_angles', cryst%angdeg, width=width, stream=stream)
-
- call yaml_add_realfield('etotal', results%etotal, width=width, stream=stream)
- call yaml_add_realfield('entropy', results%entropy, width=width, stream=stream)
- call yaml_add_realfield('fermie', results%fermie, width=width, stream=stream)
+ call ydoc%add_real1d('abc', cryst%angdeg)
+ call ydoc%add_real1d('alpha_beta_gamma_angles', cryst%angdeg)
+ call ydoc%add_real('etotal', results%etotal)
+ call ydoc%add_real('entropy', results%entropy)
+ call ydoc%add_real('fermie', results%fermie)
 
  strten(1,1) = results%strten(1)
  strten(2,2) = results%strten(2)
@@ -872,17 +871,14 @@ subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
  strten(1,2) = results%strten(6)
  strten(2,1) = results%strten(6)
 
- call yaml_add_real2d('stress_tensor', strten, width=width, stream=stream, tag='CartTensor')
+ call ydoc%add_real2d('stress_tensor', strten, tag='CartTensor')
  ! Add results in GPa as well
  !strten = strten * HaBohr3_GPa
- !call yaml_add_real2d('stress_tensor_GPa', strten, width=width, stream=stream, tag='CartTensor')
- !call yaml_add_realfield('pressure_GPa', get_trace(strten) / three, width=width, stream=stream)
- !call stream%write(ch10)
+ !call ydoc%add_real2d('stress_tensor_GPa', strten, tag='CartTensor')
+ !call ydoc%add_real('pressure_GPa', get_trace(strten) / three)
 
- call yaml_add_real2d('cartesian_forces', results%fcart, width=width, stream=stream, tag='CartForces')
-
- call yaml_close_doc(stream=stream)
- call stream%dump(iout, newline=.True.)
+ call ydoc%add_real2d('cartesian_forces', results%fcart, tag='CartForces')
+ call ydoc%write_and_free(iout)
 
 end subroutine results_gs_yaml_write
 !!***
