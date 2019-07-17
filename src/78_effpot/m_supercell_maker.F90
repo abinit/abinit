@@ -39,7 +39,7 @@ module m_supercell_maker
   use m_errors
   use m_xmpi
   use m_symtk,    only : matr3inv
-  use m_mathfuncs , only: mat33det, binsearch_left_integerlist
+  use m_mathfuncs , only: mat33det, binsearch_left_integerlist, rotate_by_angle_around_axis
   use m_mpi_scheduler, only: init_mpi_info
   use m_supercell
   implicit none
@@ -262,6 +262,122 @@ contains
             MSG_ERROR("Bug found. supercell_maker%R_to_sc: Cannot find rprim")
     end if
   end subroutine R_to_sc
+
+  
+  
+  !-----------------------------------------------------------------------
+  !> @brief generate a wave like quantity. A_sc(R) = A(0)* exp(ikR)
+  !>  The A_sc will be allocated. size : (ncells)
+  !> @param [in] A: a scalar quantity.
+  !> @param [in] kpoint: the wave vector
+  !> @param [out] A_sc: indices in supercell.
+  !-----------------------------------------------------------------------
+  subroutine generate_wave_scalar(self, A, kpoint, A_sc)
+    class(supercell_maker_t), intent(inout) :: self
+    real(dp), intent(in) :: A
+    real(dp), intent(in) ::  kpoint(3)
+    real(dp), allocatable, intent(inout) :: A_sc(:)
+    integer :: i
+    if(.not. allocated(A_sc)) then
+       ABI_ALLOCATE(A_sc, (self%ncells))
+    end if
+    do i=1, self%ncells
+       A_sc(i) = real(A*exp(cmplx(0.0,two_pi, kind=dp) * &
+            &dot_product(kpoint, self%rvecs(:, i))), kind=dp)
+    end do
+  end subroutine generate_wave_scalar
+
+  !-----------------------------------------------------------------------
+  !> @brief generate a wave like quantity. A_sc(R) = A(0)* exp(ikR)
+  !>  The A_sc will be allocated. size : (nA*ncells)
+  !> @param [in] A: a list scalar quantity in primitive cell.
+  !> @param [in] kpoint: the wave vector
+  !> @param [out] A_sc: indices in supercell.
+  !-----------------------------------------------------------------------
+  subroutine generate_wave_scalarlist(self, A, kpoint, A_sc)
+    class(supercell_maker_t), intent(inout) :: self
+    real(dp), intent(in) :: A(:)
+    real(dp), intent(in) ::  kpoint(3)
+    real(dp), allocatable, intent(inout) :: A_sc(:)
+    integer :: icell, iA, nA, counter
+    nA=size(A)
+    if(.not. allocated(A_sc)) then
+       ABI_ALLOCATE(A_sc, (nA*self%ncells))
+    end if
+    counter=0
+    do icell = 1, self%ncells
+       do iA=1 , nA
+          counter=counter+1
+          A_sc(counter) = real(A(iA)*exp(cmplx(0.0,two_pi, kind=dp) * &
+               &dot_product(kpoint, self%rvecs(:, icell))), kind=dp)
+       end do
+    end do
+  end subroutine generate_wave_scalarlist
+
+
+  !-----------------------------------------------------------------------
+  !> @brief generate a wave like quantity. A_sc(R) = A(0)* exp(ikR)
+  !>  The A_sc will be allocated. size : (ndim, nA*ncells)
+  !>   NOTE: This generate a density wave. For a spin wave,
+  !>         use generate_rotate_wave_vectorlist.
+  !> @param [in] A: a vector quantity. dimension (xyz, iA)
+  !> @param [in] kpoint: the wave vector
+  !> @param [out] A_sc: indices in supercell.
+  !-----------------------------------------------------------------------
+  subroutine generate_wave_vectorlist(self, A, kpoint, A_sc)
+    class(supercell_maker_t), intent(inout) :: self
+    real(dp), intent(in) :: A(:, :)
+    real(dp), intent(in) ::  kpoint(3)
+    real(dp), allocatable, intent(inout) :: A_sc(:, :)
+    integer :: icell, iA, nA, counter, ndim
+    ndim=size(A, 1)
+    nA=size(A,2)
+    if(.not. allocated(A_sc)) then
+       ABI_ALLOCATE(A_sc, (ndim, nA*self%ncells))
+    end if
+    counter=0
+    do icell = 1, self%ncells
+       do iA=1 , nA
+          counter=counter+1
+          A_sc(:,counter) = real(A(:,iA)*exp(cmplx(0.0,two_pi, kind=dp) * &
+               &dot_product(kpoint, self%rvecs(:, icell))), kind=dp)
+       end do
+    end do
+  end subroutine generate_wave_vectorlist
+
+
+  !-----------------------------------------------------------------------
+  !> @brief generate a spin wave  quantity. rotate by theta(R) = 2pi * k.dot.R, around axis.
+  !>  The A_sc will be allocated. size : (ndim, nA*ncells)
+  !>   NOTE: This generate a density wave. For a spin wave, use generate_Euler_wave.
+  !> @param [in] A: a vector quantity. dimension (xyz, iA)
+  !> @param [in] kpoint: the wave vector
+  !> @param [in] axis: the axis to rotate around
+  !> @param [out] A_sc: indices in supercell.
+  !-----------------------------------------------------------------------
+  subroutine generate_rotate_wave_vectorlist(self, A, kpoint, axis, A_sc)
+    class(supercell_maker_t), intent(inout) :: self
+    real(dp), intent(in) :: A(:, :)
+    real(dp), intent(in) ::  kpoint(3)
+    real(dp), intent(in) ::  axis(3)
+    real(dp), allocatable, intent(inout) :: A_sc(:, :)
+    integer :: icell, iA, nA, counter, ndim
+    ndim=size(A, 1)
+    nA=size(A,2)
+    if(.not. allocated(A_sc)) then
+       ABI_ALLOCATE(A_sc, (ndim, nA*self%ncells))
+    end if
+    counter=0
+    do icell = 1, self%ncells
+       do iA=1 , nA
+          counter=counter+1
+          A_sc(:,counter) = rotate_by_angle_around_axis( &
+               &angle=two_pi* DOT_PRODUCT(kpoint,  self%rvecs(:, icell)), &
+               & axis=axis, vec=A(:, iA))
+       end do
+    end do
+  end subroutine generate_rotate_wave_vectorlist
+
 
   !-----------------------------------------------------------------------
   !> @brief Get the indices of all the supercell repeat of an index in primitive cell
@@ -594,66 +710,66 @@ contains
 
 !===================================================================================
 ! The functions below are deprecated!!!
-! They are used with the m_supercell module. 
-  ! R (in term of primitive cell) to R_sc(in term of supercell) + R_prim
-  subroutine find_R_PBC(scell, R, R_sc, R_prim)
-    type(supercell_type) , intent(in):: scell
-    integer, intent(in):: R(3)
-    integer, intent(out):: R_sc(3), R_prim(3)
-    real(dp) :: R_sc_d(3), sc_mat(3,3)
+! ! They are used with the m_supercell module. 
+!
+!   ! R (in term of primitive cell) to R_sc(in term of supercell) + R_prim
+!   subroutine find_R_PBC(scell, R, R_sc, R_prim)
+!     type(supercell_type) , intent(in):: scell
+!     integer, intent(in):: R(3)
+!     integer, intent(out):: R_sc(3), R_prim(3)
+!     real(dp) :: R_sc_d(3), sc_mat(3,3)
 
-    integer:: ipriv(3), info
-    !call dgesv( n, nrhs, a, lda, ipiv, b, ldb, info )
-    sc_mat(:,:)=scell%rlatt
-    R_sc_d(:)=R(:)
-    call dgesv(3, 1, sc_mat, 3, ipriv, R_sc_d, 3, info)
-    if ( info/=0 ) then
-       MSG_ERROR("Failed to find R_sc")
-    end if
+!     integer:: ipriv(3), info
+!     !call dgesv( n, nrhs, a, lda, ipiv, b, ldb, info )
+!     sc_mat(:,:)=scell%rlatt
+!     R_sc_d(:)=R(:)
+!     call dgesv(3, 1, sc_mat, 3, ipriv, R_sc_d, 3, info)
+!     if ( info/=0 ) then
+!        MSG_ERROR("Failed to find R_sc")
+!     end if
 
-    ! if only diagonal of rlatt works.
-    !R_sc_d(1)= real(R(1))/real(scell%rlatt(1,1))
-    !R_sc_d(2)= real(R(2))/real(scell%rlatt(2,2))
-    !R_sc_d(3)= real(R(3))/real(scell%rlatt(3,3))
-    ! TODO hexu: R_prim should be non-negative, which is assumed in m_supercell.
-    ! But should we make it more general?
-    R_sc(1)=floor(R_sc_d(1))
-    R_sc(2)=floor(R_sc_d(2))
-    R_sc(3)=floor(R_sc_d(3))
-    R_prim(1)=(R(1)-R_sc(1)*scell%rlatt(1,1))
-    R_prim(2)=(R(2)-R_sc(2)*scell%rlatt(2,2))
-    R_prim(3)=(R(3)-R_sc(3)*scell%rlatt(3,3))
-  end subroutine find_R_PBC
+!     ! if only diagonal of rlatt works.
+!     !R_sc_d(1)= real(R(1))/real(scell%rlatt(1,1))
+!     !R_sc_d(2)= real(R(2))/real(scell%rlatt(2,2))
+!     !R_sc_d(3)= real(R(3))/real(scell%rlatt(3,3))
+!     ! TODO hexu: R_prim should be non-negative, which is assumed in m_supercell.
+!     ! But should we make it more general?
+!     R_sc(1)=floor(R_sc_d(1))
+!     R_sc(2)=floor(R_sc_d(2))
+!     R_sc(3)=floor(R_sc_d(3))
+!     R_prim(1)=(R(1)-R_sc(1)*scell%rlatt(1,1))
+!     R_prim(2)=(R(2)-R_sc(2)*scell%rlatt(2,2))
+!     R_prim(3)=(R(3)-R_sc(3)*scell%rlatt(3,3))
+!   end subroutine find_R_PBC
 
-  ! TODO hexu: move this to m_supercell?
-  ! find the spercelll atom index from index of atom in primitive cell and R vector
-  function find_supercell_index(scell, iatom_prim, rvec) result(iatom_supercell)
-    type(supercell_type) , intent(in):: scell
-    integer, intent(in) :: iatom_prim, rvec(3)
-    integer  :: iatom_supercell
-    integer :: i
-    iatom_supercell=-1
-    do i=1, scell%natom, 1
-       if ( scell%atom_indexing(i) == iatom_prim .and. &
-            all(scell%uc_indexing(:,i)==rvec) ) then
-          iatom_supercell=i
-          return
-       end if
-    end do
-    MSG_ERROR("BUG found. supercell_maker%find_supercell_index cannot find iatom_prim, rvec pair in supercell")
-  end function find_supercell_index
+!   ! TODO hexu: move this to m_supercell?
+!   ! find the spercelll atom index from index of atom in primitive cell and R vector
+!   function find_supercell_index(scell, iatom_prim, rvec) result(iatom_supercell)
+!     type(supercell_type) , intent(in):: scell
+!     integer, intent(in) :: iatom_prim, rvec(3)
+!     integer  :: iatom_supercell
+!     integer :: i
+!     iatom_supercell=-1
+!     do i=1, scell%natom, 1
+!        if ( scell%atom_indexing(i) == iatom_prim .and. &
+!             all(scell%uc_indexing(:,i)==rvec) ) then
+!           iatom_supercell=i
+!           return
+!        end if
+!     end do
+!     MSG_ERROR("BUG found. supercell_maker%find_supercell_index cannot find iatom_prim, rvec pair in supercell")
+!   end function find_supercell_index
 
-  !i0, j0+R0 shifted by R to i1=i0+0+R->periodic, j1=j0+R0+R->periodic
-  subroutine find_supercell_ijR(scell, i0, j0, R0, R, i1, j1, R1, R_sc)
+!   !i0, j0+R0 shifted by R to i1=i0+0+R->periodic, j1=j0+R0+R->periodic
+!   subroutine find_supercell_ijR(scell, i0, j0, R0, R, i1, j1, R1, R_sc)
 
-    type(supercell_type) , intent(in):: scell
-    integer, intent(in) :: i0, j0, R0(3), R(3)
-    integer, intent(out) :: i1, j1, R1(3), R_sc(3)
-    i1=find_supercell_index(scell,i0,R)
-    call find_R_PBC(scell,R0+R,R_sc,R1)
-    j1=find_supercell_index(scell, j0, R1)
-  end subroutine find_supercell_ijR
+!     type(supercell_type) , intent(in):: scell
+!     integer, intent(in) :: i0, j0, R0(3), R(3)
+!     integer, intent(out) :: i1, j1, R1(3), R_sc(3)
+!     i1=find_supercell_index(scell,i0,R)
+!     call find_R_PBC(scell,R0+R,R_sc,R1)
+!     j1=find_supercell_index(scell, j0, R1)
+!   end subroutine find_supercell_ijR
 
 
-
-end module m_supercell_maker
+ end module m_supercell_maker
