@@ -61,7 +61,7 @@ module m_longwave
  use m_fft,         only : fourdp
  use m_ddb,         only : DDB_VERSION,dfpt_lw_doutput
  use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
- use m_dfpt_elt,    only : dfpt_ewalddq
+ use m_dfpt_elt,    only : dfpt_ewalddq, dfpt_ewalddqdq
  use m_mkcore,      only : mkcore
 
  implicit none
@@ -164,7 +164,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  integer,allocatable :: indsym(:,:,:),irrzon(:,:,:),kg(:,:)
  integer,allocatable :: nattyp(:),npwarr(:),pertsy(:,:),rfpert(:),symrec(:,:,:) 
  real(dp),allocatable :: cg(:,:)
- real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),doccde(:),dyewdq(:,:,:,:,:,:)
+ real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),doccde(:)
+ real(dp),allocatable :: dyewdq(:,:,:,:,:,:),dyewdqdq(:,:,:,:,:,:)
  real(dp),allocatable :: eigen0(:),grxc(:,:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor(:,:),dummy_dyfrx2(:,:,:)
  real(dp),allocatable :: work(:),xccc3d(:)
@@ -482,13 +483,26 @@ ecore=zero
 !#############  SPATIAL-DISPERSION POPERTIES CALCULATION  ###########################
 
 !Calculate the nonvariational terms
-!q-gradient of Ewald contribution to the dynamical matrix
- ABI_ALLOCATE(dyewdq,(2,3,natom,3,natom,3))
- dyewdq(:,:,:,:,:,:)=zero
- if (dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
-   sumg0=0;qphon(:)=zero
-   call dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
-&   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+!1st q-gradient of Ewald contribution to the dynamical matrix
+ if (dtset%lw_flexo/=0) then
+   ABI_ALLOCATE(dyewdq,(2,3,natom,3,natom,3))
+   dyewdq(:,:,:,:,:,:)=zero
+   if (dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
+     sumg0=0;qphon(:)=zero
+     call dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
+   & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+   end if
+ end if
+
+!2nd q-gradient of Ewald contribution to the dynamical matrix
+ if (dtset%lw_flexo/=0) then
+   ABI_ALLOCATE(dyewdqdq,(2,3,natom,3,3,3))
+   dyewdqdq(:,:,:,:,:,:)=zero
+   if (dtset%lw_flexo==1.or.dtset%lw_flexo==4) then
+     sumg0=0;qphon(:)=zero
+     call dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
+   & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+   end if
  end if
 
 !Calculate the quadrupole tensor
@@ -502,7 +516,7 @@ ecore=zero
 
 !Calculate the flexoelectric tensor
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4) then
-   call dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,&
+   call dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyewdqdq, &
 &   gmet,gprimd,kxc,mpert,&
 &   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
 &   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
@@ -544,6 +558,11 @@ ecore=zero
  ABI_DEALLOCATE(rhor)
  ABI_DEALLOCATE(symrec)
  ABI_DEALLOCATE(vxc)
+ ABI_DEALLOCATE(d3etot)
+ if (dtset%lw_flexo/=0) then
+   ABI_DEALLOCATE(dyewdq)
+   ABI_DEALLOCATE(dyewdqdq)
+ end if
 
  DBG_EXIT("COLL")
 

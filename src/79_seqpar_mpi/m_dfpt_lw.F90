@@ -1547,6 +1547,8 @@ end subroutine dfpt_qdrpout
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  dyewdq(2,3,natom,3,natom,3)= First q-gradient of Ewald part of the dynamical matrix
+!!  dyewdqdq(2,3,natom,3,natom,3,3)= Second q-gradient of Ewald part of the dynamical matrix 
+!!             sumed over the second sublattice
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2.
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  kxc(nfft,nkxc)=exchange and correlation kernel
@@ -1595,7 +1597,7 @@ end subroutine dfpt_qdrpout
 !!
 !! SOURCE
 
-subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,&
+subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyewdqdq,&
 &          gmet,gprimd,kxc,mpert,&
 &          mpi_enreg,nattyp,nfft,ngfft,nkpt,nkxc,&
 &          nspden,nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
@@ -1630,6 +1632,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,&
  real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
  real(dp),intent(in) :: doccde(dtset%mband*nkpt*dtset%nsppol)
  real(dp),intent(in) :: dyewdq(2,3,dtset%natom,3,dtset%natom,3)
+ real(dp),intent(in) :: dyewdqdq(2,3,dtset%natom,3,3,3)
  real(dp),intent(in) :: gmet(3,3), gprimd(3,3)
  real(dp),intent(in) :: kxc(nfft,nkxc)
  real(dp),intent(in) :: occ(dtset%mband*nkpt*dtset%nsppol)
@@ -2840,7 +2843,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    & dyewdq,gprimd,dtset%kptopt,matom,mpert,natpert,nq1grad,pert_atdis,dtset%prtvol,q1grad,rprimd)
    end if
    if (lw_flexo==1.or.lw_flexo==4) then
-     call dfpt_isdqout(d3etot,frwfdq,gprimd,isdq_flg,isdq_qgradhart,isdqwf,isdqwf_t1,isdqwf_t2,&
+     call dfpt_isdqout(d3etot,dyewdqdq,frwfdq,gprimd,isdq_flg,isdq_qgradhart,isdqwf,isdqwf_t1,isdqwf_t2,&
    & isdqwf_t3,isdqwf_t4,isdqwf_t5,dtset%kptopt,matom,mpert,natpert, &
    & nstrpert,nq1grad,pert_atdis,pert_strain,dtset%prtvol,q1grad,rprimd)
    end if
@@ -3882,6 +3885,8 @@ end subroutine dfpt_flexoout
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
+!!  dyewdqdq(2,3,natom,3,3,3)= Second q-gradient of Ewald part of the dynamical matrix
+!!           sumed over the second atomic sublattice
 !!  frwfdq(2,natpert,3,3,nq1grad)=frozen wf contribution (type-I)
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  isdq_flg(matom,3,nq1grad,3,3)=array that indicates which elements of the q-gradient of
@@ -3924,7 +3929,7 @@ end subroutine dfpt_flexoout
 !!
 !! SOURCE
 
- subroutine dfpt_isdqout(d3etot,frwfdq,gprimd,isdq_flg,isdq_qgradhart,isdqwf,isdqwf_t1,isdqwf_t2,&
+ subroutine dfpt_isdqout(d3etot,dyewdqdq,frwfdq,gprimd,isdq_flg,isdq_qgradhart,isdqwf,isdqwf_t1,isdqwf_t2,&
    & isdqwf_t3,isdqwf_t4,isdqwf_t5,kptopt,matom,mpert,natpert, &
    & nstrpert,nq1grad,pert_atdis,pert_strain,prtvol,q1grad,rprimd)
 
@@ -3946,6 +3951,7 @@ end subroutine dfpt_flexoout
  integer,intent(in) :: pert_atdis(3,natpert)
  integer,intent(in) :: pert_strain(6,nstrpert)
  integer,intent(in) :: q1grad(3,nq1grad)
+ real(dp),intent(in) :: dyewdqdq(2,3,matom,3,3,3)
  real(dp),intent(in) :: isdqwf(2,matom,3,nq1grad,3,3)
  real(dp),intent(inout) :: frwfdq(2,matom,3,3,3,nq1grad)
  real(dp),intent(inout) :: isdq_qgradhart(2,matom,3,nq1grad,3,3)
@@ -3963,14 +3969,14 @@ end subroutine dfpt_flexoout
  integer :: iatdir,iatom,iatpert,ibuf,ii,iq1dir,iq1grad,istr1dir,istr2dir,istrpert
  integer :: q1pert,strcomp,strpert
  integer, parameter :: re=1,im=2
- real(dp) :: celastre,celastim,fac,tfrim,tfrre,t4im,tmpim,tmpre,t4re
+ real(dp) :: celastre,celastim,fac,tewim,tewre,tfrim,tfrre,t4im,tmpim,tmpre,t4re
  character(len=500) :: msg                   
 
 !arrays
  integer :: flg1(3),flg2(3)
  integer, allocatable :: typeI_cartflag(:,:,:,:,:),redflg(:,:,:,:,:)
  real(dp) :: vec1(3),vec2(3)
- real(dp),allocatable :: frwfdq_cart(:,:,:,:,:,:)
+ real(dp),allocatable :: dyewdqdq_cart(:,:,:,:,:,:),frwfdq_cart(:,:,:,:,:,:)
  real(dp),allocatable :: isdqtens_cart(:,:,:,:,:,:),isdqtens_red(:,:,:,:,:,:)
  real(dp),allocatable :: isdqwf_t4_cart(:,:,:,:,:,:)
  real(dp),allocatable :: isdqtens_buffer_cart(:,:,:,:,:,:,:)
@@ -4028,6 +4034,12 @@ end subroutine dfpt_flexoout
            frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-tmpre
            frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-tmpim
 
+           !Multiply by -1 the Ewald contribution 
+           tmpre=frwfdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)
+           tmpim=frwfdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)
+           frwfdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-tmpre
+           frwfdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-tmpim
+           
            !Compute and save individual terms in mixed coordinates
            if (prtvol==1) then
              
@@ -4109,6 +4121,12 @@ end subroutine dfpt_flexoout
            frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-tmpre
            frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=zero
 
+           !Multiply by -1 the Ewald contribution 
+           tmpre=frwfdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)
+           tmpim=frwfdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)
+           frwfdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-tmpre
+           frwfdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)=zero
+           
            !Compute and save individual terms in mixed coordinates
            if (prtvol==1) then
              
@@ -4149,10 +4167,12 @@ end subroutine dfpt_flexoout
  ABI_ALLOCATE(isdqtens_cart,(2,matom,3,nq1grad,3,3))
  ABI_ALLOCATE(isdqwf_t4_cart,(2,matom,3,3,3,nq1grad))
  ABI_ALLOCATE(frwfdq_cart,(2,matom,3,3,3,nq1grad))
+ ABI_ALLOCATE(dyewdqdq_cart,(2,3,matom,3,3,nq1grad))
  ABI_ALLOCATE(typeI_cartflag,(matom,3,3,3,nq1grad))
  isdqtens_cart=isdqtens_red
  isdqwf_t4_cart=isdqwf_t4
  frwfdq_cart=frwfdq
+ dyewdqdq_cart=dyewdqdq
  typeI_cartflag=0
 
  if (prtvol==1) then
@@ -4197,6 +4217,15 @@ end subroutine dfpt_flexoout
            call cart39(flg1,flg2,gprimd,iatom,matom,rprimd,vec1,vec2)
            do iatdir=1,3
              frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)=vec2(iatdir)
+           end do
+
+           do iatdir=1,3
+             vec1(iatdir)=dyewdqdq_cart(ii,iatdir,iatom,istr1dir,istr2dir,iq1dir)
+             flg1(iatdir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           end do
+           call cart39(flg1,flg2,gprimd,iatom,matom,rprimd,vec1,vec2)
+           do iatdir=1,3
+             dyewdqdq_cart(ii,iatdir,iatom,istr1dir,istr2dir,iq1dir)=vec2(iatdir)
            end do
 
          end do 
@@ -4256,6 +4285,15 @@ end subroutine dfpt_flexoout
              frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)=vec2(iq1dir)
            end do
 
+           do iq1dir=1,3
+             vec1(iq1dir)=dyewdqdq_cart(ii,iatdir,iatom,istr1dir,istr2dir,iq1dir)
+             flg1(iq1dir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           end do
+           call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
+           do iq1dir=1,3
+             dyewdqdq_cart(ii,iatdir,iatom,istr1dir,istr2dir,iq1dir)=vec2(iq1dir)
+           end do
+
          end do 
        end do
      end do
@@ -4305,6 +4343,15 @@ end subroutine dfpt_flexoout
              frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)=vec2(istr1dir)
            end do
 
+           do istr1dir=1,3
+             vec1(istr1dir)=dyewdqdq_cart(ii,iatdir,iatom,istr1dir,istr2dir,iq1dir)
+             flg1(istr1dir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           end do
+           call cart39(flg1,flg2,gprimd,iatom,matom,rprimd,vec1,vec2)
+           do istr1dir=1,3
+             dyewdqdq_cart(ii,iatdir,iatom,istr1dir,istr2dir,iq1dir)=vec2(istr1dir)
+           end do
+
          end do 
        end do
      end do
@@ -4326,6 +4373,15 @@ end subroutine dfpt_flexoout
            call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
            do istr2dir=1,3
              frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)=vec2(istr2dir)
+           end do
+
+           do istr2dir=1,3
+             vec1(istr2dir)=dyewdqdq_cart(ii,iatdir,iatom,istr1dir,istr2dir,iq1dir)
+             flg1(istr2dir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           end do
+           call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
+           do istr2dir=1,3
+             dyewdqdq_cart(ii,iatdir,iatom,istr1dir,istr2dir,iq1dir)=vec2(istr2dir)
            end do
 
          end do 
@@ -4380,11 +4436,20 @@ end subroutine dfpt_flexoout
                   & frwfdq_cart(im,iatom,alpha,delta,gamma,beta) - & 
                   & frwfdq_cart(im,iatom,alpha,gamma,beta,delta) 
 
-             !Add the type-II T4 and frozen wf contributions 
+             !Converts the Ewald term to type-II form
+             tewre= dyewdqdq_cart(re,alpha,iatom,beta,delta,gamma) + &
+                  & dyewdqdq_cart(re,alpha,iatom,delta,gamma,beta) - & 
+                  & dyewdqdq_cart(re,alpha,iatom,gamma,beta,delta) 
+
+             tewim= dyewdqdq_cart(im,alpha,iatom,beta,delta,gamma) + &
+                  & dyewdqdq_cart(im,alpha,iatom,delta,gamma,beta) - & 
+                  & dyewdqdq_cart(im,alpha,iatom,gamma,beta,delta) 
+
+             !Add the type-II T4, frozen wf and Ewald contributions 
              isdqtens_cart(re,iatom,alpha,gamma,beta,delta)= &
-           & isdqtens_cart(re,iatom,alpha,gamma,beta,delta) + t4re + tfrre
+           & isdqtens_cart(re,iatom,alpha,gamma,beta,delta) + t4re + tfrre + quarter*tewre
              isdqtens_cart(im,iatom,alpha,gamma,beta,delta)= &
-           & isdqtens_cart(im,iatom,alpha,gamma,beta,delta) + t4im + tfrim
+           & isdqtens_cart(im,iatom,alpha,gamma,beta,delta) + t4im + tfrim + quarter*tewim
 
              !Writes the complete q-gradient of internal strain tensor
              write(ab_out,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
@@ -4415,6 +4480,10 @@ end subroutine dfpt_flexoout
              & isdqtens_buffer_cart(4,im,iatom,alpha,gamma,beta,delta)
 
                write(77,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta,tfrre,tfrim
+
+               write(78,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
+             & quarter*tewre, quarter*tewim
+
              end if 
 
            end if
@@ -4473,6 +4542,7 @@ end subroutine dfpt_flexoout
 
          write(ab_out,'(4(i5,4x),2(1x,f20.10))') alpha,gamma,beta,delta, &
        & celastre, celastim
+
        end do
      end do
    write(ab_out,*)' '
@@ -4485,6 +4555,7 @@ end subroutine dfpt_flexoout
  ABI_DEALLOCATE(isdqtens_cart) 
  ABI_DEALLOCATE(isdqwf_t4_cart)
  ABI_DEALLOCATE(frwfdq_cart)
+ ABI_DEALLOCATE(dyewdqdq_cart)
  ABI_DEALLOCATE(typeI_cartflag)
  ABI_ALLOCATE(redflg,(matom,3,3,3,3))
 
