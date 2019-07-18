@@ -1,5 +1,5 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/m_lobpcgwf
+!!****f* ABINIT/m_chebfiwf
 !! NAME
 !! m_chebfiwf
 !!
@@ -11,7 +11,7 @@
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (BS)
+!! Copyright (C) 2018-2019 ABINIT group (BS)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -411,7 +411,7 @@ module m_chebfiwf
  
   end subroutine chebfiwf2
  
-  subroutine getghc_gsc1(X,AX,BX,npband,transposer)	
+  subroutine getghc_gsc1(X,AX,BX,transposer)	
     use m_xg, only : xg_t, xgBlock_get, xgBlock_set, xgBlock_getSize, xgBlock_t
     use m_xgTransposer !, only xgTransposer, xgTransposer_getCPURow
 #ifdef HAVE_OPENMP
@@ -427,7 +427,6 @@ module m_chebfiwf
     type(xgBlock_t), intent(inout) :: X
     type(xgBlock_t), intent(inout) :: AX
     type(xgBlock_t), intent(inout) :: BX
-    type(integer), intent(inout) :: npband
     type(xgTransposer_t), optional, intent(inout) :: transposer
     integer         :: blockdim
     integer         :: spacedim
@@ -472,7 +471,6 @@ module m_chebfiwf
     
     !print *, "spacedim", spacedim
     !print *, "blockdim", blockdim
-    !print *, "npband", npband
     !print *, "l_npw", l_npw
     !stop
     
@@ -567,7 +565,7 @@ module m_chebfiwf
     !call xgBlock_set(BX,gsc(:,1:blockdim*spacedim),0,spacedim)
   end subroutine getghc_gsc1
  
-  subroutine getBm1X(X,Bm1X,iline_t,xXColsRows,X1,npband,transposer)
+  subroutine getBm1X(X,Bm1X,iline_t,xXColsRows,X1,transposer)
     use m_xg, only : xgBlock_t, xgBlock_gemm
     use m_xgTransposer !, only xgTransposer, xgTransposer_getCPURow
 !This section has been created automatically by the script Abilint (TD).
@@ -581,7 +579,6 @@ module m_chebfiwf
     type(integer), intent(inout) :: iline_t
     type(xgBlock_t), intent(inout) :: xXColsRows
     type(xgBlock_t), intent(inout) :: X1
-    type(integer), intent(inout) :: npband
     type(xgTransposer_t), optional, intent(inout) :: transposer
     integer         :: blockdim
     integer         :: spacedim   
