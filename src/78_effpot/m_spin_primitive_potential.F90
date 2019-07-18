@@ -37,9 +37,9 @@ module m_spin_primitive_potential
   use m_errors
   use m_xmpi
   use m_nctk
-  !#if defined HAVE_NETCDF
+#if defined HAVE_NETCDF
   use netcdf
-  !#endif
+#endif
 
   use m_mpi_scheduler, only: init_mpi_info
   use m_multibinit_dataset, only: multibinit_dtset_type
@@ -222,11 +222,11 @@ contains
     integer , allocatable:: spin_bilinear_Rlist(:,:)
     real(dp), allocatable:: spin_bilinear_vallist(:,:,:)
 
-!#if defined HAVE_NETCDF
+#if defined HAVE_NETCDF
 
     ! open netcdf file
     ierr=nf90_open(trim(fname)//char(0), NF90_NOWRITE, ncid)
-    call nc_handle_err(ierr)
+    NCF_CHECK_MSG(ierr, "open netcdf file")
 
     ! read primcell info
     ierr=nctk_get_dim(ncid, "natom", natom)
@@ -239,39 +239,38 @@ contains
     ABI_ALLOCATE(gyroratio, (nspin))
     ABI_ALLOCATE(gilbert_damping, (nspin))
 
-
     ierr =nf90_inq_varid(ncid, "ref_cell", varid)
-    call nc_handle_err(ierr, "ref_cell")
+    NCF_CHECK_MSG(ierr, "ref_cell")
     ierr = nf90_get_var(ncid, varid, cell)
-    call nc_handle_err(ierr, "ref_cell")
+    NCF_CHECK_MSG(ierr, "ref_cell")
     cell(:,:)=cell(:,:)/ Bohr_Ang
 
     ierr =nf90_inq_varid(ncid, "ref_xcart", varid)
-    call nc_handle_err(ierr, "ref_xcart")
+    NCF_CHECK_MSG(ierr, "ref_xcart")
     ierr = nf90_get_var(ncid, varid, xcart)
-    call nc_handle_err(ierr, "ref_xcart")
+    NCF_CHECK_MSG(ierr, "ref_xcart")
 
     xcart(:,:)=xcart(:,:)/ Bohr_Ang
 
     ierr =nf90_inq_varid(ncid, "spinat", varid)
-    call nc_handle_err(ierr, "spinat")
+    NCF_CHECK_MSG(ierr, "spinat")
     ierr = nf90_get_var(ncid, varid, spinat)
-    call nc_handle_err(ierr, "spinat")
+    NCF_CHECK_MSG(ierr, "spinat")
 
     ierr =nf90_inq_varid(ncid, "index_spin", varid)
-    call nc_handle_err(ierr, "index_spin")
+    NCF_CHECK_MSG(ierr, "index_spin")
     ierr = nf90_get_var(ncid, varid, index_spin)
-    call nc_handle_err(ierr, "index_spin")
+    NCF_CHECK_MSG(ierr, "index_spin")
 
     ierr =nf90_inq_varid(ncid, "gyroratio", varid)
-    call nc_handle_err(ierr, "gyroratio")
+    NCF_CHECK_MSG(ierr, "gyroratio")
     ierr = nf90_get_var(ncid, varid, gyroratio)
-    call nc_handle_err(ierr, "gyroratio")
+    NCF_CHECK_MSG(ierr, "gyroratio")
 
     ierr =nf90_inq_varid(ncid, "gilbert_damping", varid)
-    call nc_handle_err(ierr, "gilbert_damping")
+    NCF_CHECK_MSG(ierr, "gilbert_damping")
     ierr = nf90_get_var(ncid, varid, gilbert_damping)
-    call nc_handle_err(ierr, "gilbert_damping")
+    NCF_CHECK_MSG(ierr, "gilbert_damping")
 
 
     call self%set_spin_primcell( natoms=natom, unitcell=cell, positions=xcart, &
@@ -295,25 +294,25 @@ contains
        ABI_ALLOCATE(spin_exchange_vallist, (3,spin_exchange_nterm))
 
        ierr =nf90_inq_varid(ncid, "spin_exchange_ilist", varid)
-       call nc_handle_err(ierr, "spin_exchange_ilist")
+       NCF_CHECK_MSG(ierr, "spin_exchange_ilist")
        ierr = nf90_get_var(ncid, varid, spin_exchange_ilist)
-       call nc_handle_err(ierr, "spin_exchange_ilist")
+       NCF_CHECK_MSG(ierr, "spin_exchange_ilist")
 
        ierr =nf90_inq_varid(ncid, "spin_exchange_jlist", varid)
-       call nc_handle_err(ierr, "spin_exchange_jlist")
+       NCF_CHECK_MSG(ierr, "spin_exchange_jlist")
        ierr = nf90_get_var(ncid, varid, spin_exchange_jlist)
-       call nc_handle_err(ierr, "spin_exchange_jlist")
+       NCF_CHECK_MSG(ierr, "spin_exchange_jlist")
 
        ierr =nf90_inq_varid(ncid, "spin_exchange_Rlist", varid)
-       call nc_handle_err(ierr, "spin_exchange_Rlist")
+       NCF_CHECK_MSG(ierr, "spin_exchange_Rlist")
        ierr = nf90_get_var(ncid, varid, spin_exchange_Rlist)
-       call nc_handle_err(ierr, "spin_exchange_Rlist")
+       NCF_CHECK_MSG(ierr, "spin_exchange_Rlist")
 
 
        ierr =nf90_inq_varid(ncid, "spin_exchange_vallist", varid)
-       call nc_handle_err(ierr, "spin_exchange_vallist")
+       NCF_CHECK_MSG(ierr, "spin_exchange_vallist")
        ierr = nf90_get_var(ncid, varid, spin_exchange_vallist)
-       call nc_handle_err(ierr, "spin_exchange_vallist")
+       NCF_CHECK_MSG(ierr, "spin_exchange_vallist")
 
        spin_exchange_vallist(:,:) = spin_exchange_vallist(:,:) * eV_Ha
 
@@ -339,25 +338,25 @@ contains
        ABI_ALLOCATE(spin_dmi_vallist, (3,spin_dmi_nterm))
 
        ierr =nf90_inq_varid(ncid, "spin_dmi_ilist", varid)
-       call nc_handle_err(ierr, "spin_dmi_ilist")
+       NCF_CHECK_MSG(ierr, "spin_dmi_ilist")
        ierr = nf90_get_var(ncid, varid, spin_dmi_ilist)
-       call nc_handle_err(ierr, "spin_dmi_ilist")
+       NCF_CHECK_MSG(ierr, "spin_dmi_ilist")
 
        ierr =nf90_inq_varid(ncid, "spin_dmi_jlist", varid)
-       call nc_handle_err(ierr, "spin_dmi_jlist")
+       NCF_CHECK_MSG(ierr, "spin_dmi_jlist")
        ierr = nf90_get_var(ncid, varid, spin_dmi_jlist)
-       call nc_handle_err(ierr, "spin_dmi_jlist")
+       NCF_CHECK_MSG(ierr, "spin_dmi_jlist")
 
        ierr =nf90_inq_varid(ncid, "spin_dmi_Rlist", varid)
-       call nc_handle_err(ierr, "spin_dmi_Rlist")
+       NCF_CHECK_MSG(ierr, "spin_dmi_Rlist")
        ierr = nf90_get_var(ncid, varid, spin_dmi_Rlist)
-       call nc_handle_err(ierr, "spin_dmi_Rlist")
+       NCF_CHECK_MSG(ierr, "spin_dmi_Rlist")
 
 
        ierr =nf90_inq_varid(ncid, "spin_dmi_vallist", varid)
-       call nc_handle_err(ierr, "spin_dmi_vallist")
+       NCF_CHECK_MSG(ierr, "spin_dmi_vallist")
        ierr = nf90_get_var(ncid, varid, spin_dmi_vallist)
-       call nc_handle_err(ierr, "spin_dmi_vallist")
+       NCF_CHECK_MSG(ierr, "spin_dmi_vallist")
 
        spin_dmi_vallist(:,:) = spin_dmi_vallist(:,:) * eV_Ha
 
@@ -380,20 +379,20 @@ contains
        ABI_ALLOCATE(spin_SIA_k1dirlist, (3,spin_SIA_nterm))
 
        ierr =nf90_inq_varid(ncid, "spin_SIA_ilist", varid)
-       call nc_handle_err(ierr, "spin_SIA_ilist")
+       NCF_CHECK_MSG(ierr, "spin_SIA_ilist")
        ierr = nf90_get_var(ncid, varid, spin_SIA_ilist)
-       call nc_handle_err(ierr, "spin_SIA_ilist")
+       NCF_CHECK_MSG(ierr, "spin_SIA_ilist")
 
        ierr =nf90_inq_varid(ncid, "spin_SIA_k1list", varid)
-       call nc_handle_err(ierr, "spin_SIA_k1list")
+       NCF_CHECK_MSG(ierr, "spin_SIA_k1list")
        ierr = nf90_get_var(ncid, varid, spin_SIA_k1list)
-       call nc_handle_err(ierr, "spin_SIA_k1list")
+       NCF_CHECK_MSG(ierr, "spin_SIA_k1list")
 
        
        ierr =nf90_inq_varid(ncid, "spin_SIA_k1dirlist", varid)
-       call nc_handle_err(ierr, "spin_SIA_k1dirlist")
+       NCF_CHECK_MSG(ierr, "spin_SIA_k1dirlist")
        ierr = nf90_get_var(ncid, varid, spin_SIA_k1dirlist)
-       call nc_handle_err(ierr, "spin_SIA_k1dirlist")
+       NCF_CHECK_MSG(ierr, "spin_SIA_k1dirlist")
 
        spin_SIA_k1list(:) = spin_SIA_k1list(:) * eV_Ha
 
@@ -416,24 +415,24 @@ contains
        ABI_ALLOCATE(spin_bilinear_vallist, (3,3,spin_bilinear_nterm))
 
        ierr =nf90_inq_varid(ncid, "spin_bilinear_ilist", varid)
-       call nc_handle_err(ierr, "spin_bilinear_ilist")
+       NCF_CHECK_MSG(ierr, "spin_bilinear_ilist")
        ierr = nf90_get_var(ncid, varid, spin_bilinear_ilist)
-       call nc_handle_err(ierr, "spin_bilinear_ilist")
+       NCF_CHECK_MSG(ierr, "spin_bilinear_ilist")
 
        ierr =nf90_inq_varid(ncid, "spin_bilinear_jlist", varid)
-       call nc_handle_err(ierr, "spin_bilinear_jlist")
+       NCF_CHECK_MSG(ierr, "spin_bilinear_jlist")
        ierr = nf90_get_var(ncid, varid, spin_bilinear_jlist)
-       call nc_handle_err(ierr, "spin_bilinear_jlist")
+       NCF_CHECK_MSG(ierr, "spin_bilinear_jlist")
 
        ierr =nf90_inq_varid(ncid, "spin_bilinear_Rlist", varid)
-       call nc_handle_err(ierr, "spin_bilinear_Rlist")
+       NCF_CHECK_MSG(ierr, "spin_bilinear_Rlist")
        ierr = nf90_get_var(ncid, varid, spin_bilinear_Rlist)
-       call nc_handle_err(ierr, "spin_bilinear_Rlist")
+       NCF_CHECK_MSG(ierr, "spin_bilinear_Rlist")
 
        ierr =nf90_inq_varid(ncid, "spin_bilinear_vallist", varid)
-       call nc_handle_err(ierr, "spin_bilinear_vallist")
+       NCF_CHECK_MSG(ierr, "spin_bilinear_vallist")
        ierr = nf90_get_var(ncid, varid, spin_bilinear_vallist)
-       call nc_handle_err(ierr, "spin_bilinear_vallist")
+       NCF_CHECK_MSG(ierr, "spin_bilinear_vallist")
 
        spin_bilinear_vallist(:,:,:) = spin_bilinear_vallist(:,:,:) * eV_Ha
 
@@ -447,10 +446,11 @@ contains
        ABI_SFREE(spin_bilinear_vallist)
     end if
 
-
-
-
-
+    ierr=nf90_close(ncid)
+    NCF_CHECK_MSG(ierr, "Close netcdf file")
+#else
+    NETCDF_NOTENABLED_ERROR()
+#endif
   end subroutine read_netcdf
 
 
@@ -566,7 +566,7 @@ contains
     real(dp) :: bivallist(3,3, n)
     if (xmpi_comm_rank(xmpi_world)==0) then
        bivallist(:,:,:)=0.0d0
-       Rlist(:, :)=0.0d0
+       Rlist(:, :)=0
        do idx=1,n, 1
           bivallist(:,:, idx)= (- k1list(idx))*  &
                outer_product(k1dirlist(:,idx), k1dirlist(:, idx))
@@ -830,19 +830,6 @@ contains
     if(len(string2)>len(string1)) return
     if(string1(len(string1)-len(string2)+1:)==string2) answer = .True.
   end function endswith
-
-  subroutine nc_handle_err(ierr, name)
-    integer, intent ( in) ::ierr
-    character(*), optional, intent(in) :: name
-    if(ierr/= nf90_noerr) then
-       if (present(name)) then
-          write(std_out, *)  trim(nf90_strerror(ierr)), "when trying to read ", name
-       else
-          write(std_out, *)  trim(nf90_strerror(ierr))
-       end if
-       stop "Stopped"
-    end if
-  end subroutine nc_handle_err
 
 
 end module m_spin_primitive_potential

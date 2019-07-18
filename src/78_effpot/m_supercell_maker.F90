@@ -39,13 +39,19 @@ module m_supercell_maker
   use m_errors
   use m_xmpi
   use m_symtk,    only : matr3inv
-  use m_mathfuncs , only: mat33det, binsearch_left_integerlist
+  use m_mathfuncs , only: mat33det, binsearch_left_integerlist, rotate_by_angle_around_axis
   use m_mpi_scheduler, only: init_mpi_info
   use m_supercell
   implicit none
   private
 !!***
-
+  !-----------------------------------------------------------------------
+  !> @brief A helper type to build supercell and potentials from primitive
+  !> It keep the information of the supercell matrix, and the R-vectors (R1~Rn),
+  !> so that the potentials in
+  !> For a list of indices in primitive cell (e.g. (i, j, k)), it will become
+  !> (i,R0), (j, R0), (k, R0), (i, R1), (i, R1), ... (i, Rn), (j,Rn), (k, Rn)
+  !-----------------------------------------------------------------------
   type ,public :: supercell_maker_t
      integer :: scmat(3,3)  ! supercell matrix
      real(dp) :: inv_scmat(3,3) ! inverse of supercell matrix
@@ -84,6 +90,11 @@ module m_supercell_maker
   public :: scmaker_unittest
 contains
 
+  !-----------------------------------------------------------------------
+  !> @brief initialize
+  !> @param [in] sc_matrix: the supercell matrix which maps the primitive cell to sc
+  !>       if does not have to be diagonal.
+  !-----------------------------------------------------------------------
   subroutine initialize(self, sc_matrix)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: sc_matrix(3, 3)
@@ -99,6 +110,8 @@ contains
     ABI_ALLOCATE(self%rvecs, (3, self%ncells))
     ! Why transpose?
     tmp(:,:)=transpose(self%scmat)
+
+    ! save inverse of matrix so A^{-1} x can be easily calculated.
     call matr3inv(tmp, self%inv_scmat)
     call self%build_rvec()
     !call xmpi_bcast(self%inv_scmat, master, comm, ierr)
@@ -106,6 +119,9 @@ contains
     !call xmpi_bcast(self%rvecs, master, comm, ierr)
   end subroutine initialize
 
+  !-----------------------------------------------------------------------
+  !> @brief Finalize
+  !-----------------------------------------------------------------------
   subroutine finalize(self)
     class(supercell_maker_t), intent(inout) :: self
     self%scmat=0
@@ -115,8 +131,12 @@ contains
     end if
   end subroutine finalize
 
-
-
+  !-----------------------------------------------------------------------
+  !> @brief from reduced coordinate in primitive cell to that insupercell
+  !>  This does not use translation symmetry, so it is a ONE to ONE convert.
+  !> @param [in] pos (reduced position in primitive cell)
+  !> @param [out] ret reduce position in supercell
+  !-----------------------------------------------------------------------
   function to_red_sc(self, pos) result(ret)
     class(supercell_maker_t), intent(inout) :: self
     real(dp), intent(in) :: pos(3)
@@ -124,7 +144,9 @@ contains
     ret(:)=matmul(pos, self%inv_scmat)
   end function to_red_sc
 
-  ! build R vectors for supercells.
+  !-----------------------------------------------------------------------
+  !> @brief build R vectors for supercells.
+  !-----------------------------------------------------------------------
   subroutine build_rvec(self)
     class(supercell_maker_t), intent(inout) :: self
     real(dp):: scorners_newcell(8,3), corners(8,3), x(3), tmp(3)
@@ -156,7 +178,11 @@ contains
     end if
   end subroutine build_rvec
 
-  ! cell parameters from unitcell to supercell
+  !-----------------------------------------------------------------------
+  !> @brief cell parameters from unitcell to supercell 
+  !> @param [in] cell: cell parameter in primitive cell
+  !> @param [out] sccell: supercell cell parameter
+  !-----------------------------------------------------------------------
   function sc_cell(self, cell) result(sccell)
     class(supercell_maker_t), intent(inout) :: self
     real(dp), intent(in) :: cell(3,3)
@@ -164,7 +190,13 @@ contains
     sccell=matmul(self%scmat, cell)
   end function sc_cell
 
-  ! xred in list of xred in supercell by translation
+  !-----------------------------------------------------------------------
+  !> @brief reduced position in primitive cell to supercell.
+  !>    It use translation symmetry. so (3,n) -> (3, n*ncells)
+  !> Note that allocation will be done if not already allocated.
+  !> @param [in] xred: reduced coordinates in primitive cell
+  !> @param [out] sccell: reduced coordinates in supercell
+  !-----------------------------------------------------------------------
   subroutine trans_xred(self, xred, scxred)
     class(supercell_maker_t), intent(inout) :: self
     real(dp), intent(in) :: xred(:,:)
@@ -182,12 +214,19 @@ contains
     end do
   end subroutine trans_xred
 
+  !-----------------------------------------------------------------------
+  !> @brief cartesion position in primitive cell to supercell.
+  !>    It use translation symmetry. so (3,n) -> (3, n*ncells)
+  !> Note that allocation will be done if not already allocated.
+  !> @param [in] primcell: cell parameter in primitive cell
+  !> @param [in] xcart: cartesion coordinates in primitive cell
+  !> @param [out] scxcart:cartesion coordinates in supercell 
+  !-----------------------------------------------------------------------
   subroutine trans_xcart(self, primcell, xcart, scxcart)
     class(supercell_maker_t), intent(inout) :: self
     real(dp), intent(in) :: xcart(:,:), primcell(3,3)
     real(dp), allocatable, intent(inout) :: scxcart(:,:)
     integer :: npos, icell, ipos, counter
-
     counter =0
     npos=size(xcart, dim=2)
     if (.not. allocated(scxcart)) then
@@ -202,9 +241,15 @@ contains
   end subroutine trans_xcart
 
 
-  ! R: R index using primitive cell parameter
-  ! R_sc: R index using supercell parameter
-  ! ind_sc: index of cell INSIDE supercell in primitive cell.
+  !-----------------------------------------------------------------------
+  !> @brief Find a R vector in primitive cell unit to a R vector in supercell unit
+  !>  Here is an example:
+  !>   A Rp for a 1*1*1 primitive cell. Rp=(0,0, 3)
+  !>   For a supercell of 1*1*2, Rp = (0, 0, 1) * supercell + (0, 0, 1) * primcell
+  !> @param [in] R index using primitive cell parameter
+  !> @param [out] R index using supercell parameter
+  !> @param [out] index of cell INSIDE supercell in primitive cell.
+  !-----------------------------------------------------------------------
   subroutine R_to_sc(self, R, R_sc, ind_sc)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: R(3)
@@ -218,8 +263,130 @@ contains
     end if
   end subroutine R_to_sc
 
-  ! ind: index in primitive cell
-  ! ind_sc: indices (PLURAL) in supercell
+  
+  
+  !-----------------------------------------------------------------------
+  !> @brief generate a wave like quantity. A_sc(R) = A(0)* exp(ikR)
+  !>  The A_sc will be allocated. size : (ncells)
+  !> @param [in] A: a scalar quantity.
+  !> @param [in] kpoint: the wave vector
+  !> @param [out] A_sc: indices in supercell.
+  !-----------------------------------------------------------------------
+  subroutine generate_wave_scalar(self, A, kpoint, A_sc)
+    class(supercell_maker_t), intent(inout) :: self
+    real(dp), intent(in) :: A
+    real(dp), intent(in) ::  kpoint(3)
+    real(dp), allocatable, intent(inout) :: A_sc(:)
+    integer :: i
+    if(.not. allocated(A_sc)) then
+       ABI_ALLOCATE(A_sc, (self%ncells))
+    end if
+    do i=1, self%ncells
+       A_sc(i) = real(A*exp(cmplx(0.0,two_pi, kind=dp) * &
+            &dot_product(kpoint, self%rvecs(:, i))), kind=dp)
+    end do
+  end subroutine generate_wave_scalar
+
+  !-----------------------------------------------------------------------
+  !> @brief generate a wave like quantity. A_sc(R) = A(0)* exp(ikR)
+  !>  The A_sc will be allocated. size : (nA*ncells)
+  !> @param [in] A: a list scalar quantity in primitive cell.
+  !> @param [in] kpoint: the wave vector
+  !> @param [out] A_sc: indices in supercell.
+  !-----------------------------------------------------------------------
+  subroutine generate_wave_scalarlist(self, A, kpoint, A_sc)
+    class(supercell_maker_t), intent(inout) :: self
+    real(dp), intent(in) :: A(:)
+    real(dp), intent(in) ::  kpoint(3)
+    real(dp), allocatable, intent(inout) :: A_sc(:)
+    integer :: icell, iA, nA, counter
+    nA=size(A)
+    if(.not. allocated(A_sc)) then
+       ABI_ALLOCATE(A_sc, (nA*self%ncells))
+    end if
+    counter=0
+    do icell = 1, self%ncells
+       do iA=1 , nA
+          counter=counter+1
+          A_sc(counter) = real(A(iA)*exp(cmplx(0.0,two_pi, kind=dp) * &
+               &dot_product(kpoint, self%rvecs(:, icell))), kind=dp)
+       end do
+    end do
+  end subroutine generate_wave_scalarlist
+
+
+  !-----------------------------------------------------------------------
+  !> @brief generate a wave like quantity. A_sc(R) = A(0)* exp(ikR)
+  !>  The A_sc will be allocated. size : (ndim, nA*ncells)
+  !>   NOTE: This generate a density wave. For a spin wave,
+  !>         use generate_rotate_wave_vectorlist.
+  !> @param [in] A: a vector quantity. dimension (xyz, iA)
+  !> @param [in] kpoint: the wave vector
+  !> @param [out] A_sc: indices in supercell.
+  !-----------------------------------------------------------------------
+  subroutine generate_wave_vectorlist(self, A, kpoint, A_sc)
+    class(supercell_maker_t), intent(inout) :: self
+    real(dp), intent(in) :: A(:, :)
+    real(dp), intent(in) ::  kpoint(3)
+    real(dp), allocatable, intent(inout) :: A_sc(:, :)
+    integer :: icell, iA, nA, counter, ndim
+    ndim=size(A, 1)
+    nA=size(A,2)
+    if(.not. allocated(A_sc)) then
+       ABI_ALLOCATE(A_sc, (ndim, nA*self%ncells))
+    end if
+    counter=0
+    do icell = 1, self%ncells
+       do iA=1 , nA
+          counter=counter+1
+          A_sc(:,counter) = real(A(:,iA)*exp(cmplx(0.0,two_pi, kind=dp) * &
+               &dot_product(kpoint, self%rvecs(:, icell))), kind=dp)
+       end do
+    end do
+  end subroutine generate_wave_vectorlist
+
+
+  !-----------------------------------------------------------------------
+  !> @brief generate a spin wave  quantity. rotate by theta(R) = 2pi * k.dot.R, around axis.
+  !>  The A_sc will be allocated. size : (ndim, nA*ncells)
+  !> @param [in] A: a vector quantity. dimension (xyz, iA)
+  !> @param [in] kpoint: the wave vector
+  !> @param [in] axis: the axis to rotate around
+  !> @param [out] A_sc: indices in supercell.
+  !-----------------------------------------------------------------------
+  subroutine generate_spin_wave_vectorlist(self, A, kpoint, axis, A_sc)
+    class(supercell_maker_t), intent(inout) :: self
+    real(dp), intent(in) :: A(:, :)
+    real(dp), intent(in) ::  kpoint(3)
+    real(dp), intent(in) ::  axis(3)
+    real(dp), allocatable, intent(inout) :: A_sc(:, :)
+    integer :: icell, iA, nA, counter, ndim
+    ndim=size(A, 1)
+    nA=size(A,2)
+    if(.not. allocated(A_sc)) then
+       ABI_ALLOCATE(A_sc, (ndim, nA*self%ncells))
+    end if
+    counter=0
+    do icell = 1, self%ncells
+       do iA=1 , nA
+          counter=counter+1
+          A_sc(:,counter) = rotate_by_angle_around_axis( &
+               &angle=two_pi* DOT_PRODUCT(kpoint,  self%rvecs(:, icell)), &
+               & axis=axis, vec=A(:, iA))
+       end do
+    end do
+  end subroutine generate_spin_wave_vectorlist
+
+
+  !-----------------------------------------------------------------------
+  !> @brief Get the indices of all the supercell repeat of an index in primitive cell
+  !> @param [in] nbasis: total number of indices in the primitive cell (eg. natom in a cell)
+  !>  Note that if the dimension xyz is also in the index, then use 3*natom.
+  !>  i_sc array will be allocated if not already done
+  !> This function is mostly useful for building supercell potential with such format H_ij(R_j)
+  !> @param [in] i: index in primitive cell
+  !> @param [out] i_sc: indices in supercell.
+  !-----------------------------------------------------------------------
   subroutine trans_i(self, nbasis, i, i_sc)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: i, nbasis
@@ -230,6 +397,15 @@ contains
     call self%trans_i_noalloc(nbasis, i, i_sc)
   end subroutine trans_i
 
+  !-----------------------------------------------------------------------
+  !> @brief Get the indices of all the supercell repeat of an index in primitive cell
+  !> @param [in] nbasis: total number of indices in the primitive cell (eg. natom in a cell)
+  !>  Note that if the dimension xyz is also in the index, then use 3*natom.
+  !>  i_sc array will NOT be allocated.
+  !> This function is mostly useful for building supercell potential with such format H_ij(R_j)
+  !> @param [in] i: index in primitive cell
+  !> @param [out] i_sc: indices in supercell.
+  !-----------------------------------------------------------------------
   subroutine trans_i_noalloc(self, nbasis, i, i_sc)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: i, nbasis
@@ -241,6 +417,15 @@ contains
   end subroutine trans_i_noalloc
 
 
+  !-----------------------------------------------------------------------
+  !> @brief Get the indices of all the supercell repeat of an LIST of indices in primitive cell
+  !> @param [in] nbasis: total number of indices in the primitive cell (eg. natom in a cell)
+  !>  Note that if the dimension xyz is also in the index, then use 3*natom.
+  !>  i_sc array will be allocated if not already done.
+  !> This function is mostly useful for building supercell potential with such format H_ij(R_j)
+  !> @param [in] ilist: list of indices in primitive cell
+  !> @param [out] ilist_sc: list of indices in supercell.
+  !-----------------------------------------------------------------------
   subroutine trans_ilist(self, nbasis, ilist, ilist_sc)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: ilist(:), nbasis
@@ -254,7 +439,20 @@ contains
     end do
   end subroutine trans_ilist
 
-
+  !-----------------------------------------------------------------------
+  !> @brief Get the indices and R vector for a index of j displaced by a R vector.
+  !>  This is often used to represent a vector outside the primitive cell.
+  !>      i.e. its position is (r_j + R_j) in primitive cell unit. Then it will have
+  !>      periodical repeats, which has index of j_sc inside supercell, and a R_sc vector to shift it.
+  !> @param [in] nbasis: total number of indices in the primitive cell (eg. natom in a cell)
+  !>  Note that if the dimension xyz is also in the index, then use 3*natom.
+  !>  i_sc array will be allocated if not already done.
+  !> This function is mostly useful for building supercell potential with such format H_ij(R_j)
+  !> @param [in] j: index in primitive cell
+  !> @param [in] Rj: R vector in primitive cell unit
+  !> @param [out] j_sc: index in supercell
+  !> @param [out] Rj_sc: R' vector in supercell unit.
+  !-----------------------------------------------------------------------
   subroutine trans_j_and_Rj(self, nbasis, j, Rj, j_sc, Rj_sc)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: j, Rj(3), nbasis
@@ -268,6 +466,9 @@ contains
     call self%trans_j_and_Rj_noalloc(nbasis, j, Rj, j_sc, Rj_sc)
   end subroutine trans_j_and_Rj
 
+  !-----------------------------------------------------------------------
+  !> @brief same as trans_j_and_Rj, but it does not allocate data.
+  !-----------------------------------------------------------------------
   subroutine trans_j_and_Rj_noalloc(self, nbasis, j, Rj, j_sc, Rj_sc)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: j, Rj(3), nbasis
@@ -279,6 +480,10 @@ contains
     end do
   end subroutine trans_j_and_Rj_noalloc
 
+  !-----------------------------------------------------------------------
+  !> @brief same as trans_j_and_Rj, but it loop over a list of j with the
+  !>    same Rj 
+  !-----------------------------------------------------------------------
   subroutine trans_jlist_and_Rj(self, nbasis, jlist, Rj, ind_sc, R_sc)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: jlist(:), Rj(3), nbasis
@@ -301,6 +506,12 @@ contains
   end subroutine trans_jlist_and_Rj
 
 
+  !-----------------------------------------------------------------------
+  !> @brief repeat a quantity (which is a scalar for each index)
+  !>  memory will be allocated if not already done
+  !> @param [in] a: the quantity to be repeated (loop over index i in primcell)
+  !> @param [out] ret: the repeat. also a 1D matrix. (loop over index in supercell)
+  !-----------------------------------------------------------------------
   subroutine repeat_int1d(self, a, ret)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: a(:)
@@ -315,7 +526,12 @@ contains
     end do
   end subroutine repeat_int1d
 
-
+  !-----------------------------------------------------------------------
+  !> @brief repeat a quantity (which is a scalar for each index)
+  !> memory will NOT be allocated.
+  !> @param [in] a: the quantity to be repeated (loop over index i in primcell)
+  !> @param [out] ret: the repeat. also a 1D matrix. (loop over index in supercell)
+  !-----------------------------------------------------------------------
   subroutine repeat_int1d_noalloc(self, a, ret)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: a(:)
@@ -327,7 +543,12 @@ contains
     end do
   end subroutine repeat_int1d_noalloc
 
-
+  !-----------------------------------------------------------------------
+  !> @brief repeat a quantity (which is a 1D matrix for each index)
+  !>  memory will be allocated if not already done
+  !> @param [in] a: the quantity to be repeated (loop over index i in primcell)
+  !> @param [out] ret: the repeat. also a 1D matrix. (loop over index in supercell)
+  !-----------------------------------------------------------------------
   subroutine repeat_real1d(self, a, ret)
     class(supercell_maker_t), intent(inout) :: self
     real(dp), intent(in) :: a(:)
@@ -342,6 +563,12 @@ contains
     end do
   end subroutine repeat_real1d
 
+  !-----------------------------------------------------------------------
+  !> @brief repeat a quantity (which is a 1D matrix for each index)
+  !>  memory will be allocated if not already done
+  !> @param [in] a: the quantity to be repeated ( 2nd dim loop over index i in primcell)
+  !> @param [out] ret: the repeat. also a 2D matrix. (2nd dim loop over index in supercell)
+  !-----------------------------------------------------------------------
   subroutine repeat_real2d(self, a, ret)
     class(supercell_maker_t), intent(inout) :: self
     real(dp), intent(in) :: a(:,:)
@@ -357,6 +584,12 @@ contains
     end do
   end subroutine repeat_real2d
 
+  !-----------------------------------------------------------------------
+  !> @brief repeat a quantity (which is a 2D matrix for each index)
+  !>  memory will be allocated if not already done
+  !> @param [in] a: the quantity to be repeated ( 3rd dim loop over index i in primcell)
+  !> @param [out] ret: the repeat. also a 2D matrix. (3rd dim loop over index in supercell)
+  !-----------------------------------------------------------------------
   subroutine repeat_realmat(self, a, ret)
     class(supercell_maker_t), intent(inout) :: self
     real(dp), intent(in) :: a(:,:,:)
@@ -371,6 +604,12 @@ contains
     end do
   end subroutine repeat_realmat
 
+  !-----------------------------------------------------------------------
+  !> @brief  a list of R vectors for all the indices in supercell
+  !> memory will be allocated if not already done.
+  !> @param [in] nbasis: number of indices in primitivecell
+  !> @param [ret]  A R vector for each index in supercell mat(3, nbasis*ncells)
+  !-----------------------------------------------------------------------
   subroutine rvec_for_each(self, nbasis, ret)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: nbasis
@@ -470,66 +709,66 @@ contains
 
 !===================================================================================
 ! The functions below are deprecated!!!
-! They are used with the m_supercell module. 
-  ! R (in term of primitive cell) to R_sc(in term of supercell) + R_prim
-  subroutine find_R_PBC(scell, R, R_sc, R_prim)
-    type(supercell_type) , intent(in):: scell
-    integer, intent(in):: R(3)
-    integer, intent(out):: R_sc(3), R_prim(3)
-    real(dp) :: R_sc_d(3), sc_mat(3,3)
+! ! They are used with the m_supercell module. 
+!
+!   ! R (in term of primitive cell) to R_sc(in term of supercell) + R_prim
+!   subroutine find_R_PBC(scell, R, R_sc, R_prim)
+!     type(supercell_type) , intent(in):: scell
+!     integer, intent(in):: R(3)
+!     integer, intent(out):: R_sc(3), R_prim(3)
+!     real(dp) :: R_sc_d(3), sc_mat(3,3)
 
-    integer:: ipriv(3), info
-    !call dgesv( n, nrhs, a, lda, ipiv, b, ldb, info )
-    sc_mat(:,:)=scell%rlatt
-    R_sc_d(:)=R(:)
-    call dgesv(3, 1, sc_mat, 3, ipriv, R_sc_d, 3, info)
-    if ( info/=0 ) then
-       MSG_ERROR("Failed to find R_sc")
-    end if
+!     integer:: ipriv(3), info
+!     !call dgesv( n, nrhs, a, lda, ipiv, b, ldb, info )
+!     sc_mat(:,:)=scell%rlatt
+!     R_sc_d(:)=R(:)
+!     call dgesv(3, 1, sc_mat, 3, ipriv, R_sc_d, 3, info)
+!     if ( info/=0 ) then
+!        MSG_ERROR("Failed to find R_sc")
+!     end if
 
-    ! if only diagonal of rlatt works.
-    !R_sc_d(1)= real(R(1))/real(scell%rlatt(1,1))
-    !R_sc_d(2)= real(R(2))/real(scell%rlatt(2,2))
-    !R_sc_d(3)= real(R(3))/real(scell%rlatt(3,3))
-    ! TODO hexu: R_prim should be non-negative, which is assumed in m_supercell.
-    ! But should we make it more general?
-    R_sc(1)=floor(R_sc_d(1))
-    R_sc(2)=floor(R_sc_d(2))
-    R_sc(3)=floor(R_sc_d(3))
-    R_prim(1)=(R(1)-R_sc(1)*scell%rlatt(1,1))
-    R_prim(2)=(R(2)-R_sc(2)*scell%rlatt(2,2))
-    R_prim(3)=(R(3)-R_sc(3)*scell%rlatt(3,3))
-  end subroutine find_R_PBC
+!     ! if only diagonal of rlatt works.
+!     !R_sc_d(1)= real(R(1))/real(scell%rlatt(1,1))
+!     !R_sc_d(2)= real(R(2))/real(scell%rlatt(2,2))
+!     !R_sc_d(3)= real(R(3))/real(scell%rlatt(3,3))
+!     ! TODO hexu: R_prim should be non-negative, which is assumed in m_supercell.
+!     ! But should we make it more general?
+!     R_sc(1)=floor(R_sc_d(1))
+!     R_sc(2)=floor(R_sc_d(2))
+!     R_sc(3)=floor(R_sc_d(3))
+!     R_prim(1)=(R(1)-R_sc(1)*scell%rlatt(1,1))
+!     R_prim(2)=(R(2)-R_sc(2)*scell%rlatt(2,2))
+!     R_prim(3)=(R(3)-R_sc(3)*scell%rlatt(3,3))
+!   end subroutine find_R_PBC
 
-  ! TODO hexu: move this to m_supercell?
-  ! find the spercelll atom index from index of atom in primitive cell and R vector
-  function find_supercell_index(scell, iatom_prim, rvec) result(iatom_supercell)
-    type(supercell_type) , intent(in):: scell
-    integer, intent(in) :: iatom_prim, rvec(3)
-    integer  :: iatom_supercell
-    integer :: i
-    iatom_supercell=-1
-    do i=1, scell%natom, 1
-       if ( scell%atom_indexing(i) == iatom_prim .and. &
-            all(scell%uc_indexing(:,i)==rvec) ) then
-          iatom_supercell=i
-          return
-       end if
-    end do
-    MSG_ERROR("BUG found. supercell_maker%find_supercell_index cannot find iatom_prim, rvec pair in supercell")
-  end function find_supercell_index
+!   ! TODO hexu: move this to m_supercell?
+!   ! find the spercelll atom index from index of atom in primitive cell and R vector
+!   function find_supercell_index(scell, iatom_prim, rvec) result(iatom_supercell)
+!     type(supercell_type) , intent(in):: scell
+!     integer, intent(in) :: iatom_prim, rvec(3)
+!     integer  :: iatom_supercell
+!     integer :: i
+!     iatom_supercell=-1
+!     do i=1, scell%natom, 1
+!        if ( scell%atom_indexing(i) == iatom_prim .and. &
+!             all(scell%uc_indexing(:,i)==rvec) ) then
+!           iatom_supercell=i
+!           return
+!        end if
+!     end do
+!     MSG_ERROR("BUG found. supercell_maker%find_supercell_index cannot find iatom_prim, rvec pair in supercell")
+!   end function find_supercell_index
 
-  !i0, j0+R0 shifted by R to i1=i0+0+R->periodic, j1=j0+R0+R->periodic
-  subroutine find_supercell_ijR(scell, i0, j0, R0, R, i1, j1, R1, R_sc)
+!   !i0, j0+R0 shifted by R to i1=i0+0+R->periodic, j1=j0+R0+R->periodic
+!   subroutine find_supercell_ijR(scell, i0, j0, R0, R, i1, j1, R1, R_sc)
 
-    type(supercell_type) , intent(in):: scell
-    integer, intent(in) :: i0, j0, R0(3), R(3)
-    integer, intent(out) :: i1, j1, R1(3), R_sc(3)
-    i1=find_supercell_index(scell,i0,R)
-    call find_R_PBC(scell,R0+R,R_sc,R1)
-    j1=find_supercell_index(scell, j0, R1)
-  end subroutine find_supercell_ijR
+!     type(supercell_type) , intent(in):: scell
+!     integer, intent(in) :: i0, j0, R0(3), R(3)
+!     integer, intent(out) :: i1, j1, R1(3), R_sc(3)
+!     i1=find_supercell_index(scell,i0,R)
+!     call find_R_PBC(scell,R0+R,R_sc,R1)
+!     j1=find_supercell_index(scell, j0, R1)
+!   end subroutine find_supercell_ijR
 
 
-
-end module m_supercell_maker
+ end module m_supercell_maker

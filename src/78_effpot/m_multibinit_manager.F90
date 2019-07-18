@@ -149,6 +149,7 @@ contains
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
     self%filenames(:)=filenames(:)
+    call xmpi_bcast(self%filenames, master, comm, ierr)
 
     !TODO: remove params as argument. It is here because the params are read
     ! in the multibinit_main function. Once we use multibinit_main2, remove it.
@@ -160,16 +161,15 @@ contains
        call self%read_params()
     endif
 
-
     ! Initialize the random number generator
     call self%rng%set_seed([111111_dp, 2_dp])
+    ! use jump so that each cpu generates independent random numbers.
     if(my_rank>0) then
        do i =1,my_rank
           call self%rng%jump()
        end do
     end if
 
-    call xmpi_bcast(self%filenames, master, comm, ierr)
 
     if(self%params%spin_dynamics>0) then
        self%has_spin=.True.
@@ -240,8 +240,12 @@ contains
     character(len=strlen) :: string
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
+    
+    natom=0
+    nph1l=0
+    nrpt=0
+    ntypat=0
     call init_mpi_info(master, iam_master, my_rank, comm, nproc)
-
     !To automate a maximum calculation, multibinit reads the number of atoms
     !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
     !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
@@ -395,7 +399,7 @@ contains
 
 
   !-------------------------------------------------------------------!
-  ! initialize movers needed.
+  ! initialize movers which are needed.
   !-------------------------------------------------------------------!
   subroutine set_movers(self)
     class(mb_manager_t), intent(inout) :: self
@@ -416,10 +420,6 @@ contains
   !-------------------------------------------------------------------!
   !Set_lattice_mover
   !-------------------------------------------------------------------!
-
-  !-------------------------------------------------------------------!
-  ! initialize movers needed.
-  !-------------------------------------------------------------------!
   subroutine set_lattice_mover(self)
     class(mb_manager_t), intent(inout) :: self
     select case(self%params%dynamics)
@@ -429,7 +429,7 @@ contains
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_langevin_mover_t, self%lattice_mover)
     case(103)   ! Berendsen NVT
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_berendsen_NVT_mover_t, self%lattice_mover)
-    case(104)
+    case(104)   ! Berendsen NPT (not yet avaliable)
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_berendsen_NPT_mover_t, self%lattice_mover)
     end select
     call self%lattice_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
@@ -446,13 +446,9 @@ contains
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
     call self%read_potentials()
-
     call self%sc_maker%initialize(diag(self%params%ncell))
-
     call self%fill_supercell()
-
     call self%set_movers()
-
     call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
     call self%spin_mover%run_time(self%pots)
     call self%spin_mover%spin_ncfile%close()
@@ -463,7 +459,6 @@ contains
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
     call self%sc_maker%initialize(diag(self%params%ncell))
-    ! read params
     call self%read_potentials()
     call self%fill_supercell()
     call self%set_movers()
@@ -482,10 +477,7 @@ contains
     call self%fill_supercell()
     call self%set_movers()
     call self%lattice_mover%run_time(self%pots)
-
   end subroutine run_lattice_dynamics
-
-
 
   !-------------------------------------------------------------------!
   ! Run  spin and lattice dynamics sequentially.

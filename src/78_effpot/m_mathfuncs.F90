@@ -12,6 +12,7 @@ module m_mathfuncs
   use m_random_xoroshiro128plus
   implicit none
 
+
   ! the determinant of a 3*3 matrix
   interface mat33det
      procedure  real_mat33det
@@ -360,5 +361,27 @@ contains
     END IF
   end subroutine eigensh
 
+  !-----------------------------------------------------------------------
+  !> @brief rotate vector around axis by angle
+  !>  Using the quaternion rotation algorithm
+  !>   \vec{v}_new = \vec{v} + 2 \vec{r} \cross (\vec{r}\cross\vec{v}
+  !>                  + w \vec{v})
+  !> see https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
+  !> @param [in] angle : angle
+  !> @param [in] axis  : axis vector. The norm of axis does not matter.
+  !> @param [in] vec  : vector to roate
+  !> @param [out] vec2 : result vector
+  !-----------------------------------------------------------------------
+  function rotate_by_angle_around_axis(angle, axis, vec) result(vec2)
+    real(dp), intent(in) :: angle, axis(3), vec(3)
+    real(dp) :: vec2(3)
+    real(dp) :: half_angle, r(3), w, norm
+    half_angle=angle/2.0_dp
+    norm=sqrt(axis(1)*axis(1)+axis(2)*axis(2)+axis(3)*axis(3))
+    r(:)=axis(:)/norm * sin(half_angle)
+    w=cos(half_angle)
+    ! (w, r) is the quaternion
+    vec2(:) = vec2(:) + 2.0 * cross(r, (cross(r, vec) + w*vec))
+  end function rotate_by_angle_around_axis
 
 end module m_mathfuncs

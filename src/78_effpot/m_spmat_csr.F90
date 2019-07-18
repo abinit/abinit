@@ -64,6 +64,10 @@ module m_spmat_csr
 
 contains
 
+  !-----------------------------------------------------------------------
+  !> @brief initialization
+  !> @param [in] mshape: shape of matrix, should be size 2.
+  !-----------------------------------------------------------------------
   subroutine initialize(self, mshape)
     class(csr_mat_t), intent(inout) :: self
     integer, intent(in) :: mshape(:)
@@ -73,9 +77,14 @@ contains
     self%ncol=mshape(2)
   end subroutine initialize
 
-  ! COO matrix
-  subroutine set(self, nnz, icol, row_shift, val)
-
+  !-----------------------------------------------------------------------
+  !> @brief set the full csr matrix
+  !> @param [in] nnz: number of entries
+  !> @param [in] icol:
+  !> @param [in] row_shift: 
+  !> @param [in] val: values:
+  !-----------------------------------------------------------------------
+  subroutine set(self,  nnz, icol, row_shift, val)
     class(CSR_mat_t), intent(inout) :: self
     integer, intent(in) :: nnz 
     ! i: col number of each entry
@@ -115,6 +124,12 @@ contains
 
   end subroutine set
 
+  !-----------------------------------------------------------------------
+  !> @brief sync the matrix from master node to all nodes
+  !> @param [in] master: the id of master node
+  !> @param [in] comm: the communicator
+  !> @param [in] nblock: the minimal block for assigning the tasks to nodes.
+  !-----------------------------------------------------------------------
   subroutine sync(self, master, comm, nblock)
     class (csr_mat_t), intent(inout) :: self
     integer , intent(in) :: master, comm, nblock
@@ -154,6 +169,9 @@ contains
   end subroutine sync
 
 
+  !-----------------------------------------------------------------------
+  !> @brief Finalize
+  !-----------------------------------------------------------------------
   subroutine CSR_mat_t_finalize(self)
     class(CSR_mat_t), intent(inout) :: self
     self%ncol=0
@@ -176,7 +194,11 @@ contains
   end subroutine CSR_mat_t_finalize
 
 
-  ! b=Ax+b
+  !-----------------------------------------------------------------------
+  !> @brief Matrix vector multiplication
+  !> @param [in] x : M x = b
+  !> @param [out] b: M x = b
+  !-----------------------------------------------------------------------
   subroutine CSR_mat_t_mv(self, x, b)
     class(CSR_mat_t), intent(in):: self
     real(dp), intent(in) :: x(self%ncol)
@@ -194,7 +216,11 @@ contains
     !$OMP END PARALLEL DO
   end subroutine CSR_mat_t_mv
 
-
+  !-----------------------------------------------------------------------
+  !> @brief Matrix vector multiplication (mpi version)
+  !> @param [in] x : M x = b
+  !> @param [out] b: M x = b
+  !-----------------------------------------------------------------------
   subroutine CSR_mat_t_mv_mpi(self, x, b, bcastx, syncb)
     class(CSR_mat_t), intent(in) :: self
     real(dp), intent(inout) :: x(self%ncol)
@@ -222,6 +248,13 @@ contains
     endif
   end subroutine CSR_mat_t_mv_mpi
 
+  !-----------------------------------------------------------------------
+  !> @brief multiple a submatrix (rows indexed by i) of M by x:   y_i=\sum M_ij x_j
+  !> @param [in] nrow: number of rows.
+  !> @param [in] ind_row: indices i
+  !> @param [in]  x: x
+  !> @param [out]  y: y
+  !-----------------------------------------------------------------------
   subroutine CSR_mat_t_mv_select_row(self, nrow, id_row, x, y)
     class(CSR_mat_t), intent(in)::self 
     integer, intent(in) :: nrow,  id_row(nrow)

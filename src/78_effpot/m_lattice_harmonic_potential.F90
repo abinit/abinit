@@ -37,6 +37,7 @@ module m_lattice_harmonic_potential
   use m_spmat_coo, only: COO_mat_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   implicit none
+!!***
 
   private
 
