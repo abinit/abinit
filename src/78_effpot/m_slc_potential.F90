@@ -5,24 +5,7 @@
 !!
 !! FUNCTION
 !! This module contains the spin-lattice coupling, and the methods for
-!! calculating effective magnetic field (torque), force, dS/dt, and total_energy
-!!
-!!
-!! Datatypes:
-!!
-!! * slc_potential_t
-!!
-!! Subroutines:
-!!
-!! * slc_potential_t_initialize
-!! * slc_potential_t_finalize
-!! * slc_potential_t_set_params
-!! * slc_potential_t_calculate
-!! * slc_potential_t_total_Heff : calculate total Heff
-!! * slc_potential_t_Heff_to_dSdt: 
-!! * slc_potential_t_get_dSdt: dSdt, Langevin term is an input.
-!! * slc_potential_t_get_Langevin_Heff
-
+!! calculating effective magnetic field (torque), force, and total_energy
 !!
 !!
 !! COPYRIGHT
@@ -71,18 +54,9 @@ module  m_slc_potential
      type(ndcoo_mat_t) :: oiju_sc          ! parameter values quadlin term
      type(ndcoo_mat_t) :: tijuv_sc         ! parameter values biquad term
 
-     !R vector of i index is always zero
-     !type(int2d_array_type) :: oRjlist  ! R vector for j index of oiju 
-     !type(int2d_array_type) :: oRulist  ! R vector for u index of oiju
-     !type(int2d_array_type) :: tRjlist  ! R vector for j index of tijuv
-     !type(int2d_array_type) :: tRulist  ! R vector for u index of tijuv
-     !type(int2d_array_type) :: tRvlist  ! R vector for v index of tijuv
+     ! magnetic moments
+     real(dp), allocatable :: ms(:)
 
-     ! COO sparse matrix form for 2d matrices (summed over other indices)
-     type(ndcoo_mat_t) :: oiju_sumj
-
-     ! vector for calculating effective field
-     real(dp), allocatable :: Htmp(:, :)
      ! mpi
      type(mb_mpi_info_t) :: mpiinfo
      type(mpi_scheduler_t) :: mpsspin
@@ -121,6 +95,7 @@ contains
     self%natom=natom
     call xmpi_bcast(self%nspin, master, comm, ierr)
     call xmpi_bcast(self%natom, master, comm, ierr)
+    ABI_ALLOCATE( self%ms, (self%nspin))
     if(iam_master) then
       call self%oiju_sc%initialize(mshape=[-1, -1, self%nspin*3, self%nspin*3, self%natom*3])
     endif
@@ -130,11 +105,8 @@ contains
 
     class(slc_potential_t), intent(inout):: self
 
-    if (allocated(self%Htmp)) then
-       ABI_DEALLOCATE(self%Htmp)
-    endif
+    if(self%has_bilin) call self%liu_sc%finalize()
     if(self%has_quadlin) call self%oiju_sc%finalize()
-    !if(self%has_bilin) call self%liu_sc%finalize()
     !if(self%has_linquad) call self%niuv%finalize() 
     !if(self%has_biquad) call self%tijuv%finalize()
 
@@ -185,7 +157,12 @@ contains
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
     self%supercell=>supercell
+    self%ms(:)=supercell%spin%ms(:)
+
+    call xmpi_bcast(self%ms, master, comm, ierr)
   end subroutine set_supercell
 
 
@@ -209,7 +186,9 @@ contains
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
  
+    integer :: ii
     real(dp) :: f1(1:3*self%natom), disp(1:3*self%natom), b1(1:3*self%nspin), sp(1:3*self%nspin)
+    real(dp) :: btmp(3, self%nspin)
 
     sp(:) = reshape(spin, (/ 3*self%nspin /))
     disp(:) = reshape(displacement, (/ 3*self%natom /))
@@ -217,8 +196,12 @@ contains
     ! oiju contribution
     if(present(bfield)) then
       b1(:) = 0.0d0
-      call self%oiju_sc%vec_product(1, sp, 3, disp, 2, b1) 
-      bfield(:,:) = bfield(:,:) + reshape(b1, (/ 3, self%nspin /))
+      call self%oiju_sc%vec_product(1, sp, 3, disp, 2, b1)
+      btmp = reshape(b1, (/ 3, self%nspin /))
+      do ii = 1, self%nspin
+        btmp(:, ii) = btmp(:,ii)/self%ms(ii)
+      enddo
+      bfield(:,:) = bfield(:,:) + btmp(:,:)
     endif
 
     if(present(force)) then
@@ -229,10 +212,11 @@ contains
 
     if(present(energy)) then
       if(present(bfield)) then
+        b1=reshape(btmp, (/ 3*self%nspin /))
         energy = energy + dot_product(b1, sp)
       else 
         if(present(force)) then
-          energy = energy + dot_product(f1, disp)
+          energy = energy - 0.5_dp*dot_product(f1, disp)
         else
           f1(:) = 0.0d0
           call self%oiju_sc%vec_product(1, sp, 2, sp, 3, f1)
