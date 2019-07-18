@@ -31,8 +31,8 @@ module m_chebfi2
   
   integer, parameter :: EIGENV = 1
   integer, parameter :: EIGENVD = 2
-  integer, parameter :: DEBUG_ROWS = 10
-  integer, parameter :: DEBUG_COLUMNS = 20
+  integer, parameter :: DEBUG_ROWS = 5
+  integer, parameter :: DEBUG_COLUMNS = 5
   
 #ifdef HAVE_OPENMP 
   integer, save :: eigenSolver = EIGENVD     ! Type of eigen solver to use
@@ -364,8 +364,10 @@ module m_chebfi2
     double precision :: radius
     
     double precision :: errmax
-    double precision, pointer :: cg(:,:)
+    double precision, allocatable, target :: cg(:,:)
     double precision, pointer :: cg0(:,:)
+    
+    logical :: status_p
     
     integer :: remainder
     
