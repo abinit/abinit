@@ -51,8 +51,8 @@ typat 31*1
 znucl 56.
 chkprim 0
 
-wfoptalg 111
-istwfk 2
+wfoptalg 1
+istwfk 1
 #istwfk 2
 
 #Atomic positions

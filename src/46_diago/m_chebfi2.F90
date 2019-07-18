@@ -2115,167 +2115,167 @@ module m_chebfi2
 
   end function cheb_poly1
   
-  subroutine debug_me_g0_LINALG(debugBlock, chebfi)
+!  subroutine debug_me_g0_LINALG(debugBlock, chebfi)
+!  
+!    type(xgBlock_t) , intent(inout) :: debugBlock
+!    type(chebfi_t) , intent(inout) :: chebfi
+!    type(xgBlock_t) :: HELPER
+!    
+!    call xmpi_barrier(chebfi%spacecom)
+!    
+!    !if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+!    if (xmpi_comm_rank(chebfi%spacecom) == 0) then
+!      call xgBlock_setBlock(debugBlock, HELPER, 1, 2, 5) 
+!      call xgBlock_print(HELPER, 200+xmpi_comm_size(xmpi_world)) 
+!    end if
+!    !else 
+!    
+!    !end if
+!    call xmpi_barrier(chebfi%spacecom)   
+!    
+!  end subroutine
+!  
+!  subroutine debug_me_g0_COLROWS(debugBlock, chebfi)
+!  
+!    type(xgBlock_t) , intent(inout) :: debugBlock
+!    type(chebfi_t) , intent(inout) :: chebfi
+!    type(xgBlock_t) :: HELPER
+!    
+!    call xmpi_barrier(chebfi%spacecom)
+!    
+!    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+!      if (xmpi_comm_rank(chebfi%spacecom) == 0) then
+!        call xgBlock_setBlock(debugBlock, HELPER, 1, 2, 5) 
+!        call xgBlock_print(HELPER, 100) 
+!      
+!        call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, 2, 5) 
+!        call xgBlock_print(HELPER, 101) 
+!      end if
+!    else 
+!      call xgBlock_setBlock(debugBlock, HELPER, 1, 2, 5) 
+!      call xgBlock_print(HELPER, 200 + xmpi_comm_rank(chebfi%spacecom)) 
+!    end if
+!    
+!    call xmpi_barrier(chebfi%spacecom)   
+!    
+!  end subroutine
   
-    type(xgBlock_t) , intent(inout) :: debugBlock
-    type(chebfi_t) , intent(inout) :: chebfi
-    type(xgBlock_t) :: HELPER
-    
-    call xmpi_barrier(chebfi%spacecom)
-    
-    !if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
-    if (xmpi_comm_rank(chebfi%spacecom) == 0) then
-      call xgBlock_setBlock(debugBlock, HELPER, 1, 2, 5) 
-      call xgBlock_print(HELPER, 200+xmpi_comm_size(xmpi_world)) 
-    end if
-    !else 
-    
-    !end if
-    call xmpi_barrier(chebfi%spacecom)   
-    
-  end subroutine
-  
-  subroutine debug_me_g0_COLROWS(debugBlock, chebfi)
-  
-    type(xgBlock_t) , intent(inout) :: debugBlock
-    type(chebfi_t) , intent(inout) :: chebfi
-    type(xgBlock_t) :: HELPER
-    
-    call xmpi_barrier(chebfi%spacecom)
-    
-    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
-      if (xmpi_comm_rank(chebfi%spacecom) == 0) then
-        call xgBlock_setBlock(debugBlock, HELPER, 1, 2, 5) 
-        call xgBlock_print(HELPER, 100) 
-      
-        call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, 2, 5) 
-        call xgBlock_print(HELPER, 101) 
-      end if
-    else 
-      call xgBlock_setBlock(debugBlock, HELPER, 1, 2, 5) 
-      call xgBlock_print(HELPER, 200 + xmpi_comm_rank(chebfi%spacecom)) 
-    end if
-    
-    call xmpi_barrier(chebfi%spacecom)   
-    
-  end subroutine
-  
-  subroutine debug_helper_colrows(debugBlock, chebfi)
-      
-    type(xgBlock_t) , intent(inout) :: debugBlock
-    type(chebfi_t) , intent(inout) :: chebfi
-    type(xgBlock_t) :: HELPER
-    
-    call xmpi_barrier(chebfi%spacecom)
-    
-    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
-      !print *, "USAOOSOOSOSOSO"
-      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)) 
-      
-      call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
-      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)+1) 
-    else
-      !print *, "2222222222222222222"
-      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-      call xgBlock_print(HELPER, 200+xmpi_comm_rank(chebfi%spacecom)) 
-    end if
-    
-    !print *, "debugBlock%rows", rows(debugBlock)
-    !print *, "debugBlock%cols", cols(debugBlock)
-    call xmpi_barrier(chebfi%spacecom)
+!  subroutine debug_helper_colrows(debugBlock, chebfi)
+!      
+!    type(xgBlock_t) , intent(inout) :: debugBlock
+!    type(chebfi_t) , intent(inout) :: chebfi
+!    type(xgBlock_t) :: HELPER
+!    
+!    call xmpi_barrier(chebfi%spacecom)
+!    
+!    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+!      !print *, "USAOOSOOSOSOSO"
+!      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+!      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)) 
+!      
+!      call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
+!      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)+1) 
+!    else
+!      !print *, "2222222222222222222"
+!      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+!      call xgBlock_print(HELPER, 200+xmpi_comm_rank(chebfi%spacecom)) 
+!    end if
+!    
+!    !print *, "debugBlock%rows", rows(debugBlock)
+!    !print *, "debugBlock%cols", cols(debugBlock)
+!    call xmpi_barrier(chebfi%spacecom)
 
-  end subroutine debug_helper_colrows
+!  end subroutine debug_helper_colrows
   
-  subroutine debug_helper_linalg(debugBlock, chebfi, set_option, first_row)
-      
-    type(xgBlock_t) , intent(inout) :: debugBlock
-    type(chebfi_t) , intent(inout) :: chebfi
-    type(integer) , intent(in) :: set_option
-    type(integer), intent(in) :: first_row
-    type(xgBlock_t) :: HELPER
-    
-    integer, parameter :: FROW = 1, FCOL = 1, DROWS = 1, DCOLS = 10
-    
-    call xmpi_barrier(chebfi%spacecom) 
-    
-    !print *, "chebfi%bandpp", chebfi%bandpp
-    print *, "spacedim", chebfi%spacedim
-    !stop
-    !stop
-    
-    if (set_option == 0) then
-      if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
-        ! *, "PISE 1"
-        call xgBlock_setBlock(debugBlock, HELPER, 1, DROWS, DCOLS) 
-        call xgBlock_print(HELPER, 200+xmpi_comm_rank(chebfi%spacecom)) 
-      
-        call xgBlock_setBlock(debugBlock, HELPER, chebfi%neigenpairs/2+1, DROWS, DCOLS) 
-        call xgBlock_print(HELPER, 200+xmpi_comm_rank(chebfi%spacecom)+1) 
-      else
-        !print *, "2222222222222222222"
-        !print *, "xmpi_comm_rank(chebfi%spacecom)", xmpi_comm_rank(chebfi%spacecom)
-        if (xmpi_comm_rank(chebfi%spacecom) == 0) then
-          call xgBlock_setBlock(debugBlock, HELPER, 1, DROWS, DCOLS) 
-          call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom))
-        
-          call xgBlock_setBlock(debugBlock, HELPER, chebfi%neigenpairs/2+1, DROWS, DCOLS) 
-          call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)+1)  
-        end if
-      end if
-    else
-      if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
-        print *, "STAMPAM MPI1"
-        print *, "chebfi%spacedim/2", chebfi%spacedim/2
-        call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
-        call xgBlock_print(HELPER, 100) 
-        
-        call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim/2+1, FCOL, DROWS, DCOLS) 
-        call xgBlock_print(HELPER, 101)
-      
-        !call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim/2+2, FCOL, DROWS, DCOLS) 
-        !call xgBlock_print(HELPER, 101)
-        !!TODO OVO IZNAD JE OK OVO ISPOD NE VALJA NE ZNAM ZASTO POLUDECU!!!!
-        
-        !call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim/2+2, FCOL, DROWS, DCOLS) 
-        !call xgBlock_print(HELPER, 110) 
-      
-        !call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim/2+3, FCOL, DROWS, DCOLS) 
-        !call xgBlock_print(HELPER, 111)
-         
-      else
-        !!TODO STOP DEBUGGING PARTS OF AX AND TRY TO PRINT THE SUM
-        print *, "STAMPAM MPI2"
-        print *, "rank, spacedim", xmpi_comm_rank(chebfi%spacecom), chebfi%spacedim
-        if (xmpi_comm_rank(chebfi%spacecom) == 0) then
-          !print *, "chebfi%spacedim-1", chebfi%spacedim-1
-          call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
-          call xgBlock_print(HELPER, 200)
-          
-          !call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim, FCOL, DROWS, DCOLS) 
-          !call xgBlock_print(HELPER, 201)
-          
-          !print *, "chebfi%spacedim", chebfi%spacedim
-          !print *, "FCOL", FCOL
-          
-          !call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim, FCOL, DROWS, DCOLS) 
-          !call xgBlock_print(HELPER, 201)  
-        else !!TODO OVO IZNAD JE OK OVO ISPOD NE VALJA NE ZNAM ZASTO POLUDECU!!!!
-          !print *, "FROW, FCOL, DROWS, DCOLS", FROW, FCOL, DROWS, DCOLS
-          call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
-          call xgBlock_print(HELPER, 201)
-        
-          !call xgBlock_setBlock1(debugBlock, HELPER, FROW+1, FCOL, DROWS, DCOLS) 
-          !call xgBlock_print(HELPER, 211)
-        end if
-      end if
-    end if
-    
-    !print *, "debugBlock%rows", rows(debugBlock)
-    !print *, "debugBlock%cols", cols(debugBlock)
-    call xmpi_barrier(chebfi%spacecom)
+!  subroutine debug_helper_linalg(debugBlock, chebfi, set_option, first_row)
+!      
+!    type(xgBlock_t) , intent(inout) :: debugBlock
+!    type(chebfi_t) , intent(inout) :: chebfi
+!    type(integer) , intent(in) :: set_option
+!    type(integer), intent(in) :: first_row
+!    type(xgBlock_t) :: HELPER
+!    
+!    integer, parameter :: FROW = 1, FCOL = 1, DROWS = 1, DCOLS = 10
+!    
+!    call xmpi_barrier(chebfi%spacecom) 
+!    
+!    !print *, "chebfi%bandpp", chebfi%bandpp
+!    print *, "spacedim", chebfi%spacedim
+!    !stop
+!    !stop
+!    
+!    if (set_option == 0) then
+!      if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+!        ! *, "PISE 1"
+!        call xgBlock_setBlock(debugBlock, HELPER, 1, DROWS, DCOLS) 
+!        call xgBlock_print(HELPER, 200+xmpi_comm_rank(chebfi%spacecom)) 
+!      
+!        call xgBlock_setBlock(debugBlock, HELPER, chebfi%neigenpairs/2+1, DROWS, DCOLS) 
+!        call xgBlock_print(HELPER, 200+xmpi_comm_rank(chebfi%spacecom)+1) 
+!      else
+!        !print *, "2222222222222222222"
+!        !print *, "xmpi_comm_rank(chebfi%spacecom)", xmpi_comm_rank(chebfi%spacecom)
+!        if (xmpi_comm_rank(chebfi%spacecom) == 0) then
+!          call xgBlock_setBlock(debugBlock, HELPER, 1, DROWS, DCOLS) 
+!          call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom))
+!        
+!          call xgBlock_setBlock(debugBlock, HELPER, chebfi%neigenpairs/2+1, DROWS, DCOLS) 
+!          call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)+1)  
+!        end if
+!      end if
+!    else
+!      if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+!        print *, "STAMPAM MPI1"
+!        print *, "chebfi%spacedim/2", chebfi%spacedim/2
+!        call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
+!        call xgBlock_print(HELPER, 100) 
+!        
+!        call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim/2+1, FCOL, DROWS, DCOLS) 
+!        call xgBlock_print(HELPER, 101)
+!      
+!        !call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim/2+2, FCOL, DROWS, DCOLS) 
+!        !call xgBlock_print(HELPER, 101)
+!        !!TODO OVO IZNAD JE OK OVO ISPOD NE VALJA NE ZNAM ZASTO POLUDECU!!!!
+!        
+!        !call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim/2+2, FCOL, DROWS, DCOLS) 
+!        !call xgBlock_print(HELPER, 110) 
+!      
+!        !call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim/2+3, FCOL, DROWS, DCOLS) 
+!        !call xgBlock_print(HELPER, 111)
+!         
+!      else
+!        !!TODO STOP DEBUGGING PARTS OF AX AND TRY TO PRINT THE SUM
+!        print *, "STAMPAM MPI2"
+!        print *, "rank, spacedim", xmpi_comm_rank(chebfi%spacecom), chebfi%spacedim
+!        if (xmpi_comm_rank(chebfi%spacecom) == 0) then
+!          !print *, "chebfi%spacedim-1", chebfi%spacedim-1
+!          call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
+!          call xgBlock_print(HELPER, 200)
+!          
+!          !call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim, FCOL, DROWS, DCOLS) 
+!          !call xgBlock_print(HELPER, 201)
+!          
+!          !print *, "chebfi%spacedim", chebfi%spacedim
+!          !print *, "FCOL", FCOL
+!          
+!          !call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim, FCOL, DROWS, DCOLS) 
+!          !call xgBlock_print(HELPER, 201)  
+!        else !!TODO OVO IZNAD JE OK OVO ISPOD NE VALJA NE ZNAM ZASTO POLUDECU!!!!
+!          !print *, "FROW, FCOL, DROWS, DCOLS", FROW, FCOL, DROWS, DCOLS
+!          call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
+!          call xgBlock_print(HELPER, 201)
+!        
+!          !call xgBlock_setBlock1(debugBlock, HELPER, FROW+1, FCOL, DROWS, DCOLS) 
+!          !call xgBlock_print(HELPER, 211)
+!        end if
+!      end if
+!    end if
+!    
+!    !print *, "debugBlock%rows", rows(debugBlock)
+!    !print *, "debugBlock%cols", cols(debugBlock)
+!    call xmpi_barrier(chebfi%spacecom)
 
-  end subroutine debug_helper_linalg
+!  end subroutine debug_helper_linalg
   
 end module m_chebfi2
 
