@@ -2781,35 +2781,6 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
  end if
 
-!TMP: Writing of individual terms
- do iatpert= 1, natpert
-   iatom=pert_atdis(1,iatpert)
-   iatdir=pert_atdis(2,iatpert)
-   do istrpert= 1, nstrpert
-     ka=pert_strain(3,istrpert)
-     kb=pert_strain(4,istrpert)
-     do iq1grad=1,3
-       write(98,'(4i3,1x,2f14.8)')iatpert,ka,kb,iq1grad,&
-     & frwfdq(1,iatom,iatdir,ka,kb,iq1grad), frwfdq(2,iatom,iatdir,ka,kb,iq1grad)
-       write(99,'(4i3,1x,2f14.8)')iatpert,iq1grad,ka,kb,&
-     & isdq_qgradhart(re,iatom,iatdir,q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert)), &
-     & isdq_qgradhart(im,iatom,iatdir,q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))
-       write(101,'(4i3,1x,2f14.8)')iatpert,iq1grad,ka,kb,&
-     & isdqwf_t1(re,iatom,iatdir,iq1grad,ka,kb),isdqwf_t1(im,iatom,iatdir,iq1grad,ka,kb)
-       write(102,'(4i3,1x,2f14.8)')iatpert,iq1grad,ka,kb,&
-     & isdqwf_t2(re,iatom,iatdir,iq1grad,ka,kb),isdqwf_t2(im,iatom,iatdir,iq1grad,ka,kb)
-       write(103,'(4i3,1x,2f14.8)')iatpert,iq1grad,ka,kb,&
-     & isdqwf_t3(re,iatom,iatdir,iq1grad,ka,kb),isdqwf_t3(im,iatom,iatdir,iq1grad,ka,kb)
-       write(104,'(4i3,1x,2f14.8)')iatpert,ka,kb,iq1grad,&
-     & isdqwf_t3(re,iatom,iatdir,ka,kb,iq1grad), isdqwf_t3(im,iatom,iatdir,ka,kb,iq1grad)
-       write(105,'(4i3,1x,2f14.8)')iatpert,iq1grad,ka,kb,&
-     & isdqwf_t5(re,iatom,iatdir,iq1grad,ka,kb),isdqwf_t5(im,iatom,iatdir,iq1grad,ka,kb)
-     end do
-   end do
- end do
-
-
-
 !Anounce finalization of calculations
  if (lw_flexo==1.or.lw_flexo==2) then
    write(msg, '(a,a,a)' ) ch10, &
@@ -2845,7 +2816,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    if (lw_flexo==1.or.lw_flexo==4) then
      call dfpt_isdqout(d3etot,dyewdqdq,frwfdq,gprimd,isdq_flg,isdq_qgradhart,isdqwf,isdqwf_t1,isdqwf_t2,&
    & isdqwf_t3,isdqwf_t4,isdqwf_t5,dtset%kptopt,matom,mpert,natpert, &
-   & nstrpert,nq1grad,pert_atdis,pert_strain,dtset%prtvol,q1grad,rprimd)
+   & nstrpert,nq1grad,pert_atdis,pert_strain,dtset%prtvol,q1grad,rprimd,ucvol)
    end if
  end if
 
@@ -3911,6 +3882,7 @@ end subroutine dfpt_flexoout
 !!  prtvol=volume of information to be printed. 1-> The different contributions to the quadrupole are printed.
 !!  q1grad(3,nq1grad)=array with the info for the q1 (q_{\gamma}) gradients
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  ucvol=Unit cell volume
 !!  
 !! OUTPUT
 !!  d3etot(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
@@ -3931,7 +3903,7 @@ end subroutine dfpt_flexoout
 
  subroutine dfpt_isdqout(d3etot,dyewdqdq,frwfdq,gprimd,isdq_flg,isdq_qgradhart,isdqwf,isdqwf_t1,isdqwf_t2,&
    & isdqwf_t3,isdqwf_t4,isdqwf_t5,kptopt,matom,mpert,natpert, &
-   & nstrpert,nq1grad,pert_atdis,pert_strain,prtvol,q1grad,rprimd)
+   & nstrpert,nq1grad,pert_atdis,pert_strain,prtvol,q1grad,rprimd,ucvol)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -3944,13 +3916,14 @@ end subroutine dfpt_flexoout
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: kptopt,matom,mpert,natpert,nstrpert,nq1grad,prtvol
- real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
+ real(dp),intent(in) :: ucvol
 
 !arrays
  integer,intent(in) :: isdq_flg(matom,3,nq1grad,3,3)
  integer,intent(in) :: pert_atdis(3,natpert)
  integer,intent(in) :: pert_strain(6,nstrpert)
  integer,intent(in) :: q1grad(3,nq1grad)
+ real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
  real(dp),intent(in) :: dyewdqdq(2,3,matom,3,3,3)
  real(dp),intent(in) :: isdqwf(2,matom,3,nq1grad,3,3)
  real(dp),intent(inout) :: frwfdq(2,matom,3,3,3,nq1grad)
@@ -4541,7 +4514,7 @@ end subroutine dfpt_flexoout
          end do
 
          write(ab_out,'(4(i5,4x),2(1x,f20.10))') alpha,gamma,beta,delta, &
-       & celastre, celastim
+       & celastre/ucvol, celastim/ucvol
 
        end do
      end do
