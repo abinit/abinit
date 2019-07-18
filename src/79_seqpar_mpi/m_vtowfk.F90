@@ -412,14 +412,15 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            !print *, "gs_hamk%istwf_k", gs_hamk%istwf_k
            !print *, "gs_hamk%istwf_k*npw_k*my_nspinor", gs_hamk%istwf_k*npw_k*my_nspinor
            !print *, "nband_k", nband_k
+           !stop
 
            call xgBlock_map(xgx0,cg(:, icg+1:),3,gs_hamk%istwf_k*npw_k*my_nspinor,nband_k,mpi_enreg%comm_bandspinorfft) 
-           call debug_helper_linalg(xgx0)
+           !call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*my_nspinor)
            !stop
            call chebfiwf2(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
-           call debug_helper_linalg(xgx0)
-           
+           !call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*my_nspinor)
+           !stop
            !if (inonsc == 2) stop
            !stop 
          end if            
@@ -1304,9 +1305,10 @@ end subroutine fxphas
 !!***
 
   
-subroutine debug_helper_linalg(debugBlock)
+subroutine debug_helper_linalg(debugBlock, npw)
       
   type(xgBlock_t) , intent(inout) :: debugBlock
+  type(integer) , intent(in) :: npw
   type(xgBlock_t) :: HELPER
     
   integer, parameter :: FROW = 1, FCOL = 1, DROWS = 5, DCOLS = 5
@@ -1317,7 +1319,7 @@ subroutine debug_helper_linalg(debugBlock)
     call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
     call xgBlock_print(HELPER, 100) 
 
-    call xgBlock_setBlock1(debugBlock, HELPER, 3888/2+1, FCOL, DROWS, DCOLS) 
+    call xgBlock_setBlock1(debugBlock, HELPER, npw/2+1, FCOL, DROWS, DCOLS) 
     call xgBlock_print(HELPER, 101)    
   else
     if (xmpi_comm_rank(xmpi_world) == 0) then

@@ -31,7 +31,7 @@ nsym 0
 chksymbreak 0
 
 #Electronic configuration
-nband 192
+nband 1080
 occopt 3
 tsmear 0.002 hartree
 
@@ -53,8 +53,8 @@ znucl 56.
 chkprim 0
 
 wfoptalg 111
+#istwfk 1
 istwfk 2
-#istwfk 2
 
 #Atomic positions
 xred
