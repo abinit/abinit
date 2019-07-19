@@ -158,20 +158,20 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: iout0=0,chksymbreak0=0,iscf2=2
- integer :: my_nshiftk !,ii
- integer,allocatable :: indkpt(:),bz2ibz_smap(:,:)
+ integer,parameter :: iout0 = 0, chksymbreak0 = 0, iscf2=2
+ integer :: my_nshiftk
  real(dp) :: kptrlen
 !arrays
- integer,parameter :: vacuum0(3)=[0, 0, 0]
+ integer,parameter :: vacuum0(3) = [0, 0, 0]
  integer :: my_kptrlatt(3,3)
+ integer,allocatable :: indkpt(:),bz2ibz_smap(:,:)
  real(dp) :: my_shiftk(3,MAX_NSHIFTK)
 
 ! *********************************************************************
 
  ! Copy kptrlatt and shifts because getkgrid can change them
  ! Be careful as getkgrid expects shiftk(3,MAX_NSHIFTK).
- ABI_CHECK(nshiftk > 0 .and. nshiftk <= MAX_NSHIFTK, sjoin("nshiftk must be in 1 and", itoa(MAX_NSHIFTK)))
+ ABI_CHECK(nshiftk > 0 .and. nshiftk <= MAX_NSHIFTK, sjoin("nshiftk must be between 1 and", itoa(MAX_NSHIFTK)))
  my_nshiftk = nshiftk; my_shiftk = zero; my_shiftk(:,1:nshiftk) = shiftk
  my_kptrlatt = kptrlatt
 
@@ -180,7 +180,7 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
    cryst%symrel,vacuum0,wtk,indkpt,bz2ibz_smap,fullbz=kbz)
 
  if (present(bz2ibz)) then
-   ABI_MOVE_ALLOC(bz2ibz_smap,bz2ibz)
+   ABI_MOVE_ALLOC(bz2ibz_smap, bz2ibz)
  else
    ABI_SFREE(bz2ibz_smap)
  endif
@@ -703,6 +703,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
          ! Besides, one should use symrel^{-1 T} to keep the correspondence between isym -> R or S
          do itimrev=0,timrev_used
            do isym=1,nsym_used
+           !do itimrev=0,timrev_used
 
              ! Select magnetic characteristic of symmetries
              if (isppol == 1 .and. symafm(isym) == -1) cycle

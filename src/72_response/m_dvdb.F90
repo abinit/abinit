@@ -493,6 +493,22 @@ module m_dvdb
 
 !----------------------------------------------------------------------
 
+ !type, public star_t
+ !  integer :: npts
+ !  real(dp) :: weight
+ !  real(dp) :: ibz_point(3)
+ !  integer,allocatable :: pt2ibz_map(:,:)
+ !  ! (6, npts)
+ !  real(dp), allocatable :: points(:,:)
+ !  ! points(3, npts)
+ !end type kstars_t
+
+ !type, public stars_t
+ !  integer :: nstars
+ !  type(star_t),allocatable :: star(:)
+ !  ! star(nstars)
+ !end type stars_t
+
 contains
 !!***
 
@@ -2771,7 +2787,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0, qptopt1 = 1
- integer :: iq_ibz,nqibz,iq_bz,nqbz !, timerev_q
+ integer :: iq_ibz,nqibz,iq_bz,nqbz, my_ir0 !, timerev_q
  integer :: ii,jj,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc, unt
  integer :: iqst,itimrev,isym
  integer :: ifft, ierr, nrtot, my_rstart, my_rstop, iatom
@@ -2786,9 +2802,9 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  integer :: g0q(3)
  !integer :: symq(4,2,db%cryst%nsym)
  integer,allocatable :: indqq(:,:),iperm(:), iperm_irpt(:), nqsts(:),iqs_dvdb(:),all_cell(:,:)
- real(dp) :: qpt_bz(3), sc_rprimd(3,3) !, sc_rmet(3, 3)
+ real(dp) :: qpt_bz(3), sc_rprimd(3,3), sumr(2)
  real(dp),allocatable :: qibz(:,:),qbz(:,:),emiqr(:,:), all_rpt(:,:), all_wghatm(:,:,:)
- real(dp),allocatable :: v1r_qibz(:,:,:,:),v1r_qbz(:,:,:,:), v1r_lr(:,:,:)
+ real(dp),allocatable :: v1r_qibz(:,:,:,:), v1r_qbz(:,:,:,:), v1r_lr(:,:,:), asr_work(:,:,:,:)
  real(dp),allocatable :: maxw(:,:), all_rmod(:)
 
 ! *************************************************************************
@@ -2879,6 +2895,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
      ! IS(q_ibz) + g0q = q_bz
      isym = indqq(iq_bz, 2); itimrev = indqq(iq_bz, 6) + 1; g0q = indqq(iq_bz, 3:5)
      isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
+     !write(std_out, *)"qbz", trim(ktoa(qpt_bz)), " --> qibz ", trim(ktoa(qibz(:,iq_ibz)))
+     !write(std_out, *)"via isym, itimrev, g0q:", isym, itimrev, g0q
 
      ! Compute long-range part of the coupling potential at qpt_bz.
      if (db%add_lr /= 0) then
@@ -2898,11 +2916,11 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
          do imyp=1,db%my_npert
            ipc = db%my_pinfo(3, imyp)
            do ispden=1,db%nspden
-             if (db%add_lr == 3 .and. ispden == 1) then
-               write(std_out,*)"q=0: Reshifting v1r_lr with average", sum(v1r_qibz(1, :, ispden, ipc)) / nfft
-               write(std_out,*)"Average of v1r_lr: ", sum(v1r_lr(1, :, imyp)) /nfft
-               v1r_lr(1, :, imyp) = v1r_lr(1, :, imyp) + sum(v1r_qibz(1, :, ispden, ipc)) / nfft
-             end if
+             !if (db%add_lr == 3 .and. ispden == 1) then
+             !  write(std_out,*)"q=0: Reshifting v1r_lr with average", sum(v1r_qibz(1, :, ispden, ipc)) / nfft
+             !  write(std_out,*)"Average of v1r_lr: ", sum(v1r_lr(1, :, imyp)) /nfft
+             !  v1r_lr(1, :, imyp) = v1r_lr(1, :, imyp) + sum(v1r_qibz(1, :, ispden, ipc)) / nfft
+             !end if
              v1r_qibz(1, :, ispden, ipc) = v1r_qibz(1, :, ispden, ipc) - v1r_lr(1, :, imyp)
            end do
          end do
@@ -2994,12 +3012,89 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
 
  !call xmpi_sum(db%v1scf_rpt, db%comm, ierr)
  db%v1scf_rpt = db%v1scf_rpt / nqbz
- !if (method == 1) db%v1scf_rpt = real(db%v1scf_rpt)
+ !if (method == 1) db%v1scf_rpt(2,:,:,:,:) = zero
+
+ do imyp=1,db%my_npert
+   write(std_out, *)" Imaginary part for imyp:" ,imyp
+   do ispden=1,db%nspden
+       write(std_out, *)"min max, avg:", &
+         minval(abs(db%v1scf_rpt(2, :, :, ispden, imyp))), maxval(abs(db%v1scf_rpt(2, :, :, ispden, imyp))), &
+         sum(abs(db%v1scf_rpt(2, :, :, ispden, imyp))) / (nfft * db%my_nrpt)
+   end do
+ end do
 
  ! Now we have W(R, r)
  if (any(qrefine > 1)) then
    call dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt1, nqshift, qshift, nfft, ngfft, method)
  end if
+
+#if 0
+ call wrtout(std_out, " Enforcing ASR on W(R, r): \sum_{R,kappa} v1(R, r, kappa, alpha) = 0")
+ MSG_WARNING_IF(method == 0, "Encorcing ASR with method == 0")
+ ! Enforcing ASR \sum_{R,kappa} v1(R, r, kappa, alpha) = f(r, alpha) = 0 for each r and alpha-direction
+ ABI_CALLOC(asr_work, (2, nfft, db%nspden, 3))
+
+ do imyp=1,db%my_npert
+   idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
+   do ispden=1,db%nspden
+     do ifft=1,nfft
+       sumr = zero
+       do irpt=1,db%my_npert
+         sumr(:) = sumr(:) + db%my_wratm(irpt, ipert) * db%v1scf_rpt(:,irpt,ifft,ispden,imyp)
+       end do
+       asr_work(:,ifft,ispden, idir) = asr_work(:,ifft,ispden, idir) + sumr(:)
+     end do
+   end do
+ end do
+ if (db%nprocs_pert /= 1) call xmpi_sum(asr_work, db%comm_pert, ierr)
+ asr_work = asr_work / (nrtot * db%natom)
+
+ do idir=1,3
+   write(std_out, *)" ASR breaking For idir:" ,idir
+   write(std_out, *)"   For Re:  minval, maxval_fft:", minval(abs(asr_work(1,:,1,idir))), maxval(abs(asr_work(1,:,1,idir)))
+   write(std_out, *)"   For Im:  minval, maxval_fft:", minval(abs(asr_work(2,:,1,idir))), maxval(abs(asr_work(2,:,1,idir)))
+ end do
+
+ ! Remove average value.
+ do imyp=1,db%my_npert
+   idir = db%my_pinfo(1, imyp)
+   do ispden=1,db%nspden
+     do ifft=1,nfft
+       db%v1scf_rpt(1, :, ifft, ispden, imyp) = db%v1scf_rpt(1, :, ifft, ispden, imyp) - asr_work(1, ifft, ispden, idir)
+       db%v1scf_rpt(2, :, ifft, ispden, imyp) = db%v1scf_rpt(2, :, ifft, ispden, imyp) - asr_work(2, ifft, ispden, idir)
+     end do
+   end do
+ end do
+
+ ! Here I change only the R=0 term
+ my_ir0 = -1
+ do irpt=1,db%my_nrpt
+   if (all(abs(db%my_rpt(:,irpt)) <= tol10)) then
+     my_ir0 = irpt; exit
+   end if
+ end do
+
+ !if (my_ir0 /= -1) then
+ !  asr_work = asr_work * (nrtot * db%natom)
+ !  do imyp=1,db%my_npert
+ !    idir = db%my_pinfo(1, imyp)
+ !    do ispden=1,db%nspden
+ !      asr_work(:,:,ispden, idir) = asr_work(:,:,ispden, idir) - db%v1scf_rpt(:,my_ir0,:,ispden,imyp)
+ !    end do
+ !  end do
+ !  asr_work = asr_work / db%natom
+
+ !  do imyp=1,db%my_npert
+ !    idir = db%my_pinfo(1, imyp)
+ !    do ispden=1,db%nspden
+ !      !write(std_out, *)"imyp ispden:", imyp, ispden, "max: ", maxval(v1r_qbz(:, :, ispden, imyp), dim=2)
+ !      db%v1scf_rpt(:, my_ir0, :, ispden, imyp) = - asr_work(:, :, ispden, idir)
+ !    end do
+ !  end do
+ !end if
+
+ ABI_FREE(asr_work)
+#endif
 
  ! Write file with |R| R(1:3)_frac MAX_r |W(R,r,idir,ipert)|
  ! TODO: Cleanup, support ftinterp_refine case.
@@ -3025,8 +3120,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
      sc_rprimd(:, 1) = ngqpt(1) * db%cryst%rprimd(:, 1)
      sc_rprimd(:, 2) = ngqpt(2) * db%cryst%rprimd(:, 2)
      sc_rprimd(:, 3) = ngqpt(3) * db%cryst%rprimd(:, 3)
-     !sc_rmet = matmul(transpose(sc_rprimd), sc_rprimd)
-     call sort_rpts(nrtot, all_rpt, db%cryst%rmet, iperm, rmod=all_rmod)
+     call sort_rpts(nrtot, all_rpt, db%cryst%rmet, iperm_irpt, rmod=all_rmod)
      if (open_file(outwr_path, msg, newunit=unt, form="formatted", action="write", status="unknown") /= 0) then
        MSG_ERROR(msg)
      end if
@@ -3130,7 +3224,7 @@ subroutine dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt, nqshift, qshift, nff
  integer,allocatable :: indqq(:,:),qzone2ibz(:,:),iperm(:), nqsts(:),iqs_dvdb(:)
  real(dp) :: qpt_bz(3)
  real(dp),allocatable :: qibz_fine(:,:), qbz_fine(:,:), emiqr(:,:), all_rpt_fine(:,:), all_wghatm(:,:,:)
- real(dp),allocatable :: v1r_qbz(:,:,:,:), v1r_qibz(:,:,:,:), work_qbz(:,:,:,:), v1r_lr(:,:)
+ real(dp),allocatable :: v1r_qbz(:,:,:,:), v1r_lr(:,:) !, v1r_qibz(:,:,:,:), work_qbz(:,:,:,:),
  real(dp),allocatable :: microzone(:,:), my_rpt_fine(:,:)
  real(kind=dp),allocatable :: v1scf_rpt(:,:,:,:,:)
 
@@ -3354,11 +3448,12 @@ subroutine prepare_ftinterp(db, method, ngqpt, qptopt, nqshift, qshift, &
  nq1 = ngqpt(1); nq2 = ngqpt(2); nq3 = ngqpt(3)
  qptrlatt = 0; qptrlatt(1, 1) = ngqpt(1); qptrlatt(2, 2) = ngqpt(2); qptrlatt(3, 3) = ngqpt(3)
 
+ ABI_CHECK(nqshift == 1, "nshift > 1 not supported")
+ ABI_CHECK(all(qshift(:, 1) == zero), "qshift != 0 not supported")
+
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt, nqshift, qshift, &
    nqibz, qibz, wtq, nqbz, qbz) ! new_kptrlatt, new_shiftk)
 
- ABI_CHECK(nqshift == 1, "nshift > 1 not supported")
- ABI_CHECK(all(qshift(:, 1) == zero), "qshift != 0 not supported")
  ABI_CHECK(nqbz == product(ngqpt) * nqshift, "nqbz /= product(ngqpt) * nqshift")
 
  if (method == 0) then
