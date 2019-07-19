@@ -23,7 +23,7 @@ message: |
 src_file: m_dtfil.F90
 src_line: 1106
 message: |
-    Renaming old t03_2_x.out to t03_2_x.out0148
+    Renaming old t03_2_x.out to t03_2_x.out0166
 ...
  
 
@@ -42,8 +42,8 @@ message: |
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 18 Jul 2019.
-- ( at 13h35 )
+.Starting date : Fri 19 Jul 2019.
+- ( at 13h39 )
   
  
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -199,20 +199,20 @@ memory: analysis of memory needs
      natom =      31  nloc_mem =       2    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =       1    ntypat =       1
     occopt =       3   xclevel =       1
--    mband =        1080        mffmem =           1         mkmem =           1
+-    mband =         192        mffmem =           1         mkmem =           1
        mpw =         972          nfft =       64000          nkpt =           1
 Pmy_natom=        16
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        45    nfftf =     91125
 ================================================================================
-P This job should need less than                     123.018 Mbytes of memory.
+P This job should need less than                      43.792 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :     16.020 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
+_ WF disk file :      2.850 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 ================================================================================
  
- Biggest array : cg(disk), with     16.0201 MBytes.
- memana : allocated an array of     16.020 Mbytes, for testing purposes.
- memana: allocated     123.018Mbytes, for testing purposes. 
+ Biggest array : pawfgrtab%gylm(gr), with     10.8401 MBytes.
+ memana : allocated an array of     10.840 Mbytes, for testing purposes.
+ memana: allocated      43.792Mbytes, for testing purposes. 
  The job will continue.
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
@@ -222,13 +222,13 @@ _ WF disk file :     16.020 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    2
+-  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
 -          iomode           1
             acell      1.5340000000E+01  1.5340000000E+01  1.5340000000E+01 Bohr
               amu      1.37327000E+02
-           bandpp         540
+           bandpp          96
       chksymbreak           0
      densfor_pred           6
              ecut      8.00000000E+00 Hartree
@@ -238,7 +238,7 @@ _ WF disk file :     16.020 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
            kptopt           0
 P           mkmem           1
             natom          31
-            nband        1080
+            nband         192
             ngfft          40      40      40
           ngfftdg          45      45      45
              nkpt           1
@@ -273,154 +273,6 @@ P           mkmem           1
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  2.000000  2.000000  2.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
@@ -580,8 +432,8 @@ P           mkmem           1
  CHARACTER: Data type name: CHARACTER             Kind value: 1
 
   ==== OpenMP parallelism is ON ====
-- Max_threads:       2
-- Num_threads:       2
+- Max_threads:       1
+- Num_threads:       1
 - Num_procs:         2
 - Dynamic:           F
 - Nested:            F
@@ -679,7 +531,7 @@ message: |
  
   XC functional for type 1 is 7
  
- wfconv:  1080 bands initialized randomly with npw=   972, for ikpt=     1
+ wfconv:   192 bands initialized randomly with npw=   972, for ikpt=     1
 _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  initro: for itypat=  1, take pseudo charge density from pp file
  
@@ -709,317 +561,337 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  ITER STEP NUMBER     1
  vtorho: nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=0 0 1
  Invovl built
-  1941955712
-  1941955712
- -1838593728
- -1838593728
+  -246480448
+  -246480448
+  -246209536
+  -246209536
  xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_COLS)%rank           0
- xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_COLS)%rank           1
- xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_COLS)%rank           1
- xgTransposer%mpiData(MPI_COLS)%size           2
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%size           2
  xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           1
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_COLS)%rank           0
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_COLS)%rank           1
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_COLS)%rank           1
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%size           2
  xgTransposer%mpiData(MPI_COLS)%size           2
  flag_inv_sym 3
  flag_inv_sym 3
  ndatarecv_tot        3887
- bandpp_sym         270
+ bandpp_sym          48
  ndatarecv_tot        3887
- bandpp_sym         270
+ bandpp_sym          48
  PROSAO getAX_BX
  PROSAO getAX_BX
  ************************
  BITNI POINTERI PRE LOOPA
  xXcolsRows
-  1597920192
+  -411037312
  X
-  1941955712
+  -246480448
  X_next
-  1649407360
+  -402054336
  X_prev
-  1666203520
+  -399068352
  X_NP
-  1649407360
+  -402054336
  ***********************
  ILINE           0
  X_next before getBm1X
-  1649407360
+  -402054336
  X_prev before getBm1X
-  1666203520
+  -399068352
  X_xXColsRows before getBm1X
-  1597920192
+  -411037312
  CPUROW0
  CPUROW0
- size(cprjin)       16740
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
- size(cprjin)       16740
+ ndat          96
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
- size(cprjin)       16740
+ ndat          96
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
- size(cprjin)       16740
+ ndat          96
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
+ ndat          96
  ILINE           0
  X_next after getBm1X
-  1649407360
+  -402054336
  X_prev after getBm1X
-  1666203520
+  -399068352
  X_xXColsRows after getBm1X
-  1597920192
- flag_inv_sym 3
+  -411037312
  flag_inv_sym 3
  ndatarecv_tot        3887
- bandpp_sym         270
+ bandpp_sym          48
+ flag_inv_sym 3
  ndatarecv_tot        3887
- bandpp_sym         270
+ bandpp_sym          48
  CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
  ILINE           1
  X_next before getBm1X
-  1666203520
+  -399068352
  X_prev before getBm1X
-  1597920192
+  -411037312
  X_xXColsRows before getBm1X
-  1649407360
- size(cprjin)       16740
- hamk%natom          31
- my_nspinor           1
- ndat         540
+  -402054336
  CPUROW0
- size(cprjin)       16740
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
- size(cprjin)       16740
+ ndat          96
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
- size(cprjin)       16740
+ ndat          96
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
+ ndat          96
  flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
  ILINE           1
  X_next after getBm1X
-  1666203520
+  -399068352
  X_prev after getBm1X
-  1597920192
+  -411037312
  X_xXColsRows after getBm1X
-  1649407360
- ndatarecv_tot        3887
- bandpp_sym         270
+  -402054336
  flag_inv_sym 3
  ndatarecv_tot        3887
- bandpp_sym         270
+ bandpp_sym          48
  chebfi%total_spacedim        3888
- chebfi%bandpp         540
+ chebfi%bandpp          96
  CPUROW0
- size(cprjin)       16740
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
+ ndat          96
  ILINE           2
  X_next before getBm1X
-  1597920192
+  -411037312
  X_prev before getBm1X
-  1649407360
+  -402054336
  X_xXColsRows before getBm1X
-  1666203520
+  -399068352
  chebfi%total_spacedim        3888
- chebfi%bandpp         540
+ chebfi%bandpp          96
  CPUROW0
- size(cprjin)       16740
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
- size(cprjin)       16740
+ ndat          96
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
- size(cprjin)       16740
+ ndat          96
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym         270
+ ndat          96
  ILINE           2
  X_next after getBm1X
-  1597920192
+  -411037312
  X_prev after getBm1X
-  1649407360
+  -402054336
  X_xXColsRows after getBm1X
-  1666203520
+  -399068352
+ flag_inv_sym 3
  flag_inv_sym 3
  ndatarecv_tot        3887
- bandpp_sym         270
- CPUROW0
- size(cprjin)       16740
- hamk%natom          31
- my_nspinor           1
- ndat         540
+ bandpp_sym          48
+ ndatarecv_tot        3887
+ bandpp_sym          48
  ILINE           3
  X_next before getBm1X
-  1649407360
+  -402054336
  X_prev before getBm1X
-  1666203520
+  -399068352
  X_xXColsRows before getBm1X
-  1597920192
+  -411037312
  CPUROW0
- size(cprjin)       16740
+ CPUROW0
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
- size(cprjin)       16740
+ ndat          96
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
- size(cprjin)       16740
+ ndat          96
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
  flag_inv_sym 3
  ndatarecv_tot        3887
- bandpp_sym         270
+ bandpp_sym          48
  ILINE           3
  X_next after getBm1X
-  1649407360
+  -402054336
  X_prev after getBm1X
-  1666203520
+  -399068352
  X_xXColsRows after getBm1X
-  1597920192
+  -411037312
  flag_inv_sym 3
  ndatarecv_tot        3887
- bandpp_sym         270
+ bandpp_sym          48
  CPUROW0
- size(cprjin)       16740
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
+ ndat          96
  ILINE           4
  X_next before getBm1X
-  1666203520
+  -399068352
  X_prev before getBm1X
-  1597920192
+  -411037312
  X_xXColsRows before getBm1X
-  1649407360
+  -402054336
  CPUROW0
- size(cprjin)       16740
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
- size(cprjin)       16740
+ ndat          96
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
  flag_inv_sym 3
  ndatarecv_tot        3887
- bandpp_sym         270
- size(cprjin)       16740
- hamk%natom          31
- my_nspinor           1
- ndat         540
+ bandpp_sym          48
  ILINE           4
  X_next after getBm1X
-  1666203520
+  -399068352
  X_prev after getBm1X
-  1597920192
+  -411037312
  X_xXColsRows after getBm1X
-  1649407360
+  -402054336
  flag_inv_sym 3
  ndatarecv_tot        3887
- bandpp_sym         270
+ bandpp_sym          48
  CPUROW0
- size(cprjin)       16740
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
+ ndat          96
  ILINE           5
  X_next before getBm1X
-  1597920192
+  -411037312
  X_prev before getBm1X
-  1649407360
+  -402054336
  X_xXColsRows before getBm1X
-  1666203520
+  -399068352
  CPUROW0
- size(cprjin)       16740
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
- size(cprjin)       16740
+ ndat          96
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
- ndat         540
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
  flag_inv_sym 3
  ndatarecv_tot        3887
- bandpp_sym         270
- size(cprjin)       16740
- hamk%natom          31
- my_nspinor           1
- ndat         540
+ bandpp_sym          48
  ILINE           5
  X_next after getBm1X
-  1597920192
+  -411037312
  X_prev after getBm1X
-  1649407360
+  -402054336
  X_xXColsRows after getBm1X
-  1666203520
+  -399068352
  flag_inv_sym 3
  ndatarecv_tot        3887
- bandpp_sym         270
+ bandpp_sym          48
  ************************
  BITNI POINTERI POSLE LOOPA
  xXcolsRows
-  2112082880
+  -411185664
  X
- -1838593728
+  -246209536
  X_next
- -2130910976
+  -402206272
  X_prev
- -2114114816
+  -399220288
  X_NP
- -2130910976
+  -402206272
  ***********************
  LOOP FINISHED
  ************************
  BITNI POINTERI POSLE LOOPA
  xXcolsRows
-  1597920192
+  -411037312
  X
-  1941955712
+  -246480448
  X_next
-  1649407360
+  -402054336
  X_prev
-  1666203520
+  -399068352
  X_NP
-  1649407360
+  -402054336
  ***********************
  LOOP FINISHED
-  1597920192
-  2112082880
+  -411037312
+  -411185664
+ PROSAO TRANSPOSE
+ PROSAO TRANSPOSE
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
  PRE DGEMM
  PRE DGEMM
  NAKON DGEMM
@@ -1040,27 +912,13 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  transat
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632948
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
  PRE DGEMM
- PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
- PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
- PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
- PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
  PRE DGEMM
  NAKON DGEMM
  transan
@@ -1070,20 +928,82 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  transan
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632942
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ spacedim        1944
+ STAMPAM MPI2
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ rank, spacedim           0        1944
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  X_swap AT THE END
-  1941955712
+  -246480448
  ************************
  BITNI POINTERI
  xXcolsRows
-  1597920192
+  -411037312
  X
-  1941955712
+  -246480448
  X_next
-  1649556224
+  -402047936
  X_prev
-  1666352384
+  -399061952
  X_NP
-  1649556224
+  -402047936
  ***********************
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
  xgx0 AFTER
-  1941955712
+  -246480448

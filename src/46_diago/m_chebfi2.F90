@@ -469,7 +469,7 @@ module m_chebfi2
     call xg_getPointer(chebfi%X)
     ! Initialize the _filter pointers. Depending on paral_kgb, they might point to the actual arrays or to _alltoall variables
 
-    !call debug_helper_linalg(chebfi%X, chebfi, 1, 1) 
+    !call debug_helper_linalg(chebfi%X, chebfi) 
     !stop
     
     !call debug_me_g0_LINALG(chebfi%X, chebfi)  !OK 1-2 ISTWFK2 MPI
@@ -572,7 +572,7 @@ module m_chebfi2
 !      
 !      stop
       
-      !call debug_helper_colrows(chebfi%xXColsRows, chebfi) 
+     ! call debug_helper_colrows(chebfi%xXColsRows, chebfi) 
       !stop
       
       
@@ -602,14 +602,8 @@ module m_chebfi2
       call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, 1, spacedim, neigenpairs)
     end if
     
-    !stop
-    
-    !call debug_me_g0_COLROWS(chebfi%xXColsRows, chebfi) !OK 1-2 ISTWFK2 MPI
-    !stop
-    
-    !print *, "AAAAAAAAAAAAAAAAAAAA"
-    !stop
-    !call debug_helper_colrows(chebfi%xXColsRows, chebfi) 
+
+    call debug_helper_colrows(chebfi%xXColsRows, chebfi, "LINE606") 
     !stop
    
     !call debug_helper_colrows(chebfi%xAXColsRows, chebfi) 
@@ -633,9 +627,7 @@ module m_chebfi2
     !call debug_helper_colrows(chebfi%xBXColsRows, chebfi) 
     !stop
     
-    !print *, "getAXBX"
-    !call debug_me_g0_COLROWS(chebfi%xXColsRows, chebfi)
-    !stop
+
       
     if (chebfi%paral_kgb == 1) then   
       call xmpi_barrier(chebfi%spacecom)
@@ -705,9 +697,9 @@ module m_chebfi2
     
 
     !call xgTransposer_transpose(chebfi%xgTransposerX,STATE_LINALG) !all_to_all
-    !call debug_helper_colrows(chebfi%xXColsRows, chebfi) 
-    !call debug_helper_colrows(chebfi%xAXColsRows, chebfi) 
-    !call debug_helper_colrows(chebfi%xBXColsRows, chebfi) 
+    call debug_helper_colrows(chebfi%xXColsRows, chebfi, "LINE700") 
+    call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "LINE701") 
+    call debug_helper_colrows(chebfi%xBXColsRows, chebfi, "LINE702") 
     !stop
      !call debug_helper_linalg(chebfi%X, chebfi, 1, 1)    
    ! print *, "AAAAAAAAAAAAAAAAAAAA"
@@ -785,7 +777,7 @@ module m_chebfi2
       
       if (iline == 2) then
 !        print *, "2 before swap"
-!        !call debug_helper_colrows(chebfi%xXColsRows, chebfi)
+         call debug_helper_colrows(chebfi%xXColsRows, chebfi, "LINE780")
 !        !stop
 !        call xgBlock_setBlock(chebfi%X_next, chebfi%xXColsRows, 1, chebfi%total_spacedim, chebfi%bandpp)  
 !        call xgTransposer_transpose(chebfi%xgTransposerX,STATE_LINALG) !all_to_all
@@ -813,7 +805,7 @@ module m_chebfi2
       !print *, "iline", iline
       !stop     
       
-      if (iline == 100) then
+      if (iline == 2) then
 !        print *, "0 after swap"
 !        
 !        if (xmpi_comm_rank(xmpi_world) == 0) then !only one MPI
@@ -833,7 +825,7 @@ module m_chebfi2
 !        print *, "***********************"
 !        
 !        end if
-!        !call debug_helper_colrows(chebfi%xXColsRows, chebfi)
+        call debug_helper_colrows(chebfi%xXColsRows, chebfi, "LINE828")
 !        !stop
 !        call xgBlock_setBlock(chebfi%X_next, chebfi%xXColsRows, 1, chebfi%total_spacedim, chebfi%bandpp)  
 !        call xgTransposer_transpose(chebfi%xgTransposerX,STATE_LINALG) !all_to_all
@@ -897,9 +889,11 @@ module m_chebfi2
       call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)  !OVO SAD MORA SVUDA DA SE MENJA
       !print *, "getAX_BX after"
       !stop
-      !call debug_helper_colrows(chebfi%xXColsRows, chebfi) 
-      !call debug_helper_colrows(chebfi%xAXColsRows, chebfi) 
-      !call debug_helper_colrows(chebfi%xBXColsRows, chebfi) 
+      if (iline == 2) then
+        call debug_helper_colrows(chebfi%xXColsRows, chebfi, "LINE892") 
+        call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "LINE893") 
+        call debug_helper_colrows(chebfi%xBXColsRows, chebfi, "LINE894") 
+      end if
       !stop
       call timab(tim_getAX_BX,2,tsec) 
       
@@ -960,9 +954,9 @@ module m_chebfi2
     
 
     print *, "LOOP FINISHED"
-    !call debug_helper_colrows(chebfi%xXColsRows, chebfi) 
-    !call debug_helper_colrows(chebfi%xAXColsRows, chebfi) 
-    !call debug_helper_colrows(chebfi%xBXColsRows, chebfi) 
+    call debug_helper_colrows(chebfi%xXColsRows, chebfi, "LINE957") 
+    call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "LINE958") 
+    call debug_helper_colrows(chebfi%xBXColsRows, chebfi, "LINE959") 
     !stop
     
     !print *, "LOOP FINISHED"
@@ -1056,9 +1050,9 @@ module m_chebfi2
 !    call debug_helper_linalg(chebfi%AX%self, chebfi, 1) 
 !    stop
 !   
-    !call debug_helper_colrows(chebfi%xXColsRows, chebfi) 
-    !call debug_helper_colrows(chebfi%xAXColsRows, chebfi) 
-    !call debug_helper_colrows(chebfi%xBXColsRows, chebfi) 
+    call debug_helper_colrows(chebfi%xXColsRows, chebfi, "LINE1053") 
+    call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "LINE1054") 
+    call debug_helper_colrows(chebfi%xBXColsRows, chebfi, "LINE1055") 
     !print *, "AMPFACTOR FINISHED" 
     !stop
    
@@ -1109,22 +1103,14 @@ module m_chebfi2
 !    stop
     
     
-    !call xgBlock_setBlock(chebfi%xXColsRows, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-    !call xgBlock_print(HELPER, 200 + chebfi%paral_kgb) 
-    !call debug_helper_colrows(chebfi%xXColsRows, chebfi) 
-    !stop
-     
-    !call debug_helper_linalg(chebfi%X, chebfi, 1) 
-    !stop
-    
-    !print *, "PROSAO TRANSPOSE"
+    print *, "PROSAO TRANSPOSE"
     !stop
     
     !!TODO TRANSPOSE IS NOT WORKING CORRECTLY FOR ISTWFK2 (or some other thing)
     !print *, "AFTER BACKTRANSPOSE"
-    !call debug_helper_linalg(chebfi%X, chebfi, 1, 1)  !!TODO FROM HERE
-    !call debug_helper_linalg(chebfi%AX%self, chebfi, 1, 1) 
-    !call debug_helper_linalg(chebfi%BX%self, chebfi, 1) 
+    call debug_helper_linalg(chebfi%X, chebfi, "LINE1111")  !!TODO FROM HERE
+    call debug_helper_linalg(chebfi%AX%self, chebfi, "LINE1112") 
+    call debug_helper_linalg(chebfi%BX%self, chebfi, "LINE1113") 
     !stop 
     
     !call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS) !proba ali ne radi bas kako treba :(
@@ -1179,7 +1165,7 @@ module m_chebfi2
       call xgBlock_copy(chebfi%X_swap,chebfi%X, 1, 1)    !copy cannot be avoided :(
     end if
     
-    !call debug_helper_linalg(chebfi%X_swap, chebfi, 1, 1) !MPI 1,2 OK
+    call debug_helper_linalg(chebfi%X_swap, chebfi, "LINE1168") !MPI 1,2 OK
     !stop   
      
   end subroutine chebfi_run
@@ -1378,7 +1364,6 @@ module m_chebfi2
     
     !print *, "PROSAO APPLY"
     !stop 
-            
     !ψi-1 = c * ψi-1   
     !call xgBlock_scale(chebfi%X, center, 1) !scale by c
     call xgBlock_scale(chebfi%xXColsRows, center, 1) !scale by c
@@ -1389,6 +1374,8 @@ module m_chebfi2
     !(B-1 * A * ψi-1 - c * ψi-1)
     !call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%X)
     call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%xXColsRows)  
+    
+    !stop
     !call xgBlock_saxpy(chebfi%AX_swap, dble(-1.0), chebfi%X)
     !call xgBlock_saxpy(chebfi%XXX, dble(-1.0), chebfi%X)
     !call debug_helper_colrows(chebfi%X_next, chebfi) 
@@ -1738,7 +1725,7 @@ module m_chebfi2
     !print *, "chebfi%paral_kgb", chebfi%paral_kgb
     !stop
      !if (X_NP_TEST == 1) then  
-    if (chebfi%paral_kgb == 1 .and. xmpi_comm_size(xmpi_world) > 1) then  !!TODO TODO TODO ovde je problem za 1, izgube se adrese ili sta vec...
+    if (chebfi%paral_kgb == 1 .and. xmpi_comm_size(chebfi%spacecom) > 1) then  !!TODO TODO TODO ovde je problem za 1, izgube se adrese ili sta vec...
 !      multiply = chebfi%total_spacedim * (chebfi%bandpp * 2 + 1)
 !      size_remainder = multiply - (spacedim * 2 * neigenpairs)
 !      print *, "X_NP old size", multiply
@@ -1787,7 +1774,7 @@ module m_chebfi2
       !print *, "USAAAAAAAAAAAAAAAAAAAAAAAAA"
     end if 
     !end if
-    !call debug_helper_linalg(chebfi%X, chebfi, 1, 1)  !X OK HERE FOR 1 and 2 MPI
+    call debug_helper_linalg(chebfi%X, chebfi, "LINE1777")  !X OK HERE FOR 1 and 2 MPI
     !stop
  
     !call xgBlock_setBlock(chebfi%X, HELPER, 1, 2, 5) 
@@ -1832,7 +1819,7 @@ module m_chebfi2
             
     end if
     
-    !call debug_helper_linalg(chebfi%X_swap, chebfi, 1, 1) 
+    call debug_helper_linalg(chebfi%X_swap, chebfi, "LINE1822") 
     !print *, "X_SWAP print"
     !stop
                           
@@ -1840,7 +1827,7 @@ module m_chebfi2
                       chebfi%AX%self, A_und_X%self, 0.d0, chebfi%AX_swap)
         
     !print *, "AX_swap"              
-    !call debug_helper_linalg(chebfi%AX_swap, chebfi, 1, 1)  !AX_swap OK HERE FOR 1 and 2 MPI
+    call debug_helper_linalg(chebfi%AX_swap, chebfi, "LINE1830")  !AX_swap OK HERE FOR 1 and 2 MPI
     !stop
       
     !call xgBlock_setBlock(chebfi%AX_swap, HELPER, 1, 2, 5) 
@@ -1854,7 +1841,7 @@ module m_chebfi2
     end if  
     
     !print *, "BX_swap"
-    !call debug_helper_linalg(chebfi%BX_swap, chebfi, 1, 1)  !BX_swap OK HERE FOR 1 and 2 MPI
+    call debug_helper_linalg(chebfi%BX_swap, chebfi, "LINE1844")  !BX_swap OK HERE FOR 1 and 2 MPI
     !stop
     
 !    print *, "AX_swap"
@@ -1935,7 +1922,7 @@ module m_chebfi2
     !stop
     
     !print *, "AFTER COLWISE"
-    !call debug_helper_linalg(chebfi%AX_swap, chebfi, 1, 1) !MPI 1,2 OK
+    call debug_helper_linalg(chebfi%AX_swap, chebfi, "LINE1925") !MPI 1,2 OK
     !stop      
     
     !pcond call
@@ -1944,7 +1931,7 @@ module m_chebfi2
     call timab(tim_pcond,2,tsec)
     
     !print *, "AX_swap after pcond"
-    !call debug_helper_linalg(chebfi%AX_swap, chebfi, 1, 1) !MPI 1,2 OK
+    call debug_helper_linalg(chebfi%AX_swap, chebfi, "LINE1934") !MPI 1,2 OK
     !stop
     
     !call debug_helper_linalg(chebfi%AX_swap, chebfi, 1, 1) 
@@ -1956,7 +1943,7 @@ module m_chebfi2
                                                       min_val=minResidu, min_elt=eigResiduMin) 
     
     !print *, "AX_swap after xgBlock_colwiseNorm2"
-    !call debug_helper_linalg(chebfi%AX_swap, chebfi, 1, 1) !MPI 1,2 OK
+    call debug_helper_linalg(chebfi%AX_swap, chebfi, "LINE1946") !MPI 1,2 OK
     !stop
     
     
@@ -2137,147 +2124,85 @@ module m_chebfi2
 !    
 !  end subroutine
 !  
-!  subroutine debug_me_g0_COLROWS(debugBlock, chebfi)
-!  
-!    type(xgBlock_t) , intent(inout) :: debugBlock
-!    type(chebfi_t) , intent(inout) :: chebfi
-!    type(xgBlock_t) :: HELPER
-!    
-!    call xmpi_barrier(chebfi%spacecom)
-!    
-!    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
-!      if (xmpi_comm_rank(chebfi%spacecom) == 0) then
-!        call xgBlock_setBlock(debugBlock, HELPER, 1, 2, 5) 
-!        call xgBlock_print(HELPER, 100) 
-!      
-!        call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, 2, 5) 
-!        call xgBlock_print(HELPER, 101) 
-!      end if
-!    else 
-!      call xgBlock_setBlock(debugBlock, HELPER, 1, 2, 5) 
-!      call xgBlock_print(HELPER, 200 + xmpi_comm_rank(chebfi%spacecom)) 
-!    end if
-!    
-!    call xmpi_barrier(chebfi%spacecom)   
-!    
-!  end subroutine
-  
-!  subroutine debug_helper_colrows(debugBlock, chebfi)
-!      
-!    type(xgBlock_t) , intent(inout) :: debugBlock
-!    type(chebfi_t) , intent(inout) :: chebfi
-!    type(xgBlock_t) :: HELPER
-!    
-!    call xmpi_barrier(chebfi%spacecom)
-!    
-!    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
-!      !print *, "USAOOSOOSOSOSO"
-!      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-!      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)) 
-!      
-!      call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
-!      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)+1) 
-!    else
-!      !print *, "2222222222222222222"
-!      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-!      call xgBlock_print(HELPER, 200+xmpi_comm_rank(chebfi%spacecom)) 
-!    end if
-!    
-!    !print *, "debugBlock%rows", rows(debugBlock)
-!    !print *, "debugBlock%cols", cols(debugBlock)
-!    call xmpi_barrier(chebfi%spacecom)
 
-!  end subroutine debug_helper_colrows
   
-!  subroutine debug_helper_linalg(debugBlock, chebfi, set_option, first_row)
-!      
-!    type(xgBlock_t) , intent(inout) :: debugBlock
-!    type(chebfi_t) , intent(inout) :: chebfi
-!    type(integer) , intent(in) :: set_option
-!    type(integer), intent(in) :: first_row
-!    type(xgBlock_t) :: HELPER
-!    
-!    integer, parameter :: FROW = 1, FCOL = 1, DROWS = 1, DCOLS = 10
-!    
-!    call xmpi_barrier(chebfi%spacecom) 
-!    
-!    !print *, "chebfi%bandpp", chebfi%bandpp
-!    print *, "spacedim", chebfi%spacedim
-!    !stop
-!    !stop
-!    
-!    if (set_option == 0) then
-!      if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
-!        ! *, "PISE 1"
-!        call xgBlock_setBlock(debugBlock, HELPER, 1, DROWS, DCOLS) 
-!        call xgBlock_print(HELPER, 200+xmpi_comm_rank(chebfi%spacecom)) 
-!      
-!        call xgBlock_setBlock(debugBlock, HELPER, chebfi%neigenpairs/2+1, DROWS, DCOLS) 
-!        call xgBlock_print(HELPER, 200+xmpi_comm_rank(chebfi%spacecom)+1) 
-!      else
-!        !print *, "2222222222222222222"
-!        !print *, "xmpi_comm_rank(chebfi%spacecom)", xmpi_comm_rank(chebfi%spacecom)
-!        if (xmpi_comm_rank(chebfi%spacecom) == 0) then
-!          call xgBlock_setBlock(debugBlock, HELPER, 1, DROWS, DCOLS) 
-!          call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom))
-!        
-!          call xgBlock_setBlock(debugBlock, HELPER, chebfi%neigenpairs/2+1, DROWS, DCOLS) 
-!          call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)+1)  
-!        end if
-!      end if
-!    else
-!      if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
-!        print *, "STAMPAM MPI1"
-!        print *, "chebfi%spacedim/2", chebfi%spacedim/2
-!        call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
-!        call xgBlock_print(HELPER, 100) 
-!        
-!        call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim/2+1, FCOL, DROWS, DCOLS) 
-!        call xgBlock_print(HELPER, 101)
-!      
-!        !call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim/2+2, FCOL, DROWS, DCOLS) 
-!        !call xgBlock_print(HELPER, 101)
-!        !!TODO OVO IZNAD JE OK OVO ISPOD NE VALJA NE ZNAM ZASTO POLUDECU!!!!
-!        
-!        !call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim/2+2, FCOL, DROWS, DCOLS) 
-!        !call xgBlock_print(HELPER, 110) 
-!      
-!        !call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim/2+3, FCOL, DROWS, DCOLS) 
-!        !call xgBlock_print(HELPER, 111)
-!         
-!      else
-!        !!TODO STOP DEBUGGING PARTS OF AX AND TRY TO PRINT THE SUM
-!        print *, "STAMPAM MPI2"
-!        print *, "rank, spacedim", xmpi_comm_rank(chebfi%spacecom), chebfi%spacedim
-!        if (xmpi_comm_rank(chebfi%spacecom) == 0) then
-!          !print *, "chebfi%spacedim-1", chebfi%spacedim-1
-!          call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
-!          call xgBlock_print(HELPER, 200)
-!          
-!          !call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim, FCOL, DROWS, DCOLS) 
-!          !call xgBlock_print(HELPER, 201)
-!          
-!          !print *, "chebfi%spacedim", chebfi%spacedim
-!          !print *, "FCOL", FCOL
-!          
-!          !call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim, FCOL, DROWS, DCOLS) 
-!          !call xgBlock_print(HELPER, 201)  
-!        else !!TODO OVO IZNAD JE OK OVO ISPOD NE VALJA NE ZNAM ZASTO POLUDECU!!!!
-!          !print *, "FROW, FCOL, DROWS, DCOLS", FROW, FCOL, DROWS, DCOLS
-!          call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
-!          call xgBlock_print(HELPER, 201)
-!        
-!          !call xgBlock_setBlock1(debugBlock, HELPER, FROW+1, FCOL, DROWS, DCOLS) 
-!          !call xgBlock_print(HELPER, 211)
-!        end if
-!      end if
-!    end if
-!    
-!    !print *, "debugBlock%rows", rows(debugBlock)
-!    !print *, "debugBlock%cols", cols(debugBlock)
-!    call xmpi_barrier(chebfi%spacecom)
+  subroutine debug_helper_colrows(debugBlock, chebfi, line)
+      
+    type(xgBlock_t) , intent(inout) :: debugBlock
+    type(chebfi_t) , intent(inout) :: chebfi
+    character(*) , intent(in) :: line
+    type(xgBlock_t) :: HELPER
+    
+    call xmpi_barrier(chebfi%spacecom)
+    
+    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+      write(100+xmpi_comm_rank(chebfi%spacecom),*) (line)
+      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)) 
+      
+      write(100+xmpi_comm_rank(chebfi%spacecom)+1,*) (line)
+      call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)+1) 
+    else
+      write(200+xmpi_comm_rank(chebfi%spacecom),*) (line)
+      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 200+xmpi_comm_rank(chebfi%spacecom)) 
+    end if
+    
+    !print *, "debugBlock%rows", rows(debugBlock)
+    !print *, "debugBlock%cols", cols(debugBlock)
+    call xmpi_barrier(chebfi%spacecom)
 
-!  end subroutine debug_helper_linalg
+  end subroutine debug_helper_colrows
+  
+  subroutine debug_helper_linalg(debugBlock, chebfi, line)
+      
+    type(xgBlock_t) , intent(inout) :: debugBlock
+    type(chebfi_t) , intent(inout) :: chebfi
+    character(*) , intent(in) :: line
+    type(xgBlock_t) :: HELPER
+    
+    integer, parameter :: FROW = 1, FCOL = 1, DROWS = 1, DCOLS = 10
+    
+    call xmpi_barrier(chebfi%spacecom) 
+    
+    !print *, "chebfi%bandpp", chebfi%bandpp
+    print *, "spacedim", chebfi%spacedim
+    !stop
+    !stop
+    
+    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+      write(100,*) (line)
+      call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
+      call xgBlock_print(HELPER, 100) 
+      
+      write(101,*) (line) 
+      call xgBlock_setBlock1(debugBlock, HELPER, chebfi%spacedim/2+1, FCOL, DROWS, DCOLS) 
+      call xgBlock_print(HELPER, 101)
+     
+    else
+      !!TODO STOP DEBUGGING PARTS OF AX AND TRY TO PRINT THE SUM
+      print *, "STAMPAM MPI2"
+      print *, "rank, spacedim", xmpi_comm_rank(chebfi%spacecom), chebfi%spacedim
+      write(200+xmpi_comm_rank(chebfi%spacecom),*) (line)
+      if (xmpi_comm_rank(chebfi%spacecom) == 0) then
+        !print *, "chebfi%spacedim-1", chebfi%spacedim-1
+        call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
+        call xgBlock_print(HELPER, 200)
+      
+      else !!TODO OVO IZNAD JE OK OVO ISPOD NE VALJA NE ZNAM ZASTO POLUDECU!!!!
+        !print *, "FROW, FCOL, DROWS, DCOLS", FROW, FCOL, DROWS, DCOLS
+        call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
+        call xgBlock_print(HELPER, 201)
+     
+      end if
+    end if
+    
+    !print *, "debugBlock%rows", rows(debugBlock)
+    !print *, "debugBlock%cols", cols(debugBlock)
+    call xmpi_barrier(chebfi%spacecom)
+
+  end subroutine debug_helper_linalg
   
 end module m_chebfi2
 
