@@ -1,6 +1,4 @@
-'''
-    Base classes for documents containing tabular data represented with pandas DataFrames.
-'''
+"""Base classes for documents containing tabular data represented with pandas DataFrames."""
 from ..register_tag import yaml_scalar, yaml_not_available_tag
 from .. import has_pandas
 
@@ -11,7 +9,7 @@ if has_pandas:
 
     @yaml_scalar
     class Table(DataFrame):
-        # assume the class implemenst a complete dict-like interface
+        # assume the class implements a complete dict-like interface
         is_dict_like = True
         table_sep = r'\s+'
 

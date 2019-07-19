@@ -440,10 +440,6 @@ P           mkmem22        64
 == DATASET 11 ==================================================================
 -   nproc =    1
  
---- !IterStart
-dtset:    11
-...
- 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
@@ -625,29 +621,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
    max. value=  5.21E-12, min. value= -2.16E-12
  
  
----
-label     : results_gs
-comment   : Summary of ground states results.
-natom     :        2
-nsppol    :        1
-cutoff energies: {"ecut":   5.00000000000000000E+00, "pawecutdg":   1.00000000000000000E+01, }
-convergence: {
-    "deltae":  -8.20676859802915715E-13, "res2":   3.94248819542692761E-13, 
-    "residm":   6.97915219202327066E-15, "diffor":   0.00000000000000000E+00, 
-}
-etotal    :  -8.56369468562918357E+00
-entropy   :   0.00000000000000000E+00
-fermie    :   4.81303048439042092E-02
-stress tensor: !Tensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
- 
-cartesian forces: !CartForces
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-...
- 
 ================================================================================
  
  ----iterations are completed or convergence reached----
@@ -695,40 +668,9 @@ cartesian forces: !CartForces
   >Total energy in eV           = -2.33029977513982E+02
   >Total DC energy in eV        = -2.33029983350498E+02
 --------------------------------------------------------------------------------
---- !ETOT
-label               : Etot
-comment             : Components of total free energy (in Hartree)
-Kinetic energy      :  3.101253248135579454E+00
-Hartree energy      :  8.110799002016441106E-01
-XC energy           : -7.295028127318822442E+00
-Ewald energy        : -8.409355529521921113E+00
-PsPCore             :  1.011284399098083098E+00
-Loc. psp. energy    : -2.061614705741800613E+00
-Spherical terms     :  4.278686344006064957E+00
-Etotal              : -8.563694471141172215E+00
-Total energy(eV)    : -2.330299775139821463E+02
-...
- 
---- !ETOT
-label               : Etot DC
-comment             : '"Double-counting" decomposition of free energy'
-Band energy         : -9.362996273795187729E-01
-Ewald energy        : -8.409355529521921113E+00
-PspCore energy      :  1.011284399098083098E+00
-'Dble-C XC-energy'  : -4.326590795814971635E+00
-Spherical terms     :  4.097266867989144856E+00
-Etotal (DC)         : -8.563694685629183567E+00
-Total DC energy(eV) : -2.330299775139821463E+02
-...
- 
- 
 ================================================================================
 == DATASET 12 ==================================================================
 -   nproc =    1
- 
---- !IterStart
-dtset:    12
-...
  
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
@@ -882,29 +824,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
    max. value=  1.78E-06, min. value= -4.52E-07
  
  
----
-label     : results_gs
-comment   : Summary of ground states results.
-natom     :        2
-nsppol    :        1
-cutoff energies: {"ecut":   5.00000000000000000E+00, "pawecutdg":   1.00000000000000000E+01, }
-convergence: {
-    "deltae":  -8.86402062860724982E-13, "res2":   3.94836720121338466E-13, 
-    "residm":   6.94497881212451100E-15, "diffor":   0.00000000000000000E+00, 
-}
-etotal    :  -8.56369471931888881E+00
-entropy   :   0.00000000000000000E+00
-fermie    :   4.81322972601073498E-02
-stress tensor: !Tensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
- 
-cartesian forces: !CartForces
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-...
- 
 ================================================================================
  
  ----iterations are completed or convergence reached----
@@ -952,40 +871,9 @@ cartesian forces: !CartForces
   >Total energy in eV           = -2.33029976577855E+02
   >Total DC energy in eV        = -2.33029984267241E+02
 --------------------------------------------------------------------------------
---- !ETOT
-label               : Etot
-comment             : Components of total free energy (in Hartree)
-Kinetic energy      :  3.101253302003150747E+00
-Hartree energy      :  8.110798924842282931E-01
-XC energy           : -7.295028128546853452E+00
-Ewald energy        : -8.409355529521921113E+00
-PsPCore             :  1.011284399098083098E+00
-Loc. psp. energy    : -2.061614750464826784E+00
-Spherical terms     :  4.278686378209005881E+00
-Etotal              : -8.563694436739133664E+00
-Total energy(eV)    : -2.330299765778550523E+02
-...
- 
---- !ETOT
-label               : Etot DC
-comment             : '"Double-counting" decomposition of free energy'
-Band energy         : -9.362996649017719664E-01
-Ewald energy        : -8.409355529521921113E+00
-PspCore energy      :  1.011284399098083098E+00
-'Dble-C XC-energy'  : -4.326590789202126253E+00
-Spherical terms     :  4.097266865208847975E+00
-Etotal (DC)         : -8.563694719318888815E+00
-Total DC energy(eV) : -2.330299765778550523E+02
-...
- 
- 
 ================================================================================
 == DATASET 21 ==================================================================
 -   nproc =    1
- 
---- !IterStart
-dtset:    21
-...
  
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
@@ -1117,29 +1005,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
    max. value=  1.29E-01, min. value= -6.67E-02
  
  
----
-label     : results_gs
-comment   : Summary of ground states results.
-natom     :        2
-nsppol    :        1
-cutoff energies: {"ecut":   5.00000000000000000E+00, "pawecutdg":   1.00000000000000000E+01, }
-convergence: {
-    "deltae":   9.25481913327530492E-13, "res2":   6.49806009940183930E-14, 
-    "residm":   4.64764647596229310E-15, "diffor":   0.00000000000000000E+00, 
-}
-etotal    :  -8.56369468562904679E+00
-entropy   :   0.00000000000000000E+00
-fermie    :   4.81303055471493241E-02
-stress tensor: !Tensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
- 
-cartesian forces: !CartForces
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-...
- 
 ================================================================================
  
  ----iterations are completed or convergence reached----
@@ -1187,40 +1052,9 @@ cartesian forces: !CartForces
   >Total energy in eV           = -2.33029982848492E+02
   >Total DC energy in eV        = -2.33029983350494E+02
 --------------------------------------------------------------------------------
---- !ETOT
-label               : Etot
-comment             : Components of total free energy (in Hartree)
-Kinetic energy      :  3.101253281788572291E+00
-Hartree energy      :  8.110799502167733710E-01
-XC energy           : -7.295028310918104886E+00
-Ewald energy        : -8.409355529521921113E+00
-PsPCore             :  1.011284399098083098E+00
-Loc. psp. energy    : -2.061614851552353134E+00
-Spherical terms     :  4.278686393708126090E+00
-Etotal              : -8.563694667180822506E+00
-Total energy(eV)    : -2.330299828484923239E+02
-...
- 
---- !ETOT
-label               : Etot DC
-comment             : '"Double-counting" decomposition of free energy'
-Band energy         : -9.362995829676283854E-01
-Ewald energy        : -8.409355529521921113E+00
-PspCore energy      :  1.011284399098083098E+00
-'Dble-C XC-energy'  : -4.326590816681831875E+00
-Spherical terms     :  4.097266844444250822E+00
-Etotal (DC)         : -8.563694685629046788E+00
-Total DC energy(eV) : -2.330299828484923239E+02
-...
- 
- 
 ================================================================================
 == DATASET 22 ==================================================================
 -   nproc =    1
- 
---- !IterStart
-dtset:    22
-...
  
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
@@ -1374,29 +1208,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
    max. value=  6.46E-02, min. value= -3.56E-02
  
  
----
-label     : results_gs
-comment   : Summary of ground states results.
-natom     :        2
-nsppol    :        1
-cutoff energies: {"ecut":   5.00000000000000000E+00, "pawecutdg":   1.00000000000000000E+01, }
-convergence: {
-    "deltae":  -1.34470212742598960E-12, "res2":   9.66870498259227870E-14, 
-    "residm":   1.23776477969062408E-15, "diffor":   0.00000000000000000E+00, 
-}
-etotal    :  -8.56369471931910908E+00
-entropy   :   0.00000000000000000E+00
-fermie    :   4.81323010953236263E-02
-stress tensor: !Tensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
- 
-cartesian forces: !CartForces
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-...
- 
 ================================================================================
  
  ----iterations are completed or convergence reached----
@@ -1444,33 +1255,6 @@ cartesian forces: !CartForces
   >Total energy in eV           = -2.33029979784034E+02
   >Total DC energy in eV        = -2.33029984267247E+02
 --------------------------------------------------------------------------------
---- !ETOT
-label               : Etot
-comment             : Components of total free energy (in Hartree)
-Kinetic energy      :  3.101253268763495718E+00
-Hartree energy      :  8.110799318500069299E-01
-XC energy           : -7.295028248282600991E+00
-Ewald energy        : -8.409355529521921113E+00
-PsPCore             :  1.011284399098083098E+00
-Loc. psp. energy    : -2.061614801524789264E+00
-Spherical terms     :  4.278686425053691345E+00
-Etotal              : -8.563694554564033723E+00
-Total energy(eV)    : -2.330299797840336566E+02
-...
- 
---- !ETOT
-label               : Etot DC
-comment             : '"Double-counting" decomposition of free energy'
-Band energy         : -9.362996212991189227E-01
-Ewald energy        : -8.409355529521921113E+00
-PspCore energy      :  1.011284399098083098E+00
-'Dble-C XC-energy'  : -4.326590821501135053E+00
-Spherical terms     :  4.097266853904984352E+00
-Etotal (DC)         : -8.563694719319107307E+00
-Total DC energy(eV) : -2.330299797840336566E+02
-...
- 
- 
 == END DATASET(S) ==============================================================
 ================================================================================
   

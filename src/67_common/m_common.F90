@@ -48,17 +48,17 @@ module m_common
  use m_xmpi
  use m_dtset
  use m_xpapi
+ use m_yaml
+ use m_invars2
 
  use m_fstrings,          only : indent, endswith, sjoin
  use m_electronpositron,  only : electronpositron_type
  use m_energies,          only : energies_type, energies_eval_eint
  use m_pair_list,         only : pair_list
- use m_neat,              only : neat_energies, neat_open_etot, neat_finish_etot, neat_etot_add_line, stream_string
  use m_geometry,          only : mkrdim, metric
  use m_kg,                only : getcut
  use m_parser,            only : parsefile
  use m_invars1,           only : invars0, invars1m, indefo
- use m_invars2
  use m_time,              only : timab, time_set_papiopt
  use defs_abitypes,       only : dataset_type, ab_dimensions, hdr_type, MPI_type
  use defs_datatypes,      only : pspheader_type, ebands_t
@@ -75,10 +75,11 @@ module m_common
  public :: prtene
  public :: get_dtsets_pspheads     ! Parse input file, get list of pseudos for files file and build list of datasets
                                    ! pseudopotential headers, maxval of dimensions needed in outvars
- public :: ebands_from_file        ! Build an ebands_t object from file. Supports Fortran and netcdf files 
- public :: crystal_from_file       ! Build a crystal_t object from netcdf file or Abinit input file 
+ public :: ebands_from_file        ! Build an ebands_t object from file. Supports Fortran and netcdf files
+ public :: crystal_from_file       ! Build a crystal_t object from netcdf file or Abinit input file
                                    ! with file extension in [".abi", ".in"]
- type(stream_string) :: etot_yaml_doc
+
+ type(yamldoc_t),private,save :: etot_yaml_doc
 !!***
 
 contains
@@ -324,31 +325,35 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          if (prtfor==0) then
            if (optres==0) then
              write(message, '(4a)' ) ch10,&
-&             '     iter   Etot(hartree)      deltaE(h)  ', colname, '   vres2'
+               '     iter   Etot(hartree)      deltaE(h)  ', colname, '   vres2'
            else
              write(message, '(4a)' ) ch10,&
-&             '     iter   Etot(hartree)      deltaE(h)  ', colname, '   nres2'
+               '     iter   Etot(hartree)      deltaE(h)  ', colname, '   nres2'
            end if
          else
            if (optres==0) then
              write(message, '(4a)' ) ch10,&
-&             '     iter   Etot(hartree)      deltaE(h)  ',colname,'   vres2    diffor    maxfor '
+              '     iter   Etot(hartree)      deltaE(h)  ',colname,'   vres2    diffor    maxfor '
            else
              write(message, '(4a)' ) ch10,&
-&             '     iter   Etot(hartree)      deltaE(h)  ',colname,'   nres2    diffor    maxfor '
+              '     iter   Etot(hartree)      deltaE(h)  ',colname,'   nres2    diffor    maxfor '
            end if
          end if
        else
          if (optres==0) then
            write(message, '(4a)' ) ch10,&
-&           '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  vres2'
+            '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  vres2'
          else
            write(message, '(4a)' ) ch10,&
-&           '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  nres2'
+            '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  nres2'
          end if
        end if
      end if
-     call neat_open_etot(etot_yaml_doc, '', message)
+     ! Will save iterations in this global variables.
+     etot_yaml_doc = yamldoc_open('EtotSteps', "")
+     etot_yaml_doc%use_yaml = dtset%use_yaml
+     call etot_yaml_doc%open_tabular('data', tag='EtotIters')
+     call etot_yaml_doc%add_tabular_line(message)
      call wrtout(ab_out,message,'COLL')
    end if
 
@@ -369,9 +374,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    if(abs(tolvrs)>tiny(0.0_dp))ttolvrs=1
    ! Conduct printing. If extra output follows, then put a blank line into the output here
    if (dtset%prtvol>=10) then
-     message = ' '
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     call wrtout([std_out, ab_out], ' ')
    end if
 
    ! Calculate up and down charge and magnetization
@@ -455,9 +458,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &         firstchar,'ETOT',istep,etotal,deltae,residm,res2
        end if
      end if
-     if (etot_yaml_doc%length /= 0) then
-       call neat_etot_add_line(etot_yaml_doc, message)
-     end if
+     if (etot_yaml_doc%stream%length /= 0) call etot_yaml_doc%add_tabular_line('  '//message(6:))
      call wrtout(ab_out,message,'COLL')
 
      if(mpi_enreg%paral_pert==1) then
@@ -476,19 +477,15 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      if(tmagnet==1) then
        write(message,'(a,f11.6,a,f11.6,a,f10.6)')&
 &       ' #electrons spin up=',rhoup,', spin down=',rhodn,', magnetization=',magnet
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
+       call wrtout([std_out, ab_out], message)
      end if
 
      ! Moreover, print atomic positions if dtset%ionmov==4, and moved_atm_inside==1
      if (dtset%ionmov==4 .and. moved_atm_inside==1)then
-       message = ' reduced coordinates :'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+       call wrtout([std_out, ab_out], ' reduced coordinates :')
        do iatom=1,dtset%natom
          write(message, '(i5,1x,3es21.11)' ) iatom,xred(:,iatom)
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         call wrtout([std_out, ab_out], message)
        end do
      end if
 
@@ -499,16 +496,14 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        if(abs(favg(2))<1.0d-13)f_tmp(2)=zero
        if(abs(favg(3))<1.0d-13)f_tmp(3)=zero
        write(message, '(a,3es10.2)' )' cartesian forces (ha/bohr); non-corrected avg=',f_tmp(:)
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+       call wrtout([std_out, ab_out], message)
        do iatom=1,dtset%natom
          f_tmp(:)=fcart(:,iatom)
          if(abs(fcart(1,iatom))<1.0d-13)f_tmp(1)=zero
          if(abs(fcart(2,iatom))<1.0d-13)f_tmp(2)=zero
          if(abs(fcart(3,iatom))<1.0d-13)f_tmp(3)=zero
          write(message, '(i5,1x,3es21.11)' ) iatom,f_tmp(:)
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         call wrtout([std_out, ab_out], message)
        end do
      end if
 
@@ -570,8 +565,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
            write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a)' )ch10, &
            ' At SCF step',istep,'   max grdnorm=',residm,' < tolwfr=',tolwfr,' =>converged.'
          end if
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         call wrtout([std_out, ab_out], message)
          quit=1
        else
          use_dpfft = residm < tol7
@@ -602,8 +596,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
 &         ' At SCF step',istep,', forces are converged : ',ch10,&
 &         '  for the second time, max diff in force=',diffor,' < toldff=',toldff
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         call wrtout([std_out, ab_out], message)
          quit=1
        end if
      end if
@@ -625,11 +618,10 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
        if(tolrff_ok==2 .and. (.not.noquit))then
          write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3,a)' ) ch10, &
-&         ' At SCF step',istep,', forces are sufficiently converged : ',ch10,&
-&         '  for the second time, max diff in force=',diffor,&
-&         ' is less than < tolrff=',tolrff, ' times max force'
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         ' At SCF step',istep,', forces are sufficiently converged : ',ch10,&
+         '  for the second time, max diff in force=',diffor,&
+         ' is less than < tolrff=',tolrff, ' times max force'
+         call wrtout([std_out, ab_out], message)
          quit=1
        end if
      end if
@@ -648,15 +640,14 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        if(toldfe_ok==2 .and. (.not.noquit))then
          if(usefock==0 .or. nnsclohf<2)then
            write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
-&           ' At SCF step',istep,', etot is converged : ',ch10,&
-&           '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+            ' At SCF step',istep,', etot is converged : ',ch10,&
+            '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
          else
            write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
-&           ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot converged : ',ch10,&
-&           '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+            ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot converged : ',ch10,&
+            '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
          endif
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         call wrtout([std_out, ab_out], message)
          quit=1
        end if
        if(usefock==1 .and. nnsclohf>1)then
@@ -664,20 +655,18 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 !          The change due to the update of the Fock operator is sufficiently small. No need to meet it a second times.
            if (abs(deltae)<toldfe) then
              write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
-&             ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - etot converged : ',ch10,&
-&             '  update of Fock operator yields diff in etot=',abs(deltae),' < toldfe=',toldfe
-             call wrtout(ab_out,message,'COLL')
-             call wrtout(std_out,message,'COLL')
+             ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - etot converged : ',ch10,&
+             '  update of Fock operator yields diff in etot=',abs(deltae),' < toldfe=',toldfe
+             call wrtout([std_out, ab_out], message)
              fock%fock_common%fock_converged=.true.
              quit=1
            endif
          endif
          if(istep_mix==nnsclohf .and. quit==0)then
            write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
-&           ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot NOT converged : ',ch10,&
-&           '  diff in etot=',abs(deltae),' > toldfe=',toldfe
-           call wrtout(ab_out,message,'COLL')
-           call wrtout(std_out,message,'COLL')
+           ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot NOT converged : ',ch10,&
+           '  diff in etot=',abs(deltae),' > toldfe=',toldfe
+           call wrtout([std_out, ab_out], message)
          endif
        endif
 
@@ -712,8 +701,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
            write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
             ' At SCF step',istep,'       nres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
          end if
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         call wrtout([std_out, ab_out], message)
          quit=1
        else
          use_dpfft = res2 < tol5
@@ -722,9 +710,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
      if (quit==1.and.noquit) then
        write(message, '(a,a,a)' ) ch10, &
-&       ' SCF cycle will continue as it is in an initialization stage',' (occ. matrix was kept constant)...'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+        ' SCF cycle will continue as it is in an initialization stage',' (occ. matrix was kept constant)...'
+       call wrtout([std_out, ab_out], message)
      end if
 
    end if
@@ -744,38 +731,36 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
        if(iscf>=1 .or. iscf==-3 .or. iscf == 0)then
          write(message, '(a,a,a,a,i5,a)' ) ch10,&
-&         ' scprqt:  WARNING -',ch10,&
-&         '  nstep=',nstep,' was not enough SCF cycles to converge;'
+         ' scprqt:  WARNING -',ch10,&
+         '  nstep=',nstep,' was not enough SCF cycles to converge;'
 
          write(std_out,'(6a,i0,3a)')ch10,&
-&         "--- !ScfConvergenceWarning",ch10,&
-&         "message: |",ch10,&
-&         '    nstep ',nstep,' was not enough SCF cycles to converge.',ch10,&
-&         "..."
+         "--- !ScfConvergenceWarning",ch10,&
+         "message: |",ch10,&
+         '    nstep ',nstep,' was not enough SCF cycles to converge.',ch10,&
+         "..."
            !MSG_WARNING_CLASS(message, "ScfConvergenceWarning")
        else
          write(message, '(a,a,a,a,i5,a)' ) ch10,&
-&         ' scprqt:  WARNING -',ch10,&
-&         '  nstep=',nstep,' was not enough non-SCF iterations to converge;'
+         ' scprqt:  WARNING -',ch10,&
+         '  nstep=',nstep,' was not enough non-SCF iterations to converge;'
 
          write(std_out,'(8a)')ch10,&
-&         "--- !NscfConvergenceWarning",ch10,&
-&         "message: |",ch10,TRIM(indent(message)),ch10,&
-&         "..."
+         "--- !NscfConvergenceWarning",ch10,&
+         "message: |",ch10,TRIM(indent(message)),ch10,&
+         "..."
            !MSG_WARNING_CLASS(message, "NScfConvergenceWarning")
        end if
-
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+       call wrtout([std_out, ab_out], message)
 
        if (ttolwfr==1) then
          if (dtset%usewvl == 0) then
            write(message, '(a,es11.3,a,es11.3,a)' ) &
-&           '  maximum residual=',residm,' exceeds tolwfr=',tolwfr,ch10
+           '  maximum residual=',residm,' exceeds tolwfr=',tolwfr,ch10
 
            write(message2, '(a,es11.3,2a)' ) &
-&           '  maximum residual each band. tolwfr= ',tolwfr,ch10,&
-&           '  iband, isppol, individual band residuals (max over all k-points):'
+           '  maximum residual each band. tolwfr= ',tolwfr,ch10,&
+           '  iband, isppol, individual band residuals (max over all k-points):'
            call wrtout(std_out, message2,'COLL')
            do isppol = 1, dtset%nsppol
              do iband = 1, dtset%mband
@@ -786,33 +771,31 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
          else
            write(message, '(a,es11.3,a,es11.3,a)' ) &
-&           '  maximum grdnorm=',residm,' exceeds tolwfr=',tolwfr,ch10
+           '  maximum grdnorm=',residm,' exceeds tolwfr=',tolwfr,ch10
          end if
 
        else if (ttoldff==1) then
          write(message, '(a,es11.3,a,es11.3,a)' ) &
-&         '  maximum force difference=',diffor,' exceeds toldff=',toldff,ch10
+         '  maximum force difference=',diffor,' exceeds toldff=',toldff,ch10
 
        else if (ttolrff==1) then
          write(message, '(a,es11.3,a,es11.3,a)' ) &
-&         '  maximum force difference=',diffor,' exceeds tolrff*maxfor=',tolrff*maxfor,ch10
+         '  maximum force difference=',diffor,' exceeds tolrff*maxfor=',tolrff*maxfor,ch10
 
        else if (ttoldfe==1) then
          write(message, '(a,es11.3,a,es11.3,a)' ) &
-&         '  maximum energy difference=',abs(deltae),' exceeds toldfe=',toldfe,ch10
+         '  maximum energy difference=',abs(deltae),' exceeds toldfe=',toldfe,ch10
 
        else if(ttolvrs==1)then
          if (optres==0) then
            write(message, '(a,es11.3,a,es11.3,a)' ) &
-&           '  potential residual=',res2,' exceeds tolvrs=',tolvrs,ch10
+           '  potential residual=',res2,' exceeds tolvrs=',tolvrs,ch10
          else
            write(message, '(a,es11.3,a,es11.3,a)' ) &
-&           '  density residual=',res2,' exceeds tolvrs=',tolvrs,ch10
+           '  density residual=',res2,' exceeds tolvrs=',tolvrs,ch10
          end if
        end if
-
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message, 'COLL')
+       call wrtout([std_out, ab_out], message)
 
        if (prtxml == 1) then
          write(ab_xml_out, "(A)", advance = "NO") '      <status cvState="Failed"'
@@ -842,10 +825,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      end if
 
      ! If enabled, output a YAML document with the ETOT iterations
-     call neat_finish_etot(etot_yaml_doc, ab_out)
-
+     if (etot_yaml_doc%stream%length > 0) call etot_yaml_doc%write_and_free(ab_out)
    end if ! nstep == 0 : no output
-
 
  case default
    write(message, '(a,i0,a)' )' choice = ',choice,' is not an allowed value.'
@@ -895,8 +876,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &                 ' max. force from electronic calculation and max. force from positronic calculation',ch10,&
 &                 ' is converged :  diff(maxfor_el-maxfor_pos)=',diff_f,' < postoldff=',electronpositron%postoldff
                end if
-               call wrtout(ab_out,message,'COLL')
-               call wrtout(std_out,message,'COLL')
+               call wrtout([std_out, ab_out], message)
              else
                quit=0
              end if
@@ -912,8 +892,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &           '  posnstep=',dtset%posnstep,' was not enough SCF cycles to converge difference between',ch10,&
 &           '  etotal from electronic calculation and etotal from positronic calculation;',ch10,&
 &           '  diff=',diff_e,' exceeds postoldfe=',electronpositron%postoldfe
-           call wrtout(ab_out,message,'COLL')
-           call wrtout(std_out,message,'COLL')
+           call wrtout([std_out, ab_out], message)
          end if
          if (diff_f>=electronpositron%postoldff.and.abs(dtset%postoldff)>tiny(0.0_dp)) then
            write(message, '(4a,i5,5a,es11.3,a,es11.3)' ) ch10,&
@@ -921,8 +900,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &           '  posnstep=',dtset%posnstep,' was not enough SCF cycles to converge difference between',ch10,&
 &           '  max. force from electronic calculation and max. force from positronic calculation;',ch10,&
 &           '  diff=',diff_e,' exceeds postoldff=',electronpositron%postoldff
-           call wrtout(ab_out,message,'COLL')
-           call wrtout(std_out,message,'COLL')
+           call wrtout([std_out, ab_out], message)
          end if
        end if
      end if
@@ -937,14 +915,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
    logical function converged()
 
-!   converged = .not.(                             &
-!&   (ttolwfr==1 .and. residm > tolwfr) .or.       &
-!&   (ttoldff==1 .and. diffor > toldff) .or.       &
-!&   (ttolrff==1 .and. diffor > tolrff*maxfor .and. maxfor > tol16) .or.&
-!&   (ttoldfe==1 .and. abs(deltae) > toldfe) .or.  &
-!&   (ttolvrs==1 .and. res2  > tolvrs) )
-
-   ! LB-02/01/2017 :
+   ! LB-02/01/2017:
    ! This code avoids evaluation of undefined variables (which could happen in respfn, apparently)
    logical :: loc_conv
    loc_conv = .true.
@@ -1074,17 +1045,14 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
  if(response==1 .and. dtset%nqpt==1)then
    k0(:)=dtset%qptn(:)
    write(message, '(a)' )' setup1 : take into account q-point for computing boxcut.'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
  end if
  if (usepaw==1) then
    write(message,'(2a)') ch10,' Coarse grid specifications (used for wave-functions):'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
    call getcut(boxcutc,ecutc_eff,gmet,gsqcutc_eff,dtset%iboxcut,ab_out,k0,ngfftc)
    write(message,'(2a)') ch10,' Fine grid specifications (used for densities):'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
    call getcut(boxcut,ecut_eff,gmet,gsqcut_eff,dtset%iboxcut,ab_out,k0,ngfft)
  else
    call getcut(boxcut,ecut_eff,gmet,gsqcut_eff,dtset%iboxcut,ab_out,k0,ngfft)
@@ -1475,7 +1443,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
  ! Do not modify the length of these strings
  character(len=14) :: eneName
  character(len=500) :: msg
- type(pair_list) :: e_components, e_components_dc
+ type(yamldoc_t) :: edoc, dc_edoc
 !arrays
  character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
 
@@ -1527,136 +1495,126 @@ subroutine prtene(dtset,energies,iout,usepaw)
    if (directE_avail) then
      write(msg, '(2a)' ) ' Components of total free energy (in Hartree) :',ch10
      call wrtout(iout,msg,'COLL')
-     call e_components%set('comment', s='Components of total free energy (in Hartree)')
+     edoc = yamldoc_open('EnergyTerms', 'Components of total free energy in Hartree', width=20, real_fmt='(es21.14)')
+     edoc%use_yaml = dtset%use_yaml
      write(msg, '(a,es21.14)' ) '    Kinetic energy  = ',energies%e_kinetic
      call wrtout(iout,msg,'COLL')
-     call e_components%set('kinetic', r=energies%e_kinetic)
+     call edoc%add_real('kinetic', energies%e_kinetic)
      if (ipositron/=1) then
        exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
-!XG20181025 This should NOT be a part of the semilocal XC energy, but treated separately.
-!      At present, there is still a problem with the variational formulation for the Fock term with PAW.
-!      So, for the time being, keep it inside.
+       ! XG20181025 This should NOT be a part of the semilocal XC energy, but treated separately.
+       ! At present, there is still a problem with the variational formulation for the Fock term with PAW.
+       ! So, for the time being, keep it inside.
        if(usepaw==1)exc_semilocal=exc_semilocal+energies%e_fock
        write(msg, '(3(a,es21.14,a),a,es21.14)' ) &
-&       '    Hartree energy  = ',energies%e_hartree,ch10,&
-&       '    XC energy       = ',exc_semilocal,ch10,&
-&       '    '//eneName//'  = ',enevalue,ch10,&
-&       '    PspCore energy  = ',energies%e_corepsp
+         '    Hartree energy  = ',energies%e_hartree,ch10,&
+         '    XC energy       = ',exc_semilocal,ch10,&
+         '    '//eneName//'  = ',enevalue,ch10,&
+         '    PspCore energy  = ',energies%e_corepsp
        call wrtout(iout,msg,'COLL')
-       call e_components%set('hartree', r=energies%e_hartree)
-       call e_components%set('xc', r=exc_semilocal)
-       call e_components%set(eneName, r=enevalue)
-       call e_components%set('psp_core', r=energies%e_corepsp)
+       call edoc%add_real('hartree', energies%e_hartree)
+       call edoc%add_real('xc', exc_semilocal)
+       call edoc%add_real(eneName, enevalue)
+       call edoc%add_real('psp_core', energies%e_corepsp)
 #if defined DEV_YP_VDWXC
        if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 10) .and. (xc_vdw_status()) ) then
          write(msg, '(a,es21.14)' )'    vdW-DF energy   = ',energies%e_xc_vdw
          call wrtout(iout,msg,'COLL')
-         call e_components%set('VdWaals_df', r=energies%e_xc_vdw)
+         call edoc%add_real('VdWaals_df', energies%e_xc_vdw)
        end if
 #endif
      end if
      write(msg, '(a,es21.14)' ) '    Loc. psp. energy= ',energies%e_localpsp
      call wrtout(iout,msg,'COLL')
-     call e_components%set('local_psp', r=energies%e_localpsp)
+     call edoc%add_real('local_psp', energies%e_localpsp)
      if (usepaw==0) then
        if(abs(energies%e_fock0)<tol8)then
-         write(msg, '(a,es21.14)' ) &
-&         '    NL   psp  energy= ',energies%e_nlpsp_vfock
-         call e_components%set('non_local_psp', r=energies%e_nlpsp_vfock)
+         write(msg, '(a,es21.14)' ) '    NL   psp  energy= ',energies%e_nlpsp_vfock
+         call edoc%add_real('non_local_psp', energies%e_nlpsp_vfock)
        else
-         write(msg, '(a,es21.14)' ) &
-&         '    NL(psp+X) energy= ',energies%e_nlpsp_vfock-energies%e_fock0
-         call e_components%set('non_local_psp+x', r=energies%e_nlpsp_vfock-energies%e_fock0)
+         write(msg, '(a,es21.14)' ) '    NL(psp+X) energy= ',energies%e_nlpsp_vfock-energies%e_fock0
+         call edoc%add_real('non_local_psp+x', energies%e_nlpsp_vfock-energies%e_fock0)
        endif
        call wrtout(iout,msg,'COLL')
      else
-       write(msg, '(a,es21.14)' ) &
-&       '    Spherical terms = ',energies%e_paw
+       write(msg, '(a,es21.14)' ) '    Spherical terms = ',energies%e_paw
        call wrtout(iout,msg,'COLL')
-       call e_components%set('spherical_terms', r=energies%e_paw)
-!XG20181025 Does not work (yet)...
-!       if(abs(energies%e_nlpsp_vfock)>tol8)then
-!         write(msg, '(a,es21.14)' ) &
-!&         '    Fock-type term  = ',energies%e_nlpsp_vfock
-!         call wrtout(iout,msg,'COLL')
-!         write(msg, '(a,es21.14)' ) &
-!&         '    -frozen Fock en.= ',-energies%e_fock0
-!         call wrtout(iout,msg,'COLL')
-!       endif
+       call edoc%add_real('spherical_terms', energies%e_paw)
+       !XG20181025 Does not work (yet)...
+       !if(abs(energies%e_nlpsp_vfock)>tol8)then
+       !  write(msg, '(a,es21.14)' )'    Fock-type term  = ',energies%e_nlpsp_vfock
+       !  call wrtout(iout,msg,'COLL')
+       !  write(msg, '(a,es21.14)' ) '    -frozen Fock en.= ',-energies%e_fock0
+       !  call wrtout(iout,msg,'COLL')
+       !endif
      end if
      if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
        write(msg, '(a,es21.14)' ) '    Vd Waals DFT-D = ',energies%e_vdw_dftd
        call wrtout(iout,msg,'COLL')
-       call e_components%set('VdWaals_dft_d', r=energies%e_vdw_dftd)
+       call edoc%add_real('VdWaals_dft_d', energies%e_vdw_dftd)
      end if
      if (dtset%nzchempot>=1) then
        write(msg, '(a,es21.14)' ) '    Chem. potential = ',energies%e_chempot
        call wrtout(iout,msg,'COLL')
-       call e_components%set('chem_potential', r=energies%e_chempot)
+       call edoc%add_real('chem_potential', energies%e_chempot)
      end if
      if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then
-       call e_components%set('internal', r=etotal-eent)
+       call edoc%add_real('internal', etotal-eent)
        if(.not.testdmft) then
          write(msg, '(a,es21.14,a,a,a,es21.14)' ) &
-&         '    >>>>> Internal E= ',etotal-eent,ch10,ch10,&
-&         '    -kT*entropy     = ',eent
+           '    >>>>> Internal E= ',etotal-eent,ch10,ch10,&
+           '    -kT*entropy     = ',eent
          call wrtout(iout,msg,'COLL')
-         call e_components%set('-kT*entropy', r=eent)
+         call edoc%add_real('-kT*entropy', eent)
        else
-         write(msg, '(a,es21.14,a)' ) &
-&         '    >>>>> Internal E= ',etotal-eent,ch10
+         write(msg, '(a,es21.14,a)' ) '    >>>>> Internal E= ',etotal-eent,ch10
          call wrtout(iout,msg,'COLL')
        end if
      else if (ipositron/=0) then
        if (dtset%occopt>=3.and.dtset%occopt<=8) then
          write(msg, '(a,es21.14)' ) '    -kT*entropy     = ',eent
          call wrtout(iout,msg,'COLL')
-         call e_components%set('-kT*entropy', r=eent)
+         call edoc%add_real('-kT*entropy', eent)
        end if
        write(msg, '(3a,es21.14,a)' ) &
-&       '    >>> ',EPName(ipositron),' E= ',etotal-energies%e0_electronpositron &
-&       -energies%e_electronpositron,ch10
+        '    >>> ',EPName(ipositron),' E= ',etotal-energies%e0_electronpositron -energies%e_electronpositron,ch10
        call wrtout(iout,msg,'COLL')
        write(msg, '(3a,es21.14,2a,es21.14)' ) &
-&       '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
-&       '    EP interaction E= '             ,energies%e_electronpositron
+        '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
+        '    EP interaction E= '             ,energies%e_electronpositron
        call wrtout(iout,msg,'COLL')
        if(ipositron == 1) then
-        call e_components%set('positronic', r=etotal- &
-&                                         energies%e0_electronpositron-energies%e_electronpositron)
-        call e_components%set('electronic', r=energies%e0_electronpositron)
+        call edoc%add_real('positronic', etotal- &
+                                              energies%e0_electronpositron-energies%e_electronpositron)
+        call edoc%add_real('electronic', energies%e0_electronpositron)
        else
-        call e_components%set('electronic', r=etotal- &
-&                                         energies%e0_electronpositron-energies%e_electronpositron)
-        call e_components%set('positronic', r=energies%e0_electronpositron)
+        call edoc%add_real('electronic', etotal- &
+                                              energies%e0_electronpositron-energies%e_electronpositron)
+        call edoc%add_real('positronic', energies%e0_electronpositron)
        end if
-       call e_components%set('electron_positiron_interaction', r=energies%e_electronpositron)
+       call edoc%add_real('electron_positiron_interaction', energies%e_electronpositron)
      end if
      if ((dtset%berryopt==4 .or.  dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
-&     dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17) .and.ipositron/=1) then
+          dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17) .and.ipositron/=1) then
        write(msg, '(a,es21.14)' ) '    Electric energy = ',energies%e_elecfield
        call wrtout(iout,msg,'COLL')
        write(msg, '(a,es21.14)' ) '    Kohn-Sham energy= ',etotal-energies%e_elecfield
        call wrtout(iout,msg,'COLL')
-       call e_components%set('electric', r=energies%e_elecfield)
-       call e_components%set('kohn_sham', r=etotal-energies%e_elecfield)
+       call edoc%add_real('electric', energies%e_elecfield)
+       call edoc%add_real('kohn_sham', etotal-energies%e_elecfield)
      end if
      write(msg, '(a,es21.14)' ) '    >>>>>>>>> Etotal= ',etotal
      call wrtout(iout,msg,'COLL')
-     call e_components%set('total_energy', r=etotal)
+     call edoc%add_real('total_energy', etotal)
 
    else
      write(msg, '(9a)' ) &
-&     ' COMMENT: ',ch10,&
-&     '  "Direct" decomposition of total free energy cannot be printed out !!!',ch10,&
-&     '  PAW contribution due to spin-orbit coupling cannot be evaluated',ch10,&
-&     '  without the knowledge of imaginary part of Rhoij atomic occupancies',ch10,&
-&     '  (computed only when pawcpxocc=2).'
+     ' COMMENT: ',ch10,&
+     '  "Direct" decomposition of total free energy cannot be printed out !!!',ch10,&
+     '  PAW contribution due to spin-orbit coupling cannot be evaluated',ch10,&
+     '  without the knowledge of imaginary part of Rhoij atomic occupancies',ch10,&
+     '  (computed only when pawcpxocc=2).'
      call wrtout(iout,msg,'COLL')
-     call e_components%set('comment', s='"Direct" decomposition of total free energy cannot be printed out !!!'//ch10// &
-&                       'PAW contribution due to spin-orbit coupling cannot be evaluated'//ch10// &
-&                       'without the knowledge of imaginary part of Rhoij atomic occupancies'//ch10// &
-&                       '(computed only when pawcpxocc=2).')
    end if
  end if
 !============= Printing of Etotal by double-counting scheme ===========
@@ -1664,149 +1622,142 @@ subroutine prtene(dtset,energies,iout,usepaw)
  if (optdc>=1) then
 
    write(msg, '(4a,es21.14)' ) ch10,&
-&   ' "Double-counting" decomposition of free energy:',ch10,&
-&   '    Band energy     = ',energies%e_eigenvalues
+    ' "Double-counting" decomposition of free energy:',ch10,&
+    '    Band energy     = ',energies%e_eigenvalues
    call wrtout(iout,msg,'COLL')
-   call e_components_dc%set('comment', s='"Double-counting" decomposition of free energy')
-   call e_components_dc%set('band_energy', r=energies%e_eigenvalues)
+   dc_edoc = yamldoc_open('EnergyTermsDC', '"Double-counting" decomposition of free energy', width=20)
+   dc_edoc%use_yaml = dtset%use_yaml
+   call dc_edoc%add_real('band_energy', energies%e_eigenvalues)
    if (ipositron/=1) then
      write(msg, '(2(a,es21.14,a),a,es21.14)' ) &
-&     '    '//eneName//'  =',enevalue,ch10,&
-&     '    PspCore energy  = ',energies%e_corepsp-energies%e_corepspdc,ch10,&
-&     '    Dble-C XC-energy= ',-energies%e_hartree+energies%e_xc-energies%e_xcdc&
-&     -energies%e_fock0+&
-&     energies%e_hybcomp_E0-energies%e_hybcomp_v0
+       '    '//eneName//'  =',enevalue,ch10,&
+       '    PspCore energy  = ',energies%e_corepsp-energies%e_corepspdc,ch10,&
+       '    Dble-C XC-energy= ',-energies%e_hartree+energies%e_xc-energies%e_xcdc -energies%e_fock0 + &
+       energies%e_hybcomp_E0-energies%e_hybcomp_v0
      call wrtout(iout,msg,'COLL')
-     call e_components_dc%set(eneName, r=enevalue)
-     call e_components_dc%set('psp_core', r=energies%e_corepsp-energies%e_corepspdc)
-     call e_components_dc%set('xc_dc', r=-energies%e_hartree+energies%e_xc-energies%e_xcdc)
+     call dc_edoc%add_real(eneName, enevalue)
+     call dc_edoc%add_real('psp_core', energies%e_corepsp-energies%e_corepspdc)
+     call dc_edoc%add_real('xc_dc', -energies%e_hartree+energies%e_xc-energies%e_xcdc)
    end if
    if ((dtset%berryopt==4 .or.  dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
-&   dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17).and.ipositron/=1) then
+        dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17).and.ipositron/=1) then
      write(msg, '(a,es21.14)' ) '    Electric field  = ',energies%e_elecfield
      call wrtout(iout,msg,'COLL')
-     call e_components_dc%set('electric_field', r=energies%e_elecfield)
+     call dc_edoc%add_real('electric_field', energies%e_elecfield)
    end if
    if (usepaw==1) then
      write(msg, '(a,es21.14)' ) '    Spherical terms = ',energies%e_pawdc
      call wrtout(iout,msg,'COLL')
-     call e_components_dc%set('spherical_terms', r=energies%e_pawdc)
+     call dc_edoc%add_real('spherical_terms', energies%e_pawdc)
    end if
    if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
      write(msg, '(a,es21.14)' ) '    Vd Waals DFT-D = ',energies%e_vdw_dftd
      call wrtout(iout,msg,'COLL')
-     call e_components_dc%set('VdWaals_dft_d', r=energies%e_vdw_dftd)
+     call dc_edoc%add_real('VdWaals_dft_d', energies%e_vdw_dftd)
    end if
    if (dtset%nzchempot>=1) then
      write(msg, '(a,es21.14)' ) '    Chem. potential = ',energies%e_chempot
      call wrtout(iout,msg,'COLL')
-     call e_components_dc%set('chem_potential', r=energies%e_chempot)
+     call dc_edoc%add_real('chem_potential', energies%e_chempot)
    end if
    if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then
      if(.not.testdmft) then
        write(msg, '(a,es21.14,a,a,a,es21.14)' ) &
-&       '    >>>>> Internal E= ',etotaldc-eent,ch10,ch10,&
-&       '    -kT*entropy     = ',eent
+        '    >>>>> Internal E= ',etotaldc-eent,ch10,ch10,&
+        '    -kT*entropy     = ',eent
        call wrtout(iout,msg,'COLL')
-       call e_components_dc%set('internal', r=etotaldc-eent)
-       call e_components_dc%set('-kT*entropy', r=eent)
+       call dc_edoc%add_real('internal', etotaldc-eent)
+       call dc_edoc%add_real('-kT*entropy', eent)
      else
        write(msg, '(a,es21.14,a)' ) '    >>>>> Internal E= ',etotaldc-eent,ch10
        call wrtout(iout,msg,'COLL')
-       call e_components_dc%set('internal', r=etotaldc-eent)
+       call dc_edoc%add_real('internal', etotaldc-eent)
      end if
    else if (ipositron/=0) then
      if (dtset%occopt>=3 .and. dtset%occopt<=8) then
        write(msg, '(a,es21.14)' ) '    -kT*entropy     = ',eent
        call wrtout(iout,msg,'COLL')
-       call e_components_dc%set('-kT*entropy', r=eent)
+       call dc_edoc%add_real('-kT*entropy', eent)
      end if
      write(msg, '(a,es21.14,4a,es21.14,a)' ) &
-&     '    - EP dble-ct En.= ',-energies%edc_electronpositron,ch10,&
-&     '    >>> ',EPName(ipositron),' E= ',etotaldc-energies%e0_electronpositron &
-&     -energies%e_electronpositron,ch10
+       '    - EP dble-ct En.= ',-energies%edc_electronpositron,ch10,&
+       '    >>> ',EPName(ipositron),' E= ',etotaldc-energies%e0_electronpositron -energies%e_electronpositron,ch10
      call wrtout(iout,msg,'COLL')
      write(msg, '(3a,es21.14,2a,es21.14)' ) &
-&     '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
-&     '    EP interaction E= '            ,energies%e_electronpositron
+      '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
+      '    EP interaction E= '            ,energies%e_electronpositron
      call wrtout(iout,msg,'COLL')
-     call e_components_dc%set('electron_positron_dc', r=-energies%edc_electronpositron)
+     call dc_edoc%add_real('electron_positron_dc', -energies%edc_electronpositron)
      if(ipositron == 1) then
-       call e_components_dc%set('positronic', r=etotaldc-energies%e0_electronpositron-energies%e_electronpositron)
-       call e_components_dc%set('electronic', r=energies%e0_electronpositron)
+       call dc_edoc%add_real('positronic', etotaldc-energies%e0_electronpositron-energies%e_electronpositron)
+       call dc_edoc%add_real('electronic', energies%e0_electronpositron)
      else
-       call e_components_dc%set('electronic', r=etotaldc-energies%e0_electronpositron-energies%e_electronpositron)
-       call e_components_dc%set('positronic', r=energies%e0_electronpositron)
+       call dc_edoc%add_real('electronic', etotaldc-energies%e0_electronpositron-energies%e_electronpositron)
+       call dc_edoc%add_real('positronic', energies%e0_electronpositron)
      end if
-     call e_components_dc%set('electron_positron_interaction', r=energies%e_electronpositron)
+     call dc_edoc%add_real('electron_positron_interaction', energies%e_electronpositron)
    end if
    write(msg, '(a,es21.14)' ) '    >>>> Etotal (DC)= ',etotaldc
    call wrtout(iout,msg,'COLL')
-   call e_components_dc%set('total_energy_dc', r=etotaldc)
-
+   call dc_edoc%add_real('total_energy_dc', etotaldc)
  end if
 
 !======= Additional printing for compatibility  ==========
 
  if (usepaw==0.and.optdc==0) then
    write(msg, '(a,a,a,a,es21.14,a,es18.10)' ) ch10,&
-&   ' Other information on the energy :',ch10,&
-&   '    Total energy(eV)= ',etotal*Ha_eV,' ; Band energy (Ha)= ',energies%e_eigenvalues
+     ' Other information on the energy :',ch10,&
+     '    Total energy(eV)= ',etotal*Ha_eV,' ; Band energy (Ha)= ',energies%e_eigenvalues
    call wrtout(iout,msg,'COLL')
-   call e_components%set('band_energy', r=energies%e_eigenvalues)
-   call e_components%set('total_energy_eV', r=etotal*Ha_eV)
+   call edoc%add_real('band_energy', energies%e_eigenvalues)
+   call edoc%add_real('total_energy_eV', etotal*Ha_eV)
  end if
 
  if ((optdc==0.or.optdc==2).and.(.not.directE_avail)) then
    write(msg, '(a,a,es18.10)' ) ch10,' Band energy (Ha)= ',energies%e_eigenvalues
    call wrtout(iout,msg,'COLL')
-   call e_components%set('band_energy', r=energies%e_eigenvalues)
+   !call edoc%add_real('band_energy', energies%e_eigenvalues)
  end if
 
  if (usepaw==1) then
    if ((optdc==0.or.optdc==2).and.(directE_avail)) then
      write(msg, '(a,a,es21.14)' ) ch10,'  >Total energy in eV           = ',etotal*Ha_eV
      call wrtout(iout,msg,'COLL')
-     call e_components%set('total_energy_eV', r=etotal*Ha_eV)
+     call edoc%add_real('total_energy_eV', etotal*Ha_eV)
    end if
    if (optdc>=1) then
-     if (optdc==1) write(msg, '(a,a,es21.14)' ) ch10,&
-&     '  >Total DC energy in eV        = ',etotaldc*Ha_eV
-     if (optdc==2) write(msg, '(a,es21.14)' ) &
-&     '  >Total DC energy in eV        = ',etotaldc*Ha_eV
+     if (optdc==1) write(msg, '(a,a,es21.14)' ) ch10,'  >Total DC energy in eV        = ',etotaldc*Ha_eV
+     if (optdc==2) write(msg, '(a,es21.14)' ) '  >Total DC energy in eV        = ',etotaldc*Ha_eV
      call wrtout(iout,msg,'COLL')
-     call e_components_dc%set('total_energy_dc_eV', r=etotal*Ha_eV)
+     call dc_edoc%add_real('total_energy_dc_eV', etotal*Ha_eV)
    end if
  end if
 
  if( dtset%icoulomb/=1.and.abs(dtset%charge)>tol8) then
    write(msg, '(6a)' ) &
-&   ch10,' Calculation was performed for a charged system with PBC',&
-&   ch10,' You may consider including the monopole correction to the total energy',&
-&   ch10,' The correction is to be divided by the dielectric constant'
+     ch10,' Calculation was performed for a charged system with PBC',&
+     ch10,' You may consider including the monopole correction to the total energy',&
+     ch10,' The correction is to be divided by the dielectric constant'
    call wrtout(iout,msg,'COLL')
    write(msg, '(a,es21.14)' ) '    Monopole correction (Ha)=',energies%e_monopole
    call wrtout(iout,msg,'COLL')
    write(msg, '(a,es21.14)' ) '    Monopole correction (eV)=',energies%e_monopole*Ha_eV
    call wrtout(iout,msg,'COLL')
-   call e_components%set('monopole_correction', r=energies%e_monopole)
-   call e_components%set('monopole_correction_eV', r=energies%e_monopole*Ha_eV)
+   call edoc%add_real('monopole_correction', energies%e_monopole)
+   call edoc%add_real('monopole_correction_eV', energies%e_monopole*Ha_eV)
  end if
 
  write(msg,'(a,80a)')('-',mu=1,80)
  call wrtout(iout,msg,'COLL')
-
  call wrtout(iout, ch10, 'COLL')
 
- call neat_energies(e_components, iout)
- call e_components%free()
+ ! Write components of total energies in Yaml format.
+ call edoc%write_and_free(iout)
 
- if(e_components_dc%length() > 1) then
-   call wrtout(iout, ch10, 'COLL')
-   call neat_energies(e_components_dc, iout, tag='EnergyTermsDC')
-   call e_components_dc%free()
+ if (optdc >= 1) then
+   !call wrtout(iout, ch10, 'COLL')
+   call dc_edoc%write_and_free(iout)
  end if
-
 
 end subroutine prtene
 !!***
@@ -2010,7 +1961,7 @@ end subroutine get_dtsets_pspheads
 !! ebands_from_file
 !!
 !! FUNCTION
-!!  Build and ebands_t object from file. Supports Fortran and netcdf files 
+!!  Build and ebands_t object from file. Supports Fortran and netcdf files
 !!  provided they have a Abinit header and obviously GS eigenvalues
 !!
 !! INPUTS
@@ -2042,13 +1993,13 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
 
 ! *************************************************************************
 
- ! NOTE: Assume file with header. Must use wfk_read_eigenvalues to handle Fortran WFK 
+ ! NOTE: Assume file with header. Must use wfk_read_eigenvalues to handle Fortran WFK
  if (endswith(path, "_WFK") .or. endswith(path, "_WFK.nc")) then
    call hdr_read_from_fname(hdr, path, fform, comm)
    ABI_CHECK(fform /= 0, "fform == 0")
    call wfk_read_eigenvalues(path, gs_eigen, hdr, comm)
    new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
-   
+
  else if (endswith(path, ".nc")) then
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(ncid, path, comm))
@@ -2110,7 +2061,7 @@ type(crystal_t) function crystal_from_file(path, comm) result(new)
    NOT_IMPLEMENTED_ERROR()
 
    ! TODO
-   ! This routine prompts for the list of pseudos! One should get rid of the files file 
+   ! This routine prompts for the list of pseudos! One should get rid of the files file
    ! before activating this part.
    !call get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, comm)
    !call crystal_init(dtset%amu_orig(:,1), new, dtset%spgroup, dtset%natom, dtset%npsp, &

@@ -54,7 +54,6 @@ module m_outscfcv
  use m_results_gs,       only : results_gs_type, results_gs_ncwrite
  use m_ioarr,            only : ioarr, fftdatar_write
  use m_nucprop,          only : calc_efg,calc_fc
- use m_neat,             only : neat_crystal, neat_results_gs
  use m_outwant,          only : outwant
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type, simp_gen, bound_deriv
@@ -376,6 +375,11 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    ABI_ALLOCATE(my_atmtab, (natom))
    my_atmtab = (/ (iatom, iatom=1, natom) /)
    my_atmtab_allocated = .true.
+ end if
+
+ ! YAML output
+ if (me == master) then
+  call results_gs%yaml_write(ab_out, dtset, crystal, comment="Summary of ground state results")
  end if
 
 !wannier interface
@@ -1107,7 +1111,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        call rw_self(self,paw_dmft,prtopt=5,opt_rw=1,opt_stop=1)
 
       ! Read self energy on real axis obtained from Maxent
-       call rw_self(selfr,paw_dmft,prtopt=5,opt_rw=1,opt_imagonly=opt_imagonly, &                
+       call rw_self(selfr,paw_dmft,prtopt=5,opt_rw=1,opt_imagonly=opt_imagonly, &
      & opt_selflimit=self%oper(self%nw)%matlu,opt_hdc=self%hdc%matlu,pawang=pawang,cryst_struc=crystal)
 
       ! Check: from self on real axis, recompute self on Imaginary axis.
@@ -1116,7 +1120,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
       !  paw_dmft%fermie=hdr%fermie ! for tests
        write(std_out,*) "    Fermi level is",paw_dmft%fermie
 
-       ! selfr does not have any double couting in self%hdc 
+       ! selfr does not have any double couting in self%hdc
        ! hdc from self%hdc has been put in real part of self in rw_self.
        ! For the LDA BS: use opt_self=0 and fermie=fermie_lda
 
@@ -1243,14 +1247,10 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    call ebands_interpolate_kpath(ebands, dtset, crystal, [0, 0], dtfil%filnam_ds(4), spacecomm)
  end if
 
- ! YAML output
- call neat_crystal(crystal, ab_out, comment="Summary crystal properties.")
- call neat_results_gs(results_gs, ab_out, ecut, dtset%pawecutdg, comment="Summary of ground states results.")
-
  call crystal%free()
  call ebands_free(ebands)
 
-!Destroy atom table used for parallelism
+ ! Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
  call timab(969,2,tsec)
