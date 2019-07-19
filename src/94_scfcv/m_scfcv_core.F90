@@ -2223,7 +2223,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  if(allocated(vectornd)) then
     ABI_DEALLOCATE(vectornd)
  end if
- 
+
  if((nstep>0.and.dtset%iscf>0).or.dtset%iscf==-1) then
    ABI_DEALLOCATE(dielinv)
  end if
@@ -2234,7 +2234,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  ABI_DEALLOCATE(susmat)
  ABI_DEALLOCATE(ph1ddiel)
  ABI_DEALLOCATE(ylmdiel)
- !end if
 
  if (psps%usepaw==1) then
    if (dtset%iscf>0) then
@@ -2598,8 +2597,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 
 !    See similar section in m_energies.F90
 !    XG 20181025 This gives a variational energy in case of NCPP with all bands occupied - not yet for metals.
-     if (usepaw==0) etotal = etotal + energies%e_nlpsp_vfock - energies%e_fock0 
-!    XG 20181025 I was expecting the following to give also a variational energy in case of PAW, but this is not true. 
+     if (usepaw==0) etotal = etotal + energies%e_nlpsp_vfock - energies%e_fock0
+!    XG 20181025 I was expecting the following to give also a variational energy in case of PAW, but this is not true.
 !    if (usepaw==1) etotal = etotal + energies%e_paw + energies%e_nlpsp_vfock - energies%e_fock0
 !    XG 20181025 So, the following is giving a non-variational expression ...
      if (usepaw==1) etotal = etotal + energies%e_paw + energies%e_fock

@@ -8,7 +8,7 @@ ks:
     ResultsGS!:
         convergence:
             ceil: 1.0e-6
-        stress tensor:
+        stress_tensor:
             tol_vec: 1.0e-7
 
     EtotSteps:
@@ -38,7 +38,7 @@ dmft:
         fermie:
             tol_abs: 1.0e-7
             tol_rel: 1.0e-8
-        stress tensor:
+        stress_tensor:
             ignore: true
     EnergyTerms:
         total_energy_eV:

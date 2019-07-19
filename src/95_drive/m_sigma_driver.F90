@@ -2434,7 +2434,7 @@ endif
        end if
      end do
 
-     if (wfd%iam_master()) call write_sigma_results(ikcalc,ik_ibz,Sigp,Sr,KS_BSt)
+     if (wfd%iam_master()) call write_sigma_results(ikcalc,ik_ibz,Sigp,Sr,KS_BSt,dtset%use_yaml)
    end do !ikcalc
 
    call timab(425,2,tsec) ! solve_dyson
