@@ -4045,12 +4045,13 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
 
  !arrays
  integer :: nattyp_dum(dtset%ntypat)
- integer,allocatable :: dimlmn(:),kg_kg(:,:),pwind_bg(:)
+ integer,allocatable :: dimlmn(:),kg_kg(:,:),pwind_bg(:),pwind_bg_all(:,:,:)
  real(dp) ::dkb(3),dkg(3),dkbg(3),kpointg(3),rhodum(1)
  real(dp),allocatable :: bra(:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
  real(dp),allocatable :: ket(:,:),kpg_k_dummy(:,:)
  real(dp),allocatable :: buffer(:,:),buffer1(:),buffer2(:),cgqb(:,:),cgrvtrial(:,:),ghc_vectornd(:,:)
  real(dp),allocatable :: tkbra(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vtrial(:,:)
+ logical,allocatable :: has_pwind_bg(:,:)
  type(pawcprj_type),allocatable :: cprj_buf(:,:),cprj_kb(:,:),cprj_kg(:,:),cwaveprj(:,:)
 
 
@@ -4089,6 +4090,9 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
  end if
 
  ABI_ALLOCATE(pwind_bg,(dtset%mpw))
+ ABI_ALLOCATE(pwind_bg_all,(dtset%nkpt,dtset%nkpt,dtset%mpw))
+ ABI_ALLOCATE(has_pwind_bg,(dtset%nkpt,dtset%nkpt))
+ has_pwind_bg(:,:) = .FALSE.
 
  ! input parameters for calls to getghc
  cpopt = -1 ! will not use cprj anyway
@@ -4317,12 +4321,17 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
                    ! end parallel communication 
                    
                    if (ikptg > 0) then
+
+                      if ( .NOT. has_pwind_bg(ikptg,ikptb) ) then
+                         call mkpwind_k(-dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,&
+                              &             dtorbmag%indkk_f2ibz,ikptg,ikptb,&
+                              &             mpi_enreg,npwarr,pwind_bg,symrec)
+                         has_pwind_bg(ikptg,ikptb) = .TRUE.
+                         pwind_bg_all(ikptg,ikptb,:) = pwind_bg(:)
+                      else
+                         pwind_bg(:) = pwind_bg_all(ikptg,ikptb,:)
+                      end if
                       
-                      call mkpwind_k(-dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,&
-                           &             dtorbmag%indkk_f2ibz,ikptg,ikptb,&
-                           &             mpi_enreg,npwarr,pwind_bg,symrec)
-
-
                       ABI_ALLOCATE(ket,(2,npw_kb))
                       do n1 = 1, nband_k
                          ket(1:2,1:npw_kb) = cgqb(1:2,(n1-1)*npw_kb+1:n1*npw_kb)
@@ -4413,6 +4422,8 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
  call destroy_hamiltonian(gs_hamk)
 
  ABI_DEALLOCATE(pwind_bg)
+ ABI_DEALLOCATE(pwind_bg_all)
+ ABI_DEALLOCATE(has_pwind_bg)
 
 end subroutine make_eeig123
 !!***
