@@ -938,7 +938,7 @@ type dataset_type
  integer :: eph_frohlichm != 0
  real(dp) :: eph_fsmear != 0.01
  real(dp) :: eph_fsewin != 0.04
- real(dp) :: eph_alpha_gmin = zero !sqrt(5)
+ !real(dp) :: eph_alpha_gmin = zero !sqrt(5)
  real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
  integer :: eph_phrange(2) = 0
 
@@ -955,6 +955,7 @@ type dataset_type
  real(dp) :: ph_smear
  integer :: dvdb_ngqpt(3)
  integer :: ddb_ngqpt(3)
+ integer :: ddb_qrefine(3) = [1, 1, 1]
  real(dp) :: ddb_shiftq(3)
 
  integer :: mixprec = 0
@@ -988,7 +989,7 @@ type dataset_type
  real(dp) :: tmesh(3) ! = [5._dp, 59._dp, 6._dp] This triggers a bug in the bindings
 
  character(len=fnlen) :: getkerange_path = ABI_NOFILE
- !character(len=fnlen) :: getpot_path = ABI_NOFILE
+ character(len=fnlen) :: getpot_path = ABI_NOFILE
  !character(len=fnlen) :: getsigeph_path = ABI_NOFILE
 
  end type dataset_type
@@ -1385,6 +1386,10 @@ type dataset_type
    ! if no dataset mode             : abi//'DVDB'
    ! if dataset mode, and getdvdb==0 : abi//'_DS'//trim(jdtset)//'DVDB'
    ! if dataset mode, and getdvdb/=0 : abo//'_DS'//trim(jgetden)//'DVDB'
+
+  character(len=fnlen) :: filpotin
+   ! Filename used to read POT file.
+   ! Initialize via getpot_path
 
   character(len=fnlen) :: filkdensin
    ! if no dataset mode             : abi//'KDEN'

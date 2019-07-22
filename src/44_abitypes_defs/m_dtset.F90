@@ -489,13 +489,13 @@ subroutine dtset_copy(dtout, dtin)
  dtout%eph_frohlichm      = dtin%eph_frohlichm
  dtout%eph_fsmear         = dtin%eph_fsmear
  dtout%eph_fsewin         = dtin%eph_fsewin
- dtout%eph_alpha_gmin     = dtin%eph_alpha_gmin
+ !dtout%eph_alpha_gmin     = dtin%eph_alpha_gmin
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
  dtout%eph_np_pqbks       = dtin%eph_np_pqbks
  dtout%eph_restart        = dtin%eph_restart
  dtout%eph_task           = dtin%eph_task
  dtout%eph_stern          = dtin%eph_stern
- dtout%eph_use_ftinterp = dtin%eph_use_ftinterp
+ dtout%eph_use_ftinterp   = dtin%eph_use_ftinterp
  dtout%eph_transport      = dtin%eph_transport
 
  dtout%ph_wstep          = dtin%ph_wstep
@@ -506,6 +506,7 @@ subroutine dtset_copy(dtout, dtin)
  if (allocated(dtin%ph_qshift)) call alloc_copy(dtin%ph_qshift, dtout%ph_qshift)
  dtout%ph_smear          = dtin%ph_smear
  dtout%ddb_ngqpt         = dtin%ddb_ngqpt
+ dtout%ddb_qrefine       = dtin%ddb_qrefine
  dtout%dvdb_ngqpt        = dtin%dvdb_ngqpt
  dtout%ddb_shiftq        = dtin%ddb_shiftq
  dtout%dvdb_qcache_mb    = dtin%dvdb_qcache_mb
@@ -534,7 +535,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
  dtout%fftgw              = dtin%fftgw
- dtout%fockdownsampling  = dtin%fockdownsampling
+ dtout%fockdownsampling   = dtin%fockdownsampling
  dtout%fockoptmix         = dtin%fockoptmix
  dtout%freqim_alpha       = dtin%freqim_alpha
  dtout%freqremin          = dtin%freqremin
@@ -562,6 +563,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%gethaydock         = dtin%gethaydock
  dtout%getocc             = dtin%getocc
  dtout%getpawden          = dtin%getpawden
+ dtout%getpot_path        = dtin%getpot_path
  dtout%getqps             = dtin%getqps
  dtout%getscr             = dtin%getscr
  dtout%getsuscep          = dtin%getsuscep
@@ -2171,7 +2173,8 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' charge chempot chkdilatmx chkexit chkprim'
  list_vars=trim(list_vars)//' chksymbreak chneut cineb_start coefficients cpus cpum cpuh'
 !D
- list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb delayperm densfor_pred densty dfield'
+ list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_qrefine ddb_shiftq dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb'
+ list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
  list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dipdip_prt dipdip_range'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
@@ -2192,7 +2195,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' efmas_bands efmas_calc_dirs efmas_deg efmas_deg_tol'
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit eshift'
- list_vars=trim(list_vars)//' esmear exchmix exchn2n3d extrapwf eph_alpha_gmin eph_frohlichm eph_phrange'
+ list_vars=trim(list_vars)//' esmear exchmix exchn2n3d extrapwf eph_frohlichm eph_phrange'
  list_vars=trim(list_vars)//' eph_tols_idelta eph_intmeth eph_extrael eph_fermie eph_frohlich eph_fsmear'
  list_vars=trim(list_vars)//' eph_fsewin eph_mustar eph_ngqpt_fine eph_np_pqbks eph_restart '
  list_vars=trim(list_vars)//' eph_stern eph_task eph_transport eph_use_ftinterp'
@@ -2210,7 +2213,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
  list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
  list_vars=trim(list_vars)//' getddb getddk getdelfd getdkdk getdkde getden getdvdb getefmas getkerange_path getgam_eig2nkq'
- list_vars=trim(list_vars)//' gethaydock getocc getpawden getqps getscr'
+ list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_path getqps getscr'
  list_vars=trim(list_vars)//' getwfkfine getsuscep '
  list_vars=trim(list_vars)//' getvel getwfk getwfq getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'

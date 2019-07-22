@@ -311,12 +311,12 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
  interpolated = 0
  if (dtset%eph_use_ftinterp /= 0) then
-   MSG_WARNING(sjoin("Enforcing FT interpolation as could not find q-point:", ktoa(qpt), "in DVDB"))
+   MSG_WARNING(sjoin("Enforcing FT interpolation for q-point", ktoa(qpt)))
    comm_rpt = xmpi_comm_self
    wr_path = ""
    method = dtset%userid
    !method = 0
-   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, wr_path, comm_rpt)
+   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, wr_path, comm_rpt)
    cplex = 2
    ABI_MALLOC(v1scf, (cplex, nfftf, nspden, dvdb%my_npert))
    call dvdb%ftinterp_qpt(qpt, nfftf, ngfftf, v1scf, dvdb%comm_rpt)
@@ -374,6 +374,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        nctkarr_t("eigenvalues_kq", "dp", "max_number_of_states, number_of_kpoints, number_of_spins"), &
        nctkarr_t('phfreqs', "dp", 'number_of_phonon_modes'), &
        nctkarr_t('phdispl_cart', "dp", 'complex, number_of_phonon_modes, number_of_phonon_modes'), &
+       !nctkarr_t('phdispl_cart_qvers', "dp", 'complex, number_of_phonon_modes, number_of_phonon_modes'), &
        nctkarr_t('phdispl_red', "dp", 'complex, number_of_phonon_modes, number_of_phonon_modes'), &
        nctkarr_t("gkq_representation", "char", "character_string_length"), &
        nctkarr_t('gkq', "dp", &
@@ -402,6 +403,9 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      ABI_FREE(eigens_kq)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phfreqs"), phfrq))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_cart'), displ_cart))
+     ! Add phonon displacement for qvers
+     !call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, nanaqdir="reduced")
+     !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_cart_qvers'), displ_cart))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_red'), displ_red))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gkq_representation"), "atom"))
 #endif
@@ -646,16 +650,17 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
 
 !Local variables-------------------------------
 !scalars
- integer :: ip,nu,iq,db_iqpt,cplex,ispden,nfft,comm
+ integer :: iq, db_iqpt, cplex, nfft, comm, ip, idir, ipert
+ logical :: with_lr_model
 #ifdef HAVE_NETCDF
- integer :: ncid,ncerr
+ integer :: ncid, ncerr
 #endif
- !character(len=500) :: msg
 !arrays
  integer :: ngfft(18)
  real(dp) :: phfreqs(3*cryst%natom),qpt(3)
- real(dp) :: displ_cart(2,3*cryst%natom,3*cryst%natom),displ_red(2,3*cryst%natom,3*cryst%natom)
- real(dp),allocatable :: v1scf(:,:,:,:),v1qnu(:,:,:,:)
+ real(dp) :: displ_cart(2,3*cryst%natom,3*cryst%natom), displ_red(2,3*cryst%natom,3*cryst%natom)
+ real(dp),allocatable :: v1scf(:,:,:,:), v1_qnu(:,:,:,:)
+ real(dp),allocatable :: v1lr_atm(:,:,:,:), v1lr_qnu(:,:,:,:)
 
 !************************************************************************
 
@@ -667,6 +672,7 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
  call dvdb%open_read(ngfft, xmpi_comm_self)
  call dvdb%print()
  !call dvdb%list_perts([-1, -1, -1])
+ with_lr_model = .True.
 
  ! Create netcdf file.
 #ifdef HAVE_NETCDF
@@ -685,15 +691,23 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
    nctkarr_t("qlist", "dp", "three, nqlist"), &
    nctkarr_t("phfreqs", "dp", "natom3, nqlist"), &
    nctkarr_t("displ_cart", "dp", "two, natom3, natom3, nqlist"), &
-   nctkarr_t("v1qnu", "dp", "two, nfft, nspden, natom3, nqlist")])
+   nctkarr_t("v1_qnu", "dp", "two, nfft, nspden, natom3, nqlist")])
  NCF_CHECK(ncerr)
+
+ if (with_lr_model) then
+   NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t("v1lr_qnu", "dp", "two, nfft, nspden, natom3, nqlist")]))
+ end if
 
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngfft"), ngfft(1:3)))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qlist"), qlist))
 #endif
 
- ABI_MALLOC(v1qnu, (2, nfft, dvdb%nspden, dvdb%natom3))
+ ABI_MALLOC(v1_qnu, (2, nfft, dvdb%nspden, dvdb%natom3))
+ if (with_lr_model) then
+   ABI_MALLOC(v1lr_atm, (2, nfft, dvdb%nspden, dvdb%natom3))
+   ABI_MALLOC(v1lr_qnu, (2, nfft, dvdb%nspden, dvdb%natom3))
+ end if
 
  do iq=1,nqlist
    qpt = qlist(:,iq)
@@ -710,45 +724,39 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
      MSG_ERROR(sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB file"))
    end if
 
-   !cplex = 2
-   !ABI_CALLOC(v1scf, (cplex, nfft, db%nspden, 3*db%natom))
-   !do idir=1,3
-   !  do ipert=1,db%natom
-   !    ip = (ipert - 1) * 3 + idir
-   !    call db%v1r_long_range(qpt, ipert, idir, nfft, ngfft, v1scf(:,:,1,ip))
-   !    if (db%nspden == 2) v1scf(:,:,2,ip) = v1scf(:,:,1,ip)
-   !  end do
-   !end do
+   ! v1_qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
+   ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials saved to file.
+   ! v1_qnu(2, nfft, nspden, natom3), v1scf(cplex, nfft, nspden, natom3)
+   call v1atm_to_vqnu(cplex, nfft, dvdb%nspden, dvdb%natom3, v1scf, displ_red, v1_qnu)
 
-   do nu=1,dvdb%natom3
-     ! v1qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
-     ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials saved to file.
-     ! v1qnu(2, nfft, nspden, natom3), v1scf(cplex, nfft, nspden, natom3)
-     v1qnu(:, :, :, nu) = zero
-     do ip=1,dvdb%natom3
-       do ispden=1,dvdb%nspden
-         if (cplex == 2) then
-           v1qnu(1, :, ispden, nu) = v1qnu(1, :, ispden, nu) + &
-             displ_red(1,ip,nu) * v1scf(1,:,ispden,ip) - displ_red(2,ip,nu) * v1scf(2,:,ispden,ip)
-           v1qnu(2, :, ispden, nu) = v1qnu(2, :, ispden, nu) + &
-             displ_red(2,ip,nu) * v1scf(1,:,ispden,ip) + displ_red(1,ip,nu) * v1scf(2,:,ispden,ip)
-         else
-           ! Gamma point. d(q) = d(-q)* --> d is real.
-           v1qnu(1, :, ispden, nu) = v1qnu(1, :, ispden, nu) + displ_red(1,ip,nu) * v1scf(1,:,ispden,ip)
-         end if
+   if (with_lr_model) then
+     ! Compute LR model in the atomic representation then compute phonon representation in v1lr_qnu.
+     v1lr_atm = zero
+     do idir=1,3
+       do ipert=1,dvdb%natom
+         ip = (ipert - 1) * 3 + idir
+         call dvdb%get_v1r_long_range(qpt, idir, ipert, nfft, ngfft, v1lr_atm(:,:,1,ip))
+         if (dvdb%nspden == 2) v1lr_atm(:,:,2,ip) = v1lr_atm(:,:,1,ip)
        end do
      end do
-   end do
-   ! Save results to file.
+     call v1atm_to_vqnu(2, nfft, dvdb%nspden, dvdb%natom3, v1lr_atm, displ_red, v1lr_qnu)
+   end if
+
 #ifdef HAVE_NETCDF
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phfreqs"), phfreqs, start=[1, iq]))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "displ_cart"), displ_cart, start=[1, 1, 1, iq]))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1qnu"), v1qnu, start=[1, 1, 1, 1, iq]))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1_qnu"), v1_qnu, start=[1, 1, 1, 1, iq]))
+   if (with_lr_model) then
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1lr_qnu"), v1lr_qnu, start=[1, 1, 1, 1, iq]))
+   end if
 #endif
    ABI_FREE(v1scf)
  end do
 
- ABI_FREE(v1qnu)
+ ABI_FREE(v1_qnu)
+ ABI_SFREE(v1lr_atm)
+ ABI_SFREE(v1lr_qnu)
+
 #ifdef HAVE_NETCDF
  NCF_CHECK(nf90_close(ncid))
 #endif
@@ -757,6 +765,64 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
  call wrtout(std_out, "dvqnu file written", do_flush=.True.)
 
 end subroutine ncwrite_v1qnu
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gkk/v1atm_to_vqnu
+!! NAME
+!!  v1atm_to_vqnu
+!!
+!! FUNCTION
+!!  Receive potentials in atomic representation and return potential in phonon representation
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine v1atm_to_vqnu(cplex, nfft, nspden, natom3, v1_atm, displ_red, v1_qnu)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex, nfft, nspden, natom3
+!arrays
+ real(dp),intent(in) :: v1_atm(cplex, nfft, nspden, natom3)
+ real(dp),intent(out) :: v1_qnu(2, nfft, nspden, natom3)
+ real(dp),intent(in) :: displ_red(2, natom3, natom3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: nu, ip, ispden
+
+!************************************************************************
+
+ do nu=1,natom3
+   ! v1_qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
+   ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials saved to file.
+   ! v1_qnu(2, nfft, nspden, natom3), v1_atm(cplex, nfft, nspden, natom3)
+   v1_qnu(:, :, :, nu) = zero
+   do ip=1,natom3
+     do ispden=1,nspden
+       if (cplex == 2) then
+         v1_qnu(1, :, ispden, nu) = v1_qnu(1, :, ispden, nu) + &
+           displ_red(1,ip,nu) * v1_atm(1,:,ispden,ip) - displ_red(2,ip,nu) * v1_atm(2,:,ispden,ip)
+         v1_qnu(2, :, ispden, nu) = v1_qnu(2, :, ispden, nu) + &
+           displ_red(2,ip,nu) * v1_atm(1,:,ispden,ip) + displ_red(1,ip,nu) * v1_atm(2,:,ispden,ip)
+       else
+         ! Gamma point. d(q) = d(-q)* --> d is real.
+         v1_qnu(1, :, ispden, nu) = v1_qnu(1, :, ispden, nu) + displ_red(1,ip,nu) * v1_atm(1,:,ispden,ip)
+       end if
+     end do
+   end do
+ end do
+
+end subroutine v1atm_to_vqnu
 !!***
 
 !----------------------------------------------------------------------

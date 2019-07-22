@@ -1163,6 +1163,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getpawden',tread,'INT')
  if(tread==1) dtset%getpawden=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getpot_path',tread,'KEY', key_value=key_value)
+ !print *, tread, key_value
+ if(tread==1) dtset%getpot_path = key_value
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getcell',tread,'INT')
  if(tread==1) dtset%getcell=intarr(1)
 
@@ -1253,8 +1257,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fsewin',tread,'ENE')
  if(tread==1) dtset%eph_fsewin=dprarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_alpha_gmin',tread,'DPR')
- if(tread==1) dtset%eph_alpha_gmin=dprarr(1)
+ !call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_alpha_gmin',tread,'DPR')
+ !if(tread==1) dtset%eph_alpha_gmin=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'eph_ngqpt_fine',tread,'INT')
  if(tread==1) dtset%eph_ngqpt_fine=intarr(1:3)
@@ -1284,8 +1288,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ddb_ngqpt',tread,'INT')
  if(tread==1) dtset%ddb_ngqpt=intarr(1:3)
 
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ddb_qrefine',tread,'INT')
+ if(tread==1) dtset%ddb_qrefine=intarr(1:3)
+
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'dvdb_ngqpt',tread,'INT')
  if(tread==1) dtset%dvdb_ngqpt=intarr(1:3)
+ ! Set dvdb_ngqpt equatl to ddb_ngqpt is variable is not specified in input.
  if (all(dtset%dvdb_ngqpt==0)) dtset%dvdb_ngqpt = dtset%ddb_ngqpt
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ddb_shiftq',tread,'DPR')
@@ -1516,8 +1524,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread_key==1)then
    if(tread==1)then
      write(message, '(5a)' )&
-&     'ixc and xcname cannot be specified simultaneously',ch10,&
-&     'for the same dataset.',ch10,'Action: check the input file.'
+     'ixc and xcname cannot be specified simultaneously',ch10,&
+     'for the same dataset.',ch10,'Action: check the input file.'
      MSG_ERROR(message)
    else
 !    Note that xcname is a 'key' variable : its value is stored in keyw at output of intagm

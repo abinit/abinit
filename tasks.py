@@ -1,13 +1,14 @@
 """
-Pyinvoke tasks.py file for automating build/config stuff.
+Pyinvoke file for automating build/config stuff.
 
 Example:
 
     invoke abichecks
-
     invoke --list
 
 Can be executed everywhere inside the Abinit directory, including build directories.
+
+Use: `pip install invoke --user` to install invoke package.
 """
 import os
 import sys
@@ -77,15 +78,6 @@ def cd(path):
         os.chdir(cwd)
 
 
-#@task
-#def vim(ctx, tag):
-#    """Invoke """
-#    with cd(ABINIT_SRCDIR):
-#        cmd = "mvim -t %s" % tag
-#        #cmd = "vim -t %s" % tag
-#        ctx.run(cmd)
-
-
 @task
 def make(ctx, jobs="auto", touch=False, clean=False):
     """
@@ -116,7 +108,7 @@ def make(ctx, jobs="auto", touch=False, clean=False):
 
 @task
 def clean(ctx):
-    """Remove object files in src and shared."""
+    """Remove object files in src and shared. Do not object files in fallbacks"""
     top = find_top_build_tree(".", with_abinit=False)
     with cd(top):
         ctx.run("cd src && make clean && cd ..", pty=True)
@@ -242,6 +234,21 @@ def ctags(ctx):
     """
     with cd(ABINIT_ROOTDIR):
         ctx.run('ctags -R --exclude="_*"', pty=True)
+
+@task
+def fgrep(ctx, pattern):
+    """
+    Grep for `pattern` in all F90 files contained in `src` and `shared` directories.
+    """
+    # grep -r -i --include \*.h
+    # Syntax notes:
+    #    -r - search recursively
+    #    -i - case-insensitive search
+    #    --include=\*.${file_extension} - search files that match the extension(s) or file pattern only
+    with cd(ABINIT_ROOTDIR):
+        cmd  = 'grep -r -i --color --include "*.F90" %s src shared' % pattern
+        print("Executing:", cmd)
+        ctx.run(cmd, pty=True)
 
 #def pulltrunk(ctx):
 #    ctx.run("git stash")

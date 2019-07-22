@@ -828,8 +828,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_frohlichm',dt%eph_frohlichm,2,[0,1],iout)
 
      if (dt%eph_stern /= 0) then
+       ! Check requirements for Sternheimer.
        MSG_ERROR_NOSTOP_IF(dt%tolwfr == zero, "tolwfr must be specified when eph_stern /= 0", ierr)
-       !if (dt%getpot_path == ABI_NOFILE)
+       if (dt%getpot_path == ABI_NOFILE) then
+         MSG_ERROR_NOSTOP(" getpot_path is required when eph_stern /= 0", ierr)
+       end if
+       if (all(dt%sigma_bsum_range /= 0)) then
+         MSG_ERROR_NOSTOP("sigma_bsum_range cannot be used when eph_stern /= 0", ierr)
+       end if
      end if
    end if
 

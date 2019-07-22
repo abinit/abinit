@@ -71,6 +71,7 @@ module m_sigmaph
  use m_double_grid,    only : double_grid_t
  use m_fftcore,        only : get_kg
  use m_kg,             only : getph
+ use m_bz_mesh,        only : isamek
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_ioarr,          only : read_rhor
  use m_pawang,         only : pawang_type, gauleg
@@ -190,10 +191,10 @@ module m_sigmaph
   integer :: coords(3)
 
   integer :: nqbz
-  ! Number of q-points in the BZ.
+  ! Number of q-points in the (dense) BZ for sigma integration
 
   integer :: nqibz
-  ! Number of q-points in the IBZ.
+  ! Number of q-points in the (dense) IBZ for sigma integration
 
   integer :: nqibz_k
   ! Number of q-points in the IBZ(k). Depends on ikcalc.
@@ -473,8 +474,8 @@ module m_sigmaph
    ! Integration in q-space is done according to eph_intmeth.
 
   real(dp),allocatable :: gfw_mesh(:)
-   ! Frequency mesh for Eliashberg function (Allen-Cardona adiabatic, phonons only)
    ! gfw_mesh(gfw_nomega)
+   ! Frequency mesh for Eliashberg function (Allen-Cardona adiabatic, phonons only)
 
    real(dp),allocatable :: gf_nnuq(:,:,:,:)
    ! (nbcalc_ks, natom3, %nqibz_k, 3)
@@ -944,9 +945,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_CALLOC(vlocal, (n4, n5, n6, gs_hamkq%nvloc))
 
  if (dtset%eph_stern == 1) then
-   ! Read vtrial from POT file (in principle one may store vtrial in the DVDB!)
-   call wrtout(std_out, " Reading vtrial potential for Sternheimer from external file.")
-   call read_rhor("foo_POT", cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pawrhoij, comm, &
+   ! Read GS POT (vtrial) from input POT file
+   ! Iin principle one may store vtrial in the DVDB but this is simpler to implement.
+   call wrtout(std_out, sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
+   call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pawrhoij, comm, &
                   allow_interp=.True.)
    call hdr_free(pot_hdr)
  end if
@@ -1075,8 +1077,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      wr_path = strcat(dtfil%filnam_ds(4), "_WRMAX")
      !wr_path = ""
      method = dtset%userid
-     !method = 1
-     call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, wr_path, comm_rpt)
+     call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, &
+                              nfftf, ngfftf, method, wr_path, comm_rpt)
 
      ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
      ABI_CALLOC(qselect, (sigma%nqibz))
@@ -1413,6 +1415,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
            ! Build global array with cg_kq wavefunctions to prepare call to dfpt_cgwf.
            ! TODO: Ideally, dfpt_cgwf should be modified so that we can pass cgq that is MPI distributed over nband_kq
+           ! bsum_range is not compatible with Sternheimer. There's a check at the level of the parser in chkinp.
            do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
              if (isirr_kq) then
                 call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
@@ -1514,7 +1517,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_FREE(vlocal1)
        ABI_FREE(v1scf)
 
-       ! Add contribution to Fan-Migdal self-energy stemming from Sternheimer.
+       ! Add contribution to Fan-Migdal self-energy coming from Sternheimer.
        if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
          call xmpi_sum(cg1s_kq, comm, ierr)
          ! h1kets_kq are MPI distributed inside comm_pert but we need off-diagonal pp' terms --> collect results.
@@ -1592,7 +1595,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! This can happen if we have loaded the wavefunctions inside the energy range.
          if (sigma%imag_only .and. sigma%qint_method == 1) then
            if (.not. wfd%ihave_ug(ibsum_kq, ikq_ibz, spin)) then
-             ignore_kq = ignore_kq + 1; cycle
+             ignore_ibsum_kq = ignore_ibsum_kq + 1; cycle
            end if
          end if
 
@@ -2043,7 +2046,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      end if ! not %imag_only
 
      if (dtset%prteliash /= 0) then
-       ! Compute Eliashberg function (useful but cost is not negligible so it must be activated by user).
+       ! Compute Eliashberg function (useful but cost is not negligible so it must be activated by the user).
        call cwtime(cpu, wall, gflops, "start", msg=sjoin(" Computing Eliashberg function with nomega: ", &
            itoa(sigma%gfw_nomega)))
 
@@ -3840,7 +3843,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
 !Local variables-------------------------------
  integer,parameter :: sppoldbl1 = 1, timrev1 = 1, master = 0
  integer :: spin, my_rank, iq_ibz, nprocs !, nbcalc_ks !, bstart_ks
- integer :: ikpt, ibz_k, isym_lgk, isym_k, itim_k
+ integer :: ikpt, ibz_k, isym_k, itim_k !isym_lgk,
  real(dp) :: dksqmax, cpu, wall, gflops
  character(len=500) :: msg
  logical :: compute_lgk
@@ -4256,24 +4259,6 @@ subroutine distribute_nqibz_k_nofilter()
   end do
 
 end subroutine distribute_nqibz_k_nofilter
-
-!subroutine distribute_nqibz_k_noitreatq()
-! integer :: q_start, q_stop
-! call xmpi_split_work(self%nqibz_k, self%comm_qpt, q_start, q_stop)
-! self%my_nqibz_k = 0; if (q_start <= q_stop) self%my_nqibz_k = q_stop - q_start + 1
-! ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
-! if (self%my_nqibz_k /= 0) self%myq2ibz_k = [(iq_ibz_k, iq_ibz_k=q_start, q_stop)]
-!
-!end subroutine distribute_nqibz_k_noitreatq
-!
-!subroutine dont_distribute_nqibz_k()
-!
-! ! Use full IBZ(k) in q-integration ==> build trivial myq2ibz_k map.
-! self%my_nqibz_k = self%nqibz_k
-! ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
-! self%myq2ibz_k = [(iq_ibz_k, iq_ibz_k=1, self%nqibz_k)]
-!
-!end subroutine dont_distribute_nqibz_k
 
 end subroutine sigmaph_setup_qloop
 !!***
@@ -5406,7 +5391,8 @@ end subroutine eval_sigfrohl2
 !!
 !! FUNCTION
 !!  This function tries to predict the **full** list of q-points needed to compute the lifetimes
-!!  once we know sigma%nkcalc. It uses a energy window computed from the max phonon frequency times sigma%winfact
+!!  once we know sigma%nkcalc. It uses an energy window computed from the max phonon frequency
+!!  multiplied by sigma%winfact.
 !!
 !! INPUT
 !! cryst=Crystalline structure
@@ -5447,6 +5433,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  character(len=500) :: msg
  type(kptrank_type) :: kptrank
 !arrays
+ integer :: g0(3)
  integer,allocatable :: qbz_count(:), qbz2qpt(:,:), bz2ibz(:,:)
  real(dp) :: kq(3), kk(3)
  real(dp),allocatable :: wtk(:), kibz(:,:), kbz(:,:)
@@ -5480,7 +5467,6 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
 
  ! Make full k-point rank arrays
  call mkkptrank(kbz, nkbz, kptrank)
- ABI_FREE(kbz)
 
  ABI_ICALLOC(qbz_count, (nqbz))
  cnt = 0
@@ -5494,9 +5480,8 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
        kq = kk + qbz(:, iq_bz)
        call get_rank_1kpt(kq, kq_rank, kptrank)
        ikq_bz = kptrank%invrank(kq_rank)
-       if (ikq_bz < 1) then
-         MSG_ERROR(sjoin("Cannot find kq: ", ktoa(kq)))
-       end if
+       ABI_CHECK(ikq_bz > 0, sjoin("Cannot find kq: ", ktoa(kq)))
+       ABI_CHECK(isamek(kq, kbz(:, ikq_bz), g0), "Wrong invrank")
        !ikq_ibz = bz2ibz(ikq_bz,1)
        ikq_ibz = bz2ibz(1, ikq_bz)
        do ib_k=1,sigma%nbcalc_ks(ikcalc, spin)
@@ -5506,17 +5491,14 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
            eig0mkq = ebands%eig(ibsum_kq, ikq_ibz, spin)
            ediff = eig0nk - eig0mkq
            ! Perform check on the energy difference to exclude this q-point.
-           !if (eig0mkq >= sigma%elow - sigma%winfact * sigma%wmax .and. &
-           !    eig0mkq <= sigma%ehigh + sigma%winfact * sigma%wmax) then
-           if (abs(ediff) <= sigma%winfact * sigma%wmax) then
-             qbz_count(iq_bz) = qbz_count(iq_bz) + 1
-           end if
+           if (abs(ediff) <= sigma%winfact * sigma%wmax) qbz_count(iq_bz) = qbz_count(iq_bz) + 1
          end do
        end do
      end do
    end do
  end do
 
+ ABI_FREE(kbz)
  call destroy_kptrank(kptrank)
 
  call xmpi_sum(qbz_count, comm, ierr)

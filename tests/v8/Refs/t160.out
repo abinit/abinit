@@ -1355,10 +1355,6 @@ Transport calculation results
 == DATASET  7 ==================================================================
 -   nproc =    1
 
---- !IterStart
-dtset:     7
-...
-
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
@@ -1512,10 +1508,6 @@ Transport calculation results
 ================================================================================
 == DATASET  8 ==================================================================
 -   nproc =    1
-
---- !IterStart
-dtset:     8
-...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
