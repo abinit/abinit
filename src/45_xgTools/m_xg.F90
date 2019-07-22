@@ -2651,12 +2651,14 @@ module m_xg
 
 
 
-  subroutine xg_getPointer(xgBlock) 
+  subroutine xg_getPointer(xgBlock, outunit) 
     use iso_c_binding
     type(xgBlock_t), intent(in) :: xgBlock
+    type(integer), intent(in) :: outunit
+    character(15) :: str
     integer :: cptr
     !integer :: i
-    
+
     select case (xgBlock%space)
       case ( SPACE_R,SPACE_CR )
         !cptr = getClocR(xgBlock%Ldim,xgBlock%cols,xgBlock%vecR(:,:))
@@ -2666,7 +2668,9 @@ module m_xg
         cptr = loc(xgBlock%vecC(:,:))
     end select
    ! i = cptr
-    print *, cptr
+    !print *, cptr
+    write(str , *) (cptr)
+    write(outunit,*) str
   end subroutine xg_getPointer
 
 

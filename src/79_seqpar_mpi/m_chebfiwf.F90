@@ -320,14 +320,14 @@ module m_chebfiwf
   !###########################################################################
   !print *, "BEFORE"
   !stop
-  call xg_getPointer(xgx0)   
+  !call xg_getPointer(xgx0)   
   !stop
   ! Run chebfi
   call chebfi_run(chebfi, xgx0, getghc_gsc1, getBm1X, precond1, xgeigen, xgresidu) 
 
   if (xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft) == 0) then
     print *, "xgx0 AFTER"
-    call xg_getPointer(xgx0) 
+    !call xg_getPointer(xgx0) 
   end if  
   !stop
   
