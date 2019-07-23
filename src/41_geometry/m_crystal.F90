@@ -1493,5 +1493,29 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
 end subroutine prtposcar
 !!***
 
+!!! !!****f* m_crystal/crystal_yaml_write
+!!! !!
+!!! !! NAME
+!!! !! crystal_yaml_write
+!!! !!
+!!! !! FUNCTION
+!!! !! Write rystal info in YAML format
+!!! !!
+!!! !! PARENTS
+!!! !!
+!!! !! CHILDREN
+!!! !!
+!!! !! SOURCE
+!!!
+!!! subroutine neat_crystal(crystal, iout, comment)
+!!!  class(crystal_t),intent(in) :: crystal
+!!!  integer,intent(in) :: iout
+!!!  character(len=*),intent(in),optional :: comment
+!!!
+!!!  write(std_out, *)"Unused neat_crystal", crystal%natom, iout, trim(comment)
+!!!
+!!! end subroutine neat_crystal
+!!! !!***
+
 END MODULE m_crystal
 !!***

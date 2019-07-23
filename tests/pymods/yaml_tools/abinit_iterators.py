@@ -1,3 +1,8 @@
+'''
+    Define classes and contants to represent the state of iteration of a document
+    as well as the operations possible on this state. This is used in filter
+    applications by the configuration handler.
+'''
 from __future__ import print_function, division, unicode_literals
 from .errors import EmptySetError, NotOrderedOverlappingSetError
 
@@ -135,10 +140,10 @@ class IterStateFilter(object):
     '''
         Represent a set of conditions on the iterator state of a document.
         Alternatively it can be seen as a cartesian product of subsets of
-        the natural integers. The implicit subset for each component is Z*
+        the natural integers. The implicit subset for each component is N*
         ({1, 2, 3, 4...}).
         For example IterStateFilter({'dtset': 4, 'image': {1, 5}}) is
-        {4} x Z* x {1, 2, 3, 4, 5} x Z* x Z*
+        {4} x N* x {1, 2, 3, 4, 5} x N* x N*
     '''
     def __init__(self, d):
         self.filters = {}

@@ -1,3 +1,7 @@
+'''
+Define the internals of parsing the configuration file.
+Also define the evaluation of a constraint.
+'''
 from __future__ import print_function, division, unicode_literals
 from inspect import isclass
 from copy import deepcopy
@@ -153,6 +157,10 @@ class Constraint(object):
 
 
 class SpecKey(object):
+    '''
+        This object encapsulate the manipulation of field labels, interpreting
+        the eventual ! at the end and normalizing the name.
+    '''
     def __init__(self, name, hardreset=False):
         self.name = normalize_attr(name)
         self.hardreset = hardreset
@@ -185,6 +193,7 @@ class ConfTree(object):
     '''
         Configuration tree wrapper. Give access to constraints and parameters
         defined in the nodes.
+        Internally used by DriverTestConf to manipulate individual trees.
     '''
     def __init__(self, dict_tree):
         self.dict = dict_tree
@@ -311,7 +320,7 @@ class ConfTree(object):
 class ConfParser(object):
     '''
         Test configuration loader and parser. It takes output from yaml parser
-        and build the actual configuration tree.
+        and build the actual configuration trees.
     '''
     def __init__(self):
         self.parameters = {
@@ -348,6 +357,7 @@ class ConfParser(object):
                    handle_undef=True):
         '''
             Register a constraints to be recognised while parsing config.
+            Decorator for the constraint body function.
         '''
         def register(fun):
             if name is None:
@@ -376,7 +386,8 @@ class ConfParser(object):
 
     def make_trees(self, parsed_src, metadata={}):
         '''
-            Create a ConfTree instance from the yaml parser output.
+            Create a dict of ConfTree instances and the associated filter dict
+            from the yaml parser output.
         '''
         assert isinstance(parsed_src, dict), ('parsed_src have to be derivated'
                                               ' from a dictionary but it is'

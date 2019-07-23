@@ -44,7 +44,7 @@ Ideally, we would like to be able to
 * use **different tolerances** for particular quantities that are selected by keyword
 * be able to replace the check on the absolute and relative difference with a **threshold check**
   (is this quantity smaller that the give threshold?)
-* have some sort of syntax to apply different rules depending on the **iteration state** e.g. the dataset index.
+* have some sort of syntax to apply different rules depending on the **iteration state** e.g. the dataset index
 * execute python code (**callbacks**) that operates on the data to perform more advanced tests requiring 
   some sort of post-processing
 * provide an easy-to-use **declarative interface** that allows developers to define the logic
@@ -93,7 +93,7 @@ test suite, the syntax used to define tests and the modifications required to ex
 ## Implementation details
 
 For reasons that will be clear later, implementing smart algorithms requires metadata and context.
-In other words the python code needs to have some basic understanding of the meaning of the numerical values 
+In other words, the python code needs to have some basic understanding of the meaning of the numerical values 
 extracted from the output file and must be able to locate a particular property by name or by its "position"
 inside the output file.
 For this reason, the most important physical results are now written in the main output file (*ab_out*)
@@ -107,19 +107,19 @@ to the total free energy using:
 
 
 ```yaml
---- !ETOT
-label               : Etot
+--- !EnergyTerms
 comment             : Components of total free energy (in Hartree)
-Kinetic energy      :  5.279019930263079807E+00
-Hartree energy      :  8.846303409910728499E-01
-XC energy           : -4.035286123400158687E+00
-Ewald energy        : -1.095155892074578219E+01
-PsPCore             :  1.549159282251551528E-01
-Loc. psp. energy    : -3.356800625695788298E+00
-NL psp energy       :  1.895544586353373973E+00
-Etotal              : -1.012953488400904689E+01
-Band energy         :  1.406569063148472631E+00
-Total energy(eV)    : -2.756386620520307815E+02
+kinetic             :  4.323825067238190201E+01
+hartree             :  3.133994553363548619E+01
+xc                  : -2.246182631222462689E+01
+Ewald energy        : -1.142203169790575572E+02
+psp_core            :  6.536925226004570710E+00
+local_psp           : -9.852521179991468614E+01
+spherical_terms     :  2.587718945528139081E+00
+internal            : -1.515045147136467563E+02
+'-kT*entropy'       : -3.174881766478041684E-03
+total_energy        : -1.515076895954132397E+02
+total_energy_eV     : -4.122733899322517573E+03
 ...
 ```
 
@@ -239,9 +239,11 @@ Etot:
 
 The `tol_abs` keyword defines the **constraint** that will applied to **all the children** of the `Etot` document.
 In other words, all the entries in the `Etot` dictionary will be compared with 
-an absolute tolerance of 1.0e-7 and a default value for the relative difference `tol_rel`.
-In order to pass the test, all the absolute differences must be smaller that `tol_abs`.
+an absolute tolerance of 1.0e-7 and the **default value** for the relative difference `tol_rel` as this 
+tolerance is not explicitly specified.
+
 <!--
+In order to pass the test, all the absolute differences must be smaller that `tol_abs`.
 If this condition is not fulfilled, the test will fail and python will list the entries that did not pass the test.
 -->
 
@@ -265,9 +267,9 @@ Etot:
 ```
 
 However the `tol_abs` constraint defined in `Etot` is _inherited_ by `Total
-energy (eV)` which mean we will not only check `tol_rel` with a relative tolerance of
-1.0e-10 but also `tol_abs` with an absolute tolerance of 1.0e-7. Most of the time it is
-what we need, even though here, it is not. So we will just use a different
+energy (eV)` which means that the comparison will be performed with a relative tolerance `tol_rel` of
+1.0e-10 **and** an absolute tolerance `tol_abs` of 1.0e-7. Most of the time it is
+what we need even though here it's not. So we will just use a different
 tolerance for `tol_abs` in `Total energy (eV)`.
 -->
 
@@ -282,6 +284,19 @@ Etot:
 Now we achieve the same relative precision and the test does not fail because
 of the looser absolute precision of the total energy in eV.
 -->
+
+To change the default value for the relative difference, it is sufficient to specify the 
+constraint outside of the document:
+
+```yaml
+tol_rel: 1.0e-2
+
+Etot:
+    tol_abs: 1.0e-7
+    Total energy (eV):
+        tol_abs: 1.0e-5
+```
+
 
 ### Basic concepts
 
@@ -299,12 +314,12 @@ Document tree
 : The YAML document is a dictionary that can be treated as a tree
   whose nodes have a label and leaf are scalars or special data structures
   identified by a tag (note however that not all tags mark a leaf).
-  The top-level node is the YAML document.
+  The top-level nodes are the YAML documents and their labels are the names of their tag.
 
 Config tree
 : The YAML configuration also takes the form of a tree where nodes are
   **specializations** and its leaf represent **parameters** or **constraints**.
-  Its structure match the structure of the **document tree** thus one can define rules
+  Its structure matches the structure of the **document tree** thus one can define rules
   (constraint and parameters) that will be applied to a specific part of the **document tree**.
 
 Specialization
@@ -323,7 +338,7 @@ Iteration state
   in the run (e.g. idtset = 2, itimimage = not used, image = 5, time = not used).
   It gives information on the current state of the run. Documents are implicitly
   associated to their iteration state. This information is made available to
-  the test engine through specialized YAML documents using the `IterStart` tag.
+  the test engine through specialized YAML documents with `IterStart` tag.
 
 !!! tip
 
@@ -334,24 +349,24 @@ Iteration state
     and type `show *`. You can then type for example `show tol_eq` to learn more
     about a specific constraint or parameter.
 
+<!--
 A few conventions on documents writing
 
-: The *label* field appears in all data document. It should be a unique identifier
-  at the scale of an _iteration state_. The tag is not necessarily unique, it
-  describes the structure of the document and there is no need to use it unless
-  special logic have to be implemented for the document. The *comment* field is
+: All data document have a **tag**. It should be a unique identifier
+  at the scale of an _iteration state_. It also describes the structure of the document
+  like other uses of tags but in this case it identify the document. The *comment* field is
   optional but it is recommended especially when the purpose of the document is not obvious.
+-->
 
 ### A more complicated example
 
 The `Etot` document is the simplest possible document. It only contains fields
-with real values. Now we will have a look at the `results_gs` document
+with real values. Now we will have a look at the `ResultsGS` document
 that represents the results stored in the corresponding Fortran datatype used in Abinit.
 The YAML document is now given by:
 
 ```yaml
----
-label     : results_gs
+--- !ResultsGS
 comment   : Summary of ground states results.
 natom     :        5
 nsppol    :        1
@@ -380,22 +395,27 @@ cartesian forces: !CartForces
 This YAML document is more complicated as it contains scalar fields, dictionaries and even 2D arrays.
 **MG: Are integer values always compared without tolerance?**
 Still, the parsers will be able to locate the entire document via its tag/label and address all the entries by name.
-To specify the tolerance for the relative difference for all the scalar quantities in `results_gs`,
-we just add a new entry to the YAML configuration file similarly to what we did for `Etot`: 
+To specify the tolerance for the relative difference for all the scalar quantities in `ResultsGS`,
+we just add a new entry to the YAML configuration file similarly to what we did for `EnergyTerms`: 
 
 ```yaml
-Etot:
+EnergyTerms:
     tol_abs: 1.0e-7
-    Total energy (eV):
+    total_energy_eV:
         tol_abs: 1.0e-5
         tol_rel: 1.0e-10
 
-results_gs:
+ResultsGS:
     tol_rel: 1.0e-8
 ```
 
+At this point we have to precise that there are implicit top-level settings that
+are applied on all quantities that are not subject to a more specific rule.
+For example in the above example ResultsGS is subject to the default absolute
+tolerance, whereas the default relative tolerance have been overridden.
+
 <!--
-For simplicity sake I will only write the `results_gs` part in next examples.
+For simplicity sake I will only write the `ResultsGS` part in next examples.
 -->
 Unfortunately, such a strict value for `tol_rel` will become very problematic
 when we have to compare the residues stored in the `convergence` dictionary!
@@ -403,7 +423,7 @@ In this case, it makes more sense to check that all the residues are below a cer
 This is what the **ceil** constraint is for:
 
 ```yaml
-results_gs:
+ResultsGS:
     tol_rel: 1.0e-8
     convergence:
         ceil: 3.0e-7
@@ -411,7 +431,7 @@ results_gs:
 
 Now the test will fail if one of the components of the `convergence` dictionary is above 3.0e-7.
 Note that the `ceil` constraint automatically disables the check for `tol_rel` and `tol_abs` inside `convergence`.
-In other words, all the scalar entries in `results_gs` will be compared with our `tol_rel` and the default `tol_abs`
+In other words, all the scalar entries in `ResultsGS` will be compared with our `tol_rel` and the default `tol_abs`
 whereas the entries in the `convergence` dictionary will be tested against `ceil`.
 
 !!! tip
@@ -421,17 +441,17 @@ whereas the entries in the `convergence` dictionary will be tested against `ceil
 
 Up to now we have been focusing on scalar quantities for which the concept of 
 relative and absolute difference is unambiguously defined but how do we compare vectors and matrices?
-Fields with the `!Tensor` tags are leafs of the tree. The tester routine
+Fields with the `!TensorCart` tags are leafs of the tree. The tester routine
 won't try to compare each individual coefficient with `tol_rel`. However we
 still want to check that it does not change too much. For that purpose we use the
 `tol_vec` constraint which apply to all arrays derived from `BaseArray` (most
 arrays with a tag). `BaseArray` let us use the capabilities of Numpy arrays with
 YAML defined arrays. `tol_vec` check the euclidean distance between the reference
 and the output arrays. Since we also want to apply this constraint to
-`cartesian_force`, we will define the constraint at the top level of `results_gs`.
+`cartesian_force`, we will define the constraint at the top level of `ResultsGS`.
 
 ```yaml
-results_gs:
+ResultsGS:
     tol_rel: 1.0e-8
     tol_vec: 1.0e-5
     convergence:
@@ -462,35 +482,36 @@ Let's declare two filters with the syntax:
 
 ```yaml
 filters:
-    lda:
+    ks:
         dtset: 1
     dmft:
         dtset: 2
 ```
 
-Here we are simply saying that we want to associate the label `lda` to all
-documents created in the first dataset and the label `dmft` to all document created in the second dataset.
-This is the simplest filter declaration possible.
-See [here](#filters-api) for more info on filter declarations.
-Now we can use our filters. First of all we will associate the configuration
-we already wrote to the `lda` filter so we can have a different configuration
-for the second dataset. The YAML file now reads
+Here we are simply saying that we want to associate the label `ks` to all
+documents created in the first dataset and the label `dmft` to all document
+created in the second dataset. The chose of the names `ks` and `dmft` are
+absolutely arbitrary. Pick anything that make sense to your test. This is the
+simplest filter declaration possible.  See [here](#filters-api) for more info on
+filter declarations.  Now we can use our filters. First of all we will associate
+the configuration we already wrote to the `ks` filter so we can have a different
+configuration for the second dataset. The YAML file now reads
 
 ```yaml
 filters:
-    lda:
+    ks:
         dtset: 1
     dmft:
         dtset: 2
 
-lda:
-    Etot:
+ks:
+    EnergyTerms:
         tol_abs: 1.0e-7
-        Total energy (eV):
+        total_energy_eV:
             tol_abs: 1.0e-5
             tol_rel: 1.0e-10
 
-    results_gs:
+    ResultsGS:
         tol_rel: 1.0e-8
         tol_vec: 1.0e-5
         convergence:
@@ -498,26 +519,26 @@ lda:
 
 ```
 
-By putting the configuration under the `lda` node, we specify that these rules
+By inserting the configuration options under the `ks` node, we specify that these rules
 apply only to the first dataset. We will then create a new `dmft` node and create a
-configuration following the same procedure as before. 
+configuration following the same procedure as before.
 We end up with something like this:
 
 ```yaml
 filters:
-    lda:
+    ks:
         dtset: 1
     dmft:
         dtset: 2
 
-lda:
-    Etot:
+ks:
+    EnergyTerms:
         tol_abs: 1.0e-7
-        Total energy (eV):
+        total_energy_eV:
             tol_abs: 1.0e-5
             tol_rel: 1.0e-10
 
-    results_gs:
+    ResultsGS:
         tol_rel: 1.0e-8
         tol_vec: 1.0e-5
         convergence:
@@ -527,7 +548,7 @@ dmft:
     tol_abs: 2.0e-8
     tol_rel: 5.0e-9
 
-    results_gs:
+    ResultsGS:
         convergence:
             ceil: 1.0e-6
             diffor:
@@ -538,14 +559,14 @@ dmft:
 
         stress tensor:
             ignore: true
-    Etot:
-        Total energy eV:
+    EnergyTerms:
+        total_energy_eV:
             tol_abs: 1.0e-5
             tol_rel: 1.0e-8
 
-    Etot DC:
+    EnergyTermsDC:
         tol_abs: 1.0e-7
-        Total DC energy eV:
+        total_energy_dc_eV:
             tol_abs: 1.0e-5
             tol_rel: 1.0e-8
 ```
@@ -560,18 +581,24 @@ states of iterations without having to rewrite everything from scratch.
 A filter can specify all currently known iterators: **dtset**, **timimage**, **image**, and **time**.
 For each iterator, a set of integers can be defined with three different methods:
 
-- a single integer value (`dtset: 1`)
-- a YAML list of values (`dtset: [1, 2, 5]`)
+- a single integer value e.g. `dtset: 1`
+- a YAML list of values e.g. `dtset: [1, 2, 5]`
 - a mapping with the optional members "from" and "to" specifying the boundaries (both
-  included) of the integer interval (`dtset: {from: 1, to: 5}`). If "from" is omitted, the default is 1. If
-  "to" is omitted the default is no upper boundary. 
+  included) of the integer interval e.g. `dtset: {from: 1, to: 5}`. 
+  If "from" is omitted, the default is 1. If "to" is omitted the default is no upper boundary. 
+
+!!! tip
+
+    The order is never relevant in parsing YAML (unless you are writing a list
+    of course). As a consequence you can define filter wherever you want in the
+    file.
 
 ### Filter overlapping
 
-Several filters can apply to the same document if they overlap. However, they
-are required to have a trivial order of *specificity*. Though the first example
-below is fine because _f2_ is included (i.e. is more specific) in _f1_ but the
-second example will raise an error because _f4_ is not included in _f3_.
+Several filters can apply to the same document even when they overlap. Note, however, 
+that overlapping filters must have a trivial order of *specificity*.
+In other words, one filter must be a subset of the other one.
+The example below is OK because _f2_ is included in _f1_  i.e. is more specific:
 
 ```yaml
 # this is fine
@@ -590,6 +617,8 @@ filters:
         - 5
         - 6
 ```
+
+whereas this second example will raise an error because _f4_ is not included in _f3_.
 
 ```yaml
 # this will raise an error
@@ -618,8 +647,15 @@ is done on the new tree, the original constraints will be kept. For example let
 `f1`  and `f2` be two filters such that `f2` is included in `f1`.
 
 ```yaml
+filters:
+    f1:
+        dtset: 1
+    f2:
+        dtset: 1
+        image: 5
+
 f1:
-    results_gs:
+    ResultsGS:
         tol_abs: 1.0e-6
         convergence:
             ceil: 1.0e-6
@@ -627,24 +663,17 @@ f1:
                 1.0e-4
 
 f2:
-    results_gs:
+    ResultsGS:
         tol_rel: 1.0e-7
         convergence:
             ceil: 1.0e-7
-
-filters:
-    f1:
-        dtset: 1
-    f2:
-        dtset: 1
-        image: 5
 ```
 
 When the tester will reach the fifth image of the first dataset, the config tree
 used will be the following:
 
 ```yaml
-results_gs:
+ResultsGS:
     tol_abs: 1.0e-6  # this come from application of f1
     tol_rel: 1.0e-7  # this has been appended without modifying anything else when appling f2
     convergence:
@@ -659,7 +688,7 @@ replace it. Let the `f2` tree be:
 
 ```yaml
 f2:
-    results_gs:
+    ResultsGS:
         convergence!:
             ceil: 1.0e-7
 ```
@@ -667,7 +696,7 @@ f2:
 and now the resulting tree for the fifth image of the first dataset is:
 
 ```yaml
-results_gs:
+ResultsGS:
     tol_abs: 1.0e-6
     convergence:  # the whole convergence node have been overriden
         ceil: 1.0e-7
@@ -693,7 +722,7 @@ array that will be compared to `tol_eq` value.
 A minimal example:
 
 ```yaml
-Etot:
+EnergyTerms:
     tol_eq: 1.0e-6
     equation: 'this["Etotal"] - this["Total energy(eV)"]/27.2114'
 ```
@@ -705,9 +734,8 @@ object can be referred as `this` and the reference object can be referred as `re
 
 
 **callback** requires a bit of python coding since it will invoke a method of the
-structure. Suppose we have a tag `!AtomSpeeds` associated
-to a class `AtomSpeeds` and to a document labeled `Atomic speeds` in the data
-tree. The `AtomSpeeds` class have a method `not_going_anywhere` that checks
+structure. Suppose we have a tag `!AtomSpeeds` associated to a document and
+a class `AtomSpeeds`. The `AtomSpeeds` class have a method `not_going_anywhere` that checks
 that the atoms are not going to try to leave the box. We would like to
 pass some kind of tolerance `d_min` the minimal distance atoms can approach
 the border of the box. The signature of the method have to be
@@ -717,7 +745,7 @@ for explanations about those). Note that `self` will be the reference
 instance. We can then use it by with the following configuration:
 
 ```yaml
-Atomic speeds:
+AtomSpeeds:
     callback:
         method: not_going_anywhere
         d_min: 1.0e-2

@@ -1,3 +1,6 @@
+'''
+Define the interface to the configuration of the test.
+'''
 from __future__ import print_function, division, unicode_literals
 import os
 from copy import copy
@@ -27,6 +30,9 @@ class DriverTestConf:
     '''
         Interface to access parameters and constraints defined by the
         configuration file by following the traversal of the data tree.
+        Aggregate all available config trees according to the filters.
+        Used as a context manager it allow to recursively explore the data tree
+        while accessing the constraints and parameters for each node.
     '''
     default_conf = DEFAULT_CONF_PATH
 

@@ -5,13 +5,13 @@
 '''
 from __future__ import print_function, division, unicode_literals
 import re
-from .yaml_tools import Document
+from .yaml_tools import Document, is_available as has_yaml
 from .yaml_tools.abinit_iterators import ITERATOR_RANKS
 from .yaml_tools.errors import NoIteratorDefinedError, DuplicateDocumentError
 
 # Tag is only recognised if it is a valid a word ([A-Za-z0-9_]+)
 # It won't recognise serialized tags for example
-doc_start_re = re.compile(r'---( !!?\w+)?\n?$')
+doc_start_re = re.compile(r'---(?: !(\w+))?\n?$')
 doc_end_re = re.compile(r'\.\.\.\n?$')
 
 
@@ -21,7 +21,9 @@ class DataExtractor(object):
     '''
 
     def __init__(self, use_yaml, ignore=True, ignoreP=True, xml_mode=False):
-        self.use_yaml = use_yaml
+        self.use_yaml = use_yaml and has_yaml
+        # do not use fldiff on data that have explicitly been written for YAML use
+        self.use_fl_for_yaml = not use_yaml
         self.ignore = ignore
         self.ignoreP = ignoreP
         self.iterators_state = {}
@@ -104,16 +106,19 @@ class DataExtractor(object):
                                 raise NoIteratorDefinedError(current_doc)
 
                             if current_doc.id in docs:
-                                raise DuplicateDocumentError(current_doc.id)
+                                raise DuplicateDocumentError(line, current_doc.id)
 
                             docs[current_doc.id] = current_doc
+                    elif self.use_fl_for_yaml:  # let fldiff compare lines if YAML test is disabled
+                        lines.extend((current_doc.start + i, ' ', ' ' + line) for i, line in enumerate(current_doc.lines))
                     current_doc = None  # go back to normal mode
 
             elif self._get_metachar(line) == '-':
                 # starting a yaml doc
                 if line.startswith('---') and doc_start_re.match(line):
-                    current_doc = Document(self.iterators_state.copy(),
-                                           i, [line])
+                    tag = doc_start_re.match(line).group(1)
+                    current_doc = Document(self.iterators_state.copy(), i,
+                                           [line], tag=tag)
                 else:
                     ignored.append((i, line))
             else:

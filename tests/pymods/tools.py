@@ -26,41 +26,35 @@ def patch(fromfile, tofile):
     Use the unix tools diff and patch to patch tofile.
     Returns 0 if success
     """
-    # Temporary patch file.
-    _, tmp = tempfile.mkstemp(suffix='.patch')
+    with tempfile.NamedTemporaryFile(delete=True, suffix=".patch") as f:
+        tmp = f.name
 
-    # An exit status of 0 means no differences were found, 1 means some
-    # differences were found, and 2 means trouble.
-    #diff_cmd = "diff -c %s %s > %s" % (fromfile, tofile, tmp)
-    diff_cmd = "diff -c %s %s > %s" % (tofile, fromfile, tmp)
-    print(diff_cmd)
+        # An exit status of 0 means no differences were found, 1 means some
+        # differences were found, and 2 means trouble.
+        diff_cmd = "diff -c %s %s > %s" % (tofile, fromfile, tmp)
+        print(diff_cmd)
 
-    retcode = os.system(diff_cmd)
+        retcode = os.system(diff_cmd)
 
-    #if retcode >= 2:
-    #    warnings.warn("%s returned %s, won't patch!" % (diff_cmd, retcode) )
-    #    return retcode
+        # if retcode >= 2:
+        #    warnings.warn("%s returned %s, won't patch!" % (diff_cmd, retcode) )
+        #    return retcode
 
-    # Keep a backup copy of tofile.
-    bkp = tofile + ".orig"
-    shutil.copy(tofile, bkp)
+        # Keep a backup copy of tofile.
+        bkp = tofile + ".orig"
+        shutil.copy(tofile, bkp)
 
-    #print(open(tmp, "r").readlines())
-    #patch_cmd = "patch -p1 -i %s -o %s" % (tmp, tofile)
-    #patch_cmd = "patch -p0 < %s" % tmp
-    patch_cmd = "cp %s %s" % (fromfile, tofile)
-    #print(patch_cmd)
+        # print(open(tmp, "r").readlines())
+        # patch_cmd = "patch -p1 -i %s -o %s" % (tmp, tofile)
+        # patch_cmd = "patch -p0 < %s" % tmp
+        patch_cmd = "cp %s %s" % (fromfile, tofile)
+        # print(patch_cmd)
 
-    retcode = os.system(patch_cmd)
-    if retcode != 0:
-        warnings.warn("%s returned %s, reverting to original file" % (patch_cmd, retcode))
-        shutil.move(bkp, tofile)
-        return retcode
-
-    try:
-        os.remove(tmp)
-    except IOError:
-        pass
+        retcode = os.system(patch_cmd)
+        if retcode != 0:
+            warnings.warn("%s returned %s, reverting to original file" % (patch_cmd, retcode))
+            shutil.move(bkp, tofile)
+            return retcode
 
     return retcode
 

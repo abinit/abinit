@@ -5,7 +5,6 @@ from .common import Undef, BaseArray
 from .abinit_iterators import IterStateFilter
 from .meta_conf_parser import ConfTree, ConfParser, SpecKey, Constraint
 from .driver_test_conf import DriverTestConf
-from .structures import Tensor
 
 
 class TestStateFilter(object):
@@ -620,12 +619,6 @@ filters:
                     assert constraints[0].name == 'ceil'
                     assert constraints[0].value == 1.5e-8
 
-    src3 = '''\
-sp1:
-    stress tensor:
-        tensor_is_symetric: true
-'''
-
     src4 = '''\
 sp1:
     stress tensor:
@@ -634,16 +627,6 @@ sp1:
 
     def test_get_constraints_other_types(self):
         DriverTestConf.default_conf = '/dev/null'
-        driver = DriverTestConf(src=self.src3)
-
-        ten = Tensor.from_seq([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
-
-        with driver.use_filter({'dtset': 1}):
-            with driver.go_down('sp1').go_down('stress tensor'):
-                constraints = driver.get_constraints_for(ten)
-                assert len(constraints) == 1
-                assert constraints[0].name == 'tensor_is_symetric'
-                assert constraints[0].value is True
 
         driver = DriverTestConf(src=self.src4)
         from .common import BaseArray

@@ -8,27 +8,50 @@ from .pandas_commons import has_pandas
 
 
 @yaml_auto_map
-class Etot(object):
-    __yaml_tag = 'ETOT'
+class EnergyTerms(object):
+    """Component of total energy."""
 
-    def __init__(self, label='nothing', comment='no comment'):
-        self.label = label
+    not_components = {
+        'total_energy',
+        'comment',
+        'band_energy',
+        'total_energy_eV'
+    }
+
+    def __init__(self, comment='no comment'):
         self.comment = comment
 
     @classmethod
     def from_map(cls, map):
-        new = super(Etot, cls).from_map(map)
+        new = super(EnergyTerms, cls).from_map(map)
         new.components = {
             name: value for name, value in new.__dict__.items()
-            if name not in [
-                'Etotal',
-                'label',
-                'comment',
-                'Band energy',
-                'Total energy(eV)'
-            ]
+            if name not in cls.not_components
         }
         return new
+
+
+@yaml_auto_map
+class EnergyTermsDC(EnergyTerms):
+    """Components of total energy in Double Counting."""
+
+    not_components = {
+        'total_energy_dc',
+        'comment',
+        'band_energy',
+        '-kT*entropy',
+        'total_energy_dc_eV'
+    }
+
+
+@yaml_auto_map
+class EtotSteps(object):
+    """Detail of the values of Etot through the steps of self consistent cycle."""
+
+
+@yaml_auto_map
+class ResultsGS(object):
+    """Miscellaneous results from ground state computations."""
 
 
 if has_pandas:
@@ -39,13 +62,13 @@ if has_pandas:
         is_dict_like = False  # prevent tester from browsing columns
 
         def last_iter(self, other, **opts):
-            '''
-                Expects opts to be a dictionary with keys being column names and
-                values being 'ceil': ceiling_tol_value or 'tol': tolerance_value.
-                The checks are only performed on the last values of each columns.
-                An additional optional key of opts is 'tol_iter' giving a tolerance
-                for the variation of number of iterations. The default value is 5.
-            '''
+            """
+            Expects opts to be a dictionary with keys being column names and
+            values being 'ceil': ceiling_tol_value or 'tol': tolerance_value.
+            The checks are only performed on the last values of each columns.
+            An additional optional key of opts is 'tol_iter' giving a tolerance
+            for the variation of number of iterations. The default value is 5.
+            """
             tol_iter = opts.get('tol_iter', 5)
 
             def chk_tol(a, b, tol):

@@ -5,11 +5,11 @@
 A. All merges, when appropriate
 -------------------------------
 A.1 Update the year, use the script developers/maintainers/change_year.sh (read it first ...)
-A.2 Update shared/common/src/m_specialmsg.F90, lines 243-244
+A.2 Update shared/common/src/14_hidewrite/m_specialmsg.F90, lines 243-244
 A.3 Update KNOWN_PROBLEMS
 A.4 Run the "On-demand only slaves"
 A.5 Check manually that "make tests_in" works (on one of the slaves)
-A.6 On abiref, under buildbot, possibly clean content of bin/LinkChecker_rm_false_errors.py, in "url_string_to_skip"
+A.6 On abiref, under buildbot, possibly clean content of scripts/bbtools/LinkChecker_rm_false_errors.py, in "url_string_to_skip" [likely supercededby new procedure from JMB when ready]
 A.7 Issue ./mksite.py build, then ./mksite.py validate [generate lots of errors, but can be ignored at present]
 A.8 Issue pytest abimkdocs_tests/test_variables.py [generate lots of errors, can be ignored at present]
 A.9 Run abilint (to avoid source files be updated by each separate developer)

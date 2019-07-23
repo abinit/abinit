@@ -18,13 +18,13 @@ y                                           ! Do we add an additional s partial 
 0.5                                         ! Reference energy for this new s partial wave (Ryd)
 n                                           ! Do we add an additional s partial wave ? no
 y                                           ! Do we add an additional p partial wave ? yes
-0.                                          ! Reference energy for this p new partial wave (Ryd)
+1.                                          ! Reference energy for this p new partial wave (Ryd)
 n                                           ! Do we add an additional p partial wave ? no
 y                                           ! Do we add an additional d partial wave ? yes
 0.                                          ! Reference energy for this new d partial wave (Ryd)
 n                                           ! Do we add an additional s partial wave ? no
 bloechl                                     ! Scheme for PS partial waves and projectors
 3 0. troulliermartins                       ! Scheme for pseudopotential (l_loc=3, E_loc=0Ry)
-2                                           ! Option for ABINIT file creation
+ABINITOUT                                   ! Option for ABINIT file creation
 default                                     ! All parameters set to default for ABINIT file
 0                                           ! End of file

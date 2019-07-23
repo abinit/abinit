@@ -22,6 +22,10 @@ else:
     basestring = basestring
 
 
+def get_yaml_tag(cls):
+    return getattr(cls, '_' + cls.__name__.lstrip('_') + '__yaml_tag', cls.__name__)
+
+
 def normalize_attr(string):
     return '_'.join(re_word.findall(string))  # .lower()
 
@@ -94,6 +98,28 @@ class BaseDictWrapper(object):
         for key in self.__dict__:
             yield key
 
+    def __len__(self):
+        return len(self.__dict__)
+
+    def __eq__(self, other):
+        try:
+            if len(self) != len(other):
+                return False
+
+            for (sk, si) in self.items():
+                if sk not in other or other[sk] != si:
+                    return False
+
+            for key in other:
+                if key not in self:
+                    return False
+            return True
+        except Exception:
+            return False
+
+    def __ne__(self, other):
+        return not self == other
+
     def keys(self):
         return self.__dict__.keys()
 
@@ -103,7 +129,9 @@ class BaseDictWrapper(object):
 
 class Undef(float):
     '''
-        Represent the magic number undef.
+    Represent the magic number undef. In Abinit the value 9.9999999999E+99 is
+    used as a magic number when the value should not be used/have not been
+    computed. Undef() represent this value.
     '''
     _is_undef = True
     yaml_pattern = re.compile('undef')
@@ -131,6 +159,9 @@ class Undef(float):
 
 
 class FailDetail(object):
+    '''
+    Result of a failed test with additional informations.
+    '''
     def __init__(self, details):
         self.details = details
 
@@ -143,9 +174,9 @@ class FailDetail(object):
 
 class BaseArray(np.ndarray):
     '''
-        Define a base class for YAML tags converted to numpy compatible
-        objects. Can be used for converting any YAML array of number of any
-        dimension into a numpy compatible array.
+    Define a base class for YAML tags converted to numpy compatible
+    objects. Can be used for converting any YAML array of number of any
+    dimension into a numpy compatible array.
     '''
 
     # attribute to identify the class without relying on isinstance (unreliable
@@ -196,7 +227,7 @@ class BaseArray(np.ndarray):
 
 class IterStart(object):
     '''
-        Mark the begining of a iteration of a given iterator.
+    Mark the begining of a iteration of a given iterator.
     '''
     # Don't do this at home, trick to workaround the custom sys.path
     _is_iter_start = True
