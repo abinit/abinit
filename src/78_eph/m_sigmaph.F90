@@ -1075,7 +1075,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      comm_rpt = xmpi_comm_self
      if (dtset%useric == 666) comm_rpt = xmpi_comm_self
      wr_path = strcat(dtfil%filnam_ds(4), "_WRMAX")
-     wr_path = ""
+     !wr_path = ""
      method = dtset%userid
      call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, &
                               nfftf, ngfftf, method, wr_path, comm_rpt)
