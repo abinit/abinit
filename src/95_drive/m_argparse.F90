@@ -548,13 +548,8 @@ integer function get_arg_str(argname, argval, msg, default, exclude) result(ierr
    end if
    if (arg == "--" // trim(argname)) then
      found_argname = .True.
-     call get_command_argument(ii + 1, arg, status=istat)
-     if (istat == 0) then
-       read(arg, *, iostat=istat, iomsg=iomsg) argval
-       if (istat /= 0) then
-         ierr = ierr + 1; msg = sjoin(msg, ch10, iomsg)
-       end if
-     else
+     call get_command_argument(ii + 1, argval, status=istat)
+     if (istat /= 0) then
        ierr = ierr + 1; msg = sjoin(msg, ch10, "Error in get_command_argument")
      end if
    end if

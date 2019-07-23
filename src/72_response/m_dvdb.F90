@@ -514,9 +514,9 @@ contains
 
 !----------------------------------------------------------------------
 
-!!****f* m_dvdb/dbdb_new
+!!****f* m_dvdb/dvdb_new
 !! NAME
-!!  dbdb_new
+!!  dvdb_new
 !!
 !! FUNCTION
 !!  Initialize the object from file. This is a COLLECTIVE procedure that must be called
@@ -1195,7 +1195,7 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
      read(db%fh, err=10, iomsg=msg) (v1scf(ifft, ispden), ifft=1,cplex*nfftot_file)
    end do
  else
-   ! The FFT mesh used in the caller differ from the one found in the DBDB --> Fourier interpolation
+   ! The FFT mesh used in the caller differ from the one found in the DVDB --> Fourier interpolation
    ! TODO: Add linear interpolation as well.
    if (enough == 0) MSG_WARNING("FFT interpolation of DFPT potentials must be tested.")
    enough = enough + 1
@@ -5959,7 +5959,7 @@ subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, qdamp, ddb_path, dump_
  integer,parameter :: brav1 = 1, master = 0, natifc0 = 0, rfmeth1 = 1, selectz0 = 0
  integer :: nfft, iq, cplex, mu, ispden, comm_rpt, iblock_dielt, iblock_dielt_zeff, my_rank !,  ierr
  integer :: idir, ipert
- integer :: i1,i2,i3,n1,n2,n3,id1,id2,id3
+ integer :: i1,i2,i3,n1,n2,n3
  integer :: cnt, unt, ifft, iqpt
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr
@@ -5979,10 +5979,6 @@ subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, qdamp, ddb_path, dump_
  my_rank = xmpi_comm_rank(comm)
 
  write(std_out,"(a)") " Testing Fourier long range part."
- if (len_trim(ddb_path) > 0) then
-   write(std_out,"(a)")sjoin(" Reading Zeff and einf from DDB file:", ddb_path)
-   write(std_out,"(a)")sjoin(" dvdb_add_lr set to:", itoa(dvdb_add_lr))
- end if
 
  dvdb = dvdb_new(dvdb_path, comm)
  dvdb%debug = .False.
@@ -5995,7 +5991,9 @@ subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, qdamp, ddb_path, dump_
 
  iblock_dielt = 0; iblock_dielt_zeff = 0
  if (len_trim(ddb_path) > 0) then
-   call dvdb_load_ddb(dvdb,ddb_path,prtvol,comm)
+   write(std_out,"(a)")sjoin(" Reading Zeff and eps_inf from DDB file:", ddb_path)
+   write(std_out,"(a)")sjoin(" dvdb_add_lr set to:", itoa(dvdb_add_lr))
+   call dvdb_load_ddb(dvdb, ddb_path, prtvol, comm)
    dvdb%qdamp = 0.01
  end if
 
@@ -6007,7 +6005,6 @@ subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, qdamp, ddb_path, dump_
  call dvdb%open_read(ngfft, comm)
 
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
- id1 = n1/2+2; id2 = n2/2+2; id3 = n3/2+2
 
  ABI_MALLOC(long_v1r, (2, nfft, dvdb%nspden, dvdb%natom3))
  ABI_MALLOC(file_v1r, (2, nfft, dvdb%nspden, dvdb%natom3))
@@ -6025,25 +6022,32 @@ subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, qdamp, ddb_path, dump_
 
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
-   tmp_fname = strcat(dvdb_path, "_VQMAX.nc")
+   tmp_fname = strcat(dvdb_path, "_V1QAVG.nc")
    NCF_CHECK(nctk_open_create(ncid, tmp_fname, xmpi_comm_self))
+   NCF_CHECK(dvdb%cryst%ncwrite(ncid))
    ncerr = nctk_def_dims(ncid, [&
      nctkdim_t("nspden", dvdb%nspden), &
      nctkdim_t("natom", dvdb%natom3/3), nctkdim_t("nqpt", dvdb%nqpt), &
      nctkdim_t("natom3", dvdb%natom3) &
+   ], defmode=.True.)
+   NCF_CHECK(ncerr)
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("v1scf_avg", "dp", "two, nspden, three, natom, nqpt"), &
+     nctkarr_t("v1lr_avg",  "dp", "two, nspden, three, natom, nqpt"), &
+     !nctkarr_t("v1scfmlr_avg",  "dp", "two, nspden, three, natom, nqpt"), &
+     nctkarr_t("v1scf_abs_avg",  "dp", "two, nspden, three, natom, nqpt"), &
+     nctkarr_t("qpoints", "dp", "three, nqpt") &
    ])
    NCF_CHECK(ncerr)
-   NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("v1scf_avg", "dp", "two, nspden, three, natom, nqpt")))
-   NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("v1lr_avg",  "dp", "two, nspden, three, natom, nqpt")))
-   NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("v1scfmlr_avg",  "dp", "two, nspden, three, natom, nqpt")))
    NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpoints"), dvdb%qpts))
  end if
 #endif
 
  cnt = 0
  do iq=1,dvdb%nqpt
    iqpt = dvdb%findq(dvdb%qpts(:,iq))
-   ! Read data from DVDB file and store it in file_v1r
+   ! Read data from DVDB file, reconstruct all 3*natom perts and store them in file_v1r
    call dvdb%readsym_allv1(iqpt, cplex, nfft, ngfft, tmp_v1r, comm)
 
    if (cplex == 1) then
@@ -6054,8 +6058,8 @@ subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, qdamp, ddb_path, dump_
    end if
    ABI_FREE(tmp_v1r)
 
-   ! Compute LR part
-   long_v1r = 0
+   ! Compute the periodic parr of the LR term (not add_phase = 0)
+   long_v1r = zero
    if (dvdb_add_lr==1) then
      do ispden=0,dvdb%nspden
        do mu=1,dvdb%natom3
@@ -6071,12 +6075,19 @@ subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, qdamp, ddb_path, dump_
      do ispden=1,dvdb%nspden
 
 #ifdef HAVE_NETCDF
-       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_avg"), sum(file_v1r(:,:,ispden,mu),2)/nfft,&
+       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_avg"), sum(file_v1r(:,:,ispden,mu), dim=2) / nfft,&
                                   start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
-       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1lr_avg"),  sum(long_v1r(:,:,ispden,mu),2)/nfft,&
+       NCF_CHECK(ncerr)
+       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_abs_avg"), sum(abs(file_v1r(:,:,ispden,mu)), dim=2) / nfft,&
                                   start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
-       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scfmlr_avg"),  sum(file_v1r(:,:,ispden,mu)-long_v1r(:,:,ispden,mu),2)/nfft,&
+       NCF_CHECK(ncerr)
+       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1lr_avg"),  sum(long_v1r(:,:,ispden,mu), dim=2) / nfft,&
                                   start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
+       NCF_CHECK(ncerr)
+       !ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scfmlr_avg"), &
+       !                           sum(file_v1r(:,:,ispden,mu)-long_v1r(:,:,ispden,mu), dim=2) / nfft,&
+       !                           start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
+       !NCF_CHECK(ncerr)
 #endif
 
        write(std_out, "(a)")"--- !DVDB_LONGRANGE_DIFF"
@@ -6786,7 +6797,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  if (dtset%eph_task == 5 .or. present(custom_qpt)) then
    msg = sjoin(" From coarse q-mesh:", ltoa(ngqpt_coarse), "to:", ltoa(dtset%eph_ngqpt_fine))
    call wrtout([std_out, ab_out], msg)
-   ! Setup fine q-point grid
+   ! Setup fine q-point grid in the IBZ
    ! Generate the list of irreducible q-points in the grid
    qptrlatt = 0
    qptrlatt(1,1) = dtset%eph_ngqpt_fine(1); qptrlatt(2,2) = dtset%eph_ngqpt_fine(2); qptrlatt(3,3) = dtset%eph_ngqpt_fine(3)
@@ -6796,9 +6807,6 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
    msg = sjoin(" Using list of q-points specified by ph_qpath with ", itoa(dtset%ph_nqpath), "qpoints")
    call wrtout([std_out, ab_out], msg)
    ABI_CHECK(dtset%ph_nqpath > 0, "ph_nqpath must be specified when eph_task == -5")
-   !qpath = kpath_new(dtset%ph_qpath(:,1:dtset%ph_nqpath), cryst%gprimd, dtset%ph_ndivsm)
-   !nqpts = qpath%npts
-   !call kpath_free(qpath)
    nqibz = dtset%ph_nqpath
    ABI_MALLOC(qibz, (3, nqibz))
    qibz = dtset%ph_qpath(:, 1:nqibz)
@@ -6824,11 +6832,13 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
   qbz = qibz
  end if
 
- ! =======================
- ! Setup fine q-point grid
- ! =======================
- nfftf = product(ngfftf(1:3))
- nfft = product(ngfft(1:3))
+ nfft = product(ngfft(1:3)); nfftf = product(ngfftf(1:3))
+
+ !comm_rpt = sigma%comm_qpt
+ !wr_path = ""
+ !method = dtset%userid
+ !call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, dtset%qrefine, 1, dtset%ddb_qshift, nfftf, ngfftf, method, outwr_path, comm_rpt)
+ !call dvdb%ftinterp_qpt(qpt, nfft, ngfft, ov1r, comm_rpt)
 
  ! check that ngqpt_coarse is in DVDB.
  nqbz_coarse = product(ngqpt_coarse) * nqshift_coarse
