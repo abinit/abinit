@@ -215,6 +215,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  
  type(xgBlock_t) :: xgx0
  character(len=15) :: str
+ integer, save :: counter = 0
 
 ! **********************************************************************
 
@@ -415,13 +416,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            !print *, "nband_k", nband_k
            !stop
 
-           call xgBlock_map(xgx0,cg(:, icg+1:),3,gs_hamk%istwf_k*npw_k*my_nspinor,nband_k,mpi_enreg%comm_bandspinorfft) 
-           write(str , *) inonsc
-           call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*my_nspinor, "BEFORE CB2 SCF: " // str)
+           !call xgBlock_map(xgx0,cg(:, icg+1:),3,gs_hamk%istwf_k*npw_k*my_nspinor,nband_k,mpi_enreg%comm_bandspinorfft) 
+           !write(str , *) counter
+           !call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*my_nspinor, "BEFORE CB2 SCF LOOP: " // str)
            !stop
            call chebfiwf2(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,&
-&           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
-           call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*my_nspinor, "AFTER CB2: " // str)
+&           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k, counter)
+           !call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*my_nspinor, "AFTER CB2 LOOP: " // str)
+           counter = counter + 1
            !stop
            !if (inonsc == 2) stop
            !stop 

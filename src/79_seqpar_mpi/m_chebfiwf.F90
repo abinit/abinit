@@ -86,7 +86,7 @@ module m_chebfiwf
   contains
  
   subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
-&                   nband,npw,nspinor,prtvol,resid) 
+&                   nband,npw,nspinor,prtvol,resid,counter) 
 
 
   use m_cgtools, only : dotprod_g
@@ -110,6 +110,7 @@ module m_chebfiwf
   real(dp)                 ,target,intent(  out) :: resid(nband)
   real(dp)                        ,intent(  out) :: enl_out(nband) !*(1-gs_hamk%usepaw)
   real(dp)                 ,target,intent(  out) :: eig(nband)
+  integer                         ,intent(in   ) :: counter            
  
   !Local variables-------------------------------
  
@@ -323,7 +324,7 @@ module m_chebfiwf
   !call xg_getPointer(xgx0)   
   !stop
   ! Run chebfi
-  call chebfi_run(chebfi, xgx0, getghc_gsc1, getBm1X, precond1, xgeigen, xgresidu) 
+  call chebfi_run(chebfi, xgx0, getghc_gsc1, getBm1X, precond1, xgeigen, xgresidu, counter) 
 
   if (xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft) == 0) then
     print *, "xgx0 AFTER"
