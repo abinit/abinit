@@ -3373,7 +3373,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
  ABI_DEALLOCATE(dum_vlocal)
 
 !--------------------------------------------------------------------------------------
-! Acumulates all the wf dependent terms of the flexoelectric tensor
+! Acumulate all the wf dependent terms of the flexoelectric tensor
 !--------------------------------------------------------------------------------------
  isdqwf_k=zero
  isdqwf_t1_k=zero
@@ -3592,6 +3592,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
  real(dp),allocatable :: cwave0i(:,:)
  real(dp),allocatable :: dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:)
+ real(dp),allocatable :: frwfdq_bks(:,:,:,:,:,:,:)
  real(dp),allocatable :: gh1dqc(:,:),gvloc1dqc(:,:),gvnl1dqc(:,:)
  real(dp),allocatable :: ghatdisdqdq_c0m(:,:,:,:,:,:)
  real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg1_k(:,:),ph3d(:,:,:),ph3d1(:,:,:)
@@ -3788,7 +3789,9 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 !--------------------------------------------------------------------------------------
 ! Acumulates the three frozen wf terms of the q-gradient of the internal strain
 !--------------------------------------------------------------------------------------
- frwfdq_k=zero
+
+!Specific allocations and definitions
+ ABI_ALLOCATE(frwfdq_bks,(2,nband_k,matom,3,3,3,nq1grad))
 
 !Generate k+G vectors
  nkpg=3;                                                                                              
@@ -3828,30 +3831,30 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
        & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
          !Accumulate this term (take here into account the -i·-i prefactors and the conjugate complex)
-         frwfdq_k(1,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(1,iatom,iatdir,ka,kb,iq1grad)-dotr
-         frwfdq_k(2,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(2,iatom,iatdir,ka,kb,iq1grad)+doti
+         frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)=-dotr
+         frwfdq_bks(2,iband,iatom,iatdir,ka,kb,iq1grad)=doti
 
          !Next complete the other two terms involving the 1st q-gradient of atdis Hamiltonian:
          !<u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\gamma} \frac{\delta_{\beta\delta}}{2} | u_{i,k}^{(0)} >
          !<u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\delta} \frac{\delta_{\beta\gamma}}{2} | u_{i,k}^{(0)} >
          !--------------------------------------------------------------------------
          if (ka==kb) then
-           frwfdq_k(1,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(1,iatom,iatdir,ka,kb,iq1grad)-   &
+           frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)=frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)-   &
          & half*c0_hatdisdq_c0_bks(1,iband,iq1grad,iatpert)
-           frwfdq_k(2,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(2,iatom,iatdir,ka,kb,iq1grad)+   &
+           frwfdq_bks(2,iband,iatom,iatdir,ka,kb,iq1grad)=frwfdq_bks(2,iband,iatom,iatdir,ka,kb,iq1grad)+   &
          & half*c0_hatdisdq_c0_bks(2,iband,iq1grad,iatpert)
          end if
          if (ka==iq1grad) then
-           frwfdq_k(1,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(1,iatom,iatdir,ka,kb,iq1grad)-   &
+           frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)=frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)-   &
          & half*c0_hatdisdq_c0_bks(1,iband,kb,iatpert)
-           frwfdq_k(2,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(2,iatom,iatdir,ka,kb,iq1grad)+   &
+           frwfdq_bks(2,iband,iatom,iatdir,ka,kb,iq1grad)=frwfdq_bks(2,iband,iatom,iatdir,ka,kb,iq1grad)+   &
          & half*c0_hatdisdq_c0_bks(2,iband,kb,iatpert)
          end if
 
-         !Take into account band occupations, kpt weights and two pi factor from the term 
+         !Take into account the two pi factor from the term 
          !(\hat{p}_{k\beta + \frac{q_{\beta}}{2}}) appearing before the double q-derivation
-         frwfdq_k(:,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(:,iatom,iatdir,ka,kb,iq1grad)* &
-       & occ_k(iband)*two_pi
+         frwfdq_bks(:,iband,iatom,iatdir,ka,kb,iq1grad)=frwfdq_bks(:,iband,iatom,iatdir,ka,kb,iq1grad)*     &
+       & two_pi
 
        end do !iband
 
@@ -3861,6 +3864,29 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 
  end do !iatpert
 
+!--------------------------------------------------------------------------------------
+! Acumulate the frwf terms of this ikpt
+!--------------------------------------------------------------------------------------
+ frwfdq_k=zero
+ do iatpert= 1, natpert
+   iatom=pert_atdis(1,iatpert)
+   iatdir=pert_atdis(2,iatpert)
+   do istrpert= 1, nstrpert
+     ka=pert_strain(3,istrpert)
+     kb=pert_strain(4,istrpert)
+     do iq1grad=1,3
+       do iband=1,nband_k
+
+         if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
+   
+         frwfdq_k(:,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(:,iatom,iatdir,ka,kb,iq1grad) + &
+       & occ_k(iband) * frwfdq_bks(:,iband,iatom,iatdir,ka,kb,iq1grad) 
+
+       end do
+     end do
+   end do
+ end do
+
 !scale by the k-point weight
  frwfdq_k=frwfdq_k * wtk_k
 
@@ -3868,6 +3894,9 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
  ABI_DEALLOCATE(c0_hatdisdq_c0_bks)
  ABI_DEALLOCATE(ghatdisdqdq_c0m)
  ABI_DEALLOCATE(gh1dqc)
+ ABI_DEALLOCATE(frwfdq_bks)
+
+
  DBG_EXIT("COLL")
 
  end subroutine dfpt_isdqfr
