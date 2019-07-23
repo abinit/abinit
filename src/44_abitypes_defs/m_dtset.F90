@@ -431,6 +431,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%dmft_entropy       = dtin%dmft_entropy
  dtout%dmft_charge_prec   = dtin%dmft_charge_prec
  dtout%dmft_iter          = dtin%dmft_iter
+ dtout%dmft_kspectralfunc = dtin%dmft_kspectralfunc
  dtout%dmft_nlambda       = dtin%dmft_nlambda
  dtout%dmft_mxsf          = dtin%dmft_mxsf
  dtout%dmft_nwlo          = dtin%dmft_nwlo
@@ -482,6 +483,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%eph_mustar         = dtin%eph_mustar
  dtout%eph_intmeth        = dtin%eph_intmeth
  dtout%eph_tols_idelta    = dtin%eph_tols_idelta
+ dtout%eph_phrange        = dtin%eph_phrange
  dtout%eph_extrael        = dtin%eph_extrael
  dtout%eph_fermie         = dtin%eph_fermie
  dtout%eph_frohlichm      = dtin%eph_frohlichm
@@ -1093,138 +1095,74 @@ subroutine dtset_copy(dtout, dtin)
 !Use alloc_copy to allocate and copy the allocatable arrays
 
 !integer allocatables
- call alloc_copy( dtin%algalch, dtout%algalch)
-
- call alloc_copy( dtin%bdgw, dtout%bdgw)
-
- call alloc_copy( dtin%bs_loband, dtout%bs_loband)
-
- call alloc_copy( dtin%dynimage, dtout%dynimage)
-
- call alloc_copy( dtin%efmas_bands, dtout%efmas_bands)
-
- call alloc_copy( dtin%iatfix, dtout%iatfix)
-
- call alloc_copy( dtin%iatsph, dtout%iatsph)
-
- call alloc_copy( dtin%istwfk, dtout%istwfk)
-
- call alloc_copy( dtin%kberry, dtout%kberry)
-
- call alloc_copy( dtin%lexexch, dtout%lexexch)
-
- call alloc_copy( dtin%ldaminushalf, dtout%ldaminushalf)
-
- call alloc_copy( dtin%lpawu, dtout%lpawu)
-
- call alloc_copy( dtin%nband, dtout%nband)
-
- call alloc_copy( dtin%plowan_iatom, dtout%plowan_iatom)
-
- call alloc_copy( dtin%plowan_it, dtout%plowan_it)
-
- call alloc_copy( dtin%plowan_nbl, dtout%plowan_nbl)
-
- call alloc_copy( dtin%plowan_lcalc, dtout%plowan_lcalc)
-
- call alloc_copy( dtin%plowan_projcalc, dtout%plowan_projcalc)
-
- call alloc_copy( dtin%prtatlist, dtout%prtatlist)
-
- call alloc_copy( dtin%so_psp, dtout%so_psp)
-
- call alloc_copy( dtin%symafm, dtout%symafm)
-
- call alloc_copy( dtin%symrel, dtout%symrel)
-
- call alloc_copy( dtin%typat, dtout%typat)
+ call alloc_copy(dtin%algalch, dtout%algalch)
+ call alloc_copy(dtin%bdgw, dtout%bdgw)
+ call alloc_copy(dtin%bs_loband, dtout%bs_loband)
+ call alloc_copy(dtin%dynimage, dtout%dynimage)
+ call alloc_copy(dtin%efmas_bands, dtout%efmas_bands)
+ call alloc_copy(dtin%iatfix, dtout%iatfix)
+ call alloc_copy(dtin%iatsph, dtout%iatsph)
+ call alloc_copy(dtin%istwfk, dtout%istwfk)
+ call alloc_copy(dtin%kberry, dtout%kberry)
+ call alloc_copy(dtin%lexexch, dtout%lexexch)
+ call alloc_copy(dtin%ldaminushalf, dtout%ldaminushalf)
+ call alloc_copy(dtin%lpawu, dtout%lpawu)
+ call alloc_copy(dtin%nband, dtout%nband)
+ call alloc_copy(dtin%plowan_iatom, dtout%plowan_iatom)
+ call alloc_copy(dtin%plowan_it, dtout%plowan_it)
+ call alloc_copy(dtin%plowan_nbl, dtout%plowan_nbl)
+ call alloc_copy(dtin%plowan_lcalc, dtout%plowan_lcalc)
+ call alloc_copy(dtin%plowan_projcalc, dtout%plowan_projcalc)
+ call alloc_copy(dtin%prtatlist, dtout%prtatlist)
+ call alloc_copy(dtin%so_psp, dtout%so_psp)
+ call alloc_copy(dtin%symafm, dtout%symafm)
+ call alloc_copy(dtin%symrel, dtout%symrel)
+ call alloc_copy(dtin%typat, dtout%typat)
 
 !Allocate and copy real allocatable
- call alloc_copy( dtin%acell_orig, dtout%acell_orig)
-
- call alloc_copy( dtin%amu_orig, dtout%amu_orig)
-
- call alloc_copy( dtin%atvshift, dtout%atvshift)
-
- call alloc_copy( dtin%cd_imfrqs, dtout%cd_imfrqs)
-
- call alloc_copy( dtin%chempot, dtout%chempot)
-
- call alloc_copy( dtin%corecs, dtout%corecs)
-
- call alloc_copy( dtin%densty, dtout%densty)
-
- call alloc_copy( dtin%dmatpawu, dtout%dmatpawu)
-
- call alloc_copy( dtin%efmas_dirs, dtout%efmas_dirs)
-
- call alloc_copy( dtin%f4of2_sla, dtout%f4of2_sla)
-
- call alloc_copy( dtin%f6of2_sla, dtout%f6of2_sla)
-
- call alloc_copy( dtin%gw_qlwl, dtout%gw_qlwl)
-
- call alloc_copy( dtin%gw_freqsp, dtout%gw_freqsp)
-
- call alloc_copy( dtin%gwls_list_proj_freq, dtout%gwls_list_proj_freq)
-
- call alloc_copy( dtin%jpawu, dtout%jpawu)
-
- call alloc_copy( dtin%kpt, dtout%kpt)
-
- call alloc_copy( dtin%kptgw, dtout%kptgw)
-
- call alloc_copy( dtin%kptns, dtout%kptns)
-
- call alloc_copy( dtin%kptns_hf, dtout%kptns_hf)
-
- call alloc_copy( dtin%mixalch_orig, dtout%mixalch_orig)
-
- call alloc_copy( dtin%mixesimgf, dtout%mixesimgf)
-
- call alloc_copy( dtin%nucdipmom, dtout%nucdipmom)
-
- call alloc_copy( dtin%occ_orig, dtout%occ_orig)
-
- call alloc_copy( dtin%pimass, dtout%pimass)
-
- call alloc_copy( dtin%ptcharge, dtout%ptcharge)
-
- call alloc_copy( dtin%qmass, dtout%qmass)
-
- call alloc_copy( dtin%qptdm, dtout%qptdm)
-
- call alloc_copy( dtin%quadmom, dtout%quadmom)
-
- call alloc_copy( dtin%ratsph, dtout%ratsph)
-
- call alloc_copy( dtin%rprim_orig, dtout%rprim_orig)
-
- call alloc_copy( dtin%rprimd_orig, dtout%rprimd_orig)
-
- call alloc_copy( dtin%shiftk, dtout%shiftk)
-
- call alloc_copy( dtin%spinat, dtout%spinat)
-
- call alloc_copy( dtin%tnons, dtout%tnons)
-
- call alloc_copy( dtin%upawu, dtout%upawu)
-
- call alloc_copy( dtin%vel_orig, dtout%vel_orig)
-
- call alloc_copy( dtin%vel_cell_orig, dtout%vel_cell_orig)
-
- call alloc_copy( dtin%wtatcon, dtout%wtatcon)
-
- call alloc_copy( dtin%wtk, dtout%wtk)
-
- call alloc_copy( dtin%xred_orig, dtout%xred_orig)
-
- call alloc_copy( dtin%xredsph_extra, dtout%xredsph_extra)
-
- call alloc_copy( dtin%ziontypat, dtout%ziontypat)
-
- call alloc_copy( dtin%znucl, dtout%znucl)
+ call alloc_copy(dtin%acell_orig, dtout%acell_orig)
+ call alloc_copy(dtin%amu_orig, dtout%amu_orig)
+ call alloc_copy(dtin%atvshift, dtout%atvshift)
+ call alloc_copy(dtin%cd_imfrqs, dtout%cd_imfrqs)
+ call alloc_copy(dtin%chempot, dtout%chempot)
+ call alloc_copy(dtin%corecs, dtout%corecs)
+ call alloc_copy(dtin%densty, dtout%densty)
+ call alloc_copy(dtin%dmatpawu, dtout%dmatpawu)
+ call alloc_copy(dtin%efmas_dirs, dtout%efmas_dirs)
+ call alloc_copy(dtin%f4of2_sla, dtout%f4of2_sla)
+ call alloc_copy(dtin%f6of2_sla, dtout%f6of2_sla)
+ call alloc_copy(dtin%gw_qlwl, dtout%gw_qlwl)
+ call alloc_copy(dtin%gw_freqsp, dtout%gw_freqsp)
+ call alloc_copy(dtin%gwls_list_proj_freq, dtout%gwls_list_proj_freq)
+ call alloc_copy(dtin%jpawu, dtout%jpawu)
+ call alloc_copy(dtin%kpt, dtout%kpt)
+ call alloc_copy(dtin%kptgw, dtout%kptgw)
+ call alloc_copy(dtin%kptns, dtout%kptns)
+ call alloc_copy(dtin%kptns_hf, dtout%kptns_hf)
+ call alloc_copy(dtin%mixalch_orig, dtout%mixalch_orig)
+ call alloc_copy(dtin%mixesimgf, dtout%mixesimgf)
+ call alloc_copy(dtin%nucdipmom, dtout%nucdipmom)
+ call alloc_copy(dtin%occ_orig, dtout%occ_orig)
+ call alloc_copy(dtin%pimass, dtout%pimass)
+ call alloc_copy(dtin%ptcharge, dtout%ptcharge)
+ call alloc_copy(dtin%qmass, dtout%qmass)
+ call alloc_copy(dtin%qptdm, dtout%qptdm)
+ call alloc_copy(dtin%quadmom, dtout%quadmom)
+ call alloc_copy(dtin%ratsph, dtout%ratsph)
+ call alloc_copy(dtin%rprim_orig, dtout%rprim_orig)
+ call alloc_copy(dtin%rprimd_orig, dtout%rprimd_orig)
+ call alloc_copy(dtin%shiftk, dtout%shiftk)
+ call alloc_copy(dtin%spinat, dtout%spinat)
+ call alloc_copy(dtin%tnons, dtout%tnons)
+ call alloc_copy(dtin%upawu, dtout%upawu)
+ call alloc_copy(dtin%vel_orig, dtout%vel_orig)
+ call alloc_copy(dtin%vel_cell_orig, dtout%vel_cell_orig)
+ call alloc_copy(dtin%wtatcon, dtout%wtatcon)
+ call alloc_copy(dtin%wtk, dtout%wtk)
+ call alloc_copy(dtin%xred_orig, dtout%xred_orig)
+ call alloc_copy(dtin%xredsph_extra, dtout%xredsph_extra)
+ call alloc_copy(dtin%ziontypat, dtout%ziontypat)
+ call alloc_copy(dtin%znucl, dtout%znucl)
 
  dtout%ndivsm = dtin%ndivsm
  dtout%nkpath = dtin%nkpath
@@ -1354,8 +1292,8 @@ end subroutine dtset_free
 !! dtset_free_nkpt_arrays
 !!
 !! FUNCTION
-!!  Free arrays that depend on input nkpt (used in EPH code, because EPH has its own 
-!!  treatmend of BZ sampling and we don't want to waste memory with large and useless arrays 
+!!  Free arrays that depend on input nkpt (used in EPH code, because EPH has its own
+!!  treatment of BZ sampling and we don't want to waste memory with large and useless arrays
 !!  especially if very dense k-meshes are used.
 !!
 !! PARENTS
@@ -1427,7 +1365,7 @@ subroutine find_getdtset(dtsets,getvalue,getname,idtset,iget,miximage,mxnimage,n
 !Local variables-------------------------------
  integer :: iimage
  real(dp) :: newimage_get,ratio
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -1442,18 +1380,17 @@ subroutine find_getdtset(dtsets,getvalue,getname,idtset,iget,miximage,mxnimage,n
      if(iget==idtset)then
 !      The index of the dataset, from which the data ought to be taken,
 !      does not correspond to a previous dataset.
-       write(message, '(a,i3,4a,i3,7a)' )&
-&       'The component number',idtset,' of the input variable ',trim(getname),',',&
-&       ' equal to',getvalue,',',ch10,&
-&       'does not correspond to an existing index.',ch10,&
-&       'Action: correct ',trim(getname),' or jdtset in your input file.'
-       MSG_ERROR(message)
+       write(msg, '(a,i0,4a,i3,7a)' )&
+        'The component number ',idtset,' of the input variable ',trim(getname),',',' equal to ',getvalue,',',ch10,&
+        'does not correspond to an existing index.',ch10,&
+        'Action: correct ',trim(getname),' or jdtset in your input file.'
+       MSG_ERROR(msg)
      end if
    end if
-   write(message, '(3a,i3,2a)' )&
+   write(msg, '(3a,i3,2a)' )&
 &   ' find_getdtset : ',trim(getname),'/=0, take data from output of dataset with index',dtsets(iget)%jdtset,'.',ch10
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
  end if
 
 !For the time being, uses a simple interpolation when the images do not match. If only one image, take the first get image.
@@ -2158,16 +2095,13 @@ subroutine macroin2(dtsets,ndtset_alloc)
    pawujat=pawujat-count(dtsets(idtset)%lpawu( dtsets(idtset)%typat( 1:pawujat ))<0)
 
    if (dtsets(idtset)%macro_uj>0) then
-!    Level shift atom with amplitude pawujv
+     ! Level shift atom with amplitude pawujv
      dtsets(idtset)%atvshift(:,:,pawujat)=dtsets(idtset)%pawujv
-
-!    Case level shift only on one spin channel
+     ! Case level shift only on one spin channel
      if ((dtsets(idtset)%macro_uj==2.or.dtsets(idtset)%macro_uj==3).and.dtsets(idtset)%nsppol==2) then
        dtsets(idtset)%atvshift(:,2,pawujat)=0_dp
      end if
-
    end if ! macro_uj
-
  end do
 
 end subroutine macroin2
@@ -2237,8 +2171,8 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dipdip_prt dipdip_range'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
  list_vars=trim(list_vars)//' dmft_entropy dmft_nlambda'
- list_vars=trim(list_vars)//' dmft_charge_prec dmft_dc dmft_iter dmft_mxsf dmft_nwli dmft_nwlo'
- list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv dmft_t2g'
+ list_vars=trim(list_vars)//' dmft_charge_prec dmft_dc dmft_iter dmft_kspectralfunc dmft_mxsf dmft_nwli dmft_nwlo'
+ list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv dmft_t2g dmft_x2my2d'
  list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmftbandi dmftbandf dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
  list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_meas dmftctqmc_mrka'
@@ -2253,7 +2187,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' efmas_bands efmas_calc_dirs efmas_deg efmas_deg_tol'
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit eshift'
- list_vars=trim(list_vars)//' esmear exchmix exchn2n3d extrapwf eph_frohlichm'
+ list_vars=trim(list_vars)//' esmear exchmix exchn2n3d extrapwf eph_frohlichm eph_phrange'
  list_vars=trim(list_vars)//' eph_tols_idelta eph_intmeth eph_extrael eph_fermie eph_frohlich eph_fsmear'
  list_vars=trim(list_vars)//' eph_fsewin eph_mustar eph_ngqpt_fine eph_np_pqbks eph_restart eph_stern eph_task eph_transport'
 !F

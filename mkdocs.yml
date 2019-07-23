@@ -223,9 +223,11 @@ pages:
 - Developers:
     - Abimkdocs: developers/abimkdocs.md
     - Markdown: developers/markdown.md
-    - Test Suite Howto: developers/testsuite_howto.md
-    - Test Suite: developers/testsuite.md
-    - New Test Suite Project: developers/new_testsuite.md
+    - Test Suite:
+        - Test list: developers/testsuite.md
+        - Test Suite Howto: developers/testsuite_howto.md
+        - YAML-based test suite Howto: developers/new_testsuite.md
+        - YAML-based test suite Python tools and API: developers/yaml_tools_api.md
     - HowTo for developers: developers/developers_howto.md
     - XgType: developers/XgType.md
     - Pseudos: 
@@ -314,7 +316,7 @@ copyright: Copyright &copy; 2018-2019 The Abinit Group
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 8.11.7
+    version: 8.11.9
     previous_published_versions: [] #8.2.0
     social:
         - type: github-alt

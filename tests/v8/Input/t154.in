@@ -35,6 +35,8 @@ symsigma  1
 optdriver  7
 nband      8
 tmesh 5 295 2
+eph_extrael 1e-6
+occopt 3
 
 gw_qprange 2
 
@@ -55,11 +57,11 @@ znucl 6
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_1[89].0_.*
+#%% exclude_builders = .*_intel_1[789].0_.*
 #%% test_chain = t150.in, t151.in, t152.in, t153.in, t154.in, t155.in, t156.in
 #%% [files]
 #%% files_to_test = 
-#%%   t154.out, tolnlines = 30, tolabs = 0.25, tolrel = 2.0e-2
+#%%   t154.out, tolnlines = 30, tolabs = 450, tolrel = 2.0e-2
 #%% psp_files = 6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 10

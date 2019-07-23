@@ -9,7 +9,8 @@ from .fldiff import (
     ForcedDifference,
 )
 from .data_extractor import DataExtractor
-from .yaml_tools.errors import NoIteratorDefinedError
+from .yaml_tools.errors import NoIteratorDefinedError, UntaggedDocumentError
+from .yaml_tools.structures.commons import GenericMap
 
 
 class TestDiffer:
@@ -225,11 +226,10 @@ class TestDataExtractor:
         assert ignored == []
 
     def test_extract_require_iterstart(self):
-
         dext = DataExtractor(True)
         dext.iterators_state = {'dtset': 1}
         lines = '''\
----
+--- !GenericMap
 a field: 58
 another: 78
 a list of strings:
@@ -240,6 +240,29 @@ a list of strings:
         lines = [line + '\n' for line in lines.split('\n')]
         with pytest.raises(NoIteratorDefinedError):
             _, documents, _ = dext.extract(lines)
+            print(documents)
+
+    def test_extract_require_label(self):
+        dext = DataExtractor(True)
+        dext.iterators_state = {'dtset': 1}
+        lines = '''\
+--- !IterStart
+dtset: 1
+...
+
+---
+a field: 58
+another: 78
+a list of strings:
+- "a string"
+- "two strings"
+- "..."
+...'''
+        lines = [line + '\n' for line in lines.split('\n')]
+        with pytest.raises(UntaggedDocumentError):
+            _, documents, _ = dext.extract(lines)
+            assert len(documents) == 1
+            print(*(doc.obj for doc in documents))
 
     def test_extract_find_yaml_doc(self):
         dext = DataExtractor(True)
@@ -251,7 +274,7 @@ dtset: 1
 
  Garbage here
 
----
+--- !GenericMap
 a field: 58
 another: 78
 a list of strings:
@@ -262,16 +285,15 @@ a list of strings:
 
         lines = [line + '\n' for line in lines.split('\n')]
         _, documents, _ = dext.extract(lines)
-        print(documents)
 
         # IterStart documents should not be in the document list
         assert len(documents) == 1
-        assert documents[0].iterators == {'dtset': 1}
-        assert documents[0].start == 6
-        assert documents[0].end == 13
-        assert documents[0].lines == lines[6:]
-        assert documents[0].obj == {
+        assert documents['dtset=1 GenericMap'].iterators == {'dtset': 1}
+        assert documents['dtset=1 GenericMap'].start == 6
+        assert documents['dtset=1 GenericMap'].end == 13
+        assert documents['dtset=1 GenericMap'].lines == lines[6:]
+        assert documents['dtset=1 GenericMap'].obj == GenericMap.from_map({
             'a field': 58,
             'another': 78,
             'a list of strings': ['a string', 'two strings', '...']
-        }
+        })

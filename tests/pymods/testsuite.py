@@ -35,7 +35,7 @@ from .tools import (RestrictedShell, unzip, tail_file, pprint_table, Patcher,
                     Editor)
 from .xyaptu import xcopier
 from .devtools import NoErrorFileLock, makeunique
-from .memprof import AbimemParser
+from .memprof import AbimemFile
 from .termcolor import cprint
 
 from .fldiff import Differ as FlDiffer
@@ -311,6 +311,9 @@ class FileToTest(object):
             if not opt.startswith("-"):
                 raise ValueError("Wrong fldiff option: %s" % opt)
 
+        self.has_line_count_error = False
+        self.do_html_diff = False
+
     @lazy__str__
     def __str__(self): pass
 
@@ -369,15 +372,15 @@ class FileToTest(object):
             result = differ.diff(ref_fname, out_fname)
             result.dump_details(outf)
 
-            return result.passed_within_tols(
+            return (result.passed_within_tols(
                 self.tolnlines, self.tolabs, self.tolrel
-            )
+            ), result.has_line_count_error())
 
         if fldebug:  # fail on first error and output the traceback
-            isok, status, msg = make_diff()
+            (isok, status, msg), has_line_count_error = make_diff()
         else:
             try:
-                isok, status, msg = make_diff()
+                (isok, status, msg), has_line_count_error = make_diff()
             except Exception as e:
                 warnings.warn(('[{}] Something went wrong with this test:\n'
                                '{}: {}\n').format(self.name, type(e).__name__,
@@ -385,12 +388,14 @@ class FileToTest(object):
                 isok, status = False, 'failed'
                 msg = 'internal error:\n{}: {}'.format(type(e).__name__,
                                                        str(e))
+                has_line_count_error = False
         msg += ' [file={}]'.format(os.path.basename(ref_fname))
 
         # Save comparison results.
         self.fld_isok = isok
         self.fld_status = status
         self.fld_msg = msg
+        self.has_line_count_error = has_line_count_error
 
         return isok, status, msg
 
@@ -557,7 +562,7 @@ class AbinitTestInfo(object):
         #     raise TestInfoParserError(err_msg)
 
         # Add the executable name to the list of keywords.
-        self.add_keywords(self.executable)
+        self.add_keywords([self.executable])
 
     @lazy__str__
     def __str__(self): pass
@@ -1387,6 +1392,7 @@ class BaseTest(object):
         self._isok = None
         self.stdout_fname = None
         self._print_lock = NotALock()
+        self.exec_error = False
 
         self.had_timeout = False
         self.force_skip = False
@@ -1964,6 +1970,7 @@ class BaseTest(object):
 
             # Save exceptions (if any).
             if runner.exceptions:
+                self.exec_error = True
                 self.exceptions.extend(runner.exceptions)
                 if not self.expected_failure:
                     for exc in runner.exceptions:
@@ -1990,9 +1997,11 @@ class BaseTest(object):
 
                     isok, status, msg = f.compare(self.abenv.fldiff_path, self.ref_dir, self.workdir,
                                                   yaml_test=self.yaml_test, timebomb=self.timebomb, outf=fh)
-
                 self.keep_files(os.path.join(self.workdir, f.name))
                 self.fld_isok = self.fld_isok and isok
+
+                if not self.exec_error and f.has_line_count_error:
+                    f.do_html_diff = True
 
                 msg = ": ".join([self.full_id, msg])
                 self.cprint(msg, status2txtcolor[status])
@@ -2072,10 +2081,10 @@ class BaseTest(object):
                 self.cprint("Found %s abimem files" % len(paths))
                 # abimem_retcode = 0
                 for path in paths:
-                    parser = AbimemParser(path)
-                    parser.find_memleaks()
-                    # if rc: parser.show_errors()
-                    # abimem_retcode += rc
+                    memfile = AbimemFile(path)
+                    memfile.find_memleaks()
+                    #if rc: parser.show_errors()
+                    #abimem_retcode += rc
 
             # if False and kwargs.get("etsf_check", False):
             if kwargs.get("etsf_check", False):
@@ -2139,6 +2148,7 @@ class BaseTest(object):
         self.run_etime = d['run_etime']
         self._executed = d['executed']
         self._isok = d['isok']
+        self.exec_error = d['exec_error']
         self.workdir = d['workdir']
 
     def results_dump(self, skipped_info=False):
@@ -2153,6 +2163,7 @@ class BaseTest(object):
             'tot_etime': self.tot_etime,
             'run_etime': self.run_etime,
             'executed': self._executed,
+            'exec_error': self.exec_error,
             'isok': self.isok,
             'workdir': self.workdir,
         }
@@ -2216,7 +2227,7 @@ class BaseTest(object):
         diffpy = self.abenv.apath_of("tests", "pymods", "diff.py")
 
         for f in self.files_to_test:
-            if f.fld_isok and self.make_html_diff == 1:
+            if not f.do_html_diff and self.make_html_diff == 1:
                 continue
 
             ref_fname = os.path.abspath(os.path.join(self.ref_dir, f.name))
@@ -2238,10 +2249,10 @@ class BaseTest(object):
             safe_hdiff = ext in {".out", ".stdout"}  # Create HTML diff file only for these files
 
             if ref_exists and out_exists and safe_hdiff:
-                out_opt = "-u"
+                out_opt = "-m"
                 # out_opt = "-t"   # For simple HTML table. (can get stuck)
                 # args = ["python", diffpy, out_opt, "-f " + hdiff_fname, out_fname, ref_fname ]
-                args = [diffpy, out_opt, "-f " + hdiff_fname, out_fname, ref_fname]
+                args = [diffpy, out_opt, "-j",  "-f " + hdiff_fname, out_fname, ref_fname]
                 cmd = " ".join(args)
                 # print("Diff", cmd)
 
@@ -2294,7 +2305,7 @@ class BaseTest(object):
                 # out_opt = "-n"
                 # out_opt = "-c"
                 out_opt = "-u"
-                args = [diffpy, out_opt, "-f " + diff_fname, out_fname,
+                args = [diffpy, out_opt, "-j", "-f " + diff_fname, out_fname,
                         ref_fname]
                 cmd = " ".join(args)
 
@@ -3532,7 +3543,7 @@ class AbinitTestSuite(object):
                 # remove this to let python garbage collect processes and avoid
                 # Pickle to complain (it does not accept processes for security
                 # reasons)
-                del self._processes
+                self._processes = []
                 task_q.close()
                 res_q.close()
 
@@ -3715,7 +3726,7 @@ class AbinitTestSuite(object):
         for p in self._processes:
             p.terminate()
         self._kill_me = True
-        del self._processes
+        self._processes = []
 
     @staticmethod
     def _pyhtml_table_section(status):

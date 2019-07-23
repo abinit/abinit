@@ -267,7 +267,7 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
  integer :: spin, spad, itt ! For diagonal !
  logical :: is_resonant, diago_is_real, use_mpio=.FALSE.
  character(len=fnlen) :: hreso_fname, hcoup_fname
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  complex(dpc),allocatable :: test(:,:)
 
@@ -294,10 +294,7 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
  hexc%nbnd_coarse = BSp%maxnbndv*BSp%maxnbndc
 
  ! Divide the columns of the Hamiltonian among the nodes.
- call xmpi_split_work(hsize,comm,hexc%my_t1,hexc%my_t2,msg,ierr)
- if (ierr/=0) then
-   MSG_WARNING(msg)
- end if
+ call xmpi_split_work(hsize,comm,hexc%my_t1,hexc%my_t2)
 
  hexc%my_nt = hexc%my_t2 - hexc%my_t1 + 1
  ABI_CHECK(hexc%my_nt>0,"found processor with 0 rows")

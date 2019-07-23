@@ -78,8 +78,6 @@ CONTAINS  !===========================================================
 
 subroutine hessinit(ab_mover, hessin, init_matrix, ndim, ucvol)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ndim
@@ -210,8 +208,6 @@ end subroutine hessinit
 
 subroutine hessupdt(hessin,iatfix,natom,ndim,vin,vin_prev,vout,vout_prev, &
 &                   nimage) ! optional argument
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -365,8 +361,6 @@ end subroutine hessupdt
 !! SOURCE
 
 subroutine brdene(etotal,etotal_prev,hessin,ndim,vin,vin_prev,vout,vout_prev)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

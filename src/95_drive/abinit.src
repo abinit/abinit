@@ -35,6 +35,7 @@ sources = [
  "m_pead_nl_loop.F90",
  "m_screening_driver.F90",
  "m_sigma_driver.F90",
+ "m_unittests.F90",
  "m_wfk_analyze.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

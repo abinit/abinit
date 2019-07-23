@@ -5,3 +5,16 @@ EXTRA_DIST += replacements \
   abi_xorthonormalize.f90 abi_gpu_linalg.f90 \
   farray_ncwrite.finc \
   genarray.py
+
+m_abi_linalg.$(OBJEXT): \
+  m_abi_linalg.F90 \
+  abi_gpu_linalg.f90 \
+  abi_xcopy.f90 \
+  abi_xgemm.f90 \
+  abi_xheev.f90 \
+  abi_xhegv.f90 \
+  abi_xhpev.f90 \
+  abi_xhpgv.f90 \
+  abi_xorthonormalize.f90 \
+  abi_xpotrf.f90 \
+  abi_xtrsm.f90

@@ -992,7 +992,7 @@ subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals, comm)
 !scalars
  integer :: cnt,nstars,i1,i2,i3,msize,ir,nsh,ish,ss,ee,nst,ierr,nprocs,my_rank,ii
  real(dp) :: r2_prev
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer,allocatable :: iperm(:),rtmp(:,:),rgen(:,:),r2sh(:),shlim(:),sh_start(:),sh_stop(:)
  integer,allocatable :: recvcounts(:),displs(:),recvbuf(:,:)
@@ -1051,7 +1051,7 @@ subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals, comm)
  ! Each proc works on a contigous block of shells, then we have to gather the results.
  ABI_MALLOC(sh_start, (0:nprocs-1))
  ABI_MALLOC(sh_stop, (0:nprocs-1))
- call xmpi_split_work2_i4b(nsh, nprocs, sh_start, sh_stop, msg, ierr)
+ call xmpi_split_work2_i4b(nsh, nprocs, sh_start, sh_stop)
 
  ABI_MALLOC(cnorm, (msize))
  nstars = 0

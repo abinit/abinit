@@ -118,6 +118,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_errors
  use m_results_out
  use m_results_respfn
+ use m_yaml
  use m_xmpi
  use m_xomp
  use m_abi_linalg
@@ -152,7 +153,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_gwls_sternheimer, only : gwls_sternheimer
  use m_nonlinear,        only : nonlinear
  use m_drivexc,          only : echo_xc_name
- use m_neat,             only : neat_start_iter
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
@@ -291,7 +291,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    write(message,'(3a)') trim(message),ch10,' '
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'PERS')     ! PERS is choosen to make debugging easier
-   call neat_start_iter(jdtset, 'dtset', ab_out);
+   call yaml_iterstart('dtset', jdtset, ab_out, dtset%use_yaml)
 
    if ( dtset%np_slk == 0 ) then
      call xgScalapack_config(SLK_DISABLED,dtset%slk_rankpp)
@@ -745,8 +745,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    case (RUNL_EPH)
-     !call dtset_free_nkpt_arrays(dtsets(idtset))
-     !call dtset_free_nkpt_arrays(dtset)
+     call dtset_free_nkpt_arrays(dtsets(0))
+     call dtset_free_nkpt_arrays(dtsets(idtset))
      call eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    case default
@@ -830,10 +830,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    ! several problems in outvars since one should take into account
    ! the new dimensions (e.g. nkptgw) and their maximum value.
    ! For the time being, we continue to pass a copy of dtsets(idtset).
-#if 0
-   call dtset_free(dtsets(idtset))
-   call dtset_copy(dtsets(idtset),dtset)
-#endif
+   !call dtset_free(dtsets(idtset))
+   !call dtset_copy(dtsets(idtset),dtset)
 
    call dtset_free(dtset)
 
