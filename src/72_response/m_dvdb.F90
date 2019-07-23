@@ -2385,13 +2385,16 @@ end subroutine find_symeq
 !!  cryst<crystal_t>=crystal structure parameters
 !!  qpt_ibz(3)=q-point in the IBZ in reduced coordinates.
 !!  ngfft=array of dimensions for different FFT grids
+!!  isym, itimrev, g0q:
+!!    qpt_bz = I(itimrev) S(isym) q_ibz + g0q
+!!  ngfft(18)=contain all needed information about 3D FFT.
 !!  cplex: if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
 !!  nfft=(effective) number of FFT grid points (for this proc) for the "fine" grid (see NOTES in respfn.F90)
 !!  nspden=number of spin-density components
 !!  nsppol=Number of independent spin polarizations
 !!  mpi_enreg=information about MPI parallelization
 !!  v1r_qibz(cplex*nfft,nspden,3*cryst%natom)=Array with first order potentials in real space
-!!   for the irreducible q-point `qpt_ibz`
+!!    for the irreducible q-point `qpt_ibz`
 !!  comm: MPI communicator to distribute natom3 * nspden FFT calls
 !!
 !! OUTPUT
@@ -2440,7 +2443,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  natom3 = 3 * cryst%natom; tsign = 3-2*itimrev
 
- ! Compute IBZ potentials in G-space (results in v1g_qibz)
+ ! Compute IBZ potentials in G-space. Results stored in v1g_qibz(G)
  ABI_MALLOC(v1g_qibz, (2*nfft, nspden, natom3))
  requests_v1g_qibz_done = .False.
  cnt = 0
