@@ -3851,7 +3851,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
          !Take into account band occupations, kpt weights and two pi factor from the term 
          !(\hat{p}_{k\beta + \frac{q_{\beta}}{2}}) appearing before the double q-derivation
          frwfdq_k(:,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(:,iatom,iatdir,ka,kb,iq1grad)* &
-       & wtk_k*occ_k(iband)*two_pi
+       & occ_k(iband)*two_pi
 
        end do !iband
 
@@ -3860,6 +3860,9 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
    end do !istrpert
 
  end do !iatpert
+
+!scale by the k-point weight
+ frwfdq_k=frwfdq_k * wtk_k
 
 !Deallocations
  ABI_DEALLOCATE(c0_hatdisdq_c0_bks)
