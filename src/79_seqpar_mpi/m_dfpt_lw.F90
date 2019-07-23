@@ -1632,7 +1632,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
  real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
  real(dp),intent(in) :: doccde(dtset%mband*nkpt*dtset%nsppol)
  real(dp),intent(in) :: dyewdq(2,3,dtset%natom,3,dtset%natom,3)
- real(dp),intent(in) :: dyewdqdq(2,3,dtset%natom,3,3,3)
+ real(dp),intent(inout) :: dyewdqdq(2,3,dtset%natom,3,3,3)
  real(dp),intent(in) :: gmet(3,3), gprimd(3,3)
  real(dp),intent(in) :: kxc(nfft,nkxc)
  real(dp),intent(in) :: occ(dtset%mband*nkpt*dtset%nsppol)
@@ -3924,7 +3924,7 @@ end subroutine dfpt_flexoout
  integer,intent(in) :: pert_strain(6,nstrpert)
  integer,intent(in) :: q1grad(3,nq1grad)
  real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
- real(dp),intent(in) :: dyewdqdq(2,3,matom,3,3,3)
+ real(dp),intent(inout) :: dyewdqdq(2,3,matom,3,3,3)
  real(dp),intent(in) :: isdqwf(2,matom,3,nq1grad,3,3)
  real(dp),intent(inout) :: frwfdq(2,matom,3,3,3,nq1grad)
  real(dp),intent(inout) :: isdq_qgradhart(2,matom,3,nq1grad,3,3)
@@ -4008,10 +4008,10 @@ end subroutine dfpt_flexoout
            frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-tmpim
 
            !Multiply by -1 the Ewald contribution 
-           tmpre=frwfdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)
-           tmpim=frwfdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)
-           frwfdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-tmpre
-           frwfdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-tmpim
+           tmpre=dyewdqdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)
+           tmpim=dyewdqdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)
+           dyewdqdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-tmpre
+           dyewdqdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-tmpim
            
            !Compute and save individual terms in mixed coordinates
            if (prtvol==1) then
@@ -4090,15 +4090,13 @@ end subroutine dfpt_flexoout
 
            !Multiply by -1 the frozen wf contribution 
            tmpre=frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)
-           tmpim=frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)
            frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-tmpre
            frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=zero
 
            !Multiply by -1 the Ewald contribution 
-           tmpre=frwfdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)
-           tmpim=frwfdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)
-           frwfdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-tmpre
-           frwfdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)=zero
+           tmpre=dyewdqdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)
+           dyewdqdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-tmpre
+           dyewdqdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)=zero
            
            !Compute and save individual terms in mixed coordinates
            if (prtvol==1) then
