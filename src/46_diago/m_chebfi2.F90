@@ -472,8 +472,13 @@ module m_chebfi2
    
     !call xg_getPointer(chebfi%X)
     ! Initialize the _filter pointers. Depending on paral_kgb, they might point to the actual arrays or to _alltoall variables
-
-    !call debug_helper_linalg(chebfi%X, chebfi) 
+    !if (counter == 11 .or. counter == 10) then
+    if (counter == 3) then
+      call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X at the BEGINNING of the CB2 RUN counter:" // str) !MPI 1,2 OK
+    end if
+    !call debug_helper_linalg(chebfi%X, chebfi, "INSIDE CB2 SCF LOOP: " // str) 
+    !if (counter == 11) stop
+    !end if
     !stop
     
     !call debug_me_g0_LINALG(chebfi%X, chebfi)  !OK 1-2 ISTWFK2 MPI
@@ -606,9 +611,9 @@ module m_chebfi2
       call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, 1, spacedim, neigenpairs)
     end if
     
-    !stop
-    !call debug_helper_colrows(chebfi%xXColsRows, chebfi, "LINE606") 
-    !stop
+    if (counter == 3) then
+      call debug_helper_colrows(chebfi%xXColsRows, chebfi, "LINE606 counter 3") 
+    end if
    
     !call debug_helper_colrows(chebfi%xAXColsRows, chebfi) 
     !call debug_helper_colrows(chebfi%xBXColsRows, chebfi) 
@@ -626,10 +631,11 @@ module m_chebfi2
     !stop
     
     !!on nproc 2 for some reason
-    !call debug_helper_colrows(chebfi%xXColsRows, chebfi) 
-    !call debug_helper_colrows(chebfi%xAXColsRows, chebfi) 
-    !call debug_helper_colrows(chebfi%xBXColsRows, chebfi) 
-    !stop
+    if (counter == 3) then
+      call debug_helper_colrows(chebfi%xXColsRows, chebfi, "LINE635 counter 3") 
+      call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "LINE636 counter 3") 
+      call debug_helper_colrows(chebfi%xBXColsRows, chebfi, "LINE637 counter 3") 
+    end if
     
 
       
@@ -956,12 +962,12 @@ module m_chebfi2
     !call debug_helper_linalg(chebfi%AX%self, chebfi, 1) 
     !stop
     
-
-    !print *, "LOOP FINISHED"
-    !call debug_helper_colrows(chebfi%xXColsRows, chebfi, "LINE957") 
-    !call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "LINE958") 
-    !call debug_helper_colrows(chebfi%xBXColsRows, chebfi, "LINE959") 
-    !stop
+    if (counter == 3) then
+      print *, "LOOP FINISHED"
+      call debug_helper_colrows(chebfi%xXColsRows, chebfi, "LINE957 counter 3") 
+      call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "LINE958 counter 3") 
+      call debug_helper_colrows(chebfi%xBXColsRows, chebfi, "LINE959 counter 3") 
+    end if
     
     !print *, "LOOP FINISHED"
     !stop
@@ -1070,7 +1076,7 @@ module m_chebfi2
      
       if (counter < 100) then
         !call debug_helper_colrows(chebfi%xXColsRows, chebfi, "chebfi%xXColsRows before backtranspose, LOOP:" // str) 
-        call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "chebfi%xAXColsRows before backtranspose, LOOP:" // str) 
+        !call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "chebfi%xAXColsRows before backtranspose, LOOP:" // str) 
         !call debug_helper_linalg(chebfi%AX%self, chebfi, "chebfi%AX before backtranspose, LOOP:" // str) 
         !call debug_helper_colrows(chebfi%xBXColsRows, chebfi, "chebfi%xBXColsRows before backtranspose, LOOP:" // str) 
       end if
@@ -1090,10 +1096,10 @@ module m_chebfi2
       
       if (counter < 100) then
         !call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X after backtranspose, LOOP:" // str)  !!TODO FROM HERE
-        call debug_helper_linalg(chebfi%AX%self, chebfi, "chebfi%AX after backtranspose, LOOP:" // str) 
+        !call debug_helper_linalg(chebfi%AX%self, chebfi, "chebfi%AX after backtranspose, LOOP:" // str) 
         !call debug_helper_linalg(chebfi%BX%self, chebfi, "chebfi%BX after backtranspose, LOOP:" // str) 
-        call xmpi_barrier(chebfi%spacecom)
-        !if (counter == 2) stop
+        !call xmpi_barrier(chebfi%spacecom)
+        !if (counter == 3) stop
       end if
      
     else
@@ -1148,6 +1154,10 @@ module m_chebfi2
                        
     deallocate(nline_bands)
     
+    if (xmpi_comm_size(chebfi%spacecom) > 1) then
+      call xgBlock_copy(chebfi%X_swap,chebfi%X, 1, 1)    !copy cannot be avoided :(
+    end if
+    
     call xg_free(DivResults)
     
     if (chebfi%paral_kgb == 1) then
@@ -1180,11 +1190,9 @@ module m_chebfi2
 !      print *, "***********************"
 !    end if
     
-    if (xmpi_comm_size(chebfi%spacecom) > 1) then
-      call xgBlock_copy(chebfi%X_swap,chebfi%X, 1, 1)    !copy cannot be avoided :(
-    end if
+
     
-    !call debug_helper_linalg(chebfi%X_swap, chebfi, "LINE1168") !MPI 1,2 OK
+    call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X at the end of the CB2 RUN") !MPI 1,2 OK
     !stop   
      
   end subroutine chebfi_run
@@ -1566,9 +1574,11 @@ module m_chebfi2
     !end if
        
     !ispada da je prvi deo AX jednak za proc 0 i 1?!?!?!
-    !call debug_helper_linalg(chebfi%X, chebfi, 1, 1) 
-    !call debug_helper_linalg(chebfi%AX%self, chebfi, 1) 
-    !call debug_helper_linalg(chebfi%BX%self, chebfi, 1) 
+    if (counter == 3) then
+      call debug_helper_linalg(chebfi%X, chebfi, "RR X counter 3") 
+      call debug_helper_linalg(chebfi%AX%self, chebfi, "RR AX counter 3") 
+      call debug_helper_linalg(chebfi%BX%self, chebfi, "RR BX counter 3")
+    end if
     !stop
     
     !!TODO TODO TODO TODO A_und_X se ne izracuna dobro iz nekog razloga. Ulazni nizovi deluju dobro DEBUG
