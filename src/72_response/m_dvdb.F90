@@ -47,6 +47,7 @@ module m_dvdb
  use m_time,          only : cwtime, cwtime_report, sec2str, timab
  use m_io_tools,      only : open_file, file_exists, delete_file
  use m_numeric_tools, only : wrap2_pmhalf, vdiff_t, vdiff_eval, vdiff_print, l2int
+ use m_special_funcs, only : levi_civita_3
  use m_symtk,         only : mati3inv, matr3inv, littlegroup_q
  use m_geometry,      only : littlegroup_pert, irreducible_set_pert, mkradim, xcart2xred
  use m_dynmat,        only : canat9, get_bigbox_and_weights
@@ -5997,6 +5998,13 @@ subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, qdamp, ddb_path, dump_
    dvdb%qdamp = 0.01
  end if
 
+ !dvdb%has_dielt = .True.
+ !dvdb%dielt = 13.103 * dvdb%dielt
+ do ipert=1,dvdb%natom
+   dvdb%qstar(:,:,:,ipert) = ((-1) ** (ipert + 1)) * abs(levi_civita_3()) * 13.368_dp
+ end do
+ dvdb%has_quadrupoles = .True.
+
  call dvdb%print()
 
  ! Define FFT mesh for real space representation.
@@ -6034,7 +6042,7 @@ subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, qdamp, ddb_path, dump_
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("v1scf_avg", "dp", "two, nspden, three, natom, nqpt"), &
      nctkarr_t("v1lr_avg",  "dp", "two, nspden, three, natom, nqpt"), &
-     !nctkarr_t("v1scfmlr_avg",  "dp", "two, nspden, three, natom, nqpt"), &
+     nctkarr_t("v1scfmlr_avg",  "dp", "two, nspden, three, natom, nqpt"), &
      nctkarr_t("v1scf_abs_avg",  "dp", "two, nspden, three, natom, nqpt"), &
      nctkarr_t("qpoints", "dp", "three, nqpt") &
    ])
@@ -6058,15 +6066,17 @@ subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, qdamp, ddb_path, dump_
    end if
    ABI_FREE(tmp_v1r)
 
-   ! Compute the periodic parr of the LR term (not add_phase = 0)
-   long_v1r = zero
-   if (dvdb_add_lr==1) then
-     do ispden=0,dvdb%nspden
-       do mu=1,dvdb%natom3
-         idir = dvdb%my_pinfo(1, mu); ipert = dvdb%my_pinfo(2, mu)
-         call dvdb%get_v1r_long_range(dvdb%qpts(:,iq), idir, ipert, nfft, ngfft, long_v1r(:,:,ispden,mu), add_phase=0)
+   ! Compute LR part
+   long_v1r = 0
+   if (dvdb%has_dielt .and. (dvdb%has_zeff .or. dvdb%has_quadrupoles)) then
+     if (dvdb_add_lr==1) then
+       do ispden=0,dvdb%nspden
+         do mu=1,dvdb%natom3
+           idir = dvdb%my_pinfo(1, mu); ipert = dvdb%my_pinfo(2, mu)
+           call dvdb%get_v1r_long_range(dvdb%qpts(:,iq), idir, ipert, nfft, ngfft, long_v1r(:,:,ispden,mu), add_phase=0)
+         end do
        end do
-     end do
+     end if
    end if
 
    write(std_out,"(a)")sjoin("=== For DVDB q-point:", ktoa(dvdb%qpts(:,iq)), "===")
@@ -6084,10 +6094,10 @@ subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, qdamp, ddb_path, dump_
        ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1lr_avg"),  sum(long_v1r(:,:,ispden,mu), dim=2) / nfft,&
                                   start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
        NCF_CHECK(ncerr)
-       !ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scfmlr_avg"), &
-       !                           sum(file_v1r(:,:,ispden,mu)-long_v1r(:,:,ispden,mu), dim=2) / nfft,&
-       !                           start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
-       !NCF_CHECK(ncerr)
+       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scfmlr_avg"), &
+                                  sum(file_v1r(:,:,ispden,mu)-long_v1r(:,:,ispden,mu), dim=2) / nfft,&
+                                  start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
+       NCF_CHECK(ncerr)
 #endif
 
        write(std_out, "(a)")"--- !DVDB_LONGRANGE_DIFF"
@@ -6543,6 +6553,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
 !Local variables-------------------------------
 !scalars
  integer :: n1, n2, n3, nfftot, ig, iphase !, timerev_q !, ii !, jj, kk
+ integer :: ii, jj, kk, ll, mm
  real(dp) :: fac, qGZ, qGS, denom, denom_inv, qtau !, ll
  real(dp) :: re, im, phre, phim, qg_mod, gsq_max !, qdamp
  type(MPI_type) :: MPI_enreg_seq
@@ -6551,7 +6562,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
  integer, allocatable :: gfft(:,:)
  real(dp) :: gprimd(3,3), rprimd(3,3)
  real(dp) :: dielt_red(3,3) !, quad_cart(3,3)
- real(dp) :: qG_red(3), qG_cart(3), Zstar(3), tau_red(3)
+ real(dp) :: qG_red(3), qG_cart(3), Zstar(3), Sstar(3,3), tau_red(3)
  real(dp), allocatable :: v1G_lr(:,:)
 
 ! *************************************************************************
@@ -6581,9 +6592,35 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
  ! and select the relevant direction.
  !ll = sqrt(sum(rprimd(:, idir) ** 2))
  !ll = one
+#if 1
  Zstar = matmul(transpose(gprimd), matmul(db%zeff(:,:,iatom), rprimd(:,idir))) * two_pi
  !Zstar = matmul(transpose(gprimd), matmul(db%zeff_raw(:,:,iatom), rprimd(:,idir) / ll)) * two_pi
- !Sstar = matmul(transpose(gprimd), matmul(db%qstar(:,:,:,iatom), rprimd(:,idir))) * two_pi
+#else
+ Zstar = zero
+ do ii=1,3
+   do kk=1,3
+     do ll=1,3
+       Zstar(ii) = Zstar(ii) + gprimd(ll,ii)*db%zeff(ll,kk,iatom)*rprimd(kk,idir) * two_pi
+     end do
+   end do
+ end do
+#endif
+
+ if (db%has_quadrupoles) then
+   Sstar = zero
+   do ii=1,3
+     do jj=1,3
+       do kk=1,3
+         do ll=1,3
+           do mm=1,3
+             Sstar(ii,jj) = Sstar(ii,jj) + &
+                   gprimd(mm,jj)*gprimd(ll,ii)*db%qstar(mm,ll,kk,iatom)*rprimd(kk,idir) * two_pi ** 2
+           end do
+         end do
+       end do
+     end do
+   end do
+ end if
 
  ! Transform the dielectric tensor from Cartesian to reduced coordinates.
  dielt_red = matmul(transpose(gprimd), matmul(db%dielt, gprimd)) * two_pi ** 2
@@ -6612,15 +6649,20 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
    ! HM hard cutoff, in this case qdamp takes the meaning of an energy cutoff in Hartree (hardcoded to 1 for the moment)
    !if (half*qG_mod**2 > 1) cycle
    if (db%qdamp > zero) denom_inv = denom_inv * exp(-qG_mod ** 2 / (four * db%qdamp))
-   !if (db%has_quadrupoles) then
-   !  db%qstar(:,:,:,iatom)
-   !end if
+   if (db%has_quadrupoles) then
+     qGS = zero
+     do ii=1,3
+       do jj=1,3
+         qGS = qGS + qG_red(ii)*qG_red(jj)*Sstar(ii,jj) / 2
+       end do
+     end do
+   end if
 
    ! Phase factor exp(-i (q+G) . tau)
    qtau = - two_pi * dot_product(qG_red, tau_red)
    phre = cos(qtau); phim = sin(qtau)
 
-   re = zero
+   re = fac * qGS * denom_inv
    im = fac * qGZ * denom_inv
    v1G_lr(1,ig) = phre * re - phim * im
    v1G_lr(2,ig) = phim * re + phre * im
