@@ -583,6 +583,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      dvdb%qdamp = dtset%frohl_params(4)
    end if
 
+   !call dvdb%load_ddb(dtset%prtvol, comm, ddb=ddb)
+
    !dvdb%diel = 13.103 * dvdb%dielt
    !do ii=1,dvdb%natom
    !  dvdb%qstar(:,:,:,ii) = (-1 ** (ii + 1)) * abs(levi_civita_3()) * 13.368_dp

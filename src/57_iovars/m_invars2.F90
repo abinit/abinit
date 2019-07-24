@@ -1335,7 +1335,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    ABI_MALLOC(dtset%ph_qpath, (3, dtset%ph_nqpath))
    ABI_CHECK(3 * dtset%ph_nqpath <= marr, "3 * dtset%ph_nqpath > marr!")
    call intagm(dprarr,intarr,jdtset,marr,3*dtset%ph_nqpath,string(1:lenstr),'ph_qpath',tread,'DPR')
-   if (tread==0) then
+   if (tread == 0) then
      MSG_ERROR("When ph_nqpath > 0, ph_qpath should be specified")
    end if
    dtset%ph_qpath = reshape(dprarr(1:3*dtset%ph_nqpath), [3, dtset%ph_nqpath])
