@@ -416,13 +416,16 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            !print *, "nband_k", nband_k
            !stop
 
-           !call xgBlock_map(xgx0,cg(:, icg+1:),3,gs_hamk%istwf_k*npw_k*my_nspinor,nband_k,mpi_enreg%comm_bandspinorfft) 
-           !write(str , *) counter
-           !call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*my_nspinor, "BEFORE CB2 SCF LOOP: " // str)
+           call xgBlock_map(xgx0,cg(:, icg+1:),3,gs_hamk%istwf_k*npw_k*my_nspinor,nband_k,mpi_enreg%comm_bandspinorfft) 
+           write(str , *) inonsc
+           if (counter == 3) then
+             call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*my_nspinor, "BEFORE CB2 counter 3")
+             !stop
+           end if
            !stop
            call chebfiwf2(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k, counter)
-           !call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*my_nspinor, "AFTER CB2 LOOP: " // str)
+           call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*my_nspinor, "AFTER CB2 inonsc: " // str)
            counter = counter + 1
            !stop
            !if (inonsc == 2) stop
@@ -1316,15 +1319,16 @@ subroutine debug_helper_linalg(debugBlock, npw, line)
   character(*) , intent(in) :: line
   type(xgBlock_t) :: HELPER
     
-  integer, parameter :: FROW = 1, FCOL = 1, DROWS = 5, DCOLS = 5
+  integer, parameter :: FROW = 1, FCOL = 1, DROWS = 1, DCOLS = 10
      
   call xmpi_barrier(xmpi_world)
 
   if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
     write(100,*) (line)
+    !stop
     call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
     call xgBlock_print(HELPER, 100) 
-
+    !stop
     write(101,*) (line)
     call xgBlock_setBlock1(debugBlock, HELPER, npw/2+1, FCOL, DROWS, DCOLS) 
     call xgBlock_print(HELPER, 101)    
