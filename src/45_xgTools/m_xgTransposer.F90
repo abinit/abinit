@@ -870,6 +870,7 @@ module m_xgTransposer
 !              print *, "frome", frome
 !            end if
 !          end if
+          !print *, "loc BORDERED", loc(bufferOrdered)
           bufferOrdered(:,tos:toe) = bufferMess(:,froms:frome)
         end do
       end do
@@ -889,6 +890,7 @@ module m_xgTransposer
           toe=((col-1)*nrowsColsRows+sum(nrowsLinalg(me+1:me+icpu)))
           froms=(shiftCpu+(col-1)*nrowsLinalg(me+icpu)+1)
           frome=(shiftCpu+col*nrowsLinalg(me+icpu))
+          !print *, "loc BMESS", loc(bufferOrdered)
           bufferMess(:,froms:frome) = bufferOrdered(:,tos:toe)
         end do
       end do

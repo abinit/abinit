@@ -521,7 +521,7 @@
 &
 @target G0.S75
 @type xy
-0  -1.64487661E+01
+0  -1.64487660E+01
 &
 @target G0.S76
 @type xy
@@ -605,7 +605,7 @@
 &
 @target G0.S96
 @type xy
-0  -1.36374296E+01
+0  -1.36374295E+01
 &
 @target G0.S97
 @type xy
@@ -745,7 +745,7 @@
 &
 @target G0.S131
 @type xy
-0  -2.87338481E+00
+0  -2.87338480E+00
 &
 @target G0.S132
 @type xy
@@ -829,7 +829,7 @@
 &
 @target G0.S152
 @type xy
-0  -5.04312881E-01
+0  -5.04312880E-01
 &
 @target G0.S153
 @type xy
@@ -837,11 +837,11 @@
 &
 @target G0.S154
 @type xy
-0  -4.43724843E-02
+0  -4.43724844E-02
 &
 @target G0.S155
 @type xy
-0   4.63144970E-02
+0   4.63144971E-02
 &
 @target G0.S156
 @type xy
@@ -905,7 +905,7 @@
 &
 @target G0.S171
 @type xy
-0   3.49655492E+00
+0   3.49655491E+00
 &
 @target G0.S172
 @type xy
@@ -917,19 +917,19 @@
 &
 @target G0.S174
 @type xy
-0   4.78353066E+00
+0   4.78353065E+00
 &
 @target G0.S175
 @type xy
-0   4.97891236E+00
+0   4.97891235E+00
 &
 @target G0.S176
 @type xy
-0   6.09593652E+00
+0   6.09593651E+00
 &
 @target G0.S177
 @type xy
-0   7.08745984E+00
+0   7.08745983E+00
 &
 @target G0.S178
 @type xy
@@ -937,15 +937,15 @@
 &
 @target G0.S179
 @type xy
-0   9.42059136E+00
+0   9.42059135E+00
 &
 @target G0.S180
 @type xy
-0   9.94449160E+00
+0   9.94449159E+00
 &
 @target G0.S181
 @type xy
-0   1.07334064E+01
+0   1.07334063E+01
 &
 @target G0.S182
 @type xy
@@ -953,7 +953,7 @@
 &
 @target G0.S183
 @type xy
-0   1.38807580E+01
+0   1.38807579E+01
 &
 @target G0.S184
 @type xy
@@ -973,11 +973,11 @@
 &
 @target G0.S188
 @type xy
-0   3.10921725E+01
+0   3.10921724E+01
 &
 @target G0.S189
 @type xy
-0   3.31330526E+01
+0   3.31330525E+01
 &
 @target G0.S190
 @type xy

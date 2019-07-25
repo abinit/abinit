@@ -23,7 +23,7 @@ message: |
 src_file: m_dtfil.F90
 src_line: 1106
 message: |
-    Renaming old t03_2_x.out to t03_2_x.out0198
+    Renaming old t03_2_x.out to t03_2_x.out0433
 ...
  
 
@@ -42,8 +42,8 @@ message: |
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 24 Jul 2019.
-- ( at 17h24 )
+.Starting date : Thu 25 Jul 2019.
+- ( at 18h03 )
   
  
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -51,7 +51,7 @@ message: |
  === Build Information === 
   Version       : 8.11.9
   Build target  : x86_64_linux_intel19.0
-  Build date    : 20190724
+  Build date    : 20190725
  
  === Compiler Suite === 
   C compiler       : gnu7.4
@@ -59,13 +59,13 @@ message: |
   Fortran compiler : intel19.0
   CFLAGS           :  -g -O2 -mtune=native -march=native
   CXXFLAGS         :  -g -O2 -mtune=native -march=native
-  FCFLAGS          : -O2 -qopenmp -heap-arrays 1000000
+  FCFLAGS          : -O2 -qopenmp -heap-arrays 1000000 -traceback
   FC_LDFLAGS       :    -static-intel -static-libgcc
  
  === Optimizations === 
   Debug level        : basic
   Optimization level : standard
-  Architecture       : intel_core_i3
+  Architecture       : intel_xeon
  
  === Multicore === 
   Parallel build : yes
@@ -222,7 +222,7 @@ _ WF disk file :      2.850 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    2
+-  max_nthreads =    6
 -
  -outvars: echo values of preprocessed input variables --------
 -          iomode           1
@@ -433,9 +433,9 @@ P           mkmem           1
  CHARACTER: Data type name: CHARACTER             Kind value: 1
 
   ==== OpenMP parallelism is ON ====
-- Max_threads:       2
-- Num_threads:       2
-- Num_procs:         2
+- Max_threads:       6
+- Num_threads:       6
+- Num_procs:         6
 - Dynamic:           F
 - Nested:            F
  
@@ -544,18 +544,18 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
-   0.33615   0.05206   0.00347   0.00000   0.00347  -0.00021  -0.00000  -0.00021  -0.00060   0.00000   0.00035   0.00000 ...
-   0.05206   0.00679   0.00068   0.00000   0.00068   0.00029   0.00000   0.00029  -0.00015   0.00000   0.00009   0.00000 ...
-   0.00347   0.00068  -0.20099   0.00000  -0.00084  -0.00031   0.00000  -0.00042   0.00085   0.00000  -0.00049   0.00000 ...
-   0.00000   0.00000   0.00000  -0.20015   0.00000   0.00000   0.00011   0.00000   0.00000   0.00068   0.00000   0.00068 ...
+   0.33615   0.05206   0.00347   0.00000   0.00347  -0.00021  -0.00000  -0.00021  -0.00060  -0.00000   0.00035   0.00000 ...
+   0.05206   0.00679   0.00068   0.00000   0.00068   0.00029   0.00000   0.00029  -0.00015  -0.00000   0.00009   0.00000 ...
+   0.00347   0.00068  -0.20099  -0.00000  -0.00084  -0.00031  -0.00000  -0.00042   0.00085   0.00000  -0.00049   0.00000 ...
+   0.00000   0.00000  -0.00000  -0.20015   0.00000  -0.00000   0.00011   0.00000   0.00000   0.00068   0.00000   0.00068 ...
    0.00347   0.00068  -0.00084   0.00000  -0.20099  -0.00042   0.00000  -0.00031   0.00085   0.00000  -0.00049   0.00000 ...
-  -0.00021   0.00029  -0.00031   0.00000  -0.00042  -1.17007   0.00000  -0.00111   0.00049   0.00000  -0.00029   0.00000 ...
-  -0.00000   0.00000   0.00000   0.00011   0.00000   0.00000  -1.16896   0.00000   0.00000   0.00032   0.00000   0.00032 ...
+  -0.00021   0.00029  -0.00031  -0.00000  -0.00042  -1.17007  -0.00000  -0.00111   0.00049   0.00000  -0.00029   0.00000 ...
+  -0.00000   0.00000  -0.00000   0.00011   0.00000  -0.00000  -1.16896   0.00000   0.00000   0.00032   0.00000   0.00032 ...
   -0.00021   0.00029  -0.00042   0.00000  -0.00031  -0.00111   0.00000  -1.17007   0.00049   0.00000  -0.00029   0.00000 ...
-  -0.00060  -0.00015   0.00085   0.00000   0.00085   0.00049   0.00000   0.00049  -0.03395   0.00000   0.00015   0.00000 ...
-   0.00000   0.00000   0.00000   0.00068   0.00000   0.00000   0.00032   0.00000   0.00000  -0.03381   0.00000  -0.00011 ...
-   0.00035   0.00009  -0.00049   0.00000  -0.00049  -0.00029   0.00000  -0.00029   0.00015   0.00000  -0.03383   0.00000 ...
-   0.00000   0.00000   0.00000   0.00068   0.00000   0.00000   0.00032   0.00000   0.00000  -0.00011   0.00000  -0.03381 ...
+  -0.00060  -0.00015   0.00085   0.00000   0.00085   0.00049   0.00000   0.00049  -0.03395   0.00000   0.00015  -0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00068   0.00000   0.00000   0.00032   0.00000   0.00000  -0.03381   0.00000  -0.00011 ...
+   0.00035   0.00009  -0.00049   0.00000  -0.00049  -0.00029   0.00000  -0.00029   0.00015   0.00000  -0.03383  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00068   0.00000   0.00000   0.00032   0.00000  -0.00000  -0.00011  -0.00000  -0.03381 ...
    ...  only 12  components have been written...
  
  
@@ -565,6 +565,14 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  VTOFK CALL
  VTOFK CALL
  xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_COLS)%rank           1
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_COLS)%rank           0
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%size           2
@@ -574,275 +582,50 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  xgTransposer%mpiData(MPI_COLS)%size           2
  xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           1
  xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_COLS)%rank           0
- xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_COLS)%rank           1
- xgTransposer%mpiData(MPI_COLS)%size           2
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- PROSAO getAX_BX
- PROSAO getAX_BX
- CPUROW0
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- chebfi%total_spacedim        3888
- chebfi%bandpp          96
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- chebfi%total_spacedim        3888
- chebfi%bandpp          96
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- PROSAO TRANSPOSE
- PRE DGEMM
- NAKON DGEMM
- transat
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
- PROSAO TRANSPOSE
- PRE DGEMM
- NAKON DGEMM
- transat
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
- PRE DGEMM
- PRE DGEMM
- NAKON DGEMM
- transat
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
- NAKON DGEMM
- transat
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
- REMAINDER           0
- PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
- PRE DGEMM
- REMAINDER           0
- PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
- PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
- PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
- PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
  spacedim        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
- xgx0 AFTER
- xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_COLS)%rank           0
- xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_COLS)%rank           1
- xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_COLS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_COLS)%rank           1
- xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_COLS)%rank           1
- xgTransposer%mpiData(MPI_COLS)%rank           0
- xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_COLS)%size           2
+ flag_inv_sym 3
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
- flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
  PROSAO getAX_BX
  PROSAO getAX_BX
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ CPUROW0
  CPUROW0
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
- CPUROW0
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
@@ -851,22 +634,40 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  hamk%natom          31
  my_nspinor           1
  ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ flag_inv_sym 3
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ CPUROW0
  CPUROW0
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
- CPUROW0
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
@@ -875,25 +676,39 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  hamk%natom          31
  my_nspinor           1
  ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
  chebfi%total_spacedim        3888
  chebfi%bandpp          96
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  chebfi%total_spacedim        3888
  chebfi%bandpp          96
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ CPUROW0
  CPUROW0
  size(cprjin)        2976
  hamk%natom          31
@@ -903,57 +718,39 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  hamk%natom          31
  my_nspinor           1
  ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  CPUROW0
  size(cprjin)        2976
  hamk%natom          31
@@ -963,16 +760,39 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  hamk%natom          31
  my_nspinor           1
  ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ flag_inv_sym 3
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ CPUROW0
  CPUROW0
  size(cprjin)        2976
  hamk%natom          31
@@ -982,11 +802,120 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  hamk%natom          31
  my_nspinor           1
  ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ flag_inv_sym 3
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ CPUROW0
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ flag_inv_sym 3
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ LOOP FINISHED
+ LOOP FINISHED
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  PROSAO TRANSPOSE
  PROSAO TRANSPOSE
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  PRE DGEMM
  PRE DGEMM
  NAKON DGEMM
@@ -1007,29 +936,61 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  transat
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632942
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ REMAINDER           0
  REMAINDER           0
  PRE DGEMM
- REMAINDER           0
  PRE DGEMM
  NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
- PRE DGEMM
  NAKON DGEMM
  transan
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632942
- PRE DGEMM
- NAKON DGEMM
  transan
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632948
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
  PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
  PRE DGEMM
  NAKON DGEMM
  transan
@@ -1045,16 +1006,503 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  rank, spacedim           1        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ xgx0 AFTER
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_COLS)%rank           0
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_COLS)%rank           1
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_COLS)%rank           0
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_COLS)%rank           1
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_COLS)%rank           0
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_COLS)%rank           1
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ flag_inv_sym 3
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ PROSAO getAX_BX
+ PROSAO getAX_BX
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ CPUROW0
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ flag_inv_sym 3
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ CPUROW0
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ flag_inv_sym 3
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ chebfi%total_spacedim        3888
+ chebfi%bandpp          96
+ chebfi%total_spacedim        3888
+ chebfi%bandpp          96
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ CPUROW0
+ CPUROW0
+ size(cprjin)        2976
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ flag_inv_sym 3
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ CPUROW0
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ CPUROW0
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ flag_inv_sym 3
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ LOOP FINISHED
+ LOOP FINISHED
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ PROSAO TRANSPOSE
+ PROSAO TRANSPOSE
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ REMAINDER           0
+ REMAINDER           0
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ spacedim        1944
+ STAMPAM MPI2
+ spacedim        1944
+ rank, spacedim           0        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
  xgx0 AFTER
  size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
- newocc: new Fermi energy is       0.550363 , with nelect=    310.000000, Number of bisection calls: 46
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ newocc: new Fermi energy is       0.550363 , with nelect=    310.000000, Number of bisection calls: 47
  newocc: computed new occ. numbers for occopt= 3 , spin-unpolarized case.
  2.000 2.000 2.000 2.000 2.000 2.000 2.000 2.000 2.000 2.000 2.000 2.000
  2.000 2.000 2.000 2.000 2.000 2.000 2.000 2.000 2.000 2.000 2.000 2.000
@@ -1151,8 +1599,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  scprqt: <Vxc>= -4.9191994E-01 hartree
  
  Simple mixing update:
-  residual square of the potential:   2.443685568516083E-005
- scfcv_core: previous iteration took 12.80 [s]
+  residual square of the potential:   2.443685568515974E-005
+ scfcv_core: previous iteration took  5.21 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -1176,29 +1624,35 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  VTOFK CALL
  VTOFK CALL
  xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_COLS)%rank           1
- xgTransposer%mpiData(MPI_COLS)%size           2
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%size           2
  xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           1
  xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           1
  xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_COLS)%rank           1
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
@@ -1207,214 +1661,432 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  bandpp_sym          48
  PROSAO getAX_BX
  PROSAO getAX_BX
- CPUROW0
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- CPUROW0
- CPUROW0
- size(cprjin)        2976
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- chebfi%total_spacedim        3888
- chebfi%bandpp          96
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- chebfi%total_spacedim        3888
- chebfi%bandpp          96
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- PROSAO TRANSPOSE
- PROSAO TRANSPOSE
- PRE DGEMM
- PRE DGEMM
- NAKON DGEMM
- transat
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
- NAKON DGEMM
- transat
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
- PRE DGEMM
- PRE DGEMM
- NAKON DGEMM
- transat
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
- NAKON DGEMM
- transat
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
- REMAINDER           0
- PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
- PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
- PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
- REMAINDER           0
- PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
- PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
- PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
  spacedim        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ CPUROW0
+ CPUROW0
+ size(cprjin)        2976
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ flag_inv_sym 3
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ CPUROW0
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ chebfi%total_spacedim        3888
+ chebfi%bandpp          96
+ chebfi%total_spacedim        3888
+ chebfi%bandpp          96
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ flag_inv_sym 3
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ CPUROW0
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ flag_inv_sym 3
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ CPUROW0
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ flag_inv_sym 3
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ LOOP FINISHED
+ LOOP FINISHED
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ PROSAO TRANSPOSE
+ PROSAO TRANSPOSE
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ REMAINDER           0
+ REMAINDER           0
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ spacedim        1944
+ STAMPAM MPI2
+ spacedim        1944
+ rank, spacedim           0        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ spacedim        1944
+ STAMPAM MPI2
+ spacedim        1944
+ rank, spacedim           0        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
  xgx0 AFTER
  spacedim        1944
  STAMPAM MPI2
@@ -1426,31 +2098,31 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           0
+ xgTransposer%mpiData(MPI_COLS)%size           2
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           1
  xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_COLS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_COLS)%rank           1
- xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_COLS)%size           2
  xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_COLS)%rank           1
  xgTransposer%mpiData(MPI_COLS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_COLS)%rank           1
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_COLS)%rank           0
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_COLS)%rank           1
  xgTransposer%mpiData(MPI_COLS)%size           2
  flag_inv_sym 3
  flag_inv_sym 3
- ndatarecv_tot        3887
  ndatarecv_tot        3887
  bandpp_sym          48
+ ndatarecv_tot        3887
  bandpp_sym          48
  PROSAO getAX_BX
  PROSAO getAX_BX
@@ -1483,6 +2155,11 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  hamk%natom          31
  my_nspinor           1
  ndat          96
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
@@ -1490,11 +2167,13 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
- CPUROW0
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
  chebfi%total_spacedim        3888
  chebfi%bandpp          96
  CPUROW0
@@ -1509,18 +2188,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  chebfi%total_spacedim        3888
  chebfi%bandpp          96
  CPUROW0
@@ -1528,6 +2195,15 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  hamk%natom          31
  my_nspinor           1
  ndat          96
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
@@ -1535,10 +2211,54 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ CPUROW0
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ CPUROW0
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
@@ -1554,77 +2274,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- LOOP FINISHED
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- LOOP FINISHED
  PROSAO TRANSPOSE
- PROSAO TRANSPOSE
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
  PRE DGEMM
+ PROSAO TRANSPOSE
  PRE DGEMM
  NAKON DGEMM
  transat
@@ -1638,11 +2290,11 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  PRE DGEMM
  NAKON DGEMM
  transat
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
  NAKON DGEMM
+ xgBlockA%transt
  transat
  xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
  xgBlockW%spacedim_comm -1006632948
  REMAINDER           0
  PRE DGEMM
@@ -1651,11 +2303,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  NAKON DGEMM
  transan
  xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
- PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
  xgBlockW%spacedim_comm -1006632948
  PRE DGEMM
  NAKON DGEMM
@@ -1672,22 +2319,27 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  transan
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632942
+ PRE DGEMM
  NAKON DGEMM
  transan
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
  spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  xgx0 AFTER
  size(cprjin)        2976
- size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
+ size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
@@ -1784,7 +2436,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
       Maximum=    2.1118E-01  at reduced coord.    0.5333    0.5556    0.5556
       Minimum=   -7.4246E-02  at reduced coord.    0.2444    0.2444    0.0000
    Integrated=    3.1000E+02
- ETOT  2  -797.83475582221    -5.938E+00 3.707E+00 1.587E+00
+ ETOT  2  -797.83475582265    -5.938E+00 3.707E+00 1.587E+00
  scprqt: <Vxc>= -4.9337395E-01 hartree
  Computing residual forces using atomic densities taken from pseudos
  
@@ -1807,8 +2459,8 @@ message: |
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =    -81.974233424609764
- Compensation charge over fine fft grid    =    -82.418544944597230
+ Compensation charge over spherical meshes =    -81.974233424610276
+ Compensation charge over fine fft grid    =    -82.418544945011035
  
  ==== Results concerning PAW augmentation regions ====
  
@@ -1991,37 +2643,37 @@ message: |
      densfor_pred           6
              ecut      8.00000000E+00 Hartree
            etotal     -7.9783475582E+02
-            fcart     -3.7958942504E-02 -3.7958942504E-02  2.2383528778E-19
-                      -3.7958942504E-02  1.1191764361E-19 -3.7958942504E-02
-                      -1.3430117223E-18 -3.7958942504E-02 -3.7958942504E-02
-                      -1.3430117234E-18  1.1191764361E-19  2.2383528722E-19
-                       2.1086515352E-02  2.1086515352E-02  2.2383528329E-19
-                      -3.7958942504E-02  1.1191763912E-19  3.7958942504E-02
-                      -1.3430117201E-18 -3.7958942504E-02  3.7958942504E-02
-                      -1.3430117234E-18  1.1191764361E-19  2.2383528722E-19
-                      -3.7958942504E-02  3.7958942504E-02  2.2383529228E-19
-                       2.1086515352E-02  1.1191764024E-19  2.1086515352E-02
-                      -1.3430117268E-18  3.7958942504E-02 -3.7958942504E-02
-                      -1.3430117234E-18  1.1191764361E-19  2.2383528722E-19
-                       2.1086515352E-02 -2.1086515352E-02  2.2383528152E-19
-                       2.1086515352E-02  1.1191764923E-19 -2.1086515352E-02
-                      -1.3430117246E-18  3.7958942504E-02  3.7958942504E-02
-                      -1.3430117234E-18  1.1191764361E-19  2.2383528722E-19
-                       3.7958942504E-02 -3.7958942504E-02  2.2383528217E-19
-                       3.7958942504E-02  1.1191764810E-19 -3.7958942504E-02
-                      -1.3430117268E-18  2.1086515352E-02  2.1086515352E-02
-                      -1.3430117234E-18  1.1191764361E-19  2.2383528722E-19
-                      -2.1086515352E-02  2.1086515352E-02  2.2383529292E-19
-                       3.7958942504E-02  1.1191764361E-19  3.7958942504E-02
-                      -1.3430117302E-18  2.1086515352E-02 -2.1086515352E-02
-                      -1.3430117234E-18  1.1191764361E-19  2.2383528722E-19
-                       3.7958942504E-02  3.7958942504E-02  2.2383528666E-19
-                      -2.1086515352E-02  1.1191763799E-19  2.1086515352E-02
-                      -1.3430117190E-18 -2.1086515352E-02  2.1086515352E-02
-                      -1.3430117234E-18  1.1191764361E-19  2.2383528722E-19
-                      -2.1086515352E-02 -2.1086515352E-02  2.2383529115E-19
-                      -2.1086515352E-02  1.1191764698E-19 -2.1086515352E-02
-                      -1.3430117201E-18 -2.1086515352E-02 -2.1086515352E-02
+            fcart     -3.7958942500E-02 -3.7958942500E-02  2.2383528778E-19
+                      -3.7958942500E-02 -6.7150586055E-19 -3.7958942500E-02
+                       8.9534114886E-19 -3.7958942500E-02 -3.7958942500E-02
+                       8.9534114886E-19 -6.7150586167E-19  2.2383528722E-19
+                       2.1086515355E-02  2.1086515355E-02  2.2383529059E-19
+                      -3.7958942500E-02 -6.7150586279E-19  3.7958942500E-02
+                       8.9534114661E-19 -3.7958942500E-02  3.7958942500E-02
+                       8.9534114886E-19 -6.7150586167E-19  2.2383528722E-19
+                      -3.7958942500E-02  3.7958942500E-02  2.2383528554E-19
+                       2.1086515355E-02 -6.7150586279E-19  2.1086515355E-02
+                       8.9534114661E-19  3.7958942500E-02 -3.7958942500E-02
+                       8.9534114886E-19 -6.7150586167E-19  2.2383528722E-19
+                       2.1086515355E-02 -2.1086515355E-02  2.2383528545E-19
+                       2.1086515355E-02 -6.7150586392E-19 -2.1086515355E-02
+                       8.9534114886E-19  3.7958942500E-02  3.7958942500E-02
+                       8.9534114886E-19 -6.7150586167E-19  2.2383528722E-19
+                       3.7958942500E-02 -3.7958942500E-02  2.2383528666E-19
+                       3.7958942500E-02 -6.7150586279E-19 -3.7958942500E-02
+                       8.9534114773E-19  2.1086515355E-02  2.1086515355E-02
+                       8.9534114886E-19 -6.7150586167E-19  2.2383528722E-19
+                      -2.1086515355E-02  2.1086515355E-02  2.2383528899E-19
+                       3.7958942500E-02 -6.7150586279E-19  3.7958942500E-02
+                       8.9534114661E-19  2.1086515355E-02 -2.1086515355E-02
+                       8.9534114886E-19 -6.7150586167E-19  2.2383528722E-19
+                       3.7958942500E-02  3.7958942500E-02  2.2383528666E-19
+                      -2.1086515355E-02 -6.7150585942E-19  2.1086515355E-02
+                       8.9534115110E-19 -2.1086515355E-02  2.1086515355E-02
+                       8.9534114886E-19 -6.7150586167E-19  2.2383528722E-19
+                      -2.1086515355E-02 -2.1086515355E-02  2.2383528385E-19
+                      -2.1086515355E-02 -6.7150586055E-19 -2.1086515355E-02
+                       8.9534114998E-19 -2.1086515355E-02 -2.1086515355E-02
 -          fftalg         312
            istwfk        2
               ixc           7
@@ -2077,7 +2729,7 @@ P           mkmem           1
            prteig           0
             prtwf           0
           spgroup         221
-           strten     -4.2121969985E-03 -4.2121969985E-03 -4.2121969985E-03
+           strten     -4.2121969984E-03 -4.2121969984E-03 -4.2121969984E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                       -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
@@ -2281,7 +2933,7 @@ P           mkmem           1
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
- Proc.   0 individual time (sec): cpu=         41.3  wall=         27.9
+ Proc.   0 individual time (sec): cpu=         56.0  wall=         11.0
  
  Calculation completed.
 .Delivered   1 WARNINGs and   0 COMMENTs to log file.
@@ -2289,17 +2941,17 @@ P           mkmem           1
 --- !FinalSummary
 program: abinit
 version: 8.11.9
-start_datetime: Wed Jul 24 17:24:47 2019
-end_datetime: Wed Jul 24 17:25:15 2019
-overall_cpu_time:          82.5
-overall_wall_time:          55.7
+start_datetime: Thu Jul 25 18:03:06 2019
+end_datetime: Thu Jul 25 18:03:17 2019
+overall_cpu_time:         109.5
+overall_wall_time:          22.0
 exit_requested_by_user: no 
 timelimit: 0
 pseudos: 
     Ba  : ce3b7093966dc4149014117c18eb5b71
 usepaw: 1
 mpi_procs: 2
-omp_threads: 2
+omp_threads: 6
 num_warnings: 1
 num_comments: 0
 ...
