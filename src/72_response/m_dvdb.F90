@@ -6025,6 +6025,9 @@ subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, qdamp, ddb_path, dump_
    !this_nqpt = dtset%nqpath
    !this_qpts => dtset%ph_qpath(:, 1:this_nqpt)
    !use_ftinterp = .True.
+   !comm_rpt = xmpi_comm_self
+   !method = dtset%userid
+   !call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, dtset%qrefine, 1, dtset%ddb_qshift, nfft, ngfft, method, "", comm_rpt)
  !end if
 
 #ifdef HAVE_NETCDF
@@ -6048,12 +6051,6 @@ subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, qdamp, ddb_path, dump_
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpoints"), this_qpts))
  end if
 #endif
-
- if (use_ftinterp) then
-   comm_rpt = xmpi_comm_self
-   !method = dtset%userid
-   !call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, dtset%qrefine, 1, dtset%ddb_qshift, nfft, ngfft, method, "", comm_rpt)
- end if
 
  do iq=1,this_nqpt
 
