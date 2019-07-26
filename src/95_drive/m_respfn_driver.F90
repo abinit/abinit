@@ -3494,7 +3494,7 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
                if(ipert1<=natom .and. ipert2<=natom) then
                  d2matr(ii,idir1,ipert1,idir2,ipert2)=&
 &                 d2matr(ii,idir1,ipert1,idir2,ipert2)+&
-!tmp commented &                 dyew(ii,idir1,ipert1,idir2,ipert2)  +&
+&                 dyew(ii,idir1,ipert1,idir2,ipert2)  +&
 &                 dyfrx1(ii,idir1,ipert1,idir2,ipert2)
                  if (usevdw==1) then
                    d2matr(ii,idir1,ipert1,idir2,ipert2)=&
@@ -3579,9 +3579,7 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
      d2matr(:,:,:,:,natom+3:natom+4)=0.0_dp
 !    Accumulate all frozen parts of the elastic tensor
      ABI_ALLOCATE(elfrtot,(6+3*natom,6))
-!     elfrtot(:,:)=elteew(:,:)+eltfrloc(:,:)+eltfrnl(:,:)+eltfrxc(:,:)
-!tmp
-     elfrtot(:,:)=eltfrloc(:,:)+eltfrnl(:,:)+eltfrxc(:,:)
+     elfrtot(:,:)=elteew(:,:)+eltfrloc(:,:)+eltfrnl(:,:)+eltfrxc(:,:)
      elfrtot(1:6,1:6)=elfrtot(1:6,1:6)+eltcore(:,:)+eltfrhar(:,:)+eltfrkin(:,:)
      if (usevdw==1) elfrtot(:,:)=elfrtot(:,:)+eltvdw(:,:)
 
