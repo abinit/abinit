@@ -234,16 +234,16 @@ means:
 means that an additional $s$\- partial-wave at $E_{ref}=0.5 Ry$ as been added,
 ```
     y  
-    0.  
+    1.  
     n
 ```
-means that an additional $p$\- partial-wave at $E_{ref}=0. Ry$ has been added,
+means that an additional $p$\- partial-wave at $E_{ref}=1. Ry$ has been added,
 ```
     y  
-    0.  
+    1.  
     n
 ```
-means that an additional $d$- partial-wave at $E_{ref}=0. Ry$ as been added.
+means that an additional $d$- partial-wave at $E_{ref}=1. Ry$ as been added.
 Finally, partial-waves basis contains two $s$\-, two $p$\-  and two $d$\- partial-waves.
       * Next line: definition of the <span style="color:green">generation scheme for pseudo partial
         waves $\tphi_i$</span>, and of projectors $\tprj_i$.  
@@ -260,10 +260,10 @@ Finally, partial-waves basis contains two $s$\-, two $p$\-  and two $d$\- partia
 ```
     3 0. troulliermartins
 ```
-      * Next two lines: a `2` (two) makes `ATOMPAW` generate a PAW dataset for ABINIT;
+      * Next two lines: `ABINITOUT` makes `ATOMPAW` generate a PAW dataset for ABINIT;
         The next line contains options for this ABINIT file. "default" set all parameters to their default value.
 ```
-    2
+    ABINITOUT
     default
 
 ```
@@ -281,40 +281,78 @@ A summary of the PAW dataset generation process has been written in a file
 named `Ni` (name extracted from first line of input file).
 Open it. It should look like:
 
-    Atom = Ni Z = 28  
-    Perdew \- Burke - Ernzerhof GGA Log grid -- n,r0,rmax = 2000 2.2810899E-04
-    8.0000000E+01  
-    Scalar relativistic calculation -- point nucleus  
-    all-electron results  
-     core states (zcore) = 18.0000000000000  
-       1  1  0  2.0000000E+00 -6.0358607E+02  
-       2  2  0  2.0000000E+00 -7.2163318E+01  
-       3  3  0  2.0000000E+00 -8.1627107E+00  
-       5  2  1  6.0000000E+00 -6.2083048E+01  
-       6  3  1  6.0000000E+00 -5.2469208E+00  
-    valence states (zvale) = 10.0000000000000  
-       4  4  0  2.0000000E+00 -4.1475541E-01  
-       7  4  1  0.0000000E+00 -9.0035738E-02  
-       8  3  2  8.0000000E+00 -6.5223644E-01  
-    evale = -185.182300204924  
-    selfenergy contribution = 8.13253645212050  
-    paw parameters:  
-        lmax = 2  
-        rc   = 2.30969849741149  
-        irc  = 1445  
-    Vloc: Norm-conserving Troullier-Martins form; l= 3;e= 0.0000E+00  
-    Projector method: Bloechl  
-    Sinc^2 compensation charge shape zeroed at rc  
-      
-    Number of basis functions 6  
-     No.  n   l  Energy          Cp coeff      Occ  
-      1   4   0  -4.1475541E-01 -9.5091493E+00 2.0000000E+00  
-      2 999   0   5.0000000E-01  3.2926940E+00 0.0000000E+00  
-      3   4   1  -9.0035738E-02 -8.9594194E+00 0.0000000E+00  
-      4 999   1   0.0000000E+00  1.0836820E+01 0.0000000E+00  
-      5   3   2  -6.5223644E-01  9.1576176E+00 8.0000000E+00  
-      6 999   2   0.0000000E+00  1.3369075E+01 0.0000000E+00  
-     evale from matrix elements -1.85182309373359203E+02
+     Completed calculations for Ni
+     Exchange-correlation type: GGA, Perdew-Burke-Ernzerhof
+      Radial integration grid is logarithmic 
+    r0 =   2.2810899E-04 h =   6.3870518E-03   n =      2000 rmax =   8.0000000E+01
+     Scalar relativistic calculation
+       AEatom converged in          28  iterations
+         for nz =  28.00
+         delta  =    4.0124038786859556E-017
+      All Electron Orbital energies:
+      n  l     occupancy       energy
+     1  0      2.0000000E+00 -6.0358607E+02
+     2  0      2.0000000E+00 -7.2163318E+01
+     3  0      2.0000000E+00 -8.1627107E+00
+     4  0      2.0000000E+00 -4.1475541E-01
+     2  1      6.0000000E+00 -6.2083048E+01
+     3  1      6.0000000E+00 -5.2469208E+00
+     4  1      0.0000000E+00 -9.0035739E-02
+     3  2      8.0000000E+00 -6.5223644E-01
+
+      Total energy
+         Total                    :    -3041.0743834043615
+     Completed calculations for Ni
+     Exchange-correlation type: GGA, Perdew-Burke-Ernzerhof
+      Radial integration grid is logarithmic 
+    r0 =   2.2810899E-04 h =   6.3870518E-03   n =      2000 rmax =   8.0000000E+01
+     Scalar relativistic calculation
+       SCatom converged in           3  iterations
+         for nz =  28.00
+         delta  =    3.0160553423681305E-018
+       Valence Electron Orbital energies:         
+      n  l     occupancy       energy
+     4  0      2.0000000E+00 -4.1475541E-01
+     4  1      0.0000000E+00 -9.0035739E-02
+     3  2      8.0000000E+00 -6.5223644E-01
+
+      Total energy
+         Total                    :    -3041.0743834044238
+         Valence                  :    -185.18230020220784
+      paw parameters: 
+           lmax =            2
+             rc =    2.3096984974114871     
+            irc =         1445
+     Vloc: Norm-conserving Troullier-Martins with l= 3;e=   0.0000E+00
+     Projector type: Bloechl + Gram-Schmidt ortho.
+     Sinc^2 compensation charge shape zeroed at rc
+
+    Number of basis functions     6
+     No.   n    l      Energy         Cp coeff         Occ
+        1    4    0 -4.1475541E-01 -9.5091487E+00  2.0000000E+00
+        2  999    0  5.0000000E-01  3.2926948E+00  0.0000000E+00
+        3    4    1 -9.0035739E-02 -8.9594191E+00  0.0000000E+00
+        4  999    1  1.0000000E+00  1.0610645E+01  0.0000000E+00
+        5    3    2 -6.5223644E-01  9.1576184E+00  8.0000000E+00
+        6  999    2  0.0000000E+00  1.3369076E+01  0.0000000E+00
+     Completed diagonalization of ovlp with info =        0
+
+     Eigenvalues of overlap operator (in the basis of projectors):
+        1        7.27257366E-03
+        2        2.25491432E-02
+        3        1.25237568E+00
+        4        1.87485118E+00
+        5        1.05720648E+01
+        6        2.00807906E+01
+
+      Summary of PAW energies
+            Total valence energy       -185.18230536144634
+              Smooth energy             11.667559551752486
+              One center               -196.84986491319881
+              Smooth kinetic            15.154868504786746
+              Vloc energy              -2.8094614747336673
+              Smooth exch-corr         -3.3767012054581866
+              One-center xc            -123.07769380744551
 
 This generated PAW dataset (contained in *Ni.atomicdata*, *Ni.GGA-PBE-paw.abinit*
 or *Ni.GGA-PBE.xml* file) is a first draft.
@@ -336,17 +374,19 @@ Then run:
     
 again and look at the Ni file:
 
-    evale = -185.182300567432  
-    evale from matrix elements -1.85182301887091256E+02
+       Summary of PAW energies
+             Total valence energy       -185.18230025525258     
+               Smooth energy             11.634042250372509     
+               One center               -196.81634250562510     
+               Smooth kinetic            15.117781978173387     
+               Vloc energy              -2.8024659321889955     
+               Smooth exch-corr         -3.3712015020489359     
+               One-center xc            -123.08319452733129     
 
-As you see, results obtained with this new grid are very close to previous ones.
+As you see, results obtained with this new grid are very close to previous ones, expecially the `valence energy`.
 We can keep the 700 points grid.
 
-You could decrease the size of the grid; by setting 400 points you should obtain:
-
-    evale = -185.182294626845
-    evale from matrix elements -1.85182337214119599E+02
-
+We could try to decrease the size of the grid.
 Small grids give PAW dataset with small size (in kB) and run faster in ABINIT,
 but accuracy can be affected.
 
@@ -364,9 +404,9 @@ If convergence cannot be reached, try a non-relativistic calculation (not recomm
 
 !!! Note
     For the following, note that you always should check the `Ni` file, especially
-    the values of valence energy `evale`. You can find the valence energy
+    the values of 'valence energy'. You can find the valence energy
     computed for the exact atomic problem and the valence energy computed with the
-    PAW parameters `evale from matrix elements`. These two results should be in close agreement!
+    PAW parameters. These two results should be in close agreement!
 
 ## 5. Adjusting partial-waves and projectors
 
@@ -413,7 +453,7 @@ Run `ATOMPAW` again and plot `wfn6` file:
 Now the PS partial-wave and projector have the same order of magnitude!
 
 !!! Important
-    Note again that you should always check the `evale` values in `Ni` file and make
+    Note again that you should always check the two `Valence energy` values in `Ni` file and make
     sure they are as close as possible.  
     If not, choices for projectors and/or partial-waves are certainly not judicious.
 
@@ -508,7 +548,7 @@ Now, edit the *Ni.ghost.atompaw.input* file and replace `troulliermartins` by
 `ultrasoft`. Run `ATOMPAW` again... and look at `logderiv.1` file.
 The ghost state has moved!
 
-Edit again the file and replace `ultrasoft` by `bessel`; then change the 17th
+Edit again the file and replace `troulliermartins` by `bessel` (line 28); then change the 17th
 line `2.0 2.0 2.0 2.0` by `2.0 2.0 1.8 2.0` (decreasing the $r_{Vloc}$ radius from $2.0$ to $1.8$).
 Run `ATOMPAW`: the ghost state disappears!
 
@@ -537,22 +577,22 @@ Run ABINIT with them.
 ABINIT computes the _total energy_ of ferromagnetic FCC Nickel for several values of [[ecut]].  
 At the end of output file, you get this:
   
-      ecut1   8.00000000E+00 Hartree  
-      ecut2   1.00000000E+01 Hartree  
-      ecut3   1.20000000E+01 Hartree  
-      ecut4   1.40000000E+01 Hartree  
-      ecut5   1.60000000E+01 Hartree  
-      ecut6   1.80000000E+01 Hartree  
-      ecut7   2.00000000E+01 Hartree  
-      ecut8   2.20000000E+01 Hartree  
-    etotal1  -3.9300291581E+01  
-    etotal2  -3.9503638785E+01  
-    etotal3  -3.9583278145E+01  
-    etotal4  -3.9613946329E+01  
-    etotal5  -3.9623543087E+01  
-    etotal6  -3.9626889070E+01  
-    etotal7  -3.9628094989E+01  
-    etotal8  -3.9628458879E+01  
+      ecut1     8.00000000E+00 Hartree
+      ecut2     1.00000000E+01 Hartree
+      ecut3     1.20000000E+01 Hartree
+      ecut4     1.40000000E+01 Hartree
+      ecut5     1.60000000E+01 Hartree
+      ecut6     1.80000000E+01 Hartree
+      ecut7     2.00000000E+01 Hartree
+      ecut8     2.20000000E+01 Hartree
+    etotal1    -3.9300291581E+01
+    etotal2    -3.9503638785E+01
+    etotal3    -3.9583278145E+01
+    etotal4    -3.9613946329E+01
+    etotal5    -3.9623543087E+01
+    etotal6    -3.9626889070E+01
+    etotal7    -3.9628094989E+01
+    etotal8    -3.9628458879E+01
   
 `etotal` convergence (at 1 mHartree) is achieve for 18<=$e_{cut}$<=20 Hartree  
 `etotal` convergence (at 0,1 mHartree) is achieve for $e_{cut}$>22 Hartree
@@ -576,22 +616,22 @@ This is not a good result for a PAW dataset; let's try to optimize it.
 
 {% dialog tutorial/paw2_assets/Ni.atompaw.input2 %}
 
-      ecut1   8.00000000E+00 Hartree  
-      ecut2   1.00000000E+01 Hartree  
-      ecut3   1.20000000E+01 Hartree  
-      ecut4   1.40000000E+01 Hartree  
-      ecut5   1.60000000E+01 Hartree  
-      ecut6   1.80000000E+01 Hartree  
-      ecut7   2.00000000E+01 Hartree  
-      ecut8   2.20000000E+01 Hartree  
-    etotal1  -3.9600401638E+01  
-    etotal2  -3.9627563690E+01  
-    etotal3  -3.9627901781E+01  
-    etotal4  -3.9628482371E+01  
-    etotal5  -3.9628946655E+01  
-    etotal6  -3.9629072497E+01  
-    etotal7  -3.9629079826E+01  
-    etotal8  -3.9629097793E+01
+      ecut1     8.00000000E+00 Hartree
+      ecut2     1.00000000E+01 Hartree
+      ecut3     1.20000000E+01 Hartree
+      ecut4     1.40000000E+01 Hartree
+      ecut5     1.60000000E+01 Hartree
+      ecut6     1.80000000E+01 Hartree
+      ecut7     2.00000000E+01 Hartree
+      ecut8     2.20000000E+01 Hartree
+    etotal1    -3.9600469883E+01
+    etotal2    -3.9627528577E+01
+    etotal3    -3.9627858027E+01
+    etotal4    -3.9628445505E+01
+    etotal5    -3.9628912968E+01
+    etotal6    -3.9629038227E+01
+    etotal7    -3.9629045275E+01
+    etotal8    -3.9629064079E+01
 
 `etotal` convergence (at 1 mHartree) is achieve for 12 <= $e_{cut}$ <= 14 Hartree  
 `etotal` convergence (at 0,1 mHartree) is achieve for 16 <= $e_{cut}$ <= 18 Hartree
@@ -611,37 +651,32 @@ Repeat the procedure (`ATOMPAW`\ + `ABINIT`) with the
 
 {% dialog tutorial/paw2_assets/Ni.atompaw.input.vanderbilt %}
 
-As you can see ABINIT convergence cannot be achieved!
-You can try whatever you want with radii and/or references energies in the
-`ATOMPAW` input file: ABINIT always diverges!
-The solution here is to change the pseudization scheme for the local pseudopotential.
+Let's try  to change the pseudization scheme for the local pseudopotential.
 Try to replace the `troulliermartins` keyword by `ultrasoft`.
 Repeat the procedure (`ATOMPAW` \+ `ABINIT`).
 ABINIT can now reach convergence!
 
 Results are below:
 
-```
-  ecut1   8.00000000E+00 Hartree  
-  ecut2   1.00000000E+01 Hartree  
-  ecut3   1.20000000E+01 Hartree  
-  ecut4   1.40000000E+01 Hartree  
-  ecut5   1.60000000E+01 Hartree  
-  ecut6   1.80000000E+01 Hartree  
-  ecut7   2.00000000E+01 Hartree  
-  ecut8   2.20000000E+01 Hartree  
-etotal1  -3.9609714395E+01  
-etotal2  -3.9615187859E+01  
-etotal3  -3.9618367959E+01  
-etotal4  -3.9622476129E+01  
-etotal5  -3.9624707476E+01  
-etotal6  -3.9625234480E+01  
-etotal7  -3.9625282524E+01  
-etotal8  -3.9625330757E+01
-```
+      ecut1     8.00000000E+00 Hartree
+      ecut2     1.00000000E+01 Hartree
+      ecut3     1.20000000E+01 Hartree
+      ecut4     1.40000000E+01 Hartree
+      ecut5     1.60000000E+01 Hartree
+      ecut6     1.80000000E+01 Hartree
+      ecut7     2.00000000E+01 Hartree
+      ecut8     2.20000000E+01 Hartree
+    etotal1    -3.9609758248E+01
+    etotal2    -3.9615269046E+01
+    etotal3    -3.9618415691E+01
+    etotal4    -3.9622479240E+01
+    etotal5    -3.9624694849E+01
+    etotal6    -3.9625216320E+01
+    etotal7    -3.9625264395E+01
+    etotal8    -3.9625314410E+01
 
 `etotal` convergence (at 1 mHartree) is achieved for 14 <= $e_{cut}$ <= 16 Hartree
-`etotal` convergence (at 0,1 mHartree) is achieved for 20 <= $e_{cut}$ <= 22 Hartree
+`etotal` convergence (at 0,1 mHartree) is achieved for 18 <= $e_{cut}$ <= 20 Hartree
 
 !!! note
 
@@ -688,7 +723,7 @@ Plot the `etotal` vs `acell` curve:
 From this graph and output file, you can extract some physical quantities:
 
     Equilibrium cell parameter:     a0 = 3.523 angstrom  
-    Bulk modulus:                    B = 190 GPa  
+    Bulk modulus:                    B = 199 GPa  
     Magnetic moment at equilibrium: mu = 0.60
 
 Compare these results with published results:
@@ -727,7 +762,7 @@ It can be useful to test the sensitivity of results to some `ATOMPAW` input para
     compensation charge density definition,
     By default a `sinc` function is used but a `gaussian` shape can have an influence on results.
     `Bessel` shapes are efficient and generally need a smaller cut-off radius ($r_{shape}=0.8~r_{PAW}$).
-  * The matching radius $r_{core} used to generate the pseudo core density from atomic core density,
+  * The matching radius $r_{core}$ used to generate the pseudo core density from atomic core density,
   * The inclusion of additional ("semi-core") states in the set of valence electrons,
   * The pseudization scheme used to get pseudopotential $Vloc(r)$.
 
@@ -743,7 +778,7 @@ dataset is used for non-standard solid structures or thermodynamical domains.
     Note: this new PAW dataset has a smaller $r_{PAW}$ radius (because semi-core states are localized).
 
     ````
-        a0 = 3.519 angstrom
+        a0 = 3.518 angstrom
         B = 194 GPa
         mu = 0.60
     ````
@@ -788,11 +823,12 @@ In your working directory, re-use the dataset *\$ABI_HOME/doc/tutorial/paw2_asse
 (Bloechl's projectors).
 Replace the ABINIT options (penultimate line):
 ````
-    2
-    defaults
+    ABINITOUT
+    default
 ````
 with:
 ````
+    ABINITOUT
     rsoptim 8. 2 0.0001
 ````
 8., 2 and 0.0001 are the values for $g_{max}$, $\frac{\gamma}{g_{max}}$ and $W$).

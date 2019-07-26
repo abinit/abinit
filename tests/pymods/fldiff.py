@@ -17,12 +17,12 @@ Some special characters at the beginning of lines require a different handling:
         (can be be present in the 2 files or not, but must begin with -)
 _       mark lines as same regardless to their content
         (must be present in the 2 files, but can begin with _ in only one of them)
-+	mark lines as different regardless to their content 
-,	handle as + if ignore option is False and as - else 
-P	handle as + if ignoreP option is False and as - else 
-%	floating point comparisons are done with a tolerance of 1.01e-2 
-;	floating point comparisons are done irrespective of signs 
-:	ignore floating point numbers and do a characters comparison 
++	mark lines as different regardless to their content
+,	handle as + if ignore option is False and as - else
+P	handle as + if ignoreP option is False and as - else
+%	floating point comparisons are done with a tolerance of 1.01e-2
+;	floating point comparisons are done irrespective of signs
+:	ignore floating point numbers and do a characters comparison
 .	do a characters comparison, but do not count this line in the Summary
 
 Both files should have the same number of non - starting lines.
@@ -461,7 +461,9 @@ class Differ(object):
         corrupted = [None, None]
 
         def extractor(src, i):
-            dext = DataExtractor(self.use_yaml, xml_mode=self.xml_mode,
+            # Remark: self.options['use_yam'] -> explicit request for YAML
+            #         self.use_yaml -> explicit request AND availability of YAML
+            dext = DataExtractor(self.options['use_yaml'], xml_mode=self.xml_mode,
                                  ignore=self.options['ignore'],
                                  ignoreP=self.options['ignoreP'])
 

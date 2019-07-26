@@ -7,9 +7,7 @@ from ..register_tag import yaml_auto_map, yaml_implicit_scalar
 
 @yaml_auto_map
 class GenericMap(object):
-    '''
-    A generic tag definition for test and example.
-    '''
+    """A generic tag definition for test and example."""
 
 
 @yaml_implicit_scalar
