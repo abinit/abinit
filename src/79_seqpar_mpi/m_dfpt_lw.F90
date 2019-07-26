@@ -3979,11 +3979,11 @@ end subroutine dfpt_flexoout
 
          if (isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)==1) then  
         
-           !The interesting magnitude is minus the gradient of the second order Energy
-           isdqtens_red(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-1.0_dp* &
+           !The interesting magnitude is -2 times the gradient of the second order Energy
+           isdqtens_red(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-two* &
          & ( isdq_qgradhart(re,iatom,iatdir,iq1dir,istr1dir,istr2dir) + &
          &   isdqwf(re,iatom,iatdir,iq1dir,istr1dir,istr2dir) )
-           isdqtens_red(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-1.0_dp* &
+           isdqtens_red(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-two* &
          & ( isdq_qgradhart(im,iatom,iatdir,iq1dir,istr1dir,istr2dir) + &
          &   isdqwf(im,iatom,iatdir,iq1dir,istr1dir,istr2dir) )
 
@@ -3995,51 +3995,51 @@ end subroutine dfpt_flexoout
 
            !Do the smae for the T4 term 
            !(This is different from the flexoout routine because the factorized -i in the T4
-           ! has to be multiplied by -1 as we did for the rest of contributions)
+           ! has to be multiplied by -2 as we did for the rest of contributions)
            tmpre=isdqwf_t4(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)
            tmpim=isdqwf_t4(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)
-           isdqwf_t4(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-tmpim
-           isdqwf_t4(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=tmpre
+           isdqwf_t4(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-two*tmpim
+           isdqwf_t4(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=two*tmpre
 
-           !Multiply by -1 the frozen wf contribution 
+           !Multiply by -2 the frozen wf contribution 
            tmpre=frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)
            tmpim=frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)
-           frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-tmpre
-           frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-tmpim
+           frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-two*tmpre
+           frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-two*tmpim
 
-           !Multiply by -1 the Ewald contribution 
+           !Multiply by -2 the Ewald contribution 
            tmpre=dyewdqdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)
            tmpim=dyewdqdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)
-           dyewdqdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-tmpre
-           dyewdqdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-tmpim
+           dyewdqdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-two*tmpre
+           dyewdqdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-two*tmpim
            
            !Compute and save individual terms in mixed coordinates
            if (prtvol==1) then
              
              tmpre=isdq_qgradhart(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)
              tmpim=isdq_qgradhart(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
-             isdq_qgradhart(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
-             isdq_qgradhart(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-tmpre
+             isdq_qgradhart(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=two*tmpim
+             isdq_qgradhart(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-two*tmpre
 
              tmpre=isdqwf_t1(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)
              tmpim=isdqwf_t1(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
-             isdqwf_t1(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
-             isdqwf_t1(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-tmpre
+             isdqwf_t1(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=two*tmpim
+             isdqwf_t1(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-two*tmpre
 
              tmpre=isdqwf_t2(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)
              tmpim=isdqwf_t2(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
-             isdqwf_t2(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
-             isdqwf_t2(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-tmpre
+             isdqwf_t2(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=two*tmpim
+             isdqwf_t2(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-two*tmpre
 
              tmpre=isdqwf_t3(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)
              tmpim=isdqwf_t3(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
-             isdqwf_t3(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
-             isdqwf_t3(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-tmpre
+             isdqwf_t3(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=two*tmpim
+             isdqwf_t3(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-two*tmpre
 
              tmpre=isdqwf_t5(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)
              tmpim=isdqwf_t5(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
-             isdqwf_t5(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
-             isdqwf_t5(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-tmpre
+             isdqwf_t5(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=two*tmpim
+             isdqwf_t5(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-two*tmpre
 
            end if
 
@@ -4066,11 +4066,11 @@ end subroutine dfpt_flexoout
 
          if (isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)==1) then  
         
-           !The interesting magnitude is minus the gradient of the second order Energy
-           isdqtens_red(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-1.0_dp* &
+           !The interesting magnitude is -2 times the gradient of the second order Energy
+           isdqtens_red(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-two* &
          & ( isdq_qgradhart(re,iatom,iatdir,iq1dir,istr1dir,istr2dir) + &
          &   isdqwf(re,iatom,iatdir,iq1dir,istr1dir,istr2dir) )
-           isdqtens_red(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-1.0_dp* &
+           isdqtens_red(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-two* &
          & ( isdq_qgradhart(im,iatom,iatdir,iq1dir,istr1dir,istr2dir) + &
          &   isdqwf(im,iatom,iatdir,iq1dir,istr1dir,istr2dir) )
 
@@ -4082,43 +4082,43 @@ end subroutine dfpt_flexoout
 
            !Do the smae for the T4 term 
            !(This is different from the flexoout routine because the factorized -i in the T4
-           ! has to be multiplied by -1 as we did for the rest of contributions)
+           ! has to be multiplied by -2 as we did for the rest of contributions)
            tmpre=isdqwf_t4(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)
            tmpim=isdqwf_t4(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)
-           isdqwf_t4(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-tmpim
+           isdqwf_t4(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-two*tmpim
            isdqwf_t4(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=zero
 
-           !Multiply by -1 the frozen wf contribution 
+           !Multiply by -2 the frozen wf contribution 
            tmpre=frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)
-           frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-tmpre
+           frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-two*tmpre
            frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=zero
 
-           !Multiply by -1 the Ewald contribution 
+           !Multiply by -2 the Ewald contribution 
            tmpre=dyewdqdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)
-           dyewdqdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-tmpre
+           dyewdqdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-two*tmpre
            dyewdqdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)=zero
            
            !Compute and save individual terms in mixed coordinates
            if (prtvol==1) then
              
              tmpim=isdq_qgradhart(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
-             isdq_qgradhart(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdq_qgradhart(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=two*tmpim
              isdq_qgradhart(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=zero
 
              tmpim=isdqwf_t1(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
-             isdqwf_t1(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t1(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=two*tmpim
              isdqwf_t1(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=zero
 
              tmpim=isdqwf_t2(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
-             isdqwf_t2(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t2(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=two*tmpim
              isdqwf_t2(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=zero
 
              tmpim=isdqwf_t3(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
-             isdqwf_t3(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t3(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=two*tmpim
              isdqwf_t3(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=zero
 
              tmpim=isdqwf_t5(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
-             isdqwf_t5(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t5(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=two*tmpim
              isdqwf_t5(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=zero
 
            end if
@@ -4418,9 +4418,11 @@ end subroutine dfpt_flexoout
 
              !Add the type-II T4, frozen wf and Ewald contributions 
              isdqtens_cart(re,iatom,alpha,gamma,beta,delta)= &
-           & isdqtens_cart(re,iatom,alpha,gamma,beta,delta) + t4re + tfrre + quarter*tewre
+           & isdqtens_cart(re,iatom,alpha,gamma,beta,delta) + t4re + &
+           & quarter*tfrre + quarter*tewre
              isdqtens_cart(im,iatom,alpha,gamma,beta,delta)= &
-           & isdqtens_cart(im,iatom,alpha,gamma,beta,delta) + t4im + tfrim + quarter*tewim
+           & isdqtens_cart(im,iatom,alpha,gamma,beta,delta) + t4im + &
+           & quarter*tfrim + quarter*tewim
 
              !Writes the complete q-gradient of internal strain tensor
              write(ab_out,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
@@ -4450,7 +4452,8 @@ end subroutine dfpt_flexoout
              & isdqtens_buffer_cart(4,re,iatom,alpha,gamma,beta,delta), &
              & isdqtens_buffer_cart(4,im,iatom,alpha,gamma,beta,delta)
 
-               write(77,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta,tfrre,tfrim
+               write(77,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
+             & quarter*tfrre, quarter*tfrim
 
                write(78,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
              & quarter*tewre, quarter*tewim
@@ -4574,7 +4577,7 @@ end subroutine dfpt_flexoout
    end do
  end do
 
-!Add contributions to d3etot
+!Add contributions to d3etot (remove the -2 factor)
  q1pert=matom+8
  do istrpert=1,nstrpert
    strpert=pert_strain(1,istrpert)
@@ -4588,9 +4591,9 @@ end subroutine dfpt_flexoout
 
          if (redflg(iatom,iatdir,iq1dir,istr1dir,istr2dir)==1) then
            d3etot(re,iatdir,iatom,strcomp,strpert,iq1dir,q1pert)= &
-         & -1.0_dp*isdqtens_red(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+         & -half*isdqtens_red(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)
            d3etot(im,iatdir,iatom,strcomp,strpert,iq1dir,q1pert)= &
-         & -1.0_dp*isdqtens_red(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+         & -half*isdqtens_red(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
          end if
 
        end do
