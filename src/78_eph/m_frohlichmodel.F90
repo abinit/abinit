@@ -56,7 +56,7 @@ contains
 !! Main routine to compute properties based on the Frohlich model
 !!
 !! INPUTS
-!! cryst<crystal_t>=Structure defining the unit cell 
+!! cryst<crystal_t>=Structure defining the unit cell
 !! dtset<dataset_type>=All input variables for this dataset.
 !! efmasdeg(nkpt_rbz) <type(efmasdeg_type)>= information about the band degeneracy at each k point
 !! efmasval(mband,nkpt_rbz) <type(efmasdeg_type)>= double tensor datastructure
@@ -160,8 +160,7 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
  ABI_ALLOCATE(dielt_qdir,(nqdir))
 
  !Compute phonon frequencies and mode-polarity for each qdir
- call ifc_calcnwrite_nana_terms(ifc, cryst, nqdir, unit_qdir, &
-&  phfrq2l=phfrq_qdir, polarity2l=polarity_qdir)
+ call ifc%calcnwrite_nana_terms(cryst, nqdir, unit_qdir, phfrq2l=phfrq_qdir, polarity2l=polarity_qdir)
 
  !Compute dielectric tensor for each qdir
  do iqdir=1,nqdir

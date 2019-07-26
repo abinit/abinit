@@ -474,7 +474,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
- iblock = ddb_get_dielt_zeff(ddb, cryst, dtset%rfmeth, dtset%chneut, selectz0, dielt, zeff)
+ iblock = ddb%get_dielt_zeff(cryst, dtset%rfmeth, dtset%chneut, selectz0, dielt, zeff)
  if (my_rank == master) then
    if (iblock == 0) then
      call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_path))
@@ -488,7 +488,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    brav1,dtset%asr,dtset%symdynmat,dtset%dipdip,dtset%rfmeth,dtset%ddb_ngqpt,ddb_nqshift,ddb_qshifts,dielt,zeff,&
    nsphere0,rifcsph0,prtsrlr0,dtset%enunit,comm)
  ABI_FREE(ddb_qshifts)
- call ifc_print(ifc, unit=std_out)
+ call ifc%print(unit=std_out)
 
  ! Output phonon band structure (requires qpath)
  if (dtset%prtphbands /= 0) call ifc_mkphbs(ifc, cryst, dtset, dtfil%filnam_ds(4), comm)
@@ -502,7 +502,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      if (all(count_wminmax == 0)) exit
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
      wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
-     call phdos_free(phdos)
+     call phdos%free()
      write(msg, "(a, 2f8.5)")"Initial frequency mesh not large enough. Recomputing PHODOS with wmin, wmax: ",wminmax
      call wrtout(std_out, msg)
    end do
@@ -512,7 +512,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      if (dtset%prtvol > 0) then
        path = strcat(dtfil%filnam_ds(4), "_PHDOS")
        call wrtout(ab_out, sjoin("- Writing phonon DOS to file:", path))
-       call phdos_print(phdos, path)
+       call phdos%print(path)
        !call phdos_print_debye(phdos, cryst%ucvol)
      end if
 
@@ -522,15 +522,15 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      ncerr = nctk_open_create(ncid, path, xmpi_comm_self)
      NCF_CHECK_MSG(ncerr, sjoin("Creating PHDOS.nc file:", path))
      NCF_CHECK(cryst%ncwrite(ncid))
-     call phdos_ncwrite(phdos, ncid)
+     call phdos%ncwrite(ncid)
      NCF_CHECK(nf90_close(ncid))
 #endif
    end if
-   call phdos_free(phdos)
+   call phdos%free()
  end if ! prtphdos
 
  if (dtset%prtbltztrp == 1 .and. my_rank == master) then
-   call ifc_outphbtrap(ifc,cryst,dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,dtfil%filnam_ds(4))
+   call ifc%outphbtrap(cryst,dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,dtfil%filnam_ds(4))
    ! BoltzTraP output files in GENEric format
    call ebands_prtbltztrp(ebands, cryst, dtfil%filnam_ds(4))
  end if
@@ -539,7 +539,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (dtset%prtphsurf == 1) then
    path = strcat(dtfil%filnam_ds(4), "_PH.bxsf")
    call wrtout(ab_out, sjoin("- Writing phonon frequencies in Xcrysden format to file:", path))
-   call ifc_printbxsf(ifc, cryst, dtset%ph_ngqpt, dtset%ph_nqshift, dtset%ph_qshift, path, comm)
+   call ifc%printbxsf(cryst, dtset%ph_ngqpt, dtset%ph_nqshift, dtset%ph_qshift, path, comm)
  end if
 
  call cwtime_report(" eph%ifc:", cpu, wall, gflops)
@@ -674,9 +674,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  !=====================
  call cryst%free()
  call dvdb%free()
- call ddb_free(ddb)
+ call ddb%free()
  call ddk_free(ddk)
- call ifc_free(ifc)
+ call ifc%free()
  call hdr_free(wfk0_hdr)
  if (use_wfk) call ebands_free(ebands)
  if (use_wfq) call ebands_free(ebands_kq)
