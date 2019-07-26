@@ -999,10 +999,7 @@ module m_xg
       print *, "xgBlockW%spacedim_comm", xgBlockW%spacedim_comm
       !stop
       if ( transa == xgBlockA%trans .and. (beta) < 1d-10) then
-        !print *, "LUDILO"
-        call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K) !!TODO BUGGGGGGGGGGGGGGGGGGg
-        !print *, "LUDILO GOTOVO"
-        !stop
+        call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K)
       end if
     case(SPACE_C)
       calpha = dcmplx(alpha,0.d0)
@@ -2614,8 +2611,7 @@ module m_xg
       !write(outunit,*) xgBLock%vecR
       !print *, xgBLock%vecR
       do i = 1, xgBlock%rows
-          !print *, xgBlock%vecR(i,1)
-          write(outunit,*) (/ (xgBlock%vecR(i,j), j = 1, xgBlock%cols) /)
+          write(outunit,fstring) (/ (xgBlock%vecR(i,j), j = 1, xgBlock%cols) /)
       end do
     case (SPACE_C)
       write(ccols,'(i4)') xgBlock%cols

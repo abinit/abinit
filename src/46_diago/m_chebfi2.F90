@@ -511,6 +511,8 @@ module m_chebfi2
       !stop
     !print *, "RANK", xmpi_comm_rank(chebfi%spacecom)
     !stop
+    
+    !if (counter == 1) stop
     ! Transpose
     if (chebfi%paral_kgb == 1) then
       
@@ -537,9 +539,9 @@ module m_chebfi2
     
       
       !all stride arrays are hidden inside transposer
-      call xgTransposer_init(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nCpuRows,nCpuCols,STATE_LINALG,1,0)
+      call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nCpuRows,nCpuCols,STATE_LINALG,1)
       !print *, "PROSAO INIT"
-      !call xgTransposer_init(chebfi%xgTransposerX,X0,chebfi%X,nCpuRows,nCpuCols,STATE_LINALG,1,0)
+      !call xgTransposer_constructor(chebfi%xgTransposerX,X0,chebfi%X,nCpuRows,nCpuCols,STATE_LINALG,1,0)
       
  !     call xgBlock_getSize(chebfi%X,rows,cols)
       
@@ -552,10 +554,12 @@ module m_chebfi2
 !      flush (100+xmpi_comm_rank(chebfi%spacecom))
 !      stop
       !print *, "EEEEEEEEEEEEEEEEE"
-      call xgTransposer_init(chebfi%xgTransposerAX,chebfi%AX%self,chebfi%xAXColsRows,nCpuRows,nCpuCols,STATE_LINALG,1,0)
+      call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,chebfi%AX%self,chebfi%xAXColsRows,STATE_LINALG)
+      !call xgTransposer_constructor(chebfi%xgTransposerAX,chebfi%AX%self,chebfi%xAXColsRows,nCpuRows,nCpuCols,STATE_LINALG,1)
       
       !print *, "DDDDDDDDDDDDDDDD"
-      call xgTransposer_init(chebfi%xgTransposerBX,chebfi%BX%self,chebfi%xBXColsRows,nCpuRows,nCpuCols,STATE_LINALG,1,0)
+      call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,chebfi%BX%self,chebfi%xBXColsRows,STATE_LINALG)
+      !call xgTransposer_constructor(chebfi%xgTransposerBX,chebfi%BX%self,chebfi%xBXColsRows,nCpuRows,nCpuCols,STATE_LINALG,1)
       
       !call debug_helper_linalg(chebfi%X, chebfi, 1, 1)
       !stop
@@ -1214,15 +1218,17 @@ module m_chebfi2
     
     call xg_free(DivResults)
     
+    !stop
+    
     if (chebfi%paral_kgb == 1) then
       call xgTransposer_free(chebfi%xgTransposerX)
-      call xgTransposer_free(chebfi%xgTransposerAX)
-      call xgTransposer_free(chebfi%xgTransposerBX)
+      !call xgTransposer_free(chebfi%xgTransposerAX)
+      !call xgTransposer_free(chebfi%xgTransposerBX)
     end if
     
     call timab(tim_run,2,tsec)
     
-    
+    !stop
     !X_swap izgleda ne mora da se koristi kod MPI > 1 jer je X vec poseban bafer
 !    if (xmpi_comm_rank(chebfi%spacecom) == 0) then
 !      print *, "X_swap AT THE END"
@@ -1244,7 +1250,7 @@ module m_chebfi2
 !      print *, "***********************"
 !    end if
     
-
+    !stop
     
     call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X at the end of the CB2 RUN") !MPI 1,2 OK
     !stop   
@@ -2415,7 +2421,7 @@ module m_chebfi2
     character(*) , intent(in) :: line
     type(xgBlock_t) :: HELPER
     
-    integer, parameter :: FROW = 1, FCOL = 1, DROWS = 1, DCOLS = 10
+    integer, parameter :: FROW = 1, FCOL = 1, DROWS = 5, DCOLS = 5
     
     call xmpi_barrier(chebfi%spacecom) 
     
