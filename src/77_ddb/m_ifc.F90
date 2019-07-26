@@ -523,8 +523,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ABI_MALLOC(ifc_tmp%wghatm, (natom, natom, ifc_tmp%nrpt))
 
  ! HM: this tolerance is highly dependent on the compilation/architecture
- !     numeric errors in the DDB text file. Try a few tolerances and
- !     check if all the weights are found.
+ !     numeric errors in the DDB text file. Try a few tolerances and check whether all the weights are found.
  toldist = tol8
  do while (toldist <= tol6)
    ! Note ngqpt(9) with intent(inout)!

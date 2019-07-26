@@ -2788,7 +2788,7 @@ subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshift, qshift, rpr
 
 ! *********************************************************************
 
- ABI_CHECK(any(cutmode == [0, 1, 2]), "cutmode should be 0, 1, 2")
+ ABI_CHECK(any(cutmode == [0, 1, 2]), "cutmode should be in [0, 1, 2]")
 
  ! Create the Big Box of R vectors in real space and compute the number of points (cells) in real space
  call make_bigbox(brav, all_cell, ngqpt, nqshift, rprim, all_nrpt, all_rpt)
@@ -2797,8 +2797,7 @@ subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshift, qshift, rpr
  ABI_MALLOC(all_wghatm, (natom, natom, all_nrpt))
 
  ! HM: this tolerance is highly dependent on the compilation/architecture
- !     numeric errors in the DDB text file. Try a few tolerances and
- !     check if all the weights are found.
+ !     numeric errors in the DDB text file. Try a few tolerances and check whether all the weights are found.
  ngqpt9 = 0; ngqpt9(1:3) = ngqpt(1:3)
  toldist = tol8
  do while (toldist <= tol6)
@@ -2859,13 +2858,13 @@ logical pure function filterw(wg)
 
  select case (cutmode)
  case (1)
-   filterw = sum(abs(wg)) < tol16
+   filterw = sum(abs(wg)) < tol20
  case (2)
    trace = zero
    do iat=1,natom
      trace = trace + abs(wg(iat,iat))
    end do
-   filterw = trace < tol16
+   filterw = trace < tol20
  case default
    filterw = .False.
  end select

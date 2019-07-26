@@ -54,7 +54,7 @@ module m_eph_driver
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
  use m_frohlichmodel,   only : frohlichmodel
- !use m_special_funcs,   only : levi_civita_3
+ use m_special_funcs,   only : levi_civita_3
  use m_transport,       only : transport
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
@@ -578,18 +578,20 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! This to symmetrize the DFPT potentials.
    dvdb%symv1 = dtset%symv1scf
 
+   !call dvdb%load_ddb(dtset%prtvol, comm, ddb=ddb)
+
    ! Set qdamp from frohl_params
-   if (dtset%frohl_params(4)/=0) then
+   if (dtset%frohl_params(4) /= 0) then
      dvdb%qdamp = dtset%frohl_params(4)
    end if
 
-   !call dvdb%load_ddb(dtset%prtvol, comm, ddb=ddb)
-
-   !dvdb%diel = 13.103 * dvdb%dielt
-   !do ii=1,dvdb%natom
-   !  dvdb%qstar(:,:,:,ii) = (-1 ** (ii + 1)) * abs(levi_civita_3()) * 13.368_dp
-   !end do
-   !dvdb%has_quadrupoles = .True.
+   if (dtset%userie == 123) then
+     call wrtout(std_out, "Setting dynamic quadrupoles for Silicon")
+     do ii=1,dvdb%natom
+       dvdb%qstar(:,:,:,ii) = (-1 ** (ii + 1)) * abs(levi_civita_3()) * 13.368_dp
+     end do
+     dvdb%has_quadrupoles = .True.
+   end if
 
    ! Set dielectric tensor, BECS and associated flags.
    ! This activates automatically the treatment of the long-range term in the Fourier interpolation
@@ -613,7 +615,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      call dvdb%print()
      call dvdb%list_perts([-1, -1, -1], unit=ab_out)
    end if
-
  end if
 
  ! TODO Recheck getng, should use same trick as that used in screening and sigma.
@@ -628,7 +629,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfftc(2),ngfftc(3),'all')
  call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
 
-!I am not sure yet the EFMAS file will be needed as soon as eph_frohlichm/=0. To be decided later.
+ ! I am not sure yet the EFMAS file will be needed as soon as eph_frohlichm/=0. To be decided later.
  if (dtset%eph_frohlichm /= 0) then
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(ncid, dtfil%fnameabi_efmas, xmpi_comm_self))
@@ -694,17 +695,24 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! Compute phonon limited transport from SIGEPH file
    call transport(dtfil, dtset, ebands, cryst, comm)
 
+ case (14, -14)
+   if (my_rank == master) then
+     call dvdb%open_read(ngfftf, xmpi_comm_self)
+     ! Write average of DFPT potentials to file.
+     path = strcat(dtfil%filnam_ds(4), "_V1QAVG.nc")
+     call dvdb%write_v1qavg(dtset, path)
+   end if
+
  case (15)
-   comm_rpt = xmpi_comm_self
-   method = dtset%userid
-   path = strcat(dtfil%filnam_ds(4), "_WRMAX")
-   call wrtout(std_out, sjoin("Saving W(r, R) to file:", path))
-   call dvdb%open_read(ngfftf, xmpi_comm_self)
-   ! This to symmetrize the DFPT potentials.
-   dvdb%symv1 = dtset%symv1scf
-   call dvdb%print()
-   !call dvdb%list_perts([-1, -1, -1])
-   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, path, comm_rpt)
+   if (my_rank == master) then
+     path = strcat(dtfil%filnam_ds(4), "_WRMAX")
+     call wrtout(std_out, sjoin("Saving W(R,r) to file:", path))
+     comm_rpt = xmpi_comm_self
+     method = dtset%userid
+     call dvdb%open_read(ngfftf, xmpi_comm_self)
+     !call dvdb%list_perts([-1, -1, -1])
+     call dvdb%ftinterp_setup(dtset%ddb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, path, comm_rpt)
+   end if
 
  case (16)
    ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.

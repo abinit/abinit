@@ -812,7 +812,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=RUNL_EPH
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
-       13, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, 15, 16], iout)
+       15, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, 14, -14, 15, 16], iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        MSG_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
@@ -820,8 +820,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      if (dt%eph_task == 2 .and. dt%irdwfq == 0 .and. dt%getwfq == 0) then
        MSG_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
      end if
-     if (dt%eph_task == -5) then
-       ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task == -5")
+     if (any(dt%eph_task == [-5, -14])) then
+       ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task in [-5, -14]")
      end if
 
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
