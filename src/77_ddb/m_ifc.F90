@@ -33,8 +33,6 @@ MODULE m_ifc
  use m_xmpi
  use m_sort
  use m_cgtools
- use m_bspline
- use m_skw
  use m_lebedev
  use m_nctk
  use m_ddb

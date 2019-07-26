@@ -3763,7 +3763,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  if (db%symv1 == 2) then
    ! Initialize the list of perturbations rfpert and rdfir
    ! WARNING: Only phonon perturbations are considered for the time being.
-   ABI_MALLOC(rfpert,(db%mpert))
+   ABI_MALLOC(rfpert, (db%mpert))
    rfpert = 0; rfpert(1:db%cryst%natom) = 1; rfdir = 1
    ABI_MALLOC(pertsy, (3,db%mpert))
    ABI_MALLOC(pflag, (3, db%natom))
@@ -3778,9 +3778,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
    pflag = 0
    do imyp=1,3*db%cryst%natom
      idir = mod(imyp-1, 3) + 1; ipert = (imyp - idir) / 3 + 1
-     if (pertsy(idir, ipert) == 1) then
-       pflag(idir,ipert) = 1
-     end if
+     if (pertsy(idir, ipert) == 1) pflag(idir,ipert) = 1
    end do
 
    ! Complete potentials
@@ -5869,7 +5867,6 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
          write(unt,*)"# idir: ",idir,", ipert: ",ipert,", ispden:", ispden
          write(unt,*)"# file_v1scf, symmetrized_v1scf, diff"
          if (cplex == 1) then
-           !do ifft=1,nfft
            do i3=1,n3
              do i2=1,n2
                do i1=1,n1
@@ -5882,7 +5879,6 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
              end do
            end do
          else
-           !do ifft=1,nfft
            do i3=1,n3
              do i2=1,n2
                do i1=1,n1

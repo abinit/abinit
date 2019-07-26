@@ -3701,13 +3701,18 @@ The choice is among:
 * 2 --> Compute electron-phonon matrix elements. Save results in GKK.nc file format.
 * -2 --> Compute electron-phonon matrix elements. Save results in GKQ.nc file format that can be post-processed with AbiPy.
 * 3 --> Compute phonon self-energy.
-* 4 --> Compute electron-phonon self-energy (Fan-Migdal + Debye-Waller) and QP corrections Generate SIGEPH.nc file.
+* 4 --> Compute electron-phonon self-energy (Fan-Migdal + Debye-Waller) and QP corrections. Generate SIGEPH.nc file.
 * -4 --> Compute electron lifetimes due to e-ph interaction (imaginary part of Fan-Migdal self-energy). Generate SIGEPH.nc file.
 * 5 --> Interpolate DFPT potentials to produce a new DVDB file on the [[eph_ngqpt_fine]] q-mesh that can be read with [[getdvdb]]
 * -5 --> Interpolate DFPT potentials on the q-path specified by [[ph_qpath]] and [[ph_nqpath]]. Note that, in this case,
          the user has to provide the full list of q-points in the input, [[ph_ndivsm]] is not used to generate the q-path.
 * 6 --> Estimate correction to the ZPR in polar materials using the Frohlich model. Requires EFMAS.nc file.
 * 7 --> Compute phonon limited transport in semiconductors using lifetimes taken from SIGEPH.nc file.
+* 14, -14 --> Write average of DFPT potentials to V1QAVG.nc file. 
+              In the first case (14) the q-points are taken directly from the DVDB file.
+              In the second case (-14) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
+              input DVDB contains q-points in the IBZ and the potentials along the path are interpolated with Fourier.
+* 15 -> Produce WRMAX.nc file with the decay of the W(R,r) as a function of R
 """,
 ),
 

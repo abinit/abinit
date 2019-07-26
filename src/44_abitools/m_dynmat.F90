@@ -2731,7 +2731,7 @@ end subroutine asrif9
 !! get_bigbox_and_weights
 !!
 !! FUNCTION
-!! Compute Big Box containing all the R points in the cartesian real space needed to Fourier Transform
+!! Compute the Big Box containing the R points in the cartesian real space needed to Fourier Transform
 !! the dynamical matrix into its corresponding interatomic force.
 !!
 !! INPUTS
@@ -2744,7 +2744,12 @@ end subroutine asrif9
 !! rprim(3,3)= Normalized coordinates in real space.
 !! rprimd, gprimd
 !! rcan(3,natom)  = Atomic position in canonical coordinates
-!! cutmode
+!! cutmode=Define the cutoff used to filter the output R-points according to their weights.
+!!   0 --> No cutoff (mainly for debugging)
+!!   1 --> Include only those R-points for which sum(abs(wg(:,:,irpt)) < tol20
+!!         This is the approach used for the dynamical matrix.
+!!   2 --> Include only those R-points for which the trace over iatom of abs(wg(iat,iat,irpt)) < tol20
+!!         This option is used for objects that depend on a single atomic index.
 !! comm= MPI communicator
 !!
 !! OUTPUT
@@ -2831,6 +2836,7 @@ subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshift, qshift, rpr
    nrpt = nrpt + 1
  end do
 
+ ! Allocate output arrays and transfer data.
  ABI_MALLOC(rpt, (3, nrpt))
  ABI_MALLOC(cell, (3, nrpt))
  ABI_MALLOC(wghatm, (natom, natom, nrpt))

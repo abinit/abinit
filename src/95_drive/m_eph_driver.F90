@@ -696,14 +696,15 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call transport(dtfil, dtset, ebands, cryst, comm)
 
  case (14, -14)
+   ! Write average of DFPT potentials to file.
    if (my_rank == master) then
      call dvdb%open_read(ngfftf, xmpi_comm_self)
-     ! Write average of DFPT potentials to file.
      path = strcat(dtfil%filnam_ds(4), "_V1QAVG.nc")
      call dvdb%write_v1qavg(dtset, path)
    end if
 
  case (15)
+   ! Produce WRMAX.nc file with the decay of the W(R,r) as a function of R
    if (my_rank == master) then
      path = strcat(dtfil%filnam_ds(4), "_WRMAX")
      call wrtout(std_out, sjoin("Saving W(R,r) to file:", path))
