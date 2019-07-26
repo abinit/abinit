@@ -3830,8 +3830,8 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
          call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cwave0i,gh1dqc, &
        & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
-         !Accumulate this term (take here into account the -i·-i prefactors and the conjugate complex)
-         frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)=-dotr
+         !Accumulate this term. Take here into account the -i·(-i)^{\dagger} prefactors.
+         frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)=dotr
          frwfdq_bks(2,iband,iatom,iatdir,ka,kb,iq1grad)=doti
 
          !Next complete the other two terms involving the 1st q-gradient of atdis Hamiltonian:
@@ -3839,13 +3839,13 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
          !<u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\delta} \frac{\delta_{\beta\gamma}}{2} | u_{i,k}^{(0)} >
          !--------------------------------------------------------------------------
          if (ka==kb) then
-           frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)=frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)-   &
+           frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)=frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)+   &
          & half*c0_hatdisdq_c0_bks(1,iband,iq1grad,iatpert)
            frwfdq_bks(2,iband,iatom,iatdir,ka,kb,iq1grad)=frwfdq_bks(2,iband,iatom,iatdir,ka,kb,iq1grad)+   &
          & half*c0_hatdisdq_c0_bks(2,iband,iq1grad,iatpert)
          end if
          if (ka==iq1grad) then
-           frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)=frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)-   &
+           frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)=frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)+   &
          & half*c0_hatdisdq_c0_bks(1,iband,kb,iatpert)
            frwfdq_bks(2,iband,iatom,iatdir,ka,kb,iq1grad)=frwfdq_bks(2,iband,iatom,iatdir,ka,kb,iq1grad)+   &
          & half*c0_hatdisdq_c0_bks(2,iband,kb,iatpert)
