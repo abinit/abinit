@@ -6651,10 +6651,24 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
    qtau = - two_pi * dot_product(qG_red, tau_red)
    phre = cos(qtau); phim = sin(qtau)
 
-   re = fac * qGS * denom_inv
+   !re = -fac * qGS * denom_inv
+   re = zero
    im = fac * qGZ * denom_inv
    v1G_lr(1,ig) = phre * re - phim * im
    v1G_lr(2,ig) = phim * re + phre * im
+
+   if (db%has_quadrupoles) then
+     !qtau = - two_pi * dot_product(qG_red, tau_red)
+     !qtau = qtau - two_pi * two * dot_product(gfft(:,ig), tau_red)
+     qtau = - two_pi * three * dot_product(qG_red, tau_red)
+
+     phre = cos(qtau); phim = sin(qtau)
+     ! Had to reintroduce (-1) ** (iatom + 1) to get the correct sign for the 1/4 1/4 1/4 atom in Si
+     ! This point should be clarified!
+     re = -fac * qGS * denom_inv * (-1) ** (iatom + 1)
+     v1G_lr(1,ig) = v1G_lr(1,ig) + re * phre
+     v1G_lr(2,ig) = v1G_lr(2,ig) + re * phim
+   end if
  end do
 
  ABI_FREE(gfft)
