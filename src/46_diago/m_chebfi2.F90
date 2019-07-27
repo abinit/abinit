@@ -539,7 +539,7 @@ module m_chebfi2
     
       
       !all stride arrays are hidden inside transposer
-      call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nCpuRows,nCpuCols,STATE_LINALG,1)
+      call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL)
       !print *, "PROSAO INIT"
       !call xgTransposer_constructor(chebfi%xgTransposerX,X0,chebfi%X,nCpuRows,nCpuCols,STATE_LINALG,1,0)
       
@@ -554,9 +554,10 @@ module m_chebfi2
 !      flush (100+xmpi_comm_rank(chebfi%spacecom))
 !      stop
       !print *, "EEEEEEEEEEEEEEEEE"
+      !stop
       call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,chebfi%AX%self,chebfi%xAXColsRows,STATE_LINALG)
       !call xgTransposer_constructor(chebfi%xgTransposerAX,chebfi%AX%self,chebfi%xAXColsRows,nCpuRows,nCpuCols,STATE_LINALG,1)
-      
+      !stop
       !print *, "DDDDDDDDDDDDDDDD"
       call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,chebfi%BX%self,chebfi%xBXColsRows,STATE_LINALG)
       !call xgTransposer_constructor(chebfi%xgTransposerBX,chebfi%BX%self,chebfi%xBXColsRows,nCpuRows,nCpuCols,STATE_LINALG,1)
@@ -658,7 +659,8 @@ module m_chebfi2
     
     call timab(tim_getAX_BX,1,tsec)         
     !call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self) 
-    call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)  !OVO SAD MORA SVUDA DA SE MENJA
+    !!TODO TODO TODO UNCOMMENT THIS 
+    !call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)  !OVO SAD MORA SVUDA DA SE MENJA
     call timab(tim_getAX_BX,2,tsec)
     
     
@@ -943,7 +945,8 @@ module m_chebfi2
       !call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self)
       !stop
       !print *, "getAX_BX before"
-      call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)  !OVO SAD MORA SVUDA DA SE MENJA
+      !!TODO TODO TODO UNCOMMENT THIS 
+      !call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)  !OVO SAD MORA SVUDA DA SE MENJA
       !print *, "getAX_BX after"
       !stop
       if (iline == 2) then
@@ -1416,7 +1419,8 @@ module m_chebfi2
       
       iline_t = iline
       !!TODO UCI U WRAPPER SA ILINE=2 i transposerom i probati transponovati unutra
-      call getBm1X(chebfi%xAXColsRows, chebfi%X_next, iline_t, chebfi%xXColsRows, chebfi%X, chebfi%xgTransposerX) !ovde pobrljavi X skroz za iline 2 MPI istwfk 2
+      !!TODO TODO TODO UNCOMMENT THIS 
+      !call getBm1X(chebfi%xAXColsRows, chebfi%X_next, iline_t, chebfi%xXColsRows, chebfi%X, chebfi%xgTransposerX) !ovde pobrljavi X skroz za iline 2 MPI istwfk 2
       
       if (counter < 3) then
         call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "xAXColsRows after getBm1X 1" // str) !MPI 1,2 OK
