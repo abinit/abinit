@@ -23,7 +23,7 @@ message: |
 src_file: m_dtfil.F90
 src_line: 1106
 message: |
-    Renaming old t03_2_x.out to t03_2_x.out0216
+    Renaming old t03_2_x.out to t03_2_x.out0245
 ...
  
 
@@ -42,8 +42,8 @@ message: |
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 27 Jul 2019.
-- ( at 18h38 )
+.Starting date : Sun 28 Jul 2019.
+- ( at 14h17 )
   
  
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -564,6 +564,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  Invovl built
  VTOFK CALL
  VTOFK CALL
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           0
@@ -573,143 +579,23 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  xgTransposer%mpiData(MPI_COLS)%rank           1
  xgTransposer%mpiData(MPI_COLS)%size           2
  spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  PROSAO getAX_BX
  PROSAO getAX_BX
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
  chebfi%total_spacedim        3888
  chebfi%bandpp          96
  chebfi%total_spacedim        3888
  chebfi%bandpp          96
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
  LOOP FINISHED
  LOOP FINISHED
  spacedim        1944
  STAMPAM MPI2
- rank, spacedim           0        1944
  spacedim        1944
+ rank, spacedim           0        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
  spacedim        1944
@@ -733,40 +619,40 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  PROSAO TRANSPOSE
  PROSAO TRANSPOSE
  spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
- spacedim        1944
  STAMPAM MPI2
- spacedim        1944
  rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
- spacedim        1944
  STAMPAM MPI2
- spacedim        1944
  rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  PRE DGEMM
  PRE DGEMM
- NAKON DGEMM
- transat
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
  NAKON DGEMM
  transat
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632948
- PRE DGEMM
- PRE DGEMM
  NAKON DGEMM
  transat
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632942
+ PRE DGEMM
+ PRE DGEMM
  NAKON DGEMM
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
  transat
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632948
@@ -789,23 +675,23 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  STAMPAM MPI2
  rank, spacedim           1        1944
  spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
- spacedim        1944
  STAMPAM MPI2
- spacedim        1944
  rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
- spacedim        1944
  STAMPAM MPI2
- spacedim        1944
  rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  REMAINDER           0
  REMAINDER           0
  PRE DGEMM
@@ -813,55 +699,240 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  NAKON DGEMM
  transan
  xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ xgx0 AFTER
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_COLS)%rank           1
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_COLS)%rank           0
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ PROSAO getAX_BX
+ PROSAO getAX_BX
+ chebfi%total_spacedim        3888
+ chebfi%total_spacedim        3888
+ chebfi%bandpp          96
+ chebfi%bandpp          96
+ LOOP FINISHED
+ LOOP FINISHED
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ PROSAO TRANSPOSE
+ PROSAO TRANSPOSE
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ REMAINDER           0
+ REMAINDER           0
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
  xgBlockW%spacedim_comm -1006632942
  NAKON DGEMM
  transan
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632948
  spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
- PRE DGEMM
- PRE DGEMM
- NAKON DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
- spacedim        1944
- STAMPAM MPI2
- spacedim        1944
- rank, spacedim           0        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- PRE DGEMM
- PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
- spacedim        1944
- STAMPAM MPI2
- spacedim        1944
- rank, spacedim           0        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
  spacedim        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  xgx0 AFTER
  size(cprjin)        2976
  hamk%natom          31
@@ -891,9 +962,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  1.615 1.615 1.615 1.615 1.615 1.615 1.615 1.615 1.615 1.615 1.615 1.615
  mkrho: echo density (plane-wave part only)
  Total charge density [el/Bohr^3]
-      Maximum=           NaN  at reduced coord.    0.0000    0.0000    0.0000
-      Minimum=           NaN  at reduced coord.    0.0000    0.0000    0.0000
-   Integrated=           NaN
+      Maximum=    8.9229E+20  at reduced coord.    0.0000    0.5000    0.5000
+      Minimum=    3.6455E+20  at reduced coord.    0.0000    0.3000    0.0000
+   Integrated=    2.0979E+24
  
 --- !WARNING
 src_file: m_vtorho.F90
@@ -910,32 +981,32 @@ message: |
  ========= Values of RHOIJ before symetrization =========
  
  Atom #  1
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
    ...  only 12  components have been written...
  Atom # 16
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
    ...  only 12  components have been written...
  
  
@@ -943,66 +1014,78 @@ message: |
  ========= Values of RHOIJ after symetrization =========
  
  Atom #  1
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* 341.33333 ********* ********* ...
+ ********* ********* *********   0.00000 ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* 682.66667 ********* ********* ********* ********* ********* ...
+ *********   0.00000 ********* ********* ********* ********* ********* ********* 682.66667 *********   0.00000 ********* ...
+ ********* ********* ********* ********* ********* ********* 682.66667 ********* ********* -85.33333 ********* ********* ...
+ ********* ********* ********* ********* ********* ********* 170.66667 ********* ********* 341.33333 ********* 170.66667 ...
+ ********* ********* 682.66667 ********* 682.66667 170.66667 ********* 341.33333 341.33333 ********* 341.33333 ********* ...
+ ********* ********* ********* ********* ********* ********* 341.33333 ********* ********* 263.66667 ********* 853.33333 ...
+ ********* ********* ********* 682.66667 ********* ********* 341.33333 ********* *********   0.00000 ********* ********* ...
+ 341.33333 ********* ********* ********* -85.33333 341.33333 ********* 263.66667   0.00000 ********* 170.66667 ********* ...
+ ********* ********* *********   0.00000 ********* ********* 341.33333 ********* ********* 170.66667 ********* 640.00000 ...
+ ********* ********* ********* ********* ********* 170.66667 ********* 853.33333 ********* ********* 640.00000 ********* ...
    ...  only 12  components have been written...
  Atom # 16
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
+ ********* *********   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ********* ********* ********* ...
+ ********* *********   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ********* ********* ********* ********* ...
+   0.00000   0.00000 ********* ********* ********* *********   0.00000 170.66667   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000 ********* ********* ********* 682.66667 ********* 170.66667   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000 ********* ********* *********   0.00000 ********* *********   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000 ********* 682.66667   0.00000 *********   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000 ********* *********   0.00000 *********   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000 170.66667 170.66667 *********   0.00000   0.00000 *********   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000 *********   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 *********   0.00000   0.00000   0.00000 ...
+ ********* *********   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 *********   0.00000 ********* ...
+ ********* *********   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ********* ********* ...
+ ********* *********   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ********* ********* ********* ...
    ...  only 12  components have been written...
  
  Total charge density [el/Bohr^3]
-      Maximum=           NaN  at reduced coord.    0.0000    0.0000    0.0000
-      Minimum=           NaN  at reduced coord.    0.0000    0.0000    0.0000
-   Integrated=           NaN
- ETOT  1  -759.62766281240    -7.596E+02 0.000E+00       NaN
+      Maximum=    8.4634E+20  at reduced coord.    0.4889    0.3556    0.0000
+      Minimum=   -3.3704E+20  at reduced coord.    0.5111    0.5111    0.0000
+   Integrated=    1.9503E+24
+ ETOT  1  -759.62766281240    -7.596E+02 2.225E+20 2.917E+46
  scprqt: <Vxc>= -4.9191994E-01 hartree
  
  Simple mixing update:
-  residual square of the potential:                      NaN
- scfcv_core: previous iteration took  2.06 [s]
+  residual square of the potential:   2.968527066181273E+041
+ scfcv_core: previous iteration took  2.36 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
    ...  only 12  components have been written...
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (144 components have a value greater than   50.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
  
  
  ITER STEP NUMBER     2
  vtorho: nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=2 0 2
  VTOFK CALL
  VTOFK CALL
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           0
@@ -1012,143 +1095,23 @@ message: |
  xgTransposer%mpiData(MPI_COLS)%rank           1
  xgTransposer%mpiData(MPI_COLS)%size           2
  spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  PROSAO getAX_BX
  PROSAO getAX_BX
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
  chebfi%total_spacedim        3888
  chebfi%bandpp          96
  chebfi%total_spacedim        3888
  chebfi%bandpp          96
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
  LOOP FINISHED
  LOOP FINISHED
  spacedim        1944
  STAMPAM MPI2
- rank, spacedim           0        1944
  spacedim        1944
+ rank, spacedim           0        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
  spacedim        1944
@@ -1172,43 +1135,43 @@ message: |
  PROSAO TRANSPOSE
  PROSAO TRANSPOSE
  spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
- spacedim        1944
  STAMPAM MPI2
- spacedim        1944
  rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
- spacedim        1944
  STAMPAM MPI2
- spacedim        1944
  rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  PRE DGEMM
  PRE DGEMM
- NAKON DGEMM
- transat
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
  NAKON DGEMM
  transat
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632948
- PRE DGEMM
- PRE DGEMM
  NAKON DGEMM
  transat
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632942
+ PRE DGEMM
+ PRE DGEMM
  NAKON DGEMM
  transat
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
@@ -1268,17 +1231,99 @@ message: |
  NAKON DGEMM
  transan
  xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
  xgBlockW%spacedim_comm -1006632942
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ PRE DGEMM
+ PRE DGEMM
  NAKON DGEMM
  transan
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
  spacedim        1944
- STAMPAM MPI2
  spacedim        1944
- rank, spacedim           0        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ xgx0 AFTER
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_COLS)%rank           1
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_COLS)%rank           0
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ PROSAO getAX_BX
+ PROSAO getAX_BX
+ chebfi%total_spacedim        3888
+ chebfi%bandpp          96
+ chebfi%total_spacedim        3888
+ chebfi%bandpp          96
+ PROSAO TRANSPOSE
+ PROSAO TRANSPOSE
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ REMAINDER           0
+ PRE DGEMM
+ REMAINDER           0
+ PRE DGEMM
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ PRE DGEMM
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
  PRE DGEMM
  PRE DGEMM
  NAKON DGEMM
@@ -1289,18 +1334,17 @@ message: |
  transan
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632948
+ PRE DGEMM
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
  spacedim        1944
- STAMPAM MPI2
- spacedim        1944
- rank, spacedim           0        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  xgx0 AFTER
  size(cprjin)        2976
  hamk%natom          31
@@ -1330,9 +1374,9 @@ message: |
  1.615 1.615 1.615 1.615 1.615 1.615 1.615 1.615 1.615 1.615 1.615 1.615
  mkrho: echo density (plane-wave part only)
  Total charge density [el/Bohr^3]
-      Maximum=           NaN  at reduced coord.    0.0000    0.0000    0.0000
-      Minimum=           NaN  at reduced coord.    0.0000    0.0000    0.0000
-   Integrated=           NaN
+      Maximum=    1.6965+223  at reduced coord.    0.0000    0.5000    0.5000
+      Minimum=    1.9221+222  at reduced coord.    0.8250    0.1750    0.1750
+   Integrated=    2.6839+226
  
 --- !WARNING
 src_file: m_vtorho.F90
@@ -1349,32 +1393,32 @@ message: |
  ========= Values of RHOIJ before symetrization =========
  
  Atom #  1
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
    ...  only 12  components have been written...
  Atom # 16
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
    ...  only 12  components have been written...
  
  
@@ -1382,40 +1426,40 @@ message: |
  ========= Values of RHOIJ after symetrization =========
  
  Atom #  1
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* *********   0.00000 ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* *********   0.00000 ********* ********* ********* ********* ********* ...
+ *********   0.00000 ********* *********   0.00000 ********* *********   0.00000   0.00000 *********   0.00000 ********* ...
+ ********* ********* *********   0.00000 ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* *********   0.00000 ********* ********* ********* *********   0.00000   0.00000 ********* ********* ********* ...
+ ********* ********* *********   0.00000 ********* *********   0.00000 ********* ********* ********* ********* ********* ...
+ ********* ********* *********   0.00000 ********* *********   0.00000 ********* ********* ********* *********   0.00000 ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* *********   0.00000 ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* *********   0.00000 ********* ********* ********* ...
    ...  only 12  components have been written...
  Atom # 16
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
+ ********* *********   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 *********   0.00000 *********   0.00000 ...
+ ********* *********   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ********* ********* ********* ...
+   0.00000   0.00000 ********* ********* ********* ********* ********* *********   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000 ********* ********* ********* ********* ********* *********   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000 ********* ********* ********* ********* ********* *********   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000 ********* ********* ********* *********   0.00000 *********   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000 ********* ********* *********   0.00000 ********* *********   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000 ********* ********* ********* ********* ********* *********   0.00000   0.00000   0.00000   0.00000 ...
+ *********   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 *********   0.00000   0.00000 ********* ...
+   0.00000 *********   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ********* ********* ********* ...
+ ********* *********   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ********* ********* ********* ...
+   0.00000 *********   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ********* ********* ********* ********* ...
    ...  only 12  components have been written...
  
  Total charge density [el/Bohr^3]
-      Maximum=           NaN  at reduced coord.    0.0000    0.0000    0.0000
-      Minimum=           NaN  at reduced coord.    0.0000    0.0000    0.0000
-   Integrated=           NaN
- ETOT  2                   NaN       NaN 0.000E+00       NaN
- scprqt: <Vxc>=            NaN hartree
+      Maximum=    1.4756+223  at reduced coord.    0.4889    0.3778    0.0000
+      Minimum=   -5.5997+222  at reduced coord.    0.0000    0.5111    0.5111
+   Integrated=    2.4866+226
+ ETOT  2 -7.32295790827697E+43-7.323E+43 7.236+222  Infinity
+ scprqt: <Vxc>= -8.1544064E+06 hartree
  Computing residual forces using atomic densities taken from pseudos
  
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1423,75 +1467,106 @@ message: |
   sigma(2 2)=             NaN  sigma(3 1)=             NaN
   sigma(3 3)=             NaN  sigma(2 1)=             NaN
  
+
+--- !ScfConvergenceWarning
+message: |
+    nstep 2 was not enough SCF cycles to converge.
+...
+ 
+ scprqt:  WARNING -
+  nstep=    2 was not enough SCF cycles to converge;
+  maximum energy difference=  7.323E+43 exceeds toldfe=  1.000E-05
+ 
  
  PAW TEST:
  ==== Compensation charge inside spheres ============
- The following values must be close to each other ...
- Compensation charge over spherical meshes =    -25.191974158425246
- Compensation charge over fine fft grid    =      0.000000000000000
  
  ==== Results concerning PAW augmentation regions ====
  
  Total pseudopotential strength Dij (hartree):
  Atom #  1
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
+ ********* ********* *********   0.00000 ********* *********  -0.00000 ********* *********  -0.00000 *********   0.00000 ...
+ ********* ********* *********   0.00000 ********* *********   0.00000 ********* *********   0.00000 *********  -0.00000 ...
+ ********* ********* *********   0.00000 ********* *********  -0.00000 ********* *********  -0.00000 *********   0.00000 ...
+   0.00000   0.00000   0.00000 *********  -0.00000  -0.00000 *********  -0.00000   0.00000 *********   0.00000 ********* ...
+ ********* ********* *********  -0.00000 ********* *********  -0.00000 ********* *********   0.00000 *********  -0.00000 ...
+ ********* ********* *********  -0.00000 ********* *********   0.00000 ********* *********  -0.00000 *********   0.00000 ...
+  -0.00000   0.00000  -0.00000 *********  -0.00000   0.00000 *********   0.00000  -0.00000 *********   0.00000 ********* ...
+ ********* ********* *********  -0.00000 ********* *********   0.00000 ********* *********  -0.00000 *********   0.00000 ...
+ ********* ********* *********   0.00000 ********* *********  -0.00000 ********* *********  -0.00000 *********  -0.00000 ...
+  -0.00000   0.00000  -0.00000 *********   0.00000  -0.00000 *********  -0.00000  -0.00000 *********  -0.00000 ********* ...
+ ********* ********* *********   0.00000 ********* *********   0.00000 ********* *********  -0.00000 *********  -0.00000 ...
+   0.00000  -0.00000   0.00000 *********  -0.00000   0.00000 *********   0.00000  -0.00000 *********  -0.00000 ********* ...
    ...  only 12  components have been written...
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  ( 80 components have a value greater than  100.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
  Atom # 31
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
-       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN ...
+ ********* ********* ********* *********   0.00000 ********* *********   0.00000  -0.00000 ********* *********  -0.00000 ...
+ ********* ********* ********* *********   0.00000 ********* *********   0.00000  -0.00000 ********* *********   0.00000 ...
+ ********* ********* ********* *********   0.00000 ********* *********   0.00000  -0.00000 ********* *********   0.00000 ...
+ ********* ********* ********* *********  -0.00000 ********* *********  -0.00000  -0.00000 ********* *********  -0.00000 ...
+   0.00000   0.00000   0.00000  -0.00000 *********   0.00000  -0.00000 ********* *********  -0.00000  -0.00000 ********* ...
+ ********* ********* ********* *********   0.00000 ********* *********   0.00000  -0.00000 ********* *********   0.00000 ...
+ ********* ********* ********* *********  -0.00000 ********* *********   0.00000   0.00000 ********* *********  -0.00000 ...
+   0.00000   0.00000   0.00000  -0.00000 *********   0.00000   0.00000 ********* *********  -0.00000  -0.00000 ********* ...
+  -0.00000  -0.00000  -0.00000  -0.00000 *********  -0.00000   0.00000 ********* *********  -0.00000  -0.00000 ********* ...
+ ********* ********* ********* *********  -0.00000 ********* *********  -0.00000  -0.00000 ********* *********   0.00000 ...
+ ********* ********* ********* *********  -0.00000 ********* *********  -0.00000  -0.00000 ********* *********   0.00000 ...
+  -0.00000   0.00000   0.00000  -0.00000 *********   0.00000  -0.00000 ********* *********   0.00000   0.00000 ********* ...
    ...  only 12  components have been written...
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  ( 80 components have a value greater than  100.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
  
  
  Augmentation waves occupancies Rhoij:
  Atom #  1
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* *********   0.00000 ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* *********   0.00000 ********* ********* ********* ********* ********* ...
+ *********   0.00000 ********* *********   0.00000 ********* *********   0.00000   0.00000 *********   0.00000 ********* ...
+ ********* ********* *********   0.00000 ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* *********   0.00000 ********* ********* ********* *********   0.00000   0.00000 ********* ********* ********* ...
+ ********* ********* *********   0.00000 ********* *********   0.00000 ********* ********* ********* ********* ********* ...
+ ********* ********* *********   0.00000 ********* *********   0.00000 ********* ********* ********* *********   0.00000 ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* *********   0.00000 ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* *********   0.00000 ********* ********* ********* ...
    ...  only 12  components have been written...
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (126 components have a value greater than   25.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
  Atom # 31
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* *********   0.00000 ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* *********   0.00000   0.00000 ********* ********* ********* ...
+ ********* ********* ********* ********* *********   0.00000   0.00000 ********* ********* ********* ********* ********* ...
+ ********* ********* ********* *********   0.00000 ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* *********   0.00000 ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* *********   0.00000 ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* *********   0.00000   0.00000 ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
+ ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ********* ...
    ...  only 12  components have been written...
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (134 components have a value greater than   25.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
  
  
 ================================================================================
@@ -1501,33 +1576,33 @@ message: |
  
  === Gap info ===
 Not enough states to calculate the band gap.
- Mean square residual over all n,k,spin=          NaN; max=  0.0000E+00
-   0.0000  0.0000  0.0000    1    -Infinity kpt; spin; max resid(k); each band:
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
-       NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN
- Fermi (or HOMO) energy (hartree) =   0.00287   Average Vxc (hartree)=       NaN
+ Mean square residual over all n,k,spin=   88.352+220; max=  72.355+221
+   0.0000  0.0000  0.0000    1  7.23554+222 kpt; spin; max resid(k); each band:
+  1.55+222 4.40+221 1.82+222 3.08+221 5.80+221 6.95+221 2.74+221 4.99+221
+  4.46+222 3.73+221 9.65+221 2.82+222 3.47+222 4.69+222 5.59+221 3.15+221
+  4.35+221 8.84+220 1.15+222 2.98+221 1.80+222 2.56+220 1.42+222 9.69+221
+  1.87+221 7.94+220 1.17+221 1.43+222 1.47+222 3.38+221 5.28+220 1.17+221
+  1.84+222 4.67+221 7.24+222 6.25+221 3.38+221 9.29+221 1.96+222 1.31+221
+  3.33+222 1.29+221 1.11+220 2.71+222 1.04+222 3.77+221 1.07+221 7.33+221
+  1.75+221 3.07+221 1.57+221 1.70+221 1.79+221 3.15+221 9.12+221 4.18+221
+  1.49+221 4.43+221 3.36+220 7.54+221 9.30+221 3.08+222 1.86+221 3.52+220
+  1.66+222 2.47+222 2.49+221 1.50+221 2.01+222 1.42+222 5.59+221 2.57+222
+  2.07+221 1.69+221 4.12+221 2.93+221 1.02+222 2.57+221 1.24+222 8.28+221
+  8.78+220 2.73+221 2.72+221 3.92+220 1.35+221 5.58+221 6.82+219 2.36+221
+  6.03+220 6.53+220 2.64+221 1.12+222 2.18+221 3.03+221 4.45+221 6.95+220
+  4.14+221 7.62+220 1.71+222 5.02+221 3.40+221 4.51+222 1.00+222 3.39+220
+  2.84+222 1.05+222 1.10+221 1.02+222 9.98+221 5.97+221 2.28+221 2.09+221
+  5.07+222 7.41+220 1.92+221 7.95+221 3.95+221 1.97+221 2.12+221 6.84+221
+  4.72+221 1.09+222 2.69+222 1.49+222 1.50+221 3.39+221 5.24+221 1.72+221
+  5.01+222 2.59+221 3.50+222 1.01+222 2.00+222 7.17+221 3.29+220 4.40+220
+  2.76+221 2.68+222 1.51+221 4.53+221 6.99+221 9.83+220 8.17+220 4.07+221
+  6.68+221 1.61+221 3.72+221 1.62+221 2.27+222 9.52+219 2.26+222 1.14+222
+  1.08+222 2.34+221 2.57+222 2.64+222 4.15+222 9.54+221 1.42+221 5.89+220
+  2.72+220 1.62+221 3.64+221 2.86+222 1.10+222 3.69+221 3.51+220 5.07+221
+  1.74+222 3.34+221 1.25+221 1.08+221 3.23+221 1.53+222 1.07+221 6.21+221
+  6.12+220 1.91+222 2.72+221 5.78+220 4.65+221 5.59+221 2.02+222 1.08+222
+  8.13+220 1.21+222 1.72+220 3.82+221 1.04+221 1.43+221 3.94+221 4.14+221
+ Fermi (or HOMO) energy (hartree) =   0.00287   Average Vxc (hartree)=**********
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=192, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
@@ -1580,11 +1655,11 @@ Not enough states to calculate the band gap.
    1.61458    1.61458    1.61458    1.61458    1.61458    1.61458    1.61458    1.61458
    1.61458    1.61458    1.61458    1.61458    1.61458    1.61458    1.61458    1.61458
  Total charge density [el/Bohr^3]
-      Maximum=           NaN  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=           NaN  at reduced coord.    0.0222    0.0000    0.0000
-      Minimum=           NaN  at reduced coord.    0.0000    0.0000    0.0000
- Next minimum=           NaN  at reduced coord.    0.0222    0.0000    0.0000
-   Integrated=           NaN
+      Maximum=    1.4756+223  at reduced coord.    0.4889    0.3778    0.0000
+ Next maximum=    1.4756+223  at reduced coord.    0.3778    0.4889    0.0000
+      Minimum=   -5.5997+222  at reduced coord.    0.0000    0.5111    0.5111
+ Next minimum=   -5.5997+222  at reduced coord.    0.5111    0.0000    0.5111
+   Integrated=    2.4866+226
  
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=             NaN  sigma(3 2)=             NaN
@@ -1607,38 +1682,38 @@ Not enough states to calculate the band gap.
       chksymbreak           0
      densfor_pred           6
              ecut      8.00000000E+00 Hartree
-           etotal                   NaN
-            fcart                   NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
-                                    NaN               NaN               NaN
+           etotal     -7.3229579083E+43
+            fcart      1.2462323143+244  1.2462323143+244  4.8907449984+226
+                       1.2462323143+244 -7.3361174976+226  1.2462323143+244
+                       6.6368371555+208  1.2462323143+244  1.2462323143+244
+                       6.6368371555+208 -7.3361174976+226  4.8907449984+226
+                      -5.9343445128+243 -5.9343445128+243  4.8907449984+226
+                       1.2462323143+244 -7.3361174976+226 -1.2462323143+244
+                       9.8077704631+209  1.2462323143+244 -1.2462323143+244
+                       6.6368371555+208 -7.3361174976+226  4.8907449984+226
+                       1.2462323143+244 -1.2462323143+244  4.8907449984+226
+                      -5.9343445128+243 -7.3361174976+226 -5.9343445128+243
+                       6.6368371555+208 -1.2462323143+244  1.2462323143+244
+                       6.6368371555+208 -7.3361174976+226  4.8907449984+226
+                      -5.9343445128+243  5.9343445128+243  4.8907449984+226
+                      -5.9343445128+243 -7.3361174976+226  5.9343445128+243
+                       6.6368371555+208 -1.2462323143+244 -1.2462323143+244
+                       6.6368371555+208 -7.3361174976+226  4.8907449984+226
+                      -1.2462323143+244  1.2462323143+244  4.8907449984+226
+                      -1.2462323143+244 -7.3361174976+226  1.2462323143+244
+                       6.6368371555+208 -5.9343445128+243 -5.9343445128+243
+                       6.6368371555+208 -7.3361174976+226  4.8907449984+226
+                       5.9343445128+243 -5.9343445128+243  4.8907449984+226
+                      -1.2462323143+244 -7.3361174976+226 -1.2462323143+244
+                      -4.7932712790+208 -5.9343445128+243  5.9343445128+243
+                       6.6368371555+208 -7.3361174976+226  4.8907449984+226
+                      -1.2462323143+244 -1.2462323143+244  4.8907449984+226
+                       5.9343445128+243 -7.3361174976+226 -5.9343445128+243
+                       6.6368371555+208  5.9343445128+243 -5.9343445128+243
+                       6.6368371555+208 -7.3361174976+226  4.8907449984+226
+                       5.9343445128+243  5.9343445128+243  4.8907449984+226
+                       5.9343445128+243 -7.3361174976+226  5.9343445128+243
+                      -1.9910511467+210  5.9343445128+243  5.9343445128+243
 -          fftalg         312
            istwfk        2
               ixc           7
@@ -1898,18 +1973,18 @@ P           mkmem           1
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
- Proc.   0 individual time (sec): cpu=         10.2  wall=          6.1
+ Proc.   0 individual time (sec): cpu=         11.4  wall=          7.9
  
  Calculation completed.
-.Delivered   0 WARNINGs and   0 COMMENTs to log file.
+.Delivered   5 WARNINGs and   0 COMMENTs to log file.
 
 --- !FinalSummary
 program: abinit
 version: 8.11.9
-start_datetime: Sat Jul 27 18:38:43 2019
-end_datetime: Sat Jul 27 18:38:49 2019
-overall_cpu_time:          20.3
-overall_wall_time:          12.2
+start_datetime: Sun Jul 28 14:17:52 2019
+end_datetime: Sun Jul 28 14:18:00 2019
+overall_cpu_time:          22.1
+overall_wall_time:          15.8
 exit_requested_by_user: no 
 timelimit: 0
 pseudos: 
@@ -1917,6 +1992,6 @@ pseudos:
 usepaw: 1
 mpi_procs: 2
 omp_threads: 2
-num_warnings: 0
+num_warnings: 5
 num_comments: 0
 ...
