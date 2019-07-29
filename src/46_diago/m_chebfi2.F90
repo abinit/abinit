@@ -525,15 +525,15 @@ module m_chebfi2
       !print *, "neigenpairs", neigenpairs
       
       !call xg_init(xCOPY, chebfi%space, spacedim, neigenpairs)
-      call xgBlock_reverseMap(chebfi%X,cg0,spacedim,neigenpairs)
-      call xgBlock_reverseMap(chebfi%AX%self,gh,spacedim,neigenpairs)
-      call xgBlock_reverseMap(chebfi%BX%self,ghc,spacedim,neigenpairs)  
+      !call xgBlock_reverseMap(chebfi%X,cg0,spacedim,neigenpairs)
+      !call xgBlock_reverseMap(chebfi%AX%self,gh,spacedim,neigenpairs)
+      !call xgBlock_reverseMap(chebfi%BX%self,ghc,spacedim,neigenpairs)  
       !call xgBlock_reverseMap(chebfi%X_next,cg0_next,spacedim,chebfi%bandpp)
       !call xgBlock_reverseMap(chebfi%X_prev,cg0_prev,spacedim,chebfi%bandpp)  
       
       !call random_number(cg0)
-      call random_number(gh)
-      call random_number(ghc)
+      !call random_number(gh)
+      !call random_number(ghc)
       !call random_number(cg0_next)
       !call random_number(cg0_prev)
       
@@ -581,20 +581,21 @@ module m_chebfi2
       !print *, "SSSSSSSSSSSSSS"
       
       !if (counter < 3) then
-        call xgBlock_copy(chebfi%X, chebfi%AX%self, 1, 1)  
-        call xgBlock_copy(chebfi%X, chebfi%BX%self, 1, 1)  
-        call debug_helper_linalg(chebfi%AX%self, chebfi, "AX LINALG")
+        !call xgBlock_copy(chebfi%X, chebfi%AX%self, 1, 1)  
+        !call xgBlock_copy(chebfi%X, chebfi%BX%self, 1, 1)  
+        !call debug_helper_linalg(chebfi%AX%self, chebfi, "AX LINALG")
       !end if
       
       call xgTransposer_transpose(chebfi%xgTransposerX,STATE_COLSROWS) !all_to_all
       call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS) !all_to_all
       call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_COLSROWS) 
       
-      call xgBlock_copy(chebfi%xXColsRows, chebfi%X_next, 1, 1)    !!TODO ERASE THIS JUST FOR TEST   
-      call debug_helper_colrows(chebfi%X_next, chebfi, "X_next COLROWS") 
-      call xgBlock_copy(chebfi%xXColsRows, chebfi%X_prev, 1, 1)    
-      call debug_helper_colrows(chebfi%X_prev, chebfi, "X_prev COLROWS") 
+      !call xgBlock_copy(chebfi%xXColsRows, chebfi%X_next, 1, 1)    !!TODO ERASE THIS JUST FOR TEST   
+      !call debug_helper_colrows(chebfi%X_next, chebfi, "X_next COLROWS") 
+      !call xgBlock_copy(chebfi%xXColsRows, chebfi%X_prev, 1, 1)    
+      !call debug_helper_colrows(chebfi%X_prev, chebfi, "X_prev COLROWS") 
       !stop
+      
 !      if (counter < 3) then
 !        call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "xAXColsRows COLROWS") 
 !        call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_LINALG) !all_to_all
@@ -672,14 +673,14 @@ module m_chebfi2
     if (counter == 3) then
       call debug_helper_colrows(chebfi%xXColsRows, chebfi, "LINE606 counter 3") 
     end if
-   
+    !stop
     !call debug_helper_colrows(chebfi%xAXColsRows, chebfi) 
     !call debug_helper_colrows(chebfi%xBXColsRows, chebfi) 
     
     call timab(tim_getAX_BX,1,tsec)         
     !call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self) 
     !!TODO TODO TODO UNCOMMENT THIS 
-    !call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)  !OVO SAD MORA SVUDA DA SE MENJA
+    call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)  !OVO SAD MORA SVUDA DA SE MENJA
     call timab(tim_getAX_BX,2,tsec)
     
     
@@ -758,8 +759,8 @@ module m_chebfi2
     radius = (lambda_plus - lambda_minus)*0.5
     
     !!TODO TEST OVERRIDE (ERASE AND CHECK VALUES BEFORE)
-    center = 1
-    radius = 1
+    !center = 1
+    !radius = 1
     
     !print *, "center", center
     !print *, "radius", radius
@@ -807,6 +808,8 @@ module m_chebfi2
 !      call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "xAXColsRows before LOOP 2:" // str) !MPI 1,2 OK
       !if (counter == 2) stop
     end if 
+    
+    !stop
     
     do iline = 0, nline - 1 
     
@@ -979,7 +982,7 @@ module m_chebfi2
       !stop
       !print *, "getAX_BX before"
       !!TODO TODO TODO UNCOMMENT THIS 
-      !call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)  !OVO SAD MORA SVUDA DA SE MENJA
+      call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)  !OVO SAD MORA SVUDA DA SE MENJA
       !print *, "getAX_BX after"
       !stop
       if (iline == 2) then
@@ -1226,7 +1229,7 @@ module m_chebfi2
 !    stop
     
     
-    print *, "PROSAO TRANSPOSE"
+    !print *, "PROSAO TRANSPOSE"
     !stop
     
     !!TODO TRANSPOSE IS NOT WORKING CORRECTLY FOR ISTWFK2 (or some other thing)
@@ -1455,7 +1458,7 @@ module m_chebfi2
       iline_t = iline
       !!TODO UCI U WRAPPER SA ILINE=2 i transposerom i probati transponovati unutra
       !!TODO TODO TODO UNCOMMENT THIS 
-      !call getBm1X(chebfi%xAXColsRows, chebfi%X_next, iline_t, chebfi%xXColsRows, chebfi%X, chebfi%xgTransposerX) !ovde pobrljavi X skroz za iline 2 MPI istwfk 2
+      call getBm1X(chebfi%xAXColsRows, chebfi%X_next, iline_t, chebfi%xXColsRows, chebfi%X, chebfi%xgTransposerX) !ovde pobrljavi X skroz za iline 2 MPI istwfk 2
       
       if (counter < 3) then
 !        call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "xAXColsRows after getBm1X 1" // str) !MPI 1,2 OK
