@@ -256,7 +256,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
    idir1=rf2%idirs(kdir1)
    ipert1=rf2%iperts(kdir1)
    do iband=1,nband_k
-     call wfk_read_bks(ddk_f(file_index(kdir1)),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
+     call ddk_f(file_index(kdir1))%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
 !    Copy ddk_read in "dudk"
      shift_band1=(iband-1)*size_wf
      shift_dir1=(kdir1-1)*nband_k*size_wf
@@ -293,7 +293,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
      ABI_ALLOCATE(dudk_dir2,(2,nband_k*size_wf))
    end if
    do iband=1,nband_k
-     call wfk_read_bks(ddk_f(1),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
+     call ddk_f(1)%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
      shift_band1=(iband-1)*size_wf
      dudkdk(:,1+shift_band1:size_wf+shift_band1)=ddk_read(:,:)
 !    Check that < u^(0) | u^(2) > = - Re[< u^(1) | u^(1) >]
@@ -322,7 +322,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
      end if ! debug_mode
 !    Read ddk for idir2
      if (idir>3) then
-       call wfk_read_bks(ddk_f(4),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
+       call ddk_f(4)%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
        dudk_dir2(:,1+shift_band1:size_wf+shift_band1)=ddk_read(:,:)
      end if
    end do !iband
