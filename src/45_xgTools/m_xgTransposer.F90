@@ -386,7 +386,8 @@ module m_xgTransposer
     
     print *, "xgTransposer%mpiData(MPI_ROWS)%rank", xgTransposer%mpiData(MPI_ROWS)%rank
     print *, "xgTransposer%mpiData(MPI_ROWS)%size", xgTransposer%mpiData(MPI_ROWS)%size 
-    !stop
+    print *, "xgTransposer%mpiData(MPI_ROWS)%comm", xgTransposer%mpiData(MPI_ROWS)%comm
+    print *, "xgTransposer%mpiData(MPI_COLS)%comm", xgTransposer%mpiData(MPI_COLS)%comm
 
     xgTransposer%mpiData(MPI_COLS)%rank = xmpi_comm_rank(xgTransposer%mpiData(MPI_COLS)%comm)
     xgTransposer%mpiData(MPI_COLS)%size = xmpi_comm_size(xgTransposer%mpiData(MPI_COLS)%comm)

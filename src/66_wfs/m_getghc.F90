@@ -498,7 +498,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      ABI_DEALLOCATE(cwavef2)
    end if
    ABI_DEALLOCATE(work)
-
+   print *, "mpi_enreg%comm_fft getghc", mpi_enreg%comm_fft
 !  Retrieve eventually original FFT distrib
    if(have_to_reequilibrate) then
      if(ndat > 1 ) then
@@ -1347,6 +1347,7 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
    index_gsc=index_gsc+npw_k*my_nspinor
  end do
 
+ print *, "mpi_enreg%comm_band getgsc", mpi_enreg%comm_band
 !Reduction in case of parallelization
  if ((xmpi_paral==1)) then
    call timab(48,1,tsec)

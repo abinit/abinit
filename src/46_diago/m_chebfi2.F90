@@ -211,7 +211,7 @@ module m_chebfi2
       !print *, "chebfi%nproc_band", chebfi%nproc_band
       !call xmpi_barrier(chebfi%spacecom)
       !stop
-    
+    print *, "chebfi%spacecom", chebfi%spacecom
     if (chebfi%paral_kgb == 0) then
       chebfi%total_spacedim = spacedim
       call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs, chebfi%spacecom) !regular arrays
