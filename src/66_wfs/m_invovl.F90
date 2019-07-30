@@ -354,6 +354,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
        ABI_ALLOCATE(gram_proj, (cplx, nlmn, nlmn))
        call abi_xgemm(blas_transpose,'N', nlmn, nlmn, (3-cplx)*ham%npw_k, cone, atom_projs(:,:,1), (3-cplx)*ham%npw_k, &
 &                     atom_projs(:,:,1), (3-cplx)*ham%npw_k, czero, gram_proj(:,:,1), nlmn,x_cplx=cplx)
+       print *, "mpi_enreg%comm_bandspinorfft make invovl", mpi_enreg%comm_bandspinorfft
        call xmpi_sum(gram_proj,mpi_enreg%comm_bandspinorfft,ierr)
        invovl%inv_s_approx(:,1:nlmn,1:nlmn,itypat) = invovl%inv_s_approx(:,1:nlmn,1:nlmn,itypat) + gram_proj(:,:,:)
        ABI_DEALLOCATE(gram_proj)
@@ -405,12 +406,14 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 &                      projs(:, :, shift+1), (3-cplx)*ham%npw_k, czero, gramwork(:,:,1), invovl%nprojs,x_cplx=cplx)
    shift = shift + slice_size
    ! reduce on proc i
+   print *, "mpi_enreg%comm_fft make invovl", mpi_enreg%comm_fft
    call xmpi_sum_master(gramwork, iproc-1, mpi_enreg%comm_fft, ierr)
    if(iproc == mpi_enreg%me_fft+1) then
      invovl%gram_projs = gramwork
    end if
    ABI_DEALLOCATE(gramwork)
  end do
+ print *, "mpi_enreg%comm_band make invovl", mpi_enreg%comm_band
  call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr)
 
  call timab(timer_mkinvovl_build_ptp, 2, tsec)

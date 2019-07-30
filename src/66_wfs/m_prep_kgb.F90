@@ -690,6 +690,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  bandpp     = mpi_enreg%bandpp
  spaceComm=mpi_enreg%comm_fft
  if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_band
+ print *, "prepnonlop spaceComm", spaceComm
  my_nspinor=max(1,hamk%nspinor/mpi_enreg%nproc_spinor)
  nspinortot=hamk%nspinor
 
