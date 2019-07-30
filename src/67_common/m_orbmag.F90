@@ -4193,7 +4193,6 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,gmet,&
  real(dp),allocatable :: ket(:,:),kpg_k_dummy(:,:)
  real(dp),allocatable :: buffer(:,:),buffer1(:),buffer2(:),cgqb(:,:),cgrvtrial(:,:),ghc_vectornd(:,:)
  real(dp),allocatable :: tkbra(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vtrial(:,:)
- logical,allocatable :: has_pwind_bg(:,:)
  type(pawcprj_type),allocatable :: cprj_buf(:,:),cprj_kb(:,:),cprj_kg(:,:),cwaveprj(:,:)
 
 
@@ -4232,9 +4231,6 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,gmet,&
  end if
 
  ABI_ALLOCATE(pwind_bg,(dtset%mpw))
- ! ABI_ALLOCATE(pwind_bg_all,(dtorbmag%fnkpt,dtorbmag%fnkpt,dtset%mpw))
- ! ABI_ALLOCATE(has_pwind_bg,(dtorbmag%fnkpt,dtorbmag%fnkpt))
- ! has_pwind_bg(:,:) = .FALSE.
 
  ! input parameters for calls to getghc
  cpopt = -1 ! will not use cprj anyway
@@ -4556,8 +4552,6 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,gmet,&
  call destroy_hamiltonian(gs_hamk)
 
  ABI_DEALLOCATE(pwind_bg)
- ! ABI_DEALLOCATE(pwind_bg_all)
- ! ABI_DEALLOCATE(has_pwind_bg)
 
 end subroutine make_eeig123
 !!***
