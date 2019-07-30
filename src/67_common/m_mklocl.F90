@@ -1507,7 +1507,6 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
    vpsp1dq(1:cplex*nfft)=vpsp1dq(1:cplex*nfft)*xnorm
 
    ABI_DEALLOCATE(work1)
-!   ABI_DEALLOCATE(vlspleff)
 
 !  End the condition of non-electric-field
  end if
@@ -1868,7 +1867,6 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
    vpsp1dqdq(1:cplex*nfft)=vpsp1dqdq(1:cplex*nfft)*xnorm
 
    ABI_DEALLOCATE(work1)
-!   ABI_DEALLOCATE(vlspleff)
 
 !  End the condition of non-electric-field
  end if
@@ -2252,8 +2250,6 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
 
    xnorm=1.0_dp/ucvol/two_pi
    vpsp1dqdq(1:cplex*nfft)=vpsp1dqdq(1:cplex*nfft)*xnorm
-
-!   ABI_DEALLOCATE(vlspleff)
 
    work1=0.0_dp
 
