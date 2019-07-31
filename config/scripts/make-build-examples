@@ -48,6 +48,7 @@ my_name     = "make-build-examples"
 my_configs  = ["config/specs/testfarm.conf"]
 my_template = "doc/build/config-template.ac"
 my_outdir   = "doc/build/config-examples"
+my_fbck     = "config/specs/fbversion.conf"
 
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
@@ -70,6 +71,19 @@ else:
   print("%s: Could not find template file (%s)." % (my_name,my_template))
   print("%s: Aborting now." % my_name)
   sys.exit(3)
+
+# Check if we have a fallback config file
+if ( os.path.exists(my_fbck) ):
+  fcnf = MyConfigParser()
+  fcnf.read(my_fbck)
+  if len(fcnf.sections()) != 0:
+     fbversion = '_'+fcnf.sections()[0]
+  else:
+     fbversion = ''
+else:
+  print("%s: Could not find fbversion file (%s)." % (my_name,my_fbck))
+  print("%s: Aborting now." % my_name)
+  sys.exit(4)
 
 # What time is it?
 now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
@@ -103,6 +117,9 @@ for my_config in my_configs:
     my_subdir = ""
     if ( cnf_vars["status"] == "uncertified" ):
       my_subdir = "uncertified/"
+
+    # Inject fbversion in out_data
+    out_data_tmp=out_data.replace("_FB_",fbversion)
 
     # Write data
     open("%s/%s%s.ac" % (my_outdir,my_subdir,sec), "wt").write(out_data)

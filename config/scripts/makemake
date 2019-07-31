@@ -186,7 +186,7 @@ else:
 # Parse command-line arguments
 from optparse import OptionParser
 my_help = "Usage: %prog [options] vdW-DF_file"
-parser = OptionParser(usage=my_help, version="%prog for Abinit 6")
+parser = OptionParser(usage=my_help, version="%prog for Abinit 9")
 parser.add_option("-a", "--without-autotools", action="store_false",
   dest="run_autotools", default=True,
   help="Skip Autotools-related operations")
@@ -207,7 +207,7 @@ parser.add_option("-n", "--no-split", action="store_false",
   help="Behave as if the source tree were not split")
 parser.add_option("-s", "--without-source", action="store_false",
   dest="run_source", default=True,
-  help="Skip source tree update (will skip abilint as well)")
+  help="Skip source tree update (will skip abisrc as well)")
 parser.add_option("-t", "--toggle", action="store", metavar="LIST",
   dest="toggle",
   help="Comma-separated list of subsystems to toggle")
@@ -254,8 +254,8 @@ if ( opts.run_clean ):
     "rm -f config/dist/*.lst")
   run_script(my_name, "Removing M4 macros",
     "rm -f config/m4/auto-*.m4")
-  run_script(my_name, "Removing abilint outputs ",
-    "rm -f .abilint abilint.log abilint.out")
+  #run_script(my_name, "Removing abilint outputs ",
+  #  "rm -f .abilint abilint.log abilint.out")
   run_script(my_name, "Removing configuration dumper input",
     "rm -f config.dump.in")
   run_script(my_name, "Removing source split scripts",
@@ -357,6 +357,8 @@ if ( opts.run_clean ):
     "find . -depth -name '__pycache__' -exec rm -r {} \;")
   run_script(my_name, "Removing abisrc.py Pickle files",
     "find . -depth -name '_project_py[23].pickle' -exec rm {} \;")
+  run_script(my_name, "Removing abisrc output files",
+    "rm -f abisrc.stderr abisrc.stdout")
 
   now = strftime("%Y/%m/%d %H:%M:%S +0000", gmtime())
   print_message(my_name, "--------------------------------------")
@@ -497,7 +499,7 @@ if ( opts.run_source ):
 
   # Call abisrc to build dependency graph and create files for buildsystem
   #abisrc_cmdline = "./abisrc.py validate"
-  abisrc_cmdline = "./abisrc.py makemake"
+  abisrc_cmdline = "./abisrc.py makemake > abisrc.stdout 2> abisrc.stderr"
   print_message(my_name, "---> running %s" % (abisrc_cmdline))
   abisrc_exitcode = os.system(abisrc_cmdline)
 
