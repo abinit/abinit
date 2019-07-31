@@ -988,80 +988,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    sigma%use_ftinterp = .False.
  end if
 
- ! FIXME: Temporary hack to interpolate dvdb only in qpoints that will be used
- if (dtset%useria == 1999) then
-   ! Calculate desired qpt mesh
-   sigma%use_ftinterp = .False.
-   qptrlatt = 0
-   qptrlatt(1,1) = dtset%eph_ngqpt_fine(1); qptrlatt(2,2) = dtset%eph_ngqpt_fine(2); qptrlatt(3,3) = dtset%eph_ngqpt_fine(3)
-   call kpts_ibz_from_kptrlatt(cryst, qptrlatt, dtset%qptopt, 1, [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
-   ! Call qpoints_oracle with this desired qpoint mesh
-   ABI_CALLOC(qselect, (nqibz))
-   call qpoints_oracle(sigma, cryst, ebands, qibz, nqibz, nqbz, qbz, qselect, comm)
-   ! Select only needed qpoints
-   cnt = count(qselect /= 0)
-   ABI_MALLOC(custom_qpt,(3,cnt))
-   cnt = 1
-   do iq_ibz=1,nqibz
-     if (qselect(iq_ibz) == 0) cycle
-     custom_qpt(:,cnt) = qibz(:,iq_ibz)
-     cnt = cnt + 1
-   end do
-   call dvdb%close()
-   ABI_SFREE(qibz)
-   ABI_SFREE(wtq)
-   ABI_SFREE(qbz)
-   ! Interpolate and write on those qpoints
-   if (.not.file_exists(dtfil%fnameabo_dvdb)) then
-     call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfft, ngfftf, cryst, &
-                                     ifc%ngqpt, ifc%nqshft, ifc%qshft, comm, custom_qpt)
-   end if
-   ! Save dielt and zeff to propagate to new dvdb instance
-   dielt = dvdb%dielt
-   zeff = dvdb%zeff
-   has_dielt = dvdb%has_dielt
-   has_zeff = dvdb%has_zeff
-   has_quadrupoles = dvdb%has_quadrupoles
-   add_lr = dvdb%add_lr
-   call dvdb%free()
-   dvdb = dvdb_new(dtfil%fnameabo_dvdb, comm)
-   ! Add dielt and zeff again
-   dvdb%dielt = dielt
-   dvdb%zeff = zeff
-   dvdb%has_dielt = has_dielt
-   dvdb%has_zeff = has_zeff
-   dvdb%has_quadrupoles = has_quadrupoles
-   !dvdb%qstar = qstar
-   !dvdb%alpha_gmin = alpha_gmin
-   dvdb%add_lr = add_lr
-   ! Naive q-point check
-   do iq_ibz=1,cnt-1
-     found = .false.
-     do ik_ibz=1,dvdb%nqpt
-       if (sum(abs(custom_qpt(:,iq_ibz) - dvdb%qpts(:,ik_ibz))) < tol6) then
-         found = .true.; exit
-       end if
-     end do
-     ABI_CHECK(found, 'Wrong q-points found in DVDB file.')
-   end do
-   ABI_SFREE(custom_qpt)
-   call dvdb%open_read(ngfftf, xmpi_comm_self)
-   if (dtset%prtvol > 10) dvdb%debug = .True.
-   ! This to symmetrize the DFPT potentials.
-   dvdb%symv1 = dtset%symv1scf
-   if (sigma%nprocs_pert > 1) then
-     call dvdb%set_pert_distrib(sigma%my_npert, natom3, sigma%my_pinfo, sigma%pert_table, sigma%comm_pert)
-   end if
-
-   ! Recreate mapping dvdb%qpts -> sigma%qibz
-   ABI_MALLOC(iqk2dvdb,(nqibz,6))
-   call listkk(dksqmax, cryst%gmet, iqk2dvdb, dvdb%qpts, sigma%qibz, dvdb%nqpt, sigma%nqibz, cryst%nsym, &
-        1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
-   sigma%ibz2dvdb(:) = iqk2dvdb(:,1)
-   ABI_FREE(iqk2dvdb)
-
- else if (dtset%useria == 2000 .or. sigma%use_ftinterp) then
-     sigma%use_ftinterp = .True.
+ if (sigma%use_ftinterp) then
      ! Use ddb_ngqpt q-mesh to compute real-space represention of DFPT v1scf potentials to prepare Fourier interpolation.
      ! R-points are distributed inside comm_rpt
      ! Note that when R-points are distributed inside comm_qpt we cannot interpolate potentials on-the-fly
@@ -1106,10 +1033,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    do iq_ibz=1,sigma%nqibz
      if (sigma%itreat_qibz(iq_ibz) == 0) cycle
      db_iqpt = sigma%ibz2dvdb(iq_ibz)
-     if (dtset%useria==1999) then
-       if (db_iqpt /= -1) itreatq_dvdb(db_iqpt) = 1
-       cycle
-     end if
      ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(sigma%qibz(:, iq_ibz)), "in DVDB file."))
      itreatq_dvdb(db_iqpt) = 1
    end do
@@ -3980,34 +3903,12 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
    ! Note:
    !   q --> -q symmetry is always used for phonons.
    !   we use symrec instead of symrel (see also m_dvdb)
-#if 0
-   ABI_MALLOC(iqk2dvdb, (self%nqibz_k, 6))
-   iqk2dvdb = -1
-   call listkk(dksqmax, cryst%gmet, iqk2dvdb, dvdb%qpts, self%qibz_k, dvdb%nqpt, self%nqibz_k, cryst%nsym, &
-        1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
-   if (all(dtset%useria /= [1999, 2000])) then
-     if (dksqmax > tol12) then
-       write(msg, '(a,es16.6,2a)' )&
-         "At least one of the q points could not be generated from a symmetrical one in the DVDB. dksqmax: ",dksqmax, ch10,&
-         "Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh."
-       MSG_ERROR(msg)
-     end if
-   end if
-   call cwtime_report(" IBZ_k --> DVDB", cpu, wall, gflops)
-
-   ABI_REMALLOC(self%indq2dvdb_k, (6, self%nqibz_k))
-   do iq_ibz=1,self%nqibz_k
-     self%indq2dvdb_k(:, iq_ibz) = iqk2dvdb(iq_ibz, :)
-   end do
-   ABI_FREE(iqk2dvdb)
-#else
    ! IBZ_K -> BZ -> IBZ -> DVDB
    ABI_REMALLOC(self%indq2dvdb_k, (6, self%nqibz_k))
    self%indq2dvdb_k = self%ind_ibzk2ibz
    do ikpt=1,self%nqibz_k
      self%indq2dvdb_k(1,ikpt) = self%ibz2dvdb(self%ind_ibzk2ibz(1,ikpt))
    end do
-#endif
    call cwtime_report(" IBZ_k --> DVDB", cpu, wall, gflops)
  end if
 
