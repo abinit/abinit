@@ -1165,45 +1165,45 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
 
 ! *************************************************************************
 
-!Compute unit cell volume
+ ! Compute unit cell volume
  ucvol=rprimd(1,1)*(rprimd(2,2)*rprimd(3,3)-rprimd(3,2)*rprimd(2,3))+&
-& rprimd(2,1)*(rprimd(3,2)*rprimd(1,3)-rprimd(1,2)*rprimd(3,3))+&
-& rprimd(3,1)*(rprimd(1,2)*rprimd(2,3)-rprimd(2,2)*rprimd(1,3))
+       rprimd(2,1)*(rprimd(3,2)*rprimd(1,3)-rprimd(1,2)*rprimd(3,3))+&
+       rprimd(3,1)*(rprimd(1,2)*rprimd(2,3)-rprimd(2,2)*rprimd(1,3))
 
-!Check that the input primitive translations are not linearly dependent (and none is zero); i.e. ucvol~=0
-!Also ask that the mixed product is positive.
+ ! Check that the input primitive translations are not linearly dependent (and none is zero); i.e. ucvol~=0
+ ! Also ask that the mixed product is positive.
  if (abs(ucvol)<tol12) then
-!  write(std_out,*)"rprimd",rprimd,"ucvol",ucvol
+   !write(std_out,*)"rprimd",rprimd,"ucvol",ucvol
    write(message,'(5a)')&
-&   'Input rprim and acell gives vanishing unit cell volume.',ch10,&
-&   'This indicates linear dependency between primitive lattice vectors',ch10,&
-&   'Action: correct either rprim or acell in input file.'
+     'Input rprim and acell gives vanishing unit cell volume.',ch10,&
+     'This indicates linear dependency between primitive lattice vectors',ch10,&
+     'Action: correct either rprim or acell in input file.'
    MSG_ERROR(message)
  end if
  if (ucvol<zero)then
    write(message,'(2a,3(a,3es16.6,a),7a)')&
-&   'Current rprimd gives negative (R1xR2).R3 . ',ch10,&
-&   'Rprimd =',rprimd(:,1),ch10,&
-&   '        ',rprimd(:,2),ch10,&
-&   '        ',rprimd(:,3),ch10,&
-&   'Action: if the cell size and shape are fixed (optcell==0),',ch10,&
-&   '        exchange two of the input rprim vectors;',ch10,&
-&   '        if you are optimizing the cell size and shape (optcell/=0),',ch10,&
-&   '        maybe the move was too large, and you might try to decrease strprecon.'
+     'Current rprimd gives negative (R1xR2).R3 . ',ch10,&
+     'Rprimd =',rprimd(:,1),ch10,&
+     '        ',rprimd(:,2),ch10,&
+     '        ',rprimd(:,3),ch10,&
+     'Action: if the cell size and shape are fixed (optcell==0),',ch10,&
+     '        exchange two of the input rprim vectors;',ch10,&
+     '        if you are optimizing the cell size and shape (optcell/=0),',ch10,&
+     '        maybe the move was too large, and you might try to decrease strprecon.'
    MSG_ERROR(message)
  end if
 
-!Generates gprimd
+ ! Generate gprimd
  call matr3inv(rprimd,gprimd)
 
-!Write out rprimd, gprimd and ucvol
+ ! Write out rprimd, gprimd and ucvol
  if (iout>=0) then
    write(message,'(2a)')' Real(R)+Recip(G) ','space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):'
    call wrtout(iout,message,'COLL')
    do nu=1,3
      write(message, '(1x,a,i1,a,3f11.7,2x,a,i1,a,3f11.7)' ) &
-&     'R(',nu,')=',rprimd(:,nu)+tol10,&
-&     'G(',nu,')=',gprimd(:,nu)+tol10
+      'R(',nu,')=',rprimd(:,nu)+tol10,&
+      'G(',nu,')=',gprimd(:,nu)+tol10
      call wrtout(iout,message,'COLL')
    end do
    write(message,'(a,1p,e15.7,a)') ' Unit cell volume ucvol=',ucvol+tol10,' bohr^3'
@@ -1211,13 +1211,13 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
    call wrtout(std_out,message,'COLL')
  end if
 
-!Compute real space metric.
+ ! Compute real space metric.
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
 
-!Compute reciprocal space metric.
+ ! Compute reciprocal space metric.
  gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
 
-!Write out the angles
+ ! Write out the angles
  if (iout>=0) then
    angle(1)=acos(rmet(2,3)/sqrt(rmet(2,2)*rmet(3,3)))/two_pi*360.0d0
    angle(2)=acos(rmet(1,3)/sqrt(rmet(1,1)*rmet(3,3)))/two_pi*360.0d0
