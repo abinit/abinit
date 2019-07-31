@@ -178,7 +178,6 @@ module m_orbmag
   private :: cpg_dij_cpb
   private :: ctocprjb
   private :: kgk_ke
-  private :: make_pwind_all_bg
   private :: make_CCI
   private :: make_CCIV_dsdk
   private :: make_CCIV_dpdk
@@ -1102,8 +1101,8 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
   complex(dpc) :: IA,IB,t1A,t2A,t3A,t1B,t2B,t3B,t4B
   character(len=500) :: message
   !arrays
-  integer,allocatable :: pwind_bg_all(:,:,:)
   real(dp) :: cnum(2,3),dkb(3),dkg(3),gmet(3,3),gprimd(3,3),rmet(3,3)
+  ! real(dp),allocatable :: smat_all_indx(:,:,:,:,:,:)
   real(dp),pointer :: smat_all_indx(:,:,:,:,:,:)
 
   ! ***********************************************************************
@@ -1136,15 +1135,9 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
   if (present(smat_all)) then
      smat_all_indx=>smat_all
   else
-     ABI_ALLOCATE(pwind_bg_all,(dtorbmag%fnkpt,dtorbmag%fnkpt,dtset%mpw))
-     call make_pwind_all_bg(dtorbmag,dtset,gmet,mpi_enreg,npwarr,pwind_bg_all,symrec)
-
      ABI_ALLOCATE(smat_all_indx,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4))
-     call make_smat(atindx1,cg,cprj,dtorbmag,dtset,gprimd,mcg,mcprj,mpi_enreg,&
-          & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_bg_all,pwind_alloc,smat_all_indx,xred)
-
-     ABI_DEALLOCATE(pwind_bg_all)
-     
+     call make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
+          & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,smat_all_indx,symrec,xred)
   end if
 
   cnum(:,:) = zero
@@ -1286,8 +1279,8 @@ end subroutine chern_number
 !!
 !! SOURCE
 
-subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gprimd,mcg,mcprj,mpi_enreg,&
-     & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_bg_all,pwind_alloc,smat_all,xred)
+subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
+     & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,smat_all,symrec,xred)
 
   !Arguments ------------------------------------
   !scalars
@@ -1301,9 +1294,8 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gprimd,mcg,mcprj,mpi_enreg,&
 
   !arrays
   integer,intent(in) :: atindx1(dtset%natom)
-  integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3)
-  integer,intent(in) :: pwind_bg_all(dtorbmag%fnkpt,dtorbmag%fnkpt,dtset%mpw)
-  real(dp), intent(in) :: cg(2,mcg),gprimd(3,3),xred(3,dtset%natom)
+  integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
+  real(dp), intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),xred(3,dtset%natom)
   real(dp),intent(out) :: smat_all(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
@@ -1626,7 +1618,9 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gprimd,mcg,mcprj,mpi_enreg,&
                             &             dtorbmag%lmn_size,dtset%mband,&
                             &             dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
                        
-                       pwind_bg(:) = pwind_bg_all(ikptb,ikptg,:)
+                       call mkpwind_k(dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,&
+                            &             dtorbmag%indkk_f2ibz,ikptb,ikptg,&
+                            &             mpi_enreg,npwarr,pwind_bg,symrec)
                        
                        sflag_k=0
                        call smatrix(cgqb,cgqg,cg1_k,ddkflag,dtm_k,0,0,itrs,job,nband_k,&
@@ -3966,142 +3960,6 @@ end subroutine applyap
 !!***
 
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/make_pwind_all_bg
-!! NAME
-!! make_pwind_all_bg
-!!
-!! FUNCTION
-!! Compute index for <u_kg|...|u_kb> overlaps
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!! pwind_all_bg
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!! Direct questions and comments to J Zwanziger
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine make_pwind_all_bg(dtorbmag,dtset,gmet,mpi_enreg,npwarr,pwind_bg_all,symrec)
-
- !Arguments ------------------------------------
- !scalars
- type(dataset_type),intent(in) :: dtset
- type(MPI_type), intent(inout) :: mpi_enreg
- type(orbmag_type), intent(inout) :: dtorbmag
-
- !arrays
- integer,intent(in) :: npwarr(dtset%nkpt),symrec(3,3,dtset%nsym)
- integer,intent(out) :: pwind_bg_all(dtorbmag%fnkpt,dtorbmag%fnkpt,dtset%mpw)
- real(dp),intent(in) :: gmet(3,3)
-
- !Local variables -------------------------
- !scalars
- integer :: bdir,bfor,bsigma,countb,gdir,gfor,gsigma,ierr,ikpt,ikptb,ikptg_loc,ikptg
- integer :: me,my_nspinor,nproc,spaceComm
-
- !arrays
- integer,allocatable :: buffer1(:),buffer2(:),pwind_bg(:)
- real(dp) :: dkb(3),dkg(3),dkbg(3)
- !-----------------------------------------------------------------------
-
- pwind_bg_all(:,:,:) = 0
- ABI_ALLOCATE(pwind_bg,(dtset%mpw))
-
- !Init MPI
- spaceComm=mpi_enreg%comm_cell
- nproc=xmpi_comm_size(spaceComm)
- my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
- me = mpi_enreg%me_kpt
-
- ! TODO: generalize to nsppol > 1
-
- !    Loop on the values of ikptg_loc and ikptg :
- !    ikptg is incremented one by one, and enumerates the k points in the FBZ
- !    ikptgi refer to the k point numbering in the IBZ
- !    ikptg_loc differs from ikptg only in the parallel case, and gives
- !    the index of the k point in the FBZ, in the set treated by the present processor
- !    NOTE : in order to allow synchronisation, ikpt_loc contain information about
- !    ikpt AND ISPPOL !
- !    It means that the following loop is equivalent to a double loop :
- !    do isppol = 1, nsppol
- !    do ikpt1 =  1, dtefield%fmkmem
- !
- ! do ikpt_loc = 1, dtorbmag%fmkmem_max*nsppol
- do ikptg_loc = 1, dtorbmag%fmkmem_max
-    ikptg=mpi_enreg%kpt_loc2fbz_sp(me, ikptg_loc,1)
-    
-    ! if this k and spin are for me do it
-    if (ikptg > 0) then
-
-       do gdir = 1, 3
-          do gfor = 1, 2
-             gsigma = -2*gfor+3
-             dkg(1:3) = gsigma*dtorbmag%dkvecs(1:3,gdir)
-             ! find the k point for H_k that goes with the current |u_kg>
-             do ikpt = 1, dtorbmag%fnkpt
-                if (ikptg .EQ. dtorbmag%ikpt_dk(ikpt,gfor,gdir)) exit
-             end do
-
-             do bdir = 1, 3
-                if (bdir .EQ. gdir) cycle
-                
-                do bfor = 1, 2
-                   bsigma = -2*bfor+3
-                   dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
-                   dkbg(1:3) = dkg(1:3) - dkb(1:3)
-                   ikptb = dtorbmag%ikpt_dk(ikpt,bfor,bdir)
-
-                   call mkpwind_k(-dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,&
-                        &             dtorbmag%indkk_f2ibz,ikptg,ikptb,&
-                        &             mpi_enreg,npwarr,pwind_bg,symrec)
-                   pwind_bg_all(ikptg,ikptb,:) = pwind_bg(:)
-                   
-                end do ! end loop over bfor
-             end do ! end loop over bdir
-             
-          end do ! end loop over gfor
-       end do ! end loop over gdir
-
-    end if ! end check that ikptg > 0
-       
- end do ! end loop over ikptg_loc
-
- ! MPI communicate stuff between everyone
- if (nproc>1) then
-    countb = size(pwind_bg_all)
-    ABI_ALLOCATE(buffer1,(countb))
-    ABI_ALLOCATE(buffer2,(countb))
-    buffer1 = 0; buffer2 = 0
-    buffer1(1:countb) = reshape(pwind_bg_all,(/countb/))
-    call xmpi_sum(buffer1,buffer2,countb,spaceComm,ierr)
-    pwind_bg_all(1:dtorbmag%fnkpt,1:dtorbmag%fnkpt,1:dtset%mpw) = reshape(buffer2,(/dtorbmag%fnkpt,dtorbmag%fnkpt,dtset%mpw/))
-    ABI_DEALLOCATE(buffer1)
-    ABI_DEALLOCATE(buffer2)
- end if
-
- ABI_DEALLOCATE(pwind_bg)
-
-end subroutine make_pwind_all_bg
-!!***
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_eeig123
 !! NAME
 !! make_eeig123
@@ -4143,10 +4001,10 @@ end subroutine make_pwind_all_bg
 !!
 !! SOURCE
 
-subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,gmet,&
-     & mcg,mcprj,mpi_enreg,nband_k,nfftf,npwarr,&
-     & paw_ij,pawfgr,pawtab,psps,pwind_bg_all,&
-     & rprimd,vectornd,vhartr,vpsp,vxc,with_vectornd,xred)
+subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
+     & gmet,mcg,mcprj,mpi_enreg,nband_k,nfftf,npwarr,&
+     & paw_ij,pawfgr,pawtab,psps,&
+     & rprimd,symrec,vectornd,vhartr,vpsp,vxc,with_vectornd,xred)
 
  !Arguments ------------------------------------
  !scalars
@@ -4159,7 +4017,7 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,gmet,&
 
  !arrays
  integer,intent(in) :: atindx1(dtset%natom)
- integer,intent(in) :: npwarr(dtset%nkpt),pwind_bg_all(dtorbmag%fnkpt,dtorbmag%fnkpt,dtset%mpw)
+ integer,intent(in) :: npwarr(dtset%nkpt),symrec(3,3,dtset%nsym)
  real(dp),intent(in) :: cg(2,mcg),gmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: vhartr(nfftf),vpsp(nfftf),vxc(nfftf,dtset%nspden)
  real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,3)
@@ -4459,9 +4317,12 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,gmet,&
                    ! end parallel communication 
                    
                    if (ikptg > 0) then
-
-                      pwind_bg(:) = pwind_bg_all(ikptg,ikptb,:)
                       
+                      call mkpwind_k(-dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,&
+                           &             dtorbmag%indkk_f2ibz,ikptg,ikptb,&
+                           &             mpi_enreg,npwarr,pwind_bg,symrec)
+
+
                       ABI_ALLOCATE(ket,(2,npw_kb))
                       do n1 = 1, nband_k
                          ket(1:2,1:npw_kb) = cgqb(1:2,(n1-1)*npw_kb+1:n1*npw_kb)
@@ -4667,7 +4528,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  character(len=500) :: message
 
  !arrays
- integer,allocatable :: dimlmn(:),pwind_bg_all(:,:,:)
+ integer,allocatable :: dimlmn(:)
  real(dp) :: CCI(2,3),CCIV(2,3),gmet(3,3),gprimd(3,3)
  real(dp) :: onsite_bm(2,3),onsite_l(2,3),orbmagvec(2,3),rhorij1(2,3)
  real(dp) :: rmet(3,3),s1trace(2,3),VVI(2,3),VVII(2,3),VVIII(2,3)
@@ -4691,9 +4552,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
- ABI_ALLOCATE(pwind_bg_all,(dtorbmag%fnkpt,dtorbmag%fnkpt,dtset%mpw))
- call make_pwind_all_bg(dtorbmag,dtset,gmet,mpi_enreg,npwarr,pwind_bg_all,symrec)
-
  ! the smat_all_indx structure holds the <u_nk|S|u_n'k'> overlap matrix
  ! elements. k ranges over the k pts in the FBZ.
  ! k' can be k + bsigma*dkb, so k +/- an increment in the b direction,
@@ -4709,8 +4567,8 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  call cpu_time(start_time)
  write(std_out,'(a)')' orbmag progress: making <u_n1k1|S|u_n2k2>, step 1 of 6'
  ABI_ALLOCATE(smat_all_indx,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4))
- call make_smat(atindx1,cg,cprj,dtorbmag,dtset,gprimd,mcg,mcprj,mpi_enreg,&
-      & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_bg_all,pwind_alloc,smat_all_indx,xred)
+ call make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
+      & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,smat_all_indx,symrec,xred)
  call cpu_time(finish_time)
  write(std_out,'(a,es16.8)')' orbmag progress: make_smat time ',finish_time-start_time
  
@@ -4766,8 +4624,8 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  write(std_out,'(a)')' orbmag progress: making <u_n1k1|H_k2|u_n3k3>, step 5 of 6'
  ABI_ALLOCATE(eeig123,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,1:4))
  call make_eeig123(atindx1,cg,cprj_kb_k,dtorbmag,dtset,eeig123,gmet,mcg,mcprj,&
-      & mpi_enreg,nband_k,nfftf,npwarr,paw_ij,pawfgr,pawtab,psps,&
-      & pwind_bg_all,rprimd,vectornd,vhartr,vpsp,vxc,with_vectornd,xred)
+      & mpi_enreg,nband_k,nfftf,npwarr,&
+      & paw_ij,pawfgr,pawtab,psps,rprimd,symrec,vectornd,vhartr,vpsp,vxc,with_vectornd,xred)
  call cpu_time(finish_time)
  write(std_out,'(a,es16.8)')' orbmag progress: make_eeig123 time ',finish_time-start_time
 
@@ -4920,7 +4778,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ABI_DEALLOCATE(eeig123)
  ABI_DEALLOCATE(dsdk)
  ! ABI_DEALLOCATE(dsdk_)
- ABI_DEALLOCATE(pwind_bg_all)
 
 end subroutine orbmag
 !!***
