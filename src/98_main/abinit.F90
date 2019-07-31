@@ -114,7 +114,6 @@ program abinit
  use m_libpaw_tools,only : libpaw_spmsg_getcount
  use m_mpinfo,      only : destroy_mpi_enreg, clnmpi_img, clnmpi_grid, clnmpi_atom, clnmpi_pert
  use m_memeval,     only : memory_eval
- use m_neat,        only : enable_yaml
  use m_chkinp,      only : chkinp
  use m_dtset,       only : chkvars, dtset_free
  use m_dtfil,       only : iofn1
@@ -207,11 +206,11 @@ program abinit
  ! Parse command line arguments.
  args = args_parser(); if (args%exit /= 0) goto 100
 
- ! Initialize memory profiling if it is activated
- ! if a full memocc.prc report is desired, set the argument of abimem_init to "2" instead of "0"
- ! note that memocc.prc files can easily be multiple GB in size so don't use this option normally
+ ! Initialize memory profiling if activated at configure time.
+ ! if a full report is desired, set the argument of abimem_init to "2" instead of "0" via the command line.
+ ! note that the file can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(args%abimem_level)
+ call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
 #endif
 
 !------------------------------------------------------------------------------
@@ -260,8 +259,7 @@ program abinit
     '- output file    -> ',trim(filnam(2)),ch10,&
     '- root for input  files -> ',trim(filnam(3)),ch10,&
     '- root for output files -> ',trim(filnam(4)),ch10
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
  end if
 
  call timab(44,1,tsec)
@@ -356,9 +354,6 @@ program abinit
 
 !------------------------------------------------------------------------------
 
- ! Enable or disable yaml output
- call enable_yaml(dtsets(1)%use_yaml == 1)
-
 !14) Print more information, and activate GPU
 
  if (me == 0) then
@@ -387,10 +382,9 @@ program abinit
 
  test_exit=.false.
  prtvol=dtsets(1)%prtvol
- if (prtvol==-level .or. prtvol==-2.or.args%dry_run/=0) then
+ if (prtvol == -level .or. prtvol == -2 .or. args%dry_run /= 0) then
    write(message,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip driver '
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
    test_exit=.true.
  end if
 
@@ -405,8 +399,7 @@ program abinit
  call timab(46,1,tsec)
 
  write(message,'(a,a,a,62a,80a)') ch10,'== END DATASET(S) ',('=',mu=1,62),ch10,('=',mu=1,80)
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout([std_out, ab_out], message)
 
  ! Gather contributions to results_out from images of the cell, if needed
  if (test_img) then
@@ -420,8 +413,7 @@ program abinit
  if(me==0) then
    if(test_exit)then
      write(message,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip outvars '
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
+     call wrtout([std_out, ab_out], message)
    else
      ! Echo input to output file on unit ab_out, and to log file on unit std_out.
      choice=2
@@ -479,8 +471,7 @@ program abinit
  if(me==0) then
    if(test_exit)then
      write(message,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip acknowledgments'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
+     call wrtout([std_out, ab_out], message)
    else
      do ii=1,2
        if(ii==1)iounit=ab_out
@@ -571,9 +562,7 @@ program abinit
  end if
 
  if (me==0) then
-   if (xml_output) then
-     call outxml_finalise(tsec, values)
-   end if
+   if (xml_output) call outxml_finalise(tsec, values)
 #ifndef HAVE_MEM_PROFILING
    close(unit=ab_out)
 #endif

@@ -38,6 +38,7 @@ MODULE m_numeric_tools
  private
 
  public :: arth                  ! Return an arithmetic progression
+ public :: linspace              ! Similar to the above but with start, stop and num of division
  public :: geop                  ! Return a geometric progression
  public :: reverse               ! Reverse a 1D array *IN PLACE*
  public :: set2unit              ! Set the matrix to be a unit matrix (if it is square)
@@ -96,6 +97,7 @@ MODULE m_numeric_tools
  public :: findmin               ! Compute the minimum of a function whose value and derivative are known at two points.
  public :: kramerskronig         ! check or apply the Kramers Kronig relation
  public :: invcb                 ! Compute a set of inverse cubic roots as fast as possible.
+ public :: safe_div              ! Performs 'save division' that is to prevent overflow, underflow, NaN or infinity errors
 
  !MG FIXME: deprecated: just to avoid updating refs while refactoring.
  public :: dotproduct
@@ -364,6 +366,51 @@ pure function arth_rdp(start,step,nn)
 
 end function arth_rdp
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/linspace
+!! NAME
+!!  linspace
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+pure function linspace(start,stop,nn)
+
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nn
+ real(dp),intent(in) :: start,stop
+ real(dp) :: length
+ real(dp) :: linspace(nn)
+
+!Local variables-------------------------------
+ integer :: ii
+! *********************************************************************
+
+ select case (nn)
+
+ case (1:)
+  length = stop-start
+  do ii=1,nn
+   linspace(ii)=start+length*(ii-1)/(nn-1)
+  end do
+
+ case (0)
+  RETURN
+
+ end select
+
+end function linspace
+!!***
+
 
 !----------------------------------------------------------------------
 
@@ -5541,12 +5588,12 @@ subroutine vdiff_print(vd, unit)
 ! *********************************************************************
 
  unt = std_out; if (present(unit)) unt = unit
- write(unt,"(a,es10.3)")"  L1_rerr: ", vd%l1_rerr
- write(unt,"(a,es10.3)")"  Integral |f1-f2| dr: ", vd%int_adiff
- write(unt,"(a,es10.3)")"  min {|f1-f2|}: ", vd%min_adiff
- write(unt,"(a,es10.3)")"  Max {|f1-f2|}: ", vd%max_adiff
- write(unt,"(a,es10.3)")"  mean {|f1-f2|}: ", vd%mean_adiff
- write(unt,"(a,es10.3)")"  stdev {|f1-f2|}: ", vd%stdev_adiff
+ write(unt,"(a,es10.3,a)")"  L1_rerr: ", vd%l1_rerr, ","
+ write(unt,"(a,es10.3,a)")"  'Integral |f1-f2|dr': ", vd%int_adiff, ","
+ write(unt,"(a,es10.3,a)")"  'min {|f1-f2|}': ", vd%min_adiff, ","
+ write(unt,"(a,es10.3,a)")"  'Max {|f1-f2|}': ", vd%max_adiff, ","
+ write(unt,"(a,es10.3,a)")"  'mean {|f1-f2|}': ", vd%mean_adiff, ","
+ write(unt,"(a,es10.3,a)")"  'stdev {|f1-f2|}': ", vd%stdev_adiff, ","
 
 end subroutine vdiff_print
 !!***
@@ -6378,6 +6425,51 @@ subroutine invcb(rhoarr,rspts,npts)
  end do
 
 end subroutine invcb
+!!***
+
+!!****f* ABINIT/safe_div
+!! NAME
+!! safe_div
+!!
+!! FUNCTION
+!!  Subroutine safe_div performs "safe division", that is to prevent overflow,
+!!  underflow, NaN, or infinity errors.  An alternate value is returned if the
+!!  division cannot be performed. (bmy, 2/26/08)
+!!
+!!  For more information, see the discussion on:
+!!  http://groups.google.com/group/comp.lang.fortran/browse_thread/thread/8b367f44c419fa1d/
+!!
+!!  Taken by HM from:
+!!  http://wiki.seas.harvard.edu/geos-chem/index.php/Floating_point_math_issues#Safe_floating-point_division
+!!
+!! INPUTS
+!!  n    : Numerator for the division
+!!  d    : Divisor for the division
+!!  altv : Alternate value to be returned if the division can't be done
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+elemental subroutine safe_div( n, d, altv, q )
+!Arguments ----------------------------------------------
+!scalars
+ real(dp), intent(in) :: n, d, altv
+ real(dp),intent(out) :: q
+
+! *********************************************************************
+
+ if ( exponent(n) - exponent(d) >= maxexponent(n) .or. d==0 ) then
+    q = altv
+ else
+    q = n / d
+ endif
+
+end subroutine safe_div
 !!***
 
 END MODULE m_numeric_tools

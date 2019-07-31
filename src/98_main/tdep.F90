@@ -57,6 +57,7 @@ program tdep
   use m_xmpi
   use m_io_tools
   use m_errors
+  use m_argparse
 
   use m_ifc,              only : ifc_type
   use m_crystal,          only : crystal_t
@@ -65,7 +66,8 @@ program tdep
   use m_tdep_abitypes,    only : tdep_init_crystal, tdep_init_ifc, tdep_init_ddb, tdep_write_ifc
   use m_tdep_psij,        only : tdep_calc_psijfcoeff, tdep_calc_psijtot, tdep_calc_alpha_gamma, tdep_write_gruneisen
   use m_tdep_phij,        only : tdep_calc_phijfcoeff, tdep_calc_pijfcoeff, tdep_build_phijNN, tdep_calc_dij, tdep_write_dij, &
-&                                Eigen_Variables_type, tdep_init_eigen2nd, tdep_destroy_eigen2nd, tdep_write_yaml, tdep_build_pijN
+                                 Eigen_Variables_type, tdep_init_eigen2nd, tdep_destroy_eigen2nd, &
+                                 tdep_write_yaml, tdep_build_pijN
   use m_tdep_latt,        only : tdep_make_latt, Lattice_Variables_type
   use m_tdep_sym,         only : tdep_make_sym, Symetries_Variables_type
   use m_tdep_readwrite,   only : tdep_print_Aknowledgments, tdep_ReadEcho, Input_Variables_type
@@ -73,7 +75,7 @@ program tdep
   use m_tdep_qpt,         only : tdep_make_qptpath, Qpoints_type
   use m_tdep_phdos,       only : tdep_calc_phdos,tdep_calc_elastic,tdep_calc_thermo
   use m_tdep_shell,       only : Shell_Variables_type, tdep_init_shell2at, tdep_init_shell3at, tdep_init_shell1at, &
-&                                tdep_destroy_shell
+                                 tdep_destroy_shell
   use m_tdep_constraints, only : tdep_calc_constraints, tdep_check_constraints
 
   implicit none
@@ -90,6 +92,7 @@ program tdep
   double precision, allocatable :: omega (:),ftot3(:,:)
   double precision :: qpt_cart(3)
   double complex  , allocatable :: dij(:,:),eigenV(:,:)
+  type(args_t) :: args
   type(phonon_dos_type) :: PHdos
   type(Input_Variables_type) :: InVar
   type(Lattice_Variables_type) :: Lattice
@@ -109,20 +112,28 @@ program tdep
 !==========================================================================================
  call xmpi_init()
 
- ! Initialize memory profiling if it is activated
- ! if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
- ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ! Parse command line arguments.
+ args = args_parser(); if (args%exit /= 0) goto 100
+
+ ! Initialize memory profiling if activated at configure time.
+ ! if a full report is desired, set the argument of abimem_init to "2" instead of "0" via the command line.
+ ! note that the file can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
+ call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
 #endif
 
 ! Read input values from the input.in input file
  call tdep_ReadEcho(InVar)
 
-! Initialize basic quantities  
+ if (args%dry_run /= 0) then
+   call wrtout(std_out, "Dry run mode. Exiting after have read the input")
+   goto 100
+ end if
+
+! Initialize basic quantities
  natom         =InVar%natom
  natom_unitcell=InVar%natom_unitcell
- stdout        =InVar%stdout  
+ stdout        =InVar%stdout
  nshell_max    =500
 
 !==========================================================================================
@@ -134,7 +145,7 @@ program tdep
 ! Compute all the symmetries coming from the bravais lattice
  call tdep_make_sym(Invar,Lattice,Sym)
 
-! Initialize the Brillouin zone and compute the q-points path 
+! Initialize the Brillouin zone and compute the q-points path
  call tdep_make_qptpath(InVar,Lattice,Qpt)
 
 !==========================================================================================
@@ -163,14 +174,14 @@ program tdep
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=# CALCULATION OF THE 2nd ORDER =#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
- 
+
 !==========================================================================================
 !============== Initialize the Shell1at datatype ==========================================
 !==========================================================================================
  ABI_MALLOC(proj_tmp,(3,3,nshell_max)) ; proj_tmp(:,:,:)=0.d0
  call tdep_init_shell1at(distance,InVar,3,nshell_max,ncoeff1st,1,proj_tmp,Shell1at,Sym)
  ABI_MALLOC(proj1st  ,(3,3,Shell1at%nshell)) ; proj1st(:,:,:)=0.d0
- proj1st = reshape (proj_tmp, (/ 3,3,Shell1at%nshell /)) 
+ proj1st = reshape (proj_tmp, (/ 3,3,Shell1at%nshell /))
  ABI_FREE(proj_tmp)
 !Rotational invariances (1st order)
 !    constraints = 3
@@ -183,15 +194,15 @@ program tdep
  ABI_MALLOC(proj_tmp,(9,9,nshell_max)) ; proj_tmp(:,:,:)=0.d0
  call tdep_init_shell2at(distance,InVar,9,nshell_max,ncoeff2nd,2,proj_tmp,Shell2at,Sym)
  ABI_MALLOC(proj2nd  ,(9,9,Shell2at%nshell)) ; proj2nd(:,:,:)=0.d0
- proj2nd = reshape (proj_tmp, (/ 9,9,Shell2at%nshell /)) 
+ proj2nd = reshape (proj_tmp, (/ 9,9,Shell2at%nshell /))
  ABI_FREE(proj_tmp)
-!Rotational invariances (2nd order) + Symetry of the Dynamical Matrix + Huang invariances 
+!Rotational invariances (2nd order) + Symetry of the Dynamical Matrix + Huang invariances
 !    constraints = natom*3**2 + (3*natom_unitcell)**2 + 3**4
  CoeffMoore%nconst_rot2nd = natom_unitcell*9
  CoeffMoore%nconst_dynmat = (3*natom_unitcell)**2
  CoeffMoore%nconst_huang  = 81
  CoeffMoore%nconst_2nd = CoeffMoore%nconst_rot2nd + CoeffMoore%nconst_dynmat + CoeffMoore%nconst_huang
- ntotconst=CoeffMoore%nconst_1st + CoeffMoore%nconst_2nd 
+ ntotconst=CoeffMoore%nconst_1st + CoeffMoore%nconst_2nd
 
 !==========================================================================================
 !============== Initialize the IFC Abinit datatype ========================================
@@ -208,7 +219,7 @@ program tdep
    ABI_MALLOC(proj_tmp,(27,27,nshell_max)) ; proj_tmp(:,:,:)=0.d0
    call tdep_init_shell3at(distance,InVar,27,nshell_max,ncoeff3rd,3,proj_tmp,Shell3at,Sym)
    ABI_MALLOC(proj3rd  ,(27,27,Shell3at%nshell)) ; proj3rd(:,:,:)=0.d0
-   proj3rd = reshape (proj_tmp, (/ 27,27,Shell3at%nshell /)) 
+   proj3rd = reshape (proj_tmp, (/ 27,27,Shell3at%nshell /))
    ABI_FREE(proj_tmp)
 !  Rotational invariances (3rd order) + acoustic sum rules (3rd order)
 !    constraints = natom_unitcell*natom*3**3) + 3permutations*3**3*nshell2at
@@ -224,7 +235,7 @@ program tdep
  CoeffMoore%ncoeff1st=ncoeff1st
  CoeffMoore%ncoeff2nd=ncoeff2nd
  CoeffMoore%ncoeff3rd=ncoeff3rd
- ABI_MALLOC(CoeffMoore%fcoeff,(3*natom*InVar%nstep+ntotconst,ntotcoeff)); CoeffMoore%fcoeff(:,:)=0.d0 
+ ABI_MALLOC(CoeffMoore%fcoeff,(3*natom*InVar%nstep+ntotconst,ntotcoeff)); CoeffMoore%fcoeff(:,:)=0.d0
 
 !==========================================================================================
 !============= Build fcoeff, needed for the Moore-Penrose method just below ===============
@@ -238,12 +249,12 @@ program tdep
    call tdep_calc_psijfcoeff(CoeffMoore,InVar,proj3rd,Shell3at,Sym,ucart)
    CoeffMoore%fcoeff(:,ncoeff2nd+1:ntotcoeff)=CoeffMoore%fcoeff(:,ncoeff2nd+1:ntotcoeff)/2.d0
    call tdep_calc_constraints(CoeffMoore,distance,InVar,Shell1at%nshell,Shell2at%nshell,Shell3at%nshell,Sym,&
-&                             proj1st,Shell1at,proj2nd,Shell2at,proj3rd,Shell3at) 
+&                             proj1st,Shell1at,proj2nd,Shell2at,proj3rd,Shell3at)
  else
    call tdep_calc_constraints(CoeffMoore,distance,InVar,Shell1at%nshell,Shell2at%nshell,Shell3at%nshell,Sym,&
 &                             proj1st,Shell1at,proj2nd,Shell2at)
- end if  
- 
+ end if
+
 !==========================================================================================
 !============= Compute the pseudo inverse using the Moore-Penrose method ==================
 !==========================================================================================
@@ -285,8 +296,8 @@ program tdep
  open(unit=53,file=trim(InVar%output_prefix)//'omega.dat')
  open(unit=52,file=trim(InVar%output_prefix)//'dij.dat')
  open(unit=51,file=trim(InVar%output_prefix)//'eigenvectors.dat')
- ABI_MALLOC(dij   ,(3*InVar%natom_unitcell,3*InVar%natom_unitcell)) 
- ABI_MALLOC(eigenV,(3*InVar%natom_unitcell,3*InVar%natom_unitcell)) 
+ ABI_MALLOC(dij   ,(3*InVar%natom_unitcell,3*InVar%natom_unitcell))
+ ABI_MALLOC(eigenV,(3*InVar%natom_unitcell,3*InVar%natom_unitcell))
  ABI_MALLOC(omega,(3*InVar%natom_unitcell))
  call tdep_init_eigen2nd(Eigen2nd,InVar%natom_unitcell,Qpt%nqpt)
  do iqpt=1,Qpt%nqpt
@@ -296,7 +307,7 @@ program tdep
    call tdep_write_dij(dij,eigenV,iqpt,InVar,Lattice,omega,qpt_cart)
    Eigen2nd%eigenval(:,iqpt)=  omega(:)
    Eigen2nd%eigenvec(:,:,iqpt)=eigenV(:,:)
- end do  
+ end do
  ABI_FREE(dij)
  ABI_FREE(eigenV)
  ABI_FREE(omega)
@@ -313,8 +324,8 @@ program tdep
 !==========================================================================================
 !=========== Compute U_0, the "free energy" and the forces (from the model) ===============
 !==========================================================================================
- ABI_MALLOC(Forces_TDEP,(3*InVar%natom*InVar%nstep)); Forces_TDEP(:)=0.d0 
- call tdep_calc_model(Free_Anh,Forces_MD,Forces_TDEP,InVar,Phij_NN,Pij_N,ucart,U0) 
+ ABI_MALLOC(Forces_TDEP,(3*InVar%natom*InVar%nstep)); Forces_TDEP(:)=0.d0
+ call tdep_calc_model(Free_Anh,Forces_MD,Forces_TDEP,InVar,Phij_NN,Pij_N,ucart,U0)
 
 !==========================================================================================
 !===================== Compute the thermodynamical quantities =============================
@@ -325,7 +336,7 @@ program tdep
    call tdep_print_Aknowledgments(InVar)
    call xmpi_end()
    stop
- end if  
+ end if
 
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
@@ -371,7 +382,7 @@ program tdep
 
  call abinit_doctor("__fftprof")
 
- call xmpi_end()
+100 call xmpi_end()
 
  end program tdep
 !!***

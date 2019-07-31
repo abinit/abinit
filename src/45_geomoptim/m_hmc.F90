@@ -72,9 +72,6 @@ contains
 
 subroutine compute_kinetic_energy(ab_mover,vel,ekin)
     
- use defs_basis
- implicit none
-
 !Arguments ------------------------------------
  type(abimover),intent(in)   :: ab_mover              
  real(dp),      intent(in)   :: vel(3,ab_mover%natom) ! velocities
@@ -124,9 +121,6 @@ end subroutine compute_kinetic_energy
 
 subroutine generate_random_velocities(ab_mover,kbtemp,seed,vel,ekin)
     
- use defs_basis
- implicit none
-
 !Arguments ------------------------------------
  type(abimover),intent(in)   :: ab_mover              
  integer,       intent(inout):: seed
@@ -204,9 +198,6 @@ end subroutine generate_random_velocities
 
 subroutine metropolis_check(seed,de,kbtemp,iacc)
     
- use defs_basis
- implicit none
-
 !Arguments ------------------------------------
  integer,       intent(inout):: seed
  real(dp),      intent(in)   :: de         

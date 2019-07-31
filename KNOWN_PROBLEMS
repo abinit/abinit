@@ -5,7 +5,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release ABINITv8.11.6 is for development
+The present release ABINITv8.11.8 is for development
 
 0. List of platforms
 1. Batteries of tests
@@ -14,7 +14,7 @@ The present release ABINITv8.11.6 is for development
 ================================================================
 0. Platforms
 
-For ABINITv8.11.6, list closed on 2019 04 27
+For ABINITv8.11.8, list closed on 2019 07 06
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
 https://bbportal.abinit.org/#/status
@@ -29,22 +29,23 @@ but there is no check on the ABINIT testfarm that ABINIT runs correctly with the
 
 Status, for the different versions of compilers that are supported (or might become soon).
 
-GNU Fortran compiler (presently tested : v5.3, v5.4, v6.3, v6.4, v6.5, v7.2, v7.3, v8.2, v8.3)
+GNU Fortran compiler (presently tested : v5.3, v5.4, v6.3, v6.4, v6.5, v7.2, v7.3, v8.2, v8.3, v9.1)
 All are mostly OK
 gnu 5.3 : bigdft#14 is disactivated on ubu_gnu_5.3_openmpi 
-gnu 8.2 or 8.3 + openmpi : the reading of WFK files using MPIIO is not correct for test mpiio#26
+gnu 8.2, 8.3, 9.1 + openmpi : the reading of WFK files using MPIIO is not correct for test mpiio#26
 all gnu : bigdft#14 is disactivated
 
 Intel ifort compiler (presently tested : 13.1, 15.0, 16.0, 17.0, 18.0, 19.0)
 Ifort 13.1 is OK.
 Ifort 15.0 is mostly OK, except for one test paral#30 (on ubu). Paral KGB.
 Ifort 16.0 is mostly OK, except for one test paral#30 (on ubu). Paral KGB.
-Ifort 17.0 is mostly OK, except for bigdft#06, bigdft#07.
+Ifort 17.0 is mostly OK, except for bigdft#06, bigdft#07, v8#156.
 Ifort 18.0 and 19.0 are a bit problematic. 
  - In "real" conditions (mrgscr and mrgdv), the ADVANCE='NO' specification for the write instruction does not work, but
    it works in simple programs. Thus all tests (and their chain of tests) that rely on mrgscr and mrgdv have been disabled for this compiler.
    Namely, v3#87-91, v67mbpt#37-39, v7#85-89, v8#41-44, v8#61-65
  - Also, the reading of WFK files using MPIIO is not correct, for tests mpiio#26 and 62.
+ - Also, problem with electron-phonon test chain v8#15X.
 Ifort 19.0 has the same problems than Ifort 18.0 .
 
 NAG Compiler
@@ -821,3 +822,6 @@ Test v6_t52 (for electron-phonon).
 The tolerance is extremely large. Why is this test lacking so much portability ? Why is this not important ?
 At least this portability problem should be commented upon ?!
 
+P811.1 (XG190619)
+Test v8_t156 (for electron-phonon) on Ubu Intel 17
+The kptgw input variables, with default values  is echoed, while the reference does not include it. Should track why it is printed.

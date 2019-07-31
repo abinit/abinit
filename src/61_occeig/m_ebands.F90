@@ -35,7 +35,7 @@ MODULE m_ebands
  use m_errors
  use m_abicore
  use m_xmpi
- use m_tetrahedron
+ use m_htetrahedron
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
@@ -54,7 +54,7 @@ MODULE m_ebands
  use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename, replace
  use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson_int, wrap2_zero_one, &
                               isdiagmat
- use m_special_funcs,  only : dirac_delta
+ use m_special_funcs,  only : gaussian
  use m_geometry,       only : normv
  use m_cgtools,        only : set_istwfk
  use m_pptools,        only : printbxsf
@@ -2333,7 +2333,7 @@ subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
  ebands%occopt = occopt; ebands%tsmear = tsmear
 
- if (prtvol > 10) then
+ if (my_prtvol > 10) then
    call wrtout(std_out, " Changing occupation scheme in electron bands")
    call wrtout(std_out, sjoin(" occopt:", itoa(ebands%occopt), " ==> ", itoa(occopt)))
    call wrtout(std_out, sjoin(" tsmear:", ftoa(ebands%tsmear), " ==> ", ftoa(tsmear)))
@@ -2341,7 +2341,7 @@ subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
 
  call ebands_update_occ(ebands, spinmagntarget, stmbias0, prtvol=my_prtvol)
 
- if (prtvol > 10) then
+ if (my_prtvol > 10) then
    call wrtout(std_out, sjoin(' Fermi level is now:', ftoa(ebands%fermie)))
  end if
 
@@ -2948,7 +2948,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
  real(dp) :: max_ene,min_ene,wtk,max_occ
  character(len=500) :: msg
  type(stats_t) :: ediffs
- type(t_tetrahedron) :: tetra
+ type(t_htetrahedron) :: tetra
 !arrays
  real(dp) :: eminmax_spin(2,ebands%nsppol)
  real(dp),allocatable :: wme0(:),wdt(:,:),tmp_eigen(:)
@@ -2998,7 +2998,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
        wtk = ebands%wtk(ikpt)
        do band=1,ebands%nband(ikpt+(spin-1)*ebands%nkpt)
           wme0 = edos%mesh - ebands%eig(band, ikpt, spin)
-          edos%dos(:, spin) = edos%dos(:, spin) + wtk * dirac_delta(wme0, edos%broad)
+          edos%dos(:, spin) = edos%dos(:, spin) + wtk * gaussian(wme0, edos%broad)
        end do
      end do
    end do
@@ -3029,9 +3029,9 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
 
          ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223 [[cite:Bloechl1994a]])
-         call tetra_get_onewk(tetra, ikpt, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
+         call htetra_get_onewk(tetra, ikpt, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
 
-         edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, 1)
+         edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, 1)*ebands%wtk(ikpt)
          ! IDOS is computed afterwards with simpson
          !edos%idos(:,spin) = edos%idos(:,spin) + wdt(:, 2)
        end do ! ikpt
@@ -3043,7 +3043,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
    ! Free memory
    ABI_FREE(tmp_eigen)
    ABI_FREE(wdt)
-   call destroy_tetra(tetra)
+   call htetra_free(tetra)
 
    ! Filter so that dos[i] is always >= 0 and idos is monotonic
    ! IDOS is computed afterwards with simpson
@@ -4227,11 +4227,11 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
  !real(dp) :: dksqmax
  character(len=500) :: msg
  type(stats_t) :: ediffs
- type(t_tetrahedron) :: tetra
+ type(t_htetrahedron) :: tetra
 !arrays
  !integer,allocatable :: bz2ibz(:,:)
  real(dp) :: eminmax_spin(2,ebands%nsppol)
- real(dp) :: v(3), vsum(3), t(3,3), tsum(3,3) !, tsym(3,3), vsym(3), 
+ real(dp) :: v(3), vsum(3), t(3,3), tsum(3,3) !, tsym(3,3), vsym(3),
  real(dp),allocatable :: wme0(:),wdt(:,:,:),tmp_eigen(:)
 
 ! *********************************************************************
@@ -4300,7 +4300,7 @@ select case (intmeth)
        wtk = ebands%wtk(ikpt)
        do band=1,ebands%nband(ikpt+(spin-1)*ebands%nkpt)
          wme0 = out_mesh - ebands%eig(band, ikpt, spin)
-         wme0 = dirac_delta(wme0,broad) * wtk
+         wme0 = gaussian(wme0, broad) * wtk
          edos%dos(:,spin) = edos%dos(:,spin) + wme0(:)
 
          !scalar
@@ -4374,7 +4374,7 @@ select case (intmeth)
          if (all(tmp_eigen > emax)) cycle
        end if
 
-       call tetra_blochl_weights(tetra, tmp_eigen, min_ene, max_ene, max_occ1, nw, ebands%nkpt, &
+       call htetra_blochl_weights(tetra, tmp_eigen, min_ene, max_ene, max_occ1, nw, ebands%nkpt, &
          bcorr, wdt(:,:,2), wdt(:,:,1), comm)
 
        do ikpt=1,ebands%nkpt
@@ -4428,7 +4428,7 @@ select case (intmeth)
    ! Free memory
    ABI_FREE(tmp_eigen)
    ABI_FREE(wdt)
-   call destroy_tetra(tetra)
+   call htetra_free(tetra)
 
  case default
    MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
@@ -4544,7 +4544,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
  integer :: ik_ibz,ibc,ibv,spin,nw,nband_k,nbv,nproc,my_rank,cnt,mpierr,bcorr !iw, unt,
  real(dp) :: wtk,wmax,wstep,wbroad
  type(stats_t) :: ediffs
- type(t_tetrahedron) :: tetra
+ type(t_htetrahedron) :: tetra
  character(len=500) :: msg
  !character(len=fnlen) :: path
 !arrays
@@ -4616,7 +4616,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
          do ibc=nbv+1,nband_k
            cvmw = ebands%eig(ibc,ik_ibz,spin) - ebands%eig(ibv,ik_ibz,spin) - jdos%mesh
-           jdos%values(:, spin) = jdos%values(:, spin) + wtk * dirac_delta(cvmw, wbroad)
+           jdos%values(:, spin) = jdos%values(:, spin) + wtk * gaussian(cvmw, wbroad)
          end do
        end do
 
@@ -4637,7 +4637,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
    tetra = tetra_from_kptrlatt(cryst, ebands%kptopt, ebands%kptrlatt, &
      ebands%nshiftk, ebands%shiftk, ebands%nkpt, ebands%kptns, comm, msg, ierr)
    if (ierr/=0) then
-     call destroy_tetra(tetra); return
+     call htetra_free(tetra); return
    end if
 
    ! For each spin and band, interpolate over kpoints,
@@ -4657,8 +4657,8 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
            cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! mpi-parallelism
 
            ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223 [[cite:Bloechl1994a]])
-           call tetra_get_onewk(tetra, ik_ibz, bcorr, nw, ebands%nkpt, cvmw, jdos%mesh(0), jdos%mesh(nw), one, wdt)
-           jdos%values(:,spin) = jdos%values(:,spin) + wdt(:, 1)
+           call htetra_get_onewk(tetra, ik_ibz, bcorr, nw, ebands%nkpt, cvmw, jdos%mesh(0), jdos%mesh(nw), one, wdt)
+           jdos%values(:,spin) = jdos%values(:,spin) + wdt(:, 1)*ebands%wtk(ik_ibz)
          end do
        end do ! ibc
      end do ! ibv
@@ -4669,7 +4669,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
    ! Free memory
    ABI_FREE(wdt)
    ABI_FREE(cvmw)
-   call destroy_tetra(tetra)
+   call htetra_free(tetra)
 
  case default
    MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))

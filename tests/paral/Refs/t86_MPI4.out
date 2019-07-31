@@ -390,8 +390,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     753.188     753.111
   sigma(2 2)=  3.56483996E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.56483996E-03  sigma(2 1)=  0.00000000E+00
 
----
-label: Etot steps
+--- !EtotSteps
 data: !EtotIters |
     
      iter   Etot(hartree)      deltaE(h)  residm     nres2
@@ -415,6 +414,31 @@ data: !EtotIters |
        18  -151.50771171082     6.975E-09 8.959E-07 3.447E-07
        19  -151.50771171003     7.863E-10 4.517E-07 2.354E-07
        20  -151.50771170766     2.374E-09 2.603E-07 1.415E-08
+...
+
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        5
+nsppol    :        1
+cutoff_energies: {"ecut":   1.20000000000000000E+01, "pawecutdg":   2.00000000000000000E+01, }
+convergence: {
+    "deltae":   2.37409381043107715E-09, "res2":   1.41518780109792898E-08, 
+    "residm":   2.60254842131463755E-07, "diffor": undef, 
+}
+etotal    :  -1.51507711707660150E+02
+entropy   :   0.00000000000000000E+00
+fermie    :   3.09658145725792422E-01
+stress_tensor: !CartTensor
+- [  3.56483996349480498E-03,   0.00000000000000000E+00,   0.00000000000000000E+00, ]
+- [  0.00000000000000000E+00,   3.56483996349480151E-03,   0.00000000000000000E+00, ]
+- [  0.00000000000000000E+00,   0.00000000000000000E+00,   3.56483996349478416E-03, ]
+cartesian_forces: !CartForces
+- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
+- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
+- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
+- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
+- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
 ...
 
  Integrated electronic density in atomic spheres:
@@ -513,32 +537,6 @@ data: !EtotIters |
      0.00000    0.00000    0.00000    0.00000    0.22651
 
 
-
----
-label     : results_gs
-comment   : Summary of ground states results.
-natom     :        5
-nsppol    :        1
-cut       : {"ecut":   1.20000000000000000E+01, "pawecutdg":   2.00000000000000000E+01, }
-convergence: {
-    "deltae":   2.37409381043107715E-09, "res2":   1.41518780109792898E-08, 
-    "residm":   2.60254842131463755E-07, "diffor": undef, 
-}
-etotal    :  -1.51507711707660150E+02
-entropy   :   0.00000000000000000E+00
-fermie    :   3.09658145725792422E-01
-stress tensor: !Tensor
-- [  3.56483996349480498E-03,   0.00000000000000000E+00,   0.00000000000000000E+00, ]
-- [  0.00000000000000000E+00,   3.56483996349480151E-03,   0.00000000000000000E+00, ]
-- [  0.00000000000000000E+00,   0.00000000000000000E+00,   3.56483996349478416E-03, ]
-
-cartesian forces: !CartForces
-- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
-- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
-- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
-- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
-- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
-...
 
 ================================================================================
 
@@ -698,36 +696,34 @@ cartesian forces: !CartForces
 --------------------------------------------------------------------------------
 
 
---- !ETOT
-label               : Etot
+--- !EnergyTerms
 comment             : Components of total free energy (in Hartree)
-Kinetic energy      :  4.323825067238190201E+01
-Hartree energy      :  3.133994553363548619E+01
-XC energy           : -2.246182631222462689E+01
+kinetic             :  4.323825067238190201E+01
+hartree             :  3.133994553363548619E+01
+xc                  : -2.246182631222462689E+01
 Ewald energy        : -1.142203169790575572E+02
-PsPCore             :  6.536925226004570710E+00
-Loc. psp. energy    : -9.852521179991468614E+01
-Spherical terms     :  2.587718945528139081E+00
-Internal E          : -1.515045147136467563E+02
+psp_core            :  6.536925226004570710E+00
+local_psp           : -9.852521179991468614E+01
+spherical_terms     :  2.587718945528139081E+00
+internal            : -1.515045147136467563E+02
 '-kT*entropy'       : -3.174881766478041684E-03
-Etotal              : -1.515076895954132397E+02
-Total energy(eV)    : -4.122733899322517573E+03
+total_energy        : -1.515076895954132397E+02
+total_energy_eV     : -4.122733899322517573E+03
 ...
 
 
 
---- !ETOT
-label               : Etot DC
+--- !EnergyTermsDC
 comment             : '"Double-counting" decomposition of free energy'
-Band energy         : -1.473142751049871890E+01
+band_energy         : -1.473142751049871890E+01
 Ewald energy        : -1.142203169790575572E+02
-PspCore energy      :  6.536925226004570710E+00
-'Dble-C XC-energy'  : -2.441177133385859221E+01
-Spherical terms     : -4.677946228483357061E+00
-Internal E          : -1.515045368258936662E+02
+psp_core            :  6.536925226004570710E+00
+xc_dc               : -2.441177133385859221E+01
+spherical_terms     : -4.677946228483357061E+00
+internal            : -1.515045368258936662E+02
 '-kT*entropy'       : -3.174881766478041684E-03
-Etotal (DC)         : -1.515077117076601496E+02
-Total DC energy(eV) : -4.122733899322517573E+03
+total_energy_dc     : -1.515077117076601496E+02
+total_energy_dc_eV  : -4.122733899322517573E+03
 ...
 
 
@@ -940,8 +936,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.438     188.419
   nstep=   10 was not enough SCF cycles to converge;
   maximum energy difference=  1.168E-04 exceeds toldfe=  1.000E-08
 
----
-label: Etot steps
+--- !EtotSteps
 data: !EtotIters |
     
      iter   Etot(hartree)      deltaE(h)  residm     nres2
@@ -955,6 +950,32 @@ data: !EtotIters |
         8  -151.47532187439     2.905E-04 1.224E-13 1.378E-01
         9  -151.47515674122     1.651E-04 4.520E-13 1.449E-01
        10  -151.47503995336     1.168E-04 5.751E-13 1.551E-01
+...
+
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        5
+nsppol    :        1
+cutoff_energies: {"ecut":   1.20000000000000000E+01, "pawecutdg":   2.00000000000000000E+01, }
+convergence: {
+    "deltae":   1.16787860122258280E-04, "res2":   1.55089824285158578E-01, 
+    "residm":   5.75125273407124985E-13, "diffor":   0.00000000000000000E+00, 
+}
+etotal    :  -1.51475039953364643E+02
+entropy   :   0.00000000000000000E+00
+fermie    :   3.04097071766542659E-01
+stress_tensor: !CartTensor
+- [  4.02224082195374102E-03,   0.00000000000000000E+00,   0.00000000000000000E+00, ]
+- [  0.00000000000000000E+00,   4.02224082195372368E-03,   0.00000000000000000E+00, ]
+- [  0.00000000000000000E+00,   0.00000000000000000E+00,   4.02224082195374449E-03, ]
+
+cartesian_forces: !CartForces
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1055,32 +1076,6 @@ data: !EtotIters |
      0.00000    0.00000    0.00000    0.00000    0.23337
 
 
-
----
-label     : results_gs
-comment   : Summary of ground states results.
-natom     :        5
-nsppol    :        1
-cut       : {"ecut":   1.20000000000000000E+01, "pawecutdg":   2.00000000000000000E+01, }
-convergence: {
-    "deltae":   1.16787860122258280E-04, "res2":   1.55089824285158578E-01, 
-    "residm":   5.75125273407124985E-13, "diffor":   0.00000000000000000E+00, 
-}
-etotal    :  -1.51475039953364643E+02
-entropy   :   0.00000000000000000E+00
-fermie    :   3.04097071766542659E-01
-stress tensor: !Tensor
-- [  4.02224082195374102E-03,   0.00000000000000000E+00,   0.00000000000000000E+00, ]
-- [  0.00000000000000000E+00,   4.02224082195372368E-03,   0.00000000000000000E+00, ]
-- [  0.00000000000000000E+00,   0.00000000000000000E+00,   4.02224082195374449E-03, ]
-
-cartesian forces: !CartForces
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-...
 
 ================================================================================
 
@@ -1222,34 +1217,32 @@ cartesian forces: !CartForces
 --------------------------------------------------------------------------------
 
 
---- !ETOT
-label               : Etot
+--- !EnergyTerms
 comment             : Components of total free energy (in Hartree)
-Kinetic energy      :  4.311836595104540493E+01
-Hartree energy      :  3.130289914056712774E+01
-XC energy           : -2.247254202033941795E+01
+kinetic             :  4.311836595104540493E+01
+hartree             :  3.130289914056712774E+01
+xc                  : -2.247254202033941795E+01
 Ewald energy        : -1.142203169790575572E+02
-PsPCore             :  6.536925226004570710E+00
-Loc. psp. energy    : -9.850462805134246480E+01
-Spherical terms     :  2.593450868757609662E+00
-Internal E          : -1.516458458643647305E+02
-Etotal              : -1.516458458643647305E+02
-Total energy(eV)    : -4.126493322589622039E+03
+psp_core            :  6.536925226004570710E+00
+local_psp           : -9.850462805134246480E+01
+spherical_terms     :  2.593450868757609662E+00
+internal            : -1.516458458643647305E+02
+total_energy        : -1.516458458643647305E+02
+total_energy_eV     : -4.126493322589622039E+03
 ...
 
 
 
---- !ETOT
-label               : Etot DC
+--- !EnergyTermsDC
 comment             : '"Double-counting" decomposition of free energy'
-Band energy         : -1.468734668477278760E+01
+band_energy         : -1.468734668477278760E+01
 Ewald energy        : -1.142203169790575572E+02
-PspCore energy      :  6.536925226004570710E+00
-'Dble-C XC-energy'  : -2.437127990976835790E+01
-Spherical terms     : -4.733021605770507456E+00
-Internal E          : -1.514750399533646430E+02
-Etotal (DC)         : -1.514750399533646430E+02
-Total DC energy(eV) : -4.126493322589622039E+03
+psp_core            :  6.536925226004570710E+00
+xc_dc               : -2.437127990976835790E+01
+spherical_terms     : -4.733021605770507456E+00
+internal            : -1.514750399533646430E+02
+total_energy_dc     : -1.514750399533646430E+02
+total_energy_dc_eV  : -4.126493322589622039E+03
 ...
 
 

@@ -1,4 +1,3 @@
-
 !{\src2tex{textfont=tt}}
 !!****p* ABINIT/multibinit
 !! NAME
@@ -60,6 +59,7 @@ program multibinit
   use m_dtset,      only : chkvars
   use m_dtfil,      only : isfile
 
+!Arguments -----------------------------------
 
   use m_multibinit_dataset
   !use m_generate_training_set, only : generate_training_set
@@ -124,32 +124,32 @@ program multibinit
   !set the argument of abimem_init to "2" instead of "0"
   !note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
-  call abimem_init(0)
+ call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
 #endif
 
-  !Initialisation of the timing
-  call timein(tcpui,twalli)
+!Initialisation of the timing
+ call timein(tcpui,twalli)
 
-  if (iam_master) then
-     codename='MULTIBINIT'//repeat(' ',14)
-     call herald(codename,abinit_version,std_out)
-  end if
+ if (iam_master) then
+   codename='MULTIBINIT'//repeat(' ',14)
+   call herald(codename,abinit_version,std_out)
+ end if
 
-  start_datetime = asctime()
+ start_datetime = asctime()
 
-  !Print the number of cpus in log file
-  write(message,'(a,i5,a)') '-  nproc =',nproc,ch10
-  call wrtout(std_out,message,'COLL')
+!Print the number of cpus in log file
+ write(message,'(a,i5,a)') '-  nproc =',nproc,ch10
+ call wrtout(std_out,message,'COLL')
 
-  !Initialise the code : write heading, and read names of files.
-  call init10(filnam,comm)
+!Initialise the code : write heading, and read names of files.
+ call init10(filnam,comm)
 
-  !******************************************************************
+!******************************************************************
 
-  call timein(tcpu,twall)
+ call timein(tcpu,twall)
 
-  write(message, '(a,f11.3,a,f11.3,a)' )'-begin at tcpu',tcpu-tcpui,'  and twall',twall-twalli,' sec'
-  call wrtout(std_out,message,'COLL')
+ write(message, '(a,f11.3,a,f11.3,a)' )'-begin at tcpu',tcpu-tcpui,'  and twall',twall-twalli,' sec'
+ call wrtout(std_out,message,'COLL')
 
   ! Open output files and ab_out (might change its name if needed)
   ! MJV 1/2010 : now output file is open, but filnam(2) continues unmodified
@@ -203,19 +203,19 @@ program multibinit
           &     '- Proc.',my_rank,' individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
   end if
 
-  call xmpi_sum(tsec,comm,ierr)
+   call xmpi_sum(tsec,comm,ierr)
 
-  write(message, '(a,(80a),a,a,a,f11.3,a,f11.3,a,a,a,a)' ) ch10,&
-       &   ('=',ii=1,80),ch10,ch10,&
-       &   '+Total cpu time',tsec(1),&
-       &   '  and wall time',tsec(2),' sec',ch10,ch10,&
-       &   ' multibinit : the run completed succesfully.'
-  call wrtout(std_out,message,'COLL')
-  call wrtout(ab_out,message,'COLL')
+   write(message, '(a,(80a),a,a,a,f11.3,a,f11.3,a,a,a,a)' ) ch10,&
+&   ('=',ii=1,80),ch10,ch10,&
+&   '+Total cpu time',tsec(1),&
+&   '  and wall time',tsec(2),' sec',ch10,ch10,&
+&   ' multibinit : the run completed succesfully.'
+   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,message,'COLL')
 
-  if (iam_master) then
-     ! Write YAML document with the final summary.
-     ! we use this doc to test whether the calculation is completed.
+   if (iam_master) then
+   ! Write YAML document with the final summary.
+   ! we use this doc to test whether the calculation is completed.
      write(std_out,"(a)")"--- !FinalSummary"
      write(std_out,"(a)")"program: multibinit"
      write(std_out,"(2a)")"version: ",trim(abinit_version)
@@ -225,22 +225,21 @@ program multibinit
      write(std_out,"(a,f13.1)")"overall_wall_time: ",tsec(2)
      write(std_out,"(a,i0)")"mpi_procs: ",xmpi_comm_size(xmpi_world)
      write(std_out,"(a,i0)")"omp_threads: ",xomp_get_num_threads(open_parallel=.True.)
-     !write(std_out,"(a,i0)")"num_warnings: ",nwarning
-     !write(std_out,"(a,i0)")"num_comments: ",ncomment
+   !write(std_out,"(a,i0)")"num_warnings: ",nwarning
+   !write(std_out,"(a,i0)")"num_comments: ",ncomment
      write(std_out,"(a)")"..."
      call flush_unit(std_out)
-  end if
+   end if
 
-  !Write information on file about the memory before ending mpi module, if memory profiling is enabled
-  call abinit_doctor("__multibinit")
+!Write information on file about the memory before ending mpi module, if memory profiling is enabled
+   call abinit_doctor("__multibinit")
 
-  call flush_unit(ab_out)
-  call flush_unit(std_out)
+   call flush_unit(ab_out)
+   call flush_unit(std_out)
 
-  if (iam_master) close(ab_out)
+   if (iam_master) close(ab_out)
 
-100 call xmpi_end()
+   100 call xmpi_end()
 
-end program multibinit
+   end program multibinit
 !!***
-

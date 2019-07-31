@@ -1227,6 +1227,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_tols_idelta',tread,'DPR')
  if (tread == 1) dtset%eph_tols_idelta = dprarr(1:2)
 
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_phrange',tread,'INT')
+ if (tread == 1) dtset%eph_phrange = intarr(1:2)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_intmeth',tread,'INT')
  if (tread == 1) then
    dtset%eph_intmeth = intarr(1)
@@ -1806,17 +1809,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandkss',tread,'INT')
  if(tread==1) dtset%nbandkss=intarr(1)
- if ( dtset%usedmft > 0  .and. dtset%nbandkss==0) then
-   if (dtset%usepawu /= 0 ) then
-     write(message,'(7a)')&
-     'usedmft and usepawu are both activated ',ch10,&
-     'This is not an usual calculation:',ch10,&
-     'usepawu will be put to a value >= 10:',ch10,&
-     'LDA+U potential and energy will be put to zero'
-     MSG_WARNING(message)
-   end if
-   if (abs(dtset%usepawu)==4.or.dtset%usepawu==14)  dtset%usepawu=14
-   if (abs(dtset%usepawu)/=4.and.dtset%usepawu/=14) dtset%usepawu=10
+ if ( dtset%usedmft > 0  .and. (dtset%nbandkss==0.or.dtset%iscf<0)) then
+   if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
+   if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npwkss',tread,'INT')
@@ -1976,6 +1971,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end if
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_iter',tread,'INT')
    if(tread==1) dtset%dmft_iter=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_kspectralfunc',tread,'INT')
+   if(tread==1) dtset%dmft_kspectralfunc=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_mxsf',tread,'DPR')
    if(tread==1) dtset%dmft_mxsf=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_nwli',tread,'INT')

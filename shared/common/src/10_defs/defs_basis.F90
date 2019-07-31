@@ -195,6 +195,12 @@ module defs_basis
  real(dp), parameter :: b2Mb=one/1024.0_dp**2  ! conversion factor bytes --> Mbytes
  real(dp), parameter :: b2Gb=b2Mb/1024.0_dp    ! conversion factor bytes --> Gbytes
 
+ ! This value is used as sentinel to initialize real values that are "undefined" i.e.
+ ! values that cannot be computed or values that do not make any sense in a particular context
+ ! e.g. stress tensor in NSCF calculations. The sentinel is used the yaml routines to print "undef" instead of the
+ ! numerical value.
+ real(dp),parameter :: MAGIC_UNDEF = 9.9999999999D+99
+
 !Real physical constants
 !Revised fundamental constants from http://physics.nist.gov/cuu/Constants/index.html
 !(from 2006 least squares adjustment)
@@ -227,6 +233,8 @@ module defs_basis
  real(dp), parameter :: Time_Sec=2.418884326505D-17 !  Atomic unit of time, in seconds
  real(dp), parameter :: BField_Tesla=4.254383d-6 ! Tesla in a.u.
  real(dp), parameter :: dipole_moment_debye=0.393430307_dp ! Debye unit in a.u.
+ real(dp), parameter :: siemens_SI=e_Cb**2 / Ha_J / Time_Sec**2 ! Siemens in SI
+ real(dp), parameter :: volt_SI=Ha_J/e_Cb ! Volt in SI
 !EB suppress *0.5_dp  ! Atomic unit of induction field (in Tesla) * mu_B (in atomic units).
  real(dp), parameter :: mu_B_SI=9.274009994D-24   ! Bohr magneton in SI
  real(dp), parameter :: mu_B = 0.5_dp             ! Bohr magneton in atomic units

@@ -795,14 +795,14 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
        end do
      end do
    end do
-!
-!  * Now read m_lda_to_qp and update the energies in QP_BSt.
-!  TODO switch on the renormalization of n in sigma.
+   !
+   ! Now read m_lda_to_qp and update the energies in QP_BSt.
+   ! TODO switch on the renormalization of n in sigma.
    ABI_MALLOC(prev_rhor,(nfftf,Wfd%nspden))
    ABI_DT_MALLOC(prev_Pawrhoij,(Cryst%natom*Wfd%usepaw))
 
    call rdqps(QP_BSt,Dtfil%fnameabi_qps,Wfd%usepaw,Wfd%nspden,1,nscf,&
-&   nfftf,ngfftf,Cryst%ucvol,Wfd%paral_kgb,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_lda_to_qp,prev_rhor,prev_Pawrhoij)
+    nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_lda_to_qp,prev_rhor,prev_Pawrhoij)
 
    ABI_FREE(prev_rhor)
    if (Psps%usepaw==1.and.nscf>0) then
@@ -1635,13 +1635,9 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  if (Dtset%usepaw==1) call pawrhoij_free(Pawrhoij)
  ABI_DT_FREE(Pawrhoij)
 
- ! === Find optimal value for G-sphere enlargment due to oscillator matrix elements ===
-
+ ! Find optimal value for G-sphere enlargment due to oscillator matrix elements
  ! We will split k-points over processors
- call xmpi_split_work(Kmesh%nbz,comm,my_k1,my_k2,msg,ierr)
- if (ierr/=0) then
-   MSG_WARNING(msg)
- end if
+ call xmpi_split_work(Kmesh%nbz, comm, my_k1, my_k2)
 
  ! If there is no work to do, just skip the computation
  if (my_k2-my_k1+1 <= 0) then
