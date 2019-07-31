@@ -1051,7 +1051,8 @@ class BuildEnvironment(object):
 
         # Binaries that are not located in src/98_main
         self._external_bins = {
-            "atompaw": os.path.join(self.build_dir, "fallbacks", "exports", "bin", "atompaw-abinit"),
+            #"atompaw": os.path.join(self.build_dir, "fallbacks", "exports", "bin", "atompaw-abinit"),
+            "atompaw": os.path.join(self.build_dir, "src", "98_main", "atompaw"),
             "timeout": os.path.join(self.build_dir, "tests", "Timeout", "timeout"),
         }
 

@@ -119,7 +119,7 @@ for my_config in my_configs:
       my_subdir = "uncertified/"
 
     # Inject fbversion in out_data
-    out_data_tmp=out_data.replace("_FB_",fbversion)
+    out_data=out_data.replace("_FB_",fbversion)
 
     # Write data
-    open("%s/%s%s.ac" % (my_outdir,my_subdir,sec), "wt").write(out_data_tmp)
+    open("%s/%s%s.ac" % (my_outdir,my_subdir,sec), "wt").write(out_data)
