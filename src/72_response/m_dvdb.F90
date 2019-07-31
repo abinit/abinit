@@ -271,7 +271,7 @@ module m_dvdb
   integer :: my_nrpt = 0
   ! Number of real space points used for Fourier interpolation treated by this MPI rank.
 
-  !integer :: nrtot = 0
+  integer :: nrtot = 0
   ! Total Number of real space points used for Fourier interpolation.
 
   integer :: prtvol = 0
@@ -2799,7 +2799,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  integer :: iq_ibz,nqibz,iq_bz,nqbz !, timerev_q
  integer :: ii,jj,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc, unt
  integer :: iqst,itimrev,isym
- integer :: ifft, ierr, nrtot, my_rstart, my_rstop, iatom
+ integer :: ifft, ierr,  my_rstart, my_rstop, iatom
 #ifdef HAVE_NETCDF
  integer :: ncerr, ncid
 #endif
@@ -2848,13 +2848,13 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  call prepare_ftinterp(db, method, ngqpt, qptopt1, nqshift, qshift, &
      qibz, qbz, indqq, iperm, nqsts, iqs_dvdb, all_rpt, all_wghatm, db%comm)
 
- nqibz = size(qibz, dim=2); nqbz = size(qbz, dim=2); nrtot = size(all_rpt, dim=2)
+ nqibz = size(qibz, dim=2); nqbz = size(qbz, dim=2); db%nrtot = size(all_rpt, dim=2)
  write(std_out, "(a, i0)")" Using method for integration weights: ", method
- write(std_out, "(a, i0)")" Number of R-points in real-space big box: ", nrtot
+ write(std_out, "(a, i0)")" Total number of R-points in real-space big box: ", db%nrtot
  write(std_out, "(a, i0)")" dvdb_add_lr: ", db%add_lr
 
  ! Distribute R-points inside comm_rpt. In the unlikely case that nqbz > nprocs, my_nrpt is set to zero
- call xmpi_split_work(nrtot, db%comm_rpt, my_rstart, my_rstop)
+ call xmpi_split_work(db%nrtot, db%comm_rpt, my_rstart, my_rstop)
  db%my_nrpt = 0
  ii = minval(db%my_pinfo(2,:)); jj = maxval(db%my_pinfo(2,:))
  if (my_rstop >= my_rstart) then
@@ -3022,6 +3022,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  !call xmpi_sum(db%v1scf_rpt, db%comm, ierr)
  db%v1scf_rpt = db%v1scf_rpt / nqbz
  !if (method == 1) db%v1scf_rpt(2,:,:,:,:) = zero
+ !call dvdb_enforce_asr(db)
 
  do imyp=1,db%my_npert
    write(std_out, *)" Imaginary part for imyp:" ,imyp
@@ -3035,12 +3036,141 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  ! Now we have W(R, r)
  if (any(qrefine > 1)) then
    call dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt1, nqshift, qshift, nfft, ngfft, method)
+   !call dvdb_enforce_asr(db)
  end if
 
-#if 0
- call wrtout(std_out, " Enforcing ASR on W(R, r): \sum_{R,kappa} v1(R, r, kappa, alpha) = 0")
- MSG_WARNING_IF(method == 0, "Encorcing ASR with method == 0")
+ ! Write file with |R| R(1:3)_frac MAX_r |W(R,r,idir,ipert)|
+ ! TODO: Cleanup, support ftinterp_refine case.
+ write_maxw = len_trim(outwr_path) > 0
+ !write_maxw = .False.
+ if (write_maxw) then
+   ABI_CALLOC(maxw, (db%nrtot, db%natom3))
+   do imyp=1,db%my_npert
+     ipc = db%my_pinfo(3, imyp)
+     do irpt=1,db%my_nrpt
+       phre = zero
+       do ispden=1,db%nspden
+         do ifft=1,nfft
+           phre = max(phre, db%v1scf_rpt(1,irpt,ifft,ispden,imyp) ** 2 + db%v1scf_rpt(2,irpt,ifft,ispden,imyp) ** 2)
+         end do
+       end do
+       maxw(irpt - 1 + my_rstart, ipc) = sqrt(phre)
+     end do
+   end do
+   call xmpi_sum_master(maxw, master, db%comm, ierr)
+
+   if (xmpi_comm_rank(db%comm) == master) then
+     sc_rprimd(:, 1) = ngqpt(1) * db%cryst%rprimd(:, 1)
+     sc_rprimd(:, 2) = ngqpt(2) * db%cryst%rprimd(:, 2)
+     sc_rprimd(:, 3) = ngqpt(3) * db%cryst%rprimd(:, 3)
+     call sort_rpts(db%nrtot, all_rpt, db%cryst%rmet, iperm_irpt, rmod=all_rmod)
+     if (open_file(outwr_path, msg, newunit=unt, form="formatted", action="write", status="unknown") /= 0) then
+       MSG_ERROR(msg)
+     end if
+     write(unt, "(a)")"# |R| R(1:3)_frac MAX_r |W(R,r,idir,ipert)|"
+     write(unt, "(a, 3(i0, 1x))")"# ngqpt:", ngqpt
+     write(sfmt, "(a,i0,a)")"(es16.8, 3(f4.0,1x),", db%natom3, "(es16.8))"
+     do ii=1,db%nrtot
+       irpt = iperm_irpt(ii)
+       write(unt, sfmt)all_rmod(ii), all_rpt(:, irpt), maxw(irpt, :)
+     end do
+     close(unt)
+
+     ! Write results to netcdf file.
+     all_rpt = all_rpt(:, iperm_irpt(:))
+     do ii=1,db%natom3
+       maxw(:, ii) = maxw(iperm_irpt(:), ii)
+     end do
+#ifdef HAVE_NETCDF
+     NCF_CHECK(nctk_open_create(ncid, strcat(outwr_path, ".nc"), xmpi_comm_self))
+     NCF_CHECK(db%cryst%ncwrite(ncid))
+     ncerr = nctk_def_dims(ncid, [ &
+         nctkdim_t("nrpt", db%nrtot), nctkdim_t("nfft", nfft), &
+         nctkdim_t("natom3", db%natom3), nctkdim_t("nspden", db%nspden)], defmode=.True.)
+     NCF_CHECK(ncerr)
+     ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+       "has_dielt", "has_zeff", "has_quadrupoles", "dvdb_add_lr", "symv1"])
+     NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"]))
+     ncerr = nctk_def_arrays(ncid, [ &
+        nctkarr_t("ngqpt", "int", "three"), nctkarr_t("rpt", "dp", "three, nrpt"), nctkarr_t("rmod", "dp", "nrpt"), &
+        !nctkarr_t("v1scf_rpt", "dp", "two, nrpt, nfft, nspden, natom3"), &
+        nctkarr_t("maxw", "dp", "nrpt, natom3") &
+     ])
+     NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_set_datamode(ncid))
+     ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+       "has_dielt", "has_zeff", "has_quadrupoles"], &
+       l2int([db%has_dielt, db%has_zeff, db%has_quadrupoles]))
+     NCF_CHECK(ncerr)
+     ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+       "dvdb_add_lr", "symv1"], &
+       [db%add_lr, db%symv1])
+     NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], [db%qdamp]))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), ngqpt))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rpt"), all_rpt))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rmod"), all_rmod))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "maxw"), maxw))
+     ! FIXME: This wont work if parallelism over R and/or perturbations.
+     ! Besides I got HDF5 Error when writing big files ~4 Gb on lemaitre3
+     ! I hope it's not a issue related to 4byte integers!
+     !if (db%my_npert == db%natom3 .and. db%my_nrpt == db%nrtot) then
+     !  ii = minval(db%my_pinfo(3, :))
+     !  ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_rpt"), db%v1scf_rpt, &
+     !    start=[1, my_rstart, 1, 1, ii], count=[2, db%my_nrpt, nfft, db%nspden, db%my_npert])
+     !  NCF_CHECK(ncerr)
+     !end if
+     NCF_CHECK(nf90_close(ncid))
+#endif
+     ABI_FREE(all_rmod)
+     ABI_FREE(iperm_irpt)
+   end if
+
+   ABI_FREE(maxw)
+ end if
+
+ ABI_FREE(all_rpt)
+
+ call cwtime_report(" Construction of W(R,r)", cpu_all, wall_all, gflops_all)
+
+end subroutine dvdb_ftinterp_setup
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_enforce_asr1
+!! NAME
+!!  dvdb_enforce_asr1
+!!
+!! FUNCTION
+!!  Enforce acoustic sum rule on the DFPT potentials.
+!!
+!! INPUTS
+!!
+!! FUNCTION
+!!
+
+subroutine dvdb_enforce_asr1(db)
+
+!Arguments ------------------------------------
+!scalars
+ class(dvdb_t),target,intent(inout) :: db
+
+!Local variables-------------------------------
+!scalars
+integer :: imyp, idir, ipert, ifft, nfft, ierr, irpt, ispden
+!arrays
+ real(dp) :: sumr(2)
+ real(dp),allocatable :: asr_work(:,:,:,:)
+
+! *************************************************************************
+
+ ABI_CHECK(allocated(db%v1scf_rpt), "v1scf_rpt is not allocated (call dvdb_ftinterp_setup)")
+ nfft = size(db%v1scf_rpt, dim=2)
+
  ! Enforcing ASR \sum_{R,kappa} v1(R, r, kappa, alpha) = f(r, alpha) = 0 for each r and alpha-direction
+ call wrtout(std_out, " Enforcing ASR on W(R,r) i.e. \sum_{R,kappa} v1(R, r, kappa, alpha) = 0")
  ABI_CALLOC(asr_work, (2, nfft, db%nspden, 3))
 
  do imyp=1,db%my_npert
@@ -3048,18 +3178,19 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
    do ispden=1,db%nspden
      do ifft=1,nfft
        sumr = zero
-       do irpt=1,db%my_npert
+       do irpt=1,db%my_nrpt
          sumr(:) = sumr(:) + db%my_wratm(irpt, ipert) * db%v1scf_rpt(:,irpt,ifft,ispden,imyp)
        end do
        asr_work(:,ifft,ispden, idir) = asr_work(:,ifft,ispden, idir) + sumr(:)
      end do
    end do
  end do
+ if (db%nprocs_rpt /= 1) call xmpi_sum(asr_work, db%comm_rpt, ierr)
  if (db%nprocs_pert /= 1) call xmpi_sum(asr_work, db%comm_pert, ierr)
- asr_work = asr_work / (nrtot * db%natom)
+ asr_work = asr_work / (db%nrtot * db%natom)
 
  do idir=1,3
-   write(std_out, *)" ASR breaking For idir:" ,idir
+   write(std_out, *)" ASR breaking for idir:" ,idir
    write(std_out, *)"   For Re:  minval, maxval_fft:", minval(abs(asr_work(1,:,1,idir))), maxval(abs(asr_work(1,:,1,idir)))
    write(std_out, *)"   For Im:  minval, maxval_fft:", minval(abs(asr_work(2,:,1,idir))), maxval(abs(asr_work(2,:,1,idir)))
  end do
@@ -3103,101 +3234,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  !end if
 
  ABI_FREE(asr_work)
-#endif
 
- ! Write file with |R| R(1:3)_frac MAX_r |W(R,r,idir,ipert)|
- ! TODO: Cleanup, support ftinterp_refine case.
- write_maxw = len_trim(outwr_path) > 0
- !write_maxw = .False.
- if (write_maxw) then
-   ABI_CALLOC(maxw, (nrtot, db%natom3))
-   do imyp=1,db%my_npert
-     ipc = db%my_pinfo(3, imyp)
-     do irpt=1,db%my_nrpt
-       phre = zero
-       do ispden=1,db%nspden
-         do ifft=1,nfft
-           phre = max(phre, db%v1scf_rpt(1,irpt,ifft,ispden,imyp) ** 2 + db%v1scf_rpt(2,irpt,ifft,ispden,imyp) ** 2)
-         end do
-       end do
-       maxw(irpt - 1 + my_rstart, ipc) = sqrt(phre)
-     end do
-   end do
-   call xmpi_sum_master(maxw, master, db%comm, ierr)
-
-   if (xmpi_comm_rank(db%comm) == master) then
-     sc_rprimd(:, 1) = ngqpt(1) * db%cryst%rprimd(:, 1)
-     sc_rprimd(:, 2) = ngqpt(2) * db%cryst%rprimd(:, 2)
-     sc_rprimd(:, 3) = ngqpt(3) * db%cryst%rprimd(:, 3)
-     call sort_rpts(nrtot, all_rpt, db%cryst%rmet, iperm_irpt, rmod=all_rmod)
-     if (open_file(outwr_path, msg, newunit=unt, form="formatted", action="write", status="unknown") /= 0) then
-       MSG_ERROR(msg)
-     end if
-     write(unt, "(a)")"# |R| R(1:3)_frac MAX_r |W(R,r,idir,ipert)|"
-     write(unt, "(a, 3(i0, 1x))")"# ngqpt:", ngqpt
-     write(sfmt, "(a,i0,a)")"(es16.8, 3(f4.0,1x),", db%natom3, "(es16.8))"
-     do ii=1,nrtot
-       irpt = iperm_irpt(ii)
-       write(unt, sfmt)all_rmod(ii), all_rpt(:, irpt), maxw(irpt, :)
-     end do
-     close(unt)
-
-     ! Write results to netcdf file.
-     all_rpt = all_rpt(:, iperm_irpt(:))
-     do ii=1,db%natom3
-       maxw(:, ii) = maxw(iperm_irpt(:), ii)
-     end do
-#ifdef HAVE_NETCDF
-     NCF_CHECK(nctk_open_create(ncid, strcat(outwr_path, ".nc"), xmpi_comm_self))
-     NCF_CHECK(db%cryst%ncwrite(ncid))
-     ncerr = nctk_def_dims(ncid, [ &
-         nctkdim_t("nrpt", nrtot), nctkdim_t("nfft", nfft), &
-         nctkdim_t("natom3", db%natom3), nctkdim_t("nspden", db%nspden)], defmode=.True.)
-     NCF_CHECK(ncerr)
-     ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-       "has_dielt", "has_zeff", "has_quadrupoles", "dvdb_add_lr", "symv1"])
-     NCF_CHECK(ncerr)
-     NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"]))
-     ncerr = nctk_def_arrays(ncid, [ &
-        nctkarr_t("ngqpt", "int", "three"), nctkarr_t("rpt", "dp", "three, nrpt"), nctkarr_t("rmod", "dp", "nrpt"), &
-        !nctkarr_t("v1scf_rpt", "dp", "two, nrpt, nfft, nspden, natom3"), &
-        nctkarr_t("maxw", "dp", "nrpt, natom3") &
-     ])
-     NCF_CHECK(ncerr)
-     NCF_CHECK(nctk_set_datamode(ncid))
-     ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-       "has_dielt", "has_zeff", "has_quadrupoles"], &
-       l2int([db%has_dielt, db%has_zeff, db%has_quadrupoles]))
-     NCF_CHECK(ncerr)
-     NCF_CHECK(nctk_write_iscalars(ncid, [character(len=nctk_slen) :: "dvdb_add_lr"], [db%add_lr]))
-     NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], [db%qdamp]))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), ngqpt))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rpt"), all_rpt))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rmod"), all_rmod))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "maxw"), maxw))
-     ! FIXME: This wont work if parallelism over R and/or perturbations.
-     ! Besides I got HDF5 Error when writing big files ~4 Gb on lemaitre3
-     ! I hope it's not a issue related to 4byte integers!
-     !if (db%my_npert == db%natom3 .and. db%my_nrpt == nrtot) then
-     !  ii = minval(db%my_pinfo(3, :))
-     !  ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_rpt"), db%v1scf_rpt, &
-     !    start=[1, my_rstart, 1, 1, ii], count=[2, db%my_nrpt, nfft, db%nspden, db%my_npert])
-     !  NCF_CHECK(ncerr)
-     !end if
-     NCF_CHECK(nf90_close(ncid))
-#endif
-     ABI_FREE(all_rmod)
-     ABI_FREE(iperm_irpt)
-   end if
-
-   ABI_FREE(maxw)
- end if
-
- ABI_FREE(all_rpt)
-
- call cwtime_report(" Construction of W(R,r)", cpu_all, wall_all, gflops_all)
-
-end subroutine dvdb_ftinterp_setup
+end subroutine dvdb_enforce_asr1
 !!***
 
 !----------------------------------------------------------------------
@@ -6651,24 +6689,27 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
    qtau = - two_pi * dot_product(qG_red, tau_red)
    phre = cos(qtau); phim = sin(qtau)
 
-   !re = -fac * qGS * denom_inv
-   re = zero
+   re = +fac * qGS * denom_inv
+   !re = zero
    im = fac * qGZ * denom_inv
    v1G_lr(1,ig) = phre * re - phim * im
    v1G_lr(2,ig) = phim * re + phre * im
 
+#if 0
    if (db%has_quadrupoles) then
      !qtau = - two_pi * dot_product(qG_red, tau_red)
      !qtau = qtau - two_pi * two * dot_product(gfft(:,ig), tau_red)
-     qtau = - two_pi * three * dot_product(qG_red, tau_red)
+     !qtau = + two_pi * dot_product(qG_red, tau_red)
+     !qtau = - three * two_pi * dot_product(qG_red, tau_red)
+     qtau = - two * two_pi * dot_product(qG_red, tau_red)
+     !qtau = zero
 
      phre = cos(qtau); phim = sin(qtau)
-     ! Had to reintroduce (-1) ** (iatom + 1) to get the correct sign for the 1/4 1/4 1/4 atom in Si
-     ! This point should be clarified!
-     re = -fac * qGS * denom_inv * (-1) ** (iatom + 1)
+     re = +fac * qGS * denom_inv
      v1G_lr(1,ig) = v1G_lr(1,ig) + re * phre
      v1G_lr(2,ig) = v1G_lr(2,ig) + re * phim
    end if
+#endif
  end do
 
  ABI_FREE(gfft)
@@ -7257,16 +7298,13 @@ subroutine dvdb_qdownsample(dvdb, new_dvdb_fname, ngqpt, comm)
  integer,parameter :: master=0, qptopt1=1, timrev1=1
  integer :: fform_pot=111
  integer :: ierr,my_rank,nproc,idir,ipert,iat,ipc,ispden
- integer :: cplex, db_iqpt, npc
- integer :: nqbz, nqibz, iq, ifft, nperts_read, nfft
- integer :: ount !, fform
+ integer :: cplex, db_iqpt, npc, nqbz, nqibz, iq, ifft, nperts_read, nfft, ount
  character(len=500) :: msg
 !arrays
  integer :: qptrlatt(3,3)
  integer,allocatable :: iq_read(:), pinfo(:,:)
  real(dp) :: rhog1_g0(2)
- real(dp),allocatable :: v1scf(:,:,:), v1(:)
- real(dp),allocatable :: wtq(:), qibz(:,:), qbz(:,:)
+ real(dp),allocatable :: v1scf(:,:,:), v1(:), wtq(:), qibz(:,:), qbz(:,:)
 
 !************************************************************************
 

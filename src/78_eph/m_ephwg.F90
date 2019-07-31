@@ -452,7 +452,6 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping )
    ABI_FREE(indkk)
    call cwtime_report(" listkk1", cpu, wall, gflops)
 
-
    ! Get mapping (k + q) --> initial IBZ.
    do ii=1,self%nq_k
      self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) + kpoint

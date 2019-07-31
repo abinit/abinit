@@ -114,6 +114,8 @@ type, public :: t_htetrahedron
   type(htetra_bucket),allocatable :: unique_tetra(:)
   ! indexes of the unique tetrahedra
 
+  !contains
+
 end type t_htetrahedron
 !!***
 
@@ -584,7 +586,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  tetra_shifts(:, 3,24,4) = [ -1, -1,  0]
  tetra_shifts(:, 4,24,4) = [ -1,  0,  0]
 
- ! These shifts are taken from previous tetrahedron implmentation MJV and BXU
+ ! These shifts are taken from previous tetrahedron implementation by MJV and BXU
  ! TODO: implement shifts for the other diagonals
  tetra_shifts_6(:,1,1,1) = [0,0,0]
  tetra_shifts_6(:,2,1,1) = [1,0,0]

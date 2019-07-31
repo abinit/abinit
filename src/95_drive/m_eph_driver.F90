@@ -588,7 +588,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    if (dtset%userie == 123) then
      call wrtout(std_out, "Setting dynamic quadrupoles for Silicon")
      do ii=1,dvdb%natom
-       dvdb%qstar(:,:,:,ii) = (-1 ** (ii + 1)) * abs(levi_civita_3()) * 13.368_dp
+       dvdb%qstar(:,:,:,ii) = ((-1) ** (ii + 1)) * abs(levi_civita_3()) * 13.368_dp
      end do
      dvdb%has_quadrupoles = .True.
    end if
