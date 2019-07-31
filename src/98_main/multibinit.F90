@@ -77,10 +77,9 @@ program multibinit
   real(dp) :: tsec(2)
   character(len=24) :: codename,start_datetime
   character(len=fnlen) :: filnam(17),tmpfilename
-  character(len=500) :: message, arg
+  character(len=500) :: message 
   type(args_t) :: args
   integer :: ii
-  logical :: unittest=.False. , use_f03=.False.
   integer :: master, my_rank, comm, nproc, ierr
   logical :: iam_master
 
