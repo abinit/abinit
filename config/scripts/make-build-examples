@@ -122,4 +122,4 @@ for my_config in my_configs:
     out_data_tmp=out_data.replace("_FB_",fbversion)
 
     # Write data
-    open("%s/%s%s.ac" % (my_outdir,my_subdir,sec), "wt").write(out_data)
+    open("%s/%s%s.ac" % (my_outdir,my_subdir,sec), "wt").write(out_data_tmp)

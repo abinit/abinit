@@ -147,7 +147,8 @@ my_name     = "makemake"
 my_configs  = {
   "make":"config/specs/makemake.conf",
   "bsys":"config/specs/buildsys.conf",
-  "bins":"config/specs/binaries.conf"}
+  "bins":"config/specs/binaries.conf",
+  "fbks":"config/specs/fbversion.conf"}
 
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
@@ -182,6 +183,11 @@ else:
     (my_name, my_configs["bins"]))
   sys.stderr.write("[%s] Aborting now!" % (my_name))
   sys.exit(12)
+if ( not os.path.exists(my_configs["fbks"]) ):
+  sys.stderr.write("[%s] Could not find config file (%s)" % \
+    (my_name, my_configs["fbks"]))
+  sys.stderr.write("[%s] Aborting now!" % (my_name))
+  sys.exit(13)
 
 # Parse command-line arguments
 from optparse import OptionParser
