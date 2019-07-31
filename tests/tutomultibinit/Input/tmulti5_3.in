@@ -47,5 +47,5 @@ spin_sia_k1dir = 1.0 0.0 0.0    ! direction of SIA, easy axis along x.
 #%%   1-D spin chain, with 1st nearest neighbor AFM exchange and DMI.
 #%%   1NN J=5 meV, 1NN D=(0, 0, 2) meV with two neighboring D opposite.
 #%%   This is to show how to see the spin canting.
-#%% <END TEST_INFO>
+#%%<END TEST_INFO>
 
