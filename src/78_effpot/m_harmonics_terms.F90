@@ -313,7 +313,7 @@ subroutine harmonics_terms_free(harmonics_terms)
     ABI_DEALLOCATE(harmonics_terms%qpoints)
   end if
 
-  call ifc_free(harmonics_terms%ifcs)
+  call harmonics_terms%ifcs%free()
 
 end subroutine harmonics_terms_free
 !!***

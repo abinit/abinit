@@ -299,7 +299,7 @@ type(ephwg_t) function ephwg_new( &
 
  do ik=1,new%nibz
    if (mod(ik, nprocs) /= my_rank) cycle ! mpi-parallelism
-   call ifc_fourq(ifc, cryst, new%ibz(:, ik), phfrq, displ_cart)
+   call ifc%fourq(cryst, new%ibz(:, ik), phfrq, displ_cart)
    new%phfrq_ibz(ik, :) = phfrq
 
    if (frohl_model /= 3) cycle

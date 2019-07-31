@@ -39,7 +39,7 @@ module m_harmonic_thermo
  use m_geometry,       only : mkrdim
  use m_crystal,        only : crystal_t
  use m_anaddb_dataset, only : anaddb_dataset_type
- use m_ifc,            only : ifc_type, ifc_fourq
+ use m_ifc,            only : ifc_type
  use m_kpts,           only : smpbz
  use m_symkpt,         only : symkpt
 
@@ -93,8 +93,6 @@ contains
 !! SOURCE
 
 subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,comm,thmflag)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -301,7 +299,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
      qphnrm=1.0_dp
 
      ! Fourier Interpolation
-     call ifc_fourq(Ifc,Crystal,qphon,phfrq,displ,out_eigvec=eigvec)
+     call ifc%fourq(Crystal,qphon,phfrq,displ,out_eigvec=eigvec)
 
      if (present(thmflag)) then
        if (thmflag ==2)then

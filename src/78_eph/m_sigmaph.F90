@@ -889,7 +889,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      qpt_cart = sigma%qvers_cart(:, iang)
      inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
 
-     call ifc_fourq(ifc, cryst, qpt_cart, phfrq, displ_cart, nanaqdir="cart")
+     call ifc%fourq(cryst, qpt_cart, phfrq, displ_cart, nanaqdir="cart")
 
      ! Note that acoustic modes are ignored.
      do nu=4,natom3
@@ -1274,7 +1274,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Get phonon frequencies and displacements in reduced coordinates for this q-point
        call timab(1901, 1, tsec)
-       call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, comm=sigma%comm_pert)
+       call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, comm=sigma%comm_pert)
 
        if (sigma%frohl_model == 2) then
          ! TODO: Recheck this part
@@ -1950,7 +1950,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          end if
 
          ! Get phonons for this q-point.
-         call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, comm=sigma%comm_pert)
+         call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, comm=sigma%comm_pert)
 
          ! Sum over my modes for this q-point.
          do imyp=1,my_npert
@@ -2063,7 +2063,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          do iq_ibz=1,sigma%nqibz_k
            if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
            ! Recompute phonons (cannot use sigma%ephwg in this case)
-           call ifc_fourq(ifc, cryst, sigma%qibz_k(:,iq_ibz), phfrq, displ_cart)
+           call ifc%fourq(cryst, sigma%qibz_k(:,iq_ibz), phfrq, displ_cart)
            do nu=1,natom3
              dwargs = sigma%gfw_mesh - phfrq(nu)
              dtw_weights(:, 1) = gaussian(dwargs, dtset%ph_smear)
@@ -5008,7 +5008,7 @@ subroutine eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, prtvol,
    inv_qepsq = one / dot_product(qvers_cart, matmul(ifc%dielt, qvers_cart))
 
    ! Compute phonons with NA behaviour along qvers_cart.
-   call ifc_fourq(ifc, cryst, qvers_cart, phfrq, displ_cart, nanaqdir="cart")
+   call ifc%fourq(cryst, qvers_cart, phfrq, displ_cart, nanaqdir="cart")
 
    ! Note that acoustic modes are ignored.
    do nu=4,3*cryst%natom
@@ -5176,7 +5176,7 @@ subroutine eval_sigfrohl2(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
           ! Should write routine to compute weights given kptrlatt, kibz and radius.
           if (dot_product(qpt_cart, qpt_cart) <= qrad2) cycle
           vol_fact = one
-          call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart)
+          call ifc%fourq(cryst, qpt, phfrq, displ_cart)
           inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
 
           ! Interpolate e_{n k+q}
@@ -5270,9 +5270,9 @@ subroutine eval_sigfrohl2(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
 
       if (iqr == 1) then
         ! Include non-analytical part for the first point
-        call ifc_fourq(ifc, cryst, qpt_cart, phfrq, displ_cart, nanaqdir="cart")
+        call ifc%fourq(cryst, qpt_cart, phfrq, displ_cart, nanaqdir="cart")
       else
-        call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart)
+        call ifc%fourq(cryst, qpt, phfrq, displ_cart)
       end if
       wqr(iqr, :) = phfrq
 
