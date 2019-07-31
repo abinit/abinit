@@ -822,7 +822,7 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
  natom3 = gams%natom3
 
  ! Get phonon frequencies and eigenvectors.
- call ifc_fourq(ifc,cryst,gams%qibz(:,iq_ibz),phfrq,displ_cart,out_eigvec=pheigvec, out_displ_red=displ_red)
+ call ifc%fourq(cryst,gams%qibz(:,iq_ibz),phfrq,displ_cart,out_eigvec=pheigvec, out_displ_red=displ_red)
 
  ! If the matrices do not contain the scalar product with the displ_red vectors yet do it now.
  tmp_gam2 = reshape(gams%vals_qibz(:,:,:,iq_ibz,spin), [2,natom3,natom3])
@@ -986,7 +986,7 @@ subroutine phgamma_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_ph,lambda_ph,displ
  ABI_FREE(sinkr)
 
  ! Get phonon frequencies and eigenvectors.
- call ifc_fourq(ifc,cryst,qpt,phfrq,displ_cart,out_eigvec=pheigvec, out_displ_red=displ_red)
+ call ifc%fourq(cryst,qpt,phfrq,displ_cart,out_eigvec=pheigvec, out_displ_red=displ_red)
 
  ! If the matrices do not contain the scalar product with the displ_cart vectors yet do it now.
  tmp_gam2 = reshape (gam_now, [2,natom3,natom3])
@@ -1287,7 +1287,7 @@ subroutine phgamma_vv_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_in_ph,gam
  natom3 = gams%natom3
 
  ! Get phonon frequencies and eigenvectors.
- call ifc_fourq(ifc,cryst,gams%qibz(:,iq_ibz),phfrq,displ_cart,out_eigvec=pheigvec, out_displ_red=displ_red)
+ call ifc%fourq(cryst,gams%qibz(:,iq_ibz),phfrq,displ_cart,out_eigvec=pheigvec, out_displ_red=displ_red)
 
  do jdir = 1,gams%ndir_transp
    do idir = 1,gams%ndir_transp
@@ -1414,7 +1414,7 @@ subroutine phgamma_vv_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_in_ph,gamma_out
  natom3 = gams%natom3
 
  ! Get phonon frequencies and eigenvectors.
- call ifc_fourq(ifc,cryst,qpt,phfrq,displ_cart,out_eigvec=pheigvec, out_displ_red=displ_red)
+ call ifc%fourq(cryst,qpt,phfrq,displ_cart,out_eigvec=pheigvec, out_displ_red=displ_red)
 
  ! Taken from mkph_linwid
  ! This reduced version of ftgkk supposes the kpoints have been integrated
@@ -2097,7 +2097,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
    do iq_ibz = 1, nqibz
      cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
      ! interpolated phonon freqs
-     call ifc_fourq(ifc,cryst,qibz(:,iq_ibz),phfrq,displ_cart)
+     call ifc%fourq(cryst,qibz(:,iq_ibz),phfrq,displ_cart)
      ! save for tetrahedron interpolation
      phfreq_tetra(iq_ibz,:) = phfrq(:)
    end do

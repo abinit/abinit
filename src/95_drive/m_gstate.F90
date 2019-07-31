@@ -1527,7 +1527,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    mpert = dtset%natom + 6 ; msize = 3*mpert
 
 !  create a ddb structure with just one blok
-   call ddb_malloc(ddb,msize,1,dtset%natom,dtset%ntypat)
+   call ddb%malloc(msize,1,dtset%natom,dtset%ntypat)
 
    ddb%flg = 0
    ddb%qpt = zero
@@ -1539,7 +1539,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ddb%typ(1) = 0
      ddb%val(1,1,1) = results_gs%etotal
      ddb%flg(1,1) = 1
-     call ddb_write_blok(ddb,1,choice,dtset%mband,mpert,msize,dtset%nkpt,dtfil%unddb)
+     call ddb%write_block(1,choice,dtset%mband,mpert,msize,dtset%nkpt,dtfil%unddb)
    end if
 
 !  Write gradients to the DDB
@@ -1574,9 +1574,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ddb%val(1,indx+1:indx+6,1) = results_gs%strten(1:6)
    end if
 
-   call ddb_write_blok(ddb,1,choice,dtset%mband,mpert,msize,dtset%nkpt,dtfil%unddb)
-
-   call ddb_free(ddb)
+   call ddb%write_block(1,choice,dtset%mband,mpert,msize,dtset%nkpt,dtfil%unddb)
+   call ddb%free()
 
 !  Close DDB
    close(dtfil%unddb)
