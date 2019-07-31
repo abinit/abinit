@@ -29,7 +29,6 @@ module m_phonons
  use m_errors
  use m_xmpi
  use m_abicore
- use m_tetrahedron
  use m_htetrahedron
  use m_numeric_tools
  use m_crystal

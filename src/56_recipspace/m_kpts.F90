@@ -40,7 +40,6 @@ module m_kpts
  use m_fstrings,       only : sjoin, itoa, ltoa
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_geometry,       only : metric
- use m_tetrahedron,    only : t_tetrahedron, init_tetra, destroy_tetra
  use m_htetrahedron,   only : t_htetrahedron, htetra_init
  use m_symkpt,         only : symkpt, symkpt_new
 
@@ -50,7 +49,7 @@ module m_kpts
 
  public :: kpts_timrev_from_kptopt   ! Returns the value of timrev from kptopt
  public :: kpts_ibz_from_kptrlatt    ! Determines the IBZ, the weights and the BZ from kptrlatt
- public :: tetra_from_kptrlatt       ! Create an instance of `t_tetrahedron` from kptrlatt and shiftk
+ public :: tetra_from_kptrlatt       ! Create an instance from kptrlatt and shiftk
  public :: symkchk                   ! Checks that the set of k points has the full space group symmetry,
                                      ! modulo time reversal if appropriate.
  public :: listkk                    ! Find correspondence between two set of k-points.
@@ -136,7 +135,7 @@ end function kpts_timrev_from_kptopt
 !!      m_dvdb,m_ebands,m_gruneisen,m_ifc,m_kpts,m_phgamma,m_phonons,m_sigmaph
 !!
 !! CHILDREN
-!!      getkgrid,init_tetra,kpts_ibz_from_kptrlatt,listkk
+!!      getkgrid,kpts_ibz_from_kptrlatt,listkk
 !!
 !! SOURCE
 
@@ -207,7 +206,7 @@ end subroutine kpts_ibz_from_kptrlatt
 !! tetra_from_kptrlatt
 !!
 !! FUNCTION
-!!  Create an instance of `t_tetrahedron` from kptrlatt and shiftk
+!!  Create an instance from kptrlatt and shiftk
 !!
 !! INPUTS
 !!  cryst<cryst_t>=Crystalline structure.
@@ -220,7 +219,7 @@ end subroutine kpts_ibz_from_kptrlatt
 !!  comm= MPI communicator
 !!
 !! OUTPUT
-!!  tetra<t_tetrahedron>=Tetrahedron object, fully initialized if ierr == 0.
+!!  tetra<t_htetrahedron>=Tetrahedron object, fully initialized if ierr == 0.
 !!  msg=Error message if ierr /= 0
 !!  ierr=Exit status
 !!
@@ -228,7 +227,7 @@ end subroutine kpts_ibz_from_kptrlatt
 !!      gstate,wfk_analyze
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
+!!      listkk,smpbz
 !!
 !! SOURCE
 
