@@ -1,5 +1,5 @@
 #ABINIT - INPUT FILE
-#GOLD 31 ATOMS
+#BARIUM 31 ATOMS
 
 #Process distribution (parallelism) - TO BE ADAPTED
 #autoparal 1
@@ -8,7 +8,7 @@
 # npkpt 1 npband 16 npfft 4  # 64 MPI processes -2
 # npkpt 1 npband 16 npfft 8  # 128 MPI processes
 #max_ncpus 500
-use_gemm_nonlop 1
+use_gemm_nonlop 1 #0
 paral_kgb 1
 npband 1
 npfft 1
@@ -56,6 +56,8 @@ chkprim 0
 wfoptalg 111
 #istwfk 1
 istwfk 2
+
+#useria 121212
 
 #Atomic positions
 xred

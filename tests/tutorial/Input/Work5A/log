@@ -23,7 +23,7 @@ message: |
 src_file: m_dtfil.F90
 src_line: 1106
 message: |
-    Renaming old t03_2_x.out to t03_2_x.out0448
+    Renaming old t03_2_x.out to t03_2_x.out0003
 ...
  
 
@@ -42,8 +42,8 @@ message: |
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 29 Jul 2019.
-- ( at 17h35 )
+.Starting date : Thu  1 Aug 2019.
+- ( at 13h13 )
   
  
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -51,7 +51,7 @@ message: |
  === Build Information === 
   Version       : 8.11.9
   Build target  : x86_64_linux_intel19.0
-  Build date    : 20190729
+  Build date    : 20190801
  
  === Compiler Suite === 
   C compiler       : gnu7.4
@@ -145,7 +145,7 @@ message: |
 - root for input  files -> t03_xi
 - root for output files -> t03_xo
  
--instrng: 112 lines of input have been read from file t03_2.in
+-instrng: 114 lines of input have been read from file t03_2.in
  
 
  Please give name of formatted atomic psp file
@@ -563,10 +563,10 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  vtorho: nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=2 0 1
  mpi_enreg%comm_bandspinorfft make invovl -1006632942
  mpi_enreg%comm_bandspinorfft make invovl -1006632948
- mpi_enreg%comm_fft make invovl -2080374778
  mpi_enreg%comm_fft make invovl -2080374780
- mpi_enreg%comm_band make invovl -1006632960
+ mpi_enreg%comm_fft make invovl -2080374778
  mpi_enreg%comm_band make invovl -2080374778
+ mpi_enreg%comm_band make invovl -1006632960
  Invovl built
  VTOFK CALL
  VTOFK CALL
@@ -581,9 +581,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_ROWS)%comm -1006632939
- xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%comm -1006632937
  xgTransposer%mpiData(MPI_COLS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%size           2
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_ROWS)%comm -1006632946
@@ -591,37 +591,37 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  xgTransposer%mpiData(MPI_COLS)%rank           1
  xgTransposer%mpiData(MPI_COLS)%size           2
  flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
- ndatarecv_tot        3887
- bandpp_sym          48
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
  PROSAO getAX_BX
  PROSAO getAX_BX
  CPUROW0
- prepnonlop spaceComm -2080374778
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  CPUROW0
  prepnonlop spaceComm -1006632960
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
+ prepnonlop spaceComm -2080374778
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
  prepnonlop spaceComm -1006632960
  size(cprjin)        2976
  hamk%natom          31
@@ -635,17 +635,17 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  flag_inv_sym 3
  flag_inv_sym 3
  ndatarecv_tot        3887
+ bandpp_sym          48
  ndatarecv_tot        3887
  bandpp_sym          48
- bandpp_sym          48
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
@@ -653,11 +653,16 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  CPUROW0
  CPUROW0
  prepnonlop spaceComm -1006632960
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
  prepnonlop spaceComm -2080374778
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
+ prepnonlop spaceComm -2080374778
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
@@ -667,32 +672,27 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  hamk%natom          31
  my_nspinor           1
  ndat          96
- prepnonlop spaceComm -2080374778
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  flag_inv_sym 3
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
  ndatarecv_tot        3887
  bandpp_sym          48
- mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- chebfi%total_spacedim        3888
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
  chebfi%total_spacedim        3888
  chebfi%bandpp          96
+ chebfi%total_spacedim        3888
  chebfi%bandpp          96
  CPUROW0
  CPUROW0
@@ -706,42 +706,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  hamk%natom          31
  my_nspinor           1
  ndat          96
- prepnonlop spaceComm -2080374778
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  prepnonlop spaceComm -1006632960
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- ndatarecv_tot        3887
- bandpp_sym          48
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- CPUROW0
- CPUROW0
- prepnonlop spaceComm -2080374778
- prepnonlop spaceComm -1006632960
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
@@ -751,11 +716,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  hamk%natom          31
  my_nspinor           1
  ndat          96
- prepnonlop spaceComm -1006632960
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  flag_inv_sym 3
  flag_inv_sym 3
  ndatarecv_tot        3887
@@ -764,55 +724,15 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  bandpp_sym          48
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- CPUROW0
- CPUROW0
- prepnonlop spaceComm -1006632960
- prepnonlop spaceComm -2080374778
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- prepnonlop spaceComm -2080374778
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- prepnonlop spaceComm -1006632960
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- ndatarecv_tot        3887
- bandpp_sym          48
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
  CPUROW0
  CPUROW0
@@ -842,38 +762,106 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  bandpp_sym          48
  ndatarecv_tot        3887
  bandpp_sym          48
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ CPUROW0
+ CPUROW0
+ prepnonlop spaceComm -1006632960
+ prepnonlop spaceComm -2080374778
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ prepnonlop spaceComm -1006632960
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ prepnonlop spaceComm -2080374778
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ CPUROW0
+ CPUROW0
+ prepnonlop spaceComm -1006632960
+ prepnonlop spaceComm -2080374778
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ prepnonlop spaceComm -1006632960
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ prepnonlop spaceComm -2080374778
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
  LOOP FINISHED
  LOOP FINISHED
  spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
- spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
@@ -887,17 +875,45 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  STAMPAM MPI2
  rank, spacedim           1        1944
  spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
- spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
  spacedim        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
  PRE DGEMM
  PRE DGEMM
  NAKON DGEMM
@@ -908,16 +924,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  transat
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632942
- PRE DGEMM
- PRE DGEMM
- NAKON DGEMM
- transat
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
- NAKON DGEMM
- transat
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
  spacedim        1944
  spacedim        1944
  STAMPAM MPI2
@@ -931,29 +937,43 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  STAMPAM MPI2
  rank, spacedim           0        1944
  spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
- spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
+ INFO           0
+ INFO           0
+ spacedim        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
- spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
  spacedim        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
- spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
  spacedim        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  REMAINDER           0
  REMAINDER           0
  PRE DGEMM
@@ -967,22 +987,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632942
  spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
- PRE DGEMM
- PRE DGEMM
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
- NAKON DGEMM
- transan
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
- spacedim        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
@@ -999,42 +1003,64 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632942
  spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
  spacedim        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  xgx0 AFTER
- chebfi%spacecom -1006632948
  chebfi%spacecom -1006632942
+ chebfi%spacecom -1006632948
  spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
- xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%comm -1006632937
  xgTransposer%mpiData(MPI_COLS)%comm -1006632936
  xgTransposer%mpiData(MPI_COLS)%rank           0
- xgTransposer%mpiData(MPI_COLS)%size           2
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_ROWS)%comm -1006632944
  xgTransposer%mpiData(MPI_COLS)%comm -1006632946
  xgTransposer%mpiData(MPI_COLS)%rank           1
  xgTransposer%mpiData(MPI_COLS)%size           2
- flag_inv_sym 3
+ xgTransposer%mpiData(MPI_COLS)%size           2
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
+ flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
  mpi_enreg%comm_fft getghc -2080374780
@@ -1042,11 +1068,11 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  PROSAO getAX_BX
@@ -1079,22 +1105,22 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  bandpp_sym          48
  ndatarecv_tot        3887
  bandpp_sym          48
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
  CPUROW0
  CPUROW0
- prepnonlop spaceComm -2080374778
  prepnonlop spaceComm -1006632960
+ prepnonlop spaceComm -2080374778
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
@@ -1119,18 +1145,18 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  bandpp_sym          48
  ndatarecv_tot        3887
  bandpp_sym          48
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
  chebfi%total_spacedim        3888
  chebfi%bandpp          96
  chebfi%total_spacedim        3888
@@ -1147,46 +1173,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  hamk%natom          31
  my_nspinor           1
  ndat          96
- prepnonlop spaceComm -2080374778
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- prepnonlop spaceComm -1006632960
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- ndatarecv_tot        3887
- bandpp_sym          48
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- CPUROW0
- CPUROW0
- prepnonlop spaceComm -2080374778
- prepnonlop spaceComm -1006632960
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  prepnonlop spaceComm -1006632960
  size(cprjin)        2976
  hamk%natom          31
@@ -1198,12 +1184,15 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  my_nspinor           1
  ndat          96
  flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
- ndatarecv_tot        3887
- bandpp_sym          48
- mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
@@ -1211,18 +1200,15 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- CPUROW0
+ mpi_enreg%comm_fft getghc -2080374780
  CPUROW0
  prepnonlop spaceComm -2080374778
- prepnonlop spaceComm -1006632960
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
+ CPUROW0
+ prepnonlop spaceComm -1006632960
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
@@ -1238,9 +1224,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  my_nspinor           1
  ndat          96
  flag_inv_sym 3
- flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
+ flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
  mpi_enreg%comm_fft getghc -2080374780
@@ -1278,23 +1264,63 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  my_nspinor           1
  ndat          96
  flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ CPUROW0
+ prepnonlop spaceComm -1006632960
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ CPUROW0
+ prepnonlop spaceComm -2080374778
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ prepnonlop spaceComm -1006632960
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ prepnonlop spaceComm -2080374778
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ flag_inv_sym 3
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
  ndatarecv_tot        3887
  bandpp_sym          48
- mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
  LOOP FINISHED
  LOOP FINISHED
  spacedim        1944
@@ -1328,37 +1354,43 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  STAMPAM MPI2
  rank, spacedim           0        1944
  spacedim        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
  spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
  PRE DGEMM
  PRE DGEMM
- NAKON DGEMM
- transat
- NAKON DGEMM
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
- transat
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
- PRE DGEMM
- PRE DGEMM
- NAKON DGEMM
- transat
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
  NAKON DGEMM
  transat
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632942
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
  spacedim        1944
  spacedim        1944
  STAMPAM MPI2
@@ -1377,24 +1409,38 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  rank, spacedim           1        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
+ INFO           0
+ INFO           0
  spacedim        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
  spacedim        1944
- spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
  spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
  REMAINDER           0
  REMAINDER           0
  PRE DGEMM
@@ -1418,15 +1464,15 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  NAKON DGEMM
  transan
  xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
+ xgBlockW%spacedim_comm -1006632948
  NAKON DGEMM
  transan
  xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
+ xgBlockW%spacedim_comm -1006632942
  spacedim        1944
  STAMPAM MPI2
- spacedim        1944
  rank, spacedim           0        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
  PRE DGEMM
@@ -1445,6 +1491,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
@@ -1555,12 +1607,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
       Maximum=    2.1562E-01  at reduced coord.    0.0000    0.6889    0.6889
       Minimum=   -9.1809E-02  at reduced coord.    0.2444    0.2444    0.0000
    Integrated=    3.1000E+02
- ETOT  1  -791.89667798634    -7.919E+02 2.208E-02 7.712E+00
+ ETOT  1  -791.89667798634    -7.919E+02 0.000E+00 7.712E+00
  scprqt: <Vxc>= -4.9191994E-01 hartree
  
  Simple mixing update:
   residual square of the potential:   2.443685568515974E-005
- scfcv_core: previous iteration took  3.10 [s]
+ scfcv_core: previous iteration took  5.46 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -1586,11 +1638,11 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  chebfi%spacecom -1006632948
  chebfi%spacecom -1006632942
  spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
- STAMPAM MPI2
- rank, spacedim           0        1944
  xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_ROWS)%comm -1006632936
@@ -1609,18 +1661,18 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  bandpp_sym          48
  ndatarecv_tot        3887
  bandpp_sym          48
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
  PROSAO getAX_BX
  PROSAO getAX_BX
  CPUROW0
@@ -1635,16 +1687,16 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  hamk%natom          31
  my_nspinor           1
  ndat          96
- prepnonlop spaceComm -1006632960
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  prepnonlop spaceComm -2080374778
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
+ prepnonlop spaceComm -1006632960
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
  flag_inv_sym 3
  flag_inv_sym 3
  ndatarecv_tot        3887
@@ -1652,55 +1704,55 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  ndatarecv_tot        3887
  bandpp_sym          48
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
  CPUROW0
  CPUROW0
+ prepnonlop spaceComm -2080374778
  prepnonlop spaceComm -1006632960
+ size(cprjin)        2976
+ hamk%natom          31
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ my_nspinor           1
+ ndat          96
  prepnonlop spaceComm -2080374778
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  prepnonlop spaceComm -1006632960
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
- prepnonlop spaceComm -2080374778
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  chebfi%total_spacedim        3888
@@ -1709,13 +1761,53 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  chebfi%bandpp          96
  CPUROW0
  CPUROW0
- prepnonlop spaceComm -2080374778
  prepnonlop spaceComm -1006632960
+ prepnonlop spaceComm -2080374778
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
  size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ prepnonlop spaceComm -1006632960
+ prepnonlop spaceComm -2080374778
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ flag_inv_sym 3
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ CPUROW0
+ CPUROW0
+ prepnonlop spaceComm -1006632960
+ prepnonlop spaceComm -2080374778
+ size(cprjin)        2976
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
  hamk%natom          31
  my_nspinor           1
  ndat          96
@@ -1736,16 +1828,56 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  ndatarecv_tot        3887
  bandpp_sym          48
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
+ CPUROW0
+ CPUROW0
+ prepnonlop spaceComm -1006632960
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ prepnonlop spaceComm -2080374778
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ prepnonlop spaceComm -2080374778
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ prepnonlop spaceComm -1006632960
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  CPUROW0
  CPUROW0
@@ -1759,92 +1891,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  hamk%natom          31
  my_nspinor           1
  ndat          96
- prepnonlop spaceComm -2080374778
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  prepnonlop spaceComm -1006632960
  size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- ndatarecv_tot        3887
- bandpp_sym          48
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- CPUROW0
- CPUROW0
- prepnonlop spaceComm -1006632960
  prepnonlop spaceComm -2080374778
- size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- prepnonlop spaceComm -1006632960
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- prepnonlop spaceComm -2080374778
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- ndatarecv_tot        3887
- bandpp_sym          48
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- CPUROW0
- CPUROW0
- prepnonlop spaceComm -2080374778
- prepnonlop spaceComm -1006632960
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- prepnonlop spaceComm -1006632960
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- prepnonlop spaceComm -2080374778
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
@@ -1856,17 +1908,17 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  ndatarecv_tot        3887
  bandpp_sym          48
  mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
  LOOP FINISHED
  LOOP FINISHED
  spacedim        1944
@@ -1888,49 +1940,55 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  STAMPAM MPI2
  rank, spacedim           1        1944
  spacedim        1944
- spacedim        1944
- STAMPAM MPI2
- rank, spacedim           1        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
  spacedim        1944
- spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
  spacedim        1944
- spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
  spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
  PRE DGEMM
  PRE DGEMM
- NAKON DGEMM
- transat
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
  NAKON DGEMM
  transat
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632942
- PRE DGEMM
- PRE DGEMM
- NAKON DGEMM
  NAKON DGEMM
  transat
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632948
+ PRE DGEMM
+ PRE DGEMM
+ NAKON DGEMM
  transat
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632942
+ NAKON DGEMM
+ transat
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
  spacedim        1944
  spacedim        1944
  STAMPAM MPI2
@@ -1949,6 +2007,20 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  rank, spacedim           1        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
+ INFO           0
+ INFO           0
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
  spacedim        1944
  spacedim        1944
  STAMPAM MPI2
@@ -1972,10 +2044,10 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  PRE DGEMM
  PRE DGEMM
  NAKON DGEMM
+ NAKON DGEMM
  transan
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632948
- NAKON DGEMM
  transan
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632942
@@ -1990,54 +2062,60 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  NAKON DGEMM
  transan
  xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
+ xgBlockW%spacedim_comm -1006632942
  NAKON DGEMM
  transan
  xgBlockA%transt
- xgBlockW%spacedim_comm -1006632942
- spacedim        1944
+ xgBlockW%spacedim_comm -1006632948
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
  PRE DGEMM
  PRE DGEMM
  NAKON DGEMM
  transan
- NAKON DGEMM
- xgBlockA%transt
- xgBlockW%spacedim_comm -1006632948
- transan
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632942
+ NAKON DGEMM
+ transan
+ xgBlockA%transt
+ xgBlockW%spacedim_comm -1006632948
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
  spacedim        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
- spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
  spacedim        1944
+ spacedim        1944
  STAMPAM MPI2
  rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  xgx0 AFTER
  chebfi%spacecom -1006632942
  chebfi%spacecom -1006632948
  xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%comm -1006632939
- xgTransposer%mpiData(MPI_COLS)%comm -1006632937
- xgTransposer%mpiData(MPI_COLS)%rank           0
- xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_ROWS)%comm -1006632944
  xgTransposer%mpiData(MPI_COLS)%comm -1006632946
  xgTransposer%mpiData(MPI_COLS)%rank           1
  xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_ROWS)%comm -1006632939
+ xgTransposer%mpiData(MPI_COLS)%comm -1006632937
+ xgTransposer%mpiData(MPI_COLS)%rank           0
+ xgTransposer%mpiData(MPI_COLS)%size           2
  flag_inv_sym 3
  flag_inv_sym 3
  ndatarecv_tot        3887
@@ -2049,9 +2127,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
@@ -2060,8 +2138,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  PROSAO getAX_BX
  CPUROW0
  CPUROW0
- prepnonlop spaceComm -1006632960
  prepnonlop spaceComm -2080374778
+ prepnonlop spaceComm -1006632960
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
@@ -2087,26 +2165,26 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  ndatarecv_tot        3887
  bandpp_sym          48
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
  CPUROW0
+ prepnonlop spaceComm -1006632960
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
  CPUROW0
- prepnonlop spaceComm -1006632960
  prepnonlop spaceComm -2080374778
  size(cprjin)        2976
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  hamk%natom          31
  my_nspinor           1
  ndat          96
@@ -2121,39 +2199,29 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  my_nspinor           1
  ndat          96
  flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
- ndatarecv_tot        3887
- bandpp_sym          48
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
  chebfi%total_spacedim        3888
  chebfi%bandpp          96
  chebfi%total_spacedim        3888
  chebfi%bandpp          96
  CPUROW0
  CPUROW0
- prepnonlop spaceComm -2080374778
- prepnonlop spaceComm -1006632960
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  prepnonlop spaceComm -1006632960
  size(cprjin)        2976
  hamk%natom          31
@@ -2164,22 +2232,72 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  hamk%natom          31
  my_nspinor           1
  ndat          96
+ prepnonlop spaceComm -2080374778
+ prepnonlop spaceComm -1006632960
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ flag_inv_sym 3
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ bandpp_sym          48
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ CPUROW0
+ CPUROW0
+ prepnonlop spaceComm -1006632960
+ prepnonlop spaceComm -2080374778
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ prepnonlop spaceComm -2080374778
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ prepnonlop spaceComm -1006632960
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
  flag_inv_sym 3
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
  ndatarecv_tot        3887
  bandpp_sym          48
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  CPUROW0
@@ -2194,12 +2312,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  hamk%natom          31
  my_nspinor           1
  ndat          96
+ prepnonlop spaceComm -1006632960
  prepnonlop spaceComm -2080374778
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
- prepnonlop spaceComm -1006632960
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
@@ -2211,65 +2329,25 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  ndatarecv_tot        3887
  bandpp_sym          48
  mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
  CPUROW0
+ prepnonlop spaceComm -2080374778
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
  CPUROW0
- prepnonlop spaceComm -2080374778
  prepnonlop spaceComm -1006632960
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- prepnonlop spaceComm -1006632960
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- prepnonlop spaceComm -2080374778
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- ndatarecv_tot        3887
- bandpp_sym          48
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- CPUROW0
- CPUROW0
- prepnonlop spaceComm -2080374778
- prepnonlop spaceComm -1006632960
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
@@ -2290,18 +2368,24 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  bandpp_sym          48
  ndatarecv_tot        3887
  bandpp_sym          48
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
- mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374778
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
+ mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374780
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
  mpi_enreg%comm_fft getghc -2080374778
- mpi_enreg%comm_fft getghc -2080374778
+ spacedim        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
  PRE DGEMM
  PRE DGEMM
  NAKON DGEMM
@@ -2315,13 +2399,15 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  PRE DGEMM
  PRE DGEMM
  NAKON DGEMM
- NAKON DGEMM
  transat
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632948
+ NAKON DGEMM
  transat
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632942
+ INFO           0
+ INFO           0
  REMAINDER           0
  PRE DGEMM
  REMAINDER           0
@@ -2354,6 +2440,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  transan
  xgBlockA%transt
  xgBlockW%spacedim_comm -1006632942
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
  spacedim        1944
  STAMPAM MPI2
  rank, spacedim           0        1944
@@ -2464,10 +2556,10 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
       Maximum=    2.1118E-01  at reduced coord.    0.5333    0.5556    0.5556
       Minimum=   -7.4246E-02  at reduced coord.    0.2444    0.2444    0.0000
    Integrated=    3.1000E+02
- ETOT  2  -797.83475582265    -5.938E+00 3.707E+00 1.587E+00
+ ETOT  2  -797.83475582265    -5.938E+00 0.000E+00 1.587E+00
  scprqt: <Vxc>= -4.9337395E-01 hartree
- prepnonlop spaceComm -2080374778
  prepnonlop spaceComm -1006632960
+ prepnonlop spaceComm -2080374778
  Computing residual forces using atomic densities taken from pseudos
  
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2566,32 +2658,32 @@ message: |
    Minimum direct gap =   0.0907 [eV], located at k-point      :   0.0000  0.0000  0.0000
    Fundamental gap    =   0.0907 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                        Bottom of conduction at :   0.0000  0.0000  0.0000
- Mean square residual over all n,k,spin=   13.042E-02; max=  37.069E-01
-   0.0000  0.0000  0.0000    1  3.70693E+00 kpt; spin; max resid(k); each band:
-  6.64E-08 6.06E-07 7.43E-07 5.62E-07 6.30E-07 6.85E-07 5.20E-07 5.36E-07
-  6.90E-07 8.30E-07 8.35E-07 1.02E-06 7.49E-07 8.79E-07 1.05E-06 6.22E-07
-  6.82E-07 8.53E-07 1.02E-06 7.00E-07 7.15E-07 9.07E-07 1.02E-06 1.10E-06
-  1.03E-06 1.12E-06 9.56E-07 1.02E-06 1.12E-06 1.23E-06 1.37E-06 3.56E-08
-  7.94E-08 7.44E-08 1.14E-07 1.12E-07 1.11E-07 1.89E-07 2.64E-06 3.50E-06
-  5.54E-06 1.86E-06 2.00E-06 2.95E-06 3.71E-06 9.52E-08 1.04E-07 1.64E-07
-  2.77E-06 3.62E-06 3.95E-06 5.24E-06 7.39E-06 3.32E-06 4.11E-06 5.61E-06
-  1.89E-06 2.56E-06 3.86E-06 2.39E-06 2.87E-06 3.68E-06 7.00E-07 6.02E-07
-  5.04E-07 7.46E-07 1.05E-06 1.78E-06 2.79E-06 2.47E-06 9.19E-07 4.50E-07
-  9.26E-07 1.04E-06 1.16E-06 1.81E-05 1.85E-05 2.53E-05 1.77E-06 1.43E-06
-  3.02E-05 5.04E-05 7.23E-05 1.65E-05 2.08E-05 2.69E-05 1.79E-06 2.41E-06
-  4.95E-06 8.12E-06 1.14E-05 1.69E-05 5.34E-06 9.74E-06 1.16E-05 9.30E-06
-  1.49E-05 1.24E-05 8.53E-06 1.09E-05 1.97E-05 1.17E-05 2.31E-05 2.60E-05
-  2.05E-05 2.61E-05 3.04E-05 2.09E-05 2.40E-05 6.26E-05 2.08E-05 2.37E-05
-  2.97E-05 4.00E-05 1.50E-05 4.67E-05 3.06E-05 5.12E-05 3.17E-05 3.84E-05
-  6.12E-05 1.53E-04 1.83E-04 2.09E-04 3.91E-03 1.13E-02 1.30E-02 3.18E-03
-  1.08E-02 6.73E-03 1.19E-02 1.18E-02 9.60E-03 8.92E-03 1.31E-02 9.99E-03
-  1.59E-02 1.61E-02 1.77E-02 1.96E-02 2.29E-02 1.86E-02 1.71E-02 2.83E-02
-  3.16E-02 2.76E-02 2.59E-02 3.60E-02 2.54E-02 2.26E-02 2.17E-02 4.01E-02
-  2.76E-02 4.61E-02 4.28E-02 3.21E-02 3.00E-02 3.69E-02 5.26E-02 3.28E-02
-  3.37E-02 4.14E-02 4.37E-02 6.65E-02 5.76E-02 5.36E-02 1.33E-01 4.91E-02
-  7.05E-02 9.83E-02 1.55E-01 1.72E-01 1.84E-01 2.82E-01 2.87E-01 2.69E-01
-  4.07E-01 4.55E-01 4.68E-01 6.47E-01 6.49E-01 7.35E-01 9.13E-01 9.44E-01
-  1.35E+00 1.43E+00 1.62E+00 1.72E+00 2.21E+00 2.34E+00 2.65E+00 3.71E+00
+ Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
+   0.0000  0.0000  0.0000    1  0.00000E+00 kpt; spin; max resid(k); each band:
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
+  0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00 0.00E+00
  Fermi (or HOMO) energy (hartree) =   0.47061   Average Vxc (hartree)=  -0.49337
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=192, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -2963,7 +3055,7 @@ P           mkmem           1
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
- Proc.   0 individual time (sec): cpu=         36.6  wall=          7.2
+ Proc.   0 individual time (sec): cpu=         54.1  wall=         10.7
  
  Calculation completed.
 .Delivered   1 WARNINGs and   0 COMMENTs to log file.
@@ -2971,10 +3063,10 @@ P           mkmem           1
 --- !FinalSummary
 program: abinit
 version: 8.11.9
-start_datetime: Mon Jul 29 17:35:11 2019
-end_datetime: Mon Jul 29 17:35:18 2019
-overall_cpu_time:          71.8
-overall_wall_time:          14.3
+start_datetime: Thu Aug 01 13:13:49 2019
+end_datetime: Thu Aug 01 13:14:00 2019
+overall_cpu_time:         105.3
+overall_wall_time:          21.3
 exit_requested_by_user: no 
 timelimit: 0
 pseudos: 

@@ -71,6 +71,7 @@ module m_chebfiwf
   integer,save  :: l_prtvol
   integer,save  :: l_sij_opt
   integer, save :: l_paral_kgb
+  integer, save :: l_useria
   real(dp), allocatable,save :: l_gvnlc(:,:)
   real(dp), allocatable,save ::  l_pcon(:)
   type(mpi_type),pointer,save :: l_mpi_enreg
@@ -170,7 +171,8 @@ module m_chebfiwf
  
   !Variables
   nline=dtset%nline
-  
+  !for debug
+  l_useria=dtset%useria
    
   !Depends on istwfk
   if ( l_istwf == 2 ) then ! Real only
@@ -227,7 +229,10 @@ module m_chebfiwf
 !  print *, "l_icplx*l_npw*l_nspinor", l_icplx*l_npw*l_nspinor
 !  print *, "nband", nband
   !stop
-  !call random_number(cg) !to test validity of algo
+  if (l_useria == 121212) then
+    !call random_number(cg) !to test validity of algo
+    !print *, "USAO RANDOM"
+  end if
   
   call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft) 
   
@@ -503,17 +508,26 @@ module m_chebfiwf
       
     !print *, "before getghc"  
       
-    if (l_mpi_enreg%paral_kgb==0) then
-      !l_cpopt = -1
-      call multithreaded_getghc(l_cpopt,cg,cprj_dum,ghc,gsc,& 
-        l_gs_hamk,l_gvnlc,eval,l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0) 
+    if (l_useria == 121212) then
+      !call random_number(ghc)
+      ghc = 1
+      gsc = 2
+      !call random_number(gsc)
+      !call xgBlock_copy(X,AX)
+      !call xgBlock_copy(X,BX)
     else
-      !print *, "blockdim", blockdim
-      !print *, "spacedim", spacedim
-      !print *, "before prep_getghc"
-      call prep_getghc(cg(:,1:blockdim*spacedim),l_gs_hamk,l_gvnlc,ghc,gsc(:,1:blockdim*spacedim),eval,blockdim,l_mpi_enreg,&
-&                     l_prtvol,l_sij_opt,l_cpopt,cprj_dum,already_transposed=.true.)  !already_transposed = true (previous)
-      !print *, "after prep_getghc"
+      if (l_mpi_enreg%paral_kgb==0) then
+        !l_cpopt = -1
+        call multithreaded_getghc(l_cpopt,cg,cprj_dum,ghc,gsc,& 
+          l_gs_hamk,l_gvnlc,eval,l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0) 
+      else
+        !print *, "blockdim", blockdim
+        !print *, "spacedim", spacedim
+        !print *, "before prep_getghc"
+        call prep_getghc(cg(:,1:blockdim*spacedim),l_gs_hamk,l_gvnlc,ghc,gsc(:,1:blockdim*spacedim),eval,blockdim,l_mpi_enreg,&
+&                       l_prtvol,l_sij_opt,l_cpopt,cprj_dum,already_transposed=.true.)  !already_transposed = true (previous)
+        !print *, "after prep_getghc"
+      end if
     end if
     
     !print *, "after getghc"  
@@ -614,6 +628,12 @@ module m_chebfiwf
     !stop
     call xgBlock_reverseMap(Bm1X,gsm1hc_filter,l_icplx,spacedim*blockdim)
     
+    if (l_useria == 121212) then
+      !call random_number(ghc_filter)
+      !call random_number(gsm1hc_filter)
+      gsm1hc_filter = 3
+      !call xgBlock_copy(X,Bm1X)
+    end if
     !stop
 !        print *, "spacedim", spacedim
 !          print *, "blockdim", blockdim
@@ -678,20 +698,23 @@ module m_chebfiwf
     !print *, "PROSAO 1"
     !stop
     !cwaveprj dummy allocate
+
     if(l_paw) then
       !print *, "blockdim", blockdim
       !stop
-      ABI_DATATYPE_ALLOCATE(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim)) !nband_filter
-      !print *, "ABI_DATATYPE_ALLOCATE PASS"
-      !stop
-      !print *, "l_gs_hamk%dimcprj", l_gs_hamk%dimcprj
-      call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj) 
-      !print *, "DUMMY ALLOCATE PASS"
-      !stop
-      call apply_invovl(l_gs_hamk, ghc_filter(:,:), gsm1hc_filter(:,:), cwaveprj_next(:,:), & 
-&     spacedim, blockdim, l_mpi_enreg, l_nspinor)   !!ghc_filter size problem if transposed
-      !print *, "APPLY INVOVL PASS"
-      !stop
+      if (l_useria /= 121212) then
+        ABI_DATATYPE_ALLOCATE(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim)) !nband_filter
+        !print *, "ABI_DATATYPE_ALLOCATE PASS"
+        !stop
+        !print *, "l_gs_hamk%dimcprj", l_gs_hamk%dimcprj
+        call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj) 
+        !print *, "DUMMY ALLOCATE PASS"
+        !stop
+        call apply_invovl(l_gs_hamk, ghc_filter(:,:), gsm1hc_filter(:,:), cwaveprj_next(:,:), & 
+&       spacedim, blockdim, l_mpi_enreg, l_nspinor)   !!ghc_filter size problem if transposed
+        !print *, "APPLY INVOVL PASS"
+        !stop
+      end if
     else
       gsm1hc_filter(:,:) = ghc_filter(:,:)
     end if
@@ -725,8 +748,10 @@ module m_chebfiwf
     end if
 
     if (l_paw) then
-      call pawcprj_free(cwaveprj_next)
-      ABI_DATATYPE_DEALLOCATE(cwaveprj_next)
+      if (l_useria /= 121212) then
+        call pawcprj_free(cwaveprj_next)
+        ABI_DATATYPE_DEALLOCATE(cwaveprj_next)
+      end if
     end if
     
     !print *, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"

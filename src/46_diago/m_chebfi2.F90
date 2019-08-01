@@ -248,6 +248,7 @@ module m_chebfi2
       call xg_init(chebfi%X_NP,space,total_spacedim,2*chebfi%bandpp,chebfi%spacecom) !transposed arrays
       call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,total_spacedim,chebfi%bandpp)  
       call xg_setBlock(chebfi%X_NP,chebfi%X_prev,chebfi%bandpp+1,total_spacedim,chebfi%bandpp)  
+      call xgBlock_zero(chebfi%X_NP%self)
       !print *, "prosao"
       !stop
     end if
@@ -480,6 +481,7 @@ module m_chebfi2
     if (counter < 3) then
       call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X at the BEGINNING of the CB2 RUN counter:" // str) !MPI 1,2 OK
     end if
+    !stop
     !call debug_helper_linalg(chebfi%X, chebfi, "INSIDE CB2 SCF LOOP: " // str) 
     !if (counter == 11) stop
     !end if
@@ -536,6 +538,9 @@ module m_chebfi2
       !call random_number(ghc)
       !call random_number(cg0_next)
       !call random_number(cg0_prev)
+      
+      !call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X at the BEGINNING of the CB2 RUN counter:" // str) !MPI 1,2 OK
+      !stop
       
       !call debug_helper_linalg(chebfi%X_next, chebfi, "AX LINALG")
       !call xgBlock_copy(chebfi%X,xCOPY%self, 1, 1)
@@ -691,12 +696,12 @@ module m_chebfi2
     !stop
     
     !!on nproc 2 for some reason
-    if (counter == 3) then
-      call debug_helper_colrows(chebfi%xXColsRows, chebfi, "LINE635 counter 3") 
-      call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "LINE636 counter 3") 
-      call debug_helper_colrows(chebfi%xBXColsRows, chebfi, "LINE637 counter 3") 
+    if (counter < 3) then
+      call debug_helper_colrows(chebfi%xXColsRows, chebfi, " xXColsRows after first getAX_BX") 
+      call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "xAXColsRows after first getAX_BX") 
+      call debug_helper_colrows(chebfi%xBXColsRows, chebfi, "xBXColsRows after first getAX_BX") 
     end if
-    
+    !stop
 
       
     if (chebfi%paral_kgb == 1) then   
@@ -1239,16 +1244,17 @@ module m_chebfi2
     
     !call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS) !proba ali ne radi bas kako treba :(
     !stop
-   
+    
+    call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X before chebfi_rayleightRitz:" // str)  !!TODO FROM HERE
     call timab(tim_RR, 1, tsec)
     call chebfi_rayleightRitz(chebfi, nline, counter)
     call timab(tim_RR, 2, tsec) 
 
     !print *, "PRE RESIDUE"
     !stop
-    
+    call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X before chebfi_computeResidue:" // str)  !!TODO FROM HERE
     call timab(tim_residu, 1, tsec)
-    maximum =  chebfi_computeResidue(chebfi, residu, pcond)
+    !maximum =  chebfi_computeResidue(chebfi, residu, pcond)
     call timab(tim_residu, 2, tsec)
                        
     deallocate(nline_bands)
@@ -1929,6 +1935,8 @@ module m_chebfi2
     case default
        MSG_ERROR("Error for Eigen Solver HEGV")
     end select
+    print *, "INFO", info
+    !stop
     
     !print *, "comm", chebfi%spacecom
     !print *, "RANK", xmpi_comm_rank(chebfi%spacecom)
@@ -1959,7 +1967,7 @@ module m_chebfi2
         call xgBlock_print(HELPER, 200+xmpi_comm_rank(chebfi%spacecom))
       end if
      end if
-    
+     !stop
 !    if (xmpi_comm_size(chebfi%spacecom) == 1) then
 !      call xgBlock_print(A_und_X%self, 1000+xmpi_comm_rank(chebfi%spacecom)+1)
 !    else
@@ -2049,6 +2057,7 @@ module m_chebfi2
       !!TODO UOPSTE NE ZNAM DA LI OVO MOZE DA SE ODRADI SA POSTOJECIM FUNKCIJAMA
       !print *, "USAAAAAAAAAAAAAAAAAAAAAAAAA"
     end if 
+    call xgBlock_zero(chebfi%X_NP%self)
     !end if
     !call debug_helper_linalg(chebfi%X, chebfi, "LINE1777")  !X OK HERE FOR 1 and 2 MPI
     !stop
@@ -2063,8 +2072,10 @@ module m_chebfi2
       call debug_helper_linalg(chebfi%X, chebfi, "RR X before orthonorming counter :" // str) 
       call debug_helper_linalg(chebfi%AX%self, chebfi, "RR AX before orthonorming counter :" // str) 
       call debug_helper_linalg(chebfi%BX%self, chebfi, "RR BX before orthonorming counter :" // str)
+      call debug_helper_linalg(chebfi%X_prev, chebfi, "RR X_prev before orthonorming counter :" // str)
+      call debug_helper_linalg(chebfi%X_next, chebfi, "RR X_next before orthonorming counter :" // str)
     end if
-    
+    !stop
     
     print *, "REMAINDER", remainder      
     if (remainder == 1) then  !save original cg address into temp
