@@ -51,7 +51,7 @@ module m_phonons
  use m_geometry,        only : mkrdim, symredcart, normv
  use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph
  use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new, kpath_free
- use m_ifc,             only : ifc_type, ifc_fourq, ifc_calcnwrite_nana_terms
+ use m_ifc,             only : ifc_type
  use m_anaddb_dataset,  only : anaddb_dataset_type
  use m_kpts,            only : kpts_ibz_from_kptrlatt, get_full_kgrid
  use m_special_funcs,   only : bose_einstein
@@ -157,15 +157,18 @@ module m_phonons
    ! allows one to calculate Debye Waller factors by integration with 1/omega
    ! and the Bose Einstein factor
 
+ contains
+
+   procedure :: print => phdos_print
+   procedure :: print_debye => phdos_print_debye
+   procedure :: print_msqd => phdos_print_msqd
+   procedure :: print_thermo => phdos_print_thermo
+   procedure :: free => phdos_free
+   procedure :: ncwrite => phdos_ncwrite
+
  end type phonon_dos_type
 
  public :: mkphdos
- public :: phdos_print
- public :: phdos_print_debye
- public :: phdos_print_msqd
- public :: phdos_print_thermo
- public :: phdos_free
- public :: phdos_ncwrite
 !!**
 
 CONTAINS  !===============================================================================
@@ -199,7 +202,7 @@ subroutine phdos_print(PHdos,fname)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: fname
- type(phonon_dos_type),intent(in) :: PHdos
+ class(phonon_dos_type),intent(in) :: PHdos
 
 !Local variables-------------------------------
  integer :: io,itype,unt,unt_by_atom,unt_msqd,iatom
@@ -328,7 +331,7 @@ subroutine phdos_print_debye(PHdos, ucvol)
 
 !Arguments ------------------------------------
  real(dp), intent(in) :: ucvol
- type(phonon_dos_type),intent(in) :: PHdos
+ class(phonon_dos_type),intent(in) :: PHdos
 
 !Local variables-------------------------------
  integer :: io, iomax, iomin
@@ -442,7 +445,7 @@ subroutine phdos_print_thermo(PHdos, fname, ntemper, tempermin, temperinc)
 !Arguments ------------------------------------
  integer, intent(in) :: ntemper
  real(dp), intent(in) :: tempermin, temperinc
- type(phonon_dos_type),intent(in) :: PHdos
+ class(phonon_dos_type),intent(in) :: PHdos
  character(len=*),intent(in) :: fname
 
 !Local variables-------------------------------
@@ -557,7 +560,7 @@ end subroutine phdos_print_thermo
 subroutine phdos_free(PHdos)
 
 !Arguments -------------------------------
- type(phonon_dos_type),intent(inout) ::PHdos
+ class(phonon_dos_type),intent(inout) ::PHdos
 
 ! *************************************************************************
 
@@ -835,7 +838,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
    if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
 
    ! Fourier interpolation (keep track of min/max to decide if initial mesh was large enough)
-   call ifc_fourq(Ifc, crystal, qibz(:,iq_ibz), phfrq, displ, out_eigvec=eigvec)
+   call ifc%fourq(crystal, qibz(:,iq_ibz), phfrq, displ, out_eigvec=eigvec)
    wminmax(1) = min(wminmax(1), minval(phfrq))
    if (wminmax(1) < phdos%omega(1)) count_wminmax(1) = count_wminmax(1) + 1
    wminmax(2) = max(wminmax(2), maxval(phfrq))
@@ -1246,7 +1249,7 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, tem
  imode = 0
  do iq = 1, nqibz
    ! Fourier interpolation.
-   call ifc_fourq(Ifc, Crystal, qibz(:,iq), phfrq, phdispl, out_eigvec=pheigvec)
+   call ifc%fourq(Crystal, qibz(:,iq), phfrq, phdispl, out_eigvec=pheigvec)
    phfrq_allq((iq-1)*3*Crystal%natom+1 : iq*3*Crystal%natom) = phfrq
    phdispl_allq(1:2, 1:3, 1:Crystal%natom, 1:3*Crystal%natom, iq) = phdispl
    do jmode = 1, 3*Crystal%natom
@@ -1422,7 +1425,7 @@ subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,op
  imode = 0
  do iq = 1, nqibz
    ! Fourier interpolation.
-   call ifc_fourq(Ifc, Crystal, qibz(:,iq), phfrq, phdispl, out_eigvec=pheigvec)
+   call ifc%fourq(Crystal, qibz(:,iq), phfrq, phdispl, out_eigvec=pheigvec)
    phfrq_allq(1:3*Crystal%natom, iq) = phfrq
    phdispl_allq(1:2, 1:3, 1:Crystal%natom, 1:3*Crystal%natom, iq) = phdispl
  end do
@@ -1704,7 +1707,7 @@ subroutine phdos_ncwrite(phdos,ncid)
 
 !Arguments ------------------------------------
 !scalars
- type(phonon_dos_type),intent(in) :: phdos
+ class(phonon_dos_type),intent(in) :: phdos
  integer,intent(in) :: ncid
 
 !Local variables-------------------------------
@@ -1883,7 +1886,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    if (ifcflag == 1) then
 
      ! Get phonon frequencies and displacements in reduced coordinates for this q-point
-     !call ifc_fourq(ifc, cryst, save_qpoints(:,iphl1), phfrq, displ, out_eigvec=eigvec)
+     !call ifc%fourq(cryst, save_qpoints(:,iphl1), phfrq, displ, out_eigvec=eigvec)
 
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
@@ -1900,13 +1903,13 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
      rfphon(1:2)=1; rfelfd(1:2)=0; rfstrs(1:2)=0
      qphon_padded = zero; qphon_padded(:,1) = qphon
 
-     call gtblk9(ddb,iblok,qphon_padded,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+     call ddb%get_block(iblok,qphon_padded,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
      ! Copy the dynamical matrix in d2cart
      d2cart(:,1:ddb%msize)=ddb%val(:,:,iblok)
 
      ! Eventually impose the acoustic sum rule based on previously calculated d2asr
-     call asrq0_apply(asrq0, natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
+     call asrq0%apply(natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
    end if
 
    ! Use inp%symdynmat instead of ifc because of ifcflag
@@ -1995,7 +1998,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
    ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
    if (inp%nph2l /= 0 .and. inp%ifcflag == 1) then
-     call ifc_calcnwrite_nana_terms(ifc, crystal, inp%nph2l, inp%qph2l, inp%qnrml2, ncid)
+     call ifc%calcnwrite_nana_terms(crystal, inp%nph2l, inp%qph2l, inp%qnrml2, ncid)
    end if
 
    NCF_CHECK(nf90_close(ncid))
@@ -2239,7 +2242,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
 !Arguments -------------------------------
 !scalars
  integer, intent(in) :: ntemper
- type(phonon_dos_type),intent(in) :: PHdos
+ class(phonon_dos_type),intent(in) :: PHdos
  character(len=*),intent(in) :: fname
  real(dp), intent(in) :: tempermin, temperinc
 
@@ -3286,7 +3289,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  do iqpt=1,nqpts
    if (mod(iqpt, nprocs) /= my_rank) cycle ! mpi-parallelism
    ! Get phonon frequencies and displacements in cartesian coordinates for this q-point
-   call ifc_fourq(ifc, cryst, qpath%points(:,iqpt), phfrqs(:,iqpt), phdispl_cart(:,:,:,iqpt), out_eigvec=eigvec)
+   call ifc%fourq(cryst, qpath%points(:,iqpt), phfrqs(:,iqpt), phdispl_cart(:,:,:,iqpt), out_eigvec=eigvec)
  end do
 
  call xmpi_sum_master(phfrqs, master, comm, ierr)
@@ -3332,7 +3335,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
    NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")], defmode=.True.))
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'atomic_mass_units'), ifc%amu))
-   if (nph2l /= 0) call ifc_calcnwrite_nana_terms(ifc, cryst, nph2l, qph2l, qnrml2, ncid=ncid)
+   if (nph2l /= 0) call ifc%calcnwrite_nana_terms(cryst, nph2l, qph2l, qnrml2, ncid=ncid)
    NCF_CHECK(nf90_close(ncid))
 #endif
 

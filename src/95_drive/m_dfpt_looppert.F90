@@ -631,9 +631,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call ddb_from_file(ddb,filnam,1,dtset%natom,0,dummy,ddb_crystal,mpi_enreg%comm_world)
 !  Get Dielectric Tensor and Effective Charges
 !  (initialized to one_3D and zero if the derivatives are not available in the DDB file)
-   iblok = ddb_get_dielt_zeff(ddb,ddb_crystal,1,0,0,dielt,zeff)
+   iblok = ddb%get_dielt_zeff(ddb_crystal,1,0,0,dielt,zeff)
    call ddb_crystal%free()
-   call ddb_free(ddb)
+   call ddb%free()
    ABI_DEALLOCATE(dummy)
  end if
 
