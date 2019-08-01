@@ -284,11 +284,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
  if (use_wfk) then
-   call xmpi_bcast(wfk0_path,master,comm,ierr)
+   call xmpi_bcast(wfk0_path, master, comm, ierr)
    call wrtout(ab_out, sjoin("- Reading GS states from WFK file:", wfk0_path))
  end if
  if (use_wfq) then
-   call xmpi_bcast(wfq_path,master,comm,ierr)
+   call xmpi_bcast(wfq_path, master, comm, ierr)
    call wrtout(ab_out, sjoin("- Reading GS states from WFQ file:", wfq_path) )
  end if
  call wrtout(ab_out, sjoin("- Reading DDB from file:", ddb_path))
@@ -433,7 +433,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    if (dtset%prtfsurf /= 0) then
      path = strcat(dtfil%filnam_ds(4), "_BXSF")
      call wrtout(ab_out, sjoin("- Writing Fermi surface to file:", path))
-     if (ebands_write_bxsf(ebands,cryst,path) /= 0) then
+     if (ebands_write_bxsf(ebands, cryst, path) /= 0) then
        msg = "Cannot produce file for Fermi surface, check log file for more info"
        MSG_WARNING(msg)
        call wrtout(ab_out,msg)
@@ -444,8 +444,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    if (dtset%prtnest /= 0 .and. dtset%ph_nqpath > 0) then
      path = strcat(dtfil%filnam_ds(4), "_NEST")
      call wrtout(ab_out, sjoin("- Writing nesting factor to file:", path))
-     if (ebands_write_nesting(ebands,cryst,path,dtset%prtnest,&
-         dtset%tsmear,dtset%fermie_nest,dtset%ph_qpath(:,1:dtset%ph_nqpath),msg) /= 0) then
+     if (ebands_write_nesting(ebands, cryst, path, dtset%prtnest, &
+         dtset%tsmear, dtset%fermie_nest, dtset%ph_qpath(:,1:dtset%ph_nqpath), msg) /= 0) then
        MSG_WARNING(msg)
        call wrtout(ab_out,msg)
      end if
@@ -701,8 +701,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! Write average of DFPT potentials to file.
    if (my_rank == master) then
      call dvdb%open_read(ngfftf, xmpi_comm_self)
-     path = strcat(dtfil%filnam_ds(4), "_V1QAVG.nc")
-     call dvdb%write_v1qavg(dtset, path)
+     call dvdb%write_v1qavg(dtset, strcat(dtfil%filnam_ds(4), "_V1QAVG.nc"))
    end if
 
  case (15)
@@ -743,9 +742,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (allocated(efmasdeg)) call efmasdeg_free_array(efmasdeg)
  if (allocated(efmasval)) call efmasval_free_array(efmasval)
  ABI_SFREE(kpt_efmas)
-
- ! XG20180810: please do not remove. Otherwise, I get an error on my Mac.
- !write(std_out,*)' eph : after free efmasval and kpt_efmas'
 
  ! Deallocation for PAW.
  if (dtset%usepaw==1) then

@@ -384,23 +384,20 @@ subroutine dtset_copy(dtout, dtin)
  dtout%bs_coulomb_term  = dtin%bs_coulomb_term
  dtout%bs_calctype      = dtin%bs_calctype
  dtout%bs_coupling      = dtin%bs_coupling
-
  dtout%bs_haydock_tol   = dtin%bs_haydock_tol
  dtout%bs_hayd_term     = dtin%bs_hayd_term
-
  dtout%bs_interp_m3_width = dtin%bs_interp_m3_width
  dtout%bs_interp_method = dtin%bs_interp_method
  dtout%bs_interp_mode   = dtin%bs_interp_mode
  dtout%bs_interp_prep   = dtin%bs_interp_prep
  dtout%bs_interp_rl_nb  = dtin%bs_interp_rl_nb
-
  dtout%bs_interp_kmult(:) = dtin%bs_interp_kmult(:)
  dtout%bs_eh_cutoff(:) = dtin%bs_eh_cutoff(:)
  dtout%bs_freq_mesh(:) = dtin%bs_freq_mesh(:)
 !END VARIABLES FOR @Bethe-Salpeter.
 
 !Copy integers from dtin to dtout
- dtout%iomode          = dtin%iomode
+ dtout%iomode             = dtin%iomode
  dtout%accuracy           = dtin%accuracy
  dtout%adpimd             = dtin%adpimd
  dtout%autoparal          = dtin%autoparal
@@ -563,7 +560,11 @@ subroutine dtset_copy(dtout, dtin)
  dtout%gethaydock         = dtin%gethaydock
  dtout%getocc             = dtin%getocc
  dtout%getpawden          = dtin%getpawden
+ dtout%getddb_path        = dtin%getddb_path
+ dtout%getdvdb_path       = dtin%getdvdb_path
  dtout%getpot_path        = dtin%getpot_path
+ dtout%getwfk_path        = dtin%getwfk_path
+ dtout%getwfq_path        = dtin%getwfq_path
  dtout%getqps             = dtin%getqps
  dtout%getscr             = dtin%getscr
  dtout%getsuscep          = dtin%getsuscep
@@ -2212,10 +2213,11 @@ subroutine chkvars (string)
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
  list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
- list_vars=trim(list_vars)//' getddb getddk getdelfd getdkdk getdkde getden getdvdb getefmas getkerange_path getgam_eig2nkq'
+ list_vars=trim(list_vars)//' getddb getddb_path getddk getdelfd getdkdk getdkde getden getdvdb getdvdb_path'
+ list_vars=trim(list_vars)//' getefmas getkerange_path getgam_eig2nkq'
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_path getqps getscr'
  list_vars=trim(list_vars)//' getwfkfine getsuscep '
- list_vars=trim(list_vars)//' getvel getwfk getwfq getxcart getxred'
+ list_vars=trim(list_vars)//' getvel getwfk getwfk_path getwfq getwfq_path getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwcalctyp gwcomp gwencomp gwgamma gwmem'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gw_customnfreqsp'

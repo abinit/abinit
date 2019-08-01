@@ -168,8 +168,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 !if(multivals%ntypat==0)ntypat=dtsets(1)%ntypat
  ntypat=dtsets(1)%ntypat
 
-!write(ab_out,*)' outvar_a_h : A '
-!call flush(ab_out)
 !###########################################################
 !### 03. Print all the input variables (A)
 !##
@@ -191,7 +189,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    end do
  end do
  call prttagm_images(dprarr_images,iout,jdtset_,2,marr,narrm,ncid,ndtset_alloc,'acell','LEN',&
-& mxvals%nimage,nimagem,ndtset,prtimg,strimg)
+   mxvals%nimage,nimagem,ndtset,prtimg,strimg)
 
 !adpimd and adpimd_gamma
  intarr(1,:)=dtsets(:)%adpimd
@@ -208,7 +206,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    intarr(1:narrm(idtset),idtset)=dtsets(idtset)%algalch(1:narrm(idtset))
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
-& narrm,ncid,ndtset_alloc,'algalch','INT',multivals%ntypalch)
+   narrm,ncid,ndtset_alloc,'algalch','INT',multivals%ntypalch)
 
 !amu
  prtimg(:,:)=1
@@ -268,8 +266,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%awtr
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'awtr','INT',0)
 
-!write(ab_out,*)' outvar_a_h : B '
-!call flush(ab_out)
 !###########################################################
 !### 03. Print all the input variables (B)
 !##
@@ -582,7 +578,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
      end do
    end do
    call prttagm_images(dprarr_images,iout,jdtset_,5,marr,narrm,&
-&   ncid,ndtset_alloc,'dmatpawu','DPR',mxvals%nimage,nimagem,ndtset,prtimg,strimg)
+     ncid,ndtset_alloc,'dmatpawu','DPR',mxvals%nimage,nimagem,ndtset,prtimg,strimg)
  end if
 
  intarr(1,:)=dtsets(:)%dmatpuopt
@@ -877,7 +873,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    tmpimg0=nimagem(0)
    nimagem(0)=0
    call prttagm_images(dprarr_images,iout,jdtset_,2,marr,narrm,ncid,ndtset_alloc,'etotal','DPR',&
-&   mxvals%nimage,nimagem,ndtset,prtimg,strimg)
+     mxvals%nimage,nimagem,ndtset,prtimg,strimg)
    nimagem(0)=tmpimg0
  end if
 
@@ -920,7 +916,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    tmpimg0=nimagem(0)
    nimagem(0)=0
    call prttagm_images(dprarr_images,iout,jdtset_,2,marr,narrm,ncid,ndtset_alloc,'fcart','DPR',&
-&   mxvals%nimage,nimagem,ndtset,prtimg,strimg)
+     mxvals%nimage,nimagem,ndtset,prtimg,strimg)
    nimagem(0)=tmpimg0
  end if
 
@@ -947,14 +943,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(2,:)=dtsets(:)%fockdownsampling(2)
  intarr(3,:)=dtsets(:)%fockdownsampling(3)
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'fockdownsampling','INT',0)
-!DEBUG
-! write(std_out,*)' outvar_a_h : echo fockdownsampling ...'
-! write(std_out,*)' dtsets(0)%fockdownsampling(1:3)=',dtsets(0)%fockdownsampling(1:3)
-! write(std_out,*)' dtsets(1)%fockdownsampling(1:3)=',dtsets(1)%fockdownsampling(1:3)
-! write(std_out,*)' dtsets(2)%fockdownsampling(1:3)=',dtsets(2)%fockdownsampling(1:3)
-! write(std_out,*)' dtsets(3)%fockdownsampling(1:3)=',dtsets(3)%fockdownsampling(1:3)
-! call prttagm(dprarr,intarr,std_out,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'fockdownsampling','INT',0)
-!ENDDEBUG
 
  dprarr(1,:)=dtsets(:)%freqim_alpha
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'freqim_alpha','DPR',0)
