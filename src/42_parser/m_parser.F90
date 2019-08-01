@@ -489,8 +489,8 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
      ij=index(line(1:ii),char(9))
      if (ij>0 .and. option==1 ) then
        write(msg, '(3a,i0,3a)' ) &
-&       'The occurence of a tab, in the input file: ',TRIM(filnam),' line number ',iline,',',ch10,&
-&       'is observed. This sign is confusing, and has been forbidden.'
+        'The occurence of a tab, in the input file: ',TRIM(filnam),' line number ',iline,',',ch10,&
+        'is observed. This sign is confusing, and has been forbidden.'
        MSG_ERROR(msg)
      end if
 
@@ -1449,12 +1449,9 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
    ds_input = ds_input_
  end if
 
-!DEBUG
 !write(std_out,*) ' intagm : exit value tread=',tread
 !write(std_out,*) ' intarr =',intarr(1:narr)
 !write(std_out,*) ' dprarr =',dprarr(1:narr)
-!stop
-!ENDDEBUG
 
 end subroutine intagm
 !!***
@@ -1530,11 +1527,9 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 
 ! *************************************************************************
 
-!DEBUG
 !write(std_out,'(2a)' )' inarray : token=',trim(cs)
 !write(std_out,'(a,i4)' )' inarray : narr=',narr
 !write(std_out,'(2a)' )' inarray : typevarphys=',typevarphys
-!ENDDEBUG
 
  ii=0
  typevar='INT'
@@ -2655,18 +2650,18 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
  write(message, '(2a)' ) ch10,' chkint_prt: ERROR -'
  if(cond_number/=0)then
    do icond=1,cond_number
-!    The following format restricts cond_values(icond) to be between -99 and 999
+     ! The following format restricts cond_values(icond) to be between -99 and 999
      write(message, '(5a,i0,a)' ) trim(message),ch10,&
-&     ' Context: the value of the variable ',trim(cond_string(icond)),' is ',cond_values(icond),'.'
+      ' Context: the value of the variable ',trim(cond_string(icond)),' is ',cond_values(icond),'.'
    end do
  end if
  write(message, '(5a,i0,a)' ) trim(message),ch10,&
-& '  The value of the input variable ',trim(input_name),' is ',input_value,', while it must be'
+  '  The value of the input variable ',trim(input_name),' is ',input_value,', while it must be'
  if(minmax_flag==2)then
    write(message, '(3a,20(i0,1x))' ) trim(message),ch10,&
    '  different from one of the following: ',list_values(1:list_number)
  else if(list_number>1 .or. minmax_flag==0 .or. list_values(1)/=minmax_value )then
-!  The following format restricts list_values to be between -99 and 999
+   ! The following format restricts list_values to be between -99 and 999
    if(list_number/=1)then
      write(message, '(3a,40(i0,1x))' ) trim(message),ch10,&
      '  equal to one of the following: ',list_values(1:list_number)
@@ -2674,34 +2669,31 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
      write(message, '(3a,40(i0,1x))' ) trim(message),ch10,'  equal to ',list_values(1)
    end if
    if(minmax_flag==1)then
-!    The following format restricts minmax_value to be between -99 and 999
-     write(message, '(3a,i0,a)' ) trim(message),ch10,&
-      '  or it must be larger or equal to ',minmax_value,'.'
+     ! The following format restricts minmax_value to be between -99 and 999
+     write(message, '(3a,i0,a)' ) trim(message),ch10,'  or it must be larger or equal to ',minmax_value,'.'
    else if(minmax_flag==-1)then
-     write(message, '(3a,i0,a)' ) trim(message),ch10,&
-      '  or it must be smaller or equal to ',minmax_value,'.'
+     write(message, '(3a,i0,a)' ) trim(message),ch10,'  or it must be smaller or equal to ',minmax_value,'.'
    end if
  else if(minmax_flag==1)then
-!  The following format restricts minmax_value to be between -99 and 999
+   ! The following format restricts minmax_value to be between -99 and 999
    write(message, '(3a,i0,a)' ) trim(message),ch10,'  larger or equal to ',minmax_value,'.'
  else if(minmax_flag==-1)then
-!  The following format restricts minmax_value to be between -99 and 999
+   ! The following format restricts minmax_value to be between -99 and 999
    write(message, '(3a,i0,a)' ) trim(message),ch10,'  smaller or equal to ',minmax_value,'.'
  end if
  if(cond_number==0 .or. advice_change_cond==0)then
-   write(message, '(5a)' ) trim(message),ch10,&
-&   '  Action: you should change the input variable ',trim(input_name),'.'
+   write(message, '(5a)' ) trim(message),ch10,'  Action: you should change the input variable ',trim(input_name),'.'
  else if(cond_number==1)then
    write(message, '(7a)' ) trim(message),ch10,&
-&   '  Action: you should change the input variables ',trim(input_name),' or ',trim(cond_string(1)),'.'
+    '  Action: you should change the input variables ',trim(input_name),' or ',trim(cond_string(1)),'.'
  else if(cond_number==2)then
    write(message, '(11a)' ) trim(message),ch10,&
-&   '  Action: you should change one of the input variables ',trim(input_name),',',ch10,&
-&   '   ',trim(cond_string(1)),' or ',trim(cond_string(2)),'.'
+    '  Action: you should change one of the input variables ',trim(input_name),',',ch10,&
+    '   ',trim(cond_string(1)),' or ',trim(cond_string(2)),'.'
  else if(cond_number==3)then
    write(message, '(13a)' ) trim(message),ch10,&
-&   '  Action: you should change one of the input variables ',trim(input_name),',',ch10,&
-&   '   ',trim(cond_string(1)),', ',trim(cond_string(2)),' or ',trim(cond_string(3)),'.'
+    '  Action: you should change one of the input variables ',trim(input_name),',',ch10,&
+    '   ',trim(cond_string(1)),', ',trim(cond_string(2)),' or ',trim(cond_string(3)),'.'
  end if
  call wrtout(unit   ,message,'COLL')
  call wrtout(std_out,message,'COLL')
@@ -3202,19 +3194,19 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
    end if
    if (present(firstchar).and.present(forceprint)) then
      call prttagm(dprarr,intarr,iout,jdtset_,length,marr,narr,&
-&     narrm,ncid,ndtset_alloc,token,typevarphys,multi_narr,&
-&     firstchar=firstchar,forceprint=forceprint)
+       narrm,ncid,ndtset_alloc,token,typevarphys,multi_narr,&
+       firstchar=firstchar,forceprint=forceprint)
    else if (present(firstchar)) then
      call prttagm(dprarr,intarr,iout,jdtset_,length,marr,narr,&
-&     narrm,ncid,ndtset_alloc,token,typevarphys,multi_narr,&
-&     firstchar=firstchar)
+       narrm,ncid,ndtset_alloc,token,typevarphys,multi_narr,&
+       firstchar=firstchar)
    else if (present(forceprint)) then
      call prttagm(dprarr,intarr,iout,jdtset_,length,marr,narr,&
-&     narrm,ncid,ndtset_alloc,token,typevarphys,multi_narr,&
-&     forceprint=forceprint)
+       narrm,ncid,ndtset_alloc,token,typevarphys,multi_narr,&
+       forceprint=forceprint)
    else
      call prttagm(dprarr,intarr,iout,jdtset_,length,marr,narr,&
-&     narrm,ncid,ndtset_alloc,token,typevarphys,multi_narr)
+       narrm,ncid,ndtset_alloc,token,typevarphys,multi_narr)
    end if
    ABI_DEALLOCATE(intarr)
    ABI_DEALLOCATE(dprarr)

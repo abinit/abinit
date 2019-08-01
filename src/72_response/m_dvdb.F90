@@ -358,6 +358,9 @@ module m_dvdb
    ! ngfft3_v1(3, numv1)
    ! The FFT mesh used for each v1 potential (the one used to store data in the file).
 
+  !integer,allocatable :: my_irpt2tot(:)
+  ! Mapping my_irpt index to full list of R-points.
+
   real(dp),allocatable :: qpts(:,:)
    ! qpts(3,nqpt)
    ! List of q-points in reduced coordinates.
@@ -889,6 +892,7 @@ subroutine dvdb_free(db)
  ABI_SFREE(db%symq_table)
  ABI_SFREE(db%iv_pinfoq)
  ABI_SFREE(db%ngfft3_v1)
+ !ABI_SFREE(db%my_irpt2tot)
 
  ! real arrays
  ABI_SFREE(db%qpts)
@@ -2843,7 +2847,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  do ii=1,nqshift
    call wrtout(std_out, ltoa(qshift(:, ii)))
  end do
- call wrtout(std_out, " It may take some time depending on the number of MPI procs, ngqpt and nfft points...")
+ call wrtout(std_out, " It may take some time depending on the number of MPI procs, ngqpt and nfft points.")
+ call wrtout(std_out, " Use boxcutmin < 2.0 (> 1.1) to decrease nfft, reduce memory requirements and speedup the calculation.")
 
  call prepare_ftinterp(db, method, ngqpt, qptopt1, nqshift, qshift, &
      qibz, qbz, indqq, iperm, nqsts, iqs_dvdb, all_rpt, all_wghatm, db%comm)
@@ -2851,6 +2856,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  nqibz = size(qibz, dim=2); nqbz = size(qbz, dim=2); db%nrtot = size(all_rpt, dim=2)
  write(std_out, "(a, i0)")" Using method for integration weights: ", method
  write(std_out, "(a, i0)")" Total number of R-points in real-space big box: ", db%nrtot
+ write(std_out, "(a, 3(i0, 1x))")" ngfft: ", ngfft(1:3)
+ !write(std_out,*)"db%ngfft", db%ngfft
  write(std_out, "(a, i0)")" dvdb_add_lr: ", db%add_lr
 
  ! Distribute R-points inside comm_rpt. In the unlikely case that nqbz > nprocs, my_nrpt is set to zero
@@ -2861,6 +2868,10 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
    db%my_nrpt = my_rstop - my_rstart + 1
    ABI_MALLOC(db%my_rpt, (3, db%my_nrpt))
    db%my_rpt = all_rpt(:, my_rstart:my_rstop)
+   !ABI_MALLOC(db%my_irpt2tot, (db%my_nrpt))
+   !do irpt=1,db%my_nrpt
+   !  db%my_irpt2tot(iprt) = my_rstart + (irpt - 1)
+   !end do
    ! Copy weights for the atoms treated by this proc.
    ABI_MALLOC(db%my_wratm, (db%my_nrpt, ii:jj))
    db%my_wratm = one
@@ -2925,11 +2936,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
          do imyp=1,db%my_npert
            ipc = db%my_pinfo(3, imyp)
            do ispden=1,db%nspden
-             !if (db%add_lr == 3 .and. ispden == 1) then
-             !  write(std_out,*)"q=0: Reshifting v1r_lr with average", sum(v1r_qibz(1, :, ispden, ipc)) / nfft
-             !  write(std_out,*)"Average of v1r_lr: ", sum(v1r_lr(1, :, imyp)) /nfft
-             !  v1r_lr(1, :, imyp) = v1r_lr(1, :, imyp) + sum(v1r_qibz(1, :, ispden, ipc)) / nfft
-             !end if
              v1r_qibz(1, :, ispden, ipc) = v1r_qibz(1, :, ispden, ipc) - v1r_lr(1, :, imyp)
            end do
          end do
@@ -6013,7 +6019,8 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  call dvdb%print()
 
  ! Define FFT mesh
- call ngfft_seq(ngfft, dvdb%ngfft3_v1(:,1))
+ !call ngfft_seq(ngfft, dvdb%ngfft3_v1(:,1))
+ ngfft = dvdb%ngfft
  nfft = product(ngfft(1:3))
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
 
@@ -6029,15 +6036,15 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  end if
 
  ! Select list of q-points depending on eph_task (from file or interpolated)
- if (dtset%eph_task == 14) then
+ if (dtset%eph_task == -15) then
   call wrtout(std_out, " Using list of q-points found in DVDB file")
   this_nqpt = dvdb%nqpt
   this_qpts => dvdb%qpts
   interpolated = 0
 
- else if (dtset%eph_task == -14) then
+ else if (dtset%eph_task == +15) then
    msg = sjoin(" Using list of q-points specified by ph_qpath with ", itoa(dtset%ph_nqpath), "qpoints")
-   ABI_CHECK(dtset%ph_nqpath > 0, "When eph_task = -14, ph_qpath must be given in input.")
+   ABI_CHECK(dtset%ph_nqpath > 0, "When eph_task = +15, ph_qpath must be given in input.")
    this_nqpt = dtset%ph_nqpath
    this_qpts => dtset%ph_qpath(:, 1:this_nqpt)
    comm_rpt = xmpi_comm_self
@@ -6139,6 +6146,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
        NCF_CHECK(ncerr)
 #endif
 
+       ! Debugging section.
 #if 0
        write(std_out, "(a)")"--- !DVDB_LONGRANGE_DIFF"
        write(std_out,"(3a)")"  qpoint: ", trim(ktoa(this_qpts(:,iq))), ","

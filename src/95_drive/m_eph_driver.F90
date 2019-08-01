@@ -697,14 +697,14 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! Compute phonon limited transport from SIGEPH file
    call transport(dtfil, dtset, ebands, cryst, comm)
 
- case (14, -14)
+ case (15, -15)
    ! Write average of DFPT potentials to file.
    if (my_rank == master) then
      call dvdb%open_read(ngfftf, xmpi_comm_self)
      call dvdb%write_v1qavg(dtset, strcat(dtfil%filnam_ds(4), "_V1QAVG.nc"))
    end if
 
- case (15)
+ case (16)
    ! Produce WRMAX.nc file with the decay of the W(R,r) as a function of R
    if (my_rank == master) then
      path = strcat(dtfil%filnam_ds(4), "_WRMAX")
@@ -716,7 +716,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      call dvdb%ftinterp_setup(dtset%ddb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, path, comm_rpt)
    end if
 
- case (16)
+ case (17)
    ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
    if (my_rank == master) then
      call ncwrite_v1qnu(dvdb, cryst, ifc, dvdb%nqpt, dvdb%qpts, dtset%prtvol, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))

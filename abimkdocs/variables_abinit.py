@@ -3708,11 +3708,11 @@ The choice is among:
          the user has to provide the full list of q-points in the input, [[ph_ndivsm]] is not used to generate the q-path.
 * 6 --> Estimate correction to the ZPR in polar materials using the Frohlich model. Requires EFMAS.nc file.
 * 7 --> Compute phonon limited transport in semiconductors using lifetimes taken from SIGEPH.nc file.
-* 14, -14 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file. 
-              In the first case (14) the q-points are taken directly from the DVDB file.
-              In the second case (-14) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
+* 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file. 
+              In the first case (+15) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
               input DVDB contains q-points in the IBZ and the potentials along the path are interpolated with Fourier transform.
-* 15 -> Produce WRMAX.nc file with the decay of the W(R,r) as a function of R
+              In the second case (-15) the q-points are taken directly from the DVDB file.
+* 16 -> Produce WRMAX.nc file with the decay of the W(R,r) as a function of R
 """,
 ),
 
