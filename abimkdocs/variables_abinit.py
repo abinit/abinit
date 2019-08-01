@@ -19868,7 +19868,7 @@ Variable(
     vartype="string",
     topics=['multidtset_useful'],
     dimensions="scalar",
-    defaultval="None",
+    defaultval=None,
     mnemonics="GET the wavefunctions from WFK PATH",
     text=r"""
 Specify the path of the WFK file using a string instead of the dataset index.
@@ -19884,13 +19884,13 @@ Variable(
     vartype="string",
     topics=['multidtset_useful'],
     dimensions="scalar",
-    defaultval="None",
+    defaultval=None,
     mnemonics="GET the k+q wavefunctions from WFQ PATH",
     text=r"""
 Specify the path of the WFQ file using a string instead of the dataset index.
 Alternative to [[getwfq]] and [[irdwfq]]. The string must be enclosed between quotation marks:
 
-    getwfq_path "../foodir/out_WFK"
+    getwfq_path "../foodir/out_WFQ"
 """
 ),
 
@@ -19916,13 +19916,13 @@ Variable(
     vartype="string",
     topics=['multidtset_useful'],
     dimensions="scalar",
-    defaultval="None",
+    defaultval=None,
     mnemonics="GET the DVDB file from PATH",
     text=r"""
 Specify the path of the DVDB file using a string instead of the dataset index.
 Alternative to [[getdvdb]] and [[irddvdb]]. The string must be enclosed between quotation marks:
 
-    getdvdb_path "../foodir/out_DDB"
+    getdvdb_path "../foodir/out_DVDB"
 """
 ),
 

@@ -219,7 +219,6 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -          fftalg         312
         freqspmax      7.34986508E-02 Hartree
         freqspmin     -7.34986508E-02 Hartree
-           getddb          20
           getdvdb1          0
           getdvdb2          0
           getdvdb3          2
@@ -228,7 +227,6 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
           getdvdb6          2
           getdvdb7         20
           getdvdb8         20
-           getwfk          20
        gw_qprange1          4
        gw_qprange2          0
        gw_qprange3          4
@@ -355,9 +353,9 @@ P           mkmem           8
 == DATASET  1 ==================================================================
 -   nproc =    1
 
- mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+ mkfilename: getwfk from: t160o_DS20_WFK
 
- mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+ mkfilename: getddb from: t160o_DS20_DDB
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -569,9 +567,11 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
 == DATASET  2 ==================================================================
 -   nproc =    1
 
- mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+ mkfilename: getwfk from: t160o_DS20_WFK
 
- mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+ mkfilename: getddb from: t160o_DS20_DDB
+
+ mkfilename: getdvdb from: t160o_DS20_DVDB
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -663,9 +663,9 @@ Interpolation of the electron-phonon coupling potential completed
 == DATASET  3 ==================================================================
 -   nproc =    1
 
- mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+ mkfilename: getwfk from: t160o_DS20_WFK
 
- mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+ mkfilename: getddb from: t160o_DS20_DDB
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
 
@@ -865,9 +865,9 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
 == DATASET  4 ==================================================================
 -   nproc =    1
 
- mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+ mkfilename: getwfk from: t160o_DS20_WFK
 
- mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+ mkfilename: getddb from: t160o_DS20_DDB
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
 
@@ -1066,9 +1066,9 @@ Transport calculation results
 == DATASET  5 ==================================================================
 -   nproc =    1
 
- mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+ mkfilename: getwfk from: t160o_DS20_WFK
 
- mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+ mkfilename: getddb from: t160o_DS20_DDB
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
 
@@ -1182,9 +1182,9 @@ Interpolation of the electron-phonon coupling potential completed
 == DATASET  6 ==================================================================
 -   nproc =    1
 
- mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+ mkfilename: getwfk from: t160o_DS20_WFK
 
- mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+ mkfilename: getddb from: t160o_DS20_DDB
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
 
@@ -1355,9 +1355,9 @@ Transport calculation results
 == DATASET  7 ==================================================================
 -   nproc =    1
 
- mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+ mkfilename: getwfk from: t160o_DS20_WFK
 
- mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+ mkfilename: getddb from: t160o_DS20_DDB
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET  20.
 
@@ -1509,9 +1509,9 @@ Transport calculation results
 == DATASET  8 ==================================================================
 -   nproc =    1
 
- mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+ mkfilename: getwfk from: t160o_DS20_WFK
 
- mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+ mkfilename: getddb from: t160o_DS20_DDB
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET  20.
 
@@ -1766,7 +1766,6 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
 -          fftalg         312
         freqspmax      7.34986508E-02 Hartree
         freqspmin     -7.34986508E-02 Hartree
-           getddb          20
           getdvdb1          0
           getdvdb2          0
           getdvdb3          2
@@ -1775,7 +1774,6 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
           getdvdb6          2
           getdvdb7         20
           getdvdb8         20
-           getwfk          20
        gw_qprange1          4
        gw_qprange2          0
        gw_qprange3          4

@@ -190,7 +190,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  end if
 
  ! According to getwfk and irdwfk, build _WFK file name, referred as fnamewffk
- if (iimage>0.and.dtfil%getwfk_from_image/=0) then
+ if (iimage >0 .and. dtfil%getwfk_from_image /= 0) then
    if (dtfil%getwfk_from_image==-1) then
      call appdig(iimage,'',appen)
    else
@@ -285,7 +285,6 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ireadden=will_read
 
  if ((dtset%optdriver==RUNL_GWLS.or.dtset%optdriver==RUNL_GSTATE) .and.dtset%iscf<0) ireadden=1
- !if (optdriver==RUNL_GSTATE.and.ireadwf/=0) ireadden=0
 
  ! According to getpawden, build _PAWDEN file name, referred as filpawdensin
  ! A default is available if getden is 0
@@ -755,10 +754,10 @@ subroutine fappnd(filapp,filnam,iapp,&
      write(nchar, '(i8)' ) iapp
      if (ndig>8) then
        write(msg,'(5a,i0,2a,i0,2a)')&
-&       'Requested file name extension has more than the allowed 8 digits.',ch10,&
-&       'Action: resubmit the job with smaller value for ntime.',ch10,&
-&       'Value computed here was ndig=',ndig,ch10,&
-&       'iapp= ',iapp,' filnam=',TRIM(filnam)
+        'Requested file name extension has more than the allowed 8 digits.',ch10,&
+        'Action: resubmit the job with smaller value for ntime.',ch10,&
+        'Value computed here was ndig=',ndig,ch10,&
+        'iapp= ',iapp,' filnam=',TRIM(filnam)
        MSG_ERROR(msg)
      end if
 !    Concatenate into character string, picking off exact number of digits
@@ -955,7 +954,7 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
 
  if (present(getpath)) then
    if (getpath /= ABI_NOFILE) then
-     if (ird /= 0 .and. get /= 0)then
+     if (ird /= 0 .or. get /= 0)then
        write(msg, '(11a,i0,3a,i0,a,i0,7a)' ) &
        'When the input variable: ', trim(getpath), ' is used ',ch10, &
        'the input variables ird',trim(stringvar),' and get',trim(stringvar),' cannot be',ch10,&
@@ -965,7 +964,7 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
        MSG_ERROR(msg)
      end if
      filnam_out = rmquotes(getpath)
-     write(msg, '(4a)' )' mkfilename: get',trim(stringvar) ," from: ",trim(getpath)
+     write(msg, '(5a)' )' mkfilename: get',trim(stringvar) ," from: ",trim(filnam_out), ch10
      call wrtout([std_out, ab_out], msg)
      will_read = 1; return
    end if
