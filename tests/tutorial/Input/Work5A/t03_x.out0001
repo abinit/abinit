@@ -1,5 +1,5 @@
 
-.Version 8.11.8 of ABINIT 
+.Version 8.11.9 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel19.0 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 20 Jun 2019.
-- ( at 11h25 )
+.Starting date : Thu  1 Aug 2019.
+- ( at 13h08 )
   
 - input  file    -> t03.in
 - output file    -> t03_x.out
@@ -33,13 +33,13 @@
     nsppol =       1      nsym =      48    n1xccc =       1    ntypat =       1
     occopt =       3   xclevel =       1
 -    mband =         192        mffmem =           1         mkmem =           1
-       mpw =        3887          nfft =       64000          nkpt =           1
+       mpw =        1944          nfft =       64000          nkpt =           1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        45    nfftf =     91125
 ================================================================================
-P This job should need less than                      83.897 Mbytes of memory.
+P This job should need less than                      59.720 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :     11.390 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
+_ WF disk file :      5.697 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 ================================================================================
  
 --------------------------------------------------------------------------------
@@ -56,11 +56,12 @@ _ WF disk file :     11.390 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 -          iomode           1
             acell      1.5340000000E+01  1.5340000000E+01  1.5340000000E+01 Bohr
               amu      1.37327000E+02
+           bandpp         192
       chksymbreak           0
      densfor_pred           6
              ecut      8.00000000E+00 Hartree
 -          fftalg         312
-           istwfk        1
+           istwfk        2
               ixc           7
            kptopt           0
 P           mkmem           1
@@ -69,6 +70,8 @@ P           mkmem           1
             ngfft          40      40      40
           ngfftdg          45      45      45
              nkpt           1
+            nline           6
+           nnsclo           2
             nstep          40
              nsym          48
            ntypat           1
@@ -140,8 +143,9 @@ P           mkmem           1
            tsmear      2.00000000E-03 Hartree
             typat      1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1  1  1  1  1
+  use_gemm_nonlop           1
            useylm           1
-         wfoptalg         114
+         wfoptalg         111
            xangst      2.0293945949E+00  2.0293945949E+00  0.0000000000E+00
                        2.0293945949E+00  0.0000000000E+00  2.0293945949E+00
                        0.0000000000E+00  2.0293945949E+00  2.0293945949E+00
@@ -296,3 +300,13 @@ _setup2: Arith. and geom. avg. npw (full set) are    3887.000    3887.000
 ================================================================================
  
      iter   Etot(hartree)      deltaE(h)  residm     nres2
+ ETOT  1  -791.89667798634    -7.919E+02 0.000E+00 7.712E+00
+ ETOT  2  -797.83475582233    -5.938E+00 0.000E+00 1.587E+00
+ ETOT  3  -799.32805160434    -1.493E+00 0.000E+00 1.661E-01
+ ETOT  4  -800.43639290020    -1.108E+00 0.000E+00 4.530E-01
+ ETOT  5  -800.44509378677    -8.701E-03 0.000E+00 4.457E-01
+ ETOT  6  -800.45207063681    -6.977E-03 0.000E+00 4.260E-01
+ ETOT  7  -800.44532089417     6.750E-03 0.000E+00 4.354E-01
+ ETOT  8  -800.44207479958     3.246E-03 0.000E+00 3.580E-01
+ ETOT  9  -800.43553792107     6.537E-03 0.000E+00 2.399E-01
+ ETOT 10  -800.43115479423     4.383E-03 0.000E+00 1.229E-01
