@@ -911,7 +911,7 @@ subroutine dvdb_free(db)
 
  ! Close the file but only if we have performed IO.
  if (db%rw_mode == DVDB_NOMODE) return
- call dvdb_close(db)
+ call db%close()
 
 end subroutine dvdb_free
 !!***
@@ -1329,7 +1329,7 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
  do ipc=1,npc
    idir = pinfo(1,ipc); ipert = pinfo(2,ipc); pcase = pinfo(3, ipc)
    if (my_rank == master) then
-     if (dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1scf(:,:,:,pcase), msg) /= 0) then
+     if (db%read_onev1(idir, ipert, iqpt, cplex, nfft, ngfft, v1scf(:,:,:,pcase), msg) /= 0) then
        MSG_ERROR(msg)
      end if
      !if (db%add_lr == 2) call dvdb_fix_nonpolar(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1scf(:,:,:,pcase))
@@ -1488,7 +1488,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
  if (.not. incache) then
    ! Read the dvscf potentials in the IBZ for all 3*natom perturbations.
    ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom)
-   call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
+   call db%readsym_allv1(db_iqpt, cplex, nfft, ngfft, v1scf, comm)
 
    ! Store all 3 natom potentials for q in IBZ in cache.
    if (db%qcache%use_3natom_cache .and. db%qcache%stored_iqibz_cplex(1) /= db_iqpt .and. isirr_q) then
@@ -1727,7 +1727,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, mbsize, qselect_dvdb, itreatq, comm
    call cwtime(cpu, wall, gflops, "start")
 
    ! Read all 3*natom potentials inside comm
-   call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
+   call db%readsym_allv1(db_iqpt, cplex, nfft, ngfft, v1scf, comm)
 
    ! Print progress.
    if (db_iqpt <= 50 .or. mod(db_iqpt, 50) == 0) then
@@ -1824,7 +1824,7 @@ subroutine dvdb_qcache_update_from_file(db, nfft, ngfft, ineed_qpt, comm)
    if (qselect(db_iqpt) == 0) cycle
 
    ! Read all 3*natom potentials inside comm.
-   call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
+   call db%readsym_allv1(db_iqpt, cplex, nfft, ngfft, v1scf, comm)
 
    ! Transfer to cache taking into account my_npert.
    if (ineed_qpt(db_iqpt) /= 0) then
@@ -2891,7 +2891,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
    ! Here all procs get all potentials for this IBZ q-point on the real-space FFT mesh.
    ! This call allocates v1r_qibz(cplex_qibz, nfft, nspden, 3*natom)
    ! Note that here we need all 3*natom perturbations because of v1phq_rotate
-   call dvdb_readsym_allv1(db, iqs_dvdb(iq_ibz), cplex_qibz, nfft, ngfft, v1r_qibz, db%comm)
+   call db%readsym_allv1(iqs_dvdb(iq_ibz), cplex_qibz, nfft, ngfft, v1r_qibz, db%comm)
 
    ! Reconstruct by symmetry the potentials for the star of this q-point,
    ! perform slow FT and accumulate in v1scf_rpt. Be careful with the gamma point.
@@ -3323,7 +3323,7 @@ subroutine dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt, nqshift, qshift, nff
    MSG_BUG("Cannot map microzone to IBZ")
  end if
 
- !iq_dvdb = dvdb_findq(db, qbz(:,iq_bz))
+ !iq_dvdb = db%findq(qbz(:,iq_bz))
 
  ! Distribute R-points fine inside comm_rpt.
  call xmpi_split_work(nrtot_fine, db%comm_rpt, my_rstart, my_rstop)
@@ -3592,7 +3592,7 @@ subroutine prepare_ftinterp(db, method, ngqpt, qptopt, nqshift, qshift, &
      nqst = nqst + 1
      iq_bz = iperm(ii)
      if (.not. found) then
-       iq_dvdb = dvdb_findq(db, qbz(:,iq_bz))
+       iq_dvdb = db%findq(qbz(:,iq_bz))
        if (iq_dvdb /= -1) then
          qibz(:,iq_ibz) = qbz(:,iq_bz)
          iqs_dvdb(iq_ibz) = iq_dvdb
@@ -4098,7 +4098,7 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
      db_iqpt = db%findq(qibz(:, iq_ibz))
      if (db_iqpt /= -1) then
        call wrtout(std_out, " DBG: Reading V(q) from DVDB...")
-       call dvdb_readsym_allv1(db, db_iqpt, my_cplex, nfft, ngfft, all_v1scf, comm)
+       call db%readsym_allv1(db_iqpt, my_cplex, nfft, ngfft, all_v1scf, comm)
        do imyp=1,db%my_npert
          if (my_cplex == 2) then
            v1scf(:,:,:,imyp) = all_v1scf(:,:,:,db%my_pinfo(3, imyp))
@@ -4388,7 +4388,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
 
      iq_bz = iperm(ii)
      if (.not. found) then
-       iq_dvdb = dvdb_findq(db, qbz(:,iq_bz))
+       iq_dvdb = db%findq(qbz(:,iq_bz))
        if (iq_dvdb /= -1) then
          qibz(:,iq_ibz) = qbz(:,iq_bz)
          iqs_dvdb(iq_ibz) = iq_dvdb
@@ -4435,7 +4435,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
    ! Get potentials for this IBZ q-point on the real-space FFT mesh.
    ! This call allocates v1r_qibz(cplex_qibz, nfft, nspden, 3*natom)
    ! TODO: Interface with qcache
-   call dvdb_readsym_allv1(db, iqs_dvdb(iq_ibz), cplex_qibz, nfft, ngfft, v1r_qibz, comm)
+   call db%readsym_allv1(iqs_dvdb(iq_ibz), cplex_qibz, nfft, ngfft, v1r_qibz, comm)
 
    ! Reconstruct by symmetry the potentials for the star of this q-point, perform FT and accumulate
    ! Be careful with the gamma point.
@@ -5209,7 +5209,7 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
      call wrtout(unt,' More than 20 q-points with prtvol == 0. Only important messages will be printed...')
    end if
    qq = qibz(:,iq_ibz)
-   iq_file = dvdb_findq(db, qq)
+   iq_file = db%findq(qq)
 
    ! Examine the symmetries of the q wavevector
    call littlegroup_q(cryst%nsym,qq,symq,cryst%symrec,cryst%symafm,timerev_q,prtvol=db%prtvol)
@@ -5640,12 +5640,12 @@ subroutine dvdb_test_v1rsym(db_path, symv1scf, comm)
  db = dvdb_new(db_path, comm)
  db%debug = .True.
  db%symv1 = symv1scf
- call dvdb_print(db)
- !call dvdb%list_perts([-1,-1,-1])
+ call db%print()
+ !call db%list_perts([-1,-1,-1])
 
  call ngfft_seq(ngfft, db%ngfft3_v1(:,1))
  nfft = product(ngfft(1:3))
- call dvdb_open_read(db, ngfft, comm)
+ call db%open_read(ngfft, comm)
 
  ABI_CHECK(db%nspinor==1, "nspinor == 2 not coded")
 
@@ -5670,7 +5670,7 @@ subroutine dvdb_test_v1rsym(db_path, symv1scf, comm)
        nfft = product(ngfft(:3))
        ABI_MALLOC(v1scf, (cplex*nfft, db%nspden))
 
-       if (dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1scf, msg) /= 0) then
+       if (db%read_onev1(idir, ipert, iqpt, cplex, nfft, ngfft, v1scf, msg) /= 0) then
          MSG_ERROR(msg)
        end if
 
@@ -5721,7 +5721,7 @@ subroutine dvdb_test_v1rsym(db_path, symv1scf, comm)
  ABI_FREE(symrel1)
  ABI_FREE(tnons1)
 
- call dvdb_free(db)
+ call db%free()
 
 end subroutine dvdb_test_v1rsym
 !!***
@@ -6978,10 +6978,10 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  ! Open DVDB and copy important dimensions
  ! =======================================
 
- call dvdb_open_read(dvdb, ngfftf, xmpi_comm_self)
+ call dvdb%open_read(ngfftf, xmpi_comm_self)
 
  ! Besides perturbations with same q-points won't be contiguous on file --> IO is gonna be inefficient.
- call dvdb_print(dvdb, prtvol=dtset%prtvol)
+ call dvdb%print(prtvol=dtset%prtvol)
 
  natom = cryst%natom
  natom3 = 3 * natom
@@ -7010,7 +7010,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
    qpt = qibz(:,iq)
 
    ! Find the index of the q-point in the DVDB.
-   db_iqpt = dvdb_findq(dvdb, qpt)
+   db_iqpt = dvdb%findq(qpt)
    !if (db_iqpt /= 1) db_iqpt = -1
 
    if (db_iqpt /= -1) then
@@ -7087,7 +7087,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
 
      do ipc=1,npc
        idir = pinfo(1,ipc); iat = pinfo(2,ipc); ipert = pinfo(3, ipc)
-       if (dvdb_read_onev1(dvdb, idir, iat, db_iqpt, cplex, nfftf, ngfftf, v1scf, msg) /= 0) then
+       if (dvdb%read_onev1(idir, iat, db_iqpt, cplex, nfftf, ngfftf, v1scf, msg) /= 0) then
          MSG_ERROR(msg)
        end if
 
@@ -7331,7 +7331,7 @@ subroutine dvdb_qdownsample(dvdb, new_dvdb_fname, ngqpt, comm)
 
  do iq=1,nqibz
    ! Find the index of the q-point in the DVDB.
-   db_iqpt = dvdb_findq(dvdb, qibz(:, iq))
+   db_iqpt = dvdb%findq(qibz(:, iq))
    ABI_CHECK(db_iqpt /= -1, sjoin("Q-point:", ktoa(qibz(:, iq)), "not found in DVDB!"))
    iq_read(iq) = db_iqpt
 
@@ -7368,7 +7368,7 @@ subroutine dvdb_qdownsample(dvdb, new_dvdb_fname, ngqpt, comm)
 
    do ipc=1,npc
      idir = pinfo(1,ipc); iat = pinfo(2,ipc); ipert = pinfo(3, ipc)
-     if (dvdb_read_onev1(dvdb, idir, iat, db_iqpt, cplex, nfft, dvdb%ngfft, v1scf, msg) /= 0) then
+     if (dvdb%read_onev1(idir, iat, db_iqpt, cplex, nfft, dvdb%ngfft, v1scf, msg) /= 0) then
        MSG_ERROR(msg)
      end if
 
