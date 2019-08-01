@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  8 May 2019.
-- ( at 11h10 )
+.Starting date : Mon  8 Jul 2019.
+- ( at 03h40 )
   
 - input  file    -> t86.in
 - output file    -> t86_MPI4.out
@@ -1219,30 +1219,30 @@ cartesian_forces: !CartForces
 
 --- !EnergyTerms
 comment             : Components of total free energy (in Hartree)
-kinetic             :  4.311836595104540493E+01
-hartree             :  3.130289914056712774E+01
-xc                  : -2.247254202033941795E+01
+kinetic             :  4.311836597191735621E+01
+hartree             :  3.130289914951606178E+01
+xc                  : -2.247254202094165265E+01
 Ewald energy        : -1.142203169790575572E+02
 psp_core            :  6.536925226004570710E+00
-local_psp           : -9.850462805134246480E+01
-spherical_terms     :  2.593450868757609662E+00
-internal            : -1.516458458643647305E+02
-total_energy        : -1.516458458643647305E+02
-total_energy_eV     : -4.126493322589622039E+03
+local_psp           : -9.850462806455921339E+01
+spherical_terms     :  2.593450873945524204E+00
+internal            : -1.516458458431749250E+02
+total_energy        : -1.516458458431749250E+02
+total_energy_eV     : -4.126493322013018769E+03
 ...
 
 
 
 --- !EnergyTermsDC
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.468734668477278760E+01
+band_energy         : -1.468734667547897210E+01
 Ewald energy        : -1.142203169790575572E+02
 psp_core            :  6.536925226004570710E+00
-xc_dc               : -2.437127990976835790E+01
-spherical_terms     : -4.733021605770507456E+00
-internal            : -1.514750399533646430E+02
-total_energy_dc     : -1.514750399533646430E+02
-total_energy_dc_eV  : -4.126493322589622039E+03
+xc_dc               : -2.437127991852323916E+01
+spherical_terms     : -4.733021606622212829E+00
+internal            : -1.514750399536774239E+02
+total_energy_dc     : -1.514750399536774239E+02
+total_energy_dc_eV  : -4.126493322013018769E+03
 ...
 
 

@@ -41,7 +41,7 @@ module m_iogkk
  use m_symtk,           only : mati3inv, littlegroup_q
  use m_geometry,        only : phdispl_cart2red, littlegroup_pert
  use m_crystal,         only : crystal_t
- use m_ifc,             only : ifc_type, ifc_fourq
+ use m_ifc,             only : ifc_type
  use m_dynmat,          only : d2sym3
 
  implicit none
@@ -334,7 +334,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
    ! Determine dynamical matrix, phonon frequencies and displacement vector for qpoint
    !call wrtout(std_out,' read_gkk: calling inpphon to calculate the dynamical matrix','COLL')
 
-   call ifc_fourq(ifc,cryst,qptirred_local(:,iqptirred),phfrq_tmp,displ_cart,out_eigvec=eigvec)
+   call ifc%fourq(cryst,qptirred_local(:,iqptirred),phfrq_tmp,displ_cart,out_eigvec=eigvec)
 
 !  Get displacement vectors for all branches in reduced coordinates
 !  used in scalar product with H(1)_atom,idir  matrix elements

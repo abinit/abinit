@@ -5374,7 +5374,7 @@ subroutine dvdb_test_ftinterp(dvdb_path, dvdb_ngqpt, dvdb_add_lr, ddb_path, prtv
    ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
    ABI_MALLOC(zeff, (3, 3, dvdb%natom))
    chneut = 2
-   iblock = ddb_get_dielt_zeff(ddb, dvdb%cryst, rfmeth1, chneut, selectz0, dielt, zeff)
+   iblock = ddb%get_dielt_zeff(dvdb%cryst, rfmeth1, chneut, selectz0, dielt, zeff)
    if (my_rank == master) then
      if (iblock == 0) then
        call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_path))
@@ -5526,7 +5526,7 @@ subroutine dvdb_test_ftinterp(dvdb_path, dvdb_ngqpt, dvdb_add_lr, ddb_path, prtv
  ABI_FREE(file_v1r)
 
  call dvdb%free()
- call ddb_free(ddb)
+ call ddb%free()
 
 end subroutine dvdb_test_ftinterp
 !!***
