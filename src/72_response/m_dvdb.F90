@@ -2854,7 +2854,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  !write(std_out,*)"db%ngfft", db%ngfft
  write(std_out, "(a, i0)")" dvdb_add_lr: ", db%add_lr
 
- ! Distribute R-points inside comm_rpt. In the unlikely case that nqbz > nprocs, my_nrpt is set to zero
+ ! Distribute R-points inside comm_rpt.
  call xmpi_split_work(db%nrtot, db%comm_rpt, my_rstart, my_rstop)
  db%my_nrpt = 0
  ii = minval(db%my_pinfo(2,:)); jj = maxval(db%my_pinfo(2,:))
@@ -2892,6 +2892,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  ABI_MALLOC_OR_DIE(db%v1scf_rpt, (2, db%my_nrpt, nfft, db%nspden, db%my_npert), ierr)
  db%v1scf_rpt = zero
 
+ ! TODO: Parallelize this part over q-points using comm_rpt. For the time being only pert parallelism.
  iqst = 0
  do iq_ibz=1,nqibz
    call cwtime(cpu, wall, gflops, "start")
@@ -2928,8 +2929,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
        ABI_CHECK(nqsts(iq_ibz) == 1, "cplex_qibz == 1 and nq nqst /= 1 (should be gamma)")
        ABI_CHECK(all(g0q == 0), "gamma point with g0q /= 0")
 
-       ! Substract the long-range part of the potential.
        if (db%add_lr /= 0) then
+         ! Substract the long-range part of the potential.
          do imyp=1,db%my_npert
            ipc = db%my_pinfo(3, imyp)
            do ispden=1,db%nspden
@@ -2970,8 +2971,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
        ! Multiply by e^{iqpt_bz.r}
        call times_eikr(qpt_bz, ngfft, nfft, db%nspden * db%natom3, v1r_qbz)
 
-       ! Substract the long-range part of the potential.
        if (db%add_lr /= 0) then
+         ! Substract the long-range part of the potential.
          do imyp=1,db%my_npert
            ipc = db%my_pinfo(3, imyp)
            do ispden=1,db%nspden
@@ -3036,7 +3037,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
    end do
  end do
 
- ! Now we have W(R, r)
+ ! Now we have W(R,r)
  if (any(qrefine > 1)) then
    call dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt1, nqshift, qshift, nfft, ngfft, method)
    !call dvdb_enforce_asr(db)
@@ -3064,7 +3065,7 @@ subroutine dvdb_get_maxw(db, ngqpt, all_rpt, all_rmod, maxw)
 
 !Arguments ------------------------------------
 !scalars
- class(dvdb_t),target,intent(inout) :: db
+ class(dvdb_t),intent(in) :: db
  integer,intent(in) :: ngqpt(3)
  real(dp),allocatable,intent(out) :: maxw(:,:), all_rpt(:,:), all_rmod(:)
 
@@ -5458,7 +5459,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
  end do
  ABI_DT_FREE(hdr1_list)
 
- write(std_out,"(a,i0,a)")"Merged successfully ",nfiles," files"
+ write(std_out,"(a,i0,a)")"Merged successfully ", nfiles, " files"
 
  ! List available perturbations.
  dvdb = dvdb_new(dvdb_path, xmpi_comm_self)

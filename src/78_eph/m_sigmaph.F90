@@ -68,7 +68,6 @@ module m_sigmaph
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
  use m_occ,            only : occ_fd, occ_dfd, occ_be
- use m_double_grid,    only : double_grid_t
  use m_fftcore,        only : get_kg
  use m_kg,             only : getph
  use m_bz_mesh,        only : isamek
@@ -983,30 +982,30 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end if
 
  if (sigma%use_ftinterp) then
-     ! Use ddb_ngqpt q-mesh to compute real-space represention of DFPT v1scf potentials to prepare Fourier interpolation.
-     ! R-points are distributed inside comm_rpt
-     ! Note that when R-points are distributed inside comm_qpt we cannot interpolate potentials on-the-fly
-     ! inside the loop over q-points.
-     ! In this case, indeed, the interpolation must be done in sigma_setup_qloop once we know the q-points contributing
-     ! to the integral and the potentials must be cached.
-     comm_rpt = sigma%comm_qpt
-     if (.not. sigma%imag_only) comm_rpt = sigma%comm_bsum
-     !FIXME: comm_qpt is buggy.
-     if (sigma%imag_only) comm_rpt = xmpi_comm_self
-     comm_rpt = xmpi_comm_self
-     if (dtset%useric == 666) comm_rpt = xmpi_comm_self
-     method = dtset%userid
-     call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, &
-                              nfftf, ngfftf, method, comm_rpt)
+   ! Use ddb_ngqpt q-mesh to compute real-space represention of DFPT v1scf potentials to prepare Fourier interpolation.
+   ! R-points are distributed inside comm_rpt
+   ! Note that when R-points are distributed inside comm_qpt we cannot interpolate potentials on-the-fly
+   ! inside the loop over q-points.
+   ! In this case, indeed, the interpolation must be done in sigma_setup_qloop once we know the q-points contributing
+   ! to the integral and the potentials must be cached.
+   comm_rpt = sigma%comm_qpt
+   if (.not. sigma%imag_only) comm_rpt = sigma%comm_bsum
+   !FIXME: comm_qpt is buggy.
+   if (sigma%imag_only) comm_rpt = xmpi_comm_self
+   comm_rpt = xmpi_comm_self
+   if (dtset%useric == 666) comm_rpt = xmpi_comm_self
+   method = dtset%userid
+   call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, &
+                            nfftf, ngfftf, method, comm_rpt)
 
-     ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
-     ABI_CALLOC(qselect, (sigma%nqibz))
-     qselect = 1
-     if (sigma%imag_only .and. sigma%qint_method == 1) then
-       call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
-       !qselect = 1
-     end if
-     call dvdb%ftqcache_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, sigma%itreat_qibz, comm)
+   ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
+   ABI_CALLOC(qselect, (sigma%nqibz))
+   qselect = 1
+   if (sigma%imag_only .and. sigma%qint_method == 1) then
+     call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
+     !qselect = 1
+   end if
+   call dvdb%ftqcache_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, sigma%itreat_qibz, comm)
 
  else
    ABI_CALLOC(qselect, (dvdb%nqpt))
@@ -2171,7 +2170,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,occopt3=3,qptopt1=1,sppoldbl1=1,istwfk1=1
+ integer,parameter :: master=0, occopt3=3, qptopt1=1, sppoldbl1=1, istwfk1=1
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,ik_ibz,ndeg, iq_ibz
  integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,qprange_,bstop
  integer :: jj,bstart,natom,natom3
@@ -2241,7 +2240,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz, bz2ibz=new%ind_bz2ibz)
 
 !HM: the bz2ibz produced above is incomplete, I do it here using listkk
- ABI_MALLOC(temp,(new%nqbz,6))
+ ABI_MALLOC(temp,(new%nqbz, 6))
  call listkk(dksqmax, cryst%gmet, temp, new%qibz, new%qbz, new%nqibz, new%nqbz, cryst%nsym, &
       1, cryst%symafm, cryst%symrec, 1, comm, exit_loop=.True., use_symrec=.True.)
 
@@ -3746,8 +3745,6 @@ end subroutine sigmaph_free
 
 subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol, comm)
 
- use m_abicore
-
 !Arguments ------------------------------------
  integer,intent(in) :: ikcalc, prtvol, comm
  type(dataset_type),intent(in) :: dtset
@@ -3939,10 +3936,10 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
 
  if (self%qint_method > 0 .and. .not. self%use_doublegrid) then
    !self%ephwg%lgk2ibz
-   ABI_REMALLOC(self%ephwg%lgk2ibz,(self%nqibz_k))
+   ABI_REMALLOC(self%ephwg%lgk2ibz, (self%nqibz_k))
    self%ephwg%lgk2ibz = self%ind_ibzk2ibz(1, :)
    !self%ephwg%kq2ibz
-   ABI_REMALLOC(self%ephwg%kq2ibz,(self%nqibz_k))
+   ABI_REMALLOC(self%ephwg%kq2ibz, (self%nqibz_k))
    self%ephwg%kq2ibz = self%indkk_kq(1, :)
  end if
 

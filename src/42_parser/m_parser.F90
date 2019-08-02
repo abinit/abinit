@@ -98,7 +98,7 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
  integer,parameter :: master=0
  integer :: option,marr,tread,lenstr_noxyz,ierr
  character(len=strlen) :: string_raw
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: intarr(1)
  real(dp) :: dprarr(1)
@@ -130,11 +130,11 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
    if (tread==1) ndtset=intarr(1)
    ! Check that ndtset is not negative
    if (ndtset<0 .or. ndtset>9999) then
-     write(message, '(a,i0,4a)' )&
+     write(msg, '(a,i0,4a)' )&
      'Input ndtset must be non-negative and < 10000, but was ',ndtset,ch10,&
      'This is not allowed.',ch10,&
      'Action: modify ndtset in the input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
  end if ! master
 
@@ -720,7 +720,7 @@ subroutine incomprs(string,length)
  character(len=1) :: blank=' '
 !scalars
  integer :: bb,f1,ii,jj,kk,l1,lbef,lcut,lold,stringlen
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -789,12 +789,12 @@ subroutine incomprs(string,length)
 !
 !    Add blank on end unless string had no extra space
      if (lcut==stringlen) then
-       write(message,'(a,i7,a,a,a,a,a,a,a,a)')&
+       write(msg,'(a,i7,a,a,a,a,a,a,a,a)')&
        'For input file, with data forming a string of',stringlen,' characters,',ch10,&
        'no double blanks or tabs were found.',ch10,&
        'This is unusual for an input file (or any file),',ch10,&
        'and may cause parsing trouble.  Is this a binary file?',ch10
-       MSG_WARNING(message)
+       MSG_WARNING(msg)
      else
        length=lcut+1
        string(length:length)=blank
@@ -933,7 +933,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  integer :: ds_input_
  character(len=4) :: appen
  character(len=3) :: typevar
- character(len=500) :: message
+ character(len=500) :: msg
  character(len=fnlen) :: cs,cs1,cs1colon,cs1plus,cs1times,cs2colon,cs2plus
  character(len=fnlen) :: cs2times,cscolon,csplus,cstimes,trial_cs
 !arrays
@@ -950,13 +950,13 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  unities=jdtset-10*dozens
 
  if(jdtset<0)then
-   write(message,'(a,i0,a)')' jdtset=',jdtset,', while it should be non-negative.'
-   MSG_ERROR(message)
+   write(msg,'(a,i0,a)')' jdtset=',jdtset,', while it should be non-negative.'
+   MSG_ERROR(msg)
  end if
 
  if(jdtset>9999)then
-   write(message,'(a,i0,a)')' jdtset=',jdtset,', while it must be lower than 10000.'
-   MSG_ERROR(message)
+   write(msg,'(a,i0,a)')' jdtset=',jdtset,', while it must be lower than 10000.'
+   MSG_ERROR(msg)
  end if
 
 !Default values : nothing has been read
@@ -994,11 +994,11 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 !    Look for another occurence of the same token in string, if so, leaves:
      itoken2=index(string,cs(1:cslen), BACK=.true. )
      if(itoken/=itoken2)then
-       write(message, '(7a)' )&
+       write(msg, '(7a)' )&
        'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
        'This is confusing, so it has been forbidden.',ch10,&
        'Action: remove one of the two occurences.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
 
      if(itoken/=0) then
@@ -1023,11 +1023,11 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 !    Look for another occurence of the same token in string, if so, leaves:
      itoken2=index(string,cs(1:cslen), BACK=.true. )
      if(itoken/=itoken2)then
-       write(message, '(7a)' )&
-&       'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
-&       'This is confusing, so it has been forbidden.',ch10,&
-&       'Action: remove one of the two occurences.'
-       MSG_ERROR(message)
+       write(msg, '(7a)' )&
+        'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
+        'This is confusing, so it has been forbidden.',ch10,&
+        'Action: remove one of the two occurences.'
+       MSG_ERROR(msg)
      end if
      if(itoken/=0) then
        opttoken=1
@@ -1044,19 +1044,19 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 !    Look for another occurence of the same token in string, if so, leaves:
      itoken2=index(string,cs1(1:cslen), BACK=.true. )
      if(itoken1/=itoken2)then
-       write(message, '(7a)' )&
+       write(msg, '(7a)' )&
        'There are two occurences of the keyword "',cs1(1:cslen),'" in the input file.',ch10,&
        'This is confusing, so it has been forbidden.',ch10,&
        'Action: remove one of the two occurences.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
 
      if(itoken/=0 .and. itoken1/=0)then
-       write(message, '(9a)' )&
+       write(msg, '(9a)' )&
        'The keywords "',cs(1:cslen),'" and "',cs1(1:cslen),'"',ch10,&
        'cannot be used together in the input file.',ch10,&
        'Action: remove one of the two keywords.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
 
      if(itoken1/=0)then
@@ -1126,24 +1126,24 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
 !      If the multi-dataset mode is not used, no token should have been found
        if(itoken_colon+itoken_plus+itoken_times+ itoken_2colon+itoken_2plus+itoken_2times > 0 ) then
-         write(message,'(a,a,a,a,a,a,a,a,a,a,a,a, a)' )&
+         write(msg,'(a,a,a,a,a,a,a,a,a,a,a,a, a)' )&
          'Although the multi-dataset mode is not activated,',ch10,&
          'the keyword "',trim(cs),'" has been found',ch10,&
          'appended with  + * or :  .',ch10,&
          'This is not allowed.',ch10,&
          'Action: remove the appended keyword, or',ch10,&
          'use the multi-dataset mode (ndtset/=0).'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
        if(itoken_1colon+itoken_1plus+itoken_1times > 0 ) then
-         write(message, '(a,a,a,a,a,a,a,a,a,a,a,a,a)' )&
+         write(msg, '(a,a,a,a,a,a,a,a,a,a,a,a,a)' )&
          'Although the multi-dataset mode is not activated,',ch10,&
          'the keyword "',trim(cs),'" has been found',ch10,&
          'appended with ? , then + * or :  .',ch10,&
          'This is not allowed.',ch10,&
          'Action: remove the appended keyword, or',ch10,&
          'use the multi-dataset mode (ndtset/=0).'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
 
      else
@@ -1161,13 +1161,13 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        if(itoken_2times/=0)sum_token=sum_token+1
 
        if(sum_token/=0 .and. sum_token/=2) then
-         write(message, '(a,a,a,a,a,i0,a,a,a,a,a,a,a)' )&
+         write(msg, '(a,a,a,a,a,i0,a,a,a,a,a,a,a)' )&
          'The keyword "',trim(cs),'" has been found to take part',ch10,&
          'to series definition in the multi-dataset mode',sum_token,' times.',ch10,&
          'This is not allowed, since it should be used once with ":",',ch10,&
          'and once with "+" or "*".',ch10,&
          'Action: change the number of occurences of this keyword.'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
 
 !      If the multi-dataset mode is used, make sure that
@@ -1201,11 +1201,11 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
          ier=1 ; cs=cs2times
        end if
        if(ier==1)then
-         write(message, '(a,a,a,a,a,a,a)' )&
+         write(msg, '(a,a,a,a,a,a,a)' )&
          'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
          'This is confusing, so it has been forbidden.',ch10,&
          'Action: remove one of the two occurences.'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
 
 !      Select the series according to the presence of a colon flag
@@ -1230,28 +1230,28 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
 !      Make sure that the proper combination of : + and * is found .
        if(itoken_colon > 0 .and. (itoken_plus==0 .and. itoken_times==0) )then
-         write(message, '(13a)' )&
+         write(msg, '(13a)' )&
          'The keyword "',cscolon(1:cslen),'" initiate a series,',ch10,&
          'but there is no occurence of "',csplus(1:cslen),'" or "',cstimes(1:cslen),'".',ch10,&
          'Action: either suppress the series, or make the increment',ch10,&
          'or the factor available.'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
        if(itoken_plus/=0 .and. itoken_times/=0)then
-         write(message, '(a,a, a,a,a,a,a)' )&
+         write(msg, '(a,a, a,a,a,a,a)' )&
          'The combined occurence of keywords "',csplus(1:cslen),'" and "',cstimes(1:cslen),'" is not allowed.',ch10,&
          'Action: suppress one of them in your input file.'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
        if(itoken_colon==0 .and. (itoken_plus/=0 .or. itoken_times/=0) ) then
          cs=csplus
          if(itoken_times/=0)cs=cstimes
-         write(message, '(a,a,a,a,a,a,a,a,a,a,a)' )&
+         write(msg, '(a,a,a,a,a,a,a,a,a,a,a)' )&
          'The keyword "',cscolon(1:cslen),'" does not appear in the input file.',ch10,&
          'However, the keyword "',cs(1:cslen),'" appears.',ch10,&
          'This is forbidden.',ch10,&
          'Action: make the first appear, or suppress the second.'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
 
 !      At this stage, either
@@ -1281,11 +1281,11 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 !    Look for another occurence of the same token in string, if so, leaves:
      itoken2=index(string,cs(1:cslen), BACK=.true. )
      if(itoken/=itoken2)then
-       write(message, '(a,a,a,a,a,a,a)' )&
+       write(msg, '(a,a,a,a,a,a,a)' )&
        'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
        'This is confusing, so it has been forbidden.',ch10,&
        'Action: remove one of the two occurences.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
 
      if(itoken/=0) then
@@ -1314,20 +1314,20 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 !      If itoken2/=0
        if(itoken2/=0)then
          if(trial_jdtset==0)then
-           write(message, '(a,a,a,a,a,a,a)' )&
+           write(msg, '(a,a,a,a,a,a,a)' )&
            'There is an occurence of the keyword "',trim(token),'" appended with 0 in the input file.',ch10,&
            'This is forbidden.',ch10,&
            'Action: remove this occurence.'
-           call wrtout(std_out,message,'COLL')
+           call wrtout(std_out,msg,'COLL')
          else
-           write(message, '(a,a,a,a,a,i1,a,a,a,a,a)' )&
+           write(msg, '(a,a,a,a,a,i1,a,a,a,a,a)' )&
            'In the input file, there is an occurence of the ',ch10,&
            'keyword "',trim(token),'", appended with the digit "',trial_jdtset,'".',ch10,&
            'This is forbidden when ndtset==0 .',ch10,&
            'Action: remove this occurence, or change ndtset.'
-           call wrtout(std_out,message,'COLL')
+           call wrtout(std_out,msg,'COLL')
          end if
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
      end if
    end do
@@ -1348,20 +1348,20 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
     typevarphys=='BFI' .or. typevarphys=='TIM')typevar='DPR'
  if(typevarphys=='KEY')then
    if(opttoken>=2)then
-     write(message, '(9a)' )&
+     write(msg, '(9a)' )&
      'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
      'a series has been defined in the input file.',ch10,&
      'This is forbidden.',ch10,&
      'Action: check your input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
    if(narr>=2)then
-     write(message, '(9a)' )&
+     write(msg, '(9a)' )&
      'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
      'the number of data requested is larger than 1.',ch10,&
      'This is forbidden.',ch10,&
      'Action: check your input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
    typevar='KEY'
 !  write(std_out,*)' intagm : will read cs=',trim(cs)
@@ -1523,7 +1523,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  integer :: asciichar,b2,errcod,ii,integ,istar,nrep,strln
  real(dp) :: factor,real8
  character(len=3) :: typevar
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -1591,7 +1591,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  end do
 
 !if (ii>narr) then
-!write(message, '(a,a,a,a,a,a,a,a,a,a,i4,a,i4,a,a,a,a,a,a,a,a)' ) ch10,&
+!write(msg, '(a,a,a,a,a,a,a,a,a,a,i4,a,i4,a,a,a,a,a,a,a,a)' ) ch10,&
 !' inarray : ERROR -',ch10,&
 !&  '  Too many data are provided in the input file for',ch10,&
 !&  '  the keyword "',cs,'" :',ch10,&
@@ -1600,18 +1600,18 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 !&  '  of this array, in the input file.',ch10,&
 !&  '  Action: check the data provided for this keyword,',ch10,&
 !&  '  as well as its declared dimension. They do not match.'
-!call wrtout(std_out,message,'COLL')
+!call wrtout(std_out,msg,'COLL')
 !end if
 
  if(errcod/=0)then
-   write(message, '(5a,i0,10a)' ) &
+   write(msg, '(5a,i0,10a)' ) &
    'An error occurred reading data for keyword "',trim(cs),'",',ch10,&
    'looking for ',narr,' array elements.', ch10, &
    'There is a problem with the input file: maybe  ',ch10,&
    'a disagreement between the declared dimension of the array,',ch10,&
    'and the number of data actually provided. ',ch10,&
    'Action: correct your input file, and especially the keyword', trim(cs)
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
 !In case of 'LEN', 'ENE', 'BFI', or 'TIM', try to identify the unit
@@ -1724,7 +1724,7 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
  integer :: dtset_len,ixyz,ii,index_already_done,index_xyz_fname
  integer :: index_xyz_fname_end,index_xyz_token,kk
  character(len=2) :: dtset_char
- character(len=500) :: message
+ character(len=500) :: msg
  character(len=fnlen) :: xyz_fname
 
 !************************************************************************
@@ -1739,8 +1739,8 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
 
    ixyz=ixyz+1
    if(ixyz==1)then
-     write(message,'(80a)')('=',ii=1,80)
-     call wrtout(ab_out,message,'COLL')
+     write(msg,'(80a)')('=',ii=1,80)
+     call wrtout(ab_out,msg,'COLL')
    end if
 
 !  The xyzFILE token has been identified
@@ -1756,12 +1756,12 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
    index_xyz_fname_end=index(string_upper(index_xyz_fname:lenstr),blank)
 
    if(index_xyz_fname_end ==0 )then
-     write(message, '(5a,i4,2a)' )&
+     write(msg, '(5a,i4,2a)' )&
      'Could not find the name of the xyz file.',ch10,&
      'index_xyz_fname_end should be non-zero, while it is :',ch10,&
      'index_xyz_fname_end=',index_xyz_fname_end,ch10,&
      'Action: check the filename that was provided after the XYZFILE input variable keyword.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
    index_xyz_fname_end=index_xyz_fname_end+index_xyz_fname-1
@@ -1771,8 +1771,8 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
    xyz_fname=repeat(blank,fnlen)                  ! Initialize xyz_fname to a blank line
    xyz_fname=string_raw(index_xyz_fname:index_xyz_fname_end-1)
 
-   write(message, '(3a)') ch10, ' importxyz : Identified token XYZFILE, referring to file ',trim(xyz_fname)
-   call wrtout([std_out, ab_out],message,'COLL')
+   write(msg, '(3a)') ch10, ' importxyz : Identified token XYZFILE, referring to file ',trim(xyz_fname)
+   call wrtout([std_out, ab_out],msg,'COLL')
 
 !  Append the data from the xyz file to the string, and update the length of the string
    call append_xyz(dtset_char,lenstr,string_upper,xyz_fname,strln)
@@ -1794,8 +1794,8 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
    end do
    string_upper(1:1)=blank
    lenstr=lenstr+1
-   write(message,'(a,80a,a)')ch10,('=',ii=1,80),ch10
-   call wrtout(ab_out,message,'COLL')
+   write(msg,'(a,80a,a)')ch10,('=',ii=1,80),ch10
+   call wrtout(ab_out,msg,'COLL')
  end if
 
 end subroutine importxyz
@@ -1849,7 +1849,7 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
  real(dp) :: znucl
  character(len=5) :: string5
  character(len=20) :: string20
- character(len=500) :: message
+ character(len=500) :: msg
  type(atomdata_t) :: atom
 !arrays
  real(dp),allocatable :: xangst(:,:)
@@ -1878,11 +1878,11 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
  end if
 
 !open file with xyz data
- if (open_file(xyz_fname, message, newunit=unitxyz, status="unknown") /= 0) then
-   MSG_ERROR(message)
+ if (open_file(xyz_fname, msg, newunit=unitxyz, status="unknown") /= 0) then
+   MSG_ERROR(msg)
  end if
- write(message, '(3a)')' importxyz : Opened file ',trim(xyz_fname),'; content stored in string_xyz'
- call wrtout(std_out,message,'COLL')
+ write(msg, '(3a)')' importxyz : Opened file ',trim(xyz_fname),'; content stored in string_xyz'
+ call wrtout(std_out,msg,'COLL')
 
 !check number of atoms is correct
  read(unitxyz,*) natom
@@ -1905,10 +1905,10 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
    call atomdata_from_symbol(atom,elementtype(iatom))
    znucl = atom%znucl
    if (znucl > 200) then
-     write (message,'(5a)')&
+     write (msg,'(5a)')&
      'found element beyond Z=200 ', ch10,&
      'Solution: increase size of atomspecies in append_xyz', ch10
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 !  found a new atom type
    if (atomspecies(int(znucl)) == 0) then
@@ -1952,10 +1952,10 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
 
 !Check the length of the string
  if(lenstr_new>strln)then
-   write(message,'(3a)')&
+   write(msg,'(3a)')&
    'The maximal size of the input variable string has been exceeded.',ch10,&
    'The use of a xyz file is more character-consuming than the usual input file. Sorry.'
-   MSG_BUG(message)
+   MSG_BUG(msg)
  end if
 
 !Update the length of the string
@@ -2023,13 +2023,13 @@ subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
 !Local variables-------------------------------
 !scalars
  integer :: icond,ok
- character(len=500) :: message
+ character(len=500) :: msg
 
 !******************************************************************
 
  if(cond_number<0 .or. cond_number>4)then
-   write(message,'(a,i0,a)' )'The value of cond_number is ',cond_number,'but it should be positive and < 5.'
-   MSG_BUG(message)
+   write(msg,'(a,i0,a)' )'The value of cond_number is ',cond_number,'but it should be positive and < 5.'
+   MSG_BUG(msg)
  end if
 
 !Checks the allowed values
@@ -2041,46 +2041,46 @@ subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
 !If there is something wrong, compose the message, and print it
  if(ok==0)then
    ierr=1
-   write(message, '(a,a)' ) ch10,' chkdpr: ERROR -'
+   write(msg, '(a,a)' ) ch10,' chkdpr: ERROR -'
    if(cond_number/=0)then
      do icond=1,cond_number
 !      The following format restricts cond_values(icond) to be between -99 and 999
-       write(message, '(2a,a,a,a,i4,a)' ) trim(message),ch10,&
+       write(msg, '(2a,a,a,a,i4,a)' ) trim(msg),ch10,&
        '  Context : the value of the variable ',trim(cond_string(icond)),' is',cond_values(icond),'.'
      end do
    end if
-   write(message, '(2a,a,a,a,es20.12,a)' ) trim(message),ch10,&
+   write(msg, '(2a,a,a,a,es20.12,a)' ) trim(msg),ch10,&
     '  The value of the input variable ',trim(input_name),' is',input_value,','
    if(minimal_flag==0)then
-     write(message, '(2a,a,es20.12,a)' ) trim(message),ch10,&
+     write(msg, '(2a,a,es20.12,a)' ) trim(msg),ch10,&
      '  while it must be equal to ',reference_value,'.'
    else if(minimal_flag==1)then
-     write(message, '(2a,a,es20.12,a)' ) trim(message),ch10,&
+     write(msg, '(2a,a,es20.12,a)' ) trim(msg),ch10,&
        '  while it must be larger or equal to',reference_value,'.'
    else if(minimal_flag==-1)then
-     write(message, '(2a,a,es20.12,a)' ) trim(message),ch10,&
+     write(msg, '(2a,a,es20.12,a)' ) trim(msg),ch10,&
       '  while it must be smaller or equal to',reference_value,'.'
    end if
 
    if(cond_number==0 .or. advice_change_cond==0)then
-     write(message, '(2a,a,a,a)' ) trim(message),ch10,&
+     write(msg, '(2a,a,a,a)' ) trim(msg),ch10,&
      '  Action: you should change the input variable ',trim(input_name),'.'
    else if(cond_number==1)then
-     write(message, '(2a,a,a,a,a,a)' ) trim(message),ch10,&
+     write(msg, '(2a,a,a,a,a,a)' ) trim(msg),ch10,&
      '  Action: you should change the input variables ',trim(input_name),' or ',trim(cond_string(1)),'.'
    else if(cond_number==2)then
-     write(message, '(2a,a,a,a,a,a,a,a,a,a)' ) trim(message),ch10,&
+     write(msg, '(2a,a,a,a,a,a,a,a,a,a)' ) trim(msg),ch10,&
      '  Action: you should change one of the input variables ',trim(input_name),',',ch10,&
      '   ',trim(cond_string(1)),' or ',trim(cond_string(2)),'.'
    else if(cond_number==3)then
-     write(message, '(2a,a,a,a,a,a,a,a,a,a,a,a)' ) trim(message),ch10,&
+     write(msg, '(2a,a,a,a,a,a,a,a,a,a,a,a)' ) trim(msg),ch10,&
      '  Action: you should change one of the input variables ',trim(input_name),',',ch10,&
      '   ',trim(cond_string(1)),', ',trim(cond_string(2)),' or ',trim(cond_string(3)),'.'
    end if
 
-   call wrtout(unit,message,'COLL')
-   !call wrtout(std_out,  message,'COLL')
-   MSG_WARNING(message)
+   call wrtout(unit,msg,'COLL')
+   !call wrtout(std_out,  msg,'COLL')
+   MSG_WARNING(msg)
  end if
 
 end subroutine chkdpr
@@ -2095,7 +2095,6 @@ end subroutine chkdpr
 !! write a sophisticated error message when it is erroneous.
 !! A few conditions might have been checked before calling chkint,
 !! and these are mentioned in the error message.
-!!
 !! See the examples in the NOTES
 !!
 !! INPUTS
@@ -2132,19 +2131,15 @@ end subroutine chkdpr
 !!
 !! Examples :
 !!  List of values - ionmov must be equal to 0, 1, 3, 8, or 9
-!!   call chkint(0,0,cond_string,cond_values,ierr,&
-!!  & 'ionmov',ionmov,5,(/0,1,3,8,9/),0,0,iout)
+!!   call chkint(0,0,cond_string,cond_values,ierr,'ionmov',ionmov,5,(/0,1,3,8,9/),0,0,iout)
 !!
 !!  Larger or equal to a given value - nberry >= limit
-!!   call chkint(0,0,cond_string,cond_values,ierr,&
-!!  & 'nberry',nberry,1,(/limit/),1,limit,iout)
+!!   call chkint(0,0,cond_string,cond_values,ierr,'nberry',nberry,1,(/limit/),1,limit,iout)
 !!
 !!  Smaller or equal to a given value - nberry <= limit
-!!   call chkint(0,0,cond_string,cond_values,ierr,&
-!!  & 'nberry',nberry,1,(/limit/),-1,limit,iout)
+!!   call chkint(0,0,cond_string,cond_values,ierr,'nberry',nberry,1,(/limit/),-1,limit,iout)
 !!
-!!  Conditional cases (examples to be provided - see chkinp.f for the
-!!  time being)
+!!  Conditional cases (examples to be provided - see chkinp.f for the time being)
 !!
 !! PARENTS
 !!      chkinp
@@ -2155,8 +2150,7 @@ end subroutine chkdpr
 !! SOURCE
 
 subroutine chkint(advice_change_cond,cond_number,cond_string,cond_values,&
-&  ierr,input_name,input_value,&
-&  list_number,list_values,minmax_flag,minmax_value,unit)
+                  ierr,input_name,input_value,list_number,list_values,minmax_flag,minmax_value,unit)
 
 !Arguments ------------------------------------
 !scalars
@@ -2187,8 +2181,8 @@ subroutine chkint(advice_change_cond,cond_number,cond_string,cond_values,&
 !If there is something wrong, compose the message, and print it
  if(ok==0)then
    call chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
-&   ierr,input_name,input_value,&
-&   list_number,list_values,minmax_flag,minmax_value,unit)
+    ierr,input_name,input_value,&
+    list_number,list_values,minmax_flag,minmax_value,unit)
  end if
 
 ! reset all cond_strings
@@ -2242,7 +2236,7 @@ end subroutine chkint
 !! SOURCE
 
 subroutine chkint_eq(advice_change_cond,cond_number,cond_string,cond_values,&
-&  ierr,input_name,input_value,list_number,list_values,unit)
+                     ierr,input_name,input_value,list_number,list_values,unit)
 
 !Arguments ------------------------------------
 !scalars
@@ -2273,8 +2267,8 @@ subroutine chkint_eq(advice_change_cond,cond_number,cond_string,cond_values,&
 !If there is something wrong, compose the message, and print it
  if(ok==0)then
    call chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
-&   ierr,input_name,input_value,&
-&   list_number,list_values,minmax_flag,minmax_value,unit)
+     ierr,input_name,input_value,&
+     list_number,list_values,minmax_flag,minmax_value,unit)
  end if
 
 ! reset all cond_strings
@@ -2327,7 +2321,7 @@ end subroutine chkint_eq
 !! SOURCE
 
 subroutine chkint_ge(advice_change_cond,cond_number,cond_string,cond_values,&
-&  ierr,input_name,input_value,minmax_value,unit)
+                     ierr,input_name,input_value,minmax_value,unit)
 
 !Arguments ------------------------------------
 !scalars
@@ -2413,8 +2407,7 @@ end subroutine chkint_ge
 !! SOURCE
 
 subroutine chkint_le(advice_change_cond,cond_number,cond_string,cond_values,&
-&  ierr,input_name,input_value,&
-&  minmax_value,unit)
+                     ierr,input_name,input_value,minmax_value,unit)
 
 !Arguments ------------------------------------
 !scalars
@@ -2446,8 +2439,7 @@ subroutine chkint_le(advice_change_cond,cond_number,cond_string,cond_values,&
 !If there is something wrong, compose the message, and print it
  if(ok==0)then
    call chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
-&   ierr,input_name,input_value,&
-&   list_number,list_values,minmax_flag,minmax_value,unit)
+     ierr,input_name,input_value,list_number,list_values,minmax_flag,minmax_value,unit)
  end if
 
  ABI_DEALLOCATE(list_values)
@@ -2503,8 +2495,7 @@ end subroutine chkint_le
 !! SOURCE
 
 subroutine chkint_ne(advice_change_cond,cond_number,cond_string,cond_values,&
-&  ierr,input_name,input_value,&
-&  list_number,list_values,unit)
+                     ierr,input_name,input_value, list_number,list_values,unit)
 
 !Arguments ------------------------------------
 !scalars
@@ -2585,26 +2576,21 @@ end subroutine chkint_ne
 !! must be between -99 and 999 to be printed correctly.
 !!
 !! for the time being, at most 3 conditions are allowed.
-!!
-!! in order to ask only for a minimal value, set list_number
+!! In order to ask only for a minimal value, set list_number
 !! as well as minmax_flag to 1, and put the minimal value in both
 !! list_values and minmax_value.
 !!
-!! Examples :
+!! Examples:
 !!  List of values - ionmov must be equal to 0, 1, 3, 8, or 9
-!!   call chkint_prt(0,0,cond_string,cond_values,ierr,&
-!!  & 'ionmov',ionmov,5,(/0,1,3,8,9/),0,0,iout)
+!!   call chkint_prt(0,0,cond_string,cond_values,ierr,'ionmov',ionmov,5,(/0,1,3,8,9/),0,0,iout)
 !!
 !!  Larger or equal to a given value - nberry >= limit
-!!   call chkint_prt(0,0,cond_string,cond_values,ierr,&
-!!  & 'nberry',nberry,1,(/limit/),1,limit,iout)
+!!   call chkint_prt(0,0,cond_string,cond_values,ierr,'nberry',nberry,1,(/limit/),1,limit,iout)
 !!
 !!  Smaller or equal to a given value - nberry <= limit
-!!   call chkint_prt(0,0,cond_string,cond_values,ierr,&
-!!  & 'nberry',nberry,1,(/limit/),-1,limit,iout)
+!!   call chkint_prt(0,0,cond_string,cond_values,ierr,'nberry',nberry,1,(/limit/),-1,limit,iout)
 !!
-!!  Conditional cases (examples to be provided - see chkinp.f for the
-!!  time being)
+!!  Conditional cases (examples to be provided - see chkinp.f for the time being)
 !!
 !! PARENTS
 !!      chkint,chkint_eq,chkint_ge,chkint_le,chkint_ne
@@ -2615,8 +2601,7 @@ end subroutine chkint_ne
 !! SOURCE
 
 subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
-&  ierr,input_name,input_value,&
-&  list_number,list_values,minmax_flag,minmax_value,unit)
+                      ierr,input_name,input_value,list_number,list_values,minmax_flag,minmax_value,unit)
 
 !Arguments ------------------------------------
 !scalars
@@ -2631,72 +2616,72 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
 !Local variables-------------------------------
 !scalars
  integer :: icond
- character(len=500) :: message
+ character(len=500) :: msg
 
 !******************************************************************
 
  if(cond_number<0 .or. cond_number>4)then
-   write(message,'(a,i0,a)' )'The value of cond_number is ',cond_number,' but it should be positive and < 5.'
-   MSG_BUG(message)
+   write(msg,'(a,i0,a)' )'The value of cond_number is ',cond_number,' but it should be positive and < 5.'
+   MSG_BUG(msg)
  end if
 
  if(list_number<0 .or. list_number>40)then
-   write(message,'(a,i0,a)' )'The value of list_number is',list_number,' but it should be between 0 and 40.'
-   MSG_BUG(messagE)
+   write(msg,'(a,i0,a)' )'The value of list_number is',list_number,' but it should be between 0 and 40.'
+   MSG_BUG(msg)
  end if
 
 !Compose the message, and print it
  ierr=1
- write(message, '(2a)' ) ch10,' chkint_prt: ERROR -'
+ write(msg, '(2a)' ) ch10,' chkint_prt: ERROR -'
  if(cond_number/=0)then
    do icond=1,cond_number
      ! The following format restricts cond_values(icond) to be between -99 and 999
-     write(message, '(5a,i0,a)' ) trim(message),ch10,&
+     write(msg, '(5a,i0,a)' ) trim(msg),ch10,&
       ' Context: the value of the variable ',trim(cond_string(icond)),' is ',cond_values(icond),'.'
    end do
  end if
- write(message, '(5a,i0,a)' ) trim(message),ch10,&
+ write(msg, '(5a,i0,a)' ) trim(msg),ch10,&
   '  The value of the input variable ',trim(input_name),' is ',input_value,', while it must be'
  if(minmax_flag==2)then
-   write(message, '(3a,20(i0,1x))' ) trim(message),ch10,&
+   write(msg, '(3a,20(i0,1x))' ) trim(msg),ch10,&
    '  different from one of the following: ',list_values(1:list_number)
  else if(list_number>1 .or. minmax_flag==0 .or. list_values(1)/=minmax_value )then
    ! The following format restricts list_values to be between -99 and 999
    if(list_number/=1)then
-     write(message, '(3a,40(i0,1x))' ) trim(message),ch10,&
+     write(msg, '(3a,40(i0,1x))' ) trim(msg),ch10,&
      '  equal to one of the following: ',list_values(1:list_number)
    else
-     write(message, '(3a,40(i0,1x))' ) trim(message),ch10,'  equal to ',list_values(1)
+     write(msg, '(3a,40(i0,1x))' ) trim(msg),ch10,'  equal to ',list_values(1)
    end if
    if(minmax_flag==1)then
      ! The following format restricts minmax_value to be between -99 and 999
-     write(message, '(3a,i0,a)' ) trim(message),ch10,'  or it must be larger or equal to ',minmax_value,'.'
+     write(msg, '(3a,i0,a)' ) trim(msg),ch10,'  or it must be larger or equal to ',minmax_value,'.'
    else if(minmax_flag==-1)then
-     write(message, '(3a,i0,a)' ) trim(message),ch10,'  or it must be smaller or equal to ',minmax_value,'.'
+     write(msg, '(3a,i0,a)' ) trim(msg),ch10,'  or it must be smaller or equal to ',minmax_value,'.'
    end if
  else if(minmax_flag==1)then
    ! The following format restricts minmax_value to be between -99 and 999
-   write(message, '(3a,i0,a)' ) trim(message),ch10,'  larger or equal to ',minmax_value,'.'
+   write(msg, '(3a,i0,a)' ) trim(msg),ch10,'  larger or equal to ',minmax_value,'.'
  else if(minmax_flag==-1)then
    ! The following format restricts minmax_value to be between -99 and 999
-   write(message, '(3a,i0,a)' ) trim(message),ch10,'  smaller or equal to ',minmax_value,'.'
+   write(msg, '(3a,i0,a)' ) trim(msg),ch10,'  smaller or equal to ',minmax_value,'.'
  end if
  if(cond_number==0 .or. advice_change_cond==0)then
-   write(message, '(5a)' ) trim(message),ch10,'  Action: you should change the input variable ',trim(input_name),'.'
+   write(msg, '(5a)' ) trim(msg),ch10,'  Action: you should change the input variable ',trim(input_name),'.'
  else if(cond_number==1)then
-   write(message, '(7a)' ) trim(message),ch10,&
+   write(msg, '(7a)' ) trim(msg),ch10,&
     '  Action: you should change the input variables ',trim(input_name),' or ',trim(cond_string(1)),'.'
  else if(cond_number==2)then
-   write(message, '(11a)' ) trim(message),ch10,&
+   write(msg, '(11a)' ) trim(msg),ch10,&
     '  Action: you should change one of the input variables ',trim(input_name),',',ch10,&
     '   ',trim(cond_string(1)),' or ',trim(cond_string(2)),'.'
  else if(cond_number==3)then
-   write(message, '(13a)' ) trim(message),ch10,&
+   write(msg, '(13a)' ) trim(msg),ch10,&
     '  Action: you should change one of the input variables ',trim(input_name),',',ch10,&
     '   ',trim(cond_string(1)),', ',trim(cond_string(2)),' or ',trim(cond_string(3)),'.'
  end if
- call wrtout(unit   ,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(unit   ,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
 end subroutine chkint_prt
 !!***
@@ -2775,8 +2760,8 @@ end subroutine chkint_prt
 !! SOURCE
 
 subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
-& marr,narr,narrm,ncid,ndtset_alloc,token,typevarphys,use_narrm,&
-  firstchar,forceprint)  ! optional
+                    marr,narr,narrm,ncid,ndtset_alloc,token,typevarphys,use_narrm,&
+                    firstchar,forceprint)  ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -2820,7 +2805,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
  character(len=4) :: appen
  character(len=8) :: out_unit
  character(len=50) :: format_dp,format_int,full_format
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -2828,29 +2813,29 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
 !### 01. Check consistency of input
 
  if(len_trim(token)>16)then
-   write(message, '(3a,i0,2a)' )&
+   write(msg, '(3a,i0,2a)' )&
    'The length of the name of the input variable ',trim(token),' is ',len_trim(token),ch10,&
    'This exceeds 16 characters, the present maximum in routine prttagm.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  if(ndtset_alloc<1)then
-   write(message, '(a,i0,a,a,a,a,a)' )&
+   write(msg, '(a,i0,a,a,a,a,a)' )&
    'ndtset_alloc=',ndtset_alloc,', while it should be >= 1.',ch10,&
    'This happened for token=',token,'.'
-   MSG_BUG(message)
+   MSG_BUG(msg)
  end if
 
  if(ndtset_alloc>9999)then
-   write(message, '(a,i0,a,a,a,a,a)' )&
+   write(msg, '(a,i0,a,a,a,a,a)' )&
    'ndtset_alloc=',ndtset_alloc,', while it must be lower than 10000.',ch10,&
    'This happened for token=',token,'.'
-   MSG_BUG(message)
+   MSG_BUG(msg)
  end if
 
  if(narr>99 .and. (typevarphys=='ENE'.or.typevarphys=='LEN'))then
-   write(message, '(3a,i0,a)' )' typevarphys=',typevarphys,' with narr=',narr,'  is not allowed.'
-   MSG_BUG(message)
+   write(msg, '(3a,i0,a)' )' typevarphys=',typevarphys,' with narr=',narr,'  is not allowed.'
+   MSG_BUG(msg)
  end if
 
  if ((narr>0).or.(use_narrm/=0)) then
@@ -3104,8 +3089,7 @@ end subroutine prttagm
 !! images information, in those cases the same variable
 !! is printed several times for each dataset
 !!
-!! Cases where images information are relevant includes
-!! xcart, xred, acell, fcart.
+!! Cases where images information are relevant includes xcart, xred, acell, fcart.
 !!
 !! INPUT
 !! (see prttagm.F90)
@@ -3318,7 +3302,7 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
  character,parameter :: blank=' '
 !scalars
  integer :: index_blank,index_current,index_endword,index_endwordnow,index_list_vars
- character(len=500) :: message
+ character(len=500) :: msg
 
 !************************************************************************
 
@@ -3375,12 +3359,12 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
          !write(std_out,*)"Found logical variable: ",string(index_current:index_endword)
          index_blank=index(string(index_current:),blank)+index_current-1
          if(index(' F T ',string(index_blank:index_blank+2))==0)then
-           write(message, '(8a)' )&
+           write(msg, '(8a)' )&
             'Found the token ',string(index_current:index_endword),' in the input file.',ch10,&
             'This variable should be given a logical value (T or F), but the following string was found :',&
             string(index_blank:index_blank+2),ch10,&
             'Action: check your input file. You likely misused the input variable.'
-            MSG_ERROR(message)
+            MSG_ERROR(msg)
          else
            index_blank=index_blank+2
          end if
@@ -3395,11 +3379,11 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
 
 !        If still not admitted, then there is a problem
        else
-         write(message, '(7a)' )&
+         write(msg, '(7a)' )&
          'Found the token: ',string(index_current:index_endword),' in the input file.',ch10,&
          'This name is not one of the registered input variable names (see https://docs.abinit.org/).',ch10,&
          'Action: check your input file. You likely mistyped the input variable.'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
      end if
    end if

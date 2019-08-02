@@ -849,7 +849,6 @@ subroutine ebands_free(ebands)
  ABI_SFREE(ebands%wtk)
  ABI_SFREE(ebands%velocity)
  ABI_SFREE(ebands%kTmesh)
-
  ABI_SFREE(ebands%shiftk_orig)
  ABI_SFREE(ebands%shiftk)
 
