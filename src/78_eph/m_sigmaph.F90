@@ -5322,7 +5322,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  integer :: cnt, my_rank, nprocs, ib_k, band_ks, nkibz, nkbz, kq_rank
  real(dp) :: eig0nk, eig0mkq, dksqmax, ediff, cpu, wall, gflops
  character(len=500) :: msg
- type(kptrank_type) :: kptrank
+ type(krank_t) :: kptrank
 !arrays
  integer :: g0(3)
  integer,allocatable :: qbz_count(:), qbz2qpt(:,:), bz2ibz(:,:)
@@ -5369,7 +5369,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
      do iq_bz=1,nqbz
        if (qbz_count(iq_bz) /= 0) cycle ! No need to check this q-point again.
        kq = kk + qbz(:, iq_bz)
-       call get_rank_1kpt(kq, kq_rank, kptrank)
+       kq_rank = kptrank%get_rank_1kpt(kq)
        ikq_bz = kptrank%invrank(kq_rank)
        ABI_CHECK(ikq_bz > 0, sjoin("Cannot find kq: ", ktoa(kq)))
        ABI_CHECK(isamek(kq, kbz(:, ikq_bz), g0), "Wrong invrank")
@@ -5390,7 +5390,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  end do
 
  ABI_FREE(kbz)
- call destroy_kptrank(kptrank)
+ call kptrank%free()
 
  call xmpi_sum(qbz_count, comm, ierr)
  call cwtime_report(" qbz_count", cpu, wall, gflops)

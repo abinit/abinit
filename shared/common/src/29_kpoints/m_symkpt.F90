@@ -463,7 +463,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
 
 !Local variables -------------------------
 !scalars
- type(kptrank_type) :: kptrank
+ type(krank_t) :: kptrank
  integer :: identi,ii,ikpt,ikibz,ikpt_found
  integer :: isym,itim,jj,nkpout,tident
  !real(dp) :: cpu, gflops, wall
@@ -472,8 +472,8 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
  real(dp) :: ksym(3),kpt1(3)
 
 ! *********************************************************************
+
  ABI_UNUSED(comm)
- ABI_UNUSED(chksymbreak)
  ABI_UNUSED(gmet)
 
  if (timrev/=1 .and. timrev/=0) then
@@ -540,7 +540,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
            end do
 
            !find this point
-           ikpt_found = kptrank_index(kptrank,ksym)
+           ikpt_found = kptrank%kptrank_index(ksym)
            !if (sum(abs(mod(ksym-kbz(:,ikpt_found),one)))>tol8) then
            !  MSG_ERROR('Wrong k-point mapping found by kptrank')
            !end if
@@ -583,7 +583,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
          end do
 
          !find this point
-         ikpt_found = kptrank_index(kptrank,ksym)
+         ikpt_found = kptrank%kptrank_index(ksym)
          !if k-point not found just cycle
          if (ikpt_found < 0) cycle
          !if (sum(abs(mod(ksym-kbz(:,ikpt_found),one)))>tol8) then
@@ -631,7 +631,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
        end do
 
        !find this point
-       ikpt_found = kptrank_index(kptrank,ksym)
+       ikpt_found = kptrank%kptrank_index(ksym)
        if (ikpt_found < 0) cycle
        if (bz2ibz_smap(1, ikpt_found) /= 0) cycle
        bz2ibz_smap(:3, ikpt_found) = [ikpt,isym,itim]
@@ -641,7 +641,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
  end do
  !call cwtime_report(" map", cpu, wall, gflops)
 
- call destroy_kptrank(kptrank)
+ call kptrank%free()
 
  !Here I make a check if the mapping was sucessfull
  if (any(bz2ibz_smap(1, :) == 0)) then

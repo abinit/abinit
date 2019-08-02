@@ -694,7 +694,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    ABI_ALLOCATE(elph_ds%k_fine%kpt,(3,elph_ds%k_fine%nkpt))
    elph_ds%k_fine%kpt = elph_ds%k_phon%kpt
 
-   call copy_kptrank(elph_ds%k_phon%kptrank_t, elph_ds%k_fine%kptrank_t)
+   call elph_ds%k_phon%krank%copy_kptrank(elph_ds%k_fine%krank)
 
    ABI_ALLOCATE(elph_ds%k_fine%irr2full,(elph_ds%k_fine%nkptirr))
    elph_ds%k_fine%irr2full = elph_ds%k_phon%irr2full
@@ -836,8 +836,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  do ikpt_fine = 1, elph_ds%k_phon%nkpt
    do iqpt = 1, elph_ds%nqpt_full
      kpt = elph_ds%k_phon%kpt(:,ikpt_fine) + elph_ds%qpt_full(:,iqpt)
-     call get_rank_1kpt (kpt,symrankkpt,elph_ds%k_phon%kptrank_t)
-     iFSkpq = elph_ds%k_phon%kptrank_t%invrank(symrankkpt)
+     symrankkpt = elph_ds%k_phon%krank%get_rank_1kpt (kpt)
+     iFSkpq = elph_ds%k_phon%krank%invrank(symrankkpt)
      do iband = 1, elph_ds%ngkkband
        do ibandp = 1, elph_ds%ngkkband
          res = res + elph_ds%gkk_intweight(iband,ikpt_fine,1)*elph_ds%gkk_intweight(ibandp,iFSkpq,1)
@@ -852,8 +852,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  do ikpt_fine = 1, elph_ds%k_phon%nkpt
    do iqpt = 1, elph_ds%k_phon%nkpt
      kpt = elph_ds%k_phon%kpt(:,ikpt_fine) + elph_ds%k_phon%kpt(:,iqpt)
-     call get_rank_1kpt (kpt,symrankkpt,elph_ds%k_phon%kptrank_t)
-     iFSkpq = elph_ds%k_phon%kptrank_t%invrank(symrankkpt)
+     symrankkpt = elph_ds%k_phon%krank%get_rank_1kpt (kpt)
+     iFSkpq = elph_ds%k_phon%krank%invrank(symrankkpt)
      do iband = 1, elph_ds%ngkkband
        do ibandp = 1, elph_ds%ngkkband
          res = res + elph_ds%gkk_intweight(iband,ikpt_fine,1)*elph_ds%gkk_intweight(ibandp,iFSkpq,1)
@@ -1432,7 +1432,7 @@ subroutine outelph(elph_ds,enunit,fname)
  real(dp) :: lambda_q_max,lambda_qbranch_max,lambda_tot,nest_max,nest_min
  real(dp) :: omegalog_q,omegalog_qgrid,tc_macmill
  character(len=500) :: msg
- type(kptrank_type) :: kptrank_t
+ type(krank_t) :: krank
 !arrays
  integer :: qbranch_max(2)
  real(dp),allocatable :: lambda_q(:,:),nestfactor(:),qirred(:,:)
@@ -1611,16 +1611,16 @@ subroutine outelph(elph_ds,enunit,fname)
    qirred(:,iqirr)=elph_ds%qpt_full(:,elph_ds%qirredtofull(iqirr))
  end do
 
- call mkkptrank (elph_ds%k_phon%kpt,elph_ds%k_phon%nkpt,kptrank_t)
+ call mkkptrank (elph_ds%k_phon%kpt,elph_ds%k_phon%nkpt,krank)
 
  ABI_ALLOCATE(nestfactor,(nqptirred))
 
 !NOTE: weights are not normalised, the normalisation factor in reintroduced in bfactor
- call bfactor(elph_ds%k_phon%nkpt,elph_ds%k_phon%kpt,nqptirred,qirred,kptrank_t,&
+ call bfactor(elph_ds%k_phon%nkpt,elph_ds%k_phon%kpt,nqptirred,qirred,krank,&
 & elph_ds%k_phon%nkpt,elph_ds%k_phon%wtk,elph_ds%nFSband,nestfactor)
 
  ABI_DEALLOCATE(qirred)
- call destroy_kptrank (kptrank_t)
+ call krank%free()
 
 
 !find Max and min of the nesting factor
@@ -1890,12 +1890,12 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  elph_k%wtkirr(:) = zero
 
 !first allocation for irred kpoints - will be destroyed below
- call mkkptrank (elph_k%kptirr,elph_k%nkptirr,elph_k%kptrank_t)
- ABI_ALLOCATE(rankallk,(elph_k%kptrank_t%max_rank))
+ call mkkptrank (elph_k%kptirr,elph_k%nkptirr,elph_k%krank)
+ ABI_ALLOCATE(rankallk,(elph_k%krank%max_rank))
 
-!elph_k%kptrank_t%invrank is used as a placeholder in the following loop
+!elph_k%krank%invrank is used as a placeholder in the following loop
  rankallk = -1
- elph_k%kptrank_t%invrank = -1
+ elph_k%krank%invrank = -1
 
 !replicate all irred kpts by symmetry to get the full k grid.
  elph_k%nkpt=0 !zero k-points found so far
@@ -1908,11 +1908,11 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 &       symrec(:,2,isym)*elph_k%kptirr(2,ikpt1) + &
 &       symrec(:,3,isym)*elph_k%kptirr(3,ikpt1))
 
-       call get_rank_1kpt (kpt,symrankkpt,elph_k%kptrank_t)
+       symrankkpt = elph_k%krank%get_rank_1kpt (kpt)
 
 !      is the kpt on the full grid (may have lower symmetry than full spgroup)
 !      is kpt among the full FS kpts found already?
-       if (elph_k%kptrank_t%invrank(symrankkpt) == -1) then
+       if (elph_k%krank%invrank(symrankkpt) == -1) then
          elph_k%wtkirr(ikpt1)=elph_k%wtkirr(ikpt1)+1
          elph_k%nkpt=elph_k%nkpt+1
 
@@ -1925,7 +1925,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
          tmpkphon_full2irr(2,elph_k%nkpt) = isym
          tmpkphon_full2irr(3,elph_k%nkpt) = itim
 
-         elph_k%kptrank_t%invrank(symrankkpt) = elph_k%nkpt
+         elph_k%krank%invrank(symrankkpt) = elph_k%nkpt
          rankallk(elph_k%nkpt) = symrankkpt
        end if
 
@@ -1961,11 +1961,10 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  ABI_DEALLOCATE(rankallk)
  ABI_DEALLOCATE(tmpkphon_full2irr)
  ABI_DEALLOCATE(tmpkpt)
- call destroy_kptrank (elph_k%kptrank_t)
-
+ call elph_k%krank%free()
 
 !make proper full rank arrays
- call mkkptrank (elph_k%kpt,elph_k%nkpt,elph_k%kptrank_t)
+ call mkkptrank (elph_k%kpt,elph_k%nkpt,elph_k%krank)
 
 
 !find correspondence table between irred FS kpoints and a full one
@@ -1973,8 +1972,8 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  elph_k%irr2full(:) = 0
 
  do ikpt1=1,elph_k%nkptirr
-   call get_rank_1kpt (elph_k%kptirr(:,ikpt1),symrankkpt,elph_k%kptrank_t)
-   elph_k%irr2full(ikpt1) = elph_k%kptrank_t%invrank(symrankkpt)
+   symrankkpt = elph_k%krank%get_rank_1kpt (elph_k%kptirr(:,ikpt1))
+   elph_k%irr2full(ikpt1) = elph_k%krank%invrank(symrankkpt)
  end do
 
 !find correspondence table between FS kpoints under symmetry
@@ -1991,8 +1990,8 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 &       symrec(:,3,isym)*elph_k%kpt(3,ikpt1))
 
 !      which kpt is it among the full FS kpts
-       call get_rank_1kpt (kpt,symrankkpt,elph_k%kptrank_t)
-       ikpt2 = elph_k%kptrank_t%invrank(symrankkpt)
+       symrankkpt = elph_k%krank%get_rank_1kpt (kpt)
+       ikpt2 = elph_k%krank%invrank(symrankkpt)
        new=1
        if (ikpt2 /= -1) then
          elph_k%full2full(itim+1,isym,ikpt2) = ikpt1
@@ -2808,18 +2807,18 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
 !scalars
  integer :: irank,ikpt,jkpt,kkpt,new, ik
  real(dp) :: res
- type(kptrank_type) :: kptrank_t
+ type(krank_t) :: krank
 !arrays
  integer :: kptirrank(nkptirr)
 
 ! *************************************************************************
 
 !rank is used to order kpoints
- call mkkptrank (kptns,nkpt,kptrank_t)
+ call mkkptrank (kptns,nkpt,krank)
 
  ik=1
  do ikpt=1,nkpt
-   call get_rank_1kpt(kptns(:,ikpt),irank,kptrank_t)
+   irank = krank%get_rank_1kpt(kptns(:,ikpt))
 !  add kpt to FS kpts, in order, increasing z, then y, then x !
    new = 1
 !  look for position to insert kpt ikpt among irredkpts already found
@@ -2853,7 +2852,7 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
    ik=ik+1
  end do
 
- call destroy_kptrank (kptrank_t)
+ call krank%free()
 
 end subroutine order_fs_kpts
 !!***
@@ -5280,7 +5279,7 @@ subroutine integrate_gamma(elph_ds,FSfullpqtofull)
 
  do iqpt=1,elph_ds%nqptirred
    iqpt_fullbz = elph_ds%qirredtofull(iqpt)
-   call get_rank_1kpt (elph_ds%k_phon%kpt(:,iqpt_fullbz),symrankkpt_phon, elph_ds%k_phon%kptrank_t)
+   symrankkpt_phon = elph_ds%k_phon%krank%get_rank_1kpt (elph_ds%k_phon%kpt(:,iqpt_fullbz))
    write (std_out,*) ' iqpt_fullbz in qpt grid only,  rank ', iqpt_fullbz, symrankkpt_phon
 
    do ik_this_proc =1,elph_ds%k_phon%my_nkpt

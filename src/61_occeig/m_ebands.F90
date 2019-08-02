@@ -1817,7 +1817,7 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
 !Local variables-------------------------------
 !scalars
  integer :: spin,ik,ikpt,cnt
- type(kptrank_type) :: krank
+ type(krank_t) :: krank
 
 ! *************************************************************************
 
@@ -1827,7 +1827,7 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
 
  do spin=1,ebands%nsppol
    do ik=1,nkpts
-     ikpt = kptrank_index(krank, kpoints(:,ik))
+     ikpt = krank%kptrank_index(kpoints(:,ik))
      if (ikpt == -1) then
        MSG_WARNING(sjoin("Cannot find k-point:", ktoa(kpoints(:,ik))))
        cycle
@@ -1839,7 +1839,7 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
    end do
  end do
 
- call destroy_kptrank(krank)
+ call krank%free()
 
  ! This can happen if wrong input.
  if (cnt == 0) then

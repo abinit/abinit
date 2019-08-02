@@ -486,7 +486,7 @@ subroutine kptrank_unittests(comm)
 
 !Variables -------------------------------
  type(crystal_t) :: crystal
- type(kptrank_type) :: kptrank
+ type(krank_t) :: kptrank
  type(hkptrank_t) :: hkptrank
  integer,parameter :: qptopt1=1,nqshft1=1,iout0=0,chksymbreak0=0,sppoldbl1=1
  integer :: nqibz,iqbz,iqibz,iqbz_rank,nqbz,nqibz_symkpt,nqibz_symkpt_new
@@ -522,11 +522,11 @@ subroutine kptrank_unittests(comm)
  ! Test mkkptrank
  call mkkptrank(qbz,nqbz,kptrank)
  do iqbz=1,nqbz
-   iqbz_rank = kptrank_index(kptrank,qbz(:,iqbz))
+   iqbz_rank = kptrank%kptrank_index(qbz(:,iqbz))
    ABI_CHECK(iqbz==iqbz_rank,'wrong q-point')
  end do
  call cwtime_report(" kptrank", cpu, wall, gflops)
- call destroy_kptrank(kptrank)
+ call kptrank%free()
 
  ! Test hkptrank
  call hkptrank_init(hkptrank,qbz,nqbz)

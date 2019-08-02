@@ -36,30 +36,47 @@ module m_kptrank
  double precision :: zero = 0.0d0, half = 0.5d0, one = 1.0d0, tol8 = 1.d-8,  tol10 = 1.d-10, tol12 = 1.d-12
 !!***
 
-!!****t* m_kptrank/kptrank_type
+!!****t* m_kptrank/krank_t
 !! NAME
-!! kptrank_type
+!! krank_t
 !!
 !! FUNCTION
 !!  structure to contain a rank/inverse rank pair of arrays, with dimensions
 !!
 !! SOURCE
 
- type,public :: kptrank_type
+ type,public :: krank_t
+
    integer :: max_linear_density
    integer :: min_rank
    integer :: max_rank
    integer :: npoints
    logical :: time_reversal
    integer,allocatable :: invrank(:)
- end type kptrank_type
+
+ contains
+
+   !procedure :: get_rank
+   procedure :: get_rank_1kpt
+    ! Calculates the rank for one kpt
+
+   !procedure :: get_index =>
+   procedure :: kptrank_index
+    ! Return the index of the k-point `kpt` in the initial set. -1 if not found.
+
+   !procedure :: copy =>
+   procedure :: copy_kptrank
+    ! Copy the object
+
+   procedure :: free => krank_free
+    ! Free memory
+
+   procedure :: dump => krank_dump
+    ! Prints the arrays and dimensions of a krank_t structure
+
+ end type krank_t
 
  public :: mkkptrank       ! Sets up the kpt ranks for comparing kpts
- public :: get_rank_1kpt   ! Calculates the rank for one kpt
- public :: kptrank_index   ! Return the index of the k-point `kpt` in the initial set. -1 if not found.
- public :: copy_kptrank    ! Copy the object
- public :: destroy_kptrank ! Free memory
- public :: dump_kptrank    ! Prints the arrays and dimensions of a kptrank_type structure
 !!***
 
 contains
@@ -90,7 +107,7 @@ contains
 !!
 !! SOURCE
 
-subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
+subroutine mkkptrank(kpt,nkpt,krank,nsym,symrec, time_reversal)
 
 !Arguments ------------------------------------
 !scalars
@@ -98,7 +115,7 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
  integer,intent(in), optional :: nsym
  logical,intent(in), optional :: time_reversal
 !arrays
- type(kptrank_type), intent(out) :: krank
+ type(krank_t), intent(out) :: krank
  double precision,intent(in) :: kpt(3,nkpt)
  integer,intent(in), optional :: symrec(3,3, *)
 
@@ -145,7 +162,7 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
 !ie ngkpt < 100.
 ! the following fills invrank for the k-points in the list provided (may be only the irred kpts)
  do ikpt=1,nkpt
-   call get_rank_1kpt (kpt(:,ikpt), irank, krank)
+   irank = krank%get_rank_1kpt(kpt(:,ikpt))
 
    if (irank > krank%max_rank .or. irank < krank%min_rank) then
      write(msg,'(a,2i0)')" rank above max_rank or bellow min_rank, ikpt, rank ", ikpt, irank
@@ -167,7 +184,7 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
      do itim = timrev, 1, -1
        do isym = 1, nsym
          symkpt = (-1)**(timrev+1) * matmul(symrec(:,:,isym), kpt(:, ikpt))
-         call get_rank_1kpt (symkpt(:), symkptrank, krank)
+         symkptrank = krank%get_rank_1kpt(symkpt(:))
          krank%invrank(symkptrank) = ikpt
        end do
      end do
@@ -203,12 +220,11 @@ end subroutine mkkptrank
 !!
 !! SOURCE
 
-subroutine get_rank_1kpt(kpt,rank,krank)
+integer function get_rank_1kpt(krank, kpt) result(rank)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(out) :: rank
- type(kptrank_type), intent(in) :: krank
+ class(krank_t), intent(in) :: krank
 !arrays
  double precision,intent(in) :: kpt(3)
 
@@ -254,7 +270,7 @@ subroutine get_rank_1kpt(kpt,rank,krank)
    TETRA_ERROR(msg)
  end if
 
-end subroutine get_rank_1kpt
+end function get_rank_1kpt
 !!***
 
 !----------------------------------------------------------------------
@@ -283,7 +299,7 @@ integer function kptrank_index(krank, kpt) result(ikpt)
 
 !Arguments ------------------------------------
 !scalars
- type(kptrank_type), intent(in) :: krank
+ class(krank_t), intent(in) :: krank
 !arrays
  double precision,intent(in) :: kpt(3)
 
@@ -293,7 +309,7 @@ integer function kptrank_index(krank, kpt) result(ikpt)
 
 ! *************************************************************************
 
- call get_rank_1kpt(kpt, kpt_rank, krank)
+ kpt_rank = krank%get_rank_1kpt(kpt)
  ikpt = -1
  if (kpt_rank < krank%max_rank) ikpt = krank%invrank(kpt_rank)
 
@@ -326,8 +342,8 @@ subroutine copy_kptrank (krank_in, krank_out)
 
 !Arguments ------------------------------------
 !scalars
- type(kptrank_type), intent(in) :: krank_in
- type(kptrank_type), intent(out) :: krank_out
+ class(krank_t), intent(in) :: krank_in
+ class(krank_t), intent(out) :: krank_out
 
 ! *********************************************************************
  krank_out%max_linear_density = krank_in%max_linear_density
@@ -343,13 +359,13 @@ end subroutine copy_kptrank
 
 !----------------------------------------------------------------------
 
-!!****f* m_kptrank/destroy_kptrank
+!!****f* m_kptrank/krank_free
 !!
 !! NAME
-!! destroy_kptrank
+!! krank_free
 !!
 !! FUNCTION
-!! This routine deallocates the arrays in a kptrank_type structure
+!! This routine deallocates the arrays in a krank_t structure
 !!
 !! INPUTS
 !!  krank = object containing ranking and inverse ranking, to be deallocated
@@ -363,11 +379,10 @@ end subroutine copy_kptrank
 !!
 !! SOURCE
 
-subroutine destroy_kptrank (krank)
+subroutine krank_free(krank)
 
 !Arguments ------------------------------------
-!scalars
- type(kptrank_type), intent(inout) :: krank
+ class(krank_t), intent(inout) :: krank
 
 ! *********************************************************************
 
@@ -375,18 +390,18 @@ subroutine destroy_kptrank (krank)
    TETRA_DEALLOCATE(krank%invrank)
  end if
 
-end subroutine destroy_kptrank
+end subroutine krank_free
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_kptrank/dump_kptrank
+!!****f* m_kptrank/krank_dump
 !!
 !! NAME
-!! dump_kptrank
+!! krank_dump
 !!
 !! FUNCTION
-!! This routine prints the arrays and dimensions of a kptrank_type structure
+!! This routine prints the arrays and dimensions of a krank_t structure
 !!
 !! INPUTS
 !!  krank = object containing ranking and inverse ranking
@@ -398,18 +413,18 @@ end subroutine destroy_kptrank
 !!
 !! SOURCE
 
-subroutine dump_kptrank (krank, unout)
+subroutine krank_dump (krank, unout)
 
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: unout
 !arrays
- type(kptrank_type), intent(in) :: krank
+ class(krank_t), intent(in) :: krank
 
 ! *********************************************************************
 
   write(unout, *)
-  write(unout, '(a)') ' Dump of the contents of a kptrank_type structure with k-point rank information'
+  write(unout, '(a)') ' Dump of the contents of a krank_t structure with k-point rank information'
   write(unout, '(a,I8)') ' max linear density of points in 3 directions: max_linear_density = ',  krank%max_linear_density
   write(unout, '(a,I8)') ' maximum rank for any point in grid: max_rank = ',  krank%max_rank
   write(unout, '(a,I8)') ' number of points in input grid: npoints = ',  krank%npoints
@@ -418,7 +433,7 @@ subroutine dump_kptrank (krank, unout)
   write(unout, '(I4)') krank%invrank(:)
   write(unout, *)
 
-end subroutine dump_kptrank
+end subroutine krank_dump
 !!***
 
 !----------------------------------------------------------------------

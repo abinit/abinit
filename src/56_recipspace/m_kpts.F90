@@ -1525,7 +1525,7 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,nkpt_fullbz,nshift
  integer :: ikpt,isym,itim,timrev
  integer :: symrankkpt
  character(len=500) :: msg
- type(kptrank_type) :: kptrank_t
+ type(krank_t) :: krank
 !arrays
  integer :: inv_symrel(3,3,nsym)
  real(dp) :: k2(3)
@@ -1540,12 +1540,10 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,nkpt_fullbz,nshift
 
  call get_kpt_fullbz(kpt_fullbz,kptrlatt,nkpt_fullbz,nshiftk,shiftk)
 
-!make full k-point rank arrays
- call mkkptrank (kpt,nkpt,kptrank_t)
+ ! make full k-point rank arrays
+ call mkkptrank (kpt,nkpt,krank)
 
-!
-!find equivalence to irred kpoints in kpt
-!
+ !find equivalence to irred kpoints in kpt
  indkpt(:) = 0
  timrev=1 ! includes the time inversion symmetry
  do ikpt=1,nkpt_fullbz
@@ -1553,11 +1551,11 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,nkpt_fullbz,nshift
      do itim=1,(1-2*timrev),-2
 
        k2(:) = itim*(inv_symrel(:,1,isym)*kpt_fullbz(1,ikpt) + &
-&       inv_symrel(:,2,isym)*kpt_fullbz(2,ikpt) + &
-&       inv_symrel(:,3,isym)*kpt_fullbz(3,ikpt))
+                     inv_symrel(:,2,isym)*kpt_fullbz(2,ikpt) + &
+                     inv_symrel(:,3,isym)*kpt_fullbz(3,ikpt))
 
-       call get_rank_1kpt (k2,symrankkpt,kptrank_t)
-       if (kptrank_t%invrank(symrankkpt) /= -1) indkpt(ikpt) = kptrank_t%invrank(symrankkpt)
+       symrankkpt = krank%get_rank_1kpt(k2)
+       if (krank%invrank(symrankkpt) /= -1) indkpt(ikpt) = krank%invrank(symrankkpt)
 
      end do ! loop time reversal symmetry
    end do !  loop sym ops
@@ -1568,7 +1566,7 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,nkpt_fullbz,nshift
    end if
  end do !  loop full kpts
 
- call destroy_kptrank (kptrank_t)
+ call krank%free()
 
 end subroutine get_full_kgrid
 !!***

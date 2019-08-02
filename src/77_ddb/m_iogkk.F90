@@ -98,8 +98,6 @@ contains
 
 subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_prt_yambo,unitgkk)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n1wf,nband,unitgkk,ep_prt_yambo
@@ -394,12 +392,10 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 
 !      find place of irred k in k_phon
 !      the kpoints in the file (kptns) could be ordered arbitrarily
-       call get_rank_1kpt (hdr1%kptns(:,ikpt1)-qptirred_local(:,iqptirred), &
-&       symrankkpt, elph_ds%k_phon%kptrank_t)
-       ikpt1_phon = elph_ds%k_phon%kptrank_t%invrank(symrankkpt)
+       symrankkpt = elph_ds%k_phon%krank%get_rank_1kpt (hdr1%kptns(:,ikpt1)-qptirred_local(:,iqptirred))
+       ikpt1_phon = elph_ds%k_phon%krank%invrank(symrankkpt)
        if (ikpt1_phon < 0) then
-         write (msg,'(a,3es16.6,a)')&
-&         ' irred k ',hdr1%kptns(:,ikpt1),' was not found in full grid'
+         write (msg,'(a,3es16.6,a)')' irred k ',hdr1%kptns(:,ikpt1),' was not found in full grid'
          MSG_ERROR(msg)
        end if
 !      find correspondence between this kpt_phon and the others
@@ -410,8 +406,8 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
            timsign=one-two*itim1
            kpt(:) = timsign*matmul(symrc1(:,:,isym1), elph_ds%k_phon%kpt(:,ikpt1_phon))
 
-           call get_rank_1kpt (kpt,symrankkpt,elph_ds%k_phon%kptrank_t)
-           jkpt_phon = elph_ds%k_phon%kptrank_t%invrank(symrankkpt)
+           symrankkpt = elph_ds%k_phon%krank%get_rank_1kpt (kpt)
+           jkpt_phon = elph_ds%k_phon%krank%invrank(symrankkpt)
 
            if (jkpt_phon > 0) then
              FSirrtok(1,jkpt_phon) = ikpt1_phon
@@ -727,8 +723,6 @@ end subroutine read_gkk
 
 subroutine outgkk(bantot0,bantot1,outfile,eigen0,eigen1,hdr0,hdr1,mpi_enreg,phasecg)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: bantot0,bantot1
@@ -843,8 +837,6 @@ end subroutine outgkk
 
 subroutine prt_gkk_yambo(displ_cart,displ_red,kpt_phon,h1_mat_el,iqpt,&
 &       natom,nFSband,nkpt_phon,phfrq,qptn)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1037,8 +1029,6 @@ end subroutine prt_gkk_yambo
 
 subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
 
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  integer, intent(in) :: nband_in,nkpt_in,nsppol_in
@@ -1056,7 +1046,7 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
  character(len=fnlen) :: filnam1,filnam2,filnam3
  character(len=500) :: msg
  type(hdr_type) :: hdr1
- type(kptrank_type) :: kptrank_t
+ type(krank_t) :: krank
 
 !arrays
  real(dp) :: im_el_veloc(3)
@@ -1118,13 +1108,13 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
  elph_tr_ds%el_veloc=zero
 
 !need correspondence between the DDK kpoints and the kpt_phon
- call mkkptrank (hdr1%kptns,hdr1%nkpt,kptrank_t)
+ call mkkptrank (hdr1%kptns,hdr1%nkpt,krank)
 
  do isppol=1,nsppol_in
    im_el_veloc(:)=zero
    do ikpt=1,nkpt_in
-     call get_rank_1kpt (kpt_in(:,ikpt),symrankkpt, kptrank_t)
-     ikpt_ddk = kptrank_t%invrank(symrankkpt)
+    symrankkpt = krank%get_rank_1kpt (kpt_in(:,ikpt))
+     ikpt_ddk = krank%invrank(symrankkpt)
      if (ikpt_ddk == -1) then
        write(std_out,*)'read_el_veloc ******** error in correspondence between ddk and gkk kpoint sets'
        write(std_out,*)' kpt sets in gkk and ddk files must agree.'
@@ -1151,7 +1141,7 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
    end do
  end do ! end isppol
 
- call destroy_kptrank (kptrank_t)
+ call krank%free()
  ABI_DEALLOCATE(eig1_k)
  ABI_DEALLOCATE(eigen11)
  ABI_DEALLOCATE(eigen12)
@@ -1189,8 +1179,6 @@ end subroutine read_el_veloc
 !! SOURCE
 
 subroutine inpgkk(eigen1,filegkk,hdr1)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1310,8 +1298,6 @@ end subroutine inpgkk
 
 subroutine completeperts(Cryst,nbranch,nFSband,nkpt,nsppol,gkk_flag,h1_mat_el,h1_mat_el_sq,&
 &   qpt,symq,qtimrev)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1461,8 +1447,6 @@ end subroutine completeperts
 
 subroutine normsq_gkq(displ_red,eigvec,elph_ds,FSfullpqtofull,&
 &    h1_mat_el_sq,iqptirred,phfrq_tmp,qpt_irred,qdata)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1673,8 +1657,6 @@ end subroutine normsq_gkq
 subroutine nmsq_gam (accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpqtofull,&
 &  h1_mat_el_sq,iqptirred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqptirred
@@ -1825,8 +1807,6 @@ end subroutine nmsq_gam
 
 subroutine nmsq_gam_sumFS(accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpqtofull,&
 &   h1_mat_el_sq,iqptirred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1987,8 +1967,6 @@ end subroutine nmsq_gam_sumFS
 subroutine nmsq_pure_gkk(accum_mat,accum_mat2,displ_red,elph_ds,FSfullpqtofull,&
 &   h1_mat_el_sq,iqptirred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqptirred
@@ -2118,8 +2096,6 @@ end subroutine nmsq_pure_gkk
 !! SOURCE
 
 subroutine nmsq_pure_gkk_sumfs(accum_mat,accum_mat2,displ_red,elph_ds,FSfullpqtofull,h1_mat_el_sq,iqptirred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

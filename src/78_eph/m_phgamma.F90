@@ -1080,7 +1080,7 @@ subroutine phgamma_interp_setup(gams,cryst,action)
  integer,parameter :: qtor1=1
  integer :: iq_bz,iq_ibz,isq_bz,spin,isym,ierr,ii
  !character(len=500) :: msg
- type(kptrank_type) :: qrank
+ type(krank_t) :: qrank
 !arrays
  integer :: g0(3)
  integer,allocatable :: qirredtofull(:),qpttoqpt(:,:,:)
@@ -1105,7 +1105,7 @@ subroutine phgamma_interp_setup(gams,cryst,action)
 
      do iq_ibz=1,gams%nqibz
        qirr = gams%qibz(:,iq_ibz)
-       iq_bz = kptrank_index(qrank, qirr)
+       iq_bz = qrank%kptrank_index(qirr)
        if (iq_bz /= -1) then
          ABI_CHECK(isamek(qirr,gams%qbz(:,iq_bz),g0), "isamek")
          qirredtofull(iq_ibz) = iq_bz
@@ -1121,7 +1121,7 @@ subroutine phgamma_interp_setup(gams,cryst,action)
        do isym=1,cryst%nsym
          tmp_qpt = matmul(cryst%symrec(:,:,isym), gams%qbz(:,iq_bz))
 
-         isq_bz = kptrank_index(qrank, tmp_qpt)
+         isq_bz = qrank%kptrank_index(tmp_qpt)
          if (isq_bz == -1) then
            MSG_ERROR("looks like no kpoint equiv to q by symmetry without time reversal!")
          end if
@@ -1129,14 +1129,14 @@ subroutine phgamma_interp_setup(gams,cryst,action)
 
          ! q --> -q
          tmp_qpt = -tmp_qpt
-         isq_bz = kptrank_index(qrank, tmp_qpt)
+         isq_bz = qrank%kptrank_index(tmp_qpt)
          if (isq_bz == -1) then
            MSG_ERROR("looks like no kpoint equiv to q by symmetry with time reversal!")
          end if
          qpttoqpt(2,isym,isq_bz) = iq_bz
        end do
      end do
-     call destroy_kptrank(qrank)
+     call qrank%free()
 
      ! Fill BZ array with IBZ data.
      do spin=1,gams%nsppol
@@ -1533,7 +1533,7 @@ subroutine phgamma_vv_interp_setup(gams,cryst,action)
  integer :: iq_bz,iq_ibz,isq_bz,spin,isym,ierr
  integer :: ii, idir, jdir
  !character(len=500) :: msg
- type(kptrank_type) :: qrank
+ type(krank_t) :: qrank
 !arrays
  integer :: g0(3)
  integer,allocatable :: qirredtofull(:),qpttoqpt(:,:,:)
@@ -1559,7 +1559,7 @@ subroutine phgamma_vv_interp_setup(gams,cryst,action)
 
      do iq_ibz=1,gams%nqibz
        qirr = gams%qibz(:,iq_ibz)
-       iq_bz = kptrank_index(qrank, qirr)
+       iq_bz = qrank%kptrank_index(qirr)
        if (iq_bz /= -1) then
          ABI_CHECK(isamek(qirr,gams%qbz(:,iq_bz),g0), "isamek")
          qirredtofull(iq_ibz) = iq_bz
@@ -1575,7 +1575,7 @@ subroutine phgamma_vv_interp_setup(gams,cryst,action)
        do isym=1,cryst%nsym
          tmp_qpt = matmul(cryst%symrec(:,:,isym), gams%qbz(:,iq_bz))
 
-         isq_bz = kptrank_index(qrank, tmp_qpt)
+         isq_bz = qrank%kptrank_index(tmp_qpt)
          if (isq_bz == -1) then
            MSG_ERROR("looks like no kpoint equiv to q by symmetry without time reversal!")
          end if
@@ -1583,14 +1583,14 @@ subroutine phgamma_vv_interp_setup(gams,cryst,action)
 
          ! q --> -q
          tmp_qpt = -tmp_qpt
-         isq_bz = kptrank_index(qrank, tmp_qpt)
+         isq_bz = qrank%kptrank_index(tmp_qpt)
          if (isq_bz == -1) then
            MSG_ERROR("looks like no kpoint equiv to q by symmetry with time reversal!")
          end if
          qpttoqpt(2,isym,isq_bz) = iq_bz
        end do
      end do
-     call destroy_kptrank(qrank)
+     call qrank%free()
 
      ! Fill BZ array with IBZ data.
      do spin=1,gams%nsppol

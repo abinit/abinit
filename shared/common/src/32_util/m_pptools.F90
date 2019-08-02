@@ -593,7 +593,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
  integer :: symkptrank, nsymfm, isymfm
  real(dp) :: ene
  character(len=500) :: msg
- type(kptrank_type) :: kptrank_t
+ type(krank_t) :: krank
 !arrays
  integer,allocatable :: fulltoirred(:),symrecfm(:,:,:)
  real(dp) :: kptgrid(3),gmet(3,3)
@@ -665,7 +665,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
  ABI_MALLOC(fulltoirred,(nkptfull))
  timrev=0; if (use_tr) timrev=1
 
- call mkkptrank (kptirred,nkptirred,kptrank_t, nsym=nsymfm, symrec=symrecfm, time_reversal=use_tr)
+ call mkkptrank (kptirred,nkptirred,krank, nsym=nsymfm, symrec=symrecfm, time_reversal=use_tr)
 
 !Xcrysden employs the C-ordering for the Fermi Surface.
  ikgrid=0
@@ -678,14 +678,14 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
        kptgrid(2)=DBLE(ik2)/kptrlatt(2,2)
        kptgrid(3)=DBLE(ik3)/kptrlatt(3,3)
 
-       ! Find correspondence between the Xcrysden grid and the IBZ ===
-       call get_rank_1kpt (kptgrid, symkptrank, kptrank_t)
-       fulltoirred(ikgrid) = kptrank_t%invrank(symkptrank)
+       ! Find correspondence between the Xcrysden grid and the IBZ
+       symkptrank = krank%get_rank_1kpt(kptgrid)
+       fulltoirred(ikgrid) = krank%invrank(symkptrank)
 
        if (fulltoirred(ikgrid) < 1) then
          write(msg,'(a,3es16.8,2a,i0,2a)')&
-&         'kpt = ',kptgrid,ch10,' with rank ', symkptrank, ch10,&
-&         'has no symmetric among the k-points used in the GS calculation '
+          'kpt = ',kptgrid,ch10,' with rank ', symkptrank, ch10,&
+          'has no symmetric among the k-points used in the GS calculation '
          ierr=ierr + 1
          MSG_WARNING(msg)
        end if
@@ -694,7 +694,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
    end do !ik2
  end do !ik3
 
- call destroy_kptrank(kptrank_t)
+ call krank%free()
 
  if (ierr/=0) then
    ABI_FREE(fulltoirred)
