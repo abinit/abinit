@@ -143,7 +143,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  type(rf_hamiltonian_type) :: rf_hamkq
  type(gkk_t) :: gkk2d
  character(len=500) :: msg, what
- character(len=fnlen) :: fname, gkkfilnam, wr_path
+ character(len=fnlen) :: fname, gkkfilnam
 !arrays
  integer :: g0_k(3),symq(4,2,cryst%nsym)
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),nband_kq(:,:),blkflg(:,:), wfd_istwfk(:)
@@ -313,10 +313,9 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  if (dtset%eph_use_ftinterp /= 0) then
    MSG_WARNING(sjoin("Enforcing FT interpolation for q-point", ktoa(qpt)))
    comm_rpt = xmpi_comm_self
-   wr_path = ""
    method = dtset%userid
    !method = 0
-   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, wr_path, comm_rpt)
+   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, comm_rpt)
    cplex = 2
    ABI_MALLOC(v1scf, (cplex, nfftf, nspden, dvdb%my_npert))
    call dvdb%ftinterp_qpt(qpt, nfftf, ngfftf, v1scf, dvdb%comm_rpt)

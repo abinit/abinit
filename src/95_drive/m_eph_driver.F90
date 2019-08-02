@@ -701,22 +701,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! Write average of DFPT potentials to file.
    if (my_rank == master) then
      call dvdb%open_read(ngfftf, xmpi_comm_self)
+     !call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
      call dvdb%write_v1qavg(dtset, strcat(dtfil%filnam_ds(4), "_V1QAVG.nc"))
    end if
 
  case (16)
-   ! Produce WRMAX.nc file with the decay of the W(R,r) as a function of R
-   if (my_rank == master) then
-     path = strcat(dtfil%filnam_ds(4), "_WRMAX")
-     call wrtout(std_out, sjoin("Saving W(R,r) to file:", path))
-     comm_rpt = xmpi_comm_self
-     method = dtset%userid
-     call dvdb%open_read(ngfftf, xmpi_comm_self)
-     !call dvdb%list_perts([-1, -1, -1])
-     call dvdb%ftinterp_setup(dtset%ddb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, path, comm_rpt)
-   end if
-
- case (17)
    ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
    if (my_rank == master) then
      call ncwrite_v1qnu(dvdb, cryst, ifc, dvdb%nqpt, dvdb%qpts, dtset%prtvol, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))

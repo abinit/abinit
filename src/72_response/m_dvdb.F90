@@ -308,10 +308,6 @@ module m_dvdb
    ! 1 --> Symmetrization in real space
    ! 2 --> Call v1phq_complete after interpolation of the potentials in ftinterp_qpt
 
-  real(dp) :: q0rad = -one
-   ! If > 0, use Verdi's model to interpolate potential if |q| < q0rad without adding (short-range) contribution
-   ! coming from W(r, R). Used when add_lr = 5
-
   type(qcache_t) :: qcache
     ! Cache used to store potentials if Fourier interpolation is not used
     ! (see dvdb_readsym_qbz for the implementation)
@@ -358,7 +354,7 @@ module m_dvdb
    ! ngfft3_v1(3, numv1)
    ! The FFT mesh used for each v1 potential (the one used to store data in the file).
 
-  !integer,allocatable :: my_irpt2tot(:)
+  integer,allocatable :: my_irpt2tot(:)
   ! Mapping my_irpt index to full list of R-points.
 
   real(dp),allocatable :: qpts(:,:)
@@ -449,6 +445,8 @@ module m_dvdb
 
    procedure :: ftinterp_setup => dvdb_ftinterp_setup
    ! Prepare the internal tables for Fourier interpolation.
+
+   procedure :: get_maxw => dvdb_get_maxw
 
    procedure :: ftinterp_qpt => dvdb_ftinterp_qpt
    ! Fourier interpolation of potentials for given q-point
@@ -892,7 +890,7 @@ subroutine dvdb_free(db)
  ABI_SFREE(db%symq_table)
  ABI_SFREE(db%iv_pinfoq)
  ABI_SFREE(db%ngfft3_v1)
- !ABI_SFREE(db%my_irpt2tot)
+ ABI_SFREE(db%my_irpt2tot)
 
  ! real arrays
  ABI_SFREE(db%qpts)
@@ -2777,7 +2775,6 @@ end subroutine rotate_fqg
 !!  qshift(3,nqshift)=The shifts of the ab-initio q-mesh.
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT
-!!  outwr_path=Filename of output file used to print max_r(W(R,r)). Ignored if empty string.
 !!  comm_rpt = MPI communicator used to distribute R-lattice points.
 !!
 !! PARENTS
@@ -2786,13 +2783,12 @@ end subroutine rotate_fqg
 !!
 !! SOURCE
 
-subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft, method, outwr_path, comm_rpt)
+subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft, method, comm_rpt)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nqshift,nfft,comm_rpt, method
  class(dvdb_t),target,intent(inout) :: db
- character(len=*),intent(in) :: outwr_path
 !arrays
  integer,intent(in) :: ngqpt(3), qrefine(3), ngfft(18)
  real(dp),intent(in) :: qshift(3,nqshift)
@@ -2801,24 +2797,23 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
 !scalars
  integer,parameter :: master=0, qptopt1 = 1
  integer :: iq_ibz,nqibz,iq_bz,nqbz !, timerev_q
- integer :: ii,jj,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc, unt
- integer :: iqst,itimrev,isym
+ integer :: ii,jj,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc
+ integer :: iqst, itimrev, isym
  integer :: ifft, ierr,  my_rstart, my_rstop, iatom
 #ifdef HAVE_NETCDF
  integer :: ncerr, ncid
 #endif
  real(dp) :: phre !,phim,
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
- logical :: isirr_q, write_maxw
- character(len=500) :: msg, sfmt
+ logical :: isirr_q
+ character(len=500) :: msg
 !arrays
  integer :: g0q(3)
  !integer :: symq(4,2,db%cryst%nsym)
- integer,allocatable :: indqq(:,:),iperm(:), iperm_irpt(:), nqsts(:),iqs_dvdb(:),all_cell(:,:)
- real(dp) :: qpt_bz(3), sc_rprimd(3,3), sumr(2)
- real(dp),allocatable :: qibz(:,:),qbz(:,:),emiqr(:,:), all_rpt(:,:), all_wghatm(:,:,:)
+ integer,allocatable :: indqq(:,:), iperm(:), nqsts(:), iqs_dvdb(:), all_cell(:,:)
+ real(dp) :: qpt_bz(3)
+ real(dp),allocatable :: qibz(:,:), qbz(:,:), emiqr(:,:), all_rpt(:,:), all_wghatm(:,:,:)
  real(dp),allocatable :: v1r_qibz(:,:,:,:), v1r_qbz(:,:,:,:), v1r_lr(:,:,:)
- real(dp),allocatable :: maxw(:,:), all_rmod(:), asr_work(:,:,:,:)
 
 ! *************************************************************************
 
@@ -2826,7 +2821,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
 
  ! Radius of sphere with volume equivalent to the micro zone.
  nqbz = product(ngqpt) * nqshift
- db%q0rad = two_pi * (three / (four_pi * db%cryst%ucvol * nqbz)) ** third
 
  if (db%add_lr == 4) then
    call wrtout(std_out, " Skipping construction of W(R,r) because add_lr = 4")
@@ -2865,13 +2859,14 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  db%my_nrpt = 0
  ii = minval(db%my_pinfo(2,:)); jj = maxval(db%my_pinfo(2,:))
  if (my_rstop >= my_rstart) then
+   ! Select my_rpoints.
    db%my_nrpt = my_rstop - my_rstart + 1
    ABI_MALLOC(db%my_rpt, (3, db%my_nrpt))
    db%my_rpt = all_rpt(:, my_rstart:my_rstop)
-   !ABI_MALLOC(db%my_irpt2tot, (db%my_nrpt))
-   !do irpt=1,db%my_nrpt
-   !  db%my_irpt2tot(iprt) = my_rstart + (irpt - 1)
-   !end do
+   ABI_MALLOC(db%my_irpt2tot, (db%my_nrpt))
+   do irpt=1,db%my_nrpt
+     db%my_irpt2tot(irpt) = my_rstart + (irpt - 1)
+   end do
    ! Copy weights for the atoms treated by this proc.
    ABI_MALLOC(db%my_wratm, (db%my_nrpt, ii:jj))
    db%my_wratm = one
@@ -2881,9 +2876,11 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
      end do
    end if
  end if
+
  ABI_CHECK(db%my_nrpt /= 0, "my_nrpt == 0!")
  ABI_SFREE(all_cell)
  ABI_SFREE(all_wghatm)
+ ABI_FREE(all_rpt)
 
  ! Allocate potential in the supercell. Memory is distributed over my_nrpt and my_npert
  call wrtout(std_out, sjoin(" Memory required for W(R,r): ", &
@@ -3045,102 +3042,87 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
    !call dvdb_enforce_asr(db)
  end if
 
- ! Write file with |R| R(1:3)_frac MAX_r |W(R,r,idir,ipert)|
- ! TODO: Cleanup, support ftinterp_refine case.
- write_maxw = len_trim(outwr_path) > 0
- !write_maxw = .False.
- if (write_maxw) then
-   ABI_CALLOC(maxw, (db%nrtot, db%natom3))
-   do imyp=1,db%my_npert
-     ipc = db%my_pinfo(3, imyp)
-     do irpt=1,db%my_nrpt
-       phre = zero
-       do ispden=1,db%nspden
-         do ifft=1,nfft
-           phre = max(phre, db%v1scf_rpt(1,irpt,ifft,ispden,imyp) ** 2 + db%v1scf_rpt(2,irpt,ifft,ispden,imyp) ** 2)
-         end do
-       end do
-       maxw(irpt - 1 + my_rstart, ipc) = sqrt(phre)
-     end do
-   end do
-   call xmpi_sum_master(maxw, master, db%comm, ierr)
-
-   if (xmpi_comm_rank(db%comm) == master) then
-     sc_rprimd(:, 1) = ngqpt(1) * db%cryst%rprimd(:, 1)
-     sc_rprimd(:, 2) = ngqpt(2) * db%cryst%rprimd(:, 2)
-     sc_rprimd(:, 3) = ngqpt(3) * db%cryst%rprimd(:, 3)
-     call sort_rpts(db%nrtot, all_rpt, db%cryst%rmet, iperm_irpt, rmod=all_rmod)
-     if (open_file(outwr_path, msg, newunit=unt, form="formatted", action="write", status="unknown") /= 0) then
-       MSG_ERROR(msg)
-     end if
-     write(unt, "(a)")"# |R| R(1:3)_frac MAX_r |W(R,r,idir,ipert)|"
-     write(unt, "(a, 3(i0, 1x))")"# ngqpt:", ngqpt
-     write(sfmt, "(a,i0,a)")"(es16.8, 3(f4.0,1x),", db%natom3, "(es16.8))"
-     do ii=1,db%nrtot
-       irpt = iperm_irpt(ii)
-       write(unt, sfmt)all_rmod(ii), all_rpt(:, irpt), maxw(irpt, :)
-     end do
-     close(unt)
-
-     ! Write results to netcdf file.
-     all_rpt = all_rpt(:, iperm_irpt(:))
-     do ii=1,db%natom3
-       maxw(:, ii) = maxw(iperm_irpt(:), ii)
-     end do
-#ifdef HAVE_NETCDF
-     NCF_CHECK(nctk_open_create(ncid, strcat(outwr_path, ".nc"), xmpi_comm_self))
-     NCF_CHECK(db%cryst%ncwrite(ncid))
-     ncerr = nctk_def_dims(ncid, [ &
-         nctkdim_t("nrpt", db%nrtot), nctkdim_t("nfft", nfft), &
-         nctkdim_t("natom3", db%natom3), nctkdim_t("nspden", db%nspden)], defmode=.True.)
-     NCF_CHECK(ncerr)
-     ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-       "has_dielt", "has_zeff", "has_quadrupoles", "dvdb_add_lr", "symv1"])
-     NCF_CHECK(ncerr)
-     NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"]))
-     ncerr = nctk_def_arrays(ncid, [ &
-        nctkarr_t("ngqpt", "int", "three"), nctkarr_t("rpt", "dp", "three, nrpt"), nctkarr_t("rmod", "dp", "nrpt"), &
-        !nctkarr_t("v1scf_rpt", "dp", "two, nrpt, nfft, nspden, natom3"), &
-        nctkarr_t("maxw", "dp", "nrpt, natom3") &
-     ])
-     NCF_CHECK(ncerr)
-     NCF_CHECK(nctk_set_datamode(ncid))
-     ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-       "has_dielt", "has_zeff", "has_quadrupoles"], &
-       l2int([db%has_dielt, db%has_zeff, db%has_quadrupoles]))
-     NCF_CHECK(ncerr)
-     ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-       "dvdb_add_lr", "symv1"], &
-       [db%add_lr, db%symv1])
-     NCF_CHECK(ncerr)
-     NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], [db%qdamp]))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), ngqpt))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rpt"), all_rpt))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rmod"), all_rmod))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "maxw"), maxw))
-     ! FIXME: This wont work if parallelism over R and/or perturbations.
-     ! Besides I got HDF5 Error when writing big files ~4 Gb on lemaitre3
-     ! I hope it's not a issue related to 4byte integers!
-     !if (db%my_npert == db%natom3 .and. db%my_nrpt == db%nrtot) then
-     !  ii = minval(db%my_pinfo(3, :))
-     !  ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_rpt"), db%v1scf_rpt, &
-     !    start=[1, my_rstart, 1, 1, ii], count=[2, db%my_nrpt, nfft, db%nspden, db%my_npert])
-     !  NCF_CHECK(ncerr)
-     !end if
-     NCF_CHECK(nf90_close(ncid))
-#endif
-     ABI_FREE(all_rmod)
-     ABI_FREE(iperm_irpt)
-   end if
-
-   ABI_FREE(maxw)
- end if
-
- ABI_FREE(all_rpt)
-
  call cwtime_report(" Construction of W(R,r)", cpu_all, wall_all, gflops_all)
 
 end subroutine dvdb_ftinterp_setup
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_get_maxw
+!! NAME
+!!  dvdb_get_maxw
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! FUNCTION
+!!
+
+subroutine dvdb_get_maxw(db, ngqpt, all_rpt, all_rmod, maxw)
+
+!Arguments ------------------------------------
+!scalars
+ class(dvdb_t),target,intent(inout) :: db
+ integer,intent(in) :: ngqpt(3)
+ real(dp),allocatable,intent(out) :: maxw(:,:), all_rpt(:,:), all_rmod(:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: imyp, ipc, irpt, irpt_tot, ifft, nfft, ispden, ierr, ii
+ real(dp) :: phre
+!arrays
+ integer,allocatable :: iperm_irpt(:)
+ real(dp) :: sc_rprimd(3,3)
+
+! *************************************************************************
+
+ ABI_CHECK(allocated(db%v1scf_rpt), "v1scf_rpt is not allocated (call dvdb_ftinterp_setup)")
+
+ nfft = size(db%v1scf_rpt, dim=3)
+ ABI_CALLOC(maxw, (db%nrtot, db%natom3))
+
+ ! Need all RPTs to sort output.
+ ABI_CALLOC(all_rpt, (3, db%nrtot))
+ do irpt=1,db%my_nrpt
+   irpt_tot = db%my_irpt2tot(irpt)
+   all_rpt(:, irpt_tot) = db%my_rpt(:, irpt)
+ end do
+ call xmpi_sum(all_rpt, db%comm_rpt, ierr)
+
+ do imyp=1,db%my_npert
+   ipc = db%my_pinfo(3, imyp)
+   do irpt=1,db%my_nrpt
+     irpt_tot = db%my_irpt2tot(irpt)
+     phre = zero
+     do ispden=1,db%nspden
+       do ifft=1,nfft
+         phre = max(phre, db%v1scf_rpt(1,irpt,ifft,ispden,imyp) ** 2 + db%v1scf_rpt(2,irpt,ifft,ispden,imyp) ** 2)
+       end do
+     end do
+     maxw(irpt_tot, ipc) = sqrt(phre)
+   end do
+ end do
+
+ ! Handle parallelism
+ if (db%nprocs_rpt /= 1) call xmpi_sum(maxw, db%comm_rpt, ierr)
+ if (db%nprocs_pert /= 1) call xmpi_sum(maxw, db%comm_pert, ierr)
+
+ sc_rprimd(:, 1) = ngqpt(1) * db%cryst%rprimd(:, 1)
+ sc_rprimd(:, 2) = ngqpt(2) * db%cryst%rprimd(:, 2)
+ sc_rprimd(:, 3) = ngqpt(3) * db%cryst%rprimd(:, 3)
+ call sort_rpts(db%nrtot, all_rpt, db%cryst%rmet, iperm_irpt, rmod=all_rmod)
+
+ ! Sort output results by |R|.
+ all_rpt = all_rpt(:, iperm_irpt(:))
+ do ii=1,db%natom3
+   maxw(:, ii) = maxw(iperm_irpt(:), ii)
+ end do
+
+ ABI_FREE(iperm_irpt)
+
+end subroutine dvdb_get_maxw
 !!***
 
 !----------------------------------------------------------------------
@@ -3286,9 +3268,7 @@ subroutine dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt, nqshift, qshift, nff
  ! Dense q-mesh
  ngqpt_fine = qrefine * ngqpt
  cryst => db%cryst
-
  !nqbz = product(ngqpt) * nqshift
- !db%q0rad = two_pi * (three / (four_pi * db%cryst%ucvol * nqbz)) ** third
 
  ! Build q-points in the microzone (assume unshifted mesh).
  nq_zone = product(2 * qrefine - 1) - 1
@@ -3439,6 +3419,12 @@ subroutine dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt, nqshift, qshift, nff
  db%my_nrpt = my_nrpt_fine
  ABI_MOVE_ALLOC(my_rpt_fine, db%my_rpt)
  ABI_MOVE_ALLOC(v1scf_rpt, db%v1scf_rpt)
+
+ ! TODO
+ !ABI_MALLOC(db%my_irpt2tot, (db%my_nrpt))
+ !do irpt=1,db%my_nrpt
+ !  db%my_irpt2tot(irpt) = my_rstart + (irpt - 1)
+ !end do
  ! Copy weights for the atoms treated by this proc.
  ii = minval(db%my_pinfo(2,:)); jj = maxval(db%my_pinfo(2,:))
  ABI_REMALLOC(db%my_wratm, (db%my_nrpt, ii:jj))
@@ -3727,7 +3713,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  qcart = two_pi * matmul(db%cryst%gprimd, qpt)
  qmod = sqrt(dot_product(qcart, qcart))
 
- if (my_add_lr == 4 .or. (my_add_lr == 5 .and. qmod < db%q0rad .and. qmod > tol20)) then
+ if (my_add_lr == 4) then
    ov1r = zero
    do imyp=1,db%my_npert
      idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
@@ -5999,17 +5985,18 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
 !scalars
  integer,parameter :: master = 0
  integer :: nfft, iq, cplex, ispden, comm_rpt, my_rank, idir, ipert, ipc, imyp
- integer :: i1, i2, i3, n1, n2, n3, unt, ifft, this_nqpt, method, interpolated
+ integer :: i1, i2, i3, n1, n2, n3, unt, this_nqpt, method, interpolated !ifft,
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr
 #endif
- type(vdiff_t) :: vd_max
+ !type(vdiff_t) :: vd_max
  character(len=500) :: msg
- character(len=fnlen) :: tmp_fname, dump_path
+ character(len=fnlen) :: dump_path !tmp_fname,
 !arrays
  integer :: ngfft(18)
  real(dp),pointer :: this_qpts(:,:)
  real(dp),allocatable :: file_v1r(:,:,:,:),long_v1r(:,:,:,:),tmp_v1r(:,:,:,:)
+ real(dp),allocatable :: maxw(:,:), all_rpt(:,:), all_rmod(:)
 
 ! *************************************************************************
 
@@ -6049,8 +6036,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    this_qpts => dtset%ph_qpath(:, 1:this_nqpt)
    comm_rpt = xmpi_comm_self
    method = dtset%userid
-   call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, &
-                            nfft, ngfft, method, "", comm_rpt)
+   call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, nfft, ngfft, method, comm_rpt)
    interpolated = 1
  else
    MSG_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
@@ -6065,8 +6051,22 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
      nctkdim_t("natom3", dvdb%natom3) &
    ], defmode=.True.)
    NCF_CHECK(ncerr)
+
+   if (interpolated == 1) then
+     ! Define arrays for Max_r |W(R, r)|
+     NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("nrpt", dvdb%nrtot), nctkdim_t("nfft", nfft)]))
+     ncerr = nctk_def_arrays(ncid, [ &
+        nctkarr_t("ngqpt", "int", "three"), nctkarr_t("rpt", "dp", "three, nrpt"), nctkarr_t("rmod", "dp", "nrpt"), &
+        nctkarr_t("maxw", "dp", "nrpt, natom3") &
+     ])
+     NCF_CHECK(ncerr)
+   end if
+
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
      "symdynmat", "symv1scf", "dvdb_add_lr", "interpolated"])
+   NCF_CHECK(ncerr)
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+     "has_dielt", "has_zeff", "has_quadrupoles", "dvdb_add_lr", "symv1"])
    NCF_CHECK(ncerr)
    NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"]))
    ncerr = nctk_def_arrays(ncid, [ &
@@ -6082,6 +6082,10 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
        "symdynmat", "symv1scf", "dvdb_add_lr", "interpolated"], &
        [dtset%symdynmat, dtset%symv1scf, dtset%dvdb_add_lr, interpolated])
+   NCF_CHECK(ncerr)
+   ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+     "has_dielt", "has_zeff", "has_quadrupoles"], &
+     l2int([dvdb%has_dielt, dvdb%has_zeff, dvdb%has_quadrupoles]))
    NCF_CHECK(ncerr)
    NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], [dvdb%qdamp]))
  end if
@@ -6198,14 +6202,30 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    !write(std_out,*)" "
  end do ! iq
 
-#ifdef HAVE_NETCDF
- if (my_rank == master) then
-   NCF_CHECK(nf90_close(ncid))
- end if
-#endif
-
  ABI_FREE(long_v1r)
  ABI_FREE(file_v1r)
+
+ if (interpolated == 1) then
+   ! Compute max_r |W(R,r)| and write data to file.
+   call dvdb%get_maxw(dtset%dvdb_ngqpt, all_rpt, all_rmod, maxw)
+   if (my_rank == master) then
+#ifdef HAVE_NETCDF
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), dtset%dvdb_ngqpt))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rpt"), all_rpt))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rmod"), all_rmod))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "maxw"), maxw))
+#endif
+   end if
+   ABI_FREE(all_rpt)
+   ABI_FREE(all_rmod)
+   ABI_FREE(maxw)
+ end if
+
+ if (my_rank == master) then
+#ifdef HAVE_NETCDF
+   NCF_CHECK(nf90_close(ncid))
+#endif
+ end if
 
 end subroutine dvdb_write_v1qavg
 !!***
@@ -6256,7 +6276,7 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
  type(dvdb_t) :: dvdb, coarse_dvdb
  type(vdiff_t) :: vd_max
  type(ddb_type) :: ddb
- character(len=fnlen) :: outwr_path, coarse_fname
+ character(len=fnlen) :: coarse_fname
 !arrays
  integer :: ngfft(18), qrefine(3)
  real(dp),allocatable :: file_v1r(:,:,:,:),intp_v1r(:,:,:,:),tmp_v1r(:,:,:,:)
@@ -6304,9 +6324,7 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
 
  autotest = .True.
  if (autotest) then
-   outwr_path = strcat(dvdb_path, "_WRMAX")
-   !outwr_path = ""
-   call dvdb%ftinterp_setup(dvdb_ngqpt, qrefine, 1, [zero, zero, zero], nfft, ngfft, method, outwr_path, comm_rpt)
+   call dvdb%ftinterp_setup(dvdb_ngqpt, qrefine, 1, [zero, zero, zero], nfft, ngfft, method, comm_rpt)
 
    ! First step: Use FT interpolation to get q-points in the initial ab-initio mesh.
    ! We should get the same result...
@@ -6376,9 +6394,7 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
    !call coarse_dvdb%print()
 
    ! Prepare FT interpolation using coarse q-mesh.
-   outwr_path = strcat(dvdb_path, "_QCOARSE_WRMAX")
-   !outwr_path = ""
-   call coarse_dvdb%ftinterp_setup(coarse_ngqpt, qrefine, 1, [zero, zero, zero], nfft, ngfft, method, outwr_path, comm_rpt)
+   call coarse_dvdb%ftinterp_setup(coarse_ngqpt, qrefine, 1, [zero, zero, zero], nfft, ngfft, method, comm_rpt)
 
    do iq=1,dvdb%nqpt
      ! Read data from DVDB file and store it in file_v1r

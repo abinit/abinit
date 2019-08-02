@@ -534,7 +534,7 @@ integer function get_arg_str(argname, argval, msg, default, exclude) result(ierr
 !Local variables-------------------------------
  integer :: ii, istat
  logical :: found_argname, found_excl
- character(len=500) :: arg, iomsg
+ character(len=500) :: arg
 
 ! *************************************************************************
 
