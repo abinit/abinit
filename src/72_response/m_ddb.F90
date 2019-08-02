@@ -342,7 +342,7 @@ subroutine ddb_malloc(ddb,msize,nblok,natom,ntypat)
  ddb%msize = msize
  ddb%nblok = nblok
  ddb%natom = natom
- ddb%mpert = natom+6
+ ddb%mpert = natom+MPERT_MAX
  ddb%ntypat = ntypat
 
  ! integer
@@ -1088,7 +1088,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
  integer,parameter :: msppol=2,mtyplo=6
  integer :: iblok,isym
  integer :: nsize,timrev
- integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
+ integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,npert
  real(dp),parameter :: tolsym8=tol8
  character(len=500) :: message
  type(ddb_hdr_type) :: ddb_hdr
@@ -1196,14 +1196,15 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
 
    else if (ddb%typ(iblok) == 3) then
 
-     nsize=3*mpert*3*mpert*3*mpert
-     ABI_MALLOC(tmpflg,(3,mpert,3,mpert,3,mpert))
-     ABI_MALLOC(tmpval,(2,3,mpert,3,mpert,3,mpert))
-     ABI_MALLOC(rfpert,(3,mpert,3,mpert,3,mpert))
+     npert = 8
+     nsize=3*npert*3*npert*3*npert
+     ABI_MALLOC(tmpflg,(3,npert,3,npert,3,npert))
+     ABI_MALLOC(tmpval,(2,3,npert,3,npert,3,npert))
+     ABI_MALLOC(rfpert,(3,npert,3,npert,3,npert))
 
-     tmpflg(:,:,:,:,:,:) = reshape(ddb%flg(1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
-     tmpval(1,:,:,:,:,:,:) = reshape(ddb%val(1,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
-     tmpval(2,:,:,:,:,:,:) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
+     tmpflg(:,:,:,:,:,:) = reshape(ddb%flg(1:nsize,iblok), shape = (/3,npert,3,npert,3,npert/))
+     tmpval(1,:,:,:,:,:,:) = reshape(ddb%val(1,1:nsize,iblok), shape = (/3,npert,3,npert,3,npert/))
+     tmpval(2,:,:,:,:,:,:) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,npert,3,npert,3,npert/))
 
 !    Set the elements that are zero by symmetry for raman and
 !    non-linear optical susceptibility tensors
@@ -1212,10 +1213,10 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
      rfpert(:,1:natom,:,natom+2,:,natom+2) = 1
      rfpert(:,natom+2,:,1:natom,:,natom+2) = 1
      rfpert(:,natom+2,:,natom+2,:,1:natom) = 1
-     call sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
-     do i1pert = 1,mpert
-       do i2pert = 1,mpert
-         do i3pert = 1,mpert
+     call sytens(indsym,npert,natom,nsym,rfpert,symrec,symrel)
+     do i1pert = 1,npert
+       do i2pert = 1,npert
+         do i3pert = 1,npert
            do i1dir=1,3
              do i2dir=1,3
                do i3dir=1,3
@@ -1231,16 +1232,16 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
        end do
      end do
 
-     call d3sym(tmpflg,tmpval,indsym,mpert,natom,nsym,symrec,symrel)
+     call d3sym(tmpflg,tmpval,indsym,npert,natom,nsym,symrec,symrel)
 
-     ABI_MALLOC(d3cart,(2,3,mpert,3,mpert,3,mpert))
-     ABI_MALLOC(car3flg,(3,mpert,3,mpert,3,mpert))
+     ABI_MALLOC(d3cart,(2,3,npert,3,npert,3,npert))
+     ABI_MALLOC(car3flg,(3,npert,3,npert,3,npert))
 
-     call nlopt(tmpflg,car3flg,tmpval,d3cart,gprimd,mpert,natom,rprimd,ucvol)
+     call nlopt(tmpflg,car3flg,tmpval,d3cart,gprimd,npert,natom,rprimd,ucvol)
 
-     ddb%flg(1:nsize,iblok) = reshape(car3flg, shape = (/3*mpert*3*mpert*3*mpert/))
-     ddb%val(1,1:nsize,iblok) = reshape(d3cart(1,:,:,:,:,:,:), shape = (/3*mpert*3*mpert*3*mpert/))
-     ddb%val(2,1:nsize,iblok) = reshape(d3cart(2,:,:,:,:,:,:), shape = (/3*mpert*3*mpert*3*mpert/))
+     ddb%flg(1:nsize,iblok) = reshape(car3flg, shape = (/3*npert*3*npert*3*npert/))
+     ddb%val(1,1:nsize,iblok) = reshape(d3cart(1,:,:,:,:,:,:), shape = (/3*npert*3*npert*3*npert/))
+     ddb%val(2,1:nsize,iblok) = reshape(d3cart(2,:,:,:,:,:,:), shape = (/3*npert*3*npert*3*npert/))
 
      ABI_FREE(d3cart)
      ABI_FREE(car3flg)
@@ -1582,7 +1583,7 @@ subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, crystal, com
    MSG_ERROR(sjoin("input natom:",itoa(natom),"does not agree with DDB value:",itoa(natom)))
  end if
 
- mpert = natom+6
+ mpert = natom+MPERT_MAX
  msize=3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
 
  ! Allocate arrays depending on msym (which is actually fixed to nsym inside inprep8)
@@ -3415,7 +3416,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    call ddb_hdr_free(ddb_hdr)
  end do
 
- mpert=matom+6
+ mpert=matom+MPERT_MAX
  msize=3*mpert*3*mpert
  if(mblktyp==3)msize=msize*3*mpert
 
@@ -3741,7 +3742,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  end do
 
- mpert=matom+6
+ mpert=matom+MPERT_MAX
  msize=3*mpert*3*mpert
  if(mblktyp==3)msize=msize*3*mpert
 
