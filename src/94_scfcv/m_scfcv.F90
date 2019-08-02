@@ -457,7 +457,6 @@ type(scfcv_t), intent(inout) :: this
 end subroutine scfcv_destroy
 !!***
 
-
 !!****f* ABINIT/m_scfcv/scfcv_run
 !! NAME
 !!  scfcv_run

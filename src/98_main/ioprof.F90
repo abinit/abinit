@@ -130,8 +130,8 @@ program ioprof
    if (my_rank == master) then
      formeig = 0
      call wfk_open_read(wfk, wfk_path, formeig, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
-     call wfk_print(wfk)
-     call wfk_close(wfk)
+     call wfk%print()
+     call wfk%close()
    end if
 
  case ("nc2fort")

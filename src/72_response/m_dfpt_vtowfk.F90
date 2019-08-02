@@ -373,9 +373,9 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
 !  If electric field, the derivative of the wf should be read, and multiplied by i.
    if(test_ddk==1) then
-     ii = wfk_findk(ddk_f(1), gs_hamkq%kpt_k)
+     ii = ddk_f(1)%findk(gs_hamkq%kpt_k)
      ABI_CHECK(ii == ikpt, "ii != ikpt, something is wrong with k-point, check kptopt/ngkpt, etc")
-     call wfk_read_bks(ddk_f(1), iband, ikpt, isppol, xmpio_single, cg_bks=gvnlx1)
+     call ddk_f(1)%read_bks(iband, ikpt, isppol, xmpio_single, cg_bks=gvnlx1)
 
 !    Multiplication by -i
 !    MVeithen 021212 : use + i instead,

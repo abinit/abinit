@@ -1,8 +1,8 @@
-GW Sigma perturbative:
-    DeltaE^GW_gap:
+SelfEnergy_ee:
+    Delta_QP_KS:
         tol_abs: 1.0e-4
         tol_rel: 1.0e-3
     
-    E^GW_gap:
+    QP_gap:
         tol_abs: 1.0e-4
         tol_rel: 5.0e-5

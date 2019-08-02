@@ -127,8 +127,6 @@ contains
 
  subroutine conducti_paw(filnam,filnam_out,mpi_enreg)
 
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  character(len=fnlen) :: filnam,filnam_out
@@ -564,8 +562,6 @@ end subroutine conducti_paw
 
  subroutine conducti_paw_core(filnam,filnam_out,mpi_enreg)
 
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  character(len=fnlen) :: filnam,filnam_out
@@ -882,14 +878,12 @@ end subroutine conducti_paw_core
 !!
 !! CHILDREN
 !!      getnel,hdr_free,jacobi,matr3inv,metric,msig,nctk_fort_or_ncfile
-!!      wfk_close,wfk_open_read,wfk_read_eigk
+!!      wfk_open_read,wfk_read_eigk
 !!
 !! SOURCE
 
 
 subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -964,10 +958,10 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  if (len_trim(msg) /= 0) MSG_ERROR(msg)
  call wfk_open_read(ddk3,filnam3, formeig1, iomode, get_unit(), comm)
 
- if (wfk_compare(ddk1, ddk2) /= 0) then
+ if (ddk1%compare(ddk2) /= 0) then
    MSG_ERROR("ddk1 and ddk2 are not consistent. see above messages")
  end if
- if (wfk_compare(ddk1, ddk3) /= 0) then
+ if (ddk1%compare(ddk3) /= 0) then
    MSG_ERROR("ddk1 and ddk3 are not consistent. see above messages")
  end if
 
@@ -1015,16 +1009,16 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  do isppol=1,nsppol
    do ikpt=1,nkpt
      nband1=nband(ikpt+(isppol-1)*nkpt)
-     call wfk_read_eigk(gswfk,ikpt,isppol,xmpio_single,eig0tmp)
+     call gswfk%read_eigk(ikpt,isppol,xmpio_single,eig0tmp)
      eigen0(1+bdtot0_index:nband1+bdtot0_index)=eig0tmp(1:nband1)
 
-     call wfk_read_eigk(ddk1,ikpt,isppol,xmpio_single,eigtmp)
+     call ddk1%read_eigk(ikpt,isppol,xmpio_single,eigtmp)
      eigen11(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
 
-     call wfk_read_eigk(ddk2,ikpt,isppol,xmpio_single,eigtmp)
+     call ddk2%read_eigk(ikpt,isppol,xmpio_single,eigtmp)
      eigen12(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
 
-     call wfk_read_eigk(ddk3,ikpt,isppol,xmpio_single,eigtmp)
+     call ddk3%read_eigk(ikpt,isppol,xmpio_single,eigtmp)
      eigen13(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
 
      bdtot0_index=bdtot0_index+nband1
@@ -1033,10 +1027,10 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  end do
 
  ! Close files
- call wfk_close(gswfk)
- call wfk_close(ddk1)
- call wfk_close(ddk2)
- call wfk_close(ddk3)
+ call gswfk%close()
+ call ddk1%close()
+ call ddk2%close()
+ call ddk3%close()
 
  ABI_DEALLOCATE(eigtmp)
  ABI_DEALLOCATE(eig0tmp)
@@ -1517,8 +1511,6 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 
 subroutine msig(fcti,npti,xi,filnam_out_sig)
 
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  integer,intent(in) :: npti
@@ -1749,8 +1741,6 @@ end subroutine msig
 !! SOURCE
 
  subroutine emispec_paw(filnam,filnam_out,mpi_enreg)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars

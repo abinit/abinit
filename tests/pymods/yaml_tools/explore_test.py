@@ -46,6 +46,9 @@ def print_iter(it):
 
 
 class ExtendedTestConf(DriverTestConf):
+    '''
+    Test configuration driver with additional introspection and movements.
+    '''
     def get_spec(self):
         '''
             Return the list of specializations known at the current path.
@@ -133,6 +136,9 @@ class ExtendedTestConf(DriverTestConf):
 
 
 class Explorer(cmd.Cmd):
+    '''
+    Define the command line interface.
+    '''
     intro = intro
 
     debug = False
@@ -170,9 +176,10 @@ class Explorer(cmd.Cmd):
         return stop
 
     def precmd(self, line):
-        # most command should not be called if tree is not loaded
+        # exit on CTRL_D
         if line == 'EOF':
             line = 'exit'
+        # most command should not be called if tree is not loaded
         if not self.tree and line and line.split(' ')[0] not in [
             'load', 'edit',
             'default', 'show',
@@ -310,8 +317,8 @@ class Explorer(cmd.Cmd):
         '''
             Usage: show [ARG | *]
             If no argument is given, list all parameters and constraints
-            visible from the current level.  If argument is *, list all
-            parameters and constraints known.  If argument is ARG, show all
+            visible from the current level. If argument is *, list all
+            parameters and constraints known. If argument is ARG, show all
             informations about ARG.
         '''
         def show_cons(cons, used=False):
@@ -406,7 +413,8 @@ class Explorer(cmd.Cmd):
     def do_tree(self, arg):
         '''
             Usage: tree
-            Show the tree defined by the configuration.
+            Show the tree defined by the configuration starting at the current
+            level
         '''
         def show_rec(specs, indent=[]):
             for i, sp in enumerate(specs):
@@ -431,14 +439,14 @@ class Explorer(cmd.Cmd):
     def do_shell(self, arg):
         '''
             Usage: shell CMD ARG1 ARG2...
-            Pass command to the system shell.
+            Pass command to the system shell (environment variable SHELL)
         '''
         sh = os.environ.get('SHELL', '/bin/sh')
         try:
             call([sh, '-c', arg])
         except IOError:
             print('The shell command {} cannot be found.'.format(sh),
-                  'You may want to set your SHELL envrionment variable to',
+                  'You may want to set your SHELL environment variable to',
                   'select a different command.')
 
     def do_edit(self, arg):
@@ -449,7 +457,7 @@ class Explorer(cmd.Cmd):
             the following in a shell:
             $ export EDITOR='nano'
             Replace nano with any editor you like. Then restart
-            testconf_explorer.
+            explorer.
         '''
         ed = os.environ.get('EDITOR', 'nano')
         if arg:
@@ -491,6 +499,9 @@ class Explorer(cmd.Cmd):
 
 
 class DebugExplorer(Explorer):
+    '''
+    Command line interface with an additional debug command
+    '''
     def do_debug(self, arg):
         '''
             Usage debug PYTHON_EXPR
