@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_kptrank
+!!****m* ABINIT/m_krank
 !! NAME
-!! m_kptrank
+!! m_krank
 !!
 !! FUNCTION
 !! This module deals with rank objects for hashing k-point vector lists
@@ -24,7 +24,7 @@
 
 #include "libtetra.h"
 
-module m_kptrank
+module m_krank
 
  USE_MEMORY_PROFILING
  USE_MSG_HANDLING
@@ -36,7 +36,7 @@ module m_kptrank
  double precision :: zero = 0.0d0, half = 0.5d0, one = 1.0d0, tol8 = 1.d-8,  tol10 = 1.d-10, tol12 = 1.d-12
 !!***
 
-!!****t* m_kptrank/krank_t
+!!****t* m_krank/krank_t
 !! NAME
 !! krank_t
 !!
@@ -56,16 +56,13 @@ module m_kptrank
 
  contains
 
-   !procedure :: get_rank
-   procedure :: get_rank_1kpt
+   procedure :: get_rank
     ! Calculates the rank for one kpt
 
-   !procedure :: get_index =>
-   procedure :: kptrank_index
+   procedure :: get_index => krank_get_index
     ! Return the index of the k-point `kpt` in the initial set. -1 if not found.
 
-   !procedure :: copy =>
-   procedure :: copy_kptrank
+   procedure :: copy => krank_copy
     ! Copy the object
 
    procedure :: free => krank_free
@@ -82,7 +79,7 @@ module m_kptrank
 contains
 !!***
 
-!!****f* m_kptrank/mkkptrank
+!!****f* m_krank/mkkptrank
 !!
 !! NAME
 !! mkkptrank
@@ -141,12 +138,12 @@ subroutine mkkptrank(kpt,nkpt,krank,nsym,symrec, time_reversal)
  krank%max_linear_density = nint(one/smallestlen)
  krank%npoints = nkpt
  krank%min_rank = nint(real(krank%max_linear_density)*(half+tol8 +&
-&                      real(krank%max_linear_density)*(half+tol8 +&
-&                      real(krank%max_linear_density)*(half+tol8))))
+                       real(krank%max_linear_density)*(half+tol8 +&
+                       real(krank%max_linear_density)*(half+tol8))))
 
  krank%max_rank = nint(real(krank%max_linear_density)*(1+half+tol8 +&
-&                      real(krank%max_linear_density)*(1+half+tol8 +&
-&                      real(krank%max_linear_density)*(1+half+tol8))))
+                       real(krank%max_linear_density)*(1+half+tol8 +&
+                       real(krank%max_linear_density)*(1+half+tol8))))
 
  TETRA_ALLOCATE(krank%invrank, (krank%min_rank:krank%max_rank))
  krank%invrank(:) = -1
@@ -162,7 +159,7 @@ subroutine mkkptrank(kpt,nkpt,krank,nsym,symrec, time_reversal)
 !ie ngkpt < 100.
 ! the following fills invrank for the k-points in the list provided (may be only the irred kpts)
  do ikpt=1,nkpt
-   irank = krank%get_rank_1kpt(kpt(:,ikpt))
+   irank = krank%get_rank(kpt(:,ikpt))
 
    if (irank > krank%max_rank .or. irank < krank%min_rank) then
      write(msg,'(a,2i0)')" rank above max_rank or bellow min_rank, ikpt, rank ", ikpt, irank
@@ -184,7 +181,7 @@ subroutine mkkptrank(kpt,nkpt,krank,nsym,symrec, time_reversal)
      do itim = timrev, 1, -1
        do isym = 1, nsym
          symkpt = (-1)**(timrev+1) * matmul(symrec(:,:,isym), kpt(:, ikpt))
-         symkptrank = krank%get_rank_1kpt(symkpt(:))
+         symkptrank = krank%get_rank(symkpt(:))
          krank%invrank(symkptrank) = ikpt
        end do
      end do
@@ -196,10 +193,10 @@ end subroutine mkkptrank
 
 !----------------------------------------------------------------------
 
-!!****f* m_kptrank/get_rank_1kpt
+!!****f* m_krank/get_rank
 !!
 !! NAME
-!! get_rank_1kpt
+!! get_rank
 !!
 !! FUNCTION
 !! This routine calculates the rank for one kpt
@@ -213,14 +210,14 @@ end subroutine mkkptrank
 !!
 !! PARENTS
 !!      elphon,get_full_kgrid,integrate_gamma,integrate_gamma_alt,k_neighbors
-!!      m_ddk,m_kptrank,m_nesting,m_pptools,m_tetrahedron,mkfskgrid,mkqptequiv
+!!      m_ddk,m_krank,m_nesting,m_pptools,m_tetrahedron,mkfskgrid,mkqptequiv
 !!      read_el_veloc,read_gkk
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-integer function get_rank_1kpt(krank, kpt) result(rank)
+integer function get_rank(krank, kpt) result(rank)
 
 !Arguments ------------------------------------
 !scalars
@@ -259,26 +256,26 @@ integer function get_rank_1kpt(krank, kpt) result(rank)
  if(abs(redkpt(3))<tol12)redkpt(3)=zero
 
 ! rank = int(real(krank%max_linear_density)*(redkpt(3)+half+tol8 +&
-!&           real(krank%max_linear_density)*(redkpt(2)+half+tol8 +&
-!&           real(krank%max_linear_density)*(redkpt(1)+half+tol8))))
+!            real(krank%max_linear_density)*(redkpt(2)+half+tol8 +&
+!            real(krank%max_linear_density)*(redkpt(1)+half+tol8))))
  rank = nint(real(krank%max_linear_density)*(redkpt(1)+half+tol8 +&
-&           real(krank%max_linear_density)*(redkpt(2)+half+tol8 +&
-&           real(krank%max_linear_density)*(redkpt(3)+half+tol8))))
+             real(krank%max_linear_density)*(redkpt(2)+half+tol8 +&
+             real(krank%max_linear_density)*(redkpt(3)+half+tol8))))
 
  if (rank > krank%max_rank) then
    write(msg,'(a,i0,a,i0)') ' rank should be inferior to ', krank%max_rank, ' got ', rank
    TETRA_ERROR(msg)
  end if
 
-end function get_rank_1kpt
+end function get_rank
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_kptrank/kptrank_index
+!!****f* m_krank/krank_get_index
 !!
 !! NAME
-!! kptrank_index
+!! krank_get_index
 !!
 !! FUNCTION
 !!  Return the index of the k-point `kpt` in the initial set. -1 if not found.
@@ -295,7 +292,7 @@ end function get_rank_1kpt
 !!
 !! SOURCE
 
-integer function kptrank_index(krank, kpt) result(ikpt)
+integer function krank_get_index(krank, kpt) result(ikpt)
 
 !Arguments ------------------------------------
 !scalars
@@ -309,19 +306,19 @@ integer function kptrank_index(krank, kpt) result(ikpt)
 
 ! *************************************************************************
 
- kpt_rank = krank%get_rank_1kpt(kpt)
+ kpt_rank = krank%get_rank(kpt)
  ikpt = -1
  if (kpt_rank < krank%max_rank) ikpt = krank%invrank(kpt_rank)
 
-end function kptrank_index
+end function krank_get_index
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_kptrank/copy_kptrank
+!!****f* m_krank/krank_copy
 !!
 !! NAME
-!! copy_kptrank
+!! krank_copy
 !!
 !! FUNCTION
 !! Copy the object
@@ -338,7 +335,7 @@ end function kptrank_index
 !!
 !! SOURCE
 
-subroutine copy_kptrank (krank_in, krank_out)
+subroutine krank_copy (krank_in, krank_out)
 
 !Arguments ------------------------------------
 !scalars
@@ -354,12 +351,12 @@ subroutine copy_kptrank (krank_in, krank_out)
  TETRA_ALLOCATE(krank_out%invrank, (krank_out%min_rank:krank_out%max_rank))
  krank_out%invrank = krank_in%invrank
 
-end subroutine copy_kptrank
+end subroutine krank_copy
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_kptrank/krank_free
+!!****f* m_krank/krank_free
 !!
 !! NAME
 !! krank_free
@@ -395,7 +392,7 @@ end subroutine krank_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_kptrank/krank_dump
+!!****f* m_krank/krank_dump
 !!
 !! NAME
 !! krank_dump
@@ -438,5 +435,5 @@ end subroutine krank_dump
 
 !----------------------------------------------------------------------
 
-end module m_kptrank
+end module m_krank
 !!***

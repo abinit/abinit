@@ -43,7 +43,7 @@ module m_sigmaph
  use m_pawcprj
  use m_wfd
  use m_skw
- use m_kptrank
+ use m_krank
  use m_lgroup
  use m_ephwg
  use m_sort
@@ -5369,7 +5369,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
      do iq_bz=1,nqbz
        if (qbz_count(iq_bz) /= 0) cycle ! No need to check this q-point again.
        kq = kk + qbz(:, iq_bz)
-       kq_rank = kptrank%get_rank_1kpt(kq)
+       kq_rank = kptrank%get_rank(kq)
        ikq_bz = kptrank%invrank(kq_rank)
        ABI_CHECK(ikq_bz > 0, sjoin("Cannot find kq: ", ktoa(kq)))
        ABI_CHECK(isamek(kq, kbz(:, ikq_bz), g0), "Wrong invrank")

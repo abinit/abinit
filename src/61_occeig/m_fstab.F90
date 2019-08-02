@@ -28,7 +28,7 @@ module m_fstab
  use m_abicore
  use m_xmpi
  use m_errors
- use m_kptrank
+ use m_krank
  use m_tetrahedron
  use m_ebands
 
@@ -523,7 +523,7 @@ integer function fstab_findkg0(fstab, kpt, g0) result(ikfs)
 
 ! *************************************************************************
 
- ikfs = fstab%krank%kptrank_index(kpt)
+ ikfs = fstab%krank%get_index(kpt)
  if (ikfs /= -1) then
    g0 = nint(kpt - fstab%kpts(:, ikfs))
  else
@@ -714,7 +714,7 @@ end subroutine fstab_print
 !!      elphon,get_tau_k
 !!
 !! CHILDREN
-!!      destroy_kptrank,get_rank_1kpt,mkkptrank,wrtout
+!!      destroy_kptrank,get_rank,mkkptrank,wrtout
 !!
 !! SOURCE
 
@@ -732,7 +732,7 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
 !Local variables-------------------------------
 !scalars
  integer :: ikpt_phon,iFSqpt,iqpt,isym,symrankkpt_phon
- character(len=500) :: message
+ !character(len=500) :: message
  type(krank_t) :: krank
 !arrays
  real(dp) :: tmpkpt(3),gamma_kpt(3)
@@ -752,7 +752,7 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
      tmpkpt(:) = kpt_phon(:,ikpt_phon) + qpt_full(:,iqpt)
 
 !    which kpt is it among the full FS kpts?
-     symrankkpt_phon = krank%get_rank_1kpt(tmpkpt)
+     symrankkpt_phon = krank%get_rank(tmpkpt)
 
      FSfullpqtofull(ikpt_phon,iqpt) = krank%invrank(symrankkpt_phon)
      if (FSfullpqtofull(ikpt_phon,iqpt) == -1) then
@@ -767,7 +767,7 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
      tmpkpt(:) = gamma_kpt(:) - qpt_full(:,iqpt)
 
      ! which kpt is it among the full FS kpts?
-     symrankkpt_phon = krank%get_rank_1kpt(tmpkpt)
+     symrankkpt_phon = krank%get_rank(tmpkpt)
 
      mqtofull(iqpt) = krank%invrank(symrankkpt_phon)
      if (mqtofull(iqpt) == -1) then
@@ -790,18 +790,16 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
                 + Cryst%symrec(:,2,isym)*qpt_full(2,iFSqpt) &
                 + Cryst%symrec(:,3,isym)*qpt_full(3,iFSqpt)
 
-     symrankkpt_phon = krank%get_rank_1kpt(tmpkpt)
+     symrankkpt_phon = krank%get_rank(tmpkpt)
      if (krank%invrank(symrankkpt_phon) == -1) then
-       message = "looks like no kpoint equiv to q by symmetry without time reversal!!!"
-       MSG_ERROR(message)
+       MSG_ERROR("looks like no kpoint equiv to q by symmetry without time reversal!!!")
      end if
      qpttoqpt(1,isym,krank%invrank(symrankkpt_phon)) = iFSqpt
 
      tmpkpt = -tmpkpt
-     symrankkpt_phon = krank%get_rank_1kpt(tmpkpt)
+     symrankkpt_phon = krank%get_rank(tmpkpt)
      if (krank%invrank(symrankkpt_phon) == -1) then
-       message = ' mkqptequiv : Error : looks like no kpoint equiv to q by symmetry with time reversal!!!'
-       MSG_ERROR(message)
+       MSG_ERROR('looks like no kpoint equiv to q by symmetry with time reversal!!!')
      end if
      qpttoqpt(2,isym,krank%invrank(symrankkpt_phon)) = iFSqpt
    end do

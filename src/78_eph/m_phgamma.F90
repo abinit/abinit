@@ -28,7 +28,7 @@ module m_phgamma
  use m_abicore
  use m_xmpi
  use m_errors
- use m_kptrank
+ use m_krank
  use m_htetrahedron
  use m_ifc
  use m_ebands
@@ -1105,7 +1105,7 @@ subroutine phgamma_interp_setup(gams,cryst,action)
 
      do iq_ibz=1,gams%nqibz
        qirr = gams%qibz(:,iq_ibz)
-       iq_bz = qrank%kptrank_index(qirr)
+       iq_bz = qrank%get_index(qirr)
        if (iq_bz /= -1) then
          ABI_CHECK(isamek(qirr,gams%qbz(:,iq_bz),g0), "isamek")
          qirredtofull(iq_ibz) = iq_bz
@@ -1121,7 +1121,7 @@ subroutine phgamma_interp_setup(gams,cryst,action)
        do isym=1,cryst%nsym
          tmp_qpt = matmul(cryst%symrec(:,:,isym), gams%qbz(:,iq_bz))
 
-         isq_bz = qrank%kptrank_index(tmp_qpt)
+         isq_bz = qrank%get_index(tmp_qpt)
          if (isq_bz == -1) then
            MSG_ERROR("looks like no kpoint equiv to q by symmetry without time reversal!")
          end if
@@ -1129,7 +1129,7 @@ subroutine phgamma_interp_setup(gams,cryst,action)
 
          ! q --> -q
          tmp_qpt = -tmp_qpt
-         isq_bz = qrank%kptrank_index(tmp_qpt)
+         isq_bz = qrank%get_index(tmp_qpt)
          if (isq_bz == -1) then
            MSG_ERROR("looks like no kpoint equiv to q by symmetry with time reversal!")
          end if
@@ -1559,7 +1559,7 @@ subroutine phgamma_vv_interp_setup(gams,cryst,action)
 
      do iq_ibz=1,gams%nqibz
        qirr = gams%qibz(:,iq_ibz)
-       iq_bz = qrank%kptrank_index(qirr)
+       iq_bz = qrank%get_index(qirr)
        if (iq_bz /= -1) then
          ABI_CHECK(isamek(qirr,gams%qbz(:,iq_bz),g0), "isamek")
          qirredtofull(iq_ibz) = iq_bz
@@ -1575,7 +1575,7 @@ subroutine phgamma_vv_interp_setup(gams,cryst,action)
        do isym=1,cryst%nsym
          tmp_qpt = matmul(cryst%symrec(:,:,isym), gams%qbz(:,iq_bz))
 
-         isq_bz = qrank%kptrank_index(tmp_qpt)
+         isq_bz = qrank%get_index(tmp_qpt)
          if (isq_bz == -1) then
            MSG_ERROR("looks like no kpoint equiv to q by symmetry without time reversal!")
          end if
@@ -1583,7 +1583,7 @@ subroutine phgamma_vv_interp_setup(gams,cryst,action)
 
          ! q --> -q
          tmp_qpt = -tmp_qpt
-         isq_bz = qrank%kptrank_index(tmp_qpt)
+         isq_bz = qrank%get_index(tmp_qpt)
          if (isq_bz == -1) then
            MSG_ERROR("looks like no kpoint equiv to q by symmetry with time reversal!")
          end if

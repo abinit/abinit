@@ -32,7 +32,6 @@ module m_a2ftr
  use m_errors
  use m_abicore
  use m_xmpi
- use m_kptrank
  use m_splines
  use m_ebands
 

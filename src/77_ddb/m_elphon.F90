@@ -33,7 +33,7 @@ module m_elphon
  use defs_abitypes
  use defs_elphon
  use m_abicore
- use m_kptrank
+ use m_krank
  use m_errors
  use m_xmpi
  use m_hdr
@@ -141,7 +141,7 @@ contains
 !!      ebands_update_occ,eliashberg_1d,elph_ds_clean,elph_k_procs
 !!      elph_tr_ds_clean,ep_fs_weights,ep_setupqpt,ftgam,ftgam_init
 !!      get_all_gkk2,get_all_gkq,get_all_gkr,get_fs_bands,get_nv_fs_en
-!!      get_nv_fs_temp,get_rank_1kpt,get_tau_k,get_veloc_tr,hdr_bcast
+!!      get_nv_fs_temp,get_rank,get_tau_k,get_veloc_tr,hdr_bcast
 !!      hdr_fort_read,hdr_free,integrate_gamma,integrate_gamma_tr
 !!      integrate_gamma_tr_lova,mka2f,mka2f_tr,mka2f_tr_lova,mka2fqgrid
 !!      mkfskgrid,mknesting,mkph_linwid,mkqptequiv,order_fs_kpts,outelph
@@ -694,7 +694,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    ABI_ALLOCATE(elph_ds%k_fine%kpt,(3,elph_ds%k_fine%nkpt))
    elph_ds%k_fine%kpt = elph_ds%k_phon%kpt
 
-   call elph_ds%k_phon%krank%copy_kptrank(elph_ds%k_fine%krank)
+   call elph_ds%k_phon%krank%copy(elph_ds%k_fine%krank)
 
    ABI_ALLOCATE(elph_ds%k_fine%irr2full,(elph_ds%k_fine%nkptirr))
    elph_ds%k_fine%irr2full = elph_ds%k_phon%irr2full
@@ -836,7 +836,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  do ikpt_fine = 1, elph_ds%k_phon%nkpt
    do iqpt = 1, elph_ds%nqpt_full
      kpt = elph_ds%k_phon%kpt(:,ikpt_fine) + elph_ds%qpt_full(:,iqpt)
-     symrankkpt = elph_ds%k_phon%krank%get_rank_1kpt (kpt)
+     symrankkpt = elph_ds%k_phon%krank%get_rank (kpt)
      iFSkpq = elph_ds%k_phon%krank%invrank(symrankkpt)
      do iband = 1, elph_ds%ngkkband
        do ibandp = 1, elph_ds%ngkkband
@@ -852,7 +852,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  do ikpt_fine = 1, elph_ds%k_phon%nkpt
    do iqpt = 1, elph_ds%k_phon%nkpt
      kpt = elph_ds%k_phon%kpt(:,ikpt_fine) + elph_ds%k_phon%kpt(:,iqpt)
-     symrankkpt = elph_ds%k_phon%krank%get_rank_1kpt (kpt)
+     symrankkpt = elph_ds%k_phon%krank%get_rank (kpt)
      iFSkpq = elph_ds%k_phon%krank%invrank(symrankkpt)
      do iband = 1, elph_ds%ngkkband
        do ibandp = 1, elph_ds%ngkkband
@@ -1846,7 +1846,7 @@ end subroutine rchkGSheader
 !!      elphon
 !!
 !! CHILDREN
-!!      destroy_kptrank,get_rank_1kpt,mkkptrank,sort_int,wrap2_pmhalf,wrtout
+!!      destroy_kptrank,get_rank,mkkptrank,sort_int,wrap2_pmhalf,wrtout
 !!
 !! SOURCE
 
@@ -1908,7 +1908,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 &       symrec(:,2,isym)*elph_k%kptirr(2,ikpt1) + &
 &       symrec(:,3,isym)*elph_k%kptirr(3,ikpt1))
 
-       symrankkpt = elph_k%krank%get_rank_1kpt (kpt)
+       symrankkpt = elph_k%krank%get_rank (kpt)
 
 !      is the kpt on the full grid (may have lower symmetry than full spgroup)
 !      is kpt among the full FS kpts found already?
@@ -1972,7 +1972,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  elph_k%irr2full(:) = 0
 
  do ikpt1=1,elph_k%nkptirr
-   symrankkpt = elph_k%krank%get_rank_1kpt (elph_k%kptirr(:,ikpt1))
+   symrankkpt = elph_k%krank%get_rank (elph_k%kptirr(:,ikpt1))
    elph_k%irr2full(ikpt1) = elph_k%krank%invrank(symrankkpt)
  end do
 
@@ -1990,7 +1990,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 &       symrec(:,3,isym)*elph_k%kpt(3,ikpt1))
 
 !      which kpt is it among the full FS kpts
-       symrankkpt = elph_k%krank%get_rank_1kpt (kpt)
+       symrankkpt = elph_k%krank%get_rank (kpt)
        ikpt2 = elph_k%krank%invrank(symrankkpt)
        new=1
        if (ikpt2 /= -1) then
@@ -2818,7 +2818,7 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
 
  ik=1
  do ikpt=1,nkpt
-   irank = krank%get_rank_1kpt(kptns(:,ikpt))
+   irank = krank%get_rank(kptns(:,ikpt))
 !  add kpt to FS kpts, in order, increasing z, then y, then x !
    new = 1
 !  look for position to insert kpt ikpt among irredkpts already found
@@ -5227,7 +5227,7 @@ end subroutine get_veloc_tr
 !!      elphon
 !!
 !! CHILDREN
-!!      get_rank_1kpt,wrtout,xmpi_sum
+!!      get_rank,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -5279,7 +5279,7 @@ subroutine integrate_gamma(elph_ds,FSfullpqtofull)
 
  do iqpt=1,elph_ds%nqptirred
    iqpt_fullbz = elph_ds%qirredtofull(iqpt)
-   symrankkpt_phon = elph_ds%k_phon%krank%get_rank_1kpt (elph_ds%k_phon%kpt(:,iqpt_fullbz))
+   symrankkpt_phon = elph_ds%k_phon%krank%get_rank (elph_ds%k_phon%kpt(:,iqpt_fullbz))
    write (std_out,*) ' iqpt_fullbz in qpt grid only,  rank ', iqpt_fullbz, symrankkpt_phon
 
    do ik_this_proc =1,elph_ds%k_phon%my_nkpt

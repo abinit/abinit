@@ -32,8 +32,7 @@ module m_unittests
  use m_ptgroups
  use m_tetrahedron
  use m_htetrahedron
- use m_kptrank
- use m_hkptrank
+ use m_krank
  use m_hashtable
  use m_symkpt
  use m_sort
@@ -476,7 +475,7 @@ end subroutine tetra_unittests
 !!  kptrank_unittests
 !!
 !! FUNCTION
-!!  Test the kptrank and hkptrank routines
+!!  Test the kptrank routines
 !!
 subroutine kptrank_unittests(comm)
 
@@ -487,7 +486,6 @@ subroutine kptrank_unittests(comm)
 !Variables -------------------------------
  type(crystal_t) :: crystal
  type(krank_t) :: kptrank
- type(hkptrank_t) :: hkptrank
  integer,parameter :: qptopt1=1,nqshft1=1,iout0=0,chksymbreak0=0,sppoldbl1=1
  integer :: nqibz,iqbz,iqibz,iqbz_rank,nqbz,nqibz_symkpt,nqibz_symkpt_new
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
@@ -522,20 +520,11 @@ subroutine kptrank_unittests(comm)
  ! Test mkkptrank
  call mkkptrank(qbz,nqbz,kptrank)
  do iqbz=1,nqbz
-   iqbz_rank = kptrank%kptrank_index(qbz(:,iqbz))
+   iqbz_rank = kptrank%get_index(qbz(:,iqbz))
    ABI_CHECK(iqbz==iqbz_rank,'wrong q-point')
  end do
  call cwtime_report(" kptrank", cpu, wall, gflops)
  call kptrank%free()
-
- ! Test hkptrank
- call hkptrank_init(hkptrank,qbz,nqbz)
- do iqbz=1,nqbz
-   iqbz_rank = hkptrank_get_index(hkptrank,qbz(:,iqbz))
-   ABI_CHECK(iqbz==iqbz_rank,'wrong q-point')
- end do
- call cwtime_report(" hkptrank", cpu, wall, gflops)
- call hkptrank_free(hkptrank)
 
  ABI_MALLOC(wtq_fullbz,(nqbz))
  ABI_MALLOC(wtq_folded,(nqbz))

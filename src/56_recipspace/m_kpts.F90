@@ -30,7 +30,7 @@ module m_kpts
  use m_abicore
  use m_crystal
  use m_sort
- use m_kptrank
+ use m_krank
  use m_xmpi
 
  use m_time,           only : timab
@@ -1554,7 +1554,7 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,nkpt_fullbz,nshift
                      inv_symrel(:,2,isym)*kpt_fullbz(2,ikpt) + &
                      inv_symrel(:,3,isym)*kpt_fullbz(3,ikpt))
 
-       symrankkpt = krank%get_rank_1kpt(k2)
+       symrankkpt = krank%get_rank(k2)
        if (krank%invrank(symrankkpt) /= -1) indkpt(ikpt) = krank%invrank(symrankkpt)
 
      end do ! loop time reversal symmetry

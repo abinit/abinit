@@ -33,7 +33,7 @@ MODULE m_ddk
  use m_xmpi
  use m_nctk
  use m_hdr
- use m_kptrank
+ use m_krank
  use m_fstab
  use m_wfd
  use m_mpinfo
@@ -894,7 +894,7 @@ subroutine ddk_read_fsvelocities(ddk, fstab, comm)
      fs => fstab(isppol)
      do ikfs=1,fs%nkfs
        ik_ibz = fs%istg0(1,ikfs)
-       symrankkpt = krank%get_rank_1kpt (fs%kpts(:,ikfs))
+       symrankkpt = krank%get_rank (fs%kpts(:,ikfs))
        ikpt_ddk = krank%invrank(symrankkpt)
        if (ikpt_ddk == -1) then
          write(msg, "(3a)")&

@@ -28,7 +28,7 @@ MODULE m_nesting
  use defs_basis
  use m_errors
  use m_abicore
- use m_kptrank
+ use m_krank
  use m_sort
 
  use m_numeric_tools,  only : wrap2_zero_one, interpol3d
@@ -85,8 +85,6 @@ CONTAINS  !=====================================================================
 
 subroutine bfactor(nkptfull,kptfull,nqpt,qpt,krank,nkpt,weight,nband,nestfactor)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nband,nkptfull,nqpt,nkpt
@@ -110,11 +108,11 @@ subroutine bfactor(nkptfull,kptfull,nqpt,qpt,krank,nkpt,weight,nband,nestfactor)
 
  do iqpt=1,nqpt
    do ikpt=1,nkptfull
-     irank_kpt = krank%get_rank_1kpt(kptfull(:,ikpt))
+     irank_kpt = krank%get_rank(kptfull(:,ikpt))
      ikpt_irr = krank%invrank(irank_kpt)
 
      kptpq(:) = kptfull(:,ikpt) + qpt(:,iqpt)
-     symrank_kpt = krank%get_rank_1kpt(kptpq)
+     symrank_kpt = krank%get_rank(kptpq)
 
      ikplusq_irr = krank%invrank(symrank_kpt)
      if (ikplusq_irr == -1) then
@@ -177,8 +175,6 @@ end subroutine bfactor
 subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
 & qpath_vertices,nqptfull,qptfull,base_name,gprimd,gmet,prtnest,qptrlatt,&
 & nsym,symrec) ! optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -279,7 +275,7 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
 
  ABI_MALLOC(tmprank, (nqptfull))
  do ikpt=1,nqptfull
-   tmprank(ikpt) = krank%get_rank_1kpt(qptfull(:,ikpt))
+   tmprank(ikpt) = krank%get_rank(qptfull(:,ikpt))
  end do
  call sort_int(nqptfull, tmprank, ktable)
  ABI_FREE(tmprank)
@@ -339,8 +335,6 @@ end subroutine mknesting
 !! SOURCE
 
 subroutine outnesting(base_name,gmet,gprimd,kptrlatt,nestordered,nkpt,nqpath,prtnest,qpath_vertices)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nqpath,prtnest,nkpt

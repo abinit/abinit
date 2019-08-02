@@ -37,10 +37,11 @@ module m_htetrahedron
 
  use defs_basis
  use m_abicore
- use m_kptrank
+ use m_krank
+ use m_xmpi
+
  use m_numeric_tools,   only : linspace
  use m_simtet,          only : sim0onei, SIM0TWOI
- use m_xmpi
 
 implicit none
 
@@ -708,7 +709,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
          !ikpt2 = octree_find(oct,k2,dist)
          !ikpt2 = octree_find_nearest_pbc(oct,k2,dist,shift)
          !if (dist>tol12) call exit(1)
-         ikpt2 = kptrank%kptrank_index(k2)
+         ikpt2 = kptrank%get_index(k2)
          ! Find the index of those points in the BZ and IBZ
          tetra_ibz(isummit) = bz2ibz(ikpt2)
        end do
@@ -767,7 +768,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
          !ikpt2 = octree_find(oct,k2,dist)
          !ikpt2 = octree_find_nearest_pbc(oct,k2,dist,shift)
          !if (dist>tol12) call exit(1)
-         ikpt2 = kptrank%kptrank_index(k2)
+         ikpt2 = kptrank%get_index(k2)
          ! Find the index of those points in the BZ and IBZ
          tetra_ibz(isummit) = bz2ibz(ikpt2)
        end do

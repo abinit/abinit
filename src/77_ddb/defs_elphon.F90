@@ -40,7 +40,7 @@ module defs_elphon
  use m_errors
  use m_xmpi
 
- use m_kptrank,  only : krank_t
+ use m_krank,  only : krank_t
  use m_crystal,  only : crystal_t
 
  implicit none
@@ -474,7 +474,7 @@ subroutine elph_k_copy(elph_k_in, elph_k_out)
  ABI_ALLOCATE(elph_k_out%kpt,(3,elph_k_out%nkpt))
  elph_k_out%kpt = elph_k_in%kpt
 
- call elph_k_in%krank%copy_kptrank(elph_k_out%krank)
+ call elph_k_in%krank%copy(elph_k_out%krank)
 
  ABI_ALLOCATE(elph_k_out%irr2full,(elph_k_out%nkptirr))
  elph_k_out%irr2full = elph_k_in%irr2full

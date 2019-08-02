@@ -33,7 +33,7 @@ module m_iogkk
  use m_errors
  use m_abicore
  use m_xmpi
- use m_kptrank
+ use m_krank
  use m_hdr
 
  use m_numeric_tools,   only : wrap2_pmhalf
@@ -90,7 +90,7 @@ contains
 !!      get_all_gkq
 !!
 !! CHILDREN
-!!      completeperts,get_rank_1kpt,hdr_bcast,hdr_fort_read,hdr_free,ifc_fourq
+!!      completeperts,get_rank,hdr_bcast,hdr_fort_read,hdr_free,ifc_fourq
 !!      littlegroup_pert,littlegroup_q,mati3inv,normsq_gkq,phdispl_cart2red
 !!      prt_gkk_yambo,wrap2_pmhalf,wrtout,xmpi_bcast
 !!
@@ -392,7 +392,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 
 !      find place of irred k in k_phon
 !      the kpoints in the file (kptns) could be ordered arbitrarily
-       symrankkpt = elph_ds%k_phon%krank%get_rank_1kpt (hdr1%kptns(:,ikpt1)-qptirred_local(:,iqptirred))
+       symrankkpt = elph_ds%k_phon%krank%get_rank (hdr1%kptns(:,ikpt1)-qptirred_local(:,iqptirred))
        ikpt1_phon = elph_ds%k_phon%krank%invrank(symrankkpt)
        if (ikpt1_phon < 0) then
          write (msg,'(a,3es16.6,a)')' irred k ',hdr1%kptns(:,ikpt1),' was not found in full grid'
@@ -406,7 +406,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
            timsign=one-two*itim1
            kpt(:) = timsign*matmul(symrc1(:,:,isym1), elph_ds%k_phon%kpt(:,ikpt1_phon))
 
-           symrankkpt = elph_ds%k_phon%krank%get_rank_1kpt (kpt)
+           symrankkpt = elph_ds%k_phon%krank%get_rank (kpt)
            jkpt_phon = elph_ds%k_phon%krank%invrank(symrankkpt)
 
            if (jkpt_phon > 0) then
@@ -1023,7 +1023,7 @@ end subroutine prt_gkk_yambo
 !!      elphon
 !!
 !! CHILDREN
-!!      destroy_kptrank,get_rank_1kpt,hdr_free,inpgkk,mkkptrank
+!!      destroy_kptrank,get_rank,hdr_free,inpgkk,mkkptrank
 !!
 !! SOURCE
 
@@ -1113,7 +1113,7 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
  do isppol=1,nsppol_in
    im_el_veloc(:)=zero
    do ikpt=1,nkpt_in
-    symrankkpt = krank%get_rank_1kpt (kpt_in(:,ikpt))
+    symrankkpt = krank%get_rank (kpt_in(:,ikpt))
      ikpt_ddk = krank%invrank(symrankkpt)
      if (ikpt_ddk == -1) then
        write(std_out,*)'read_el_veloc ******** error in correspondence between ddk and gkk kpoint sets'

@@ -41,7 +41,7 @@ MODULE m_ebands
  use netcdf
 #endif
  use m_hdr
- use m_kptrank
+ use m_krank
  use m_skw
  use m_kpts
  use m_sort
@@ -1827,7 +1827,7 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
 
  do spin=1,ebands%nsppol
    do ik=1,nkpts
-     ikpt = krank%kptrank_index(kpoints(:,ik))
+     ikpt = krank%get_index(kpoints(:,ik))
      if (ikpt == -1) then
        MSG_WARNING(sjoin("Cannot find k-point:", ktoa(kpoints(:,ik))))
        cycle

@@ -2800,10 +2800,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  integer :: ii,jj,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc
  integer :: iqst, itimrev, isym
  integer :: ifft, ierr,  my_rstart, my_rstop, iatom
-#ifdef HAVE_NETCDF
- integer :: ncerr, ncid
-#endif
- real(dp) :: phre !,phim,
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  logical :: isirr_q
  character(len=500) :: msg
@@ -5986,7 +5982,8 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
 !scalars
  integer,parameter :: master = 0
  integer :: nfft, iq, cplex, ispden, comm_rpt, my_rank, idir, ipert, ipc, imyp
- integer :: i1, i2, i3, n1, n2, n3, unt, this_nqpt, method, interpolated !ifft,
+ integer :: n1, n2, n3, unt, this_nqpt, method, interpolated !ifft,
+ !integer :: i1, i2, i3
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr
 #endif

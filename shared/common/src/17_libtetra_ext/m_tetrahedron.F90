@@ -35,7 +35,7 @@ module m_tetrahedron
 
  USE_MEMORY_PROFILING
  USE_MSG_HANDLING
- use m_kptrank
+ use m_krank
 #ifdef HAVE_MPI2
  use mpi
 #endif
@@ -318,7 +318,7 @@ subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ier
 &       + tetra_shifts(3,isummit,itetra)*klatt(:,3)
 
        ! Find full kpoint which is summit isummit of tetrahedron itetra around full kpt ikpt_full !
-       symrankkpt =  krank%get_rank_1kpt(k1)
+       symrankkpt =  krank%get_rank(k1)
        ikpt2 = krank%invrank(symrankkpt)
        if (ikpt2 < 1) then
          errorstring='Error in ranking k-points - exiting with un-initialized tetrahedra.'

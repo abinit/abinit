@@ -31,7 +31,7 @@ MODULE m_double_grid
  use m_abicore
  use m_hide_blas
  use m_bz_mesh
- use m_kptrank
+ use m_krank
 
  use m_numeric_tools,  only : wrap2_zero_one, interpol3d_indices
  use m_symtk,          only : matr3inv
@@ -931,7 +931,7 @@ end subroutine kptfine_av
 !! PARENTS
 !!
 !! CHILDREN
-!!      get_rank_1kpt,interpol3d_indices,wrap2_zero_one
+!!      get_rank,interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -965,35 +965,35 @@ subroutine k_neighbors (kpt, kptrlatt,krank, rel_kpt, kpt_phon_indices)
 !order of kpt_phons:
 !ir1 ir2 ir3
  cornerkpt = (/real(ir1-1)/kptrlatt(1,1),real(ir2-1)/kptrlatt(2,2), real(ir3-1)/kptrlatt(3,3)/)
- symrankkpt = krank%get_rank_1kpt(cornerkpt)
+ symrankkpt = krank%get_rank(cornerkpt)
  kpt_phon_indices(1) = krank%invrank(symrankkpt)
 !pr1 ir2 ir3
  cornerkpt = (/real(pr1-1)/kptrlatt(1,1),real(ir2-1)/kptrlatt(2,2), real(ir3-1)/kptrlatt(3,3)/)
- symrankkpt = krank%get_rank_1kpt (cornerkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
  kpt_phon_indices(2) = krank%invrank(symrankkpt)
 !ir1 pr2 ir3
  cornerkpt = (/real(ir1-1)/kptrlatt(1,1),real(pr2-1)/kptrlatt(2,2), real(ir3-1)/kptrlatt(3,3)/)
- symrankkpt = krank%get_rank_1kpt (cornerkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
  kpt_phon_indices(3) = krank%invrank(symrankkpt)
 !pr1 pr2 ir3
  cornerkpt = (/real(pr1-1)/kptrlatt(1,1),real(pr2-1)/kptrlatt(2,2), real(ir3-1)/kptrlatt(3,3)/)
- symrankkpt = krank%get_rank_1kpt (cornerkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
  kpt_phon_indices(4) = krank%invrank(symrankkpt)
 !ir1 ir2 pr3
  cornerkpt = (/real(ir1-1)/kptrlatt(1,1),real(ir2-1)/kptrlatt(2,2), real(pr3-1)/kptrlatt(3,3)/)
- symrankkpt = krank%get_rank_1kpt (cornerkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
  kpt_phon_indices(5) = krank%invrank(symrankkpt)
 !pr1 ir2 pr3
  cornerkpt = (/real(pr1-1)/kptrlatt(1,1),real(ir2-1)/kptrlatt(2,2), real(pr3-1)/kptrlatt(3,3)/)
- symrankkpt = krank%get_rank_1kpt (cornerkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
  kpt_phon_indices(6) = krank%invrank(symrankkpt)
 !ir1 pr2 pr3
  cornerkpt = (/real(ir1-1)/kptrlatt(1,1),real(pr2-1)/kptrlatt(2,2), real(pr3-1)/kptrlatt(3,3)/)
- symrankkpt = krank%get_rank_1kpt (cornerkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
  kpt_phon_indices(7) = krank%invrank(symrankkpt)
 !pr1 pr2 pr3
  cornerkpt = (/real(pr1-1)/kptrlatt(1,1),real(pr2-1)/kptrlatt(2,2), real(pr3-1)/kptrlatt(3,3)/)
- symrankkpt = krank%get_rank_1kpt (cornerkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
  kpt_phon_indices(8) = krank%invrank(symrankkpt)
 
 !retrieve the gkq matrix for all q, at the neighbor k vectors

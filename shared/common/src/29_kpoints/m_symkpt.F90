@@ -3,11 +3,8 @@
 !! NAME
 !!  m_symkpt
 !!
-!! FUNCTION
-!!
-!!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group ()
+!!  Copyright (C) 1999-2019 ABINIT group (XG,LSI,HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +26,14 @@
 
 module m_symkpt
 
- use m_kptrank
+ use defs_basis
+ use m_abicore
+ use m_errors
+ use m_sort
+ use m_krank
+ use m_numeric_tools
+ use m_time
+
  implicit none
 
  private
@@ -53,13 +57,6 @@ contains
 !! Also compute the number of k points in the reduced set
 !! This routine is also used for sampling the q vectors in the Brillouin zone for the computation
 !! of thermodynamical properties (from the routine thm9).
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (XG,LSI)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! chksymbreak= if 1, will check whether the k point grid is symmetric, and stop if not.
@@ -103,11 +100,6 @@ contains
 !! SOURCE
 
 subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev,wtk,wtk_folded, bz2ibz_smap, comm)
-
- use defs_basis
- use m_abicore
- use m_errors
- use m_sort
 
 !Arguments -------------------------------
 !scalars
@@ -425,13 +417,6 @@ end subroutine symkpt
 !! From a few tests it produces the same IBZ as before but avoids computing the lengths and sorting.
 !! Instead it uses the kptrank datatype to map k-points onto each other.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (XG,LSI,HM)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -443,13 +428,6 @@ end subroutine symkpt
 !! SOURCE
 
 subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev,bz2ibz_smap, comm)
-
- use defs_basis
- use m_abicore
- use m_errors
- use m_sort
- use m_numeric_tools
- use m_time
 
 !Arguments -------------------------------
 !scalars
@@ -540,7 +518,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
            end do
 
            !find this point
-           ikpt_found = kptrank%kptrank_index(ksym)
+           ikpt_found = kptrank%get_index(ksym)
            !if (sum(abs(mod(ksym-kbz(:,ikpt_found),one)))>tol8) then
            !  MSG_ERROR('Wrong k-point mapping found by kptrank')
            !end if
@@ -583,7 +561,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
          end do
 
          !find this point
-         ikpt_found = kptrank%kptrank_index(ksym)
+         ikpt_found = kptrank%get_index(ksym)
          !if k-point not found just cycle
          if (ikpt_found < 0) cycle
          !if (sum(abs(mod(ksym-kbz(:,ikpt_found),one)))>tol8) then
@@ -631,7 +609,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
        end do
 
        !find this point
-       ikpt_found = kptrank%kptrank_index(ksym)
+       ikpt_found = kptrank%get_index(ksym)
        if (ikpt_found < 0) cycle
        if (bz2ibz_smap(1, ikpt_found) /= 0) cycle
        bz2ibz_smap(:3, ikpt_found) = [ikpt,isym,itim]
