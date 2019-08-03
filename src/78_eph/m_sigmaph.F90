@@ -953,7 +953,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  if (dtset%eph_stern == 1) then
    ! Read GS POT (vtrial) from input POT file
    ! Iin principle one may store vtrial in the DVDB but this is simpler to implement.
-   call wrtout(std_out, sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
+   call wrtout([std_out, ab_out], sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
    call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pawrhoij, comm, &
                   allow_interp=.True.)
    call hdr_free(pot_hdr)
@@ -1004,9 +1004,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    comm_rpt = sigma%comm_qpt
    if (.not. sigma%imag_only) comm_rpt = sigma%comm_bsum
    !FIXME: comm_qpt is buggy.
-   if (sigma%imag_only) comm_rpt = xmpi_comm_self
+   !if (sigma%imag_only) comm_rpt = xmpi_comm_self
+   !comm_rpt = sigma%comm_bsum
    comm_rpt = xmpi_comm_self
-   if (dtset%useric == 666) comm_rpt = xmpi_comm_self
    method = dtset%userid
    call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, &
                             nfftf, ngfftf, method, comm_rpt)
@@ -2701,7 +2701,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    if (minval(dtset%eph_phrange) < 1 .or. &
        maxval(dtset%eph_phrange) > natom3 .or. &
        dtset%eph_phrange(2) < dtset%eph_phrange(1)) then
-     MSG_ERROR('Invalid range for eph_phrange. Should be between [1,3*natom] and eph_modes(2)>eph_modes(1)')
+     MSG_ERROR('Invalid range for eph_phrange. Should be between [1, 3*natom] and eph_modes(2) > eph_modes(1)')
    end if
    call wrtout(std_out, sjoin(" Including phonon modes between [", &
                itoa(dtset%eph_phrange(1)), ',', itoa(dtset%eph_phrange(2)),"]"))

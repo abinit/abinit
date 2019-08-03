@@ -2815,8 +2815,10 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
 
  !ngqpt_coarse = ngqpt / qrefine
 
- ! Radius of sphere with volume equivalent to the micro zone.
- nqbz = product(ngqpt) * nqshift
+ ! Set communicator for R-point parallelism.
+ ! Note that client code is responsible for calling the interpolation routine dvdb_get_ftqbz (R -> q)
+ ! with all procs inside comm_rpt to avoid MPI deadlocks.
+ db%comm_rpt = comm_rpt; db%nprocs_rpt = xmpi_comm_size(db%comm_rpt); db%me_rpt = xmpi_comm_rank(db%comm_rpt)
 
  if (db%add_lr == 4) then
    call wrtout(std_out, " Skipping construction of W(R,r) because add_lr = 4")
@@ -2825,11 +2827,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
 
  ABI_CHECK(.not. allocated(db%v1scf_rpt), " v1scf_rpt is already allocated!")
  call cwtime(cpu_all, wall_all, gflops_all, "start")
-
- ! Set communicator for R-point parallelism.
- ! Note that client code is responsible for calling the interpolation routine dvdb_get_ftqbz (R -> q)
- ! with all procs inside comm_rpt to avoid MPI deadlocks.
- db%comm_rpt = comm_rpt; db%nprocs_rpt = xmpi_comm_size(db%comm_rpt); db%me_rpt = xmpi_comm_rank(db%comm_rpt)
 
  call wrtout(std_out, sjoin(ch10, "Building W(R,r) using ngqpt: ", ltoa(ngqpt), &
    ", with nprocs_rpt:", itoa(db%nprocs_rpt)), do_flush=.True.)
@@ -2844,15 +2841,10 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
      qibz, qbz, indqq, iperm, nqsts, iqs_dvdb, all_rpt, all_wghatm, db%comm)
 
  nqibz = size(qibz, dim=2); nqbz = size(qbz, dim=2); db%nrtot = size(all_rpt, dim=2)
- write(std_out, "(a, i0)")" Using method for integration weights: ", method
- write(std_out, "(a, i0)")" Total number of R-points in real-space big box: ", db%nrtot
- write(std_out, "(a, 3(i0, 1x))")" ngfft: ", ngfft(1:3)
- write(std_out, "(a, i0)")" dvdb_add_lr: ", db%add_lr
 
  ! Distribute R-points inside comm_rpt.
  call xmpi_split_work(db%nrtot, db%comm_rpt, my_rstart, my_rstop)
- db%my_nrpt = 0
- ii = minval(db%my_pinfo(2,:)); jj = maxval(db%my_pinfo(2,:))
+
  ! Select my_rpoints.
  db%my_nrpt = my_rstop - my_rstart + 1
  ABI_CHECK(db%my_nrpt /= 0, "my_nrpt == 0!")
@@ -2862,7 +2854,9 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  do irpt=1,db%my_nrpt
    db%my_irpt2tot(irpt) = my_rstart + (irpt - 1)
  end do
+
  ! Copy weights for the atoms treated by this proc.
+ ii = minval(db%my_pinfo(2,:)); jj = maxval(db%my_pinfo(2,:))
  ABI_MALLOC(db%my_wratm, (db%my_nrpt, ii:jj))
  db%my_wratm = one
  if (method == 1) then
@@ -2871,13 +2865,18 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
    end do
  end if
 
- ABI_SFREE(all_cell)
- ABI_SFREE(all_wghatm)
- ABI_FREE(all_rpt)
-
+ write(std_out, "(a, i0)")" Using method for integration weights: ", method
+ write(std_out, "(a, i0)")" Total number of R-points in real-space big box: ", db%nrtot
+ write(std_out, "(a, i0)")" Number of R-points treated by this MPI rank: ", db%my_nrpt
+ write(std_out, "(a, 3(i0, 1x))")" ngfft: ", ngfft(1:3)
+ write(std_out, "(a, i0)")" dvdb_add_lr: ", db%add_lr
  ! Allocate potential in the supercell. Memory is distributed over my_nrpt and my_npert
  call wrtout(std_out, sjoin(" Memory required for W(R,r): ", &
     ftoa(two * db%my_nrpt * nfft * db%nspden * db%my_npert * dp * b2Mb, fmt="f8.1"), "[Mb] <<< MEM"))
+
+ ABI_SFREE(all_cell)
+ ABI_SFREE(all_wghatm)
+ ABI_FREE(all_rpt)
 
  ABI_MALLOC(emiqr, (2, db%my_nrpt))
  ABI_MALLOC(v1r_qbz, (2, nfft, db%nspden, db%natom3))
@@ -2901,7 +2900,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
      iqst = iqst + 1
      !if (mod(ii, nproc) /= my_rank) cycle ! MPI parallelism.
      iq_bz = iperm(iqst)
-     ABI_CHECK(iq_ibz == indqq(iq_bz,1), "iq_ibz !/ ind qq(1)")
+     ABI_CHECK(iq_ibz == indqq(iq_bz,1), "iq_ibz !/ indqq(1)")
      qpt_bz = qbz(:, iq_bz)
      ! IS(q_ibz) + g0q = q_bz
      isym = indqq(iq_bz, 2); itimrev = indqq(iq_bz, 6) + 1; g0q = indqq(iq_bz, 3:5)
@@ -3021,14 +3020,18 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  !if (method == 1) db%v1scf_rpt(2,:,:,:,:) = zero
  !call dvdb_enforce_asr(db)
 
- do imyp=1,db%my_npert
-   write(std_out, *)" Imaginary part for imyp:", imyp
-   do ispden=1,db%nspden
-     write(std_out, *)"min, max, avg:", &
-        minval(abs(db%v1scf_rpt(2, :, :, ispden, imyp))), maxval(abs(db%v1scf_rpt(2, :, :, ispden, imyp))), &
-        sum(abs(db%v1scf_rpt(2, :, :, ispden, imyp))) / (nfft * db%my_nrpt)
-   end do
- end do
+ !do irpt=1,db%my_nrpt
+ !  write(std_out,*)"v1scf_rpt:", db%v1scf_rpt(:, irpt, 1:5, 1, 1)
+ !end do
+
+ !do imyp=1,db%my_npert
+ !  write(std_out, *)" Imaginary part for imyp:", imyp
+ !  do ispden=1,db%nspden
+ !    write(std_out, *)"min, max, avg:", &
+ !       minval(abs(db%v1scf_rpt(2, :, :, ispden, imyp))), maxval(abs(db%v1scf_rpt(2, :, :, ispden, imyp))), &
+ !       sum(abs(db%v1scf_rpt(2, :, :, ispden, imyp))) / (nfft * db%my_nrpt)
+ !  end do
+ !end do
 
  ! Now we have W(R,r)
  if (any(qrefine > 1)) then
