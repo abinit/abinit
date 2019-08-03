@@ -694,7 +694,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    ABI_ALLOCATE(elph_ds%k_fine%kpt,(3,elph_ds%k_fine%nkpt))
    elph_ds%k_fine%kpt = elph_ds%k_phon%kpt
 
-   call elph_ds%k_phon%krank%copy(elph_ds%k_fine%krank)
+   elph_ds%k_fine%krank = elph_ds%k_phon%krank%copy()
 
    ABI_ALLOCATE(elph_ds%k_fine%irr2full,(elph_ds%k_fine%nkptirr))
    elph_ds%k_fine%irr2full = elph_ds%k_phon%irr2full
@@ -1611,7 +1611,7 @@ subroutine outelph(elph_ds,enunit,fname)
    qirred(:,iqirr)=elph_ds%qpt_full(:,elph_ds%qirredtofull(iqirr))
  end do
 
- call mkkptrank (elph_ds%k_phon%kpt,elph_ds%k_phon%nkpt,krank)
+ krank = krank_new(elph_ds%k_phon%nkpt, elph_ds%k_phon%kpt)
 
  ABI_ALLOCATE(nestfactor,(nqptirred))
 
@@ -1890,7 +1890,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  elph_k%wtkirr(:) = zero
 
 !first allocation for irred kpoints - will be destroyed below
- call mkkptrank (elph_k%kptirr,elph_k%nkptirr,elph_k%krank)
+ elph_k%krank = krank_new(elph_k%nkptirr, elph_k%kptirr)
  ABI_ALLOCATE(rankallk,(elph_k%krank%max_rank))
 
 !elph_k%krank%invrank is used as a placeholder in the following loop
@@ -1964,8 +1964,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  call elph_k%krank%free()
 
 !make proper full rank arrays
- call mkkptrank (elph_k%kpt,elph_k%nkpt,elph_k%krank)
-
+ elph_k%krank = krank_new(elph_k%nkpt, elph_k%kpt)
 
 !find correspondence table between irred FS kpoints and a full one
  ABI_ALLOCATE(elph_k%irr2full,(elph_k%nkptirr))
@@ -2814,7 +2813,7 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
 ! *************************************************************************
 
 !rank is used to order kpoints
- call mkkptrank (kptns,nkpt,krank)
+ krank = krank_new(nkpt, kptns)
 
  ik=1
  do ikpt=1,nkpt

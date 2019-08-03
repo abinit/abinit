@@ -40,8 +40,8 @@ module defs_elphon
  use m_errors
  use m_xmpi
 
- use m_krank,  only : krank_t
- use m_crystal,  only : crystal_t
+ use m_krank,   only : krank_t
+ use m_crystal, only : crystal_t
 
  implicit none
 
@@ -322,8 +322,6 @@ CONTAINS  !=====================================================================
 
 subroutine elph_ds_clean(elph_ds)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(elph_type), intent(inout) :: elph_ds
@@ -376,8 +374,6 @@ end subroutine elph_ds_clean
 !! SOURCE
 
 subroutine elph_tr_ds_clean(elph_tr_ds)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -439,8 +435,6 @@ end subroutine elph_tr_ds_clean
 
 subroutine elph_k_copy(elph_k_in, elph_k_out)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(elph_kgrid_type), intent(in) :: elph_k_in
@@ -474,7 +468,7 @@ subroutine elph_k_copy(elph_k_in, elph_k_out)
  ABI_ALLOCATE(elph_k_out%kpt,(3,elph_k_out%nkpt))
  elph_k_out%kpt = elph_k_in%kpt
 
- call elph_k_in%krank%copy(elph_k_out%krank)
+ elph_k_out%krank = elph_k_in%krank%copy()
 
  ABI_ALLOCATE(elph_k_out%irr2full,(elph_k_out%nkptirr))
  elph_k_out%irr2full = elph_k_in%irr2full
@@ -485,7 +479,6 @@ subroutine elph_k_copy(elph_k_in, elph_k_out)
 
  ABI_ALLOCATE(elph_k_out%irredtoGS,(elph_k_out%nkptirr))
  elph_k_out%irredtoGS = elph_k_in%irredtoGS
-
 
 end subroutine elph_k_copy
 !!***
@@ -513,8 +506,6 @@ end subroutine elph_k_copy
 !! SOURCE
 
 subroutine elph_k_destroy(elph_k)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -569,8 +560,6 @@ end subroutine elph_k_destroy
 !! SOURCE
 
 subroutine elph_k_procs(nproc, elph_k)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -646,8 +635,6 @@ end subroutine elph_k_procs
 
 subroutine gam_mult_displ(nbranch, displ_red, gam_bare, gam_now)
 
- implicit none
-
 !Arguments -------------------------------
  integer, intent(in)  :: nbranch
  real(dp), intent(in)  :: displ_red(2,nbranch,nbranch)
@@ -699,8 +686,6 @@ end subroutine gam_mult_displ
 !! SOURCE
 
 subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,qirredtofull,qpttoqpt,gamma_qpt)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -950,7 +935,6 @@ end subroutine complete_gamma
 subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsppol,gamma_qpt_tr,qirredtofull,qpttoqpt)
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments ------------------------------------
 !scalars

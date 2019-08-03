@@ -241,9 +241,9 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
 !new version now puts kptfull in correct order before bfactor, so no need to re-order...
  if (present(symrec)) then
    ABI_CHECK(present(nsym), "error - provide nsym and symrec arguments together")
-   call mkkptrank (kpt,nkpt,krank, nsym, symrec)
+   krank = krank_new(nkpt, kpt, nsym=nsym, symrec=symrec)
  else
-   call mkkptrank (kpt,nkpt,krank)
+   krank = krank_new(nkpt, kpt)
  end if
 
  call bfactor(nkptfull,kptfull,nkptfull,kptfull,krank,nkpt,weight,nband,nestordered)
@@ -266,7 +266,7 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
  call krank%free()
  ABI_FREE(kptfull)
 
- call mkkptrank (qptfull,nqptfull,krank)
+ krank = krank_new(nqptfull, qptfull)
 
  ABI_MALLOC(ktable,(nqptfull))
  do ikpt=1,nqptfull

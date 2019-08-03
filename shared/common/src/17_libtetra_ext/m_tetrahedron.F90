@@ -304,7 +304,7 @@ subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ier
 
  ! Make full k-point rank arrays
  ! TODO: Lot of memory allocated here if dense mesh e.g ~ 300 ** 3
- call mkkptrank (kpt_fullbz,nkpt_fullbz,krank)
+ krank = krank_new(nkpt_fullbz, kpt_fullbz)
 
  ialltetra = 1
  do ikpt_full=1,nkpt_fullbz
@@ -313,9 +313,9 @@ subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ier
      !if (mod(ialltetra, nprocs) /= my_rank) cycle ! MPI parallelism.
      do isummit=1,4
        k1(:) = kpt_fullbz(:,ikpt_full) &
-&       + tetra_shifts(1,isummit,itetra)*klatt(:,1) &
-&       + tetra_shifts(2,isummit,itetra)*klatt(:,2) &
-&       + tetra_shifts(3,isummit,itetra)*klatt(:,3)
+        + tetra_shifts(1,isummit,itetra)*klatt(:,1) &
+        + tetra_shifts(2,isummit,itetra)*klatt(:,2) &
+        + tetra_shifts(3,isummit,itetra)*klatt(:,3)
 
        ! Find full kpoint which is summit isummit of tetrahedron itetra around full kpt ikpt_full !
        symrankkpt =  krank%get_rank(k1)

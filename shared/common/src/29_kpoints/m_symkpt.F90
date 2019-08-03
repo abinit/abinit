@@ -415,7 +415,7 @@ end subroutine symkpt
 !! FUNCTION
 !! Same routine as above but with an algorithm with better scalling than before.
 !! From a few tests it produces the same IBZ as before but avoids computing the lengths and sorting.
-!! Instead it uses the kptrank datatype to map k-points onto each other.
+!! Instead it uses the krank datatype to map k-points onto each other.
 !!
 !! INPUTS
 !!
@@ -441,7 +441,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
 
 !Local variables -------------------------
 !scalars
- type(krank_t) :: kptrank
+ type(krank_t) :: krank
  integer :: identi,ii,ikpt,ikibz,ikpt_found
  integer :: isym,itim,jj,nkpout,tident
  !real(dp) :: cpu, gflops, wall
@@ -490,8 +490,8 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
    bz2ibz_smap(4, ikpt) = 1 ! We will use this as wtk_folded
  end do
 
- ! Start kptrank
- call mkkptrank(kbz,nkbz,kptrank)
+ ! Start krank
+ krank = krank_new(nkbz, kbz)
 
  ! Here begins the serious business
  !call cwtime(cpu, wall, gflops, "start")
@@ -518,9 +518,9 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
            end do
 
            !find this point
-           ikpt_found = kptrank%get_index(ksym)
+           ikpt_found = krank%get_index(ksym)
            !if (sum(abs(mod(ksym-kbz(:,ikpt_found),one)))>tol8) then
-           !  MSG_ERROR('Wrong k-point mapping found by kptrank')
+           !  MSG_ERROR('Wrong k-point mapping found by krank')
            !end if
            !if k-point not found
            if (ikpt_found < 0) then
@@ -561,11 +561,11 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
          end do
 
          !find this point
-         ikpt_found = kptrank%get_index(ksym)
+         ikpt_found = krank%get_index(ksym)
          !if k-point not found just cycle
          if (ikpt_found < 0) cycle
          !if (sum(abs(mod(ksym-kbz(:,ikpt_found),one)))>tol8) then
-         !  MSG_ERROR('Wrong k-point mapping found by kptrank')
+         !  MSG_ERROR('Wrong k-point mapping found by krank')
          !end if
          if (ikpt_found >= ikpt) cycle
          bz2ibz_smap(:3, ikpt)  = [ikpt_found,isym,itim]
@@ -609,7 +609,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
        end do
 
        !find this point
-       ikpt_found = kptrank%get_index(ksym)
+       ikpt_found = krank%get_index(ksym)
        if (ikpt_found < 0) cycle
        if (bz2ibz_smap(1, ikpt_found) /= 0) cycle
        bz2ibz_smap(:3, ikpt_found) = [ikpt,isym,itim]
@@ -619,7 +619,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
  end do
  !call cwtime_report(" map", cpu, wall, gflops)
 
- call kptrank%free()
+ call krank%free()
 
  !Here I make a check if the mapping was sucessfull
  if (any(bz2ibz_smap(1, :) == 0)) then

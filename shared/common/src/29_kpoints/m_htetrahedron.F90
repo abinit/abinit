@@ -204,7 +204,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 !Local variables-------------------------------
 !scalars
  !type(octree_t) :: oct
- type(krank_t) :: kptrank
+ type(krank_t) :: krank
  integer :: ikpt2,isummit,itetra,jtetra
  integer :: ikibz,ikbz,idiag,ihash,min_idiag,my_rank,nprocs
  integer :: max_ntetra, ntetra
@@ -669,10 +669,10 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
    end if
  end do
 
- ! HM TODO: Avoid mkkptrank and map the k-point grid to indexes
+ ! HM TODO: Avoid krank and map the k-point grid to indexes
  ! Make full k-point rank arrays
  !oct = octree_init(kpt_fullbz,2**4,[-one,-one,-one],[two,two,two])
- call mkkptrank(kpt_fullbz,nkpt_fullbz,kptrank)
+ krank = krank_new(nkpt_fullbz, kpt_fullbz)
 
  !
  ! HM (13/04/2019): I implement two different versions:
@@ -709,7 +709,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
          !ikpt2 = octree_find(oct,k2,dist)
          !ikpt2 = octree_find_nearest_pbc(oct,k2,dist,shift)
          !if (dist>tol12) call exit(1)
-         ikpt2 = kptrank%get_index(k2)
+         ikpt2 = krank%get_index(k2)
          ! Find the index of those points in the BZ and IBZ
          tetra_ibz(isummit) = bz2ibz(ikpt2)
        end do
@@ -768,7 +768,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
          !ikpt2 = octree_find(oct,k2,dist)
          !ikpt2 = octree_find_nearest_pbc(oct,k2,dist,shift)
          !if (dist>tol12) call exit(1)
-         ikpt2 = kptrank%get_index(k2)
+         ikpt2 = krank%get_index(k2)
          ! Find the index of those points in the BZ and IBZ
          tetra_ibz(isummit) = bz2ibz(ikpt2)
        end do
@@ -812,7 +812,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  end select
  !ierr = octree_free(oct)
  ABI_FREE(tetra_hash_count)
- call kptrank%free()
+ call krank%free()
 
  ! Do some maintenance: free unused memory and count unique tetrahedra per IBZ point
  tetra%nunique_tetra = 0

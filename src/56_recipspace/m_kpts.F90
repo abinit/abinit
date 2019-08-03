@@ -1541,7 +1541,7 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,nkpt_fullbz,nshift
  call get_kpt_fullbz(kpt_fullbz,kptrlatt,nkpt_fullbz,nshiftk,shiftk)
 
  ! make full k-point rank arrays
- call mkkptrank (kpt,nkpt,krank)
+ krank = krank_new(nkpt, kpt)
 
  !find equivalence to irred kpoints in kpt
  indkpt(:) = 0

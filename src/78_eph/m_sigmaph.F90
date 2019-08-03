@@ -85,12 +85,6 @@ module m_sigmaph
  private
 !!***
 
- public :: sigmaph         ! Main entry point to compute self-energy matrix elements
- public :: sigmaph_read    ! Read main dimensions and header of sigmaph from a netcdf file.
- public :: sigmaph_ebands  ! Fill in values in ebands from the sigmaph structure and netcdf file
- public :: sigmaph_free    ! Free sigmaph object
-!!***
-
  ! Tables for degenerated KS states.
  type bids_t
    integer, allocatable :: vals(:)
@@ -317,7 +311,7 @@ module m_sigmaph
    ! pert_table(2, npert): imyp index in my_pinfo table, -1 if this rank is not treating ipert.
 
   integer,allocatable :: phmodes_skip(:)
-   ! (natoms3) A mask to skip accumulating the contribution of certain phonon modes
+   ! (natom3) A mask to skip accumulating the contribution of certain phonon modes
 
   integer,allocatable:: ind_bz2ibz(:,:)
    ! (6, %nqibz)
@@ -509,16 +503,35 @@ module m_sigmaph
    ! (nkcalc, nsppol)
    ! Table used to average QP results in the degenerate subspace if symsigma == 1
 
+  contains
+
+    procedure :: write => sigmaph_write
+     ! Write main dimensions and header of sigmaph on a netcdf file.
+
+    procedure :: comp  => sigmaph_comp
+     ! Compare two instances of sigmaph raise error if different
+
+    procedure :: setup_kcalc => sigmaph_setup_kcalc
+     ! Return tables used to perform the sum over q-points for given k-point.
+
+    procedure :: gather_and_write => sigmaph_gather_and_write
+     ! Compute the QP corrections.
+
+    procedure :: print => sigmaph_print
+     ! Print results to main output file.
+
+    procedure :: free => sigmaph_free
+      ! Free sigmaph object
+
+    procedure :: get_ebands => sigmaph_get_ebands
+      ! Fill in values in ebands from the sigmaph structure and netcdf file
+
  end type sigmaph_t
 !!***
 
- private :: sigmaph_new               ! Creation method (allocates memory, initialize data from input vars).
- private :: sigmaph_write             ! Write main dimensions and header of sigmaph on a netcdf file.
- private :: sigmaph_comp              ! Compare two instances of sigmaph raise error if different
- private :: sigmaph_setup_kcalc       ! Return tables used to perform the sum over q-points for given k-point.
- private :: sigmaph_gather_and_write  ! Compute the QP corrections.
- private :: sigmaph_print             ! Print results to main output file.
-
+ public :: sigmaph         ! Main entry point to compute self-energy matrix elements
+ public :: sigmaph_read    ! Read main dimensions and header of sigmaph from a netcdf file.
+ private :: sigmaph_new   ! Creation method (allocates memory, initialize data from input vars).
 
  real(dp),private,parameter :: EPH_WTOL = tol6
  ! Tolerance for phonon frequencies to be ignored.
@@ -689,7 +702,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  if (my_rank == master .and. dtset%eph_restart == 1) then
    if (ierr == 0) then
      if (any(sigma_restart%qp_done /= 1)) then
-       call sigmaph_comp(sigma, sigma_restart)
+       call sigma%comp(sigma_restart)
        sigma%qp_done = sigma_restart%qp_done
        restart = 1
        call wrtout([std_out, ab_out], "- Restarting from previous SIGEPH.nc file")
@@ -698,14 +711,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        MSG_COMMENT("Found SIGEPH.nc file with all QP entries already computed. Will overwrite file.")
      end if
    end if
-   call sigmaph_free(sigma_restart)
+   call sigma_restart%free()
  end if
 
  call xmpi_bcast(restart, master, comm, ierr)
  call xmpi_bcast(sigma%qp_done, master, comm, ierr)
 
  if (restart == 0) then
-   call sigmaph_write(sigma, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
+   call sigma%write(dtset, cryst, ebands, wfk_hdr, dtfil, comm)
  else
    if (my_rank == master) then
 #ifdef HAVE_NETCDF
@@ -715,8 +728,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end if
 
  if (my_rank == master) then
-   call sigmaph_print(sigma, dtset, ab_out)
-   call sigmaph_print(sigma, dtset, std_out)
+   call sigma%print(dtset, ab_out)
+   call sigma%print(dtset, std_out)
  end if
  my_npert = sigma%my_npert
 
@@ -1044,7 +1057,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
    ! Find IBZ(k) for q-point integration.
    call cwtime(cpu_setk, wall_setk, gflops_setk, "start")
-   call sigmaph_setup_kcalc(sigma, dtset, cryst, dvdb, ebands, ikcalc, dtset%prtvol, comm)
+   call sigma%setup_kcalc(dtset, cryst, dvdb, ebands, ikcalc, dtset%prtvol, comm)
 
    ! Symmetry indices for kk.
    kk = sigma%kcalc(:, ikcalc)
@@ -2023,7 +2036,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      end if
 
      ! Collect results inside comm and write results for this (k-point, spin) to NETCDF file.
-     call sigmaph_gather_and_write(sigma, ebands, ikcalc, spin, dtset%prtvol, comm)
+     call sigma%gather_and_write(ebands, ikcalc, spin, dtset%prtvol, comm)
 
      ABI_SFREE(alpha_mrta)
    end do ! spin
@@ -2062,7 +2075,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call pawcprj_free(cwaveprj)
  ABI_DT_FREE(cwaveprj)
  call ddkop%free()
- call sigmaph_free(sigma)
+ call sigma%free()
 
 end subroutine sigmaph
 !!***
@@ -3003,7 +3016,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
- type(sigmaph_t),intent(inout) :: self
+ class(sigmaph_t),intent(inout) :: self
  type(crystal_t),intent(in) :: cryst
  type(dataset_type),intent(in) :: dtset
  type(ebands_t),intent(in) :: ebands
@@ -3176,6 +3189,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
          nctkarr_t("a2f_emesh", "dp", "a2f_ne"), &
          nctkarr_t("a2few", "dp", "a2f_ne, gfw_nomega, max_nbcalc, nkcalc, nsppol") &
        ])
+       NCF_CHECK(ncerr)
      end if
    end if
 
@@ -3412,9 +3426,9 @@ end function sigmaph_read
 
 !----------------------------------------------------------------------
 
-!!****f* m_sigmaph/sigmaph_ebands
+!!****f* m_sigmaph/sigmaph_get_ebands
 !! NAME
-!!  sigmaph_ebands
+!!  sigmaph_get_ebands
 !!
 !! FUNCTION
 !!  Read quantities from the sigmaph to a ebands structure and return mapping
@@ -3429,12 +3443,12 @@ end function sigmaph_read
 !!
 !! SOURCE
 
-type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, linewidth_mrta, &
+type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta, linewidth_mrta, &
                                        velocity, comm, ierr, indq2ebands) result(new)
 
 !Arguments -----------------------------------------------
  integer,intent(in) :: comm
- type(sigmaph_t),intent(in) :: self
+ class(sigmaph_t),intent(in) :: self
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
  integer, intent(out) :: ierr
@@ -3539,6 +3553,7 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, lin
          if (has_red_vel) then
            ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vred_calc"),&
                                 vk_red(1,:), start=[1,iband,ikcalc,spin])
+           NCF_CHECK(ncerr)
            call ddk_red2car(cryst%rprimd,vk_red,vk_car)
            velocity(:,band_ks,ikpt,spin) = vk_car(1,:)
          end if
@@ -3551,7 +3566,7 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, lin
 
  ABI_FREE(indkk)
 
-end function sigmaph_ebands
+end function sigmaph_get_ebands
 !!***
 
 !----------------------------------------------------------------------
@@ -3575,7 +3590,7 @@ end function sigmaph_ebands
 subroutine sigmaph_comp(self,comp)
 
 !Arguments ------------------------------------
- type(sigmaph_t),intent(in) :: self, comp
+ class(sigmaph_t),intent(in) :: self, comp
 
 ! *************************************************************************
 
@@ -3630,7 +3645,7 @@ end subroutine sigmaph_comp
 subroutine sigmaph_free(self)
 
 !Arguments ------------------------------------
- type(sigmaph_t),intent(inout) :: self
+ class(sigmaph_t),intent(inout) :: self
 
 !Local variables-------------------------------
  integer :: ii,jj,ideg
@@ -3749,7 +3764,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  integer,intent(in) :: ikcalc, prtvol, comm
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
- type(sigmaph_t),target,intent(inout) :: self
+ class(sigmaph_t),target,intent(inout) :: self
  type(ebands_t),intent(in) :: ebands
  type(dvdb_t),intent(in) :: dvdb
 
@@ -3978,7 +3993,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
  integer,intent(in) :: spin, ikcalc, nfftf, comm
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
- type(sigmaph_t),intent(inout) :: self
+ class(sigmaph_t),intent(inout) :: self
  type(ebands_t),intent(in) :: ebands
  type(dvdb_t),intent(inout) :: dvdb
 !arrays
@@ -4182,7 +4197,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: ikcalc, spin, prtvol, comm
- type(sigmaph_t),target,intent(inout) :: self
+ class(sigmaph_t),target,intent(inout) :: self
  type(ebands_t),intent(in) :: ebands
 
 !Local variables-------------------------------
@@ -4599,7 +4614,7 @@ subroutine sigmaph_print(self, dtset, unt)
 !Arguments ------------------------------------
  integer,intent(in) :: unt
  type(dataset_type),intent(in) :: dtset
- type(sigmaph_t),intent(in) :: self
+ class(sigmaph_t),intent(in) :: self
 
 !Local variables-------------------------------
  integer :: ikc, is, ndiv
@@ -4705,7 +4720,7 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
 
 !Arguments ------------------------------------
 !scalars
- type(sigmaph_t),intent(inout) :: sigma
+ class(sigmaph_t),intent(inout) :: sigma
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: ikcalc, spin, comm
@@ -4858,7 +4873,7 @@ end subroutine sigmaph_get_all_qweights
 subroutine eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, prtvol, comm)
 
 !Arguments ------------------------------------
- type(sigmaph_t),intent(inout) :: sigma
+ class(sigmaph_t),intent(inout) :: sigma
  type(crystal_t),intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
  type(ebands_t),intent(in) :: ebands
@@ -4990,7 +5005,7 @@ end subroutine eval_sigfrohl_deltas
 subroutine eval_sigfrohl2(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
 
 !Arguments ------------------------------------
- type(sigmaph_t),intent(inout) :: sigma
+ class(sigmaph_t),intent(inout) :: sigma
  type(crystal_t),intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
  type(ebands_t),intent(in) :: ebands
@@ -5308,7 +5323,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nqpt, nqbz, comm
- type(sigmaph_t),intent(in) :: sigma
+ class(sigmaph_t),intent(in) :: sigma
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
 !arrays
@@ -5322,7 +5337,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  integer :: cnt, my_rank, nprocs, ib_k, band_ks, nkibz, nkbz, kq_rank
  real(dp) :: eig0nk, eig0mkq, dksqmax, ediff, cpu, wall, gflops
  character(len=500) :: msg
- type(krank_t) :: kptrank
+ type(krank_t) :: krank
 !arrays
  integer :: g0(3)
  integer,allocatable :: qbz_count(:), qbz2qpt(:,:), bz2ibz(:,:)
@@ -5357,7 +5372,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  !call cwtime_report(" qpoints_oracle_listkk1", cpu, wall, gflops)
 
  ! Make full k-point rank arrays
- call mkkptrank(kbz, nkbz, kptrank)
+ krank = krank_new(nkbz, kbz)
 
  ABI_ICALLOC(qbz_count, (nqbz))
  cnt = 0
@@ -5369,8 +5384,8 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
      do iq_bz=1,nqbz
        if (qbz_count(iq_bz) /= 0) cycle ! No need to check this q-point again.
        kq = kk + qbz(:, iq_bz)
-       kq_rank = kptrank%get_rank(kq)
-       ikq_bz = kptrank%invrank(kq_rank)
+       kq_rank = krank%get_rank(kq)
+       ikq_bz = krank%invrank(kq_rank)
        ABI_CHECK(ikq_bz > 0, sjoin("Cannot find kq: ", ktoa(kq)))
        ABI_CHECK(isamek(kq, kbz(:, ikq_bz), g0), "Wrong invrank")
        !ikq_ibz = bz2ibz(ikq_bz,1)
@@ -5390,7 +5405,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  end do
 
  ABI_FREE(kbz)
- call kptrank%free()
+ call krank%free()
 
  call xmpi_sum(qbz_count, comm, ierr)
  call cwtime_report(" qbz_count", cpu, wall, gflops)

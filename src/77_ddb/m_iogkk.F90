@@ -1047,7 +1047,6 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
  character(len=500) :: msg
  type(hdr_type) :: hdr1
  type(krank_t) :: krank
-
 !arrays
  real(dp) :: im_el_veloc(3)
  real(dp),allocatable :: eig1_k(:,:)
@@ -1108,7 +1107,7 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
  elph_tr_ds%el_veloc=zero
 
 !need correspondence between the DDK kpoints and the kpt_phon
- call mkkptrank (hdr1%kptns,hdr1%nkpt,krank)
+ krank = krank_new(hdr1%nkpt, hdr1%kptns)
 
  do isppol=1,nsppol_in
    im_el_veloc(:)=zero

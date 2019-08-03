@@ -3025,7 +3025,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  !call dvdb_enforce_asr(db)
 
  do imyp=1,db%my_npert
-   write(std_out, *)" Imaginary part for imyp:" ,imyp
+   write(std_out, *)" Imaginary part for imyp:", imyp
    do ispden=1,db%nspden
        write(std_out, *)"min, max, avg:", &
          minval(abs(db%v1scf_rpt(2, :, :, ispden, imyp))), maxval(abs(db%v1scf_rpt(2, :, :, ispden, imyp))), &
@@ -3261,6 +3261,8 @@ subroutine dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt, nqshift, qshift, nff
  real(kind=dp),allocatable :: v1scf_rpt(:,:,:,:,:)
 
 ! *************************************************************************
+
+ MSG_ERROR("Not implemented")
 
  ! Dense q-mesh
  ngqpt_fine = qrefine * ngqpt
@@ -6128,6 +6130,8 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
 
    ! Compute average and write to file.
    !write(std_out,"(a)")sjoin("=== For DVDB q-point:", ktoa(this_qpts(:,iq)), "===")
+   if (my_rank /= master) cycle
+
    do imyp=1,dvdb%my_npert
      idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
      do ispden=1,dvdb%nspden

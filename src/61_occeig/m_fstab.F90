@@ -381,7 +381,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
      fs%istg0(:, ik) = full2ebands(:, ik_full)
    end do
    fs%maxnb = maxval(fs%bstcnt_ibz(2, :))
-   call mkkptrank(fs%kpts,nkfs,fs%krank)
+   fs%krank = krank_new(nkfs, fs%kpts)
  end do ! spin
 
  call cwtime(cpu,wall,gflops,"stop")
@@ -741,7 +741,7 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
 
  call wrtout(std_out,' mkqptequiv : making rankkpt_phon and invrankkpt_phon',"COLL")
 
- call mkkptrank(kpt_phon,nkpt_phon,krank)
+ krank = krank_new(nkpt_phon, kpt_phon)
 
  FSfullpqtofull = -999
  gamma_kpt(:) = zero
@@ -781,7 +781,7 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
 !start over with q grid
  call wrtout(std_out,' mkqptequiv : FSfullpqtofull made. Do qpttoqpt',"COLL")
 
- call mkkptrank (qpt_full,nqpt,krank)
+ krank = krank_new(nqpt, qpt_full)
 
  qpttoqpt(:,:,:) = -1
  do iFSqpt=1,nqpt

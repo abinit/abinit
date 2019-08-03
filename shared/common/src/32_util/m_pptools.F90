@@ -665,7 +665,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
  ABI_MALLOC(fulltoirred,(nkptfull))
  timrev=0; if (use_tr) timrev=1
 
- call mkkptrank (kptirred,nkptirred,krank, nsym=nsymfm, symrec=symrecfm, time_reversal=use_tr)
+ krank = krank_new(nkptirred, kptirred, nsym=nsymfm, symrec=symrecfm, time_reversal=use_tr)
 
 !Xcrysden employs the C-ordering for the Fermi Surface.
  ikgrid=0

@@ -73,16 +73,16 @@ module m_krank
 
  end type krank_t
 
- public :: mkkptrank       ! Sets up the kpt ranks for comparing kpts
+ public :: krank_new       ! Sets up the kpt ranks for comparing kpts
 !!***
 
 contains
 !!***
 
-!!****f* m_krank/mkkptrank
+!!****f* m_krank/krank_new
 !!
 !! NAME
-!! mkkptrank
+!! krank_new
 !!
 !! FUNCTION
 !! This routine sets up the kpt ranks for comparing kpts
@@ -104,7 +104,7 @@ contains
 !!
 !! SOURCE
 
-subroutine mkkptrank(kpt,nkpt,krank,nsym,symrec, time_reversal)
+type(krank_t) function krank_new(nkpt, kpt, nsym, symrec, time_reversal) result(krank)
 
 !Arguments ------------------------------------
 !scalars
@@ -112,7 +112,6 @@ subroutine mkkptrank(kpt,nkpt,krank,nsym,symrec, time_reversal)
  integer,intent(in), optional :: nsym
  logical,intent(in), optional :: time_reversal
 !arrays
- type(krank_t), intent(out) :: krank
  double precision,intent(in) :: kpt(3,nkpt)
  integer,intent(in), optional :: symrec(3,3, *)
 
@@ -188,7 +187,7 @@ subroutine mkkptrank(kpt,nkpt,krank,nsym,symrec, time_reversal)
    end do
  end if
 
-end subroutine mkkptrank
+end function krank_new
 !!***
 
 !----------------------------------------------------------------------
@@ -335,12 +334,11 @@ end function krank_get_index
 !!
 !! SOURCE
 
-subroutine krank_copy (krank_in, krank_out)
+type(krank_t) function krank_copy(krank_in) result(krank_out)
 
 !Arguments ------------------------------------
 !scalars
  class(krank_t), intent(in) :: krank_in
- class(krank_t), intent(out) :: krank_out
 
 ! *********************************************************************
  krank_out%max_linear_density = krank_in%max_linear_density
@@ -351,7 +349,7 @@ subroutine krank_copy (krank_in, krank_out)
  TETRA_ALLOCATE(krank_out%invrank, (krank_out%min_rank:krank_out%max_rank))
  krank_out%invrank = krank_in%invrank
 
-end subroutine krank_copy
+end function krank_copy
 !!***
 
 !----------------------------------------------------------------------

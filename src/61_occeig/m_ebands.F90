@@ -1821,8 +1821,7 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
 
 ! *************************************************************************
 
- call mkkptrank(ebands%kptns, ebands%nkpt, krank)
-
+ krank = krank_new(ebands%nkpt, ebands%kptns)
  emin = huge(one); emax = -huge(one); cnt = 0
 
  do spin=1,ebands%nsppol

@@ -475,7 +475,7 @@ end subroutine tetra_unittests
 !!  kptrank_unittests
 !!
 !! FUNCTION
-!!  Test the kptrank routines
+!!  Test the krank routines
 !!
 subroutine kptrank_unittests(comm)
 
@@ -485,7 +485,7 @@ subroutine kptrank_unittests(comm)
 
 !Variables -------------------------------
  type(crystal_t) :: crystal
- type(krank_t) :: kptrank
+ type(krank_t) :: krank
  integer,parameter :: qptopt1=1,nqshft1=1,iout0=0,chksymbreak0=0,sppoldbl1=1
  integer :: nqibz,iqbz,iqibz,iqbz_rank,nqbz,nqibz_symkpt,nqibz_symkpt_new
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
@@ -517,14 +517,14 @@ subroutine kptrank_unittests(comm)
                              nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
  call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
- ! Test mkkptrank
- call mkkptrank(qbz,nqbz,kptrank)
+ ! Test krank
+ krank = krank_new(nqbz, qbz)
  do iqbz=1,nqbz
-   iqbz_rank = kptrank%get_index(qbz(:,iqbz))
+   iqbz_rank = krank%get_index(qbz(:,iqbz))
    ABI_CHECK(iqbz==iqbz_rank,'wrong q-point')
  end do
- call cwtime_report(" kptrank", cpu, wall, gflops)
- call kptrank%free()
+ call cwtime_report(" krank", cpu, wall, gflops)
+ call krank%free()
 
  ABI_MALLOC(wtq_fullbz,(nqbz))
  ABI_MALLOC(wtq_folded,(nqbz))

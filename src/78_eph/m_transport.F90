@@ -233,7 +233,7 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
  ! Initialize transport
  transport_rta = transport_rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm)
  sigmaph%ncid = nctk_noid
- call sigmaph_free(sigmaph)
+ call sigmaph%free()
 
  ! Compute transport
  call transport_rta_compute(transport_rta, cryst, dtset, comm)
@@ -334,12 +334,12 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
    kptrlatt(2,2) = dtset%sigma_ngkpt(2)
    kptrlatt(3,3) = dtset%sigma_ngkpt(3)
    tmp_ebands = ebands_downsample(ebands, cryst, kptrlatt, 1, [zero,zero,zero])
-   new%ebands = sigmaph_ebands(sigmaph, cryst, tmp_ebands, new%linewidth_serta, new%linewidth_mrta, &
+   new%ebands = sigmaph%get_ebands(cryst, tmp_ebands, new%linewidth_serta, new%linewidth_mrta, &
                                new%velocity, xmpi_comm_self, ierr)
    call ebands_free(tmp_ebands)
  else
-   new%ebands = sigmaph_ebands(sigmaph, cryst, ebands, new%linewidth_serta, new%linewidth_mrta, &
-                               new%velocity, xmpi_comm_self, ierr)
+   new%ebands = sigmaph%get_ebands(cryst, ebands, new%linewidth_serta, new%linewidth_mrta, &
+                                  new%velocity, xmpi_comm_self, ierr)
  end if
 
  ! Perform further downsampling (usefull for debugging purposes)
@@ -382,7 +382,7 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
    end if
 
    ABI_SFREE(indkk)
-   call ebands_copy(tmp_ebands,new%ebands)
+   call ebands_copy(tmp_ebands, new%ebands)
    call ebands_free(tmp_ebands)
  end if
 
@@ -575,9 +575,9 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  ABI_MALLOC(self%mobility,(self%nw,self%nsppol,3,3,self%ntemp+1,2))
 
  ! Compute onsager coefficients
- call onsager(0,self%l0)
- call onsager(1,self%l1)
- call onsager(2,self%l2)
+ call onsager(0, self%l0)
+ call onsager(1, self%l1)
+ call onsager(2, self%l2)
 
  ! Compute transport quantities
  fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)

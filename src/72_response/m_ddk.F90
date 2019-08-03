@@ -889,7 +889,7 @@ subroutine ddk_read_fsvelocities(ddk, fstab, comm)
    nband_in = maxval(hdr1%nband)
 
    ! need correspondence hash between the DDK and the fs k-points
-   call mkkptrank (hdr1%kptns,hdr1%nkpt,krank)
+   krank = krank_new(hdr1%nkpt, hdr1%kptns)
    do isppol=1,ddk%nsppol
      fs => fstab(isppol)
      do ikfs=1,fs%nkfs

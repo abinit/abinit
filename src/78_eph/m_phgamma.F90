@@ -54,7 +54,6 @@ module m_phgamma
  use m_geometry,       only : normv
  use m_special_funcs,  only : gaussian
  use m_fftcore,        only : ngfft_seq, get_kg
- use m_fft_mesh,       only : rotate_fft_mesh
  use m_cgtools,        only : dotprod_g
  use m_cgtk,           only : cgtk_rotate
  use m_kg,             only : getph
@@ -1098,7 +1097,7 @@ subroutine phgamma_interp_setup(gams,cryst,action)
      gams%vals_bz = zero
 
      ! Build tables needed by complete_gamma.
-     call mkkptrank(gams%qbz,gams%nqbz,qrank)
+     qrank = krank_new(gams%nqbz, gams%qbz)
 
      ! Compute index of IBZ q-point in the BZ array
      ABI_CALLOC(qirredtofull,(gams%nqibz))
@@ -1552,7 +1551,7 @@ subroutine phgamma_vv_interp_setup(gams,cryst,action)
      gams%vals_out_bz = zero
 
      ! Build tables needed by complete_gamma.
-     call mkkptrank(gams%qbz,gams%nqbz,qrank)
+     qrank = krank_new(gams%nqbz, gams%qbz)
 
      ! Compute index of IBZ q-point in the BZ array
      ABI_CALLOC(qirredtofull,(gams%nqibz))
@@ -2208,7 +2207,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
      do mu=1,natom3
        cnt = 0
        do iq_ibz=1,nqibz
-! NB: if we are interpolating the gamma, nqibz > gams%nqibz
+         ! NB: if we are interpolating the gamma, nqibz > gams%nqibz
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
 
          call tetra%get_onewk(iq_ibz, bcorr0, nomega, nqibz, phfreq_tetra(:,mu), &
