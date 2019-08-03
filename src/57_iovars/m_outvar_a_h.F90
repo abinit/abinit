@@ -200,7 +200,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
 !algalch
  narr=ntypalch                      ! default size for all datasets
- do idtset=0,ndtset_alloc       ! especific size for each dataset
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=dtsets(idtset)%ntypalch
    if(idtset==0)narrm(idtset)=mxvals%ntypat
    intarr(1:narrm(idtset),idtset)=dtsets(idtset)%algalch(1:narrm(idtset))
@@ -232,7 +232,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 !atvshift
  if(mxvals%natpawu>0)then
    narr=dtsets(1)%natvshift*dtsets(1)%nsppol*mxvals%natom ! default size for all datasets
-   do idtset=0,ndtset_alloc       ! especific size for each dataset
+   do idtset=0,ndtset_alloc       ! specific size for each dataset
      if(idtset/=0)then
        narrm(idtset)=dtsets(idtset)%natvshift*dtsets(idtset)%nsppol*mxvals%natom
        if(narrm(idtset)/=0)&
@@ -284,7 +284,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
 !bdgw
  narr=2*dtsets(1)%nkptgw*dtsets(1)%nsppol ! default size for all datasets
- do idtset=0,ndtset_alloc        ! especific size for each dataset
+ do idtset=0,ndtset_alloc        ! specific size for each dataset
    if(idtset/=0)then
      narrm(idtset)=2*dtsets(idtset)%nkptgw*dtsets(idtset)%nsppol
      if (narrm(idtset)>0)&
@@ -366,9 +366,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'bs_interp_kmult','INT',0)
 
- !dprarr(1,:)=dtsets(:)%bs_interp_m3_width
- !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'bs_interp_m3_width','DPR',0)
-
  intarr(1,:)=dtsets(:)%bs_interp_method
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'bs_interp_method','INT',0)
 
@@ -384,7 +381,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 !bs_loband
  narr=dtsets(1)%nsppol ! default size for all datasets
  intarr = 0
- do idtset=0,ndtset_alloc        ! especific size for each dataset
+ do idtset=0,ndtset_alloc        ! specific size for each dataset
    if(idtset/=0)then
      narrm(idtset)=dtsets(idtset)%nsppol
    else
@@ -513,7 +510,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
 !densty
  narr=mxvals%ntypat              ! default size for all datasets
- do idtset=0,ndtset_alloc        ! especific size for each dataset
+ do idtset=0,ndtset_alloc        ! specific size for each dataset
    narrm(idtset)=dtsets(idtset)%ntypat
    if(idtset==0)narrm(idtset)=mxvals%ntypat
 !  Only one component of densty is used until now
@@ -852,7 +849,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 !etotal
  if(choice==2)then
    prtimg(:,:)=1
-   do idtset=0,ndtset_alloc       ! especific size for each dataset
+   do idtset=0,ndtset_alloc       ! specific size for each dataset
      compute_static_images=(dtsets(idtset)%istatimg>0)
      narrm(idtset)=1
 
@@ -893,7 +890,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 !fcart
  if(choice==2)then
    prtimg(:,:)=1
-   do idtset=0,ndtset_alloc       ! especific size for each dataset
+   do idtset=0,ndtset_alloc       ! specific size for each dataset
      compute_static_images=(dtsets(idtset)%istatimg>0)
      size2=dtsets(idtset)%natom
      if(idtset==0)size2=0
@@ -1013,7 +1010,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
 !ga_rules
  narr=ga_n_rules                    ! default size for all datasets
- do idtset=0,ndtset_alloc       ! especific size for each dataset
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=dtsets(idtset)%ga_n_rules
    if(idtset==0)narrm(idtset)=mxvals%ga_n_rules
    intarr(1:narrm(idtset),idtset)=dtsets(idtset)%ga_rules(1:narrm(idtset))
@@ -1182,7 +1179,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
 !gw_qlwl
  narr=3*dtsets(1)%gw_nqlwl ! default size for all datasets
- do idtset=0,ndtset_alloc       ! especific size for each dataset
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
    if(idtset/=0)then
      narrm(idtset)=3*dtsets(idtset)%gw_nqlwl
      if (narrm(idtset)>0)then

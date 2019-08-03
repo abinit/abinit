@@ -2847,33 +2847,30 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  write(std_out, "(a, i0)")" Using method for integration weights: ", method
  write(std_out, "(a, i0)")" Total number of R-points in real-space big box: ", db%nrtot
  write(std_out, "(a, 3(i0, 1x))")" ngfft: ", ngfft(1:3)
- !write(std_out,*)"db%ngfft", db%ngfft
  write(std_out, "(a, i0)")" dvdb_add_lr: ", db%add_lr
 
  ! Distribute R-points inside comm_rpt.
  call xmpi_split_work(db%nrtot, db%comm_rpt, my_rstart, my_rstop)
  db%my_nrpt = 0
  ii = minval(db%my_pinfo(2,:)); jj = maxval(db%my_pinfo(2,:))
- if (my_rstop >= my_rstart) then
-   ! Select my_rpoints.
-   db%my_nrpt = my_rstop - my_rstart + 1
-   ABI_MALLOC(db%my_rpt, (3, db%my_nrpt))
-   db%my_rpt = all_rpt(:, my_rstart:my_rstop)
-   ABI_MALLOC(db%my_irpt2tot, (db%my_nrpt))
-   do irpt=1,db%my_nrpt
-     db%my_irpt2tot(irpt) = my_rstart + (irpt - 1)
+ ! Select my_rpoints.
+ db%my_nrpt = my_rstop - my_rstart + 1
+ ABI_CHECK(db%my_nrpt /= 0, "my_nrpt == 0!")
+ ABI_MALLOC(db%my_rpt, (3, db%my_nrpt))
+ db%my_rpt = all_rpt(:, my_rstart:my_rstop)
+ ABI_MALLOC(db%my_irpt2tot, (db%my_nrpt))
+ do irpt=1,db%my_nrpt
+   db%my_irpt2tot(irpt) = my_rstart + (irpt - 1)
+ end do
+ ! Copy weights for the atoms treated by this proc.
+ ABI_MALLOC(db%my_wratm, (db%my_nrpt, ii:jj))
+ db%my_wratm = one
+ if (method == 1) then
+   do iatom=1,db%cryst%natom
+     if (iatom >= ii .and. iatom <= jj) db%my_wratm(:, iatom) = all_wghatm(iatom, iatom, my_rstart:my_rstop)
    end do
-   ! Copy weights for the atoms treated by this proc.
-   ABI_MALLOC(db%my_wratm, (db%my_nrpt, ii:jj))
-   db%my_wratm = one
-   if (method == 1) then
-     do iatom=1,db%cryst%natom
-       if (iatom >= ii .and. iatom <= jj) db%my_wratm(:, iatom) = all_wghatm(iatom, iatom, my_rstart:my_rstop)
-     end do
-   end if
  end if
 
- ABI_CHECK(db%my_nrpt /= 0, "my_nrpt == 0!")
  ABI_SFREE(all_cell)
  ABI_SFREE(all_wghatm)
  ABI_FREE(all_rpt)
@@ -3027,9 +3024,9 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  do imyp=1,db%my_npert
    write(std_out, *)" Imaginary part for imyp:", imyp
    do ispden=1,db%nspden
-       write(std_out, *)"min, max, avg:", &
-         minval(abs(db%v1scf_rpt(2, :, :, ispden, imyp))), maxval(abs(db%v1scf_rpt(2, :, :, ispden, imyp))), &
-         sum(abs(db%v1scf_rpt(2, :, :, ispden, imyp))) / (nfft * db%my_nrpt)
+     write(std_out, *)"min, max, avg:", &
+        minval(abs(db%v1scf_rpt(2, :, :, ispden, imyp))), maxval(abs(db%v1scf_rpt(2, :, :, ispden, imyp))), &
+        sum(abs(db%v1scf_rpt(2, :, :, ispden, imyp))) / (nfft * db%my_nrpt)
    end do
  end do
 
@@ -3624,32 +3621,6 @@ end subroutine prepare_ftinterp
 
 !----------------------------------------------------------------------
 
-!!****f* m_dvdb/dvdb_ftinterp_write
-!! NAME
-!!  dvdb_ftinterp_write
-!!
-!! FUNCTION
-!!
-subroutine dvdb_ftinterp_write
-
-end subroutine dvdb_ftinterp_write
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_dvdb/dvdb_ftinterp_load
-!! NAME
-!!  dvdb_ftinterp_load
-!!
-!! FUNCTION
-!!
-subroutine dvdb_ftinterp_load
-
-end subroutine dvdb_ftinterp_load
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_dvdb/dvdb_ftinterp_qpt
 !! NAME
 !!  dvdb_ftinterp_qpt
@@ -3699,11 +3670,10 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  real(dp) :: wr, wi, qmod
  !complex(dpc) :: beta
 !arrays
- integer :: symq(4,2,db%cryst%nsym)
- integer :: rfdir(3)
+ integer :: symq(4,2,db%cryst%nsym), rfdir(3)
+ integer,allocatable :: pertsy(:,:), rfpert(:), pflag(:,:)
  real(dp) :: qcart(3)
  real(dp),allocatable :: eiqr(:,:), weiqr(:,:), v1r_lr(:,:,:)
- integer,allocatable :: pertsy(:,:), rfpert(:), pflag(:,:)
 
 ! *************************************************************************
 
