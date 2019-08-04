@@ -1004,7 +1004,7 @@ subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
      do ikfs=1,fs%nkfs
        ik_ibz = fs%istg0(1,ikfs)
        nband_k = fs%bstcnt_ibz(2, ik_ibz)
-       call fstab_weights_ibz(fs, ebands, ik_ibz, isppol, sigmas, wtk, iene)
+       call fs%get_weights_ibz(ebands, ik_ibz, isppol, sigmas, wtk, iene)
 
        do idir = 1,3
          do iband = 1, nband_k

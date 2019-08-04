@@ -2561,7 +2561,9 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    new%nbsum = new%bsum_stop - new%bsum_start + 1
  end if
 
- ! === MPI SECTION ===
+ ! ========================
+ ! === MPI DISTRIBUTION ===
+ ! ========================
  ! Init for sequential execution.
  new%comm_pert = xmpi_comm_self; new%my_npert = natom3; new%me_pert = 0; new%nprocs_pert = 1
  new%comm_bq = xmpi_comm_self; new%me_bq = 0; new%nprocs_bq = 1
@@ -2705,7 +2707,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
      MSG_ERROR('Invalid range for eph_phrange. Should be between [1, 3*natom] and eph_modes(2) > eph_modes(1)')
    end if
    call wrtout(std_out, sjoin(" Including phonon modes between [", &
-               itoa(dtset%eph_phrange(1)), ',', itoa(dtset%eph_phrange(2)),"]"))
+               itoa(dtset%eph_phrange(1)), ',', itoa(dtset%eph_phrange(2)), "]"))
    new%phmodes_skip = 0
    new%phmodes_skip(dtset%eph_phrange(1):dtset%eph_phrange(2)) = 1
  end if
@@ -2792,7 +2794,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  ! TODO: Should add support for getwfkfine_path
  new%use_doublegrid = .False.
- if ((dtset%getwfkfine /= 0.or. dtset%irdwfkfine /= 0) .or. dtset%getwfkfine_path /= ABI_NOFILE) then
+ if (dtset%getwfkfine /= 0 .or. dtset%irdwfkfine /= 0 .or. dtset%getwfkfine_path /= ABI_NOFILE) then
 
    wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)
    if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
@@ -3235,7 +3237,6 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
      end if
    end if
    !NCF_CHECK(nf90_sync(ncid))
-   !NCF_CHECK(nf90_close(ncid))
  end if ! master
 #endif
 

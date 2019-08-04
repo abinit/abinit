@@ -125,13 +125,21 @@ module m_fstab
    ! for all chemical potentials
    ! Note that the weights are dimensioned with nkibz
 
+ contains
+
+   procedure :: free => fstab_free
+     ! Free memory.
+
+   procedure :: findkg0 => fstab_findkg0
+     ! Find the index of the k-point on the FS
+
+   procedure :: get_weights_ibz => fstab_get_weights_ibz
+     ! Compute weights for FS integration.
+
  end type fstab_t
 
- public :: fstab_init            ! Initialize the object.
- public :: fstab_free            ! Free memory.
- public :: fstab_findkg0         ! Find the index of the k-point on the FS
- public :: fstab_weights_ibz     ! Compute weights for FS integration.
- public :: fstab_print           ! Print the object
+ public :: fstab_init    ! Initialize the object.
+ public :: fstab_print   ! Print the object
 !!***
 
  !FIXME These routines are deprecated
@@ -164,7 +172,7 @@ contains  !============================================================
 subroutine fstab_free(fstab)
 
 !Arguments ------------------------------------
- type(fstab_t),intent(inout) :: fstab
+ class(fstab_t),intent(inout) :: fstab
 
 ! ************************************************************************
 
@@ -521,7 +529,7 @@ integer function fstab_findkg0(fstab, kpt, g0) result(ikfs)
 
 !Arguments ------------------------------------
 !scalars
- type(fstab_t),intent(in) :: fstab
+ class(fstab_t),intent(in) :: fstab
 !arrays
  integer,intent(out) :: g0(3)
  real(dp),intent(in) :: kpt(3)
@@ -540,9 +548,9 @@ end function fstab_findkg0
 
 !----------------------------------------------------------------------
 
-!!****f* m_fstab/fstab_weights_ibz
+!!****f* m_fstab/fstab_get_weights_ibz
 !! NAME
-!!  fstab_weights_ibz
+!!  fstab_get_weights_ibz
 !!
 !! FUNCTION
 !!  Return the weights for the integration on the Fermi-surface
@@ -565,13 +573,13 @@ end function fstab_findkg0
 !!
 !! SOURCE
 
-subroutine fstab_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
+subroutine fstab_get_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,spin
  integer,intent(in),optional :: iene
- type(fstab_t),intent(in) :: fs
+ class(fstab_t),intent(in) :: fs
  type(ebands_t),intent(in) :: ebands
 !arrays
  real(dp),intent(in) :: sigmas(:) !fs%nsig)
@@ -615,7 +623,7 @@ subroutine fstab_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
    MSG_ERROR(sjoin("Wrong integration method:", itoa(fs%integ_method)))
  end select
 
-end subroutine fstab_weights_ibz
+end subroutine fstab_get_weights_ibz
 !!***
 
 !----------------------------------------------------------------------
@@ -650,7 +658,7 @@ subroutine fstab_print(fstab, header, unit, prtvol, mode_paral)
  integer,optional,intent(in) :: prtvol,unit
  character(len=4),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
- type(fstab_t),target,intent(in) :: fstab(:)
+ class(fstab_t),target,intent(in) :: fstab(:)
 
 !Local variables-------------------------------
 !scalars
@@ -753,10 +761,10 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
 
  do ikpt_phon=1,nkpt_phon
    do iqpt=1,nqpt
-!    tmpkpt = jkpt = ikpt + qpt
+     ! tmpkpt = jkpt = ikpt + qpt
      tmpkpt(:) = kpt_phon(:,ikpt_phon) + qpt_full(:,iqpt)
 
-!    which kpt is it among the full FS kpts?
+     ! which kpt is it among the full FS kpts?
      symrankkpt_phon = krank%get_rank(tmpkpt)
 
      FSfullpqtofull(ikpt_phon,iqpt) = krank%invrank(symrankkpt_phon)
@@ -783,7 +791,7 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
 
  call krank%free()
 
-!start over with q grid
+ ! start over with q grid
  call wrtout(std_out,' mkqptequiv : FSfullpqtofull made. Do qpttoqpt',"COLL")
 
  krank = krank_new(nqpt, qpt_full)
