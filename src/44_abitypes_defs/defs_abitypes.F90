@@ -989,6 +989,7 @@ type dataset_type
  real(dp) :: tmesh(3) ! = [5._dp, 59._dp, 6._dp] This triggers a bug in the bindings
 
  character(len=fnlen) :: getddb_path = ABI_NOFILE
+ !character(len=fnlen) :: getden_path = ABI_NOFILE
  character(len=fnlen) :: getdvdb_path = ABI_NOFILE
  character(len=fnlen) :: getwfk_path = ABI_NOFILE
  character(len=fnlen) :: getwfkfine_path = ABI_NOFILE

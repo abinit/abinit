@@ -553,7 +553,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
- EPH Double grid interpolation: will read energies from: t150o_DS6_WFK
+ EPH double grid interpolation: will read energies from: t150o_DS6_WFK
+
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
  Symsigma: 1 Timrev: 1
@@ -845,7 +846,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
- EPH Double grid interpolation: will read energies from: t150o_DS6_WFK
+ EPH double grid interpolation: will read energies from: t150o_DS6_WFK
+
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
  Symsigma: 1 Timrev: 1
