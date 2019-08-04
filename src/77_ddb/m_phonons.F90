@@ -29,7 +29,7 @@ module m_phonons
  use m_errors
  use m_xmpi
  use m_abicore
- use m_htetrahedron
+ use m_htetra
  use m_numeric_tools
  use m_crystal
  use m_nctk
@@ -725,7 +725,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
  real(dp) :: dosdeltae, phdos_int
  character(len=500) :: msg
  character(len=80) :: errstr
- type(t_htetrahedron) :: htetraq
+ type(htetra_t) :: htetraq
 !arrays
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
  integer,allocatable :: bz2ibz_smap(:,:), bz2ibz(:)

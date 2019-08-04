@@ -29,7 +29,7 @@ module m_phgamma
  use m_xmpi
  use m_errors
  use m_krank
- use m_htetrahedron
+ use m_htetra
  use m_ifc
  use m_ebands
  use m_fstab
@@ -1984,7 +1984,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 #endif
  logical :: do_qintp
  character(len=500) :: msg
- type(t_htetrahedron) :: tetra
+ type(htetra_t) :: tetra
 !arrays
  integer :: qptrlatt(3,3),new_qptrlatt(3,3)
  real(dp),allocatable :: my_qshift(:,:)
@@ -3229,7 +3229,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
  real(dp) :: omega,xx,omega_min,omega_max,ww
  logical :: do_qintp
  character(len=500) :: msg
- type(t_htetrahedron) :: tetra
+ type(htetra_t) :: tetra
 !arrays
  integer :: qptrlatt(3,3),new_qptrlatt(3,3)
  real(dp),allocatable :: my_qshift(:,:)

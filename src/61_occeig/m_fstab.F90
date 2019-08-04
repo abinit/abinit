@@ -415,7 +415,8 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    bs2ibz = full2ebands(1, :)
 
    call init_tetra(bs2ibz, cryst%gprimd, klatt, kpt_full, nkpt_full, tetra, ierr, errstr, comm)
-   ABI_CHECK(ierr==0, errstr)
+   !call htetra_init(tetra, bz2ibz, cryst%gprimd, klatt, kpt_fullbz, nkpt_full, ebands%kptns, nkibz, ierr, errstr, comm, opt)
+   ABI_CHECK(ierr == 0, errstr)
    ABI_FREE(bs2ibz)
 
    ABI_MALLOC(tmp_eigen, (nkibz))
@@ -459,6 +460,9 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
        call tetra_blochl_weights(tetra,tmp_eigen,enemin,enemax,max_occ,fs%nene,nkibz,&
          bcorr0,btheta,bdelta,xmpi_comm_self)
 
+       !call tetra%blochl_weights(tmp_eigen,enemin,enemax,max_occ,fs%nene,nkibz,&
+       !  bcorr0,btheta,bdelta,xmpi_comm_self)
+
        do ik_ibz=1,nkibz
          bstart_k = fs%bstcnt_ibz(1, ik_ibz); bstop_k = bstart_k + fs%bstcnt_ibz(2, ik_ibz) - 1
          if (band >= bstart_k .and. band <= bstop_k) then
@@ -476,6 +480,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    ABI_FREE(bdelta)
 
    call destroy_tetra(tetra)
+   !call tetra%free()
  end if
 
  !ABI_FREE(fs2irr)

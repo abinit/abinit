@@ -129,7 +129,7 @@ znucl 6
 #%% test_chain = t41.in, t42.in, t43.in, t44.in
 #%% [files]
 #%% files_to_test = 
-#%%   t44.out, tolnlines = 20, tolabs = 0.003, tolrel = 1.5e-1
+#%%   t44.out, tolnlines = 35, tolabs = 0.003, tolrel = 1.5e-1
 #%% psp_files = 6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 10
@@ -137,6 +137,5 @@ znucl 6
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
 #%% description = 
-#%%   WARNING: This code is still under development. Use at your own risk.
 #%%   Calculation of the Fan-Migdal + Debye-Waller self-energy matrix elements.
 #%%<END TEST_INFO>

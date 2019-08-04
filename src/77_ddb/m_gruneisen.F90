@@ -28,7 +28,7 @@ MODULE m_gruneisen
  use m_abicore
  use m_xmpi
  use m_crystal
- use m_htetrahedron
+ use m_htetra
  use m_ddb
  use m_ddb_hdr
  use m_ifc
@@ -485,7 +485,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
  integer,parameter :: master=0,qptopt1=1,bcorr0=0
  integer :: nprocs,my_rank,iqibz,nqbz,nqibz,ierr,ii,nu,ncerr,nomega,cnt,unt,io
  real(dp) :: gavg,omega_min,omega_max,v2
- type(t_htetrahedron) :: tetra
+ type(htetra_t) :: tetra
  character(len=500) :: msg
 !arrays
  integer :: qptrlatt(3,3)
@@ -501,7 +501,6 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
 
  write(msg,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of Gruneisen DOSes ',ch10
  call wrtout(std_out, msg)
- !call wrtout(ab_out, msg)
 
  ! Generate the q-mesh by finding the IBZ and the corresponding weights.
  ABI_CHECK(all(ngqpt > 0), sjoin("invalid ngqpt:", ltoa(ngqpt)))

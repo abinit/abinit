@@ -70,7 +70,7 @@ module m_outscfcv
  use m_paw_tools,        only : pawprt
  use m_numeric_tools,    only : simpson_int
  use m_epjdos,           only : dos_calcnwrite, partial_dos_fractions, partial_dos_fractions_paw, &
-                                epjdos_t, epjdos_new, epjdos_free, prtfatbands, fatbands_ncwrite
+                                epjdos_t, epjdos_new, prtfatbands, fatbands_ncwrite
  use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
  use m_io_kss,           only : outkss
  use m_multipoles,       only : multipoles_out, out1dm
@@ -199,7 +199,7 @@ contains
 !!      compute_coeff_plowannier,crystal_free,crystal_init,datafordmft,denfgr
 !!      destroy_dmft,destroy_oper,destroy_plowannier,dos_calcnwrite,ebands_free
 !!      ebands_init,ebands_interpolate_kpath,ebands_prtbltztrp,ebands_write
-!!      epjdos_free,fatbands_ncwrite,fftdatar_write,free_my_atmtab
+!!      fatbands_ncwrite,fftdatar_write,free_my_atmtab
 !!      get_my_atmtab,init_dmft,init_oper,init_plowannier,ioarr,mag_constr_e
 !!      mlwfovlp,mlwfovlp_qp,multipoles_out,optics_paw,optics_paw_core
 !!      optics_vloc,out1dm,outkss,outwant,partial_dos_fractions
@@ -931,7 +931,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    end if
 #endif
 
-   call epjdos_free(dos)
+   call dos%free()
  end if ! prtdos > 1
 
  call timab(959,2,tsec)

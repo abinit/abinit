@@ -35,7 +35,7 @@ MODULE m_ebands
  use m_errors
  use m_abicore
  use m_xmpi
- use m_htetrahedron
+ use m_htetra
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
@@ -2944,7 +2944,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
  real(dp) :: max_ene,min_ene,wtk,max_occ
  character(len=500) :: msg
  type(stats_t) :: ediffs
- type(t_htetrahedron) :: tetra
+ type(htetra_t) :: tetra
 !arrays
  real(dp) :: eminmax_spin(2,ebands%nsppol)
  real(dp),allocatable :: wme0(:),wdt(:,:),tmp_eigen(:)
@@ -4223,7 +4223,7 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
  !real(dp) :: dksqmax
  character(len=500) :: msg
  type(stats_t) :: ediffs
- type(t_htetrahedron) :: tetra
+ type(htetra_t) :: tetra
 !arrays
  !integer,allocatable :: bz2ibz(:,:)
  real(dp) :: eminmax_spin(2,ebands%nsppol)
@@ -4540,7 +4540,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
  integer :: ik_ibz,ibc,ibv,spin,nw,nband_k,nbv,nproc,my_rank,cnt,mpierr,bcorr !iw, unt,
  real(dp) :: wtk,wmax,wstep,wbroad
  type(stats_t) :: ediffs
- type(t_htetrahedron) :: tetra
+ type(htetra_t) :: tetra
  character(len=500) :: msg
  !character(len=fnlen) :: path
 !arrays

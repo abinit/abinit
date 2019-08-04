@@ -36,7 +36,7 @@ module m_ephwg
  use m_errors
  use m_xmpi
  use m_copy
- use m_htetrahedron
+ use m_htetra
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
@@ -151,7 +151,7 @@ type, public :: ephwg_t
   type(lgroup_t) :: lgk
   ! Little group of the k-point
 
-  type(t_htetrahedron) :: tetra_k
+  type(htetra_t) :: tetra_k
   ! Used to evaluate delta(w - e_{k+q} +/- phw_q) with tetrahedron method.
 
  contains

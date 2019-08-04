@@ -564,6 +564,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%getdvdb_path       = dtin%getdvdb_path
  dtout%getpot_path        = dtin%getpot_path
  dtout%getwfk_path        = dtin%getwfk_path
+ dtout%getwfkfine_path    = dtin%getwfkfine_path
  dtout%getwfq_path        = dtin%getwfq_path
  dtout%getqps             = dtin%getqps
  dtout%getscr             = dtin%getscr
@@ -2193,7 +2194,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' getefmas getkerange_path getgam_eig2nkq'
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_path getqps getscr'
  list_vars=trim(list_vars)//' getwfkfine getsuscep '
- list_vars=trim(list_vars)//' getvel getwfk getwfk_path getwfq getwfq_path getxcart getxred'
+ list_vars=trim(list_vars)//' getvel getwfk getwfk_path getwfkfine_path getwfq getwfq_path getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwcalctyp gwcomp gwencomp gwgamma gwmem'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gw_customnfreqsp'

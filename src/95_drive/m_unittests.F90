@@ -31,7 +31,7 @@ module m_unittests
  use m_defs_ptgroups
  use m_ptgroups
  use m_tetrahedron
- use m_htetrahedron
+ use m_htetra
  use m_krank
  use m_hashtable
  use m_symkpt
@@ -204,7 +204,7 @@ subroutine tetra_unittests(comm)
  real(dp) :: dosdeltae, emin, emax, qnorm, dos_int
  character(len=80) :: errstr
  type(t_tetrahedron) :: tetraq
- type(t_htetrahedron) :: htetraq
+ type(htetra_t) :: htetraq
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
  integer,allocatable :: bz2ibz(:,:)
  real(dp) :: dos_qshift(3,nqshft1)

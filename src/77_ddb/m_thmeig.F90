@@ -78,10 +78,7 @@ contains
 !!
 !! SOURCE
 
-subroutine thmeig(inp, ddb, crystal, &
-&                 elph_base_name, eig2_filnam, ddbun, iout, &
-&                 natom, mpert, msize, d2asr, &
-&                 comm)
+subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, natom, mpert, msize, d2asr, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -164,11 +161,6 @@ subroutine thmeig(inp, ddb, crystal, &
  character(len=80) :: errstr
 
 ! *********************************************************************
-
-!DEBUG
-! write(std_out,*)'-thmeig : enter '
-!call flush(6)
-!ENDDEBUG
 
  ! Only master works for the time being
  if (xmpi_comm_rank(comm) /= master) return

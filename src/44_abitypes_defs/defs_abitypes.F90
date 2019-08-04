@@ -991,6 +991,7 @@ type dataset_type
  character(len=fnlen) :: getddb_path = ABI_NOFILE
  character(len=fnlen) :: getdvdb_path = ABI_NOFILE
  character(len=fnlen) :: getwfk_path = ABI_NOFILE
+ character(len=fnlen) :: getwfkfine_path = ABI_NOFILE
  character(len=fnlen) :: getwfq_path = ABI_NOFILE
  character(len=fnlen) :: getkerange_path = ABI_NOFILE
  character(len=fnlen) :: getpot_path = ABI_NOFILE

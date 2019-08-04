@@ -95,7 +95,6 @@
 #%% authors = G. Brunin, M. Giantomassi
 #%% keywords = NC, DFPT, EPH
 #%% description = 
-#%%   WARNING: This code is still under development. Use at your own risk!
 #%%   Preparatory run for the calculation of the Fan-Migdal self-energy 
 #%%   C in diamond structure. Very rough 2x2x2 q-point grid (3 qpoints); low ecut.
 #%%<END TEST_INFO>
