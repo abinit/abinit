@@ -37,7 +37,7 @@ bdgw 1 8
 ###########
 # With the double-grid
 ###########
-getwfkfine2 20
+getwfkfine_path2 "t150o_DS6_WFK"
 
 ###########
 # Set the carrier concentration
@@ -48,7 +48,7 @@ occopt3 3
 ##########
 # Double-grid and carrier concentration
 ##########
-getwfkfine4 20
+getwfkfine_path4 "t150o_DS6_WFK"
 eph_extrael4 0.2
 occopt4 3
 

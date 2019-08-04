@@ -2792,14 +2792,13 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  ! TODO: Should add support for getwfkfine_path
  new%use_doublegrid = .False.
- if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine == 0) .or.&
-     (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /= 0) ) then
+ if ((dtset%getwfkfine /= 0.or. dtset%irdwfkfine /= 0) .or. dtset%getwfkfine_path /= ABI_NOFILE) then
 
-   wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)//'FINE'
+   wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)
    if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
      MSG_ERROR(msg)
    end if
-   call wrtout(std_out," EPH Interpolation: will read energies from: "//trim(wfk_fname_dense))
+   call wrtout([std_out, ab_out], " EPH double grid interpolation: will read energies from: "//trim(wfk_fname_dense), newlines=1)
    ebands_dense = wfk_read_ebands(wfk_fname_dense, comm)
 
    !TODO add consistency check: number of bands and kpoints (commensurability)
@@ -2808,7 +2807,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  else if (any(dtset%bs_interp_kmult /= 0)) then
    ! Read bs_interpmult
-   call wrtout(std_out," EPH Interpolation: will use star functions interpolation")
+   call wrtout([std_out, ab_out]," EPH interpolation: will use star functions interpolation.", newlines=1)
    ! Interpolate band energies with star-functions
    params = 0; params(1) = 1; params(2) = 5
    if (nint(dtset%einterp(1)) == 1) params = dtset%einterp

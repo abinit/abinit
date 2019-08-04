@@ -37,8 +37,8 @@ gw_qprange 2
 ###########
 # Use of the two-grids technique
 ###########
-getwfkfine1 20
-getwfkfine2 20
+getwfkfine_path1 "t150o_DS6_WFK"
+getwfkfine_path2 "t150o_DS6_WFK"
 eph_intmeth2 2
 
 bs_interp_kmult3 2 2 2

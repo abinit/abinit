@@ -1372,6 +1372,9 @@ type dataset_type
   integer :: unpawq  ! unit number for temporary PAW cprjq=<c+_k+q|p> at k+qdata
   integer :: unpos   ! unit number for restart molecular dynamics
 
+  ! TODO: All this strings should be initialized with ABI_NOFILE
+  ! so that we can easily test for path /= ABI_NOFILE instead of getwfk /= 0 or irdwfk /= 0
+
   character(len=fnlen) :: filnam_ds(5)
    ! if no dataset mode, the five names from the standard input :
    !   ab_in, ab_out, abi, abo, tmp
