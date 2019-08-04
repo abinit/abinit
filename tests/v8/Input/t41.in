@@ -28,7 +28,7 @@
 ##################################################
 # Dataset 2 (NSCF run to get WFK with empty states
 ##################################################
- getden2  1
+ getden_path2 "t41o_DS1_DEN"
  getwfk2  0
  iscf2   -2
  nband2   54

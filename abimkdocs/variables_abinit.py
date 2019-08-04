@@ -19883,4 +19883,20 @@ Alternative to [[getdvdb]] and [[irddvdb]]. The string must be enclosed between 
 """
 ),
 
+Variable(
+    abivarname="getden_path",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the DEN file from PATH",
+    text=r"""
+Specify the path of the DEN file using a string instead of the dataset index.
+Alternative to [[getden]] and [[irdden]]. The string must be enclosed between quotation marks:
+
+    getden_path "../outdata/out_DEN"
+"""
+),
+
 ]

@@ -279,7 +279,8 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    stringfile='_DEN'
  end if
  stringvar='den'
- call mkfilename(filnam,fildensin,dtset%getden,idtset,dtset%irdden,jdtset_,ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,fildensin,dtset%getden,idtset,dtset%irdden,jdtset_,ndtset,stringfile,stringvar, will_read, &
+                 getpath=dtset%getden_path)
 
  if(will_read==0)fildensin=trim(filnam_ds(3))//'_DEN'
  ireadden=will_read
