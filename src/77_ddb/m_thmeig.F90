@@ -29,6 +29,7 @@ module m_thmeig
  use defs_basis
  use m_abicore
  use m_tetrahedron
+ use m_htetra
  use m_errors
  use m_ddb
  use m_ddb_hdr
@@ -158,6 +159,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  real(dp),allocatable :: wghtq(:)
 
  type(t_tetrahedron) :: tetrahedra
+ !type(htetra_t) :: tetrahedra
  character(len=80) :: errstr
 
 ! *********************************************************************
@@ -771,6 +773,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 
 !  Get tetrahedra, ie indexes of the full kpoints at their summits
    call init_tetra(indqpt,gprimd,qlatt,qpt_full,nqpt, tetrahedra, ierr, errstr, xmpi_comm_self)
+   !call htetra_init(tetra, indqpt, gprimd, qlatt, qpt_full, nqpt, kpt_ibz, nkpt_ibz, ierr, errstr, xmpi_comm_self
    ABI_CHECK(ierr==0,errstr)
 
    rcvol = abs (gprimd(1,1)*(gprimd(2,2)*gprimd(3,3)-gprimd(3,2)*gprimd(2,3)) &

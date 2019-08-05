@@ -29,11 +29,10 @@ module m_fstab
  use m_xmpi
  use m_errors
  use m_krank
- !use m_tetrahedron
  use m_htetra
  use m_ebands
 
- use m_time,           only : cwtime
+ use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : itoa, sjoin
  use m_numeric_tools,  only : bisect
  use m_symtk,          only : matr3inv
@@ -255,11 +254,10 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  integer,allocatable :: fs2full(:),indkk(:,:) !,fs2irr(:)
  character(len=500) :: msg
  type(fstab_t),pointer :: fs
- !type(t_tetrahedron) :: tetra
  type(htetra_t) :: tetra
 !arrays
  !integer :: g0(3)
- integer,allocatable :: full2ebands(:,:),bs2ibz(:)
+ integer,allocatable :: full2ebands(:,:),bz2ibz(:)
  real(dp) :: rlatt(3,3),klatt(3,3) !kibz(3),krot(3),
  real(dp),allocatable :: kpt_full(:,:) !,fskpts(:,:)
  real(dp), allocatable :: tmp_eigen(:),bdelta(:,:),btheta(:,:)
@@ -269,7 +267,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  ABI_UNUSED(comm)
 
  !@fstab_t
- call cwtime(cpu,wall,gflops,"start")
+ call cwtime(cpu, wall, gflops, "start")
 
  if (any(cryst%symrel(:,:,1) /= identity_3d) .and. any(abs(cryst%tnons(:,1)) > tol10) ) then
   MSG_ERROR('The first symmetry is not the identity operator!')
@@ -313,9 +311,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    MSG_ERROR(msg)
  end if
 
- call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')"fstab_init%listkk: cpu:",cpu,", wall: ",wall
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
+ call cwtime_report("fstab_init%listkk", cpu, wall, gflops)
 
  ABI_MALLOC(full2ebands, (6, nkpt_full))
  full2ebands = 0
@@ -326,8 +322,6 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    full2ebands(3, ik_full) = indkk(ik_full,6)     ! itimrev
    full2ebands(4:6, ik_full) = indkk(ik_full,3:5) ! g0
  end do
-
- call cwtime(cpu,wall,gflops,"start")
 
  ! Select only those k-points in the BZ close to the FS.
  ABI_CHECK(fsewin > tol12, "fsewin < tol12")
@@ -394,10 +388,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    fs%krank = krank_new(nkfs, fs%kpts)
  end do ! spin
 
- call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')"fstab_init%fs_build: cpu:",cpu,", wall: ",wall
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
- call cwtime(cpu,wall,gflops,"start")
+ call cwtime_report("fstab_init%fs_build:", cpu, wall, gflops)
 
  ! fix window around fermie for tetrahedron or gaussian weight calculation
  ! this is spin independent
@@ -421,13 +412,12 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    rlatt = kptrlatt
    call matr3inv(rlatt,klatt)
 
-   ABI_MALLOC(bs2ibz, (nkpt_full))
-   bs2ibz = full2ebands(1, :)
+   ABI_MALLOC(bz2ibz, (nkpt_full))
+   bz2ibz = full2ebands(1, :)
 
-   !call init_tetra(bs2ibz, cryst%gprimd, klatt, kpt_full, nkpt_full, tetra, ierr, errstr, comm)
-   call htetra_init(tetra, bs2ibz, cryst%gprimd, klatt, kpt_full, nkpt_full, ebands%kptns, nkibz, ierr, errstr, comm)
+   call htetra_init(tetra, bz2ibz, cryst%gprimd, klatt, kpt_full, nkpt_full, ebands%kptns, nkibz, ierr, errstr, comm)
    ABI_CHECK(ierr == 0, errstr)
-   ABI_FREE(bs2ibz)
+   ABI_FREE(bz2ibz)
 
    ABI_MALLOC(tmp_eigen, (nkibz))
    ABI_MALLOC(btheta, (nene, nkibz))
@@ -489,7 +479,6 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    ABI_FREE(btheta)
    ABI_FREE(bdelta)
 
-   !call destroy_tetra(tetra)
    call tetra%free()
  end if
 
@@ -499,9 +488,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  ABI_FREE(full2ebands)
  ABI_FREE(indkk)
 
- call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')"fstab_init%fs_weights ",cpu,", wall: ",wall
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
+ call cwtime_report("fstab_init%fs_weights:", cpu, wall, gflops)
 
 end subroutine fstab_init
 !!***

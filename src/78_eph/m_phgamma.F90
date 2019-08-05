@@ -46,7 +46,7 @@ module m_phgamma
  use m_hamiltonian
  use m_pawcprj
 
- use m_time,           only : cwtime, sec2str
+ use m_time,           only : cwtime, cwtime_report, sec2str
  use m_fstrings,       only : toupper, itoa, sjoin, ktoa, ftoa, ltoa, strcat
  use m_numeric_tools,  only : arth, wrap2_pmhalf, simpson_int, simpson, bisect, mkherm, get_diag
  use m_io_tools,       only : open_file, iomode_from_fname
@@ -2041,7 +2041,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
  nsppol = gams%nsppol; natom3 = gams%natom3
 
- call cwtime(cpu,wall,gflops,"start")
+ call cwtime(cpu, wall, gflops, "start")
  if (do_qintp) then
    ! Generate the q-mesh by finding the IBZ and the corresponding weights.
    qptrlatt = 0
@@ -2070,9 +2070,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
    a2f%qshift = zero ! Note: assuming q-mesh centered on Gamma.
  end if
 
- call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')"a2fw_init, q-setup: ",cpu,", wall: ",wall
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
+ call cwtime_report("a2fw_init, q-setup:", cpu, wall, gflops)
 
  ! Define Min and max frequency for the mesh (enlarge it a bit)
  omega_min = wminmax(1); omega_max = wminmax(2)
@@ -2102,7 +2100,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
  ABI_MALLOC(tmp_a2f, (nomega))
 
  if (intmeth == 2) then
-   call cwtime(cpu,wall,gflops,"start")
+   call cwtime(cpu, wall, gflops, "start")
 
    ! Prepare tetrahedron integration.
    qptrlatt = 0
@@ -2128,12 +2126,10 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
    end do
    call xmpi_sum(phfreq_tetra, comm, ierr)
 
-   call cwtime(cpu,wall,gflops,"stop")
-   write(msg,'(2(a,f8.2))')"a2fw_init%tetra, cpu",cpu,", wall: ",wall
-   call wrtout(std_out,msg,"COLL",do_flush=.True.)
+   call cwtime_report("a2fw_init%tetra", cpu, wall, gflops)
  end if
 
- call cwtime(cpu,wall,gflops,"start")
+ call cwtime(cpu, wall, gflops, "start")
 
 #ifdef DEV_MJV
  open (unit=900, file="a2fvals_ee.dat")
@@ -2166,7 +2162,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
      case (1)
        ! Gaussian: Add all contributions from the phonon modes at this qpoint to a2f
        ! (note that unstable modes are included).
-       ABI_ALLOCATE(tmp_gaussian, (nomega, natom3))
+       ABI_MALLOC(tmp_gaussian, (nomega, natom3))
        do mu=1,natom3
          tmp_a2f = zero
          do iw=1,nomega
@@ -2208,7 +2204,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
          end do
        end do
 #endif
-       ABI_DEALLOCATE(tmp_gaussian)
+       ABI_FREE(tmp_gaussian)
 
      case (2)
        ! Tetra: store data.
@@ -2278,9 +2274,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
  !  end do
  !end do
 
- call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')"a2fw_init, a2f_eval: ",cpu,", wall: ",wall
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
+ call cwtime_report("a2fw_init, a2f_eval:", cpu, wall, gflops)
 
  ABI_MALLOC(a2f_1mom,(nomega))
  ABI_MALLOC(a2flogmom,(nomega))
@@ -2353,10 +2347,10 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
    ntemp = 100
    min_temp = zero
    delta_temp = 40._dp ! Kelvin
-   ABI_ALLOCATE (a2feew_partial, (a2f%nene))
-   ABI_ALLOCATE (a2feew_partial_int, (a2f%nene))
-   ABI_ALLOCATE (a2feew_w, (nomega))
-   ABI_ALLOCATE (a2feew_w_int, (nomega))
+   ABI_MALLOC (a2feew_partial, (a2f%nene))
+   ABI_MALLOC (a2feew_partial_int, (a2f%nene))
+   ABI_MALLOC (a2feew_w, (nomega))
+   ABI_MALLOC (a2feew_w_int, (nomega))
    ount = get_unit()
    open (unit=ount, name="EPC_strength_aafo_T.dat")
    write (ount, "# temp_el, G_0(T_e) in W/m^3/K, spin")
@@ -2388,10 +2382,10 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
      end do
    end do
    close (ount)
-   ABI_DEALLOCATE (a2feew_partial)
-   ABI_DEALLOCATE (a2feew_partial_int)
-   ABI_DEALLOCATE (a2feew_w)
-   ABI_DEALLOCATE (a2feew_w_int)
+   ABI_FREE (a2feew_partial)
+   ABI_FREE (a2feew_partial_int)
+   ABI_FREE (a2feew_w)
+   ABI_FREE (a2feew_w_int)
  end if
 #endif
 
@@ -2850,9 +2844,8 @@ subroutine a2fw_ee_write(a2f,basename)
 
 !Local variables -------------------------
 !scalars
- integer :: iw,spin,unt,ii
- integer :: iene, jene
- real(dp) :: ene1,ene2
+ integer :: iw, spin, unt, ii, iene, jene
+ real(dp) :: ene1, ene2
  character(len=500) :: msg
  character(len=fnlen) :: path
 
@@ -3249,9 +3242,8 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
 !scalars
  integer,parameter :: bcorr0=0,master=0
  integer :: my_qptopt,iq_ibz,nqibz,ount,ii,my_rank,nproc,cnt
- integer :: mu,iw,natom3,nsppol,spin,ierr,nomega,nqbz
- integer :: idir, jdir
- real(dp) :: cpu,wall,gflops
+ integer :: mu,iw,natom3,nsppol,spin,ierr,nomega,nqbz, idir, jdir
+ real(dp) :: cpu, wall, gflops
  real(dp) :: omega,xx,omega_min,omega_max,ww
  logical :: do_qintp
  character(len=500) :: msg
@@ -3263,8 +3255,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
  real(dp) :: phfrq(gams%natom3)
  real(dp) :: gamma_in_ph(3,3,gams%natom3), gamma_out_ph(3,3,gams%natom3)
  real(dp) :: lambda_in_ph(3,3,gams%natom3), lambda_out_ph(3,3,gams%natom3)
- real(dp),allocatable :: tmp_a2f_in(:,:,:)
- real(dp),allocatable :: tmp_a2f_out(:,:,:)
+ real(dp),allocatable :: tmp_a2f_in(:,:,:), tmp_a2f_out(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: a2f_tr_1d(:)
  real(dp),allocatable :: qibz(:,:),wtq(:),qbz(:,:)
  real(dp),allocatable :: a2f_tr_1mom(:),a2f_tr_logmom(:),a2f_tr_logmom_int(:),wdt(:,:)
@@ -3280,7 +3271,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
  nsppol = gams%nsppol; natom3 = gams%natom3
 
- call cwtime(cpu,wall,gflops,"start")
+ call cwtime(cpu, wall, gflops, "start")
 
  if (do_qintp) then
    ! Generate the q-mesh by finding the IBZ and the corresponding weights.
@@ -3310,9 +3301,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
    a2f_tr%qshift = zero ! Note: assuming q-mesh centered on Gamma.
  end if
 
- call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')"a2fw_tr_init, q-setup: ",cpu,", wall: ",wall
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
+ call cwtime_report("a2fw_tr_init, q-setup", cpu, wall, gflops)
 
  ! Define Min and max frequency for the mesh (enlarge it a bit)
  omega_min = wminmax(1); omega_max = wminmax(2)
@@ -3337,7 +3326,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
  ABI_MALLOC(tmp_a2f_out, (nomega,3,3))
 
  if (intmeth == 2) then
-   call cwtime(cpu,wall,gflops,"start")
+   call cwtime(cpu, wall, gflops, "start")
 
    ! Prepare tetrahedron integration.
    qptrlatt = 0
@@ -3356,12 +3345,10 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
    ABI_MALLOC_OR_DIE(phfreq_tetra, (nqibz,natom3,nsppol), ierr)
    phfreq_tetra = zero
 
-   call cwtime(cpu,wall,gflops,"stop")
-   write(msg,'(2(a,f8.2))')"a2fw_tr_init%tetra, cpu",cpu,", wall: ",wall
-   call wrtout(std_out,msg,"COLL",do_flush=.True.)
+   call cwtime_report("a2fw_tr_init%tetra,", cpu, wall, gflops)
  end if
 
- call cwtime(cpu,wall,gflops,"start")
+ call cwtime(cpu, wall, gflops, "start")
 
  ! Loop over spins and qpoints in the IBZ
  cnt = 0
@@ -3470,9 +3457,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
 
  a2f_tr%vals_tr = a2f_tr%vals_out - a2f_tr%vals_in
 
- call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')"a2fw_tr_init, a2f_eval: ",cpu,", wall: ",wall
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
+ call cwtime_report("a2fw_tr_init, a2f_eval", cpu, wall, gflops)
 
 ! NOTE: for the moment calculate the log moms etc on just the trace of the a2f functions
  ABI_MALLOC(a2f_tr_1mom,(nomega))
@@ -3631,16 +3616,16 @@ subroutine a2fw_tr_write(a2f_tr, basename, post, ncid)
    write(unt,'(a)')"# Frequency, a2F_tr_tot(w,i,j), a2F_tr_spin1(w,i,j) ..."
    do iw=1,a2f_tr%nomega
      write(unt,'(e16.6, 2x, 3(3e16.6,1x), 2x,  3(3e16.6,1x), 2x,  3(3e16.6,1x))') a2f_tr%omega(iw), &
-&                 ((sum(a2f_tr%vals_tr(iw,idir,jdir,0,:)), idir=1,3), jdir=1,3) , &
-&                 a2f_tr%vals_tr(iw,:,:,0,1), &  ! UP
-&                 a2f_tr%vals_tr(iw,:,:,0,2)     ! DOWN
+                  ((sum(a2f_tr%vals_tr(iw,idir,jdir,0,:)), idir=1,3), jdir=1,3) , &
+                  a2f_tr%vals_tr(iw,:,:,0,1), &  ! UP
+                  a2f_tr%vals_tr(iw,:,:,0,2)     ! DOWN
    end do
    write(unt,'(3a)') ch10, ch10, "# Frequency, lambda_tr_tot(w,i,j)dw, lambda_tr_spin1(w,i,j) ..."
    do iw=1,a2f_tr%nomega
      write(unt,'(e16.6, 2x, 3(3e16.6,1x), 2x, 3(3e16.6,1x), 2x,      3(3e16.6,1x), 2x,  3(3e16.6,1x))') a2f_tr%omega(iw), &
-&                 ((sum(a2f_tr%lambdaw_tr(iw,idir,jdir,0,:)), idir=1,3), jdir=1,3) , &  ! TOT
-&                 a2f_tr%lambdaw_tr(iw,:,:,0,1), &  ! UP
-&                 a2f_tr%lambdaw_tr(iw,:,:,0,2)     ! DOWN
+                  ((sum(a2f_tr%lambdaw_tr(iw,idir,jdir,0,:)), idir=1,3), jdir=1,3) , &  ! TOT
+                  a2f_tr%lambdaw_tr(iw,:,:,0,1), &  ! UP
+                  a2f_tr%lambdaw_tr(iw,:,:,0,2)     ! DOWN
    end do
  end if
 
@@ -3943,7 +3928,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    ! Add eph dimensions.
    ncerr = nctk_def_dims(ncid, [nctkdim_t("nqibz", gams%nqibz), nctkdim_t("natom3", natom3)], defmode=.True.)
    NCF_CHECK(ncerr)
-
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "eph_intmeth", "eph_transport", "symdynmat"], defmode=.True.)
    NCF_CHECK(ncerr)
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "ph_intmeth"], defmode=.True.)
@@ -4069,7 +4053,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ! mpw is the maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
  ! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
  ! that will be used to symmetrize the wavefunctions in G-space.
- call cwtime(cpu,wall,gflops,"start")
+ call cwtime(cpu, wall, gflops, "start")
  mpw = 0; gmax=0; cnt=0
  do iq_ibz=1,gams%nqibz
    qpt = gams%qibz(:,iq_ibz)
@@ -4102,9 +4086,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      end do
    end do
  end do
- call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')"gmax and mpw: ",cpu,", wall: ",wall
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
+
+ call cwtime_report("gmax and mpw", cpu, wall, gflops)
 
  my_mpw = mpw; call xmpi_max(my_mpw, mpw, comm, ierr)
  my_gmax = gmax; call xmpi_max(my_gmax, gmax, comm, ierr)
@@ -4205,7 +4188,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      tgamvv_in = zero; tgamvv_out = zero
    end if
 
-   call cwtime(cpu,wall,gflops,"start")
+   call cwtime(cpu, wall, gflops, "start")
 
    ! Find the index of the q-point in the DVDB.
    db_iqpt = dvdb%findq(qpt)
@@ -4593,9 +4576,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    ABI_FREE(v1scf)
    ABI_FREE(vlocal1)
 
-   call cwtime(cpu,wall,gflops,"stop")
-   write(msg,'(2(a,i0),2(a,f8.2))')"q-point [",iq_ibz,"/",gams%nqibz,"] completed. cpu:",cpu,", wall:",wall
-   call wrtout(std_out, msg, do_flush=.True.)
+   write(msg,'(2(a,i0),a)')"q-point [",iq_ibz,"/",gams%nqibz,"]"
+   call cwtime_report(msg, cpu, wall, gflops)
  end do ! iq_ibz
 
 #ifdef DEV_MJV
@@ -4645,10 +4627,10 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  do spin=1,ebands%nsppol
    call fstab(spin)%free()
  end do
- ABI_DT_FREE(fstab)
+ ABI_FREE(fstab)
 
  call pawcprj_free(cwaveprj0)
- ABI_DT_FREE(cwaveprj0)
+ ABI_FREE(cwaveprj0)
 
  ! Initialize object used to interpolate linewidths, compute a2f, write results etc.
  ! TODO: also save values for isig > 1???
