@@ -29,7 +29,6 @@ module m_phonons
  use m_errors
  use m_xmpi
  use m_abicore
- use m_tetrahedron
  use m_htetrahedron
  use m_numeric_tools
  use m_crystal
@@ -984,7 +983,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
        ! Compute the weights for this q-point using tetrahedron
        do imode=1,3*natom
          tmp_phfrq(:) = full_phfrq(imode,:)
-         call htetra_get_onewk_wvals(htetraq,iq_ibz,bcorr0,phdos%nomega,energies,max_occ1,phdos%nqibz,tmp_phfrq,wdt)
+         call htetraq%get_onewk_wvals(iq_ibz,bcorr0,phdos%nomega,energies,max_occ1,phdos%nqibz,tmp_phfrq,wdt)
          wdt = wdt * wtq_ibz(iq_ibz)
 
          ! Accumulate DOS/IDOS
@@ -1083,7 +1082,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
    ABI_FREE(full_eigvec)
    ABI_FREE(full_phfrq)
    ABI_FREE(tmp_phfrq)
-   call htetra_free(htetraq)
+   call htetraq%free()
  else
 #ifdef HAVE_NETCDF
    MSG_WARNING('The netcdf PHIBZ file is only output for tetrahedron integration and DOS calculations')
@@ -3275,6 +3274,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
    MSG_COMMENT("ph_nqpath <= 0 or ph_ndivsm <= 0. Phonon bands won't be produced. Returning")
    return
  end if
+ call wrtout(std_out, "Writing phonon bands, use prtphbands 0 to disable this part")
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  natom = cryst%natom

@@ -27,6 +27,7 @@
 module m_octree
 
   use defs_basis
+  use m_abicore
   implicit none
 
   real(dp),protected :: shifts(3,2,8)
@@ -166,9 +167,10 @@ module m_octree
     type(octree_t),target,intent(in) :: octree
     real(dp),intent(in) :: point(3)
     real(dp),intent(inout) :: dist
+    real(dp) :: check_dist
     !check if the point is inside the initial box
-    dist = box_dist(octree%lo,octree%hi,point)
-    if (dist>0) then
+    check_dist = box_dist(octree%lo,octree%hi,point)
+    if (check_dist>0) then
       nearest_id = -1
       return
     end if
@@ -222,12 +224,18 @@ module m_octree
     real(dp) :: trial_dist
     real(dp) :: first_shift(3), trial_shift(3)
     real(dp) :: po(3)
+    id = 0
     ! bring the point inside the box
     po = modulo(point,one)
+    !po = modulo(point+half,one)-half
     ! compute shift
     first_shift = po-point
-    first_id = octn_find_nearest(octree,octree%first,octree%lo,octree%hi,po,dist)
-    id = first_id
+    trial_dist = dist
+    first_id = octn_find_nearest(octree,octree%first,octree%lo,octree%hi,po,trial_dist)
+    if (first_id>0.and.trial_dist<dist) then
+      id   = first_id
+      dist = trial_dist
+    end if
     ! try unitary shifts
     found=.false.
     do ii=-1,1

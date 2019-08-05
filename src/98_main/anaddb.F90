@@ -317,7 +317,6 @@ program anaddb
 
  if (my_rank == master) then
 #ifdef HAVE_NETCDF
-   ! TODO: Cartesian or reduced?
    ncerr = nctk_def_arrays(ana_ncid, [&
    nctkarr_t('emacro_cart', "dp", 'number_of_cartesian_directions, number_of_cartesian_directions'),&
    nctkarr_t('becs_cart', "dp", "number_of_cartesian_directions, number_of_cartesian_directions, number_of_atoms")],&
@@ -458,26 +457,25 @@ program anaddb
 
    if (any(inp%qrefine(:) > 1)) then
      ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
-
      ! Build the IFCs using the coarse q-mesh.
      do ii = 1, 3
-       ngqpt_coarse(ii) = inp%ngqpt(ii)/inp%qrefine(ii)
+       ngqpt_coarse(ii) = inp%ngqpt(ii) / inp%qrefine(ii)
      end do
      call ifc_init(Ifc_coarse,Crystal,ddb,&
-&     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,ngqpt_coarse,inp%nqshft,inp%q1shft,dielt,zeff,&
-&     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
+       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,ngqpt_coarse,inp%nqshft,inp%q1shft,dielt,zeff,&
+       inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
 
-     ! And now use the coarse q-mesh to fill the entries in dynmat(q)
+     ! Now use the coarse q-mesh to fill the entries in dynmat(q)
      ! on the dense q-mesh that cannot be obtained from the DDB file.
      call ifc_init(Ifc,Crystal,ddb,&
-&     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
-&     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm,Ifc_coarse=Ifc_coarse)
+      inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
+      inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm,Ifc_coarse=Ifc_coarse)
      call Ifc_coarse%free()
 
    else
      call ifc_init(Ifc,Crystal,ddb,&
-&     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
-&     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
+       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
+       inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
    end if
 
    call ifc%print(unit=std_out)

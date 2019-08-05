@@ -213,6 +213,9 @@ MODULE m_crystal
    procedure :: symbol_type
    ! Return the atomic symbol from the itypat index.
 
+   procedure :: symbol_iatom
+   ! Return the atomic symbol from the iatom index.
+
    procedure :: adata_type
    ! Return atomic data from the itypat index.
 
@@ -804,7 +807,7 @@ end function isalchemical
 !!
 !! SOURCE
 
-function adata_type(crystal,itypat) result(atom)
+function adata_type(crystal, itypat) result(atom)
 
 !Arguments ------------------------------------
 !scalars
@@ -850,6 +853,34 @@ function symbol_type(crystal, itypat) result(symbol)
  symbol = atom%symbol
 
 end function symbol_type
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/symbol_iatom
+!! NAME
+!!  symbol_iatom
+!!
+!! FUNCTION
+!!  Return the atomic symbol from the iatom index
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+function symbol_iatom(crystal, iatom) result(symbol)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iatom
+ character(len=2) :: symbol
+ class(crystal_t),intent(in) :: crystal
+
+! *************************************************************************
+
+ symbol = crystal%symbol_type(crystal%typat(iatom))
+
+end function symbol_iatom
 !!***
 
 !----------------------------------------------------------------------

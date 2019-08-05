@@ -158,6 +158,40 @@ P This job should need less than                       4.937 Mbytes of memory.
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
+
+ DATASET    9 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  9.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =      16  mpssoang =       2    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =          20        mffmem =           1         mkmem =           8
+       mpw =        1131          nfft =        4096          nkpt =           8
+================================================================================
+P This job should need less than                       4.937 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET   10 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 10.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =      16  mpssoang =       2    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =          20        mffmem =           1         mkmem =           8
+       mpw =        1131          nfft =        4096          nkpt =           8
+================================================================================
+P This job should need less than                       4.937 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -181,6 +215,8 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
   eph_tols_idelta6     1.00000000E-06  1.00000000E-06
   eph_tols_idelta7     1.00000000E-06  1.00000000E-06
   eph_tols_idelta8     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta9     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta10    1.00000000E-12  1.00000000E-12
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
@@ -189,6 +225,8 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
       eph_intmeth6          2
       eph_intmeth7          2
       eph_intmeth8          1
+      eph_intmeth9          2
+      eph_intmeth10         2
       eph_restart           1
          eph_task1          4
          eph_task2          5
@@ -198,6 +236,8 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
          eph_task6         -4
          eph_task7         -4
          eph_task8          4
+         eph_task9         15
+         eph_task10       -15
    eph_ngqpt_fine1       0    0    0
    eph_ngqpt_fine2       4    4    4
    eph_ngqpt_fine3       4    4    4
@@ -206,7 +246,10 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
    eph_ngqpt_fine6       4    4    4
    eph_ngqpt_fine7       4    4    4
    eph_ngqpt_fine8       4    4    4
+   eph_ngqpt_fine9       0    0    0
+   eph_ngqpt_fine10      0    0    0
         ddb_ngqpt        2    2    2
+       dvdb_ngqpt        2    2    2
         ph_nqpath1          3
         ph_nqpath2          3
         ph_nqpath3          3
@@ -215,10 +258,11 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
         ph_nqpath6          3
         ph_nqpath7          3
         ph_nqpath8          3
+        ph_nqpath9          5
+        ph_nqpath10         3
 -          fftalg         312
         freqspmax      7.34986508E-02 Hartree
         freqspmin     -7.34986508E-02 Hartree
-           getddb          20
           getdvdb1          0
           getdvdb2          0
           getdvdb3          2
@@ -227,7 +271,8 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
           getdvdb6          2
           getdvdb7         20
           getdvdb8         20
-           getwfk          20
+          getdvdb9          0
+          getdvdb10         0
        gw_qprange1          4
        gw_qprange2          0
        gw_qprange3          4
@@ -236,8 +281,10 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
        gw_qprange6          0
        gw_qprange7          0
        gw_qprange8          4
+       gw_qprange9          0
+       gw_qprange10         0
            istwfk        2    0    3    0    0    0    7    0
-           jdtset        1    2    3    4    5    6    7    8
+           jdtset        1    2    3    4    5    6    7    8    9   10
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
@@ -252,7 +299,7 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 P           mkmem           8
             natom           2
             nband          20
-           ndtset           8
+           ndtset          10
           nfreqsp         100
             ngfft          16      16      16
              nkpt           8
@@ -276,6 +323,8 @@ P           mkmem           8
  sigma_bsum_range6       0    0
  sigma_bsum_range7       0    0
  sigma_bsum_range8       2    4
+ sigma_bsum_range9       0    0
+ sigma_bsum_range10      0    0
      sigma_erange1    -1.00000000E+00 -1.00000000E+00 Hartree
      sigma_erange2    -1.00000000E+00 -1.00000000E+00 Hartree
      sigma_erange3    -1.00000000E+00 -1.00000000E+00 Hartree
@@ -284,6 +333,8 @@ P           mkmem           8
      sigma_erange6     1.83746627E-02  1.83746627E-02 Hartree
      sigma_erange7     1.83746627E-02  1.83746627E-02 Hartree
      sigma_erange8    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange9    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange10   -1.00000000E+00 -1.00000000E+00 Hartree
       sigma_ngkpt1       2    2    2
       sigma_ngkpt2       0    0    0
       sigma_ngkpt3       2    2    2
@@ -292,6 +343,8 @@ P           mkmem           8
       sigma_ngkpt6       2    2    2
       sigma_ngkpt7       2    2    2
       sigma_ngkpt8       2    2    2
+      sigma_ngkpt9       0    0    0
+      sigma_ngkpt10      0    0    0
           spgroup         225
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -350,13 +403,17 @@ P           mkmem           8
 
  chkinp: Checking input parameters for consistency, jdtset=   8.
 
+ chkinp: Checking input parameters for consistency, jdtset=   9.
+
+ chkinp: Checking input parameters for consistency, jdtset=  10.
+
 ================================================================================
 == DATASET  1 ==================================================================
 -   nproc =    1
 
- mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+ mkfilename: getwfk from: t160o_DS20_WFK
 
- mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+ mkfilename: getddb from: t160o_DS20_DDB
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -480,6 +537,7 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
+ Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
  asr: 1 dipdip: 1 symdynmat: 1
@@ -567,9 +625,11 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
 == DATASET  2 ==================================================================
 -   nproc =    1
 
- mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+ mkfilename: getwfk from: t160o_DS20_WFK
 
- mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+ mkfilename: getddb from: t160o_DS20_DDB
+
+ mkfilename: getdvdb from: t160o_DS20_DVDB
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -661,9 +721,9 @@ Interpolation of the electron-phonon coupling potential completed
 == DATASET  3 ==================================================================
 -   nproc =    1
 
- mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+ mkfilename: getwfk from: t160o_DS20_WFK
 
- mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+ mkfilename: getddb from: t160o_DS20_DDB
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
 
@@ -775,6 +835,7 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
+ Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
  Number of q-points in the IBZ: 8
  asr: 1 dipdip: 1 symdynmat: 1
@@ -862,9 +923,9 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
 == DATASET  4 ==================================================================
 -   nproc =    1
 
- mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+ mkfilename: getwfk from: t160o_DS20_WFK
 
- mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+ mkfilename: getddb from: t160o_DS20_DDB
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
 
@@ -977,6 +1038,7 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
+ Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
  Number of q-points in the IBZ: 8
  asr: 1 dipdip: 1 symdynmat: 1
@@ -1062,9 +1124,9 @@ Transport calculation results
 == DATASET  5 ==================================================================
 -   nproc =    1
 
- mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+ mkfilename: getwfk from: t160o_DS20_WFK
 
- mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+ mkfilename: getddb from: t160o_DS20_DDB
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
 
@@ -1178,9 +1240,9 @@ Interpolation of the electron-phonon coupling potential completed
 == DATASET  6 ==================================================================
 -   nproc =    1
 
- mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+ mkfilename: getwfk from: t160o_DS20_WFK
 
- mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+ mkfilename: getddb from: t160o_DS20_DDB
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
 
@@ -1293,6 +1355,7 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
+ Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
  Number of q-points in the IBZ: 8
  asr: 1 dipdip: 1 symdynmat: 1
@@ -1350,9 +1413,9 @@ Transport calculation results
 == DATASET  7 ==================================================================
 -   nproc =    1
 
- mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+ mkfilename: getwfk from: t160o_DS20_WFK
 
- mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+ mkfilename: getddb from: t160o_DS20_DDB
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET  20.
 
@@ -1446,6 +1509,7 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
+ Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
  Number of q-points in the IBZ: 8
  asr: 1 dipdip: 1 symdynmat: 1
@@ -1503,9 +1567,9 @@ Transport calculation results
 == DATASET  8 ==================================================================
 -   nproc =    1
 
- mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+ mkfilename: getwfk from: t160o_DS20_WFK
 
- mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+ mkfilename: getddb from: t160o_DS20_DDB
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET  20.
 
@@ -1598,6 +1662,7 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
+ Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
  Number of q-points in the IBZ: 8
  asr: 1 dipdip: 1 symdynmat: 1
@@ -1681,6 +1746,186 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
  
 ============================================================================================
 
+================================================================================
+== DATASET  9 ==================================================================
+-   nproc =    1
+
+ mkfilename: getwfk from: t160o_DS20_WFK
+
+ mkfilename: getddb from: t160o_DS20_DDB
+
+ mkfilename: getdvdb from: t160o_DS20_DVDB
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+- Reading GS states from WFK file: t160o_DS20_WFK
+- Reading DDB from file: t160o_DS20_DDB
+- Reading DVDB from file: t160o_DS20_DVDB
+- Reading EFMAS information from file: t160i_DS9_EFMAS.nc
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
+ R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
+ R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
+ Unit cell volume ucvol=  1.1426706E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ Effective charge tensors after 
+ imposition of the charge neutrality,
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    1.042939E+00   -1.084758E-18   -1.087344E-18
+         1         2   -1.084758E-18    1.042939E+00    1.082171E-18
+         1         3    1.084758E-18    1.084758E-18    1.042939E+00
+         2         1   -1.038797E+00   -2.253431E-16   -2.256333E-16
+         2         2   -2.253431E-16   -1.038797E+00    2.250528E-16
+         2         3    2.253431E-16    2.253431E-16   -1.038797E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+- Found dielectric tensor and Born effective charges in DDB file: t160o_DS20_DDB
+       Homogeneous q point set in the B.Z.
+ Grid q points  :        8
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  3)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+  4)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+  5)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+  6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+  7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+  8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+
+ The interatomic forces have been obtained
+qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=independent, found=Yes
+    5)  idir= 2, ipert=   2, type=symmetric, found=No
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=independent, found=Yes
+    5)  idir= 2, ipert=   2, type=independent, found=Yes
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=independent, found=Yes
+    5)  idir= 2, ipert=   2, type=symmetric, found=No
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+All the independent perturbations are available
+--------------------------------------------------------------------------------
+
+
+================================================================================
+== DATASET 10 ==================================================================
+-   nproc =    1
+
+ mkfilename: getwfk from: t160o_DS20_WFK
+
+ mkfilename: getddb from: t160o_DS20_DDB
+
+ mkfilename: getdvdb from: t160o_DS20_DVDB
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+- Reading GS states from WFK file: t160o_DS20_WFK
+- Reading DDB from file: t160o_DS20_DDB
+- Reading DVDB from file: t160o_DS20_DVDB
+- Reading EFMAS information from file: t160i_DS10_EFMAS.nc
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
+ R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
+ R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
+ Unit cell volume ucvol=  1.1426706E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ Effective charge tensors after 
+ imposition of the charge neutrality,
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    1.042939E+00   -1.084758E-18   -1.087344E-18
+         1         2   -1.084758E-18    1.042939E+00    1.082171E-18
+         1         3    1.084758E-18    1.084758E-18    1.042939E+00
+         2         1   -1.038797E+00   -2.253431E-16   -2.256333E-16
+         2         2   -2.253431E-16   -1.038797E+00    2.250528E-16
+         2         3    2.253431E-16    2.253431E-16   -1.038797E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+- Found dielectric tensor and Born effective charges in DDB file: t160o_DS20_DDB
+       Homogeneous q point set in the B.Z.
+ Grid q points  :        8
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  3)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+  4)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+  5)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+  6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+  7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+  8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+
+ The interatomic forces have been obtained
+qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=independent, found=Yes
+    5)  idir= 2, ipert=   2, type=symmetric, found=No
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=independent, found=Yes
+    5)  idir= 2, ipert=   2, type=independent, found=Yes
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=independent, found=Yes
+    5)  idir= 2, ipert=   2, type=symmetric, found=No
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+All the independent perturbations are available
+--------------------------------------------------------------------------------
+
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -1697,6 +1942,8 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
   eph_tols_idelta6     1.00000000E-06  1.00000000E-06
   eph_tols_idelta7     1.00000000E-06  1.00000000E-06
   eph_tols_idelta8     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta9     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta10    1.00000000E-12  1.00000000E-12
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
@@ -1705,6 +1952,8 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
       eph_intmeth6          2
       eph_intmeth7          2
       eph_intmeth8          1
+      eph_intmeth9          2
+      eph_intmeth10         2
       eph_restart           1
          eph_task1          4
          eph_task2          5
@@ -1714,6 +1963,8 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
          eph_task6         -4
          eph_task7         -4
          eph_task8          4
+         eph_task9         15
+         eph_task10       -15
    eph_ngqpt_fine1       0    0    0
    eph_ngqpt_fine2       4    4    4
    eph_ngqpt_fine3       4    4    4
@@ -1722,7 +1973,10 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
    eph_ngqpt_fine6       4    4    4
    eph_ngqpt_fine7       4    4    4
    eph_ngqpt_fine8       4    4    4
+   eph_ngqpt_fine9       0    0    0
+   eph_ngqpt_fine10      0    0    0
         ddb_ngqpt        2    2    2
+       dvdb_ngqpt        2    2    2
         ph_nqpath1          3
         ph_nqpath2          3
         ph_nqpath3          3
@@ -1731,6 +1985,8 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
         ph_nqpath6          3
         ph_nqpath7          3
         ph_nqpath8          3
+        ph_nqpath9          5
+        ph_nqpath10         3
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
@@ -1739,6 +1995,8 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
            etotal6     0.0000000000E+00
            etotal7     0.0000000000E+00
            etotal8     0.0000000000E+00
+           etotal9     0.0000000000E+00
+           etotal10    0.0000000000E+00
             fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1755,10 +2013,13 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart8     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart9     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart10    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
         freqspmax      7.34986508E-02 Hartree
         freqspmin     -7.34986508E-02 Hartree
-           getddb          20
           getdvdb1          0
           getdvdb2          0
           getdvdb3          2
@@ -1767,7 +2028,8 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
           getdvdb6          2
           getdvdb7         20
           getdvdb8         20
-           getwfk          20
+          getdvdb9          0
+          getdvdb10         0
        gw_qprange1          4
        gw_qprange2          0
        gw_qprange3          4
@@ -1776,14 +2038,16 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
        gw_qprange6          0
        gw_qprange7          0
        gw_qprange8          4
-           jdtset        1    2    3    4    5    6    7    8
+       gw_qprange9          0
+       gw_qprange10         0
+           jdtset        1    2    3    4    5    6    7    8    9   10
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      2.17873965E+01
           mixprec        1
 P           mkmem           8
             natom           2
             nband          20
-           ndtset           8
+           ndtset          10
           nfreqsp         100
             ngfft          16      16      16
              nkpt           8
@@ -1807,6 +2071,8 @@ P           mkmem           8
  sigma_bsum_range6       0    0
  sigma_bsum_range7       0    0
  sigma_bsum_range8       2    4
+ sigma_bsum_range9       0    0
+ sigma_bsum_range10      0    0
      sigma_erange1    -1.00000000E+00 -1.00000000E+00 Hartree
      sigma_erange2    -1.00000000E+00 -1.00000000E+00 Hartree
      sigma_erange3    -1.00000000E+00 -1.00000000E+00 Hartree
@@ -1815,6 +2081,8 @@ P           mkmem           8
      sigma_erange6     1.83746627E-02  1.83746627E-02 Hartree
      sigma_erange7     1.83746627E-02  1.83746627E-02 Hartree
      sigma_erange8    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange9    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange10   -1.00000000E+00 -1.00000000E+00 Hartree
       sigma_ngkpt1       2    2    2
       sigma_ngkpt2       0    0    0
       sigma_ngkpt3       2    2    2
@@ -1823,6 +2091,8 @@ P           mkmem           8
       sigma_ngkpt6       2    2    2
       sigma_ngkpt7       2    2    2
       sigma_ngkpt8       2    2    2
+      sigma_ngkpt9       0    0    0
+      sigma_ngkpt10      0    0    0
           spgroup         225
            strten1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1839,6 +2109,10 @@ P           mkmem           8
            strten7     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten8     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten9     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten10    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -1911,48 +2185,48 @@ P           mkmem           8
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [3] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         21.4  wall=         21.4
+- Proc.   0 individual time (sec): cpu=          8.5  wall=          8.7
 
 ================================================================================
 

@@ -65,8 +65,8 @@ def main():
     # we're passing these as arguments to the diff function
     fromdate = time.ctime(os.stat(fromfile).st_mtime)
     todate = time.ctime(os.stat(tofile).st_mtime)
-    fromlines = open(fromfile).readlines()
-    tolines = open(tofile).readlines()
+    fromlines = open(fromfile, "rt").readlines()
+    tolines = open(tofile, "rt").readlines()
 
     if options.abinit_junk:
         line_junk = abinit_line_junk
@@ -98,9 +98,8 @@ def main():
 
     # writelines because diff is a generator
     if options.file:
-        fh = open(options.file, 'w')
-        fh.writelines(diff)
-        fh.close()
+        with open(options.file, "w") as fh:
+            fh.writelines(diff)
     else:
         sys.stdout.writelines(diff)
 
