@@ -6711,7 +6711,8 @@ subroutine dvdb_load_ddb(dvdb,ddb_path,prtvol,comm)
  type(crystal_t) :: cryst_ddb
  type(ddb_type) :: ddb
  integer :: my_rank, chneut
- integer :: iblock_dielt, iblock_dielt_zeff
+ integer :: iblock_dielt, iblock_dielt_zeff, iblock_quadrupoles
+ integer :: iatom
  integer,allocatable :: dummy_atifc(:)
  real(dp),allocatable :: zeff(:,:,:), zeff_raw(:,:,:)
  real(dp) :: dielt(3,3)
@@ -6723,7 +6724,6 @@ subroutine dvdb_load_ddb(dvdb,ddb_path,prtvol,comm)
  ABI_CALLOC(dummy_atifc, (dvdb%natom))
  call ddb_from_file(ddb, ddb_path, brav1, dvdb%natom, natifc0, dummy_atifc, cryst_ddb, comm, prtvol=prtvol)
  ABI_FREE(dummy_atifc)
- call cryst_ddb%free()
 
  ! Get Dielectric Tensor
  iblock_dielt = ddb_get_dielt(ddb, rfmeth1, dielt)
@@ -6758,6 +6758,12 @@ subroutine dvdb_load_ddb(dvdb,ddb_path,prtvol,comm)
  end if
  ABI_FREE(zeff)
  ABI_FREE(zeff_raw)
+
+ ! Read the quadrupoles
+ iblock_quadrupoles = ddb_get_quadrupoles(ddb, cryst_ddb, 3, dvdb%qstar)
+ if (iblock_quadrupoles /=0) dvdb%has_quadrupoles = .True.
+
+ call cryst_ddb%free()
 
 end subroutine dvdb_load_ddb
 !!***

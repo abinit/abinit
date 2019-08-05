@@ -36,6 +36,7 @@ MODULE m_ddb
  use m_ddb_hdr
  use m_dtset
 
+ use m_io_tools,       only : file_exists
  use m_fstrings,       only : sjoin, itoa, ktoa
  use m_numeric_tools,  only : mkherm
  use m_symtk,          only : mati3inv, matr3inv, littlegroup_q, symatm
@@ -142,6 +143,7 @@ MODULE m_ddb
  public :: ddb_get_etotal           ! Read the GS total energy.
  public :: ddb_get_dielt_zeff       ! Reads the Dielectric Tensor and the Effective Charges
  public :: ddb_get_dielt            ! Reads the Dielectric Tensor
+ public :: ddb_get_quadrupoles      ! Reads the Quadrupoles
  public :: ddb_get_dchidet          ! Reads the non-linear optical susceptibility tensor and the
                                     ! first-order change in the linear dielectric susceptibility
  public :: ddb_diagoq               ! Compute the phonon frequencies at the specified q-point by performing
@@ -2441,6 +2443,91 @@ integer function ddb_get_dielt(ddb, rftyp, dielt) result(iblok)
  end if ! iblok not found
 
 end function ddb_get_dielt
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb/ddb_get_quadrupoles
+!!
+!! NAME
+!!  ddb_get_quadrupoles
+!!
+!! FUNCTION
+!! Reads the Dielectric Tensor from the DDB file
+!!
+!! INPUTS
+!!  ddb<type(ddb_type)>=Derivative database.
+!!  rftyp  = 1 if non-stationary block
+!!           2 if stationary block
+!!           3 if third order derivatives
+!!
+!! OUTPUT
+!!  quadrupoles(3,3) = Macroscopic dielectric tensor
+!!  iblok=Index of the block containing the data. 0 if block is not found.
+!!
+!! NOTES
+!!  quadrupoles is initialized to zero if the derivatives are not available in the DDB file.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function ddb_get_quadrupoles(ddb, crystal, rftyp, quadrupoles) result(iblok)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: rftyp
+ type(ddb_type),intent(in) :: ddb
+ type(crystal_t),intent(in) :: crystal
+!arrays
+ real(dp),intent(out) :: quadrupoles(3,3,3,ddb%natom)
+
+!Local variables -------------------------
+!scalars
+ integer :: ii, jj, iatdir, iatom, iq1dir, iq2dir
+ integer :: quad_unt
+ character(len=500) :: msg
+!arrays
+ integer :: rfelfd(4),rfphon(4),rfstrs(4)
+ real(dp) :: qphnrm(3),qphon(3,3)
+
+! *********************************************************************
+
+ ! Look for the Gamma Block in the DDB
+ qphon(:,:)=zero
+ qphnrm(:)=one
+ rfphon(1:2)=1
+ rfelfd(1:2)=1
+ rfstrs(1:2)=8
+
+ call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+
+ ! Read the dielectric tensor only if the Gamma-block was found in the DDB
+ ! In case it was not found, iblok = 0
+ iblok = 0
+ quadrupoles=zero
+
+ !Temporary hack to read the quadrupole tensor from a text file
+ if (.not.file_exists("quadrupoles_cart.out")) return
+ quad_unt = 71
+ open(unit=quad_unt,file="quadrupoles_cart.out",action="read")
+ do ii=1,2
+   read(quad_unt,*) msg
+ end do
+
+ do ii=1,3
+   do jj=1,3*3*crystal%natom
+     read(quad_unt,'(4(i5,3x),2(1x,f20.10))') iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
+     !write(*,*) iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
+   end do
+   read(quad_unt,'(a)') msg
+ end do
+ close(quad_unt)
+ iblok = 1
+
+end function ddb_get_quadrupoles
 !!***
 
 !----------------------------------------------------------------------
