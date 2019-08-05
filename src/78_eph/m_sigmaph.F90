@@ -648,7 +648,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gdw2_mn(:,:),gkq0_atm(:,:,:,:),gkq2_lr(:,:)
  real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:), out_eig1_k(:), cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
- real(dp),allocatable :: dcwavef(:, :), gh1c_n(:, :), ghc(:,:), gsc(:,:), stern_ppb(:,:,:,:)
+ real(dp),allocatable :: dcwavef(:, :), gh1c_n(:, :), ghc(:,:), gsc(:,:), stern_ppb(:,:,:,:), stern_dw(:,:,:,:)
  logical,allocatable :: ihave_ikibz_spin(:,:)
  complex(dpc),allocatable :: tpp_red(:,:)
  complex(dpc) :: cdd(3), cp3(3)
@@ -1404,7 +1404,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              if (out_resid > dtset%tolwfr) then
                write(msg, "(2(a, es13.5), a, i0, a)") &
                  "Sternheimer solver didn't convergence: out_resid:", out_resid, " >= tolwfr: ", dtset%tolwfr, &
-                 " after nline: ", nlines_done, " iterations. Increase nline and/or decrease tolwfr."
+                 " after nline: ", nlines_done, " iterations. Increase nline and/or tolwfr."
                MSG_ERROR(msg)
              else if (out_resid < zero) then
                MSG_ERROR(sjoin(" out_resid: ", ftoa(out_resid), ", nlines_done:", itoa(nlines_done)))
@@ -1456,12 +1456,19 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          end do
          call xmpi_sum(h1kets_kq_allperts, sigma%comm_pert, ierr)
 
-         ! Compute S_pp' = <D_{qp} vscf u_nk|u'_{nk+qp'}>
+         if (isqzero) then
+           ABI_CALLOC(stern_dw, (2, natom3, natom3, nbcalc_ks))
+         end if
+
+         ! Compute S_pp' = <D_{qp} vscf u_nk|u'_{nk+q p'}>
          ABI_CALLOC(stern_ppb, (2, natom3, natom3, nbcalc_ks))
          do ib_k=1,nbcalc_ks
            call cg_zgemm("C", "N", npw_kq*nspinor, natom3, natom3, &
              h1kets_kq_allperts(:,:,:,ib_k), cg1s_kq(:,:,:,ib_k), stern_ppb(:,:,:,ib_k))
              !cg1s_kq(:,:,:,ib_k), h1kets_kq_allperts(:,:,:,ib_k), stern_ppb(:,:,:,ib_k))
+
+             ! Save data for Debye-Waller computation (performed outside the q-loop)
+             if (isqzero) stern_dw(:,:,:,ib_k) = stern_ppb(:,:,:,ib_k)
          end do
 
          ! Compute contribution for M > sigma%nbsum using static + adiabatic approximation for self-energy.
@@ -1469,9 +1476,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            wqnu = phfrq(nu); if (wqnu < EPH_WTOL) cycle
            ! Get phonon occupation for all temperatures.
            nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
-
-           ! Compute T_pp'(q,nu) matrix in reduced coordinates.
-           !if (isqzero) call get_tpp(displ_red, nu, tpp_red)
 
            do ib_k=1,nbcalc_ks
              ! sum_{pp'} d_p* Stern_{pp'} d_p' with d = displ_red(:, :, :, nu), S = stern_ppb(:, :, :, ib_k)
@@ -1484,11 +1488,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              rfact = rfact * sigma%wtq_k(iq_ibz) / (two * wqnu)
              ! Need to rescale by nprocs because for the time being all procs enter this part (DOH!)
              rfact = rfact / nprocs
-
-             ! Compute DW term for m > nband
-             if (isqzero) then
-               !dw_stern = zero
-             end if
 
              do it=1,sigma%ntemp
                sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + (two * nqnu_tlist(it) + one) * rfact
@@ -1860,8 +1859,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ! if I have treated q = Gamma
        !call xmpi_sum(gkq0_atm, sigma%comm_bsum, ierr)
        !call xmpi_sum(gkq0_atm, sigma%comm_qpt, ierr)
+       if (dtset%eph_stern == 1) call xmpi_sum(stern_dw, sigma%comm_bq, ierr)
 
-       ABI_MALLOC(gdw2_mn, (bsum_start:bsum_stop, nbcalc_ks))
+       ABI_CALLOC(gdw2_mn, (bsum_start:bsum_stop+1, nbcalc_ks))
 
        ! Integral over IBZ(k). Distributed inside comm_bq
        nq = sigma%nqibz; if (sigma%symsigma == 0) nq = sigma%nqbz
@@ -1886,6 +1886,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! Ignore acoustic or unstable modes.
            wqnu = phfrq(nu); if (wqnu < EPH_WTOL) cycle
 
+           ! Get phonon occupation for all temperatures.
+           nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
+
            ! Compute T_pp'(q,nu) matrix in reduced coordinates.
            do ip2=1,natom3
              idir2 = mod(ip2-1, 3) + 1; ipert2 = (ip2 - idir2) / 3 + 1
@@ -1900,12 +1903,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              end do
            end do
 
-           ! Get phonon occupation for all temperatures.
-           nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
-
            ! Sum over bands and add (static) DW contribution for the different temperatures.
            do ibsum=bsum_start, bsum_stop
-
              do ib_k=1,nbcalc_ks
                ! Compute DW term following XG paper. Check prefactor.
                ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
@@ -1925,6 +1924,17 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                end do
 
                gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) / (four * two * wqnu)
+
+               !if (dtset%eph_stern == 1 .and. ibsum == bsum_stop) then
+               !  ! Compute DW term for m > nband
+               !  cfact = zero
+               !  do ip2=1,natom3
+               !    do ip1=1,natom3
+               !      cfact = cfact + tpp_red(ip1, ip2) * cmplx(stern_dw(1,ip1,ip2,ib_k), stern_dw(2,ip1,ip2,ib_k), kind=dpc)
+               !    end do
+               !  end do
+               !  gdw2_mn(ibsum+1, ib_k) = real(cfact) / (four * two * wqnu)
+               !end if
              end do ! ib_k
            end do ! ibsum
 
@@ -1944,6 +1954,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                   sigma%gf_nnuq(ib_k, nu, iq_ibz, 3) = sigma%gf_nnuq(ib_k, nu, iq_ibz, 3) &
                       - gdw2_mn(ibsum, ib_k) / real(cplx_ediff)
                end if
+
                !if (dtset%prteliash == 3) then
                !  delta_e_minus_emkq = gaussian(sigma%a2f_emesh - eig0mk, dtset%tsmear)
                !  dwargs = sigma%gfw_mesh - phfrq(nu)
@@ -1957,6 +1968,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                ! - (2 n_{q\nu} + 1) * gdw2 / (e_nk - e_mk)
                do it=1,sigma%ntemp
                  cfact = - weight_q * gdw2_mn(ibsum, ib_k) * (two * nqnu_tlist(it) + one)  / cplx_ediff
+                 if (dtset%eph_stern == 1 .and. ibsum == bsum_stop) then
+                   cfact = cfact - weight_q * gdw2_mn(ibsum+1, ib_k) * (two * nqnu_tlist(it) + one)
+                 end if
                  rfact = real(cfact)
                  sigma%dw_vals(it, ib_k) = sigma%dw_vals(it, ib_k) + rfact
                  sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + rfact
@@ -1970,6 +1984,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ABI_FREE(gdw2_mn)
        ABI_FREE(gkq0_atm)
+       ABI_SFREE(stern_dw)
+
        call cwtime_report(" DW completed", cpu_dw, wall_dw, gflops_dw)
      end if ! not %imag_only
 
