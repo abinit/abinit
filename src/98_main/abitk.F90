@@ -42,7 +42,6 @@ program abitk
  use m_ebands
  use m_crystal
  use m_kpts
- use m_tetrahedron
 
  use defs_datatypes,   only : ebands_t
  use m_fstrings,       only : sjoin, strcat, basename
@@ -67,12 +66,11 @@ program abitk
  type(ebands_t) :: ebands !, ebands_kpath
  type(edos_t) :: edos
  type(crystal_t) :: cryst
- type(t_tetrahedron) :: tetra
 !arrays
  integer :: kptrlatt(3,3), new_kptrlatt(3,3)
- integer,allocatable :: bz2ibz(:), indkk(:,:)
+ integer,allocatable :: indkk(:,:), bz2ibz(:)
  !real(dp):: params(4)
- real(dp) :: klatt(3,3), rlatt(3,3)
+ !real(dp) :: klatt(3,3), rlatt(3,3)
  real(dp),allocatable :: shiftk(:,:), new_shiftk(:,:), wtk(:), kibz(:,:), kbz(:,:)
 
 !*******************************************************
@@ -121,7 +119,6 @@ program abitk
      !write(std_out,"(a)")"ebands_skw_path FILE                     Produce BXSF file for Xcrysden."
      write(std_out,"(a)")"ebands_extrael FILE --occopt --tsmear --extrael  Change number of electron, compute new Fermi level."
      write(std_out,"(2a)")ch10,"=== DEVELOPERS ==="
-     write(std_out,"(a)")"tetra_mjv                             Old tetrahedron routine"
      write(std_out,"(a)")"tetra_unit_tests                      Run unit tests for tetrahedron routines."
      write(std_out,"(a)")"kptrank_unit_tests                    Run unit tests for kptrank routines."
      goto 100
@@ -249,26 +246,6 @@ program abitk
    write(std_out, "(a)") msg
    call ebands_update_occ(ebands, spinmagntarget, prtvol=prtvol)
    call ebands_print(ebands, prtvol=prtvol)
-
- case ("tetra_mjv")
-   call get_path_cryst(path, cryst, comm)
-   call parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
-   ABI_CHECK(any(kptrlatt /= 0), "ngkpt or kptrlatt must be specified")
-
-   call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
-      new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk, bz2ibz=indkk)
-
-   new_nshiftk = size(new_shiftk, dim=2)
-   rlatt = new_kptrlatt; call matr3inv(rlatt, klatt)
-
-   ABI_MALLOC(bz2ibz,(nkbz))
-   bz2ibz(:) = indkk(1,:)
-   call init_tetra(bz2ibz, cryst%gprimd, klatt, kbz, nkbz, tetra, ierr, msg, comm)
-   ABI_FREE(bz2ibz)
-
-   ABI_CHECK(ierr == 0, msg)
-   call tetra_write(tetra, nkibz, kibz, strcat(basename(path), "_TETRA"))
-   call destroy_tetra(tetra)
 
  case ("tetra_unit_tests")
    call tetra_unittests(comm)

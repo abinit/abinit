@@ -29,7 +29,8 @@ module m_fstab
  use m_xmpi
  use m_errors
  use m_krank
- use m_tetrahedron
+ !use m_tetrahedron
+ use m_htetra
  use m_ebands
 
  use m_time,           only : cwtime
@@ -254,7 +255,8 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  integer,allocatable :: fs2full(:),indkk(:,:) !,fs2irr(:)
  character(len=500) :: msg
  type(fstab_t),pointer :: fs
- type(t_tetrahedron) :: tetra
+ !type(t_tetrahedron) :: tetra
+ type(htetra_t) :: tetra
 !arrays
  !integer :: g0(3)
  integer,allocatable :: full2ebands(:,:),bs2ibz(:)
@@ -422,8 +424,8 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    ABI_MALLOC(bs2ibz, (nkpt_full))
    bs2ibz = full2ebands(1, :)
 
-   call init_tetra(bs2ibz, cryst%gprimd, klatt, kpt_full, nkpt_full, tetra, ierr, errstr, comm)
-   !call htetra_init(tetra, bz2ibz, cryst%gprimd, klatt, kpt_fullbz, nkpt_full, ebands%kptns, nkibz, ierr, errstr, comm, opt)
+   !call init_tetra(bs2ibz, cryst%gprimd, klatt, kpt_full, nkpt_full, tetra, ierr, errstr, comm)
+   call htetra_init(tetra, bs2ibz, cryst%gprimd, klatt, kpt_full, nkpt_full, ebands%kptns, nkibz, ierr, errstr, comm)
    ABI_CHECK(ierr == 0, errstr)
    ABI_FREE(bs2ibz)
 
@@ -465,11 +467,11 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 
        ! Calculate general integration weights at each irred kpoint
        ! as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
-       call tetra_blochl_weights(tetra,tmp_eigen,enemin,enemax,max_occ,fs%nene,nkibz,&
-         bcorr0,btheta,bdelta,xmpi_comm_self)
-
-       !call tetra%blochl_weights(tmp_eigen,enemin,enemax,max_occ,fs%nene,nkibz,&
+       !call tetra_blochl_weights(tetra,tmp_eigen,enemin,enemax,max_occ,fs%nene,nkibz,&
        !  bcorr0,btheta,bdelta,xmpi_comm_self)
+
+       call tetra%blochl_weights(tmp_eigen,enemin,enemax,max_occ,fs%nene,nkibz, &
+         bcorr0,btheta,bdelta,xmpi_comm_self)
 
        do ik_ibz=1,nkibz
          bstart_k = fs%bstcnt_ibz(1, ik_ibz); bstop_k = bstart_k + fs%bstcnt_ibz(2, ik_ibz) - 1
@@ -487,8 +489,8 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    ABI_FREE(btheta)
    ABI_FREE(bdelta)
 
-   call destroy_tetra(tetra)
-   !call tetra%free()
+   !call destroy_tetra(tetra)
+   call tetra%free()
  end if
 
  !ABI_FREE(fs2irr)
