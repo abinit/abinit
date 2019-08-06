@@ -358,7 +358,7 @@ type dataset_type
  integer :: max_ncpus
  integer :: mband
  integer :: mep_solver
- integer :: mem_test=1
+ integer :: mem_test = 1
  integer :: mffmem
  integer :: mgfft
  integer :: mgfftdg
@@ -380,7 +380,7 @@ type dataset_type
  integer :: nbdblock
  integer :: nbdbuf
  integer :: nberry
- integer :: nc_xccc_gspace=0
+ integer :: nc_xccc_gspace = 0
  integer :: nconeq
  integer :: nctime
  integer :: ndtset
@@ -492,7 +492,7 @@ type dataset_type
  integer :: prtdipole
  integer :: prtdos
  integer :: prtdosm
- integer :: prtebands=1
+ integer :: prtebands = 1
  integer :: prtefg
  integer :: prtefmas
  integer :: prteig
@@ -500,7 +500,7 @@ type dataset_type
  integer :: prtfc
  integer :: prtfull1wf
  integer :: prtfsurf
- integer :: prtgsr=1
+ integer :: prtgsr = 1
  integer :: prtgden
  integer :: prtgeo
  integer :: prtgkk
@@ -512,10 +512,10 @@ type dataset_type
  integer :: prtpmp
  integer :: prtposcar
  integer :: prtphdos
- integer :: prtphbands=1
- integer :: prtphsurf=0
+ integer :: prtphbands = 1
+ integer :: prtphsurf = 0
  integer :: prtpot
- integer :: prtpsps=0
+ integer :: prtpsps = 0
  integer :: prtspcur
  integer :: prtstm
  integer :: prtsuscep
@@ -582,11 +582,11 @@ type dataset_type
  integer :: usepead
  integer :: usepotzero
  integer :: userec
- integer :: useria=0
- integer :: userib=0
- integer :: useric=0
- integer :: userid=0
- integer :: userie=0
+ integer :: useria = 0
+ integer :: userib = 0
+ integer :: useric = 0
+ integer :: userid = 0
+ integer :: userie = 0
  integer :: usewvl
  integer :: usexcnhat_orig
  integer :: useylm
@@ -773,11 +773,11 @@ type dataset_type
  real(dp) :: tolwfr
  real(dp) :: tphysel
  real(dp) :: tsmear
- real(dp) :: userra=zero
- real(dp) :: userrb=zero
- real(dp) :: userrc=zero
- real(dp) :: userrd=zero
- real(dp) :: userre=zero
+ real(dp) :: userra = zero
+ real(dp) :: userrb = zero
+ real(dp) :: userrc = zero
+ real(dp) :: userrd = zero
+ real(dp) :: userre = zero
  real(dp) :: vacwidth
  real(dp) :: vdw_tol
  real(dp) :: vdw_tol_3bt
@@ -901,11 +901,9 @@ type dataset_type
 
  real(dp) :: bs_eh_cutoff(2)
  real(dp) :: bs_freq_mesh(3)
-
 !END VARIABLES FOR @Bethe-Salpeter.
 
- integer :: gpu_linalg_limit ! MT sept2012: had to add this keyword at the end
-                             ! to get BigDFT automatic tests work on shiva and littlebuda (why????)
+ integer :: gpu_linalg_limit
 
 !EPH variables
 ! ifc variables
@@ -918,9 +916,9 @@ type dataset_type
  integer :: ph_freez_disp_addStrain
  integer :: ph_freez_disp_option
  integer :: ph_freez_disp_nampl
- integer :: ph_ndivsm    ! =20
- integer :: ph_nqpath    !=0
- integer :: ph_ngqpt(3)  !0
+ integer :: ph_ndivsm    ! = 20
+ integer :: ph_nqpath    ! = 0
+ integer :: ph_ngqpt(3)  ! = 0
  integer :: ph_nqshift
 
  real(dp),allocatable :: ph_freez_disp_ampl(:,:)
@@ -982,9 +980,9 @@ type dataset_type
  ! shifts in k-mesh for Sigma_{nk}.
 !END EPH
 
- integer :: ndivsm=0
- integer :: nkpath=0
- real(dp) :: einterp(4)=zero
+ integer :: ndivsm = 0
+ integer :: nkpath = 0
+ real(dp) :: einterp(4) = zero
  real(dp),allocatable :: kptbounds(:,:)
  real(dp) :: tmesh(3) ! = [5._dp, 59._dp, 6._dp] This triggers a bug in the bindings
 
@@ -996,6 +994,7 @@ type dataset_type
  character(len=fnlen) :: getwfq_path = ABI_NOFILE
  character(len=fnlen) :: getkerange_path = ABI_NOFILE
  character(len=fnlen) :: getpot_path = ABI_NOFILE
+ character(len=fnlen) :: getscr_path = ABI_NOFILE
  !character(len=fnlen) :: getsigeph_path = ABI_NOFILE
 
  end type dataset_type

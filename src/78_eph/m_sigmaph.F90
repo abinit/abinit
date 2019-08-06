@@ -1037,7 +1037,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    do iq_ibz=1,sigma%nqibz
      if (sigma%itreat_qibz(iq_ibz) == 0) cycle
      db_iqpt = sigma%ibz2dvdb(iq_ibz)
-     ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(sigma%qibz(:, iq_ibz)), "in DVDB file."))
+     ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(sigma%qibz(:, iq_ibz)), "in the DVDB file."))
      itreatq_dvdb(db_iqpt) = 1
    end do
    !itreatq_dvdb = 1

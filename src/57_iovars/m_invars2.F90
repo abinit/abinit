@@ -910,6 +910,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getscr',tread,'INT')
  if(tread==1) dtset%getscr=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getscr_path',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%getscr_path = key_value
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwgamma',tread,'INT')
  if(tread==1) dtset%gwgamma=intarr(1)
@@ -1127,7 +1129,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fockoptmix',tread,'INT')
  if(tread==1) dtset%fockoptmix=intarr(1)
 
-!Get array
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getocc',tread,'INT')
  if(tread==1) dtset%getocc=intarr(1)
  getocc=dtset%getocc
@@ -1459,15 +1460,15 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      densfor_pred=2
      dtset%densfor_pred=densfor_pred
      write(message, '(4a)' )&
-&     'When ionmov==23, densfor_pred must be 2.',ch10,&
-&     'Set densfor_pred to 2.',ch10
+       'When ionmov==23, densfor_pred must be 2.',ch10,&
+       'Set densfor_pred to 2.',ch10
      MSG_COMMENT(message)
    end if
 #else
    dtset%ionmov=12
    write(message, '(4a)' )&
-&   'LOTF is disabled, ionmov can not be 23.',ch10,&
-&   'Set ionmov to 12.',ch10
+     'LOTF is disabled, ionmov can not be 23.',ch10,&
+    'Set ionmov to 12.',ch10
    MSG_COMMENT(message)
 #endif
  end if
@@ -1580,7 +1581,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    else if (ixc_current<0) then
      call libxc_functionals_init(ixc_current,dtset%nspden)
      call libxc_functionals_get_hybridparams(hyb_mixing=dtset%hyb_mixing,hyb_mixing_sr=dtset%hyb_mixing_sr,&
-&     hyb_range=dtset%hyb_range_dft)
+       hyb_range=dtset%hyb_range_dft)
      call libxc_functionals_end()
      dtset%hyb_range_fock=dtset%hyb_range_dft
    end if
@@ -1988,8 +1989,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmft_dc=intarr(1)
    if (dtset%usepawu==14.and.dtset%dmft_dc/=5) then
      write(message, '(a,a,a)' )&
-      'usepawu==4 and usedmft=1, dmft_dc should be equal to 5  ',ch10,&
-      'impose dmft_dc = 5'
+      'usepawu == 4 and usedmft == 1, dmft_dc should be equal to 5 ',ch10,&
+      'imposing dmft_dc = 5'
      MSG_WARNING(message)
      dtset%dmft_dc=5
    end if
@@ -2194,12 +2195,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ionmov=dtset%ionmov ; densfor_pred=dtset%densfor_pred ; iscf=dtset%iscf ; nqpt=dtset%nqpt
  kptopt=dtset%kptopt; nberry=dtset%nberry ; berryopt=dtset%berryopt
 
-
-!Dielectric real(dp) input variables
-!Reading of diemix/diemixmag must be inserted after iprcel
+ ! Dielectric real(dp) input variables
+ ! Reading of diemix/diemixmag must be inserted after iprcel
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'diecut',tread,'ENE')
  if(tread==1) dtset%diecut=dprarr(1)
-!Special treatment if iscf==-1
+ ! Special treatment if iscf==-1
  if(iscf==-1) dtset%diecut=four*dtset%ecut
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dielng',tread,'LEN')
  if(tread==1) dtset%dielng=dprarr(1)
@@ -2248,10 +2248,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'mffmem',tread,'INT')
  if(tread==1) dtset%mffmem=intarr(1)
 
-!Set default values of 0 for occupation numbers and k pt wts
- bantot=0
-
-!nkpt and nband must be defined to execute following loop
+ ! Set default values of 0 for occupation numbers and k pt wts
+ bantot = 0
+ ! nkpt and nband must be defined to execute following loop
  if ( tnband == 1 ) then
    do ikpt=1,nkpt*nsppol
      do ii=1,dtset%nband(ikpt)
@@ -2262,9 +2261,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nloc_alg',tread,'INT')
- if(tread==1) then
-   dtset%nloalg(1)=intarr(1)
- end if
+ if(tread==1) dtset%nloalg(1)=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nloc_mem',tread,'INT')
  if(tread==1) then

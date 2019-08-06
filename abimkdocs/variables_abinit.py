@@ -4933,6 +4933,8 @@ a GW calculation), to indicate that the dielectric matrix (_SCR file) is to be
 taken from the output of a previous dataset. It is used to chain the
 calculations, since it describes from which dataset the OUTPUT dielectric
 matrix is to be taken, as INPUT of the present dataset.
+Note also that, starting Abinit v9, one can also use [[getscr_path]] to specify the path of the file directly.
+
 If [[getscr]] == 0, no such use of previously computed output _SCR file is done.
 If [[getscr]] is positive, its value gives the index of the dataset from which
 the output _SCR file is to be used as input.
@@ -19896,6 +19898,22 @@ Specify the path of the DEN file using a string instead of the dataset index.
 Alternative to [[getden]] and [[irdden]]. The string must be enclosed between quotation marks:
 
     getden_path "../outdata/out_DEN"
+"""
+),
+
+Variable(
+    abivarname="getscr_path",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the SCR file from PATH",
+    text=r"""
+Specify the path of the SCR file using a string instead of the dataset index.
+Alternative to [[getscr]] and [[irdscr]]. The string must be enclosed between quotation marks:
+
+    getscr_path "../outdata/out_SCR"
 """
 ),
 

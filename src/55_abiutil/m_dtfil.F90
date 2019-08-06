@@ -340,7 +340,8 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ! According to getscr and irdscr, build _SCR file name, referred as filscr
  ! A default is available if getscr is 0
  stringfile='_SCR' ; stringvar='scr'
- call mkfilename(filnam,filscr,dtset%getscr,idtset,dtset%irdscr,jdtset_,ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,filscr,dtset%getscr,idtset,dtset%irdscr,jdtset_,ndtset,stringfile,stringvar,will_read, &
+                 getpath=dtset%getscr_path)
  if(will_read==0)filscr=trim(filnam_ds(3))//'_SCR'
 
  ! According to getsuscep and irdsuscep, build _SUS file name, referred as filsus
