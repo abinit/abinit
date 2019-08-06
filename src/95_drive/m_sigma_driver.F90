@@ -2101,8 +2101,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if(ic>1) then
      MSG_ERROR("number of correlated species is larger than one")
    end if
-   ABI_ALLOCATE(rhot1_q_m,(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,ndim,ndim,sigp%npwx,Qmesh%nibz))
-   ABI_ALLOCATE(M1_q_m,(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,ndim,ndim,sigp%npwx,Qmesh%nibz))
+   ABI_MALLOC(rhot1_q_m,(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,ndim,ndim,sigp%npwx,Qmesh%nibz))
+   ABI_MALLOC(M1_q_m,(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,ndim,ndim,sigp%npwx,Qmesh%nibz))
 
    M1_q_m=czero
    rhot1_q_m=czero
@@ -2142,8 +2142,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    call calc_ucrpa(itypatcor,cryst,Kmesh,lcor,M1_q_m,Qmesh,Er%npwe,sigp%npwx,&
 &   Cryst%nsym,rhot1_q_m,Sigp%nomegasr,Sigp%minomega_r,Sigp%maxomega_r,ib1,ib2,'Gsum',Cryst%ucvol,Wfd,Er%fname)
 
-   ABI_DEALLOCATE(rhot1_q_m)
-   ABI_DEALLOCATE(M1_q_m)
+   ABI_FREE(rhot1_q_m)
+   ABI_FREE(M1_q_m)
 
  else
    do ikcalc=1,Sigp%nkptgw
@@ -2171,7 +2171,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
 
 !      sigcme_p => sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:) ! Causes annoying Fortran runtime warning on abiref.
-       ABI_ALLOCATE(sigcme_k,(nomega_sigc,ib2-ib1+1,ib2-ib1+1,Sigp%nsppol*Sigp%nsig_ab))
+       ABI_MALLOC(sigcme_k,(nomega_sigc,ib2-ib1+1,ib2-ib1+1,Sigp%nsppol*Sigp%nsig_ab))
        sigcme_k=czero
        if (any(mod10 == [SIG_SEX, SIG_COHSEX])) then
          ! Calculate static COHSEX or SEX using the coarse gwc_ngfft mesh.
@@ -2210,7 +2210,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
 
 !    sigcme_p => sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)   ! Causes annoying Fortran runtime warning on abiref.
-     ABI_ALLOCATE(sigcme_k,(nomega_sigc,ib2-ib1+1,ib2-ib1+1,Sigp%nsppol*Sigp%nsig_ab))
+     ABI_MALLOC(sigcme_k,(nomega_sigc,ib2-ib1+1,ib2-ib1+1,Sigp%nsppol*Sigp%nsig_ab))
      sigcme_k=sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)
 
 !    call solve_dyson(ikcalc,ib1,ib2,nomega_sigc,Sigp,Kmesh,sigcme_p,QP_BSt%eig,Sr,Dtset%prtvol,Dtfil,Wfd%comm)
@@ -2812,7 +2812,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! So doing it here, even though it is not clean
  Kmesh%kptrlatt(:,:) =Dtset%kptrlatt(:,:)
  Kmesh%nshift        =Dtset%nshiftk
- ABI_ALLOCATE(Kmesh%shift,(3,Kmesh%nshift))
+ ABI_MALLOC(Kmesh%shift,(3,Kmesh%nshift))
  Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
 
  call kmesh_print(Kmesh,"K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")

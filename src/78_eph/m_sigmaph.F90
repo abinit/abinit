@@ -1494,17 +1494,17 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                !if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkq2 * cfact_wr(:)
 
                ! Add DW contribution for this T
-               if (isqzero) then
+               !if (isqzero) then
                !  gdw2_mn(ibsum, ib_k) = - gdw2_mn(ibsum, ib_k) /  (four * two * wqnu)
                !  sigma%dw_vals(it, ib_k) = sigma%dw_vals(it, ib_k) + rfact
                !  sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + rfact
                !  !if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + rfact
-               end if
-
-               ! TODO Eliashberg functions.
-               !if (dtset%prteliash /= 0) then
                !end if
              end do
+
+             ! TODO Eliashberg functions with Stern
+             !if (dtset%prteliash /= 0) then
+             !end if
            end do
          end do
 
@@ -1861,6 +1861,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        !call xmpi_sum(gkq0_atm, sigma%comm_qpt, ierr)
        if (dtset%eph_stern == 1) call xmpi_sum(stern_dw, sigma%comm_bq, ierr)
 
+       ! Last band + 1 is used to compute the Sternheimer term.
        ABI_CALLOC(gdw2_mn, (bsum_start:bsum_stop+1, nbcalc_ks))
 
        ! Integral over IBZ(k). Distributed inside comm_bq
@@ -1908,7 +1909,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              do ib_k=1,nbcalc_ks
                ! Compute DW term following XG paper. Check prefactor.
                ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
-               ! previous version
                gdw2_mn(ibsum, ib_k) = zero
                do ip2=1,natom3
                  do ip1=1,natom3
@@ -1925,16 +1925,18 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
                gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) / (four * two * wqnu)
 
-               !if (dtset%eph_stern == 1 .and. ibsum == bsum_stop) then
-               !  ! Compute DW term for m > nband
-               !  cfact = zero
-               !  do ip2=1,natom3
-               !    do ip1=1,natom3
-               !      cfact = cfact + tpp_red(ip1, ip2) * cmplx(stern_dw(1,ip1,ip2,ib_k), stern_dw(2,ip1,ip2,ib_k), kind=dpc)
-               !    end do
-               !  end do
-               !  gdw2_mn(ibsum+1, ib_k) = real(cfact) / (four * two * wqnu)
-               !end if
+               if (dtset%eph_stern == 1 .and. ibsum == bsum_stop) then
+                 ! Compute DW term for m > nband
+                 cfact = zero
+                 do ip2=1,natom3
+                   do ip1=1,natom3
+                     cfact = cfact + tpp_red(ip1, ip2) * cmplx(stern_dw(1,ip1,ip2,ib_k), stern_dw(2,ip1,ip2,ib_k), kind=dpc)
+                   end do
+                 end do
+                 ! There's no 1/two here because I don't symmetrize the expression.
+                 ! TODO: Test symmetrization, real quantity? add support for the different Eliashberg functions with Stern
+                 gdw2_mn(ibsum+1, ib_k) = real(cfact) / (four * wqnu)
+               end if
              end do ! ib_k
            end do ! ibsum
 
@@ -1953,6 +1955,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                if (dtset%prteliash /= 0) then
                   sigma%gf_nnuq(ib_k, nu, iq_ibz, 3) = sigma%gf_nnuq(ib_k, nu, iq_ibz, 3) &
                       - gdw2_mn(ibsum, ib_k) / real(cplx_ediff)
+                 !if (dtset%eph_stern == 1 .and. ibsum == bsum_stop) then
+                 !end if
                end if
 
                !if (dtset%prteliash == 3) then
@@ -1969,6 +1973,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                do it=1,sigma%ntemp
                  cfact = - weight_q * gdw2_mn(ibsum, ib_k) * (two * nqnu_tlist(it) + one)  / cplx_ediff
                  if (dtset%eph_stern == 1 .and. ibsum == bsum_stop) then
+                   ! Add contribution due to Sternheimer (no cplx_ediff)
                    cfact = cfact - weight_q * gdw2_mn(ibsum+1, ib_k) * (two * nqnu_tlist(it) + one)
                  end if
                  rfact = real(cfact)
@@ -2290,7 +2295,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  new%kTmesh = arth(dtset%tmesh(1), dtset%tmesh(2), new%ntemp) * kb_HaK
 
  gap_err = get_gaps(ebands, gaps)
- if (gap_err/=0) then
+ if (gap_err /= 0) then
    ! In case of error try to enforce semiconductor occupations before calling get_gaps
    ! This might still fail though...
    call gaps%free()
