@@ -19590,7 +19590,7 @@ Variable(
     mnemonics="Electron-PHonon: use STERNheimer approach to replace explicit sum empty states ",
     requires="[[tolwfr]] > 0",
     text=r"""
-NB - this does not work yet.
+NB - Still under development!
 
 This variable activates the Sternheimer method in the calculation of the e-ph self-energy ([[eph_task]] == 4)
 This technique replaces the explicit sum over empty states above [[nband]]
@@ -19599,7 +19599,7 @@ the projection in the subspace orthogonal to the nband states).
 
 The Sternheimer approach requires an external file with the KS potential produced by setting [[prtpot]] = 1 in the GS run
 and the specification of [[tolwfr]] in the input file.
-The path to the POT file is specified via [[getpot_path]].
+The path to the POT file used in the EP calculation is specified via [[getpot_path]].
 The number of line minimisations for the Sternheimer solver is defined by [[nline]].
 
 !!! important
@@ -19607,7 +19607,10 @@ The number of line minimisations for the Sternheimer solver is defined by [[nlin
     The Sternheimer approach approximates the e-ph self-energy with the adiabatic expression
     in which phonon frequencies are neglected and the frequency dependence of $\Sigma_{n\kk}(\omega)$ is neglected
     and replaced by $\Sigma_{n\kk}(\ee_{n\kk})$.
-    This approximation is valid provided that enough [[nband]] bands above the states of interest are explicitly included.
+    This approximation is valid provided that enough bands above the states of interest are explicitly included.
+    The calculation should therefore be converged with respect to the value of [[nband]]. 
+    Note however that the memory requirements and the computational cost of the Sternheimer solver increases with **nband**. 
+
 """,
 ),
 

@@ -1126,6 +1126,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Arrays for Debye-Waller
      if (.not. sigma%imag_only) then
        ABI_CALLOC_OR_DIE(gkq0_atm, (2, nbcalc_ks, bsum_start:bsum_stop, natom3), ierr)
+       if (dtset%eph_stern == 1) then
+         ABI_CALLOC(stern_dw, (2, natom3, natom3, nbcalc_ks))
+       end if
      end if
 
      ! Integrate delta functions inside miniBZ around Gamma.
@@ -1447,7 +1450,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Add contribution to Fan-Migdal self-energy coming from Sternheimer.
        if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
-         call xmpi_sum(cg1s_kq, comm, ierr)
+         call xmpi_sum(cg1s_kq, sigma%comm_bsum, ierr)
+         call xmpi_sum(cg1s_kq, sigma%comm_pert, ierr)
+
          ! h1kets_kq are MPI distributed inside comm_pert but we need off-diagonal pp' terms --> collect results.
          ABI_CALLOC(h1kets_kq_allperts, (2, npw_kq*nspinor, natom3, nbcalc_ks))
          do imyp=1,my_npert
@@ -1455,10 +1460,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            h1kets_kq_allperts(:, :, ipc, :) = h1kets_kq(:, :, imyp, :)
          end do
          call xmpi_sum(h1kets_kq_allperts, sigma%comm_pert, ierr)
-
-         if (isqzero) then
-           ABI_CALLOC(stern_dw, (2, natom3, natom3, nbcalc_ks))
-         end if
 
          ! Compute S_pp' = <D_{qp} vscf u_nk|u'_{nk+q p'}>
          ABI_CALLOC(stern_ppb, (2, natom3, natom3, nbcalc_ks))
@@ -2649,7 +2650,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  if (new%nprocs_pert * new%nprocs_qpt * new%nprocs_bsum /= nprocs) then
    write(msg, "(a,i0,3a, 4(a,1x,i0))") &
      "Cannot create 3d Cartesian grid with nprocs: ", nprocs, ch10, &
-     "Idle processes are not supported. The product of `nprocs_*` should be equal to nprocs.", ch10, &
+     "Idle processes are not supported. The product of `nprocs_*` vars should be equal to nprocs.", ch10, &
      "nprocs_pert (", new%nprocs_pert, ") x nprocs_qpt (", new%nprocs_qpt, ") x nprocs_bsum (", new%nprocs_bsum, &
      ") = ", new%nprocs_pert * new%nprocs_qpt * new%nprocs_bsum
    MSG_ERROR(msg)

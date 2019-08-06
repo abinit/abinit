@@ -58,7 +58,7 @@ program abitk
 !scalars
  integer,parameter :: master = 0
  integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands
- integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, ierr, occopt, intmeth
+ integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, occopt, intmeth !ierr,
  real(dp) :: spinmagntarget, tsmear, extrael, step, broad
  character(len=500) :: command, arg, msg
  character(len=fnlen) :: path !, prefix
@@ -68,7 +68,7 @@ program abitk
  type(crystal_t) :: cryst
 !arrays
  integer :: kptrlatt(3,3), new_kptrlatt(3,3)
- integer,allocatable :: indkk(:,:), bz2ibz(:)
+ !integer,allocatable :: indkk(:,:) !, bz2ibz(:)
  !real(dp):: params(4)
  !real(dp) :: klatt(3,3), rlatt(3,3)
  real(dp),allocatable :: shiftk(:,:), new_shiftk(:,:), wtk(:), kibz(:,:), kbz(:,:)
