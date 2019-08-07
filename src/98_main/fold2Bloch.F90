@@ -210,7 +210,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
      call progress(ikpt,nkpt,kpts(:,ikpt)) !Write progress information
 
      !Read a block of data
-     call wfk_read_band_block(wfk, [1, nband(ikpt)], ikpt, csppol, xmpio_single, kg_k=kg, cg_k=cg, eig_k=eig)
+     call wfk%read_band_block([1, nband(ikpt)], ikpt, csppol, xmpio_single, kg_k=kg, cg_k=cg, eig_k=eig)
 
      !Determine unfolded K point states
      call newk(kpts(1,ikpt),kpts(2,ikpt),kpts(3,ikpt),folds(1),folds(2),folds(3),nkval)
@@ -271,7 +271,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
      close(outfile1)
    end if
  end do
- call wfk_close(wfk)
+ call wfk%close()
 
  ABI_FREE(kpts)
  ABI_FREE(nband)

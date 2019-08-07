@@ -41,7 +41,7 @@ MODULE m_ebands
  use netcdf
 #endif
  use m_hdr
- use m_kptrank
+ use m_krank
  use m_skw
  use m_kpts
  use m_sort
@@ -849,7 +849,6 @@ subroutine ebands_free(ebands)
  ABI_SFREE(ebands%wtk)
  ABI_SFREE(ebands%velocity)
  ABI_SFREE(ebands%kTmesh)
-
  ABI_SFREE(ebands%shiftk_orig)
  ABI_SFREE(ebands%shiftk)
 
@@ -1606,7 +1605,7 @@ subroutine apply_scissor(ebands, scissor_energy)
 
  ! Recalculate the fermi level and occ. factors.
  ! For Semiconductors only the Fermi level is changed (in the middle of the new gap)
- spinmagntarget_=-99.99_dp !?; if (PRESENT(spinmagntarget)) spinmagntarget_=spinmagntarget
+ spinmagntarget_ = -99.99_dp !?; if (PRESENT(spinmagntarget)) spinmagntarget_=spinmagntarget
  call ebands_update_occ(ebands, spinmagntarget_)
 
 end subroutine apply_scissor
@@ -1818,17 +1817,16 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
 !Local variables-------------------------------
 !scalars
  integer :: spin,ik,ikpt,cnt
- type(kptrank_type) :: krank
+ type(krank_t) :: krank
 
 ! *************************************************************************
 
- call mkkptrank(ebands%kptns, ebands%nkpt, krank)
-
+ krank = krank_new(ebands%nkpt, ebands%kptns)
  emin = huge(one); emax = -huge(one); cnt = 0
 
  do spin=1,ebands%nsppol
    do ik=1,nkpts
-     ikpt = kptrank_index(krank, kpoints(:,ik))
+     ikpt = krank%get_index(kpoints(:,ik))
      if (ikpt == -1) then
        MSG_WARNING(sjoin("Cannot find k-point:", ktoa(kpoints(:,ik))))
        cycle
@@ -1840,7 +1838,7 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
    end do
  end do
 
- call destroy_kptrank(krank)
+ call krank%free()
 
  ! This can happen if wrong input.
  if (cnt == 0) then
@@ -2341,9 +2339,7 @@ subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
 
  call ebands_update_occ(ebands, spinmagntarget, stmbias0, prtvol=my_prtvol)
 
- if (my_prtvol > 10) then
-   call wrtout(std_out, sjoin(' Fermi level is now:', ftoa(ebands%fermie)))
- end if
+ if (my_prtvol > 10) call wrtout(std_out, sjoin(' Fermi level is now:', ftoa(ebands%fermie)))
 
 end subroutine ebands_set_scheme
 !!***
@@ -3029,7 +3025,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
 
          ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223 [[cite:Bloechl1994a]])
-         call htetra_get_onewk(tetra, ikpt, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
+         call tetra%get_onewk(ikpt, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
 
          edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, 1)*ebands%wtk(ikpt)
          ! IDOS is computed afterwards with simpson
@@ -3043,7 +3039,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
    ! Free memory
    ABI_FREE(tmp_eigen)
    ABI_FREE(wdt)
-   call htetra_free(tetra)
+   call tetra%free()
 
    ! Filter so that dos[i] is always >= 0 and idos is monotonic
    ! IDOS is computed afterwards with simpson
@@ -4374,7 +4370,7 @@ select case (intmeth)
          if (all(tmp_eigen > emax)) cycle
        end if
 
-       call htetra_blochl_weights(tetra, tmp_eigen, min_ene, max_ene, max_occ1, nw, ebands%nkpt, &
+       call tetra%blochl_weights(tmp_eigen, min_ene, max_ene, max_occ1, nw, ebands%nkpt, &
          bcorr, wdt(:,:,2), wdt(:,:,1), comm)
 
        do ikpt=1,ebands%nkpt
@@ -4428,7 +4424,7 @@ select case (intmeth)
    ! Free memory
    ABI_FREE(tmp_eigen)
    ABI_FREE(wdt)
-   call htetra_free(tetra)
+   call tetra%free()
 
  case default
    MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
@@ -4637,7 +4633,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
    tetra = tetra_from_kptrlatt(cryst, ebands%kptopt, ebands%kptrlatt, &
      ebands%nshiftk, ebands%shiftk, ebands%nkpt, ebands%kptns, comm, msg, ierr)
    if (ierr/=0) then
-     call htetra_free(tetra); return
+     call tetra%free(); return
    end if
 
    ! For each spin and band, interpolate over kpoints,
@@ -4657,7 +4653,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
            cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! mpi-parallelism
 
            ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223 [[cite:Bloechl1994a]])
-           call htetra_get_onewk(tetra, ik_ibz, bcorr, nw, ebands%nkpt, cvmw, jdos%mesh(0), jdos%mesh(nw), one, wdt)
+           call tetra%get_onewk(ik_ibz, bcorr, nw, ebands%nkpt, cvmw, jdos%mesh(0), jdos%mesh(nw), one, wdt)
            jdos%values(:,spin) = jdos%values(:,spin) + wdt(:, 1)*ebands%wtk(ik_ibz)
          end do
        end do ! ibc
@@ -4669,7 +4665,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
    ! Free memory
    ABI_FREE(wdt)
    ABI_FREE(cvmw)
-   call htetra_free(tetra)
+   call tetra%free()
 
  case default
    MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))

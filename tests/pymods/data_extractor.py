@@ -1,10 +1,11 @@
-'''
-    Implement the steps to extract data from an Abinit output file.
-    Extract lines associated with their "meta character" (that make sense in
-    fldiff), and valid YAML documents associated with there iteration context.
-'''
+"""
+Implement the steps to extract data from an Abinit output file.
+Extract lines associated with their "meta character" (that make sense in
+fldiff), and valid YAML documents associated with their iteration context.
+"""
 from __future__ import print_function, division, unicode_literals
 import re
+
 from .yaml_tools import Document, is_available as has_yaml
 from .yaml_tools.abinit_iterators import ITERATOR_RANKS
 from .yaml_tools.errors import NoIteratorDefinedError, DuplicateDocumentError
@@ -16,11 +17,16 @@ doc_end_re = re.compile(r'\.\.\.\n?$')
 
 
 class DataExtractor(object):
-    '''
-        Setup extraction of formatted documents and significant lines.
-    '''
+    """Setup extraction of formatted documents and significant lines."""
 
     def __init__(self, use_yaml, ignore=True, ignoreP=True, xml_mode=False):
+        """
+        Args:
+            use_yaml: True to use Yaml mode.
+            ignore
+            ignoreP
+            xml_mode
+        """
         self.use_yaml = use_yaml and has_yaml
         # do not use fldiff on data that have explicitly been written for YAML use
         self.use_fl_for_yaml = not use_yaml
@@ -32,10 +38,10 @@ class DataExtractor(object):
         self.abinit_messages = []
 
     def _get_metachar(self, line):
-        '''
-            Return a meta character which gives the behaviour of the line
-            independently from options.
-        '''
+        """
+        Return a meta character which gives the behaviour of the line
+        independently from options.
+        """
         if not line or line.isspace():  # blank line
             c = '-'
         elif line[0].isspace():
@@ -60,7 +66,7 @@ class DataExtractor(object):
 
     def extract(self, src_lines):
         '''
-            Extract formatted documents and significant lines from list of strings.
+        Extract formatted documents and significant lines from list of strings `src_lines`.
         '''
         # Reset internal state to allow several extractions with the same instance
         self.iterators_state = {}
@@ -82,14 +88,11 @@ class DataExtractor(object):
                             curr_it = current_doc.obj.iterator
 
                             # Update current iterators state
-                            # list freeze the key list to allow deleting in the
-                            # loop
+                            # list freeze the key list to allow deleting in the loop
                             for iterator in list(self.iterators_state):
-                                if ITERATOR_RANKS[curr_it] \
-                                   < ITERATOR_RANKS[iterator]:
+                                if ITERATOR_RANKS[curr_it] < ITERATOR_RANKS[iterator]:
                                     del self.iterators_state[iterator]
-                            self.iterators_state[curr_it] = \
-                                current_doc.obj.iteration
+                            self.iterators_state[curr_it] = current_doc.obj.iteration
 
                         elif current_doc.corrupted:
                             # Signal corruption but ignore the document
@@ -102,16 +105,20 @@ class DataExtractor(object):
 
                         elif current_doc.obj is not None:
                             if not current_doc.iterators:
-                                # This is not normal !
+                                # This is not normal!
                                 raise NoIteratorDefinedError(current_doc)
 
                             if current_doc.id in docs:
                                 raise DuplicateDocumentError(line, current_doc.id)
 
                             docs[current_doc.id] = current_doc
-                    elif self.use_fl_for_yaml:  # let fldiff compare lines if YAML test is disabled
+
+                    elif self.use_fl_for_yaml:
+                         # let fldiff compare lines if YAML test is disabled
                         lines.extend((current_doc.start + i, ' ', ' ' + line) for i, line in enumerate(current_doc.lines))
-                    current_doc = None  # go back to normal mode
+
+                    # go back to normal mode
+                    current_doc = None
 
             elif self._get_metachar(line) == '-':
                 # starting a yaml doc

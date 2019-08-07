@@ -131,6 +131,7 @@ _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
        ph_intmeth4       2
          ph_smear      3.67493254E-05 Hartree
         ddb_ngqpt        4    4    4
+       dvdb_ngqpt        4    4    4
         ph_nqpath           3
          ph_ngqpt       16   16   16
 -          fftalg         312
@@ -1231,6 +1232,7 @@ All the independent perturbations are available
        ph_intmeth4       2
          ph_smear      3.67493254E-05 Hartree
         ddb_ngqpt        4    4    4
+       dvdb_ngqpt        4    4    4
         ph_nqpath           3
          ph_ngqpt       16   16   16
            etotal1     0.0000000000E+00

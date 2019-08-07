@@ -172,7 +172,7 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
    ! Get Dielectric Tensor and Effective Charges
    ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
    ABI_MALLOC(zeff, (3,3,natom))
-   iblock = ddb_get_dielt_zeff(new%ddb_vol(ivol), new%cryst_vol(ivol), inp%rfmeth, inp%chneut, inp%selectz, dielt, zeff)
+   iblock = new%ddb_vol(ivol)%get_dielt_zeff(new%cryst_vol(ivol), inp%rfmeth, inp%chneut, inp%selectz, dielt, zeff)
    if (iblock == 0) then
      call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_paths(ivol)))
      call wrtout(ab_out, "Values initialized with zeros")
@@ -274,10 +274,10 @@ subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq, phdispl_cart)
  do ivol=1,gruns%nvols
    if (ivol == gruns%iv0) then
      ! Compute group velocities for V=V0
-     call ifc_fourq(gruns%ifc_vol(ivol), gruns%cryst_vol(ivol), qpt, wvols(:,ivol), phdispl_cart(:,:,:,ivol), &
+     call gruns%ifc_vol(ivol)%fourq(gruns%cryst_vol(ivol), qpt, wvols(:,ivol), phdispl_cart(:,:,:,ivol), &
                     out_d2cart=d2cart(:,:,:,ivol), out_eigvec=eigvec(:,:,:,ivol), dwdq=dwdq)
    else
-     call ifc_fourq(gruns%ifc_vol(ivol), gruns%cryst_vol(ivol), qpt, wvols(:,ivol), phdispl_cart(:,:,:,ivol), &
+     call gruns%ifc_vol(ivol)%fourq(gruns%cryst_vol(ivol), qpt, wvols(:,ivol), phdispl_cart(:,:,:,ivol), &
                     out_d2cart=d2cart(:,:,:,ivol), out_eigvec=eigvec(:,:,:,ivol))
    end if
 
@@ -561,7 +561,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
    do nu=1,gruns%natom3
      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! mpi-parallelism
      wibz = wvols_qibz(nu, gruns%iv0, :)
-     call htetra_get_onewk(tetra,iqibz,bcorr0,nomega,nqibz,wibz,omega_min,omega_max,one,wdt)
+     call tetra%get_onewk(iqibz,bcorr0,nomega,nqibz,wibz,omega_min,omega_max,one,wdt)
      wdt = wdt*wtq(iqibz)
      wdos = wdos + wdt
      grdos = grdos + wdt * gvals_qibz(nu,iqibz)
@@ -667,7 +667,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
  ABI_FREE(v2dos)
  ABI_FREE(vdos)
 
- call htetra_free(tetra)
+ call tetra%free()
 
 end subroutine gruns_qmesh
 !!***
@@ -709,14 +709,14 @@ subroutine gruns_free(gruns)
 
  if (allocated(gruns%ddb_vol)) then
    do ii=1,size(gruns%ddb_vol)
-     call ddb_free(gruns%ddb_vol(ii))
+     call gruns%ddb_vol(ii)%free()
    end do
    ABI_FREE(gruns%ddb_vol)
  end if
 
  if (allocated(gruns%ifc_vol)) then
    do ii=1,size(gruns%ifc_vol)
-     call ifc_free(gruns%ifc_vol(ii))
+     call gruns%ifc_vol(ii)%free()
    end do
    ABI_FREE(gruns%ifc_vol)
  end if
@@ -832,12 +832,12 @@ subroutine gruns_anaddb(inp, prefix, comm)
 
  ! Compute speed of sound for V0.
  if (inp%vs_qrad_tolkms(1) > zero) then
-   call ifc_speedofsound(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), inp%vs_qrad_tolkms, ncid, comm)
+   call gruns%ifc_vol(iv0)%speedofsound(gruns%cryst_vol(iv0), inp%vs_qrad_tolkms, ncid, comm)
  end if
 
  ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
  if (my_rank == master .and. inp%nph2l /= 0 .and. inp%ifcflag == 1) then
-   call ifc_calcnwrite_nana_terms(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), inp%nph2l, inp%qph2l, inp%qnrml2, ncid)
+   call gruns%ifc_vol(iv0)%calcnwrite_nana_terms(gruns%cryst_vol(iv0), inp%nph2l, inp%qph2l, inp%qnrml2, ncid)
  end if
 
 #ifdef HAVE_NETCDF

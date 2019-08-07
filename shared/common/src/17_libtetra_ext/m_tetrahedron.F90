@@ -35,7 +35,7 @@ module m_tetrahedron
 
  USE_MEMORY_PROFILING
  USE_MSG_HANDLING
- use m_kptrank
+ use m_krank
 #ifdef HAVE_MPI2
  use mpi
 #endif
@@ -213,7 +213,7 @@ subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ier
  integer :: symrankkpt,mtetra,itmp,ntetra_irred
  real(dp) :: shift1,shift2,shift3, rcvol,hashfactor
  !real :: cpu_start, cpu_stop
- type(kptrank_type) :: kptrank_t
+ type(krank_t) :: krank
 !arrays
  integer :: ind_ibz(4), tetra_shifts(3,4,6)  ! 3 dimensions, 4 summits, and 6 tetrahedra / kpoint box
  real(dp)  :: k1(3),k2(3),k3(3)
@@ -304,7 +304,7 @@ subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ier
 
  ! Make full k-point rank arrays
  ! TODO: Lot of memory allocated here if dense mesh e.g ~ 300 ** 3
- call mkkptrank (kpt_fullbz,nkpt_fullbz,kptrank_t)
+ krank = krank_new(nkpt_fullbz, kpt_fullbz)
 
  ialltetra = 1
  do ikpt_full=1,nkpt_fullbz
@@ -313,17 +313,17 @@ subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ier
      !if (mod(ialltetra, nprocs) /= my_rank) cycle ! MPI parallelism.
      do isummit=1,4
        k1(:) = kpt_fullbz(:,ikpt_full) &
-&       + tetra_shifts(1,isummit,itetra)*klatt(:,1) &
-&       + tetra_shifts(2,isummit,itetra)*klatt(:,2) &
-&       + tetra_shifts(3,isummit,itetra)*klatt(:,3)
+        + tetra_shifts(1,isummit,itetra)*klatt(:,1) &
+        + tetra_shifts(2,isummit,itetra)*klatt(:,2) &
+        + tetra_shifts(3,isummit,itetra)*klatt(:,3)
 
        ! Find full kpoint which is summit isummit of tetrahedron itetra around full kpt ikpt_full !
-       call get_rank_1kpt (k1,symrankkpt,kptrank_t)
-       ikpt2 = kptrank_t%invrank(symrankkpt)
+       symrankkpt =  krank%get_rank(k1)
+       ikpt2 = krank%invrank(symrankkpt)
        if (ikpt2 < 1) then
          errorstring='Error in ranking k-points - exiting with un-initialized tetrahedra.'
          ierr = 2
-         call destroy_kptrank (kptrank_t)
+         call krank%free()
          TETRA_ALLOCATE(tetra%tetra_full, (4,2,1))
          TETRA_ALLOCATE(tetra%tetra_mult, (1))
          TETRA_ALLOCATE(tetra%tetra_wrap, (3,4,1))
@@ -396,7 +396,7 @@ subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ier
  !write(*,*)"tetra_init ikpt_loop:", cpu_stop - cpu_start
  !cpu_start = cpu_stop
 
- call destroy_kptrank (kptrank_t)
+ call krank%free()
 
  rcvol = abs (gprimd(1,1)*(gprimd(2,2)*gprimd(3,3)-gprimd(3,2)*gprimd(2,3)) &
 & -gprimd(2,1)*(gprimd(1,2)*gprimd(3,3)-gprimd(3,2)*gprimd(1,3)) &

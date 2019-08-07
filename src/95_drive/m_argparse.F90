@@ -534,7 +534,7 @@ integer function get_arg_str(argname, argval, msg, default, exclude) result(ierr
 !Local variables-------------------------------
  integer :: ii, istat
  logical :: found_argname, found_excl
- character(len=500) :: arg, iomsg
+ character(len=500) :: arg
 
 ! *************************************************************************
 
@@ -548,13 +548,8 @@ integer function get_arg_str(argname, argval, msg, default, exclude) result(ierr
    end if
    if (arg == "--" // trim(argname)) then
      found_argname = .True.
-     call get_command_argument(ii + 1, arg, status=istat)
-     if (istat == 0) then
-       read(arg, *, iostat=istat, iomsg=iomsg) argval
-       if (istat /= 0) then
-         ierr = ierr + 1; msg = sjoin(msg, ch10, iomsg)
-       end if
-     else
+     call get_command_argument(ii + 1, argval, status=istat)
+     if (istat /= 0) then
        ierr = ierr + 1; msg = sjoin(msg, ch10, "Error in get_command_argument")
      end if
    end if
@@ -660,7 +655,7 @@ integer function get_arg_list_int(argname, argval, lenr, msg, default, default_l
      end if
    else
      ierr = ierr + 1
-     msg = sjoin("Cannot find", argname, "in CLI and want_len:", itoa(want_len), ch10, msg)
+     msg = sjoin("Cannot find --", argname, "option in CLI and want_len:", itoa(want_len), ch10, msg)
    end if
  end if
 
@@ -760,7 +755,7 @@ integer function get_arg_list_dp(argname, argval, lenr, msg, default, default_li
      end if
    else
      ierr = ierr + 1
-     msg = sjoin("Cannot find ", argname, "in CLI and want_len:", itoa(want_len), ch10, msg)
+     msg = sjoin("Cannot find --", argname, " option in CLI and want_len:", itoa(want_len), ch10, msg)
    end if
  end if
 

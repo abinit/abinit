@@ -40,6 +40,7 @@ MODULE m_mpinfo
  use m_distribfft
 
  use defs_abitypes,   only : MPI_type, dataset_type
+ use m_fstrings,      only : sjoin, ltoa
  use m_io_tools,      only : file_exists, open_file
  use m_libpaw_tools,  only : libpaw_write_comm_set
  use m_paral_atom,    only : get_my_natom, get_my_atmtab
@@ -574,8 +575,8 @@ subroutine ptabs_fourdp(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,
    end if
  end if
 
- if(.not.(grid_found)) then
-   MSG_BUG("Unable to find an allocated distrib for this fft grid")
+ if (.not.grid_found) then
+   MSG_BUG(sjoin("Unable to find an allocated distrib for this fft grid with n2, n3 = ", ltoa([n2, n3])))
  end if
 
 end subroutine ptabs_fourdp

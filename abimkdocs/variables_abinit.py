@@ -3701,13 +3701,18 @@ The choice is among:
 * 2 --> Compute electron-phonon matrix elements. Save results in GKK.nc file format.
 * -2 --> Compute electron-phonon matrix elements. Save results in GKQ.nc file format that can be post-processed with AbiPy.
 * 3 --> Compute phonon self-energy.
-* 4 --> Compute electron-phonon self-energy (Fan-Migdal + Debye-Waller) and QP corrections Generate SIGEPH.nc file.
+* 4 --> Compute electron-phonon self-energy (Fan-Migdal + Debye-Waller) and QP corrections. Generate SIGEPH.nc file.
 * -4 --> Compute electron lifetimes due to e-ph interaction (imaginary part of Fan-Migdal self-energy). Generate SIGEPH.nc file.
 * 5 --> Interpolate DFPT potentials to produce a new DVDB file on the [[eph_ngqpt_fine]] q-mesh that can be read with [[getdvdb]]
 * -5 --> Interpolate DFPT potentials on the q-path specified by [[ph_qpath]] and [[ph_nqpath]]. Note that, in this case,
          the user has to provide the full list of q-points in the input, [[ph_ndivsm]] is not used to generate the q-path.
 * 6 --> Estimate correction to the ZPR in polar materials using the Frohlich model. Requires EFMAS.nc file.
 * 7 --> Compute phonon limited transport in semiconductors using lifetimes taken from SIGEPH.nc file.
+* 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file. 
+              In the first case (+15) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
+              input DVDB contains q-points in the IBZ and the potentials along the path are interpolated with Fourier transform.
+              In the second case (-15) the q-points are taken directly from the DVDB file.
+* 16 -> Produce WRMAX.nc file with the decay of the W(R,r) as a function of R
 """,
 ),
 
@@ -4391,8 +4396,7 @@ Variable(
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to [[irdwfk]], [[irdwfq]],
-[[ird1wf]], [[irdddk]]. One should first read the explanations given for these
-latter variables.
+[[ird1wf]], [[irdddk]]. One should first read the explanations given for these latter variables.
 The **getwfk**, **getwfq**, [[get1wf]] and **getddk** variables are
 typically used to chain the calculations in the multi-dataset mode, since they
 describe from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
@@ -5056,15 +5060,15 @@ Variable(
     mnemonics="GET the wavefunctions from _WFK file",
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
-starting wavefunctions, as an alternative to [[irdwfk]],[[irdwfq]],[[ird1wf]],
+starting wavefunctions, as an alternative to [[irdwfk]], [[irdwfq]],[[ird1wf]],
 or [[irdddk]]. One should first read the explanations given for these latter variables.
 The [[getwfk]], **getwfq**, **get1wf** and **getddk** variables are typically
 used to chain the calculations in the multi-dataset mode, since they describe
-from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
-wavefunctions of the present dataset.
+from which dataset the OUTPUT wavefunctions are to be taken, as INPUT wavefunctions of the present dataset.
+Note also that, starting Abinit v9, one can also use [[getwfk_path]] to specify the path of the file directly.
 
-We now focus on the [[getwfk]] input variable (the only one used in ground-
-state calculations), but the rules for **getwfq** and **get1wf** are similar,
+We now focus on the [[getwfk]] input variable (the only one used in ground-state calculations), 
+but the rules for **getwfq** and **get1wf** are similar,
 with _WFK replaced by _WFQ or _1WF.
 If [[getwfk]] == 0, no use of previously computed output wavefunction file
 appended with _DSx_WFK is done.
@@ -5164,8 +5168,8 @@ starting wavefunctions, as an alternative to [[irdwfk]],[[irdwfq]],[[ird1wf]]
 or [[irdddk]]. One should first read the explanations given for these latter variables.
 The **getwfk**, [[getwfq]], **get1wf** and **getddk** variables are typically
 used to chain the calculations in the multi-dataset mode, since they describe
-from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
-wavefunctions of the present dataset.
+from which dataset the OUTPUT wavefunctions are to be taken, as INPUT wavefunctions of the present dataset.
+Note also that, starting Abinit v9, one can also use [[getwfq_path]] to specify the path of the file directly.
 
 We now focus on the **getwfk** input variable (the only one used in ground-
 state calculations), but the rules for [[getwfq]] and **get1wf** are similar,
@@ -7170,7 +7174,9 @@ the charge neutrality sum rule is usually prohibitively large.
 
 A non-zero value of [[irdddb]] is treated in the same way as other "ird" variables.
 For further information about the *files file*, consult the [[help:abinit#files-file]].
+Note also that, starting Abinit v9, one can also use [[getddb_path]] to specify the path of the DDB file directly.
 """,
+
 ),
 
 Variable(
@@ -19597,7 +19603,7 @@ Variable(
 This variable can be used to introduce a cutoff on the q-points when computing the imaginary
 part of the electron-phonon self-energy ([[eph_task]] = -4) with the tetrahedron method ([[eph_intmeth]] = 2)
 The first entry refers to phonon absorption while the second one is associated to phonon emission.
-A q-point is included in the sum if the tetrahedron weights for phonon absorption/emission are larger that these values.
+A q-point is included in the sum of the tetrahedron weights for phonon absorption/emission are larger that these values.
 """,
 ),
 
@@ -19610,8 +19616,9 @@ Variable(
     dimensions=[2],
     mnemonics="EPH PHonon mode RANGE.",
     text=r"""
-This variable is used to select the range of phonon modes included in the computation of the phonon self-energy.
-By default [0,0] all phonon modes are included, otherwise only the modes with index between the first and second entries are included.
+This variable is used to select the range of phonon modes included in the computation of the electron-phonon self-energy.
+By default all phonon modes are included ([0, 0]), otherwise only the phonon modes with index between the first 
+and second entry are included.
 """,
 ),
 
@@ -19651,6 +19658,7 @@ the projection in the subspace orthogonal to the nband states).
 
 The Sternheimer approach requires an external file with the KS potential produced by setting [[prtpot]] = 1 in the GS run
 and the specification of [[tolwfr]] in the input file.
+The path to the POT file is specified via [[getpot_path]].
 The number of line minimisations for the Sternheimer solver is defined by [[nline]].
 
 !!! important
@@ -19686,7 +19694,7 @@ Variable(
     defaultval=0,
     mnemonics="SYMmetrize V1 DFPT SCF potentials",
     text=r"""
-If symv1scf is equal to 1, the spatial-symmetry on the first-order DFPT potentials 
+If *symv1scf* is equal to 1, the spatial-symmetry on the first-order DFPT potentials 
 is enforced every time a set of potentials in the BZ is recostructed by symmetry
 starting from the initial values in the IBZ.
 This option is similar to [[symdynmat]] but it acts on the DFPT potentials instead of 
@@ -19707,10 +19715,17 @@ This flag is used in the Fourier interpolation in q-space of the DFPT potentials
 In polar materials there is a long range (LR) component in the first-order variation
 of the KS potential that can be modeled in terms of the Born effective charges and 
 the macroscopic dielectric tensor [[cite:Verdi2015]], [[cite:Giustino2017]].
-If dvdb_add_lr is set to 1, this part is removed when computing the real-space representation
-of the DFPT potentials so that the potential is short-ranged and ameneable to Fourier interpolation.
-The long-range contribution is added back when interpolating the DFPT potentials at arbitrary q-points
-Setting this flag to zero deactivate the treatment of the LR contribution.
+Possible values are [0, -1, 1].
+
+Setting this flag to 0 deactivates the treatment of the LR contribution (not recommended in polar materials).
+
+If *dvdb_add_lr* is set to 1, the LR part is removed when computing the real-space representation
+of the DFPT potentials so that the potential in real space is short-ranged and ameneable to Fourier interpolation.
+The long-range contribution is then added back when interpolating the DFPT potentials at arbitrary q-points
+
+If *dvdb_add_lr* is set to -1, the LR part is removed before computing the real-space representation
+but the LR term is **not** added back during the interpolation in $\qq$-space. This option is mainly used 
+for debugging purposes.
 
 By default, the code will always treat the LR term is the DDB file contains Born effective charges 
 and the macroscopic dielectric tensor.
@@ -19741,7 +19756,7 @@ present the same scalability and the same parallel efficiency.
 Besides the maximum number of MPI processes that can be used for the different MPI-levels is related 
 to the basic dimensions of the calculation.
 
-In what follows, we explain briefly the pros/cons of the different MPI-levels, then we specialize 
+In what follows, we explain briefly the pros and cons of the different MPI-levels, then we specialize 
 the discussion to the different calculations activated by [[eph_task]].
 
 The parallelization over perturbations (**np**) is network intensive but it allows one to decrease the memory
@@ -19774,6 +19789,141 @@ allocated for the wavefunctions, especially when we have to sum over empty state
 
     The total number of MPI processes must be equal to the product of the different entries.
 """,
+),
+
+Variable(
+    abivarname="eph_use_ftinterp",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="EPH FORCE Fourier Transform Interpolation of DFPT potentials.",
+    text=r"""
+This is an *advanced option* used for testing/debugging the interpolation of the DFPT potentials when [[eph_task]] in (2, -2)
+By default, the code seeks for the q-point in the input DVDB file when *eph_use_ftinterp* is set to zero (default)
+and stops is the q-point in not found in the file.
+When *eph_use_ftinterp* is set to 1, the input DVDB file (assumed to be on the [[ddb_ngqpt]] q-mesh)
+will be used to generate the real-space representation of the DFPT potentials and interpolated the potential
+at the input [[qpt]].
+""",
+),
+
+#Variable(
+#    abivarname="eph_alpha_gmin",
+#    varset="eph",
+#    vartype="real",
+#    topics=['ElPhonInt_expert'],
+#    dimensions="scalar",
+#    defaultval=0,
+#    mnemonics="EPH ALPHA times norm of GMIN.",
+#    text=r"""
+#This is an *advanced option* used to compute the long-range part of the DFTP potential.
+#TO BE DESCRIBED WHEN WE ENTER PRODUCTION
+#""",
+#),
+
+Variable(
+    abivarname="getpot_path",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the KS POTential from PATH",
+    text=r"""
+This variable defines the path of the POT file containing the KS ground-state potential
+that should be used in input. 
+At present, it is mainly used in EPH code when performing calculation with the Sternheimer equation. 
+Note that the path must be inserted between quotation marks.
+Note also that relative paths are interpreted according to the working directory in which Abinit is executed!
+""",
+),
+
+Variable(
+    abivarname="ddb_qrefine",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_expert'],
+    dimensions=[3],
+    defaultval=[1, 1, 1],
+    mnemonics="Q-point REFINEment order (experimental)",
+    text=r"""
+If **ddb_qrefine** is superior to 1, the EPH code attempts to initialize a first set of
+dynamical matrices from the DDB file and DFPT potentials from the DVDB file, with a q-point grid which is
+[[ddb_ngqpt]] divided by **qrefine** (e.g. ddb_ngqpt 4 4 2 ddb_qrefine 2 2 1 starts with a 2x2x2 grid). 
+The dynamical matrices and DFPT potentials are interpolated onto the full
+[[ddb_ngqpt]] grid and any additional information found in the DDB file is
+imposed, before proceeding to normal band structure and other interpolations.
+Should implement Gaal-Nagy's algorithm in [[cite:GaalNagy2006]].
+
+A similar option is also available in anaddb. The main difference is that ddb_qrefine will also densify
+the q-mesh used for the Fourier transform of the DFPT potentials.
+""",
+),
+
+Variable(
+    abivarname="getwfk_path",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the wavefunctions from WFK PATH",
+    text=r"""
+Specify the path of the WFK file using a string instead of the dataset index.
+Alternative to [[getwfk]] and [[irdwfk]]. The string must be enclosed between quotation marks:
+
+    getwfk_path "../foodir/out_WFK"
+"""
+),
+
+Variable(
+    abivarname="getwfq_path",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the k+q wavefunctions from WFQ PATH",
+    text=r"""
+Specify the path of the WFQ file using a string instead of the dataset index.
+Alternative to [[getwfq]] and [[irdwfq]]. The string must be enclosed between quotation marks:
+
+    getwfq_path "../foodir/out_WFQ"
+"""
+),
+
+Variable(
+    abivarname="getddb_path",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="GET the DDB from PATH",
+    text=r"""
+Specify the path of the DDB file using a string instead of the dataset index.
+Alternative to [[getddb]] and [[irdddb]]. The string must be enclosed between quotation marks:
+
+    getddb_path "../foodir/out_DDB"
+"""
+),
+
+Variable(
+    abivarname="getdvdb_path",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the DVDB file from PATH",
+    text=r"""
+Specify the path of the DVDB file using a string instead of the dataset index.
+Alternative to [[getdvdb]] and [[irddvdb]]. The string must be enclosed between quotation marks:
+
+    getdvdb_path "../foodir/out_DVDB"
+"""
 ),
 
 ]

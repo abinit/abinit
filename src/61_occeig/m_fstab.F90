@@ -28,7 +28,7 @@ module m_fstab
  use m_abicore
  use m_xmpi
  use m_errors
- use m_kptrank
+ use m_krank
  use m_tetrahedron
  use m_ebands
 
@@ -89,7 +89,7 @@ module m_fstab
    real(dp) :: deltaene
    ! Chemical potential increment for inelastic integration
 
-   type(kptrank_type) :: krank
+   type(krank_t) :: krank
    ! rank/inverse_rank pair for the k-points on the FS (kpts).
 
    integer,allocatable :: istg0(:,:)
@@ -180,7 +180,7 @@ subroutine fstab_free(fstab)
  ABI_SFREE(fstab%tetra_wtk_ene)
 
  ! types
- call destroy_kptrank(fstab%krank)
+ call fstab%krank%free()
 
 end subroutine fstab_free
 !!***
@@ -381,7 +381,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
      fs%istg0(:, ik) = full2ebands(:, ik_full)
    end do
    fs%maxnb = maxval(fs%bstcnt_ibz(2, :))
-   call mkkptrank(fs%kpts,nkfs,fs%krank)
+   fs%krank = krank_new(nkfs, fs%kpts)
  end do ! spin
 
  call cwtime(cpu,wall,gflops,"stop")
@@ -523,7 +523,7 @@ integer function fstab_findkg0(fstab, kpt, g0) result(ikfs)
 
 ! *************************************************************************
 
- ikfs = kptrank_index(fstab%krank, kpt)
+ ikfs = fstab%krank%get_index(kpt)
  if (ikfs /= -1) then
    g0 = nint(kpt - fstab%kpts(:, ikfs))
  else
@@ -714,7 +714,7 @@ end subroutine fstab_print
 !!      elphon,get_tau_k
 !!
 !! CHILDREN
-!!      destroy_kptrank,get_rank_1kpt,mkkptrank,wrtout
+!!      destroy_kptrank,get_rank,mkkptrank,wrtout
 !!
 !! SOURCE
 
@@ -732,8 +732,8 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
 !Local variables-------------------------------
 !scalars
  integer :: ikpt_phon,iFSqpt,iqpt,isym,symrankkpt_phon
- character(len=500) :: message
- type(kptrank_type) :: kptrank_t
+ !character(len=500) :: message
+ type(krank_t) :: krank
 !arrays
  real(dp) :: tmpkpt(3),gamma_kpt(3)
 
@@ -741,7 +741,7 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
 
  call wrtout(std_out,' mkqptequiv : making rankkpt_phon and invrankkpt_phon',"COLL")
 
- call mkkptrank (kpt_phon,nkpt_phon,kptrank_t)
+ krank = krank_new(nkpt_phon, kpt_phon)
 
  FSfullpqtofull = -999
  gamma_kpt(:) = zero
@@ -752,9 +752,9 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
      tmpkpt(:) = kpt_phon(:,ikpt_phon) + qpt_full(:,iqpt)
 
 !    which kpt is it among the full FS kpts?
-     call get_rank_1kpt (tmpkpt,symrankkpt_phon,kptrank_t)
+     symrankkpt_phon = krank%get_rank(tmpkpt)
 
-     FSfullpqtofull(ikpt_phon,iqpt) = kptrank_t%invrank(symrankkpt_phon)
+     FSfullpqtofull(ikpt_phon,iqpt) = krank%invrank(symrankkpt_phon)
      if (FSfullpqtofull(ikpt_phon,iqpt) == -1) then
        MSG_ERROR("looks like no kpoint equiv to k+q !!!")
      end if
@@ -766,48 +766,46 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
    do iqpt=1,nqpt
      tmpkpt(:) = gamma_kpt(:) - qpt_full(:,iqpt)
 
-!    which kpt is it among the full FS kpts?
-     call get_rank_1kpt (tmpkpt,symrankkpt_phon,kptrank_t)
+     ! which kpt is it among the full FS kpts?
+     symrankkpt_phon = krank%get_rank(tmpkpt)
 
-     mqtofull(iqpt) = kptrank_t%invrank(symrankkpt_phon)
+     mqtofull(iqpt) = krank%invrank(symrankkpt_phon)
      if (mqtofull(iqpt) == -1) then
        MSG_ERROR("looks like no kpoint equiv to -q !!!")
      end if
    end do
  end if
 
- call destroy_kptrank (kptrank_t)
+ call krank%free()
 
 !start over with q grid
  call wrtout(std_out,' mkqptequiv : FSfullpqtofull made. Do qpttoqpt',"COLL")
 
- call mkkptrank (qpt_full,nqpt,kptrank_t)
+ krank = krank_new(nqpt, qpt_full)
 
  qpttoqpt(:,:,:) = -1
  do iFSqpt=1,nqpt
    do isym=1,Cryst%nsym
      tmpkpt(:) =  Cryst%symrec(:,1,isym)*qpt_full(1,iFSqpt) &
-&     + Cryst%symrec(:,2,isym)*qpt_full(2,iFSqpt) &
-&     + Cryst%symrec(:,3,isym)*qpt_full(3,iFSqpt)
+                + Cryst%symrec(:,2,isym)*qpt_full(2,iFSqpt) &
+                + Cryst%symrec(:,3,isym)*qpt_full(3,iFSqpt)
 
-     call get_rank_1kpt (tmpkpt,symrankkpt_phon,kptrank_t)
-     if (kptrank_t%invrank(symrankkpt_phon) == -1) then
-       message = "looks like no kpoint equiv to q by symmetry without time reversal!!!"
-       MSG_ERROR(message)
+     symrankkpt_phon = krank%get_rank(tmpkpt)
+     if (krank%invrank(symrankkpt_phon) == -1) then
+       MSG_ERROR("looks like no kpoint equiv to q by symmetry without time reversal!!!")
      end if
-     qpttoqpt(1,isym,kptrank_t%invrank(symrankkpt_phon)) = iFSqpt
+     qpttoqpt(1,isym,krank%invrank(symrankkpt_phon)) = iFSqpt
 
      tmpkpt = -tmpkpt
-     call get_rank_1kpt (tmpkpt,symrankkpt_phon,kptrank_t)
-     if (kptrank_t%invrank(symrankkpt_phon) == -1) then
-       message = ' mkqptequiv : Error : looks like no kpoint equiv to q by symmetry with time reversal!!!'
-       MSG_ERROR(message)
+     symrankkpt_phon = krank%get_rank(tmpkpt)
+     if (krank%invrank(symrankkpt_phon) == -1) then
+       MSG_ERROR('looks like no kpoint equiv to q by symmetry with time reversal!!!')
      end if
-     qpttoqpt(2,isym,kptrank_t%invrank(symrankkpt_phon)) = iFSqpt
+     qpttoqpt(2,isym,krank%invrank(symrankkpt_phon)) = iFSqpt
    end do
  end do
 
- call destroy_kptrank (kptrank_t)
+ call krank%free()
 
 end subroutine mkqptequiv
 !!***

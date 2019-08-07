@@ -1,7 +1,8 @@
-'''
-    Define basic structures without particular requirements.
-'''
+"""
+Define basic structures without particular requirements.
+"""
 from __future__ import print_function, division, unicode_literals
+
 from ..register_tag import yaml_auto_map, yaml_scalar, yaml_not_available_tag
 from ..common import FailDetail
 from .pandas_commons import has_pandas
@@ -15,7 +16,7 @@ class EnergyTerms(object):
         'total_energy',
         'comment',
         'band_energy',
-        'total_energy_eV'
+        'total_energy_eV',
     }
 
     def __init__(self, comment='no comment'):
@@ -40,7 +41,7 @@ class EnergyTermsDC(EnergyTerms):
         'comment',
         'band_energy',
         '-kT*entropy',
-        'total_energy_dc_eV'
+        'total_energy_dc_eV',
     }
 
 

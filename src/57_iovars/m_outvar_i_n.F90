@@ -274,7 +274,7 @@ subroutine outvar_i_n (dtsets,iout,&
 
 !iatfix
  narr=natfix                    ! default size for all datasets
- do idtset=0,ndtset_alloc       ! especific size for each dataset
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=natfix_(idtset)
    if(idtset==0)narrm(idtset)=mxvals%natom
    intarr(1:narrm(idtset),idtset)=iatfixio_(1:narrm(idtset),idtset)
@@ -284,7 +284,7 @@ subroutine outvar_i_n (dtsets,iout,&
 
 !iatfixx
  narr=natfixx                   ! default size for all datasets
- do idtset=0,ndtset_alloc       ! especific size for each dataset
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=natfixx_(idtset)
    if(idtset==0)narrm(idtset)=mxvals%natom
    intarr(1:narrm(idtset),idtset)=iatfixx_(1:narrm(idtset),idtset)
@@ -294,7 +294,7 @@ subroutine outvar_i_n (dtsets,iout,&
 
 !iatfixy
  narr=natfixy                   ! default size for all datasets
- do idtset=0,ndtset_alloc       ! especific size for each dataset
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=natfixy_(idtset)
    if(idtset==0)narrm(idtset)=mxvals%natom
    intarr(1:narrm(idtset),idtset)=iatfixy_(1:narrm(idtset),idtset)
@@ -304,7 +304,7 @@ subroutine outvar_i_n (dtsets,iout,&
 
 !iatfixz
  narr=natfixz                   ! default size for all datasets
- do idtset=0,ndtset_alloc       ! especific size for each dataset
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=natfixz_(idtset)
    if(idtset==0)narrm(idtset)=mxvals%natom
    intarr(1:narrm(idtset),idtset)=iatfixz_(1:narrm(idtset),idtset)
@@ -533,7 +533,7 @@ subroutine outvar_i_n (dtsets,iout,&
 
 !kberry
  narr=3*dtsets(1)%nberry ! default size for all datasets
- do idtset=0,ndtset_alloc       ! especific size for each dataset
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
    if(idtset/=0)then
      narrm(idtset)=3*dtsets(idtset)%nberry
      if (narrm(idtset)>0)&
@@ -577,6 +577,7 @@ subroutine outvar_i_n (dtsets,iout,&
 
 !kptgw
  narr=3*dtsets(1)%nkptgw ! default size for all datasets
+ dprarr(:,0)=zero
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    if(idtset/=0)then
      narrm(idtset)=3*dtsets(idtset)%nkptgw
@@ -830,7 +831,7 @@ subroutine outvar_i_n (dtsets,iout,&
 !Need to be printed only if there is some occurence of prtdos==3 or
 !pawfatbnd>0
  narr=1                      ! default size for all datasets
- do idtset=0,ndtset_alloc       ! especific size for each dataset
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=1
    intarr(1,idtset)=dtsets(idtset)%natsph
 

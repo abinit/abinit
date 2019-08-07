@@ -1,6 +1,6 @@
 
-.Version 8.11.7 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.8 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -464,10 +464,10 @@ data: !EtotIters |
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
-cutoff_energies: {"ecut":   8.00000000000000000E+00, "pawecutdg":  -1.00000000000000000E+00, }
+cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
 convergence: {
-    "deltae":  -9.53903622757934500E-13, "res2":   2.13135145196609473E-11, 
-    "residm":   8.96759867517499773E-11, "diffor": undef, 
+    "deltae": -9.539036227579345E-013, "res2":  2.131351451966095E-011, 
+    "residm":  8.967598675174998E-011, "diffor": undef, 
 }
 etotal    :  -8.87168809125275004E+00
 entropy   :   0.00000000000000000E+00
