@@ -745,7 +745,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
 !                  Eventually close the dot file
                    do ii=1,nwffile
-                     call wfk_close(ddk_f(ii))
+                     call ddk_f(ii)%close()
                    end do
 
 !                   if (psps%usepaw==1) then

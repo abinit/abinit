@@ -497,7 +497,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        do ii=1,3 ! Loop over elect. field directions
          if (ddkfil(ii)/=0)then
 !        Number of k points to skip in the full set of k pointsp
-           ik_ddk(ii) = wfk_findk(ddkfiles(ii), kpoint)
+           ik_ddk(ii) = ddkfiles(ii)%findk(kpoint)
            ABI_CHECK(ik_ddk(ii) /= -1, "Cannot find k-point in DDK")
            npw_ = ddkfiles(ii)%hdr%npwarr(ik_ddk(ii))
            if (npw_/=npw_k) then
@@ -694,7 +694,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !            Read ddk wave function
            ABI_ALLOCATE(ddk,(2,npw_k*dtset%nspinor))
            if (ddkfil(ii)/=0) then
-             call wfk_read_bks(ddkfiles(ii), iband, ik_ddk(ii), isppol, xmpio_single, cg_bks=ddk)
+             call ddkfiles(ii)%read_bks(iband, ik_ddk(ii), isppol, xmpio_single, cg_bks=ddk)
 !            Multiply ddk by +i
              do jj=1,npw_k*dtset%nspinor
                arg=ddk(1,jj)
@@ -1068,7 +1068,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 
 !Close the ddk files
  do ii=1,3
-   call wfk_close(ddkfiles(ii))
+   call ddkfiles(ii)%close()
  end do
 
 !Release now useless memory

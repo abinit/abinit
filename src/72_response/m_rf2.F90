@@ -157,8 +157,6 @@ CONTAINS  !=====================================================================
 
 subroutine rf2_getidir(idir1,idir2,idir)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: idir1,idir2
@@ -198,8 +196,6 @@ end subroutine rf2_getidir
 !! SOURCE
 
 subroutine rf2_getidirs(idir,idir1,idir2)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -280,8 +276,6 @@ end subroutine rf2_getidirs
 
 subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
                                  jband,debug_mode,vi,v1j,v2j)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -447,8 +441,6 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 &                                jband,gs_hamkq,gvnlx1,idir,ipert,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
 &                                debug_mode,prtvol,rf_hamk_idir,size_cprj,size_wf,&
 &                                conj,enl,ffnl1,ffnl1_test) ! optional
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -810,8 +802,6 @@ end subroutine rf2_apply_hamiltonian
 !! SOURCE
 
 subroutine rf2_destroy(rf2)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars

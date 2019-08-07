@@ -33,8 +33,6 @@ MODULE m_ifc
  use m_xmpi
  use m_sort
  use m_cgtools
- use m_bspline
- use m_skw
  use m_lebedev
  use m_nctk
  use m_ddb
@@ -194,18 +192,36 @@ MODULE m_ifc
     ! dynmat_lr(2,3,natom,3,natom,nqbz))
     ! Long-range part of dynmat in q-space
 
+ contains
+
+    procedure :: free => ifc_free
+    ! Release memory
+
+    procedure :: print => ifc_print
+     ! Print info on the object.
+
+    procedure :: fourq => ifc_fourq
+     ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
+
+    procedure :: speedofsound => ifc_speedofsound
+     ! Compute the speed of sound by averaging phonon group velocities.
+
+    procedure :: write => ifc_write
+     ! Print the ifc (output, netcdf and text file)
+
+    procedure :: outphbtrap => ifc_outphbtrap
+     ! Print out phonon frequencies on regular grid for BoltzTrap code.
+
+    procedure :: printbxsf => ifc_printbxsf
+     ! Output phonon isosurface in Xcrysden format.
+
+    procedure :: calcnwrite_nana_terms => ifc_calcnwrite_nana_terms
+     ! Compute phonons for q--> 0 with LO-TO
+
  end type ifc_type
 
  public :: ifc_init          ! Constructor from DDB datatype
  public :: ifc_init_fromFile ! Constructor from filename
- public :: ifc_free          ! Release memory
- public :: ifc_print         ! Print info on the object.
- public :: ifc_fourq         ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
- public :: ifc_speedofsound  ! Compute the speed of sound by averaging phonon group velocities.
- public :: ifc_write         ! Print the ifc (output, netcdf and text file)
- public :: ifc_outphbtrap    ! Print out phonon frequencies on regular grid for BoltzTrap code.
- public :: ifc_printbxsf     ! Output phonon isosurface in Xcrysden format.
- public :: ifc_calcnwrite_nana_terms   ! Compute phonons for q--> 0 with LO-TO
 !!***
 
 !----------------------------------------------------------------------
@@ -234,7 +250,7 @@ CONTAINS  !===========================================================
 subroutine ifc_free(ifc)
 
 !Arguments ------------------------------------
- type(ifc_type),intent(inout) :: ifc
+ class(ifc_type),intent(inout) :: ifc
 
 ! ************************************************************************
 
@@ -523,8 +539,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ABI_MALLOC(ifc_tmp%wghatm, (natom, natom, ifc_tmp%nrpt))
 
  ! HM: this tolerance is highly dependent on the compilation/architecture
- !     numeric errors in the DDB text file. Try a few tolerances and
- !     check if all the weights are found.
+ !     numeric errors in the DDB text file. Try a few tolerances and check whether all the weights are found.
  toldist = tol8
  do while (toldist <= tol6)
    ! Note ngqpt(9) with intent(inout)!
@@ -734,11 +749,11 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 
  ! Get Dielectric Tensor and Effective Charges
  ABI_ALLOCATE(zeff,(3,3,natom))
- iblok = ddb_get_dielt_zeff(ddb,ucell_ddb,1,1,0,dielt,zeff)
+ iblok = ddb%get_dielt_zeff(ucell_ddb,1,1,0,dielt,zeff)
 
  ! Try to get dielt, in case just the DDE are present
  if (iblok == 0) then
-   iblok_tmp = ddb_get_dielt(ddb,1,dielt)
+   iblok_tmp = ddb%get_dielt(1,dielt)
  end if
 
  ! ifc to be calculated for interpolation
@@ -754,7 +769,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 
  ! Free them all
  ABI_DEALLOCATE(atifc)
- call ddb_free(ddb)
+ call ddb%free()
  call ddb_hdr_free(ddb_hdr)
 
  end subroutine ifc_init_fromFile
@@ -784,13 +799,13 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 !!
 !! SOURCE
 
-subroutine ifc_print(ifc,header,unit,prtvol)
+subroutine ifc_print(ifc, header, unit, prtvol)
 
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: unit,prtvol
  character(len=*),optional,intent(in) :: header
- type(ifc_type),intent(in) :: ifc
+ class(ifc_type),intent(in) :: ifc
 
 !Local variables-------------------------------
  integer :: unt,my_prtvol,iatom,ii
@@ -880,7 +895,7 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
 !Arguments ------------------------------------
 !scalars
  character(len=*),optional,intent(in) :: nanaqdir
- type(ifc_type),intent(in) :: Ifc
+ class(ifc_type),intent(in) :: Ifc
  type(crystal_t),intent(in) :: Crystal
  integer,optional,intent(in) :: comm
 !arrays
@@ -1114,7 +1129,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: comm,ncid
- type(ifc_type),intent(in) :: ifc
+ class(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: crystal
 !arrays
  real(dp),intent(in) :: qrad_tolkms(2)
@@ -1618,7 +1633,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: ifcout,ifcana,prt_ifc,ncid
- type(ifc_type),intent(inout) :: Ifc
+ class(ifc_type),intent(inout) :: Ifc
 !arrays
  integer,intent(in) :: atifc(Ifc%natom)
 
@@ -2464,7 +2479,7 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
 !scalars
  integer,intent(in) :: nqshft
  character(len=*),intent(in) :: basename
- type(ifc_type),intent(in) :: ifc
+ class(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: cryst
 !arrays
  integer,intent(in) :: ngqpt(3)
@@ -2577,7 +2592,7 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
 !scalars
  integer,intent(in) :: nqshft,comm
  character(len=*),intent(in) :: path
- type(ifc_type),intent(in) :: ifc
+ class(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: cryst
 !arrays
  integer,intent(in) :: ngqpt(3)
@@ -2668,7 +2683,7 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
 !Arguments ------------------------------------
  integer,intent(in) :: nph2l
  integer,optional,intent(in) :: ncid
- type(ifc_type),intent(in) :: ifc
+ class(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: crystal
 !arrays
  real(dp),intent(in) :: qph2l(3, nph2l)

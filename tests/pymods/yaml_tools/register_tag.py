@@ -1,9 +1,9 @@
-'''
+"""
 This module provides facilities to use YAML formatted data.
 It defines several decorators to easily create YAML compatible
-classes which will be used both when parsing YAML formatted data
+classes which are used both when parsing YAML formatted data
 and when writing YAML formatted data.
-'''
+"""
 from __future__ import print_function, division, unicode_literals
 
 import re
@@ -20,9 +20,7 @@ known_tags = set()
 
 
 def reserve_tag(tag):
-    '''
-    Prevent multiple registration of the same tag.
-    '''
+    """Prevent multiple registration of the same tag."""
     if tag in known_tags:
         raise AlreadyRegisteredTagError(tag)
     else:
@@ -30,13 +28,14 @@ def reserve_tag(tag):
 
 
 def yaml_map(cls):
-    '''
+    """
     Register a class with a given tag in the YAML library.
     The class must expose the methods `from_map` and `to_map`.
     `from_map` must return a valid instance of cls.
     It can be a classmethod or a normal method but in
     the latter case 'cls()' must be a valid initialisation.
-    '''
+    """
+
     tag = '!' + get_yaml_tag(cls)
 
     reserve_tag(tag)
@@ -58,13 +57,13 @@ def yaml_map(cls):
 
 
 def yaml_seq(cls):
-    '''
+    """
     Register a class with a given tag in the YAML library.
     The class must expose the methods `from_seq` and `to_seq`.
     `from_seq` must return a valid instance of cls.
     It can be a class method or a normal method but in
     the latter case 'cls()' must be a valid initialisation.
-    '''
+    """
     tag = '!' + get_yaml_tag(cls)
 
     reserve_tag(tag)
@@ -86,13 +85,13 @@ def yaml_seq(cls):
 
 
 def yaml_scalar(cls):
-    '''
+    """
     Register a class with a given tag in the YAML library.
     The class must expose the methods `from_scalar` and `to_scalar`.
     `from_scalar` must return a valid instance of cls.
     It can be a class method or a normal method but in
     the latter case 'cls()' must be a valid initialisation.
-    '''
+    """
     tag = '!' + get_yaml_tag(cls)
 
     reserve_tag(tag)
@@ -114,30 +113,30 @@ def yaml_scalar(cls):
 
 
 def auto_map(Cls):
-    '''
-        Automatically append methods from_map, to_map and __repr__ to a
-        class intended to be used with YAML tag, provided __getitem__
-        and __setitem__ are defined. Attribute names are normalized to
-        be accessible as regular property even if the
-        original name contained spaces or special characters. The original
-        name can still be used in dict like access.
-        Example:
+    """
+    Automatically append methods from_map, to_map and __repr__ to a
+    class intended to be used with YAML tag, provided __getitem__
+    and __setitem__ are defined. Attribute names are normalized to
+    be accessible as regular property even if the
+    original name contained spaces or special characters. The original
+    name can still be used in dict like access.
+    Example:
 
-        >>> @auto_map
-        ... class A(object):
-        ...     pass
-        ...
-        >>> a = A()
-        >>> a['attr w/ spaces'] = 78
-        >>> a.attr_w_spaces
-        78
-        >>> a.attr_w_spaces = 82
-        >>> a['attr w/ spaces']
-        82
-        >>> # be careful, simple normalization imply collisions
-        ... a['attr .w. --spaces']
-        82
-    '''
+    >>> @auto_map
+    ... class A(object):
+    ...     pass
+    ...
+    >>> a = A()
+    >>> a['attr w/ spaces'] = 78
+    >>> a.attr_w_spaces
+    78
+    >>> a.attr_w_spaces = 82
+    >>> a['attr w/ spaces']
+    82
+    >>> # be careful, simple normalization imply collisions
+    ... a['attr .w. --spaces']
+    82
+    """
     class AutoMap(Cls, BaseDictWrapper):
         @classmethod
         def from_map(cls, d):
@@ -154,27 +153,26 @@ def auto_map(Cls):
 
 
 def yaml_auto_map(cls):
-    '''
+    """
     @yaml_auto_map
 
     is equivalent to:
 
     @yaml_map
     @auto_map
-    '''
+    """
     return yaml_map(auto_map(cls))
 
 
 def yaml_implicit_scalar(cls):
-    '''
-    Register a class with a given tag in the YAML library and a pattern
-    which imply this tag.
-    The class must expose methods `from_scalar` and `to_scalar`.
+    """
+    Register a class with a given tag in the YAML library and a pattern which implies this tag.
+    The class must expose mthe ethods `from_scalar` and `to_scalar`.
     Moreover it must have a class attribute `yaml_pattern` that
     can be either a string with the regex pattern matching
     all string representing this kind of data or the compiled
     object of this same regex.
-    '''
+    """
     yaml_scalar(cls)  # register the constructor and the representer
     tag = '!' + get_yaml_tag(cls)
 
@@ -187,12 +185,12 @@ def yaml_implicit_scalar(cls):
 
 
 def yaml_not_available_tag(tag, reason, fatal=False):
-    '''
+    """
     Register tag with a given tag but trigger a warning if fatal == false
     or an error if fatal == True. Use `reason` as the message
     to give more detail to the user. If fatal is False then the returned object
     is an empty dictionary.
-    '''
+    """
     msg = 'The tag !{} is used but is not available:\n{}'.format(tag, reason)
 
     reserve_tag('!' + tag)

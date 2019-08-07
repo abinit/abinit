@@ -510,19 +510,14 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvo
 
  verbose = 0; if (PRESENT(prtvol)) verbose = prtvol
 
- if (kptrlatt(1,2)/=0 .or. kptrlatt(2,1)/=0 .or. &
-&    kptrlatt(1,3)/=0 .or. kptrlatt(3,1)/=0 .or. &
-&    kptrlatt(2,3)/=0 .or. kptrlatt(3,2)/=0 ) then
+ if (kptrlatt(1,2) /= 0 .or. kptrlatt(2,1) /= 0 .or. &
+     kptrlatt(1,3) /= 0 .or. kptrlatt(3,1) /= 0 .or. &
+     kptrlatt(2,3) /= 0 .or. kptrlatt(3,2) /= 0 ) then
    MSG_ERROR('Off-diagonal elements of kptrlatt must be zero')
  end if
 
- n1 = kptrlatt(1,1)
- n2 = kptrlatt(2,2)
- n3 = kptrlatt(3,3)
-
- l1_max = lmax(1)
- l2_max = lmax(2)
- l3_max = lmax(3)
+ n1 = kptrlatt(1,1); n2 = kptrlatt(2,2); n3 = kptrlatt(3,3)
+ l1_max = lmax(1); l2_max = lmax(2); l3_max = lmax(3)
 
  nl=(2*l1_max+1)*(2*l2_max+1)*(2*l3_max+1)
  l0=1+l1_max*(1+(2*l2_max+1)**2+(2*l3_max+1)) ! Index of the origin.
@@ -563,15 +558,13 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvo
         do ii=1,nl
           if (ABS(dist(ii) - dist_min) < TOL_DIST) ndegen(npts) = ndegen(npts) + 1
         end do
-        irvec(1, npts) = in1
-        irvec(2, npts) = in2
-        irvec(3, npts) = in3
+        irvec(:, npts) = [in1, in2, in3]
       end if
      end do !in3
    end do !in2
  end do !in1
 
- if (verbose>=1) then
+ if (verbose >= 1) then
    write(msg,'(a,i0)')' lattice points in Wigner-Seitz supercell: ',npts
    call wrtout(std_out,msg,'COLL')
    do ii=1,npts
@@ -585,7 +578,7 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvo
  do ii=1,npts
    tot = tot + one/ndegen(ii)
  end do
- if (ABS(tot-(n1*n2*n3))>tol8) then
+ if (ABS(tot-(n1*n2*n3)) > tol8) then
    write(msg,'(a,es16.8,a,i0)')'Something wrong in the generation of WS mesh: tot ',tot,' /= ',n1*n2*n3
    MSG_ERROR(msg)
  end if

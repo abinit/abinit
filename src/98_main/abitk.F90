@@ -44,7 +44,6 @@ program abitk
  use m_kpts
  use m_tetrahedron
 
-
  use defs_datatypes,   only : ebands_t
  use m_fstrings,       only : sjoin, strcat, basename
  use m_specialmsg,     only : herald

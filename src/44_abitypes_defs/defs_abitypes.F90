@@ -988,6 +988,10 @@ type dataset_type
  real(dp),allocatable :: kptbounds(:,:)
  real(dp) :: tmesh(3) ! = [5._dp, 59._dp, 6._dp] This triggers a bug in the bindings
 
+ character(len=fnlen) :: getddb_path = ABI_NOFILE
+ character(len=fnlen) :: getdvdb_path = ABI_NOFILE
+ character(len=fnlen) :: getwfk_path = ABI_NOFILE
+ character(len=fnlen) :: getwfq_path = ABI_NOFILE
  character(len=fnlen) :: getkerange_path = ABI_NOFILE
  character(len=fnlen) :: getpot_path = ABI_NOFILE
  !character(len=fnlen) :: getsigeph_path = ABI_NOFILE
@@ -1440,9 +1444,7 @@ type dataset_type
    ! only useful in the response-function case
 
   character(len=fnlen) :: fildens1in   ! to be described by MVeithen
-
   character(len=fnlen) :: fname_tdwf
-
   character(len=fnlen) :: fname_w90
 
   character(len=fnlen) :: fnametmp_wf1
@@ -1451,7 +1453,7 @@ type dataset_type
   character(len=fnlen) :: fnametmp_1wf2
   character(len=fnlen) :: fnametmp_wfgs
   character(len=fnlen) :: fnametmp_wfkq
-   ! Set of filemanes formed from trim(dtfil%filnam_ds(5))//APPEN where APPEN is _WF1, _WF2 ...
+   ! Set of filenames formed from trim(dtfil%filnam_ds(5))//APPEN where APPEN is _WF1, _WF2 ...
    ! See dtfil_init
 
   character(len=fnlen) :: fnametmp_kg
@@ -1463,7 +1465,7 @@ type dataset_type
   character(len=fnlen) :: fnametmp_paw
   character(len=fnlen) :: fnametmp_paw1
   character(len=fnlen) :: fnametmp_pawq
-   ! Set of filemanes formed from trim(dtfil%filnam_ds(5))//APPEN where APPEN is _KG, _DUM, followed
+   ! Set of filenames formed from trim(dtfil%filnam_ds(5))//APPEN where APPEN is _KG, _DUM, followed
    ! by the index of the processor.
    ! See dtfil_init
 

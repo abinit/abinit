@@ -23,8 +23,6 @@
 !!
 !! SOURCE
 
-#define DEV_NEW_TETRA
-
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -38,11 +36,7 @@ module m_ephwg
  use m_errors
  use m_xmpi
  use m_copy
-#ifdef DEV_NEW_TETRA
  use m_htetrahedron
-#else
- use m_tetrahedron
-#endif
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
@@ -157,13 +151,8 @@ type, public :: ephwg_t
   type(lgroup_t) :: lgk
   ! Little group of the k-point
 
-#ifdef DEV_NEW_TETRA
   type(t_htetrahedron) :: tetra_k
   ! Used to evaluate delta(w - e_{k+q} +/- phw_q) with tetrahedron method.
-#else
-  type(t_tetrahedron) :: tetra_k
-  ! Used to evaluate delta(w - e_{k+q} +/- phw_q) with tetrahedron method.
-#endif
 
  contains
 
@@ -299,7 +288,7 @@ type(ephwg_t) function ephwg_new( &
 
  do ik=1,new%nibz
    if (mod(ik, nprocs) /= my_rank) cycle ! mpi-parallelism
-   call ifc_fourq(ifc, cryst, new%ibz(:, ik), phfrq, displ_cart)
+   call ifc%fourq(cryst, new%ibz(:, ik), phfrq, displ_cart)
    new%phfrq_ibz(ik, :) = phfrq
 
    if (frohl_model /= 3) cycle
@@ -452,7 +441,6 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping )
    ABI_FREE(indkk)
    call cwtime_report(" listkk1", cpu, wall, gflops)
 
-
    ! Get mapping (k + q) --> initial IBZ.
    do ii=1,self%nq_k
      self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) + kpoint
@@ -483,14 +471,9 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping )
 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
-#ifdef DEV_NEW_TETRA
- call htetra_free(self%tetra_k)
+ call self%tetra_k%free()
  call htetra_init(self%tetra_k, indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, &
                   self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
-#else
- call destroy_tetra(self%tetra_k)
- call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring, comm)
-#endif
  !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_", ktoa(kpoint)))
  ABI_CHECK(ierr == 0, errorstring)
  ABI_FREE(indkk)
@@ -706,14 +689,9 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
-#ifdef DEV_NEW_TETRA
- call htetra_free(self%tetra_k)
+ call self%tetra_k%free()
  call htetra_init(self%tetra_k, bz2lgkibz, cryst%gprimd, self%klatt, self%bz, self%nbz, &
                   self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
-#else
- call destroy_tetra(self%tetra_k)
- call init_tetra(bz2lgkibz, cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring, comm)
-#endif
  if (ierr /= 0) then
    MSG_ERROR(errorstring)
  end if
@@ -849,17 +827,10 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
 
  else
    ! TODO Add routine to compute only delta
-#ifdef DEV_NEW_TETRA
-   call htetra_blochl_weights(self%tetra_k, pme_k(:,1), eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
+   call self%tetra_k%blochl_weights(pme_k(:,1), eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
      bcorr, thetaw, deltaw_pm(:,:,1), comm)
-   call htetra_blochl_weights(self%tetra_k, pme_k(:,2), eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
+   call self%tetra_k%blochl_weights(pme_k(:,2), eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
      bcorr, thetaw, deltaw_pm(:,:,2), comm)
-#else
-   call tetra_blochl_weights(self%tetra_k, pme_k(:,1), eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
-     bcorr, thetaw, deltaw_pm(:,:,1), comm)
-   call tetra_blochl_weights(self%tetra_k, pme_k(:,2), eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
-     bcorr, thetaw, deltaw_pm(:,:,2), comm)
-#endif
  end if
 
 end subroutine ephwg_get_deltas
@@ -931,7 +902,6 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
    pme_k(iq,2) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
  end do
 
-#ifdef DEV_NEW_TETRA
  ! Compute the tetrahedron or gaussian weights
  if (present(broad)) then
    do iq_ibz=1,self%nq_k
@@ -942,27 +912,9 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
      deltaw_pm(:,iq_ibz,2) = gaussian(wme0, broad) * self%lgk%weights(iq_ibz)
    end do
  else
-   call htetra_wvals_weights_delta(self%tetra_k,pme_k(:,1),neig,eig,max_occ1,self%nq_k,bcorr,deltaw_pm(:,:,1),comm)
-   call htetra_wvals_weights_delta(self%tetra_k,pme_k(:,2),neig,eig,max_occ1,self%nq_k,bcorr,deltaw_pm(:,:,2),comm)
+   call self%tetra_k%wvals_weights_delta(pme_k(:,1),neig,eig,max_occ1,self%nq_k,bcorr,deltaw_pm(:,:,1),comm)
+   call self%tetra_k%wvals_weights_delta(pme_k(:,2),neig,eig,max_occ1,self%nq_k,bcorr,deltaw_pm(:,:,2),comm)
  end if
-#else
- ! Compute the tetrahedron or gaussian weights
- do iq_ibz=1,self%nq_k
-   if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
-   if (present(broad)) then
-     wme0 = eig - pme_k(iq_ibz, 1)
-     deltaw_pm(:,iq_ibz,1) = gaussian(wme0, broad) * self%lgk%weights(iq_ibz)
-     wme0 = eig - pme_k(iq_ibz, 2)
-     deltaw_pm(:,iq_ibz,2) = gaussian(wme0, broad) * self%lgk%weights(iq_ibz)
-   else
-     call tetra_get_onewk_wvals(self%tetra_k, iq_ibz, bcorr, neig, eig, self%nq_k, pme_k(:,1), weights, tol6)
-     deltaw_pm(:,iq_ibz,1) = weights(:,1)
-     call tetra_get_onewk_wvals(self%tetra_k, iq_ibz, bcorr, neig, eig, self%nq_k, pme_k(:,2), weights, tol6)
-     deltaw_pm(:,iq_ibz,2) = weights(:,1)
-   end if
- end do
- call xmpi_sum(deltaw_pm, comm, ierr)
-#endif
 
 end subroutine ephwg_get_deltas_wvals
 !!***
@@ -1020,13 +972,8 @@ subroutine ephwg_get_deltas_qibzk(self, nu, nene, eminmax, bcorr, dt_weights, co
    eigen_in(iq) = self%phfrq_ibz(iq_ibz, nu)
  end do
 
-#ifdef DEV_NEW_TETRA
- call htetra_blochl_weights(self%tetra_k, eigen_in, eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
+ call self%tetra_k%blochl_weights(eigen_in, eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
    bcorr, dt_weights(:,:,2), dt_weights(:,:,1), comm)
-#else
- call tetra_blochl_weights(self%tetra_k, eigen_in, eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
-   bcorr, dt_weights(:,:,2), dt_weights(:,:,1), comm)
-#endif
 
  if (present(with_qweights)) then
   if (.not. with_qweights) then
@@ -1094,13 +1041,6 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
  real(dp),allocatable :: pme_k(:,:)
  complex(dp),allocatable :: cweights_tmp(:,:)
  !complex(dpc) :: SIM0, SIM0I
-#ifndef DEV_NEW_TETRA
- integer :: itetra, iqlk, jj, iz
- integer :: ind_ibz(4)
- real(dp) :: volconst_mult
- real(dp) :: ework(4, 2)
- complex(dpc) :: VERM(4), VERL(4), VERLI(4),  cint(4,nz)
-#endif
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -1119,53 +1059,17 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
  end do
 
  cweights = zero
-#ifdef DEV_NEW_TETRA
  ABI_MALLOC(cweights_tmp,(nz,self%nq_k))
  do ib=1,nbcalc
    do ii=1,2
-     call htetra_weights_wvals_zinv(self%tetra_k, pme_k(:, ii), nz, zvals(:,ib), &
-                                    max_occ1, self%nq_k, 1, cweights_tmp, comm)
+     call self%tetra_k%weights_wvals_zinv(pme_k(:, ii), nz, zvals(:,ib), &
+                                          max_occ1, self%nq_k, 1, cweights_tmp, comm)
      do iq=1,self%nq_k
        cweights(:,ii,ib,iq) = cweights_tmp(:,iq)
      end do
    end do
  end do
  ABI_FREE(cweights_tmp)
-#else
- do itetra = 1, self%tetra_k%ntetra
-   if (mod(itetra, nprocs) /= my_rank) cycle ! MPI parallelism
-   ! Here we need the original ordering to reference the correct irred kpoints
-   ! See also tetra_get_onewk
-   !if (all(self%tetra_k%tetra_full(:, 1, itetra) /= iqlk)) cycle
-   ind_ibz = self%tetra_k%tetra_full(:, 1, itetra)
-   !volconst_mult = self%tetra_k%vv / 4.d0 !* dble(self%tetra_k%tetra_mult(itetra))
-   volconst_mult = self%tetra_k%vv * dble(self%tetra_k%tetra_mult(itetra))
-
-   ework = pme_k(ind_ibz(:), :)
-   do ib=1,nbcalc
-     do ii=1,2
-       ! Compute weights for nz points.
-       ! TODO: This is slow if nz >> 1
-       do iz=1,nz
-         verm = zvals(iz, ib) - ework(:, ii)
-         !verm = zvals(iz, ib) - pme_k(ind_ibz(:), ii)
-         !call SIM0ONEI(SIM0, SIM0I, VERM)
-         !cint(iz,:) = SIM0I / 4.0_dp * volconst_mult
-         call SIM0TWOI(VERL, VERLI, VERM)
-         cint(:, iz) = verl(:) * volconst_mult
-       end do
-
-       ! TODO
-       ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
-       do jj=1,4
-         iqlk = ind_ibz(jj)
-         cweights(:, ii, ib, iqlk) = cweights(:, ii, ib, iqlk) + cint(jj, :)
-       end do
-     end do  ! +-
-   end do ! ib
-
- end do ! itetra
-#endif
 
  ! Rescale weights so that the caller can sum over the full BZ.
  !if (use_bzsum_) cweights = cweights / ( self%lgk%weights(iqlk) * self%nbz )
@@ -1230,11 +1134,7 @@ subroutine ephwg_free(self)
  ABI_SFREE(self%eigkbs_ibz)
 
  ! types
-#ifdef DEV_NEW_TETRA
- call htetra_free(self%tetra_k)
-#else
- call destroy_tetra(self%tetra_k)
-#endif
+ call self%tetra_k%free()
  call self%lgk%free()
 
  ! nullify pointers

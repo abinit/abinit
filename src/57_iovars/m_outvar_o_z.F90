@@ -130,13 +130,12 @@ contains
 !scalars
  integer,parameter :: nkpt_max=50
  integer :: iat,icount,idtset,ii,iimage,ndtset_alloc_tmp
- integer :: narr!,jdtset
+ integer :: narr
  integer :: multi_kptopt
  integer :: natom
  integer :: nimage,nnos,nsym
  integer :: ntypalch,ntypat,size1,size2,tnkpt,timopt_default,tmpimg0
  logical :: compute_static_images
-! character(len=4) :: appen
  character(len=1) :: firstchar_gpu
 !arrays
  integer,allocatable :: narrm(:)

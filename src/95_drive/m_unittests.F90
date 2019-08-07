@@ -32,8 +32,7 @@ module m_unittests
  use m_ptgroups
  use m_tetrahedron
  use m_htetrahedron
- use m_kptrank
- use m_hkptrank
+ use m_krank
  use m_hashtable
  use m_symkpt
  use m_sort
@@ -292,7 +291,7 @@ subroutine tetra_unittests(comm)
  call write_file('parabola_tetra.dat', nw, energies, idos, dos)
 
  ! Compute blochl weights
- call htetra_blochl_weights(htetraq,eig,emin,emax,max_occ1,nw,&
+ call htetraq%blochl_weights(eig,emin,emax,max_occ1,nw,&
                            nqibz,bcorr0,tweight,dweight,comm)
  do iqibz=1,nqibz
    dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
@@ -306,7 +305,7 @@ subroutine tetra_unittests(comm)
  call write_file('parabola_htetra.dat', nw, energies, idos, dos)
 
  ! Compute blochl weights
- call htetra_blochl_weights(htetraq,eig,emin,emax,max_occ1,nw,&
+ call htetraq%blochl_weights(eig,emin,emax,max_occ1,nw,&
                            nqibz,1,tweight,dweight,comm)
  do iqibz=1,nqibz
    dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
@@ -320,8 +319,8 @@ subroutine tetra_unittests(comm)
  call write_file('parabola_htetra_corr.dat', nw, energies, idos, dos)
 
  ! Compute weights using LV integration from TDEP
- call htetra_blochl_weights(htetraq,eig,emin,emax,max_occ1,nw,&
-                           nqibz,2,tweight,dweight,comm)
+ call htetraq%blochl_weights(eig,emin,emax,max_occ1,nw,&
+                             nqibz,2,tweight,dweight,comm)
  do iqibz=1,nqibz
    dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
    tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
@@ -339,7 +338,7 @@ subroutine tetra_unittests(comm)
  cenergies = energies
 
  ! Use SIMTET routines
- call htetra_weights_wvals_zinv(htetraq,eig,nw,cenergies,max_occ1,&
+ call htetraq%weights_wvals_zinv(eig,nw,cenergies,max_occ1,&
                                  nqibz,1,cweight,comm)
  dos(:)  = -sum(aimag(cweight(:,:)),2)/pi
  idos(:) =  sum(real(cweight(:,:)),2)
@@ -349,7 +348,7 @@ subroutine tetra_unittests(comm)
  call write_file('parabola_zinv_simtet.dat', nw, energies, idos, dos)
 
  ! Use LV integration from TDEP
- call htetra_weights_wvals_zinv(htetraq,eig,nw,cenergies,max_occ1,&
+ call htetraq%weights_wvals_zinv(eig,nw,cenergies,max_occ1,&
                                  nqibz,2,cweight,comm)
  dos(:)  = -sum(aimag(cweight(:,:)),2)/pi
  idos(:) =  sum(real(cweight(:,:)),2)
@@ -360,7 +359,7 @@ subroutine tetra_unittests(comm)
 
  dos = zero; idos = zero
  do iqibz=1,nqibz
-   call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eig,wdt)
+   call htetraq%get_onewk_wvals(iqibz,bcorr0,nw,energies,max_occ1,nqibz,eig,wdt)
    wdt(:,:) = wdt(:,:)*mat(iqibz)
    dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
    idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
@@ -372,7 +371,7 @@ subroutine tetra_unittests(comm)
 
  dos = zero; idos = zero
  do iqibz=1,nqibz
-   call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eig,emin,emax,max_occ1,wdt)
+   call htetraq%get_onewk(iqibz,bcorr0,nw,nqibz,eig,emin,emax,max_occ1,wdt)
    wdt(:,:) = wdt(:,:)*mat(iqibz)
    dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
    idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
@@ -381,7 +380,7 @@ subroutine tetra_unittests(comm)
  write(std_out,*) "dos_int", dos_int, idos(nw)
  call cwtime_report(" htetra_get_onewk", cpu, wall, gflops)
  call write_file('parabola_htetra_onewk.dat', nw, energies, idos, dos)
- call htetra_print(htetraq)
+ call htetraq%print()
 
  !
  ! 2. Compute energies for a flat band
@@ -398,8 +397,8 @@ subroutine tetra_unittests(comm)
  call write_file('flat_tetra.dat', nw, energies, idos, dos)
 
  ! Compute DOS using new tetrahedron implementation
- call htetra_blochl_weights(htetraq,eig,emin,emax,max_occ1,nw,&
-                           nqibz,bcorr0,tweight,dweight,comm)
+ call htetraq%blochl_weights(eig,emin,emax,max_occ1,nw,&
+                             nqibz,bcorr0,tweight,dweight,comm)
  dos(:)  = sum(dweight,2)
  idos(:) = sum(tweight,2)
  call cwtime_report(" htetra_blochl", cpu, wall, gflops)
@@ -407,7 +406,7 @@ subroutine tetra_unittests(comm)
 
  dos = zero; idos = zero
  do iqibz=1,nqibz
-   call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eig,wdt)
+   call htetraq%get_onewk_wvals(iqibz,bcorr0,nw,energies,max_occ1,nqibz,eig,wdt)
    dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
    idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
  end do
@@ -416,7 +415,7 @@ subroutine tetra_unittests(comm)
 
  dos = zero; idos = zero
  do iqibz=1,nqibz
-   call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eig,emin,emax,max_occ1,wdt)
+   call htetraq%get_onewk(iqibz,bcorr0,nw,nqibz,eig,emin,emax,max_occ1,wdt)
    dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
    idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
  end do
@@ -444,7 +443,7 @@ subroutine tetra_unittests(comm)
  ABI_SFREE(cenergies)
  ABI_SFREE(cweight)
  call crystal%free()
- call htetra_free(htetraq)
+ call htetraq%free()
  call destroy_tetra(tetraq)
 
  contains
@@ -476,7 +475,7 @@ end subroutine tetra_unittests
 !!  kptrank_unittests
 !!
 !! FUNCTION
-!!  Test the kptrank and hkptrank routines
+!!  Test the krank routines
 !!
 subroutine kptrank_unittests(comm)
 
@@ -486,8 +485,7 @@ subroutine kptrank_unittests(comm)
 
 !Variables -------------------------------
  type(crystal_t) :: crystal
- type(kptrank_type) :: kptrank
- type(hkptrank_t) :: hkptrank
+ type(krank_t) :: krank
  integer,parameter :: qptopt1=1,nqshft1=1,iout0=0,chksymbreak0=0,sppoldbl1=1
  integer :: nqibz,iqbz,iqibz,iqbz_rank,nqbz,nqibz_symkpt,nqibz_symkpt_new
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
@@ -519,23 +517,14 @@ subroutine kptrank_unittests(comm)
                              nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
  call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
- ! Test mkkptrank
- call mkkptrank(qbz,nqbz,kptrank)
+ ! Test krank
+ krank = krank_new(nqbz, qbz)
  do iqbz=1,nqbz
-   iqbz_rank = kptrank_index(kptrank,qbz(:,iqbz))
+   iqbz_rank = krank%get_index(qbz(:,iqbz))
    ABI_CHECK(iqbz==iqbz_rank,'wrong q-point')
  end do
- call cwtime_report(" kptrank", cpu, wall, gflops)
- call destroy_kptrank(kptrank)
-
- ! Test hkptrank
- call hkptrank_init(hkptrank,qbz,nqbz)
- do iqbz=1,nqbz
-   iqbz_rank = hkptrank_get_index(hkptrank,qbz(:,iqbz))
-   ABI_CHECK(iqbz==iqbz_rank,'wrong q-point')
- end do
- call cwtime_report(" hkptrank", cpu, wall, gflops)
- call hkptrank_free(hkptrank)
+ call cwtime_report(" krank", cpu, wall, gflops)
+ call krank%free()
 
  ABI_MALLOC(wtq_fullbz,(nqbz))
  ABI_MALLOC(wtq_folded,(nqbz))

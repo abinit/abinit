@@ -3701,13 +3701,18 @@ The choice is among:
 * 2 --> Compute electron-phonon matrix elements. Save results in GKK.nc file format.
 * -2 --> Compute electron-phonon matrix elements. Save results in GKQ.nc file format that can be post-processed with AbiPy.
 * 3 --> Compute phonon self-energy.
-* 4 --> Compute electron-phonon self-energy (Fan-Migdal + Debye-Waller) and QP corrections Generate SIGEPH.nc file.
+* 4 --> Compute electron-phonon self-energy (Fan-Migdal + Debye-Waller) and QP corrections. Generate SIGEPH.nc file.
 * -4 --> Compute electron lifetimes due to e-ph interaction (imaginary part of Fan-Migdal self-energy). Generate SIGEPH.nc file.
 * 5 --> Interpolate DFPT potentials to produce a new DVDB file on the [[eph_ngqpt_fine]] q-mesh that can be read with [[getdvdb]]
 * -5 --> Interpolate DFPT potentials on the q-path specified by [[ph_qpath]] and [[ph_nqpath]]. Note that, in this case,
          the user has to provide the full list of q-points in the input, [[ph_ndivsm]] is not used to generate the q-path.
 * 6 --> Estimate correction to the ZPR in polar materials using the Frohlich model. Requires EFMAS.nc file.
 * 7 --> Compute phonon limited transport in semiconductors using lifetimes taken from SIGEPH.nc file.
+* 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file. 
+              In the first case (+15) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
+              input DVDB contains q-points in the IBZ and the potentials along the path are interpolated with Fourier transform.
+              In the second case (-15) the q-points are taken directly from the DVDB file.
+* 16 -> Produce WRMAX.nc file with the decay of the W(R,r) as a function of R
 """,
 ),
 
@@ -4391,8 +4396,7 @@ Variable(
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to [[irdwfk]], [[irdwfq]],
-[[ird1wf]], [[irdddk]]. One should first read the explanations given for these
-latter variables.
+[[ird1wf]], [[irdddk]]. One should first read the explanations given for these latter variables.
 The **getwfk**, **getwfq**, [[get1wf]] and **getddk** variables are
 typically used to chain the calculations in the multi-dataset mode, since they
 describe from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
@@ -5056,15 +5060,15 @@ Variable(
     mnemonics="GET the wavefunctions from _WFK file",
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
-starting wavefunctions, as an alternative to [[irdwfk]],[[irdwfq]],[[ird1wf]],
+starting wavefunctions, as an alternative to [[irdwfk]], [[irdwfq]],[[ird1wf]],
 or [[irdddk]]. One should first read the explanations given for these latter variables.
 The [[getwfk]], **getwfq**, **get1wf** and **getddk** variables are typically
 used to chain the calculations in the multi-dataset mode, since they describe
-from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
-wavefunctions of the present dataset.
+from which dataset the OUTPUT wavefunctions are to be taken, as INPUT wavefunctions of the present dataset.
+Note also that, starting Abinit v9, one can also use [[getwfk_path]] to specify the path of the file directly.
 
-We now focus on the [[getwfk]] input variable (the only one used in ground-
-state calculations), but the rules for **getwfq** and **get1wf** are similar,
+We now focus on the [[getwfk]] input variable (the only one used in ground-state calculations), 
+but the rules for **getwfq** and **get1wf** are similar,
 with _WFK replaced by _WFQ or _1WF.
 If [[getwfk]] == 0, no use of previously computed output wavefunction file
 appended with _DSx_WFK is done.
@@ -5164,8 +5168,8 @@ starting wavefunctions, as an alternative to [[irdwfk]],[[irdwfq]],[[ird1wf]]
 or [[irdddk]]. One should first read the explanations given for these latter variables.
 The **getwfk**, [[getwfq]], **get1wf** and **getddk** variables are typically
 used to chain the calculations in the multi-dataset mode, since they describe
-from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
-wavefunctions of the present dataset.
+from which dataset the OUTPUT wavefunctions are to be taken, as INPUT wavefunctions of the present dataset.
+Note also that, starting Abinit v9, one can also use [[getwfq_path]] to specify the path of the file directly.
 
 We now focus on the **getwfk** input variable (the only one used in ground-
 state calculations), but the rules for [[getwfq]] and **get1wf** are similar,
@@ -7170,7 +7174,9 @@ the charge neutrality sum rule is usually prohibitively large.
 
 A non-zero value of [[irdddb]] is treated in the same way as other "ird" variables.
 For further information about the *files file*, consult the [[help:abinit#files-file]].
+Note also that, starting Abinit v9, one can also use [[getddb_path]] to specify the path of the DDB file directly.
 """,
+
 ),
 
 Variable(
@@ -19854,6 +19860,70 @@ Should implement Gaal-Nagy's algorithm in [[cite:GaalNagy2006]].
 A similar option is also available in anaddb. The main difference is that ddb_qrefine will also densify
 the q-mesh used for the Fourier transform of the DFPT potentials.
 """,
+),
+
+Variable(
+    abivarname="getwfk_path",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the wavefunctions from WFK PATH",
+    text=r"""
+Specify the path of the WFK file using a string instead of the dataset index.
+Alternative to [[getwfk]] and [[irdwfk]]. The string must be enclosed between quotation marks:
+
+    getwfk_path "../foodir/out_WFK"
+"""
+),
+
+Variable(
+    abivarname="getwfq_path",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the k+q wavefunctions from WFQ PATH",
+    text=r"""
+Specify the path of the WFQ file using a string instead of the dataset index.
+Alternative to [[getwfq]] and [[irdwfq]]. The string must be enclosed between quotation marks:
+
+    getwfq_path "../foodir/out_WFQ"
+"""
+),
+
+Variable(
+    abivarname="getddb_path",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="GET the DDB from PATH",
+    text=r"""
+Specify the path of the DDB file using a string instead of the dataset index.
+Alternative to [[getddb]] and [[irdddb]]. The string must be enclosed between quotation marks:
+
+    getddb_path "../foodir/out_DDB"
+"""
+),
+
+Variable(
+    abivarname="getdvdb_path",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the DVDB file from PATH",
+    text=r"""
+Specify the path of the DVDB file using a string instead of the dataset index.
+Alternative to [[getdvdb]] and [[irddvdb]]. The string must be enclosed between quotation marks:
+
+    getdvdb_path "../foodir/out_DVDB"
+"""
 ),
 
 ]

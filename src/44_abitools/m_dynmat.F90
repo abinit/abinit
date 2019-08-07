@@ -2731,7 +2731,7 @@ end subroutine asrif9
 !! get_bigbox_and_weights
 !!
 !! FUNCTION
-!! Compute Big Box containing all the R points in the cartesian real space needed to Fourier Transform
+!! Compute the Big Box containing the R points in the cartesian real space needed to Fourier Transform
 !! the dynamical matrix into its corresponding interatomic force.
 !!
 !! INPUTS
@@ -2744,7 +2744,12 @@ end subroutine asrif9
 !! rprim(3,3)= Normalized coordinates in real space.
 !! rprimd, gprimd
 !! rcan(3,natom)  = Atomic position in canonical coordinates
-!! cutmode
+!! cutmode=Define the cutoff used to filter the output R-points according to their weights.
+!!   0 --> No cutoff (mainly for debugging)
+!!   1 --> Include only those R-points for which sum(abs(wg(:,:,irpt)) < tol20
+!!         This is the approach used for the dynamical matrix.
+!!   2 --> Include only those R-points for which the trace over iatom of abs(wg(iat,iat,irpt)) < tol20
+!!         This option is used for objects that depend on a single atomic index.
 !! comm= MPI communicator
 !!
 !! OUTPUT
@@ -2788,7 +2793,7 @@ subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshift, qshift, rpr
 
 ! *********************************************************************
 
- ABI_CHECK(any(cutmode == [0, 1, 2]), "cutmode should be 0, 1, 2")
+ ABI_CHECK(any(cutmode == [0, 1, 2]), "cutmode should be in [0, 1, 2]")
 
  ! Create the Big Box of R vectors in real space and compute the number of points (cells) in real space
  call make_bigbox(brav, all_cell, ngqpt, nqshift, rprim, all_nrpt, all_rpt)
@@ -2797,8 +2802,7 @@ subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshift, qshift, rpr
  ABI_MALLOC(all_wghatm, (natom, natom, all_nrpt))
 
  ! HM: this tolerance is highly dependent on the compilation/architecture
- !     numeric errors in the DDB text file. Try a few tolerances and
- !     check if all the weights are found.
+ !     numeric errors in the DDB text file. Try a few tolerances and check whether all the weights are found.
  ngqpt9 = 0; ngqpt9(1:3) = ngqpt(1:3)
  toldist = tol8
  do while (toldist <= tol6)
@@ -2832,6 +2836,7 @@ subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshift, qshift, rpr
    nrpt = nrpt + 1
  end do
 
+ ! Allocate output arrays and transfer data.
  ABI_MALLOC(rpt, (3, nrpt))
  ABI_MALLOC(cell, (3, nrpt))
  ABI_MALLOC(wghatm, (natom, natom, nrpt))
@@ -2859,13 +2864,13 @@ logical pure function filterw(wg)
 
  select case (cutmode)
  case (1)
-   filterw = sum(abs(wg)) < tol16
+   filterw = sum(abs(wg)) < tol20
  case (2)
    trace = zero
    do iat=1,natom
      trace = trace + abs(wg(iat,iat))
    end do
-   filterw = trace < tol16
+   filterw = trace < tol20
  case default
    filterw = .False.
  end select

@@ -29,8 +29,8 @@ sources = [
  "libtetrabz_polcmplx_mod.F90",
  "libtetrabz_polstat_mod.F90",
  "m_simtet.F90",
- "m_kptrank.F90",
- "m_tetrahedron.F90"
+ "m_krank.F90",
+ "m_tetrahedron.F90",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

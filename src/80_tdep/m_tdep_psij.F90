@@ -16,7 +16,7 @@ module m_tdep_psij
 
   use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
-  use m_ifc,              only : ifc_type,ifc_fourq
+  use m_ifc,              only : ifc_type
   use m_tdep_qpt,         only : Qpoints_type
   use m_tdep_readwrite,   only : Input_Variables_type
   use m_tdep_latt,        only : Lattice_Variables_type
@@ -469,7 +469,7 @@ subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref
   do iq_ibz=1,nqibz
 !   Compute the frequencies
 !   =======================
-    call ifc_fourq(Ifc,Crystal,qibz(:,iq_ibz),omega(:,iq_ibz),displ(:,iq_ibz),out_eigvec=out_eigvec(:,:,:,:,:,iq_ibz))
+    call ifc%fourq(Crystal,qibz(:,iq_ibz),omega(:,iq_ibz),displ(:,iq_ibz),out_eigvec=out_eigvec(:,:,:,:,:,iq_ibz))
     qibz_cart(:,iq_ibz)=matmul(Crystal%gprimd,qibz(:,iq_ibz))
 
 !   Compute the gruneisen for this q-point
