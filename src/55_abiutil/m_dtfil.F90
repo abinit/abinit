@@ -34,7 +34,7 @@ module m_dtfil
  use m_build_info
 
  use m_clib,         only : clib_rename
- use m_fstrings,     only : int2char4
+ use m_fstrings,     only : int2char4, rmquotes
  use m_io_tools,     only : open_file
  use m_libpaw_tools, only : libpaw_log_flag_set
 
@@ -190,7 +190,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  end if
 
  ! According to getwfk and irdwfk, build _WFK file name, referred as fnamewffk
- if (iimage>0.and.dtfil%getwfk_from_image/=0) then
+ if (iimage >0 .and. dtfil%getwfk_from_image /= 0) then
    if (dtfil%getwfk_from_image==-1) then
      call appdig(iimage,'',appen)
    else
@@ -201,15 +201,16 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    stringfile='_WFK'
  end if
  stringvar='wfk'
- call mkfilename(filnam,fnamewffk,dtset%getwfk,idtset,dtset%irdwfk,jdtset_,ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,fnamewffk,dtset%getwfk,idtset,dtset%irdwfk,jdtset_,ndtset,stringfile,stringvar,will_read, &
+                 getpath=dtset%getwfk_path)
 
- if(dtset%optdriver/=RUNL_RESPFN)ireadwf=will_read
+ if (dtset%optdriver /= RUNL_RESPFN) ireadwf = will_read
  if(ndtset/=0 .and. dtset%optdriver==RUNL_RESPFN .and. will_read==0)then
-   write(msg, '(5a,i3,3a,i3,a,i3,3a)' )&
+   write(msg, '(5a,i0,3a,i0,a,i0,3a)' )&
    'At least one of the input variables irdwfk and getwfk ',ch10,&
    'must refer to a valid _WFK file, in the response function',ch10,&
    'case, while for idtset = ',idtset,',',ch10,&
-   'they are irdwfk=',dtset%irdwfk,', and getwfk=',dtset%getwfk,'.',ch10,&
+   'they are irdwfk= ',dtset%irdwfk,', and getwfk= ',dtset%getwfk,'.',ch10,&
    'Action: correct irdwfk or getwfk in your input file.'
    MSG_ERROR(msg)
  end if
@@ -219,9 +220,10 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
 
    ! According to getwfq and irdwfq, build _WFQ file name, referred as fnamewffq
    stringfile='_WFQ' ; stringvar='wfq'
-   call mkfilename(filnam,fnamewffq,dtset%getwfq,idtset,dtset%irdwfq,jdtset_,ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewffq,dtset%getwfq,idtset,dtset%irdwfq,jdtset_,ndtset,stringfile,stringvar,will_read, &
+                   getpath=dtset%getwfq_path)
    ! If fnamewffq is not initialized thanks to getwfq or irdwfq, use fnamewffk
-   if(will_read==0)fnamewffq=fnamewffk
+   if(will_read==0) fnamewffq = fnamewffk
 
    ! According to get1wf and ird1wf, build _1WF file name, referred as fnamewff1
    stringfile='_1WF' ; stringvar='1wf'
@@ -250,13 +252,18 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
 
  ! According to getddb, build _DDB file name, referred as filddbsin
  stringfile='_DDB'; stringvar='ddb'
- call mkfilename(filnam,filddbsin,dtset%getddb,idtset,dtset%irdddb,jdtset_,ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,filddbsin,dtset%getddb,idtset,dtset%irdddb,jdtset_,ndtset,stringfile,stringvar,will_read, &
+                  getpath=dtset%getddb_path)
 
-! According to getdvdb, build _DVDB file name
-! A default is available if getden is 0
+ ! According to getpot, build _POT file name
+ stringfile='_POT'; stringvar='pot'
+ call mkfilename(filnam, dtfil%filpotin, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                  getpath=dtset%getpot_path)
+
+ ! According to getdvdb, build _DVDB file name
  stringfile='_DVDB'; stringvar='dvdb'
- call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,ndtset,stringfile,stringvar,will_read)
- !if (will_read == 0) dtfile%fildvdbin = trim(filnam_ds(3))//'_DVDB'
+ call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,ndtset,stringfile,stringvar,will_read, &
+                  getpath=dtset%getdvdb_path)
  if (will_read == 0) dtfil%fildvdbin = ABI_NOFILE
 
  ! According to getden, build _DEN file name, referred as fildensin
@@ -278,7 +285,6 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ireadden=will_read
 
  if ((dtset%optdriver==RUNL_GWLS.or.dtset%optdriver==RUNL_GSTATE) .and.dtset%iscf<0) ireadden=1
- !if (optdriver==RUNL_GSTATE.and.ireadwf/=0) ireadden=0
 
  ! According to getpawden, build _PAWDEN file name, referred as filpawdensin
  ! A default is available if getden is 0
@@ -748,10 +754,10 @@ subroutine fappnd(filapp,filnam,iapp,&
      write(nchar, '(i8)' ) iapp
      if (ndig>8) then
        write(msg,'(5a,i0,2a,i0,2a)')&
-&       'Requested file name extension has more than the allowed 8 digits.',ch10,&
-&       'Action: resubmit the job with smaller value for ntime.',ch10,&
-&       'Value computed here was ndig=',ndig,ch10,&
-&       'iapp= ',iapp,' filnam=',TRIM(filnam)
+        'Requested file name extension has more than the allowed 8 digits.',ch10,&
+        'Action: resubmit the job with smaller value for ntime.',ch10,&
+        'Value computed here was ndig=',ndig,ch10,&
+        'iapp= ',iapp,' filnam=',TRIM(filnam)
        MSG_ERROR(msg)
      end if
 !    Concatenate into character string, picking off exact number of digits
@@ -897,6 +903,7 @@ end subroutine dtfil_init_img
 !! stringfil=the string of characters to be appended e.g. '_WFK' or '_DEN'
 !! stringvar=the string of characters to be appended
 !!   that defines the 'get' or 'ird' variables, e.g. 'wfk' or 'ddk'
+!! [getpath]=String with filename to be used as input, exclude get and ird option.
 !!
 !! OUTPUT
 !! filnam_out=the new file name
@@ -910,7 +917,8 @@ end subroutine dtfil_init_img
 !!
 !! SOURCE
 
-subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,stringvar,will_read)
+subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,stringvar,will_read, &
+                      getpath) ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -919,6 +927,7 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
  character(len=*),intent(in) :: stringfil
  character(len=*),intent(in) :: stringvar
  character(len=fnlen),intent(out) :: filnam_out
+ character(len=fnlen),optional,intent(in) :: getpath
 !arrays
  integer,intent(in) :: jdtset_(0:ndtset)
  character(len=fnlen),intent(in) :: filnam(5)
@@ -942,6 +951,24 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
    filnam_appen = trim(filnam_appen)//'_DS'//appen
  end if
  filnam_out = trim(filnam_appen)//trim(stringfil)
+
+ if (present(getpath)) then
+   if (getpath /= ABI_NOFILE) then
+     if (ird /= 0 .or. get /= 0)then
+       write(msg, '(11a,i0,3a,i0,a,i0,7a)' ) &
+       'When the input variable: ', trim(getpath), ' is used ',ch10, &
+       'the input variables ird',trim(stringvar),' and get',trim(stringvar),' cannot be',ch10,&
+       'simultaneously non-zero, while for idtset = ',idtset,',',ch10,&
+       'they are ',ird,', and ',get,'.',ch10,&
+       'Action: correct ird',trim(stringvar),' or get',trim(stringvar),' in your input file.'
+       MSG_ERROR(msg)
+     end if
+     filnam_out = rmquotes(getpath)
+     write(msg, '(5a)' )' mkfilename: get',trim(stringvar) ," from: ",trim(filnam_out), ch10
+     call wrtout([std_out, ab_out], msg)
+     will_read = 1; return
+   end if
+ end if
 
  ! Treatment of the multi-dataset case (get is not relevant otherwise)
  if (ndtset /= 0) then
@@ -991,15 +1018,12 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
        write(msg, '(5a,i3,2a)' )&
        ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),' from output of DATASET ',jget,'.',ch10
      end if
-     call wrtout(ab_out,msg,'COLL')
-     call wrtout(std_out,msg,'COLL')
+     call wrtout([std_out, ab_out], msg)
    end if ! conditions on get and idtset
-
  end if ! ndtset/=0
 
 end subroutine mkfilename
 !!***
-
 
 !!****f* m_dtfil/isfile
 !! NAME

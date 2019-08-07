@@ -35,7 +35,6 @@ module m_wfk_analyze
  use m_hdr
  use m_crystal
  use m_ebands
- use m_tetrahedron
  use m_nctk
  use m_wfk
  use m_wfd

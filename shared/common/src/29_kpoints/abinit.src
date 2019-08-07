@@ -19,7 +19,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "m_hashtable.F90",
- "m_hkptrank.F90",
  "m_htetrahedron.F90",
  "m_octree.F90",
  "m_symkpt.F90"

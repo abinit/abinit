@@ -187,8 +187,6 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 &                   kg,kpg,kpt,lmnmax,lnmax,mpsang,mqgrid,nkpg,npw,ntypat,pspso,&
 &                   qgrid,rmet,usepaw,useylm,ylm,ylm_gr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: dimekb,dimffnl,ider,idir,lmnmax,lnmax,mpsang,mqgrid,nkpg

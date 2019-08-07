@@ -32,14 +32,16 @@ module m_unittests
  use m_ptgroups
  use m_tetrahedron
  use m_htetrahedron
- use m_kptrank
- use m_hkptrank
- use m_numeric_tools
+ use m_krank
+ use m_hashtable
+ use m_symkpt
+ use m_sort
 
  use m_time,            only : cwtime, cwtime_report
+ use m_numeric_tools,   only : linspace, ctrap
  use m_symtk,           only : matr3inv
  use m_io_tools,        only : open_file
- use m_kpts,            only : kpts_ibz_from_kptrlatt
+ use m_kpts,            only : kpts_ibz_from_kptrlatt, listkk
  use m_geometry,        only : normv
 
  implicit none
@@ -289,7 +291,7 @@ subroutine tetra_unittests(comm)
  call write_file('parabola_tetra.dat', nw, energies, idos, dos)
 
  ! Compute blochl weights
- call htetra_blochl_weights(htetraq,eig,emin,emax,max_occ1,nw,&
+ call htetraq%blochl_weights(eig,emin,emax,max_occ1,nw,&
                            nqibz,bcorr0,tweight,dweight,comm)
  do iqibz=1,nqibz
    dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
@@ -303,7 +305,7 @@ subroutine tetra_unittests(comm)
  call write_file('parabola_htetra.dat', nw, energies, idos, dos)
 
  ! Compute blochl weights
- call htetra_blochl_weights(htetraq,eig,emin,emax,max_occ1,nw,&
+ call htetraq%blochl_weights(eig,emin,emax,max_occ1,nw,&
                            nqibz,1,tweight,dweight,comm)
  do iqibz=1,nqibz
    dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
@@ -317,8 +319,8 @@ subroutine tetra_unittests(comm)
  call write_file('parabola_htetra_corr.dat', nw, energies, idos, dos)
 
  ! Compute weights using LV integration from TDEP
- call htetra_blochl_weights(htetraq,eig,emin,emax,max_occ1,nw,&
-                           nqibz,2,tweight,dweight,comm)
+ call htetraq%blochl_weights(eig,emin,emax,max_occ1,nw,&
+                             nqibz,2,tweight,dweight,comm)
  do iqibz=1,nqibz
    dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
    tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
@@ -336,7 +338,7 @@ subroutine tetra_unittests(comm)
  cenergies = energies
 
  ! Use SIMTET routines
- call htetra_weights_wvals_zinv(htetraq,eig,nw,cenergies,max_occ1,&
+ call htetraq%weights_wvals_zinv(eig,nw,cenergies,max_occ1,&
                                  nqibz,1,cweight,comm)
  dos(:)  = -sum(aimag(cweight(:,:)),2)/pi
  idos(:) =  sum(real(cweight(:,:)),2)
@@ -346,7 +348,7 @@ subroutine tetra_unittests(comm)
  call write_file('parabola_zinv_simtet.dat', nw, energies, idos, dos)
 
  ! Use LV integration from TDEP
- call htetra_weights_wvals_zinv(htetraq,eig,nw,cenergies,max_occ1,&
+ call htetraq%weights_wvals_zinv(eig,nw,cenergies,max_occ1,&
                                  nqibz,2,cweight,comm)
  dos(:)  = -sum(aimag(cweight(:,:)),2)/pi
  idos(:) =  sum(real(cweight(:,:)),2)
@@ -357,7 +359,7 @@ subroutine tetra_unittests(comm)
 
  dos = zero; idos = zero
  do iqibz=1,nqibz
-   call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eig,wdt)
+   call htetraq%get_onewk_wvals(iqibz,bcorr0,nw,energies,max_occ1,nqibz,eig,wdt)
    wdt(:,:) = wdt(:,:)*mat(iqibz)
    dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
    idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
@@ -369,7 +371,7 @@ subroutine tetra_unittests(comm)
 
  dos = zero; idos = zero
  do iqibz=1,nqibz
-   call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eig,emin,emax,max_occ1,wdt)
+   call htetraq%get_onewk(iqibz,bcorr0,nw,nqibz,eig,emin,emax,max_occ1,wdt)
    wdt(:,:) = wdt(:,:)*mat(iqibz)
    dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
    idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
@@ -378,7 +380,7 @@ subroutine tetra_unittests(comm)
  write(std_out,*) "dos_int", dos_int, idos(nw)
  call cwtime_report(" htetra_get_onewk", cpu, wall, gflops)
  call write_file('parabola_htetra_onewk.dat', nw, energies, idos, dos)
- call htetra_print(htetraq)
+ call htetraq%print()
 
  !
  ! 2. Compute energies for a flat band
@@ -395,8 +397,8 @@ subroutine tetra_unittests(comm)
  call write_file('flat_tetra.dat', nw, energies, idos, dos)
 
  ! Compute DOS using new tetrahedron implementation
- call htetra_blochl_weights(htetraq,eig,emin,emax,max_occ1,nw,&
-                           nqibz,bcorr0,tweight,dweight,comm)
+ call htetraq%blochl_weights(eig,emin,emax,max_occ1,nw,&
+                             nqibz,bcorr0,tweight,dweight,comm)
  dos(:)  = sum(dweight,2)
  idos(:) = sum(tweight,2)
  call cwtime_report(" htetra_blochl", cpu, wall, gflops)
@@ -404,7 +406,7 @@ subroutine tetra_unittests(comm)
 
  dos = zero; idos = zero
  do iqibz=1,nqibz
-   call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eig,wdt)
+   call htetraq%get_onewk_wvals(iqibz,bcorr0,nw,energies,max_occ1,nqibz,eig,wdt)
    dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
    idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
  end do
@@ -413,7 +415,7 @@ subroutine tetra_unittests(comm)
 
  dos = zero; idos = zero
  do iqibz=1,nqibz
-   call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eig,emin,emax,max_occ1,wdt)
+   call htetraq%get_onewk(iqibz,bcorr0,nw,nqibz,eig,emin,emax,max_occ1,wdt)
    dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
    idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
  end do
@@ -441,7 +443,7 @@ subroutine tetra_unittests(comm)
  ABI_SFREE(cenergies)
  ABI_SFREE(cweight)
  call crystal%free()
- call htetra_free(htetraq)
+ call htetraq%free()
  call destroy_tetra(tetraq)
 
  contains
@@ -473,7 +475,7 @@ end subroutine tetra_unittests
 !!  kptrank_unittests
 !!
 !! FUNCTION
-!!  Test the kptrank and hkptrank routines
+!!  Test the krank routines
 !!
 subroutine kptrank_unittests(comm)
 
@@ -483,37 +485,113 @@ subroutine kptrank_unittests(comm)
 
 !Variables -------------------------------
  type(crystal_t) :: crystal
- type(kptrank_type) :: kptrank
- type(hkptrank_t) :: hkptrank
- integer,parameter :: qptopt1=1,nqshft1=1
- integer :: nqibz,nqbz
+ type(krank_t) :: krank
+ integer,parameter :: qptopt1=1,nqshft1=1,iout0=0,chksymbreak0=0,sppoldbl1=1
+ integer :: nqibz,iqbz,iqibz,iqbz_rank,nqbz,nqibz_symkpt,nqibz_symkpt_new
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
+ real(dp) :: cpu, gflops, wall
+ real(dp) :: dksqmax
  real(dp) :: dos_qshift(3,nqshft1)
+ character(len=500) :: msg
  integer,allocatable :: bz2ibz(:,:)
+ integer,allocatable :: bz2ibz_symkpt(:,:), bz2ibz_symkpt_new(:,:)
+ integer,allocatable :: bz2ibz_listkk(:,:)
+ integer,allocatable :: ibz2bz(:), ibz2bz_new(:)
+ real(dp),allocatable :: wtq_fullbz(:), wtq_folded(:)
  real(dp),allocatable :: wtq_ibz(:)
  real(dp),allocatable :: qbz(:,:),qibz(:,:)
 
  ABI_UNUSED(comm)
 
  ! Create fake crystal
+ !crystal = crystal_from_ptgroup('6')
  crystal = crystal_from_ptgroup('m-3m')
 
  ! Create a regular grid
- in_qptrlatt(:,1)=[ 20, 0, 0]
- in_qptrlatt(:,2)=[ 0, 20, 0]
- in_qptrlatt(:,3)=[ 0, 0, 20]
+ in_qptrlatt(:,1)=[ 100, 0, 0]
+ in_qptrlatt(:,2)=[ 0, 100, 0]
+ in_qptrlatt(:,3)=[ 0, 0, 100]
  dos_qshift(:,1) =[0.0,0.0,0.0]
+ call cwtime(cpu, wall, gflops, "start")
  call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, qptopt1, nqshft1, dos_qshift, &
                              nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
+ call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
- ! Test mkkptrank
- call mkkptrank(qbz,nqbz,kptrank)
- call destroy_kptrank(kptrank)
+ ! Test krank
+ krank = krank_new(nqbz, qbz)
+ do iqbz=1,nqbz
+   iqbz_rank = krank%get_index(qbz(:,iqbz))
+   ABI_CHECK(iqbz==iqbz_rank,'wrong q-point')
+ end do
+ call cwtime_report(" krank", cpu, wall, gflops)
+ call krank%free()
 
- ! Test hkptrank
- call hkptrank_init(hkptrank,qbz,nqbz)
- call hkptrank_free(hkptrank)
+ ABI_MALLOC(wtq_fullbz,(nqbz))
+ ABI_MALLOC(wtq_folded,(nqbz))
+ ABI_MALLOC(ibz2bz,(nqbz))
+ ABI_MALLOC(ibz2bz_new,(nqbz))
+ ABI_MALLOC(bz2ibz_symkpt,(6,nqbz))
+ ABI_MALLOC(bz2ibz_symkpt_new,(6,nqbz))
+ wtq_fullbz = one/nqbz
 
+ ! Test symkpt (note that the above call to kpts_ibz_from_kptrlatt already involves calling this routine)
+ call symkpt(chksymbreak0,crystal%gmet,ibz2bz,iout0,qbz,nqbz,&
+             nqibz_symkpt,crystal%nsym,crystal%symrec,crystal%timrev,&
+             wtq_fullbz,wtq_folded, bz2ibz_symkpt, comm)
+ call cwtime_report(" symkpt", cpu, wall, gflops)
+
+ wtq_fullbz = one/nqbz
+ call symkpt_new(chksymbreak0,crystal%gmet,ibz2bz_new,iout0,qbz,nqbz,&
+                 nqibz_symkpt_new,crystal%nsym,crystal%symrec,crystal%timrev,&
+                 bz2ibz_symkpt_new, comm)
+ call cwtime_report(" symkpt_new", cpu, wall, gflops)
+ ABI_CHECK(nqibz_symkpt==nqibz_symkpt_new,'Wrong number of qpoints in the IBZ')
+
+ ! check if ibz is the same
+ do iqibz=1,nqibz
+   if (ibz2bz(iqibz) == ibz2bz_new(iqibz)) cycle
+   MSG_ERROR("The IBZ is different")
+ end do
+
+ ! check if mapping is the same
+ do iqbz=1,nqbz
+   if (bz2ibz_symkpt(1,iqbz) == bz2ibz_symkpt_new(1,iqbz)) cycle
+   write(msg,*) "Inconsistent mapping", iqbz, bz2ibz_symkpt(1,iqbz), bz2ibz_symkpt_new(1,iqbz)
+   MSG_ERROR(msg)
+ end do
+
+ ! call listkk
+ ABI_MALLOC(bz2ibz_listkk,(nqbz,6))
+ call listkk(dksqmax,crystal%gmet,bz2ibz_listkk,qibz,qbz,nqibz,nqbz,crystal%nsym,&
+             sppoldbl1,crystal%symafm,crystal%symrec,crystal%timrev,comm,&
+             exit_loop=.True., use_symrec=.True.)
+ call cwtime_report(" listkk", cpu, wall, gflops)
+
+ ! check if indkk is the same
+ do iqbz=1,nqbz
+   if (bz2ibz_listkk(iqbz,1) /= bz2ibz_symkpt_new(1,iqbz)) then
+     write(std_out,*) "Inconsistent ikpt", iqbz, bz2ibz_listkk(iqbz,1), bz2ibz_symkpt_new(1,iqbz)
+   end if
+   if (bz2ibz_listkk(iqbz,2) /= bz2ibz_symkpt_new(2,iqbz)) then
+     write(std_out,*) "Inconsistent isym", iqbz, bz2ibz_listkk(iqbz,2), bz2ibz_symkpt_new(2,iqbz)
+   end if
+   if (bz2ibz_listkk(iqbz,6) /= bz2ibz_symkpt_new(3,iqbz)) then
+     write(std_out,*) "Inconsistent itim", iqbz, bz2ibz_listkk(iqbz,6), bz2ibz_symkpt_new(3,iqbz)
+   end if
+   if (.not.all(bz2ibz_listkk(iqbz,3:5) == bz2ibz_symkpt_new(4:,iqbz))) then
+     write(std_out,*) "Inconsistent shift", iqbz
+     write(std_out,*) bz2ibz_listkk(iqbz,3:5)
+     write(std_out,*) bz2ibz_symkpt_new(4:,iqbz)
+   end if
+ end do
+
+ ABI_SFREE(bz2ibz_symkpt)
+ ABI_SFREE(bz2ibz_symkpt_new)
+ ABI_SFREE(bz2ibz_listkk)
+ ABI_SFREE(wtq_fullbz)
+ ABI_SFREE(wtq_folded)
+ ABI_SFREE(ibz2bz)
+ ABI_SFREE(ibz2bz_new)
  ABI_SFREE(qbz)
  ABI_SFREE(qibz)
  ABI_SFREE(bz2ibz)

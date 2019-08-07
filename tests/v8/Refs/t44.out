@@ -141,6 +141,7 @@ _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
          ph_wstep      3.67493254E-06 Hartree
          ph_smear      3.67493254E-05 Hartree
         ddb_ngqpt        2    2    2
+       dvdb_ngqpt        2    2    2
    dvdb_qcache_mb1    -1.00000000E+00
    dvdb_qcache_mb2     0.00000000E+00
    dvdb_qcache_mb3     1.02400000E+03
@@ -384,6 +385,7 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 1749
  Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
+ Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
  asr: 1 dipdip: 1 symdynmat: 1
@@ -572,6 +574,7 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 1749
  Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
+ Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
  asr: 1 dipdip: 1 symdynmat: 1
@@ -864,6 +867,7 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 1749
  Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
+ Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
  Number of q-points in the IBZ: 8
  asr: 1 dipdip: 1 symdynmat: 1
@@ -1074,6 +1078,7 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 1749
  Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
+ Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
  Number of q-points in the IBZ: 8
  asr: 1 dipdip: 1 symdynmat: 1
@@ -1184,6 +1189,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
          ph_wstep      3.67493254E-06 Hartree
          ph_smear      3.67493254E-05 Hartree
         ddb_ngqpt        2    2    2
+       dvdb_ngqpt        2    2    2
    dvdb_qcache_mb1    -1.00000000E+00
    dvdb_qcache_mb2     0.00000000E+00
    dvdb_qcache_mb3     1.02400000E+03

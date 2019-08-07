@@ -1,9 +1,12 @@
 # LiF Very rough 2x2x2 q-point grid; low ecut.
 
-ndtset 8
+ndtset 10
 
-getwfk   20    # Read GS wavefunctions from DS20_WFK
-getddb   20    # Read DDB files from DS20_DDB
+getwfk_path  "t160o_DS20_WFK"
+getddb_path  "t160o_DS20_DDB"
+
+#getwfk   20    # Read GS wavefunctions from DS20_WFK
+#getddb   20    # Read DDB files from DS20_DDB
 
 # Global parameters.
 ecut   35
@@ -54,6 +57,7 @@ sigma_ngkpt1 2 2 2
 # interpolate DVDB
 eph_task2 5
 eph_ngqpt_fine2 4 4 4
+getdvdb_path2  "t160o_DS20_DVDB"
 
 ############
 # DATASET 3
@@ -130,6 +134,28 @@ sigma_bsum_range8 2 4
 eph_ngqpt_fine8 4 4 4
 getdvdb8  20
 
+############
+# DATASET 9
+############
+# Interpolate DFPT potentials, produce v1qavg file  along q-path
+eph_task9 15
+getdvdb_path9  "t160o_DS20_DVDB"
+
+ph_nqpath9 5
+ph_qpath9
+  0 0 0 
+  0.15 0 0
+  0.25 0 0
+  0.35 0 0
+  0.5 0.0 0
+
+############
+# DATASET 10
+############
+# Interpolate DFPT potentials, produce v1qavg file  along q-path
+eph_task10 -15
+getdvdb_path10  "t160o_DS20_DVDB"
+
 ############################################################################################
 #                                         STRUCTURE
 ############################################################################################
@@ -161,5 +187,5 @@ getdvdb8  20
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
 #%% description = 
-#%%   Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
+#%%   Calculation of the Fan-Migdal self-energy matrix elements in LiF.
 #%%<END TEST_INFO>

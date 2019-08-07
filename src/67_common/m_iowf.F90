@@ -1049,7 +1049,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      ABI_MALLOC_OR_DIE(cg_k,(2,mpw*my_nspinor*mband), ierr)
 
      if (iam_master) then
-       call wfk_open_write(wfk,hdr,path,formeig,iomode,get_unit(),xmpi_comm_self,write_hdr=.True.)
+       call wfk%open_write(hdr,path,formeig,iomode,get_unit(),xmpi_comm_self,write_hdr=.True.)
 
        NCF_CHECK(crystal%ncwrite(wfk%fh))
        !write(std_out,*)"after crystal_ncwrite"
@@ -1102,11 +1102,11 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
          ! Master writes this block of bands.
          if (iam_master) then
            if (response == 0) then
-             call wfk_write_band_block(wfk,[1,nband_k],ikpt,spin,xmpio_single,kg_k=kg_k,cg_k=cg_k,&
+             call wfk%write_band_block([1,nband_k],ikpt,spin,xmpio_single,kg_k=kg_k,cg_k=cg_k,&
                eig_k=gs_ebands%eig(:,ikpt,spin),occ_k=gs_ebands%occ(:,ikpt,spin))
              !write(std_out,*)"cg_k",cg_k(:,1:2)
            else
-             call wfk_write_band_block(wfk,[1,nband_k],ikpt,spin,xmpio_single,kg_k=kg_k,cg_k=cg_k)
+             call wfk%write_band_block([1,nband_k],ikpt,spin,xmpio_single,kg_k=kg_k,cg_k=cg_k)
            end if
          end if
 
@@ -1121,7 +1121,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      ABI_FREE(kg_k)
      ABI_FREE(cg_k)
 
-     if (iam_master) call wfk_close(wfk)
+     if (iam_master) call wfk%close()
      call xmpi_barrier(comm_cell)
 
      done = .True.
