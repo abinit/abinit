@@ -57,7 +57,7 @@ module m_sigmaph
  use m_rf2
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
- use m_time,           only : cwtime, cwtime_report, timab
+ use m_time,           only : cwtime, cwtime_report, timab, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, simpson
  use m_io_tools,       only : iomode_from_fname, file_exists
@@ -494,7 +494,7 @@ module m_sigmaph
    ! a2few(a2f_ne, gwf_nomega, max_nbcalc)
 
   type(ephwg_t) :: ephwg
-   ! This object compute the weights for the BZ integration in q-space if qint_method > 0
+   ! This object computes the weights for the BZ integration in q-space if qint_method > 0
 
   type(skw_t) :: frohl_skw
    ! Star-function interpolator.
@@ -617,12 +617,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: n1,n2,n3,n4,n5,n6,nspden,nu, iang
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
- integer :: nlines_done, nline_in, grad_berry_size_mpw1
+ integer :: nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop,iatom
  integer :: comm_rpt, method
- integer :: enough = 0
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
- real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val
+ real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val, cpu_stern, wall_stern, gflops_stern
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, qmod, fqdamp, simag, q0rad, out_resid
  real(dp) :: vkk_norm2
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,cplx_ediff, cnum, sig_cplx
@@ -1130,6 +1129,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_CALLOC_OR_DIE(gkq0_atm, (2, nbcalc_ks, bsum_start:bsum_stop, natom3), ierr)
        if (dtset%eph_stern == 1) then
          ABI_CALLOC(stern_dw, (2, natom3, natom3, nbcalc_ks))
+         enough_stern = 0
        end if
      end if
 
@@ -1337,9 +1337,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
          end do
 
-         ! Activate Sternheimer (we are still inside the MPI loop over my_npert).
-         ! NB: Assume adiabatic AHC expression to compute the contribution of states above nband_kq.
          if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
+           ! Activate Sternheimer (we are still inside the MPI loop over my_npert).
+           ! NB: Assume adiabatic AHC expression to compute the contribution of states above nband_kq.
            mcgq = npw_kq * nspinor * nband_kq
            mgscq = npw_kq * nspinor * nband_kq * psps%usepaw
            ABI_CALLOC(cgq, (2, npw_kq * nspinor, nband_kq))
@@ -1376,7 +1376,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            !
            ! and
            !
-           !  npw1_k=number of plane waves at this k+q point
+           !  npw1_k = number of plane waves at this k+q point
            !
            ! So in principle we should allocate lot of memory to avoid bound checking error!
            ! For the time being use mpw1 = 0 because mpw1 is not used in this call to dfpt_cgwf
@@ -1396,6 +1396,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              ! Save u1 in cg1s_kq
              cg1s_kq(:, :, ipc, ib_k) = zero
 
+             call cwtime(cpu_stern, wall_stern, gflops_stern, "start")
              call dfpt_cgwf(band_ks, berryopt0, cgq, cg1s_kq(:,:,ipc, ib_k), kets_k(:,:,ib_k), &
                cwaveprj, cwaveprj0, rf2, dcwavef, &
                eig0nk, ebands%eig(:, ikq_ibz, spin), out_eig1_k, ghc, gh1c_n, grad_berry, gsc, gscq, &
@@ -1404,23 +1405,22 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                opt_gvnlx1, dtset%prtvol, quit0, out_resid, rf_hamkq, dtset%dfpt_sciss, -one, dtset%tolwfr, &
                !opt_gvnlx1, -15, quit0, out_resid, rf_hamkq, dtset%dfpt_sciss, dtset%tolrde, dtset%tolwfr, &
                usedcwavef0, dtset%wfoptalg, nlines_done)
+             call cwtime(cpu_stern, wall_stern, gflops_stern, "stop")
 
-             ! Handle possible convergence issues.
+             ! Handle possible convergence errors.
              if (out_resid > dtset%tolwfr) then
                write(msg, "(2(a, es13.5), a, i0, a)") &
-                 " Sternheimer solver didn't convergence: out_resid:", out_resid, " >= tolwfr: ", dtset%tolwfr, &
+                 " Sternheimer didn't convergence: resid:", out_resid, " >= tolwfr: ", dtset%tolwfr, &
                  " after nline: ", nlines_done, " iterations. Increase nline and/or tolwfr."
                MSG_ERROR(msg)
              else if (out_resid < zero) then
-               MSG_ERROR(sjoin(" out_resid: ", ftoa(out_resid), ", nlines_done:", itoa(nlines_done)))
-             else
-               if (my_rank == master .and. (enough < 6 .or. dtset%prtvol > 10)) then
-                 write(std_out, "(2(a, es13.5), a, i0, a)") &
-                   " Sternheimer solver converged with out_resid: ", out_resid, " <= tolwfr: ", dtset%Tolwfr, &
-                   " after ", nlines_done, " iterations."
-                 !write(std_out,*)" |psi1|^2", cg_real_zdotc(npw_kq*nspinor, cg1s_kq(:, :, ipc, ib_k), cg1s_kq(:, :, ipc, ib_k))
-                 enough = enough + 1
-               end if
+               MSG_ERROR(sjoin(" resid: ", ftoa(out_resid), ", nlines_done:", itoa(nlines_done)))
+             else if (my_rank == master .and. (enough_stern <= 5 .or. dtset%prtvol > 10)) then
+               write(std_out, "(2(a,es13.5),a,i0,2a)") &
+                 " Sternheimer converged with resid: ", out_resid, " <= tolwfr: ", dtset%tolwfr, &
+                 " after ", nlines_done, " iterations. Wall-time: ", trim(sec2str(wall_stern))
+               !write(std_out,*)" |psi1|^2", cg_real_zdotc(npw_kq*nspinor, cg1s_kq(:, :, ipc, ib_k), cg1s_kq(:, :, ipc, ib_k))
+               enough_stern = enough_stern + 1
              end if
 
            end do ! ib_k
@@ -1455,6 +1455,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
          ! Add contribution to Fan-Migdal self-energy coming from Sternheimer.
+         ! All procs inside comm_bsum, comm_pert enter here!
          call xmpi_sum(cg1s_kq, sigma%comm_bsum, ierr)
          call xmpi_sum(cg1s_kq, sigma%comm_pert, ierr)
 
@@ -1473,11 +1474,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              h1kets_kq_allperts(:,:,:,ib_k), cg1s_kq(:,:,:,ib_k), stern_ppb(:,:,:,ib_k))
              !cg1s_kq(:,:,:,ib_k), h1kets_kq_allperts(:,:,:,ib_k), stern_ppb(:,:,:,ib_k))
 
-           ! Save data for Debye-Waller computation (performed outside the q-loop)
+           ! Save data for Debye-Waller that is performed outside the q-loop.
            if (isqzero) stern_dw(:,:,:,ib_k) = stern_ppb(:,:,:,ib_k)
          end do
 
-         ! Compute contribution for M > sigma%nbsum using static + adiabatic approximation for self-energy.
+         ! Compute contribution to Fan-Migdal for M > sigma%nbsum
          do nu=1,natom3
            wqnu = phfrq(nu); if (wqnu < EPH_WTOL) cycle
            ! Get phonon occupation for all temperatures.
@@ -1498,17 +1499,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              do it=1,sigma%ntemp
                sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + (two * nqnu_tlist(it) + one) * rfact
                !if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkq2 * cfact_wr(:)
-
-               ! Add DW contribution for this T
-               !if (isqzero) then
-               !  gdw2_mn(ibsum, ib_k) = - gdw2_mn(ibsum, ib_k) /  (four * two * wqnu)
-               !  sigma%dw_vals(it, ib_k) = sigma%dw_vals(it, ib_k) + rfact
-               !  sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + rfact
-               !  !if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + rfact
-               !end if
              end do
 
-             ! TODO Eliashberg functions with Stern
+             ! TODO Eliashberg functions with Sternheimer
              !if (dtset%prteliash /= 0) then
              !end if
            end do
@@ -1532,7 +1525,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            end if
          end if
 
-         ! Symmetrize wavefunctions from IBZ (if needed). Be careful with time-reversal symmetry.
+         ! Symmetrize wavefunctions in BZ from IBZ (if needed). Be careful with time-reversal symmetry.
          if (isirr_kq) then
            ! Copy u_kq(G)
            call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
@@ -1546,7 +1539,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                             npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
          end if
 
-         ! Get gkk(kcalc, q, idir-ipert) (atom representation)
+         ! Get gkk(kcalc, q, idir_ipert) (atom representation)
          ! No need to handle istwf_kq because it's always 1.
          gkq_atm = zero
          do imyp=1,my_npert
@@ -1567,9 +1560,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          ! Save data for Debye-Waller computation (performed outside the q-loop)
          ! gkq_nu(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
-         if (isqzero .and. .not. sigma%imag_only) then
-           gkq0_atm(:, :, ibsum_kq, :) = gkq_atm
-         end if
+         if (isqzero .and. .not. sigma%imag_only) gkq0_atm(:, :, ibsum_kq, :) = gkq_atm
 
          ! Accumulate contribution to self-energy
          eig0mkq = ebands%eig(ibsum_kq, ikq_ibz, spin)
@@ -1638,7 +1629,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                       delta_e_minus_emkq(:) * dtw_weights(iw, 1) * gf_val * sigma%wtq_k(iq_ibz)
                  end do
                end if
-             end if  ! dtset%prteliash /= 0
+             end if  ! prteliash /= 0
 
              do it=1,sigma%ntemp
                ! Compute occ for this T (note mu_e(it) Fermi level)
@@ -1658,6 +1649,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                  ! =========
                  ! zcut mode
                  ! =========
+
                  if (sigma%use_doublegrid) then
                    cfact = zero
                    do jj=1,sigma%eph_doublegrid%ndiv
@@ -1709,6 +1701,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                  ! Tetrahedron method
                  ! ===================
                  if (sigma%use_doublegrid) then
+
                    do jj=1,sigma%eph_doublegrid%ndiv
                      ! Double Grid shared points weights
                      ikq_bz_fine  = sigma%eph_doublegrid%mapping(2, jj)
@@ -1748,6 +1741,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                    end do
 
                  else
+
                    ! Tetrahedron method WITHOUT double grid.
                    if (sigma%imag_only) then
                      simag = gkq2 * pi * ( &
@@ -1983,7 +1977,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                do it=1,sigma%ntemp
                  cfact = - weight_q * gdw2_mn(ibsum, ib_k) * (two * nqnu_tlist(it) + one)  / cplx_ediff
                  if (dtset%eph_stern == 1 .and. ibsum == bsum_stop) then
-                   ! Add contribution due to Sternheimer (no cplx_ediff)
+                   ! Add contribution due to the Sternheimer (cplx_ediff absorbed in Sternheimer)
                    cfact = cfact - weight_q * gdw2_mn(ibsum+1, ib_k) * (two * nqnu_tlist(it) + one)
                  end if
                  rfact = real(cfact)
@@ -2017,8 +2011,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        sigma%gfw_vals = zero
 
        if (sigma%qint_method == 0 .or. sigma%symsigma == 0) then
-         ! Eliashberg function with gaussian method (ph_smear)
-
+         ! Compute Eliashberg function with gaussian method and ph_smear smearing.
          do iq_ibz=1,sigma%nqibz_k
            if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
            ! Recompute phonons (cannot use sigma%ephwg in this case)
@@ -2037,7 +2030,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          end do
 
        else
-         ! Eliashberg function with tetrahedron method.
+         ! Compute Eliashberg function with tetrahedron method.
          eminmax = [sigma%gfw_mesh(1), sigma%gfw_mesh(sigma%gfw_nomega)]
          ABI_MALLOC(dt_tetra_weights, (sigma%gfw_nomega, sigma%nqibz_k, 2))
          do nu=1,natom3
@@ -2103,9 +2096,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call destroy_hamiltonian(gs_hamkq)
  call wfd%free()
  call pawcprj_free(cwaveprj0)
- ABI_DT_FREE(cwaveprj0)
+ ABI_FREE(cwaveprj0)
  call pawcprj_free(cwaveprj)
- ABI_DT_FREE(cwaveprj)
+ ABI_FREE(cwaveprj)
  call ddkop%free()
  call sigma%free()
 
@@ -3741,10 +3734,10 @@ subroutine sigmaph_free(self)
        do ideg=1,size(self%degtab(ii, jj)%bids)
          ABI_FREE(self%degtab(ii, jj)%bids(ideg)%vals)
        end do
-       ABI_DT_FREE(self%degtab(ii, jj)%bids)
+       ABI_FREE(self%degtab(ii, jj)%bids)
      end do
    end do
-   ABI_DT_FREE(self%degtab)
+   ABI_FREE(self%degtab)
  end if
 
  call self%ephwg%free()
@@ -4663,7 +4656,7 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt,"(a)")sjoin(" From bsum_start:", itoa(self%bsum_start), "to bsum_stop:", itoa(self%bsum_stop))
  if (dtset%eph_stern == 1 .and. .not. self%imag_only) then
    write(unt, "(a)")" Treating high-energy bands with Sternheimer and static self-energy."
-   write(unt, "(a, es16.6, a, i0)")" Tolwfr:", dtset%tolwfr, ", nline:", dtset%nline
+   write(unt, "(a, es16.6, a, i0)")" Tolwfr:", dtset%tolwfr, ", nline: ", dtset%nline
  end if
  write(unt,"(a)")sjoin(" Symsigma: ",itoa(self%symsigma), "Timrev:", itoa(self%timrev))
  write(unt,"(a)")sjoin(" Imaginary shift in the denominator (zcut): ", ftoa(aimag(self%ieta) * Ha_eV, fmt="f5.3"), "[eV]")
@@ -5469,7 +5462,6 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  cnt = count(qselect /= 0)
  write(std_out, "(a, i0, a, f5.1, a)")" qpoints_oracle: calculation of tau_nk will need: ", cnt, &
    " q-points in the IBZ. (nqibz_eff / nqibz): ", (100.0_dp * cnt) / sigma%nqibz, " [%]"
- !qselect = 0
 
 end subroutine qpoints_oracle
 !!***
