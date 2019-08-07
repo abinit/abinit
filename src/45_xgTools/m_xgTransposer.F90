@@ -104,8 +104,9 @@ module m_xgTransposer
   public :: xgTransposer_copyConstructor
   public :: xgTransposer_transpose
   public :: xgTransposer_getRank
+  public :: xgTransposer_getComm
   public :: xgTransposer_free
-  public :: xgTransposer_getCPURow
+  !public :: xgTransposer_getCPURow
 
 
   contains
@@ -999,6 +1000,22 @@ module m_xgTransposer
     end if
     rank = xgTransposer%mpiData(comm)%rank
   end function xgTransposer_getRank
+  
+  
+!!****f* m_xgTransposer/xgTransposer_getComm
+!!
+!! NAME
+!! xgTransposer_getComm
+
+  function xgTransposer_getComm(xgTransposer, comm1) result(communicator)
+    type(xgTransposer_t), intent(in   ) :: xgTransposer
+    integer             , intent(in   ) :: comm1
+    integer :: communicator
+    if ( (comm1 > ubound(xgTransposer%mpiData,1)) .or.  (comm1 < lbound(xgTransposer%mpiData,1)) ) then
+      MSG_ERROR("Value for communicator is wrong")
+    end if
+    communicator = xgTransposer%mpiData(comm1)%comm
+  end function xgTransposer_getComm
 
 
 !!****f* m_xgTransposer/xgTransposer_free
@@ -1040,14 +1057,14 @@ module m_xgTransposer
   end subroutine xgTransposer_free
 !!***
 
-  subroutine xgTransposer_getCPURow(xgTransposer, row)
-  
-    type(xgTransposer_t), intent(inout) :: xgTransposer
-    type(integer), intent(inout) :: row
-    
-    row = xgTransposer%mpiData(MPI_ROWS)%rank
-  
-  end subroutine xgTransposer_getCPURow
+!  subroutine xgTransposer_getCPURow(xgTransposer, row)
+!  
+!    type(xgTransposer_t), intent(inout) :: xgTransposer
+!    type(integer), intent(inout) :: row
+!    
+!    row = xgTransposer%mpiData(MPI_ROWS)%rank
+!  
+!  end subroutine xgTransposer_getCPURow
 
 end module m_xgTransposer
 !!***
