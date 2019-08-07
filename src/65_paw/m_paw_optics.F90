@@ -854,7 +854,7 @@ CONTAINS  !=====================================================================
  real(dp) :: e2rot(3,3),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),rprimdinv(3,3),symd(3,3),symdinv(3,3)
  real(dp),allocatable :: e1(:,:,:),e2(:,:,:,:),epsilon_tot(:,:,:,:),eigen0(:),eig0_k(:)
  real(dp),allocatable :: kpts(:,:),occ(:),occ_k(:),oml1(:),wtk(:)
- complex,allocatable :: eps_work(:)
+ complex(dpc),allocatable :: eps_work(:)
  character(len=fnlen) :: filnam1,filnam_gen
  character(len=500) :: msg
  type(hdr_type) :: hdr
@@ -1039,7 +1039,7 @@ CONTAINS  !=====================================================================
  only_check=0 ! compute real part of eps in kk routine
  do ii = 1, 3
    do jj = 1, 3
-     eps_work(:) = cmplx(0.0,epsilon_tot(2,ii,jj,:))
+     eps_work(:) = cmplx(0.0,epsilon_tot(2,ii,jj,:), kind=dpc)
      call kramerskronig(mom,oml1,eps_work,method,only_check)
      epsilon_tot(1,ii,jj,:) = real(eps_work(:))
      if (ii /= jj) epsilon_tot(1,ii,jj,:) = epsilon_tot(1,ii,jj,:)- 1.0
