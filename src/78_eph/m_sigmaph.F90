@@ -1158,9 +1158,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Distribute q-points, compute tetra weigths.
      call sigmaph_setup_qloop(sigma, dtset, cryst, ebands, dvdb, spin, ikcalc, nfftf, ngfftf, comm)
-
-     ! Continue to initialize the Hamiltonian
-     !call load_spin_hamiltonian(gs_hamkq, spin, vlocal=vlocal, with_nonlocal=.true.)
      call timab(1900, 2, tsec)
 
      ! =======================================
@@ -1307,23 +1304,21 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          ! Set up local potential vlocal1 with proper dimensioning, from vtrial1 taking into account the spin.
          ! Each CPU prepares its own potentials.
-         call rf_transgrid_and_pack(spin,nspden,psps%usepaw,cplex,nfftf,nfft,ngfft,gs_hamkq%nvloc, &
-           pawfgr,mpi_enreg,vtrial,v1scf(:,:,:,imyp),vlocal,vlocal1(:,:,:,:,imyp))
+         call rf_transgrid_and_pack(spin, nspden, psps%usepaw, cplex, nfftf, nfft, ngfft, gs_hamkq%nvloc, &
+           pawfgr, mpi_enreg, vtrial, v1scf(:,:,:,imyp), vlocal, vlocal1(:,:,:,:,imyp))
 
-         ! This is needed to call dfpt_cgwf (Sternheimer).
-         !if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
+         ! Continue to initialize the Hamiltonian (call it here to support dfpt_cgwf Sternheimer).
          call load_spin_hamiltonian(gs_hamkq, spin, vlocal=vlocal, with_nonlocal=.true.)
-         !end if
 
          ! Prepare application of the NL part.
          call init_rf_hamiltonian(cplex, gs_hamkq, ipert, rf_hamkq, has_e1kbsc=.true.)
          call load_spin_rf_hamiltonian(rf_hamkq, spin, vlocal1=vlocal1(:,:,:,:,imyp), with_nonlocal=.true.)
 
          ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
-         call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kk,kq,idir,ipert, &  ! In
-           cryst%natom,cryst%rmet,cryst%gprimd,cryst%gmet,istwf_k, &          ! In
-           npw_k,npw_kq,useylmgr1,kg_k,ylm_k,kg_kq,ylm_kq,ylmgr_kq, &         ! In
-           dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)      ! Out
+         call getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kk, kq, idir, ipert, &  ! In
+           cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, &             ! In
+           npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &         ! In
+           dkinpw, nkpg, nkpg1, kpg_k, kpg1_k, kinpw1, ffnlk, ffnl1, ph3d, ph3d1)    ! Out
 
          ! Compute H(1) applied to GS wavefunction Psi_nk(0)
          do ib_k=1,nbcalc_ks
@@ -1332,9 +1327,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! Use scissor shift on 0-order eigenvalue
            eshift = eig0nk - dtset%dfpt_sciss
 
-           call getgh1c(berryopt0,kets_k(:,:,ib_k),cwaveprj0,h1kets_kq(:, :, imyp, ib_k),&
-             grad_berry,gs1c,gs_hamkq,gvnlx1,idir,ipert,eshift,mpi_enreg,optlocal,&
-             optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+           call getgh1c(berryopt0, kets_k(:,:,ib_k), cwaveprj0, h1kets_kq(:, :, imyp, ib_k), &
+             grad_berry, gs1c, gs_hamkq, gvnlx1, idir, ipert, eshift, mpi_enreg, optlocal, &
+             optnl, opt_gvnlx1, rf_hamkq, sij_opt, tim_getgh1c, usevnl)
          end do
 
          if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
@@ -1570,7 +1565,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          if (sigma%calc_mrta) then
            call ddkop%apply(eig0mkq, npw_kq, wfd%nspinor, bra_kq, cwaveprj0, wfd%mpi_enreg)
            vkq_red = ddkop%get_velocity(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, wfd%mpi_enreg%me_g0, bra_kq)
-           call ddk_red2car(cryst%rprimd,vkq_red,vkq)
+           call ddk_red2car(cryst%rprimd, vkq_red, vkq)
            do ib_k=1,nbcalc_ks
              vk(1,:) = sigma%vcar_calc(:, ib_k, ikcalc, spin)
              vkk_norm2 = dot_product(vk(1,:), vk(1,:))
@@ -1856,10 +1851,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call cwtime(cpu_dw, wall_dw, gflops_dw, "start", msg=" Computing Debye-Waller term...")
        ! Collect gkq0_atm inside comm_bq so that we can parallelize CPU easily inside comm_bq
        ! In principle is requires broadcasting itreated_q0 insise comm_qpt
-       call xmpi_sum(gkq0_atm, sigma%comm_qpt, ierr)
-       ! if I have treated q = Gamma
-       !call xmpi_sum(gkq0_atm, sigma%comm_bsum, ierr)
-       !call xmpi_sum(gkq0_atm, sigma%comm_qpt, ierr)
+       ! TODO: Should use same MPI distribution over q, pert, bsum
+        call xmpi_sum(gkq0_atm, sigma%comm_bq, ierr)
+
        if (dtset%eph_stern == 1) call xmpi_sum(stern_dw, sigma%comm_qpt, ierr)
 
        ! Last band + 1 is used to compute the Sternheimer term.
@@ -1882,7 +1876,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! Get phonons for this q-point.
          call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, comm=sigma%comm_pert)
 
-         ! Sum over my modes for this q-point.
+         ! Sum over my phonon modes for this q-point.
          do imyp=1,my_npert
            nu = sigma%my_pinfo(3, imyp)
            ! Ignore acoustic or unstable modes.
@@ -1907,6 +1901,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
            ! Sum over bands and add (static) DW contribution for the different temperatures.
            do ibsum=bsum_start, bsum_stop
+
              do ib_k=1,nbcalc_ks
                ! Compute DW term following XG paper. Check prefactor.
                ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
@@ -2389,8 +2384,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    end if
    ! Note symrel and use_symrel.
    kk = new%kcalc(:,ikcalc)
-   call listkk(dksqmax,cryst%gmet,indkk_k,ebands%kptns,kk,ebands%nkpt,1,cryst%nsym,&
-      sppoldbl1,cryst%symafm,cryst%symrel,new%timrev,xmpi_comm_self,exit_loop=.True., use_symrec=.False.)
+   call listkk(dksqmax, cryst%gmet, indkk_k, ebands%kptns, kk, ebands%nkpt, 1, cryst%nsym,&
+      sppoldbl1, cryst%symafm, cryst%symrel, new%timrev, xmpi_comm_self, exit_loop=.True., use_symrec=.False.)
 
    if (dksqmax > tol12) then
       write(msg, '(4a,es16.6,7a)' )&
@@ -2672,17 +2667,17 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call MPI_COMM_RANK(comm_cart, me_cart, ierr)
  call MPI_CART_COORDS(comm_cart, me_cart, ndims, new%coords, ierr)
 
- ! Create communicator to distribute perturbations.
+ ! Create communicator to distribute 3natom perturbations.
  keepdim = .False.; keepdim(1) = .True.
  call MPI_CART_SUB(comm_cart, keepdim, new%comm_pert, ierr)
  call MPI_COMM_RANK(new%comm_pert, new%me_pert, ierr)
 
- ! Create communicator for qpoints.
+ ! Create communicator for qpoints in self-energy integration.
  keepdim = .False.; keepdim(2) = .True.
  call MPI_CART_SUB(comm_cart, keepdim, new%comm_qpt, ierr)
  call MPI_COMM_RANK(new%comm_qpt, new%me_qpt, ierr)
 
- ! Create communicator for bands.
+ ! Create communicator for bands for self-energy summation
  keepdim = .False.; keepdim(3) = .True.
  call MPI_CART_SUB(comm_cart, keepdim, new%comm_bsum, ierr)
  call MPI_COMM_RANK(new%comm_bsum, new%me_bsum, ierr)
