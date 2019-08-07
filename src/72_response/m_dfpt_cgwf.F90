@@ -446,9 +446,9 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
  if(ipert/=natom+10.and.ipert/=natom+11) then
    ! For ipert=natom+10 or natom+11, this is done in rf2_init
 
-   !The array eig1_k contains:
-   !<u_(iband,k+q)^(0)|H_(k+q,k)^(1)|u_(jband,k)^(0)>                           (NC psps)
-   !or <u_(iband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(jband,k)^(0)> (PAW)
+   ! The array eig1_k contains:
+   ! <u_(iband,k+q)^(0)|H_(k+q,k)^(1)|u_(jband,k)^(0)>                              (NC psps)
+   ! or <u_(iband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(jband,k)^(0)> (PAW)
    jband=(band-1)*2*nband
    if (gen_eigenpb) then
      indx_cgq=icgq
@@ -544,9 +544,9 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
    ! ghc also includes the eigenvalue shift
    if (gen_eigenpb) then
-     call cg_zaxpy(npw1*nspinor,(/-eshift,zero/),gsc,ghc)
+     call cg_zaxpy(npw1*nspinor, [-eshift, zero], gsc,ghc)
    else
-     call cg_zaxpy(npw1*nspinor,(/-eshift,zero/),cwavef,ghc)
+     call cg_zaxpy(npw1*nspinor, [-eshift, zero], cwavef,ghc)
    end if
 
    ! Initialize resid, in case of nline==0
@@ -854,12 +854,12 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      ! ================ GENERATE NEW |wf>, H|wf>, Vnl|Wf ... ================
      ! ======================================================================
 
-     call cg_zaxpy(npw1*nspinor,(/theta,zero/),conjgr,cwavef)
-     call cg_zaxpy(npw1*nspinor,(/theta,zero/),gh_direc,ghc)
-     call cg_zaxpy(npw1*nspinor,(/theta,zero/),gvnlx_direc,gvnlxc)
+     call cg_zaxpy(npw1*nspinor, [theta, zero], conjgr,cwavef)
+     call cg_zaxpy(npw1*nspinor, [theta, zero], gh_direc,ghc)
+     call cg_zaxpy(npw1*nspinor, [theta, zero], gvnlx_direc,gvnlxc)
 
      if (gen_eigenpb) then
-       call cg_zaxpy(npw1*nspinor,(/theta,zero/),sconjgr,gsc)
+       call cg_zaxpy(npw1*nspinor, [theta, zero], sconjgr, gsc)
      end if
      if (usepaw==1) then
        call pawcprj_axpby(theta,one,conjgrprj,cwaveprj)
