@@ -424,6 +424,7 @@ module m_sigmaph
   complex(dpc),allocatable :: vals_e0ks(:,:)
    ! vals_e0ks(ntemp, max_nbcalc)
    ! Sigma_eph(omega=eKS, kT, band) for fixed (kcalc, spin).
+   ! Fan-Migdal + Debye-Waller
 
   complex(dpc),allocatable :: frohl_vals_e0ks(:,:)
    ! frohl_vals_e0ks(ntemp, max_nbcalc)
@@ -619,6 +620,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: nlines_done, nline_in, grad_berry_size_mpw1
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop,iatom
  integer :: comm_rpt, method
+ integer :: enough = 0
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, qmod, fqdamp, simag, q0rad, out_resid
@@ -1158,7 +1160,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      call sigmaph_setup_qloop(sigma, dtset, cryst, ebands, dvdb, spin, ikcalc, nfftf, ngfftf, comm)
 
      ! Continue to initialize the Hamiltonian
-     call load_spin_hamiltonian(gs_hamkq, spin, vlocal=vlocal, with_nonlocal=.true.)
+     !call load_spin_hamiltonian(gs_hamkq, spin, vlocal=vlocal, with_nonlocal=.true.)
      call timab(1900, 2, tsec)
 
      ! =======================================
@@ -1382,7 +1384,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            !
            grad_berry_size_mpw1 = 0
            do ib_k=1,nbcalc_ks
-             ! MPI parallelism inside comm_bsum
+             ! MPI parallelism inside comm_bsum (not very efficient)
              ! TODO: To be replaced by MPI parallellism in projbd inside dfpt_cgwf
              if (mod(ib_k, sigma%nprocs_bsum) /= sigma%me_bsum) cycle
              band_ks = ib_k + bstart_ks - 1
@@ -1406,15 +1408,18 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              ! Handle possible convergence issues.
              if (out_resid > dtset%tolwfr) then
                write(msg, "(2(a, es13.5), a, i0, a)") &
-                 "Sternheimer solver didn't convergence: out_resid:", out_resid, " >= tolwfr: ", dtset%tolwfr, &
+                 " Sternheimer solver didn't convergence: out_resid:", out_resid, " >= tolwfr: ", dtset%tolwfr, &
                  " after nline: ", nlines_done, " iterations. Increase nline and/or tolwfr."
                MSG_ERROR(msg)
              else if (out_resid < zero) then
                MSG_ERROR(sjoin(" out_resid: ", ftoa(out_resid), ", nlines_done:", itoa(nlines_done)))
              else
-               if (my_rank == master .and. dtset%prtvol > 10) then
-                 write(std_out,*)" Converged with out_resid: ", out_resid, " after ", nlines_done, " iterations."
-                 write(std_out,*)" |psi1|^2", cg_real_zdotc(npw_kq*nspinor, cg1s_kq(:, :, ipc, ib_k), cg1s_kq(:, :, ipc, ib_k))
+               if (my_rank == master .and. (enough < 6 .or. dtset%prtvol > 10)) then
+                 write(std_out, "(2(a, es13.5), a, i0, a)") &
+                   " Sternheimer solver converged with out_resid: ", out_resid, " <= tolwfr: ", dtset%Tolwfr, &
+                   " after ", nlines_done, " iterations."
+                 !write(std_out,*)" |psi1|^2", cg_real_zdotc(npw_kq*nspinor, cg1s_kq(:, :, ipc, ib_k), cg1s_kq(:, :, ipc, ib_k))
+                 enough = enough + 1
                end if
              end if
 
@@ -1448,8 +1453,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_FREE(vlocal1)
        ABI_FREE(v1scf)
 
-       ! Add contribution to Fan-Migdal self-energy coming from Sternheimer.
        if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
+         ! Add contribution to Fan-Migdal self-energy coming from Sternheimer.
          call xmpi_sum(cg1s_kq, sigma%comm_bsum, ierr)
          call xmpi_sum(cg1s_kq, sigma%comm_pert, ierr)
 
@@ -1468,8 +1473,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              h1kets_kq_allperts(:,:,:,ib_k), cg1s_kq(:,:,:,ib_k), stern_ppb(:,:,:,ib_k))
              !cg1s_kq(:,:,:,ib_k), h1kets_kq_allperts(:,:,:,ib_k), stern_ppb(:,:,:,ib_k))
 
-             ! Save data for Debye-Waller computation (performed outside the q-loop)
-             if (isqzero) stern_dw(:,:,:,ib_k) = stern_ppb(:,:,:,ib_k)
+           ! Save data for Debye-Waller computation (performed outside the q-loop)
+           if (isqzero) stern_dw(:,:,:,ib_k) = stern_ppb(:,:,:,ib_k)
          end do
 
          ! Compute contribution for M > sigma%nbsum using static + adiabatic approximation for self-energy.
@@ -1487,8 +1492,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              rfact = dotri(1)
              !rfact = cg_real_zdotc(natom3, displ_red(:,:,:,nu), vec_natom3)
              rfact = rfact * sigma%wtq_k(iq_ibz) / (two * wqnu)
-             ! Need to rescale by nprocs because for the time being all procs enter this part (DOH!)
-             rfact = rfact / nprocs
+             ! Need to rescale by pb MPI subgrid because for the time being all procs enter this part (DOH!)
+             rfact = rfact / (sigma%nprocs_pert * sigma%nprocs_bsum)
 
              do it=1,sigma%ntemp
                sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + (two * nqnu_tlist(it) + one) * rfact
@@ -1856,11 +1861,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      if (.not. sigma%imag_only) then
        call cwtime(cpu_dw, wall_dw, gflops_dw, "start", msg=" Computing Debye-Waller term...")
        ! Collect gkq0_atm inside comm_bq so that we can parallelize CPU easily inside comm_bq
-       call xmpi_sum(gkq0_atm, sigma%comm_bq, ierr)
+       ! In principle is requires broadcasting itreated_q0 insise comm_qpt
+       call xmpi_sum(gkq0_atm, sigma%comm_qpt, ierr)
        ! if I have treated q = Gamma
        !call xmpi_sum(gkq0_atm, sigma%comm_bsum, ierr)
        !call xmpi_sum(gkq0_atm, sigma%comm_qpt, ierr)
-       if (dtset%eph_stern == 1) call xmpi_sum(stern_dw, sigma%comm_bq, ierr)
+       if (dtset%eph_stern == 1) call xmpi_sum(stern_dw, sigma%comm_qpt, ierr)
 
        ! Last band + 1 is used to compute the Sternheimer term.
        ABI_CALLOC(gdw2_mn, (bsum_start:bsum_stop+1, nbcalc_ks))
@@ -1967,6 +1973,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                !  do ie=1,sigma%a2f_ne
                !    sigma%a2few(:, ie, ib_k, 2) = sigma%a2few(:, ie, ib_k, 2) + &
                !         delta_e_minus_emkq(ie) * dtw_weights(:, 1) * gdw2_mn(ibsum, ib_k) / (enk - e) * sigma%wtq_k(iq_ibz)
+               !  end do
+               !if (dtset%eph_stern == 1 .and. ibsum == bsum_stop) then
+               !end if
                !end if
 
                ! Accumulate DW for each T, add it to Sigma(e0) and Sigma(w) as well
