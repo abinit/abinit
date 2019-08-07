@@ -946,7 +946,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_unt,my_prtvol,iv1,iq,idir,ipert
+ integer :: my_unt,my_prtvol,iv1,iq,idir,ipert,iatom
  character(len=4) :: my_mode
  character(len=500) :: msg
 
@@ -975,7 +975,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
 
  write(my_unt,"(a)")sjoin(" Have dielectric tensor:", yesno(db%has_dielt))
  write(my_unt,"(a)")sjoin(" Have Born effective charges:", yesno(db%has_zeff))
- !write(my_unt,"(a)")sjoin(" Have Dynamical quadrupoles:", yesno(db%has_quadrupoles))
+ write(my_unt,"(a)")sjoin(" Have Dynamical quadrupoles:", yesno(db%has_quadrupoles))
  write(my_unt,"(a)")sjoin(" Treatment of long-range part in V1scf:", itoa(db%add_lr))
  write(my_unt,"(a, f6.1)")" qdamp:", db%qdamp
 
@@ -989,15 +989,17 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
    call print_zeff(my_unt, db%zeff, db%cryst, title=' Born effectives charges in Cart coords:')
    !call print_zeff(my_unt, db%zeff_raw, db%cryst, title=' Born effectives charges before chneut: ')
  end if
- !if (db%has_quadrupoles) then
- !  write(my_unt, '(a)') ' Dynamical Quadrupoles: '
- !  do iatom=1,db%natom
- !    write(my_unt,'(a,i0,3(/,3es16.6))')' iatom: ', iatom, &
- !      db%qstar(1,1,iatom), db%qstar(1,2,iatom), db%qstar(1,3,iatom), &
- !      db%qstar(2,1,iatom), db%qstar(2,2,iatom), db%qstar(2,3,iatom), &
- !      db%qstar(3,1,iatom), db%qstar(3,2,iatom), db%qstar(3,3,iatom)
- !  end do
- !end if
+ if (db%has_quadrupoles) then
+   write(my_unt, '(a)') ' Dynamical Quadrupoles: '
+   do iatom=1,db%natom
+     do idir=1,3
+       write(my_unt,'(a,i0,a,i0,3(/,3es16.6))')' iatom: ', iatom, ' idir: ', idir, &
+         db%qstar(1,1,idir,iatom), db%qstar(1,2,idir,iatom), db%qstar(1,3,idir,iatom), &
+         db%qstar(2,1,idir,iatom), db%qstar(2,2,idir,iatom), db%qstar(2,3,idir,iatom), &
+         db%qstar(3,1,idir,iatom), db%qstar(3,2,idir,iatom), db%qstar(3,3,idir,iatom)
+     end do
+   end do
+ end if
 
  if (my_prtvol > 0) then
    call crystal_print(db%cryst, header="Crystal structure in DVDB file")

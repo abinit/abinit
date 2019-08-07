@@ -161,7 +161,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !scalars
  integer,parameter :: master = 0, natifc0 = 0, timrev2 = 2, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,jj
- integer :: iblock_dielt_zeff, iblock_dielt, ddb_nqshift,ierr,brav1
+ integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift,ierr,brav1
  integer :: omp_ncpus, work_size, nks_per_proc, comm_rpt, method
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
 #ifdef HAVE_NETCDF
@@ -588,6 +588,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    !  dvdb%qstar(:,:,:,ii) = (-1 ** (ii + 1)) * abs(levi_civita_3()) * 13.368_dp
    !end do
    !dvdb%has_quadrupoles = .True.
+
+   ! Read the quadrupoles
+   iblock_quadrupoles = ddb_get_quadrupoles(ddb, cryst_ddb, 3, dvdb%qstar)
+   if (iblock_quadrupoles /=0) dvdb%has_quadrupoles = .True.
 
    ! Set dielectric tensor, BECS and associated flags.
    ! This activates automatically the treatment of the long-range term in the Fourier interpolation
