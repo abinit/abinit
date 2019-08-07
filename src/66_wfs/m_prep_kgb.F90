@@ -214,6 +214,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 
  spaceComm=mpi_enreg%comm_fft
  if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_band
+ print *, "prep_getghc spaceComm", spaceComm
 
  ikpt_this_proc=bandfft_kpt_get_ikpt()
 
@@ -1026,6 +1027,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  ABI_CHECK((mpi_enreg%bandpp==ndat),'BUG: bandpp/=ndat')
 
  spaceComm=mpi_enreg%comm_band
+ print *, "prep_fourwf spaceComm", spaceComm
  nproc_band = mpi_enreg%nproc_band
  nproc_fft  = mpi_enreg%nproc_fft
  bandpp     = mpi_enreg%bandpp

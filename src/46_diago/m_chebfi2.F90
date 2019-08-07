@@ -191,7 +191,7 @@ module m_chebfi2
     integer :: spacedim
     integer :: neigenpairs
     integer :: space
-    integer :: remainder = 0
+    !integer :: remainder = 0
 
     integer :: row, col
     integer :: total_spacedim, ierr !don't know why but have to have different var for MPI spacedim
@@ -320,7 +320,7 @@ module m_chebfi2
 
   end function chebfi_memInfo
 
-  subroutine chebfi_run(chebfi, X0, getAX_BX, getBm1X, pcond, eigen, residu, counter)
+  subroutine chebfi_run(chebfi, X0, getAX_BX, getBm1X, pcond, eigen, residu, counter, mpi_enreg)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -334,6 +334,7 @@ module m_chebfi2
     type(xgBlock_t), intent(inout) :: eigen   ! Full initial eigen values
     type(xgBlock_t), intent(inout) :: residu
     type(integer), intent(in) :: counter
+    type(mpi_type),  intent(inout) :: mpi_enreg
           
     integer :: spacedim
     integer :: neigenpairs
@@ -343,14 +344,11 @@ module m_chebfi2
     !double precision :: ecut
     double precision :: maxeig, maxeig_global
     double precision :: mineig, mineig_global
-    double precision :: ampfactor
+    !double precision :: ampfactor
     
     type(xg_t)::DivResults
 
-    integer :: test, iline, iband
-    
-    integer :: ikpt_this_proc, node_spacedim
-    
+    integer :: iline, iband    
     integer :: nCpuCols, nCpuRows
         
     !Pointers similar to old Chebfi    
@@ -365,7 +363,7 @@ module m_chebfi2
     double precision :: center
     double precision :: radius
     
-    double precision :: errmax
+    !double precision :: errmax
     double precision, allocatable, target :: cg(:,:)
     double precision, pointer :: cg0(:,:)
     double precision, pointer :: gh(:,:)
@@ -373,14 +371,17 @@ module m_chebfi2
     double precision, pointer :: cg0_next(:,:)
     double precision, pointer :: cg0_prev(:,:)
     
-    logical :: status_p
+    integer :: comm_fft_save
+    integer :: comm_band_save
     
-    integer :: remainder
+    !logical :: status_p
     
-    integer :: info
+    !integer :: remainder
+    
+    !integer :: info
     integer :: ierr
     
-    integer :: cols, rows
+    !integer :: cols, rows
     
     type(xgBlock_t) :: HELPER
     type(xg_t) :: xCOPY
@@ -470,6 +471,8 @@ module m_chebfi2
     lambda_plus = chebfi%ecut
     chebfi%X = X0
     
+    !call xgBlock_one(chebfi%X)
+    
     !print *, "xmpi_comm_rank(comm)", xmpi_comm_rank(chebfi%spacecom)
     !print *, "xmpi_comm_size(chebfi%spacecom)", xmpi_comm_size(chebfi%spacecom)
     !print *, "xmpi_comm_size(chebfi%spacecom)", xmpi_comm_size(chebfi%spacecom)
@@ -478,7 +481,7 @@ module m_chebfi2
     !call xg_getPointer(chebfi%X)
     ! Initialize the _filter pointers. Depending on paral_kgb, they might point to the actual arrays or to _alltoall variables
     !if (counter == 11 .or. counter == 10) then
-    if (counter < 3) then
+    if (counter < 8) then
       call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X at the BEGINNING of the CB2 RUN counter:" // str) !MPI 1,2 OK
     end if
     !stop
@@ -562,6 +565,14 @@ module m_chebfi2
       !print *, "PROSAO INIT"
       !call xgTransposer_constructor(chebfi%xgTransposerX,X0,chebfi%X,nCpuRows,nCpuCols,STATE_LINALG,1,0)
       
+      comm_fft_save = mpi_enreg%comm_fft
+      comm_band_save = mpi_enreg%comm_band
+      
+      print *, "COMM FFT", xgTransposer_getComm(chebfi%xgTransposerX, 2)
+      print *, "COMM BAND", xgTransposer_getComm(chebfi%xgTransposerX, 3)
+      !stop
+      mpi_enreg%comm_fft = xgTransposer_getComm(chebfi%xgTransposerX, 2)
+      mpi_enreg%comm_band = xgTransposer_getComm(chebfi%xgTransposerX, 3)
  !     call xgBlock_getSize(chebfi%X,rows,cols)
       
 !      print *, "CCCCCCCCCCCCCCC"
@@ -585,7 +596,7 @@ module m_chebfi2
       !stop
       !print *, "SSSSSSSSSSSSSS"
       
-      !if (counter < 3) then
+      !if (counter < 8) then
         !call xgBlock_copy(chebfi%X, chebfi%AX%self, 1, 1)  
         !call xgBlock_copy(chebfi%X, chebfi%BX%self, 1, 1)  
         !call debug_helper_linalg(chebfi%AX%self, chebfi, "AX LINALG")
@@ -601,7 +612,7 @@ module m_chebfi2
       !call debug_helper_colrows(chebfi%X_prev, chebfi, "X_prev COLROWS") 
       !stop
       
-!      if (counter < 3) then
+!      if (counter < 8) then
 !        call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "xAXColsRows COLROWS") 
 !        call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_LINALG) !all_to_all
 !        call debug_helper_linalg(chebfi%AX%self, chebfi, "AX LINALG") 
@@ -675,12 +686,38 @@ module m_chebfi2
       call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, 1, spacedim, neigenpairs)
     end if
     
-    if (counter == 3) then
-      call debug_helper_colrows(chebfi%xXColsRows, chebfi, "LINE606 counter 3") 
+    if (counter < 8) then
+      !if (counter == 0) then
+        !call xgBlock_zero(chebfi%xXColsRows)
+        !call xgBlock_one(chebfi%xXColsRows)
+      !end if
+      !!TODO DEBUG THIS ONCE CLUSTER ACCESS IS GAINED
+      call debug_helper_colrows(chebfi%xXColsRows, chebfi, "xXColsRows after first transpose counter:" // str) 
+      !if (counter == 6) stop
     end if
     !stop
     !call debug_helper_colrows(chebfi%xAXColsRows, chebfi) 
     !call debug_helper_colrows(chebfi%xBXColsRows, chebfi) 
+    
+    !print *, "getAX_BX FFT communicator", mpi_enreg%comm_fft
+    !print *, "getAX_BX NBAND communicator", mpi_enreg%comm_band
+    
+    print *, "mpi_enreg%comm_fft BEFORE getAX_BX", mpi_enreg%comm_fft
+    print *, "mpi_enreg%comm_band BEFORE getAX_BX", mpi_enreg%comm_band
+    print *, "mpi_enreg%comm_kpt BEFORE getAX_BX", mpi_enreg%comm_kpt
+    print *, "mpi_enreg%comm_spinor BEFORE getAX_BX", mpi_enreg%comm_spinor 
+    print *, "mpi_enreg%comm_bandspinor BEFORE getAX_BX", mpi_enreg%comm_bandspinor 
+    print *, "mpi_enreg%comm_kptband BEFORE getAX_BX", mpi_enreg%comm_kptband 
+    print *, "mpi_enreg%comm_spinorfft BEFORE getAX_BX", mpi_enreg%comm_spinorfft 
+    print *, "mpi_enreg%comm_bandfft BEFORE getAX_BX", mpi_enreg%comm_bandfft 
+    print *, "mpi_enreg%comm_bandspinorfft BEFORE getAX_BX", mpi_enreg%comm_bandspinorfft 
+    print *, "xXColsRows FFT communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerX, 2)
+    print *, "xXColsRows NBAND communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerX, 3)
+    print *, "xAXColsRows FFT communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerAX, 2)
+    print *, "xAXColsRows NBAND communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerAX, 3)
+    print *, "xBXColsRows FFT communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerBX, 2)
+    print *, "xBXColsRows NBAND communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerBX, 3)
+    
     
     call timab(tim_getAX_BX,1,tsec)         
     !call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self) 
@@ -690,16 +727,32 @@ module m_chebfi2
     
     
     print *, "PROSAO getAX_BX"
+    print *, "mpi_enreg%comm_fft AFTER getAX_BX", mpi_enreg%comm_fft
+    print *, "mpi_enreg%comm_band AFTER getAX_BX", mpi_enreg%comm_band
+    print *, "mpi_enreg%comm_kpt AFTER getAX_BX", mpi_enreg%comm_kpt
+    print *, "mpi_enreg%comm_spinor AFTER getAX_BX", mpi_enreg%comm_spinor 
+    print *, "mpi_enreg%comm_bandspinor AFTER getAX_BX", mpi_enreg%comm_bandspinor 
+    print *, "mpi_enreg%comm_kptband AFTER getAX_BX", mpi_enreg%comm_kptband 
+    print *, "mpi_enreg%comm_spinorfft AFTER getAX_BX", mpi_enreg%comm_spinorfft 
+    print *, "mpi_enreg%comm_bandfft AFTER getAX_BX", mpi_enreg%comm_bandfft 
+    print *, "mpi_enreg%comm_bandspinorfft AFTER getAX_BX", mpi_enreg%comm_bandspinorfft 
+    print *, "xXColsRows FFT communicator AFTER getAX_BX", xgTransposer_getComm(chebfi%xgTransposerX, 2)
+    print *, "xXColsRows NBAND communicator AFTER getAX_BX", xgTransposer_getComm(chebfi%xgTransposerX, 3)
+    print *, "xAXColsRows FFT communicator AFTER getAX_BX", xgTransposer_getComm(chebfi%xgTransposerAX, 2)
+    print *, "xAXColsRows NBAND communicator AFTER getAX_BX", xgTransposer_getComm(chebfi%xgTransposerAX, 3)
+    print *, "xBXColsRows FFT communicator AFTER getAX_BX", xgTransposer_getComm(chebfi%xgTransposerBX, 2)
+    print *, "xBXColsRows NBAND communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerBX, 3)
+    
     !stop
     !call xgTransposer_transpose(chebfi%xgTransposerX,STATE_LINALG) !all_to_all
     !call debug_helper_linalg(chebfi%X, chebfi, 1) 
     !stop
     
     !!on nproc 2 for some reason
-    if (counter < 3) then
-      call debug_helper_colrows(chebfi%xXColsRows, chebfi, " xXColsRows after first getAX_BX") 
-      call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "xAXColsRows after first getAX_BX") 
-      call debug_helper_colrows(chebfi%xBXColsRows, chebfi, "xBXColsRows after first getAX_BX") 
+    if (counter < 8) then
+      call debug_helper_colrows(chebfi%xXColsRows, chebfi, " xXColsRows after first getAX_BX counter:" // str) 
+      call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "xAXColsRows after first getAX_BX counter:" // str) 
+      call debug_helper_colrows(chebfi%xBXColsRows, chebfi, "xBXColsRows after first getAX_BX counter:" // str) 
     end if
     !stop
 
@@ -737,8 +790,8 @@ module m_chebfi2
     
     !print *, "lambda_minus", lambda_minus
     !stop
-        
-    nline_max = cheb_oracle1(mineig, lambda_minus, lambda_plus, 1D-16, 40)
+                            !(x, a, b, tol, nmax) result(n)
+    nline_max = cheb_oracle1(mineig_global, lambda_minus, lambda_plus, 1D-16, 40)
     
     !print *, "nline_max", nline_max
     !stop
@@ -802,7 +855,7 @@ module m_chebfi2
 !    
     !stop
     !stop
-    if (counter < 3) then
+    if (counter < 8) then
       call debug_helper_colrows(chebfi%xXColsRows, chebfi, "xXColsRows AAA") 
       call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "xAXColsRows AAA" // str) !MPI 1,2 OK
       call debug_helper_colrows(chebfi%xBXColsRows, chebfi, "xBXColsRows AAA" // str) !MPI 1,2 OK
@@ -1010,7 +1063,7 @@ module m_chebfi2
     
     !call xg_getPointer(chebfi%xAXColsRows, 101) 
     
-    if (counter < 3) then
+    if (counter < 8) then
       call debug_helper_colrows(chebfi%xXColsRows, chebfi, "xXColsRows BBB") 
       call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "xAXColsRows BBB" // str) !MPI 1,2 OK
       call debug_helper_colrows(chebfi%xBXColsRows, chebfi, "xBXColsRows BBB" // str) !MPI 1,2 OK
@@ -1066,7 +1119,7 @@ module m_chebfi2
     !call debug_helper_linalg(chebfi%AX%self, chebfi, 1) 
     !stop
     
-    if (counter < 3) then
+    if (counter < 8) then
       print *, "LOOP FINISHED"
       call debug_helper_colrows(chebfi%xXColsRows, chebfi, "xXColsRows LINE957") 
       call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "xAXColsRows LINE958") 
@@ -1178,7 +1231,7 @@ module m_chebfi2
       call xmpi_barrier(chebfi%spacecom)
      
      
-      if (counter < 3) then
+      if (counter < 8) then
         call debug_helper_colrows(chebfi%xXColsRows, chebfi, "chebfi%xXColsRows before backtranspose, LOOP:" // str) 
         call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "chebfi%xAXColsRows before backtranspose, LOOP:" // str) 
         call debug_helper_linalg(chebfi%AX%self, chebfi, "chebfi%AX before backtranspose, LOOP:" // str) 
@@ -1198,7 +1251,7 @@ module m_chebfi2
         !call xgBlock_copy(chebfi%xBXColsRows, chebfi%BX%self, 1, 1)  
       end if
       
-      if (counter < 3) then
+      if (counter < 8) then
         call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X after backtranspose, LOOP:" // str)  !!TODO FROM HERE
         call debug_helper_linalg(chebfi%AX%self, chebfi, "chebfi%AX after backtranspose, LOOP:" // str) 
         call debug_helper_linalg(chebfi%BX%self, chebfi, "chebfi%BX after backtranspose, LOOP:" // str) 
@@ -1254,8 +1307,10 @@ module m_chebfi2
     !stop
     call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X before chebfi_computeResidue:" // str)  !!TODO FROM HERE
     call timab(tim_residu, 1, tsec)
-    !maximum =  chebfi_computeResidue(chebfi, residu, pcond)
+    maximum =  chebfi_computeResidue(chebfi, residu, pcond)
     call timab(tim_residu, 2, tsec)
+    
+    print *, "RESIDUE", maximum
                        
     deallocate(nline_bands)
     
@@ -1298,6 +1353,9 @@ module m_chebfi2
 !    end if
     
     !stop
+    
+    mpi_enreg%comm_fft = comm_fft_save
+    mpi_enreg%comm_band = comm_band_save
     
     call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X at the end of the CB2 RUN") !MPI 1,2 OK
     !stop   
@@ -1448,7 +1506,7 @@ module m_chebfi2
         !stop    
       end if
       
-      if (counter < 3) then
+      if (counter < 8) then
 !        call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "xAXColsRows before getBm1X 1" // str) !MPI 1,2 OK
 !        call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_LINALG) !all_to_all
 !        call debug_helper_linalg(chebfi%AX%self, chebfi, "AX before getBm1X 1" // str) !MPI 1,2 OK
@@ -1466,7 +1524,7 @@ module m_chebfi2
       !!TODO TODO TODO UNCOMMENT THIS 
       call getBm1X(chebfi%xAXColsRows, chebfi%X_next, iline_t, chebfi%xXColsRows, chebfi%X, chebfi%xgTransposerX) !ovde pobrljavi X skroz za iline 2 MPI istwfk 2
       
-      if (counter < 3) then
+      if (counter < 8) then
 !        call debug_helper_colrows(chebfi%xAXColsRows, chebfi, "xAXColsRows after getBm1X 1" // str) !MPI 1,2 OK
 !        call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_LINALG) !all_to_all
 !        call debug_helper_linalg(chebfi%AX%self, chebfi, "AX after getBm1X" // str) !MPI 1,2 OK
@@ -1756,14 +1814,14 @@ module m_chebfi2
 !      call xgBlock_print(A_und_X%self, 200+xmpi_comm_rank(chebfi%spacecom))
 !    end if
     write(str , *) counter
-    if (counter < 3) then
+    if (counter < 8) then
       call debug_helper_linalg(chebfi%X, chebfi, "RR X counter LOOP:" // str) 
       call debug_helper_linalg(chebfi%AX%self, chebfi, "RR AX counter LOOP:" // str) 
       call debug_helper_linalg(chebfi%BX%self, chebfi, "RR BX counter LOOP:" // str)
     end if
 
 
-    if (counter < 3) then
+    if (counter < 8) then
       call xgBlock_setBlock1(A_und_X%self, HELPER, 1, 1, 1, 10) 
       if (xmpi_comm_size(chebfi%spacecom) == 1) then
         write(100+xmpi_comm_rank(chebfi%spacecom),*) ("A_und_X 1, LOOP:" // str)
@@ -1784,7 +1842,7 @@ module m_chebfi2
     call xgBlock_gemm(chebfi%AX%self%trans, chebfi%X%normal, 1.0d0, chebfi%AX%self, chebfi%X, 0.d0, A_und_X%self) 
     !call xgBlock_gemm(dummy_AX%self%trans, dummy_X%self%normal, 1.0d0, dummy_AX%self, dummy_X%self, 0.d0, dummy_A_und_X%self) 
     
-    if (counter < 3) then
+    if (counter < 8) then
      call xgBlock_setBlock1(A_und_X%self, HELPER, 1, 1, 1, 10) 
       if (xmpi_comm_size(chebfi%spacecom) == 1) then
         write(100+xmpi_comm_rank(chebfi%spacecom),*) ("A_und_X 2, LOOP:" // str)
@@ -1830,7 +1888,7 @@ module m_chebfi2
     !print *, "PROSAO GEMM"
     !stop
     
-    if (counter < 3) then
+    if (counter < 8) then
       call xgBlock_setBlock1(B_und_X%self, HELPER, 1, 1, 1, 10) 
       if (xmpi_comm_size(chebfi%spacecom) == 1) then
         write(100+xmpi_comm_rank(chebfi%spacecom),*) ("B_und_X 1, LOOP:" // str)
@@ -1855,7 +1913,7 @@ module m_chebfi2
     end if
     
         
-    if (counter < 3) then
+    if (counter < 8) then
       call xgBlock_setBlock1(B_und_X%self, HELPER, 1, 1, 1, 10) 
       if (xmpi_comm_size(chebfi%spacecom) == 1) then
         write(100+xmpi_comm_rank(chebfi%spacecom),*) ("B_und_X 2, LOOP:" // str)
@@ -1905,7 +1963,7 @@ module m_chebfi2
     !print *, "PROSLO SKALIRANJE"
     !stop
     
-    if (counter < 3) then
+    if (counter < 8) then
       call debug_helper_linalg(chebfi%X, chebfi, "RR X after scaling counter :" // str) 
       call debug_helper_linalg(chebfi%AX%self, chebfi, "RR AX after scaling counter :" // str) 
       call debug_helper_linalg(chebfi%BX%self, chebfi, "RR BX after scaling counter :" // str)
@@ -1951,7 +2009,7 @@ module m_chebfi2
     
     !call debug_helper_linalg(chebfi%X, chebfi, 1, 1)  !X OK HERE FOR 1 and 2 MPI
     !stop
-    if (counter < 3) then 
+    if (counter < 8) then 
      call xgBlock_setBlock1(A_und_X%self, HELPER, 1, 1, 1, 10) 
       if (xmpi_comm_size(chebfi%spacecom) == 1) then
         write(100+xmpi_comm_rank(chebfi%spacecom),*) ("A_und_X 3 after hegvd LOOP:" // str)
@@ -1973,7 +2031,7 @@ module m_chebfi2
 !    else
 !      call xgBlock_print(A_und_X%self, 2000+xmpi_comm_rank(chebfi%spacecom)+1)
 !    end if
-    if (counter < 3) then 
+    if (counter < 8) then 
       if (xmpi_comm_size(chebfi%spacecom) == 1) then
         write(100+xmpi_comm_rank(chebfi%spacecom),*) ("eigenvalues LOOP:" // str)
         call xgBlock_print(chebfi%eigenvalues, 100+xmpi_comm_rank(chebfi%spacecom))
@@ -2068,7 +2126,7 @@ module m_chebfi2
     
     !call debug_helper_linalg(chebfi%X, chebfi, 1, 1) 
     !stop
-    if (counter < 3) then
+    if (counter < 8) then
       call debug_helper_linalg(chebfi%X, chebfi, "RR X before orthonorming counter :" // str) 
       call debug_helper_linalg(chebfi%AX%self, chebfi, "RR AX before orthonorming counter :" // str) 
       call debug_helper_linalg(chebfi%BX%self, chebfi, "RR BX before orthonorming counter :" // str)
@@ -2131,7 +2189,7 @@ module m_chebfi2
             
     end if
     
-    if (counter < 3) then
+    if (counter < 8) then
       call debug_helper_linalg(chebfi%X_swap, chebfi, "X_swap counter :" // str) 
     end if
     !print *, "X_SWAP print"
@@ -2141,7 +2199,7 @@ module m_chebfi2
                       chebfi%AX%self, A_und_X%self, 0.d0, chebfi%AX_swap)
         
     !print *, "AX_swap"   
-    if (counter < 3) then           
+    if (counter < 8) then           
       call debug_helper_linalg(chebfi%AX_swap, chebfi, "AX_swap counter :" // str)  !AX_swap OK HERE FOR 1 and 2 MPI
     end if
     !stop
@@ -2157,7 +2215,7 @@ module m_chebfi2
     end if  
     
     !print *, "BX_swap"
-    if (counter < 3) then            
+    if (counter < 8) then            
       call debug_helper_linalg(chebfi%BX_swap, chebfi, "BX_swap counter :" // str)  !BX_swap OK HERE FOR 1 and 2 MPI
     end if
     !stop
@@ -2227,8 +2285,7 @@ module m_chebfi2
     !call xgBlock_print(HELPER, 200 + chebfi%paral_kgb)
     !stop
     
-    !print *, "AX_swap residue"
-    !call debug_helper_linalg(chebfi%AX_swap, chebfi, 1, 1) 
+    call debug_helper_linalg(chebfi%AX_swap, chebfi, "AX_swap BEFORE xgBlock_colwiseCymax") 
     !stop  
     
     if (chebfi%paw) then
@@ -2239,8 +2296,7 @@ module m_chebfi2
     !print *, "POSLE COLWISE"
     !stop
     
-    !print *, "AFTER COLWISE"
-    !call debug_helper_linalg(chebfi%AX_swap, chebfi, "LINE1925") !MPI 1,2 OK
+    call debug_helper_linalg(chebfi%AX_swap, chebfi, "AX_swap AFTER xgBlock_colwiseCymax") !MPI 1,2 OK
     !stop      
     
     !pcond call
@@ -2249,7 +2305,7 @@ module m_chebfi2
     call timab(tim_pcond,2,tsec)
     
     !print *, "AX_swap after pcond"
-    !call debug_helper_linalg(chebfi%AX_swap, chebfi, "LINE1934") !MPI 1,2 OK
+    call debug_helper_linalg(chebfi%AX_swap, chebfi, "AX_swap AFTER PCOND") !MPI 1,2 OK
     !stop
     
     !call debug_helper_linalg(chebfi%AX_swap, chebfi, 1, 1) 
@@ -2261,7 +2317,7 @@ module m_chebfi2
                                                       min_val=minResidu, min_elt=eigResiduMin) 
     
     !print *, "AX_swap after xgBlock_colwiseNorm2"
-    !call debug_helper_linalg(chebfi%AX_swap, chebfi, "LINE1946") !MPI 1,2 OK
+    call debug_helper_linalg(chebfi%AX_swap, chebfi, "AX_swap AFTER xgBlock_colwiseNorm2") !MPI 1,2 OK
     !stop
     
     

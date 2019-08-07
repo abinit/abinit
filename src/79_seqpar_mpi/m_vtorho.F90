@@ -966,7 +966,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      Compute the eigenvalues, wavefunction, residuals,
 !      contributions to kinetic energy, nonlocal energy, forces,
 !      and update of rhor to this k-point and this spin polarization.
-       print *, "VTOFK CALL"
+       print *, "BEFORE VTOFK CALL"
        write(str , *) counter1
        call xgBlock_map(xgx0,cg(:, icg+1:),3,gs_hamk%istwf_k*npw_k*1,nband_k,mpi_enreg%comm_bandspinorfft) 
        call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*1, "X BEFORE VTWOFK CALL outer_counter" // str)

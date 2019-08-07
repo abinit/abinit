@@ -329,12 +329,34 @@ module m_chebfiwf
   !call xg_getPointer(xgx0)   
   !stop
   ! Run chebfi
-  call chebfi_run(chebfi, xgx0, getghc_gsc1, getBm1X, precond1, xgeigen, xgresidu, counter) 
-
-  if (xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft) == 0) then
-    print *, "xgx0 AFTER"
+  print *, "CB2 RUN STARTED!"
+  
+  print *, "mpi_enreg%comm_fft BEFORE CB2", l_mpi_enreg%comm_fft
+  print *, "mpi_enreg%comm_band BEFORE CB2", l_mpi_enreg%comm_band
+  print *, "mpi_enreg%comm_kpt BEFORE CB2", l_mpi_enreg%comm_kpt
+  print *, "mpi_enreg%comm_spinor BEFORE CB2", l_mpi_enreg%comm_spinor 
+  print *, "mpi_enreg%comm_bandspinor BEFORE CB2", l_mpi_enreg%comm_bandspinor 
+  print *, "mpi_enreg%comm_kptband BEFORE CB2", l_mpi_enreg%comm_kptband 
+  print *, "mpi_enreg%comm_spinorfft BEFORE CB2", l_mpi_enreg%comm_spinorfft 
+  print *, "mpi_enreg%comm_bandfft BEFORE CB2", l_mpi_enreg%comm_bandfft 
+  print *, "mpi_enreg%comm_bandspinorfft BEFORE CB2", l_mpi_enreg%comm_bandspinorfft 
+  
+  call chebfi_run(chebfi, xgx0, getghc_gsc1, getBm1X, precond1, xgeigen, xgresidu, counter, l_mpi_enreg) 
+  
+  print *, "mpi_enreg%comm_fft AFTER CB2", l_mpi_enreg%comm_fft
+  print *, "mpi_enreg%comm_band AFTER CB2", l_mpi_enreg%comm_band
+  print *, "mpi_enreg%comm_kpt AFTER CB2", l_mpi_enreg%comm_kpt
+  print *, "mpi_enreg%comm_spinor AFTER CB2", l_mpi_enreg%comm_spinor 
+  print *, "mpi_enreg%comm_bandspinor AFTER CB2", l_mpi_enreg%comm_bandspinor 
+  print *, "mpi_enreg%comm_kptband AFTER CB2", l_mpi_enreg%comm_kptband 
+  print *, "mpi_enreg%comm_spinorfft AFTER CB2", l_mpi_enreg%comm_spinorfft 
+  print *, "mpi_enreg%comm_bandfft AFTER CB2", l_mpi_enreg%comm_bandfft 
+  print *, "mpi_enreg%comm_bandspinorfft AFTER CB2", l_mpi_enreg%comm_bandspinorfft 
+  
+  !if (xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft) == 0) then
+  print *, "CB2 RUN FINISHED!"
     !call xg_getPointer(xgx0) 
-  end if  
+  !end if  
   !stop
   
   !call debug_helper_linalg(xgx0, l_mpi_enreg%comm_bandspinorfft, l_icplx*l_npw*l_nspinor, nband, 1, 1) !MPI 1,2 OK
@@ -488,7 +510,8 @@ module m_chebfiwf
       if (l_paral_kgb == 0) then
         if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
       else
-        call xgTransposer_getCPURow(transposer, cpuRow)
+        !call xgTransposer_getCPURow(transposer, cpuRow)
+        cpuRow = xgTransposer_getRank(transposer, 2)
         !print *, "CPUROW", cpurow
         !l_npw is not same for all processes so the lower formula cannot be like
         !that
@@ -524,6 +547,8 @@ module m_chebfiwf
         !print *, "blockdim", blockdim
         !print *, "spacedim", spacedim
         !print *, "before prep_getghc"
+        print *, "l_mpi_enreg%comm_fft INSIDE getAX_BX", l_mpi_enreg%comm_fft
+        print *, "l_mpi_enreg%comm_band INSIDE getAX_BX", l_mpi_enreg%comm_band
         call prep_getghc(cg(:,1:blockdim*spacedim),l_gs_hamk,l_gvnlc,ghc,gsc(:,1:blockdim*spacedim),eval,blockdim,l_mpi_enreg,&
 &                       l_prtvol,l_sij_opt,l_cpopt,cprj_dum,already_transposed=.true.)  !already_transposed = true (previous)
         !print *, "after prep_getghc"
@@ -646,7 +671,8 @@ module m_chebfiwf
       if (l_paral_kgb == 0) then
         if(l_mpi_enreg%me_g0 == 1) ghc_filter(:, 1:spacedim*blockdim:l_npw) = ghc_filter(:, 1:spacedim*blockdim:l_npw) * sqrt2
       else
-        call xgTransposer_getCPURow(transposer, cpuRow)
+        !call xgTransposer_getCPURow(transposer, cpuRow)
+        cpuRow = xgTransposer_getRank(transposer, 2)
         if (cpuRow == 0) then
           ghc_filter(:, 1:spacedim*blockdim:spacedim) = ghc_filter(:, 1:spacedim*blockdim:spacedim) * sqrt2
         end if

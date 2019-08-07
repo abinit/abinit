@@ -418,14 +418,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
            call xgBlock_map(xgx0,cg(:, icg+1:),3,gs_hamk%istwf_k*npw_k*my_nspinor,nband_k,mpi_enreg%comm_bandspinorfft) 
            write(str , *) inonsc
-           if (counter == 3) then
-             call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*my_nspinor, "BEFORE CB2 counter 3")
+           !if (counter == 3) then
+           call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*my_nspinor, "BEFORE chebfiwf2 inonsc: " // str)
              !stop
-           end if
+           !end if
            !stop
            call chebfiwf2(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k, counter)
-           call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*my_nspinor, "AFTER CB2 inonsc: " // str)
+           call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*my_nspinor, "AFTER chebfiwf2 inonsc: " // str)
            counter = counter + 1
            !stop
            !if (inonsc == 2) stop
