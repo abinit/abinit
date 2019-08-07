@@ -271,7 +271,7 @@ program optic
    ! Consistency check
    do ii=1,2
      if (.not. use_ncddk(ii) .and. .not. use_ncddk(ii+1)) then
-       if (wfk_compare(wfks(ii), wfks(ii+1)) /= 0) then
+       if (wfks(ii)%compare(wfks(ii+1)) /= 0) then
          write(msg, "(2(a,i0,a))")"evkfile", ii," and evkfile ",ii+1, ", are not consistent. see above messages"
          MSG_ERROR(msg)
        end if
@@ -428,13 +428,13 @@ program optic
        eigtmp = zero
        eig0tmp = zero
 
-       call wfk_read_eigk(wfk0,ikpt,isppol,xmpio_single,eig0tmp)
+       call wfk0%read_eigk(ikpt,isppol,xmpio_single,eig0tmp)
        eigen0(1+bdtot0_index:nband1+bdtot0_index)=eig0tmp(1:nband1)
 
        ! Read DDK matrix elements from WFK
        do ii=1,3
          if (.not. use_ncddk(ii)) then
-           call wfk_read_eigk(wfks(ii), ikpt, isppol, xmpio_single, eigtmp)
+           call wfks(ii)%read_eigk(ikpt, isppol, xmpio_single, eigtmp)
            if (ii == 1) eigen11(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
            if (ii == 2) eigen12(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
            if (ii == 3) eigen13(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
@@ -446,9 +446,9 @@ program optic
      end do
    end do
 
-   call wfk_close(wfk0)
+   call wfk0%close()
    do ii=1,3
-     if (.not. use_ncddk(ii)) call wfk_close(wfks(ii))
+     if (.not. use_ncddk(ii)) call wfks(ii)%close()
    end do
 
    ABI_DEALLOCATE(eigtmp)

@@ -1174,7 +1174,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
                if (ddkfil(idir1)/=0) then
                  !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
                  ik_ddk = indkpt1(ikpt)
-                 call wfk_read_bks(ddks(idir1), iband, ik_ddk, isppol, xmpio_single, cg_bks=gvnlx1)
+                 call ddks(idir1)%read_bks(iband, ik_ddk, isppol, xmpio_single, cg_bks=gvnlx1)
                else
                  gvnlx1=zero
                end if
@@ -1318,7 +1318,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
                if (need_ddk_file.and.ddkfil(idir1)/=0) then
                  !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
                  ik_ddk = indkpt1(ikpt)
-                 call wfk_read_bks(ddks(idir1), iband, ik_ddk, isppol, xmpio_single, cg_bks=gh1)
+                 call ddks(idir1)%read_bks(iband, ik_ddk, isppol, xmpio_single, cg_bks=gh1)
                else
                  gh1=zero
                end if
@@ -1611,7 +1611,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    do kdir1=1,mdir1
      idir1=jdir1(kdir1)
      if (ddkfil(idir1)/=0)then
-       call wfk_close(ddks(idir1))
+       call ddks(idir1)%close()
      end if
    end do
  end if
@@ -1953,7 +1953,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
    if (ddkfil(idir1)/=0)then
 !    Read npw record
      nsp=dtset%nspinor
-     ik_ddks(idir1) = wfk_findk(ddks(idir1), kpt)
+     ik_ddks(idir1) = ddks(idir1)%findk(kpt)
      ABI_CHECK(ik_ddks(idir1) /= -1, "Cannot find kpt")
      npw_disk = ddks(idir1)%hdr%npwarr(ik_ddks(idir1))
      if (npw_k /= npw_disk) then
@@ -2038,7 +2038,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
              else if( ipert1==dtset%natom+2 )then
                ! TODO: Several tests fail here ifdef HAVE_MPI_IO_DEFAULT
                ! The problem is somehow related to the use of MPI-IO file views!.
-               call wfk_read_bks(ddks(idir1), iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
+               call ddks(idir1)%read_bks(iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
                eig1_bks=eig2_k(1+(iband-1)*2*nband_k:))
                  !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k))
                !write(777,*)"eig2_k, gvnlx1 for band: ",iband,", ikpt: ",ikpt
@@ -2112,7 +2112,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
          eig2_k(:) = eig1_k(:)
        else
          if (ddkfil(idir1) /= 0) then
-           call wfk_read_bks(ddks(idir1), iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
+           call ddks(idir1)%read_bks(iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
            eig1_bks=eig2_k(1+(iband-1)*2*nband_k:))
              !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k))
            !write(778,*)"eig2_k, gvnlx1 for band: ",iband,", ikpt: ",ikpt

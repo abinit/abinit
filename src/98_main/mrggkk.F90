@@ -64,6 +64,7 @@ program mrggkk
  use m_fstrings,        only : endswith, sjoin
  use m_io_tools,        only : flush_unit, open_file, file_exists
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
+
  implicit none
 
 !Arguments ------------------------------------
@@ -204,7 +205,7 @@ program mrggkk
    do ik_ibz=1,GS_wfk%nkpt
      nband_k = GS_wfk%nband(ik_ibz,spin)
 
-     call wfk_read_eigk(GS_wfk,ik_ibz,spin,xmpio_single,eig_k)
+     call GS_wfk%read_eigk(ik_ibz,spin,xmpio_single,eig_k)
      if (binascii==0) then
        write(unitout) eig_k(1:nband_k)
      else
@@ -216,7 +217,7 @@ program mrggkk
  ABI_FREE(eig_k)
 
 !Close GS wf file
- call wfk_close(GS_wfk)
+ call GS_wfk%close()
 
  ntot = n1wf + ntotgkk
  if (binascii==0) then
@@ -272,7 +273,7 @@ program mrggkk
 !      write(std_out,*) 'spin,ik_ibz = ', spin,ik_ibz
        nband_k = PH_wfk%nband(ik_ibz,spin)
 
-       call wfk_read_eigk(PH_wfk,ik_ibz,spin,xmpio_single,eig_k)
+       call PH_wfk%read_eigk(ik_ibz,spin,xmpio_single,eig_k)
 
        !base = 0
        !do jband=1,nband_k
@@ -314,7 +315,7 @@ program mrggkk
 !  clean header to deallocate everything
    call hdr_free(hdr1)
 
-   call wfk_close(PH_wfk)
+   call PH_wfk%close()
  end do
 
 !-------------------------------------------------------

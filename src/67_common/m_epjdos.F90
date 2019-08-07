@@ -409,7 +409,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  tetra = tetra_from_kptrlatt(crystal, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
    dtset%shiftk, dtset%nkpt, dtset%kpt, comm, msg, ierr)
  if (ierr /= 0) then
-   call htetra_free(tetra)
+   call tetra%free()
    MSG_WARNING(msg)
    return
  end if
@@ -536,7 +536,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
         ! Accumulate total DOS from eigenvalues (this is the **exact** total DOS)
         tmp_eigen(:) = ebands%eig(iband, :, isppol)
-        call htetra_get_onewk(tetra,ikpt,bcorr0,nene,nkpt,tmp_eigen,enemin,enemax,max_occ,wdt)
+        call tetra%get_onewk(ikpt,bcorr0,nene,nkpt,tmp_eigen,enemin,enemax,max_occ,wdt)
         wdt = wdt*ebands%wtk(ikpt)
         eig_dos = eig_dos + wdt
 
@@ -718,7 +718,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
    ABI_FREE(dos_pawt1)
  end if
 
- call htetra_free(tetra)
+ call tetra%free()
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2),a)')" tetrahedron: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"

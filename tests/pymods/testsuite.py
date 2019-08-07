@@ -160,16 +160,6 @@ def lazy_readlines(fname):
             return fh.readlines()
 
 
-def lazy_write(fname, s):
-    with open(fname, "wt") as fh:
-        fh.write(s)
-
-
-def lazy_writelines(fname, lines):
-    with open(fname, "wt") as fh:
-        fh.writelines(lines)
-
-
 def rmrf(top, exclude_paths=None):
     """
     Recursively remove all files and directories contained in directory top.
@@ -376,7 +366,8 @@ class FileToTest(object):
                 self.tolnlines, self.tolabs, self.tolrel
             ), result.has_line_count_error())
 
-        if fldebug:  # fail on first error and output the traceback
+        if fldebug:  
+            # fail on first error and output the traceback
             (isok, status, msg), has_line_count_error = make_diff()
         else:
             try:
@@ -558,8 +549,7 @@ class AbinitTestInfo(object):
             self.__dict__[k] = v
 
         # if self.nprocs_to_test and self.test_chain:
-        #     err_msg = "test_chain and nprocs_to_test are mutually exclusive"
-        #     raise TestInfoParserError(err_msg)
+        #     raise TestInfoParserError("test_chain and nprocs_to_test are mutually exclusive")
 
         # Add the executable name to the list of keywords.
         self.add_keywords([self.executable])
@@ -605,10 +595,8 @@ class AbinitTestInfoParser(object):
     def __init__(self, inp_fname, defaults=None):
         """
         Args:
-            inp_fname:
-                test input file
-            defaults:
-                default values passed to the INI parser.
+            inp_fname: test input file
+            defaults: default values passed to the INI parser.
         """
         logger.info("Parsing TEST_INFO section from input file : " + str(inp_fname))
 
@@ -1051,7 +1039,8 @@ class BuildEnvironment(object):
 
         # Binaries that are not located in src/98_main
         self._external_bins = {
-            "atompaw": os.path.join(self.build_dir, "fallbacks", "exports", "bin", "atompaw-abinit"),
+            #"atompaw": os.path.join(self.build_dir, "fallbacks", "exports", "bin", "atompaw-abinit"),
+            "atompaw": os.path.join(self.build_dir, "src", "98_main", "atompaw"),
             "timeout": os.path.join(self.build_dir, "tests", "Timeout", "timeout"),
         }
 
@@ -1160,17 +1149,7 @@ def parse_configh_file(fname):
     Handling this case would require a real preprocessing with CPP and then the parsing.
     Not easy to implement in a portable way especially on IBM machines with XLF.
     """
-    with open(fname, "r") as fh:
-        # defined_cppvars = []
-        # for l in fh:
-        #     l = l.lstrip()
-        #     if l.startswith("#define "):
-        #         tokens = l.split()
-        #         varname = tokens[1]
-        #         if varname.startswith("HAVE_") and len(tokens) >= 3:
-        #             value = int(tokens[2])
-        #             if value != 0: defined_cppvars.append(varname)
-
+    with open(fname, "rt") as fh:
         defined_cppvars = {}
         for l in fh:
             l = l.lstrip()
@@ -1206,7 +1185,7 @@ def input_file_has_vars(fname, ivars, comment="#", mode="any"):
     """
     # This algorithm is not very robust as it assumes that the variable and the line
     # are placed on the same line.
-    with open(fname, "r") as fh:
+    with open(fname, "rt") as fh:
         lines = []
         for line in fh:
             line = line.lower().strip()
@@ -1460,9 +1439,6 @@ class BaseTest(object):
     def __str__(self):
         return repr(self)
 
-    # @lazy__str__
-    # def __str__(self): pass
-
     def stdin_readlines(self):
         return lazy_readlines(self.stdin_fname)
 
@@ -1642,7 +1618,7 @@ class BaseTest(object):
         Subclasses should redefine this method according to their needs.
         """
         t_stdin = StringIO()
-        with open(self.inp_fname, "r") as fh:
+        with open(self.inp_fname, "rt") as fh:
             t_stdin.writelines(fh)
 
         return t_stdin.getvalue()
@@ -1881,16 +1857,6 @@ class BaseTest(object):
         else:
             self.timebomb = TimeBomb(timeout, delay=0.05)
 
-        # str_colorizer = StringColorizer(sys.stdout)
-
-        # status2txtcolor = {
-        #     "succeeded": lambda string: str_colorizer(string, "green"),
-        #     "passed": lambda string: str_colorizer(string, "blue"),
-        #     "failed": lambda string: str_colorizer(string, "red"),
-        #     "disabled": lambda string: str_colorizer(string, "cyan"),
-        #     "skipped": lambda string: str_colorizer(string, "cyan"),
-        # }
-
         status2txtcolor = {
             "succeeded": "green",
             "passed": "blue",
@@ -1955,7 +1921,7 @@ class BaseTest(object):
 
             # Create input file.
             t_stdin = self.make_stdin()
-            with open(self.stdin_fname, "w") as fh:
+            with open(self.stdin_fname, "wt") as fh:
                 fh.writelines(t_stdin)
 
             # Run the code (run_etime is the wall time spent to execute the test)
@@ -2059,7 +2025,7 @@ class BaseTest(object):
                     # Extract YAML error message from ABORTFILE or stdout.
                     abort_file = os.path.join(self.workdir, "__ABI_MPIABORTFILE__")
                     if os.path.exists(abort_file):
-                        f = open(abort_file, "r")
+                        f = open(abort_file, "rt")
                         self.cprint(12 * "=" + " ABI_MPIABORTFILE " + 12 * "=")
                         self.cprint(f.read(), status2txtcolor["failed"])
                         f.close()
@@ -2328,7 +2294,7 @@ class BaseTest(object):
         if fh is None:
             close_fh = True
             html_report = os.path.join(self.workdir, "test_report.html")
-            fh = open(html_report, "w")
+            fh = open(html_report, "wt")
 
         self.keep_files(fh.name)
 
@@ -2759,7 +2725,7 @@ class Band2epsTest(BaseTest):
 
 class AtompawTest(BaseTest):
     """
-    Class for Atompaw tests. Redefine the  methods clean_workdir and bin_path provided by BaseTest
+    Class for Atompaw tests. Redefine the methods clean_workdir and bin_path provided by BaseTest
     """
     def clean_workdir(self, other_test_files=None):
         """Keep all atompaw output files."""
@@ -3025,7 +2991,7 @@ class ChainOfTests(object):
 
     def write_html_report(self):
         html_report = os.path.join(self.workdir, "test_report.html")
-        with open(html_report, "w") as fh:
+        with open(html_report, "wt") as fh:
             for idx, test in enumerate(self):
                 oc = ""
                 if idx == 0:
@@ -3338,12 +3304,11 @@ class AbinitTestSuite(object):
             raise ValueError("Cannot have more than two tests with the same full_id")
 
     def start_workers(self, nprocs, runner):
-        '''
+        """
         Start nprocs new processes that will get tests from a queue and run
         them with runner and put the result of runner in a output queue.
-        Return the task/input queue (to be closed only) and the results/output
-        queue.
-        '''
+        Return the task/input queue (to be closed only) and the results/output queue.
+        """
 
         def worker(qin, qout, print_lock, thread_mode=False):
             done = {
@@ -3376,13 +3341,16 @@ class AbinitTestSuite(object):
         task_q = Queue()
         res_q = Queue()
 
-        for test in self:  # fill the queue
+        for test in self:  
+            # fill the queue
             task_q.put(test)
 
-        for _ in range(nprocs):  # one end signal for each worker
+        for _ in range(nprocs):  
+            # one end signal for each worker
             task_q.put(None)
 
-        for i in range(nprocs - 1):  # create and start subprocesses
+        for i in range(nprocs - 1):  
+            # create and start subprocesses
             p = Process(target=worker, args=(task_q, res_q, print_lock))
             self._processes.append(p)
             p.start()
@@ -3449,16 +3417,11 @@ class AbinitTestSuite(object):
         Execute the list of tests (main entry point for client code)
 
         Args:
-            build_env:
-                `BuildEnv` instance with info on the build environment.
-            workdir:
-                Working directory (string)
-            runner:
-                `JobRunner` instance
-            nprocs:
-                number of MPI processes to use for a single test.
-            py_nprocs:
-                number of py_nprocs for tests
+            build_env: `BuildEnv` instance with info on the build environment.
+            workdir: Working directory (string)
+            runner: `JobRunner` instance
+            nprocs: number of MPI processes to use for a single test.
+            py_nprocs: number of py_nprocs for tests
         """
         self.sanity_check()
 
@@ -3522,15 +3485,13 @@ class AbinitTestSuite(object):
             if py_nprocs == 1:
                 logger.info("Sequential version")
                 for test in self:
-                    # discard the return value because tests are directly
-                    # modified
+                    # discard the return value because tests are directly modified
                     run_and_check_test(test)
 
             elif py_nprocs > 1:
                 logger.info("Parallel version with py_nprocs = %s" % py_nprocs)
 
-                task_q, res_q = self.start_workers(py_nprocs,
-                                                   run_and_check_test)
+                task_q, res_q = self.start_workers(py_nprocs, run_and_check_test)
 
                 timeout_1test = float(runner.timebomb.timeout)
                 if timeout_1test <= 0.1:
@@ -3541,8 +3502,7 @@ class AbinitTestSuite(object):
                                          timeout_1test, res_q)
 
                 # remove this to let python garbage collect processes and avoid
-                # Pickle to complain (it does not accept processes for security
-                # reasons)
+                # Pickle to complain (it does not accept processes for security reasons)
                 self._processes = []
                 task_q.close()
                 res_q.close()
@@ -3622,7 +3582,7 @@ class AbinitTestSuite(object):
                         if abs(test.run_etime) > 0.0 and abs(test.run_etime - mean_etime) > 2 * dev_etime:
                             print("%s has run_etime %.2f s" % (test.full_id, test.run_etime))
 
-            with open(os.path.join(self.workdir, "results.txt"), "w") as fh:
+            with open(os.path.join(self.workdir, "results.txt"), "wt") as fh:
                 pprint_table(table, out=fh)
 
             if hasattr(os, 'getlogin'):
@@ -3894,11 +3854,6 @@ class Results(object):
         #     print("reference: %s, output %s" % (r, o))
 
         return Editor().edit_files(in_files)
-
-    # def inspect_stdouts(self):
-    #     out_files, ref_files = self.outref_files()
-    #     return Editor().edit_files(in_files)
-    # def inspect_diffs(self):
 
     def inspect_stderrs(self, status="failed"):
         """Open the stderr of the tests with the give status in `Editor`."""
