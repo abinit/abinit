@@ -320,7 +320,6 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  ABI_FREE(irottb)
 
  ! The number of occupied states for each point in the IBZ and spin.
- ! nbv_ks(:,:) = COUNT(qp_occ>=tol_empty,DIM=1)  MG: g95 returns random numbers, likely a bug in the compiler
  do spin=1,nsppol
    do ik_ibz=1,Kmesh%nibz
      nbv_ks(ik_ibz,spin) = COUNT(qp_occ(:,ik_ibz,spin)>=tol_empty)

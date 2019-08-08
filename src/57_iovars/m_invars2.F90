@@ -156,7 +156,7 @@ subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,nps
      call setshells(dtsets(idtset)%ecutwfn,dtsets(idtset)%npwwfn,nshwfn,&
        dtsets(idtset)%nsym,gmet,gprimd,dtsets(idtset)%symrel,'wfn',ucvol)
 
-     ! MG: Hack to avoid portability problems under gfortran and g95:
+     ! MG: Hack to avoid portability problems under gfortran:
      ! getng and getmpw are indeed quite sensitive if ecut is small
      ! and, in the GW tests, mpw and ngfft might depend on the compiler used.
      ! the problem shows up if we use npwwfn instead of ecutwfn, a good reason for removing npwwfn!

@@ -415,9 +415,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !XG090617 Please, do not remove this write, unless you have checked
 !that the code executes correctly on max+g95 (especially, Tv5#70).
 !It is one more a silly write, perhaps needed because the compiler does not treat correctly non-nullified pointers.
- if (sigma_needs_w(Sigp) .and. my_rank==master) then
-   write(std_out,*)' screening after setup_sigma : Er%Hscr%headform=',Er%Hscr%headform
- end if
+! if (sigma_needs_w(Sigp) .and. my_rank==master) then
+!   write(std_out,*)' screening after setup_sigma : Er%Hscr%headform=',Er%Hscr%headform
+! end if
 !END XG090617
 
  pole_screening = .FALSE.
