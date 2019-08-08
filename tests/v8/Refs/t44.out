@@ -1277,7 +1277,7 @@ All the independent perturbations are available
  Number of bands in e-ph self-energy sum: 54
  From bsum_start: 1 to bsum_stop: 54
  Treating high-energy bands with Sternheimer and static self-energy.
- Tolwfr:    1.000000E-16, nline:4
+ Tolwfr:    1.000000E-16, nline: 4
  Symsigma: 1 Timrev: 1
  Imaginary shift in the denominator (zcut): 0.100 [eV]
  Method for q-space integration:  Tetrahedron method

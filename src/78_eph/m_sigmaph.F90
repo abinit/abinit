@@ -1009,8 +1009,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    !comm_rpt = sigma%comm_bsum
    comm_rpt = xmpi_comm_self
    method = dtset%userid
-   call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, &
-                            nfftf, ngfftf, method, comm_rpt)
+   call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, comm_rpt)
 
    ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
    ABI_MALLOC(qselect, (sigma%nqibz))
@@ -1242,7 +1241,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          if (.not. sigma%use_doublegrid) then
            iq_ibz_fine = iq_ibz
            if (sigma%symsigma == 0) iq_ibz_fine = sigma%ephwg%lgk%find_ibzimage(qpt)
-           ABI_CHECK(iq_ibz_fine /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
+           ABI_CHECK(iq_ibz_fine /= -1, sjoin("Cannot find q-point in IBZ(k):", ktoa(qpt)))
            if (sigma%symsigma == 1) then
               if (.not. all(abs(sigma%qibz_k(:, iq_ibz_fine) - sigma%ephwg%lgk%ibz(:, iq_ibz_fine)) < tol12)) then
                 MSG_ERROR("Mismatch in qpoints.")
@@ -1276,9 +1275,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC_OR_DIE(h1kets_kq, (2, npw_kq*nspinor, my_npert, nbcalc_ks), ierr)
 
        ! Allocate vlocal1 with correct cplex. Note nvloc
-       ABI_MALLOC_OR_DIE(vlocal1,(cplex*n4, n5, n6, gs_hamkq%nvloc, my_npert), ierr)
+       ABI_MALLOC_OR_DIE(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc, my_npert), ierr)
 
-       ABI_MALLOC(gs1c, (2,npw_kq*nspinor*((sij_opt+1)/2)))
+       ABI_MALLOC(gs1c, (2, npw_kq*nspinor*((sij_opt+1)/2)))
        ABI_MALLOC(gvnlx1, (2, npw_kq*nspinor))
 
        ! Set up the spherical harmonics (Ylm) at k and k+q. See also dfpt_looppert
@@ -1578,7 +1577,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              vk(1,:) = sigma%vcar_calc(:, ib_k, ikcalc, spin)
              vkk_norm2 = dot_product(vk(1,:), vk(1,:))
              alpha_mrta(ib_k) = zero
-             if (vkk_norm2 > tol6) alpha_mrta(ib_k) = one - dot_product(vkq(1,:), vk(1,:)) / vkk_norm2**2
+             if (vkk_norm2 > tol6) alpha_mrta(ib_k) = one - dot_product(vkq(1,:), vk(1,:)) / vkk_norm2 ** 2
            end do
          end if
 
@@ -2823,6 +2822,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
      MSG_ERROR(msg)
    end if
    call wrtout([std_out, ab_out], " EPH double grid interpolation: will read energies from: "//trim(wfk_fname_dense), newlines=1)
+
    ebands_dense = wfk_read_ebands(wfk_fname_dense, comm)
 
    !TODO add consistency check: number of bands and kpoints (commensurability)
@@ -2846,8 +2846,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    intp_kptrlatt(:,2) = [0, ebands%kptrlatt(2,2)*dtset%bs_interp_kmult(2), 0]
    intp_kptrlatt(:,3) = [0, 0, ebands%kptrlatt(3,3)*dtset%bs_interp_kmult(3)]
 
-   intp_nshiftk = 1
-   intp_shiftk = zero
+   intp_nshiftk = 1; intp_shiftk = zero
    ebands_dense = ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, &
                                       intp_nshiftk, intp_shiftk, band_block, comm)
    new%use_doublegrid = .True.
@@ -3085,7 +3084,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
  end if
 
  ! Open netcdf file (only master works for the time being because I cannot assume HDF5 + MPI-IO)
- ! This could create problems if MPI parallelism over (spin, nkptgw) ...
+ ! This could create problems if MPI parallelism over (spin, nkcalc) ...
  path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
@@ -3260,7 +3259,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
    !NCF_CHECK(nf90_sync(ncid))
  end if ! master
 
- ! Now reopen file inside comm_ncwrite to perform pararallel-IO if k-point parallelism.
+ ! Now reopen file inside comm_ncwrite to perform pararallel-IO (required for k-point parallelism).
  !if (self%comm_ncwrite%size /= 0) then
  ! if (my_rank == master) then
  !   NCF_CHECK(nctk_close(ncid))
