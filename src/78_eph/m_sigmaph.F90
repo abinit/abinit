@@ -624,7 +624,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val, cpu_stern, wall_stern, gflops_stern
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, qmod, fqdamp, simag, q0rad, out_resid
  real(dp) :: vkk_norm2
- complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,cplx_ediff, cnum, sig_cplx
+ complex(dpc) :: cfact,dka,dkap,dkpa,dkpap, cnum, sig_cplx
  logical :: isirr_k,isirr_kq,gen_eigenpb,isqzero
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -644,10 +644,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: vk(2, 3), vk_red(2,3), vkq(2,3), vkq_red(2,3), tsec(2), eminmax(2)
  real(dp) :: frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
  real(dp) :: wqnu,nqnu,gkq2,gkq2_pf,gkq2_dfrohl,eig0nk,eig0mk,eig0mkq,f_mkq
+ real(dp) :: gdw2, gdw2_stern
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
- real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gdw2_mn(:,:),gkq0_atm(:,:,:,:),gkq2_lr(:,:)
+ real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gkq0_atm(:,:,:,:),gkq2_lr(:,:)
  real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:), out_eig1_k(:), cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
  real(dp),allocatable :: dcwavef(:, :), gh1c_n(:, :), ghc(:,:), gsc(:,:), stern_ppb(:,:,:,:), stern_dw(:,:,:,:)
  logical,allocatable :: ihave_ikibz_spin(:,:)
@@ -1126,7 +1127,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Arrays for Debye-Waller
      if (.not. sigma%imag_only) then
-       ABI_CALLOC_OR_DIE(gkq0_atm, (2, nbcalc_ks, bsum_start:bsum_stop, natom3), ierr)
+       ABI_CALLOC_OR_DIE(gkq0_atm, (2, nbcalc_ks, sigma%my_bsum_start:sigma%my_bsum_stop, natom3), ierr)
        if (dtset%eph_stern == 1) then
          ABI_CALLOC(stern_dw, (2, natom3, natom3, nbcalc_ks))
          enough_stern = 0
@@ -1849,24 +1850,19 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! =========================
      if (.not. sigma%imag_only) then
        call cwtime(cpu_dw, wall_dw, gflops_dw, "start", msg=" Computing Debye-Waller term...")
-       ! Collect gkq0_atm inside comm_bq so that we can parallelize CPU easily inside comm_bq
-       ! In principle is requires broadcasting itreated_q0 insise comm_qpt
-       ! TODO: Should use same MPI distribution over q, pert, bsum
-        call xmpi_sum(gkq0_atm, sigma%comm_bq, ierr)
-
+       ! Collect gkq0_atm inside comm_qpt
+       ! In principle is requires broadcasting from itreated_q0 inside comm_qpt
+       call xmpi_sum(gkq0_atm, sigma%comm_qpt, ierr)
        if (dtset%eph_stern == 1) call xmpi_sum(stern_dw, sigma%comm_qpt, ierr)
 
-       ! Last band + 1 is used to compute the Sternheimer term.
-       ABI_CALLOC(gdw2_mn, (bsum_start:bsum_stop+1, nbcalc_ks))
-
-       ! Integral over IBZ(k). Distributed inside comm_bq
+       ! Integral over IBZ(k) distributed inside comm_qpt
        nq = sigma%nqibz; if (sigma%symsigma == 0) nq = sigma%nqbz
        if (sigma%symsigma == +1) nq = sigma%nqibz_k
-       call xmpi_split_work(nq, sigma%comm_bq, q_start, q_stop)
+       call xmpi_split_work(nq, sigma%comm_qpt, q_start, q_stop)
 
        do iq_ibz=q_start,q_stop
          if (abs(sigma%symsigma) == 1) then
-           !qpt = sigma%qibz(:,iq_ibz); weight_q = sigma%wtq(iq_ibz)
+           !qpt = sigma%qibz(:,iq_ibz); weight_q = sigma%wtq(iq_ibz) ! TODO: This should be much faster
            qpt = sigma%qibz_k(:,iq_ibz); weight_q = sigma%wtq_k(iq_ibz)
          else
            ! Use full BZ for q-integration.
@@ -1899,13 +1895,20 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              end do
            end do
 
-           ! Sum over bands and add (static) DW contribution for the different temperatures.
-           do ibsum=bsum_start, bsum_stop
+           ! Sum over my bands and add (static) DW contribution for the different temperatures.
+           do ibsum=sigma%my_bsum_start, sigma%my_bsum_stop
+             eig0mk = ebands%eig(ibsum, ik_ibz, spin)
 
+             ! For each n in Sigma_nk
              do ib_k=1,nbcalc_ks
+               band_ks = ib_k + bstart_ks - 1
+               eig0nk = ebands%eig(band_ks, ik_ibz, spin)
+               ! Handle n == m and degenerate states.
+               ediff = eig0nk - eig0mk; if (abs(ediff) < EPH_WTOL) cycle
+
                ! Compute DW term following XG paper. Check prefactor.
                ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
-               gdw2_mn(ibsum, ib_k) = zero
+               gdw2 = zero
                do ip2=1,natom3
                  do ip1=1,natom3
                    cfact = ( &
@@ -1915,11 +1918,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                      + gkq0_atm(2, ib_k, ibsum, ip2) * gkq0_atm(2, ib_k, ibsum, ip1) &
                    )
 
-                   gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) + real(tpp_red(ip1,ip2) * cfact)
+                   gdw2 = gdw2 + real(tpp_red(ip1,ip2) * cfact)
                  end do
                end do
-
-               gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) / (four * two * wqnu)
+               gdw2 = gdw2 / (four * two * wqnu)
 
                if (dtset%eph_stern == 1 .and. ibsum == bsum_stop) then
                  ! Compute DW term for m > nband
@@ -1931,27 +1933,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                  end do
                  ! There's no 1/two here because I don't symmetrize the expression.
                  ! TODO: Test symmetrization, real quantity? add support for the different Eliashberg functions with Stern
-                 gdw2_mn(ibsum+1, ib_k) = real(cfact) / (four * wqnu)
+                 gdw2_stern = real(cfact) / (four * wqnu)
                end if
-             end do ! ib_k
-           end do ! ibsum
-
-           do ibsum=bsum_start,bsum_stop
-             eig0mk = ebands%eig(ibsum, ik_ibz, spin)
-
-             do ib_k=1,nbcalc_ks
-               band_ks = ib_k + bstart_ks - 1
-               eig0nk = ebands%eig(band_ks, ik_ibz, spin)
-               ! Handle n == m and degenerate states (either ignore or add broadening)
-               cplx_ediff = (eig0nk - eig0mk)
-               if (abs(cplx_ediff) < EPH_WTOL) cycle
-               !if (abs(cplx_ediff) < EPH_WTOL) cplx_ediff = cplx_ediff + sigma%ieta
 
                ! Optionally, accumulate DW contribution to Eliashberg functions.
                if (dtset%prteliash /= 0) then
-                  sigma%gf_nnuq(ib_k, nu, iq_ibz, 3) = sigma%gf_nnuq(ib_k, nu, iq_ibz, 3) &
-                      - gdw2_mn(ibsum, ib_k) / real(cplx_ediff)
+                  sigma%gf_nnuq(ib_k, nu, iq_ibz, 3) = sigma%gf_nnuq(ib_k, nu, iq_ibz, 3) - gdw2 / ediff
                  !if (dtset%eph_stern == 1 .and. ibsum == bsum_stop) then
+                 !  sigma%gf_nnuq(ib_k, nu, iq_ibz, 3) = sigma%gf_nnuq(ib_k, nu, iq_ibz, 3) - gdw2_stern
                  !end if
                end if
 
@@ -1961,7 +1950,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                !  dtw_weights(:, 1) = gaussian(dwargs, dtset%ph_smear)
                !  do ie=1,sigma%a2f_ne
                !    sigma%a2few(:, ie, ib_k, 2) = sigma%a2few(:, ie, ib_k, 2) + &
-               !         delta_e_minus_emkq(ie) * dtw_weights(:, 1) * gdw2_mn(ibsum, ib_k) / (enk - e) * sigma%wtq_k(iq_ibz)
+               !         delta_e_minus_emkq(ie) * dtw_weights(:, 1) * gdw2 / (enk - e) * sigma%wtq_k(iq_ibz)
                !  end do
                !if (dtset%eph_stern == 1 .and. ibsum == bsum_stop) then
                !end if
@@ -1970,23 +1959,23 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                ! Accumulate DW for each T, add it to Sigma(e0) and Sigma(w) as well
                ! - (2 n_{q\nu} + 1) * gdw2 / (e_nk - e_mk)
                do it=1,sigma%ntemp
-                 cfact = - weight_q * gdw2_mn(ibsum, ib_k) * (two * nqnu_tlist(it) + one)  / cplx_ediff
+                 cfact = - weight_q * gdw2 * (two * nqnu_tlist(it) + one)  / ediff
                  if (dtset%eph_stern == 1 .and. ibsum == bsum_stop) then
-                   ! Add contribution due to the Sternheimer (cplx_ediff absorbed in Sternheimer)
-                   cfact = cfact - weight_q * gdw2_mn(ibsum+1, ib_k) * (two * nqnu_tlist(it) + one)
+                   ! Add contribution due to the Sternheimer. ediff is absorbed in Sternheimer.
+                   cfact = cfact - weight_q * gdw2_stern * (two * nqnu_tlist(it) + one)
                  end if
                  rfact = real(cfact)
                  sigma%dw_vals(it, ib_k) = sigma%dw_vals(it, ib_k) + rfact
                  sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + rfact
                  if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + rfact
                end do
+
              end do ! ib_k
-           end do ! ib_sum
+           end do ! ibsum
 
          end do ! nu
        end do ! iq_ibz
 
-       ABI_FREE(gdw2_mn)
        ABI_FREE(gkq0_atm)
        ABI_SFREE(stern_dw)
 
@@ -2811,7 +2800,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  !  NB: The routines assume that the k-mesh for electrons and the q-mesh for phonons are the same.
  !  Thus we need to downsample the k-mesh if it's denser that the q-mesh.
 
- ! TODO: Should add support for getwfkfine_path
+ ! TODO: Should only check the value of getwfkfine_path
  new%use_doublegrid = .False.
  if (dtset%getwfkfine /= 0 .or. dtset%irdwfkfine /= 0 .or. dtset%getwfkfine_path /= ABI_NOFILE) then
 
