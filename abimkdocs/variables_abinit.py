@@ -19577,6 +19577,8 @@ At present, this feature is supported only when computing the electron-phonon se
 In this case, the code will look for a pre-existing SIGEPH.nc file and will compute the remaining k-points
 provided that the metadata found in the netcdf file is compatible with the input variables specified in the input file.
 The code aborts if the metadata reported in the SIGEPH.nc file is not compatible with the input file.
+Note that the restart in done in-place that is the output SIGEPH.nc is used as input of the calculation so there is no
+need to specify getsigeph or irdsigeph input variables.
 """,
 ),
 
@@ -19590,15 +19592,13 @@ Variable(
     mnemonics="Electron-PHonon: use STERNheimer approach to replace sum over empty states.",
     requires="[[tolwfr]] > 0",
     text=r"""
-NB - Still under development!
-
 This variable activates the Sternheimer method in the calculation of the e-ph self-energy ([[eph_task]] == 4)
 This technique replaces the explicit sum over empty states **above** [[nband]]
 with the NSCF computation of the first order derivative of the KS wavefunctions (actually
 the projection in the subspace orthogonal to the nband states).
 
 The Sternheimer approach requires an external file with the KS potential produced by setting [[prtpot]] = 1 
-in the GS run and the specification of [[tolwfr]] in the input file.
+during the GS run and the specification of [[tolwfr]] in the EPH input file.
 The path to the POT file used in the EPH calculation is specified via [[getpot_path]].
 The number of line minimisations for the Sternheimer solver is defined by [[nline]].
 
@@ -19668,10 +19668,10 @@ of the DFPT potentials so that the potential in real space is short-ranged and a
 The long-range contribution is then added back when interpolating the DFPT potentials at arbitrary q-points
 
 If *dvdb_add_lr* is set to -1, the LR part is removed before computing the real-space representation
-but the LR term is **not** added back during the interpolation in $\qq$-space. This option is mainly used 
-for debugging purposes.
+but the LR term is **not** reintroduced during the interpolation in $\qq$-space. 
+This option is mainly used for debugging purposes.
 
-By default, the code will always treat the LR term is the DDB file contains Born effective charges 
+By default, the code will always treat the LR term if the DDB file contains the Born effective charges 
 and the macroscopic dielectric tensor.
 This option is similar to [[dipdip]] but it acts on the DFPT potentials instead of the dynamical matrix.
 """,

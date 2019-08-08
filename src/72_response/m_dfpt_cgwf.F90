@@ -521,7 +521,6 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
  else
    ! If not a buffer band, perform the optimisation
-
    ABI_ALLOCATE(conjgr,(2,npw1*nspinor))
    ABI_ALLOCATE(direc,(2,npw1*nspinor))
    ABI_ALLOCATE(gresid,(2,npw1*nspinor))

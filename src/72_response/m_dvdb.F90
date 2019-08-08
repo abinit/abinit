@@ -1164,7 +1164,7 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
 
 !Local variables-------------------------------
 !scalars
- integer,save :: enough=0
+ integer,save :: enough = 0
  integer :: iv1,ispden,nfftot_file,nfftot_out,ifft
  type(MPI_type) :: MPI_enreg_seq
 !arrays
@@ -1205,7 +1205,7 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
  else
    ! The FFT mesh used in the caller differ from the one found in the DVDB --> Fourier interpolation
    ! TODO: Add linear interpolation as well.
-   if (enough == 0) MSG_WARNING("FFT interpolation of DFPT potentials must be tested.")
+   if (enough == 0) MSG_COMMENT("Performing FFT interpolation of DFPT potentials as input ngfft differs from ngfft_file.")
    enough = enough + 1
    ABI_MALLOC(v1r_file, (cplex*nfftot_file, db%nspden))
    do ispden=1,db%nspden

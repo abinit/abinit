@@ -282,7 +282,7 @@ type(ephwg_t) function ephwg_new( &
 
  ! Fourier interpolate phonon frequencies on the same mesh.
  ABI_CALLOC(new%phfrq_ibz, (new%nibz, new%natom3))
- if (frohl_model==3) then
+ if (frohl_model == 3) then
    ABI_CALLOC(new%frohl_ibz, (new%nibz, new%natom3))
  end if
 
