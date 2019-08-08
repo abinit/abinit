@@ -423,10 +423,23 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              !stop
            !end if
            !stop
+           !if (counter  3) then
+             print *, "mpi_enreg%comm_fft BEFORE chebfiwf2, rank", &
+               mpi_enreg%comm_fft, xmpi_comm_rank(mpi_enreg%comm_bandspinorfft)
+             print *, "mpi_enreg%comm_band BEFORE chebfiwf2, rank", & 
+               mpi_enreg%comm_band, xmpi_comm_rank(mpi_enreg%comm_bandspinorfft)
+             !stop
+           !end if
+           
            call chebfiwf2(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k, counter)
            call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*my_nspinor, "AFTER chebfiwf2 inonsc: " // str)
            counter = counter + 1
+           
+             print *, "mpi_enreg%comm_fft AFTER chebfiwf2, rank", &
+               mpi_enreg%comm_fft, xmpi_comm_rank(mpi_enreg%comm_bandspinorfft)
+             print *, "mpi_enreg%comm_band AFTER chebfiwf2, rank", & 
+               mpi_enreg%comm_band, xmpi_comm_rank(mpi_enreg%comm_bandspinorfft)
            !stop
            !if (inonsc == 2) stop
            !stop 
