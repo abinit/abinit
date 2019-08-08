@@ -271,7 +271,7 @@ module m_chebfiwf
     
   cptr = c_loc(eig)			
   call c_f_pointer(cptr,eig_ptr,(/ nband,1 /))
-  call xgBlock_map(xgeigen,eig_ptr,SPACE_R,nband,1)
+  call xgBlock_map(xgeigen,eig_ptr,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
   !if (xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft) == 1) then  
     !print *, "EIG FROM OUT", l_nband_filter
     !print *, eig
@@ -300,7 +300,7 @@ module m_chebfiwf
   ! Trick the with C to change rank of arrays (:) to (:,:)
   cptr = c_loc(resid)		
   call c_f_pointer(cptr,resid_ptr,(/ nband,1 /))
-  call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1)
+  call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
  
   ABI_MALLOC(l_gvnlc,(2,l_npw*l_nspinor*l_nband_filter)) !*blockdim
  
@@ -330,31 +330,35 @@ module m_chebfiwf
   !stop
   ! Run chebfi
   print *, "CB2 RUN STARTED!"
-  
-  print *, "mpi_enreg%comm_fft BEFORE CB2", l_mpi_enreg%comm_fft
-  print *, "mpi_enreg%comm_band BEFORE CB2", l_mpi_enreg%comm_band
-  print *, "mpi_enreg%comm_kpt BEFORE CB2", l_mpi_enreg%comm_kpt
-  print *, "mpi_enreg%comm_spinor BEFORE CB2", l_mpi_enreg%comm_spinor 
-  print *, "mpi_enreg%comm_bandspinor BEFORE CB2", l_mpi_enreg%comm_bandspinor 
-  print *, "mpi_enreg%comm_kptband BEFORE CB2", l_mpi_enreg%comm_kptband 
-  print *, "mpi_enreg%comm_spinorfft BEFORE CB2", l_mpi_enreg%comm_spinorfft 
-  print *, "mpi_enreg%comm_bandfft BEFORE CB2", l_mpi_enreg%comm_bandfft 
-  print *, "mpi_enreg%comm_bandspinorfft BEFORE CB2", l_mpi_enreg%comm_bandspinorfft 
+  !stop
+  print *, "mpi_enreg%comm_fft BEFORE CB2, rank", l_mpi_enreg%comm_fft, xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft)
+  print *, "mpi_enreg%comm_band BEFORE CB2, rank", l_mpi_enreg%comm_band, xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft)
+  !print *, "mpi_enreg%comm_kpt BEFORE CB2", l_mpi_enreg%comm_kpt
+  !print *, "mpi_enreg%comm_spinor BEFORE CB2", l_mpi_enreg%comm_spinor 
+  !print *, "mpi_enreg%comm_bandspinor BEFORE CB2", l_mpi_enreg%comm_bandspinor 
+  !print *, "mpi_enreg%comm_kptband BEFORE CB2", l_mpi_enreg%comm_kptband 
+  !print *, "mpi_enreg%comm_spinorfft BEFORE CB2", l_mpi_enreg%comm_spinorfft 
+  !print *, "mpi_enreg%comm_bandfft BEFORE CB2", l_mpi_enreg%comm_bandfft 
+  !print *, "mpi_enreg%comm_bandspinorfft BEFORE CB2", l_mpi_enreg%comm_bandspinorfft 
   
   call chebfi_run(chebfi, xgx0, getghc_gsc1, getBm1X, precond1, xgeigen, xgresidu, counter, l_mpi_enreg) 
   
-  print *, "mpi_enreg%comm_fft AFTER CB2", l_mpi_enreg%comm_fft
-  print *, "mpi_enreg%comm_band AFTER CB2", l_mpi_enreg%comm_band
-  print *, "mpi_enreg%comm_kpt AFTER CB2", l_mpi_enreg%comm_kpt
-  print *, "mpi_enreg%comm_spinor AFTER CB2", l_mpi_enreg%comm_spinor 
-  print *, "mpi_enreg%comm_bandspinor AFTER CB2", l_mpi_enreg%comm_bandspinor 
-  print *, "mpi_enreg%comm_kptband AFTER CB2", l_mpi_enreg%comm_kptband 
-  print *, "mpi_enreg%comm_spinorfft AFTER CB2", l_mpi_enreg%comm_spinorfft 
-  print *, "mpi_enreg%comm_bandfft AFTER CB2", l_mpi_enreg%comm_bandfft 
-  print *, "mpi_enreg%comm_bandspinorfft AFTER CB2", l_mpi_enreg%comm_bandspinorfft 
+  print *, "mpi_enreg%comm_fft AFTER CB2, rank", l_mpi_enreg%comm_fft, xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft)
+  print *, "mpi_enreg%comm_band AFTER CB2, rank", l_mpi_enreg%comm_band, xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft)
+  !print *, "mpi_enreg%comm_kpt AFTER CB2", l_mpi_enreg%comm_kpt
+  !print *, "mpi_enreg%comm_spinor AFTER CB2", l_mpi_enreg%comm_spinor 
+  !print *, "mpi_enreg%comm_bandspinor AFTER CB2", l_mpi_enreg%comm_bandspinor 
+  !print *, "mpi_enreg%comm_kptband AFTER CB2", l_mpi_enreg%comm_kptband 
+  !print *, "mpi_enreg%comm_spinorfft AFTER CB2", l_mpi_enreg%comm_spinorfft 
+  !print *, "mpi_enreg%comm_bandfft AFTER CB2", l_mpi_enreg%comm_bandfft 
+  !print *, "mpi_enreg%comm_bandspinorfft AFTER CB2", l_mpi_enreg%comm_bandspinorfft 
   
   !if (xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft) == 0) then
   print *, "CB2 RUN FINISHED!"
+  
+  print *, "CB2WF PREPNONLOP pi_enreg%comm_fft, rank", mpi_enreg%comm_fft, xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft)
+  print *, "CB2WF PREPNONLOP pi_enreg%comm_band, rank", mpi_enreg%comm_band, xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft)
+  !stop
     !call xg_getPointer(xgx0) 
   !end if  
   !stop

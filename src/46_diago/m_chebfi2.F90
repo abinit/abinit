@@ -704,12 +704,12 @@ module m_chebfi2
     
     print *, "mpi_enreg%comm_fft BEFORE getAX_BX", mpi_enreg%comm_fft
     print *, "mpi_enreg%comm_band BEFORE getAX_BX", mpi_enreg%comm_band
-    print *, "mpi_enreg%comm_kpt BEFORE getAX_BX", mpi_enreg%comm_kpt
-    print *, "mpi_enreg%comm_spinor BEFORE getAX_BX", mpi_enreg%comm_spinor 
-    print *, "mpi_enreg%comm_bandspinor BEFORE getAX_BX", mpi_enreg%comm_bandspinor 
-    print *, "mpi_enreg%comm_kptband BEFORE getAX_BX", mpi_enreg%comm_kptband 
-    print *, "mpi_enreg%comm_spinorfft BEFORE getAX_BX", mpi_enreg%comm_spinorfft 
-    print *, "mpi_enreg%comm_bandfft BEFORE getAX_BX", mpi_enreg%comm_bandfft 
+!    print *, "mpi_enreg%comm_kpt BEFORE getAX_BX", mpi_enreg%comm_kpt
+!    print *, "mpi_enreg%comm_spinor BEFORE getAX_BX", mpi_enreg%comm_spinor 
+!    print *, "mpi_enreg%comm_bandspinor BEFORE getAX_BX", mpi_enreg%comm_bandspinor 
+!    print *, "mpi_enreg%comm_kptband BEFORE getAX_BX", mpi_enreg%comm_kptband 
+!    print *, "mpi_enreg%comm_spinorfft BEFORE getAX_BX", mpi_enreg%comm_spinorfft 
+!    print *, "mpi_enreg%comm_bandfft BEFORE getAX_BX", mpi_enreg%comm_bandfft 
     print *, "mpi_enreg%comm_bandspinorfft BEFORE getAX_BX", mpi_enreg%comm_bandspinorfft 
     print *, "xXColsRows FFT communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerX, 2)
     print *, "xXColsRows NBAND communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerX, 3)
@@ -729,12 +729,12 @@ module m_chebfi2
     print *, "PROSAO getAX_BX"
     print *, "mpi_enreg%comm_fft AFTER getAX_BX", mpi_enreg%comm_fft
     print *, "mpi_enreg%comm_band AFTER getAX_BX", mpi_enreg%comm_band
-    print *, "mpi_enreg%comm_kpt AFTER getAX_BX", mpi_enreg%comm_kpt
-    print *, "mpi_enreg%comm_spinor AFTER getAX_BX", mpi_enreg%comm_spinor 
-    print *, "mpi_enreg%comm_bandspinor AFTER getAX_BX", mpi_enreg%comm_bandspinor 
-    print *, "mpi_enreg%comm_kptband AFTER getAX_BX", mpi_enreg%comm_kptband 
-    print *, "mpi_enreg%comm_spinorfft AFTER getAX_BX", mpi_enreg%comm_spinorfft 
-    print *, "mpi_enreg%comm_bandfft AFTER getAX_BX", mpi_enreg%comm_bandfft 
+!    print *, "mpi_enreg%comm_kpt AFTER getAX_BX", mpi_enreg%comm_kpt
+!    print *, "mpi_enreg%comm_spinor AFTER getAX_BX", mpi_enreg%comm_spinor 
+!    print *, "mpi_enreg%comm_bandspinor AFTER getAX_BX", mpi_enreg%comm_bandspinor 
+!    print *, "mpi_enreg%comm_kptband AFTER getAX_BX", mpi_enreg%comm_kptband 
+!    print *, "mpi_enreg%comm_spinorfft AFTER getAX_BX", mpi_enreg%comm_spinorfft 
+!    print *, "mpi_enreg%comm_bandfft AFTER getAX_BX", mpi_enreg%comm_bandfft 
     print *, "mpi_enreg%comm_bandspinorfft AFTER getAX_BX", mpi_enreg%comm_bandspinorfft 
     print *, "xXColsRows FFT communicator AFTER getAX_BX", xgTransposer_getComm(chebfi%xgTransposerX, 2)
     print *, "xXColsRows NBAND communicator AFTER getAX_BX", xgTransposer_getComm(chebfi%xgTransposerX, 3)
@@ -1324,8 +1324,8 @@ module m_chebfi2
     
     if (chebfi%paral_kgb == 1) then
       call xgTransposer_free(chebfi%xgTransposerX)
-      !call xgTransposer_free(chebfi%xgTransposerAX)
-      !call xgTransposer_free(chebfi%xgTransposerBX)
+      call xgTransposer_free(chebfi%xgTransposerAX)
+      call xgTransposer_free(chebfi%xgTransposerBX)
     end if
     
     call timab(tim_run,2,tsec)
