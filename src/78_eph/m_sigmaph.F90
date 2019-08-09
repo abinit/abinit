@@ -176,22 +176,27 @@ module m_sigmaph
   integer :: me_bsum
   integer :: nprocs_bsum
 
-  ! MPI communicator for bands in self-energy sum
-  !integer :: comm_pqb = xmpi_comm_null
-  !integer :: me_pqb
-  !integer :: nprocs_pqb
+  ! MPI communicator for parallelism over k-points (high-level)
+  integer :: comm_kcalc = xmpi_comm_null
+  integer :: me_kcalc
+  integer :: nprocs_kcalc
 
-   ! MPI communicator for parallelism over k-points (high-level)
-  !integer :: comm_kcalc = xmpi_comm_null
-  !integer :: nprocs_kcalc
-  !integer :: me_kcalc
+  ! MPI communicator for parallelism over k-points (high-level)
+  integer :: comm_spin = xmpi_comm_null
+  integer :: me_spin
+  integer :: nprocs_spin
+
+  ! Create communicator for the (perturbation, band_sum, qpoint_sum)
+  integer :: comm_pqb = xmpi_comm_null
+  integer :: me_pqb
+  integer :: nprocs_pqb
 
   ! MPI communicator for parallel netcdf IO used to write results for the different k-points.
-  !integer :: comm_ncwrite = xmpi_comm_null
-  !integer :: me_ncwrite
-  !integer :: nprocs_ncwrite
+  integer :: comm_ncwrite = xmpi_comm_null
+  integer :: me_ncwrite
+  integer :: nprocs_ncwrite
 
-  integer :: coords(3)
+  integer :: coords(5)
   ! Cartesian coordinates of this processor in the Cartesian grid.
 
   integer :: nqbz
@@ -301,8 +306,8 @@ module m_sigmaph
   !integer :: my_nspins
   !integer,allocatable :: my_spins(:)
 
-  !integer :: my_nkcalc
-  !integer,allocatable :: my_ikcalc(:)
+  integer :: my_nkcalc
+  integer,allocatable :: my_ikcalc(:)
     ! my_ikcalc(my_nkcalc)
     ! List of ikcalc indices treated by this pool if k-point parallelism is activated.
 
@@ -636,7 +641,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
  integer :: nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
- integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop,iatom
+ integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikc,ikcalc,bstart,bstop,iatom
  integer :: comm_rpt, method
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val, cpu_stern, wall_stern, gflops_stern
@@ -890,8 +895,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! Write results to disk.
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
-   NCF_CHECK(nctk_set_defmode(sigma%ncid))
-   NCF_CHECK(nctk_def_arrays(sigma%ncid, [nctkarr_t("vcar_calc", "dp", "three, max_nbcalc, nkcalc, nsppol")]))
+   !NCF_CHECK(nctk_set_defmode(sigma%ncid))
+   !NCF_CHECK(nctk_def_arrays(sigma%ncid, [nctkarr_t("vcar_calc", "dp", "three, max_nbcalc, nkcalc, nsppol")]))
    NCF_CHECK(nctk_set_datamode(sigma%ncid))
    NCF_CHECK(nf90_put_var(sigma%ncid, nctk_idname(sigma%ncid, "vcar_calc"), sigma%vcar_calc))
  end if
@@ -1065,8 +1070,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_FREE(qselect)
 
  ! Loop over k-points in Sigma_nk. Loop over spin is internal as we operate on nspden components at once.
- do ikcalc=1,sigma%nkcalc
-   !ikcalc = sigma%my_ikcalc(ii)
+ do ikc=1,sigma%my_nkcalc
+   ikcalc = sigma%my_ikcalc(ikc)
 
    ! Check if this (kpoint, spin) was already calculated
    if (all(sigma%qp_done(ikcalc, :) == 1)) cycle
@@ -1075,7 +1080,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
    ! Find IBZ(k) for q-point integration.
    call cwtime(cpu_setk, wall_setk, gflops_setk, "start")
-   call sigma%setup_kcalc(dtset, cryst, ebands, ikcalc, dtset%prtvol, comm)
+   ! FIXME invert spin
+   call sigma%setup_kcalc(dtset, cryst, ebands, ikcalc, dtset%prtvol, sigma%comm_pqb)
 
    ! Symmetry indices for kk.
    kk = sigma%kcalc(:, ikcalc)
@@ -1154,14 +1160,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Integrate delta functions inside miniBZ around Gamma.
      if (sigma%frohl_model == 1 .and. sigma%imag_only) then
-       call eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, dtset%prtvol, comm)
+       call eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, dtset%prtvol, sigma%comm_pqb)
      end if
 
      ABI_CALLOC(gkq2_lr, (nbcalc_ks, natom3))
      if (sigma%frohl_model == 2) then
        ! Compute self-energy with Frohlich model for the gkq to handle divergence for q-->0
        ! and improve convergence with respect to nqpt.
-       call eval_sigfrohl2(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
+       call eval_sigfrohl2(sigma, cryst, ifc, ebands, ikcalc, spin, sigma%comm_pqb)
      end if
 
      ! Load ground-state wavefunctions for which corrections are wanted (available on each node)
@@ -1176,7 +1182,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      end do
 
      ! Distribute q-points, compute tetra weigths.
-     call sigmaph_setup_qloop(sigma, dtset, cryst, ebands, dvdb, spin, ikcalc, nfftf, ngfftf, comm)
+     call sigmaph_setup_qloop(sigma, dtset, cryst, ebands, dvdb, spin, ikcalc, nfftf, ngfftf, sigma%comm_pqb)
      call timab(1900, 2, tsec)
 
      ! ==========================================
@@ -2018,11 +2024,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call cwtime(cpu, wall, gflops, "start", msg=sjoin(" Computing Eliashberg function with nomega: ", &
            itoa(sigma%gfw_nomega)))
 
-       if (dtset%prteliash == 3) call xmpi_sum(sigma%a2few, comm, ierr)
+       if (dtset%prteliash == 3) call xmpi_sum(sigma%a2few, sigma%comm_pqb, ierr)
 
        ! Collect all terms on each node so that we can MPI-parallelize easily.
        ! NB: gf_nnuq does not include the q-weights from integration.
-       call xmpi_sum(sigma%gf_nnuq, comm, ierr)
+       call xmpi_sum(sigma%gf_nnuq, sigma%comm_pqb, ierr)
        sigma%gfw_vals = zero
 
        if (sigma%qint_method == 0 .or. sigma%symsigma == 0) then
@@ -2050,7 +2056,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ABI_MALLOC(dt_tetra_weights, (sigma%gfw_nomega, sigma%nqibz_k, 2))
          do nu=1,natom3
            ! All procs compute weights.
-           call sigma%ephwg%get_deltas_qibzk(nu, sigma%gfw_nomega, eminmax, sigma%bcorr, dt_tetra_weights, comm, &
+           call sigma%ephwg%get_deltas_qibzk(nu, sigma%gfw_nomega, eminmax, sigma%bcorr, dt_tetra_weights, sigma%comm_pqb, &
                                              with_qweights=.True.)
            do iq_ibz=1,sigma%nqibz_k
              if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
@@ -2066,7 +2072,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end if
 
        ! Collect final results.
-       call xmpi_sum(sigma%gfw_vals, comm, ierr)
+       call xmpi_sum(sigma%gfw_vals, sigma%comm_pqb, ierr)
        call cwtime_report(" Eliashberg function", cpu, wall, gflops)
      end if
 
@@ -2075,8 +2081,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        if (ignore_ibsum_kq /= 0) write(std_out, "(a, 1x, i0)")" Number of ignored (k+q, m) states:", ignore_ibsum_kq
      end if
 
-     ! Collect results inside comm and write results for this (k-point, spin) to NETCDF file.
-     call sigma%gather_and_write(ebands, ikcalc, spin, dtset%prtvol, comm)
+     ! Collect results inside comm_pqb and write results for this (k-point, spin) to NETCDF file.
+     !call sigma%gather_and_write(ebands, ikcalc, spin, dtset%prtvol, sigma%comm_pqb)
 
      ABI_SFREE(alpha_mrta)
    end do ! spin
@@ -2387,16 +2393,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  call gaps%free()
 
- ! Distribute k-points and create indirect mapping
- !call xmpi_split_work(new%nkcalc, new%comm_kcalc, bstart, bstop)
- !ABI_CHECK(bstop > bstart, "nkcalc < nprocs_kcalc")
- !new%my_nkcalc = bstop - bstart + 1
- !ABI_MALLOC(new%my_ikcalc, (new%my_nkcalc))
- !do ii=1,new%my_ikcalc
- !   new%my_ikcalc(ii) = bstart + (ii - 1)
- !end do
- !new%my_ikcalc(ii) = [(bstart + (ii - 1)), ii=1, new%my_nkcalc]
-
  ! The k-point and the symmetries relating the BZ k-point to the IBZ.
  ABI_MALLOC(new%kcalc2ibz, (new%nkcalc, 6))
  if (abs(new%symsigma) == 1) then
@@ -2623,12 +2619,18 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  new%comm_qb = xmpi_comm_self; new%me_qb = 0; new%nprocs_qb = 1
  new%comm_qpt = xmpi_comm_self; new%me_qpt = 0; new%nprocs_qpt = 1
  new%comm_bsum = xmpi_comm_self; new%me_bsum = 0; new%nprocs_bsum = 1
+ new%comm_kcalc = xmpi_comm_self; new%me_kcalc = 0; new%nprocs_kcalc = 1
+ new%comm_spin = xmpi_comm_self; new%me_spin = 0; new%nprocs_spin = 1
+ new%comm_pqb = xmpi_comm_self; new%me_pqb = 0; new%nprocs_pqb = 1
+ new%comm_ncwrite = xmpi_comm_self; new%me_ncwrite = 0; new%nprocs_ncwrite = 1
 
  if (any(dtset%eph_np_pqbks /= 0)) then
    ! Use parameters from input file.
    new%nprocs_pert = dtset%eph_np_pqbks(1)
    new%nprocs_qpt  = dtset%eph_np_pqbks(2)
    new%nprocs_bsum = dtset%eph_np_pqbks(3)
+   new%nprocs_kcalc = dtset%eph_np_pqbks(4)
+   new%nprocs_spin = dtset%eph_np_pqbks(5)
    new%my_npert = natom3 / new%nprocs_pert
    ABI_CHECK(new%my_npert > 0, "nprocs_pert cannot be greater than 3 * natom.")
    ABI_CHECK(mod(natom3, new%nprocs_pert) == 0, "nprocs_pert must divide 3 * natom.")
@@ -2677,23 +2679,24 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  end if
 
  ! Consistency check.
- if (new%nprocs_pert * new%nprocs_qpt * new%nprocs_bsum /= nprocs) then
-   write(msg, "(a,i0,3a, 4(a,1x,i0))") &
-     "Cannot create 3d Cartesian grid with nprocs: ", nprocs, ch10, &
-     "Idle processes are not supported. The product of `nprocs_*` vars should be equal to nprocs.", ch10, &
+ if (new%nprocs_pert * new%nprocs_qpt * new%nprocs_bsum * new%nprocs_kcalc * new%nprocs_spin /= nprocs) then
+   write(msg, "(a,i0,3a, 6(a,1x,i0))") &
+     "Cannot create 5d Cartesian grid with nprocs: ", nprocs, ch10, &
+     "Idle processes are not supported. The product of the `nprocs_*` vars should be equal to nprocs.", ch10, &
      "nprocs_pert (", new%nprocs_pert, ") x nprocs_qpt (", new%nprocs_qpt, ") x nprocs_bsum (", new%nprocs_bsum, &
-     ") = ", new%nprocs_pert * new%nprocs_qpt * new%nprocs_bsum
+     ") x nprocs_kcalc (", new%nprocs_kcalc, ") x nprocs_spin (", new%nprocs_spin, ") != ", &
+     new%nprocs_pert * new%nprocs_qpt * new%nprocs_bsum * new%nprocs_kcalc * new%nprocs_spin
    MSG_ERROR(msg)
  end if
 
 #ifdef HAVE_MPI
- ! Create 3d cartesian communicator: 3*natom perturbations, q-points in IBZ, bands in Sigma sum.
- ndims = 3
+ ! Create 5d cartesian communicator: 3*natom perturbations, q-points in IBZ, bands in Sigma sum, kpoints in Sigma_k, spins
+ ndims = 5
  ABI_MALLOC(dims, (ndims))
  ABI_MALLOC(periods, (ndims))
  ABI_MALLOC(keepdim, (ndims))
  periods(:) = .False.; reorder = .False.
- dims = [new%nprocs_pert, new%nprocs_qpt, new%nprocs_bsum]
+ dims = [new%nprocs_pert, new%nprocs_qpt, new%nprocs_bsum, new%nprocs_kcalc, new%nprocs_spin]
 
  call MPI_CART_CREATE(comm, ndims, dims, periods, reorder, comm_cart, ierr)
  ! Find the index and coordinates of the current processor
@@ -2703,44 +2706,64 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ! Create communicator to distribute natom3 perturbations.
  keepdim = .False.; keepdim(1) = .True.
  call MPI_CART_SUB(comm_cart, keepdim, new%comm_pert, ierr)
- call MPI_COMM_RANK(new%comm_pert, new%me_pert, ierr)
+ new%me_pert = xmpi_comm_rank(new%comm_pert)
 
  ! Create communicator for qpoints in self-energy integration.
  keepdim = .False.; keepdim(2) = .True.
  call MPI_CART_SUB(comm_cart, keepdim, new%comm_qpt, ierr)
- call MPI_COMM_RANK(new%comm_qpt, new%me_qpt, ierr)
+ new%me_qpt = xmpi_comm_rank(new%comm_qpt)
 
  ! Create communicator for bands for self-energy summation
  keepdim = .False.; keepdim(3) = .True.
  call MPI_CART_SUB(comm_cart, keepdim, new%comm_bsum, ierr)
- call MPI_COMM_RANK(new%comm_bsum, new%me_bsum, ierr)
+ new%me_bsum = xmpi_comm_rank(new%comm_bsum)
 
  ! Create communicator for kponts.
- !keepdim = .False.; keepdim(4) = .True.
- !call MPI_CART_SUB(comm_cart, keepdim, new%comm_kcalc, ierr)
- !call MPI_COMM_RANK(new%comm_kcalc, new%me_kcalc, ierr)
+ keepdim = .False.; keepdim(4) = .True.
+ call MPI_CART_SUB(comm_cart, keepdim, new%comm_kcalc, ierr)
+ new%me_kcalc = xmpi_comm_rank(new%comm_kcalc)
+
+ ! Create communicator for spins.
+ keepdim = .False.; keepdim(5) = .True.
+ call MPI_CART_SUB(comm_cart, keepdim, new%comm_spin, ierr)
+ new%me_spin = xmpi_comm_rank(new%comm_spin)
 
  ! Create communicator for the (band_sum, qpoint_sum) loops
  keepdim = .False.; keepdim(2:3) = .True.
  call MPI_CART_SUB(comm_cart, keepdim, new%comm_qb, ierr)
- call MPI_COMM_RANK(new%comm_qb, new%me_qb, ierr)
+ new%me_qb = xmpi_comm_rank(new%comm_qb)
 
  ! Create communicator for the (perturbation, band_sum, qpoint_sum)
- !keepdim = .False.; keepdim(1:3) = .True.
- !call MPI_CART_SUB(comm_cart, keepdim, new%comm_pqb, ierr)
- !call MPI_COMM_RANK(new%comm_pqb, new%me_pqb, ierr)
+ keepdim = .False.; keepdim(1:3) = .True.
+ call MPI_CART_SUB(comm_cart, keepdim, new%comm_pqb, ierr)
+ new%me_pqb = xmpi_comm_rank(new%comm_pqb)
 
  ! Create MPI communicator for parallel netcdf IO used to write results for the different k-points.
- !new%comm_ncwrite = xmpi_comm_self
- !if (new%nprocs_kcalc > 1) then
- !  new%comm_ncwrite = xmpi_comm_self
- !end if
+ new%comm_ncwrite = xmpi_comm_self
+ if (new%nprocs_kcalc > 1) then
+   MSG_WARNING("You should not be here")
+   !new%comm_ncwrite = xmpi_comm_self
+ end if
 
  ABI_FREE(dims)
  ABI_FREE(periods)
  ABI_FREE(keepdim)
  call xmpi_comm_free(comm_cart)
 #endif
+
+ ! Distribute k-points and create mapping to ikcalc index.
+ call xmpi_split_work(new%nkcalc, new%comm_kcalc, bstart, bstop)
+ ABI_CHECK(bstop >= bstart, sjoin("nkcalc (", itoa(new%nkcalc), ") < nprocs_kcalc (", itoa(new%nprocs_kcalc), ")"))
+ new%my_nkcalc = bstop - bstart + 1
+ ABI_MALLOC(new%my_ikcalc, (new%my_nkcalc))
+ new%my_ikcalc = [(bstart + (ii - 1), ii=1, new%my_nkcalc)]
+
+ ! Distribute spins and create mapping to spin index.
+ !call xmpi_split_work(new%nsppol, new%comm_spin, bstart, bstop)
+ !ABI_CHECK(bstop >= bstart, sjoin("nsppol (", itoa(new%nsppol), ") < nprocs_spin (", itoa(new%nprocs_spin), ")"))
+ !new%my_nspins = bstop - bstart + 1
+ !ABI_MALLOC(new%my_spins, (new%my_nspins))
+ !new%my_spins = [(bstart + (ii - 1), ii=1, new%my_nkcalc)]
 
  ! Build table with list of perturbations treated by this CPU.
  ABI_MALLOC(new%my_pinfo, (3, new%my_npert))
@@ -3201,7 +3224,8 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
      nctkarr_t("ks_enes", "dp", "max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("ks_gaps", "dp", "nkcalc, nsppol"), &
      nctkarr_t("qpoms_gaps", "dp", "ntemp, nkcalc, nsppol"), &
-     nctkarr_t("qp_gaps", "dp", "ntemp, nkcalc, nsppol") &
+     nctkarr_t("qp_gaps", "dp", "ntemp, nkcalc, nsppol"), &
+     nctkarr_t("vcar_calc", "dp", "three, max_nbcalc, nkcalc, nsppol") &
    ])
    NCF_CHECK(ncerr)
 
@@ -3304,16 +3328,16 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
      end if
    end if
    !NCF_CHECK(nf90_sync(ncid))
+   NCF_CHECK(nf90_close(ncid))
  end if ! master
+
+ call xmpi_barrier(comm)
 
  ! Now reopen the file inside comm_ncwrite to perform pararallel-IO (required for k-point parallelism).
  !if (self%comm_ncwrite%size /= 0) then
- ! if (my_rank == master) then
- !   NCF_CHECK(nctk_close(ncid))
- ! end if
- ! call xmpi_barrier(self%comm_ncwrite%value)
- ! NCF_CHECK(nctk_open_modify(self%ncid, path, self%comm_ncwrite%value))
- !end if
+ if (my_rank == master) then
+   NCF_CHECK(nctk_open_modify(self%ncid, path, self%comm_ncwrite))
+ end if
 #endif
 
  call edos%free()
@@ -3734,7 +3758,7 @@ subroutine sigmaph_free(self)
  ABI_SFREE(self%bstop_ks)
  ABI_SFREE(self%nbcalc_ks)
  ABI_SFREE(self%kcalc2ibz)
- !ABI_SFREE(self%my_ikcalc)
+ ABI_SFREE(self%my_ikcalc)
  ABI_SFREE(self%myq2ibz_k)
  ABI_SFREE(self%itreat_qibz)
  ABI_SFREE(self%my_pinfo)
@@ -3801,9 +3825,11 @@ subroutine sigmaph_free(self)
  call xmpi_comm_free(self%comm_pert)
  call xmpi_comm_free(self%comm_qpt)
  call xmpi_comm_free(self%comm_bsum)
- !call xmpi_comm_free(self%comm_kcalc)
- !call xmpi_comm_free(self%comm_pqb)
  call xmpi_comm_free(self%comm_qb)
+ call xmpi_comm_free(self%comm_kcalc)
+ call xmpi_comm_free(self%comm_spin)
+ call xmpi_comm_free(self%comm_pqb)
+ call xmpi_comm_free(self%comm_ncwrite)
 
  ! Close netcdf file.
 #ifdef HAVE_NETCDF
@@ -4307,6 +4333,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  if (self%calc_mrta) call xmpi_sum_master(self%linewidth_mrta, master, comm, ierr)
 
  call cwtime_report(" Sigma_nk gather completed", cpu, wall, gflops, comm=comm)
+
  ! Only master writes
  if (my_rank /= master) return
 
@@ -4652,7 +4679,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  end if
 
  ! Write array for restart.
- self%qp_done(ikcalc,spin) = 1
+ self%qp_done(ikcalc, spin) = 1
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_done"), 1, start=[ikcalc, spin]))
 
  ! Dump the cache to file (this is necessary to ensure we can restart)
@@ -4761,6 +4788,7 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt, "(2(a,i0))")"P Number of q-points in the IBZ treated by this proc: " , &
      count(self%itreat_qibz == 1), " of ", self%nqibz
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over bands: ", self%nprocs_bsum
+ !write(unt, "(a,i0)")"P Number of CPUs for parallelism over spins: ", self%nprocs_spin
  !write(unt, "(a,i0)")"P Number of CPUs for parallelism over k-points: ", self%nprocs_kcalc
  !write(unt, "(a,i0)")"P Number of k-point in Sigma_nk treated by this proc: ", len(self%my_ikcalc)
 
