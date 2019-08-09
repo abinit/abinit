@@ -257,9 +257,9 @@ module m_sigmaph
    ! 1 -> Use tetrahedron method.
 
   integer :: frohl_model
-   ! > 0 to treat the q-->0 divergence and accelerate convergence in polar semiconductors.
+   ! > 0 to treat the q --> 0 divergence and accelerate convergence in polar semiconductors.
    !   1: Use spherical integration inside the micro zone around the Gamma point
-   !   2: More advanced (and expensive) treatmentent inside the BZ (NOT IMPLEMENTED YET)
+   !   2: More advanced (and expensive) treatment inside the BZ (NOT IMPLEMENTED YET)
 
   logical :: use_doublegrid = .False.
    ! whether to use double grid or not
@@ -296,9 +296,14 @@ module m_sigmaph
 
   integer,allocatable :: kcalc2ibz(:,:)
     !kcalc2ibz(nkcalc, 6))
-    ! Mapping kcalc --> ibz as reported by listkk.
+    ! Mapping ikcalc --> ibz as reported by listkk.
 
+  !integer :: my_nspins
+  !integer,allocatable :: my_spins(:)
+
+  !integer :: my_nkcalc
   !integer,allocatable :: my_ikcalc(:)
+    ! my_ikcalc(my_nkcalc)
     ! List of ikcalc indices treated by this pool if k-point parallelism is activated.
 
   integer,allocatable :: myq2ibz_k(:)
@@ -1096,6 +1101,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ! TODO: Spin should be treated in a more flexible and scalable way --> kcalc and bdgw should depend on spin.
    ! Introduce other comm and cartesian dimension for spin
    do spin=1,nsppol
+     !spin = sigma%my_spins(ii)
+
      ! Check if this kpoint and spin was already calculated
      if (sigma%qp_done(ikcalc, spin) == 1) cycle
 
@@ -2329,7 +2336,10 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    if (dtset%freqspmax /= zero) new%wr_step = dtset%freqspmax / (new%nwr - 1)
  end if
 
+ ! ======================================================
  ! Select k-point and bands where corrections are wanted
+ ! ======================================================
+ !
  ! if symsigma == +1, we have to include all degenerate states in the set
  ! because the final QP corrections will be obtained by averaging the results in the degenerate subspace.
  ! We initialize IBZ(k) here so that we have all the basic dimensions of the run and it's possible
@@ -2376,6 +2386,16 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  end if ! nkptgw /= 0
 
  call gaps%free()
+
+ ! Distribute k-points and create indirect mapping
+ !call xmpi_split_work(new%nkcalc, new%comm_kcalc, bstart, bstop)
+ !ABI_CHECK(bstop > bstart, "nkcalc < nprocs_kcalc")
+ !new%my_nkcalc = bstop - bstart + 1
+ !ABI_MALLOC(new%my_ikcalc, (new%my_nkcalc))
+ !do ii=1,new%my_ikcalc
+ !   new%my_ikcalc(ii) = bstart + (ii - 1)
+ !end do
+ !new%my_ikcalc(ii) = [(bstart + (ii - 1)), ii=1, new%my_nkcalc]
 
  ! The k-point and the symmetries relating the BZ k-point to the IBZ.
  ABI_MALLOC(new%kcalc2ibz, (new%nkcalc, 6))
@@ -2599,7 +2619,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ! === MPI DISTRIBUTION ===
  ! ========================
  ! Init for sequential execution.
- new%comm_pert = xmpi_comm_self; new%my_npert = natom3; new%me_pert = 0; new%nprocs_pert = 1
+ new%comm_pert = xmpi_comm_self; new%me_pert = 0; new%nprocs_pert = 1; new%my_npert = natom3
  new%comm_qb = xmpi_comm_self; new%me_qb = 0; new%nprocs_qb = 1
  new%comm_qpt = xmpi_comm_self; new%me_qpt = 0; new%nprocs_qpt = 1
  new%comm_bsum = xmpi_comm_self; new%me_bsum = 0; new%nprocs_bsum = 1
@@ -2695,7 +2715,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call MPI_CART_SUB(comm_cart, keepdim, new%comm_bsum, ierr)
  call MPI_COMM_RANK(new%comm_bsum, new%me_bsum, ierr)
 
- ! Create communicator for bands for self-energy summation
+ ! Create communicator for kponts.
  !keepdim = .False.; keepdim(4) = .True.
  !call MPI_CART_SUB(comm_cart, keepdim, new%comm_kcalc, ierr)
  !call MPI_COMM_RANK(new%comm_kcalc, new%me_kcalc, ierr)
@@ -2705,9 +2725,16 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call MPI_CART_SUB(comm_cart, keepdim, new%comm_qb, ierr)
  call MPI_COMM_RANK(new%comm_qb, new%me_qb, ierr)
 
+ ! Create communicator for the (perturbation, band_sum, qpoint_sum)
  !keepdim = .False.; keepdim(1:3) = .True.
  !call MPI_CART_SUB(comm_cart, keepdim, new%comm_pqb, ierr)
  !call MPI_COMM_RANK(new%comm_pqb, new%me_pqb, ierr)
+
+ ! Create MPI communicator for parallel netcdf IO used to write results for the different k-points.
+ !new%comm_ncwrite = xmpi_comm_self
+ !if (new%nprocs_kcalc > 1) then
+ !  new%comm_ncwrite = xmpi_comm_self
+ !end if
 
  ABI_FREE(dims)
  ABI_FREE(periods)
@@ -3509,7 +3536,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
 !Local variables -----------------------------------------
 !scalars
  integer,parameter :: sppoldbl1 = 1, timrev1 = 1
- integer :: spin, ikpt, ikcalc, iband, itemp, nkcalc, nsppol, nkpt
+ integer :: spin, ikpt, ikcalc, iband, itemp, nsppol, nkpt
  integer :: band_ks, bstart_ks, nbcalc_ks, mband
 #ifdef HAVE_NETCDF
  integer :: ncerr, varid
@@ -3523,12 +3550,11 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
 
  ! copy useful dimensions
  nsppol = self%nsppol
- nkcalc = self%nkcalc
  nkpt = ebands%nkpt
 
  ! Map ebands kpoints to sigmaph
- ABI_MALLOC(indkk,(nkcalc, 6))
- call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, ebands%nkpt, nkcalc, cryst%nsym, &
+ ABI_MALLOC(indkk, (self%nkcalc, 6))
+ call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, ebands%nkpt, self%nkcalc, cryst%nsym, &
              sppoldbl1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
 
  if (dksqmax > tol12) then
@@ -3540,7 +3566,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
 
  ! store mapping to return
  if (present(indq2ebands)) then
-   ABI_MALLOC(indq2ebands,(nkcalc))
+   ABI_MALLOC(indq2ebands, (self%nkcalc))
    indq2ebands(:) = indkk(:,1)
  end if
 
@@ -3565,16 +3591,16 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
  has_vel = (has_car_vel .or. has_red_vel)
 
  ! Read linewidths from sigmaph
- ABI_CALLOC(linewidth_serta,(self%ntemp,mband,nkpt,nsppol))
+ ABI_CALLOC(linewidth_serta, (self%ntemp, mband, nkpt, nsppol))
  if (has_mrta) then
-   ABI_CALLOC(linewidth_mrta,(self%ntemp,mband,nkpt,nsppol))
+   ABI_CALLOC(linewidth_mrta, (self%ntemp, mband, nkpt, nsppol))
  end if
  if (has_vel) then
    ABI_CALLOC(velocity, (3, mband, nkpt, nsppol))
  end if
 
  do spin=1,nsppol
-   do ikcalc=1,nkcalc
+   do ikcalc=1,self%nkcalc
      bstart_ks = self%bstart_ks(ikcalc,spin)
      nbcalc_ks = self%nbcalc_ks(ikcalc,spin)
      do iband=1,nbcalc_ks
@@ -4735,6 +4761,8 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt, "(2(a,i0))")"P Number of q-points in the IBZ treated by this proc: " , &
      count(self%itreat_qibz == 1), " of ", self%nqibz
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over bands: ", self%nprocs_bsum
+ !write(unt, "(a,i0)")"P Number of CPUs for parallelism over k-points: ", self%nprocs_kcalc
+ !write(unt, "(a,i0)")"P Number of k-point in Sigma_nk treated by this proc: ", len(self%my_ikcalc)
 
 end subroutine sigmaph_print
 !!***
@@ -4966,6 +4994,7 @@ subroutine eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, prtvol,
    ! Note that acoustic modes are ignored.
    do nu=4,3*cryst%natom
      wqnu = phfrq(nu); if (wqnu < EPH_WTOL) cycle
+     if (sigma%phmodes_skip(nu) == 1) cycle
      ! Get phonon occupation for all temperatures.
      nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
 
