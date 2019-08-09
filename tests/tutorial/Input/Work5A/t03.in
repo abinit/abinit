@@ -20,7 +20,7 @@ pawecutdg 10.
 
 #Self-consistent cycle parameters
 toldfe 1.d-5
-nstep 5
+nstep 10
 nline 6
 nnsclo 1
 
