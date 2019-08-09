@@ -2098,7 +2098,7 @@ end subroutine xmpi_comm_set_errhandler
 !!  split_work_i4b
 !!
 !! FUNCTION
-!!  Splits the number of tasks, ntasks, among nprocs processors. 
+!!  Splits the number of tasks, ntasks, among nprocs processors.
 !!  Used for the MPI parallelization of simple loops.
 !!
 !! INPUTS

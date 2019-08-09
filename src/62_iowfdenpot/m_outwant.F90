@@ -100,8 +100,6 @@ contains
 
 subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwant)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer :: mband,mcg,mkmem,mpw,nkpt,nsppol,prtwant

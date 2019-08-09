@@ -117,7 +117,6 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
 #else
  use defs_wvltypes, only : coulomb_operator
 #endif
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -627,7 +626,6 @@ subroutine createIonicPotential_new(fftn3_distrib,ffti3_local,geocode,iproc,&
 &  hxh,hyh,hzh,n1i,n2i,n3d,n3i,kernel,pot_ion,spaceworld,pawtab,usepaw)
 
  use defs_wvltypes, only : coulomb_operator
-implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -899,7 +897,6 @@ implicit none
 
 subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 
- implicit none
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in)  :: xx,rloc,Z
@@ -937,7 +934,6 @@ subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 
 function vloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1012,7 +1008,6 @@ subroutine local_forces_new(fftn3_distrib,ffti3_local,&
      geocode,iproc,ntypes,nat,iatype,rxyz,gridcart,psppar,nelpsp,hxh,hyh,hzh,&
      n1,n2,n3,n3d,rho,pot,floc,pawtab,usepaw)
 
-  implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1212,7 +1207,6 @@ subroutine local_forces_new(fftn3_distrib,ffti3_local,&
 
 subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 
- implicit none
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in)  :: xx,rloc,Z
@@ -1250,7 +1244,6 @@ subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 
 function dvloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1325,7 +1318,6 @@ end subroutine local_forces_new
 
 subroutine ind_positions_mklocl(periodic,i,n,j,go)
 
- implicit none
 
 !Arguments -------------------------------
  logical, intent(in) :: periodic
@@ -1396,7 +1388,6 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
  use BigDFT_API, only : ELECTRONIC_DENSITY,createIonicPotential,local_forces
  use poisson_solver, only : H_potential
 #endif
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1617,7 +1608,6 @@ subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : PSPCODE_PAW,ind_positions
 #endif
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1829,7 +1819,6 @@ subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n
 
 subroutine calcdVloc_wvl(yy,xx,rloc,Z)
 
- implicit none
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in)  :: xx,rloc,Z
@@ -1867,7 +1856,6 @@ subroutine calcdVloc_wvl(yy,xx,rloc,Z)
 
 function dvloc_zero_wvl(charge,rloc,msz,rad,vloc,d2vloc)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars

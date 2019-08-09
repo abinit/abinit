@@ -60,7 +60,7 @@ module m_sigmaph
  use m_time,           only : cwtime, cwtime_report, timab, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, simpson
- use m_io_tools,       only : iomode_from_fname, file_exists
+ use m_io_tools,       only : iomode_from_fname, file_exists, is_open, open_file
  use m_special_funcs,  only : gaussian
  use m_fftcore,        only : ngfft_seq
  use m_cgtk,           only : cgtk_rotate
@@ -2082,7 +2082,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      end if
 
      ! Collect results inside comm_pqb and write results for this (k-point, spin) to NETCDF file.
-     !call sigma%gather_and_write(ebands, ikcalc, spin, dtset%prtvol, sigma%comm_pqb)
+     call sigma%gather_and_write(ebands, ikcalc, spin, dtset%prtvol, sigma%comm_pqb)
 
      ABI_SFREE(alpha_mrta)
    end do ! spin
@@ -2231,10 +2231,10 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 !scalars
  integer,parameter :: master = 0, occopt3 = 3, qptopt1 = 1, sppoldbl1 = 1, istwfk1 = 1
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,ik_ibz,ndeg, iq_ibz
- integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,qprange_,bstop
- integer :: jj,bstart,natom,natom3
+ integer :: onpw, ii, ipw, ierr, it, spin, gap_err, ikcalc, qprange_, bstop
+ integer :: jj, bstart, natom, natom3
  integer :: isym_k, trev_k, mband, i1,i2,i3
- integer :: idir, iatom, pertcase, nrest
+ integer :: idir, iatom, pertcase, nrest, color
  integer :: ip, npoints !,skw_cplex !, edos_intmeth
  logical :: downsample
  character(len=fnlen) :: wfk_fname_dense
@@ -2622,7 +2622,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  new%comm_kcalc = xmpi_comm_self; new%me_kcalc = 0; new%nprocs_kcalc = 1
  new%comm_spin = xmpi_comm_self; new%me_spin = 0; new%nprocs_spin = 1
  new%comm_pqb = xmpi_comm_self; new%me_pqb = 0; new%nprocs_pqb = 1
- new%comm_ncwrite = xmpi_comm_self; new%me_ncwrite = 0; new%nprocs_ncwrite = 1
+
 
  if (any(dtset%eph_np_pqbks /= 0)) then
    ! Use parameters from input file.
@@ -2738,13 +2738,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call MPI_CART_SUB(comm_cart, keepdim, new%comm_pqb, ierr)
  new%me_pqb = xmpi_comm_rank(new%comm_pqb)
 
- ! Create MPI communicator for parallel netcdf IO used to write results for the different k-points.
- new%comm_ncwrite = xmpi_comm_self
- if (new%nprocs_kcalc > 1) then
-   MSG_WARNING("You should not be here")
-   !new%comm_ncwrite = xmpi_comm_self
- end if
-
  ABI_FREE(dims)
  ABI_FREE(periods)
  ABI_FREE(keepdim)
@@ -2763,7 +2756,31 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  !ABI_CHECK(bstop >= bstart, sjoin("nsppol (", itoa(new%nsppol), ") < nprocs_spin (", itoa(new%nprocs_spin), ")"))
  !new%my_nspins = bstop - bstart + 1
  !ABI_MALLOC(new%my_spins, (new%my_nspins))
- !new%my_spins = [(bstart + (ii - 1), ii=1, new%my_nkcalc)]
+ !new%my_spins = [(bstart + (ii - 1), ii=1, new%my_nspins)]
+
+ ! Create MPI communicator for parallel netcdf IO used to write results for the different k-points.
+ ! This communicator is defined only on the processes that perform IO.
+ new%comm_ncwrite = xmpi_comm_null; new%me_ncwrite = -1; new%nprocs_ncwrite = 0
+ if (new%nprocs_kcalc == 1 .and. new%nprocs_spin == 1) then
+   if (my_rank == master) then
+     new%comm_ncwrite = xmpi_comm_self; new%me_ncwrite = 0; new%nprocs_ncwrite = 1
+   end if
+ else
+    MSG_WARNING("Building comm_ncwrite")
+    new%comm_ncwrite = xmpi_comm_self
+    color = xmpi_undefined; if (all(new%coords(1:3) == 0)) color = 1
+    call xmpi_comm_split(comm, color, my_rank, new%comm_ncwrite, ierr)
+    if (color == 1) then
+      new%me_ncwrite = xmpi_comm_rank(new%comm_ncwrite)
+      new%nprocs_ncwrite = xmpi_comm_size(new%comm_ncwrite)
+      write(std_out, *)"me_ncwrite:", new%me_ncwrite, "nprocs_ncwrite:", new%nprocs_ncwrite
+      if (.not. is_open(ab_out)) then
+       if (open_file(strcat("foo_rank:", itoa(new%me_ncwrite)), msg, unit=ab_out, status='unknown') /= 0) then
+         MSG_ERROR(msg)
+       end if
+      end if
+    end if
+ end if
 
  ! Build table with list of perturbations treated by this CPU.
  ABI_MALLOC(new%my_pinfo, (3, new%my_npert))
@@ -3334,8 +3351,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
  call xmpi_barrier(comm)
 
  ! Now reopen the file inside comm_ncwrite to perform pararallel-IO (required for k-point parallelism).
- !if (self%comm_ncwrite%size /= 0) then
- if (my_rank == master) then
+ if (self%comm_ncwrite /= xmpi_comm_null) then
    NCF_CHECK(nctk_open_modify(self%ncid, path, self%comm_ncwrite))
  end if
 #endif
@@ -4335,7 +4351,8 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  call cwtime_report(" Sigma_nk gather completed", cpu, wall, gflops, comm=comm)
 
  ! Only master writes
- if (my_rank /= master) return
+ if (self%comm_ncwrite == xmpi_comm_null) return
+ !if (my_rank /= master) return
 
  ik_ibz = self%kcalc2ibz(ikcalc, 1)
 
