@@ -186,7 +186,13 @@ module m_sigmaph
   !integer :: nprocs_kcalc
   !integer :: me_kcalc
 
+  ! MPI communicator for parallel netcdf IO used to write results for the different k-points.
+  !integer :: comm_ncwrite = xmpi_comm_null
+  !integer :: me_ncwrite
+  !integer :: nprocs_ncwrite
+
   integer :: coords(3)
+  ! Cartesian coordinates of this processor in the Cartesian grid.
 
   integer :: nqbz
   ! Number of q-points in the (dense) BZ for sigma integration
@@ -208,7 +214,7 @@ module m_sigmaph
   ! Maximum number of PWs for all possible k+q
 
   integer :: bcorr = 0
-  ! 1 to include Blochl correction in tetrahedron method else 0.
+  ! 1 to include Blochl correction in the tetrahedron method else 0.
 
   integer :: ntheta, nphi
   ! Number of division for spherical integration of Frohlich term.
@@ -246,7 +252,7 @@ module m_sigmaph
   ! and filter q-points on the basis of electron energy difference.
 
   integer :: qint_method
-   ! Defines the method used to integrate in q-space
+   ! Defines the method used for the q-space integration
    ! 0 -> Standard quadrature (one point per micro zone).
    ! 1 -> Use tetrahedron method.
 
@@ -319,7 +325,8 @@ module m_sigmaph
    ! pert_table(2, npert): imyp index in my_pinfo table, -1 if this rank is not treating ipert.
 
   integer,allocatable :: phmodes_skip(:)
-   ! (natom3) A mask to skip accumulating the contribution of certain phonon modes
+   ! (natom3)
+   ! A mask to skip accumulating the contribution of certain phonon modes
 
   integer,allocatable:: ind_bz2ibz(:,:)
    ! (6, %nqibz)
@@ -608,9 +615,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_getgh1c=1,berryopt0=0,timrev0=0
- integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,sppoldbl1=1,timrev1=1
- integer,parameter :: igscq0=0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
+ integer,parameter :: tim_getgh1c = 1,berryopt0 = 0
+ integer,parameter :: useylmgr = 0,useylmgr1 =0 , master = 0, ndat1 = 1
+ integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_frohl,iq_bz_frohl, my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj, iw
@@ -2209,7 +2216,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0, occopt3=3, qptopt1=1, sppoldbl1=1, istwfk1=1
+ integer,parameter :: master = 0, occopt3 = 3, qptopt1 = 1, sppoldbl1 = 1, istwfk1 = 1
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,ik_ibz,ndeg, iq_ibz
  integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,qprange_,bstop
  integer :: jj,bstart,natom,natom3
@@ -2501,7 +2508,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
          new%mpw = max(new%mpw, onpw)
          do ipw=1,onpw
            do ii=1,3
-            new%gmax(ii) = max(new%gmax(ii), abs(gtmp(ii,ipw)))
+            new%gmax(ii) = max(new%gmax(ii), abs(gtmp(ii, ipw)))
            end do
          end do
          ABI_FREE(gtmp)
@@ -2516,18 +2523,20 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call wrtout(std_out, sjoin(' Optimal value of mpw:', itoa(new%mpw), "gmax:", ltoa(new%gmax)))
  call cwtime_report(" sigmaph_new: mpw", cpu, wall, gflops)
 
- ! Define number of bands included in self-energy summation as well as band range.
+ ! Define number of bands included in self-energy summation as well as the band range.
  ! This value depends on the kind of calculation as imag_only can take advantage of
- ! an energy window aroud the Fermi level.
+ ! the energy window aroud the band edges.
  !
  ! Notes about MPI version.
  ! If eph_task == -4:
  !    Loops are MPI parallelized over bands so that we can distribute memory for wavefunctions over nband.
+ !    perturbations and q-points in the IBZ can also be distributed.
  !
  ! If eph_task == -4:
  !    Loops are MPI parallelized over q-points
  !    wavefunctions are not distributed but only states between my_bsum_start and my_bsum_stop
  !    are allocated and read from file.
+ !    perturbations and q-points in the IBZ can also be distributed.
 
  new%wmax = 1.1_dp * abs(ifc%omega_minmax(2))
  if (new%qint_method == 0) new%wmax = new%wmax + five * dtset%zcut
@@ -3059,7 +3068,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0
+ integer,parameter :: master = 0
  integer :: my_rank, ii, edos_intmeth
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr
@@ -3270,7 +3279,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
    !NCF_CHECK(nf90_sync(ncid))
  end if ! master
 
- ! Now reopen file inside comm_ncwrite to perform pararallel-IO (required for k-point parallelism).
+ ! Now reopen the file inside comm_ncwrite to perform pararallel-IO (required for k-point parallelism).
  !if (self%comm_ncwrite%size /= 0) then
  ! if (my_rank == master) then
  !   NCF_CHECK(nctk_close(ncid))
@@ -3498,14 +3507,15 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
  character(len=500) :: msg
 
 !Local variables -----------------------------------------
+!scalars
  integer,parameter :: sppoldbl1 = 1, timrev1 = 1
  integer :: spin, ikpt, ikcalc, iband, itemp, nkcalc, nsppol, nkpt
  integer :: band_ks, bstart_ks, nbcalc_ks, mband
- logical :: has_mrta, has_vel, has_car_vel, has_red_vel
 #ifdef HAVE_NETCDF
  integer :: ncerr, varid
 #endif
- !character(len=fnlen) :: path
+ logical :: has_mrta, has_vel, has_car_vel, has_red_vel
+!arrays
  integer,allocatable :: indkk(:,:)
  real(dp) :: dksqmax, vk_red(2,3), vk_car(2,3)
 
@@ -3698,6 +3708,7 @@ subroutine sigmaph_free(self)
  ABI_SFREE(self%bstop_ks)
  ABI_SFREE(self%nbcalc_ks)
  ABI_SFREE(self%kcalc2ibz)
+ !ABI_SFREE(self%my_ikcalc)
  ABI_SFREE(self%myq2ibz_k)
  ABI_SFREE(self%itreat_qibz)
  ABI_SFREE(self%my_pinfo)
@@ -3765,6 +3776,7 @@ subroutine sigmaph_free(self)
  call xmpi_comm_free(self%comm_qpt)
  call xmpi_comm_free(self%comm_bsum)
  !call xmpi_comm_free(self%comm_kcalc)
+ !call xmpi_comm_free(self%comm_pqb)
  call xmpi_comm_free(self%comm_qb)
 
  ! Close netcdf file.
@@ -3924,10 +3936,10 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
      ABI_CHECK(sum(abs(self%qbz(:,ikpt) - self%qibz_k(:,ibz_k))) < tol8, 'Wrong mapping')
      ! IBZ_k --> IBZ
      !self%ind_ibzk2ibz(:, ibz_k) = self%ind_bz2ibz(:,ikpt)
-     self%ind_ibzk2ibz(1, ibz_k) = self%ind_bz2ibz(1,ikpt)
-     self%ind_ibzk2ibz(2, ibz_k) = self%ind_bz2ibz(2,ikpt)
-     self%ind_ibzk2ibz(6, ibz_k) = self%ind_bz2ibz(3,ikpt)
-     self%ind_ibzk2ibz(3:5, ibz_k) = self%ind_bz2ibz(4:6,ikpt)
+     self%ind_ibzk2ibz(1, ibz_k) = self%ind_bz2ibz(1, ikpt)
+     self%ind_ibzk2ibz(2, ibz_k) = self%ind_bz2ibz(2, ikpt)
+     self%ind_ibzk2ibz(6, ibz_k) = self%ind_bz2ibz(3, ikpt)
+     self%ind_ibzk2ibz(3:5, ibz_k) = self%ind_bz2ibz(4:6, ikpt)
    end do
    do ikpt=1,self%nqibz_k
      ABI_CHECK(self%ind_ibzk2ibz(1,ikpt) /= 0, 'Did not find mapping')
@@ -4039,7 +4051,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
  integer,parameter :: master = 0
  integer :: my_rank, iq_ibz_k, iq_ibz, ierr, nprocs, imyq, iq_dvdb, ii, cnt, itreat, iq
  integer :: nqeff, ndiv
- real(dp) :: cpu, wall, gflops !, weight_q
+ real(dp) :: cpu, wall, gflops
  logical :: qfilter
  character(len=500) :: msg
 !arrays
@@ -4081,8 +4093,6 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        ABI_ICALLOC(mask_qibz_k, (self%nqibz_k))
        do imyq=1,self%my_nqibz_k
          iq_ibz_k = self%myq2ibz_k(imyq)
-         ! TODO: Weight should be reintroduced when Henrique's htetra is merged....
-         !weight_q = self%wtq_k(iq_ibz_k)
          if (any(abs(self%deltaw_pm(1, :, :, :, imyq, :)) >= dtset%eph_tols_idelta(1) / ndiv)) mask_qibz_k(iq_ibz_k) = 1
          if (any(abs(self%deltaw_pm(2, :, :, :, imyq, :)) >= dtset%eph_tols_idelta(2) / ndiv)) mask_qibz_k(iq_ibz_k) = 1
        end do
