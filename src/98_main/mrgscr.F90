@@ -65,11 +65,11 @@ program mrgscr
  use m_crystal
  use m_pawrhoij
 
- use m_specialmsg,          only : specialmsg_getcount, herald
+ use m_specialmsg,          only : herald
  use m_time,                only : timein
  use m_gwdefs,              only : GW_TOLQ, GW_TOLQ0, GW_Q0_DEFAULT
- use m_io_tools,            only : prompt, file_exists, flush_unit, open_file
- use m_fstrings,            only : int2char4, endswith, itoa, sjoin, strcat
+ use m_io_tools,            only : prompt, flush_unit, open_file
+ use m_fstrings,            only : int2char4, endswith, itoa, sjoin
  use m_fft_mesh,            only : g2ifft
  use m_fftcore,             only : get_cache_kb, getng
  use m_fft,                 only : fourdp
@@ -80,25 +80,20 @@ program mrgscr
  use m_bz_mesh,             only : kmesh_t, find_qmesh, kmesh_init, kmesh_print, kmesh_free
  use m_vcoul,               only : vcoul_t, vcoul_init, vcoul_free
  use m_ioarr,               only : read_rhor
- use m_io_screening,        only : hscr_io, hscr_print, hscr_copy, read_screening, &
-                                   write_screening, hscr_free, hscr_t, hscr_from_file,&
-                                   em1_ncname, chi0_ncname, &
+ use m_io_screening,        only : hscr_print, read_screening, hscr_free, hscr_t, hscr_from_file,&
                                    ioscr_qmerge, ioscr_qrecover, ioscr_wmerge, ioscr_wremove
  use m_ppmodel,             only : ppm_init, ppm_free, setup_ppmodel, getem1_from_PPm_one_ggp, &
-&                                  get_PPm_eigenvalues, ppmodel_t, cqratio
- use m_model_screening,     only : init_peaks_from_grid,im_screening,re_screening,remove_phase, &
-&                                  init_peaks_even_dist,init_single_peak,sequential_fitting, &
-&                                  re_and_im_screening_with_phase
- use m_levenberg_marquardt, only : lmdif1, lm_fit_print_info
- use m_screening,           only : mkdump_er, em1results_free, em1results_print,decompose_epsm1,&
-&                                  init_er_from_file, Epsilonm1_results
+                                   get_PPm_eigenvalues, ppmodel_t, cqratio
+ use m_model_screening,     only : remove_phase
+ use m_screening,           only : mkdump_er, em1results_free, em1results_print, decompose_epsm1, &
+                                   init_er_from_file, Epsilonm1_results
  use m_wfd,                 only : test_charge
+
  implicit none
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,paral_kgb0=0,rdwr2=2,prtvol=0,cplex1=1
- !integer,parameter :: MAX_NUMFILES=100
  integer :: iomode,fform1,ifile,ierr,ii,ios,iqibz,iqf,nfiles,timrev
  integer :: unt_dump,idx,ig1,ig2,iomega,ppmodel,npwe_asked,mqmem,io,unt_dump2
  integer :: id_required,ikxc,approx_type,option_test,dim_kxcg,usexcnhat,usefinegrid
@@ -142,7 +137,6 @@ program mrgscr
  character(len=fnlen),allocatable :: filenames(:)
  type(pawrhoij_type),allocatable :: pawrhoij(:)
  type(hscr_t),target,allocatable :: Hscr_file(:) ! Cannot use allocatable as pathscale5 miscompiles the code
- !type(hscr_t),target :: Hscr_file(MAX_NUMFILES)
 
 ! *************************************************************************
 
@@ -172,13 +166,6 @@ program mrgscr
 
  call prompt(' Enter the number of files to merge: ',nfiles)
  ABI_CHECK(nfiles > 0, 'nfiles must be >0')
-! if (nfiles>MAX_NUMFILES) then
-!   write(msg,"(3a,i0,2a)")&
-!&   "Do to a bug in the PATHSCALE-v5 compiler, ",ch10,&
-!&   "the maximum number of files that can be merged is limited to: ",MAX_NUMFILES,ch10,&
-!&   "Increase the value of MAX_NUMFILES in mrgscr.F90 and recompile"
-!   MSG_ERROR(msg)
-! end if
 
  ABI_MALLOC(filenames,(nfiles))
  ABI_MALLOC(Hscr_file,(nfiles))
@@ -229,10 +216,10 @@ program mrgscr
 
    call hscr_print(Hscr_file(ifile),unit=std_out,prtvol=1)
 
-   if (ifile==1) call metric(gmet,gprimd,-1,rmet,Hscr_file(ifile)%Hdr%rprimd,ucvol)
+   if (ifile == 1) call metric(gmet,gprimd,-1,rmet,Hscr_file(ifile)%Hdr%rprimd,ucvol)
  end do !ifile
 
- if (nfiles>1) then
+ if (nfiles > 1) then
    ! Put the correct ending on the output file
    if (is_scr) fname_out=TRIM(fname_out)//'_SCR'
    if (is_sus) fname_out=TRIM(fname_out)//'_SUS'
@@ -244,7 +231,7 @@ program mrgscr
  !============================
  !=== Merge multiple files ===
  !============================
- if (nfiles>1) then
+ if (nfiles > 1) then
 
    ! Check what kind of merging is to be performed
    write(std_out,'(2(a))') ch10,' Do you want to merge q-points        (= 1) ?'
@@ -284,7 +271,7 @@ program mrgscr
  fname =filenames(1)
  if (nfiles>1) then
    Hscr0 => Hscr_merge
-   fname =fname_out
+   fname = fname_out
  end if
 
  timrev=2 ! This should be read from kptopt
@@ -354,7 +341,6 @@ program mrgscr
    write(std_out,'(a)')         '  or remove real frequencies                    (= 4) ?'
    write(std_out,'(a)')         '  or remove imaginary frequencies               (= 5) ?'
    write(std_out,'(a)')         '  or calculate a model screening                (= 6) ?'
-   !write(std_out,'(a)')         '  or interpolate a new real freq. grid          (= 7) ?'
    !write(std_out,'(a)')         '  or interpolate the screening in k-space       (= 8) ?'
    !write(std_out,'(a)')         '  or convert a netcd file to Fortran            (= 9) ?'
    read(std_in,*)choice
@@ -374,7 +360,7 @@ program mrgscr
      call ioscr_qrecover(filenames(1), nq_selected, fname_out)
 
    case(2)
-       ! Analyse file ----------------------------------------------------------------
+     ! Analyse file ----------------------------------------------------------------
      ABI_CHECK(iomode==IO_MODE_FORTRAN, "netcdf output not coded")
 
      write(std_out,'(a)') ' 2 => Extraction of file contents'
@@ -387,10 +373,8 @@ program mrgscr
      ! Give option to output epsilon instead of chi0
      calc_epsilon = .FALSE.
      if (is_sus) then
-       write(std_out,'(2a)') ch10,&
-       ' You have provided a chi_0 file for analysis. Would you like to output'
-       write(std_out,'(2a)',advance='no') ' the dielectric function epsilon_GG'' ',&
-        '= delta_GG'' - v_G*chi0_GG''[Y/N] ? '
+       write(std_out,'(2a)') ch10,' You have provided a chi_0 file for analysis. Would you like to output'
+       write(std_out,'(2a)',advance='no') ' the dielectric function epsilon_GG'' ', '= delta_GG'' - v_G*chi0_GG''[Y/N] ? '
        read(std_in,*)ans
 
        if (ans=='Y'.or.ans=='y') then
@@ -535,7 +519,6 @@ program mrgscr
              write(unt_dump,*)
            end do !ig2
          end do !ig1
-!            end if
          close(unt_dump)
        end if ! Output real frequency axis
 
@@ -563,7 +546,6 @@ program mrgscr
              write(unt_dump,*)
            end do !ig2
          end do !ig1
-!            end if
          close(unt_dump)
        end if ! Check for imaginary frequencies
 
@@ -659,7 +641,7 @@ program mrgscr
 
      ! Get the density from an external file ===
      ! If meshes are not the same, do an FFT interpolation to have rhor on ngfft.
-     call prompt(' Enter name for external DEN (or PAWDEN) file: ',fname_rho)
+     call prompt(' Enter name for external DEN (or PAWDEN) file: ', fname_rho)
 
      ABI_MALLOC(rhor,(nfft,Hscr0%Hdr%nspden))
      ABI_MALLOC(pawrhoij,(Hscr0%Hdr%natom*Hscr0%Hdr%usepaw))
@@ -714,8 +696,8 @@ program mrgscr
      write(std_out,'(2a)',advance='no') ch10,&
      ' Would you like to calculate the eigenvalues of eps^{-1}_GG''(omega) [Y/N] ? '
      read(std_in,*) ans
-     if (ans=='Y'.or.ans=='y') then
 
+     if (ans=='Y'.or.ans=='y') then
        ABI_MALLOC(epsm1_eigen,(Er%npwe,Er%nomega))
        imax = 10
        if (Er%npwe < imax) imax = Er%npwe
@@ -738,7 +720,6 @@ program mrgscr
        end do
        ABI_FREE(epsm1_eigen)
        ABI_FREE(kxcg)
-
      end if ! Calculate eigenvalues
 
      ! Analyze the PPmodel.
@@ -746,7 +727,6 @@ program mrgscr
      read(std_in,*)ans
 
      if (ans=='Y'.or.ans=='y') then
-
        write(std_out,'(2a,f6.2,a)') ch10,' Plasma frequency for GN PPM is: ',GN_drude_plsmf*Ha_eV, ' eV'
        write(std_out,'(a)',advance='no') ' Would you like to change it [Y/N] ?'
        read(std_in,*) ans
@@ -761,7 +741,6 @@ program mrgscr
        read(std_in,*) ans
 
        if (ans=='Y'.or.ans=='y') then
-
          ABI_MALLOC(ppm_eigen,(PPm%npwc,Er%nomega))
          imax = 10; if (Er%npwe < imax) imax = Er%npwe
          do iqibz=1,Er%nqibz
@@ -803,23 +782,21 @@ program mrgscr
              write(unt_dump,'(a)')       '# REAL omega [eV]  REAL(eigen(ppm_eps^-1(1,w)))  AIMAG(eigen(ppm_eps^-1(1,w))  ...'
              do iomega=1,Er%nomega_r
                write(unt_dump,'(21(es16.8))')REAL(Er%omega(iomega))*Ha_eV,&
-&               (REAL(ppm_eigen(ii,iomega)),ii=1,imax),(AIMAG(ppm_eigen(ii,iomega)),ii=1,imax)
+                 (REAL(ppm_eigen(ii,iomega)),ii=1,imax),(AIMAG(ppm_eigen(ii,iomega)),ii=1,imax)
              end do
              close(unt_dump)
 
            end do !ppmodel
-
          end do ! iqibz
          ABI_FREE(ppm_eigen)
-
        end if ! Calculate PPM eigenvalues
 
-!        Optionally output eps^{-1}_GG''(w) for a given set of GG' and gridpoints
+       ! Optionally output eps^{-1}_GG''(w) for a given set of GG' and gridpoints
        write(std_out,'(2a)',advance='no') ch10,' Would you like to extract eps^{-1}_GG''(omega) for the PPM [Y/N] ?'
        read(std_in,*) ans
 
        if (ans=='Y'.or.ans=='y') then
-!          Reconstruct e^{-1}_GG'(w) according to PPmodel for statistical analysis.
+         ! Reconstruct e^{-1}_GG'(w) according to PPmodel for statistical analysis.
          write(std_out,'(a)') ' Enter the number of frequency points in the'
          write(std_out,'(a)') '  interval 0 - freqremax (0 means same as input file ): '
          read(std_in,*) nfreqre
@@ -845,7 +822,6 @@ program mrgscr
          end if ! frequencies
 
          do iqibz=1,Er%nqibz
-
            qtmp(:)=Er%qibz(:,iqibz); if (normv(qtmp,Cryst%gmet,'G')<GW_TOLQ0) qtmp(:)=zero
            call int2char4(iqibz,tagq)
            ABI_CHECK((tagq(1:1)/='#'),'Bug: string length too short!')
@@ -887,7 +863,7 @@ program mrgscr
 
              ig1 = 0; ig2 = 0
              write(std_out,'(3a,I0,a,I0)') ch10,' Enter indices for G and G''.',&
-&             'Entering 0 exits the loop. iqibz = ',iqibz,' ppmodel = ',ppmodel
+               'Entering 0 exits the loop. iqibz = ',iqibz,' ppmodel = ',ppmodel
 
              do
                write(std_out,'(2(a),I0,a)',advance='NO') ch10,' Enter index for G (1 - ',Er%npwe,' ): '
@@ -903,8 +879,7 @@ program mrgscr
                call getem1_from_PPm_one_ggp(PPm,iqibz,Er%Hscr%zcut,nfreq_tot,omega,Vcp,em1_ppm,ig1,ig2)
 
                write(unt_dump,'(a,I1)') '# epsilon^-1_GG''(omega) from ppmodel = ',ppmodel
-               write(unt_dump,'(2(a,i8),/,a,3f12.6,/,a,3i6,a,3i6,&
-                 /,a,3F9.4,a,3F9.4,a,/a,f9.4,a,f9.4,a,/,a,/)')&
+               write(unt_dump,'(2(a,i8),/,a,3f12.6,/,a,3i6,a,3i6,/,a,3F9.4,a,3F9.4,a,/a,f9.4,a,f9.4,a,/,a,/)')&
                  '# ig1= ',ig1,'    ig2= ',ig2,&
                  '# q = ',Er%qibz(:,iqibz),&
                  '# G = ',Er%gvec(:,ig1),'  G''= ',Er%gvec(:,ig2),&
@@ -914,8 +889,7 @@ program mrgscr
                  ' Ha 1/2|G''|^2 =',half*normv(Er%gvec(:,ig2),Cryst%gmet,'G')**2,' Ha',&
                  '#   omega [eV]           Re             Im '
                write(unt_dump2,'(a,I1)') '# epsilon^-1_GG''(iomega) from ppmodel = ',ppmodel
-               write(unt_dump2,'(2(a,i8),/,a,3f12.6,/,a,3i6,a,3i6,&
-                 /,a,3F9.4,a,3F9.4,a,/a,f9.4,a,f9.4,a,/,a,/)')&
+               write(unt_dump2,'(2(a,i8),/,a,3f12.6,/,a,3i6,a,3i6,/,a,3F9.4,a,3F9.4,a,/a,f9.4,a,f9.4,a,/,a,/)')&
                  '# ig1= ',ig1,'    ig2= ',ig2,&
                  '# q = ',Er%qibz(:,iqibz),&
                  '# G = ',Er%gvec(:,ig1),'  G''= ',Er%gvec(:,ig2),&
@@ -951,7 +925,6 @@ program mrgscr
              close(unt_dump2)
 
            end do ! ppmodel
-
          end do ! iqibz
          ABI_FREE(omega)
        end if ! Output epsilon for PPM
@@ -984,7 +957,6 @@ program mrgscr
 
              ! Prepare ratios and density for the f-sum rule
              ABI_MALLOC_OR_DIE(qratio,(orig_npwe,orig_npwe), ierr)
-
              ABI_MALLOC_OR_DIE(rhoggp,(Er%npwe,Er%npwe), ierr)
 
              call cqratio(orig_npwe,Gsphere%gvec,qtmp,Cryst%gmet,Cryst%gprimd,qratio)
@@ -1068,7 +1040,8 @@ program mrgscr
                  ! Evaluate the f-sum rule
                  if (ig1==ig2) then
                    ftab(1:nfreqre) = real_omega(1:nfreqre)*AIMAG(Er%epsm1(ig1,ig2,1:nfreqre,iqibz))
-                 else ! Dephase first - HERE epsm1 is changed!
+                 else
+                   ! Dephase first - HERE epsm1 is changed!
                    call remove_phase(epsm1(ig1,ig2,:,1),Hscr_file(1)%nomega,phase)
                    ftab(1:nfreqre) = real_omega(1:nfreqre)*AIMAG(Er%epsm1(ig1,ig2,1:nfreqre,iqibz))
                  end if
@@ -1178,7 +1151,7 @@ program mrgscr
        write(std_out,'(2a,I0,a)') ch10,' ',nfreqre,' real frequencies will be kept.'
 
      case(2)
-         ! Specify freq. individually
+       ! Specify freq. individually
        ii = nfreqre; nfreqre = 0
        do ifrq=1,ii
          write(std_out,'(a,f12.6,a)') ' Would you like to keep freq. at: ',REAL(Hscr_file(1)%omega(ifrq))*Ha_eV,' eV? [y/n]'
@@ -1210,7 +1183,7 @@ program mrgscr
      nfreq_tot = nfreqre + nfreqim ! Here nfreq_tot becomes the *true* number of freq
      write(std_out,'(3(a,i0),a)')' Finally, we have ',nfreq_tot,' frequencies. ',nfreqre,' real, and ',nfreqim,' imaginary.'
 
-     call prompt(' Enter the full name of the final output file: ',fname_out)
+     call prompt(' Enter the full name of the final output file: ', fname_out)
 
      if (endswith(filenames(1), ".nc") .and. .not. endswith(fname_out, ".nc")) then
        fname_out = nctk_ncify(fname_out)
@@ -1231,8 +1204,8 @@ program mrgscr
        if (REAL(Hscr_file(1)%omega(ifrq))<tol8.and.AIMAG(Hscr_file(1)%omega(ifrq))>tol8)  nfreqim = nfreqim + 1
      end do ! ifrq
 
-       ! Test for no real frequencies
-     if (nfreqim==0) then
+     ! Test for no real frequencies
+     if (nfreqim == 0) then
        MSG_ERROR("No imaginary frequencies in file!")
      end if
 
@@ -1284,10 +1257,6 @@ program mrgscr
      ! Model screening -------------------------------------------------------------
      MSG_ERROR("Model screening has been removed")
 
-   case (7)
-     ! Interpolation for real frequency -------------------------------------
-     MSG_ERROR("Still under development")
-
    !case(9)
    !  TODO
    !  ! netcdf --> Fortran converter -------------------------------------------------------------
@@ -1296,7 +1265,7 @@ program mrgscr
    !  call ioscr_nc2fort(filenames(1), fname_out)
 
    case default
-       ! Bail if choice is wrong
+     ! Bail if choice is wrong
      write(std_out,*) ' Invalid choice! Exiting...'
      goto 100
    end select
@@ -1310,11 +1279,10 @@ program mrgscr
 
  write(std_out, '(a,a,a,f13.1,a,f13.1)' )  '-',ch10,'- Proc.   0 individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
 
-!=====================
-!==== Free memory ====
-!=====================
+ ! =====================
+ ! ==== Free memory ====
+ ! =====================
  ABI_FREE(filenames)
-
  ABI_SFREE(kxcg)
  ABI_SFREE(foundq)
 

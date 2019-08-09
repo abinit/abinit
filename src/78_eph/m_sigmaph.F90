@@ -156,30 +156,35 @@ module m_sigmaph
   integer :: my_npert
    ! Number of atomic perturbations or phonon modes treated by this MPI rank.
 
-  integer :: comm_pert = xmpi_comm_null
    ! MPI communicator for parallelism over atomic perturbations.
-
+  integer :: comm_pert = xmpi_comm_null
   integer :: nprocs_pert
-   ! Number of cpus for parallelism over atomic perturbations.
-
   integer :: me_pert
-   ! My rank in comm_pert
 
-  integer :: comm_bq = xmpi_comm_null
-   ! MPI communicator used to distribute bsum, q-points (high-level parallelization)
+   ! MPI communicator used to distribute bsum, q-points
+  integer :: comm_qb = xmpi_comm_null
+  integer :: me_qb
+  integer :: nprocs_qb
 
-  integer :: me_bq
-  integer :: nprocs_bq
-
-  integer :: comm_qpt = xmpi_comm_null
   ! MPI communicator for q-points
+  integer :: comm_qpt = xmpi_comm_null
   integer :: me_qpt
   integer :: nprocs_qpt
 
+  ! MPI communicator for bands in self-energy sum
   integer :: comm_bsum = xmpi_comm_null
-  ! MPI communicator for bands in sum
   integer :: me_bsum
   integer :: nprocs_bsum
+
+  ! MPI communicator for bands in self-energy sum
+  !integer :: comm_pqb = xmpi_comm_null
+  !integer :: me_pqb
+  !integer :: nprocs_pqb
+
+   ! MPI communicator for parallelism over k-points (high-level)
+  !integer :: comm_kcalc = xmpi_comm_null
+  !integer :: nprocs_kcalc
+  !integer :: me_kcalc
 
   integer :: coords(3)
 
@@ -271,21 +276,24 @@ module m_sigmaph
    ! Number of divisions in the Q mesh in the BZ.
 
   integer,allocatable :: bstart_ks(:,:)
-   ! bstart_ks(nkcalc,nsppol)
+   ! bstart_ks(nkcalc, nsppol)
    ! Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
    ! Depends on spin because all denerate states should be included when symmetries are used.
 
   integer,allocatable :: bstop_ks(:,:)
-   ! bstop_ks(nkcalc,nsppol)
+   ! bstop_ks(nkcalc, nsppol)
 
   integer,allocatable :: nbcalc_ks(:,:)
-   ! nbcalc_ks(nkcalc,nsppol)
+   ! nbcalc_ks(nkcalc, nsppol)
    ! Number of bands included in self-energy matrix elements for each k-point in kcalc.
    ! Depends on spin because all denerate states should be included when symmetries are used.
 
   integer,allocatable :: kcalc2ibz(:,:)
     !kcalc2ibz(nkcalc, 6))
     ! Mapping kcalc --> ibz as reported by listkk.
+
+  !integer,allocatable :: my_ikcalc(:)
+    ! List of ikcalc indices treated by this pool if k-point parallelism is activated.
 
   integer,allocatable :: myq2ibz_k(:)
    ! myq2ibz_k(my_nqibz_k)
@@ -321,8 +329,6 @@ module m_sigmaph
    ! (6, %nqibz_k))
    ! Mapping k+q --> initial IBZ. Depends on ikcalc.
 
-  !integer,allocatable :: ind_ibz2dvdb(:,:)
-
   integer,allocatable :: indq2dvdb_k(:,:)
    ! (6, %nqibz_k))
    ! Mapping qibz_k --> IBZ found in DVDB file. Used when DFPT potentials are read from DVDB file
@@ -343,11 +349,11 @@ module m_sigmaph
    ! List of k-points where the self-energy is computed.
 
   real(dp),allocatable :: qbz(:,:)
-  ! qbz(3,nqbz)
+  ! qbz(3, nqbz)
   ! Reduced coordinates of the q-points in the full BZ.
 
   real(dp),allocatable :: qibz(:,:)
-  ! qibz(3,nqibz)
+  ! qibz(3, nqibz)
   ! Reduced coordinates of the q-points in the IBZ (full simmetry of the system).
 
   real(dp),allocatable :: wtq(:)
@@ -355,7 +361,7 @@ module m_sigmaph
   ! Weights of the q-points in the IBZ (normalized to one).
 
   real(dp),allocatable :: qibz_k(:,:)
-  ! qibz(3,nqibz_k)
+  ! qibz(3, nqibz_k)
   ! Reduced coordinates of the q-points in the IBZ(k). Depends on ikcalc.
 
   real(dp),allocatable :: wtq_k(:)
@@ -382,7 +388,7 @@ module m_sigmaph
   real(dp),allocatable :: linewidth_mrta(:,:)
    ! linewidth_mrta(ntemp, max_nbcalc)
    ! Linewidths computed withing the momentum relaxation time approximation
-   ! for fixed (kcalc, spin). Only if imag_only
+   ! for given (ikcalc, spin). Only if imag_only
 
   complex(dpc),allocatable :: cweights(:,:,:,:,:,:,:)
   ! (nz, 2, nbcalc_ks, my_npert, my_bsum_start:my_bsum_stop, my_nqibz_k, ndiv))
@@ -418,28 +424,28 @@ module m_sigmaph
    ! Used if frohl_model == 1 and imag_only. This array depend on (ikcalc, spin)
 
   integer, allocatable :: qp_done(:,:)
-   ! qp_done(kcalc,spin)
+   ! qp_done(kcalc, spin)
    ! Keep track of the QP states already computed for restart of the calculation
 
   complex(dpc),allocatable :: vals_e0ks(:,:)
    ! vals_e0ks(ntemp, max_nbcalc)
-   ! Sigma_eph(omega=eKS, kT, band) for fixed (kcalc, spin).
+   ! Sigma_eph(omega=eKS, kT, band) for given (ikcalc, spin).
    ! Fan-Migdal + Debye-Waller
 
   complex(dpc),allocatable :: frohl_vals_e0ks(:,:)
    ! frohl_vals_e0ks(ntemp, max_nbcalc)
-   ! Sigma_frohl(omega=eKS, kT, band) for fixed (kcalc, spin).
+   ! Sigma_frohl(omega=eKS, kT, band) for given (ikcalc, spin).
 
   complex(dpc),allocatable :: dvals_de0ks(:,:)
-   ! dvals_de0ks(ntemp, max_nbcalc) for fixed (kcalc, spin)
+   ! dvals_de0ks(ntemp, max_nbcalc) for given (ikcalc, spin)
    ! d Re Sigma_eph(omega, kT, band, kcalc, spin) / d omega (omega=eKS)
 
   complex(dpc),allocatable :: frohl_dvals_de0ks(:,:)
-   ! frohl_dvals_de0ks(ntemp, max_nbcalc) for fixed (kcalc, spin)
+   ! frohl_dvals_de0ks(ntemp, max_nbcalc) for given (ikcalc, spin)
    ! d Re Sigma_frohl(omega, kT, band, kcalc, spin) / d omega (omega=eKS)
 
   real(dp),allocatable :: dw_vals(:,:)
-  !  dw_vals(ntemp, max_nbcalc) for fixed (kcalc, spin)
+  !  dw_vals(ntemp, max_nbcalc) for given (ikcalc, spin)
   !  Debye-Waller term (static).
 
   !real(dp),allocatable :: qpoms_enes(:,:)
@@ -452,13 +458,13 @@ module m_sigmaph
 
   complex(dpc),allocatable :: vals_wr(:,:,:)
    ! vals_wr(nwr, ntemp, max_nbcalc)
-   ! Sigma_eph(omega, kT, band) for given (k, spin).
+   ! Sigma_eph(omega, kT, band) for given (ikcalc, spin).
    ! enk_KS corresponds to nwr/2 + 1.
    ! This array depends on (ikcalc, spin)
 
   complex(dpc),allocatable :: frohl_vals_wr(:,:,:)
    ! frohl_vals_wr(nwr, ntemp, max_nbcalc)
-   ! Sigma_frohl(omega, kT, band) for given (k, spin).
+   ! Sigma_frohl(omega, kT, band) for given (ikcalc, spin).
    ! enk_KS corresponds to nwr/2 + 1.
    ! This array depends on (ikcalc, spin)
 
@@ -530,8 +536,8 @@ module m_sigmaph
  end type sigmaph_t
 !!***
 
- public :: sigmaph         ! Main entry point to compute self-energy matrix elements
- public :: sigmaph_read    ! Read main dimensions and header of sigmaph from a netcdf file.
+ public :: sigmaph        ! Main entry point to compute self-energy matrix elements
+ public :: sigmaph_read   ! Read main dimensions and header of sigmaph from a netcdf file.
  private :: sigmaph_new   ! Creation method (allocates memory, initialize data from input vars).
 
  real(dp),private,parameter :: EPH_WTOL = tol6
@@ -1048,6 +1054,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Loop over k-points in Sigma_nk. Loop over spin is internal as we operate on nspden components at once.
  do ikcalc=1,sigma%nkcalc
+   !ikcalc = sigma%my_ikcalc(ii)
+
    ! Check if this (kpoint, spin) was already calculated
    if (all(sigma%qp_done(ikcalc, :) == 1)) cycle
    call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
@@ -1476,6 +1484,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! Save data for Debye-Waller that is performed outside the q-loop.
            if (isqzero) stern_dw(:,:,:,ib_k) = stern_ppb(:,:,:,ib_k)
          end do
+         if (isqzero) call xmpi_sum(stern_dw, sigma%comm_bsum, ierr)
 
          ! Compute contribution to Fan-Migdal for M > sigma%nbsum
          do imyp=1,my_npert
@@ -2582,7 +2591,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ! ========================
  ! Init for sequential execution.
  new%comm_pert = xmpi_comm_self; new%my_npert = natom3; new%me_pert = 0; new%nprocs_pert = 1
- new%comm_bq = xmpi_comm_self; new%me_bq = 0; new%nprocs_bq = 1
+ new%comm_qb = xmpi_comm_self; new%me_qb = 0; new%nprocs_qb = 1
  new%comm_qpt = xmpi_comm_self; new%me_qpt = 0; new%nprocs_qpt = 1
  new%comm_bsum = xmpi_comm_self; new%me_bsum = 0; new%nprocs_bsum = 1
 
@@ -2635,8 +2644,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
          exit
        end if
      end do
-     ! This to recover the previous behaviour in Re-Im that is OK
-     !new%nprocs_bsum = nrest; new%nprocs_qpt = 1
    end if
  end if
 
@@ -2686,8 +2693,12 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  ! Create communicator for the (band_sum, qpoint_sum) loops
  keepdim = .False.; keepdim(2:3) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, new%comm_bq, ierr)
- call MPI_COMM_RANK(new%comm_bq, new%me_bq, ierr)
+ call MPI_CART_SUB(comm_cart, keepdim, new%comm_qb, ierr)
+ call MPI_COMM_RANK(new%comm_qb, new%me_qb, ierr)
+
+ !keepdim = .False.; keepdim(1:3) = .True.
+ !call MPI_CART_SUB(comm_cart, keepdim, new%comm_pqb, ierr)
+ !call MPI_COMM_RANK(new%comm_pqb, new%me_pqb, ierr)
 
  ABI_FREE(dims)
  ABI_FREE(periods)
@@ -3754,7 +3765,7 @@ subroutine sigmaph_free(self)
  call xmpi_comm_free(self%comm_qpt)
  call xmpi_comm_free(self%comm_bsum)
  !call xmpi_comm_free(self%comm_kcalc)
- call xmpi_comm_free(self%comm_bq)
+ call xmpi_comm_free(self%comm_qb)
 
  ! Close netcdf file.
 #ifdef HAVE_NETCDF
@@ -3878,7 +3889,6 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
 
  call cwtime_report(" lgroup_symsigma", cpu, wall, gflops)
 
- !if (self%symsigma == 0 .or. .true.) then
  if (self%symsigma == 0) then
    ! Find correspondence IBZ_k --> IBZ
    ABI_MALLOC(iqk2dvdb, (self%nqibz_k, 6))
@@ -3896,7 +3906,8 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
      self%ind_ibzk2ibz(:, iq_ibz) = iqk2dvdb(iq_ibz, :)
    end do
    ABI_FREE(iqk2dvdb)
- elseif (abs(self%symsigma) == 1) then
+
+ else if (abs(self%symsigma) == 1) then
    ! IBZ_k --> BZ --> IBZ
    ABI_REMALLOC(self%ind_ibzk2ibz, (6, self%nqibz_k))
    self%ind_ibzk2ibz = 0
@@ -3908,7 +3919,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
      isym_k   = lgk_ptr%bz2ibz_smap(2,ikpt)
      itim_k   = lgk_ptr%bz2ibz_smap(3,ikpt)
      ! I assume that isym=1 and itim_k=0 is identity but still verify the kpoint
-     if (isym_k /= 1 .or. itim_k /= 1 .or. any(lgk_ptr%bz2ibz_smap(4:,ikpt)/=0)) cycle
+     if (isym_k /= 1 .or. itim_k /= 1 .or. any(lgk_ptr%bz2ibz_smap(4:,ikpt) /= 0)) cycle
      ! check IBZ_k --> BZ
      ABI_CHECK(sum(abs(self%qbz(:,ikpt) - self%qibz_k(:,ibz_k))) < tol8, 'Wrong mapping')
      ! IBZ_k --> IBZ
@@ -4792,19 +4803,19 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
       nu = sigma%my_pinfo(3, imyp)
 
       ! HM: This one should be faster but uses more memory, I compute for each ib instead
-      ! Compute weights inside comm_bq
+      ! Compute weights inside comm_qb
       !call sigma%ephwg%get_deltas_wvals(ibsum_kq, spin, nu, nbcalc_ks, &
       !                                  ebands%eig(bstart_ks:bstart_ks+nbcalc_ks, ik_ibz, spin), &
-      !                                  sigma%bcorr, tmp_deltaw_pm, sigma%comm_bq)
+      !                                  sigma%bcorr, tmp_deltaw_pm, sigma%comm_qb)
 
       ! loop over bands in self-energy matrix elements.
       do ib_k=1,nbcalc_ks
         band_ks = ib_k + bstart_ks - 1
         eig0nk = ebands%eig(band_ks, ik_ibz, spin)
 
-        ! Compute weights inside comm_bq
+        ! Compute weights inside comm_qb
         call sigma%ephwg%get_deltas_wvals(ibsum_kq, spin, nu, 1, [eig0nk], &
-                                          sigma%bcorr, tmp_deltaw_pm, sigma%comm_bq)
+                                          sigma%bcorr, tmp_deltaw_pm, sigma%comm_qb)
 
         ! For all the q-points that I am going to calculate
         do imyq=1,sigma%my_nqibz_k
