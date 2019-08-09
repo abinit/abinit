@@ -12749,12 +12749,11 @@ Variable(
     mnemonics="PAW - choice for eXchange-Correlation DEVelopment (spherical part)",
     requires="[[usepaw]] == 1",
     text=r"""
-  * If set to 0, the exchange-correlation term in the spherical part of energy is totally computed on the angular mesh
+  * If set to 0, the exchange-correlation term in the spherical part of energy is totally computed on the angular mesh (time consuming but exact!)
   * If set to 1, the exchange-correlation term in the spherical part of energy is developed onto lm-moments at order 1
   * If set to 2, the exchange-correlation term in the spherical part of energy is developed onto lm-moments at order 2
-    (can be memory/CPU consuming)
 
-Be careful: GGA requires [[pawxcdev]] > 0
+Be careful: Response function (DFPT) + PAW + GGA requires [[pawxcdev]] = 0. But if you plan to do DFPT calculations, it is better to use this option also in the preliminary ground state calculation.
 """,
 ),
 
