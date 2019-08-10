@@ -55,6 +55,7 @@ MODULE m_xmpi
 
 #ifdef HAVE_MPI
  ! MPI constants used in abinit. Make sure that a corresponding fake value is provided for the sequential version.
+ integer,public,parameter :: xmpi_paral          = 1
  integer,public,parameter :: xmpi_world          = MPI_COMM_WORLD
  integer,public,parameter :: xmpi_comm_self      = MPI_COMM_SELF
  integer,public,parameter :: xmpi_undefined      = MPI_UNDEFINED
@@ -64,21 +65,22 @@ MODULE m_xmpi
  integer,public,parameter :: xmpi_any_source     = MPI_ANY_SOURCE
  integer,public,parameter :: xmpi_request_null   = MPI_REQUEST_NULL
  integer,public,parameter :: xmpi_msg_len        = MPI_MAX_ERROR_STRING ! Length of fortran string used to store MPI error strings.
- integer,public,parameter :: xmpi_paral          = 1
  integer,public,parameter :: xmpi_info_null      = MPI_INFO_NULL
  integer,public,parameter :: xmpi_success        = MPI_SUCCESS
 #else
- ! Fake replacements for the sequential version.
- integer,public,parameter :: xmpi_world          = 0
- integer,public,parameter :: xmpi_comm_self      = 0
- integer,public,parameter :: xmpi_undefined      =-32765
- integer,public,parameter :: xmpi_undefined_rank =-32766
- integer,public,parameter :: xmpi_comm_null      = 0
- integer,public,parameter :: xmpi_group_null     = 0
- integer,public,parameter :: xmpi_any_source     = 0
- integer,public,parameter :: xmpi_request_null   = 738197504
- integer,public,parameter :: xmpi_msg_len        = 1000
+ ! Fake replacements for the sequential version. Values are taken from
+ ! http://www.mit.edu/course/13/13.715/sun-hpc-ct-8.2.1/Linux/sun/include/mpif-common.h
+ ! Please use these conventions when adding new replacements in order to avoid collisions between values.
  integer,public,parameter :: xmpi_paral          = 0
+ integer,public,parameter :: xmpi_world          = 0
+ integer,public,parameter :: xmpi_comm_self      = 1
+ integer,public,parameter :: xmpi_undefined      =-32766
+ integer,public,parameter :: xmpi_undefined_rank =-32766
+ integer,public,parameter :: xmpi_comm_null      = 2
+ integer,public,parameter :: xmpi_group_null     = 0
+ integer,public,parameter :: xmpi_any_source     = -1
+ integer,public,parameter :: xmpi_request_null   = 0
+ integer,public,parameter :: xmpi_msg_len        = 1000
  integer,public,parameter :: xmpi_info_null      = 0
  integer,public,parameter :: xmpi_success        = 0
 #endif
