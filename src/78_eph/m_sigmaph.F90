@@ -303,10 +303,14 @@ module m_sigmaph
     !kcalc2ibz(nkcalc, 6))
     ! Mapping ikcalc --> ibz as reported by listkk.
 
-  !integer :: my_nspins
-  !integer,allocatable :: my_spins(:)
+  integer :: my_nspins
+    ! Number of spins treated by this MPI rank
+
+  integer,allocatable :: my_spins(:)
 
   integer :: my_nkcalc
+    ! Number of k-points treated by this MPI rank
+
   integer,allocatable :: my_ikcalc(:)
     ! my_ikcalc(my_nkcalc)
     ! List of ikcalc indices treated by this pool if k-point parallelism is activated.
@@ -2122,6 +2126,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call ddkop%free()
  call sigma%free()
 
+ ! This to make sure that the parallel output of SIGEPH is completed
+ call xmpi_barrier(comm)
+
 end subroutine sigmaph
 !!***
 
@@ -2622,7 +2629,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  new%comm_spin = xmpi_comm_self; new%me_spin = 0; new%nprocs_spin = 1
  new%comm_pqb = xmpi_comm_self; new%me_pqb = 0; new%nprocs_pqb = 1
 
-
  if (any(dtset%eph_np_pqbks /= 0)) then
    ! Use parameters from input file.
    new%nprocs_pert = dtset%eph_np_pqbks(1)
@@ -2751,21 +2757,29 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  new%my_ikcalc = [(bstart + (ii - 1), ii=1, new%my_nkcalc)]
 
  ! Distribute spins and create mapping to spin index.
- !call xmpi_split_work(new%nsppol, new%comm_spin, bstart, bstop)
- !ABI_CHECK(bstop >= bstart, sjoin("nsppol (", itoa(new%nsppol), ") < nprocs_spin (", itoa(new%nprocs_spin), ")"))
- !new%my_nspins = bstop - bstart + 1
- !ABI_MALLOC(new%my_spins, (new%my_nspins))
- !new%my_spins = [(bstart + (ii - 1), ii=1, new%my_nspins)]
+ if (new%nspinor == 1) then
+   call xmpi_split_work(new%nsppol, new%comm_spin, bstart, bstop)
+   ABI_CHECK(bstop >= bstart, sjoin("nsppol (", itoa(new%nsppol), ") < nprocs_spin (", itoa(new%nprocs_spin), ")"))
+   new%my_nspins = bstop - bstart + 1
+   ABI_MALLOC(new%my_spins, (new%my_nspins))
+   new%my_spins = [(bstart + (ii - 1), ii=1, new%my_nspins)]
+ else
+   NOT_IMPLEMENTED_ERROR()
+ end if
 
  ! Create MPI communicator for parallel netcdf IO used to write results for the different k-points.
  ! This communicator is defined only on the processes that perform IO.
  new%comm_ncwrite = xmpi_comm_null; new%me_ncwrite = -1; new%nprocs_ncwrite = 0
  if (new%nprocs_kcalc == 1 .and. new%nprocs_spin == 1) then
+   ! Easy-peasy: only master rank performs IO.
    if (my_rank == master) then
      new%comm_ncwrite = xmpi_comm_self; new%me_ncwrite = 0; new%nprocs_ncwrite = 1
    end if
  else
-    MSG_WARNING("Building comm_ncwrite")
+    ! Create subcommunicator by selecting one proc per kpoint-spin subgrid.
+    ! Since we write to ab_out in sigmaph_gather_and_write, make sure that ab_out is connected!
+    ! Remember that now all nc define operations must be done inside comm_ncwrite
+    ! Obviously I'm assuming HDF5 + MPI-IO
     new%comm_ncwrite = xmpi_comm_self
     color = xmpi_undefined; if (all(new%coords(1:3) == 0)) color = 1
     call xmpi_comm_split(comm, color, my_rank, new%comm_ncwrite, ierr)
@@ -2774,7 +2788,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
       new%nprocs_ncwrite = xmpi_comm_size(new%comm_ncwrite)
       write(std_out, *)"me_ncwrite:", new%me_ncwrite, "nprocs_ncwrite:", new%nprocs_ncwrite
       if (.not. is_open(ab_out)) then
-       if (open_file(strcat("foo_rank", itoa(new%me_ncwrite)), msg, unit=ab_out, action="write", status='unknown') /= 0) then
+       if (open_file(strcat(dtfil%filnam_ds(2), "_rank_", itoa(new%me_ncwrite)), msg, unit=ab_out, &
+           action="write", status='unknown') /= 0) then
          MSG_ERROR(msg)
        end if
       end if
@@ -3775,6 +3790,7 @@ subroutine sigmaph_free(self)
  ABI_SFREE(self%nbcalc_ks)
  ABI_SFREE(self%kcalc2ibz)
  ABI_SFREE(self%my_ikcalc)
+ ABI_SFREE(self%my_spins)
  ABI_SFREE(self%myq2ibz_k)
  ABI_SFREE(self%itreat_qibz)
  ABI_SFREE(self%my_pinfo)
@@ -4805,9 +4821,9 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt, "(2(a,i0))")"P Number of q-points in the IBZ treated by this proc: " , &
      count(self%itreat_qibz == 1), " of ", self%nqibz
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over bands: ", self%nprocs_bsum
- !write(unt, "(a,i0)")"P Number of CPUs for parallelism over spins: ", self%nprocs_spin
- !write(unt, "(a,i0)")"P Number of CPUs for parallelism over k-points: ", self%nprocs_kcalc
- !write(unt, "(a,i0)")"P Number of k-point in Sigma_nk treated by this proc: ", len(self%my_ikcalc)
+ write(unt, "(a,i0)")"P Number of CPUs for parallelism over spins: ", self%nprocs_spin
+ write(unt, "(a,i0)")"P Number of CPUs for parallelism over k-points: ", self%nprocs_kcalc
+ write(unt, "(2(a,i0))")"P Number of k-point in Sigma_nk treated by this proc: ", self%my_nkcalc, " of ", self%nkcalc
 
 end subroutine sigmaph_print
 !!***

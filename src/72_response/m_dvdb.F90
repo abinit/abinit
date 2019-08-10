@@ -3004,6 +3004,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  end do ! iq_ibz
 
  ABI_CHECK(iqst == nqbz, "iqst /= nqbz")
+ call wrtout(std_out, ch10//ch10)
 
  ABI_FREE(iperm)
  ABI_FREE(emiqr)
@@ -4039,8 +4040,8 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
 
  call timab(1808, 1, tsec)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
- call wrtout(std_out, " Precomputing Vscf(q) from W(R,r) and building qcache...", do_flush=.True.)
 
+ call wrtout(std_out, ch10//" Precomputing Vscf(q) from W(R,r) and building qcache...", do_flush=.True.)
  db%ft_qcache = qcache_new(nqibz, nfft, ngfft, mbsize, db%natom3, db%my_npert, db%nspden)
  db%ft_qcache%itreatq(:) = itreatq
 

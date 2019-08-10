@@ -1376,7 +1376,7 @@ type dataset_type
   ! so that we can easily test for path /= ABI_NOFILE instead of getwfk /= 0 or irdwfk /= 0
 
   character(len=fnlen) :: filnam_ds(5)
-   ! if no dataset mode, the five names from the standard input :
+   ! if no dataset mode, the five names from the standard input:
    !   ab_in, ab_out, abi, abo, tmp
    ! if dataset mode, the same 5 filenames, appended with //'_DS'//trim(jdtset)
 

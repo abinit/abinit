@@ -114,7 +114,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 !scalars
  integer :: bantot,iatom,iband,ii,iimage,ikpt,isppol,nocc
  real(dp) :: maxocc,nelect_occ,nelect_spin,occlast,sign_spin,zval
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp),allocatable :: tmpocc(:)
 
@@ -204,7 +204,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
          end if
          !write(std_out,*)' dtset%nband(1),maxocc,occlast=',dtset%nband(1),maxocc,occlast
          if(dtset%nband(1)*nint(maxocc)<nocc)then
-           write(message, '(a,i0,a, a,2i0,a, a,es16.6,a, a,es16.6,6a)' )&
+           write(msg, '(a,i0,a, a,2i0,a, a,es16.6,a, a,es16.6,6a)' )&
            'Initialization of occ, with nspden = ',dtset%nspden,ch10,&
            'number of bands = ',dtset%nband(1:2),ch10,&
            'number of electrons = ',dtset%nelect,ch10,&
@@ -212,7 +212,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
            'This combination is not possible, because of a lack of bands.',ch10,&
            'Action: modify input file ... ',ch10,&
            '(you should likely increase nband, but also check nspden, nspinor, nsppol, and spinmagntarget)'
-           MSG_ERROR(message)
+           MSG_ERROR(msg)
          end if
          do ikpt=1,dtset%nkpt
            ! Fill all bands, except the upper one
@@ -227,40 +227,40 @@ subroutine dtset_chkneu(charge,dtset,occopt)
        end do
 
      else
-       write(message, '(a,i0,a,a,es16.6,6a)' )&
+       write(msg, '(a,i0,a,a,es16.6,6a)' )&
        'Initialization of occ, with nspden = ',dtset%nspden,ch10,&
        'and spinmagntarget = ',dtset%spinmagntarget,ch10,&
        'This combination is not possible.',ch10,&
        'Action: modify input file ... ',ch10,&
        '(check nspden, nspinor, nsppol and spinmagntarget)'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
 
      ! Now print the values (only the first image, since they are all the same)
      if(dtset%nsppol==1)then
        if (dtset%prtvol > 0) then
-         write(message, '(a,i0,a,a)' ) &
+         write(msg, '(a,i0,a,a)' ) &
           ' chkneu: initialized the occupation numbers for occopt= ',occopt,', spin-unpolarized or antiferromagnetic case:'
-         call wrtout(std_out,message,'COLL')
+         call wrtout(std_out,msg)
          do ii=0,(dtset%nband(1)-1)/12
-           write(message,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)),1 )
-           call wrtout(std_out,message,'COLL')
+           write(msg,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)),1 )
+           call wrtout(std_out,msg)
          end do
        end if
      else
-       write(message, '(a,i0,2a)' ) &
+       write(msg, '(a,i0,2a)' ) &
         ' dtset_chkneu: initialized the occupation numbers for occopt= ',occopt,ch10,'    spin up   values:'
-       call wrtout(std_out,message,'COLL')
+       call wrtout(std_out,msg)
        if (dtset%prtvol > 0) then
          do ii=0,(dtset%nband(1)-1)/12
-           write(message,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)),1 )
-           call wrtout(std_out,message,'COLL')
+           write(msg,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)),1 )
+           call wrtout(std_out,msg)
          end do
-         call wrtout(std_out,'    spin down values:','COLL')
+         call wrtout(std_out,'    spin down values:')
          do ii=0,(dtset%nband(1)-1)/12
-           write(message,'(12f6.2)') &
+           write(msg,'(12f6.2)') &
              dtset%occ_orig( 1+ii*12+dtset%nkpt*dtset%nband(1) : min(12+ii*12,dtset%nband(1))+dtset%nkpt*dtset%nband(1) ,1)
-           call wrtout(std_out,message,'COLL')
+           call wrtout(std_out,msg)
          end do
        end if
 
@@ -268,13 +268,13 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 
 !    Here, treat the case when the number of allowed bands is not large enough
    else
-     write(message, '(a,i0,8a)' )&
+     write(msg, '(a,i0,8a)' )&
      'Initialization of occ, with occopt: ',occopt,ch10,&
      'There are not enough bands to get charge balance right',ch10,&
      'Action: modify input file ... ',ch10,&
      '(check the pseudopotential charges, the variable charge,',ch10,&
      'and the declared number of bands, nband)'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
  end if
 
@@ -302,35 +302,35 @@ subroutine dtset_chkneu(charge,dtset,occopt)
      if (abs(nelect_occ-dtset%nelect)>tol11 .and. dtset%iscf/=-3) then
 
 !      There is a discrepancy
-       write(message, &
+       write(msg, &
        '(a,a,e16.8,a,e16.8,a,a,a,e22.14,a,a,a,i5,a,a,a,a)' ) ch10,&
        ' chkneu: nelect_occ=',nelect_occ,', zval=',zval,',',ch10,&
        '         and input value of charge=',charge,',',ch10,&
        '   nelec_occ is computed from occ and wtk, iimage=',iimage,ch10,&
        '   zval is nominal charge of all nuclei, computed from zion (read in psp),',ch10,&
        '   charge is an input variable (usually 0).'
-       call wrtout(std_out,message,'COLL')
+       call wrtout(std_out,msg)
 
        if (abs(nelect_occ-dtset%nelect)>tol8) then
 !        The discrepancy is severe
-         write(message,'(a,a,e9.2,a,a)')ch10,&
+         write(msg,'(a,a,e9.2,a,a)')ch10,&
          'These must obey zval-nelect_occ=charge to better than ',tol8,ch10,&
          ' This is not the case. '
        else
 !        The discrepancy is not so severe
-         write(message, '(2a,e9.2)' )ch10,'These should obey zval-nelect_occ=charge to better than ',tol11
+         write(msg, '(2a,e9.2)' )ch10,'These should obey zval-nelect_occ=charge to better than ',tol11
        end if
-       MSG_WARNING(message)
+       MSG_WARNING(msg)
 
-       write(message, '(a,a,a,a,a,a)' ) &
+       write(msg, '(a,a,a,a,a,a)' ) &
        'Action: check input file for occ,wtk, and charge.',ch10,&
        'Note that wtk is NOT automatically normalized when occopt=2,',ch10,&
        'but IS automatically normalized otherwise.',ch10
-       call wrtout(std_out,message,'COLL')
+       call wrtout(std_out,msg)
 
 !      If the discrepancy is severe, stop
        if (abs(nelect_occ-dtset%nelect)>tol8)then
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
 
      end if
@@ -1400,8 +1400,7 @@ subroutine find_getdtset(dtsets,getvalue,getname,idtset,iget,miximage,mxnimage,n
    end if
    write(msg, '(3a,i3,2a)' )&
 &   ' find_getdtset : ',trim(getname),'/=0, take data from output of dataset with index',dtsets(iget)%jdtset,'.',ch10
-   call wrtout(ab_out,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
  end if
 
 !For the time being, uses a simple interpolation when the images do not match. If only one image, take the first get image.
@@ -1465,7 +1464,7 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
  integer :: icase,idir,ikpt,ikpt1,ipert,isppol,isym,maxidir,mpert,nband_k,nsym1,timrev,timrev_pert
  integer :: to_compute_this_pert
  real(dp) :: tolsym8,ucvol
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: rfdir(9),rf2dir(9),rf2_dir1(3),rf2_dir2(3)
  integer,allocatable :: indkpt1(:,:),indsym(:,:,:),pertsy(:,:),rfpert(:),symq(:,:,:),symrec(:,:,:)
@@ -1531,11 +1530,11 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
 !         npert = npert+1;
 !         pert_tmp(npert) = idir+(ipert-1)*3;
 !       else
-!         write(message, '(a,a,i0,a,i0,a,a,a,a,a,a)' )ch10,&
+!         write(msg, '(a,a,i0,a,i0,a,a,a,a,a,a)' )ch10,&
 !&         'The perturbation idir=',idir,'  ipert=',ipert,' is',ch10,&
 !&         'symmetric of a previously calculated perturbation.',ch10,&
 !&         'So, its SCF calculation is not needed.',ch10
-!         call wrtout(std_out,message,'COLL')
+!         call wrtout(std_out,msg,'COLL')
 !       end if ! Test of existence of symmetry of perturbation
 !     end if ! Test of existence of perturbation
 !   end do
@@ -1585,11 +1584,11 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
          pert_tmp(1,npert) = ipert
          pert_tmp(2,npert) = idir
        else
-         write(message, '(a,a,i4,a,i4,a,a,a,a,a,a)' )ch10,&
+         write(msg, '(a,a,i4,a,i4,a,a,a,a,a,a)' )ch10,&
            ' The perturbation idir=',idir,'  ipert=',ipert,' is',ch10,&
            ' symmetric of a previously calculated perturbation.',ch10,&
            ' So, its SCF calculation is not needed.',ch10
-         call wrtout(std_out,message,'COLL')
+         call wrtout(std_out,msg)
        end if ! Test of existence of symmetry of perturbation
      end if ! Test of existence of perturbation
    end do
@@ -1839,7 +1838,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
  integer,allocatable :: intarr(:)
  real(dp) :: ecutmax(3),ecutdgmax(3)
  real(dp),allocatable :: dprarr(:)
- character(len=500) :: message
+ character(len=500) :: msg
 !******************************************************************
 
  do idtset=1,ndtset_alloc
@@ -2015,10 +2014,10 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%prteig=1
        dtsets(idtset)%prtden=1
      elseif(dtsets(idtset)%accuracy>6)then
-       write(message, '(a,a,a)' )&
+       write(msg, '(a,a,a)' )&
          'accuracy >6 is forbidden !',ch10,&
          'Action: check your input data file.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
    else
      if (ecutmax(3)>zero) dtsets(idtset)%ecut=ecutmax(3)

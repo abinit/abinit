@@ -19709,24 +19709,30 @@ The maximum valus for **np** is 3 * [[natom]] and the workload is equally distri
 divides 3 * [[natom]] equally. 
 Using **np** == [[natom]] usually gives good parallel efficiency.
 
-The parallelization over bands (**nb**) has limited scalability but it allows one to reduce the memory
+The parallelization over bands (**nb**) has limited scalability that depends on the number of bands includes 
+in the self-energy but it allows one to reduce the memory
 allocated for the wavefunctions, especially when we have to sum over empty states.
 
 [[eph_task]] = +4
-:   Parallelization over k-points and spin is not yet implemented hence use 1 for these entries.
     Parallelization over bands allows one to reduce the memory needed for the wavefunctions but
     this level is less efficient than the parallelization over q-points and perturbations.
     To avoid load and memory imbalance, **nb** should divide [[nband]].
     We suggest to increase the number of procs for bands until the memory allocated for the wavefunctions
-    decreases to a reasonable level and then use the remaining procs for **nq** and **np** in this order.
+    decreases to a reasonable level and then use the remaining procs for **nq** and **np** in this order 
+    until these levels start to saturate.
+    The MPI parallelism over k-points and spins is efficient at the level of the wall-time 
+    but it requires HDF5 + MPI-IO support and memory does not scale. Use these additional levels if the memory requirements
+    are under control and you need to boost the calculation. Note also that in this case the output results are written to
+    different text files, only the SIGEPH.nc file will contains all the k-points and spins.
+
 
 [[eph_task]] = -4
-:   Parallelization over k-points and spin is not yet implemented hence use 1 for these entries.
     The number of bands in the self-energy sum is usually small so it does not make sense to
     parallelize along this dimension. The parallelization over q-points seem to be more efficient than
     the one over perturbations although it introduces some load imbalance because, due to memory reasons, 
     the code distributes the q-points in the IBZ (nqibz) instead of the q-points in the full BZ (nqbz).
-    Moreover non all the q-points in the IBZ contribute to the imaginary part of $$\Sigma_nk$$ 
+    Moreover non all the q-points in the IBZ contribute to the imaginary part of $$\Sigma_nk$$.
+    The MPI parallelism over k-points and spins is supported with similar behaviour as in **eph_task** +4.
 
 
 !!! important
