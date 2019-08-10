@@ -897,7 +897,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  if (my_rank == master) then
    !NCF_CHECK(nctk_set_defmode(sigma%ncid))
    !NCF_CHECK(nctk_def_arrays(sigma%ncid, [nctkarr_t("vcar_calc", "dp", "three, max_nbcalc, nkcalc, nsppol")]))
-   NCF_CHECK(nctk_set_datamode(sigma%ncid))
+   !NCF_CHECK(nctk_set_datamode(sigma%ncid))
    NCF_CHECK(nf90_put_var(sigma%ncid, nctk_idname(sigma%ncid, "vcar_calc"), sigma%vcar_calc))
  end if
 #endif
@@ -2045,7 +2045,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                  sigma%gfw_vals(:, ii, ib_k) = sigma%gfw_vals(:, ii, ib_k) +  &
                    sigma%gf_nnuq(ib_k, nu, iq_ibz, ii) * dtw_weights(:, 1) * sigma%wtq_k(iq_ibz)
                end do
-
              end do
            end do
          end do
@@ -2775,7 +2774,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
       new%nprocs_ncwrite = xmpi_comm_size(new%comm_ncwrite)
       write(std_out, *)"me_ncwrite:", new%me_ncwrite, "nprocs_ncwrite:", new%nprocs_ncwrite
       if (.not. is_open(ab_out)) then
-       if (open_file(strcat("foo_rank:", itoa(new%me_ncwrite)), msg, unit=ab_out, status='unknown') /= 0) then
+       if (open_file(strcat("foo_rank", itoa(new%me_ncwrite)), msg, unit=ab_out, action="write", status='unknown') /= 0) then
          MSG_ERROR(msg)
        end if
       end if
@@ -3353,6 +3352,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
  ! Now reopen the file inside comm_ncwrite to perform pararallel-IO (required for k-point parallelism).
  if (self%comm_ncwrite /= xmpi_comm_null) then
    NCF_CHECK(nctk_open_modify(self%ncid, path, self%comm_ncwrite))
+   NCF_CHECK(nctk_set_datamode(self%ncid))
  end if
 #endif
 
