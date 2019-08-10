@@ -50,7 +50,7 @@ MODULE m_ebands
  use defs_abitypes,    only : hdr_type, dataset_type
  use m_copy,           only : alloc_copy
  use m_io_tools,       only : file_exists, open_file
- use m_time,           only : cwtime, sec2str
+ use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename, replace
  use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson_int, wrap2_zero_one, &
                               isdiagmat
@@ -4219,8 +4219,7 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
  !integer :: my_nkibz, nkfull, timrev
  integer :: ii, jj, ief
  real(dp) :: max_ene,min_ene,wtk,max_occ
- !real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
- !real(dp) :: dksqmax
+ real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  type(stats_t) :: ediffs
  type(htetra_t) :: tetra
@@ -4282,8 +4281,8 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
    ABI_CALLOC(out_tensdos,  (nw, 2, 0:ebands%nsppol, 3, 3, ntens))
  end if
 
-! call cwtime(cpu_all, wall_all, gflops_all, "start")
-! call wrtout(std_out, "Computing DOS weighted by matrix elements.")
+ call cwtime(cpu, wall, gflops, "start")
+ call wrtout(std_out, "Computing DOS weighted by matrix elements.")
 
 select case (intmeth)
  case (1)
@@ -4430,9 +4429,7 @@ select case (intmeth)
    MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
  end select
 
-! call cwtime(cpu_all, wall_all, gflops_all, "stop")
-! call wrtout(std_out, sjoin("Computation of DOS weighted by matrix elements completed. cpu-time:", sec2str(cpu_all), ",wall-time:", &
-!   sec2str(wall_all)), do_flush=.True.)
+
 
  ! Compute total DOS and IDOS
  max_occ = two/(ebands%nspinor*ebands%nsppol)
@@ -4462,6 +4459,8 @@ select case (intmeth)
  do spin=0,edos%nsppol
    edos%gef(spin) = edos%dos(ief,spin)
  end do
+
+ call cwtime_report("Computation of DOS weighted by matrix elements", cpu, wall, gflops)
 
 contains
  function symmetrize_vector(cryst,v) result(vsum)
