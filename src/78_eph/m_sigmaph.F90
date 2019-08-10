@@ -645,7 +645,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
  integer :: nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
- integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikc,ikcalc,bstart,bstop,iatom
+ integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom
  integer :: comm_rpt, method
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val, cpu_stern, wall_stern, gflops_stern
@@ -967,10 +967,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  !* Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
  !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
- call init_hamiltonian(gs_hamkq,psps,pawtab,nspinor,nsppol,nspden,natom,&
-  dtset%typat,cryst%xred,nfft,mgfft,ngfft,cryst%rprimd,dtset%nloalg,&
-  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-  usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
+ call init_hamiltonian(gs_hamkq, psps, pawtab, nspinor, nsppol, nspden, natom,&
+  dtset%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg,&
+  comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab,&
+  usecprj=usecprj, ph1d=ph1d, nucdipmom=dtset%nucdipmom, use_gpu_cuda=dtset%use_gpu_cuda)
 
  ! Allocate work space arrays.
  ! vtrial and vlocal are required for Sternheimer (H0). DFPT routines do not need it.
@@ -1004,15 +1004,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
 
- ! This to symmetrize the DFPT potentials.
- dvdb%symv1 = dtset%symv1scf
  if (sigma%nprocs_pert > 1) then
    call dvdb%set_pert_distrib(sigma%my_npert, natom3, sigma%my_pinfo, sigma%pert_table, sigma%comm_pert)
  end if
 
- sigma%use_ftinterp = .False.
-
  ! Find correspondence IBZ --> set of q-points in DVDB.
+ ! Activate FT interpolation automatically if required q-points in the IBZ are not found in the DVDB.
+ sigma%use_ftinterp = .False.
  ABI_MALLOC(sigma%ibz2dvdb, (sigma%nqibz))
  if (dvdb%find_qpts(sigma%nqibz, sigma%qibz, sigma%ibz2dvdb, comm) /= 0) then
    call wrtout([std_out, ab_out], " Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
@@ -1074,8 +1072,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_FREE(qselect)
 
  ! Loop over k-points in Sigma_nk. Loop over spin is internal as we operate on nspden components at once.
- do ikc=1,sigma%my_nkcalc
-   ikcalc = sigma%my_ikcalc(ikc)
+ do my_ikcalc=1,sigma%my_nkcalc
+   ikcalc = sigma%my_ikcalc(my_ikcalc)
 
    ! Check if this (kpoint, spin) was already calculated
    if (all(sigma%qp_done(ikcalc, :) == 1)) cycle
@@ -1084,7 +1082,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
    ! Find IBZ(k) for q-point integration.
    call cwtime(cpu_setk, wall_setk, gflops_setk, "start")
-   ! FIXME invert spin
+   ! FIXME invert spin but checks shape of the different arrays!
    call sigma%setup_kcalc(dtset, cryst, ebands, ikcalc, dtset%prtvol, sigma%comm_pqb)
 
    ! Symmetry indices for kk.
@@ -1092,7 +1090,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ik_ibz = sigma%kcalc2ibz(ikcalc, 1); isym_k = sigma%kcalc2ibz(ikcalc, 2)
    trev_k = sigma%kcalc2ibz(ikcalc, 6); g0_k = sigma%kcalc2ibz(ikcalc, 3:5)
    isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
-   ABI_CHECK(isirr_k, "For the time being the k-point must be in the IBZ")
+   ABI_CHECK(isirr_k, "For the time being the k-point in Sigma_{nk} must be in the IBZ")
    kk_ibz = ebands%kptns(:,ik_ibz)
    npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
 
