@@ -4282,7 +4282,7 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
  end if
 
  call cwtime(cpu, wall, gflops, "start")
- call wrtout(std_out, "Computing DOS weighted by matrix elements.")
+ !call wrtout(std_out, " Computing DOS weighted by matrix elements.")
 
 select case (intmeth)
  case (1)
@@ -4429,8 +4429,6 @@ select case (intmeth)
    MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
  end select
 
-
-
  ! Compute total DOS and IDOS
  max_occ = two/(ebands%nspinor*ebands%nsppol)
  edos%dos(:, 0) = max_occ * sum(edos%dos(:,1:), dim=2)
@@ -4460,7 +4458,7 @@ select case (intmeth)
    edos%gef(spin) = edos%dos(ief,spin)
  end do
 
- call cwtime_report("Computation of DOS weighted by matrix elements", cpu, wall, gflops)
+ call cwtime_report(" ebands_get_dos_matrix_elements", cpu, wall, gflops)
 
 contains
  function symmetrize_vector(cryst,v) result(vsum)
