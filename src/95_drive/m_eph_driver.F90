@@ -227,8 +227,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  comm = xmpi_world; nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
 #ifndef HAVE_MPI_IBCAST
- do ii=1,20
-   MSG_WARNING("Your MPI library does not provide MPI_IBCAST. Calculations will be slow")
+ do ii=1,5
+   MSG_WARNING("Your MPI library does not provide MPI_IBCAST. Calculations parallelized over perturbations will be slow")
  end do
 #endif
 

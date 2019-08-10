@@ -748,9 +748,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  if (restart == 0) then
    call sigma%write(dtset, cryst, ebands, wfk_hdr, dtfil, comm)
  else
-   if (my_rank == master) then
+   ! Open file inside comm_ncwrite to perform parallel IO if k
+   if (sigma%comm_ncwrite /= xmpi_comm_null) then
+   !if (my_rank == master) then
 #ifdef HAVE_NETCDF
-     NCF_CHECK(nctk_open_modify(sigma%ncid, sigeph_path, xmpi_comm_self))
+     !NCF_CHECK(nctk_open_modify(sigma%ncid, sigeph_path, xmpi_comm_self))
+     NCF_CHECK(nctk_open_modify(sigma%ncid, sigeph_path, sigma%comm_ncwrite))
+     NCF_CHECK(nctk_set_datamode(sigma%ncid))
 #endif
    end if
  end if
@@ -954,8 +958,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Prepare call to getgh1c
  usevnl = 0
- optlocal = 1  ! local part of H^(1) is computed in gh1c=<G|H^(1)|C>
- optnl = 2     ! non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
+ optlocal = 1   ! local part of H^(1) is computed in gh1c=<G|H^(1)|C>
+ optnl = 2      ! non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
  opt_gvnlx1 = 0 ! gvnlx1 is output
 
  ABI_MALLOC(grad_berry, (2, nspinor*(berryopt0/4)))
@@ -2748,11 +2752,14 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 #endif
 
  ! Distribute k-points and create mapping to ikcalc index.
- call xmpi_split_work(new%nkcalc, new%comm_kcalc, bstart, bstop)
- ABI_CHECK(bstop >= bstart, sjoin("nkcalc (", itoa(new%nkcalc), ") < nprocs_kcalc (", itoa(new%nprocs_kcalc), ")"))
- new%my_nkcalc = bstop - bstart + 1
- ABI_MALLOC(new%my_ikcalc, (new%my_nkcalc))
- new%my_ikcalc = [(bstart + (ii - 1), ii=1, new%my_nkcalc)]
+ !call xmpi_split_work(new%nkcalc, new%comm_kcalc, bstart, bstop)
+ !ABI_CHECK(bstop >= bstart, sjoin("nkcalc (", itoa(new%nkcalc), ") < nprocs_kcalc (", itoa(new%nprocs_kcalc), ")"))
+ !new%my_nkcalc = bstop - bstart + 1
+ !ABI_MALLOC(new%my_ikcalc, (new%my_nkcalc))
+ !new%my_ikcalc = [(bstart + (ii - 1), ii=1, new%my_nkcalc)]
+
+ call xmpi_split_cyclic(new%nkcalc, new%comm_kcalc, new%my_nkcalc, new%my_ikcalc)
+ ABI_CHECK(new%my_nkcalc > 0, sjoin("nkcalc (", itoa(new%nkcalc), ") < nprocs_kcalc (", itoa(new%nprocs_kcalc), ")"))
 
  ! Distribute spins and create mapping to spin index.
  if (new%nspinor == 1) then
@@ -2776,6 +2783,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  else
     ! Create subcommunicator by selecting one proc per kpoint-spin subgrid.
     ! Since we write to ab_out in sigmaph_gather_and_write, make sure that ab_out is connected!
+    ! This means Sigma_nk resuls will be spread among multiple ab_out files.
+    ! Only SIGPEH will contain all the results.
     ! Remember that now all nc define operations must be done inside comm_ncwrite
     ! Obviously I'm assuming HDF5 + MPI-IO
     new%comm_ncwrite = xmpi_comm_self
@@ -2787,7 +2796,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
       write(std_out, *)"me_ncwrite:", new%me_ncwrite, "nprocs_ncwrite:", new%nprocs_ncwrite
       if (.not. is_open(ab_out)) then
        if (open_file(strcat(dtfil%filnam_ds(2), "_rank_", itoa(new%me_ncwrite)), msg, unit=ab_out, &
-           action="write", status='unknown') /= 0) then
+           form="formatted", action="write", status='unknown') /= 0) then
          MSG_ERROR(msg)
        end if
       end if
@@ -3417,6 +3426,7 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  integer :: ncid, varid, ncerr
 #endif
  real(dp) :: eph_fermie, eph_fsewin, ph_wstep, ph_smear, eta, eph_extrael, eph_fsmear
+ real(dp) :: cpu, wall, gflops
  character(len=fnlen) :: path
 !arrays
  integer :: eph_task, symdynmat, ph_intmeth, eph_intmeth, eph_transport
@@ -3433,6 +3443,8 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  if (.not. file_exists(path)) then
    ierr = 1; return
  end if
+
+ call cwtime(cpu, wall, gflops, "start")
  NCF_CHECK(nctk_open_read(ncid, path, comm))
 
  !TODO?
@@ -3542,6 +3554,8 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  ABI_CHECK(all(dtset%sigma_ngkpt    == sigma_ngkpt),   "netcdf sigma_ngkpt != input file")
  !ABI_CHECK(all(abs(dtset%frohl_params - frohl_params) < tol6), "netcdf frohl_params != input file")
  !ABI_CHECK(all(abs(dtset%sigma_erange - sigma_erange) < tol6),  "netcdf sigma_erange != input file")
+
+ call cwtime_report(" sigmaph_read", cpu, wall, gflops)
 
 contains
  integer function vid(vname)

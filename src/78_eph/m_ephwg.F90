@@ -550,7 +550,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
                             eph_doublegrid%bz2lgkibz, timrev0, use_symrec=.true.)
 
  ! self%lgrp%ibz --> dg%bz
- ABI_CALLOC(lgkibz2bz,(self%lgk%nibz))
+ ABI_ICALLOC(lgkibz2bz, (self%lgk%nibz))
  do ii=1,self%nbz
    ik_idx = eph_doublegrid%bz2lgkibz(ii)
    lgkibz2bz(ik_idx) = ii

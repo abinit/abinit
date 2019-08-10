@@ -19688,7 +19688,8 @@ Variable(
 This variable defines the Cartesian grid of MPI processors used for EPH calculations.
 If not specified in the input, the code will generate this grid automatically using the total number of processors 
 and the basic dimensions of the job computed at runtime.
-At present (|today|), this variable is supported only in the calculation of the e-ph self-energy.
+At present (|today|), this variable is supported only in the calculation of the e-ph self-energy 
+i.e. [[eph_task]] 4 or -4. In all the other tasks, this variable is ignored.
 
 Preliminary considerations:
 

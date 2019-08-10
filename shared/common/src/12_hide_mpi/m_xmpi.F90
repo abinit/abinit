@@ -162,7 +162,8 @@ MODULE m_xmpi
  public :: xmpi_request_free          ! Hides MPI_REQUEST_FREE from MPI library.
  public :: xmpi_comm_set_errhandler   ! Hides MPI_COMM_SET_ERRHANDLER from MPI library.
  public :: xmpi_error_string          ! Return a string describing the error from ierr.
- public :: xmpi_split_work
+ public :: xmpi_split_work            ! Splits tasks inside communicator using blocks
+ public :: xmpi_split_cyclic          ! Splits tasks inside communicator using cyclic distribution.
  public :: xmpi_distab
  public :: xmpi_distrib_with_replicas ! Distribute tasks among MPI ranks (replicas are allowed)
 
@@ -2152,6 +2153,59 @@ subroutine xmpi_split_work_i4b(ntasks,comm,my_start,my_stop)
  end if
 
 end subroutine xmpi_split_work_i4b
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_split_cyclic
+!! NAME
+!!  split_work_i4b
+!!
+!! FUNCTION
+!!  Splits tasks inside communicator using cyclic distribution.
+!!  Used for the MPI parallelization of simple loops.
+!!
+!! INPUTS
+!!  ntasks: number of tasks
+!!  comm: MPI communicator.
+!!
+!! OUTPUT
+!!  my_ntasks: Number of tasks received by this rank. May be zero if ntasks > nprocs.
+!!  my_inds(my_ntasks): List of tasks treated by this rank. Allocated by the routine. May be zero-sized.
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+subroutine xmpi_split_cyclic(ntasks, comm, my_ntasks, my_inds)
+
+!Arguments ------------------------------------
+ integer,intent(in)  :: ntasks, comm
+ integer,intent(out) :: my_ntasks
+ integer,allocatable,intent(out) :: my_inds(:)
+
+!Local variables-------------------------------
+ integer :: ii, cnt, itask, my_rank, nprocs
+
+! *************************************************************************
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ do ii=1,2
+   if (ii == 2) then
+     ABI_MALLOC(my_inds, (my_ntasks))
+   end if
+   cnt = 0
+   do itask=1,ntasks
+     if (mod(itask, nprocs) == my_rank) then
+       cnt = cnt + 1
+       if (ii == 2) my_inds(cnt) = itask
+     end if
+   end do
+   if (ii == 1) my_ntasks = cnt
+ end do
+
+end subroutine xmpi_split_cyclic
 !!***
 
 !----------------------------------------------------------------------
