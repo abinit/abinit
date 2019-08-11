@@ -1732,7 +1732,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, mbsize, qselect_dvdb, itreatq, comm
    call db%readsym_allv1(db_iqpt, cplex, nfft, ngfft, v1scf, comm)
 
    ! Print progress.
-   if (db_iqpt <= 50 .or. mod(db_iqpt, 50) == 0) then
+   if (db_iqpt <= 10 .or. mod(db_iqpt, 50) == 0) then
      write(msg,'(2(a,i0),a)') " Reading q-point [",db_iqpt,"/",db%nqpt, "]"
      call cwtime_report(msg, cpu, wall, gflops)
    end if

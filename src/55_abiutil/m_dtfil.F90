@@ -34,8 +34,8 @@ module m_dtfil
  use m_build_info
 
  use m_clib,         only : clib_rename
- use m_fstrings,     only : int2char4, rmquotes
- use m_io_tools,     only : open_file
+ use m_fstrings,     only : int2char4, rmquotes, sjoin
+ use m_io_tools,     only : open_file, file_exists
  use m_libpaw_tools, only : libpaw_log_flag_set
 
  implicit none
@@ -969,6 +969,12 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
      filnam_out = rmquotes(getpath)
      write(msg, '(5a)' )' mkfilename: get',trim(stringvar) ," from: ",trim(filnam_out), ch10
      call wrtout([std_out, ab_out], msg)
+     ! Check whether file exists.
+     if (xmpi_comm_rank(xmpi_world) == 0) then
+       if (.not. file_exists(filnam_out)) then
+         MSG_ERROR(sjoin("Cannot find file:", filnam_out))
+       end if
+     end if
      will_read = 1; return
    end if
  end if
@@ -1119,7 +1125,7 @@ subroutine isfile(filnam, status)
        end if
        if ( ios /= 0 )  ioserr=ioserr+1
        if ( ioserr > 10 ) then
-!        There is a problem => stop
+         ! There is a problem => stop
          write(msg, '(2a,i0,2a)' )&
          'Check for permissions of reading/writing files on the filesystem', &
          '10 INQUIRE statements returned an error code like ',ios,ch10,&
@@ -1145,9 +1151,7 @@ subroutine isfile(filnam, status)
    end if
    ! if ii > 0 we iterated so rename abi_out to abi_outXXXX and just write to abi_out
  else
-   ! status not recognized
-   write(msg,'(3a)')' Input status= ',status,' not recognized.'
-   MSG_BUG(msg)
+   MSG_BUG(sjoin('Input status:', status, ' not recognized.'))
  end if
 
 end subroutine isfile

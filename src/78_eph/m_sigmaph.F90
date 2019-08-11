@@ -123,6 +123,10 @@ module m_sigmaph
  !  subroutine free(self)
  !    class(xcomm_t),intent(inout)
  !  end subroutine free
+ !  pure logical function itreat(self, iter)
+ !    class(xcomm_t),intent(in)
+ !    itreat = mod(iter, self%nprocs) /= self%me_bsum
+ !  end function
  end type xcomm_t
 
 !----------------------------------------------------------------------
@@ -958,7 +962,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Note that acoustic modes are ignored.
      do nu=4,natom3
-       wqnu = phfrq(nu); if (wqnu < EPH_WTOL) cycle
+       wqnu = phfrq(nu); if (sigma%skip_mode(nu, wqnu)) cycle
        cp3 = czero
        do iatom=1, natom
          cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), cmplx(displ_cart(1,:,iatom, nu), displ_cart(2,:,iatom, nu), kind=dpc))
@@ -977,7 +981,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      write(std_out, "(a)")" Note that this term tends to zero for N_q --> oo "
      write(std_out, "(a,/)")" so it's different from the integral of the Frohlich potential in the full BZ."
      do nu=1,natom3
-       write(std_out, "(a,i0,a,f8.3,a)")" For phonon mode: ", nu," sphcorr:", frohl_sphcorr(nu) * Ha_eV, " [eV]"
+       write(std_out, "(a,f8.1,a,i0,a,f8.1,a)")&
+         " Sphcorr:", frohl_sphcorr(nu) * Ha_meV, " (meV) for ph-mode: ", nu, "wqnu:", phfrq(nu) * Ha_meV, " (meV)"
      end do
      write(std_out, "(a)")ch10
    end if
@@ -993,10 +998,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! This part is taken from dfpt_vtorho
  !==== Initialize most of the Hamiltonian (and derivative) ====
- !1) Allocate all arrays and initialize quantities that do not depend on k and spin.
- !2) Perform the setup needed for the non-local factors:
- !* Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
- !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
+  !1) Allocate all arrays and initialize quantities that do not depend on k and spin.
+ ! 2) Perform the setup needed for the non-local factors:
+ !
+ ! Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
+ ! PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
  call init_hamiltonian(gs_hamkq, psps, pawtab, nspinor, nsppol, nspden, natom,&
   dtset%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg,&
@@ -1131,9 +1137,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_MALLOC(kg_kq, (3, mpw))
 
    ! Spherical Harmonics for useylm == 1.
-   ABI_MALLOC(ylm_k,(mpw, psps%mpsang**2 * psps%useylm))
-   ABI_MALLOC(ylm_kq,(mpw, psps%mpsang**2 * psps%useylm))
-   ABI_MALLOC(ylmgr_kq,(mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
+   ABI_MALLOC(ylm_k, (mpw, psps%mpsang**2 * psps%useylm))
+   ABI_MALLOC(ylm_kq, (mpw, psps%mpsang**2 * psps%useylm))
+   ABI_MALLOC(ylmgr_kq, (mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
 
    call cwtime_report(" Setup kcalc", cpu_setk, wall_setk, gflops_setk)
 
@@ -1418,7 +1424,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            end do
            call xmpi_sum(cgq, sigma%comm_bsum, ierr)
 
-           ! In principle, one can provide an improved initial guess if the WFK contains > nband states.
            ABI_CALLOC(out_eig1_k, (2*nband_kq**2))
            ABI_MALLOC(dcwavef, (2, npw_kq*nspinor*usedcwavef0))
            ABI_MALLOC(gh1c_n, (2, npw_kq*nspinor))
@@ -1460,7 +1465,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                gs_hamkq, gvnlxc, gvnlx1, icgq0, idir, ipert, igscq0, &
                mcgq, mgscq, mpi_enreg, grad_berry_size_mpw1, cryst%natom, nband_kq, nbdbuf0, nline_in, npw_k, npw_kq, nspinor, &
                opt_gvnlx1, dtset%prtvol, quit0, out_resid, rf_hamkq, dtset%dfpt_sciss, -one, dtset%tolwfr, &
-               !opt_gvnlx1, -15, quit0, out_resid, rf_hamkq, dtset%dfpt_sciss, dtset%tolrde, dtset%tolwfr, &
                usedcwavef0, dtset%wfoptalg, nlines_done)
 
              call cwtime(cpu_stern, wall_stern, gflops_stern, "stop")
@@ -1897,7 +1901,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end if
      end do ! iq_ibz (sum over q-points in IBZ_k)
 
-     call cwtime_report(" Q-loop", cpu_qloop, wall_qloop, gflops_qloop)
+     call cwtime_report(" Fan-Migdal q-loop", cpu_qloop, wall_qloop, gflops_qloop)
 
      ! Print cache stats.
      if (sigma%use_ftinterp) then
@@ -1919,6 +1923,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call cwtime(cpu_dw, wall_dw, gflops_dw, "start", msg=" Computing Debye-Waller term...")
        ! Collect gkq0_atm inside comm_qpt
        ! In principle i't sufficient to broadcast from itreated_q0 inside comm_qpt
+       ! Yet, q-points are not equally distributed so this synch is detrimental.
        call xmpi_sum(gkq0_atm, sigma%comm_qpt, ierr)
        if (dtset%eph_stern == 1) call xmpi_sum(stern_dw, sigma%comm_qpt, ierr)
 
@@ -1928,6 +1933,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call xmpi_split_work(nq, sigma%comm_qpt, q_start, q_stop)
 
        do iq_ibz=q_start,q_stop
+         call cwtime(cpu, wall, gflops, "start")
          if (abs(sigma%symsigma) == 1) then
            qpt = sigma%qibz_k(:,iq_ibz); weight_q = sigma%wtq_k(iq_ibz)
            ! TODO: This should be much faster but it should be tested.
@@ -2042,11 +2048,16 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            end do ! ibsum
 
          end do ! nu
+
+         if (nq < 1000 .or. (nq > 1000 .and. mod(iq_ibz, 200) == 0) .or. iq_ibz <= nprocs) then
+           write(msg,'(4(a,i0),a,f8.2)') " k-point [",ikcalc,"/",sigma%nkcalc, "] q-point [",iq_ibz,"/",nq,"]"
+           call cwtime_report(msg, cpu, wall, gflops)
+         end if
        end do ! iq_ibz
 
        ABI_FREE(gkq0_atm)
        ABI_SFREE(stern_dw)
-       call cwtime_report(" Debye-Waller", cpu_dw, wall_dw, gflops_dw)
+       call cwtime_report(" Debye-Waller", cpu_dw, wall_dw, gflops_dw, end_str=ch10)
      end if ! not %imag_only
 
      if (dtset%prteliash /= 0) then
@@ -3967,6 +3978,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  write(msg, "(2(a,i0))")"P Allocating and treating bands from my_bsum_start: ", self%my_bsum_start, &
      " up to my_bsum_stop: ", self%my_bsum_stop
  call wrtout(std_out, msg)
+ if (.not. self%imag_only .and. dtset%eph_stern == 1) call wrtout(std_out, " Sternheimer method activated")
 
  ! Prepare weights for BZ(k) integration
  if (self%qint_method > 0) then

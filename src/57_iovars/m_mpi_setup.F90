@@ -1068,12 +1068,10 @@ end subroutine mpi_setup
 
 !Is it available
  if ((dtset%usefock==1).AND.(dtset%nphf/=1)) then
-   msg="autoparal>0 not available for Hartree-Fock or hybrid XC calculations!"
-   MSG_ERROR(msg)
+   MSG_ERROR("autoparal>0 not available for Hartree-Fock or hybrid XC calculations!")
  end if
  if ((autoparal>1).and.dtset%wfoptalg/=4.and.dtset%wfoptalg/=14) then
-   msg="autoparal>1 only available for the old LOBPCG algorithm (wfoptalg=4/14)!"
-   MSG_ERROR(msg)
+   MSG_ERROR("autoparal>1 only available for the old LOBPCG algorithm (wfoptalg=4/14)!")
  end if
 
 !Unit number used for outputting the autoparal sections
