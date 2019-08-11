@@ -725,13 +725,13 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  if (nctk_has_mpiio) then
    ncerr = nf90_einval
 #ifdef HAVE_NETCDF_MPI
-   call wrtout(std_out, sjoin(" Creating HDf5 file with MPI-IO support:", path))
+   call wrtout(std_out, sjoin("- Creating HDf5 file with MPI-IO support:", path))
    ! Believe it or not, I have to use xmpi_comm_self even in sequential to avoid weird SIGSEV in the MPI layer!
    ncerr = nf90_create(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), ncid=ncid, &
      comm=comm, info=xmpio_info)
 #endif
  else
-   call wrtout(std_out, sjoin(" Creating netcdf file WITHOUT MPI-IO support:", path))
+   call wrtout(std_out, sjoin("- Creating netcdf file WITHOUT MPI-IO support:", path))
    ncerr = nf90_create(path, ior(nf90_clobber, nf90_write), ncid)
    if (xmpi_comm_size(comm) > 1) then
      MSG_WARNING("netcdf without MPI-IO support with nprocs > 1!")
@@ -788,7 +788,7 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
  end if
 
  if (xmpi_comm_size(comm) > 1 .or. nctk_has_mpiio) then
-   call wrtout(std_out, sjoin(" Opening HDf5 file with MPI-IO support:", path))
+   call wrtout(std_out, sjoin("- Opening HDf5 file with MPI-IO support:", path))
 #ifdef HAVE_NETCDF_MPI
    ncerr = nf90_open_par(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
      comm=comm, info=xmpio_info, ncid=ncid)
@@ -797,7 +797,7 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
    MSG_ERROR("nprocs > 1 but netcdf does not support MPI-IO")
 #endif
  else
-   call wrtout(std_out, sjoin(" Opening netcdf file without MPI-IO support:", path))
+   call wrtout(std_out, sjoin("- Opening netcdf file without MPI-IO support:", path))
    ncerr = nf90_open(path, nf90_write, ncid)
    NCF_CHECK_MSG(ncerr, sjoin("nf90_open: ", path))
  end if

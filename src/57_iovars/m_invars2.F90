@@ -1274,18 +1274,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  narr = size(dtset%eph_np_pqbks)
  call intagm(dprarr,intarr,jdtset,marr,narr,string(1:lenstr),'eph_np_pqbks',tread,'INT')
- if (tread==1) then
-   dtset%eph_np_pqbks = intarr(1:narr)
-   if (any(dtset%eph_np_pqbks /= 0) .and. product(dtset%eph_np_pqbks) /= nprocs) then
-     write(msg, "(a,i0,3a, 6(a,1x,i0))") &
-       "Cannot create 5d Cartesian grid with nprocs: ", nprocs, ch10, &
-       "Idle processes are not supported. The product of the `nprocs_*` vars should be equal to nprocs.", ch10, &
-       "nprocs_pert (", dtset%eph_np_pqbks(1), ") x nprocs_qpt (", dtset%eph_np_pqbks(2), &
-       ") x nprocs_bsum (", dtset%eph_np_pqbks(3), ") x nprocs_kcalc (", dtset%eph_np_pqbks(4), &
-       ") x nprocs_spin (", dtset%eph_np_pqbks(5), ") != ", nprocs
-     MSG_ERROR(msg)
-   end if
- end if
+ if (tread==1) dtset%eph_np_pqbks = intarr(1:narr)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_stern',tread,'INT')
  if(tread==1) dtset%eph_stern = intarr(1)

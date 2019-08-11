@@ -165,6 +165,7 @@ MODULE m_xmpi
  public :: xmpi_comm_set_errhandler   ! Hides MPI_COMM_SET_ERRHANDLER from MPI library.
  public :: xmpi_error_string          ! Return a string describing the error from ierr.
  public :: xmpi_split_work            ! Splits tasks inside communicator using blocks
+ public :: xmpi_split_block           ! Splits tasks inside communicator using block distribution.
  public :: xmpi_split_cyclic          ! Splits tasks inside communicator using cyclic distribution.
  public :: xmpi_distab
  public :: xmpi_distrib_with_replicas ! Distribute tasks among MPI ranks (replicas are allowed)
@@ -2098,7 +2099,7 @@ end subroutine xmpi_comm_set_errhandler
 
 !!****f* m_xmpi/xmpi_split_work_i4b
 !! NAME
-!!  split_work_i4b
+!!  xmpi_split_work_i4b
 !!
 !! FUNCTION
 !!  Splits the number of tasks, ntasks, among nprocs processors.
@@ -2129,7 +2130,7 @@ end subroutine xmpi_comm_set_errhandler
 !!
 !! SOURCE
 
-subroutine xmpi_split_work_i4b(ntasks,comm,my_start,my_stop)
+subroutine xmpi_split_work_i4b(ntasks, comm, my_start, my_stop)
 
 !Arguments ------------------------------------
  integer,intent(in)  :: ntasks,comm
@@ -2159,9 +2160,51 @@ end subroutine xmpi_split_work_i4b
 
 !----------------------------------------------------------------------
 
+!!****f* m_xmpi/xmpi_split_block
+!! NAME
+!!  xmpi_split_block
+!!
+!! FUNCTION
+!!  Splits tasks inside communicator using cyclic distribution.
+!!  Used for the MPI parallelization of simple loops.
+!!
+!! INPUTS
+!!  ntasks: number of tasks
+!!  comm: MPI communicator.
+!!
+!! OUTPUT
+!!  my_ntasks: Number of tasks received by this rank. May be zero if ntasks > nprocs.
+!!  my_inds(my_ntasks): List of tasks treated by this rank. Allocated by the routine. May be zero-sized.
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+subroutine xmpi_split_block(ntasks, comm, my_ntasks, my_inds)
+
+!Arguments ------------------------------------
+ integer,intent(in)  :: ntasks, comm
+ integer,intent(out) :: my_ntasks
+ integer,allocatable,intent(out) :: my_inds(:)
+
+!Local variables-------------------------------
+ integer :: ii, istart, istop
+
+! *************************************************************************
+
+ call xmpi_split_work(ntasks, comm, istart, istop)
+ my_ntasks = istop - istart + 1
+ ABI_MALLOC(my_inds, (my_ntasks))
+ if (my_ntasks > 0) my_inds = [(istart + (ii - 1), ii=1, my_ntasks)]
+
+end subroutine xmpi_split_block
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_xmpi/xmpi_split_cyclic
 !! NAME
-!!  split_work_i4b
+!!  xmpi_split_cyclic
 !!
 !! FUNCTION
 !!  Splits tasks inside communicator using cyclic distribution.
