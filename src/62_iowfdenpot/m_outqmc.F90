@@ -87,8 +87,6 @@ contains
 
 subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,results_gs)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer :: mcg
@@ -530,8 +528,6 @@ end subroutine outqmc
 
  function i2s(n)
 
- implicit none
-
 !Arguments ----------------------
  integer, intent(in) :: n
  character(len=20) :: i2s
@@ -606,8 +602,6 @@ end function i2s
 !! SOURCE
 
  function r2s(r,real_format)
-
- implicit none
 
 !Arguments -------------------------
  real(dp),intent(in) :: r

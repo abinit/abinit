@@ -147,8 +147,6 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 &       ia3,idir,indlmn,istwf_k,kpg,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg,nlmn,&
 &       nloalg,npw,nspinor,ph3d,signs,ucvol,vect)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice,cplex,dimffnl,ia3,idir,istwf_k,matblk,nd2gxdt

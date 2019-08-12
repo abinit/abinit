@@ -87,8 +87,6 @@ CONTAINS
 
 subroutine exit_init(time_limit)
 
- implicit none
-
 !Arguments ------------------------------------
  real(dp),intent(in) :: time_limit
 
@@ -120,8 +118,6 @@ end subroutine exit_init
 !! SOURCE
 
 subroutine disable_timelimit()
-
- implicit none
 
 !Local variables-------------------------------
 !scalars
@@ -155,8 +151,6 @@ end subroutine disable_timelimit
 
 logical pure function have_timelimit_in(abifunc) result(ans)
 
- implicit none
-
 !Arguments -----------------------------------
  character(len=*),intent(in) :: abifunc
 
@@ -189,8 +183,6 @@ end function have_timelimit_in
 
 function enable_timelimit_in(abifunc) result(prev_func)
 
- implicit none
-
 !Arguments -----------------------------------
  character(len=*),intent(in) :: abifunc
  character(len=fnlen) :: prev_func
@@ -218,8 +210,6 @@ end function enable_timelimit_in
 
 real(dp) pure function get_timelimit()
 
- implicit none
-
  get_timelimit = WTIME_LIMIT
 
 end function get_timelimit
@@ -239,8 +229,6 @@ end function get_timelimit
 !! SOURCE
 
 pure function get_timelimit_string() result(string)
-
- implicit none
 
 !Local variables-------------------------------
 !scalars
@@ -313,8 +301,6 @@ end function get_start_time
 !! SOURCE
 
 subroutine exit_check(cpus,filename,iexit,iout,comm,openexit)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm

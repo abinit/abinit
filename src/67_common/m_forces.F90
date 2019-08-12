@@ -178,8 +178,6 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 &                  vresid,vxc,wvl,wvl_den,xred,&
 &                  electronpositron) ! optional argument
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mgfft,n1xccc,n3xccc,nfft,ngrvdw,ntypat,usefock
@@ -630,8 +628,6 @@ end subroutine forces
 
 subroutine sygrad(fred,natom,dedt,nsym,symrec,indsym)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nsym
@@ -724,8 +720,6 @@ end subroutine sygrad
 
 subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqgrid,nattyp,nfft,&
 &          ngfft,ntypat,psps,pawtab,ph1d,qgrid,ucvol,usepaw,vresid,zion,znucl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -859,8 +853,6 @@ end subroutine fresidrsp
 
 subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
 &                 pawtab,rhor,rprimd,ucvol,work,xred_new,xred_old,znucl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1484,7 +1476,6 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
 & nconeq,prtvol,rprimd,wtatcon,xred)
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments ------------------------------------
 !scalars

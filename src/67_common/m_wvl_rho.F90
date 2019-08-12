@@ -91,7 +91,6 @@ subroutine wvl_initro(&
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : ELECTRONIC_DENSITY, ext_buffers, ind_positions
 #endif
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: me,natom,ntypat,nfft,nspden
@@ -426,7 +425,6 @@ subroutine wvl_mkrho(dtset, irrzon, mpi_enreg, phnons, rhor, wvl_wfs, wvl_den)
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : sumrho, symmetry_data, ELECTRONIC_DENSITY, communicate_density
 #endif
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -514,8 +512,6 @@ end subroutine wvl_mkrho
 
 subroutine wvl_prcref(dielar,iprcel,my_natom,nfftprc,npawmix,nspden,pawrhoij,&
 & rhoijrespc,usepaw,vresid,vrespc)
-
- implicit none
 
 !Arguments ------------------------------------
  integer , intent(in)  :: iprcel,nfftprc,my_natom,npawmix,nspden,usepaw

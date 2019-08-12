@@ -307,8 +307,6 @@ end function ncname_from_id
 
 subroutine hscr_from_file(hscr,path,fform,comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: path
@@ -411,8 +409,6 @@ end subroutine hscr_from_file
 !! SOURCE
 
 subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -729,8 +725,6 @@ end subroutine hscr_io
 
 subroutine hscr_print(Hscr,header,unit,prtvol,mode_paral)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: prtvol,unit
@@ -856,8 +850,6 @@ end subroutine hscr_print
 
 type(hscr_t) function hscr_new(varname,dtset,ep,hdr_abinit,ikxc,test_type,tordering,titles,ngvec,gvec) result(hscr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikxc,test_type,tordering,ngvec
@@ -972,8 +964,6 @@ end function hscr_new
 
 subroutine hscr_bcast(hscr,master,my_rank,comm)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: master,my_rank,comm
  type(hscr_t),intent(inout) :: hscr
@@ -1060,8 +1050,6 @@ end subroutine hscr_bcast
 
 subroutine hscr_malloc(hscr, npwe, nqibz, nomega, nqlwl)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwe, nqibz, nomega, nqlwl
@@ -1103,8 +1091,6 @@ end subroutine hscr_malloc
 
 subroutine hscr_free(hscr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(hscr_t),intent(inout) :: hscr
@@ -1114,18 +1100,10 @@ subroutine hscr_free(hscr)
  !@hscr_t
  DBG_ENTER("COLL")
 
- if (allocated(hscr%gvec)) then
-   ABI_FREE(hscr%gvec)
- end if
- if (allocated(hscr%qibz)) then
-   ABI_FREE(hscr%qibz)
- end if
- if (allocated(hscr%qlwl)) then
-   ABI_FREE(hscr%qlwl)
- end if
- if (allocated(hscr%omega)) then
-   ABI_FREE(hscr%omega)
- end if
+ ABI_SFREE(hscr%gvec)
+ ABI_SFREE(hscr%qibz)
+ ABI_SFREE(hscr%qlwl)
+ ABI_SFREE(hscr%omega)
 
  call hdr_free(hscr%Hdr)
 
@@ -1154,8 +1132,6 @@ end subroutine hscr_free
 !! SOURCE
 
 subroutine hscr_copy(Hscr_in,Hscr_cp)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1240,8 +1216,6 @@ end subroutine hscr_copy
 !! SOURCE
 
 subroutine hscr_merge(Hscr_in,Hscr_out)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1401,8 +1375,6 @@ end subroutine hscr_merge
 
 subroutine write_screening(varname,unt,iomode,npwe,nomega,iqibz,epsm1)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: varname
@@ -1511,8 +1483,6 @@ end subroutine write_screening
 
 subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
 & iqiA) ! Optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1839,8 +1809,6 @@ end subroutine read_screening
 
 subroutine hscr_mpio_skip(mpio_fh,fform,offset)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: mpio_fh
  integer,intent(out) :: fform
@@ -1925,8 +1893,6 @@ end subroutine hscr_mpio_skip
 !! SOURCE
 
 subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2066,8 +2032,6 @@ end subroutine ioscr_qmerge
 
 subroutine ioscr_qrecover(ipath, nqrec, fname_out)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nqrec
@@ -2193,8 +2157,6 @@ end subroutine ioscr_qrecover
 !! SOURCE
 
 subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohscr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2488,8 +2450,6 @@ end subroutine ioscr_wmerge
 !! SOURCE
 
 subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -175,8 +175,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 &  pwind_alloc,pwnsfac,&
 &  rprimd,typat,ucvol,unit_out,usecprj,usepaw,xred,zion)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: lmnmax,mband,mcg,mcprj,mkmem,mpw,my_natom,natom,nkpt
  integer, intent(in) :: nsppol,ntypat,calc_pol_ddk
@@ -1806,8 +1804,6 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 &  scfcv_level,scfcv_quit,scfcv_step,ucvol,unit_out,&
 &  usepaw,xred,ylm,ylmgr)
 
-  implicit none
-
   !Arguments ------------------------------------
   integer, intent(in) :: idir,mcg,mkmem,mpw,my_natom,natom,nkpt,ntypat
   integer, intent(in) :: pwind_alloc,scfcv_level,scfcv_quit,scfcv_step,unit_out,usepaw
@@ -2309,8 +2305,6 @@ end subroutine update_e_field_vars
 
 subroutine prtefield(dtset,dtefield,iunit,rprimd)
 
-  implicit none
-
   !Arguments ------------------------------------
   integer :: iunit
   real(dp),intent(in) :: rprimd(3,3)
@@ -2714,8 +2708,6 @@ subroutine init_e_field_vars(dtefield,dtset,gmet,gprimd,kg,&
      &              mpi_enreg,npwarr,occ,pawang,pawrad,pawtab,psps,&
      &              pwind,pwind_alloc,pwnsfac,rprimd,symrec,xred)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(out) :: pwind_alloc
@@ -2861,8 +2853,6 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      &              nsym,ntypat,occ,pawang,pawrad,pawtab,psps,&
      &              pwind,pwind_alloc,pwnsfac,&
      &              rprimd,symrec,typat,usepaw,xred)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars

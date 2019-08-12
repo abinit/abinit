@@ -196,8 +196,6 @@ CONTAINS
 
 subroutine eigr2d_init(eig2nkq,eigr2d,mband,nsppol,nkpt,natom)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) ::mband,nsppol,nkpt,natom
@@ -241,8 +239,6 @@ end subroutine eigr2d_init
 !! SOURCE
 
 subroutine eigr2d_ncwrite(eigr2d,iqpt,wtq,ncid)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -330,8 +326,6 @@ end subroutine eigr2d_ncwrite
 
 subroutine eigr2d_free(eigr2d)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(eigr2d_t),intent(inout) :: eigr2d
@@ -377,8 +371,6 @@ end subroutine eigr2d_free
 !! SOURCE
 
 subroutine fan_init(fan,fan2d,mband,nsppol,nkpt,natom)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -428,8 +420,6 @@ end subroutine fan_init
 
 subroutine gkk_init(gkk,gkk2d,mband,nsppol,nkpt,natom,ncart)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) ::mband,nsppol,nkpt,natom,ncart
@@ -473,8 +463,6 @@ end subroutine gkk_init
 !! SOURCE
 
 subroutine fan_ncwrite(fan2d,iqpt,wtq,ncid)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -564,8 +552,6 @@ end subroutine fan_ncwrite
 
 subroutine gkk_ncwrite(gkk2d,iqpt,wtq,ncid)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) ::ncid
@@ -653,8 +639,6 @@ end subroutine gkk_ncwrite
 
 subroutine fan_free(fan2d)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(fan_t),intent(inout) :: fan2d
@@ -696,8 +680,6 @@ end subroutine fan_free
 !! SOURCE
 
 subroutine gkk_free(gkk2d)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -804,8 +786,6 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 &  eigen1,eig2nkq,elph2_imagden,esmear,gh0c1_pert,gh1c_pert,ieig2rf,istwfk_pert,&
 &  mband,mk1mem,mpert,npert,mpi_enreg,mpw1,nkpt_rbz,npwar1,nspinor,nsppol,smdelta,&
 &  dtset,eigbrd,eigenq_fine,hdr_fine,hdr0)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1297,8 +1277,6 @@ end subroutine eig2stern
 subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0,eigenq,eigen1,eig2nkq,&
 &  elph2_imagden,esmear,ieig2rf,mband,mpert,npert,mpi_enreg,doccde,&
 &  nkpt_rbz,nsppol,smdelta,rprimd,dtset,occ_rbz,hdr0,eigbrd,eigenq_fine,hdr_fine)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1867,8 +1845,6 @@ end subroutine eig2tot
 
 subroutine outbsd(bdeigrf,dtset,eig2nkq,mpert,nkpt_rbz,unitout)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: bdeigrf,mpert,nkpt_rbz,unitout
@@ -1949,8 +1925,6 @@ end subroutine outbsd
 !! SOURCE
 
 subroutine smeared_delta(eigen0,eigenq,esmear,mband,smdelta,smdfunc)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2063,8 +2037,6 @@ end subroutine smeared_delta
 !! SOURCE
 
 subroutine elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_corr,gprimd,mband,natom,nkpt,nsppol,option,phfrq,prtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

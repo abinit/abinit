@@ -94,7 +94,6 @@ subroutine diag_occ(occ_nd_cpx, nband, occ_diag)
   use m_errors
 
 ! use m_paw_dmft,     only : paw_dmft_type
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -218,7 +217,6 @@ subroutine rot_cg(occ_nd, cwavef, npw, nband, blocksize, nspinor, first_bandc, n
   use m_errors
 
 ! use m_paw_dmft,     only : paw_dmft_type
-  implicit none
 
 !Arguments ------------------------------------
 !scalars

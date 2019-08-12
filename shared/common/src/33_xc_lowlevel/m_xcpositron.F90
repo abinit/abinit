@@ -102,8 +102,6 @@ contains
 subroutine xcpositron(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,rhoer,rhopr,vxce,vxcegr,vxcp,&
 &                     dvxce,dvxcp) ! optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixcpositron,ngr,npt

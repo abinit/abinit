@@ -134,8 +134,6 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 & pel,pel_cg,pelev,pion,psps,pwind,pwind_alloc,&
 & pwnsfac,rprimd,ucvol,usecprj,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mkmem,mpw,my_natom,natom,nkpt,nsppol,ntypat
@@ -486,8 +484,6 @@ end subroutine elpolariz
 subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 & mband,mcg,mkmem,mpi_enreg,mpw,natom,nband,nberry,npwarr,nspinor,nsppol,nkpt_,&
 & unddk,fnameabo_1wf)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -977,8 +973,6 @@ end subroutine uderiv
 subroutine waveformat(cg,cg_disk,cg_index,cg_new,dk,ii,ikpt,&
 & ikpt_,isgn,isppol,jj,jkpt,jkpt_,kg_kpt,kpt,kg_jl,maxband,mband,mcg,mcg_disk,&
 & minband,mkmem,mpw,nkpt,nkpt_,npwarr,nsppol,nspinor,shift_g_2,tr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

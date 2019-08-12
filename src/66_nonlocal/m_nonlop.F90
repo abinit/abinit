@@ -325,8 +325,6 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &                 paw_opt,signs,svectout,tim_nonlop,vectin,vectout,&
 &                 enl,iatom_only,only_SO,select_k) !optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice,cpopt,idir,ndat,nnlout,paw_opt,signs,tim_nonlop
@@ -940,8 +938,6 @@ end subroutine nonlop
 &                      mpi_enreg,natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,&
 &                      npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,phkxredin,phkxredout,ph1d,&
 &                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

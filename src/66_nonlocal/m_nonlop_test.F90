@@ -113,7 +113,6 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  use m_mkffnl,         only : mkffnl
  use m_mpinfo,         only : proc_distrb_cycle
  use m_nonlop,         only : nonlop
- implicit none
 
 !Arguments ------------------------------------
 !scalars

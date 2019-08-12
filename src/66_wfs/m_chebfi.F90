@@ -114,8 +114,6 @@ contains
 
 subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor,prtvol,resid)
 
- implicit none
-
 !Arguments ------------------------------------
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
  type(dataset_type),intent(in) :: dtset
@@ -621,8 +619,6 @@ end subroutine chebfi
 
 function cheb_poly(x, n, a, b) result(y)
 
- implicit none
-
  integer, intent(in) :: n
  integer :: i
  real(dp), intent(in) :: x, a, b
@@ -671,8 +667,6 @@ end function cheb_poly
 !! SOURCE
 
 function cheb_oracle(x, a, b, tol, nmax) result(n)
-
- implicit none
 
  real(dp) :: tol
 

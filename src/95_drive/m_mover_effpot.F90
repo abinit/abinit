@@ -127,7 +127,6 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  use m_results_gs,       only : results_gs_type,init_results_gs,destroy_results_gs
  use m_mover,            only : mover
  use m_io_tools,         only : get_unit, open_file
-implicit none
 
 !Arguments --------------------------------
 !scalar
@@ -186,7 +185,7 @@ implicit none
  real(dp) :: vel_cell(3,3),rprimd(3,3)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
  character(len=fnlen) :: filename
- character(len=50) :: name_file 
+ character(len=50) :: name_file
  character(len=200):: term_name
 !character(len=fnlen) :: filename_psp(3)
  type(electronpositron_type),pointer :: electronpositron
@@ -552,35 +551,35 @@ implicit none
      write(message, '((80a),3a)' ) ('-',ii=1,80), ch10,&
 &     '-Monte Carlo / Molecular Dynamics ',ch10
 
-     ! Marcus: if wanted analyze anharmonic terms of effective potential && 
+     ! Marcus: if wanted analyze anharmonic terms of effective potential &&
      ! and print anharmonic contribution to file anharmonic_energy_terms.out
-     ! Open File and write header 
+     ! Open File and write header
      ncoeff = effective_potential%anharmonics_terms%ncoeff
-     name_file='anharmonic_energy_terms.out' 
+     name_file='anharmonic_energy_terms.out'
      unit_out = get_unit()
-     if(inp%analyze_anh_pot == 1)then 
+     if(inp%analyze_anh_pot == 1)then
        open(unit=unit_out,file=name_file,status='replace',form='formatted')
        write(unit_out,*) '#---------------------------------------------#'
        write(unit_out,*) '#    Anharmonic Terms Energy Contribution     #'
        write(unit_out,*) '#---------------------------------------------#'
        write(unit_out,*) ''
        write(unit_out,'(A,I5)') 'Number of Terms: ', ncoeff
-       write(unit_out,*) '' 
-       write(unit_out,'(A)') 'Terms     Names' 
+       write(unit_out,*) ''
+       write(unit_out,'(A)') 'Terms     Names'
        do icoeff=1,ncoeff
          term_name = effective_potential%anharmonics_terms%coefficients(icoeff)%name
          write(unit_out,'(I5,A,A)') icoeff,'     ',trim(term_name)
-       enddo  
-       write(unit_out,*) ''  
+       enddo
+       write(unit_out,*) ''
        write(unit_out,'(A)',advance='no')  'Cycle/Terms'
        do icoeff=1,ncoeff
          if(icoeff<ncoeff)then
          write(unit_out,'(I5)',advance='no') icoeff
-         else 
+         else
          write(unit_out,'(I5)',advance='yes') icoeff
          endif
-       enddo  
-     end if 
+       enddo
+     end if
 
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')

@@ -971,7 +971,7 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
      call wrtout([std_out, ab_out], msg)
      ! Check whether file exists taking into account a possible NC file extension.
      if (xmpi_comm_rank(xmpi_world) == 0) then
-       if (.not. file_exists(filnam_out) .and. .not. file_exists(strcat(filnam_out, ".nc")) then
+       if (.not. file_exists(filnam_out) .and. .not. file_exists(strcat(filnam_out, ".nc"))) then
          MSG_ERROR(sjoin("Cannot find file:", filnam_out, "(with or without .nc extension)"))
        end if
      end if

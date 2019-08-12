@@ -91,7 +91,6 @@ contains
  use m_time,         only : timab
  use m_io_tools,     only : get_unit
  use m_mpinfo,       only : proc_distrb_cycle
- implicit none
 
 !Arguments ------------------------------------
 !scalars

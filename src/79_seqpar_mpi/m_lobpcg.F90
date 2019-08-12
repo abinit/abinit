@@ -100,8 +100,6 @@ subroutine xprecon(cg,eval,blocksize,iterationnumber,kinpw,&
 &  mpi_enreg,npw,nspinor,optekin,optpcon,pcon,ghc,vect,vectsize,&
 &  timopt,tim_xprecon) ! optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: blocksize,iterationnumber,npw,nspinor,optekin

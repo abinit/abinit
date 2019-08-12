@@ -329,8 +329,6 @@ contains
 &                      npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,phkxredin,phkxredout,ph1d,&
 &                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout,cprjin_left)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,idir

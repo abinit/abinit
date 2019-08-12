@@ -49,7 +49,6 @@ module m_mklocl_realspace
  use m_wvl_wfs,     only : derf_ab
  use m_fft,         only : fourdp
 
-
  implicit none
 
  private

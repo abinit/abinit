@@ -160,7 +160,6 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_mpinfo,   only : proc_distrb_cycle
  use m_nonlop,   only : nonlop
  use m_paw_occupancies, only : pawaccrhoij
- implicit none
 
 !Arguments ------------------------------------
 !scalars

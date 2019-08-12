@@ -54,6 +54,7 @@ program aim
  use m_specialmsg,  only : specialmsg_getcount, herald
  use m_fstrings, only : int2char4
  use m_bader !,    only : adini, drvaim, inpar, defad, aim_shutdown
+
  implicit none
 
 !Arguments -----------------------------------

@@ -147,8 +147,6 @@ contains
 !! SOURCE
  subroutine destroy_gemm_nonlop(nkpt)
 
-  implicit none
-
   integer,intent(in) :: nkpt
   integer :: ikpt
 
@@ -189,7 +187,6 @@ contains
  subroutine make_gemm_nonlop(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k,ph3d_k)
 
   use m_abi_linalg
-  implicit none
 
   integer, intent(in) :: ikpt
   integer, intent(in) :: npw, lmnmax,ntypat
@@ -328,7 +325,6 @@ contains
 
   use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby
   use m_time,    only : cwtime
-  implicit none
 
   !Arguments ------------------------------------
   !scalars

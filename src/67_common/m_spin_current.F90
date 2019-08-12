@@ -96,8 +96,6 @@ contains
 
 subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !integer,intent(in) :: nfftf
@@ -614,8 +612,6 @@ end subroutine spin_current
 !! SOURCE
 
 subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
-
- implicit none
 
 !Arguments -------------------------------
  type(hdr_type),intent(inout) :: hdr

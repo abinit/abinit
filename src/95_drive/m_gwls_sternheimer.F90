@@ -87,7 +87,7 @@ use m_errors
 
 use m_time,      only : timab
 use m_gstateimg, only : gstateimg
-implicit none
+
 !Arguments ------------------------------------
 !scalars
 integer,intent(in) :: nimage

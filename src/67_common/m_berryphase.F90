@@ -162,8 +162,6 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 &  mkmem,mpw,natom,nattyp,nband,nberry,npwarr,nspinor,nsppol,ntypat,&
 &  nkpt_,rprimd,ucvol,xred,zion)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: kptopt,mband,mcg,mkmem,mpw,natom,nberry,nkpt_

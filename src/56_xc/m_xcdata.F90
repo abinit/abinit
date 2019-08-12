@@ -149,8 +149,6 @@ contains
 
 subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,tphysel,usekden,vdw_xc,xc_tb09_c,xc_denpos)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in),optional :: auxc_ixc,intxc,ixc,nspden,usekden,vdw_xc
@@ -238,8 +236,6 @@ end subroutine xcdata_init
 
 subroutine get_xclevel(ixc,xclevel,usefock)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: ixc
@@ -320,8 +316,6 @@ end subroutine get_xclevel
 !! SOURCE
 
 subroutine get_auxc_ixc(auxc_ixc,ixc)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

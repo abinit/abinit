@@ -120,8 +120,6 @@ contains
 subroutine precpred_1geo(ab_mover,ab_xfh,amu_curr,deloc,dt_chkdilatmx,comm_cell,dilatmx,filnam_ds4,hist,hmctt,&
 & icycle,iexit,itime,mttk_vars,nctime,ncycle,nerr_dilatmx,npsp,ntime,rprimd_orig,skipcycle,usewvl)
 
-implicit none
-
 !Arguments ------------------------------------
 !scalars
 integer, intent(in) :: comm_cell,dt_chkdilatmx,hmctt,icycle,itime,nctime,npsp,ntime

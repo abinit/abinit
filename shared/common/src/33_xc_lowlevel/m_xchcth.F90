@@ -96,8 +96,6 @@ contains
 
 subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,npts,nspden,order
