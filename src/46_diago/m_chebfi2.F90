@@ -1328,6 +1328,9 @@ module m_chebfi2
       call xgTransposer_free(chebfi%xgTransposerBX)
     end if
     
+    mpi_enreg%comm_fft = comm_fft_save
+    mpi_enreg%comm_band = comm_band_save
+    
     call timab(tim_run,2,tsec)
     
     !stop
@@ -1353,9 +1356,6 @@ module m_chebfi2
 !    end if
     
     !stop
-    
-    mpi_enreg%comm_fft = comm_fft_save
-    mpi_enreg%comm_band = comm_band_save
     
     call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X at the end of the CB2 RUN") !MPI 1,2 OK
     !stop   
@@ -2301,7 +2301,7 @@ module m_chebfi2
     
     !pcond call
     call timab(tim_pcond,1,tsec)
-    call pcond(chebfi%AX%self)
+    call pcond(chebfi%AX%self)    !zar ovde ne ide AX_swap???
     call timab(tim_pcond,2,tsec)
     
     !print *, "AX_swap after pcond"
