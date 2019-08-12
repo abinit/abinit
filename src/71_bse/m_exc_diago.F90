@@ -36,7 +36,6 @@ MODULE m_exc_diago
  use m_hdr
  use m_sort
 
- use defs_abitypes,     only : hdr_type
  use m_io_tools,        only : open_file
  use m_fstrings,        only : int2char4
  use m_numeric_tools,   only : print_arr, hermitianize

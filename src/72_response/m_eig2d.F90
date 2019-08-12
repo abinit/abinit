@@ -41,6 +41,7 @@ MODULE m_eig2d
  use m_xmpi
  use m_ebands
  use m_cgtools
+ use m_hdr
 
  use m_time,       only : timab
  use m_fstrings,   only : strcat

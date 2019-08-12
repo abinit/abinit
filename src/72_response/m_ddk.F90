@@ -51,7 +51,7 @@ MODULE m_ddk
  use m_symtk,         only : matr3inv
  use m_io_tools,      only : iomode_from_fname
  use m_time,          only : cwtime, sec2str
- use defs_abitypes,   only : hdr_type, dataset_type, MPI_type
+ use defs_abitypes,   only : dataset_type, MPI_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
  use m_geometry,      only : mkradim
  use m_crystal,       only : crystal_t

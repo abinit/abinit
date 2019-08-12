@@ -39,6 +39,7 @@ module m_scfcv
  use m_rec
  use m_efield
  use m_entropyDMFT
+ use m_hdr
 
  use m_scf_history,      only : scf_history_type
  use m_results_gs ,      only : results_gs_type
@@ -710,15 +711,6 @@ subroutine scfcv_scfcv(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv
 &    conv_retcode)
 
 end subroutine scfcv_scfcv
-
-!keep the same name
-!#include "afterscfloop.finc"
-
-!keep the same name
-!#include "outscfcv.finc"
-
-!keep the same name
-!#include "elpolariz.finc"
 
 end module m_scfcv
 !!***

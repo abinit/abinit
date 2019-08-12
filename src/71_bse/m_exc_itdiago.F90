@@ -33,8 +33,9 @@ MODULE m_exc_itdiago
  use m_errors
  use m_abicore
  use m_linalg_interfaces
+ use m_hdr
  use m_xmpi
-#if defined HAVE_MPI2
+#ifdef HAVE_MPI2
  use mpi
 #endif
 

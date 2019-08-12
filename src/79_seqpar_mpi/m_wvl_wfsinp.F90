@@ -34,7 +34,7 @@ module m_wvl_wfsinp
  use m_abicore
  use m_errors
  use m_xmpi
-
+ use m_hdr
 
  use m_geometry,  only : xred2xcart
  use m_abi2big,   only : wvl_occ_abi2big, wvl_occopt_abi2big, wvl_setngfft, wvl_setboxgeometry

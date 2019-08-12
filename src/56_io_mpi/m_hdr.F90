@@ -59,10 +59,10 @@ module m_hdr
  use m_symtk,         only : print_symmetries
  use defs_wvltypes,   only : wvl_internal_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
- use defs_abitypes,   only : hdr_type, dataset_type
+ use defs_abitypes,   only : dataset_type
  use m_pawtab,        only : pawtab_type
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, &
-&                            pawrhoij_io, pawrhoij_inquire_dim
+                             pawrhoij_io, pawrhoij_inquire_dim
 
  implicit none
 
@@ -71,6 +71,174 @@ module m_hdr
 #if defined HAVE_MPI1
  include 'mpif.h'
 #endif
+
+!----------------------------------------------------------------------
+
+!!****t* m_hdr/hdr_type
+!! NAME
+!! hdr_type
+!!
+!! FUNCTION
+!! It contains all the information needed to write a header for a wf, den or pot file.
+!! The structure of the header is explained in the abinit_help.html and other associated html files.
+!! The datatype is considered as an object, to which are attached a whole
+!! set of "methods", actually, different subroutines.
+!! A few of these subroutines are: hdr_init, hdr_update, hdr_free, hdr_check, hdr_io, hdr_skip.
+!!
+!! SOURCE
+
+ type, public :: hdr_type
+
+! WARNING : if you modify this datatype, please check whether there might be creation/destruction/copy routines,
+! declared in another part of ABINIT, that might need to take into account your modification.
+
+  integer :: bantot        ! total number of bands (sum of nband on all kpts and spins)
+  integer :: date          ! starting date
+  integer :: headform      ! format of the header
+  integer :: intxc         ! input variable
+  integer :: ixc           ! input variable
+  integer :: mband         ! maxval(hdr%nband)
+  integer :: natom         ! input variable
+  integer :: nkpt          ! input variable
+  integer :: npsp          ! input variable
+  integer :: nspden        ! input variable
+  integer :: nspinor       ! input variable
+  integer :: nsppol        ! input variable
+  integer :: nsym          ! input variable
+  integer :: ntypat        ! input variable
+  integer :: occopt        ! input variable
+  integer :: pertcase      ! the index of the perturbation, 0 if GS calculation
+  integer :: usepaw        ! input variable (0=norm-conserving psps, 1=paw)
+  integer :: usewvl        ! input variable (0=plane-waves, 1=wavelets)
+
+  integer :: kptopt          ! input variable (defines symmetries used for k-point sampling)
+  integer :: pawcpxocc       ! input variable
+  integer :: nshiftk_orig=1  ! original number of shifts given in input (changed in inkpts, the actual value is nshiftk)
+  integer :: nshiftk=1       ! number of shifts after inkpts.
+  integer :: icoulomb        ! input variable.
+
+  real(dp) :: ecut         ! input variable
+  real(dp) :: ecutdg       ! input variable (ecut for NC psps, pawecutdg for paw)
+  real(dp) :: ecutsm       ! input variable
+  real(dp) :: ecut_eff     ! ecut*dilatmx**2 (dilatmx is an input variable)
+  real(dp) :: etot         ! EVOLVING variable
+  real(dp) :: fermie       ! EVOLVING variable
+  real(dp) :: residm       ! EVOLVING variable
+  real(dp) :: stmbias      ! input variable
+  real(dp) :: tphysel      ! input variable
+  real(dp) :: tsmear       ! input variable
+  real(dp) :: nelect       ! number of electrons (computed from pseudos and charge)
+  real(dp) :: charge       ! input variable
+
+  ! This record is not a part of the hdr_type, although it is present in the
+  ! header of the files. This is because it depends on the kind of file
+  ! that is written, while all other information does not depend on it.
+  ! It was preferred to let it be initialized or defined outside of hdr_type.
+  ! integer :: fform         ! file format
+
+  real(dp) :: qptn(3)
+  ! the wavevector, in case of a perturbation
+
+  real(dp) :: rprimd(3,3)
+  ! EVOLVING variables
+
+  integer :: ngfft(3)
+  ! input variable
+
+  integer :: nwvlarr(2)
+  ! nwvlarr(2) array holding the number of wavelets for each resolution.
+
+  integer :: kptrlatt_orig(3,3)
+  ! Original kptrlatt
+
+  integer :: kptrlatt(3,3)
+  ! kptrlatt after inkpts.
+
+  integer, allocatable :: istwfk(:)
+  ! input variable istwfk(nkpt)
+
+  integer, allocatable :: lmn_size(:)
+  ! lmn_size(npsp) from psps
+
+  integer, allocatable :: nband(:)
+  ! input variable nband(nkpt*nsppol)
+
+  integer, allocatable :: npwarr(:)
+  ! npwarr(nkpt) array holding npw for each k point
+
+  integer, allocatable :: pspcod(:)
+  ! pscod(npsp) from psps
+
+  integer, allocatable :: pspdat(:)
+  ! psdat(npsp) from psps
+
+  integer, allocatable :: pspso(:)
+  ! pspso(npsp) from psps
+
+  integer, allocatable :: pspxc(:)
+  ! pspxc(npsp) from psps
+
+  integer, allocatable :: so_psp(:)
+  ! input variable so_psp(npsp)
+
+  integer, allocatable :: symafm(:)
+  ! input variable symafm(nsym)
+
+  integer, allocatable :: symrel(:,:,:)
+  ! input variable symrel(3,3,nsym)
+
+  integer, allocatable :: typat(:)
+  ! input variable typat(natom)
+
+  real(dp), allocatable :: kptns(:,:)
+  ! input variable kptns(3,nkpt)
+
+  real(dp), allocatable :: occ(:)
+  ! EVOLVING variable occ(bantot)
+
+  real(dp), allocatable :: tnons(:,:)
+  ! input variable tnons(3,nsym)
+
+  real(dp), allocatable :: wtk(:)
+  ! weight of kpoints wtk(nkpt)
+
+  real(dp),allocatable :: shiftk_orig(:,:)
+  ! original shifts given in input (changed in inkpts).
+
+  real(dp),allocatable :: shiftk(:,:)
+  ! shiftk(3,nshiftk), shiftks after inkpts
+
+  real(dp),allocatable :: amu(:)
+  ! amu(ntypat) ! EVOLVING variable
+
+  real(dp), allocatable :: xred(:,:)
+  ! EVOLVING variable xred(3,natom)
+
+  real(dp), allocatable :: zionpsp(:)
+  ! zionpsp(npsp) from psps
+
+  real(dp), allocatable :: znuclpsp(:)
+  ! znuclpsp(npsp) from psps
+  ! Note the difference between (znucl|znucltypat) and znuclpsp !
+
+  real(dp), allocatable :: znucltypat(:)
+  ! znucltypat(ntypat) from alchemy
+
+  character(len=6) :: codvsn
+  ! version of the code
+
+  character(len=132), allocatable :: title(:)
+  ! title(npsp) from psps
+
+  character(len=md5_slen),allocatable :: md5_pseudos(:)
+  ! md5pseudos(npsp)
+  ! md5 checksums associated to pseudos (read from file)
+
+  ! EVOLVING variable, only for paw
+  type(pawrhoij_type), allocatable :: pawrhoij(:)
+
+ end type hdr_type
+!!***
 
  public :: abifile_from_varname
  public :: abifile_from_fform
@@ -653,7 +821,7 @@ subroutine hdr_malloc(hdr, bantot, nkpt, nsppol, npsp, natom, ntypat, nsym, nshi
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: bantot,nkpt,nsppol,npsp,natom,ntypat,nsym,nshiftk,nshiftk_orig
- type(hdr_type),intent(inout) :: hdr
+ class(hdr_type),intent(inout) :: hdr
 ! *************************************************************************
 
  !@hdt_type
@@ -766,31 +934,31 @@ subroutine hdr_init(ebands,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl, &
  if (present(comm_atom)) then
    if (present(mpi_atmtab)) then
      call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
-&     dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
-&     dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
-&     dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
-&     dtset%symrel,dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
-&     dtset%kptopt,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
-&     dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
-&     comm_atom=comm_atom,mpi_atmtab=mpi_atmtab)
+       dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
+       dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
+       dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
+       dtset%symrel,dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
+       dtset%kptopt,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
+       dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
+       comm_atom=comm_atom,mpi_atmtab=mpi_atmtab)
    else
      call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
-&     dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
-&     dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
-&     dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
-&     dtset%symrel,dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
-&     dtset%kptopt,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
-&     dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
-&     comm_atom=comm_atom)
+       dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
+       dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
+       dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
+       dtset%symrel,dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
+       dtset%kptopt,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
+       dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
+       comm_atom=comm_atom)
    end if
  else
    call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
-&   dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
-&   dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
-&   dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),dtset%symrel,&
-&   dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
-&   dtset%kptopt,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
-&   dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk)
+     dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
+     dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
+     dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),dtset%symrel,&
+     dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
+     dtset%kptopt,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
+     dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk)
  end if
 
 end subroutine hdr_init
@@ -827,7 +995,7 @@ subroutine hdr_free(hdr)
 
 !Arguments ------------------------------------
 !scalars
- type(hdr_type),intent(inout) :: hdr
+ class(hdr_type),intent(inout) :: hdr
 
 ! *************************************************************************
 
@@ -905,7 +1073,7 @@ subroutine hdr_copy(Hdr_in,Hdr_cp)
 
 !Arguments ------------------------------------
 !scalars
- type(hdr_type),intent(in) :: Hdr_in
+ class(hdr_type),intent(in) :: Hdr_in
  type(hdr_type),intent(inout) :: Hdr_cp
 
 !Local variables-------------------------------
@@ -1043,7 +1211,7 @@ real(dp) pure function hdr_nelect_fromocc(Hdr) result(nelect)
 
 !Arguments ---------------------------------------------
 !scalars
- type(hdr_type),intent(in) :: Hdr
+ class(hdr_type),intent(in) :: Hdr
 
 !Local variables ---------------------------------------
 !scalars
@@ -1395,7 +1563,7 @@ subroutine hdr_write_to_fname(Hdr,fname,fform)
 !Arguments ------------------------------------
  integer,intent(in) :: fform
  character(len=*),intent(in) :: fname
- type(hdr_type),intent(inout) :: Hdr
+ class(hdr_type),intent(inout) :: Hdr
 
 !Local variables-------------------------------
  integer :: fh,ierr
@@ -1573,7 +1741,7 @@ subroutine hdr_bsize_frecords(Hdr,formeig,nfrec,bsize_frecords)
 !scalars
  integer,intent(in) :: formeig
  integer,intent(out) :: nfrec
- type(hdr_type),intent(in) :: Hdr
+ class(hdr_type),intent(in) :: Hdr
 !arrays
  integer(XMPI_OFFSET_KIND),allocatable,intent(out) :: bsize_frecords(:)
 
@@ -1874,7 +2042,7 @@ subroutine hdr_echo(hdr, fform, rdwr, unit, header)
  integer,intent(inout) :: fform
  integer,intent(in) :: rdwr
  integer,optional,intent(in) :: unit
- type(hdr_type),intent(inout) :: hdr
+ class(hdr_type),intent(inout) :: hdr
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
@@ -2255,7 +2423,7 @@ subroutine hdr_update(hdr,bantot,etot,fermie,residm,rprimd,occ,pawrhoij,xred,amu
  integer,intent(in) :: bantot
  integer,optional,intent(in) :: comm_atom
  real(dp),intent(in) :: etot,fermie,residm
- type(hdr_type),intent(inout) :: hdr
+ class(hdr_type),intent(inout) :: hdr
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),intent(in) :: occ(bantot),rprimd(3,3),xred(3,hdr%natom),amu(hdr%ntypat)
@@ -2327,7 +2495,7 @@ subroutine hdr_bcast(hdr,master,me,comm)
 
 !Arguments ------------------------------------
  integer, intent(in) :: master,me,comm
- type(hdr_type),intent(inout) :: hdr
+ class(hdr_type),intent(inout) :: hdr
 
 !Local variables-------------------------------
 !scalars
@@ -2692,10 +2860,10 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
 
 !Reading the second record of the file ------------------------------------
  read(unit, err=10, iomsg=errmsg) &
-&  hdr%bantot, hdr%date, hdr%intxc, hdr%ixc, hdr%natom, hdr%ngfft(1:3),&
-&  hdr%nkpt, hdr%nspden, hdr%nspinor, hdr%nsppol, hdr%nsym, hdr%npsp, hdr%ntypat, hdr%occopt, hdr%pertcase,&
-&  hdr%usepaw, hdr%ecut, hdr%ecutdg, hdr%ecutsm, hdr%ecut_eff, hdr%qptn(1:3), hdr%rprimd,&
-&  hdr%stmbias, hdr%tphysel, hdr%tsmear, hdr%usewvl, hdr%nshiftk_orig, hdr%nshiftk, hdr%mband
+   hdr%bantot, hdr%date, hdr%intxc, hdr%ixc, hdr%natom, hdr%ngfft(1:3),&
+   hdr%nkpt, hdr%nspden, hdr%nspinor, hdr%nsppol, hdr%nsym, hdr%npsp, hdr%ntypat, hdr%occopt, hdr%pertcase,&
+   hdr%usepaw, hdr%ecut, hdr%ecutdg, hdr%ecutsm, hdr%ecut_eff, hdr%qptn(1:3), hdr%rprimd,&
+   hdr%stmbias, hdr%tphysel, hdr%tsmear, hdr%usewvl, hdr%nshiftk_orig, hdr%nshiftk, hdr%mband
 
  !Allocate all parts of hdr that need to be --------------------------------
  call hdr_malloc(hdr, hdr%bantot, hdr%nkpt, hdr%nsppol, hdr%npsp, hdr%natom, hdr%ntypat,&
@@ -2712,10 +2880,10 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
  ABI_MALLOC(occ3d, (hdr%mband,hdr%nkpt,hdr%nsppol))
 
  read(unit, err=10, iomsg=errmsg) &
-& hdr%istwfk(:), hdr%nband(:), hdr%npwarr(:), &
-& hdr%so_psp(:), hdr%symafm(:), hdr%symrel(:,:,:), &
-& hdr%typat(:), hdr%kptns(:,:), occ3d, &
-& hdr%tnons(:,:), hdr%znucltypat(:), hdr%wtk(:)
+   hdr%istwfk(:), hdr%nband(:), hdr%npwarr(:), &
+   hdr%so_psp(:), hdr%symafm(:), hdr%symrel(:,:,:), &
+   hdr%typat(:), hdr%kptns(:,:), occ3d, &
+   hdr%tnons(:,:), hdr%znucltypat(:), hdr%wtk(:)
  ABI_CHECK(hdr%mband == maxval(hdr%nband), "mband != maxval(hdr_in%nband)")
 
  call hdr_set_occ(hdr, occ3d)
@@ -2731,8 +2899,8 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
 ! Reading the records with psp information ---------------------------------
  do ipsp=1,hdr%npsp
    read(unit, err=10, iomsg=errmsg) &
-&   hdr%title(ipsp), hdr%znuclpsp(ipsp), hdr%zionpsp(ipsp), hdr%pspso(ipsp), hdr%pspdat(ipsp), &
-&   hdr%pspcod(ipsp), hdr%pspxc(ipsp), hdr%lmn_size(ipsp), hdr%md5_pseudos(ipsp)
+     hdr%title(ipsp), hdr%znuclpsp(ipsp), hdr%zionpsp(ipsp), hdr%pspso(ipsp), hdr%pspdat(ipsp), &
+     hdr%pspcod(ipsp), hdr%pspxc(ipsp), hdr%lmn_size(ipsp), hdr%md5_pseudos(ipsp)
  end do
 
  if (hdr%usepaw==1) then ! Reading the Rhoij tab if the PAW method was used.
@@ -2982,7 +3150,7 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
  integer,intent(out) :: ierr
  integer,intent(in) :: unit,fform
  logical,optional,intent(in) :: rewind
- type(hdr_type),intent(inout) :: hdr
+ class(hdr_type),intent(inout) :: hdr
 
 !Local variables-------------------------------
  integer :: headform,ipsp
@@ -3006,17 +3174,17 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
  write(unit, err=10, iomsg=errmsg) hdr%codvsn, headform, fform
 
  write(unit, err=10, iomsg=errmsg) &
-& hdr%bantot, hdr%date, hdr%intxc, hdr%ixc, hdr%natom, hdr%ngfft(1:3), &
-& hdr%nkpt, hdr%nspden, hdr%nspinor, hdr%nsppol, hdr%nsym, hdr%npsp, hdr%ntypat, hdr%occopt, hdr%pertcase,&
-& hdr%usepaw, hdr%ecut, hdr%ecutdg, hdr%ecutsm, hdr%ecut_eff, hdr%qptn, hdr%rprimd, &
-& hdr%stmbias, hdr%tphysel, hdr%tsmear, hdr%usewvl, hdr%nshiftk_orig, hdr%nshiftk, hdr%mband
+   hdr%bantot, hdr%date, hdr%intxc, hdr%ixc, hdr%natom, hdr%ngfft(1:3), &
+   hdr%nkpt, hdr%nspden, hdr%nspinor, hdr%nsppol, hdr%nsym, hdr%npsp, hdr%ntypat, hdr%occopt, hdr%pertcase,&
+   hdr%usepaw, hdr%ecut, hdr%ecutdg, hdr%ecutsm, hdr%ecut_eff, hdr%qptn, hdr%rprimd, &
+   hdr%stmbias, hdr%tphysel, hdr%tsmear, hdr%usewvl, hdr%nshiftk_orig, hdr%nshiftk, hdr%mband
  ABI_CHECK(hdr%mband == maxval(hdr%nband), "mband != maxval(hdr_in%nband)")
 
  ABI_MALLOC(occ3d, (hdr%mband,hdr%nkpt,hdr%nsppol))
  call hdr_get_occ3d(hdr, occ3d)
  write(unit,err=10, iomsg=errmsg) hdr%istwfk(:), hdr%nband(:), hdr%npwarr(:),&
-& hdr%so_psp(:), hdr%symafm(:), hdr%symrel(:,:,:), hdr%typat(:), hdr%kptns(:,:), occ3d, &
-& hdr%tnons(:,:), hdr%znucltypat(:), hdr%wtk(:)
+   hdr%so_psp(:), hdr%symafm(:), hdr%symrel(:,:,:), hdr%typat(:), hdr%kptns(:,:), occ3d, &
+   hdr%tnons(:,:), hdr%znucltypat(:), hdr%wtk(:)
  ABI_FREE(occ3d)
 
  write(unit,err=10, iomsg=errmsg) hdr%residm, hdr%xred(:,:), hdr%etot, hdr%fermie, hdr%amu(:)
@@ -3027,8 +3195,8 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
  ! Write the records with psp information ---------------------------------
  do ipsp=1,hdr%npsp
    write(unit, err=10, iomsg=errmsg) &
-&   hdr%title(ipsp), hdr%znuclpsp(ipsp), hdr%zionpsp(ipsp), hdr%pspso(ipsp), hdr%pspdat(ipsp), &
-&   hdr%pspcod(ipsp), hdr%pspxc(ipsp), hdr%lmn_size(ipsp), hdr%md5_pseudos(ipsp)
+     hdr%title(ipsp), hdr%znuclpsp(ipsp), hdr%zionpsp(ipsp), hdr%pspso(ipsp), hdr%pspdat(ipsp), &
+     hdr%pspcod(ipsp), hdr%pspxc(ipsp), hdr%lmn_size(ipsp), hdr%md5_pseudos(ipsp)
  end do
 
  if (hdr%usepaw==1) then
@@ -3067,7 +3235,7 @@ end subroutine hdr_fort_write
 integer function hdr_backspace(hdr, unit, msg) result(ierr)
 
 !Arguments ------------------------------------
- type(hdr_type),intent(in) :: hdr
+ class(hdr_type),intent(in) :: hdr
  integer,intent(in) :: unit
  character(len=*),intent(out) :: msg
 
@@ -3126,7 +3294,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
 !scalars
  integer,intent(in) :: ncid,fform
  logical,optional,intent(in) :: nc_define
- type(hdr_type),target,intent(in) :: hdr
+ class(hdr_type),target,intent(in) :: hdr
 
 #ifdef HAVE_NETCDF
 !Local variables-------------------------------
@@ -3449,7 +3617,7 @@ end function hdr_ncwrite
 subroutine hdr_set_occ(hdr, occ3d)
 
 !Arguments ------------------------------------
- type(hdr_type),intent(inout) :: hdr
+ class(hdr_type),intent(inout) :: hdr
  real(dp),intent(in) :: occ3d(hdr%mband,hdr%nkpt,hdr%nsppol)
 
 !Local variables-------------------------------
@@ -3488,7 +3656,7 @@ end subroutine hdr_set_occ
 subroutine hdr_get_occ3d(hdr, occ3d)
 
 !Arguments ------------------------------------
- type(hdr_type),intent(in) :: hdr
+ class(hdr_type),intent(in) :: hdr
  real(dp),intent(out) :: occ3d(hdr%mband,hdr%nkpt,hdr%nsppol)
 
 !Local variables-------------------------------
@@ -3632,9 +3800,9 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
 !Write out a header
  write(msg,'(a1,80a,2a1,10x,a,3a1,8x,a,25x,a,a1,8x,19a,25x,12a,a1)' )&
-& ch10,('=',ii=1,80),ch10,ch10,&
-& '- hdr_check: checking restart file header for consistency -',&
-& (ch10,ii=1,3),'current calculation','restart file',ch10,('-',ii=1,19),('-',ii=1,12),ch10
+   ch10,('=',ii=1,80),ch10,ch10,&
+   '- hdr_check: checking restart file header for consistency -',&
+   (ch10,ii=1,3),'current calculation','restart file',ch10,('-',ii=1,19),('-',ii=1,12),ch10
  call wrtout(std_out,msg,mode_paral)
 
 !Check validity of fform, and find filetype
@@ -3650,11 +3818,11 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  end if
 
  write(msg,'(a,a13,3x,2a,a13)') &
-& '  calculation expects a ',ljust(abifile%class, 13),'|','  input file contains a ',ljust(abifile0%class, 13)
+  '  calculation expects a ',ljust(abifile%class, 13),'|','  input file contains a ',ljust(abifile0%class, 13)
  call wrtout(std_out,msg,mode_paral)
 
  write(msg,'(a,a,11x,a,a,a)')&
-& '. ABINIT  code version ',hdr%codvsn,'|','  ABINIT  code version ',hdr0%codvsn
+  '. ABINIT  code version ',hdr%codvsn,'|','  ABINIT  code version ',hdr0%codvsn
  call wrtout(std_out,msg,mode_paral)
 
 !Check fform from input, not from header file
@@ -3664,36 +3832,36 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  end if
 
  write(msg, '(a,i8,a,i4,a,i4,2x,a,a,i8,a,i4,a,i4)' ) &
-& '. date ',hdr %date,' bantot ',hdr %bantot,' natom ',hdr %natom,'|',&
-& '  date ',hdr0%date,' bantot ',hdr0%bantot,' natom ',hdr0%natom
+  '. date ',hdr %date,' bantot ',hdr %bantot,' natom ',hdr %natom,'|',&
+  '  date ',hdr0%date,' bantot ',hdr0%bantot,' natom ',hdr0%natom
  call wrtout(std_out,msg,mode_paral)
 
  write(msg, '(a,i4,a,i3,3(a,i4),2x,a,a,i4,a,i3,3(a,i4))' )&
-& '  nkpt',hdr %nkpt,' nsym',hdr %nsym,' ngfft',hdr %ngfft(1),',',hdr %ngfft(2),',',hdr %ngfft(3),'|',&
-& '  nkpt',hdr0%nkpt,' nsym',hdr0%nsym,' ngfft',hdr0%ngfft(1),',',hdr0%ngfft(2),',',hdr0%ngfft(3)
+  '  nkpt',hdr %nkpt,' nsym',hdr %nsym,' ngfft',hdr %ngfft(1),',',hdr %ngfft(2),',',hdr %ngfft(3),'|',&
+  '  nkpt',hdr0%nkpt,' nsym',hdr0%nsym,' ngfft',hdr0%ngfft(1),',',hdr0%ngfft(2),',',hdr0%ngfft(3)
  call wrtout(std_out,msg,mode_paral)
 
  if (hdr%usewvl == 0) then
 !  Note that the header actually contains ecut_eff=ecut*dilatmx**2
    write(msg,'(a,i3,a,f12.7,8x,a,a,i3,a,f12.7)')&
-&   '  ntypat',hdr %ntypat,' ecut_eff',hdr %ecut_eff,'|',&
-&   '  ntypat',hdr0%ntypat,' ecut_eff',hdr0%ecut_eff
+    '  ntypat',hdr %ntypat,' ecut_eff',hdr %ecut_eff,'|',&
+    '  ntypat',hdr0%ntypat,' ecut_eff',hdr0%ecut_eff
    call wrtout(std_out,msg,mode_paral)
  else
    write(msg,'(a,i3,a,f12.7,8x,a,a,i3,a,f12.7)')&
-&   '  ntypat',hdr %ntypat,' hgrid   ', 2. * hdr %rprimd(1,1) / (hdr %ngfft(1) - 31),'|',&
-&   '  ntypat',hdr0%ntypat,' hgrid   ', 2. * hdr0%rprimd(1,1) / (hdr0%ngfft(1) - 31)
+    '  ntypat',hdr %ntypat,' hgrid   ', 2. * hdr %rprimd(1,1) / (hdr %ngfft(1) - 31),'|',&
+    '  ntypat',hdr0%ntypat,' hgrid   ', 2. * hdr0%rprimd(1,1) / (hdr0%ngfft(1) - 31)
    call wrtout(std_out,msg,mode_paral)
 !  Check hgrid and rprimd values.
    if (hdr0%rprimd(1,2) /= zero .or. hdr0%rprimd(1,3) /= zero .or. &
-&   hdr0%rprimd(2,1) /= zero .or. hdr0%rprimd(2,3) /= zero .or. &
-&   hdr0%rprimd(3,1) /= zero .or. hdr0%rprimd(3,2) /= zero) then
+    hdr0%rprimd(2,1) /= zero .or. hdr0%rprimd(2,3) /= zero .or. &
+    hdr0%rprimd(3,1) /= zero .or. hdr0%rprimd(3,2) /= zero) then
      MSG_ERROR('disk file rprimd is not parallelepipedic.')
    end if
    if (abs(hdr0%rprimd(1,1) / hdr0%ngfft(1) - hdr %rprimd(1,1) / hdr %ngfft(1)) > tol8) then
      write(msg,'(a,F7.4,a,F7.4)')&
-&     'input wvl_hgrid=', 2. * hdr%rprimd(1,1) / hdr%ngfft(1), &
-&     'not equal disk file wvl_hgrid=', 2. * hdr0%rprimd(1,1) / hdr0%ngfft(1)
+      'input wvl_hgrid=', 2. * hdr%rprimd(1,1) / hdr%ngfft(1), &
+      'not equal disk file wvl_hgrid=', 2. * hdr0%rprimd(1,1) / hdr0%ngfft(1)
      MSG_COMMENT(msg)
      tgrid = 1
    end if
@@ -3706,10 +3874,10 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  call wrtout(std_out,msg,mode_paral)
 
  write(msg,'(a,31x,a,a,3(a1,2x,3f12.7,2x,a,2x,3f12.7))')&
-& '  rprimd:','|','  rprimd:',ch10,&
-& hdr%rprimd(:,1),'|',hdr0%rprimd(:,1),ch10,&
-& hdr%rprimd(:,2),'|',hdr0%rprimd(:,2),ch10,&
-& hdr%rprimd(:,3),'|',hdr0%rprimd(:,3)
+  '  rprimd:','|','  rprimd:',ch10,&
+  hdr%rprimd(:,1),'|',hdr0%rprimd(:,1),ch10,&
+  hdr%rprimd(:,2),'|',hdr0%rprimd(:,2),ch10,&
+  hdr%rprimd(:,3),'|',hdr0%rprimd(:,3)
  call wrtout(std_out,msg,mode_paral)
 
  if (hdr%bantot/=hdr0%bantot) tband=1
@@ -3731,13 +3899,13 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  end if
 
  if ( ANY(hdr%ngfft/=hdr0%ngfft) ) then
-!  For sensible rho(r) or V(r) data, fft grid must be identical
-!  Note, however, that we allow for different FFT meshes and we interpolate the density in the
-!  caller when we are restarting a SCF calculation.
+   ! For sensible rho(r) or V(r) data, fft grid must be identical
+   ! Note, however, that we allow for different FFT meshes and we interpolate the density in the
+   ! caller when we are restarting a SCF calculation.
    if (abifile%class == "density" .or. abifile%class == "potential") then
      write(msg, '(5a)' )&
-&     'fft grids must be the same for restart from a ',trim(abifile%class),' file.',ch10,&
-&     'Action: change your fft grid or your restart file.'
+       'fft grids must be the same for restart from a ',trim(abifile%class),' file.',ch10,&
+       'Action: change your fft grid or your restart file.'
      MSG_ERROR(msg)
    end if
    tng=1
@@ -3786,8 +3954,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
  if (hdr%usewvl/=hdr0%usewvl) then
    write(msg, '(a,i6,a,i6,a,a)' )&
-&   'input usewvl=',hdr%usewvl,' not equal disk file usewvl=',hdr0%usewvl, ch10, &
-&   'Action: change usewvl input variable or your restart file.'
+     'input usewvl=',hdr%usewvl,' not equal disk file usewvl=',hdr0%usewvl, ch10, &
+     'Action: change usewvl input variable or your restart file.'
    MSG_ERROR(msg)
  end if
 
@@ -3802,7 +3970,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do jj=1,3
      if (abs(hdr%rprimd(ii,jj)-hdr0%rprimd(ii,jj))>tol6) then
        write(msg, '(a,i1,a,i1,a,1p,e17.9,a,i1,a,i1,a,e17.9)' )&
-&       'input rprimd(',ii,',',jj,')=',hdr%rprimd(ii,jj),' /= disk file rprimd(',ii,',',jj,')=',hdr0%rprimd(ii,jj)
+         'input rprimd(',ii,',',jj,')=',hdr%rprimd(ii,jj),' /= disk file rprimd(',ii,',',jj,')=',hdr0%rprimd(ii,jj)
        MSG_WARNING(msg)
        tprim=1
      end if
@@ -3867,8 +4035,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  if (hdr%usewvl == 1) then
    if (size(hdr%nwvlarr) /= size(hdr0%nwvlarr) .or. size(hdr%nwvlarr) /= 2) then
      write(msg, '(a,i0,a,i0,a,a)' )&
-&     'input nwvlres= ',size(hdr%nwvlarr),' not equal disk file nwvlres= ',size(hdr0%nwvlarr),' or 2',&
-&     ' ABINIT is not implemented for wavelet resolutions different from 2.'
+      'input nwvlres= ',size(hdr%nwvlarr),' not equal disk file nwvlres= ',size(hdr0%nwvlarr),' or 2',&
+      ' ABINIT is not implemented for wavelet resolutions different from 2.'
      MSG_ERROR(msg)
    end if
  end if
@@ -3918,7 +4086,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    tsym=1
  end if
 
-!Compare typat(natom)
+ ! Compare typat(natom)
  if (hdr%natom==hdr0%natom) then
    natom=hdr%natom
    write(msg,'(a,32x,a,a)') '  typat:','|','  typat:'
@@ -3961,7 +4129,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end do
  end if
 
-!Compare istwfk(nkpt)
+ ! Compare istwfk(nkpt)
  if (hdr%nkpt==hdr0%nkpt) then
    nkpt=hdr%nkpt
    write(msg,'(a,31x,a,a)') '  istwfk:','|','  istwfk:'
@@ -3981,7 +4149,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do ii=1,nkpt
      if (hdr%istwfk(ii)/=hdr0%istwfk(ii)) then
        write(msg, '(a,i0,a,i0,a,i0)' )&
-&       'For k point number ',ii,' input istwfk=',hdr%istwfk(ii),' not equal disk file istwfk=',hdr0%istwfk(ii)
+         'For k point number ',ii,' input istwfk=',hdr%istwfk(ii),' not equal disk file istwfk=',hdr0%istwfk(ii)
        MSG_COMMENT(msg)
        twfk=1
      end if
@@ -4038,8 +4206,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      end do
      if (itest==1) then
        write(msg, '(a,i5,a,3es17.7,a,a,3es17.7)' )&
-&       'kpt num',ii,', input kpt=',hdr%kptns(:,ii),ch10,&
-&       'not equal  disk file kpt=',hdr0%kptns(:,ii)
+        'kpt num',ii,', input kpt=',hdr%kptns(:,ii),ch10,&
+        'not equal  disk file kpt=',hdr0%kptns(:,ii)
        MSG_WARNING(msg)
        tkpt=1 ; iwarning=iwarning+1
        if(iwarning>=mwarning)then
@@ -4068,8 +4236,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      itest=0
      if (abs( hdr%wtk(ii)-hdr0%wtk(ii) )>tol6) then
        write(msg,'(a,i5,a,es17.7,a,a,es17.7)')&
-&       'kpt num',ii,', input weight=',hdr%wtk(ii),ch10,&
-&       'not equal to disk file weight=',hdr0%wtk(ii)
+        'kpt num',ii,', input weight=',hdr%wtk(ii),ch10,&
+        'not equal to disk file weight=',hdr0%wtk(ii)
        MSG_WARNING(msg)
 
        tkpt=1 ; iwarning=iwarning+1
@@ -4154,7 +4322,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do ii=1,ntypat
      if (abs(hdr%znucltypat(ii)-hdr0%znucltypat(ii))>tol6) then
        write(msg, '(a,i5,a,f12.6,a,f12.6)' )&
-&       ' For atom number ',ii,' input znucl=',hdr%znucltypat(ii),' not equal disk file znucl=',hdr0%znucltypat(ii)
+        ' For atom number ',ii,' input znucl=',hdr%znucltypat(ii),' not equal disk file znucl=',hdr0%znucltypat(ii)
        MSG_WARNING(msg)
      end if
    end do
@@ -4172,34 +4340,34 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
    do ipsp=1,npsp
      write(msg,'(a,i3,a,9x,a,a,i3,a)')&
-&     '  pseudopotential atom type',ipsp,':','|','  pseudopotential atom type',ipsp,':'
+      '  pseudopotential atom type',ipsp,':','|','  pseudopotential atom type',ipsp,':'
      call wrtout(std_out,msg,mode_paral)
 
      if (hdr%usepaw==1 .and. hdr0%usepaw==1) then
        write(msg,'(a,i3,a,i3,a,i3,5x,a,a,i3,a,i3,a,i3)')&
-&       '  pspso ',hdr %pspso(ipsp),' pspxc ',hdr %pspxc(ipsp),&
-&       '  lmn_size ',hdr%lmn_size(ipsp),'|',&
-&       '  pspso ',hdr0%pspso(ipsp),' pspxc ',hdr0%pspxc(ipsp),&
-&       '  lmn_size ',hdr0%lmn_size(ipsp)
+        '  pspso ',hdr %pspso(ipsp),' pspxc ',hdr %pspxc(ipsp),&
+        '  lmn_size ',hdr%lmn_size(ipsp),'|',&
+        '  pspso ',hdr0%pspso(ipsp),' pspxc ',hdr0%pspxc(ipsp),&
+        '  lmn_size ',hdr0%lmn_size(ipsp)
        call wrtout(std_out,msg,mode_paral)
        if (hdr%lmn_size(ipsp)/=hdr0%lmn_size(ipsp)) then
          write(msg, '(a,i3,a,i3,a,i3)' )&
-&         'For atom type ',ipsp,' input lmn_size=',hdr%lmn_size(ipsp),&
-&         'not equal disk file lmn_size=',hdr0%lmn_size(ipsp)
+          'For atom type ',ipsp,' input lmn_size=',hdr%lmn_size(ipsp),&
+          'not equal disk file lmn_size=',hdr0%lmn_size(ipsp)
          MSG_WARNING(msg)
          tlmn=1
        end if
      else
        write(msg,'(a,i3,a,i3,19x,a,a,i3,a,i3)')&
-&       '  pspso ',hdr %pspso(ipsp),' pspxc ',hdr %pspxc(ipsp),'|',&
-&       '  pspso ',hdr0%pspso(ipsp),' pspxc ',hdr0%pspxc(ipsp)
+        '  pspso ',hdr %pspso(ipsp),' pspxc ',hdr %pspxc(ipsp),'|',&
+        '  pspso ',hdr0%pspso(ipsp),' pspxc ',hdr0%pspxc(ipsp)
        call wrtout(std_out,msg,mode_paral)
      end if
      write(msg,'(a,i6,a,i4,a,f5.1,2x,a,a,i6,a,i4,a,f5.1)')&
-&     '  pspdat ',hdr %pspdat(ipsp),' pspcod ',hdr %pspcod(ipsp),&
-&     ' zion ',hdr %zionpsp(ipsp),'|',&
-&     '  pspdat ',hdr0%pspdat(ipsp),' pspcod ',hdr0%pspcod(ipsp),&
-&     ' zion ',hdr0%zionpsp(ipsp)
+      '  pspdat ',hdr %pspdat(ipsp),' pspcod ',hdr %pspcod(ipsp),&
+      ' zion ',hdr %zionpsp(ipsp),'|',&
+      '  pspdat ',hdr0%pspdat(ipsp),' pspcod ',hdr0%pspcod(ipsp),&
+      ' zion ',hdr0%zionpsp(ipsp)
      call wrtout(std_out,msg,mode_paral)
 
      ! Check on md5 values.
@@ -4212,9 +4380,9 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
        itest=1; tpsch=1
      end if
 
-!    Second, test
-!    NOTE, XG 000719: should do something about pspso
-!    NOTE, XG 020716: znucl and zion are not written
+     ! Second, test
+     ! NOTE, XG 000719: should do something about pspso
+     ! NOTE, XG 020716: znucl and zion are not written
      if (abs(hdr%znuclpsp(ipsp)-hdr0%znuclpsp(ipsp))>tol6) itest=1
      if (abs(hdr%zionpsp(ipsp)-hdr0%zionpsp(ipsp))>tol6) then
        itest=1; tpsch=1
@@ -4230,7 +4398,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end if
  end if
 
-!Finally, read residm and etotal ("current value" not known), and check xred.
+ ! Finally, read residm and etotal ("current value" not known), and check xred.
  if (hdr%natom==hdr0%natom) then
    natom=hdr%natom
    write(msg,'(a,33x,a,a)') '  xred:','|','  xred:'
@@ -4240,8 +4408,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      call wrtout(std_out,msg,mode_paral)
    end do
 
-!  check atom positions one atom at a time and allow possibility
-!  that there is a harmless translation of atoms by a cell vector.
+   ! check atom positions one atom at a time and allow possibility
+   ! that there is a harmless translation of atoms by a cell vector.
    do ii=1,natom
      rms=0.0_dp
      do jj=1,3
@@ -4272,8 +4440,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
 !If there is a problem somewhere
  if ( (abifile%class == "wf_planewave"  .and. tfform2  ) .or.  &
-& (abifile%class == "density" .and. tfform52 ) .or.  &
-& (abifile%class == "wf_wavelet" .and. tfform2 ) ) then
+      (abifile%class == "density" .and. tfform52 ) .or.  &
+      (abifile%class == "wf_wavelet" .and. tfform2 ) ) then
 
    if (abifile%class == "wf_planewave") then
      restart=2
@@ -4284,8 +4452,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end if
 
    write(msg,'(a,a1,a)') &
-&   '  Indeed, critical differences between current calculation and',ch10,&
-&   '  restart file have been detected in:'
+     '  Indeed, critical differences between current calculation and',ch10,&
+     '  restart file have been detected in:'
    call wrtout(std_out,msg,mode_paral)
 
    if ( (abifile%class == "density" .or. abifile%class == "wf_wavelet") .and. tatty /= 0 ) then
@@ -4346,8 +4514,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
        end if
      else if (tdg/=0) then
        write(msg,'(a,a,a,a,a,a)') ch10,&
-&       ' hdr_check: WARNING -',ch10,&
-&       '  Restart of calculation within PAW may be inconsistent because of:"'
+         ' hdr_check: WARNING -',ch10,&
+         '  Restart of calculation within PAW may be inconsistent because of:"'
        call wrtout(std_out,msg,mode_paral)
        if(tdg/=0)then
          write(msg, '(8x,a)' )'* the cutoff energy of the paw double (fine) grid'
@@ -4399,7 +4567,7 @@ end subroutine hdr_check
 subroutine hdr_vs_dtset(Hdr,Dtset)
 
 !Arguments ------------------------------------
- type(Hdr_type),intent(in) :: Hdr
+ class(Hdr_type),intent(in) :: Hdr
  type(Dataset_type),intent(in) :: Dtset
 
 !Local variables-------------------------------
@@ -4651,7 +4819,7 @@ end subroutine hdr_vs_dtset
 type(crystal_t) function hdr_get_crystal(hdr, timrev, remove_inv) result(cryst)
 
 !Arguments ------------------------------------
- type(hdr_type),intent(in) :: hdr
+ class(hdr_type),intent(in) :: hdr
  integer,intent(in) :: timrev
  logical,optional,intent(in) :: remove_inv
 
@@ -4672,8 +4840,8 @@ type(crystal_t) function hdr_get_crystal(hdr, timrev, remove_inv) result(cryst)
  space_group = 0 !FIXME not known at this level.
 
  call crystal_init(hdr%amu,cryst,space_group,hdr%natom,hdr%npsp,hdr%ntypat,hdr%nsym,hdr%rprimd,hdr%typat,hdr%xred,&
-& hdr%zionpsp,hdr%znuclpsp,timrev,use_antiferro,rinv,hdr%title,&
-& symrel=hdr%symrel,tnons=hdr%tnons,symafm=hdr%symafm) ! Optional
+   hdr%zionpsp,hdr%znuclpsp,timrev,use_antiferro,rinv,hdr%title,&
+   symrel=hdr%symrel,tnons=hdr%tnons,symafm=hdr%symafm) ! Optional
 
 end function hdr_get_crystal
 !!***

@@ -36,9 +36,8 @@ MODULE m_exc_spectra
  use netcdf
 #endif
  use m_ebands
- !use m_hdr,          only : hdr_free
+ use m_hdr
 
- use defs_abitypes,     only : hdr_type
  use m_io_tools,        only : open_file
  use m_fstrings,        only : toupper, strcat, sjoin, int2char4
  use m_numeric_tools,   only : simpson_int, simpson_cplx

@@ -74,7 +74,7 @@ module m_wfk
 #endif
  use m_clib
 
- use defs_abitypes,  only : hdr_type, dataset_type, MPI_type
+ use defs_abitypes,  only : dataset_type, MPI_type
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_wvltypes,  only : wvl_internal_type
  use m_geometry,     only : metric

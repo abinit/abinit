@@ -45,7 +45,7 @@ MODULE m_ioarr
  use netcdf
 #endif
 
- use defs_abitypes,   only : hdr_type, mpi_type, dataset_type
+ use defs_abitypes,   only : mpi_type, dataset_type
  use defs_datatypes,  only : ebands_t
  use defs_wvltypes,   only : wvl_denspot_type
  use m_time,          only : cwtime, cwtime_report

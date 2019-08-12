@@ -38,6 +38,7 @@ module m_vtorho
  use m_efield
  use m_cgtools
  use m_gemm_nonlop
+ use m_hdr
 
  use m_time,               only : timab
  use m_geometry,           only : xred2xcart

@@ -60,7 +60,7 @@ module m_common
  use m_parser,            only : parsefile
  use m_invars1,           only : invars0, invars1m, indefo
  use m_time,              only : timab, time_set_papiopt
- use defs_abitypes,       only : dataset_type, ab_dimensions, hdr_type, MPI_type
+ use defs_abitypes,       only : dataset_type, ab_dimensions, MPI_type
  use defs_datatypes,      only : pspheader_type, ebands_t
  use m_pspheads,          only : inpspheads, pspheads_comm
 

@@ -33,6 +33,7 @@ module m_wvl_rwwf
  use m_wffile
  use m_errors
  use m_abicore
+ use m_hdr
  use m_xmpi
 #if defined HAVE_ETSF_IO
   use etsf_io
