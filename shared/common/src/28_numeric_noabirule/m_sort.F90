@@ -384,6 +384,7 @@ subroutine sort_weights(n, weights, iperm, tol, sorted_weights)
  my_tol = tol12; if (present(tol)) my_tol = tol
 
  ABI_MALLOC(my_weights, (n))
+ my_weights = weights
  ABI_MALLOC(iperm, (n))
  iperm = [(ii, ii=1,n)]
  call sort_dp(n, my_weights, iperm, my_tol)
