@@ -51,6 +51,73 @@ module m_bader
  public
 !!***
 
+!!****t* m_bader/aim_dataset_type
+!! NAME
+!! aim_dataset_type
+!!
+!! FUNCTION
+!! The aim_dataset_type structured datatype
+!! gathers all the input variables for the aim code
+!!
+!! SOURCE
+
+ type aim_dataset_type
+
+! Since all these input variables are described in the aim_help.html
+! file, they are not described in length here ...
+
+! Integer
+  integer :: crit
+  integer :: denout
+  integer :: dltyp
+  integer :: gpsurf
+  integer :: irho
+  integer :: ivol
+  integer :: lapout
+  integer :: nsa
+  integer :: nsb
+  integer :: nsc
+
+  integer :: batom  ! Warning : corresponds to the input variable atom
+  integer :: foll   ! Warning : corresponds to the input variable follow
+  integer :: isurf  ! Warning : corresponds to the input variable surf
+  integer :: irsur  ! Warning : corresponds to the input variable rsurf
+  integer :: nph    ! Warning : corresponds to the input variable nphi
+  integer :: npt    ! Warning : corresponds to the input variable inpt
+  integer :: nth    ! Warning : corresponds to the input variable ntheta
+  integer :: plden  ! Warning : not documented in help file ?!
+
+  integer :: ngrid(3)
+
+! Real
+  real(dp) :: atrad
+  real(dp) :: coff1
+  real(dp) :: coff2
+  real(dp) :: dpclim
+  real(dp) :: folstp
+  real(dp) :: lgrad
+  real(dp) :: lgrad2
+  real(dp) :: lstep
+  real(dp) :: lstep2
+  real(dp) :: maxatd
+  real(dp) :: maxcpd
+  real(dp) :: phimax
+  real(dp) :: phimin
+
+  real(dp) :: dr0    ! Warning : correspond to the input variable radstp
+  real(dp) :: phi0   ! Warning : correspond to the input variable rsurdir(2)
+  real(dp) :: rmin   ! Warning : correspond to the input variable ratmin
+  real(dp) :: th0    ! Warning : correspond to the input variable rsurdir(1)
+  real(dp) :: themax ! Warning : correspond to the input variable thetamax
+  real(dp) :: themin ! Warning : correspond to the input variable thetamin
+
+  real(dp) :: foldep(3)
+  real(dp) :: scal(3)
+  real(dp) :: vpts(3,4)
+
+ end type aim_dataset_type
+!!***
+
  public :: adini
  public :: drvaim
  public :: inpar
