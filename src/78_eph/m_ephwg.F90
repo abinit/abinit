@@ -961,7 +961,7 @@ subroutine ephwg_get_deltas_qibzk(self, nu, nene, eminmax, bcorr, dt_weights, co
  integer :: iq, iq_ibz, ie, ii
  real(dp),parameter :: max_occ1 = one
 !arrays
- real(dp) :: eigen_in(self%nq_k) !thetaw(nene, self%nq_k),
+ real(dp) :: eigen_in(self%nq_k)
 
 !----------------------------------------------------------------------
 
@@ -1040,7 +1040,6 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
 !arrays
  real(dp),allocatable :: pme_k(:,:)
  complex(dp),allocatable :: cweights_tmp(:,:)
- !complex(dpc) :: SIM0, SIM0I
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
