@@ -35,7 +35,9 @@ module m_sort
  public :: sort_int      ! Sort integer array
 
  ! Helper functions to perform common operations.
+ !
  public :: sort_rpts     ! Sort list of real points by |r|
+ public :: sort_weights  ! Sort list of weights.
 
 CONTAINS  !====================================================================================================
 !!***
@@ -275,6 +277,7 @@ end subroutine sort_int
 !!
 !! FUNCTION
 !!  Sort list of real space 3d-points by norm (ascending order)
+!!  Input list is not modified.
 !!
 !! INPUTS
 !!  n: dimension of the list
@@ -285,7 +288,7 @@ end subroutine sort_int
 !! OUTPUT
 !!  iperm(n) index of permutation giving the right ascending order:
 !!      the i-th element of the ordered list had index iperm(i) in rpts.
-!!  [rmod(n)]= list of sorted |r| values. 
+!!  [rmod(n)]= list of sorted |r| values.
 !!
 !! PARENTS
 !!
@@ -301,7 +304,7 @@ subroutine sort_rpts(n, rpts, metric, iperm, tol, rmod)
  integer,allocatable,intent(out) :: iperm(:)
  real(dp),optional,allocatable,intent(out) :: rmod(:)
  real(dp),optional,intent(in) :: tol
-!arrays 
+!arrays
  real(dp),intent(in) :: rpts(3,n), metric(3,3)
 
 !Local variables-------------------------------
@@ -326,10 +329,72 @@ subroutine sort_rpts(n, rpts, metric, iperm, tol, rmod)
  if (present(rmod)) then
    call move_alloc(my_rmod, rmod)
  else
-   ABI_FREE(my_rmod) 
+   ABI_FREE(my_rmod)
  end if
 
 end subroutine sort_rpts
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_sort/sort_weights
+!! NAME
+!!  sort_weights
+!!
+!! FUNCTION
+!!  Sort list of real values (ascending order)
+!!  Input list is not modified.
+!!
+!! INPUTS
+!!  n: dimension of the list
+!!  weights(n): input weigts.
+!!  [tol]: numbers within tolerance are equal.
+!!
+!! OUTPUT
+!!  iperm(n) index of permutation giving the right ascending order:
+!!      the i-th element of the ordered list had index iperm(i) in weights.
+!!  [sorted_weights(n)]= list of sorted weigts.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine sort_weights(n, weights, iperm, tol, sorted_weights)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: n
+ integer,allocatable,intent(out) :: iperm(:)
+ real(dp),optional,allocatable,intent(out) :: sorted_weights(:)
+ real(dp),optional,intent(in) :: tol
+!arrays
+ real(dp),intent(in) :: weights(n)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii
+ real(dp) :: my_tol
+!arrays
+ real(dp),allocatable :: my_weights(:)
+
+!************************************************************************
+
+ my_tol = tol12; if (present(tol)) my_tol = tol
+
+ ABI_MALLOC(my_weights, (n))
+ ABI_MALLOC(iperm, (n))
+ iperm = [(ii, ii=1,n)]
+ call sort_dp(n, my_weights, iperm, my_tol)
+
+ if (present(sorted_weights)) then
+   call move_alloc(my_weights, sorted_weights)
+ else
+   ABI_FREE(my_weights)
+ end if
+
+end subroutine sort_weights
 !!***
 
 end module m_sort

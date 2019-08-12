@@ -927,7 +927,7 @@ subroutine indefo1(dtset)
  dtset%vel_orig(:,:,:)=zero
  dtset%vel_cell_orig(:,:,:)=zero
 !W
- dtset%wtq=0
+ dtset%wtq=zero
  if (dtset%usepaw==0) dtset%wfoptalg=0
  if (dtset%usepaw/=0) dtset%wfoptalg=10
  if (dtset%optdriver==RUNL_GSTATE.and.dtset%paral_kgb>0) dtset%wfoptalg=14

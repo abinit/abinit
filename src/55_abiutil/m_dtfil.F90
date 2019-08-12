@@ -969,9 +969,9 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
      filnam_out = rmquotes(getpath)
      write(msg, '(5a)' )' mkfilename: get',trim(stringvar) ," from: ",trim(filnam_out), ch10
      call wrtout([std_out, ab_out], msg)
-     ! Check whether file exists.
+     ! Check whether file exists taking into account a possible NC file extension.
      if (xmpi_comm_rank(xmpi_world) == 0) then
-       if (.not. file_exists(filnam_out)) then
+       if (.not. file_exists(filnam_out) .and..not. file_exists(filnam_out//".nc")) then
          MSG_ERROR(sjoin("Cannot find file:", filnam_out))
        end if
      end if

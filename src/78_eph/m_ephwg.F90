@@ -885,10 +885,9 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
  real(dp),parameter :: max_occ1 = one
  real(dp) :: wme0(neig)
 !arrays
- real(dp) :: pme_k(self%nq_k,2), weights(neig,2)
+ real(dp) :: pme_k(self%nq_k,2)
 
 !----------------------------------------------------------------------
- ABI_UNUSED(weights)
 
  ib = band - self%bstart + 1
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -1004,6 +1003,7 @@ end subroutine ephwg_get_deltas_qibzk
 !! nu=Phonon branch.
 !! nbcalc=Number of bands in self-energy matrix elements.
 !! zvals
+!! opt: 1 for S. Kaprzyk routines, 2 for Lambin.
 !! comm=MPI communicator
 !! [use_bzsum]= By default the weights are multiplied by the Nstar(q) / Nq where
 !!   Nstar(q) is the number of points in the star of the q-point (using the symmetries of the little group of k)
@@ -1020,11 +1020,11 @@ end subroutine ephwg_get_deltas_qibzk
 !!
 !! SOURCE
 
-subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, cweights, comm, use_bzsum)
+subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, opt, cweights, comm, use_bzsum)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iband_sum, spin, nu, nz, nbcalc, comm
+ integer,intent(in) :: iband_sum, spin, nu, nz, nbcalc, opt, comm
  class(ephwg_t),intent(in) :: self
  logical, optional, intent(in) :: use_bzsum
 !arraye
@@ -1063,7 +1063,7 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
  do ib=1,nbcalc
    do ii=1,2
      call self%tetra_k%weights_wvals_zinv(pme_k(:, ii), nz, zvals(:,ib), &
-                                          max_occ1, self%nq_k, 1, cweights_tmp, comm)
+                                          max_occ1, self%nq_k, opt, cweights_tmp, comm)
      do iq=1,self%nq_k
        cweights(:,ii,ib,iq) = cweights_tmp(:,iq)
      end do
