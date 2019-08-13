@@ -67,6 +67,7 @@ module m_hdr
  implicit none
 
  private
+!!***
 
 #if defined HAVE_MPI1
  include 'mpif.h'

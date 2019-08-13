@@ -30,6 +30,7 @@ module m_alloc_hamilt_gpu
  use defs_abitypes
  use m_abicore
  use m_xmpi
+ use m_dtset
 
 #if defined HAVE_GPU_CUDA
  use m_gpu_toolbox
@@ -79,8 +80,6 @@ contains
 !! SOURCE
 
 subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,psps,use_gpu_cuda)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -180,8 +179,6 @@ end subroutine alloc_hamilt_gpu
 !! SOURCE
 
 subroutine dealloc_hamilt_gpu(option,use_gpu_cuda)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
