@@ -34,10 +34,12 @@ module m_mlwfovlp_qp
  use m_abicore
  use m_xmpi
  use m_hdr
+ use m_dtset
 
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
  use m_pawtab,         only : pawtab_type
  use m_pawcprj,        only : pawcprj_type, paw_overlap, pawcprj_getdim, pawcprj_alloc, pawcprj_free
+ use m_pawrhoij,       only : pawrhoij_type
  use m_numeric_tools,  only : isordered
  use m_geometry,       only : metric
  use m_crystal,        only : crystal_t
@@ -169,14 +171,14 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  DBG_ENTER("COLL")
 
  write(msg,'(17a)')ch10,&
-&  ' mlwfovlp_qp: WARNING',ch10,&
-&  '  The input *_WFK file of LDA wavefunctions to be  converted',ch10,&
-&  '  to GW quasiparticle wavefunctions MUST have been written in',ch10,&
-&  '  the run that produced the GW *_KSS file using kssform 3,',ch10,&
-&  '  the ONLY value of kssform permitted for GW Wannier functions.',ch10,&
-&  '  Otherwise, the *_QPS file needed here will be inconsistent,',ch10,&
-&  '  and the output quasiparticle wavefunctions will be garbage.',ch10,&
-&  '  No internal check that can verify this is presently possible.',ch10
+  ' mlwfovlp_qp: WARNING',ch10,&
+  '  The input *_WFK file of LDA wavefunctions to be  converted',ch10,&
+  '  to GW quasiparticle wavefunctions MUST have been written in',ch10,&
+  '  the run that produced the GW *_KSS file using kssform 3,',ch10,&
+  '  the ONLY value of kssform permitted for GW Wannier functions.',ch10,&
+  '  Otherwise, the *_QPS file needed here will be inconsistent,',ch10,&
+  '  and the output quasiparticle wavefunctions will be garbage.',ch10,&
+  '  No internal check that can verify this is presently possible.',ch10
  call wrtout(std_out,msg,'COLL')
 
  ! === Some features are not implemented yet ===
@@ -237,9 +239,9 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 
  if (dksqmax>tol8) then
     write(msg,'(5a)')&
-&     'Set of GW irreducible-zone kptgw in input file is inconsistent',ch10,&
-&     'with full-zone set being used for wannier90 setup.',ch10,&
-&     'Action: correct input data'
+     'Set of GW irreducible-zone kptgw in input file is inconsistent',ch10,&
+     'with full-zone set being used for wannier90 setup.',ch10,&
+     'Action: correct input data'
     MSG_ERROR(msg)
  end if
 
@@ -433,8 +435,8 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
       ! FIXME There's a problem in twannier90 since nband_k > nbdgw and therefore we also read KS states from the QPS file!
       ! Automatic test has to be changed!
       write(msg,'(2a,3f8.4,3a)')ch10,&
-&       "QP energies at k-point ",QP_bst%kptns(:,irzkpt)," are not sorted in ascending numerical order!",ch10,&
-&       "Performing reordering of energies and wavefunctions to be written on the final WKF file."
+        "QP energies at k-point ",QP_bst%kptns(:,irzkpt)," are not sorted in ascending numerical order!",ch10,&
+        "Performing reordering of energies and wavefunctions to be written on the final WKF file."
       MSG_ERROR(msg)
       !write(std_out,*)"eig",(QP_bst%eig(ii,irzkpt,isppol),ii=1,nband_k)
       ABI_MALLOC(sorted_qpene,(nband_k))

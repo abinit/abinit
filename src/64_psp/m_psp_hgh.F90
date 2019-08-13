@@ -32,6 +32,7 @@ module m_psp_hgh
  use m_splines
  use m_abicore
  use m_errors
+ use m_dtset
 
  use m_special_funcs,  only : abi_derfc
 #if defined HAVE_BIGDFT

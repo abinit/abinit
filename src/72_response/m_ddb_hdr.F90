@@ -31,6 +31,7 @@ MODULE m_ddb_hdr
  use m_errors
  use m_abicore
  use m_xmpi
+ use m_dtset
 
  use m_copy,      only : alloc_copy
  use m_pawtab,    only : pawtab_type, pawtab_nullify, pawtab_free !, pawtab_copy

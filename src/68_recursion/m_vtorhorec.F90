@@ -34,6 +34,7 @@ module m_vtorhorec
  use m_errors
  use m_abicore
  use m_per_cond
+ use m_dtset
 
  use m_time,             only : timein, timab
  use m_rec,              only : Calcnrec, init_nlpsprec, cpu_distribution

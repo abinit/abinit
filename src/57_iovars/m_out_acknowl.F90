@@ -30,6 +30,7 @@ module m_out_acknowl
  use defs_datatypes
  use defs_abitypes
  use m_abicore
+ use m_dtset
 
  use m_fstrings,     only : prep_dash
 

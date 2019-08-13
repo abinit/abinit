@@ -41,12 +41,12 @@ module m_phonons
  use netcdf
 #endif
  use m_supercell
+ use m_dtset
 
  use m_fstrings,        only : itoa, ftoa, sjoin, ktoa, strcat, basename, replace
  use m_symtk,           only : matr3inv
  use m_time,            only : cwtime, cwtime_report
  use m_io_tools,        only : open_file
- use defs_abitypes,     only : dataset_type
  use m_geometry,        only : mkrdim, symredcart, normv
  use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph
  use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new, kpath_free

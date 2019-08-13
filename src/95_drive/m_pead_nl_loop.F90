@@ -34,6 +34,7 @@ module m_pead_nl_loop
  use m_abicore
  use m_xmpi
  use m_hdr
+ use m_dtset
 #if defined HAVE_MPI2
  use mpi
 #endif

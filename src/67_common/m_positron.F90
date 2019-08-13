@@ -38,6 +38,7 @@ module m_positron
  use m_hdr
  use m_xmpi
  use m_bandfft_kpt
+ use m_dtset
 
  use m_special_funcs,  only : sbf8
  use m_ioarr,    only : ioarr, read_rhor

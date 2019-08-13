@@ -35,6 +35,7 @@ module m_chi0
  use m_hide_blas
  use m_time
  use m_wfd
+ use m_dtset
 
  use m_gwdefs,          only : GW_TOL_DOCC, GW_TOL_W0, czero_gw, em1params_t, g0g0w
  use m_numeric_tools,   only : imin_loc, print_arr

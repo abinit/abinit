@@ -27,6 +27,7 @@ MODULE m_iowf
  use defs_wvltypes
  use m_abicore
  use m_errors
+ use m_dtset
  use m_xmpi
  use m_wffile
  use m_abi_etsf

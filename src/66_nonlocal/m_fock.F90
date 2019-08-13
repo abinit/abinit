@@ -42,6 +42,7 @@ module m_fock
  use m_pawfgrtab
  use m_pawcprj
  use m_cgtools
+ use m_dtset
 
  use m_time,            only : timab
  use m_fstrings,        only : itoa, ftoa, sjoin
@@ -1271,32 +1272,18 @@ subroutine fock_common_destroy(fock)
 
  DBG_ENTER("COLL")
 
-  if (allocated(fock%atindx)) then
-   ABI_DEALLOCATE(fock%atindx)
- endif
- if (allocated(fock%typat)) then
-    ABI_DEALLOCATE(fock%typat)
- endif
+ ABI_SFREE(fock%atindx)
+ ABI_SFREE(fock%typat)
  ! real arrays
- if (allocated(fock%forces)) then
-   ABI_DEALLOCATE(fock%forces)
- endif
- if (allocated(fock%nband)) then
-   ABI_DEALLOCATE(fock%nband)
- endif
- if (allocated(fock%forces_ikpt)) then
-   ABI_DEALLOCATE(fock%forces_ikpt)
- endif
- if (allocated(fock%stress_ikpt)) then
-   ABI_DEALLOCATE(fock%stress_ikpt)
- endif
- if (allocated(fock%eigen_ikpt)) then
-    ABI_DEALLOCATE(fock%eigen_ikpt)
- endif
-!*Deallocate datatypes
+ ABI_SFREE(fock%forces)
+ ABI_SFREE(fock%nband)
+ ABI_SFREE(fock%forces_ikpt)
+ ABI_SFREE(fock%stress_ikpt)
+ ABI_SFREE(fock%eigen_ikpt)
+ ! Deallocate datatypes
  if (allocated(fock%pawfgrtab)) then
     call pawfgrtab_free(fock%pawfgrtab)
-    ABI_DATATYPE_DEALLOCATE(fock%pawfgrtab)
+    ABI_FREE(fock%pawfgrtab)
  endif
 
  ! Put the integer to 0
@@ -1329,75 +1316,39 @@ subroutine fock_BZ_destroy(fock)
 
  DBG_ENTER("COLL")
 
- if (allocated(fock%cwaveocc_bz)) then
-   ABI_DEALLOCATE(fock%cwaveocc_bz)
- endif
- if (allocated(fock%cgocc)) then
-   ABI_DEALLOCATE(fock%cgocc)
- endif
- if (allocated(fock%npwarr)) then
-   ABI_DEALLOCATE(fock%npwarr)
- endif
- if (allocated(fock%occ_bz)) then
-   ABI_DEALLOCATE(fock%occ_bz)
- endif
+ ABI_SFREE(fock%cwaveocc_bz)
+ ABI_SFREE(fock%cgocc)
+ ABI_SFREE(fock%npwarr)
+ ABI_SFREE(fock%occ_bz)
  if (allocated(fock%cwaveocc_prj)) then
    call pawcprj_free(fock%cwaveocc_prj)
-   ABI_DATATYPE_DEALLOCATE(fock%cwaveocc_prj)
+   ABI_FREE(fock%cwaveocc_prj)
  endif
  ! Deallocate integer arrays
 
- if (allocated(fock%kg_bz)) then
-   ABI_DEALLOCATE(fock%kg_bz)
- endif
- if (allocated(fock%nbandocc_bz)) then
-   ABI_DEALLOCATE(fock%nbandocc_bz)
- endif
- if (allocated(fock%istwfk_bz)) then
-   ABI_DEALLOCATE(fock%istwfk_bz)
- endif
- if (allocated(fock%calc_phase)) then
-    ABI_DEALLOCATE(fock%calc_phase)
- endif
- if (allocated(fock%timerev)) then
-    ABI_DEALLOCATE(fock%timerev)
- endif
- if (allocated(fock%tab_ibg)) then
-    ABI_DEALLOCATE(fock%tab_ibg)
- endif
- if (allocated(fock%tab_icg)) then
-    ABI_DEALLOCATE(fock%tab_icg)
- endif
- if (allocated(fock%tab_icp)) then
-    ABI_DEALLOCATE(fock%tab_icp)
- endif
- if (allocated(fock%tab_ikpt)) then
-    ABI_DEALLOCATE(fock%tab_ikpt)
- endif
- if (allocated(fock%tab_symkpt)) then
-    ABI_DEALLOCATE(fock%tab_symkpt)
- endif
+ ABI_SFREE(fock%kg_bz)
+ ABI_SFREE(fock%nbandocc_bz)
+ ABI_SFREE(fock%istwfk_bz)
+ ABI_SFREE(fock%calc_phase)
+ ABI_SFREE(fock%timerev)
+ ABI_SFREE(fock%tab_ibg)
+ ABI_SFREE(fock%tab_icg)
+ ABI_SFREE(fock%tab_icp)
+ ABI_SFREE(fock%tab_ikpt)
+ ABI_SFREE(fock%tab_symkpt)
 
 !* [description of IBZ and BZ]
 !* Deallocate real arrays
- if (allocated(fock%wtk_bz)) then
-   ABI_DEALLOCATE(fock%wtk_bz)
- endif
- if (allocated(fock%kptns_bz)) then
-    ABI_DEALLOCATE(fock%kptns_bz)
- endif
- if (allocated(fock%phase)) then
-    ABI_DEALLOCATE(fock%phase)
- endif
+ ABI_SFREE(fock%wtk_bz)
+ ABI_SFREE(fock%kptns_bz)
+ ABI_SFREE(fock%phase)
 !* Put the integer to 0
-   fock%nkpt_bz=0
+ fock%nkpt_bz=0
 
 !* Deallocate real arrays
 
 !* Deallocate integer arrays
- if (allocated(fock%gbound_bz)) then
-    ABI_DEALLOCATE(fock%gbound_bz)
- endif
+ ABI_SFREE(fock%gbound_bz)
 
 !* [description of size of arrays/pointers]
 !* Put the integer to 0

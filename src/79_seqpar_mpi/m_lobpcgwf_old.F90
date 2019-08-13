@@ -104,6 +104,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  use m_xmpi
  use m_errors
  use iso_c_binding
+ use m_dtset
 
  use m_time,        only : timab
  use m_hamiltonian, only : gs_hamiltonian_type

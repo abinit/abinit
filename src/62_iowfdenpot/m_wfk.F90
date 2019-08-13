@@ -56,6 +56,7 @@ module m_wfk
  use m_abicore
  use m_build_info
  use m_errors
+ use m_dtset
 #ifdef HAVE_MPI2
  use mpi
 #endif
@@ -74,7 +75,7 @@ module m_wfk
 #endif
  use m_clib
 
- use defs_abitypes,  only : dataset_type, MPI_type
+ use defs_abitypes,  only : MPI_type
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_wvltypes,  only : wvl_internal_type
  use m_geometry,     only : metric

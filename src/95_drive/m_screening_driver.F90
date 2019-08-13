@@ -31,6 +31,7 @@ module m_screening_driver
  use defs_abitypes
  use defs_wvltypes
  use m_abicore
+ use m_dtset
  use m_xmpi
  use m_xomp
  use m_errors

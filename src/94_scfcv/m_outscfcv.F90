@@ -43,6 +43,7 @@ module m_outscfcv
  use m_plowannier
  use m_splines
  use m_ebands
+ use m_dtset
 
  use m_time,             only : timab
  use m_io_tools,         only : open_file
@@ -83,7 +84,7 @@ module m_outscfcv
  use m_positron,         only : poslifetime, posdoppler
  use m_optics_vloc,      only : optics_vloc
  use m_green,            only : green_type,compute_green,&
-&                      fourier_green,print_green,init_green,destroy_green,init_green_tau
+                                fourier_green,print_green,init_green,destroy_green,init_green_tau
  use m_self,             only : self_type,initialize_self,rw_self,destroy_self,destroy_self,selfreal2imag_self
 
  implicit none

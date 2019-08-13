@@ -30,6 +30,7 @@ MODULE m_paw_optics
  use m_wffile
  use m_abicore
  use m_hdr
+ use m_dtset
 
  use m_time,         only : timab
  use m_io_tools,     only : open_file,get_unit

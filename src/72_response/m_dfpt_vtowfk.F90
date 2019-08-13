@@ -34,8 +34,9 @@ module m_dfpt_vtowfk
  use m_cgtools
  use m_wfk
  use m_rf2
- use m_rf2_init,         only : rf2_init
+ use m_dtset
 
+ use m_rf2_init,     only : rf2_init
  use m_time,         only : timab
  use m_pawrhoij,     only : pawrhoij_type
  use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, pawcprj_get, pawcprj_copy, pawcprj_zaxpby

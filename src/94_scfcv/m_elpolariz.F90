@@ -35,6 +35,7 @@ module m_elpolariz
  use m_xmpi
  use m_wffile
  use m_hdr
+ use m_dtset
 
  use m_geometry, only : metric
  use m_symtk,    only : matr3inv

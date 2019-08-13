@@ -32,6 +32,7 @@ module m_rf2_init
  use defs_basis
  use m_errors
  use m_abicore
+ use m_dtset
 
  implicit none
 

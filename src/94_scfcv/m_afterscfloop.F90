@@ -36,6 +36,7 @@ module m_afterscfloop
  use m_efield
  use m_ab7_mixing
  use m_hdr
+ use m_dtset
 
  use m_time,             only : timab
  use m_xmpi,             only : xmpi_sum, xmpi_comm_rank,xmpi_comm_size

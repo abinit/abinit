@@ -37,6 +37,7 @@ MODULE m_paw_dmft
  use m_abicore
  use m_xmpi
  use m_data4entropyDMFT
+ use m_dtset
 
  use m_io_tools,  only : open_file
  use m_pawtab,    only : pawtab_type
@@ -163,7 +164,7 @@ MODULE m_paw_dmft
   integer :: dmftctqmc_triqs_nleg
   ! CTQMC of TRIQS: Nb of Legendre polynomial used to compute the
   ! Green's function (Phys. Rev. B 84, 075145) [[cite:Boehnke2011]]. Default is 30.
-  
+
   ! 0 : nothing, >=1 max order evaluated in Perturbation.dat
 
   real(dp) :: dmftqmc_n
@@ -349,9 +350,6 @@ CONTAINS  !=====================================================================
 subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,nkpt,nspden,&
 &nspinor,nsppol,occ,usedmft,paw_dmft,use_sc_dmft,dmft_solv,mpi_enreg)
 
- implicit none
-
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: bandkss,dmft_read_occnd,dmftbandi,dmftbandf,mband,nkpt,nspden,&
@@ -471,7 +469,7 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
  else
   paw_dmft%mbandc = 0
  endif
-  
+
  if(paw_dmft%use_sc_dmft /= 0 .and. mpi_enreg%paral_kgb/=0) then
    call init_sc_dmft_paralkgb(paw_dmft, mpi_enreg)
  end if
@@ -558,7 +556,6 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
  use defs_abitypes
  use m_splines
  !use m_CtqmcInterface
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -786,7 +783,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
        message = "Cannot continue: the missing file coming from Maxent code is needed"
        MSG_WARNING(message)
      endif
-     
+
      if(iexist2==1) then
 #ifdef FC_NAG
        open (unit=grid_unt,file=trim(tmpfil),status='unknown',form='formatted',recl=ABI_RECL)
@@ -908,8 +905,6 @@ end subroutine init_dmft
 
 subroutine construct_nwli_dmft(paw_dmft,nwli,omega_li)
 
- implicit none
-
  type(paw_dmft_type), intent(in) :: paw_dmft
  integer, intent(in) :: nwli
  real(dp), intent(out) :: omega_li(:)
@@ -976,7 +971,6 @@ end subroutine construct_nwli_dmft
 
 subroutine construct_nwlo_dmft(paw_dmft)
  use m_splines
- implicit none
 
  type(paw_dmft_type), intent(inout) :: paw_dmft
  integer :: cubic_freq
@@ -1258,8 +1252,6 @@ end subroutine construct_nwlo_dmft
 
 subroutine destroy_dmft(paw_dmft)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(paw_dmft_type),intent(inout) :: paw_dmft
@@ -1325,8 +1317,6 @@ end subroutine destroy_dmft
 
 subroutine destroy_sc_dmft(paw_dmft)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(paw_dmft_type),intent(inout) :: paw_dmft
@@ -1381,8 +1371,6 @@ end subroutine destroy_sc_dmft
 !! SOURCE
 
 subroutine print_dmft(paw_dmft,pawprtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1476,8 +1464,6 @@ end subroutine print_dmft
 
 subroutine print_sc_dmft(paw_dmft,pawprtvol)
 
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(paw_dmft_type),intent(in) :: paw_dmft
@@ -1544,8 +1530,6 @@ end subroutine print_sc_dmft
 
 subroutine saveocc_dmft(paw_dmft)
 
- implicit none
-
 !Arguments ------------------------------------
  type(paw_dmft_type),intent(inout) :: paw_dmft
 
@@ -1608,8 +1592,6 @@ end subroutine saveocc_dmft
 !! SOURCE
 
 subroutine readocc_dmft(paw_dmft,filnam_ds3,filnam_ds4)
-
- implicit none
 
 !Arguments ------------------------------------
  type(paw_dmft_type),intent(inout) :: paw_dmft
@@ -1679,7 +1661,7 @@ end subroutine readocc_dmft
 !!
 !! INPUTS
 !!  paw_dmft   = data structure
-!!  
+!!
 !! OUTPUT
 !!  paw_dmft: bandc_proc, use_bandc
 !!
@@ -1691,8 +1673,6 @@ end subroutine readocc_dmft
 !! SOURCE
 
 subroutine init_sc_dmft_paralkgb(paw_dmft,mpi_enreg)
-
- implicit none
 
 !Arguments ------------------------------------
  type(paw_dmft_type),intent(inout) :: paw_dmft
@@ -1709,7 +1689,7 @@ subroutine init_sc_dmft_paralkgb(paw_dmft,mpi_enreg)
  ABI_ALLOCATE(paw_dmft%use_bandc,(nproc))
  paw_dmft%bandc_proc = 0
  paw_dmft%use_bandc = .false.
- 
+
  do ibc=1,paw_dmft%mbandc
    ib = paw_dmft%include_bands(ibc)
    proc = mod((ib-1)/mpi_enreg%bandpp,nproc)
@@ -1731,7 +1711,7 @@ end subroutine init_sc_dmft_paralkgb
 !!
 !! INPUTS
 !!  paw_dmft   = data structure
-!!  
+!!
 !! OUTPUT
 !!
 !! PARENTS
@@ -1742,8 +1722,6 @@ end subroutine init_sc_dmft_paralkgb
 !! SOURCE
 
 subroutine destroy_sc_dmft_paralkgb(paw_dmft)
-
- implicit none
 
 !Arguments ------------------------------------
  type(paw_dmft_type),intent(inout) :: paw_dmft

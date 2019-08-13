@@ -35,6 +35,7 @@ module m_mpi_setup
  use m_sort
  use m_errors
  use m_abicore
+ use m_dtset
 
  use m_time,         only : abi_wtime
  use m_io_tools,     only : flush_unit

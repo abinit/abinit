@@ -46,6 +46,7 @@ MODULE m_io_kss
  use m_paw_ij
  use m_pawcprj
  use m_pawfgr
+ use m_dtset
 
  use m_time,             only : timab
  use m_io_tools,         only : open_file
@@ -370,8 +371,6 @@ end subroutine write_kss_header
 
 subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikpt,iomode,kss_npw,kss_unt
@@ -501,8 +500,6 @@ end subroutine write_vkb
 subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,&
 &          nbandksseff,natom,Psps,ene_k,occ_k,rprimd,gbig,wfg,Cprjnk_k,iomode)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikpt,isppol,iomode,kss_npw,nspinor,kss_unt,nbandksseff
@@ -631,8 +628,6 @@ end subroutine write_kss_wfgk
 
 subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nbandksseff,ngfft,gmet,&
 &  MPI_enreg,gbig,ug,icg,cg,eig_vec)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -824,8 +819,6 @@ end subroutine k2gamma_centered
 
 subroutine make_gvec_kss(nkpt,kptns,ecut_eff,symmorphi,nsym,symrel,tnons,gprimd,prtvol,npwkss,gvec_kss,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpt,nsym,prtvol,symmorphi
@@ -985,8 +978,6 @@ end subroutine make_gvec_kss
 subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_ij, mpi_enreg, &
   rprimd, xred, eigen, npwarr, kg, ylm, ngfftc, nfftc, ngfftf, nfftf, vtrial,&
   electronpositron) ! Optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1422,8 +1413,6 @@ end subroutine gshgg_mkncwrite
 
 subroutine kss_calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k
@@ -1663,7 +1652,6 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 & prtvol,Psps,rprimd,vtrial,xred,cg,usecprj,Cprj,eigen,ierr)
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2508,8 +2496,6 @@ contains
 
 subroutine memkss(mband,mgfft,mproj,mpsang,mpw,natom,ngfft,nkpt,nspinor,nsym,ntypat)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mgfft,mproj,mpsang,mpw,natom,nkpt,nspinor
@@ -2638,8 +2624,6 @@ end subroutine memkss
 !! SOURCE
 
 subroutine dsksta(ishm,usepaw,nbandkss,mpsang,natom,ntypat,npwkss,nkpt,nspinor,nsppol,nsym2,dimlmn)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

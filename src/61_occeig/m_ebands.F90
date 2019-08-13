@@ -45,9 +45,9 @@ MODULE m_ebands
  use m_skw
  use m_kpts
  use m_sort
+ use m_dtset
 
  use defs_datatypes,   only : ebands_t
- use defs_abitypes,    only : dataset_type
  use m_copy,           only : alloc_copy
  use m_io_tools,       only : file_exists, open_file
  use m_time,           only : cwtime, cwtime_report

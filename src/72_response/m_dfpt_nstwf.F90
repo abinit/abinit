@@ -25,6 +25,53 @@
 
 module m_dfpt_nstwf
 
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use m_xmpi
+ use m_errors
+ use m_abicore
+ use m_wfk
+ use m_hamiltonian
+ use m_cgtools
+ use m_nctk
+ use m_dtset
+
+ use m_time,     only : timab
+ use m_io_tools, only : file_exists
+ use m_geometry, only : stresssym
+ use m_dynmat,   only : dfpt_sygra
+ use m_mpinfo,   only : destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle
+ use m_hdr,      only : hdr_skip
+ use m_occ,      only : occeig
+ use m_pawang,   only : pawang_type
+ use m_pawrad,   only : pawrad_type
+ use m_pawtab,   only : pawtab_type
+ use m_paw_an,   only : paw_an_type, paw_an_reset_flags
+ use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
+ use m_pawfgrtab,only : pawfgrtab_type
+ use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, pawrhoij_nullify, &
+&                       pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
+ use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get, pawcprj_copy
+ use m_pawdij,   only : pawdijfr
+ use m_pawfgr,   only : pawfgr_type
+ use m_paw_mkrho,only : pawmkrho
+ use m_paw_nhat, only : pawnhatfr
+ use m_paw_dfpt, only : pawdfptenergy
+ use m_kg,       only : mkkin, kpgstr, mkkpg
+ use m_fft,      only : fftpac
+ use m_spacepar, only : hartrestr, symrhg
+ use m_initylmg, only : initylmg
+ use m_mkffnl,   only : mkffnl
+ use m_getgh1c,  only : getgh1c, getdc1
+ use m_dfpt_mkrho, only : dfpt_accrho
+ use m_atm2fft,    only : dfpt_atm2fft
+ use m_mkcore,     only : dfpt_mkcore
+ use m_dfpt_mkvxc,    only : dfpt_mkvxc, dfpt_mkvxc_noncoll
+ use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
+ use m_mklocl,     only : dfpt_vlocal, vlocalstr
+ use m_cgprj,           only : getcprj
+
  implicit none
 
  private
@@ -192,52 +239,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &                  pawrhoij1,pawtab,phnons1,ph1d,ph1df,psps,rhog,rhor,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,&
 &                  ucvol,usecprj,usepaw,usexcnhat,useylmgr1,vhartr1,vpsp1,vtrial,vtrial1,vxc,&
 &                  wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr1)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_xmpi
- use m_errors
- use m_abicore
- use m_wfk
- use m_hamiltonian
- use m_cgtools
- use m_nctk
-
- use m_time,     only : timab
- use m_io_tools, only : file_exists
- use m_geometry, only : stresssym
- use m_dynmat,   only : dfpt_sygra
- use m_mpinfo,   only : destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle
- use m_hdr,      only : hdr_skip
- use m_occ,      only : occeig
- use m_pawang,   only : pawang_type
- use m_pawrad,   only : pawrad_type
- use m_pawtab,   only : pawtab_type
- use m_paw_an,   only : paw_an_type, paw_an_reset_flags
- use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
- use m_pawfgrtab,only : pawfgrtab_type
- use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, pawrhoij_nullify, &
-&                       pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
- use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get, pawcprj_copy
- use m_pawdij,   only : pawdijfr
- use m_pawfgr,   only : pawfgr_type
- use m_paw_mkrho,only : pawmkrho
- use m_paw_nhat, only : pawnhatfr
- use m_paw_dfpt, only : pawdfptenergy
- use m_kg,       only : mkkin, kpgstr, mkkpg
- use m_fft,      only : fftpac
- use m_spacepar, only : hartrestr, symrhg
- use m_initylmg, only : initylmg
- use m_mkffnl,   only : mkffnl
- use m_getgh1c,  only : getgh1c, getdc1
- use m_dfpt_mkrho, only : dfpt_accrho
- use m_atm2fft,    only : dfpt_atm2fft
- use m_mkcore,     only : dfpt_mkcore
- use m_dfpt_mkvxc,    only : dfpt_mkvxc, dfpt_mkvxc_noncoll
- use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
- use m_mklocl,     only : dfpt_vlocal, vlocalstr
- use m_cgprj,           only : getcprj
 
 !Arguments -------------------------------
 !scalars

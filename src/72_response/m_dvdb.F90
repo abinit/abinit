@@ -41,8 +41,9 @@ module m_dvdb
 #endif
  use m_hdr
  use m_ddb
+ use m_dtset
 
- use defs_abitypes,   only : mpi_type, dataset_type
+ use defs_abitypes,   only : mpi_type
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
  use m_time,          only : cwtime, cwtime_report, sec2str, timab
  use m_io_tools,      only : open_file, file_exists, delete_file

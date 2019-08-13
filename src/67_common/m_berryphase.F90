@@ -29,6 +29,7 @@ module m_berryphase
  use m_errors
  use m_abicore
  use m_hdr
+ use m_dtset
 
  use m_geometry,     only : xred2xcart
  use m_hide_lapack,  only : dzgedi, dzgefa

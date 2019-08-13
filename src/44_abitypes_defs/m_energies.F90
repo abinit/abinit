@@ -31,11 +31,10 @@ MODULE m_energies
  use m_abicore
  use m_errors
  use m_nctk
+ use m_dtset
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
-
- use defs_abitypes, only : dataset_type
 
  implicit none
 

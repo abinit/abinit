@@ -42,6 +42,7 @@ module m_bethe_salpeter
  use netcdf
 #endif
  use m_hdr
+ use m_dtset
 
  use m_gwdefs,          only : GW_Q0_DEFAULT
  use m_time,            only : timab

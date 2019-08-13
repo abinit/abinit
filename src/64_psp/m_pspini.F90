@@ -33,6 +33,7 @@ module m_pspini
  use m_abicore
  use m_xmpi
  use m_psxml2ab
+ use m_dtset
  !use m_psps
 
  use m_time,      only : timab

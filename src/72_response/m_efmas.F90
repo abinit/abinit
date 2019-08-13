@@ -31,6 +31,7 @@ module m_efmas
  use m_efmas_defs
  use m_nctk
  use m_cgtools
+ use m_dtset
 
  use m_gaussian_quadrature, only : cgqf
  use m_io_tools, only : get_unit

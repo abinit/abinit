@@ -45,6 +45,7 @@ module m_phgamma
  use m_fft
  use m_hamiltonian
  use m_pawcprj
+ use m_dtset
 
  use m_time,           only : cwtime, cwtime_report, sec2str
  use m_fstrings,       only : toupper, itoa, sjoin, ktoa, ftoa, ltoa, strcat

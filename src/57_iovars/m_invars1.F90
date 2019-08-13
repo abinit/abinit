@@ -31,12 +31,13 @@ module m_invars1
  use m_xmpi
  use m_errors
  use m_atomdata
+ use m_dtset
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
- use defs_abitypes,  only : dataset_type, ab_dimensions
+ use defs_abitypes,  only : ab_dimensions
  use m_fstrings, only : inupper, itoa, rmquotes
  use m_geometry, only : mkrdim
  use m_parser,   only : intagm, chkint_ge

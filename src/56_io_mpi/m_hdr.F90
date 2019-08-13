@@ -52,6 +52,7 @@ module m_hdr
  use netcdf
 #endif
  use m_nctk
+ use m_dtset
 
  use m_copy,          only : alloc_copy
  use m_io_tools,      only : flush_unit, isncfile, file_exists, open_file
@@ -59,7 +60,6 @@ module m_hdr
  use m_symtk,         only : print_symmetries
  use defs_wvltypes,   only : wvl_internal_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
- use defs_abitypes,   only : dataset_type
  use m_pawtab,        only : pawtab_type
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, &
                              pawrhoij_io, pawrhoij_inquire_dim

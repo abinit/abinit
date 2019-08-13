@@ -31,6 +31,7 @@ module m_mover
  use m_errors
  use m_abimover
  use m_abihist
+ use m_dtset
  use m_xmpi
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -71,7 +72,7 @@ module m_mover
  use m_generate_training_set, only : generate_training_set
  use m_wvl_wfsinp, only : wvl_wfsinp_reformat
  use m_wvl_rho,      only : wvl_mkrho
- use m_effective_potential_file, only : effective_potential_file_mapHistToRef 
+ use m_effective_potential_file, only : effective_potential_file_mapHistToRef
 
  implicit none
 
@@ -376,9 +377,9 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
  nhisttot=ncycle*ntime;if (scfcv_args%dtset%nctime>0) nhisttot=nhisttot+1
 !AM_2017 New version of the hist, we just store the needed history step not all of them...
- if(specs%nhist/=-1)then   
+ if(specs%nhist/=-1)then
   nhisttot = specs%nhist! We don't need to store all the history
- endif 
+ endif
 
  call abihist_init(hist,ab_mover%natom,nhisttot,specs%isVused,specs%isARused)
  call abiforstr_ini(preconforstr,ab_mover%natom)
@@ -611,7 +612,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
              if(itime == 1 .and. ab_mover%restartxf==-3)then
                call effective_potential_file_mapHistToRef(effective_potential,hist,comm,need_verbose) ! Map Hist to Ref to order atoms
                xred(:,:) = hist%xred(:,:,1) ! Fill xred with new ordering
-             end if 
+             end if
            call effective_potential_evaluate( &
 &           effective_potential,scfcv_args%results_gs%etotal,&
 &           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
@@ -839,7 +840,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !    vel_cell(3,3)= velocities of cell parameters
 !    Not yet used here but compute it for consistency
      vel_cell(:,:)=zero
-     if (ab_mover%ionmov==13 .and. hist%mxhist >= 2) then 
+     if (ab_mover%ionmov==13 .and. hist%mxhist >= 2) then
        if (itime_hist>2) then
          ihist_prev2 = abihist_findIndex(hist,-2)
          vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)- hist%rprimd(:,:,ihist_prev2))/(two*ab_mover%dtion)

@@ -32,22 +32,901 @@ MODULE m_dtset
  use m_symtk,        only : mati3inv, littlegroup_q, symatm
  use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
  use m_parser,       only : intagm, chkvars_in_string
- use defs_abitypes,  only : dataset_type
 
  implicit none
 
  private
 
+
+!----------------------------------------------------------------------
+
+!!****t* m_dtset/dataset_type
+!! NAME
+!! dataset_type
+!!
+!! FUNCTION
+!! The dataset_type structured datatype gather all the input variables,
+!! except those that are labelled NOT INTERNAL.
+!! For one dataset, it is initialized in driver.f, and will not change
+!! at all during the treatment of the dataset.
+!! The "evolving" input variables are also stored, with their
+!! name appended with _orig, to make clear that this is the original
+!! value, decided by the user, and not a possibly modified, intermediate value.
+!! The following input variables are NOT INTERNAL, that is, they
+!! are input variables used to determine other input variables,
+!! after suitable processing, and do not appear anymore afterwards
+!! (so, they do not appear as components of a dataset_type variable) :
+!! cpuh,cpum(but cpus is present),fband,kptbounds,ndivk,ndism,nobj,
+!! objaat,objbat,objaax,objbax,objan,objbn,objarf,objbrf,objaro,objbro
+!! objatr,objbtr,vaclst,vacuum
+!!
+!! WARNING: if you modify this datatype, please check whether there might be
+!! creation/destruction/copy routines, declared in another part of ABINIT,
+!! that might need to take into account your modification.
+!
+!! Variables should be declared on separated lines in order to reduce the occurence of git conflicts.
+!
+!! Since all these input variables are described in the abinit_help.html and
+!! associated html files they are not described in length here ...
+!!
+!! SOURCE
+
+type, public :: dataset_type
+
+! Integer
+ integer :: iomode
+ integer :: accuracy
+ integer :: adpimd
+ integer :: autoparal
+ integer :: auxc_ixc
+ integer :: awtr
+ integer :: bandpp
+ integer :: bdeigrf
+ integer :: berryopt
+ integer :: berrysav
+ integer :: berrystep
+ integer :: brvltt
+ integer :: bs_nstates
+ integer :: bs_hayd_term
+ integer :: builtintest
+ integer :: cd_full_grid
+ integer :: cd_frqim_method
+ integer :: cd_customnimfrqs
+ integer :: chkdilatmx
+ integer :: chkexit
+ integer :: chkprim
+ integer :: chksymbreak
+ integer :: cineb_start
+ integer :: delayperm
+ integer :: densfor_pred
+ integer :: diismemory
+ integer :: dmatpuopt
+ integer :: dmatudiag
+ integer :: dmft_dc
+ integer :: dmft_entropy
+ integer :: dmft_iter
+ integer :: dmft_kspectralfunc
+ integer :: dmft_nlambda
+ integer :: dmft_nwli
+ integer :: dmft_nwlo
+ integer :: dmft_occnd_imag
+ integer :: dmft_rslf
+ integer :: dmft_read_occnd
+ integer :: dmft_solv
+ integer :: dmft_t2g
+ integer :: dmft_x2my2d
+ integer :: dmftbandi
+ integer :: dmftbandf
+ integer :: dmftcheck
+ integer :: dmftctqmc_basis
+ integer :: dmftctqmc_check
+ integer :: dmftctqmc_correl
+ integer :: dmftctqmc_gmove
+ integer :: dmftctqmc_grnns
+ integer :: dmftctqmc_meas
+ integer :: dmftctqmc_mov
+ integer :: dmftctqmc_mrka
+ integer :: dmftctqmc_order
+ integer :: dmftctqmc_triqs_nleg
+ integer :: dmftqmc_l
+ integer :: dmftqmc_seed
+ integer :: dmftqmc_therm
+ integer :: d3e_pert1_elfd
+ integer :: d3e_pert1_phon
+ integer :: d3e_pert2_elfd
+ integer :: d3e_pert2_phon
+ integer :: d3e_pert3_elfd
+ integer :: d3e_pert3_phon
+ integer :: efmas
+ integer :: efmas_calc_dirs
+ integer :: efmas_deg
+ integer :: efmas_dim
+ integer :: efmas_n_dirs
+ integer :: efmas_ntheta
+ integer :: enunit
+ integer :: eph_restart = 0
+ integer :: eph_task
+ integer :: exchn2n3d
+ integer :: extrapwf
+ integer :: fftgw
+ integer :: fockoptmix
+ integer :: frzfermi
+ integer :: ga_algor
+ integer :: ga_fitness
+ integer :: ga_n_rules
+ integer :: getcell
+ integer :: getddb
+ integer :: getdvdb = 0
+ integer :: getddk
+ integer :: getdelfd
+ integer :: getdkdk
+ integer :: getdkde
+ integer :: getden
+ integer :: getefmas
+ integer :: getgam_eig2nkq
+ integer :: getocc
+ integer :: getpawden
+ integer :: getqps
+ integer :: getscr
+ integer :: getsuscep
+ integer :: getvel
+ integer :: getwfk
+ integer :: getwfkfine
+ integer :: getwfq
+ integer :: getxcart
+ integer :: getxred
+ integer :: get1den
+ integer :: get1wf
+ integer :: getbseig
+ integer :: getbsreso
+ integer :: getbscoup
+ integer :: gethaydock
+ integer :: goprecon
+ integer :: gwcalctyp
+ integer :: gwcomp
+ integer :: gwgamma
+ integer :: gwrpacorr
+ integer :: gw_customnfreqsp
+ integer :: gw_invalid_freq
+ integer :: gw_qprange
+ integer :: gw_nqlwl
+ integer :: gw_nstep
+ integer :: gw_sigxcore
+
+ ! GWLS
+ integer :: gwls_stern_kmax             ! number of Lanczos steps taken by the gw_sternheimer routine
+ integer :: gwls_npt_gauss_quad         ! number of points used in Gaussian quadrature in gw_sternheimer routine
+ integer :: gwls_diel_model             ! switch to determine which dielectic model should be used in integration
+ integer :: gwls_print_debug            ! switch to determine what to print out for debugging
+ integer :: gwls_nseeds                 ! number of seeds in the Lanczos description of the dielectric matrix
+ integer :: gwls_n_proj_freq            ! Number of projection frequencies to be used for the construction of the sternheimer basis
+ integer :: gwls_kmax_complement        ! number of Lanczos steps taken in the complement space
+ integer :: gwls_kmax_poles             ! number of Lanczos steps taken to compute Poles contribution
+ integer :: gwls_kmax_analytic          ! number of Lanczos steps taken to compute the analytic contribution
+ integer :: gwls_kmax_numeric           ! number of Lanczos steps taken to compute the numeric contribution
+ integer :: gwls_band_index             ! band index of the state to be corrected
+ integer :: gwls_exchange               ! Flag to determine if Exchange energy will be computed
+ integer :: gwls_correlation            ! Flag to determine if Correlation energy will be computed
+ integer :: gwls_first_seed             ! index of the first seed used in the Lanczos algorithm;
+                                        ! seeds will go from first_seed to first_seed+nseeds
+ !integer :: gwls_n_ext_freq            ! The number of frequencies to be read in gwls_ext_freq
+ integer :: gwls_recycle                ! Recycle the sternheimer solutions computed to obtain the static dielectric matrix
+                                        ! and add them to the other solutions requested.
+                                        ! 0 : don't recycle. 1 : store in RAM. 2 : Store on disk.
+ integer :: gw_frqim_inzgrid
+ integer :: gw_frqre_inzgrid
+ integer :: gw_frqre_tangrid
+ integer :: gw_sctype
+ integer :: gwmem
+ integer :: gwpara
+ integer :: hmcsst
+ integer :: hmctt
+ integer :: iboxcut
+ integer :: icoulomb
+ integer :: icutcoul
+ integer :: ieig2rf
+ integer :: imgmov
+ integer :: imgwfstor
+ integer :: inclvkb
+ integer :: intxc
+ integer :: ionmov
+ integer :: iprcel
+ integer :: iprcfc
+ integer :: irandom
+ integer :: irdddb
+ integer :: irddvdb = 0
+ integer :: irdddk
+ integer :: irdden
+ integer :: irdefmas
+ integer :: irdhaydock
+ integer :: irdpawden
+ integer :: irdqps
+ integer :: irdscr
+ integer :: irdsuscep
+ integer :: irdvdw
+ integer :: irdwfk
+ integer :: irdwfkfine
+ integer :: irdwfq
+ integer :: ird1den
+ integer :: ird1wf
+ integer :: irdbseig
+ integer :: irdbsreso
+ integer :: irdbscoup
+ integer :: iscf
+ integer :: isecur
+ integer :: istatimg
+ integer :: istatr
+ integer :: istatshft
+ integer :: ixc
+ integer :: ixc_sigma
+ integer :: ixcpositron
+ integer :: ixcrot
+ integer :: jdtset !  jdtset contains the current dataset number
+ integer :: jellslab
+ integer :: kptopt
+ integer :: kssform
+ integer :: localrdwf
+ integer :: lotf_classic
+ integer :: lotf_nitex
+ integer :: lotf_nneigx
+ integer :: lotf_version
+ integer :: magconon
+ integer :: maxnsym
+ integer :: max_ncpus
+ integer :: mband
+ integer :: mep_solver
+ integer :: mem_test = 1
+ integer :: mffmem
+ integer :: mgfft
+ integer :: mgfftdg
+ integer :: mkmem
+ integer :: mkqmem
+ integer :: mk1mem
+ integer :: nnos
+ integer :: mpw
+ integer :: mqgrid
+ integer :: mqgriddg
+ integer :: natom
+ integer :: natpawu
+ integer :: natrd
+ integer :: natsph
+ integer :: natsph_extra
+ integer :: natvshift
+ integer :: nbandhf
+ integer :: nbandkss
+ integer :: nbdblock
+ integer :: nbdbuf
+ integer :: nberry
+ integer :: nc_xccc_gspace = 0
+ integer :: nconeq
+ integer :: nctime
+ integer :: ndtset
+ integer :: ndynimage
+ integer :: neb_algo
+ integer :: nfft
+ integer :: nfftdg
+ integer :: nfreqim
+ integer :: nfreqre
+ integer :: nfreqsp
+ integer :: nimage
+ integer :: nkpt
+ integer :: nkptgw
+ integer :: nkpthf
+ integer :: nline
+ integer :: nnsclo
+ integer :: nnsclohf
+ integer :: nomegasf
+ integer :: nomegasi
+ integer :: nomegasrd
+ integer :: nonlinear_info
+ integer :: npband
+ integer :: npfft
+ integer :: nphf
+ integer :: npimage
+ integer :: npkpt
+ integer :: nppert
+ integer :: npspinor
+ integer :: npsp
+ integer :: npspalch
+ integer :: npulayit
+ integer :: npvel
+ integer :: npweps
+ integer :: npwkss
+ integer :: npwsigx
+ integer :: npwwfn
+ integer :: np_slk
+ integer :: nqpt
+ integer :: nqptdm
+ integer :: nscforder
+ integer :: nshiftk
+ integer :: nshiftk_orig  ! original number of shifts given in input (changed in inkpts, the actual value is nshiftk)
+ integer :: nspden
+ integer :: nspinor
+ integer :: nsppol
+ integer :: nstep
+ integer :: nsym
+ integer :: ntime
+ integer :: ntimimage
+ integer :: ntypalch
+ integer :: ntypat
+ integer :: ntyppure
+ integer :: nwfshist
+ integer :: nzchempot
+ integer :: occopt
+ integer :: optcell
+ integer :: optdriver
+ integer :: optforces
+ integer :: optnlxccc
+ integer :: optstress
+ integer :: orbmag
+ integer :: ortalg
+ integer :: paral_atom
+ integer :: paral_kgb
+ integer :: paral_rf
+ integer :: pawcpxocc
+ integer :: pawcross
+ integer :: pawfatbnd
+ integer :: pawlcutd
+ integer :: pawlmix
+ integer :: pawmixdg
+ integer :: pawnhatxc
+ integer :: pawnphi
+ integer :: pawntheta
+ integer :: pawnzlm
+ integer :: pawoptmix
+ integer :: pawoptosc
+ integer :: pawprtdos
+ integer :: pawprtvol
+ integer :: pawprtwf
+ integer :: pawprt_k
+ integer :: pawprt_b
+ integer :: pawspnorb
+ integer :: pawstgylm
+ integer :: pawsushat
+ integer :: pawusecp
+ integer :: macro_uj
+ integer :: pawujat
+ integer :: pawxcdev
+ integer :: pimd_constraint
+ integer :: pitransform
+ integer :: plowan_bandi
+ integer :: plowan_bandf
+ integer :: plowan_compute
+ integer :: plowan_natom
+ integer :: plowan_nt
+ integer :: plowan_realspace
+ integer :: posdoppler
+ integer :: positron
+ integer :: posnstep
+ integer :: ppmodel
+ integer :: prepanl
+ integer :: prepgkk
+ integer :: prtbbb
+ integer :: prtbltztrp
+ integer :: prtcif
+ integer :: prtden
+ integer :: prtdensph
+ integer :: prtdipole
+ integer :: prtdos
+ integer :: prtdosm
+ integer :: prtebands = 1
+ integer :: prtefg
+ integer :: prtefmas
+ integer :: prteig
+ integer :: prtelf
+ integer :: prtfc
+ integer :: prtfull1wf
+ integer :: prtfsurf
+ integer :: prtgsr = 1
+ integer :: prtgden
+ integer :: prtgeo
+ integer :: prtgkk
+ integer :: prtkden
+ integer :: prtkpt
+ integer :: prtlden
+ integer :: prtnabla
+ integer :: prtnest
+ integer :: prtpmp
+ integer :: prtposcar
+ integer :: prtphdos
+ integer :: prtphbands = 1
+ integer :: prtphsurf = 0
+ integer :: prtpot
+ integer :: prtpsps = 0
+ integer :: prtspcur
+ integer :: prtstm
+ integer :: prtsuscep
+ integer :: prtvclmb
+ integer :: prtvdw
+ integer :: prtvha
+ integer :: prtvhxc
+ integer :: prtkbff=0
+ integer :: prtvol
+ integer :: prtvolimg
+ integer :: prtvpsp
+ integer :: prtvxc
+ integer :: prtwant
+ integer :: prtwf
+ integer :: prtwf_full
+ integer :: prtxml
+ integer :: prt1dm
+ integer :: ptgroupma
+ integer :: qptopt
+ integer :: random_atpos
+ integer :: recgratio
+ integer :: recnpath
+ integer :: recnrec
+ integer :: recptrott
+ integer :: rectesteg
+ integer :: restartxf
+ integer :: rfasr
+ integer :: rfddk
+ integer :: rfelfd
+ integer :: rfmagn
+ integer :: rfmeth
+ integer :: rfphon
+ integer :: rfstrs
+ integer :: rfuser
+ integer :: rf2_dkdk
+ integer :: rf2_dkde
+ integer :: signperm
+ integer :: slk_rankpp
+ integer :: smdelta
+ integer :: spgaxor
+ integer :: spgorig
+ integer :: spgroup
+ integer :: spmeth
+ integer :: string_algo
+ integer :: symmorphi
+ integer :: symchi
+ integer :: symsigma
+ integer :: td_mexcit
+ integer :: tfkinfunc
+ integer :: tim1rev
+ integer :: timopt
+ integer :: tl_nprccg
+ integer :: ucrpa
+ integer :: use_gpu_cuda
+ integer :: usedmatpu
+ integer :: usedmft
+ integer :: useexexch
+ integer :: usefock
+ integer :: usekden
+ integer :: use_gemm_nonlop
+ integer :: use_nonscf_gkk
+ integer :: usepaw
+ integer :: usepawu
+ integer :: usepead
+ integer :: usepotzero
+ integer :: userec
+ integer :: useria = 0
+ integer :: userib = 0
+ integer :: useric = 0
+ integer :: userid = 0
+ integer :: userie = 0
+ integer :: usewvl
+ integer :: usexcnhat_orig
+ integer :: useylm
+ integer :: use_slk
+ integer :: use_yaml
+ integer :: vacnum
+ integer :: vdw_nfrag
+ integer :: vdw_df_ndpts
+ integer :: vdw_df_ngpts
+ integer :: vdw_df_nqpts
+ integer :: vdw_df_nrpts
+ integer :: vdw_df_nsmooth
+ integer :: vdw_df_tweaks
+ integer :: vdw_xc
+ integer :: wfoptalg
+ integer :: wfk_task
+ integer :: wvl_bigdft_comp
+ integer :: wvl_nprccg
+ integer :: w90iniprj
+ integer :: w90prtunk
+ integer :: xclevel
+
+!Integer arrays
+ integer :: bdberry(4)
+ integer :: bravais(11)
+ integer :: cd_subset_freq(2)
+ integer :: d3e_pert1_atpol(2)
+ integer :: d3e_pert1_dir(3)
+ integer :: d3e_pert2_atpol(2)
+ integer :: d3e_pert2_dir(3)
+ integer :: d3e_pert3_atpol(2)
+ integer :: d3e_pert3_dir(3)
+ integer :: fockdownsampling(3)
+ integer :: jfielddir(3)
+ integer :: kptrlatt(3,3)
+ integer :: kptrlatt_orig(3,3)=0
+ integer :: qptrlatt(3,3)
+ integer :: ga_rules(30)
+ integer :: gpu_devices(5)
+ integer :: ngfft(18)
+ integer :: ngfftdg(18)
+ integer :: nloalg(3)
+ integer :: ngkpt(3)   ! Number of division for MP sampling.
+ integer :: qprtrb(3)
+ integer :: rfatpol(2)
+ integer :: rfdir(3)
+ integer :: rf2_pert1_dir(3)
+ integer :: rf2_pert2_dir(3)
+ integer :: supercell_latt(3,3)
+ integer :: ucrpa_bands(2)
+ integer :: vdw_supercell(3)
+ integer :: vdw_typfrag(100)
+ integer :: wvl_ngauss(2)
+
+!Integer allocatables
+ integer, allocatable ::  algalch(:)    ! algalch(ntypalch)
+ integer, allocatable ::  bdgw(:,:,:)   ! bdgw(2,nkptgw,nsppol)
+ integer, allocatable ::  dynimage(:)   ! dynimage(nimage or mxnimage)
+ integer, allocatable ::  efmas_bands(:,:) ! efmas_bands(2,nkptgw)
+ integer, allocatable ::  iatfix(:,:)   ! iatfix(3,natom)
+ integer, allocatable ::  iatsph(:)     ! iatsph(natsph)
+ integer, allocatable ::  istwfk(:)     ! istwfk(nkpt)
+ integer, allocatable ::  kberry(:,:)   ! kberry(3,nberry)
+ integer, allocatable ::  lexexch(:)    ! lexexch(ntypat)
+ integer, allocatable ::  ldaminushalf(:) !lminushalf(ntypat)
+ integer, allocatable ::  lpawu(:)      ! lpawu(ntypat)
+ integer, allocatable ::  nband(:)      ! nband(nkpt*nsppol)
+ integer, allocatable ::  plowan_iatom(:)    ! plowan_iatom(plowan_natom)
+ integer, allocatable ::  plowan_it(:)     ! plowan_it(plowan_nt*3)
+ integer, allocatable ::  plowan_lcalc(:)    ! plowan_lcalc(\sum_iatom plowan_nbl)
+ integer, allocatable ::  plowan_nbl(:)     ! plowan_nbl(plowan_natom)
+ integer, allocatable ::  plowan_projcalc(:) ! plowan_projcalc(\sum_iatom plowan_nbl)
+ integer, allocatable ::  prtatlist(:)  ! prtatlist(natom)
+ integer, allocatable ::  so_psp(:)     ! so_psp(npsp)
+ integer, allocatable ::  symafm(:)     ! symafm(nsym)
+ integer, allocatable ::  symrel(:,:,:) ! symrel(3,3,nsym)
+ integer, allocatable ::  typat(:)      ! typat(natom)
+
+!Real
+ real(dp) :: adpimd_gamma
+ real(dp) :: auxc_scal
+ real(dp) :: bmass
+ real(dp) :: boxcutmin
+ real(dp) :: bxctmindg
+ real(dp) :: cd_halfway_freq
+ real(dp) :: cd_max_freq
+ real(dp) :: charge
+ real(dp) :: cpus
+ real(dp) :: ddamp
+ real(dp) :: dfpt_sciss
+ real(dp) :: diecut
+ real(dp) :: diegap
+ real(dp) :: dielam
+ real(dp) :: dielng
+ real(dp) :: diemac
+ real(dp) :: diemix
+ real(dp) :: diemixmag
+ real(dp) :: dilatmx
+ real(dp) :: dmft_charge_prec
+ real(dp) :: dmft_mxsf
+ real(dp) :: dmft_tolfreq
+ real(dp) :: dmft_tollc
+ real(dp) :: dmftqmc_n
+ real(dp) :: dosdeltae
+ real(dp) :: dtion
+ real(dp) :: dvdb_qcache_mb = 1024.0_dp
+ real(dp) :: ecut
+ real(dp) :: ecuteps
+ real(dp) :: ecutsigx
+ real(dp) :: ecutsm
+ real(dp) :: ecutwfn
+ real(dp) :: effmass_free
+ real(dp) :: efmas_deg_tol
+ real(dp) :: elph2_imagden
+ real(dp) :: eshift
+ real(dp) :: esmear
+ real(dp) :: exchmix
+ real(dp) :: fband
+ real(dp) :: fermie_nest
+ real(dp) :: focktoldfe
+ real(dp) :: freqim_alpha
+ real(dp) :: freqremin
+ real(dp) :: freqremax
+ real(dp) :: freqspmin
+ real(dp) :: freqspmax
+ real(dp) :: friction
+ real(dp) :: fxcartfactor
+ real(dp) :: ga_opt_percent
+ real(dp) :: gwencomp
+ real(dp) :: gwls_model_parameter         ! Parameter used in dielectric function model
+ real(dp) :: gw_toldfeig
+ real(dp) :: hyb_mixing
+ real(dp) :: hyb_mixing_sr
+ real(dp) :: hyb_range_dft
+ real(dp) :: hyb_range_fock
+ real(dp) :: kptnrm
+ real(dp) :: kptrlen
+ real(dp) :: magcon_lambda
+ real(dp) :: maxestep
+ real(dp) :: mbpt_sciss
+ real(dp) :: mdf_epsinf
+ real(dp) :: mdwall
+ real(dp) :: mep_mxstep
+ real(dp) :: nelect
+ real(dp) :: noseinert
+ real(dp) :: omegasimax
+ real(dp) :: omegasrdmax
+ real(dp) :: pawecutdg
+ real(dp) :: pawovlp
+ real(dp) :: pawujrad
+ real(dp) :: pawujv
+ real(dp) :: posocc
+ real(dp) :: postoldfe
+ real(dp) :: postoldff
+ real(dp) :: ppmfrq
+ real(dp) :: pw_unbal_thresh
+ real(dp) :: ratsph_extra
+ real(dp) :: recrcut
+ real(dp) :: recefermi
+ real(dp) :: rectolden
+ real(dp) :: rhoqpmix
+ real(dp) :: rcut
+ real(dp) :: slabwsrad
+ real(dp) :: slabzbeg
+ real(dp) :: slabzend
+ real(dp) :: spbroad
+ real(dp) :: spinmagntarget
+ real(dp) :: spnorbscl
+ real(dp) :: stmbias
+ real(dp) :: strfact
+ real(dp) :: strprecon
+ real(dp) :: td_maxene
+ real(dp) :: tfw_toldfe
+ real(dp) :: tl_radius
+ real(dp) :: toldfe
+ real(dp) :: tolmxde
+ real(dp) :: toldff
+ real(dp) :: tolimg
+ real(dp) :: tolmxf
+ real(dp) :: tolrde
+ real(dp) :: tolrff
+ real(dp) :: tolsym
+ real(dp) :: tolvrs
+ real(dp) :: tolwfr
+ real(dp) :: tphysel
+ real(dp) :: tsmear
+ real(dp) :: userra = zero
+ real(dp) :: userrb = zero
+ real(dp) :: userrc = zero
+ real(dp) :: userrd = zero
+ real(dp) :: userre = zero
+ real(dp) :: vacwidth
+ real(dp) :: vdw_tol
+ real(dp) :: vdw_tol_3bt
+ real(dp) :: vdw_df_acutmin
+ real(dp) :: vdw_df_aratio
+ real(dp) :: vdw_df_damax
+ real(dp) :: vdw_df_damin
+ real(dp) :: vdw_df_dcut
+ real(dp) :: vdw_df_dratio
+ real(dp) :: vdw_df_dsoft
+ real(dp) :: vdw_df_gcut
+ real(dp) :: vdw_df_phisoft
+ real(dp) :: vdw_df_qcut
+ real(dp) :: vdw_df_qratio
+ real(dp) :: vdw_df_rcut
+ real(dp) :: vdw_df_rsoft
+ real(dp) :: vdw_df_threshold
+ real(dp) :: vdw_df_tolerance
+ real(dp) :: vdw_df_zab
+ real(dp) :: vis
+ real(dp) :: wfmix
+ real(dp) :: wtq
+ real(dp) :: wvl_hgrid
+ real(dp) :: wvl_crmult
+ real(dp) :: wvl_frmult
+ real(dp) :: xc_denpos
+ real(dp) :: xc_tb09_c
+ real(dp) :: zcut
+
+!Real arrays
+ real(dp) :: boxcenter(3)
+ real(dp) :: bfield(3)
+ real(dp) :: dfield(3)
+ real(dp) :: efield(3)
+ real(dp) :: genafm(3)
+ real(dp) :: goprecprm(3)
+ real(dp) :: neb_spring(2)
+ real(dp) :: pol(3)
+ real(dp) :: polcen(3)
+ real(dp) :: pvelmax(3)
+ real(dp) :: qptn(3)
+ real(dp) :: red_efield(3)
+ real(dp) :: red_dfield(3)
+ real(dp) :: red_efieldbar(3)
+ real(dp) :: strtarget(6)
+ real(dp) :: ucrpa_window(2)
+ real(dp) :: vcutgeo(3)
+ real(dp) :: vprtrb(2)
+ real(dp) :: zeemanfield(3)
+ real(dp) :: mdtemp(2)
+
+!Real allocatables
+ real(dp), allocatable :: acell_orig(:,:)   ! acell_orig(3,nimage)
+ real(dp), allocatable :: amu_orig(:,:)     ! amu(ntypat,nimage)
+ real(dp), allocatable :: atvshift(:,:,:)   ! atvshift(16,nsppol,natom)
+ real(dp), allocatable :: cd_imfrqs(:)      ! cd_imfrqs(cd_customnimfrqs)
+ real(dp), allocatable :: chempot(:,:,:)    ! chempot(3,nzchempot,ntypat)
+ real(dp), allocatable :: corecs(:)         ! corecs(ntypat)
+ real(dp), allocatable :: densty(:,:)       ! densty(ntypat,4)
+ real(dp), allocatable :: dmatpawu(:,:,:,:,:) ! dmatpawu(2*lpawu+1,2*lpawu+1,nsppol*nspinor,natpu,nimage)
+                                              ! where natpu=number of atoms with lpawu/=1
+ real(dp), allocatable :: efmas_dirs(:,:)   ! efmas_dirs(3,efmas_n_dirs)
+ real(dp), allocatable :: f4of2_sla(:)      ! f4of2_sla(ntypat)
+ real(dp), allocatable :: f6of2_sla(:)      ! f6of2_sla(ntypat)
+ real(dp), allocatable :: gw_qlwl(:,:)      ! gw_qlwl(3,gw_nqlwl)
+ real(dp), allocatable :: gw_freqsp(:)      ! gw_freqsp(gw_customnfreqsp)
+ real(dp), allocatable :: gwls_list_proj_freq(:)      ! gwls_list_proj_freq(gwls_n_proj_freq)
+ real(dp), allocatable :: jpawu(:,:)        ! jpawu(ntypat,nimage)
+ real(dp), allocatable :: kpt(:,:)          ! kpt(3,nkpt)
+ real(dp), allocatable :: kptgw(:,:)        ! kptgw(3,nkptgw)
+ real(dp), allocatable :: kptns(:,:)        ! kptns(3,nkpt) k-points renormalized and shifted.
+                                            !  The ones that should be used inside the code.
+ real(dp), allocatable :: kptns_hf(:,:)     ! kpthf(3,nkptns_hf)
+
+ real(dp), allocatable :: mixalch_orig(:,:,:) ! mixalch_orig(npspalch,ntypalch,nimage)
+ real(dp), allocatable :: mixesimgf(:)        ! mixesimgf(nimage)
+ real(dp), allocatable :: nucdipmom(:,:)      ! nucdipmom(3,natom)
+ real(dp), allocatable :: occ_orig(:,:)       ! occ_orig(mband*nkpt*nsppol,nimage)
+ real(dp), allocatable :: pimass(:)           ! pimass(ntypat)
+ real(dp), allocatable :: ptcharge(:)         ! ptcharge(ntypat)
+ real(dp), allocatable :: qmass(:)            ! qmass(nnos)
+ real(dp), allocatable :: qptdm(:,:)          ! qptdm(3,nqptdm)
+ real(dp), allocatable :: quadmom(:)          ! quadmom(ntypat)
+ real(dp), allocatable :: ratsph(:)           ! ratsph(ntypat)
+ real(dp), allocatable :: rprim_orig(:,:,:)   ! rprim_orig(3,3,nimage)
+ real(dp), allocatable :: rprimd_orig(:,:,:)  ! rprimd_orig(3,3,nimage)
+ real(dp), allocatable :: shiftk(:,:)         ! shiftk(3,nshiftk)
+ real(dp) :: shiftk_orig(3,MAX_NSHIFTK)       ! original shifts given in input (changed in inkpts).
+
+ real(dp), allocatable :: spinat(:,:)         ! spinat(3,natom)
+ real(dp), allocatable :: tnons(:,:)          ! tnons(3,nsym)
+ real(dp), allocatable :: upawu(:,:)          ! upawu(ntypat,nimage)
+ real(dp), allocatable :: vel_cell_orig(:,:,:)! vel_cell_orig(3,3,nimage)
+ real(dp), allocatable :: vel_orig(:,:,:)     ! vel_orig(3,natom,nimage)
+ real(dp), allocatable :: wtatcon(:,:,:)      ! wtatcon(3,natom,nconeq)
+ real(dp), allocatable :: wtk(:)              ! wtk(nkpt)
+ real(dp), allocatable :: xred_orig(:,:,:)    ! xred_orig(3,natom,nimage)
+ real(dp), allocatable :: xredsph_extra(:,:)  ! xredsph_extra(3,natsph_extra)
+ real(dp), allocatable :: ziontypat(:)        ! ziontypat(ntypat)
+ real(dp), allocatable :: znucl(:)            ! znucl(npsp)
+
+
+!BEGIN VARIABLES FOR @Bethe-Salpeter
+ integer :: bs_algorithm
+ integer :: bs_haydock_niter
+ integer :: bs_exchange_term
+ integer :: bs_coulomb_term
+ integer :: bs_calctype
+ integer :: bs_coupling
+ integer :: bs_interp_mode
+ integer :: bs_interp_prep
+ integer :: bs_interp_method
+ integer :: bs_interp_rl_nb
+
+ real(dp) :: bs_interp_m3_width
+
+ integer  :: bs_interp_kmult(3)
+ real(dp) :: bs_haydock_tol(2)
+
+ integer,allocatable :: bs_loband(:)
+
+ real(dp) :: bs_eh_cutoff(2)
+ real(dp) :: bs_freq_mesh(3)
+!END VARIABLES FOR @Bethe-Salpeter.
+
+ integer :: gpu_linalg_limit
+
+!EPH variables
+! ifc variables
+ integer :: asr
+ integer :: dipdip
+ integer :: chneut
+ integer :: symdynmat
+
+! Phonon variables.
+ integer :: ph_freez_disp_addStrain
+ integer :: ph_freez_disp_option
+ integer :: ph_freez_disp_nampl
+ integer :: ph_ndivsm    ! = 20
+ integer :: ph_nqpath    ! = 0
+ integer :: ph_ngqpt(3)  ! = 0
+ integer :: ph_nqshift
+
+ real(dp),allocatable :: ph_freez_disp_ampl(:,:)
+  ! ph_freez_disp_ampl(5,ph_freez_disp_nampl)
+ real(dp),allocatable :: ph_qshift(:,:)
+  ! ph_qshift(3, ph_nqshift)
+ real(dp),allocatable :: ph_qpath(:,:)
+  ! ph_qpath(3, nqpath)
+
+! e-ph variables
+ real(dp) :: eph_mustar
+ integer :: eph_intmeth ! = 1
+ real(dp) :: eph_extrael != zero
+ real(dp) :: eph_fermie != huge(one)
+ integer :: eph_frohlichm != 0
+ real(dp) :: eph_fsmear != 0.01
+ real(dp) :: eph_fsewin != 0.04
+ !real(dp) :: eph_alpha_gmin = zero !sqrt(5)
+ real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
+ integer :: eph_phrange(2) = 0
+
+ integer :: eph_ngqpt_fine(3)
+ integer :: eph_np_pqbks(5) = 0
+
+ integer :: eph_stern = 0
+ integer :: eph_transport = 0
+ integer :: eph_use_ftinterp = 0
+
+ integer :: ph_intmeth
+ integer :: prteliash = 0
+ real(dp) :: ph_wstep
+ real(dp) :: ph_smear
+ integer :: dvdb_ngqpt(3)
+ integer :: ddb_ngqpt(3)
+ integer :: ddb_qrefine(3) = [1, 1, 1]
+ real(dp) :: ddb_shiftq(3)
+
+ integer :: mixprec = 0
+ integer :: symv1scf = 0
+ integer :: dvdb_add_lr = 1
+
+ integer :: sigma_bsum_range(2) = 0
+
+ real(dp) :: sigma_erange(2) = -one
+
+ integer :: transport_ngkpt(3) = 0
+ ! K-mesh for Transport calculation.
+
+ integer :: sigma_ngkpt(3) = 0
+ ! K-mesh for Sigma_{nk} (only IBZ points). Alternative to kptgw.
+
+ integer :: sigma_nshiftk = 1
+ ! Number of shifts in k-mesh for Sigma_{nk}.
+
+ real(dp) :: frohl_params(4) = zero
+
+ real(dp),allocatable :: sigma_shiftk(:,:)
+ ! sigma_shiftk(3, sigma_nshiftk)
+ ! shifts in k-mesh for Sigma_{nk}.
+!END EPH
+
+ integer :: ndivsm = 0
+ integer :: nkpath = 0
+ real(dp) :: einterp(4) = zero
+ real(dp),allocatable :: kptbounds(:,:)
+ real(dp) :: tmesh(3) ! = [5._dp, 59._dp, 6._dp] This triggers a bug in the bindings
+
+ character(len=fnlen) :: getddb_path = ABI_NOFILE
+ character(len=fnlen) :: getden_path = ABI_NOFILE
+ character(len=fnlen) :: getdvdb_path = ABI_NOFILE
+ character(len=fnlen) :: getwfk_path = ABI_NOFILE
+ character(len=fnlen) :: getwfkfine_path = ABI_NOFILE
+ character(len=fnlen) :: getwfq_path = ABI_NOFILE
+ character(len=fnlen) :: getkerange_path = ABI_NOFILE
+ character(len=fnlen) :: getpot_path = ABI_NOFILE
+ character(len=fnlen) :: getscr_path = ABI_NOFILE
+ !character(len=fnlen) :: getsigeph_path = ABI_NOFILE
+
+ end type dataset_type
+!!***
+
  public :: dtset_chkneu
  public :: dtset_copy              ! Copy object.
  public :: dtset_free              ! Free dynamic memory.
  public :: dtset_free_nkpt_arrays  ! Free arrays that depend on input nkpt (used in EPH code)
- public :: find_getdtset     ! Find the number of the dataset (iget) for a given value of a "get" variable (getvalue)
- public :: get_npert_rbz     ! Get the number of effective pertubation done in looper3, nkpt_rbz, nband_rbz
- public :: testsusmat        ! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
- public :: macroin           ! Treat "macro" input variables
+ public :: find_getdtset           ! Find the number of the dataset (iget) for a given value of a "get" variable (getvalue)
+ public :: get_npert_rbz           ! Get the number of effective pertubation done in looper3, nkpt_rbz, nband_rbz
+ public :: testsusmat              ! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
+ public :: macroin                 ! Treat "macro" input variables
  public :: macroin2
- public :: chkvars           !  Examines the input string, to check whether all names are allowed.
+ public :: chkvars                 !  Examines the input string, to check whether all names are allowed.
 
 CONTAINS  !==============================================================================
 !!***
@@ -368,7 +1247,7 @@ subroutine dtset_copy(dtout, dtin)
 
 !Arguments ------------------------------------
 !scalars
- type(dataset_type),intent(in) :: dtin
+ class(dataset_type),intent(in) :: dtin
  type(dataset_type),intent(out) :: dtout
 
 ! *************************************************************************
@@ -438,7 +1317,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%dmft_rslf          = dtin%dmft_rslf
  dtout%dmft_solv          = dtin%dmft_solv
  dtout%dmft_t2g           = dtin%dmft_t2g
- dtout%dmft_x2my2d         = dtin%dmft_x2my2d
+ dtout%dmft_x2my2d        = dtin%dmft_x2my2d
  dtout%dmft_tolfreq       = dtin%dmft_tolfreq
  dtout%dmft_tollc         = dtin%dmft_tollc
  dtout%dmftbandi          = dtin%dmftbandi
@@ -524,7 +1403,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%ph_nqpath          = dtin%ph_nqpath
  dtout%ph_ngqpt           = dtin%ph_ngqpt
  if (allocated(dtin%ph_qpath)) call alloc_copy(dtin%ph_qpath, dtout%ph_qpath)
- if(allocated(dtin%ph_freez_disp_ampl))call alloc_copy(dtin%ph_freez_disp_ampl,dtout%ph_freez_disp_ampl)
+ if (allocated(dtin%ph_freez_disp_ampl)) call alloc_copy(dtin%ph_freez_disp_ampl,dtout%ph_freez_disp_ampl)
 ! end eph variables
 
  dtout%exchn2n3d          = dtin%exchn2n3d
@@ -1211,7 +2090,7 @@ subroutine dtset_free(dtset)
 
 !Arguments ------------------------------------
 !scalars
- type(dataset_type),intent(inout) :: dtset
+ class(dataset_type),intent(inout) :: dtset
 
 ! *************************************************************************
 
@@ -1317,7 +2196,7 @@ subroutine dtset_free_nkpt_arrays(dtset)
 
 !Arguments ------------------------------------
 !scalars
- type(dataset_type),intent(inout) :: dtset
+ class(dataset_type),intent(inout) :: dtset
 
 ! *************************************************************************
 
@@ -1457,7 +2336,7 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
 !arrays
  integer,pointer :: nkpt_rbz(:)
  real(dp),pointer :: nband_rbz(:,:)
- type(dataset_type),intent(in) :: dtset
+ class(dataset_type),intent(in) :: dtset
 
 !Local variables-------------------------------
 !scalars

@@ -116,6 +116,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use defs_abitypes
  use defs_wvltypes
  use m_errors
+ use m_dtset
  use m_results_out
  use m_results_respfn
  use m_yaml

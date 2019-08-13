@@ -35,6 +35,7 @@ module m_wvl_rho
  use defs_abitypes
  use m_abi2big
  use m_xmpi
+ use m_dtset
 
  use m_geometry, only : xred2xcart, metric
  use m_pawrad,   only : pawrad_type, pawrad_init, pawrad_free

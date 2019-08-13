@@ -36,6 +36,7 @@ module m_frohlichmodel
  use m_ebands
  use m_efmas_defs
  use m_ifc
+ use m_dtset
 
  use m_gaussian_quadrature, only : cgqf
 

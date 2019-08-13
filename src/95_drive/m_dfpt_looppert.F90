@@ -29,6 +29,7 @@ module m_dfpt_loopert
  use defs_basis
  use defs_datatypes
  use defs_abitypes
+ use m_dtset
  use defs_wvltypes
  use m_efmas_defs
  use m_abicore

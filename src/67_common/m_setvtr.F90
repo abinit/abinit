@@ -34,6 +34,7 @@ module m_setvtr
  use m_abi2big
  use m_xmpi
  use m_xcdata
+ use m_dtset
 
  use m_time,              only : timab
  use m_geometry,          only : xred2xcart

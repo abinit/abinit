@@ -29,8 +29,9 @@ module m_getgh1c
  use defs_basis
  use m_abicore
  use m_errors
+ use m_dtset
 
- use defs_abitypes, only : MPI_type, dataset_type
+ use defs_abitypes, only : MPI_type
  use defs_datatypes, only : pseudopotential_type
  use m_time,        only : timab
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_lincom, pawcprj_axpby
@@ -39,8 +40,8 @@ module m_getgh1c
  use m_pawfgr,      only : pawfgr_type
  use m_fft,         only : fftpac, fourwf
  use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type,&
-&                          load_k_hamiltonian, load_kprime_hamiltonian,&
-&                          load_k_rf_hamiltonian
+                           load_k_hamiltonian, load_kprime_hamiltonian,&
+                           load_k_rf_hamiltonian
  use m_cgtools,          only : projbd
  use m_nonlop,           only : nonlop
  use m_fourier_interpol, only : transgrid

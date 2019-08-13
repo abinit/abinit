@@ -37,6 +37,7 @@ module m_dft_energy
  use m_gemm_nonlop
  use m_xcdata
  use m_cgtools
+ use m_dtset
 
  use m_time,             only : timab
  use m_geometry,         only : metric
@@ -814,7 +815,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  if (optene==0.or.optene==2) then
    etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
 !&   energies%e_nlpsp_vfock - energies%e_fock0 +
-!   Should compute the e_fock0 energy !! Also, the Fock contribution to e_nlpsp_vfock 
+!   Should compute the e_fock0 energy !! Also, the Fock contribution to e_nlpsp_vfock
 &   energies%e_nlpsp_vfock + energies%e_localpsp + energies%e_corepsp
    if (psps%usepaw==1) etotal=etotal + energies%e_paw
  else if (optene==1.or.optene==3) then

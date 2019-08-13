@@ -34,6 +34,7 @@ MODULE m_electronpositron
  use m_energies
  use m_xmpi
  use m_cgtools
+ use m_dtset
 
  use m_pawtab,   only : pawtab_type
  use m_paw_an,   only : paw_an_type

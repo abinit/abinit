@@ -31,6 +31,7 @@
 MODULE m_datafordmft
 
  use defs_basis
+ use m_dtset
 
  implicit none
 
@@ -1699,7 +1700,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
          enddo ! itot
          iatomcor=0
          do itot=1,dimoverlap
-           psichivect(ib,itot)=wanall(itot)   
+           psichivect(ib,itot)=wanall(itot)
          enddo
         ! do iatom=1,natom
         !   if(paw_dmft%lpawu(iatom).ne.-1) then
@@ -1732,7 +1733,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
        enddo
 
 
-!      psichivect -> psichi 
+!      psichivect -> psichi
        do ib=1,mbandc
          itot=0
          do iatom=1,natom

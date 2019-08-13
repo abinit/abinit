@@ -33,6 +33,7 @@ MODULE m_ddk
  use m_xmpi
  use m_nctk
  use m_hdr
+ use m_dtset
  use m_krank
  use m_fstab
  use m_wfd
@@ -51,7 +52,7 @@ MODULE m_ddk
  use m_symtk,         only : matr3inv
  use m_io_tools,      only : iomode_from_fname
  use m_time,          only : cwtime, sec2str
- use defs_abitypes,   only : dataset_type, MPI_type
+ use defs_abitypes,   only : MPI_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
  use m_geometry,      only : mkradim
  use m_crystal,       only : crystal_t

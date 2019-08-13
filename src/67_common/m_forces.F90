@@ -34,6 +34,7 @@ module m_forces
  use m_efield
  use m_errors
  use m_atomdata
+ use m_dtset
 
  use m_time,             only : timab
  use m_geometry,         only : fred2fcart, metric, xred2xcart

@@ -39,12 +39,12 @@ MODULE m_mpinfo
  use m_sort
  use m_distribfft
 
- use defs_abitypes,   only : MPI_type, dataset_type
+ use defs_abitypes,   only : MPI_type
  use m_fstrings,      only : sjoin, ltoa
  use m_io_tools,      only : file_exists, open_file
  use m_libpaw_tools,  only : libpaw_write_comm_set
  use m_paral_atom,    only : get_my_natom, get_my_atmtab
- use m_dtset,         only : get_npert_rbz
+ use m_dtset,         only : get_npert_rbz, dataset_type
 
  implicit none
 

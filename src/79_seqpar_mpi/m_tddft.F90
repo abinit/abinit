@@ -36,6 +36,7 @@ module m_tddft
  use m_errors
  use m_wffile
  use m_sort
+ use m_dtset
 #if defined HAVE_MPI2
  use mpi
 #endif

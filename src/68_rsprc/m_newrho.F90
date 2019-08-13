@@ -27,8 +27,20 @@
 module m_newrho
 
  use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use defs_wvltypes
  use m_errors
  use m_abicore
+ use m_ab7_mixing
+ use m_abi2big
+ use m_dtset
+
+ use m_time,     only : timab
+ use m_geometry, only : metric
+ use m_pawtab,   only : pawtab_type
+ use m_pawrhoij, only : pawrhoij_type,pawrhoij_filter
+ use m_prcref,   only : prcref
 
  use m_wvl_rho, only : wvl_prcref
  use m_fft,     only : fourdp
@@ -167,22 +179,6 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 &  nresid,ntypat,n1xccc,pawrhoij,pawtab,&
 &  ph1d,psps,rhog,rhor,rprimd,susmat,usepaw,vtrial,wvl,wvl_den,xred,&
 &  taug,taur,tauresid)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wvltypes
- use m_errors
- use m_abicore
- use m_ab7_mixing
- use m_abi2big
-
- use m_time,     only : timab
- use m_geometry, only : metric
- use m_pawtab,   only : pawtab_type
- use m_pawrhoij, only : pawrhoij_type,pawrhoij_filter
- use m_prcref,   only : prcref
- implicit none
 
 !Arguments-------------------------------
 !scalars

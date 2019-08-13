@@ -26,6 +26,40 @@
 
 module m_d2frnl
 
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use m_abicore
+ use m_xmpi
+ use m_errors
+ use m_cgtools
+ use m_nctk
+ use m_hamiltonian
+ use m_efmas_defs
+ use m_wfk
+ use m_dtset
+
+ use m_time,     only : timab
+ use m_geometry, only : metric, strconv
+ use m_efmas,    only : check_degeneracies
+ use m_io_tools, only : file_exists
+ use m_hdr,      only : hdr_skip
+ use m_pawang,   only : pawang_type
+ use m_pawrad,   only : pawrad_type
+ use m_pawtab,   only : pawtab_type,pawtab_get_lsize
+ use m_pawfgrtab,only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
+ use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
+ use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_gather, &
+                        pawrhoij_nullify, pawrhoij_symrhoij
+ use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_free
+ use m_pawdij,   only : pawdijfr
+ use m_paw_dfpt, only : pawgrnl
+ use m_kg,       only : mkkin, mkkpg
+ use m_mkffnl,   only : mkffnl
+ use m_mpinfo,   only : proc_distrb_cycle
+ use m_nonlop,   only : nonlop
+ use m_paw_occupancies, only : pawaccrhoij
+
  implicit none
 
  private
@@ -127,39 +161,6 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 &          gsqcut,has_allddk,indsym,kg,mgfftf,mpi_enreg,mpsang,my_natom,natom,nfftf,ngfft,ngfftf,npwarr,&
 &          occ,paw_ij,pawang,pawbec,pawfgrtab,pawpiezo,pawrad,pawrhoij,pawtab,ph1d,ph1df,piezofrnl,psps,&
 &          rprimd,rfphon,rfstrs,symrec,vtrial,vxc,xred,ylm,ylmgr)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_abicore
- use m_xmpi
- use m_errors
- use m_cgtools
- use m_nctk
- use m_hamiltonian
- use m_efmas_defs
- use m_wfk
-
- use m_time,     only : timab
- use m_geometry, only : metric, strconv
- use m_efmas,    only : check_degeneracies
- use m_io_tools, only : file_exists
- use m_hdr,      only : hdr_skip
- use m_pawang,   only : pawang_type
- use m_pawrad,   only : pawrad_type
- use m_pawtab,   only : pawtab_type,pawtab_get_lsize
- use m_pawfgrtab,only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
- use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
- use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_gather, &
-&                       pawrhoij_nullify, pawrhoij_symrhoij
- use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_free
- use m_pawdij,   only : pawdijfr
- use m_paw_dfpt, only : pawgrnl
- use m_kg,       only : mkkin, mkkpg
- use m_mkffnl,   only : mkffnl
- use m_mpinfo,   only : proc_distrb_cycle
- use m_nonlop,   only : nonlop
- use m_paw_occupancies, only : pawaccrhoij
 
 !Arguments ------------------------------------
 !scalars

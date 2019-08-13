@@ -37,6 +37,7 @@ MODULE m_lobpcg
  use m_wfutils
  use m_abi_linalg
  use m_cgtools
+ use m_dtset
 
  use m_time,              only : timab
 

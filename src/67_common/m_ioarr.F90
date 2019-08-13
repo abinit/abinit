@@ -34,6 +34,7 @@ MODULE m_ioarr
  use m_wffile
  use m_errors
  use m_nctk
+ use m_dtset
  use m_crystal
  use m_ebands
  use m_hdr
@@ -45,7 +46,7 @@ MODULE m_ioarr
  use netcdf
 #endif
 
- use defs_abitypes,   only : mpi_type, dataset_type
+ use defs_abitypes,   only : mpi_type
  use defs_datatypes,  only : ebands_t
  use defs_wvltypes,   only : wvl_denspot_type
  use m_time,          only : cwtime, cwtime_report

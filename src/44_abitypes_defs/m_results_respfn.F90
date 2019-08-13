@@ -13,10 +13,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -35,6 +31,7 @@ MODULE m_results_respfn
  use defs_abitypes
  use m_errors
  use m_abicore
+ use m_dtset
 
  implicit none
 
@@ -123,18 +120,18 @@ subroutine init_results_respfn(dtsets,ndtset_alloc,results_respfn)
      enddo
      if(dtsets(idtset_gam)%optdriver/=RUNL_RESPFN)then
        write(message, '(a,i5,a,i5,2a,i5,3a)' )&
-&        'For jdtset=',dtsets(idtset)%jdtset,', getgam_eig2nkq=',getgam_eig2nkq,ch10,&
-&        'However this dataset with idtset=',idtset_gam, ' is not a phonon calculation;',ch10,&
-&        'Action : correct the value of getgam_eig2nkq for that dataset.'
+         'For jdtset=',dtsets(idtset)%jdtset,', getgam_eig2nkq=',getgam_eig2nkq,ch10,&
+         'However this dataset with idtset=',idtset_gam, ' is not a phonon calculation;',ch10,&
+         'Action : correct the value of getgam_eig2nkq for that dataset.'
        MSG_ERROR(message)
      endif
      if(results_respfn%gam_jdtset==0)then
        results_respfn%gam_jdtset=-getgam_eig2nkq ! Store a negative value, indicating that it is expected.
      else if(results_respfn%gam_jdtset/=-getgam_eig2nkq) then
        write(message, '(a,i5,2a,i5,2a)' )&
-&        'results_respfn%gam_jdtset=',results_respfn%gam_jdtset,ch10,&
-&        'dtsets(idtset)%getgam_eig2nkq=',getgam_eig2nkq,ch10,&
-&        'So, it seems that two gamma q point calculations should be stored, while this is not yet allowed.'
+         'results_respfn%gam_jdtset=',results_respfn%gam_jdtset,ch10,&
+         'dtsets(idtset)%getgam_eig2nkq=',getgam_eig2nkq,ch10,&
+         'So, it seems that two gamma q point calculations should be stored, while this is not yet allowed.'
        MSG_BUG(message)
      endif
    endif
@@ -172,16 +169,7 @@ subroutine destroy_results_respfn(results_respfn)
 
 !************************************************************************
 
- if(results_respfn%gam_jdtset>0)then
-!DEBUG
-!  write(std_out,*)' results_respfn%gam_jdtset=',results_respfn%gam_jdtset
-!  write(std_out,*)' allocated(results_respfn%gam_eig2nkq)=',allocated(results_respfn%gam_eig2nkq)
-!  call flush(6)
-!ENDDEBUG
-   if(allocated(results_respfn%gam_eig2nkq))then
-     ABI_DEALLOCATE(results_respfn%gam_eig2nkq)
-   endif
- endif
+ ABI_SFREE(results_respfn%gam_eig2nkq)
 
 end subroutine destroy_results_respfn
 

@@ -43,6 +43,7 @@ module m_lobpcgwf
  use m_fstrings
  use m_xg
  use m_lobpcg2
+ use m_dtset
 
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type

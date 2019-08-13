@@ -38,6 +38,7 @@ module m_wfk_analyze
  use m_nctk
  use m_wfk
  use m_wfd
+ use m_dtset
 
  use m_time,            only : timab
  use m_fstrings,        only : strcat, sjoin, itoa, ftoa

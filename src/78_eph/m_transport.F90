@@ -36,6 +36,7 @@ module m_transport
  use m_ebands
  use m_nctk
  use m_sigmaph
+ use m_dtset
 #ifdef HAVE_NETCDF
  use netcdf
 #endif

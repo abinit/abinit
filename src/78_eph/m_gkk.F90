@@ -28,6 +28,7 @@ module m_gkk
  use m_abicore
  use m_xmpi
  use m_errors
+ use m_dtset
  use m_ifc
  use m_ebands
  use m_ddb

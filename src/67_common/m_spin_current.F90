@@ -32,6 +32,7 @@ module m_spin_current
  use m_abicore
  use m_splines
  use m_hdr
+ use m_dtset
 
  use m_io_tools,   only : open_file
  use m_pptools,    only : printxsf

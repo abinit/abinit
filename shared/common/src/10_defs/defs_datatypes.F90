@@ -128,7 +128,6 @@ module defs_datatypes
   ! wtk(nkpt)
   ! weight of each k point, normalized to one.
 
-!EBANDS_NEW
   integer :: kptopt
   ! Option used for k-point generation.
 

@@ -32,6 +32,7 @@ module m_mkrho
  use m_abicore
  use m_xmpi
  use m_errors
+ use m_dtset
 
  use m_time,         only : timab
  use m_fftcore,      only : sphereboundary

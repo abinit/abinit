@@ -29,6 +29,7 @@ module m_outvars
  use defs_basis
  use defs_abitypes
  use m_results_out
+ use m_dtset
  use m_abicore
  use m_errors
  use m_xomp

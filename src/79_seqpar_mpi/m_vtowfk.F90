@@ -34,6 +34,7 @@ module m_vtowfk
  use m_efield
  use m_linalg_interfaces
  use m_cgtools
+ use m_dtset
 
  use m_time,        only : timab, cwtime, sec2str
  use m_fstrings,    only : sjoin, itoa, ftoa

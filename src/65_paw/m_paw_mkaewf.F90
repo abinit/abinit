@@ -37,6 +37,7 @@ module m_paw_mkaewf
  use m_errors
  use m_nctk
  use m_hdr
+ use m_dtset
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -140,8 +141,6 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 & istwfk,npwarr,kpt,ngfftf,kg,dimcprj,Pawfgrtab,Pawrad,Pawtab,&
 & Hdr,Dtfil,cg,Cprj,MPI_enreg,ierr,pseudo_norms,set_k,set_band , &
 & mpi_atmtab,comm_atom) ! Optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

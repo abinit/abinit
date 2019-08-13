@@ -33,6 +33,7 @@ module m_vhxc_me
  use m_errors
  use m_xcdata
  use libxc_functionals
+ use m_dtset
 
  use m_pawang,      only : pawang_type
  use m_pawtab,      only : pawtab_type
@@ -45,7 +46,6 @@ module m_vhxc_me
  use m_wfd,         only : wfd_t
  use m_crystal,     only : crystal_t
  use m_melemts,     only : melements_init, melements_herm, melements_mpisum, melflags_t, melements_t
- use m_dtset,       only : dtset_copy, dtset_free
  use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
  use m_kg,          only : mkkin
  use m_rhotoxc,     only : rhotoxc

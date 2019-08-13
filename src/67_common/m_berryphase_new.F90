@@ -34,6 +34,7 @@ module m_berryphase_new
  use m_abicore
  use m_xmpi
  use m_hdr
+ use m_dtset
 
  use m_berrytk,      only : smatrix, polcart
  use m_cgprj,        only : ctocprj

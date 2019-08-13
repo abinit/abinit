@@ -43,6 +43,7 @@ module m_mlwfovlp
 #endif
  use m_nctk
  use m_hdr
+ use m_dtset
 
  use m_io_tools, only : delete_file, get_unit, open_file
  use m_hide_lapack,     only : matrginv
@@ -138,8 +139,6 @@ contains
 & mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
 & nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
 & pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1349,8 +1348,6 @@ contains
 
  subroutine read_chkunit(seed_name,nkpt,ndimwin,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpt
@@ -1435,8 +1432,6 @@ end subroutine mlwfovlp
 
 subroutine mlwfovlp_seedname(fname_w90,filew90_win,filew90_wout,filew90_amn,&
 & filew90_ramn,filew90_mmn,filew90_eig,nsppol,seed_name)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nsppol
@@ -1626,8 +1621,6 @@ end subroutine mlwfovlp_seedname
 & nntot,num_bands,num_nnmax,nsppol,nwan,ovikp,&
 & proj_l,proj_m,proj_radial,proj_site,proj_s_loc,proj_s_qaxis_loc,proj_x,proj_z,proj_zona,&
 & real_lattice,recip_lattice,rprimd,seed_name,spinors,xcart,xred)
-
- implicit none
 
 !Arguments---------------------------
 ! scalars
@@ -1922,8 +1915,6 @@ end subroutine mlwfovlp_setup
 
 subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
 &  npwarr,nspinor,nsppol,ovikp,seed_name)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2284,8 +2275,6 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 &nkpt,npwarr,nspinor,&
 &nsppol,ntypat,num_bands,nwan,pawtab,proj_l,proj_m,proj_radial,&
 &proj_site,proj_x,proj_z,proj_zona,psps,ucvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2787,8 +2776,6 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
 &proj_l,proj_m,proj_radial,proj_site,proj_x,proj_z,proj_zona,psps,&
 &rprimd,typat,xred)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: max_num_bands,mband,mkmem,mwan,natom,nkpt
  integer,intent(in) :: nspinor,nsppol,ntypat
@@ -3154,8 +3141,6 @@ end subroutine mlwfovlp_projpaw
 
 subroutine mlwfovlp_radial(alpha,lmax,lmax2,radial,rvalue,xx)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lmax,lmax2,rvalue
@@ -3297,8 +3282,6 @@ end subroutine mlwfovlp_radial
 
 
 subroutine mlwfovlp_ylmfac(ylmc_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,proj_z)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in):: lmax,lmax2,nwan,mband
@@ -3554,8 +3537,6 @@ end subroutine mlwfovlp_ylmfac
 !! SOURCE
 
 subroutine mlwfovlp_ylmfar(ylmr_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,proj_z)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in):: lmax,lmax2,nwan,mband

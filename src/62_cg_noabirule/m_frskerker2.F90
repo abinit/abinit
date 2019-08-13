@@ -36,6 +36,7 @@ module m_frskerker2
   use defs_basis
   use defs_abitypes
   use m_abicore
+  use m_dtset
 
   use m_spacepar, only : laplacian
   use m_numeric_tools, only : dotproduct

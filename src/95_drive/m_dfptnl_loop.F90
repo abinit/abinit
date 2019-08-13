@@ -153,13 +153,13 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
-
  use m_errors
  use m_abicore
  use m_hdr
  use m_nctk
  use m_wffile
  use m_wfk
+ use m_dtset
 
  use m_time,        only : timab
  use m_io_tools,    only : file_exists

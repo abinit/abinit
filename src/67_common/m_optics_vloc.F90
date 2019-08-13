@@ -26,6 +26,19 @@
 
 module m_optics_vloc
 
+ use defs_basis
+ use defs_abitypes
+ use m_abicore
+ use m_errors
+ use m_wffile
+ use m_xmpi
+ use m_hdr
+ use m_dtset
+
+ use m_time,         only : timab
+ use m_io_tools,     only : get_unit
+ use m_mpinfo,       only : proc_distrb_cycle
+
  implicit none
 
  private
@@ -79,19 +92,6 @@ contains
 
  subroutine optics_vloc(cg,dtfil,dtset,eigen0,gprimd,hdr,kg,mband,mcg,mkmem,mpi_enreg,mpw,&
 &                       nkpt,npwarr,nsppol)
-
- use defs_basis
- use defs_abitypes
- use m_abicore
- use m_errors
- use m_wffile
- use m_xmpi
- use m_hdr
-
- use m_time,         only : timab
- use m_io_tools,     only : get_unit
- use m_mpinfo,       only : proc_distrb_cycle
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mkmem,mpw,nkpt,nsppol

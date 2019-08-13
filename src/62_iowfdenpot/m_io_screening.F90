@@ -35,6 +35,7 @@ MODULE m_io_screening
  use m_mpiotk
  use m_nctk
  use m_errors
+ use m_dtset
  use iso_c_binding
 #ifdef HAVE_NETCDF
  use netcdf

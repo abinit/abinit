@@ -33,6 +33,7 @@ module m_ingeo
  use m_errors
  use m_atomdata
  use m_sort
+ use m_dtset
 
  use m_symtk,      only : mati3inv, chkorthsy, symrelrot, mati3det, symmetrize_rprimd, symmetrize_xred, symatm
  use m_spgbuilder, only : gensymspgr, gensymshub, gensymshub4

@@ -31,6 +31,7 @@ module m_sigc
  use m_errors
  use m_time
  use m_splines
+ use m_dtset
 
  !use m_gwdefs, only : czero_gw, cone_gw, Kron15N, Kron15W, Gau7W, &
  !                     Kron23N, Kron23W, Gau11W, Kron31N, Kron31W, Gau15W

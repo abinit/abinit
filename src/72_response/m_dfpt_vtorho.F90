@@ -35,6 +35,7 @@ module m_dfpt_vtorho
  use m_hamiltonian
  use m_wfk
  use m_cgtools
+ use m_dtset
 
  use m_time,     only : timab
  use m_occ,      only : occeig

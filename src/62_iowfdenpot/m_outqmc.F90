@@ -37,6 +37,7 @@ module m_outqmc
  use m_abicore
  use m_xmpi
  use m_hdr
+ use m_dtset
 
  use m_io_tools,    only : get_unit
  use m_geometry,    only : xred2xcart

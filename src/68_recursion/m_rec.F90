@@ -48,6 +48,7 @@ module m_rec
  use m_errors
  use m_xmpi
  use m_sort
+ use m_dtset
 
  use m_exp_mat,         only : exp_mat
  use m_numeric_tools,   only : set2unit

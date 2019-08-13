@@ -55,6 +55,7 @@ module m_sigmaph
 #endif
  use m_nctk
  use m_rf2
+ use m_dtset
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_time,           only : cwtime, cwtime_report, timab, sec2str

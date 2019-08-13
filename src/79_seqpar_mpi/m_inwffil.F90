@@ -36,6 +36,7 @@ module m_inwffil
  use m_xmpi
  use m_nctk
  use m_hdr
+ use m_dtset
 #if defined HAVE_MPI2
  use mpi
 #endif

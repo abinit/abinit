@@ -29,6 +29,7 @@ module m_mover_effpot
  use defs_basis
  use m_errors
  use m_abicore
+ use m_dtset
 
  implicit none
 

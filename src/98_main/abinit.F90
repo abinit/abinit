@@ -94,6 +94,7 @@ program abinit
  use m_cppopts_dumper
  use m_optim_dumper
  use m_abicore
+ use m_dtset
  use m_results_out
  use m_xmpi
  use m_xomp

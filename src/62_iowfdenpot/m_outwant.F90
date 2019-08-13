@@ -32,6 +32,7 @@ module m_outwant
  use m_errors
  use m_abicore
  use m_hdr
+ use m_dtset
 
  use m_io_tools,   only : open_file
  use m_symtk,      only : matr3inv

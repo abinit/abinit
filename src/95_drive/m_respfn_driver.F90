@@ -41,6 +41,7 @@ module m_respfn_driver
  use m_hdr
  use m_crystal
  use m_xcdata
+ use m_dtset
 
  use m_time,        only : timab
  use m_fstrings,    only : strcat

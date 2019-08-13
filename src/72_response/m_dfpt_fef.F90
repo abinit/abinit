@@ -31,6 +31,7 @@ module m_dfpt_fef
  use m_abicore
  use m_errors
  use m_efield
+ use m_dtset
 
  use m_kg,        only : kpgio
  use m_cgtools,   only : overlap_g

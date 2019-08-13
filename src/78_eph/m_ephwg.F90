@@ -36,6 +36,7 @@ module m_ephwg
  use m_errors
  use m_xmpi
  use m_copy
+ use m_dtset
  use m_htetra
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -48,7 +49,6 @@ module m_ephwg
  use m_eph_double_grid
 
  use defs_datatypes,    only : ebands_t
- use defs_abitypes,     only : dataset_type
  use m_time,            only : cwtime, cwtime_report
  use m_symtk,           only : matr3inv
  use m_numeric_tools,   only : arth, inrange, wrap2_pmhalf

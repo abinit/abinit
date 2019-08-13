@@ -37,6 +37,7 @@ module m_nonlinear
  use m_hdr
  use m_ebands
  use m_xcdata
+ use m_dtset
 
  use m_fstrings, only : sjoin, itoa
  use m_time,     only : timab

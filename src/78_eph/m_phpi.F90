@@ -42,6 +42,7 @@ module m_phpi
  use m_fft
  use m_hamiltonian
  use m_pawcprj
+ use m_dtset
 
  use m_time,            only : cwtime
  use m_fstrings,        only : sjoin, itoa, ftoa, ktoa, ltoa, strcat

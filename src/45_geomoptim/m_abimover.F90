@@ -28,6 +28,7 @@ module m_abimover
  use m_atomdata
  use m_errors
  use defs_abitypes
+ use m_dtset
 
  use m_geometry,  only : acrossb
 

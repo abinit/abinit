@@ -34,6 +34,7 @@ module m_chebfi
  use m_abi_linalg
  use m_rayleigh_ritz
  use m_invovl
+ use m_dtset
 
  use m_time,          only : timab
  use m_cgtools,       only : dotprod_g

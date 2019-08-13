@@ -32,6 +32,7 @@ MODULE m_memeval
  use m_abicore
  use m_xmpi
  use m_errors
+ use m_dtset
 
  use m_geometry,      only : mkradim, mkrdim, xred2xcart, metric
  use m_symtk,         only : mati3inv, littlegroup_q

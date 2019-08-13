@@ -35,6 +35,7 @@ module m_wvl_rwwf
  use m_abicore
  use m_hdr
  use m_xmpi
+ use m_dtset
 #if defined HAVE_ETSF_IO
   use etsf_io
 #endif

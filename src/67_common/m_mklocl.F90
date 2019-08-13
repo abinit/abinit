@@ -33,6 +33,7 @@ module m_mklocl
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_dtset
 
  use m_time,     only : timab
  use m_geometry, only : xred2xcart

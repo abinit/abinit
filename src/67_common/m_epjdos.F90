@@ -42,6 +42,7 @@ module m_epjdos
  use m_hdr
  use m_mpinfo
  use m_sort
+ use m_dtset
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_occ,            only : dos_hdr_write

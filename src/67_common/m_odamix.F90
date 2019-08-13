@@ -33,6 +33,7 @@ module m_odamix
  use m_errors
  use m_xmpi
  use m_xcdata
+ use m_dtset
 
  use m_time,       only : timab
  use m_geometry,   only : metric
@@ -437,7 +438,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !energies%e_magfield = emag
 !end if
 
-!HONG  Turn it into an internal enthalpy, refer to Eq.(36) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]], 
+!HONG  Turn it into an internal enthalpy, refer to Eq.(36) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]],
 !but a little different: U=E_ks + (vol/8*pi) *  g^{-1})_ij ebar_i ebar_j
  if (dtset%berryopt == 6 .or. dtset%berryopt == 16 )  then
    energies%e_elecfield=zero

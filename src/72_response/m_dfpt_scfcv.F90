@@ -31,6 +31,7 @@ module m_dfpt_scfcv
  use m_ab7_mixing
  use m_efield
  use m_errors
+ use m_dtset
  use m_abicore
  use m_wfk
  use m_wffile

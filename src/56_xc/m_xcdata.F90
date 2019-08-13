@@ -32,8 +32,7 @@ module m_xcdata
  use defs_basis
  use m_errors
  use libxc_functionals
-
- use defs_abitypes, only : dataset_type
+ use m_dtset
 
  implicit none
 

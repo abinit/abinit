@@ -32,6 +32,7 @@ module m_dfpt_elt
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_dtset
 
  use m_time,        only : timab
  use m_special_funcs,  only : abi_derfc

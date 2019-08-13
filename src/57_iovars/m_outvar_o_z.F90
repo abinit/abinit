@@ -32,6 +32,7 @@ module m_outvar_o_z
  use m_results_out
  use m_abicore
  use m_xmpi
+ use m_dtset
 
  use m_geometry,     only : mkrdim, xred2xcart
  use m_parser,       only : prttagm, prttagm_images

@@ -27,6 +27,7 @@ MODULE m_paw_tools
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_dtset
 
  use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype,EP_POSITRON

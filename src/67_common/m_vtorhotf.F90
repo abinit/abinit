@@ -31,6 +31,7 @@ module m_vtorhotf
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_dtset
 
  use m_time,     only : timab
  use m_spacepar,  only : symrhg

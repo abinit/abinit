@@ -31,6 +31,7 @@ module m_extraprho
  use m_errors
  use m_xmpi
  use m_cgtools
+ use m_dtset
 
  use defs_datatypes, only : pseudopotential_type
  use m_atomdata, only : atom_length
@@ -1118,7 +1119,7 @@ end subroutine extrapwf
 !! INPUTS
 !!  atindx1(dtset%natom)=index table for atoms, inverse of atindx
 !!  dtset <type(dataset_type)>=all input variables in this dataset
-!!  istep=number of call the routine 
+!!  istep=number of call the routine
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mcprj=size of cprj array
 !!  mpi_enreg=information about MPI parallelization
@@ -1173,7 +1174,7 @@ end subroutine extrapwf
  integer :: nband_k,nbdmix,nbdmax,npw_k,ntypat
  integer :: spaceComm_band,usepaw
  real(dp) :: alpha,beta !,dotr,doti
- 
+
 !arrays
  integer,allocatable :: ipiv(:),dimcprj(:)
  real(dp),allocatable ::psi_ortho(:,:),mmn(:,:,:)
@@ -1426,7 +1427,7 @@ end subroutine extrapwf
  ABI_DEALLOCATE(mmn)
  ABI_DEALLOCATE(smn)
 
- 
+
 
 end subroutine extrapwf_biortho
 !!***

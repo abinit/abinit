@@ -26,6 +26,44 @@
 
 module m_dfptnl_pert
 
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use m_abicore
+ use m_wffile
+ use m_wfk
+ use m_xmpi
+ use m_hamiltonian
+ use m_errors
+ use m_rf2
+ use m_kg
+ use m_dtset
+
+ use m_cgtools,    only : dotprod_g,sqnorm_g,dotprod_vn
+ use m_pawang,     only : pawang_type
+ use m_pawfgrtab,  only : pawfgrtab_type
+ use m_pawrad,     only : pawrad_type
+ use m_pawtab,     only : pawtab_type
+ use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free
+ use m_paw_ij,     only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify,paw_ij_reset_flags
+ use m_pawdij,     only : pawdijfr
+ use m_pawfgr,     only : pawfgr_type
+ use m_pawrhoij,   only : pawrhoij_type, pawrhoij_alloc , pawrhoij_nullify, pawrhoij_free,&
+&                         pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
+ use m_paw_an,     only : paw_an_type
+ use m_paw_mkrho,  only : pawmkrho
+ use m_paw_nhat,   only : pawnhatfr
+ use m_paw_dfpt,   only : pawdfptenergy
+ use m_paw_dfptnl, only : paw_dfptnl_accrhoij,paw_dfptnl_energy
+ use m_initylmg,   only : initylmg
+ use m_mkffnl,     only : mkffnl
+ use m_getghc,     only : getgsc
+ use m_getgh1c,    only : rf_transgrid_and_pack
+ use m_mpinfo,     only : proc_distrb_cycle
+ use m_nonlop,     only : nonlop
+ use m_fourier_interpol, only : transgrid
+ use m_cgprj,     only : getcprj
+
  implicit none
 
  private
@@ -159,43 +197,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 & paw_an0,paw_an1_i2pert,paw_ij1_i2pert,ph1d,psps,rho1r1,rho2r1,rho3r1,rprimd,symaf1,symrc1,&
 & ucvol,vtrial,vhartr1_i2pert,vtrial1_i2pert,vxc1_i2pert,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred,&
 & d3etot_1,d3etot_2,d3etot_3,d3etot_4,d3etot_5,d3etot_6,d3etot_7,d3etot_8,d3etot_9)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_abicore
- use m_wffile
- use m_wfk
- use m_xmpi
- use m_hamiltonian
- use m_errors
- use m_rf2
- use m_kg
-
- use m_cgtools,    only : dotprod_g,sqnorm_g,dotprod_vn
- use m_pawang,     only : pawang_type
- use m_pawfgrtab,  only : pawfgrtab_type
- use m_pawrad,     only : pawrad_type
- use m_pawtab,     only : pawtab_type
- use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free
- use m_paw_ij,     only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify,paw_ij_reset_flags
- use m_pawdij,     only : pawdijfr
- use m_pawfgr,     only : pawfgr_type
- use m_pawrhoij,   only : pawrhoij_type, pawrhoij_alloc , pawrhoij_nullify, pawrhoij_free,&
-&                         pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
- use m_paw_an,     only : paw_an_type
- use m_paw_mkrho,  only : pawmkrho
- use m_paw_nhat,   only : pawnhatfr
- use m_paw_dfpt,   only : pawdfptenergy
- use m_paw_dfptnl, only : paw_dfptnl_accrhoij,paw_dfptnl_energy
- use m_initylmg,   only : initylmg
- use m_mkffnl,     only : mkffnl
- use m_getghc,     only : getgsc
- use m_getgh1c,    only : rf_transgrid_and_pack
- use m_mpinfo,     only : proc_distrb_cycle
- use m_nonlop,     only : nonlop
- use m_fourier_interpol, only : transgrid
- use m_cgprj,     only : getcprj
 
 !Arguments ------------------------------------
 !scalars

@@ -64,6 +64,7 @@ program mrgscr
  use m_hdr
  use m_crystal
  use m_pawrhoij
+ use m_dtset
 
  use m_specialmsg,          only : herald
  use m_time,                only : timein

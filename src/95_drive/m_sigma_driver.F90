@@ -31,6 +31,7 @@ module m_sigma_driver
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
+ use m_dtset
  use m_xmpi
  use m_xomp
  use m_errors

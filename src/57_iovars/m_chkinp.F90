@@ -35,6 +35,7 @@ module m_chkinp
  use m_xmpi
  use m_xomp
  use libxc_functionals
+ use m_dtset
 
  use m_numeric_tools,  only : iseven
  use m_symtk,          only : chkgrp, chkorthsy

@@ -42,6 +42,7 @@ MODULE m_eig2d
  use m_ebands
  use m_cgtools
  use m_hdr
+ use m_dtset
 
  use m_time,       only : timab
  use m_fstrings,   only : strcat
@@ -1197,10 +1198,6 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 
  call timab(148,2,tsec)
 
-!DEBUG
-!write(std_out,*)' eig2stern: exit'
-!ENDDEBUG
-
 end subroutine eig2stern
 !!***
 
@@ -1317,7 +1314,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  real(dp) :: ar,ai,deltae,den,eig1_i1,eig1_i2,eigen_corr
  real(dp) :: eig1_r1,eig1_r2,eig2_diai,den_av
  real(dp) :: eig2_diar,eigbrd_i,eigbrd_r,wgt_int
- character(len=500) :: message
+ !character(len=500) :: message
  logical :: remove_inv,test_do_band
  type(crystal_t) :: Crystal
  type(ebands_t)  :: Bands
@@ -1359,8 +1356,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  call timab(148,1,tsec)
 
  if(nsppol==2)then
-   message = 'nsppol=2 is still under development. Be careful when using it ...'
-   MSG_COMMENT(message)
+   MSG_COMMENT('nsppol=2 is still under development. Be careful when using it ...')
  end if
 
  band2tot_index =0
@@ -1812,9 +1808,6 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 
 
  call timab(148,2,tsec)
-!DEBUG
-!write(std_out,*)' eig2tot: exit'
-!ENDDEBUG
 
 end subroutine eig2tot
 !!***
