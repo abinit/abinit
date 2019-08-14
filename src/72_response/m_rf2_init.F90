@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group ()
+!!  Copyright (C) 2015-2019 ABINIT group (LB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,13 +52,6 @@ contains
 !! FUNCTION
 !! Compute terms needed for the 2nd order Sternheimer equation.
 !! All terms are stored in a rf2_t object.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2015-2019 ABINIT group (LB,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cg(2,mpw*nspinor*mband*nsppol)=planewave coefficients of wavefunctions at k
@@ -122,7 +115,6 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  use m_time   , only : timab
  use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_copy,pawcprj_get,pawcprj_free,pawcprj_output
  use m_cgprj,   only : getcprj
- implicit none
 
 ! *************************************************************************
 !Arguments -------------------------------

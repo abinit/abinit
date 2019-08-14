@@ -56,6 +56,7 @@ module m_eph_double_grid
 
    type(ebands_t) :: ebands_dense
    ! ebands structure with the eigenvalues on the dense grid
+   ! TODO: Should be replaced by ebands_dense%eig to reduce memory requirements (occ, kpts ...)
 
    integer :: coarse_nbz, dense_nbz, dense_nibz
 
@@ -84,11 +85,13 @@ module m_eph_double_grid
 
    integer,allocatable :: indexes_to_coarse(:,:,:)
    ! given integer indexes get the array index of the kpoint (coarse)
+
    integer,allocatable :: coarse_to_indexes(:,:)
    ! given the array index get the integer indexes of the kpoints (coarse)
 
    integer,allocatable :: indexes_to_dense(:,:,:)
    ! given integer indexes get the array index of the kpoint (dense)
+
    integer,allocatable :: dense_to_indexes(:,:)
    ! given the array index get the integer indexes of the kpoint (dense)
 
@@ -118,9 +121,7 @@ module m_eph_double_grid
  end type eph_double_grid_t
 !!***
 
- public :: eph_double_grid_new
- public :: eph_double_grid_get_index
- ! Initialize the double grid structure
+ public :: eph_double_grid_new  ! Initialize the double grid structure
 
 contains  !=====================================================
 !!***
@@ -206,7 +207,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  eph_dg%interp_kmult = interp_kmult
  eph_dg%nkpt_coarse = nkpt_coarse
  eph_dg%nkpt_dense = nkpt_dense
- eph_dg%ebands_dense = ebands_dense
+ call ebands_copy(ebands_dense, eph_dg%ebands_dense)
 
  ! A microzone is the set of points in the fine grid belonging to a certain coarse point
  ! we have to consider a side of a certain size around the coarse point
@@ -388,6 +389,8 @@ subroutine eph_double_grid_free(self)
  ABI_SFREE(self%bz2lgkibz)
  ABI_SFREE(self%mapping)
 
+ call ebands_free(self%ebands_dense)
+
 end subroutine eph_double_grid_free
 !!***
 
@@ -514,7 +517,7 @@ subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symmat,nsym,bz2ibz,timrev,ma
        call wrap2_pmhalf(kpt_sym(1),wrap_kpt(1),shift)
        call wrap2_pmhalf(kpt_sym(2),wrap_kpt(2),shift)
        call wrap2_pmhalf(kpt_sym(3),wrap_kpt(3),shift)
-       ik_bz = eph_double_grid_get_index(self,wrap_kpt,2)
+       ik_bz = self%get_index(wrap_kpt, 2)
 
        ! check if applying this symmetry operation to kpt gives kpt_dense
        if (bz2ibz(ik_bz)==0) then
@@ -574,9 +577,9 @@ subroutine eph_double_grid_get_mapping(self,kk,kq,qpt)
  integer :: ik_bz, ikq_bz, iq_bz
  integer :: ik_ibz_fine,iq_ibz_fine,ikq_ibz_fine,ik_bz_fine,ikq_bz_fine,iq_bz_fine
 
- ik_bz  = eph_double_grid_get_index(self,kk,1)
- ikq_bz = eph_double_grid_get_index(self,kq,1)
- iq_bz  = eph_double_grid_get_index(self,qpt,1)
+ ik_bz  = self%get_index(kk, 1)
+ ikq_bz = self%get_index(kq, 1)
+ iq_bz  = self%get_index(qpt, 1)
 
  ik_bz_fine  = self%coarse_to_dense(ik_bz,1)
  ik_ibz_fine = self%bz2ibz_dense(ik_bz_fine)

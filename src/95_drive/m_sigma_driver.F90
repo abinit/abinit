@@ -415,9 +415,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !XG090617 Please, do not remove this write, unless you have checked
 !that the code executes correctly on max+g95 (especially, Tv5#70).
 !It is one more a silly write, perhaps needed because the compiler does not treat correctly non-nullified pointers.
- if (sigma_needs_w(Sigp) .and. my_rank==master) then
-   write(std_out,*)' screening after setup_sigma : Er%Hscr%headform=',Er%Hscr%headform
- end if
+! if (sigma_needs_w(Sigp) .and. my_rank==master) then
+!   write(std_out,*)' screening after setup_sigma : Er%Hscr%headform=',Er%Hscr%headform
+! end if
 !END XG090617
 
  pole_screening = .FALSE.
@@ -2101,8 +2101,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if(ic>1) then
      MSG_ERROR("number of correlated species is larger than one")
    end if
-   ABI_ALLOCATE(rhot1_q_m,(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,ndim,ndim,sigp%npwx,Qmesh%nibz))
-   ABI_ALLOCATE(M1_q_m,(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,ndim,ndim,sigp%npwx,Qmesh%nibz))
+   ABI_MALLOC(rhot1_q_m,(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,ndim,ndim,sigp%npwx,Qmesh%nibz))
+   ABI_MALLOC(M1_q_m,(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,ndim,ndim,sigp%npwx,Qmesh%nibz))
 
    M1_q_m=czero
    rhot1_q_m=czero
@@ -2142,8 +2142,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    call calc_ucrpa(itypatcor,cryst,Kmesh,lcor,M1_q_m,Qmesh,Er%npwe,sigp%npwx,&
 &   Cryst%nsym,rhot1_q_m,Sigp%nomegasr,Sigp%minomega_r,Sigp%maxomega_r,ib1,ib2,'Gsum',Cryst%ucvol,Wfd,Er%fname)
 
-   ABI_DEALLOCATE(rhot1_q_m)
-   ABI_DEALLOCATE(M1_q_m)
+   ABI_FREE(rhot1_q_m)
+   ABI_FREE(M1_q_m)
 
  else
    do ikcalc=1,Sigp%nkptgw
@@ -2171,7 +2171,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
 
 !      sigcme_p => sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:) ! Causes annoying Fortran runtime warning on abiref.
-       ABI_ALLOCATE(sigcme_k,(nomega_sigc,ib2-ib1+1,ib2-ib1+1,Sigp%nsppol*Sigp%nsig_ab))
+       ABI_MALLOC(sigcme_k,(nomega_sigc,ib2-ib1+1,ib2-ib1+1,Sigp%nsppol*Sigp%nsig_ab))
        sigcme_k=czero
        if (any(mod10 == [SIG_SEX, SIG_COHSEX])) then
          ! Calculate static COHSEX or SEX using the coarse gwc_ngfft mesh.
@@ -2210,7 +2210,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
 
 !    sigcme_p => sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)   ! Causes annoying Fortran runtime warning on abiref.
-     ABI_ALLOCATE(sigcme_k,(nomega_sigc,ib2-ib1+1,ib2-ib1+1,Sigp%nsppol*Sigp%nsig_ab))
+     ABI_MALLOC(sigcme_k,(nomega_sigc,ib2-ib1+1,ib2-ib1+1,Sigp%nsppol*Sigp%nsig_ab))
      sigcme_k=sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)
 
 !    call solve_dyson(ikcalc,ib1,ib2,nomega_sigc,Sigp,Kmesh,sigcme_p,QP_BSt%eig,Sr,Dtset%prtvol,Dtfil,Wfd%comm)
@@ -2771,8 +2771,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    Sigp%npwwfn  =ng_kss
    Dtset%npwwfn =ng_kss
    write(msg,'(2a,(a,i8,a))')&
-&    'Number of G-vectors for WFS found in the KSS file is less than required',ch10,&
-&    'calculation will proceed with npwwfn  = ',Sigp%npwwfn,ch10
+    'Number of G-vectors for WFS found in the KSS file is less than required',ch10,&
+    'calculation will proceed with npwwfn  = ',Sigp%npwwfn,ch10
    MSG_WARNING(msg)
  end if
 
@@ -2782,15 +2782,15 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    gamma_point(:,1) = (/zero,zero,zero/); nullify(gsphere_sigx_p)
 
    call merge_and_sort_kg(1,gamma_point,Dtset%ecutsigx,Cryst%nsym,pinv,Cryst%symrel,&
-&   Cryst%gprimd,gsphere_sigx_p,Dtset%prtvol)
+     Cryst%gprimd,gsphere_sigx_p,Dtset%prtvol)
 
    ng_sigx=SIZE(gsphere_sigx_p,DIM=2)
    Sigp%npwx     = ng_sigx
    Dtset%npwsigx = ng_sigx
 
    write(msg,'(2a,(a,i8,a))')&
-&    'Number of G-vectors for Sigma_x found in the KSS file is less than required',ch10,&
-&    'calculation will proceed with npwsigx = ',Sigp%npwx,ch10
+     'Number of G-vectors for Sigma_x found in the KSS file is less than required',ch10,&
+     'calculation will proceed with npwsigx = ',Sigp%npwx,ch10
    MSG_WARNING(msg)
 
    ltest = (Sigp%npwx >= ng_kss)
@@ -2812,7 +2812,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! So doing it here, even though it is not clean
  Kmesh%kptrlatt(:,:) =Dtset%kptrlatt(:,:)
  Kmesh%nshift        =Dtset%nshiftk
- ABI_ALLOCATE(Kmesh%shift,(3,Kmesh%nshift))
+ ABI_MALLOC(Kmesh%shift,(3,Kmesh%nshift))
  Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
 
  call kmesh_print(Kmesh,"K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
@@ -2850,9 +2850,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  npwarr(:)=Sigp%npwwfn
 
  call ebands_init(bantot,KS_BSt,Dtset%nelect,doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
-&  Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
-&  dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig,&
-&  dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+   Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
+   dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig,&
+   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
 
  ABI_FREE(doccde)
  ABI_FREE(eigen)
@@ -3014,8 +3014,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      do ikcalc=1,Sigp%nkptgw
        if (Dtset%bdgw(2,ikcalc,spin)>Sigp%nbnds) then
          write(msg,'(a,2i0,2(a,i0),2a,i0)')&
-&          "For (k,s) ",ikcalc,spin," bdgw= ",Dtset%bdgw(2,ikcalc,spin), " > nbnds=",Sigp%nbnds,ch10,&
-&          "Calculation will continue with bdgw =",Sigp%nbnds
+          "For (k,s) ",ikcalc,spin," bdgw= ",Dtset%bdgw(2,ikcalc,spin), " > nbnds=",Sigp%nbnds,ch10,&
+          "Calculation will continue with bdgw =",Sigp%nbnds
          MSG_COMMENT(msg)
          Dtset%bdgw(2,ikcalc,spin)=Sigp%nbnds
        end if
@@ -3035,8 +3035,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
          call enclose_degbands(KS_BSt,ikibz,isppol,Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enediff)
          if (changed) then
            write(msg,'(2(a,i0),2a,2(1x,i0))')&
-&            "Not all the degenerate states at ikcalc= ",ikcalc,", spin= ",isppol,ch10,&
-&            "were included in the bdgw set. bdgw has been changed to: ",Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol)
+            "Not all the degenerate states at ikcalc= ",ikcalc,", spin= ",isppol,ch10,&
+            "were included in the bdgw set. bdgw has been changed to: ",Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol)
            MSG_COMMENT(msg)
          end if
        else
@@ -3079,9 +3079,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    do jj=ii+1,Sigp%nkptgw
      if (isamek(Sigp%kptgw(:,ii),Sigp%kptgw(:,jj),G0)) then
        write(msg,'(5a)')&
-&        'kptgw contains duplicated k-points. This is not allowed since ',ch10,&
-&        'the QP corrections for this k-point will be calculated more than once. ',ch10,&
-&        'Check your input file. '
+        'kptgw contains duplicated k-points. This is not allowed since ',ch10,&
+        'the QP corrections for this k-point will be calculated more than once. ',ch10,&
+        'Check your input file. '
        MSG_ERROR(msg)
      end if
    end do
@@ -3090,9 +3090,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! Warn the user if SCGW run and not all the k-points are included.
  if (gwcalctyp>=10 .and. Sigp%nkptgw/=Hdr_wfk%nkpt) then
    write(msg,'(3a,2(a,i0),2a)')ch10,&
-&    " COMMENT: In a self-consistent GW run, the QP corrections should be calculated for all the k-points of the KSS file ",ch10,&
-&    " but nkptgw= ",Sigp%nkptgw," and WFK nkpt= ",Hdr_wfk%nkpt,ch10,&
-&    " Assuming expert user. Execution will continue. "
+    " COMMENT: In a self-consistent GW run, the QP corrections should be calculated for all the k-points of the KSS file ",ch10,&
+    " but nkptgw= ",Sigp%nkptgw," and WFK nkpt= ",Hdr_wfk%nkpt,ch10,&
+    " Assuming expert user. Execution will continue. "
    call wrtout(ab_out,msg,"COLL")
  end if
 
@@ -3115,7 +3115,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  mqmem=0; if (Dtset%gwmem/10==1) mqmem=1
 
- if (Dtset%getscr/=0.or.Dtset%irdscr/=0) then
+ if (dtset%getscr /=0 .or. dtset%irdscr/=0 .or. dtset%getscr_path /= ABI_NOFILE) then
    fname=Dtfil%fnameabi_scr
  else if (Dtset%getsuscep/=0.or.Dtset%irdsuscep/=0) then
    fname=Dtfil%fnameabi_sus
@@ -3167,9 +3167,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      sq = (3-2*itim)*MATMUL(Cryst%symrec(:,:,isym),Qmesh%ibz(:,iq_ibz))
      write(std_out,*) sq,Qmesh%bz(:,iqbz)
      write(msg,'(a,3f6.3,a,3f6.3,2a,9i3,a,i2,2a)')&
-&      'qpoint ',Qmesh%bz(:,iqbz),' is the symmetric of ',Qmesh%ibz(:,iq_ibz),ch10,&
-&      'through operation ',Cryst%symrec(:,:,isym),' and itim ',itim,ch10,&
-&      'however a non zero umklapp G_o vector is required and this is not yet allowed'
+       'qpoint ',Qmesh%bz(:,iqbz),' is the symmetric of ',Qmesh%ibz(:,iq_ibz),ch10,&
+       'through operation ',Cryst%symrec(:,:,isym),' and itim ',itim,ch10,&
+       'however a non zero umklapp G_o vector is required and this is not yet allowed'
      MSG_ERROR(msg)
    end if
  end do
@@ -3246,10 +3246,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    nvcoul_init=2
    if(mod(Dtset%gwcalctyp,10)==5)then
      write(msg,'(4a,i3,a,i3,4a,i5)')ch10,&
-&     ' The starting wavefunctions were obtained from self-consistent calculations in the planewave basis set',ch10,&
-&     ' with ixc = ',Dtset%ixc,' associated with usefock =',usefock_ixc,ch10,&
-&     ' In this case, the present implementation does not allow that the self-energy for sigma corresponds to',ch10,&
-&     '  mod(gwcalctyp,10)==5, while your gwcalctyp= ',Dtset%gwcalctyp
+     ' The starting wavefunctions were obtained from self-consistent calculations in the planewave basis set',ch10,&
+     ' with ixc = ',Dtset%ixc,' associated with usefock =',usefock_ixc,ch10,&
+     ' In this case, the present implementation does not allow that the self-energy for sigma corresponds to',ch10,&
+     '  mod(gwcalctyp,10)==5, while your gwcalctyp= ',Dtset%gwcalctyp
      MSG_ERROR(msg)
    endif
  endif
@@ -3260,7 +3260,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    Sigp%sigma_mixing=one
    if( mod(Dtset%gwcalctyp,10)==5 .or. ivcoul_init==2)then
      if(abs(Dtset%hyb_mixing)>tol8)then
-!      Warning : the absolute value is needed, because of the singular way used to define the default for this input variable
+       ! Warning: the absolute value is needed, because of the singular way used to define the default for this input variable
        Sigp%sigma_mixing=abs(Dtset%hyb_mixing)
      else if(abs(Dtset%hyb_mixing_sr)>tol8)then
        Sigp%sigma_mixing=abs(Dtset%hyb_mixing_sr)
@@ -3274,10 +3274,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
      if (Gsph_x%ng > Gsph_c%ng) then
        call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
-&        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
      else
        call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
-&        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
      end if
 
    else
@@ -3285,10 +3285,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 !    Use a temporary Vcp_ks to compute the Coulomb interaction already present in the Fock part of the Kohn-Sham Hamiltonian
      if (Gsph_x%ng > Gsph_c%ng) then
        call vcoul_init(Vcp_ks,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
-&        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
      else
        call vcoul_init(Vcp_ks,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
-&        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
      end if
 
 !    Now compute the residual Coulomb interaction
@@ -3348,11 +3348,11 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  ! FFT mesh for sigma_x.
  call setmesh(gmet,Gsph_Max%gvec,gwx_ngfft,Sigp%npwvec,Sigp%npwx,Sigp%npwwfn,&
-&  gwx_nfftot,method,Sigp%mG0,Cryst,enforce_sym)
+  gwx_nfftot,method,Sigp%mG0,Cryst,enforce_sym)
 
  ! FFT mesh for sigma_c.
  call setmesh(gmet,Gsph_Max%gvec,gwc_ngfft,Sigp%npwvec,Er%npwe,Sigp%npwwfn,&
-&  gwc_nfftot,method,Sigp%mG0,Cryst,enforce_sym,unit=dev_null)
+  gwc_nfftot,method,Sigp%mG0,Cryst,enforce_sym,unit=dev_null)
 
  !call new_setmesh(Cryst,ecut_osc,ecutwfn,nkpt,kpoints,method,Sigp%mG0,enforce_sym,gwx_ngfft,gwx_nfftot)
  !call new_setmesh(Cryst,ecut_osc,ecutwfn,nkpt,kpoints,method,Sigp%mG0,enforce_sym,gwc_ngfft,gwc_nfftot)
@@ -3392,9 +3392,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  if (Sigp%gwcomp==1) then
    write(msg,'(6a,e11.4,a)')ch10,&
-&    'Using the extrapolar approximation to accelerate convergence',ch10,&
-&    'with respect to the number of bands included',ch10,&
-&    'with gwencomp: ',Sigp%gwencomp*Ha_eV,' [eV]'
+    'Using the extrapolar approximation to accelerate convergence',ch10,&
+    'with respect to the number of bands included',ch10,&
+    'with gwencomp: ',Sigp%gwencomp*Ha_eV,' [eV]'
    call wrtout(std_out,msg,'COLL')
  end if
  !
@@ -3412,8 +3412,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  if (Dtset%symsigma/=0 .and. Sigp%nomegasr/=0) then
    if (cryst%idx_spatial_inversion() == 0) then
      write(msg,'(5a)')' setup_sigma : BUG :',ch10,&
-&      'It is not possible to use symsigma/=0 to calculate the spectral function ',ch10,&
-&      'when the system does not have the spatial inversion. Please use symsigma=0 '
+      'It is not possible to use symsigma/=0 to calculate the spectral function ',ch10,&
+      'when the system does not have the spatial inversion. Please use symsigma=0 '
      MSG_WARNING(msg)
    end if
  end if

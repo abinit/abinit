@@ -44,7 +44,6 @@ module m_gstate
  use m_bandfft_kpt
  use m_invovl
  use m_gemm_nonlop
- use m_htetrahedron
  use m_wfk
  use m_nctk
  use m_hdr
@@ -111,8 +110,8 @@ module m_gstate
  use defs_wvltypes,      only : wvl_data,coulomb_operator,wvl_wf_type
 #if defined HAVE_BIGDFT
  use BigDFT_API,         only : wvl_timing => timing,xc_init,xc_end,XC_MIXED,XC_ABINIT,&
-&                               local_potential_dimensions,nullify_gaussian_basis, &
-&                               copy_coulomb_operator,deallocate_coulomb_operator
+                                local_potential_dimensions,nullify_gaussian_basis, &
+                                copy_coulomb_operator,deallocate_coulomb_operator
 #else
  use defs_wvltypes,      only : coulomb_operator
 #endif
@@ -284,7 +283,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  real(dp) :: fatvshift
  type(crystal_t) :: cryst
  type(ebands_t) :: bstruct,ebands
- !type(t_htetrahedron) :: tetra
  type(efield_type) :: dtefield
  type(electronpositron_type),pointer :: electronpositron
  type(hdr_type) :: hdr,hdr_den
@@ -1435,18 +1433,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    wfkfull_path = strcat(dtfil%filnam_ds(4), "_FULL_WFK")
    if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
    call wfk_tofullbz(filnam, dtset, psps, pawtab, wfkfull_path)
-
-   ! Write tetrahedron tables.
-   !cryst = hdr_get_crystal(hdr, 2)
-   !tetra = tetra_from_kptrlatt(cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
-   !dtset%shiftk, dtset%nkpt, dtset%kptns, xmpi_comm_self, message, ierr)
-   !if (ierr == 0) then
-   !  call tetra_write(tetra, dtset%nkpt, dtset%kptns, strcat(dtfil%filnam_ds(4), "_TETRA"))
-   !else
-   !  MSG_WARNING(sjoin("Cannot produce TETRA file", ch10, message))
-   !end if
-
-   !call destroy_tetra(tetra)
    call cryst%free()
  end if
 

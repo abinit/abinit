@@ -1666,8 +1666,8 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  Ep%zcut   =Dtset%zcut
 
  write(msg,'(2a,i4,2a,f10.6,a)')ch10,&
-&  ' GW calculation type              = ',Ep%gwcalctyp,ch10,&
-&  ' zcut to avoid poles in chi0 [eV] = ',Ep%zcut*Ha_eV,ch10
+   ' GW calculation type              = ',Ep%gwcalctyp,ch10,&
+   ' zcut to avoid poles in chi0 [eV] = ',Ep%zcut*Ha_eV,ch10
  call wrtout(std_out,msg,'COLL')
 
  Ep%awtr  =Dtset%awtr
@@ -2069,7 +2069,6 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 
  ! To write the SCR header correctly, with heads and wings, we have
  ! to make sure that q==0, if present, is the first q-point in the list.
- !has_q0=(ANY(normv(Ep%qcalc(:,:),gmet,'G')<GW_TOLQ0)) !commented to avoid problems with sunstudio12
  has_q0=.FALSE.
  do iq=1,Ep%nqcalc
    if (normv(Ep%qcalc(:,iq),gmet,'G')<GW_TOLQ0) then

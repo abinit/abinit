@@ -186,12 +186,12 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
 !Local variables ------------------------------
 !scalars
  integer,parameter :: iout0=0,my_timrev0=0,chksymbreak0=0,debug=0
- integer :: otimrev_k,ierr,itim,isym,ik_ibz,ik_bz,ksign
+ integer :: otimrev_k,ierr,itim,isym,ik_ibz,ik_bz,ksign,isym_lgk
 !arrays
  integer :: symrec_lg(3,3,2*cryst%nsym), symafm_lg(2*cryst%nsym), lgsym2glob(2, 2*cryst%nsym)
  real(dp) :: kred(3),shift(3)
  integer,allocatable :: ibz2bz(:), iperm(:), inv_iperm(:)
- real(dp),allocatable :: wtk(:),wtk_folded(:), kord(:,:)
+ real(dp),allocatable :: wtk_folded(:), kord(:,:)
 
 ! *************************************************************************
 
@@ -230,24 +230,29 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
  ! Find the irreducible zone with the little group operations.
  ! Do not use time-reversal since it has been manually introduced previously
  ABI_MALLOC(ibz2bz, (nkbz))
- ABI_MALLOC(wtk_folded, (nkbz))
- ABI_MALLOC(wtk, (nkbz))
- wtk = one / nkbz ! Weights sum up to one
 
  ABI_MALLOC(new%bz2ibz_smap, (6, nkbz))
  ! IBZ2BZ ?
 
  ! TODO: In principle here we would like to have a set that contains the initial IBZ.
- call symkpt(chksymbreak0, cryst%gmet, ibz2bz, iout0, kbz, nkbz, new%nibz,&
-   new%nsym_lg, new%symrec_lg, my_timrev0, wtk, wtk_folded, new%bz2ibz_smap, comm)
+ call symkpt_new(chksymbreak0, cryst%gmet, ibz2bz, iout0, kbz, nkbz, new%nibz,&
+   new%nsym_lg, new%symrec_lg, my_timrev0, new%bz2ibz_smap, comm)
 
  ABI_MALLOC(new%ibz, (3, new%nibz))
- ABI_MALLOC(new%weights, (new%nibz))
+ ABI_CALLOC(new%weights, (new%nibz))
+
+ do ik_bz=1,nkbz
+   ik_ibz   = new%bz2ibz_smap(1,ik_bz)
+   isym_lgk = new%bz2ibz_smap(2,ik_bz)
+   new%bz2ibz_smap(2,ik_bz) = lgsym2glob(1,isym_lgk)
+   new%bz2ibz_smap(3,ik_bz) = lgsym2glob(2,isym_lgk)
+   new%weights(ik_ibz) = new%weights(ik_ibz) + 1
+ end do
+ new%weights(:) = new%weights(:) / nkbz
 
  do ik_ibz=1,new%nibz
    ik_bz = ibz2bz(ik_ibz)
    new%ibz(:,ik_ibz) = kbz(:, ik_bz)
-   new%weights(ik_ibz) = wtk_folded(ik_bz)
  end do
 
  ! TODO: Activate this part so that we can cache the q-point in the IBZ.
@@ -256,7 +261,7 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
 
  ! Need to repack the IBZ points and rearrange the other arrays dimensioned with nibz.
  ! In principle, the best approach would be to pack in stars using crystal%symrec.
- ! For the time being we pack in shells (much easier). Use wtk as workspace to store the norm.
+ ! For the time being we pack in shells (much easier). Use wtk_folded as workspace to store the norm.
  ksign = 0
  if (present(sord)) then
    if (sord == "<") ksign = -1
@@ -264,14 +269,15 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
  end if
 
  if (ksign /= 0) then
+   ABI_MALLOC(wtk_folded, (new%nibz))
    do ik_ibz=1,new%nibz
      call wrap2_pmhalf(new%ibz(:, ik_ibz), kred, shift)
-     wtk(ik_ibz) = ksign * normv(kred, cryst%gmet, "G")
+     wtk_folded(ik_ibz) = ksign * normv(kred, cryst%gmet, "G")
    end do
 
    ABI_MALLOC(iperm, (new%nibz))
    iperm = [(ik_ibz, ik_ibz=1, new%nibz)]
-   call sort_dp(new%nibz, wtk, iperm, tol12)
+   call sort_dp(new%nibz, wtk_folded, iperm, tol12)
    !iperm = [(ik_ibz, ik_ibz=1, new%nibz)]
 
    ! Trasfer data.
@@ -297,11 +303,10 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
    ABI_FREE(inv_iperm)
    ABI_FREE(kord)
    ABI_FREE(iperm)
+   ABI_FREE(wtk_folded)
  end if
 
  ABI_FREE(ibz2bz)
- ABI_FREE(wtk_folded)
- ABI_FREE(wtk)
 
  ! Debug section.
  ABI_CHECK(sum(new%weights) - one < tol6, sjoin("Weights don't sum up to one but to:", ftoa(sum(new%weights))))
