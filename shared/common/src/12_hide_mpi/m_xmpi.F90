@@ -136,8 +136,60 @@ MODULE m_xmpi
  integer,save, public ABI_PROTECTED :: xmpi_count_requests = 0
  ! Count number of requests (+1 for each call to non-blocking API, -1 for each call to xmpi_wait)
  ! This counter should be zero at the end of the run if all requests have been released)
+!!***
 
 !----------------------------------------------------------------------
+
+!!****t* m_xmpi/xcomm_t
+!! NAME
+!! xcomm_t
+!!
+!! FUNCTION
+!!  A small object storing the MPI communicator, the rank of the processe and the size of the communicator.
+!!  Provides helper functions to perform typical operations and parallelize loops.
+!!
+!! SOURCE
+
+ type, public :: xcomm_t
+   integer :: value = xmpi_comm_self
+   integer :: nproc = 1
+   integer :: me = 0
+ !contains
+ !  procedure :: iam_master => xcomm_iam_master
+ !  procedure :: skip => xcomm_skip
+ !  procedure :: set_to_null => xcomm_set_to_null
+ !  procedure :: free => xcomm_free
+ !  type(xcomm_t) function from_mpi_int(comm_value) result(new)
+ !    new%value = comm_value
+ !    new%nproc  xmpi_comm_size(comm_value)
+ !    new%me  xmpi_comm_rank(comm_value)
+ !  end function from_mpi
+ !  pure logical function xcomm_iam_master(self)
+ !    class(xcomm_t),intent(in)
+ !    xcomm_iam_master = self%me == 0
+ !  pure logical function xcomm_skip(self, iter)
+ !    class(xcomm_t),intent(in)
+ !    skip = mod(iter, self%nproc) /= self%me
+ !  end function xcomm_skip
+ !  subroutine xcomm_set_to_null(self)
+ !    class(xcomm_t),intent(inout)
+ !    call self%free()
+ !    self%value = xmpi_comm_null
+ !  end subroutine xcomm_set_to_null
+ !  subroutine xcomm_set_to_self(self)
+ !    class(xcomm_t),intent(inout)
+ !    call self%free()
+ !    self%value = xmpi_comm_self
+ !    self%nproc = xmpi_comm_size(self%value)
+ !    self%me  xmpi_comm_rank(self%value)
+ !  end subroutine xcomm_set_to_self
+ !  subroutine xcomm_free(self)
+ !    class(xcomm_t),intent(inout)
+ !    call xmpi_comm_free(self%value)
+ !    self%nproc = 0
+ !    self%me = -1
+ !  end subroutine xcomm_free
+ end type xcomm_t
 !!***
 
 ! Public procedures.
@@ -2419,7 +2471,7 @@ subroutine xmpi_distab_4D(nprocs,task_distrib)
  n4= SIZE(task_distrib,DIM=4)
  ntasks = n1*n2*n3*n4
 
- ABI_ALLOCATE(list,(ntasks))
+ ABI_MALLOC(list, (ntasks))
  list=-999
 
  ntpblock  = ntasks/nprocs
@@ -2446,7 +2498,7 @@ subroutine xmpi_distab_4D(nprocs,task_distrib)
 
  if (ANY(task_distrib==-999)) call xmpi_abort(msg="task_distrib == -999")
 
- ABI_DEALLOCATE(list)
+ ABI_FREE(list)
 
 end subroutine xmpi_distab_4D
 !!***
@@ -2734,10 +2786,10 @@ subroutine xmpio_get_info_frm(bsize_frm,mpi_type_frm,comm)
 
    if (ii==iimax.and.bsize_frm<=0) then
      write(std_out,'(7a)') &
-&      'Error during FORTRAN file record marker detection:',ch10,&
-&      'It was not possible to read/write a small file!',ch10,&
-&      'ACTION: check your access permissions to the file system.',ch10,&
-&      'Common sources of this problem: quota limit exceeded, R/W incorrect permissions, ...'
+       'Error during FORTRAN file record marker detection:',ch10,&
+       'It was not possible to read/write a small file!',ch10,&
+       'ACTION: check your access permissions to the file system.',ch10,&
+       'Common sources of this problem: quota limit exceeded, R/W incorrect permissions, ...'
      call xmpi_abort()
    else
      !write(std_out,'(a,i0)')' Detected FORTRAN record mark length: ',bsize_frm
