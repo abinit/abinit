@@ -4,16 +4,15 @@
 !! defs_datatypes
 !!
 !! FUNCTION
-!! This module contains definitions of all structured datatypes for the
-!! ABINIT package.
+!! This module contains definitions important structured datatypes for the ABINIT package.
 !! If you want to add one new datatype, please, examine first whether
 !! another datatype might meet your need (e.g. adding some records to it).
 !! Then, if you are sure your new structured datatype is needed,
 !! write it here, and DOCUMENT it properly (not all datastructure here are
 !! well documented, it is a shame ...).
-!! Do not forget : you will likely be the major winner if you document
-!! properly.
-!! Proper documentation of a structured datatype means :
+!! Do not forget: you will likely be the major winner if you document properly.
+!! Proper documentation of a structured datatype means:
+!!
 !!  (1) Mention it in the list just below
 !!  (2) Describe it in the NOTES section
 !!  (3) Put it in alphabetical order in the the main section of this module
@@ -21,12 +20,10 @@
 !!      (this exception is typically the case of the dataset associated with
 !!      input variables, for which there is a help file)
 !!
-!! List of datatypes :
-!! * ebands_t : different information about the band structure
-!! * datafil_type : the data (units,filenames) related to files
-!! * pseudopotential_type : for norm-conserving pseudopotential, all the
-!!   information
-!! * pspheader_type : for norm-conserving pseudopotentials, the header of the file
+!! List of datatypes:
+!! * ebands_t: different information about the band structure
+!! * pseudopotential_type: for norm-conserving pseudopotential, all the information
+!! * pspheader_type: for norm-conserving pseudopotentials, the header of the file
 !!
 !! COPYRIGHT
 !! Copyright (C) 2001-2019 ABINIT group (XG)

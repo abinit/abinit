@@ -61,7 +61,7 @@ MODULE m_ebands
  use m_occ,            only : getnel, newocc, occ_fd
  use m_nesting,        only : mknesting
  use m_crystal,        only : crystal_t
- use m_bz_mesh,        only : isamek, kpath_t, kpath_new, kpath_free, kpath_print
+ use m_bz_mesh,        only : isamek, kpath_t, kpath_new
  use m_fftcore,        only : get_kg
 
  implicit none
@@ -435,7 +435,6 @@ end function get_gaps
 !!      m_sigmaph,setup_sigma
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -486,7 +485,6 @@ end subroutine gaps_free
 !!      m_sigmaph,setup_sigma
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -599,7 +597,6 @@ end subroutine gaps_print
 !!      setup_bse,setup_bse_interp,setup_screening,setup_sigma
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -706,8 +703,6 @@ end subroutine ebands_init
 !!      elphon,eph,m_iowf,m_wfk,wfk_analyze
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -828,7 +823,6 @@ end function ebands_from_dtset
 !!      wfk_analyze
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -878,7 +872,6 @@ end subroutine ebands_free
 !!      setup_bse_interp,sigma
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -955,7 +948,6 @@ end subroutine ebands_copy
 !!      eph,setup_bse,setup_bse_interp,wfk_analyze
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -1061,7 +1053,6 @@ end subroutine ebands_print
 !!      cchi0q0_intraband,m_ebands,m_ioarr,m_iowf
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -1126,7 +1117,6 @@ end subroutine unpack_eneocc
 !!      cchi0q0_intraband,m_ebands,m_shirley
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -1183,7 +1173,6 @@ end subroutine pack_eneocc
 !!      m_ebands
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -1245,7 +1234,6 @@ end subroutine get_eneocc_vect
 !!      dfpt_looppert,m_ebands
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -1553,7 +1541,6 @@ end function ebands_vcbm_range_from_gaps
 !!      screening,setup_bse,setup_bse_interp
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -1706,7 +1693,6 @@ end function get_occupied
 !!      m_sigmaph,setup_sigma
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -1799,7 +1785,6 @@ end subroutine enclose_degbands
 !! PARENTS
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -2142,7 +2127,6 @@ end function ebands_write_bxsf
 !!      screening,setup_bse,setup_bse_interp,setup_sigma,sigma
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -2308,7 +2292,6 @@ end subroutine ebands_update_occ
 !!      eph,m_sigmaph
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -2370,7 +2353,6 @@ end subroutine ebands_set_scheme
 !!      eph
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -2456,7 +2438,6 @@ end subroutine ebands_set_fermie
 !! PARENTS
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -2568,7 +2549,6 @@ end function ebands_calc_nelect
 !!      sigma
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -2924,8 +2904,6 @@ end function ebands_ncwrite_path
 !!      eph
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3103,7 +3081,6 @@ end function ebands_get_edos
 !!      eph
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -3143,7 +3120,6 @@ end subroutine edos_free
 !!      eph
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -3305,7 +3281,6 @@ end function edos_ncwrite
 !!      eph
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -3464,7 +3439,6 @@ end function ebands_write_nesting
 !!      m_wfk
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -4518,7 +4492,6 @@ end function ebands_get_dos_matrix_elements
 !! PARENTS
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -4816,7 +4789,6 @@ end subroutine jdos_free
 !!      eph,outscfcv
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -5033,7 +5005,6 @@ end subroutine ebands_prtbltztrp
 !!      get_tau_k
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -5224,7 +5195,6 @@ end subroutine ebands_prtbltztrp_tau_out
 !!      eph,m_ebands,outscfcv
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -5282,7 +5252,6 @@ end subroutine ebands_write
 !!      m_ebands
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -5413,7 +5382,6 @@ end subroutine ebands_write_xmgrace
 !!      m_ebands
 !!
 !! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
 !!
 !! SOURCE
 
@@ -5563,9 +5531,6 @@ end subroutine ebands_write_gnuplot
 !! PARENTS
 !!      outscfcv,sigma
 !!
-!! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
-!!
 !! SOURCE
 
 subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
@@ -5626,7 +5591,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
  end if
 
  kpath = kpath_new(bounds, cryst%gprimd, ndivsm)
- call kpath_print(kpath, header="Interpolating energies on k-path", unit=std_out)
+ call kpath%print(header="Interpolating energies on k-path", unit=std_out)
  ABI_FREE(bounds)
 
  ! Interpolate bands on k-path.
@@ -5731,7 +5696,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
  end if
 
  call ebands_free(ebands_kpath)
- call kpath_free(kpath)
+ call kpath%free()
 
 end subroutine ebands_interpolate_kpath
 !!***

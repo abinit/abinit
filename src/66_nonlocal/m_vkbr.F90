@@ -8,6 +8,9 @@
 !!  of the commutator [H,r] needed for the correct treatment of the optical limit q-->0
 !!  in the matrix elements <k-q,b1|e^{-iqr}|k,b2> when non-local pseudopotentials are used.
 !!
+!! NOTES
+!!  This module is deprecated. Use ddkop_t in m_ddk.F90
+!!
 !! COPYRIGHT
 !! Copyright (C) 2008-2019 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the

@@ -74,7 +74,7 @@ module m_sigmaph
  use m_bz_mesh,        only : isamek
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_ioarr,          only : read_rhor
- use m_pawang,         only : pawang_type, gauleg
+ use m_pawang,         only : pawang_type, make_angular_mesh
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
  use m_pawrhoij,       only : pawrhoij_type
@@ -107,9 +107,6 @@ module m_sigmaph
 !! xcomm_t
 !!
 !! FUNCTION
-!! Container for the (diagonal) matrix elements of the electronic self-energy (phonon contribution)
-!! computed in the KS representation i.e. Sigma_eph(omega, T, band, k, spin).
-!! Provides methods to compute the QP corrections, the spectral functions and save the results to file.
 !!
 !! SOURCE
 
@@ -118,19 +115,40 @@ module m_sigmaph
    integer :: nprocs = 1
    integer :: my_rank = 0
  !contains
- !  subroutine undefine(self)
- !    class(xcomm_t),intent(inout)
- !  end subroutine undefine
- !  subroutine free(self)
- !    class(xcomm_t),intent(inout)
- !  end subroutine free
- !  pure logical function iam_master(self)
+ !  procedure :: iam_master => xcomm_iam_master
+ !  procedure :: skip => xcomm_skip
+ !  procedure :: set_to_null => xcomm_set_to_null
+ !  procedure :: free => xcomm_free
+ !  type(xcomm_t) function from_mpi_int(comm_value) result(new)
+ !    new%value = comm_value
+ !    new%nprocs  xmpi_comm_size(comm_value)
+ !    new%my_rank  xmpi_comm_rank(comm_value)
+ !  end function from_mpi
+ !  pure logical function xcomm_iam_master(self)
  !    class(xcomm_t),intent(in)
- !    iam_master = self%my_rank == 0
- !  pure logical function skip(self, iter)
+ !    xcomm_iam_master = self%my_rank == 0
+ !  pure logical function xcomm_skip(self, iter)
  !    class(xcomm_t),intent(in)
  !    skip = mod(iter, self%nprocs) /= self%my_rank
- !  end function
+ !  end function xcomm_skip
+ !  subroutine xcomm_set_to_null(self)
+ !    class(xcomm_t),intent(inout)
+ !    call self%free()
+ !    self%value = xmpi_comm_null
+ !  end subroutine xcomm_set_to_null
+ !  subroutine xcomm_set_to_self(self)
+ !    class(xcomm_t),intent(inout)
+ !    call self%free()
+ !    self%value = xmpi_comm_self
+ !    self%nprocs = xmpi_comm_size(self%value)
+ !    self%my_rank  xmpi_comm_rank(self%value)
+ !  end subroutine xcomm_set_to_self
+ !  subroutine xcomm_free(self)
+ !    class(xcomm_t),intent(inout)
+ !    call xmpi_comm_free(self%value)
+ !    self%nprocs = 0
+ !    self%my_rank = -1
+ !  end subroutine xcomm_free
  end type xcomm_t
 !!***
 
@@ -205,31 +223,37 @@ module m_sigmaph
   integer :: comm_qpt = xmpi_comm_null
   integer :: me_qpt
   integer :: nprocs_qpt
+  !type(xcomm_t) :: comm_qpt
 
   ! MPI communicator for bands in self-energy sum
   integer :: comm_bsum = xmpi_comm_null
   integer :: me_bsum
   integer :: nprocs_bsum
+  !type(xcomm_t) :: comm_bsum
 
   ! MPI communicator for parallelism over k-points (high-level)
   integer :: comm_kcalc = xmpi_comm_null
   integer :: me_kcalc
   integer :: nprocs_kcalc
+  !type(xcomm_t) :: comm_kcalc
 
-  ! MPI communicator for parallelism over k-points (high-level)
+  ! MPI communicator for parallelism over spins (high-level)
   integer :: comm_spin = xmpi_comm_null
   integer :: me_spin
   integer :: nprocs_spin
+  !type(xcomm_t) :: comm_spin
 
   ! Create communicator for the (perturbation, band_sum, qpoint_sum)
   integer :: comm_pqb = xmpi_comm_null
   integer :: me_pqb
   integer :: nprocs_pqb
+  !type(xcomm_t) :: comm_pqb
 
   ! MPI communicator for parallel netcdf IO used to write results for the different k-points.
   integer :: comm_ncwrite = xmpi_comm_null
   integer :: me_ncwrite
   integer :: nprocs_ncwrite
+  !type(xcomm_t) :: comm_ncwrite
 
   integer :: coords(5)
    ! Cartesian coordinates of this processor in the Cartesian grid.
@@ -660,8 +684,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_getgh1c = 1,berryopt0 = 0
- integer,parameter :: useylmgr = 0,useylmgr1 =0 , master = 0, ndat1 = 1
+ integer,parameter :: tim_getgh1c = 1, berryopt0 = 0
+ integer,parameter :: useylmgr = 0, useylmgr1 =0, master = 0, ndat1 = 1
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_frohl,iq_bz_frohl, my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
@@ -1189,6 +1213,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      end if
 
      ! Integrate delta functions inside miniBZ around Gamma.
+     ! TODO: Remove?
      if (sigma%frohl_model == 1 .and. sigma%imag_only) then
        call eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, dtset%prtvol, sigma%comm_pqb)
      end if
@@ -1218,7 +1243,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        iq_ibz = sigma%myq2ibz_k(imyq)
        qpt = sigma%qibz_k(:, iq_ibz)
        !qibz = sigma%qibz(:, sigma%ind_ibzk2ibz(1, iq_ibz))
-       isqzero = sum(qpt**2) < tol14 !; if (isqzero) cycle
+       isqzero = sum(qpt**2) < tol14
 
        call cwtime(cpu, wall, gflops, "start")
 
@@ -1335,11 +1360,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            pawfgr, mpi_enreg, vtrial, v1scf(:,:,:,imyp), vlocal, vlocal1(:,:,:,:,imyp))
 
          ! Continue to initialize the Hamiltonian (call it here to support dfpt_cgwf Sternheimer).
-         call load_spin_hamiltonian(gs_hamkq, spin, vlocal=vlocal, with_nonlocal=.true.)
+         call gs_hamkq%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
 
          ! Prepare application of the NL part.
          call init_rf_hamiltonian(cplex, gs_hamkq, ipert, rf_hamkq, has_e1kbsc=.true.)
-         call load_spin_rf_hamiltonian(rf_hamkq, spin, vlocal1=vlocal1(:,:,:,:,imyp), with_nonlocal=.true.)
+         call rf_hamkq%load_spin(spin, vlocal1=vlocal1(:,:,:,:,imyp), with_nonlocal=.true.)
 
          ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
          call getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kk, kq, idir, ipert, &  ! In
@@ -1409,6 +1434,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              ! TODO: To be replaced by MPI parallellism over bands in projbd inside dfpt_cgwf
              ! (pass optional communicator and band range treated by me.
              if (mod(ib_k, sigma%nprocs_bsum) /= sigma%me_bsum) cycle
+             !if (self%comm_bsum%skip(ib_k)) cycle
              band_ks = ib_k + bstart_ks - 1
              eig0nk = ebands%eig(band_ks, ik_ibz, spin)
 
@@ -1458,7 +1484,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ABI_FREE(gvnlxc)
          end if ! sternheimer
 
-         call destroy_rf_hamiltonian(rf_hamkq)
+         call rf_hamkq%free()
 
          ABI_FREE(kinpw1)
          ABI_FREE(kpg1_k)
@@ -2029,7 +2055,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        if (sigma%qint_method == 0 .or. sigma%symsigma == 0) then
          ! Compute Eliashberg function with gaussian method and ph_smear smearing.
          do iq_ibz=1,sigma%nqibz_k
-           if (mod(iq_ibz, nprocs) /= sigma%me_pqb) cycle ! MPI parallelism
+           if (mod(iq_ibz, sigma%nprocs_pqb) /= sigma%me_pqb) cycle ! MPI parallelism
            ! Recompute phonons (cannot use sigma%ephwg in this case)
            call ifc%fourq(cryst, sigma%qibz_k(:,iq_ibz), phfrq, displ_cart)
            do nu=1,natom3
@@ -2053,7 +2079,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            call sigma%ephwg%get_deltas_qibzk(nu, sigma%gfw_nomega, eminmax, sigma%bcorr, dt_tetra_weights, sigma%comm_pqb, &
                                              with_qweights=.True.)
            do iq_ibz=1,sigma%nqibz_k
-             if (mod(iq_ibz, nprocs) /= sigma%me_pqb) cycle ! MPI parallelism
+             if (mod(iq_ibz, sigma%nprocs_pqb) /= sigma%me_pqb) cycle ! MPI parallelism
              do ib_k=1,nbcalc_ks
                do ii=1,3
                  sigma%gfw_vals(:, ii, ib_k) = sigma%gfw_vals(:, ii, ib_k) +  &
@@ -2108,7 +2134,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_SFREE(dtw_weights)
  ABI_SFREE(delta_e_minus_emkq)
 
- call destroy_hamiltonian(gs_hamkq)
+ call gs_hamkq%free()
  call wfd%free()
  call pawcprj_free(cwaveprj0)
  ABI_FREE(cwaveprj0)
@@ -2229,13 +2255,13 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  integer,parameter :: master = 0, occopt3 = 3, qptopt1 = 1, sppoldbl1 = 1, istwfk1 = 1
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,ik_ibz,ndeg, iq_ibz
  integer :: onpw, ii, ipw, ierr, it, spin, gap_err, ikcalc, qprange_, bstop
- integer :: jj, bstart, natom, natom3, ip, npoints
+ integer :: jj, bstart, natom, natom3, ip
  integer :: isym_k, trev_k, mband, i1,i2,i3
  integer :: idir, iatom, pertcase, nrest, color
  logical :: downsample
  character(len=fnlen) :: wfk_fname_dense
  character(len=500) :: msg
- real(dp) :: dksqmax,ang,con,cos_phi,cos_theta,sin_phi,sin_theta,nelect, estep
+ real(dp) :: dksqmax,nelect, estep
  real(dp) :: cpu_all, wall_all, gflops_all, cpu, wall, gflops
  logical :: changed, isirr_k
  type(ebands_t) :: tmp_ebands, ebands_dense
@@ -2248,7 +2274,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  integer,allocatable :: temp(:,:)
  integer,allocatable :: gtmp(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iperm(:)
  real(dp):: params(4), my_shiftq(3,1),kk(3),kq(3),intp_shiftk(3)
- real(dp),allocatable :: th(:),wth(:)
 #ifdef HAVE_MPI
  integer :: ndims, comm_cart, me_cart
  logical :: reorder
@@ -2677,7 +2702,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ! Consistency check.
  if (new%nprocs_pert * new%nprocs_qpt * new%nprocs_bsum * new%nprocs_kcalc * new%nprocs_spin /= nprocs) then
    write(msg, "(a,i0,3a, 6(a,1x,i0))") &
-     "Cannot create 5d Cartesian grid with nprocs: ", nprocs, ch10, &
+     "Cannot create 5d Cartesian grid with total nprocs: ", nprocs, ch10, &
      "Idle processes are not supported. The product of the `nprocs_*` vars should be equal to nprocs.", ch10, &
      "nprocs_pert (", new%nprocs_pert, ") x nprocs_qpt (", new%nprocs_qpt, ") x nprocs_bsum (", new%nprocs_bsum, &
      ") x nprocs_kcalc (", new%nprocs_kcalc, ") x nprocs_spin (", new%nprocs_spin, ") != ", &
@@ -2701,38 +2726,31 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  ! Create communicator to distribute natom3 perturbations.
  keepdim = .False.; keepdim(1) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, new%comm_pert, ierr)
- new%me_pert = xmpi_comm_rank(new%comm_pert)
+ call MPI_CART_SUB(comm_cart, keepdim, new%comm_pert, ierr); new%me_pert = xmpi_comm_rank(new%comm_pert)
 
  ! Create communicator for qpoints in self-energy integration.
  keepdim = .False.; keepdim(2) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, new%comm_qpt, ierr)
- new%me_qpt = xmpi_comm_rank(new%comm_qpt)
+ call MPI_CART_SUB(comm_cart, keepdim, new%comm_qpt, ierr); new%me_qpt = xmpi_comm_rank(new%comm_qpt)
 
  ! Create communicator for bands for self-energy summation
  keepdim = .False.; keepdim(3) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, new%comm_bsum, ierr)
- new%me_bsum = xmpi_comm_rank(new%comm_bsum)
+ call MPI_CART_SUB(comm_cart, keepdim, new%comm_bsum, ierr); new%me_bsum = xmpi_comm_rank(new%comm_bsum)
 
  ! Create communicator for kponts.
  keepdim = .False.; keepdim(4) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, new%comm_kcalc, ierr)
- new%me_kcalc = xmpi_comm_rank(new%comm_kcalc)
+ call MPI_CART_SUB(comm_cart, keepdim, new%comm_kcalc, ierr); new%me_kcalc = xmpi_comm_rank(new%comm_kcalc)
 
  ! Create communicator for spins.
  keepdim = .False.; keepdim(5) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, new%comm_spin, ierr)
- new%me_spin = xmpi_comm_rank(new%comm_spin)
+ call MPI_CART_SUB(comm_cart, keepdim, new%comm_spin, ierr); new%me_spin = xmpi_comm_rank(new%comm_spin)
 
  ! Create communicator for the (band_sum, qpoint_sum) loops
  keepdim = .False.; keepdim(2:3) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, new%comm_qb, ierr)
- new%me_qb = xmpi_comm_rank(new%comm_qb)
+ call MPI_CART_SUB(comm_cart, keepdim, new%comm_qb, ierr); new%me_qb = xmpi_comm_rank(new%comm_qb)
 
  ! Create communicator for the (perturbation, band_sum, qpoint_sum)
  keepdim = .False.; keepdim(1:3) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, new%comm_pqb, ierr)
- new%me_pqb = xmpi_comm_rank(new%comm_pqb)
+ call MPI_CART_SUB(comm_cart, keepdim, new%comm_pqb, ierr); new%me_pqb = xmpi_comm_rank(new%comm_pqb)
 
  ABI_FREE(dims)
  ABI_FREE(periods)
@@ -2767,7 +2785,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
     ! Create subcommunicator by selecting one proc per kpoint-spin subgrid.
     ! Since we write to ab_out in sigmaph_gather_and_write, make sure that ab_out is connected!
     ! This means Sigma_nk resuls will be spread among multiple ab_out files.
-    ! Only SIGPEH will contain all the results.
+    ! Only SIGPEPH.nc will contain all the results.
     ! Remember that now all nc define operations must be done inside comm_ncwrite
     ! Obviously I'm assuming HDF5 + MPI-IO
     new%comm_ncwrite = xmpi_comm_self
@@ -2777,8 +2795,10 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
       new%me_ncwrite = xmpi_comm_rank(new%comm_ncwrite)
       new%nprocs_ncwrite = xmpi_comm_size(new%comm_ncwrite)
       if (my_rank == master) then
-        write(std_out, *)"me_ncwrite:", new%me_ncwrite, "nprocs_ncwrite:", new%nprocs_ncwrite
-        !call wrtout([std_out, ab_out], "- Parallelism over k-points/spins. Cannot write full results to main output")
+        !write(std_out, *)"me_ncwrite:", new%me_ncwrite, "nprocs_ncwrite:", new%nprocs_ncwrite
+        call wrtout([std_out, ab_out], &
+          sjoin("- Using parallelism over k-points/spins. Cannot write full results to main output", ch10, &
+                "- All proc except master will write to dev_null. Use SIGEPH.nc to analyze results"))
       end if
       if (.not. is_open(ab_out)) then
        !if (open_file(strcat(dtfil%filnam_ds(2), "_rank_", itoa(new%me_ncwrite)), msg, unit=ab_out, &
@@ -2921,6 +2941,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    ebands_dense = wfk_read_ebands(wfk_fname_dense, comm)
 
    ! TODO add consistency check: number of bands and kpoints (commensurability)
+   !if (ebands_dense%is_commensurate(msg) /= 0)
    ABI_CHECK(ebands_dense%mband == ebands%mband, 'Inconsistent number of bands for the fine and dense grid')
    new%use_doublegrid = .True.
 
@@ -3047,41 +3068,9 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    write(std_out,"(2(a,i0,1x))")" ntheta: ", new%ntheta, "nphi: ", new%nphi
    write(std_out,"((a,i0,1x,a,f6.3,1x,a))")" nqr points: ", new%nqr, "qrad: ", new%qrad, " [Bohr^-1]"
 
-   !call make_angular_mesh(new%ntheta, new%nphi, new%angl_size, new%qvers_cart, new%angwgth)
-
-   ! Initialize angular mesh qvers_cart and angwgth (inspired to initang in m_pawang)
-   ABI_MALLOC(th, (new%ntheta))
-   ABI_MALLOC(wth, (new%ntheta))
-   con = two_pi / new%nphi
-   call gauleg(-one, one, th, wth, new%ntheta)
-
-   ! Initialize qvers_cart and angular weights angwgth
+   ! Initialize angular mesh qvers_cart and angwgth
    ! NB: summing over f * angwgth gives the spherical average 1/(4pi) \int domega f(omega)
-   new%angl_size = new%ntheta * new%nphi
-   ABI_MALLOC(new%qvers_cart, (3, new%angl_size))
-   ABI_MALLOC(new%angwgth, (new%angl_size))
-   npoints = 0
-   do it = 1, new%ntheta
-     cos_theta = th(it)
-     sin_theta = sqrt(one - cos_theta*cos_theta)
-     do ip = 1, new%nphi
-       ang = con * (ip-1)
-       cos_phi = cos(ang); sin_phi = sin(ang)
-       npoints = npoints + 1
-       new%qvers_cart(1, npoints) = sin_theta * cos_phi
-       new%qvers_cart(2, npoints) = sin_theta * sin_phi
-       new%qvers_cart(3, npoints) = cos_theta
-       ! Normalization required
-       new%angwgth(npoints) = wth(it) / (two * new%nphi)
-     end do
-   end do
-   !write(std_out, *)"Sum angwgth: ", sum(new%angwgth)
-   !write(std_out, *)"int sig(theta): ", sum(new%angwgth * sqrt(one - new%qvers_cart(3, :) **2))
-   !write(std_out, *)pi/4
-   !stop
-
-   ABI_FREE(th)
-   ABI_FREE(wth)
+   call make_angular_mesh(new%ntheta, new%nphi, new%angl_size, new%qvers_cart, new%angwgth)
  end if
 
  if (new%calc_mrta) then

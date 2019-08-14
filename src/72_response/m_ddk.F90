@@ -162,7 +162,8 @@ MODULE m_ddk
      procedure :: free => ham_targets_free   ! Free memory.
  end type ham_targets_t
 
-!!****t* m_ddk/ddkop_t
+
+ !!****t* m_ddk/ddkop_t
 !! NAME
 !!  ddkop_t
 !!

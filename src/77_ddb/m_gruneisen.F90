@@ -43,7 +43,7 @@ MODULE m_gruneisen
  use m_fstrings,            only : sjoin, itoa, ltoa, ftoa, strcat
  use m_numeric_tools,       only : central_finite_diff, arth
  use m_kpts,                only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
- use m_bz_mesh,             only : kpath_t, kpath_new, kpath_free, kpath_print
+ use m_bz_mesh,             only : kpath_t, kpath_new
  use m_anaddb_dataset,      only : anaddb_dataset_type
  use m_dynmat,              only : massmult_and_breaksym, dfpt_phfrq, gtdyn9
 
@@ -389,7 +389,7 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
    end if
    write(unt,'(a)')'# Phonon band structure, Gruneisen parameters and group velocity'
    write(unt,'(a)')"# Energy in Hartree, DOS in states/Hartree"
-   call kpath_print(qpath, unit=unt, pre="#")
+   call qpath%print(unit=unt, pre="#")
    write(unt,'(5a)')&
      "# phfreq(mode=1) gruneisen(mode=1) velocity(mode=1)    phfreq(mode=2) gruneisen(mode=2) velocity(mode=2)   ..."
    do iqpt=1,qpath%npts
@@ -824,7 +824,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
  if (inp%nqpath /= 0) then
    qpath = kpath_new(inp%qpath, gruns%cryst_vol(iv0)%gprimd, inp%ndivsm)
    call gruns_qpath(gruns, prefix, qpath, ncid, comm)
-   call kpath_free(qpath)
+   call qpath%free()
  else
    MSG_WARNING("Cannot compute Gruneisen parameters on q-path because nqpath == 0")
  end if

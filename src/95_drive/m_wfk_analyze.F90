@@ -43,8 +43,6 @@ module m_wfk_analyze
  use m_time,            only : timab
  use m_fstrings,        only : strcat, sjoin, itoa, ftoa
  use m_fftcore,         only : print_ngfft
- use m_kpts,            only : tetra_from_kptrlatt
- use m_bz_mesh,         only : kpath_t, kpath_new, kpath_free
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_esymm,           only : esymm_t, esymm_free
  use m_ddk,             only : ddk_compute
@@ -395,17 +393,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    if (my_rank == master) then
      wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
      call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path)
-
-     ! Write tetrahedron tables.
-     !tetra = tetra_from_kptrlatt(cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
-     !dtset%shiftk, dtset%nkpt, dtset%kptns, xmpi_comm_self, msg, ierr)
-     !if (ierr == 0) then
-     !  call tetra_write(tetra, dtset%nkpt, dtset%kptns, strcat(dtfil%filnam_ds(4), "_TETRA"))
-     !else
-     !  MSG_WARNING(sjoin("Cannot produce TETRA file", ch10, msg))
-     !end if
-
-     !call destroy_tetra(tetra)
    end if
    call xmpi_barrier(comm)
 
