@@ -46,7 +46,7 @@ use m_ab7_mixing
 use m_mpinfo
 
 use m_io_tools,         only : get_unit
-use m_hamiltonian,      only : gs_hamiltonian_type, copy_hamiltonian, destroy_hamiltonian, load_k_hamiltonian
+use m_hamiltonian,      only : gs_hamiltonian_type, copy_hamiltonian
 use m_paw_dmft,         only : paw_dmft_type
 use m_pawcprj,          only : pawcprj_type
 use m_vcoul,            only : vcoul_t, vcoul_init, vcoul_free
@@ -1033,7 +1033,7 @@ end subroutine precondition
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
@@ -1070,7 +1070,7 @@ end subroutine precondition_cplx
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
@@ -1112,7 +1112,7 @@ end subroutine sqrt_vc_k
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
@@ -1193,7 +1193,7 @@ end subroutine Hpsik
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
@@ -1320,7 +1320,7 @@ end subroutine Hpsikc
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
@@ -1392,7 +1392,7 @@ end subroutine g_to_r
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
@@ -1454,7 +1454,7 @@ end subroutine gr_to_g
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
@@ -1511,7 +1511,7 @@ end subroutine kbkb_to_kb
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
@@ -1550,7 +1550,7 @@ end subroutine build_vxc
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
@@ -1558,7 +1558,7 @@ end subroutine build_vxc
 subroutine destroy_H
 
 call dtset_free(dtset)
-call destroy_hamiltonian(gs_hamk)
+call gs_hamk%free()
 
 call cryst%free()
 call kmesh_free(Kmesh)
@@ -1704,7 +1704,7 @@ end subroutine destroy_H
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
@@ -1918,7 +1918,7 @@ else
   ph3d_gather  => ph3d
   kinpw_gather => kinpw
 endif
-call load_k_hamiltonian(gs_hamk,kinpw_k=kinpw_gather,kg_k=kg_k_gather,ffnl_k=ffnl_gather,ph3d_k=ph3d_gather)
+call gs_hamk%load_k(kinpw_k=kinpw_gather,kg_k=kg_k_gather,ffnl_k=ffnl_gather,ph3d_k=ph3d_gather)
 
 gbound = gs_hamk%gbound_k
 

@@ -167,8 +167,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_inwffil,     only : inwffil
  use m_fft,         only : fourdp
  use m_ioarr,       only : read_rhor
- use m_hamiltonian, only : destroy_hamiltonian,destroy_rf_hamiltonian,gs_hamiltonian_type,&
-                           init_hamiltonian,init_rf_hamiltonian,rf_hamiltonian_type
+ use m_hamiltonian, only : gs_hamiltonian_type, init_hamiltonian
  use m_pawdij,      only : pawdij, pawdijfr, symdij
  use m_pawfgr,      only : pawfgr_type
  use m_pawfgrtab,   only : pawfgrtab_type
@@ -767,7 +766,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  end do     ! i1pert
 
 !More memory cleaning
- call destroy_hamiltonian(gs_hamkq)
+ call gs_hamkq%free()
 
  ABI_DEALLOCATE(cg1)
  ABI_DEALLOCATE(cg2)

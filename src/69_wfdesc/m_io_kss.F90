@@ -46,14 +46,13 @@ MODULE m_io_kss
  use m_paw_ij
  use m_pawcprj
  use m_pawfgr
- use m_dtset
 
  use m_time,             only : timab
  use m_io_tools,         only : open_file
  use m_fstrings,         only : sjoin, itoa, strcat
  use m_hide_lapack,      only : xheevx, xhegvx
  use m_geometry,         only : metric, remove_inversion
- use m_dtset,            only : dtset_copy, dtset_free
+ use m_dtset,            only : dtset_copy, dtset_free, dataset_type
  use m_mpinfo,           only : destroy_mpi_enreg, proc_distrb_cycle
  use m_fftcore,          only : get_kg, sphere
  use m_fft,              only : fftpac
@@ -1163,7 +1162,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
    end if
 
    !Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
+   call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
 
    do ikpt=1,dtset%nkpt
      nband_k = dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
@@ -1211,9 +1210,9 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
 
 !    Load k-dependent part in the Hamiltonian datastructure
      ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
-     call load_k_hamiltonian(gs_hamk,kpt_k=dtset%kptns(:,ikpt),npw_k=npw_k,istwf_k=istwf_k,&
-&                            kinpw_k=kinpw,kg_k=kg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
-&                            compute_ph3d=.true.,compute_gbound=.true.)
+     call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),npw_k=npw_k,istwf_k=istwf_k,&
+                         kinpw_k=kinpw,kg_k=kg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
+                         compute_ph3d=.true.,compute_gbound=.true.)
 
      ! Prepare the call to getghc.
      ndat=1; lambda=zero; type_calc=0         ! For applying the whole Hamiltonian
@@ -1360,7 +1359,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
  ABI_FREE(kg_k)
  ABI_FREE(vlocal)
 
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
 
 #ifdef HAVE_NETCDF
  NCF_CHECK(nf90_close(ncid))

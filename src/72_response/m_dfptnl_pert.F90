@@ -186,7 +186,7 @@ contains
 !!
 !! CHILDREN
 !!      destroy_hamiltonian,dotprod_g,fftpac,fourwf,init_hamiltonian
-!!      load_k_hamiltonian,mkffnl,mkkpg,nonlop,status,xmpi_sum
+!!      mkffnl,mkkpg,nonlop,status,xmpi_sum
 !!
 !! SOURCE
 
@@ -453,8 +453,8 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 &   gs_hamkq%nvloc,pawfgr,mpi_enreg,vtrial,vtrial1_i2pert,vlocal,vlocal1_i2pert)
 
 !  Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamkq,isppol,vlocal=vlocal,with_nonlocal=.true.)
-   call load_spin_rf_hamiltonian(rf_hamkq_i2pert,isppol,vlocal1=vlocal1_i2pert,with_nonlocal=.true.)
+   call gs_hamkq%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
+   call rf_hamkq_i2pert%load_spin(isppol,vlocal1=vlocal1_i2pert,with_nonlocal=.true.)
 
 !  Loop over k-points
 
@@ -582,14 +582,14 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 
 !  Load k-dependent part in the Hamiltonian datastructure
      ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamkq%matblk))
-     call load_k_hamiltonian(gs_hamkq,kpt_k=kpt,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
+     call gs_hamkq%load_k(kpt_k=kpt,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
 &     ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
-     call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnl1,kpt_k=kpt,npw_k=npw1_k,istwf_k=istwf_k,&
+     call gs_hamkq%load_k(ffnl_k=ffnl1,kpt_k=kpt,npw_k=npw1_k,istwf_k=istwf_k,&
 &     kinpw_k=kinpw1,kg_k=kg1_k,kpg_k=kpg1_k,compute_gbound=.true.)
 !   end if
 
 !    Load k-dependent part in the 1st-order Hamiltonian datastructure
-     call load_k_rf_hamiltonian(rf_hamkq_i2pert,npw_k=npw_k,dkinpw_k=dkinpw)
+     call rf_hamkq_i2pert%load_k(npw_k=npw_k,dkinpw_k=dkinpw)
 
      ABI_MALLOC_OR_DIE(dudk,  (2,nband_k*size_wf), ierr)
      ABI_MALLOC_OR_DIE(dudkde,(2,nband_k*size_wf), ierr)
@@ -911,7 +911,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 
  end do   ! end loop over spins
 
- call destroy_rf_hamiltonian(rf_hamkq_i2pert)
+ call rf_hamkq_i2pert%free()
 
 ! **************************************************************************************************
 !    GATHER BAND-BY-BAND AND XC CONTRIBUTIONS

@@ -57,8 +57,7 @@ module m_forstr
  use m_initylmg,         only : initylmg
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_kg,               only : mkkpg
- use m_hamiltonian,      only : init_hamiltonian, destroy_hamiltonian, load_spin_hamiltonian,&
-&                               load_k_hamiltonian, gs_hamiltonian_type, load_kprime_hamiltonian!,K_H_KPRIME
+ use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type !,K_H_KPRIME
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype
  use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, prep_bandfft_tabs, &
 &                               bandfft_kpt_savetabs, bandfft_kpt_restoretabs
@@ -762,7 +761,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  do isppol=1,nsppol
 
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
-   call load_spin_hamiltonian(gs_hamk,isppol,with_nonlocal=.true.)
+   call gs_hamk%load_spin(isppol,with_nonlocal=.true.)
    if (usefock_loc) fockcommon%isppol=isppol
 
 !  Loop over k points
@@ -919,14 +918,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !     - Prepare various tabs in case of band-FFT parallelism
 !     - Load k-dependent quantities in the Hamiltonian
      ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
-     call load_k_hamiltonian(gs_hamk,kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
+     call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
 &     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_gbound=compute_gbound,compute_ph3d=.true.)
 
 !    Load band-FFT tabs (transposed k-dependent arrays)
      if (mpi_enreg%paral_kgb==1) then
        call bandfft_kpt_savetabs(my_bandfft_kpt,ffnl=ffnl_sav,ph3d=ph3d_sav,kpg=kpg_k_sav)
        call prep_bandfft_tabs(gs_hamk,ikpt,mkmem,mpi_enreg)
-       call load_k_hamiltonian(gs_hamk,npw_fft_k=my_bandfft_kpt%ndatarecv, &
+       call gs_hamk%load_k(npw_fft_k=my_bandfft_kpt%ndatarecv, &
 &       kg_k     =my_bandfft_kpt%kg_k_gather, &
 &       kpg_k    =my_bandfft_kpt%kpg_k_gather, &
        ffnl_k   =my_bandfft_kpt%ffnl_gather, &
@@ -970,7 +969,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
 !        gs_hamk%ffnl_k is changed in fock_getghc, so that it is necessary to restore it when stresses are to be calculated.
          if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
-           call load_k_hamiltonian(gs_hamk,ffnl_k=ffnl)
+           call gs_hamk%load_k(ffnl_k=ffnl)
          end if
 
 !        Load contribution from n,k
@@ -994,7 +993,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 &           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef)
          end if
          if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
-           call load_k_hamiltonian(gs_hamk,ffnl_k=ffnl_str)
+           call gs_hamk%load_k(ffnl_k=ffnl_str)
          end if
          call timab(926,2,tsec)
 
@@ -1173,7 +1172,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  end if
 
 !Deallocate temporary space
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
  if (usefock_loc) then
    fockcommon%use_ACE=use_ACE_old
  end if

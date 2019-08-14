@@ -2318,7 +2318,7 @@ end subroutine dfpt_newvtr
 !!      dfpt_scfcv
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,dfpt_mkcore,dfpt_mkvxcstr,dfpt_nsteltwf,dotprod_vn
+!!      dfpt_mkcore,dfpt_mkvxcstr,dfpt_nsteltwf,dotprod_vn
 !!      hartrestr,init_hamiltonian,stresssym,vlocalstr,wrtout,xmpi_barrier
 !!
 !! SOURCE
@@ -2336,7 +2336,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 & wtk_rbz,&
 & xred,ylm,ylm1,ylmgr,ylmgr1)
 
- use m_hamiltonian,only : init_hamiltonian,destroy_hamiltonian,gs_hamiltonian_type
+ use m_hamiltonian,only : init_hamiltonian, gs_hamiltonian_type
 
 !Arguments -------------------------------
 !scalars
@@ -2656,7 +2656,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
    end do ! istr1
  end do ! ipert1
 
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
 
  ABI_DEALLOCATE(vxc1)
  ABI_DEALLOCATE(xccc3d1)
@@ -2724,7 +2724,7 @@ end subroutine dfpt_nselt
 !!      dfpt_nselt
 !!
 !! CHILDREN
-!!      dotprod_g,kpgstr,load_k_hamiltonian,mkffnl,mkkin,nonlop
+!!      dotprod_g,kpgstr,mkffnl,mkkin,nonlop
 !!
 !! SOURCE
 
@@ -2732,7 +2732,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
 &  istwf_k,kg_k,kg1_k,kpoint,mband,mkmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,natom,nband_k,&
 &  npw_k,npw1_k,nspinor,nsppol,ntypat,occ_k,psps,rmet,wtk_k,ylm,ylmgr)
 
- use m_hamiltonian, only : gs_hamiltonian_type, load_k_hamiltonian
+ use m_hamiltonian, only : gs_hamiltonian_type
  use m_mkffnl,      only : mkffnl
  use m_nonlop,      only : nonlop
 
@@ -2806,7 +2806,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
 
 !Load k/k+q-dependent part in the Hamiltonian datastructure
  ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
- call load_k_hamiltonian(gs_hamk,kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,ffnl_k=ffnl,&
+ call gs_hamk%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,ffnl_k=ffnl,&
 & ph3d_k=ph3d,compute_ph3d=.true.)
 
  ABI_ALLOCATE(cwave0,(2,npw_k*nspinor))
@@ -2981,9 +2981,9 @@ end subroutine dfpt_nsteltwf
 !!      dfpt_scfcv
 !!
 !! CHILDREN
-!!      appdig,destroy_hamiltonian,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll
+!!      appdig,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll
 !!      dfpt_nstwf,dfpt_sygra,dfpt_vlocal,dotprod_vn,init_hamiltonian
-!!      load_spin_hamiltonian,mati3inv,timab,wfk_close,wfk_open_read,wrtout
+!!      mati3inv,timab,wfk_close,wfk_open_read,wrtout
 !!      xmpi_sum
 !!
 !! SOURCE
@@ -3158,7 +3158,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
    ikg=0;ikg1=0
 
 !  Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamkq,isppol,with_nonlocal=.true.)
+   call gs_hamkq%load_spin(isppol,with_nonlocal=.true.)
 
 !  BIG FAT k POINT LOOP
    do ikpt=1,nkpt_rbz
@@ -3253,7 +3253,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !  End loop over spins
  end do
 
- call destroy_hamiltonian(gs_hamkq)
+ call gs_hamkq%free()
 
 !Treat fixed occupation numbers (as in vtorho)
  if(xmpi_paral==1)then
@@ -3560,10 +3560,9 @@ end subroutine dfpt_nstdy
 !!      dfpt_scfcv
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dfpt_wfkfermi,fftpac
-!!      init_hamiltonian,init_rf_hamiltonian,kpgstr,load_k_hamiltonian
-!!      load_k_rf_hamiltonian,load_kprime_hamiltonian,load_spin_hamiltonian
-!!      load_spin_rf_hamiltonian,mkffnl,mkkin,mkkpg,occeig,paw_ij_free
+!!      destroy_rf_hamiltonian,dfpt_wfkfermi,fftpac
+!!      init_hamiltonian,init_rf_hamiltonian,kpgstr
+!!      mkffnl,mkkin,mkkpg,occeig,paw_ij_free
 !!      paw_ij_init,paw_ij_nullify,pawdijfr,pawmkrho,pawrhoij_alloc
 !!      pawrhoij_free,pawrhoij_free_unpacked,pawrhoij_init_unpacked
 !!      pawrhoij_mpisum_unpacked,status,symrhg,timab,xmpi_sum
@@ -3764,10 +3763,9 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  do isppol=1,nsppol
    ikg=0;ikg1=0
 !  Continue to initialize the Hamiltonian at k+q
-   call load_spin_hamiltonian(gs_hamkq,isppol,with_nonlocal=.true.)
-!  call load_spin_rf_hamiltonian(rf_hamkq,isppol,with_nonlocal=.true.)
+   call gs_hamkq%load_spin(isppol,with_nonlocal=.true.)
 
-   call load_spin_rf_hamiltonian(rf_hamkq,isppol,with_nonlocal=.true.)
+   call rf_hamkq%load_spin(isppol,with_nonlocal=.true.)
 
 
 !  Nullify contribution to density at EFermi from this k-point
@@ -3919,26 +3917,26 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
 !    Load k-dependent part in the Hamiltonian datastructure
      ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamkq%matblk))
-     call load_k_hamiltonian(gs_hamkq,kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
+     call gs_hamkq%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
 &     ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
      if (size(ffnlk)>0) then
-       call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnlk)
+       call gs_hamkq%load_k(ffnl_k=ffnlk)
      else
-       call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnl1)
+       call gs_hamkq%load_k(ffnl_k=ffnl1)
      end if
 
 !    Load k+q-dependent part in the Hamiltonian datastructure
 !        Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
-     call load_kprime_hamiltonian(gs_hamkq,kpt_kp=kpq,npw_kp=npw1_k,istwf_kp=istwf_k,&
+     call gs_hamkq%load_kprime(kpt_kp=kpq,npw_kp=npw1_k,istwf_kp=istwf_k,&
 &     kinpw_kp=kinpw1,kg_kp=kg1_k,kpg_kp=kpg1_k,ffnl_kp=ffnl1,&
 &     compute_gbound=.true.)
      if (qne0) then
        ABI_ALLOCATE(ph3d1,(2,npw1_k,gs_hamkq%matblk))
-       call load_kprime_hamiltonian(gs_hamkq,ph3d_kp=ph3d1,compute_ph3d=.true.)
+       call gs_hamkq%load_kprime(ph3d_kp=ph3d1,compute_ph3d=.true.)
      end if
 
 !    Load k-dependent part in the 1st-order Hamiltonian datastructure
-     call load_k_rf_hamiltonian(rf_hamkq,npw_k=npw_k,dkinpw_k=dkinpw)
+     call rf_hamkq%load_k(npw_k=npw_k,dkinpw_k=dkinpw)
 
 !    Compute fixed contributions to 1st-order Fermi energy
 !    and Fermi level charge density
@@ -4033,16 +4031,9 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
  end do ! End loop over spins
 
- !if(xmpi_paral==1)then
- !  call timab(166,1,tsec)
- !  call wrtout(std_out,'dfpt_rhofermi: loop on k-points and spins done in parallel','COLL')
- !  call xmpi_barrier(spaceworld)
- !  call timab(166,2,tsec)
- !end if
-
 !More memory cleaning
- call destroy_hamiltonian(gs_hamkq)
- call destroy_rf_hamiltonian(rf_hamkq)
+ call gs_hamkq%free()
+ call rf_hamkq%free()
  if(psps%usepaw==1) then
    call paw_ij_free(paw_ij1fr)
    ABI_DATATYPE_DEALLOCATE(paw_ij1fr)

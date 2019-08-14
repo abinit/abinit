@@ -1311,8 +1311,8 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
    call self%htg(idir)%free()
 
    ! Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(self%gs_hamkq(idir), spin, with_nonlocal=.true.)
-   call load_spin_rf_hamiltonian(self%rf_hamkq(idir), spin, with_nonlocal=.true.)
+   call self%gs_hamkq(idir)%load_spin(spin, with_nonlocal=.true.)
+   call self%rf_hamkq(idir)%load_spin(spin, with_nonlocal=.true.)
 
    !if (self%inclvkb /= 0) then
 
@@ -1512,9 +1512,9 @@ subroutine ddkop_free(self)
  ABI_SFREE(self%gs1c)
 
  do idir=1,3
-   call destroy_hamiltonian(self%gs_hamkq(idir))
+   call self%gs_hamkq(idir)%free()
    call self%htg(idir)%free()
-   call destroy_rf_hamiltonian(self%rf_hamkq(idir))
+   call self%rf_hamkq(idir)%free()
  end do
 
 end subroutine ddkop_free

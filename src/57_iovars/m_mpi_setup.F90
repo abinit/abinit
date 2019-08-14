@@ -35,7 +35,6 @@ module m_mpi_setup
  use m_sort
  use m_errors
  use m_abicore
- use m_dtset
 
  use m_time,         only : abi_wtime
  use m_io_tools,     only : flush_unit
@@ -45,7 +44,7 @@ module m_mpi_setup
  use m_mpinfo,       only : init_mpi_enreg, mpi_distrib_is_ok, initmpi_atom, proc_distrb_cycle, &
                             initmpi_grid, initmpi_pert, initmpi_img, distrb2, distrb2_hf, initmpi_world
  use m_libpaw_tools, only : libpaw_write_comm_set
- use m_dtset,        only : get_npert_rbz
+ use m_dtset,        only : get_npert_rbz, dataset_type
  use m_kg,           only : getmpw
  use m_dtfil,        only : mkfilename
 

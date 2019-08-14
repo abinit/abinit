@@ -147,8 +147,8 @@ contains
 !!      respfn
 !!
 !! CHILDREN
-!!      appdig,check_degeneracies,destroy_hamiltonian,dotprod_g
-!!      init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian,metric,mkffnl
+!!      appdig,check_degeneracies,dotprod_g
+!!      init_hamiltonian,metric,mkffnl
 !!      mkkin,mkkpg,nonlop,paw_ij_free,paw_ij_init,paw_ij_nullify
 !!      paw_ij_reset_flags,pawaccrhoij,pawcprj_alloc,pawcprj_free,pawdij2e1kb
 !!      pawdijfr,pawfgrtab_free,pawfgrtab_init,pawgrnl,pawrhoij_free
@@ -473,7 +473,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  do isppol=1,dtset%nsppol
 
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
-   call load_spin_hamiltonian(gs_ham,isppol,with_nonlocal=.true.)
+   call gs_ham%load_spin(isppol,with_nonlocal=.true.)
 
 !  Rewind (k+G) data if needed
    ikg=0
@@ -606,7 +606,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 
 !    Load k-dependent part in the Hamiltonian datastructure
      ABI_ALLOCATE(ph3d,(2,npw_k,gs_ham%matblk))
-     call load_k_hamiltonian(gs_ham,kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,&
+     call gs_ham%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,&
 &     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=.true.)
 
 !    Initialize contributions from current k point
@@ -720,14 +720,14 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 
            if(need_piezofr)then
              do mu=1,6 !loop over strain
-               call load_k_hamiltonian(gs_ham,ffnl_k=ffnl_str(:,:,:,:,mu))
+               call gs_ham%load_k(ffnl_k=ffnl_str(:,:,:,:,mu))
                call nonlop(choice_piez3,cpopt,cwaveprj,enlout_piez1,gs_ham,mu,(/zero/),mpi_enreg,1,&
 &               nnlout_piez1,paw_opt_3,signs_field,svectout,tim_nonlop,cwavef,svectout)
                call dotprod_g(dotprod(1),dotprod(2),istwf_k,npw_k*dtset%nspinor,2,svectout,ddk,&
 &               mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
                piezofrnlk(mu,ii)=piezofrnlk(mu,ii)+occ_k*dotprod(1)
              end do
-             call load_k_hamiltonian(gs_ham,ffnl_k=ffnl)
+             call gs_ham%load_k(ffnl_k=ffnl)
            end if
 
            ABI_DEALLOCATE(ddk)
@@ -1082,7 +1082,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      ABI_DATATYPE_DEALLOCATE(pawrhoij_tot)
    end if
  end if
- call destroy_hamiltonian(gs_ham)
+ call gs_ham%free()
  call timab(159,2,tsec)
 
  write(msg,'(3a)')ch10,' ==> Calculation of the frozen part of the second order derivative done',ch10

@@ -53,8 +53,7 @@ module m_pead_nl_loop
  use m_dfpt_mkvxc, only : dfpt_mkvxc
  use m_mkcore,     only : dfpt_mkcore
  use m_mklocl,     only : dfpt_vlocal
- use m_hamiltonian,only : init_hamiltonian, destroy_hamiltonian, &
-                          load_k_hamiltonian, gs_hamiltonian_type
+ use m_hamiltonian,only : init_hamiltonian, gs_hamiltonian_type
  use m_mkffnl,     only : mkffnl
  use m_mpinfo,     only : proc_distrb_cycle
  use m_nonlop,     only : nonlop
@@ -736,8 +735,8 @@ end subroutine pead_nl_loop
 !!      pead_nl_loop
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,dotprod_g,fftpac,fourwf,init_hamiltonian
-!!      load_k_hamiltonian,mkffnl,mkkpg,nonlop,status,xmpi_sum
+!!      dotprod_g,fftpac,fourwf,init_hamiltonian
+!!      mkffnl,mkkpg,nonlop,status,xmpi_sum
 !!
 !! SOURCE
 
@@ -866,7 +865,7 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
      end if
 
 !    Load k-dependent part in the Hamiltonian datastructure
-     call load_k_hamiltonian(gs_hamk,kpt_k=kpt,npw_k=npw_k,istwf_k=istwf_k,&
+     call gs_hamk%load_k(kpt_k=kpt,npw_k=npw_k,istwf_k=istwf_k,&
 &     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnlk,compute_gbound=.true.)
 !    Load k+q-dependent part in the Hamiltonian datastructure
 !    call load_kprime_hamiltonian...  !! To be activated when q/=0
@@ -985,7 +984,7 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 !use of time reversal symmetry
  d3lo(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = zero
 
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
 
  ABI_DEALLOCATE(vlocal1)
  ABI_DEALLOCATE(wfraug)

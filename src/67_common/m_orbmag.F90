@@ -49,8 +49,7 @@ module m_orbmag
   use m_fourier_interpol, only : transgrid
   use m_geometry,         only : metric
   use m_getghc,           only : getghc
-  use m_hamiltonian,      only : init_hamiltonian,destroy_hamiltonian,&
-       &                         load_spin_hamiltonian,load_k_hamiltonian,gs_hamiltonian_type
+  use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type
   use m_initylmg,         only : initylmg
   use m_kg,               only : getph,mkkin,mkkpg,mkpwind_k,ph1d3d
   use m_kpts,             only : listkk, smpbz
@@ -2666,7 +2665,7 @@ subroutine make_dsdk_nonlop(atindx1,cg,dsdk,dtorbmag,dtset,gmet,gprimd,kg,&
        & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=dtset%nucdipmom,&
        & paw_ij=paw_ij)
 
-  call load_spin_hamiltonian(gs_hamk,isppol,with_nonlocal=.true.)
+  call gs_hamk%load_spin(isppol,with_nonlocal=.true.)
 
   dsdk(1:2,1:nband_k,1:nband_k,1:dtorbmag%fnkpt,1:3,0:4) = zero
   do bdir = 1, 3
@@ -2746,7 +2745,7 @@ subroutine make_dsdk_nonlop(atindx1,cg,dsdk,dtorbmag,dtset,gmet,gprimd,kg,&
 
                  call ph1d3d(1,dtset%natom,kg_k,dtset%natom,dtset%natom,npw_k,ngfft1,ngfft2,ngfft3,phkxred,ph1d,ph3d)
 
-                 call load_k_hamiltonian(gs_hamk,kpt_k=kpoint(:),istwf_k=istwf_k,npw_k=npw_k,&
+                 call gs_hamk%load_k(kpt_k=kpoint(:),istwf_k=istwf_k,npw_k=npw_k,&
                       &         kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl_k,ph3d_k=ph3d,compute_gbound=.TRUE.)
 
               end if ! end if ikpt > 0 check
@@ -2890,7 +2889,7 @@ subroutine make_dsdk_nonlop(atindx1,cg,dsdk,dtorbmag,dtset,gmet,gprimd,kg,&
   ABI_DEALLOCATE(vect1)
   ABI_DEALLOCATE(vect2)
 
-  call destroy_hamiltonian(gs_hamk)
+  call gs_hamk%free()
 
 end subroutine make_dsdk_nonlop
 !!***
@@ -3188,11 +3187,11 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
  end if
 
  ! add vlocal
- call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
+ call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
 
  ! add vectornd if available
  if(has_vectornd) then
-    call load_spin_hamiltonian(gs_hamk,isppol,vectornd=vectornd_pac)
+    call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
  end if
 
  ncpgr = cprj(1,1)%ncpgr
@@ -3256,7 +3255,7 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
     !  - Prepare various tabs in case of band-FFT parallelism
     !  - Load k-dependent quantities in the Hamiltonian
     ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
-    call load_k_hamiltonian(gs_hamk,kpt_k=kpoint(:),istwf_k=istwf_k,npw_k=npw_k,&
+    call gs_hamk%load_k(kpt_k=kpoint(:),istwf_k=istwf_k,npw_k=npw_k,&
          &         kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl_k,ph3d_k=ph3d,&
          &         compute_ph3d=.TRUE.,compute_gbound=.TRUE.)
 
@@ -3307,7 +3306,7 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
     ABI_DEALLOCATE(buffer2)
  end if
 
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
  ABI_DEALLOCATE(vlocal)
  if(has_vectornd) then
     ABI_DEALLOCATE(vectornd_pac)
@@ -4126,7 +4125,7 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
  ABI_DEALLOCATE(vtrial)
 
  ! add vlocal
- call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.false.)
+ call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.false.)
 
  ! if vectornd is present, set it up similarly to how it's done for
  ! vtrial. Note that it must be done for the three Cartesian directions. Also, the following
@@ -4176,7 +4175,7 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
        nkpg = 0
        ABI_ALLOCATE(kpg_k_dummy,(npw_kg,nkpg))
 
-       call load_k_hamiltonian(gs_hamk,kpt_k=kpointg(:),istwf_k=istwf_k,npw_k=npw_kg,&
+       call gs_hamk%load_k(kpt_k=kpointg(:),istwf_k=istwf_k,npw_k=npw_kg,&
             &             kg_k=kg_kg,kpg_k=kpg_k_dummy,compute_gbound=.TRUE.)
 
        ABI_DEALLOCATE(kpg_k_dummy)
@@ -4411,7 +4410,7 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
  endif
 
  ABI_DEALLOCATE(vlocal)
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
 
  ABI_DEALLOCATE(pwind_bg)
 
@@ -5765,7 +5764,7 @@ end module m_orbmag
 !  ABI_DEALLOCATE(vtrial)
 
 !  ! add vlocal
-!  call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.false.)
+!  call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.false.)
 
 !  ! if vectornd is present, set it up similarly to how it's done for
 !  ! vtrial. Note that it must be done for the three Cartesian directions. Also, the following
@@ -5845,7 +5844,7 @@ end module m_orbmag
 !                    nkpg = 0
 !                    ABI_ALLOCATE(kpg_k_dummy,(npw_kb,nkpg))
 
-!                    call load_k_hamiltonian(gs_hamk,kpt_k=kpointb(:),istwf_k=istwf_k,npw_k=npw_kb,&
+!                    call gs_hamk%load_k(kpt_k=kpointb(:),istwf_k=istwf_k,npw_k=npw_kb,&
 !                         &             kg_k=kg_kb,kpg_k=kpg_k_dummy,compute_gbound=.TRUE.)
 
 !                 end if ! end if ikpt > 0 check
@@ -6187,7 +6186,7 @@ end module m_orbmag
 !  endif
 
 !  ABI_DEALLOCATE(vlocal)
-!  call destroy_hamiltonian(gs_hamk)
+!  call gs_hamk%free()
 
 !  ABI_DEALLOCATE(pwind_bg)
 

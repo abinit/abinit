@@ -430,7 +430,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
                pawfgr,mpi_enreg,dummy_vtrial,v1scf(:,:,:,ipc),vlocal,vlocal1(:,:,:,:,ipc))
 
      ! Continue to initialize the Hamiltonian
-     call load_spin_hamiltonian(gs_hamkq,spin,vlocal=vlocal,with_nonlocal=.true.)
+     call gs_hamkq%load_spin(spin,vlocal=vlocal,with_nonlocal=.true.)
 
      ! Allocate workspace for wavefunctions. Make npw larger than expected.
      ABI_MALLOC(bras, (2, mpw*nspinor, mband))
@@ -440,7 +440,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      ! GKA: This little block used to be right after the perturbation loop
      ! Prepare application of the NL part.
      call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=.true.)
-     call load_spin_rf_hamiltonian(rf_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
+     call rf_hamkq%load_spin(spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
 
      do ik=1,nkpt
        ! Only do a subset a k-points
@@ -528,7 +528,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      ABI_FREE(bras)
      ABI_FREE(kets)
      ABI_FREE(h1_kets)
-     call destroy_rf_hamiltonian(rf_hamkq)
+     call rf_hamkq%free()
 
      if (dtset%eph_task == -2) then
        ! Gather the k-points computed by all processes
@@ -598,7 +598,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_FREE(ylmgr_kq)
  ABI_FREE(blkflg)
 
- call destroy_hamiltonian(gs_hamkq)
+ call gs_hamkq%free()
  call wfd_k%free()
  call wfd_kq%free()
  call pawcprj_free(cwaveprj0)

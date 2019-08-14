@@ -641,7 +641,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
      enlout = zero
 
 !    Change the pointer ffnl_k to ffnl1_test (idir_ffnl=0, for nonlop with signs=1)
-     call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnl1_test)
+     call gs_hamkq%load_k(ffnl_k=ffnl1_test)
 
      signs=1
      dotr2 = 0
@@ -750,7 +750,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
      end if
 
 !    Change the pointer ffnl_k back to ffnl1 (idir_ffnl=4, for nonlop with signs=2)
-     call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnl1)
+     call gs_hamkq%load_k(ffnl_k=ffnl1)
 
      if (associated(enl_ptr)) then
        nullify(enl_ptr)
@@ -769,7 +769,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
  else
 
    h_cwave = zero
-   MSG_ERROR(" rf2_apply_hamiltonian can be used only for : 0<=ipert<=natom+2 and natom+10<=ipert<=2*natom+11.")
+   MSG_ERROR(" rf2_apply_hamiltonian can be used only for: 0<=ipert<=natom+2 and natom+10<=ipert<=2*natom+11.")
    return
 
  end if

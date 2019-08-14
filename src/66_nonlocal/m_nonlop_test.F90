@@ -87,7 +87,7 @@ contains
 !!      afterscfloop
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,dotprod_g,init_hamiltonian,initylmg
+!!      dotprod_g,init_hamiltonian,initylmg
 !!      load_k_hamiltonian,load_spin_hamiltonian,mkffnl,mkkpg,nonlop
 !!
 !! SOURCE
@@ -304,7 +304,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  bdtot_index=0 ; icg=0 ; isppol=1
 
 !Continue to initialize the Hamiltonian (PAW DIJ coefficients)
- call load_spin_hamiltonian(gs_hamk,isppol,with_nonlocal=.true.)
+ call gs_hamk%load_spin(isppol,with_nonlocal=.true.)
 
 !No loop over k points; only do the first one
  ikg=0 ; ikpt=1
@@ -369,7 +369,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
 
 !  Load k-dependent part in the Hamiltonian datastructure
    ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
-   call load_k_hamiltonian(gs_hamk,kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
+   call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
 &   kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=.true.)
 
    do iblock=1,nblockbd
@@ -447,7 +447,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  ABI_DEALLOCATE(ylmgr_k)
  ABI_DEALLOCATE(ylm)
  ABI_DEALLOCATE(ylmgr)
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
 
 end subroutine nonlop_test
 !!***

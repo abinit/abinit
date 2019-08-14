@@ -4215,7 +4215,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      call dvdb%readsym_allv1(db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
    else
      MSG_ERROR(sjoin("Cannot find q-point:", ktoa(qpt), "in DVDB"))
-     !ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
+     !ABI_MALLOC(v1scf, (cplex, nfft, nspden, db%my_npert))
      !call db%ftinterp_qpt(qbz, nfft, ngfft, v1scf, db%comm_rpt)
    end if
 
@@ -4438,8 +4438,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
          gkk_atm(:,:,:,ipc) = zero
          do ib2=1,nband_k
            do ib1=1,nband_kq
-             call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras_kq(1,1,ib1),h1kets_kq(1,1,ib2),&
-               mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+             call dotprod_g(dotr, doti, istwf_kq, npw_kq*nspinor, 2, bras_kq(1,1,ib1), h1kets_kq(1,1,ib2), &
+               mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
              gkk_atm(:,ib1,ib2,ipc) = [dotr, doti]
            end do
          end do

@@ -399,19 +399,22 @@ module m_hamiltonian
 
  contains
    procedure :: free => destroy_hamiltonian
+    ! Free the memory in the GS Hamiltonian
+
    procedure :: load_spin => load_spin_hamiltonian
+    ! Setup of the spin-dependent part of the GS Hamiltonian
+
    procedure :: load_k => load_k_hamiltonian
+    ! Setup of the k-dependent part of the GS Hamiltonian
+
    procedure :: load_kprime => load_kprime_hamiltonian
+    ! Setup of the k^prime-dependent part of the GS Hamiltonian
+
    !procedure :: copy => copy_hamiltonian
 
  end type gs_hamiltonian_type
 
-
  public :: init_hamiltonian         ! Initialize the GS Hamiltonian
- public :: destroy_hamiltonian      ! Free the memory in the GS Hamiltonian
- public :: load_spin_hamiltonian    ! Setup of the spin-dependent part of the GS Hamiltonian
- public :: load_k_hamiltonian       ! Setup of the k-dependent part of the GS Hamiltonian
- public :: load_kprime_hamiltonian  ! Setup of the k^prime-dependent part of the GS Hamiltonian
  public :: copy_hamiltonian         ! Copy the object
 !!***
 
@@ -509,15 +512,17 @@ module m_hamiltonian
 
  contains
    procedure :: free => destroy_rf_hamiltonian
+    ! Free the memory in the RF Hamiltonian
+
    procedure :: load_spin => load_spin_rf_hamiltonian
+    ! Setup of the spin-dependent part of the RF Hamiltonian.
+
    procedure :: load_k => load_k_rf_hamiltonian
+    ! Setup of the k-dependent part of the RF Hamiltonian
 
  end type rf_hamiltonian_type
 
  public :: init_rf_hamiltonian      ! Initialize the RF Hamiltonian
- public :: destroy_rf_hamiltonian   ! Free the memory in the RF Hamiltonian
- public :: load_spin_rf_hamiltonian ! Setup of the spin-dependent part of the RF Hamiltonian.
- public :: load_k_rf_hamiltonian    ! Setup of the k-dependent part of the RF Hamiltonian
 !!***
 
 CONTAINS  !===========================================================
@@ -557,7 +562,7 @@ subroutine destroy_hamiltonian(Ham)
 !@gs_hamiltonian_type
 
 ! Integer Pointers
- if (associated(Ham%gbound_kp,Ham%gbound_k))   then
+ if (associated(Ham%gbound_kp,Ham%gbound_k)) then
    nullify(Ham%gbound_kp)
  else if (associated(Ham%gbound_kp)) then
    ABI_DEALLOCATE(Ham%gbound_kp)
@@ -574,12 +579,12 @@ subroutine destroy_hamiltonian(Ham)
  ABI_SFREE(Ham%typat)
 
 ! Real Pointers
- if (associated(Ham%phkpxred,Ham%phkxred))   then
+ if (associated(Ham%phkpxred,Ham%phkxred)) then
    nullify(Ham%phkpxred)
  else if (associated(Ham%phkpxred)) then
    ABI_DEALLOCATE(Ham%phkpxred)
  end if
- if (allocated(Ham%phkxred))   then
+ if (allocated(Ham%phkxred)) then
    ABI_DEALLOCATE(Ham%phkxred)
  end if
  if (associated(Ham%ekb)) nullify(Ham%ekb)
