@@ -217,6 +217,30 @@ module m_phgamma
   real(dp),allocatable :: vals_ee(:,:,:,:,:,:,:)
   ! vals_eew(2, nene, nene, natom3, natom3, nqibz, nsppol)
 
+  !type(xcomm_t) :: pert_comm
+   ! MPI communicator for parallelism over atomic perturbations.
+
+  !type(xcomm_t) :: qb_comm
+   ! MPI communicator used to distribute (band_sum, q-points)
+
+  !type(xcomm_t) :: qpt_comm
+   ! MPI communicator for q-points
+
+  !type(xcomm_t) :: bsum_comm
+   ! MPI communicator for bands in self-energy sum
+
+  !type(xcomm_t) :: kcalc_comm
+   ! MPI communicator for parallelism over k-points (high-level)
+
+  !type(xcomm_t) :: spin_comm
+   ! MPI communicator for parallelism over spins (high-level)
+
+  !type(xcomm_t) :: pqb_comm
+    ! MPI communicator for the (perturbation, band_sum, qpoint_sum)
+
+  !type(xcomm_t) :: ncwrite_comm
+   ! MPI communicator for parallel netcdf IO used to write results for the different k-points/spins
+
   contains
 
    procedure :: free => phgamma_free
@@ -476,6 +500,23 @@ subroutine phgamma_free(gams)
  ABI_SFREE(gams%vals_ee)
  ABI_SFREE(gams%my_iqibz)
  ABI_SFREE(gams%my_iqbz)
+
+ ! Deallocate MPI communicators
+ !call gams%pert_comm%free()
+ !call gams%qpt_comm%free()
+ !call gams%bsum_comm%free()
+ !call gams%qb_comm%free()
+ !call gams%kcalc_comm%free()
+ !call gams%spin_comm%free()
+ !call gams%pqb_comm%free()
+ !call gams%ncwrite_comm%free()
+
+ ! Close netcdf file.
+!#ifdef HAVE_NETCDF
+! if (gams%ncid /= nctk_noid) then
+!   NCF_CHECK(nf90_close(gams%ncid))
+! end if
+!#endif
 
 end subroutine phgamma_free
 !!***

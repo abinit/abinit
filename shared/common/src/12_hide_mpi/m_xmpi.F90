@@ -147,6 +147,7 @@ MODULE m_xmpi
 !! FUNCTION
 !!  A small object storing the MPI communicator, the rank of the processe and the size of the communicator.
 !!  Provides helper functions to perform typical operations and parallelize loops.
+!!  The datatype is initialized with xmpi_comm_self
 !!
 !! SOURCE
 
@@ -154,41 +155,12 @@ MODULE m_xmpi
    integer :: value = xmpi_comm_self
    integer :: nproc = 1
    integer :: me = 0
- !contains
- !  procedure :: iam_master => xcomm_iam_master
- !  procedure :: skip => xcomm_skip
- !  procedure :: set_to_null => xcomm_set_to_null
- !  procedure :: free => xcomm_free
- !  type(xcomm_t) function from_mpi_int(comm_value) result(new)
- !    new%value = comm_value
- !    new%nproc  xmpi_comm_size(comm_value)
- !    new%me  xmpi_comm_rank(comm_value)
- !  end function from_mpi
- !  pure logical function xcomm_iam_master(self)
- !    class(xcomm_t),intent(in)
- !    xcomm_iam_master = self%me == 0
- !  pure logical function xcomm_skip(self, iter)
- !    class(xcomm_t),intent(in)
- !    skip = mod(iter, self%nproc) /= self%me
- !  end function xcomm_skip
- !  subroutine xcomm_set_to_null(self)
- !    class(xcomm_t),intent(inout)
- !    call self%free()
- !    self%value = xmpi_comm_null
- !  end subroutine xcomm_set_to_null
- !  subroutine xcomm_set_to_self(self)
- !    class(xcomm_t),intent(inout)
- !    call self%free()
- !    self%value = xmpi_comm_self
- !    self%nproc = xmpi_comm_size(self%value)
- !    self%me  xmpi_comm_rank(self%value)
- !  end subroutine xcomm_set_to_self
- !  subroutine xcomm_free(self)
- !    class(xcomm_t),intent(inout)
- !    call xmpi_comm_free(self%value)
- !    self%nproc = 0
- !    self%me = -1
- !  end subroutine xcomm_free
+ contains
+   ! procedure :: iam_master => xcomm_iam_master
+   procedure :: skip => xcomm_skip
+   procedure :: set_to_null => xcomm_set_to_null
+   procedure :: set_to_self => xcomm_set_to_self
+   procedure :: free => xcomm_free
  end type xcomm_t
 !!***
 
@@ -4452,20 +4424,20 @@ subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_ty
 
 !************************************************************************
 
- if ( sizes(1) /= SUM(block_sizes(1,1:2)) .or. &
-&     sizes(2) /= SUM(block_sizes(2,1:2)) ) then
+ if (sizes(1) /= SUM(block_sizes(1,1:2)) .or. &
+     sizes(2) /= SUM(block_sizes(2,1:2)) ) then
    write(std_out,*)" xmpio_create_coldistr_from_fp3blocks: Inconsistency between block_sizes ans sizes "
    call xmpi_abort()
  end if
 
- if ( block_sizes(1,1)/=block_sizes(2,1) .or.&
-&     block_sizes(1,2)/=block_sizes(2,2) ) then
+ if (block_sizes(1,1) /= block_sizes(2,1) .or.&
+     block_sizes(1,2) /= block_sizes(2,2) ) then
    write(std_out,*)" xmpio_create_coldistr_from_fp3blocks: first two blocks must be square"
    call xmpi_abort()
  end if
 
- if ( block_sizes(2,3)/=block_sizes(2,2) .or.&
-&     block_sizes(1,3)/=block_sizes(1,1) ) then
+ if (block_sizes(2,3) /= block_sizes(2,2) .or.&
+     block_sizes(1,3) /= block_sizes(1,1) ) then
    write(std_out,*)" xmpio_create_coldistr_from_fp3blocks: Full matrix must be square"
    call xmpi_abort()
  end if
@@ -4603,6 +4575,36 @@ subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_ty
 end subroutine xmpio_create_coldistr_from_fp3blocks
 !!***
 #endif
+
+ !type(xcomm_t) function from_mpi_int(comm_value) result(new)
+ !  new%value = comm_value
+ !  new%nproc  xmpi_comm_size(comm_value)
+ !  new%me  xmpi_comm_rank(comm_value)
+ !end function from_mpi_int
+ !pure logical function xcomm_iam_master(self)
+ !  class(xcomm_t),intent(in) :: self
+ !  xcomm_iam_master = self%me == 0
+ !end function xcomm_iam_master
+ pure logical function xcomm_skip(self, iter)
+   class(xcomm_t),intent(in) :: self
+   integer,intent(in) :: iter
+   xcomm_skip = mod(iter, self%nproc) /= self%me
+ end function xcomm_skip
+ subroutine xcomm_set_to_self(self)
+   class(xcomm_t),intent(inout) :: self
+   call self%free()
+   self%value = xmpi_comm_self; self%me = 0; self%nproc = 1
+ end subroutine xcomm_set_to_self
+ subroutine xcomm_set_to_null(self)
+   class(xcomm_t),intent(inout) :: self
+   call self%free()
+   self%value = xmpi_comm_null
+ end subroutine xcomm_set_to_null
+ subroutine xcomm_free(self)
+   class(xcomm_t),intent(inout) :: self
+   call xmpi_comm_free(self%value)
+   self%me = -1; self%nproc = 0
+ end subroutine xcomm_free
 
 END MODULE m_xmpi
 !!***
