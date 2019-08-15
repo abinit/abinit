@@ -27,7 +27,6 @@
 module m_vtowfk
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
@@ -35,7 +34,9 @@ module m_vtowfk
  use m_linalg_interfaces
  use m_cgtools
  use m_dtset
+ use m_dtfil
 
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab, cwtime, sec2str
  use m_fstrings,    only : sjoin, itoa, ftoa
  use m_hamiltonian, only : gs_hamiltonian_type

@@ -27,7 +27,6 @@ module m_dfpt_vtorho
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -36,7 +35,9 @@ module m_dfpt_vtorho
  use m_wfk
  use m_cgtools
  use m_dtset
+ use m_dtfil
 
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_occ,      only : occeig
  use m_hdr,      only : hdr_skip, hdr_io

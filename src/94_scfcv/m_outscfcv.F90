@@ -28,7 +28,6 @@ module m_outscfcv
  use defs_basis
  use defs_datatypes
  use defs_wvltypes
- use defs_abitypes
  use m_abicore
  use m_sort
  use m_efield
@@ -44,7 +43,9 @@ module m_outscfcv
  use m_splines
  use m_ebands
  use m_dtset
+ use m_dtfil
 
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_io_tools,         only : open_file
  use m_fstrings,         only : strcat, endswith

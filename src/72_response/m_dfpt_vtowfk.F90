@@ -27,7 +27,6 @@ module m_dfpt_vtowfk
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
@@ -35,7 +34,9 @@ module m_dfpt_vtowfk
  use m_wfk
  use m_rf2
  use m_dtset
+ use m_dtfil
 
+ use defs_abitypes,  only : MPI_type
  use m_rf2_init,     only : rf2_init
  use m_time,         only : timab
  use m_pawrhoij,     only : pawrhoij_type

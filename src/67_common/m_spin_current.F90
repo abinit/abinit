@@ -27,13 +27,15 @@
 module m_spin_current
 
  use defs_datatypes
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_splines
  use m_hdr
  use m_dtset
+ use m_dtfil
 
+
+ use defs_abitypes, only : MPI_type
  use m_io_tools,   only : open_file
  use m_pptools,    only : printxsf
  use m_geometry,   only : xred2xcart

@@ -29,7 +29,6 @@ module m_sigma_driver
  use defs_basis
  use m_gwdefs
  use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_dtset
  use m_xmpi
@@ -39,13 +38,16 @@ module m_sigma_driver
  use m_ab7_mixing
  use m_nctk
  use m_kxc
+ use m_distribfft
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_hdr
  use libxc_functionals
  use m_wfd
+ use m_dtfil
 
+ use defs_abitypes, only : MPI_type
  use m_time,          only : timab
  use m_numeric_tools, only : imax_loc
  use m_fstrings,      only : strcat, sjoin, itoa, basename, ktoa, ltoa

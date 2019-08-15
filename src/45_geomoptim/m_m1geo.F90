@@ -24,10 +24,11 @@
 module m_m1geo
 
  use defs_basis
- use defs_abitypes
+ use m_profiling_abi
  use m_abimover
  use m_abihist
  use m_dtset
+ use m_dtfil
 
  implicit none
 

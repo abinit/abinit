@@ -78,14 +78,15 @@ use m_dtset
 
 use defs_basis
 use defs_datatypes
-use defs_abitypes
 use defs_wvltypes
 use m_pawang
 use m_pawrad
 use m_pawtab
 use m_abicore
 use m_errors
+use m_dtfil
 
+use defs_abitypes, only : MPI_type
 use m_time,      only : timab
 use m_gstateimg, only : gstateimg
 

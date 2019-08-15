@@ -28,7 +28,6 @@ module m_scfcv_core
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use defs_rectypes
  use m_xmpi
@@ -43,7 +42,9 @@ module m_scfcv_core
  use m_hdr
  use m_xcdata
  use m_cgtools
+ use m_dtfil
 
+ use defs_abitypes,      only : MPI_type
  use m_berryphase_new,   only : update_e_field_vars
  use m_time,             only : timab
  use m_fstrings,         only : int2char4, sjoin
@@ -2761,7 +2762,6 @@ end subroutine etotfor
 subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 & nattyp,npwarr,pawtab,scf_history_wf)
 
- !use m_scf_history
  use m_cgcprj,  only : dotprod_set_cgcprj, dotprodm_sumdiag_cgcprj, lincom_cgcprj, cgcprj_cholesky
 
 !Arguments ------------------------------------

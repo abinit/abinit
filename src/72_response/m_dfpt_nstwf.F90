@@ -27,7 +27,6 @@ module m_dfpt_nstwf
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_xmpi
  use m_errors
  use m_abicore
@@ -36,7 +35,9 @@ module m_dfpt_nstwf
  use m_cgtools
  use m_nctk
  use m_dtset
+ use m_dtfil
 
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_io_tools, only : file_exists
  use m_geometry, only : stresssym
@@ -1806,23 +1807,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 &                 mkmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,nband_k,npw_k,npw1_k,nsppol,&
 &                 occ_k,psps,rmet,ddks,wtk_k,ylm,ylm1)
 
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_abicore
- use m_cgtools
- use m_hamiltonian
- use m_errors
- use m_wfk
- use m_xmpi
-
- use m_time,    only : timab
- use m_pawcprj, only : pawcprj_type
- use m_kg,      only : mkkpg
- use m_mkffnl,  only : mkffnl
- use m_getgh1c, only : getgh1c
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: icg,icg1,idir,ikpt,ipert,isppol,istwf_k
@@ -2260,10 +2244,6 @@ subroutine gaugetransfo(cg_k,cwavef,cwavef_d,eig_k,eig1_k,iband,nband_k, &
  real(dp) :: cwave0(2,npw1_k*nspinor),eig1(2)
 
 ! *********************************************************************
-
-!DEBUG
-!write(100,*) 'gaugetransfo: ',iband
-!ENDDEBUG
 
    cwavef_d(:,:) = cwavef(:,:)
 

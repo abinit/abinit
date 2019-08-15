@@ -27,13 +27,15 @@
 module m_mover
 
  use defs_basis
- use defs_abitypes
+ use m_abicore
  use m_errors
+ use m_profiling_abi
  use m_abimover
  use m_abihist
  use m_dtset
  use m_xmpi
  use m_nctk
+ use m_dtfil
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -42,6 +44,7 @@ module m_mover
  use m_pred_lotf
 #endif
 
+ use defs_abitypes,        only : MPI_type
  use m_fstrings,           only : strcat, sjoin, indent
  use m_symtk,              only : matr3inv, symmetrize_xred
  use m_geometry,           only : fcart2fred, chkdilatmx, xred2xcart

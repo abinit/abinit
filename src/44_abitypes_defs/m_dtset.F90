@@ -30,6 +30,7 @@ MODULE m_dtset
 
  use m_fstrings,     only : inupper
  use m_symtk,        only : mati3inv, littlegroup_q, symatm
+ use m_symkpt,       only : symkpt
  use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
  use m_parser,       only : intagm, chkvars_in_string
 
@@ -917,16 +918,17 @@ type, public :: dataset_type
  end type dataset_type
 !!***
 
- public :: dtset_chkneu
+ public :: dtset_chkneu            ! Check neutrality of system based on band occupancies and valence charges of pseudo-atoms.
  public :: dtset_copy              ! Copy object.
  public :: dtset_free              ! Free dynamic memory.
  public :: dtset_free_nkpt_arrays  ! Free arrays that depend on input nkpt (used in EPH code)
- public :: find_getdtset           ! Find the number of the dataset (iget) for a given value of a "get" variable (getvalue)
  public :: get_npert_rbz           ! Get the number of effective pertubation done in looper3, nkpt_rbz, nband_rbz
  public :: testsusmat              ! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
+
+ public :: find_getdtset           ! Find the number of the dataset (iget) for a given value of a "get" variable (getvalue)
  public :: macroin                 ! Treat "macro" input variables
  public :: macroin2
- public :: chkvars                 !  Examines the input string, to check whether all names are allowed.
+ public :: chkvars                 ! Examines the input string, to check whether all names are allowed.
 
 CONTAINS  !==============================================================================
 !!***
@@ -936,8 +938,7 @@ CONTAINS  !=====================================================================
 !! dtset_chkneu
 !!
 !! FUNCTION
-!! Check neutrality of system based on band occupancies and
-!! valence charges of pseudo-atoms.
+!! Check neutrality of system based on band occupancies and valence charges of pseudo-atoms.
 !! Eventually initialize occ if occopt==1 or 3...8
 !! Also return nelect, the number of valence electron per unit cell
 !!
@@ -2326,9 +2327,7 @@ end subroutine find_getdtset
 !!
 !! SOURCE
 
-subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
-
- use m_symkpt,     only : symkpt
+subroutine get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 
 !Arguments ------------------------------------
 !scalars
@@ -2688,8 +2687,7 @@ end subroutine testsusmat
 !!  ecut_tmp(3,2,10)= possible ecut values as read in psp files
 !!
 !! OUTPUT
-!!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables,
-!!   some of which are given a value here.
+!!  dtsets(0:ndtset_alloc)=contains all input variables, some of which are given a value here.
 !!   The dataset with number 0 should NOT be modified in the present routine.
 !!
 !! PARENTS
@@ -2928,8 +2926,7 @@ end subroutine macroin
 !!               least one data set.
 !!
 !! OUTPUT
-!!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables,
-!!   some of which are given a value here.
+!!  dtsets(0:ndtset_alloc)=contains all input variables, some of which are given a value here.
 !!   The dataset with number 0 should NOT be modified in the present routine.
 !!
 !! PARENTS
@@ -2992,7 +2989,7 @@ end subroutine macroin2
 !!
 !! SOURCE
 
-subroutine chkvars (string)
+subroutine chkvars(string)
 
 !Arguments ------------------------------------
 !scalars

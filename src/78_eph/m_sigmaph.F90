@@ -25,7 +25,6 @@
 module m_sigmaph
 
  use defs_basis
- use defs_abitypes
  use iso_c_binding
  use m_abicore
  use m_xmpi
@@ -56,7 +55,9 @@ module m_sigmaph
  use m_nctk
  use m_rf2
  use m_dtset
+ use m_dtfil
 
+ use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_time,           only : cwtime, cwtime_report, timab, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat

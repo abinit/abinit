@@ -151,7 +151,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_errors
  use m_abicore
@@ -160,7 +159,9 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_wffile
  use m_wfk
  use m_dtset
+ use m_dtfil
 
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_io_tools,    only : file_exists
  use m_kg,          only : getph

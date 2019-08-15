@@ -29,6 +29,7 @@ MODULE m_plowannier
  use m_errors
  use m_abicore
  use m_dtset
+ use m_dtfil
 
  use m_io_tools,  only : open_file
  use m_mpinfo,    only : proc_distrb_cycle

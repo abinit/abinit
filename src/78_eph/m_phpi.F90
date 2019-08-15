@@ -24,7 +24,6 @@
 module m_phpi
 
  use defs_basis
- use defs_abitypes
  use defs_datatypes
  use m_abicore
  use m_xmpi
@@ -43,7 +42,9 @@ module m_phpi
  use m_hamiltonian
  use m_pawcprj
  use m_dtset
+ use m_dtfil
 
+ use defs_abitypes,     only : mpi_type
  use m_time,            only : cwtime
  use m_fstrings,        only : sjoin, itoa, ftoa, ktoa, ltoa, strcat
  use m_io_tools,        only : iomode_from_fname

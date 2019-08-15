@@ -30,7 +30,6 @@ module m_bethe_salpeter
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_bs_defs
  use m_abicore
@@ -38,12 +37,15 @@ module m_bethe_salpeter
  use m_errors
  use m_screen
  use m_nctk
+ use m_distribfft
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_hdr
  use m_dtset
+ use m_dtfil
 
+ use defs_abitypes,     only : MPI_type
  use m_gwdefs,          only : GW_Q0_DEFAULT
  use m_time,            only : timab
  use m_fstrings,        only : strcat, sjoin, endswith

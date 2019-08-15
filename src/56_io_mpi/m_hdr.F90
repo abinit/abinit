@@ -238,6 +238,9 @@ module m_hdr
   ! EVOLVING variable, only for paw
   type(pawrhoij_type), allocatable :: pawrhoij(:)
 
+  !contains
+  !procedure
+
  end type hdr_type
 !!***
 
@@ -268,15 +271,15 @@ module m_hdr
  public :: hdr_ncwrite             ! Writes the header and fform to a Netcdf file.
  public :: hdr_check               ! Compare two headers.
  public :: hdr_vs_dtset            ! Check the compatibility of header with dtset.
- public :: hdr_get_crystal
+ public :: hdr_get_crystal         ! Return the crystal structure stored in the header.
 
-! Generic interface of the routines hdr_skip
+ ! Generic interface of the routines hdr_skip
  interface hdr_skip
    module procedure hdr_skip_int
    module procedure hdr_skip_wfftype
  end interface hdr_skip
 
-! Generic interface of the routines hdr_io
+ ! Generic interface of the routines hdr_io
  interface hdr_io
    module procedure hdr_io_int
    module procedure hdr_io_wfftype
@@ -3791,28 +3794,28 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  !@hdr_type
  DBG_ENTER("COLL")
 
-!We will adopt convention that if things agree between restart
-!and current calculation then the tflag is 0. Begin by assuming
-!that there is complete agreement between the files
+ ! We will adopt convention that if things agree between restart
+ ! and current calculation then the tflag is 0. Begin by assuming
+ ! that there is complete agreement between the files
 
  tatty = 0; tband = 0; tdg = 0 ; tecut = 0; tkpt = 0;
  tlmn = 0; tng = 0; tpaw = 0; tprim = 0; tpsch = 0; tpseu = 0;
  tspinor=0; tsym = 0; twfk = 0 ; txred = 0 ; twvl = 0 ; tgrid = 0
 
-!Write out a header
+ ! Write out a header
  write(msg,'(a1,80a,2a1,10x,a,3a1,8x,a,25x,a,a1,8x,19a,25x,12a,a1)' )&
    ch10,('=',ii=1,80),ch10,ch10,&
    '- hdr_check: checking restart file header for consistency -',&
    (ch10,ii=1,3),'current calculation','restart file',ch10,('-',ii=1,19),('-',ii=1,12),ch10
  call wrtout(std_out,msg,mode_paral)
 
-!Check validity of fform, and find filetype
+ ! Check validity of fform, and find filetype
  abifile = abifile_from_fform(fform)
  if (abifile%fform == 0) then
     MSG_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform)))
  end if
 
-!Check validity of fform0, and find filetype
+ ! Check validity of fform0, and find filetype
  abifile0 = abifile_from_fform(fform0)
  if (abifile0%fform == 0) then
     MSG_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform0)))
@@ -3826,7 +3829,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
   '. ABINIT  code version ',hdr%codvsn,'|','  ABINIT  code version ',hdr0%codvsn
  call wrtout(std_out,msg,mode_paral)
 
-!Check fform from input, not from header file
+ ! Check fform from input, not from header file
  if ( fform /= fform0) then
    write(msg,'(a,i0,a,i0,a)')'input fform=',fform,' differs from disk file fform=',fform0,'.'
    MSG_ERROR(msg)
@@ -3843,7 +3846,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  call wrtout(std_out,msg,mode_paral)
 
  if (hdr%usewvl == 0) then
-!  Note that the header actually contains ecut_eff=ecut*dilatmx**2
+   ! Note that the header actually contains ecut_eff=ecut*dilatmx**2
    write(msg,'(a,i3,a,f12.7,8x,a,a,i3,a,f12.7)')&
     '  ntypat',hdr %ntypat,' ecut_eff',hdr %ecut_eff,'|',&
     '  ntypat',hdr0%ntypat,' ecut_eff',hdr0%ecut_eff
@@ -3853,7 +3856,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
     '  ntypat',hdr %ntypat,' hgrid   ', 2. * hdr %rprimd(1,1) / (hdr %ngfft(1) - 31),'|',&
     '  ntypat',hdr0%ntypat,' hgrid   ', 2. * hdr0%rprimd(1,1) / (hdr0%ngfft(1) - 31)
    call wrtout(std_out,msg,mode_paral)
-!  Check hgrid and rprimd values.
+   ! Check hgrid and rprimd values.
    if (hdr0%rprimd(1,2) /= zero .or. hdr0%rprimd(1,3) /= zero .or. &
     hdr0%rprimd(2,1) /= zero .or. hdr0%rprimd(2,3) /= zero .or. &
     hdr0%rprimd(3,1) /= zero .or. hdr0%rprimd(3,2) /= zero) then
@@ -3928,7 +3931,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    tspinor=1
  end if
 
-!No check is present for nspden
+ ! No check is present for nspden
  if (hdr%nsppol/=hdr0%nsppol) then
    write(msg,'(a,i0,a,i0)')'input nsppol=',hdr%nsppol,' not equal disk file nsppol=',hdr0%nsppol
    MSG_WARNING(msg)
@@ -3960,7 +3963,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    MSG_ERROR(msg)
  end if
 
-!Also examine agreement of floating point data
+ ! Also examine agreement of floating point data
  if (hdr%usewvl == 0 .and. abs(hdr%ecut_eff-hdr0%ecut_eff)>tol8) then
    write(msg,'(a,f12.6,a,f12.6,a)')'input ecut_eff=',hdr%ecut_eff,' /= disk file ecut_eff=',hdr0%ecut_eff,'.'
    MSG_WARNING(msg)
@@ -3978,13 +3981,13 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end do
  end do
 
-!Below this point many comparisons only make sense if
-!certain things agree, e.g. nkpt, natom.  Also have to
-!accomodate different amounts of data in general.
+ ! Below this point many comparisons only make sense if
+ ! certain things agree, e.g. nkpt, natom.  Also have to
+ ! accomodate different amounts of data in general.
 
  if (hdr%usepaw==1 .and. hdr0%usepaw==1) then
 
-!  Compare ecutdg (PAW)
+   ! Compare ecutdg (PAW)
    write(msg, '(a,f12.6,15x,a,a,f12.6)' )'  PAW: ecutdg',hdr %ecutdg,'|','  PAW: ecutdg',hdr0%ecutdg
    call wrtout(std_out,msg,mode_paral)
    if (hdr%ecutdg/=hdr0%ecutdg) then
@@ -3994,7 +3997,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end if
  end if
 
-!Compare nband(nkpt*nsppol) (cannot compare if nkpt and nsppol not same)
+ ! Compare nband(nkpt*nsppol) (cannot compare if nkpt and nsppol not same)
  if (hdr%nkpt==hdr0%nkpt .and. hdr%nsppol==hdr0%nsppol) then
    nkpt=hdr%nkpt ; nsppol=hdr%nsppol
    write(msg,'(a,32x,a,a)') '  nband:','|','  nband:'
@@ -4032,7 +4035,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end do
  end if
 
-!Compare the number of wavelets in each resolution.
+ ! Compare the number of wavelets in each resolution.
  if (hdr%usewvl == 1) then
    if (size(hdr%nwvlarr) /= size(hdr0%nwvlarr) .or. size(hdr%nwvlarr) /= 2) then
      write(msg, '(a,i0,a,i0,a,a)' )&
@@ -4042,8 +4045,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end if
  end if
 
-! Compare symmetry arrays (integers) symafm(nsym)
-! only for same number of symmetries nsym
+ ! Compare symmetry arrays (integers) symafm(nsym)
+ ! only for same number of symmetries nsym
  itest=0
  if (hdr%nsym==hdr0%nsym) then
    nsym=hdr%nsym
@@ -4064,8 +4067,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    tsym=1
  end if
 
-! Compare symmetry arrays (integers) symrel(3,3,nsym)
-! only for same number of symmetries nsym
+ ! Compare symmetry arrays (integers) symrel(3,3,nsym)
+ ! only for same number of symmetries nsym
  itest=0
  if (hdr%nsym==hdr0%nsym) then
    nsym=hdr%nsym
@@ -4102,14 +4105,14 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do ii=1,natom
      if (hdr%typat(ii)/=hdr0%typat(ii)) then
        write(msg, '(a,i0,a,i0,a,i0)' )&
-&       'For atom number ',ii,' input typat=',hdr%typat(ii),' not equal disk file typat=',hdr0%typat(ii)
+        'For atom number ',ii,' input typat=',hdr%typat(ii),' not equal disk file typat=',hdr0%typat(ii)
        MSG_WARNING(msg)
        tatty=1
      end if
    end do
  end if
 
-!Compare so_psp(npsp)
+ ! Compare so_psp(npsp)
  if (hdr%npsp==hdr0%npsp) then
    npsp=hdr%npsp
    write(msg,'(a,29x,a,a)') '  so_psp  :','|','  so_psp  :'
@@ -4124,7 +4127,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do ii=1,npsp
      if (hdr%so_psp  (ii)/=hdr0%so_psp  (ii)) then
        write(msg,'(a,i0,a,i0,a,i0)')&
-&       'For pseudopotential number ',ii,' input so_psp =',hdr%so_psp(ii),' not equal disk file so_psp=',hdr0%so_psp(ii)
+         'For pseudopotential number ',ii,' input so_psp =',hdr%so_psp(ii),' not equal disk file so_psp=',hdr0%so_psp(ii)
        MSG_WARNING(msg)
      end if
    end do
@@ -4186,7 +4189,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  end if
 !end NEW_HDR
 
-!Compare kpt(3,nkpt)
+ ! Compare kpt(3,nkpt)
  if (hdr%nkpt==hdr0%nkpt) then
    nkpt=hdr%nkpt
    write(msg,'(a,34x,a,a)') '  kpt:','|','  kpt:'
@@ -4219,7 +4222,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end do
  end if
 
-!Compare wtk(nkpt)
+ ! Compare wtk(nkpt)
  if (hdr%nkpt==hdr0%nkpt) then
    nkpt=hdr%nkpt
 
@@ -4250,7 +4253,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end do
  end if
 
-!Compare occ(bantot)
+ ! Compare occ(bantot)
  if (hdr%nkpt==hdr0%nkpt.and. hdr%bantot==hdr0%bantot) then
    nkpt=hdr%nkpt
    bantot=hdr%bantot
@@ -4283,7 +4286,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end do
  end if
 
-!Compare tnons(3,nsym)
+ ! Compare tnons(3,nsym)
  if (hdr%nsym==hdr0%nsym) then
    nsym=hdr%nsym
    itest=0
@@ -4306,7 +4309,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end if
  end if
 
-!Compare znucltypat(ntypat)
+ ! Compare znucltypat(ntypat)
  if (hdr%ntypat==hdr0%ntypat) then
    ntypat=hdr%ntypat
 
@@ -4329,12 +4332,12 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end do
  end if
 
-!Should perform some checks related to pertcase and qptn,
-!that have been introduced in the header in v4.1
-!Warning: a GS file might be read, while the hdr corresponds
-!to a RF file (to initialize k+q), and vice-versa (in nonlinear).
+ ! Should perform some checks related to pertcase and qptn,
+ ! that have been introduced in the header in v4.1
+ ! Warning: a GS file might be read, while the hdr corresponds
+ ! to a RF file (to initialize k+q), and vice-versa (in nonlinear).
 
-!Now check agreement of psp headers too
+ ! Now check agreement of psp headers too
  if (hdr%npsp==hdr0%npsp) then
    npsp=hdr%npsp
    itest=0
@@ -4421,25 +4424,25 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end do
  end if
 
-!Run tests here to establish whether this is a valid restart
+ ! Run tests here to establish whether this is a valid restart
 
-!tfform2 will be true if there is a problem for the wavefunctions
+ ! tfform2 will be true if there is a problem for the wavefunctions
  tfform2 = (hdr%usewvl == 0 .and. &
-& (tprim /= 0 .or. tecut /= 0 .or. tkpt /= 0 .or. &
-& twfk /=0 .or. tspinor /= 0)) .or. &
-& (hdr%usepaw == 1 .and. &
-& (tpaw /= 0 .or. tlmn /= 0 .or. tdg /= 0)) .or. &
-& (hdr%usewvl == 1 .and. &
-& (tatty /= 0 .or. tband /= 0))
-!tfform52 will be true if there is a problem for the format 52
- tfform52=tprim /= 0 .or. tatty /= 0 .or. txred /= 0 .or.&
-& tpseu /= 0 .or. tecut /= 0 .or. tng /= 0 .or. &
-& (hdr%usepaw == 1 .and. &
-& (tpaw /= 0 .or. tlmn /= 0 .or. tdg /= 0))
+           (tprim /= 0 .or. tecut /= 0 .or. tkpt /= 0 .or. &
+           twfk /=0 .or. tspinor /= 0)) .or. &
+           (hdr%usepaw == 1 .and. &
+           (tpaw /= 0 .or. tlmn /= 0 .or. tdg /= 0)) .or. &
+           (hdr%usewvl == 1 .and. &
+           (tatty /= 0 .or. tband /= 0))
+
+ ! tfform52 will be true if there is a problem for the format 52
+ tfform52 = tprim /= 0 .or. tatty /= 0 .or. txred /= 0 .or.&
+            tpseu /= 0 .or. tecut /= 0 .or. tng /= 0 .or. &
+            (hdr%usepaw == 1 .and. (tpaw /= 0 .or. tlmn /= 0 .or. tdg /= 0))
 
  restart=1; restartpaw=hdr%usepaw
 
-!If there is a problem somewhere
+ ! If there is a problem somewhere
  if ( (abifile%class == "wf_planewave"  .and. tfform2  ) .or.  &
       (abifile%class == "density" .and. tfform52 ) .or.  &
       (abifile%class == "wf_wavelet" .and. tfform2 ) ) then
@@ -4498,7 +4501,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      call wrtout(std_out,msg,mode_paral)
    end if
 
-!  Tests for a restart in the framework of the PAW method
+   ! Tests for a restart in the framework of the PAW method
    if (hdr%usepaw/=0 .or. hdr0%usepaw/=0) then
      if (tpaw /= 0 .or. tlmn /= 0) restartpaw=0
      if (restartpaw == 0) then
@@ -4830,15 +4833,15 @@ type(crystal_t) function hdr_get_crystal(hdr, timrev, remove_inv) result(cryst)
 ! *********************************************************************
 
  rinv=.FALSE.; if (PRESENT(remove_inv)) rinv=remove_inv
- use_antiferro = (hdr%nspden==2.and.hdr%nsppol==1)
+ use_antiferro = hdr%nspden == 2 .and. hdr%nsppol ==1
 
  ! Consistency check
- ABI_CHECK(any(timrev == [1, 2]),"timrev should be in (1|2)")
+ ABI_CHECK(any(timrev == [1, 2]), "timrev should be in (1|2)")
  if (use_antiferro) then
-   ABI_CHECK(ANY(hdr%symafm==-1),"Wrong nspden, nsppol, symafm.")
+   ABI_CHECK(ANY(hdr%symafm == -1), "Wrong nspden, nsppol, symafm.")
  end if
 
- space_group = 0 !FIXME not known at this level.
+ space_group = 0 ! FIXME not known at this level.
 
  call crystal_init(hdr%amu,cryst,space_group,hdr%natom,hdr%npsp,hdr%ntypat,hdr%nsym,hdr%rprimd,hdr%typat,hdr%xred,&
    hdr%zionpsp,hdr%znuclpsp,timrev,use_antiferro,rinv,hdr%title,&

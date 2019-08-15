@@ -27,7 +27,6 @@ module m_gstate
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use defs_rectypes
  use m_errors
  use m_xmpi
@@ -48,7 +47,9 @@ module m_gstate
  use m_nctk
  use m_hdr
  use m_ebands
+ use m_dtfil
 
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_symtk,            only : matr3inv
  use m_io_tools,         only : open_file

@@ -30,7 +30,6 @@ module m_eph_driver
  use m_errors
  use m_abicore
  use defs_datatypes
- use defs_abitypes
  use m_xmpi
  use m_xomp
  use m_hdr
@@ -38,6 +37,7 @@ module m_eph_driver
  use m_ebands
  use m_dtset
  use m_efmas_defs
+ use m_dtfil
  use m_ddk
  use m_ddb
  use m_dvdb
@@ -45,10 +45,12 @@ module m_eph_driver
  use m_phonons
  use m_nctk
  use m_wfk
+ use m_distribfft
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
+ use defs_abitypes, only : MPI_type
  use m_io_tools,        only : file_exists
  use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa

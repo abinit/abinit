@@ -28,14 +28,15 @@ module m_mlwfovlp_qp
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use defs_wannier90
  use m_errors
  use m_abicore
  use m_xmpi
  use m_hdr
  use m_dtset
+ use m_dtfil
 
+ use defs_abitypes,    only : MPI_type
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
  use m_pawtab,         only : pawtab_type
  use m_pawcprj,        only : pawcprj_type, paw_overlap, pawcprj_getdim, pawcprj_alloc, pawcprj_free

@@ -24,7 +24,6 @@
 module m_gkk
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -38,10 +37,12 @@ module m_gkk
  use m_pawcprj
  use m_wfk
  use m_nctk
+ use m_dtfil
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
+ use defs_abitypes,    only : MPI_type
  use m_time,           only : cwtime, sec2str
  use m_io_tools,       only : iomode_from_fname
  use m_fstrings,       only : itoa, sjoin, ktoa, ltoa, strcat

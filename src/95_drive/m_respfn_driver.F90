@@ -28,7 +28,7 @@ module m_respfn_driver
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
+
  use defs_wvltypes
  use m_efmas_defs
  use m_abicore
@@ -42,7 +42,9 @@ module m_respfn_driver
  use m_crystal
  use m_xcdata
  use m_dtset
+ use m_dtfil
 
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_fstrings,    only : strcat
  use m_symtk,       only : matr3inv, littlegroup_q, symmetrize_xred

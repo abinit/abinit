@@ -27,7 +27,6 @@ module m_dfpt_scfcv
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_ab7_mixing
  use m_efield
  use m_errors
@@ -38,10 +37,13 @@ module m_dfpt_scfcv
  use m_xmpi
  use m_nctk
  use m_hdr
+ use m_dtfil
+ use m_hamiltonian
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
+ use defs_abitypes, only : MPI_type
  use m_cgtools,  only : mean_fftr, overlap_g, dotprod_vn, dotprod_vn, dotprod_g
  use m_fstrings, only : int2char4, sjoin
  use m_geometry, only : metric, stresssym
@@ -51,6 +53,14 @@ module m_dfpt_scfcv
  use m_mpinfo,   only : iwrite_fftdatar, proc_distrb_cycle
  use m_kg,       only : getcut, mkkin, kpgstr, mkkpg
  use m_fft,      only : fftpac, fourdp
+ use m_symtk,     only : mati3inv
+ use m_dynmat,    only : dfpt_sygra
+ use m_occ,         only : occeig
+ use m_paw_mkrho,   only : pawmkrho
+ use m_mkffnl,      only : mkffnl
+ use m_getgh1c,     only : getgh1c
+ use m_dfpt_mkrho,  only : dfpt_accrho
+ use m_nonlop,      only : nonlop
  use m_ioarr,    only : ioarr, fftdatar_write_from_hdr, fort_denpot_skip
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type
@@ -58,7 +68,9 @@ module m_dfpt_scfcv
  use m_paw_an,   only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify, paw_an_reset_flags
  use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
  use m_pawfgrtab,only : pawfgrtab_type
- use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_io, pawrhoij_inquire_dim, pawrhoij_filter
+ use m_pawrhoij,    only : pawrhoij_type, pawrhoij_init_unpacked, pawrhoij_gather, pawrhoij_filter, &
+                           pawrhoij_alloc, pawrhoij_free, pawrhoij_nullify, &
+                           pawrhoij_free_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_axpby, pawcprj_free, pawcprj_getdim
  use m_pawdij,   only : pawdij, pawdijfr, symdij
  use m_pawfgr,   only : pawfgr_type
@@ -2336,8 +2348,6 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 & wtk_rbz,&
 & xred,ylm,ylm1,ylmgr,ylmgr1)
 
- use m_hamiltonian,only : init_hamiltonian, gs_hamiltonian_type
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mband,mgfft,mk1mem
@@ -2732,9 +2742,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
 &  istwf_k,kg_k,kg1_k,kpoint,mband,mkmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,natom,nband_k,&
 &  npw_k,npw1_k,nspinor,nsppol,ntypat,occ_k,psps,rmet,wtk_k,ylm,ylmgr)
 
- use m_hamiltonian, only : gs_hamiltonian_type
- use m_mkffnl,      only : mkffnl
- use m_nonlop,      only : nonlop
+
 
 !Arguments ------------------------------------
 !scalars
@@ -2993,12 +3001,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 &          mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,nfft,ngfft,nkpt,nkpt_rbz,nkxc,&
 &          npwarr,npwar1,nspden,nsppol,nsym1,occ_rbz,ph1d,psps,rhor1,rmet,rprimd,&
 &          symrc1,ucvol,wtk_rbz,xred,ylm,ylm1,rhor,vxc)
-
- use m_hamiltonian
-
- use m_symtk,     only : mati3inv
- use m_dynmat,    only : dfpt_sygra
- use m_dfpt_mkvxc,     only : dfpt_mkvxc
 
 !Arguments -------------------------------
 !scalars
@@ -3576,16 +3578,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 & nsppol,nsym1,occkq,occ_rbz,paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
 & phnons1,ph1d,prtvol,psps,rhorfermi,rmet,rprimd,symaf1,symrc1,symrl1,&
 & ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1)
-
- use m_hamiltonian
-
- use m_occ,         only : occeig
- use m_pawrhoij,    only : pawrhoij_type, pawrhoij_init_unpacked, pawrhoij_gather, &
-&                          pawrhoij_alloc, pawrhoij_free, pawrhoij_nullify, &
-&                          pawrhoij_free_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
- use m_paw_mkrho,   only : pawmkrho
-
- use m_mkffnl,      only : mkffnl
 
 !Arguments -------------------------------
 !scalars
@@ -4258,10 +4250,6 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 &          kptopt,mband,mcgq,mcprjq,mkmem,mpi_enreg,mpw,nband_k,ncpgr,&
 &          npw_k,npw1_k,nspinor,nsppol,occ_k,pawrhoijfermi,prtvol,&
 &          rf_hamkq,rhoaug,rocceig,wtk_k)
-
- use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type
- use m_getgh1c,     only : getgh1c
- use m_dfpt_mkrho,  only : dfpt_accrho
 
 !Arguments ------------------------------------
 !scalars

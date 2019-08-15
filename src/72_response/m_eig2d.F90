@@ -31,7 +31,6 @@ MODULE m_eig2d
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_nctk
@@ -43,7 +42,9 @@ MODULE m_eig2d
  use m_cgtools
  use m_hdr
  use m_dtset
+ use m_dtfil
 
+ use defs_abitypes, only : MPI_type
  use m_time,       only : timab
  use m_fstrings,   only : strcat
  use m_crystal,    only : crystal_init,  crystal_t

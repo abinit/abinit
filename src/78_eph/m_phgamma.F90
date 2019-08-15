@@ -24,7 +24,6 @@
 module m_phgamma
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -46,8 +45,10 @@ module m_phgamma
  use m_hamiltonian
  use m_pawcprj
  use m_dtset
+ use m_dtfil
  use m_wfd
 
+ use defs_abitypes,    only : mpi_type
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : toupper, itoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, wrap2_pmhalf, simpson_int, simpson, mkherm, get_diag

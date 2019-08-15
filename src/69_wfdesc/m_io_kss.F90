@@ -29,7 +29,6 @@ MODULE m_io_kss
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -46,7 +45,9 @@ MODULE m_io_kss
  use m_paw_ij
  use m_pawcprj
  use m_pawfgr
+ use m_dtfil
 
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_io_tools,         only : open_file
  use m_fstrings,         only : sjoin, itoa, strcat
@@ -121,8 +122,6 @@ CONTAINS  !===========================================================
 
 subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2,tnons2,occ,gbig,shlim,&
 &  crystal,Dtset,Hdr,Psps,iomode,kss_unt)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -30,6 +30,9 @@ module m_mover_effpot
  use m_errors
  use m_abicore
  use m_dtset
+ use m_dtfil
+
+ use defs_abitypes, only : MPI_type
 
  implicit none
 

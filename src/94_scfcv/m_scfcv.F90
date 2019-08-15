@@ -29,18 +29,19 @@
 module m_scfcv
 
  use defs_basis
- use m_abicore
- use m_errors
  use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use defs_rectypes
+ use m_abicore
+ use m_errors
  use m_wffile
  use m_rec
  use m_efield
  use m_entropyDMFT
  use m_hdr
+ use m_dtfil
 
+ use defs_abitypes,      only : MPI_type
  use m_scf_history,      only : scf_history_type
  use m_results_gs ,      only : results_gs_type
  use m_electronpositron, only : electronpositron_type

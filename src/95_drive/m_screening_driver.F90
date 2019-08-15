@@ -28,7 +28,6 @@ module m_screening_driver
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_dtset
@@ -43,7 +42,10 @@ module m_screening_driver
 #endif
  use libxc_functionals
  use m_hdr
+ use m_dtfil
+ use m_distribfft
 
+ use defs_abitypes,   only : MPI_type
  use m_time,          only : timab
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_fstrings,      only : int2char10, sjoin, strcat, itoa, ltoa, itoa

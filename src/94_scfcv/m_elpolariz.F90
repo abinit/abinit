@@ -28,7 +28,6 @@ module m_elpolariz
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_efield
@@ -36,7 +35,9 @@ module m_elpolariz
  use m_wffile
  use m_hdr
  use m_dtset
+ use m_dtfil
 
+ use defs_abitypes, only : MPI_type
  use m_geometry, only : metric
  use m_symtk,    only : matr3inv
  use m_hide_lapack,  only : dzgedi, dzgefa

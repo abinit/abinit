@@ -37,6 +37,7 @@ MODULE m_screening
  use m_lebedev
  use m_spectra
  use m_nctk
+ use m_distribfft
 #ifdef HAVE_NETCDF
  use netcdf
 #endif

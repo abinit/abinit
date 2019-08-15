@@ -28,7 +28,6 @@ module m_nonlinear
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_wffile
  use m_errors
@@ -38,7 +37,9 @@ module m_nonlinear
  use m_ebands
  use m_xcdata
  use m_dtset
+ use m_dtfil
 
+ use defs_abitypes, only : MPI_type
  use m_fstrings, only : sjoin, itoa
  use m_time,     only : timab
  use m_symtk,    only : symmetrize_xred, littlegroup_q

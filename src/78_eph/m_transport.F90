@@ -26,7 +26,6 @@
 module m_transport
 
  use defs_basis
- use defs_abitypes
  use iso_c_binding
  use m_abicore
  use m_xmpi
@@ -37,6 +36,7 @@ module m_transport
  use m_nctk
  use m_sigmaph
  use m_dtset
+ use m_dtfil
 #ifdef HAVE_NETCDF
  use netcdf
 #endif

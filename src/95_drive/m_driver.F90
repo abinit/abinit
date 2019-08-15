@@ -113,10 +113,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_errors
  use m_dtset
+ use m_dtfil
  use m_results_out
  use m_results_respfn
  use m_yaml
@@ -132,6 +132,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 #endif
  use m_xgScalapack
 
+ use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
  use m_xg,           only : xg_finalize
  use m_libpaw_tools, only : libpaw_write_comm_set

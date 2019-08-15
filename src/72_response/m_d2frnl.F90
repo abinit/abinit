@@ -28,7 +28,6 @@ module m_d2frnl
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -38,7 +37,9 @@ module m_d2frnl
  use m_efmas_defs
  use m_wfk
  use m_dtset
+ use m_dtfil
 
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_geometry, only : metric, strconv
  use m_efmas,    only : check_degeneracies

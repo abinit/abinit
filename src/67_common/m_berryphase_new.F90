@@ -25,7 +25,6 @@
 
 module m_berryphase_new
 
- use defs_abitypes
  use defs_basis
  use defs_datatypes
  use defs_wvltypes
@@ -35,7 +34,9 @@ module m_berryphase_new
  use m_xmpi
  use m_hdr
  use m_dtset
+ use m_dtfil
 
+ use defs_abitypes,  only : MPI_type
  use m_berrytk,      only : smatrix, polcart
  use m_cgprj,        only : ctocprj
  use m_fftcore,      only : kpgsph

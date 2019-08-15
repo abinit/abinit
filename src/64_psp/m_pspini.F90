@@ -28,12 +28,12 @@ module m_pspini
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
  use m_psxml2ab
  use m_dtset
+ use m_dtfil
  !use m_psps
 
  use m_time,      only : timab

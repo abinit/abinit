@@ -28,17 +28,18 @@ module m_pead_nl_loop
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_wffile
  use m_abicore
  use m_xmpi
  use m_hdr
  use m_dtset
+ use m_dtfil
 #if defined HAVE_MPI2
  use mpi
 #endif
 
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_kg,       only : getph, mkkpg
  use m_cgtools,  only : dotprod_vn, dotprod_g
