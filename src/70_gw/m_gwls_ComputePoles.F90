@@ -24,11 +24,8 @@
 
 #include "abi_common.h"
 
-
-
 module m_gwls_ComputePoles
 
-! local modules
 use m_gwls_utility
 use m_gwls_wf
 use m_gwls_hamiltonian
@@ -40,11 +37,8 @@ use m_gwls_GWanalyticPart
 use m_gwls_TimingLog
 use m_gwls_LanczosBasis
 
-
-! abinit modules
 use defs_basis
 use defs_datatypes
-use defs_abitypes
 use defs_wvltypes
 use m_abicore
 use m_xmpi
@@ -54,7 +48,6 @@ use m_errors
 use m_io_tools,         only : get_unit
 use m_paw_dmft,         only: paw_dmft_type
 use m_ebands,           only : ebands_init, ebands_free
-
 use m_gaussian_quadrature, only: gaussian_quadrature_gegenbauer, gaussian_quadrature_legendre
 
 
@@ -99,12 +92,10 @@ CONTAINS
 
 subroutine generate_degeneracy_table_for_poles(debug)
 !----------------------------------------------------------------------
-! This subroutine groups, once and for all, the indices of 
+! This subroutine groups, once and for all, the indices of
 ! degenerate eigenstates. This will be useful to compute the poles
 !
 !----------------------------------------------------------------------
-implicit none
-
 
 logical, intent(in) :: debug
 
@@ -134,24 +125,24 @@ degeneracy_tolerance = 1.0D-8
 nbands = size(eig)
 
 ! initialize
-largest_degeneracy      = 1 
+largest_degeneracy      = 1
 number_of_denerate_sets = 1
 
 n_degeneracy = 1
 energy       = eig(1)
 
 !============================================================
-! Notes for the code block below: 
+! Notes for the code block below:
 !
 ! The electronic eigenvalues can be grouped in degenerate
 ! sets. The code below counts how many such sets there are,
 ! and how many eigenvalues belong to each set.
 !
-! It is important to have a robust algorithm to do this 
+! It is important to have a robust algorithm to do this
 ! properly. In particular, the edge case where the LAST SET
 ! is degenerate must be treated with care .
 
-! The algorithm.I'm looking at at the time of this writing 
+! The algorithm.I'm looking at at the time of this writing
 ! has a bug in it and cannot handle a degenerate last set...
 ! Let's fix that!
 !============================================================
@@ -251,12 +242,12 @@ if (debug .and. mpi_enreg%me == 0) then
 
   do i_set = 1, number_of_denerate_sets
   write(io_unit,12) i_set, number_of_degenerate_states(i_set), degeneracy_table(i_set,:)
-  end do 
+  end do
 
   flush(io_unit)
 
   close(io_unit)
-end if 
+end if
 
 10 format(A)
 12 format(I5,10X,I5,15X,1000I5)
@@ -288,7 +279,6 @@ end subroutine generate_degeneracy_table_for_poles
 
 subroutine clean_degeneracy_table_for_poles()
 
-implicit none
 ! *************************************************************************
 
 if(allocated(degeneracy_table)) then
@@ -313,10 +303,10 @@ end subroutine clean_degeneracy_table_for_poles
 !! OUTPUT
 !!
 !! PARENTS
-!!       
+!!
 !!
 !! CHILDREN
-!!       
+!!
 !!
 !! SOURCE
 
@@ -326,12 +316,11 @@ function compute_Poles(external_omega,kmax_poles,debug)
 ! energy, as a function of the external frequency.
 !
 ! The algorithm builds a Lanczos chain for each contributing subspace;
-! the number of steps is controlled by kmax_poles. 
+! the number of steps is controlled by kmax_poles.
 !
 ! This function will take in explicit arguments, as it is simpler
 ! to do this than to define global arrays.
 !----------------------------------------------------------------------
-implicit none
 real(dp) :: compute_Poles
 
 real(dp),     intent(in) :: external_omega
@@ -446,8 +435,8 @@ if (debug .and. mpi_enreg%me == 0 ) then
   write(io_unit,10) "#  Determine where the external energy is:                                                           "
   write(io_unit,10) "#                                                                                                    "
   write(io_unit,14) "#             pole_is_valence    = ",pole_is_valence
-  write(io_unit,14) "#             pole_is_conduction = ",pole_is_conduction 
-  write(io_unit,14) "#             pole_is_in_gap     = ",pole_is_in_gap 
+  write(io_unit,14) "#             pole_is_conduction = ",pole_is_conduction
+  write(io_unit,14) "#             pole_is_in_gap     = ",pole_is_in_gap
   write(io_unit,10) "#                                                                                                    "
   write(io_unit,10) "#===================================================================================================="
   flush(io_unit)
@@ -489,7 +478,7 @@ end if
 !------------------------------------------
 ! Test if we need to exit the loop
 !------------------------------------------
-if (pole_is_valence ) then 
+if (pole_is_valence ) then
 
   ! If the pole is valence, get out when we enter conduction states
   if (  n > nbandv  ) then
@@ -499,13 +488,13 @@ if (pole_is_valence ) then
       flush(io_unit)
     end if
 
-    exit 
+    exit
   end if
 
   ! if the valence energy is smaller than the external frequency,
   ! then there is no contribution
 
-  if (En_m_omega < zero  .and. abs(En_m_omega) > energy_tolerance) then 
+  if (En_m_omega < zero  .and. abs(En_m_omega) > energy_tolerance) then
     ! careful close to zero!
     if (debug .and. mpi_enreg%me == 0) then
       write(io_unit,10) "# "
@@ -519,7 +508,7 @@ if (pole_is_valence ) then
   ! if we are still here, there is a valence contribution
   prefactor = -one
 
-else if ( pole_is_conduction ) then 
+else if ( pole_is_conduction ) then
 
   ! If the pole is conduction, get out when the conduction state is
   ! larger than the frequency (careful close to zero!)
@@ -529,7 +518,7 @@ else if ( pole_is_conduction ) then
       write(io_unit,10) "#                eig(n) > omega : exit!"
       flush(io_unit)
     end if
-    exit 
+    exit
   end if
 
   ! If the pole is conduction, there is no contribution while
@@ -563,7 +552,7 @@ if (abs(En_m_omega) < energy_tolerance ) then
 
   ! The factor of 1/2 accounts for the fact that
   ! the pole is at the origin!
-  prefactor = 0.5_dp*prefactor  
+  prefactor = 0.5_dp*prefactor
 end if
 
 
@@ -577,7 +566,7 @@ call get_seeds(n, number_of_seeds, seeds) !Missing wrappers
 call set_dielectric_function_frequency([En_m_omega,zero])
 if (debug .and. mpi_enreg%me == 0) then
   write(io_unit,10) "#                Compute pole contribution:"
-  write(io_unit,12) "#                        number of seeds = ",number_of_seeds 
+  write(io_unit,12) "#                        number of seeds = ",number_of_seeds
   write(io_unit,16) "#                        ||   seeds   || = ",sqrt(sum(abs(seeds(:,:))**2))  !Missing xmpi_sum
   write(io_unit,16) "#                        eig(n)-omega    = ",En_m_omega, " Ha"
   write(io_unit,17) "#                        prefactor       = ",prefactor
@@ -596,7 +585,7 @@ if (debug .and. mpi_enreg%me == 0) then
 end if
 
 
-compute_Poles = compute_Poles + prefactor*pole_contribution 
+compute_Poles = compute_Poles + prefactor*pole_contribution
 ABI_DEALLOCATE(seeds)
 end do
 
@@ -628,10 +617,10 @@ end function compute_Poles
 !! OUTPUT
 !!
 !! PARENTS
-!!       
+!!
 !!
 !! CHILDREN
-!!       
+!!
 !!
 !! SOURCE
 
@@ -640,7 +629,6 @@ function compute_pole_contribution(epsilon_matrix_function,nseeds,kmax,seeds,deb
 ! This routine computes the contribution to the  poles energy
 ! coming from the states in the seeds.
 !----------------------------------------------------------------------
-implicit none
 interface
   subroutine epsilon_matrix_function(v_out,v_in,l)
 

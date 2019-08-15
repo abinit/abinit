@@ -44,7 +44,6 @@ use m_gwls_GWlanczos
 use m_abicore
 use defs_basis
 use defs_datatypes
-use defs_abitypes
 use m_dtset
 
 use m_io_tools,    only : get_unit

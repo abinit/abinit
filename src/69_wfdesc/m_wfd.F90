@@ -26,7 +26,6 @@ module m_wfd
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_copy
@@ -34,7 +33,9 @@ module m_wfd
  use m_crystal
  use m_wfk
  use m_hdr
+ use m_distribfft
 
+ use defs_abitypes,    only : mpi_type
  use m_gwdefs,         only : one_gw
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa

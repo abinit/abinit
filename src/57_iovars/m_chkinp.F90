@@ -28,7 +28,6 @@ module m_chkinp
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_gwdefs
  use m_abicore
  use m_errors
@@ -36,6 +35,7 @@ module m_chkinp
  use m_xomp
  use libxc_functionals
 
+ use defs_abitypes,    only : MPI_type
  use m_numeric_tools,  only : iseven
  use m_symtk,          only : chkgrp, chkorthsy
  use m_geometry,       only : metric

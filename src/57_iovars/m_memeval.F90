@@ -28,12 +28,12 @@ MODULE m_memeval
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
  use m_dtset
 
+ use defs_abitypes,   only : MPI_type
  use m_geometry,      only : mkradim, mkrdim, xred2xcart, metric
  use m_symtk,         only : mati3inv, littlegroup_q
  use m_spgdata,       only : prtspgroup

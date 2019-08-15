@@ -28,7 +28,6 @@ module m_out_acknowl
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_dtset
 

@@ -27,7 +27,6 @@
 module m_outvars
 
  use defs_basis
- use defs_abitypes
  use m_results_out
  use m_dtset
  use m_abicore
@@ -41,6 +40,7 @@ module m_outvars
  use m_outvar_i_n
  use m_outvar_o_z
 
+ use defs_abitypes,  only : ab_dimensions
  use m_nctk,      only : create_nc_file
 
  implicit none

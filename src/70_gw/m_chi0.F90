@@ -28,7 +28,6 @@ module m_chi0
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors

@@ -32,6 +32,7 @@
 MODULE m_read_plowannier
 
  use defs_basis
+
  implicit none
 
  private
@@ -102,7 +103,6 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
 
@@ -110,7 +110,7 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
  use m_crystal,       only : crystal_t
  use m_bz_mesh,       only : kmesh_t, get_BZ_item
  use m_pawang,        only : pawang_type
- implicit none
+
 !Arguments ------------------------------------
 !types and arrays
  type(kmesh_t),intent(in) :: Kmesh

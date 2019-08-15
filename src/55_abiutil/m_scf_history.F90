@@ -33,11 +33,11 @@
 MODULE m_scf_history
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_dtset
  use m_errors
 
+ use defs_abitypes, only : MPI_type
  use m_pawcprj,  only : pawcprj_type, pawcprj_free
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_nullify, pawrhoij_free
 

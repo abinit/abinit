@@ -32,11 +32,12 @@
 MODULE m_results_out
 
  use defs_basis
- use defs_abitypes
  use m_dtset
  use m_errors
  use m_abicore
  use m_xmpi
+
+ use defs_abitypes, only : MPI_type
 
  implicit none
 

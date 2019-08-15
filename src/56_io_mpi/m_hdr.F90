@@ -238,6 +238,7 @@ module m_hdr
   ! EVOLVING variable, only for paw
   type(pawrhoij_type), allocatable :: pawrhoij(:)
 
+  ! TODO
   !contains
   !procedure
 
@@ -2145,9 +2146,9 @@ subroutine hdr_echo(hdr, fform, rdwr, unit, header)
      ! TODO: This part should always be printed.
      !write(ount,'(a,a)' ) '   md5=',trim(hdr%md5_pseudos(ipsp))
      write(ount,'(a,f6.2,a,f6.2,a,i3,a,i6,a,i3,a,i3)' ) &
-&     '  znuclpsp=',hdr%znuclpsp(ipsp),    ', zionpsp=',  hdr%zionpsp(ipsp),&
-&     ', pspso=' , hdr%pspso(ipsp),  ', pspdat=',hdr%pspdat(ipsp),          &
-&     ', pspcod=', hdr%pspcod(ipsp), ', pspxc=', hdr%pspxc(ipsp)
+      '  znuclpsp=',hdr%znuclpsp(ipsp),    ', zionpsp=',  hdr%zionpsp(ipsp),&
+      ', pspso=' , hdr%pspso(ipsp),  ', pspdat=',hdr%pspdat(ipsp),          &
+      ', pspcod=', hdr%pspcod(ipsp), ', pspxc=', hdr%pspxc(ipsp)
 
      if(hdr%usepaw==1)then
        write(ount,'(a,i3)' ) '  lmn_size=', hdr%lmn_size(ipsp)
@@ -2288,8 +2289,8 @@ subroutine hdr_skip_wfftype(wff,ierr)
    read(unit, err=10, iomsg=errmsg) codvsn,headform ! fform
 
    if (headform==1   .or. headform==2   .or. &
-&   headform==51  .or. headform==52  .or.   &
-&   headform==101 .or. headform==102 ) headform=22
+       headform==51  .or. headform==52  .or.   &
+       headform==101 .or. headform==102 ) headform=22
 
    if (headform < 80) then
      write(msg,'(3a,i0,4a)')&
@@ -2315,9 +2316,9 @@ subroutine hdr_skip_wfftype(wff,ierr)
  else if(wff%iomode==IO_MODE_MPI)then
 
    headform=wff%headform
-   if(headform==1   .or. headform==2   .or. &
-&   headform==51  .or. headform==52  .or. &
-&   headform==101 .or. headform==102) headform=22
+   if (headform==1   .or. headform==2   .or. &
+      headform==51  .or. headform==52  .or. &
+      headform==101 .or. headform==102) headform=22
 
    if (headform < 80) then
      write(msg,'(3a,i0,4a)')&

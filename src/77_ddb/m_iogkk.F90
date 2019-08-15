@@ -28,7 +28,6 @@ module m_iogkk
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use defs_elphon
  use m_errors
  use m_abicore
@@ -36,6 +35,7 @@ module m_iogkk
  use m_krank
  use m_hdr
 
+ use defs_abitypes,     only : MPI_type
  use m_numeric_tools,   only : wrap2_pmhalf
  use m_io_tools,        only : open_file, get_unit
  use m_symtk,           only : mati3inv, littlegroup_q

@@ -36,7 +36,6 @@ module m_hamiltonian
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi

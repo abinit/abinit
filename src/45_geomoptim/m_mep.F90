@@ -32,12 +32,12 @@
 MODULE m_mep
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_dtset
  use m_xmpi
 
+ use defs_abitypes, only : MPI_type
  use m_geometry,    only : fred2fcart, fcart2fred, xcart2xred, xred2xcart, metric
  use m_bfgs,        only : hessupdt
  use m_results_img, only : results_img_type, gather_array_img

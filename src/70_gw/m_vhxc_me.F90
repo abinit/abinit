@@ -28,13 +28,14 @@ module m_vhxc_me
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xcdata
  use libxc_functionals
  use m_dtset
+ use m_distribfft
 
+ use defs_abitypes, only : MPI_type
  use m_pawang,      only : pawang_type
  use m_pawtab,      only : pawtab_type
  use m_paw_an,      only : paw_an_type

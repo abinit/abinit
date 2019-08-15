@@ -42,7 +42,7 @@ module m_strain
  public  :: strain_apply
 !!***
 
-!!****t* defs_abitypes/strain_type
+!!****t* m_strain/strain_type
 !! NAME
 !! strain_type
 !!

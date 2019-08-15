@@ -27,14 +27,14 @@ module m_alloc_hamilt_gpu
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_dtset
-
 #if defined HAVE_GPU_CUDA
  use m_gpu_toolbox
 #endif
+
+ use defs_abitypes, only : MPI_type
 
  implicit none
 

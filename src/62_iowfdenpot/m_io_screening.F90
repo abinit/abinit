@@ -26,7 +26,6 @@
 MODULE m_io_screening
 
  use defs_basis
- use defs_abitypes
  use m_abicore
 #if defined HAVE_MPI2
  use mpi

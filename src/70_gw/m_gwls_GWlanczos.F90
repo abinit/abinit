@@ -41,7 +41,6 @@ use m_gwls_QR_factorization
 !abinit modules
 use defs_basis
 use defs_datatypes
-use defs_abitypes
 use defs_wvltypes
 use m_abicore
 use m_xmpi
@@ -117,7 +116,7 @@ ABI_ALLOCATE(psig_e,(2,npw_g))
 ABI_ALLOCATE(psikb_s,(2,npw_kb))
 ABI_ALLOCATE(psig_s,(2,npw_g))
 
-nsblk = ceiling(1.0*nseeds/blocksize) 
+nsblk = ceiling(1.0*nseeds/blocksize)
 
 do i=1,nsblk
 do j=1,blocksize
@@ -125,7 +124,7 @@ psikb_e(:,(j-1)*npw_k+1:j*npw_k) = cg(:,(e-1)*npw_k+1:e*npw_k)
 end do
 
 psig_e = zero
-call wf_block_distribute(psikb_e,  psig_e,1) ! LA -> FFT 
+call wf_block_distribute(psikb_e,  psig_e,1) ! LA -> FFT
 
 do j=1,blocksize
 n = (i-1)*blocksize + j-1 + first_seed
@@ -137,7 +136,7 @@ end if
 end do
 
 psig_s = zero
-call wf_block_distribute(psikb_s,  psig_s,1) ! LA -> FFT 
+call wf_block_distribute(psikb_s,  psig_s,1) ! LA -> FFT
 
 ! Fourier transform valence wavefunction, to real space
 call g_to_r(psir1,psig_s)
@@ -154,7 +153,7 @@ n = (i-1)*blocksize + j
 if(n<=nseeds) then
   psik_out = psikb_s(:,(j-1)*npw_k+1:j*npw_k)
   call sqrt_vc_k(psik_out)
-  seeds(:,n) = cmplx_1*psik_out(1,:) + cmplx_i*psik_out(2,:) 
+  seeds(:,n) = cmplx_1*psik_out(1,:) + cmplx_i*psik_out(2,:)
 end if
 end do
 end do
@@ -421,11 +420,11 @@ list_time(itime) = list_time(itime) + time2-time1
 xkm1(:,:) = xk(:,:)
 
 
-! Orthonormalize THE RESIDUAL to all previously calculated directions 
+! Orthonormalize THE RESIDUAL to all previously calculated directions
 
 itime = itime+1
 call cpu_time(time1)
-!if ( ortho .and. (dtset%gwcalctyp/=1) ) then !This is a test to obtain the CPU time taken by the orthogonalizations.  
+!if ( ortho .and. (dtset%gwcalctyp/=1) ) then !This is a test to obtain the CPU time taken by the orthogonalizations.
 
 if(present(Qk)) then
   ! Orthonormalize to all previously calculated directions, if
@@ -521,7 +520,7 @@ complex(dpc), allocatable :: saved_band_storage_matrix(:,:)
 
 complex(dpc), allocatable :: eigenvectors(:,:)
 
-complex(dpc), allocatable :: Lbasis_tmp(:,:)  
+complex(dpc), allocatable :: Lbasis_tmp(:,:)
 
 integer :: i, j
 integer :: k
@@ -611,7 +610,7 @@ nseeds*kmax,      & ! dimension of eigenvector matrix
 work, rwork, info )  ! work arrays and info
 
 
-if ( info /= 0) then        
+if ( info /= 0) then
   debug_unit = get_unit()
   write(debug_filename,'(A,I4.4,A)') 'LAPACK_DEBUG_PROC=',mpi_enreg%me,'.log'
 
@@ -649,7 +648,7 @@ end if
 ! Lbasis = matmul(Lbasis,eigenvectors)
 
 ! use temporary array, which is PROPERLY ALLOCATED, to perform matrix multiplication
-ABI_ALLOCATE(Lbasis_tmp, (Hsize,nseeds*kmax))  
+ABI_ALLOCATE(Lbasis_tmp, (Hsize,nseeds*kmax))
 
 ! Compute C = A * B, where A = Lbasis, B = eigenvectors, and C = Lbasis_tmp
 call ZGEMM(     'N',     & ! leave array A as is

@@ -37,7 +37,6 @@ use m_bandfft_kpt
 use m_cgtools
 use defs_basis
 use defs_datatypes
-use defs_abitypes
 use m_abicore
 use m_xmpi
 use m_pawang
@@ -45,6 +44,7 @@ use m_errors
 use m_ab7_mixing
 use m_mpinfo
 
+use defs_abitypes,    only : MPI_type
 use m_io_tools,         only : get_unit
 use m_hamiltonian,      only : gs_hamiltonian_type, copy_hamiltonian
 use m_paw_dmft,         only : paw_dmft_type

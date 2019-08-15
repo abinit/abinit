@@ -28,7 +28,6 @@
 MODULE m_exc_itdiago
 
  use defs_basis
- use defs_abitypes
  use m_bs_defs
  use m_errors
  use m_abicore

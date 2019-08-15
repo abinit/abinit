@@ -30,9 +30,18 @@ MODULE m_plowannier
  use m_abicore
  use m_dtset
  use m_dtfil
+ use defs_datatypes
+ use defs_wvltypes
+ use m_xmpi
 
+ use defs_abitypes, only : MPI_type
  use m_io_tools,  only : open_file
  use m_mpinfo,    only : proc_distrb_cycle
+ use m_crystal, only : crystal_t
+ use m_pawtab, only : pawtab_type
+ use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_get,pawcprj_free
+ use m_pawrad, only : pawrad_type, simp_gen
+
 
  implicit none
 
@@ -297,14 +306,6 @@ CONTAINS  !=====================================================================
 
 
 subroutine init_plowannier(dtset,wan)
-
-  use defs_basis
-  use defs_datatypes
-  use defs_abitypes
-  use defs_wvltypes
-  use m_abicore
-  use m_errors
-  use m_xmpi
 
 !Arguments ----------------------------------
 !scalars
@@ -667,19 +668,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 !DEC$ NOOPTIMIZE
 #endif
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wvltypes
- use m_abicore
- use m_errors
- use m_xmpi
  use m_hide_lapack
-
- use m_crystal, only : crystal_t
- use m_pawtab, only : pawtab_type
- use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_get,pawcprj_free
- use m_pawrad, only : pawrad_type, simp_gen
 
 !Arguments ------------------------------------
 !scalars

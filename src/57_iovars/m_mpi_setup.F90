@@ -27,7 +27,6 @@
 module m_mpi_setup
 
  use defs_basis
- use defs_abitypes
  use m_distribfft
  use m_xmpi
  use m_xomp
@@ -36,6 +35,7 @@ module m_mpi_setup
  use m_errors
  use m_abicore
 
+ use defs_abitypes,  only : MPI_type
  use m_time,         only : abi_wtime
  use m_io_tools,     only : flush_unit
  use m_parser,       only : intagm

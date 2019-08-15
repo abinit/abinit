@@ -52,7 +52,6 @@
 program mrgscr
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_abicore
  use m_build_info
@@ -66,6 +65,7 @@ program mrgscr
  use m_pawrhoij
  use m_dtset
 
+ use defs_abitypes,         only : MPI_type
  use m_specialmsg,          only : herald
  use m_time,                only : timein
  use m_gwdefs,              only : GW_TOLQ, GW_TOLQ0, GW_Q0_DEFAULT

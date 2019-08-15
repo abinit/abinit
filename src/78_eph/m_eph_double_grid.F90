@@ -25,9 +25,9 @@
 module m_eph_double_grid
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_ebands
+ use m_abicore
 
  use defs_datatypes,   only : ebands_t
  use m_numeric_tools,  only : wrap2_pmhalf

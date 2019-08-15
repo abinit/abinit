@@ -26,7 +26,6 @@
 MODULE m_screening
 
  use defs_basis
- use defs_abitypes
  use m_hide_blas
  use m_linalg_interfaces
  use m_xmpi
@@ -42,6 +41,7 @@ MODULE m_screening
  use netcdf
 #endif
 
+ use defs_abitypes,     only : MPI_type
  use m_gwdefs,          only : GW_TOLQ0, czero_gw, GW_Q0_DEFAULT
  use m_fstrings,        only : toupper, endswith, sjoin, itoa
  use m_io_tools,        only : open_file

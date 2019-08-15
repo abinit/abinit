@@ -27,7 +27,6 @@
 module m_ingeo
 
  use defs_basis
- use defs_abitypes
  use m_intagm_img
  use m_abicore
  use m_errors
