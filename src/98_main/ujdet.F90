@@ -36,20 +36,20 @@
 program ujdet
 
  use defs_basis
- use defs_abitypes
  use defs_datatypes
  use m_xmpi
  use m_abicore
  use m_build_info
  use m_errors
 
- use m_paw_uj,      only : pawuj_ini,pawuj_free,pawuj_det
-
+ use defs_abitypes, only : MPI_type, macro_uj_type
  use m_specialmsg,  only : specialmsg_getcount, herald
  use m_io_tools,    only : open_file
  use m_parser,      only : intagm, parsefile
  use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
  use m_dtfil,       only : isfile
+ use m_paw_uj,      only : pawuj_ini,pawuj_free,pawuj_det
+
  implicit none
 
 !Local variables-------------------------------

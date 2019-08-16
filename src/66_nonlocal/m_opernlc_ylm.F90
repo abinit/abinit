@@ -26,10 +26,11 @@
 module m_opernlc_ylm
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
+
+ use defs_abitypes, only : MPI_type
 
  implicit none
 

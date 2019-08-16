@@ -27,7 +27,6 @@
 module m_psolver
 
  use defs_basis
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_errors
@@ -35,6 +34,7 @@ module m_psolver
  use m_cgtools
  use m_xmpi
 
+ use defs_abitypes, only : mpi_type
  use m_geometry, only : metric
  use m_drivexc,  only : mkdenpos
 

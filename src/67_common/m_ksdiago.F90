@@ -28,12 +28,13 @@ module m_ksdiago
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
  use m_hamiltonian
+ use m_distribfft
 
+ use defs_abitypes,       only : MPI_type
  use m_fstrings,          only : toupper
  use m_geometry,          only : metric
  use m_hide_lapack,       only : xheev, xhegv, xheevx, xhegvx

@@ -33,7 +33,6 @@
 
 module m_orbmag
 
-  use defs_abitypes
   use defs_basis
   use defs_datatypes
   use m_errors
@@ -41,6 +40,7 @@ module m_orbmag
   use m_xmpi
   use m_dtset
 
+  use defs_abitypes,      only : MPI_type
   use m_berrytk,          only : smatrix
   use m_cgprj,            only : getcprj
   use m_cgtools,          only : overlap_g

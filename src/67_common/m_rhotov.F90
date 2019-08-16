@@ -26,7 +26,6 @@
 module m_rhotov
 
  use defs_basis
- use defs_abitypes
  use defs_wvltypes
  use m_errors
  use m_abicore
@@ -37,6 +36,7 @@ module m_rhotov
  use m_xcdata
  use m_dtset
 
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_geometry,         only : xred2xcart
  use m_energies,         only : energies_type

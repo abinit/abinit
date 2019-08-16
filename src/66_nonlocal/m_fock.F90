@@ -30,7 +30,6 @@ module m_fock
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_mpinfo
@@ -44,6 +43,7 @@ module m_fock
  use m_cgtools
  use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use m_time,            only : timab
  use m_fstrings,        only : itoa, ftoa, sjoin
  use m_symtk,           only : mati3inv, matr3inv
@@ -287,6 +287,7 @@ module m_fock
   type(MPI_type) :: mpi_enreg
   type(pawang_type),pointer :: pawang
   type(pawcprj_type), allocatable :: cwaveocc_prj(:,:)
+
  end type fock_BZ_type
 !----------------------------------------------------------------------
 

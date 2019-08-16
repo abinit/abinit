@@ -28,7 +28,6 @@ module m_newvtr
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_errors
@@ -37,6 +36,7 @@ module m_newvtr
  use m_cgtools
  use m_dtset
 
+ use defs_abitypes,     only : MPI_type
  use m_time,     only : timab
  use m_geometry, only : metric
  use m_pawtab,   only : pawtab_type

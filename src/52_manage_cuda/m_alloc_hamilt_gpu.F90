@@ -26,7 +26,6 @@
 module m_alloc_hamilt_gpu
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_xmpi
  use m_dtset
@@ -34,6 +33,7 @@ module m_alloc_hamilt_gpu
  use m_gpu_toolbox
 #endif
 
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
 
  implicit none

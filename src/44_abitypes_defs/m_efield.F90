@@ -46,7 +46,7 @@ module m_efield
 !!***
 
 
-!!****t* defs_datatypes/efield_type
+!!****t* m_efield/efield_type
 !! NAME
 !! efield_type
 !!

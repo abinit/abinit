@@ -25,7 +25,6 @@
 module m_berryphase
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_hdr

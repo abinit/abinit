@@ -24,13 +24,13 @@
 MODULE m_paw_uj
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_linalg_interfaces
  use m_xmpi
  use m_dtset
 
+ use defs_abitypes,   only : macro_uj_type
  use m_pptools,       only : prmat
  use m_special_funcs, only : iradfnh
  use m_geometry,      only : shellstruct,ioniondist

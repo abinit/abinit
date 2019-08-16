@@ -27,12 +27,12 @@
 module m_vtorhotf
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
  use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_spacepar,  only : symrhg
 

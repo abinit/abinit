@@ -98,7 +98,6 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -108,6 +107,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  use m_pawcprj
  use m_cgtools
 
+ use defs_abitypes, only : MPI_type
  use m_kg,             only : mkkpg
  use m_initylmg,       only : initylmg
  use m_mkffnl,         only : mkffnl

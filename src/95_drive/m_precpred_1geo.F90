@@ -27,8 +27,8 @@
 module m_precpred_1geo
 
  use defs_basis
- use defs_abitypes
  use m_errors
+ use m_abicore
  use m_abimover
  use m_abihist
  use m_xmpi

@@ -27,12 +27,12 @@
 module m_dfpt_fef
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_efield
  use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use m_kg,        only : kpgio
  use m_cgtools,   only : overlap_g
  use m_mpinfo,    only : proc_distrb_cycle

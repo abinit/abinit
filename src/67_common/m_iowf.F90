@@ -23,7 +23,6 @@
 MODULE m_iowf
 
  use defs_basis
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_errors
@@ -39,6 +38,7 @@ MODULE m_iowf
  use m_hdr
  use m_ebands
 
+ use defs_abitypes, only : MPI_type
  use m_time,           only : cwtime, cwtime_report, timab
  use m_io_tools,       only : get_unit, flush_unit, iomode2str
  use m_fstrings,       only : endswith, sjoin

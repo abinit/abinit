@@ -31,7 +31,6 @@ MODULE m_paw_dmft
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_CtqmcInterface
  use m_errors
  use m_abicore
@@ -39,6 +38,7 @@ MODULE m_paw_dmft
  use m_data4entropyDMFT
  use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use m_io_tools,  only : open_file
  use m_pawtab,    only : pawtab_type
 
@@ -553,7 +553,6 @@ end subroutine init_sc_dmft
 
 subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor, paw_dmft, pawtab, psps, typat)
 
- use defs_abitypes
  use m_splines
  !use m_CtqmcInterface
 

@@ -26,13 +26,13 @@
 module m_nonlop
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
  use m_cgtools
  use m_gemm_nonlop
 
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_hamiltonian, only : gs_hamiltonian_type, KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy

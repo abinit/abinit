@@ -49,7 +49,7 @@ module m_gstate
  use m_ebands
  use m_dtfil
 
- use defs_abitypes,      only : MPI_type
+ use defs_abitypes,      only : MPI_type, macro_uj_type
  use m_time,             only : timab
  use m_symtk,            only : matr3inv
  use m_io_tools,         only : open_file

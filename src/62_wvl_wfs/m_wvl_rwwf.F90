@@ -27,7 +27,7 @@
 module m_wvl_rwwf
 
  use defs_basis
- use defs_abitypes
+
  use defs_datatypes
  use defs_wvltypes
  use m_wffile
@@ -40,6 +40,7 @@ module m_wvl_rwwf
   use etsf_io
 #endif
 
+ use defs_abitypes,  only : MPI_type
  use m_geometry,     only : xred2xcart
 
  implicit none

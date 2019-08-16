@@ -28,12 +28,12 @@
 MODULE m_rf2
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_hamiltonian
  use m_cgtools
 
+ use defs_abitypes, only : MPI_type
  use m_getgh1c,     only : getgh1c
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free, pawcprj_output
  use m_getghc,      only : getghc

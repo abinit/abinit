@@ -29,7 +29,6 @@
 module m_rayleigh_ritz
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_cgtools
  use m_xmpi
@@ -37,6 +36,7 @@ module m_rayleigh_ritz
  use m_abi_linalg
  use m_slk
 
+ use defs_abitypes,   only : mpi_type
  use m_time,          only : timab
  use m_numeric_tools, only : pack_matrix
 

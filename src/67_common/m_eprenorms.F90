@@ -28,8 +28,8 @@
 module m_eprenorms
 
  use defs_basis
- use defs_abitypes
  use defs_datatypes
+ use m_abicore
  use m_errors
  use m_xmpi
 #ifdef HAVE_NETCDF

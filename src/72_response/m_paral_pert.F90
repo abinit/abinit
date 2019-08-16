@@ -29,12 +29,12 @@
 MODULE m_paral_pert
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
  use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use m_time,      only : timab
  use m_copy,      only : deep_copy
  use m_paw_an,    only : paw_an_type, paw_an_free, paw_an_redistribute

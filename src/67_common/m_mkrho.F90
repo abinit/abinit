@@ -27,13 +27,13 @@
 module m_mkrho
 
  use defs_basis
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_xmpi
  use m_errors
  use m_dtset
 
+ use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
  use m_fftcore,      only : sphereboundary
  use m_fft,          only : fftpac, zerosym, fourwf, fourdp

@@ -28,7 +28,6 @@ module m_forstr
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_efield
@@ -39,6 +38,7 @@ module m_forstr
  use m_xcdata
  use m_dtset
 
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_geometry,         only : xred2xcart, metric, stresssym
  use m_energies,         only : energies_type

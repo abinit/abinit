@@ -27,7 +27,6 @@
 module m_chebfi
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_xmpi
  use m_abicore
@@ -36,6 +35,7 @@ module m_chebfi
  use m_invovl
  use m_dtset
 
+ use defs_abitypes, only : mpi_type
  use m_time,          only : timab
  use m_cgtools,       only : dotprod_g
  use m_bandfft_kpt,   only : bandfft_kpt, bandfft_kpt_get_ikpt

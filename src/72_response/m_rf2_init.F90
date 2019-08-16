@@ -31,7 +31,6 @@ module m_rf2_init
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_xmpi
  use m_errors
  use m_wfk
@@ -43,6 +42,7 @@ module m_rf2_init
  use m_dtfil
 
  use m_time   , only : timab
+ use defs_abitypes, only : MPI_type
  use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_copy,pawcprj_get,pawcprj_free,pawcprj_output
  use m_cgprj,   only : getcprj
 

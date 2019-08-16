@@ -41,7 +41,7 @@ MODULE m_results_respfn
  public :: destroy_results_respfn
 !!***
 
-!!****t* defs_datatypes/results_respfn_type
+!!****t* m_results_respfn/results_respfn_type
 !! NAME
 !! results_respfn_type
 !!

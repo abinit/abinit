@@ -26,9 +26,9 @@
 module m_vtorhorec
 
  use defs_basis
- use defs_abitypes
  use defs_datatypes
  use defs_rectypes
+ use m_distribfft
  use m_xmpi
  use m_pretty_rec
  use m_errors
@@ -36,6 +36,7 @@ module m_vtorhorec
  use m_per_cond
  use m_dtset
 
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timein, timab
  use m_rec,              only : Calcnrec, init_nlpsprec, cpu_distribution
  use m_rec_tools,        only : reshape_pot, trottersum, get_pt0_pt1

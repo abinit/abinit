@@ -26,7 +26,7 @@
 module m_extraprho
 
  use defs_basis
- use defs_abitypes
+ use m_abicore
  use m_scf_history
  use m_errors
  use m_xmpi
@@ -34,6 +34,7 @@ module m_extraprho
  use m_dtset
 
  use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_atomdata, only : atom_length
  use m_numeric_tools,   only : hermit
  use m_geometry, only : metric

@@ -32,11 +32,11 @@ module m_wvl_rho
  use m_errors
  use defs_wvltypes
  use m_sort
- use defs_abitypes
  use m_abi2big
  use m_xmpi
  use m_dtset
 
+ use defs_abitypes,  only : MPI_type
  use m_geometry, only : xred2xcart, metric
  use m_pawrad,   only : pawrad_type, pawrad_init, pawrad_free
  use m_pawtab,   only : pawtab_type

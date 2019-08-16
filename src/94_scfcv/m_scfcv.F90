@@ -41,7 +41,7 @@ module m_scfcv
  use m_hdr
  use m_dtfil
 
- use defs_abitypes,      only : MPI_type
+ use defs_abitypes,      only : MPI_type, macro_uj_type
  use m_scf_history,      only : scf_history_type
  use m_results_gs ,      only : results_gs_type
  use m_electronpositron, only : electronpositron_type

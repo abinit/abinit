@@ -26,7 +26,6 @@
 module m_wvl_psi
 
   use defs_basis
-  use defs_abitypes
   use defs_datatypes
   use defs_wvltypes
   use m_errors
@@ -34,6 +33,7 @@ module m_wvl_psi
   use m_abicore
   use m_dtset
 
+  use defs_abitypes,  only : MPI_type
   use m_energies, only : energies_type
   use m_pawcprj,  only : pawcprj_type, pawcprj_alloc
   use m_abi2big,  only : wvl_vxc_abi2big, wvl_vtrial_abi2big

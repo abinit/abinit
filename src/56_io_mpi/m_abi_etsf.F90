@@ -26,7 +26,6 @@ module m_abi_etsf
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_dtset

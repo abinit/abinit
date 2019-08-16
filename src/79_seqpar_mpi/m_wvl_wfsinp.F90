@@ -27,7 +27,6 @@
 module m_wvl_wfsinp
 
  use defs_basis
- use defs_abitypes
  use defs_datatypes
  use defs_wvltypes
  use m_wffile
@@ -37,6 +36,7 @@ module m_wvl_wfsinp
  use m_hdr
  use m_dtset
 
+ use defs_abitypes,  only : MPI_type
  use m_geometry,  only : xred2xcart
  use m_abi2big,   only : wvl_occ_abi2big, wvl_occopt_abi2big, wvl_setngfft, wvl_setboxgeometry
  use m_psolver,   only : psolver_kernel

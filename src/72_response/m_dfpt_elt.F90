@@ -28,12 +28,12 @@ module m_dfpt_elt
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
  use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_special_funcs,  only : abi_derfc
  use m_geometry,    only : metric

@@ -27,13 +27,13 @@
 module m_cgwf
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_xmpi
  use m_abicore
  use m_cgtools
  use m_efield
 
+ use defs_abitypes,   only : MPI_type
  use m_time,          only : timab
  use m_numeric_tools, only : rhophi
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_copy, &

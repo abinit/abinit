@@ -43,8 +43,9 @@ module m_scfcv_core
  use m_xcdata
  use m_cgtools
  use m_dtfil
+ use m_distribfft
 
- use defs_abitypes,      only : MPI_type
+ use defs_abitypes,      only : MPI_type, macro_uj_type
  use m_berryphase_new,   only : update_e_field_vars
  use m_time,             only : timab
  use m_fstrings,         only : int2char4, sjoin

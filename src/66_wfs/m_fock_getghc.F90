@@ -25,7 +25,6 @@
 module m_fock_getghc
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
@@ -33,6 +32,7 @@ module m_fock_getghc
  use m_pawcprj
  !use m_cgtools
 
+ use defs_abitypes, only : mpi_type
  use defs_datatypes, only : pseudopotential_type
  use m_time,         only : timab
  use m_symtk,        only : matr3inv

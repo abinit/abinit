@@ -26,7 +26,6 @@
 module m_nonlop_pl
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
@@ -41,6 +40,7 @@ module m_nonlop_pl
  use m_metstr
  use m_opernl
 
+ use defs_abitypes, only : MPI_type
  use m_geometry,   only : strconv
  use m_kg,         only : ph1d3d
  use m_contract,   only : cont22cso, cont22so, cont24, cont33cso, cont33so, cont35, cont22, cont3, cont13, &

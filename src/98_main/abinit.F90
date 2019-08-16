@@ -89,7 +89,6 @@ program abinit
 
  use defs_basis
  use defs_datatypes
- use defs_abitypes
  use m_build_info
  use m_cppopts_dumper
  use m_optim_dumper
@@ -106,6 +105,7 @@ program abinit
  use mpi
 #endif
 
+ use defs_abitypes, only : MPI_type, ab_dimensions
  use m_time ,       only : asctime, sec2str, timein, time_set_papiopt, timab
  use m_fstrings,    only : sjoin, strcat, itoa, yesno, ljust
  use m_io_tools,    only : flush_unit, delete_file
