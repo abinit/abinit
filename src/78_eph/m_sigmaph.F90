@@ -818,7 +818,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    nspden, nspinor, ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
    dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
- call wfd%print(header="Wavefunctions for self-energy calculation.",mode_paral='PERS')
+ call wfd%print(header="Wavefunctions for self-energy calculation.", mode_paral='PERS')
 
  ABI_FREE(nband)
  ABI_FREE(bks_mask)
