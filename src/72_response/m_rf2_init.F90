@@ -30,7 +30,6 @@
 module m_rf2_init
 
  use defs_basis
- use defs_datatypes
  use m_xmpi
  use m_errors
  use m_wfk

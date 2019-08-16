@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group ()
+!!  Copyright (C) 2008-2019 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,8 +31,41 @@ module m_mover_effpot
  use m_abicore
  use m_dtset
  use m_dtfil
+ use m_abimover
+ use m_build_info
+ use m_scf_history
+ use defs_wvltypes
+ use m_xmpi
+ use m_phonons
+ use m_strain
+ use m_effective_potential_file
+ use m_supercell
+ use m_psps
+ use m_args_gs
+ use m_ifc
 
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
+ use m_geometry, only : xcart2xred, xred2xcart
+ use m_multibinit_dataset, only : multibinit_dtset_type
+ use m_effective_potential,only : effective_potential_type
+ use m_fit_polynomial_coeff, only : polynomial_coeff_writeXML, &
+   fit_polynomial_coeff_fit, genereList, fit_polynomial_coeff_getPositive,fit_polynomial_coeff_getCoeffBound
+ use m_polynomial_coeff,only : polynomial_coeff_getNorder
+! use m_pawang,       only : pawang_type, pawang_free
+! use m_pawrad,       only : pawrad_type, pawrad_free
+! use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
+! use m_pawxmlps, only : paw_setup, ipsp2xml, rdpawpsxml, &
+!&                       paw_setup_copy, paw_setup_free, getecutfromxml
+ use m_abihist, only : abihist
+ use m_ewald
+ use m_mpinfo,           only : init_mpi_enreg,destroy_mpi_enreg
+ use m_copy            , only : alloc_copy
+ use m_electronpositron, only : electronpositron_type
+ use m_scfcv,            only : scfcv_t, scfcv_run,scfcv_destroy
+ use m_results_gs,       only : results_gs_type,init_results_gs,destroy_results_gs
+ use m_mover,            only : mover
+ use m_io_tools,         only : get_unit, open_file
 
  implicit none
 
@@ -51,12 +84,6 @@ contains
 !!
 !! FUNCTION
 !! this routine is driver for using mover with effective potential
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (AM)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  inp = input of multibinit
@@ -89,48 +116,6 @@ contains
 
 subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 
- use defs_basis
- use defs_abitypes
- use m_abicore
- use defs_datatypes
- use m_errors
- use m_abimover
- use m_build_info
- use m_scf_history
- use defs_wvltypes
- use m_xmpi
- use m_abimover
- use m_phonons
- use m_strain
- use m_effective_potential_file
- use m_supercell
- use m_psps
- use m_args_gs
-
- use m_geometry, only : xcart2xred, xred2xcart
- use m_multibinit_dataset, only : multibinit_dtset_type
- use m_effective_potential,only : effective_potential_type
- use m_fit_polynomial_coeff, only : polynomial_coeff_writeXML
- use m_fit_polynomial_coeff, only : fit_polynomial_coeff_fit,genereList
- use m_fit_polynomial_coeff, only : fit_polynomial_coeff_getPositive,fit_polynomial_coeff_getCoeffBound
- use m_electronpositron,   only : electronpositron_type
- use m_polynomial_coeff,only : polynomial_coeff_getNorder
-! use m_pawang,       only : pawang_type, pawang_free
-! use m_pawrad,       only : pawrad_type, pawrad_free
-! use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
-! use m_pawxmlps, only : paw_setup, ipsp2xml, rdpawpsxml, &
-!&                       paw_setup_copy, paw_setup_free, getecutfromxml
- use m_dtset,  only : dtset_free
- use m_abihist, only : abihist
- use m_ifc
- use m_ewald
- use m_mpinfo,           only : init_mpi_enreg,destroy_mpi_enreg
- use m_copy            , only : alloc_copy
- use m_electronpositron, only : electronpositron_type
- use m_scfcv,            only : scfcv_t, scfcv_run,scfcv_destroy
- use m_results_gs,       only : results_gs_type,init_results_gs,destroy_results_gs
- use m_mover,            only : mover
- use m_io_tools,         only : get_unit, open_file
 
 !Arguments --------------------------------
 !scalar

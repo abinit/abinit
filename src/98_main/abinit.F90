@@ -88,7 +88,6 @@
 program abinit
 
  use defs_basis
- use defs_datatypes
  use m_build_info
  use m_cppopts_dumper
  use m_optim_dumper
@@ -105,6 +104,7 @@ program abinit
  use mpi
 #endif
 
+ use defs_datatypes, only : pspheader_type
  use defs_abitypes, only : MPI_type
  use m_parser,      only : ab_dimensions
  use m_time ,       only : asctime, sec2str, timein, time_set_papiopt, timab

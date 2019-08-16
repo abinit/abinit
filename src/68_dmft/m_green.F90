@@ -32,7 +32,6 @@
  use m_errors
  use m_lib_four
  use m_splines
- use defs_datatypes
 
  !use defs_abitypes, only : MPI_type
  use m_crystal, only : crystal_t

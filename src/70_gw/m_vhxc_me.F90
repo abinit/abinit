@@ -27,7 +27,6 @@
 module m_vhxc_me
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_errors
  use m_xcdata
@@ -35,6 +34,7 @@ module m_vhxc_me
  use m_dtset
  use m_distribfft
 
+ use defs_datatypes,only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_pawang,      only : pawang_type
  use m_pawtab,      only : pawtab_type

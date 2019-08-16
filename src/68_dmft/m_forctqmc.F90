@@ -31,7 +31,6 @@
 MODULE m_forctqmc
 
  use defs_basis
- use defs_datatypes
  use m_errors
  use m_xmpi
  use m_abicore

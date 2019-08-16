@@ -28,11 +28,11 @@
 MODULE m_vkbr
 
  use defs_basis
- use defs_datatypes
  use m_hide_blas
  use m_errors
  use m_abicore
 
+ use defs_datatypes,  only : pseudopotential_type
  use m_gwdefs,        only : czero_gw
  use m_fstrings,      only : sjoin, itoa
  use m_paw_sphharm,   only : ylmc, ylmcd

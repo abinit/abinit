@@ -29,7 +29,6 @@
 module m_elphon
 
  use defs_basis
- use defs_datatypes
  use defs_elphon
  use m_abicore
  use m_krank
@@ -38,6 +37,7 @@ module m_elphon
  use m_hdr
  use m_ebands
 
+ use defs_datatypes,    only : ebands_t
  use m_fstrings,        only : int2char4
  use m_io_tools,        only : open_file, is_open, get_unit
  use m_time,            only : timein

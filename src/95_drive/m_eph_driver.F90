@@ -29,7 +29,6 @@ module m_eph_driver
  use defs_basis
  use m_errors
  use m_abicore
- use defs_datatypes
  use m_xmpi
  use m_xomp
  use m_hdr
@@ -50,6 +49,7 @@ module m_eph_driver
  use netcdf
 #endif
 
+ use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
  use m_io_tools,        only : file_exists
  use m_time,            only : cwtime, cwtime_report

@@ -27,7 +27,6 @@
 module m_mlwfovlp_qp
 
  use defs_basis
- use defs_datatypes
  use defs_wannier90
  use m_errors
  use m_abicore
@@ -36,6 +35,7 @@ module m_mlwfovlp_qp
  use m_dtset
  use m_dtfil
 
+ use defs_datatypes,   only : ebands_t
  use defs_abitypes,    only : MPI_type
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
  use m_pawtab,         only : pawtab_type

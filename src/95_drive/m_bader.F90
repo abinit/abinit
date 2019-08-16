@@ -27,7 +27,6 @@
 module m_bader
 
  use defs_basis
- use defs_datatypes
  use m_errors
  use m_abicore
  use m_xmpi

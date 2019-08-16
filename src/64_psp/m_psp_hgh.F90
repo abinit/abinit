@@ -27,12 +27,12 @@
 module m_psp_hgh
 
  use defs_basis
- use defs_datatypes
  use m_splines
  use m_abicore
  use m_errors
  use m_dtset
 
+ use defs_datatypes, only : pseudopotential_type
  use m_special_funcs,  only : abi_derfc
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: atomic_info

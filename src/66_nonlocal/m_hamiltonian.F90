@@ -35,11 +35,11 @@
 module m_hamiltonian
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_errors
  use m_xmpi
 
+ use defs_datatypes,      only : pseudopotential_type
  use m_copy,              only : addr_copy
  use m_geometry,          only : metric
  use m_pawtab,            only : pawtab_type

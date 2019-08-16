@@ -28,7 +28,6 @@ module m_wvl_rwwf
 
  use defs_basis
 
- use defs_datatypes
  use defs_wvltypes
  use m_wffile
  use m_errors

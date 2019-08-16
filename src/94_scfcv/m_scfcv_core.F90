@@ -27,7 +27,6 @@
 module m_scfcv_core
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use defs_rectypes
  use m_xmpi
@@ -45,6 +44,8 @@ module m_scfcv_core
  use m_dtfil
  use m_distribfft
 
+
+ use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
  use m_berryphase_new,   only : update_e_field_vars
  use m_time,             only : timab

@@ -28,7 +28,6 @@ module m_sigma_driver
 
  use defs_basis
  use m_gwdefs
- use defs_datatypes
  use defs_wvltypes
  use m_dtset
  use m_xmpi
@@ -47,6 +46,7 @@ module m_sigma_driver
  use m_wfd
  use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
  use m_time,          only : timab
  use m_numeric_tools, only : imax_loc

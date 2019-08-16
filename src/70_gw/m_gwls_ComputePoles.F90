@@ -38,17 +38,12 @@ use m_gwls_TimingLog
 use m_gwls_LanczosBasis
 
 use defs_basis
-use defs_datatypes
 use defs_wvltypes
 use m_abicore
 use m_xmpi
-use m_pawang
 use m_errors
 
 use m_io_tools,         only : get_unit
-use m_paw_dmft,         only: paw_dmft_type
-use m_ebands,           only : ebands_init, ebands_free
-use m_gaussian_quadrature, only: gaussian_quadrature_gegenbauer, gaussian_quadrature_legendre
 
 
 implicit none

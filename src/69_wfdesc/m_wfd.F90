@@ -25,7 +25,6 @@
 module m_wfd
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_xmpi
  use m_copy
@@ -35,6 +34,7 @@ module m_wfd
  use m_hdr
  use m_distribfft
 
+ use defs_datatypes,   only : pseudopotential_type, ebands_t
  use defs_abitypes,    only : mpi_type
  use m_gwdefs,         only : one_gw
  use m_time,           only : cwtime, cwtime_report

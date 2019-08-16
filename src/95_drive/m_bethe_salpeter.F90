@@ -29,7 +29,6 @@
 module m_bethe_salpeter
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use m_bs_defs
  use m_abicore
@@ -45,6 +44,7 @@ module m_bethe_salpeter
  use m_dtset
  use m_dtfil
 
+ use defs_datatypes,    only : pseudopotential_type, ebands_t
  use defs_abitypes,     only : MPI_type
  use m_gwdefs,          only : GW_Q0_DEFAULT
  use m_time,            only : timab

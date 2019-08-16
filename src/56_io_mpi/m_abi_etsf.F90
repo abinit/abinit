@@ -25,7 +25,6 @@
 module m_abi_etsf
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use m_abicore
  use m_dtset
@@ -38,7 +37,8 @@ module m_abi_etsf
  use etsf_io
 #endif
 
- use m_fstrings,   only : endswith
+ use m_fstrings,     only : endswith
+ use defs_datatypes, only : pseudopotential_type
 
  implicit none
 

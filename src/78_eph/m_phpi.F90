@@ -24,7 +24,6 @@
 module m_phpi
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -44,6 +43,7 @@ module m_phpi
  use m_dtset
  use m_dtfil
 
+ use defs_datatypes,    only : pseudopotential_type, ebands_t
  use defs_abitypes,     only : mpi_type
  use m_time,            only : cwtime
  use m_fstrings,        only : sjoin, itoa, ftoa, ktoa, ltoa, strcat

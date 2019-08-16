@@ -26,13 +26,13 @@
 module m_wvl_psi
 
   use defs_basis
-  use defs_datatypes
   use defs_wvltypes
   use m_errors
   use m_xmpi
   use m_abicore
   use m_dtset
 
+  use defs_datatypes, only : pseudopotential_type
   use defs_abitypes,  only : MPI_type
   use m_energies, only : energies_type
   use m_pawcprj,  only : pawcprj_type, pawcprj_alloc

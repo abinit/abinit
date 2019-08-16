@@ -26,7 +26,6 @@
 module m_gstateimg
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use defs_rectypes
  use m_abicore
@@ -47,6 +46,7 @@ module m_gstateimg
  use m_yaml
  use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_time,         only : timab
  use m_geometry,     only : mkradim, mkrdim, fcart2fred, xred2xcart, metric

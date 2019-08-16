@@ -30,10 +30,10 @@ MODULE m_plowannier
  use m_abicore
  use m_dtset
  use m_dtfil
- use defs_datatypes
  use defs_wvltypes
  use m_xmpi
 
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_io_tools,  only : open_file
  use m_mpinfo,    only : proc_distrb_cycle

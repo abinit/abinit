@@ -26,7 +26,6 @@
 module m_gstate
 
  use defs_basis
- use defs_datatypes
  use defs_rectypes
  use m_errors
  use m_xmpi
@@ -49,6 +48,7 @@ module m_gstate
  use m_ebands
  use m_dtfil
 
+ use defs_datatypes,     only : pseudopotential_type, ebands_t
  use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_symtk,            only : matr3inv

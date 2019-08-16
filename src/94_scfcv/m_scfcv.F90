@@ -29,7 +29,6 @@
 module m_scfcv
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use defs_rectypes
  use m_abicore
@@ -41,6 +40,7 @@ module m_scfcv
  use m_hdr
  use m_dtfil
 
+ use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
  use m_scf_history,      only : scf_history_type
  use m_results_gs ,      only : results_gs_type

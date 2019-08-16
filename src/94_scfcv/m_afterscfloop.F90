@@ -27,7 +27,6 @@
 module m_afterscfloop
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use m_energies
  use m_errors
@@ -38,7 +37,9 @@ module m_afterscfloop
  use m_dtset
  use m_dtfil
 
- use defs_abitypes,       only : mpi_type
+
+ use defs_datatypes,     only : pseudopotential_type
+ use defs_abitypes,      only : mpi_type
  use m_time,             only : timab
  use m_xmpi,             only : xmpi_sum, xmpi_comm_rank,xmpi_comm_size
  use m_geometry,         only : xred2xcart, metric

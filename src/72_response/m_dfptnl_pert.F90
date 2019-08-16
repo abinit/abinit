@@ -27,7 +27,6 @@
 module m_dfptnl_pert
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_wffile
  use m_wfk
@@ -39,6 +38,7 @@ module m_dfptnl_pert
  use m_dtset
  use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_cgtools,    only : dotprod_g,sqnorm_g,dotprod_vn
  use m_pawang,     only : pawang_type

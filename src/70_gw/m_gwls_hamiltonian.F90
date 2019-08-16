@@ -36,7 +36,6 @@ use m_dtset
 use m_bandfft_kpt
 use m_cgtools
 use defs_basis
-use defs_datatypes
 use m_abicore
 use m_xmpi
 use m_pawang
@@ -44,18 +43,17 @@ use m_errors
 use m_ab7_mixing
 use m_mpinfo
 
-use defs_abitypes,    only : MPI_type
+use defs_abitypes,      only : MPI_type
 use m_io_tools,         only : get_unit
 use m_hamiltonian,      only : gs_hamiltonian_type, copy_hamiltonian
-use m_paw_dmft,         only : paw_dmft_type
 use m_pawcprj,          only : pawcprj_type
 use m_vcoul,            only : vcoul_t, vcoul_init, vcoul_free
 use m_crystal,          only : crystal_t, crystal_init, crystal_print
-use m_io_kss,           only : make_gvec_kss
 use m_gsphere,          only : gsphere_t, gsph_init, gsph_free, print_gsphere
 use m_bz_mesh,          only : kmesh_t, kmesh_init, kmesh_free, kmesh_print, find_qmesh
 use m_fft,              only : fftpac, fourwf
 use m_getghc,           only : getghc
+use m_io_kss,           only : make_gvec_kss
 
 implicit none
 save

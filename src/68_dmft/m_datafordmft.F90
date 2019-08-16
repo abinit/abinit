@@ -31,7 +31,26 @@
 MODULE m_datafordmft
 
  use defs_basis
+ use defs_abitypes
+ use defs_wvltypes
+ use m_abicore
+ use m_errors
+ use m_xmpi
  use m_dtset
+
+ use defs_datatypes, only : pseudopotential_type
+ use m_io_tools,  only : open_file
+ use m_crystal, only : crystal_t
+ use m_matlu, only: matlu_type,init_matlu,sym_matlu,copy_matlu,print_matlu,diff_matlu,destroy_matlu, checkdiag_matlu, &
+                    gather_matlu,add_matlu
+ use m_oper, only : init_oper,oper_type,identity_oper,loc_oper,destroy_oper,diff_oper, upfold_oper,copy_oper,prod_oper
+ use m_pawang, only : pawang_type
+ use m_pawtab, only : pawtab_type
+ use m_paw_ij, only : paw_ij_type
+ use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
+ use m_paw_dmft, only: paw_dmft_type
+ use m_mpinfo,   only : proc_distrb_cycle
+ use m_matrix, only : invsqrt_matrix
 
  implicit none
 
@@ -51,13 +70,6 @@ contains
 !!
 !! FUNCTION
 !!  Compute psichi (and print some data for check)
-!!
-!! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors .
 !!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=crystal structure data
@@ -105,26 +117,6 @@ contains
 subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 & lda_occup,mband,mband_cprj,mkmem,mpi_enreg,nkpt,my_nspinor,nsppol,occ,&
 & paw_dmft,paw_ij,pawang,pawtab,psps,usecprj,unpaw,nbandkss)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wvltypes
- use m_abicore
- use m_errors
- use m_xmpi
-
- use m_io_tools,  only : open_file
- use m_matlu, only: matlu_type,init_matlu,sym_matlu,copy_matlu,print_matlu,diff_matlu,destroy_matlu
- use m_crystal, only : crystal_t
- use m_oper, only : oper_type
-
- use m_pawang, only : pawang_type
- use m_pawtab, only : pawtab_type
- use m_paw_ij, only : paw_ij_type
- use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
- use m_paw_dmft, only: paw_dmft_type
- use m_mpinfo,   only : proc_distrb_cycle
 
 !Arguments ------------------------------------
 !scalars
@@ -781,9 +773,6 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
 &nsppol,paw_dmft,pawtab,psps,t2g,x2my2d)
 
- use m_abicore
- use m_io_tools,  only : open_file
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpt,my_nspinor,nsppol,ntypat
@@ -951,10 +940,6 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
 subroutine psichi_check(dtset,nattyp,nkpt,my_nspinor,&
 & nsppol,ntypat,paw_dmft,pawtab,psps,xocc_check,xnorm_check)
 
- use m_abicore
-
- use m_matlu, only: matlu_type,init_matlu,sym_matlu
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpt,my_nspinor,nsppol,ntypat
@@ -1054,15 +1039,7 @@ end subroutine datafordmft
 !! FUNCTION
 !! Compute levels for ctqmc
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
-!!
 !!
 !! OUTPUT
 !!
@@ -1077,18 +1054,6 @@ end subroutine datafordmft
 !! SOURCE
 
  subroutine compute_levels(cryst_struc,energy_level,hdc,pawang,paw_dmft,nondiag)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_errors
- use m_abicore
-
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_paw_dmft, only : paw_dmft_type
- use m_oper, only : oper_type,loc_oper
- use m_matlu, only : sym_matlu, print_matlu, checkdiag_matlu
 
 !Arguments ------------------------------------
 !scalars
@@ -1171,13 +1136,6 @@ end subroutine datafordmft
 !! FUNCTION
 !! Renormalize psichi.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>= crystal structure data.
 !!  paw_dmft =  data for LDA+DMFT calculations.
@@ -1198,16 +1156,6 @@ end subroutine datafordmft
 !! SOURCE
 
 subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
-
- use defs_basis
- use m_errors
- use m_abicore
-
- use m_pawang, only : pawang_type
- use m_paw_dmft, only: paw_dmft_type
- use m_crystal, only : crystal_t
- use m_oper, only : init_oper,oper_type,identity_oper,loc_oper,destroy_oper,diff_oper
- use m_matlu, only : matlu_type,sym_matlu,print_matlu,diff_matlu
 
 !Arguments ------------------------------------
 !scalars
@@ -1394,17 +1342,6 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
 !! SOURCE
 
 subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
-
- use m_abicore
-
- use defs_basis
- use m_errors
-
- use m_paw_dmft, only: paw_dmft_type
- use m_crystal, only : crystal_t
- use m_oper, only : init_oper,oper_type,identity_oper,loc_oper,destroy_oper
- use m_matlu, only : gather_matlu,sym_matlu,print_matlu,add_matlu
- use m_matrix, only : invsqrt_matrix
 
 !Arguments ------------------------------------
  integer,intent(in) :: nkpt
@@ -1774,13 +1711,6 @@ end subroutine psichi_renormalization
 !! FUNCTION
 !! Compute some components for the limit of hybridization
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=crystal structure data
 !!  lda_occup
@@ -1802,17 +1732,6 @@ end subroutine psichi_renormalization
 !! SOURCE
 
 subroutine hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,pawang,hybri_coeff)
-
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_abicore
- use m_crystal, only : crystal_t
- use m_oper, only : oper_type,init_oper,upfold_oper,copy_oper,prod_oper,destroy_oper,loc_oper
- use m_matlu, only : matlu_type,init_matlu,add_matlu,destroy_matlu,print_matlu,sym_matlu
- use m_paw_dmft, only: paw_dmft_type
- use m_pawang, only : pawang_type
 
 !Arguments ------------------------------------
 !scalars

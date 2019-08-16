@@ -26,7 +26,6 @@
 
 module m_spin_current
 
- use defs_datatypes
  use m_errors
  use m_abicore
  use m_splines
@@ -34,7 +33,7 @@ module m_spin_current
  use m_dtset
  use m_dtfil
 
-
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_io_tools,   only : open_file
  use m_pptools,    only : printxsf

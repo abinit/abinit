@@ -27,7 +27,6 @@
 module m_paw_mkaewf
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use m_abicore
  use m_xmpi
@@ -42,7 +41,7 @@ module m_paw_mkaewf
  use netcdf
 #endif
 
-
+ use defs_datatypes,   only : ebands_t
  use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : flush_unit
  use m_numeric_tools,  only : wrap2_zero_one

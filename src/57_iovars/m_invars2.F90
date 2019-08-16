@@ -27,7 +27,6 @@
 module m_invars2
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_errors
  use m_xmpi
@@ -39,6 +38,7 @@ module m_invars2
  use netcdf
 #endif
 
+ use defs_datatypes, only : pspheader_type
  use m_time,      only : timab
  use m_fstrings,  only : sjoin, itoa, ltoa, tolower, rmquotes
  use m_symtk,     only : matr3inv

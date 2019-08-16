@@ -27,7 +27,6 @@
 module m_positron
 
  use defs_basis
- use defs_datatypes
  use m_efield
  use m_errors
  use m_abicore
@@ -40,6 +39,7 @@ module m_positron
  use m_dtset
  use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_special_funcs,  only : sbf8
  use m_ioarr,    only : ioarr, read_rhor

@@ -40,7 +40,6 @@ use m_gwls_QR_factorization
 
 !abinit modules
 use defs_basis
-use defs_datatypes
 use defs_wvltypes
 use m_abicore
 use m_xmpi

@@ -27,7 +27,6 @@
 module m_mlwfovlp
 
  use defs_basis
- use defs_datatypes
  use defs_wannier90
  use m_abicore
  use m_errors
@@ -45,6 +44,7 @@ module m_mlwfovlp
  use m_dtset
  use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
  use m_io_tools, only : delete_file, get_unit, open_file
  use m_hide_lapack,     only : matrginv

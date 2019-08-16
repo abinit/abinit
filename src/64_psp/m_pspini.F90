@@ -27,7 +27,6 @@
 module m_pspini
 
  use defs_basis
- use defs_datatypes
  use m_errors
  use m_abicore
  use m_xmpi
@@ -36,6 +35,7 @@ module m_pspini
  use m_dtfil
  !use m_psps
 
+ use defs_datatypes, only : pseudopotential_type, nctab_t, pspheader_type
  use m_time,      only : timab
  use m_io_tools,  only : open_file
  use m_pawrad,    only : pawrad_type
@@ -1428,8 +1428,6 @@ subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
 
  use defs_basis
  use m_errors
-
- use defs_datatypes, only : nctab_t
 
 !Arguments ------------------------------------
 !scalars

@@ -24,12 +24,12 @@
 MODULE m_paw_dfpt
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_xmpi
  use m_errors
  use m_time, only : timab
 
+ use defs_datatypes, only : pseudopotential_type
  use m_pawang,       only : pawang_type
  use m_pawrad,       only : pawrad_type
  use m_pawtab,       only : pawtab_type

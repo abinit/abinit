@@ -27,7 +27,6 @@
 module m_screening_driver
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use m_abicore
  use m_dtset
@@ -45,6 +44,8 @@ module m_screening_driver
  use m_dtfil
  use m_distribfft
 
+
+ use defs_datatypes,  only : pseudopotential_type, ebands_t
  use defs_abitypes,   only : MPI_type
  use m_time,          only : timab
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname

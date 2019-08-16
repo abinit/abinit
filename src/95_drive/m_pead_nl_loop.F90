@@ -27,7 +27,6 @@
 module m_pead_nl_loop
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use m_wffile
  use m_abicore
@@ -39,6 +38,7 @@ module m_pead_nl_loop
  use mpi
 #endif
 
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_kg,       only : getph, mkkpg

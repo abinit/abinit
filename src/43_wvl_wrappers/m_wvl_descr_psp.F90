@@ -30,6 +30,8 @@ module m_wvl_descr_psp
  use m_errors
  use m_abicore
 
+ use defs_datatypes, only : pseudopotential_type, pseudopotential_gth_type
+
  implicit none
 
  private
@@ -77,7 +79,6 @@ contains
 
 subroutine wvl_descr_psp_set(filoccup, nsppol, psps, spinat, wvl)
 
- use defs_datatypes
  use defs_wvltypes
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: aoig_set,UNINITIALIZED,dict_init,dict_free,dictionary, &
@@ -176,7 +177,6 @@ end subroutine wvl_descr_psp_set
 
 subroutine wvl_descr_psp_fill(gth_params, ipsp, ixc, nelpsp, nzatom, pspunit)
 
-  use defs_datatypes
 #if defined HAVE_BIGDFT
   use BigDFT_API, only: atomic_info, UNINITIALIZED, psp_from_data
 #endif

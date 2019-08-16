@@ -29,7 +29,6 @@
 module m_fock
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_errors
  use m_mpinfo

@@ -26,12 +26,13 @@
 MODULE m_ddb_hdr
 
  use defs_basis
- use defs_datatypes
  use m_errors
  use m_abicore
  use m_xmpi
  use m_dtset
 
+
+ use defs_datatypes, only : pseudopotential_type
  use m_copy,      only : alloc_copy
  use m_pawtab,    only : pawtab_type, pawtab_nullify, pawtab_free !, pawtab_copy
  use m_psps,      only : psps_copy, psps_free

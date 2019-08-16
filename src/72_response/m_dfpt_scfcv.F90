@@ -26,7 +26,6 @@
 module m_dfpt_scfcv
 
  use defs_basis
- use defs_datatypes
  use m_ab7_mixing
  use m_efield
  use m_errors
@@ -43,6 +42,7 @@ module m_dfpt_scfcv
  use netcdf
 #endif
 
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_cgtools,  only : mean_fftr, overlap_g, dotprod_vn, dotprod_vn, dotprod_g
  use m_fstrings, only : int2char4, sjoin

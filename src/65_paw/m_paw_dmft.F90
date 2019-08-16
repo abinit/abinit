@@ -30,7 +30,6 @@
 MODULE m_paw_dmft
 
  use defs_basis
- use defs_datatypes
  use m_CtqmcInterface
  use m_errors
  use m_abicore
@@ -38,6 +37,7 @@ MODULE m_paw_dmft
  use m_data4entropyDMFT
  use m_dtset
 
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_io_tools,  only : open_file
  use m_pawtab,    only : pawtab_type

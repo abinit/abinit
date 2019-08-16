@@ -26,7 +26,6 @@
 module m_setvtr
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use m_abicore
  use m_errors
@@ -35,6 +34,7 @@ module m_setvtr
  use m_xcdata
  use m_dtset
 
+ use defs_datatypes,      only : pseudopotential_type
  use defs_abitypes,       only : MPI_type
  use m_time,              only : timab
  use m_geometry,          only : xred2xcart

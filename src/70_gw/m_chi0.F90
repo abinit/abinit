@@ -27,7 +27,6 @@
 module m_chi0
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -36,6 +35,7 @@ module m_chi0
  use m_wfd
  use m_dtset
 
+ use defs_datatypes,    only : pseudopotential_type, ebands_t
  use m_gwdefs,          only : GW_TOL_DOCC, GW_TOL_W0, czero_gw, em1params_t, g0g0w
  use m_numeric_tools,   only : imin_loc, print_arr
  use m_geometry,        only : normv, vdotw

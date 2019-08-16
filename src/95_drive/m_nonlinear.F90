@@ -27,7 +27,6 @@
 module m_nonlinear
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use m_wffile
  use m_errors
@@ -39,6 +38,7 @@ module m_nonlinear
  use m_dtset
  use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
  use m_fstrings, only : sjoin, itoa
  use m_time,     only : timab

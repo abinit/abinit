@@ -28,7 +28,6 @@
 module m_frohlichmodel
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_errors
  use m_crystal

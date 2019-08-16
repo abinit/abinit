@@ -28,7 +28,6 @@
 module m_eprenorms
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_errors
  use m_xmpi
@@ -37,8 +36,9 @@ module m_eprenorms
 #endif
  use m_nctk
 
- use m_crystal,  only : crystal_t
- use m_kpts,     only : listkk
+ use defs_datatypes, only : ebands_t
+ use m_crystal,      only : crystal_t
+ use m_kpts,         only : listkk
 
  implicit none
 

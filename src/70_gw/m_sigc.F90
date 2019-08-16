@@ -21,7 +21,6 @@
 module m_sigc
 
  use defs_basis
- use defs_datatypes
  use m_gwdefs
  use m_abicore
  use m_xmpi
@@ -32,6 +31,8 @@ module m_sigc
  use m_splines
  use m_dtset
 
+
+ use defs_datatypes,  only : pseudopotential_type, ebands_t
  use m_hide_blas,     only : xdotc, xgemv, xgemm
  use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
  use m_fstrings,      only : sjoin, itoa

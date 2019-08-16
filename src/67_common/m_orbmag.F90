@@ -34,12 +34,12 @@
 module m_orbmag
 
   use defs_basis
-  use defs_datatypes
   use m_errors
   use m_abicore
   use m_xmpi
   use m_dtset
 
+  use defs_datatypes,     only : pseudopotential_type
   use defs_abitypes,      only : MPI_type
   use m_berrytk,          only : smatrix
   use m_cgprj,            only : getcprj

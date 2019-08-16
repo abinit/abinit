@@ -27,7 +27,6 @@
 module m_wfk_analyze
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -41,6 +40,7 @@ module m_wfk_analyze
  use m_dtfil
  use m_distribfft
 
+ use defs_datatypes,    only : pseudopotential_type, ebands_t
  use defs_abitypes,     only : mpi_type
  use m_time,            only : timab
  use m_fstrings,        only : strcat, sjoin, itoa, ftoa

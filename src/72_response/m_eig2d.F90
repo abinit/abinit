@@ -30,7 +30,6 @@
 MODULE m_eig2d
 
  use defs_basis
- use defs_datatypes
  use m_errors
  use m_abicore
  use m_nctk
@@ -44,6 +43,7 @@ MODULE m_eig2d
  use m_dtset
  use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
  use m_time,       only : timab
  use m_fstrings,   only : strcat

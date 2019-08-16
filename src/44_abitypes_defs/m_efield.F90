@@ -6,7 +6,6 @@
 !! FUNCTION
 !!  This module contains the declaration of data types and methods
 !!  used to handle electric fields
-!!  Imported object from defs_datatypes
 !!
 !! COPYRIGHT
 !! Copyright (C) 2011-2019 ABINIT group (MJV)

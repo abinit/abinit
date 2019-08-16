@@ -27,7 +27,6 @@
 module m_d2frnl
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -39,6 +38,8 @@ module m_d2frnl
  use m_dtset
  use m_dtfil
 
+
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_geometry, only : metric, strconv

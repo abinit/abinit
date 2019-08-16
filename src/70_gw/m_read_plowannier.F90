@@ -32,6 +32,13 @@
 MODULE m_read_plowannier
 
  use defs_basis
+ use m_abicore
+ use m_errors
+
+ use m_io_tools,      only : open_file
+ use m_crystal,       only : crystal_t
+ use m_bz_mesh,       only : kmesh_t, get_BZ_item
+ use m_pawang,        only : pawang_type
 
  implicit none
 
@@ -100,16 +107,6 @@ contains
 !! SOURCE
 
 subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,luwindow,nspinor,nsppol,pawang,prtvol,ucrpa_bands)
-
- use defs_basis
- use defs_datatypes
- use m_abicore
- use m_errors
-
- use m_io_tools,      only : open_file
- use m_crystal,       only : crystal_t
- use m_bz_mesh,       only : kmesh_t, get_BZ_item
- use m_pawang,        only : pawang_type
 
 !Arguments ------------------------------------
 !types and arrays

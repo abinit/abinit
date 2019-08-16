@@ -26,7 +26,6 @@
 module m_dfpt_nstwf
 
  use defs_basis
- use defs_datatypes
  use m_xmpi
  use m_errors
  use m_abicore
@@ -37,6 +36,8 @@ module m_dfpt_nstwf
  use m_dtset
  use m_dtfil
 
+
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_io_tools, only : file_exists

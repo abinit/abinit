@@ -31,13 +31,14 @@
 module m_outqmc
 
  use defs_basis
- use defs_datatypes
  use m_errors
  use m_abicore
  use m_xmpi
  use m_hdr
  use m_dtset
 
+
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : mpi_type
  use m_io_tools,    only : get_unit
  use m_geometry,    only : xred2xcart
