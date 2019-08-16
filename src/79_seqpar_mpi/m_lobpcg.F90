@@ -33,12 +33,12 @@ MODULE m_lobpcg
  use defs_basis
  use m_abicore
  use m_errors
- use defs_abitypes
  use m_wfutils
  use m_abi_linalg
  use m_cgtools
  use m_dtset
 
+ use defs_abitypes,       only : mpi_type
  use m_time,              only : timab
 
  implicit none

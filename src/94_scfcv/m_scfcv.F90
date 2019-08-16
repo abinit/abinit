@@ -41,7 +41,7 @@ module m_scfcv
  use m_hdr
  use m_dtfil
 
- use defs_abitypes,      only : MPI_type, macro_uj_type
+ use defs_abitypes,      only : MPI_type
  use m_scf_history,      only : scf_history_type
  use m_results_gs ,      only : results_gs_type
  use m_electronpositron, only : electronpositron_type
@@ -52,6 +52,7 @@ module m_scfcv
  use m_pawrhoij,         only : pawrhoij_type
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type
+ use m_paw_uj,           only : macro_uj_type
  use m_orbmag,           only : orbmag_type
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
  use m_scfcv_core,       only : scfcv_core

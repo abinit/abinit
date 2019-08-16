@@ -42,13 +42,13 @@ program ujdet
  use m_build_info
  use m_errors
 
- use defs_abitypes, only : MPI_type, macro_uj_type
+ use defs_abitypes, only : MPI_type
  use m_specialmsg,  only : specialmsg_getcount, herald
  use m_io_tools,    only : open_file
  use m_parser,      only : intagm, parsefile
  use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
  use m_dtfil,       only : isfile
- use m_paw_uj,      only : pawuj_ini,pawuj_free,pawuj_det
+ use m_paw_uj,      only : pawuj_ini,pawuj_free,pawuj_det, macro_uj_type
 
  implicit none
 

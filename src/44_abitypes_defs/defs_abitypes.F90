@@ -21,7 +21,6 @@
 !!
 !! List of datatypes:
 !! * MPI_type: the data related to MPI parallelization
-!! * macro_uj_type: TO BE COMPLETED
 !!
 !! COPYRIGHT
 !! Copyright (C) 2001-2019 ABINIT group (XG)
@@ -387,69 +386,6 @@ module defs_abitypes
     integer :: nzchempot  ! maximal value of input nzchempot for all the datasets
 
  end type ab_dimensions
-!!***
-
-!----------------------------------------------------------------------
-
-!!****t* defs_abitypes/macro_uj_type
-!! NAME
-!! dtmacro_uj
-!!
-!! FUNCTION
-!! This data type contains the potential shifts and the occupations
-!! for the determination of U and J for the DFT+U calculations.
-!! iuj=1,2: non-selfconsistent calculations. iuj=3,4 selfconsistent calculations.
-!! iuj=2,4  => pawujsh<0 ; iuj=1,3 => pawujsh >0,
-!!
-!! SOURCE
-
- type macro_uj_type
-
-! Integer
-  integer :: iuj        ! dataset treated
-  integer :: nat        ! number of atoms U (J) is determined on
-  integer :: ndtset     ! total number of datasets
-  integer :: nspden     ! number of densities treated
-  integer :: macro_uj   ! which mode the determination runs in
-  integer :: pawujat    ! which atom U (J) is determined on
-  integer :: pawprtvol  ! controlling amount of output
-  integer :: option     ! controls the determination of U (1 with compensating charge bath, 2 without)
-  integer :: dmatpuopt  ! controls the renormalisation of the PAW projectors
-
-! Real
-  real(dp) :: diemix    ! mixing parameter
-  real(dp) :: mdist     ! maximal distance of ions
-  real(dp) :: pawujga   ! gamma for inversion of singular matrices
-  real(dp) :: ph0phiint ! integral of phi(:,1)*phi(:,1)
-  real(dp) :: pawujrad  ! radius to which U should be extrapolated.
-  real(dp) :: pawrad    ! radius of the paw atomic data
-
-! Integer arrays
-  integer , allocatable  :: scdim(:)
-  ! size of supercell
-
-! Real arrays
-  real(dp) , allocatable :: occ(:,:)
-  ! occupancies after a potential shift: occ(ispden,nat)
-
-  real(dp) , allocatable :: rprimd(:,:)
-  ! unit cell for symmetrization
-
-  real(dp) , allocatable :: vsh(:,:)
-  ! potential shifts on atoms, dimensions: nspden,nat
-
-  real(dp) , allocatable :: xred(:,:)
-  ! atomic position for symmetrization
-
-  real(dp) , allocatable :: wfchr(:)
-  ! wfchr(1:3): zion, n and l of atom on which projection is done
-  ! wfchr(4:6): coefficients ai of a0+a1*r+a2*r^2, fit to the wfc for r< r_paw
-
-  real(dp), allocatable :: zioneff(:)
-  ! zioneff(ij_proj), "Effective charge"*n "seen" at r_paw, deduced from Phi at r_paw, n:
-  ! pricipal quantum number; good approximation to model wave function outside PAW-sphere through
-
- end type macro_uj_type
 !!***
 
 end module defs_abitypes

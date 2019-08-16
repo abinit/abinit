@@ -45,7 +45,7 @@ module m_scfcv_core
  use m_dtfil
  use m_distribfft
 
- use defs_abitypes,      only : MPI_type, macro_uj_type
+ use defs_abitypes,      only : MPI_type
  use m_berryphase_new,   only : update_e_field_vars
  use m_time,             only : timab
  use m_fstrings,         only : int2char4, sjoin
@@ -79,7 +79,7 @@ module m_scfcv_core
  use m_paw_correlations, only : setnoccmmp,setrhoijpbe0
  use m_orbmag,           only : orbmag_type
  use m_paw_mkrho,        only : pawmkrho
- use m_paw_uj,           only : pawuj_red
+ use m_paw_uj,           only : pawuj_red, macro_uj_type
  use m_paw_dfpt,         only : pawgrnl
  use m_fock,             only : fock_type, fock_init, fock_destroy, fock_ACE_destroy, fock_common_destroy, &
                                 fock_BZ_destroy, fock_update_exc, fock_updatecwaveocc

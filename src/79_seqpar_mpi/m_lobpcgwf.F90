@@ -32,7 +32,6 @@
 
 module m_lobpcgwf
 
- use defs_abitypes
  use defs_basis
  use m_abicore
  use m_lobpcg
@@ -45,6 +44,7 @@ module m_lobpcgwf
  use m_lobpcg2
  use m_dtset
 
+ use defs_abitypes, only : mpi_type
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type
  use m_nonlop,      only : nonlop
