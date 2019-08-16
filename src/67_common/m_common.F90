@@ -58,10 +58,10 @@ module m_common
  use m_pair_list,         only : pair_list
  use m_geometry,          only : mkrdim, metric
  use m_kg,                only : getcut
- use m_parser,            only : parsefile
+ use m_parser,            only : parsefile, ab_dimensions
  use m_invars1,           only : invars0, invars1m, indefo
  use m_time,              only : timab, time_set_papiopt
- use defs_abitypes,       only : ab_dimensions, MPI_type
+ use defs_abitypes,       only : MPI_type
  use defs_datatypes,      only : pspheader_type, ebands_t
  use m_pspheads,          only : inpspheads, pspheads_comm
 

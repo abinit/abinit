@@ -335,58 +335,5 @@ module defs_abitypes
  end type MPI_type
 !!***
 
-!----------------------------------------------------------------------
-
-!!****t* defs_abitypes/ab_dimensions
-!! NAME
-!! ab_dimensions
-!!
-!! FUNCTION
-!! One record for each dimension of arrays used in ABINIT.
-!! Will be used to e.g.:
-!! - contain the maximum size attained over all datasets (mxvals)
-!! - indicate whether this dimension is the same for all datasets or not (multivals).
-!! Used for example inside outvars
-!!
-!! SOURCE
-
- type ab_dimensions
-
-    integer :: ga_n_rules   ! maximal value of input ga_n_rules for all the datasets
-    integer :: gw_nqlwl     ! maximal value of input gw_nqlwl for all the datasets
-    integer :: lpawu        ! maximal value of input lpawu for all the datasets
-    integer :: mband
-    integer :: mband_upper ! maximal value of input nband for all the datasets
-                           ! Maybe this one could be removed
-    integer :: natom
-    integer :: natpawu     ! maximal value of number of atoms on which +U is applied for all the datasets
-    integer :: natsph      ! maximal value of input natsph for all the datasets
-    integer :: natsph_extra  ! maximal value of input natsph_extra for all the datasets
-    integer :: natvshift   ! maximal value of input natvshift for all the datasets
-    integer :: nberry = 20 ! This is presently a fixed value. Should be changed.
-    integer :: nbandhf
-    integer :: nconeq      ! maximal value of input nconeq for all the datasets
-    integer :: n_efmas_dirs
-    integer :: nfreqsp
-    integer :: n_projection_frequencies
-    integer :: nimage
-    integer :: nimfrqs
-    integer :: nkpt       ! maximal value of input nkpt for all the datasets
-    integer :: nkptgw     ! maximal value of input nkptgw for all the datasets
-    integer :: nkpthf     ! maximal value of input nkpthf for all the datasets
-    integer :: nnos       ! maximal value of input nnos for all the datasets
-    integer :: nqptdm     ! maximal value of input nqptdm for all the datasets
-    integer :: nshiftk
-    integer :: nsp
-    integer :: nspinor    ! maximal value of input nspinor for all the datasets
-    integer :: nsppol     ! maximal value of input nsppol for all the datasets
-    integer :: nsym       ! maximum number of symmetries
-    integer :: ntypalch
-    integer :: ntypat     ! maximum number of types of atoms
-    integer :: nzchempot  ! maximal value of input nzchempot for all the datasets
-
- end type ab_dimensions
-!!***
-
 end module defs_abitypes
 !!***

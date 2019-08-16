@@ -37,13 +37,12 @@ module m_invars1
  use netcdf
 #endif
 
- use defs_abitypes,  only : ab_dimensions
  use m_fstrings, only : inupper, itoa, rmquotes
  use m_geometry, only : mkrdim
- use m_parser,   only : intagm, chkint_ge
+ use m_parser,   only : intagm, chkint_ge, ab_dimensions
  use m_inkpts,   only : inkpts, inqpt
  use m_ingeo,    only : ingeo, invacuum
- use m_symtk,   only : mati3det
+ use m_symtk,    only : mati3det
 
 #if defined HAVE_GPU_CUDA
  use m_gpu_toolbox

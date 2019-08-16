@@ -35,8 +35,7 @@ module m_outvar_o_z
  use m_dtset
 
  use m_geometry,     only : mkrdim, xred2xcart
- use m_parser,       only : prttagm, prttagm_images
- use defs_abitypes,  only : ab_dimensions
+ use m_parser,       only : prttagm, prttagm_images, ab_dimensions
 
  implicit none
 

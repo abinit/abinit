@@ -105,7 +105,8 @@ program abinit
  use mpi
 #endif
 
- use defs_abitypes, only : MPI_type, ab_dimensions
+ use defs_abitypes, only : MPI_type
+ use m_parser,      only : ab_dimensions
  use m_time ,       only : asctime, sec2str, timein, time_set_papiopt, timab
  use m_fstrings,    only : sjoin, strcat, itoa, yesno, ljust
  use m_io_tools,    only : flush_unit, delete_file

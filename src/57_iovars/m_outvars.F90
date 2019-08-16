@@ -40,7 +40,7 @@ module m_outvars
  use m_outvar_i_n
  use m_outvar_o_z
 
- use defs_abitypes,  only : ab_dimensions
+ use m_parser,    only : ab_dimensions
  use m_nctk,      only : create_nc_file
 
  implicit none

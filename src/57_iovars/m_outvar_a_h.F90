@@ -30,8 +30,7 @@ module m_outvar_a_h
  use m_results_out
  use m_dtset
 
- use defs_abitypes,  only : ab_dimensions
- use m_parser,  only : prttagm, prttagm_images
+ use m_parser,  only : prttagm, prttagm_images, ab_dimensions
 
  implicit none
 
