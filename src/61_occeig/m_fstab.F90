@@ -242,24 +242,19 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: option0=0,brav1=1,bcorr0=0
- integer :: nkfs,spin,band,nband_k,i1,i2,ib,blow,ik_full,ik_ibz,nkibz,sppoldbl,timrev
- integer :: ik,mkpt,nkpt_full,ierr !ikfull,my_kstart,my_kstop,isym,itime,tsign
- integer :: bstart_k,bstop_k,nene,ifermi,bmin,bmax
+ integer,parameter :: option0 = 0, brav1 = 1, bcorr0 = 0
+ integer :: nkfs,spin,band,nband_k,i1,i2,ib,blow,ik_bz,ik_ibz,nkibz,sppoldbl,timrev
+ integer :: ik,mkpt,nkbz,ierr, bstart_k,bstop_k,nene,ifermi,bmin,bmax
  real(dp) :: elow,ehigh,ebis,enemin,enemax,deltaene,max_occ,dksqmax,cpu,wall,gflops
  logical :: inwin
- character (len=80) :: errstr
-!arrays
- integer,allocatable :: fs2full(:),indkk(:,:) !,fs2irr(:)
+ character(len=80) :: errstr
  character(len=500) :: msg
  type(fstab_t),pointer :: fs
  type(htetra_t) :: tetra
 !arrays
- !integer :: g0(3)
- integer,allocatable :: full2ebands(:,:),bz2ibz(:)
- real(dp) :: rlatt(3,3),klatt(3,3) !kibz(3),krot(3),
- real(dp),allocatable :: kpt_full(:,:) !,fskpts(:,:)
- real(dp), allocatable :: tmp_eigen(:),bdelta(:,:),btheta(:,:)
+ integer,allocatable :: full2ebands(:,:),bz2ibz(:), fs2bz(:),indkk(:,:) !,fs2ibz(:)
+ real(dp) :: rlatt(3,3), klatt(3,3)
+ real(dp),allocatable :: kbz(:,:), tmp_eigen(:),bdelta(:,:),btheta(:,:)
 
 ! *************************************************************************
 
@@ -275,7 +270,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  !call kpts_ibz_from_kptrlatt(cryst, kptrlatt, ebands%kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
  ! new_kptrlatt, new_shiftk)  ! Optional
 
- ! Call smpbz to get the full grid of k-points `kpt_full`
+ ! Call smpbz to get the full grid of k-points `kbz`
  ! brav1=1 is able to treat all bravais lattices (same option used in getkgrid)
  mkpt= kptrlatt(1,1)*kptrlatt(2,2)*kptrlatt(3,3) &
    +kptrlatt(1,2)*kptrlatt(2,3)*kptrlatt(3,1) &
@@ -284,17 +279,17 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    -kptrlatt(1,3)*kptrlatt(2,2)*kptrlatt(3,1) &
    -kptrlatt(1,1)*kptrlatt(2,3)*kptrlatt(3,2)
 
- ABI_MALLOC_OR_DIE(kpt_full,(3,mkpt), ierr)
+ ABI_MALLOC_OR_DIE(kbz, (3, mkpt), ierr)
 
- call smpbz(brav1, std_out, kptrlatt, mkpt, nkpt_full, nshiftk, option0, shiftk, kpt_full)
+ call smpbz(brav1, std_out, kptrlatt, mkpt, nkbz, nshiftk, option0, shiftk, kbz)
 
- ! Find correspondence BZ --> ebands%kpt
+ ! Find correspondence BZ --> IBZ
+ ! Note that we use symrel so these tables can be used to symmetrize wavefunctions.
  timrev = kpts_timrev_from_kptopt(ebands%kptopt)
- sppoldbl = 1; if (any(cryst%symafm == -1) .and. ebands%nsppol==1) sppoldbl=2
- ABI_MALLOC(indkk, (nkpt_full*sppoldbl,6))
+ sppoldbl = 1; if (any(cryst%symafm == -1) .and. ebands%nsppol == 1) sppoldbl=2
+ ABI_MALLOC(indkk, (nkbz*sppoldbl, 6))
 
- ! Compute k points from input file closest to the output file
- call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, kpt_full, ebands%nkpt, nkpt_full, cryst%nsym,&
+ call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, kbz, ebands%nkpt, nkbz, cryst%nsym,&
     sppoldbl, cryst%symafm, cryst%symrel, timrev, comm, exit_loop=.True., use_symrec=.False.)
 
  if (dksqmax > tol12) then
@@ -302,7 +297,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    'The WFK file cannot be used to start thee present calculation ',ch10,&
    'It was asked that the wavefunctions be accurate, but',ch10,&
    'at least one of the k points could not be generated from a symmetrical one.',ch10,&
-   'dksqmax=',dksqmax,ch10,&
+   'dksqmax= ',dksqmax,ch10,&
    'Action: check your WFK file and k-point input variables',ch10,&
    '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
    MSG_ERROR(msg)
@@ -310,14 +305,16 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 
  call cwtime_report("fstab_init%listkk", cpu, wall, gflops)
 
- ABI_MALLOC(full2ebands, (6, nkpt_full))
+ ABI_MALLOC(full2ebands, (6, nkbz))
  full2ebands = 0
 
- do ik_full=1,nkpt_full
-   full2ebands(1, ik_full) = indkk(ik_full,1)     ! ik_ibz
-   full2ebands(2, ik_full) = indkk(ik_full,2)     ! isym
-   full2ebands(3, ik_full) = indkk(ik_full,6)     ! itimrev
-   full2ebands(4:6, ik_full) = indkk(ik_full,3:5) ! g0
+ do ik_bz=1,nkbz
+   full2ebands(1, ik_bz) = indkk(ik_bz, 1)     ! ik_ibz
+   full2ebands(2, ik_bz) = indkk(ik_bz, 2)     ! isym
+   full2ebands(3, ik_bz) = indkk(ik_bz, 6)     ! itimrev
+   full2ebands(4:6, ik_bz) = indkk(ik_bz, 3:5) ! g0
+   !full2ebands(3:5, ik_bz) = indkk(ik_bz, 3:5)  ! g0
+   !full2ebands(6, ik_bz) = indkk(ik_bz, 6)  ! itimrev
  end do
 
  ! Select only those k-points in the BZ close to the FS.
@@ -327,26 +324,25 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  ebis = elow - abs(elow) * 0.001_dp
 
  ! Allocate workspace arrays.
- !ABI_MALLOC(fs2irr, (nkpt_full))
- ABI_MALLOC(fs2full, (nkpt_full))
+ !ABI_MALLOC(fs2ibz, (nkbz))
+ ABI_MALLOC(fs2bz, (nkbz))
 
  do spin=1,ebands%nsppol
    fs => fstab(spin)
    ABI_MALLOC(fs%bstcnt_ibz, (2, nkibz))
    fs%bstcnt_ibz = -1
 
-   ! Find k-points on the FS(spin).
+   ! Find k-points on the FS associated to this spin.
    nkfs = 0
-   do ik_full=1,nkpt_full
-     ik_ibz = full2ebands(1, ik_full)
-     nband_k = ebands%nband(ik_ibz+(spin-1)*nkibz)
+   do ik_bz=1,nkbz
+     ik_ibz = full2ebands(1, ik_bz)
+     nband_k = ebands%nband(ik_ibz + (spin-1)*nkibz)
 
-     blow = bisect(ebands%eig(:nband_k,ik_ibz,spin), ebis)
+     blow = bisect(ebands%eig(:nband_k, ik_ibz, spin), ebis)
      if (blow == 0) blow = 1
      !if (blow == nband_k .or. blow == 0) cycle ! out of range
      !write(std_out,*)"here with blow: ", blow,nband_k
-     !write(std_out,*)"eig_blow, eig_max, elow, ehigh:", &
-     !  ebands%eig(blow, ik_ibz, spin), ebands%eig(nband_k, ik_ibz, spin), elow,ehigh
+     !write(std_out,*)"eig_blow, eig_max, elow, ehigh:", ebands%eig(blow, ik_ibz, spin), ebands%eig(nband_k, ik_ibz, spin), elow,ehigh
 
      inwin = .False.; i1 = huge(1); i2 = -1
      do band=blow,nband_k
@@ -361,28 +357,29 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
        ! Add this k-point and the corresponding bands.
        !write(std_out,*)"in win"
        nkfs = nkfs + 1
-       !fs2irr(nkfs) = ik_ibz
-       fs2full(nkfs) = ik_full
+       !fs2ibz(nkfs) = ik_ibz
+       fs2bz(nkfs) = ik_bz
        if (any(fs%bstcnt_ibz(:, ik_ibz) /= [-1, -1])) then
          ABI_CHECK(all(fs%bstcnt_ibz(:, ik_ibz) == [i1, i2-i1+1]), "bstcnt_ibz!")
        end if
        fs%bstcnt_ibz(:, ik_ibz) = [i1, i2-i1+1]
      end if
-   end do !ik_full
+   end do ! ik_bz
 
    ! @fstab_t
    ! Build fstab_t for this spin.
-   fs%nkibz = nkibz; fs%nkfs = nkfs; fs%nktot = nkpt_full
+   fs%nkibz = nkibz; fs%nkfs = nkfs; fs%nktot = nkbz
    ABI_MALLOC(fs%kpts, (3, nkfs))
    ABI_MALLOC(fs%istg0, (6, nkfs))
    do ik=1,nkfs
-     !ik_ibz = fs2irr(ik)
-     ik_full = fs2full(ik)
-     fs%kpts(:,ik) = kpt_full(:, ik_full)
-     fs%istg0(:, ik) = full2ebands(:, ik_full)
+     !ik_ibz = fs2ibz(ik)
+     ik_bz = fs2bz(ik)
+     fs%kpts(:,ik) = kbz(:, ik_bz)
+     fs%istg0(:, ik) = full2ebands(:, ik_bz)
    end do
    fs%maxnb = maxval(fs%bstcnt_ibz(2, :))
    fs%krank = krank_new(nkfs, fs%kpts)
+
  end do ! spin
 
  call cwtime_report("fstab_init%fs_build:", cpu, wall, gflops)
@@ -405,20 +402,21 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    fs%integ_method = integ_method
  end do
 
+ ! TODO: compute weights on the fly to reduce memory? nene should be set to zero if not used!
  if (integ_method == 2) then
    rlatt = kptrlatt
    call matr3inv(rlatt,klatt)
 
-   ABI_MALLOC(bz2ibz, (nkpt_full))
+   ABI_MALLOC(bz2ibz, (nkbz))
    bz2ibz = full2ebands(1, :)
 
-   call htetra_init(tetra, bz2ibz, cryst%gprimd, klatt, kpt_full, nkpt_full, ebands%kptns, nkibz, ierr, errstr, comm)
+   call htetra_init(tetra, bz2ibz, cryst%gprimd, klatt, kbz, nkbz, ebands%kptns, nkibz, ierr, errstr, comm)
    ABI_CHECK(ierr == 0, errstr)
    ABI_FREE(bz2ibz)
 
    ABI_MALLOC(tmp_eigen, (nkibz))
    ABI_MALLOC(btheta, (nene, nkibz))
-   ABI_MALLOC(bdelta, (nene,nkibz))
+   ABI_MALLOC(bdelta, (nene, nkibz))
 
    max_occ = one
    ! in spinor or spin polarized case, orbitals have occupation <= 1 instead of 2
@@ -454,9 +452,6 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 
        ! Calculate general integration weights at each irred kpoint
        ! as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
-       !call tetra_blochl_weights(tetra,tmp_eigen,enemin,enemax,max_occ,fs%nene,nkibz,&
-       !  bcorr0,btheta,bdelta,xmpi_comm_self)
-
        call tetra%blochl_weights(tmp_eigen, enemin, enemax, max_occ, fs%nene, nkibz, &
          bcorr0, btheta, bdelta, xmpi_comm_self)
 
@@ -465,8 +460,8 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
          if (band >= bstart_k .and. band <= bstop_k) then
            ! Save weights in the correct position.
            ib = band - bstart_k + 1
-           fs%tetra_wtk(ib,ik_ibz) = bdelta(ifermi,ik_ibz) * nkibz
-           fs%tetra_wtk_ene(ib,ik_ibz,1:fs%nene) = bdelta(1:fs%nene,ik_ibz) * nkibz
+           fs%tetra_wtk(ib, ik_ibz) = bdelta(ifermi, ik_ibz) * nkibz
+           fs%tetra_wtk_ene(ib, ik_ibz, 1:fs%nene) = bdelta(1:fs%nene, ik_ibz) * nkibz
          end if
        end do ! ik_ibz
      end do ! band
@@ -475,13 +470,12 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    ABI_FREE(tmp_eigen)
    ABI_FREE(btheta)
    ABI_FREE(bdelta)
-
    call tetra%free()
  end if
 
- !ABI_FREE(fs2irr)
- ABI_FREE(fs2full)
- ABI_FREE(kpt_full)
+ !ABI_FREE(fs2ibz)
+ ABI_FREE(fs2bz)
+ ABI_FREE(kbz)
  ABI_FREE(full2ebands)
  ABI_FREE(indkk)
 
@@ -540,16 +534,16 @@ end function fstab_findkg0
 !!
 !! FUNCTION
 !!  Return the weights for the integration on the Fermi-surface
-!!  NB: single spin version - should have an array (nsppol) of the fstab objects
 !!
 !! INPUTS
 !!  ebands<ebands_type>=GS band structure.
 !!  ik_ibz=Index of the k-point in the IBZ
 !!  spin=Spin index
 !!  sigmas
+!!  [iene]
 !!
 !! OUTPUT
-!!   wtk(fs%nsig,fs%maxnb)=Weights for FS integration.
+!!   wtk(fs%nsig, fs%maxnb)=Weights for FS integration.
 !!
 !! PARENTS
 !!      m_ddk,m_phgamma
@@ -573,23 +567,18 @@ subroutine fstab_get_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
 
 !Local variables-------------------------------
 !scalars
- integer :: ib,bstart_k,nband_k,band,isig
- real(dp) :: arg
- real(dp) :: chempot
+ integer :: ib, bstart_k, nband_k, band, isig
+ real(dp) :: arg, chempot
 
 ! *************************************************************************
 
- !ik_ibz = fs%istg0(1, ik_bz)
  bstart_k = fs%bstcnt_ibz(1, ik_ibz); nband_k = fs%bstcnt_ibz(2, ik_ibz)
  ABI_CHECK(nband_k >= 1 .and. nband_k <= fs%maxnb, "wrong nband_k")
 
-! TODO: add iene looping for chemical potential in gaussian case too
+ ! TODO: add iene looping for chemical potential in gaussian case too
  select case (fs%integ_method)
  case (1)
-   chempot = ebands%fermie
-   if (present(iene)) then
-     chempot = fs%enemin + (iene-1)*fs%deltaene
-   end if
+   chempot = ebands%fermie; if (present(iene)) chempot = fs%enemin + (iene-1)*fs%deltaene
    do ib=1,nband_k
      band = ib + bstart_k - 1
      arg = ebands%eig(band,ik_ibz,spin) - chempot
@@ -664,9 +653,9 @@ subroutine fstab_print(fstab, header, unit, prtvol, mode_paral)
  call wrtout(my_unt,msg,my_mode)
 
  if (fstab(1)%integ_method == 1) then
-   write(std_out,"(a,i0)")"FS integration done with gaussians and nsig: ",fstab(1)%nsig
+   write(std_out,"(a,i0)")"FS integration done with gaussian method and nsig: ",fstab(1)%nsig
  else if (fstab(1)%integ_method == 2) then
-   write(std_out,"(a)")"FS integration done with Tetrahedron method"
+   write(std_out,"(a)")"FS integration done with tetrahedron method"
  end if
  write(std_out,"(a,i0)")"Total number of points in the full mesh: ",fstab(1)%nktot
 

@@ -4227,6 +4227,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        kk = fs%kpts(:, ik_bz)
        ik_ibz = fs%istg0(1, ik_bz); isym_k = fs%istg0(2, ik_bz)
        trev_k = fs%istg0(3, ik_bz); g0_k = fs%istg0(4:6,ik_bz)
+       !trev_k = fs%istg0(6, ik_bz); g0_k = fs%istg0(3:5,ik_bz)
+
        isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
        kk_ibz = ebands%kptns(:,ik_ibz)
 
@@ -4257,11 +4259,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        trev_kq = indkk_kq(1, 6); g0_kq = indkk_kq(1, 3:5)
        isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
        kq_ibz = ebands%kptns(:, ikq_ibz)
-
-       !ikq_ibz = fs%istg0(1, ikq_bz); isym_kq = fs%istg0(2, ikq_bz)
-       !trev_kq = fs%istg0(3, ikq_bz); g0ibz_kq = fs%istg0(4:6,ikq_bz)
-       !isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0ibz_kq == 0))
-       !g0_kq =  g0ibz_kq + g0bz_kq
 
        ! Number of bands crossing the fermi level at k + q
        bstart_kq = fs%bstcnt_ibz(1, ikq_ibz); nband_kq = fs%bstcnt_ibz(2, ikq_ibz)
