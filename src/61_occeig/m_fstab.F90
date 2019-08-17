@@ -263,8 +263,6 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 
 ! *************************************************************************
 
- ABI_UNUSED(comm)
-
  !@fstab_t
  call cwtime(cpu, wall, gflops, "start")
 
@@ -288,7 +286,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 
  ABI_MALLOC_OR_DIE(kpt_full,(3,mkpt), ierr)
 
- call smpbz(brav1,std_out,kptrlatt,mkpt,nkpt_full,nshiftk,option0,shiftk,kpt_full)
+ call smpbz(brav1, std_out, kptrlatt, mkpt, nkpt_full, nshiftk, option0, shiftk, kpt_full)
 
  ! Find correspondence BZ --> ebands%kpt
  timrev = kpts_timrev_from_kptopt(ebands%kptopt)
@@ -296,8 +294,8 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  ABI_MALLOC(indkk, (nkpt_full*sppoldbl,6))
 
  ! Compute k points from input file closest to the output file
- call listkk(dksqmax,cryst%gmet,indkk,ebands%kptns,kpt_full,ebands%nkpt,nkpt_full,cryst%nsym,&
-    sppoldbl,cryst%symafm,cryst%symrel,timrev,comm, exit_loop=.True., use_symrec=.False.)
+ call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, kpt_full, ebands%nkpt, nkpt_full, cryst%nsym,&
+    sppoldbl, cryst%symafm, cryst%symrel, timrev, comm, exit_loop=.True., use_symrec=.False.)
 
  if (dksqmax > tol12) then
    write(msg, '(7a,es16.6,4a)' )&
@@ -459,8 +457,8 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
        !call tetra_blochl_weights(tetra,tmp_eigen,enemin,enemax,max_occ,fs%nene,nkibz,&
        !  bcorr0,btheta,bdelta,xmpi_comm_self)
 
-       call tetra%blochl_weights(tmp_eigen,enemin,enemax,max_occ,fs%nene,nkibz, &
-         bcorr0,btheta,bdelta,xmpi_comm_self)
+       call tetra%blochl_weights(tmp_eigen, enemin, enemax, max_occ, fs%nene, nkibz, &
+         bcorr0, btheta, bdelta, xmpi_comm_self)
 
        do ik_ibz=1,nkibz
          bstart_k = fs%bstcnt_ibz(1, ik_ibz); bstop_k = bstart_k + fs%bstcnt_ibz(2, ik_ibz) - 1
@@ -756,7 +754,7 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
      symrankkpt_phon = krank%get_rank(tmpkpt)
 
      FSfullpqtofull(ikpt_phon,iqpt) = krank%invrank(symrankkpt_phon)
-     if (FSfullpqtofull(ikpt_phon,iqpt) == -1) then
+     if (FSfullpqtofull(ikpt_phon, iqpt) == -1) then
        MSG_ERROR("looks like no kpoint equiv to k+q !!!")
      end if
 

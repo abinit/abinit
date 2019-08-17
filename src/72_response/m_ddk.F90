@@ -200,7 +200,7 @@ MODULE m_ddk
   type(rf_hamiltonian_type) :: rf_hamkq(3)
 
   type(ham_targets_t), private :: htg(3)
-  ! Store arrays that are targetted by the hamiltonians.
+  ! Store arrays targetted by the hamiltonians.
 
   real(dp), private, allocatable :: gh1c(:,:,:)
    !gh1c, (2, mpw*nspinor, 3))
@@ -1295,15 +1295,15 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
  end if
 
  ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
- ABI_MALLOC(ylmgr1_k, (npw_k,3+6*(optder/2),psps%mpsang**2*psps%useylm*useylmgr1))
+ ABI_MALLOC(ylmgr1_k, (npw_k, 3+6*(optder/2), psps%mpsang**2*psps%useylm*useylmgr1))
 
- if (psps%useylm == 1) then ! .and. self%inclvkb /= 0
+ if (psps%useylm == 1) then
    ! Fake MPI_type for sequential part. dummy_nband and nsppol1 are not used in sequential mode.
    call initmpi_seq(mpienreg_seq)
    dummy_nband = 0
    npwarr = npw_k
-   call initylmg(cryst%gprimd,kg_k,kpoint,nkpt1,mpienreg_seq,psps%mpsang,npw_k,dummy_nband,nkpt1,&
-      npwarr,nsppol1,optder,cryst%rprimd,ylm_k,ylmgr1_k)
+   call initylmg(cryst%gprimd, kg_k, kpoint, nkpt1, mpienreg_seq, psps%mpsang, npw_k, dummy_nband, nkpt1, &
+      npwarr, nsppol1, optder, cryst%rprimd, ylm_k, ylmgr1_k)
    call destroy_mpi_enreg(mpienreg_seq)
  end if
 
@@ -1314,17 +1314,15 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
    call self%gs_hamkq(idir)%load_spin(spin, with_nonlocal=.true.)
    call self%rf_hamkq(idir)%load_spin(spin, with_nonlocal=.true.)
 
-   !if (self%inclvkb /= 0) then
-
    ! We need ffnl1 and dkinpw for 3 dirs. Note that the Hamiltonian objects use pointers to keep a reference
    ! to the output results of this routine.
    ! This is the reason why we need to store the targets in self%htg
-   call getgh1c_setup(self%gs_hamkq(idir),self%rf_hamkq(idir),dtset,psps,kpoint,kpoint,idir,self%ipert, & ! In
-     cryst%natom,cryst%rmet,cryst%gprimd,cryst%gmet,istwf_k,npw_k,npw_k, &             ! In
-     useylmgr1,kg_k,ylm_k,kg_k,ylm_k,ylmgr1_k, &                                       ! In
-     self%htg(idir)%dkinpw,nkpg,nkpg1,self%htg(idir)%kpg_k,self%htg(idir)%kpg1_k, &    ! Out
-     self%htg(idir)%kinpw1,self%htg(idir)%ffnlk,self%htg(idir)%ffnl1, &                ! Out
-     self%htg(idir)%ph3d, self%htg(idir)%ph3d1)                                        ! Out
+   call getgh1c_setup(self%gs_hamkq(idir), self%rf_hamkq(idir), dtset, psps, kpoint, kpoint, idir, self%ipert, & ! In
+     cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, npw_k, npw_k, &            ! In
+     useylmgr1, kg_k, ylm_k, kg_k, ylm_k, ylmgr1_k, &                                       ! In
+     self%htg(idir)%dkinpw, nkpg, nkpg1, self%htg(idir)%kpg_k, self%htg(idir)%kpg1_k, &     ! Out
+     self%htg(idir)%kinpw1, self%htg(idir)%ffnlk, self%htg(idir)%ffnl1, &                   ! Out
+     self%htg(idir)%ph3d, self%htg(idir)%ph3d1)                                             ! Out
  end do
 
  ABI_FREE(ylm_k)
@@ -1392,9 +1390,9 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj, mpi_enreg)
    eshift = self%eig0nk - self%dfpt_sciss
    do idir=1,3
      sij_opt = self%gs_hamkq(idir)%usepaw
-     call getgh1c(berryopt0,cwave,cwaveprj,self%gh1c(:,:,idir),&
-       grad_berry,self%gs1c(:,:,idir),self%gs_hamkq(idir),gvnlx1,idir,self%ipert,eshift,mpi_enreg,optlocal0, &
-       optnl,opt_gvnlx1,self%rf_hamkq(idir),sij_opt,tim_getgh1c,usevnl0)
+     call getgh1c(berryopt0, cwave, cwaveprj, self%gh1c(:,:,idir), &
+       grad_berry, self%gs1c(:,:,idir), self%gs_hamkq(idir), gvnlx1, idir, self%ipert, eshift, mpi_enreg, optlocal0, &
+       optnl, opt_gvnlx1, self%rf_hamkq(idir), sij_opt, tim_getgh1c, usevnl0)
    end do
 
  else
