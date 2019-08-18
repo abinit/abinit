@@ -48,6 +48,7 @@ module m_sigmaph
  use m_sort
  use m_hdr
  use m_sigtk
+ use m_ephtk
  use m_eph_double_grid
 #ifdef HAVE_NETCDF
  use netcdf
@@ -981,7 +982,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
+
  if (sigma%pert_comm%nproc > 1) then
+   !  Activate parallelism over perturbations
    call dvdb%set_pert_distrib(sigma%my_npert, natom3, sigma%my_pinfo, sigma%pert_table, sigma%pert_comm%value)
  end if
 
@@ -1357,8 +1360,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              ! MPI parallelism inside bsum_comm (not very efficient)
              ! TODO: To be replaced by MPI parallellism over bands in projbd inside dfpt_cgwf
              ! (pass optional communicator and band range treated by me.
-             if (mod(ib_k, sigma%bsum_comm%nproc) /= sigma%bsum_comm%me) cycle
-             !if (self%bsum_comm%skip(ib_k)) cycle
+             if (sigma%bsum_comm%skip(ib_k)) cycle
              band_ks = ib_k + bstart_ks - 1
              eig0nk = ebands%eig(band_ks, ik_ibz, spin)
 
@@ -1443,7 +1445,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! Compute S_pp' = <D_{qp} vscf u_nk|u'_{nk+q p'}>
          ABI_CALLOC(stern_ppb, (2, natom3, natom3, nbcalc_ks))
          do ib_k=1,nbcalc_ks
-           if (mod(ib_k, sigma%bsum_comm%nproc) /= sigma%bsum_comm%me) cycle ! MPI parallelism inside bsum
+           if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum
 
            call cg_zgemm("C", "N", npw_kq*nspinor, natom3, natom3, &
              h1kets_kq_allperts(:,:,:,ib_k), cg1s_kq(:,:,:,ib_k), stern_ppb(:,:,:,ib_k))
@@ -1463,7 +1465,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
 
            do ib_k=1,nbcalc_ks
-             if (mod(ib_k, sigma%bsum_comm%nproc) /= sigma%bsum_comm%me) cycle ! MPI parallelism inside bsum
+             if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum
 
              ! sum_{pp'} d_p* Stern_{pp'} d_p' with d = displ_red(:,:,:,nu) and S = stern_ppb(:,:,:,ib_k)
              vec_natom3 = zero
@@ -1979,7 +1981,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        if (sigma%qint_method == 0 .or. sigma%symsigma == 0) then
          ! Compute Eliashberg function with gaussian method and ph_smear smearing.
          do iq_ibz=1,sigma%nqibz_k
-           if (mod(iq_ibz, sigma%pqb_comm%nproc) /= sigma%pqb_comm%me) cycle ! MPI parallelism
+           if (sigma%pqb_comm%skip(iq_ibz)) cycle ! MPI parallelism inside pqb_comm
+
            ! Recompute phonons (cannot use sigma%ephwg in this case)
            call ifc%fourq(cryst, sigma%qibz_k(:,iq_ibz), phfrq, displ_cart)
            do nu=1,natom3
@@ -2004,7 +2007,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                                              sigma%pqb_comm%value, with_qweights=.True.)
 
            do iq_ibz=1,sigma%nqibz_k
-             if (mod(iq_ibz, sigma%pqb_comm%nproc) /= sigma%pqb_comm%me) cycle ! MPI parallelism
+             if (sigma%pqb_comm%skip(iq_ibz)) cycle ! MPI parallelism inside pqb_comm
              do ib_k=1,nbcalc_ks
                do ii=1,3
                  sigma%gfw_vals(:, ii, ib_k) = sigma%gfw_vals(:, ii, ib_k) +  &
@@ -2195,9 +2198,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  integer :: intp_kptrlatt(3,3), g0_k(3)
  integer :: qptrlatt(3,3), indkk_k(1,6), my_gmax(3), band_block(2)
  integer :: val_indeces(ebands%nkpt, ebands%nsppol), intp_nshiftk
- integer :: all_pinfo(3, cryst%natom*3)
- integer,allocatable :: temp(:,:)
- integer,allocatable :: gtmp(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iperm(:)
+ integer,allocatable :: temp(:,:), gtmp(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iperm(:)
  real(dp):: params(4), my_shiftq(3,1),kk(3),kq(3),intp_shiftk(3)
 #ifdef HAVE_MPI
  integer :: ndims, comm_cart, me_cart
@@ -2270,7 +2271,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    ! In case of error try to enforce semiconductor occupations before calling get_gaps
    ! This might still fail though...
    call gaps%free()
-   call ebands_copy(ebands,tmp_ebands)
+   call ebands_copy(ebands, tmp_ebands)
    call ebands_set_scheme(tmp_ebands, occopt3, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol)
    call ebands_set_nelect(tmp_ebands, tmp_ebands%nelect-dtset%eph_extrael, dtset%spinmagntarget, msg)
    gap_err = get_gaps(tmp_ebands,gaps)
@@ -2356,7 +2357,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
      new%kcalc2ibz(ikcalc, :) = 0
      new%bstart_ks(ikcalc, :) = 0
      new%nbcalc_ks(ikcalc, :) = 0
-     cycle ! MPI parallelism.
+     cycle ! MPI parallelism inside comm
    end if
    ! Note symrel and use_symrel.
    kk = new%kcalc(:,ikcalc)
@@ -2464,7 +2465,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    do i3=-1,1
      do i2=-1,1
        do i1=-1,1
-         cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
+         cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism inside comm
          kq = kk + half * [i1, i2, i3]
          ! TODO: g0 umklapp here can enter into play gmax could not be large enough!
          call get_kg(kq, istwfk1, 1.1_dp * ecut, cryst%gmet, onpw, gtmp)
@@ -2563,14 +2564,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ! ========================
  ! Init for sequential execution.
  new%my_npert = natom3
-
- !new%pert_comm = xmpi_comm_self; new%pert_comm_me = 0; new%pert_comm_nproc = 1
- !new%qb_comm = xmpi_comm_self; new%qb_comm_me = 0; new%qb_comm_nproc = 1
- !new%qpt_comm = xmpi_comm_self; new%qpt_comm_me = 0; new%qpt_comm_nproc = 1
- !new%bsum_comm = xmpi_comm_self; new%bsum_comm_me = 0; new%bsum_comm_nproc = 1
- !new%kcalc_comm = xmpi_comm_self; new%kcalc_comm_me = 0; new%kcalc_comm_nproc = 1
- !new%spin_comm = xmpi_comm_self; new%spin_comm_me = 0; new%spin_comm_nproc = 1
- !new%pqb_comm = xmpi_comm_self; new%pqb_comm_me = 0; new%pqb_comm_nproc = 1
 
  if (any(dtset%eph_np_pqbks /= 0)) then
    ! Use parameters from input file.
@@ -2701,8 +2694,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  end if
 
  ! Create MPI communicator for parallel netcdf IO used to write results for the different k-points.
- ! This communicator is defined only on the processes performing IO.
- !new%ncwrite_comm = xmpi_comm_null; new%ncwrite_comm_me = -1; new%ncwrite_comm%nproc = 0
+ ! This communicator is defined only on the processes that will perform IO.
  call new%ncwrite_comm%set_to_null()
  if (new%kcalc_comm%nproc == 1 .and. new%spin_comm%nproc == 1) then
    ! Easy-peasy: only master in comm_world performs IO.
@@ -2737,43 +2729,11 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
     end if
  end if
 
- ! Build table with list of perturbations treated by this CPU.
- ABI_MALLOC(new%my_pinfo, (3, new%my_npert))
- ABI_MALLOC(new%pert_table, (2, natom3))
-
- do iatom=1,cryst%natom
-   do idir=1,3
-     pertcase = idir + (iatom-1) * 3
-     all_pinfo(:, pertcase) = [idir, iatom, pertcase]
-     new%pert_table(1, pertcase) = (pertcase - 1) / (natom3 / new%pert_comm%nproc)
-   end do
- end do
- bstart = (natom3 / new%pert_comm%nproc) * new%pert_comm%me + 1
- bstop = bstart + new%my_npert - 1
- new%my_pinfo = all_pinfo(:, bstart:bstop)
-
- new%pert_table(2, :) = -1
- do ii=1,new%my_npert
-   ip = new%my_pinfo(3, ii)
-   new%pert_table(2, ip) = ii
- end do
- !write(std_out,*)"my_npert", new%my_npert, "pert_comm%nproc", new%pert_comm%nproc; write(std_out,*)"my_pinfo", new%my_pinfo
+ ! Build table with list of perturbations treated by this CPU inside pert_comm
+ call ephtk_set_pertables(cryst%natom, new%my_npert, new%pert_table, new%my_pinfo, new%pert_comm%value)
 
  ! Setup a mask to skip accumulating the contribution of certain phonon modes.
- ! By default do not skip, if set skip all but specified
- ABI_MALLOC(new%phmodes_skip, (natom3))
- new%phmodes_skip = 0
- if (all(dtset%eph_phrange /= 0)) then
-   if (minval(dtset%eph_phrange) < 1 .or. &
-       maxval(dtset%eph_phrange) > natom3 .or. &
-       dtset%eph_phrange(2) < dtset%eph_phrange(1)) then
-     MSG_ERROR('Invalid range for eph_phrange. Should be between [1, 3*natom] and eph_modes(2) > eph_modes(1)')
-   end if
-   call wrtout(std_out, sjoin(" Including phonon modes between [", &
-               itoa(dtset%eph_phrange(1)), ',', itoa(dtset%eph_phrange(2)), "]"))
-   new%phmodes_skip = 0
-   new%phmodes_skip(dtset%eph_phrange(1):dtset%eph_phrange(2)) = 1
- end if
+ call ephtk_set_phmodes_ship(dtset, new%phmodes_skip)
 
  if (.not. new%imag_only) then
    ! Split bands among the procs inside bsum_comm.
@@ -2943,7 +2903,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    ! We only need mu_e so MPI parallelize the T-loop.
    new%mu_e = zero
    do it=1,new%ntemp
-     if (mod(it, nprocs) /= my_rank) cycle ! MPI parallelism.
+     if (mod(it, nprocs) /= my_rank) cycle ! MPI parallelism inside comm.
      ! Use Fermi-Dirac occopt
      call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(it), dtset%spinmagntarget, dtset%prtvol)
      call ebands_set_nelect(tmp_ebands, ebands%nelect, dtset%spinmagntarget, msg)
@@ -4891,7 +4851,7 @@ subroutine eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, prtvol,
 
  ! Compute angular average.
  do iang=1,sigma%angl_size
-   if (mod(iang, nprocs) /= my_rank) cycle ! MPI parallelism
+   if (mod(iang, nprocs) /= my_rank) cycle ! MPI parallelism inside comm
    qvers_cart = sigma%qvers_cart(:, iang)
    inv_qepsq = one / dot_product(qvers_cart, matmul(ifc%dielt, qvers_cart))
 
@@ -5060,7 +5020,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  cnt = 0
  do spin=1,sigma%nsppol
    do ikcalc=1,sigma%nkcalc
-     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism
+     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism inside comm
      kk = sigma%kcalc(:, ikcalc)
      ik_ibz = sigma%kcalc2ibz(ikcalc, 1)
      do iq_bz=1,nqbz

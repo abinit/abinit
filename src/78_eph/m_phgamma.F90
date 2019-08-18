@@ -144,6 +144,20 @@ module m_phgamma
   integer :: nene
   ! Number of chemical potential values used for inelastic integration
 
+  !integer :: my_npert
+   ! Number of atomic perturbations or phonon modes treated by this MPI rank.
+
+  !integer,allocatable :: my_pinfo(:,:)
+   ! my_pinfo(3, my_npert)
+   ! my_pinfo(1, ip) gives the `idir` index of the ip-th perturbation.
+   ! my_pinfo(2, ip) gives the `ipert` index of the ip-th perturbation.
+   ! my_pinfo(3, ip) gives `pertcase`=idir + (ipert-1)*3
+
+  !integer,allocatable :: pert_table(:,:)
+   ! pert_table(2, natom3)
+   ! pert_table(1, npert): rank of the processor treating this atomic perturbation.
+   ! pert_table(2, npert): imyp index in my_pinfo table, -1 if this rank is not treating ipert.
+
   integer, allocatable :: my_iqibz(:)
   ! indices of ibz iq in local array. -1 if iq does not belong to current proc
 
@@ -665,7 +679,7 @@ end subroutine phgamma_init
 !! phgamma_print
 !!
 !! FUNCTION
-!!  Finalize the phgamma_t datatype.
+!!  Print the phgamma_t datatype.
 !!
 !! INPUTS
 !! cryst<crystal_t>=Crystalline structure.
@@ -673,7 +687,6 @@ end subroutine phgamma_init
 !! ncid=Netcdf file handler (already open in the caller).
 !!
 !! OUTPUT
-!! gams<phgamma_t>
 !!
 !! PARENTS
 !!
@@ -817,7 +830,7 @@ subroutine tgamma_symm(cryst, qpt, tgamma)
    k = k + 3
  end do
 
- ! Reduced --> Cartesian
+ ! Cartesian --> Reduced
  call zgemm('N','N',natom3,natom3,natom3,cone,tgcart,natom3,umat,natom3,czero,tmp_mat,natom3)
  call zgemm('T','N',natom3,natom3,natom3,cone,umat,natom3,tmp_mat,natom3,czero,tgamma,natom3)
 
@@ -2442,8 +2455,8 @@ real(dp) function a2fw_get_moment(a2f, nn, spin, out_int)
 
 !Local variables -------------------------
 !scalars
- integer :: iw !,nomega
- real(dp) :: omg,omg_nm1
+ integer :: iw
+ real(dp) :: omg, omg_nm1
 !arrays
  real(dp) :: ff(a2f%nomega),int_ff(a2f%nomega)
 
@@ -2513,8 +2526,7 @@ function a2fw_tr_moment(a2f_tr,nn,spin,out_int)
 
 !Local variables -------------------------
 !scalars
- integer :: iw !,nomega
- integer :: idir, jdir
+ integer :: iw, idir, jdir
  real(dp) :: omg,omg_nm1
 !arrays
  real(dp) :: ff(a2f_tr%nomega),int_ff(a2f_tr%nomega)
@@ -3772,7 +3784,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 !scalars
  integer,parameter :: nsig = 1, tim_getgh1c = 1, berryopt0 = 0, timrev1 = 1
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, eph_scalprod0 = 0
- integer :: my_rank,nproc,mband,nsppol,nkpt,idir,ipert,iq_ibz
+ integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor,onpw
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,ib1,ib2,band !band1,band2,
  integer :: ik_ibz,ik_bz,ikq_bz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq,timerev_q
@@ -3797,6 +3809,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  type(phgamma_t) :: gams
  type(a2fw_t) :: a2fw
  type(a2fw_tr_t) :: a2fw_tr
+ type(ddkop_t) :: ddkop
  character(len=500) :: msg
  character(len=fnlen) :: path
 !arrays
@@ -3843,7 +3856,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
- nkpt = ebands%nkpt; mband=ebands%mband
+ nkibz = ebands%nkpt; mband = ebands%mband
 
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
  nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
@@ -3872,7 +3885,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  ! Find Fermi surface k points
  ABI_DT_MALLOC(fstab, (nsppol))
- ! FIXME: kptopt, change setup of k-points if tetra: fist tetra weights then k-points on the Fermi surface.!
+ ! FIXME: kptopt, change setup of k-points if tetra: fist tetra weights then k-points on the Fermi surface!
  call fstab_init(fstab, ebands, cryst, dtset%eph_fsewin, dtset%eph_intmeth, dtset%kptrlatt, dtset%nshiftk, dtset%shiftk, comm)
  call fstab_print(fstab)
 
@@ -3952,6 +3965,12 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
+ !if (sigma%pert_comm%nproc > 1) then
+    ! Build table with list of perturbations treated by this CPU inside pert_comm
+    !call ephtk_set_pertables(cryst%natom, new%my_npert, new%pert_table, new%my_pinfo, new%pert_comm%value)
+    !Activate parallelism over perturbations
+    !call dvdb%set_pert_distrib(sigma%my_npert, natom3, sigma%my_pinfo, sigma%pert_table, sigma%pert_comm%value)
+ !end if
 
  do_ftv1q = 0
  do iq_ibz=1,gams%nqibz
@@ -3977,9 +3996,9 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  end if
 
  ! Initialize the wave function descriptor.
- ABI_MALLOC(nband, (nkpt, nsppol))
- ABI_MALLOC(bks_mask, (mband, nkpt, nsppol))
- ABI_MALLOC(keep_ur, (mband, nkpt ,nsppol))
+ ABI_MALLOC(nband, (nkibz, nsppol))
+ ABI_MALLOC(bks_mask, (mband, nkibz, nsppol))
+ ABI_MALLOC(keep_ur, (mband, nkibz ,nsppol))
  nband = mband; bks_mask = .False.; keep_ur = .False.
 
  ! Only wavefunctions on the FS are stored in wfd.
@@ -3988,7 +4007,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  do spin=1,nsppol
    fs => fstab(spin)
    do ik_bz=1,fs%nkfs
-     ik_ibz = fs%istg0(1, ik_bz)
+     ik_ibz = fs%indkk_fs(1, ik_bz)
      bstart_k = fs%bstcnt_ibz(1, ik_ibz); nband_k = fs%bstcnt_ibz(2, ik_ibz)
      bks_mask(bstart_k:bstart_k+nband_k-1, ik_ibz, spin) = .True.
    end do
@@ -3996,13 +4015,13 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ! no memory distribution, each node has the full set of states.
  !bks_mask(1:mband,:,:) = .True.
 
- ! Impose istwfk=1 for all k points. This is also done in respfn (see inkpts)
+ ! Impose istwfk = 1 for all k points. This is also done in respfn (see inkpts)
  ! wfd_read_wfk will handle a possible conversion if WFK contains istwfk /= 1.
- ABI_MALLOC(wfd_istwfk, (nkpt))
+ ABI_MALLOC(wfd_istwfk, (nkibz))
  wfd_istwfk = 1
 
  ecut = dtset%ecut ! dtset%dilatmx
- call wfd_init(wfd, cryst, pawtab, psps, keep_ur, mband, nband, nkpt, nsppol, bks_mask,&
+ call wfd_init(wfd, cryst, pawtab, psps, keep_ur, mband, nband, nkibz, nsppol, bks_mask,&
    nspden, nspinor, ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
    dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
@@ -4015,8 +4034,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
 
- ! ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information on the coarse grid.
- ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
+ ! one-dimensional structure factor information on the coarse grid.
+ ABI_MALLOC(ph1d, (2, 3*(2*mgfft+1)*natom))
  call getph(cryst%atindx, natom, n1, n2, n3, ph1d, cryst%xred)
 
  ! mpw is the maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
@@ -4029,10 +4048,10 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    do spin=1,nsppol
      fs => fstab(spin)
      do ik_bz=1,fs%nkfs
-       cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
+       cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism inside comm
        kk = fs%kpts(:, ik_bz); kq = kk + qpt
        ! Compute G sphere, returning npw. Note istwfk == 1.
-       call get_kg(kk,1,ecut,cryst%gmet,onpw,gtmp)
+       call get_kg(kk, 1, ecut, cryst%gmet, onpw, gtmp)
        mpw = max(mpw, onpw)
        do ipw=1,onpw
          do ii=1,3
@@ -4118,10 +4137,11 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    ABI_MALLOC(tgamvv_out, (2, gams%ndir_transp**2, natom3, natom3, nsig))
    ABI_MALLOC(resvv_in, (2, gams%ndir_transp**2))
    ABI_MALLOC(resvv_out, (2, gams%ndir_transp**2))
-   ! TODO: if we remove the nsig dependency we can remove this intermediate array
-   ! and save a lot of memory
+   ! TODO: if we remove the nsig dependency we can remove this intermediate array and save a lot of memory
    ABI_MALLOC_OR_DIE(gvvvals_in_qibz, (2, gams%ndir_transp**2, natom3, natom3, nsig, gams%nqibz, nsppol), ierr)
    ABI_MALLOC_OR_DIE(gvvvals_out_qibz, (2, gams%ndir_transp**2, natom3, natom3, nsig, gams%nqibz, nsppol), ierr)
+
+   !ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
  end if
 
  !open (unit=800, file="wt_kq_en.dat")
@@ -4131,13 +4151,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    ABI_MALLOC_OR_DIE(tmp_vals_ee, (2, gams%nene, gams%nene, gams%natom3, gams%natom3), ierr)
    gams%vals_ee = zero
  end if
-
- !ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
- !call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
- !call ddkop%apply(eig0nk, npw_k, wfd%nspinor, cgwork, cwaveprj0, wfd%mpi_enreg)
- !vk_red = ddkop%get_velocity(eig0nk, istwf_k, npw_k, wfd%nspinor, wfd%mpi_enreg%me_g0, cgwork)
- !call ddk_red2car(cryst%rprimd, vk_red, vk)
- !call ddkop%free()
 
  if (do_ftv1q /= 0) then
    ! Prepare Fourier interpolation of DFPT potentials.
@@ -4225,10 +4238,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      do ik_bz=my_kstart,my_kstop
        ! The k-point and the symmetries relating the BZ points to the IBZ.
        kk = fs%kpts(:, ik_bz)
-       ik_ibz = fs%istg0(1, ik_bz); isym_k = fs%istg0(2, ik_bz)
-       trev_k = fs%istg0(3, ik_bz); g0_k = fs%istg0(4:6,ik_bz)
-       !trev_k = fs%istg0(6, ik_bz); g0_k = fs%istg0(3:5,ik_bz)
-
+       ik_ibz = fs%indkk_fs(1, ik_bz); isym_k = fs%indkk_fs(2, ik_bz)
+       trev_k = fs%indkk_fs(6, ik_bz); g0_k = fs%indkk_fs(3:5,ik_bz)
        isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
        kk_ibz = ebands%kptns(:,ik_ibz)
 
@@ -4260,82 +4271,17 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
        kq_ibz = ebands%kptns(:, ikq_ibz)
 
-       ! Number of bands crossing the fermi level at k + q
+       ! Number of bands crossing the Fermi level at k + q
        bstart_kq = fs%bstcnt_ibz(1, ikq_ibz); nband_kq = fs%bstcnt_ibz(2, ikq_ibz)
        ABI_CHECK(nband_k <= mnb .and. nband_kq <= mnb, "wrong nband")
 
-#if 0
-       ! TODO: Change convention in istg0, use listkk
        ! Get npw_k, kg_k and symmetrize wavefunctions from IBZ (if needed).
-       call wfd%sym_ug_kg(ecut, kk, kk_ibz, bstart_k, nband_k, spin, mpw, fs%istg0(:,ik_bz), cryst, &
+       call wfd%sym_ug_kg(ecut, kk, kk_ibz, bstart_k, nband_k, spin, mpw, fs%indkk_fs(:,ik_bz), cryst, &
                           work_ngfft, work, istwf_k, npw_k, kg_k, kets_k)
 
        ! Get npw_kq, kg_kq and symmetrize wavefunctions from IBZ (if needed).
        call wfd%sym_ug_kg(ecut, kq, kq_ibz, bstart_kq, nband_kq, spin, mpw, indkk_kq(1,:), cryst, &
                           work_ngfft, work, istwf_kq, npw_kq, kg_kq, bras_kq)
-#else
-
-       ! Get npw_k, kg_k and symmetrize wavefunctions from IBZ (if needed).
-       ! Be careful with time-reversal symmetry.
-       if (isirr_k) then
-         ! Copy u_k(G)
-         istwf_k = wfd%istwfk(ik_ibz); npw_k = wfd%npwarr(ik_ibz)
-         ABI_CHECK(mpw >= npw_k, "mpw < npw_k")
-         kg_k(:,1:npw_k) = wfd%kdata(ik_ibz)%kg_k
-         do ib2=1,nband_k
-           band = ib2 + bstart_k - 1
-           call wfd%copy_cg(band, ik_ibz, spin, kets_k(1,1,ib2))
-         end do
-       else
-         ! Reconstruct u_k(G) from the IBZ image.
-         istwf_k = 1
-         call get_kg(kk, istwf_k, ecut, cryst%gmet, npw_k, gtmp)
-         ABI_CHECK(mpw >= npw_k, "mpw < npw_k")
-         kg_k(:,1:npw_k) = gtmp(:,:npw_k)
-         ABI_FREE(gtmp)
-
-         ! Use h1kets_kq as workspace array, results stored in kets_k.
-         istwf_kirr = wfd%istwfk(ik_ibz); npw_kirr = wfd%npwarr(ik_ibz)
-         do ib2=1,nband_k
-           band = ib2 + bstart_k - 1
-           call wfd%copy_cg(band, ik_ibz, spin, h1kets_kq)
-           call cgtk_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, nspinor, ndat1, &
-                            npw_kirr, wfd%kdata(ik_ibz)%kg_k, &
-                            npw_k, kg_k, istwf_kirr, istwf_k, h1kets_kq, kets_k(:,:,ib2), work_ngfft, work)
-         end do
-       end if
-
-       ! Get npw_kq, kg_kq and symmetrize wavefunctions from IBZ (if needed).
-       ! Be careful with time-reversal symmetry.
-       if (isirr_kq) then
-         ! Copy u_kq(G)
-         istwf_kq = wfd%istwfk(ikq_ibz); npw_kq = wfd%npwarr(ikq_ibz)
-         ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
-         kg_kq(:,1:npw_kq) = wfd%kdata(ikq_ibz)%kg_k
-         do ib1=1,nband_kq
-           band = ib1 + bstart_kq - 1
-           call wfd%copy_cg(band, ikq_ibz, spin, bras_kq(1,1,ib1))
-         end do
-       else
-         ! Reconstruct u_kq(G) from the IBZ image.
-         istwf_kq = 1
-         call get_kg(kq,istwf_kq,ecut,cryst%gmet,npw_kq,gtmp)
-         ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
-         kg_kq(:,1:npw_kq) = gtmp(:,:npw_kq)
-         ABI_FREE(gtmp)
-
-         ! Use h1kets_kq as workspace array, results stored in bras_kq
-         istwf_kirr = wfd%istwfk(ikq_ibz); npw_kirr = wfd%npwarr(ikq_ibz)
-         !g0_kq =  g0ibz_kq + g0bz_kq
-         do ib1=1,nband_kq
-           band = ib1 + bstart_kq - 1
-           call wfd%copy_cg(band, ikq_ibz, spin, h1kets_kq)
-           call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1, &
-                            npw_kirr, wfd%kdata(ikq_ibz)%kg_k, &
-                            npw_kq, kg_kq, istwf_kirr, istwf_kq, h1kets_kq, bras_kq(:,:,ib1), work_ngfft, work)
-         end do
-       end if
-#endif
 
        ! if PAW, one has to solve a generalized eigenproblem
        ! BE careful here because I will need sij_opt==-1
@@ -4465,6 +4411,26 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        end if
 
        if (dtset%eph_transport > 0) then
+
+         ! Compute diagonal matrix elements of velocity operator with DFPT routines
+         !call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, kg_k)
+         !do ib2=1,nband_k
+         !  band = ib2 + bstart_k - 1
+         !  eig0nk = ebands%eig(band, ik_ibz, spin)
+         !  call ddkop%apply(eig0nk, npw_k, wfd%nspinor, kets_k(:,:,ib2), cwaveprj0, wfd%mpi_enreg)
+         !  vk_red = ddkop%get_velocity(eig0nk, istwf_k, npw_k, wfd%nspinor, wfd%mpi_enreg%me_g0, kets_k(:,:,ib2))
+         !  call ddk_red2car(cryst%rprimd, vk_red, vk)
+         !end do
+
+         !call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
+         !do ib1=1,nband_kq
+         !  band = ib1 + bstart_kq - 1
+         !  eig0nkq = ebands%eig(band, ikq_ibz, spin)
+         !  call ddkop%apply(eig0nkq, npw_kq, wfd%nspinor, bras_kq(:,:,ib1), cwaveprj0, wfd%mpi_enreg)
+         !  vk_red = ddkop%get_velocity(eig0nkq, istwf_kq, npw_kq, wfd%nspinor, wfd%mpi_enreg%me_g0, bras_kq(:,:,ib1))
+         !  call ddk_red2car(cryst%rprimd, vk_red, vk)
+         !end do
+
          ! TODO: could almost make this a BLAS call plus a reshape...
          do ib2 = 1,nband_k
            do ipc2 = 1,gams%ndir_transp
@@ -4531,7 +4497,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ABI_FREE(vv_kkq)
        call xmpi_sum(tgamvv_in, comm, ierr)
        call xmpi_sum(tgamvv_out, comm, ierr)
-     end if ! add transport things
+     end if
 
      do isig=1,nsig
        ! Save results for this (q-point, spin)
@@ -4594,6 +4560,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    ABI_FREE(resvv_out)
  end if
 
+ !call ddkop%free()
  call gs_hamkq%free()
  call wfd%free()
  do spin=1,ebands%nsppol

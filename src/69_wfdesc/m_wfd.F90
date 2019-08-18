@@ -4787,7 +4787,7 @@ subroutine wfd_sym_ug_kg(self, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, in
 !************************************************************************
 
  ! As reported by listkk via symrel
- ik_ibz = indkk(1); isym_k = indkk(2); trev_k = indkk(3); g0_k = indkk(4:6)
+ ik_ibz = indkk(1); isym_k = indkk(2); trev_k = indkk(6); g0_k = indkk(3:5)
  isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
 
  ! Get npw_kbz, kg_kbz and symmetrize wavefunctions from IBZ (if needed).

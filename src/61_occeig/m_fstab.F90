@@ -91,23 +91,22 @@ module m_fstab
    type(krank_t) :: krank
    ! rank/inverse_rank pair for the k-points on the FS (kpts).
 
-   integer,allocatable :: istg0(:,:)
-   ! istg0(6, nkfs)
-   ! Tables giving the correspondence between a point in the FS-BZ and the IBZ.
+   integer,allocatable :: indkk_fs(:,:)
+   ! indkk_fs(6, nkfs)
+   ! Tables giving the correspondence between a point in the FS-BZ and the IBZ computed in listkk.
    !
-   ! istg0(1,:)      Mapping FS-BZ --> k-points in the IBZ (taken from ebands_t)
-   ! istg0(2,:)      The index of the symmetry S such that kfs = tim_sign * S(k_ibz) + G0
-   ! istg0(3,:)      1 if time-reversal was used to generate the k-point, 0 otherwise
-   ! istg0(4:6,:)    The reduced components of G0.
+   !   indkk_fs(1,:)      Mapping FS-BZ --> k-points in the IBZ (taken from ebands_t)
+   !   indkk_fs(2,:)      The index of the symmetry S such that kfs = tim_sign * S(k_ibz) + G0
+   !   indkk_fs(3:5,:)    The reduced components of G0.
+   !   indkk_fs(6,:)      1 if time-reversal was used to generate the k-point, 0 otherwise
 
    integer,allocatable :: bstcnt_ibz(:,:)
     ! bstcnt_ibz(2, nkibz)
     ! The indices of the bands within the energy window (depends on fsk)
     ! Note that we use the k-point index in the IBZ.
-    ! bstcnt(1, :)
-    ! The index of the first band inside the energy window (start)
-    ! bstcnt(2, :)
-    ! Number of bands on the FS (count)
+    !
+    !   bstcnt(1, :) The index of the first band inside the energy window (start)
+    !   bstcnt(2, :) Number of bands on the FS (count)
 
    real(dp),allocatable :: kpts(:,:)
    ! kpts(3,nkfs)
@@ -178,7 +177,7 @@ subroutine fstab_free(fstab)
  !@fstab_t
 
  ! integer
- ABI_SFREE(fstab%istg0)
+ ABI_SFREE(fstab%indkk_fs)
  ABI_SFREE(fstab%bstcnt_ibz)
 
  ! real
@@ -311,10 +310,10 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  do ik_bz=1,nkbz
    full2ebands(1, ik_bz) = indkk(ik_bz, 1)     ! ik_ibz
    full2ebands(2, ik_bz) = indkk(ik_bz, 2)     ! isym
-   full2ebands(3, ik_bz) = indkk(ik_bz, 6)     ! itimrev
-   full2ebands(4:6, ik_bz) = indkk(ik_bz, 3:5) ! g0
-   !full2ebands(3:5, ik_bz) = indkk(ik_bz, 3:5)  ! g0
-   !full2ebands(6, ik_bz) = indkk(ik_bz, 6)  ! itimrev
+   !full2ebands(3, ik_bz) = indkk(ik_bz, 6)     ! itimrev
+   !full2ebands(4:6, ik_bz) = indkk(ik_bz, 3:5) ! g0
+   full2ebands(3:5, ik_bz) = indkk(ik_bz, 3:5)  ! g0
+   full2ebands(6, ik_bz) = indkk(ik_bz, 6)  ! itimrev
  end do
 
  ! Select only those k-points in the BZ close to the FS.
@@ -370,12 +369,12 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    ! Build fstab_t for this spin.
    fs%nkibz = nkibz; fs%nkfs = nkfs; fs%nktot = nkbz
    ABI_MALLOC(fs%kpts, (3, nkfs))
-   ABI_MALLOC(fs%istg0, (6, nkfs))
+   ABI_MALLOC(fs%indkk_fs, (6, nkfs))
    do ik=1,nkfs
      !ik_ibz = fs2ibz(ik)
      ik_bz = fs2bz(ik)
      fs%kpts(:,ik) = kbz(:, ik_bz)
-     fs%istg0(:, ik) = full2ebands(:, ik_bz)
+     fs%indkk_fs(:, ik) = full2ebands(:, ik_bz)
    end do
    fs%maxnb = maxval(fs%bstcnt_ibz(2, :))
    fs%krank = krank_new(nkfs, fs%kpts)

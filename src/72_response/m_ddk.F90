@@ -895,7 +895,7 @@ subroutine ddk_read_fsvelocities(ddk, fstab, comm)
    do isppol=1,ddk%nsppol
      fs => fstab(isppol)
      do ikfs=1,fs%nkfs
-       ik_ibz = fs%istg0(1,ikfs)
+       ik_ibz = fs%indkk_fs(1,ikfs)
        symrankkpt = krank%get_rank (fs%kpts(:,ikfs))
        ikpt_ddk = krank%invrank(symrankkpt)
        if (ikpt_ddk == -1) then
@@ -1004,7 +1004,7 @@ subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
    fs => fstab(isppol)
    do iene = 1, fs%nene
      do ikfs=1,fs%nkfs
-       ik_ibz = fs%istg0(1,ikfs)
+       ik_ibz = fs%indkk_fs(1,ikfs)
        nband_k = fs%bstcnt_ibz(2, ik_ibz)
        call fs%get_weights_ibz(ebands, ik_ibz, isppol, sigmas, wtk, iene)
 
