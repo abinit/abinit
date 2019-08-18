@@ -302,7 +302,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    MSG_ERROR(msg)
  end if
 
- call cwtime_report("fstab_init%listkk", cpu, wall, gflops)
+ call cwtime_report(" fstab_init%listkk", cpu, wall, gflops)
 
  ABI_MALLOC(full2ebands, (6, nkbz))
  full2ebands = 0
@@ -381,7 +381,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 
  end do ! spin
 
- call cwtime_report("fstab_init%fs_build:", cpu, wall, gflops)
+ call cwtime_report(" fstab_init%fs_build:", cpu, wall, gflops)
 
  ! fix window around fermie for tetrahedron or gaussian weight calculation
  ! this is spin independent
@@ -478,7 +478,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  ABI_FREE(full2ebands)
  ABI_FREE(indkk)
 
- call cwtime_report("fstab_init%fs_weights:", cpu, wall, gflops)
+ call cwtime_report(" fstab_init%fs_weights:", cpu, wall, gflops)
 
 end subroutine fstab_init
 !!***
