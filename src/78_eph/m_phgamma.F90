@@ -584,7 +584,7 @@ subroutine phgamma_init(gams, cryst, ifc, fstab, dtset, eph_scalprod, ngqpt, n0,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: qptopt1 = 1
- integer :: ind, my_rank, nproc, iq, ierr, nsppol
+ integer :: ind, my_rank, nproc, iq, ierr, nsppol, natom3
 !arrays
  integer :: qptrlatt(3,3)
 
@@ -592,11 +592,13 @@ subroutine phgamma_init(gams, cryst, ifc, fstab, dtset, eph_scalprod, ngqpt, n0,
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
- nsppol = dtset%nsppol
-
- !@phgamma_t
  ! Set basic dimensions.
- gams%natom = cryst%natom; gams%natom3 = 3*cryst%natom; gams%nsppol = nsppol; gams%nspinor = dtset%nspinor
+ nsppol = dtset%nsppol
+ gams%nsppol = nsppol; gams%nspinor = dtset%nspinor
+
+ gams%natom = cryst%natom
+ gams%natom3 = 3*cryst%natom; natom3 = gams%natom3
+
  gams%symgamma = dtset%symdynmat; gams%eph_scalprod = eph_scalprod
  !gams%asr = ifc%asr
  gams%asr = 0
@@ -618,7 +620,7 @@ subroutine phgamma_init(gams, cryst, ifc, fstab, dtset, eph_scalprod, ngqpt, n0,
    gams%nqibz, gams%qibz, gams%wtq, gams%nqbz, gams%qbz)
 
  ! Allocate matrices in the IBZ.
- ABI_MALLOC_OR_DIE(gams%vals_qibz, (2, gams%natom3, gams%natom3, gams%nqibz, nsppol), ierr)
+ ABI_MALLOC_OR_DIE(gams%vals_qibz, (2, natom3, natom3, gams%nqibz, nsppol), ierr)
  gams%vals_qibz = zero
 
  ABI_MALLOC(gams%my_iqibz, (gams%nqibz))
@@ -650,16 +652,16 @@ subroutine phgamma_init(gams, cryst, ifc, fstab, dtset, eph_scalprod, ngqpt, n0,
  gams%my_nqbz = ind
 
  ! TODO: if we remove the nsig dependency in the gvvvals_*_qibz we can remove the intermediate array and save a lot of memory
- ABI_MALLOC_OR_DIE(gams%vals_in_qibz, (2,gams%ndir_transp**2,gams%natom3, gams%natom3, gams%nqibz, nsppol), ierr)
+ ABI_MALLOC_OR_DIE(gams%vals_in_qibz, (2,gams%ndir_transp**2, natom3, natom3, gams%nqibz, nsppol), ierr)
  gams%vals_in_qibz = zero
 
  if (dtset%eph_transport > 0) then
-   ABI_MALLOC_OR_DIE(gams%vals_out_qibz, (2,gams%ndir_transp**2, gams%natom3, gams%natom3, gams%nqibz, nsppol), ierr)
+   ABI_MALLOC_OR_DIE(gams%vals_out_qibz, (2, gams%ndir_transp**2, natom3, natom3, gams%nqibz, nsppol), ierr)
    gams%vals_out_qibz = zero
  end if
 
  if (gams%prteliash == 3) then
-   ABI_MALLOC_OR_DIE(gams%vals_ee, (2,gams%nene,gams%nene,gams%natom3,gams%natom3,gams%my_nqibz,gams%nsppol), ierr)
+   ABI_MALLOC_OR_DIE(gams%vals_ee, (2,gams%nene,gams%nene, natom3, natom3, gams%my_nqibz, nsppol), ierr)
  end if
 
  ! Prepare Fourier interpolation.
@@ -675,12 +677,12 @@ end subroutine phgamma_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_phgamma/phgamma_print
+!!****f* m_phgamma/phgamma_ncwrite
 !! NAME
-!! phgamma_print
+!! phgamma_ncwrite
 !!
 !! FUNCTION
-!!  Print the phgamma_t datatype.
+!!  Write the results stored in the phgamma_t datatype to netcdf file.
 !!
 !! INPUTS
 !! cryst<crystal_t>=Crystalline structure.
@@ -695,7 +697,7 @@ end subroutine phgamma_init
 !!
 !! SOURCE
 
-subroutine phgamma_print(gams, cryst, ifc, ncid)
+subroutine phgamma_ncwrite(gams, cryst, ifc, ncid)
 
 !Arguments ------------------------------------
 !scalars
@@ -766,7 +768,7 @@ subroutine phgamma_print(gams, cryst, ifc, ncid)
 
  write(ab_out,"(a,f8.4)")" lambda= ",lambda_tot
 
-end subroutine phgamma_print
+end subroutine phgamma_ncwrite
 !!***
 
 !----------------------------------------------------------------------
@@ -816,14 +818,14 @@ subroutine tgamma_symm(cryst, qpt, tgamma)
  natom3 = 3 * cryst%natom
 
  ! Reduced --> Cartesian
- call zgemm('N','N',natom3,natom3,natom3,cone,tgamma,natom3,umat,natom3,czero,tmp_mat,natom3)
- call zgemm('T','N',natom3,natom3,natom3,cone,umat,natom3,tmp_mat,natom3,czero,tgcart,natom3)
+ call zgemm('N','N', natom3, natom3, natom3, cone, tgamma, natom3, umat, natom3, czero, tmp_mat, natom3)
+ call zgemm('T','N', natom3, natom3, natom3, cone, umat, natom3, tmp_mat, natom3, czero, tgcart, natom3)
 
  ! Make the matrix hermitian
- call mkherm(tgcart,3*cryst%natom)
+ call mkherm(tgcart, 3*cryst%natom)
 
  ! Symmetrize tgamma matrix.
- call symdyma(tgcart,cryst%indsym,cryst%natom,cryst%nsym,qpt,cryst%rprimd,cryst%symrel,cryst%symafm)
+ call symdyma(tgcart, cryst%indsym, cryst%natom, cryst%nsym, qpt, cryst%rprimd, cryst%symrel, cryst%symafm)
 
  umat = zero; k = 1
  do ii=0,cryst%natom-1
@@ -832,8 +834,8 @@ subroutine tgamma_symm(cryst, qpt, tgamma)
  end do
 
  ! Cartesian --> Reduced
- call zgemm('N','N',natom3,natom3,natom3,cone,tgcart,natom3,umat,natom3,czero,tmp_mat,natom3)
- call zgemm('T','N',natom3,natom3,natom3,cone,umat,natom3,tmp_mat,natom3,czero,tgamma,natom3)
+ call zgemm('N','N', natom3, natom3, natom3, cone, tgcart, natom3, umat, natom3, czero, tmp_mat, natom3)
+ call zgemm('T','N', natom3, natom3, natom3, cone, umat, natom3, tmp_mat, natom3, czero, tgamma, natom3)
 
 end subroutine tgamma_symm
 !!***
@@ -889,7 +891,6 @@ subroutine phgamma_eval_qibz(gams, cryst, ifc, iq_ibz, spin, phfrq, gamma_ph, la
  real(dp) :: displ_red(2,gams%natom3,gams%natom3)
  real(dp) :: img(gams%natom3)
  real(dp) :: tmp_gam1(2,gams%natom3,gams%natom3),tmp_gam2(2,gams%natom3,gams%natom3)
- real(dp) :: pheigvec(2*(3*cryst%natom)**2)
 
 ! *************************************************************************
 
@@ -897,9 +898,9 @@ subroutine phgamma_eval_qibz(gams, cryst, ifc, iq_ibz, spin, phfrq, gamma_ph, la
  natom3 = gams%natom3
 
  ! Get phonon frequencies and eigenvectors.
- call ifc%fourq(cryst,gams%qibz(:,iq_ibz),phfrq,displ_cart,out_eigvec=pheigvec, out_displ_red=displ_red)
+ call ifc%fourq(cryst, gams%qibz(:,iq_ibz), phfrq, displ_cart, out_displ_red=displ_red)
 
- ! If the matrices do not contain the scalar product with the displ_red vectors yet do it now.
+ ! Scalar product with the displ_red vectors.
  tmp_gam2 = reshape(gams%vals_qibz(:,:,:,iq_ibz,spin), [2, natom3, natom3])
  call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
 
@@ -1016,7 +1017,6 @@ subroutine phgamma_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_ph, lambda_p
  real(dp) :: displ_red(2,gams%natom3,gams%natom3)
  real(dp) :: gam_now(2,gams%natom3**2),img(gams%natom3)
  real(dp) :: tmp_gam1(2,gams%natom3,gams%natom3),tmp_gam2(2,gams%natom3,gams%natom3)
- real(dp) :: pheigvec(2*gams%natom3**2)
  real(dp),allocatable :: coskr(:,:),sinkr(:,:)
 
 ! *************************************************************************
@@ -1053,10 +1053,10 @@ subroutine phgamma_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_ph, lambda_p
  ABI_FREE(sinkr)
 
  ! Get phonon frequencies and eigenvectors.
- call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_eigvec=pheigvec, out_displ_red=displ_red)
+ call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
 
- ! If the matrices do not contain the scalar product with the displ_cart vectors yet do it now.
- tmp_gam2 = reshape (gam_now, [2, natom3, natom3])
+ ! Scalar product with the displ_red
+ tmp_gam2 = reshape(gam_now, [2, natom3, natom3])
  call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
 
  do nu1=1,natom3
@@ -1070,7 +1070,7 @@ subroutine phgamma_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_ph, lambda_p
 
 ! do iene = 1, gams%nene
 !   do jene = 1, gams%nene
-!     tmp_gam2 = reshape (gam_now, [2,natom3,natom3])
+!     tmp_gam2 = reshape(gam_now, [2,natom3,natom3])
 !     call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
 !     do nu1=1,natom3
 !       gamma_ph(nu1) = tmp_gam1(1, nu1, nu1)
@@ -1297,11 +1297,9 @@ subroutine phgamma_vv_eval_qibz(gams, cryst, ifc, iq_ibz, spin, phfrq, gamma_in_
  real(dp) :: spinfact
  character(len=500) :: msg
 !arrays
- real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
- real(dp) :: displ_red(2,gams%natom3,gams%natom3)
+ real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom), displ_red(2,gams%natom3,gams%natom3)
  real(dp) :: img(gams%natom3)
  real(dp) :: tmp_gam1(2,gams%natom3,gams%natom3),tmp_gam2(2,gams%natom3,gams%natom3)
- real(dp) :: pheigvec(2*(3*cryst%natom)**2)
 
 ! *************************************************************************
 
@@ -1309,12 +1307,12 @@ subroutine phgamma_vv_eval_qibz(gams, cryst, ifc, iq_ibz, spin, phfrq, gamma_in_
  natom3 = gams%natom3
 
  ! Get phonon frequencies and eigenvectors.
- call ifc%fourq(cryst, gams%qibz(:,iq_ibz), phfrq, displ_cart, out_eigvec=pheigvec, out_displ_red=displ_red)
+ call ifc%fourq(cryst, gams%qibz(:,iq_ibz), phfrq, displ_cart, out_displ_red=displ_red)
 
  do jdir = 1,gams%ndir_transp
    do idir = 1,gams%ndir_transp
      ii = idir + gams%ndir_transp*(jdir-1)
-     ! If the matrices do not contain the scalar product with the displ_red vectors yet do it now.
+     ! Scalar product with the displ_red vectors.
      tmp_gam2 = reshape(gams%vals_in_qibz(:,ii,:,:,iq_ibz,spin), [2, natom3, natom3])
      call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
 
@@ -1422,7 +1420,6 @@ subroutine phgamma_vv_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_in_ph, ga
  real(dp) :: gam_in_now(2,3,3,gams%natom3**2)
  real(dp) :: gam_out_now(2,3,3,gams%natom3**2)
  real(dp) :: tmp_gam1(2,gams%natom3,gams%natom3),tmp_gam2(2,gams%natom3,gams%natom3)
- real(dp) :: pheigvec(2*gams%natom3**2)
  real(dp),allocatable :: coskr(:,:),sinkr(:,:)
 
 ! *************************************************************************
@@ -1434,7 +1431,7 @@ subroutine phgamma_vv_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_in_ph, ga
  natom3 = gams%natom3
 
  ! Get phonon frequencies and eigenvectors.
- call ifc%fourq(cryst,qpt,phfrq,displ_cart,out_eigvec=pheigvec, out_displ_red=displ_red)
+ call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
 
  ! Taken from mkph_linwid
  ! This reduced version of ftgkk supposes the kpoints have been integrated
@@ -1458,8 +1455,8 @@ subroutine phgamma_vv_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_in_ph, ga
        call tgamma_symm(cryst, qpt, gam_out_now)
      end if
 
-     ! If the matrices do not contain the scalar product with the displ_cart vectors yet do it now.
-     tmp_gam2 = reshape (gam_in_now, [2,natom3, natom3])
+     ! Scalar product with the displ_red
+     tmp_gam2 = reshape(gam_in_now, [2, natom3, natom3])
      call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
 
      do nu1=1,natom3
@@ -4437,7 +4434,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    ABI_FREE(v1scf)
    ABI_FREE(vlocal1)
 
-   write(msg,'(2(a,i0),a)')" q-point [", iq_ibz, "/", gams%nqibz, "]"
+   write(msg,'(2(a,i0),a)')" q-point [ ", iq_ibz, "/", gams%nqibz, " ]"
    call cwtime_report(msg, cpu, wall, gflops)
  end do ! iq_ibz
 
@@ -4517,7 +4514,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  end if
 
  ! Print gamma(IBZ) to ab_out and ncid
- if (my_rank == master) call phgamma_print(gams, cryst, ifc, ncid)
+ if (my_rank == master) call phgamma_ncwrite(gams, cryst, ifc, ncid)
 
  ! Interpolate linewidths along the q-path.
  if (dtset%ph_nqpath <= 0) then

@@ -648,13 +648,9 @@ subroutine gam_mult_displ(nbranch, displ_red, gam_bare, gam_now)
 
  gam_now = zero
 
- call zgemm('c','n',nbranch,nbranch,nbranch,cone,&
-& displ_red,nbranch,gam_bare,&
-& nbranch,czero,zgemm_tmp_mat,nbranch)
+ call zgemm('c','n',nbranch,nbranch,nbranch,cone,displ_red,nbranch,gam_bare,nbranch,czero,zgemm_tmp_mat,nbranch)
 
- call zgemm('n','n',nbranch,nbranch,nbranch,cone,&
-& zgemm_tmp_mat,nbranch,displ_red,&
-& nbranch,czero,gam_now,nbranch)
+ call zgemm('n','n',nbranch,nbranch,nbranch,cone,zgemm_tmp_mat,nbranch,displ_red,nbranch,czero,gam_now,nbranch)
 
 end subroutine gam_mult_displ
 !!***
