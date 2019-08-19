@@ -47,6 +47,7 @@ module m_phgamma
  use m_dtset
  use m_dtfil
  use m_wfd
+ use m_ephtk
 
  use defs_abitypes,    only : mpi_type
  use m_time,           only : cwtime, cwtime_report
@@ -1143,13 +1144,10 @@ subroutine phgamma_interp_setup(gams, cryst, action)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: qtor1 = 1
- integer :: iq_bz,iq_ibz,isq_bz,spin,isym,ierr,ii
+ integer :: iq_bz,iq_ibz,spin,ierr,ii
  !character(len=500) :: msg
- type(krank_t) :: qrank
 !arrays
- integer :: g0(3)
  integer,allocatable :: qirredtofull(:),qpttoqpt(:,:,:)
- real(dp) :: qirr(3),tmp_qpt(3)
  real(dp),allocatable :: coskr(:,:),sinkr(:,:)
  real(dp),allocatable :: gamma_qpt(:,:,:,:),atmfrc(:,:)
 
@@ -1163,45 +1161,7 @@ subroutine phgamma_interp_setup(gams, cryst, action)
      gams%vals_bz = zero
 
      ! Build tables needed by complete_gamma.
-     qrank = krank_new(gams%nqbz, gams%qbz)
-
-     ! Compute index of IBZ q-point in the BZ array
-     ABI_CALLOC(qirredtofull,(gams%nqibz))
-
-     do iq_ibz=1,gams%nqibz
-       qirr = gams%qibz(:,iq_ibz)
-       iq_bz = qrank%get_index(qirr)
-       if (iq_bz /= -1) then
-         ABI_CHECK(isamek(qirr, gams%qbz(:,iq_bz), g0), "isamek")
-         qirredtofull(iq_ibz) = iq_bz
-       else
-         MSG_ERROR(sjoin("Full BZ does not contain IBZ q-point:", ktoa(qirr)))
-       end if
-     end do
-
-     ! Build qpttoqpt table. See also mkqptequiv
-     ABI_MALLOC(qpttoqpt, (2, cryst%nsym, gams%nqbz))
-     qpttoqpt = -1
-     do iq_bz=1,gams%nqbz
-       do isym=1,cryst%nsym
-         tmp_qpt = matmul(cryst%symrec(:,:,isym), gams%qbz(:,iq_bz))
-
-         isq_bz = qrank%get_index(tmp_qpt)
-         if (isq_bz == -1) then
-           MSG_ERROR("Looks like no kpoint equiv to q by symmetry without time reversal!")
-         end if
-         qpttoqpt(1,isym,isq_bz) = iq_bz
-
-         ! q --> -q
-         tmp_qpt = -tmp_qpt
-         isq_bz = qrank%get_index(tmp_qpt)
-         if (isq_bz == -1) then
-           MSG_ERROR("Looks like no kpoint equiv to q by symmetry with time reversal!")
-         end if
-         qpttoqpt(2,isym,isq_bz) = iq_bz
-       end do
-     end do
-     call qrank%free()
+     call ephtk_mkqtabs(cryst, gams%nqibz, gams%qibz, gams%nqbz, gams%qbz, qirredtofull, qpttoqpt)
 
      ! Fill BZ array with IBZ data.
      do spin=1,gams%nsppol
@@ -1218,8 +1178,8 @@ subroutine phgamma_interp_setup(gams, cryst, action)
        gamma_qpt(:, :, spin, :) = gams%vals_bz(:, :, :, spin)
      end do
 
-     call complete_gamma(cryst,gams%natom3,gams%nsppol,gams%nqibz,gams%nqbz,&
-       gams%eph_scalprod,qirredtofull,qpttoqpt,gamma_qpt)
+     call complete_gamma(cryst, gams%natom3, gams%nsppol, gams%nqibz, gams%nqbz, &
+       gams%eph_scalprod, qirredtofull, qpttoqpt, gamma_qpt)
        !gams%eph_scalprod,qirredtofull,qpttoqpt,gams%vals_bz)
 
      do spin=1,gams%nsppol
@@ -1589,14 +1549,11 @@ subroutine phgamma_vv_interp_setup(gams, cryst, action)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: qtor1 = 1
- integer :: iq_bz,iq_ibz,isq_bz,spin,isym,ierr
+ integer :: iq_bz,iq_ibz,spin,ierr
  integer :: ii, idir, jdir
  !character(len=500) :: msg
- type(krank_t) :: qrank
 !arrays
- integer :: g0(3)
  integer,allocatable :: qirredtofull(:),qpttoqpt(:,:,:)
- real(dp) :: qirr(3),tmp_qpt(3)
  real(dp),allocatable :: coskr(:,:),sinkr(:,:)
 
 ! *************************************************************************
@@ -1611,41 +1568,7 @@ subroutine phgamma_vv_interp_setup(gams, cryst, action)
      gams%vals_out_bz = zero
 
      ! Build tables needed by complete_gamma.
-     qrank = krank_new(gams%nqbz, gams%qbz)
-
-     ! Compute index of IBZ q-point in the BZ array
-     ABI_CALLOC(qirredtofull, (gams%nqibz))
-
-     do iq_ibz=1,gams%nqibz
-       qirr = gams%qibz(:,iq_ibz)
-       iq_bz = qrank%get_index(qirr)
-       if (iq_bz /= -1) then
-         ABI_CHECK(isamek(qirr, gams%qbz(:,iq_bz), g0), "isamek")
-         qirredtofull(iq_ibz) = iq_bz
-       else
-         MSG_ERROR(sjoin("Full BZ does not contain IBZ q-point:", ktoa(qirr)))
-       end if
-     end do
-
-     ! Build qpttoqpt table. See also mkqptequiv
-     ABI_MALLOC(qpttoqpt,(2,cryst%nsym,gams%nqbz))
-     qpttoqpt = -1
-     do iq_bz=1,gams%nqbz
-       do isym=1,cryst%nsym
-         tmp_qpt = matmul(cryst%symrec(:,:,isym), gams%qbz(:,iq_bz))
-
-         isq_bz = qrank%get_index(tmp_qpt)
-         ABI_CHECK(isq_bz /= -1, "looks like no kpoint equiv to q by symmetry without time reversal!")
-         qpttoqpt(1,isym,isq_bz) = iq_bz
-
-         ! q --> -q
-         tmp_qpt = -tmp_qpt
-         isq_bz = qrank%get_index(tmp_qpt)
-         ABI_CHECK(isq_bz /= -1, "looks like no kpoint equiv to q by symmetry with time reversal!")
-         qpttoqpt(2,isym,isq_bz) = iq_bz
-       end do
-     end do
-     call qrank%free()
+     call ephtk_mkqtabs(cryst, gams%nqibz, gams%qibz, gams%nqbz, gams%qbz, qirredtofull, qpttoqpt)
 
      ! Fill BZ array with IBZ data.
      do spin=1,gams%nsppol
@@ -1660,13 +1583,13 @@ subroutine phgamma_vv_interp_setup(gams, cryst, action)
 
      ! Complete vals_bz in the full BZ.
      !TODO!!! rotate the vv in and out matrices, according to the symmetry operation, instead of just copying them
-     !     call complete_gamma_vv(cryst,gams%natom3,gams%nsppol,gams%nqibz,gams%nqbz,&
-     !       gams%eph_scalprod,qirredtofull,qpttoqpt,gams%vals_in_bz(:,:,:,:,spin))
-     !     call complete_gamma_vv(cryst,gams%natom3,gams%nsppol,gams%nqibz,gams%nqbz,&
-     !       gams%eph_scalprod,qirredtofull,qpttoqpt,gams%vals_out_bz(:,:,:,:,spin))
+     !call complete_gamma_vv(cryst,gams%natom3,gams%nsppol,gams%nqibz,gams%nqbz,&
+     !  gams%eph_scalprod,qirredtofull,qpttoqpt,gams%vals_in_bz(:,:,:,:,spin))
+     !call complete_gamma_vv(cryst,gams%natom3,gams%nsppol,gams%nqibz,gams%nqbz,&
+     !  gams%eph_scalprod,qirredtofull,qpttoqpt,gams%vals_out_bz(:,:,:,:,spin))
 
      ! TODO: replace the above with these calls from anaddb
-     !   call complete_gamma_tr(cryst,elph_ds%ep_scalprod,elph_ds%nbranch,elph_ds%nqptirred,&
+     !call complete_gamma_tr(cryst,elph_ds%ep_scalprod,elph_ds%nbranch,elph_ds%nqptirred,&
      !&   elph_ds%nqpt_full,elph_ds%nsppol,elph_tr_ds%gamma_qpt_trout,elph_ds%qirredtofull,qpttoqpt)
 
 
@@ -2036,13 +1959,11 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqp
  type(htetra_t) :: tetra
 !arrays
  integer :: qptrlatt(3,3),new_qptrlatt(3,3)
- real(dp),allocatable :: my_qshift(:,:)
+ real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
  real(dp) :: phfrq(gams%natom3),gamma_ph(gams%natom3),lambda_ph(gams%natom3)
  real(dp) :: invphfrq(gams%natom3)
+ real(dp),allocatable :: my_qshift(:,:)
  real(dp),allocatable :: gamma_ph_ee(:,:,:,:)
- real(dp) :: tmp_gam1(2,gams%natom3,gams%natom3)
- real(dp) :: tmp_gam2(2,gams%natom3,gams%natom3)
- real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
  real(dp),allocatable :: tmp_a2f(:)
  real(dp), ABI_CONTIGUOUS pointer :: a2f_1d(:)
  real(dp),allocatable :: qibz(:,:),wtq(:),qbz(:,:)
@@ -3784,7 +3705,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor,onpw
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,ib1,ib2,band !band1,band2,
  integer :: ik_ibz,ik_bz,ikq_bz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq,timerev_q
- integer :: spin,istwf_k,istwf_kq,istwf_kirr,npw_k,npw_kq,npw_kirr
+ integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq
  integer :: ii,ipw,mpw,my_mpw,mnb,ierr,my_kstart,my_kstop,cnt,ncid
  integer :: isig,n1,n2,n3,n4,n5,n6,nspden,do_ftv1q
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
@@ -3885,7 +3806,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ! FIXME: kptopt, change setup of k-points if tetra: fist tetra weights then k-points on the Fermi surface!
  ABI_MALLOC(fstab, (nsppol))
  call fstab_init(fstab, ebands, cryst, dtset%eph_fsewin, dtset%eph_intmeth, dtset%kptrlatt, dtset%nshiftk, dtset%shiftk, comm)
- call fstab_print(fstab)
+ call fstab_print(fstab, unit=std_out)
 
  ! now we can initialize the ddk velocities, on the FS grid only
  ! TODO: Group velocites should be computed on the fly.
@@ -3894,8 +3815,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    call ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
  end if
 
- gamma_ngqpt = ifc%ngqpt
- if (all(dtset%eph_ngqpt_fine /= 0)) gamma_ngqpt = dtset%eph_ngqpt_fine
+ gamma_ngqpt = ifc%ngqpt; if (all(dtset%eph_ngqpt_fine /= 0)) gamma_ngqpt = dtset%eph_ngqpt_fine
 
  ! TODO: Support nsig in phgamma_init
  call phgamma_init(gams, cryst, ifc, fstab(1), dtset, eph_scalprod0, gamma_ngqpt, n0, comm)
@@ -4002,7 +3922,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  ! Only wavefunctions on the FS are stored in wfd.
  ! Need all k-points on the FS because of k+q, spin is not distributed for the time being.
- ! One could reduce the memory allocated per MPI-rank via MPI-FFT or OpenMP...
+ ! One could reduce the memory allocated per MPI-rank via MPI-FFT or OpenMP.
  do spin=1,nsppol
    fs => fstab(spin)
    do ik_bz=1,fs%nkfs
@@ -4091,7 +4011,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ABI_MALLOC(kg_k, (3, mpw))
  ABI_MALLOC(kg_kq, (3, mpw))
 
- ! Spherical Harmonics for useylm==1.
+ ! Spherical Harmonics for useylm == 1.
  ABI_MALLOC(ylm_k, (mpw, psps%mpsang*psps%mpsang*psps%useylm))
  ABI_MALLOC(ylm_kq, (mpw, psps%mpsang*psps%mpsang*psps%useylm))
  ABI_MALLOC(ylmgr_kq, (mpw, 3, psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
@@ -4410,9 +4330,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        end if
 
        if (dtset%eph_transport > 0) then
-#if 1
          ! Compute diagonal matrix elements of velocity operator with DFPT routines
-         ! Results are in Cartesian coordinates.
+         ! Velocities are in Cartesian coordinates.
          call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, kg_k)
          do ib2=1,nband_k
            band = ib2 + bstart_k - 1
@@ -4435,7 +4354,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
            !write(std_out,*)"vkq: ", vkq
            !write(std_out,*)"ddk: ", ddk%velocity(:,ib1,ikq_bz,spin)
          end do
-#endif
 
          ! TODO: could almost make this a BLAS call plus a reshape...
          do ib2 = 1,nband_k

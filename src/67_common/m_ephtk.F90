@@ -29,8 +29,11 @@ module m_ephtk
  use m_errors
  use m_xmpi
  use m_dtset
+ use m_crystal
+ use m_krank
 
- use m_fstrings,     only : itoa, sjoin, ltoa
+ use m_fstrings,     only : itoa, sjoin, ltoa, ktoa
+ use m_bz_mesh,      only : isamek
 
  implicit none
 
@@ -38,6 +41,7 @@ module m_ephtk
 
  public :: ephtk_set_phmodes_ship     ! Setup a mask to skip accumulating the contribution of certain phonon modes.
  public :: ephtk_set_pertables        ! Set tables for parallelism over perturbations from my_npert and comm
+ public :: ephtk_mkqtabs              ! Build tables with correspondence between q-points as needed by complete_gamma.
 !!***
 
 contains  !=====================================================
@@ -167,6 +171,91 @@ subroutine ephtk_set_pertables(natom, my_npert, pert_table, my_pinfo, comm)
  !write(std_out,*)"my_npert", my_npert, "nproc", nproc; write(std_out,*)"my_pinfo", my_pinfo
 
 end subroutine ephtk_set_pertables
+!!***
+
+!!****f* m_ephtk/ephtk_mkqtabs
+!! NAME
+!!  ephtk_mkqtabs
+!!
+!! FUNCTION
+!!  Build tables with correspondence between q-points in the IBZ/BZ as needed by complete_gamma.
+!!
+!! INPUT
+!!  cryst<crystal_t>=Crystal structure.
+!!  nqibz, qibz = Points in the IBZ
+!!  nqbz, qbz = Points in the BZ
+!!
+!! OUTPUT
+!! qirredtofull(nqibz) = mapping irred to full qpoints
+!! qpttoqpt(2, cryst%nsym, nqbz)) = qpoint index mapping under symops.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ephtk_mkqtabs(cryst, nqibz, qibz, nqbz, qbz, qirredtofull, qpttoqpt)
+
+!Arguments ------------------------------------
+ type(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: nqibz, nqbz
+!arrays
+ real(dp),intent(in) :: qibz(3, nqibz), qbz(3, nqbz)
+ integer,allocatable :: qirredtofull(:),qpttoqpt(:,:,:)
+
+!Local variables ------------------------------
+!scalars
+ integer :: iq_bz, iq_ibz, isq_bz, isym
+ type(krank_t) :: qrank
+!arrays
+ integer :: g0(3)
+ real(dp) :: qirr(3), tmp_qpt(3)
+
+! *************************************************************************
+
+ qrank = krank_new(nqbz, qbz)
+
+ ! Compute index of IBZ q-point in the BZ array
+ ABI_CALLOC(qirredtofull, (nqibz))
+
+ do iq_ibz=1,nqibz
+   qirr = qibz(:,iq_ibz)
+   iq_bz = qrank%get_index(qirr)
+   if (iq_bz /= -1) then
+     ABI_CHECK(isamek(qirr, qbz(:,iq_bz), g0), "isamek")
+     qirredtofull(iq_ibz) = iq_bz
+   else
+     MSG_ERROR(sjoin("Full BZ does not contain IBZ q-point:", ktoa(qirr)))
+   end if
+ end do
+
+ ! Build qpttoqpt table. See also mkqptequiv
+ ABI_MALLOC(qpttoqpt, (2, cryst%nsym, nqbz))
+ qpttoqpt = -1
+ do iq_bz=1,nqbz
+   do isym=1,cryst%nsym
+     tmp_qpt = matmul(cryst%symrec(:,:,isym), qbz(:,iq_bz))
+
+     isq_bz = qrank%get_index(tmp_qpt)
+     if (isq_bz == -1) then
+       MSG_ERROR("Looks like no kpoint equiv to q by symmetry without time reversal!")
+     end if
+     qpttoqpt(1,isym,isq_bz) = iq_bz
+
+     ! q --> -q
+     tmp_qpt = -tmp_qpt
+     isq_bz = qrank%get_index(tmp_qpt)
+     if (isq_bz == -1) then
+       MSG_ERROR("Looks like no kpoint equiv to q by symmetry with time reversal!")
+     end if
+     qpttoqpt(2,isym,isq_bz) = iq_bz
+   end do
+ end do
+
+ call qrank%free()
+
+end subroutine ephtk_mkqtabs
 !!***
 
 end module m_ephtk

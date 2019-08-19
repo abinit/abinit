@@ -310,8 +310,6 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  do ik_bz=1,nkbz
    full2ebands(1, ik_bz) = indkk(ik_bz, 1)     ! ik_ibz
    full2ebands(2, ik_bz) = indkk(ik_bz, 2)     ! isym
-   !full2ebands(3, ik_bz) = indkk(ik_bz, 6)     ! itimrev
-   !full2ebands(4:6, ik_bz) = indkk(ik_bz, 3:5) ! g0
    full2ebands(3:5, ik_bz) = indkk(ik_bz, 3:5)  ! g0
    full2ebands(6, ik_bz) = indkk(ik_bz, 6)  ! itimrev
  end do
@@ -612,7 +610,6 @@ end subroutine fstab_get_weights_ibz
 !! INPUTS
 !! [unit]=the unit number for output
 !! [prtvol]=verbosity level
-!! [mode_paral]=either "COLL" or "PERS"
 !!
 !! OUTPUT
 !!  Only printing.
@@ -625,12 +622,11 @@ end subroutine fstab_get_weights_ibz
 !!
 !! SOURCE
 
-subroutine fstab_print(fstab, header, unit, prtvol, mode_paral)
+subroutine fstab_print(fstab, header, unit, prtvol)
 
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: prtvol,unit
- character(len=4),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
  class(fstab_t),target,intent(in) :: fstab(:)
 
@@ -638,34 +634,32 @@ subroutine fstab_print(fstab, header, unit, prtvol, mode_paral)
 !scalars
  integer :: my_unt,my_prtvol,spin
  type(fstab_t),pointer :: fs
- character(len=4) :: my_mode
  character(len=500) :: msg
 
 ! *************************************************************************
 
  my_unt =std_out; if (present(unit)) my_unt = unit
  my_prtvol=0    ; if (present(prtvol)) my_prtvol = prtvol
- my_mode='COLL' ; if (present(mode_paral)) my_mode = mode_paral
 
  msg=' ==== Info on the fstab% object ==== '
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
- call wrtout(my_unt,msg,my_mode)
+ write(my_unt, "(a)")trim(msg)
 
  if (fstab(1)%integ_method == 1) then
-   write(std_out,"(a,i0)")"FS integration done with gaussian method and nsig: ",fstab(1)%nsig
+   write(my_unt,"(a,i0)")"FS integration done with gaussian method and nsig: ",fstab(1)%nsig
  else if (fstab(1)%integ_method == 2) then
-   write(std_out,"(a)")"FS integration done with tetrahedron method"
+   write(my_unt,"(a)")"FS integration done with tetrahedron method"
  end if
- write(std_out,"(a,i0)")"Total number of points in the full mesh: ",fstab(1)%nktot
+ write(my_unt,"(a,i0)")"Total number of points in the full mesh: ",fstab(1)%nktot
 
  do spin=1,size(fstab)
    fs => fstab(spin)
-   write(std_out,"(a,i0)")"For spin: ",spin
-   write(std_out,"(a,i0,a,f5.1,a)")&
+   write(my_unt,"(a,i0)")"For spin: ",spin
+   write(my_unt,"(a,i0,a,f5.1,a)")&
      "  Number of BZ k-points close to the Fermi surface: ",fs%nkfs," [",(100.0_dp*fs%nkfs)/fs%nktot," %]"
-   write(std_out,"(a,i0)")"  Maximum number of bands crossing the Fermi level: ",fs%maxnb
-   write(std_out,"(2(a,i0))")"  min band: ",minval(fs%bstcnt_ibz(1,:), mask=fs%bstcnt_ibz(1,:)/=-1)
-   write(std_out,"(2(a,i0))")"  Max band: ",maxval(fs%bstcnt_ibz(1,:)+fs%bstcnt_ibz(2,:)-1, mask=fs%bstcnt_ibz(1,:)/=-1)
+   write(my_unt,"(a,i0)")"  Maximum number of bands crossing the Fermi level: ",fs%maxnb
+   write(my_unt,"(2(a,i0))")"  min band: ",minval(fs%bstcnt_ibz(1,:), mask=fs%bstcnt_ibz(1,:)/=-1)
+   write(my_unt,"(2(a,i0))")"  Max band: ",maxval(fs%bstcnt_ibz(1,:)+fs%bstcnt_ibz(2,:)-1, mask=fs%bstcnt_ibz(1,:)/=-1)
  end do
 
 end subroutine fstab_print
