@@ -195,9 +195,9 @@ MODULE m_ddk
 
   real(dp) :: dfpt_sciss = zero
 
-  !real(dp) :: rprimd(3,3)
+  real(dp) :: rprimd(3,3)
 
-  !type(MPI_type),pointer :: mpi_enreg => null()
+  type(MPI_type),pointer :: mpi_enreg => null()
 
   type(gs_hamiltonian_type) :: gs_hamkq(3)
 
@@ -220,11 +220,11 @@ MODULE m_ddk
    procedure :: apply => ddkop_apply
     ! Apply dH/dk to input wavefunction.
 
-   procedure :: get_velocity => ddkop_get_velocity
-    ! Compute matrix element.
+   procedure :: get_braket => ddkop_get_braket
+    ! Compute matrix element (complex results) in cartesian coords.
 
    procedure :: get_vdiag => ddkop_get_vdiag
-    ! Compute diagonal matrix element.
+    ! Compute diagonal matrix element (real) in cartesian coords.
 
    procedure :: free => ddkop_free
     ! Free memory.
@@ -558,7 +558,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
        if (dtset%useria /= 666) then
          call wfd%copy_cg(ib_v, ik, spin, cg_v)
-         call ddkop%apply(ebands%eig(ib_v, ik, spin), npw_k, wfd%nspinor, cg_v, cwaveprj, wfd%mpi_enreg)
+         call ddkop%apply(ebands%eig(ib_v, ik, spin), npw_k, wfd%nspinor, cg_v, cwaveprj)
        else
          ug_v(1:npw_k*nspinor) = wfd%wave(ib_v,ik,spin)%ug
        end if
@@ -572,7 +572,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
          if (dtset%useria /= 666) then
            call wfd%copy_cg(ib_c, ik, spin, cg_c)
-           vv = ddkop%get_velocity(ebands%eig(ib_c, ik, spin), istwf_k, npw_k, nspinor, wfd%mpi_enreg%me_g0, cg_c)
+           vv = ddkop%get_braket(ebands%eig(ib_c, ik, spin), istwf_k, npw_k, nspinor, cg_c, mode="reduced")
            !if (ib_v == ib_c) vv(2, :) = zero
 
            if (only_diago) then
@@ -638,7 +638,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
  call cwtime(cpu_all, wall_all, gflops_all, "stop")
  call wrtout(std_out, sjoin("Calculation completed. cpu-time:", sec2str(cpu_all), ",wall-time:", &
-   sec2str(wall_all)), do_flush=.True.)
+             sec2str(wall_all)), do_flush=.True.)
 
  ABI_FREE(ug_c)
  ABI_FREE(ug_v)
@@ -1213,7 +1213,7 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngf
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
- type(MPI_type),intent(in) :: mpi_enreg
+ type(MPI_type),target,intent(in) :: mpi_enreg
  integer,intent(in) :: mpw
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -1227,7 +1227,6 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngf
 ! *************************************************************************
 
  ABI_CHECK(dtset%usepaw == 0, "PAW not tested/implemented!")
- ABI_UNUSED((/mpi_enreg%paral_kgb/))
 
  new%inclvkb = dtset%inclvkb
  new%usepaw = dtset%usepaw
@@ -1235,8 +1234,8 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngf
  new%dfpt_sciss = dtset%dfpt_sciss
  new%mpw = mpw
 
- !new%rprimd = cryst%rprimd
- !new%mpi_enreg => mpi_enreg
+ new%rprimd = cryst%rprimd
+ new%mpi_enreg => mpi_enreg
 
  ! Not used because vlocal1 is not applied.
  nfft = product(ngfft(1:3))
@@ -1376,9 +1375,10 @@ end subroutine ddkop_setup_spin_kpoint
 !!  cwaveprj(natom,nspinor*usecprj)=<p_lmn|C> coefficients for wavefunction |C> (and 1st derivatives)
 !!     if not allocated or size=0, they are locally computed (and not sorted)!!
 !!
-!! OUTPUT
-!! gh1c(2,npw1*nspinor)= <G|H^(1)|C> or  <G|H^(1)-lambda.S^(1)|C> on the k+q sphere
-!!                      (only kinetic+non-local parts if optlocal=0)
+!! SIDE EFFECTS
+!! Stores:
+!!  gh1c(2,npw1*nspinor)= <G|H^(1)|C> or  <G|H^(1)-lambda.S^(1)|C> on the k+q sphere
+!!                        (only kinetic+non-local parts if optlocal=0)
 !!
 !! PARENTS
 !!
@@ -1386,13 +1386,12 @@ end subroutine ddkop_setup_spin_kpoint
 !!
 !! SOURCE
 
-subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj, mpi_enreg)
+subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
 
 !Arguments ------------------------------------
 !scalars
  class(ddkop_t),intent(inout) :: self
  integer,intent(in) :: npw_k, nspinor
- type(MPI_type),intent(in) :: mpi_enreg
  real(dp),intent(in) :: eig0nk
 !arrays
  real(dp),intent(inout) :: cwave(2,npw_k*nspinor)
@@ -1421,7 +1420,7 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj, mpi_enreg)
    do idir=1,3
      sij_opt = self%gs_hamkq(idir)%usepaw
      call getgh1c(berryopt0, cwave, cwaveprj, self%gh1c(:,:,idir), &
-       grad_berry, self%gs1c(:,:,idir), self%gs_hamkq(idir), gvnlx1, idir, self%ipert, eshift, mpi_enreg, optlocal0, &
+       grad_berry, self%gs1c(:,:,idir), self%gs_hamkq(idir), gvnlx1, idir, self%ipert, eshift, self%mpi_enreg, optlocal0, &
        optnl, opt_gvnlx1, self%rf_hamkq(idir), sij_opt, tim_getgh1c, usevnl0)
    end do
 
@@ -1449,14 +1448,19 @@ end subroutine ddkop_apply
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddk/ddkop_get_velocity
+!!****f* m_ddk/ddkop_get_braket
 !! NAME
-!!  ddkop_get_velocity
+!!  ddkop_get_braket
 !!
 !! FUNCTION
-!!  Compute matrix element
+!!  Compute matrix element in Cartesian coordinates.
 !!
 !! INPUTS
+!!  eig0mk: Eigenvalue associated to the "bra" wavefunction
+!!  istwkf_k: defines storage of wavefunctions for this k-point
+!!  npw_k: Number of planewaves.
+!!  nspinor: Number of spinor components.
+!!  brag(2,npw_k*nspinor)=input wavefunction in reciprocal space
 !!
 !! PARENTS
 !!
@@ -1464,23 +1468,25 @@ end subroutine ddkop_apply
 !!
 !! SOURCE
 
-function ddkop_get_velocity(self, eig0mk, istwf_k, npw_k, nspinor, me_g0, brag) result(vk)
+function ddkop_get_braket(self, eig0mk, istwf_k, npw_k, nspinor, brag, mode) result(vk)
 
 !Arguments ------------------------------------
 !scalars
  class(ddkop_t),intent(in) :: self
- integer,intent(in) :: istwf_k, npw_k, nspinor, me_g0
+ integer,intent(in) :: istwf_k, npw_k, nspinor
  real(dp),intent(in) :: eig0mk
+ character(len=*),optional,intent(in) :: mode
 !arrays
- real(dp),intent(in) :: brag(npw_k*nspinor)
- real(dp) :: vk(2, 3)
+ real(dp),intent(in) :: brag(2*npw_k*nspinor)
+ real(dp) :: vk(2,3)
 
 !Local variables-------------------------------
 !scalars
  integer :: idir
  real(dp) :: doti
 !arrays
- real(dp) :: dotarr(2) !, vk_red(2, 3)
+ real(dp) :: dotarr(2), vk_red(2, 3)
+ character(len=50) :: my_mode
 
 !************************************************************************
 
@@ -1491,7 +1497,7 @@ function ddkop_get_velocity(self, eig0mk, istwf_k, npw_k, nspinor, me_g0, brag) 
      if (istwf_k > 1) then
        !dum = two * j_dpc * AIMAG(dum); if (vkbr%istwfk==2) dum = dum - j_dpc * AIMAG(gamma_term)
        doti = two * dotarr(2)
-       if (istwf_k == 2 .and. me_g0 == 1) then
+       if (istwf_k == 2 .and. self%mpi_enreg%me_g0 == 1) then
          ! nspinor always 1
          ! TODO: Recheck this part but it should be ok.
          doti = doti - (brag(1) * self%gh1c(2,1,idir) - brag(2) * self%gh1c(1,1,idir))
@@ -1507,10 +1513,18 @@ function ddkop_get_velocity(self, eig0mk, istwf_k, npw_k, nspinor, me_g0, brag) 
    ABI_UNUSED(eig0mk)
  end if
 
- !vk_red = vk
- !call ddk_red2car(self%rprimd, vk_red, vk)
+ my_mode = "cart"; if (present(mode)) my_mode = mode
+ select case (mode)
+ case ("cart")
+   vk_red = vk
+   call ddk_red2car(self%rprimd, vk_red, vk)
+ case ("reduced")
+   continue
+ case default
+   MSG_ERROR(sjoin("Invalid vaue for mode:", mode))
+ end select
 
-end function ddkop_get_velocity
+end function ddkop_get_braket
 !!***
 
 !----------------------------------------------------------------------
@@ -1520,7 +1534,7 @@ end function ddkop_get_velocity
 !!  ddkop_get_vdiag
 !!
 !! FUNCTION
-!!  Simplified interface to compute the diagonal matrix element of the velocity operator
+!!  Simplified interface to compute the diagonal matrix element of the velocity operator in cartesian coords.
 !!
 !! INPUTS
 !!
@@ -1530,29 +1544,30 @@ end function ddkop_get_velocity
 !!
 !! SOURCE
 
-function ddkop_get_vdiag(self, eig0nk, istwf_k, npw_k, nspinor, cwave, cwaveprj, mpi_enreg) result(vk)
+function ddkop_get_vdiag(self, eig0nk, istwf_k, npw_k, nspinor, cwave, cwaveprj, mode) result(vk)
 
 !Arguments ------------------------------------
 !scalars
  class(ddkop_t),intent(inout) :: self
  integer,intent(in) :: istwf_k, npw_k, nspinor
- type(MPI_type),intent(in) :: mpi_enreg
  real(dp),intent(in) :: eig0nk
+ character(len=*),optional,intent(in) :: mode
 !arrays
  real(dp),intent(inout) :: cwave(2,npw_k*nspinor)
  type(pawcprj_type),intent(inout) :: cwaveprj(:,:)
  real(dp) :: vk(3)
 
 !Local variables-------------------------------
+ character(len=50) :: my_mode
 !arrays
- real(dp) :: cvk_red(2, 3), cvk_cart(2, 3)
+ real(dp) :: cvk(2, 3)
 
 !************************************************************************
 
- call self%apply(eig0nk, npw_k, nspinor, cwave, cwaveprj, mpi_enreg)
- cvk_red = self%get_velocity(eig0nk, istwf_k, npw_k, nspinor, mpi_enreg%me_g0, cwave)
- !call ddk_red2car(self%rprimd, cvk_red, cvk_cart)
- !vk = cvk_cart(1, :)
+ my_mode = "cart"; if (present(mode)) my_mode = mode
+ call self%apply(eig0nk, npw_k, nspinor, cwave, cwaveprj)
+ cvk = self%get_braket(eig0nk, istwf_k, npw_k, nspinor, cwave, mode=my_mode)
+ vk = cvk(1, :)
 
 end function ddkop_get_vdiag
 !!***
@@ -1594,6 +1609,8 @@ subroutine ddkop_free(self)
    call self%htg(idir)%free()
    call self%rf_hamkq(idir)%free()
  end do
+
+ self%mpi_enreg => null()
 
 end subroutine ddkop_free
 !!***

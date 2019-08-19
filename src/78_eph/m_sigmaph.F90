@@ -650,7 +650,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
- real(dp) :: vk(2, 3), vk_red(2,3), vkq(2,3), vkq_red(2,3), tsec(2), eminmax(2)
+ real(dp) :: vk(3), vkq(3), tsec(2), eminmax(2)
  real(dp) :: frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
  real(dp) :: wqnu,nqnu,gkq2,gkq2_pf,gkq2_dfrohl,eig0nk,eig0mk,eig0mkq,f_mkq
  real(dp) :: gdw2, gdw2_stern
@@ -848,7 +848,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_CALLOC(sigma%vcar_calc, (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
 
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
- !if (my_rank == master) call ddkop%print(ab_out)
+ !if (my_rank == master) call ddkop%print(std_out)
+
  ! All sigma_nk states are available on each node so parallelization is easy.
  cnt = 0
  do spin=1,nsppol
@@ -864,11 +865,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        band_ks = ib_k + bstart_ks - 1
        call wfd%copy_cg(band_ks, ik_ibz, spin, cgwork)
        eig0nk = ebands%eig(band_ks, ik_ibz, spin)
-       call ddkop%apply(eig0nk, npw_k, wfd%nspinor, cgwork, cwaveprj0, wfd%mpi_enreg)
-       vk_red = ddkop%get_velocity(eig0nk, istwf_k, npw_k, wfd%nspinor, wfd%mpi_enreg%me_g0, cgwork)
-       call ddk_red2car(cryst%rprimd, vk_red, vk)
-       !vk_cart = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cgwork, cwaveprj0)
-       sigma%vcar_calc(:, ib_k, ikcalc, spin) = vk(1, :)
+       sigma%vcar_calc(:, ib_k, ikcalc, spin) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cgwork, cwaveprj0)
      end do
 
    end do
@@ -1549,15 +1546,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          weight_q = sigma%wtq_k(iq_ibz)
 
          if (sigma%calc_mrta) then
-           call ddkop%apply(eig0mkq, npw_kq, wfd%nspinor, bra_kq, cwaveprj0, wfd%mpi_enreg)
-           vkq_red = ddkop%get_velocity(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, wfd%mpi_enreg%me_g0, bra_kq)
-           !vkq_cart = ddkop%get_vdiag(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, bra_kq, cwaveprj0)
-           call ddk_red2car(cryst%rprimd, vkq_red, vkq)
+           ! Precompute alpha coefficients.
+           vkq = ddkop%get_vdiag(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, bra_kq, cwaveprj0)
            do ib_k=1,nbcalc_ks
-             vk(1,:) = sigma%vcar_calc(:, ib_k, ikcalc, spin)
-             vkk_norm2 = dot_product(vk(1,:), vk(1,:))
+             vk = sigma%vcar_calc(:, ib_k, ikcalc, spin)
+             vkk_norm2 = dot_product(vk, vk)
              alpha_mrta(ib_k) = zero
-             if (vkk_norm2 > tol6) alpha_mrta(ib_k) = one - dot_product(vkq(1,:), vk(1,:)) / vkk_norm2 ** 2
+             if (vkk_norm2 > tol6) alpha_mrta(ib_k) = one - dot_product(vkq, vk) / vkk_norm2 ** 2
            end do
          end if
 
@@ -3528,6 +3523,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
                                 velocity(:,band_ks,ikpt,spin), start=[1,iband,ikcalc,spin])
            NCF_CHECK(ncerr)
          end if
+         ! TODO: This section of code can be removed because we don't write vred_calc anymore
          if (has_red_vel) then
            ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vred_calc"),&
                                 vk_red(1,:), start=[1,iband,ikcalc,spin])

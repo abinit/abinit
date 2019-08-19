@@ -899,7 +899,7 @@ subroutine phgamma_eval_qibz(gams, cryst, ifc, iq_ibz, spin, phfrq, gamma_ph, la
  call ifc%fourq(cryst,gams%qibz(:,iq_ibz),phfrq,displ_cart,out_eigvec=pheigvec, out_displ_red=displ_red)
 
  ! If the matrices do not contain the scalar product with the displ_red vectors yet do it now.
- tmp_gam2 = reshape(gams%vals_qibz(:,:,:,iq_ibz,spin), [2,natom3,natom3])
+ tmp_gam2 = reshape(gams%vals_qibz(:,:,:,iq_ibz,spin), [2, natom3, natom3])
  call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
 
  do nu1=1,natom3
@@ -1086,7 +1086,7 @@ subroutine phgamma_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_ph, lambda_p
  !spinfact should be 1 for a normal non sppol calculation without spinorbit
  !for spinors it should also be 1 as bands are twice as numerous but n0 has been divided by 2
  !for sppol 2 it should be 0.5 as we have 2 spin channels to sum
- spinfact = two/(gams%nsppol*gams%nspinor)
+ spinfact = two / (gams%nsppol * gams%nspinor)
 
  ! Compute lambda
  do nu1=1,gams%natom3
@@ -1207,7 +1207,7 @@ subroutine phgamma_interp_setup(gams, cryst, action)
      do spin=1,gams%nsppol
        do iq_ibz=1,gams%nqibz
          iq_bz = qirredtofull(iq_ibz)
-         gams%vals_bz(:,:,iq_bz,spin) = reshape(gams%vals_qibz(:,:,:,iq_ibz,spin), [2,gams%natom3**2])
+         gams%vals_bz(:,:,iq_bz,spin) = reshape(gams%vals_qibz(:,:,:,iq_ibz,spin), [2, gams%natom3**2])
        end do
      end do
 
@@ -1499,7 +1499,7 @@ subroutine phgamma_vv_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_in_ph, ga
      end if
 
      ! If the matrices do not contain the scalar product with the displ_cart vectors yet do it now.
-     tmp_gam2 = reshape (gam_in_now, [2,natom3,natom3])
+     tmp_gam2 = reshape (gam_in_now, [2,natom3, natom3])
      call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
 
      do nu1=1,natom3
@@ -1511,7 +1511,7 @@ subroutine phgamma_vv_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_in_ph, ga
        end if
      end do
 
-     tmp_gam2 = reshape (gam_out_now, [2,natom3,natom3])
+     tmp_gam2 = reshape(gam_out_now, [2, natom3, natom3])
      call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
 
      do nu1=1,natom3
@@ -2549,9 +2549,9 @@ function a2fw_tr_moment(a2f_tr,nn,spin,out_int)
      end if
 
      ! Integration with simpson rule on a linear mesh.
-     call simpson_int(a2f_tr%nomega,a2f_tr%wstep,ff,int_ff)
+     call simpson_int(a2f_tr%nomega, a2f_tr%wstep, ff, int_ff)
 
-     a2fw_tr_moment(idir,jdir) = int_ff(a2f_tr%nomega)
+     a2fw_tr_moment(idir, jdir) = int_ff(a2f_tr%nomega)
      if (present(out_int)) out_int(:,idir,jdir) = int_ff(:)
    end do
  end do
@@ -2608,7 +2608,7 @@ real(dp) function a2fw_logmoment(a2f,spin) result(res)
    end if
  end do
 
- !call simpson_int(nomega,a2f%wstep,a2flogmom,a2flogmom_int)
+ !call simpson_int(nomega, a2f%wstep, a2flogmom, a2flogmom_int)
  !res = exp(a2flogmom_int(nomega))
  res = zero
 
@@ -3498,7 +3498,7 @@ subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, intmeth, wstep, wminmax, smear
  end if
 
  do spin=1,nsppol
-   lambda_iso = a2fw_tr_moment(a2f_tr,0,spin)
+   lambda_iso = a2fw_tr_moment(a2f_tr, 0, spin)
 
    do idir=1,3
      do jdir=1,3
@@ -3512,9 +3512,9 @@ subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, intmeth, wstep, wminmax, smear
            a2f_tr_logmom(iw) = (two/lambda_iso(idir,jdir)) * a2f_tr_1d(iw)*log(abs(omega))/abs(omega)
          end if
        end do
-       call simpson_int(nomega,wstep,a2f_tr_logmom,a2f_tr_logmom_int)
+       call simpson_int(nomega, wstep, a2f_tr_logmom, a2f_tr_logmom_int)
        !write(std_out,*)' iw,nomega,greatest_real,a2f_tr_logmom_int(nomega)=',& iw,nomega,greatest_real,a2f_tr_logmom_int(nomega)
-       if(abs(a2f_tr_logmom_int(nomega))<log(greatest_real*tol6))then
+       if(abs(a2f_tr_logmom_int(nomega)) < log(greatest_real*tol6)) then
          omega_log(idir,jdir) = exp(a2f_tr_logmom_int(nomega))
        else
          omega_log(idir,jdir)=greatest_real*tol6
@@ -3829,7 +3829,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(fstab_t),target,allocatable :: fstab(:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
- real(dp) :: vk_red(2,3), vk(2,3)
+ real(dp) :: vk(3), vkq(3)
  real(dp), allocatable :: gvvvals_in_qibz(:,:,:,:,:,:,:)
  real(dp), allocatable :: gvvvals_out_qibz(:,:,:,:,:,:,:)
  real(dp), allocatable :: resvv_in(:,:)
@@ -3984,7 +3984,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        if (fs%findkg0(kq, g0bz_kq) == -1) cycle
        kqcount = kqcount + 1
      end do
-     write(std_out,"((a,i0,2a,a,i0))")"For spin: ",spin,", qpt: ",trim(ktoa(qpt)),", number of (k,q) pairs: ",kqcount
+     write(std_out,"((a,i0,2a,a,i0))")" For spin: ",spin,", qpt: ",trim(ktoa(qpt)),", number of (k,q) pairs: ",kqcount
    end do
  end do
 
@@ -4412,17 +4412,16 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        if (dtset%eph_transport > 0) then
 #if 1
          ! Compute diagonal matrix elements of velocity operator with DFPT routines
+         ! Results are in Cartesian coordinates.
          call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, kg_k)
          do ib2=1,nband_k
            band = ib2 + bstart_k - 1
            eig0nk = ebands%eig(band, ik_ibz, spin)
-           call ddkop%apply(eig0nk, npw_k, wfd%nspinor, kets_k(:,:,ib2), cwaveprj0, wfd%mpi_enreg)
-           vk_red = ddkop%get_velocity(eig0nk, istwf_k, npw_k, wfd%nspinor, wfd%mpi_enreg%me_g0, kets_k(:,:,ib2))
-           call ddk_red2car(cryst%rprimd, vk_red, vk)
-           !vk = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, kets_k(:,:,ib2), cwaveprj0)
+           call ddkop%apply(eig0nk, npw_k, wfd%nspinor, kets_k(:,:,ib2), cwaveprj0)
+           vk = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, kets_k(:,:,ib2), cwaveprj0)
            !write(std_out,*)"kk:", kk
-           !write(std_out,*)"vk_diff:", vk(1,:) - ddk%velocity(:,ib2,ik_bz,spin)
-           !write(std_out,*)"vk:  ", vk(1,:)
+           !write(std_out,*)"vk_diff:", vk - ddk%velocity(:,ib2,ik_bz,spin)
+           !write(std_out,*)"vk:  ", vk
            !write(std_out,*)"ddk: " , ddk%velocity(:,ib2,ik_bz,spin)
          end do
 
@@ -4430,13 +4429,10 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
          do ib1=1,nband_kq
            band = ib1 + bstart_kq - 1
            eig0nkq = ebands%eig(band, ikq_ibz, spin)
-           call ddkop%apply(eig0nkq, npw_kq, wfd%nspinor, bras_kq(:,:,ib1), cwaveprj0, wfd%mpi_enreg)
-           vk_red = ddkop%get_velocity(eig0nkq, istwf_kq, npw_kq, wfd%nspinor, wfd%mpi_enreg%me_g0, bras_kq(:,:,ib1))
-           call ddk_red2car(cryst%rprimd, vk_red, vk)
-           !vk = ddkop%get_vdiag(eig0nkq, istwf_kq, npw_kq, wfd%nspinor, bras_kq(:,:,ib1), cwaveprj0)
+           vkq = ddkop%get_vdiag(eig0nkq, istwf_kq, npw_kq, wfd%nspinor, bras_kq(:,:,ib1), cwaveprj0)
            !write(std_out,*)"kq:", kq
-           !write(std_out,*)"vkq_diff:", vk(1,:) - ddk%velocity(:,ib1,ikq_bz,spin)
-           !write(std_out,*)"vkq: ", vk(1,:)
+           !write(std_out,*)"vkq_diff:", vkq - ddk%velocity(:,ib1,ikq_bz,spin)
+           !write(std_out,*)"vkq: ", vkq
            !write(std_out,*)"ddk: ", ddk%velocity(:,ib1,ikq_bz,spin)
          end do
 #endif
@@ -4625,7 +4621,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  call a2fw%free()
 
  ! Compute a2Fw using Fourier interpolation.
- call a2fw_init(a2fw,gams, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, wminmax, dtset%ph_smear,&
+ call a2fw_init(a2fw, gams, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, wminmax, dtset%ph_smear,&
    dtset%ph_ngqpt, dtset%ph_nqshift, dtset%ph_qshift, comm, qptopt=1)
 
  if (my_rank == master) then
