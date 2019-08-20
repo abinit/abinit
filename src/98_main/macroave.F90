@@ -51,11 +51,9 @@
 
 #include "abi_common.h"
 
-
 program macroave
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_abicore
  use m_errors

@@ -36,6 +36,7 @@ module m_ephwg
  use m_errors
  use m_xmpi
  use m_copy
+ use m_dtset
  use m_htetra
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -48,7 +49,6 @@ module m_ephwg
  use m_eph_double_grid
 
  use defs_datatypes,    only : ebands_t
- use defs_abitypes,     only : dataset_type
  use m_time,            only : cwtime, cwtime_report
  use m_symtk,           only : matr3inv
  use m_numeric_tools,   only : arth, inrange, wrap2_pmhalf
@@ -550,7 +550,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
                             eph_doublegrid%bz2lgkibz, timrev0, use_symrec=.true.)
 
  ! self%lgrp%ibz --> dg%bz
- ABI_CALLOC(lgkibz2bz,(self%lgk%nibz))
+ ABI_ICALLOC(lgkibz2bz, (self%lgk%nibz))
  do ii=1,self%nbz
    ik_idx = eph_doublegrid%bz2lgkibz(ii)
    lgkibz2bz(ik_idx) = ii
@@ -885,10 +885,9 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
  real(dp),parameter :: max_occ1 = one
  real(dp) :: wme0(neig)
 !arrays
- real(dp) :: pme_k(self%nq_k,2), weights(neig,2)
+ real(dp) :: pme_k(self%nq_k,2)
 
 !----------------------------------------------------------------------
- ABI_UNUSED(weights)
 
  ib = band - self%bstart + 1
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -962,7 +961,7 @@ subroutine ephwg_get_deltas_qibzk(self, nu, nene, eminmax, bcorr, dt_weights, co
  integer :: iq, iq_ibz, ie, ii
  real(dp),parameter :: max_occ1 = one
 !arrays
- real(dp) :: eigen_in(self%nq_k) !thetaw(nene, self%nq_k),
+ real(dp) :: eigen_in(self%nq_k)
 
 !----------------------------------------------------------------------
 
@@ -1004,6 +1003,7 @@ end subroutine ephwg_get_deltas_qibzk
 !! nu=Phonon branch.
 !! nbcalc=Number of bands in self-energy matrix elements.
 !! zvals
+!! opt: 1 for S. Kaprzyk routines, 2 for Lambin.
 !! comm=MPI communicator
 !! [use_bzsum]= By default the weights are multiplied by the Nstar(q) / Nq where
 !!   Nstar(q) is the number of points in the star of the q-point (using the symmetries of the little group of k)
@@ -1020,11 +1020,11 @@ end subroutine ephwg_get_deltas_qibzk
 !!
 !! SOURCE
 
-subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, cweights, comm, use_bzsum)
+subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, opt, cweights, comm, use_bzsum)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iband_sum, spin, nu, nz, nbcalc, comm
+ integer,intent(in) :: iband_sum, spin, nu, nz, nbcalc, opt, comm
  class(ephwg_t),intent(in) :: self
  logical, optional, intent(in) :: use_bzsum
 !arraye
@@ -1040,7 +1040,6 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
 !arrays
  real(dp),allocatable :: pme_k(:,:)
  complex(dp),allocatable :: cweights_tmp(:,:)
- !complex(dpc) :: SIM0, SIM0I
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -1063,7 +1062,7 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
  do ib=1,nbcalc
    do ii=1,2
      call self%tetra_k%weights_wvals_zinv(pme_k(:, ii), nz, zvals(:,ib), &
-                                          max_occ1, self%nq_k, 1, cweights_tmp, comm)
+                                          max_occ1, self%nq_k, opt, cweights_tmp, comm)
      do iq=1,self%nq_k
        cweights(:,ii,ib,iq) = cweights_tmp(:,iq)
      end do

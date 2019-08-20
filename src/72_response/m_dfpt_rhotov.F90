@@ -27,11 +27,11 @@
 module m_dfpt_rhotov
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_cgtools
 
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_spacepar,    only : hartrestr, hartre
  use m_dfpt_mkvxc,    only : dfpt_mkvxc, dfpt_mkvxc_noncoll

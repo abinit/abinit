@@ -26,7 +26,6 @@
 module m_transport
 
  use defs_basis
- use defs_abitypes
  use iso_c_binding
  use m_abicore
  use m_xmpi
@@ -36,11 +35,14 @@ module m_transport
  use m_ebands
  use m_nctk
  use m_sigmaph
+ use m_dtset
+ use m_dtfil
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
  use defs_datatypes,   only : ebands_t
+ use m_time,           only : cwtime, cwtime_report
  use m_crystal,        only : crystal_t
  use m_numeric_tools,  only : bisect, simpson_int, safe_div !polyn_interp,
  use m_fstrings,       only : strcat, sjoin, ltoa
@@ -220,8 +222,6 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
 
 ! *************************************************************************
 
- ABI_UNUSED((/comm, cryst%natom/))
-
  my_rank = xmpi_comm_rank(comm)
  call wrtout(std_out, ' Transport computation driver')
 
@@ -293,16 +293,19 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
 !Local variables ------------------------------
  type(ebands_t) :: tmp_ebands
  integer,parameter :: occopt3=3, timrev1=1, sppoldbl1=1
- integer :: ierr, itemp, spin
- integer :: nprocs, my_rank
+ integer :: ierr, itemp, spin, nprocs, my_rank
+ real(dp) :: nelect, dksqmax
+ real(dp) :: cpu, wall, gflops
+ character(len=500) :: msg
+!arrays
  integer :: kptrlatt(3,3)
  integer,allocatable :: indkk(:,:)
- real(dp) :: nelect, dksqmax
- character(len=500) :: msg
 
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ call cwtime(cpu, wall, gflops, "start")
 
  ! Allocate temperature arrays
  new%ntemp = sigmaph%ntemp
@@ -444,6 +447,8 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
    call xmpi_sum(new%transport_mu_e, comm, ierr)
  endif
 
+ call cwtime_report(" transport_rta_new", cpu, wall, gflops)
+
  contains
  subroutine downsample_array(array,indkk,nkpt)
 
@@ -497,16 +502,21 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  real(dp) :: vr(3)
  real(dp) :: emin, emax, edos_broad, edos_step, max_occ, kT
  real(dp) :: linewidth, fact0
+ real(dp) :: cpu, wall, gflops
  real(dp) :: dummy_vals(1,1,1,1), dummy_vecs(1,1,1,1,1)
  real(dp),allocatable :: vv_tens(:,:,:,:,:,:)
  real(dp),allocatable :: dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
  !character(len=500) :: msg
+
+!************************************************************************
 
  ! create alias for dimensions
  nsppol = self%ebands%nsppol
  nkpt   = self%ebands%nkpt
  mband  = self%ebands%mband
  nvals = 0; nvecs = 0
+
+ call cwtime(cpu, wall, gflops, "start")
 
  ! Allocate vv tensors with and without the lifetimes
  ntens = 1+self%ntemp
@@ -561,9 +571,9 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  ABI_FREE(vv_tens)
 
  ! Transport coeficients computation
- ABI_MALLOC(self%l0,(self%nw,self%nsppol,3,3,self%ntemp+1))
- ABI_MALLOC(self%l1,(self%nw,self%nsppol,3,3,self%ntemp+1))
- ABI_MALLOC(self%l2,(self%nw,self%nsppol,3,3,self%ntemp+1))
+ ABI_MALLOC(self%l0, (self%nw,self%nsppol,3,3,self%ntemp+1))
+ ABI_MALLOC(self%l1, (self%nw,self%nsppol,3,3,self%ntemp+1))
+ ABI_MALLOC(self%l2, (self%nw,self%nsppol,3,3,self%ntemp+1))
 
  ABI_MALLOC(self%sigma,   (self%nw,self%nsppol,3,3,self%ntemp+1))
  ABI_CALLOC(self%seebeck, (self%nw,self%nsppol,3,3,self%ntemp+1))
@@ -640,6 +650,8 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
      end do
    end do !itemp
  end do !spin
+
+ call cwtime_report(" transport_rta_compute", cpu, wall, gflops)
 
 contains
  real(dp) function carriers(wmesh,dos,istart,istop,kT,mu)
@@ -739,11 +751,17 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
  integer :: bmin(2), bmax(2)
  real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3)
  real(dp) :: eig_nk, mu_e, linewidth, fact, fact0
+ real(dp) :: cpu, wall, gflops
  real(dp) :: max_occ, kT, wtk
+
+!************************************************************************
 
  ABI_UNUSED((/dtset%natom, comm/))
 
  ABI_MALLOC(self%mobility_mu,(2,self%nsppol,3,3,self%ntemp+1))
+
+ call cwtime(cpu, wall, gflops, "start")
+
 
  ! create alias for dimensions
  nsppol = self%ebands%nsppol
@@ -829,6 +847,8 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
                   zero, self%mobility_mu(2,:,:,:,itemp) )
  end do
 
+ call cwtime_report(" transport_rta_compute_mobility", cpu, wall, gflops)
+
 contains
  function symmetrize_tensor(cryst,t) result(tsum)
   integer :: isym
@@ -872,6 +892,12 @@ subroutine transport_rta_ncwrite(self, cryst, dtset, ncid)
 
 !Local variables --------------------------------
  integer :: ncerr
+ real(dp) :: cpu, wall, gflops
+
+!************************************************************************
+
+ call cwtime(cpu, wall, gflops, "start")
+
 
 #ifdef HAVE_NETCDF
  ! Write to netcdf file
@@ -930,6 +956,8 @@ subroutine transport_rta_ncwrite(self, cryst, dtset, ncid)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mobility_mu"),self%mobility_mu(:,:,:,:,:self%ntemp)))
 #endif
 
+ call cwtime_report(" transport_rta_ncwrite", cpu, wall, gflops)
+
 end subroutine transport_rta_ncwrite
 !!***
 
@@ -954,7 +982,12 @@ subroutine transport_rta_write(self, cryst)
 
 !Local variables --------------------------------
  integer :: itemp, ispin
+ real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
+
+!************************************************************************
+
+ call cwtime(cpu, wall, gflops, "start")
 
  call wrtout(ab_out, 'Transport calculation results')
  write(msg,"(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
@@ -967,8 +1000,10 @@ subroutine transport_rta_write(self, cryst)
                             self%nh(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
                             self%mobility_mu(1,ispin,1,1,itemp), self%mobility_mu(2,ispin,1,1,itemp)
      call wrtout([std_out, ab_out], msg)
-   end do !temp
- end do !spin
+   end do ! itemp
+ end do ! spin
+
+ call cwtime_report(" transport_rta_write", cpu, wall, gflops)
 
 end subroutine transport_rta_write
 !!***

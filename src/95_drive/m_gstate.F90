@@ -26,8 +26,6 @@
 module m_gstate
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_rectypes
  use m_errors
  use m_xmpi
@@ -48,7 +46,10 @@ module m_gstate
  use m_nctk
  use m_hdr
  use m_ebands
+ use m_dtfil
 
+ use defs_datatypes,     only : pseudopotential_type, ebands_t
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_symtk,            only : matr3inv
  use m_io_tools,         only : open_file
@@ -75,7 +76,7 @@ module m_gstate
  use m_paw_occupancies,  only : initrhoij
  use m_paw_correlations, only : pawpuxinit
  use m_orbmag,           only : initorbmag,destroy_orbmag,orbmag_type
- use m_paw_uj,           only : pawuj_ini,pawuj_free,pawuj_det
+ use m_paw_uj,           only : pawuj_ini,pawuj_free,pawuj_det, macro_uj_type
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
                                 electronpositron_calctype

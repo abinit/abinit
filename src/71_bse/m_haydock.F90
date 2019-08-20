@@ -34,6 +34,7 @@ MODULE m_haydock
  use m_haydock_io
  use m_linalg_interfaces
  use m_ebands
+ use m_hdr
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -41,7 +42,6 @@ MODULE m_haydock
  use m_time,              only : timab
  use m_fstrings,          only : strcat, sjoin, itoa, int2char4
  use m_io_tools,          only : file_exists, open_file
- use defs_abitypes,       only : Hdr_type
  use defs_datatypes,      only : ebands_t, pseudopotential_type
  use m_geometry,          only : normv
  use m_hide_blas,         only : xdotc, xgemv

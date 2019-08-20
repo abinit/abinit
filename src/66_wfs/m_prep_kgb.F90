@@ -27,11 +27,11 @@
 module m_prep_kgb
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
 
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_bandfft_kpt, only : bandfft_kpt, bandfft_kpt_get_ikpt, bandfft_kpt_type
  use m_pawcprj,     only : pawcprj_type
@@ -103,8 +103,6 @@ contains
 subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 &                      mpi_enreg,prtvol,sij_opt,cpopt,cwaveprj,&
 &                      already_transposed) ! optional argument
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -613,8 +611,6 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 &                      blocksize,mpi_enreg,nnlout,paw_opt,signs,gsc,&
 &                      tim_nonlop,cwavef,gvnlc,already_transposed)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: blocksize,choice,cpopt,idir,signs,nnlout,paw_opt
  logical,optional,intent(in) :: already_transposed
@@ -918,8 +914,6 @@ end subroutine prep_nonlop
 subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 &          mpi_enreg,nband_k,ndat,ngfft,npw_k,n4,n5,n6,occ_k,option_fourwf,ucvol,wtk,&
 &          bandfft_kpt_tab,use_gpu_cuda) ! Optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1419,8 +1413,6 @@ subroutine prep_wavef_sym_do(mpi_enreg,bandpp,nspinor,&
 &     ewavef_alltoall_sym,&
 &     index_wavef_send)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: bandpp,ndatarecv,ndatarecv_tot,ndatasend_sym
@@ -1688,8 +1680,6 @@ subroutine prep_wavef_sym_undo(mpi_enreg,bandpp,nspinor,&
 &     gwavef_alltoall_sym,&
 &     index_wavef_send)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: bandpp,idatarecv0,ndatarecv,ndatarecv_tot,ndatasend_sym
@@ -1910,8 +1900,6 @@ subroutine prep_index_wavef_bandpp(nproc_band,bandpp,&
                              recvcounts,rdispls,&
                              index_wavef_band)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: bandpp,ndatarecv,nproc_band,nspinor
@@ -1995,8 +1983,6 @@ end subroutine prep_index_wavef_bandpp
 !! SOURCE
 
 subroutine prep_sort_wavef_spin(nproc_band,nspinor,ndatarecv,recvcounts,rdispls,index_wavef)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

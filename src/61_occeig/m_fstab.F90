@@ -24,7 +24,6 @@
 module m_fstab
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors

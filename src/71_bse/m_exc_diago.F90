@@ -24,7 +24,6 @@
 MODULE m_exc_diago
 
  use defs_basis
- use defs_datatypes
  use m_slk
  use m_bs_defs
  use m_abicore
@@ -36,7 +35,7 @@ MODULE m_exc_diago
  use m_hdr
  use m_sort
 
- use defs_abitypes,     only : hdr_type
+ use defs_datatypes,    only : pseudopotential_type, ebands_t
  use m_io_tools,        only : open_file
  use m_fstrings,        only : int2char4
  use m_numeric_tools,   only : print_arr, hermitianize

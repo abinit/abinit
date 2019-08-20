@@ -27,13 +27,13 @@
 module m_cohsex
 
  use defs_basis
- use defs_datatypes
  use m_defs_ptgroups
- use m_gwdefs !,        only : czero_gw, cone_gw, j_gw, sigparams_t, sigma_type_from_key, sigma_is_herm
+ use m_gwdefs
  use m_xmpi
  use m_errors
  use m_abicore
 
+ use defs_datatypes,  only : pseudopotential_type, ebands_t
  use m_time,          only : timab
  use m_fstrings,      only : sjoin, itoa
  use m_hide_blas,     only : xdotc, xgemv

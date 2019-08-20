@@ -95,7 +95,6 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 &                   nband_k,nbdblock,npw_k,prtvol,resid_k,subham,totvnlx,use_totvnlx)
 
 
- use defs_abitypes
  use defs_basis
  use m_abicore
  use m_lobpcg
@@ -104,12 +103,15 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  use m_xmpi
  use m_errors
  use iso_c_binding
+ use m_dtset
 
+ use defs_abitypes, only : mpi_type
  use m_time,        only : timab
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type
  use m_getghc,      only : getghc
  use m_prep_kgb,    only : prep_getghc
+
  implicit none
 
 !Arguments ------------------------------------

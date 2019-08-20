@@ -41,15 +41,15 @@ module m_phonons
  use netcdf
 #endif
  use m_supercell
+ use m_dtset
 
  use m_fstrings,        only : itoa, ftoa, sjoin, ktoa, strcat, basename, replace
  use m_symtk,           only : matr3inv
  use m_time,            only : cwtime, cwtime_report
  use m_io_tools,        only : open_file
- use defs_abitypes,     only : dataset_type
  use m_geometry,        only : mkrdim, symredcart, normv
  use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph
- use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new, kpath_free
+ use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new
  use m_ifc,             only : ifc_type
  use m_anaddb_dataset,  only : anaddb_dataset_type
  use m_kpts,            only : kpts_ibz_from_kptrlatt, get_full_kgrid
@@ -434,8 +434,6 @@ end subroutine phdos_print_debye
 !!      anaddb,eph
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -551,8 +549,6 @@ end subroutine phdos_print_thermo
 !!      anaddb,eph
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -691,8 +687,6 @@ end subroutine phdos_init
 !!      anaddb,eph,m_tdep_phdos
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1178,8 +1172,6 @@ end subroutine mkphdos
 !!      anaddb
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1354,8 +1346,6 @@ end subroutine zacharias_supercell_make
 !! PARENTS
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1550,8 +1540,6 @@ end subroutine thermal_supercell_make
 !!      anaddb
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1592,8 +1580,6 @@ end subroutine thermal_supercell_free
 !!      anaddb
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1643,8 +1629,6 @@ end subroutine zacharias_supercell_print
 !!      anaddb
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1697,8 +1681,6 @@ end subroutine thermal_supercell_print
 !!      anaddb,eph
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1783,8 +1765,6 @@ end subroutine phdos_ncwrite
 !!      anaddb
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2090,8 +2070,6 @@ end subroutine mkphbs
 !!      m_phonons
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2160,8 +2138,6 @@ end subroutine phdos_calc_vsound
 !!      m_phonons
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2227,8 +2203,6 @@ end subroutine phdos_print_vsound
 !!      anaddb
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2388,8 +2362,6 @@ end subroutine phdos_print_msqd
 !!      m_phonons
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2470,8 +2442,6 @@ end subroutine phonons_ncwrite
 !!      m_phonons
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2572,8 +2542,6 @@ end subroutine phonons_write_phfrq
 !!      m_phonons
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2701,8 +2669,6 @@ end subroutine phonons_write_xmgrace
 !!      m_phonons
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2831,8 +2797,6 @@ end subroutine phonons_write_gnuplot
 !!      eph
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2863,7 +2827,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
    MSG_COMMENT("ph_nqpath <= 0 or ph_ndivsm <= 0. Phonon bands won't be produced. Returning")
    return
  end if
- call wrtout(std_out, "Writing phonon bands, use prtphbands 0 to disable this part")
+ call wrtout(std_out, " Writing phonon bands, use prtphbands 0 to disable this part")
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  natom = cryst%natom
@@ -2949,7 +2913,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  ABI_FREE(phdispl_cart)
  ABI_FREE(eigvec)
 
- call kpath_free(qpath)
+ call qpath%free()
 
 end subroutine ifc_mkphbs
 !!***

@@ -27,11 +27,11 @@
 module m_getghc
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
 
+ use defs_abitypes, only : mpi_type
  use m_time,        only : timab
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim, pawcprj_copy
  use m_bandfft_kpt, only : bandfft_kpt, bandfft_kpt_get_ikpt
@@ -847,13 +847,13 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
  ! scale conversion from SI to atomic units,
  ! here \alpha^2 where \alpha is the fine structure constant
  scale_conversion = FineStructureConstant2
- 
+
  if (nspinortot==1) then
 
     ABI_ALLOCATE(ghc1,(2,npw_k*ndat))
 
     !  Do it in 2 STEPs:
-    !  STEP1: Compute grad of cwavef 
+    !  STEP1: Compute grad of cwavef
     ABI_ALLOCATE(gcwavef,(2,npw_k*ndat,3))
 
     gcwavef = zero
@@ -875,7 +875,7 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
     end do
     ABI_DEALLOCATE(kgkpk)
     gcwavef = gcwavef*two_pi
-         
+
     !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
     do idir=1,3
        call fourwf(1,vectornd(:,:,:,:,idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&

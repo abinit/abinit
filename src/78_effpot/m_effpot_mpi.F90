@@ -31,14 +31,14 @@ module m_effpot_mpi
  use m_errors
  use m_abicore
  use m_supercell,only: getPBCIndexes_supercell
- 
+
  implicit none
 
  public :: effpot_mpi_init
  public :: effpot_mpi_free
 !!***
 
-!!****t* defs_abitypes/effpot_mpi_type
+!!****t* m_effpot_mpi/effpot_mpi_type
 !! NAME
 !! effective_potential_type
 !!
@@ -59,7 +59,7 @@ module m_effpot_mpi
 
    integer my_ncell
    ! Number of cell treat by current proc
-   
+
    integer my_nrpt
    ! Number of rpt/coefficient treat by current proc
 
@@ -70,7 +70,7 @@ module m_effpot_mpi
    integer,allocatable :: my_index_cells(:,:)
    ! my_cells(4,my_ncell)
    ! 1-3 are the indexes of the cells in the supercell treat by this CPU
-   ! dimension 4 is the index of the first atom in the cell 
+   ! dimension 4 is the index of the first atom in the cell
 
    integer,allocatable :: my_rpt(:)
    ! my_rpt(my_nrpt)
@@ -95,12 +95,12 @@ CONTAINS  !=====================================================================
 !! deallocate all dynamic memory for mpi of supercell
 !!
 !! INPUTS
-!! index_rpt(3,nrpt) = indexes of the rpt for the ifc  
+!! index_rpt(3,nrpt) = indexes of the rpt for the ifc
 !! sc_size(3) = size of the supercell, 3 3 3 for example
 !! natom = natom in the unit cell
 !! ndiv  = number of division to consider. For example if ndiv==2,
 !!         the mpi will be set over the 2 lvl of parallelisation,
-!!         cell and nrpt by considering nrpt / 2 for each CPU 
+!!         cell and nrpt by considering nrpt / 2 for each CPU
 !!         (still experimental, only ndiv=1 available)
 !! nrpt  = number of cell to be parallelised for the IFC
 !! comm  = MPI communicator
@@ -160,7 +160,7 @@ subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
 !Do some checks
  if(mod(nrpt,npcell) /= 0.or.mod(ncell,npcell) /=0)then
 !   write(msg,'(2a,2I0)')' Chose another number of CPU ',ncell,nrpt
-!   MSG_ERROR(msg)   
+!   MSG_ERROR(msg)
  end if
 
  call effpot_mpi_free(effpot_mpi)
@@ -187,7 +187,7 @@ subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
  effpot_mpi%my_index_cells = 0
 
  virt_rank = int(aint(real(my_rank,sp)/(ndiv)))
- 
+
  do icell=1,effpot_mpi%my_ncell
    if(virt_rank >= (nproc-ncell_alone))then
      effpot_mpi%my_cells(icell)=(int(aint(real(ncell,sp)/nproc)))*(virt_rank)+&
@@ -214,27 +214,27 @@ subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
    end do
  end do
 
-!TREAT RPT Not yet parallelised 
+!TREAT RPT Not yet parallelised
  ABI_ALLOCATE(rpt_list,(nproc))
- 
+
  irpt = 1
 
  do while (irpt < nproc)
-   do ii=1,ndiv       
+   do ii=1,ndiv
      rpt_list(irpt+ii-1) = ii-1
    end do
    irpt = irpt + ndiv
  end do
 
  virt_rank = rpt_list(my_rank+1)
- 
+
  effpot_mpi%my_nrpt = nprpt
  ABI_ALLOCATE(effpot_mpi%my_rpt,(effpot_mpi%my_nrpt))
  ABI_ALLOCATE(effpot_mpi%my_atmrpt_index,(effpot_mpi%my_nrpt,effpot_mpi%my_ncell))
  effpot_mpi%my_rpt = 0
  effpot_mpi%my_atmrpt_index = 0
- 
- 
+
+
  do irpt=1,effpot_mpi%my_nrpt
 !AM_EXPERIMENTAL
 !   if(virt_rank >= (nproc-ncell_alone))then
@@ -266,7 +266,7 @@ subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
 &       ((cell_atom2(3)-1))*natom
    end do
  end do
-  
+
 
  ABI_DEALLOCATE(rpt_list)
 

@@ -27,18 +27,17 @@
 module m_prcref
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_errors
  use m_abicore
  use m_xmpi
  use m_xcdata
-
  use m_frskerker1
  use m_frskerker2
  use mod_prc_memory
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_numeric_tools, only : dotproduct
  use m_geometry, only : xcart2xred, metric
@@ -2505,7 +2504,7 @@ subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,v
 !******************************************************************
  vrespc=vresid !starting point
  ! put the laplacian of the residuals into deltaW
- call laplacian(gprimd,mpi_enreg,nfft,nspden,ngfft,rdfuncr=vrespc,laplacerdfuncr=deltaW,g2cart_out=g2cart) 
+ call laplacian(gprimd,mpi_enreg,nfft,nspden,ngfft,rdfuncr=vrespc,laplacerdfuncr=deltaW,g2cart_out=g2cart)
 
 !call laplacian(vrespc,buffer,ngfft,gprimd) ! put the laplacian of the residuals into deltaW
 !do ifft=1,nfft

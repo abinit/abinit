@@ -34,7 +34,7 @@
 program abitk
 
  use defs_basis
- use defs_abitypes
+ use m_abicore
  use m_build_info
  use m_xmpi
  use m_errors
