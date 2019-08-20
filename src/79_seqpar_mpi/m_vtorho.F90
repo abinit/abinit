@@ -1219,6 +1219,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !    Blanchet Compute u0 energy shift factor from eigenvalues and kinetic energy.
      if(associated(hightemp)) then
        call hightemp%compute_e_shiftfactor(eigen,eknk,dtset%mband,dtset%nkpt,dtset%nsppol)
+       if(dtset%userra/=zero) hightemp%e_shiftfactor=dtset%userra
      end if
 
 !    Compute the new occupation numbers from eigen
@@ -1766,6 +1767,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call pawrhoij_free(pawrhoij_unsym)
        ABI_DATATYPE_DEALLOCATE(pawrhoij_unsym)
      end if
+   end if
+
+!  Blanchet Add free electron gas contribution to rhor
+   if(associated(hightemp)) then
+     rhor(:,:)=rhor(:,:)+hightemp%nfreeel/hightemp%ucvol/dtset%nspden
+     rhog(1,1)=rhog(1,1)+hightemp%nfreeel/hightemp%ucvol/dtset%nspden/nfftf
    end if
 
    if(paw_dmft%use_dmft==1) then

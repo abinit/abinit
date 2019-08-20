@@ -40,7 +40,6 @@ module m_hightemp
   implicit none
 
   type,public :: hightemp_type
-    logical :: enabled
     integer :: bcut,nbcut
     real(dp) :: ebcut,e_kin_freeel,e_ent_freeel,nfreeel,e_shiftfactor,ucvol
   contains

@@ -32,7 +32,7 @@ module m_spacepar
  use m_errors
  use m_xmpi
  use m_sort
- use m_hightemp
+!use m_hightemp
 
  use m_time,            only : timab
  use defs_abitypes,     only : MPI_type
@@ -1383,9 +1383,9 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
    end if
 
 !  Blanchet Add free electron gas contribution
-   if(associated(hightemp)) then
-     rhor(:,:)=rhor(:,:)+hightemp%nfreeel/hightemp%ucvol/nspden
-   end if
+!  if(associated(hightemp)) then
+!    rhor(:,:)=rhor(:,:)+hightemp%nfreeel/hightemp%ucvol/nspden
+!  end if
 
 !  If not using symmetry, still want total density in G space rho(G).
 !  Fourier transform (incl normalization) to get rho(G)
@@ -1659,9 +1659,9 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
      end if ! nspden==4
 
 !    Blanchet Add free electron gas contribution
-     if(associated(hightemp)) then
-       rhor(:,:)=rhor(:,:)+hightemp%nfreeel/hightemp%ucvol/nspden
-     end if
+!    if(associated(hightemp)) then
+!      rhor(:,:)=rhor(:,:)+hightemp%nfreeel/hightemp%ucvol/nspden
+!    end if
 
      call timab(17,2,tsec)
 
