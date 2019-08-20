@@ -1240,14 +1240,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 & (dtset%berryopt/=4 .and.dtset%berryopt/= 6.and.dtset%berryopt/= 7.and.&
 & dtset%berryopt/=14.and.dtset%berryopt/=16.and.dtset%berryopt/=17)).or.&
 & ipert==dtset%natom+10.or.ipert==dtset%natom+11) then
-   call wfk_close(ddk_f(1))
+   call ddk_f(1)%close()
  end if
  if ((ipert==dtset%natom+10 .and. idir>3) .or. ipert==dtset%natom+11) then
-   call wfk_close(ddk_f(2))
+   call ddk_f(2)%close()
  end if
  if (ipert==dtset%natom+11) then
-   call wfk_close(ddk_f(3))
-   if(idir>3) call wfk_close(ddk_f(4))
+   call ddk_f(3)%close()
+   if(idir>3) call ddk_f(4)%close()
  end if
 
 !Deallocate the no more needed arrays
@@ -3188,7 +3188,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
      do idir1=1,3
        if (ddkfil(idir1)/=0) then
-         ii = wfk_findk(ddks(idir1), kpt_rbz(:, ikpt))
+         ii = ddks(idir1)%findk(kpt_rbz(:, ikpt))
          ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1")
        end if
      end do
@@ -3292,7 +3292,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !In case of electric field ipert1, close the ddk wf files
  do idir1=1,3
    if (ddkfil(idir1)/=0)then
-     call wfk_close(ddks(idir1))
+     call ddks(idir1)%close()
    end if
  end do
 

@@ -105,8 +105,6 @@ contains
 
 subroutine init_(mix)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(ab7_mixing_object), intent(out) :: mix
@@ -143,8 +141,6 @@ end subroutine init_
 !! SOURCE
 
 subroutine nullify_(mix)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -185,8 +181,6 @@ end subroutine nullify_
 
 subroutine ab7_mixing_new(mix, iscf, kind, space, nfft, nspden, &
 &  npawmix, errid, errmess, npulayit, useprec)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -371,8 +365,6 @@ end subroutine ab7_mixing_new
 
 subroutine ab7_mixing_use_disk_cache(mix, fnametmp_fft)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(ab7_mixing_object), intent(inout) :: mix
@@ -509,8 +501,6 @@ end subroutine ab7_mixing_copy_current_step
 
 subroutine ab7_mixing_eval_allocate(mix, istep)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(ab7_mixing_object), intent(inout) :: mix
@@ -594,8 +584,6 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
 
  subroutine ab7_mixing_eval_deallocate(mix)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(ab7_mixing_object), intent(inout) :: mix
@@ -661,8 +649,6 @@ end subroutine ab7_mixing_eval_deallocate
 & mpi_comm, mpi_summarize, errid, errmess, &
 & reset, isecur, pawarr, pawopt, response, etotal, potden, &
 & resnrm, comm_atom)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -815,8 +801,6 @@ end subroutine ab7_mixing_eval
 
 subroutine ab7_mixing_deallocate(mix)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(ab7_mixing_object), intent(inout) :: mix
@@ -948,8 +932,6 @@ subroutine scfcge(cplex,dbl_nnsclo,dtn_pc,etotal,f_atm,&
 & f_fftgr,initialized,iscf,isecur,istep,&
 & i_rhor,i_vresid,i_vrespc,moved_atm_inside,mpicomm,mpi_summarize,&
 & natom,nfft,nfftot,nspden,n_fftgr,n_index,opt_denpot,response,rhor,ucvol,vtrial,xred,errid,errmess)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1748,8 +1730,6 @@ end subroutine scfcge
 
 subroutine scfeig(istep,nfft,nspden,vrespc,vtrial,vtrial0,work,errid,errmess)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istep,nfft,nspden
@@ -1943,8 +1923,6 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 & mpicomm,mpi_summarize,nfft,npawmix,nspden,n_fftgr,&
 & n_index,opt_denpot,pawoptmix,usepaw,vpaw,vresid,vtrial,errid,errmess, &
 & comm_atom) ! optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2327,8 +2305,6 @@ subroutine findminscf(choice,dedv_1,dedv_2,dedv_predict,&
 & etotal_1,etotal_2,etotal_predict,&
 & lambda_1,lambda_2,lambda_predict,errid,errmess)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice
@@ -2471,8 +2447,6 @@ end subroutine findminscf
 
 subroutine dotprodm_v(cplex,cpldot,dot,index1,index2,mpicomm,mpi_summarize,&
 &   mult1,mult2,nfft,npot1,npot2,nspden,opt_storage,potarr1,potarr2)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2648,8 +2622,6 @@ end subroutine dotprodm_v
 
 subroutine dotprodm_vn(cplex,cpldot,denarr,dot,id,ip,mpicomm, mpi_summarize,multd,multp,&
 & nden,nfft,nfftot,npot,nspden,potarr,ucvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2938,8 +2910,6 @@ end subroutine dotprodm_vn
 
 subroutine sqnormm_v(cplex,index,mpicomm, mpi_summarize,mult,nfft,norm2,npot,nspden,opt_storage,potarr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,index,mult,nfft,npot,nspden,opt_storage,mpicomm
@@ -3062,8 +3032,6 @@ end subroutine sqnormm_v
 subroutine aprxdr(cplex,choice,dedv_mix,dedv_new,dedv_old,&
 &  f_atm,f_fftgr,i_rhor2,i_vresid,moved_atm_inside,&
 &  mpicomm,mpi_summarize,natom,nfft,nfftot,nspden,n_fftgr,rhor,ucvol,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

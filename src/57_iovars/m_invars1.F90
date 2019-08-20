@@ -2028,6 +2028,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%dmft_entropy=0
    dtsets(idtset)%dmft_dc  =1
    dtsets(idtset)%dmft_iter=0
+   dtsets(idtset)%dmft_kspectralfunc=0
    dtsets(idtset)%dmft_nlambda=6
    dtsets(idtset)%dmft_nwli=0
    dtsets(idtset)%dmft_nwlo=0
@@ -2692,6 +2693,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%ph_nqshift = 1
    dtsets(idtset)%ph_smear = 0.00002_dp
    dtsets(idtset)%ddb_ngqpt = [0, 0, 0]
+   dtsets(idtset)%dvdb_ngqpt = [0, 0, 0]
    dtsets(idtset)%ddb_shiftq(:) = zero
 
 ! JB:UNINITIALIZED VALUES (not found in this file neither indefo1)

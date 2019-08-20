@@ -307,7 +307,6 @@ program band2eps
  write(unt1,'(a)') '%****Vertical graduation****'
  deltaE=(inp%max-inp%min)/inp%ngrad
 
-!Replacing do loop with real variables with standard g95 do loop
  E=inp%min
  do
 !  do E=inp%min,(inp%max-deltaE/2),deltaE

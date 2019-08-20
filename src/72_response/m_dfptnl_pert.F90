@@ -606,20 +606,20 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
        if (occ_k(iband)>tol10) then
 
 !        Read dude file
-         call wfk_read_bks(ddk_f(1), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
+         call ddk_f(1)%read_bks(iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
 !        Copy eig1_k_i2pert in "eig1_k_stored"
          eig1_k_stored(1+(iband-1)*2*nband_k:2*nband_k+(iband-1)*2*nband_k)=eig1_k_i2pert(:)
 
          if (i2pert==natom+2) then
 !          Read dudk file
-           call wfk_read_bks(ddk_f(2), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
+           call ddk_f(2)%read_bks(iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
            offset_cgi = (iband-1)*size_wf+icg0
            cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
 !          Copy cwave_right in "dudk"
            dudk(:,1+(iband-1)*size_wf:iband*size_wf)=cwave_right(:,:)
 
 !          Read dudkde file
-           call wfk_read_bks(ddk_f(3), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
+           call ddk_f(3)%read_bks(iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
            offset_cgi = (iband-1)*size_wf+icg0
            cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
 !          Copy cwave_right in "dudkde"
@@ -813,18 +813,18 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 !          Read dkk file (for tests only)
            if (debug_mode/=0) then
              if(idir_elfd==i2dir) then
-               call wfk_read_bks(ddk_f(2), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
+               call ddk_f(2)%read_bks(jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
              else
-               call wfk_read_bks(ddk_f(4), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
+               call ddk_f(4)%read_bks(jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
              end if
              cg_jband(1,1+size_wf*(jband-1):size_wf*jband,2) = -iddk(2,1:size_wf)
              cg_jband(2,1+size_wf*(jband-1):size_wf*jband,2) =  iddk(1,1:size_wf)
            end if
 !          Read dkde file
            if(idir_elfd==i2dir) then
-             call wfk_read_bks(ddk_f(3), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
+             call ddk_f(3)%read_bks(jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
            else
-             call wfk_read_bks(ddk_f(5), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
+             call ddk_f(5)%read_bks(jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
            end if
            s_cwave = iddk
            iddk(1,:) = -s_cwave(2,:)
@@ -840,9 +840,9 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 
 !          Read ddk file
            if(idir_elfd==i2dir) then
-             call wfk_read_bks(ddk_f(2), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
+             call ddk_f(2)%read_bks(jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
            else
-             call wfk_read_bks(ddk_f(4), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
+             call ddk_f(4)%read_bks(jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
            end if
            s_cwave = iddk
            iddk(1,:) = -s_cwave(2,:)

@@ -216,30 +216,30 @@ module defs_datatypes
 
  type,public :: nctab_t
 
-   integer :: mqgrid_vl=0
+   integer :: mqgrid_vl = 0
    ! Number of points in the reciprocal space grid on which
    ! the radial functions are specified (same grid as the one used for the local part).
 
-   logical :: has_tvale=.False.
+   logical :: has_tvale = .False.
     ! True if the norm-conserving pseudopotential provides the atomic pseudized valence density.
     ! If alchemy, has_tvale is True only if all the mixed pseudos
     ! have the valence charge in the pseudopotential file.
 
-   logical :: has_tcore=.False.
+   logical :: has_tcore = .False.
     ! True if the norm-conserving pseudopotential has the model core-charge for NLCC.
     ! If alchemy, has_tcore is True if at least one of the mixed pseudos has NLCC.
     ! See also tcorespl
 
-   real(dp) :: dncdq0=zero
+   real(dp) :: dncdq0 = zero
     ! Gives 1/q d(tNcore(q))/dq for q=0
     ! (tNcore(q) = FT of pseudo core density)
 
-   real(dp) :: d2ncdq0=zero
+   real(dp) :: d2ncdq0 = zero
     ! Gives contribution of d2(tNcore(q))/d2q for q=0
     ! \int{(16/15)*pi^5*n(r)*r^6* dr}
     ! (tNcore(q) = FT of pseudo core density)
 
-   real(dp) :: dnvdq0=zero
+   real(dp) :: dnvdq0 = zero
     ! Gives 1/q d(tNvale(q))/dq for q=0
     ! (tNvale(q) = FT of pseudo valence density)
 
@@ -465,7 +465,7 @@ module defs_datatypes
 
   real(dp), allocatable :: ziontypat(:)
    ! ziontypat(ntypat)
-   !  For each type of atom (might be alchemy wrt psps), the ionic pseudo-charge
+   ! For each type of atom (might be alchemy wrt psps), the ionic pseudo-charge
    ! (giving raise to a long-range coulomb potential)
 
   real(dp), allocatable :: znuclpsp(:)
@@ -499,7 +499,7 @@ module defs_datatypes
    ! nctab(ntypat)
    ! Tables storing data for NC pseudopotentials.
 
-   integer :: nc_xccc_gspace=0
+   integer :: nc_xccc_gspace = 0
    ! NC pseudos only. Set to 1 if the non-linear core correction should
    ! be treated in G-space similarly to the approach used for PAW.
 

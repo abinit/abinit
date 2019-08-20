@@ -56,6 +56,8 @@ topology.so
 *.tmp
 *.pyc
 *.[ao]
+*.stderr
+*.stdout
 buildbot.ac
 tests/TestBot_MPI*/*
 /.abilint
@@ -130,8 +132,7 @@ mkdocs_plugins/dist
 /doc/config.status
 /doc/build/build-howto.html
 /doc/build/build-system-guide.pdf
-/doc/build/config-examples/*.ac
-/doc/build/config-examples/uncertified/*.ac
+/doc/build/config-examples
 /doc/build/connectors.pdf
 /doc/config/gnu/config.guess
 /doc/config/gnu/config.sub
@@ -313,8 +314,6 @@ src/*/test_*
 !tests_*F90
 abichecks/special.py
 abienv.txt
-fallbacks/make.stderr
-make.stderr
 makefile.sed
 tests/testcfg.py
 CheckFB.py
@@ -322,3 +321,4 @@ tests/built-in/Input/abinit
 tests/built-in/Input/fort.98
 tests/built-in/Input/testin_wannier90o_EBANDS.agr
 doc/input-web/*~
+mac-1P0-225.ac

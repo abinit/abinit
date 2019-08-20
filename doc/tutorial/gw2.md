@@ -32,15 +32,15 @@ by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 The user should be familiarized with the four basic tutorials of ABINIT, see the
 [tutorial index](.) as well as the [first GW tutorial](gw1).
 
-[TUTORIAL_README]
-
-This tutorial should take about one hour to be completed (also including the
-reading of [[cite:Bruneval2006]] and [[cite:Lebegue2003]].
-
 Visualisation tools are NOT covered in this tutorial.
 Powerful visualisation procedures have been developed in the Abipy context,
 relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
 and the [Abipy tutorials](https://github.com/abinit/abitutorials).
+
+This tutorial should take about one hour to be completed (also including the
+reading of [[cite:Bruneval2006]] and [[cite:Lebegue2003]].
+
+[TUTORIAL_README]
 
 ## The preliminary Kohn-Sham band structure calculation
 
@@ -54,10 +54,10 @@ will see, the agreement of the band structure with experiment can be improved
 significantly if one relies on the GW approximation.
 
 In the directory *Work_gw2*, copy the files *tgw2_x.files* and *tgw2_1.in* located
-in *\$ABI_TUTORIAL/Input*, and modify the *tgw2_x.files* file as usual (see [the first tutorial](base1)).
+in *\$ABI_TESTS/tutorial/Input*, and modify the *tgw2_x.files* file as usual (see [the first tutorial](base1)).
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work_gw2
 cd Work_gw2
 cp ../tgw2_x.files .  # modify this file as usual (see tutorial 1)

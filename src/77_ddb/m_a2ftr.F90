@@ -32,7 +32,6 @@ module m_a2ftr
  use m_errors
  use m_abicore
  use m_xmpi
- use m_kptrank
  use m_splines
  use m_ebands
 
@@ -41,7 +40,7 @@ module m_a2ftr
  use m_hide_lapack,     only : matrginv
  use m_geometry,        only : phdispl_cart2red
  use m_crystal,         only : crystal_t
- use m_ifc,             only : ifc_type, ifc_fourq
+ use m_ifc,             only : ifc_type
  use m_dynmat,          only : ftgam_init, ftgam
  use m_epweights,       only : d2c_wtq, ep_ph_weights, ep_el_weights, ep_ph_weights
  use m_fstab,           only : mkqptequiv
@@ -230,7 +229,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  ABI_ALLOCATE(pheigvec,(2*elph_ds%nbranch*elph_ds%nbranch, elph_ds%k_fine%nkpt))
 
  do iFSqpt=1,elph_ds%k_fine%nkpt
-   call ifc_fourq(ifc,crystal,elph_ds%k_fine%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
+   call ifc%fourq(crystal,elph_ds%k_fine%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
  end do
  omega_min = omega_min - domega
 
@@ -260,7 +259,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  ABI_ALLOCATE(pheigvec,(2*elph_ds%nbranch*elph_ds%nbranch, elph_ds%k_phon%nkpt))
 
  do iFSqpt=1,elph_ds%k_phon%nkpt
-   call ifc_fourq(ifc,crystal,elph_ds%k_phon%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
+   call ifc%fourq(crystal,elph_ds%k_phon%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
  end do
 
  ABI_ALLOCATE(elph_tr_ds%a2f_1d_tr,(elph_ds%na2f,9,elph_ds%nsppol,4,tmp_nenergy**2,ntemper))
@@ -1163,7 +1162,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
  ABI_ALLOCATE(pheigvec,(2*elph_ds%nbranch*elph_ds%nbranch, elph_ds%k_fine%nkpt))
 
  do iFSqpt=1,elph_ds%k_fine%nkpt
-   call ifc_fourq(ifc,crystal,elph_ds%k_fine%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
+   call ifc%fourq(crystal,elph_ds%k_fine%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
  end do
 
  omega_min = minval(phfrq)
@@ -1654,7 +1653,7 @@ end subroutine mka2f_tr_lova
 !!
 !! FUNCTION
 !!  Calculate the k-dependent relaxation time due to EPC. Impelementation based
-!!  on derivation from Grmvall's book or 
+!!  on derivation from Grmvall's book or
 !!  OD Restrepo's paper (PRB 94 212103 (2009) [[cite:Restrepo2009]])
 !!
 !! INPUTS
@@ -1861,7 +1860,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  ABI_ALLOCATE(pheigvec,(2*nbranch*nbranch, nkptirr))
 
  do iFSqpt = 1, nkptirr
-   call ifc_fourq(ifc,cryst,elph_ds%k_phon%kptirr(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
+   call ifc%fourq(cryst,elph_ds%k_phon%kptirr(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
  end do
 
  omega_min = omega_min - domega
