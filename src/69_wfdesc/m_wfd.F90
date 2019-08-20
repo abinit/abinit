@@ -25,8 +25,6 @@
 module m_wfd
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_copy
@@ -34,7 +32,10 @@ module m_wfd
  use m_crystal
  use m_wfk
  use m_hdr
+ use m_distribfft
 
+ use defs_datatypes,   only : pseudopotential_type, ebands_t
+ use defs_abitypes,    only : mpi_type
  use m_gwdefs,         only : one_gw
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa
@@ -5130,7 +5131,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       ABI_SFREE(work)
       ABI_SFREE(out_cg)
 
-      if (ik_ibz <= 20 .or. mod(ik_ibz, 50) == 0) then
+      if (ik_ibz <= 10 .or. mod(ik_ibz, 50) == 0) then
         write(msg,'(4(a,i0),a)') " Reading k-point [", ik_ibz, "/", wfd%nkibz, "] spin [", spin, "/", wfd%nsppol, "]"
         call cwtime_report(msg, cpu_ks, wall_ks, gflops_ks)
       end if

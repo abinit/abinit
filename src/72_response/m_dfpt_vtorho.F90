@@ -26,8 +26,6 @@
 module m_dfpt_vtorho
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -35,7 +33,12 @@ module m_dfpt_vtorho
  use m_hamiltonian
  use m_wfk
  use m_cgtools
+ use m_dtset
+ use m_dtfil
 
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_occ,      only : occeig
  use m_hdr,      only : hdr_skip, hdr_io
@@ -204,9 +207,9 @@ contains
 !!      dfpt_scfcv
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dfpt_vtowfk,dfptff_gbefd
+!!      destroy_rf_hamiltonian,dfpt_vtowfk,dfptff_gbefd
 !!      dfptff_gradberry,fftpac,getgh1c_setup,init_hamiltonian
-!!      init_rf_hamiltonian,load_spin_hamiltonian,load_spin_rf_hamiltonian
+!!      init_rf_hamiltonian
 !!      occeig,pawmkrho,pawrhoij_alloc,pawrhoij_free,pawrhoij_init_unpacked
 !!      pawrhoij_mpisum_unpacked,rf_transgrid_and_pack,sqnorm_v,symrhg,timab
 !!      xmpi_sum
@@ -458,17 +461,17 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 &   gs_hamkq%nvloc,pawfgr,mpi_enreg,vtrial,vtrial1,vlocal,vlocal1)
 
 !  Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamkq,isppol,vlocal=vlocal,with_nonlocal=.true.)
-   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+   call gs_hamkq%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
+   call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.true.)
    if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
-     call load_spin_rf_hamiltonian(rf_hamk_dir2,isppol,with_nonlocal=.true.)
+     call rf_hamk_dir2%load_spin(isppol,with_nonlocal=.true.)
      if (ipert==natom+11) then ! load vlocal1
-       call load_spin_rf_hamiltonian(rf_hamk_dir2,isppol,vlocal1=vlocal1)
+       call rf_hamk_dir2%load_spin(isppol,vlocal1=vlocal1)
      end if
    end if
 
    if (ipert==natom+5) then !SPr deb, in case of magnetic field perturbation, no non-local
-     call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1)
+     call rf_hamkq%load_spin(isppol,vlocal1=vlocal1)
    end if
 
 !  Nullify contribution to 1st-order density from this k-point
@@ -712,10 +715,10 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  end do !  End loop over spins
 
 !More memory cleaning
- call destroy_hamiltonian(gs_hamkq)
- call destroy_rf_hamiltonian(rf_hamkq)
+ call gs_hamkq%free()
+ call rf_hamkq%free()
  if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
-   call destroy_rf_hamiltonian(rf_hamk_dir2)
+   call rf_hamk_dir2%free()
  end if
  ABI_DEALLOCATE(rhoaug1)
  ABI_DEALLOCATE(vlocal)

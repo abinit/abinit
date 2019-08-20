@@ -130,8 +130,6 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
 &                      enlk,enlout,fnlk,gx,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,&
 &                      ndgxdtfac,nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice,cplex,cplex_fac,ia3,natom,nd2gxdt,ndgxdt

@@ -40,7 +40,6 @@ module m_exc_build
  use m_hdr
 
  use defs_datatypes, only : pseudopotential_type
- use defs_abitypes,  only : hdr_type
  use m_gwdefs,       only : czero_gw, cone_gw, GW_TOLQ0
  use m_time,         only : cwtime, timab
  use m_io_tools,     only : get_unit, open_file

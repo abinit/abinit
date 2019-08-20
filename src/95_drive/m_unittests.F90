@@ -31,7 +31,7 @@ module m_unittests
  use m_defs_ptgroups
  use m_ptgroups
  use m_tetrahedron
- use m_htetrahedron
+ use m_htetra
  use m_krank
  use m_hashtable
  use m_symkpt
@@ -174,6 +174,7 @@ type(crystal_t) function crystal_from_ptgroup(ptgroup) result(crystal)
  ABI_FREE(symrel)
  ABI_FREE(tnons)
  ABI_FREE(symafm)
+
 end function crystal_from_ptgroup
 !!***
 
@@ -195,16 +196,15 @@ subroutine tetra_unittests(comm)
 !Local variables -------------------------
 !scalars
  type(crystal_t) :: crystal
- integer,parameter :: brav1=1,bcorr0=0,bcorr1=1,qptopt1=1,nqshft1=1,space_group0=0
  integer,parameter :: timrev1=1,npsp1=1
+ integer,parameter :: brav1=1,bcorr0=0,bcorr1=1,qptopt1=1,nqshft1=1,space_group0=0
  real(dp),parameter :: max_occ1=1.d0
- integer :: nqibz,iqibz,nqbz,ierr
- integer :: nw
+ integer :: nqibz,iqibz,nqbz,ierr,nw
  real(dp) :: cpu, wall, gflops
  real(dp) :: dosdeltae, emin, emax, qnorm, dos_int
  character(len=80) :: errstr
  type(t_tetrahedron) :: tetraq
- type(t_htetrahedron) :: htetraq
+ type(htetra_t) :: htetraq
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
  integer,allocatable :: bz2ibz(:,:)
  real(dp) :: dos_qshift(3,nqshft1)
@@ -230,10 +230,10 @@ subroutine tetra_unittests(comm)
  crystal = crystal_from_ptgroup('m-3m')
 
  ! Create a regular grid
- in_qptrlatt(:,1)=[ 20, 0, 0]
- in_qptrlatt(:,2)=[ 0, 20, 0]
- in_qptrlatt(:,3)=[ 0, 0, 20]
- dos_qshift(:,1) =[0.0,0.0,0.0]
+ in_qptrlatt(:,1) = [ 20, 0, 0]
+ in_qptrlatt(:,2) = [ 0, 20, 0]
+ in_qptrlatt(:,3) = [ 0, 0, 20]
+ dos_qshift(:,1) = [0.0,0.0,0.0]
  call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, qptopt1, nqshft1, dos_qshift, &
                              nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
  call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
@@ -292,7 +292,7 @@ subroutine tetra_unittests(comm)
 
  ! Compute blochl weights
  call htetraq%blochl_weights(eig,emin,emax,max_occ1,nw,&
-                           nqibz,bcorr0,tweight,dweight,comm)
+                            nqibz,bcorr0,tweight,dweight,comm)
  do iqibz=1,nqibz
    dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
    tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
@@ -306,7 +306,7 @@ subroutine tetra_unittests(comm)
 
  ! Compute blochl weights
  call htetraq%blochl_weights(eig,emin,emax,max_occ1,nw,&
-                           nqibz,1,tweight,dweight,comm)
+                            nqibz,1,tweight,dweight,comm)
  do iqibz=1,nqibz
    dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
    tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
@@ -320,7 +320,7 @@ subroutine tetra_unittests(comm)
 
  ! Compute weights using LV integration from TDEP
  call htetraq%blochl_weights(eig,emin,emax,max_occ1,nw,&
-                             nqibz,2,tweight,dweight,comm)
+                              nqibz,2,tweight,dweight,comm)
  do iqibz=1,nqibz
    dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
    tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
@@ -442,6 +442,7 @@ subroutine tetra_unittests(comm)
  ABI_SFREE(bz2ibz)
  ABI_SFREE(cenergies)
  ABI_SFREE(cweight)
+
  call crystal%free()
  call htetraq%free()
  call destroy_tetra(tetraq)
@@ -459,6 +460,7 @@ subroutine tetra_unittests(comm)
     MSG_ERROR(msg)
   end if
 
+  write(funit, *)"# Energies, IDOS, DOS"
   do iw=1,nw
     write(funit,*) energies(iw), idos(iw), dos(iw)
   end do

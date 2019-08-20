@@ -50,6 +50,7 @@ module m_common
  use m_xpapi
  use m_yaml
  use m_invars2
+ use m_dtset
 
  use m_fstrings,          only : indent, endswith, sjoin
  use m_electronpositron,  only : electronpositron_type
@@ -57,10 +58,10 @@ module m_common
  use m_pair_list,         only : pair_list
  use m_geometry,          only : mkrdim, metric
  use m_kg,                only : getcut
- use m_parser,            only : parsefile
+ use m_parser,            only : parsefile, ab_dimensions
  use m_invars1,           only : invars0, invars1m, indefo
  use m_time,              only : timab, time_set_papiopt
- use defs_abitypes,       only : dataset_type, ab_dimensions, hdr_type, MPI_type
+ use defs_abitypes,       only : MPI_type
  use defs_datatypes,      only : pspheader_type, ebands_t
  use m_pspheads,          only : inpspheads, pspheads_comm
 

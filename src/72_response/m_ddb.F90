@@ -28,8 +28,6 @@
 MODULE m_ddb
 
  use defs_basis
- use defs_abitypes
- use defs_datatypes
  use m_abicore
  use m_errors
  use m_xmpi
@@ -37,6 +35,7 @@ MODULE m_ddb
  use m_dtset
 
  use m_io_tools,       only : file_exists
+ use defs_datatypes,   only : pseudopotential_type
  use m_fstrings,       only : sjoin, itoa, ktoa
  use m_numeric_tools,  only : mkherm
  use m_symtk,          only : mati3inv, matr3inv, littlegroup_q, symatm

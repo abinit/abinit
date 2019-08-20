@@ -24,13 +24,16 @@
 MODULE m_paw_optics
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_errors
  use m_wffile
  use m_abicore
  use m_hdr
+ use m_dtset
+ use m_dtfil
 
+
+ use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
  use m_io_tools,     only : open_file,get_unit
  use m_pawpsp,       only : pawpsp_read_corewf

@@ -23,15 +23,17 @@
 module m_efmas
 
  use defs_basis
- use defs_abitypes
  use m_errors
+ use m_abicore
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_efmas_defs
  use m_nctk
  use m_cgtools
+ use m_dtset
 
+ use defs_abitypes,         only : MPI_type
  use m_gaussian_quadrature, only : cgqf
  use m_io_tools, only : get_unit
 

@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_htetrahedron
+!!****m* ABINIT/m_htetra
 !! NAME
-!! m_htetrahedron
+!! m_htetra
 !!
 !! FUNCTION
 !!  module for tetrahedron interpolation of DOS and similar quantities
@@ -33,13 +33,15 @@
 
 #include "abi_common.h"
 
-module m_htetrahedron
+module m_htetra
 
  use defs_basis
  use m_abicore
  use m_krank
  use m_xmpi
+ use m_errors
 
+ use m_fstrings,        only : sjoin, itoa
  use m_numeric_tools,   only : linspace
  use m_simtet,          only : sim0onei, SIM0TWOI
 
@@ -51,7 +53,7 @@ private
 integer, parameter :: TETRA_SIZE = 6
 integer, parameter :: TETRA_STEP = 6
 
-!!****t* m_htetrahedron/t_htetra_bucket
+!!****t* m_htetra/t_htetra_bucket
 !! NAME
 !! t_htetra_bucket
 !!
@@ -67,16 +69,16 @@ type :: htetra_bucket
 end type htetra_bucket
 !!***
 
-!!****t* m_htetrahedron/t_htetrahedron
+!!****t* m_htetra/htetra_t
 !! NAME
-!! t_htetrahedron
+!! htetra_t
 !!
 !! FUNCTION
 !! tetrahedron geometry object
 !!
 !! SOURCE
 
-type, public :: t_htetrahedron
+type, public :: htetra_t
 
   integer :: opt
   ! Option for the generation of tetrahedra
@@ -134,19 +136,19 @@ type, public :: t_htetrahedron
   procedure :: get_onewk_wvals_zinv => htetra_get_onewk_wvals_zinv
     ! Calculate integration weights for 1/(z-E(k)) for a single k-point in the IBZ.
 
-  procedure :: weights_wvals_zinv  => htetra_weights_wvals_zinv
+  procedure :: weights_wvals_zinv => htetra_weights_wvals_zinv
     ! Same as above but return the weight on all the kpoints by looping over tetrahedra
 
   procedure :: wvals_weights => htetra_wvals_weights
     ! Compute delta and theta on a list of energies for all kpoints
 
-  procedure :: wvals_weights_delta  => htetra_wvals_weights_delta
+  procedure :: wvals_weights_delta => htetra_wvals_weights_delta
     ! Compute delta on a list of energies for all kpoints
 
   procedure :: blochl_weights => htetra_blochl_weights
     ! And interface to help to facilitate the transition to the new tetrahedron implementation
 
-end type t_htetrahedron
+end type htetra_t
 !!***
 
 public :: htetra_init            ! Initialize the object
@@ -157,7 +159,7 @@ contains
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/htetra_init
+!!****f* m_htetra/htetra_init
 !! NAME
 !! htetra_init
 !!
@@ -175,6 +177,7 @@ contains
 !!          2.generate tetrahedra on the FBZ and map to IBZ
 !!            slower but same results for IBZ and FBZ.
 !!  comm= MPI communicator
+!!  [opt]= 1 for Togo's version, 2 for Blochl's version (default)
 !!
 !! OUTPUT
 !!  tetra%ibz(4,24,nkibz)=for each k-point, the indexes in the IBZ
@@ -196,7 +199,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  integer,optional,intent(in) :: opt
  integer,intent(out) :: ierr
  character(len=80),intent(out) :: errorstring
- class(t_htetrahedron),intent(out),target :: tetra
+ class(htetra_t),intent(out),target :: tetra
 !arrays
  integer,intent(in) :: bz2ibz(nkpt_fullbz)
  real(dp),intent(in) :: gprimd(3,3),klatt(3,3),kpt_fullbz(3,nkpt_fullbz),kpt_ibz(3,nkpt_ibz)
@@ -864,7 +867,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 
  contains
  integer function compute_hash(tetra,t) result(ihash)
-   class(t_htetrahedron),intent(in) :: tetra
+   class(htetra_t),intent(in) :: tetra
    integer,intent(in) :: t(4)
    ihash = mod(sum(t),tetra%nbuckets)+1
    ! TODO: should use a more general hash function that supports more buckets
@@ -883,7 +886,7 @@ end subroutine htetra_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/htetra_init_mapping_ibz
+!!****f* m_htetra/htetra_init_mapping_ibz
 !! NAME
 !! htetra_init_mapping_ibz
 !!
@@ -898,7 +901,7 @@ end subroutine htetra_init
 !! SOURCE
 
 subroutine htetra_init_mapping_ibz(tetra)
- class(t_htetrahedron),intent(inout) :: tetra
+ class(htetra_t),intent(inout) :: tetra
  integer :: ikibz, itetra, isummit, ihash, ntetra
  integer :: tetra_count(tetra%nkibz),tetra_mibz(0:4)
 
@@ -932,7 +935,7 @@ end subroutine htetra_init_mapping_ibz
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/htetra_get_ibz
+!!****f* m_htetra/htetra_get_ibz
 !! NAME
 !! htetra_get_ibz
 !!
@@ -946,7 +949,7 @@ end subroutine htetra_init_mapping_ibz
 !! SOURCE
 
 pure subroutine htetra_get_ibz(tetra,ikibz,itetra,tetra_mibz)
- class(t_htetrahedron), intent(in) :: tetra
+ class(htetra_t), intent(in) :: tetra
  integer,intent(in) :: ikibz, itetra
  integer,intent(out) :: tetra_mibz(0:4)
  integer :: ihash, jtetra
@@ -959,7 +962,7 @@ end subroutine htetra_get_ibz
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/htetra_print
+!!****f* m_htetra/htetra_print
 !! NAME
 !! htetra_print
 !!
@@ -974,7 +977,7 @@ end subroutine htetra_get_ibz
 
 subroutine htetra_print(self)
 
- class(t_htetrahedron), intent(in) :: self
+ class(htetra_t), intent(in) :: self
  real(dp) :: total_size, unique_tetra_size, ibz_pointer_size
 
  unique_tetra_size = self%nunique_tetra*5*four/1024/1024
@@ -994,7 +997,7 @@ end subroutine htetra_print
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/htetra_free
+!!****f* m_htetra/htetra_free
 !! NAME
 !! htetra_free
 !!
@@ -1011,7 +1014,7 @@ end subroutine htetra_print
 
 subroutine htetra_free(tetra)
 
- class(t_htetrahedron), intent(inout) :: tetra
+ class(htetra_t), intent(inout) :: tetra
  integer :: ikibz,ihash
 
  ABI_SFREE(tetra%tetra_count)
@@ -1037,7 +1040,7 @@ end subroutine htetra_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/get_onetetra_blochl
+!!****f* m_htetra/get_onetetra_blochl
 !! NAME
 !! get_onetetra_blochl
 !!
@@ -1272,7 +1275,7 @@ pure subroutine get_onetetra_blochl(eig,energies,nene,bcorr,tweight,dweight)
 end subroutine get_onetetra_blochl
 !!***
 
-!!****f* m_htetrahedron/get_ontetra_lambinvigneron
+!!****f* m_htetra/get_ontetra_lambinvigneron
 !! NAME
 !! get_ontetra_lambinvigneron
 !!
@@ -1406,7 +1409,7 @@ pure subroutine get_ontetra_lambinvigneron(eig,z,cw)
 end subroutine get_ontetra_lambinvigneron
 !!***
 
-!!****f* m_htetrahedron/get_ontetratra_lambinvigneron_imag
+!!****f* m_htetra/get_ontetratra_lambinvigneron_imag
 !! NAME
 !! get_ontetratra_lambinvigneron_imag
 !!
@@ -1528,7 +1531,7 @@ end subroutine get_ontetetra_lambinvigneron_imag
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/htetra_get_onewk_wvals
+!!****f* m_htetra/htetra_get_onewk_wvals
 !! NAME
 !! htetra_get_onewk_wvals
 !!
@@ -1536,7 +1539,7 @@ end subroutine get_ontetetra_lambinvigneron_imag
 !! Calculate integration weights and their derivatives for a single k-point in the IBZ.
 !!
 !! INPUTS
-!! tetra<t_htetrahedron>=Object with tables for tetrahedron method.
+!! tetra<htetra_t>=Object with tables for tetrahedron method.
 !! ik_ibz=Index of the k-point in the IBZ array
 !! bcorr=1 to include Blochl correction else 0.
 !! nw=number of energies in wvals
@@ -1561,7 +1564,7 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, opt, nw, wvals, max_occ, nkibz,
 !scalars
  integer,intent(in) :: ik_ibz,nw,nkibz,opt
  real(dp) ,intent(in) :: max_occ
- class(t_htetrahedron), intent(inout) :: tetra
+ class(htetra_t), intent(inout) :: tetra
 !arrays
  real(dp),intent(in) :: wvals(nw)
  real(dp),intent(in) :: eig_ibz(nkibz)
@@ -1623,7 +1626,7 @@ end subroutine htetra_get_onewk_wvals
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/tetra_get_onewk
+!!****f* m_htetra/tetra_get_onewk
 !! NAME
 !! tetra_get_onewk
 !!
@@ -1648,7 +1651,7 @@ subroutine htetra_get_onewk(tetra,ik_ibz,bcorr,nw,nkibz,eig_ibz,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,nw,nkibz,bcorr
- class(t_htetrahedron), intent(inout) :: tetra
+ class(htetra_t), intent(inout) :: tetra
  real(dp) ,intent(in) :: enemin,enemax,max_occ
 !arrays
  real(dp),intent(in) :: eig_ibz(nkibz)
@@ -1669,7 +1672,7 @@ end subroutine htetra_get_onewk
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/htetra_get_onewk_wvals_zinv
+!!****f* m_htetra/htetra_get_onewk_wvals_zinv
 !! NAME
 !! htetra_get_onewk_wvals_zinv
 !!
@@ -1681,13 +1684,14 @@ end subroutine htetra_get_onewk
 !! P. Lambin and J.P. Vigneron, Phys. Rev. B 29, 3430 (1984).
 !!
 !! INPUTS
-!! tetra<t_htetrahedron>=Object with tables for tetrahedron method.
+!! tetra<htetra_t>=Object with tables for tetrahedron method.
 !! ik_ibz=Index of the k-point in the IBZ array
 !! bcorr=1 to include Blochl correction else 0.
 !! nw=number of energies in wvals
 !! nibz=number of irreducible kpoints
 !! wvals(nw)=Frequency points.
 !! eigen_ibz(nkibz)=eigenenergies for each k point
+!! opt: 1 for S. Kaprzyk routines, 2 for Lambin.
 !!
 !! OUTPUT
 !!  weights(nw,2) = integration weights for
@@ -1706,7 +1710,7 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
 !scalars
  integer,intent(in) :: ik_ibz,nz,nkibz,opt
  real(dp) ,intent(in) :: max_occ
- class(t_htetrahedron), intent(inout) :: tetra
+ class(htetra_t), intent(inout) :: tetra
 !arrays
  complex(dp),intent(in) :: zvals(nz)
  real(dp),intent(in) :: eig_ibz(nkibz)
@@ -1725,6 +1729,10 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
  cweights = zero
  ! lazy evaluation of the mapping from k-points to tetrahedra
  if (.not.allocated(tetra%ibz)) call htetra_init_mapping_ibz(tetra)
+
+ if (all(opt /= [1, 2])) then
+   MSG_ERROR(sjoin("Invalid opt:", itoa(opt)))
+ end if
 
  ! For each tetrahedron that belongs to this k-point
  tetra_count = tetra%tetra_count(ik_ibz)
@@ -1746,7 +1754,7 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
        verm = zvals(iz) - eig
        call SIM0TWOI(cw, VERLI, VERM)
      case(2)
-       call get_ontetra_lambinvigneron(eig,zvals(iz),cw)
+       call get_ontetra_lambinvigneron(eig, zvals(iz), cw)
      end select
 
      do isummit=1,4
@@ -1763,7 +1771,7 @@ end subroutine htetra_get_onewk_wvals_zinv
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/htetra_get_delta_mask
+!!****f* m_htetra/htetra_get_delta_mask
 !! NAME
 !!  htetra_get_delta_mask
 !!
@@ -1774,7 +1782,7 @@ end subroutine htetra_get_onewk_wvals_zinv
 subroutine htetra_get_delta_mask(tetra,eig_ibz,wvals,nw,nkpt,kmask,comm)
 !Arguments
  integer,intent(in) :: nw,nkpt,comm
- class(t_htetrahedron), intent(in) :: tetra
+ class(htetra_t), intent(in) :: tetra
  real(dp),intent(in) :: wvals(nw)
  real(dp),intent(in) :: eig_ibz(nkpt)
  integer,intent(out) :: kmask(nkpt)
@@ -1825,7 +1833,7 @@ end subroutine htetra_get_delta_mask
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/htetra_wvals_weights
+!!****f* m_htetra/htetra_wvals_weights
 !! NAME
 !!  htetra_wvals_weights
 !!
@@ -1855,7 +1863,7 @@ subroutine htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,tweight,
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nw,nkpt,opt,comm
- class(t_htetrahedron), intent(in) :: tetra
+ class(htetra_t), intent(in) :: tetra
  real(dp) ,intent(in) :: max_occ
 !arrays
  real(dp),intent(in) :: eig_ibz(nkpt)
@@ -1932,7 +1940,7 @@ end subroutine htetra_wvals_weights
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/htetra_wvals_weights_delta
+!!****f* m_htetra/htetra_wvals_weights_delta
 !! NAME
 !!  htetra_wvals_weights_delta
 !!
@@ -1946,7 +1954,7 @@ subroutine htetra_wvals_weights_delta(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,dw
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nw,nkpt,opt,comm
- class(t_htetrahedron), intent(in) :: tetra
+ class(htetra_t), intent(in) :: tetra
  real(dp) ,intent(in) :: max_occ
 !arrays
  real(dp),intent(in) :: eig_ibz(nkpt)
@@ -2018,7 +2026,7 @@ end subroutine htetra_wvals_weights_delta
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/htetra_blochl_weights
+!!****f* m_htetra/htetra_blochl_weights
 !! NAME
 !!  htetra_blochl_weights
 !!
@@ -2041,7 +2049,7 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nw,nkpt,bcorr,comm
- class(t_htetrahedron), intent(in) :: tetra
+ class(htetra_t), intent(in) :: tetra
  real(dp) ,intent(in) :: enemax,enemin,max_occ
 !arrays
  real(dp) ,intent(in) :: eig_ibz(nkpt)
@@ -2060,7 +2068,7 @@ end subroutine htetra_blochl_weights
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/htetra_blochl_weights_wvals_zinv
+!!****f* m_htetra/htetra_blochl_weights_wvals_zinv
 !! NAME
 !!  htetra_blochl_weights_wvals_zinv
 !!
@@ -2083,7 +2091,7 @@ subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cwe
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nz,nkpt,opt,comm
- class(t_htetrahedron), intent(in) :: tetra
+ class(htetra_t), intent(in) :: tetra
  real(dp) ,intent(in) :: max_occ
 !arrays
  real(dp) ,intent(in) :: eig_ibz(nkpt)
@@ -2128,7 +2136,7 @@ subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cwe
          verm = zvals(iz) - eig
          call SIM0TWOI(cw, VERLI, VERM)
        case(2)
-         call get_ontetra_lambinvigneron(eig,zvals(iz),cw)
+         call get_ontetra_lambinvigneron(eig, zvals(iz), cw)
        end select
 
        ! Acumulate the contributions
@@ -2158,7 +2166,7 @@ end subroutine htetra_weights_wvals_zinv
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/sort_4tetra
+!!****f* m_htetra/sort_4tetra
 !! NAME
 !!  sort_4tetra
 !!
@@ -2179,7 +2187,7 @@ end subroutine htetra_weights_wvals_zinv
 !!  perm(4) index of permutation given the right ascending order
 !!
 !! PARENTS
-!!      m_htetrahedron
+!!      m_htetra
 !!
 !! CHILDREN
 !!
@@ -2310,5 +2318,5 @@ pure subroutine sort_4tetra_int(list)
 end subroutine sort_4tetra_int
 !!***
 
-end module m_htetrahedron
+end module m_htetra
 !!***

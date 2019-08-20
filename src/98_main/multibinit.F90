@@ -44,7 +44,6 @@
 program multibinit
 
  use defs_basis
- use defs_abitypes
  use m_build_info
  use m_xmpi
  use m_xomp

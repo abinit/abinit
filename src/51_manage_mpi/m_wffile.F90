@@ -19,7 +19,7 @@
 !! CHILDREN
 !!
 !! NOTES
-!! wffile_type : a handler for dealing with the IO of a wavefunction file
+!! wffile_type: a handler for dealing with the IO of a wavefunction file
 !!
 !! SOURCE
 
@@ -32,7 +32,6 @@
 MODULE m_wffile
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
@@ -44,6 +43,7 @@ MODULE m_wffile
  use netcdf
 #endif
 
+ use defs_abitypes, only : MPI_Type
  use m_io_tools,   only : mvrecord, open_file
  use m_fstrings,   only : toupper, endswith, sjoin
 

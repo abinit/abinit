@@ -4131,8 +4131,7 @@ Variable(
 ([[gwcalctyp]] =  2, 12, 22, 9, 19, 29).
 [[freqremax]] sets the maximum real frequency used to calculate the dielectric
 matrix in order to perform the numerical integration of the GW self-energy.
-[[freqremax]], [[freqremin]] and [[nfreqre]] define the spacing of the
-frequency mesh along the real axis.
+[[freqremax]], [[freqremin]] and [[nfreqre]] define the spacing of the frequency mesh along the real axis.
 """,
 ),
 
@@ -4309,8 +4308,7 @@ Variable(
     defaultval=0.2,
     mnemonics="Genetic Algorithm OPTimal PERCENT",
     text=r"""
-Percentage of the population that according to the fitness function passes to
-the following iteration.
+Percentage of the population that according to the fitness function passes to the following iteration.
 """,
 ),
 
@@ -4356,8 +4354,7 @@ one translation associated with a change of magnetization. [[genafm]] is
 precisely this translation, in reduced coordinates (like [[xred]])
 Thus, one way to specify a Shubnikov IV magnetic space group, is to define
 both [[spgroup]] and [[genafm]]. Alternatively, one might define [[spgroup]]
-and [[spgroupma]], or define by hand the set of symmetries, using [[symrel]],
-[[tnons]] and [[symafm]]
+and [[spgroupma]], or define by hand the set of symmetries, using [[symrel]], [[tnons]] and [[symafm]]
 """,
 ),
 
@@ -4395,41 +4392,12 @@ Variable(
     mnemonics="GET the first-order wavefunctions from _1WF file",
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
-starting wavefunctions, as an alternative to [[irdwfk]], [[irdwfq]],
-[[ird1wf]], [[irdddk]]. One should first read the explanations given for these latter variables.
-The **getwfk**, **getwfq**, [[get1wf]] and **getddk** variables are
-typically used to chain the calculations in the multi-dataset mode, since they
+starting wavefunctions, as an alternative to [[ird1wf]].
+One should first read the explanations given for these latter variables.
+This variable is  typically used to chain the calculations in the multi-dataset mode, since they
 describe from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
 wavefunctions of the present dataset.
-
-We now focus on the **getwfk** input variable (the only one used in ground-
-state calculations), but the rules for **getwfq** and [[get1wf]] are similar,
-with _WFK replaced by _WFQ or _1WF.
-If **getwfk** ==0, no use of previously computed output wavefunction file
-appended with _DSx_WFK is done.
-If **getwfk** is positive, its value gives the index of the dataset for which
-the output wavefunction file appended with _WFK must be used.
-If **getwfk** is -1, the output wf file with _WFK of the previous dataset must
-be taken, which is a frequently occurring case.
-If **getwfk** is a negative number, it indicates the number of datasets to go
-backward to find the needed wavefunction file. In this case, if one refers to
-a non existent data set (prior to the first), the wavefunctions are not
-initialised from a disk file, so that it is as if **getwfk** =0 for that
-initialisation. Thanks to this rule, the use of **getwfk** -1 is rather
-straightforward: except for the first wavefunctions, that are not initialized
-by reading a disk file, the output wavefunction of one dataset is input of the
-next one.
-In the case of a ddk calculation in a multi dataset run, in order to compute
-correctly the localisation tensor, it is mandatory to give [[getddk]] the
-value of the current dataset (i.e. getddk3 3 ) - this is a bit strange and
-should be changed in the future.
-NOTE: a negative value of a "get" variable indicates the number of datasets
-to go backwards; it is not the number to be subtracted from the current
-dataset to find the proper dataset. As an example:
-
-      ndtset 3   jdtset 1 2 4  getXXX -1
-
-refers to dataset 2 when dataset 4 is initialized.
+See also discussion in [[getwfk]].
 """,
 ),
 
@@ -4448,8 +4416,7 @@ excitonic Hamiltonian will be taken from the output of a previous dataset. It
 is used to chain the calculations, since it describes from which dataset the
 OUTPUT coupling block is to be taken, as INPUT of the present dataset.
 If [[getbscoup]] == 0, no such use of previously computed coupling block file is done.
-If [[getbscoup]] is positive, its value gives the index of the dataset to be
-used as input.
+If [[getbscoup]] is positive, its value gives the index of the dataset to be used as input.
 If [[getbscoup]] is -1, the output of the previous dataset must be taken,
 which is a frequently occurring case.
 If [[getbscoup]] is a negative number, it indicates the number of datasets to
@@ -4545,7 +4512,12 @@ Variable(
     defaultval=0,
     mnemonics="GET the DDB from...",
     text=r"""
-This variable should be used when performing electron-phonon or temperature-dependent calculations.
+This variable should be used when performing electron-phonon or temperature-dependent calculations in semiconductors
+with the legacy implementation that computes the e-ph matrix elements at the end of the DFPT run
+(for the new EPH code, see [[eph_task]]).
+
+More detailed explanation:
+
 The Born effective charge as well as the dielectric
 tensor will be read from a previous DFPT calculations of the electric field at
 q=Gamma. The use of this variable will trigger the cancellation of a residual
@@ -4553,14 +4525,11 @@ dipole that leads to an unphysical divergence of the GKK with vanishing
 q-points. The use of this variable greatly improves the k-point convergence
 speed as the density of the k-point grid required to obtain the fulfillment of
 the charge neutrality sum rule is usually prohibitively large.
-If [[getddb]] == 0, no such use of previously computed Born effective charge and
-dielectric tensor is done.
-If [[getddb]] is positive, its value gives the index of the dataset from which
-the output density is to be used as input.
-If [[getddb]] is -1, the output density of the previous dataset must be taken,
-which is a frequently occurring case.
-If [[getddb]] is a negative number, it indicates the number of datasets to go
-backward to find the needed file.
+If [[getddb]] == 0, no such use of previously computed Born effective charge and dielectric tensor is done.
+If [[getddb]] is positive, its value gives the index of the dataset from which the output density is to be used as input.
+If [[getddb]] is -1, the output density of the previous dataset must be taken, which is a frequently occurring case.
+If [[getddb]] is a negative number, it indicates the number of datasets to go backward to find the needed file.
+
 NOTE: a negative value of a "get" variable indicates the number of datasets
 to go backwards; it is not the number to be subtracted from the current
 dataset to find the proper dataset. As an example:
@@ -4568,6 +4537,8 @@ dataset to find the proper dataset. As an example:
       ndtset 3   jdtset 1 2 4  getXXX -1
 
 refers to dataset 2 when dataset 4 is initialized.
+
+Note also that, starting Abinit v9, one can also use [[getddb_path]] to specify the path of the file directly.
 """,
 ),
 
@@ -4798,8 +4769,7 @@ this rule, the use of [[getden]] -1 is rather straightforward: except for the
 first density, that is not initialized by reading a disk file, the output
 density of one dataset is input of the next one.
 Be careful: the output density file of a run with non-zero [[ionmov]] does
-not have the proper name (it has a "TIM" indication) for use as an input of an
-[[iscf]]<0 calculation.
+not have the proper name (it has a "TIM" indication) for use as an input of an [[iscf]]<0 calculation.
 One should use the output density of a [[ionmov]] == 0 run.
 NOTE: a negative value of a "get" variable indicates the number of datasets
 to go backwards; it is not the number to be subtracted from the current
@@ -4824,6 +4794,8 @@ This variable can be used when performing electron-phonon calculations with [[op
 to read a DVDB file produced in a previous dataset.
 For example, one can concatenate a dataset in which an initial set of DFPT potentials
 on a relatively coarse q-mesh is interpolated on a denser q-mesh using [[eph_task]] = 5 and [[eph_ngqpt_fine]].
+
+Note also that, starting Abinit v9, one can also use [[getdvdb_path]] to specify the path of the file directly.
 """
 ),
 
@@ -4961,6 +4933,8 @@ a GW calculation), to indicate that the dielectric matrix (_SCR file) is to be
 taken from the output of a previous dataset. It is used to chain the
 calculations, since it describes from which dataset the OUTPUT dielectric
 matrix is to be taken, as INPUT of the present dataset.
+Note also that, starting Abinit v9, one can also use [[getscr_path]] to specify the path of the file directly.
+
 If [[getscr]] == 0, no such use of previously computed output _SCR file is done.
 If [[getscr]] is positive, its value gives the index of the dataset from which
 the output _SCR file is to be used as input.
@@ -5060,18 +5034,16 @@ Variable(
     mnemonics="GET the wavefunctions from _WFK file",
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
-starting wavefunctions, as an alternative to [[irdwfk]], [[irdwfq]],[[ird1wf]],
-or [[irdddk]]. One should first read the explanations given for these latter variables.
+starting wavefunctions, as an alternative to [[irdwfk]],.
+Note also that, starting Abinit v9, one can also use [[getwfk_path]] to specify the path of the file directly.
+
 The [[getwfk]], **getwfq**, **get1wf** and **getddk** variables are typically
 used to chain the calculations in the multi-dataset mode, since they describe
 from which dataset the OUTPUT wavefunctions are to be taken, as INPUT wavefunctions of the present dataset.
-Note also that, starting Abinit v9, one can also use [[getwfk_path]] to specify the path of the file directly.
 
 We now focus on the [[getwfk]] input variable (the only one used in ground-state calculations), 
-but the rules for **getwfq** and **get1wf** are similar,
-with _WFK replaced by _WFQ or _1WF.
-If [[getwfk]] == 0, no use of previously computed output wavefunction file
-appended with _DSx_WFK is done.
+but the rules for **getwfq** and **get1wf** are similar, with _WFK replaced by _WFQ or _1WF.
+If [[getwfk]] == 0, no use of previously computed output wavefunction file appended with _DSx_WFK is done.
 If [[getwfk]] is positive, its value gives the index of the dataset for which
 the output wavefunction file appended with _WFK must be used.
 If [[getwfk]] is -1, the output wf file with _WFK of the previous dataset must
@@ -5084,10 +5056,6 @@ initialisation. Thanks to this rule, the use of [[getwfk]] -1 is rather
 straightforward: except for the first wavefunctions, that are not initialized
 by reading a disk file, the output wavefunction of one dataset is input of the
 next one.
-In the case of a ddk calculation in a multi dataset run, in order to compute
-correctly the localisation tensor, it is mandatory to declare give getddk the
-value of the current dataset (i.e. getddk3 3 ) - this is a bit strange and
-should be changed in the future.
 NOTE: a negative value of a "get" variable indicates the number of datasets
 to go backwards; it is not the number to be subtracted from the current
 dataset to find the proper dataset. As an example:
@@ -5164,41 +5132,13 @@ Variable(
     mnemonics="GET the wavefunctions from _WFQ file",
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
-starting wavefunctions, as an alternative to [[irdwfk]],[[irdwfq]],[[ird1wf]]
-or [[irdddk]]. One should first read the explanations given for these latter variables.
+starting wavefunctions, as an alternative to [[irdwfq]].
+Note also that, starting Abinit v9, one can also use [[getwfq_path]] to specify the path of the file directly.
+
 The **getwfk**, [[getwfq]], **get1wf** and **getddk** variables are typically
 used to chain the calculations in the multi-dataset mode, since they describe
 from which dataset the OUTPUT wavefunctions are to be taken, as INPUT wavefunctions of the present dataset.
-Note also that, starting Abinit v9, one can also use [[getwfq_path]] to specify the path of the file directly.
-
-We now focus on the **getwfk** input variable (the only one used in ground-
-state calculations), but the rules for [[getwfq]] and **get1wf** are similar,
-with _WFK replaced by _WFQ or _1WF.
-If **getwfk** ==0, no use of previously computed output wavefunction file
-appended with _DSx_WFK is done.
-If **getwfk** is positive, its value gives the index of the dataset for which
-the output wavefunction file appended with _WFK must be used.
-If **getwfk** is -1, the output wf file with _WFK of the previous dataset must
-be taken, which is a frequently occurring case.
-If **getwfk** is a negative number, it indicates the number of datasets to go
-backward to find the needed wavefunction file. In this case, if one refers to
-a non existent data set (prior to the first), the wavefunctions are not
-initialised from a disk file, so that it is as if **getwfk** =0 for that
-initialisation. Thanks to this rule, the use of **getwfk** -1 is rather
-straightforward: except for the first wavefunctions, that are not initialized
-by reading a disk file, the output wavefunction of one dataset is input of the
-next one.
-In the case of a ddk calculation in a multi dataset run, in order to compute
-correctly the localisation tensor, it is mandatory to declare give getddk the
-value of the current dataset (i.e. getddk3 3 ) - this is a bit strange and
-should be changed in the future.
-NOTE: a negative value of a "get" variable indicates the number of datasets
-to go backwards; it is not the number to be subtracted from the current
-dataset to find the proper dataset. As an example:
-
-      ndtset 3   jdtset 1 2 4  getXXX -1
-
-refers to dataset 2 when dataset 4 is initialized.
+See discussion in [[getwfk]]
 """,
 ),
 
@@ -12749,12 +12689,11 @@ Variable(
     mnemonics="PAW - choice for eXchange-Correlation DEVelopment (spherical part)",
     requires="[[usepaw]] == 1",
     text=r"""
-  * If set to 0, the exchange-correlation term in the spherical part of energy is totally computed on the angular mesh
+  * If set to 0, the exchange-correlation term in the spherical part of energy is totally computed on the angular mesh (time consuming but exact!)
   * If set to 1, the exchange-correlation term in the spherical part of energy is developed onto lm-moments at order 1
   * If set to 2, the exchange-correlation term in the spherical part of energy is developed onto lm-moments at order 2
-    (can be memory/CPU consuming)
 
-Be careful: GGA requires [[pawxcdev]] > 0
+Be careful: Response function (DFPT) + PAW + GGA requires [[pawxcdev]] = 0. But if you plan to do DFPT calculations, it is better to use this option also in the preliminary ground state calculation.
 """,
 ),
 
@@ -19377,6 +19316,7 @@ If [[znucl]] does not agree with nuclear charge, as given in pseudopotential
 files, the program writes an error message and stops.
 
 !!! note
+
     In the pseudopotential files, [[znucl]] is called "zatom".
 
 For a "dummy" atom, with [[znucl]] = 0, as used in the case of calculations
@@ -19636,6 +19576,8 @@ At present, this feature is supported only when computing the electron-phonon se
 In this case, the code will look for a pre-existing SIGEPH.nc file and will compute the remaining k-points
 provided that the metadata found in the netcdf file is compatible with the input variables specified in the input file.
 The code aborts if the metadata reported in the SIGEPH.nc file is not compatible with the input file.
+Note that the restart in done in-place that is the output SIGEPH.nc is used as input of the calculation so there is no
+need to specify getsigeph or irdsigeph input variables.
 """,
 ),
 
@@ -19646,27 +19588,28 @@ Variable(
     topics=['ElPhonInt_expert'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="Electron-PHonon: use STERNheimer approach to replace explicit sum empty states ",
+    mnemonics="Electron-PHonon: use STERNheimer approach to replace sum over empty states.",
     requires="[[tolwfr]] > 0",
     text=r"""
-NB - this does not work yet.
-
 This variable activates the Sternheimer method in the calculation of the e-ph self-energy ([[eph_task]] == 4)
-This technique replaces the explicit sum over empty states above [[nband]]
-with the NSCF computation of the first order variation of the KS wavefunctions (actually
+This technique replaces the explicit sum over empty states **above** [[nband]]
+with the NSCF computation of the first order derivative of the KS wavefunctions (actually
 the projection in the subspace orthogonal to the nband states).
 
-The Sternheimer approach requires an external file with the KS potential produced by setting [[prtpot]] = 1 in the GS run
-and the specification of [[tolwfr]] in the input file.
-The path to the POT file is specified via [[getpot_path]].
+The Sternheimer approach requires an external file with the KS potential produced by setting [[prtpot]] = 1 
+during the GS run and the specification of [[tolwfr]] in the EPH input file.
+The path to the POT file used in the EPH calculation is specified via [[getpot_path]].
 The number of line minimisations for the Sternheimer solver is defined by [[nline]].
 
 !!! important
 
     The Sternheimer approach approximates the e-ph self-energy with the adiabatic expression
-    in which phonon frequencies are neglected and the frequency dependence of $\Sigma_{n\kk}(\omega)$ is neglected
-    and replaced by $\Sigma_{n\kk}(\ee_{n\kk})$.
-    This approximation is valid provided that enough bands above the states of interest are explicitly included.
+    in which phonon frequencies are neglected and the frequency dependence of $\Sigma_{n\kk}(\omega)$ is
+    replaced by $\Sigma_{n\kk}(\ee_{n\kk})$.
+    This approximation is valid provided that **enough** bands above the states of interest are explicitly included.
+    The calculation should therefore be converged with respect to the value of [[nband]]. 
+    Note however that the memory requirements and the computational cost of the Sternheimer solver increases with **nband**. 
+
 """,
 ),
 
@@ -19724,10 +19667,10 @@ of the DFPT potentials so that the potential in real space is short-ranged and a
 The long-range contribution is then added back when interpolating the DFPT potentials at arbitrary q-points
 
 If *dvdb_add_lr* is set to -1, the LR part is removed before computing the real-space representation
-but the LR term is **not** added back during the interpolation in $\qq$-space. This option is mainly used 
-for debugging purposes.
+but the LR term is **not** reintroduced during the interpolation in $\qq$-space. 
+This option is mainly used for debugging purposes.
 
-By default, the code will always treat the LR term is the DDB file contains Born effective charges 
+By default, the code will always treat the LR term if the DDB file contains the Born effective charges 
 and the macroscopic dielectric tensor.
 This option is similar to [[dipdip]] but it acts on the DFPT potentials instead of the dynamical matrix.
 """,
@@ -19745,7 +19688,8 @@ Variable(
 This variable defines the Cartesian grid of MPI processors used for EPH calculations.
 If not specified in the input, the code will generate this grid automatically using the total number of processors 
 and the basic dimensions of the job computed at runtime.
-At present (|today|), this variable is supported only in the calculation of the e-ph self-energy.
+At present (|today|), this variable is supported only in the calculation of the e-ph self-energy 
+i.e. [[eph_task]] 4 or -4. In all the other tasks, this variable is ignored.
 
 Preliminary considerations:
 
@@ -19765,24 +19709,30 @@ The maximum valus for **np** is 3 * [[natom]] and the workload is equally distri
 divides 3 * [[natom]] equally. 
 Using **np** == [[natom]] usually gives good parallel efficiency.
 
-The parallelization over bands (**nb**) has limited scalability but it allows one to reduce the memory
+The parallelization over bands (**nb**) has limited scalability that depends on the number of bands includes 
+in the self-energy but it allows one to reduce the memory
 allocated for the wavefunctions, especially when we have to sum over empty states.
 
 [[eph_task]] = +4
-:   Parallelization over k-points and spin is not yet implemented hence use 1 for these entries.
     Parallelization over bands allows one to reduce the memory needed for the wavefunctions but
     this level is less efficient than the parallelization over q-points and perturbations.
     To avoid load and memory imbalance, **nb** should divide [[nband]].
     We suggest to increase the number of procs for bands until the memory allocated for the wavefunctions
-    decreases to a reasonable level and then use the remaining procs for **nq** and **np** in this order.
+    decreases to a reasonable level and then use the remaining procs for **nq** and **np** in this order 
+    until these levels start to saturate.
+    The MPI parallelism over k-points and spins is efficient at the level of the wall-time 
+    but it requires HDF5 + MPI-IO support and memory does not scale. Use these additional levels if the memory requirements
+    are under control and you need to boost the calculation. Note also that in this case the output results are written to
+    different text files, only the SIGEPH.nc file will contains all the k-points and spins.
+
 
 [[eph_task]] = -4
-:   Parallelization over k-points and spin is not yet implemented hence use 1 for these entries.
     The number of bands in the self-energy sum is usually small so it does not make sense to
     parallelize along this dimension. The parallelization over q-points seem to be more efficient than
     the one over perturbations although it introduces some load imbalance because, due to memory reasons, 
     the code distributes the q-points in the IBZ (nqibz) instead of the q-points in the full BZ (nqbz).
-    Moreover non all the q-points in the IBZ contribute to the imaginary part of $$\Sigma_nk$$ 
+    Moreover non all the q-points in the IBZ contribute to the imaginary part of $$\Sigma_nk$$.
+    The MPI parallelism over k-points and spins is supported with similar behaviour as in **eph_task** +4.
 
 
 !!! important
@@ -19874,9 +19824,27 @@ Variable(
 Specify the path of the WFK file using a string instead of the dataset index.
 Alternative to [[getwfk]] and [[irdwfk]]. The string must be enclosed between quotation marks:
 
-    getwfk_path "../foodir/out_WFK"
+    getwfk_path "../outdata/out_WFK"
 """
 ),
+
+
+Variable(
+    abivarname="getwfkfine_path",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the fine wavefunctions from PATH",
+    text=r"""
+Specify the path of the fine WFK file using a string instead of the dataset index.
+Alternative to [[getwfkfine]] and [[irdwfkfine]]. The string must be enclosed between quotation marks:
+
+    getwfkfine_path "../outdata/out_WFK"
+"""
+),
+
 
 Variable(
     abivarname="getwfq_path",
@@ -19890,7 +19858,7 @@ Variable(
 Specify the path of the WFQ file using a string instead of the dataset index.
 Alternative to [[getwfq]] and [[irdwfq]]. The string must be enclosed between quotation marks:
 
-    getwfq_path "../foodir/out_WFQ"
+    getwfq_path "../outdata/out_WFQ"
 """
 ),
 
@@ -19906,7 +19874,7 @@ Variable(
 Specify the path of the DDB file using a string instead of the dataset index.
 Alternative to [[getddb]] and [[irdddb]]. The string must be enclosed between quotation marks:
 
-    getddb_path "../foodir/out_DDB"
+    getddb_path "../outdata/out_DDB"
 """
 ),
 
@@ -19922,7 +19890,39 @@ Variable(
 Specify the path of the DVDB file using a string instead of the dataset index.
 Alternative to [[getdvdb]] and [[irddvdb]]. The string must be enclosed between quotation marks:
 
-    getdvdb_path "../foodir/out_DVDB"
+    getdvdb_path "../outdata/out_DVDB"
+"""
+),
+
+Variable(
+    abivarname="getden_path",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the DEN file from PATH",
+    text=r"""
+Specify the path of the DEN file using a string instead of the dataset index.
+Alternative to [[getden]] and [[irdden]]. The string must be enclosed between quotation marks:
+
+    getden_path "../outdata/out_DEN"
+"""
+),
+
+Variable(
+    abivarname="getscr_path",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the SCR file from PATH",
+    text=r"""
+Specify the path of the SCR file using a string instead of the dataset index.
+Alternative to [[getscr]] and [[irdscr]]. The string must be enclosed between quotation marks:
+
+    getscr_path "../outdata/out_SCR"
 """
 ),
 
