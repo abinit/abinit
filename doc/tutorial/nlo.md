@@ -25,20 +25,19 @@ respect to atomic positions (Raman tensor) thanks to finite differences.
 The user should have already passed through several advanced tutorials of the
 tutorial: the [tutorial Response-Function 1](rf1), the [tutorial Response-Function 2](rf2), 
 the [tutorial on Polarization and finite electric field](ffield), and the 
-[tutorial on Elastic properties](elastic)
-
-[TUTORIAL_README]
+[tutorial on Elastic properties](elastic).
 
 This tutorial should take about 1 hour and 30 minutes.
 
+[TUTORIAL_README]
 
 ## 1 Ground-state properties of AlAs and general parameters
   
 *Before beginning, you might consider to work in a different subdirectory as for the other tutorials. 
-Why not create Work-NLO in \$ABI_TUTORESPFN/Input?*
+Why not create Work-NLO in \$ABI_TESTS/tutorespfn/Input?*
 
 In order to save some time, you might immediately start running a calculation.
-Copy the file *tnlo_2.in* from *\$ABI_TUTORESPFN/Input* to *Work-NLO*. Copy also
+Copy the file *tnlo_2.in* from *\$ABI_TESTS/tutorespfn/Input* to *Work-NLO*. Copy also
 *tnlo_x.files* in *Work-NLO*, and modify it so that
 all occurrences of tnlo_x are replaced by tnlo_2, then run abinit with these
 data. This calculation might be one or two minutes on a PC 3GHz.
@@ -86,7 +85,7 @@ In what follows, the lattice constant has been arbitrarily fixed to 10.53
 Bohr. For comparison, results with [[ecut]] = 5 are also reported and, in that
 case, were obtained at the optimized lattice constant of 10.64 Bohr. For those
 who would like to try later, convergence tests and structural optimizations
-can be done using the file *\$ABI_TUTORESPFN/Input/tnlo_1.in*. Before
+can be done using the file *\$ABI_TESTS/tutorespfn/Input/tnlo_1.in*. Before
 going further, you might refresh your mind concerning the other variables:
 [[ixc]], [[ecutsm]], [[dilatmx]], [[nbdbuf]].
 
@@ -169,7 +168,7 @@ free boundary conditions, thanks to a further finite difference calculation on
 top of linear response calculations. The DFPT implementation of the
 computation of this correction is not available at present.
 
-You can now copy the file *\$ABI_TUTORESPFN/Input/tnlo_3.in* in *Work-NLO*,
+You can now copy the file *\$ABI_TESTS/tutorespfn/Input/tnlo_3.in* in *Work-NLO*,
 and modify the *tnlo_x.files* accordingly (or create a file *tnlo_3.files* -
 in any case, this new file should contain tnlo_3 instead of tnlo_x or tnlo_2).
 You can launch the calculation, it might last about 1 minute on a PC 3 GHz.
@@ -199,8 +198,8 @@ You might copy it, or make an alias.
 **Analysis of the DDB.**
 
 We are now ready for the analysis of the results using ANADDB. You can copy
-the files *\$ABI_TUTORESPFN/Input/tnlo_5.in* and
-*\$ABI_TUTORESPFN/Input/tnlo_5.files* in *Work-NLO*. You already used
+the files *\$ABI_TESTS/tutorespfn/Input/tnlo_5.in* and
+*\$ABI_TESTS/tutorespfn/Input/tnlo_5.files* in *Work-NLO*. You already used
 ANADDB previously. It is located in the same directory as *abinit*.
 You might copy it, or make an alias. The present input is in
 principle very similar to the one you have used for the analysis of dynamical
@@ -332,10 +331,10 @@ the system (1/mu = 1/m_Al + 1/m_As). From the previous data, we get :
 For comparison with the DPFT calculation, we can compute $\frac{d \chi}{d \tau}$ for the Al
 nucleus from finite differences. In practice, this is achieved by computing
 the linear optical susceptibility for 3 different positions of the Al nucleus.
-This is done with the file *\$ABI_TUTORESPFN/Input/tnlo_6.in*, however
+This is done with the file *\$ABI_TESTS/tutorespfn/Input/tnlo_6.in*, however
 with the unrealistic cutoff of 2.8 Ha. The calculation is about 2 or 3 minutes
 on a PC 3 GHz). For those who want to do it you anyway, you can copy
-*\$ABI_TUTORESPFN/Input/tnlo_6.in* in your working directory. If you
+*\$ABI_TESTS/tutorespfn/Input/tnlo_6.in* in your working directory. If you
 have time, you should modify the cutoff to [[ecut]] = 5 Ha, in order to obtain
 realistic results. So, you might as well start the run after this modification
 (the run is about two times more time-consuming than with 2.8 Ha).
