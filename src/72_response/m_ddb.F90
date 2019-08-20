@@ -1234,6 +1234,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
 
    else if (ddb%typ(iblok) == 3) then
 
+     npert = 8
      nsize=3*npert*3*npert*3*npert
      ABI_MALLOC(tmpflg,(3,npert,3,npert,3,npert))
      ABI_MALLOC(tmpval,(2,3,npert,3,npert,3,npert))
