@@ -188,6 +188,7 @@ type dataset_type
  integer :: dmft_dc
  integer :: dmft_entropy
  integer :: dmft_iter
+ integer :: dmft_kspectralfunc
  integer :: dmft_nlambda
  integer :: dmft_nwli
  integer :: dmft_nwlo
@@ -357,7 +358,7 @@ type dataset_type
  integer :: max_ncpus
  integer :: mband
  integer :: mep_solver
- integer :: mem_test=1
+ integer :: mem_test = 1
  integer :: mffmem
  integer :: mgfft
  integer :: mgfftdg
@@ -379,7 +380,7 @@ type dataset_type
  integer :: nbdblock
  integer :: nbdbuf
  integer :: nberry
- integer :: nc_xccc_gspace=0
+ integer :: nc_xccc_gspace = 0
  integer :: nconeq
  integer :: nctime
  integer :: ndtset
@@ -491,7 +492,7 @@ type dataset_type
  integer :: prtdipole
  integer :: prtdos
  integer :: prtdosm
- integer :: prtebands=1
+ integer :: prtebands = 1
  integer :: prtefg
  integer :: prtefmas
  integer :: prteig
@@ -499,7 +500,7 @@ type dataset_type
  integer :: prtfc
  integer :: prtfull1wf
  integer :: prtfsurf
- integer :: prtgsr=1
+ integer :: prtgsr = 1
  integer :: prtgden
  integer :: prtgeo
  integer :: prtgkk
@@ -511,10 +512,10 @@ type dataset_type
  integer :: prtpmp
  integer :: prtposcar
  integer :: prtphdos
- integer :: prtphbands=1
- integer :: prtphsurf=0
+ integer :: prtphbands = 1
+ integer :: prtphsurf = 0
  integer :: prtpot
- integer :: prtpsps=0
+ integer :: prtpsps = 0
  integer :: prtspcur
  integer :: prtstm
  integer :: prtsuscep
@@ -581,11 +582,11 @@ type dataset_type
  integer :: usepead
  integer :: usepotzero
  integer :: userec
- integer :: useria=0
- integer :: userib=0
- integer :: useric=0
- integer :: userid=0
- integer :: userie=0
+ integer :: useria = 0
+ integer :: userib = 0
+ integer :: useric = 0
+ integer :: userid = 0
+ integer :: userie = 0
  integer :: usewvl
  integer :: usexcnhat_orig
  integer :: useylm
@@ -772,11 +773,11 @@ type dataset_type
  real(dp) :: tolwfr
  real(dp) :: tphysel
  real(dp) :: tsmear
- real(dp) :: userra=zero
- real(dp) :: userrb=zero
- real(dp) :: userrc=zero
- real(dp) :: userrd=zero
- real(dp) :: userre=zero
+ real(dp) :: userra = zero
+ real(dp) :: userrb = zero
+ real(dp) :: userrc = zero
+ real(dp) :: userrd = zero
+ real(dp) :: userre = zero
  real(dp) :: vacwidth
  real(dp) :: vdw_tol
  real(dp) :: vdw_tol_3bt
@@ -900,11 +901,9 @@ type dataset_type
 
  real(dp) :: bs_eh_cutoff(2)
  real(dp) :: bs_freq_mesh(3)
-
 !END VARIABLES FOR @Bethe-Salpeter.
 
- integer :: gpu_linalg_limit ! MT sept2012: had to add this keyword at the end
-                             ! to get BigDFT automatic tests work on shiva and littlebuda (why????)
+ integer :: gpu_linalg_limit
 
 !EPH variables
 ! ifc variables
@@ -917,9 +916,9 @@ type dataset_type
  integer :: ph_freez_disp_addStrain
  integer :: ph_freez_disp_option
  integer :: ph_freez_disp_nampl
- integer :: ph_ndivsm    ! =20
- integer :: ph_nqpath    !=0
- integer :: ph_ngqpt(3)  !0
+ integer :: ph_ndivsm    ! = 20
+ integer :: ph_nqpath    ! = 0
+ integer :: ph_ngqpt(3)  ! = 0
  integer :: ph_nqshift
 
  real(dp),allocatable :: ph_freez_disp_ampl(:,:)
@@ -937,6 +936,7 @@ type dataset_type
  integer :: eph_frohlichm != 0
  real(dp) :: eph_fsmear != 0.01
  real(dp) :: eph_fsewin != 0.04
+ !real(dp) :: eph_alpha_gmin = zero !sqrt(5)
  real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
  integer :: eph_phrange(2) = 0
 
@@ -944,13 +944,16 @@ type dataset_type
  integer :: eph_np_pqbks(5) = 0
 
  integer :: eph_stern = 0
- integer :: eph_transport
+ integer :: eph_transport = 0
+ integer :: eph_use_ftinterp = 0
 
  integer :: ph_intmeth
  integer :: prteliash = 0
  real(dp) :: ph_wstep
  real(dp) :: ph_smear
+ integer :: dvdb_ngqpt(3)
  integer :: ddb_ngqpt(3)
+ integer :: ddb_qrefine(3) = [1, 1, 1]
  real(dp) :: ddb_shiftq(3)
 
  integer :: mixprec = 0
@@ -960,6 +963,9 @@ type dataset_type
  integer :: sigma_bsum_range(2) = 0
 
  real(dp) :: sigma_erange(2) = -one
+
+ integer :: transport_ngkpt(3) = 0
+ ! K-mesh for Transport calculation.
 
  integer :: sigma_ngkpt(3) = 0
  ! K-mesh for Sigma_{nk} (only IBZ points). Alternative to kptgw.
@@ -974,14 +980,21 @@ type dataset_type
  ! shifts in k-mesh for Sigma_{nk}.
 !END EPH
 
- integer :: ndivsm=0
- integer :: nkpath=0
- real(dp) :: einterp(4)=zero
+ integer :: ndivsm = 0
+ integer :: nkpath = 0
+ real(dp) :: einterp(4) = zero
  real(dp),allocatable :: kptbounds(:,:)
  real(dp) :: tmesh(3) ! = [5._dp, 59._dp, 6._dp] This triggers a bug in the bindings
 
+ character(len=fnlen) :: getddb_path = ABI_NOFILE
+ character(len=fnlen) :: getden_path = ABI_NOFILE
+ character(len=fnlen) :: getdvdb_path = ABI_NOFILE
+ character(len=fnlen) :: getwfk_path = ABI_NOFILE
+ character(len=fnlen) :: getwfkfine_path = ABI_NOFILE
+ character(len=fnlen) :: getwfq_path = ABI_NOFILE
  character(len=fnlen) :: getkerange_path = ABI_NOFILE
- !character(len=fnlen) :: getpot_path = ABI_NOFILE
+ character(len=fnlen) :: getpot_path = ABI_NOFILE
+ character(len=fnlen) :: getscr_path = ABI_NOFILE
  !character(len=fnlen) :: getsigeph_path = ABI_NOFILE
 
  end type dataset_type
@@ -1359,6 +1372,9 @@ type dataset_type
   integer :: unpawq  ! unit number for temporary PAW cprjq=<c+_k+q|p> at k+qdata
   integer :: unpos   ! unit number for restart molecular dynamics
 
+  ! TODO: All this strings should be initialized with ABI_NOFILE
+  ! so that we can easily test for path /= ABI_NOFILE instead of getwfk /= 0 or irdwfk /= 0
+
   character(len=fnlen) :: filnam_ds(5)
    ! if no dataset mode, the five names from the standard input :
    !   ab_in, ab_out, abi, abo, tmp
@@ -1378,6 +1394,10 @@ type dataset_type
    ! if no dataset mode             : abi//'DVDB'
    ! if dataset mode, and getdvdb==0 : abi//'_DS'//trim(jdtset)//'DVDB'
    ! if dataset mode, and getdvdb/=0 : abo//'_DS'//trim(jgetden)//'DVDB'
+
+  character(len=fnlen) :: filpotin
+   ! Filename used to read POT file.
+   ! Initialize via getpot_path
 
   character(len=fnlen) :: filkdensin
    ! if no dataset mode             : abi//'KDEN'
@@ -1428,9 +1448,7 @@ type dataset_type
    ! only useful in the response-function case
 
   character(len=fnlen) :: fildens1in   ! to be described by MVeithen
-
   character(len=fnlen) :: fname_tdwf
-
   character(len=fnlen) :: fname_w90
 
   character(len=fnlen) :: fnametmp_wf1
@@ -1439,7 +1457,7 @@ type dataset_type
   character(len=fnlen) :: fnametmp_1wf2
   character(len=fnlen) :: fnametmp_wfgs
   character(len=fnlen) :: fnametmp_wfkq
-   ! Set of filemanes formed from trim(dtfil%filnam_ds(5))//APPEN where APPEN is _WF1, _WF2 ...
+   ! Set of filenames formed from trim(dtfil%filnam_ds(5))//APPEN where APPEN is _WF1, _WF2 ...
    ! See dtfil_init
 
   character(len=fnlen) :: fnametmp_kg
@@ -1451,7 +1469,7 @@ type dataset_type
   character(len=fnlen) :: fnametmp_paw
   character(len=fnlen) :: fnametmp_paw1
   character(len=fnlen) :: fnametmp_pawq
-   ! Set of filemanes formed from trim(dtfil%filnam_ds(5))//APPEN where APPEN is _KG, _DUM, followed
+   ! Set of filenames formed from trim(dtfil%filnam_ds(5))//APPEN where APPEN is _KG, _DUM, followed
    ! by the index of the processor.
    ! See dtfil_init
 

@@ -13,40 +13,6 @@
 
 
 
-# _ABI_CHECK_CC_COMPAQ(COMPILER)
-# ------------------------------
-#
-# Checks whether the specified C compiler is the COMPAQ C compiler.
-# If yes, tries to determine its version number and sets the abi_cc_vendor
-# and abi_cc_version variables accordingly.
-#
-AC_DEFUN([_ABI_CHECK_CC_COMPAQ],[
-  dnl Do some sanity checking of the arguments
-  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
-
-  dnl AC_MSG_CHECKING([if we are using the Compaq C compiler])
-  cc_info_string=`$1 -V 2>&1 | head -n 1`
-  abi_result=`echo "${cc_info_string}" | grep '^Compaq C '`
-  if test "${abi_result}" = ""; then
-    abi_result="no"
-    cc_info_string=""
-    abi_cc_vendor="unknown"
-    abi_cc_version="unknown"
-  else
-    AC_DEFINE([CC_COMPAQ],1,[Define to 1 if you are using the COMPAQ C compiler.])
-    abi_cc_vendor="compaq"
-    cc_info_string=`$1 -V 2>&1 | grep '^Compiler Driver' | head -n 1`
-    abi_cc_version=`echo "${cc_info_string}" | sed -e 's/Compiler Driver V//; s/ .*//'`
-    if test "${abi_cc_version}" = "${cc_info_string}"; then
-      abi_cc_version="unknown"
-    fi
-    abi_result="yes"
-  fi
-  dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_CC_COMPAQ
-
-
-
 # _ABI_CHECK_CC_GNU(COMPILER)
 # ---------------------------
 #
@@ -165,69 +131,6 @@ AC_DEFUN([_ABI_CHECK_CC_INTEL],[
 
 
 
-# _ABI_CHECK_CC_PATHSCALE(COMPILER)
-# ---------------------------------
-#
-# Checks whether the specified C compiler is the PathScale C compiler.
-# If yes, tries to determine its version number and sets the abi_cc_vendor
-# and abi_cc_version variables accordingly.
-#
-AC_DEFUN([_ABI_CHECK_CC_PATHSCALE],[
-  dnl Do some sanity checking of the arguments
-  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
-
-  dnl AC_MSG_CHECKING([if we are using the PathScale C compiler])
-  cc_info_string=`$1 --version 2>&1 | head -n 1`
-  abi_result=`echo "${cc_info_string}" | grep '^PathScale'`
-  if test "${abi_result}" = ""; then
-    abi_result="no"
-    cc_info_string=""
-    abi_cc_vendor="unknown"
-    abi_cc_version="unknown"
-  else
-    AC_DEFINE([CC_PATHSCALE],1,[Define to 1 if you are using the PathScale C compiler.])
-    abi_cc_vendor="pathscale"
-    abi_cc_version=`echo "${abi_result}" | sed -e 's/.* Version //; s/ .*//'`
-    if test "${abi_cc_version}" = "${abi_result}"; then
-      abi_cc_version="unknown"
-    fi
-    abi_result="yes"
-  fi
-  dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_CC_PATHSCALE
-
-
-# _ABI_CHECK_CC_OPEN64(COMPILER)
-# ---------------------------------
-#
-# Checks whether the specified C compiler is the Open64 C compiler.
-# If yes, tries to determine its version number and sets the abi_cc_vendor
-# and abi_cc_version variables accordingly.
-#
-AC_DEFUN([_ABI_CHECK_CC_OPEN64],[
-  dnl Do some sanity checking of the arguments
-  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
-
-  dnl AC_MSG_CHECKING([if we are using the Open64 C compiler])
-  cc_info_string=`$1 --version 2>&1 | head -n 1`
-  abi_result=`echo "${cc_info_string}" | grep '^Open64'`
-  if test "${abi_result}" = ""; then
-    abi_result="no"
-    cc_info_string=""
-    abi_cc_vendor="unknown"
-    abi_cc_version="unknown"
-  else
-    AC_DEFINE([CC_OPEN64],1,[Define to 1 if you are using the Open64 C compiler.])
-    abi_cc_vendor="open64"
-    abi_cc_version=`echo "${abi_result}" | sed -e 's/.* Version //; s/ .*//'`
-    if test "${abi_cc_version}" = "${abi_result}"; then
-      abi_cc_version="unknown"
-    fi
-    abi_result="yes"
-  fi
-  dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_CC_OPEN64
-
 # _ABI_CHECK_CC_PGI(COMPILER)
 # ---------------------------
 #
@@ -258,39 +161,6 @@ AC_DEFUN([_ABI_CHECK_CC_PGI],[
   fi
   dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CHECK_CC_PGI
-
-
-
-# _ABI_CHECK_CC_SUN(COMPILER)
-# ---------------------------
-#
-# Checks whether the specified C compiler is the Sun C compiler.
-# If yes, tries to determine its version number and sets the abi_cc_vendor
-# and abi_cc_version variables accordingly.
-#
-AC_DEFUN([_ABI_CHECK_CC_SUN],[
-  dnl Do some sanity checking of the arguments
-  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
-
-  dnl AC_MSG_CHECKING([if we are using the Sun C compiler])
-  cc_info_string=`$1 -V 2>&1 | head -n 1`
-  abi_result=`echo "${cc_info_string}" | grep 'Sun' | grep ' C '`
-  if test "${abi_result}" = ""; then
-    abi_result="no"
-    cc_info_string=""
-    abi_cc_vendor="unknown"
-    abi_cc_version="unknown"
-  else
-    AC_DEFINE([CC_SUN],1,[Define to 1 if you are using the Sun C compiler.])
-    abi_cc_vendor="sun"
-    abi_cc_version=`echo "${abi_result}" | sed -e 's/.* C //; s/ .*//'`
-    if test "${abi_cc_version}" = "${abi_result}"; then
-      abi_cc_version="unknown"
-    fi
-    abi_result="yes"
-  fi
-  dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_CC_SUN
 
 
 
@@ -411,22 +281,10 @@ AC_DEFUN([ABI_PROG_CC],[
   fi
 
   if test "${abi_cc_vendor}" = "unknown"; then
-    _ABI_CHECK_CC_COMPAQ(${CC})
-  fi
-  if test "${abi_cc_vendor}" = "unknown"; then
     _ABI_CHECK_CC_INTEL(${CC})
   fi
   if test "${abi_cc_vendor}" = "unknown"; then
-    _ABI_CHECK_CC_PATHSCALE(${CC})
-  fi
-  if test "${abi_cc_vendor}" = "unknown"; then
-    _ABI_CHECK_CC_OPEN64(${CC})
-  fi
-  if test "${abi_cc_vendor}" = "unknown"; then
     _ABI_CHECK_CC_PGI(${CC})
-  fi
-  if test "${abi_cc_vendor}" = "unknown"; then
-    _ABI_CHECK_CC_SUN(${CC})
   fi
 
   dnl Check the GNU compiler last, because other compilers are cloning

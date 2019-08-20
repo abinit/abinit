@@ -202,7 +202,7 @@ end subroutine init_matlu
 !!
 !! SOURCE
 
-subroutine zero_matlu(matlu,natom)
+subroutine zero_matlu(matlu,natom,onlynondiag)
 
  use defs_basis
  implicit none
@@ -211,14 +211,36 @@ subroutine zero_matlu(matlu,natom)
 !scalars
  integer, intent(in) :: natom
  type(matlu_type),intent(inout) :: matlu(natom)
+ integer, optional, intent(in) :: onlynondiag
 !Local variables-------------------------------
- integer :: iatom
+ integer :: iatom,im,im1,ispinor,ispinor1,isppol,ndim
 
 !*********************************************************************
 
- do iatom=1,natom
-  matlu(iatom)%mat=czero
- enddo
+ if(present(onlynondiag)) then
+   do iatom=1,natom
+     if(matlu(iatom)%lpawu.ne.-1) then
+       do ispinor=1,matlu(iatom)%nspinor
+         ndim=(2*matlu(iatom)%lpawu+1)
+         do im=1,ndim
+           do im1=1,ndim
+             do ispinor1=1,matlu(iatom)%nspinor
+               if(im/=im1.or.ispinor/=ispinor1) then
+                 do isppol=1,matlu(iatom)%nsppol
+                   matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)=czero
+                 enddo
+               end if
+             end do
+           end do
+         end do
+       end do
+     endif
+   enddo
+ else
+   do iatom=1,natom
+    matlu(iatom)%mat=czero
+   enddo
+ endif
 
 
 end subroutine zero_matlu
@@ -894,7 +916,7 @@ end subroutine print_matlu
 !! CHILDREN
 !!
 !! SOURCE
-subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr)
+subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr,zero_or_one)
 
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
@@ -909,6 +931,7 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr)
  character(len=*), intent(in) :: char1,char2
  real(dp),intent(in) :: toldiff
  integer,intent(out), optional :: ierr
+ integer,intent(in), optional :: zero_or_one
 
 !local variables-------------------------------
  integer :: iatom,idiff,ispinor,ispinor1,isppol,m1,m,lpawu,nspinor,nsppol
@@ -942,7 +965,8 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr)
    enddo ! isppol
   endif ! lpawu/=1
  enddo ! natom
- matludiff=matludiff/float(idiff)
+ if(.not.present(zero_or_one)) matludiff=matludiff/float(idiff)
+
  if(option==1.or.option==0) then
   if( matludiff < toldiff ) then
    write(message,'(5a,6x,3a,4x,e12.4,a,e12.4)') ch10,&
@@ -950,7 +974,7 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr)
 &   ch10,matludiff,' is lower than',toldiff
    call wrtout(std_out,message,'COLL')
    if(present(ierr)) ierr=0
-  else
+  else 
    write(message,'(5a,3x,3a,3x,e12.4,a,e12.4)') ch10,&
 &   'Differences between ',trim(char1),' and ',ch10,trim(char2),' is too large:',&
 &   ch10,matludiff,' is larger than',toldiff
@@ -962,9 +986,19 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr)
    write(message,'(a,3x,a)') ch10,trim(char2)
    call wrtout(std_out,message,'COLL')
    call print_matlu(matlu2,natom,prtopt=1,opt_diag=-1)
-   if(option==1) then
-     call flush_unit(std_out)
-     MSG_ERROR("option==1, aborting now!")
+   if (present(zero_or_one).and.(mod(matludiff,1.d0)< toldiff)) then
+     write(message,'(a,3x,a)') ch10," The norm is not identity for this k-point but&
+    & is compatible with a high symmetry point"
+     call wrtout(std_out,message,'COLL')
+   else if(present(zero_or_one)) then
+     write(message,'(a,3x,a)') ch10," The norm is not identity for this k-point but&
+    & might be compatible with a high symmetry point: it should be checked"
+     call wrtout(std_out,message,'COLL')
+   else 
+     if(option==1) then
+       call flush_unit(std_out)
+       MSG_ERROR("option==1, aborting now!")
+     end if
    end if
    if(present(ierr)) ierr=-1
   endif

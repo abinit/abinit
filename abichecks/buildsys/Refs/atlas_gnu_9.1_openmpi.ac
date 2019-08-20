@@ -39,7 +39,7 @@
 #       the CPPFLAGS_64BITS, CFLAGS_64BITS, CXXFLAGS_64BITS, and
 #       FCFLAGS_64BITS variables manually.
 #
-enable_64bit_flags="yes"
+#enable_64bit_flags="yes"
 
 # Enable debug mode (default is basic)
 #
@@ -90,7 +90,7 @@ enable_64bit_flags="yes"
 #
 #     * this option is ignored when debugging is in profile mode
 #
-enable_optim="yes"
+#enable_optim="aggressive"
 
 # Disable vectorization with AVX-enable processor in problematic procedures
 #
@@ -106,7 +106,7 @@ enable_optim="yes"
 
 # C preprocessor (should not be set in most cases)
 #
-CPP="/usr/lpp/xlf/bin/cpp"
+#CPP="/usr/bin/cpp"
 
 # C preprocessor custom debug flags (when enable_debug=yes)
 #
@@ -129,7 +129,7 @@ CPP="/usr/lpp/xlf/bin/cpp"
 
 # C compiler
 #
-CC="/usr/lpp/ppe.poe/bin/mpcc_r"
+#CC="gcc"
 
 # C compiler custom debug flags (when enable_debug=yes)
 #
@@ -146,7 +146,7 @@ CC="/usr/lpp/ppe.poe/bin/mpcc_r"
 # Forced C compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-CFLAGS="-qlanglvl=extc99 -O2 -q64 -qspill=2000 -qarch=pwr6 -qtune=auto -qcache=auto -qstrict -qsuppress=1520-031:1520-003"
+#CFLAGS="-O2"
 
 # C linker custom debug flags (when enable_debug=yes)
 #
@@ -213,7 +213,7 @@ CFLAGS="-qlanglvl=extc99 -O2 -q64 -qspill=2000 -qarch=pwr6 -qtune=auto -qcache=a
 
 # C++ compiler
 #
-CXX="/usr/lpp/ppe.poe/bin/mpCC_r"
+#CXX="g++"
 
 # C++ compiler custom debug flags (when enable_debug=yes)
 #
@@ -295,7 +295,7 @@ CXX="/usr/lpp/ppe.poe/bin/mpCC_r"
 
 # Fortran compiler
 #
-FC="/usr/lpp/ppe.poe/bin/mpxlf90_r"
+#FC="gfortran"
 
 # Fortran 77 compiler (addition for the Windows/Cygwin environment)
 #
@@ -320,7 +320,7 @@ FC="/usr/lpp/ppe.poe/bin/mpxlf90_r"
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-FCFLAGS="-g -O2 -q64 -lxlopt -bmaxdata:2000000000 -qarch=pwr6 -qtune=auto -qstrict -qsuppress=1520-031:1520-003 -qmaxmem=-1 -qcache=auto -qspillsize=1664"
+#FCFLAGS="-O2"
 
 # Fortran flags for fixed-form source files
 #
@@ -382,7 +382,7 @@ FCFLAGS="-g -O2 -q64 -lxlopt -bmaxdata:2000000000 -qarch=pwr6 -qtune=auto -qstri
 # Combine this option with enable_debug="yes" to keep preprocessed source
 # files (they are removed by default, except if their build fails)
 #
-enable_fc_wrapper="no"
+#enable_fc_wrapper="yes"
 
 # Choose whether to read file lists from standard input or "ab.files"
 # (default is yes = standard input)
@@ -422,7 +422,7 @@ enable_fc_wrapper="no"
 
 # Set archiver name
 #
-AR="ar"
+#AR="xiar"
 
 # Archiver custom debug flags (when enable_debug=yes)
 #
@@ -434,7 +434,7 @@ AR="ar"
 
 # Archiver additional custom flags
 #
-ARFLAGS_EXTRA="-X64"
+#ARFLAGS_EXTRA="-X 64"
 
 # Forced archiver flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -531,12 +531,12 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-#with_mpi_prefix="/usr/local/openmpi-gcc"
+with_mpi_prefix="$MPI_HOME"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
 #
-MPI_RUNNER="/usr/lpp/ppe.poe/bin/poe"
+#MPI_RUNNER="/usr/local/bin/mpiexec"
 
 # Set serial runner for tests (default is unset)
 # Note: this option has no effect yet
@@ -705,27 +705,27 @@ MPI_RUNNER="/usr/lpp/ppe.poe/bin/poe"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf"
+with_trio_flavor="netcdf+psml"
 
                        # ------------------------------ #
 
 # Include flags for the psml library (default is unset)
 #
-#with_psml_incs="-I/usr/local/include/psml"
+with_psml_incs="-I${FALLBACKS_HOME}_8.12/${FB}/xmlf90/1.5.3.1/include -I${FALLBACKS_HOME}_8.12/${FB}/libpsml/1.1.7/include"
 
 # Link flags for the psml library (default is unset)
 #
-#with_psml_libs="-L/usr/local/lib/psml -lpsml"
+with_psml_libs="-L${FALLBACKS_HOME}_8.12/${FB}/libpsml/1.1.7/lib -lpsml -L${FALLBACKS_HOME}_8.12/${FB}/xmlf90/1.5.3.1/lib -lxmlf90"
 
                        # ------------------------------ #
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/usr/local/netcdf/include"
+with_netcdf_incs="-I${FALLBACKS_HOME}_8.12/${FB}/netcdf4/4.4.1.1/include -I${FALLBACKS_HOME}_8.12/${FB}/netcdf4_fortran/4.4.4/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/usr/local/netcdf/lib -lnetcdf"
+with_netcdf_libs="-L${FALLBACKS_HOME}_8.12/${FB}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_HOME}_8.12/${FB}/netcdf4/4.4.1.1/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -769,15 +769,15 @@ with_netcdf_libs="-L/usr/local/netcdf/lib -lnetcdf"
 #   * By default, Abinit will use the internal Goedecker FFT library
 #   * This connector is highly experimental - USE AT YOUR OWN RISKS!
 #
-#with_fft_flavor="fftw3"
+with_fft_flavor="fftw3"
 
 # Include flags for the FFT library (default is unset)
 #
-#with_fft_incs="-I/usr/local/include/fftw"
+with_fft_incs="-I/usr/include"
 
 # Link flags for the FFT library (default is unset)
 #
-#with_fft_libs="-L/usr/local/lib/fftw -lfftw3"
+with_fft_libs="-L/usr/lib64 -lfftw3 -lfftw3f"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -852,15 +852,15 @@ with_netcdf_libs="-L/usr/local/netcdf/lib -lnetcdf"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="netlib"
+with_linalg_flavor="goto"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
-#with_linalg_incs="-I/usr/local/include"
+with_linalg_incs="-I/usr/local/OpenBLAS-0.3.6_gnu91/include"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/usr/local/lib64/linalg -llapack -lblas"
+with_linalg_libs="-L/usr/local/OpenBLAS-0.3.6_gnu91/lib/ -lopenblas -lm -lpthread -lgfortran"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -906,49 +906,49 @@ with_dft_flavor="atompaw+libxc+wannier90"
 
 # Full path to the AtomPAW executables (default is unset)
 #
-#with_atompaw_bins="/usr/local/bin"
+with_atompaw_bins="${FALLBACKS_HOME}_8.12/${FB}/atompaw/4.1.0.6/bin"
 
 # Include flags for the AtomPAW library (default is unset)
 #
-#with_atompaw_incs="-I/usr/local/include/atompaw"
+with_atompaw_incs="-I${FALLBACKS_HOME}_8.12/${FB}/atompaw/4.1.0.6/include"
 
 # Link flags for the AtomPAW library (default is unset)
 #
-#with_atompaw_libs="-L/usr/local/lib/atompaw -latompaw"
+with_atompaw_libs="-L${FALLBACKS_HOME}_8.12/${FB}/atompaw/4.1.0.6/lib -latompaw"
 
                        # ------------------------------ #
 
 # Include flags for the BigDFT library (default is unset)
 #
-with_bigdft_incs="-I/usr/local/bigdft_1.7/include"
+#with_bigdft_incs="-I/usr/local/include/bigdft"
 
 # Link flags for the BigDFT library (default is unset)
 #
-with_bigdft_libs="-L/usr/local/bigdft_1.7/lib -lbigdft -ldft_common -labinit"
+#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
 
                        # ------------------------------ #
 
 # Include flags for the LibXC library (default is unset)
 #
-#with_libxc_incs="-I/opt/etsf/include"
+with_libxc_incs="-I${FALLBACKS_HOME}_8.12/${FB}/libxc/4.2.3/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-#with_libxc_libs="-L/opt/etsf/lib -lxc"
+with_libxc_libs="-L${FALLBACKS_HOME}_8.12/${FB}/libxc/4.2.3/lib -lxc"
 
                        # ------------------------------ #
 
 # Full path to the Wannier90 executables (default is unset)
 #
-#with_wannier90_bins="/usr/local/bin"
+with_wannier90_bins="${FALLBACKS_HOME}_8.12/${FB}/wannier90/2.0.1.1/bin"
 
 # Include flags for the Wannier90 library (default is unset)
 #
-#with_wannier90_incs="-I/usr/local/include/wannier90"
+with_wannier90_incs="-I${FALLBACKS_HOME}_8.12/${FB}/wannier90/2.0.1.1/include"
 
 # Link flags for the Wannier90 library (default is unset)
 #
-#with_wannier90_libs="-L${HOME}/lib/wannier90 -lwannier90"
+with_wannier90_libs="-L${FALLBACKS_HOME}_8.12/${FB}/wannier90/2.0.1.1/lib -lwannier90"
 
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #

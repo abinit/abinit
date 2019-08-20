@@ -1,16 +1,15 @@
 '''
-    This package gather all tools used by the Abinit test suite for
-    manipulating YAML formated data.
+    This package gathers all tools used by the Abinit test suite for
+    manipulating YAML formatted data.
 '''
 from __future__ import print_function, division, unicode_literals
 
 import warnings
-from .errors import NoYAMLSupportError, UnlabeledDocumentError
+from .errors import NoYAMLSupportError, UntaggedDocumentError, TagMismatchError
 
 try:
     import yaml
     import numpy  # numpy is also required
-
     is_available = True
 
 except ImportError:
@@ -28,21 +27,18 @@ except ImportError:
 
 
 if is_available:
-    if hasattr(yaml, 'CSafeLoader'):  # use the C binding (faster) if possible
+    # use the C binding (faster) if possible
+    if hasattr(yaml, 'CSafeLoader'):
         Loader = yaml.CSafeLoader
     else:
-        warnings.warn('The libyaml binding is not available, tests will take'
-                      ' more time. Using python 3 may solve the problem. If it'
-                      ' doesn\'t you may have to install libyaml yourself.')
+        warnings.warn("The libyaml binding is not available, tests will take"
+                      " more time. Using python 3 may solve the problem. If it"
+                      " doesn't you may have to install libyaml yourself.")
         Loader = yaml.SafeLoader
 
-    from .common import Undef, IterStart
+    from .common import string, get_yaml_tag
 
     def yaml_parse(content, *args, **kwargs):
-        from .register_tag import yaml_implicit_scalar, yaml_map
-        yaml_implicit_scalar(Undef)
-        yaml_map(IterStart)
-
         from . import structures
         return yaml.load(content, *args, Loader=Loader, **kwargs)
 
@@ -51,26 +47,45 @@ if is_available:
 
 class Document(object):
     '''
-        Represent a document with all its metadata from the original file.
+        Represent a document with all its metadata extracted from the original file.
     '''
 
-    def __init__(self, iterators, start, lines):
+    def __init__(self, iterators, start, lines, tag=None):
         self.iterators = iterators
         self.start = start
         self.end = -1
         self.lines = lines
+        self._tag = tag
         self._obj = None
         self._corrupted = False
         self._id = None
 
     def _parse(self):
+        '''
+        Parse lines, set `obj` property.
+        Raise an error if the document is untagged.
+        '''
         if is_available:
             content = '\n'.join(self.lines)
             try:
                 self._obj = yaml_parse(content)
             except yaml.YAMLError as e:
+                print(content)
+                print(e)
                 self._obj = e
                 self._corrupted = True
+                self._tag = 'Corrupted'
+
+            # use type in instead of isinstance because inheritance is fine
+            if type(self._obj) in {dict, list, tuple, string}:
+                raise UntaggedDocumentError(self.start)
+            else:
+                tag = get_yaml_tag(type(self._obj))
+                if self._tag is not None and tag != self._tag:
+                    self._corrupted = True
+                    self._obj = TagMismatchError(self.start, tag, self._tag)
+                else:
+                    self._tag = tag
         else:
             raise NoYAMLSupportError('Try to access YAML document but YAML is'
                                      ' not available in this environment.')
@@ -78,27 +93,40 @@ class Document(object):
     @property
     def id(self):
         '''
-            Produce a string id that should be unique.
+        Produce a string id that should be unique.
         '''
         if self._id is None:
             state = []
-            if 'label' not in self.obj:
-                raise UnlabeledDocumentError(self.start)
 
             for key, val in self.iterators.items():
                 state.append('{}={}'.format(key, val))
 
-            self._id = ','.join(state) + ' ' + self.obj['label']
+            self._id = ','.join(state) + ' ' + self.tag
         return self._id
 
     @property
     def obj(self):
+        '''
+        The python object constructed by Pyyaml.
+        '''
         if self._obj is None:
             self._parse()
         return self._obj
 
     @property
+    def tag(self):
+        '''
+        The document tag.
+        '''
+        if self._tag is None:
+            self._parse()
+        return self._tag
+
+    @property
     def corrupted(self):
+        '''
+        True if Yaml document is corrupted.
+        '''
         if self._obj is None:
             self._parse()
         return self._corrupted

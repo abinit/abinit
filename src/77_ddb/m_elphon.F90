@@ -33,7 +33,7 @@ module m_elphon
  use defs_abitypes
  use defs_elphon
  use m_abicore
- use m_kptrank
+ use m_krank
  use m_errors
  use m_xmpi
  use m_hdr
@@ -48,7 +48,7 @@ module m_elphon
  use m_geometry,        only : phdispl_cart2red
  use m_kpts,            only : getkgrid, smpbz
  use m_crystal,         only : crystal_t
- use m_ifc,             only : ifc_type, ifc_fourq
+ use m_ifc,             only : ifc_type
  use m_nesting,         only : mknesting, bfactor
  use m_anaddb_dataset,  only : anaddb_dataset_type
  use m_eliashberg_1d,   only : eliashberg_1d
@@ -141,7 +141,7 @@ contains
 !!      ebands_update_occ,eliashberg_1d,elph_ds_clean,elph_k_procs
 !!      elph_tr_ds_clean,ep_fs_weights,ep_setupqpt,ftgam,ftgam_init
 !!      get_all_gkk2,get_all_gkq,get_all_gkr,get_fs_bands,get_nv_fs_en
-!!      get_nv_fs_temp,get_rank_1kpt,get_tau_k,get_veloc_tr,hdr_bcast
+!!      get_nv_fs_temp,get_rank,get_tau_k,get_veloc_tr,hdr_bcast
 !!      hdr_fort_read,hdr_free,integrate_gamma,integrate_gamma_tr
 !!      integrate_gamma_tr_lova,mka2f,mka2f_tr,mka2f_tr_lova,mka2fqgrid
 !!      mkfskgrid,mknesting,mkph_linwid,mkqptequiv,order_fs_kpts,outelph
@@ -151,8 +151,6 @@ contains
 !! SOURCE
 
 subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -696,7 +694,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    ABI_ALLOCATE(elph_ds%k_fine%kpt,(3,elph_ds%k_fine%nkpt))
    elph_ds%k_fine%kpt = elph_ds%k_phon%kpt
 
-   call copy_kptrank(elph_ds%k_phon%kptrank_t, elph_ds%k_fine%kptrank_t)
+   elph_ds%k_fine%krank = elph_ds%k_phon%krank%copy()
 
    ABI_ALLOCATE(elph_ds%k_fine%irr2full,(elph_ds%k_fine%nkptirr))
    elph_ds%k_fine%irr2full = elph_ds%k_phon%irr2full
@@ -838,8 +836,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  do ikpt_fine = 1, elph_ds%k_phon%nkpt
    do iqpt = 1, elph_ds%nqpt_full
      kpt = elph_ds%k_phon%kpt(:,ikpt_fine) + elph_ds%qpt_full(:,iqpt)
-     call get_rank_1kpt (kpt,symrankkpt,elph_ds%k_phon%kptrank_t)
-     iFSkpq = elph_ds%k_phon%kptrank_t%invrank(symrankkpt)
+     symrankkpt = elph_ds%k_phon%krank%get_rank (kpt)
+     iFSkpq = elph_ds%k_phon%krank%invrank(symrankkpt)
      do iband = 1, elph_ds%ngkkband
        do ibandp = 1, elph_ds%ngkkband
          res = res + elph_ds%gkk_intweight(iband,ikpt_fine,1)*elph_ds%gkk_intweight(ibandp,iFSkpq,1)
@@ -854,8 +852,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  do ikpt_fine = 1, elph_ds%k_phon%nkpt
    do iqpt = 1, elph_ds%k_phon%nkpt
      kpt = elph_ds%k_phon%kpt(:,ikpt_fine) + elph_ds%k_phon%kpt(:,iqpt)
-     call get_rank_1kpt (kpt,symrankkpt,elph_ds%k_phon%kptrank_t)
-     iFSkpq = elph_ds%k_phon%kptrank_t%invrank(symrankkpt)
+     symrankkpt = elph_ds%k_phon%krank%get_rank (kpt)
+     iFSkpq = elph_ds%k_phon%krank%invrank(symrankkpt)
      do iband = 1, elph_ds%ngkkband
        do ibandp = 1, elph_ds%ngkkband
          res = res + elph_ds%gkk_intweight(iband,ikpt_fine,1)*elph_ds%gkk_intweight(ibandp,iFSkpq,1)
@@ -1421,8 +1419,6 @@ end subroutine elphon
 
 subroutine outelph(elph_ds,enunit,fname)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: enunit
@@ -1436,7 +1432,7 @@ subroutine outelph(elph_ds,enunit,fname)
  real(dp) :: lambda_q_max,lambda_qbranch_max,lambda_tot,nest_max,nest_min
  real(dp) :: omegalog_q,omegalog_qgrid,tc_macmill
  character(len=500) :: msg
- type(kptrank_type) :: kptrank_t
+ type(krank_t) :: krank
 !arrays
  integer :: qbranch_max(2)
  real(dp),allocatable :: lambda_q(:,:),nestfactor(:),qirred(:,:)
@@ -1615,16 +1611,16 @@ subroutine outelph(elph_ds,enunit,fname)
    qirred(:,iqirr)=elph_ds%qpt_full(:,elph_ds%qirredtofull(iqirr))
  end do
 
- call mkkptrank (elph_ds%k_phon%kpt,elph_ds%k_phon%nkpt,kptrank_t)
+ krank = krank_new(elph_ds%k_phon%nkpt, elph_ds%k_phon%kpt)
 
  ABI_ALLOCATE(nestfactor,(nqptirred))
 
 !NOTE: weights are not normalised, the normalisation factor in reintroduced in bfactor
- call bfactor(elph_ds%k_phon%nkpt,elph_ds%k_phon%kpt,nqptirred,qirred,kptrank_t,&
+ call bfactor(elph_ds%k_phon%nkpt,elph_ds%k_phon%kpt,nqptirred,qirred,krank,&
 & elph_ds%k_phon%nkpt,elph_ds%k_phon%wtk,elph_ds%nFSband,nestfactor)
 
  ABI_DEALLOCATE(qirred)
- call destroy_kptrank (kptrank_t)
+ call krank%free()
 
 
 !find Max and min of the nesting factor
@@ -1780,8 +1776,6 @@ end subroutine outelph
 
 subroutine rchkGSheader (hdr,natom,nband,unitgkk)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,unitgkk
@@ -1852,14 +1846,13 @@ end subroutine rchkGSheader
 !!      elphon
 !!
 !! CHILDREN
-!!      destroy_kptrank,get_rank_1kpt,mkkptrank,sort_int,wrap2_pmhalf,wrtout
+!!      destroy_kptrank,get_rank,mkkptrank,sort_int,wrap2_pmhalf,wrtout
 !!
 !! SOURCE
 
 subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 
  use m_sort
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1897,12 +1890,12 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  elph_k%wtkirr(:) = zero
 
 !first allocation for irred kpoints - will be destroyed below
- call mkkptrank (elph_k%kptirr,elph_k%nkptirr,elph_k%kptrank_t)
- ABI_ALLOCATE(rankallk,(elph_k%kptrank_t%max_rank))
+ elph_k%krank = krank_new(elph_k%nkptirr, elph_k%kptirr)
+ ABI_ALLOCATE(rankallk,(elph_k%krank%max_rank))
 
-!elph_k%kptrank_t%invrank is used as a placeholder in the following loop
+!elph_k%krank%invrank is used as a placeholder in the following loop
  rankallk = -1
- elph_k%kptrank_t%invrank = -1
+ elph_k%krank%invrank = -1
 
 !replicate all irred kpts by symmetry to get the full k grid.
  elph_k%nkpt=0 !zero k-points found so far
@@ -1915,11 +1908,11 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 &       symrec(:,2,isym)*elph_k%kptirr(2,ikpt1) + &
 &       symrec(:,3,isym)*elph_k%kptirr(3,ikpt1))
 
-       call get_rank_1kpt (kpt,symrankkpt,elph_k%kptrank_t)
+       symrankkpt = elph_k%krank%get_rank (kpt)
 
 !      is the kpt on the full grid (may have lower symmetry than full spgroup)
 !      is kpt among the full FS kpts found already?
-       if (elph_k%kptrank_t%invrank(symrankkpt) == -1) then
+       if (elph_k%krank%invrank(symrankkpt) == -1) then
          elph_k%wtkirr(ikpt1)=elph_k%wtkirr(ikpt1)+1
          elph_k%nkpt=elph_k%nkpt+1
 
@@ -1932,7 +1925,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
          tmpkphon_full2irr(2,elph_k%nkpt) = isym
          tmpkphon_full2irr(3,elph_k%nkpt) = itim
 
-         elph_k%kptrank_t%invrank(symrankkpt) = elph_k%nkpt
+         elph_k%krank%invrank(symrankkpt) = elph_k%nkpt
          rankallk(elph_k%nkpt) = symrankkpt
        end if
 
@@ -1968,20 +1961,18 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  ABI_DEALLOCATE(rankallk)
  ABI_DEALLOCATE(tmpkphon_full2irr)
  ABI_DEALLOCATE(tmpkpt)
- call destroy_kptrank (elph_k%kptrank_t)
-
+ call elph_k%krank%free()
 
 !make proper full rank arrays
- call mkkptrank (elph_k%kpt,elph_k%nkpt,elph_k%kptrank_t)
-
+ elph_k%krank = krank_new(elph_k%nkpt, elph_k%kpt)
 
 !find correspondence table between irred FS kpoints and a full one
  ABI_ALLOCATE(elph_k%irr2full,(elph_k%nkptirr))
  elph_k%irr2full(:) = 0
 
  do ikpt1=1,elph_k%nkptirr
-   call get_rank_1kpt (elph_k%kptirr(:,ikpt1),symrankkpt,elph_k%kptrank_t)
-   elph_k%irr2full(ikpt1) = elph_k%kptrank_t%invrank(symrankkpt)
+   symrankkpt = elph_k%krank%get_rank (elph_k%kptirr(:,ikpt1))
+   elph_k%irr2full(ikpt1) = elph_k%krank%invrank(symrankkpt)
  end do
 
 !find correspondence table between FS kpoints under symmetry
@@ -1998,8 +1989,8 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 &       symrec(:,3,isym)*elph_k%kpt(3,ikpt1))
 
 !      which kpt is it among the full FS kpts
-       call get_rank_1kpt (kpt,symrankkpt,elph_k%kptrank_t)
-       ikpt2 = elph_k%kptrank_t%invrank(symrankkpt)
+       symrankkpt = elph_k%krank%get_rank (kpt)
+       ikpt2 = elph_k%krank%invrank(symrankkpt)
        new=1
        if (ikpt2 /= -1) then
          elph_k%full2full(itim+1,isym,ikpt2) = ikpt1
@@ -2064,7 +2055,6 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
 
  use m_special_funcs,  only : fermi_dirac, bose_einstein
  use m_epweights,      only : d2c_wtq, ep_ph_weights
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2203,7 +2193,7 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
  ABI_ALLOCATE(pheigvec,(2*nbranch*nbranch,elph_ds%k_fine%nkpt))
 
  do iFSqpt=1,elph_ds%k_fine%nkpt
-   call ifc_fourq(ifc,cryst,elph_ds%k_fine%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ_cart,out_eigvec=pheigvec(:,iFSqpt))
+   call ifc%fourq(cryst,elph_ds%k_fine%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ_cart,out_eigvec=pheigvec(:,iFSqpt))
  end do
 
  omega_min = omega_min - domega
@@ -2262,7 +2252,7 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
 &       coskr(iFSqpt,:), sinkr(iFSqpt,:))
      end if
 
-     call ifc_fourq(ifc,cryst,kpt(:,iFSqpt),phfrq(:,iFSqpt),displ_cart,out_eigvec=pheigvec)
+     call ifc%fourq(cryst,kpt(:,iFSqpt),phfrq(:,iFSqpt),displ_cart,out_eigvec=pheigvec)
 
 !    Diagonalize gamma matrix at qpoint (complex matrix).
 
@@ -2610,8 +2600,6 @@ end subroutine mka2f
 
 subroutine mka2fQgrid(elph_ds,fname)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: fname
@@ -2804,8 +2792,6 @@ end subroutine mka2fQgrid
 
 subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkptirr
@@ -2820,18 +2806,18 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
 !scalars
  integer :: irank,ikpt,jkpt,kkpt,new, ik
  real(dp) :: res
- type(kptrank_type) :: kptrank_t
+ type(krank_t) :: krank
 !arrays
  integer :: kptirrank(nkptirr)
 
 ! *************************************************************************
 
 !rank is used to order kpoints
- call mkkptrank (kptns,nkpt,kptrank_t)
+ krank = krank_new(nkpt, kptns)
 
  ik=1
  do ikpt=1,nkpt
-   call get_rank_1kpt(kptns(:,ikpt),irank,kptrank_t)
+   irank = krank%get_rank(kptns(:,ikpt))
 !  add kpt to FS kpts, in order, increasing z, then y, then x !
    new = 1
 !  look for position to insert kpt ikpt among irredkpts already found
@@ -2865,7 +2851,7 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
    ik=ik+1
  end do
 
- call destroy_kptrank (kptrank_t)
+ call krank%free()
 
 end subroutine order_fs_kpts
 !!***
@@ -2900,8 +2886,6 @@ end subroutine order_fs_kpts
 !! SOURCE
 
 subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3102,8 +3086,6 @@ end subroutine ep_setupqpt
 
 subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nqpath
@@ -3279,7 +3261,7 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 !
 !    get phonon freqs and eigenvectors anyway
 !
-     call ifc_fourq(ifc,cryst,qpt,phfrq_tmp,displ_cart,out_eigvec=pheigvec)
+     call ifc%fourq(cryst,qpt,phfrq_tmp,displ_cart,out_eigvec=pheigvec)
 !
 !    additional frequency factor for some cases
 !
@@ -3446,8 +3428,6 @@ end subroutine mkph_linwid
 
 subroutine get_fs_bands(eigenGS,hdr,fermie,ep_b_min,ep_b_max,minFSband,maxFSband,nkptirr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: ep_b_min, ep_b_max
@@ -3587,8 +3567,6 @@ end subroutine get_fs_bands
 
 subroutine get_all_gkk2(crystal,ifc,elph_ds,kptirr_phon,kpt_phon)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: crystal
@@ -3689,8 +3667,6 @@ end subroutine get_all_gkk2
 !! SOURCE
 
 subroutine interpolate_gkk(crystal,ifc,elph_ds,kpt_phon)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3810,7 +3786,7 @@ subroutine interpolate_gkk(crystal,ifc,elph_ds,kpt_phon)
    redkpt(3) = qphon(1)*gprim(3,1)+qphon(2)*gprim(3,2)+qphon(3)*gprim(3,3)
    write (unit_gkkp,*) 'qp= ', redkpt
 
-   call ifc_fourq(ifc,crystal,qphon,phfrq_tmp,displ,out_eigvec=pheigvec)
+   call ifc%fourq(crystal,qphon,phfrq_tmp,displ,out_eigvec=pheigvec)
    write (unit_gkkp,*) phfrq_tmp(:)*Ha_cmm1
 
    ii = ii+1
@@ -3939,8 +3915,6 @@ end subroutine interpolate_gkk
 
 subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksize,&
 &    qpttoqpt,ep_prt_yambo,unitgkk,ifltransport)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4101,8 +4075,6 @@ end subroutine get_all_gkq
 
 subroutine get_all_gkr (elph_ds,gprim,natom,nrpt,onegkksize,rpt,qpt_full,wghatm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nrpt,onegkksize
@@ -4224,8 +4196,6 @@ end subroutine get_all_gkr
 !! SOURCE
 
 subroutine complete_gkk(elph_ds,gkk_flag,gprimd,indsym,natom,nsym,qpttoqpt,rprimd,symrec,symrel)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4563,8 +4533,6 @@ end subroutine complete_gkk
 
 subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max)
 
- implicit none
-
 !Arguments ------------------------------------
 !Scalars
  real(dp), intent(in)  :: max_occ
@@ -4618,7 +4586,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
  ABI_ALLOCATE(displ,(2, elph_ds%nbranch, elph_ds%nbranch, elph_ds%k_phon%nkpt))
 
  do iFSqpt=1,elph_ds%k_phon%nkpt
-   call ifc_fourq(ifc,crystal,elph_ds%k_phon%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt))
+   call ifc%fourq(crystal,elph_ds%k_phon%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt))
  end do
 
  omega_max = maxval(phfrq)*1.1_dp
@@ -5067,11 +5035,7 @@ end subroutine get_nv_fs_en
 
 subroutine get_nv_fs_temp(elph_ds,BSt,eigenGS,gprimd,max_occ,elph_tr_ds)
 
- implicit none
-
 !Arguments ------------------------------------
-
-!data_type
  type(elph_type),intent(inout) :: elph_ds
  type(ebands_t),intent(inout)   :: BSt
  type(elph_tr_type),intent(inout) :: elph_tr_ds
@@ -5196,8 +5160,6 @@ end subroutine get_nv_fs_temp
 
 subroutine get_veloc_tr(elph_ds,elph_tr_ds)
 
-  implicit none
-
 !Arguments ------------------------------------
 !arrays
   type(elph_type),intent(in) :: elph_ds
@@ -5264,13 +5226,11 @@ end subroutine get_veloc_tr
 !!      elphon
 !!
 !! CHILDREN
-!!      get_rank_1kpt,wrtout,xmpi_sum
+!!      get_rank,wrtout,xmpi_sum
 !!
 !! SOURCE
 
 subroutine integrate_gamma(elph_ds,FSfullpqtofull)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5318,7 +5278,7 @@ subroutine integrate_gamma(elph_ds,FSfullpqtofull)
 
  do iqpt=1,elph_ds%nqptirred
    iqpt_fullbz = elph_ds%qirredtofull(iqpt)
-   call get_rank_1kpt (elph_ds%k_phon%kpt(:,iqpt_fullbz),symrankkpt_phon, elph_ds%k_phon%kptrank_t)
+   symrankkpt_phon = elph_ds%k_phon%krank%get_rank (elph_ds%k_phon%kpt(:,iqpt_fullbz))
    write (std_out,*) ' iqpt_fullbz in qpt grid only,  rank ', iqpt_fullbz, symrankkpt_phon
 
    do ik_this_proc =1,elph_ds%k_phon%my_nkpt
@@ -5398,8 +5358,6 @@ end subroutine integrate_gamma
 !! SOURCE
 
 subroutine integrate_gamma_tr(elph_ds,FSfullpqtofull,s1,s2, veloc_sq1,veloc_sq2,elph_tr_ds)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5564,8 +5522,6 @@ end subroutine integrate_gamma_tr
 !! SOURCE
 
 subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5786,8 +5742,6 @@ end subroutine integrate_gamma_tr_lova
 subroutine ftgkk (wghatm,gkk_qpt,gkk_rpt,gkqwrite,gkrwrite,gprim,ikpt_phon0,&
 &                  natom,nkpt_phon,ngkkband,nkpt_used,nqpt,nrpt,nsppol,&
 &                  qtor,rpt,qpt_full,unit_gkk_rpt,unitgkq)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -6018,8 +5972,6 @@ end subroutine ftgkk
 !! SOURCE
 
 subroutine test_ftgkk(elph_ds,gprim,natom,nrpt,rpt,qpt_full,wghatm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

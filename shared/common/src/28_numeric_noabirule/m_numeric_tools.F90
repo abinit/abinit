@@ -5538,7 +5538,7 @@ type(vdiff_t) function vdiff_eval(cplex, nr, f1, f2, volume, vd_max) result(vd)
  end if
 
  vd%int_adiff = num * dr
- vd%l1_rerr = num / den
+ call safe_div(num,den,zero,vd%l1_rerr)
 
  stats = stats_eval(abs_diff)
  vd%mean_adiff = stats%mean

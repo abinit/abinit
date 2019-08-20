@@ -518,7 +518,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 
 !   Free the phonon-strain coupling array
     do ii = 1,6
-      call ifc_free(phonon_strain(ii))
+      call phonon_strain(ii)%free()
     end do
     ABI_DEALLOCATE(elastic_displacement)
 

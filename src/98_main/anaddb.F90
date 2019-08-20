@@ -247,7 +247,7 @@ program anaddb
  ! Acoustic Sum Rule
  ! In case the interatomic forces are not calculated, the
  ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
- asrq0 = ddb_get_asrq0(ddb, inp%asr, inp%rfmeth, crystal%xcart)
+ asrq0 = ddb%get_asrq0(inp%asr, inp%rfmeth, crystal%xcart)
 
  ! TODO: This is to maintain the previous behaviour in which all the arrays were initialized to zero.
  ! In the new version asrq0%d2asr is always computed if the Gamma block is present
@@ -302,10 +302,10 @@ program anaddb
 
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
- iblok = ddb_get_dielt_zeff(ddb,crystal,inp%rfmeth,inp%chneut,inp%selectz,dielt,zeff)
+ iblok = ddb%get_dielt_zeff(crystal,inp%rfmeth,inp%chneut,inp%selectz,dielt,zeff)
  ! Try to get dielt, in case just the DDE are present
  if (iblok == 0) then
-   iblok_tmp = ddb_get_dielt(ddb,inp%rfmeth,dielt)
+   iblok_tmp = ddb%get_dielt(inp%rfmeth,dielt)
  end if
 
  !if (iblok == 0) then
@@ -317,7 +317,6 @@ program anaddb
 
  if (my_rank == master) then
 #ifdef HAVE_NETCDF
-   ! TODO: Cartesian or reduced?
    ncerr = nctk_def_arrays(ana_ncid, [&
    nctkarr_t('emacro_cart', "dp", 'number_of_cartesian_directions, number_of_cartesian_directions'),&
    nctkarr_t('becs_cart', "dp", "number_of_cartesian_directions, number_of_cartesian_directions, number_of_atoms")],&
@@ -364,7 +363,7 @@ program anaddb
    end if ! iblok not found
 
    ! Extract the block with the total energy
-   if (ddb_get_etotal(ddb,etotal) == 0) then
+   if (ddb%get_etotal(etotal) == 0) then
      MSG_ERROR("DDB file does not contain GS etotal")
    end if
 
@@ -375,7 +374,7 @@ program anaddb
    if (inp%relaxat == 1) rfphon(:) = 1
    if (inp%relaxstr == 1) rfstrs(:) = 3
 
-   call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp4)
+   call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp4)
 
    if (inp%relaxat == 1) then
      index = 0
@@ -417,7 +416,7 @@ program anaddb
    ABI_ALLOCATE(dchide,(3,3,3))
    ABI_ALLOCATE(dchidt,(natom,3,3,3))
 
-   if (ddb_get_dchidet(ddb,inp%ramansr,inp%nlflag,dchide,dchidt) == 0) then
+   if (ddb%get_dchidet(inp%ramansr,inp%nlflag,dchide,dchidt) == 0) then
      MSG_ERROR("Cannot find block corresponding to non-linear optical susceptibilities in DDB file")
    end if
 
@@ -458,41 +457,38 @@ program anaddb
 
    if (any(inp%qrefine(:) > 1)) then
      ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
-
      ! Build the IFCs using the coarse q-mesh.
      do ii = 1, 3
-       ngqpt_coarse(ii) = inp%ngqpt(ii)/inp%qrefine(ii)
+       ngqpt_coarse(ii) = inp%ngqpt(ii) / inp%qrefine(ii)
      end do
      call ifc_init(Ifc_coarse,Crystal,ddb,&
-&     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,ngqpt_coarse,inp%nqshft,inp%q1shft,dielt,zeff,&
-&     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
+       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,ngqpt_coarse,inp%nqshft,inp%q1shft,dielt,zeff,&
+       inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
 
-     ! And now use the coarse q-mesh to fill the entries in dynmat(q)
+     ! Now use the coarse q-mesh to fill the entries in dynmat(q)
      ! on the dense q-mesh that cannot be obtained from the DDB file.
      call ifc_init(Ifc,Crystal,ddb,&
-&     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
-&     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm,Ifc_coarse=Ifc_coarse)
-     call ifc_free(Ifc_coarse)
+      inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
+      inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm,Ifc_coarse=Ifc_coarse)
+     call Ifc_coarse%free()
 
    else
      call ifc_init(Ifc,Crystal,ddb,&
-&     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
-&     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
+       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
+       inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
    end if
 
-   call ifc_print(ifc, unit=std_out)
+   call ifc%print(unit=std_out)
 
    ! Compute speed of sound.
    if (inp%vs_qrad_tolkms(1) > zero) then
-     call ifc_speedofsound(ifc, crystal, inp%vs_qrad_tolkms, ana_ncid, comm)
-     !call ifc_test_phinterp(ifc, crystal, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm, test_dwdq=.True.)
-     !stop
+     call ifc%speedofsound(crystal, inp%vs_qrad_tolkms, ana_ncid, comm)
    end if
 
    ! Print analysis of the real-space interatomic force constants
    ! TODO: ifc_out should not have side effects
    if (my_rank == master .and. inp%ifcout/=0) then
-     call ifc_write(Ifc,inp%ifcana,inp%atifc,inp%ifcout,inp%prt_ifc,ana_ncid)
+     call ifc%write(inp%ifcana,inp%atifc,inp%ifcout,inp%prt_ifc,ana_ncid)
    end if
  end if
 
@@ -524,31 +520,31 @@ program anaddb
      if (all(count_wminmax == 0)) exit
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
      wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
-     call phdos_free(phdos)
+     call phdos%free()
      write(msg, "(a, 2f8.5)")"Initial frequency mesh not large enough. Recomputing PHDOS with wmin, wmax: ",wminmax
      call wrtout(std_out, msg)
    end do
 
    if (iam_master) then
-     call phdos_print_msqd(Phdos, filnam(2), inp%ntemper, inp%tempermin, inp%temperinc)
-     call phdos_print(Phdos, strcat(filnam(2), "_PHDOS"))
-     call phdos_print_debye(Phdos, Crystal%ucvol)
-     call phdos_print_thermo(PHdos, strcat(filnam(2), "_THERMO"), inp%ntemper, inp%tempermin, inp%temperinc)
+     call phdos%print_msqd(filnam(2), inp%ntemper, inp%tempermin, inp%temperinc)
+     call phdos%print(strcat(filnam(2), "_PHDOS"))
+     call phdos%print_debye(Crystal%ucvol)
+     call phdos%print_thermo(strcat(filnam(2), "_THERMO"), inp%ntemper, inp%tempermin, inp%temperinc)
 
 #ifdef HAVE_NETCDF
      ncerr = nctk_open_create(phdos_ncid, strcat(filnam(2), "_PHDOS.nc"), xmpi_comm_self)
      NCF_CHECK_MSG(ncerr, "Creating PHDOS.nc file")
      NCF_CHECK(Crystal%ncwrite(phdos_ncid))
-     call phdos_ncwrite(Phdos, phdos_ncid)
+     call phdos%ncwrite(phdos_ncid)
      NCF_CHECK(nf90_close(phdos_ncid))
 #endif
    end if
 
-   call phdos_free(Phdos)
+   call phdos%free()
  end if
 
  if (iam_master .and. inp%ifcflag==1 .and. inp%outboltztrap==1) then
-   call ifc_outphbtrap(Ifc,Crystal,inp%ng2qpt,1,inp%q2shft,filnam(2))
+   call ifc%outphbtrap(Crystal,inp%ng2qpt,1,inp%q2shft,filnam(2))
  end if
 
  ! Phonon density of states and thermodynamical properties calculation
@@ -627,13 +623,13 @@ program anaddb
 
      ! Look after the information in the DDB
      rfphon(1:2)=1; rfelfd(1:2)=2; rfstrs(1:2)=0
-     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
+     call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
 
      ! Copy the dynamical matrix in d2cart
      d2cart(:,1:msize)=ddb%val(:,:,iblok)
 
      ! Eventually impose the acoustic sum rule
-     call asrq0_apply(asrq0, natom, mpert, msize, crystal%xcart, d2cart)
+     call asrq0%apply(natom, mpert, msize, crystal%xcart, d2cart)
    end if ! end of the generation of the dynamical matrix at gamma.
 
    if (inp%nph2l/=0) then
@@ -737,7 +733,7 @@ program anaddb
    ! independent of the interatomic force constant calculation
    qphon(:,1)=zero; qphnrm(1)=zero
    rfphon(1:2)=0; rfelfd(1:2)=2; rfstrs(1:2)=0
-   call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
+   call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
    if (iblok == 0) then
      MSG_ERROR("DDB file must contain both derivatives wrt electric field, Check your calculations")
    end if
@@ -790,7 +786,7 @@ program anaddb
      qphon(:,1)=zero; qphnrm(1)=zero
      rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=3
 
-     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
+     call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
      if (iblok == 0) then
        MSG_ERROR("DDB file must contain both uniaxial and shear strain for piezoelectric, Check your calculations")
      end if
@@ -816,7 +812,7 @@ program anaddb
      qphon(:,1)=zero; qphnrm(1)=zero
      rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=0
 
-     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp4)
+     call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp4)
      iblok_stress=iblok
 
      ! look after the blok no.iblok that contains the elastic tensor
@@ -824,7 +820,7 @@ program anaddb
      rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=3
 
      ! for both diagonal and shear parts
-     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
+     call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
      if (iblok == 0) then
        MSG_ERROR("DDB file must contain both uniaxial and shear strain when elaflag != 0, Check your calculations")
      end if
@@ -853,7 +849,7 @@ program anaddb
      rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=3
 
      ! for both diagonal and shear parts
-     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
+     call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
      if (iblok == 0) then
        MSG_ERROR("DDB file must contain both uniaxial and shear strain for piezoelectric, Check your calculations")
      end if
@@ -877,10 +873,10 @@ program anaddb
 
  50 continue
 
- call asrq0_free(asrq0)
- call ifc_free(Ifc)
+ call asrq0%free()
+ call ifc%free()
  call crystal%free()
- call ddb_free(ddb)
+ call ddb%free()
  call anaddb_dtset_free(inp)
  call thermal_supercell_free(inp%ntemper, thm_scells)
 

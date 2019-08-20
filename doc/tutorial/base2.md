@@ -17,9 +17,9 @@ the supercell, and finally consider the effect of the XC functional. The
 problems related to the use of different pseudopotential are not examined.
 You will also finish to read the [[help:abinit]].
 
-[TUTORIAL_README]
-
 This tutorial should take about 1 hour.
+
+[TUTORIAL_README]
 
 ## Summary of the previous tutorial
   
@@ -49,11 +49,11 @@ Why not Work2?*
 
 Because we will compute many times the bond length and atomisation energy, it
 is worth to make a single input file that will do all the associated operations. 
-You should try to use 2 datasets (try to combine *\$ABI_TUTORIAL/Input/tbase1_3.in* with *tbase1_5.in*).
+You should try to use 2 datasets (try to combine *\$ABI_TESTS/tutorial/Input/tbase1_3.in* with *tbase1_5.in*).
 Do not try to have the same position of the H atom as one of the H$_2$ atoms in the optimized geometry.
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work2
 cd Work2
 cp ../tbase2_x.files .   # You will need to edit this file.
@@ -68,7 +68,7 @@ while *tbase2_1.out* is an example of output file:
 
 {% dialog tests/tutorial/Refs/tbase2_1.out %}
 
-You might use *$ABI_TUTORIAL/Input/tbase2_x.files* as *files* file 
+You might use *$ABI_TESTS/tutorial/Input/tbase2_x.files* as *files* file 
 (do not forget to modify it, like in [[lesson:base1|tutorial 1]], 
 although it does not differ from *tbase1_x.files*. 
 
@@ -121,7 +121,7 @@ focus only on [[ecut]] and [[acell]]. This is because
   
 For the check of convergence with respect to [[ecut]], you have the choice
 between doing different runs of the *tbase2_1.in* file with different values of
-[[ecut]], or doing a double loop of datasets, as proposed in *$ABI_TUTORIAL/Input/tbase2_2.in*. 
+[[ecut]], or doing a double loop of datasets, as proposed in *$ABI_TESTS/tutorial/Input/tbase2_2.in*. 
 The values of [[ecut]] have been chosen between 10 Ha and 35 Ha, by step of 5 Ha. 
 If you want to make a double loop, you might benefit of reading again the 
 [[help:abinit#loop|double-loop section]] of the abinit_help file.
@@ -185,11 +185,11 @@ We will explore [[acell]] starting from `8 8 8` to `18 18 18`, by step of `2 2 2
 We keep [[ecut]] 10 for this study. Indeed, it is a rather general rule that there is 
 little cross-influence between the convergence of [[ecut]] and the convergence of [[acell]]. 
 
-The file *$ABI_TUTORIAL/Input/tbase2_3.in* can be used as an example. 
+The file *$ABI_TESTS/tutorial/Input/tbase2_3.in* can be used as an example. 
 
 {% dialog tests/tutorial/Input/tbase2_3.in %}
 
-The output results in *$ABI_TUTORIAL/Refs/tbase2_3.out* are as follows:
+The output results in *$ABI_TESTS/tutorial/Refs/tbase2_3.out* are as follows:
     
         etotal11   -1.1188124709E+00
         etotal12   -4.8074164402E-01
@@ -252,11 +252,11 @@ Well, you should modify the *tbase2_3.in* file to make a calculation with `acell
 You can still use the double loop feature with `udtset 1 2`
 (which reduces to a single loop), to minimize the modifications to the file.
 
-The file *$ABI_TUTORIAL/Input/tbase2_4.in* can be taken as an example of input file:
+The file *$ABI_TESTS/tutorial/Input/tbase2_4.in* can be taken as an example of input file:
 
 {% dialog tests/tutorial/Input/tbase2_4.in %}
 
-while *$ABI_TUTORIAL/Refs/tbase2_4.out* is as an example of output file:
+while *$ABI_TESTS/tutorial/Refs/tbase2_4.out* is as an example of output file:
 
 {% dialog tests/tutorial/Refs/tbase2_4.out %}
 

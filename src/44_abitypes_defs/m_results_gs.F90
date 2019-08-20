@@ -32,13 +32,19 @@ MODULE m_results_gs
  use m_xmpi
  use m_energies
  use m_errors
+ use m_yaml
+ use m_crystal
+ use m_stream_string
+ use m_pair_list
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
- use m_io_tools,  only : file_exists
- use m_fstrings,  only : sjoin
+ use m_io_tools,      only : file_exists
+ use m_fstrings,      only : sjoin
+ use m_numeric_tools, only : get_trace
+ use defs_abitypes,   only : dataset_type
 
  implicit none
 
@@ -184,6 +190,11 @@ MODULE m_results_gs
    ! The "sy" prefix refer to the fact that this gradient has been
    ! symmetrized.
 
+ contains
+
+  procedure :: yaml_write => results_gs_yaml_write
+    ! Write the most important results in Yaml format.
+
  end type results_gs_type
 
 !public procedures.
@@ -238,7 +249,6 @@ subroutine init_results_gs(natom,nsppol,results_gs,only_part)
 !Local variables-------------------------------
 !scalars
  logical :: full_init
-!arrays
 
 !************************************************************************
 
@@ -700,7 +710,7 @@ end subroutine copy_results_gs
 !!
 !! SOURCE
 
-integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
+integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 
 !Arguments ------------------------------------
 !scalars
@@ -778,6 +788,99 @@ contains
  end function vid
 
 end function results_gs_ncwrite
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_results_gs/results_gs_yaml_write
+!!
+!! NAME
+!! results_gs_yaml_write
+!!
+!! FUNCTION
+!! Write results_gs in yaml format to unit iout
+!!
+!! INPUTS
+!!  results <type(results_gs_type)>=miscellaneous information about the system after ground state computation
+!!  iout= unit of output file
+!!  [comment] optional comment for the final document
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
+
+ class(results_gs_type),intent(in) :: results
+ type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: iout
+ character(len=*),intent(in),optional :: comment
+
+!Local variables-------------------------------
+ integer,parameter :: width=10
+ integer :: ii
+ type(yamldoc_t) :: ydoc
+ type(pair_list) :: dict
+ real(dp) :: strten(3,3), abc(3)
+
+!************************************************************************
+
+ if (present(comment)) then
+   ydoc = yamldoc_open('ResultsGS', comment, width=width)
+ else
+   ydoc = yamldoc_open('ResultsGS', '', width=width)
+ end if
+ ydoc%use_yaml = dtset%use_yaml
+
+ call ydoc%add_int('natom', results%natom)
+ call ydoc%add_int('nsppol', results%nsppol)
+ call ydoc%add_int('nspinor', dtset%nspinor)
+ call ydoc%add_int('nspden', dtset%nspden)
+ call ydoc%add_real("nelect", dtset%nelect)
+ call ydoc%add_real("charge", dtset%charge)
+
+ call dict%set('ecut', r=dtset%ecut)
+ call dict%set('pawecutdg', r=dtset%pawecutdg)
+ call ydoc%add_dict('cutoff_energies', dict)
+ call dict%free()
+
+ call dict%set('deltae', r=results%deltae)
+ call dict%set('res2', r=results%res2)
+ call dict%set('residm', r=results%residm)
+ call dict%set('diffor', r=results%diffor)
+ call ydoc%add_dict('convergence', dict, multiline_trig=2)
+ call dict%free()
+
+ abc(:) = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
+ call ydoc%add_real1d('abc', cryst%angdeg)
+ call ydoc%add_real1d('alpha_beta_gamma_angles', cryst%angdeg)
+ call ydoc%add_real('etotal', results%etotal)
+ call ydoc%add_real('entropy', results%entropy)
+ call ydoc%add_real('fermie', results%fermie)
+
+ strten(1,1) = results%strten(1)
+ strten(2,2) = results%strten(2)
+ strten(3,3) = results%strten(3)
+ strten(2,3) = results%strten(4)
+ strten(3,2) = results%strten(4)
+ strten(1,3) = results%strten(5)
+ strten(3,1) = results%strten(5)
+ strten(1,2) = results%strten(6)
+ strten(2,1) = results%strten(6)
+
+ call ydoc%add_real2d('stress_tensor', strten, tag='CartTensor')
+ ! Add results in GPa as well
+ !strten = strten * HaBohr3_GPa
+ !call ydoc%add_real2d('stress_tensor_GPa', strten, tag='CartTensor')
+ !call ydoc%add_real('pressure_GPa', get_trace(strten) / three)
+
+ call ydoc%add_real2d('cartesian_forces', results%fcart, tag='CartForces')
+ call ydoc%write_and_free(iout)
+
+end subroutine results_gs_yaml_write
 !!***
 
 !----------------------------------------------------------------------

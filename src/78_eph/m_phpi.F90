@@ -357,7 +357,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  ABI_MALLOC(gkk_m, (2, mband_kq, mband))
 
  ! Compute displacement vectors and phonon frequencies
- call ifc_fourq(ifc,cryst,qpt,phfrq,displ_cart, out_displ_red=displ_red)
+ call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
 
  ! Broadening parameter
  if (dtset%elph2_imagden .gt. tol12) then
