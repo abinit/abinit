@@ -67,7 +67,7 @@ module m_phgamma
  use m_bz_mesh,        only : isamek, kpath_t, kpath_new
  use m_special_funcs,  only : fermi_dirac
  use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk
- use defs_elphon,      only : gam_mult_displ, complete_gamma !, complete_gamma_tr
+ use defs_elphon,      only : complete_gamma !, complete_gamma_tr
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
@@ -889,8 +889,8 @@ subroutine phgamma_eval_qibz(gams, cryst, ifc, iq_ibz, spin, phfrq, gamma_ph, la
  character(len=500) :: msg
  !arrays
  real(dp) :: displ_red(2,gams%natom3,gams%natom3)
- real(dp) :: img(gams%natom3)
- real(dp) :: tmp_gam1(2,gams%natom3,gams%natom3),tmp_gam2(2,gams%natom3,gams%natom3)
+ real(dp) :: work_qnu(gams%natom3)
+ real(dp) :: gam_atm(2,gams%natom3,gams%natom3)
 
 ! *************************************************************************
 
@@ -901,34 +901,17 @@ subroutine phgamma_eval_qibz(gams, cryst, ifc, iq_ibz, spin, phfrq, gamma_ph, la
  call ifc%fourq(cryst, gams%qibz(:,iq_ibz), phfrq, displ_cart, out_displ_red=displ_red)
 
  ! Scalar product with the displ_red vectors.
- tmp_gam2 = reshape(gams%vals_qibz(:,:,:,iq_ibz,spin), [2, natom3, natom3])
- call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
-
- do nu1=1,natom3
-   gamma_ph(nu1) = tmp_gam1(1, nu1, nu1)
-   img(nu1) = tmp_gam1(2, nu1, nu1)
-   if (abs(img(nu1)) > tol8) then
-     write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
-     MSG_WARNING(msg)
-   end if
- end do
+ gam_atm = reshape(gams%vals_qibz(:,:,:,iq_ibz,spin), [2, natom3, natom3])
+ call ephtk_gam_atm2qnu(natom3, displ_red, gam_atm, gamma_ph)
 
  if (present (gamma_ph_ee)) then
    if (gams%my_iqibz(iq_ibz) /= -1) then
      do iene = 1, gams%nene
        do jene = 1, gams%nene
          ! FIXME: Here one should use my_iq_ibz
-         tmp_gam2 = reshape(gams%vals_ee(:,jene,iene,:,:,iq_ibz,spin), [2, natom3, natom3])
-         call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
-
-         do nu1=1,natom3
-           gamma_ph_ee(jene,iene,nu1) = tmp_gam1(1, nu1, nu1)
-           img(nu1) = tmp_gam1(2, nu1, nu1)
-           if (abs(img(nu1)) > tol8) then
-             write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
-             MSG_WARNING(msg)
-           end if
-         end do
+         gam_atm = reshape(gams%vals_ee(:,jene,iene,:,:,iq_ibz,spin), [2, natom3, natom3])
+         call ephtk_gam_atm2qnu(natom3, displ_red, gam_atm, work_qnu)
+         gamma_ph_ee(jene, iene, :) = work_qnu
        end do
      end do
    end if
@@ -1015,8 +998,8 @@ subroutine phgamma_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_ph, lambda_p
  character(len=500) :: msg
  !arrays
  real(dp) :: displ_red(2,gams%natom3,gams%natom3)
- real(dp) :: gam_now(2,gams%natom3**2),img(gams%natom3)
- real(dp) :: tmp_gam1(2,gams%natom3,gams%natom3),tmp_gam2(2,gams%natom3,gams%natom3)
+ real(dp) :: gam_now(2,gams%natom3**2) !,work_qnu(gams%natom3)
+ real(dp) :: gam_atm(2,gams%natom3,gams%natom3)
  real(dp),allocatable :: coskr(:,:),sinkr(:,:)
 
 ! *************************************************************************
@@ -1056,32 +1039,8 @@ subroutine phgamma_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_ph, lambda_p
  call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
 
  ! Scalar product with the displ_red
- tmp_gam2 = reshape(gam_now, [2, natom3, natom3])
- call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
-
- do nu1=1,natom3
-   gamma_ph(nu1) = tmp_gam1(1, nu1, nu1)
-   img(nu1) = tmp_gam1(2, nu1, nu1)
-   if (abs(img(nu1)) > tol8) then
-     write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
-     MSG_WARNING(msg)
-   end if
- end do
-
-! do iene = 1, gams%nene
-!   do jene = 1, gams%nene
-!     tmp_gam2 = reshape(gam_now, [2,natom3,natom3])
-!     call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
-!     do nu1=1,natom3
-!       gamma_ph(nu1) = tmp_gam1(1, nu1, nu1)
-!       img(nu1) = tmp_gam1(2, nu1, nu1)
-!       if (abs(img(nu1)) > tol8) then
-!         write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
-!         MSG_WARNING(msg)
-!       end if
-!     end do
-!   end do
-! end do
+ gam_atm = reshape(gam_now, [2, natom3, natom3])
+ call ephtk_gam_atm2qnu(natom3, displ_red, gam_atm, gamma_ph)
 
  ! Compute lambda
  !spinfact should be 1 for a normal non sppol calculation without spinorbit
@@ -1298,8 +1257,8 @@ subroutine phgamma_vv_eval_qibz(gams, cryst, ifc, iq_ibz, spin, phfrq, gamma_in_
  character(len=500) :: msg
 !arrays
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom), displ_red(2,gams%natom3,gams%natom3)
- real(dp) :: img(gams%natom3)
- real(dp) :: tmp_gam1(2,gams%natom3,gams%natom3),tmp_gam2(2,gams%natom3,gams%natom3)
+ real(dp) :: work_qnu(gams%natom3)
+ real(dp) :: gam_atm(2,gams%natom3,gams%natom3)
 
 ! *************************************************************************
 
@@ -1313,30 +1272,13 @@ subroutine phgamma_vv_eval_qibz(gams, cryst, ifc, iq_ibz, spin, phfrq, gamma_in_
    do idir = 1,gams%ndir_transp
      ii = idir + gams%ndir_transp*(jdir-1)
      ! Scalar product with the displ_red vectors.
-     tmp_gam2 = reshape(gams%vals_in_qibz(:,ii,:,:,iq_ibz,spin), [2, natom3, natom3])
-     call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
+     gam_atm = reshape(gams%vals_in_qibz(:,ii,:,:,iq_ibz,spin), [2, natom3, natom3])
+     call ephtk_gam_atm2qnu(natom3, displ_red, gam_atm, work_qnu)
+     gamma_in_ph(idir,jdir,:) = work_qnu
 
-     do nu1=1,natom3
-       gamma_in_ph(idir,jdir,nu1) = tmp_gam1(1, nu1, nu1)
-       img(nu1) = tmp_gam1(2, nu1, nu1)
-       if (abs(img(nu1)) > tol8) then
-         write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
-         MSG_WARNING(msg)
-       end if
-     end do
-
-     tmp_gam2 = reshape(gams%vals_out_qibz(:,ii,:,:,iq_ibz,spin), [2, natom3, natom3])
-     call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
-
-     do nu1=1,natom3
-       gamma_out_ph(idir,jdir,nu1) = tmp_gam1(1, nu1, nu1)
-       img(nu1) = tmp_gam1(2, nu1, nu1)
-       if (abs(img(nu1)) > tol8) then
-         write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
-         MSG_WARNING(msg)
-       end if
-     end do
-
+     gam_atm = reshape(gams%vals_out_qibz(:,ii,:,:,iq_ibz,spin), [2, natom3, natom3])
+     call ephtk_gam_atm2qnu(natom3, displ_red, gam_atm, work_qnu)
+     gamma_out_ph(idir,jdir,:) = work_qnu
    end do ! idir
  end do ! jdir
 
@@ -1416,10 +1358,10 @@ subroutine phgamma_vv_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_in_ph, ga
  character(len=500) :: msg
  !arrays
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
- real(dp) :: displ_red(2,gams%natom3,gams%natom3),img(gams%natom3)
+ real(dp) :: displ_red(2,gams%natom3,gams%natom3),work_qnu(gams%natom3)
  real(dp) :: gam_in_now(2,3,3,gams%natom3**2)
  real(dp) :: gam_out_now(2,3,3,gams%natom3**2)
- real(dp) :: tmp_gam1(2,gams%natom3,gams%natom3),tmp_gam2(2,gams%natom3,gams%natom3)
+ real(dp) :: gam_atm(2,gams%natom3,gams%natom3)
  real(dp),allocatable :: coskr(:,:),sinkr(:,:)
 
 ! *************************************************************************
@@ -1456,30 +1398,13 @@ subroutine phgamma_vv_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_in_ph, ga
      end if
 
      ! Scalar product with the displ_red
-     tmp_gam2 = reshape(gam_in_now, [2, natom3, natom3])
-     call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
+     gam_atm = reshape(gam_in_now, [2, natom3, natom3])
+     call ephtk_gam_atm2qnu(natom3, displ_red, gam_atm, work_qnu)
+     gamma_in_ph(idir,jdir,:) = work_qnu
 
-     do nu1=1,natom3
-       gamma_in_ph(idir,jdir,nu1) = tmp_gam1(1, nu1, nu1)
-       img(nu1) = tmp_gam1(2, nu1, nu1)
-       if (abs(img(nu1)) > tol8) then
-         write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
-         MSG_WARNING(msg)
-       end if
-     end do
-
-     tmp_gam2 = reshape(gam_out_now, [2, natom3, natom3])
-     call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
-
-     do nu1=1,natom3
-       gamma_out_ph(idir,jdir,nu1) = tmp_gam1(1, nu1, nu1)
-       img(nu1) = tmp_gam1(2, nu1, nu1)
-       if (abs(img(nu1)) > tol8) then
-         write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch= ',nu1,', img= ',img(nu1)
-         MSG_WARNING(msg)
-       end if
-     end do
-
+     gam_atm = reshape(gam_out_now, [2, natom3, natom3])
+     call ephtk_gam_atm2qnu(natom3, displ_red, gam_atm, work_qnu)
+     gamma_out_ph(idir,jdir,:) = work_qnu
    end do
  end do
 
@@ -1490,7 +1415,7 @@ subroutine phgamma_vv_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_in_ph, ga
  ! spinfact should be 1 for a normal non sppol calculation without spinorbit
  ! for spinors it should also be 1 as bands are twice as numerous but n0 has been divided by 2
  ! for sppol 2 it should be 0.5 as we have 2 spin channels to sum
- spinfact = two/(gams%nsppol*gams%nspinor)
+ spinfact = two / (gams%nsppol * gams%nspinor)
 
  ! Compute lambda
  do nu1=1,gams%natom3
@@ -1965,8 +1890,7 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqp
  real(dp), ABI_CONTIGUOUS pointer :: a2f_1d(:)
  real(dp),allocatable :: qibz(:,:),wtq(:),qbz(:,:)
  real(dp),allocatable :: a2f_1mom(:),a2flogmom(:),a2flogmom_int(:),wdt(:,:)
- real(dp),allocatable :: lambda_tetra(:,:,:),phfreq_tetra(:,:)
- real(dp),allocatable :: tmp_gaussian(:,:)
+ real(dp),allocatable :: lambda_tetra(:,:,:),phfreq_tetra(:,:), tmp_gaussian(:,:)
  real(dp), allocatable :: a2feew_partial(:), a2feew_partial_int(:), a2feew_w(:), a2feew_w_int(:)
 
 ! *********************************************************************

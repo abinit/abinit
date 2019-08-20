@@ -42,8 +42,7 @@ module m_ephtk
  public :: ephtk_set_phmodes_ship     ! Setup a mask to skip accumulating the contribution of certain phonon modes.
  public :: ephtk_set_pertables        ! Set tables for parallelism over perturbations from my_npert and comm
  public :: ephtk_mkqtabs              ! Build tables with correspondence between q-points as needed by complete_gamma.
- public :: ephtk_mult_displ
- public :: ephtk_mult_displ_ip
+ public :: ephtk_gam_atm2qnu
 !!***
 
 contains  !=====================================================
@@ -262,13 +261,13 @@ end subroutine ephtk_mkqtabs
 
 !----------------------------------------------------------------------
 
-!!****f* m_ephtk/ephtk_mult_displ
+!!****f* m_ephtk/ephtk_gam_atm2qnu
 !! NAME
-!! ephtk_mult_displ
+!! ephtk_gam_atm2qnu
 !!
 !! FUNCTION
-!! This routine takes the bare gamma matrices and multiplies them
-!!  by the displ_red matrices. Based on gam_mult_displ
+!! This routine takes the bare gamma matrices and multiplies them by the displ_red matrices.
+!! Based on gam_mult_displ
 !!
 !! INPUTS
 !!   natom3 = number of phonon branches (3*natom)
@@ -285,66 +284,40 @@ end subroutine ephtk_mkqtabs
 !!
 !! SOURCE
 
-subroutine ephtk_mult_displ(natom3, displ_red, gam_bare, gam_now)
+subroutine ephtk_gam_atm2qnu(natom3, displ_red, gam_atm, gam_qnu)
 
 !Arguments -------------------------------
  integer, intent(in)  :: natom3
  real(dp), intent(in)  :: displ_red(2,natom3,natom3)
- real(dp), intent(in)  :: gam_bare(2,natom3,natom3)
- real(dp), intent(out) :: gam_now(2,natom3,natom3)
+ real(dp), intent(in)  :: gam_atm(2,natom3,natom3)
+ real(dp), intent(out) :: gam_qnu(natom3)
 
 !Local variables -------------------------
- real(dp) :: zgemm_tmp_mat(2,natom3,natom3)
+ integer,save :: enough = 0
+ integer :: nu
+ character(len=500) :: msg
+ real(dp) :: zgemm_tmp_mat(2,natom3,natom3), gam_now(2,natom3,natom3)
 
 ! *********************************************************************
 
- call zgemm('c','n',natom3,natom3,natom3,cone,displ_red,natom3,gam_bare,natom3,czero,zgemm_tmp_mat,natom3)
+ call zgemm('c','n',natom3, natom3, natom3, cone, displ_red, natom3, gam_atm, natom3, czero, zgemm_tmp_mat, natom3)
 
  gam_now = zero
  call zgemm('n','n',natom3,natom3,natom3,cone,zgemm_tmp_mat,natom3,displ_red,natom3,czero,gam_now,natom3)
 
-end subroutine ephtk_mult_displ
-!!***
+ ! Extract gamma(q,nu)
+ do nu=1,natom3
+   gam_qnu(nu) = gam_now(1, nu, nu)
+   if (abs(gam_now(2, nu, nu)) > tol8) then
+     enough = enough + 1
+     if (enough <= 30) then
+       write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch: ',nu,', img: ',gam_now(2, nu, nu)
+       MSG_WARNING(msg)
+     end if
+   end if
+ end do
 
-!!****f* m_ephtk/ephtk_mult_displ_ip
-!! NAME
-!! ephtk_mult_displ_ip
-!!
-!! FUNCTION
-!! This routine takes the bare gamma matrices and multiplies them
-!!  by the displ_red matrices. Based on gam_mult_displ
-!!
-!! INPUTS
-!!   natom3 = number of phonon branches (3*natom)
-!!   displ_red = phonon mode displacement vectors in reduced coordinates.
-!!
-!! OUTPUT
-!!   gam_bare = bare gamma matrices before multiplication
-!!   gam_now = output gamma matrices multiplied by displacement matrices
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      zgemm
-!!
-!! SOURCE
-
-subroutine ephtk_mult_displ_ip(natom3, displ_red, gam_bare)
-
-!Arguments -------------------------------
- integer, intent(in) :: natom3
- real(dp), intent(in) :: displ_red(2,natom3,natom3)
- real(dp), intent(inout)  :: gam_bare(2,natom3,natom3)
-
-!Local variables -------------------------
- real(dp) :: gam_now(2,natom3,natom3)
-
-! *********************************************************************
-
- call ephtk_mult_displ(natom3, displ_red, gam_bare, gam_now)
- gam_bare = gam_now
-
-end subroutine ephtk_mult_displ_ip
+end subroutine ephtk_gam_atm2qnu
 !!***
 
 end module m_ephtk
