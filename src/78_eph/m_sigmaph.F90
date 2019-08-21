@@ -832,8 +832,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! if PAW, one has to solve a generalized eigenproblem
  ! BE careful here because I will need sij_opt == -1
  usecprj = 0
- gen_eigenpb = psps%usepaw == 1
- sij_opt = 0; if (gen_eigenpb) sij_opt = 1
+ gen_eigenpb = psps%usepaw == 1; sij_opt = 0; if (gen_eigenpb) sij_opt = 1
 
  ABI_DT_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
  ABI_DT_MALLOC(cwaveprj, (natom, nspinor*usecprj))
@@ -2653,7 +2652,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  keepdim = .False.; keepdim(3) = .True.
  call MPI_CART_SUB(comm_cart, keepdim, new%bsum_comm%value, ierr); new%bsum_comm%me = xmpi_comm_rank(new%bsum_comm%value)
 
- ! Create communicator for kponts.
+ ! Create communicator for kpoints.
  keepdim = .False.; keepdim(4) = .True.
  call MPI_CART_SUB(comm_cart, keepdim, new%kcalc_comm%value, ierr); new%kcalc_comm%me = xmpi_comm_rank(new%kcalc_comm%value)
 

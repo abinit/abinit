@@ -31,6 +31,7 @@ module m_ephtk
  use m_dtset
  use m_crystal
  use m_krank
+ use m_xmpi
 
  use m_fstrings,     only : itoa, sjoin, ltoa, ktoa
  use m_bz_mesh,      only : isamek

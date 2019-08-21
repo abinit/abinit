@@ -174,8 +174,6 @@ subroutine fstab_free(fstab)
 
 ! ************************************************************************
 
- !@fstab_t
-
  ! integer
  ABI_SFREE(fstab%indkk_fs)
  ABI_SFREE(fstab%bstcnt_ibz)
@@ -655,11 +653,11 @@ subroutine fstab_print(fstab, header, unit, prtvol)
  do spin=1,size(fstab)
    fs => fstab(spin)
    write(my_unt,"(a,i0)")"For spin: ",spin
-   write(my_unt,"(a,i0,a,f5.1,a)")&
-     "  Number of BZ k-points close to the Fermi surface: ",fs%nkfs," [",(100.0_dp*fs%nkfs)/fs%nktot," %]"
+   write(my_unt,"(a,i0,a,f5.1,a)") &
+     "  Number of BZ k-points close to the Fermi surface: ",fs%nkfs," [", (100.0_dp * fs%nkfs) / fs%nktot, " %]"
    write(my_unt,"(a,i0)")"  Maximum number of bands crossing the Fermi level: ",fs%maxnb
-   write(my_unt,"(2(a,i0))")"  min band: ",minval(fs%bstcnt_ibz(1,:), mask=fs%bstcnt_ibz(1,:)/=-1)
-   write(my_unt,"(2(a,i0))")"  Max band: ",maxval(fs%bstcnt_ibz(1,:)+fs%bstcnt_ibz(2,:)-1, mask=fs%bstcnt_ibz(1,:)/=-1)
+   write(my_unt,"(2(a,i0))")"  min band: ",minval(fs%bstcnt_ibz(1,:), mask=fs%bstcnt_ibz(1,:) /= -1)
+   write(my_unt,"(2(a,i0))")"  Max band: ",maxval(fs%bstcnt_ibz(1,:)+fs%bstcnt_ibz(2,:)-1, mask=fs%bstcnt_ibz(1,:) /= -1)
  end do
 
 end subroutine fstab_print

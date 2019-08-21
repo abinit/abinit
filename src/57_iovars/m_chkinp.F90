@@ -818,6 +818,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (any(dt%ddb_ngqpt <= 0)) then
        MSG_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
      end if
+     if (dt%eph_task == 1 .and. dt%ph_nqpath <= 0) then
+       MSG_ERROR("When eph_task == 1, the q-path for the linewidth must be specified via ph_nqpath and ph_qpath")
+     end if
+
      if (dt%eph_task == 2 .and. dt%irdwfq == 0 .and. dt%getwfq == 0) then
        MSG_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
      end if
@@ -844,7 +848,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (product(dt%eph_np_pqbks) /= all_nprocs) then
        write(msg, "(a,i0,3a, 6(a,1x,i0))") &
          "Cannot create 5d Cartesian grid with nprocs: ", all_nprocs, ch10, &
-         "Idle processes are not supported. The product of the `nprocs_*` vars should be equal to nprocs.", ch10, &
+         "Idle processes are not supported. The product of the `nproc_*` vars should be equal to nproc.", ch10, &
          "nprocs_pert (", dt%eph_np_pqbks(1), ") x nprocs_qpt (", dt%eph_np_pqbks(2), &
          ") x nprocs_bsum (", dt%eph_np_pqbks(3), ") x nprocs_kcalc (", dt%eph_np_pqbks(4), &
          ") x nprocs_spin (", dt%eph_np_pqbks(5), ") != ", all_nprocs
