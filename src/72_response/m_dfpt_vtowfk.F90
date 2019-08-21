@@ -87,7 +87,7 @@ contains
 !!  icgq=shift to be applied on the location of data in the array cgq
 !!  icg1=shift to be applied on the location of data in the array cg1
 !!  idir=direction of the current perturbation
-!!  ikpt=number of the k-point
+!!  ikpt=k-point index number
 !!  ipert=type of the perturbation
 !!  isppol=1 index of current spin component
 !!  mband=maximum number of bands
@@ -373,9 +373,9 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
 !  If electric field, the derivative of the wf should be read, and multiplied by i.
    if(test_ddk==1) then
-     ii = wfk_findk(ddk_f(1), gs_hamkq%kpt_k)
-     ABI_CHECK(ii == ikpt, "ii != ikpt")
-     call wfk_read_bks(ddk_f(1), iband, ikpt, isppol, xmpio_single, cg_bks=gvnlx1)
+     ii = ddk_f(1)%findk(gs_hamkq%kpt_k)
+     ABI_CHECK(ii == ikpt, "ii != ikpt, something is wrong with k-point, check kptopt/ngkpt, etc")
+     call ddk_f(1)%read_bks(iband, ikpt, isppol, xmpio_single, cg_bks=gvnlx1)
 
 !    Multiplication by -i
 !    MVeithen 021212 : use + i instead,
