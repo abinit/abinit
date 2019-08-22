@@ -636,28 +636,28 @@ subroutine fstab_print(fstab, header, unit, prtvol)
 
 ! *************************************************************************
 
- my_unt =std_out; if (present(unit)) my_unt = unit
- my_prtvol=0    ; if (present(prtvol)) my_prtvol = prtvol
+ my_unt = std_out; if (present(unit)) my_unt = unit
+ my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
  msg=' ==== Info on the fstab% object ==== '
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
  write(my_unt, "(a)")trim(msg)
 
  if (fstab(1)%integ_method == 1) then
-   write(my_unt,"(a,i0)")"FS integration done with gaussian method and nsig: ",fstab(1)%nsig
+   write(my_unt,"(a,i0)")" FS integration done with gaussian method and nsig: ",fstab(1)%nsig
  else if (fstab(1)%integ_method == 2) then
-   write(my_unt,"(a)")"FS integration done with tetrahedron method"
+   write(my_unt,"(a)")" FS integration done with tetrahedron method"
  end if
- write(my_unt,"(a,i0)")"Total number of points in the full mesh: ",fstab(1)%nktot
+ write(my_unt,"(a,i0)")" Total number of k-points in the full mesh: ",fstab(1)%nktot
 
  do spin=1,size(fstab)
    fs => fstab(spin)
-   write(my_unt,"(a,i0)")"For spin: ",spin
+   write(my_unt,"(a,i0)")" For spin: ",spin
    write(my_unt,"(a,i0,a,f5.1,a)") &
      "  Number of BZ k-points close to the Fermi surface: ",fs%nkfs," [", (100.0_dp * fs%nkfs) / fs%nktot, " %]"
    write(my_unt,"(a,i0)")"  Maximum number of bands crossing the Fermi level: ",fs%maxnb
    write(my_unt,"(2(a,i0))")"  min band: ",minval(fs%bstcnt_ibz(1,:), mask=fs%bstcnt_ibz(1,:) /= -1)
-   write(my_unt,"(2(a,i0))")"  Max band: ",maxval(fs%bstcnt_ibz(1,:)+fs%bstcnt_ibz(2,:)-1, mask=fs%bstcnt_ibz(1,:) /= -1)
+   write(my_unt,"(2(a,i0))")"  Max band: ",maxval(fs%bstcnt_ibz(1,:)+fs%bstcnt_ibz(2,:) - 1, mask=fs%bstcnt_ibz(1,:) /= -1)
  end do
 
 end subroutine fstab_print

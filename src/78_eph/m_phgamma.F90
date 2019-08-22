@@ -211,23 +211,14 @@ module m_phgamma
   !   abinit uses nband,nkpt,nsppol, but here for convenience nkpt_phon,nsppol,nqbz interpolation is on qpt
   !MG: I think that nsppol should be the last dimension set call to ftgam.
 
-  real(dp),allocatable :: vals_bz(:,:,:,:)
-  ! vals_bz(2,natom3**2,nqbz,nsppol)
-  ! tgamma matrices in reduced coordinates for each q in full zone
-  ! integrated over kpoints coeff and bands: still depends on qpt and spin.
-
   real(dp),allocatable :: vals_rpt(:,:,:,:)
   ! vals_rpt(2,natom3**2,nrpt,nsppol)
-  ! tgamma matrices in real space in reduced coordinates.
+  ! tgamma matrices in real space in reduced coordinates. Used for the Fourier interpolation.
 
   ! transport stuff with velocity factors
   real(dp),allocatable :: vals_in_qibz(:,:,:,:,:,:)
   real(dp),allocatable :: vals_out_qibz(:,:,:,:,:,:)
   ! vals_XX_qibz(2,ndir_transp**2,natom3,natom3,nqibz,nsppol)) in reduced coordinates for each q-point in the IBZ.
-
-  real(dp),allocatable :: vals_in_bz(:,:,:,:,:)
-  real(dp),allocatable :: vals_out_bz(:,:,:,:,:)
-  ! vals_XX_bz(2,ndir_transp**2,natom3**2,nqbz,nsppol)) in reduced coordinates for each q-point in the IBZ.
 
   real(dp),allocatable :: vals_in_rpt(:,:,:,:,:)
   real(dp),allocatable :: vals_out_rpt(:,:,:,:,:)
@@ -485,13 +476,10 @@ subroutine phgamma_free(gams)
  ABI_SFREE(gams%rpt)
  ABI_SFREE(gams%wghatm)
  ABI_SFREE(gams%vals_qibz)
- ABI_SFREE(gams%vals_bz)
  ABI_SFREE(gams%vals_rpt)
  ABI_SFREE(gams%vals_in_qibz)
- ABI_SFREE(gams%vals_in_bz)
  ABI_SFREE(gams%vals_in_rpt)
  ABI_SFREE(gams%vals_out_qibz)
- ABI_SFREE(gams%vals_out_bz)
  ABI_SFREE(gams%vals_out_rpt)
  ABI_SFREE(gams%vals_ee)
  ABI_SFREE(gams%my_iqibz)
@@ -616,10 +604,9 @@ subroutine phgamma_init(gams, cryst, ifc, fstab, dtset, eph_scalprod, ngqpt, n0,
  gams%my_nqbz = ind
 
  ! TODO: if we remove the nsig dependency in the gvvvals_*_qibz we can remove the intermediate array and save a lot of memory
- ABI_MALLOC_OR_DIE(gams%vals_in_qibz, (2,gams%ndir_transp**2, natom3, natom3, gams%nqibz, nsppol), ierr)
- gams%vals_in_qibz = zero
-
  if (dtset%eph_transport > 0) then
+   ABI_MALLOC_OR_DIE(gams%vals_in_qibz, (2,gams%ndir_transp**2, natom3, natom3, gams%nqibz, nsppol), ierr)
+   gams%vals_in_qibz = zero
    ABI_MALLOC_OR_DIE(gams%vals_out_qibz, (2, gams%ndir_transp**2, natom3, natom3, gams%nqibz, nsppol), ierr)
    gams%vals_out_qibz = zero
  end if
@@ -969,7 +956,7 @@ subroutine phgamma_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_ph, lambda_p
 ! *************************************************************************
 
  ! Compute internal tables used for Fourier interpolation.
- if (.not.allocated(gams%vals_bz)) call gams%interp_setup(cryst, "INIT")
+ if (.not. allocated(gams%vals_rpt)) call gams%interp_setup(cryst, "INIT")
 
  if (present(gamma_ph_ee) .and. icall == 0) then
    gamma_ph_ee = zero
@@ -980,7 +967,6 @@ subroutine phgamma_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_ph, lambda_p
    icall = 1
  end if
 
- !@phgamma_t
  natom3 = gams%natom3
 
  ! Taken from mkph_linwid
@@ -1007,9 +993,9 @@ subroutine phgamma_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_ph, lambda_p
  call ephtk_gam_atm2qnu(natom3, displ_red, gam_atm, gamma_ph)
 
  ! Compute lambda
- !spinfact should be 1 for a normal non sppol calculation without spinorbit
- !for spinors it should also be 1 as bands are twice as numerous but n0 has been divided by 2
- !for sppol 2 it should be 0.5 as we have 2 spin channels to sum
+ ! spinfact should be 1 for a normal non sppol calculation without spinorbit
+ ! for spinors it should also be 1 as bands are twice as numerous but n0 has been divided by 2
+ ! for sppol 2 it should be 0.5 as we have 2 spin channels to sum
  spinfact = two / (gams%nsppol * gams%nspinor)
 
  ! Compute lambda
@@ -1048,7 +1034,7 @@ end subroutine phgamma_interp
 !!    "FREE" to deallocate the internal tables.
 !!
 !! SIDE EFFECTS
-!!  gams<phgamma_t>= gams%vals_bz and gams%vals_rpt, depending on action.
+!!  gams<phgamma_t>= gams%vals_rpt, depending on action.
 !!
 !! PARENTS
 !!
@@ -1073,99 +1059,92 @@ subroutine phgamma_interp_setup(gams, cryst, action)
  integer,allocatable :: qirredtofull(:),qpttoqpt(:,:,:)
  real(dp),allocatable :: coskr(:,:),sinkr(:,:)
  real(dp),allocatable :: gamma_qpt(:,:,:,:),atmfrc(:,:)
+ real(dp),allocatable :: vals_bz(:,:,:,:)
 
 ! *************************************************************************
 
  select case (toupper(action))
 
  case ("INIT")
-   if (.not.allocated(gams%vals_bz)) then
-     ABI_MALLOC_OR_DIE(gams%vals_bz,(2, gams%natom3**2, gams%nqbz, gams%nsppol), ierr)
-     gams%vals_bz = zero
+   ABI_MALLOC_OR_DIE(vals_bz, (2, gams%natom3**2, gams%nqbz, gams%nsppol), ierr)
+   vals_bz = zero
 
-     ! Build tables needed by complete_gamma.
-     call ephtk_mkqtabs(cryst, gams%nqibz, gams%qibz, gams%nqbz, gams%qbz, qirredtofull, qpttoqpt)
+   ! Build tables needed by complete_gamma.
+   call ephtk_mkqtabs(cryst, gams%nqibz, gams%qibz, gams%nqbz, gams%qbz, qirredtofull, qpttoqpt)
 
-     ! Fill BZ array with IBZ data.
+   ! Fill BZ array with IBZ data.
+   do spin=1,gams%nsppol
+     do iq_ibz=1,gams%nqibz
+       iq_bz = qirredtofull(iq_ibz)
+       vals_bz(:,:,iq_bz,spin) = reshape(gams%vals_qibz(:,:,:,iq_ibz,spin), [2, gams%natom3**2])
+     end do
+   end do
+
+   ! Complete vals_bz in the full BZ.
+   ! FIXME: Change complete_gamma API to pass (..., nsppol)
+   ABI_MALLOC(gamma_qpt, (2, gams%natom3**2, gams%nsppol, gams%nqbz))
+   do spin=1,gams%nsppol
+     gamma_qpt(:, :, spin, :) = vals_bz(:, :, :, spin)
+   end do
+
+   call complete_gamma(cryst, gams%natom3, gams%nsppol, gams%nqibz, gams%nqbz, &
+     gams%eph_scalprod, qirredtofull, qpttoqpt, gamma_qpt)
+
+   do spin=1,gams%nsppol
+     vals_bz(:, :, :, spin) = gamma_qpt(:, :, spin, :)
+   end do
+
+   ABI_FREE(gamma_qpt)
+   ABI_FREE(qirredtofull)
+   ABI_FREE(qpttoqpt)
+
+   ! This call is not executed in elphon!
+   if (gams%symgamma == 1) then
      do spin=1,gams%nsppol
-       do iq_ibz=1,gams%nqibz
-         iq_bz = qirredtofull(iq_ibz)
-         gams%vals_bz(:,:,iq_bz,spin) = reshape(gams%vals_qibz(:,:,:,iq_ibz,spin), [2, gams%natom3**2])
+       do iq_bz=1,gams%nqbz
+         call tgamma_symm(cryst, gams%qbz(:,iq_bz), vals_bz(:,:,iq_bz,spin))
        end do
      end do
-
-     ! Complete vals_bz in the full BZ.
-     ! FIXME: Change complete_gamma API to pass (..., nsppol)
-     ABI_MALLOC(gamma_qpt, (2, gams%natom3**2, gams%nsppol, gams%nqbz))
-     do spin=1,gams%nsppol
-       gamma_qpt(:, :, spin, :) = gams%vals_bz(:, :, :, spin)
-     end do
-
-     call complete_gamma(cryst, gams%natom3, gams%nsppol, gams%nqibz, gams%nqbz, &
-       gams%eph_scalprod, qirredtofull, qpttoqpt, gamma_qpt)
-       !gams%eph_scalprod,qirredtofull,qpttoqpt,gams%vals_bz)
-
-     do spin=1,gams%nsppol
-       gams%vals_bz(:, :, :, spin) = gamma_qpt(:, :, spin, :)
-     end do
-     ABI_FREE(gamma_qpt)
-
-     ! TODO: idem for vv_vals 3x3 matrices
-     ABI_FREE(qirredtofull)
-     ABI_FREE(qpttoqpt)
-
-     ! This call is not executed in elphon!
-     if (gams%symgamma == 1) then
-       do spin=1,gams%nsppol
-         do iq_bz=1,gams%nqbz
-           call tgamma_symm(cryst, gams%qbz(:,iq_bz), gams%vals_bz(:,:,iq_bz,spin))
-         end do
-       end do
-     end if
-   end if ! first allocation and filling of arrays in qbz
+   end if
 
    ! Now FT to real space too
    ! NOTE: gprim (not gprimd) is used for all FT interpolations,
    ! to be consistent with the dimensions of the rpt, which come from anaddb.
-   ! TODO: this is needed only if FT is used, no when the linear interpolation is employed.
-   if (.not.allocated(gams%vals_rpt)) then
-     ABI_MALLOC_OR_DIE(gams%vals_rpt, (2, gams%natom3**2, gams%nrpt, gams%nsppol), ierr)
-     gams%vals_rpt = zero
+   ABI_MALLOC_OR_DIE(gams%vals_rpt, (2, gams%natom3**2, gams%nrpt, gams%nsppol), ierr)
+   gams%vals_rpt = zero
 
-     ! q --> r
-     ABI_MALLOC(coskr, (gams%nqbz, gams%nrpt))
-     ABI_MALLOC(sinkr, (gams%nqbz, gams%nrpt))
-     call ftgam_init(gams%gprim, gams%nqbz, gams%nrpt, gams%qbz, gams%rpt, coskr, sinkr)
+   ! q --> r
+   ABI_MALLOC(coskr, (gams%nqbz, gams%nrpt))
+   ABI_MALLOC(sinkr, (gams%nqbz, gams%nrpt))
+   call ftgam_init(gams%gprim, gams%nqbz, gams%nrpt, gams%qbz, gams%rpt, coskr, sinkr)
 
-     do spin=1,gams%nsppol
-       call ftgam(gams%wghatm, gams%vals_bz(:,:,:,spin), gams%vals_rpt(:,:,:,spin), gams%natom, gams%nqbz,&
-          gams%nrpt, qtor1, coskr, sinkr)
+   do spin=1,gams%nsppol
+     call ftgam(gams%wghatm, vals_bz(:,:,:,spin), gams%vals_rpt(:,:,:,spin), gams%natom, gams%nqbz,&
+        gams%nrpt, qtor1, coskr, sinkr)
 
-       ! Enforce "acoustic" rule on vals_rpt
-       ! This call is not executed in elphon!
-       if (gams%asr /= 0) then
-         ABI_MALLOC(atmfrc, (3*gams%natom*3*gams%natom, gams%nrpt))
-         do ii=1,2
-           atmfrc = gams%vals_rpt(ii,:,:,spin)
-           !gals%vals_rpt(2,:,,spin) = zero
-           call asrif9(gams%asr, atmfrc, gams%natom, gams%nrpt, gams%rpt, gams%wghatm)
-           gams%vals_rpt(ii,:,:,spin) = atmfrc
-         end do
-         ABI_FREE(atmfrc)
-       end if
-     end do
+     ! Enforce "acoustic" rule on vals_rpt
+     ! This call is not executed in elphon!
+     if (gams%asr /= 0) then
+       ABI_MALLOC(atmfrc, (3*gams%natom*3*gams%natom, gams%nrpt))
+       do ii=1,2
+         atmfrc = gams%vals_rpt(ii,:,:,spin)
+         !gals%vals_rpt(2,:,,spin) = zero
+         call asrif9(gams%asr, atmfrc, gams%natom, gams%nrpt, gams%rpt, gams%wghatm)
+         gams%vals_rpt(ii,:,:,spin) = atmfrc
+       end do
+       ABI_FREE(atmfrc)
+     end if
+   end do
 
-     ABI_FREE(coskr)
-     ABI_FREE(sinkr)
-   end if ! allocation and filling of rpt as well
+   ABI_FREE(vals_bz)
+   ABI_FREE(coskr)
+   ABI_FREE(sinkr)
 
  case ("FREE")
-   ABI_SFREE(gams%vals_bz)
    ABI_SFREE(gams%vals_rpt)
-   ABI_SFREE(gams%vals_ee)
 
  case default
-   MSG_BUG(sjoin("Wrong action:",action))
+   MSG_BUG(sjoin("Wrong action:", action))
  end select
 
 end subroutine phgamma_interp_setup
@@ -1331,7 +1310,7 @@ subroutine phgamma_vv_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_in_ph, ga
 ! *************************************************************************
 
  ! Compute internal tables used for Fourier interpolation.
- if (.not.allocated(gams%vals_in_bz)) call phgamma_vv_interp_setup(gams,cryst,"INIT")
+ if (.not.allocated(gams%vals_in_rpt)) call phgamma_vv_interp_setup(gams, cryst, "INIT")
 
  !@phgamma_t
  natom3 = gams%natom3
@@ -1416,7 +1395,7 @@ end subroutine phgamma_vv_interp
 !!    "FREE" to deallocate the internal tables.
 !!
 !! SIDE EFFECTS
-!!  gams<phgamma_t>= gams%vals_in_bz and gams%vals_in_rpt, etc... depending on action.
+!!  gams<phgamma_t>= gams%vals_in_rpt, etc... depending on action.
 !!
 !! PARENTS
 !!
@@ -1441,100 +1420,99 @@ subroutine phgamma_vv_interp_setup(gams, cryst, action)
 !arrays
  integer,allocatable :: qirredtofull(:),qpttoqpt(:,:,:)
  real(dp),allocatable :: coskr(:,:),sinkr(:,:)
+ real(dp),allocatable :: vals_in_bz(:,:,:,:,:)
+ real(dp),allocatable :: vals_out_bz(:,:,:,:,:)
 
 ! *************************************************************************
 
  select case (toupper(action))
 
  case ("INIT")
-   if (.not.allocated(gams%vals_in_bz)) then
-     ABI_MALLOC_OR_DIE(gams%vals_in_bz,(2,gams%ndir_transp**2,gams%natom3**2,gams%nqbz,gams%nsppol), ierr)
-     gams%vals_in_bz = zero
-     ABI_MALLOC_OR_DIE(gams%vals_out_bz,(2,gams%ndir_transp**2,gams%natom3**2,gams%nqbz,gams%nsppol), ierr)
-     gams%vals_out_bz = zero
+   ABI_MALLOC_OR_DIE(vals_in_bz,(2,gams%ndir_transp**2,gams%natom3**2,gams%nqbz,gams%nsppol), ierr)
+   ABI_MALLOC_OR_DIE(vals_out_bz,(2,gams%ndir_transp**2,gams%natom3**2,gams%nqbz,gams%nsppol), ierr)
+   vals_in_bz = zero
+   vals_out_bz = zero
 
-     ! Build tables needed by complete_gamma.
-     call ephtk_mkqtabs(cryst, gams%nqibz, gams%qibz, gams%nqbz, gams%qbz, qirredtofull, qpttoqpt)
+   ! Build tables needed by complete_gamma.
+   call ephtk_mkqtabs(cryst, gams%nqibz, gams%qibz, gams%nqbz, gams%qbz, qirredtofull, qpttoqpt)
 
-     ! Fill BZ array with IBZ data.
-     do spin=1,gams%nsppol
-       do iq_ibz=1,gams%nqibz
-         iq_bz = qirredtofull(iq_ibz)
-         gams%vals_in_bz(:,:,:,iq_bz,spin) = reshape(gams%vals_in_qibz(:,:,:,:,iq_ibz,spin), &
-              [2,gams%ndir_transp**2,gams%natom3**2])
-         gams%vals_out_bz(:,:,:,iq_bz,spin) = reshape(gams%vals_out_qibz(:,:,:,:,iq_ibz,spin), &
-              [2,gams%ndir_transp**2,gams%natom3**2])
-       end do
+   ! Fill BZ array with IBZ data.
+   do spin=1,gams%nsppol
+     do iq_ibz=1,gams%nqibz
+       iq_bz = qirredtofull(iq_ibz)
+       vals_in_bz(:,:,:,iq_bz,spin) = reshape(gams%vals_in_qibz(:,:,:,:,iq_ibz,spin), &
+            [2,gams%ndir_transp**2,gams%natom3**2])
+       vals_out_bz(:,:,:,iq_bz,spin) = reshape(gams%vals_out_qibz(:,:,:,:,iq_ibz,spin), &
+            [2,gams%ndir_transp**2,gams%natom3**2])
      end do
+   end do
 
-     ! Complete vals_bz in the full BZ.
-     !TODO!!! rotate the vv in and out matrices, according to the symmetry operation, instead of just copying them
-     !call complete_gamma_vv(cryst,gams%natom3,gams%nsppol,gams%nqibz,gams%nqbz,&
-     !  gams%eph_scalprod,qirredtofull,qpttoqpt,gams%vals_in_bz(:,:,:,:,spin))
-     !call complete_gamma_vv(cryst,gams%natom3,gams%nsppol,gams%nqibz,gams%nqbz,&
-     !  gams%eph_scalprod,qirredtofull,qpttoqpt,gams%vals_out_bz(:,:,:,:,spin))
+   ! Complete vals_bz in the full BZ.
+   !TODO!!! rotate the vv in and out matrices, according to the symmetry operation, instead of just copying them
+   !call complete_gamma_vv(cryst,gams%natom3,gams%nsppol,gams%nqibz,gams%nqbz,&
+   !  gams%eph_scalprod,qirredtofull,qpttoqpt,vals_in_bz(:,:,:,:,spin))
+   !call complete_gamma_vv(cryst,gams%natom3,gams%nsppol,gams%nqibz,gams%nqbz,&
+   !  gams%eph_scalprod,qirredtofull,qpttoqpt,vals_out_bz(:,:,:,:,spin))
 
-     ! TODO: replace the above with these calls from anaddb
-     !call complete_gamma_tr(cryst,elph_ds%ep_scalprod,elph_ds%nbranch,elph_ds%nqptirred,&
-     !&   elph_ds%nqpt_full,elph_ds%nsppol,elph_tr_ds%gamma_qpt_trout,elph_ds%qirredtofull,qpttoqpt)
+   ! TODO: replace the above with these calls from anaddb
+   !call complete_gamma_tr(cryst,elph_ds%ep_scalprod,elph_ds%nbranch,elph_ds%nqptirred,&
+   !&   elph_ds%nqpt_full,elph_ds%nsppol,elph_tr_ds%gamma_qpt_trout,elph_ds%qirredtofull,qpttoqpt)
 
 
-     ! TODO: idem for vv_vals 3x3 matrices
+   ! TODO: idem for vv_vals 3x3 matrices
 
-     ABI_FREE(qirredtofull)
-     ABI_FREE(qpttoqpt)
+   ABI_FREE(qirredtofull)
+   ABI_FREE(qpttoqpt)
 
-     !! This call is not executed in elphon!
-     !if (gams%symgamma == 1) then
-     !  do spin=1,gams%nsppol
-     !    do iq_bz=1,gams%nqbz
-     !      call tgamma_symm_vv(cryst,gams%qbz(:,iq_bz),gams%vals_in_bz(:,:,:,iq_bz,spin))
-     !      call tgamma_symm_vv(cryst,gams%qbz(:,iq_bz),gams%vals_out_bz(:,:,:,iq_bz,spin))
-     !    end do
-     !  end do
-     !end if
-   end if
+   !! This call is not executed in elphon!
+   !if (gams%symgamma == 1) then
+   !  do spin=1,gams%nsppol
+   !    do iq_bz=1,gams%nqbz
+   !      call tgamma_symm_vv(cryst, gams%qbz(:,iq_bz), vals_in_bz(:,:,:,iq_bz,spin))
+   !      call tgamma_symm_vv(cryst, gams%qbz(:,iq_bz), vals_out_bz(:,:,:,iq_bz,spin))
+   !    end do
+   !  end do
+   !end if
 
    ! Now FT to real space
    ! NOTE: gprim (not gprimd) is used for all FT interpolations,
    ! to be consistent with the dimensions of the rpt, which come from anaddb.
    ! TODO: this is needed only if FT is used, not when the linear interpolation is employed.
-   if (.not. allocated(gams%vals_in_rpt)) then
-     ABI_MALLOC_OR_DIE(gams%vals_in_rpt,(2,gams%ndir_transp**2,gams%natom3**2,gams%nrpt,gams%nsppol), ierr)
-     gams%vals_in_rpt = zero
-     ABI_MALLOC_OR_DIE(gams%vals_out_rpt,(2,gams%ndir_transp**2,gams%natom3**2,gams%nrpt,gams%nsppol), ierr)
-     gams%vals_out_rpt = zero
+   !if (.not. allocated(gams%vals_in_rpt)) then
+   ABI_MALLOC_OR_DIE(gams%vals_in_rpt, (2,gams%ndir_transp**2,gams%natom3**2,gams%nrpt,gams%nsppol), ierr)
+   ABI_MALLOC_OR_DIE(gams%vals_out_rpt, (2,gams%ndir_transp**2,gams%natom3**2,gams%nrpt,gams%nsppol), ierr)
+   gams%vals_in_rpt = zero
+   gams%vals_out_rpt = zero
 
-     ! q --> r
-     ABI_MALLOC(coskr, (gams%nqbz,gams%nrpt))
-     ABI_MALLOC(sinkr, (gams%nqbz,gams%nrpt))
-     call ftgam_init(gams%gprim, gams%nqbz, gams%nrpt, gams%qbz, gams%rpt, coskr, sinkr)
+   ! q --> r
+   ABI_MALLOC(coskr, (gams%nqbz,gams%nrpt))
+   ABI_MALLOC(sinkr, (gams%nqbz,gams%nrpt))
+   call ftgam_init(gams%gprim, gams%nqbz, gams%nrpt, gams%qbz, gams%rpt, coskr, sinkr)
 
-     do spin=1,gams%nsppol
-       do idir=1,gams%ndir_transp
-         do jdir=1,gams%ndir_transp
-           ii = idir+gams%ndir_transp*(jdir-1)
-           ! TODO: this is no contiguous in memory and will be slow. Make adapted ftgam?
-           call ftgam(gams%wghatm,gams%vals_in_bz(:,ii,:,:,spin),gams%vals_in_rpt(:,ii,:,:,spin),gams%natom,gams%nqbz,&
-             gams%nrpt,qtor1, coskr, sinkr)
-           call ftgam(gams%wghatm,gams%vals_out_bz(:,ii,:,:,spin),gams%vals_out_rpt(:,ii,:,:,spin),gams%natom,gams%nqbz,&
-             gams%nrpt,qtor1, coskr, sinkr)
-         end do
+   do spin=1,gams%nsppol
+     do idir=1,gams%ndir_transp
+       do jdir=1,gams%ndir_transp
+         ii = idir+gams%ndir_transp*(jdir-1)
+         ! TODO: this is no contiguous in memory and will be slow. Make adapted ftgam?
+         call ftgam(gams%wghatm, vals_in_bz(:,ii,:,:,spin), gams%vals_in_rpt(:,ii,:,:,spin), gams%natom, gams%nqbz,&
+           gams%nrpt, qtor1, coskr, sinkr)
+         call ftgam(gams%wghatm, vals_out_bz(:,ii,:,:,spin), gams%vals_out_rpt(:,ii,:,:,spin), gams%natom, gams%nqbz,&
+           gams%nrpt, qtor1, coskr, sinkr)
        end do
      end do
+   end do
 
-     ABI_FREE(coskr)
-     ABI_FREE(sinkr)
-   end if
+   ABI_FREE(vals_in_bz)
+   ABI_FREE(vals_out_bz)
+   ABI_FREE(coskr)
+   ABI_FREE(sinkr)
 
  case ("FREE")
-   ABI_SFREE(gams%vals_in_bz)
-   ABI_SFREE(gams%vals_out_bz)
    ABI_SFREE(gams%vals_in_rpt)
    ABI_SFREE(gams%vals_out_rpt)
 
  case default
-   MSG_BUG(sjoin("Wrong action:",action))
+   MSG_BUG(sjoin("Wrong action:", action))
  end select
 
 end subroutine phgamma_vv_interp_setup
@@ -2307,9 +2285,7 @@ end function a2fw_get_moment
 !!
 !! SOURCE
 
-function a2fw_tr_moment(a2f_tr,nn,spin,out_int)
-
- real(dp), dimension(3,3) :: a2fw_tr_moment
+function a2fw_tr_moment(a2f_tr, nn, spin, out_int)
 
 !Arguments ------------------------------------
 !scalars
@@ -2317,6 +2293,7 @@ function a2fw_tr_moment(a2f_tr,nn,spin,out_int)
  type(a2fw_tr_t),intent(in) :: a2f_tr
 !arrays
  real(dp),intent(out),optional :: out_int(a2f_tr%nomega,3,3)
+ real(dp), dimension(3,3) :: a2fw_tr_moment
 
 !Local variables -------------------------
 !scalars
@@ -3759,7 +3736,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 #endif
  call edos%free()
 
-
  ! ========================
  ! === MPI DISTRIBUTION ===
  ! ========================
@@ -4455,7 +4431,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  ! Collect results on each node and divide by the total number of k-points in the full mesh.
  do spin=1,nsppol
-   !call xmpi_summ(gvals_qibz(:,:,:,:,:,spin), comm)
+   !call xmpi_sum(gvals_qibz(:,:,:,:,:,spin), comm)
    gvals_qibz(:,:,:,:,:,spin) = gvals_qibz(:,:,:,:,:,spin) / fstab(spin)%nktot
    if (dtset%prteliash == 3) then
      gams%vals_ee(:,:,:,:,:,:,spin) = gams%vals_ee(:,:,:,:,:,:,spin) / fstab(spin)%nktot
