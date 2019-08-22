@@ -655,7 +655,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  !blanchet Initialize hightemp object
  if(dtset%useria==6661) ABI_DATATYPE_ALLOCATE(hightemp,)
  if(associated(hightemp)) then
-   call hightemp%init(dtset%mband,dtset%userib,rprimd)
+   call hightemp%init(dtset%useric,dtset%mband,dtset%userib,rprimd)
  end if
 
 !Allocations/initializations for PAW only

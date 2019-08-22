@@ -40,7 +40,7 @@ module m_hightemp
   implicit none
 
   type,public :: hightemp_type
-    integer :: bcut,nbcut
+    integer :: bcut,ioptden,nbcut
     real(dp) :: ebcut,e_kin_freeel,e_ent_freeel,nfreeel,e_shiftfactor,ucvol
   contains
     procedure :: compute_e_kin_freeel,compute_nfreeel
@@ -74,12 +74,12 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine init(this,mband,nbcut,rprimd)
+  subroutine init(this,ioptden,mband,nbcut,rprimd)
 
     ! Arguments -------------------------------
     ! Scalars
     class(hightemp_type),intent(inout) :: this
-    integer,intent(in) :: mband,nbcut
+    integer,intent(in) :: ioptden,mband,nbcut
     ! Arrays
     real(dp),intent(in) :: rprimd(3,3)
 
@@ -89,6 +89,7 @@ contains
 
     ! *********************************************************************
 
+    this%ioptden=ioptden
     this%bcut=mband
     this%nbcut=nbcut
     this%ebcut=zero

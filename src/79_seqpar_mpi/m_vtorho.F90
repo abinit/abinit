@@ -1771,8 +1771,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !  Blanchet Add free electron gas contribution to rhor
    if(associated(hightemp)) then
-     rhor(:,:)=rhor(:,:)+hightemp%nfreeel/hightemp%ucvol/dtset%nspden
-     rhog(1,1)=rhog(1,1)+hightemp%nfreeel/hightemp%ucvol/dtset%nspden/nfftf
+     if(hightemp%ioptden==0) then
+       rhor(:,:)=rhor(:,:)+hightemp%nfreeel/hightemp%ucvol/dtset%nspden
+       rhog(1,1)=rhog(1,1)+hightemp%nfreeel/hightemp%ucvol/dtset%nspden/nfftf
+     end if
    end if
 
    if(paw_dmft%use_dmft==1) then
