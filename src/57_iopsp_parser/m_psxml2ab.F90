@@ -46,6 +46,7 @@ module m_psxml2ab
  use m_psml_api
 #endif
 
+ use defs_datatypes, only : pspheader_type
  use m_fstrings,     only : yesno
 
 implicit none

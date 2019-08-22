@@ -29,6 +29,8 @@ module m_wvl_wfs
  use m_errors
  use m_abicore
 
+ use defs_datatypes, only : pseudopotential_type
+
  implicit none
 
  private
@@ -79,7 +81,6 @@ contains
 subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, nproc, nspinor, &
 &  nsppol, nwfshist, occ, psps, rprimd, wfs, wtk, wvl, wvl_crmult, wvl_frmult, xred)
 
- use defs_datatypes
  use defs_wvltypes
 
  use m_geometry, only : xred2xcart

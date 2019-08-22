@@ -31,13 +31,13 @@ module m_conducti
  use defs_basis
  use m_errors
  use m_abicore
- use defs_abitypes
  use m_xmpi
  use m_wffile
  use m_wfk
  use m_hdr
  use m_nctk
 
+ use defs_abitypes,  only : MPI_type
  use m_io_tools,     only : open_file, get_unit
  use m_fstrings,     only : sjoin
  use m_symtk,        only : matr3inv

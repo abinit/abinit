@@ -27,8 +27,8 @@
 module m_dfpt_loopert
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
+ use m_dtset
+ use m_dtfil
  use defs_wvltypes
  use m_efmas_defs
  use m_abicore
@@ -46,6 +46,8 @@ module m_dfpt_loopert
  use m_hdr
  use m_ebands
 
+ use defs_datatypes, only : pseudopotential_type, ebands_t
+ use defs_abitypes, only : MPI_type
  use m_occ,        only : getnel
  use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_io_tools,   only : file_exists

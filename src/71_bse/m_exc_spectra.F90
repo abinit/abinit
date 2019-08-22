@@ -25,7 +25,6 @@
 MODULE m_exc_spectra
 
  use defs_basis
- use defs_datatypes
  use m_bs_defs
  use m_abicore
  use iso_c_binding
@@ -36,9 +35,9 @@ MODULE m_exc_spectra
  use netcdf
 #endif
  use m_ebands
- !use m_hdr,          only : hdr_free
+ use m_hdr
 
- use defs_abitypes,     only : hdr_type
+ use defs_datatypes,    only : pseudopotential_type, ebands_t
  use m_io_tools,        only : open_file
  use m_fstrings,        only : toupper, strcat, sjoin, int2char4
  use m_numeric_tools,   only : simpson_int, simpson_cplx

@@ -90,12 +90,15 @@
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [shell]
-#%% post_commands = ww_mv t150o_DS2_WFK t153o_DS20_WFK; ww_cp t153o_DS20_WFK t154o_DS20_WFK; ww_mv t150o_DS6_WFK t155o_DS20_WFKFINE; ww_cp t153o_DS20_WFK t155o_DS20_WFK; ww_cp t153o_DS20_WFK t156o_DS20_WFK; ww_cp t155o_DS20_WFKFINE t156o_DS20_WFKFINE
+#%% post_commands = 
+#%%  ww_mv t150o_DS2_WFK t153o_DS20_WFK; 
+#%%  ww_cp t153o_DS20_WFK t154o_DS20_WFK; 
+#%%  ww_cp t153o_DS20_WFK t155o_DS20_WFK; 
+#%%  ww_cp t153o_DS20_WFK t156o_DS20_WFK; 
 #%% [extra_info]
 #%% authors = G. Brunin, M. Giantomassi
 #%% keywords = NC, DFPT, EPH
 #%% description = 
-#%%   WARNING: This code is still under development. Use at your own risk!
 #%%   Preparatory run for the calculation of the Fan-Migdal self-energy 
 #%%   C in diamond structure. Very rough 2x2x2 q-point grid (3 qpoints); low ecut.
 #%%<END TEST_INFO>

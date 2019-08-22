@@ -24,10 +24,10 @@
 MODULE m_fourier_interpol
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
 
+ use defs_abitypes, only : MPI_type
  use m_fft,    only : zerosym, indirect_parallel_Fourier, fourdp
  use m_pawfgr, only : pawfgr_type,pawfgr_destroy,indgrid
 

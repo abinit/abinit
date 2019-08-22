@@ -24,10 +24,9 @@
 MODULE m_paw_dfptnl
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
- use m_xmpi, only : xmpi_comm_self,xmpi_sum
+ use m_xmpi
 
  use m_pawang,     only : pawang_type
  use m_pawrad,     only : pawrad_type,simp_gen
@@ -102,8 +101,6 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
 &                    pawrhoij_1,pawrhoij_2,pawrhoij_3,&
 &                    pawtab,pawxcdev,&
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -306,8 +303,6 @@ end subroutine paw_dfptnl_energy
 
 subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmselect1,lmselect2,lmselect3,&
 &                 nhat1,nhat2,nhat3,nkxc,nrad,nspden,pawang,pawrad,rhor1,rhor2,rhor3,usexcnhat)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -530,8 +525,6 @@ end subroutine paw_dfptnl_xc
 &                       cwaveprj1_pert12,cwaveprj1_pert21,ipert1,ipert2,isppol,my_natom,natom,&
 &                       nspinor,occ_k,pawrhoij,wtk_k,&
 &                       comm_atom,mpi_atmtab ) ! optional (parallelism)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars

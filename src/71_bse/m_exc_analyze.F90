@@ -28,12 +28,12 @@
 module m_exc_analyze
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_bs_defs
  use m_xmpi
  use m_errors
 
+ use defs_datatypes,      only : pseudopotential_type, ebands_t
  use m_io_tools,          only : open_file
  use m_numeric_tools,     only : iseven, wrap2_zero_one
  use m_bz_mesh,           only : kmesh_t, get_BZ_item
@@ -41,7 +41,6 @@ module m_exc_analyze
  use m_wfd,               only : wfd_t
  use m_bse_io,            only : exc_read_eigen
  use m_pptools,           only : printxsf
-
  use m_pawrad,            only : pawrad_type
  use m_pawtab,            only : pawtab_type,pawtab_get_lsize
  use m_pawfgrtab,         only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print

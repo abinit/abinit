@@ -13,24 +13,24 @@ get the following physical properties of periodic solids:
 * Phonon band structures 
 * Thermodynamical properties 
 
-[TUTORIAL_README]
-
-This tutorial should take about 1 hour.
-
 Visualisation tools are NOT covered in this tutorial.
 Powerful visualisation procedures have been developed in the Abipy context,
 relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
 and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
+This tutorial should take about 1 hour.
+
+[TUTORIAL_README]
+
 ## 1 Generation of a derivative database
   
 *Before beginning, you might consider to work in a different subdirectory as
-for the other tutorials. Why not create Work_rf2 in \$ABI_TUTORESPFN/Input?*
+for the other tutorials. Why not create Work_rf2 in \$ABI_TESTS/tutorespfn/Input?*
 
-Then copy the files *trf2_1.files* and *trf2_1.in* from  \$ABI_TUTORESPFN/Input* to *Work_rf2*:
+Then copy the files *trf2_1.files* and *trf2_1.in* from  \$ABI_TESTS/tutorespfn/Input* to *Work_rf2*:
 
 ```sh
-cd $ABI_TUTORESPFN/Input
+cd $ABI_TESTS/tutorespfn/Input
 mkdir Work_rf2
 cd Work_rf2
 cp ../trf2_1_x.files .
@@ -97,7 +97,7 @@ gamma) and taking the output kpt set file as this qpt set. One might set
 [[nstep]] = 1 and [[nline]] = 1, so only one iteration runs, or even
 [[nstep]] = 0 and [[prtvol]] = -1, so no real DFT calculation is done.
 
-The input file *\$ABI_TUTORESPFN/Input/trf2_2.in* is precisely an input
+The input file *\$ABI_TESTS/tutorespfn/Input/trf2_2.in* is precisely an input
 file that can be used to generate such a set of k points. 
 Copy it in the present *Work_rf2* directly, as well as the accompanying *trf2_2.files*. 
 Examine these files, then run this calculation (it is very rapid - it won't hurt the trf2_1 job).
@@ -129,7 +129,7 @@ Now, there might be two possibilities: either the trf2_1 run is finished, and
 you can continue the tutorial with the section 2 about the MRGDDB utility, or the run is not finished.
 In the latter case, instead of waiting for trf2_1 to be finished, we suggest
 you to pursue with section 3. You will use as DDB file the one that can be
-found in *\$ABI_TUTORESPFN/Refs*, with the name [[tests/tutorespfn/Refs/trf2_3.ddb.out|trf2_3.ddb.out]],
+found in *\$ABI_TESTS/tutorespfn/Refs*, with the name [[tests/tutorespfn/Refs/trf2_3.ddb.out|trf2_3.ddb.out]],
 instead of the one that would result from the section 2.
 Copy this file to the present directory, then go to
 section section 3 of this tutorial. You might come back to section 2 afterwards.
@@ -150,7 +150,7 @@ and Born effective charges). Name the new DDB *trf2_3.ddb.out*.
     (it contains the forces and stresses), but is not needed for the computation
     of phonon band structure, interatomic force constants, and thermodynamical properties.
 
-File *\$ABI_TUTORESPFN/Input/trf2_3.in* is an example of input file for MRGDDB. 
+File *\$ABI_TESTS/tutorespfn/Input/trf2_3.in* is an example of input file for MRGDDB. 
 
 {% dialog tests/tutorespfn/Input/trf2_3.in %}
 
@@ -185,7 +185,7 @@ In this tutorial, we will focus on the flags [[anaddb:ifcflag]] and [[anaddb:thm
 
 ## 4 The computation of interatomic force constants
   
-You can copy the files *trf2_4.in* and *trf2_4.files* from *\$ABI_TUTORESPFN/Input* to the *Work_rf2* directory.
+You can copy the files *trf2_4.in* and *trf2_4.files* from *\$ABI_TESTS/tutorespfn/Input* to the *Work_rf2* directory.
 Open the file *trf2_4.in*. Note that [[anaddb:ifcflag]] is activated. 
 
 {% dialog tests/tutorespfn/Input/trf2_4.files tests/tutorespfn/Input/trf2_4.in %}
@@ -258,7 +258,7 @@ longitudinal and a transverse component.
 
 ## 5 Computation of phonon band structures with efficient interpolation
   
-You can copy the files *trf2_5.in* and *trf2_5.files* from *\$ABI_TUTORESPFN/Input* to the *Work_rf2* directory.
+You can copy the files *trf2_5.in* and *trf2_5.files* from *\$ABI_TESTS/tutorespfn/Input* to the *Work_rf2* directory.
 Then open *trf2_5.in*.
 
 {% dialog tests/tutorespfn/Input/trf2_5.files tests/tutorespfn/Input/trf2_5.in %}
@@ -431,7 +431,7 @@ farthest from a clean, stable, usage. By exploring the input variables, the
 user should be able to produce figures and data like the ones for SiO2 quartz
 and stishovite, published in [[cite:Lee1995]]. 
 
-You can copy the files *trf2_7.in* and *trf2_7.files* from *\$ABI_TUTORESPFN/Input* to *Work_rf2*
+You can copy the files *trf2_7.in* and *trf2_7.files* from *\$ABI_TESTS/tutorespfn/Input* to *Work_rf2*
 and have a look at them.
 The same DDB as for trf2_4 and trf2_5 is used, namely *trf2_3.ddb.out*.
 
