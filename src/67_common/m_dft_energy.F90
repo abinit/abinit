@@ -844,11 +844,13 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
    etotal=electronpositron%e0+energies%e0_electronpositron+energies%e_electronpositron
  end if
 
-!  Blanchet Add the energy contribution
+!Blanchet Add the energy contribution to hightemp free electron model
  if(associated(hightemp)) then
    energies%e_kin_freeel=hightemp%e_kin_freeel
    energies%e_shiftfactor=hightemp%e_shiftfactor
-   etotal=etotal+energies%e_kin_freeel
+   energies%edc_kin_freeel=hightemp%edc_kin_freeel
+   if(optene==0.or.optene==2) etotal=etotal+energies%e_kin_freeel
+   if(optene==1.or.optene==3) etotal=etotal+energies%e_kin_freeel-energies%edc_kin_freeel
  end if
 
 !Compute new charge density based on incoming wf

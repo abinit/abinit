@@ -41,7 +41,8 @@ module m_hightemp
 
   type,public :: hightemp_type
     integer :: bcut,ioptden,nbcut
-    real(dp) :: ebcut,e_kin_freeel,e_ent_freeel,nfreeel,e_shiftfactor,ucvol
+    real(dp) :: ebcut,edc_kin_freeel,e_kin_freeel,e_ent_freeel
+    real(dp) :: nfreeel,e_shiftfactor,ucvol
   contains
     procedure :: compute_e_kin_freeel,compute_nfreeel
     procedure :: compute_e_shiftfactor,init
@@ -93,6 +94,7 @@ contains
     this%bcut=mband
     this%nbcut=nbcut
     this%ebcut=zero
+    this%edc_kin_freeel=zero
     this%e_kin_freeel=zero
     this%e_ent_freeel=zero
     this%nfreeel=zero
@@ -251,23 +253,26 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine compute_e_kin_freeel(this,fermie,mrgrid,tsmear)
+  subroutine compute_e_kin_freeel(this,fermie,mrgrid,nfftf,nspden,tsmear,vtrial)
 
     ! Arguments -------------------------------
     ! Scalars
     class(hightemp_type),intent(inout) :: this
-    integer,intent(in) :: mrgrid
+    integer,intent(in) :: mrgrid,nfftf,nspden
     real(dp),intent(in) :: fermie,tsmear
+    ! Arrays
+    real(dp),intent(in) :: vtrial(nfftf,nspden)
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ii
+    integer :: ii,ifft,ispden
     real(dp) :: ix,step
     ! Arrays
     real(dp) :: values(mrgrid)
 
     ! *********************************************************************
 
+    ! Computation of e_kin_freeel
     step=(1/this%ebcut)/mrgrid
     do ii=1,mrgrid
       ix=(ii)*step
@@ -275,6 +280,17 @@ contains
       & hightemp_dosfreeel(1/ix,this%e_shiftfactor,this%ucvol)*(1/ix-this%e_shiftfactor)/(ix*ix)
     end do
     this%e_kin_freeel=simpson(step,values)
+
+    ! Computation of edc_kin_freeel
+    this%edc_kin_freeel=zero
+    do ispden=1,nspden
+      do ifft=1,nfftf
+        this%edc_kin_freeel=this%edc_kin_freeel+vtrial(ifft,ispden)
+      end do
+    end do
+    ! Verifier la constante (/nspden**2)
+    this%edc_kin_freeel=this%edc_kin_freeel*this%nfreeel/nspden/nfftf/nspden
+
   end subroutine compute_e_kin_freeel
 
   ! *********************************************************************

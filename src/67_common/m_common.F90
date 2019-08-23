@@ -1532,15 +1532,12 @@ subroutine prtene(dtset,energies,iout,usepaw)
      call wrtout(iout,msg,'COLL')
      call e_components%set('Kinetic energy', r=energies%e_kinetic)
      if(abs(energies%e_kin_freeel)>tiny(0.0_dp)) then
-        write(msg, '(a,es21.14)' ) '    Kin. free el. E = ',energies%e_kin_freeel
-        call wrtout(iout,msg,'COLL')
-        call e_components%set('Kin. free el. E', r=energies%e_kin_freeel)
-        write(msg, '(a,es21.14)' ) '    Tot kin. energy = ',energies%e_kin_freeel+energies%e_kinetic
-        call wrtout(iout,msg,'COLL')
-        call e_components%set('Tot kin. energy', r=energies%e_kin_freeel+energies%e_kinetic)
-        write(msg, '(a,es21.14)' ) '    Shift factor U0 = ',energies%e_shiftfactor
-        call wrtout(iout,msg,'COLL')
-        call e_components%set('Shift factor U0', r=energies%e_shiftfactor)
+       write(msg, '(a,es21.14)' ) '    Kin. free el. E = ',energies%e_kin_freeel
+       call wrtout(iout,msg,'COLL')
+       call e_components%set('Kin. free el. E', r=energies%e_kin_freeel)
+       write(msg, '(a,es21.14)' ) '    Tot kin. energy = ',energies%e_kin_freeel+energies%e_kinetic
+       call wrtout(iout,msg,'COLL')
+       call e_components%set('Tot kin. energy', r=energies%e_kin_freeel+energies%e_kinetic)
      end if
      if (ipositron/=1) then
        exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
@@ -1674,6 +1671,11 @@ subroutine prtene(dtset,energies,iout,usepaw)
    call wrtout(iout,msg,'COLL')
    call e_components_dc%set('comment', s='"Double-counting" decomposition of free energy')
    call e_components_dc%set('Band energy', r=energies%e_eigenvalues)
+   if(abs(energies%e_kin_freeel)>tiny(0.0_dp)) then
+     write(msg, '(a,es21.14)' ) '    Kin. free el. E = ',energies%e_kin_freeel
+     call wrtout(iout,msg,'COLL')
+     call e_components%set('Kin. free el. E', r=energies%e_kin_freeel)
+   end if
    if (ipositron/=1) then
      write(msg, '(2(a,es21.14,a),a,es21.14)' ) &
 &     '    '//eneName//'  =',enevalue,ch10,&
