@@ -568,7 +568,7 @@ subroutine fstab_get_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
 ! *************************************************************************
 
  bstart_k = fs%bstcnt_ibz(1, ik_ibz); nband_k = fs%bstcnt_ibz(2, ik_ibz)
- ABI_CHECK(nband_k >= 1 .and. nband_k <= fs%maxnb, "wrong nband_k")
+ ABI_CHECK(nband_k >= 1 .and. nband_k <= fs%maxnb, "Wrong nband_k")
 
  ! TODO: add iene looping for chemical potential in gaussian case too
  select case (fs%integ_method)
