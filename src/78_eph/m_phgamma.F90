@@ -3559,7 +3559,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,kqcount,nkpg,nkpg1,edos_intmeth
  integer :: jene, iene, comm_rpt, method
- integer :: my_npert
+ integer :: my_npert, imyp
 #ifdef HAVE_NETCDF
  integer :: ncerr
 #endif
@@ -3583,6 +3583,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: g0_k(3),g0bz_kq(3),g0_kq(3),symq(4,2,cryst%nsym)
  integer :: work_ngfft(18),gmax(3),my_gmax(3),gamma_ngqpt(3) !g0ibz_kq(3),
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:),wfd_istwfk(:)
+ integer,allocatable :: my_pinfo(:,:), pert_table(:,:)
  integer :: indkk_kq(1,6)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), lf(2),rg(2),res(2)
  real(dp) :: sigmas(2),wminmax(2)
@@ -3594,7 +3595,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:),work(:,:,:,:)
- real(dp),allocatable ::  gs1c(:,:)
+ real(dp),allocatable :: gs1c(:,:), v1_work(:,:,:,:)
  real(dp),allocatable :: wt_k(:,:),wt_kq(:,:)
  real(dp),allocatable :: wt_k_en(:,:,:),wt_kq_en(:,:,:)
  real(dp) :: vk(3), vkq(3)
@@ -3824,9 +3825,11 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  if (pert_comm%nproc > 1) then
    ! Build table with list of perturbations treated by this CPU inside pert_comm
-   !call ephtk_set_pertables(cryst%natom, my_npert, new%pert_table, new%my_pinfo, pert_comm%value)
+   call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, pert_comm%value)
    !Activate parallelism over perturbations
-   !call dvdb%set_pert_distrib(my_npert, natom3, sigma%my_pinfo, sigma%pert_table, pert_comm%value)
+   call dvdb%set_pert_distrib(my_npert, natom3, my_pinfo, pert_table, pert_comm%value)
+   ABI_FREE(my_pinfo)
+   ABI_FREE(pert_table)
  end if
 
  ! Check whether all q-points are available in the DVDB file
@@ -4028,20 +4031,21 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
        call dvdb%readsym_allv1(db_iqpt, cplex, nfftf, ngfftf, v1scf, pkb_comm%value)
 
-       !if (dvdb%my_npert /= natom3) then
-       !  ! Extract my data from work2
-       !  ABI_MALLOC(v1_work, (cplex, nfftf, db%nspden, db%my_npert))
-       !  do imyp=1,db%my_npert
-       !    v1_work(:,:,:,imyp) = v1scf(:,:,:,db%my_pinfo(3, imyp))
-       !  end do
-       !  ABI_MOVE_ALLOC(v1_work, v1scf)
-       !end if
+       if (dvdb%my_npert /= natom3) then
+         ! Extract my npert from v1scf
+         ABI_MALLOC(v1_work, (cplex, nfftf, nspden, dvdb%my_npert))
+         do imyp=1,dvdb%my_npert
+           v1_work(:,:,:,imyp) = v1scf(:,:,:,dvdb%my_pinfo(3, imyp))
+         end do
+         ABI_MOVE_ALLOC(v1_work, v1scf)
+       end if
+
      else
        MSG_ERROR(sjoin("Cannot find q-point:", ktoa(qpt), "in the DVDB file."))
      end if
 
    else
-     ! Use Fourier interpolation of DFPT potentials.
+     ! Use Fourier interpolation of DFPT potentials to get my_npert potentials.
      cplex = 2
      ABI_MALLOC(v1scf, (cplex, nfft, nspden, dvdb%my_npert))
      call dvdb%ftinterp_qpt(qpt, nfftf, ngfftf, v1scf, dvdb%comm_rpt)
@@ -4050,8 +4054,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    ! Examine the symmetries of the q wavevector
    call littlegroup_q(cryst%nsym, qpt, symq, cryst%symrec, cryst%symafm, timerev_q, prtvol=dtset%prtvol)
 
-   ! Allocate vlocal1 with correct cplex. Note nvloc
-   ABI_MALLOC_OR_DIE(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc, natom3), ierr)
+   ! Allocate vlocal1 with correct cplex. Note nvloc and my_npert
+   ABI_MALLOC_OR_DIE(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc, my_npert), ierr)
 
    do spin=1,nsppol
      if (spin_comm%skip(spin)) cycle ! MPI parallelism inside spin_comm
@@ -4059,10 +4063,11 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      fs => fstab(spin)
      if (dtset%prteliash == 3) tmp_vals_ee = zero
 
-     ! Set up local potential vlocal1 with proper dimensioning, from vtrial1 taking into account the spin.
-     do ipc=1,natom3
+     ! Set up local potential vlocal1 with proper dimensioning from vtrial1 taking into account the spin.
+     !do ipc=1,natom3
+     do imyp=1,my_npert
        call rf_transgrid_and_pack(spin, nspden, psps%usepaw, cplex, nfftf, nfft, ngfft, gs_hamkq%nvloc,&
-                 pawfgr, mpi_enreg, dummy_vtrial, v1scf(:,:,:,ipc), vlocal, vlocal1(:,:,:,:,ipc))
+                 pawfgr, mpi_enreg, dummy_vtrial, v1scf(:,:,:,imyp), vlocal, vlocal1(:,:,:,:,imyp))
      end do
 
      ! Continue to initialize the GS Hamiltonian
@@ -4162,15 +4167,13 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
        ! Loop over all 3*natom perturbations.
        gkk_atm = zero
-       do ipc=1,natom3
-       !do imyp=1,my_npert
-         idir = mod(ipc-1, 3) + 1; ipert = (ipc - idir) / 3 + 1
-         !idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
+       do imyp=1,my_npert
+         idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
 
          ! Prepare application of the NL part.
          call init_rf_hamiltonian(cplex, gs_hamkq, ipert, rf_hamkq, has_e1kbsc=.true.)
 
-         call rf_hamkq%load_spin(spin, vlocal1=vlocal1(:,:,:,:,ipc), with_nonlocal=.true.)
+         call rf_hamkq%load_spin(spin, vlocal1=vlocal1(:,:,:,:,imyp), with_nonlocal=.true.)
 
          ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
          call getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kk, kq, idir, ipert, &  ! In
@@ -4214,9 +4217,9 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
            end do
          end do
 
-       end do ! ipc (loop over 3*natom atomic perturbations)
+       end do ! ipc (loop over my_npert atomic perturbations)
 
-       !if (pert_comm%nproc > 1) call xmpi_sum(gkk_atm, pert_comm%value, ierr)
+       if (pert_comm%nproc > 1) call xmpi_sum(gkk_atm, pert_comm%value, ierr)
        ABI_FREE(gs1c)
 
        ! Compute weights for FS integration.

@@ -556,6 +556,7 @@ subroutine fstab_get_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
  integer,intent(in),optional :: iene
  class(fstab_t),intent(in) :: fs
  type(ebands_t),intent(in) :: ebands
+ !real(dp),intent(in) :: eph_fsmear
 !arrays
  real(dp),intent(in) :: sigmas(:) !fs%nsig)
  real(dp),intent(out) :: wtk(fs%nsig,fs%maxnb)
