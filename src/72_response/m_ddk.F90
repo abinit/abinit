@@ -979,12 +979,12 @@ end subroutine ddk_read_fsvelocities
 !!
 !! SOURCE
 
-subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
+subroutine ddk_fs_average_veloc(ddk, ebands, fstab, eph_fsmear)
 
 !Arguments ------------------------------------
 !scalars
 !integer,intent(in) :: comm  ! could distribute this over k in the future
- real(dp),intent(in) :: sigmas(:)
+ real(dp),intent(in) :: eph_fsmear
  type(ebands_t),intent(in) :: ebands
  type(ddk_t),intent(inout) :: ddk
  type(fstab_t),target,intent(in) :: fstab(ddk%nsppol)
@@ -992,10 +992,10 @@ subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
 !Local variables-------------------------------
 !scalars
  integer :: idir, ikfs, isppol, ik_ibz, iene
- integer :: iband, mnb, nband_k, nsig
+ integer :: iband, mnb, nband_k
  type(fstab_t), pointer :: fs
 !arrays
- real(dp), allocatable :: wtk(:,:)
+ real(dp), allocatable :: wtk(:)
 
 !************************************************************************
 
@@ -1003,13 +1003,12 @@ subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
  ABI_MALLOC(ddk%velocity_fsavg, (3,ddk%nene,ddk%nsppol))
  ddk%velocity_fsavg = zero
 
- nsig = size(sigmas, dim=1)
  mnb = 1
  do isppol=1,ddk%nsppol
    fs => fstab(isppol)
    mnb = max(mnb, maxval(fs%bstcnt_ibz(2, :)))
  end do
- ABI_MALLOC(wtk, (nsig,mnb))
+ ABI_MALLOC(wtk, (mnb))
 
  do isppol=1,ddk%nsppol
    fs => fstab(isppol)
@@ -1017,12 +1016,12 @@ subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
      do ikfs=1,fs%nkfs
        ik_ibz = fs%indkk_fs(1,ikfs)
        nband_k = fs%bstcnt_ibz(2, ik_ibz)
-       call fs%get_weights_ibz(ebands, ik_ibz, isppol, sigmas, wtk, iene)
+       call fs%get_weights_ibz(ebands, ik_ibz, isppol, eph_fsmear, wtk, iene)
 
        do idir = 1,3
          do iband = 1, nband_k
            ddk%velocity_fsavg(idir, iene, isppol) = ddk%velocity_fsavg(idir, iene, isppol) + &
-&             wtk(1,iband) * ddk%velocity(idir, iband, ikfs, isppol)**2
+&             wtk(iband) * ddk%velocity(idir, iband, ikfs, isppol)**2
 !&             fs%tetra_wtk_ene(iband,ik_ibz,iene) * ddk%velocity(idir, iband, ikfs, isppol)**2
          end do
        end do ! idir

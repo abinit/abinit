@@ -43,7 +43,7 @@ module m_ephtk
  public :: ephtk_set_phmodes_ship     ! Setup a mask to skip accumulating the contribution of certain phonon modes.
  public :: ephtk_set_pertables        ! Set tables for parallelism over perturbations from my_npert and comm
  public :: ephtk_mkqtabs              ! Build tables with correspondence between q-points as needed by complete_gamma.
- public :: ephtk_gam_atm2qnu
+ public :: ephtk_gam_atm2qnu          ! Compute phonon linewidths from gamma matrix in reduced coordinates.
 !!***
 
 contains  !=====================================================
@@ -60,7 +60,7 @@ contains  !=====================================================
 !!  dtset<dataset_type>=All input variables for this dataset.
 !!
 !! OUTPUT
-!!   phmodes_skip(natom3)) For each mode: 1 to skip this contribution else 0
+!!   phmodes_skip(natom3) For each mode: 1 to skip this contribution else 0
 !!
 !! PARENTS
 !!
@@ -107,7 +107,7 @@ end subroutine ephtk_set_phmodes_ship
 !!  ephtk_set_pertables
 !!
 !! FUNCTION
-!!  Set tables for parallelism over perturbations from my_npert and comm
+!!  Build tables for parallelism over perturbations from my_npert and comm
 !!
 !! INPUT
 !!  natom: Number of atoms
@@ -267,8 +267,8 @@ end subroutine ephtk_mkqtabs
 !! ephtk_gam_atm2qnu
 !!
 !! FUNCTION
-!! This routine takes the bare gamma matrices and multiplies them by the displ_red matrices.
-!! Based on gam_mult_displ
+!! This routine takes the gamma matrices in the atom representation and
+!! multiplies them by the displ_red matrices. Based on gam_mult_displ
 !!
 !! INPUTS
 !!   natom3 = number of phonon branches (3*natom)

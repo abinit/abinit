@@ -76,9 +76,6 @@ module m_fstab
    integer :: integ_method
    ! Integration method. 1 for gaussian, 2 for tetrahedra
 
-   integer :: nsig
-   ! Number of smearing values used for Gaussian integration
-
    integer :: nene
    ! Number of chemical potential values used for inelastic integration
 
@@ -125,14 +122,14 @@ module m_fstab
 
  contains
 
-   procedure :: free => fstab_free
-     ! Free memory.
+ procedure :: free => fstab_free
+  ! Free memory.
 
-   procedure :: findkg0 => fstab_findkg0
-     ! Find the index of the k-point on the FS
+ procedure :: findkg0 => fstab_findkg0
+  ! Find the index of the k-point on the FS
 
-   procedure :: get_weights_ibz => fstab_get_weights_ibz
-     ! Compute weights for FS integration.
+ procedure :: get_weights_ibz => fstab_get_weights_ibz
+  ! Compute weights for FS integration.
 
  end type fstab_t
 
@@ -290,12 +287,12 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
     sppoldbl, cryst%symafm, cryst%symrel, timrev, comm, exit_loop=.True., use_symrec=.False.)
 
  if (dksqmax > tol12) then
-   write(msg, '(7a,es16.6,4a)' )&
-   'The WFK file cannot be used to start thee present calculation ',ch10,&
-   'It was asked that the wavefunctions be accurate, but',ch10,&
-   'at least one of the k points could not be generated from a symmetrical one.',ch10,&
-   'dksqmax= ',dksqmax,ch10,&
-   'Action: check your WFK file and k-point input variables',ch10,&
+   write(msg, '(7a,es16.6,4a)' ) &
+   'The WFK file cannot be used to start the present calculation ',ch10, &
+   'It was asked that the wavefunctions be accurate, but',ch10, &
+   'at least one of the k points could not be generated from a symmetrical one.',ch10, &
+   'dksqmax= ',dksqmax,ch10, &
+   'Action: check your WFK file and k-point input variables',ch10, &
    '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
    MSG_ERROR(msg)
  end if
@@ -308,8 +305,8 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  do ik_bz=1,nkbz
    full2ebands(1, ik_bz) = indkk(ik_bz, 1)     ! ik_ibz
    full2ebands(2, ik_bz) = indkk(ik_bz, 2)     ! isym
-   full2ebands(3:5, ik_bz) = indkk(ik_bz, 3:5)  ! g0
-   full2ebands(6, ik_bz) = indkk(ik_bz, 6)  ! itimrev
+   full2ebands(3:5, ik_bz) = indkk(ik_bz, 3:5) ! g0
+   full2ebands(6, ik_bz) = indkk(ik_bz, 6)     ! itimrev
  end do
 
  ! Select only those k-points in the BZ close to the FS.
@@ -393,7 +390,6 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    fs%nene = nene
    fs%enemin = enemin
    fs%deltaene = deltaene
-   fs%nsig = 1
    fs%integ_method = integ_method
  end do
 
@@ -534,11 +530,11 @@ end function fstab_findkg0
 !!  ebands<ebands_type>=GS band structure.
 !!  ik_ibz=Index of the k-point in the IBZ
 !!  spin=Spin index
-!!  sigmas
+!!  eph_fsmear
 !!  [iene]
 !!
 !! OUTPUT
-!!   wtk(fs%nsig, fs%maxnb)=Weights for FS integration.
+!!   wtk(fs%maxnb)=Weights for FS integration.
 !!
 !! PARENTS
 !!      m_ddk,m_phgamma
@@ -548,7 +544,7 @@ end function fstab_findkg0
 !!
 !! SOURCE
 
-subroutine fstab_get_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
+subroutine fstab_get_weights_ibz(fs, ebands, ik_ibz, spin, eph_fsmear, wtk, iene)
 
 !Arguments ------------------------------------
 !scalars
@@ -556,14 +552,13 @@ subroutine fstab_get_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
  integer,intent(in),optional :: iene
  class(fstab_t),intent(in) :: fs
  type(ebands_t),intent(in) :: ebands
- !real(dp),intent(in) :: eph_fsmear
+ real(dp),intent(in) :: eph_fsmear
 !arrays
- real(dp),intent(in) :: sigmas(:) !fs%nsig)
- real(dp),intent(out) :: wtk(fs%nsig,fs%maxnb)
+ real(dp),intent(out) :: wtk(fs%maxnb)
 
 !Local variables-------------------------------
 !scalars
- integer :: ib, bstart_k, nband_k, band, isig
+ integer :: ib, bstart_k, nband_k, band
  real(dp) :: arg, chempot
 
 ! *************************************************************************
@@ -578,16 +573,14 @@ subroutine fstab_get_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
    do ib=1,nband_k
      band = ib + bstart_k - 1
      arg = ebands%eig(band,ik_ibz,spin) - chempot
-     do isig=1,fs%nsig
-       wtk(isig,ib) = gaussian(arg, sigmas(isig))
-     end do
+     wtk(ib) = gaussian(arg, eph_fsmear)
    end do
 
  case (2)
    if (present(iene)) then
-     wtk(1,1:nband_k) = fs%tetra_wtk_ene(1:nband_k, ik_ibz, iene)
+     wtk(1:nband_k) = fs%tetra_wtk_ene(1:nband_k, ik_ibz, iene)
    else
-     wtk(1,1:nband_k) = fs%tetra_wtk(1:nband_k, ik_ibz)
+     wtk(1:nband_k) = fs%tetra_wtk(1:nband_k, ik_ibz)
    end if
 
  case default
@@ -645,7 +638,7 @@ subroutine fstab_print(fstab, header, unit, prtvol)
  write(my_unt, "(a)")trim(msg)
 
  if (fstab(1)%integ_method == 1) then
-   write(my_unt,"(a,i0)")" FS integration done with gaussian method and nsig: ",fstab(1)%nsig
+   write(my_unt,"(a)")" FS integration done with gaussian method"
  else if (fstab(1)%integ_method == 2) then
    write(my_unt,"(a)")" FS integration done with tetrahedron method"
  end if
