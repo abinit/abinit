@@ -913,8 +913,8 @@ subroutine ddk_read_fsvelocities(ddk, fstab, comm)
        end if
 
        bd2tot_index=2*nband_in**2*(ikpt_ddk-1) + 2*nband_in**2*hdr1%nkpt*(isppol-1)
-       bstart_k = fs%bstcnt_ibz(1, ik_ibz)
-       nband_k = fs%bstcnt_ibz(2, ik_ibz)
+       bstart_k = fs%bstart_cnt_ibz(1, ik_ibz)
+       nband_k = fs%bstart_cnt_ibz(2, ik_ibz)
        ! first derivative eigenvalues for k-point. Diagonal of eigen1 is real -> only use that part
        do iband = bstart_k, bstart_k+nband_k-1
          ! Previous version (this is wrong because eigen1 contains complex numbers)
@@ -1006,7 +1006,7 @@ subroutine ddk_fs_average_veloc(ddk, ebands, fstab, eph_fsmear)
  mnb = 1
  do isppol=1,ddk%nsppol
    fs => fstab(isppol)
-   mnb = max(mnb, maxval(fs%bstcnt_ibz(2, :)))
+   mnb = max(mnb, maxval(fs%bstart_cnt_ibz(2, :)))
  end do
  ABI_MALLOC(wtk, (mnb))
 
@@ -1015,7 +1015,7 @@ subroutine ddk_fs_average_veloc(ddk, ebands, fstab, eph_fsmear)
    do iene = 1, fs%nene
      do ikfs=1,fs%nkfs
        ik_ibz = fs%indkk_fs(1,ikfs)
-       nband_k = fs%bstcnt_ibz(2, ik_ibz)
+       nband_k = fs%bstart_cnt_ibz(2, ik_ibz)
        call fs%get_weights_ibz(ebands, ik_ibz, isppol, eph_fsmear, wtk, iene)
 
        do idir = 1,3

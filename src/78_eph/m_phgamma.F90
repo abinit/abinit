@@ -3584,7 +3584,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer,allocatable :: my_pinfo(:,:), pert_table(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), lf(2),rg(2),res(2)
  real(dp) :: wminmax(2), n0(ebands%nsppol)
- real(dp) :: vk(3), vkq(3)
+ real(dp),allocatable :: vk(:,:), vkq(:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:),tgam(:,:,:),gkk_atm(:,:,:,:)
@@ -3593,8 +3593,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:),work(:,:,:,:)
  real(dp),allocatable :: gs1c(:,:), v1_work(:,:,:,:)
- real(dp),allocatable :: wt_k(:),wt_kq(:)
- real(dp),allocatable :: wt_k_en(:,:),wt_kq_en(:,:)
+ real(dp),allocatable :: wt_k_en(:,:),wt_kq_en(:,:), dbldelta_wts(:,:)
  real(dp), allocatable :: resvv_in(:,:), resvv_out(:,:)
  real(dp), allocatable :: tgamvv_in(:,:,:,:),  vv_kk(:,:,:)
  real(dp), allocatable :: tgamvv_out(:,:,:,:), vv_kkq(:,:,:)
@@ -4074,8 +4073,9 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      ABI_MALLOC(gkk_atm, (2, mnb, mnb, natom3))
 
      ! The weights for FS integration.
-     ABI_CALLOC(wt_k, (mnb))
-     ABI_CALLOC(wt_kq, (mnb))
+     ABI_MALLOC(dbldelta_wts, (mnb, mnb))
+     ABI_MALLOC(vk, (3, mnb))
+     ABI_MALLOC(vkq, (3, mnb))
 
      if (dtset%eph_transport > 0) then
        ABI_CALLOC(vv_kk, (9, mnb, mnb))
@@ -4091,6 +4091,11 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      ! Integration over the FS for this spin
      ! =====================================
      call xmpi_split_work(fs%nkfs, kpt_comm%value, my_kstart, my_kstop)
+
+     !ltetra = 0
+     ! TODO: Here I have to convert between full BZ and fs%nkfs
+     !call fs%setup_qpoint(cryst, ebands, spin, ltetra, qpt, &
+     !                     [bstart_k, nband_k], [bstart_kq, nband_kq], wght, kpt_comm%value)
 
      do ik_bz=my_kstart,my_kstop
        call cwtime(cpu_k, wall_k, gflops_k, "start")
@@ -4213,9 +4218,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        if (pert_comm%nproc > 1) call xmpi_sum(gkk_atm, pert_comm%value, ierr)
        ABI_FREE(gs1c)
 
-       ! Compute weights for FS integration.
-       call fs%get_weights_ibz(ebands, ik_ibz, spin, dtset%eph_fsmear, wt_k)
-       call fs%get_weights_ibz(ebands, ikq_ibz, spin, dtset%eph_fsmear, wt_kq)
+       ! Compute weights for double delta integration at the Fermi level.
+       call fs%get_dbldelta_weights(ebands, ik_bz, ik_ibz, ikq_ibz, spin, dtset%eph_fsmear, dbldelta_wts)
 
        ! Accumulate results in tgam (sum over FS and bands for this spin).
        do ipc2=1,natom3
@@ -4226,7 +4230,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
                rg = gkk_atm(:, ib1, ib2, ipc2)
                res(1) = lf(1) * rg(1) + lf(2) * rg(2)
                res(2) = lf(1) * rg(2) - lf(2) * rg(1)
-               tgam(:,ipc1,ipc2) = tgam(:,ipc1,ipc2) + res(:) * wt_kq(ib1) * wt_k(ib2)
+               tgam(:,ipc1,ipc2) = tgam(:,ipc1,ipc2) + res(:) * dbldelta_wts(ib1, ib2)
              end do
            end do
          end do
@@ -4238,20 +4242,22 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
          call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, kg_k)
          do ib2=1,nband_k
            band = ib2 + bstart_k - 1
-           vk = ddkop%get_vdiag(ebands%eig(band, ik_ibz, spin), istwf_k, npw_k, wfd%nspinor, kets_k(:,:,ib2), cwaveprj0)
+           vk(:,ib2) = ddkop%get_vdiag(ebands%eig(band, ik_ibz, spin), &
+                                       istwf_k, npw_k, wfd%nspinor, kets_k(:,:,ib2), cwaveprj0)
            !write(std_out,*)"kk:", kk
-           !write(std_out,*)"vk_diff:", vk - ddk%velocity(:,ib2,ik_bz,spin)
-           !write(std_out,*)"vk:  ", vk
+           !write(std_out,*)"vk_diff:", vk(:,ib2) - ddk%velocity(:,ib2,ik_bz,spin)
+           !write(std_out,*)"vk:  ", vk(:,ib2)
            !write(std_out,*)"ddk: " , ddk%velocity(:,ib2,ik_bz,spin)
          end do
 
          call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
          do ib1=1,nband_kq
            band = ib1 + bstart_kq - 1
-           vkq = ddkop%get_vdiag(ebands%eig(band, ikq_ibz, spin), istwf_kq, npw_kq, wfd%nspinor, bras_kq(:,:,ib1), cwaveprj0)
+           vkq(:,ib1) = ddkop%get_vdiag(ebands%eig(band, ikq_ibz, spin), &
+                                        istwf_kq, npw_kq,wfd%nspinor, bras_kq(:,:,ib1), cwaveprj0)
            !write(std_out,*)"kq:", kq
-           !write(std_out,*)"vkq_diff:", vkq - ddk%velocity(:,ib1,ikq_bz,spin)
-           !write(std_out,*)"vkq: ", vkq
+           !write(std_out,*)"vkq_diff:", vkq(:,ib1) - ddk%velocity(:,ib1,ikq_bz,spin)
+           !write(std_out,*)"vkq: ", vkq(:,ib1)
            !write(std_out,*)"ddk: ", ddk%velocity(:,ib1,ikq_bz,spin)
          end do
 
@@ -4260,10 +4266,12 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
            do ipc2 = 1,3
              do ib1 = 1,nband_kq
                do ipc1 = 1,3
+                 ! vk vk
                  vv_kk(ipc1+(ipc2-1)*gams%ndir_transp, ib1,ib2)  = ddk%velocity(ipc1,ib1,ik_bz,spin) &
-                    * ddk%velocity(ipc2,ib2,ik_bz,spin) ! vk vk
+                    * ddk%velocity(ipc2,ib2,ik_bz,spin)
+                 ! vk vk+q
                  vv_kkq(ipc1+(ipc2-1)*gams%ndir_transp, ib1,ib2) = ddk%velocity(ipc1,ib1,ikq_bz,spin) &
-                    * ddk%velocity(ipc2,ib2,ik_bz,spin) ! vk vk+q
+                    * ddk%velocity(ipc2,ib2,ik_bz,spin)
                end do
              end do
            end do
@@ -4276,14 +4284,15 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
                 do ib1=1,nband_kq
                   lf = gkk_atm(:, ib1, ib2, ipc1)
                   rg = gkk_atm(:, ib1, ib2, ipc2)
+                  ! res was missing in MJV version!
+                  res(1) = lf(1) * rg(1) + lf(2) * rg(2)
+                  res(2) = lf(1) * rg(2) - lf(2) * rg(1)
                   resvv_in(1,:) = res(1) * vv_kkq(:,ib1,ib2)
                   resvv_in(2,:) = res(2) * vv_kkq(:,ib1,ib2)
                   resvv_out(1,:) = res(1) * vv_kk(:,ib1,ib2)
                   resvv_out(2,:) = res(2) * vv_kk(:,ib1,ib2)
-                  ! Loop over smearing values.
-                  tgamvv_in(:,:,ipc1,ipc2)  = tgamvv_in(:,:,ipc1,ipc2) + resvv_in * wt_kq(ib1) * wt_k(ib2)
-                  tgamvv_out(:,:,ipc1,ipc2) = tgamvv_out(:,:,ipc1,ipc2) + resvv_out * wt_kq(ib1) * wt_k(ib2)
-                  !write(std_out,*)res, wt_kq(ib,  wt_k(ib2)
+                  tgamvv_in(:,:,ipc1,ipc2)  = tgamvv_in(:,:,ipc1,ipc2) + resvv_in * dbldelta_wts(ib1, ib2)
+                  tgamvv_out(:,:,ipc1,ipc2) = tgamvv_out(:,:,ipc1,ipc2) + resvv_out * dbldelta_wts(ib1, ib2)
                 end do
               end do
            end do
@@ -4330,8 +4339,9 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
      end do ! ik_bz: sum over k-points on the BZ FS for this spin.
 
-     ABI_FREE(wt_k)
-     ABI_FREE(wt_kq)
+     ABI_FREE(dbldelta_wts)
+     ABI_FREE(vk)
+     ABI_FREE(vkq)
      ABI_FREE(bras_kq)
      ABI_FREE(kets_k)
      ABI_FREE(h1kets_kq)
@@ -4514,7 +4524,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 end subroutine eph_phgamma
 !!***
 
-!----------------------------------------------------------------------
-
 end module m_phgamma
 !!***
+
+!----------------------------------------------------------------------

@@ -28,6 +28,7 @@
 !
 MODULE libtetrabz_common
   !
+  use m_abicore
   use m_errors
 
   IMPLICIT NONE
