@@ -11261,14 +11261,18 @@ Variable(
     mnemonics="NUClear DIPole MOMents",
     requires="[[usepaw]] = 1; [[pawcpxocc]] = 2; [[kptopt]] > 2",
     text=r"""
-Places an array of nuclear magnetic dipole moments on the atomic positions,
-useful for computing the magnetization in the presence of nuclear dipoles and
-thus the chemical shielding by the converse method. The presence of these
-dipoles breaks time reversal symmetry and lowers the overall spatial symmetry.
+Places an array of nuclear magnetic dipole moments on the atomic
+positions, useful for computing the magnetization in the presence of
+nuclear dipoles and thus the chemical shielding by the converse method
+[[cite:Thonhauser2009]]. The presence of these dipoles breaks time
+reversal symmetry and lowers the overall spatial symmetry.  The dipole
+moment values are entered in atomic units. For reference, note that
+one Bohr magneton has value $1/2$ in atomic units, while one nuclear
+Bohr magneton has value $2.7321\times 10^{-4}$ in atomic units.
 """,
 ),
 
-Variable(
+    Variable(
     abivarname="nwfshist",
     varset="gstate",
     vartype="integer",
@@ -11884,12 +11888,28 @@ Variable(
     defaultval=0,
     mnemonics="ORBital MAGnetization",
     characteristics=['[[DEVELOP]]'],
-    requires="""[[usepaw]] == 1
-[[kptopt]] == 3
-[[NPROC]] == 1""",
+    requires="""[[usepaw]] == 1;
+[[usexcnhat]] == 0;
+[[nspinor]] == 1;
+[[paral_atom]] == 0;
+[[paral_kgb]] == 0;
+[[kptopt]] > 2 """,
     text=r"""
-Compute quantities related to orbital magnetization. Currently only the Chern
-number calculated.
+Compute quantities related to orbital magnetization. The
+    implementation assumes an insulator, so no empty or partially
+    filled bands, and currently restricted to [[nspinor]] 1. Such
+    insulators have orbital magnetization zero, except in the presence
+    of nonzero nuclear dipole moments, see [[nucdipmom]].  [[orbmag]]
+    is parallelized over k points only. The implementation follows the
+    theory outlined in [[cite:Gonze2011a]] extended to the PAW case;
+    see also [[cite:Ceresoli2006]]. The computed results are returned in the
+    standard output file, search for "Orbital magnetization" and "Chern number".
+
+* [[orbmag]] = 1: Compute Chern number [[cite:Ceresoli2006]]. This computation is
+    faster than the full [[orbmag]] calculation, and a nonzero value indicates a circulating
+    electronic current.
+* [[orbmag]] = 2: Compute electronic orbital magnetization.
+* [[orbmag]] = 3: Compute both Chern number and electronic orbital magnetization.
 """,
 ),
 
