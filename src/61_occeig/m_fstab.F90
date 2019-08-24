@@ -94,7 +94,7 @@ module m_fstab
    ! rank/inverse_rank pair for the k-points on the FS (kpts).
 
    integer,allocatable :: indkk_fs(:,:)
-   ! indkk_fs(6, nkfs)
+   ! (6, nkfs)
    ! Tables giving the correspondence between a point in the FS-BZ and the IBZ computed in listkk.
    !
    !   indkk_fs(1,:)      Mapping FS-BZ --> k-points in the IBZ (taken from ebands_t)
@@ -103,7 +103,7 @@ module m_fstab
    !   indkk_fs(6,:)      1 if time-reversal was used to generate the k-point, 0 otherwise
 
    integer,allocatable :: bstart_cnt_ibz(:,:)
-    ! bstart_cnt_ibz(2, nkibz)
+    ! (2, nkibz)
     ! The indices of the bands within the energy window (depends on fsk)
     ! Note that we use the k-point index in the IBZ.
     !
@@ -115,14 +115,13 @@ module m_fstab
    ! Reduced coordinates of the k-points on the Fermi surface.
 
    real(dp),allocatable :: tetra_wtk(:,:)
-   ! tetra_wtk(maxnb, nkibz)
+   ! (maxnb, nkibz)
    ! Weights for FS integration with tetrahedron method
    ! Note that the weights are dimensioned with nkibz
 
    real(dp),allocatable :: tetra_wtk_ene(:,:,:)
-   ! tetra_wtk_ene(maxnb, nkibz, nene)
-   ! Weights for FS integration with tetrahedron method
-   ! for all chemical potentials
+   ! (maxnb, nkibz, nene)
+   ! Weights for FS integration with tetrahedron method for all chemical potentials
    ! Note that the weights are dimensioned with nkibz
 
    real(dp),allocatable :: dbldelta_tetra_weights_kfs(:,:,:)
@@ -252,8 +251,9 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 !scalars
  integer,parameter :: option0 = 0, brav1 = 1, bcorr0 = 0
  integer :: nkfs,spin,band,nband_k,i1,i2,ib,blow,ik_bz,ik_ibz,nkibz,sppoldbl,timrev
- integer :: ik,mkpt,nkbz,ierr, bstart_k,bstop_k,nene,ifermi,bmin,bmax
- real(dp) :: elow,ehigh,ebis,enemin,enemax,deltaene,max_occ,dksqmax,cpu,wall,gflops
+ integer :: ik,mkpt,nkbz,ierr, bstart_k,bstop_k,nene,ifermi
+ real(dp),parameter :: max_occ1=one
+ real(dp) :: elow,ehigh,ebis,enemin,enemax,deltaene,dksqmax,cpu,wall,gflops
  logical :: inwin
  character(len=80) :: errstr
  character(len=500) :: msg
@@ -384,9 +384,26 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
      fs%kpts(:,ik) = kbz(:, ik_bz)
      fs%indkk_fs(:, ik) = full2ebands(:, ik_bz)
    end do
-   fs%maxnb = maxval(fs%bstart_cnt_ibz(2, :))
-   fs%krank = krank_new(nkfs, fs%kpts)
 
+   ! Define band indices enclosing states on the FS.
+   ! Note that we need all k-points for a given band when computing weights with tetrahedron.
+   ! This means that we have to be carefull when selecting the weight associated to a given pair
+   ! (band_kq, kq), (band_k, k).
+   ! Then we have to rearrange the weights
+   fs%bmin = huge(1); fs%bmax = -huge(1)
+   do ik_ibz=1,nkibz
+     if (fs%bstart_cnt_ibz(1, ik_ibz) /= -1) then
+       fs%bmin = min(fs%bmin, fs%bstart_cnt_ibz(1,ik_ibz))
+     end if
+     if (fs%bstart_cnt_ibz(2, ik_ibz) /= -1) then
+       fs%bmax = max(fs%bmax, fs%bstart_cnt_ibz(1,ik_ibz) + fs%bstart_cnt_ibz(2,ik_ibz) - 1)
+     end if
+   end do
+   !write(std_out,*)"bmin, bmax for tetra: ",fs%bmin, fs%bmax
+   ABI_CHECK(fs%bmin /= huge(1) .and. fs%bmax /= -huge(1), "No point on the Fermi surface!")
+   fs%maxnb = fs%bmax - fs%bmin + 1
+
+   fs%krank = krank_new(nkfs, fs%kpts)
  end do ! spin
 
  call cwtime_report(" fstab_init%fs_build:", cpu, wall, gflops)
@@ -395,7 +412,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  ! this is spin independent
  nene = 100 ! TODO: make this variable and maybe temperature dependent???
  deltaene = 2*fsewin/dble(nene-1)
- ifermi = int(nene/2)
+ ifermi = int(nene / 2)
  enemin = ebands%fermie - dble(ifermi-1)*deltaene
  enemax = enemin + dble(nene-1)*deltaene
 
@@ -411,7 +428,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  ! TODO: compute weights on the fly to reduce memory? nene should be set to zero if not used!
  if (integ_method == 2) then
    rlatt = kptrlatt
-   call matr3inv(rlatt,klatt)
+   call matr3inv(rlatt, klatt)
 
    ABI_MALLOC(bz2ibz, (nkbz))
    bz2ibz = full2ebands(1, :)
@@ -424,12 +441,6 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    ABI_MALLOC(btheta, (nene, nkibz))
    ABI_MALLOC(bdelta, (nene, nkibz))
 
-   max_occ = one
-   ! in spinor or spin polarized case, orbitals have occupation <= 1 instead of 2
-   !if (ebands%nsppol > 1) max_occ = one
-   ! this accounts for the doubling of the num of bands, even though spin channels are not well defined
-   !if (ebands%nspinor == 2) max_occ = half
-
    do spin=1,ebands%nsppol
      fs => fstab(spin)
 
@@ -438,29 +449,18 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
      ABI_CALLOC(fs%tetra_wtk, (fs%maxnb, nkibz))
      ABI_CALLOC(fs%tetra_wtk_ene, (fs%maxnb, nkibz, fs%nene))
 
-     ! we have to pass full bands to get_tetra_weight
-     ! Here I create a full set of bands enclosing the states that will be used in the FS integration.
-     ! Then we have to rearrange the weights
-     bmin = huge(1); bmax = -huge(1)
-     do ik_ibz=1,nkibz
-       if (fs%bstart_cnt_ibz(1, ik_ibz) /= -1) then
-         bmin = min(bmin, fs%bstart_cnt_ibz(1,ik_ibz))
-       end if
-       if (fs%bstart_cnt_ibz(2, ik_ibz) /= -1) then
-         bmax = max(bmax, fs%bstart_cnt_ibz(1,ik_ibz) + fs%bstart_cnt_ibz(2,ik_ibz) - 1)
-       end if
-     end do
-     !write(std_out,*)"bmin, bmax for tetra: ",bmin,bmax
-     ABI_CHECK(bmin /= huge(1) .and. bmax /= -huge(1), "No point on the Fermi surface!")
-
-     do band=bmin,bmax
+     do band=fs%bmin,fs%bmax
        ! Get the contribution of this band
        tmp_eigen = ebands%eig(band, :nkibz, spin)
 
        ! Calculate general integration weights at each irred kpoint
        ! as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
-       call tetra%blochl_weights(tmp_eigen, enemin, enemax, max_occ, fs%nene, nkibz, &
+       call tetra%blochl_weights(tmp_eigen, enemin, enemax, max_occ1, fs%nene, nkibz, &
          bcorr0, btheta, bdelta, xmpi_comm_self)
+
+       !ib = band - fs%bmin + 1
+       !fs%tetra_wtk(ib, ik_ibz) = bdelta(ifermi, ik_ibz) * nkibz
+       !fs%tetra_wtk_ene(ib, ik_ibz, 1:fs%nene) = bdelta(1:fs%nene, ik_ibz) * nkibz
 
        do ik_ibz=1,nkibz
          bstart_k = fs%bstart_cnt_ibz(1, ik_ibz); bstop_k = bstart_k + fs%bstart_cnt_ibz(2, ik_ibz) - 1
@@ -472,7 +472,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
          end if
        end do ! ik_ibz
      end do ! band
-   end do ! sppol
+   end do ! spin
 
    ABI_FREE(tmp_eigen)
    ABI_FREE(btheta)
@@ -593,6 +593,7 @@ subroutine fstab_get_weights_ibz(fs, ebands, ik_ibz, spin, eph_fsmear, wtk, iene
    end do
 
  case (2)
+   !band = bstart_k - fs%bmin + 1
    if (present(iene)) then
      wtk(1:nband_k) = fs%tetra_wtk_ene(1:nband_k, ik_ibz, iene)
    else
@@ -620,7 +621,7 @@ end subroutine fstab_get_weights_ibz
 !!
 !! SOURCE
 
-subroutine fstab_setup_qpoint(fs, cryst, ebands, spin, ltetra, qpt, bk, bkq, wght, comm)
+subroutine fstab_setup_qpoint(fs, cryst, ebands, spin, ltetra, qpt, comm)
 
  use libtetrabz_dbldelta_mod
 
@@ -629,14 +630,14 @@ subroutine fstab_setup_qpoint(fs, cryst, ebands, spin, ltetra, qpt, bk, bkq, wgh
  type(ebands_t),intent(in) :: ebands
  class(fstab_t),intent(inout) :: fs
  integer,intent(in) :: spin, ltetra, comm
- integer,intent(in) :: bk(2), bkq(2)
  real(dp),intent(in) :: qpt(3)
- real(dp),allocatable,intent(out) :: wght(:,:,:) !(nb*nb,PRODUCT(ngw(1:3)))
+ !real(dp),allocatable,intent(out) :: wght(:,:,:) !(nb*nb,PRODUCT(ngw(1:3)))
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: enough = 50
- integer :: bstart_k, nband_k, bstart_kq, nband_kq, nkbz, ierr, ib, nb, ik_bz, ik_ibz
+ !integer :: bstart_k, nband_k, bstart_kq, nband_kq
+ integer :: nkbz, ierr, ib, nb, ik_bz, ik_ibz, ik_fs
  integer :: i1, i2, i3, band
  character(len=500) :: msg
  type(krank_t) :: krank
@@ -649,93 +650,80 @@ subroutine fstab_setup_qpoint(fs, cryst, ebands, spin, ltetra, qpt, bk, bkq, wgh
 
 ! *************************************************************************
 
- !if (fs%integ_method /= 2) return
+ if (fs%integ_method /= 2) return
 
- ABI_CHECK(isdiagmat(ebands%kptrlatt), "kptrlatt must be diagonal")
- ABI_CHECK(ebands%nshiftk == 1, "nshiftk must be 1")
+ ! The double delta is ill-defined for q == 0.
+ !if (fs%integ_method == 2 .and. all(abs(qpt) < tol12)) return
+
+ ABI_CHECK(isdiagmat(ebands%kptrlatt), "kptrlatt must be diagonal when tetra is used.")
+ ABI_CHECK(ebands%nshiftk == 1, "nshiftk must be 1 when tetra is used")
  nge = get_diag(ebands%kptrlatt)
  ngw = nge
 
- bstart_k = bk(1); nband_k = bk(2)
- bstart_kq = bkq(1); nband_kq = bkq(2)
- nb = max(nband_k, nband_kq); nkbz = product(ngw(1:3))
+ nb = fs%maxnb
+ nkbz = product(ngw(1:3))
 
  ABI_MALLOC(eig_k, (nb, nkbz))
  ABI_MALLOC(eig_kq, (nb, nkbz))
 
+ ! TODO: Handle symmetries in a cleaner way
  !ABI_MALLOC(fulltoirred, (nkbz))
  !timrev = 0; if (use_tr) timrev=1
- !krank = krank_new(nkptirred, kptirred, nsym=nsymfm, symrec=symrecfm, time_reversal=use_tr)
+ krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, time_reversal=.True.)
 
+ ierr = 0
  ik_bz = 0
  do i3=0,nge(3) - 1
-    do i2=0,nge(2) - 1
-       do i1 =0,nge(1) - 1
-         ik_bz = ik_bz + 1
+   do i2=0,nge(2) - 1
+     do i1 =0,nge(1) - 1
+       ik_bz = ik_bz + 1
 
-         ! Find correspondence between the grid and the IBZ
-         kpt = ([i1, i2, i3] + ebands%shiftk(:, 1)) / nge(:)
-         !ik_ibz = krank%find(kpt, msg)
-         ik_ibz = krank%invrank(krank%get_rank(kpt))
+       ! Find correspondence between the grid and the IBZ
+       kpt = ([i1, i2, i3] + ebands%shiftk(:, 1)) / nge(:)
+       !ik_ibz = krank%find(kpt, msg)
+       ik_ibz = krank%invrank(krank%get_rank(kpt))
 
-         if (ik_ibz < 1) then
-           if (ierr <= enough) then
-             write(msg,'(3a,i0,a)')&
-              'kpt: ',trim(ktoa(kpt)),' with rank: ', krank%get_rank(kpt),' has no symmetric among the k-points'
-             MSG_WARNING(msg)
-           end if
-           ierr = ierr + 1
-           cycle
+       if (ik_ibz < 1) then
+         if (ierr <= enough) then
+           write(msg,'(3a,i0,a)') &
+            'kpt: ',trim(ktoa(kpt)),' with rank: ', krank%get_rank(kpt),' has no symmetric among the k-points'
+           MSG_WARNING(msg)
          end if
+         ierr = ierr + 1
+         cycle
+       end if
 
-         do ib=1,nband_k
-           band = ib + bstart_k - 1
-           eig_k(ib, ik_bz) = ebands%eig(band, ik_ibz, spin)
-         end do
+       eig_k(:, ik_bz) = ebands%eig(fs%bmin:fs%bmax, ik_ibz, spin)
 
-         ! Find correspondence between the grid and the IBZ
-         kpt = kpt + qpt
-         ik_ibz = krank%invrank(krank%get_rank(kpt))
+       ! Find correspondence between the grid and the IBZ
+       kpt = kpt + qpt
+       ik_ibz = krank%invrank(krank%get_rank(kpt))
 
-         if (ik_ibz < 1) then
-           if (ierr <= enough) then
-             write(msg,'(3a,i0,a)')&
-              'kpt + qpt: ',trim(ktoa(kpt)),' with rank: ', krank%get_rank(kpt),' has no symmetric among the k-points'
-             MSG_WARNING(msg)
-           end if
-           ierr = ierr + 1
-           cycle
+       if (ik_ibz < 1) then
+         if (ierr <= enough) then
+           write(msg,'(3a,i0,a)') &
+            'kpt + qpt: ',trim(ktoa(kpt)),' with rank: ', krank%get_rank(kpt),' has no symmetric among the k-points'
+           MSG_WARNING(msg)
          end if
+         ierr = ierr + 1
+         cycle
+       end if
 
-         do ib=1,nband_kq
-           band = ib + bstart_kq - 1
-           eig_kq(ib, ik_bz) = ebands%eig(band, ik_ibz, spin)
-         end do
-
-       end do
-    end do
+       eig_kq(:, ik_bz) = ebands%eig(fs%bmin:fs%bmax, ik_ibz, spin)
+     end do
+   end do
  end do
 
  ABI_CHECK(ierr == 0, "See above warnings")
  call krank%free()
 
- ! This combination of (bk, bkq) will never be used by the caller yet I initialize then with reasonable values.
- ! to avoid problems in libtetrabz_dbldelta
- ! TODO: Can also use single mband
- if (nband_kq > nband_k) then
-    do ib=nband_k+1, nb
-      eig_k(ib, :) = eig_k(1, :)
-    end do
- else if (nband_kq < nband_k) then
-    do ib=nband_kq+1, nb
-      eig_kq(ib, :) = eig_kq(1, :)
-    end do
- end if
-
+ ! Compute weights for double delta. Note that kibtetra assumes Ef set to zero.
  eig_k = eig_k - ebands%fermie
  eig_kq = eig_kq - ebands%fermie
  ABI_MALLOC(wght_bz, (nb, nb, nkbz))
 
+ write(std_out,*)"Calling libtetrabz_dbldelta with ltetra:", ltetra
+ write(std_out,*)"Q-point", qpt
  call libtetrabz_dbldelta(ltetra, cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz, comm=comm)
 
  ABI_FREE(eig_k)
@@ -745,15 +733,19 @@ subroutine fstab_setup_qpoint(fs, cryst, ebands, spin, ltetra, qpt, bk, bkq, wgh
  krank = krank_new(fs%nkfs, fs%kpts)
 
  !ABI_CALLOC(wght_fs, (fs%maxnb, fs%maxnb, fs%nkfs))
+ fs%dbldelta_tetra_weights_kfs = zero
  ik_bz = 0
  do i3=0,nge(3) - 1
     do i2=0,nge(2) - 1
        do i1 =0,nge(1) - 1
          ik_bz = ik_bz + 1
          kpt = ([i1, i2, i3] + ebands%shiftk(:, 1)) / nge(:)
-         !ik_fs = krank%invrank(krank%get_rank(kpt))
-         !if (ik_fs =/ -1) then
-         !wght_fs(1:nband_k, 1:nband_kq, ik_fs) = wght_bz(1:nband_k, 1:nband_kq, ik_bz)
+         ! Then we have to rearrange the weights
+         ik_fs = krank%invrank(krank%get_rank(kpt))
+         if (ik_fs /= -1) then
+           fs%dbldelta_tetra_weights_kfs(:,:,ik_fs) = wght_bz(:,:,ik_bz)
+           write(std_out,*)"dbldelta wts:", wght_bz(:,:,ik_bz)
+         end if
        end do
     end do
  end do
@@ -829,7 +821,9 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ikfs, ik_ibz, ikq_ibz, spin, e
 
  case (2)
    do ib2=1,nband_k
+     !band2 = ib2 + bstart_k - fs%bmin
      do ib1=1,nband_kq
+       !band1 = ib1 + bstart_kq - fs%bmin
        ! This is the old version (WRONG)
        wtk(ib1, ib2) = fs%tetra_wtk(ib1, ikq_ibz) * fs%tetra_wtk(ib2, ik_ibz)
        ! libtetrabz_dbldelta seems to report Weights in this order.

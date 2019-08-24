@@ -30,6 +30,8 @@ MODULE libtetrabz_dbldelta_mod
   !
 
   use m_abicore
+  use m_errors
+
   IMPLICIT NONE
   !
   PRIVATE
@@ -210,10 +212,18 @@ SUBROUTINE libtetrabz_dbldelta2(nb,ej,w)
   !
   INTEGER :: ib, ii, indx(3)
   REAL(8) :: a(3,3), e(3), V
+  character(len=500) :: msg
   !
   DO ib = 1, nb
      !
-     IF(maxval(ABS(ej(1:3,ib))) < 1d-10) STOP "Nesting !!"
+     !IF(maxval(ABS(ej(1:3,ib))) < 1d-10) then
+     ! MG reduce tolerance wrt original version.
+     IF(maxval(ABS(ej(1:3,ib))) < 1d-22) then
+      !write(std_out, ej(1:3,ib))
+      write(msg, *)"Nesting for band index:", ib, "ej:", ej(1:3,ib)
+      MSG_ERROR(msg)
+      !MSG_ERROR("STOP Nesting !!")
+     end if
      !
      w(ib,1:3) = 0d0
      e(1:3) = ej(1:3, ib)

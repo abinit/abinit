@@ -2128,7 +2128,7 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqp
    end if
  end do
 
- ! calculate the temperature dependence of the a2f(e,e',w) integrals (G_0(T_e) in PRL 110 016405 (2013) [[cite:Arnaud2013]])
+ ! Calculate the temperature dependence of the a2f(e,e',w) integrals (G_0(T_e) in PRL 110 016405 (2013) [[cite:Arnaud2013]])
  if (gams%prteliash == 3 .and. my_rank == master) then
    ntemp = 100
    min_temp = zero
@@ -3865,7 +3865,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    fs => fstab(spin)
    do ik_bz=1,fs%nkfs
      ik_ibz = fs%indkk_fs(1, ik_bz)
-     bstart_k = fs%bstcnt_ibz(1, ik_ibz); nband_k = fs%bstcnt_ibz(2, ik_ibz)
+     bstart_k = fs%bstart_cnt_ibz(1, ik_ibz); nband_k = fs%bstart_cnt_ibz(2, ik_ibz)
      bks_mask(bstart_k:bstart_k+nband_k-1, ik_ibz, spin) = .True.
    end do
  end do
@@ -4090,12 +4090,11 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      ! =====================================
      ! Integration over the FS for this spin
      ! =====================================
-     call xmpi_split_work(fs%nkfs, kpt_comm%value, my_kstart, my_kstop)
-
-     !ltetra = 0
      ! TODO: Here I have to convert between full BZ and fs%nkfs
-     !call fs%setup_qpoint(cryst, ebands, spin, ltetra, qpt, &
-     !                     [bstart_k, nband_k], [bstart_kq, nband_kq], wght, kpt_comm%value)
+     !ltetra = dtset%userid + 1
+     !call fs%setup_qpoiint(cryst, ebands, spin, dtset%userid + 1 , qpt, kpt_comm%value)
+
+     call xmpi_split_work(fs%nkfs, kpt_comm%value, my_kstart, my_kstop)
 
      do ik_bz=my_kstart,my_kstop
        call cwtime(cpu_k, wall_k, gflops_k, "start")
@@ -4107,7 +4106,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        kk_ibz = ebands%kptns(:,ik_ibz)
 
        ! Number of bands crossing the Fermi level at k
-       bstart_k = fs%bstcnt_ibz(1, ik_ibz); nband_k = fs%bstcnt_ibz(2, ik_ibz)
+       bstart_k = fs%bstart_cnt_ibz(1, ik_ibz); nband_k = fs%bstart_cnt_ibz(2, ik_ibz)
 
        ! Find k+q in the extended zone and extract symmetry info. cycle if k+q not in FS.
        ! Be careful here because there are two umklapp vectors to be considered:
@@ -4136,7 +4135,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        kq_ibz = ebands%kptns(:, ikq_ibz)
 
        ! Number of bands crossing the Fermi level at k+q
-       bstart_kq = fs%bstcnt_ibz(1, ikq_ibz); nband_kq = fs%bstcnt_ibz(2, ikq_ibz)
+       bstart_kq = fs%bstart_cnt_ibz(1, ikq_ibz); nband_kq = fs%bstart_cnt_ibz(2, ikq_ibz)
        ABI_CHECK(nband_k <= mnb .and. nband_kq <= mnb, "wrong nband")
 
        ! Get npw_k, kg_k and symmetrize wavefunctions from IBZ (if needed).
