@@ -275,6 +275,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      end if
    end if
 
+#if 1
    if (dtset%eph_transport > 0) then
      do ii=1,3
        if (nctk_try_fort_or_ncfile(ddk_path(ii), msg) /= 0) then
@@ -282,6 +283,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
        end if
      end do
    end if
+#endif
  end if ! master
 
  ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
@@ -295,6 +297,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
  call wrtout(ab_out, sjoin("- Reading DDB from file:", ddb_path))
  if (use_dvdb) call wrtout(ab_out, sjoin("- Reading DVDB from file:", dvdb_path))
+#if 1
  if (dtset%eph_transport > 0) then
    call xmpi_bcast(ddk_path,master,comm,ierr)
    call wrtout(ab_out, sjoin("- Reading DDK x from file:", ddk_path(1)))
@@ -306,6 +309,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! TODO: Should perform consistency check
    !call hdr_vs_dtset(ddk_hdr(ii), dtset)
  end if
+#endif
 
  if (dtset%eph_frohlichm /= 1) call wrtout(ab_out, sjoin("- Reading EFMAS information from file:", dtfil%fnameabi_efmas))
 

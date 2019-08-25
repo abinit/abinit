@@ -71,10 +71,12 @@ module m_fstab
     ! Number of points in the IBZ
 
    integer :: bmin, bmax
+    ! Min and max band index included in the calculation.
+    ! Note that these values are obtained by taking the union over the k-points in the FS
+    ! For each k-point, we usually have a different number of states crossing eF given by bstart_cnt_ibz
 
    integer :: maxnb
-   ! Max number of bands on the FS.
-   ! TODO: Maybe maxnbfs
+   ! Max number of bands on the FS (bmax - bmin + 1)
 
    integer :: eph_intmeth
    ! Integration method. 1 for gaussian, 2 for tetrahedra
@@ -83,6 +85,12 @@ module m_fstab
    ! Number of chemical potential values used for inelastic integration
 
    real(dp) :: eph_fsmear
+   ! Gaussian broadening. Negative value activates adaptive gaussian broadening.
+   ! https://journals.aps.org/prb/pdf/10.1103/PhysRevB.92.075405
+
+   real(dp) :: min_smear = tol9
+   ! Used for the adaptive gaussian broadening: use min_smear if the broadening computed from the group velocity
+   ! is smaller than this value to avoid divergences in the gaussian
 
    real(dp) :: enemin
    ! Minimal chemical potential value used for inelastic integration
@@ -110,14 +118,19 @@ module m_fstab
     !   bstcnt(1, :) The index of the first band inside the energy window (start)
     !   bstcnt(2, :) Number of bands on the FS (count)
 
+   real(dp) :: kmesh_cartvec(3,3)
+    ! vectors defining the k-mesh (stored as column vector in Cartesian coords.
+    ! Used to implement the adaptive gaussian broadening.
+    ! NB: two_pi is included.
+
    real(dp),allocatable :: kpts(:,:)
    ! (3, nkfs)
    ! Reduced coordinates of the k-points on the Fermi surface.
 
    real(dp),allocatable :: vk(:,:), vkq(:,:)
    ! (3, mnb)
-   ! Velocities in cartesian cordinates. Used to implement adaptive broadening
-   ! Initialized in phgamma inside the loop over k-points.
+   ! Velocities in cartesian cordinates. Used to implement the adaptive gaussian broadening
+   ! Values are filled by the called (phgamma) inside the loop over k-points.
 
    real(dp),allocatable :: tetra_wtk(:,:)
    ! (maxnb, nkibz)
@@ -331,7 +344,8 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
    full2ebands(6, ik_bz) = indkk(ik_bz, 6)     ! itimrev
  end do
 
- ! Select only those k-points in the BZ close to the FS.
+ ! Select only the k-points in the BZ that are sufficiently close to the FS.
+ ! FIXME: Do not know why but lamda depends on eph_fsewin if gaussian
  ABI_CHECK(dtset%eph_fsewin > tol12, "dtset%eph_fsewin < tol12")
  elow = ebands%fermie - dtset%eph_fsewin
  ehigh = ebands%fermie + dtset%eph_fsewin
@@ -438,12 +452,17 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
    fs%deltaene = deltaene
    fs%eph_intmeth = dtset%eph_intmeth
    fs%eph_fsmear = dtset%eph_fsmear
- end do
 
- !k1(:) = cryst%gprimd(:,1)*klatt(1,1) + cryst%gprimd(:,2)*klatt(2,1) + cryst%gprimd(:,3)*klatt(3,1)
- !k2(:) = cryst%gprimd(:,1)*klatt(1,2) + cryst%gprimd(:,2)*klatt(2,2) + cryst%gprimd(:,3)*klatt(3,2)
- !k3(:) = cryst%gprimd(:,1)*klatt(1,3) + cryst%gprimd(:,2)*klatt(2,3) + cryst%gprimd(:,3)*klatt(3,3)
- !fs%kmesh_cartvec = two_pi *
+   fs%kmesh_cartvec(:, 1) = cryst%gprimd(:,1)*klatt(1,1) + cryst%gprimd(:,2)*klatt(2,1) + cryst%gprimd(:,3)*klatt(3,1)
+   fs%kmesh_cartvec(:, 2) = cryst%gprimd(:,1)*klatt(1,2) + cryst%gprimd(:,2)*klatt(2,2) + cryst%gprimd(:,3)*klatt(3,2)
+   fs%kmesh_cartvec(:, 3) = cryst%gprimd(:,1)*klatt(1,3) + cryst%gprimd(:,2)*klatt(2,3) + cryst%gprimd(:,3)*klatt(3,3)
+   fs%kmesh_cartvec = two_pi * fs%kmesh_cartvec
+   !do i1=1,3
+   !  write(std_out, *)"klatt:", klatt(:, i1)
+   !  write(std_out, *)"gprimd:", cryst%gprimd(:, i1)
+   !  write(std_out, *)"cartvec:", fs%kmesh_cartvec(:, i1)
+   !end do
+ end do
 
  ! TODO: compute weights on the fly to reduce memory? nene should be set to zero if not used!
  if (dtset%eph_intmeth == 2) then
@@ -656,14 +675,14 @@ subroutine fstab_setup_qpoint(fs, cryst, ebands, spin, ltetra, qpt, comm)
  ABI_CHECK(ierr == 0, "See above warnings")
  call krank%free()
 
- ! Compute weights for double delta. Note that kibtetra assumes Ef set to zero.
+ ! Compute weights for double delta. Note that libtetra assumes Ef set to zero.
  eig_k = eig_k - ebands%fermie
  eig_kq = eig_kq - ebands%fermie
  ABI_MALLOC(wght_bz, (nb, nb, nkbz))
 
  write(std_out,*)" Calling libtetrabz_dbldelta with ltetra:", ltetra
  write(std_out,*)" Q-point", qpt
- call libtetrabz_dbldelta(ltetra, cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz, comm=comm)
+ call libtetrabz_dbldelta(ltetra, cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz) !, comm=comm)
 
  ABI_FREE(eig_k)
  ABI_FREE(eig_kq)
@@ -732,7 +751,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ikfs, ik_ibz, ikq_ibz, spin, w
 
 !Local variables-------------------------------
 !scalars
- integer :: bstart_k, nband_k, bstart_kq, nband_kq, ib1, band1, ib2, band2
+ integer :: bstart_k, nband_k, bstart_kq, nband_kq, ib1, band1, ib2, band2, ii
  real(dp) :: g1, g2, sigma
 
 ! *************************************************************************
@@ -749,17 +768,17 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ikfs, ik_ibz, ikq_ibz, spin, w
    sigma = fs%eph_fsmear
    do ib2=1,nband_k
      band2 = ib2 + bstart_k - 1
-     !if (fs%eph_fsmear < zero) then
-     !  sigma = max(max([(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii)), ii=1,3)]), tol9)
-     !end if
+     if (fs%eph_fsmear < zero) then
+       sigma = max(maxval([(abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+     end if
      g2 = gaussian(ebands%eig(band2, ik_ibz, spin) - ebands%fermie, sigma)
      do ib1=1,nband_kq
        band1 = ib1 + bstart_kq - 1
-       !if (fs%eph_fsmear < zero) then
-       !  sigma = max(max([(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii)), ii=1,3)]), tol9)
-       !end if
+       if (fs%eph_fsmear < zero) then
+         sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+       end if
        g1 = gaussian(ebands%eig(band1, ikq_ibz, spin) - ebands%fermie, sigma)
-       wtk(ib1, ib2) = g1 * g2 ! / fs%nktot
+       wtk(ib1, ib2) = (g1 * g2) / fs%nktot
      end do
    end do
 
@@ -770,10 +789,10 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ikfs, ik_ibz, ikq_ibz, spin, w
      do ib1=1,nband_kq
        band1 = ib1 + bstart_kq - fs%bmin
        ! This is the old version (WRONG)
-       wtk(ib1, ib2) = fs%tetra_wtk(band1, ikq_ibz) * fs%tetra_wtk(band2, ik_ibz) ! / fs%nktot
+       wtk(ib1, ib2) = fs%tetra_wtk(band1, ikq_ibz) * fs%tetra_wtk(band2, ik_ibz) / fs%nktot
 
-       !write(std_out,*)wtk(ib1, ib2) / fs%nktot, fs%dbldelta_tetra_weights_kfs(band1, band2, ikfs), &
-       !                abs(wtk(ib1, ib2) / fs%nktot - fs%dbldelta_tetra_weights_kfs(band1, band2, ikfs))
+       !write(std_out,*)wtk(ib1, ib2), fs%dbldelta_tetra_weights_kfs(band1, band2, ikfs), &
+       !                abs(wtk(ib1, ib2) - fs%dbldelta_tetra_weights_kfs(band1, band2, ikfs))
 
        ! libtetrabz_dbldelta seems to report Weights in this order.
        !wtk(ib1, ib2) = fs%dbldelta_tetra_weights_kfs(band1, band2, ikfs)

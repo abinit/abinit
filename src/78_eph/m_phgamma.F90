@@ -3563,7 +3563,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, gflops_q, cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
  real(dp) :: edos_step, edos_broad, sigma
  real(dp) :: ecut,eshift,eig0nk,dksqmax
- logical :: isirr_k,isirr_kq,gen_eigenpb, compute_velocities
+ logical :: isirr_k,isirr_kq,gen_eigenpb, need_velocities
  type(wfd_t) :: wfd
  type(fstab_t),pointer :: fs
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -3843,7 +3843,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  call wrtout(std_out, " ", do_flush=.True.)
 
  if (do_ftv1q /= 0) then
-   MSG_ERROR(sjoin("Cannot find:", itoa(do_ftv1q), "q-points in DVDB. Use eph_task to interpolate DFPT potentials"))
+   !MSG_ERROR(sjoin("Cannot find:", itoa(do_ftv1q), "q-points in DVDB. Use eph_task to interpolate DFPT potentials"))
    call wrtout([std_out, ab_out], " Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
    ! Prepare Fourier interpolation of DFPT potentials.
    comm_rpt = xmpi_comm_self
@@ -4091,8 +4091,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      ! Integration over the FS for this spin
      ! =====================================
      ! TODO: Here I have to convert between full BZ and fs%nkfs
-     !ltetra = dtset%userid + 1
-     call fs%setup_qpoiint(cryst, ebands, spin, dtset%userid + 1 , qpt, kpt_comm%value)
+     !ltetra = dtset%useria + 1
+     call fs%setup_qpoiint(cryst, ebands, spin, dtset%useria + 1 , qpt, kpt_comm%value)
 
      call xmpi_split_work(fs%nkfs, kpt_comm%value, my_kstart, my_kstop)
 
@@ -4219,12 +4219,9 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ! Collect gkk_atm inside pert_comm so that all procs can operate on data.
        if (pert_comm%nproc > 1) call xmpi_sum(gkk_atm, pert_comm%value, ierr)
 
-       ! Compute weights for double delta integration at the Fermi level.
-       call fs%get_dbldelta_weights(ebands, ik_bz, ik_ibz, ikq_ibz, spin, dbldelta_wts)
+       need_velocities = dtset%eph_transport > 0 .or. fs%eph_fsmear < zero
 
-       compute_velocities = dtset%eph_transport > 0
-
-       if (compute_velocities) then
+       if (need_velocities) then
          ! Compute diagonal matrix elements of velocity operator with DFPT routines
          ! Velocities are in Cartesian coordinates.
          call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, kg_k)
@@ -4249,6 +4246,9 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
            !write(std_out,*)"ddk: ", ddk%velocity(:,ib1,ikq_bz,spin)
          end do
        end if
+
+       ! Compute weights for double delta integration at the Fermi level.
+       call fs%get_dbldelta_weights(ebands, ik_bz, ik_ibz, ikq_ibz, spin, dbldelta_wts)
 
        ! Accumulate results in tgam (sum over FS and bands for this spin).
        do ipc2=1,natom3
@@ -4310,18 +4310,18 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
          do ib2=1,nband_k
            band_k = ib2 + bstart_k - 1
            sigma = fs%eph_fsmear
-           !if (fs%eph_fsmear < zero) then
-           !  sigma = max(max([(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii)), ii=1,3)]), tol9)
-           !end if
-           wt_k_en(:, ib2) = gaussian(emesh - ebands%eig(band_k, ik_ibz, spin), sigma)
+           if (fs%eph_fsmear < zero) then
+             sigma = max(maxval([(abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+           end if
+           wt_k_en(:, ib2) = gaussian(emesh - ebands%eig(band_k, ik_ibz, spin), sigma) / sqrt(one * fs%nktot)
          end do
          do ib1=1,nband_kq
            band_kq = ib1 + bstart_kq - 1
            sigma = fs%eph_fsmear
-           !if (fs%eph_fsmear < zero) then
-           !  sigma = max(max([(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii)), ii=1,3)]), tol9)
-           !end if
-           wt_kq_en(:, ib1) = gaussian(emesh - ebands%eig(band_kq, ikq_ibz, spin), sigma)
+           if (fs%eph_fsmear < zero) then
+             sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+           end if
+           wt_kq_en(:, ib1) = gaussian(emesh - ebands%eig(band_kq, ikq_ibz, spin), sigma) / sqrt(one * fs%nktot)
          end do
 
          do ib2=1,nband_k
@@ -4346,7 +4346,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
          end do
        end if
 
-       if (ik_bz < 100 .or. (fs%nkfs > 100 .and. mod(ik_bz, 200) == 0)) then
+       if (ik_bz < 20 .or. (fs%nkfs > 100 .and. mod(ik_bz, 200) == 0)) then
          write(msg,'(4(a,i0),a,f8.2)') " q-point [", iq_ibz, "/", gams%nqibz, "] k-point [", ik_bz, "/", fs%nkfs, "]"
          call cwtime_report(msg, cpu_k, wall_k, gflops_k)
        end if
@@ -4365,22 +4365,22 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      call xmpi_sum(tgam, kpt_comm%value, ierr)
      ! Symmetrize gamma matrices. Note that this call is not executed in elphon!
      if (gams%symgamma == 1) call tgamma_symm(cryst, gams%qibz(:,iq_ibz), tgam)
-     gams%vals_qibz(:,:,:,iq_ibz, spin) = tgam / fstab(spin)%nktot
+     gams%vals_qibz(:,:,:,iq_ibz, spin) = tgam
 
      if (dtset%eph_transport > 0) then
        ABI_FREE(vv_kk)
        ABI_FREE(vv_kkq)
        call xmpi_sum(tgamvv_in, kpt_comm%value, ierr)
        call xmpi_sum(tgamvv_out, kpt_comm%value, ierr)
-       gams%vals_in_qibz(:,:,:,:,iq_ibz,spin)  = tgamvv_in / fstab(spin)%nktot
-       gams%vals_out_qibz(:,:,:,:,iq_ibz,spin) = tgamvv_out / fstab(spin)%nktot
+       gams%vals_in_qibz(:,:,:,:,iq_ibz,spin)  = tgamvv_in
+       gams%vals_out_qibz(:,:,:,:,iq_ibz,spin) = tgamvv_out
      end if
 
      if (dtset%prteliash == 3) then
        call xmpi_sum(tmp_vals_ee, kpt_comm%value, ierr)
        if (gams%my_iqibz(iq_ibz) /= -1) then ! this saves the right matrices locally
          !TODO: apply same distributed mem scheme for other vals_XX arrays
-         gams%vals_ee(:,:,:,:,:, gams%my_iqibz(iq_ibz), spin) = tmp_vals_ee / fstab(spin)%nktot
+         gams%vals_ee(:,:,:,:,:, gams%my_iqibz(iq_ibz), spin) = tmp_vals_ee
        end if
      end if
 
@@ -4389,10 +4389,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    ABI_FREE(v1scf)
    ABI_FREE(vlocal1)
 
-   !if (nq < 1000 .or. (nq > 1000 .and. mod(iq_ibz, 200) == 0) .or. iq_ibz <= nprocs) then
-   write(msg,'(2(a,i0),a)')" q-point [ ", iq_ibz, "/", gams%nqibz, " ]"
-   call cwtime_report(msg, cpu_q, wall_q, gflops_q)
-   !end if
+   write(msg,'(2(a,i0),a)')" q-point [", iq_ibz, "/", gams%nqibz, "]"
+   call cwtime_report(msg, cpu_q, wall_q, gflops_q, pre_str=ch10, end_str=ch10)
  end do ! iq_ibz
 
  call cwtime_report("Computation of phonon linewidths", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10)
@@ -4538,5 +4536,3 @@ end subroutine eph_phgamma
 
 end module m_phgamma
 !!***
-
-!----------------------------------------------------------------------
