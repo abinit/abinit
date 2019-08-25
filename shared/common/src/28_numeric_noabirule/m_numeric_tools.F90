@@ -124,6 +124,12 @@ MODULE m_numeric_tools
    module procedure get_trace_cdp
  end interface get_trace
 
+ !interface cart_prod33
+ !  module procedure cart_prod33_int
+ !  module procedure cart_prod33_rdp
+ !  module procedure cart_prod33_cdp
+ !end interface cart_prod33
+
  interface get_diag
    module procedure get_diag_int
    module procedure get_diag_rdp
@@ -296,7 +302,7 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-pure function arth_int(start,step,nn)
+pure function arth_int(start, step, nn)
 
 
 !Arguments ------------------------------------
@@ -338,7 +344,7 @@ end function arth_int
 !!
 !! SOURCE
 
-pure function arth_rdp(start,step,nn)
+pure function arth_rdp(start, step, nn)
 
 
 !Arguments ------------------------------------
