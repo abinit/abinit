@@ -37,7 +37,6 @@ module m_eph_driver
  use m_dtset
  use m_efmas_defs
  use m_dtfil
- use m_ddk
  use m_ddb
  use m_dvdb
  use m_ifc
@@ -49,8 +48,8 @@ module m_eph_driver
  use netcdf
 #endif
 
- use defs_datatypes, only : pseudopotential_type, ebands_t
- use defs_abitypes, only : MPI_type
+ use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_abitypes,     only : MPI_type
  use m_io_tools,        only : file_exists
  use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
@@ -162,7 +161,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master = 0, natifc0 = 0, timrev2 = 2, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0
- integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,jj
+ integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, ddb_nqshift,ierr,brav1
  integer :: omp_ncpus, work_size, nks_per_proc
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
@@ -180,7 +179,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  type(ebands_t) :: ebands, ebands_kq
  type(ddb_type) :: ddb
  type(dvdb_t) :: dvdb
- type(ddk_t) :: ddk
  type(ifc_type) :: ifc, ifc_coarse
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
@@ -192,7 +190,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: wminmax(2), dielt(3,3), zeff(3,3,dtset%natom), zeff_raw(3,3,dtset%natom)
  real(dp),pointer :: gs_eigen(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:), kpt_efmas(:,:)
- character(len=fnlen) :: ddk_path(3)
  type(efmasdeg_type),allocatable :: efmasdeg(:)
  type(efmasval_type),allocatable :: efmasval(:,:)
  !type(pawfgrtab_type),allocatable :: pawfgrtab(:)
@@ -256,9 +253,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
  use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1 .and. dtset%eph_task /= 7)
 
- ddk_path(1) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+1))
- ddk_path(2) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+2))
- ddk_path(3) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+3))
+ !ddk_path(1) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+1))
+ !ddk_path(2) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+2))
+ !ddk_path(3) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+3))
 
  if (my_rank == master) then
    if (.not. file_exists(ddb_path)) MSG_ERROR(sjoin("Cannot find DDB file:", ddb_path))
@@ -275,15 +272,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      end if
    end if
 
-#if 1
-   if (dtset%eph_transport > 0) then
-     do ii=1,3
-       if (nctk_try_fort_or_ncfile(ddk_path(ii), msg) /= 0) then
-         MSG_ERROR(sjoin("Cannot find DDK file:", ddk_path(ii), msg))
-       end if
-     end do
-   end if
-#endif
  end if ! master
 
  ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
@@ -297,19 +285,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
  call wrtout(ab_out, sjoin("- Reading DDB from file:", ddb_path))
  if (use_dvdb) call wrtout(ab_out, sjoin("- Reading DVDB from file:", dvdb_path))
-#if 1
- if (dtset%eph_transport > 0) then
-   call xmpi_bcast(ddk_path,master,comm,ierr)
-   call wrtout(ab_out, sjoin("- Reading DDK x from file:", ddk_path(1)))
-   call wrtout(ab_out, sjoin("- Reading DDK y from file:", ddk_path(2)))
-   call wrtout(ab_out, sjoin("- Reading DDK z from file:", ddk_path(3)))
-   ! Read header in DDK files and init basic dimensions.
-   ! subdrivers will use ddk to get the matrix elements from file.
-   call ddk_init(ddk, ddk_path, comm)
-   ! TODO: Should perform consistency check
-   !call hdr_vs_dtset(ddk_hdr(ii), dtset)
- end if
-#endif
 
  if (dtset%eph_frohlichm /= 1) call wrtout(ab_out, sjoin("- Reading EFMAS information from file:", dtfil%fnameabi_efmas))
 
@@ -497,7 +472,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_path))
    end if
  end if
- !do ii=1,3; do jj=1,3; if (ii /= jj) dielt(ii, jj) = zero; enddo; enddo
 
  if (any(dtset%ddb_qrefine > 1)) then
    ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
@@ -670,7 +644,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  case (1)
    ! Compute phonon linewidths in metals.
-   call eph_phgamma(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ddk, ifc, &
+   call eph_phgamma(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
      pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (2, -2)
@@ -723,7 +697,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call cryst%free()
  call dvdb%free()
  call ddb%free()
- call ddk_free(ddk)
  call ifc%free()
  call hdr_free(wfk0_hdr)
  if (use_wfk) call ebands_free(ebands)

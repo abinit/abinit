@@ -136,7 +136,6 @@ _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
          ph_ngqpt       16   16   16
 -          fftalg         312
            getddb          20
-           getddk          20
           getdvdb1          0
           getdvdb2          0
           getdvdb3          0
@@ -292,8 +291,6 @@ P           mkmem          29
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
- mkfilename : getddk/=0, take file _1WF from output of DATASET  20.
-
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
 
  Exchange-correlation functional for the present dataset will be:
@@ -304,9 +301,6 @@ P           mkmem          29
 - Reading GS states from WFK file: t88o_DS20_WFK
 - Reading DDB from file: t88o_DS20_DDB
 - Reading DVDB from file: t88o_DS20_DVDB
-- Reading DDK x from file: t88o_DS20_1WF4
-- Reading DDK y from file: t88o_DS20_1WF5
-- Reading DDK z from file: t88o_DS20_1WF6
 - Reading EFMAS information from file: t88i_DS1_EFMAS.nc
 - Writing Fermi surface to file: t88o_DS1_BXSF
 - Writing nesting factor to file: t88o_DS1_NEST
@@ -517,8 +511,6 @@ All the independent perturbations are available
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
- mkfilename : getddk/=0, take file _1WF from output of DATASET  20.
-
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
 
  Exchange-correlation functional for the present dataset will be:
@@ -529,9 +521,6 @@ All the independent perturbations are available
 - Reading GS states from WFK file: t88o_DS20_WFK
 - Reading DDB from file: t88o_DS20_DDB
 - Reading DVDB from file: t88o_DS20_DVDB
-- Reading DDK x from file: t88o_DS20_1WF4
-- Reading DDK y from file: t88o_DS20_1WF5
-- Reading DDK z from file: t88o_DS20_1WF6
 - Reading EFMAS information from file: t88i_DS2_EFMAS.nc
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
@@ -719,8 +708,6 @@ All the independent perturbations are available
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
- mkfilename : getddk/=0, take file _1WF from output of DATASET  20.
-
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
 
  Exchange-correlation functional for the present dataset will be:
@@ -730,9 +717,6 @@ All the independent perturbations are available
 
 - Reading DDB from file: t88o_DS20_DDB
 - Reading DVDB from file: t88o_DS20_DVDB
-- Reading DDK x from file: t88o_DS20_1WF4
-- Reading DDK y from file: t88o_DS20_1WF5
-- Reading DDK z from file: t88o_DS20_1WF6
 - Reading EFMAS information from file: t88i_DS3_EFMAS.nc
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
@@ -874,8 +858,6 @@ Interpolation of the electron-phonon coupling potential completed
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
- mkfilename : getddk/=0, take file _1WF from output of DATASET  20.
-
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   3.
@@ -888,9 +870,6 @@ Interpolation of the electron-phonon coupling potential completed
 - Reading GS states from WFK file: t88o_DS20_WFK
 - Reading DDB from file: t88o_DS20_DDB
 - Reading DVDB from file: t88o_DS3_DVDB
-- Reading DDK x from file: t88o_DS20_1WF4
-- Reading DDK y from file: t88o_DS20_1WF5
-- Reading DDK z from file: t88o_DS20_1WF6
 - Reading EFMAS information from file: t88i_DS4_EFMAS.nc
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
@@ -1245,7 +1224,6 @@ All the independent perturbations are available
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
            getddb          20
-           getddk          20
           getdvdb1          0
           getdvdb2          0
           getdvdb3          0

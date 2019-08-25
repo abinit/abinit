@@ -38,9 +38,10 @@ module m_phgamma
  use netcdf
 #endif
  use m_wfk
- use m_ddk
  use m_ddb
+ use m_ddk
  use m_dvdb
+ use m_crystal
  use m_fft
  use m_hamiltonian
  use m_pawcprj
@@ -59,11 +60,9 @@ module m_phgamma
  use m_special_funcs,  only : gaussian
  use m_fftcore,        only : ngfft_seq, get_kg
  use m_cgtools,        only : cg_zdotc
- use m_cgtk,           only : cgtk_rotate
  use m_kg,             only : getph
  use m_dynmat,         only : symdyma, ftgam_init, ftgam, asrif9
  use defs_datatypes,   only : ebands_t, pseudopotential_type
- use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : isamek, kpath_t, kpath_new
  use m_special_funcs,  only : fermi_dirac
  use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk
@@ -994,7 +993,7 @@ subroutine phgamma_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_ph, lambda_p
  ! Compute lambda
  ! spinfact should be 1 for a normal non sppol calculation without spinorbit
  ! for spinors it should also be 1 as bands are twice as numerous but n0 has been divided by 2
- ! for sppol 2 it should be 0.5 as we have 2 spin channels to sum
+ ! for nsppol 2 it should be 0.5 as we have 2 spin channels to sum
  spinfact = two / (gams%nsppol * gams%nspinor)
 
  ! Compute lambda
@@ -3519,7 +3518,7 @@ end subroutine a2fw_tr_write
 !!
 !! SOURCE
 
-subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, ddk, ifc, &
+subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                        pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
 !Arguments ------------------------------------
@@ -3540,7 +3539,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer,intent(in) :: ngfft(18),ngfftf(18)
  type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
- type(ddk_t),intent(inout) :: ddk
 
 !Local variables ------------------------------
 !scalars
@@ -3653,13 +3651,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  call fstab_init(fstab, ebands, cryst, dtset, comm)
  call fstab_print(fstab, unit=std_out)
  !call fstab_print(fstab, unit=ab_out)
-
- ! now we can initialize the ddk velocities, on the FS grid only
- ! TODO: Group velocites should be computed on the fly.
- if (dtset%eph_transport > 0) then
-   call ddk_read_fsvelocities(ddk, fstab, comm)
-   !call ddk_fs_average_veloc(ddk, ebands, fstab, dtset%eph_fsmear)
- end if
 
  gamma_ngqpt = ifc%ngqpt; if (all(dtset%eph_ngqpt_fine /= 0)) gamma_ngqpt = dtset%eph_ngqpt_fine
 
@@ -4229,10 +4220,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
            band_k = ib2 + bstart_k - 1
            fs%vk(:,ib2) = ddkop%get_vdiag(ebands%eig(band_k, ik_ibz, spin), &
                                           istwf_k, npw_k, wfd%nspinor, kets_k(:,:,ib2), cwaveprj0)
-           !write(std_out,*)"kk:", kk
-           !write(std_out,*)"vk_diff:", fs%vk(:,ib2) - ddk%velocity(:,ib2,ik_bz,spin)
-           !write(std_out,*)"vk:  ", fs%vk(:,ib2)
-           !write(std_out,*)"ddk: " , ddk%velocity(:,ib2,ik_bz,spin)
          end do
 
          call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
@@ -4240,10 +4227,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
            band_kq = ib1 + bstart_kq - 1
            fs%vkq(:,ib1) = ddkop%get_vdiag(ebands%eig(band_kq, ikq_ibz, spin), &
                                            istwf_kq, npw_kq,wfd%nspinor, bras_kq(:,:,ib1), cwaveprj0)
-           !write(std_out,*)"kq:", kq
-           !write(std_out,*)"vkq_diff:", fs%vkq(:,ib1) - ddk%velocity(:,ib1,ikq_bz,spin)
-           !write(std_out,*)"vkq: ", fs%vkq(:,ib1)
-           !write(std_out,*)"ddk: ", ddk%velocity(:,ib1,ikq_bz,spin)
          end do
        end if
 
@@ -4272,11 +4255,11 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
              do ib1 = 1,nband_kq
                do ipc1 = 1,3
                  ! vk x vk
-                 vv_kk(ipc1 + (ipc2-1)*3, ib1,ib2)  = ddk%velocity(ipc1,ib1,ik_bz,spin) &
-                    * ddk%velocity(ipc2,ib2,ik_bz,spin)
+                 vv_kk(ipc1 + (ipc2-1)*3, ib1,ib2) = fs%vk(ipc1, ib1) * fs%vk(ipc2, ib2)
+                    !ddk%velocity(ipc1,ib1,ik_bz,spin) * ddk%velocity(ipc2,ib2,ik_bz,spin)
                  ! vk x vk+q
-                 vv_kkq(ipc1 + (ipc2-1)*3, ib1,ib2) = ddk%velocity(ipc1,ib1,ikq_bz,spin) &
-                    * ddk%velocity(ipc2,ib2,ik_bz,spin)
+                 vv_kkq(ipc1 + (ipc2-1)*3, ib1,ib2) = fs%vkq(ipc1, ib1) * fs%vk(ipc2, ib2)
+                    !ddk%velocity(ipc1,ib1,ikq_bz,spin) * ddk%velocity(ipc2,ib2,ik_bz,spin)
                end do
              end do
            end do

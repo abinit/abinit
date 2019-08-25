@@ -36,6 +36,7 @@ MODULE m_ddk
  use m_dtset
  use m_krank
  use m_fstab
+ use m_crystal
  use m_wfd
  use m_mpinfo
  use m_cgtools
@@ -49,13 +50,10 @@ MODULE m_ddk
 #endif
 
  use m_fstrings,      only : strcat, sjoin, itoa, endswith, ktoa
- use m_symtk,         only : matr3inv
  use m_io_tools,      only : iomode_from_fname
  use m_time,          only : cwtime, sec2str
  use defs_abitypes,   only : MPI_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
- use m_geometry,      only : mkradim
- use m_crystal,       only : crystal_t
  use m_vkbr,          only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
  use m_pawtab,        only : pawtab_type
  use m_wfk,           only : wfk_read_ebands, wfk_read_h1mat
@@ -65,99 +63,15 @@ MODULE m_ddk
  private
 !!***
 
- integer,private,parameter :: DDK_NOMODE    = 0
- integer,private,parameter :: DDK_READMODE  = 1
- integer,private,parameter :: DDK_WRITEMODE = 2
-
-!----------------------------------------------------------------------
-
-!!****t* m_ddk/ddk_t
-!! NAME
-!!  ddk_t
-!!
-!! FUNCTION
-!!  object containing ddk derivatives ([H,r] proportional to band velocities)
-!!
-!! SOURCE
-
- type,public :: ddk_t
-
-  integer :: comm
-  ! MPI communicator used for IO.
-
-  !integer :: version
-  ! File format version read from file.
-
-  integer :: iomode=IO_MODE_FORTRAN
-  ! Method used to access the DDK file:
-  !   IO_MODE_FORTRAN for usual Fortran IO routines
-  !   IO_MODE_MPI if MPI/IO routines.
-  !   IO_MODE_ETSF netcdf files in etsf format
-
-  integer :: rw_mode = DDK_NOMODE
-   ! (Read|Write) mode
-
-  integer :: nsppol
-   ! Number of spin polarizations.
-
-  integer :: nspinor
-   ! Number of spinor components.
-
-  integer :: nene
-    ! Number of energy points we may need the fsavg at
-
-  integer :: nkfs
-    ! Number of k-points on the Fermi-surface (FS-BZ).
-
-  integer :: maxnb
-   ! Max number of bands on the FS.
-   ! TODO: Maybe maxnbfs
-
-  integer :: usepaw
-   ! 1 if PAW calculation, 0 otherwise
-
-  integer :: prtvol=0
-   ! Verbosity level
-
-  logical :: debug=.False.
-   ! Debug flag
-
-  character(len=fnlen) :: paths(3) = ABI_NOFILE
-   ! File name
-
-  real(dp) :: acell(3),rprim(3,3),gprim(3,3)
-   ! TODO: Are these really needed?
-
-  real(dp), allocatable :: velocity (:,:,:,:)
-   ! (3,maxnb,nkfs,nsppol)
-   ! velocity on the FS in cartesian coordinates.
-
-  real(dp), allocatable :: velocity_fsavg (:,:,:)
-   ! (3,nene,nsppol)
-   ! velocity on the FS in cartesian coordinates.
-
-  logical :: use_ncddk(3)
-   ! True if we are readin DDK matrix elements from EVK.nc instead of WFK file
-
-  type(crystal_t) :: cryst
-   ! Crystal structure read from file
-
- end type ddk_t
-
- public :: ddk_init              ! Initialize the object.
- public :: ddk_read_fsvelocities ! Read FS velocities from file.
- !public :: ddk_fs_average_veloc  ! find FS average of velocity squared
- public :: ddk_free              ! Close the file and release the memory allocated.
- public :: ddk_print             ! output values
  public :: ddk_red2car           ! Convert band velocities from cartesian to reduced coordinates
- public :: ddk_compute           ! Calculate ddk matrix elements. Save result on disk.
+ public :: ddk_compute           ! Calculate ddk matrix elements. Save result to disk.
 !!***
 
  type, private :: ham_targets_t
-   real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:)
-   real(dp),allocatable :: kpg_k(:,:),kpg1_k(:,:)
-   real(dp),allocatable :: ph3d(:,:,:),ph3d1(:,:,:)
-   real(dp),allocatable :: dkinpw(:),kinpw1(:)
+   real(dp),allocatable :: ffnlk(:,:,:,:), ffnl1(:,:,:,:)
+   real(dp),allocatable :: kpg_k(:,:), kpg1_k(:,:)
+   real(dp),allocatable :: ph3d(:,:,:), ph3d1(:,:,:)
+   real(dp),allocatable :: dkinpw(:), kinpw1(:)
    contains
      procedure :: free => ham_targets_free   ! Free memory.
  end type ham_targets_t
@@ -239,78 +153,6 @@ MODULE m_ddk
 !!***
 
 CONTAINS
-
-!----------------------------------------------------------------------
-
-!!****f* m_ddk/ddk_init
-!! NAME
-!!  ddk_init
-!!
-!! FUNCTION
-!!  Initialize the object from file. This is a COLLECTIVE procedure that must be called
-!!  by each process in the MPI communicator comm.
-!!
-!! INPUTS
-!!   paths=3 Filenames (could be either DFPT WFK files of DKK.nc files.
-!!   comm=MPI communicator.
-!!
-!! PARENTS
-!!      eph
-!!
-!! CHILDREN
-!!      wrtout
-!!
-!! SOURCE
-
-subroutine ddk_init(ddk, paths, comm)
-
-!Arguments ------------------------------------
-!scalars
- character(len=*),intent(in) :: paths(3)
- integer,intent(in) :: comm
- type(ddk_t),intent(inout) :: ddk
-
-!Local variables-------------------------------
-!scalars
- integer,parameter :: timrev2=2,fform2=2
- integer :: my_rank, restart, restartpaw, ii
-!arrays
- integer :: fforms(3)
- type(hdr_type) :: hdrs(3)
-
-!************************************************************************
-
- my_rank = xmpi_comm_rank(comm)
- ddk%paths = paths; ddk%comm = comm
- ddk%iomode = iomode_from_fname(paths(1))
-
- ! In this calls everything is broadcast properly to the whole comm
- do ii=1,3
-   ddk%use_ncddk(ii) = endswith(paths(ii), "_EVK.nc")
-   call hdr_read_from_fname(hdrs(ii), paths(ii), fforms(ii), comm)
-   if (ddk%debug) call hdr_echo(hdrs(ii), fforms(ii), 4, unit=std_out)
-   ! check that 2 headers are compatible
-   if (ii > 1) call hdr_check(fform2, fform2, hdrs(ii-1), hdrs(ii), 'COLL', restart, restartpaw)
- end do
-
- ddk%nsppol = hdrs(1)%nsppol
- ddk%nspinor = hdrs(1)%nspinor
- ddk%usepaw = hdrs(1)%usepaw
- ABI_CHECK(ddk%usepaw == 0, "PAW not yet supported")
-
- ! Init crystal_t
- ddk%cryst = hdr_get_crystal(hdrs(1), timrev2)
-
- ! Compute rprim, and gprimd. Used for slow FFT q--r if multiple shifts
- call mkradim(ddk%acell,ddk%rprim,ddk%cryst%rprimd)
- call matr3inv(ddk%rprim,ddk%gprim)
-
- do ii=1,3
-   call hdr_free(hdrs(ii))
- end do
-
-end subroutine ddk_init
-!!***
 
 !----------------------------------------------------------------------
 
@@ -706,7 +548,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      call ebands_copy(ebands,ebands_tmp)
      call ebands_set_scheme(ebands_tmp, ebands%occopt, ebands%tsmear, dtset%spinmagntarget, dtset%prtvol)
      call gaps%free()
-     ierr = get_gaps(ebands_tmp,gaps)
+     ierr = get_gaps(ebands_tmp, gaps)
      call ebands_free(ebands_tmp)
    end if
    do spin=1,ebands%nsppol
@@ -823,141 +665,6 @@ end subroutine ddk_compute
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddk/ddk_read_fsvelocities
-!! NAME
-!!  ddk_read_fsvelocities
-!!
-!! FUNCTION
-!!  Read FS velocities from DDK files. Returned in ddk%velocity
-!!
-!! INPUTS
-!!   fstab(ddk%nsppol)=Tables with the correspondence between points of the Fermi surface (FS)
-!!     and the k-points in the IBZ
-!!   comm=MPI communicator
-!!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
-!!      wrtout
-!!
-!! SOURCE
-
-subroutine ddk_read_fsvelocities(ddk, fstab, comm)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: comm
- type(ddk_t),intent(inout) :: ddk
- type(fstab_t),target,intent(in) :: fstab(ddk%nsppol)
-
-!Local variables-------------------------------
-!scalars
- integer :: idir, ikfs, isppol, ik_ibz, ii
- integer :: symrankkpt, ikpt_ddk,iband, bd2tot_index
- integer :: bstart_k, nband_k, nband_in, vdim
-#ifdef HAVE_NETCDF
- integer :: ncid, varid, nc_fform
-#endif
- type(hdr_type) :: hdr1
- type(krank_t) :: krank
- type(fstab_t), pointer :: fs
- character(len=500) :: msg
-!arrays
- real(dp), allocatable :: eigen1(:), velocityp(:,:)
-
-!************************************************************************
-
- if (ddk%rw_mode /= DDK_NOMODE) then
-   MSG_ERROR("ddk should be in ddk_NOMODE before open_read is called.")
- end if
- ddk%rw_mode = DDK_READMODE
-
- ddk%maxnb = maxval(fstab(:)%maxnb)
- ddk%nkfs = maxval(fstab(:)%nkfs)
- ABI_MALLOC(ddk%velocity, (3,ddk%maxnb,ddk%nkfs,ddk%nsppol))
-
- call wrtout(std_out, sjoin('Read DDK FILES with iomode=', itoa(ddk%iomode)), 'COLL')
- do idir = 1,3
-   ! Open the files. All procs in comm receive hdr1 and eigen1
-   if (ddk%use_ncddk(idir)) then
-#ifdef HAVE_NETCDF
-     NCF_CHECK(nctk_open_read(ncid, ddk%paths(ii), comm))
-     call hdr_ncread(hdr1, ncid, nc_fform)
-     varid = nctk_idname(ncid, "h1_matrix_elements")
-     ABI_MALLOC(eigen1, (2*hdr1%mband*hdr1%mband*hdr1%nkpt*ddk%nsppol))
-     !NCF_CHECK(nctk_set_collective(ncid, varid))
-     NCF_CHECK(nf90_get_var(ncid, varid, eigen1, count=[2, hdr1%mband, hdr1%mband, hdr1%nkpt, hdr1%nsppol]))
-     NCF_CHECK(nf90_close(ncid))
-#else
-     MSG_ERROR("Netcdf not available!")
-#endif
-   else
-     call wfk_read_h1mat(ddk%paths(idir), eigen1, hdr1, comm)
-   end if
-   nband_in = maxval(hdr1%nband)
-
-   ! need correspondence hash between the DDK and the fs k-points
-   krank = krank_new(hdr1%nkpt, hdr1%kptns)
-   do isppol=1,ddk%nsppol
-     fs => fstab(isppol)
-     do ikfs=1,fs%nkfs
-       ik_ibz = fs%indkk_fs(1,ikfs)
-       symrankkpt = krank%get_rank (fs%kpts(:,ikfs))
-       ikpt_ddk = krank%invrank(symrankkpt)
-       if (ikpt_ddk == -1) then
-         write(msg, "(3a)")&
-           "Error in correspondence between ddk and fsk kpoint sets",ch10,&
-           "kpt sets in fsk and ddk files must agree."
-         MSG_ERROR(msg)
-       end if
-
-       bd2tot_index=2*nband_in**2*(ikpt_ddk-1) + 2*nband_in**2*hdr1%nkpt*(isppol-1)
-       bstart_k = fs%bstart_cnt_ibz(1, ik_ibz)
-       nband_k = fs%bstart_cnt_ibz(2, ik_ibz)
-       ! first derivative eigenvalues for k-point. Diagonal of eigen1 is real -> only use that part
-       do iband = bstart_k, bstart_k+nband_k-1
-         ! Previous version (this is wrong because eigen1 contains complex numbers)
-         ddk%velocity(idir, iband-bstart_k+1, ikfs, isppol)=eigen1(bd2tot_index + 2*nband_in*(iband-1) + iband)
-         ! This is ok but one should also divide by two_pi
-         !ddk%velocity(idir, iband-bstart_k+1, ikfs, isppol)=eigen1(bd2tot_index + 2*nband_in*(iband-1) + 2*(iband-1) + 1)
-       end do
-     end do
-   end do
-
-   ABI_FREE(eigen1)
-   call krank%free()
-   call hdr_free(hdr1)
- end do ! idir
-
- ! process the eigenvalues(1): rotate to cartesian and divide by 2 pi
- ! use DGEMM better here on whole matrix and then reshape?
- vdim = ddk%maxnb*ddk%nkfs*ddk%nsppol
- ABI_MALLOC(velocityp, (3,vdim))
- velocityp = zero
- call dgemm('n','n',3,vdim,3,one,ddk%cryst%rprimd,3,ddk%velocity,3,zero,velocityp,3)
- !velocityp  velocityp / two_pi
-
-! do isppol = 1, ddk%nsppol
-!   do ikpt = 1, ddk%nkfs
-!     do iband = 1, ddk%maxnb
-!       tmpveloc = ddk%velocity (:, iband, ikpt, isppol)
-!       call dgemm('n','n',3,3,3,one,ddk%cryst%rprimd,3,tmpveloc,3,zero,tmpveloc2,3)
-!       ddk%velocity (:, iband, ikpt, isppol) = tmpveloc2
-!     end do
-!   end do
-! end do
-
- ddk%velocity = reshape (velocityp, [3,ddk%maxnb,ddk%nkfs,ddk%nsppol])
-
- ABI_FREE(velocityp)
- call krank%free()
-
-end subroutine ddk_read_fsvelocities
-!!***
-
-!----------------------------------------------------------------------
-
 !!!!     !!****f* m_ddk/ddk_fs_average_veloc
 !!!!     !! NAME
 !!!!     !!  ddk_fs_average_veloc
@@ -1038,41 +745,6 @@ end subroutine ddk_read_fsvelocities
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddk/ddk_free
-!! NAME
-!!  ddk_free
-!!
-!! FUNCTION
-!! Close the file and release the memory allocated.
-!!
-!! PARENTS
-!!      eph
-!!
-!! CHILDREN
-!!      wrtout
-!!
-!! SOURCE
-
-subroutine ddk_free(ddk)
-
-!Arguments ------------------------------------
-!scalars
- type(ddk_t),intent(inout) :: ddk
-
-!************************************************************************
-
- ! integer arrays
-
- ! real arrays
- ABI_SFREE(ddk%velocity)
- ABI_SFREE(ddk%velocity_fsavg)
-
- ! types
- call ddk%cryst%free()
-
-end subroutine ddk_free
-!!***
-
 !----------------------------------------------------------------------
 
 !!****f* m_ddk/ddk_red2car
@@ -1117,66 +789,6 @@ subroutine ddk_red2car(rprimd, vred, vcar)
  vcar = vtmp / two_pi
 
 end subroutine ddk_red2car
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_ddk/ddk_print
-!! NAME
-!!  ddk_print
-!!
-!! FUNCTION
-!!  Print info on the object.
-!!
-!! INPUTS
-!! [unit]=the unit number for output
-!! [prtvol]=verbosity level
-!! [mode_paral]=either "COLL" or "PERS"
-!!
-!! OUTPUT
-!!  Only printing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
-!!
-!! SOURCE
-
-subroutine ddk_print(ddk, header, unit, prtvol, mode_paral)
-
-!Arguments ------------------------------------
-!scalars
- integer,optional,intent(in) :: prtvol,unit
- character(len=4),optional,intent(in) :: mode_paral
- character(len=*),optional,intent(in) :: header
- type(ddk_t),intent(in) :: ddk
-
-!Local variables-------------------------------
-!scalars
- integer :: my_unt,my_prtvol
- character(len=4) :: my_mode
- character(len=500) :: msg
-
-! *************************************************************************
-
- my_unt =std_out; if (PRESENT(unit)) my_unt   =unit
- my_prtvol=0    ; if (PRESENT(prtvol)) my_prtvol=prtvol
- my_mode='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
-
- msg=' ==== Info on the ddk% object ==== '
- if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
- call wrtout(my_unt,msg,my_mode)
-
- write(std_out,*)"Number of FS bands: ",ddk%maxnb
- write(std_out,*)"Number of FS k-points: ",ddk%nkfs
- write(std_out,*)"Number of spin channels: ",ddk%nsppol
- write(std_out,*)"Paths to files: "
- write(std_out,*)"  ", trim(ddk%paths(1))
- write(std_out,*)"  ", trim(ddk%paths(2))
- write(std_out,*)"  ", trim(ddk%paths(3))
-
-end subroutine ddk_print
 !!***
 
 !----------------------------------------------------------------------
