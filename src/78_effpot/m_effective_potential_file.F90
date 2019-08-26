@@ -2256,7 +2256,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  real(dp):: dielt(3,3),elast_clamped(6,6),fact
  real(dp):: red(3,3),qphnrm(3),qphon(3,3)
  real(dp),allocatable :: blkval(:,:,:,:,:,:),d2asr(:,:,:,:,:)
- real(dp),allocatable :: instrain(:,:),zeff(:,:,:)
+ real(dp),allocatable :: instrain(:,:),zeff(:,:,:),qdrp_cart(:,:,:,:)
  real(dp),pointer :: atmfrc_red(:,:,:,:,:),wghatm_red(:,:,:)
  character(len=500) :: message
  type(asrq0_t) :: asrq0
@@ -2359,12 +2359,14 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 ! Dielectric Tensor and Effective Charges
 !**********************************************************************
   ABI_ALLOCATE(zeff,(3,3,natom))
+  ABI_ALLOCATE(qdrp_cart,(3,3,3,natom))
   ABI_ALLOCATE(effective_potential%harmonics_terms%zeff,(3,3,natom))
 
   rftyp   = 1 ! Blocks obtained by a non-stationary formulation.
   chneut  = 1 ! The ASR for effective charges is imposed
   selectz = 0 ! No selection of some parts of the effective charge tensor
   iblok = ddb%get_dielt_zeff(crystal,rftyp,chneut,selectz,dielt,zeff)
+  qdrp_cart = zero
   if (iblok /=0 .and. maxval(abs(dielt)) < 10000) then
     effective_potential%harmonics_terms%epsilon_inf = dielt
     effective_potential%harmonics_terms%zeff = zeff
@@ -2581,7 +2583,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   call wrtout(ab_out,message,'COLL')
 
   call ifc_init(ifc,crystal,ddb,inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,&
-&   inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,effective_potential%harmonics_terms%zeff,&
+&   inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,effective_potential%harmonics_terms%zeff,qdrp_cart,&
 &   inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
 
 !***************************************************************************
@@ -2620,7 +2622,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
     ! long-range coulomb interaction through Ewald summation
     call gtdyn9(ddb%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip,ifc%dyewq0,d2cart,crystal%gmet,&
 &     ddb%gprim,mpert,natom,ifc%nrpt,qphnrm(1),qphon(:,1),crystal%rmet,ddb%rprim,ifc%rpt,&
-&     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff,xmpi_comm_self)
+&     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff,qdrp_cart,xmpi_comm_self)
 
     ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
     call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,crystal%indsym,&
@@ -2863,6 +2865,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 ! DEALLOCATION OF ARRAYS
   ABI_DEALLOCATE(blkval)
   ABI_DEALLOCATE(zeff)
+  ABI_DEALLOCATE(qdrp_cart)
   ABI_DEALLOCATE(instrain)
   ABI_DEALLOCATE(d2asr)
   call asrq0%free()

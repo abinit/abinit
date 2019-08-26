@@ -190,6 +190,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer,allocatable :: dummy_atifc(:)
  real(dp),parameter :: k0(3)=zero
  real(dp) :: wminmax(2), dielt(3,3), zeff(3,3,dtset%natom), zeff_raw(3,3,dtset%natom)
+ real(dp) :: qdrp_cart(3,3,3,dtset%natom)
  real(dp),pointer :: gs_eigen(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:), kpt_efmas(:,:)
  character(len=fnlen) :: ddk_path(3)
@@ -495,25 +496,36 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
  !do ii=1,3; do jj=1,3; if (ii /= jj) dielt(ii, jj) = zero; enddo; enddo
 
+ ! Read the quadrupoles
+ iblock_quadrupoles = ddb%get_quadrupoles(cryst_ddb, 3, qdrp_cart)
+ if (my_rank == master) then
+   if (iblock_quadrupoles == 0) then
+     call wrtout(ab_out, sjoin("- Cannot find quadrupole tensor in DDB file:", ddb_path))
+     call wrtout(ab_out, "Values initialized with zeros")
+   else
+     call wrtout(ab_out, sjoin("- Found quadrupole tensor in DDB file:", ddb_path))
+   end if
+ end if
+
  if (any(dtset%ddb_qrefine > 1)) then
    ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
    ! Build the IFCs using the coarse q-mesh.
    ngqpt_coarse = dtset%ddb_ngqpt / dtset%ddb_qrefine
    call ifc_init(ifc_coarse, cryst, ddb, &
      brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, ngqpt_coarse, ddb_nqshift, ddb_qshifts, dielt, zeff, &
-     nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
+     qdrp_cart, nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
 
    ! Now use the coarse q-mesh to fill the entries in dynmat(q)
    ! on the dense q-mesh that cannot be obtained from the DDB file.
    call ifc_init(ifc, cryst, ddb, &
      brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
-     nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm, ifc_coarse=ifc_coarse)
+     qdrp_cart, nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm, ifc_coarse=ifc_coarse)
    call ifc_coarse%free()
 
  else
    call ifc_init(ifc, cryst, ddb, &
      brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
-     nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
+     qdrp_cart, nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
  end if
 
  ABI_FREE(ddb_qshifts)
@@ -597,8 +609,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      dvdb%has_quadrupoles = .True.
    end if
 
-   ! Read the quadrupoles
-   iblock_quadrupoles = ddb%get_quadrupoles(cryst_ddb, 3, dvdb%qstar)
+   dvdb%qstar = qdrp_cart
    if (iblock_quadrupoles /=0) dvdb%has_quadrupoles = .True.
 
    ! Set dielectric tensor, BECS and associated flags.

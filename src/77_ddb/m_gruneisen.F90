@@ -140,7 +140,7 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
 !arrays
  integer,allocatable :: atifc0(:)
  real(dp) :: dielt(3,3)
- real(dp),allocatable :: zeff(:,:,:)
+ real(dp),allocatable :: zeff(:,:,:), qdrp_cart(:,:,:,:)
 
 ! ************************************************************************
 
@@ -172,6 +172,7 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
    ! Get Dielectric Tensor and Effective Charges
    ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
    ABI_MALLOC(zeff, (3,3,natom))
+   ABI_CALLOC(qdrp_cart, (3,3,3,natom))
    iblock = new%ddb_vol(ivol)%get_dielt_zeff(new%cryst_vol(ivol), inp%rfmeth, inp%chneut, inp%selectz, dielt, zeff)
    if (iblock == 0) then
      call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_paths(ivol)))
@@ -182,8 +183,9 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
 
    call ifc_init(new%ifc_vol(ivol), new%cryst_vol(ivol), new%ddb_vol(ivol),&
      inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
-     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
+     qdrp_cart,inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
    ABI_FREE(zeff)
+   ABI_FREE(qdrp_cart)
  end do
 
  ! Consistency check
