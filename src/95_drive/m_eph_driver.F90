@@ -131,16 +131,6 @@ contains
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! CHILDREN
-!!      crystal_free,crystal_from_hdr,crystal_print,cwtime,ddb_free
-!!      ddb_from_file,ddk_free,ddk_init,destroy_mpi_enreg,dvdb_free,dvdb_init
-!!      dvdb_interpolate_and_write,dvdb_list_perts,dvdb_print,ebands_free
-!!      ebands_print,ebands_prtbltztrp,ebands_set_fermie,ebands_set_scheme
-!!      ebands_update_occ,ebands_write,edos_free,edos_print,edos_write,eph_gkk
-!!      eph_phgamma,eph_phpi,hdr_free,hdr_vs_dtset,ifc_free,ifc_init,ifc_mkphbs
-!!      ifc_outphbtrap,ifc_print,ifc_printbxsf
-!!      init_distribfft_seq,initmpi_seq,mkphdos,pawfgr_destroy,pawfgr_init
-!!      phdos_free,phdos_ncwrite,phdos_print,phdos_print_thermo,print_ngfft
-!!      pspini,sigmaph,wfk_read_eigenvalues,wrtout,xmpi_bcast,xmpi_end
 !!
 !! SOURCE
 
@@ -253,10 +243,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
  use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1 .and. dtset%eph_task /= 7)
 
- !ddk_path(1) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+1))
- !ddk_path(2) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+2))
- !ddk_path(3) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+3))
-
  if (my_rank == master) then
    if (.not. file_exists(ddb_path)) MSG_ERROR(sjoin("Cannot find DDB file:", ddb_path))
    if (use_dvdb .and. .not. file_exists(dvdb_path)) MSG_ERROR(sjoin("Cannot find DVDB file:", dvdb_path))
@@ -285,8 +271,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
  call wrtout(ab_out, sjoin("- Reading DDB from file:", ddb_path))
  if (use_dvdb) call wrtout(ab_out, sjoin("- Reading DVDB from file:", dvdb_path))
-
- if (dtset%eph_frohlichm /= 1) call wrtout(ab_out, sjoin("- Reading EFMAS information from file:", dtfil%fnameabi_efmas))
+ if (dtset%eph_frohlichm /= 0) call wrtout(ab_out, sjoin("- Reading EFMAS information from file:", dtfil%fnameabi_efmas))
+ call wrtout(ab_out, ch10//ch10)
 
  ! autoparal section
  ! TODO: This just to activate autoparal in AbiPy. Lot of things should be improved.
@@ -327,7 +313,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      end do
    end do
    write(ab_out,'(a)')"..."
-   MSG_ERROR_NODUMP("aborting now")
+   MSG_ERROR_NODUMP("Aborting now")
  end if
 
  call cwtime(cpu, wall, gflops, "start")
@@ -338,7 +324,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call hdr_vs_dtset(wfk0_hdr, dtset)
 
    cryst = hdr_get_crystal(wfk0_hdr, timrev2)
-   call crystal_print(cryst,header="crystal structure from WFK file")
+   call cryst%print(header="crystal structure from WFK file")
 
    ebands = ebands_from_hdr(wfk0_hdr, maxval(wfk0_hdr%nband), gs_eigen)
    ABI_FREE(gs_eigen)
@@ -417,7 +403,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      if (ebands_write_bxsf(ebands, cryst, path) /= 0) then
        msg = "Cannot produce file for Fermi surface, check log file for more info"
        MSG_WARNING(msg)
-       call wrtout(ab_out,msg)
+       call wrtout(ab_out, msg)
      end if
    end if
 
@@ -446,10 +432,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  brav1 = 1; if (dtset%eph_transport > 0) brav1 = -1
 
  if (use_wfk) then
-   call ddb_from_file(ddb,ddb_path,brav1,dtset%natom,natifc0,dummy_atifc,cryst_ddb,comm, prtvol=dtset%prtvol)
+   call ddb_from_file(ddb, ddb_path, brav1, dtset%natom, natifc0, dummy_atifc, cryst_ddb,comm, prtvol=dtset%prtvol)
    call cryst_ddb%free()
  else
-   call ddb_from_file(ddb,ddb_path,brav1,dtset%natom,natifc0,dummy_atifc,cryst,comm, prtvol=dtset%prtvol)
+   call ddb_from_file(ddb, ddb_path, brav1, dtset%natom, natifc0, dummy_atifc, cryst, comm, prtvol=dtset%prtvol)
  end if
  ABI_FREE(dummy_atifc)
 
@@ -520,7 +506,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
        path = strcat(dtfil%filnam_ds(4), "_PHDOS")
        call wrtout(ab_out, sjoin("- Writing phonon DOS to file:", path))
        call phdos%print(path)
-       !call phdos_print_debye(phdos, cryst%ucvol)
      end if
 
 #ifdef HAVE_NETCDF
@@ -537,7 +522,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if ! prtphdos
 
  if (dtset%prtbltztrp == 1 .and. my_rank == master) then
-   call ifc%outphbtrap(cryst,dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,dtfil%filnam_ds(4))
+   call ifc%outphbtrap(cryst, dtset%ph_ngqpt, dtset%ph_nqshift, dtset%ph_qshift, dtfil%filnam_ds(4))
    ! BoltzTraP output files in GENEric format
    call ebands_prtbltztrp(ebands, cryst, dtfil%filnam_ds(4))
  end if
@@ -670,16 +655,17 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
 
  case (6)
-   ! Compute ZPR and temperature-dependent electronic structure using the Frohlich model
+   ! Estimate zero-point renormalization and temperature-dependent electronic structure using the Frohlich model
    call frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 
  case (7)
-   ! Compute phonon limited transport from SIGEPH file
+   ! Compute phonon-limited transport from SIGEPH file
    call transport(dtfil, dtset, ebands, cryst, comm)
 
  case (15, -15)
    ! Write average of DFPT potentials to file.
    call dvdb%open_read(ngfftf, xmpi_comm_self)
+   !call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, comm)
    !call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
    call dvdb%write_v1qavg(dtset, strcat(dtfil%filnam_ds(4), "_V1QAVG.nc"))
 

@@ -301,7 +301,6 @@ P           mkmem          29
 - Reading GS states from WFK file: t88o_DS20_WFK
 - Reading DDB from file: t88o_DS20_DDB
 - Reading DVDB from file: t88o_DS20_DVDB
-- Reading EFMAS information from file: t88i_DS1_EFMAS.nc
 - Writing Fermi surface to file: t88o_DS1_BXSF
 - Writing nesting factor to file: t88o_DS1_NEST
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -451,9 +450,21 @@ All the independent perturbations are available
    1.58563817E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
- Fermi level:   7.16066825E+00 [eV]
- Total electron DOS at Fermi level in states/eV :   3.22193685E-01
-- Writing electron DOS to file: t88o_DS1_EDOS
+ Fermi level:   7.16066825E+00 (eV)
+ Total electron DOS at Fermi level in states/eV:   3.22193685E-01
+ Total number of electrons at eF:    3.0
+ Linear tetrahedron method with mesh step:  9.99999978E-03 (eV)
+
+- Writing electron DOS to file: t88o_DS1_EDOS 
+
+ ==== Fermi surface info ====
+ FS integration done with tetrahedron method
+ Total number of k-points in the full mesh: 512
+ For spin: 1
+    Number of BZ k-points close to the Fermi surface: 138 [ 27.0 %]
+    Maximum number of bands crossing the Fermi level: 2
+    min band: 2
+    Max band: 3
 
  q-point =    0.000000E+00    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -521,7 +532,9 @@ All the independent perturbations are available
 - Reading GS states from WFK file: t88o_DS20_WFK
 - Reading DDB from file: t88o_DS20_DDB
 - Reading DVDB from file: t88o_DS20_DVDB
-- Reading EFMAS information from file: t88i_DS2_EFMAS.nc
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
@@ -648,9 +661,21 @@ qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
- Fermi level:   7.16066825E+00 [eV]
- Total electron DOS at Fermi level in states/eV :   3.22193685E-01
-- Writing electron DOS to file: t88o_DS2_EDOS
+ Fermi level:   7.16066825E+00 (eV)
+ Total electron DOS at Fermi level in states/eV:   3.22193685E-01
+ Total number of electrons at eF:    3.0
+ Linear tetrahedron method with mesh step:  9.99999978E-03 (eV)
+
+- Writing electron DOS to file: t88o_DS2_EDOS 
+
+ ==== Fermi surface info ====
+ FS integration done with gaussian method
+ Total number of k-points in the full mesh: 512
+ For spin: 1
+    Number of BZ k-points close to the Fermi surface: 138 [ 27.0 %]
+    Maximum number of bands crossing the Fermi level: 2
+    min band: 2
+    Max band: 3
 
  q-point =    0.000000E+00    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -717,7 +742,9 @@ All the independent perturbations are available
 
 - Reading DDB from file: t88o_DS20_DDB
 - Reading DVDB from file: t88o_DS20_DVDB
-- Reading EFMAS information from file: t88i_DS3_EFMAS.nc
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
@@ -870,7 +897,9 @@ Interpolation of the electron-phonon coupling potential completed
 - Reading GS states from WFK file: t88o_DS20_WFK
 - Reading DDB from file: t88o_DS20_DDB
 - Reading DVDB from file: t88o_DS3_DVDB
-- Reading EFMAS information from file: t88i_DS4_EFMAS.nc
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
@@ -997,9 +1026,21 @@ qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
- Fermi level:   7.16066825E+00 [eV]
- Total electron DOS at Fermi level in states/eV :   3.22193685E-01
-- Writing electron DOS to file: t88o_DS4_EDOS
+ Fermi level:   7.16066825E+00 (eV)
+ Total electron DOS at Fermi level in states/eV:   3.22193685E-01
+ Total number of electrons at eF:    3.0
+ Linear tetrahedron method with mesh step:  9.99999978E-03 (eV)
+
+- Writing electron DOS to file: t88o_DS4_EDOS 
+
+ ==== Fermi surface info ====
+ FS integration done with tetrahedron method
+ Total number of k-points in the full mesh: 512
+ For spin: 1
+    Number of BZ k-points close to the Fermi surface: 138 [ 27.0 %]
+    Maximum number of bands crossing the Fermi level: 2
+    min band: 2
+    Max band: 3
 
  q-point =    0.000000E+00    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)

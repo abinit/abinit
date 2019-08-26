@@ -45,6 +45,7 @@ module m_sigma_driver
  use libxc_functionals
  use m_wfd
  use m_dtfil
+ use m_crystal
 
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
@@ -59,9 +60,8 @@ module m_sigma_driver
  use m_fft_mesh,      only : get_gftt, setmesh
  use m_fft,           only : fourdp
  use m_ioarr,         only : fftdatar_write, read_rhor
- use m_crystal,       only : crystal_t, crystal_print
  use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, get_valence_idx, get_bandenergy, &
-&                            ebands_free, ebands_init, ebands_ncwrite, ebands_interpolate_kpath, get_eneocc_vect, &
+                             ebands_free, ebands_init, ebands_ncwrite, ebands_interpolate_kpath, get_eneocc_vect, &
                              enclose_degbands, get_gaps, gaps_t
  use m_energies,      only : energies_type, energies_init
  use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_init, littlegroup_free, &
@@ -2768,9 +2768,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  ! Create crystal_t data type
  cryst = hdr_get_crystal(Hdr_wfk, timrev, remove_inv)
- call crystal_print(Cryst)
+ call cryst%print()
 
- if (Sigp%npwwfn>ng_kss) then ! cannot use more G"s for the wfs than those stored on file
+ if (Sigp%npwwfn > ng_kss) then ! cannot use more G"s for the wfs than those stored on file
    Sigp%npwwfn  =ng_kss
    Dtset%npwwfn =ng_kss
    write(msg,'(2a,(a,i8,a))')&

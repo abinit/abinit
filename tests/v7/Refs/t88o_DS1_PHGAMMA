@@ -2,7 +2,6 @@
 # ABINIT package: E-PH band structure file. Hartree units
 #
 # Phonon frequencies, ph linewidths and lambda calculated on 41 q-points
-# eph_scalprod = 0
 # ==== Description of the q-path: ====
 # Number of points: 41 , ndivsmall: 20
 # Boundaries and corresponding index in the k-points array:

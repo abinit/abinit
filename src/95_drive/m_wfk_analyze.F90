@@ -213,7 +213,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  call hdr_vs_dtset(wfk0_hdr, dtset)
 
  cryst = hdr_get_crystal(wfk0_hdr, timrev2)
- call crystal_print(cryst,header="crystal structure from WFK file")
+ call cryst%print(header="crystal structure from WFK file")
 
  ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)
 

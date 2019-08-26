@@ -56,7 +56,7 @@ module m_dvdb
  use m_fftcore,       only : ngfft_seq
  use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
  use m_fft,           only : fourdp, zerosym
- use m_crystal,       only : crystal_t, crystal_print
+ use m_crystal,       only : crystal_t
  use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk
  use m_spacepar,      only : symrhg, setsym
  use m_fourier_interpol,only : fourier_interpol
@@ -1008,7 +1008,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  !end if
 
  if (my_prtvol > 0) then
-   call crystal_print(db%cryst, header="Crystal structure in DVDB file")
+   call db%cryst%print(header="Crystal structure in DVDB file")
    write(my_unt,"(a)")"FFT mesh for potentials on file:"
    write(my_unt,"(a)")"q-point, idir, ipert, ngfft(:3)"
    do iv1=1,db%numv1

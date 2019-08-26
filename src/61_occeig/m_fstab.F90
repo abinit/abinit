@@ -269,8 +269,8 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
 !scalars
  integer,parameter :: option0 = 0, brav1 = 1, bcorr0 = 0
  integer :: nkfs,spin,band,nband_k,i1,i2,ib,blow,ik_bz,ik_ibz,nkibz,sppoldbl,timrev
- integer :: ik,mkpt,nkbz,ierr, bstart_k,bstop_k,nene,ifermi
- real(dp),parameter :: max_occ1=one
+ integer :: ik,mkpt,nkbz,ierr, nene,ifermi
+ real(dp),parameter :: max_occ1 = one
  real(dp) :: elow,ehigh,ebis,enemin,enemax,deltaene,dksqmax,cpu,wall,gflops
  logical :: inwin
  character(len=80) :: errstr
@@ -456,7 +456,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
    fs%kmesh_cartvec(:, 1) = cryst%gprimd(:,1)*klatt(1,1) + cryst%gprimd(:,2)*klatt(2,1) + cryst%gprimd(:,3)*klatt(3,1)
    fs%kmesh_cartvec(:, 2) = cryst%gprimd(:,1)*klatt(1,2) + cryst%gprimd(:,2)*klatt(2,2) + cryst%gprimd(:,3)*klatt(3,2)
    fs%kmesh_cartvec(:, 3) = cryst%gprimd(:,1)*klatt(1,3) + cryst%gprimd(:,2)*klatt(2,3) + cryst%gprimd(:,3)*klatt(3,3)
-   fs%kmesh_cartvec = two_pi * fs%kmesh_cartvec
+   !fs%kmesh_cartvec = two_pi * fs%kmesh_cartvec
    !do i1=1,3
    !  write(std_out, *)"klatt:", klatt(:, i1)
    !  write(std_out, *)"gprimd:", cryst%gprimd(:, i1)
@@ -591,29 +591,48 @@ subroutine fstab_setup_qpoint(fs, cryst, ebands, spin, ltetra, qpt, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: enough = 50
- integer :: nkbz, ierr, ib, nb, ik_bz, ik_ibz, ik_fs, i1, i2, i3, band
+ integer :: nkbz, ierr, nb, ik_bz, ik_ibz, ik_fs, i1, i2, i3
+ real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  type(krank_t) :: krank
 !arrays
  integer :: nge(3), ngw(3)
- !integer,allocatable :: symrecfm(:,:,:)
+ !integer,allocatable :: this_fks(:), symrecfm(:,:,:)
  real(dp) :: kpt(3)
  real(dp),allocatable :: eig_k(:,:), eig_kq(:,:), wght_bz(:,:,:)
  !real(dp),allocatable,intent(out) :: wght(:,:,:) !(nb*nb,PRODUCT(ngw(1:3)))
 
 ! *************************************************************************
 
+ !ABI_MALLOC(this_kfs, (fs%nkfs))
+ !nkfs_q = 0
+ !do ik_bz=1,fs%nkfs
+ !  kk = fs%kpts(:, ik_bz)
+ !  kq = kk + qpt; ikq_bz = fs%findkg0(kq, g0bz_kq)
+ !  if (ikq_bz == -1) cycle
+ !  nkfs_q = nkfs_q + 1
+ !  this_nfks(nkfs_q) = ik_bz
+ !end do
+ !ABI_FREE(this_kfs)
+ !ABI_SFREE(my_inds)
+ !call xmpi_split_list(nkfs_q, comm, fs%my_nfks_q, fs%my_inds)
+ !call xmpi_split_block(nkfs_q, comm, my_ntasks, my_inds)
+ !ABI_FREE(my_inds)
+
+ ABI_UNUSED(comm)
+
  if (fs%eph_intmeth /= 2) return
- return
+ !return
 
  fs%dbldelta_tetra_weights_kfs = zero
 
  ! The double delta is ill-defined for q == 0.
  if (fs%eph_intmeth == 2 .and. all(abs(qpt) < tol12)) then
-   MSG_COMMENT("tetrahedron method with q = 0 is ill-defined. Returning")
+   MSG_COMMENT("tetrahedron method with q = 0 is ill-defined. Returning zeros")
    return
  end if
 
+ call cwtime(cpu, wall, gflops, "start")
  ABI_CHECK(isdiagmat(ebands%kptrlatt), "kptrlatt must be diagonal when tetra is used.")
  ABI_CHECK(ebands%nshiftk == 1, "nshiftk must be 1 when tetra is used")
  nge = get_diag(ebands%kptrlatt)
@@ -680,8 +699,7 @@ subroutine fstab_setup_qpoint(fs, cryst, ebands, spin, ltetra, qpt, comm)
  eig_kq = eig_kq - ebands%fermie
  ABI_MALLOC(wght_bz, (nb, nb, nkbz))
 
- write(std_out,*)" Calling libtetrabz_dbldelta with ltetra:", ltetra
- write(std_out,*)" Q-point", qpt
+ write(std_out,"(a,i0,2a)")" Calling libtetrabz_dbldelta with ltetra:", ltetra, " for q-point", trim(ktoa(qpt))
  call libtetrabz_dbldelta(ltetra, cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz) !, comm=comm)
 
  ABI_FREE(eig_k)
@@ -689,28 +707,42 @@ subroutine fstab_setup_qpoint(fs, cryst, ebands, spin, ltetra, qpt, comm)
 
  ! Convert from full BZ to fs% kpoints
  ! TODO: Average over degenerate states?
- krank = krank_new(fs%nkfs, fs%kpts)
+ !krank = krank_new(fs%nkfs, fs%kpts)
 
  ik_bz = 0
  do i3=0,nge(3) - 1
-    do i2=0,nge(2) - 1
-       do i1 =0,nge(1) - 1
-         ik_bz = ik_bz + 1
-         kpt = ([i1, i2, i3] + ebands%shiftk(:, 1)) / nge(:)
-         ! Then we have to rearrange the weights
-         ik_fs = krank%invrank(krank%get_rank(kpt))
-         if (ik_fs /= -1) then
-           fs%dbldelta_tetra_weights_kfs(:,:,ik_fs) = wght_bz(:,:,ik_bz) !* fs%nktot
-           !write(std_out,*)"dbldelta wts:", wght_bz(:,:,ik_bz)
-         else
-           !write(std_out,*)"should be zero :", wght_bz(:,:,ik_bz)
-         end if
-       end do
-    end do
+   do i2=0,nge(2) - 1
+     do i1 =0,nge(1) - 1
+       ik_bz = ik_bz + 1
+       kpt = ([i1, i2, i3] + ebands%shiftk(:, 1)) / nge(:)
+       ! Then we have to rearrange the weights
+       ik_fs = fs%krank%invrank(krank%get_rank(kpt))
+
+       if (ik_fs /= -1) then
+         fs%dbldelta_tetra_weights_kfs(:,:,ik_fs) = wght_bz(:,:,ik_bz) !* fs%nktot
+         !write(std_out,*)"dbldelta wts:", wght_bz(:,:,ik_bz)
+         !ik_ibz = fs%indkk_fs(1, ik_fs)
+         !bstart_k = fs%bstart_cnt_ibz(1, ik_ibz); nband_k = fs%bstart_cnt_ibz(2, ik_ibz)
+         !bstart_kq = fs%bstart_cnt_ibz(1, ikq_ibz); nband_kq = fs%bstart_cnt_ibz(2, ikq_ibz)
+         !do ib2=1,nband_k
+         !  band2 = ib2 + bstart_k - fs%bmin
+         !  do ib1=1,nband_kq
+         !    band1 = ib1 + bstart_kq - fs%bmin
+         !    wtk(ib1, ib2) = fs%dbldelta_tetra_weights_kfs(band1, band2, ikfs)
+         !  end do
+         !end do
+
+       else
+         !write(std_out,*)"should be zero :", wght_bz(:,:,ik_bz)
+       end if
+     end do
+   end do
  end do
 
- call krank%free()
+ !call krank%free()
  ABI_FREE(wght_bz)
+
+ call cwtime_report(" libtetrabz_dbldelta", cpu, wall, gflops)
 
 end subroutine fstab_setup_qpoint
 !!***
@@ -770,6 +802,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ikfs, ik_ibz, ikq_ibz, spin, w
      band2 = ib2 + bstart_k - 1
      if (fs%eph_fsmear < zero) then
        sigma = max(maxval([(abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+       !write(std_out, *)"sigma:", sigma * Ha_eV
      end if
      g2 = gaussian(ebands%eig(band2, ik_ibz, spin) - ebands%fermie, sigma)
      do ib1=1,nband_kq
@@ -784,6 +817,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ikfs, ik_ibz, ikq_ibz, spin, w
 
  case (2)
    ! Copy weights in the correct position.
+   ABI_UNUSED(ikfs)
    do ib2=1,nband_k
      band2 = ib2 + bstart_k - fs%bmin
      do ib1=1,nband_kq
@@ -794,8 +828,8 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ikfs, ik_ibz, ikq_ibz, spin, w
        !write(std_out,*)wtk(ib1, ib2), fs%dbldelta_tetra_weights_kfs(band1, band2, ikfs), &
        !                abs(wtk(ib1, ib2) - fs%dbldelta_tetra_weights_kfs(band1, band2, ikfs))
 
-       ! libtetrabz_dbldelta seems to report Weights in this order.
-       !wtk(ib1, ib2) = fs%dbldelta_tetra_weights_kfs(band1, band2, ikfs)
+       ! libtetrabz_dbldelta seems to report weights in this order.
+       wtk(ib1, ib2) = fs%dbldelta_tetra_weights_kfs(band1, band2, ikfs)
      end do
    end do
 
@@ -849,7 +883,7 @@ subroutine fstab_print(fstab, header, unit, prtvol)
  my_unt = std_out; if (present(unit)) my_unt = unit
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
- msg=' ==== Info on the fstab% object ==== '
+ msg = ' ==== Fermi surface info ==== '
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
  write(my_unt, "(a)")trim(msg)
 
@@ -859,16 +893,17 @@ subroutine fstab_print(fstab, header, unit, prtvol)
    write(my_unt,"(a)")" FS integration done with tetrahedron method"
  end if
  write(my_unt,"(a,i0)")" Total number of k-points in the full mesh: ",fstab(1)%nktot
+ !write(my_unt,"(a,f5.1)")" Energy window: ",fstab(1)%eph_fsewin * Ha_eV, " (eV)
 
  do spin=1,size(fstab)
    fs => fstab(spin)
    write(my_unt,"(a,i0)")" For spin: ",spin
    write(my_unt,"(a,i0,a,f5.1,a)") &
-     "  Number of BZ k-points close to the Fermi surface: ",fs%nkfs," [", (100.0_dp * fs%nkfs) / fs%nktot, " %]"
-   write(my_unt,"(a,i0)")"  Maximum number of bands crossing the Fermi level: ",fs%maxnb
-   write(my_unt,"(2(a,i0))")"  min band: ",minval(fs%bstart_cnt_ibz(1,:), mask=fs%bstart_cnt_ibz(1,:) /= -1)
-   write(my_unt,"(2(a,i0))")"  Max band: ",maxval(fs%bstart_cnt_ibz(1,:)+fs%bstart_cnt_ibz(2,:) - 1, &
-                                                  mask=fs%bstart_cnt_ibz(1,:) /= -1)
+     "    Number of BZ k-points close to the Fermi surface: ",fs%nkfs," [", (100.0_dp * fs%nkfs) / fs%nktot, " %]"
+   write(my_unt,"(a,i0)")"    Maximum number of bands crossing the Fermi level: ",fs%maxnb
+   write(my_unt,"(2(a,i0))")"    min band: ",minval(fs%bstart_cnt_ibz(1,:), mask=fs%bstart_cnt_ibz(1,:) /= -1)
+   write(my_unt,"(2(a,i0))")"    Max band: ",maxval(fs%bstart_cnt_ibz(1,:)+fs%bstart_cnt_ibz(2,:) - 1, &
+                                                    mask=fs%bstart_cnt_ibz(1,:) /= -1)
  end do
 
 end subroutine fstab_print
