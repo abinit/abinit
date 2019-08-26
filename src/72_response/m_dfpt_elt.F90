@@ -2692,8 +2692,8 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
 !Local variables -------------------------
 !nr, ng affect convergence of sums (nr=3,ng=5 is not good enough):
 !scalars
- integer,parameter :: im=2,ng=10,nr=6,re=1
- integer :: ia,ia0,ib,ierr,ig1,ig2,ig3,ii,i1,iq,ir1,ir2,ir3,mu,my_comm_atom,nu
+ integer,parameter :: im=2,nng=10,nnr=6,re=1
+ integer ::ia,ia0,ib,ierr,ig1,ig2,ig3,ii,i1,iq,ir1,ir2,ir3,mu,my_comm_atom,newg,newr,ng,nr,nu
  logical :: my_atmtab_allocated,paral_atom
  real(dp) :: arg,arga,argb,c1i,c1r,da1,da2,da3,delag,delbg,derfc_arg
  real(dp) :: direct,dot1,dot2,dot3,dotr1,dotr2,dotr3
@@ -2719,77 +2719,94 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
 & rmet(2,2)+rmet(2,3)+rmet(3,1)+rmet(3,2)+rmet(3,3)
  recip=gmet(1,1)+gmet(1,2)+gmet(1,3)+gmet(2,1)+&
 & gmet(2,2)+gmet(2,3)+gmet(3,1)+gmet(3,2)+gmet(3,3)
- eta=pi*(dble(ng)/dble(nr))*sqrt(1.69_dp*recip/direct)
+ eta=pi*(dble(nng)/dble(nnr))*sqrt(1.69_dp*recip/direct)
 
 !Test Ewald s summation
 !eta=1.2_dp*eta
 
-!Sum terms over g space:
+!Sum over G space, done shell after shell until all
+!contributions are too small.
  fac=pi**2.d0/eta
  fac2=2.d0*fac
  dyewdq(:,:,:,:,:,:)=zero
- do ig3=-ng,ng
-   do ig2=-ng,ng
-     do ig1=-ng,ng
-       gpq(1)=dble(ig1)+qphon(1)
-       gpq(2)=dble(ig2)+qphon(2)
-       gpq(3)=dble(ig3)+qphon(3)
-       gdot12=gmet(2,1)*gpq(1)*gpq(2)
-       gdot13=gmet(3,1)*gpq(1)*gpq(3)
-       gdot23=gmet(3,2)*gpq(2)*gpq(3)
-       dot1=gmet(1,1)*gpq(1)**2+gdot12+gdot13
-       dot2=gmet(2,2)*gpq(2)**2+gdot12+gdot23
-       dot3=gmet(3,3)*gpq(3)**2+gdot13+gdot23
-       gsq=dot1+dot2+dot3
-!      Skip q=0:
-       if (gsq<1.0d-20) then
-         if (sumg0==1) then
-           write(message,'(5a)')&
-&           'The phonon wavelength should not be zero : ',ch10,&
-&           'there are non-analytical terms that the code cannot handle.',ch10,&
-&           'Action : subtract this wavelength from the input.'
-           MSG_ERROR(message)
-         end if
-       else
-         arg=fac*gsq
-!        Larger arg gives 0 contribution:
-         if (arg <= 80._dp) then
-           term=exp(-arg)/gsq
-           do ia0=1,my_natom
-             ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
-             arga=two_pi*(gpq(1)*xred(1,ia)+gpq(2)*xred(2,ia)+gpq(3)*xred(3,ia))
-             do ib=1,ia
-               argb=two_pi*(gpq(1)*xred(1,ib)+gpq(2)*xred(2,ib)+gpq(3)*xred(3,ib))
-               arg=arga-argb
-               c1r=cos(arg)*term
-               c1i=sin(arg)*term
+ ng=0
+ do
+   ng=ng+1
+   newg=0
 
-               do iq=1,3
-                 gpqdq=gmet(iq,1)*gpq(1)+gmet(iq,2)*gpq(2)+gmet(iq,3)*gpq(3)
-                 do mu=1,3
-                   delag=zero; if(iq==mu) delag=one
-                   do nu=1,mu
-                     delbg=zero; if(iq==nu) delbg=one
-                     term1=delag*gpq(nu)+delbg*gpq(mu)
-                     term2=gpq(mu)*gpq(nu)*gpqdq
-                     term3=fac2*term2
-                     term2=two*term2/gsq
-                     gterms=term1-term2-term3
-                     dyewdq(re,mu,ia,nu,ib,iq)=dyewdq(re,mu,ia,nu,ib,iq)+gterms*c1r
-                     dyewdq(im,mu,ia,nu,ib,iq)=dyewdq(im,mu,ia,nu,ib,iq)+gterms*c1i
+   do ig3=-ng,ng
+     do ig2=-ng,ng
+       do ig1=-ng,ng
+
+!        Exclude shells previously summed over
+         if(abs(ig1)==ng .or. abs(ig2)==ng .or. abs(ig3)==ng&
+&         .or. ng==1 ) then
+
+           gpq(1)=dble(ig1)+qphon(1)
+           gpq(2)=dble(ig2)+qphon(2)
+           gpq(3)=dble(ig3)+qphon(3)
+           gdot12=gmet(2,1)*gpq(1)*gpq(2)
+           gdot13=gmet(3,1)*gpq(1)*gpq(3)
+           gdot23=gmet(3,2)*gpq(2)*gpq(3)
+           dot1=gmet(1,1)*gpq(1)**2+gdot12+gdot13
+           dot2=gmet(2,2)*gpq(2)**2+gdot12+gdot23
+           dot3=gmet(3,3)*gpq(3)**2+gdot13+gdot23
+           gsq=dot1+dot2+dot3
+  !        Skip q=0:
+           if (gsq<1.0d-20) then
+             if (sumg0==1) then
+               write(message,'(3a)')&
+  &             'The G=0 term has no contributions at first order in q: ',ch10,&
+  &             'Action : sumg0=0 '
+               MSG_ERROR(message)
+             end if
+           else
+             arg=fac*gsq
+  !          Larger arg gives 0 contribution:
+             if (arg <= 80._dp) then
+!              When any term contributes then include next shell
+               newg=1
+               term=exp(-arg)/gsq
+               do ia0=1,my_natom
+                 ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+                 arga=two_pi*(gpq(1)*xred(1,ia)+gpq(2)*xred(2,ia)+gpq(3)*xred(3,ia))
+                 do ib=1,ia
+                   argb=two_pi*(gpq(1)*xred(1,ib)+gpq(2)*xred(2,ib)+gpq(3)*xred(3,ib))
+                   arg=arga-argb
+                   c1r=cos(arg)*term
+                   c1i=sin(arg)*term
+  
+                   do iq=1,3
+                     gpqdq=gmet(iq,1)*gpq(1)+gmet(iq,2)*gpq(2)+gmet(iq,3)*gpq(3)
+                     do mu=1,3
+                       delag=zero; if(iq==mu) delag=one
+                       do nu=1,mu
+                         delbg=zero; if(iq==nu) delbg=one
+                         term1=delag*gpq(nu)+delbg*gpq(mu)
+                         term2=gpq(mu)*gpq(nu)*gpqdq
+                         term3=fac2*term2
+                         term2=two*term2/gsq
+                         gterms=term1-term2-term3
+                         dyewdq(re,mu,ia,nu,ib,iq)=dyewdq(re,mu,ia,nu,ib,iq)+gterms*c1r
+                         dyewdq(im,mu,ia,nu,ib,iq)=dyewdq(im,mu,ia,nu,ib,iq)+gterms*c1i
+                       end do
+                     end do
                    end do
+  
                  end do
                end do
-
-             end do
-           end do
+             end if
+  !          Endif g/=0 :
+           end if
          end if
-!        Endif g/=0 :
-       end if
-!      End triple loop over G s:
+  !        End triple loop over G s:
+       end do
      end do
    end do
- end do
+
+!  Check if new shell must be calculated
+   if (newg==0) exit
+ end do !  End the loop on ng (new shells). Note that there is one exit from this loop.
 
 !End G summation by accounting for some common factors.
 !(for the charges:see end of routine)
@@ -2811,78 +2828,84 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
  reta=sqrt(eta)
  reta3m=-eta*reta
  fac=4._dp/3.0_dp/sqrt(pi)
- do ir3=-nr,nr
-   do ir2=-nr,nr
-     do ir1=-nr,nr
-       arg=two_pi*(qphon(1)*ir1+qphon(2)*ir2+qphon(3)*ir3)
-       c1r=cos(arg)*reta3m
-       c1i=sin(arg)*reta3m
-       do ia0=1,my_natom
-         ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
-         do ib=1,ia
-           r1=dble(ir1)+xred(1,ib)-xred(1,ia)
-           r2=dble(ir2)+xred(2,ib)-xred(2,ia)
-           r3=dble(ir3)+xred(3,ib)-xred(3,ia)
-           dakk(:)=two_pi*(/r1,r2,r3/)
-           rdot12=rmet(2,1)*r1*r2
-           rdot13=rmet(3,1)*r1*r3
-           rdot23=rmet(3,2)*r2*r3
-           dotr1=rmet(1,1)*r1**2+rdot12+rdot13
-           dotr2=rmet(2,2)*r2**2+rdot12+rdot23
-           dotr3=rmet(3,3)*r3**2+rdot13+rdot23
-           rsq=dotr1+dotr2+dotr3
-           rmagn=sqrt(rsq)
-!          Avoid zero denominators in term :
-           if (rmagn>=1.0d-12) then
-             arg=reta*rmagn
-             term=zero
-             if (arg<8.0_dp) then
-!              Note: erfc(8) is about 1.1e-29,
-!              so don t bother with larger arg.
-!              Also: exp(-64) is about 1.6e-28,
-!              so don t bother with larger arg**2 in exp.
-               derfc_arg = abi_derfc(arg)
-               term=derfc_arg/arg**3
-               term1=2.0_dp/sqrt(pi)*exp(-arg**2)/arg**2
-               term2=-(term+term1)
-               term3=(3*term+term1*(3.0_dp+2.0_dp*arg**2))/rsq
-               rq(1)=rmet(1,1)*r1+rmet(1,2)*r2+rmet(1,3)*r3
-               rq(2)=rmet(2,1)*r1+rmet(2,2)*r2+rmet(2,3)*r3
-               rq(3)=rmet(3,1)*r1+rmet(3,2)*r2+rmet(3,3)*r3
-               do iq=1,3               
-                 do mu=1,3
-!                   do nu=1,3
-                   do nu=1,mu
-                     dyewdq(re,mu,ia,nu,ib,iq)=dyewdq(re,mu,ia,nu,ib,iq)-&
-&                     c1i*dakk(iq)*(rq(mu)*rq(nu)*term3+rmet(mu,nu)*term2)
-                     dyewdq(im,mu,ia,nu,ib,iq)=dyewdq(im,mu,ia,nu,ib,iq)+&
-&                     c1r*dakk(iq)*(rq(mu)*rq(nu)*term3+rmet(mu,nu)*term2)
-                   end do
-                 end do
-               end do
-             end if
-           else
-             if (ia/=ib)then
-               write(message,'(a,a,a,a,a,i5,a,i5,a)')&
-&               'The distance between two atoms vanishes.',ch10,&
-&               'This is not allowed.',ch10,&
-&               'Action: check the input for the atoms number',ia,' and',ib,'.'
-               MSG_ERROR(message)
-!             else
-!               do mu=1,3
-!                 do nu=1,mu
-!                   dyewdq(re,mu,ia,nu,ib)=dyewdq(re,mu,ia,nu,ib)+&
-!&                   fac*reta3m*rmet(mu,nu)
-!                 end do
-!               end do
-             end if
-           end if
+ nr=0
+ do
+   nr=nr+1
+   newr=0
+ 
+   do ir3=-nr,nr
+     do ir2=-nr,nr
+       do ir1=-nr,nr
+         if( abs(ir3)==nr .or. abs(ir2)==nr .or. abs(ir1)==nr .or. nr==1 )then
 
-         end do ! End loop over ib:
-       end do ! End loop over ia:
-     end do ! End triple loop over real space points:
+           arg=two_pi*(qphon(1)*ir1+qphon(2)*ir2+qphon(3)*ir3)
+           c1r=cos(arg)*reta3m
+           c1i=sin(arg)*reta3m
+           do ia0=1,my_natom
+             ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+             do ib=1,ia
+               r1=dble(ir1)+xred(1,ib)-xred(1,ia)
+               r2=dble(ir2)+xred(2,ib)-xred(2,ia)
+               r3=dble(ir3)+xred(3,ib)-xred(3,ia)
+               dakk(:)=two_pi*(/r1,r2,r3/)
+               rdot12=rmet(2,1)*r1*r2
+               rdot13=rmet(3,1)*r1*r3
+               rdot23=rmet(3,2)*r2*r3
+               dotr1=rmet(1,1)*r1**2+rdot12+rdot13
+               dotr2=rmet(2,2)*r2**2+rdot12+rdot23
+               dotr3=rmet(3,3)*r3**2+rdot13+rdot23
+               rsq=dotr1+dotr2+dotr3
+               rmagn=sqrt(rsq)
+!              Avoid zero denominators in term :
+               if (rmagn>=1.0d-12) then
+                 arg=reta*rmagn
+                 term=zero
+                 if (arg<8.0_dp) then
+!                  Note: erfc(8) is about 1.1e-29,
+!                  so don t bother with larger arg.
+!                  Also: exp(-64) is about 1.6e-28,
+!                  so don t bother with larger arg**2 in exp.
+                   newr=1
+                   derfc_arg = abi_derfc(arg)
+                   term=derfc_arg/arg**3
+                   term1=2.0_dp/sqrt(pi)*exp(-arg**2)/arg**2
+                   term2=-(term+term1)
+                   term3=(3*term+term1*(3.0_dp+2.0_dp*arg**2))/rsq
+                   rq(1)=rmet(1,1)*r1+rmet(1,2)*r2+rmet(1,3)*r3
+                   rq(2)=rmet(2,1)*r1+rmet(2,2)*r2+rmet(2,3)*r3
+                   rq(3)=rmet(3,1)*r1+rmet(3,2)*r2+rmet(3,3)*r3
+                   do iq=1,3               
+                     do mu=1,3
+!                       do nu=1,3
+                       do nu=1,mu
+                         dyewdq(re,mu,ia,nu,ib,iq)=dyewdq(re,mu,ia,nu,ib,iq)-&
+&                         c1i*dakk(iq)*(rq(mu)*rq(nu)*term3+rmet(mu,nu)*term2)
+                         dyewdq(im,mu,ia,nu,ib,iq)=dyewdq(im,mu,ia,nu,ib,iq)+&
+&                         c1r*dakk(iq)*(rq(mu)*rq(nu)*term3+rmet(mu,nu)*term2)
+                       end do
+                     end do
+                   end do
+                 end if
+               else
+                 if (ia/=ib)then
+                   write(message,'(a,a,a,a,a,i5,a,i5,a)')&
+&                   'The distance between two atoms vanishes.',ch10,&
+&                   'This is not allowed.',ch10,&
+&                   'Action: check the input for the atoms number',ia,' and',ib,'.'
+                   MSG_ERROR(message)
+                 end if
+               end if
+
+             end do ! End loop over ib:
+           end do ! End loop over ia:
+         end if
+       end do ! End triple loop over real space points:
+     end do
    end do
- end do
+
+!  Check if new shell must be calculated
+   if(newr==0) exit
+ end do !  End loop on nr (new shells). Note that there is an exit within the loop
 
 !Take account of the charges
 !write(std_out,*)' '
