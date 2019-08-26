@@ -499,7 +499,7 @@ ecore=zero
    ABI_ALLOCATE(dyewdqdq,(2,3,natom,3,3,3))
    dyewdqdq(:,:,:,:,:,:)=zero
    if (dtset%lw_flexo==1.or.dtset%lw_flexo==4) then
-     sumg0=0;qphon(:)=zero
+     sumg0=1;qphon(:)=zero
      call dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
    & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    end if
