@@ -2060,7 +2060,8 @@ subroutine elt_ewald(elteew,gmet,gprimd,my_natom,natom,ntypat,rmet,rprimd,&
 !Here, a bias is introduced, because G-space summation scales
 !better than r space summation ! Note : debugging is the most
 !easier at fixed eta.
- eta=pi*200._dp/33.0_dp*sqrt(1.69_dp*recip/direct)
+! eta=pi*200._dp/33.0_dp*sqrt(1.69_dp*recip/direct)
+eta=1.0_dp
 
 !Conduct reciprocal space summations
  fac=pi**2/eta ; gsum=zero
@@ -3058,7 +3059,8 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
 & rmet(2,2)+rmet(2,3)+rmet(3,1)+rmet(3,2)+rmet(3,3)
  recip=gmet(1,1)+gmet(1,2)+gmet(1,3)+gmet(2,1)+&
 & gmet(2,2)+gmet(2,3)+gmet(3,1)+gmet(3,2)+gmet(3,3)
- eta=pi*(dble(nng)/dble(nnr))*sqrt(1.69_dp*recip/direct)
+! eta=pi*(dble(nng)/dble(nnr))*sqrt(1.69_dp*recip/direct)
+ eta=1.0_dp
 
 !Test Ewald s summation
 !eta=1.2_dp*eta
