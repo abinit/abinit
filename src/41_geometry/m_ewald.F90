@@ -687,7 +687,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  if (all(zeff == zero).and.all(qdrp_cart == zero)) then
    dyew = zero; return
  end if
- do_quadrupole = .false.!any(qdrp_cart /= zero)
+ do_quadrupole = any(qdrp_cart /= zero)
 
  ! Keep track of total time spent.
  call timab(1749, 1, tsec)
@@ -869,8 +869,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                    do ia=1,natom
 
                      ! phase factor for dipole-quadrupole
-                     cqdr=cosqxred(ia)*cosqxred(ib)+sinqxred(ia)*sinqxred(ib)
-                     cqdi=sinqxred(ia)*cosqxred(ib)-cosqxred(ia)*sinqxred(ib)
+                     cqdr=cosqxred(ia)*sinqxred(ib)-sinqxred(ia)*cosqxred(ib)
+                     cqdi=cosqxred(ia)*cosqxred(ib)+sinqxred(ia)*sinqxred(ib)
 
                      ! phase factor quadrupole-quadrupole
                      cqqr=cosqxred(ia)*cosqxred(ib)+sinqxred(ia)*sinqxred(ib)
@@ -1155,8 +1155,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                  dyew(2,mu,ia,nu,ib)=dyew(2,mu,ia,nu,ib) + &
                    (zeff(ii,nu,ib)*qdrp_cart(kk,jj,mu,ia) - &
                     zeff(ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dydqt(2,ii,ia,jj,ib,kk)
+                 ! quadrupole-quadrupole correction
                  do ll=1,3
-                   ! quadrupole-quadrupole correction
                    dyew(1,mu,ia,nu,ib)=dyew(1,mu,ia,nu,ib) + &
                    (qdrp_cart(ll,ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dyqqt(1,ii,ia,jj,ib,kk,ll)
                    dyew(2,mu,ia,nu,ib)=dyew(2,mu,ia,nu,ib) + &
