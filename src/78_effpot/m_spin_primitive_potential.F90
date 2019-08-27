@@ -776,15 +776,18 @@ contains
   !  scmaker: supercell maker helper class
   !  scpot: supercell potential (a pointer to a abstract potential)
   !-------------------------------------------------------------------!
-  subroutine fill_supercell(self, scmaker, scpot)
+  subroutine fill_supercell(self, scmaker, params, scpot)
     class(spin_primitive_potential_t) , intent(inout) :: self
-    type(supercell_maker_t), intent(inout):: scmaker
+    type(supercell_maker_t),            intent(inout) :: scmaker
+    type(multibinit_dtset_type),        intent(inout) :: params
     class(abstract_potential_t), pointer, intent(inout) :: scpot
+
     integer :: nspin, sc_nspin, i, R(3), ind_Rij(3), iR, ii, ij, inz
-    integer, allocatable :: i_sc(:), j_sc(:), Rj_sc(:, :)
-    real(dp) :: val_sc(scmaker%ncells)
     integer :: master, my_rank, comm, nproc, ierr
+    integer, allocatable :: i_sc(:), j_sc(:), Rj_sc(:, :)
     logical :: iam_master
+    real(dp) :: val_sc(scmaker%ncells)
+
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
     nspin=self%nspin

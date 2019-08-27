@@ -76,6 +76,8 @@ module m_spmat_NDCOO
      procedure :: get_ind               ! get the indices for all in a dimension
      procedure :: group_by_1dim         ! group the matrix by first dimension
      procedure :: mv1vec                ! multiply vector
+     procedure :: vec_product           ! multiply 3d matrix with two vectors
+     procedure :: vec_product4d         ! multiply 4d matrix with three vectors
      !procedure :: print
   end type ndcoo_mat_t
 
@@ -336,6 +338,28 @@ contains
       res(irv) = res(irv) + self%val%data(iind) * veci(iiv)*vecj(ijv)
     end do
   end subroutine vec_product
+
+
+  ! matrix vector vector vector product. matrix should be dim4.
+  ! n(vector)=ndim-1
+  ! which returns a vecor
+  ! res_r = \sum_ijk M_{ijkr} V_i V_j V_k
+  ! i, j, k, r can be in any order.
+  subroutine vec_product4d(self, iv, veci, jv, vecj, kv, veck, rv, res)
+    class(ndcoo_mat_t), intent(inout) :: self
+    real(dp), intent(in) :: veci(:), vecj(:), veck(:)
+    integer ,intent(in) :: iv, jv, kv, rv               !
+    real(dp), intent(inout) :: res(:)
+    integer :: iind, iiv, ijv, ikv, irv
+    do iind =1 , self%nnz
+      iiv=self%ind%data(iv, iind)
+      ijv=self%ind%data(jv, iind)
+      ikv=self%ind%data(kv, iind)
+      irv=self%ind%data(rv, iind)
+      res(irv) = res(irv) + self%val%data(iind) * veci(iiv)*vecj(ijv)*veck(ikv)
+    end do
+  end subroutine vec_product4d
+
 
 
   subroutine test_ndcoo()

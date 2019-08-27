@@ -68,6 +68,7 @@ module  m_slc_potential
      procedure :: set_params
      procedure :: set_supercell
      procedure :: add_oiju_term
+     procedure :: add_tijuv_term
      procedure :: calculate
   end type slc_potential_t
  
@@ -93,12 +94,10 @@ contains
     self%is_null=.False.
     self%nspin=nspin
     self%natom=natom
+    
     call xmpi_bcast(self%nspin, master, comm, ierr)
     call xmpi_bcast(self%natom, master, comm, ierr)
-    ABI_ALLOCATE( self%ms, (self%nspin))
-    if(iam_master) then
-      call self%oiju_sc%initialize(mshape=[-1, -1, self%nspin*3, self%nspin*3, self%natom*3])
-    endif
+    ABI_ALLOCATE(self%ms, (self%nspin))
   end subroutine initialize
 
   subroutine finalize(self)
@@ -121,29 +120,33 @@ contains
   subroutine set_params(self, params)
     class(slc_potential_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
-    
-    integer :: coupling
-    integer :: master, my_rank, comm, nproc, ierr
+
+    integer :: master, my_rank, comm, nproc, ierr, coupling
     logical :: iam_master
-   
+
     coupling = params%slc_coupling
+
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
     if(iam_master) then
       if(coupling .ge. 1000) then
         self%has_biquad=.True.
         call xmpi_bcast(self%has_biquad, master, comm, ierr)
         coupling=coupling - 1000
       endif
+
       if(coupling .ge. 100) then
         self%has_linquad=.True.
         call xmpi_bcast(self%has_linquad, master, comm, ierr)
         coupling=coupling - 100
       endif
+
       if(coupling .ge. 10) then
         self%has_quadlin=.True.
         call xmpi_bcast(self%has_quadlin, master, comm, ierr)
         coupling=coupling - 10
       endif
+
       if(coupling .ge. 1) then   
         self%has_bilin=.True.
         call xmpi_bcast(self%has_bilin, master, comm, ierr)
@@ -180,6 +183,21 @@ contains
     endif
   end subroutine add_oiju_term
 
+  subroutine add_tijuv_term(self, i,j,u,v, val)
+    class(slc_potential_t), intent(inout) :: self
+    integer,                intent(in)    :: i, j, u, v
+    real(dp),               intent(in)    :: val
+
+    integer :: master, my_rank, comm, nproc
+    logical :: iam_master
+
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    if(iam_master) then
+       call self%tijuv_sc%add_entry(ind=[i,j,u,v],val=val)
+    endif
+  end subroutine add_tijuv_term
+
+
   subroutine calculate(self, displacement, strain, spin, lwf, &
        force, stress, bfield, lwf_force, energy)
     class(slc_potential_t), intent(inout) :: self
@@ -193,6 +211,8 @@ contains
     sp(:) = reshape(spin, (/ 3*self%nspin /))
     disp(:) = reshape(displacement, (/ 3*self%natom /))
 
+    write(*,*) 'Calculating coupling terms'
+
     ! oiju contribution
     if(present(bfield)) then
       b1(:) = 0.0d0
@@ -202,12 +222,24 @@ contains
         btmp(:, ii) = btmp(:,ii)/self%ms(ii)
       enddo
       bfield(:,:) = bfield(:,:) + btmp(:,:)
+      write(*,*) 'Magnetic fields are'
+      do ii = 1, self%natom
+        if(dot_product(bfield(:,ii), bfield(:,ii)).gt.1d-16) then
+          write(*,*) ii, bfield(:,ii)
+        endif
+      enddo
     endif
 
     if(present(force)) then
       f1(:) = 0.0d0
       call self%oiju_sc%vec_product(1, sp, 2, sp, 3, f1)
       force(:,:) = force(:,:) + reshape(f1, (/ 3, self%natom /))
+      write(*,*) 'Forces are'
+      do ii = 1, self%natom
+        if(dot_product(force(:,ii), force(:,ii)).gt.1d-16) then
+          write(*,*) ii, force(:,ii)
+        endif
+      enddo
     endif
 
     if(present(energy)) then

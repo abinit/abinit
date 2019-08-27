@@ -309,6 +309,7 @@ contains
     if(self%has_displacement) then
        self%params%temperature = self%params%temperature/Ha_K
     end if
+    
   end subroutine prepare_params
 
 
@@ -359,6 +360,7 @@ contains
 
     !LWF : TODO
 
+    ! spin-lattice coupling
     if(self%params%slc_coupling>0) then
        ABI_DATATYPE_ALLOCATE_SCALAR(slc_primitive_potential_t, slc_pot)
        select type(slc_pot)
@@ -375,6 +377,7 @@ contains
   !-------------------------------------------------------------------!
   subroutine fill_supercell(self)
     class(mb_manager_t), target, intent(inout) :: self
+
     ! build supercell structure
     !call self%unitcell%fill_supercell(self%sc_maker, self%supercell)
     call self%supercell%from_unitcell(self%sc_maker, self%unitcell)
@@ -382,7 +385,7 @@ contains
     ! supercell potential
     call self%pots%initialize()
     call self%pots%set_supercell(self%supercell)
-    call self%prim_pots%fill_supercell_list(self%sc_maker,self%pots)
+    call self%prim_pots%fill_supercell_list(self%sc_maker, self%params, self%pots)
 
     ! why do this twice.
     call self%pots%set_supercell(self%supercell)

@@ -50,7 +50,7 @@ module m_slc_primitive_potential
 
 
   type, public, extends(primitive_potential_t) :: slc_primitive_potential_t
-     integer :: natom, nspin            ! on every mpi node
+     integer :: natom, nspin        ! on every mpi node
      logical :: has_bilin=.False.   ! bilinear coupling term, i.e. liu        
      logical :: has_linquad=.False. ! spin first then lattice, i.e. niuv
      logical :: has_quadlin=.False. ! spin first then lattice, i.e. oiju
@@ -76,13 +76,17 @@ module m_slc_primitive_potential
      procedure:: initialize
      procedure:: finalize
      !procedure :: set_slc_primcell
+     procedure :: set_liu
+     procedure :: set_liu_1term
      procedure :: set_oiju
      procedure :: set_oiju_1term
      !procedure:: set_tijuv
      procedure :: load_from_files
      procedure :: read_netcdf
      procedure :: fill_supercell
+     !procedure :: set_liu_sc
      procedure :: set_oiju_sc
+     procedure :: set_tijuv_sc
   end type slc_primitive_potential_t
 
 contains
@@ -309,21 +313,17 @@ contains
   subroutine set_liu_1term(self, ii, uu, Ru, val)
     class(slc_primitive_potential_t), intent(inout) :: self
     integer,                          intent(in)    :: ii    
-    integer,                          intent(in)    :: jj
     integer,                          intent(in)    :: uu
-    integer,                          intent(in)    :: Rj(3)
     integer,                          intent(in)    :: Ru(3)
     real(dp),                         intent(in)    :: val
 
-    integer :: indRj, indRu
+    integer :: indRu
     
     call self%lRulist%push_unique(Ru, position=indRu)
     
     call self%liu%add_entry(ind=[indRu, ii, uu], val=val)
 
   end subroutine set_liu_1term
-
-
 
   subroutine set_oiju(self, nn, ilist, jlist, ulist, Rjlist, Rulist, vallist)
 
@@ -378,9 +378,10 @@ contains
     end if
   end subroutine nc_handle_err
 
-  subroutine fill_supercell(self, scmaker, scpot)
+  subroutine fill_supercell(self, scmaker, params, scpot)
     class(slc_primitive_potential_t) , intent(inout) :: self
-    type(supercell_maker_t), intent(inout):: scmaker
+    type(supercell_maker_t),           intent(inout) :: scmaker
+    type(multibinit_dtset_type),       intent(inout) :: params
     class(abstract_potential_t), pointer, intent(inout) :: scpot
 
     integer :: nspin, sc_nspin, natom, sc_natom
@@ -400,13 +401,15 @@ contains
     select type(scpot) ! use select type because properties only defined for slc_potential is used.
     type is (slc_potential_t) 
       call scpot%initialize(sc_nspin, sc_natom)
+      call scpot%set_params(params)
       if (iam_master) then
         if(scpot%has_bilin) then
           if(self%has_bilin) then !did we actually find this in the netcdf file
             call self%liu%sum_duplicates()
-            call self%set_liu_sc(scpot, scmaker)
+            !call self%set_liu_sc(scpot, scmaker)
           else
-            write(std_out,'(A30)') 'No parameters for bilinear coupling available'
+            write(std_out,'(A47)') 'No parameters for bilinear coupling available'
+            scpot%has_bilin = .False.
           endif
         endif
         if(scpot%has_quadlin) then
@@ -414,10 +417,34 @@ contains
             call self%oiju%sum_duplicates()
             call self%set_oiju_sc(scpot, scmaker)
           else
-            write(std_out,'(A30)') 'No parameters for quadratic-linear coupling available'
+            write(std_out,'(A55)') 'No parameters for quadratic-linear coupling available'
+            scpot%has_quadlin = .False.
           endif
         endif
-        
+        if(scpot%has_linquad) then
+          if(self%has_linquad) then
+            call self%niuv%sum_duplicates()
+            !call self%set_niuv_sc(scpot, scmaker)
+          else
+            write(std_out,'(A55)') 'No parameters for linear-quadratic coupling available'
+            scpot%has_linquad = .False.
+          endif
+        endif
+        if(scpot%has_biquad) then
+          if(self%has_biquad) then
+            call self%tijuv%sum_duplicates()
+            !call self%set_tijuv_sc(scpot, scmaker)
+          else
+            write(std_out,'(A50)') 'No parameters for biquadratic coupling available'
+            scpot%has_biquad = .False.
+          endif
+        endif
+        !Write information which terms are used
+        write(std_out,'(A55)') 'Using the following terms for the spin-lattice coupling'
+        if(scpot%has_bilin)   write(std_out,'(A19)') 'Bilinear term: Liu'
+        if(scpot%has_quadlin) write(std_out,'(A28)') 'Quadratic-linear term: Oiju'
+        if(scpot%has_linquad) write(std_out,'(A28)') 'Linear-quadratic term: Niuv'
+        if(scpot%has_biquad)  write(std_out,'(A24)') 'Biquadratic term: Tijuv'
       endif
     end select
   end subroutine fill_supercell
@@ -432,6 +459,15 @@ contains
     integer, allocatable :: i_sc(:), j_sc(:), u_sc(:), Rj_sc(:, :), Ru_sc(:,:)
     integer, allocatable :: i1list(:), ise(:)
     real(dp) :: val_sc(scmaker%ncells)
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+    if(iam_master) then
+      call scpot%oiju_sc%initialize(mshape=[-1, -1, self%nspin*3, self%nspin*3, self%natom*3])
+    endif
 
     do inz=1, self%oiju%nnz
       oiju_ind=self%oiju%get_ind_inz(inz)
@@ -459,6 +495,59 @@ contains
     call scpot%oiju_sc%group_by_1dim(ngroup, i1list, ise)
 
   end subroutine set_oiju_sc
+
+  subroutine set_tijuv_sc(self, scpot, scmaker)
+    class(slc_primitive_potential_t), intent(inout) :: self
+    type(slc_potential_t),            intent(inout) :: scpot
+    type(supercell_maker_t),          intent(inout) :: scmaker
+        
+    integer :: icell, Rj(3), Ru(3), Rv(3), tijuv_ind(7), iRj, iRu, iRv, ii, ij, iu, iv, inz
+    integer :: ngroup
+    integer, allocatable :: i_sc(:), j_sc(:), u_sc(:), v_sc(:), Rj_sc(:, :), Ru_sc(:,:), Rv_sc(:,:)
+    integer, allocatable :: i1list(:), ise(:)
+    real(dp) :: val_sc(scmaker%ncells)
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+    if(iam_master) then
+      call scpot%tijuv_sc%initialize(mshape=[-1, -1, -1, self%nspin*3, self%nspin*3, self%natom*3, self%natom*3])
+    endif
+
+    do inz=1, self%tijuv%nnz
+      tijuv_ind=self%tijuv%get_ind_inz(inz)
+      iRj=tijuv_ind(1)
+      iRu=tijuv_ind(2)
+      iRv=tijuv_ind(3)
+      ii=tijuv_ind(4)
+      ij=tijuv_ind(5)
+      iu=tijuv_ind(6)
+      iv=tijuv_ind(7)
+      Rj=self%tRjlist%data(:,iRj)
+      Ru=self%tRulist%data(:,iRu)
+      Rv=self%tRvlist%data(:,iRv)
+      call scmaker%trans_i(nbasis=nspin*3, i=ii, i_sc=i_sc)
+      call scmaker%trans_j_and_Rj(nbasis=nspin*3, j=ij, Rj=Rj, j_sc=j_sc, Rj_sc=Rj_sc)
+      call scmaker%trans_j_and_Rj(nbasis=natom*3, j=iu, Rj=Ru, j_sc=u_sc, Rj_sc=Ru_sc)
+      call scmaker%trans_j_and_Rj(nbasis=natom*3, j=iv, Rj=Rv, j_sc=v_sc, Rj_sc=Rv_sc)
+      val_sc(:)= self%tijuv%val%data(inz)
+      do icell=1, scmaker%ncells
+        call scpot%add_tijuv_term(i_sc(icell), j_sc(icell), u_sc(icell), v_sc(icell), val_sc(icell))
+      end do
+      if(allocated(i_sc)) ABI_DEALLOCATE(i_sc)
+      if(allocated(j_sc)) ABI_DEALLOCATE(j_sc)
+      if(allocated(u_sc)) ABI_DEALLOCATE(u_sc)
+      if(allocated(v_sc)) ABI_DEALLOCATE(v_sc)
+      if(allocated(Rj_sc)) ABI_DEALLOCATE(Rj_sc)
+      if(allocated(Ru_sc)) ABI_DEALLOCATE(Ru_sc)
+      if(allocated(Rv_sc)) ABI_DEALLOCATE(Rv_sc)
+    end do
+    
+    call scpot%tijuv_sc%group_by_1dim(ngroup, i1list, ise)
+
+  end subroutine set_tijuv_sc
 
 
 end module m_slc_primitive_potential

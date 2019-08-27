@@ -90,12 +90,13 @@ end subroutine finalize
 !> @param[in]  input
 !> @param[out] output
 !----------------------------------------------------------------------
-subroutine fill_supercell(self, scmaker, scpot)
+subroutine fill_supercell(self, scmaker, params, scpot)
     class(primitive_potential_t), intent(inout) :: self
-    type(supercell_maker_t), intent(inout) :: scmaker
-    class(abstract_potential_t), pointer, intent(inout) :: scpot
-    ! Note that sc_pot is a pointer
+    type(supercell_maker_t),      intent(inout) :: scmaker
+    type(multibinit_dtset_type),  intent(inout) :: params
+    class(abstract_potential_t), pointer, intent(inout) :: scpot 
 
+    ! Note that sc_pot is a pointer
     ! use a pointer to the specific potential which will be filled
     ! e.g. type(spin_potential_t), pointer :: tmp
     ! call tmp%initialize(....)

@@ -76,9 +76,10 @@ contains
   !-------------------------------------------------------------------!
   ! fill supercell: 
   !-------------------------------------------------------------------!
-  subroutine fill_supercell(self, scmaker, scpot)
+  subroutine fill_supercell(self, scmaker, params, scpot)
     class(primitive_potential_list_t), intent(inout) :: self
-    type(supercell_maker_t), intent(inout) :: scmaker
+    type(supercell_maker_t),           intent(inout) :: scmaker
+    type(multibinit_dtset_type),       intent(inout) :: params
     class(abstract_potential_t), pointer, intent(inout) :: scpot
     ! Note that sc_pot is a pointer
     ! use a pointer to the specific potential which will be filled
@@ -209,15 +210,17 @@ contains
   !> @param[in]  sc_maker: the helper class for uilder supercell
   !> @param[out] sc_pots: the potential list of supercell pots.
   !----------------------------------------------------------------------
-    subroutine fill_supercell_ptr(self, sc_maker, sc_pot)
+  subroutine fill_supercell_ptr(self, sc_maker, params, sc_pot)
     class(primitive_potential_list_t), intent(inout) :: self
-    type(supercell_maker_t), intent(inout) :: sc_maker
+    type(supercell_maker_t),           intent(inout) :: sc_maker
+    type(multibinit_dtset_type),       intent(inout) :: params
     class(abstract_potential_t), pointer, intent(inout) :: sc_pot
+
     ! Note that sc_pot is a pointer
     ! use a pointer to the specific potential which will be filled
     type(potential_list_t), pointer :: tmp
     ABI_MALLOC_SCALAR(tmp)
-    call self%fill_supercell_list( sc_maker, tmp)
+    call self%fill_supercell_list( sc_maker, params, tmp)
     sc_pot=>tmp
     nullify(tmp)
   end subroutine fill_supercell_ptr
@@ -228,17 +231,19 @@ contains
   !> @param[in]  sc_maker: the helper class for uilder supercell
   !> @param[out] sc_pots: the potential list of supercell pots.
   !----------------------------------------------------------------------
-  subroutine fill_supercell_list(self, sc_maker, sc_pots)
+  subroutine fill_supercell_list(self, sc_maker, params, sc_pots)
     class(primitive_potential_list_t), intent(inout) :: self
-    type(supercell_maker_t), intent(inout) :: sc_maker
-    type(potential_list_t), intent(inout) :: sc_pots
+    type(supercell_maker_t),           intent(inout) :: sc_maker
+    type(multibinit_dtset_type),       intent(inout) :: params
+    type(potential_list_t),            intent(inout) :: sc_pots
+
     ! Note that sc_pot is a pointer
     ! use a pointer to the specific potential which will be filled
     class(abstract_potential_t), pointer :: tmp
     integer :: i
     tmp=>null()
     do i =1, self%size
-      call self%data(i)%obj%fill_supercell(sc_maker, tmp)
+      call self%data(i)%obj%fill_supercell(sc_maker, params, tmp)
     end do
     call sc_pots%append(tmp)
   end subroutine fill_supercell_list
