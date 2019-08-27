@@ -1384,7 +1384,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 
 !  Blanchet Add free electron gas contribution
    if(associated(hightemp)) then
-     if(hightemp%ioptden==1) then
+     if(hightemp%ioptden==0) then
        rhor(:,:)=rhor(:,:)+hightemp%nfreeel/hightemp%ucvol/nspden
      end if
    end if
@@ -1662,7 +1662,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 
 !    Blanchet Add free electron gas contribution
      if(associated(hightemp)) then
-       if(hightemp%ioptden==1) then
+       if(hightemp%ioptden==0) then
          rhog(1,1)=rhog(1,1)+hightemp%nfreeel/hightemp%ucvol/nspden
        end if
      end if
