@@ -3112,7 +3112,7 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
                          do nu=1,mu
                            delbg=zero; if(iq1==nu) delbg=one
                            delbd=zero; if(iq2==nu) delbd=one
-                           g0term=-fac2*(delad*delbg+delbd*delag)
+                           g0term=-fac*(delad*delbg+delbd*delag)
                            work(re,mu,ia,nu,ib,iq1,iq2)=work(re,mu,ia,nu,ib,iq1,iq2)+g0term
                          end do
                        end do
