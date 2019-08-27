@@ -566,7 +566,7 @@ end subroutine energies_to_array
    eintdc = eintdc + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
    if (positron) eintdc=eintdc-energies%edc_electronpositron &
 &   +energies%e0_electronpositron+energies%e_electronpositron
-   if(abs(energies%e_kin_freeel)>tiny(0.0_dp)) eintdc=eintdc+energies%e_kin_freeel
+   if(abs(energies%e_kin_freeel)>tiny(0.0_dp)) eintdc=eintdc+energies%e_kin_freeel+energies%edc_kin_freeel
  end if
 
 end subroutine energies_eval_eint
