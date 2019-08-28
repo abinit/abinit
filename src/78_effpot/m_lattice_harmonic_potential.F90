@@ -135,11 +135,14 @@ contains
     ABI_UNUSED_A(bfield)
     ABI_UNUSED_A(lwf_force)
 
+    call self%coeff%mv(displacement, f)
     if (present(force)) then
-       call self%coeff%mv(displacement, f)
        force(:,:) = force(:,:) - f
+    endif
+    if (present(energy)) then
        energy =energy + 0.5_dp * sum(f*displacement)
     endif
+
   end subroutine calculate
 
 end module m_lattice_harmonic_potential

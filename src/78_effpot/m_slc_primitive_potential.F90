@@ -55,7 +55,7 @@ module m_slc_primitive_potential
      logical :: has_linquad=.False. ! spin first then lattice, i.e. niuv
      logical :: has_quadlin=.False. ! spin first then lattice, i.e. oiju
      logical :: has_biquad=.False.  ! biquadratic coupling term, i.e. tijuv
-
+ 
      !four possible coupling terms, bilinear, quadratic-linear, linear-quadratic, and biquadratic
      !all the following are only on master node 
      type(ndcoo_mat_t) :: liu           ! parameter values

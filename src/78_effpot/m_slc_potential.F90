@@ -153,7 +153,11 @@ contains
       endif
     endif
   end subroutine set_params
- 
+
+  !-------------------------------------------------------------------!
+  !set_supercell: use the same supercell for all terms
+  !               copy magnetic moments
+  !-------------------------------------------------------------------!
   subroutine set_supercell(self, supercell)
     class(slc_potential_t),      intent(inout) :: self
     type(mbsupercell_t), target, intent(inout) :: supercell
@@ -223,10 +227,10 @@ contains
       enddo
       bfield(:,:) = bfield(:,:) + btmp(:,:)
       write(*,*) 'Magnetic fields are'
-      do ii = 1, self%natom
-        if(dot_product(bfield(:,ii), bfield(:,ii)).gt.1d-16) then
+      do ii = 1, self%nspin
+        !if(dot_product(bfield(:,ii), bfield(:,ii)).gt.1d-16) then
           write(*,*) ii, bfield(:,ii)
-        endif
+        !endif
       enddo
     endif
 
@@ -236,9 +240,9 @@ contains
       force(:,:) = force(:,:) + reshape(f1, (/ 3, self%natom /))
       write(*,*) 'Forces are'
       do ii = 1, self%natom
-        if(dot_product(force(:,ii), force(:,ii)).gt.1d-16) then
+        !if(dot_product(force(:,ii), force(:,ii)).gt.1d-16) then
           write(*,*) ii, force(:,ii)
-        endif
+        !endif
       enddo
     endif
 
