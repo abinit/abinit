@@ -498,14 +498,12 @@ contains
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
     do istep = 1 , self%params%ntime
-       call self%spin_mover%run_one_step(self%pots)
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
        call self%lattice_mover%run_one_step(self%pots)
        write(msg, "(A13, 4X,  I13)")  "Latt_Iter", istep
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
-
        call self%spin_mover%run_one_step(self%pots)
        write(msg, "(A13, 4X,  I13)")  "Spin_Iter", istep
        call wrtout(std_out,msg,'COLL')
