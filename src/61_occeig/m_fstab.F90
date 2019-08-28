@@ -35,7 +35,7 @@ module m_fstab
 
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : itoa, sjoin, ktoa
- use m_numeric_tools,  only : bisect, isdiagmat, get_diag
+ use m_numeric_tools,  only : bisect
  use m_symtk,          only : matr3inv
  use defs_datatypes,   only : ebands_t
  use m_special_funcs,  only : gaussian
@@ -118,10 +118,12 @@ module m_fstab
     !   bstcnt(1, :) The index of the first band inside the energy window (start)
     !   bstcnt(2, :) Number of bands on the FS (count)
 
+   real(dp) :: klatt(3, 3)
+    ! Reciprocal of lattice vectors for full kpoint grid. Used by init_tetra
+
    real(dp) :: kmesh_cartvec(3,3)
     ! vectors defining the k-mesh (stored as column vector in Cartesian coords.
     ! Used to implement the adaptive gaussian broadening.
-    ! NB: two_pi is included.
 
    real(dp),allocatable :: kpts(:,:)
    ! (3, nkfs)
@@ -156,8 +158,6 @@ module m_fstab
  procedure :: findkg0 => fstab_findkg0
   ! Find the index of the k-point on the FS
 
- procedure :: setup_qpoiint => fstab_setup_qpoint
-
  procedure :: get_dbldelta_weights => fstab_get_dbldelta_weights
 
  end type fstab_t
@@ -165,9 +165,6 @@ module m_fstab
  public :: fstab_init    ! Initialize the object.
  public :: fstab_print   ! Print the object
 !!***
-
- !FIXME These routines are deprecated
- public :: mkqptequiv
 
 !----------------------------------------------------------------------
 
@@ -421,9 +418,17 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
        fs%bmax = max(fs%bmax, fs%bstart_cnt_ibz(1,ik_ibz) + fs%bstart_cnt_ibz(2,ik_ibz) - 1)
      end if
    end do
+
    !write(std_out,*)"bmin, bmax for tetra: ",fs%bmin, fs%bmax
    ABI_CHECK(fs%bmin /= huge(1) .and. fs%bmax /= -huge(1), "No point on the Fermi surface!")
    fs%maxnb = fs%bmax - fs%bmin + 1
+
+   ! Debugging: use samek number of bands for each k-point on the FS.
+   !do ik_ibz=1,nkibz
+   !  if (fs%bstart_cnt_ibz(1, ik_ibz) /= -1) then
+   !    fs%bstart_cnt_ibz(1, ik_ibz) = fs%bmin
+   !    fs%bstart_cnt_ibz(2, ik_ibz) = fs%maxnb
+   !end do
 
    ABI_CALLOC(fs%vk, (3, fs%maxnb))
    ABI_CALLOC(fs%vkq, (3, fs%maxnb))
@@ -453,9 +458,11 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
    fs%eph_intmeth = dtset%eph_intmeth
    fs%eph_fsmear = dtset%eph_fsmear
 
+   fs%klatt = klatt
    fs%kmesh_cartvec(:, 1) = cryst%gprimd(:,1)*klatt(1,1) + cryst%gprimd(:,2)*klatt(2,1) + cryst%gprimd(:,3)*klatt(3,1)
    fs%kmesh_cartvec(:, 2) = cryst%gprimd(:,1)*klatt(1,2) + cryst%gprimd(:,2)*klatt(2,2) + cryst%gprimd(:,3)*klatt(3,2)
    fs%kmesh_cartvec(:, 3) = cryst%gprimd(:,1)*klatt(1,3) + cryst%gprimd(:,2)*klatt(2,3) + cryst%gprimd(:,3)*klatt(3,3)
+   ! TODO: It seems that two_pi is not needed here!
    !fs%kmesh_cartvec = two_pi * fs%kmesh_cartvec
    !do i1=1,3
    !  write(std_out, *)"klatt:", klatt(:, i1)
@@ -482,7 +489,6 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
 
      ! Allocate tables used to store tetrahedron weights.
      ABI_CALLOC(fs%dbldelta_tetra_weights_kfs, (fs%maxnb, fs%maxnb, fs%nkfs))
-
      ABI_CALLOC(fs%tetra_wtk, (fs%maxnb, nkibz))
      ABI_CALLOC(fs%tetra_wtk_ene, (fs%maxnb, nkibz, fs%nene))
 
@@ -528,13 +534,13 @@ end subroutine fstab_init
 !!  fstab_findkg0
 !!
 !! FUNCTION
-!!  Return the index `ikfs` of the k-point `kpt` in the FS-BZ. Return -1 if not found.
+!!  Return the index `ik_fs` of the k-point `kpt` in the FS-BZ. Return -1 if not found.
 !!
 !! INPUTS
 !!  kpt(3)=K-point in reduced coordinates
 !!
 !! OUTPUT
-!!   g0=Reciprocal lattice vector such that kpt = fstab%kpts(:, ikfs) + g0
+!!   g0=Reciprocal lattice vector such that kpt = fstab%kpts(:, ik_fs) + g0
 !!
 !! PARENTS
 !!
@@ -542,7 +548,7 @@ end subroutine fstab_init
 !!
 !! SOURCE
 
-integer function fstab_findkg0(fstab, kpt, g0) result(ikfs)
+integer function fstab_findkg0(fstab, kpt, g0) result(ik_fs)
 
 !Arguments ------------------------------------
 !scalars
@@ -553,198 +559,14 @@ integer function fstab_findkg0(fstab, kpt, g0) result(ikfs)
 
 ! *************************************************************************
 
- ikfs = fstab%krank%get_index(kpt)
- if (ikfs /= -1) then
-   g0 = nint(kpt - fstab%kpts(:, ikfs))
+ ik_fs = fstab%krank%get_index(kpt)
+ if (ik_fs /= -1) then
+   g0 = nint(kpt - fstab%kpts(:, ik_fs))
  else
    g0 = huge(1)
  end if
 
 end function fstab_findkg0
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_fstab/fstab_setup_qpoint
-!! NAME
-!! fstab_setup_qpoint
-!!
-!! FUNCTION
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine fstab_setup_qpoint(fs, cryst, ebands, spin, ltetra, qpt, comm)
-
- use libtetrabz_dbldelta_mod
-
-!Arguments ------------------------------------
- type(crystal_t),intent(in) :: cryst
- type(ebands_t),intent(in) :: ebands
- class(fstab_t),intent(inout) :: fs
- integer,intent(in) :: spin, ltetra, comm
- real(dp),intent(in) :: qpt(3)
-
-!Local variables-------------------------------
-!scalars
- integer,parameter :: enough = 50
- integer :: nkbz, ierr, nb, ik_bz, ik_ibz, ik_fs, i1, i2, i3
- real(dp) :: cpu, wall, gflops
- character(len=500) :: msg
- type(krank_t) :: krank
-!arrays
- integer :: nge(3), ngw(3)
- !integer,allocatable :: this_fks(:), symrecfm(:,:,:)
- real(dp) :: kpt(3)
- real(dp),allocatable :: eig_k(:,:), eig_kq(:,:), wght_bz(:,:,:)
- !real(dp),allocatable,intent(out) :: wght(:,:,:) !(nb*nb,PRODUCT(ngw(1:3)))
-
-! *************************************************************************
-
- !ABI_MALLOC(this_kfs, (fs%nkfs))
- !nkfs_q = 0
- !do ik_bz=1,fs%nkfs
- !  kk = fs%kpts(:, ik_bz)
- !  kq = kk + qpt; ikq_bz = fs%findkg0(kq, g0bz_kq)
- !  if (ikq_bz == -1) cycle
- !  nkfs_q = nkfs_q + 1
- !  this_nfks(nkfs_q) = ik_bz
- !end do
- !ABI_FREE(this_kfs)
- !ABI_SFREE(my_inds)
- !call xmpi_split_list(nkfs_q, comm, fs%my_nfks_q, fs%my_inds)
- !call xmpi_split_block(nkfs_q, comm, my_ntasks, my_inds)
- !ABI_FREE(my_inds)
-
- ABI_UNUSED(comm)
-
- if (fs%eph_intmeth /= 2) return
- !return
-
- fs%dbldelta_tetra_weights_kfs = zero
-
- ! The double delta is ill-defined for q == 0.
- if (fs%eph_intmeth == 2 .and. all(abs(qpt) < tol12)) then
-   MSG_COMMENT("tetrahedron method with q = 0 is ill-defined. Returning zeros")
-   return
- end if
-
- call cwtime(cpu, wall, gflops, "start")
- ABI_CHECK(isdiagmat(ebands%kptrlatt), "kptrlatt must be diagonal when tetra is used.")
- ABI_CHECK(ebands%nshiftk == 1, "nshiftk must be 1 when tetra is used")
- nge = get_diag(ebands%kptrlatt)
- ngw = nge
-
- nb = fs%maxnb
- nkbz = product(ngw(1:3))
-
- ABI_MALLOC(eig_k, (nb, nkbz))
- ABI_MALLOC(eig_kq, (nb, nkbz))
-
- ! TODO: Handle symmetries in a cleaner way
- !timrev = 0; if (use_tr) timrev=1
- krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, time_reversal=.True.)
-
- ierr = 0
- ik_bz = 0
- do i3=0,nge(3) - 1
-   do i2=0,nge(2) - 1
-     do i1 =0,nge(1) - 1
-       ik_bz = ik_bz + 1
-
-       ! Find correspondence between the grid and the IBZ
-       kpt = ([i1, i2, i3] + ebands%shiftk(:, 1)) / nge(:)
-       !ik_ibz = krank%find(kpt, msg)
-       ik_ibz = krank%invrank(krank%get_rank(kpt))
-
-       if (ik_ibz < 1) then
-         if (ierr <= enough) then
-           write(msg,'(3a,i0,a)') &
-            'kpt: ',trim(ktoa(kpt)),' with rank: ', krank%get_rank(kpt),' has no symmetric among the k-points'
-           MSG_WARNING(msg)
-         end if
-         ierr = ierr + 1
-         cycle
-       end if
-
-       eig_k(:, ik_bz) = ebands%eig(fs%bmin:fs%bmax, ik_ibz, spin)
-
-       ! Find correspondence between the grid and the IBZ
-       kpt = kpt + qpt
-       ik_ibz = krank%invrank(krank%get_rank(kpt))
-
-       if (ik_ibz < 1) then
-         if (ierr <= enough) then
-           write(msg,'(3a,i0,a)') &
-            'kpt + qpt: ',trim(ktoa(kpt)),' with rank: ', krank%get_rank(kpt),' has no symmetric among the k-points'
-           MSG_WARNING(msg)
-         end if
-         ierr = ierr + 1
-         cycle
-       end if
-
-       eig_kq(:, ik_bz) = ebands%eig(fs%bmin:fs%bmax, ik_ibz, spin)
-     end do
-   end do
- end do
-
- ABI_CHECK(ierr == 0, "See above warnings")
- call krank%free()
-
- ! Compute weights for double delta. Note that libtetra assumes Ef set to zero.
- eig_k = eig_k - ebands%fermie
- eig_kq = eig_kq - ebands%fermie
- ABI_MALLOC(wght_bz, (nb, nb, nkbz))
-
- write(std_out,"(a,i0,2a)")" Calling libtetrabz_dbldelta with ltetra:", ltetra, " for q-point", trim(ktoa(qpt))
- call libtetrabz_dbldelta(ltetra, cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz) !, comm=comm)
-
- ABI_FREE(eig_k)
- ABI_FREE(eig_kq)
-
- ! Convert from full BZ to fs% kpoints
- ! TODO: Average over degenerate states?
- !krank = krank_new(fs%nkfs, fs%kpts)
-
- ik_bz = 0
- do i3=0,nge(3) - 1
-   do i2=0,nge(2) - 1
-     do i1 =0,nge(1) - 1
-       ik_bz = ik_bz + 1
-       kpt = ([i1, i2, i3] + ebands%shiftk(:, 1)) / nge(:)
-       ! Then we have to rearrange the weights
-       ik_fs = fs%krank%invrank(krank%get_rank(kpt))
-
-       if (ik_fs /= -1) then
-         fs%dbldelta_tetra_weights_kfs(:,:,ik_fs) = wght_bz(:,:,ik_bz) !* fs%nktot
-         !write(std_out,*)"dbldelta wts:", wght_bz(:,:,ik_bz)
-         !ik_ibz = fs%indkk_fs(1, ik_fs)
-         !bstart_k = fs%bstart_cnt_ibz(1, ik_ibz); nband_k = fs%bstart_cnt_ibz(2, ik_ibz)
-         !bstart_kq = fs%bstart_cnt_ibz(1, ikq_ibz); nband_kq = fs%bstart_cnt_ibz(2, ikq_ibz)
-         !do ib2=1,nband_k
-         !  band2 = ib2 + bstart_k - fs%bmin
-         !  do ib1=1,nband_kq
-         !    band1 = ib1 + bstart_kq - fs%bmin
-         !    wtk(ib1, ib2) = fs%dbldelta_tetra_weights_kfs(band1, band2, ikfs)
-         !  end do
-         !end do
-
-       else
-         !write(std_out,*)"should be zero :", wght_bz(:,:,ik_bz)
-       end if
-     end do
-   end do
- end do
-
- !call krank%free()
- ABI_FREE(wght_bz)
-
- call cwtime_report(" libtetrabz_dbldelta", cpu, wall, gflops)
-
-end subroutine fstab_setup_qpoint
 !!***
 
 !----------------------------------------------------------------------
@@ -771,11 +593,11 @@ end subroutine fstab_setup_qpoint
 !!
 !! SOURCE
 
-subroutine fstab_get_dbldelta_weights(fs, ebands, ikfs, ik_ibz, ikq_ibz, spin, wtk)
+subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, wtk)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ikfs, ik_ibz, ikq_ibz, spin
+ integer,intent(in) :: ik_fs, ik_ibz, ikq_ibz, spin
  class(fstab_t),intent(in) :: fs
  type(ebands_t),intent(in) :: ebands
 !arrays
@@ -817,7 +639,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ikfs, ik_ibz, ikq_ibz, spin, w
 
  case (2)
    ! Copy weights in the correct position.
-   ABI_UNUSED(ikfs)
+   ABI_UNUSED(ik_fs)
    do ib2=1,nband_k
      band2 = ib2 + bstart_k - fs%bmin
      do ib1=1,nband_kq
@@ -825,11 +647,11 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ikfs, ik_ibz, ikq_ibz, spin, w
        ! This is the old version (WRONG)
        wtk(ib1, ib2) = fs%tetra_wtk(band1, ikq_ibz) * fs%tetra_wtk(band2, ik_ibz) / fs%nktot
 
-       !write(std_out,*)wtk(ib1, ib2), fs%dbldelta_tetra_weights_kfs(band1, band2, ikfs), &
-       !                abs(wtk(ib1, ib2) - fs%dbldelta_tetra_weights_kfs(band1, band2, ikfs))
+       !write(std_out,*)wtk(ib1, ib2), fs%dbldelta_tetra_weights_kfs(band1, band2, ik_fs), &
+       !                abs(wtk(ib1, ib2) - fs%dbldelta_tetra_weights_kfs(band1, band2, ik_fs))
 
        ! libtetrabz_dbldelta seems to report weights in this order.
-       wtk(ib1, ib2) = fs%dbldelta_tetra_weights_kfs(band1, band2, ikfs)
+       !wtk(ib1, ib2) = fs%dbldelta_tetra_weights_kfs(band1, band2, ik_fs)
      end do
    end do
 
@@ -907,132 +729,6 @@ subroutine fstab_print(fstab, header, unit, prtvol)
  end do
 
 end subroutine fstab_print
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_fstab/mkqptequiv
-!! NAME
-!! mkqptequiv
-!!
-!! FUNCTION
-!! This routine determines the equivalence between
-!!   1) qpoints and fermi surface kpoints
-!!   2) qpoints under symmetry operations
-!!
-!! INPUTS
-!!   Cryst<crystal_t>=Info on unit cell and symmetries.
-!!   kpt_phon = fermi surface kpoints
-!!   nkpt_phon = number of kpoints in the full FS set
-!!   nqpt = number of qpoints
-!!   qpt_full = qpoint coordinates
-!!
-!! OUTPUT
-!!   FSfullpqtofull = mapping of k + q onto k' for k and k' in full BZ
-!!   qpttoqpt(itim,isym,iqpt) = qpoint index which transforms to iqpt under isym and with time reversal itim.
-!!
-!! NOTES
-!!   REMOVED 3/6/2008: much too large matrix, and not used at present
-!!       FStoqpt = mapping of kpoint pairs (1 irreducible and 1 full) to qpoints
-!!
-!! PARENTS
-!!      elphon,get_tau_k
-!!
-!! CHILDREN
-!!      destroy_kptrank,get_rank,mkkptrank,wrtout
-!!
-!! SOURCE
-
-subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_full,mqtofull)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: nkpt_phon,nqpt
- type(crystal_t),intent(in) :: Cryst
-!arrays
- integer,intent(out) :: FSfullpqtofull(nkpt_phon,nqpt),qpttoqpt(2,Cryst%nsym,nqpt)
- integer,intent(out),optional :: mqtofull(nqpt)
- real(dp),intent(in) :: kpt_phon(3,nkpt_phon),qpt_full(3,nqpt)
-
-!Local variables-------------------------------
-!scalars
- integer :: ikpt_phon,iFSqpt,iqpt,isym,symrankkpt_phon
- !character(len=500) :: message
- type(krank_t) :: krank
-!arrays
- real(dp) :: tmpkpt(3),gamma_kpt(3)
-
-! *************************************************************************
-
- call wrtout(std_out,' mkqptequiv : making rankkpt_phon and invrankkpt_phon',"COLL")
-
- krank = krank_new(nkpt_phon, kpt_phon)
-
- FSfullpqtofull = -999
- gamma_kpt(:) = zero
-
- do ikpt_phon=1,nkpt_phon
-   do iqpt=1,nqpt
-     ! tmpkpt = jkpt = ikpt + qpt
-     tmpkpt(:) = kpt_phon(:,ikpt_phon) + qpt_full(:,iqpt)
-
-     ! which kpt is it among the full FS kpts?
-     symrankkpt_phon = krank%get_rank(tmpkpt)
-
-     FSfullpqtofull(ikpt_phon,iqpt) = krank%invrank(symrankkpt_phon)
-     if (FSfullpqtofull(ikpt_phon, iqpt) == -1) then
-       MSG_ERROR("looks like no kpoint equiv to k+q !!!")
-     end if
-
-   end do
- end do
-
- if (present(mqtofull)) then
-   do iqpt=1,nqpt
-     tmpkpt(:) = gamma_kpt(:) - qpt_full(:,iqpt)
-
-     ! which kpt is it among the full FS kpts?
-     symrankkpt_phon = krank%get_rank(tmpkpt)
-
-     mqtofull(iqpt) = krank%invrank(symrankkpt_phon)
-     if (mqtofull(iqpt) == -1) then
-       MSG_ERROR("looks like no kpoint equiv to -q !!!")
-     end if
-   end do
- end if
-
- call krank%free()
-
- ! start over with q grid
- call wrtout(std_out,' mkqptequiv : FSfullpqtofull made. Do qpttoqpt',"COLL")
-
- krank = krank_new(nqpt, qpt_full)
-
- qpttoqpt(:,:,:) = -1
- do iFSqpt=1,nqpt
-   do isym=1,Cryst%nsym
-     tmpkpt(:) =  Cryst%symrec(:,1,isym)*qpt_full(1,iFSqpt) &
-                + Cryst%symrec(:,2,isym)*qpt_full(2,iFSqpt) &
-                + Cryst%symrec(:,3,isym)*qpt_full(3,iFSqpt)
-
-     symrankkpt_phon = krank%get_rank(tmpkpt)
-     if (krank%invrank(symrankkpt_phon) == -1) then
-       MSG_ERROR("looks like no kpoint equiv to q by symmetry without time reversal!!!")
-     end if
-     qpttoqpt(1,isym,krank%invrank(symrankkpt_phon)) = iFSqpt
-
-     tmpkpt = -tmpkpt
-     symrankkpt_phon = krank%get_rank(tmpkpt)
-     if (krank%invrank(symrankkpt_phon) == -1) then
-       MSG_ERROR('looks like no kpoint equiv to q by symmetry with time reversal!!!')
-     end if
-     qpttoqpt(2,isym,krank%invrank(symrankkpt_phon)) = iFSqpt
-   end do
- end do
-
- call krank%free()
-
-end subroutine mkqptequiv
 !!***
 
 end module m_fstab

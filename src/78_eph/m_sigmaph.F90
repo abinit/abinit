@@ -318,7 +318,7 @@ module m_sigmaph
    ! Table used to distribute potentials over q-points in the IBZ.
    ! The loop over qpts in the IBZ(k) is MPI distributed inside qpt_comm accordinging to this table.
    ! 0 if this IBZ point is not treated by this proc.
-   ! 1 or 2-9 if this IBZ is treated.
+   ! 1 if this IBZ is treated.
 
   integer,allocatable :: my_pinfo(:,:)
    ! my_pinfo(3, my_npert)

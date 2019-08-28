@@ -39,9 +39,8 @@ module defs_elphon
  use m_abicore
  use m_errors
  use m_xmpi
-
- use m_krank,   only : krank_t
- use m_crystal, only : crystal_t
+ use m_krank
+ use m_crystal
 
  implicit none
 
@@ -51,6 +50,7 @@ module defs_elphon
  public :: gam_mult_displ
  public :: complete_gamma
  public :: complete_gamma_tr
+ public :: mkqptequiv
 
 !----------------------------------------------------------------------
 !!****t* defs_elphon/elph_kgrid_type
@@ -1245,6 +1245,132 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
  ABI_DEALLOCATE(gkk_qpt_tmp)
 
 end subroutine complete_gamma_tr
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fstab/mkqptequiv
+!! NAME
+!! mkqptequiv
+!!
+!! FUNCTION
+!! This routine determines the equivalence between
+!!   1) qpoints and fermi surface kpoints
+!!   2) qpoints under symmetry operations
+!!
+!! INPUTS
+!!   Cryst<crystal_t>=Info on unit cell and symmetries.
+!!   kpt_phon = fermi surface kpoints
+!!   nkpt_phon = number of kpoints in the full FS set
+!!   nqpt = number of qpoints
+!!   qpt_full = qpoint coordinates
+!!
+!! OUTPUT
+!!   FSfullpqtofull = mapping of k + q onto k' for k and k' in full BZ
+!!   qpttoqpt(itim,isym,iqpt) = qpoint index which transforms to iqpt under isym and with time reversal itim.
+!!
+!! NOTES
+!!   REMOVED 3/6/2008: much too large matrix, and not used at present
+!!       FStoqpt = mapping of kpoint pairs (1 irreducible and 1 full) to qpoints
+!!
+!! PARENTS
+!!      elphon,get_tau_k
+!!
+!! CHILDREN
+!!      destroy_kptrank,get_rank,mkkptrank,wrtout
+!!
+!! SOURCE
+
+subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_full,mqtofull)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkpt_phon,nqpt
+ type(crystal_t),intent(in) :: Cryst
+!arrays
+ integer,intent(out) :: FSfullpqtofull(nkpt_phon,nqpt),qpttoqpt(2,Cryst%nsym,nqpt)
+ integer,intent(out),optional :: mqtofull(nqpt)
+ real(dp),intent(in) :: kpt_phon(3,nkpt_phon),qpt_full(3,nqpt)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt_phon,iFSqpt,iqpt,isym,symrankkpt_phon
+ !character(len=500) :: message
+ type(krank_t) :: krank
+!arrays
+ real(dp) :: tmpkpt(3),gamma_kpt(3)
+
+! *************************************************************************
+
+ call wrtout(std_out,' mkqptequiv : making rankkpt_phon and invrankkpt_phon',"COLL")
+
+ krank = krank_new(nkpt_phon, kpt_phon)
+
+ FSfullpqtofull = -999
+ gamma_kpt(:) = zero
+
+ do ikpt_phon=1,nkpt_phon
+   do iqpt=1,nqpt
+     ! tmpkpt = jkpt = ikpt + qpt
+     tmpkpt(:) = kpt_phon(:,ikpt_phon) + qpt_full(:,iqpt)
+
+     ! which kpt is it among the full FS kpts?
+     symrankkpt_phon = krank%get_rank(tmpkpt)
+
+     FSfullpqtofull(ikpt_phon,iqpt) = krank%invrank(symrankkpt_phon)
+     if (FSfullpqtofull(ikpt_phon, iqpt) == -1) then
+       MSG_ERROR("looks like no kpoint equiv to k+q !!!")
+     end if
+
+   end do
+ end do
+
+ if (present(mqtofull)) then
+   do iqpt=1,nqpt
+     tmpkpt(:) = gamma_kpt(:) - qpt_full(:,iqpt)
+
+     ! which kpt is it among the full FS kpts?
+     symrankkpt_phon = krank%get_rank(tmpkpt)
+
+     mqtofull(iqpt) = krank%invrank(symrankkpt_phon)
+     if (mqtofull(iqpt) == -1) then
+       MSG_ERROR("looks like no kpoint equiv to -q !!!")
+     end if
+   end do
+ end if
+
+ call krank%free()
+
+ ! start over with q grid
+ call wrtout(std_out,' mkqptequiv : FSfullpqtofull made. Do qpttoqpt',"COLL")
+
+ krank = krank_new(nqpt, qpt_full)
+
+ qpttoqpt(:,:,:) = -1
+ do iFSqpt=1,nqpt
+   do isym=1,Cryst%nsym
+     tmpkpt(:) =  Cryst%symrec(:,1,isym)*qpt_full(1,iFSqpt) &
+                + Cryst%symrec(:,2,isym)*qpt_full(2,iFSqpt) &
+                + Cryst%symrec(:,3,isym)*qpt_full(3,iFSqpt)
+
+     symrankkpt_phon = krank%get_rank(tmpkpt)
+     if (krank%invrank(symrankkpt_phon) == -1) then
+       MSG_ERROR("looks like no kpoint equiv to q by symmetry without time reversal!!!")
+     end if
+     qpttoqpt(1,isym,krank%invrank(symrankkpt_phon)) = iFSqpt
+
+     tmpkpt = -tmpkpt
+     symrankkpt_phon = krank%get_rank(tmpkpt)
+     if (krank%invrank(symrankkpt_phon) == -1) then
+       MSG_ERROR('looks like no kpoint equiv to q by symmetry with time reversal!!!')
+     end if
+     qpttoqpt(2,isym,krank%invrank(symrankkpt_phon)) = iFSqpt
+   end do
+ end do
+
+ call krank%free()
+
+end subroutine mkqptequiv
 !!***
 
 end module defs_elphon
