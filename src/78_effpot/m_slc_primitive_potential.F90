@@ -55,7 +55,7 @@ module m_slc_primitive_potential
      logical :: has_linquad=.False. ! spin first then lattice, i.e. niuv
      logical :: has_quadlin=.False. ! spin first then lattice, i.e. oiju
      logical :: has_biquad=.False.  ! biquadratic coupling term, i.e. tijuv
- 
+
      !four possible coupling terms, bilinear, quadratic-linear, linear-quadratic, and biquadratic
      !all the following are only on master node 
      type(ndcoo_mat_t) :: liu           ! parameter values
@@ -84,6 +84,12 @@ module m_slc_primitive_potential
      procedure :: load_from_files
      procedure :: read_netcdf
      procedure :: fill_supercell
+     procedure :: fill_liu
+     procedure :: fill_niuv
+     procedure :: fill_oiju
+     procedure :: fill_tijuv
+     procedure :: read_liu
+     procedure :: read_oiju
      !procedure :: set_liu_sc
      procedure :: set_oiju_sc
      procedure :: set_tijuv_sc
@@ -134,13 +140,15 @@ contains
     endif
     call self%read_netcdf(trim(ncdf_fname)//char(0), params%slc_coupling)
   end subroutine load_from_files
- 
 
+  !-----------------------------------
+  ! reading parameters from ncdf file
+  !-----------------------------------
   subroutine read_netcdf(self, ncdf_fname, slc_coupling)
     class(slc_primitive_potential_t), intent(inout) :: self
     character (len = *), intent(in) :: ncdf_fname
     integer, intent(in) :: slc_coupling
-    integer:: ncid, ncerr
+    integer:: ncid, ncerr, comm
     integer:: dimid, varid
     integer:: ndata
     
@@ -150,125 +158,18 @@ contains
 
 !#if defined HAVE_NETCDF
 
-    ncerr = nf90_open(ncdf_fname,NF90_NOWRITE,ncid)
-    if(ncerr /= NF90_NOERR) then
-      write(std_out,'(A24)') 'Could not open netcdf file'
-    else 
-      write(std_out,'(A30)') ncdf_fname
-    endif
-    
+    comm = xmpi_world
+
+    ncerr = nctk_open_read(ncid, ncdf_fname, comm)
+
     ! read primcell info
     ncerr=nctk_get_dim(ncid, "natom", self%natom)
     ncerr=nctk_get_dim(ncid, "nspin", self%nspin)
 
-    ! read L_iu terms
-    ncerr = nf90_inq_dimid(ncid, "Liu_ndata", dimid)
-    if(ncerr /= NF90_NOERR) then
-      write(std_out,'(A20)') 'Spin-lattice coupling does not contain L_iu term'
-    else
-      self%has_bilin=.True.
-      ncerr = nctk_get_dim(ncid, "Liu_ndata", ndata)
-      ABI_ALLOCATE(ilist, (ndata))
-      ABI_ALLOCATE(ulist, (ndata))
-      ABI_ALLOCATE(Rulist, (3, ndata))
-      ABI_ALLOCATE(vallist, (ndata))
+    ! read different coupling terms if they are present in the file
+    call self%read_liu(ncid)
+    call self%read_oiju(ncid)
 
-      ncerr =nf90_inq_varid(ncid, "Liu_ilist", varid)
-      call nc_handle_err(ncerr, "Liu_ilist")
-      ncerr = nf90_get_var(ncid, varid, ilist)
-      call nc_handle_err(ncerr, "Liu_ilist")
-
-      ncerr =nf90_inq_varid(ncid, "Liu_ulist", varid)
-      call nc_handle_err(ncerr, "Liu_ulist")
-      ncerr = nf90_get_var(ncid, varid, ulist)
-      call nc_handle_err(ncerr, "Liu_ulist")
-
-      ncerr =nf90_inq_varid(ncid, "Liu_Rulist", varid)
-      call nc_handle_err(ncerr, "Liu_Rulist")
-      ncerr = nf90_get_var(ncid, varid, Rulist)
-      call nc_handle_err(ncerr, "Liu_Rulist")
-
-      ncerr =nf90_inq_varid(ncid, "Liu_vallist", varid)
-      call nc_handle_err(ncerr, "Liu_vallist")
-      ncerr = nf90_get_var(ncid, varid, vallist)
-      call nc_handle_err(ncerr, "Liu_vallist")
-
-      write(std_out,'(A7,I10,A11)') 'L_iu:', ndata, 'terms read'  
-
-      !change units from eV to Ha
-      vallist(:) = vallist(:)*eV_Ha
-  
-      !fill the sparse matrix for oiju parameters
-      call self%set_liu(ndata, ilist, ulist, Rulist, vallist)
-
-      ABI_SFREE(ilist)
-      ABI_SFREE(ulist)
-      ABI_SFREE(Rulist)
-      ABI_SFREE(vallist)
-
-    endif
-
-
-    ! read O_iju terms    
-    ncerr = nf90_inq_dimid(ncid, "Oiju_ndata", dimid)
-    if(ncerr /= NF90_NOERR) then
-      write(std_out,'(A20)') 'Spin-lattice coupling does not contain O_iju term'
-    else
-      self%has_quadlin=.True.
-      ncerr = nctk_get_dim(ncid, "Oiju_ndata", ndata)
-      ABI_ALLOCATE(ilist, (ndata))
-      ABI_ALLOCATE(jlist, (ndata))
-      ABI_ALLOCATE(ulist, (ndata))
-      ABI_ALLOCATE(Rjlist, (3, ndata))
-      ABI_ALLOCATE(Rulist, (3, ndata))
-      ABI_ALLOCATE(vallist, (ndata))
-
-      ncerr =nf90_inq_varid(ncid, "Oiju_ilist", varid)
-      call nc_handle_err(ncerr, "Oiju_ilist")
-      ncerr = nf90_get_var(ncid, varid, ilist)
-      call nc_handle_err(ncerr, "Oiju_ilist")
-
-      ncerr =nf90_inq_varid(ncid, "Oiju_jlist", varid)
-      call nc_handle_err(ncerr, "Oiju_jlist")
-      ncerr = nf90_get_var(ncid, varid, jlist)
-      call nc_handle_err(ncerr, "Oiju_jlist")
-
-      ncerr =nf90_inq_varid(ncid, "Oiju_ulist", varid)
-      call nc_handle_err(ncerr, "Oiju_ulist")
-      ncerr = nf90_get_var(ncid, varid, ulist)
-      call nc_handle_err(ncerr, "Oiju_ulist")
-
-      ncerr =nf90_inq_varid(ncid, "Oiju_Rjlist", varid)
-      call nc_handle_err(ncerr, "Oiju_Rjlist")
-      ncerr = nf90_get_var(ncid, varid, Rjlist)
-      call nc_handle_err(ncerr, "Oiju_Rjlist")
-
-      ncerr =nf90_inq_varid(ncid, "Oiju_Rulist", varid)
-      call nc_handle_err(ncerr, "Oiju_Rulist")
-      ncerr = nf90_get_var(ncid, varid, Rulist)
-      call nc_handle_err(ncerr, "Oiju_Rulist")
-
-      ncerr =nf90_inq_varid(ncid, "Oiju_vallist", varid)
-      call nc_handle_err(ncerr, "Oiju_vallist")
-      ncerr = nf90_get_var(ncid, varid, vallist)
-      call nc_handle_err(ncerr, "Oiju_vallist")
-
-      write(std_out,'(A7,I10,A11)') 'O_iju:', ndata, 'terms read'  
-
-      !change units from eV to Ha
-      vallist(:) = vallist(:)*eV_Ha
-  
-      !fill the sparse matrix for oiju parameters
-      call self%set_oiju(ndata, ilist, jlist, ulist, Rjlist, Rulist, vallist)
-
-      ABI_SFREE(ilist)
-      ABI_SFREE(jlist)
-      ABI_SFREE(ulist)
-      ABI_SFREE(Rjlist)
-      ABI_SFREE(Rulist)
-      ABI_SFREE(vallist)
-
-    endif
 
 
     !if(slc_coupling>1) then
@@ -287,9 +188,136 @@ contains
       write(std_out,'(A25)') 'Could not close netcdf file'
     endif
 
-
   end subroutine read_netcdf
 
+  !---------------------------------------
+  ! reading liu parameters from ncdf file
+  !---------------------------------------
+  subroutine read_liu(self, ncid)
+    class(slc_primitive_potential_t), intent(inout) :: self
+    integer,                          intent(in)    :: ncid    
+
+    integer :: ncerr, dimid, ndata, varid
+    integer, allocatable :: ilist(:), ulist(:)
+    integer, allocatable :: Rulist(:,:)
+    real(dp), allocatable :: vallist(:)
+
+    ncerr = nf90_inq_dimid(ncid, "Liu_ndata", dimid)
+    if(ncerr /= NF90_NOERR) then
+      ndata = 0
+    else
+      self%has_bilin=.True.
+      ncerr = nctk_get_dim(ncid, "Liu_ndata", ndata)
+      ABI_ALLOCATE(ilist, (ndata))
+      ABI_ALLOCATE(ulist, (ndata))
+      ABI_ALLOCATE(Rulist, (3, ndata))
+      ABI_ALLOCATE(vallist, (ndata))
+
+      varid = nctk_idname(ncid, "Liu_ilist")
+      ncerr = nf90_get_var(ncid, varid, ilist)
+      call netcdf_check(ncerr, "when reading Liu_ilist") 
+
+      varid = nctk_idname(ncid, "Liu_ulist")
+      ncerr = nf90_get_var(ncid, varid, ulist)
+      call netcdf_check(ncerr, "when reading Liu_ulist")
+      varid = nctk_idname(ncid, "Liu_Rulist")
+      ncerr = nf90_get_var(ncid, varid, Rulist)
+      call netcdf_check(ncerr, "when reading Liu_Rulist")
+
+      varid = nctk_idname(ncid, "Liu_vallist")
+      ncerr = nf90_get_var(ncid, varid, vallist)
+      call netcdf_check(ncerr, "when reading Liu_vallist")
+
+      !change units from eV to Ha
+      !do we also need to do something about bohr and anstroem and magnetic moments?
+      vallist(:) = vallist(:)*eV_Ha
+  
+      !fill the sparse matrix for liu parameters
+      call self%set_liu(ndata, ilist, ulist, Rulist, vallist)
+
+      ABI_SFREE(ilist)
+      ABI_SFREE(ulist)
+      ABI_SFREE(Rulist)
+      ABI_SFREE(vallist)
+    endif
+
+    write(std_out,'(A7,I10,A11)') 'L_iu:', ndata, 'terms read'  
+
+  end subroutine read_liu
+
+  !---------------------------------------
+  ! reading oiju parameters from ncdf file
+  !---------------------------------------
+  subroutine read_oiju(self, ncid)  
+    class(slc_primitive_potential_t), intent(inout) :: self
+    integer,                          intent(in)    :: ncid    
+
+    integer :: ncerr, dimid, ndata, varid
+    integer, allocatable :: ilist(:), jlist(:), ulist(:), vlist(:)
+    integer, allocatable :: Rjlist(:,:), Rulist(:,:), Rvlist(:,:)
+    real(dp), allocatable :: vallist(:)
+
+    ncerr = nf90_inq_dimid(ncid, "Oiju_ndata", dimid)
+    if(ncerr /= NF90_NOERR) then
+      write(std_out,'(A20)') 'No O_iju term found'
+    else
+      self%has_quadlin=.True.
+      ncerr = nctk_get_dim(ncid, "Oiju_ndata", ndata)
+      ABI_ALLOCATE(ilist, (ndata))
+      ABI_ALLOCATE(jlist, (ndata))
+      ABI_ALLOCATE(ulist, (ndata))
+      ABI_ALLOCATE(Rjlist, (3, ndata))
+      ABI_ALLOCATE(Rulist, (3, ndata))
+      ABI_ALLOCATE(vallist, (ndata))
+
+      varid = nctk_idname(ncid, "Oiju_ilist")
+      ncerr = nf90_get_var(ncid, varid, ilist)
+      call netcdf_check(ncerr, "when reading Oiju_ilist")
+
+      varid = nctk_idname(ncid, "Oiju_jlist")
+      ncerr = nf90_get_var(ncid, varid, jlist)
+      call netcdf_check(ncerr, "when reading Oiju_jlist")
+
+      varid = nctk_idname(ncid, "Oiju_ulist")
+      ncerr = nf90_get_var(ncid, varid, ulist)
+      call netcdf_check(ncerr, "when reading Oiju_ulist")
+
+      varid = nctk_idname(ncid, "Oiju_Rjlist")
+      ncerr = nf90_get_var(ncid, varid, Rjlist)
+      call netcdf_check(ncerr, "when reading Oiju_Rjlist")
+
+      varid = nctk_idname(ncid, "Oiju_Rulist")
+      ncerr = nf90_get_var(ncid, varid, Rulist)
+      call netcdf_check(ncerr, "when reading Oiju_Rulist")
+
+      varid = nctk_idname(ncid, "Oiju_vallist")
+      ncerr = nf90_get_var(ncid, varid, vallist)
+      call netcdf_check(ncerr, "when reading Oiju_vallist")
+
+      write(std_out,'(A7,I10,A11)') 'O_iju:', ndata, 'terms read'  
+
+      !change units from eV to Ha
+      !do we also need anstroem to bohr and magnetic moments?
+      vallist(:) = vallist(:)*eV_Ha
+  
+      !fill the sparse matrix for oiju parameters
+      call self%set_oiju(ndata, ilist, jlist, ulist, Rjlist, Rulist, vallist)
+
+      ABI_SFREE(ilist)
+      ABI_SFREE(jlist)
+      ABI_SFREE(ulist)
+      ABI_SFREE(Rjlist)
+      ABI_SFREE(Rulist)
+      ABI_SFREE(vallist)
+
+    endif
+
+  end subroutine read_oiju
+
+  !---------------------------------------
+  ! store liu parameters in sparse matrix
+  ! untested!!!
+  !---------------------------------------
   subroutine set_liu(self, nn, ilist, ulist, Rulist, vallist)
 
     class(slc_primitive_potential_t), intent(inout) :: self
@@ -310,6 +338,10 @@ contains
     endif
   end subroutine set_liu
 
+  !------------------------------------
+  ! add one entry to sparse liu matrix
+  ! untested!!!
+  !------------------------------------
   subroutine set_liu_1term(self, ii, uu, Ru, val)
     class(slc_primitive_potential_t), intent(inout) :: self
     integer,                          intent(in)    :: ii    
@@ -325,6 +357,10 @@ contains
 
   end subroutine set_liu_1term
 
+  !----------------------------------------
+  ! store oiju parameters in sparse matrix
+  ! untested!!!
+  !----------------------------------------
   subroutine set_oiju(self, nn, ilist, jlist, ulist, Rjlist, Rulist, vallist)
 
     class(slc_primitive_potential_t), intent(inout) :: self
@@ -347,6 +383,10 @@ contains
     endif
   end subroutine set_oiju
 
+  !-------------------------------------
+  ! add one entry to sparse oiju matrix
+  ! untested!!!
+  !-------------------------------------
   subroutine set_oiju_1term(self, ii, jj, uu, Rj, Ru, val)
     class(slc_primitive_potential_t), intent(inout) :: self
     integer,                          intent(in)    :: ii    
@@ -361,23 +401,13 @@ contains
     call self%oRjlist%push_unique(Rj, position=indRj)
     call self%oRulist%push_unique(Ru, position=indRu)
     
-    call self%oiju%add_entry(ind=[indRj, indRu, ii, jj, uu ], val=val)
+    call self%oiju%add_entry(ind=[indRj, indRu, ii, jj, uu], val=val)
 
   end subroutine set_oiju_1term
 
-  subroutine nc_handle_err(ierr, name)
-    integer, intent ( in) ::ierr
-    character(*), optional, intent(in) :: name
-    if(ierr/= nf90_noerr) then
-       if (present(name)) then
-          write(std_out, *)  trim(nf90_strerror(ierr)), "when trying to read ", name
-       else
-          write(std_out, *)  trim(nf90_strerror(ierr))
-       end if
-       stop "Stopped"
-    end if
-  end subroutine nc_handle_err
-
+  !-----------------------------------------------------------------
+  ! transfer parameter information from primitive cell to supercell
+  !-----------------------------------------------------------------
   subroutine fill_supercell(self, scmaker, params, scpot)
     class(slc_primitive_potential_t) , intent(inout) :: self
     type(supercell_maker_t),           intent(inout) :: scmaker
@@ -398,47 +428,16 @@ contains
     call xmpi_bcast(sc_nspin, master, comm, ierr)
     call xmpi_bcast(sc_natom, master, comm, ierr)
     ABI_DATATYPE_ALLOCATE_SCALAR(slc_potential_t, scpot)
-    select type(scpot) ! use select type because properties only defined for slc_potential is used.
+    select type(scpot) ! use select type because properties only defined for slc_potential are used
     type is (slc_potential_t) 
       call scpot%initialize(sc_nspin, sc_natom)
       call scpot%set_params(params)
       if (iam_master) then
-        if(scpot%has_bilin) then
-          if(self%has_bilin) then !did we actually find this in the netcdf file
-            call self%liu%sum_duplicates()
-            !call self%set_liu_sc(scpot, scmaker)
-          else
-            write(std_out,'(A47)') 'No parameters for bilinear coupling available'
-            scpot%has_bilin = .False.
-          endif
-        endif
-        if(scpot%has_quadlin) then
-          if(self%has_quadlin) then
-            call self%oiju%sum_duplicates()
-            call self%set_oiju_sc(scpot, scmaker)
-          else
-            write(std_out,'(A55)') 'No parameters for quadratic-linear coupling available'
-            scpot%has_quadlin = .False.
-          endif
-        endif
-        if(scpot%has_linquad) then
-          if(self%has_linquad) then
-            call self%niuv%sum_duplicates()
-            !call self%set_niuv_sc(scpot, scmaker)
-          else
-            write(std_out,'(A55)') 'No parameters for linear-quadratic coupling available'
-            scpot%has_linquad = .False.
-          endif
-        endif
-        if(scpot%has_biquad) then
-          if(self%has_biquad) then
-            call self%tijuv%sum_duplicates()
-            !call self%set_tijuv_sc(scpot, scmaker)
-          else
-            write(std_out,'(A50)') 'No parameters for biquadratic coupling available'
-            scpot%has_biquad = .False.
-          endif
-        endif
+        call self%fill_liu(scpot, scmaker)
+        call self%fill_oiju(scpot, scmaker)
+        call self%fill_niuv(scpot, scmaker)
+        call self%fill_tijuv(scpot, scmaker)
+
         !Write information which terms are used
         write(std_out,'(A55)') 'Using the following terms for the spin-lattice coupling'
         if(scpot%has_bilin)   write(std_out,'(A19)') 'Bilinear term: Liu'
@@ -448,6 +447,70 @@ contains
       endif
     end select
   end subroutine fill_supercell
+
+  subroutine fill_liu(self, scpot, scmaker)
+    class(slc_primitive_potential_t) , intent(inout) :: self
+    type(supercell_maker_t),           intent(inout) :: scmaker
+    class(slc_potential_t),            intent(inout) :: scpot
+
+    if(scpot%has_bilin) then
+      if(self%has_bilin) then !did we actually find this in the netcdf file
+        call self%liu%sum_duplicates()
+        !call self%set_liu_sc(scpot, scmaker)
+      else
+        write(std_out,'(A47)') 'No parameters for bilinear coupling available'
+        scpot%has_bilin = .False.
+      endif
+    endif
+  end subroutine fill_liu
+
+  subroutine fill_oiju(self, scpot, scmaker)
+    class(slc_primitive_potential_t) , intent(inout) :: self
+    type(supercell_maker_t),           intent(inout) :: scmaker
+    class(slc_potential_t),            intent(inout) :: scpot
+
+    if(scpot%has_quadlin) then
+      if(self%has_quadlin) then
+        call self%oiju%sum_duplicates()
+        call self%set_oiju_sc(scpot, scmaker)
+       else
+         write(std_out,'(A55)') 'No parameters for quadratic-linear coupling available'
+         scpot%has_quadlin = .False.
+       endif
+     endif
+  end subroutine fill_oiju
+
+  subroutine fill_niuv(self, scpot, scmaker)
+    class(slc_primitive_potential_t) , intent(inout) :: self
+    type(supercell_maker_t),           intent(inout) :: scmaker
+    class(slc_potential_t),            intent(inout) :: scpot
+
+    if(scpot%has_linquad) then
+      if(self%has_linquad) then
+        call self%niuv%sum_duplicates()
+        !call self%set_niuv_sc(scpot, scmaker)
+      else
+        write(std_out,'(A55)') 'No parameters for linear-quadratic coupling available'
+        scpot%has_linquad = .False.
+      endif
+    endif
+  end subroutine fill_niuv
+
+  subroutine fill_tijuv(self, scpot, scmaker)
+    class(slc_primitive_potential_t) , intent(inout) :: self
+    type(supercell_maker_t),           intent(inout) :: scmaker
+    class(slc_potential_t),            intent(inout) :: scpot
+
+    if(scpot%has_biquad) then
+      if(self%has_biquad) then
+        call self%tijuv%sum_duplicates()
+        !call self%set_tijuv_sc(scpot, scmaker)
+      else
+        write(std_out,'(A50)') 'No parameters for biquadratic coupling available'
+        scpot%has_biquad = .False.
+      endif
+    endif
+  end subroutine fill_tijuv
 
   subroutine set_oiju_sc(self, scpot, scmaker)
     class(slc_primitive_potential_t), intent(inout) :: self
