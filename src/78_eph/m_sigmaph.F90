@@ -650,7 +650,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: gvecs(3,ngvecs)
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
- real(dp) :: gkqg_frohl(ngvecs), gkqg_fine(ngvecs)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
  real(dp) :: vk(2, 3), vk_red(2,3), vkq(2,3), vkq_red(2,3), tsec(2), eminmax(2)
  real(dp) :: frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
@@ -669,8 +668,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: vtrial(:,:),gvnlx1(:,:),gvnlxc(:,:),work(:,:,:,:)
  real(dp),allocatable :: gs1c(:,:),nqnu_tlist(:),dtw_weights(:,:),dt_tetra_weights(:,:,:),dwargs(:),alpha_mrta(:)
  real(dp),allocatable :: delta_e_minus_emkq(:)
+ real(dp),allocatable :: gkq2_lr(:,:,:)
  complex(dpc) :: cp3(3)
  complex(dpc),allocatable :: cfact_wr(:), tpp_red(:,:)
+ complex(dpc) :: gkqg_frohl(ngvecs), gkqg_fine(ngvecs)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pawrhoij(:)
 
@@ -1213,6 +1214,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call sigma%eph_doublegrid%get_mapping(kk, kq, qpt)
          iq_bz_frohl = sigma%eph_doublegrid%get_index(qpt,2)
          iq_ibz_frohl = sigma%eph_doublegrid%bz2ibz_dense(iq_bz_frohl)
+         if (sigma%frohl_model == 3) then
+           ABI_MALLOC(gkq2_lr, (sigma%eph_doublegrid%ndiv,nbcalc_ks,sigma%my_npert))
+         end if
        end if
 
        ! Map q to qibz for tetrahedron
@@ -1539,6 +1543,26 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          if (sigma%pert_comm%nproc > 1) call xmpi_sum(gkq_atm, sigma%pert_comm%value, ierr)
          call gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
 
+         ! Compute electron-phonon matrix elements for the Frohlich interaction
+         ! TODO: Implement computation of oscilator matrix elements
+         ! osc(ngvecs,nbcalc_ks)
+         if (sigma%frohl_model == 3) then
+           do jj=1,sigma%eph_doublegrid%ndiv
+             ! get index of q-point
+             iq_ibz_fine = sigma%eph_doublegrid%mapping(6, jj)
+             do imyp=1,my_npert
+               ipc = sigma%my_pinfo(3, imyp)
+               gkqg_fine  = sigma%ephwg%get_frohlich(cryst,ifc,iq_ibz_fine, ipc,sigma%qdamp,ngvecs,gvecs)
+               gkqg_frohl = sigma%ephwg%get_frohlich(cryst,ifc,iq_ibz_frohl,ipc,sigma%qdamp,ngvecs,gvecs)
+               !do ib_k=1,nbcalc_ks
+               !  gkq2_lr(jj,ib_k,ipc) = sum(gkqg_fine*osc(:,ib_k))**2 - sum(gkqg_frohl*osc(:,ib_k))**2
+               !end do
+               gkq2_lr(jj,ib_k,ipc) = real(sum(gkqg_fine ))**2 + aimag(sum(gkqg_fine))**2 + &
+                                      real(sum(gkqg_frohl))**2 + aimag(sum(gkqg_fine))**2
+             end do
+           end do
+         end if
+
          ! Save data for Debye-Waller computation that will be performed outside the q-loop.
          ! gkq_nu(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
          if (isqzero .and. .not. sigma%imag_only) gkq0_atm(:, :, ibsum_kq, :) = gkq_atm
@@ -1694,14 +1718,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
                      ! Add Frohlich contribution
                      gkq2_pf = gkq2
-                     if (ediff <= TOL_EDIFF .and. sigma%frohl_model == 3) then
-                       !gkqg_fine  = sigma%ephwg%get_frohlich(cryst,ifc,iq_ibz_fine, nu,sigma%qdamp,ngvecs,gvecs)*osc
-                       !gkqg_frohl = sigma%ephwg%get_frohlich(cryst,ifc,iq_ibz_frohl,nu,sigma%qdamp,ngvecs,gvecs)*osc
-                       gkqg_fine  = sigma%ephwg%get_frohlich(cryst,ifc,iq_ibz_fine, nu,sigma%qdamp,ngvecs,gvecs)
-                       gkqg_frohl = sigma%ephwg%get_frohlich(cryst,ifc,iq_ibz_frohl,nu,sigma%qdamp,ngvecs,gvecs)
-                       gkq2_dfrohl = dot_product(gkqg_fine,gkqg_fine) - dot_product(gkqg_frohl,gkqg_frohl)
-                       gkq2_pf = gkq2_pf + weight_q * gkq2_dfrohl
-                     end if
+                     if (sigma%frohl_model == 3) gkq2_pf = gkq2_pf + weight_q * gkq2_lr(jj,ib_k,nu)
 
                      if (sigma%imag_only) then
                        ! Note pi factor from Sokhotski-Plemelj theorem.
