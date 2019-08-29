@@ -613,6 +613,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0
  integer,parameter :: useylmgr = 0, useylmgr1 =0, master = 0, ndat1 = 1
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
+ integer,parameter :: ngvecs = 1
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_frohl,iq_bz_frohl, my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj, iw
@@ -646,8 +647,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 !arrays
  integer :: g0_k(3),g0_kq(3)
  integer :: work_ngfft(18),gmax(3)
+ integer :: gvecs(3,ngvecs)
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
+ real(dp) :: gkqg_frohl(ngvecs), gkqg_fine(ngvecs)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
  real(dp) :: vk(2, 3), vk_red(2,3), vkq(2,3), vkq_red(2,3), tsec(2), eminmax(2)
  real(dp) :: frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
@@ -1692,7 +1695,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                      ! Add Frohlich contribution
                      gkq2_pf = gkq2
                      if (ediff <= TOL_EDIFF .and. sigma%frohl_model == 3) then
-                       gkq2_dfrohl = sigma%ephwg%frohl_ibz(iq_ibz_fine,nu) - sigma%ephwg%frohl_ibz(iq_ibz_frohl,nu)
+                       !gkqg_fine  = sigma%ephwg%get_frohlich(cryst,ifc,iq_ibz_fine, nu,sigma%qdamp,ngvecs,gvecs)*osc
+                       !gkqg_frohl = sigma%ephwg%get_frohlich(cryst,ifc,iq_ibz_frohl,nu,sigma%qdamp,ngvecs,gvecs)*osc
+                       gkqg_fine  = sigma%ephwg%get_frohlich(cryst,ifc,iq_ibz_fine, nu,sigma%qdamp,ngvecs,gvecs)
+                       gkqg_frohl = sigma%ephwg%get_frohlich(cryst,ifc,iq_ibz_frohl,nu,sigma%qdamp,ngvecs,gvecs)
+                       gkq2_dfrohl = dot_product(gkqg_fine,gkqg_fine) - dot_product(gkqg_frohl,gkqg_frohl)
                        gkq2_pf = gkq2_pf + weight_q * gkq2_dfrohl
                      end if
 
