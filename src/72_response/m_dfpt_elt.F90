@@ -3125,7 +3125,7 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
            else
              arg=fac*gsq
 !            Larger arg gives 0 contribution:
-             if (arg <= 200._dp) then
+             if (arg <= 80._dp) then
                newg=1
                term=exp(-arg)/gsq
                do ia0=1,my_natom
