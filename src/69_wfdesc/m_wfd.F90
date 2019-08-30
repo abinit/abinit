@@ -569,7 +569,7 @@ subroutine kdata_init(Kdata,Cryst,Psps,kpoint,istwfk,ngfft,MPI_enreg,ecut,kg_k)
  ! Finds the boundary of the basis sphere of G vectors (for this k point)
  ! for use in improved zero padding of ffts in 3 dimensions.
  ABI_MALLOC(Kdata%gbound,(2*mgfft+8, 2))
- call sphereboundary(Kdata%gbound,istwfk,Kdata%kg_k,mgfft,npw_k)
+ call sphereboundary(Kdata%gbound, istwfk, Kdata%kg_k, mgfft, npw_k)
 
  ! Compute e^{ik.Ra} for each atom. Packed according to the atom type (atindx).
  ABI_MALLOC(Kdata%phkxred,(2, Cryst%natom))

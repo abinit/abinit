@@ -65,13 +65,12 @@ module m_sigmaph
  use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, simpson
  use m_io_tools,       only : iomode_from_fname, file_exists, is_open, open_file
  use m_special_funcs,  only : gaussian
- use m_fftcore,        only : ngfft_seq
+ use m_fftcore,        only : ngfft_seq, sphereboundary, get_kg, kgindex
  use m_cgtk,           only : cgtk_rotate
  use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
  use m_occ,            only : occ_fd, occ_dfd, occ_be
- use m_fftcore,        only : get_kg
  use m_kg,             only : getph
  use m_bz_mesh,        only : isamek
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
@@ -611,13 +610,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_getgh1c = 1, berryopt0 = 0
+ integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, istw1 = 1
  integer,parameter :: useylmgr = 0, useylmgr1 =0, master = 0, ndat1 = 1
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_frohl,iq_bz_frohl, my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj, iw
- integer :: mcgq, mgscq, nband_kq
+ integer :: mcgq, mgscq, nband_kq, ig, ispinor, ifft
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
  integer :: iq_ibz_fine,ikq_ibz_fine,ikq_bz_fine
@@ -628,11 +627,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
  integer :: nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom
- integer :: comm_rpt, method
+ integer :: comm_rpt, method, need_oscillators, osc_npw
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val, cpu_stern, wall_stern, gflops_stern
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, simag, q0rad, out_resid
- real(dp) :: vkk_norm2
+ real(dp) :: vkk_norm2, osc_ecut
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap, cnum, sig_cplx
  logical :: isirr_k,isirr_kq,gen_eigenpb,isqzero
  type(wfd_t) :: wfd
@@ -649,6 +648,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: work_ngfft(18),gmax(3)
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
+ integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), osc_indpw(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
  real(dp) :: vk(3), vkq(3), tsec(2), eminmax(2)
  real(dp) :: frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
@@ -666,9 +666,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: vtrial(:,:),gvnlx1(:,:),gvnlxc(:,:),work(:,:,:,:)
  real(dp),allocatable :: gs1c(:,:),nqnu_tlist(:),dtw_weights(:,:),dt_tetra_weights(:,:,:),dwargs(:),alpha_mrta(:)
- real(dp),allocatable :: delta_e_minus_emkq(:)
+ real(dp),allocatable :: delta_e_minus_emkq(:), osc_ks(:,:,:)
+ logical,allocatable :: osc_mask(:)
  complex(dpc) :: cp3(3)
  complex(dpc),allocatable :: cfact_wr(:), tpp_red(:,:)
+ complex(gwpc),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), work_ug(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pawrhoij(:)
 
@@ -839,6 +841,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_MALLOC(displ_cart, (2, 3, cryst%natom, natom3))
  ABI_MALLOC(displ_red, (2, 3, cryst%natom, natom3))
  ABI_MALLOC(tpp_red, (natom3, natom3))
+ ABI_MALLOC(gbound_kq, (2*wfd%mgfft+8, 2))
+
+ need_oscillators = 1
+ !nsheps = 0
+ !call setshells(ecut, npw, nsh, cryst%nsym, cryst%gmet, cryst%gprimd, cryst%symrel, "eps", cryst%ucvol)
 
  !if (sigma%calc_velocity == 1) then
  call cwtime(cpu_ks, wall_ks, gflops_ks, "start", &
@@ -1146,10 +1153,17 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Note: One should rotate the wavefunctions if kk is not irred (not implemented)
      ABI_MALLOC(kets_k, (2, npw_k*nspinor, nbcalc_ks))
      ABI_MALLOC(sigma%e0vals, (nbcalc_ks))
+     if (need_oscillators /= 0) then
+       ABI_MALLOC(ur_k, (wfd%nfft*wfd%nspinor, nbcalc_ks))
+       ABI_MALLOC(ur_kq, (wfd%nfft*wfd%nspinor))
+       ABI_MALLOC(work_ur, (wfd%nfft*wfd%nspinor))
+     end if
+
      do ib_k=1,nbcalc_ks
        band_ks = ib_k + bstart_ks - 1
        call wfd%copy_cg(band_ks, ik_ibz, spin, kets_k(1, 1, ib_k))
        sigma%e0vals(ib_k) = ebands%eig(band_ks, ik_ibz, spin)
+       if (need_oscillators /= 0) call wfd%get_ur(band_ks, ik_ibz, spin, ur_k(1, ib_k))
      end do
 
      ! Distribute q-points, compute tetra weigths.
@@ -1235,7 +1249,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        else
          ! Will Reconstruct u_kq(G) from the IBZ image.
          istwf_kq = 1
-         call get_kg(kq,istwf_kq,ecut,cryst%gmet,npw_kq,gtmp)
+         call get_kg(kq, istwf_kq, ecut, cryst%gmet, npw_kq, gtmp)
          ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
          kg_kq(:,1:npw_kq) = gtmp(:,:npw_kq)
          ABI_FREE(gtmp)
@@ -1246,6 +1260,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        istwf_kqirr = wfd%istwfk(ikq_ibz); npw_kqirr = wfd%npwarr(ikq_ibz)
        ABI_MALLOC(bra_kq, (2, npw_kq*nspinor))
        ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
+
+       ! Finds the boundary of the basis sphere of G vectors (for this kq point)
+       ! for use in improved zero padding of ffts in 3 dimensions.
+       if (need_oscillators /= 0) then
+         call sphereboundary(gbound_kq, istwf_kq, kg_kq, wfd%mgfft, npw_kq)
+       end if
 
        ! Allocate array to store H1 |psi_nk> for all 3*natom perturbations
        ABI_MALLOC_OR_DIE(h1kets_kq, (2, npw_kq*nspinor, my_npert, nbcalc_ks), ierr)
@@ -1539,6 +1559,52 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! gkq_nu(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
          if (isqzero .and. .not. sigma%imag_only) gkq0_atm(:, :, ibsum_kq, :) = gkq_atm
 
+         if (need_oscillators /= 0) then
+           ! Compute "small" G-sphere centered on qpt and gbound for zero-padded FFT.
+           osc_ecut = one
+           ABI_CHECK(osc_ecut <= wfd%ecut, "osc_ecut cannot be greater than dtset%ecut")
+           call get_kg(qpt, istw1, osc_ecut, cryst%gmet, osc_npw, osc_gvecq)
+           ABI_MALLOC(osc_gbound_q, (2*wfd%mgfft+8, 2))
+           call sphereboundary(osc_gbound_q, istw1, osc_gvecq, wfd%mgfft, osc_npw)
+
+           ! Compute correspondence G-sphere --> FFT mesh.
+           ! TODO: Do I need to account for G-G0 here?
+           ABI_MALLOC(osc_indpw, (osc_npw))
+           ABI_MALLOC(osc_mask, (osc_npw))
+           !call kgindex(osc_indpw, gmg0, osc_mask, wfd%mpi_enreg, ngfft, osc_npw)
+           call kgindex(osc_indpw, osc_gvecq, osc_mask, wfd%mpi_enreg, ngfft, osc_npw)
+           ABI_FREE(osc_mask)
+
+           ABI_MALLOC(work_ug, (npw_kq*wfd%nspinor))
+           work_ug = cmplx(bra_kq(1, :), bra_kq(2, :), kind=gwpc)
+           call fft_ug(npw_kq, wfd%nfft, wfd%nspinor, ndat1, wfd%mgfft, wfd%ngfft, &
+                       istwf_kq, kg_kq, gbound_kq, work_ug, ur_kq)
+
+           ABI_MALLOC(osc_ks, (2, osc_npw*wfd%nspinor, nbcalc_ks))
+           do ib_k=1,nbcalc_ks
+             work_ur = conjg(ur_kq) * ur_k(:, ib_k)
+             ! Call zero-padded FFT routine.
+             call fftpad(work_ur, ngfft, n1, n2, n3, n1, n2, n3, nspinor, wfd%mgfft, -1, osc_gbound_q)
+
+             ! Need results on the G-sphere --> Have to map FFT to G-sphere.
+             do ispinor=1,nspinor
+               do ig=1,osc_npw
+                 ifft = osc_indpw(ig) + (ispinor-1) * wfd%nfft
+                 !! G-G0 belong to the FFT mesh.
+                 !if (ifft /= 0) rhotwg(ig) = rhotwg(ig) + work_ur(ifft)
+                 osc_ks(1, ig + (ispinor -1) * osc_npw, ib_k) = real(work_ur(ifft))
+                 osc_ks(2, ig + (ispinor -1) * osc_npw, ib_k) = aimag(work_ur(ifft))
+               end do
+             end do
+           end do
+
+           ABI_FREE(osc_ks)
+           ABI_FREE(work_ug)
+           ABI_FREE(osc_gbound_q)
+           ABI_FREE(osc_gvecq)
+           ABI_FREE(osc_indpw)
+         end if
+
          ! Accumulate contribution to self-energy
          eig0mkq = ebands%eig(ibsum_kq, ikq_ibz, spin)
          ! q-weight for naive integration
@@ -1818,6 +1884,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ABI_FREE(gkq_atm)
      ABI_FREE(gkq_nu)
 
+     if (need_oscillators /= 0) then
+       ABI_FREE(ur_k)
+       ABI_FREE(ur_kq)
+       ABI_FREE(work_ur)
+     end if
+
      ! =========================
      ! Compute Debye-Waller term
      ! =========================
@@ -2057,6 +2129,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_SFREE(dwargs)
  ABI_SFREE(dtw_weights)
  ABI_SFREE(delta_e_minus_emkq)
+ ABI_FREE(gbound_kq)
 
  call gs_hamkq%free()
  call wfd%free()
@@ -2702,7 +2775,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
     ! Only SIGPEPH.nc will contain all the results.
     ! Remember that now all nc define operations must be done inside ncwrite_comm
     ! Obviously I'm assuming HDF5 + MPI-IO
-    !new%ncwrite_comm = xmpi_comm_self
     color = xmpi_undefined; if (all(new%coords(1:3) == 0)) color = 1
     call xmpi_comm_split(comm, color, my_rank, new%ncwrite_comm%value, ierr)
     if (color == 1) then

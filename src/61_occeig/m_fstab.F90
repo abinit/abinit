@@ -305,7 +305,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
    -kptrlatt(1,3)*kptrlatt(2,2)*kptrlatt(3,1) &
    -kptrlatt(1,1)*kptrlatt(2,3)*kptrlatt(3,2)
 
- ABI_MALLOC_OR_DIE(kbz, (3, mkpt), ierr)
+ ABI_MALLOC(kbz, (3, mkpt))
 
  call smpbz(brav1, std_out, kptrlatt, mkpt, nkbz, dtset%nshiftk, option0, dtset%shiftk, kbz)
 
@@ -392,7 +392,6 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
      end if
    end do ! ik_bz
 
-   ! @fstab_t
    ! Build fstab_t for this spin.
    fs%nkibz = nkibz; fs%nkfs = nkfs; fs%nktot = nkbz
    ABI_MALLOC(fs%kpts, (3, nkfs))
@@ -423,11 +422,12 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
    ABI_CHECK(fs%bmin /= huge(1) .and. fs%bmax /= -huge(1), "No point on the Fermi surface!")
    fs%maxnb = fs%bmax - fs%bmin + 1
 
-   ! Debugging: use samek number of bands for each k-point on the FS.
+   ! DEBUG: use same number of bands for each k-point on the FS.
    !do ik_ibz=1,nkibz
    !  if (fs%bstart_cnt_ibz(1, ik_ibz) /= -1) then
    !    fs%bstart_cnt_ibz(1, ik_ibz) = fs%bmin
    !    fs%bstart_cnt_ibz(2, ik_ibz) = fs%maxnb
+   !  end if
    !end do
 
    ABI_CALLOC(fs%vk, (3, fs%maxnb))

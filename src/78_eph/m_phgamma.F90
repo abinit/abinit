@@ -511,6 +511,8 @@ subroutine phgamma_free(gams)
  ABI_SFREE(gams%vals_ee)
  ABI_SFREE(gams%my_iqibz)
  ABI_SFREE(gams%my_ifsk_q)
+ !ABI_SFREE(gams%my_spins)
+ !ABI_SFREE(gams%my_iqpt)
  ABI_SFREE(gams%my_iqbz)
 
  ! Close netcdf file.
@@ -3211,7 +3213,7 @@ subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, intmeth, wstep, wminmax, smear
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! mpi-parallelism
 
          call tetra%get_onewk(iq_ibz, gams%bcorr, nomega, nqibz, phfreq_tetra(:,mu,spin), omega_min, omega_max, one, wdt)
-         wdt = wdt*wtq(iq_ibz)
+         wdt = wdt * wtq(iq_ibz)
 
          ! Accumulate (Integral of a2F_tr is computed afterwards)
          do idir=1,3
@@ -3577,7 +3579,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: ik_ibz,ik_bz,ikq_bz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq,timerev_q
  integer :: ik_fs, myik !, myiq
  integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq
- integer :: ii,ipw,mpw,my_mpw,mnb,ierr,my_kstart,my_kstop,cnt,ncid
+ integer :: ii,ipw,mpw,my_mpw,mnb,ierr,cnt,ncid
  integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,kqcount,nkpg,nkpg1,edos_intmeth
@@ -3589,7 +3591,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, gflops_q, cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
  real(dp) :: edos_step, edos_broad, sigma
  real(dp) :: ecut,eshift,eig0nk,dksqmax
- logical :: isirr_k,isirr_kq,gen_eigenpb, need_velocities
+ logical :: gen_eigenpb, need_velocities
  type(wfd_t) :: wfd
  type(fstab_t),pointer :: fs
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -4034,7 +4036,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
    qpt = gams%qibz(:, iq_ibz)
    msg = sjoin("[", itoa(iq_ibz), "/", itoa(gams%nqibz), "]")
-   call wrtout(std_out, sjoin(" Computing phonon linewidths for q-point:", ktoa(qpt), msg))
+   call wrtout(std_out, sjoin(" Computing phonon linewidths for IBZ q-point:", ktoa(qpt), msg))
 
    tgam = zero
    if (dtset%eph_transport > 0) then
@@ -4074,14 +4076,14 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    call littlegroup_q(cryst%nsym, qpt, symq, cryst%symrec, cryst%symafm, timerev_q, prtvol=dtset%prtvol)
 
    ! Allocate vlocal1 with correct cplex. Note nvloc and my_npert.
-   ABI_MALLOC_OR_DIE(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc, my_npert), ierr)
+   ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc, my_npert))
 
    !do imyspin=1,gams%my_nspins
    !spin = gams%my_spins(imyspin)
    do spin=1,nsppol
      if (spin_comm%skip(spin)) cycle ! MPI parallelism inside spin_comm
-
      fs => fstab(spin)
+
      if (dtset%prteliash == 3) tmp_vals_ee = zero
 
      ! Set up local potential vlocal1 with proper dimensioning from vtrial1 taking into account the spin.
@@ -4096,7 +4098,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      ! Allocate workspace for wavefunctions. Make npw larger than expected.
      ! maxnb is the maximum number of bands crossing the FS, used to dimension arrays.
      mnb = fs%maxnb
-     ABI_CHECK(mnb <= ebands%mband, "mnb > ebands%mband")
      ABI_MALLOC(bras_kq, (2, mpw*nspinor, mnb))
      ABI_MALLOC(kets_k, (2, mpw*nspinor, mnb))
      ABI_MALLOC(h1kets_kq, (2, mpw*nspinor, mnb))
@@ -4122,17 +4123,14 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      !ltetra = dtset%useria + 1
      call phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, dtset%useria + 1 , qpt, nesting, kpt_comm%value)
 
-     call xmpi_split_work(fs%nkfs, kpt_comm%value, my_kstart, my_kstop)
-
-     do ik_fs=my_kstart,my_kstop
-     !do myik=1,gams%my_nfsk_q
-       !ik_fs = gams%my_ifsk_q(myik)
+     do myik=1,gams%my_nfsk_q
        call cwtime(cpu_k, wall_k, gflops_k, "start")
+
        ! The k-point and the symmetries relating the BZ k-point to the IBZ.
+       ik_fs = gams%my_ifsk_q(myik)
        kk = fs%kpts(:, ik_fs)
        ik_ibz = fs%indkk_fs(1, ik_fs); isym_k = fs%indkk_fs(2, ik_fs)
        trev_k = fs%indkk_fs(6, ik_fs); g0_k = fs%indkk_fs(3:5,ik_fs)
-       isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
        kk_ibz = ebands%kptns(:,ik_ibz)
 
        ! Number of bands crossing the Fermi level at k
@@ -4144,7 +4142,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        !   k + q = k_bz + g0_bz = IS(k_ibz) + g0_ibz + g0_bz
        !
        kq = kk + qpt; ikq_bz = fs%findkg0(kq, g0bz_kq)
-       ! Skip this point if kq does not belong to the FS
+       ! Skip this point if kq does not belong to the FS window.
        if (ikq_bz == -1) cycle
 
        call listkk(dksqmax, cryst%gmet, indkk_kq, ebands%kptns, kq, ebands%nkpt, 1, cryst%nsym,&
@@ -4161,7 +4159,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
        ikq_ibz = indkk_kq(1, 1); isym_kq = indkk_kq(1, 2)
        trev_kq = indkk_kq(1, 6); g0_kq = indkk_kq(1, 3:5)
-       isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
        kq_ibz = ebands%kptns(:, ikq_ibz)
 
        ! Number of bands crossing the Fermi level at k+q
@@ -4329,6 +4326,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        if (dtset%prteliash == 3) then
 
          ! Precompute deltas with gaussian (tetra is not supported here)
+         !call get_dbl_tetra_weight_emesh()
          do ib2=1,nband_k
            band_k = ib2 + bstart_k - 1
            sigma = fs%eph_fsmear
@@ -4368,8 +4366,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
          end do
        end if
 
-       if (ik_fs < 20 .or. (fs%nkfs > 100 .and. mod(ik_fs, 200) == 0)) then
-         write(msg,'(4(a,i0),a,f8.2)')" q-point [", iq_ibz, "/", gams%nqibz, "] k-point [", ik_fs, "/", fs%nkfs, "]"
+       if (myik < 20 .or. (fs%nkfs > 100 .and. mod(myik, 200) == 0)) then
+         write(msg,'(4(a,i0),a,f8.2)')" q-point [", iq_ibz, "/", gams%nqibz, "] k-point [", myik, "/", gams%my_nfsk_q, "]"
          call cwtime_report(msg, cpu_k, wall_k, gflops_k)
        end if
 
@@ -4587,7 +4585,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 !Local variables-------------------------------
 !scalars
  integer,parameter :: enough = 50
- integer :: nkbz, ierr, nb, ik_bz, ik_ibz, ikq_fs, ik_fs, i1, i2, i3, nkfs_q, nene
+ integer :: nkbz, ierr, nb, ik_bz, ik_ibz, ikq_ibz, ikq_fs, ik_fs, i1, i2, i3, nkfs_q, nene
  integer :: ib1, ib2 ! band1, band1
  real(dp),parameter :: max_occ1 = one
  real(dp) :: cpu, wall, gflops, enemin, enemax
@@ -4601,7 +4599,6 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  real(dp) :: kk(3), kq(3)
  real(dp),allocatable :: eig_k(:,:), eig_kq(:,:), wght_bz(:,:,:), kbz(:,:)
  real(dp),allocatable :: work_k(:), work_kq(:)
- !real(dp),allocatable,intent(out) :: wght(:,:,:) !(nb*nb,PRODUCT(ngw(1:3)))
  real(dp),allocatable :: dtweightde(:,:,:), tweight(:,:,:)
 
 ! *************************************************************************
@@ -4609,7 +4606,15 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  call cwtime(cpu, wall, gflops, "start")
  nesting = 0
 
- if (fs%eph_intmeth == 1) then
+ ! The double delta is ill-defined for q == 0. Set nesting to 1 and return
+ if (fs%eph_intmeth == 2 .and. all(abs(qpt) < tol12)) then
+   MSG_COMMENT("Tetrahedron for double grid with q = 0 is ill-defined. Returning nesting 1 to activate adaptive gaussian.")
+   nesting = 1
+ end if
+
+ ! FIXME
+ !if (fs%eph_intmeth == 1 .or. nesting == 1) then
+ if (any(fs%eph_intmeth == [1, 2] .or. nesting == 1)) then
    ! Gaussian method: distribute k-points within the FS window inside comm.
    ! 1) Select k-points such that k+q is stil inside the FS window
    ! 2) Distribute effective k-points assuming all procs in comm have all FS k-points (no filtering)
@@ -4636,13 +4641,6 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  ! 2) Distribute effective k-points assuming all procs have all FS k-points.
 
  fs%dbldelta_tetra_weights_kfs = zero
-
- ! The double delta is ill-defined for q == 0. Set nesting to 1 and return
- if (fs%eph_intmeth == 2 .and. all(abs(qpt) < tol12)) then
-   MSG_COMMENT("tetrahedron method with q = 0 is ill-defined. Returning nesting 1 to activate adaptive gaussian")
-   nesting = 1
-   return
- end if
 
  ABI_CHECK(isdiagmat(ebands%kptrlatt), "kptrlatt must be diagonal when tetra is used.")
  ABI_CHECK(ebands%nshiftk == 1, "nshiftk must be 1 when tetra is used")
@@ -4676,12 +4674,10 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
        kk = ([i1, i2, i3] + ebands%shiftk(:, 1)) / nge(:)
        kbz(:, ik_bz) = kk
 
-       ik_fs = fs%krank%invrank(fs%krank%get_rank(kk))
+       ik_fs = fs%krank%get_index(kk)
        if (ik_fs /= -1) kbz2fs(ik_bz) = ik_fs
 
-       !ik_ibz = krank%find(kk, msg)
-       ik_ibz = ibz_krank%invrank(ibz_krank%get_rank(kk))
-
+       ik_ibz = ibz_krank%get_index(kk)
        if (ik_ibz < 1) then
          if (ierr <= enough) then
            write(msg,'(3a,i0,a)') &
@@ -4694,11 +4690,11 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 
        eig_k(:, ik_bz) = ebands%eig(fs%bmin:fs%bmax, ik_ibz, spin)
 
-       ! Find correspondence between the BZ grid and the IBZ
+       ! Find correspondence between the BZ grid and the IBZ.
        kq = kk + qpt
-       ik_ibz = ibz_krank%invrank(ibz_krank%get_rank(kq))
+       ikq_ibz = ibz_krank%get_index(kq)
 
-       if (ik_ibz < 1) then
+       if (ikq_ibz < 1) then
          if (ierr <= enough) then
            write(msg,'(3a,i0,a)') &
             'kpt + qpt: ',trim(ktoa(kq)),' with rank: ', ibz_krank%get_rank(kq),' has no symmetric among the k-points'
@@ -4708,7 +4704,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
          cycle
        end if
 
-       eig_kq(:, ik_bz) = ebands%eig(fs%bmin:fs%bmax, ik_ibz, spin)
+       eig_kq(:, ik_bz) = ebands%eig(fs%bmin:fs%bmax, ikq_ibz, spin)
      end do
    end do
  end do
@@ -4716,9 +4712,10 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  ABI_CHECK(ierr == 0, "See above warnings")
  call ibz_krank%free()
 
+#if 0
  ! Compute weights for double delta integration. Note that libtetra assumes Ef set to zero.
  ! TODO: Average weights over degenerate states?
- write(std_out,"(a,i0,2a)")" Calling libtetrabz_dbldelta with ltetra:", ltetra, " for q-point", trim(ktoa(qpt))
+ write(std_out,"(a,i0,2a)")" Calling libtetrabz_dbldelta with ltetra: ", ltetra, " for q-point:", trim(ktoa(qpt))
  eig_k = eig_k - ebands%fermie; eig_kq = eig_kq - ebands%fermie
  ABI_MALLOC(wght_bz, (nb, nb, nkbz))
  call libtetrabz_dbldelta(ltetra, cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz) !, comm=comm)
@@ -4733,9 +4730,11 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
      !write(std_out,*)"should be zero :", wght_bz(:,:,ik_bz)
    end if
  end do
+ ABI_FREE(wght_bz)
 
+#else
  ! Tetrahedron method with Allen's approach for double delta.
- write(std_out,"(2a)")" Calling Allen's version  for q-point", trim(ktoa(qpt))
+ write(std_out,"(2a)")" Calling Allen's version  for q-point: ", trim(ktoa(qpt))
  nene = 3
  enemin = ebands%fermie - tol6
  enemax = ebands%fermie + tol6
@@ -4750,10 +4749,8 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 
  fs%dbldelta_tetra_weights_kfs = zero
  do ib2=1,nb
-   !band2 = ib2 + bstart_k - fs%bmin
    work_k = eig_k(ib2, :)
    do ib1=1,nb
-    !band1 = ib1 + bstart_kq - fs%bmin
     work_kq = eig_kq(ib1, :)
     ! TODO: Average weights over degenerate states?
     call get_dbl_tetra_weight(work_k, work_kq, enemin, enemax, enemin, enemax, &
@@ -4764,7 +4761,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
     do ik_bz=1,nkbz
       ik_fs = kbz2fs(ik_bz)
       if (ik_fs /= -1) then
-        fs%dbldelta_tetra_weights_kfs(ib1,ib2,ik_fs) = dtweightde(ik_bz, 2, 2) !* fs%nktot
+        fs%dbldelta_tetra_weights_kfs(ib1,ib2,ik_fs) = dtweightde(ik_bz, 2, 2) ! / nkbz
       else
         !write(std_out,*)"should be zero :", wght_bz(:,:,ik_bz)
       end if
@@ -4775,12 +4772,14 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  call destroy_tetra(tetra)
  ABI_FREE(work_k)
  ABI_FREE(work_kq)
+ ABI_FREE(dtweightde)
+ ABI_FREE(tweight)
+#endif
 
- ! Now filter k-points according to tetra weights.
+ ! Now filter k-points according to tetra weights and distribute inside comm.
  ABI_MALLOC(select_ikfs, (fs%nkfs))
  nkfs_q = 0
  do ik_fs=1,fs%nkfs
-   !bstart_kq = fs%bstart_cnt_ibz(1, ikq_ibz); nband_kq = fs%bstart_cnt_ibz(2, ikq_ibz)
    if (any(abs(fs%dbldelta_tetra_weights_kfs(:,:,ik_fs)) > zero)) then
      nkfs_q = nkfs_q + 1
      select_ikfs(nkfs_q) = ik_fs
@@ -4791,14 +4790,14 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  call xmpi_split_list(nkfs_q, select_ikfs, comm, gams%my_nfsk_q, gams%my_ifsk_q)
  ABI_FREE(select_ikfs)
 
- ABI_FREE(dtweightde)
- ABI_FREE(tweight)
+ write(std_out,"(2(a,i0),/)") &
+   " Treating ", gams%my_nfsk_q, " k-points in the FS window over total nkfs: ", fs%nkfs
+
  ABI_FREE(kbz2fs)
  ABI_FREE(indkpt)
  ABI_FREE(kbz)
  ABI_FREE(eig_k)
  ABI_FREE(eig_kq)
- ABI_FREE(wght_bz)
 
  call cwtime_report(" phgamma_setup_qpoint", cpu, wall, gflops)
 
