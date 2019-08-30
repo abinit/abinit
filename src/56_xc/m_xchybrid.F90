@@ -30,10 +30,10 @@ module m_xchybrid
  use m_errors
  use m_xcdata
  use libxc_functionals
+ use m_dtset
 
  use m_geometry,    only : metric
- use defs_abitypes, only : MPI_type, dataset_type
- use m_dtset,       only : dtset_copy, dtset_free
+ use defs_abitypes, only : MPI_type
  use m_rhotoxc,     only : rhotoxc
  use m_mkcore,      only : mkcore
 

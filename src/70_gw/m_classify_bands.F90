@@ -28,11 +28,11 @@
 module m_classify_bands
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_esymm
  use m_errors
 
+ use defs_datatypes,   only : pseudopotential_type, ebands_t
  use m_numeric_tools,  only : get_trace
  use m_symtk,          only : mati3inv
  use m_hide_blas,      only : xdotc, xdotu, xcopy

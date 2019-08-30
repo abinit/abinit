@@ -31,12 +31,15 @@
 module m_outqmc
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
+ use m_hdr
+ use m_dtset
 
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : mpi_type
  use m_io_tools,    only : get_unit
  use m_geometry,    only : xred2xcart
  use m_results_gs , only : results_gs_type
@@ -86,8 +89,6 @@ contains
 !! SOURCE
 
 subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,results_gs)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -530,8 +531,6 @@ end subroutine outqmc
 
  function i2s(n)
 
- implicit none
-
 !Arguments ----------------------
  integer, intent(in) :: n
  character(len=20) :: i2s
@@ -606,8 +605,6 @@ end function i2s
 !! SOURCE
 
  function r2s(r,real_format)
-
- implicit none
 
 !Arguments -------------------------
  real(dp),intent(in) :: r

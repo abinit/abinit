@@ -72,8 +72,6 @@ contains
 subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
 &                dvxc)!Optional argument
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npt,order
@@ -148,8 +146,6 @@ subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
 
  function fexsGamma(Gamma,t)
 
- implicit none
-
 !Arguments ------------------------------------
  real(dp) :: fexsGamma
  real(dp),intent(in) :: Gamma,t
@@ -201,8 +197,6 @@ subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
 
  function Fxc_iit(rs,t,deltavxc)
 
- implicit none
-
 !Arguments ------------------------------------
  real(dp) :: Fxc_iit
  real(dp),intent(in) :: rs,t,deltavxc
@@ -237,8 +231,6 @@ subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
 !! SOURCE
 
  function tdexcsdtiit(rs,t)
-
- implicit none
 
 !Arguments ------------------------------------
  real(dp) :: tdexcsdtiit

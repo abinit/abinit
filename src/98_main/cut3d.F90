@@ -48,7 +48,6 @@
 program cut3d
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_build_info
  use m_xmpi
@@ -64,6 +63,7 @@ program cut3d
  use m_cut3d
  use m_crystal
 
+ use defs_abitypes,     only : MPI_type
  use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : endswith, sjoin, itoa
  use m_time,            only : timein

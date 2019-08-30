@@ -27,8 +27,6 @@
 module m_dft_energy
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_hamiltonian
@@ -37,7 +35,10 @@ module m_dft_energy
  use m_gemm_nonlop
  use m_xcdata
  use m_cgtools
+ use m_dtset
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_geometry,         only : metric
  use m_kg,               only : mkkin
@@ -586,9 +587,9 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
    end if
 
 !  Continue Hamiltonian initialization
-   call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
+   call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
    if (with_vxctau) then
-     call load_spin_hamiltonian(gs_hamk,isppol,vxctaulocal=vxctaulocal)
+     call gs_hamk%load_spin(isppol,vxctaulocal=vxctaulocal)
    end if
 
 !  Loop over k points
@@ -668,7 +669,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !     - Prepare various tabs in case of band-FFT parallelism
 !     - Load k-dependent quantities in the Hamiltonian
      ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
-     call load_k_hamiltonian(gs_hamk,kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
+     call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
 &     kinpw_k=kinpw,kg_k=kg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
 &     compute_ph3d=.true.,compute_gbound=(mpi_enreg%paral_kgb/=1))
 
@@ -676,7 +677,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
      if (mpi_enreg%paral_kgb==1) then
        call bandfft_kpt_savetabs(my_bandfft_kpt,ffnl=ffnl_sav,ph3d=ph3d_sav,kinpw=kinpw_sav)
        call prep_bandfft_tabs(gs_hamk,ikpt,dtset%mkmem,mpi_enreg)
-       call load_k_hamiltonian(gs_hamk,npw_fft_k=my_bandfft_kpt%ndatarecv, &
+       call gs_hamk%load_k(npw_fft_k=my_bandfft_kpt%ndatarecv, &
 &       gbound_k =my_bandfft_kpt%gbound, &
 &       kinpw_k  =my_bandfft_kpt%kinpw_gather, &
 &       kg_k     =my_bandfft_kpt%kg_k_gather, &
@@ -787,7 +788,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
    end do
  end do
 
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
 
  if(xmpi_paral==1)then
 !  Accumulate enl eeig and ek on all proc.
@@ -814,7 +815,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  if (optene==0.or.optene==2) then
    etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
 !&   energies%e_nlpsp_vfock - energies%e_fock0 +
-!   Should compute the e_fock0 energy !! Also, the Fock contribution to e_nlpsp_vfock 
+!   Should compute the e_fock0 energy !! Also, the Fock contribution to e_nlpsp_vfock
 &   energies%e_nlpsp_vfock + energies%e_localpsp + energies%e_corepsp
    if (psps%usepaw==1) etotal=etotal + energies%e_paw
  else if (optene==1.or.optene==3) then

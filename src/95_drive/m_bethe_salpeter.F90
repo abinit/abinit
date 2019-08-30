@@ -29,8 +29,6 @@
 module m_bethe_salpeter
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_bs_defs
  use m_abicore
@@ -38,11 +36,16 @@ module m_bethe_salpeter
  use m_errors
  use m_screen
  use m_nctk
+ use m_distribfft
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_hdr
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_abitypes,     only : MPI_type
  use m_gwdefs,          only : GW_Q0_DEFAULT
  use m_time,            only : timab
  use m_fstrings,        only : strcat, sjoin, endswith
@@ -1209,7 +1212,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 
  nqlwl = 0
  w_fname = ABI_NOFILE
- if (Dtset%getscr/=0.or.Dtset%irdscr/=0) then
+ if (Dtset%getscr/=0 .or. Dtset%irdscr/=0 .or. dtset%getscr_path /= ABI_NOFILE) then
    w_fname=Dtfil%fnameabi_scr
  else if (Dtset%getsuscep/=0.or.Dtset%irdsuscep/=0) then
    w_fname=Dtfil%fnameabi_sus

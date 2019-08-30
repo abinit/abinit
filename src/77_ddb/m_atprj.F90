@@ -88,8 +88,6 @@ contains
 
 subroutine atprj_init(t_atprj, natom, natprj_bs, iatprj_bs, outfile_radix)
 
- implicit none
-
  type(atprj_type), intent(out) :: t_atprj
  integer, intent(in) :: natom
  integer, intent(in) :: natprj_bs
@@ -162,8 +160,6 @@ end subroutine atprj_init
 
 subroutine atprj_print(t_atprj, iq, phfrq, eigvec)
 
- implicit none
-
 !arguments
  integer, intent(in) :: iq
  type(atprj_type), intent(in) :: t_atprj
@@ -220,8 +216,6 @@ end subroutine atprj_print
 !! SOURCE
 
 subroutine atprj_destroy(t_atprj)
-
- implicit none
 
  type(atprj_type), intent(inout) :: t_atprj
 

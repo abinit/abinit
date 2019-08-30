@@ -64,11 +64,11 @@ MODULE m_bz_mesh
 
  private
 
- real(dp),parameter :: TOL_KDIFF=0.0001_dp
+ real(dp),parameter :: TOL_KDIFF = 0.0001_dp
  ! Tolerance below which two points are considered equal within a RL vector:
  ! for each reduced direction the absolute difference between the coordinates must be less that TOL_KDIFF
 
- integer,parameter :: NONE_KPTRLATT(3,3)=RESHAPE((/0,0,0,0,0,0,0,0,0/),(/3,3/))
+ integer,parameter :: NONE_KPTRLATT(3,3) = RESHAPE((/0,0,0,0,0,0,0,0,0/),(/3,3/))
 !!***
 
 !!****t* m_bz_mesh/kmesh_t
@@ -85,12 +85,12 @@ MODULE m_bz_mesh
  type,public :: kmesh_t
 
   !scalars
-  integer :: nshift=0
+  integer :: nshift = 0
 
-  integer :: nbz=0
+  integer :: nbz = 0
   ! Number of points in the BZ.
 
-  integer :: nibz=0
+  integer :: nibz = 0
   ! Number of points in the IBZ.
 
   integer :: nsym
@@ -210,22 +210,22 @@ MODULE m_bz_mesh
 !!
 !! SOURCE
 
-type,public :: kpath_t
+ type,public :: kpath_t
 
-  integer :: nbounds=0
+  integer :: nbounds = 0
     ! Number of extrema defining the path.
 
-  integer :: ndivsm=0
+  integer :: ndivsm = 0
     ! Number of divisions used to sample the smallest segment.
 
-  integer :: npts=0
+  integer :: npts = 0
     ! Total number of points in the path.
 
   real(dp) :: gprimd(3,3)
    ! Reciprocal lattice vectors.
 
   real(dp) :: gmet(3,3)
-   ! Metric matrix in G space.
+   ! Metric matrix in G-space.
 
   integer,allocatable :: ndivs(:)
    ! ndivs(nbounds-1)
@@ -247,12 +247,18 @@ type,public :: kpath_t
     ! dl(npts)
     ! dl(i) = Distance between the (i-1)-th and the i-th k-point. dl(1) = zero
 
+ contains
+
+  procedure :: free => kpath_free
+   ! Free memory
+
+  procedure :: print => kpath_print
+   ! Print the path.
+
  end type kpath_t
 
  public :: kpath_new        ! Construct a new path
- public :: kpath_free       ! Free memory
  public :: make_path        ! Construct a normalized path. TODO: Remove
- public :: kpath_print      ! Print the path.
 !!***
 
 !----------------------------------------------------------------------
@@ -566,43 +572,21 @@ subroutine kmesh_free(Kmesh)
 
  !@kmesh_t
 !integer
- if (allocated(Kmesh%rottb)) then
-   ABI_FREE(Kmesh%rottb)
- end if
- if (allocated(Kmesh%rottbm1)) then
-   ABI_FREE(Kmesh%rottbm1)
- end if
- if (allocated(Kmesh%tab)) then
-   ABI_FREE(Kmesh%tab)
- end if
- if (allocated(Kmesh%tabi)) then
-   ABI_FREE(Kmesh%tabi)
- end if
- if (allocated(Kmesh%tabo)) then
-   ABI_FREE(Kmesh%tabo)
- end if
- if (allocated(Kmesh%umklp)) then
-   ABI_FREE(Kmesh%umklp)
- end if
+ ABI_SFREE(Kmesh%rottb)
+ ABI_SFREE(Kmesh%rottbm1)
+ ABI_SFREE(Kmesh%tab)
+ ABI_SFREE(Kmesh%tabi)
+ ABI_SFREE(Kmesh%tabo)
+ ABI_SFREE(Kmesh%umklp)
 
 !real
- if (allocated(Kmesh%ibz)) then
-   ABI_FREE(Kmesh%ibz)
- end if
- if (allocated(Kmesh%bz)) then
-   ABI_FREE(Kmesh%bz)
- end if
- if (allocated(Kmesh%shift)) then
-   ABI_FREE(Kmesh%shift)
- end if
- if (allocated(Kmesh%wt)) then
-   ABI_FREE(Kmesh%wt)
- end if
+ ABI_SFREE(Kmesh%ibz)
+ ABI_SFREE(Kmesh%bz)
+ ABI_SFREE(Kmesh%shift)
+ ABI_SFREE(Kmesh%wt)
 
 !complex
- if (allocated(Kmesh%tabp)) then
-   ABI_FREE(Kmesh%tabp)
- end if
+ ABI_SFREE(Kmesh%tabp)
 
 end subroutine kmesh_free
 !!***
@@ -2762,39 +2746,17 @@ subroutine littlegroup_free_0D(Ltg)
 ! *********************************************************************
 
  !@littlegroup_t
- if (allocated(Ltg%g0)) then
-   ABI_FREE(Ltg%g0)
- end if
- if (allocated(Ltg%ibzq)) then
-   ABI_FREE(Ltg%ibzq)
- end if
- if (allocated(Ltg%bz2ibz)) then
-   ABI_FREE(Ltg%bz2ibz)
- end if
- if (allocated(Ltg%ibz2bz)) then
-   ABI_FREE(Ltg%ibz2bz)
- end if
- if (allocated(Ltg%igmG0)) then
-   ABI_FREE(Ltg%igmG0)
- end if
- if (allocated(Ltg%flag_umklp)) then
-   ABI_FREE(Ltg%flag_umklp)
- end if
- if (allocated(Ltg%preserve)) then
-   ABI_FREE(Ltg%preserve)
- end if
- if (allocated(Ltg%tab)) then
-   ABI_FREE(Ltg%tab)
- end if
- if (allocated(Ltg%tabo)) then
-   ABI_FREE(Ltg%tabo)
- end if
- if (allocated(Ltg%tabi)) then
-   ABI_FREE(Ltg%tabi)
- end if
- if (allocated(Ltg%wtksym)) then
-   ABI_FREE(Ltg%wtksym)
- end if
+ ABI_SFREE(Ltg%g0)
+ ABI_SFREE(Ltg%ibzq)
+ ABI_SFREE(Ltg%bz2ibz)
+ ABI_SFREE(Ltg%ibz2bz)
+ ABI_SFREE(Ltg%igmG0)
+ ABI_SFREE(Ltg%flag_umklp)
+ ABI_SFREE(Ltg%preserve)
+ ABI_SFREE(Ltg%tab)
+ ABI_SFREE(Ltg%tabo)
+ ABI_SFREE(Ltg%tabi)
+ ABI_SFREE(Ltg%wtksym)
 
 end subroutine littlegroup_free_0D
 !!***
@@ -2900,13 +2862,13 @@ subroutine littlegroup_print(Ltg,unit,prtvol,mode_paral)
  do itim=1,Ltg%timrev
    if (itim==1) then
      write(msg,'(a,2(a,i2,a))')ch10,&
-&      '  No time-reversal symmetry with zero umklapp: ',nop(1)-nopg0(1),ch10,&
-&      '  No time-reversal symmetry with non-zero umklapp: ',nopg0(1),ch10
+       '  No time-reversal symmetry with zero umklapp: ',nop(1)-nopg0(1),ch10,&
+       '  No time-reversal symmetry with non-zero umklapp: ',nopg0(1),ch10
      call wrtout(my_unt,msg,my_mode)
    else if (itim==2) then
      write(msg,'(a,2(a,i2,a))')ch10,&
-&      '  time-reversal symmetry with zero umklapp: ',nop(2)-nopg0(2),ch10,&
-&      '  time-reversal symmetry with non-zero umklapp: ',nopg0(2),ch10
+       '  time-reversal symmetry with zero umklapp: ',nop(2)-nopg0(2),ch10,&
+       '  time-reversal symmetry with non-zero umklapp: ',nopg0(2),ch10
      call wrtout(my_unt,msg,my_mode)
    end if
  end do
@@ -3096,29 +3058,15 @@ subroutine kpath_free(Kpath)
 
 !Arguments ------------------------------------
 !scalars
- type(kpath_t),intent(inout) :: Kpath
+ class(kpath_t),intent(inout) :: Kpath
 
 ! *************************************************************************
 
- if (allocated(Kpath%ndivs)) then
-   ABI_FREE(Kpath%ndivs)
- end if
-
- if (allocated(Kpath%bounds2kpt)) then
-   ABI_FREE(Kpath%bounds2kpt)
- end if
-
- if (allocated(Kpath%bounds)) then
-   ABI_FREE(Kpath%bounds)
- end if
-
- if (allocated(Kpath%points)) then
-   ABI_FREE(Kpath%points)
- end if
-
- if (allocated(Kpath%dl)) then
-   ABI_FREE(Kpath%dl)
- end if
+ ABI_SFREE(Kpath%ndivs)
+ ABI_SFREE(Kpath%bounds2kpt)
+ ABI_SFREE(Kpath%bounds)
+ ABI_SFREE(Kpath%points)
+ ABI_SFREE(Kpath%dl)
 
 end subroutine kpath_free
 !!***
@@ -3154,7 +3102,7 @@ subroutine kpath_print(kpath, header, unit, prtvol, pre)
 !scalars
  integer,optional,intent(in) :: unit,prtvol
  character(len=*),optional,intent(in) :: header,pre
- type(kpath_t),intent(in) :: kpath
+ class(kpath_t),intent(in) :: kpath
 
 !Local variables-------------------------------
  integer :: unt,my_prtvol,ii

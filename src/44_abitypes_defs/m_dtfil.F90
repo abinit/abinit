@@ -27,20 +27,356 @@
 module m_dtfil
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
  use m_build_info
+ use m_dtset
 
+ use defs_abitypes,  only : MPI_type
  use m_clib,         only : clib_rename
- use m_fstrings,     only : int2char4
- use m_io_tools,     only : open_file
+ use m_fstrings,     only : int2char4, rmquotes, sjoin, strcat
+ use m_io_tools,     only : open_file, file_exists
  use m_libpaw_tools, only : libpaw_log_flag_set
 
  implicit none
 
  private
+!!***
+
+!----------------------------------------------------------------------
+
+!!****t* m_dtfil/datafiles_type
+!! NAME
+!! datafiles_type
+!!
+!! FUNCTION
+!! The datafiles_type structures datatype gather all the variables
+!! related to files, such as filename, and file units.
+!! For one dataset, it is initialized in 95_drive/dtfil_init1.F90,
+!! and will not change at all during the treatment of the dataset.
+!!
+!! SOURCE
+
+ type, public :: datafiles_type
+
+! WARNING : if you modify this datatype, please check whether there might be creation/destruction/copy routines,
+! declared in another part of ABINIT, that might need to take into account your modification.
+
+! These keywords are only used in algorithms using images of the cell
+  integer :: getwfk_from_image
+   ! index of image from which read WFK file (0 if standard WFK)
+   !    -1: the same image as current one
+   !     0: no image
+   !    >0: index of an image
+
+  integer :: getden_from_image
+   ! index of image from which read DEN file (0 if standard DEN)
+   !    -1: the same image as current one
+   !     0: no image
+   !    >0: index of an image
+
+  integer :: getpawden_from_image
+   ! index of image from which read PAWDEN file (0 if standard PAWDEN)
+   !    -1: the same image as current one
+   !     0: no image
+   !    >0: index of an image
+
+  integer :: ireadddb
+   ! ireadddb non-zero  if the ddb file must be read
+
+  integer :: ireadden
+   ! ireadden non-zero  if the den file must be read
+
+  integer :: ireadkden
+   ! ireadkden non-zero  if the kden file must be read
+
+  integer :: ireadwf
+   ! if(optdriver/=1), that is, no response-function computation,
+   !   ireadwf non-zero  if the wffk file must be read
+   !   (if irdwfk non-zero or getwfk non-zero)
+   ! if(optdriver==1), that is, response-function computation,
+   !   ireadwf non-zero  if the wff1 file must be read
+   !   (if ird1wf non-zero or get1wf non-zero)
+
+  integer :: unchi0  ! unit number for chi0 files
+  integer :: unddb   ! unit number for Derivative DataBase
+  integer :: unddk   ! unit number for ddk 1WF file
+  integer :: undkdk  ! unit number for 2WF file (dkdk)
+  integer :: undkde  ! unit number for 2WF file (dkde)
+  integer :: unkg    ! unit number for k+G data
+  integer :: unkgq   ! unit number for k+G+q data
+  integer :: unkg1   ! unit number for first-order k+G+q data
+  integer :: unkss   ! unit number for KSS file
+  integer :: unqps   ! unit number for QPS file
+  integer :: unscr   ! unit number for SCR file
+  integer :: unwff1  ! unit number for wavefunctions, number one
+  integer :: unwff2  ! unit number for wavefunctions, number two
+  integer :: unwff3  ! unit number for wavefunctions, number three
+  integer :: unwffgs ! unit number for ground-state wavefunctions
+  integer :: unwffkq ! unit number for k+q ground-state wavefunctions
+  integer :: unwft1  ! unit number for wavefunctions, temporary one
+  integer :: unwft2  ! unit number for wavefunctions, temporary two
+  integer :: unwft3  ! unit number for wavefunctions, temporary three
+  integer :: unwftgs ! unit number for ground-state wavefunctions, temporary
+  integer :: unwftkq ! unit number for k+q ground-state wavefunctions, temporary
+  integer :: unylm   ! unit number for Ylm(k) data
+  integer :: unylm1  ! unit number for first-order Ylm(k+q) data
+  integer :: unpaw   ! unit number for temporary PAW data (for ex. rhoij_nk) (Paw only)
+  integer :: unpaw1  ! unit number for temporary PAW first-order cprj1=<c1_k,q|p>(1) data
+  integer :: unpawq  ! unit number for temporary PAW cprjq=<c+_k+q|p> at k+qdata
+  integer :: unpos   ! unit number for restart molecular dynamics
+
+  ! TODO: All this strings should be initialized with ABI_NOFILE
+  ! so that we can easily test for path /= ABI_NOFILE instead of getwfk /= 0 or irdwfk /= 0
+
+  character(len=fnlen) :: filnam_ds(5)
+   ! if no dataset mode, the five names from the standard input:
+   !   ab_in, ab_out, abi, abo, tmp
+   ! if dataset mode, the same 5 filenames, appended with //'_DS'//trim(jdtset)
+
+  character(len=fnlen) :: filddbsin
+   ! if no dataset mode             : abi//'DDB'
+   ! if dataset mode, and getden==0 : abi//'_DS'//trim(jdtset)//'DDB'
+   ! if dataset mode, and getden/=0 : abo//'_DS'//trim(jgetden)//'DDB'
+
+  character(len=fnlen) :: fildensin
+   ! if no dataset mode             : abi//'DEN'
+   ! if dataset mode, and getden==0 : abi//'_DS'//trim(jdtset)//'DEN'
+   ! if dataset mode, and getden/=0 : abo//'_DS'//trim(jgetden)//'DEN'
+
+  character(len=fnlen) :: fildvdbin
+   ! if no dataset mode             : abi//'DVDB'
+   ! if dataset mode, and getdvdb==0 : abi//'_DS'//trim(jdtset)//'DVDB'
+   ! if dataset mode, and getdvdb/=0 : abo//'_DS'//trim(jgetden)//'DVDB'
+
+  character(len=fnlen) :: filpotin
+   ! Filename used to read POT file.
+   ! Initialize via getpot_path
+
+  character(len=fnlen) :: filkdensin
+   ! if no dataset mode             : abi//'KDEN'
+   ! if dataset mode, and getden==0 : abi//'_DS'//trim(jdtset)//'KDEN'
+   ! if dataset mode, and getden/=0 : abo//'_DS'//trim(jgetden)//'KDEN'
+
+  character(len=fnlen) :: filpawdensin
+   ! if no dataset mode             : abi//'PAWDEN'
+   ! if dataset mode, and getden==0 : abi//'_DS'//trim(jdtset)//'PAWDEN'
+   ! if dataset mode, and getden/=0 : abo//'_DS'//trim(jgetden)//'PAWDEN'
+
+! character(len=fnlen) :: filpsp(ntypat)
+   ! the filenames of the pseudopotential files, from the standard input.
+
+  character(len=fnlen) :: filstat
+   ! tmp//'_STATUS'
+
+  character(len=fnlen) :: fnamewffk
+   ! the name of the ground-state wavefunction file to be read (see driver.F90)
+
+  character(len=fnlen) :: fnamewffq
+   ! the name of the k+q ground-state wavefunction file to be read (see driver.F90)
+   ! only useful in the response-function case
+
+  character(len=fnlen) :: fnamewffddk
+   ! the generic name of the ddk response wavefunction file(s) to be read (see driver.F90)
+   ! (the final name is formed by appending the number of the perturbation)
+   ! only useful in the response-function case
+
+  character(len=fnlen) :: fnamewffdelfd
+   ! the generic name of the electric field response wavefunction file(s) to be read (see driver.F90)
+   ! (the final name is formed by appending the number of the perturbation)
+   ! only useful in the response-function case
+
+  character(len=fnlen) :: fnamewffdkdk
+   ! the generic name of the 2nd order dkdk response wavefunction file(s) to be read (see driver.F90)
+   ! (the final name is formed by appending the number of the perturbation)
+   ! only useful in the response-function case
+
+  character(len=fnlen) :: fnamewffdkde
+   ! the generic name of the 2nd order dkde response wavefunction file(s) to be read (see driver.F90)
+   ! (the final name is formed by appending the number of the perturbation)
+   ! only useful in the response-function case
+
+  character(len=fnlen) :: fnamewff1
+   ! the generic name of the first-order wavefunction file(s) to be read (see driver.F90)
+   ! (the final name is formed by appending the number of the perturbation)
+   ! only useful in the response-function case
+
+  character(len=fnlen) :: fildens1in   ! to be described by MVeithen
+  character(len=fnlen) :: fname_tdwf
+  character(len=fnlen) :: fname_w90
+
+  character(len=fnlen) :: fnametmp_wf1
+  character(len=fnlen) :: fnametmp_wf2
+  character(len=fnlen) :: fnametmp_1wf1
+  character(len=fnlen) :: fnametmp_1wf2
+  character(len=fnlen) :: fnametmp_wfgs
+  character(len=fnlen) :: fnametmp_wfkq
+   ! Set of filenames formed from trim(dtfil%filnam_ds(5))//APPEN where APPEN is _WF1, _WF2 ...
+   ! See dtfil_init
+
+  character(len=fnlen) :: fnametmp_kg
+  character(len=fnlen) :: fnametmp_kgq
+  character(len=fnlen) :: fnametmp_kg1
+  character(len=fnlen) :: fnametmp_dum
+  character(len=fnlen) :: fnametmp_ylm
+  character(len=fnlen) :: fnametmp_ylm1
+  character(len=fnlen) :: fnametmp_paw
+  character(len=fnlen) :: fnametmp_paw1
+  character(len=fnlen) :: fnametmp_pawq
+   ! Set of filenames formed from trim(dtfil%filnam_ds(5))//APPEN where APPEN is _KG, _DUM, followed
+   ! by the index of the processor.
+   ! See dtfil_init
+
+  character(len=fnlen) :: fnametmp_cg
+  character(len=fnlen) :: fnametmp_cprj
+  character(len=fnlen) :: fnametmp_eig
+  character(len=fnlen) :: fnametmp_1wf1_eig
+  character(len=fnlen) :: fnametmp_fft
+  character(len=fnlen) :: fnametmp_kgs
+  character(len=fnlen) :: fnametmp_sustr
+  character(len=fnlen) :: fnametmp_tdexcit
+  character(len=fnlen) :: fnametmp_tdwf
+
+!@Bethe-Salpeter
+! New files introduced for the Bethe-Salpeter part.
+
+   character(len=fnlen) :: fnameabi_bsham_reso
+    ! if no dataset mode             : abi//'BSR'
+    ! if dataset mode, and getbsreso==0 : abi//'_DS'//trim(jdtset)//'BSR'
+    ! if dataset mode, and getbsreso/=0 : abo//'_DS'//trim(jget_reso_bsham)//'BSR'
+
+   character(len=fnlen) :: fnameabi_bsham_coup
+    ! if no dataset mode             : abi//'BSC'
+    ! if dataset mode, and getbscoup==0 : abi//'_DS'//trim(jdtset)//'BSC'
+    ! if dataset mode, and getbscoup/=0 : abo//'_DS'//trim(jget_coup_bsham)//'BSC'
+
+  character(len=fnlen) :: fnameabi_bseig
+   ! The name of the file containing the eigenstates and eigenvalues of the Bethe-Salpeter Hamiltonian
+   ! if no dataset mode             : abi//'BS_EIG'
+   ! if dataset mode, and getbseig==0 : abi//'_DS'//trim(jdtset)//'BS_EIG'
+   ! if dataset mode, and getbseig/=0 : abo//'_DS'//trim(jget_bseig)//'BS_EIG'
+
+   character(len=fnlen) :: fnameabi_haydock
+   ! The prefix used to construct the names of the files containing the coefficients of the
+   ! continued fractions produced by the Haydock iterative algorithm.
+   ! if no dataset mode             : abi//'HAYDOCK'
+   ! if dataset mode, and gethaydock==0 : abi//'_DS'//trim(jdtset)//'HAYDOCK'
+   ! if dataset mode, and gethaydock/=0 : abo//'_DS'//trim(jget_bseig)//'HAYDOCK'
+
+   character(len=fnlen) :: fnameabi_wfkfine
+   ! The name of the file containing the wavefunctions on a fine grid
+   ! if no dataset mode             : abi//'WFK'
+   ! if dataset mode, and gethaydock==0 : abi//'_DS'//trim(jdtset)//'WFK'
+   ! if dataset mode, and gethaydock/=0 : abo//'_DS'//trim(jget_bseig)//'WFK'
+
+!END @BEthe-Salpeter
+
+!The following filenames do not depend on itimimage, iimage and itime loops.
+!Note the following convention:
+!  fnameabo_* are filenames used for ouput results (writing)
+!  fnameabi_* are filenames used for data that should be read by the code.
+!  fnametmp_* are filenames used for temporary files that should be erased at the end of each dataset.
+!
+!If a file does not have the corresponding "abi" or the corresponding "abo" name, that means that
+!that particular file is only used for writing or for reading results, respectively.
+
+  character(len=fnlen) :: fnameabi_efmas
+  character(len=fnlen) :: fnameabi_hes
+  character(len=fnlen) :: fnameabi_phfrq
+  character(len=fnlen) :: fnameabi_phvec
+  character(len=fnlen) :: fnameabi_qps
+  character(len=fnlen) :: fnameabi_scr            ! SCReening file (symmetrized inverse dielectric matrix)
+  character(len=fnlen) :: fnameabi_sus            ! KS independent-particle polarizability file
+  character(len=fnlen) :: fnameabo_ddb
+  character(len=fnlen) :: fnameabo_den
+  character(len=fnlen) :: fnameabo_dos
+  character(len=fnlen) :: fnameabo_dvdb
+  character(len=fnlen) :: fnameabo_eelf
+  character(len=fnlen) :: fnameabo_eig
+  character(len=fnlen) :: fnameabo_eigi2d
+  character(len=fnlen) :: fnameabo_eigr2d
+  character(len=fnlen) :: fnameabo_em1
+  character(len=fnlen) :: fnameabo_em1_lf
+  character(len=fnlen) :: fnameabo_em1_nlf
+  character(len=fnlen) :: fnameabo_fan
+  character(len=fnlen) :: fnameabo_gkk
+  character(len=fnlen) :: fnameabo_gw
+  character(len=fnlen) :: fnameabo_gw_nlf_mdf
+  character(len=fnlen) :: fnameabo_kss
+  character(len=fnlen) :: fnameabo_moldyn
+  character(len=fnlen) :: fnameabo_pot
+  character(len=fnlen) :: fnameabo_qps            ! Quasi-Particle band structure file.
+  character(len=fnlen) :: fnameabo_qp_den
+  character(len=fnlen) :: fnameabo_qp_pawden      ! Full QP density
+  character(len=fnlen) :: fnameabo_qp_dos
+  character(len=fnlen) :: fnameabo_qp_eig
+  character(len=fnlen) :: fnameabo_rpa
+  character(len=fnlen) :: fnameabo_rpa_nlf_mdf
+  character(len=fnlen) :: fnameabo_scr
+  character(len=fnlen) :: fnameabo_sgm
+  character(len=fnlen) :: fnameabo_sgr
+  character(len=fnlen) :: fnameabo_sig
+  character(len=fnlen) :: fnameabo_spcur
+  character(len=fnlen) :: fnameabo_sus
+  character(len=fnlen) :: fnameabo_vha
+  character(len=fnlen) :: fnameabo_vpsp
+  character(len=fnlen) :: fnameabo_vso
+  character(len=fnlen) :: fnameabo_vxc
+  character(len=fnlen) :: fnameabo_wan
+  character(len=fnlen) :: fnameabo_wfk
+  character(len=fnlen) :: fnameabo_wfq
+  character(len=fnlen) :: fnameabo_w90
+  character(len=fnlen) :: fnameabo_1wf
+  character(len=fnlen) :: fnameabo_gwdiag
+  character(len=fnlen) :: fnameabo_nlcc_derivs
+  character(len=fnlen) :: fnameabo_pspdata
+
+!The following filenames are initialized only iniside itimimage, iimage and itime loops,
+!and are appended with the adequate specifier 'app'.
+
+  character(len=fnlen) :: fnameabo_app
+  character(len=fnlen) :: fnameabo_app_atmden_core
+  character(len=fnlen) :: fnameabo_app_atmden_full
+  character(len=fnlen) :: fnameabo_app_atmden_val
+  character(len=fnlen) :: fnameabo_app_n_tilde
+  character(len=fnlen) :: fnameabo_app_n_one
+  character(len=fnlen) :: fnameabo_app_nt_one
+  character(len=fnlen) :: fnameabo_app_bxsf
+  character(len=fnlen) :: fnameabo_app_cif
+  character(len=fnlen) :: fnameabo_app_den
+  character(len=fnlen) :: fnameabo_app_dos
+  character(len=fnlen) :: fnameabo_app_elf
+  character(len=fnlen) :: fnameabo_app_elf_down
+  character(len=fnlen) :: fnameabo_app_elf_up
+  character(len=fnlen) :: fnameabo_app_eig
+  character(len=fnlen) :: fnameabo_app_fatbands
+  character(len=fnlen) :: fnameabo_app_gden1
+  character(len=fnlen) :: fnameabo_app_gden2
+  character(len=fnlen) :: fnameabo_app_gden3
+  character(len=fnlen) :: fnameabo_app_geo
+  character(len=fnlen) :: fnameabo_app_kden
+  character(len=fnlen) :: fnameabo_app_lden
+  character(len=fnlen) :: fnameabo_app_nesting
+  character(len=fnlen) :: fnameabo_app_pawden
+  character(len=fnlen) :: fnameabo_app_pot
+  character(len=fnlen) :: fnameabo_app_opt
+  character(len=fnlen) :: fnameabo_app_opt2
+  character(len=fnlen) :: fnameabo_app_stm
+  character(len=fnlen) :: fnameabo_app_vclmb
+  character(len=fnlen) :: fnameabo_app_vha
+  character(len=fnlen) :: fnameabo_app_vhxc
+  character(len=fnlen) :: fnameabo_app_vhpsp
+  character(len=fnlen) :: fnameabo_app_vpsp
+  character(len=fnlen) :: fnameabo_app_vxc
+  character(len=fnlen) :: fnameabo_app_wfk
+  character(len=fnlen) :: fnameabo_app_1dm
+  character(len=fnlen) :: fnameabo_app_vha_1dm
+  character(len=fnlen) :: fnameabo_app_vclmb_1dm
+  character(len=fnlen) :: fnametmp_app_den
+  character(len=fnlen) :: fnametmp_app_kden
+
+ end type datafiles_type
 !!***
 
  public :: dtfil_init
@@ -190,7 +526,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  end if
 
  ! According to getwfk and irdwfk, build _WFK file name, referred as fnamewffk
- if (iimage>0.and.dtfil%getwfk_from_image/=0) then
+ if (iimage >0 .and. dtfil%getwfk_from_image /= 0) then
    if (dtfil%getwfk_from_image==-1) then
      call appdig(iimage,'',appen)
    else
@@ -201,15 +537,16 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    stringfile='_WFK'
  end if
  stringvar='wfk'
- call mkfilename(filnam,fnamewffk,dtset%getwfk,idtset,dtset%irdwfk,jdtset_,ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,fnamewffk,dtset%getwfk,idtset,dtset%irdwfk,jdtset_,ndtset,stringfile,stringvar,will_read, &
+                 getpath=dtset%getwfk_path)
 
- if(dtset%optdriver/=RUNL_RESPFN)ireadwf=will_read
+ if (dtset%optdriver /= RUNL_RESPFN) ireadwf = will_read
  if(ndtset/=0 .and. dtset%optdriver==RUNL_RESPFN .and. will_read==0)then
-   write(msg, '(5a,i3,3a,i3,a,i3,3a)' )&
+   write(msg, '(5a,i0,3a,i0,a,i0,3a)' )&
    'At least one of the input variables irdwfk and getwfk ',ch10,&
    'must refer to a valid _WFK file, in the response function',ch10,&
    'case, while for idtset = ',idtset,',',ch10,&
-   'they are irdwfk=',dtset%irdwfk,', and getwfk=',dtset%getwfk,'.',ch10,&
+   'they are irdwfk= ',dtset%irdwfk,', and getwfk= ',dtset%getwfk,'.',ch10,&
    'Action: correct irdwfk or getwfk in your input file.'
    MSG_ERROR(msg)
  end if
@@ -219,9 +556,10 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
 
    ! According to getwfq and irdwfq, build _WFQ file name, referred as fnamewffq
    stringfile='_WFQ' ; stringvar='wfq'
-   call mkfilename(filnam,fnamewffq,dtset%getwfq,idtset,dtset%irdwfq,jdtset_,ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewffq,dtset%getwfq,idtset,dtset%irdwfq,jdtset_,ndtset,stringfile,stringvar,will_read, &
+                   getpath=dtset%getwfq_path)
    ! If fnamewffq is not initialized thanks to getwfq or irdwfq, use fnamewffk
-   if(will_read==0)fnamewffq=fnamewffk
+   if(will_read==0) fnamewffq = fnamewffk
 
    ! According to get1wf and ird1wf, build _1WF file name, referred as fnamewff1
    stringfile='_1WF' ; stringvar='1wf'
@@ -250,13 +588,18 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
 
  ! According to getddb, build _DDB file name, referred as filddbsin
  stringfile='_DDB'; stringvar='ddb'
- call mkfilename(filnam,filddbsin,dtset%getddb,idtset,dtset%irdddb,jdtset_,ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,filddbsin,dtset%getddb,idtset,dtset%irdddb,jdtset_,ndtset,stringfile,stringvar,will_read, &
+                  getpath=dtset%getddb_path)
 
-! According to getdvdb, build _DVDB file name
-! A default is available if getden is 0
+ ! According to getpot, build _POT file name
+ stringfile='_POT'; stringvar='pot'
+ call mkfilename(filnam, dtfil%filpotin, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                  getpath=dtset%getpot_path)
+
+ ! According to getdvdb, build _DVDB file name
  stringfile='_DVDB'; stringvar='dvdb'
- call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,ndtset,stringfile,stringvar,will_read)
- !if (will_read == 0) dtfile%fildvdbin = trim(filnam_ds(3))//'_DVDB'
+ call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,ndtset,stringfile,stringvar,will_read, &
+                  getpath=dtset%getdvdb_path)
  if (will_read == 0) dtfil%fildvdbin = ABI_NOFILE
 
  ! According to getden, build _DEN file name, referred as fildensin
@@ -272,13 +615,13 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    stringfile='_DEN'
  end if
  stringvar='den'
- call mkfilename(filnam,fildensin,dtset%getden,idtset,dtset%irdden,jdtset_,ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,fildensin,dtset%getden,idtset,dtset%irdden,jdtset_,ndtset,stringfile,stringvar, will_read, &
+                 getpath=dtset%getden_path)
 
  if(will_read==0)fildensin=trim(filnam_ds(3))//'_DEN'
  ireadden=will_read
 
  if ((dtset%optdriver==RUNL_GWLS.or.dtset%optdriver==RUNL_GSTATE) .and.dtset%iscf<0) ireadden=1
- !if (optdriver==RUNL_GSTATE.and.ireadwf/=0) ireadden=0
 
  ! According to getpawden, build _PAWDEN file name, referred as filpawdensin
  ! A default is available if getden is 0
@@ -333,7 +676,8 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ! According to getscr and irdscr, build _SCR file name, referred as filscr
  ! A default is available if getscr is 0
  stringfile='_SCR' ; stringvar='scr'
- call mkfilename(filnam,filscr,dtset%getscr,idtset,dtset%irdscr,jdtset_,ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,filscr,dtset%getscr,idtset,dtset%irdscr,jdtset_,ndtset,stringfile,stringvar,will_read, &
+                 getpath=dtset%getscr_path)
  if(will_read==0)filscr=trim(filnam_ds(3))//'_SCR'
 
  ! According to getsuscep and irdsuscep, build _SUS file name, referred as filsus
@@ -375,7 +719,8 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ! According to getwfkfine and irdwfkfine, build _WFK file name, referred as filwfkfine
  ! A default is avaible if getwfkfine is 0
  stringfile='_WFK' ; stringvar='wfkfine'
- call mkfilename(filnam,filwfkfine,dtset%getwfkfine,idtset,dtset%irdwfkfine,jdtset_,ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,filwfkfine,dtset%getwfkfine,idtset,dtset%irdwfkfine,jdtset_,ndtset,stringfile,stringvar,will_read, &
+                 getpath=dtset%getwfkfine_path)
  if(will_read==0)filwfkfine=trim(filnam_ds(3))//'_WFK'
 
  dtfil%ireadden      =ireadden
@@ -482,7 +827,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  tmpfil(6)=trim(dtfil%filnam_ds(5))//'_YLM'  ! tmpfil(6)
  tmpfil(7)=trim(dtfil%filnam_ds(5))//'_PAW'  ! tmpfil(7)
 
- if(xmpi_paral==1)then ! parallel case : the index of the processor must be appended
+ if(xmpi_paral==1)then ! parallel case: the index of the processor must be appended
    call int2char4(mpi_enreg%me,tag)
    ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
    ixx=1
@@ -564,7 +909,6 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
 
  ! Prepare the name of the _FFT file
  filfft=trim(dtfil%filnam_ds(5))//'_FFT'
- ! There is a definite problem in the treatment of // by CPP ...
  if(xmpi_paral==1 .or. mpi_enreg%paral_kgb==1)then
    call int2char4(mpi_enreg%me,tag)
    ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
@@ -748,10 +1092,10 @@ subroutine fappnd(filapp,filnam,iapp,&
      write(nchar, '(i8)' ) iapp
      if (ndig>8) then
        write(msg,'(5a,i0,2a,i0,2a)')&
-&       'Requested file name extension has more than the allowed 8 digits.',ch10,&
-&       'Action: resubmit the job with smaller value for ntime.',ch10,&
-&       'Value computed here was ndig=',ndig,ch10,&
-&       'iapp= ',iapp,' filnam=',TRIM(filnam)
+        'Requested file name extension has more than the allowed 8 digits.',ch10,&
+        'Action: resubmit the job with smaller value for ntime.',ch10,&
+        'Value computed here was ndig=',ndig,ch10,&
+        'iapp= ',iapp,' filnam= ',trim(filnam)
        MSG_ERROR(msg)
      end if
 !    Concatenate into character string, picking off exact number of digits
@@ -897,6 +1241,7 @@ end subroutine dtfil_init_img
 !! stringfil=the string of characters to be appended e.g. '_WFK' or '_DEN'
 !! stringvar=the string of characters to be appended
 !!   that defines the 'get' or 'ird' variables, e.g. 'wfk' or 'ddk'
+!! [getpath]=String with filename to be used as input, exclude get and ird option.
 !!
 !! OUTPUT
 !! filnam_out=the new file name
@@ -910,7 +1255,8 @@ end subroutine dtfil_init_img
 !!
 !! SOURCE
 
-subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,stringvar,will_read)
+subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,stringvar,will_read, &
+                      getpath) ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -919,6 +1265,7 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
  character(len=*),intent(in) :: stringfil
  character(len=*),intent(in) :: stringvar
  character(len=fnlen),intent(out) :: filnam_out
+ character(len=fnlen),optional,intent(in) :: getpath
 !arrays
  integer,intent(in) :: jdtset_(0:ndtset)
  character(len=fnlen),intent(in) :: filnam(5)
@@ -942,6 +1289,30 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
    filnam_appen = trim(filnam_appen)//'_DS'//appen
  end if
  filnam_out = trim(filnam_appen)//trim(stringfil)
+
+ if (present(getpath)) then
+   if (getpath /= ABI_NOFILE) then
+     if (ird /= 0 .or. get /= 0)then
+       write(msg, '(11a,i0,3a,i0,a,i0,7a)' ) &
+       'When the input variable: ', trim(getpath), ' is used ',ch10, &
+       'the input variables ird',trim(stringvar),' and get',trim(stringvar),' cannot be',ch10,&
+       'simultaneously non-zero, while for idtset = ',idtset,',',ch10,&
+       'they are ',ird,', and ',get,'.',ch10,&
+       'Action: correct ird',trim(stringvar),' or get',trim(stringvar),' in your input file.'
+       MSG_ERROR(msg)
+     end if
+     filnam_out = rmquotes(getpath)
+     write(msg, '(5a)' )' mkfilename: get',trim(stringvar) ," from: ",trim(filnam_out), ch10
+     call wrtout([std_out, ab_out], msg)
+     ! Check whether file exists taking into account a possible NC file extension.
+     if (xmpi_comm_rank(xmpi_world) == 0) then
+       if (.not. file_exists(filnam_out) .and. .not. file_exists(strcat(filnam_out, ".nc"))) then
+         MSG_ERROR(sjoin("Cannot find file:", filnam_out, "(with or without .nc extension)"))
+       end if
+     end if
+     will_read = 1; return
+   end if
+ end if
 
  ! Treatment of the multi-dataset case (get is not relevant otherwise)
  if (ndtset /= 0) then
@@ -991,15 +1362,12 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
        write(msg, '(5a,i3,2a)' )&
        ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),' from output of DATASET ',jget,'.',ch10
      end if
-     call wrtout(ab_out,msg,'COLL')
-     call wrtout(std_out,msg,'COLL')
+     call wrtout([std_out, ab_out], msg)
    end if ! conditions on get and idtset
-
  end if ! ndtset/=0
 
 end subroutine mkfilename
 !!***
-
 
 !!****f* m_dtfil/isfile
 !! NAME
@@ -1092,7 +1460,7 @@ subroutine isfile(filnam, status)
        end if
        if ( ios /= 0 )  ioserr=ioserr+1
        if ( ioserr > 10 ) then
-!        There is a problem => stop
+         ! There is a problem => stop
          write(msg, '(2a,i0,2a)' )&
          'Check for permissions of reading/writing files on the filesystem', &
          '10 INQUIRE statements returned an error code like ',ios,ch10,&
@@ -1118,9 +1486,7 @@ subroutine isfile(filnam, status)
    end if
    ! if ii > 0 we iterated so rename abi_out to abi_outXXXX and just write to abi_out
  else
-   ! status not recognized
-   write(msg,'(3a)')' Input status= ',status,' not recognized.'
-   MSG_BUG(msg)
+   MSG_BUG(sjoin('Input status:', status, ' not recognized.'))
  end if
 
 end subroutine isfile

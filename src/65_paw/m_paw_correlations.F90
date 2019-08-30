@@ -24,15 +24,14 @@
 MODULE m_paw_correlations
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
-
+ use m_dtset
  use m_linalg_interfaces
  use m_special_funcs
- use m_io_tools, only : open_file
 
+ use m_io_tools,    only : open_file
  use m_pawang,      only : pawang_type,pawang_init,pawang_free
  use m_pawrad,      only : pawrad_type,simp_gen,nderiv_gen,pawrad_ifromr,poisson
  use m_pawtab,      only : pawtab_type

@@ -26,12 +26,13 @@
 MODULE m_ddb_hdr
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
+ use m_dtset
 
+
+ use defs_datatypes, only : pseudopotential_type
  use m_copy,      only : alloc_copy
  use m_pawtab,    only : pawtab_type, pawtab_nullify, pawtab_free !, pawtab_copy
  use m_psps,      only : psps_copy, psps_free
@@ -178,8 +179,6 @@ CONTAINS  !===========================================================
 subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
                         nblok, xred, occ, ngfft)
 
- implicit none
-
 !Arguments ------------------------------------
  type(ddb_hdr_type),intent(out) :: ddb_hdr
  type(dataset_type),intent(in) :: dtset
@@ -296,8 +295,6 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
 end subroutine ddb_hdr_init
 !!***
 
-
-
 !!****f* m_ddb_hdr/ddb_hdr_malloc
 !! NAME
 !! ddb_hdr_malloc
@@ -317,8 +314,6 @@ end subroutine ddb_hdr_init
 !! SOURCE
 
 subroutine ddb_hdr_malloc(ddb_hdr)
-
- implicit none
 
 !Arguments ------------------------------------
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
@@ -371,55 +366,27 @@ end subroutine ddb_hdr_malloc
 
 subroutine ddb_hdr_free(ddb_hdr)
 
- implicit none
-
 !Arguments ------------------------------------
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
 
 ! ************************************************************************
 
  ! integer
- if (allocated(ddb_hdr%nband)) then
-   ABI_FREE(ddb_hdr%nband)
- end if
- if (allocated(ddb_hdr%symafm)) then
-   ABI_FREE(ddb_hdr%symafm)
- end if
- if (allocated(ddb_hdr%symrel)) then
-   ABI_FREE(ddb_hdr%symrel)
- end if
- if (allocated(ddb_hdr%typat)) then
-   ABI_FREE(ddb_hdr%typat)
- end if
+ ABI_SFREE(ddb_hdr%nband)
+ ABI_SFREE(ddb_hdr%symafm)
+ ABI_SFREE(ddb_hdr%symrel)
+ ABI_SFREE(ddb_hdr%typat)
 
  ! real
- if (allocated(ddb_hdr%amu)) then
-   ABI_FREE(ddb_hdr%amu)
- end if
- if (allocated(ddb_hdr%kpt)) then
-   ABI_FREE(ddb_hdr%kpt)
- end if
- if (allocated(ddb_hdr%occ)) then
-   ABI_FREE(ddb_hdr%occ)
- end if
- if (allocated(ddb_hdr%spinat)) then
-   ABI_FREE(ddb_hdr%spinat)
- end if
- if (allocated(ddb_hdr%tnons)) then
-   ABI_FREE(ddb_hdr%tnons)
- end if
- if (allocated(ddb_hdr%wtk)) then
-   ABI_FREE(ddb_hdr%wtk)
- end if
- if (allocated(ddb_hdr%xred)) then
-   ABI_FREE(ddb_hdr%xred)
- end if
- if (allocated(ddb_hdr%zion)) then
-   ABI_FREE(ddb_hdr%zion)
- end if
- if (allocated(ddb_hdr%znucl)) then
-   ABI_FREE(ddb_hdr%znucl)
- end if
+ ABI_SFREE(ddb_hdr%amu)
+ ABI_SFREE(ddb_hdr%kpt)
+ ABI_SFREE(ddb_hdr%occ)
+ ABI_SFREE(ddb_hdr%spinat)
+ ABI_SFREE(ddb_hdr%tnons)
+ ABI_SFREE(ddb_hdr%wtk)
+ ABI_SFREE(ddb_hdr%xred)
+ ABI_SFREE(ddb_hdr%zion)
+ ABI_SFREE(ddb_hdr%znucl)
 
  ! types
  call psps_free(ddb_hdr%psps)
@@ -454,8 +421,6 @@ end subroutine ddb_hdr_free
 !! SOURCE
 
 subroutine ddb_hdr_open_write(ddb_hdr, filnam, unddb, fullinit)
-
- implicit none
 
 !Arguments ------------------------------------
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
@@ -515,8 +480,6 @@ end subroutine ddb_hdr_open_write
 
 subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, comm, &
 &        matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
-
- implicit none
 
 !Arguments ------------------------------------
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
@@ -654,8 +617,6 @@ end subroutine ddb_hdr_open_read
 
 subroutine ddb_hdr_compare(ddb_hdr1, ddb_hdr2)
 
- implicit none
-
 !Arguments ------------------------------------
  type(ddb_hdr_type),intent(inout) :: ddb_hdr1, ddb_hdr2
 
@@ -761,8 +722,6 @@ end subroutine ddb_hdr_compare
 subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
 &          nblok,ntypat,nunit,pawtab,pspso,usepaw,useylm,vrsddb)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: choice,dimekb,lmnmax,ntypat,nunit,usepaw,useylm
@@ -793,16 +752,16 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
 !Check psddb8 version number (vrsio8) against DDB version number (vrsddb)
  if (vrsio8/=vrsddb) then
    write(message, '(a,i10,a,a,i10,a)' )&
-&   'the psddb8 DDB version number=',vrsio8,ch10,&
-&   'is not equal to the calling code DDB version number=',vrsddb,'.'
+    'the psddb8 DDB version number=',vrsio8,ch10,&
+    'is not equal to the calling code DDB version number=',vrsddb,'.'
    MSG_WARNING(message)
  end if
 
 !Check the value of choice
  if (choice<=0.or.choice>=3) then
    write(message, '(a,a,a,i10,a)' )&
-&   'The permitted values for choice are 1 or 2.',ch10,&
-&   'The calling routine asks ',choice,'.'
+    'The permitted values for choice are 1 or 2.',ch10,&
+    'The calling routine asks ',choice,'.'
    MSG_BUG(message)
  end if
 
@@ -834,8 +793,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
      else if (vrspsp8==vrsio8) then
        read(nunit, '(10x,i3)') usepaw0
        if (usepaw/=usepaw0) then
-         write(message, '(a,i1,a,i1,a)' )&
-&         'usepaw is announced to be ',usepaw,' but read usepaw is ',usepaw0,' !'
+         write(message, '(a,i1,a,i1,a)' )'usepaw is announced to be ',usepaw,' but read usepaw is ',usepaw0,' !'
          MSG_ERROR(message)
        end if
        if (usepaw==0) then
@@ -854,8 +812,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
 !        Check the compatibility with the main code dimensioning
          if(nekb>dimekb)then
            write(message, '(a,i8,a,a,a,i3,a)' )&
-&           '  ',nekb,' components of ekb are announced',ch10,&
-&           'but dimekb=',dimekb,'.'
+            '  ',nekb,' components of ekb are announced',ch10,'but dimekb=',dimekb,'.'
            MSG_BUG(message)
          end if
          read(nunit,*)
@@ -919,15 +876,13 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
          end do
          if (lmn_size0>lmnmax) then
            write(message, '(a,i5,3a,i5,a)' )&
-&           'max. value of ',lmnmax,' for lmn_size is announced',ch10,&
-&           'but ',lmn_size0,' is read.'
+             'max. value of ',lmnmax,' for lmn_size is announced',ch10,'but ',lmn_size0,' is read.'
            MSG_BUG(message)
          end if
          if (allocated(pawtab(itypat)%dij0)) then
            if (lmn_size0>pawtab(itypat)%lmn_size) then
              write(message, '(a,i5,3a,i5,a)' )&
-&             'lmn_size=,',pawtab(itypat)%lmn_size,' is announced',ch10,&
-&             'but ',lmn_size0,' is read.'
+              'lmn_size=,',pawtab(itypat)%lmn_size,' is announced',ch10,'but ',lmn_size0,' is read.'
              MSG_BUG(message)
            end if
          end if
@@ -982,8 +937,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
 !    Check the compatibility with the main code dimensioning
      if(nekb>dimekb)then
        write(message, '(a,i8,a,a,a,i3,a)' )&
-&       '  ',nekb,' components of ekb are announced',ch10,&
-&       'but the maximum is dimekb=',dimekb,'.'
+        '  ',nekb,' components of ekb are announced',ch10,'but the maximum is dimekb=',dimekb,'.'
        MSG_BUG(message)
      end if
      if(useylm/=0)then
@@ -995,10 +949,8 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
      do itypat=1,ntypat
        read (nunit, '(13x,i4)' )ij
        do iproj=1,nproj
-         read (nunit, '(6x,3d22.14)' )&
-&         (ekb0(iproj+nproj*(ii-1),iproj+nproj*(ii-1)),ii=1,min(npsang,3))
-         if(npsang>3)read (nunit, '(6x,3d22.14)' )&
-&         (ekb0(iproj+nproj*(ii-1),iproj+nproj*(ii-1)),ii=4,npsang)
+         read (nunit, '(6x,3d22.14)' )(ekb0(iproj+nproj*(ii-1),iproj+nproj*(ii-1)),ii=1,min(npsang,3))
+         if(npsang>3)read (nunit, '(6x,3d22.14)' )(ekb0(iproj+nproj*(ii-1),iproj+nproj*(ii-1)),ii=4,npsang)
          do ii=1,npsang
            iekb=iproj+nproj*(ii-1)
            indlmn(1,iekb,itypat)=ii-1
@@ -1058,8 +1010,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
              nekb=jln
            end if
          end do
-         write(nunit, '(a,i4,a,i3,a,i4)' ) &
-&         '  Atom type= ',itypat,'   pspso=',pspso(itypat),'   nekb=',nekb
+         write(nunit, '(a,i4,a,i3,a,i4)' )'  Atom type= ',itypat,'   pspso=',pspso(itypat),'   nekb=',nekb
          write(nunit, '(a)' ) '  iln lpsang iproj  ekb(:)'
          iln0=0
          ekb0(:,:)=zero
@@ -1103,13 +1054,13 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
            end if
          end do
          write(nunit, '(a,i4,a,i3,a,i5)' ) &
-&         '  Atom type=',itypat,' basis_size=',pawtab(itypat)%basis_size,&
-&         '   lmn_size=',pawtab(itypat)%lmn_size
+          '  Atom type=',itypat,' basis_size=',pawtab(itypat)%basis_size,&
+          '   lmn_size=',pawtab(itypat)%lmn_size
          write(nunit, '(a,50i2)' ) &
-&         '    Basis functions=',orbitals(1:pawtab(itypat)%basis_size)
+          '    Basis functions=',orbitals(1:pawtab(itypat)%basis_size)
          write(nunit, '(a,f6.3,a,i2,a,f6.3)' ) &
-&         '    r_PAW= ',pawtab(itypat)%rpaw,' shape_type= ',pawtab(itypat)%shape_type,&
-&         '  r_shape= ',pawtab(itypat)%rshp
+          '    r_PAW= ',pawtab(itypat)%rpaw,' shape_type= ',pawtab(itypat)%shape_type,&
+          '  r_shape= ',pawtab(itypat)%rshp
          nekb=0
          ABI_MALLOC(dij0,(pawtab(itypat)%lmn2_size))
          ABI_MALLOC(i1,(pawtab(itypat)%lmn2_size))
@@ -1125,7 +1076,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
          end do
          write(nunit,'(a,i3,a)') '    Dij0=     (only the ',nekb,' values different from zero)'
          write(nunit,'(2a)') '       i    j     Dij0        i    j     Dij0 ',&
-&         '       i    j     Dij0        i    j     Dij0'
+          '       i    j     Dij0        i    j     Dij0'
          do ii=1,nekb,4
            write(nunit,'(3x,4(1x,i4,1x,i4,1x,es12.5))') (i1(ij),i2(ij),dij0(ij),ij=ii,min(ii+3,nekb))
          end do
@@ -1222,8 +1173,6 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
 &  pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
 &  typat,usepaw,wtk,xred,zion,znucl)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: matom,mband,mkpt,msym,mtypat,unddb,vrsddb,usepaw
@@ -1252,8 +1201,8 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
 !Check ioddb8 version number (vrsio8) against mkddb version number (vrsddb)
  if (vrsio8/=vrsddb) then
    write(message, '(a,i10,a,a,i10,a)' )&
-&   'The input/output DDB version number=',vrsio8,ch10,&
-&   'is not equal to the DDB version number=',vrsddb,'.'
+    'The input/output DDB version number=',vrsio8,ch10,&
+    'is not equal to the DDB version number=',vrsddb,'.'
    MSG_WARNING(message)
  end if
 
@@ -1272,8 +1221,8 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
  !write(std_out,'(a,i10)')' ddbvrs=',ddbvrs
  if(ddbvrs/=vrsio8 .and. ddbvrs/=vrsio8_old .and. ddbvrs/=vrsio8_old_old)then
    write(message, '(a,i10,2a,3(a,i10),a)' )&
-&   'The input DDB version number=',ddbvrs,' does not agree',ch10,&
-&   'with the allowed code DDB version numbers,',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old,' .'
+    'The input DDB version number=',ddbvrs,' does not agree',ch10,&
+    'with the allowed code DDB version numbers,',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old,' .'
    MSG_BUG(message)
  end if
 
@@ -1347,31 +1296,31 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
 !Message if the names or values are not right
  if (.not.testn.or..not.testv) then
    write(message, '(a,a,a)' )' ioddb8_in : An error has been found in one',ch10,&
-&   ' of the positive n-integers contained in the DDB : '
+    ' of the positive n-integers contained in the DDB : '
    call wrtout(std_out,message,'COLL')
    write(message, '(a)' )&
-&   '               Expected                      Found     '
+    '               Expected                      Found     '
    call wrtout(std_out,message,'COLL')
    write(message, '(a,i10,a,a,a,i10)' )&
-&   '    usepaw equal to   ',usepaw,'    ',trim(name(1)),' =',usepaw0
+    '    usepaw equal to   ',usepaw,'    ',trim(name(1)),' =',usepaw0
    call wrtout(std_out,message,'COLL')
    write(message, '(a,i10,a,a,a,i10)' )&
-&   '    natom , lower than',matom+1,'    ',trim(name(2)),' =',natom
+    '    natom , lower than',matom+1,'    ',trim(name(2)),' =',natom
    call wrtout(std_out,message,'COLL')
    write(message, '(a,i10,a,a,a,i10)' )&
-&   '    nkpt  , lower than',mkpt+1 ,'    ',trim(name(3)),' =',nkpt
+    '    nkpt  , lower than',mkpt+1 ,'    ',trim(name(3)),' =',nkpt
    call wrtout(std_out,message,'COLL')
    write(message, '(a,i10,a,a,a,i10)' )&
-&   '    nsppol, lower than',3      ,'    ',trim(name(4)),' =',nsppol
+    '    nsppol, lower than',3      ,'    ',trim(name(4)),' =',nsppol
    call wrtout(std_out,message,'COLL')
    write(message, '(a,i10,a,a,a,i10)' )&
-&   '    nsym  , lower than',msym+1 ,'    ',trim(name(5)),' =',nsym
+    '    nsym  , lower than',msym+1 ,'    ',trim(name(5)),' =',nsym
    call wrtout(std_out,message,'COLL')
    write(message, '(a,i10,a,a,a,i10)' )&
-&   '    ntypat, lower than',mtypat+1,'   ',trim(name(6)),' =',ntypat
+    '    ntypat, lower than',mtypat+1,'   ',trim(name(6)),' =',ntypat
    call wrtout(std_out,message,'COLL')
    write(message, '(a,a,a,i10)' )&
-&   '    occopt,  between 0 and 7        ',trim(name(7)),' =',occopt
+    '    occopt,  between 0 and 7        ',trim(name(7)),' =',occopt
    call wrtout(std_out,message,'COLL')
 
    MSG_ERROR('See the error message above.')
@@ -1810,8 +1759,6 @@ end subroutine ioddb8_in
 
 subroutine ddb_getdims(dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,ntypat,unddb,usepaw,vrsddb,comm)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: unddb,vrsddb,comm
@@ -1891,8 +1838,6 @@ end subroutine ddb_getdims
 
 subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
 & ntypat,unddb,usepaw,vrsddb)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2386,8 +2331,6 @@ end subroutine inprep8
 
 subroutine ddb_chkname(nmfond,nmxpct,nmxpct2)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  character(len=*),intent(in) :: nmfond,nmxpct
@@ -2506,8 +2449,6 @@ subroutine compare_ddb_variables(&
 & rprim,rprim8,dfpt_sciss,dfpt_sciss8,symrel,symrel8,&
 & tnons,tnons8,tolwfr,tolwfr8,typat,typat8,usepaw,wtk,wtk8,&
 & xred,xred8,zion,zion8)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2837,8 +2778,6 @@ end subroutine compare_ddb_variables
 
 subroutine chkr8(reali,realt,name,tol)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  real(dp),intent(in) :: reali,realt,tol
@@ -2891,8 +2830,6 @@ subroutine chkr8(reali,realt,name,tol)
 !! SOURCE
 
 subroutine chki8(inti,intt,name)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2998,8 +2935,6 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
 &  pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
 &  typat,usepaw,wtk,xred,zion,znucl)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: matom,mband,mkpt,msym,mtypat,unddb,vrsddb
@@ -3033,9 +2968,9 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
 !(vrsddb)
  if (vrsio8/=vrsddb) then
    write(message, '(a,a,a,i10,a,a,i10,a)' )&
-&   ' ddb_io_out: WARNING -',ch10,&
-&   '  The input/output DDB version number=',vrsio8,ch10,&
-&   '  is not equal to the DDB version number=',vrsddb,'.'
+   ' ddb_io_out: WARNING -',ch10,&
+   '  The input/output DDB version number=',vrsio8,ch10,&
+   '  is not equal to the DDB version number=',vrsddb,'.'
    call wrtout(std_out,message,'COLL')
  end if
 
@@ -3050,8 +2985,8 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
 
 !Write the heading
  write(unddb, '(/,a,/,a,i10,/,/,a,a,/)' ) &
-& ' **** DERIVATIVE DATABASE ****    ',&
-& '+DDB, Version number',vrsddb,' ',trim(dscrpt)
+ ' **** DERIVATIVE DATABASE ****    ',&
+ '+DDB, Version number',vrsddb,' ',trim(dscrpt)
 
 !Write the descriptive data
 !1. usepaw
@@ -3074,8 +3009,7 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
    name(1)='    nband'
    do iline=1,(nkpt+11)/12
      if(iline==(nkpt+11)/12)im=nkpt-12*(iline-1)
-     write(unddb, '(1x,a9,5x,12i5)' )name(1),&
-&     (nband((iline-1)*12+ii),ii=1,im)
+     write(unddb, '(1x,a9,5x,12i5)' )name(1),(nband((iline-1)*12+ii),ii=1,im)
      name(1)='         '
    end do
    bantot=0
@@ -3094,8 +3028,7 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
  name(1)='      amu'
  do iline=1,(ntypat+2)/3
    if(iline==(ntypat+2)/3)im=ntypat-3*(iline-1)
-   write (unddb, '(1x,a9,3d22.14)' )name(1),&
-&   (amu((iline-1)*3+ii),ii=1,im)
+   write (unddb, '(1x,a9,3d22.14)' )name(1),(amu((iline-1)*3+ii),ii=1,im)
    name(1)='         '
  end do
 !11. dilatmx
@@ -3117,8 +3050,7 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
 !17. kpt
  name(1)='      kpt'
  do iline=1,nkpt
-   write (unddb, '(1x,a9,3d22.14)' )name(1),&
-&   (kpt(ii,iline),ii=1,3)
+   write (unddb, '(1x,a9,3d22.14)' )name(1),(kpt(ii,iline),ii=1,3)
    name(1)='      '
  end do
 !18. kptnrm
@@ -3135,8 +3067,7 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
    name(1)='      occ'
    do iline=1,(bantot+2)/3
      if(iline==(bantot+2)/3)im=bantot-3*(iline-1)
-     write(unddb, '(1x,a9,3d22.14)' )name(1),&
-&     (occ((iline-1)*3+ii),ii=1,im)
+     write(unddb, '(1x,a9,3d22.14)' )name(1),(occ((iline-1)*3+ii),ii=1,im)
      name(1)='         '
    end do
  else
@@ -3144,16 +3075,14 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
    name(1)='      occ'
    do iline=1,(nband(1)+2)/3
      if(iline==(nband(1)+2)/3)im=nband(1)-3*(iline-1)
-     write(unddb, '(1x,a9,3d22.14)' )name(1),&
-&     (occ((iline-1)*3+ii),ii=1,im)
+     write(unddb, '(1x,a9,3d22.14)' )name(1),(occ((iline-1)*3+ii),ii=1,im)
      name(1)='         '
    end do
  end if
 !23. rprim
  name(1)='    rprim'
  do iline=1,3
-   write(unddb, '(1x,a9,3d22.14)' )name(1),&
-&   (rprim(ii,iline),ii=1,3)
+   write(unddb, '(1x,a9,3d22.14)' )name(1),(rprim(ii,iline),ii=1,3)
    name(1)='      '
  end do
 !24. dfpt_sciss
@@ -3161,8 +3090,7 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
 !25. spinat
  name(1)='   spinat'
  do iline=1,natom
-   write(unddb, '(1x,a9,3d22.14)' )name(1),&
-&   (spinat(ii,iline),ii=1,3)
+   write(unddb, '(1x,a9,3d22.14)' )name(1),(spinat(ii,iline),ii=1,3)
    name(1)='         '
  end do
 !26. symafm
@@ -3170,22 +3098,19 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
  name(1)='   symafm'
  do iline=1,(nsym+11)/12
    if(iline==(nsym+11)/12)im=nsym-12*(iline-1)
-   write(unddb, '(1x,a9,5x,12i5)' )name(1),&
-&   (symafm((iline-1)*12+ii),ii=1,im)
+   write(unddb, '(1x,a9,5x,12i5)' )name(1),(symafm((iline-1)*12+ii),ii=1,im)
    name(1)='         '
  end do
 !27. symrel
  name(1)='   symrel'
  do iline=1,nsym
-   write(unddb, '(1x,a9,5x,9i5)' )name(1),&
-&   ((symrel(ii,ij,iline),ii=1,3),ij=1,3)
+   write(unddb, '(1x,a9,5x,9i5)' )name(1),((symrel(ii,ij,iline),ii=1,3),ij=1,3)
    name(1)='         '
  end do
 !28. tnons
  name(1)='    tnons'
  do iline=1,nsym
-   write(unddb, '(1x,a9,3d22.14)' )name(1),&
-&   (tnons(ii,iline),ii=1,3)
+   write(unddb, '(1x,a9,3d22.14)' )name(1),(tnons(ii,iline),ii=1,3)
    name(1)='         '
  end do
 !29. tolwfr
@@ -3199,8 +3124,7 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
  name(1)='    typat'
  do iline=1,(natom+11)/12
    if(iline==(natom+11)/12)im=natom-12*(iline-1)
-   write(unddb, '(1x,a9,5x,12i5)' )name(1),&
-&   (typat((iline-1)*12+ii),ii=1,im)
+   write(unddb, '(1x,a9,5x,12i5)' )name(1),(typat((iline-1)*12+ii),ii=1,im)
    name(1)='         '
  end do
 !33. wtk
@@ -3208,15 +3132,13 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
  im=3
  do iline=1,(nkpt+2)/3
    if(iline==(nkpt+2)/3)im=nkpt-3*(iline-1)
-   write(unddb, '(1x,a9,3d22.14)' )name(1),&
-&   (wtk((iline-1)*3+ii),ii=1,im)
+   write(unddb, '(1x,a9,3d22.14)' )name(1),(wtk((iline-1)*3+ii),ii=1,im)
    name(1)='         '
  end do
 !34. xred
  name(1)='     xred'
  do iline=1,natom
-   write(unddb, '(1x,a9,3d22.14)' )name(1),&
-&   (xred(ii,iline),ii=1,3)
+   write(unddb, '(1x,a9,3d22.14)' )name(1),(xred(ii,iline),ii=1,3)
    name(1)='         '
  end do
 !35. znucl
@@ -3224,8 +3146,7 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
  im=3
  do iline=1,(ntypat+2)/3
    if(iline==(ntypat+2)/3)im=ntypat-3*(iline-1)
-   write(unddb, '(1x,a9,3d22.14)' )name(1),&
-&   (znucl((iline-1)*3+ii),ii=1,im)
+   write(unddb, '(1x,a9,3d22.14)' )name(1),(znucl((iline-1)*3+ii),ii=1,im)
    name(1)='         '
  end do
 !36. zion
@@ -3233,8 +3154,7 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
  im=3
  do iline=1,(ntypat+2)/3
    if(iline==(ntypat+2)/3)im=ntypat-3*(iline-1)
-   write(unddb, '(1x,a9,3d22.14)' )name(1),&
-&   (zion((iline-1)*3+ii),ii=1,im)
+   write(unddb, '(1x,a9,3d22.14)' )name(1),(zion((iline-1)*3+ii),ii=1,im)
    name(1)='         '
  end do
 

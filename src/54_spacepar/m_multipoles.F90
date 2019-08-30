@@ -27,13 +27,13 @@
 module m_multipoles
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_distribfft
  use m_xmpi
  use m_atomdata
 
+ use defs_abitypes,    only : mpi_type
  use m_io_tools, only : open_file
  use m_geometry, only : xred2xcart
  use m_mpinfo,   only : ptabs_fourdp

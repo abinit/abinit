@@ -80,8 +80,6 @@
 program optic
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_errors
  use m_xmpi
  use m_xomp
@@ -98,6 +96,7 @@ program optic
  use netcdf
 #endif
 
+ use defs_datatypes,   only : ebands_t
  use m_specialmsg,     only : specialmsg_getcount, herald
  use m_time ,          only : asctime, timein
  use m_symtk,          only : mati3inv, matr3inv

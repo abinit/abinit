@@ -31,9 +31,11 @@
 module m_entropyDMFT
 
   use defs_basis
-  use defs_abitypes
   use m_errors
+  use m_abicore
   use m_xmpi
+  use m_dtset
+
   use m_energies, only : energies_type, energies_eval_eint
   use m_splines, only : spline_integrate, spline, splint
   use m_pawang, only : pawang_type

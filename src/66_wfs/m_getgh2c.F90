@@ -27,10 +27,10 @@
 module m_getgh2c
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
 
+ use defs_abitypes, only : mpi_type
  use m_pawcprj,     only : pawcprj_type,pawcprj_alloc,pawcprj_free
  use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type
  use m_nonlop,      only : nonlop

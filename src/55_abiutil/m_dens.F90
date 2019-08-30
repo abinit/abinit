@@ -89,8 +89,6 @@ contains
 subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
   natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion,prtcharge,hcharge,hden,hweight)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nrx,nry,nrz,ntypat,prtcharge,mpoint
@@ -432,8 +430,6 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
                       mpi_enreg,nfft,ngfft,ntypat,ratsph,rhor, &
                       typat,Vmagconstr,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,magconon,nfft,nspden
@@ -676,8 +672,6 @@ end subroutine mag_constr
 
 subroutine mag_constr_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsph,rhor,rprimd,spinat,typat,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,magconon,nspden,nfft,ntypat
@@ -842,8 +836,6 @@ end subroutine mag_constr_e
 
 subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph,rhor,rprimd,typat,ucvol,xred,&
 &    prtopt,cplex,intgden,dentot)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1336,8 +1328,6 @@ end subroutine calcdensph
 
 function radsmear(r, rsph, rsm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp) :: radsmear
@@ -1399,8 +1389,6 @@ end function radsmear
 !! SOURCE
 
 subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -88,12 +88,11 @@
 program abinit
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_build_info
  use m_cppopts_dumper
  use m_optim_dumper
  use m_abicore
+ use m_dtset
  use m_results_out
  use m_xmpi
  use m_xomp
@@ -105,9 +104,12 @@ program abinit
  use mpi
 #endif
 
+ use defs_datatypes, only : pspheader_type
+ use defs_abitypes, only : MPI_type
+ use m_parser,      only : ab_dimensions
  use m_time ,       only : asctime, sec2str, timein, time_set_papiopt, timab
  use m_fstrings,    only : sjoin, strcat, itoa, yesno, ljust
- use m_io_tools,    only : open_file, flush_unit, delete_file, num_opened_units, show_units
+ use m_io_tools,    only : flush_unit, delete_file
  use m_specialmsg,  only : specialmsg_getcount, herald
  use m_exit,        only : get_timelimit_string
  use m_atomdata,    only : znucl2symbol
@@ -345,7 +347,7 @@ program abinit
 
 !13) Perform additional checks on input data
  call timab(45,3,tsec)
- call chkinp(dtsets,ab_out,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
+ call chkinp(dtsets, ab_out, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads, xmpi_world)
 
 !Check whether the string only contains valid keywords
  call chkvars(string)

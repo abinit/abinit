@@ -27,13 +27,13 @@
 module m_predict_neb
 
  use defs_basis
- use defs_abitypes
  use m_splines
  use m_mep
  use m_abicore
  use m_errors
  use m_xmpi
 
+ use defs_abitypes, only : MPI_type
  use m_results_img, only : results_img_type, gather_array_img, scatter_array_img, get_geometry_img
 
  implicit none

@@ -27,8 +27,6 @@
 MODULE m_sigma
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_xmpi
  use m_abicore
  use m_errors
@@ -40,6 +38,9 @@ MODULE m_sigma
 #endif
  use m_wfd
 
+
+ use defs_datatypes,   only : ebands_t
+ use defs_abitypes,    only : MPI_type
  use m_numeric_tools,  only : c2r
  use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, sigma_needs_w
  use m_crystal,        only : crystal_t

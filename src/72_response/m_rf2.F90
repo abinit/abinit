@@ -28,12 +28,12 @@
 MODULE m_rf2
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_hamiltonian
  use m_cgtools
 
+ use defs_abitypes, only : MPI_type
  use m_getgh1c,     only : getgh1c
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free, pawcprj_output
  use m_getghc,      only : getghc
@@ -157,8 +157,6 @@ CONTAINS  !=====================================================================
 
 subroutine rf2_getidir(idir1,idir2,idir)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: idir1,idir2
@@ -198,8 +196,6 @@ end subroutine rf2_getidir
 !! SOURCE
 
 subroutine rf2_getidirs(idir,idir1,idir2)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -280,8 +276,6 @@ end subroutine rf2_getidirs
 
 subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
                                  jband,debug_mode,vi,v1j,v2j)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -447,8 +441,6 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 &                                jband,gs_hamkq,gvnlx1,idir,ipert,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
 &                                debug_mode,prtvol,rf_hamk_idir,size_cprj,size_wf,&
 &                                conj,enl,ffnl1,ffnl1_test) ! optional
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -649,7 +641,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
      enlout = zero
 
 !    Change the pointer ffnl_k to ffnl1_test (idir_ffnl=0, for nonlop with signs=1)
-     call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnl1_test)
+     call gs_hamkq%load_k(ffnl_k=ffnl1_test)
 
      signs=1
      dotr2 = 0
@@ -758,7 +750,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
      end if
 
 !    Change the pointer ffnl_k back to ffnl1 (idir_ffnl=4, for nonlop with signs=2)
-     call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnl1)
+     call gs_hamkq%load_k(ffnl_k=ffnl1)
 
      if (associated(enl_ptr)) then
        nullify(enl_ptr)
@@ -777,7 +769,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
  else
 
    h_cwave = zero
-   MSG_ERROR(" rf2_apply_hamiltonian can be used only for : 0<=ipert<=natom+2 and natom+10<=ipert<=2*natom+11.")
+   MSG_ERROR(" rf2_apply_hamiltonian can be used only for: 0<=ipert<=natom+2 and natom+10<=ipert<=2*natom+11.")
    return
 
  end if
@@ -810,8 +802,6 @@ end subroutine rf2_apply_hamiltonian
 !! SOURCE
 
 subroutine rf2_destroy(rf2)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars

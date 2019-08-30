@@ -29,13 +29,15 @@
 MODULE m_qparticles
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_hdr
  use m_errors
  use m_nctk
+ use m_distribfft
 
+
+ use defs_datatypes,   only : pseudopotential_type, ebands_t
+ use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : open_file, file_exists, isncfile
  use m_fstrings,       only : int2char10, itoa, sjoin
  use m_numeric_tools,  only : linfit, c2r, set2unit, interpol3d, rhophi

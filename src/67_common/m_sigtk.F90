@@ -37,11 +37,11 @@ module m_sigtk
 #endif
  use m_nctk
  use m_hdr
+ use m_dtset
 
  use m_fstrings,     only : sjoin, ltoa, strcat
  use m_io_tools,     only : open_file
  use defs_datatypes, only : ebands_t, pseudopotential_type
- use defs_abitypes,  only : dataset_type, hdr_type
  use defs_wvltypes,  only : wvl_internal_type
  use m_pawtab,       only : pawtab_type
  use m_kpts,         only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
@@ -517,7 +517,7 @@ end subroutine sigtk_kcalc_from_erange
 !!  sigtk_kpts_in_erange
 !!
 !! FUNCTION
-!!  Use star functions and [[einterp]] to interpolate electron energies onto fine dense defined 
+!!  Use star functions and [[einterp]] to interpolate electron energies onto fine dense defined
 !!  by [[sigma_ngkpt]] and [[sigma_shiftk]].
 !!  Find k-points inside (electron/hole) pockets according to the values specifed in [[sigma_erange]].
 !!  Write KERANGE.nc file with the tables required by the code to automate NSCF band structure calculations
