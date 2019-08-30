@@ -215,22 +215,21 @@ contains
     sp(:) = reshape(spin, (/ 3*self%nspin /))
     disp(:) = reshape(displacement, (/ 3*self%natom /))
 
-    write(*,*) 'Calculating coupling terms'
-
     ! oiju contribution
     if(present(bfield)) then
       b1(:) = 0.0d0
       call self%oiju_sc%vec_product(1, sp, 3, disp, 2, b1)
+      ! test permutation sym      call self%oiju_sc%vec_product(2, sp, 3, disp, 1, b1)
       btmp = reshape(b1, (/ 3, self%nspin /))
       do ii = 1, self%nspin
         btmp(:, ii) = btmp(:,ii)/self%ms(ii)
       enddo
       bfield(:,:) = bfield(:,:) + btmp(:,:)
-      write(*,*) 'Magnetic fields are'
+      write(201,*) 'Magnetic fields are'
       do ii = 1, self%nspin
-        !if(dot_product(bfield(:,ii), bfield(:,ii)).gt.1d-16) then
-        !  write(*,*) ii, bfield(:,ii)
-        !endif
+        if(dot_product(bfield(:,ii), bfield(:,ii)).gt.1d-16) then
+          write(201,*) ii, bfield(:,ii)
+        endif
       enddo
     endif
 
@@ -238,11 +237,11 @@ contains
       f1(:) = 0.0d0
       call self%oiju_sc%vec_product(1, sp, 2, sp, 3, f1)
       force(:,:) = force(:,:) + reshape(f1, (/ 3, self%natom /))
-      write(*,*) 'Forces are'
+      write(200,*) 'Forces are'
       do ii = 1, self%natom
-        !if(dot_product(force(:,ii), force(:,ii)).gt.1d-16) then
-        !  write(*,*) ii, force(:,ii)
-        !endif
+        if(dot_product(force(:,ii), force(:,ii)).gt.1d-16) then
+          write(200,*) ii, force(:,ii)
+        endif
       enddo
     endif
 

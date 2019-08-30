@@ -181,6 +181,7 @@ contains
 
   !---------------------------------------
   ! reading liu parameters from ncdf file
+  ! TODO: test
   !---------------------------------------
   subroutine read_liu(self, ncid)
     class(slc_primitive_potential_t), intent(inout) :: self
@@ -217,9 +218,8 @@ contains
       ncerr = nf90_get_var(ncid, varid, vallist)
       call netcdf_check(ncerr, "when reading Liu_valuelist")
 
-      !change units from eV to Ha
-      !do we also need to do something about bohr and anstroem and magnetic moments?
-      vallist(:) = vallist(:)*eV_Ha
+      !change units from eV to Ha and Ang to Bohr
+      vallist(:) = vallist(:)*eV_Ha*Bohr_Ang
   
       !fill the sparse matrix for liu parameters
       call self%set_liu(ndata, ilist, ulist, Rulist, vallist)
@@ -236,6 +236,7 @@ contains
 
   !----------------------------------------
   ! reading niuv parameters from ncdf file
+  ! TODO: test
   !----------------------------------------
   subroutine read_niuv(self, ncid)
     class(slc_primitive_potential_t), intent(inout) :: self
@@ -281,9 +282,8 @@ contains
       ncerr = nf90_get_var(ncid, varid, vallist)
       call netcdf_check(ncerr, "when reading Niuv_valuelist")
 
-      !change units from eV to Ha
-      !do we also need to do something about bohr and anstroem and magnetic moments?
-      vallist(:) = vallist(:)*eV_Ha
+      !change units from eV to Ha and Ang to Bohr
+      vallist(:) = vallist(:)*eV_Ha*(Bohr_Ang*Bohr_Ang)
   
       !fill the sparse matrix for liu parameters
       !call self%set_niuv(ndata, ilist, ulist, vlist, Rulist, Rvlist vallist)
@@ -302,7 +302,7 @@ contains
 
   !---------------------------------------
   ! reading oiju parameters from ncdf file
-  ! not according to agreed input variables
+  ! TODO: change variable names
   !---------------------------------------
   subroutine read_oiju(self, ncid)  
     class(slc_primitive_potential_t), intent(inout) :: self
@@ -352,9 +352,8 @@ contains
 
       write(std_out,'(A8,I10,A11)') 'O_iju: ', ndata, 'terms read'  
 
-      !change units from eV to Ha
-      !do we also need anstroem to bohr and magnetic moments?
-      vallist(:) = vallist(:)*eV_Ha
+      !change units from eV to Ha and Ang to Bohr
+      vallist(:) = vallist(:)*eV_Ha*Bohr_Ang
   
       !fill the sparse matrix for oiju parameters
       call self%set_oiju(ndata, ilist, jlist, ulist, Rjlist, Rulist, vallist)
@@ -372,6 +371,7 @@ contains
 
   !-----------------------------------------
   ! reading tijuv parameters from ncdf file
+  ! TODO: test
   !-----------------------------------------
   subroutine read_tijuv(self, ncid)
     class(slc_primitive_potential_t), intent(inout) :: self
@@ -419,9 +419,8 @@ contains
       ncerr = nf90_get_var(ncid, varid, vallist)
       call netcdf_check(ncerr, "when reading Tijuv_valuelist")
 
-      !change units from eV to Ha
-      !do we also need to do something about bohr and anstroem and magnetic moments?
-      vallist(:) = vallist(:)*eV_Ha
+      !change units from eV to Ha and Ang to Bohr
+      vallist(:) = vallist(:)*eV_Ha*(Bohr_Ang*Bohr_Ang)
   
       !fill the sparse matrix for liu parameters
       !call self%set_tijuv(ndata, ilist, jlist, ulist, vlist, Rjlist, Rulist, Rvlist vallist)
@@ -442,7 +441,7 @@ contains
 
   !---------------------------------------
   ! store liu parameters in sparse matrix
-  ! untested!!!
+  ! TODO: test
   !---------------------------------------
   subroutine set_liu(self, nn, ilist, ulist, Rulist, vallist)
 
@@ -485,7 +484,7 @@ contains
 
   !----------------------------------------
   ! store oiju parameters in sparse matrix
-  ! untested!!!
+  ! TODO: test
   !----------------------------------------
   subroutine set_oiju(self, nn, ilist, jlist, ulist, Rjlist, Rulist, vallist)
 
@@ -499,7 +498,7 @@ contains
     real(dp),                         intent(in)    :: vallist(nn)
 
     integer :: idx
-
+   
     call self%oiju%initialize(mshape=[-1, -1, self%nspin*3, self%nspin*3, self%natom*3])
     
     if (xmpi_comm_rank(xmpi_world)==0) then
@@ -507,11 +506,11 @@ contains
         call self%set_oiju_1term(ilist(idx), jlist(idx), ulist(idx), Rjlist(:,idx), Rulist(:,idx), vallist(idx))
       end do
     endif
+
   end subroutine set_oiju
 
   !-------------------------------------
   ! add one entry to sparse oiju matrix
-  ! untested!!!
   !-------------------------------------
   subroutine set_oiju_1term(self, ii, jj, uu, Rj, Ru, val)
     class(slc_primitive_potential_t), intent(inout) :: self
@@ -533,6 +532,7 @@ contains
 
   !-----------------------------------------------------------------
   ! transfer parameter information from primitive cell to supercell
+  ! TODO: test
   !-----------------------------------------------------------------
   subroutine fill_supercell(self, scmaker, params, scpot)
     class(slc_primitive_potential_t) , intent(inout) :: self
@@ -554,10 +554,12 @@ contains
     call xmpi_bcast(sc_nspin, master, comm, ierr)
     call xmpi_bcast(sc_natom, master, comm, ierr)
     ABI_DATATYPE_ALLOCATE_SCALAR(slc_potential_t, scpot)
+
     select type(scpot) ! use select type because properties only defined for slc_potential are used
     type is (slc_potential_t) 
       call scpot%initialize(sc_nspin, sc_natom)
       call scpot%set_params(params)
+      ! fill different coupling terms
       if (iam_master) then
         call self%fill_liu(scpot, scmaker)
         call self%fill_oiju(scpot, scmaker)
@@ -574,6 +576,10 @@ contains
     end select
   end subroutine fill_supercell
 
+  !--------------------------------------------------------
+  ! Check for each term if it is needed in the calculation
+  ! and present in the ncdf input then put into supercell
+  !--------------------------------------------------------
   subroutine fill_liu(self, scpot, scmaker)
     class(slc_primitive_potential_t) , intent(inout) :: self
     type(supercell_maker_t),           intent(inout) :: scmaker
@@ -589,6 +595,22 @@ contains
       endif
     endif
   end subroutine fill_liu
+  
+  subroutine fill_niuv(self, scpot, scmaker)
+    class(slc_primitive_potential_t) , intent(inout) :: self
+    type(supercell_maker_t),           intent(inout) :: scmaker
+    class(slc_potential_t),            intent(inout) :: scpot
+
+    if(scpot%has_linquad) then
+      if(self%has_linquad) then
+        call self%niuv%sum_duplicates()
+        !call self%set_niuv_sc(scpot, scmaker)
+      else
+        write(std_out,'(A55)') 'No parameters for linear-quadratic coupling available'
+        scpot%has_linquad = .False.
+      endif
+    endif
+  end subroutine fill_niuv
 
   subroutine fill_oiju(self, scpot, scmaker)
     class(slc_primitive_potential_t) , intent(inout) :: self
@@ -606,22 +628,6 @@ contains
      endif
   end subroutine fill_oiju
 
-  subroutine fill_niuv(self, scpot, scmaker)
-    class(slc_primitive_potential_t) , intent(inout) :: self
-    type(supercell_maker_t),           intent(inout) :: scmaker
-    class(slc_potential_t),            intent(inout) :: scpot
-
-    if(scpot%has_linquad) then
-      if(self%has_linquad) then
-        call self%niuv%sum_duplicates()
-        !call self%set_niuv_sc(scpot, scmaker)
-      else
-        write(std_out,'(A55)') 'No parameters for linear-quadratic coupling available'
-        scpot%has_linquad = .False.
-      endif
-    endif
-  end subroutine fill_niuv
-
   subroutine fill_tijuv(self, scpot, scmaker)
     class(slc_primitive_potential_t) , intent(inout) :: self
     type(supercell_maker_t),           intent(inout) :: scmaker
@@ -638,6 +644,10 @@ contains
     endif
   end subroutine fill_tijuv
 
+  !------------------------------
+  ! fill oiju terms in supercell
+  ! TODO: test
+  !------------------------------
   subroutine set_oiju_sc(self, scpot, scmaker)
     class(slc_primitive_potential_t), intent(inout) :: self
     type(slc_potential_t),            intent(inout) :: scpot
@@ -658,7 +668,7 @@ contains
       call scpot%oiju_sc%initialize(mshape=[-1, -1, self%nspin*3, self%nspin*3, self%natom*3])
     endif
 
-    do inz=1, 1 !self%oiju%nnz
+    do inz=1, self%oiju%nnz
       oiju_ind=self%oiju%get_ind_inz(inz)
       iRj=oiju_ind(1)
       iRu=oiju_ind(2)

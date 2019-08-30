@@ -797,26 +797,26 @@ contains
     ABI_DATATYPE_ALLOCATE_SCALAR(spin_potential_t, scpot)
     select type(scpot) ! use select type because properties only defined for spin_potential is used.
     type is (spin_potential_t) 
-       call scpot%initialize(sc_nspin)
-       if (iam_master) then
-          call self%coeff%sum_duplicates()
-          do inz=1, self%coeff%nnz
-             ind_Rij=self%coeff%get_ind_inz(inz)
-             iR=ind_Rij(1)
-             ii=ind_Rij(2)
-             ij=ind_Rij(3)
-             R=self%Rlist%data(:,iR)
-             call scmaker%trans_i(nbasis=nspin*3, i=ii, i_sc=i_sc)
-             call scmaker%trans_j_and_Rj(nbasis=nspin*3, j=ij, Rj=R, j_sc=j_sc, Rj_sc=Rj_sc)
-             val_sc(:)= self%coeff%val%data(inz)
-             do i=1, scmaker%ncells
-                call scpot%add_bilinear_term(i_sc(i), j_sc(i), val_sc(i))
-             end do
-             if(allocated(i_sc)) ABI_DEALLOCATE(i_sc)
-             if(allocated(j_sc)) ABI_DEALLOCATE(j_sc)
-             if(allocated(Rj_sc)) ABI_DEALLOCATE(Rj_sc)
+      call scpot%initialize(sc_nspin)
+      if (iam_master) then
+        call self%coeff%sum_duplicates()
+        do inz=1, self%coeff%nnz
+          ind_Rij=self%coeff%get_ind_inz(inz)
+          iR=ind_Rij(1)
+          ii=ind_Rij(2)
+          ij=ind_Rij(3)
+          R=self%Rlist%data(:,iR)
+          call scmaker%trans_i(nbasis=nspin*3, i=ii, i_sc=i_sc)
+          call scmaker%trans_j_and_Rj(nbasis=nspin*3, j=ij, Rj=R, j_sc=j_sc, Rj_sc=Rj_sc)
+          val_sc(:)= self%coeff%val%data(inz)
+          do i=1, scmaker%ncells
+            call scpot%add_bilinear_term(i_sc(i), j_sc(i), val_sc(i))
           end do
-       endif
+          if(allocated(i_sc)) ABI_DEALLOCATE(i_sc)
+          if(allocated(j_sc)) ABI_DEALLOCATE(j_sc)
+          if(allocated(Rj_sc)) ABI_DEALLOCATE(Rj_sc)
+        end do
+      endif
     end select
   end subroutine fill_supercell
 
