@@ -249,43 +249,45 @@ contains
   !-------------------------------------------------------------------!
   subroutine group_by_1dim(self, ngroup, i1_list, istartend)
     class(ndcoo_mat_t), intent(inout) :: self
-    integer, intent(inout) :: ngroup
+    integer,            intent(inout) :: ngroup
     integer, allocatable, intent(inout) :: i1_list(:), istartend(:)
+
     integer :: i, ii
     type(int_array_type) :: j1, jstartend
+
     if (.not. (self%is_unique))  then
-       call self%sum_duplicates()
+      call self%sum_duplicates()
     end if
     if (self%nnz<1) then
-       ngroup=0
+      ngroup=0
     else if (self%nnz==1) then
-       i=1
-       ii=self%ind%data(1,i)
-       call j1%push(ii)
-       call jstartend%push(1)
-       call jstartend%push(2)
+      i=1
+      ii=self%ind%data(1,i)
+      call j1%push(ii)
+      call jstartend%push(1)
+      call jstartend%push(2)
     else
-       i=1
-       ii=self%ind%data(1,i)
-       call j1%push(ii)
-       call jstartend%push(i)
-       do i=2, self%nnz
-          ii=self%ind%data(1,i)
-          if(ii == self%ind%data(1, i-1)) then
-             cycle
-          else
-             call j1%push(ii)
-             call jstartend%push(i)
-          end if
-       end do
-       call jstartend%push(self%nnz+1)
+      i=1
+      ii=self%ind%data(1,i)
+      call j1%push(ii)
+      call jstartend%push(i)
+      do i=2, self%nnz
+        ii=self%ind%data(1,i)
+        if(ii == self%ind%data(1, i-1)) then
+          cycle
+        else
+          call j1%push(ii)
+          call jstartend%push(i)
+        end if
+      end do
+      call jstartend%push(self%nnz+1)
     end if
     ngroup=j1%size
     if(ngroup>0) then
-       ABI_ALLOCATE(i1_list, (ngroup))
-       ABI_ALLOCATE(istartend, (ngroup+1))
-       i1_list(:)=j1%data(1: j1%size)
-       istartend(:)=jstartend%data(1: jstartend%size)
+      ABI_ALLOCATE(i1_list, (ngroup))
+      ABI_ALLOCATE(istartend, (ngroup+1))
+      i1_list(:)=j1%data(1: j1%size)
+      istartend(:)=jstartend%data(1: jstartend%size)
     end if
     call j1%finalize()
     call jstartend%finalize()
