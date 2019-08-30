@@ -3059,8 +3059,8 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
 & rmet(2,2)+rmet(2,3)+rmet(3,1)+rmet(3,2)+rmet(3,3)
  recip=gmet(1,1)+gmet(1,2)+gmet(1,3)+gmet(2,1)+&
 & gmet(2,2)+gmet(2,3)+gmet(3,1)+gmet(3,2)+gmet(3,3)
-! eta=pi*(dble(nng)/dble(nnr))*sqrt(1.69_dp*recip/direct)
- eta=1.0_dp
+ eta=pi*(dble(nng)/dble(nnr))*sqrt(1.69_dp*recip/direct)
+! eta=1.0_dp
 
 !Test Ewald s summation
 !eta=1.2_dp*eta
@@ -3200,7 +3200,7 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
 
 !Do sums over real space:
  reta=sqrt(eta)
- reta3m=-eta*reta
+ reta3m=eta*reta
  fac=4._dp/3.0_dp/sqrt(pi)
  nr=0
  do
