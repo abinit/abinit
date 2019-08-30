@@ -730,7 +730,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  if (restart == 0) then
    call sigma%write(dtset, cryst, ebands, wfk_hdr, dtfil, comm)
  else
-   ! Open file inside ncwrite_comm to perform parallel IO if k
+   ! Open file inside ncwrite_comm to perform parallel IO if kpt parallelism.
    if (sigma%ncwrite_comm%value /= xmpi_comm_null) then
 #ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_modify(sigma%ncid, sigeph_path, sigma%ncwrite_comm%value))

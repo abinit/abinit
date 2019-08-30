@@ -536,10 +536,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    nbvw=MAXVAL(ibocc)
    nbcw=Ep%nbnds-nbvw
    write(msg,'(4a,i0,2a,i0,2a,i0,a)')ch10,&
-&   '- screening: taking advantage of time-reversal symmetry ',ch10,&
-&   '- Maximum band index for partially occupied states nbvw = ',nbvw,ch10,&
-&   '- Remaining bands to be divided among processors   nbcw = ',nbcw,ch10,&
-&   '- Number of bands treated by each node ~',nbcw/nprocs,ch10
+    '- screening: taking advantage of time-reversal symmetry ',ch10,&
+    '- Maximum band index for partially occupied states nbvw = ',nbvw,ch10,&
+    '- Remaining bands to be divided among processors   nbcw = ',nbcw,ch10,&
+    '- Number of bands treated by each node ~',nbcw/nprocs,ch10
    call wrtout(ab_out,msg,'COLL')
    if (Cryst%timrev/=2) then
      MSG_ERROR('Time-reversal cannot be used since cryst%timrev/=2')

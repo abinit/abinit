@@ -277,8 +277,8 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
 !arrays
  integer :: kptrlatt(3,3)
  integer,allocatable :: full2ebands(:,:),bz2ibz(:), fs2bz(:),indkk(:,:) !,fs2ibz(:)
- real(dp) :: rlatt(3,3), klatt(3,3)
  real(dp),allocatable :: kbz(:,:), tmp_eigen(:),bdelta(:,:),btheta(:,:)
+ real(dp) :: rlatt(3,3), klatt(3,3)
 
 ! *************************************************************************
 
@@ -342,7 +342,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  end do
 
  ! Select only the k-points in the BZ that are sufficiently close to the FS.
- ! FIXME: Do not know why but lamda depends on eph_fsewin if gaussian
+ ! FIXME: Do not know why but lambda depends on eph_fsewin if gaussian
  ABI_CHECK(dtset%eph_fsewin > tol12, "dtset%eph_fsewin < tol12")
  elow = ebands%fermie - dtset%eph_fsewin
  ehigh = ebands%fermie + dtset%eph_fsewin
@@ -619,6 +619,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
  wtk = zero
  select case (fs%eph_intmeth)
  case (1)
+   ! Gaussian method (constant or adaptive method from group velocities)
    sigma = fs%eph_fsmear
    do ib2=1,nband_k
      band2 = ib2 + bstart_k - 1
@@ -638,8 +639,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
    end do
 
  case (2)
-   ! Copy weights in the correct position.
-   ABI_UNUSED(ik_fs)
+   ! Tetrahedron method. Copy weights in the correct position.
    do ib2=1,nband_k
      band2 = ib2 + bstart_k - fs%bmin
      do ib1=1,nband_kq
@@ -651,6 +651,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
        !                abs(wtk(ib1, ib2) - fs%dbldelta_tetra_weights_kfs(band1, band2, ik_fs))
 
        ! libtetrabz_dbldelta seems to report weights in this order.
+       ABI_UNUSED(ik_fs)
        !wtk(ib1, ib2) = fs%dbldelta_tetra_weights_kfs(band1, band2, ik_fs)
      end do
    end do
@@ -723,9 +724,9 @@ subroutine fstab_print(fstab, header, unit, prtvol)
    write(my_unt,"(a,i0,a,f5.1,a)") &
      "    Number of BZ k-points close to the Fermi surface: ",fs%nkfs," [", (100.0_dp * fs%nkfs) / fs%nktot, " %]"
    write(my_unt,"(a,i0)")"    Maximum number of bands crossing the Fermi level: ",fs%maxnb
-   write(my_unt,"(2(a,i0))")"    min band: ",minval(fs%bstart_cnt_ibz(1,:), mask=fs%bstart_cnt_ibz(1,:) /= -1)
-   write(my_unt,"(2(a,i0))")"    Max band: ",maxval(fs%bstart_cnt_ibz(1,:)+fs%bstart_cnt_ibz(2,:) - 1, &
-                                                    mask=fs%bstart_cnt_ibz(1,:) /= -1)
+   write(my_unt,"(2(a,i0))")"    min band: ", minval(fs%bstart_cnt_ibz(1,:), mask=fs%bstart_cnt_ibz(1,:) /= -1)
+   write(my_unt,"(2(a,i0))")"    Max band: ", maxval(fs%bstart_cnt_ibz(1,:) + fs%bstart_cnt_ibz(2,:) - 1, &
+                                                     mask=fs%bstart_cnt_ibz(1,:) /= -1)
  end do
 
 end subroutine fstab_print
