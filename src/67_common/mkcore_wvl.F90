@@ -41,8 +41,6 @@ module m_mkcore_wvl
  use m_pawtab,      only : pawtab_type
  use m_drivexc,     only : mkdenpos
 
- implicit none
-
  private
 !!***
 
@@ -120,7 +118,6 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : PSPCODE_PAW,ind_positions
 #endif
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -560,7 +557,6 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
 #if defined HAVE_BIGDFT
   use BigDFT_API, only: ext_buffers,ind_positions
 #endif
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -929,8 +925,6 @@ subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,na
 &          nfgd,nfgd_r0,nspden,n3xccc,option,pawtab,rmet,rr,strdia,vxc,xccc3d,&
 &          rred) ! optional argument
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer ,intent(in) :: msz,natom,ncmax,nfft,nfgd,nfgd_r0,nspden,n3xccc,option
@@ -1111,8 +1105,6 @@ end module m_mkcore_wvl
 !%%  use m_pawrad,   only : pawrad_type, pawrad_init, pawrad_free
 !%%  use m_pawtab,   only : pawtab_type
 !%%  use m_mpinfo,   only : ptabs_fourdp
-!%%
-!%%  implicit none
 !%%
 !%% !Arguments ------------------------------------
 !%% !scalars

@@ -26,6 +26,23 @@
 
 module m_newvtr
 
+ use defs_basis
+ use defs_wvltypes
+ use m_abicore
+ use m_errors
+ use m_abi2big
+ use m_ab7_mixing
+ use m_cgtools
+ use m_dtset
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,     only : MPI_type
+ use m_time,     only : timab
+ use m_geometry, only : metric
+ use m_pawtab,   only : pawtab_type
+ use m_pawrhoij, only : pawrhoij_type,pawrhoij_filter
+ use m_prcref,   only : prcref_PMA
+ use m_wvl_rho,  only : wvl_prcref
  use m_fft,     only : fourdp
 
  implicit none
@@ -188,24 +205,6 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
      &  pawtab,&
      &  rhog,&
      &  wvl)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wvltypes
- use m_abicore
- use m_errors
- use m_abi2big
- use m_ab7_mixing
- use m_cgtools
-
- use m_time,     only : timab
- use m_geometry, only : metric
- use m_pawtab,   only : pawtab_type
- use m_pawrhoij, only : pawrhoij_type,pawrhoij_filter
- use m_prcref,   only : prcref_PMA
- use m_wvl_rho,  only : wvl_prcref
- implicit none
 
 !Arguments-------------------------------
   ! WARNING

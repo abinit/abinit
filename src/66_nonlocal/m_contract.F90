@@ -86,8 +86,6 @@ contains
 
 subroutine cont13(rank1,rank3,rank2)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in) :: rank1(2,3),rank3(2,10)
@@ -170,8 +168,6 @@ end subroutine cont13
 !! SOURCE
 
 subroutine cont22(gxa,gmet,rank2)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -296,8 +292,6 @@ end subroutine cont22
 
 subroutine cont22cso(gxa1,gxa2,gmet,rank2c)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in) :: gmet(3,3),gxa1(2,6),gxa2(2,6)
@@ -409,8 +403,6 @@ end subroutine cont22cso
 !! SOURCE
 
 subroutine cont22so(gxa1,gxa2,amet,rank2)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -559,8 +551,6 @@ end subroutine cont22so
 
 subroutine cont24(gxa,rank4,rank2)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in) :: gxa(2,6),rank4(2,15)
@@ -666,8 +656,6 @@ end subroutine cont24
 !! SOURCE
 
 subroutine cont3(gxa,gmet,rank2)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -903,8 +891,6 @@ end subroutine cont3
 
 subroutine cont33cso(gxa1,gxa2,gmet,rank2c)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in) :: gmet(3,3),gxa1(2,10),gxa2(2,10)
@@ -1121,8 +1107,6 @@ end subroutine cont33cso
 !! SOURCE
 
 subroutine cont33so(gxa1,gxa2,gmet,amet,rank2)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -1392,8 +1376,6 @@ end subroutine cont33so
 
 subroutine cont35(gxa,rank5,rank2)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in) :: gxa(2,10),rank5(2,21)
@@ -1552,8 +1534,6 @@ end subroutine cont35
 !! SOURCE
 
 subroutine metcon(rank,gmet,aa,bb)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1868,8 +1848,6 @@ end subroutine metcon
 
 subroutine metcon_so(rank,gmet,amet,aa,bb)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: rank
@@ -2141,8 +2119,6 @@ end subroutine metcon_so
 !! SOURCE
 
 subroutine metric_so(amet,gprimd,pauli)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays

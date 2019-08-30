@@ -44,7 +44,7 @@ module m_harmonics_terms
  public :: harmonics_terms_setInternalStrain
 !!***
 
-!!****t* defs_abitypes/harmonics_terms_type
+!!****t* m_harmonics_terms/harmonics_terms_type
 !! NAME
 !! harmonics_terms_type
 !!

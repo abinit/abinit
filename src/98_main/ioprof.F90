@@ -46,7 +46,6 @@ program ioprof
  use netcdf
 #endif
 
- use defs_abitypes,    only : hdr_type
  use m_specialmsg,     only : specialmsg_getcount, herald
  use m_fstrings,       only : lower, sjoin, itoa
  use m_io_tools,       only : delete_file, file_exists, iomode_from_fname, get_unit

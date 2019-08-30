@@ -28,12 +28,13 @@
 MODULE m_ppmodel
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_array
  use m_linalg_interfaces
+ use m_distribfft
 
+ use defs_abitypes,    only : MPI_type
  use m_fstrings,       only : sjoin, itoa
  use m_hide_lapack,    only : xhegv
  use m_gwdefs,         only : GW_Q0_DEFAULT, czero_gw

@@ -50,9 +50,9 @@ MODULE m_kxc
  use m_distribfft
  use m_xcdata
  use libxc_functionals
+ use m_dtset
 
- use defs_abitypes,   only : MPI_type, dataset_type
- use m_dtset,         only : dtset_copy, dtset_free
+ use defs_abitypes,   only : MPI_type
  use m_io_tools,      only : open_file
  use m_pptools,       only : printxsf
  use m_numeric_tools, only : hermitianize

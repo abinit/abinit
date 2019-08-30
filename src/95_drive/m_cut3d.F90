@@ -23,7 +23,6 @@
 MODULE m_cut3d
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_splines
@@ -35,7 +34,9 @@ MODULE m_cut3d
  use m_wfk
  use m_xmpi
  use m_sort
+ use m_distribfft
 
+ use defs_abitypes,      only : MPI_type
  use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists, read_string
  use m_numeric_tools,    only : interpol3d
  use m_symtk,            only : matr3inv

@@ -28,7 +28,7 @@ MODULE m_gruneisen
  use m_abicore
  use m_xmpi
  use m_crystal
- use m_htetrahedron
+ use m_htetra
  use m_ddb
  use m_ddb_hdr
  use m_ifc
@@ -43,7 +43,7 @@ MODULE m_gruneisen
  use m_fstrings,            only : sjoin, itoa, ltoa, ftoa, strcat
  use m_numeric_tools,       only : central_finite_diff, arth
  use m_kpts,                only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
- use m_bz_mesh,             only : kpath_t, kpath_new, kpath_free, kpath_print
+ use m_bz_mesh,             only : kpath_t, kpath_new
  use m_anaddb_dataset,      only : anaddb_dataset_type
  use m_dynmat,              only : massmult_and_breaksym, dfpt_phfrq, gtdyn9
 
@@ -389,7 +389,7 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
    end if
    write(unt,'(a)')'# Phonon band structure, Gruneisen parameters and group velocity'
    write(unt,'(a)')"# Energy in Hartree, DOS in states/Hartree"
-   call kpath_print(qpath, unit=unt, pre="#")
+   call qpath%print(unit=unt, pre="#")
    write(unt,'(5a)')&
      "# phfreq(mode=1) gruneisen(mode=1) velocity(mode=1)    phfreq(mode=2) gruneisen(mode=2) velocity(mode=2)   ..."
    do iqpt=1,qpath%npts
@@ -485,7 +485,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
  integer,parameter :: master=0,qptopt1=1,bcorr0=0
  integer :: nprocs,my_rank,iqibz,nqbz,nqibz,ierr,ii,nu,ncerr,nomega,cnt,unt,io
  real(dp) :: gavg,omega_min,omega_max,v2
- type(t_htetrahedron) :: tetra
+ type(htetra_t) :: tetra
  character(len=500) :: msg
 !arrays
  integer :: qptrlatt(3,3)
@@ -501,7 +501,6 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
 
  write(msg,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of Gruneisen DOSes ',ch10
  call wrtout(std_out, msg)
- !call wrtout(ab_out, msg)
 
  ! Generate the q-mesh by finding the IBZ and the corresponding weights.
  ABI_CHECK(all(ngqpt > 0), sjoin("invalid ngqpt:", ltoa(ngqpt)))
@@ -825,7 +824,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
  if (inp%nqpath /= 0) then
    qpath = kpath_new(inp%qpath, gruns%cryst_vol(iv0)%gprimd, inp%ndivsm)
    call gruns_qpath(gruns, prefix, qpath, ncid, comm)
-   call kpath_free(qpath)
+   call qpath%free()
  else
    MSG_WARNING("Cannot compute Gruneisen parameters on q-path because nqpath == 0")
  end if

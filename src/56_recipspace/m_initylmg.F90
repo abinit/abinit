@@ -28,13 +28,13 @@
 module m_initylmg
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
 
- use m_paw_sphharm, only : ass_leg_pol, plm_dtheta, plm_dphi, plm_coeff
- use m_mpinfo,      only : proc_distrb_cycle
+ use defs_abitypes,  only : MPI_type
+ use m_paw_sphharm,  only : ass_leg_pol, plm_dtheta, plm_dphi, plm_coeff
+ use m_mpinfo,       only : proc_distrb_cycle
 
  implicit none
 
