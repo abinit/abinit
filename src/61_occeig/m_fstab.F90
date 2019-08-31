@@ -645,14 +645,12 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
      do ib1=1,nband_kq
        band1 = ib1 + bstart_kq - fs%bmin
        ! This is the old version (WRONG)
-       wtk(ib1, ib2) = fs%tetra_wtk(band1, ikq_ibz) * fs%tetra_wtk(band2, ik_ibz) / fs%nktot
-
+       !wtk(ib1, ib2) = fs%tetra_wtk(band1, ikq_ibz) * fs%tetra_wtk(band2, ik_ibz) / fs%nktot
        !write(std_out,*)wtk(ib1, ib2), fs%dbldelta_tetra_weights_kfs(band1, band2, ik_fs), &
        !                abs(wtk(ib1, ib2) - fs%dbldelta_tetra_weights_kfs(band1, band2, ik_fs))
 
        ! libtetrabz_dbldelta seems to report weights in this order.
-       ABI_UNUSED(ik_fs)
-       !wtk(ib1, ib2) = fs%dbldelta_tetra_weights_kfs(band1, band2, ik_fs)
+       wtk(ib1, ib2) = fs%dbldelta_tetra_weights_kfs(band1, band2, ik_fs)
      end do
    end do
 

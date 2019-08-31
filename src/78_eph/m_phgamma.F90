@@ -3547,7 +3547,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: ik_fs, myik !, myiq
  integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq
  integer :: ii,ipw,mpw,my_mpw,mnb,ierr,cnt,ncid
- integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q
+ integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q, ltetra
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,kqcount,nkpg,nkpg1,edos_intmeth
  integer :: jene, iene, comm_rpt, method, nesting
@@ -4097,7 +4097,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      ! =====================================
      ! TODO: Here I have to convert between full BZ and fs%nkfs
      !ltetra = dtset%useria + 1
-     call phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, dtset%useria + 1 , qpt, nesting, kpt_comm%value)
+     ltetra = 2
+     call phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nesting, kpt_comm%value)
 
      do myik=1,gams%my_nfsk_q
        call cwtime(cpu_k, wall_k, gflops_k, "start")
@@ -4562,7 +4563,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 !scalars
  integer,parameter :: enough = 50
  integer :: nkbz, ierr, nb, ik_bz, ik_ibz, ikq_ibz, ikq_fs, ik_fs, i1, i2, i3, nkfs_q, nene
- integer :: ib1, ib2 ! band_k, band_kq
+ integer :: method, ib1, ib2 ! band_k, band_kq
  real(dp),parameter :: max_occ1 = one
  real(dp) :: cpu, wall, gflops, enemin, enemax
  character(len=500) :: msg
@@ -4588,8 +4589,8 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  end if
 
  ! FIXME
- !if (fs%eph_intmeth == 1 .or. nesting == 1) then
- if (any(fs%eph_intmeth == [1, 2] .or. nesting == 1)) then
+ if (fs%eph_intmeth == 1 .or. nesting == 1) then
+ !if (any(fs%eph_intmeth == [1, 2] .or. nesting == 1)) then
    ! Gaussian method: distribute k-points within the FS window inside comm.
    ! 1) Select k-points such that k+q is stil inside the FS window
    ! 2) Distribute effective k-points assuming all procs in comm have all FS k-points (no filtering)
@@ -4687,81 +4688,71 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  ABI_CHECK(ierr == 0, "See above warnings")
  call ibz_krank%free()
 
-#if 1
- ! Compute weights for double delta integration. Note that libtetra assumes Ef set to zero.
- ! TODO: Average weights over degenerate states?
- write(std_out,"(a,i0,2a)")" Calling libtetrabz_dbldelta with ltetra: ", ltetra, " for q-point:", trim(ktoa(qpt))
- eig_k = eig_k - ebands%fermie; eig_kq = eig_kq - ebands%fermie
- ABI_MALLOC(wght_bz, (nb, nb, nkbz))
- call libtetrabz_dbldelta(ltetra, cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz) !, comm=comm)
- eig_k = eig_k + ebands%fermie; eig_kq = eig_kq + ebands%fermie
+ method = 1
 
- ! Reindex from full BZ to fs% kpoints.
- do ik_bz=1,nkbz
-   ik_fs = kbz2fs(ik_bz)
-   if (ik_fs /= -1) then
-     fs%dbldelta_tetra_weights_kfs(:,:,ik_fs) = wght_bz(:,:,ik_bz)
-   else
-     !write(std_out,*)"should be zero :", wght_bz(:,:,ik_bz)
-   end if
- end do
- ABI_FREE(wght_bz)
+ if (method == 1) then
+   ! Compute weights for double delta integration. Note that libtetra assumes Ef set to zero.
+   ! TODO: Average weights over degenerate states?
+   write(std_out,"(a,i0,2a)")" Calling libtetrabz_dbldelta with ltetra: ", ltetra, " for q-point:", trim(ktoa(qpt))
+   eig_k = eig_k - ebands%fermie; eig_kq = eig_kq - ebands%fermie
+   ABI_MALLOC(wght_bz, (nb, nb, nkbz))
+   call libtetrabz_dbldelta(ltetra, cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz) !, comm=comm)
+   eig_k = eig_k + ebands%fermie; eig_kq = eig_kq + ebands%fermie
 
-#else
- ! Tetrahedron method with Allen's approach for double delta.
- write(std_out,"(2a)")" Calling Allen's version for q-point: ", trim(ktoa(qpt))
- nene = 3
- enemin = ebands%fermie - tol6
- enemax = ebands%fermie + tol6
-
- ABI_MALLOC(dtweightde, (nkbz, nene, nene))
- ABI_MALLOC(tweight, (nkbz, nene, nene))
- ABI_MALLOC(work_k, (nkbz))
- ABI_MALLOC(work_kq, (nkbz))
-
- call init_tetra(indkpt, cryst%gprimd, fs%klatt, kbz, nkbz, tetra, ierr, errorstring, comm)
- ABI_CHECK(ierr == 0, "init_tetra returned ierr /= 0")
-
- fs%dbldelta_tetra_weights_kfs = zero
- do ib2=1,nb
-   work_k = eig_k(ib2, :)
-   do ib1=1,nb
-    work_kq = eig_kq(ib1, :)
-    ! TODO: Average weights over degenerate states?
-    call get_dbl_tetra_weight(work_k, work_kq, enemin, enemax, enemin, enemax, &
-                              max_occ1, nene, nene, nkbz, tetra, tweight, dtweightde, ierr)
-    ABI_CHECK(ierr == 0, "get_dbldelta_weights returned ierr /= 0")
-
-    ! Reindex from full BZ to fs% kpoints.
-    do ik_bz=1,nkbz
-      ik_fs = kbz2fs(ik_bz)
-      if (ik_fs /= -1) then
-        fs%dbldelta_tetra_weights_kfs(ib1,ib2,ik_fs) = dtweightde(ik_bz, 2, 2) ! / nkbz
-      else
-        !write(std_out,*)"should be zero :", wght_bz(:,:,ik_bz)
-      end if
-    end do
+   ! Reindex from full BZ to fs% kpoints.
+   do ik_bz=1,nkbz
+     ik_fs = kbz2fs(ik_bz)
+     if (ik_fs /= -1) then
+       fs%dbldelta_tetra_weights_kfs(:,:,ik_fs) = wght_bz(:,:,ik_bz)
+     else
+       !write(std_out,*)"should be zero :", wght_bz(:,:,ik_bz)
+     end if
    end do
- end do
+   ABI_FREE(wght_bz)
 
- call destroy_tetra(tetra)
- ABI_FREE(work_k)
- ABI_FREE(work_kq)
- ABI_FREE(dtweightde)
- ABI_FREE(tweight)
-#endif
+ else if (method == 2) then
+   ! Tetrahedron method with Allen's approach for double delta.
+   write(std_out,"(2a)")" Calling Allen's version for q-point: ", trim(ktoa(qpt))
+   nene = 3
+   enemin = ebands%fermie - tol6
+   enemax = ebands%fermie + tol6
 
- ! Tetrahedron method. copy weights in the correct position.
- !do ib2=1,nband_k
- !  bstart_k = fs%bstart_cnt_ibz(1, ik_ibz); nband_k = fs%bstart_cnt_ibz(2, ik_ibz)
- !  band2 = ib2 + bstart_k - fs%bmin
- !  do ib1=1,nband_kq
- !    bstart_kq = fs%bstart_cnt_ibz(1, ikq_ibz); nband_kq = fs%bstart_cnt_ibz(2, ikq_ibz)
- !    band1 = ib1 + bstart_kq - fs%bmin
- !    ! This is the old version (WRONG)
- !    wtk(ib1, ib2) = fs%tetra_wtk(band1, ikq_ibz) * fs%tetra_wtk(band2, ik_ibz) / fs%nktot
- !  end do
- !end do
+   ABI_MALLOC(dtweightde, (nkbz, nene, nene))
+   ABI_MALLOC(tweight, (nkbz, nene, nene))
+   ABI_MALLOC(work_k, (nkbz))
+   ABI_MALLOC(work_kq, (nkbz))
+
+   call init_tetra(indkpt, cryst%gprimd, fs%klatt, kbz, nkbz, tetra, ierr, errorstring, comm)
+   ABI_CHECK(ierr == 0, "init_tetra returned ierr /= 0")
+
+   fs%dbldelta_tetra_weights_kfs = zero
+   do ib2=1,nb
+     work_k = eig_k(ib2, :)
+     do ib1=1,nb
+      work_kq = eig_kq(ib1, :)
+      ! TODO: Average weights over degenerate states?
+      call get_dbl_tetra_weight(work_k, work_kq, enemin, enemax, enemin, enemax, &
+                                max_occ1, nene, nene, nkbz, tetra, tweight, dtweightde, ierr)
+      ABI_CHECK(ierr == 0, "get_dbldelta_weights returned ierr /= 0")
+
+      ! Reindex from full BZ to fs% kpoints.
+      do ik_bz=1,nkbz
+        ik_fs = kbz2fs(ik_bz)
+        if (ik_fs /= -1) then
+          fs%dbldelta_tetra_weights_kfs(ib1,ib2,ik_fs) = dtweightde(ik_bz, 2, 2) ! / nkbz
+        else
+          !write(std_out,*)"should be zero :", wght_bz(:,:,ik_bz)
+        end if
+      end do
+     end do
+   end do
+
+   call destroy_tetra(tetra)
+   ABI_FREE(work_k)
+   ABI_FREE(work_kq)
+   ABI_FREE(dtweightde)
+   ABI_FREE(tweight)
+ end if
 
  ! Now we can filter k-points according to tetra weights and distribute inside comm.
  ! Assuming all procs in comm have all k-points.
