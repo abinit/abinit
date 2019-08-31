@@ -4589,8 +4589,8 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  end if
 
  ! FIXME
- !if (fs%eph_intmeth == 1 .or. nesting == 1) then
- if (any(fs%eph_intmeth == [1, 2] .or. nesting == 1)) then
+ if (fs%eph_intmeth == 1 .or. nesting == 1) then
+ !if (any(fs%eph_intmeth == [1, 2] .or. nesting == 1)) then
    ! Gaussian method: distribute k-points within the FS window inside comm.
    ! 1) Select k-points such that k+q is stil inside the FS window
    ! 2) Distribute effective k-points assuming all procs in comm have all FS k-points (no filtering)

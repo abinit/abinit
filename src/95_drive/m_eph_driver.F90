@@ -429,7 +429,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! TODO
  ! WARNING. This choice is only to insure backwards compatibility with the tests,
  ! while eph is developed. Actually, should be switched to brav1=1 as soon as possible ...
- brav1 = 1; if (dtset%eph_transport > 0) brav1 = -1
+ brav1 = 1 !; if (dtset%eph_transport > 0) brav1 = -1
 
  if (use_wfk) then
    call ddb_from_file(ddb, ddb_path, brav1, dtset%natom, natifc0, dummy_atifc, cryst_ddb,comm, prtvol=dtset%prtvol)

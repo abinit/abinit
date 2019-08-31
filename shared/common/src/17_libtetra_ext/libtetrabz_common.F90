@@ -460,7 +460,9 @@ pure function a_from_e(e) result(a)
 
   DO ii = 1, 4
      ediff = e(1:4) - e(ii)
-     ediff(ii) = 1.d0
+     where (abs(ediff) < 1.e-10)
+        ediff = 1.e-10
+     end where
      a(1:4,ii) = (0d0 - e(ii)) / ediff
   END DO
 
