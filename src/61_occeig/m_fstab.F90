@@ -582,6 +582,8 @@ end function fstab_findkg0
 !!  ebands<ebands_type>=GS band structure.
 !!  ik_ibz=Index of the k-point in the IBZ
 !!  spin=Spin index
+!!  nesting=Used in tetra. Set to 1 if tetra Weights cannot be computed with Tetrahedron due to nesting.
+!!   In this case, we fallback to adaptive gaussian.
 !!
 !! OUTPUT
 !!   wtk(fs%maxnb)=Weights for FS integration.
@@ -593,11 +595,11 @@ end function fstab_findkg0
 !!
 !! SOURCE
 
-subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, wtk)
+subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, nesting, wtk)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ik_fs, ik_ibz, ikq_ibz, spin
+ integer,intent(in) :: ik_fs, ik_ibz, ikq_ibz, spin, nesting
  class(fstab_t),intent(in) :: fs
  type(ebands_t),intent(in) :: ebands
 !arrays
@@ -617,20 +619,19 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
  ABI_CHECK(nband_kq >= 1 .and. nband_kq <= fs%maxnb, "Wrong nband_kq")
 
  wtk = zero
- select case (fs%eph_intmeth)
- case (1)
+ if (fs%eph_intmeth == 1 .or. nesting /= 0) then
    ! Gaussian method (constant or adaptive method from group velocities)
    sigma = fs%eph_fsmear
    do ib2=1,nband_k
      band2 = ib2 + bstart_k - 1
-     if (fs%eph_fsmear < zero) then
+     if (fs%eph_fsmear < zero .or. fs%eph_intmeth == 2) then
        sigma = max(maxval([(abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
        !write(std_out, *)"sigma:", sigma * Ha_eV
      end if
      g2 = gaussian(ebands%eig(band2, ik_ibz, spin) - ebands%fermie, sigma)
      do ib1=1,nband_kq
        band1 = ib1 + bstart_kq - 1
-       if (fs%eph_fsmear < zero) then
+       if (fs%eph_fsmear < zero .or. fs%eph_intmeth == 2) then
          sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
        end if
        g1 = gaussian(ebands%eig(band1, ikq_ibz, spin) - ebands%fermie, sigma)
@@ -638,25 +639,20 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
      end do
    end do
 
- case (2)
+ else if (fs%eph_intmeth == 2) then
    ! Tetrahedron method. Copy weights in the correct position.
    do ib2=1,nband_k
      band2 = ib2 + bstart_k - fs%bmin
      do ib1=1,nband_kq
        band1 = ib1 + bstart_kq - fs%bmin
-       ! This is the old version (WRONG)
-       !wtk(ib1, ib2) = fs%tetra_wtk(band1, ikq_ibz) * fs%tetra_wtk(band2, ik_ibz) / fs%nktot
-       !write(std_out,*)wtk(ib1, ib2), fs%dbldelta_tetra_weights_kfs(band1, band2, ik_fs), &
-       !                abs(wtk(ib1, ib2) - fs%dbldelta_tetra_weights_kfs(band1, band2, ik_fs))
-
        ! libtetrabz_dbldelta seems to report weights in this order.
        wtk(ib1, ib2) = fs%dbldelta_tetra_weights_kfs(band1, band2, ik_fs)
      end do
    end do
 
- case default
+ else
    MSG_ERROR(sjoin("Wrong integration method:", itoa(fs%eph_intmeth)))
- end select
+ end if
 
 end subroutine fstab_get_dbldelta_weights
 !!***
