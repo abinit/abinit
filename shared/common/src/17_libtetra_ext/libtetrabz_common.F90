@@ -479,7 +479,7 @@ pure SUBROUTINE libtetrabz_tsmall_a1(e,V,tsmall)
   REAL(8),INTENT(OUT) :: V
   REAL(8),INTENT(OUT) :: tsmall(4,4)
   !
-  INTEGER :: ii
+  !INTEGER :: ii
   REAL(8) :: a(4,4)
   !
   a = a_from_e(e)
@@ -506,7 +506,7 @@ pure SUBROUTINE libtetrabz_tsmall_b1(e,V,tsmall)
   REAL(8),INTENT(OUT) :: V
   REAL(8),INTENT(OUT) :: tsmall(4,4)
   !
-  INTEGER :: ii
+  !INTEGER :: ii
   REAL(8) :: a(4,4)
   !
   a = a_from_e(e)
@@ -533,7 +533,7 @@ pure SUBROUTINE libtetrabz_tsmall_b2(e,V,tsmall)
   REAL(8),INTENT(OUT) :: V
   REAL(8),INTENT(OUT) :: tsmall(4,4)
   !
-  INTEGER :: ii
+  !INTEGER :: ii
   REAL(8) :: a(4,4)
   !
   a = a_from_e(e)
@@ -560,7 +560,7 @@ pure SUBROUTINE libtetrabz_tsmall_b3(e,V,tsmall)
   REAL(8),INTENT(OUT) :: V
   REAL(8),INTENT(OUT) :: tsmall(4,4)
   !
-  INTEGER :: ii
+  !INTEGER :: ii
   REAL(8) :: a(4,4)
   !
   a = a_from_e(e)
@@ -587,7 +587,7 @@ pure SUBROUTINE libtetrabz_tsmall_c1(e,V,tsmall)
   REAL(8),INTENT(OUT) :: V
   REAL(8),INTENT(OUT) :: tsmall(4,4)
   !
-  INTEGER :: ii
+  !INTEGER :: ii
   REAL(8) :: a(4,4)
   !
   a = a_from_e(e)
@@ -614,7 +614,7 @@ pure SUBROUTINE libtetrabz_tsmall_c2(e,V,tsmall)
   REAL(8),INTENT(OUT) :: V
   REAL(8),INTENT(OUT) :: tsmall(4,4)
   !
-  INTEGER :: ii
+  !INTEGER :: ii
   REAL(8) :: a(4,4)
   !
   a = a_from_e(e)
@@ -641,7 +641,7 @@ pure SUBROUTINE libtetrabz_tsmall_c3(e,V,tsmall)
   REAL(8),INTENT(OUT) :: V
   REAL(8),INTENT(OUT) :: tsmall(4,4)
   !
-  INTEGER :: ii
+  !INTEGER :: ii
   REAL(8) :: a(4,4)
   !
   a = a_from_e(e)
@@ -668,7 +668,7 @@ pure SUBROUTINE libtetrabz_triangle_a1(e,V,tsmall)
   REAL(8),INTENT(OUT) :: V
   REAL(8),INTENT(OUT) :: tsmall(3,4)
   !
-  INTEGER :: ii
+  !INTEGER :: ii
   REAL(8) :: a(4,4)
   !
   a = a_from_e(e)
@@ -695,7 +695,7 @@ pure SUBROUTINE libtetrabz_triangle_b1(e,V,tsmall)
   REAL(8),INTENT(OUT) :: V
   REAL(8),INTENT(OUT) :: tsmall(3,4)
   !
-  INTEGER :: ii
+  !INTEGER :: ii
   REAL(8) :: a(4,4)
   !
   a = a_from_e(e)
@@ -722,7 +722,7 @@ pure SUBROUTINE libtetrabz_triangle_b2(e,V,tsmall)
   REAL(8),INTENT(OUT) :: V
   REAL(8),INTENT(OUT) :: tsmall(3,4)
   !
-  INTEGER :: ii
+  !INTEGER :: ii
   REAL(8) :: a(4,4)
   !
   a = a_from_e(e)
@@ -749,7 +749,7 @@ pure SUBROUTINE libtetrabz_triangle_c1(e,V,tsmall)
   REAL(8),INTENT(OUT) :: V
   REAL(8),INTENT(OUT) :: tsmall(3,4)
   !
-  INTEGER :: ii
+  !INTEGER :: ii
   REAL(8) :: a(4,4)
   !
   a = a_from_e(e)
