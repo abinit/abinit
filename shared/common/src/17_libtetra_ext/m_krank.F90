@@ -117,8 +117,7 @@ type(krank_t) function krank_new(nkpt, kpt, nsym, symrec, time_reversal) result(
 
 !Local variables -------------------------
 !scalars
- integer :: ikpt, isym, symkptrank, irank
- integer :: timrev, itim
+ integer :: ikpt, isym, symkptrank, irank, timrev, itim
  double precision :: smallestlen
  character(len=500) :: msg
 !arrays
