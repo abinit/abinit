@@ -480,10 +480,10 @@ pure SUBROUTINE libtetrabz_tsmall_a1(e,V,tsmall)
   INTEGER :: ii
   REAL(8) :: a(4,4)
   !
-  !a = a_from_e(e)
-  DO ii = 1, 4
-     a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
-  END DO
+  a = a_from_e(e)
+  !DO ii = 1, 4
+  !   a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
+  !END DO
   !
   V = a(2,1) * a(3,1) * a(4,1)
   !
@@ -507,9 +507,10 @@ pure SUBROUTINE libtetrabz_tsmall_b1(e,V,tsmall)
   INTEGER :: ii
   REAL(8) :: a(4,4)
   !
-  DO ii = 1, 4
-     a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
-  END DO
+  a = a_from_e(e)
+  !DO ii = 1, 4
+  !   a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
+  !END DO
   !
   V = a(3,1) * a(4,1) * a(2,4)
   !
@@ -533,9 +534,10 @@ pure SUBROUTINE libtetrabz_tsmall_b2(e,V,tsmall)
   INTEGER :: ii
   REAL(8) :: a(4,4)
   !
-  DO ii = 1, 4
-     a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
-  END DO
+  a = a_from_e(e)
+  !DO ii = 1, 4
+  !   a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
+  !END DO
   !
   V = a(3,2) * a(4,2)
   !
@@ -559,9 +561,10 @@ pure SUBROUTINE libtetrabz_tsmall_b3(e,V,tsmall)
   INTEGER :: ii
   REAL(8) :: a(4,4)
   !
-  DO ii = 1, 4
-     a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
-  END DO
+  a = a_from_e(e)
+  !DO ii = 1, 4
+  !   a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
+  !END DO
   !
   V = a(2,3) * a(3,1) * a(4,2)
   !
@@ -585,9 +588,10 @@ pure SUBROUTINE libtetrabz_tsmall_c1(e,V,tsmall)
   INTEGER :: ii
   REAL(8) :: a(4,4)
   !
-  DO ii = 1, 4
-     a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
-  END DO
+  a = a_from_e(e)
+  !DO ii = 1, 4
+  !   a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
+  !END DO
   !
   V = a(4,3)
   !
@@ -611,9 +615,10 @@ pure SUBROUTINE libtetrabz_tsmall_c2(e,V,tsmall)
   INTEGER :: ii
   REAL(8) :: a(4,4)
   !
-  DO ii = 1, 4
-     a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
-  END DO
+  a = a_from_e(e)
+  !DO ii = 1, 4
+  !   a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
+  !END DO
   !
   V = a(3,4) * a(4,2)
   !
@@ -637,9 +642,10 @@ pure SUBROUTINE libtetrabz_tsmall_c3(e,V,tsmall)
   INTEGER :: ii
   REAL(8) :: a(4,4)
   !
-  DO ii = 1, 4
-     a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
-  END DO
+  a = a_from_e(e)
+  !DO ii = 1, 4
+  !   a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
+  !END DO
   !
   V = a(3,4) * a(2,4) * a(4,1)
   !
@@ -663,9 +669,10 @@ pure SUBROUTINE libtetrabz_triangle_a1(e,V,tsmall)
   INTEGER :: ii
   REAL(8) :: a(4,4)
   !
-  DO ii = 1, 4
-     a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
-  END DO
+  a = a_from_e(e)
+  !DO ii = 1, 4
+  !   a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
+  !END DO
   !
   !V = 3d0 * a(2,1) * a(3,1) * a(4,1) / (0d0 - e(1))
   V = 3d0 * a(2,1) * a(3,1)           / (e(4) - e(1))
@@ -689,9 +696,10 @@ pure SUBROUTINE libtetrabz_triangle_b1(e,V,tsmall)
   INTEGER :: ii
   REAL(8) :: a(4,4)
   !
-  DO ii = 1, 4
-     a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
-  END DO
+  a = a_from_e(e)
+  !DO ii = 1, 4
+  !   a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
+  !END DO
   !
   !V = 3d0 * a(3,1) * a(4,1) * a(2,4) / (0d0 - e(1))
   V = 3d0           * a(4,1) * a(2,4) / (e(3) - e(1))
@@ -715,9 +723,10 @@ pure SUBROUTINE libtetrabz_triangle_b2(e,V,tsmall)
   INTEGER :: ii
   REAL(8) :: a(4,4)
   !
-  DO ii = 1, 4
-     a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
-  END DO
+  a = a_from_e(e)
+  !DO ii = 1, 4
+  !   a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
+  !END DO
   !
   !V = 3d0 * a(2,3) * a(3,1) * a(4,2) / (0d0 - e(1))
   V = 3d0 * a(2,3)           * a(4,2) / (e(3) - e(1))
@@ -741,9 +750,10 @@ pure SUBROUTINE libtetrabz_triangle_c1(e,V,tsmall)
   INTEGER :: ii
   REAL(8) :: a(4,4)
   !
-  DO ii = 1, 4
-     a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
-  END DO
+  a = a_from_e(e)
+  !DO ii = 1, 4
+  !   a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
+  !END DO
   !
   !V = 3d0 * a(1,4) * a(2,4) * a(3,4) / (e(4) - 0d0)
   V = 3d0 * a(1,4) * a(2,4)           / (e(4) - e(3))
