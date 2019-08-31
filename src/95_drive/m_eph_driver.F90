@@ -150,8 +150,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master = 0, natifc0 = 0, timrev2 = 2, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0, brav1 = 1
- integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
+ integer,parameter :: master = 0, natifc0 = 0, timrev2 = 2, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0 !, brav1 = 1
+ integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf, brav1
  integer :: iblock_dielt_zeff, iblock_dielt, ddb_nqshift,ierr
  integer :: omp_ncpus, work_size, nks_per_proc
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
@@ -425,6 +425,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ! Read the DDB file.
  ABI_CALLOC(dummy_atifc, (dtset%natom))
+
+ ! TODO
+ ! WARNING. This choice is only to insure backwards compatibility with the tests,
+ ! while eph is developed. Actually, should be switched to brav1=1 as soon as possible ...
+ brav1 = 1; if (dtset%eph_transport > 0) brav1 = -1
 
  if (use_wfk) then
    call ddb_from_file(ddb, ddb_path, brav1, dtset%natom, natifc0, dummy_atifc, cryst_ddb,comm, prtvol=dtset%prtvol)

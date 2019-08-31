@@ -448,6 +448,24 @@ pure SUBROUTINE libtetrabz_interpol_indx(nintp,ng,kvec,kintp,wintp)
   END DO
   !
 END SUBROUTINE libtetrabz_interpol_indx
+
+pure function a_from_e(e) result(a)
+
+  IMPLICIT NONE
+  REAL(8),INTENT(IN) :: e(4)
+  REAL(8) :: a(4,4)
+
+  INTEGER :: ii
+  REAL(8) :: ediff(4)
+
+  DO ii = 1, 4
+     ediff = e(1:4) - e(ii)
+     ediff(ii) = 1.d0
+     a(1:4,ii) = (0d0 - e(ii)) / ediff
+  END DO
+
+end function a_from_e
+
 !
 ! Cut small tetrahedron A1
 !
@@ -462,6 +480,7 @@ pure SUBROUTINE libtetrabz_tsmall_a1(e,V,tsmall)
   INTEGER :: ii
   REAL(8) :: a(4,4)
   !
+  !a = a_from_e(e)
   DO ii = 1, 4
      a(1:4,ii) = (0d0 - e(ii)) / (e(1:4) - e(ii))
   END DO
