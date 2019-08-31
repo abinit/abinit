@@ -429,6 +429,7 @@ type, public :: dataset_type
  integer :: prtnest
  integer :: prtpmp
  integer :: prtposcar
+ integer :: prtprocar
  integer :: prtphdos
  integer :: prtphbands = 1
  integer :: prtphsurf = 0

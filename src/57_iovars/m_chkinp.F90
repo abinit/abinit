@@ -2082,12 +2082,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if ((response==1 .and. dt%kptopt/=3)) then
 ! TODO: check ddk case, which should accept kptopt 2
      if (dt%rfddk/=0 .and. dt%kptopt/=2) then
-       write(message,'(a,i3,4a)' )&
+       write(msg,'(a,i3,4a)' )&
 &        'The input variable optdriver=',dt%optdriver,ch10,&
 &        'which implies response functions, and requires kptopt 3.',&
 &        'Set kptopt to 3 to let the code reduce the k with the correct small group of symmetries.', &
 &        'The only exception is a DDK calculation with kptopt 2 '
-       MSG_ERROR_NOSTOP(message, ierr)
+       MSG_ERROR_NOSTOP(msg, ierr)
      end if
    end if
    if(usepaw==1)then
