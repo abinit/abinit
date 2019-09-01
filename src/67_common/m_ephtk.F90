@@ -40,18 +40,24 @@ module m_ephtk
 
  private
 
- public :: ephtk_set_phmodes_ship     ! Setup a mask to skip accumulating the contribution of certain phonon modes.
+ public :: ephtk_set_phmodes_skip     ! Setup a mask to skip accumulating the contribution of certain phonon modes.
  public :: ephtk_set_pertables        ! Set tables for parallelism over perturbations from my_npert and comm
  public :: ephtk_mkqtabs              ! Build tables with correspondence between q-points as needed by complete_gamma.
  public :: ephtk_gam_atm2qnu          ! Compute phonon linewidths from gamma matrix in reduced coordinates.
+ public :: ephtk_gkknu_from_atm       ! Transform the gkk matrix elements from (atom, red_direction) basis to phonon-mode basis.
 !!***
+
+ real(dp),public,parameter :: EPHTK_WTOL = tol6
+  ! Tolerance for phonon frequencies to be ignored.
+  ! Lambda coefficients are set to zero when abs(w) < EPHTK_WTOL
+  ! This tolerance is also used in the integrals of a2F(w).
 
 contains  !=====================================================
 !!***
 
-!!****f* m_ephtk/ephtk_set_phmodes_ship
+!!****f* m_ephtk/ephtk_set_phmodes_skip
 !! NAME
-!!  ephtk_set_phmodes_ship
+!!  ephtk_set_phmodes_skip
 !!
 !! FUNCTION
  ! Setup a mask to skip accumulating the contribution of certain phonon modes.
@@ -68,7 +74,7 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-subroutine ephtk_set_phmodes_ship(dtset, phmodes_skip)
+subroutine ephtk_set_phmodes_skip(dtset, phmodes_skip)
 
 !Arguments ------------------------------------
  type(dataset_type),intent(in) :: dtset
@@ -99,7 +105,7 @@ subroutine ephtk_set_phmodes_ship(dtset, phmodes_skip)
    phmodes_skip(dtset%eph_phrange(1):dtset%eph_phrange(2)) = 1
  end if
 
-end subroutine ephtk_set_phmodes_ship
+end subroutine ephtk_set_phmodes_skip
 !!***
 
 !!****f* m_ephtk/ephtk_set_pertables
@@ -319,6 +325,72 @@ subroutine ephtk_gam_atm2qnu(natom3, displ_red, gam_atm, gam_qnu)
  end do
 
 end subroutine ephtk_gam_atm2qnu
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ephtk/ephtk_gkknu_from_atm
+!! NAME
+!!  ephtk_gkknu_from_atm
+!!
+!! FUNCTION
+!!  Transform the gkk matrix elements from (atom, red_direction) basis to phonon-mode basis.
+!!
+!! INPUTS
+!!  nb1,nb2=Number of bands in gkq_atm matrix.
+!!  nk=Number of k-points (usually 1)
+!!  natom=Number of atoms.
+!!  gkq_atm(2,nb1,nb2,3*natom)=EPH matrix elements in the atomic basis.
+!!  phfrq(3*natom)=Phonon frequencies in Ha
+!!  displ_red(2,3*natom,3*natom)=Phonon displacement in reduced coordinates.
+!!
+!! OUTPUT
+!!  gkq_nu(2,nb1,nb2,3*natom)=EPH matrix elements in the phonon-mode basis.
+!!
+!! PARENTS
+!!      m_ephtk
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ephtk_gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, gkq_nu)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nb1, nb2, nk, natom
+!arrays
+ real(dp),intent(in) :: phfrq(3*natom),displ_red(2,3*natom,3*natom)
+ real(dp),intent(in) :: gkq_atm(2,nb1,nb2,nk,3*natom)
+ real(dp),intent(out) :: gkq_nu(2,nb1,nb2,nk,3*natom)
+
+!Local variables-------------------------
+!scalars
+ integer :: nu,ipc
+
+! *************************************************************************
+
+ gkq_nu = zero
+
+ ! Loop over phonon branches.
+ do nu=1,3*natom
+   ! Ignore negative or too small frequencies
+   if (phfrq(nu) < EPHTK_WTOL) cycle
+
+   ! Transform the gkk from (atom, reduced direction) basis to phonon mode representation
+   do ipc=1,3*natom
+     gkq_nu(1,:,:,:,nu) = gkq_nu(1,:,:,:,nu) &
+       + gkq_atm(1,:,:,:,ipc) * displ_red(1,ipc,nu) &
+       - gkq_atm(2,:,:,:,ipc) * displ_red(2,ipc,nu)
+     gkq_nu(2,:,:,:,nu) = gkq_nu(2,:,:,:,nu) &
+       + gkq_atm(1,:,:,:,ipc) * displ_red(2,ipc,nu) &
+       + gkq_atm(2,:,:,:,ipc) * displ_red(1,ipc,nu)
+   end do
+
+   gkq_nu(:,:,:,:,nu) = gkq_nu(:,:,:,:,nu) / sqrt(two * phfrq(nu))
+ end do
+
+end subroutine ephtk_gkknu_from_atm
 !!***
 
 end module m_ephtk

@@ -457,14 +457,6 @@ module m_phgamma
  public :: a2fw_tr_init            ! Calculates the FS averaged alpha^2F_tr,in,out(w, x, x') functions.
 !!***
 
- ! TODO: increase
- !real(dp),private,parameter :: EPH_WTOL=tol7
- real(dp),private,parameter :: EPH_WTOL=tol6
- !real(dp),private,parameter :: EPH_WTOL=tol5
-   ! Tolerance for phonon frequencies.
-   ! Lambda coefficients are set to zero when abs(w) < EPH_WTOL
-   ! This tolerance is also used in the integrals of a2F(w).
-
  real(dp),private,parameter :: EPH_Q0TOL = 0.01_dp
 
 contains  !=====================================================
@@ -509,13 +501,6 @@ subroutine phgamma_free(gams)
  ABI_SFREE(gams%my_iqibz)
  ABI_SFREE(gams%my_ifsk_q)
  ABI_SFREE(gams%my_spins)
-
- ! Close netcdf file.
-!#ifdef HAVE_NETCDF
-! if (gams%ncid /= nctk_noid) then
-!   NCF_CHECK(nf90_close(gams%ncid))
-! end if
-!#endif
 
 end subroutine phgamma_free
 !!***
@@ -609,6 +594,7 @@ subroutine phgamma_init(gams, cryst, ifc, fstab, dtset, eph_scalprod, ngqpt, n0,
 
  if (gams%prteliash == 3) then
    ABI_MALLOC_OR_DIE(gams%vals_ee, (2, gams%nene, gams%nene, natom3, natom3, gams%nqibz, nsppol), ierr)
+   gams%vals_ee = zero
  end if
 
  ! Prepare Fourier interpolation.
@@ -874,7 +860,7 @@ subroutine phgamma_eval_qibz(gams, cryst, ifc, iq_ibz, spin, phfrq, gamma_ph, la
  do nu1=1,gams%natom3
    gamma_ph(nu1) =  gamma_ph(nu1) * pi * spinfact
    lambda_ph(nu1) = zero
-   if (abs(phfrq(nu1)) > EPH_WTOL) lambda_ph(nu1) = gamma_ph(nu1) / (two * pi * gams%n0(spin) * phfrq(nu1)**2)
+   if (abs(phfrq(nu1)) > EPHTK_WTOL) lambda_ph(nu1) = gamma_ph(nu1) / (two * pi * gams%n0(spin) * phfrq(nu1)**2)
    if (present(gamma_ph_ee)) gamma_ph_ee(:,:,nu1) =  gamma_ph_ee(:,:,nu1) * pi * spinfact
  end do
 
@@ -995,7 +981,7 @@ subroutine phgamma_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_ph, lambda_p
  do nu1=1,gams%natom3
    gamma_ph(nu1) = gamma_ph(nu1) * pi * spinfact
    lambda_ph(nu1) = zero
-   if (abs(phfrq(nu1)) > EPH_WTOL) lambda_ph(nu1) = gamma_ph(nu1) / (two * pi * gams%n0(spin) * phfrq(nu1)**2)
+   if (abs(phfrq(nu1)) > EPHTK_WTOL) lambda_ph(nu1) = gamma_ph(nu1) / (two * pi * gams%n0(spin) * phfrq(nu1)**2)
  end do
 
  ! This to avoid spurious results for the acoustic modes.
@@ -1175,8 +1161,7 @@ subroutine phgamma_vv_eval_qibz(gams, cryst, ifc, iq_ibz, spin, phfrq, gamma_in_
  !character(len=500) :: msg
 !arrays
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom), displ_red(2,gams%natom3,gams%natom3)
- real(dp) :: work_qnu(gams%natom3)
- real(dp) :: gam_atm(2,gams%natom3,gams%natom3)
+ real(dp) :: work_qnu(gams%natom3), gam_atm(2,gams%natom3,gams%natom3)
 
 ! *************************************************************************
 
@@ -1207,14 +1192,14 @@ subroutine phgamma_vv_eval_qibz(gams, cryst, ifc, iq_ibz, spin, phfrq, gamma_in_
      !spinfact should be 1 for a normal non sppol calculation without spinorbit
      !for spinors it should also be 1 as bands are twice as numerous but n0 has been divided by 2
      !for sppol 2 it should be 0.5 as we have 2 spin channels to sum
-     spinfact = two/(gams%nsppol*gams%nspinor)
+     spinfact = two / (gams%nsppol*gams%nspinor)
 
      do nu1=1,gams%natom3
        gamma_in_ph(idir,jdir,nu1)  =  gamma_in_ph(idir,jdir,nu1)  * pi * spinfact
        gamma_out_ph(idir,jdir,nu1) =  gamma_out_ph(idir,jdir,nu1) * pi * spinfact
        lambda_in_ph(idir,jdir,nu1)  = zero
        lambda_out_ph(idir,jdir,nu1) = zero
-       if (abs(phfrq(nu1)) > EPH_WTOL) then
+       if (abs(phfrq(nu1)) > EPHTK_WTOL) then
          lambda_in_ph(idir,jdir,nu1)  = gamma_in_ph(idir,jdir,nu1)  / (two * pi * gams%n0(spin) * phfrq(nu1)**2)
          lambda_out_ph(idir,jdir,nu1) = gamma_out_ph(idir,jdir,nu1) / (two * pi * gams%n0(spin) * phfrq(nu1)**2)
        end if
@@ -1342,7 +1327,7 @@ subroutine phgamma_vv_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_in_ph, ga
        gamma_out_ph(idir,jdir,nu1) = gamma_out_ph(idir,jdir,nu1) * pi * spinfact
        lambda_in_ph(idir,jdir,nu1) = zero
        lambda_out_ph(idir,jdir,nu1) = zero
-       if (abs(phfrq(nu1)) > EPH_WTOL) then
+       if (abs(phfrq(nu1)) > EPHTK_WTOL) then
          lambda_in_ph(idir,jdir,nu1)  = gamma_in_ph(idir,jdir,nu1) / (two * pi * gams%n0(spin) * phfrq(nu1)**2)
          lambda_out_ph(idir,jdir,nu1) = gamma_out_ph(idir,jdir,nu1) / (two * pi * gams%n0(spin) * phfrq(nu1)**2)
        end if
@@ -1801,7 +1786,7 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqp
  end if
 
  if (do_qintp) then
-   ! Generate the q-mesh by finding the IBZ and the corresponding weights.
+   ! Generate fine q-mesh, findthe IBZ and the corresponding weights.
    qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
 
    call kpts_ibz_from_kptrlatt(cryst, qptrlatt, my_qptopt, nqshift, qshift, nqibz, qibz, wtq, nqbz, qbz, &
@@ -1923,7 +1908,7 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqp
          ! reset phfrq for low freq modes
          invphfrq = zero
          do mu=1,natom3
-           if (abs(phfrq(mu)) > EPH_WTOL) invphfrq(mu) = one / abs(phfrq(mu))
+           if (abs(phfrq(mu)) > EPHTK_WTOL) invphfrq(mu) = one / abs(phfrq(mu))
          end do
 
          do iene= 1, gams%nene
@@ -2030,7 +2015,7 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqp
 
      do iw=1,nomega
        ww = a2f%omega(iw)
-       if (abs(ww) > EPH_WTOL) then
+       if (abs(ww) > EPHTK_WTOL) then
           a2f_1mom(iw) = a2f%vals(iw,mu,spin) / abs(ww)
        else
           a2f_1mom(iw) = zero
@@ -2053,7 +2038,7 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqp
    a2flogmom = zero
    do iw=1,nomega
      omega = a2f%omega(iw)
-     if (abs(omega) > EPH_WTOL) then
+     if (abs(omega) > EPHTK_WTOL) then
        a2flogmom(iw) = (two/lambda_iso) * a2f_1d(iw)*log(abs(omega))/abs(omega)
      end if
    end do
@@ -2198,7 +2183,7 @@ real(dp) function a2fw_get_moment(a2f, nn, spin, out_int)
  else
    do iw=1,a2f%nomega
      omg = a2f%omega(iw)
-     omg_nm1 = zero; if (abs(omg) > EPH_WTOL) omg_nm1 = omg**(nn-1)
+     omg_nm1 = zero; if (abs(omg) > EPHTK_WTOL) omg_nm1 = omg**(nn-1)
      ff(iw) = a2f%vals(iw,0,spin) * omg_nm1
    end do
  end if
@@ -2270,7 +2255,7 @@ function a2fw_tr_moment(a2f_tr, nn, spin, out_int)
      else
        do iw=1,a2f_tr%nomega
          omg = a2f_tr%omega(iw)
-         omg_nm1 = zero; if (abs(omg) > EPH_WTOL) omg_nm1 = omg**(nn-1)
+         omg_nm1 = zero; if (abs(omg) > EPHTK_WTOL) omg_nm1 = omg**(nn-1)
          ff(iw) = a2f_tr%vals_tr(iw,idir,jdir,0,spin) * omg_nm1
        end do
      end if
@@ -2330,7 +2315,7 @@ real(dp) function a2fw_logmoment(a2f,spin) result(res)
 
  do iw=1,a2f%nomega
    omg = a2f%omega(iw)
-   if (abs(omg) > EPH_WTOL) then
+   if (abs(omg) > EPHTK_WTOL) then
      !a2flogmom(iw) = (two/lambda_iso) * a2f%vals(iw,spin) * log(abs(omg))/abs(omg)
    end if
  end do
@@ -2381,12 +2366,12 @@ real(dp) function a2fw_lambda_wij(a2f,wi,wj,spin) result(res)
 ! *********************************************************************
 
  wd2 = (wi - wj)** 2
- iszero = (abs(wi - wj) < EPH_WTOL)
+ iszero = (abs(wi - wj) < EPHTK_WTOL)
 
  do iw=1,a2f%nomega
    omg = a2f%omega(iw)
    vv = a2f%vals(iw,0,spin)
-   if (abs(a2f%omega(iw)) > EPH_WTOL) then
+   if (abs(a2f%omega(iw)) > EPHTK_WTOL) then
      values(iw) = vv * omg / (wd2 + omg**2)
    else
      if (iszero) then ! TODO
@@ -3046,8 +3031,8 @@ subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, intmeth, wstep, wminmax, smear
  a2f_tr%omega_min = omega_min; a2f_tr%omega_max = omega_max
  nomega = int((omega_max - omega_min) / wstep); a2f_tr%nomega = nomega; a2f_tr%wstep = wstep
 
- ABI_MALLOC(a2f_tr%n0,(nsppol))
- a2f_tr%n0=gams%n0
+ ABI_MALLOC(a2f_tr%n0, (nsppol))
+ a2f_tr%n0 = gams%n0
  ! Build linear mesh.
  ABI_MALLOC(a2f_tr%omega, (nomega))
  a2f_tr%omega = arth(omega_min, wstep, nomega)
@@ -3063,7 +3048,6 @@ subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, intmeth, wstep, wminmax, smear
 
    ! Prepare tetrahedron integration.
    qptrlatt = 0; qptrlatt(1, 1) = a2f_tr%ngqpt(1); qptrlatt(2, 2) = a2f_tr%ngqpt(2); qptrlatt(3, 3) = a2f_tr%ngqpt(3)
-
    qtetra = tetra_from_kptrlatt(cryst, my_qptopt, qptrlatt, a2f_tr%nqshift, a2f_tr%qshift, nqibz, qibz, comm, msg, ierr)
    if (ierr/=0) MSG_ERROR(msg)
 
@@ -3165,11 +3149,11 @@ subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, intmeth, wstep, wminmax, smear
  end if
 
  ! Collect final results on each node and divide by g(eF, spin)
-! TODO: check whether this has to be reinstated, in particular for a2f_tr
+ ! TODO: check whether this has to be reinstated, in particular for a2f_tr
  call xmpi_sum(a2f_tr%vals_in, comm, ierr)
  call xmpi_sum(a2f_tr%vals_out, comm, ierr)
 
-! TODO: check normalization with N(0) and <v^2> from Savrasov eq 20
+ ! TODO: check normalization with N(0) and <v^2> from Savrasov eq 20
  do spin=1,nsppol
    a2f_tr%vals_in(:,:,:,0,spin)  = sum(a2f_tr%vals_in(:,:,:,1:natom3,spin), dim=4)
    a2f_tr%vals_out(:,:,:,0,spin) = sum(a2f_tr%vals_out(:,:,:,1:natom3,spin), dim=4)
@@ -3195,7 +3179,7 @@ subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, intmeth, wstep, wminmax, smear
 
          do iw=1,nomega
            ww = a2f_tr%omega(iw)
-           if (abs(ww) > EPH_WTOL) then
+           if (abs(ww) > EPHTK_WTOL) then
               a2f_tr_1mom(iw)  = a2f_tr%vals_tr(iw,idir,jdir,mu,spin) / abs(ww)
            else
               a2f_tr_1mom(iw) = zero
@@ -3229,7 +3213,7 @@ subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, intmeth, wstep, wminmax, smear
        a2f_tr_logmom = zero
        do iw=1,nomega
          omega = a2f_tr%omega(iw)
-         if (abs(omega) > EPH_WTOL .and. abs(lambda_iso(idir,jdir)) > EPH_WTOL) then
+         if (abs(omega) > EPHTK_WTOL .and. abs(lambda_iso(idir,jdir)) > EPHTK_WTOL) then
            a2f_tr_logmom(iw) = (two/lambda_iso(idir,jdir)) * a2f_tr_1d(iw)*log(abs(omega))/abs(omega)
          end if
        end do
@@ -3302,8 +3286,7 @@ subroutine a2fw_tr_write(a2f_tr, basename, post, ncid)
 
 !Local variables -------------------------
 !scalars
- integer :: iw,spin,unt,ii,mu
- integer :: idir, jdir
+ integer :: iw,spin,unt,ii,mu,idir, jdir
 #ifdef HAVE_NETCDF
  integer :: ncerr
  character(len=500) :: dim1_name
@@ -3539,7 +3522,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer,allocatable :: my_pinfo(:,:), pert_table(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), lf(2),rg(2),res(2)
  real(dp) :: wminmax(2), n0(ebands%nsppol)
- real(dp) :: resvv_in(2,9), resvv_out(2,9)
+ real(dp) :: resvv_in(2,9), resvv_out(2,9), phfrq(3*cryst%natom)
+ real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:),tgam(:,:,:),gkk_atm(:,:,:,:)
@@ -3548,7 +3532,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:),work(:,:,:,:)
  real(dp),allocatable :: gs1c(:,:), v1_work(:,:,:,:)
- real(dp),allocatable :: wt_k_en(:,:),wt_kq_en(:,:), dbldelta_wts(:,:)
+ real(dp),allocatable :: wt_ek(:,:),wt_ekq(:,:), dbldelta_wts(:,:)
  real(dp), allocatable :: tgamvv_in(:,:,:,:),  vv_kk(:,:,:)
  real(dp), allocatable :: tgamvv_out(:,:,:,:), vv_kkq(:,:,:)
  real(dp), allocatable :: tmp_vals_ee(:,:,:,:,:), emesh(:)
@@ -3611,80 +3595,11 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    call fstab_print(fstab, unit=ab_out)
  end if
 
+ ! Define q-mesh. eph_ngqpt_fine activates interpolation of potentials.
  gamma_ngqpt = ifc%ngqpt; if (all(dtset%eph_ngqpt_fine /= 0)) gamma_ngqpt = dtset%eph_ngqpt_fine
 
  call phgamma_init(gams, cryst, ifc, fstab(1), dtset, eph_scalprod0, gamma_ngqpt, n0, comm)
  call wrtout(std_out, sjoin("Will compute", itoa(gams%nqibz), "q-points in the IBZ"))
-
- path = strcat(dtfil%filnam_ds(4), "_A2F.nc")
- ncid = nctk_noid
-#ifdef HAVE_NETCDF
- if (my_rank == master) then
-   ! Master creates the netcdf file used to store the results of the calculation.
-   NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
-   NCF_CHECK(cryst%ncwrite(ncid))
-   NCF_CHECK(ebands_ncwrite(ebands, ncid))
-   NCF_CHECK(edos%ncwrite(ncid))
-
-   ! Add dimensions.
-   ncerr = nctk_def_dims(ncid, [nctkdim_t("nqibz", gams%nqibz), nctkdim_t("natom3", natom3)], defmode=.True.)
-   NCF_CHECK(ncerr)
-   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "eph_intmeth", "eph_transport", "symdynmat"])
-   NCF_CHECK(ncerr)
-   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "ph_intmeth"])
-   NCF_CHECK(ncerr)
-   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie"])
-   NCF_CHECK(ncerr)
-   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "ph_wstep", "ph_smear"])
-   NCF_CHECK(ncerr)
-
-   ! Define arrays for results.
-   ncerr = nctk_def_arrays(ncid, [ &
-     nctkarr_t("ngqpt", "int", "three"), &
-     nctkarr_t("eph_ngqpt_fine", "int", "three"), &
-     nctkarr_t("ddb_ngqpt", "int", "three"), &
-     nctkarr_t("ph_ngqpt", "int", "three"), &
-     nctkarr_t('qibz', "dp", "number_of_reduced_dimensions, nqibz"), &
-     nctkarr_t('wtq', "dp", "nqibz"), &
-     nctkarr_t('phfreq_qibz', "dp", "natom3, nqibz"), &
-     nctkarr_t('phdispl_cart_qibz', "dp", "two, natom3, natom3, nqibz"), &
-     nctkarr_t('phgamma_qibz', "dp", "natom3, nqibz, number_of_spins"), &
-     nctkarr_t('phlambda_qibz', "dp", "natom3, nqibz, number_of_spins") &
-   ])
-   NCF_CHECK(ncerr)
-
-   ! ======================================================
-   ! Write data that do not depend on the (kpt, spin) loop.
-   ! ======================================================
-   NCF_CHECK(nctk_set_datamode(ncid))
-
-   ncerr = nctk_write_iscalars(ncid, &
-       [character(len=nctk_slen) :: "eph_intmeth", "eph_transport", "symdynmat", "ph_intmeth"], &
-       [dtset%eph_intmeth, dtset%eph_transport, dtset%symdynmat, dtset%ph_intmeth])
-   NCF_CHECK(ncerr)
-   ncerr = nctk_write_dpscalars(ncid, &
-     [character(len=nctk_slen) :: "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear"], &
-     [dtset%eph_fsewin, dtset%eph_fsmear, dtset%eph_extrael, dtset%eph_fermie, dtset%ph_wstep, dtset%ph_smear])
-   NCF_CHECK(ncerr)
-
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'qibz'), gams%qibz))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'wtq'), gams%wtq))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), gamma_ngqpt))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_ngqpt_fine"), dtset%eph_ngqpt_fine))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ph_ngqpt"), dtset%ph_ngqpt))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ddb_ngqpt"), dtset%ddb_ngqpt))
-   !NCF_CHECK(nf90_close(ncid))
- end if
-
- !call xmpi_barrier(comm)
-
- ! Now reopen the file inside ncwrite_comm to perform pararallel-IO (required for q-point parallelism).
- !if (self%ncwrite_comm%value /= xmpi_comm_null) then
- !  NCF_CHECK(nctk_open_modify(self%ncid, path, self%ncwrite_comm%value))
- !  NCF_CHECK(nctk_set_datamode(self%ncid))
- !end if
-#endif
- call edos%free()
 
  ! ========================
  ! === MPI DISTRIBUTION ===
@@ -3779,6 +3694,76 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  call xmpi_split_cyclic(gams%nqibz, qpt_comm%value, gams%my_nqibz, gams%my_iqibz)
  ABI_CHECK(gams%my_nqibz > 0, sjoin("nqibz (", itoa(gams%nqibz), ") < qpt_comm_nproc (", itoa(qpt_comm%nproc), ")"))
+
+ path = strcat(dtfil%filnam_ds(4), "_A2F.nc")
+ ncid = nctk_noid
+#ifdef HAVE_NETCDF
+ if (my_rank == master) then
+   ! Master creates the netcdf file used to store the results of the calculation.
+   NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
+   NCF_CHECK(cryst%ncwrite(ncid))
+   NCF_CHECK(ebands_ncwrite(ebands, ncid))
+   NCF_CHECK(edos%ncwrite(ncid))
+
+   ! Add dimensions.
+   ncerr = nctk_def_dims(ncid, [nctkdim_t("nqibz", gams%nqibz), nctkdim_t("natom3", natom3)], defmode=.True.)
+   NCF_CHECK(ncerr)
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "eph_intmeth", "eph_transport", "symdynmat"])
+   NCF_CHECK(ncerr)
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "ph_intmeth"])
+   NCF_CHECK(ncerr)
+   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie"])
+   NCF_CHECK(ncerr)
+   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "ph_wstep", "ph_smear"])
+   NCF_CHECK(ncerr)
+
+   ! Define arrays for results.
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("ngqpt", "int", "three"), &
+     nctkarr_t("eph_ngqpt_fine", "int", "three"), &
+     nctkarr_t("ddb_ngqpt", "int", "three"), &
+     nctkarr_t("ph_ngqpt", "int", "three"), &
+     nctkarr_t('qibz', "dp", "number_of_reduced_dimensions, nqibz"), &
+     nctkarr_t('wtq', "dp", "nqibz"), &
+     nctkarr_t('phfreq_qibz', "dp", "natom3, nqibz"), &
+     nctkarr_t('phdispl_cart_qibz', "dp", "two, natom3, natom3, nqibz"), &
+     nctkarr_t('phgamma_qibz', "dp", "natom3, nqibz, number_of_spins"), &
+     nctkarr_t('phlambda_qibz', "dp", "natom3, nqibz, number_of_spins") &
+   ])
+   NCF_CHECK(ncerr)
+
+   ! ======================================================
+   ! Write data that do not depend on the (kpt, spin) loop.
+   ! ======================================================
+   NCF_CHECK(nctk_set_datamode(ncid))
+
+   ncerr = nctk_write_iscalars(ncid, &
+       [character(len=nctk_slen) :: "eph_intmeth", "eph_transport", "symdynmat", "ph_intmeth"], &
+       [dtset%eph_intmeth, dtset%eph_transport, dtset%symdynmat, dtset%ph_intmeth])
+   NCF_CHECK(ncerr)
+   ncerr = nctk_write_dpscalars(ncid, &
+     [character(len=nctk_slen) :: "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear"], &
+     [dtset%eph_fsewin, dtset%eph_fsmear, dtset%eph_extrael, dtset%eph_fermie, dtset%ph_wstep, dtset%ph_smear])
+   NCF_CHECK(ncerr)
+
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'qibz'), gams%qibz))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'wtq'), gams%wtq))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), gamma_ngqpt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_ngqpt_fine"), dtset%eph_ngqpt_fine))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ph_ngqpt"), dtset%ph_ngqpt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ddb_ngqpt"), dtset%ddb_ngqpt))
+   !NCF_CHECK(nf90_close(ncid))
+ end if
+
+ !call xmpi_barrier(comm)
+
+ ! Now reopen the file inside ncwrite_comm to perform pararallel-IO (required for q-point parallelism).
+ !if (self%ncwrite_comm%value /= xmpi_comm_null) then
+ !  NCF_CHECK(nctk_open_modify(self%ncid, path, self%ncwrite_comm%value))
+ !  NCF_CHECK(nctk_set_datamode(self%ncid))
+ !end if
+#endif
+ call edos%free()
 
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
@@ -3951,6 +3936,9 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  ! Allocate work space arrays.
  ABI_MALLOC(tgam, (2, natom3, natom3))
+ ABI_MALLOC(displ_cart, (2, 3, cryst%natom, natom3))
+ ABI_MALLOC(displ_red, (2, 3, cryst%natom, natom3))
+
  ABI_CALLOC(dummy_vtrial, (nfftf, nspden))
  ! TODO: Save data to netcdf file for each q in IBZ and then read data to build a2Fw once all big
  ! datastructures (wfd, dvdb) have been deallocated.
@@ -3961,14 +3949,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  if (dtset%eph_transport > 0) then
    ABI_MALLOC(tgamvv_in, (2, 9, natom3, natom3))
    ABI_MALLOC(tgamvv_out, (2, 9, natom3, natom3))
- end if
-
- if (dtset%prteliash == 3) then
-   ABI_MALLOC_OR_DIE(tmp_vals_ee, (2, gams%nene, gams%nene, gams%natom3, gams%natom3), ierr)
-   gams%vals_ee = zero
-   ! Energy mesh for electrons in a2F(e,e',w)
-   ABI_MALLOC(emesh, (gams%nene))
-   emesh = arth(fs%enemin, fs%deltaene, gams%nene)
  end if
 
  ! Loop over my q-point in the IBZ.
@@ -4018,7 +3998,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    call littlegroup_q(cryst%nsym, qpt, symq, cryst%symrec, cryst%symafm, timerev_q, prtvol=dtset%prtvol)
 
    ! Get phonon frequencies and eigenvectors.
-   !call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
+   call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
 
    ! Allocate vlocal1 with correct cplex. Note nvloc and my_npert.
    ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc, my_npert))
@@ -4028,7 +4008,13 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      spin = gams%my_spins(mys)
      fs => fstab(spin)
 
-     if (dtset%prteliash == 3) tmp_vals_ee = zero
+     if (dtset%prteliash == 3) then
+       ABI_MALLOC_OR_DIE(tmp_vals_ee, (2, gams%nene, gams%nene, gams%natom3, gams%natom3), ierr)
+       tmp_vals_ee = zero
+       ! Energy mesh for electrons in a2F(e,e',w) NB: It depends on the spin.
+       ABI_MALLOC(emesh, (gams%nene))
+       emesh = arth(fs%enemin, fs%deltaene, gams%nene)
+     end if
 
      ! Set up local potential vlocal1 with proper dimensioning from vtrial1 taking into account the spin.
      do imyp=1,my_npert
@@ -4051,13 +4037,13 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      ABI_MALLOC(dbldelta_wts, (mnb, mnb))
 
      if (dtset%eph_transport > 0) then
-       ABI_CALLOC(vv_kk, (9, mnb, mnb))
-       ABI_CALLOC(vv_kkq, (9, mnb, mnb))
+       ABI_MALLOC(vv_kk, (9, mnb, mnb))
+       ABI_MALLOC(vv_kkq, (9, mnb, mnb))
      end if
 
      if (dtset%prteliash == 3) then
-       ABI_CALLOC(wt_k_en, (gams%nene, mnb))
-       ABI_CALLOC(wt_kq_en, (gams%nene, mnb))
+       ABI_MALLOC(wt_ek, (gams%nene, mnb))
+       ABI_MALLOC(wt_ekq, (gams%nene, mnb))
      end if
 
      ! =====================================
@@ -4190,6 +4176,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ! Collect gkk_atm inside pert_comm so that all procs can operate on data.
        if (pert_comm%nproc > 1) call xmpi_sum(gkk_atm, pert_comm%value, ierr)
 
+       !call ephtk_gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
+
        need_velocities = dtset%eph_transport > 0 .or. fs%eph_fsmear < zero .or. nesting /= 0
 
        if (need_velocities) then
@@ -4269,23 +4257,25 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
        if (dtset%prteliash == 3) then
 
-         ! Precompute deltas with gaussian (tetra is not supported here)
-         !call get_dbl_tetra_weight_emesh()
+         ! Precompute deltas with gaussian (tetra is not supported here
+         ! also because one should allocate (nene, nene, mband, mband)
+         !call get_dbldelta_weights_emesh()
          do ib2=1,nband_k
            band_k = ib2 + bstart_k - 1
            sigma = fs%eph_fsmear
            if (fs%eph_fsmear < zero) then
              sigma = max(maxval([(abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
            end if
-           wt_k_en(:, ib2) = gaussian(emesh - ebands%eig(band_k, ik_ibz, spin), sigma) / sqrt(one * fs%nktot)
+           wt_ek(:, ib2) = gaussian(emesh - ebands%eig(band_k, ik_ibz, spin), sigma) / sqrt(one * fs%nktot)
          end do
+
          do ib1=1,nband_kq
            band_kq = ib1 + bstart_kq - 1
            sigma = fs%eph_fsmear
            if (fs%eph_fsmear < zero) then
              sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
            end if
-           wt_kq_en(:, ib1) = gaussian(emesh - ebands%eig(band_kq, ikq_ibz, spin), sigma) / sqrt(one * fs%nktot)
+           wt_ekq(:, ib1) = gaussian(emesh - ebands%eig(band_kq, ikq_ibz, spin), sigma) / sqrt(one * fs%nktot)
          end do
 
          do ib2=1,nband_k
@@ -4301,7 +4291,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
                      ! TODO: distribute this in procs over q. Make a temp array here for 1 q
                      ! then mpi sync it and save it only on 1 processor below after mpisum over k
                      tmp_vals_ee(:,iene,jene,ipc1,ipc2) = tmp_vals_ee(:,iene,jene,ipc1,ipc2) + &
-                       res(:) * wt_kq_en(iene, ib1) * wt_k_en(jene, ib2)
+                       res(:) * wt_ekq(iene, ib1) * wt_ek(jene, ib2)
                    end do
                  end do
                end do
@@ -4322,8 +4312,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      ABI_FREE(kets_k)
      ABI_FREE(h1kets_kq)
      ABI_FREE(gkk_atm)
-     ABI_SFREE(wt_k_en)
-     ABI_SFREE(wt_kq_en)
+     ABI_SFREE(wt_ek)
+     ABI_SFREE(wt_ekq)
 
      ! Collect tgam values inside kpt comm and divide by the total number of k-points in the full mesh.
      call xmpi_sum(tgam, kpt_comm%value, ierr)
@@ -4342,8 +4332,10 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
      if (dtset%prteliash == 3) then
        call xmpi_sum(tmp_vals_ee, kpt_comm%value, ierr)
-       !TODO: apply same distributed mem scheme for other vals_XX arrays
-       !gams%vals_ee(:,:,:,:,:, iq_ibz, spin) = tmp_vals_ee
+       !TODO: write arrays to ncfile.
+       gams%vals_ee(:,:,:,:,:, iq_ibz, spin) = tmp_vals_ee
+       ABI_FREE(tmp_vals_ee)
+       ABI_FREE(emesh)
      end if
 
    end do ! spin
@@ -4370,15 +4362,12 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ABI_FREE(ylm_kq)
  ABI_FREE(ylmgr_kq)
  ABI_FREE(tgam)
+ ABI_FREE(displ_cart)
+ ABI_FREE(displ_red)
 
  if (dtset%eph_transport > 0) then
    ABI_FREE(tgamvv_in)
    ABI_FREE(tgamvv_out)
- end if
-
- if (dtset%prteliash == 3) then
-   ABI_FREE(tmp_vals_ee)
-   ABI_FREE(emesh)
  end if
 
  call pawcprj_free(cwaveprj0)
@@ -4397,9 +4386,23 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    call xmpi_sum(gams%vals_in_qibz, qs_comm%value, ierr)
    call xmpi_sum(gams%vals_out_qibz, qs_comm%value, ierr)
  end if
- !if (dtset%prteliash == 3) then
- !  call xmpi_summ(gams%vals_ee, qs_comm%value, ierr)
+ if (dtset%prteliash == 3) then
+   call xmpi_sum(gams%vals_ee, qs_comm%value, ierr)
+ end if
+
+#ifdef HAVE_NETCDF
+ ! Close the netcdf file then master reopens it
+ !if (ncwrite_comm%value /= xmpi_comm_null) then
+ !  NCF_CHECK(nf90_close(ncid))
  !end if
+ !call xmpi_barrier(comm)
+
+ !ncid = nctk_noid
+ !if (my_rank == master) then
+ !  NCF_CHECK(nctk_open_modify(ncid, path, xmpi_comm_self))
+ !  NCF_CHECK(nctk_set_datamode(ncid))
+ !end if
+#endif
 
  ! Deallocate MPI communicators.
  call pert_comm%free()
@@ -4440,7 +4443,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  if (my_rank == master) then
    call a2fw%write(dtfil%filnam_ds(4), "_qintp", ncid)
-   if (dtset%prteliash  == 3) call a2fw_ee_write(a2fw, dtfil%filnam_ds(4))
+   if (dtset%prteliash == 3) call a2fw_ee_write(a2fw, dtfil%filnam_ds(4))
  end if
 
  ! TODO: Use KT mesh instead of T but read T from input.
@@ -4577,26 +4580,21 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 
  ABI_CHECK(isdiagmat(ebands%kptrlatt), "kptrlatt must be diagonal when tetra is used.")
  ABI_CHECK(ebands%nshiftk == 1, "nshiftk must be 1 when tetra is used")
- nge = get_diag(ebands%kptrlatt)
- ngw = nge
+ nge = get_diag(ebands%kptrlatt); ngw = nge
+ nkbz = product(nge(1:3))
 
- nb = fs%maxnb
- nkbz = product(ngw(1:3))
-
- ABI_MALLOC(eig_k, (nb, nkbz))
- ABI_MALLOC(eig_kq, (nb, nkbz))
-
- ! TODO: Handle symmetries in a cleaner way
+ ! TODO: Handle symmetries in a cleaner way. Change API of krank_new to pass symafm and kptopt
  !timrev = 0; if (use_tr) timrev=1
  ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, time_reversal=.True.)
 
+ nb = fs%maxnb
  ABI_MALLOC(kbz, (3, nkbz))
  ABI_MALLOC(indkpt, (nkbz))
+ ABI_MALLOC(eig_k, (nb, nkbz))
+ ABI_MALLOC(eig_kq, (nb, nkbz))
  ABI_MALLOC(kbz2fs, (nkbz))
- kbz2fs = -1
 
- ierr = 0
- ik_bz = 0
+ kbz2fs = -1; ierr = 0; ik_bz = 0
  do i3=0,nge(3) - 1
    do i2=0,nge(2) - 1
      do i1=0,nge(1) - 1
@@ -4613,12 +4611,9 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
        ik_ibz = ibz_krank%get_index(kk)
        if (ik_ibz < 1) then
          if (ierr <= enough) then
-           write(msg,'(3a,i0,a)') &
-            'kpt: ',trim(ktoa(kk)),' with rank: ', ibz_krank%get_rank(kk),' has no symmetric among the k-points'
-           MSG_WARNING(msg)
+           MSG_WARNING(sjoin('kpt:', trim(ktoa(kk)), 'has no symmetric among the k-points!'))
          end if
-         ierr = ierr + 1
-         cycle
+         ierr = ierr + 1; cycle
        end if
 
        eig_k(:, ik_bz) = ebands%eig(fs%bmin:fs%bmax, ik_ibz, spin)
@@ -4629,12 +4624,9 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 
        if (ikq_ibz < 1) then
          if (ierr <= enough) then
-           write(msg,'(3a,i0,a)') &
-            'kpt + qpt: ',trim(ktoa(kq)),' with rank: ', ibz_krank%get_rank(kq),' has no symmetric among the k-points'
-           MSG_WARNING(msg)
+           MSG_WARNING(sjoin('kpt + qpt:', trim(ktoa(kq)), 'has no symmetric among the k-points!'))
          end if
-         ierr = ierr + 1
-         cycle
+         ierr = ierr + 1; cycle
        end if
 
        eig_kq(:, ik_bz) = ebands%eig(fs%bmin:fs%bmax, ikq_ibz, spin)
@@ -4711,8 +4703,8 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
    ABI_FREE(tweight)
  end if
 
- ! Now we can filter k-points according to tetra weights and distribute inside comm.
- ! Assuming all procs in comm have all k-points.
+ ! Now we can filter the k-points according to the tetra weights and distribute inside comm.
+ ! Assuming all procs in comm have all k-points in the IBZ.
  ABI_MALLOC(select_ikfs, (fs%nkfs))
  nkfs_q = 0
  do ik_fs=1,fs%nkfs
@@ -4738,6 +4730,111 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  call cwtime_report(" phgamma_setup_qpoint", cpu, wall, gflops)
 
 end subroutine phgamma_setup_qpoint
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_phgamma/find_ewin
+!! NAME
+!! find_ewing
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine find_ewin(nqibz, qibz, cryst, ebands, ltetra, fs_ewin, comm)
+
+ use libtetrabz_dbldelta_mod
+
+!Arguments ------------------------------------
+ integer,intent(in) :: nqibz
+ type(crystal_t),intent(in) :: cryst
+ type(ebands_t),intent(in) :: ebands
+ integer,intent(in) :: ltetra, comm
+ real(dp),intent(out) :: fs_ewin
+!arrays
+ real(dp),intent(in) :: qibz(3, nqibz)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master = 0
+ integer :: my_rank, iq_ibz, spin
+ real(dp) :: cpu, wall, gflops
+ integer :: bstarts(3), bstops(3)
+ real(dp) :: elows(3), ehighs(3), ewins(3)
+ real(dp), allocatable :: wtqs(:,:,:)
+
+! *************************************************************************
+
+ my_rank = xmpi_comm_rank(comm)
+
+ call cwtime(cpu, wall, gflops, "start")
+
+ ABI_MALLOC(wtqs, (nqibz, ebands%nsppol, 3))
+
+ ! 1 is low, 2 is high, 3 is for the workspace
+ ewins(1) = 1_dp * eV_Ha; elows(1) = ebands%fermie - ewins(1); ehighs(1) = ebands%fermie + ewins(1)
+ call get_bands_from_erange(ebands, elows(1), ehighs(1), bstarts(1), bstops(1))
+ !call calc_dbldelta(ebands, cryst, bstarts(1), bstops(1), nqibz, qibz, wtqs(:,:,1), comm)
+
+ ewins(2) = 5_dp * eV_Ha; elows(2) = ebands%fermie - ewins(2); ehighs(2) = ebands%fermie + ewins(2)
+ call get_bands_from_erange(ebands, elows(2), ehighs(2), bstarts(2), bstops(2))
+ !call calc_dbldelta(ebands, cryst, bstarts(2), bstops(2), nqibz, qibz, wtqs(:,:,2), comm)
+
+ if (abs(sum(abs(wtqs(:,:,1)) - sum(abs(wtqs(:,:,2))))) / sum(abs(wtqs(:,:,2))) < tol2) then
+   fs_ewin = ewins(1)
+   call print_weights(1)
+   goto 100
+ end if
+
+ do
+   ewins(3) = (ewins(1) + ewins(2)) / two; elows(3) = ebands%fermie - ewins(3); ehighs(3) = ebands%fermie + ewins(3)
+   call get_bands_from_erange(ebands, elows(3), ehighs(3), bstarts(3), bstops(3))
+   !call calc_dbldelta(ebands, cryst, bstarts(3), bstops(3), nqibz, qibz, wtqs(:,:,3), comm)
+
+   if (abs(sum(abs(wtqs(:,:,3)) - sum(abs(wtqs(:,:,2))))) / sum(abs(wtqs(:,:,2))) < tol3) then
+     !  If 3 is close to 2, try to reduce the window by moving towards 1
+     ewins(2) = ewins(3); elows(2) = elows(3); ehighs(2) = ehighs(3)
+
+   else if (abs(sum(abs(wtqs(:,:,3)) - sum(abs(wtqs(:,:,2))))) / sum(abs(wtqs(:,:,2))) < tol2) then
+     fs_ewin = ewins(3)
+     call print_weights(3)
+     exit
+
+   else
+    ewins(1) = ewins(3); elows(1) = elows(3); ehighs(1) = ehighs(3)
+   end if
+
+ end do
+
+100 continue
+ ABI_FREE(wtqs)
+
+ call cwtime_report(" find_ewin", cpu, wall, gflops)
+
+contains
+
+subroutine print_weights(ind)
+
+ integer,intent(in) :: ind
+
+ if (my_rank == master) then
+   write(std_out, "(a, f8.3, a)")" Optimal FS energy window: ", fs_ewin * Ha_eV, " (eV)"
+   do iq_ibz=1,nqibz
+     write(std_out, "(2a)")" For q-point:", ktoa(qibz(:, iq_ibz))
+     do spin=1,ebands%nsppol
+       write(std_out, *) wtqs(iq_ibz, spin, ind)
+     end do
+   end do
+ end if
+
+end subroutine print_weights
+
+end subroutine find_ewin
 !!***
 
 end module m_phgamma

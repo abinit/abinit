@@ -542,7 +542,7 @@ module m_sigmaph
  public :: sigmaph_read   ! Read main dimensions and header of sigmaph from a netcdf file.
  private :: sigmaph_new   ! Creation method (allocates memory, initialize data from input vars).
 
- real(dp),private,parameter :: EPH_WTOL = tol6
+ !real(dp),private,parameter :: EPHTK_WTOL = tol6
  ! Tolerance for phonon frequencies to be ignored.
 
  real(dp),private,parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
@@ -1553,7 +1553,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          ! Get gkk(kcalc, q, nu)
          if (sigma%pert_comm%nproc > 1) call xmpi_sum(gkq_atm, sigma%pert_comm%value, ierr)
-         call gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
+         call ephtk_gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
 
          ! Save data for Debye-Waller computation that will be performed outside the q-loop.
          ! gkq_nu(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
@@ -1952,7 +1952,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                band_ks = ib_k + bstart_ks - 1
                eig0nk = ebands%eig(band_ks, ik_ibz, spin)
                ! Handle n == m and degenerate states.
-               ediff = eig0nk - eig0mk; if (abs(ediff) < EPH_WTOL) cycle
+               ediff = eig0nk - eig0mk; if (abs(ediff) < EPHTK_WTOL) cycle
 
                ! Compute DW term following XG paper. Check prefactor.
                ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
@@ -2144,72 +2144,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call xmpi_barrier(comm)
 
 end subroutine sigmaph
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_sigmaph/gkknu_from_atm
-!! NAME
-!!  gkknu_from_atm
-!!
-!! FUNCTION
-!!  Transform the gkk matrix elements from (atom, red_direction) basis to phonon-mode basis.
-!!
-!! INPUTS
-!!  nb1,nb2=Number of bands in gkq_atm matrix.
-!!  nk=Number of k-points (usually 1)
-!!  natom=Number of atoms.
-!!  gkq_atm(2,nb1,nb2,3*natom)=EPH matrix elements in the atomic basis.
-!!  phfrq(3*natom)=Phonon frequencies in Ha
-!!  displ_red(2,3*natom,3*natom)=Phonon displacement in reduced coordinates.
-!!
-!! OUTPUT
-!!  gkq_nu(2,nb1,nb2,3*natom)=EPH matrix elements in the phonon-mode basis.
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, gkq_nu)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: nb1, nb2, nk, natom
-!arrays
- real(dp),intent(in) :: phfrq(3*natom),displ_red(2,3*natom,3*natom)
- real(dp),intent(in) :: gkq_atm(2,nb1,nb2,nk,3*natom)
- real(dp),intent(out) :: gkq_nu(2,nb1,nb2,nk,3*natom)
-
-!Local variables-------------------------
-!scalars
- integer :: nu,ipc
-
-! *************************************************************************
-
- gkq_nu = zero
-
- ! Loop over phonon branches.
- do nu=1,3*natom
-   ! Ignore negative or too small frequencies
-   if (phfrq(nu) < EPH_WTOL) cycle
-
-   ! Transform the gkk from (atom, reduced direction) basis to phonon mode representation
-   do ipc=1,3*natom
-     gkq_nu(1,:,:,:,nu) = gkq_nu(1,:,:,:,nu) &
-       + gkq_atm(1,:,:,:,ipc) * displ_red(1,ipc,nu) &
-       - gkq_atm(2,:,:,:,ipc) * displ_red(2,ipc,nu)
-     gkq_nu(2,:,:,:,nu) = gkq_nu(2,:,:,:,nu) &
-       + gkq_atm(1,:,:,:,ipc) * displ_red(2,ipc,nu) &
-       + gkq_atm(2,:,:,:,ipc) * displ_red(1,ipc,nu)
-   end do
-
-   gkq_nu(:,:,:,:,nu) = gkq_nu(:,:,:,:,nu) / sqrt(two * phfrq(nu))
- end do
-
-end subroutine gkknu_from_atm
 !!***
 
 !----------------------------------------------------------------------
@@ -2649,6 +2583,15 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    end if
  else
    ! Automatic grid generation.
+
+   ! Automatic grid generation over q-points and spins.
+   !if (new%nsppol == 2 .and. mod(nprocs, 2) == 0) then
+   !  spin_comm%nproc = 2
+   !  qpt_comm%nproc = nprocs / 2
+   !else
+   !  qpt_comm%nproc = nprocs
+   !end if
+
    !
    ! Handle parallelism over perturbations first.
    ! Use MPI communicator to distribute 3 * natom perturbations to reduce memory requirements for DFPT potentials.
@@ -2801,7 +2744,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call ephtk_set_pertables(cryst%natom, new%my_npert, new%pert_table, new%my_pinfo, new%pert_comm%value)
 
  ! Setup a mask to skip accumulating the contribution of certain phonon modes.
- call ephtk_set_phmodes_ship(dtset, new%phmodes_skip)
+ call ephtk_set_phmodes_skip(dtset, new%phmodes_skip)
 
  if (.not. new%imag_only) then
    ! Split bands among the procs inside bsum_comm.
@@ -4028,7 +3971,7 @@ pure logical function sigmaph_skip_mode(self, nu, wqnu) result(skip)
 
 ! *************************************************************************
 
- skip = wqnu < EPH_WTOL .or. self%phmodes_skip(nu) == 1
+ skip = wqnu < EPHTK_WTOL .or. self%phmodes_skip(nu) == 1
 
 end function sigmaph_skip_mode
 !!***
