@@ -670,7 +670,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  logical,allocatable :: osc_mask(:)
  complex(dpc) :: cp3(3)
  complex(dpc),allocatable :: cfact_wr(:), tpp_red(:,:)
- complex(gwpc),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), work_ug(:)
+ complex(gwpc),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), workq_ug(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pawrhoij(:)
 
@@ -842,8 +842,17 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_MALLOC(displ_red, (2, 3, cryst%natom, natom3))
  ABI_MALLOC(tpp_red, (natom3, natom3))
  ABI_MALLOC(gbound_kq, (2*wfd%mgfft+8, 2))
+ ABI_MALLOC(osc_gbound_q, (2*wfd%mgfft+8, 2))
 
- need_oscillators = 1
+ need_oscillators = 0
+ osc_ecut = dtset%userra
+ !osc_ecut = dtset%ecut
+ !osc_ecut = one
+ if (osc_ecut /= zero) then
+   need_oscillators = 1
+   call wrtout(std_out, sjoin("Computiing oscillator matrix elements with ecut.", ftoa(osc_ecut)))
+   ABI_CHECK(osc_ecut <= wfd%ecut, "osc_ecut cannot be greater than dtset%ecut")
+ end if
  !nsheps = 0
  !call setshells(ecut, npw, nsh, cryst%nsym, cryst%gmet, cryst%gprimd, cryst%symrel, "eps", cryst%ucvol)
 
@@ -1153,6 +1162,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Note: One should rotate the wavefunctions if kk is not irred (not implemented)
      ABI_MALLOC(kets_k, (2, npw_k*nspinor, nbcalc_ks))
      ABI_MALLOC(sigma%e0vals, (nbcalc_ks))
+
      if (need_oscillators /= 0) then
        ABI_MALLOC(ur_k, (wfd%nfft*wfd%nspinor, nbcalc_ks))
        ABI_MALLOC(ur_kq, (wfd%nfft*wfd%nspinor))
@@ -1261,10 +1271,23 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(bra_kq, (2, npw_kq*nspinor))
        ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
 
-       ! Finds the boundary of the basis sphere of G vectors (for this kq point)
-       ! for use in improved zero padding of ffts in 3 dimensions.
        if (need_oscillators /= 0) then
+         ! Finds the boundary of the basis sphere of G vectors (for this kq point)
+         ! for use in improved zero padding of ffts in 3 dimensions.
          call sphereboundary(gbound_kq, istwf_kq, kg_kq, wfd%mgfft, npw_kq)
+
+         ! Compute "small" G-sphere centered on qpt and gbound for zero-padded FFT for oscillators.
+         call get_kg(qpt, istw1, osc_ecut, cryst%gmet, osc_npw, osc_gvecq)
+         call sphereboundary(osc_gbound_q, istw1, osc_gvecq, wfd%mgfft, osc_npw)
+
+         ! Compute correspondence G-sphere --> FFT mesh.
+         ABI_MALLOC(osc_indpw, (osc_npw))
+         ABI_MALLOC(osc_mask, (osc_npw))
+         call kgindex(osc_indpw, osc_gvecq, osc_mask, wfd%mpi_enreg, ngfft, osc_npw)
+         ABI_FREE(osc_mask)
+
+         ABI_MALLOC(workq_ug, (npw_kq*wfd%nspinor))
+         ABI_MALLOC(osc_ks, (2, osc_npw*wfd%nspinor, nbcalc_ks))
        end if
 
        ! Allocate array to store H1 |psi_nk> for all 3*natom perturbations
@@ -1560,49 +1583,33 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          if (isqzero .and. .not. sigma%imag_only) gkq0_atm(:, :, ibsum_kq, :) = gkq_atm
 
          if (need_oscillators /= 0) then
-           ! Compute "small" G-sphere centered on qpt and gbound for zero-padded FFT.
-           osc_ecut = one
-           ABI_CHECK(osc_ecut <= wfd%ecut, "osc_ecut cannot be greater than dtset%ecut")
-           call get_kg(qpt, istw1, osc_ecut, cryst%gmet, osc_npw, osc_gvecq)
-           ABI_MALLOC(osc_gbound_q, (2*wfd%mgfft+8, 2))
-           call sphereboundary(osc_gbound_q, istw1, osc_gvecq, wfd%mgfft, osc_npw)
-
-           ! Compute correspondence G-sphere --> FFT mesh.
-           ! TODO: Do I need to account for G-G0 here?
-           ABI_MALLOC(osc_indpw, (osc_npw))
-           ABI_MALLOC(osc_mask, (osc_npw))
-           !call kgindex(osc_indpw, gmg0, osc_mask, wfd%mpi_enreg, ngfft, osc_npw)
-           call kgindex(osc_indpw, osc_gvecq, osc_mask, wfd%mpi_enreg, ngfft, osc_npw)
-           ABI_FREE(osc_mask)
-
-           ABI_MALLOC(work_ug, (npw_kq*wfd%nspinor))
-           work_ug = cmplx(bra_kq(1, :), bra_kq(2, :), kind=gwpc)
+           workq_ug = cmplx(bra_kq(1, :), bra_kq(2, :), kind=gwpc)
            call fft_ug(npw_kq, wfd%nfft, wfd%nspinor, ndat1, wfd%mgfft, wfd%ngfft, &
-                       istwf_kq, kg_kq, gbound_kq, work_ug, ur_kq)
+                       istwf_kq, kg_kq, gbound_kq, workq_ug, ur_kq)
 
-           ABI_MALLOC(osc_ks, (2, osc_npw*wfd%nspinor, nbcalc_ks))
+           ! We need <k+q| e^{iq+G}|k> --> compute <k| e^{-i(q+G)}|k+q> with FFT and take CC.
            do ib_k=1,nbcalc_ks
-             work_ur = conjg(ur_kq) * ur_k(:, ib_k)
+             work_ur = ur_kq * conjg(ur_k(:, ib_k))
              ! Call zero-padded FFT routine.
              call fftpad(work_ur, ngfft, n1, n2, n3, n1, n2, n3, nspinor, wfd%mgfft, -1, osc_gbound_q)
 
-             ! Need results on the G-sphere --> Have to map FFT to G-sphere.
+             ! Need results on the G-sphere --> Transfer data from FFT to G-sphere.
              do ispinor=1,nspinor
                do ig=1,osc_npw
                  ifft = osc_indpw(ig) + (ispinor-1) * wfd%nfft
-                 !! G-G0 belong to the FFT mesh.
-                 !if (ifft /= 0) rhotwg(ig) = rhotwg(ig) + work_ur(ifft)
                  osc_ks(1, ig + (ispinor -1) * osc_npw, ib_k) = real(work_ur(ifft))
-                 osc_ks(2, ig + (ispinor -1) * osc_npw, ib_k) = aimag(work_ur(ifft))
+                 osc_ks(2, ig + (ispinor -1) * osc_npw, ib_k) = -aimag(work_ur(ifft))
                end do
              end do
+
+             band_ks = ib_k + bstart_ks - 1
+             !if (ibsum_kq == band_ks) then
+             if (ibsum_kq == band_ks .and. all(abs(qpt) < tol12)) then
+               write(std_out,"(a,i0,2a)")" Ene and Oscillator for band: ", band_ks, ", and q-point: ", trim(ktoa(qpt))
+               write(std_out,*)ebands%eig(band_ks, ik_ibz, spin) * Ha_eV, osc_ks(:,1:2,ib_k)
+             end if
            end do
 
-           ABI_FREE(osc_ks)
-           ABI_FREE(work_ug)
-           ABI_FREE(osc_gbound_q)
-           ABI_FREE(osc_gvecq)
-           ABI_FREE(osc_indpw)
          end if
 
          ! Accumulate contribution to self-energy
@@ -1863,6 +1870,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_FREE(bra_kq)
        ABI_FREE(cgwork)
        ABI_FREE(h1kets_kq)
+
+       if (need_oscillators /= 0) then
+         ABI_FREE(osc_gvecq)
+         ABI_FREE(osc_indpw)
+         ABI_FREE(osc_ks)
+         ABI_FREE(workq_ug)
+       end if
 
        if (sigma%nqibz_k < 1000 .or. (sigma%nqibz_k > 1000 .and. mod(iq_ibz, 200) == 0) .or. iq_ibz <= nprocs) then
          write(msg,'(4(a,i0),a,f8.2)') " k-point [",ikcalc,"/",sigma%nkcalc, "] q-point [",iq_ibz,"/",sigma%nqibz_k,"]"
@@ -2130,6 +2144,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_SFREE(dtw_weights)
  ABI_SFREE(delta_e_minus_emkq)
  ABI_FREE(gbound_kq)
+ ABI_FREE(osc_gbound_q)
 
  call gs_hamkq%free()
  call wfd%free()

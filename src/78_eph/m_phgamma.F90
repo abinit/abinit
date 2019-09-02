@@ -30,6 +30,7 @@ module m_phgamma
  use m_krank
  use m_htetra
  use m_tetrahedron
+ use libtetrabz
  use m_ifc
  use m_ebands
  use m_fstab
@@ -2039,7 +2040,9 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqp
    do iw=1,nomega
      omega = a2f%omega(iw)
      if (abs(omega) > EPHTK_WTOL) then
-       a2flogmom(iw) = (two/lambda_iso) * a2f_1d(iw)*log(abs(omega))/abs(omega)
+       a2flogmom(iw) = (two / lambda_iso) * a2f_1d(iw) * log(abs(omega)) / abs(omega)
+       ! I think this is the correct expression.
+       !a2flogmom(iw) = (one / lambda_iso) * a2f_1d(iw) * log(abs(omega)) / abs(omega)
      end if
    end do
    call simpson_int(nomega, wstep, a2flogmom, a2flogmom_int)
@@ -3601,6 +3604,10 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  call phgamma_init(gams, cryst, ifc, fstab(1), dtset, eph_scalprod0, gamma_ngqpt, n0, comm)
  call wrtout(std_out, sjoin("Will compute", itoa(gams%nqibz), "q-points in the IBZ"))
 
+ ltetra = 2 !; ltetra = dtset%useria + 1
+ ! Compute optimal energy window for tetra.
+ !call find_ewin(gams%nqibz, gams%qibz, cryst, ebands, ltetra, sigma, comm)
+
  ! ========================
  ! === MPI DISTRIBUTION ===
  ! ========================
@@ -4050,7 +4057,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      ! Integration over the FS for this spin
      ! =====================================
      ! Compute integration weights and distribute k-points (my_nfsk_q)
-     ltetra = 2 !; ltetra = dtset%useria + 1
      call phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nesting, kpt_comm%value)
 
      do myik=1,gams%my_nfsk_q
@@ -4511,8 +4517,6 @@ end subroutine eph_phgamma
 
 subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nesting, comm)
 
- use libtetrabz_dbldelta_mod
-
 !Arguments ------------------------------------
  type(phgamma_t),intent(inout) :: gams
  type(fstab_t),intent(inout) :: fs
@@ -4527,7 +4531,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 !scalars
  integer,parameter :: enough = 50
  integer :: nkbz, ierr, nb, ik_bz, ik_ibz, ikq_ibz, ikq_fs, ik_fs, i1, i2, i3, nkfs_q, nene
- integer :: method, ib1, ib2 ! band_k, band_kq
+ integer :: ib1, ib2 ! band_k, band_kq
  real(dp),parameter :: max_occ1 = one
  real(dp) :: cpu, wall, gflops, enemin, enemax
  character(len=500) :: msg
@@ -4637,9 +4641,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  ABI_CHECK(ierr == 0, "See above warnings")
  call ibz_krank%free()
 
- method = 1
-
- if (method == 1) then
+ if (any(ltetra == [1, 2])) then
    ! Compute weights for double delta integration. Note that libtetra assumes Ef set to zero.
    ! TODO: Average weights over degenerate states?
    write(std_out,"(a,i0,2a)")" Calling libtetrabz_dbldelta with ltetra: ", ltetra, " for q-point:", trim(ktoa(qpt))
@@ -4659,7 +4661,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
    end do
    ABI_FREE(wght_bz)
 
- else if (method == 2) then
+ else if (ltetra == 3) then
    ! Tetrahedron method with Allen's approach for double delta.
    write(std_out,"(2a)")" Calling Allen's version for q-point: ", trim(ktoa(qpt))
    nene = 3
@@ -4701,6 +4703,8 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
    ABI_FREE(work_kq)
    ABI_FREE(dtweightde)
    ABI_FREE(tweight)
+ else
+   MSG_ERROR(sjoin("Invalid value of ltetra:", itoa(ltetra)))
  end if
 
  ! Now we can filter the k-points according to the tetra weights and distribute inside comm.
@@ -4748,8 +4752,6 @@ end subroutine phgamma_setup_qpoint
 
 subroutine find_ewin(nqibz, qibz, cryst, ebands, ltetra, fs_ewin, comm)
 
- use libtetrabz_dbldelta_mod
-
 !Arguments ------------------------------------
  integer,intent(in) :: nqibz
  type(crystal_t),intent(in) :: cryst
@@ -4762,10 +4764,10 @@ subroutine find_ewin(nqibz, qibz, cryst, ebands, ltetra, fs_ewin, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_rank, iq_ibz, spin
+ integer :: my_rank, iq_ibz, spin, ii
  real(dp) :: cpu, wall, gflops
  integer :: bstarts(3), bstops(3)
- real(dp) :: elows(3), ehighs(3), ewins(3)
+ real(dp) :: elows(3), ehighs(3), ewins(3), qsums(3)
  real(dp), allocatable :: wtqs(:,:,:)
 
 ! *************************************************************************
@@ -4777,13 +4779,13 @@ subroutine find_ewin(nqibz, qibz, cryst, ebands, ltetra, fs_ewin, comm)
  ABI_MALLOC(wtqs, (nqibz, ebands%nsppol, 3))
 
  ! 1 is low, 2 is high, 3 is for the workspace
- ewins(1) = 1_dp * eV_Ha; elows(1) = ebands%fermie - ewins(1); ehighs(1) = ebands%fermie + ewins(1)
+ ewins(1) = half * eV_Ha; elows(1) = ebands%fermie - ewins(1); ehighs(1) = ebands%fermie + ewins(1)
  call get_bands_from_erange(ebands, elows(1), ehighs(1), bstarts(1), bstops(1))
- !call calc_dbldelta(ebands, cryst, bstarts(1), bstops(1), nqibz, qibz, wtqs(:,:,1), comm)
+ call calc_dbldelta(cryst, ebands, ltetra, bstarts(1), bstops(1), nqibz, qibz, wtqs(:,:,1), comm)
 
- ewins(2) = 5_dp * eV_Ha; elows(2) = ebands%fermie - ewins(2); ehighs(2) = ebands%fermie + ewins(2)
+ ewins(2) = five * eV_Ha; elows(2) = ebands%fermie - ewins(2); ehighs(2) = ebands%fermie + ewins(2)
  call get_bands_from_erange(ebands, elows(2), ehighs(2), bstarts(2), bstops(2))
- !call calc_dbldelta(ebands, cryst, bstarts(2), bstops(2), nqibz, qibz, wtqs(:,:,2), comm)
+ call calc_dbldelta(cryst, ebands, ltetra, bstarts(2), bstops(2), nqibz, qibz, wtqs(:,:,2), comm)
 
  if (abs(sum(abs(wtqs(:,:,1)) - sum(abs(wtqs(:,:,2))))) / sum(abs(wtqs(:,:,2))) < tol2) then
    fs_ewin = ewins(1)
@@ -4794,13 +4796,21 @@ subroutine find_ewin(nqibz, qibz, cryst, ebands, ltetra, fs_ewin, comm)
  do
    ewins(3) = (ewins(1) + ewins(2)) / two; elows(3) = ebands%fermie - ewins(3); ehighs(3) = ebands%fermie + ewins(3)
    call get_bands_from_erange(ebands, elows(3), ehighs(3), bstarts(3), bstops(3))
-   !call calc_dbldelta(ebands, cryst, bstarts(3), bstops(3), nqibz, qibz, wtqs(:,:,3), comm)
+   call calc_dbldelta(cryst, ebands, ltetra, bstarts(3), bstops(3), nqibz, qibz, wtqs(:,:,3), comm)
 
-   if (abs(sum(abs(wtqs(:,:,3)) - sum(abs(wtqs(:,:,2))))) / sum(abs(wtqs(:,:,2))) < tol3) then
-     !  If 3 is close to 2, try to reduce the window by moving towards 1
-     ewins(2) = ewins(3); elows(2) = elows(3); ehighs(2) = ehighs(3)
+   do ii=1,3
+     qsums(ii) = sum(abs(wtqs(:,:,ii))) / nqibz
+   end do
 
-   else if (abs(sum(abs(wtqs(:,:,3)) - sum(abs(wtqs(:,:,2))))) / sum(abs(wtqs(:,:,2))) < tol2) then
+   write(std_out,*)qsums(1), ", for ewins(1)_eV", ewins(1) * Ha_eV, " bstart(1)", bstarts(1), " bstopt(1)", bstops(1)
+   write(std_out,*)qsums(2), ", for ewins(2)_eV", ewins(2) * Ha_eV, " bstart(1)", bstarts(2), " bstopt(1)", bstops(2)
+   write(std_out,*)qsums(3), ", for ewins(3)_eV", ewins(3) * Ha_eV, " bstart(1)", bstarts(3), " bstopt(1)", bstops(3)
+
+   !if (abs(sum(abs(wtqs(:,:,3)) - sum(abs(wtqs(:,:,2))))) / sum(abs(wtqs(:,:,2))) < tol3) then
+   !  !  If 3 is close to 2, try to reduce the window by moving towards 1
+   !  ewins(2) = ewins(3); elows(2) = elows(3); ehighs(2) = ehighs(3)
+
+   if (abs(qsums(3) - qsums(2)) / qsums(2) < tol2) then
      fs_ewin = ewins(3)
      call print_weights(3)
      exit
@@ -4825,7 +4835,7 @@ subroutine print_weights(ind)
  if (my_rank == master) then
    write(std_out, "(a, f8.3, a)")" Optimal FS energy window: ", fs_ewin * Ha_eV, " (eV)"
    do iq_ibz=1,nqibz
-     write(std_out, "(2a)")" For q-point:", ktoa(qibz(:, iq_ibz))
+     write(std_out, "(2a)")" For q-point:", trim(ktoa(qibz(:, iq_ibz)))
      do spin=1,ebands%nsppol
        write(std_out, *) wtqs(iq_ibz, spin, ind)
      end do
@@ -4835,6 +4845,187 @@ subroutine print_weights(ind)
 end subroutine print_weights
 
 end subroutine find_ewin
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_phgamma/calc_dbldelta
+!! NAME
+!! calc_dbldelta
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine calc_dbldelta(cryst, ebands, ltetra, bstart, bstop, nqibz, qibz, wtqs, comm)
+
+!Arguments ------------------------------------
+ type(crystal_t),intent(in) :: cryst
+ type(ebands_t),intent(in) :: ebands
+ integer,intent(in) :: ltetra, bstart, bstop, nqibz, comm
+!arrays
+ real(dp),intent(in) :: qibz(3,nqibz)
+ real(dp),intent(out) :: wtqs(nqibz, ebands%nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: enough = 50
+ integer :: nkbz, ierr, nb, ik_bz, ik_ibz, ikq_ibz, i1, i2, i3, nene, spin, iq_ibz
+ integer :: ib1, ib2, my_rank, nproc, cnt
+ real(dp),parameter :: max_occ1 = one
+ real(dp) :: enemin, enemax !cpu, wall, gflops,
+ character(len=500) :: msg
+ type(krank_t) :: ibz_krank
+ type(t_tetrahedron) :: tetra
+ character(len=80) :: errorstring
+!arrays
+ integer :: nge(3), ngw(3)
+ integer,allocatable :: indkpt(:) !, symrecfm(:,:,:)
+ real(dp) :: qpt(3), kk(3), kq(3)
+ real(dp),allocatable :: eig_k(:,:), eig_kq(:,:), wght_bz(:,:,:), kbz(:,:)
+ real(dp),allocatable :: work_k(:), work_kq(:), dtweightde(:,:,:), tweight(:,:,:)
+
+! *************************************************************************
+
+ my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
+ !call cwtime(cpu, wall, gflops, "start")
+
+ ABI_CHECK(nqibz > 1, "Need more that 1 q-point")
+ ABI_CHECK(isdiagmat(ebands%kptrlatt), "kptrlatt must be diagonal when tetra is used.")
+ ABI_CHECK(ebands%nshiftk == 1, "nshiftk must be 1 when tetra is used")
+ nge = get_diag(ebands%kptrlatt); ngw = nge
+ nkbz = product(nge(1:3))
+
+ ! TODO: Handle symmetries in a cleaner way. Change API of krank_new to pass symafm and kptopt
+ !timrev = 0; if (use_tr) timrev=1
+ ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, time_reversal=.True.)
+
+ nb = bstop - bstart + 1
+ ABI_MALLOC(kbz, (3, nkbz))
+ ABI_MALLOC(indkpt, (nkbz))
+ ABI_MALLOC(eig_k, (nb, nkbz))
+ ABI_MALLOC(eig_kq, (nb, nkbz))
+
+ wtqs = zero
+
+ cnt = 0
+ do spin=1,ebands%nsppol
+   do iq_ibz=1,nqibz
+     cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
+     qpt = qibz(:, iq_ibz)
+
+     ! The double delta is ill-defined for q == 0
+     if (all(abs(qpt) < tol12)) cycle
+
+     ierr = 0; ik_bz = 0
+     do i3=0,nge(3) - 1
+       do i2=0,nge(2) - 1
+         do i1=0,nge(1) - 1
+           ik_bz = ik_bz + 1
+           indkpt(ik_bz) = ik_bz
+
+           ! Find correspondence between the grid and the IBZ
+           kk = ([i1, i2, i3] + ebands%shiftk(:, 1)) / nge(:)
+           kbz(:, ik_bz) = kk
+
+           ik_ibz = ibz_krank%get_index(kk)
+           if (ik_ibz < 1) then
+             if (ierr <= enough) then
+               MSG_WARNING(sjoin('kpt:', trim(ktoa(kk)), 'has no symmetric among the k-points!'))
+             end if
+             ierr = ierr + 1; cycle
+           end if
+
+           eig_k(:, ik_bz) = ebands%eig(bstart:bstop, ik_ibz, spin)
+
+           ! Find correspondence between the BZ grid and the IBZ.
+           kq = kk + qpt
+           ikq_ibz = ibz_krank%get_index(kq)
+
+           if (ikq_ibz < 1) then
+             if (ierr <= enough) then
+               MSG_WARNING(sjoin('kpt + qpt:', trim(ktoa(kq)), 'has no symmetric among the k-points!'))
+             end if
+             ierr = ierr + 1; cycle
+           end if
+
+           eig_kq(:, ik_bz) = ebands%eig(bstart:bstop, ikq_ibz, spin)
+         end do
+       end do
+     end do
+
+     ABI_CHECK(ierr == 0, "See above warnings")
+
+     if (any(ltetra == [1, 2])) then
+       ! Compute weights for double delta integration. Note that libtetra assumes Ef set to zero.
+       ! TODO: Average weights over degenerate states?
+       !write(std_out,"(a,i0,2a)")" Calling libtetrabz_dbldelta with ltetra: ", ltetra, " for q-point:", trim(ktoa(qpt))
+       eig_k = eig_k - ebands%fermie; eig_kq = eig_kq - ebands%fermie
+       ABI_MALLOC(wght_bz, (nb, nb, nkbz))
+       call libtetrabz_dbldelta(ltetra, cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz) !, comm=comm)
+       eig_k = eig_k + ebands%fermie; eig_kq = eig_kq + ebands%fermie
+
+       wtqs(iq_ibz, spin) = sum(wght_bz)
+       ABI_FREE(wght_bz)
+
+     else if (ltetra == 3) then
+       ! Tetrahedron method with Allen's approach for double delta.
+       !write(std_out,"(2a)")" Calling Allen's version for q-point: ", trim(ktoa(qpt))
+       nene = 3
+       enemin = ebands%fermie - tol6
+       enemax = ebands%fermie + tol6
+
+       ABI_MALLOC(dtweightde, (nkbz, nene, nene))
+       ABI_MALLOC(tweight, (nkbz, nene, nene))
+       ABI_MALLOC(work_k, (nkbz))
+       ABI_MALLOC(work_kq, (nkbz))
+
+       ! TODO
+       MSG_ERROR("Not Implemented")
+       !call init_tetra(indkpt, cryst%gprimd, fs%klatt, kbz, nkbz, tetra, ierr, errorstring, comm)
+       ABI_CHECK(ierr == 0, "init_tetra returned ierr /= 0")
+
+       !fs%dbldelta_tetra_weights_kfs = zero
+       do ib2=1,nb
+         work_k = eig_k(ib2, :)
+         do ib1=1,nb
+          work_kq = eig_kq(ib1, :)
+          ! TODO: Average weights over degenerate states?
+          call get_dbl_tetra_weight(work_k, work_kq, enemin, enemax, enemin, enemax, &
+                                    max_occ1, nene, nene, nkbz, tetra, tweight, dtweightde, ierr)
+          ABI_CHECK(ierr == 0, "get_dbldelta_weights returned ierr /= 0")
+
+          wtqs(iq_ibz, spin) = wtqs(iq_ibz, spin) + sum(dtweightde(:, 2, 2))
+         end do
+       end do
+
+       call destroy_tetra(tetra)
+       ABI_FREE(work_k)
+       ABI_FREE(work_kq)
+       ABI_FREE(dtweightde)
+       ABI_FREE(tweight)
+     else
+       MSG_ERROR(sjoin("Invalid value of ltetra:", itoa(ltetra)))
+     end if
+   end do ! iq_ibz
+ end do ! spin
+
+ ABI_FREE(indkpt)
+ ABI_FREE(kbz)
+ ABI_FREE(eig_k)
+ ABI_FREE(eig_kq)
+
+ call ibz_krank%free()
+
+ call xmpi_sum(wtqs, comm, ierr)
+
+ !call cwtime_report(" calc_dbldelta", cpu, wall, gflops)
+
+end subroutine calc_dbldelta
 !!***
 
 end module m_phgamma
