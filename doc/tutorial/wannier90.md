@@ -12,10 +12,10 @@ Maximally Localized Wannier Functions (MLWFs).
 You will learn how to get MLWFs with ABINIT and Wannier90 and what are the
 basic variables to govern the numerical efficiency.  
 
-[TUTORIAL_README]
-
 This tutorial should take about 1 hour and it is important to note that the examples in this tutorial 
 are not converged, they are just examples to show how to use the code.
+
+[TUTORIAL_README]
 
 ## Summary of Wannier90 in ABINIT
   
@@ -77,9 +77,9 @@ We are going to extract the Wannier functions corresponding to the four valence 
 *Before beginning, you might consider to work in a different sub-directory as
 for the other tutorials. Why not Work_w90?*
 Then copy the files file *tw90_1.files*, *tw90_1.in* and *wannier90.win* from 
-the *$ABI_TUTOPLUGS/Input* directory to *Work_w90*:
+the *$ABI_TESTS/tutoplugs/Input* directory to *Work_w90*:
 
-    cd $ABI_TUTOPLUGS/Input
+    cd $ABI_TESTS/tutoplugs/Input
     mkdir Work_w90
     cd Work_w90
     cp ../tw90_1.files .

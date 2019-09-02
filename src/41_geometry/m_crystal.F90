@@ -222,10 +222,12 @@ MODULE m_crystal
    !procedure :: compare => crystal_compare
    ! Compare two structures, write warning messages if they differ
 
+   procedure :: print => crystal_print
+   ! Print dimensions and basic info stored in the object
+
  end type crystal_t
 
  public :: crystal_init            ! Main Creation method.
- public :: crystal_print           ! Print dimensions and basic info stored in the object
 
  public :: symbols_crystal         ! Return an array with the atomic symbol:["Sr","Ru","O1","O2","O3"]
  public :: prt_cif                 ! Print CIF file.
@@ -572,7 +574,7 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
  integer,optional,intent(in) :: unit,prtvol
  character(len=*),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
- type(crystal_t),intent(in) :: Cryst
+ class(crystal_t),intent(in) :: Cryst
 
 !Local variables-------------------------------
  integer :: my_unt,my_prtvol,nu,iatom

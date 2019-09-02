@@ -136,10 +136,6 @@ type, public :: ephwg_t
   ! (nibz, natom3)
   ! Phonon frequencies in the IBZ
 
-  real(dp),allocatable :: phdispl_cart(:,:,:,:,:)
-  ! (2, 3, natom, 3*natom, nibz)
-  ! Phonon displacements in cartesian coordinates
-
   real(dp),allocatable :: eigkbs_ibz(:, :, :)
   ! (nibz, nbcount, nsppol)
   ! Electron eigenvalues in the IBZ for nbcount states
@@ -285,17 +281,11 @@ type(ephwg_t) function ephwg_new( &
 
  ! Fourier interpolate phonon frequencies on the same mesh.
  ABI_CALLOC(new%phfrq_ibz, (new%nibz, new%natom3))
- if (frohl_model == 3) then
-   ABI_MALLOC(new%phdispl_cart, (2,3,ifc%natom,new%natom3,new%nibz))
- end if
 
  do ik=1,new%nibz
    if (mod(ik, nprocs) /= my_rank) cycle ! mpi-parallelism
    call ifc%fourq(cryst, new%ibz(:, ik), phfrq, displ_cart)
    new%phfrq_ibz(ik, :) = phfrq
-
-   if (frohl_model /= 3) cycle
-   new%phdispl_cart(:,:,:,:,ik) = displ_cart
  end do
 
  call xmpi_sum(new%phfrq_ibz, comm, ierr)
@@ -318,7 +308,7 @@ end function ephwg_new
 !!  oscillator=oscillator matrix elements for the wavefunction to be used
 !!
 
-function ephwg_get_frohlich(self,cryst,ifc,iqpt,nu,qdamp,ngvecs,gvecs) result(gkq_lr)
+function ephwg_get_frohlich(self,cryst,ifc,iqpt,nu,displ_cart,qdamp,ngvecs,gvecs) result(gkqg_lr)
 
 !Arguments ------------------------------------
 !scalars
@@ -329,7 +319,7 @@ function ephwg_get_frohlich(self,cryst,ifc,iqpt,nu,qdamp,ngvecs,gvecs) result(gk
  real(dp) :: qdamp
 !arrays
  integer,intent(in) :: gvecs(3,ngvecs)
- complex(dpc) :: gkq_lr(ngvecs)
+ complex(dpc) :: gkqg_lr(ngvecs)
 
 !Local variables ------------------------------
  integer :: iatom, ig
@@ -337,8 +327,9 @@ function ephwg_get_frohlich(self,cryst,ifc,iqpt,nu,qdamp,ngvecs,gvecs) result(gk
  complex(dpc) :: cnum
  !arrays
  real(dp) :: qG_red(3), qG_cart(3), cdd(3)
+ real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
 
- gkq_lr = zero
+ gkqg_lr = zero
  wqnu = self%phfrq_ibz(iqpt,nu); if (wqnu < tol8) return
  do ig=1,ngvecs
    qG_red = self%ibz(:,iqpt) + gvecs(:,ig)
@@ -352,13 +343,13 @@ function ephwg_get_frohlich(self,cryst,ifc,iqpt,nu,qdamp,ngvecs,gvecs) result(gk
    cnum = zero
    do iatom=1,cryst%natom
      ! This is complex
-     cdd = cmplx(self%phdispl_cart(1,:, iatom, nu, iqpt), self%phdispl_cart(2,:, iatom, nu, iqpt), kind=dpc) * &
+     cdd = cmplx(displ_cart(1,:, iatom, nu), displ_cart(2,:, iatom, nu), kind=dpc) * &
            exp(-j_dpc * two_pi * dot_product(qG_red, cryst%xred(:, iatom)))
      cnum = cnum + dot_product(qG_cart, matmul(ifc%zeff(:, :, iatom), cdd))
    end do
-   gkq_lr(ig) = cnum * fqdamp
+   gkqg_lr(ig) = cnum * fqdamp
  end do
- gkq_lr = gkq_lr / sqrt(two * wqnu)
+ gkqg_lr = gkqg_lr / sqrt(two * wqnu)
 
 end function ephwg_get_frohlich
 !!***
@@ -1170,7 +1161,6 @@ subroutine ephwg_free(self)
  ABI_SFREE(self%bz)
  ABI_SFREE(self%lgk2ibz)
  ABI_SFREE(self%phfrq_ibz)
- ABI_SFREE(self%phdispl_cart)
  ABI_SFREE(self%eigkbs_ibz)
 
  ! types

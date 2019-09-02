@@ -15,11 +15,6 @@ It is supposed that you have some knowledge about UNIX/Linux, and you know how t
 You are supposed to know already some basics of parallelism in ABINIT,
 explained in the tutorial [A first introduction to ABINIT in parallel](basepar.md).
 
-[TUTORIAL_README]
-
-This tutorial should take about 1.5 hour and requires to have at least a 200 CPU core parallel computer.
-
-
 In the following, when "run ABINIT over nn CPU cores" appears, you have to use
 a specific command line according to the operating system and architecture of
 the computer you are using. This can be for instance:
@@ -28,18 +23,22 @@ the computer you are using. This can be for instance:
 
 or the use of a specific submission file.
 
+This tutorial should take about 1.5 hour and requires to have at least a 200 CPU core parallel computer.
+
+[TUTORIAL_README]
+
 ## 1 Generating the WFK file in parallel
 
-*Before beginning, you should create a working directory in *\$ABI_TUTOPARAL/Input* 
+*Before beginning, you should create a working directory in *\$ABI_TESTS/tutoparal/Input* 
 whose name might be Work_mbt.*
 
 ```sh
-cd $ABI_TUTOPARAL/Input/
+cd $ABI_TESTS/tutoparal/Input/
 mkdir Work_mbt && cd Work_mbt
 ```
   
 The input files necessary to run the examples related to this tutorial are
-located in the directory *\$ABI_TUTOPARAL/Input* .
+located in the directory *\$ABI_TESTS/tutoparal/Input* .
 We will do most of the actions of this tutorial in this working directory. 
 
 In the [first GW tutorial](gw1), we have learned how to
@@ -52,7 +51,7 @@ First of all, copy the files file tmbt_1.files in the working directory Work_mbt
     cd Work_mbt
     cp ../tmbt_1.files . 
 
-Now open the input file *\$ABI_TUTOPARAL/Input/tmbt_1.in* in your
+Now open the input file *\$ABI_TESTS/tutoparal/Input/tmbt_1.in* in your
 preferred editor, and look at its structure.
 
 {% dialog tests/tutoparal/Input/tmbt_1.files tests/tutoparal/Input/tmbt_1.in %}
@@ -101,7 +100,7 @@ With three nodes, the wall clock time is around 1.5 minutes.
     +Overall time at end (sec) : cpu=        626.9  wall=        626.9
     
 
-A reference output file is given in *\$ABI_TUTOPARAL/Refs*, under the name *tmbt_1.out*.
+A reference output file is given in *\$ABI_TESTS/tutoparal/Refs*, under the name *tmbt_1.out*.
 
 Note that 150 bands are not enough to obtain converged GW results, you might
 increase the number of bands in proportion to your computing resources.
@@ -117,7 +116,7 @@ symbolic link pointing to the WFK file we have generated in the previous step:
     
     >>> ln -s tmbt_1o_DS2_WFK tmbt_2i_WFK
 
-Now open the input file *\$ABI_TUTOPARAL/Input/tmbt_2.in* so that we can
+Now open the input file *\$ABI_TESTS/tutoparal/Input/tmbt_2.in* so that we can
 discuss its structure.
 
 {% dialog tests/tutoparal/Input/tmbt_2.in %}
@@ -290,7 +289,7 @@ and then create a symbolic link pointing to the WFK file.
     
     >>> ln -s tmbt_1o_DS2_WFK tmbt_3i_WFK
     
-The input file is *$\ABI_TUTOPARAL/Input/tmbt_3.in*. 
+The input file is *$\ABI_TESTS/tutoparal/Input/tmbt_3.in*. 
 Open it so that we can have a look at its structure.
 
 {% dialog tests/tutoparal/Input/tmbt_3.in %}
@@ -357,7 +356,7 @@ directory. Then create two symbolic links for the SCR and the WFK file:
     ln -s tmbt_1o_DS2_WFK tmbt_4i_WFK
     ln -s tmbt_2o_SCR     tmbt_4i_SCR
 
-Now open the input file *\$ABI_TUTOPARAL/Input/tmbt_4.in*.
+Now open the input file *\$ABI_TESTS/tutoparal/Input/tmbt_4.in*.
 
 {% dialog tests/tutoparal/Input/tmbt_4.in %}
 

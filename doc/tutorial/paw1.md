@@ -12,9 +12,9 @@ You will learn how to launch a PAW calculation and what are the main input
 variables that govern convergence and numerical efficiency.
 You are supposed to know how to use ABINIT with _Norm-Conserving PseudoPotentials_ (NCPP).
 
-[TUTORIAL_README]
-
 This tutorial should take about 1.5 hour.
+
+[TUTORIAL_README]
 
 ## 1. Summary of the PAW method
 
@@ -62,23 +62,23 @@ $\phi_i$, $\tphi_i$ and $\tprj_i$ and that plays the same role as a pseudopotent
 *Before continuing, you might consider to work in a different subdirectory as
 for the other tutorials. Why not Work_paw1?
 In what follows, the name of files are mentioned as if you were in this subdirectory.
-All the input files can be found in the `$ABI_TUTORIAL/Input` directory.*
+All the input files can be found in the `$ABI_TESTS/tutorial/Input` directory.*
 
 !!! important
 
     You can compare your results with reference output files located in
-    `$ABI_TUTORIAL/Refs` and `$ABI_TUTORIAL/Refs/tpaw1_addons`
+    `$ABI_TESTS/tutorial/Refs` and `$ABI_TESTS/tutorial/Refs/tpaw1_addons`
     directories (for the present tutorial they are named `tpaw1_*.out`).
 
 The input file *tpaw1_1.in* is an example of a file to be used to compute
 the total energy of diamond at the experimental volume (within the
 _LDA exchange-correlation functional_). You might use the file *tpaw1_1.files*
 (with a standard Norm-Conserving PseudoPotential) as a *files* file, and get
-the corresponding output file (it is available in *$ABI_TUTORIAL/Refs/tpaw1_1.out*).  
+the corresponding output file (it is available in *$ABI_TESTS/tutorial/Refs/tpaw1_1.out*).  
 Copy the files *tpaw1_1.in* and *tpaw1_1.files* in your work directory, 
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work_paw1
 cd Work_paw1
 cp ../tpaw1_1.files . 

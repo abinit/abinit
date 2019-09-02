@@ -16,10 +16,10 @@ efficiency of the parallelism on "images".
 You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial 
 [A first introduction to ABINIT in parallel](basepar), and  [ground state with plane waves](paral_gspw).
 
-[TUTORIAL_README]
-
 This tutorial should take about 1.5 hour and requires to have at least a 200 CPU
 cores parallel computer.
+
+[TUTORIAL_README]
 
 ## 1 Summary of the String Method
   
@@ -41,8 +41,8 @@ tutorials. Why not work_paral_string?*
 !!! important
 
     In what follows, the names of files are mentioned as if you were in this subdirectory.
-    All the input files can be found in the *\$ABI_TUTOPARAL/Input* directory.
-    You can compare your results with reference output files located in *\$ABI_TUTOPARAL/Refs*.  
+    All the input files can be found in the *\$ABI_TESTS/tutoparal/Input* directory.
+    You can compare your results with reference output files located in *\$ABI_TESTS/tutoparal/Refs*.  
   
     In the following, when "run ABINIT over _nn_ CPU cores" appears, you have to use
     a specific command line according to the operating system and architecture of

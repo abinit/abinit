@@ -168,7 +168,7 @@ program abitk
 
  case ("crystal_print")
     call get_path_cryst(path, cryst, comm)
-    call crystal_print(cryst, unit=std_out, prtvol=prtvol)
+    call cryst%print(unit=std_out, prtvol=prtvol)
 
  case ("ebands_print", "ebands_xmgrace", "ebands_gnuplot")
    call get_path_ebands(path, ebands, comm)
@@ -189,6 +189,7 @@ program abitk
      edos = ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
      call edos%write(strcat(basename(path), "_EDOS"))
      call edos%free()
+
    else if (command == "ebands_jdos") then
      !jdos = ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
      !call jdos%write(strcat(basename(path), "_EJDOS"))

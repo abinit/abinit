@@ -13,9 +13,9 @@ It is supposed that you already know how to run ABINIT with PAW  (tutorial [PAW1
 Obviously, you should also read the tutorial [DFT+U](dftu), and likely the tutorial [PAW2](paw2), 
 to generate PAW atomic data.  
 
-[TUTORIAL_README]
-
 This tutorial should take about 1/2 hour.
+
+[TUTORIAL_README]
 
 ## Summary of linear response method to determine *U*
   
@@ -68,9 +68,9 @@ for the other tutorials. Why not Work_udet?*
 !!! important
 
     In what follows, the name of files are mentioned as if you were in this subdirectory.  
-    All the input files can be found in the $ABI_TUTORIAL/Input directory
+    All the input files can be found in the $ABI_TESTS/tutorial/Input directory
      You can compare your results with reference output files located in
-     $ABI_TUTORIAL/Refs directory (for the present tutorial they are named tudet*.out).
+     $ABI_TESTS/tutorial/Refs directory (for the present tutorial they are named tudet*.out).
 
 The input file *tudet_1.in* is an example of a file to prepare a wave function
 for further processing. You might use the file *tudet_1.files* as a "files"
@@ -79,7 +79,7 @@ file, and get the corresponding output file ../Refs/tudet_1.out).
 Copy the files *tudet_1.in* and *tudet_1.files* in your work directory, and run ABINIT:
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work_udet
 cd Work_udet
 cp ../tudet_1.files .

@@ -53,7 +53,6 @@ module m_elphon
  use m_eliashberg_1d,   only : eliashberg_1d
  use m_iogkk,           only : read_el_veloc,  read_gkk
  use m_bz_mesh,         only : make_path
- use m_fstab,           only : mkqptequiv
  use m_epweights,       only : d2c_weights, ep_el_weights, ep_fs_weights
  use m_a2ftr,           only : mka2f_tr, mka2f_tr_lova, get_tau_k
  use m_symkpt,          only : symkpt

@@ -43,6 +43,7 @@ module m_screening_driver
  use m_hdr
  use m_dtfil
  use m_distribfft
+ use m_crystal
 
 
  use defs_datatypes,  only : pseudopotential_type, ebands_t
@@ -55,7 +56,6 @@ module m_screening_driver
  use m_geometry,      only : normv, vdotw, mkrdim, metric
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_free, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
- use m_crystal,       only : crystal_t, crystal_print
  use m_ebands,        only : ebands_update_occ, ebands_copy, get_valence_idx, get_occupied, apply_scissor, &
                              ebands_free, ebands_has_metal_scheme, ebands_ncwrite, ebands_init
  use m_bz_mesh,       only : kmesh_t, kmesh_init, kmesh_free, littlegroup_t, littlegroup_free, littlegroup_init, &
@@ -536,10 +536,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    nbvw=MAXVAL(ibocc)
    nbcw=Ep%nbnds-nbvw
    write(msg,'(4a,i0,2a,i0,2a,i0,a)')ch10,&
-&   '- screening: taking advantage of time-reversal symmetry ',ch10,&
-&   '- Maximum band index for partially occupied states nbvw = ',nbvw,ch10,&
-&   '- Remaining bands to be divided among processors   nbcw = ',nbcw,ch10,&
-&   '- Number of bands treated by each node ~',nbcw/nprocs,ch10
+    '- screening: taking advantage of time-reversal symmetry ',ch10,&
+    '- Maximum band index for partially occupied states nbvw = ',nbvw,ch10,&
+    '- Remaining bands to be divided among processors   nbcw = ',nbcw,ch10,&
+    '- Number of bands treated by each node ~',nbcw/nprocs,ch10
    call wrtout(ab_out,msg,'COLL')
    if (Cryst%timrev/=2) then
      MSG_ERROR('Time-reversal cannot be used since cryst%timrev/=2')
@@ -1735,13 +1735,13 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    Ep%nbnds=mband
    Dtset%nband(:)=mband
    write(msg,'(4a,i4,a)')ch10,&
-&    ' Number of bands found less then required. ',ch10,&
-&    ' Calculation will proceed with nbnds = ',mband,ch10
+     ' Number of bands found less then required. ',ch10,&
+     ' Calculation will proceed with nbnds = ',mband,ch10
    MSG_WARNING(msg)
  end if
 
  cryst = hdr_get_crystal(Hdr_wfk, timrev, remove_inv)
- call crystal_print(Cryst,mode_paral='COLL')
+ call cryst%print(mode_paral='COLL')
 
  ! === Create basic data types for the calculation ===
  ! * Kmesh defines the k-point sampling for the wavefunctions.
