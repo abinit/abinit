@@ -1602,7 +1602,7 @@ pure function bisect_rdp(AA,xx) result(loc)
 
  nn=SIZE(AA); ascnd=(AA(nn)>=AA(1))
  !
- ! === Initialize lower and upper limits ===
+ ! Initialize lower and upper limits
  jl=0; ju=nn+1
  do
    if (ju-jl<=1) EXIT
@@ -1614,7 +1614,7 @@ pure function bisect_rdp(AA,xx) result(loc)
    end if
  end do
  !
- ! === Set the output, being careful with the endpoints ===
+ ! Set the output, being careful with the endpoints
  if (xx==AA(1)) then
    loc=1
  else if (xx==AA(nn)) then
@@ -1657,8 +1657,8 @@ pure function bisect_int(AA,xx) result(loc)
 ! *********************************************************************
 
  nn=SIZE(AA) ; ascnd=(AA(nn)>=AA(1))
- !
- ! === Initialize lower and upper limits ===
+
+ ! Initialize lower and upper limits
  jl=0 ; ju=nn+1
  do
   if (ju-jl<=1) EXIT
@@ -1670,7 +1670,7 @@ pure function bisect_int(AA,xx) result(loc)
   end if
  end do
  !
- ! === Set the output, being careful with the endpoints ===
+ ! Set the output, being careful with the endpoints
  if (xx==AA(1)) then
   loc=1
  else if (xx==AA(nn)) then

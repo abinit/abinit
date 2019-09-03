@@ -1379,7 +1379,7 @@ end function get_valence_idx
 !!  get_bands_from_erange
 !!
 !! FUNCTION
-!! Return the indices of the mix and max band within an energy window.
+!! Return the indices of the min and max band index within an energy window.
 !!
 !! INPUTS
 !!  elow, ehigh: Min and max energy

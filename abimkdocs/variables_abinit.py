@@ -19708,8 +19708,9 @@ Variable(
 This variable defines the Cartesian grid of MPI processors used for EPH calculations.
 If not specified in the input, the code will generate this grid automatically using the total number of processors 
 and the basic dimensions of the job computed at runtime.
-At present (|today|), this variable is supported only in the calculation of the e-ph self-energy 
-i.e. [[eph_task]] 4 or -4. In all the other tasks, this variable is ignored.
+At present (|today|), this variable is supported only in the calculation of the phonon einewidths ([[eph_task]] 1)
+and in the computation of the e-ph self-energy ([[eph_task]] 4 or -4).
+In all the other tasks, this variable is ignored.
 
 Preliminary considerations:
 
@@ -19724,14 +19725,22 @@ In what follows, we explain briefly the pros and cons of the different MPI-level
 the discussion to the different calculations activated by [[eph_task]].
 
 The parallelization over perturbations (**np**) is network intensive but it allows one to decrease the memory
-needed for the DFPT potentials.
+needed for the DFPT potentials especially when computing the e-ph self-energy.
 The maximum valus for **np** is 3 * [[natom]] and the workload is equally distributed provided **np** 
 divides 3 * [[natom]] equally. 
 Using **np** == [[natom]] usually gives good parallel efficiency.
 
-The parallelization over bands (**nb**) has limited scalability that depends on the number of bands includes 
+The parallelization over bands (**nb**) has limited scalability that depends on the number of bands included
 in the self-energy but it allows one to reduce the memory
-allocated for the wavefunctions, especially when we have to sum over empty states.
+allocated for the wavefunctions, especially when we have to sum over empty states in the e-ph self-energy.
+
+[[eph_task]] = +1
+    By default, the code uses all the processes for the (k-point, spin) parallelism.
+    Since the number of k-points around the FS is usually large, this parallelization scheme is OK in most of the cases.
+    When the number of processes becomes comparable to the number of k-points around the FS, 
+    it makes sense to activate the q-point parallelism.
+    The parallelism over perturbations should be used to reduce the memory allocated for the interpolation of the DFPT potentials.
+    The band parallelism is not supported in this part.
 
 [[eph_task]] = +4
     Parallelization over bands allows one to reduce the memory needed for the wavefunctions but

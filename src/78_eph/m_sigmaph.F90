@@ -542,7 +542,7 @@ module m_sigmaph
  public :: sigmaph_read   ! Read main dimensions and header of sigmaph from a netcdf file.
  private :: sigmaph_new   ! Creation method (allocates memory, initialize data from input vars).
 
- real(dp),private,parameter :: EPH_WTOL = tol6
+ !real(dp),private,parameter :: EPHTK_WTOL = tol6
  ! Tolerance for phonon frequencies to be ignored.
 
  real(dp),private,parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
@@ -677,7 +677,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  complex(dpc) :: cp3(3)
  complex(dpc),allocatable :: osc_ks(:,:)
  complex(dpc),allocatable :: cfact_wr(:), tpp_red(:,:)
- complex(gwpc),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), work_ug(:)
+ complex(gwpc),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), workq_ug(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pawrhoij(:)
 
@@ -849,8 +849,16 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_MALLOC(displ_red, (2, 3, cryst%natom, natom3))
  ABI_MALLOC(tpp_red, (natom3, natom3))
  ABI_MALLOC(gbound_kq, (2*wfd%mgfft+8, 2))
+ ABI_MALLOC(osc_gbound_q, (2*wfd%mgfft+8, 2))
 
  need_oscillators = (sigma%frohl_model == 3 .and. sigma%use_doublegrid)
+ osc_ecut = dtset%userra
+ !osc_ecut = dtset%ecut
+ !osc_ecut = one
+ if (osc_ecut /= zero .and. need_oscillators) then
+   call wrtout(std_out, sjoin("Computiing oscillator matrix elements with ecut.", ftoa(osc_ecut)))
+   ABI_CHECK(osc_ecut <= wfd%ecut, "osc_ecut cannot be greater than dtset%ecut")
+ end if
  !nsheps = 0
  !call setshells(ecut, npw, nsh, cryst%nsym, cryst%gmet, cryst%gprimd, cryst%symrel, "eps", cryst%ucvol)
 
@@ -1272,7 +1280,22 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ! Finds the boundary of the basis sphere of G vectors (for this kq point)
        ! for use in improved zero padding of ffts in 3 dimensions.
        if (need_oscillators) then
+         ! Finds the boundary of the basis sphere of G vectors (for this kq point)
+         ! for use in improved zero padding of ffts in 3 dimensions.
          call sphereboundary(gbound_kq, istwf_kq, kg_kq, wfd%mgfft, npw_kq)
+
+         ! Compute "small" G-sphere centered on qpt and gbound for zero-padded FFT for oscillators.
+         call get_kg(qpt, istw1, osc_ecut, cryst%gmet, osc_npw, osc_gvecq)
+         call sphereboundary(osc_gbound_q, istw1, osc_gvecq, wfd%mgfft, osc_npw)
+
+         ! Compute correspondence G-sphere --> FFT mesh.
+         ABI_MALLOC(osc_indpw, (osc_npw))
+         ABI_MALLOC(osc_mask, (osc_npw))
+         call kgindex(osc_indpw, osc_gvecq, osc_mask, wfd%mpi_enreg, ngfft, osc_npw)
+         ABI_FREE(osc_mask)
+
+         ABI_MALLOC(workq_ug, (npw_kq*wfd%nspinor))
+         ABI_MALLOC(osc_ks, (osc_npw*wfd%nspinor, nbcalc_ks))
        end if
 
        ! Allocate array to store H1 |psi_nk> for all 3*natom perturbations
@@ -1561,48 +1584,38 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          ! Get gkk(kcalc, q, nu)
          if (sigma%pert_comm%nproc > 1) call xmpi_sum(gkq_atm, sigma%pert_comm%value, ierr)
-         call gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
+         call ephtk_gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
 
          ! Save data for Debye-Waller computation that will be performed outside the q-loop.
          ! gkq_nu(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
          if (isqzero .and. .not. sigma%imag_only) gkq0_atm(:, :, ibsum_kq, :) = gkq_atm
 
+
          if (need_oscillators) then
-           ! Compute "small" G-sphere centered on qpt and gbound for zero-padded FFT.
-           osc_ecut = one
-           ABI_CHECK(osc_ecut <= wfd%ecut, "osc_ecut cannot be greater than dtset%ecut")
-           call get_kg(qpt, istw1, osc_ecut, cryst%gmet, osc_npw, osc_gvecq)
-           ABI_MALLOC(osc_gbound_q, (2*wfd%mgfft+8, 2))
-           call sphereboundary(osc_gbound_q, istw1, osc_gvecq, wfd%mgfft, osc_npw)
-
-           ! Compute correspondence G-sphere --> FFT mesh.
-           ! TODO: Do I need to account for G-G0 here?
-           ABI_MALLOC(osc_indpw, (osc_npw))
-           ABI_MALLOC(osc_mask, (osc_npw))
-           !call kgindex(osc_indpw, gmg0, osc_mask, wfd%mpi_enreg, ngfft, osc_npw)
-           call kgindex(osc_indpw, osc_gvecq, osc_mask, wfd%mpi_enreg, ngfft, osc_npw)
-           ABI_FREE(osc_mask)
-
-           ABI_MALLOC(work_ug, (npw_kq*wfd%nspinor))
-           work_ug = cmplx(bra_kq(1, :), bra_kq(2, :), kind=gwpc)
+           workq_ug = cmplx(bra_kq(1, :), bra_kq(2, :), kind=gwpc)
            call fft_ug(npw_kq, wfd%nfft, wfd%nspinor, ndat1, wfd%mgfft, wfd%ngfft, &
-                       istwf_kq, kg_kq, gbound_kq, work_ug, ur_kq)
+                       istwf_kq, kg_kq, gbound_kq, workq_ug, ur_kq)
 
-           ABI_MALLOC(osc_ks, (osc_npw*wfd%nspinor, nbcalc_ks))
+           ! We need <k+q| e^{iq+G}|k> --> compute <k| e^{-i(q+G)}|k+q> with FFT and take CC.
            do ib_k=1,nbcalc_ks
-             work_ur = conjg(ur_kq) * ur_k(:, ib_k)
+             work_ur = ur_kq * conjg(ur_k(:, ib_k))
              ! Call zero-padded FFT routine.
              call fftpad(work_ur, ngfft, n1, n2, n3, n1, n2, n3, nspinor, wfd%mgfft, -1, osc_gbound_q)
 
-             ! Need results on the G-sphere --> Have to map FFT to G-sphere.
+             ! Need results on the G-sphere --> Transfer data from FFT to G-sphere.
              do ispinor=1,nspinor
                do ig=1,osc_npw
                  ifft = osc_indpw(ig) + (ispinor-1) * wfd%nfft
-                 !! G-G0 belong to the FFT mesh.
-                 !if (ifft /= 0) rhotwg(ig) = rhotwg(ig) + work_ur(ifft)
-                 osc_ks(ig + (ispinor -1) * osc_npw, ib_k) = work_ur(ifft)
+                 osc_ks(ig + (ispinor -1) * osc_npw, ib_k) = conjg(work_ur(ifft))
                end do
              end do
+
+             band_ks = ib_k + bstart_ks - 1
+             !if (ibsum_kq == band_ks) then
+             !if (ibsum_kq == band_ks .and. all(abs(qpt) < tol12)) then
+             !  write(std_out,"(a,i0,2a)")" Ene and Oscillator for band: ", band_ks, ", and q-point: ", trim(ktoa(qpt))
+             !  write(std_out,*)ebands%eig(band_ks, ik_ibz, spin) * Ha_eV, osc_ks(:,1:2,ib_k)
+             !end if
            end do
 
            ! Compute electron-phonon matrix elements for the Frohlich interaction
@@ -1638,11 +1651,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
            ABI_FREE(gkqg_fine)
            ABI_FREE(displ_cart_fine)
-           ABI_FREE(osc_ks)
-           ABI_FREE(work_ug)
-           ABI_FREE(osc_gbound_q)
-           ABI_FREE(osc_gvecq)
-           ABI_FREE(osc_indpw)
          end if
 
          ! Accumulate contribution to self-energy
@@ -1901,6 +1909,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_FREE(cgwork)
        ABI_FREE(h1kets_kq)
 
+       if (need_oscillators) then
+         ABI_FREE(osc_gvecq)
+         ABI_FREE(osc_indpw)
+         ABI_FREE(osc_ks)
+         ABI_FREE(workq_ug)
+       end if
+
        if (sigma%nqibz_k < 1000 .or. (sigma%nqibz_k > 1000 .and. mod(iq_ibz, 200) == 0) .or. iq_ibz <= nprocs) then
          write(msg,'(4(a,i0),a,f8.2)') " k-point [",ikcalc,"/",sigma%nkcalc, "] q-point [",iq_ibz,"/",sigma%nqibz_k,"]"
          call cwtime_report(msg, cpu, wall, gflops)
@@ -1990,7 +2005,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                band_ks = ib_k + bstart_ks - 1
                eig0nk = ebands%eig(band_ks, ik_ibz, spin)
                ! Handle n == m and degenerate states.
-               ediff = eig0nk - eig0mk; if (abs(ediff) < EPH_WTOL) cycle
+               ediff = eig0nk - eig0mk; if (abs(ediff) < EPHTK_WTOL) cycle
 
                ! Compute DW term following XG paper. Check prefactor.
                ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
@@ -2168,6 +2183,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_SFREE(dtw_weights)
  ABI_SFREE(delta_e_minus_emkq)
  ABI_FREE(gbound_kq)
+ ABI_FREE(osc_gbound_q)
 
  call gs_hamkq%free()
  call wfd%free()
@@ -2182,72 +2198,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call xmpi_barrier(comm)
 
 end subroutine sigmaph
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_sigmaph/gkknu_from_atm
-!! NAME
-!!  gkknu_from_atm
-!!
-!! FUNCTION
-!!  Transform the gkk matrix elements from (atom, red_direction) basis to phonon-mode basis.
-!!
-!! INPUTS
-!!  nb1,nb2=Number of bands in gkq_atm matrix.
-!!  nk=Number of k-points (usually 1)
-!!  natom=Number of atoms.
-!!  gkq_atm(2,nb1,nb2,3*natom)=EPH matrix elements in the atomic basis.
-!!  phfrq(3*natom)=Phonon frequencies in Ha
-!!  displ_red(2,3*natom,3*natom)=Phonon displacement in reduced coordinates.
-!!
-!! OUTPUT
-!!  gkq_nu(2,nb1,nb2,3*natom)=EPH matrix elements in the phonon-mode basis.
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, gkq_nu)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: nb1, nb2, nk, natom
-!arrays
- real(dp),intent(in) :: phfrq(3*natom),displ_red(2,3*natom,3*natom)
- real(dp),intent(in) :: gkq_atm(2,nb1,nb2,nk,3*natom)
- real(dp),intent(out) :: gkq_nu(2,nb1,nb2,nk,3*natom)
-
-!Local variables-------------------------
-!scalars
- integer :: nu,ipc
-
-! *************************************************************************
-
- gkq_nu = zero
-
- ! Loop over phonon branches.
- do nu=1,3*natom
-   ! Ignore negative or too small frequencies
-   if (phfrq(nu) < EPH_WTOL) cycle
-
-   ! Transform the gkk from (atom, reduced direction) basis to phonon mode representation
-   do ipc=1,3*natom
-     gkq_nu(1,:,:,:,nu) = gkq_nu(1,:,:,:,nu) &
-       + gkq_atm(1,:,:,:,ipc) * displ_red(1,ipc,nu) &
-       - gkq_atm(2,:,:,:,ipc) * displ_red(2,ipc,nu)
-     gkq_nu(2,:,:,:,nu) = gkq_nu(2,:,:,:,nu) &
-       + gkq_atm(1,:,:,:,ipc) * displ_red(2,ipc,nu) &
-       + gkq_atm(2,:,:,:,ipc) * displ_red(1,ipc,nu)
-   end do
-
-   gkq_nu(:,:,:,:,nu) = gkq_nu(:,:,:,:,nu) / sqrt(two * phfrq(nu))
- end do
-
-end subroutine gkknu_from_atm
 !!***
 
 !----------------------------------------------------------------------
@@ -2687,6 +2637,15 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    end if
  else
    ! Automatic grid generation.
+
+   ! Automatic grid generation over q-points and spins.
+   !if (new%nsppol == 2 .and. mod(nprocs, 2) == 0) then
+   !  spin_comm%nproc = 2
+   !  qpt_comm%nproc = nprocs / 2
+   !else
+   !  qpt_comm%nproc = nprocs
+   !end if
+
    !
    ! Handle parallelism over perturbations first.
    ! Use MPI communicator to distribute 3 * natom perturbations to reduce memory requirements for DFPT potentials.
@@ -2839,7 +2798,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call ephtk_set_pertables(cryst%natom, new%my_npert, new%pert_table, new%my_pinfo, new%pert_comm%value)
 
  ! Setup a mask to skip accumulating the contribution of certain phonon modes.
- call ephtk_set_phmodes_ship(dtset, new%phmodes_skip)
+ call ephtk_set_phmodes_skip(dtset, new%phmodes_skip)
 
  if (.not. new%imag_only) then
    ! Split bands among the procs inside bsum_comm.
@@ -4066,7 +4025,7 @@ pure logical function sigmaph_skip_mode(self, nu, wqnu) result(skip)
 
 ! *************************************************************************
 
- skip = wqnu < EPH_WTOL .or. self%phmodes_skip(nu) == 1
+ skip = wqnu < EPHTK_WTOL .or. self%phmodes_skip(nu) == 1
 
 end function sigmaph_skip_mode
 !!***
