@@ -3581,7 +3581,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 
 !Local variables-------------------------------
 !scalars
- integer :: iatdir,iatom,iatpert,iband,idir,ipert,ipw,iq1grad,iq2grad,istrpert,ka,kb
+ integer :: g0term,iatdir,iatom,iatpert,iband,idir,ipert,ipw,iq1grad,iq2grad,istrpert,ka,kb
  integer :: nkpg,nylmgrpart,optlocal,optnl,tim_getgh1c,useylmgr1
  real(dp) :: doti,dotr
  type(pawfgr_type) :: pawfgr
@@ -3633,6 +3633,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 
 !Specific definitions
  nylmgrpart=3
+ g0term=1
 
 !LOOP OVER HAMILTONIAN ATOMIC DISPLACEMENT PERTURBATIONS
  do iatpert=1,natpert
@@ -3647,7 +3648,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
      &  psps%mqgrid_vl,dtset%natom,&
      &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3), &
      &  ph1d,iq1grad,psps%qgrid_vl,&
-     &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq,xred)
+     &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq,xred,g0term=g0term)
 
      !Set up q-gradient of local potential vlocal1dq with proper dimensioning
      call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,2,nfft,dtset%nfft,dtset%ngfft,&
