@@ -4007,7 +4007,8 @@ end subroutine dfpt_flexoout
            frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-two*tmpre
            frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-two*tmpim
 
-           !Multiply by -2 the Ewald contribution 
+           !Multiply by -2 the Ewald contribution (Not sure about this two
+           !factor) 
            tmpre=dyewdqdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)
            tmpim=dyewdqdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)
            dyewdqdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-two*tmpre
@@ -4093,7 +4094,8 @@ end subroutine dfpt_flexoout
            frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-two*tmpre
            frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=zero
 
-           !Multiply by -2 the Ewald contribution 
+           !Multiply by -2 the Ewald contribution (Not sure about this two
+           !factor)
            tmpre=dyewdqdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)
            dyewdqdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-two*tmpre
            dyewdqdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)=zero

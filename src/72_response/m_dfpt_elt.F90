@@ -2462,7 +2462,9 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
          arg=fac*gsq
 !        Larger arg gives 0 contribution:
          if (arg <= 80._dp) then
-           term=exp(-arg)/gsq
+!           term=exp(-arg)/gsq
+!TMP for SCBCs:
+           term=(exp(-arg)-one)/gsq
            do ia0=1,my_natom
              ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
              arga=two_pi*(gpq(1)*xred(1,ia)+gpq(2)*xred(2,ia)+gpq(3)*xred(3,ia))
