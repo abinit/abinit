@@ -25,10 +25,10 @@ MODULE m_paw_nhat
 
  use defs_basis
  use m_abicore
- use defs_abitypes
  use m_errors
  use m_xmpi
 
+ use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
  use m_pawang,       only : pawang_type
  use m_pawtab,       only : pawtab_type

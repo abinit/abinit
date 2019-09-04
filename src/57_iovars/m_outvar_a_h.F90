@@ -26,11 +26,11 @@
 module m_outvar_a_h
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_results_out
+ use m_dtset
 
- use m_parser,  only : prttagm, prttagm_images
+ use m_parser,  only : prttagm, prttagm_images, ab_dimensions
 
  implicit none
 

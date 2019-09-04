@@ -142,8 +142,6 @@ contains
 subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci, & !Mandatory Arguments
 &                d2vxci,dvxcdgr,dvxci,exexch,grho2_updn)                          !Optional Arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ndvxci,nd2vxci,ngr2,npts,nspden,option,order

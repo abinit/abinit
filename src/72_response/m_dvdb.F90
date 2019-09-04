@@ -41,8 +41,9 @@ module m_dvdb
 #endif
  use m_hdr
  use m_ddb
+ use m_dtset
 
- use defs_abitypes,   only : hdr_type, mpi_type, dataset_type
+ use defs_abitypes,   only : mpi_type
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
  use m_time,          only : cwtime, cwtime_report, sec2str, timab
  use m_io_tools,      only : open_file, file_exists, delete_file
@@ -1732,7 +1733,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, mbsize, qselect_dvdb, itreatq, comm
    call db%readsym_allv1(db_iqpt, cplex, nfft, ngfft, v1scf, comm)
 
    ! Print progress.
-   if (db_iqpt <= 50 .or. mod(db_iqpt, 50) == 0) then
+   if (db_iqpt <= 10 .or. mod(db_iqpt, 50) == 0) then
      write(msg,'(2(a,i0),a)') " Reading q-point [",db_iqpt,"/",db%nqpt, "]"
      call cwtime_report(msg, cpu, wall, gflops)
    end if
@@ -1916,15 +1917,15 @@ subroutine qcache_report_stats(qcache)
  if (qcache%maxnq == 0) then
    write(std_out, "(a)")" qcache deactivated with maxnq == 0"
  else if (qcache%maxnq > 0 .and. qcache%stats(1) /= 0) then
-   write(std_out, "(2a)")ch10, " Qcache stats"
-   write(std_out, "(a,i0)")" Total Number of calls: ", qcache%stats(1)
-   write(std_out, "(a,i0,2x,a,f5.1,a)") &
+   write(std_out, "(2a)")ch10, " Qcache stats:"
+   write(std_out, "(4x,a,i0)")" Total Number of calls: ", qcache%stats(1)
+   write(std_out, "(4x,a,i0,2x,a,f5.1,a)") &
      " Cache hit in v1scf_3natom_qibz: ", qcache%stats(2), "(", (100.0_dp * qcache%stats(2)) / qcache%stats(1), "%)"
-   write(std_out, "(a,i0,2x,a,f5.1,a)") &
+   write(std_out, "(4x,a,i0,2x,a,f5.1,a)") &
      " Cache hit in MPI-distributed cache: ", qcache%stats(3), "(", (100.0_dp * qcache%stats(3)) / qcache%stats(1), "%)"
-   write(std_out, "(a,i0,2x,a,f5.1,a)") &
+   write(std_out, "(4x,a,i0,2x,a,f5.1,a)") &
      " Cache miss: ", qcache%stats(4), "(", (100.0_dp * qcache%stats(4)) / qcache%stats(1), "%)"
-   write(std_out, "(a)")sjoin(" Memory allocated for cache: ", ftoa(qcache%get_mbsize(), fmt="f8.1"), " [Mb] <<< MEM")
+   write(std_out, "(a)")sjoin("     Memory allocated for cache: ", ftoa(qcache%get_mbsize(), fmt="f8.1"), " [Mb] <<< MEM")
  end if
  write(std_out, "(a)")
  qcache%stats = 0
@@ -3004,6 +3005,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  end do ! iq_ibz
 
  ABI_CHECK(iqst == nqbz, "iqst /= nqbz")
+ call wrtout(std_out, ch10//ch10)
 
  ABI_FREE(iperm)
  ABI_FREE(emiqr)
@@ -4039,8 +4041,8 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
 
  call timab(1808, 1, tsec)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
- call wrtout(std_out, " Precomputing Vscf(q) from W(R,r) and building qcache...", do_flush=.True.)
 
+ call wrtout(std_out, ch10//" Precomputing Vscf(q) from W(R,r) and building qcache...", do_flush=.True.)
  db%ft_qcache = qcache_new(nqibz, nfft, ngfft, mbsize, db%natom3, db%my_npert, db%nspden)
  db%ft_qcache%itreatq(:) = itreatq
 

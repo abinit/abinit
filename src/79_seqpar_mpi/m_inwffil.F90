@@ -27,7 +27,6 @@
 module m_inwffil
 
  use defs_basis
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_wffile
@@ -36,10 +35,12 @@ module m_inwffil
  use m_xmpi
  use m_nctk
  use m_hdr
+ use m_dtset
 #if defined HAVE_MPI2
  use mpi
 #endif
 
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_io_tools, only : file_exists, get_unit
  use m_geometry, only : getspinrot

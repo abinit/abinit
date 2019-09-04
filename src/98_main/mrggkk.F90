@@ -48,7 +48,6 @@
 program mrggkk
 
  use defs_basis
- use defs_abitypes
  use m_build_info
  use m_abicore
  use m_xmpi
@@ -80,7 +79,6 @@ program mrggkk
  character(len=24) :: codename
  character(len=500) :: message
  character(len=fnlen) :: file1wf,filegkk,filegs,outfile
- type(MPI_type) :: mpi_enreg
  type(hdr_type) :: hdr,hdr1
  type(wfk_t) :: GS_wfk,PH_wfk
 !arrays
@@ -101,9 +99,6 @@ program mrggkk
 #ifdef HAVE_MEM_PROFILING
  call abimem_init(0)
 #endif
-
-!Default for sequential use
- call initmpi_seq(mpi_enreg)
 
  codename='MRGGKK'//repeat(' ',18)
 
@@ -427,8 +422,6 @@ program mrggkk
  call wrtout(std_out,message,'COLL')
 
  call flush_unit(std_out)
-
- call destroy_mpi_enreg(mpi_enreg)
 
  call abinit_doctor("__mrggkk")
 

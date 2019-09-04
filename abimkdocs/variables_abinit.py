@@ -2143,19 +2143,20 @@ Used for screening length (in Bohr) of the model dielectric function, diagonal
 in reciprocal space. By default, given in Bohr atomic units (1
 Bohr=0.5291772108 Angstrom), although Angstrom can be specified, if preferred,
 since [[dielng]] has the '[[LENGTH]]' characteristics.
-This model dielectric function is as follows ($\kk$ being a wavevector):
+This model dielectric function is as follows (${\bf K}$ being a wavevector):
+
 \begin{equation}
-diel(\kk) = \frac{ 1 + [[dielng]]^2 \kk^2 }{ \left( 1/[[diemac]] + [[dielng]]^2 \kk^2  \right) [[diemix]] } \nonumber
+\epsilon({\bf K}) = \frac{ 1 + [[dielng]]^2 {\bf K}^2 }{ \left( 1/[[diemac]] + [[dielng]]^2 {\bf K}^2  \right) [[diemix]] } \nonumber
 \end{equation}
 
 The inverse of this model dielectric function will be applied to the residual,
-to give the preconditioned change of potential. Right at $\kk$=0, $diel(\kk)$ is imposed to be 1.
+to give the preconditioned change of potential. Right at ${\bf K}$=0, $\epsilon({\bf K})$ is imposed to be 1.
 
 If the preconditioning were perfect, the change of potential would lead to an
 exceedingly fast solution of the self-consistency problem (two or three
 steps). The present model dielectric function is excellent for rather
 homogeneous unit cells.
-When $\kk$->0, it tends to the macroscopic dielectric constant, eventually
+When ${\bf K}$->0, it tends to the macroscopic dielectric constant, eventually
 divided by the mixing factor [[diemix]] (or [[diemixmag]]  for magnetization).
 For metals, simply put [[diemac]] to a very large value ($10^6$ is OK)
 The screening length [[dielng]] governs the length scale to go from the
@@ -11261,14 +11262,18 @@ Variable(
     mnemonics="NUClear DIPole MOMents",
     requires="[[usepaw]] = 1; [[pawcpxocc]] = 2; [[kptopt]] > 2",
     text=r"""
-Places an array of nuclear magnetic dipole moments on the atomic positions,
-useful for computing the magnetization in the presence of nuclear dipoles and
-thus the chemical shielding by the converse method. The presence of these
-dipoles breaks time reversal symmetry and lowers the overall spatial symmetry.
+Places an array of nuclear magnetic dipole moments on the atomic
+positions, useful for computing the magnetization in the presence of
+nuclear dipoles and thus the chemical shielding by the converse method
+[[cite:Thonhauser2009]]. The presence of these dipoles breaks time
+reversal symmetry and lowers the overall spatial symmetry.  The dipole
+moment values are entered in atomic units. For reference, note that
+one Bohr magneton has value $1/2$ in atomic units, while one nuclear
+Bohr magneton has value $2.7321\times 10^{-4}$ in atomic units.
 """,
 ),
 
-Variable(
+    Variable(
     abivarname="nwfshist",
     varset="gstate",
     vartype="integer",
@@ -11884,12 +11889,28 @@ Variable(
     defaultval=0,
     mnemonics="ORBital MAGnetization",
     characteristics=['[[DEVELOP]]'],
-    requires="""[[usepaw]] == 1
-[[kptopt]] == 3
-[[NPROC]] == 1""",
+    requires="""[[usepaw]] == 1;
+[[usexcnhat]] == 0;
+[[nspinor]] == 1;
+[[paral_atom]] == 0;
+[[paral_kgb]] == 0;
+[[kptopt]] > 2 """,
     text=r"""
-Compute quantities related to orbital magnetization. Currently only the Chern
-number calculated.
+Compute quantities related to orbital magnetization. The
+    implementation assumes an insulator, so no empty or partially
+    filled bands, and currently restricted to [[nspinor]] 1. Such
+    insulators have orbital magnetization zero, except in the presence
+    of nonzero nuclear dipole moments, see [[nucdipmom]].  [[orbmag]]
+    is parallelized over k points only. The implementation follows the
+    theory outlined in [[cite:Gonze2011a]] extended to the PAW case;
+    see also [[cite:Ceresoli2006]]. The computed results are returned in the
+    standard output file, search for "Orbital magnetization" and "Chern number".
+
+* [[orbmag]] = 1: Compute Chern number [[cite:Ceresoli2006]]. This computation is
+    faster than the full [[orbmag]] calculation, and a nonzero value indicates a circulating
+    electronic current.
+* [[orbmag]] = 2: Compute electronic orbital magnetization.
+* [[orbmag]] = 3: Compute both Chern number and electronic orbital magnetization.
 """,
 ),
 
@@ -16005,13 +16026,13 @@ sphere which has the same volume as the average volume per particle in a
 homogeneous electron gas with density $n_{bulk}$, so:
 
 \begin{equation}
-      1/n_{bulk} = 4/3\: \pi [[slabwsrad]]^3 \nonumber
+      \frac{1}{n_{bulk}} = \frac{4 \pi}{3} [[slabwsrad]]^3 \nonumber
 \end{equation}
 
 For example, the bulk aluminum fcc lattice constant is $a$=4.0495 Angstroms
 [WebElements](https://www.webelements.com/), each cubic centered cell includes 4 Al atoms and each atom
 has 3 valence electrons, so the average volume per electron is $a^3/12$=37.34
-Bohr$^3$ which has to be equal to $4/3\: \pi r_s^3$. Consequently Al has approximately
+Bohr$^3$ which has to be equal to $\frac{4 \pi}{3} r_s^3$. Consequently Al has approximately
 $r_s$=2.07 Bohr, while for example magnesium has $r_s$=2.65 Bohr, sodium 3.99 Bohr.
 By default, given in Bohr atomic units (1 Bohr=0.5291772108 Angstroms).
 """,
@@ -16068,10 +16089,12 @@ to be orthogonal to the other ones, so the length of the cell along z is
 
 Together with [[slabwsrad]] they define the jellium positive charge density
 distribution $n_{+}(x,y,z)$ in this way:
+
 \begin{eqnarray}
       n_{+}(x,y,z) &=& n_{bulk} \quad  \text{if} \quad [[slabzbeg]] \leq z \leq [[slabzend]] \nonumber \\
                    &=& 0        \quad  \text{otherwise}                                    \nonumber
 \end{eqnarray}
+
 so the positive charge density is invariant along the xy plane as well as the
 electrostatic potential generated by it.
 """,
@@ -16113,11 +16136,11 @@ When [[smdelta]] in non-zero, it will trigger the calculation of the imaginary
 part of the second-order electronic eigenvalues, which can be related to the
 electronic lifetimes. The delta function is evaluated using:
 
-  * when [[smdelta]] == 1, Fermi-Dirac smearing: $$\\frac{0.25}{(cosh(\\frac{x}{2.0}))^2}$$
-  * when [[smdelta]] == 2, Cold smearing by Marzari using the parameter $a=-0.5634$ (minimization of the bump): $$\\frac{e^{-x^2}}{\sqrt{\pi}}1.5\ d_0+x(-a\ 1.5\ d_0+x(-1.0\ d_0+a\ x))$$
+  * when [[smdelta]] == 1, Fermi-Dirac smearing: $\frac{0.25}{(cosh(\frac{x}{2.0}))^2}$
+  * when [[smdelta]] == 2, Cold smearing by Marzari using the parameter $a=-0.5634$ (minimization of the bump): $\frac{e^{-x^2}}{\sqrt{\pi}}\left(1.5+x(-a\ 1.5+x(-1.0+a\ x))\right)$
   * when [[smdelta]] == 3, Cold smearing by Marzari using the parameter $a=-0.8165$ (monotonic function in the tail): as 2 but different $a$
   * when [[smdelta]] == 4, Smearing of Methfessel and Paxton ([[cite:Methfessel1989]]) with Hermite polynomial of degree 2, corresponding to "Cold smearing" of N. Marzari with $a=0$ (so, same smeared delta function as smdelta=2, with different $a$).
-  * when [[smdelta]] == 5, Gaussian smearing: $$\\frac{1.0\ d_0\ e^{-x^2}}{\sqrt{\pi}}$$
+  * when [[smdelta]] == 5, Gaussian smearing: $\frac{e^{-x^2}}{\sqrt{\pi}}$
 """,
 ),
 
@@ -19688,7 +19711,8 @@ Variable(
 This variable defines the Cartesian grid of MPI processors used for EPH calculations.
 If not specified in the input, the code will generate this grid automatically using the total number of processors 
 and the basic dimensions of the job computed at runtime.
-At present (|today|), this variable is supported only in the calculation of the e-ph self-energy.
+At present (|today|), this variable is supported only in the calculation of the e-ph self-energy 
+i.e. [[eph_task]] 4 or -4. In all the other tasks, this variable is ignored.
 
 Preliminary considerations:
 
@@ -19708,24 +19732,30 @@ The maximum valus for **np** is 3 * [[natom]] and the workload is equally distri
 divides 3 * [[natom]] equally. 
 Using **np** == [[natom]] usually gives good parallel efficiency.
 
-The parallelization over bands (**nb**) has limited scalability but it allows one to reduce the memory
+The parallelization over bands (**nb**) has limited scalability that depends on the number of bands includes 
+in the self-energy but it allows one to reduce the memory
 allocated for the wavefunctions, especially when we have to sum over empty states.
 
 [[eph_task]] = +4
-:   Parallelization over k-points and spin is not yet implemented hence use 1 for these entries.
     Parallelization over bands allows one to reduce the memory needed for the wavefunctions but
     this level is less efficient than the parallelization over q-points and perturbations.
     To avoid load and memory imbalance, **nb** should divide [[nband]].
     We suggest to increase the number of procs for bands until the memory allocated for the wavefunctions
-    decreases to a reasonable level and then use the remaining procs for **nq** and **np** in this order.
+    decreases to a reasonable level and then use the remaining procs for **nq** and **np** in this order 
+    until these levels start to saturate.
+    The MPI parallelism over k-points and spins is efficient at the level of the wall-time 
+    but it requires HDF5 + MPI-IO support and memory does not scale. Use these additional levels if the memory requirements
+    are under control and you need to boost the calculation. Note also that in this case the output results are written to
+    different text files, only the SIGEPH.nc file will contains all the k-points and spins.
+
 
 [[eph_task]] = -4
-:   Parallelization over k-points and spin is not yet implemented hence use 1 for these entries.
     The number of bands in the self-energy sum is usually small so it does not make sense to
     parallelize along this dimension. The parallelization over q-points seem to be more efficient than
     the one over perturbations although it introduces some load imbalance because, due to memory reasons, 
     the code distributes the q-points in the IBZ (nqibz) instead of the q-points in the full BZ (nqbz).
-    Moreover non all the q-points in the IBZ contribute to the imaginary part of $$\Sigma_nk$$ 
+    Moreover non all the q-points in the IBZ contribute to the imaginary part of $$\Sigma_nk$$.
+    The MPI parallelism over k-points and spins is supported with similar behaviour as in **eph_task** +4.
 
 
 !!! important

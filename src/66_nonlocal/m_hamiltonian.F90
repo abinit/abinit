@@ -8,8 +8,11 @@
 !!  datastructures used in the "getghc" and "getgh1c" routines to apply the Hamiltonian (or
 !!  its derivative) on a wavefunction.
 !!  Methods to initialize or destroy the objects are defined here.
-!!  It also defines the ddiago_ctl_type structures datatype used to control the algorithm
-!!  used in ks_ddiago for performing the direct diagonalization of the KS Hamiltonian.
+!!
+!! TODO
+!!  All array pointers in H datatypes should be declared as contiguous for efficient reasons
+!!  (well, here performance is critical)
+!!  Client code should make sure they always point contiguous targets.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2009-2019 ABINIT group (MG, MT)
@@ -32,12 +35,11 @@
 module m_hamiltonian
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
 
+ use defs_datatypes,      only : pseudopotential_type
  use m_copy,              only : addr_copy
  use m_geometry,          only : metric
  use m_pawtab,            only : pawtab_type
@@ -64,7 +66,7 @@ module m_hamiltonian
  public ::  pawdij2ekb
  public ::  pawdij2e1kb
 
-!These constants select how H is applied in reciprocal space
+ ! These constants select how H is applied in reciprocal space
  integer,parameter,public :: KPRIME_H_K=1, K_H_KPRIME=2, K_H_K=3, KPRIME_H_KPRIME=4
 !!***
 
@@ -242,7 +244,7 @@ module m_hamiltonian
    ! typat(natom)
    ! type of each atom
 
-! integer, allocatable :: indpw_k(:,:)
+  ! integer, allocatable :: indpw_k(:,:)
    ! indpw_k(4,npw_fft_k)
    ! array which gives fft box index for given basis sphere
 
@@ -386,25 +388,32 @@ module m_hamiltonian
 ! ===== Structured datatype pointers
 
   type(fock_common_type), pointer :: fockcommon => null()
-   ! fock
    ! common quantities needed to calculate Fock exact exchange
 
   type(fock_BZ_type), pointer :: fockbz => null()
-   ! fock
    ! total brillouin zone quantities needed to calculate Fock exact exchange
 
   type(fock_ACE_type), pointer :: fockACE_k => null()
-   ! fock
    ! ACE quantities needed to calculate Fock exact exchange in the ACE context
+
+ contains
+   procedure :: free => destroy_hamiltonian
+    ! Free the memory in the GS Hamiltonian
+
+   procedure :: load_spin => load_spin_hamiltonian
+    ! Setup of the spin-dependent part of the GS Hamiltonian
+
+   procedure :: load_k => load_k_hamiltonian
+    ! Setup of the k-dependent part of the GS Hamiltonian
+
+   procedure :: load_kprime => load_kprime_hamiltonian
+    ! Setup of the k^prime-dependent part of the GS Hamiltonian
+
+   !procedure :: copy => copy_hamiltonian
 
  end type gs_hamiltonian_type
 
-
  public :: init_hamiltonian         ! Initialize the GS Hamiltonian
- public :: destroy_hamiltonian      ! Free the memory in the GS Hamiltonian
- public :: load_spin_hamiltonian    ! Setup of the spin-dependent part of the GS Hamiltonian
- public :: load_k_hamiltonian       ! Setup of the k-dependent part of the GS Hamiltonian
- public :: load_kprime_hamiltonian  ! Setup of the k^prime-dependent part of the GS Hamiltonian
  public :: copy_hamiltonian         ! Copy the object
 !!***
 
@@ -500,12 +509,19 @@ module m_hamiltonian
    ! vlocal1(cplex*n4,n5,n6,nvloc)
    ! 1st-order local potential in real space, on the augmented fft grid
 
+ contains
+   procedure :: free => destroy_rf_hamiltonian
+    ! Free the memory in the RF Hamiltonian
+
+   procedure :: load_spin => load_spin_rf_hamiltonian
+    ! Setup of the spin-dependent part of the RF Hamiltonian.
+
+   procedure :: load_k => load_k_rf_hamiltonian
+    ! Setup of the k-dependent part of the RF Hamiltonian
+
  end type rf_hamiltonian_type
 
  public :: init_rf_hamiltonian      ! Initialize the RF Hamiltonian
- public :: destroy_rf_hamiltonian   ! Free the memory in the RF Hamiltonian
- public :: load_spin_rf_hamiltonian ! Setup of the spin-dependent part of the RF Hamiltonian.
- public :: load_k_rf_hamiltonian    ! Setup of the k-dependent part of the RF Hamiltonian
 !!***
 
 CONTAINS  !===========================================================
@@ -536,7 +552,7 @@ subroutine destroy_hamiltonian(Ham)
 
 !Arguments ------------------------------------
 !scalars
- type(gs_hamiltonian_type),intent(inout),target :: Ham
+ class(gs_hamiltonian_type),intent(inout),target :: Ham
 
 ! *************************************************************************
 
@@ -545,45 +561,29 @@ subroutine destroy_hamiltonian(Ham)
 !@gs_hamiltonian_type
 
 ! Integer Pointers
- if (associated(Ham%gbound_kp,Ham%gbound_k))   then
+ if (associated(Ham%gbound_kp,Ham%gbound_k)) then
    nullify(Ham%gbound_kp)
  else if (associated(Ham%gbound_kp)) then
    ABI_DEALLOCATE(Ham%gbound_kp)
  end if
 
 ! Integer arrays
- if (allocated(Ham%atindx))  then
-   ABI_DEALLOCATE(Ham%atindx)
- end if
- if (allocated(Ham%atindx1))  then
-   ABI_DEALLOCATE(Ham%atindx1)
- end if
- if (allocated(Ham%dimcprj))  then
-   ABI_DEALLOCATE(Ham%dimcprj)
- end if
- if (allocated(Ham%gbound_k))  then
-   ABI_DEALLOCATE(Ham%gbound_k)
- end if
- if (allocated(Ham%indlmn ))  then
-   ABI_DEALLOCATE(Ham%indlmn)
- end if
- if (allocated(Ham%nattyp))  then
-   ABI_DEALLOCATE(Ham%nattyp)
- end if
- if (allocated(Ham%pspso))  then
-   ABI_DEALLOCATE(Ham%pspso)
- end if
- if (allocated(Ham%typat))  then
-   ABI_DEALLOCATE(Ham%typat)
- end if
+ ABI_SFREE(Ham%atindx)
+ ABI_SFREE(Ham%atindx1)
+ ABI_SFREE(Ham%dimcprj)
+ ABI_SFREE(Ham%gbound_k)
+ ABI_SFREE(Ham%indlmn)
+ ABI_SFREE(Ham%nattyp)
+ ABI_SFREE(Ham%pspso)
+ ABI_SFREE(Ham%typat)
 
 ! Real Pointers
- if (associated(Ham%phkpxred,Ham%phkxred))   then
+ if (associated(Ham%phkpxred,Ham%phkxred)) then
    nullify(Ham%phkpxred)
  else if (associated(Ham%phkpxred)) then
    ABI_DEALLOCATE(Ham%phkpxred)
  end if
- if (allocated(Ham%phkxred))   then
+ if (allocated(Ham%phkxred)) then
    ABI_DEALLOCATE(Ham%phkxred)
  end if
  if (associated(Ham%ekb)) nullify(Ham%ekb)
@@ -603,23 +603,13 @@ subroutine destroy_hamiltonian(Ham)
  if (associated(Ham%ph3d_kp)) nullify(Ham%ph3d_kp)
 
 ! Real arrays
- if (allocated(Ham%ekb_spin))   then
-   ABI_DEALLOCATE(Ham%ekb_spin)
- end if
- if (allocated(Ham%sij))   then
-   ABI_DEALLOCATE(Ham%sij)
- end if
- if (allocated(Ham%nucdipmom)) then
-   ABI_DEALLOCATE(Ham%nucdipmom)
- end if
- if (allocated(Ham%ph1d))   then
-   ABI_DEALLOCATE(Ham%ph1d)
- end if
+ ABI_SFREE(Ham%ekb_spin)
+ ABI_SFREE(Ham%sij)
+ ABI_SFREE(Ham%nucdipmom)
+ ABI_SFREE(Ham%ph1d)
 
 ! Complex arrays
- if(allocated(Ham%nucdipmom_k)) then
-   ABI_DEALLOCATE(Ham%nucdipmom_k)
- end if
+ ABI_SFREE(Ham%nucdipmom_k)
 
 ! Structured datatype pointers
  if (associated(Ham%fockcommon)) nullify(Ham%fockcommon)
@@ -700,7 +690,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 !scalars
  integer,intent(in) :: nfft,natom,nspinor,nsppol,nspden,mgfft
  integer,optional,intent(in) :: comm_atom,usecprj,use_gpu_cuda
- type(gs_hamiltonian_type),intent(inout),target :: ham
+ class(gs_hamiltonian_type),intent(inout),target :: ham
  type(electronpositron_type),optional,pointer :: electronpositron
  type(fock_type),optional,pointer :: fock
  type(pseudopotential_type),intent(in) :: psps
@@ -953,14 +943,14 @@ end subroutine init_hamiltonian
 !! SOURCE
 
 subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
-&                             kg_k,kpg_k,kpt_k,nucdipmom_k,npw_k,npw_fft_k,ph3d_k,&
-&                             compute_gbound,compute_ph3d)
+                              kg_k,kpg_k,kpt_k,nucdipmom_k,npw_k,npw_fft_k,ph3d_k,&
+                              compute_gbound,compute_ph3d)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: npw_k,npw_fft_k,istwf_k
  logical,intent(in),optional :: compute_gbound,compute_ph3d
- type(gs_hamiltonian_type),intent(inout),target :: ham
+ class(gs_hamiltonian_type),intent(inout),target :: ham
 !arrays
  integer,intent(in),optional,target :: gbound_k(:,:),kg_k(:,:)
  real(dp),intent(in),optional :: kpt_k(3)
@@ -1085,11 +1075,11 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
  if (present(compute_ph3d).and.present(ph3d_k)) then
    if (compute_ph3d.and.ham%nloalg(2)>0) then
      if ((.not.allocated(ham%phkxred)).or.(.not.associated(ham%kg_k)).or.&
-&        (.not.associated(ham%ph3d_k))) then
+         (.not.associated(ham%ph3d_k))) then
        MSG_BUG('Something is missing for ph3d_k computation!')
      end if
      call ph1d3d(1,ham%natom,ham%kg_k,ham%matblk,ham%natom,ham%npw_k,ham%ngfft(1),&
-&                ham%ngfft(2),ham%ngfft(3),ham%phkxred,ham%ph1d,ham%ph3d_k)
+                 ham%ngfft(2),ham%ngfft(3),ham%phkxred,ham%ph1d,ham%ph3d_k)
    end if
  end if
 
@@ -1137,14 +1127,14 @@ end subroutine load_k_hamiltonian
 !! SOURCE
 
 subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
-&                                  kg_kp,kpg_kp,kpt_kp,npw_kp,npw_fft_kp,&
-&                                  ph3d_kp,compute_gbound,compute_ph3d)
+                                   kg_kp,kpg_kp,kpt_kp,npw_kp,npw_fft_kp,&
+                                   ph3d_kp,compute_gbound,compute_ph3d)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: npw_kp,npw_fft_kp,istwf_kp
  logical,intent(in),optional :: compute_gbound,compute_ph3d
- type(gs_hamiltonian_type),intent(inout),target :: ham
+ class(gs_hamiltonian_type),intent(inout),target :: ham
 !arrays
  integer,intent(in),optional,target :: gbound_kp(:,:),kg_kp(:,:)
  real(dp),intent(in),optional :: kpt_kp(3)
@@ -1456,7 +1446,7 @@ subroutine load_spin_hamiltonian(Ham,isppol,vectornd,vlocal,vxctaulocal,with_non
 !scalars
  integer,intent(in) :: isppol
  logical,optional,intent(in) :: with_nonlocal
- type(gs_hamiltonian_type),intent(inout),target :: Ham
+ class(gs_hamiltonian_type),intent(inout),target :: Ham
 !arrays
  real(dp),optional,intent(in),target :: vectornd(:,:,:,:,:)
  real(dp),optional,intent(in),target :: vlocal(:,:,:,:),vxctaulocal(:,:,:,:,:)
@@ -1469,8 +1459,7 @@ subroutine load_spin_hamiltonian(Ham,isppol,vectornd,vlocal,vxctaulocal,with_non
 
  DBG_ENTER("COLL")
 
-!@gs_hamiltonian_type
-
+ !@gs_hamiltonian_type
  if (present(vlocal)) then
    ABI_CHECK(size(vlocal)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc,"Wrong vlocal")
    Ham%vlocal => vlocal
@@ -1484,7 +1473,7 @@ subroutine load_spin_hamiltonian(Ham,isppol,vectornd,vlocal,vxctaulocal,with_non
    Ham%vectornd => vectornd
  end if
 
-!Retrieve non-local factors for this spin component
+ ! Retrieve non-local factors for this spin component
  if (present(with_nonlocal)) then
    if (with_nonlocal) then
      jsppol=min(isppol,size(Ham%ekb_spin,5))
@@ -1492,7 +1481,7 @@ subroutine load_spin_hamiltonian(Ham,isppol,vectornd,vlocal,vxctaulocal,with_non
    end if
  end if
 
-!Update enl and sij on GPU
+ ! Update enl and sij on GPU
 #if defined HAVE_GPU_CUDA
  if (Ham%use_gpu_cuda==1) then
    call gpu_update_ham_data(Ham%ekb(:,:,:,1),size(Ham%ekb),Ham%sij,size(Ham%sij),Ham%gprimd,size(Ham%gprimd))
@@ -1529,7 +1518,7 @@ subroutine destroy_rf_hamiltonian(rf_Ham)
 
 !Arguments ------------------------------------
 !scalars
- type(rf_hamiltonian_type),intent(inout) :: rf_Ham
+ class(rf_hamiltonian_type),intent(inout) :: rf_Ham
 
 ! *************************************************************************
 
@@ -1538,12 +1527,8 @@ subroutine destroy_rf_hamiltonian(rf_Ham)
 !@rf_hamiltonian_type
 
 ! Real arrays
- if (allocated(rf_Ham%e1kbfr_spin))   then
-   ABI_DEALLOCATE(rf_Ham%e1kbfr_spin)
- end if
- if (allocated(rf_Ham%e1kbsc_spin))   then
-   ABI_DEALLOCATE(rf_Ham%e1kbsc_spin)
- end if
+ ABI_SFREE(rf_Ham%e1kbfr_spin)
+ ABI_SFREE(rf_Ham%e1kbsc_spin)
 
 ! Real pointers
  if (associated(rf_Ham%dkinpw_k)) nullify(rf_Ham%dkinpw_k)
@@ -1648,12 +1633,12 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
    rf_Ham%dime1kb1=cplex_dij1*(gs_Ham%lmnmax*(gs_Ham%lmnmax+1))/2
  end if
 
-!Allocate the arrays of the 1st-order Hamiltonian
-!  We preload here 1st-order non-local factors in order to avoid
-!  a communication over atoms inside the loop over spins.
+  ! Allocate the arrays of the 1st-order Hamiltonian
+  ! We preload here 1st-order non-local factors in order to avoid
+  ! a communication over atoms inside the loop over spins.
  if (gs_Ham%usepaw==1.and.rf_Ham%dime1kb1>0) then
    if ((ipert>=1.and.ipert<=gs_Ham%natom).or.ipert==gs_Ham%natom+2.or.&
-&    ipert==gs_Ham%natom+3.or.ipert==gs_Ham%natom+4.or.ipert==gs_Ham%natom+11) then
+        ipert==gs_Ham%natom+3.or.ipert==gs_Ham%natom+4.or.ipert==gs_Ham%natom+11) then
 
      ABI_ALLOCATE(rf_Ham%e1kbfr_spin,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,cplex,my_nsppol))
      rf_Ham%e1kbfr_spin=zero
@@ -1754,7 +1739,7 @@ subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vlocal1,with_nonlocal)
 !scalars
  integer,intent(in) :: isppol
  logical,optional,intent(in) :: with_nonlocal
- type(rf_hamiltonian_type),intent(inout),target :: rf_Ham
+ class(rf_hamiltonian_type),intent(inout),target :: rf_Ham
 !arrays
  real(dp),optional,target,intent(in) :: vlocal1(:,:,:,:)
 
@@ -1773,7 +1758,7 @@ subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vlocal1,with_nonlocal)
    rf_Ham%vlocal1 => vlocal1
  end if
 
-!Retrieve non-local factors for this spin component
+ ! Retrieve non-local factors for this spin component
  if (present(with_nonlocal)) then
    if (with_nonlocal) then
      if (size(rf_Ham%e1kbfr_spin)>0) then
@@ -1823,7 +1808,7 @@ subroutine load_k_rf_hamiltonian(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: npw_k
- type(rf_hamiltonian_type),intent(inout),target :: rf_Ham
+ class(rf_hamiltonian_type),intent(inout),target :: rf_Ham
 !arrays
  real(dp),intent(in),optional,target :: dkinpw_k(:),ddkinpw_k(:)
 
@@ -2037,7 +2022,7 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
    end if
  end if
 
-!Communication in case of distribution over atomic sites
+ ! Communication in case of distribution over atomic sites
  if (paral_atom) then
    if (present(e1kbfr)) then
      call xmpi_sum(e1kbfr,comm_atom,ierr)

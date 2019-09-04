@@ -26,12 +26,15 @@
 
 module m_spin_current
 
- use defs_datatypes
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_splines
+ use m_hdr
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_io_tools,   only : open_file
  use m_pptools,    only : printxsf
  use m_geometry,   only : xred2xcart
@@ -95,8 +98,6 @@ contains
 !! SOURCE
 
 subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -614,8 +615,6 @@ end subroutine spin_current
 !! SOURCE
 
 subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
-
- implicit none
 
 !Arguments -------------------------------
  type(hdr_type),intent(inout) :: hdr

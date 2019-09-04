@@ -7,13 +7,6 @@
 !!  Rotate the cg coefficient with the rotation matrix obtained from the
 !!  diagonalisation of the non-diagonal occupation matrix produced by DMFT.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (TCavignac)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -36,10 +29,9 @@
 module m_rot_cg
 
   use defs_basis
-  use defs_abitypes
-  use m_profiling_abi
   use m_xmpi
   use m_errors
+  use m_abicore
 
   implicit none
 
@@ -58,13 +50,6 @@ module m_rot_cg
 !! Use for DMFT in KGB parallelisation. Diagonalise the occupation matrix
 !! and return diagonalised occupations and associated eigen vectors sorted
 !! with descending occupation
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (TCavignac)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!   occ_nd_cpx(nband, nband) = matrix of non diagonal occupations for DMFT
@@ -86,15 +71,6 @@ module m_rot_cg
 !! TODO add the possibility of using ScaLAPACK to do computation in parallel
 
 subroutine diag_occ(occ_nd_cpx, nband, occ_diag)
-
-  use defs_basis
-  use defs_abitypes
-  use m_profiling_abi
-  use m_xmpi
-  use m_errors
-
-! use m_paw_dmft,     only : paw_dmft_type
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -173,13 +149,6 @@ end subroutine diag_occ
 !! Use for DMFT in KGB parallelisation. Diagonalise the occupation matrix
 !! and use the resulting base to represent the wave functions.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (TCavignac)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!   occ_nd(2, nband, nband) = matrix of non diagonal occupations for DMFT
 !!   cwavef(2, npw, nband) = fourier coefficient of wave functions for all bands
@@ -210,15 +179,6 @@ end subroutine diag_occ
 !! TODO Make the computation of the new wf parallel
 
 subroutine rot_cg(occ_nd, cwavef, npw, nband, blocksize, nspinor, first_bandc, nbandc, occ_diag)
-
-  use defs_basis
-  use defs_abitypes
-  use m_profiling_abi
-  use m_xmpi
-  use m_errors
-
-! use m_paw_dmft,     only : paw_dmft_type
-  implicit none
 
 !Arguments ------------------------------------
 !scalars

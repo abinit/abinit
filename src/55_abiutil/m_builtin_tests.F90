@@ -75,8 +75,6 @@ contains
 
 subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: builtintest,natom

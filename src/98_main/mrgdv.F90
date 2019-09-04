@@ -40,7 +40,6 @@
 program mrgdv
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_errors
  use m_build_info

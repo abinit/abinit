@@ -624,9 +624,11 @@ class AbinitProject(object):
     @lazy_property
     def all_src_dirs(self):
         """List with all top level directories containing subdirectories with F90 file."""
-        return [os.path.join(self.top, "shared", "common", "src"),
-                os.path.join(self.top, "src"),
-               ]
+        return [
+            os.path.join(self.top, "shared", "common", "src"),
+            #os.path.join(self.top, "shared", "libpaw"),
+            os.path.join(self.top, "src"),
+        ]
 
     def get_dirpaths(self):
         """

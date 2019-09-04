@@ -33,6 +33,7 @@ MODULE m_ddk
  use m_xmpi
  use m_nctk
  use m_hdr
+ use m_dtset
  use m_krank
  use m_fstab
  use m_wfd
@@ -51,7 +52,7 @@ MODULE m_ddk
  use m_symtk,         only : matr3inv
  use m_io_tools,      only : iomode_from_fname
  use m_time,          only : cwtime, sec2str
- use defs_abitypes,   only : hdr_type, dataset_type, MPI_type
+ use defs_abitypes,   only : MPI_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
  use m_geometry,      only : mkradim
  use m_crystal,       only : crystal_t
@@ -161,7 +162,8 @@ MODULE m_ddk
      procedure :: free => ham_targets_free   ! Free memory.
  end type ham_targets_t
 
-!!****t* m_ddk/ddkop_t
+
+ !!****t* m_ddk/ddkop_t
 !! NAME
 !!  ddkop_t
 !!
@@ -1309,8 +1311,8 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
    call self%htg(idir)%free()
 
    ! Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(self%gs_hamkq(idir), spin, with_nonlocal=.true.)
-   call load_spin_rf_hamiltonian(self%rf_hamkq(idir), spin, with_nonlocal=.true.)
+   call self%gs_hamkq(idir)%load_spin(spin, with_nonlocal=.true.)
+   call self%rf_hamkq(idir)%load_spin(spin, with_nonlocal=.true.)
 
    !if (self%inclvkb /= 0) then
 
@@ -1510,9 +1512,9 @@ subroutine ddkop_free(self)
  ABI_SFREE(self%gs1c)
 
  do idir=1,3
-   call destroy_hamiltonian(self%gs_hamkq(idir))
+   call self%gs_hamkq(idir)%free()
    call self%htg(idir)%free()
-   call destroy_rf_hamiltonian(self%rf_hamkq(idir))
+   call self%rf_hamkq(idir)%free()
  end do
 
 end subroutine ddkop_free

@@ -6456,6 +6456,7 @@ end subroutine invcb
 !! SOURCE
 
 elemental subroutine safe_div( n, d, altv, q )
+
 !Arguments ----------------------------------------------
 !scalars
  real(dp), intent(in) :: n, d, altv
@@ -6463,7 +6464,7 @@ elemental subroutine safe_div( n, d, altv, q )
 
 ! *********************************************************************
 
- if ( exponent(n) - exponent(d) >= maxexponent(n) .or. d==0 ) then
+ if ( exponent(n) - exponent(d) >= maxexponent(n) .or. d==zero ) then
     q = altv
  else
     q = n / d

@@ -26,7 +26,6 @@
 module m_nonlop_pl
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
@@ -41,6 +40,7 @@ module m_nonlop_pl
  use m_metstr
  use m_opernl
 
+ use defs_abitypes, only : MPI_type
  use m_geometry,   only : strconv
  use m_kg,         only : ph1d3d
  use m_contract,   only : cont22cso, cont22so, cont24, cont33cso, cont33so, cont35, cont22, cont3, cont13, &
@@ -188,8 +188,6 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 &                     natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,npwin,npwout,nspinor,nspinortot,&
 &                     ntypat,only_SO,phkxredin,phkxredout,ph1d,ph3din,ph3dout,signs,&
 &                     ucvol,vectin,vectout)
-
- implicit none
 
 !Arguments ------------------------------------
 !This type is defined in defs_mpi
@@ -1314,8 +1312,6 @@ contains
 
 subroutine trace2(gxa,gmet,trace)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in) :: gmet(3,3),gxa(2,6)
@@ -1380,8 +1376,6 @@ end subroutine trace2
 !! SOURCE
 
 subroutine strsocv(red,gprimd,cart)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -1465,8 +1459,6 @@ end subroutine strsocv
 !! SOURCE
 
 subroutine scalewf_nonlop(istwf_k,mpi_enreg,npw,option,vect)
-
- implicit none
 
 !Arguments ------------------------------------
 !This type is defined in defs_mpi
@@ -1577,8 +1569,6 @@ end subroutine scalewf_nonlop
 !! SOURCE
 
 subroutine ddkten(compact,idir,rank,temp,tmpfac)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

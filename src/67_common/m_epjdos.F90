@@ -25,7 +25,6 @@
 module m_epjdos
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -42,7 +41,9 @@ module m_epjdos
  use m_hdr
  use m_mpinfo
  use m_sort
+ use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_occ,            only : dos_hdr_write
  use m_time,           only : cwtime, timab
