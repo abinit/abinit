@@ -1656,7 +1656,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
  integer :: usexcnhat,useylmgr
  integer,parameter :: formeig1=1
  integer,parameter :: re=1,im=2
- real(dp) :: boxcut,doti,dotr,dum_scl,ecut_eff,ecut,etotal,fermie,gsqcut,residm
+ real(dp) :: boxcut,doti,dotr,dum_scl,ecut_eff,ecut,etotal,fermie,gsqcut,residm,rhog0
  real(dp) :: vres2,wtk_k
  logical :: non_magnetic_xc,t_exist 
  character(len=500) :: msg                   
@@ -2592,6 +2592,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    isdqwf_t3=zero
    isdqwf_t4=zero
    isdqwf_t5=zero
+   rhog0=rhog(1,1)
  end if
 
 !LOOP OVER SPINS
@@ -2683,7 +2684,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        call dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,indkpt1,&
        &  isppol,istwf_k,kg_k,kpoint,mkmem_rbz,mpi_enreg,matom,mpw,natpert,nattyp,nband_k,nfft,&
        &  ngfft,nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k,pert_atdis,   &
-       &  pert_strain,ph1d,psps,q1grad,rmet,ucvol,useylmgr,wtk_k,xred,ylm_k,ylmgr_k)
+       &  pert_strain,ph1d,psps,q1grad,rmet,rhog0,ucvol,useylmgr,wtk_k,xred,ylm_k,ylmgr_k)
 
 !      Add the contribution from each k-point
        frwfdq=frwfdq + frwfdq_k

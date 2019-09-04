@@ -3515,6 +3515,7 @@ end subroutine dfpt_isdqwf
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  q1grad(3,nq1grad)=array with the info for the q1 (q_{\gamma}) gradients
 !!  rmet(3,3)=real space metric (bohr**2)
+!!  rhog0=Gamma point component of the electron density 
 !!  ucvol=unit cell volume in bohr**3.
 !!  useylmgr= if 1 use the derivative of spherical harmonics
 !!  wtk_k=weight assigned to the k point.
@@ -3543,7 +3544,7 @@ end subroutine dfpt_isdqwf
 subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,indkpt1,&
        &  isppol,istwf_k,kg_k,kpt,mkmem,mpi_enreg,matom,mpw,natpert,nattyp,nband_k,nfft,&
        &  ngfft,nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k,pert_atdis,   &
-       &  pert_strain,ph1d,psps,q1grad,rmet,ucvol,useylmgr,wtk_k,xred,ylm_k,ylmgr_k)
+       &  pert_strain,ph1d,psps,q1grad,rmet,rhog0,ucvol,useylmgr,wtk_k,xred,ylm_k,ylmgr_k)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -3559,7 +3560,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
  integer,intent(in) :: matom,mkmem,mpw,natpert,nband_k,nfft
  integer,intent(in) :: nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr
  integer,intent(in) :: useylmgr
- real(dp),intent(in) :: gsqcut,ucvol,wtk_k
+ real(dp),intent(in) :: gsqcut,rhog0,ucvol,wtk_k
  type(dataset_type),intent(in) :: dtset
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(MPI_type),intent(in) :: mpi_enreg
@@ -3581,9 +3582,9 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 
 !Local variables-------------------------------
 !scalars
- integer :: iatdir,iatom,iatpert,iband,idir,ipert,ipw,iq1grad,iq2grad,istrpert,ka,kb
+ integer :: ia1,iatdir,iatom,iatpert,iband,idir,ii,ipert,ipw,iq1grad,iq2grad,istrpert,itypat,ka,kb
  integer :: nkpg,nylmgrpart,optlocal,optnl,tim_getgh1c,useylmgr1
- real(dp) :: doti,dotr
+ real(dp) :: doti,dotr,delad,delag,delbd,delbg,fac
  type(pawfgr_type) :: pawfgr
  type(rf_hamiltonian_type) :: rf_hamkq
 
@@ -3811,6 +3812,9 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
      !LOOP OVER Q1-GRADIENT
      do iq1grad=1,3
 
+       delag=zero ; if(iatdir==iq1grad) delag=one
+       delbg=zero ; if(ka==iq1grad) delbg=one
+
        !LOOP OVER BANDS
        do iband=1,nband_k
 
@@ -3865,16 +3869,32 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
  end do !iatpert
 
 !--------------------------------------------------------------------------------------
-! Acumulate the frwf terms of this ikpt
+! Acumulate the frwf terms of this ikpt and add the G=0 contribution
 !--------------------------------------------------------------------------------------
  frwfdq_k=zero
+ fac=2.0_dp*pi*pi*rhog0/ucvol
  do iatpert= 1, natpert
    iatom=pert_atdis(1,iatpert)
    iatdir=pert_atdis(2,iatpert)
+
+!  Determination of the atom type
+   ia1=0
+   itypat=0
+   do ii=1,dtset%ntypat
+     ia1=ia1+nattyp(ii)
+     if(atindx(iatom)<=ia1.and.itypat==0)itypat=ii
+   end do
+
    do istrpert= 1, nstrpert
      ka=pert_strain(3,istrpert)
      kb=pert_strain(4,istrpert)
+     delad=zero ; if (iatdir==kb) delad=one
+     delbd=zero ; if (ka==kb) delbd=one
+
      do iq1grad=1,3
+       delag=zero ; if(iatdir==iq1grad) delag=one
+       delbg=zero ; if(ka==iq1grad) delbg=one
+
        do iband=1,nband_k
 
          if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
@@ -3883,6 +3903,11 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
        & occ_k(iband) * frwfdq_bks(:,iband,iatom,iatdir,ka,kb,iq1grad) 
 
        end do
+
+       !Add G=0 contribution
+       frwfdq_k(:,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(:,iatom,iatdir,ka,kb,iq1grad) + &
+     & fac*psps%vlspl(1,2,itypat)*(delag*delbd+delad*delbg)
+
      end do
    end do
  end do
