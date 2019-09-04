@@ -1337,8 +1337,6 @@ end subroutine vlocalstr
 !!  ucvol=unit cell volume (Bohr**3).
 !!  vlspl(mqgrid,2,ntypat)=spline fit of q^2 V(q) for each type of atom.
 !!  xred(3,natom)=reduced atomic coordinates
-!!  [g0term]= optional, if present an alternative treatment of the G=0 term,
-!!            adopoted for the lattice-mediated flexoelectric tensor calculation, is performed.
 !!
 !! OUTPUT
 !!  vpsp1dq(cplex*nfft)=q-gradient (at q=0) of the first-order local 
@@ -1367,7 +1365,7 @@ end subroutine vlocalstr
 
 subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,ph1d,qdir,qgrid,qphon,ucvol,vlspl,vpsp1dq,xred,g0term)
+& ntypat,n1,n2,n3,ph1d,qdir,qgrid,qphon,ucvol,vlspl,vpsp1dq,xred)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1382,7 +1380,6 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
  integer,intent(in) :: qdir
- integer,optional,intent(in) :: g0term
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -1502,13 +1499,6 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
        end if
      end do
    end do
-
-  !Alternative treatment of Vloc(G=0) for the lattice-mediated flexoelectric tensor calculation
-   if (present(g0term).and.g0term==1) then
-     if (idir==qdir) then
-       work1(re,1)=pi*vlspl(1,2,itypat)
-     end if
-   end if
 
 !  Transform back to real space
    call fourdp(cplex,work1,vpsp1dq,1,mpi_enreg,nfft,1,ngfft,0)
