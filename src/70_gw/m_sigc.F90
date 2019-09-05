@@ -21,8 +21,6 @@
 module m_sigc
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_gwdefs
  use m_abicore
  use m_xmpi
@@ -31,9 +29,10 @@ module m_sigc
  use m_errors
  use m_time
  use m_splines
+ use m_dtset
 
- !use m_gwdefs, only : czero_gw, cone_gw, Kron15N, Kron15W, Gau7W, &
- !                     Kron23N, Kron23W, Gau11W, Kron31N, Kron31W, Gau15W
+
+ use defs_datatypes,  only : pseudopotential_type, ebands_t
  use m_hide_blas,     only : xdotc, xgemv, xgemm
  use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
  use m_fstrings,      only : sjoin, itoa
@@ -550,8 +549,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ! TODO if single q (ex molecule) dont allocate epsm1q, avoid waste of memory
  if ( ANY(mod10== [SIG_GW_AC, SIG_GW_CD, SIG_QPGW_CD])) then
    if (.not.(mod10==SIG_GW_CD.and.Er%mqmem==0)) then
-     ABI_STAT_MALLOC(epsm1_qbz, (npwc, npwc, Er%nomega), ierr)
-     ABI_CHECK(ierr==0, "out-of-memory in epsm1_qbz")
+     ABI_MALLOC_OR_DIE(epsm1_qbz, (npwc, npwc, Er%nomega), ierr)
    end if
  end if
 
@@ -559,8 +557,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ! the Hermitian and the anti-Hermitian part have to be symmetrized in a different way.
  !if (mod10==SIG_QPGW_CD) then
  if (mod10==SIG_QPGW_CD) then
-   ABI_STAT_MALLOC(epsm1_trcc_qbz, (npwc, npwc, Er%nomega), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in epsm1_trcc_qbz")
+   ABI_MALLOC_OR_DIE(epsm1_trcc_qbz, (npwc, npwc, Er%nomega), ierr)
    ABI_MALLOC(epsm1_tmp, (npwc, npwc))
  end if
 

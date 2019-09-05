@@ -34,9 +34,10 @@
 module m_frskerker2
 
   use defs_basis
-  use defs_abitypes
   use m_abicore
+  use m_dtset
 
+  use defs_abitypes, only : MPI_type
   use m_spacepar, only : laplacian
   use m_numeric_tools, only : dotproduct
 
@@ -77,8 +78,6 @@ contains
 !! SOURCE
 
 subroutine frskerker2__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,rdielng_in,deltaW_in,gprimd_in,mat_in )
-
- implicit none
 
 !Arguments ------------------------------------
  type(dataset_type),target,intent(in) :: dtset_in
@@ -133,8 +132,6 @@ subroutine frskerker2__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,rdi
 
   subroutine frskerker2__end()
 
- implicit none
-
 ! *************************************************************************
   if(ok) then
 !  ! set ok to false which prevent using the pf and dpf
@@ -170,8 +167,6 @@ subroutine frskerker2__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,rdi
 
 subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in)    :: nv1,nv2
  real(dp),intent(in)   :: x
@@ -204,8 +199,6 @@ subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
 
   function frskerker2__pf(nv1,nv2,vrespc)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in)    :: nv1,nv2
  real(dp),intent(in) ::vrespc(nv1,nv2)
@@ -218,7 +211,7 @@ subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
 
   if(ok) then
    buffer1=vrespc
-   call laplacian(gprimd,mpi_enreg_ptr,nfft,nspden,ngfft,dtset_ptr%paral_kgb,rdfuncr=buffer1,laplacerdfuncr=buffer2)
+   call laplacian(gprimd,mpi_enreg_ptr,nfft,nspden,ngfft,rdfuncr=buffer1,laplacerdfuncr=buffer2)
    do ispden=1,nspden
     buffer2(:,ispden)=(vrespc(:,ispden)-((rdielng(:))**2)*buffer2(:,ispden))  &
 &    *half  -  deltaW(:,ispden)
@@ -256,8 +249,6 @@ subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
 
 function frskerker2__dpf(nv1,nv2,vrespc)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: nv1,nv2
  real(dp),intent(in)::vrespc(nv1,nv2)
@@ -271,7 +262,7 @@ function frskerker2__dpf(nv1,nv2,vrespc)
 
   if(ok) then
    buffer1=vrespc
-   call laplacian(gprimd,mpi_enreg_ptr,nfft,nspden,ngfft,dtset_ptr%paral_kgb,rdfuncr=buffer1,laplacerdfuncr=buffer2)
+   call laplacian(gprimd,mpi_enreg_ptr,nfft,nspden,ngfft,rdfuncr=buffer1,laplacerdfuncr=buffer2)
    do ispden=1,nspden
     frskerker2__dpf(:,ispden)= vrespc(:,ispden)-deltaW(:,ispden)-((rdielng(:))**2)*buffer2(:,ispden)
    end do

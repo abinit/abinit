@@ -27,12 +27,12 @@
 module m_mkcore
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
  use m_linalg_interfaces
 
+ use defs_abitypes, only : mpi_type
  use m_geometry,   only : strconv
  use m_time,       only : timab
  use m_mpinfo,     only : ptabs_fourdp
@@ -148,8 +148,8 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 !Make sure option is acceptable
  if (option<0.or.option>4) then
    write(message, '(a,i12,a,a,a)' )&
-&   'option=',option,' is not allowed.',ch10,&
-&   'Must be 1, 2, 3 or 4.'
+    'option=',option,' is not allowed.',ch10,&
+    'Must be 1, 2, 3 or 4.'
    MSG_BUG(message)
  end if
 
@@ -443,17 +443,10 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 !            End of choice of option
            end if
 
-!          End of condition on the range
-         end if
-
-!        End loop on ishift1
-       end do
-
-!      End loop on ishift2
-     end do
-
-!    End loop on ishift3
-   end do
+         end if ! End of condition on the range
+       end do ! End loop on ishift1
+     end do ! End loop on ishift2
+   end do ! End loop on ishift3
 
    ABI_DEALLOCATE(ii)
    ABI_DEALLOCATE(rrdiff)
@@ -465,8 +458,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
      grxc(3,iatom)=grxc3*fact
    end if
 
-!  End big loop on atoms
- end do
+ end do !  End big loop on atoms
 
  if (option==2) then
 
@@ -678,8 +670,8 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !Make sure option is acceptable
  if (option<0.or.option>4) then
    write(message, '(a,i12,a,a,a)' )&
-&   'option=',option,' is not allowed.',ch10,&
-&   'Must be 1, 2, 3 or 4.'
+    'option=',option,' is not allowed.',ch10,&
+    'Must be 1, 2, 3 or 4.'
    MSG_BUG(message)
  end if
 

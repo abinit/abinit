@@ -27,8 +27,6 @@
 module m_positron
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_efield
  use m_errors
  use m_abicore
@@ -38,7 +36,11 @@ module m_positron
  use m_hdr
  use m_xmpi
  use m_bandfft_kpt
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_special_funcs,  only : sbf8
  use m_ioarr,    only : ioarr, read_rhor
  use m_pawang,   only : pawang_type, realgaunt
@@ -46,7 +48,7 @@ module m_positron
  use m_pawtab,   only : pawtab_type
  use m_paw_ij,   only : paw_ij_type
  use m_pawfgrtab,only : pawfgrtab_type
- use m_pawrhoij,only : pawrhoij_type, pawrhoij_copy, pawrhoij_alloc, pawrhoij_free,&
+ use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_alloc, pawrhoij_free,&
                        pawrhoij_nullify, pawrhoij_gather, pawrhoij_inquire_dim, pawrhoij_symrhoij
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_send, &
                         pawcprj_mpi_recv, pawcprj_free, pawcprj_copy, pawcprj_bcast
@@ -59,19 +61,19 @@ module m_positron
  use m_mkrho,           only : initro
  use m_paw_occupancies, only : initrhoij, pawaccrhoij
  use m_gammapositron, only : gammapositron, gammapositron_fft
- use m_forstr,          only : forstr
+ use m_forstr,        only : forstr
  use m_pawxc,         only : pawxcsum
  use m_paw_denpot,    only : pawdensities
  use m_drivexc,       only : mkdenpos
 
  use m_paw_sphharm, only : initylmr
- use m_pawpsp,  only : pawpsp_read_corewf
- use m_crystal, only : crystal_t
- use m_mpinfo,  only : ptabs_fourdp,set_mpi_enreg_fft,unset_mpi_enreg_fft,destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle
- use m_io_tools,only : open_file,close_unit,get_unit
- use m_fftcore, only : sphereboundary
- use m_prep_kgb,        only : prep_fourwf
- use m_fft,            only : fourwf, fourdp
+ use m_pawpsp,      only : pawpsp_read_corewf
+ use m_crystal,     only : crystal_t
+ use m_mpinfo,      only : ptabs_fourdp,set_mpi_enreg_fft,unset_mpi_enreg_fft,destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle
+ use m_io_tools,    only : open_file,close_unit,get_unit
+ use m_fftcore,     only : sphereboundary
+ use m_prep_kgb,    only : prep_fourwf
+ use m_fft,         only : fourwf, fourdp
 
  implicit none
 
@@ -187,8 +189,6 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 &          paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1dc,psps,rhog,rhor,&
 &          rprimd,stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,&
 &          xccc3d,xred,ylm,ylmgr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -437,7 +437,7 @@ type(fock_type),pointer, intent(inout) :: fock
        call getcut(boxcut_dum,ecut_eff,gmet,gsqcut_eff,dtset%iboxcut,std_out,qphon,ngfft)
        call initro(atindx,dtset%densty,gmet,gsqcut_eff,dtset%usepaw,mgfft,mpi_enreg,&
 &       psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%nspden,dtset%ntypat,&
-&       dtset%paral_kgb,psps,pawtab,ph1d,psps%qgrid_vl,rhog_ep,electronpositron%rhor_ep,&
+&       psps,pawtab,ph1d,psps%qgrid_vl,rhog_ep,electronpositron%rhor_ep,&
 &       dtset%spinat,ucvol,dtset%usepaw,dtset%ziontypat,dtset%znucl)
        if (dtset%usepaw==1) then
          if (size(electronpositron%pawrhoij_ep)>0) then
@@ -518,7 +518,7 @@ type(fock_type),pointer, intent(inout) :: fock
          call getcut(boxcut_dum,ecut_eff,gmet,gsqcut_eff,dtset%iboxcut,std_out,qphon,ngfft)
          call initro(atindx,dtset%densty,gmet,gsqcut_eff,dtset%usepaw,mgfft,mpi_enreg,&
 &         psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%nspden,dtset%ntypat,&
-&         dtset%paral_kgb,psps,pawtab,ph1d,psps%qgrid_vl,rhog,rhor,dtset%spinat,ucvol,&
+&         psps,pawtab,ph1d,psps%qgrid_vl,rhog,rhor,dtset%spinat,ucvol,&
 &         dtset%usepaw,dtset%ziontypat,dtset%znucl)
 
          if (dtset%usepaw==1) then
@@ -592,7 +592,7 @@ type(fock_type),pointer, intent(inout) :: fock
      call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,1,ngfft,0)
    end if
    if (history_level/=-1) then
-     call hartre(1,gsqcut,dtset%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_ep,rprimd,&
+     call hartre(1,gsqcut,dtset%usepaw,mpi_enreg,nfft,ngfft,rhog_ep,rprimd,&
 &     electronpositron%vha_ep)
      electronpositron%vha_ep=-electronpositron%vha_ep
    else
@@ -908,8 +908,6 @@ end subroutine setup_positron
 subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,nfft,ngfft,nhat,&
 &                      option,pawang,pawrad,pawrhoij,pawtab,rate,rate_paw,rhor,ucvol,xccc3d,&
 &                      rhor_dop_el,pawrhoij_dop_el,pawrhoij_ep) ! optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1849,8 +1847,6 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 &                     filpsp,kg,mcg,mcprj,mpi_enreg,my_natom,&
 &                     n3xccc,nfft,ngfft,nhat,npwarr,occ,pawang,pawrad,&
 &                     pawrhoij,pawtab,rhor,xccc3d)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3338,8 +3334,6 @@ end subroutine posdoppler
 subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enreg,&
 &                      option,pawang,pawrad,pawrhoij,pawrhoij_ep,&
 &                      pawtab,rate,rhocorej)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

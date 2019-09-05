@@ -56,6 +56,7 @@ ecut   50           # This cut-off is too low for real calculations
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
+#%% no_check = yes
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_BIGDFT
 #%% [files]

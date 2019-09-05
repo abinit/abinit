@@ -74,7 +74,8 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
       eph_intmeth           1
          eph_task          -4
         ddb_ngqpt        2    2    2
--          fftalg         312
+       dvdb_ngqpt        2    2    2
+-          fftalg         112
            getddb          20
            getwfk          20
        gw_qprange           2
@@ -101,6 +102,7 @@ P           mkmem           8
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000
         optdriver           7
+         prtphdos           0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -212,14 +214,6 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5482446053E-02 (at units)
--                                   =          11.9939 [km/s]
-
- Debye frequency from partial sums:     0.5060325864E-02 (Ha)
--                                 =     0.3329534472E+02 (THz)
--Debye temperature from partial sums:     0.1597922629E+04 (K)
-
-- Writing phonon DOS to file: t153o_DS1_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -268,22 +262,23 @@ All the independent perturbations are available
    1.48144565E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
-- Writing electron DOS to file: t153o_DS1_EDOS
-Number of bands in e-ph self-energy sum: 8
-From bmin: 1 to bmax: 8
-Symsigma: 0 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Only the Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 1749
-Number of temperatures: 2 From: 5.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
-Number of q-points in the IBZ: 3
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 8
+ From bsum_start: 1 to bsum_stop: 8
+ Symsigma: 0 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 2 From: 5.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Ab-initio q-mesh from DVDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Number of q-points in the IBZ: 3
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 8
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   2    6
    2     1  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]   2    6
    3     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   2    6
@@ -292,6 +287,14 @@ List of K-points for self-energy corrections:
    6     1  [-2.5000E-01,  2.5000E-01,  0.0000E+00]   2    6
    7     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   2    6
    8     1  [-2.5000E-01,  5.0000E-01,  2.5000E-01]   2    6
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -305,7 +308,7 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  5.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2  12.800   -0.333      1.0    0.000
    3  12.800   -0.333      1.0    0.000
@@ -319,7 +322,7 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  5.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T=  5.0 [K]
+K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2   6.210   -0.225      1.5    0.000
    3  11.056   -0.438      0.8    4.846
@@ -330,7 +333,7 @@ K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T=  5.0 [K]
  KS gap:    9.632 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=  5.0 [K]
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2  -0.746   -0.102      3.2    0.000
    3   9.967   -0.475      0.7   10.714
@@ -341,7 +344,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=  5.0 [K]
  KS gap:   11.360 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00], T=  5.0 [K]
+K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2   8.403   -0.606      0.5    0.000
    3   8.627   -0.199      1.7    0.224
@@ -352,7 +355,7 @@ K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00], T=  5.0 [K]
  KS gap:    8.690 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-K-point: [ 5.0000E-01,  2.5000E-01,  0.0000E+00], T=  5.0 [K]
+K-point: [ 5.0000E-01,  2.5000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2   1.990   -0.243      1.4    0.000
    3   6.030   -0.731      0.5    4.040
@@ -363,7 +366,7 @@ K-point: [ 5.0000E-01,  2.5000E-01,  0.0000E+00], T=  5.0 [K]
  KS gap:   11.074 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00], T=  5.0 [K]
+K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2   4.137   -0.502      0.7    0.000
    3   5.103   -0.054      6.1    0.966
@@ -374,7 +377,7 @@ K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00], T=  5.0 [K]
  KS gap:   11.050 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=  5.0 [K]
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2   0.073   -0.251      1.3    0.000
    3   6.408   -0.073      4.5    6.335
@@ -385,7 +388,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=  5.0 [K]
  KS gap:   11.187 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T=  5.0 [K]
+K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2   0.933   -0.119      2.8    0.000
    3   4.309   -0.091      3.6    3.376
@@ -396,6 +399,10 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T=  5.0 [K]
  KS gap:   19.109 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
+Transport calculation results
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.00E+00        0.00E+00            0.00            0.00
+          300.00        0.14E-13        0.00E+00          122.77            0.00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -435,14 +442,6 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5482446053E-02 (at units)
--                                   =          11.9939 [km/s]
-
- Debye frequency from partial sums:     0.5060325864E-02 (Ha)
--                                 =     0.3329534472E+02 (THz)
--Debye temperature from partial sums:     0.1597922629E+04 (K)
-
-- Writing phonon DOS to file: t153o_DS2_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -473,22 +472,23 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-- Writing electron DOS to file: t153o_DS2_EDOS
-Number of bands in e-ph self-energy sum: 8
-From bmin: 1 to bmax: 8
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Only the Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 1749
-Number of temperatures: 2 From: 5.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
-Number of q-points in the IBZ: 3
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 8
+ From bsum_start: 1 to bsum_stop: 8
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 2 From: 5.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Ab-initio q-mesh from DVDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Number of q-points in the IBZ: 3
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 8
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   2    7
    2     1  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]   2    6
    3     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   2    6
@@ -497,6 +497,14 @@ List of K-points for self-energy corrections:
    6     1  [-2.5000E-01,  2.5000E-01,  0.0000E+00]   2    6
    7     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    6
    8     1  [-2.5000E-01,  5.0000E-01,  2.5000E-01]   1    6
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -510,7 +518,7 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  5.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2  12.800   -0.333      1.0    0.000
    3  12.800   -0.333      1.0    0.000
@@ -525,7 +533,7 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  5.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T=  5.0 [K]
+K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2   6.210   -0.225      1.5    0.000
    3  11.056   -0.438      0.8    4.846
@@ -536,7 +544,7 @@ K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T=  5.0 [K]
  KS gap:    9.632 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=  5.0 [K]
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2  -0.746   -0.102      3.2    0.000
    3   9.967   -0.475      0.7   10.714
@@ -547,7 +555,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=  5.0 [K]
  KS gap:   11.360 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00], T=  5.0 [K]
+K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2   8.403   -0.606      0.5    0.000
    3   8.627   -0.199      1.7    0.224
@@ -558,7 +566,7 @@ K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00], T=  5.0 [K]
  KS gap:    8.690 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-K-point: [ 5.0000E-01,  2.5000E-01,  0.0000E+00], T=  5.0 [K]
+K-point: [ 5.0000E-01,  2.5000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2   1.990   -0.243      1.4    0.000
    3   6.030   -0.731      0.5    4.040
@@ -569,7 +577,7 @@ K-point: [ 5.0000E-01,  2.5000E-01,  0.0000E+00], T=  5.0 [K]
  KS gap:   11.074 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00], T=  5.0 [K]
+K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2   4.137   -0.502      0.7    0.000
    3   5.103   -0.054      6.1    0.966
@@ -580,7 +588,7 @@ K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00], T=  5.0 [K]
  KS gap:   11.050 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=  5.0 [K]
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1   0.073   -0.251      1.3    0.000
    2   0.073   -0.251      1.3    0.000
@@ -592,7 +600,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=  5.0 [K]
  KS gap:   11.187 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T=  5.0 [K]
+K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1   0.933   -0.119      2.8    0.000
    2   0.933   -0.119      2.8    0.000
@@ -604,6 +612,10 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T=  5.0 [K]
  KS gap:   19.109 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
+Transport calculation results
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.00E+00        0.00E+00            0.00            0.00
+          300.00        0.14E-13        0.00E+00          122.77            0.00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -616,6 +628,7 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T=  5.0 [K]
       eph_intmeth           1
          eph_task          -4
         ddb_ngqpt        2    2    2
+       dvdb_ngqpt        2    2    2
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
             fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -626,16 +639,7 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T=  5.0 [K]
            getddb          20
            getwfk          20
        gw_qprange           2
-           istwfk        1    0    1    0    0    0    1    0
            jdtset        1    2
-              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       2.50000000E-01  0.00000000E+00  0.00000000E+00
-                       5.00000000E-01  0.00000000E+00  0.00000000E+00
-                       2.50000000E-01  2.50000000E-01  0.00000000E+00
-                       5.00000000E-01  2.50000000E-01  0.00000000E+00
-                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
-                       5.00000000E-01  5.00000000E-01  0.00000000E+00
-                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      1.89602709E+01
 P           mkmem           8
@@ -649,6 +653,7 @@ P           mkmem           8
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000
         optdriver           7
+         prtphdos           0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -710,8 +715,6 @@ P           mkmem           8
            tolwfr      1.00000000E-16
             tmesh      5.00000000E+00  2.95000000E+02  2.00000000E+00
             typat      1  1
-              wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
-                         0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        8.8683062764E-01  8.8683062764E-01  8.8683062764E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -754,48 +757,48 @@ P           mkmem           8
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [3] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          7.8  wall=          7.8
+- Proc.   0 individual time (sec): cpu=          3.2  wall=          3.3
 
 ================================================================================
 

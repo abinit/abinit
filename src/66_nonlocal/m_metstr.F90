@@ -127,8 +127,6 @@ contains
 
 subroutine metstr(istr,rank,iterm,gmet,gprimd,aa,bb)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istr,iterm,rank

@@ -35,10 +35,10 @@ the scalability measurements.
 You are supposed to know already some basics of parallelism in ABINIT,
 explained in the tutorial [A first introduction to ABINIT in parallel](basepar).
 
-[TUTORIAL_README]
-
 This tutorial should take less than two hours to be done if a powerful parallel
 computer is available.
+
+[TUTORIAL_README]
 
 ## 1 The structure of the parallelism for the DFPT part of ABINIT
 
@@ -102,9 +102,9 @@ bands can be exploited.
 *Before continuing you might work in a different subdirectory as for the other
 tutorials. Why not work_paral_dfpt?*
 
-All the input files can be found in the *\$ABI_TUTOPARAL/Input* directory.
+All the input files can be found in the *\$ABI_TESTS/tutoparal/Input* directory.
 You might have to adapt them to the path of the directory in which you have decided to perform your runs. 
-You can compare your results with reference output files located in *\$ABI_TUTOPARAL/Refs*.
+You can compare your results with reference output files located in *\$ABI_TESTS/tutoparal/Refs*.
 
 In the following, when "(mpirun ...) abinit" appears, you have to use a
 specific command line according to the operating system and architecture of
@@ -130,7 +130,7 @@ You can launch it:
     
     mpirun -n 4  abinit < tdfpt_01.files > tdfpt_01.log &
 
-A reference output file is available in *\$ABI_TUTOPARAL/Refs*, under
+A reference output file is available in *\$ABI_TESTS/tutoparal/Refs*, under
 the name *tdfpt_01.out*. It was obtained using 4 computing cores, and took a few seconds.
 
 **2.2.** The second step is the DFPT calculation, for which the files are
@@ -158,7 +158,7 @@ Then, you can launch the calculation:
     
     mpirun -n 4 abinit < tdfpt_02.files > tdfpt_02.log &
 
-A reference output file is given in *\$ABI_TUTOPARAL/Refs*, under the name
+A reference output file is given in *\$ABI_TESTS/tutoparal/Refs*, under the name
 *tdfpt_02.out*. Edit it, and examine some information.
 The calculation has been made with four computing cores:
     
@@ -286,10 +286,10 @@ present tutorial is too low to obtain physical results (it should be around 40 H
 
 As in the previous case, a preparatory ground-state calculation is needed.
 
-The input files are provided, in the directory *\$ABI_TUTOPARAL/Input*.
+The input files are provided, in the directory *\$ABI_TESTS/tutoparal/Input*.
 The preparatory step is governed by *tdfpt_03.files* (and *tdfpt_03.in*). The real
 (=DFPT) test case is governed by *tdfpt_04.files* (and *tdfpt_04.in*). The
-reference output files are present in *\$ABI_TUTOPARAL/Refs*:
+reference output files are present in *\$ABI_TESTS/tutoparal/Refs*:
 *tdfpt_0324.out* and *tdfpt_0432.out*. The naming convention is such that the
 number of cores used to run them is added after the name of the test: the
 *tdfpt_03.in* file was run with 24 cores, while the *tdfpt_04.in* was run with 32
@@ -318,7 +318,7 @@ and launch the calculation:
     
 Now, examine the obtained output file for test 04, especially the timing.
 
-In the reference file *\$ABI_TUTOPARAL/Refs/tdfpt_0432.out*,
+In the reference file *\$ABI_TESTS/tutoparal/Refs/tdfpt_0432.out*,
 with 32 computing cores, the timing section delivers:
     
     - For major independent code sections, cpu and wall times (sec),

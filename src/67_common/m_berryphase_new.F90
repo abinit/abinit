@@ -25,15 +25,18 @@
 
 module m_berryphase_new
 
- use defs_abitypes
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use m_efield
  use m_errors
  use m_abicore
  use m_xmpi
+ use m_hdr
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,  only : MPI_type
  use m_berrytk,      only : smatrix, polcart
  use m_cgprj,        only : ctocprj
  use m_fftcore,      only : kpgsph
@@ -174,8 +177,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 &  nkpt,calc_pol_ddk,pawrhoij,pawtab,pel,pelev,pion,ptot,red_ptot,pwind,&  !!REC
 &  pwind_alloc,pwnsfac,&
 &  rprimd,typat,ucvol,unit_out,usecprj,usepaw,xred,zion)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: lmnmax,mband,mcg,mcprj,mkmem,mpw,my_natom,natom,nkpt
@@ -996,10 +997,19 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
            if ((det_inv_smat == 10).or.(det_inv_smat == 11)) then
 
              if (sqrt(dtm_k(1)*dtm_k(1) + dtm_k(2)*dtm_k(2)) < tol12) then
+               ! EB: the MSG_BUG has been replaced here by what is done in 67_common/m_cgwf.F90
+               ! This avoid the code to stop for phonons under E-field too.
+               ! TODO: Since the same is done in m_cgwf.F90 and in m_berryphase_new.F90,
+               ! rationalization should be done with one single module.
                write(message,'(a,i5,a,a,a)')&
 &               '  For k-point #',ikpt1,',',ch10,&
-&               '  the determinant of the overlap matrix is found to be 0.'
-               MSG_BUG(message)
+&               '  the determinant of the overlap matrix is found to be 0. Fixing...'
+                ! Try this:
+                write(std_out,*)message,dtm_k(1:2)
+                if(abs(dtm_k(1))<=1d-12)dtm_k(1)=1d-12
+                if(abs(dtm_k(2))<=1d-12)dtm_k(2)=1d-12
+                write(std_out,*)' Changing to:',dtm_k(1:2)
+!               MSG_BUG(message)
              end if
 
              dtm_mult(1,ikpt1+(isppol-1)*dtefield%fnkpt,istep) = dtm_k(1)
@@ -1797,8 +1807,6 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 &  scfcv_level,scfcv_quit,scfcv_step,ucvol,unit_out,&
 &  usepaw,xred,ylm,ylmgr)
 
-  implicit none
-
   !Arguments ------------------------------------
   integer, intent(in) :: idir,mcg,mkmem,mpw,my_natom,natom,nkpt,ntypat
   integer, intent(in) :: pwind_alloc,scfcv_level,scfcv_quit,scfcv_step,unit_out,usepaw
@@ -2300,8 +2308,6 @@ end subroutine update_e_field_vars
 
 subroutine prtefield(dtset,dtefield,iunit,rprimd)
 
-  implicit none
-
   !Arguments ------------------------------------
   integer :: iunit
   real(dp),intent(in) :: rprimd(3,3)
@@ -2705,8 +2711,6 @@ subroutine init_e_field_vars(dtefield,dtset,gmet,gprimd,kg,&
      &              mpi_enreg,npwarr,occ,pawang,pawrad,pawtab,psps,&
      &              pwind,pwind_alloc,pwnsfac,rprimd,symrec,xred)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(out) :: pwind_alloc
@@ -2852,8 +2856,6 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      &              nsym,ntypat,occ,pawang,pawrad,pawtab,psps,&
      &              pwind,pwind_alloc,pwnsfac,&
      &              rprimd,symrec,typat,usepaw,xred)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars

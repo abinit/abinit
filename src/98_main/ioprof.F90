@@ -46,10 +46,10 @@ program ioprof
  use netcdf
 #endif
 
- use defs_abitypes,    only : hdr_type
  use m_specialmsg,     only : specialmsg_getcount, herald
  use m_fstrings,       only : lower, sjoin, itoa
  use m_io_tools,       only : delete_file, file_exists, iomode_from_fname, get_unit
+
  implicit none
 
 !Local variables-------------------------------
@@ -129,8 +129,8 @@ program ioprof
    if (my_rank == master) then
      formeig = 0
      call wfk_open_read(wfk, wfk_path, formeig, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
-     call wfk_print(wfk)
-     call wfk_close(wfk)
+     call wfk%print()
+     call wfk%close()
    end if
 
  case ("nc2fort")

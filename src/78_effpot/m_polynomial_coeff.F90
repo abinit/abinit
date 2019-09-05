@@ -986,7 +986,7 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart
   integer :: i1,i2,i3,ia1,ib1,ia2,ib2,idir1,idir2,ierr,ii
   integer :: icoeff,iterm,idisp1,idisp2,idisp1_strain,idisp2_strain,icell,ndisp
   integer :: nstrain,ndisp_tot,power_disp,power_strain,unit_out
-  real(dp):: coeff,disp1,disp2,tmp1,tmp2,tmp3,weight,energy_term
+  real(dp):: coeff,disp1,disp2,tmp1,tmp2,tmp3,weight
   logical :: file_opened 
 ! array
   integer :: cell_atoma1(3),cell_atoma2(3)

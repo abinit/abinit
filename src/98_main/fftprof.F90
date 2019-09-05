@@ -76,7 +76,6 @@
 program fftprof
 
  use defs_basis
- use defs_abitypes
  use m_build_info
  use m_xmpi
  use m_xomp
@@ -85,6 +84,7 @@ program fftprof
  use m_abicore
  use m_dfti
 
+ use defs_abitypes,only : MPI_type
  use m_fstrings,   only : lower
  use m_specialmsg, only : specialmsg_getcount, herald
  use m_io_tools,   only : flush_unit
@@ -93,8 +93,8 @@ program fftprof
  use m_fft,        only : fft_use_lib_threads, fftbox_utests, fftu_utests, fftbox_mpi_utests, fftu_mpi_utests
  use m_fftw3,      only : fftw3_init_threads
  use m_mpinfo,     only : destroy_mpi_enreg, initmpi_seq
- implicit none
 
+ implicit none
 
 !Arguments -----------------------------------
 !Local variables-------------------------------
@@ -144,9 +144,9 @@ program fftprof
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  iam_master = (my_rank == master)
 
-!Initialize memory profiling if it is activated
-!if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
-!note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ! Initialize memory profiling if it is activated
+ ! if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
+ ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
  call abimem_init(0)
 #endif

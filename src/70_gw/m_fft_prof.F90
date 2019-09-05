@@ -20,13 +20,14 @@
 MODULE m_FFT_prof
 
  use defs_basis
- use defs_abitypes
  use m_xomp
  use m_errors
  use m_abicore
  use m_fftw3
  use m_fft
+ use m_distribfft
 
+ use defs_abitypes,    only : MPI_type
  use m_numeric_tools,  only : arth
  use m_time,           only : cwtime
  use m_io_tools,       only : open_file

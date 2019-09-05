@@ -57,6 +57,7 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
          eph_task           5
    eph_ngqpt_fine        4    4    4
         ddb_ngqpt        2    2    2
+       dvdb_ngqpt        2    2    2
 -          fftalg         112
            istwfk        2
          kptrlatt        1    0    0      0    1    0      0    0    1
@@ -221,7 +222,7 @@ All the independent perturbations are available
  Interpolation of the electron-phonon coupling potential
 
  From coarse q-mesh: [2,2,2] to: [4,4,4]
- Number of q-points found in input DVDB 3
+ Number of q-points found in input DVDB: 3
  Number of q-points requiring Fourier interpolation 5
 Interpolation of the electron-phonon coupling potential completed
 
@@ -237,11 +238,11 @@ Interpolation of the electron-phonon coupling potential completed
          eph_task           5
    eph_ngqpt_fine        4    4    4
         ddb_ngqpt        2    2    2
+       dvdb_ngqpt        2    2    2
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         112
-           istwfk        2
+-          fftalg         312
          kptrlatt        1    0    0      0    1    0      0    0    1
           kptrlen      4.74006772E+00
 P           mkmem           1

@@ -48,6 +48,7 @@ iomode  3
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
+#%% no_check = yes
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_NETCDF
 #%% [files]

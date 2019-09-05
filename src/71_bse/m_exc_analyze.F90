@@ -28,12 +28,12 @@
 module m_exc_analyze
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_bs_defs
  use m_xmpi
  use m_errors
 
+ use defs_datatypes,      only : pseudopotential_type, ebands_t
  use m_io_tools,          only : open_file
  use m_numeric_tools,     only : iseven, wrap2_zero_one
  use m_bz_mesh,           only : kmesh_t, get_BZ_item
@@ -41,7 +41,6 @@ module m_exc_analyze
  use m_wfd,               only : wfd_t
  use m_bse_io,            only : exc_read_eigen
  use m_pptools,           only : printxsf
-
  use m_pawrad,            only : pawrad_type
  use m_pawtab,            only : pawtab_type,pawtab_get_lsize
  use m_pawfgrtab,         only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print
@@ -268,8 +267,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
  hsize = SUM(BSp%nreh); if (BSp%use_coupling>0) hsize=2*hsize
  nvec=1
 
- ABI_STAT_MALLOC(vec_list,(hsize,nvec), ierr)
- ABI_CHECK(ierr==0, "out of memory in vec_list")
+ ABI_MALLOC_OR_DIE(vec_list,(hsize,nvec), ierr)
 
  ABI_MALLOC(vec_idx,(nvec))
  vec_idx = (/(ii, ii=1,nvec)/)
@@ -494,8 +492,7 @@ subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
  ABI_CHECK(nfftot==PRODUCT(ngfft(1:3)),"Mismatch in FFT size")
 
 !allocate and load wavefunctions in real space
- ABI_STAT_MALLOC(wfr,(nfftot*Wfd%nspinor,BSp%nbnds,Wfd%nkibz), ierr)
- ABI_CHECK(ierr==0, "out of memory: exc_den, wfr")
+ ABI_MALLOC_OR_DIE(wfr,(nfftot*Wfd%nspinor,BSp%nbnds,Wfd%nkibz), ierr)
 
  spin=1 ! SPIN support is missing.
 
@@ -550,8 +547,7 @@ subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
 
  close(eig_unt)
 
- ABI_STAT_MALLOC(wfrk,(nfftot,BSp%nbnds), ierr)
- ABI_CHECK(ierr==0, 'out of memory: exc_den, wfrk')
+ ABI_MALLOC_OR_DIE(wfrk,(nfftot,BSp%nbnds), ierr)
 
 !calculate ground state density
  n0(:) = zero

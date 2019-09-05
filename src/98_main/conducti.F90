@@ -39,7 +39,6 @@
 program conducti
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_errors
  use m_abicore
@@ -48,11 +47,13 @@ program conducti
 #endif
  use m_conducti
 
+ use defs_abitypes, only : MPI_type
  use m_io_tools,  only : open_file
  use m_time,      only : timein
  use m_fstrings,  only : sjoin, itoa
  use m_mpinfo,    only : destroy_mpi_enreg
  use m_paw_optics,only : linear_optics_paw
+
  implicit none
 
 !Arguments -----------------------------------

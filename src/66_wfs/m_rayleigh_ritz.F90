@@ -29,7 +29,6 @@
 module m_rayleigh_ritz
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_cgtools
  use m_xmpi
@@ -37,6 +36,7 @@ module m_rayleigh_ritz
  use m_abi_linalg
  use m_slk
 
+ use defs_abitypes,   only : mpi_type
  use m_time,          only : timab
  use m_numeric_tools, only : pack_matrix
 
@@ -89,8 +89,6 @@ contains
 !! SOURCE
 
 subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
-
- implicit none
 
  ! Arguments
  type(mpi_type),intent(inout) :: mpi_enreg
@@ -180,7 +178,7 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enr
  call timab(timer_subdiago, 1, tsec)
  ABI_ALLOCATE(evec, (cplx*nband, nband))
 
- call abi_xhpgv(1,'V','U',nband,subham,subovl,eig,evec,istwf_k=istwf_k,use_slk=mpi_enreg%paral_kgb)
+ call abi_xhpgv(1,'V','U',nband,subham,subovl,eig,evec,nband,istwf_k=istwf_k,use_slk=mpi_enreg%paral_kgb)
 
  ABI_DEALLOCATE(subham)
  ABI_DEALLOCATE(subovl)
@@ -316,8 +314,6 @@ end subroutine rayleigh_ritz_subdiago
 
 subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
 
- implicit none
-
  integer,external :: NUMROC
 
  ! Arguments
@@ -358,14 +354,14 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
  !======================================================================================================
  ! Init Scalapack matrices
  !======================================================================================================
- call init_matrix_scalapack(sca_ham ,nband,nband,abi_processor,istwf_k,10)
- call init_matrix_scalapack(sca_ovl ,nband,nband,abi_processor,istwf_k,10)
- call init_matrix_scalapack(sca_evec,nband,nband,abi_processor,istwf_k,10)
+ call init_matrix_scalapack(sca_ham ,nband,nband,slk_processor,istwf_k,10)
+ call init_matrix_scalapack(sca_ovl ,nband,nband,slk_processor,istwf_k,10)
+ call init_matrix_scalapack(sca_evec,nband,nband,slk_processor,istwf_k,10)
 
  ! Get info
  blocksize = sca_ham%sizeb_blocs(1) ! Assume square blocs
- nbproc = abi_processor%grid%nbprocs
- grid_dims = abi_processor%grid%dims
+ nbproc = slk_processor%grid%nbprocs
+ grid_dims = slk_processor%grid%dims
 
  !======================================================================================================
  ! Build hamiltonian and overlap matrices
@@ -396,8 +392,8 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
    coords_iproc(2) = MOD(iproc,  grid_dims(2))
 
    ! Get buffersize of iproc
-   buffsize_iproc(1) = NUMROC(nband,blocksize,coords_iproc(1),0,abi_processor%grid%dims(1))
-   buffsize_iproc(2) = NUMROC(nband,blocksize,coords_iproc(2),0,abi_processor%grid%dims(2))
+   buffsize_iproc(1) = NUMROC(nband,blocksize,coords_iproc(1),0,slk_processor%grid%dims(1))
+   buffsize_iproc(2) = NUMROC(nband,blocksize,coords_iproc(2),0,slk_processor%grid%dims(2))
 
    ! Allocate matrices_iproc, that will gather the contribution of this proc to the block owned by iproc
    ABI_ALLOCATE(ham_iproc, (cplx*buffsize_iproc(1), buffsize_iproc(2)))
@@ -427,9 +423,9 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
 &   right_temp,vectsize,czero,ham_iproc,buffsize_iproc(1), x_cplx=cplx)
 
    ! Sum to iproc, and fill sca_ matrices
-   call xmpi_sum_master(ham_iproc, iproc, abi_communicator, ierr)
-   call xmpi_sum_master(ovl_iproc, iproc, abi_communicator, ierr)
-   if(iproc == abi_processor%myproc) then
+   call xmpi_sum_master(ham_iproc, iproc, slk_communicator, ierr)
+   call xmpi_sum_master(ovl_iproc, iproc, slk_communicator, ierr)
+   if(iproc == slk_processor%myproc) then
      ! DCOPY to bypass the real/complex issue
      if(cplx == 2) then
        call DCOPY(cplx*buffsize_iproc(1)*buffsize_iproc(2), ham_iproc, 1, sca_ham%buffer_cplx, 1)
@@ -448,11 +444,11 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
 
  ! Final sum
  if(cplx == 2) then
-   call xmpi_sum(sca_ham%buffer_cplx, abi_complement_communicator, ierr)
-   call xmpi_sum(sca_ovl%buffer_cplx, abi_complement_communicator, ierr)
+   call xmpi_sum(sca_ham%buffer_cplx, slk_complement_communicator, ierr)
+   call xmpi_sum(sca_ovl%buffer_cplx, slk_complement_communicator, ierr)
  else
-   call xmpi_sum(sca_ham%buffer_real, abi_complement_communicator, ierr)
-   call xmpi_sum(sca_ovl%buffer_real, abi_complement_communicator, ierr)
+   call xmpi_sum(sca_ham%buffer_real, slk_complement_communicator, ierr)
+   call xmpi_sum(sca_ovl%buffer_real, slk_complement_communicator, ierr)
  end if
 
  ! Transform back
@@ -474,8 +470,8 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
  !write(message, *) 'RR: diag'
  !call wrtout(std_out,message,'COLL')
  call timab(timer_subdiago, 1, tsec)
- call compute_generalized_eigen_problem(abi_processor,sca_ham,sca_ovl,&
-& sca_evec,eig,abi_communicator,istwf_k)
+ call compute_generalized_eigen_problem(slk_processor,sca_ham,sca_ovl,&
+& sca_evec,eig,slk_communicator,istwf_k)
  call timab(timer_subdiago, 2, tsec)
 
  !======================================================================================================
@@ -495,19 +491,19 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
    coords_iproc(2) = MOD(iproc,  grid_dims(2))
 
    ! Get buffersize of iproc
-   buffsize_iproc(1) = NUMROC(nband,blocksize,coords_iproc(1),0,abi_processor%grid%dims(1))
-   buffsize_iproc(2) = NUMROC(nband,blocksize,coords_iproc(2),0,abi_processor%grid%dims(2))
+   buffsize_iproc(1) = NUMROC(nband,blocksize,coords_iproc(1),0,slk_processor%grid%dims(1))
+   buffsize_iproc(2) = NUMROC(nband,blocksize,coords_iproc(2),0,slk_processor%grid%dims(2))
 
    ! Get data from iproc
    ABI_ALLOCATE(evec_iproc, (cplx*buffsize_iproc(1), buffsize_iproc(2)))
-   if(iproc == abi_processor%myproc) then
+   if(iproc == slk_processor%myproc) then
      if(cplx == 2) then
        call DCOPY(cplx*buffsize_iproc(1)*buffsize_iproc(2), sca_evec%buffer_cplx, 1, evec_iproc, 1)
      else
        call DCOPY(cplx*buffsize_iproc(1)*buffsize_iproc(2), sca_evec%buffer_real, 1, evec_iproc, 1)
      end if
    end if
-   call xmpi_bcast(evec_iproc,iproc,abi_communicator,ierr)
+   call xmpi_bcast(evec_iproc,iproc,slk_communicator,ierr)
 
    ! Compute contribution to the rotated matrices from iproc
    ABI_ALLOCATE(left_temp,  (2,npw*nspinor*buffsize_iproc(1)))
@@ -591,8 +587,6 @@ end subroutine rayleigh_ritz_distributed
 !! SOURCE
 subroutine from_mat_to_block_cyclic(full_mat, vectsize, nband, block_cyclic_mat, buffsize, blocksize, iproc, nprocs)
 
- implicit none
-
  integer, intent(in) :: vectsize, nband, buffsize, blocksize, iproc, nprocs
  real(dp), intent(in) :: full_mat(2, vectsize*nband)
  real(dp), intent(inout) :: block_cyclic_mat(2, vectsize*buffsize)
@@ -647,8 +641,6 @@ end subroutine from_mat_to_block_cyclic
 !! SOURCE
 
 subroutine from_block_cyclic_to_mat(full_mat, vectsize, nband, block_cyclic_mat, buffsize, blocksize, iproc, nprocs)
-
- implicit none
 
  integer, intent(in) :: vectsize, nband, buffsize, blocksize, iproc, nprocs
  real(dp), intent(inout) :: full_mat(2, vectsize*nband)

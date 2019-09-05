@@ -1,5 +1,5 @@
 
-.Version 8.9.2 of ABINIT 
+.Version 8.11.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 13 Jun 2018.
-- ( at 07h20 )
+.Starting date : Wed 20 Feb 2019.
+- ( at 22h50 )
   
 - input  file    -> t57.in
 - output file    -> t57.out
@@ -160,6 +160,12 @@ _ WF disk file :      0.281 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
         ddb_ngqpt4       0    0    0
         ddb_ngqpt5       0    0    0
         ddb_ngqpt6       1    1    1
+       dvdb_ngqpt1       0    0    0
+       dvdb_ngqpt2       0    0    0
+       dvdb_ngqpt3       0    0    0
+       dvdb_ngqpt4       0    0    0
+       dvdb_ngqpt5       0    0    0
+       dvdb_ngqpt6       1    1    1
 -          fftalg         312
            getddb1          0
            getddb2          0
@@ -457,8 +463,8 @@ P          mk1mem6          2
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_efmas3/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_efmas3/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -472,8 +478,8 @@ P          mk1mem6          2
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_efmas3/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_efmas3/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -527,7 +533,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   6.7841E-21; max=  1.9137E-20
+ Mean square residual over all n,k,spin=   67.841E-22; max=  19.137E-21
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -648,7 +654,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.9489E-13; max=  9.7677E-13
+ Mean square residual over all n,k,spin=   59.489E-14; max=  97.677E-14
  dfpt_looppert : ek2=    4.5406579546E+01
           f-sum rule ratio=    9.7854379195E-01
  prteigrs : about to open file t57_1WF1_EIG
@@ -702,7 +708,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.9468E-13; max=  9.7679E-13
+ Mean square residual over all n,k,spin=   59.468E-14; max=  97.679E-14
  dfpt_looppert : ek2=    4.5406579546E+01
           f-sum rule ratio=    9.7854379194E-01
  prteigrs : about to open file t57_1WF1_EIG
@@ -756,7 +762,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.9375E-13; max=  9.7679E-13
+ Mean square residual over all n,k,spin=   59.375E-14; max=  97.679E-14
  dfpt_looppert : ek2=    4.5406579546E+01
           f-sum rule ratio=    9.7854379193E-01
  prteigrs : about to open file t57_1WF1_EIG
@@ -900,7 +906,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.1759E-13; max=  2.3401E-12
+ Mean square residual over all n,k,spin=   31.759E-14; max=  23.401E-13
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -956,7 +962,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   6.5081E-13; max=  6.7119E-12
+ Mean square residual over all n,k,spin=   65.081E-14; max=  67.119E-13
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1012,7 +1018,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   7.2844E-13; max=  5.0454E-12
+ Mean square residual over all n,k,spin=   72.844E-14; max=  50.454E-13
 
  Seven components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1333,7 +1339,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.6237E-12; max=  9.4227E-17
+ Mean square residual over all n,k,spin=   26.237E-13; max=  94.227E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -1379,8 +1385,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_efmas3/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_efmas3/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1394,8 +1400,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_efmas3/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_efmas3/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1456,7 +1462,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -1.6667E-02; max=  9.4639E-13
+ Mean square residual over all n,k,spin=  -16.667E-03; max=  94.639E-14
  dfpt_looppert : ek2=    4.5406579546E+01
           f-sum rule ratio=    1.3569144226E+00
  prteigrs : about to open file t57_1WF1_EIG
@@ -1512,7 +1518,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -1.6667E-02; max=  5.8255E-13
+ Mean square residual over all n,k,spin=  -16.667E-03; max=  58.255E-14
  dfpt_looppert : ek2=    4.5406579546E+01
           f-sum rule ratio=    1.3569191728E+00
  prteigrs : about to open file t57_1WF1_EIG
@@ -1568,7 +1574,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -1.6667E-02; max=  9.9432E-13
+ Mean square residual over all n,k,spin=  -16.667E-03; max=  99.432E-14
  dfpt_looppert : ek2=    4.5406579546E+01
           f-sum rule ratio=    1.3569188783E+00
  prteigrs : about to open file t57_1WF1_EIG
@@ -1688,12 +1694,16 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
  - Associated theta integrals calculated with ntheta=    100 points.
 
 --- !WARNING
+src_file: m_efmas.F90
+src_line: 0
+message: |
+    
+    Band(s)     7,     8,
+    are not band extrema, but saddle points;
+    the transport equivalent formalism breaks down in these conditions.
+    The associated tensor(s) will therefore not be printed.
+...
 
-Band(s)     7,     8,
-are not band extrema, but saddle points;
-the transport equivalent formalism breaks down in these conditions.
-The associated tensor(s) will therefore not be printed.
----
 
  K-point ( 0.000, 0.500, 0.500) | band =     7
  Transport equivalent effective mass tensor:
@@ -1821,8 +1831,8 @@ The associated tensor(s) will therefore not be printed.
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1836,8 +1846,8 @@ The associated tensor(s) will therefore not be printed.
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1856,7 +1866,7 @@ The associated tensor(s) will therefore not be printed.
 
  Rough correction to the ZPR, to take into account the missing q=0 piece using Frohlich model:
  (+ for occupied states, - for unoccupied states) * zpr_q0_fact / (Nqpt_full_bz)**(1/3) 
- where Nqpt_full_bz=number of q wavevectors in full BZ, and zpr_q0_fact=      0.035862 Ha=      0.975842 eV
+ where Nqpt_full_bz=number of q wavevectors in full BZ, and zpr_q0_fact=      0.045660 Ha=      1.242480 eV
 
  - At k-point ( 0.000, 0.000, 0.000), bands     6 through     8
  Band     6 Angular average effective mass for Frohlich model (<m**0.5>)**2=  -0.4264157872
@@ -1912,6 +1922,12 @@ The associated tensor(s) will therefore not be printed.
         ddb_ngqpt4       0    0    0
         ddb_ngqpt5       0    0    0
         ddb_ngqpt6       1    1    1
+       dvdb_ngqpt1       0    0    0
+       dvdb_ngqpt2       0    0    0
+       dvdb_ngqpt3       0    0    0
+       dvdb_ngqpt4       0    0    0
+       dvdb_ngqpt5       0    0    0
+       dvdb_ngqpt6       1    1    1
            etotal1    -5.5386471108E+01
            etotal2    -2.0593241427E+01
            etotal3    -5.0518883538E+01
@@ -1962,51 +1978,8 @@ The associated tensor(s) will therefore not be printed.
              iscf4         -2
              iscf5         -2
              iscf6         -2
-           istwfk4       2    8
-           istwfk5       1    1
-           istwfk6       2    8
               ixc          11
            jdtset        1    2    3    4    5    6
-              kpt1     0.00000000E+00  0.00000000E+00 -2.50000000E-01
-                       0.00000000E+00  2.50000000E-01  5.00000000E-01
-              kpt2     0.00000000E+00  0.00000000E+00 -2.50000000E-01
-                       0.00000000E+00  2.50000000E-01  5.00000000E-01
-                       0.00000000E+00  5.00000000E-01 -2.50000000E-01
-                       2.50000000E-01  0.00000000E+00  5.00000000E-01
-                       2.50000000E-01  2.50000000E-01 -2.50000000E-01
-                       5.00000000E-01  0.00000000E+00 -2.50000000E-01
-                       0.00000000E+00  2.50000000E-01  0.00000000E+00
-                       2.50000000E-01  0.00000000E+00  0.00000000E+00
-                       2.50000000E-01  2.50000000E-01  2.50000000E-01
-                       2.50000000E-01  5.00000000E-01  5.00000000E-01
-                       2.50000000E-01 -2.50000000E-01 -2.50000000E-01
-                       5.00000000E-01  2.50000000E-01  5.00000000E-01
-                       5.00000000E-01  5.00000000E-01 -2.50000000E-01
-                      -2.50000000E-01  2.50000000E-01 -2.50000000E-01
-                       2.50000000E-01  5.00000000E-01  0.00000000E+00
-                       5.00000000E-01  2.50000000E-01  0.00000000E+00
-              kpt3     0.00000000E+00  0.00000000E+00 -2.50000000E-01
-                       0.00000000E+00  2.50000000E-01  5.00000000E-01
-                       0.00000000E+00  5.00000000E-01 -2.50000000E-01
-                       2.50000000E-01  0.00000000E+00  5.00000000E-01
-                       2.50000000E-01  2.50000000E-01 -2.50000000E-01
-                       5.00000000E-01  0.00000000E+00 -2.50000000E-01
-                       0.00000000E+00  2.50000000E-01  0.00000000E+00
-                       2.50000000E-01  0.00000000E+00  0.00000000E+00
-                       2.50000000E-01  2.50000000E-01  2.50000000E-01
-                       2.50000000E-01  5.00000000E-01  5.00000000E-01
-                       2.50000000E-01 -2.50000000E-01 -2.50000000E-01
-                       5.00000000E-01  2.50000000E-01  5.00000000E-01
-                       5.00000000E-01  5.00000000E-01 -2.50000000E-01
-                      -2.50000000E-01  2.50000000E-01 -2.50000000E-01
-                       2.50000000E-01  5.00000000E-01  0.00000000E+00
-                       5.00000000E-01  2.50000000E-01  0.00000000E+00
-              kpt4     0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       0.00000000E+00  5.00000000E-01  5.00000000E-01
-              kpt5     0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       0.00000000E+00  5.00000000E-01  5.00000000E-01
-              kpt6     0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       0.00000000E+00  5.00000000E-01  5.00000000E-01
            kptopt1          1
            kptopt2          2
            kptopt3          2
@@ -2168,16 +2141,6 @@ P          mk1mem6          2
            useylm4          0
            useylm5          1
            useylm6          0
-              wtk1       0.25000    0.75000
-              wtk2       0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
-                         0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
-                         0.06250    0.06250    0.06250    0.06250
-              wtk3       0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
-                         0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
-                         0.06250    0.06250    0.06250    0.06250
-              wtk4       1.00000    1.00000
-              wtk5       0.50000    0.50000
-              wtk6       1.00000    1.00000
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.4172814888E+00  2.4172814888E+00  2.4172814888E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2274,10 +2237,10 @@ P          mk1mem6          2
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         57.7  wall=         67.1
+- Proc.   0 individual time (sec): cpu=         46.3  wall=         51.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered  79 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         57.7  wall=         67.1
+.Delivered  25 WARNINGs and  61 COMMENTs to log file.
++Overall time at end (sec) : cpu=         46.3  wall=         51.7

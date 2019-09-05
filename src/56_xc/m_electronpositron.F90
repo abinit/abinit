@@ -28,13 +28,14 @@
 MODULE m_electronpositron
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_energies
  use m_xmpi
  use m_cgtools
+ use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use m_pawtab,   only : pawtab_type
  use m_paw_an,   only : paw_an_type
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy
@@ -215,8 +216,6 @@ CONTAINS
 
 subroutine init_electronpositron(ireadwf,dtset,electronpositron,mpi_enreg,nfft,pawrhoij,pawtab)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ireadwf,nfft
@@ -374,8 +373,6 @@ end subroutine init_electronpositron
 
 subroutine destroy_electronpositron(electronpositron)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(electronpositron_type),pointer :: electronpositron
@@ -499,8 +496,6 @@ end subroutine destroy_electronpositron
 subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energies,fred,mcg,mcprj,&
 &                                    mpi_enreg,my_natom,nfft,ngfft,nhat,npwarr,occ,paw_an,pawrhoij,&
 &                                    rhog,rhor,stress,usecprj,vhartr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -764,8 +759,6 @@ end subroutine exchange_electronpositron
 
 integer function electronpositron_calctype(electronpositron)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(electronpositron_type),pointer :: electronpositron
@@ -831,8 +824,6 @@ end function electronpositron_calctype
 subroutine rhohxcpositron(electronpositron,gprimd,kxcapn,mpi_enreg,nfft,ngfft,nhat,nkxc,nspden,n3xccc,&
 &                         paral_kgb,rhor,strsxc,ucvol,usexcnhat,usepaw,vhartr,vxcapn,vxcavg,xccc3d,xc_denpos)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,nkxc,nspden,n3xccc,paral_kgb,usexcnhat,usepaw
@@ -888,7 +879,7 @@ subroutine rhohxcpositron(electronpositron,gprimd,kxcapn,mpi_enreg,nfft,ngfft,nh
 !Extra total electron/positron densities; compute gradients for GGA
  ABI_ALLOCATE(rhoe,(nfft,nspden_ep,ngrad**2))
  ABI_ALLOCATE(rhop,(nfft,nspden_ep))
- call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_ep,paral_kgb,qphon,rhotote,rhoe)
+ call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_ep,qphon,rhotote,rhoe)
  if (ngrad==2) grho2apn(:)=rhoe(:,1,2)**2+rhoe(:,1,3)**2+rhoe(:,1,4)**2
  rhop(:,1)=rhor(:,1);if (usepaw==1.and.usexcnhat==0) rhop(:,1)=rhop(:,1)-nhat(:,1)
  ABI_DEALLOCATE(rhotote)

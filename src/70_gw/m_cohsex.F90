@@ -27,13 +27,13 @@
 module m_cohsex
 
  use defs_basis
- use defs_datatypes
  use m_defs_ptgroups
- use m_gwdefs !,        only : czero_gw, cone_gw, j_gw, sigparams_t, sigma_type_from_key, sigma_is_herm
+ use m_gwdefs
  use m_xmpi
  use m_errors
  use m_abicore
 
+ use defs_datatypes,  only : pseudopotential_type, ebands_t
  use m_time,          only : timab
  use m_fstrings,      only : sjoin, itoa
  use m_hide_blas,     only : xdotc, xgemv
@@ -320,7 +320,6 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  ABI_FREE(irottb)
 
  ! The number of occupied states for each point in the IBZ and spin.
- ! nbv_ks(:,:) = COUNT(qp_occ>=tol_empty,DIM=1)  MG: g95 returns random numbers, likely a bug in the compiler
  do spin=1,nsppol
    do ik_ibz=1,Kmesh%nibz
      nbv_ks(ik_ibz,spin) = COUNT(qp_occ(:,ik_ibz,spin)>=tol_empty)
@@ -451,8 +450,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  call wrtout(std_out,msg,'COLL')
 
  ! TODO if single q (ex molecule) dont allocate epsm1q, avoid waste of memory
- ABI_STAT_MALLOC(epsm1_qbz, (npwc, npwc, 1), ierr)
- ABI_CHECK(ierr==0, "out-of-memory in epsm1_qbz")
+ ABI_MALLOC_OR_DIE(epsm1_qbz, (npwc, npwc, 1), ierr)
  ABI_MALLOC(igfftcg0,(Gsph_c%ng))
 
  ! Out-of-core solution for epsilon.

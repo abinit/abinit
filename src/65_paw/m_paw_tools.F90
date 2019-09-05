@@ -23,10 +23,10 @@
 MODULE m_paw_tools
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_dtset
 
  use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype,EP_POSITRON
@@ -84,8 +84,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -306,8 +304,6 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 &                 electronpositron,& ! optional argument
 &                 mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: my_natom
@@ -323,9 +319,9 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: natmax=2
- integer :: cplex_dij,group1,group2,iat,iatom,ierr,ii,im1,im2,ipositron,irhoij,ispden
- integer :: i_unitfi,itypat,jrhoij,ll,llp,me_atom,my_comm_atom,natprt,ndij,nspden,nsppol
- integer :: sz1,sz2,unitfi,unt
+ integer :: cplex_dij,group1,group2,iat,iatom,ierr,ii,im1,im2,ipositron,ispden
+ integer :: i_unitfi,itypat,ll,llp,me_atom,my_comm_atom,natprt,ndij,nspden,nsppol
+ integer :: unitfi,unt
  real(dp) :: mnorm,mx,my,mz,ntot,valmx,localm
  logical :: my_atmtab_allocated,paral_atom,useexexch,usepawu
  type(pawang_type):: pawang_dum
@@ -381,8 +377,8 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
  else
    MSG_BUG("invalid value of natprt!")
  end if
- usepawu=(count(pawtab(:)%usepawu>0)>0)
- useexexch=(count(pawtab(:)%useexexch>0)>0)
+ usepawu=(count(pawtab(:)%usepawu/=0)>0)
+ useexexch=(count(pawtab(:)%useexexch/=0)>0)
  ipositron=0
  if (present(electronpositron)) then
    if (associated(electronpositron)) ipositron=electronpositron%calctype
@@ -513,8 +509,8 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
      do iatom=1,dtset%natom
        itypat=pawrhoij_all(iatom)%itypat
        nspden=pawrhoij_all(iatom)%nspden
-       ll=-1;if (pawtab(itypat)%usepawu>0) ll=pawtab(itypat)%lpawu
-       llp=-1;if (pawtab(itypat)%useexexch>0) llp=pawtab(itypat)%lexexch
+       ll=-1;if (pawtab(itypat)%usepawu/=0) ll=pawtab(itypat)%lpawu
+       llp=-1;if (pawtab(itypat)%useexexch/=0) llp=pawtab(itypat)%lexexch
        if (ll/=llp.and.ll/=-1.and.llp/=-1) then
          MSG_BUG("lpawu/=lexexch forbidden!")
        end if
@@ -544,7 +540,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
        itypat=dtset%typat(iatom);ll=pawtab(itypat)%lpawu
        nspden=paw_ij_all(iatom)%nspden;ndij=paw_ij_all(iatom)%ndij
        cplex_dij=paw_ij_all(iatom)%cplex_dij
-       if ((ll>=0).and.(pawtab(itypat)%usepawu>0)) then
+       if ((ll>=0).and.(pawtab(itypat)%usepawu/=0)) then
          write(msg,fmt='(a,i5,a,i4,a)') " ====== For Atom ", iatom,&
 &         ", occupations for correlated orbitals. lpawu =",ll,ch10
          call wrtout(unitfi,msg,'COLL')
@@ -649,7 +645,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
            ABI_DEALLOCATE(noccmmp_ylm)
            ABI_DEALLOCATE(noccmmp_slm)
          end if ! ndij==4
-       end if ! ((ll>=0).and.(pawtab(itypat)%usepawu>0))
+       end if ! ((ll>=0).and.(pawtab(itypat)%usepawu/=0))
      end do
    end do
  end if
@@ -661,7 +657,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
    do iatom=1,dtset%natom
      itypat=dtset%typat(iatom);ll=pawtab(itypat)%lexexch
      cplex_dij=paw_ij_all(iatom)%cplex_dij
-     if (ll>=0.and.pawtab(itypat)%useexexch>0) then
+     if (ll>=0.and.pawtab(itypat)%useexexch/=0) then
        ABI_ALLOCATE(paw_ij_all(iatom)%noccmmp,(cplex_dij,2*ll+1,2*ll+1,ndij))
        ABI_ALLOCATE(paw_ij_all(iatom)%nocctot,(nspden))
      end if
@@ -676,7 +672,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
      do iatom=1,dtset%natom
        itypat=dtset%typat(iatom);ll=pawtab(itypat)%lexexch
        cplex_dij=paw_ij_all(iatom)%cplex_dij
-       if ((ll>=0).and.(pawtab(itypat)%useexexch>0)) then
+       if ((ll>=0).and.(pawtab(itypat)%useexexch/=0)) then
          write(msg,fmt='(a,i5,a,i4,a)') " ====== For Atom",iatom,&
 &         ", occupations for correlated orbitals. l =",ll,ch10
          call wrtout(unitfi,msg,'COLL')

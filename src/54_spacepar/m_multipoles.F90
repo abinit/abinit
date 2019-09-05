@@ -27,13 +27,13 @@
 module m_multipoles
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_distribfft
  use m_xmpi
  use m_atomdata
 
+ use defs_abitypes,    only : mpi_type
  use m_io_tools, only : open_file
  use m_geometry, only : xred2xcart
  use m_mpinfo,   only : ptabs_fourdp
@@ -81,9 +81,7 @@ contains
 !! SOURCE
 
 subroutine multipoles_fftr(arraysp,dipole,nfft,ngfft,nspden,rprimd,origin,&
-&                          distribfft,mpi_comm_grid)
-
- implicit none
+                           distribfft,mpi_comm_grid)
 
 !Arguments ------------------------------------
 !scalars
@@ -235,9 +233,7 @@ end subroutine multipoles_fftr
 !! SOURCE
 
 subroutine multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,nspden,&
-&                         ntypat,rprimd,typat,ucvol,unit_out,xred,ziontypat)
-
- implicit none
+                          ntypat,rprimd,typat,ucvol,unit_out,xred,ziontypat)
 
 !Arguments ------------------------------------
 !scalars
@@ -364,9 +360,7 @@ end subroutine multipoles_out
 !! SOURCE
 
 subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
-&  rhor,rprimd,typat,ucvol,vtrial,xred,znucl)
-
- implicit none
+                  rhor,rprimd,typat,ucvol,vtrial,xred,znucl)
 
 !Arguments ------------------------------------
 !scalars

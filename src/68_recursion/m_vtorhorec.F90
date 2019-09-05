@@ -26,15 +26,17 @@
 module m_vtorhorec
 
  use defs_basis
- use defs_abitypes
- use defs_datatypes
  use defs_rectypes
+ use m_distribfft
  use m_xmpi
  use m_pretty_rec
  use m_errors
  use m_abicore
  use m_per_cond
+ use m_dtset
 
+ use defs_datatypes,     only : pseudopotential_type
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timein, timab
  use m_rec,              only : Calcnrec, init_nlpsprec, cpu_distribution
  use m_rec_tools,        only : reshape_pot, trottersum, get_pt0_pt1
@@ -43,7 +45,7 @@ module m_vtorhorec
  use m_fft,              only : fourdp
 
 #ifdef HAVE_GPU_CUDA
- use m_initcuda,       only : cudap
+ use m_gpu_toolbox
  use m_hidecudarec
  use m_xredistribute
 #endif
@@ -121,8 +123,6 @@ subroutine vtorhorec(dtset,&
 &  ek,enlx,entropy,e_eigenvalues,fermie,&
 &  grnl,initialized,irrzon,nfftf,phnons,&
 &  rhog, rhor, vtrial,rset,deltastep,rprimd,gprimd)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -925,8 +925,7 @@ subroutine vtorhorec(dtset,&
 
  call symrhg(1,gprimd,irrzon,rset%mpi,nfftf,&
 & dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3),dtset%ngfft,dtset%nspden,&
-& dtset%nsppol,dtset%nsym,dtset%paral_kgb,&
-& phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
+& dtset%nsppol,dtset%nsym,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
 
 end subroutine vtorhorec
 !!***
@@ -968,8 +967,6 @@ end subroutine vtorhorec
 subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 &                     n_pt_integ,xmax,&
 &                     ent_out1,ent_out2,ent_out3,ent_out4)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1236,8 +1233,6 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 
    function func1_rec(z)
 
-   implicit none
-
    complex(dpc) :: func1_rec
    complex(dpc),intent(in) :: z
 
@@ -1294,8 +1289,6 @@ subroutine fermisolverec(fermie,rho,a,b2,debug_rec,nb_rec, &
   &                      acc, max_it, &
   &                      long_tranche,mpi_enreg,&
   &                      inf_ucvol,gputopo)
-
- implicit none
 
 !Arguments -------------------------------
  !scalars
@@ -1584,8 +1577,6 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 &                     fermie,tsmear,rtrotter, &
 &                     dim_trott,tol,inf_ucvol)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: nrec
@@ -1705,8 +1696,6 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 subroutine gran_potrec(an,bn2,nrec,trotter,ene_out, mult, &
 &                     debug_rec,n_pt_integ,xmax,&
 &                     ene_out1,ene_out2,ene_out3,ene_out4)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1947,8 +1936,6 @@ subroutine gran_potrec(an,bn2,nrec,trotter,ene_out, mult, &
 
    function func_rec(z,x)
 
-   implicit none
-
    complex(dpc) :: func_rec
    complex(dpc),intent(in) :: z
    real(dp),intent(in) :: x
@@ -1995,8 +1982,6 @@ end subroutine gran_potrec
 !! SOURCE
 
 subroutine nlenergyrec(rset,enlx,exppot,ngfft,natom,typat,tsmear,trotter,tol)
-
- implicit none
 
 !Arguments ------------------------------------
 !Scalar
@@ -2208,8 +2193,6 @@ end subroutine nlenergyrec
 !! SOURCE
 
 subroutine first_rec(dtset,psps,rset)
-
- implicit none
 
 !Arguments ------------------------------------
 ! scalars
@@ -2445,8 +2428,6 @@ end subroutine first_rec
 
 subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: nfft
@@ -2616,7 +2597,6 @@ subroutine recursion(exppot,coordx,coordy,coordz,an,bn2,rho_out, &
 
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2839,7 +2819,6 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
 
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3040,7 +3019,6 @@ subroutine vn_nl_rec(vn,natom,typat,ngfftrec,inf_ucvol,nlrec,projec)
 
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments -------------------------------
 !scalars

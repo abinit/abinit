@@ -24,13 +24,12 @@
 MODULE m_paw_dfpt
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
  use m_time, only : timab
 
+ use defs_datatypes, only : pseudopotential_type
  use m_pawang,       only : pawang_type
  use m_pawrad,       only : pawrad_type
  use m_pawtab,       only : pawtab_type
@@ -44,11 +43,9 @@ MODULE m_paw_dfpt
  use m_pawxc,        only : pawxc_dfpt, pawxcm_dfpt
  use m_paw_denpot,   only : pawdensities,pawaccenergy,pawaccenergy_nospin
  use m_paral_atom,   only : get_my_atmtab,free_my_atmtab
-
  use m_atm2fft,      only : dfpt_atm2fft
  use m_distribfft,   only : distribfft_type,init_distribfft_seq,destroy_distribfft
  use m_geometry,     only : metric, stresssym
-
  use m_efield,       only : efield_type
 
  implicit none
@@ -70,10 +67,10 @@ CONTAINS  !=====================================================================
 !! pawdfptenergy
 !!
 !! FUNCTION
-!! This routine compute the Hartree+XC PAW on-site contributions to a 1st-order or 2nd-order energy.
+!! This routine compute the Hartree+XC+U PAW on-site contributions to a 1st-order or 2nd-order energy.
 !!  These contributions are equal to:
 !!    E_onsite=
-!!       Int{ VHxc[n1_a^(1);nc^(1)].n1_b }
+!!       Int{ VHxc[n1_a^(j1);nc^(j1)].n1_b^(j2) }
 !!      -Int{ VHxc[tild_n1_a^(j1)+hat_n1_a^(j1);tild_n_c^(j1)].(tild_n1_b+n1_b)^(j2) }
 !! Some typical uses:
 !!  A-Contribution to non-stationary expression of the 2nd-order total energy:
@@ -135,6 +132,8 @@ CONTAINS  !=====================================================================
 !!      paw_an1(natom)%vxct1(cplex_a*mesh_size,:,nspden)=PS 1st-order XC potential tVxc^(j1)
 !!    ==== if paw_ij1(:)%has_dijhartree<2, compute 1st-order Dij_hartree
 !!      paw_ij1(natom)%dijhartree(cplex_a*lmn2_size)=Hartree contribution to Dij^(j1)
+!!    ==== if paw_ij1(:)%has_dijU<2, compute 1st-order Dij_U
+!!      paw_ij1(natom)%diju(cplex_a*lmn2_size)=DFT+U contribution to Dij^(j1)
 !!
 !! PARENTS
 !!      dfpt_nstpaw,newfermie1
@@ -149,8 +148,6 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 &                        paw_an0,paw_an1,paw_ij1,pawang,pawprtvol,pawrad,pawrhoij_a,pawrhoij_b,&
 &                        pawtab,pawxcdev,xclevel, &
 &                        mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -170,10 +167,11 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 
 !Local variables ---------------------------------------
 !scalars
+ integer, parameter :: PAWU_ALGO_1=1,PAWU_ALGO_2=2
  integer :: cplex_a,cplex_b,cplex_vxc1,iatom,iatom_tot,ierr,itypat,lm_size_a,lm_size_b,mesh_size
- integer :: my_comm_atom,nspden,opt_compch,optexc,optvxc,qphase_dijh1,qphase_diju1
+ integer :: my_comm_atom,nspden,opt_compch,optexc,optvxc,pawu_algo,qphase_dijh1,qphase_diju1
  integer :: usecore,usepawu,usetcore,usexcnhat
- logical :: my_atmtab_allocated,paral_atom
+ logical :: my_atmtab_allocated,non_magnetic_xc,paral_atom
  real(dp) :: compch,eexc,eexc_im
  character(len=500) :: msg
 !arrays
@@ -188,7 +186,6 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 
  call timab(567,1,tsec)
 
- usepawu=maxval(pawtab(1:ntypat)%usepawu)
  if (.not.(ipert1==natom+1.or.ipert1==natom+10.or.ipert1==natom+11 &
 & .or.ipert2==natom+1.or.ipert2==natom+10.or.ipert2==natom+11)) then
    if((abs(nzlmopt_a)/=1.and.nzlmopt_a/=0).or.(abs(nzlmopt_b)/=1.and.nzlmopt_b/=0)) then
@@ -200,13 +197,9 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
        msg='dijhartree must be allocated!'
        MSG_BUG(msg)
      end if
-     if (usepawu==1.or.usepawu==2.or.usepawu==5.or.usepawu==6) then
+     if (any(pawtab(1:ntypat)%usepawu/=0)) then
        if(paw_ij1(1)%has_dijU==0) then
          msg='dijU must be allocated!'
-         MSG_BUG(msg)
-       end if
-       if ((usepawu==1.or.usepawu==5).and.(ipert1==0.or.ipert2==0)) then
-         msg='If usepawu=1 or 5, pawdfptenergy is not implemented when ipert1=0 or ipert2=0!'
          MSG_BUG(msg)
        end if
      end if
@@ -262,7 +255,6 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
  delta_energy_h(1:2)=zero
  delta_energy_u(1:2)=zero
 
-
 !================ Loop on atomic sites =======================
  do iatom=1,my_natom
    iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
@@ -278,6 +270,9 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
    lm_size_a=paw_an1(iatom)%lm_size
    if (ipert2<=0) lm_size_b=paw_an0(iatom)%lm_size
    if (ipert2> 0) lm_size_b=paw_an1(iatom)%lm_size
+   usepawu=pawtab(itypat)%usepawu
+   pawu_algo=merge(PAWU_ALGO_1,PAWU_ALGO_2,ipert1<=0.and.ipert2<=0.and.usepawu>=0)
+   non_magnetic_xc=(mod(abs(usepawu),10)==4)
 
 !  If Vxc potentials are not in memory, compute them
    if (paw_an1(iatom)%has_vxc/=2) then
@@ -297,22 +292,22 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 !    Compute on-site 1st-order xc potentials
      if (pawxcdev/=0) then
        call pawxcm_dfpt(pawtab(itypat)%coredens,cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxc1,&
-&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,optvxc,&
+&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,optvxc,&
 &       pawang,pawrad(itypat),rho1,usecore,0,&
 &       paw_an1(iatom)%vxc1,xclevel)
        call pawxcm_dfpt(pawtab(itypat)%tcoredens(:,1),&
 &       cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxct1,&
-&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,optvxc,&
+&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,optvxc,&
 &       pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,&
 &       paw_an1(iatom)%vxct1,xclevel)
      else
        call pawxc_dfpt(pawtab(itypat)%coredens,cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxc1,&
-&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,optvxc,&
+&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,optvxc,&
 &       pawang,pawrad(itypat),rho1,usecore,0,&
 &       paw_an0(iatom)%vxc1,paw_an1(iatom)%vxc1,xclevel)
        call pawxc_dfpt(pawtab(itypat)%tcoredens(:,1),&
 &       cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxct1,&
-&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,optvxc,&
+&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,optvxc,&
 &       pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,&
 &       paw_an0(iatom)%vxct1,paw_an1(iatom)%vxct1,xclevel)
      end if
@@ -343,14 +338,14 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
    if (pawxcdev/=0) then
      ABI_ALLOCATE(kxc_dum,(mesh_size,pawang%angl_size,0))
      call pawxcm_dfpt(pawtab(itypat)%coredens,cplex_b,cplex_vxc1,eexc,ixc,kxc_dum,&
-&     lm_size_b,lmselect_b,nhat1,0,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
+&     lm_size_b,lmselect_b,nhat1,0,non_magnetic_xc,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
 &     rho1,usecore,0,paw_an1(iatom)%vxc1,xclevel,d2enxc_im=eexc_im)
 
      delta_energy_xc(1)=delta_energy_xc(1)+eexc
      delta_energy_xc(2)=delta_energy_xc(2)+eexc_im
      call pawxcm_dfpt(pawtab(itypat)%tcoredens(:,1),&
 &     cplex_b,cplex_vxc1,eexc,ixc,kxc_dum,&
-&     lm_size_b,lmselect_b,nhat1,0,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
+&     lm_size_b,lmselect_b,nhat1,0,non_magnetic_xc,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
 &     trho1,usetcore,2*usexcnhat,paw_an1(iatom)%vxct1,xclevel,&
 &     d2enxc_im=eexc_im)
      ABI_DEALLOCATE(kxc_dum)
@@ -359,13 +354,13 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
    else
      ABI_ALLOCATE(kxc_dum,(mesh_size,lm_size_b,0))
      call pawxc_dfpt(pawtab(itypat)%coredens,cplex_b,cplex_vxc1,eexc,ixc,kxc_dum,&
-&     lm_size_b,lmselect_b,nhat1,0,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
+&     lm_size_b,lmselect_b,nhat1,0,non_magnetic_xc,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
 &     rho1,usecore,0,paw_an0(iatom)%vxc1,paw_an1(iatom)%vxc1,xclevel,d2enxc_im=eexc_im)
      delta_energy_xc(1)=delta_energy_xc(1)+eexc
      delta_energy_xc(2)=delta_energy_xc(2)+eexc_im
      call pawxc_dfpt(pawtab(itypat)%tcoredens(:,1),&
 &     cplex_b,cplex_vxc1,eexc,ixc,kxc_dum,&
-&     lm_size_b,lmselect_b,nhat1,0,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
+&     lm_size_b,lmselect_b,nhat1,0,non_magnetic_xc,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
 &     trho1,usetcore,2*usexcnhat,paw_an0(iatom)%vxct1,paw_an1(iatom)%vxct1,xclevel,&
 &     d2enxc_im=eexc_im)
      ABI_DEALLOCATE(kxc_dum)
@@ -389,7 +384,7 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 &                           1,qphase_dijh1,pawtab(itypat),epaw_im=delta_energy_h(2))
 
 !  Compute contribution to 1st-order(or 2nd-order) energy from 1st-order PAW+U potential
-   if (usepawu==5.or.usepawu==6) then
+   if (usepawu/=0.and.pawu_algo==PAWU_ALGO_2) then
 !    If DijU are not in memory, compute them
      if (paw_ij1(iatom)%has_dijU/=2) then ! We force the recomputation of dijU in when cplex=2 to get diju_im
        call pawdiju_euijkl(paw_ij1(iatom)%dijU,paw_ij1(iatom)%cplex_dij,qphase_diju1,&
@@ -399,6 +394,11 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 !    Compute contribution to 1st-order(or 2nd-order) energy
      call pawaccenergy(delta_energy_u(1),pawrhoij_b(iatom),paw_ij1(iatom)%dijU,paw_ij1(iatom)%cplex_dij, &
 &                      qphase_diju1,paw_ij1(iatom)%ndij,pawtab(itypat),epaw_im=delta_energy_u(2))
+!    Add FLL double-counting contribution
+     if (ipert1==0) then ! If j1/=0, Dij^FLL^(j1)=0 because it is constant
+       call pawaccenergy_nospin(delta_energy_u(1),pawrhoij_b(iatom),pawtab(itypat)%euij_fll,1,1,&
+&                               pawtab(itypat),epaw_im=delta_energy_u(2))
+     end if
    end if
 
 !  ================ End loop on atomic sites =======================
@@ -507,8 +507,6 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 &          nattyp,nfft,ngfft,nhat,nlstr,nspden,nsym,ntypat,optgr,optgr2,optstr,optstr2,&
 &          pawang,pawfgrtab,pawrhoij,pawtab,ph1d,psps,qphon,rprimd,symrec,typat,ucvol,vtrial,vxc,xred,&
 &          mpi_atmtab,comm_atom,comm_fft,mpi_comm_grid,me_g0,paral_kgb,distribfft) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1960,8 +1958,6 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 
 subroutine pawgrnl_convert(mu4,eps_alpha,eps_beta,eps_gamma,eps_delta)
 
- implicit none
-
 !Arguments ------------------------------------
  !scalar
  integer,intent(in)  :: eps_alpha,eps_beta
@@ -2050,8 +2046,6 @@ end subroutine pawgrnl
 !! SOURCE
 
  subroutine dsdr_k_paw(cprj_k,cprj_kb,dsdr,dtefield,kdir,kfor,mband,natom,ncpgr,typat)
-
- implicit none
 
 !Arguments---------------------------
 !scalars

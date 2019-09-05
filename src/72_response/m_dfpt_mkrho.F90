@@ -27,12 +27,13 @@
 module m_dfpt_mkrho
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_cgtools
  use m_xmpi
 
+
+ use defs_abitypes, only : MPI_type
  use m_time,            only : timab
  use m_io_tools,        only : get_unit, iomode_from_fname
  use m_fftcore,         only : sphereboundary
@@ -120,14 +121,12 @@ contains
 subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 & kg,kg1,mband,mgfft,mkmem,mk1mem,mpi_enreg,mpw,mpw1,nband_rbz,&
 & nfft,ngfft,nkpt_rbz,npwarr,npwar1,nspden,nspinor,nsppol,nsym,&
-& occ_rbz,paral_kgb,phnons,rhog1,rhor1,rprimd,symafm,symrel,ucvol,wtk_rbz)
-
- implicit none
+& occ_rbz,phnons,rhog1,rhor1,rprimd,symafm,symrel,ucvol,wtk_rbz)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,mband,mgfft,mk1mem,mkmem,mpw,mpw1,nfft,nkpt_rbz
- integer,intent(in) :: nspden,nspinor,nsppol,nsym,paral_kgb
+ integer,intent(in) :: nspden,nspinor,nsppol,nsym
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -169,13 +168,11 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 !DBG_ENTER("COLL")
 
  if(nspden==4)then
-!  NOTE : see mkrho for the modifications needed for non-collinear treatment
-   write(message, '(a,a,a,a,a,a,a,a)' ) ch10,&
-&   ' dfpt_mkrho : WARNING -',ch10,&
-&   '  Linear-response calculations are under construction with nspden=4',ch10,&
-&   ' Action : modify value of nspden in input file unless you know what you are doing.'
-!   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+!  NOTE: see mkrho for the modifications needed for non-collinear treatment
+   write(message, '(3a)' )&
+    ' Linear-response calculations are under construction with nspden=4',ch10,&
+    ' Action: modify value of nspden in input file unless you know what you are doing.'
+   MSG_WARNING(message)
  end if
 
 !Init spaceworld
@@ -525,8 +522,8 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  call timab(71,2,tsec)
  call timab(48,2,tsec)
 
- call symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfft,ngfft,nspden,nsppol,nsym,paral_kgb,phnons,&
-& rhog1,rhor1,rprimd,symafm,symrel)
+ call symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfft,ngfft,nspden,nsppol,nsym,phnons,&
+             rhog1,rhor1,rprimd,symafm,symrel)
 
 !We now have both rho(r) and rho(G), symmetrized, and if nsppol=2
 !we also have the spin-up density, symmetrized, in rhor1(:,2).
@@ -546,14 +543,12 @@ end subroutine dfpt_mkrho
 !!  Also accumulate zero-order potential part of the 2nd-order total energy (if needed)
 !!
 !! INPUTS
-!!  counter=counter for status file
 !!  cplex=1 if 1st-order density is real, 2 if 1st-order density is complex
 !!  cwave0(2,npw*nspinor)=GS wavefunction at k, in reciprocal space
 !!  cwave1(2,npw1*nspinor)=1st-order wavefunction at k,q, in reciprocal space
 !!  cwavef(2,npw1*nspinor)=1st-order wavefunction at k,q, in reciprocal space, without correction due to occupation change
 !!  cwaveprj0(natom,nspinor*usecprj)= GS wave function at k projected with nl projectors
 !!  cwaveprj1(natom,nspinor*usecprj)= 1st-order wave function at k,q projected with nl projectors
-!!  filstat=name of the status file
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
 !!  iband=index of current band
 !!  idir=direction of the current perturbation
@@ -573,7 +568,6 @@ end subroutine dfpt_mkrho
 !!  option= 1: accumulate 1st-order density,
 !!          2: accumulate 0-order potential part of the 2nd-order total energy
 !!          3: accumulate both
-!!  prtvol=control print volume and debugging output
 !!  tim_fourwf= timing code for fourwf (5 from dfpt_vtowfk, 18 from dfpt_nstwf)
 !!  wf_corrected=flag put to 1 if cwave1 is different from cwavef (if there is a contribution from occ. change)
 !!  wtk_k=weight assigned to the k point.
@@ -603,23 +597,20 @@ end subroutine dfpt_mkrho
 !!
 !! SOURCE
 
-subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
-&                  eloc0_k,filstat,gs_hamkq,iband,idir,ipert,isppol,kptopt,&
+subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
+&                  eloc0_k,gs_hamkq,iband,idir,ipert,isppol,kptopt,&
 &                  mpi_enreg,natom,nband_k,ncpgr,npw_k,npw1_k,nspinor,occ_k,&
-&                  option,pawrhoij1,prtvol,rhoaug1,tim_fourwf,wf_corrected,&
+&                  option,pawrhoij1,rhoaug1,tim_fourwf,wf_corrected,&
 &                  wtk_k,comm_atom,mpi_atmtab)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: counter,cplex,iband,idir,ipert,isppol,kptopt,natom,nband_k
- integer,intent(in) :: ncpgr,npw_k,npw1_k,nspinor,option,prtvol,tim_fourwf,wf_corrected
+ integer,intent(in) :: cplex,iband,idir,ipert,isppol,kptopt,natom,nband_k
+ integer,intent(in) :: ncpgr,npw_k,npw1_k,nspinor,option,tim_fourwf,wf_corrected
  integer,optional,intent(in) :: comm_atom
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),intent(in) :: wtk_k
  real(dp),intent(out) :: eloc0_k
- character(len=fnlen),intent(in) :: filstat
  type(gs_hamiltonian_type),intent(inout),target :: gs_hamkq
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -633,7 +624,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=14
- integer :: choice,cplex_cprj,i1,i2,i3,iexit,ispinor,my_comm_atom,my_natom,n1,n2,n3,option_rhoij
+ integer :: choice,cplex_cprj,i1,i2,i3,ispinor,my_comm_atom,my_natom,n1,n2,n3,option_rhoij
  logical :: my_atmtab_allocated,paral_atom
  logical :: usetimerev
  real(dp) :: im0,im1,re0,re1,valuer,diag,offdiag,weight

@@ -19,7 +19,7 @@
 !! CHILDREN
 !!
 !! NOTES
-!! wffile_type : a handler for dealing with the IO of a wavefunction file
+!! wffile_type: a handler for dealing with the IO of a wavefunction file
 !!
 !! SOURCE
 
@@ -32,7 +32,6 @@
 MODULE m_wffile
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
@@ -44,6 +43,7 @@ MODULE m_wffile
  use netcdf
 #endif
 
+ use defs_abitypes, only : MPI_Type
  use m_io_tools,   only : mvrecord, open_file
  use m_fstrings,   only : toupper, endswith, sjoin
 
@@ -250,8 +250,6 @@ CONTAINS
 
 subroutine getRecordMarkerLength_wffile(wff)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(wffile_type),intent(inout) :: wff
@@ -404,8 +402,6 @@ end subroutine getRecordMarkerLength_wffile
 
 subroutine rwRecordMarker(option,posit,recordmarker,wff,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: option
@@ -540,8 +536,6 @@ end subroutine rwRecordMarker
 
 subroutine xnullifyOff(wff)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
 
@@ -587,8 +581,6 @@ end subroutine xnullifyOff
 !! SOURCE
 
 subroutine xmoveOff(wff,n_int,n_dp,n_ch,n_mark)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in),optional :: n_int,n_dp,n_ch,n_mark
@@ -643,8 +635,6 @@ end subroutine xmoveOff
 !! SOURCE
 
 subroutine xderiveWRecEnd(wff,ierr,me_proc)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -718,8 +708,6 @@ end subroutine xderiveWRecEnd
 !! SOURCE
 
 subroutine xderiveWRecInit(wff,ierr,me_proc)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -838,8 +826,6 @@ end subroutine xderiveRRecEnd
 
 subroutine xderiveRRecInit(wff,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(out) :: ierr
@@ -893,8 +879,6 @@ end subroutine xderiveRRecInit
 
 subroutine clsopn(wff)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(wffile_type),intent(inout) :: wff
@@ -928,7 +912,6 @@ subroutine clsopn(wff)
 
 !    od is a logical variable which is set to true if the specified
 !    unit is connected to a file; otherwise it is set to false.
-#if !defined FC_HITACHI
    else if (.not.od) then
      write(message, '(/,a,/,a,i8,/,a,/,a,/,a,/,a)' ) &
 &     ' clsopn : ERROR -',&
@@ -938,7 +921,6 @@ subroutine clsopn(wff)
 &     '  Action: check whether there might be some external problem,',&
 &     '  then resubmit.'
      MSG_ERROR(message)
-#endif
 
 !    nmd is a logical variable assigned the value true if the file
 !    has a name; otherwise false.  A scratch file is not named.
@@ -950,17 +932,6 @@ subroutine clsopn(wff)
 
 !    May now close the file and then reopen it
 !    (file is already opened according to above checks)
-
-#if defined FC_HITACHI
-     if (.not.od) then
-       write(message, '(a,i0,/,a,/,a,/,a)' ) &
-&       '  Tried to inquire about unit',unit,&
-&       '  and found it not connected to a file.',&
-&       '  May be due to temporary problem with file, disks or network.',&
-&       '  Action: disregard this error and continue the process anyway.'
-       MSG_WARNING(message)
-     end if
-#endif
      close (unit=unit)
      open (unit=unit,file=filnam,form=fm,status='old') !VALGRIND complains filnam is just a few thousand bytes inside a block of 8300
 
@@ -994,8 +965,6 @@ end subroutine clsopn
 
 function wff_usef90(wff)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer :: wff_usef90
@@ -1027,8 +996,6 @@ end function wff_usef90
 !! SOURCE
 
 function wff_ireadf90(wff)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1082,8 +1049,6 @@ end function wff_ireadf90
 
 subroutine WffOpen(iomode,spaceComm,filename,ier,wff,master,me,unwff,&
 &                  spaceComm_mpiio) ! optional argument
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in)  :: iomode,spaceComm,master,me,unwff
@@ -1237,13 +1202,9 @@ end subroutine WffOpen
 
 subroutine WffClose(wff,ier)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type), intent(inout) :: wff
  integer, intent(out) :: ier
-
-!Local ------------------------------------
 
 ! *************************************************************************
 
@@ -1296,13 +1257,9 @@ end subroutine WffClose
 
 subroutine WffDelete(wff,ier)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer, intent(out) :: ier
-
-!Local variables-------------------------------
 
 ! *************************************************************************
 
@@ -1356,8 +1313,6 @@ end subroutine WffDelete
 
 subroutine WffKg(wff,optkg)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(in) :: optkg
@@ -1399,8 +1354,6 @@ end subroutine WffKg
 !! SOURCE
 
 subroutine WffOffset(wff,sender,spaceComm,ier)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -1461,8 +1414,6 @@ end subroutine WffOffset
 
 subroutine WffReadDataRec_dp1d(dparray,ierr,ndp,wff)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(in) ::  ndp
@@ -1520,8 +1471,6 @@ end subroutine WffReadDataRec_dp1d
 !! SOURCE
 
 subroutine WffReadDataRec_dp2d(dparray,ierr,n1,n2,wff)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -1590,8 +1539,6 @@ end subroutine WffReadDataRec_dp2d
 !! SOURCE
 
 subroutine WffReadNpwRec(ierr,ikpt,isppol,nband_disk,npw,nspinor,wff)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -1678,8 +1625,6 @@ end subroutine WffReadNpwRec
 
 
 subroutine WffReadSkipRec(ierr,nrec,wff)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in)  :: nrec
@@ -1771,8 +1716,6 @@ end subroutine WffReadSkipRec
 
 subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_mpi_to_seq,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: icg,mcg,nband_disk,npwso,npwsotot,rdwr
@@ -1845,12 +1788,10 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
 !  ----------------------------------------------
 
 !  Build map; for better performance, map must be in increasing order
-   ABI_STAT_ALLOCATE(map,(2*npwso*nband_block), ierr)
-   ABI_CHECK(ierr==0, "out of memory in map")
+   ABI_MALLOC_OR_DIE(map,(2*npwso*nband_block), ierr)
 
    ABI_STAT_ALLOCATE(buf,(2*npwso*nband_block), ierr)
-   msg = "out of memory in wavefunction buffer. Try to decrease MAXBAND in WffReadWrite_mpio"
-   ABI_CHECK(ierr==0, msg)
+   ABI_CHECK(ierr==0, "out of memory in wavefunction buffer. Try to decrease MAXBAND in WffReadWrite_mpio")
 
    if (rdwr==1) then
 !    If reading, only build map
@@ -2090,8 +2031,6 @@ end subroutine WffReadWrite_mpio
 
 subroutine WffWriteDataRec_int2d(intarray,ierr,n1,n2,wff)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(in) ::  n1,n2
@@ -2149,8 +2088,6 @@ end subroutine WffWriteDataRec_int2d
 !! SOURCE
 
 subroutine WffWriteDataRec_dp1d(dparray,ierr,ndp,wff)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2210,8 +2147,6 @@ end subroutine WffWriteDataRec_dp1d
 
 
 subroutine WffWriteDataRec_dp2d(dparray,ierr,n1,n2,wff)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2276,8 +2211,6 @@ end subroutine WffWriteDataRec_dp2d
 
 subroutine WffWriteNpwRec(ierr,nband_disk,npw,nspinor,wff,&
 &                         opt_paral) ! optional argument
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2349,8 +2282,6 @@ end subroutine WffWriteNpwRec
 
 subroutine xderiveRead_int(wff,xval,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(out) :: xval
@@ -2411,8 +2342,6 @@ end subroutine xderiveRead_int
 !! SOURCE
 
 subroutine xderiveRead_int1d(wff,xval,n1,spaceComm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2501,8 +2430,6 @@ end subroutine xderiveRead_int1d
 
 subroutine xderiveRead_int2d(wff,xval,n1,n2,spaceComm,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(out) :: xval(:,:)
@@ -2588,8 +2515,6 @@ end subroutine xderiveRead_int2d
 
 subroutine xderiveRead_dp(wff,xval,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(out) :: ierr
@@ -2648,8 +2573,6 @@ end subroutine xderiveRead_dp
 !! SOURCE
 
  subroutine xderiveRead_dp1d(wff,xval,n1,spaceComm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2738,8 +2661,6 @@ end subroutine xderiveRead_dp1d
 
 subroutine xderiveRead_dp2d(wff,xval,n1,n2,spaceComm,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(in) :: n1,n2,spaceComm
@@ -2827,8 +2748,6 @@ end subroutine xderiveRead_dp2d
 !! SOURCE
 
 subroutine xderiveRead_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
-
-  implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2967,8 +2886,6 @@ end subroutine xderiveRead_int2d_displ
 
 subroutine xderiveRead_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 
-  implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(in) :: n1,n2,spaceComm
@@ -3098,8 +3015,6 @@ end subroutine xderiveRead_dp2d_displ
 
 subroutine xderiveReadVal_char(wff,xval,n,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(in) :: n
@@ -3157,8 +3072,6 @@ end subroutine xderiveReadVal_char
 !! SOURCE
 
 subroutine xmpi_read_int2d(wff,xval,spaceComm,sc_mode,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3248,8 +3161,6 @@ end subroutine xmpi_read_int2d
 
 subroutine xderiveWrite_int(wff,xval,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(out) :: ierr
  integer,intent(in):: xval
@@ -3302,8 +3213,6 @@ end subroutine xderiveWrite_int
 !! SOURCE
 
 subroutine xderiveWrite_int1d(wff,xval,n1,spaceComm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1,spaceComm
@@ -3376,8 +3285,6 @@ end subroutine xderiveWrite_int1d
 
 subroutine xderiveWrite_int2d(wff,xval,n1,n2,spaceComm,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: n1,n2,spaceComm
  integer,intent(out) :: ierr
@@ -3445,8 +3352,6 @@ end subroutine xderiveWrite_int2d
 
 subroutine xderiveWrite_dp(wff,xval,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(out) :: ierr
  real(dp),intent(in):: xval
@@ -3499,8 +3404,6 @@ end subroutine xderiveWrite_dp
 !! SOURCE
 
 subroutine xderiveWrite_dp1d(wff,xval,n1,spaceComm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1,spaceComm
@@ -3570,8 +3473,6 @@ end subroutine xderiveWrite_dp1d
 
 subroutine xderiveWrite_dp2d(wff,xval,n1,n2,spaceComm,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: n1,n2,spaceComm
  integer,intent(out) :: ierr
@@ -3639,8 +3540,6 @@ end subroutine xderiveWrite_dp2d
 
 subroutine xderiveWrite_dp2d_seq(wff,xval,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(out) :: ierr
  real(dp),intent(in):: xval(:,:)
@@ -3695,8 +3594,6 @@ end subroutine xderiveWrite_dp2d_seq
 !! SOURCE
 
 subroutine xderiveWrite_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1,n2,spaceComm
@@ -3817,8 +3714,6 @@ end subroutine xderiveWrite_int2d_displ
 
 subroutine xderiveWrite_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: n1,n2,spaceComm
  integer,intent(out) :: ierr
@@ -3937,8 +3832,6 @@ end subroutine xderiveWrite_dp2d_displ
 
 subroutine xderiveWrite_char(wff,xval,n,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(in) :: n
@@ -3996,8 +3889,6 @@ end subroutine xderiveWrite_char
 !! SOURCE
 
 subroutine xdefineOff(formeig,wff,mpi_enreg,nband,npwarr,nspinor,nsppol,nkpt)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) ::  nsppol,nkpt,nspinor,formeig

@@ -26,14 +26,15 @@
 module m_extraprho
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
+ use m_abicore
  use m_scf_history
  use m_errors
  use m_xmpi
  use m_cgtools
+ use m_dtset
 
  use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_atomdata, only : atom_length
  use m_numeric_tools,   only : hermit
  use m_geometry, only : metric
@@ -127,8 +128,6 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
 & kg,mcg,mcprj,mgfft,mpi_enreg,mqgrid,my_natom,nattyp,nfft,ngfft,npwarr,ntypat,pawrhoij,&
 & pawtab,ph1d,psps,qgrid,rhor,rprimd,scf_history,ucvol,usepaw,&
 & xred_new,xred_old,ylm,zion,znucl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -353,7 +352,7 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
    ABI_ALLOCATE(work2,(nfft,1))
    ABI_ALLOCATE(work3,(2,nfft))
    work2(:,1)=scf_history%atmrho_last(:)
-   call jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,1,option,dtset%paral_kgb,&
+   call jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,1,option,&
 &   dtset%slabwsrad,work3,work2,rprimd,work1,dtset%slabzbeg,dtset%slabzend)
    scf_history%atmrho_last(:)=work2(:,1)
    ABI_DEALLOCATE(work1)
@@ -539,8 +538,6 @@ end subroutine extraprho
 
 subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 & nattyp,ngfft,npwarr,ntypat,pawtab,psps,rprimd,scf_history,usepaw,xred_old,ylm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1123,7 +1120,7 @@ end subroutine extrapwf
 !! INPUTS
 !!  atindx1(dtset%natom)=index table for atoms, inverse of atindx
 !!  dtset <type(dataset_type)>=all input variables in this dataset
-!!  istep=number of call the routine 
+!!  istep=number of call the routine
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mcprj=size of cprj array
 !!  mpi_enreg=information about MPI parallelization
@@ -1155,7 +1152,6 @@ end subroutine extrapwf
 
  !use m_scf_history
  use m_cgcprj,  only : dotprod_set_cgcprj,cgcprj_cholesky,lincom_cgcprj
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1173,13 +1169,13 @@ end subroutine extrapwf
 !Local variables-------------------------------
 !scalars
  integer :: hermitian
- integer :: ibdmix,ibg,ibg_hist,icg,icg_hist,iband
+ integer :: ibdmix,ibg,ibg_hist,icg,icg_hist !,iband
  integer :: ierr,ikpt,indh,ind1,ind2,ind1new,inplace
  integer :: isppol,istwf_k,kk,me_distrb,mband,my_nspinor,mcprj_k
  integer :: nband_k,nbdmix,nbdmax,npw_k,ntypat
  integer :: spaceComm_band,usepaw
- real(dp) :: alpha,beta,dotr,doti
- 
+ real(dp) :: alpha,beta !,dotr,doti
+
 !arrays
  integer,allocatable :: ipiv(:),dimcprj(:)
  real(dp),allocatable ::psi_ortho(:,:),mmn(:,:,:)
@@ -1432,7 +1428,7 @@ end subroutine extrapwf
  ABI_DEALLOCATE(mmn)
  ABI_DEALLOCATE(smn)
 
- 
+
 
 end subroutine extrapwf_biortho
 !!***

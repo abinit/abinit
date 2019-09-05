@@ -95,7 +95,6 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 &                   nband_k,nbdblock,npw_k,prtvol,resid_k,subham,totvnlx,use_totvnlx)
 
 
- use defs_abitypes
  use defs_basis
  use m_abicore
  use m_lobpcg
@@ -104,12 +103,15 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  use m_xmpi
  use m_errors
  use iso_c_binding
+ use m_dtset
 
+ use defs_abitypes, only : mpi_type
  use m_time,        only : timab
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type
  use m_getghc,      only : getghc
  use m_prep_kgb,    only : prep_getghc
+
  implicit none
 
 !Arguments ------------------------------------
@@ -228,7 +230,6 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  use_lapack_gpu=use_linalg_gpu
 #endif
  if(use_linalg_gpu==1) then
-!  call gpu_linalg_init()
    call alloc_on_gpu(A_gpu,cplx*dp*vectsize*blocksize)
    call alloc_on_gpu(C_gpu,cplx*dp*vectsize*blocksize)
    call alloc_on_gpu(blockvectorr_gpu,cplx*dp*vectsize*blocksize)
@@ -416,7 +417,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    end if
    ABI_ALLOCATE(eigen,(blocksize))
 
-   call abi_xheev('v','u',blocksize,gramxax,eigen,x_cplx=cplx,istwf_k=istwf_k, &
+   call abi_xheev('v','u',blocksize,gramxax,blocksize,eigen,x_cplx=cplx,istwf_k=istwf_k, &
    timopt=timopt,tim_xeigen=tim_xeigen,use_slk=dtset%use_slk,use_gpu=use_lapack_gpu)
 
 !  blockvectorx=matmul(blockvectorx,gramxax)
@@ -843,7 +844,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
        ABI_ALLOCATE(tmpeigen,(bigorder))
        tmpgramb=gramb
 
-       call abi_xheev('v','u',bigorder,tmpgramb,tmpeigen,x_cplx=cplx,istwf_k=istwf_k, &
+       call abi_xheev('v','u',bigorder,tmpgramb,bigorder,tmpeigen,x_cplx=cplx,istwf_k=istwf_k, &
 &       timopt=timopt,tim_xeigen=tim_xeigen,use_slk=dtset%use_slk,use_gpu=use_lapack_gpu)
 
        condestgramb=tmpeigen(bigorder)/tmpeigen(1)
@@ -882,7 +883,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 !    ################ END LOOP ON COND #########################################
 !    ###########################################################################
 
-     call abi_xhegv(1,'v','u',bigorder,grama,gramb,eigen,x_cplx=cplx,istwf_k=istwf_k, &
+     call abi_xhegv(1,'v','u',bigorder,grama,bigorder,gramb,bigorder,eigen,x_cplx=cplx,istwf_k=istwf_k, &
      timopt=timopt,tim_xeigen=tim_xeigen,use_slk=dtset%use_slk,use_gpu=use_lapack_gpu)
 
      deltae=-one

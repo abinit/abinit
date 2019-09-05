@@ -23,8 +23,19 @@
 # Autoconf & Automake startup
 #
 
+# Enhance help message
+m4_divert_text([HELP_END], [
+In order to facilitate the configuration of Abinit, you can save the options
+you regularly use into a file. For full instructions, please consult the
+doc/build/config-template.ac file in this directory tree.
+
+A lot more documentation on how to build and run Abinit is available on the
+Abinit Wiki. Please consult it at https://wiki.abinit.org/ whenever needed.
+Examples of configuration files for clusters are available at https://github.com/abinit/abiconfig
+])
+
 # Initialize Autoconf
-AC_INIT([ABINIT],[8.11.5],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],[8.11.10],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 7])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -411,14 +422,15 @@ AC_CHECK_PROGS(PYTHON,[python python2.6 python2.5 python2.4])
 AC_MSG_CHECKING([for Python CPPFLAGS])
 if test "${PYTHON}" != "" -a "${PYTHON_CPPFLAGS}" = ""; then
   PYTHON_CPPFLAGS=`${PYTHON} -c "\
+from __future__ import print_function
 try:
     import distutils.sysconfig
-    print '-I' + distutils.sysconfig.get_python_inc(),
+    print('-I' + distutils.sysconfig.get_python_inc(),end=' '),
 except:
     pass
 try:
     import numpy
-    print '-I' + numpy.get_include(),
+    print('-I' + numpy.get_include()),
 except:
     pass"`
 fi
@@ -1004,11 +1016,8 @@ ABI_CONNECT_FFT
 
 # Note: the order is critical!
 #       level 1 ---> LINALG, IO, TIMER (require MPI and GPU)
-#       level 2 ---> FFT, MATH (require MPI, GPU, and LINALG)
-#       level 3 ---> DFT (may require MPI, GPU, LINALG, IO, FFT and MATH)
-#
-# Further note: MATH libraries may even depend on LINALG and FFT
-#               (wait and see...)
+#       level 2 ---> FFT (require MPI, GPU, and LINALG)
+#       level 3 ---> DFT (may require MPI, GPU, LINALG, IO and FFT)
 
 ABI_MSG_SECTION([Connectors / Fallbacks])
 
@@ -1036,11 +1045,6 @@ fi
 # External algorithmic library support
 if test "${enable_connectors}" = "yes"; then
   ABI_CONNECT_ALGO
-fi
-
-# External math library support
-if test "${enable_connectors}" = "yes"; then
-  ABI_CONNECT_MATH
 fi
 
 # External DFT support
@@ -1090,8 +1094,6 @@ for pkg in atompaw bigdft etsf_io libxc linalg netcdf wannier90; do
   AC_MSG_RESULT([${tmp_pkg_enabled}])
 done
 
-# Inform Automake
-AM_CONDITIONAL([DO_BUILD_01_GSL_EXT],[test "${lib_math_flavor}" = "gsl"])
 ##############################################
 if test "${enable_connectors}" = "yes"; then
   ABI_CONNECT_TRIQS

@@ -25,10 +25,10 @@
 module m_berryphase
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_hdr
+ use m_dtset
 
  use m_geometry,     only : xred2xcart
  use m_hide_lapack,  only : dzgedi, dzgefa
@@ -161,8 +161,6 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 &  kptopt,kptrlatt,mband,mcg,&
 &  mkmem,mpw,natom,nattyp,nband,nberry,npwarr,nspinor,nsppol,ntypat,&
 &  nkpt_,rprimd,ucvol,xred,zion)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

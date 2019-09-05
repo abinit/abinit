@@ -503,8 +503,8 @@ module m_xg
     select case (xgBlock%space)
     case ( SPACE_R,SPACE_CR )
       if ( xgBlock%cols*xgBlock%Ldim < cols*rows ) then
-          write(*,*) xgBlock%cols,xgBlock%Ldim,cols,rows
-          write(*,*) xgBlock%cols*xgBlock%Ldim,cols*rows
+          write(std_out,*) xgBlock%cols,xgBlock%Ldim,cols,rows
+          write(std_out,*) xgBlock%cols*xgBlock%Ldim,cols*rows
           MSG_ERROR("Bad reverseMapping")
       end if
       cptr = getClocR(xgBlock%Ldim,xgBlock%cols,xgBlock%vecR(:,:))

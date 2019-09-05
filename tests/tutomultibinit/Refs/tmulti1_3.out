@@ -68,12 +68,16 @@ dipdip_range         4         4         4
 -Opening the file /mnt/STORAGE/alex/dev/abinit/tests/tutomultibinit/Input/tmulti1_2_model.xml
 -Reading the file /mnt/STORAGE/alex/dev/abinit/tests/tutomultibinit/Input/tmulti1_2_model.xml with LibXML library
 
+ Bound for ifc SR:
+
+ x=[ -1  1], y=[ -1  1] and z=[ -1  1]
+
 ================================================================================
  Generation of new ifc
 
  dipdip is set to one, the dipole-dipole interation is recompute.
 
- New bound for ifc (long+short):
+ Bound for ifc (LR):
 
  x=[ -1  2], y=[ -1  2] and z=[ -1  2]
 

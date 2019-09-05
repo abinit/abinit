@@ -30,6 +30,7 @@ module m_ewald
  use m_abicore
  use m_errors
  use m_splines
+ use m_time
 
  use m_special_funcs,  only : abi_derfc
  use m_symtk,          only : matr3inv
@@ -79,8 +80,6 @@ contains
 
 subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,ntypat
@@ -99,7 +98,7 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
  real(dp) :: minexparg
  real(dp) :: r1a1d,r2,r2a2d,r3,r3a3d,recip,reta,rmagn,rsq,sumg,summi,summr,sumr
  real(dp) :: t1,term
- character(len=500) :: message
+ !character(len=500) :: message
 
 ! *************************************************************************
 
@@ -377,8 +376,6 @@ end subroutine ewald
 
 subroutine ewald2(gmet,natom,ntypat,rmet,rprimd,stress,typat,ucvol,xred,zion)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,ntypat
@@ -641,8 +638,6 @@ end subroutine ewald2
 
 subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,sumg0
@@ -669,7 +664,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  real(dp) :: c3r(2*mr+1),cosqxred(natom),gpq(3),gpqfac(3,3),gpqgpq(3,3)
  real(dp) :: invdlt(3,3),ircar(3),ircax(3),rr(3),sinqxred(natom)
  real(dp) :: xredcar(3,natom),xredcax(3,natom),xredicar(3),xredicax(3),xx(3)
- real(dp) :: gprimbyacell(3,3)
+ real(dp) :: gprimbyacell(3,3),tsec(2)
  real(dp),allocatable :: dyewt(:,:,:,:,:)
  complex(dpc) :: exp2piqx(natom)
  complex(dpc),allocatable :: expx1(:,:), expx2(:,:), expx3(:,:)
@@ -689,6 +684,9 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  if (all(zeff == zero)) then
    dyew = zero; return
  end if
+
+ ! Keep track of total time spent.
+ call timab(1749, 1, tsec)
 
 !This is the minimum argument of an exponential, with some safety
  minexparg=log(tiny(0._dp))+five
@@ -1120,6 +1118,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  ABI_DEALLOCATE(expx2)
  ABI_DEALLOCATE(expx3)
  ABI_DEALLOCATE(dyewt)
+
+ call timab(1749, 2, tsec)
 
 end subroutine ewald9
 !!***

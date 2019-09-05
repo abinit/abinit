@@ -51,7 +51,7 @@ program anaddb
  use m_xomp
  use m_abicore
  use m_errors
- !use m_argparse
+ use m_argparse
  use m_ifc
  use m_ddb
  use m_ddb_hdr
@@ -67,7 +67,7 @@ program anaddb
  use m_io_tools,       only : open_file, flush_unit
  use m_fstrings,       only : int2char4, itoa, sjoin, strcat, inupper
  use m_specialmsg,     only : specialmsg_getcount, herald
- use m_time,           only : asctime, timein
+ use m_time,           only : asctime, timein, timab
  use m_parser,         only : instrng
  use m_dtfil,          only : isfile
  use m_anaddb_dataset, only : anaddb_init, anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
@@ -83,6 +83,7 @@ program anaddb
  use m_ddb_elast,      only : ddb_elast
  use m_ddb_piezo,      only : ddb_piezo
  use m_ddb_internalstr, only : ddb_internalstr
+
  implicit none
 
 !Local variables-------------------------------
@@ -115,8 +116,8 @@ program anaddb
  character(len=24) :: start_datetime
  character(len=strlen) :: string
  character(len=fnlen) :: filnam(7),elph_base_name,tmpfilename
- character(len=500) :: message
- !type(args_t) :: args
+ character(len=500) :: msg
+ type(args_t) :: args
  type(anaddb_dataset_type) :: inp
  type(phonon_dos_type) :: Phdos
  type(ifc_type) :: Ifc,Ifc_coarse
@@ -141,15 +142,14 @@ program anaddb
  comm = xmpi_world; nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  iam_master = (my_rank == master)
 
- ! TODO
  ! Parse command line arguments.
- !args = args_parser(); if (args%exit /= 0) goto 100
+ args = args_parser(); if (args%exit /= 0) goto 100
 
-!Initialize memory profiling if it is activated !if a full abimem.mocc report is desired,
-!set the argument of abimem_init to "2" instead of "0"
-!note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ! Initialize memory profiling if activated at configure time.
+ ! if a full report is desired, set the argument of abimem_init to "2" instead of "0" via the command line.
+ ! note that the file can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
+ call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
 #endif
 
  ! Initialisation of the timing
@@ -162,6 +162,9 @@ program anaddb
 
  start_datetime = asctime()
 
+ ! Zero out all accumulators of time and init timers
+ call timab(1, 0, tsec)
+
  ! Initialise the code: write heading, and read names of files.
  if (iam_master) call anaddb_init(filnam)
  call xmpi_bcast (filnam, master, comm, ierr)
@@ -171,8 +174,8 @@ program anaddb
    call int2char4(my_rank, procstr)
    ABI_CHECK((procstr(1:1)/='#'),'Bug: string length too short!')
    tmpfilename = trim(filnam(2)) // "_LOG_P" // trim(procstr)
-   if (open_file(tmpfilename, message, unit=std_out, form="formatted", action="write") /= 0) then
-     MSG_ERROR(message)
+   if (open_file(tmpfilename, msg, unit=std_out, form="formatted", action="write") /= 0) then
+     MSG_ERROR(msg)
    end if
  end if
 
@@ -180,8 +183,7 @@ program anaddb
 
  ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
 
- call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION,comm=comm, &
-& dimonly=1)
+ call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION,comm=comm, dimonly=1)
 
  natom = ddb_hdr%natom
  ntypat = ddb_hdr%ntypat
@@ -203,16 +205,16 @@ program anaddb
    call inupper(string(1:lenstr))
  end if
 
- call xmpi_bcast(string,master, comm, ierr)
- call xmpi_bcast(lenstr,master, comm, ierr)
+ call xmpi_bcast(string, master, comm, ierr)
+ call xmpi_bcast(lenstr, master, comm, ierr)
 
  ! Read the inputs
- call invars9(inp,lenstr,natom,string)
+ call invars9(inp, lenstr, natom, string)
 
- !if (args%dry_run /= 0) then
- !  call wrtout(std_out, "Dry run mode. Exiting after have read the input")
- !  goto 100
- !end if
+ if (args%dry_run /= 0) then
+   call wrtout(std_out, "Dry run mode. Exiting after have read the input")
+   goto 100
+ end if
 
  ! Open output files and ab_out (might change its name if needed)
  ! MJV 1/2010 : now output file is open, but filnam(2) continues unmodified
@@ -220,8 +222,8 @@ program anaddb
  if (iam_master) then
    tmpfilename = filnam(2)
    call isfile(tmpfilename,'new')
-   if (open_file(tmpfilename,message,unit=ab_out,form='formatted',status='new') /= 0) then
-     MSG_ERROR(message)
+   if (open_file(tmpfilename,msg,unit=ab_out,form='formatted',status='new') /= 0) then
+     MSG_ERROR(msg)
    end if
    rewind (unit=ab_out)
    call herald(codename,abinit_version,ab_out)
@@ -236,25 +238,16 @@ program anaddb
 !******************************************************************
 
  ! Read the DDB information, also perform some checks, and symmetrize partially the DDB
- write(message, '(a,a)' )' read the DDB information and perform some checks',ch10
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ write(msg, '(a,a)' )' read the DDB information and perform some checks',ch10
+ call wrtout([std_out, ab_out], msg)
 
- ! DEBUG
- !write(*,*) 'anaddb: natom=', natom
- ! END DEBUG
  call ddb_from_file(ddb,filnam(3),inp%brav,natom,inp%natifc,inp%atifc,Crystal,comm, prtvol=inp%prtvol)
  nsym = Crystal%nsym
- ! DEBUG
- !do ii=1,Crystal%ntypat
- !  write(*,*)'anaddb: amu=', crystal%amu(ii)
- !end do
- ! END DEBUG
 
  ! Acoustic Sum Rule
  ! In case the interatomic forces are not calculated, the
  ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
- asrq0 = ddb_get_asrq0(ddb, inp%asr, inp%rfmeth, crystal%xcart)
+ asrq0 = ddb%get_asrq0(inp%asr, inp%rfmeth, crystal%xcart)
 
  ! TODO: This is to maintain the previous behaviour in which all the arrays were initialized to zero.
  ! In the new version asrq0%d2asr is always computed if the Gamma block is present
@@ -309,10 +302,10 @@ program anaddb
 
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
- iblok = ddb_get_dielt_zeff(ddb,crystal,inp%rfmeth,inp%chneut,inp%selectz,dielt,zeff)
+ iblok = ddb%get_dielt_zeff(crystal,inp%rfmeth,inp%chneut,inp%selectz,dielt,zeff)
  ! Try to get dielt, in case just the DDE are present
  if (iblok == 0) then
-   iblok_tmp = ddb_get_dielt(ddb,inp%rfmeth,dielt)
+   iblok_tmp = ddb%get_dielt(inp%rfmeth,dielt)
  end if
 
  !if (iblok == 0) then
@@ -324,7 +317,6 @@ program anaddb
 
  if (my_rank == master) then
 #ifdef HAVE_NETCDF
-   ! TODO: Cartesian or reduced?
    ncerr = nctk_def_arrays(ana_ncid, [&
    nctkarr_t('emacro_cart', "dp", 'number_of_cartesian_directions, number_of_cartesian_directions'),&
    nctkarr_t('becs_cart', "dp", "number_of_cartesian_directions, number_of_cartesian_directions, number_of_atoms")],&
@@ -361,17 +353,17 @@ program anaddb
        d2flg(1:msize)=1
      else
        ! There is a problem !
-       write(message, '(7a)' )&
+       write(msg, '(7a)' )&
 &       'The dynamical matrix at Gamma is needed, in order to perform ',ch10,&
 &       "relaxation at constant polarisation (Na Sai's method)",ch10,&
 &       'However, this was not found in the DDB.',ch10,&
 &       'Action: complete your DDB with the dynamical matrix at Gamma.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
    end if ! iblok not found
 
    ! Extract the block with the total energy
-   if (ddb_get_etotal(ddb,etotal) == 0) then
+   if (ddb%get_etotal(etotal) == 0) then
      MSG_ERROR("DDB file does not contain GS etotal")
    end if
 
@@ -382,7 +374,7 @@ program anaddb
    if (inp%relaxat == 1) rfphon(:) = 1
    if (inp%relaxstr == 1) rfstrs(:) = 3
 
-   call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp4)
+   call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp4)
 
    if (inp%relaxat == 1) then
      index = 0
@@ -424,7 +416,7 @@ program anaddb
    ABI_ALLOCATE(dchide,(3,3,3))
    ABI_ALLOCATE(dchidt,(natom,3,3,3))
 
-   if (ddb_get_dchidet(ddb,inp%ramansr,inp%nlflag,dchide,dchidt) == 0) then
+   if (ddb%get_dchidet(inp%ramansr,inp%nlflag,dchide,dchidt) == 0) then
      MSG_ERROR("Cannot find block corresponding to non-linear optical susceptibilities in DDB file")
    end if
 
@@ -454,54 +446,49 @@ program anaddb
 !**********************************************************************
  if (inp%ifcflag ==1) then
    ! ifc to be calculated for interpolation
-   write(message, '(a,a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,&
-&   ' Calculation of the interatomic forces ',ch10
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   write(msg, '(a,a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,&
+    ' Calculation of the interatomic forces ',ch10
+   call wrtout([std_out, ab_out], msg)
 
 ! TODO : check if this wrtout should be removed in latest merge 17 feb 2017
    call timein(tcpu,twall)
-   write(message, '(a,f11.3,a,f11.3,a)' )'-begin at tcpu',tcpu-tcpui,'  and twall',twall-twalli,' sec'
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   write(msg, '(a,f11.3,a,f11.3,a)' )'-begin at tcpu',tcpu-tcpui,'  and twall',twall-twalli,' sec'
+   call wrtout([std_out, ab_out], msg)
 
    if (any(inp%qrefine(:) > 1)) then
      ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
-
      ! Build the IFCs using the coarse q-mesh.
      do ii = 1, 3
-       ngqpt_coarse(ii) = inp%ngqpt(ii)/inp%qrefine(ii)
+       ngqpt_coarse(ii) = inp%ngqpt(ii) / inp%qrefine(ii)
      end do
      call ifc_init(Ifc_coarse,Crystal,ddb,&
-&     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,ngqpt_coarse,inp%nqshft,inp%q1shft,dielt,zeff,&
-&     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
+       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,ngqpt_coarse,inp%nqshft,inp%q1shft,dielt,zeff,&
+       inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
 
-     ! And now use the coarse q-mesh to fill the entries in dynmat(q)
+     ! Now use the coarse q-mesh to fill the entries in dynmat(q)
      ! on the dense q-mesh that cannot be obtained from the DDB file.
      call ifc_init(Ifc,Crystal,ddb,&
-&     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
-&     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm,Ifc_coarse=Ifc_coarse)
-     call ifc_free(Ifc_coarse)
+      inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
+      inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm,Ifc_coarse=Ifc_coarse)
+     call Ifc_coarse%free()
 
    else
      call ifc_init(Ifc,Crystal,ddb,&
-&     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
-&     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
+       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
+       inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
    end if
 
-   call ifc_print(ifc, unit=std_out)
+   call ifc%print(unit=std_out)
 
    ! Compute speed of sound.
    if (inp%vs_qrad_tolkms(1) > zero) then
-     call ifc_speedofsound(ifc, crystal, inp%vs_qrad_tolkms, ana_ncid, comm)
-     !call ifc_test_phinterp(ifc, crystal, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm, test_dwdq=.True.)
-     !stop
+     call ifc%speedofsound(crystal, inp%vs_qrad_tolkms, ana_ncid, comm)
    end if
 
    ! Print analysis of the real-space interatomic force constants
    ! TODO: ifc_out should not have side effects
    if (my_rank == master .and. inp%ifcout/=0) then
-     call ifc_write(Ifc,inp%ifcana,inp%atifc,inp%ifcout,inp%prt_ifc,ana_ncid)
+     call ifc%write(inp%ifcana,inp%atifc,inp%ifcout,inp%prt_ifc,ana_ncid)
    end if
  end if
 
@@ -522,9 +509,8 @@ program anaddb
 
  ! Phonon density of states calculation, Start if interatomic forces have been calculated
  if (inp%ifcflag==1 .and. any(inp%prtdos==[1, 2])) then
-   write(message,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of phonon density of states ',ch10
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of phonon density of states ',ch10
+   call wrtout([std_out, ab_out], msg)
 
    ! Only 1 shift in q-mesh
    wminmax = zero
@@ -534,50 +520,49 @@ program anaddb
      if (all(count_wminmax == 0)) exit
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
      wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
-     call phdos_free(phdos)
+     call phdos%free()
+     write(msg, "(a, 2f8.5)")"Initial frequency mesh not large enough. Recomputing PHDOS with wmin, wmax: ",wminmax
+     call wrtout(std_out, msg)
    end do
 
    if (iam_master) then
-     call phdos_print_msqd(Phdos, filnam(2), inp%ntemper, inp%tempermin, inp%temperinc)
-     call phdos_print(Phdos, strcat(filnam(2), "_PHDOS"))
-     call phdos_print_debye(Phdos, Crystal%ucvol)
-     call phdos_print_thermo(PHdos, strcat(filnam(2), "_THERMO"), inp%ntemper, inp%tempermin, inp%temperinc)
+     call phdos%print_msqd(filnam(2), inp%ntemper, inp%tempermin, inp%temperinc)
+     call phdos%print(strcat(filnam(2), "_PHDOS"))
+     call phdos%print_debye(Crystal%ucvol)
+     call phdos%print_thermo(strcat(filnam(2), "_THERMO"), inp%ntemper, inp%tempermin, inp%temperinc)
 
 #ifdef HAVE_NETCDF
      ncerr = nctk_open_create(phdos_ncid, strcat(filnam(2), "_PHDOS.nc"), xmpi_comm_self)
      NCF_CHECK_MSG(ncerr, "Creating PHDOS.nc file")
      NCF_CHECK(Crystal%ncwrite(phdos_ncid))
-     call phdos_ncwrite(Phdos, phdos_ncid)
+     call phdos%ncwrite(phdos_ncid)
      NCF_CHECK(nf90_close(phdos_ncid))
 #endif
    end if
 
-   call phdos_free(Phdos)
+   call phdos%free()
  end if
 
  if (iam_master .and. inp%ifcflag==1 .and. inp%outboltztrap==1) then
-   call ifc_outphbtrap(Ifc,Crystal,inp%ng2qpt,1,inp%q2shft,filnam(2))
+   call ifc%outphbtrap(Crystal,inp%ng2qpt,1,inp%q2shft,filnam(2))
  end if
 
  ! Phonon density of states and thermodynamical properties calculation
  ! Start if interatomic forces and thermal flags are on
  if (inp%ifcflag==1 .and. any(inp%thmflag==[1,2])) then
 
-   write(message, '(a,(80a),a,a,a,a,a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,&
-&   ' Calculation of phonon density of states, ',ch10,&
-&   '    thermodynamical properties, ',ch10,&
-&   '    and Debye-Waller factors.',ch10
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(a,(80a),a,a,a,a,a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,&
+    ' Calculation of phonon density of states, ',ch10,&
+    '    thermodynamical properties, ',ch10,&
+    '    and Debye-Waller factors.',ch10
+   call wrtout([std_out, ab_out], msg)
 
    if (inp%thmflag==1) then
      call harmonic_thermo(Ifc,Crystal,ddb%amu,inp,ab_out,filnam(2),comm)
 
    else if (inp%thmflag==2) then
-     write(message, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,' Entering thm9 routine with thmflag=2 ',ch10
-     call wrtout(std_out,message,'COLL')
-     call wrtout(ab_out,message,'COLL')
-
+     write(msg, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,' Entering thm9 routine with thmflag=2 ',ch10
+     call wrtout([std_out, ab_out], msg)
      call harmonic_thermo(Ifc,Crystal,ddb%amu,inp,ab_out,filnam(2),comm,thmflag=inp%thmflag)
    end if
  end if
@@ -601,11 +586,8 @@ program anaddb
 !***********************************************************************
 
  if (inp%thmflag>=3 .and. inp%thmflag<=8) then
-   !write(std_out,*)'Entering thmeig: '
    elph_base_name=trim(filnam(2))//"_ep"
-
-   call thmeig(inp,ddb,Crystal,elph_base_name,filnam(5),&
-&   ddbun,ab_out,natom,mpert,msize,asrq0%d2asr,comm)
+   call thmeig(inp,ddb,Crystal,elph_base_name,filnam(5),ddbun,ab_out,natom,mpert,msize,asrq0%d2asr,comm)
  end if
 
 !**********************************************************************
@@ -620,10 +602,9 @@ program anaddb
 
  if (inp%nph2l/=0 .or. inp%dieflag==1) then
 
-   write(message, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,&
-&   ch10,' Treat the second list of vectors ',ch10
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   write(msg, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,&
+     ch10,' Treat the second list of vectors ',ch10
+   call wrtout([std_out, ab_out], msg)
 
    ! Before examining every direction or the dielectric tensor, generates the dynamical matrix at gamma
    qphon(:,1)=zero; qphnrm(1)=zero
@@ -636,19 +617,19 @@ program anaddb
      call gtdyn9(ddb%acell,Ifc%atmfrc,dielt,inp%dipdip,&
 &     Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,mpert,natom,&
 &     Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,&
-&     Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff)
+&     Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff, xmpi_comm_self)
 
    else if (inp%ifcflag==0) then
 
      ! Look after the information in the DDB
      rfphon(1:2)=1; rfelfd(1:2)=2; rfstrs(1:2)=0
-     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
+     call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
 
      ! Copy the dynamical matrix in d2cart
      d2cart(:,1:msize)=ddb%val(:,:,iblok)
 
      ! Eventually impose the acoustic sum rule
-     call asrq0_apply(asrq0, natom, mpert, msize, crystal%xcart, d2cart)
+     call asrq0%apply(natom, mpert, msize, crystal%xcart, d2cart)
    end if ! end of the generation of the dynamical matrix at gamma.
 
    if (inp%nph2l/=0) then
@@ -709,11 +690,11 @@ program anaddb
 
    ! The frequency-dependent dielectric tensor (and oscillator strength).
    if (inp%dieflag==1)then
-     write(message, '(6a)' )&
+     write(msg, '(6a)' )&
 &     ' the frequency-dependent dielectric tensor (and also once more',ch10,&
 &     ' the phonons at gamma - without non-analytic part )',ch10,ch10,&
 &     ' The frequency-dependent dielectric tensor'
-     call wrtout(std_out,message,'COLL')
+     call wrtout(std_out,msg,'COLL')
 
      ! Initialisation of the phonon wavevector
      qphon(:,1)=zero; qphnrm(1)=zero
@@ -752,7 +733,7 @@ program anaddb
    ! independent of the interatomic force constant calculation
    qphon(:,1)=zero; qphnrm(1)=zero
    rfphon(1:2)=0; rfelfd(1:2)=2; rfstrs(1:2)=0
-   call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
+   call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
    if (iblok == 0) then
      MSG_ERROR("DDB file must contain both derivatives wrt electric field, Check your calculations")
    end if
@@ -794,10 +775,9 @@ program anaddb
 ! Here treating the internal strain tensors at Gamma point
  if (inp%instrflag/=0) then
 
-   write(message, '(a,a,(80a),a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
-&   ' Calculation of the internal-strain  tensor',ch10
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   write(msg, '(a,a,(80a),a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
+    ' Calculation of the internal-strain  tensor',ch10
+   call wrtout([std_out, ab_out], msg)
 
    if (inp%instrflag==1) then
      call wrtout(std_out,'instrflag=1, so extract the internal strain constant from the 2DTE','COLL')
@@ -806,7 +786,7 @@ program anaddb
      qphon(:,1)=zero; qphnrm(1)=zero
      rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=3
 
-     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
+     call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
      if (iblok == 0) then
        MSG_ERROR("DDB file must contain both uniaxial and shear strain for piezoelectric, Check your calculations")
      end if
@@ -821,10 +801,9 @@ program anaddb
 
 !here treating the elastic tensors at Gamma Point
  if (inp%elaflag/=0) then
-   write(message, '(a,a,(80a),a,a,a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
-&   ' Calculation of the elastic and compliances tensor (Voigt notation)',ch10
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   write(msg, '(a,a,(80a),a,a,a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
+    ' Calculation of the elastic and compliances tensor (Voigt notation)',ch10
+   call wrtout([std_out, ab_out], msg)
 
    if (any(inp%elaflag == [1,2,3,4,5])) then
      call wrtout(std_out,'so extract the elastic constant from the 2DTE','COLL')
@@ -833,7 +812,7 @@ program anaddb
      qphon(:,1)=zero; qphnrm(1)=zero
      rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=0
 
-     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp4)
+     call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp4)
      iblok_stress=iblok
 
      ! look after the blok no.iblok that contains the elastic tensor
@@ -841,15 +820,15 @@ program anaddb
      rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=3
 
      ! for both diagonal and shear parts
-     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
+     call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
      if (iblok == 0) then
        MSG_ERROR("DDB file must contain both uniaxial and shear strain when elaflag != 0, Check your calculations")
      end if
 
      ! print the elastic tensor
      call ddb_elast(inp,crystal,ddb%val,compl,compl_clamped,compl_stress,asrq0%d2asr,&
-&     elast,elast_clamped,elast_stress,iblok,iblok_stress,&
-&     instrain,ab_out,mpert,natom,ddb%nblok,ana_ncid)
+       elast,elast_clamped,elast_stress,iblok,iblok_stress,&
+       instrain,ab_out,mpert,natom,ddb%nblok,ana_ncid)
    end if
  end if !ending the part for elastic tensors
 
@@ -857,11 +836,10 @@ program anaddb
 
 !here treating the piezoelectric tensor at Gamma Point
  if (inp%piezoflag/=0 .or. inp%dieflag==4 .or. inp%elaflag==4) then
-   write(message, '(a,a,(80a),a,a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
-&   ' Calculation of the tensor related to piezoelectric effetc',ch10,&
-&   '  (Elastic indices in Voigt notation)',ch10
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   write(msg, '(a,a,(80a),a,a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
+   ' Calculation of the tensor related to piezoelectric effetc',ch10,&
+   '  (Elastic indices in Voigt notation)',ch10
+   call wrtout([std_out, ab_out], msg)
 
    if (any(inp%piezoflag == [1,2,3,4,5,6,7]) .or. inp%dieflag==4 .or.inp%elaflag==4) then
      call wrtout(std_out,'extract the piezoelectric constant from the 2DTE','COLL')
@@ -871,7 +849,7 @@ program anaddb
      rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=3
 
      ! for both diagonal and shear parts
-     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
+     call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
      if (iblok == 0) then
        MSG_ERROR("DDB file must contain both uniaxial and shear strain for piezoelectric, Check your calculations")
      end if
@@ -895,10 +873,10 @@ program anaddb
 
  50 continue
 
- call asrq0_free(asrq0)
- call ifc_free(Ifc)
+ call asrq0%free()
+ call ifc%free()
  call crystal%free()
- call ddb_free(ddb)
+ call ddb%free()
  call anaddb_dtset_free(inp)
  call thermal_supercell_free(inp%ntemper, thm_scells)
 
@@ -915,23 +893,22 @@ program anaddb
 
  call timein(tcpu,twall)
  tsec(1)=tcpu-tcpui; tsec(2)=twall-twalli
- write(message, '(a,i4,a,f13.1,a,f13.1)' )' Proc.',my_rank,' individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
- call wrtout(std_out,message,"COLL")
+ write(msg, '(a,i4,a,f13.1,a,f13.1)' )' Proc.',my_rank,' individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
+ call wrtout(std_out,msg,"COLL")
 
  if (iam_master) then
    write(ab_out, '(a,a,a,i4,a,f13.1,a,f13.1)' )'-',ch10,&
-&   '- Proc.',my_rank,' individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
+    '- Proc.',my_rank,' individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
  end if
 
  call xmpi_sum(tsec,comm,ierr)
 
- write(message, '(a,(80a),a,a,a,f11.3,a,f11.3,a,a,a,a)' ) ch10,&
-& ('=',ii=1,80),ch10,ch10,&
-& '+Total cpu time',tsec(1),&
-& '  and wall time',tsec(2),' sec',ch10,ch10,&
-& ' anaddb : the run completed succesfully.'
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ write(msg, '(a,(80a),a,a,a,f11.3,a,f11.3,a,a,a,a)' ) ch10,&
+  ('=',ii=1,80),ch10,ch10,&
+   '+Total cpu time',tsec(1),'  and wall time',tsec(2),' sec',ch10,ch10,&
+   ' anaddb : the run completed succesfully.'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
 
  if (iam_master) then
    ! Write YAML document with the final summary.

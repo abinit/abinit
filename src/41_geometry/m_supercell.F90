@@ -41,7 +41,7 @@ module m_supercell
 
 !!***
 
-!!****t* defs_abitypes/supercell_type
+!!****t* m_supercell/supercell_type
 !! NAME
 !! supercell_type
 !!
@@ -270,7 +270,7 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
 
  ABI_CHECK(iatom_supercell == scell%natom, "iatom_supercell /= scell%natom")
  if(iatom_supercell /= scell%natom) then
-    print *, "iatom_supercell /= scell%natom"
+    write(std_out,*)"iatom_supercell /= scell%natom"
  endif
 
 
@@ -389,8 +389,8 @@ subroutine freeze_displ_supercell (displ,freeze_displ,scell)
 
  ! fix gauge by imposing real displacement for first atom in first direction
  ! multiply by normalized complex conjugate of first element
- ! NB 6 March 2018: this may be imposing a positive (not just real) displacement for 1st atom along x!!! 
- ! That might be problematic below, though for the thermal displacement method freeze_displ swaps sign for each new mode 
+ ! NB 6 March 2018: this may be imposing a positive (not just real) displacement for 1st atom along x!!!
+ ! That might be problematic below, though for the thermal displacement method freeze_displ swaps sign for each new mode
  phase = cmplx(one,zero)
  if (abs(zdispl(1,1)) > tol10) then
    phase = conjg(zdispl(1,1)) / abs(zdispl(1,1))
@@ -678,7 +678,7 @@ end subroutine getPBCIndexes_supercell
 !!  for example: (4 4 4) => min = -1 and max = 2
 !!
 !! INPUTS
-!! ncell(3) = size of the supercell (for example 3 3 3)   
+!! ncell(3) = size of the supercell (for example 3 3 3)
 !!
 !! OUTPUT
 !! min = minimun of the range
@@ -805,7 +805,6 @@ subroutine destroy_supercell (scell)
    if(allocated(scell%rvecs))  then
     ABI_DEALLOCATE(scell%rvecs)
   end if
- 
 
 end subroutine destroy_supercell
 !!***

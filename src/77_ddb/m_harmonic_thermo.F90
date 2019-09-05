@@ -39,9 +39,9 @@ module m_harmonic_thermo
  use m_geometry,       only : mkrdim
  use m_crystal,        only : crystal_t
  use m_anaddb_dataset, only : anaddb_dataset_type
- use m_ifc,            only : ifc_type, ifc_fourq
+ use m_ifc,            only : ifc_type
  use m_kpts,           only : smpbz
- use m_symkpt,     only : symkpt
+ use m_symkpt,         only : symkpt
 
  implicit none
 
@@ -94,8 +94,6 @@ contains
 
 subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,comm,thmflag)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: iout,comm
@@ -129,7 +127,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
  integer :: symrec(3,3,Crystal%nsym),symrel(3,3,Crystal%nsym)
  real(dp) :: symrec_cart(3,3,Crystal%nsym)
  integer :: igqpt2(3),ii(6),jj(6),qptrlatt(3,3)
- integer,allocatable :: indqpt1(:),nchan2(:)
+ integer,allocatable :: indqpt1(:),nchan2(:),bz2ibz_smap(:,:)
  real(dp) :: gprimd(3,3),qphon(3),rprimd(3,3),tens1(3,3),tens2(3,3)
  real(dp) :: displ(2*3*Crystal%natom*3*Crystal%natom)
  real(dp) :: eigvec(2,3,Crystal%natom,3*Crystal%natom)
@@ -269,12 +267,17 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
    ABI_ALLOCATE(indqpt1,(nspqpt))
    ABI_ALLOCATE(wtq,(nspqpt))
    ABI_ALLOCATE(wtq_folded,(nspqpt))
+   ABI_ALLOCATE(bz2ibz_smap,(6, nspqpt))
 
 !  Reduce the number of such points by symmetrization
    wtq(:)=1.0_dp
 
    timrev=1
-   call symkpt(0,Crystal%gmet,indqpt1,ab_out,spqpt2,nspqpt,nqpt2,Crystal%nsym,symrec,timrev,wtq,wtq_folded)
+   call symkpt(0,Crystal%gmet,indqpt1,ab_out,spqpt2,nspqpt,nqpt2,Crystal%nsym,symrec,timrev,wtq,wtq_folded, &
+     bz2ibz_smap, xmpi_comm_self)
+
+   ABI_DEALLOCATE(bz2ibz_smap)
+
    ABI_ALLOCATE(wtq2,(nqpt2))
    do iqpt2=1,nqpt2
      wtq2(iqpt2)=wtq_folded(indqpt1(iqpt2))
@@ -296,7 +299,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
      qphnrm=1.0_dp
 
      ! Fourier Interpolation
-     call ifc_fourq(Ifc,Crystal,qphon,phfrq,displ,out_eigvec=eigvec)
+     call ifc%fourq(Crystal,qphon,phfrq,displ,out_eigvec=eigvec)
 
      if (present(thmflag)) then
        if (thmflag ==2)then

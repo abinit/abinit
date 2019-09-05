@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -25,8 +26,6 @@ contains
 
 !====================================================================================================
 subroutine tdep_calc_orthonorm(dim1,dim2,nindep,vectin,vectout)
-
-  implicit none
 
   integer, intent(in) :: dim1,dim2
   integer, intent(out) :: nindep
@@ -74,8 +73,6 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
 &                                proj2nd,Shell2at,&!optional 
 &                                proj3rd,Shell3at) !optional
 
-  implicit none
-
   type(Coeff_Moore_type), intent(inout) :: CoeffMoore
   type(Input_Variables_type),intent(in) :: InVar
   type(Symetries_Variables_type),intent(in) :: Sym
@@ -88,10 +85,10 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
   double precision, intent(in), optional :: proj3rd(27,27,nshell3at)
   double precision, intent(in) :: distance(InVar%natom,InVar%natom,4)
 
-  integer :: ishell,ncoeff,ncoeff_prev,iatom,jatom,katom,iatshell
+  integer :: ishell,ncoeff,ncoeff_prev,iatom,jatom,iatshell !katom,
   integer :: icoeff,iconst,nconst_loc,iconst_loc,iconst_new,isym,ntotcoeff,iat_mod
-  integer :: mu,nu,xi,alpha,beta,gama,lambda,trans,natom_unitcell,natom,ii,trans1,trans2,trans3,trans4,trans5
-  double precision :: terme,temp,terme1,terme2,terme3,terme4,terme5
+  integer :: mu,nu,xi,alpha,beta,gama,lambda,trans,natom_unitcell,natom !,ii,trans1,trans2,trans3,trans4,trans5
+  double precision :: terme,temp !,terme1,terme2,terme3,terme4,terme5
   double precision :: Levi_Civita(3,3,3)
   double precision, allocatable :: SS_ref(:,:,:,:,:),dlevi(:,:,:,:)
   double precision, allocatable :: vectin(:,:),vectout(:,:)
@@ -103,6 +100,8 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
   !double precision, allocatable :: const_asr3rd(:,:,:,:,:,:,:)
 !FB  double precision, allocatable :: const_rot3rd(:,:,:,:,:,:)
   !double precision, allocatable :: const_rot3rd(:,:,:,:,:,:,:,:)
+
+  ABI_UNUSED(shell3at%nshell)
 
   natom_unitcell=InVar%natom_unitcell
   natom         =InVar%natom
@@ -664,8 +663,6 @@ end subroutine tdep_calc_constraints
  subroutine tdep_check_constraints(distance,InVar,Phij_NN,Pij_N,nshell3at,&
 &                 ftot3,Psij_ref,Shell3at,Sym,ucart) !optional 
 
-  implicit none 
-
   type(Input_Variables_type),intent(in) :: InVar
   integer, intent(in)  :: nshell3at
   double precision, intent(in)  :: Phij_NN(3*InVar%natom,3*InVar%natom)
@@ -715,7 +712,7 @@ end subroutine tdep_calc_constraints
           norm1=zero
           do jatom=1,InVar%natom
             norm1=norm1+Phij_NN(3*(iatom-1)+alpha,3*(jatom-1)+beta)*distance(iatom,jatom,gama+1)-&
-&                       Phij_NN(3*(iatom-1)+alpha,3*(jatom-1)+gama)*distance(iatom,jatom,beta+1)	      
+&                       Phij_NN(3*(iatom-1)+alpha,3*(jatom-1)+gama)*distance(iatom,jatom,beta+1)
           end do !jatom
           norm1=norm1+Pij_N(3*(iatom-1)+beta)*Kroenecker(alpha,gama)&
 &                    -Pij_N(3*(iatom-1)+gama)*Kroenecker(alpha,beta)
@@ -747,14 +744,14 @@ end subroutine tdep_calc_constraints
 &                    Phij_NN(3*(iatom-1)+alpha ,3*(jatom-1)+gama  )*Kroenecker(beta,lambda)-&
 &                    Phij_NN(3*(iatom-1)+lambda,3*(jatom-1)+beta  )*Kroenecker(alpha,gama)-&
 &                    Phij_NN(3*(iatom-1)+alpha ,3*(jatom-1)+lambda)*Kroenecker(beta,gama)
-	        if (iatom.le.7) then
+             if (iatom.le.7) then
 !FB	          write(6,'(a,1x,6(i3,1x),1(e17.10,1x))') 'iatom,jatom,alpha,beta,gama,lambda,rot3',&
 !FB&		    iatom,jatom,alpha,beta,gama,lambda,&
 !FB&                    Phij_NN(3*(iatom-1)+gama  ,3*(jatom-1)+beta)*Kroenecker(alpha,lambda)+&
 !FB&                    Phij_NN(3*(iatom-1)+alpha ,3*(jatom-1)+gama)*Kroenecker(beta,lambda)-&
 !FB&                    Phij_NN(3*(iatom-1)+lambda,3*(jatom-1)+beta)*Kroenecker(alpha,gama)-&
 !FB&                    Phij_NN(3*(iatom-1)+alpha ,3*(jatom-1)+lambda)*Kroenecker(beta,gama)
-        	end if
+             end if
               end do !lambda  
             end do !gama
           end do !beta
@@ -787,11 +784,11 @@ end subroutine tdep_calc_constraints
 !         Compute the second ASR : sum_j Psi_ijk=0 
           asr3(2,katom,:,:,:)=asr3(2,katom,:,:,:)+Psij_333(:,:,:)
 !         Compute the rotational invariance (third order)
-	  if (iatom.eq.1.and.jatom.eq.7) then
-            write(6,'(a,6(i5,1x),2(e12.6,1x))') &
+      if (iatom.eq.1.and.jatom.eq.7) then
+            write(std_out,'(a,6(i5,1x),2(e12.6,1x))') &
 &          'ishell,iatom,jatom,katom,isym,trans,Psi=', &
 &           ishell,iatom,jatom,katom,isym,trans,Psij_333(1,3,3),asr3(1,jatom,1,3,3)
-	  end if
+      end if
           do alpha=1,3
             do beta=1,3
               do gama=1,3
@@ -799,7 +796,7 @@ end subroutine tdep_calc_constraints
                   rot3(jatom,alpha,beta,gama,lambda)=rot3(jatom,alpha,beta,gama,lambda)+&
 &                      Psij_333(alpha,beta,gama  )*distance(iatom,katom,lambda+1)-&
 &                      Psij_333(alpha,beta,lambda)*distance(iatom,katom,gama  +1)
-	          if (iatom.le.7) then
+              if (iatom.le.7) then
 !FB	            write(6,'(a,1x,6(i3,1x),1(e17.10,1x))') 'iatom,jatom,alpha,beta,gama,lambda,rot3',&
 !FB&		      iatom,jatom,alpha,beta,gama,lambda,&
 !FB&                      Psij_333(alpha,beta,gama)*distance(iatom,katom,lambda+1)-&
@@ -809,7 +806,7 @@ end subroutine tdep_calc_constraints
 !FB&                    Psij_333(alpha,beta,lambda),distance(iatom,katom,gama+1  )',&
 !FB&                    Psij_333(alpha,beta,gama  ),distance(iatom,katom,lambda+1),&
 !FB&                    Psij_333(alpha,beta,lambda),distance(iatom,katom,gama+1  )
-        	  end if
+               end if
                 end do  
               end do  
             end do  

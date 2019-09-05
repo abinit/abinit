@@ -39,17 +39,22 @@ module m_occ
 
  implicit none
 
- real(dp),parameter :: huge_tsmearinv = 1e50_dp
- real(dp),parameter :: maxFDarg=500.0_dp
-
  private
 !!***
+
+ real(dp),parameter :: huge_tsmearinv = 1e50_dp
+ real(dp),parameter :: maxFDarg=500.0_dp
+ real(dp),parameter :: maxDFDarg=200.0_dp
+ real(dp),parameter :: maxBEarg=600.0_dp
+ real(dp),parameter :: maxDBEarg=200.0_dp
 
  public :: getnel        ! Compute total number of electrons from efermi or DOS
  public :: newocc        ! Compute new occupation numbers at each k point,
  public :: occeig        ! (occ_{k,q}(m)-occ_k(n))/(eig0_{k,q}(m)-eig0_k(n))$,
  public :: occ_fd        ! Fermi-Dirac statistic 1 / [(exp((e - mu)/ KT) + 1]
+ public :: occ_dfd       ! Derivative of Fermi-Dirac statistic: (exp((e - mu)/ KT) / KT[(exp((e - mu)/ KT) + 1]^2
  public :: occ_be        ! Bose-Einstein statistic  1 / [(exp((e - mu)/ KT) - 1]
+ public :: occ_dbe       ! Derivative of Bose-Einstein statistic  (exp((e - mu)/ KT) / KT[(exp((e - mu)/ KT) - 1]^2
  public :: dos_hdr_write
  public :: pareigocc
 
@@ -148,13 +153,11 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
 ! TODO: This parameter is defined in init_occ_ent but we cannot call the
 ! routine to get this value since the same variable is used to dimension the
 ! arrays! This Constants should be stored somewhere in a module.
- integer,parameter :: nptsdiv2_def=6000
- integer,parameter :: prtdos1=1
- integer :: bantot,iband,iene,ikpt,index,index_start,isppol
- integer :: nene,nptsdiv2
+ integer,parameter :: nptsdiv2_def=6000,  prtdos1=1
+ integer :: bantot,iband,iene,ikpt,index,index_start,isppol, nene,nptsdiv2
  real(dp) :: buffer,deltaene,dosdbletot,doshalftot,dostot
  real(dp) :: enemax,enemin,enex,intdostot,limit,tsmearinv
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp),allocatable :: entfun(:,:),occfun(:,:)
  real(dp),allocatable :: smdfun(:,:),xgrid(:)
@@ -280,9 +283,9 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
    do isppol=1,nsppol
 
      if (nsppol==2) then
-       if(isppol==1) write(message,'(a,16x,a)')  '#','Spin-up DOS'
-       if(isppol==2) write(message,'(2a,16x,a)')  ch10,'#','Spin-dn DOS '
-       call wrtout(unitdos,message,'COLL')
+       if(isppol==1) write(msg,'(a,16x,a)')  '#','Spin-up DOS'
+       if(isppol==2) write(msg,'(2a,16x,a)')  ch10,'#','Spin-dn DOS '
+       call wrtout(unitdos,msg,'COLL')
      end if
      index_start=0
      if(isppol==2)then
@@ -378,7 +381,7 @@ end subroutine getnel
 !!  occopt=option for occupancies
 !!  prtvol=control print volume and debugging output
 !!  stmbias=if non-zero, compute occupation numbers for STM (non-zero around the Fermi energy)
-!!   NOTE : in this case, only fermie and occ are meaningful outputs.
+!!   NOTE: in this case, only fermie and occ are meaningful outputs.
 !!  tphysel="physical" electronic temperature with FD occupations
 !!  tsmear=smearing width (or temperature)
 !!  wtk(nkpt)=k point weights
@@ -423,7 +426,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
  real(dp) :: entropyt(2),fermihit(2),fermilot(2),fermimidt(2),nelecthit(2)
  real(dp) :: nelectlot(2),nelectt(2),tsec(2)
  real(dp),allocatable :: doccdet(:),eigent(:),occt(:)
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -431,44 +434,42 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 
  call timab(74,1,tsec)
 
-!Here treat the case where occopt does not correspond to a metallic occupation scheme
+ ! Here treat the case where occopt does not correspond to a metallic occupation scheme
  if (occopt<3 .or. occopt>8) then
-   write(message,'(a,i0,a)')' occopt= ',occopt,', a value not allowed in newocc.'
-   MSG_BUG(message)
- end if ! test of metallic occopt
+   MSG_BUG(sjoin(' occopt= ',itoa(occopt),', a value not allowed in newocc.'))
+ end if
 
-!Check whether nband is a constant for all k point and spin-pol
+ ! Check whether nband is a constant for all k point and spin-pol
  do isppol=1,nsppol
    do ikpt=1,nkpt
      if(nband(ikpt+(isppol-1)*nkpt)/=nband(1))then
-       write(message,'(3a,i0,a,i0,a,i0,a)')&
-&       'The number of bands must be the same for all k-points ',ch10,&
-&       'but nband(1)= ',nband(1),' is different of nband(',&
-&       ikpt+(isppol-1)*nkpt,') = ',nband(ikpt+(isppol-1)*nkpt),'.'
-       MSG_BUG(message)
+       write(msg,'(3a,i0,a,i0,a,i0,a)')&
+        'The number of bands must be the same for all k-points ',ch10,&
+        'but nband(1)= ',nband(1),' is different of nband(',ikpt+(isppol-1)*nkpt,') = ',nband(ikpt+(isppol-1)*nkpt),'.'
+       MSG_BUG(msg)
      end if
    end do
  end do
 
-!Check whether nelect is strictly positive
- if(nelect<=zero)then
-   write(message,'(3a,es16.8,a)')&
+ ! Check whether nelect is strictly positive
+ if(nelect <= zero)then
+   write(msg,'(3a,es16.8,a)')&
 &   'nelect must be a positive number, while ',ch10,&
-&   'the calling routine ask nelect=',nelect,'.'
-   MSG_BUG(message)
+&   'the calling routine asks nelect= ',nelect,'.'
+   MSG_BUG(msg)
  end if
 
  maxocc=two/(nsppol*nspinor)
 !Check whether nelect is coherent with nband (nband(1) is enough,
 !since it was checked that nband is independent of k-point and spin-pol
- if( nelect > nband(1)*nsppol*maxocc )then
-   write(message,'(3a,es16.8,a,i0,a,es16.8,a)' )&
-&   'nelect must be smaller than nband*maxocc, while ',ch10,&
-&   'the calling routine gives nelect= ',nelect,', nband= ',nband(1),' and maxocc= ',maxocc,'.'
-   MSG_BUG(message)
+ if (nelect > nband(1)*nsppol*maxocc) then
+   write(msg,'(3a,es16.8,a,i0,a,es16.8,a)' )&
+   'nelect must be smaller than nband*maxocc, while ',ch10,&
+   'the calling routine gives nelect= ',nelect,', nband= ',nband(1),' and maxocc= ',maxocc,'.'
+   MSG_BUG(msg)
  end if
 
-!Use bissection algorithm to find fermi energy
+!Use bisection algorithm to find fermi energy
 !This choice is due to the fact that it will always give sensible
 !result (because the answer is bounded, even if the smearing function
 !is non-monotonic (which is the case for occopt=4 or 6)
@@ -508,26 +509,26 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 
 !If the target nelect is not between nelectlo and nelecthi, exit
  if(nelect<nelectlo .or. nelect>nelecthi)then
-   write(message, '(a,a,a,a,d16.8,a,a,d16.8,a,d16.8,a,a,d16.8,a,d16.8)') ch10,&
+   write(msg, '(a,a,a,a,d16.8,a,a,d16.8,a,d16.8,a,a,d16.8,a,d16.8)') ch10,&
 &   ' newocc: ',ch10,&
 &   '  The calling routine gives nelect=',nelect,ch10,&
 &   '  The lowest bound is ',fermilo,', with nelect=',nelectlo,ch10,&
 &   '  The highest bound is ',fermihi,', with nelect=',nelecthi
-   call wrtout(std_out,message,'COLL')
+   call wrtout(std_out,msg,'COLL')
 
-   write(message, '(11a)' )&
+   write(msg, '(11a)' )&
 &   'In order to get the right number of electrons,',ch10,&
 &   'it seems that the Fermi energy must be outside the range',ch10,&
 &   'of eigenenergies, plus 6 or 30 times the smearing, which is strange.',ch10,&
 &   'It might be that your number of bands (nband) corresponds to the strictly',ch10,&
 &   'minimum number of bands to accomodate your electrons (so, OK for an insulator),',ch10,&
 &   'while you are trying to describe a metal. In this case, increase nband, otherwise ...'
-   MSG_BUG(message)
+   MSG_BUG(msg)
  end if
 
  if( abs(spinmagntarget+99.99_dp) < tol10 ) then
 
-!  Usual bissection loop
+!  Usual bisection loop
    do ii=1,niter_max
      fermimid=(fermihi+fermilo)*half
 !    Produce nelectmid from fermimid
@@ -544,18 +545,17 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
      end if
      if( abs(nelecthi-nelectlo) <= nelect*two*tol14 .or. abs(fermihi-fermilo) <= tol14*abs(fermihi+fermilo) ) exit
      if(ii==niter_max)then
-       write(message,'(a,i0,3a,es22.14,a,es22.14,a)')&
-&       'It was not possible to find Fermi energy in ',niter_max,' bissections.',ch10,&
+       write(msg,'(a,i0,3a,es22.14,a,es22.14,a)')&
+&       'It was not possible to find Fermi energy in ',niter_max,' bisections.',ch10,&
 &       'nelecthi = ',nelecthi,', and nelectlo = ',nelectlo,'.'
-       MSG_BUG(message)
+       MSG_BUG(msg)
      end if
-   end do ! End of bissection loop
+   end do ! End of bisection loop
 
    fermie=fermimid
-   write(message, '(a,f14.6,a,f14.6,a,a,i4)' ) &
-&   ' newocc: new Fermi energy is ',fermie,' , with nelect=',nelectmid,ch10,&
-&   '  Number of bissection calls =',ii
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(2(a,f14.6),a,i0)' ) &
+&   ' newocc: new Fermi energy is ',fermie,' , with nelect=',nelectmid,', Number of bisection calls: ',ii
+   call wrtout(std_out,msg,'COLL')
 
 !  Compute occupation numbers for prtstm/=0, close to the Fermi energy
    if(abs(stmbias)>tol10)then
@@ -569,13 +569,13 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
      if(-stmbias>tol10)occ(:)=-occ(:)
      ABI_DEALLOCATE(occt)
 
-     write(message,'(a,f14.6)')' newocc: the number of electrons in the STM range is nelect_biased=',nelect_biased
-     call wrtout(std_out,message,'COLL')
+     write(msg,'(a,f14.6)')' newocc: the number of electrons in the STM range is nelect_biased=',nelect_biased
+     call wrtout(std_out,msg,'COLL')
    end if
 
  else ! Calculations with a specified moment
 
-!  Bissection loop
+!  Bisection loop
    cnt2=0
    cnt3=0
    entropy=zero
@@ -635,20 +635,20 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
        if( abs(nelecthi-nelectlo) <= 1.0d-13 .or. abs(fermihi-fermilo) <= 0.5d-14*abs(fermihi+fermilo) ) exit
 
        if(ii==niter_max)then
-         write(message,'(a,i3,3a,es22.14,a,es22.14,a)')&
-&         '  It was not possible to find Fermi energy in ',niter_max,' bissections.',ch10,&
-&         '  nelecthi=',nelecthi,', and nelectlo=',nelectlo,'.'
-         MSG_BUG(message)
+         write(msg,'(a,i3,3a,es22.14,a,es22.14,a)')&
+&         'It was not possible to find Fermi energy in ',niter_max,' bisections.',ch10,&
+&         'nelecthi= ',nelecthi,', and nelectlo= ',nelectlo,'.'
+         MSG_BUG(msg)
        end if
-     end do ! End of bissection loop
+     end do ! End of bisection loop
 
      cnt2 = cnt2 + nkpt*mband
      entropy = entropy + entropyt(is)
      fermie=fermimid
-     write(message, '(a,i2,a,f14.6,a,f14.6,a,a,i4)' ) &
+     write(msg, '(a,i2,a,f14.6,a,f14.6,a,a,i4)' ) &
 &     ' newocc: new Fermi energy for spin ', is, ' is ',fermie,' , with nelect=',nelectmid,ch10,&
-&     '  Number of bissection calls =',ii
-     call wrtout(std_out,message,'COLL')
+&     '  Number of bisection calls =',ii
+     call wrtout(std_out,msg,'COLL')
 
    end do ! spin
 
@@ -665,14 +665,14 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
  if(prtvol==0)nkpt_eff=min(nkpt_max,nkpt)
 
  if (nsppol==1)then
-   write(message, '(a,i0,a)' )' newocc: computed new occ. numbers for occopt= ',occopt,' , spin-unpolarized case. '
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(a,i0,a)' )' newocc: computed new occ. numbers for occopt= ',occopt,' , spin-unpolarized case. '
+   call wrtout(std_out,msg,'COLL')
    do ikpt=1,nkpt_eff
-     write(message,'(a,i4,a)' ) ' k-point number ',ikpt,' :'
+     write(msg,'(a,i4,a)' ) ' k-point number ',ikpt,' :'
      do ii=0,(nband(1)-1)/12
        if (ii == 3 .and. prtvol /= 0) exit
-       write(message,'(12f6.3)') occ(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(12f6.3)') occ(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
+       call wrtout(std_out,msg,'COLL')
      end do
    end do
    if (nkpt/=nkpt_eff) call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point information','COLL')
@@ -680,10 +680,10 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 !  DEBUG
 !  call wrtout(std_out,' newocc: corresponding derivatives are ','COLL')
 !  do ikpt=1,nkpt_eff
-!  write(message,'(a,i4,a)' ) ' k-point number ',ikpt,' :'
+!  write(msg,'(a,i4,a)' ) ' k-point number ',ikpt,' :'
 !  do ii=0,(nband(1)-1)/12
-!  write(message,'(12f6.1)') doccde(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
-!  call wrtout(std_out,message,'COLL')
+!  write(msg,'(12f6.1)') doccde(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
+!  call wrtout(std_out,msg,'COLL')
 !  end do
 !  end do
 !  if(nkpt/=nkpt_eff)then
@@ -691,14 +691,14 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 !  end if
 !  ENDDEBUG
  else
-   write(message, '(a,i0,2a)' )' newocc: computed new occupation numbers for occopt= ',occopt,ch10,'  (1) spin up   values  '
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(a,i0,2a)' )' newocc: computed new occupation numbers for occopt= ',occopt,ch10,'  (1) spin up   values  '
+   call wrtout(std_out,msg,'COLL')
    do ikpt=1,nkpt_eff
-     write(message,'(a,i0,a)' ) ' k-point number ',ikpt,':'
+     write(msg,'(a,i0,a)' ) ' k-point number ',ikpt,':'
      do ii=0,(nband(1)-1)/12
        if (ii == 3 .and. prtvol /= 0) exit
-       write(message,'(12f6.3)') occ(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(12f6.3)') occ(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
+       call wrtout(std_out,msg,'COLL')
      end do
    end do
    if (nkpt/=nkpt_eff) call wrtout(std_out,'newocc: prtvol=0, stop printing more k-point information','COLL')
@@ -707,12 +707,12 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
    do ikpt=1,nkpt_eff
      do ii=0,(nband(1)-1)/12
        if (ii == 3 .and. prtvol /= 0) exit
-       write(message,'(12f6.3)') occ( 1+ii*12+(ikpt-1+nkpt)*nband(1):min(12+ii*12,nband(1))+(ikpt-1+nkpt)*nband(1) )
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(12f6.3)') occ( 1+ii*12+(ikpt-1+nkpt)*nband(1):min(12+ii*12,nband(1))+(ikpt-1+nkpt)*nband(1) )
+       call wrtout(std_out,msg,'COLL')
      end do
    end do
    if(nkpt/=nkpt_eff) call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point information','COLL')
- end if !  End choice based on spin
+ end if ! End choice based on spin
 
  call timab(74,2,tsec)
 
@@ -765,7 +765,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
  real(dp) :: resFD1,resFD2,resFD3,resFD4,resmom,resmom1,resmom2
  real(dp) :: resmom3,resmom4,secmom,smom1,smom2,thdmom,tmom1,tmom2,tmpexpsum
  real(dp) :: tmpsmdfun,tratio,tt,xx,yp1,ypn
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp),save :: entfun_prev(-nptsdiv2_def:nptsdiv2_def,2),occfun_prev(-nptsdiv2_def:nptsdiv2_def,2)
  real(dp),save :: smdfun_prev(-nptsdiv2_def:nptsdiv2_def,2),xgrid_prev(-nptsdiv2_def:nptsdiv2_def)
@@ -795,8 +795,8 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        dblsmr = 1
 !      Use FD occupations (one smearing) only with "physical" temperature tphysel
      else if (occopt /= 3) then
-       write(message, '(a,i6,a)' )' tphysel /= 0, tsmear == 0, but occopt is not = 3, but ',occopt,'.'
-       MSG_ERROR(message)
+       write(msg, '(a,i6,a)' )' tphysel /= 0, tsmear == 0, but occopt is not = 3, but ',occopt,'.'
+       MSG_ERROR(msg)
      end if
    end if
 
@@ -898,8 +898,8 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        end do
 
      else
-       write(message, '(a,i0,a)' )' Occopt=',occopt,' is not allowed in getnel. '
-       MSG_BUG(message)
+       write(msg, '(a,i0,a)' )' Occopt=',occopt,' is not allowed in getnel. '
+       MSG_BUG(msg)
      end if
 
 !    ---------------------------------------------------------
@@ -930,10 +930,10 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
 !    check input values of occopt and fill smd2(:) with appropriate data:
 !    smd2(:) contains delta_resmear ( x )
      if(occopt == 3) then
-       write(message, '(a,a)' )&
+       write(msg, '(a,a)' )&
 &       'Occopt=3 is not allowed as a re-smearing.', &
 &       'Use a single FD, or re-smear with a different delta type (faster cutoff). '
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      else if(occopt==4 .or. occopt==5)then
 !      Cold smearing of Marzari, two values of the "a" parameter being possible
 !      first value gives minimization of the bump
@@ -975,8 +975,8 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
          smd2(-ii)=smd2(ii)
        end do
      else
-       write(message, '(a,i0,a)' )' Occopt= ',occopt,' is not allowed in getnel. '
-       MSG_BUG(message)
+       write(msg, '(a,i0,a)' )' Occopt= ',occopt,' is not allowed in getnel. '
+       MSG_BUG(msg)
      end if
 
 !    Use O(1/N4) algorithm from Num Rec (see below)
@@ -1298,7 +1298,7 @@ subroutine occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,occopt,occ_k,occ_kq,
 !scalars
  integer :: ibandk,ibandkq
  real(dp) :: diffabsocc,diffeig,diffocc,ratio,sumabsocc
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -1319,14 +1319,14 @@ subroutine occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,occopt,occ_k,occ_kq,
 !        the occupation numbers must also be degenerate, in which
 !        case there is no contribution from this pair of bands
          if( abs(diffocc) > tol5 ) then
-           write(message,'(a,a,a,a,a,a,a,2(a,i4,a,es16.6,a,es16.6,a,a),a)' ) &
+           write(msg,'(a,a,a,a,a,a,a,2(a,i4,a,es16.6,a,es16.6,a,a),a)' ) &
 &           'In a non-metallic case (occopt<3), for a RF calculation,',ch10,&
 &           'if the eigenvalues are degenerate,',' the occupation numbers must also be degenerate.',ch10,&
 &           'However, the following pair of states gave :',ch10,&
 &           'k -state, band number',ibandk,', occ=',occ_k(ibandk),'eigenvalue=',eig0_k(ibandk),',',ch10,&
 &           ' kq-state, band number',ibandkq,', occ=',occ_kq(ibandkq),', eigenvalue=',eig0_kq(ibandkq),'.',ch10,&
 &           'Action: change occopt, consistently, in GS and RF calculations.'
-           MSG_ERROR(message)
+           MSG_ERROR(msg)
          end if
          ratio=0.0_dp
        else
@@ -1417,6 +1417,56 @@ end function occ_fd
 
 !----------------------------------------------------------------------
 
+!!****f* m_occ/occ_dfd
+!! NAME
+!!  occ_dfd
+!!
+!! FUNCTION
+!!  Derivative of Fermi-Dirac statistic: (exp((e - mu)/ KT) / KT[(exp((e - mu)/ KT) + 1]^2
+!!  Note that kT is given in Hartree so the derivative as well
+!!
+!! INPUTS
+!!   ee=Single particle energy in Ha
+!!   kT=Value of K_Boltzmann x T in Ha.
+!!   mu=Chemical potential in Ha.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+elemental real(dp) function occ_dfd(ee, kT, mu)
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: ee, kT, mu
+
+!Local variables ------------------------------
+ real(dp) :: ee_mu,arg
+! *************************************************************************
+
+ ee_mu = ee - mu
+
+ !TODO: Find good tols.
+ ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
+ if (kT > tol6) then
+   arg = ee_mu / kT
+   if (arg > maxDFDarg) then
+     occ_dfd = zero
+   else if (arg < -maxDFDarg) then
+     occ_dfd = zero
+   else
+     occ_dfd = exp(arg) / (exp(arg) + one)**2 / kT
+   end if
+ else
+   occ_dfd = zero
+ end if
+
+end function occ_dfd
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_occ/occ_be
 !! NAME
 !!  occ_be
@@ -1450,7 +1500,7 @@ elemental real(dp) function occ_be(ee, kT, mu)
  ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
  if (kT > tol12) then
    arg = ee_mu / kT
-   if (arg > tol12 .and. arg < 600._dp) then
+   if (arg > tol12 .and. arg < maxBEarg) then
      occ_be = one / (exp(arg) - one)
    else
      occ_be = zero
@@ -1462,6 +1512,58 @@ elemental real(dp) function occ_be(ee, kT, mu)
 
 end function occ_be
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_occ/occ_dbe
+!! NAME
+!!  occ_dbe
+!!
+!! FUNCTION
+!!   Derivative of Bose-Einstein statistic  (exp((e - mu)/ KT) / KT[(exp((e - mu)/ KT) - 1]^2
+!!   Note that kT is given in Hartree so the derivative as well
+!!
+!! INPUTS
+!!   ee=Single particle energy in Ha
+!!   kT=Value of K_Boltzmann x T in Ha.
+!!   mu=Chemical potential in Ha (usually zero)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+elemental real(dp) function occ_dbe(ee, kT, mu)
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: ee, kT, mu
+
+!Local variables ------------------------------
+ real(dp) :: ee_mu, arg
+! *************************************************************************
+
+ ee_mu = ee - mu
+
+ !TODO: Find good tols.
+ ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
+ if (kT > tol12) then
+   arg = ee_mu / kT
+   if (arg > tol12 .and. arg < maxDBEarg) then
+     occ_dbe = exp(arg) / (kT * (exp(arg) - one)**2)
+   else
+     occ_dbe = zero
+   end if
+ else
+   ! No condensate for T --> 0
+   occ_dbe = zero
+ end if
+
+end function occ_dbe
+!!***
+
+!----------------------------------------------------------------------
+
 
 !!****f* m_occ/dos_hdr_write
 !!
@@ -1653,7 +1755,7 @@ subroutine pareigocc(eigen,formeig,localrdwf,mpi_enreg,mband,nband,nkpt,nsppol,o
 !Local variables-------------------------------
 !scalars
  integer :: band_index,iband,ierr,ikpt,isppol,me,nbks,spaceComm
- !character(len=500) :: message
+ !character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: buffer1(:),buffer2(:)

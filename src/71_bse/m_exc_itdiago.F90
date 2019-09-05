@@ -28,13 +28,13 @@
 MODULE m_exc_itdiago
 
  use defs_basis
- use defs_abitypes
  use m_bs_defs
  use m_errors
  use m_abicore
  use m_linalg_interfaces
+ use m_hdr
  use m_xmpi
-#if defined HAVE_MPI2
+#ifdef HAVE_MPI2
  use mpi
 #endif
 
@@ -55,7 +55,7 @@ MODULE m_exc_itdiago
  public :: exc_iterative_diago    ! Calculates eigenvalues and eigenvectors of the Resonant BSE Hamiltonian
 !!***
 
-CONTAINS  !=========================================================================================================================
+CONTAINS  !===============================================================
 !!***
 
 !!****f* m_exc_itdiago/exc_iterative_diago
@@ -109,13 +109,10 @@ CONTAINS  !=====================================================================
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
 subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -195,10 +192,7 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
  ABI_CHECK(nstates <= hexc_size,"nstates cannot be greater that hexc size!")
 
  ! Divide the columns of the Hamiltonian among the nodes.
- call xmpi_split_work(hexc_size,comm,my_t1,my_t2,msg,ierr)
- if (ierr/=0) then
-   MSG_WARNING(msg)
- end if
+ call xmpi_split_work(hexc_size,comm,my_t1,my_t2)
 
  my_nt = my_t2-my_t1+1
  write(msg,'(a,i0,a)')" Will handle ",my_nt," columns of the excitonic Hamiltonian. "
@@ -239,8 +233,7 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
  call wrtout(std_out,msg,"COLL")
 
  ABI_MALLOC(hexc_diagonal,(my_t1:my_t2))
- ABI_STAT_MALLOC(hexc,(hexc_size,my_t1:my_t2), ierr)
- ABI_CHECK(ierr==0, 'out of memory: excitonic hamiltonian')
+ ABI_MALLOC_OR_DIE(hexc,(hexc_size,my_t1:my_t2), ierr)
  !
  ! Read and construct full excitonic Hamiltonian using Hermiticity.
  if (BS_files%in_hreso /= BSE_NOFILE) then
@@ -270,8 +263,7 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
  write(msg,'(a,f8.1,a)')' Allocating BSE eigenvectors. Memory requested: ',bsize_phi_block*b2Mb,' Mb.'
  call wrtout(std_out,msg,"COLL",do_flush=.True.)
 
- ABI_STAT_MALLOC(phi_block,(my_t1:my_t2,nstates), ierr)
- ABI_CHECK(ierr==0, "out-of-memory phi_block")
+ ABI_MALLOC_OR_DIE(phi_block,(my_t1:my_t2,nstates), ierr)
 
  ihexc_fname = ""
  if (BS_files%in_eig /= BSE_NOFILE) ihexc_fname = BS_files%in_eig
@@ -375,7 +367,7 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
 
        do ii=my_t1,my_t2
          ! Teter polynomial ratio, modified according to Kresse, Furthmuller, PRB 54, 11169 (1996) [[cite:Kresse1996]]
-         xx = hexc_diagonal(ii)/den 
+         xx = hexc_diagonal(ii)/den
          poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
          fac=poly/(poly+16._dp*xx**4)
          kprc = fac*four/(three*den)
@@ -655,13 +647,10 @@ CONTAINS  !===========================================================
 !!      m_exc_itdiago
 !!
 !! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
 subroutine exc_init_phi_block(ihexc_fname,use_mpio,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -817,13 +806,10 @@ end subroutine exc_init_phi_block
 !!      m_exc_itdiago
 !!
 !! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
 subroutine exc_write_phi_block(oeig_fname,use_mpio)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -866,8 +852,7 @@ subroutine exc_write_phi_block(oeig_fname,use_mpio)
 
    ! Wavefunctions are gathered on the master node band-by-band.
    ! TODO bands should be treated in blocks to minimize the number of MPI calls.
-   ABI_STAT_MALLOC(buffer_dpc,(hexc_size), ierr)
-   ABI_CHECK(ierr==0, "out of memory buffer_dpc")
+   ABI_MALLOC_OR_DIE(buffer_dpc,(hexc_size), ierr)
 
    do state=1,nstates
      buffer_dpc=czero
@@ -980,13 +965,10 @@ end subroutine exc_write_phi_block
 !!      m_exc_itdiago
 !!
 !! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
 subroutine exc_subspace_rotation()
-
- implicit none
 
 !Local variables ------------------------------
  integer :: ii,jj,ipack,ierr
@@ -1085,13 +1067,10 @@ end subroutine exc_subspace_rotation
 !!      m_exc_itdiago
 !!
 !! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
 subroutine exc_cholesky_ortho()
-
- implicit none
 
 !Local variables ------------------------------
  integer :: my_info,ii,jj,ipack,ierr
@@ -1191,8 +1170,6 @@ end subroutine exc_cholesky_ortho
 
 function convergence_degree(resid)
 
- implicit none
-
 !Arguments
  integer :: convergence_degree
  real(dp),intent(in) :: resid
@@ -1226,13 +1203,10 @@ end function convergence_degree
 !!      m_exc_itdiago
 !!
 !! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
 subroutine exc_check_phi_block(string)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -124,8 +124,8 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
  real(dp) :: ucvol
  real(dp) :: etotal,etotal_prev
  logical  :: DEBUG=.TRUE.
- integer,save :: icenter,irshift ! DELOCINT indexes
- integer,save :: nshell,ndeloc ! DELOCINT number of
+ !integer,save :: icenter,irshift ! DELOCINT indexes
+ integer,save :: ndeloc ! DELOCINT number of
  character(len=500) :: message
 
 !arrays

@@ -30,16 +30,18 @@ module m_kpts
  use m_abicore
  use m_crystal
  use m_sort
- use m_kptrank
+ use m_krank
+ use m_htetra
  use m_xmpi
 
  use m_time,           only : timab
+ use m_time,           only : cwtime, cwtime_report
+ use m_copy,           only : alloc_copy
  use m_symtk,          only : mati3inv, mati3det, matr3inv, smallprim
  use m_fstrings,       only : sjoin, itoa, ltoa
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_geometry,       only : metric
- use m_tetrahedron,    only : t_tetrahedron, init_tetra, destroy_tetra
- use m_symkpt,         only : symkpt
+ use m_symkpt,         only : symkpt, symkpt_new
 
  implicit none
 
@@ -47,7 +49,7 @@ module m_kpts
 
  public :: kpts_timrev_from_kptopt   ! Returns the value of timrev from kptopt
  public :: kpts_ibz_from_kptrlatt    ! Determines the IBZ, the weights and the BZ from kptrlatt
- public :: tetra_from_kptrlatt       ! Create an instance of `t_tetrahedron` from kptrlatt and shiftk
+ public :: tetra_from_kptrlatt       ! Create an instance from kptrlatt and shiftk
  public :: symkchk                   ! Checks that the set of k points has the full space group symmetry,
                                      ! modulo time reversal if appropriate.
  public :: listkk                    ! Find correspondence between two set of k-points.
@@ -56,10 +58,10 @@ module m_kpts
  public :: get_full_kgrid            ! Create full grid of kpoints and find equivalent irred ones.
                                      ! Duplicates work in getkgrid, but need all outputs of kpt_fullbz, and indkpt
 
- private :: get_kpt_fullbz          ! Create full grid of kpoints from kptrlatt and shiftk
+ private :: get_kpt_fullbz           ! Create full grid of kpoints from kptrlatt and shiftk
 
- public :: smpbz                      ! Generate a set of special k (or q) points which samples in a homogeneous way the BZ
- public :: testkgrid                  ! Test different grids of k points.
+ public :: smpbz                     ! Generate a set of special k (or q) points which samples in a homogeneous way the BZ
+ public :: testkgrid                 ! Test different grids of k points.
 
  ! FIXME: deprecated
  public :: mknormpath
@@ -80,7 +82,7 @@ contains  !============================================================
 !!
 !! INPUTS
 !!  kptopt=option for the generation of k points
-!!    (defines whether spatical symmetries and/or time-reversal can be used)
+!!    (defines whether spatial symmetries and/or time-reversal can be used)
 !!
 !! PARENTS
 !!
@@ -112,7 +114,7 @@ end function kpts_timrev_from_kptopt
 !! INPUTS
 !!  cryst<crystal_t> = crystalline structure with info on symmetries and time-reversal.
 !!  kptopt=option for the generation of k points
-!!    (defines whether spatical symmetries and/or time-reversal can be used)
+!!    (defines whether spatial symmetries and/or time-reversal can be used)
 !!  kptrlatt(3,3)=integer coordinates of the primitive vectors of the
 !!   lattice reciprocal to the k point lattice to be generated here
 !!   If diagonal, the three values are the Monkhorst-Pack usual values, in case of simple cubic.
@@ -127,17 +129,18 @@ end function kpts_timrev_from_kptopt
 !!  kbz(3,nkbz) = k-points in the BZ.
 !!  [new_kptrlatt] = New value of kptrlatt returned by getkgrid
 !!  [new_shiftk(3,new_nshiftk)] = New set of shifts returned by getkgrid
+!!  [bz2ibz(6,nkbz)]=Mapping BZ --> IBZ
 !!
 !! PARENTS
 !!      m_dvdb,m_ebands,m_gruneisen,m_ifc,m_kpts,m_phgamma,m_phonons,m_sigmaph
 !!
 !! CHILDREN
-!!      getkgrid,init_tetra,kpts_ibz_from_kptrlatt,listkk
+!!      getkgrid,kpts_ibz_from_kptrlatt,listkk
 !!
 !! SOURCE
 
 subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
-  new_kptrlatt, new_shiftk)  ! Optional
+  new_kptrlatt, new_shiftk, bz2ibz)  ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -146,6 +149,7 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
  type(crystal_t),intent(in) :: cryst
 !arrays
  integer,intent(in) :: kptrlatt(3,3)
+ integer,optional,allocatable,intent(out) :: bz2ibz(:,:)
  integer,optional,intent(out) :: new_kptrlatt(3,3)
  real(dp),intent(in) :: shiftk(3,nshiftk)
  real(dp),allocatable,intent(out) :: wtk(:),kibz(:,:),kbz(:,:)
@@ -153,39 +157,33 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: iout0=0,chksymbreak0=0,iscf2=2
- integer :: my_nshiftk,nkpt_computed
+ integer,parameter :: iout0 = 0, chksymbreak0 = 0, iscf2=2
+ integer :: my_nshiftk
  real(dp) :: kptrlen
 !arrays
- integer,parameter :: vacuum0(3)=[0, 0, 0]
+ integer,parameter :: vacuum0(3) = [0, 0, 0]
  integer :: my_kptrlatt(3,3)
+ integer,allocatable :: indkpt(:),bz2ibz_smap(:,:)
  real(dp) :: my_shiftk(3,MAX_NSHIFTK)
 
 ! *********************************************************************
 
- ! First call to getkgrid to obtain the number of points in the BZ.
- ABI_MALLOC(kibz, (3,0))
- ABI_MALLOC(wtk, (0))
-
  ! Copy kptrlatt and shifts because getkgrid can change them
  ! Be careful as getkgrid expects shiftk(3,MAX_NSHIFTK).
- ABI_CHECK(nshiftk > 0 .and. nshiftk <= MAX_NSHIFTK, sjoin("nshiftk must be in 1 and", itoa(MAX_NSHIFTK)))
+ ABI_CHECK(nshiftk > 0 .and. nshiftk <= MAX_NSHIFTK, sjoin("nshiftk must be between 1 and", itoa(MAX_NSHIFTK)))
  my_nshiftk = nshiftk; my_shiftk = zero; my_shiftk(:,1:nshiftk) = shiftk
  my_kptrlatt = kptrlatt
 
- call getkgrid(chksymbreak0,iout0,iscf2,kibz,kptopt,my_kptrlatt,kptrlen,&
-   cryst%nsym,0,nkibz,my_nshiftk,cryst%nsym,cryst%rprimd,my_shiftk,cryst%symafm,cryst%symrel,vacuum0,wtk)
+ call getkgrid_low(chksymbreak0,iout0,iscf2,kibz,kptopt,my_kptrlatt,kptrlen,&
+   cryst%nsym,-1,nkibz,my_nshiftk,cryst%nsym,cryst%rprimd,my_shiftk,cryst%symafm,&
+   cryst%symrel,vacuum0,wtk,indkpt,bz2ibz_smap,fullbz=kbz)
 
- ABI_FREE(kibz)
- ABI_FREE(wtk)
-
- ! Recall getkgrid to get kibz and wtk.
- ABI_MALLOC(kibz, (3, nkibz))
- ABI_MALLOC(wtk, (nkibz))
-
- call getkgrid(chksymbreak0,iout0,iscf2,kibz,kptopt,my_kptrlatt,kptrlen,&
-   cryst%nsym,nkibz,nkpt_computed,my_nshiftk,cryst%nsym,cryst%rprimd,my_shiftk,&
-   cryst%symafm,cryst%symrel,vacuum0,wtk,fullbz=kbz)
+ if (present(bz2ibz)) then
+   ABI_MOVE_ALLOC(bz2ibz_smap, bz2ibz)
+ else
+   ABI_SFREE(bz2ibz_smap)
+ endif
+ ABI_SFREE(indkpt)
 
  nkbz = size(kbz, dim=2)
 
@@ -208,7 +206,7 @@ end subroutine kpts_ibz_from_kptrlatt
 !! tetra_from_kptrlatt
 !!
 !! FUNCTION
-!!  Create an instance of `t_tetrahedron` from kptrlatt and shiftk
+!!  Create an instance from kptrlatt and shiftk
 !!
 !! INPUTS
 !!  cryst<cryst_t>=Crystalline structure.
@@ -218,9 +216,10 @@ end subroutine kpts_ibz_from_kptrlatt
 !!  shiftk(3,nshiftk)=shift vectors for k point generation
 !!  nkibz=Number of points in the IBZ
 !!  kibz(3,nkibz)=Reduced coordinates of the k-points in the IBZ.
+!!  comm= MPI communicator
 !!
 !! OUTPUT
-!!  tetra<t_tetrahedron>=Tetrahedron object, fully initialized if ierr == 0.
+!!  tetra<htetra_t>=Tetrahedron object, fully initialized if ierr == 0.
 !!  msg=Error message if ierr /= 0
 !!  ierr=Exit status
 !!
@@ -228,16 +227,16 @@ end subroutine kpts_ibz_from_kptrlatt
 !!      gstate,wfk_analyze
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
+!!      listkk,smpbz
 !!
 !! SOURCE
 
-type(t_tetrahedron) function tetra_from_kptrlatt( &
-&  cryst, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, msg, ierr) result (tetra)
+type(htetra_t) function tetra_from_kptrlatt( &
+  cryst, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, comm, msg, ierr) result (htetra)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: kptopt,nshiftk,nkibz
+ integer,intent(in) :: kptopt,nshiftk,nkibz,comm
  integer,intent(out) :: ierr
  character(len=*),intent(out) :: msg
  type(crystal_t),intent(in) :: cryst
@@ -247,12 +246,12 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
 
 !Local variables-------------------------------
 !scalars
- integer :: nkfull,timrev,sppoldbl,my_nkibz,new_nshiftk
- real(dp) :: dksqmax
+ integer :: nkfull,my_nkibz,new_nshiftk
  character(len=80) :: errorstring
 !arrays
  integer :: new_kptrlatt(3,3)
- integer,allocatable :: indkk(:,:)
+ integer,allocatable :: indkk(:)
+ integer,allocatable :: bz2ibz(:,:)
  real(dp) :: rlatt(3,3),klatt(3,3)
  real(dp),allocatable :: kfull(:,:),my_kibz(:,:),my_wtk(:),new_shiftk(:,:)
 
@@ -275,19 +274,18 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
  end if
 
  call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, &
-   my_nkibz, my_kibz, my_wtk, nkfull, kfull, new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
+   my_nkibz, my_kibz, my_wtk, nkfull, kfull, new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk, bz2ibz=bz2ibz)
 
- ABI_FREE(my_kibz)
  ABI_FREE(my_wtk)
  new_nshiftk = size(new_shiftk, dim=2)
 
- if (my_nkibz /= nkibz) then
+ if (my_nkibz /= nkibz .or. all(my_kibz /= kibz) ) then
    msg = sjoin("Input nkibz:", itoa(nkibz), "does not agree with computed value:", itoa(my_nkibz))
    ierr = 1; goto 10
  end if
 
  ! Do not support new_nshiftk > 1: lattice must be decomposed into boxes
- ! and this is not always possible (I think) with bizzare shiftks
+ ! and this is not always possible (I think) with bizarre shifts
  ! normally at this point we have incorporated everything into
  ! new_kptrlatt, and only 1 shift is needed (in particular for MP grids).
  if (new_nshiftk > 1) then
@@ -299,33 +297,16 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
    ierr = 2; goto 10
  end if
 
- ! Costruct full BZ and create mapping BZ --> IBZ
- ! Note:
- !   - we don't change the value of nsppol hence sppoldbl is set to 1
- !   - we use symrec (operations in reciprocal space)
- !
- sppoldbl = 1; timrev = kpts_timrev_from_kptopt(kptopt)
- ABI_MALLOC(indkk, (nkfull*sppoldbl,6))
-
- ! Compute k points from input file closest to the output file
- call listkk(dksqmax,cryst%gmet,indkk,kibz,kfull,nkibz,nkfull,cryst%nsym,&
-    sppoldbl,cryst%symafm,cryst%symrec,timrev,xmpi_comm_self,use_symrec=.True.)
-
- if (dksqmax > tol12) then
-   write(msg, '(3a,es16.6,6a)' )&
-   'At least one of the k points could not be generated from a symmetrical one.',ch10,&
-   'dksqmax=',dksqmax,ch10,&
-   'new_kptrkatt= ',trim(ltoa(reshape(new_kptrlatt, [9]))),ch10,&
-   'new_shiftk= ',trim(ltoa(reshape(new_shiftk, [3*new_nshiftk])))
-   ierr = 2; goto 10
- end if
-
  rlatt = new_kptrlatt; call matr3inv(rlatt, klatt)
 
- call init_tetra(indkk(:,1), cryst%gprimd, klatt, kfull, nkfull, tetra, ierr, errorstring)
+ ABI_MALLOC(indkk,(nkfull))
+ indkk(:) = bz2ibz(1,:)
+ ABI_SFREE(bz2ibz)
+ call htetra_init(htetra, indkk, cryst%gprimd, klatt, kfull, nkfull, my_kibz, my_nkibz, ierr, errorstring, comm)
  if (ierr /= 0) msg = errorstring
 
  10 continue
+ ABI_SFREE(my_kibz)
  ABI_SFREE(indkk)
  ABI_SFREE(kfull)
  ABI_SFREE(new_shiftk)
@@ -427,7 +408,7 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
 
 !    Loop on the symmetries
 !    For each k-point and each symmetry transformation, a matching
-!    k-pointpt must be found, modulo time reversal if appropriate
+!    k-point must be found, modulo time reversal if appropriate
      do isym=1,nsym
 
 !      Get the symmetric of the vector
@@ -487,7 +468,7 @@ end function symkchk
 !!
 !! FUNCTION
 !! Given a list of nkpt1 initial k points kptns1 and a list of nkpt2
-!! final k points kptns2, associates each final k pt with a "closest"
+!! final k points kptns2, associates each final kpt with a "closest"
 !! initial k point (or symmetric thereof, also taking possible umklapp)
 !! as determined by a metric gmet, that commutes with the symmetry operations.
 !! The algorithm does not scale as nkpt1 times nkpt2, thanks
@@ -505,10 +486,11 @@ end function symkchk
 !!  sppoldbl=if 1, no spin-polarisation doubling
 !!           if 2, spin-polarisation doubling using symafm
 !!  symafm(nsym)=(anti)ferromagnetic part of symmetry operations
-!!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on
-!!                   value of use_symrec
+!!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on value of use_symrec
 !!  timrev=1 if the use of time-reversal is allowed; 0 otherwise
-!!  comm=MPI communicator
+!!  comm=MPI communicator.
+!!  [exit_loop]: if present and True, exit the loop over k-points in the sphere as soon as the lenght**2 of the
+!!    difference vector is smaller than tol12. Default: False
 !!  [use_symrec]: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
 !!
 !! OUTPUT
@@ -542,13 +524,13 @@ end function symkchk
 !! SOURCE
 
 subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,symafm,symmat,timrev,comm, &
-                  use_symrec) ! optional
+                  exit_loop, use_symrec) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpt1,nkpt2,nsym,sppoldbl,timrev,comm
  real(dp),intent(out) :: dksqmax
- logical,optional,intent(in) :: use_symrec
+ logical,optional,intent(in) :: use_symrec, exit_loop
 !arrays
  integer,intent(in) :: symafm(nsym),symmat(3,3,nsym)
  integer,intent(out) :: indkk(nkpt2*sppoldbl,6)
@@ -557,8 +539,8 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
 !Local variables-------------------------------
 !scalars
  integer,parameter :: usesym=1, limit=1
- integer :: nprocs, my_rank, ierr
- integer :: l3,ig1,ig2,ig3,ii,ikpg1,ikpt1,ikpt2,ikpt2_done
+ integer :: nprocs, my_rank, ierr, isk_start, isk_stop
+ integer :: l3,ig1,ig2,ig3,ii,ikpg1,ikpt1,ikpt2,ikpt2_done, isk
  integer :: ilarger,ismaller,itrial
  integer :: isppol,isym,itimrev,jkpt1,jsym,jtime
  integer :: nsym_used,timrev_used
@@ -566,18 +548,16 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  character(len=500) :: msg
 !arrays
  integer :: dkint(3),jdkint(3),k1int(3),k2int(3)
- integer, allocatable :: isort(:)
+ integer, allocatable :: isort(:), tmp_indkk(:,:)
  real(dp) :: tsec(2)
  real(dp) :: dk(3),kpg1(3),kpt1a(3),k1(3),k2(3)
-!real(dp) :: kasq,ka(3)
+ !real(dp) :: kasq,ka(3)
  real(dp),allocatable :: lkpg1(:),lkpg1_sorted(:)
 
 ! *************************************************************************
 
- !write(std_out,*)' listkk : nkpt1,nkpt2,nsym=',nkpt1,nkpt2,nsym
- call timab(1021,1,tsec)
+ call timab(1021, 1, tsec)
 
- !comm = xmpi_comm_self
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  if (sppoldbl<1 .or. sppoldbl>2) then
@@ -591,16 +571,19 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  if(usesym==0)nsym_used=1
  if(usesym==0)timrev_used=0
 
- ! Precompute the length of the kpt1 vectors, also taking into account possible umpklapp vectors
+ ! Precompute the length of the kpt1 vectors, also taking into account possible umklapp vectors
  l3 = (2*limit+1)**3
  ABI_CALLOC(lkpg1,(l3*nkpt1))
  ABI_CALLOC(lkpg1_sorted,(l3*nkpt1))
  ABI_ALLOCATE(isort,(l3*nkpt1))
  isort = 0
 
+ call xmpi_split_work(nkpt1, comm, isk_start, isk_stop)
  !write(std_out,*)' List of kpt1 vectors'; write(std_out,*)' Length of the kpt1 vectors:'
- do ikpt1=1,nkpt1
-   if (mod(ikpt1, nprocs) /= my_rank) cycle  ! MPI parallelism
+
+ do ikpt1=isk_start,isk_stop
+ !do ikpt1=1,nkpt1
+   !if (mod(ikpt1, nprocs) /= my_rank) cycle  ! MPI parallelism
    k1(:)=kptns1(:,ikpt1)
    !write(std_out,*)ikpt1,k1(:)
    k1int(:)=nint(k1(:)+tol12)
@@ -614,12 +597,12 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
 
          ikpg1 = ig1+limit+1 + (2*limit+1)*(ig2+limit) + (2*limit+1)**2*(ig3+limit) + l3*(ikpt1-1)
          ! Compute the norm of the vector (also taking into account possible umklapp)
-         lkpg1(ikpg1)=sqrt(gmet(1,1)*kpg1(1)**2+gmet(2,2)*kpg1(2)**2+&
-&         gmet(3,3)*kpg1(3)**2+two*(gmet(2,1)*kpg1(2)*kpg1(1)+&
-&         gmet(3,2)*kpg1(3)*kpg1(2)+gmet(3,1)*kpg1(3)*kpg1(1)))
+         lkpg1(ikpg1)=sqrt(gmet(1,1)*kpg1(1)**2+gmet(2,2)*kpg1(2)**2 + &
+                           gmet(3,3)*kpg1(3)**2+two*(gmet(2,1)*kpg1(2)*kpg1(1) + &
+                           gmet(3,2)*kpg1(3)*kpg1(2)+gmet(3,1)*kpg1(3)*kpg1(1)))
          lkpg1_sorted(ikpg1)=lkpg1(ikpg1)
          isort(ikpg1)=ikpg1
-         ! write(std_out,*)' ikpt1,ig1,ig2,ig3,lkpg1=',ikpt1,ig1,ig2,ig3,lkpg1(ikpg1)
+         !write(std_out,*)' ikpt1,ig1,ig2,ig3,lkpg1=',ikpt1,ig1,ig2,ig3,lkpg1(ikpg1)
        end do
      end do
    end do
@@ -632,19 +615,30 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  end if
 
  call sort_dp(l3*nkpt1,lkpg1_sorted,isort,tol12)
+ ! From "precompute" to "sort_dp" represents more thatn 50% of the overall wall time for large meshes.
 
-!write(std_out,*)' listkk : output list of kpt1 for checking purposes '
-!write(std_out,*)' ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii)) '
-!do ii=1,l3*nkpt1
-!ikpt1=(isort(ii)-1)/l3+1
-!write(std_out,*)ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii))
-!enddo
+ !write(std_out,*)' listkk : output list of kpt1 for checking purposes '
+ !write(std_out,*)' ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii)) '
+ !do ii=1,l3*nkpt1
+ !ikpt1=(isort(ii)-1)/l3+1
+ !write(std_out,*)ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii))
+ !enddo
 
  dksqmax = zero
  indkk = 0
+ ! TODO: Should change API to use this shape.
+ ! workspace array for improved memory access.
+ ABI_MALLOC(tmp_indkk, (6, nkpt2*sppoldbl))
+ tmp_indkk = 0
+
+ ! Split loop in contiguous blocks
+ call xmpi_split_work(sppoldbl * nkpt2, comm, isk_start, isk_stop)
+
  do isppol=1,sppoldbl
    do ikpt2=1,nkpt2
-     if (mod(ikpt2 + (isppol-1)*nkpt2, nprocs) /= my_rank) cycle  ! MPI parallelism
+     isk = ikpt2 + (isppol-1)*nkpt2
+     !if (mod(isk, nprocs) /= my_rank) cycle  ! MPI parallelism
+     if (isk < isk_start .or. isk > isk_stop) cycle
 
      ikpt2_done=0
      ! Precompute the length of the kpt2 vector, with the Umklapp vector such that it is the closest to the Gamma point
@@ -652,16 +646,16 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
      k2int(:)=nint(k2(:)+tol12)
      k2(:)=k2(:)-k2int(:)
      lk2=sqrt(gmet(1,1)*k2(1)**2+gmet(2,2)*k2(2)**2+&
-&     gmet(3,3)*k2(3)**2+two*(gmet(2,1)*k2(2)*k2(1)+&
-&     gmet(3,2)*k2(3)*k2(2)+gmet(3,1)*k2(3)*k2(1)))
+              gmet(3,3)*k2(3)**2+two*(gmet(2,1)*k2(2)*k2(1)+&
+              gmet(3,2)*k2(3)*k2(2)+gmet(3,1)*k2(3)*k2(1)))
      ! write(std_out, '(a,i4,7es16.6)' )' listkk : ikpt2,kptns2(:,ikpt2),k2(:),lk2=',ikpt2,kptns2(:,ikpt2),k2(:),lk2
 
      ! Find the kpt1 vector whose length is the most similar to the length of lk2 up to a tolerance.
-     ! Use a bissection algorithm.
-     ismaller=0       ; lsmaller=zero
-     ilarger=l3*nkpt1+1 ; llarger=huge(one)
+     ! Use a bisection algorithm.
+     ismaller=0; lsmaller=zero
+     ilarger=l3*nkpt1+1; llarger=huge(one)
 
-     ! This loop should never reach l3*nkpt1, since this is a bissection algorithm
+     ! This loop should never reach l3*nkpt1, since this is a bisection algorithm
      do ii=1,l3*nkpt1
        if((ilarger-ismaller)<2 .or. (llarger-lsmaller)<2*tol12)exit
        itrial=(ilarger+ismaller)/2 ; ltrial=lkpg1_sorted(itrial)
@@ -678,45 +672,44 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
      if(abs(llarger-lk2)<abs(lsmaller-lk2)-tol12)itrial=ilarger
      if(itrial==0)itrial=ilarger
      ismaller=itrial ; ilarger=itrial
-     ! write(std_out,*)' listkk : starting search at itrial=',itrial
+     !write(std_out,*)' listkk : starting search at itrial=',itrial
 
      dksqmn=huge(one)
 
      ! The ii index is dummy. This avoids an infinite loop.
      do ii=1,l3*nkpt1
-       ! do ikpt1=1,nkpt1
-
        ! If the difference in length between the trial vector and the target vector is bigger
        ! than the already achieved distance, the search is finished ...
-       ldiff=abs(lkpg1_sorted(itrial)-lk2)
+       ldiff = abs(lkpg1_sorted(itrial) - lk2)
+       ! write(std_out,*)' listkk : ii,itrial,lkpg1_sorted(itrial),lk2,ldiff,&
+       ! dksqmn=',ii,itrial,lkpg1_sorted(itrial),lk2,ldiff,dksqmn
 
-       ! write(std_out,*)' listkk : ii,itrial,lkpg1_sorted(itrial),lk2,ldiff,dksqmn=',ii,itrial,lkpg1_sorted(itrial),lk2,ldiff,dksqmn
-       if(ldiff**2>dksqmn+tol8)exit
+       if (ldiff**2 > dksqmn+tol8) exit
 
        ! If this k-point has already been examined in a previous batch, skip it
-       ! First, compute the minimum of the difference of length of the sets of associated vectors thanks to Umklapp vectors
-       ! with the target vector
-       ikpt1=(isort(itrial)-1)/l3+1
-       min_l=minval(abs(lkpg1((ikpt1-1)*l3+1:(ikpt1-1)*l3+l3)-lk2))
+       ! First, compute the minimum of the difference of length of the sets of
+       ! associated vectors thanks to Umklapp vectors with the target vector
+       ikpt1 = (isort(itrial)-1) /l3 + 1
+       min_l = minval(abs(lkpg1((ikpt1-1)*l3+1:(ikpt1-1)*l3+l3)-lk2))
 
        ! Then compare with the current ldiff
        ! write(std_out,*)' listkk : ikpt1,min_l,ldiff=',ikpt1,min_l,ldiff
-       if(min_l > ldiff-tol12)then
+       if (min_l > ldiff-tol12) then
 
          ! Now, will examine the trial vector, and the symmetric ones
-         !MG FIXME:
-         ! Here there's a possible problem with the order of symmetries because
+         ! MG FIXME: Here there's a possible problem with the order of symmetries because
          ! in symkpt, time-reversal is the innermost loop. This can create inconsistencies in the symmetry tables.
          ! Besides, one should use symrel^{-1 T} to keep the correspondence between isym -> R or S
          do itimrev=0,timrev_used
            do isym=1,nsym_used
+           !do itimrev=0,timrev_used
 
              ! Select magnetic characteristic of symmetries
-             if(isppol==1 .and. symafm(isym)==-1)cycle
-             if(isppol==2 .and. symafm(isym)==1)cycle
+             if (isppol == 1 .and. symafm(isym) == -1) cycle
+             if (isppol == 2 .and. symafm(isym) == 1) cycle
 
              ! Compute symmetric point to kpt1
-             if(usesym==1)then
+             if (usesym==1) then
                ! original code only used transpose(symrel)
                if (present(use_symrec)) then
                  if (use_symrec) then
@@ -734,11 +727,10 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
 
              ! Compute difference with respect to kpt2, modulo a lattice vector
              dk(:)=kptns2(:,ikpt2)-kpt1a(:)
-             if(usesym==1)then
+             if (usesym==1) then
                ! The tolerance insure similar behaviour on different platforms
                ! XG120418: Actually, *assumes* that the closest point will have reduced
-               ! coordinates differing by less than 1/2 . There might be elongated
-               ! cells where this is not correct ...
+               ! coordinates differing by less than 1/2. There might be elongated cells where this is not correct ...
                dkint(:)=nint(dk(:)+tol12)
                dk(:)=dk(:)-dkint(:)
              else
@@ -746,93 +738,104 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
              end if
 
              ! Compute norm of the difference vector, and update kpt1 if better.
-             dksq=gmet(1,1)*dk(1)**2+gmet(2,2)*dk(2)**2+&
-&             gmet(3,3)*dk(3)**2+two*(gmet(2,1)*dk(2)*dk(1)+&
-&             gmet(3,2)*dk(3)*dk(2)+gmet(3,1)*dk(3)*dk(1))
+             dksq=gmet(1,1)*dk(1)**2+gmet(2,2)*dk(2)**2+ &
+                  gmet(3,3)*dk(3)**2+two*(gmet(2,1)*dk(2)*dk(1)+ &
+                  gmet(3,2)*dk(3)*dk(2)+gmet(3,1)*dk(3)*dk(1))
 
-             if (dksq<dksqmn+tol8) then
+             if (dksq < dksqmn+tol8) then
+               ! If exactly the right point (without using symmetries neither umklapp vector), will exit the search
+               ! Note that in this condition, each coordinate is tested separately, without squaring.
+               ! So, it is a much stronger condition than dksqmn < tol12
+               if (sum(abs(kptns2(:,ikpt2)-kptns1(:,ikpt1)))<3*tol12) ikpt2_done = 1
 
-                ! If exactly the right point (without using symmetries neither umklapp vector), will exit the search
-                ! Note that in this condition, each coordinate is tested separately, without squaring. So, it is a much stronger
-                ! condition than dksqmn<tol12
-               if(sum(abs(kptns2(:,ikpt2)-kptns1(:,ikpt1)))<3*tol12)then
-                 ikpt2_done=1
+               ! This line leads to a significant speedup for dense meshes but ~30 tests fail after this change.
+               if (present(exit_loop)) then
+                 if (exit_loop) then
+                   if (dksq < tol12) ikpt2_done = 1
+                 end if
                end if
 
                ! Update in three cases: either if succeeded to have exactly the vector, or the distance is better,
                ! or the distance is only slightly worsened so select the lowest itimrev, isym or ikpt1,
                ! in order to respect previous ordering
-               if(  ikpt2_done==1 .or. &
-&               dksq+tol12<dksqmn .or. &
-&               ( abs(dksq-dksqmn)<tol12 .and. &
-&               ((itimrev<jtime) .or. &
-&               (itimrev==jtime .and. isym<jsym) .or. &
-&               (itimrev==jtime .and. isym==jsym .and. ikpt1<jkpt1))))then
+               if (ikpt2_done==1 .or. &
+                  dksq+tol12<dksqmn .or. &
+                  ( abs(dksq-dksqmn)<tol12 .and. &
+                   ((itimrev<jtime) .or. &
+                   (itimrev==jtime .and. isym<jsym) .or. &
+                   (itimrev==jtime .and. isym==jsym .and. ikpt1<jkpt1))))then
 
-                 dksqmn=dksq
-                 jkpt1=ikpt1
-                 jsym=isym
-                 jtime=itimrev
-                 jdkint(:)=dkint(:)
+                 dksqmn = dksq
+                 jkpt1 = ikpt1
+                 jsym = isym
+                 jtime = itimrev
+                 jdkint(:) = dkint(:)
 
-                 !write(std_out,*)' ikpt1,ikpt2=',ikpt1,ikpt2
-                 !write(std_out,*)' timrev_used=',timrev_used
-                 !write(std_out,*)' Succeeded to lower dskmn,ikpt2_done=',dksqmn,ikpt2_done
-                 !write(std_out,*)' ikpt1,isym,dkint(:),itimrev=',ikpt1,isym,dkint(:),itimrev
-                 !ka(:)=kpt1a(:)+dkint(:)
-                 !write(std_out,*)'        k1=',kpt1a(:)
-                 !write(std_out,*)'     dkint=',dkint(:)
-                 !write(std_out,*)' Actual k1=',ka(:)
-                 !write(std_out,*)'        k2=',kptns2(:,ikpt2)
-                 !kasq=gmet(1,1)*ka(1)**2+gmet(2,2)*ka(2)**2+&
-                 !                  gmet(3,3)*ka(3)**2+two*(gmet(2,1)*ka(2)*ka(1)+&
-                 !                  gmet(3,2)*ka(3)*ka(2)+gmet(3,1)*ka(3)*ka(1))
-                 !write(std_out,*)' Actual k1sq=',kasq
+                 !if (ikpt2_done == 1) then
+                 !  write(std_out,*)'Succeeded to lower dskmn,ikpt2_done=',dksqmn,ikpt2_done
+                 !  write(std_out,*)'  ikpt1,ikpt2=',ikpt1, ikpt2
+                 !  write(std_out,*)'  ikpt1,isym,dkint(:),itimrev=',ikpt1,isym,dkint(:),itimrev
+                 !  ka(:) = kpt1a(:) + dkint(:)
+                 !  kasq=gmet(1,1)*ka(1)**2+gmet(2,2)*ka(2)**2+&
+                 !       gmet(3,3)*ka(3)**2+two*(gmet(2,1)*ka(2)*ka(1)+&
+                 !       gmet(3,2)*ka(3)*ka(2)+gmet(3,1)*ka(3)*ka(1))
+                 !  write(std_out,*)'             k1 = ',kpt1a(:)
+                 !  write(std_out,*)'          dkint = ',dkint(:)
+                 !  write(std_out,*)'      Actual k1 = ',ka(:)
+                 !  write(std_out,*)'             k2 = ',kptns2(:,ikpt2)
+                 !  write(std_out,*)'      Actual k1sq = ',kasq
+                 !end if
                end if
-
              end if
-             if(ikpt2_done==1)exit
+
+             if (ikpt2_done==1) exit
            end do ! isym
-           if(ikpt2_done==1)exit
+           if (ikpt2_done==1) exit
          end do ! itimrev
-         if(ikpt2_done==1)exit
+         if (ikpt2_done==1) exit
        end if
 
        ! Update the interval that has been explored
-       if(itrial<ismaller)ismaller=itrial
-       if(itrial>ilarger)ilarger=itrial
+       if (itrial < ismaller) ismaller = itrial
+       if (itrial > ilarger) ilarger = itrial
 
        ! Select the next index to be tried (preferably the smaller indices, but this is a bit arbitrary).
        ! write(std_out,*)' before choosing the next index :'
        ! write(std_out,*)' ismaller,itrial,ilarger=',ismaller,itrial,ilarger
-       ! write(std_out,*)' lkpg1_sorted(ismaller-1),lk2,lkpg1_sorted(ilarger+1)=',lkpg1_sorted(ismaller-1),lk2,lkpg1_sorted(ilarger+1)
-       if(ismaller>1 .and. ilarger<l3*nkpt1)then
-         if(abs(lkpg1_sorted(ismaller-1)-lk2)<abs(lkpg1_sorted(ilarger+1)-lk2)+tol12)then
-           itrial=ismaller-1
+       ! write(std_out,*)' lkpg1_sorted(ismaller-1),lk2,lkpg1_sorted(ilarger+1)=',&
+       ! lkpg1_sorted(ismaller-1),lk2,lkpg1_sorted(ilarger+1)
+
+       if (ismaller>1 .and. ilarger<l3*nkpt1) then
+         if (abs(lkpg1_sorted(ismaller-1)-lk2) < abs(lkpg1_sorted(ilarger+1)-lk2)+tol12) then
+           itrial = ismaller-1
          else
-           itrial=ilarger+1
+           itrial = ilarger+1
          end if
        end if
-       if(ismaller==1 .and. ilarger<l3*nkpt1)itrial=ilarger+1
-       if(ismaller>1 .and. ilarger==l3*nkpt1)itrial=ismaller-1
-       ! if(ismaller==1 .and. ilarger==l3*nkpt1), we are done with the loop !
+       if (ismaller==1 .and. ilarger<l3*nkpt1) itrial = ilarger+1
+       if (ismaller>1 .and. ilarger==l3*nkpt1) itrial = ismaller-1
+       !if(ismaller==1 .and. ilarger==l3*nkpt1), we are done with the loop !
      end do ! ikpt1
 
-     ! Store indices.
-     indkk(ikpt2+(isppol-1)*nkpt2,1)=jkpt1
-     indkk(ikpt2+(isppol-1)*nkpt2,2)=jsym
-     indkk(ikpt2+(isppol-1)*nkpt2,3:5)=jdkint(:)
-     indkk(ikpt2+(isppol-1)*nkpt2,6)=jtime
-     dksqmax=max(dksqmax,dksqmn)
+     ! Store indices (lots of cache miss here)
+     !indkk(isk, 1) = jkpt1
+     !indkk(isk, 2) = jsym
+     !indkk(isk, 3:5) = jdkint(:)
+     !indkk(isk, 6) = jtime
 
-     if (dksqmn<-tol12) then
+     tmp_indkk(1, isk) = jkpt1
+     tmp_indkk(2, isk) = jsym
+     tmp_indkk(3:5, isk) = jdkint(:)
+     tmp_indkk(6, isk) = jtime
+
+     dksqmax = max(dksqmax, dksqmn)
+
+     if (dksqmn < -tol12) then
        write(msg, '(a,es16.6)' )'The minimum square of dk has negative norm: dksqmn= ',dksqmn
        MSG_BUG(msg)
      end if
 
-     !write(std_out,'(a,i6,i2,2x,i6,5i3,es24.14)' )&
-     ! ' listkk: ikpt2,isppol,indkk(ikpt2+(isppol-1)*nkpt2,:)=',ikpt2,isppol,indkk(ikpt2+(isppol-1)*nkpt2,:),dksqmn
-     !if(nkpt1==17)stop
+     !write(std_out,'(a,i6,i2,2x,i6,5i3,es24.14)' )' listkk: ikpt2,isppol,indkk(isk,:)=',ikpt2,isppol,indkk(isk,:),dksqmn
    end do ! ikpt2
  end do ! isppol
 
@@ -840,13 +843,15 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  ABI_DEALLOCATE(lkpg1)
  ABI_DEALLOCATE(lkpg1_sorted)
 
+ indkk = transpose(tmp_indkk)
+ ABI_FREE(tmp_indkk)
  if (nprocs > 1) then
    call xmpi_sum(indkk, comm, ierr)
    dksqmn = dksqmax
    call xmpi_max(dksqmn, dksqmax, comm, ierr)
  end if
 
- call timab(1021,2,tsec)
+ call timab(1021, 2, tsec)
 
 end subroutine listkk
 !!***
@@ -893,7 +898,7 @@ end subroutine listkk
 !! kptrlatt(3,3)=k-point lattice specification
 !! nshiftk=actual number of k-point shifts in shiftk
 !! shiftk(3,MAX_NSHIFTK)=shift vectors for k point generation
-!! [nkpthf = number of k points in the full BZ, for the Fock operator]
+!! [nkpthf] = number of k points in the full BZ, for the Fock operator.
 !!
 !! PARENTS
 !!      ep_setupqpt,getshell,inkpts,inqpt,m_ab7_kpoints,m_bz_mesh,m_kpts
@@ -919,10 +924,111 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  integer,intent(in) :: symafm(msym),symrel(3,3,msym),vacuum(3)
  integer,optional,intent(in) :: downsampling(3)
  integer,intent(inout) :: kptrlatt(3,3)
+ integer,allocatable :: indkpt(:)
+ integer,allocatable :: bz2ibz_smap(:,:)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(inout) :: shiftk(3,MAX_NSHIFTK)
  real(dp),intent(inout) :: kpt(3,nkpt) !vz_i
  real(dp),intent(inout) :: wtk(nkpt)
+ real(dp),optional,allocatable,intent(out) :: fullbz(:,:)
+ real(dp),optional,intent(out) :: kpthf(:,:)
+
+!Local variables-------------------------------
+ real(dp),allocatable :: kpt_tmp(:,:)
+ real(dp),allocatable :: wtk_tmp(:)
+
+ call getkgrid_low(chksymbreak,iout,iscf,kpt_tmp,kptopt,kptrlatt,kptrlen,&
+& msym,nkpt,nkpt_computed,nshiftk,nsym,rprimd,shiftk,symafm,symrel,vacuum,wtk_tmp,indkpt,bz2ibz_smap,&
+& fullbz,nkpthf,kpthf,downsampling)
+
+ if (nkpt>0) then
+   kpt(:,1:nkpt) = kpt_tmp(:,1:nkpt)
+   wtk(1:nkpt)   = wtk_tmp(1:nkpt)
+ end if
+
+ ABI_SFREE(kpt_tmp)
+ ABI_SFREE(wtk_tmp)
+ ABI_SFREE(indkpt)
+ ABI_SFREE(bz2ibz_smap)
+
+end subroutine getkgrid
+!!***
+
+!!****f* m_kpts/getkgrid_low
+!! NAME
+!! getkgrid_low
+!!
+!! FUNCTION
+!! Compute the grid of k points in the irreducible Brillouin zone.
+!! Note that nkpt (and nkpthf) can be computed by calling this routine with nkpt=0, provided that kptopt/=0.
+!! If downsampling is present, also compute a downsampled k grid.
+!!
+!! INPUTS
+!! chksymbreak= if 1, will check whether the k point grid is symmetric (for kptopt=1,2 and 4), and stop if not.
+!! iout=unit number for echoed output . 0 if no output is wished.
+!! iscf= ( <= 0 =>non-SCF), >0 => SCF)  MG: FIXME I don't understand why we have to pass the value iscf.
+!! kptopt=option for the generation of k points
+!!   (defines whether spatial symmetries and/or time-reversal can be used)
+!! msym=default maximal number of symmetries
+!! nsym=number of symmetries
+!! rprimd(3,3)=dimensional real space primitive translations (bohr)
+!! symafm(nsym)=(anti)ferromagnetic part of symmetry operations
+!! symrel(3,3,nsym)=symmetry operations in real space in terms of primitive translations
+!! vacuum(3)=for each direction, 0 if no vacuum, 1 if vacuum
+!! [downsampling(3) = input variable that governs the downsampling]
+!!
+!! OUTPUT
+!! kptrlen=length of the smallest real space supercell vector associated with the lattice of k points.
+!! nkpt_computed=number of k-points in the IBZ computed in the present routine
+!! If nkpt/=0  the following are also output:
+!!   kpt(3,nkpt)=reduced coordinates of k points.
+!!   wtk(nkpt)=weight assigned to each k point.
+!! bz2ibz_smap(nkbz, 6)= Mapping BZ --> IBZ.
+!! [fullbz(3,nkpt_fullbz)]=k-points generated in the full Brillouin zone.
+!!   In output: allocated array with the list of k-points in the BZ.
+!! [kpthf(3,nkpthf)]=k-points generated in the full Brillouin zone, possibly downsampled (for Fock).
+!!
+!! NOTES
+!!  msym not needed since nsym is the last index.
+!!
+!! SIDE EFFECTS
+!! Input/Output
+!! nkpt=number of k points (might be zero, see output description)
+!! kptrlatt(3,3)=k-point lattice specification
+!! nshiftk=actual number of k-point shifts in shiftk
+!! shiftk(3,MAX_NSHIFTK)=shift vectors for k point generation
+!! [nkpthf] = number of k points in the full BZ, for the Fock operator.
+!!
+!! PARENTS
+!!      ep_setupqpt,getshell,inkpts,inqpt,m_ab7_kpoints,m_bz_mesh,m_kpts
+!!      nonlinear,testkgrid,thmeig
+!!
+!! CHILDREN
+!!      mati3inv,matr3inv,metric,smallprim,smpbz,symkpt
+!!
+!! SOURCE
+
+subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
+& msym,nkpt,nkpt_computed,nshiftk,nsym,rprimd,shiftk,symafm,symrel,vacuum,wtk,indkpt,bz2ibz_smap,&
+& fullbz,nkpthf,kpthf,downsampling) ! optional
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: chksymbreak,iout,iscf,kptopt,msym,nkpt,nsym
+ integer,intent(inout),optional :: nkpthf
+ integer,intent(inout) :: nshiftk
+ integer,intent(inout) :: nkpt_computed !vz_i
+ real(dp),intent(out) :: kptrlen
+!arrays
+ integer,intent(in) :: symafm(msym),symrel(3,3,msym),vacuum(3)
+ integer,optional,intent(in) :: downsampling(3)
+ integer,intent(inout) :: kptrlatt(3,3)
+ real(dp),intent(in) :: rprimd(3,3)
+ real(dp),intent(inout) :: shiftk(3,MAX_NSHIFTK)
+ integer,allocatable,intent(out) :: indkpt(:)
+ integer,allocatable,intent(out) :: bz2ibz_smap(:,:)
+ real(dp),allocatable,intent(out) :: kpt(:,:) !vz_i
+ real(dp),allocatable,intent(out) :: wtk(:)
  real(dp),optional,allocatable,intent(out) :: fullbz(:,:)
  real(dp),optional,intent(out) :: kpthf(:,:)
 
@@ -932,6 +1038,7 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  integer :: brav,decreased,found,ii,ikpt,iprime,ishiftk,isym,jshiftk,kshiftk,mkpt,mult
  integer :: nkpthf_computed,nkpt_fullbz,nkptlatt,nshiftk2,nsym_used,option
  integer :: test_prime,timrev
+ integer :: nkpt_use
  real(dp) :: length2,ucvol,ucvol_super
  character(len=500) :: msg
 !arrays
@@ -941,7 +1048,7 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 &  113,127,131,137,139, 149,151,157,163,167,&
 &  173,179,181,191,193, 197,199/)
  integer :: kptrlatt2(3,3)
- integer,allocatable :: belong_chain(:),generator(:),indkpt(:),number_in_chain(:)
+ integer,allocatable :: belong_chain(:),generator(:),number_in_chain(:)
  integer,allocatable :: repetition_factor(:),symrec(:,:,:)
 ! real(dp) :: cart(3,3)
  real(dp) :: dijk(3),delta_dmult(3),dmult(3),fact_vacuum(3),gmet(3,3)
@@ -954,6 +1061,7 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
+ !call cwtime(cpu, wall, gflops, "start")
  if (kptopt==1.or.kptopt==4) then
    ! Cannot use antiferromagnetic symmetry operations to decrease the number of k points
    nsym_used=0
@@ -1170,10 +1278,9 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 & -kptrlatt2(1,3)*kptrlatt2(2,2)*kptrlatt2(3,1) &
 & -kptrlatt2(1,1)*kptrlatt2(2,3)*kptrlatt2(3,2)
 
-!Check whether the number of k points is positive,
-!otherwise, change the handedness of kptrlatt2
+!Check whether the number of k points is positive, otherwise, change the handedness of kptrlatt2
  if(nkptlatt<=0)then
-!  write(std_out,*)' getkgrid : nkptlatt is negative !'
+   ! write(std_out,*)' getkgrid : nkptlatt is negative !'
    kptrlatt2(:,3)=-kptrlatt2(:,3)
    nkptlatt=-nkptlatt
    do ishiftk=1,nshiftk2
@@ -1241,26 +1348,26 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  option=0
  if(iout/=0)option=1
 
- if (PRESENT(downsampling))then
+ !call cwtime_report(' shifts', cpu, wall, gflops)
+
+ if (present(downsampling))then
    call smpbz(brav,iout,kptrlatt2,mkpt,nkpthf_computed,nshiftk2,option,shiftk2,spkpt,downsampling=downsampling)
-   if (PRESENT(kpthf) .and. nkpthf/=0) then ! Returns list of k-points in the Full BZ, possibly downsampled for Fock
+   if (present(kpthf) .and. nkpthf/=0) then
+     ! Returns list of k-points in the Full BZ, possibly downsampled for Fock
      kpthf = spkpt(:,1:nkpthf)
    end if
    nkpthf=nkpthf_computed
-
  end if
 
  call smpbz(brav,iout,kptrlatt2,mkpt,nkpt_fullbz,nshiftk2,option,shiftk2,spkpt)
-
- if (PRESENT(fullbz)) then ! Returns list of k-points in the Full BZ.
-   ABI_ALLOCATE(fullbz,(3,nkpt_fullbz))
-   fullbz = spkpt(:,1:nkpt_fullbz)
- end if
+ !call cwtime_report(' smpbz', cpu, wall, gflops)
 
  if(kptopt==1 .or. kptopt==2 .or. kptopt==4)then
 
    ABI_ALLOCATE(indkpt,(nkpt_fullbz))
    ABI_ALLOCATE(kpt_fullbz,(3,nkpt_fullbz))
+   ABI_ALLOCATE(bz2ibz_smap, (6, nkpt_fullbz))
+#if 1
    ABI_ALLOCATE(wtk_fullbz,(nkpt_fullbz))
    ABI_ALLOCATE(wtk_folded,(nkpt_fullbz))
 
@@ -1269,62 +1376,102 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
    timrev=1;if (kptopt==4) timrev=0
 
+   indkpt = 0
    call symkpt(chksymbreak,gmet,indkpt,iout,kpt_fullbz,nkpt_fullbz,&
-&   nkpt_computed,nsym_used,symrec,timrev,wtk_fullbz,wtk_folded)
+&   nkpt_computed,nsym_used,symrec,timrev,wtk_fullbz,wtk_folded,bz2ibz_smap,xmpi_comm_self)
 
    ABI_DEALLOCATE(symrec)
    ABI_DEALLOCATE(wtk_fullbz)
 
+   !do ikpt=1,nkpt_fullbz
+   !  write(*,*) ikpt, indkpt(ikpt), bz2ibz_smap(1,ikpt), indkpt(bz2ibz_smap(1,ikpt))
+   !end do
+#else
+   kpt_fullbz(:,:)=spkpt(:,1:nkpt_fullbz)
+
+   timrev=1;if (kptopt==4) timrev=0
+
+   call symkpt_new(chksymbreak,gmet,indkpt,iout,kpt_fullbz,nkpt_fullbz,&
+&   nkpt_computed,nsym_used,symrec,timrev,bz2ibz_smap,xmpi_comm_self)
+
+   ABI_DEALLOCATE(symrec)
+   ABI_CALLOC(wtk_folded,(nkpt_fullbz))
+   do ii=1,nkpt_fullbz
+    ikpt = indkpt(bz2ibz_smap(1,ii))
+    wtk_folded(ikpt) = wtk_folded(ikpt) + one
+   end do
+   wtk_folded = wtk_folded / nkpt_fullbz
+#endif
+
  else if(kptopt==3)then
+   ABI_CALLOC(bz2ibz_smap, (6, nkpt_fullbz))
+   bz2ibz_smap(1,:) = [(ii,ii=1,nkpt_fullbz)]
+   bz2ibz_smap(2,:) = 1 !isym
    nkpt_computed=nkpt_fullbz
  end if
+ !call cwtime_report(' symkpt', cpu, wall, gflops)
 
 !The number of k points has been computed from kptopt, kptrlatt, nshiftk, shiftk,
 !and the eventual symmetries, it is presently called nkpt_computed.
+ nkpt_use = nkpt
+ if (nkpt<0) nkpt_use = nkpt_computed
 
 !Check that the argument nkpt is coherent with nkpt_computed, if nkpt/=0.
- if(nkpt/=nkpt_computed .and. nkpt/=0)then
-   write(msg, '(a,i6,5a,i6,7a)') &
-&   'The argument nkpt=',nkpt,', does not match',ch10,&
+ if(nkpt_use/=nkpt_computed .and. nkpt/=0)then
+   write(msg, '(a,i0,5a,i0,7a)') &
+&   'The argument nkpt = ',nkpt_use,', does not match',ch10,&
 &   'the number of k points generated by kptopt, kptrlatt, shiftk,',ch10,&
-&   'and the eventual symmetries, that is, nkpt=',nkpt_computed,'.',ch10,&
+&   'and the eventual symmetries, that is, nkpt= ',nkpt_computed,'.',ch10,&
 &   'However, note that it might be due to the user,',ch10,&
 &   'if nkpt is explicitely defined in the input file.',ch10,&
 &   'In this case, please check your input file.'
    MSG_BUG(msg)
  end if
 
+ ABI_MALLOC(kpt,(3,nkpt_use))
+ ABI_MALLOC(wtk,(nkpt_use))
+
  if(kptopt==1 .or. kptopt==2 .or. kptopt==4)then
 
-   if(nkpt/=0)then
-     do ikpt=1,nkpt
+   if(nkpt_use/=0)then
+     do ikpt=1,nkpt_use
        kpt(:,ikpt)=kpt_fullbz(:,indkpt(ikpt))
        if(iscf>=0 .or. iscf==-3 .or. iscf==-1.or.iscf==-2)wtk(ikpt)=wtk_folded(indkpt(ikpt))
      end do
    end if
 
-   ABI_DEALLOCATE(indkpt)
-   ABI_DEALLOCATE(kpt_fullbz)
-   ABI_DEALLOCATE(spkpt)
+   if (present(fullbz)) then
+     ! Returns list of k-points in the Full BZ.
+     ABI_MOVE_ALLOC(kpt_fullbz,fullbz)
+   else
+     ABI_DEALLOCATE(kpt_fullbz)
+   end if
+
    ABI_DEALLOCATE(wtk_folded)
 
  else if(kptopt==3)then
 
-   if(nkpt/=0)then
-     kpt(:,1:nkpt)=spkpt(:,1:nkpt)
-     if(iscf>1 .or. iscf==-3 .or. iscf==-1.or.iscf==-2)wtk(1:nkpt)=1.0_dp/dble(nkpt)
+   if(nkpt_use/=0)then
+     kpt(:,1:nkpt_use)=spkpt(:,1:nkpt_use)
+     if(iscf>1 .or. iscf==-3 .or. iscf==-1.or.iscf==-2)wtk(1:nkpt_use)=1.0_dp/dble(nkpt_use)
    end if
-   ABI_DEALLOCATE(spkpt)
+
+   if (present(fullbz)) then
+     ! Returns list of k-points in the Full BZ.
+     ABI_ALLOCATE(fullbz,(3,nkpt_fullbz))
+     fullbz = spkpt(:,1:nkpt_fullbz)
+   end if
 
  end if
 
+ ABI_DEALLOCATE(spkpt)
  kptrlatt(:,:)=kptrlatt2(:,:)
  nshiftk=nshiftk2
  shiftk(:,1:nshiftk)=shiftk2(:,1:nshiftk)
  ABI_DEALLOCATE(shiftk2)
  ABI_DEALLOCATE(shiftk3)
 
-end subroutine getkgrid
+end subroutine getkgrid_low
 !!***
 
 !!****f* m_kpts/get_full_kgrid
@@ -1350,7 +1497,7 @@ end subroutine getkgrid
 !!  kpt_fullbz(3,nkpt_fullbz)=kpoints in full brillouin zone
 !!
 !! NOTES
-!!  MG: The present inplementation always assumes kptopt==1 !!!!
+!!  MG: The present implementation always assumes kptopt==1 !!!!
 !!
 !! TODO: This routine should be removed
 !!
@@ -1362,8 +1509,7 @@ end subroutine getkgrid
 !!
 !! SOURCE
 
-subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,&
-& nkpt_fullbz,nshiftk,nsym,shiftk,symrel)
+subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,nkpt_fullbz,nshiftk,nsym,shiftk,symrel)
 
 !Arguments ------------------------------------
 !scalars
@@ -1379,8 +1525,7 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,&
  integer :: ikpt,isym,itim,timrev
  integer :: symrankkpt
  character(len=500) :: msg
- type(kptrank_type) :: kptrank_t
-
+ type(krank_t) :: krank
 !arrays
  integer :: inv_symrel(3,3,nsym)
  real(dp) :: k2(3)
@@ -1395,12 +1540,10 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,&
 
  call get_kpt_fullbz(kpt_fullbz,kptrlatt,nkpt_fullbz,nshiftk,shiftk)
 
-!make full k-point rank arrays
- call mkkptrank (kpt,nkpt,kptrank_t)
+ ! make full k-point rank arrays
+ krank = krank_new(nkpt, kpt)
 
-!
-!find equivalence to irred kpoints in kpt
-!
+ !find equivalence to irred kpoints in kpt
  indkpt(:) = 0
  timrev=1 ! includes the time inversion symmetry
  do ikpt=1,nkpt_fullbz
@@ -1408,11 +1551,11 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,&
      do itim=1,(1-2*timrev),-2
 
        k2(:) = itim*(inv_symrel(:,1,isym)*kpt_fullbz(1,ikpt) + &
-&       inv_symrel(:,2,isym)*kpt_fullbz(2,ikpt) + &
-&       inv_symrel(:,3,isym)*kpt_fullbz(3,ikpt))
+                     inv_symrel(:,2,isym)*kpt_fullbz(2,ikpt) + &
+                     inv_symrel(:,3,isym)*kpt_fullbz(3,ikpt))
 
-       call get_rank_1kpt (k2,symrankkpt,kptrank_t)
-       if (kptrank_t%invrank(symrankkpt) /= -1) indkpt(ikpt) = kptrank_t%invrank(symrankkpt)
+       symrankkpt = krank%get_rank(k2)
+       if (krank%invrank(symrankkpt) /= -1) indkpt(ikpt) = krank%invrank(symrankkpt)
 
      end do ! loop time reversal symmetry
    end do !  loop sym ops
@@ -1423,7 +1566,7 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,&
    end if
  end do !  loop full kpts
 
- call destroy_kptrank (kptrank_t)
+ call krank%free()
 
 end subroutine get_full_kgrid
 !!***
@@ -2157,7 +2300,7 @@ end subroutine smpbz
 !!               bravais(3:11)=coordinates of rprim in the axes of the conventional bravais lattice (*2 if center/=0)
 !!  iout=unit number for echoed output
 !!  msym=default maximal number of symmetries
-!!  nsym=number of symetries
+!!  nsym=number of symmetries
 !!  prtkpt=if non-zero, will write the characteristics of k grids, then stop
 !!  rprimd(3,3)=dimensional real space primitive translations (bohr)
 !!  symafm(nsym)=(anti)ferromagnetic part of symmetry operations
@@ -2867,8 +3010,6 @@ end subroutine testkgrid
 subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
 
 !Arguments ------------------------------------
- !F95 construct, interface required but we can call mknormpath once
- !real(dp),pointer :: path(:,:)
 !scalars
  integer,intent(in) :: nbounds,ndiv_small
  integer,intent(inout) :: npt_tot
@@ -2920,10 +3061,8 @@ subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
 !The 1 stand for the first point
  npt_tot=sum(ndiv)+1
 
-!allocate(path(3,npt_tot)
  if (.not.present(path)) then
-   write(msg,'(2a,i8)')ch10,&
-&   ' mknormpath : total number of points on the path: ',npt_tot
+   write(msg,'(2a,i8)')ch10,' mknormpath : total number of points on the path: ',npt_tot
    call wrtout(std_out,msg,'COLL')
    write(msg,'(2a)')ch10,' Number of divisions for each segment of the normalized path: '
    call wrtout(std_out,msg,'COLL')
@@ -2950,7 +3089,6 @@ subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
 
 end subroutine mknormpath
 !!***
-
 
 end module m_kpts
 !!***

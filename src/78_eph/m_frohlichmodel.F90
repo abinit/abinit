@@ -28,14 +28,13 @@
 module m_frohlichmodel
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_crystal
  use m_ebands
  use m_efmas_defs
  use m_ifc
+ use m_dtset
 
  use m_gaussian_quadrature, only : cgqf
 
@@ -56,10 +55,8 @@ contains
 !! Main routine to compute properties based on the Frohlich model
 !!
 !! INPUTS
-!! cryst<crystal_t>=Structure defining the unit cell (geometry, atomic positions and symmetry operations in real and reciprocal space)
-!! dtfil<datafiles_type>=Variables related to files.
+!! cryst<crystal_t>=Structure defining the unit cell
 !! dtset<dataset_type>=All input variables for this dataset.
-!! ebands<ebands_t>=Electronic band structure information
 !! efmasdeg(nkpt_rbz) <type(efmasdeg_type)>= information about the band degeneracy at each k point
 !! efmasval(mband,nkpt_rbz) <type(efmasdeg_type)>= double tensor datastructure
 !!   efmasval(:,:)%eig2_diag band curvature double tensor
@@ -72,16 +69,12 @@ contains
 !!
 !! SOURCE
 
-subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
-
- implicit none
+subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst
- type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
- type(ebands_t),intent(in) :: ebands
  type(ifc_type),intent(in) :: ifc
 !arrays
  type(efmasdeg_type), intent(in) :: efmasdeg(:)
@@ -94,10 +87,10 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  integer :: jband,lwork,nphi,nqdir,ntheta
  real(dp) :: angle_phi,cosph,costh,sinph,sinth,weight,weight_phi
  real(dp) :: zpr_frohlich,zpr_q0_avg,zpr_q0_fact
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  logical, allocatable :: saddle_warn(:), start_eigf3d_pos(:)
- real(dp) :: kpt(3),unit_r(3)
+ real(dp) :: kpt(3)
  real(dp), allocatable :: eigenval(:), rwork(:), unit_qdir(:,:)
  real(dp), allocatable :: m_avg(:), m_avg_frohlich(:)
  real(dp), allocatable :: gq_points_th(:),gq_weights_th(:)
@@ -166,8 +159,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  ABI_ALLOCATE(dielt_qdir,(nqdir))
 
  !Compute phonon frequencies and mode-polarity for each qdir
- call ifc_calcnwrite_nana_terms(ifc, cryst, nqdir, unit_qdir, &
-&  phfrq2l=phfrq_qdir, polarity2l=polarity_qdir)
+ call ifc%calcnwrite_nana_terms(cryst, nqdir, unit_qdir, phfrq2l=phfrq_qdir, polarity2l=polarity_qdir)
 
  !Compute dielectric tensor for each qdir
  do iqdir=1,nqdir
@@ -191,7 +183,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 &    weight_qdir(iqdir)*zpr_q0_phononfactor_qdir(iqdir)/dielt_qdir(iqdir)**2
  enddo
  zpr_q0_avg=zpr_q0_avg*quarter*piinv
- zpr_q0_fact=zpr_q0_avg*two*pi*pi*(three*quarter*piinv)**third*cryst%ucvol**(-four*third)
+ zpr_q0_fact=zpr_q0_avg*eight*pi*(three*quarter*piinv)**third*cryst%ucvol**(-four*third)
 
 !DEBUG
 ! do iqdir=1,nqdir,513

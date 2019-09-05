@@ -68,6 +68,10 @@
 -Opening the file /mnt/STORAGE/amartin/dev/abinit/tests/v8/Input/t06_sys.xml
 -Reading the file /mnt/STORAGE/amartin/dev/abinit/tests/v8/Input/t06_sys.xml with LibXML library
 
+ Bound for ifc SR:
+
+ x=[ -2  2], y=[ -2  2] and z=[ -2  2]
+
 ================================================================================
 
  Impose acoustic sum rule on total ifc

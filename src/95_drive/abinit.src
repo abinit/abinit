@@ -19,11 +19,14 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "m_argparse.F90",
+ "m_bader.F90",
+ "m_cut3d.F90",
  "m_bethe_salpeter.F90",
  "m_dfptnl_loop.F90",
  "m_dfpt_looppert.F90",
  "m_driver.F90",
  "m_eph_driver.F90",
+ "m_fold2block.F90",
  "m_gstate.F90",
  "m_gstateimg.F90",
  "m_gwls_sternheimer.F90",
@@ -35,6 +38,7 @@ sources = [
  "m_pead_nl_loop.F90",
  "m_screening_driver.F90",
  "m_sigma_driver.F90",
+ "m_unittests.F90",
  "m_wfk_analyze.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

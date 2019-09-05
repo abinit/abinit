@@ -27,13 +27,14 @@
 module m_mklocl
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_dtset
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_geometry, only : xred2xcart
  use m_mpinfo,   only : ptabs_fourdp
@@ -135,8 +136,6 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 &  mpi_enreg,natom,nattyp,nfft,ngfft,nspden,ntypat,option,pawtab,ph1d,psps,qprtrb,&
 &  rhog,rhor,rprimd,ucvol,vprtrb,vpsp,wvl,wvl_den,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mgfft,natom,nfft,nspden,ntypat,option
@@ -192,7 +191,7 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    if (psps%vlspl_recipSpace) then
      call mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft, &
 &     mpi_enreg,psps%mqgrid_vl,natom,nattyp,nfft,ngfft, &
-&     ntypat,option,dtset%paral_kgb,ph1d,psps%qgrid_vl,qprtrb,rhog,ucvol, &
+&     ntypat,option,ph1d,psps%qgrid_vl,qprtrb,rhog,ucvol, &
 &     psps%vlspl,vprtrb,vpsp)
    else
      call mklocl_realspace(grtn,dtset%icoulomb,mpi_enreg,natom,nattyp,nfft, &
@@ -283,14 +282,12 @@ end subroutine mklocl
 !! SOURCE
 
 subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
-&  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,paral_kgb,ph1d,qgrid,qprtrb,&
+&  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,ph1d,qgrid,qprtrb,&
 &  rhog,ucvol,vlspl,vprtrb,vpsp)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mgfft,mqgrid,natom,nfft,ntypat,option,paral_kgb
+ integer,intent(in) :: mgfft,mqgrid,natom,nfft,ntypat,option
  real(dp),intent(in) :: eei,gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -551,10 +548,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
      work1(re,1)=zero
      work1(im,1)=zero
    end if
-
-!  DEBUG
 !  write(std_out,*) ' mklocl_recipspace : will add potential with strength vprtrb(:)=',vprtrb(:)
-!  ENDDEBUG
 
 !  Allow for the addition of a perturbing potential
    if ((vprtrb(1)**2+vprtrb(2)**2) > 1.d-30) then
@@ -744,14 +738,11 @@ end subroutine mklocl_recipspace
 
 subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,paral_kgb,ph1d,qgrid,qphon,ucvol,vlspl,vpsp1,xred)
-
- implicit none
+& ntypat,n1,n2,n3,ph1d,qgrid,qphon,ucvol,vlspl,vpsp1,xred)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
- integer,intent(in) :: paral_kgb
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -1008,14 +999,12 @@ end subroutine dfpt_vlocal
 !! SOURCE
 
 subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
-&  mqgrid,natom,nattyp,nfft,ngfft,ntypat,paral_kgb,ph1d,qgrid,&
+&  mqgrid,natom,nattyp,nfft,ngfft,ntypat,ph1d,qgrid,&
 &  ucvol,vlspl,vpsp1)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: istr,mgfft,mqgrid,natom,nfft,ntypat,paral_kgb
+ integer,intent(in) :: istr,mgfft,mqgrid,natom,nfft,ntypat
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays

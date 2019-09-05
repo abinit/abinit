@@ -36,6 +36,7 @@ sources = [
  "m_ioarr.F90",
  "m_iowf.F90",
  "m_eprenorms.F90",
+ "m_sigtk.F90",
  "m_vcoul.F90",
  "m_odamix.F90",
  "m_optics_vloc.F90",

@@ -29,8 +29,6 @@
 module m_fock
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_mpinfo
@@ -42,7 +40,9 @@ module m_fock
  use m_pawfgrtab
  use m_pawcprj
  use m_cgtools
+ use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use m_time,            only : timab
  use m_fstrings,        only : itoa, ftoa, sjoin
  use m_symtk,           only : mati3inv, matr3inv
@@ -286,6 +286,7 @@ module m_fock
   type(MPI_type) :: mpi_enreg
   type(pawang_type),pointer :: pawang
   type(pawcprj_type), allocatable :: cwaveocc_prj(:,:)
+
  end type fock_BZ_type
 !----------------------------------------------------------------------
 
@@ -350,13 +351,11 @@ contains
 !!
 !! SOURCE
 
-subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,use_ACE)
-
- implicit none
+subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,use_ACE
+ integer, intent(in) :: mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE
  type(fock_BZ_type) , intent(inout) :: fockbz
 
 !Local variables-------------------------------
@@ -434,8 +433,6 @@ subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6
  ABI_ALLOCATE(fockbz%npwarr,(mkpt))
  fockbz%npwarr=0
 
-
-
 end subroutine fockbz_create
 !!***
 
@@ -479,8 +476,6 @@ end subroutine fockbz_create
 !! SOURCE
 
 subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,pawang,pawfgr,pawtab,rprimd)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -671,7 +666,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    if(dtset%userie==1729)use_ACE=0 ! Hidden possibility to disable ACE
 
    fockcommon%use_ACE=use_ACE
-   call fockbz_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,dtset%natom,n4,n5,n6,use_ACE)
+   call fockbz_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
 
 !* Initialize %mband, %mkpt, %mkptband = size of arrays
    fockcommon%mband=mband
@@ -1163,8 +1158,6 @@ end subroutine fock_init
 
 subroutine fock_updateikpt(fock,ikpt,isppol)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: ikpt,isppol
  type(fock_common_type),pointer :: fock
@@ -1214,8 +1207,6 @@ end subroutine fock_updateikpt
 
 subroutine fock_set_ieigen(fock,iband)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: iband
  type(fock_common_type),pointer :: fock
@@ -1256,8 +1247,6 @@ end subroutine fock_set_ieigen
 !! SOURCE
 subroutine fock_destroy(fock)
 
- implicit none
-
 !Arguments ------------------------------------
  type(fock_type),pointer :: fock
 
@@ -1276,8 +1265,6 @@ end subroutine fock_destroy
 
 subroutine fock_common_destroy(fock)
 
- implicit none
-
 !Arguments ------------------------------------
  type(fock_common_type),pointer :: fock
 
@@ -1285,32 +1272,18 @@ subroutine fock_common_destroy(fock)
 
  DBG_ENTER("COLL")
 
-  if (allocated(fock%atindx)) then
-   ABI_DEALLOCATE(fock%atindx)
- endif
- if (allocated(fock%typat)) then
-    ABI_DEALLOCATE(fock%typat)
- endif
+ ABI_SFREE(fock%atindx)
+ ABI_SFREE(fock%typat)
  ! real arrays
- if (allocated(fock%forces)) then
-   ABI_DEALLOCATE(fock%forces)
- endif
- if (allocated(fock%nband)) then
-   ABI_DEALLOCATE(fock%nband)
- endif
- if (allocated(fock%forces_ikpt)) then
-   ABI_DEALLOCATE(fock%forces_ikpt)
- endif
- if (allocated(fock%stress_ikpt)) then
-   ABI_DEALLOCATE(fock%stress_ikpt)
- endif
- if (allocated(fock%eigen_ikpt)) then
-    ABI_DEALLOCATE(fock%eigen_ikpt)
- endif
-!*Deallocate datatypes
+ ABI_SFREE(fock%forces)
+ ABI_SFREE(fock%nband)
+ ABI_SFREE(fock%forces_ikpt)
+ ABI_SFREE(fock%stress_ikpt)
+ ABI_SFREE(fock%eigen_ikpt)
+ ! Deallocate datatypes
  if (allocated(fock%pawfgrtab)) then
     call pawfgrtab_free(fock%pawfgrtab)
-    ABI_DATATYPE_DEALLOCATE(fock%pawfgrtab)
+    ABI_FREE(fock%pawfgrtab)
  endif
 
  ! Put the integer to 0
@@ -1336,8 +1309,6 @@ end subroutine fock_common_destroy
 
 subroutine fock_BZ_destroy(fock)
 
- implicit none
-
 !Arguments ------------------------------------
  type(fock_BZ_type),pointer :: fock
 
@@ -1345,75 +1316,39 @@ subroutine fock_BZ_destroy(fock)
 
  DBG_ENTER("COLL")
 
- if (allocated(fock%cwaveocc_bz)) then
-   ABI_DEALLOCATE(fock%cwaveocc_bz)
- endif
- if (allocated(fock%cgocc)) then
-   ABI_DEALLOCATE(fock%cgocc)
- endif
- if (allocated(fock%npwarr)) then
-   ABI_DEALLOCATE(fock%npwarr)
- endif
- if (allocated(fock%occ_bz)) then
-   ABI_DEALLOCATE(fock%occ_bz)
- endif
+ ABI_SFREE(fock%cwaveocc_bz)
+ ABI_SFREE(fock%cgocc)
+ ABI_SFREE(fock%npwarr)
+ ABI_SFREE(fock%occ_bz)
  if (allocated(fock%cwaveocc_prj)) then
    call pawcprj_free(fock%cwaveocc_prj)
-   ABI_DATATYPE_DEALLOCATE(fock%cwaveocc_prj)
+   ABI_FREE(fock%cwaveocc_prj)
  endif
  ! Deallocate integer arrays
 
- if (allocated(fock%kg_bz)) then
-   ABI_DEALLOCATE(fock%kg_bz)
- endif
- if (allocated(fock%nbandocc_bz)) then
-   ABI_DEALLOCATE(fock%nbandocc_bz)
- endif
- if (allocated(fock%istwfk_bz)) then
-   ABI_DEALLOCATE(fock%istwfk_bz)
- endif
- if (allocated(fock%calc_phase)) then
-    ABI_DEALLOCATE(fock%calc_phase)
- endif
- if (allocated(fock%timerev)) then
-    ABI_DEALLOCATE(fock%timerev)
- endif
- if (allocated(fock%tab_ibg)) then
-    ABI_DEALLOCATE(fock%tab_ibg)
- endif
- if (allocated(fock%tab_icg)) then
-    ABI_DEALLOCATE(fock%tab_icg)
- endif
- if (allocated(fock%tab_icp)) then
-    ABI_DEALLOCATE(fock%tab_icp)
- endif
- if (allocated(fock%tab_ikpt)) then
-    ABI_DEALLOCATE(fock%tab_ikpt)
- endif
- if (allocated(fock%tab_symkpt)) then
-    ABI_DEALLOCATE(fock%tab_symkpt)
- endif
+ ABI_SFREE(fock%kg_bz)
+ ABI_SFREE(fock%nbandocc_bz)
+ ABI_SFREE(fock%istwfk_bz)
+ ABI_SFREE(fock%calc_phase)
+ ABI_SFREE(fock%timerev)
+ ABI_SFREE(fock%tab_ibg)
+ ABI_SFREE(fock%tab_icg)
+ ABI_SFREE(fock%tab_icp)
+ ABI_SFREE(fock%tab_ikpt)
+ ABI_SFREE(fock%tab_symkpt)
 
 !* [description of IBZ and BZ]
 !* Deallocate real arrays
- if (allocated(fock%wtk_bz)) then
-   ABI_DEALLOCATE(fock%wtk_bz)
- endif
- if (allocated(fock%kptns_bz)) then
-    ABI_DEALLOCATE(fock%kptns_bz)
- endif
- if (allocated(fock%phase)) then
-    ABI_DEALLOCATE(fock%phase)
- endif
+ ABI_SFREE(fock%wtk_bz)
+ ABI_SFREE(fock%kptns_bz)
+ ABI_SFREE(fock%phase)
 !* Put the integer to 0
-   fock%nkpt_bz=0
+ fock%nkpt_bz=0
 
 !* Deallocate real arrays
 
 !* Deallocate integer arrays
- if (allocated(fock%gbound_bz)) then
-    ABI_DEALLOCATE(fock%gbound_bz)
- endif
+ ABI_SFREE(fock%gbound_bz)
 
 !* [description of size of arrays/pointers]
 !* Put the integer to 0
@@ -1444,8 +1379,6 @@ end subroutine fock_BZ_destroy
 !! SOURCE
 
 subroutine fock_ACE_destroy(fockACE)
-
- implicit none
 
 !Arguments ------------------------------------
  type(fock_ACE_type),pointer :: fockACE(:,:)
@@ -1501,8 +1434,6 @@ end subroutine fock_ACE_destroy
 
 subroutine fock_calc_ene(dtset,fock,fock_energy,ikpt,nband,occ)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikpt,nband
@@ -1516,6 +1447,8 @@ subroutine fock_calc_ene(dtset,fock,fock_energy,ikpt,nband,occ)
  integer :: iband
 
 ! *************************************************************************
+
+ ABI_UNUSED(fock_energy)
 
  do iband=1,nband
 
@@ -1531,7 +1464,6 @@ subroutine fock_calc_ene(dtset,fock,fock_energy,ikpt,nband,occ)
 !     endif
    end if
  end do
-
 
 end subroutine fock_calc_ene
 !!***
@@ -1562,8 +1494,6 @@ end subroutine fock_calc_ene
 !! SOURCE
 
 subroutine fock_update_exc(fock_energy,xc_energy,xcdc_energy)
-
- implicit none
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: fock_energy
@@ -1629,8 +1559,6 @@ end subroutine fock_update_exc
 
 subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 &                              mpi_enreg,nattyp,npwarr,occ,ucvol)
-
- implicit none
 
 !scalars
  integer, intent(in) :: mcg,mcprj
@@ -1999,8 +1927,6 @@ end subroutine fock_updatecwaveocc
 
 integer function fock_set_getghc_call(fock, new) result(old)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: new
@@ -2028,8 +1954,6 @@ end function fock_set_getghc_call
 !! SOURCE
 
 pure integer function fock_get_getghc_call(fock)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2070,8 +1994,6 @@ end function fock_get_getghc_call
 !! SOURCE
 
 subroutine fock_print(fockcommon,fockbz,header,unit,mode_paral,prtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2156,8 +2078,6 @@ end subroutine fock_print
 !! SOURCE
 
 subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2362,8 +2282,6 @@ end subroutine bare_vqg
 subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock,mpi_enreg,nfft,ngfft,&
 &                  nkpt_bz,rhog,ucvol,qphon,&
 &                 rhog2) ! optional argument
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

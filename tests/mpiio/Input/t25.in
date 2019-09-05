@@ -39,7 +39,6 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = ubu_intel_13.1_openmpi
 #%% [files]
 #%% psp_files = 6c_lda.paw
 #%% [paral_info]

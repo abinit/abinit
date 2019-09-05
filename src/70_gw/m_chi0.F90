@@ -27,15 +27,15 @@
 module m_chi0
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
  use m_hide_blas
  use m_time
  use m_wfd
+ use m_dtset
 
+ use defs_datatypes,    only : pseudopotential_type, ebands_t
  use m_gwdefs,          only : GW_TOL_DOCC, GW_TOL_W0, czero_gw, em1params_t, g0g0w
  use m_numeric_tools,   only : imin_loc, print_arr
  use m_geometry,        only : normv, vdotw
@@ -523,8 +523,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    if (memreq > two) then
      MSG_WARNING(' Memory required for sf_chi0q0 is larger than 2.0 Gb!')
    end if
-   ABI_STAT_MALLOC(sf_chi0,(Ep%npwe,Ep%npwe,my_wl:my_wr), ierr)
-   ABI_CHECK(ierr==0, 'out-of-memory in sf_chi0q0')
+   ABI_MALLOC_OR_DIE(sf_chi0,(Ep%npwe,Ep%npwe,my_wl:my_wr), ierr)
    sf_chi0=czero_gw
 
  CASE DEFAULT
@@ -1380,8 +1379,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    if (memreq > two) then
      MSG_WARNING(' Memory required for sf_chi0 is larger than 2.0 Gb!')
    end if
-   ABI_STAT_MALLOC(sf_chi0,(Ep%npwe,Ep%npwe,my_wl:my_wr), ierr)
-   ABI_CHECK(ierr==0, 'out-of-memory in sf_chi0')
+   ABI_MALLOC_OR_DIE(sf_chi0,(Ep%npwe,Ep%npwe,my_wl:my_wr), ierr)
    sf_chi0=czero_gw
 
  CASE DEFAULT

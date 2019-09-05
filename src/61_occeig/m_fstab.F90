@@ -24,21 +24,20 @@
 module m_fstab
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
- use m_kptrank
- use m_tetrahedron
+ use m_krank
+ use m_htetra
  use m_ebands
 
- use m_time,           only : cwtime
+ use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : itoa, sjoin
  use m_numeric_tools,  only : bisect
  use m_symtk,          only : matr3inv
  use defs_datatypes,   only : ebands_t
  use m_crystal,        only : crystal_t
- use m_special_funcs,  only : dirac_delta
+ use m_special_funcs,  only : gaussian
  use m_kpts,           only : kpts_timrev_from_kptopt, listkk, smpbz
 
  implicit none
@@ -89,7 +88,7 @@ module m_fstab
    real(dp) :: deltaene
    ! Chemical potential increment for inelastic integration
 
-   type(kptrank_type) :: krank
+   type(krank_t) :: krank
    ! rank/inverse_rank pair for the k-points on the FS (kpts).
 
    integer,allocatable :: istg0(:,:)
@@ -125,13 +124,21 @@ module m_fstab
    ! for all chemical potentials
    ! Note that the weights are dimensioned with nkibz
 
+ contains
+
+   procedure :: free => fstab_free
+     ! Free memory.
+
+   procedure :: findkg0 => fstab_findkg0
+     ! Find the index of the k-point on the FS
+
+   procedure :: get_weights_ibz => fstab_get_weights_ibz
+     ! Compute weights for FS integration.
+
  end type fstab_t
 
- public :: fstab_init            ! Initialize the object.
- public :: fstab_free            ! Free memory.
- public :: fstab_findkg0         ! Find the index of the k-point on the FS
- public :: fstab_weights_ibz     ! Compute weights for FS integration.
- public :: fstab_print           ! Print the object
+ public :: fstab_init    ! Initialize the object.
+ public :: fstab_print   ! Print the object
 !!***
 
  !FIXME These routines are deprecated
@@ -164,7 +171,7 @@ contains  !============================================================
 subroutine fstab_free(fstab)
 
 !Arguments ------------------------------------
- type(fstab_t),intent(inout) :: fstab
+ class(fstab_t),intent(inout) :: fstab
 
 ! ************************************************************************
 
@@ -180,7 +187,7 @@ subroutine fstab_free(fstab)
  ABI_SFREE(fstab%tetra_wtk_ene)
 
  ! types
- call destroy_kptrank(fstab%krank)
+ call fstab%krank%free()
 
 end subroutine fstab_free
 !!***
@@ -246,10 +253,10 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  integer,allocatable :: fs2full(:),indkk(:,:) !,fs2irr(:)
  character(len=500) :: msg
  type(fstab_t),pointer :: fs
- type(t_tetrahedron) :: tetra
+ type(htetra_t) :: tetra
 !arrays
  !integer :: g0(3)
- integer,allocatable :: full2ebands(:,:),bs2ibz(:)
+ integer,allocatable :: full2ebands(:,:),bz2ibz(:)
  real(dp) :: rlatt(3,3),klatt(3,3) !kibz(3),krot(3),
  real(dp),allocatable :: kpt_full(:,:) !,fskpts(:,:)
  real(dp), allocatable :: tmp_eigen(:),bdelta(:,:),btheta(:,:)
@@ -259,7 +266,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  ABI_UNUSED(comm)
 
  !@fstab_t
- call cwtime(cpu,wall,gflops,"start")
+ call cwtime(cpu, wall, gflops, "start")
 
  if (any(cryst%symrel(:,:,1) /= identity_3d) .and. any(abs(cryst%tnons(:,1)) > tol10) ) then
   MSG_ERROR('The first symmetry is not the identity operator!')
@@ -279,8 +286,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    -kptrlatt(1,3)*kptrlatt(2,2)*kptrlatt(3,1) &
    -kptrlatt(1,1)*kptrlatt(2,3)*kptrlatt(3,2)
 
- ABI_STAT_MALLOC(kpt_full,(3,mkpt), ierr)
- ABI_CHECK(ierr==0, 'allocating kpt_full')
+ ABI_MALLOC_OR_DIE(kpt_full,(3,mkpt), ierr)
 
  call smpbz(brav1,std_out,kptrlatt,mkpt,nkpt_full,nshiftk,option0,shiftk,kpt_full)
 
@@ -291,7 +297,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 
  ! Compute k points from input file closest to the output file
  call listkk(dksqmax,cryst%gmet,indkk,ebands%kptns,kpt_full,ebands%nkpt,nkpt_full,cryst%nsym,&
-    sppoldbl,cryst%symafm,cryst%symrel,timrev,comm, use_symrec=.False.)
+    sppoldbl,cryst%symafm,cryst%symrel,timrev,comm, exit_loop=.True., use_symrec=.False.)
 
  if (dksqmax > tol12) then
    write(msg, '(7a,es16.6,4a)' )&
@@ -304,9 +310,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    MSG_ERROR(msg)
  end if
 
- call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')"fstab_init%listkk: cpu:",cpu,", wall: ",wall
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
+ call cwtime_report("fstab_init%listkk", cpu, wall, gflops)
 
  ABI_MALLOC(full2ebands, (6, nkpt_full))
  full2ebands = 0
@@ -317,8 +321,6 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    full2ebands(3, ik_full) = indkk(ik_full,6)     ! itimrev
    full2ebands(4:6, ik_full) = indkk(ik_full,3:5) ! g0
  end do
-
- call cwtime(cpu,wall,gflops,"start")
 
  ! Select only those k-points in the BZ close to the FS.
  ABI_CHECK(fsewin > tol12, "fsewin < tol12")
@@ -382,13 +384,10 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
      fs%istg0(:, ik) = full2ebands(:, ik_full)
    end do
    fs%maxnb = maxval(fs%bstcnt_ibz(2, :))
-   call mkkptrank(fs%kpts,nkfs,fs%krank)
+   fs%krank = krank_new(nkfs, fs%kpts)
  end do ! spin
 
- call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')"fstab_init%fs_build: cpu:",cpu,", wall: ",wall
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
- call cwtime(cpu,wall,gflops,"start")
+ call cwtime_report("fstab_init%fs_build:", cpu, wall, gflops)
 
  ! fix window around fermie for tetrahedron or gaussian weight calculation
  ! this is spin independent
@@ -412,12 +411,12 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    rlatt = kptrlatt
    call matr3inv(rlatt,klatt)
 
-   ABI_MALLOC(bs2ibz, (nkpt_full))
-   bs2ibz = full2ebands(1, :)
+   ABI_MALLOC(bz2ibz, (nkpt_full))
+   bz2ibz = full2ebands(1, :)
 
-   call init_tetra(bs2ibz, cryst%gprimd, klatt, kpt_full, nkpt_full, tetra, ierr, errstr)
-   ABI_CHECK(ierr==0, errstr)
-   ABI_FREE(bs2ibz)
+   call htetra_init(tetra, bz2ibz, cryst%gprimd, klatt, kpt_full, nkpt_full, ebands%kptns, nkibz, ierr, errstr, comm)
+   ABI_CHECK(ierr == 0, errstr)
+   ABI_FREE(bz2ibz)
 
    ABI_MALLOC(tmp_eigen, (nkibz))
    ABI_MALLOC(btheta, (nene, nkibz))
@@ -457,7 +456,10 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 
        ! Calculate general integration weights at each irred kpoint
        ! as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
-       call tetra_blochl_weights(tetra,tmp_eigen,enemin,enemax,max_occ,fs%nene,nkibz,&
+       !call tetra_blochl_weights(tetra,tmp_eigen,enemin,enemax,max_occ,fs%nene,nkibz,&
+       !  bcorr0,btheta,bdelta,xmpi_comm_self)
+
+       call tetra%blochl_weights(tmp_eigen,enemin,enemax,max_occ,fs%nene,nkibz, &
          bcorr0,btheta,bdelta,xmpi_comm_self)
 
        do ik_ibz=1,nkibz
@@ -476,7 +478,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    ABI_FREE(btheta)
    ABI_FREE(bdelta)
 
-   call destroy_tetra(tetra)
+   call tetra%free()
  end if
 
  !ABI_FREE(fs2irr)
@@ -485,9 +487,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  ABI_FREE(full2ebands)
  ABI_FREE(indkk)
 
- call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')"fstab_init%fs_weights ",cpu,", wall: ",wall
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
+ call cwtime_report("fstab_init%fs_weights:", cpu, wall, gflops)
 
 end subroutine fstab_init
 !!***
@@ -517,14 +517,14 @@ integer function fstab_findkg0(fstab, kpt, g0) result(ikfs)
 
 !Arguments ------------------------------------
 !scalars
- type(fstab_t),intent(in) :: fstab
+ class(fstab_t),intent(in) :: fstab
 !arrays
  integer,intent(out) :: g0(3)
  real(dp),intent(in) :: kpt(3)
 
 ! *************************************************************************
 
- ikfs = kptrank_index(fstab%krank, kpt)
+ ikfs = fstab%krank%get_index(kpt)
  if (ikfs /= -1) then
    g0 = nint(kpt - fstab%kpts(:, ikfs))
  else
@@ -536,9 +536,9 @@ end function fstab_findkg0
 
 !----------------------------------------------------------------------
 
-!!****f* m_fstab/fstab_weights_ibz
+!!****f* m_fstab/fstab_get_weights_ibz
 !! NAME
-!!  fstab_weights_ibz
+!!  fstab_get_weights_ibz
 !!
 !! FUNCTION
 !!  Return the weights for the integration on the Fermi-surface
@@ -561,13 +561,13 @@ end function fstab_findkg0
 !!
 !! SOURCE
 
-subroutine fstab_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
+subroutine fstab_get_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,spin
  integer,intent(in),optional :: iene
- type(fstab_t),intent(in) :: fs
+ class(fstab_t),intent(in) :: fs
  type(ebands_t),intent(in) :: ebands
 !arrays
  real(dp),intent(in) :: sigmas(:) !fs%nsig)
@@ -596,7 +596,7 @@ subroutine fstab_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
      band = ib + bstart_k - 1
      arg = ebands%eig(band,ik_ibz,spin) - chempot
      do isig=1,fs%nsig
-       wtk(isig,ib) = dirac_delta(arg, sigmas(isig))
+       wtk(isig,ib) = gaussian(arg, sigmas(isig))
      end do
    end do
 
@@ -611,7 +611,7 @@ subroutine fstab_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
    MSG_ERROR(sjoin("Wrong integration method:", itoa(fs%integ_method)))
  end select
 
-end subroutine fstab_weights_ibz
+end subroutine fstab_get_weights_ibz
 !!***
 
 !----------------------------------------------------------------------
@@ -646,7 +646,7 @@ subroutine fstab_print(fstab, header, unit, prtvol, mode_paral)
  integer,optional,intent(in) :: prtvol,unit
  character(len=4),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
- type(fstab_t),target,intent(in) :: fstab(:)
+ class(fstab_t),target,intent(in) :: fstab(:)
 
 !Local variables-------------------------------
 !scalars
@@ -715,7 +715,7 @@ end subroutine fstab_print
 !!      elphon,get_tau_k
 !!
 !! CHILDREN
-!!      destroy_kptrank,get_rank_1kpt,mkkptrank,wrtout
+!!      destroy_kptrank,get_rank,mkkptrank,wrtout
 !!
 !! SOURCE
 
@@ -733,8 +733,8 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
 !Local variables-------------------------------
 !scalars
  integer :: ikpt_phon,iFSqpt,iqpt,isym,symrankkpt_phon
- character(len=500) :: message
- type(kptrank_type) :: kptrank_t
+ !character(len=500) :: message
+ type(krank_t) :: krank
 !arrays
  real(dp) :: tmpkpt(3),gamma_kpt(3)
 
@@ -742,20 +742,20 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
 
  call wrtout(std_out,' mkqptequiv : making rankkpt_phon and invrankkpt_phon',"COLL")
 
- call mkkptrank (kpt_phon,nkpt_phon,kptrank_t)
+ krank = krank_new(nkpt_phon, kpt_phon)
 
  FSfullpqtofull = -999
  gamma_kpt(:) = zero
 
  do ikpt_phon=1,nkpt_phon
    do iqpt=1,nqpt
-!    tmpkpt = jkpt = ikpt + qpt
+     ! tmpkpt = jkpt = ikpt + qpt
      tmpkpt(:) = kpt_phon(:,ikpt_phon) + qpt_full(:,iqpt)
 
-!    which kpt is it among the full FS kpts?
-     call get_rank_1kpt (tmpkpt,symrankkpt_phon,kptrank_t)
+     ! which kpt is it among the full FS kpts?
+     symrankkpt_phon = krank%get_rank(tmpkpt)
 
-     FSfullpqtofull(ikpt_phon,iqpt) = kptrank_t%invrank(symrankkpt_phon)
+     FSfullpqtofull(ikpt_phon,iqpt) = krank%invrank(symrankkpt_phon)
      if (FSfullpqtofull(ikpt_phon,iqpt) == -1) then
        MSG_ERROR("looks like no kpoint equiv to k+q !!!")
      end if
@@ -767,48 +767,46 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
    do iqpt=1,nqpt
      tmpkpt(:) = gamma_kpt(:) - qpt_full(:,iqpt)
 
-!    which kpt is it among the full FS kpts?
-     call get_rank_1kpt (tmpkpt,symrankkpt_phon,kptrank_t)
+     ! which kpt is it among the full FS kpts?
+     symrankkpt_phon = krank%get_rank(tmpkpt)
 
-     mqtofull(iqpt) = kptrank_t%invrank(symrankkpt_phon)
+     mqtofull(iqpt) = krank%invrank(symrankkpt_phon)
      if (mqtofull(iqpt) == -1) then
        MSG_ERROR("looks like no kpoint equiv to -q !!!")
      end if
    end do
  end if
 
- call destroy_kptrank (kptrank_t)
+ call krank%free()
 
-!start over with q grid
+ ! start over with q grid
  call wrtout(std_out,' mkqptequiv : FSfullpqtofull made. Do qpttoqpt',"COLL")
 
- call mkkptrank (qpt_full,nqpt,kptrank_t)
+ krank = krank_new(nqpt, qpt_full)
 
  qpttoqpt(:,:,:) = -1
  do iFSqpt=1,nqpt
    do isym=1,Cryst%nsym
      tmpkpt(:) =  Cryst%symrec(:,1,isym)*qpt_full(1,iFSqpt) &
-&     + Cryst%symrec(:,2,isym)*qpt_full(2,iFSqpt) &
-&     + Cryst%symrec(:,3,isym)*qpt_full(3,iFSqpt)
+                + Cryst%symrec(:,2,isym)*qpt_full(2,iFSqpt) &
+                + Cryst%symrec(:,3,isym)*qpt_full(3,iFSqpt)
 
-     call get_rank_1kpt (tmpkpt,symrankkpt_phon,kptrank_t)
-     if (kptrank_t%invrank(symrankkpt_phon) == -1) then
-       message = "looks like no kpoint equiv to q by symmetry without time reversal!!!"
-       MSG_ERROR(message)
+     symrankkpt_phon = krank%get_rank(tmpkpt)
+     if (krank%invrank(symrankkpt_phon) == -1) then
+       MSG_ERROR("looks like no kpoint equiv to q by symmetry without time reversal!!!")
      end if
-     qpttoqpt(1,isym,kptrank_t%invrank(symrankkpt_phon)) = iFSqpt
+     qpttoqpt(1,isym,krank%invrank(symrankkpt_phon)) = iFSqpt
 
      tmpkpt = -tmpkpt
-     call get_rank_1kpt (tmpkpt,symrankkpt_phon,kptrank_t)
-     if (kptrank_t%invrank(symrankkpt_phon) == -1) then
-       message = ' mkqptequiv : Error : looks like no kpoint equiv to q by symmetry with time reversal!!!'
-       MSG_ERROR(message)
+     symrankkpt_phon = krank%get_rank(tmpkpt)
+     if (krank%invrank(symrankkpt_phon) == -1) then
+       MSG_ERROR('looks like no kpoint equiv to q by symmetry with time reversal!!!')
      end if
-     qpttoqpt(2,isym,kptrank_t%invrank(symrankkpt_phon)) = iFSqpt
+     qpttoqpt(2,isym,krank%invrank(symrankkpt_phon)) = iFSqpt
    end do
  end do
 
- call destroy_kptrank (kptrank_t)
+ call krank%free()
 
 end subroutine mkqptequiv
 !!***

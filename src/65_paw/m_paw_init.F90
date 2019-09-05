@@ -26,8 +26,7 @@ MODULE m_paw_init
  use m_errors
  use m_abicore
  use m_splines
-
- use defs_abitypes,  only : dataset_type
+ use m_dtset
 
  use m_time,    only : timab
  use m_pawpsp,  only : pawpsp_nl
@@ -168,8 +167,6 @@ CONTAINS  !=====================================================================
 
 subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nphi,nsym,ntheta,&
 &                  pawang,pawrad,pawspnorb,pawtab,pawxcdev,xclevel,usepotzero)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -673,8 +670,6 @@ end subroutine pawinit
 !! SOURCE
 
 subroutine paw_gencond(Dtset,gnt_option,mode,call_pawinit)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: gnt_option

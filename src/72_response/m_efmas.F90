@@ -23,15 +23,17 @@
 module m_efmas
 
  use defs_basis
- use defs_abitypes
  use m_errors
+ use m_abicore
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_efmas_defs
  use m_nctk
  use m_cgtools
+ use m_dtset
 
+ use defs_abitypes,         only : MPI_type
  use m_gaussian_quadrature, only : cgqf
  use m_io_tools, only : get_unit
 
@@ -83,8 +85,6 @@ CONTAINS
 
  subroutine efmasval_free(efmasval)
 
-   implicit none
-
    !Arguments ------------------------------------
    type(efmasval_type),intent(inout) :: efmasval
 
@@ -121,8 +121,6 @@ CONTAINS
 !! SOURCE
 
  subroutine efmasval_free_array(efmasval)
-
-   implicit none
 
    !Arguments ------------------------------------
    type(efmasval_type),allocatable,intent(inout) :: efmasval(:,:)
@@ -170,8 +168,6 @@ CONTAINS
 
  subroutine efmasdeg_free(efmasdeg)
 
-   implicit none
-
    !Arguments ------------------------------------
    type(efmasdeg_type),intent(inout) :: efmasdeg
 
@@ -206,8 +202,6 @@ CONTAINS
 !! SOURCE
 
  subroutine efmasdeg_free_array(efmasdeg)
-
-   implicit none
 
    !Arguments ------------------------------------
    type(efmasdeg_type),allocatable,intent(inout) :: efmasdeg(:)
@@ -247,8 +241,6 @@ CONTAINS
 !! SOURCE
 
  subroutine check_degeneracies(efmasdeg,bands,nband,eigen,deg_tol)
-
-   implicit none
 
    !Arguments ------------------------------------
    type(efmasdeg_type),intent(out) :: efmasdeg
@@ -370,8 +362,6 @@ CONTAINS
 !! SOURCE
 
  subroutine print_efmas(efmasdeg,efmasval,kpt,ncid)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -534,13 +524,11 @@ end subroutine print_efmas
 
  subroutine efmas_ncread(efmasdeg,efmasval,kpt,ncid)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
- integer,            intent(in) :: ncid
+ integer,intent(in) :: ncid
 !arrays
- real(dp), allocatable,            intent(out) :: kpt(:,:)
+ real(dp), allocatable,intent(out) :: kpt(:,:)
  type(efmasdeg_type), allocatable, intent(out) :: efmasdeg(:)
  type(efmasval_type), allocatable, intent(out) :: efmasval(:,:)
 
@@ -555,9 +543,6 @@ end subroutine print_efmas
  integer, allocatable :: degs_bounds_arr(:,:)
  real(dp), allocatable :: ch2c_arr(:,:,:,:)
  real(dp), allocatable :: eig2_diag_arr(:,:,:,:)
-#ifdef HAVE_NETCDF
- integer :: ncerr
-#endif
 !----------------------------------------------------------------------
 
 #ifdef HAVE_NETCDF
@@ -665,8 +650,6 @@ end subroutine print_efmas
  subroutine print_tr_efmas(io_unit,kpt,band,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,efmas_tensor,ntheta, &
 &                       m_avg,m_avg_frohlich,saddle_warn,efmas_eigval,efmas_eigvec,transport_tensor_scale)
 
-   implicit none
-
    !Arguments ------------------------------------
    integer, intent(in) :: io_unit, band, deg_dim, mdim, ndirs
    real(dp), intent(in) :: m_cart(ndirs,deg_dim), kpt(3), dirs(3,ndirs), rprimd(3,3), efmas_tensor(mdim,mdim,deg_dim)
@@ -737,12 +720,7 @@ end subroutine print_efmas
      write(tmpstr,'(6a)') ch10,'are not band extrema, but saddle points;',ch10, &
 &                       'the transport equivalent formalism breaks down in these conditions.',ch10, &
 &                       'The associated tensor(s) will therefore not be printed.'
-     msg = TRIM(msg)//TRIM(tmpstr)
-     if(io_unit==std_out) then
-       MSG_WARNING(msg)
-     else
-       write(io_unit,'(7a)') ch10,'--- !WARNING',ch10,TRIM(msg),ch10,'---'
-     end if
+     MSG_WARNING_UNIT(TRIM(msg)//TRIM(tmpstr), io_unit)
    end if
 
    if(deg_dim>1 .and. mdim>1) then
@@ -877,8 +855,6 @@ end subroutine print_efmas
  subroutine efmas_main(cg,cg1_pert,dim_eig2rf,dtset,efmasdeg,efmasval,eigen0,&
 &   eigen1,gh0c1_pert,gh1c_pert,istwfk_pert,mpert,mpi_enreg,nkpt_rbz,npwarr,rprimd)
 
-  implicit none
-
  !Arguments ------------------------------------
  !scalars
   integer,            intent(in)    :: dim_eig2rf,mpert,nkpt_rbz
@@ -916,7 +892,6 @@ end subroutine print_efmas
   integer :: adir,bdir
   integer :: deg_dim
   integer :: degl
-  integer :: lwork
   character(len=500) :: msg
   real(dp) :: deltae
   real(dp) :: dot2i,dot2r,dot3i,dot3r,doti,dotr
@@ -958,7 +933,7 @@ end subroutine print_efmas
   if(dtset%efmas_deg==0) then
     write(msg,'(a)') 'efmas_deg==0 is for debugging; the results for degenerate bands will be garbage.'
     MSG_WARNING(msg)
-    write(ab_out,'(6a)') ch10,'--- !WARNING',ch10,TRIM(msg),ch10,'---'
+    MSG_WARNING_UNIT(msg, ab_out)
   end if
 
   ipert = dtset%natom+1
@@ -1169,8 +1144,6 @@ end subroutine print_efmas
 
  subroutine efmas_analysis(dtset,efmasdeg,efmasval,kpt_rbz,mpi_enreg,nkpt_rbz,rprimd)
 
-  implicit none
-
  !Arguments ------------------------------------
  !scalars
   integer,            intent(in)    :: nkpt_rbz
@@ -1188,9 +1161,7 @@ end subroutine print_efmas
   logical :: print_fsph
   logical, allocatable :: saddle_warn(:), start_eigf3d_pos(:)
   integer :: info
-  integer :: ipert
   integer :: isppol
-  integer :: nband_k
   integer :: ideg,jdeg
   integer :: ikpt
   integer :: master,me,spaceworld
@@ -1225,7 +1196,7 @@ end subroutine print_efmas
   real(dp),allocatable :: prodr(:,:)
   !real(dp), allocatable :: f3dfd(:,:,:)
   complex(dpc) :: matr2d(2,2)
-  complex(dpc), allocatable :: eigen1_deg(:,:), eigenvec(:,:), work(:)
+  complex(dpc), allocatable :: eigenvec(:,:), work(:)
   complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
   complex(dpc), allocatable :: f3d(:,:), df3d_dth(:,:), df3d_dph(:,:)
   complex(dpc), allocatable :: unitary_tr(:,:), eff_mass(:,:)
@@ -2057,8 +2028,6 @@ end subroutine print_efmas
 
 function MATMUL_DP(aa,bb,mm,nn,transa,transb)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mm,nn
@@ -2128,8 +2097,6 @@ end function MATMUL_DP
 !! SOURCE
 
 function MATMUL_DPC(aa,bb,mm,nn,transa,transb)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

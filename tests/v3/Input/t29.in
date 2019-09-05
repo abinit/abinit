@@ -7,11 +7,14 @@ spgroup: 195
 spgroup+ 1
 
 #This is for spgroup 195 to 199
+#wyckoff multiplicity 12
 natom1 12     natom2 12     natom3 12     natom4 12   natom5 12
 
+#wyckoff multiplicity 24
 natom  24    # this is for spgroup 200 to 220
 
 #This is for spgroup 221 to 230
+#wyckoff multiplicity 48
 natom27 48    natom28 48
 natom29 48    natom30 48   natom31 48   natom32 48
 natom33 48    natom34 48   natom35 48   natom36 48
@@ -25,9 +28,9 @@ ntypat 1
 znucl 1
 natrd 1
 xred 0.17 0.15 0.11
-typat 1
+typat *1
 ecut 1
-  kptopt 0
+kptopt 0
 nkpt 1
 nline 1
 nstep 1

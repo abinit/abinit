@@ -4,7 +4,7 @@
 !!  m_six
 !!
 !! FUNCTION
-!!
+!!  Calculate diagonal and off-diagonal matrix elements of the exchange part of the self-energy operator.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1999-2019 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
@@ -25,6 +25,37 @@
 #include "abi_common.h"
 
 module m_sigx
+
+ use defs_basis
+ use m_abicore
+ use m_gwdefs
+ use m_xmpi
+ use m_defs_ptgroups
+ use m_errors
+ use m_time
+
+ use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use m_hide_blas,     only : xdotc, xgemv
+ use m_numeric_tools, only : hermitianize
+ use m_geometry,      only : normv
+ use m_crystal,       only : crystal_t
+ use m_fft_mesh,      only : rotate_FFT_mesh, cigfft
+ use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, littlegroup_t, littlegroup_print
+ use m_gsphere,       only : gsphere_t, gsph_fft_tabs
+ use m_vcoul,         only : vcoul_t
+ use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
+ use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
+ use m_pawang,        only : pawang_type
+ use m_pawtab,        only : pawtab_type
+ use m_pawfgrtab,     only : pawfgrtab_type
+ use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
+ use m_paw_nhat,      only : pawmknhat_psipsi
+ use m_paw_sym,       only : paw_symcprj
+ use m_wfd,           only : wfd_t
+ use m_sigma,         only : sigma_t, sigma_distribute_bks
+ use m_oscillators,   only : rho_tw_g
+ use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
+ use m_ptgroups,      only : sum_irreps
 
  implicit none
 
@@ -128,37 +159,6 @@ contains
 subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,&
 & Ltg_k,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,allQP_sym,gwx_ngfft,ngfftf,&
 & prtvol,pawcross)
-
- use defs_basis
- use defs_datatypes
- use m_abicore
- use m_gwdefs
- use m_xmpi
- use m_defs_ptgroups
- use m_errors
- use m_time
-
- use m_hide_blas,     only : xdotc, xgemv
- use m_numeric_tools, only : hermitianize
- use m_geometry,      only : normv
- use m_crystal,       only : crystal_t
- use m_fft_mesh,      only : rotate_FFT_mesh, cigfft
- use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, littlegroup_t, littlegroup_print
- use m_gsphere,       only : gsphere_t, gsph_fft_tabs
- use m_vcoul,         only : vcoul_t
- use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
- use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
- use m_pawang,        only : pawang_type
- use m_pawtab,        only : pawtab_type
- use m_pawfgrtab,     only : pawfgrtab_type
- use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
- use m_paw_nhat,      only : pawmknhat_psipsi
- use m_paw_sym,       only : paw_symcprj
- use m_wfd,           only : wfd_t
- use m_sigma,         only : sigma_t, sigma_distribute_bks
- use m_oscillators,   only : rho_tw_g
- use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
- use m_ptgroups,      only : sum_irreps
 
 !Arguments ------------------------------------
 !scalars
@@ -423,8 +423,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    if (ALL(proc_distrb(:,:,spin) /= Wfd%my_rank)) CYCLE
 
    ! Load wavefunctions for GW corrections.
-   ABI_STAT_MALLOC(wfr_bdgw, (gwx_nfftot*nspinor,ib1:ib2), ierr)
-   ABI_CHECK(ierr==0, "Out of memory in wfr_bdgw")
+   ABI_MALLOC_OR_DIE(wfr_bdgw, (gwx_nfftot*nspinor,ib1:ib2), ierr)
    call wfd%get_many_ur([(jb, jb=ib1,ib2)], jk_ibz, spin, wfr_bdgw)
 
    if (Wfd%usepaw==1) then

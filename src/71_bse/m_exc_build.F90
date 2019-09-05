@@ -40,7 +40,6 @@ module m_exc_build
  use m_hdr
 
  use defs_datatypes, only : pseudopotential_type
- use defs_abitypes,  only : hdr_type
  use m_gwdefs,       only : czero_gw, cone_gw, GW_TOLQ0
  use m_time,         only : cwtime, timab
  use m_io_tools,     only : get_unit, open_file
@@ -156,7 +155,6 @@ contains
 !!      exc_build_ham
 !!
 !! CHILDREN
-!!      get_bz_item,timab,wrtout,xmpi_split_work2_i4b
 !!
 !! SOURCE
 
@@ -523,10 +521,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    nels=nels_block(block)
    ABI_MALLOC(t_start,(0:nproc-1))
    ABI_MALLOC(t_stop,(0:nproc-1))
-   call xmpi_split_work2_i8b(nels,nproc,t_start,t_stop,msg,ierr)
-   if (ierr/=0) then
-     MSG_WARNING(msg)
-   end if
+   call xmpi_split_work2_i8b(nels,nproc,t_start,t_stop)
 
    ABI_MALLOC(hsize_of,(0:nproc-1))
    hsize_of=0
@@ -563,34 +558,28 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    my_starts = [my_rows(1),my_cols(1)]
    my_ends   = [my_rows(2),my_cols(2)]
    !
-   ! * Announce the treatment of submatrix treated by each node.
+   ! Announce the treatment of submatrix treated by each node.
    bsize_my_block = 2*dpc*my_hsize
    write(msg,'(4(a,i0))')' Treating ',my_hsize,'/',nels,' matrix elements, from column ',my_cols(1),' up to column ',my_cols(2)
    call wrtout(std_out,msg,'PERS')
 
    if (is_resonant) then
-     write(msg,'(a,f8.1,a)')&
-&     ' Calculating resonant blocks. Memory required: ',bsize_my_block*b2Mb,' Mb. '
+     write(msg,'(a,f8.1,a)')' Calculating resonant blocks. Memory required: ',bsize_my_block*b2Mb,' [Mb] <<< MEM'
    else
-     write(msg,'(a,f8.1,a)')&
-&     ' Calculating coupling blocks. Memory required: ',bsize_my_block*b2Mb,' Mb. '
+     write(msg,'(a,f8.1,a)')' Calculating coupling blocks. Memory required: ',bsize_my_block*b2Mb,' [Mb] <<< MEM'
    end if
    call wrtout(std_out,msg,"COLL")
 
    ! Allocate big (scalable) buffer to store the BS matrix on this node.
-   ABI_STAT_MALLOC(my_bsham,(t_start(my_rank):t_stop(my_rank)), ierr)
-   ABI_CHECK(ierr==0, 'Not enough memory for exc Hamiltonian')
+   ABI_MALLOC_OR_DIE(my_bsham,(t_start(my_rank):t_stop(my_rank)), ierr)
 
    if (BSp%prep_interp) then
      ! Allocate big (scalable) buffers to store a,b,c coeffients
-     ABI_STAT_MALLOC(acoeffs,(t_start (my_rank):t_stop(my_rank)), ierr)
-     ABI_CHECK(ierr==0, 'Not enough memory for acoeffs')
+     ABI_MALLOC_OR_DIE(acoeffs,(t_start (my_rank):t_stop(my_rank)), ierr)
 
-     ABI_STAT_MALLOC(bcoeffs,(t_start(my_rank):t_stop(my_rank)), ierr)
-     ABI_CHECK(ierr==0, 'Not enough memory for bcoeffs')
+     ABI_MALLOC_OR_DIE(bcoeffs,(t_start(my_rank):t_stop(my_rank)), ierr)
 
-     ABI_STAT_MALLOC(ccoeffs,(t_start(my_rank):t_stop(my_rank)), ierr)
-     ABI_CHECK(ierr==0, 'Not enough memory for ccoeffs')
+     ABI_MALLOC_OR_DIE(ccoeffs,(t_start(my_rank):t_stop(my_rank)), ierr)
    end if
 
    if (do_coulomb_term) then ! Construct Coulomb term.
@@ -706,35 +695,35 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          ! =======================================
          ! === Loop over the four band indeces ===
          ! =======================================
-         !
          do ic=bidx(1,2),bidx(2,2) !do ic=BSp%lumo,BSp%nbnds
 
            if (wfd%ihave_ur(ic,ik_ibz,spin1,how="Stored")) then
-             ptur_ck =>  Wfd%Wave(ic,ik_ibz,spin1)%ur
+             ptur_ck => Wfd%Wave(ic,ik_ibz,spin1)%ur
            else
              call wfd%get_ur(ic,ik_ibz,spin1,ur_ck)
              ptur_ck => ur_ck
            end if
            !
            ! Get cprj for this (c,kbz,s1) in the BZ.
-           ! * phase due to the umklapp G0 in k-q is already included.
+           ! phase due to the umklapp G0 in k-q is already included.
            if (Wfd%usepaw==1) then
              if (wfd%ihave_cprj(ic,ik_ibz,spin1,how="Stored")) then
-               ptcp_ck =>  Wfd%Wave(ic,ik_ibz,spin1)%cprj
+               ptcp_ck => Wfd%Wave(ic,ik_ibz,spin1)%cprj
              else
                call wfd%get_cprj(ic,ik_ibz,spin1,Cryst,Cp_tmp1,sorted=.FALSE.)
-               ptcp_ck =>  Cp_tmp1
+               ptcp_ck => Cp_tmp1
              end if
              call paw_symcprj_op(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,ptcp_ck,Cp_ck)
            end if
 
            do icp=bidx(1,4),bidx(2,4)  !do icp=BSp%lumo,BSp%nbnds
-             ! * Calculate matrix-elements rhxtwg_cpc
+             ! Calculate matrix-elements rhxtwg_cpc
              !
              if (ik_bz==ikp_bz) then ! Already in memory.
                rhxtwg_cpc(:) = sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npweps,rhxtwg_q0(:,icp,ic,ik_ibz,spin1),Gsph_c)
 
-             else ! Calculate matrix element from wfr.
+             else
+               ! Calculate matrix element from wfr.
                ! TODO: change the order of the loops.
 
                if (wfd%ihave_ur(icp,ikp_ibz,spin2,how="Stored")) then
@@ -745,7 +734,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                end if
 
                ! Load cprj for this (c,k,s2) in the BZ.
-               ! * Do not care about umklapp G0 in k-q as the phase is already included.
+               ! Do not care about umklapp G0 in k-q as the phase is already included.
                if (Wfd%usepaw==1) then
                  if (wfd%ihave_cprj(icp,ikp_ibz,spin2,how="Stored")) then
                    ptcp_ckp =>  Wfd%Wave(icp,ikp_ibz,spin2)%cprj
@@ -862,7 +851,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                    end if
                    !
                    ! Load cprj for this (vp,kp,s2) in the BZ.
-                   ! * Do not care about umklapp G0 in k-q as the phase is already included.
+                   ! Do not care about umklapp G0 in k-q as the phase is already included.
                    if (Wfd%usepaw==1) then
                      if (wfd%ihave_cprj(ivp,ikp_ibz,spin2,how="Stored")) then
                        ptcp_vkp =>  Wfd%Wave(ivp,ikp_ibz,spin2)%cprj
@@ -1368,19 +1357,11 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
            write(msg,'(2(a,i0))')" Wraparound error: iend=",iend," my_hsize=",hsize_of(sender)
            MSG_ERROR(msg)
          end if
-         if (allocated(prev_col)) then
-           ABI_FREE(prev_col)
-         end if
+         ABI_SFREE(prev_col)
          if (BSp%prep_interp) then
-           if (allocated(aprev_col)) then
-             ABI_FREE(aprev_col)
-           end if
-           if (allocated(bprev_col)) then
-             ABI_FREE(bprev_col)
-           end if
-           if (allocated(cprev_col)) then
-             ABI_FREE(cprev_col)
-           end if
+           ABI_SFREE(aprev_col)
+           ABI_SFREE(bprev_col)
+           ABI_SFREE(cprev_col)
          end if
          ABI_FREE(buffer)
          if (BSp%prep_interp) then
@@ -1399,19 +1380,11 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    end if ! use_mpiio
    call timab(685,2,tsec) ! exc_build_ham(write_ham)
    !
-   if (allocated(my_bsham)) then
-     ABI_FREE(my_bsham)
-   end if
+   ABI_SFREE(my_bsham)
    if (BSp%prep_interp) then
-     if (allocated(acoeffs)) then
-       ABI_FREE(acoeffs)
-     end if
-     if (allocated(bcoeffs)) then
-       ABI_FREE(bcoeffs)
-     end if
-     if (allocated(ccoeffs)) then
-       ABI_FREE(ccoeffs)
-     end if
+     ABI_SFREE(acoeffs)
+     ABI_SFREE(bcoeffs)
+     ABI_SFREE(ccoeffs)
    end if
    ABI_FREE(t_start)
    ABI_FREE(t_stop)
@@ -1432,10 +1405,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    ! Here the calculation of the block is parallelized over columns.
    ABI_MALLOC(col_start,(0:nproc-1))
    ABI_MALLOC(col_stop,(0:nproc-1))
-   call xmpi_split_work2_i4b(neh2,nproc,col_start,col_stop,msg,ierr) !check this but it should be OK.
-   if (ierr/=0) then
-     MSG_WARNING(msg)
-   end if
+   call xmpi_split_work2_i4b(neh2,nproc,col_start,col_stop)
 
    my_cols(1) = col_start(my_rank)
    my_cols(2) = col_stop (my_rank)
@@ -1616,11 +1586,9 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    call timab(685,2,tsec) ! exc_build_ham(write_ham)
 
    ABI_FREE(ncols_of)
-   if (allocated(my_kxssp))  then
-     ABI_FREE(my_kxssp)
-   end if
+   ABI_SFREE(my_kxssp)
  end if
- !
+
  ! Close the file.
  if (use_mpiio) then
 #ifdef HAVE_MPI_IO
@@ -1639,7 +1607,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      close(c_unt)
    end if
  end if
- !
+
  ! Free memory.
  ABI_FREE(igfftg0)
  ABI_FREE(ktabr_k)
@@ -1759,7 +1727,6 @@ end subroutine exc_build_block
 !! PARENTS
 !!
 !! CHILDREN
-!!      get_bz_item,timab,wrtout,xmpi_split_work2_i4b
 !!
 !! SOURCE
 
@@ -1787,7 +1754,7 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
  integer :: ik_ibz,itim_k,ikp_ibz,itim_kp,isym_k,isym_kp
  integer :: iq_bz,iq_ibz,isym_q,itim_q,iqbz0,rank
  integer :: iv,ivp,ic,icp
- integer :: block,ierr
+ integer :: block
  integer(i8b) :: tot_nels,ir,it,itp
  real(dp) :: faq,kx_fact
  complex(spc) :: ctemp
@@ -1997,10 +1964,7 @@ if (nsppol==2) then
  ! Here the calculation of the block is parallelized over columns.
  ABI_MALLOC(col_start,(0:nproc-1))
  ABI_MALLOC(col_stop,(0:nproc-1))
- call xmpi_split_work2_i4b(neh2,nproc,col_start,col_stop,msg,ierr) !check this but it should be OK.
- if (ierr/=0) then
-   MSG_WARNING(msg)
- end if
+ call xmpi_split_work2_i4b(neh2,nproc,col_start,col_stop) !check this but it should be OK.
 
  my_cols(1) = col_start(my_rank)
  my_cols(2) = col_stop (my_rank)
@@ -2095,17 +2059,13 @@ if (nsppol==2) then
  call timab(686,2,tsec) ! exc_build_ham(exch.spin)
 
  ABI_FREE(ncols_of)
- if (allocated(my_kxssp))  then
-   ABI_FREE(my_kxssp)
- end if
+ ABI_SFREE(my_kxssp)
  end if
 
  DBG_EXIT("COLL")
 
 end subroutine exc_build_v
 !!***
-
-
 
 !!****f* m_exc_build/exc_build_ham
 !! NAME
@@ -2142,9 +2102,6 @@ end subroutine exc_build_v
 !!      bethe_salpeter
 !!
 !! CHILDREN
-!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
-!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd_change_ngfft
-!!      wfd_get_cprj,wfd_get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2232,8 +2189,8 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
 &    Wfd,W,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff,all_mgq0,.FALSE.,BS_files%out_hcoup)
    call timab(673,2,tsec)
  end if
- !
- ! * Free memory.
+
+ ! Free memory.
  ABI_FREE(all_mgq0)
 
 100 call timab(670,2,tsec)
@@ -2271,9 +2228,6 @@ end subroutine exc_build_ham
 !!      exc_build_ham
 !!
 !! CHILDREN
-!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
-!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd_change_ngfft
-!!      wfd_get_cprj,wfd_get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2395,8 +2349,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
 
  ABI_MALLOC(rhotwg1,(npweps))
 
- ABI_STAT_MALLOC(mgq0, (npweps,lomo_min:humo_max,lomo_min:humo_max,Wfd%nkibz,Wfd%nsppol), ierr)
- ABI_CHECK(ierr==0, "out-of-memory in mgq0")
+ ABI_MALLOC_OR_DIE(mgq0, (npweps,lomo_min:humo_max,lomo_min:humo_max,Wfd%nkibz,Wfd%nsppol), ierr)
  mgq0 = czero
 
  call cwtime(cpu,wall,gflops,"start")

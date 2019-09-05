@@ -27,11 +27,11 @@
 module m_jellium
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
 
- use m_fft,      only : fourdp
+ use defs_abitypes, only : MPI_type
+ use m_fft,         only : fourdp
 
  implicit none
 
@@ -84,13 +84,11 @@ contains
 !! SOURCE
 
 subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
-&  option,paral_kgb,slabwsrad,rhog,rhor,rprimd,vjell,slabzstart,slabzend)
-
- implicit none
+&  option,slabwsrad,rhog,rhor,rprimd,vjell,slabzstart,slabzend)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft,nspden,option,paral_kgb
+ integer,intent(in) :: nfft,nspden,option
  real(dp),intent(in) :: gsqcut,slabwsrad,slabzend,slabzstart
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays

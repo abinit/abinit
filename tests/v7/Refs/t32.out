@@ -1,5 +1,5 @@
 
-.Version 8.11.1 of ABINIT 
+.Version 8.11.7 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel19.0 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 21 Nov 2018.
-- ( at 10h34 )
+.Starting date : Fri 10 May 2019.
+- ( at 09h28 )
   
 - input  file    -> t32.in
 - output file    -> t32.out
-- root for input  files -> t32i
-- root for output files -> t32o
+- root for input  files -> t32-i
+- root for output files -> t32-o
  
  
  DATASET   11 : space group P1 (#  1); Bravais aP (primitive triclinic)
@@ -535,8 +535,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
  ETOT  7  -8.5636946827019    -4.031E-08 3.992E-11 2.560E-08
  ETOT  8  -8.5636946853534    -2.652E-09 1.848E-12 2.463E-09
  ETOT  9  -8.5636946856204    -2.671E-10 1.163E-13 1.114E-10
- ETOT 10  -8.5636946856284    -7.944E-12 1.646E-14 8.308E-12
- ETOT 11  -8.5636946856292    -8.491E-13 6.979E-15 3.942E-13
+ ETOT 10  -8.5636946856284    -7.947E-12 1.646E-14 8.308E-12
+ ETOT 11  -8.5636946856292    -8.207E-13 6.979E-15 3.942E-13
  
  At SCF step   11       nres2   =  3.94E-13 < tolvrs=  1.00E-12 =>converged.
  Integrated electronic density in atomic spheres:
@@ -549,7 +549,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
  Compensation charge over spherical meshes =     -0.435432520234693
- Compensation charge over fine fft grid    =     -0.435433414276317
+ Compensation charge over fine fft grid    =     -0.435433414276316
  
  ==== Results concerning PAW augmentation regions ====
  
@@ -649,26 +649,25 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
  Components of total free energy (in Hartree) :
  
     Kinetic energy  =  3.10125324813558E+00
-    Hartree energy  =  8.11079900201643E-01
+    Hartree energy  =  8.11079900201644E-01
     XC energy       = -7.29502812731882E+00
-    Ewald energy    = -8.40935552952192E+00
+    Ewald energy    =-8.40935552952192E+00
     PspCore energy  =  1.01128439909808E+00
     Loc. psp. energy= -2.06161470574180E+00
-    Spherical terms =  4.27868634400604E+00
-    >>>>>>>>> Etotal= -8.56369447114120E+00
+    Spherical terms =  4.27868634400606E+00
+    >>>>>>>>> Etotal= -8.56369447114117E+00
  
  "Double-counting" decomposition of free energy:
     Band energy     = -9.36299627379519E-01
-    Ewald energy    = -8.40935552952192E+00
+    Ewald energy    =-8.40935552952192E+00
     PspCore energy  =  1.01128439909808E+00
     Dble-C XC-energy= -4.32659079581497E+00
-    Spherical terms =  4.09726686798912E+00
-    >>>> Etotal (DC)= -8.56369468562921E+00
+    Spherical terms =  4.09726686798914E+00
+    >>>> Etotal (DC)= -8.56369468562918E+00
  
-  >Total energy in eV           = -2.33029977513983E+02
-  >Total DC energy in eV        = -2.33029983350499E+02
+  >Total energy in eV           = -2.33029977513982E+02
+  >Total DC energy in eV        = -2.33029983350498E+02
 --------------------------------------------------------------------------------
- 
 ================================================================================
 == DATASET 12 ==================================================================
 -   nproc =    1
@@ -712,13 +711,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
  ETOT  2  -8.5638230000299     1.822E-03 4.737E-07 6.913E-02
  ETOT  3  -8.5635546214509     2.684E-04 3.922E-06 2.914E-03
  ETOT  4  -8.5636600746901    -1.055E-04 1.702E-08 3.130E-04
- ETOT  5  -8.5636940141386    -3.394E-05 5.781E-09 8.942E-06
+ ETOT  5  -8.5636940141387    -3.394E-05 5.781E-09 8.942E-06
  ETOT  6  -8.5636946760781    -6.619E-07 1.447E-09 6.168E-07
  ETOT  7  -8.5636947163915    -4.031E-08 3.991E-11 2.560E-08
- ETOT  8  -8.5636947190428    -2.651E-09 1.848E-12 2.464E-09
+ ETOT  8  -8.5636947190429    -2.651E-09 1.848E-12 2.464E-09
  ETOT  9  -8.5636947193100    -2.672E-10 1.161E-13 1.114E-10
- ETOT 10  -8.5636947193180    -7.978E-12 1.642E-14 8.311E-12
- ETOT 11  -8.5636947193189    -8.900E-13 6.945E-15 3.948E-13
+ ETOT 10  -8.5636947193180    -7.985E-12 1.642E-14 8.311E-12
+ ETOT 11  -8.5636947193189    -8.864E-13 6.945E-15 3.948E-13
  
  At SCF step   11       nres2   =  3.95E-13 < tolvrs=  1.00E-12 =>converged.
  Integrated electronic density in atomic spheres:
@@ -730,7 +729,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.435432524292575
+ Compensation charge over spherical meshes =     -0.435432524292574
  Compensation charge over fine fft grid    =     -0.435433418541925
  
  ==== Results concerning PAW augmentation regions ====
@@ -853,17 +852,17 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
  Components of total free energy (in Hartree) :
  
     Kinetic energy  =  3.10125330200315E+00
-    Hartree energy  =  8.11079892484229E-01
+    Hartree energy  =  8.11079892484228E-01
     XC energy       = -7.29502812854685E+00
-    Ewald energy    = -8.40935552952192E+00
+    Ewald energy    =-8.40935552952192E+00
     PspCore energy  =  1.01128439909808E+00
-    Loc. psp. energy= -2.06161475046482E+00
+    Loc. psp. energy= -2.06161475046483E+00
     Spherical terms =  4.27868637820901E+00
     >>>>>>>>> Etotal= -8.56369443673913E+00
  
  "Double-counting" decomposition of free energy:
-    Band energy     = -9.36299664901769E-01
-    Ewald energy    = -8.40935552952192E+00
+    Band energy     = -9.36299664901772E-01
+    Ewald energy    =-8.40935552952192E+00
     PspCore energy  =  1.01128439909808E+00
     Dble-C XC-energy= -4.32659078920213E+00
     Spherical terms =  4.09726686520885E+00
@@ -872,7 +871,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
   >Total energy in eV           = -2.33029976577855E+02
   >Total DC energy in eV        = -2.33029984267241E+02
 --------------------------------------------------------------------------------
- 
 ================================================================================
 == DATASET 21 ==================================================================
 -   nproc =    1
@@ -918,11 +916,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
  ETOT  4  -8.5636650573098    -1.086E-04 5.533E-08 2.683E-04
  ETOT  5  -8.5636934059699    -2.835E-05 5.314E-09 1.058E-05
  ETOT  6  -8.5636946392717    -1.233E-06 2.088E-10 5.361E-07
- ETOT  7  -8.5636946829467    -4.367E-08 4.834E-11 2.202E-08
+ ETOT  7  -8.5636946829467    -4.368E-08 4.834E-11 2.202E-08
  ETOT  8  -8.5636946853203    -2.374E-09 1.062E-12 2.796E-09
  ETOT  9  -8.5636946856359    -3.156E-10 3.273E-13 1.539E-10
- ETOT 10  -8.5636946856300     5.912E-12 3.390E-14 1.241E-11
- ETOT 11  -8.5636946856291     9.006E-13 4.648E-15 6.498E-14
+ ETOT 10  -8.5636946856300     5.901E-12 3.390E-14 1.241E-11
+ ETOT 11  -8.5636946856290     9.255E-13 4.648E-15 6.498E-14
  
  At SCF step   11       nres2   =  6.50E-14 < tolvrs=  1.00E-12 =>converged.
  Integrated electronic density in atomic spheres:
@@ -934,7 +932,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.435432780785309
+ Compensation charge over spherical meshes =     -0.435432780785308
  Compensation charge over fine fft grid    =     -0.435433442104760
  
  ==== Results concerning PAW augmentation regions ====
@@ -1037,24 +1035,23 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
     Kinetic energy  =  3.10125328178857E+00
     Hartree energy  =  8.11079950216773E-01
     XC energy       = -7.29502831091810E+00
-    Ewald energy    = -8.40935552952192E+00
+    Ewald energy    =-8.40935552952192E+00
     PspCore energy  =  1.01128439909808E+00
     Loc. psp. energy= -2.06161485155235E+00
-    Spherical terms =  4.27868639370811E+00
-    >>>>>>>>> Etotal= -8.56369466718084E+00
+    Spherical terms =  4.27868639370813E+00
+    >>>>>>>>> Etotal= -8.56369466718082E+00
  
  "Double-counting" decomposition of free energy:
     Band energy     = -9.36299582967628E-01
-    Ewald energy    = -8.40935552952192E+00
+    Ewald energy    =-8.40935552952192E+00
     PspCore energy  =  1.01128439909808E+00
     Dble-C XC-energy= -4.32659081668183E+00
-    Spherical terms =  4.09726684444424E+00
-    >>>> Etotal (DC)= -8.56369468562906E+00
+    Spherical terms =  4.09726684444425E+00
+    >>>> Etotal (DC)= -8.56369468562905E+00
  
-  >Total energy in eV           = -2.33029982848493E+02
+  >Total energy in eV           = -2.33029982848492E+02
   >Total DC energy in eV        = -2.33029983350494E+02
 --------------------------------------------------------------------------------
- 
 ================================================================================
 == DATASET 22 ==================================================================
 -   nproc =    1
@@ -1097,14 +1094,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
  ETOT  1  -8.5658459619584    -8.566E+00 2.135E-02 4.527E-01
  ETOT  2  -8.5638432796124     2.003E-03 1.610E-07 6.898E-02
  ETOT  3  -8.5635549160209     2.884E-04 4.267E-06 2.854E-03
- ETOT  4  -8.5636610148474    -1.061E-04 1.812E-08 3.034E-04
+ ETOT  4  -8.5636610148475    -1.061E-04 1.812E-08 3.034E-04
  ETOT  5  -8.5636939936206    -3.298E-05 4.822E-09 8.710E-06
  ETOT  6  -8.5636946907210    -6.971E-07 1.252E-09 5.723E-07
  ETOT  7  -8.5636947163572    -2.564E-08 4.378E-11 2.445E-08
  ETOT  8  -8.5636947190608    -2.704E-09 9.653E-13 2.322E-09
- ETOT  9  -8.5636947193096    -2.488E-10 8.117E-14 8.219E-11
- ETOT 10  -8.5636947193178    -8.194E-12 1.186E-15 4.971E-12
- ETOT 11  -8.5636947193191    -1.334E-12 1.238E-15 9.669E-14
+ ETOT  9  -8.5636947193096    -2.487E-10 8.117E-14 8.219E-11
+ ETOT 10  -8.5636947193178    -8.191E-12 1.186E-15 4.971E-12
+ ETOT 11  -8.5636947193191    -1.345E-12 1.238E-15 9.669E-14
  
  At SCF step   11       nres2   =  9.67E-14 < tolvrs=  1.00E-12 =>converged.
  Integrated electronic density in atomic spheres:
@@ -1116,8 +1113,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.435432639207737
- Compensation charge over fine fft grid    =     -0.435433414235897
+ Compensation charge over spherical meshes =     -0.435432639207738
+ Compensation charge over fine fft grid    =     -0.435433414235898
  
  ==== Results concerning PAW augmentation regions ====
  
@@ -1238,27 +1235,26 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
  
-    Kinetic energy  =  3.10125326876349E+00
+    Kinetic energy  =  3.10125326876350E+00
     Hartree energy  =  8.11079931850007E-01
     XC energy       = -7.29502824828260E+00
-    Ewald energy    = -8.40935552952192E+00
+    Ewald energy    =-8.40935552952192E+00
     PspCore energy  =  1.01128439909808E+00
-    Loc. psp. energy= -2.06161480152478E+00
-    Spherical terms =  4.27868642505368E+00
-    >>>>>>>>> Etotal= -8.56369455456404E+00
+    Loc. psp. energy= -2.06161480152479E+00
+    Spherical terms =  4.27868642505369E+00
+    >>>>>>>>> Etotal= -8.56369455456403E+00
  
  "Double-counting" decomposition of free energy:
-    Band energy     = -9.36299621299116E-01
-    Ewald energy    = -8.40935552952192E+00
+    Band energy     = -9.36299621299119E-01
+    Ewald energy    =-8.40935552952192E+00
     PspCore energy  =  1.01128439909808E+00
-    Dble-C XC-energy= -4.32659082150113E+00
+    Dble-C XC-energy= -4.32659082150114E+00
     Spherical terms =  4.09726685390498E+00
-    >>>> Etotal (DC)= -8.56369471931910E+00
+    >>>> Etotal (DC)= -8.56369471931911E+00
  
   >Total energy in eV           = -2.33029979784034E+02
   >Total DC energy in eV        = -2.33029984267247E+02
 --------------------------------------------------------------------------------
- 
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -1680,10 +1676,10 @@ P           mkmem22        64
 - Comment : the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         11.2  wall=         11.2
+- Proc.   0 individual time (sec): cpu=         13.8  wall=         13.8
  
 ================================================================================
  
  Calculation completed.
-.Delivered   5 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.2  wall=         11.2
+.Delivered   5 WARNINGs and  21 COMMENTs to log file.
++Overall time at end (sec) : cpu=         13.8  wall=         13.8

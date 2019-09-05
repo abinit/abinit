@@ -27,13 +27,13 @@
 module m_predict_neb
 
  use defs_basis
- use defs_abitypes
  use m_splines
  use m_mep
  use m_abicore
  use m_errors
  use m_xmpi
 
+ use defs_abitypes, only : MPI_type
  use m_results_img, only : results_img_type, gather_array_img, scatter_array_img, get_geometry_img
 
  implicit none
@@ -192,8 +192,9 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
 !  === Original definition of tangent
    if (mep_param%neb_algo==0) then
      do iimage=2,nimage_tot-1
+!      tangent(:,:,iimage)=xcart_all(:,:,iimage+1)-xcart_all(:,:,iimage-1)
        tangent(:,:,iimage)=coordif(:,:,iimage  )/dimage(iimage) &
-&       +coordif(:,:,iimage+1)/dimage(iimage+1)
+&                         +coordif(:,:,iimage+1)/dimage(iimage+1)
      end do
 !    === Improved tangent (J. Chem. Phys. 113, 9978 (2000) [[cite:Henkelman2000]])
    else
@@ -211,10 +212,10 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
 &         abs(etotal_all(iimage-1)-etotal_all(iimage)))
          if (etotal_all(iimage+1)>etotal_all(iimage-1)) then   ! V_i+1 > V_i-1
            tangent(:,:,iimage)=coordif(:,:,iimage+1)*dvmax &
-&           +coordif(:,:,iimage  )*dvmin
+&                             +coordif(:,:,iimage  )*dvmin
          else                                                  ! V_i+1 < V_i-1
            tangent(:,:,iimage)=coordif(:,:,iimage+1)*dvmin &
-&           +coordif(:,:,iimage  )*dvmax
+&                             +coordif(:,:,iimage  )*dvmax
          end if
        end if
      end do
@@ -232,8 +233,8 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
    else                                                                ! Variable spring
      emax=maxval(etotal_all(:))
      eref=max(etotal_all(1),etotal_all(nimage_tot))
-     spring(1)=zero
-     do iimage=2,nimage_tot
+     spring(:)=mep_param%neb_spring(1)
+     do iimage=2,nimage_tot-1
        ecur=max(etotal_all(iimage-1),etotal_all(iimage))
        if (ecur<eref) then
          spring(iimage)=mep_param%neb_spring(1)
@@ -265,7 +266,8 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
    neb_forces_all(:,:,nimage_tot)=fcart_all(:,:,nimage_tot)
    do iimage=2,nimage_tot-1
 !    === Standard NEB
-     if (iimage/=iimage_min.and.iimage/=iimage_max) then
+     if (iimage/=iimage_max) then
+!    if (iimage/=iimage_min.and.iimage/=iimage_max) then
        f_para1=mep_img_dotp(fcart_all(:,:,iimage),tangent(:,:,iimage))
        if (mep_param%neb_algo==0) then   ! Original NEB algo
          ABI_ALLOCATE(vect,(3,natom))

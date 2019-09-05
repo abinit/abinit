@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -45,7 +46,6 @@ contains
 !====================================================================================================
  subroutine tdep_init_shell1at(distance,InVar,norder,nshell_max,ntotcoeff,order,proj,Shell1at,Sym)
 
-  implicit none
   type(Input_Variables_type),intent(in) :: InVar
   type(Shell_Variables_type),intent(out) :: Shell1at
   type(Symetries_Variables_type),intent(inout) :: Sym
@@ -53,8 +53,7 @@ contains
   integer,intent(out) :: ntotcoeff
   double precision, intent(in) :: distance(InVar%natom,InVar%natom,4)
   double precision, intent(out) :: proj(norder,norder,nshell_max)
-
-  integer :: ishell,iatcell,iatom,jatom,eatom,fatom,iatref,jatref
+  integer :: ishell,iatcell,iatom,eatom,iatref
   integer :: natom,natom_unitcell,counter,ncoeff,ncoeff_prev,isym
   integer, allocatable :: ref1at(:,:),Isym1at(:,:)
 
@@ -161,7 +160,6 @@ contains
 !====================================================================================================
  subroutine tdep_init_shell2at(distance,InVar,norder,nshell_max,ntotcoeff,order,proj,Shell2at,Sym)
 
-  implicit none
   type(Input_Variables_type),intent(in) :: InVar
   type(Shell_Variables_type),intent(out) :: Shell2at
   type(Symetries_Variables_type),intent(inout) :: Sym
@@ -170,7 +168,7 @@ contains
   double precision, intent(in) :: distance(InVar%natom,InVar%natom,4)
   double precision, intent(out) :: proj(norder,norder,nshell_max)
 
-  integer :: ishell,iatcell,iatom,jatom,eatom,fatom,iatref,jatref,ii
+  integer :: ishell,iatcell,iatom,jatom,eatom,fatom,iatref,jatref !,ii
   integer :: natom,natom_unitcell,counter,ncoeff,ncoeff_prev
   integer, allocatable :: ref2at(:,:,:),Isym2at(:,:,:)
 
@@ -321,7 +319,6 @@ contains
 !====================================================================================================
  subroutine tdep_init_shell3at(distance,InVar,norder,nshell_max,ntotcoeff,order,proj,Shell3at,Sym)
 
-  implicit none
   type(Input_Variables_type),intent(in) :: InVar
   type(Shell_Variables_type),intent(out) :: Shell3at
   type(Symetries_Variables_type),intent(inout) :: Sym
@@ -330,9 +327,9 @@ contains
   double precision, intent(in) :: distance(InVar%natom,InVar%natom,4)
   double precision, intent(out) :: proj(norder,norder,nshell_max)
 
-  integer :: ii,ishell,iatcell,iatom,jatom,katom,eatom,fatom,gatom,iatref,jatref,katref
+  integer :: ii,ishell,iatom,jatom,katom,eatom,fatom,gatom,iatref,jatref,katref
   integer :: natom,natom_unitcell,watom,xatom,yatom,ninteractions,ncoeff,ncoeff_prev,nshell_tmp
-  integer :: find_equivalent,jj,ninter,iat_ref,jat_ref,kat_ref,ok,tmpinter
+  integer :: find_equivalent,ninter,iat_ref,jat_ref,kat_ref,tmpinter !jj, ok,
   double precision :: norm1,norm2,norm3
   integer :: Isym3at(2)
   integer, allocatable :: atref(:,:),interactions(:,:)
@@ -371,7 +368,7 @@ contains
         else   
           find_equivalent=0
           do ishell=1,nshell_tmp
-	    iat_ref=atref(ishell,1) ; jat_ref=atref(ishell,2) ; kat_ref=atref(ishell,3)
+            iat_ref=atref(ishell,1) ; jat_ref=atref(ishell,2) ; kat_ref=atref(ishell,3)
             norm2=dsqrt((distance(iat_ref,kat_ref,2)-distance(iat_ref,jat_ref,2))**2+&
 &                       (distance(iat_ref,kat_ref,3)-distance(iat_ref,jat_ref,3))**2+&
 &                       (distance(iat_ref,kat_ref,4)-distance(iat_ref,jat_ref,4))**2)
@@ -482,7 +479,7 @@ contains
         if (find_equivalent.eq.1) cycle
 !       Search if the triplet belongs to a shell already found
         do ishell=1,nshell_tmp
-	  iat_ref=Shell3at%iatref(ishell) ; jat_ref=Shell3at%jatref(ishell) ; kat_ref=Shell3at%katref(ishell)
+          iat_ref=Shell3at%iatref(ishell) ; jat_ref=Shell3at%jatref(ishell) ; kat_ref=Shell3at%katref(ishell)
           norm2=dsqrt((distance(iat_ref,kat_ref,2)-distance(iat_ref,jat_ref,2))**2+&
 &                     (distance(iat_ref,kat_ref,3)-distance(iat_ref,jat_ref,3))**2+&
 &                     (distance(iat_ref,kat_ref,4)-distance(iat_ref,jat_ref,4))**2)
@@ -522,7 +519,7 @@ contains
           Shell3at%iatref(nshell_tmp)=iatom
           Shell3at%jatref(nshell_tmp)=jatom
           Shell3at%katref(nshell_tmp)=katom
-	  eatom=iatom ; fatom=jatom ; gatom=katom
+          eatom=iatom ; fatom=jatom ; gatom=katom
           Isym3at(:)=1
           ishell=nshell_tmp
 !FB          write(6,'(a,1x,4(i5,1x))') 'NEW SHELL2 : nshell_tmp,iatom,jatom,katom=',nshell_tmp,iatom,jatom,katom
@@ -564,16 +561,16 @@ contains
       if (Shell3at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
       do ninter=1,Shell3at%neighbours(iatom,ishell)%n_interactions-1
         do tmpinter=ninter+1,Shell3at%neighbours(iatom,ishell)%n_interactions
-	  if (Shell3at%neighbours(iatom,ishell)%sym_in_shell(  ninter).eq.&
+            if (Shell3at%neighbours(iatom,ishell)%sym_in_shell(  ninter).eq.&
 &             Shell3at%neighbours(iatom,ishell)%sym_in_shell(tmpinter)) then
             if (Shell3at%neighbours(iatom,ishell)%transpose_in_shell(  ninter).ne.&
-&	        Shell3at%neighbours(iatom,ishell)%transpose_in_shell(tmpinter)) cycle
+&               Shell3at%neighbours(iatom,ishell)%transpose_in_shell(tmpinter)) cycle
             write(std_out,'(a,2(1x,i5))') 'For ishell and iatom =',ishell,iatom
             write(std_out,'(a,i5,a,i5,a,i5)') '  the interactions ',ninter,&
 &             ' and ',tmpinter,' have both the same symmetry isym=',Shell3at%neighbours(iatom,ishell)%sym_in_shell(  ninter)
             MSG_ERROR('Some interactions are equals due to the symmetry')
           end if
-	end do
+        end do
       end do
     end do
   end do  
@@ -682,7 +679,6 @@ contains
 !====================================================================================================
  subroutine tdep_destroy_shell(natom,order,Shell)
 
-  implicit none
   integer, intent(in) :: natom,order
   type(Shell_Variables_type),intent(inout) :: Shell
 

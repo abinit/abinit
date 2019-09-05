@@ -70,6 +70,7 @@
 #%% executable = abinit
 #%% input_prefix = t04o
 #%% test_chain = t04.in, t07.in
+#%% no_check = yes
 #%% [files]
 # MG: this file is not tested ###%% t07.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% files_to_test = t07o_DOS, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00

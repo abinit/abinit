@@ -18,9 +18,9 @@ For the description of the implementation of TCDFT in ABINIT see [[cite:Wiktor20
 
 The user should be familiar with the four basic tutorials of ABINIT and the [first PAW tutorial](paw1).
 
-[TUTORIAL_README]
-
 This tutorial should take about 2 hours.
+
+[TUTORIAL_README]
 
 ## Computing the positron lifetime in Si lattice
 
@@ -28,7 +28,7 @@ This tutorial should take about 2 hours.
 for the other tutorials. Why not Work_positron?*
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work_positron
 cd Work_positron
 cp ../tpositron_x.files .   # You will need to edit this file.

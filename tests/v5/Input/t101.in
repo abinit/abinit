@@ -60,10 +60,10 @@ prtwf 0
 #%% [extra_info]
 #%% authors =  P.M. Anglade
 #%% keywords = 
-#%% description = 
-#%% Simple test for TFvW preconditionner (not already effective) simple scf calculation
-#%% following part of the code are tested:
-#%% 04rsprc/prctfw.F90
-#%% 01cg/*
-#%% WARNING : HAS BEEN TRANSFERRED TO tests/seq
+#%%   description = 
+#%%   Simple test for TFvW preconditionner (not already effective) simple scf calculation
+#%%   following part of the code are tested:
+#%%   04rsprc/prctfw.F90
+#%%   01cg/*
+#%%   WARNING : HAS BEEN TRANSFERRED TO tests/seq
 #%%<END TEST_INFO>

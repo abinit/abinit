@@ -1,8 +1,9 @@
-4
+4                              # flag for PAW run conducti + corespectra + emissionspectra
 t09o
-0.073119 0.0000001 5.00 1000 1
+0.073119 0.0000001 5.00 1000 1 # delta_freq, min_freq, max_freq(in atomic units), nfreq, iatom 
 
 
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = conducti
@@ -25,7 +26,7 @@ t09o
 #%% authors = S. Mazevet, M. Torrent
 #%% keywords = 
 #%% description = 
-#%% Tests a PAW conductivity calculation.
-#%% It tests the following parts of the code:
-#%%   conducti, conducti_paw, conducti_paw_core, emispec_paw
+#%%   Tests a PAW conductivity calculation.
+#%%   It tests the following parts of the code:
+#%%     conducti, conducti_paw, conducti_paw_core, emispec_paw
 #%%<END TEST_INFO>

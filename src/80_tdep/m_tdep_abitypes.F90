@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -22,7 +23,7 @@ module m_tdep_abitypes
   use m_tdep_phij,        only : tdep_build_phij33
   use m_tdep_sym,         only : Symetries_Variables_type
   use m_tdep_shell,       only : Shell_Variables_type
-  use m_ifc,              only : ifc_type, ifc_init, ifc_print, ifc_write
+  use m_ifc,              only : ifc_type, ifc_init
   use m_crystal,          only : crystal_t, crystal_init
   use m_ddb,              only : ddb_type
   use m_kpts,             only : smpbz
@@ -348,8 +349,8 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
   NCF_CHECK(nctk_def_basedims(ncid))
   NCF_CHECK(nctk_defnwrite_ivars(ncid, ["anaddb_version"], [1]))
   NCF_CHECK(crystal%ncwrite(ncid))
-!JB  call ifc_print(Ifc,Ifc%dielt,Ifc%zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
-  call ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
+!JB  call ifc%print(Ifc%dielt,Ifc%zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
+  call ifc%write(ifcana,atifc,ifcout,prt_ifc,ncid)
   write(InVar%stdout,'(a)') ' ------- achieved'
 #else
   if (unitfile.eq.0) then
@@ -362,7 +363,7 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
   else
     write(InVar%stdout,'(a)') ' Write in ifc.out the IFC read previously'
   end if
-  call ifc_print(Ifc,"TDEP",77,prt_ifc)
+  call ifc%print("TDEP",77,prt_ifc)
 #endif
   close(77)
 
@@ -382,7 +383,7 @@ subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,
   double precision, intent(inout) :: Phij_NN(3*InVar%natom,3*InVar%natom)
   double precision, intent(in) :: Rlatt4abi(3,natom_unitcell,InVar%natom)
 
-  integer :: eatom,fatom,iatcell,iatom,ii,irpt,jatcell,jatom,jj,isym,kk
+  integer :: eatom,fatom,iatcell,ii,irpt,jatcell,jatom,jj,isym,kk
   integer :: ishell,iatref,jatref,iatshell,trans
   double precision :: tol,dist
   double precision :: tmp(3)

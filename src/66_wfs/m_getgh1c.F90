@@ -29,8 +29,9 @@ module m_getgh1c
  use defs_basis
  use m_abicore
  use m_errors
+ use m_dtset
 
- use defs_abitypes, only : MPI_type, dataset_type
+ use defs_abitypes, only : MPI_type
  use defs_datatypes, only : pseudopotential_type
  use m_time,        only : timab
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_lincom, pawcprj_axpby
@@ -38,9 +39,7 @@ module m_getgh1c
  use m_mkffnl,      only : mkffnl
  use m_pawfgr,      only : pawfgr_type
  use m_fft,         only : fftpac, fourwf
- use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type,&
-&                          load_k_hamiltonian, load_kprime_hamiltonian,&
-&                          load_k_rf_hamiltonian
+ use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type
  use m_cgtools,          only : projbd
  use m_nonlop,           only : nonlop
  use m_fourier_interpol, only : transgrid
@@ -128,8 +127,6 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 &          gvnlx1,idir,ipert,lambda,mpi_enreg,optlocal,optnl,opt_gvnlx1,&
 &          rf_hamkq,sij_opt,tim_getgh1c,usevnl,conj)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  logical,intent(in),optional :: conj
@@ -154,7 +151,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  integer :: tim_fourwf,tim_nonlop,usecprj
  logical :: compute_conjugate,has_kin,usevnl2
  real(dp) :: weight
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  real(dp) :: enlout(1),tsec(2),svectout_dum(1,1),vectout_dum(1,1)
  real(dp),allocatable :: cwave_sp(:,:),cwavef1(:,:),cwavef2(:,:)
@@ -184,28 +181,23 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  if(gs_hamkq%usepaw==1.and.(ipert>=0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4))) then
    if ((optnl>=1.and.(.not.associated(rf_hamkq%e1kbfr))).or. &
 &      (optnl==2.and.(.not.associated(rf_hamkq%e1kbsc))))then
-     msg='ekb derivatives must be allocated for ipert<=natom or natom+3/4 !'
-     MSG_BUG(msg)
+     MSG_BUG('ekb derivatives must be allocated for ipert<=natom or natom+3/4 !')
    end if
  end if
  if(gs_hamkq%usepaw==1.and.(ipert==natom+2)) then
    if ((optnl>=1.and.(.not.associated(rf_hamkq%e1kbfr))).or. &
 &      (optnl==2.and.(.not.associated(rf_hamkq%e1kbsc))))then
-     msg='ekb derivatives must be allocated for ipert=natom+2 !'
-     MSG_BUG(msg)
+     MSG_BUG('ekb derivatives must be allocated for ipert=natom+2 !')
    end if
    if (usevnl==0) then
-     msg='gvnlx1 must be allocated for ipert=natom+2 !'
-     MSG_BUG(msg)
+     MSG_BUG('gvnlx1 must be allocated for ipert=natom+2 !')
    end if
  end if
  if(ipert==natom+2.and.opt_gvnlx1==0) then
-   msg='opt_gvnlx1=0 not compatible with ipert=natom+2 !'
-   MSG_BUG(msg)
+   MSG_BUG('opt_gvnlx1=0 not compatible with ipert=natom+2 !')
  end if
  if (mpi_enreg%paral_spinor==1) then
-   msg='Not compatible with parallelization over spinorial components !'
-   MSG_BUG(msg)
+   MSG_BUG('Not compatible with parallelization over spinorial components !')
  end if
 
 !Check sizes
@@ -792,7 +784,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    ABI_DEALLOCATE(gvnlx1_)
  end if
 
- call timab(196+tim_getgh1c,1,tsec)
+ call timab(196+tim_getgh1c,2,tsec)
 
  DBG_EXIT("COLL")
 
@@ -838,8 +830,6 @@ end subroutine getgh1c
 subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvloc,&
 &                                pawfgr,mpi_enreg,vtrial,vtrial1,vlocal,vlocal1)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: isppol,nspden,usepaw,cplex,nfftf,nfft,nvloc
@@ -856,18 +846,20 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
 !scalars
  integer :: n1,n2,n3,n4,n5,n6,paral_kgb,ispden
 !arrays
- real(dp) :: rhodum(1)
+ real(dp) :: rhodum(1), tsec(2)
  real(dp), ABI_CONTIGUOUS pointer :: vtrial_ptr(:,:),vtrial1_ptr(:,:)
  real(dp),allocatable :: cgrvtrial(:,:),cgrvtrial1(:,:),vlocal_tmp(:,:,:),vlocal1_tmp(:,:,:)
 
 ! *************************************************************************
+
+ call timab(1904, 1, tsec)
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  n4=ngfft(4); n5=ngfft(5); n6=ngfft(6)
  paral_kgb = mpi_enreg%paral_kgb
 
  if (nspden/=4) then
-   vtrial_ptr=>vtrial
+   vtrial_ptr => vtrial
    if (usepaw==0.or.pawfgr%usefinegrid==0) then
      call fftpac(isppol,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,vtrial_ptr,vlocal(:,:,:,1),2)
      call fftpac(isppol,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,ngfft,vtrial1,vlocal1(:,:,:,1),2)
@@ -882,9 +874,10 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
      ABI_DEALLOCATE(cgrvtrial)
    end if
    nullify(vtrial_ptr)
- else  ! nspden==4 non-collinear magnetism
-   vtrial_ptr=>vtrial
-   vtrial1_ptr=>vtrial1
+ else
+   ! nspden==4 non-collinear magnetism
+   vtrial_ptr => vtrial
+   vtrial1_ptr => vtrial1
    ABI_ALLOCATE(vlocal_tmp,(n4,n5,n6))
    ABI_ALLOCATE(vlocal1_tmp,(cplex*n4,n5,n6))
    if (usepaw==0.or.pawfgr%usefinegrid==0) then
@@ -894,7 +887,8 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
        call fftpac(ispden,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,ngfft,vtrial1_ptr,vlocal1_tmp,2)
        vlocal1(:,:,:,ispden)=vlocal1_tmp(:,:,:)
      end do
-   else ! TODO FR EB check the correctness of the following lines for PAW calculations
+   else
+     ! TODO FR EB check the correctness of the following lines for PAW calculations
      ABI_ALLOCATE(cgrvtrial,(nfft,nspden))
      ABI_ALLOCATE(cgrvtrial1,(nfft,nspden))
      call transgrid(cplex,mpi_enreg,nspden,-1,0,0,paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial_ptr)
@@ -910,6 +904,8 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
    ABI_DEALLOCATE(vlocal_tmp)
    ABI_DEALLOCATE(vlocal1_tmp)
  end if !nspden
+
+ call timab(1904, 2, tsec)
 
 end subroutine rf_transgrid_and_pack
 !!***
@@ -965,9 +961,12 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
  integer :: dimffnl1,dimffnlk,ider,idir0,idir1,idir2,istr,ntypat,print_info
  logical :: qne0
 !arrays
- real(dp) :: ylmgr_dum(1,1,1)
+ real(dp) :: ylmgr_dum(1,1,1), tsec(2)
 
 ! *************************************************************************
+
+ ! Keep track of total time spent in getgh1c_setup (use 195 slot)
+ call timab(195, 1, tsec)
 
  if(.not.present(ddkinpw) .and. ipert==natom+10) then
    MSG_BUG("ddkinpw is not optional for ipert=natom+10.")
@@ -1145,32 +1144,33 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
 
 !Load k-dependent part in the Hamiltonian datastructure
  ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamkq%matblk))
- call load_k_hamiltonian(gs_hamkq,kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
-& ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
+ call gs_hamkq%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
+                      ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
  if (size(ffnlk)>0) then
-   call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnlk)
+   call gs_hamkq%load_k(ffnl_k=ffnlk)
  else
-   call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnl1)
+   call gs_hamkq%load_k(ffnl_k=ffnl1)
  end if
 
 !Load k+q-dependent part in the Hamiltonian datastructure
 !    Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
- call load_kprime_hamiltonian(gs_hamkq,kpt_kp=kpq,npw_kp=npw1_k,istwf_kp=istwf_k,&
-& kinpw_kp=kinpw1,kg_kp=kg1_k,kpg_kp=kpg1_k,ffnl_kp=ffnl1,&
-& compute_gbound=.true.)
+ call gs_hamkq%load_kprime(kpt_kp=kpq,npw_kp=npw1_k,istwf_kp=istwf_k,&
+& kinpw_kp=kinpw1,kg_kp=kg1_k,kpg_kp=kpg1_k,ffnl_kp=ffnl1,compute_gbound=.true.)
  if (qne0) then
    ABI_ALLOCATE(ph3d1,(2,npw1_k,gs_hamkq%matblk))
-   call load_kprime_hamiltonian(gs_hamkq,ph3d_kp=ph3d1,compute_ph3d=.true.)
+   call gs_hamkq%load_kprime(ph3d_kp=ph3d1,compute_ph3d=.true.)
  end if
 
 !Load k-dependent part in the 1st-order Hamiltonian datastructure
- call load_k_rf_hamiltonian(rf_hamkq,npw_k=npw_k,dkinpw_k=dkinpw)
+ call rf_hamkq%load_k(npw_k=npw_k,dkinpw_k=dkinpw)
  if (ipert==natom+10) then
-   call load_k_rf_hamiltonian(rf_hamkq,ddkinpw_k=ddkinpw)
+   call rf_hamkq%load_k(ddkinpw_k=ddkinpw)
    if (idir>3) then
-     call load_k_rf_hamiltonian(rf_hamk_dir2,dkinpw_k=dkinpw2,ddkinpw_k=ddkinpw)
+     call rf_hamk_dir2%load_k(dkinpw_k=dkinpw2,ddkinpw_k=ddkinpw)
    end if
  end if
+
+ call timab(195, 2, tsec)
 
 end subroutine getgh1c_setup
 !!***
@@ -1219,8 +1219,6 @@ end subroutine getgh1c_setup
 
 subroutine getdc1(cgq,cprjq,dcwavef,dcwaveprj,ibgq,icgq,istwfk,mcgq,mcprjq,&
 &                 mpi_enreg,natom,nband,npw1,nspinor,optcprj,s1cwave0)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

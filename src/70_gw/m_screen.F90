@@ -25,7 +25,6 @@
 MODULE m_screen
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_hide_blas
  use m_errors
@@ -514,8 +513,7 @@ subroutine fgg_init(Fgg,npw,nomega,nqlwl)
  Fgg%nqlwl = nqlwl
 
  if (npw>0.and.nomega>0) then
-   ABI_STAT_MALLOC(Fgg%mat,(npw,npw,nomega), ierr)
-   ABI_CHECK(ierr==0, "out of memory in Fgg%mat")
+   ABI_MALLOC_OR_DIE(Fgg%mat,(npw,npw,nomega), ierr)
    Fgg%has_mat = MAT_ALLOCATED
  end if
 
@@ -1479,7 +1477,7 @@ subroutine em1_symmetrize_ip(iq_bz,npwc,nomega,Gsph,Qmesh,epsm1)
  integer :: iw,g1,g2,isg1,isg2,iq_ibz,itim_q,isym_q,ierr
  logical :: q_isirred
  complex(gwpc) :: phmsg1t,phmsg2t_star
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  real(dp) :: qbz(3)
  complex(gwpc),allocatable :: work(:,:)
@@ -1491,9 +1489,8 @@ subroutine em1_symmetrize_ip(iq_bz,npwc,nomega,Gsph,Qmesh,epsm1)
 
  if (q_isirred) RETURN ! Nothing to do
 
- write(msg,'(a,f8.2,a)')" out of memory in work , requiring ",npwc**2*gwpc*b2Mb," Mb"
- ABI_STAT_MALLOC(work,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, msg)
+ !write(msg,'(a,f8.2,a)')" out of memory in work , requiring ",npwc**2*gwpc*b2Mb," Mb"
+ ABI_MALLOC_OR_DIE(work,(npwc,npwc), ierr)
 
 !$OMP PARALLEL DO PRIVATE(isg2,isg1,phmsg1t,phmsg2t_star,work) IF (nomega > 1)
  do iw=1,nomega

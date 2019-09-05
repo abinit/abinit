@@ -29,6 +29,7 @@ module m_thmeig
  use defs_basis
  use m_abicore
  use m_tetrahedron
+ use m_htetra
  use m_errors
  use m_ddb
  use m_ddb_hdr
@@ -78,12 +79,7 @@ contains
 !!
 !! SOURCE
 
-subroutine thmeig(inp, ddb, crystal, &
-&                 elph_base_name, eig2_filnam, ddbun, iout, &
-&                 natom, mpert, msize, d2asr, &
-&                 comm)
-
- implicit none
+subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, natom, mpert, msize, d2asr, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -163,14 +159,10 @@ subroutine thmeig(inp, ddb, crystal, &
  real(dp),allocatable :: wghtq(:)
 
  type(t_tetrahedron) :: tetrahedra
+ !type(htetra_t) :: tetrahedra
  character(len=80) :: errstr
 
 ! *********************************************************************
-
-!DEBUG
-! write(std_out,*)'-thmeig : enter '
-!call flush(6)
-!ENDDEBUG
 
  ! Only master works for the time being
  if (xmpi_comm_rank(comm) /= master) return
@@ -243,7 +235,7 @@ subroutine thmeig(inp, ddb, crystal, &
  mpert_eig2=natom
  msize2=3*mpert_eig2*3*mpert_eig2
 
- call ddb_malloc(ddb_eig2,msize2,nblok2,natom,ntypat)
+ call ddb_eig2%malloc(msize2,nblok2,natom,ntypat)
 
  ABI_ALLOCATE(blkval2,(2,msize2,mband,nkpt))
  ABI_ALLOCATE(blkval2gqpt,(2,msize2,mband,nkpt))
@@ -327,7 +319,7 @@ subroutine thmeig(inp, ddb, crystal, &
    found=0
    do iblok2=1,nblok2
 
-     call read_blok8(ddb_eig2,iblok2,mband,mpert_eig2,msize2,&
+     call ddb_eig2%read_block(iblok2,mband,mpert_eig2,msize2,&
 &     nkpt,ddbun,blkval2(:,:,:,:),kpnt(:,:,1))
 
 
@@ -481,7 +473,7 @@ subroutine thmeig(inp, ddb, crystal, &
 
    write(std_out,'(a,3es16.6)' )' Looking for spqpt=',qpt_search(:,1)
 
-   call gtblk9(ddb,iblok,qpt_search,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+   call ddb%get_block(iblok,qpt_search,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
    if(iblok==0) then
      write(message,'(a,3es16.6,2a)')&
@@ -516,7 +508,7 @@ subroutine thmeig(inp, ddb, crystal, &
    found=0 ; iqpt2_previous=iqpt2
    do while (iqpt2<nblok2)
      iqpt2=iqpt2+1
-     call read_blok8(ddb_eig2,iqpt2,mband,mpert_eig2,msize2,&
+     call ddb_eig2%read_block(iqpt2,mband,mpert_eig2,msize2,&
 &     nkpt,ddbun,blkval2(:,:,:,:),kpnt(:,:,1))
      !write (300,*) 'blkval2 _bis_ in thmeig'
      !write (300,*) blkval2
@@ -540,7 +532,7 @@ subroutine thmeig(inp, ddb, crystal, &
 !    And examine again the EIG2 file. Still, not beyond the previously examined value.
      found=0
      do iqpt2=1,iqpt2_previous
-       call read_blok8(ddb_eig2,iqpt2,mband,mpert_eig2,msize2,&
+       call ddb_eig2%read_block(iqpt2,mband,mpert_eig2,msize2,&
 &       nkpt,ddbun,blkval2(:,:,:,:),kpnt(:,:,1))
        diff_qpt(:)=ddb_eig2%qpt(1:3,iqpt2)/ddb_eig2%nrm(1,iqpt2)-spqpt(:,iqpt)
        if(diff_qpt(1)**2+diff_qpt(2)**2+diff_qpt(3)**2 < DDB_QTOL )then
@@ -779,11 +771,9 @@ subroutine thmeig(inp, ddb, crystal, &
 
 !  test if qlatt generates all Q points  TO DO
 
-
-
 !  Get tetrahedra, ie indexes of the full kpoints at their summits
-   call init_tetra(indqpt,gprimd,qlatt,qpt_full,nqpt,&
-&   tetrahedra, ierr, errstr)
+   call init_tetra(indqpt,gprimd,qlatt,qpt_full,nqpt, tetrahedra, ierr, errstr, xmpi_comm_self)
+   !call htetra_init(tetra, indqpt, gprimd, qlatt, qpt_full, nqpt, kpt_ibz, nkpt_ibz, ierr, errstr, xmpi_comm_self
    ABI_CHECK(ierr==0,errstr)
 
    rcvol = abs (gprimd(1,1)*(gprimd(2,2)*gprimd(3,3)-gprimd(3,2)*gprimd(2,3)) &
@@ -811,7 +801,7 @@ subroutine thmeig(inp, ddb, crystal, &
    do iband=1,3*natom
      eigen_in(:) = phfreq(iband,:)
 
-!    calculate general integration weights at each irred kpoint 
+!    calculate general integration weights at each irred kpoint
 !    as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
      call get_tetra_weight(eigen_in,enemin,enemax,&
 &     one,nene,nqpt,tetrahedra,bcorr0,&
@@ -995,10 +985,7 @@ subroutine thmeig(inp, ddb, crystal, &
  ABI_DEALLOCATE(kpnt)
  ABI_DEALLOCATE(carflg_eig2)
 
-
-
- call ddb_free(ddb_eig2)
-
+ call ddb_eig2%free()
  call destroy_tetra(tetrahedra)
 
 end subroutine thmeig
@@ -1042,8 +1029,6 @@ end subroutine thmeig
 !! SOURCE
 
 subroutine outphdos(deltaene,dos_phon,enemin,enemax,filnam,g2fsmear,nene,nqpt,ntetra,telphint,unit_phdos)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1136,8 +1121,6 @@ subroutine outphdos(deltaene,dos_phon,enemin,enemax,filnam,g2fsmear,nene,nqpt,nt
 !! SOURCE
 
 subroutine outg2f(deltaene,enemin,enemax,filnam,g2f,g2fsmear,kpnt,mband,nene,nkpt,nqpt,ntetra,telphint,unit_g2f)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

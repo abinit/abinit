@@ -35,8 +35,11 @@
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
+
 #include "abi_common.h"
+
 module  m_spin_terms
+
   use defs_basis
   use m_errors
   use m_abicore
@@ -364,7 +367,7 @@ contains
     type(spin_terms_t), intent(inout) :: self
     integer, intent(in) :: idx_i(:), idx_j(:)
     real(dp), intent(in) :: val(:,:,:)
-    integer :: i, j, ia, ib, nnz
+    integer :: i,  ia, ib, nnz
     !self%bilinear_nint = size(idx_i)
     !ABI_ALLOCATE(self%bilinear_i, (self%bilinear_nint))
     !ABI_ALLOCATE(self%bilinear_j, (self%bilinear_nint))
@@ -386,8 +389,8 @@ contains
     type(spin_terms_t), intent(inout) :: self
     real(dp), intent(in) :: S(:,:)
     real(dp), intent(out) :: Heff(3,self%nspins)
-    integer :: i, iatom, jatom
-    real(dp) ::  H(3,1)
+    integer :: i !, iatom, jatom
+    !real(dp) ::  H(3,1)
     !Svec=reshape(S, (/self%nspins*3/))
     !do i = 1, self%bilinear_nint, 1
     !    iatom=self%bilinear_i(i)
@@ -524,6 +527,8 @@ contains
     real(dp), intent(out):: Heff(3,self%nspins)
     real(dp) :: x(3, self%nspins) 
     integer :: i
+
+    ABI_UNUSED(dt)
     if ( temperature .gt. 1d-7) then
        !call rand_normal_ziggurat(x)
        call rand_normal_array(self%rng, x, 3*self%nspins)

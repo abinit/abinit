@@ -27,10 +27,10 @@
 module m_getgh2c
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
 
+ use defs_abitypes, only : mpi_type
  use m_pawcprj,     only : pawcprj_type,pawcprj_alloc,pawcprj_free
  use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type
  use m_nonlop,      only : nonlop
@@ -106,8 +106,6 @@ contains
 subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 &                  mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamkq,sij_opt,tim_getgh2c,usevnl,conj,enl,optkin)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  logical,intent(in),optional :: conj
@@ -147,6 +145,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 ! *********************************************************************
 
  DBG_ENTER("COLL")
+ ABI_UNUSED(tim_getgh2c)
 
 !Keep track of total time spent in getgh2c
 !call timab(196+tim_getgh2c,1,tsec)

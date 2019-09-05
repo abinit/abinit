@@ -27,7 +27,6 @@
 MODULE m_pspheads
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_errors
  use m_hash_md5
@@ -43,6 +42,7 @@ MODULE m_pspheads
  use funct_pwscf  ! pwscf module for naming xc functionals
  use m_xmpi
 
+ use defs_datatypes, only : pspheader_type
  use m_time,     only : timab
  use m_io_tools, only : open_file
  use m_fstrings, only : basename, lstrip, sjoin, startswith
@@ -57,7 +57,7 @@ MODULE m_pspheads
 
  public :: inpspheads      ! Initialize pspheads(1:npsp).
  public :: pspheads_comm   ! Communicate pspheads to all processors
- public  ::  pawpsxml2ab
+ public ::  pawpsxml2ab
  public :: upfxc2abi       ! UPF XcC to Abinit pspxc
 
 contains
@@ -88,8 +88,6 @@ contains
 !! SOURCE
 
 subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -557,8 +555,6 @@ end subroutine inpspheads
 
 subroutine pspheads_comm(npsp,pspheads,test_paw)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: npsp
  integer,intent(inout) :: test_paw
@@ -731,8 +727,6 @@ end subroutine pspheads_comm
 
 subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: option
@@ -743,14 +737,14 @@ subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,il,lloc,lmax,pspcod,pspxc,unt
+ integer :: ii,il,lloc,lmax,pspcod,pspxc
  real(dp) :: r2well,zionpsp,znuclpsp
 ! character(len=100) :: xclibxc
 ! character(len=500) :: message
 !arrays
 
 ! *********************************************************************
- 
+
  if (option==1) then
    call rdpawpsxml_header(ecut_tmp,filnam,paw_setuploc)
    paw_setuploc%idgrid= paw_setuploc%radial_grid(1)%id
@@ -821,8 +815,6 @@ end subroutine pawpsxml2ab
 !! SOURCE
 
 subroutine upfheader2abi (filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, nprojso_l)
-
-  implicit none
 
 !Arguments -------------------------------
   character(len=fnlen), intent(in) :: filpsp
@@ -901,8 +893,6 @@ end subroutine upfheader2abi
 !! SOURCE
 
 subroutine upfxc2abi(dft, pspxc)
-
-  implicit none
 
 !Arguments -------------------------------
   character(len=20), intent(in) :: dft

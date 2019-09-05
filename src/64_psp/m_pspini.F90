@@ -27,14 +27,15 @@
 module m_pspini
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
  use m_psxml2ab
+ use m_dtset
+ use m_dtfil
  !use m_psps
 
+ use defs_datatypes, only : pseudopotential_type, nctab_t, pspheader_type
  use m_time,      only : timab
  use m_io_tools,  only : open_file
  use m_pawrad,    only : pawrad_type
@@ -133,8 +134,6 @@ contains
 !! SOURCE
 
 subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,rprimd,comm_mpi)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -674,8 +673,6 @@ end subroutine pspini
 
 subroutine pspcor(ecore,epsatm,natom,ntypat,typat,zion)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,ntypat
@@ -815,8 +812,6 @@ end subroutine pspcor
 
 subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 &  psps,vlspl,dvlspl,xcccrc,xccc1d,nctab,comm_mpi)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1433,9 +1428,6 @@ subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
 
  use defs_basis
  use m_errors
-
- use defs_datatypes, only : nctab_t
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -60,7 +60,6 @@ nphf2  2           # Number of processors for occupied states parallelization
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = ubu_intel_13.1_openmpi
 #%% need_cpp_vars = !HAVE_NETCDF_DEFAULT, !HAVE_MPI_IO_DEFAULT
 #%% [files]
 #%% psp_files= 6c.pspnc

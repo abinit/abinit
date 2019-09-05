@@ -187,8 +187,6 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 &                   kg,kpg,kpt,lmnmax,lnmax,mpsang,mqgrid,nkpg,npw,ntypat,pspso,&
 &                   qgrid,rmet,usepaw,useylm,ylm,ylm_gr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: dimekb,dimffnl,ider,idir,lmnmax,lnmax,mpsang,mqgrid,nkpg
@@ -642,30 +640,15 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 
  end do  ! End do - loop over atom types
 
- if (allocated(kpgc))  then
-   ABI_DEALLOCATE(kpgc)
- end if
- if (allocated(kpgn))  then
-   ABI_DEALLOCATE(kpgn)
- end if
- if (allocated(dffnl_red))  then
-   ABI_DEALLOCATE(dffnl_red)
- end if
- if (allocated(d2ffnl_red))  then
-   ABI_DEALLOCATE(d2ffnl_red)
- end if
- if (allocated(dffnl_cart))  then
-   ABI_DEALLOCATE(dffnl_cart)
- end if
- if (allocated(d2ffnl_cart))  then
-   ABI_DEALLOCATE(d2ffnl_cart)
- end if
- if (allocated(dffnl_tmp))  then
-   ABI_DEALLOCATE(dffnl_tmp)
- end if
- if (allocated(d2ffnl_tmp))  then
-   ABI_DEALLOCATE(d2ffnl_tmp)
- end if
+ ! Optional deallocations.
+ ABI_SFREE(kpgc)
+ ABI_SFREE(kpgn)
+ ABI_SFREE(dffnl_red)
+ ABI_SFREE(d2ffnl_red)
+ ABI_SFREE(dffnl_cart)
+ ABI_SFREE(d2ffnl_cart)
+ ABI_SFREE(dffnl_tmp)
+ ABI_SFREE(d2ffnl_tmp)
 
  ABI_DEALLOCATE(kpgnorm_inv)
  ABI_DEALLOCATE(kpgnorm)

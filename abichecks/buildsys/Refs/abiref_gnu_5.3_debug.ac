@@ -721,11 +721,11 @@ with_trio_flavor="netcdf"
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf4/4.4.1.1/include -I${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/include"
+with_netcdf_incs="-I${FALLBACKS_HOME}_8.12/${FB}/netcdf4/4.4.1.1/include -I${FALLBACKS_HOME}_8.12/${FB}/netcdf4_fortran/4.4.4/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_PATH}/netcdf4/4.4.1.1/lib -lnetcdf"
+with_netcdf_libs="-L${FALLBACKS_HOME}_8.12/${FB}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_HOME}_8.12/${FB}/netcdf4/4.4.1.1/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -883,29 +883,6 @@ with_linalg_libs="-L/usr/local/OpenBLAS/lib -lopenblas -lpthread"
 # Link flags for the algorithmic libraries (default is unset)
 #
 #with_algo_libs="-L/usr/local/lib -llevmar"
-
-# ---------------------------------------------------------------------------- #
-# Mathematical library connector                                               #
-# ---------------------------------------------------------------------------- #
-
-# Flavor of the math library to use (default is none)
-#
-# Supported libraries:
-#
-#   * custom (bypass build-system checks)
-#   * gsl
-#   * mlib
-#   * none   (disable external math support)
-#
-#with_math_flavor="gsl"
-
-# Include flags for the math library (default is unset)
-#
-#with_math_incs="-I/usr/local/include/gsl"
-
-# Link flags for the math library (default is unset)
-#
-#with_math_libs="-L/usr/local/lib/gsl -lgsl"
 
 # ---------------------------------------------------------------------------- #
 # DFT library connector                                                        #

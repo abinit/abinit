@@ -30,10 +30,10 @@ module m_xchybrid
  use m_errors
  use m_xcdata
  use libxc_functionals
+ use m_dtset
 
  use m_geometry,    only : metric
- use defs_abitypes, only : MPI_type, dataset_type
- use m_dtset,       only : dtset_copy, dtset_free
+ use defs_abitypes, only : MPI_type
  use m_rhotoxc,     only : rhotoxc
  use m_mkcore,      only : mkcore
 
@@ -105,8 +105,6 @@ contains
 subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,strsxc,vxcavg,xccc3d,vxc,grxc,xcccrc,xccc1d,&
 &                           xred,n1xccc,optstr)
 
- implicit none
-
 !Arguments -------------------------------------------------------------
 !scalars
  integer,intent(in) :: nfft,n3xccc
@@ -138,9 +136,6 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 
  DBG_ENTER("COLL")
 
-
- nmxc=(dtset%usepawu==4).or.(dtset%usepawu==14)
-
 !Not relevant for PAW
  if (dtset%usepaw==1) return
  if(n3xccc==0) return
@@ -170,7 +165,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Define xcdata_hybrid as well as xcdata_gga
  call xcdata_init(xcdata_hybrid,dtset=dtset)
  call xcdata_init(xcdata_gga,dtset=dtset,auxc_ixc=0,ixc=ixc_gga)
- libxc_gga_initialized=0
+ libxc_gga_initialized=0 ; nmxc=.false.
 
  nkxc=0;ndim=0;usexcnhat=0;n3xccc_null=0
  ABI_ALLOCATE(kxc_dum,(nfft,nkxc))
@@ -182,7 +177,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    ABI_ALLOCATE(xccc3d_null,(n3xccc_null))
 !  Compute Vxc^Hybrid(rho_val)
    call rhotoxc(enxc,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&   n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,&
+&   n3xccc_null,option,rhor,rprimd,&
 &   strsxc,usexcnhat,vxc,vxcavg,xccc3d_null,xcdata_hybrid)
 
 !  Initialize GGA functional
@@ -194,11 +189,11 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Add Vxc^GGA(rho_core+rho_val)
    if (ixc_gga<0) then
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
+&     n3xccc,option,rhor,rprimd,&
 &     strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d,xcdata_gga,xc_funcs=xc_funcs_gga)
    else
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
+&     n3xccc,option,rhor,rprimd,&
 &     strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d,xcdata_gga)
    end if
    enxc=enxc+enxc_corr
@@ -209,11 +204,11 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Substract Vxc^GGA(rho_val)
    if (ixc_gga<0) then
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,strsxc_corr,usexcnhat,&
+&     n3xccc_null,option,rhor,rprimd,strsxc_corr,usexcnhat,&
 &     vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga,xc_funcs=xc_funcs_gga)
    else
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,strsxc_corr,usexcnhat,&
+&     n3xccc_null,option,rhor,rprimd,strsxc_corr,usexcnhat,&
 &     vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga)
    end if
    enxc=enxc-enxc_corr
@@ -242,11 +237,11 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Add Vxc^GGA(rho_core+rho_val)
    if (ixc_gga<0) then
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc,option,dtset%paral_kgb,&
+&     n3xccc,option,&
 &     rhor,rprimd,strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga,xc_funcs=xc_funcs_gga)
    else
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc,option,dtset%paral_kgb,&
+&     n3xccc,option,&
 &     rhor,rprimd,strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga)
    end if
    option=2
@@ -266,11 +261,11 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    option=0
    if (ixc_gga<0) then
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
+&     n3xccc,option,rhor,rprimd,&
 &     strsxc_corr,usexcnhat,vxc,vxcavg_corr,xccc3d,xcdata_gga,xc_funcs=xc_funcs_gga)
    else
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
+&     n3xccc,option,rhor,rprimd,&
 &     strsxc_corr,usexcnhat,vxc,vxcavg_corr,xccc3d,xcdata_gga)
    end if
  end if
@@ -330,8 +325,6 @@ end subroutine xchybrid_ncpp_cc
 
 subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hybrid_mixing,vxc,enxc)
 
- implicit none
-
 !Arguments -------------------------------------------------------------
 !scalars
  integer,intent(in) :: ixc,nfft,nspden,nkxc
@@ -352,6 +345,7 @@ subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hy
 !integer :: i1,i2,i3,k1,n1,n2,n3
 !real(dp) :: kx,rho,rhomax,ftest
 !scalars
+ logical :: nmxc
  character(len=500) :: message
  type(dataset_type) :: dtLocal
 !arrays
@@ -379,6 +373,7 @@ subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hy
  call dtset_copy(dtLocal, dtset)
  dtLocal%intxc = 0
  dtLocal%ixc   = -101
+ nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
  ! Reinitialize the libxc module with the overriden values
  if (dtset%ixc<0) then
@@ -389,15 +384,13 @@ subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hy
  end if
 
  call rhohxc(dtLocal,enxc_corr,dum,0,kxcr,mpi_enreg,nfft,dum,dum,0,dum,0,nkxc,0,&
-& dtset%usepawu==4.or.dtset%usepawu==14,nspden,n3xccc,&
-& 0,dum,rhor,rprimd,strsxc,1,dum,vxc_corr,dum,xccc3d)
+& nmxc,nspden,n3xccc,0,dum,rhor,rprimd,strsxc,1,dum,vxc_corr,dum,xccc3d)
 
  vxc(:,:) = vxc(:,:) + hybrid_mixing*vxc_corr(:,:)
  enxc = enxc + hybrid_mixing*enxc_corr
 
  call rhohxc(dtLocal,enxc_corr,dum,0,kxcr,mpi_enreg,dum,dum,dum,0,dum,0,nkxc,0,&
-& dtset%usepawu==4.or.dtset%usepawu==14,nspden,0,&
-& 0,dum,rhor,rprimd,strsxc,1,dum,vxc_corr,vxcavg,0)
+& nmxc,nspden,0,0,dum,rhor,rprimd,strsxc,1,dum,vxc_corr,vxcavg,0)
 
  vxc(:,:) = vxc(:,:) - hybrid_mixing*vxc_corr(:,:)
  enxc = enxc - hybrid_mixing*enxc_corr

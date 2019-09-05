@@ -28,13 +28,13 @@
 module m_dfpt_cgwf
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
  use m_cgtools
  use m_rf2
 
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_set_zero, pawcprj_axpby
  use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type, KPRIME_H_KPRIME
@@ -62,8 +62,8 @@ contains
 !! Try to keep close to the formulas in PRB55, 10337 (1997) [[cite:Gonze1997]], for the
 !! non-self-consistent case, except that we are computing here
 !! the second-derivative of the total energy, and not E(2). There
-!! is a factor of 2 between the two quantities ...
-!! The wavefunction that is generated is always orthogonal to cgq .
+!! is a factor of 2 between the two quantities.
+!! The wavefunction that is generated is always orthogonal to cgq.
 !! It is orthogonal to the active Hilbert space, and will be complemented
 !! by contributions from the active space in the calling routine, if needed.
 !!
@@ -154,8 +154,6 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 & opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dfpt_sciss,tolrde,tolwfr,&
 & usedcwavef,wfoptalg,nlines_done)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band,berryopt
@@ -210,62 +208,60 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
  call timab(122,1,tsec)
 
-!======================================================================
-!========= LOCAL VARIABLES DEFINITIONS AND ALLOCATIONS ================
-!====================================================================
+ !======================================================================
+ !========= LOCAL VARIABLES DEFINITIONS AND ALLOCATIONS ================
+ !====================================================================
 
  nline = nline_in
  usetolrde = 1
 
-! LB-23/04/17:
-! For ipert=natom+10 or ipert=natom+11, the Sternheimer equation is non-self-consistent, so we have
-! to solve a true linear problem (A.X = B) for each kpoint and band. In this case, the conjugate
-! gradient algorithm can find the exact solution (within the numerical precision) with only ONE call
-! of dfpt_cgwf (per kpoint and band...). The solution is found with at most N iterations, N being the dimension of X.
-! In order to avoid useless scfcv loops (and many calls of rf2_init, which can be time consuming),
-! we want to leave this routine only if 'tolwfr' is reached. Consequently, 'tolrde' is not used and 'nline' is set to 100.
-! One could use nline=npw1*nspinor (>> 100 !) instead, but when the method cannot converge (i.e when tolwfr is lower than the
-! numerical noise) the program could be stuck here for a very long time.
-! NOTE : This is also true for ipert==natom+1, but a lot of references in the test suite have to be changed...
+ ! LB-23/04/17:
+ ! For ipert=natom+10 or ipert=natom+11, the Sternheimer equation is non-self-consistent, so we have
+ ! to solve a true linear problem (A.X = B) for each kpoint and band. In this case, the conjugate
+ ! gradient algorithm can find the exact solution (within the numerical precision) with only ONE call
+ ! of dfpt_cgwf (per kpoint and band...). The solution is found with at most N iterations, N being the dimension of X.
+ ! In order to avoid useless scfcv loops (and many calls of rf2_init, which can be time consuming),
+ ! we want to leave this routine only if 'tolwfr' is reached. Consequently, 'tolrde' is not used and 'nline' is set to 100.
+ ! One could use nline=npw1*nspinor (>> 100 !) instead, but when the method cannot converge (i.e when tolwfr is lower than the
+ ! numerical noise) the program could be stuck here for a very long time.
+ ! NOTE : This is also true for ipert==natom+1, but a lot of references in the test suite have to be changed...
  if(ipert==natom+10.or.ipert==natom+11) then
    nline = 100 ! The default value is only 4... This should be sufficient to converge with nstep=1 or 2
    if (nline_in > 100) nline = nline_in ! Keep the possibility to increase nline
    usetolrde = 0  ! see below
  end if
 
-!Tell us what is going on:
  if (prtvol>=10) then
+   !Tell us what is going on:
    write(msg,'(a,i6,2x,a,i3,a)')' --- dfpt_cgwf is called for band',band,'for',nline,' lines'
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out,msg)
  end if
 
  me_g0 = mpi_enreg%me_g0
  comm_fft = mpi_enreg%comm_fft
 
-!if PAW, one has to solve a generalized eigenproblem
+ ! if PAW, one has to solve a generalized eigenproblem
  usepaw=gs_hamkq%usepaw
  gen_eigenpb=(usepaw==1)
  useoverlap=0;if (gen_eigenpb) useoverlap=1
 
-!Use scissor shift on 0-order eigenvalue
+ ! Use scissor shift on 0-order eigenvalue
  eshift=eig0nk-dfpt_sciss
 
-!Additional initializations
+ ! Additional initializations
  istwf_k=gs_hamkq%istwf_k
  optekin=0;if (wfoptalg>=10) optekin=1
  tol_restart=tol12;if (gen_eigenpb) tol_restart=tol8
- if (ipert == natom+10 .or. ipert == natom+11) then
-   tol_restart = tol7
- end if
+ if (ipert == natom+10 .or. ipert == natom+11) tol_restart = tol7
+
  kinpw1 => gs_hamkq%kinpw_kp
 
-!Memory allocations
+ ! Memory allocations
  ABI_ALLOCATE(gh1c,(2,npw1*nspinor))
  ABI_ALLOCATE(pcon,(npw1))
  ABI_ALLOCATE(scprod,(2,nband))
 
- if (berryopt== 4.or.berryopt== 6.or.berryopt== 7.or.&
-& berryopt==14.or.berryopt==16.or.berryopt==17) then
+ if (berryopt== 4.or.berryopt== 6.or.berryopt== 7.or. berryopt==14.or.berryopt==16.or.berryopt==17) then
    ABI_ALLOCATE(gberry,(2,npw1*nspinor))
    gberry(:,1:npw1*nspinor)=grad_berry(:,1:npw1*nspinor,band)
  else
@@ -274,14 +270,14 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
  shift_band=(band-1)*npw1*nspinor
 
-!Several checking statements
+ ! Several checking statements
  if (prtvol==-level.or.prtvol==-19.or.prtvol==-20) then
    write(msg,'(a)') " ** cgwf3 : debugging mode, tests will be done"
    ! Search CGWF3_WARNING in the log file to find errors (if any)
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out,msg)
    ABI_ALLOCATE(work,(2,npw1*nspinor))
    ABI_ALLOCATE(work1,(2,npw1*nspinor))
-!  ===== Check <Psi_k+q^(0)|S(0)|Psi_k+q^(0)>=delta
+   !  ===== Check <Psi_k+q^(0)|S(0)|Psi_k+q^(0)>=delta
    if (.not.gen_eigenpb) work1(:,:)=cgq(:,1+npw1*nspinor*(band-1)+icgq:npw1*nspinor*band+icgq)
    if (     gen_eigenpb) work1(:,:)=gscq(:,1+npw1*nspinor*(band-1)+igscq:npw1*nspinor*band+igscq)
    do iband=1,nband
@@ -296,50 +292,50 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      if(abs(doti)>tol12) test_is_ok=0
      if(test_is_ok/=1) then
        write(msg,'(a,i3,a,2es22.15)') "CGWF3_WARNING : <Psi_k+q,i^(0)|S(0)|Psi_k+q,j^(0)> for band j=",iband," is ",dotr,doti
-       call wrtout(std_out,msg,'PERS')
+       call wrtout(std_out,msg)
      end if
    end do
-!  ===== Check Pc.Psi_k+q^(0)=0
+   !  ===== Check Pc.Psi_k+q^(0)=0
    do iband=1,nband
      work(:,:)=cgq(:,1+npw1*nspinor*(iband-1)+icgq:npw1*nspinor*iband+icgq)
      call projbd(cgq,work,-1,icgq,igscq,istwf_k,mcgq,mgscq,nband,npw1,nspinor,&
-&     gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+       gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
      call sqnorm_g(dotr,istwf_k,npw1*nspinor,work,me_g0,comm_fft)
      if(sqrt(dotr)>tol12) then
        write(msg,'(a,i3,a,es22.15)') "CGWF3_WARNING : Norm of Pc.Psi_k+q_j^(0) for band j=",iband," is ",sqrt(dotr)
-       call wrtout(std_out,msg,'PERS')
+       call wrtout(std_out,msg)
      end if
    end do
-!  ===== Check Pc.Psi_k^(0)=0
+   ! ===== Check Pc.Psi_k^(0)=0
    work(:,:)=cwave0(:,:)
    call projbd(cgq,work,-1,icgq,igscq,istwf_k,mcgq,mgscq,nband,npw1,nspinor,&
-&   gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+     gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
    call sqnorm_g(dotr,istwf_k,npw1*nspinor,work,me_g0,comm_fft)
    if(sqrt(dotr)>tol12) then
      write(msg,'(a,i3,a,es22.15)') "CGWF3_WARNING : Norm of Pc.Psi_k^(0) for band ",band," is ",sqrt(dotr)
-     call wrtout(std_out,msg,'PERS')
+     call wrtout(std_out,msg)
    end if
-!  ===== Check Pc.dcwavef=0 (for 2nd order only)
+   ! ===== Check Pc.dcwavef=0 (for 2nd order only)
    if(ipert==natom+10.or.ipert==natom+11) then
      work(:,:)=rf2%dcwavef(:,1+shift_band:npw1*nspinor+shift_band)
      call projbd(cgq,work,-1,icgq,igscq,istwf_k,mcgq,mgscq,nband,npw1,nspinor,&
-&     gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+       gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
      call sqnorm_g(dotr,istwf_k,npw1*nspinor,work,me_g0,comm_fft)
      if(sqrt(dotr)>tol10) then
        write(msg,'(a,i3,a,es22.15)') "CGWF3_WARNING : Norm of Pc.dcwavef for band ",band," is ",sqrt(dotr)
-       call wrtout(std_out,msg,'PERS')
+       call wrtout(std_out,msg)
      end if
    end if
-!  ===== Check Pc^*.S(0).Psi_k+q^(0)=0
+   ! ===== Check Pc^*.S(0).Psi_k+q^(0)=0
    if (gen_eigenpb) then
      do iband=1,nband
        work(:,:)=gscq(:,1+npw1*nspinor*(iband-1)+igscq:npw1*nspinor*iband+igscq)
        call projbd(gscq,work,-1,igscq,icgq,istwf_k,mgscq,mcgq,nband,npw1,nspinor,&
-&       cgq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+         cgq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
        call sqnorm_g(dotr,istwf_k,npw1*nspinor,work,me_g0,comm_fft)
        if(sqrt(dotr)>tol12) then
          write(msg,'(a,i3,a,es22.15)') "CGWF3_WARNING : Norm of Pc^*.S(0).Psi_k+q_j^(0) for band j=",iband," is ",sqrt(dotr)
-         call wrtout(std_out,msg,'PERS')
+         call wrtout(std_out,msg)
        end if
      end do
    end if
@@ -347,15 +343,15 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
    ABI_DEALLOCATE(work1)
  end if
 
-!======================================================================
-!========== INITIALISATION OF MINIMIZATION ITERATIONS =================
-!======================================================================
+ !======================================================================
+ !========== INITIALISATION OF MINIMIZATION ITERATIONS =================
+ !======================================================================
 
  if(ipert/=natom+10.and.ipert/=natom+11) then
-!  The following is needed for first order perturbations only
-!  Otherwise, the work is already done in rf2_init (called in dfpt_vtowfk.F90)
+   !  The following is needed for first order perturbations only
+   !  Otherwise, the work is already done in rf2_init (called in dfpt_vtowfk.F90)
 
-!  Compute H(1) applied to GS wavefunction Psi(0)
+   ! Compute H(1) applied to GS wavefunction Psi(0)
    if (gen_eigenpb) then
      sij_opt=1
      ABI_ALLOCATE(gs1c,(2,npw1*nspinor))
@@ -369,7 +365,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      gvnlx1_saved(:,:) = gvnlx1(:,:)
    end if
    call getgh1c(berryopt,cwave0,cwaveprj0,gh1c,gberry,gs1c,gs_hamkq,gvnlx1,idir,ipert,eshift,&
-&   mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+     mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
    if (gen_eigenpb) then
      if (ipert/=natom+2) then  ! S^(1) is zero for ipert=natom+2
@@ -389,76 +385,77 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !$OMP END PARALLEL
      end if
 
-!    If generalized eigenPb and dcwavef requested, compute it:
-!    dcwavef is delta_Psi(1)=-1/2.Sum_{j}[<C0_k+q_j|S(1)|C0_k_i>.|C0_k+q_j>]
-!    see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42)
+     ! If generalized eigenPb and dcwavef requested, compute it:
+     ! dcwavef is delta_Psi(1)=-1/2.Sum_{j}[<C0_k+q_j|S(1)|C0_k_i>.|C0_k+q_j>]
+     ! see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42)
      if (usedcwavef==2) then
        call getdc1(cgq,cprj_dummy,dcwavef,cprj_dummy,0,icgq,istwf_k,mcgq,0,&
-&       mpi_enreg,natom,nband,npw1,nspinor,0,gs1c)
+         mpi_enreg,natom,nband,npw1,nspinor,0,gs1c)
      end if
    end if
 
- else ! 2nd order case (wrt k perturbation)
+ else
+   ! 2nd order case (wrt k perturbation)
    ! Copy RHS_Stern(:,:) of the given band in gh1c
    gh1c(:,:)=rf2%RHS_Stern(:,1+shift_band:npw1*nspinor+shift_band)
  end if
 
-!Check that Pc^*.(H^(0)-E.S^(0)).delta_Psi^(1) is zero ! This is a consequence of P_c delta_Psi^(1) = 0
  if (prtvol==-level.and.usedcwavef==2) then
+   !Check that Pc^*.(H^(0)-E.S^(0)).delta_Psi^(1) is zero ! This is a consequence of P_c delta_Psi^(1) = 0
    ABI_ALLOCATE(cwwork,(2,npw1*nspinor))
    cwwork=dcwavef
-!  - Apply H^(0)-E.S^(0) to delta_Psi^(1)
+   !  - Apply H^(0)-E.S^(0) to delta_Psi^(1)
    sij_opt=0;if (gen_eigenpb) sij_opt=-1
    cpopt=-1
    ABI_ALLOCATE(work,(2,npw1*nspinor))
    ABI_ALLOCATE(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
    ABI_ALLOCATE(work2,(2,npw1*nspinor))
    call getghc(cpopt,cwwork,conjgrprj,work,work1,gs_hamkq,work2,eshift,mpi_enreg,&
-&   1,prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
+     1,prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
    cwwork=work
    ABI_DEALLOCATE(work)
    ABI_DEALLOCATE(work1)
    ABI_DEALLOCATE(work2)
-!  -Apply Pc^*
+   ! -Apply Pc^*
    call projbd(gscq,cwwork,-1,igscq,icgq,istwf_k,mgscq,mcgq,nband,npw1,nspinor,&
-&   cgq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+     cgq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
    call sqnorm_g(dotr,istwf_k,npw1*nspinor,cwwork,me_g0,comm_fft)
    ABI_DEALLOCATE(cwwork)
    if(sqrt(dotr)>tol12) then
      write(msg,'(a,i3,a,es22.15)') 'CGWF3_WARNING : |Pc^*.(H^(0)-E.S^(0)).delta_Psi^(1)| (band ',band,')=',sqrt(dotr)
-     call wrtout(std_out,msg,'PERS')
+     call wrtout(std_out,msg)
    end if
  end if
 
  call cg_zcopy(npw1*nspinor,gh1c,gh1c_n)
 
-!Projecting out all bands
-!While we could avoid calculating all the eig1_k to obtain the perturbed density,
-!we do need all of the matrix element when outputing the full 1st-order wfn.
-!Note the subtlety:
-!-For the generalized eigenPb, S|cgq> is used in place of |cgq>,
-!in order to apply P_c+ projector (see PRB 73, 235101 (2006) [[cite:Audouze2006]], Eq. (71), (72))
+ ! Projecting out all bands
+ ! While we could avoid calculating all the eig1_k to obtain the perturbed density,
+ ! we do need all of the matrix element when outputing the full 1st-order wfn.
+ ! Note the subtlety:
+ ! -For the generalized eigenPb, S|cgq> is used in place of |cgq>,
+ ! in order to apply P_c+ projector (see PRB 73, 235101 (2006) [[cite:Audouze2006]], Eq. (71), (72))
  if(gen_eigenpb)then
    call projbd(gscq,gh1c,-1,igscq,icgq,istwf_k,mgscq,mcgq,nband,npw1,nspinor,&
-&   cgq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+     cgq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
  else
    call projbd(cgq,gh1c,-1,icgq,0,istwf_k,mcgq,mgscq,nband,npw1,nspinor,&
-&   dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+     dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
  end if
 
  if(ipert/=natom+10.and.ipert/=natom+11) then
- ! For ipert=natom+10 or natom+11, this is done in rf2_init
+   ! For ipert=natom+10 or natom+11, this is done in rf2_init
 
-   !The array eig1_k contains:
-   !<u_(iband,k+q)^(0)|H_(k+q,k)^(1)|u_(jband,k)^(0)>                           (NC psps)
-   !or <u_(iband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(jband,k)^(0)> (PAW)
+   ! The array eig1_k contains:
+   ! <u_(iband,k+q)^(0)|H_(k+q,k)^(1)|u_(jband,k)^(0)>                              (NC psps)
+   ! or <u_(iband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(jband,k)^(0)> (PAW)
    jband=(band-1)*2*nband
    if (gen_eigenpb) then
      indx_cgq=icgq
      do iband=1,nband
        eshiftkq=half*(eig0_kq(iband)-eig0nk)
        call dotprod_g(dotr,doti,istwf_k,npw1*nspinor,2,cgq(:,indx_cgq+1:indx_cgq+npw1*nspinor),gs1c,&
-&       me_g0,mpi_enreg%comm_spinorfft)
+         me_g0,mpi_enreg%comm_spinorfft)
        eig1_k(2*iband-1+jband)=scprod(1,iband)-eshiftkq*dotr
        eig1_k(2*iband  +jband)=scprod(2,iband)-eshiftkq*doti
        indx_cgq=indx_cgq+npw1*nspinor
@@ -470,12 +467,11 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      end do
    end if
 
-  !No more need of gs1c
+   ! No more need of gs1c
    ABI_DEALLOCATE(gs1c)
-
  end if
 
-!Filter the wavefunctions for large modified kinetic energy (see routine mkkin.f)
+ ! Filter the wavefunctions for large modified kinetic energy (see routine mkkin.f)
  do ispinor=1,nspinor
    ipws=(ispinor-1)*npw1
 !$OMP PARALLEL DO PRIVATE(ipw) SHARED(cwavef,kinpw1,ipws,npw1)
@@ -486,29 +482,29 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
    end do
  end do
 
-!Apply the orthogonality condition: <C1 k,q|C0 k+q>=0 (NCPP) or <C1 k,q|S0|C0 k+q>=0 (PAW)
-!Project out all bands from cwavef, i.e. apply P_c projector on cwavef
-!(this is needed when there are some partially or unoccupied states)
+ ! Apply the orthogonality condition: <C1 k,q|C0 k+q>=0 (NCPP) or <C1 k,q|S0|C0 k+q>=0 (PAW)
+ ! Project out all bands from cwavef, i.e. apply P_c projector on cwavef
+ ! (this is needed when there are some partially or unoccupied states)
  call projbd(cgq,cwavef,-1,icgq,igscq,istwf_k,mcgq,mgscq,nband,npw1,nspinor,&
-& gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+   gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
 
  if(ipert/=natom+10.and.ipert/=natom+11) then
-!    If PAW, the orthogonality condition is
-!    <C1 k,q|S0|C0 k+q>+1/2<C0 k|S1|C0 k+q>=0
+   ! If PAW, the orthogonality condition is <C1 k,q|S0|C0 k+q>+1/2<C0 k|S1|C0 k+q>=0
    if (usepaw==1.and.usedcwavef>0) then
 !$OMP PARALLEL DO
      do ipw=1,npw1*nspinor
        cwavef(1:2,ipw)=cwavef(1:2,ipw)+dcwavef(1:2,ipw)
      end do
    end if
- else ! In 2nd order case, dcwavef/=0 even in NC, and it is already computed in rf2_init (called in dfpt_vtowfk.F90)
+ else
+   ! In 2nd order case, dcwavef/=0 even in NC, and it is already computed in rf2_init (called in dfpt_vtowfk.F90)
    do ipw=1,npw1*nspinor
      cwavef(:,ipw)=cwavef(:,ipw)+rf2%dcwavef(:,ipw+shift_band)
    end do
  end if
 
-!Treat the case of buffer bands
  if(band>max(1,nband-nbdbuf))then
+   ! Treat the case of buffer bands
    cwavef=zero
    ghc   =zero
    gvnlxc =zero
@@ -518,14 +514,13 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      call pawcprj_set_zero(cwaveprj)
    end if
    if (usedcwavef==2) dcwavef=zero
-!  A small negative residual will be associated with these
+   ! A small negative residual will be associated with these
    resid=-0.1_dp
-!  Number of one-way 3D ffts skipped
+   ! Number of one-way 3D ffts skipped
    nskip=nskip+nline
 
  else
-!  If not a buffer band, perform the optimisation
-
+   ! If not a buffer band, perform the optimisation
    ABI_ALLOCATE(conjgr,(2,npw1*nspinor))
    ABI_ALLOCATE(direc,(2,npw1*nspinor))
    ABI_ALLOCATE(gresid,(2,npw1*nspinor))
@@ -540,35 +535,34 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
    cwaveq(:,:)=cgq(:,1+npw1*nspinor*(band-1)+icgq:npw1*nspinor*band+icgq)
    dotgp=one
 
-!  Here apply H(0) at k+q to input orthogonalized 1st-order wfs
+   ! Here apply H(0) at k+q to input orthogonalized 1st-order wfs
    sij_opt=0;if (gen_eigenpb) sij_opt=1
    cpopt=-1+usepaw
    call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamkq,gvnlxc,eshift,mpi_enreg,1,&
-&   prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
+     prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
 
-!  ghc also includes the eigenvalue shift
+   ! ghc also includes the eigenvalue shift
    if (gen_eigenpb) then
-     call cg_zaxpy(npw1*nspinor,(/-eshift,zero/),gsc,ghc)
+     call cg_zaxpy(npw1*nspinor, [-eshift, zero], gsc,ghc)
    else
-     call cg_zaxpy(npw1*nspinor,(/-eshift,zero/),cwavef,ghc)
+     call cg_zaxpy(npw1*nspinor, [-eshift, zero], cwavef,ghc)
    end if
 
-!  Initialize resid, in case of nline==0
+   ! Initialize resid, in case of nline==0
    resid=zero
 
-!  ======================================================================
-!  ====== BEGIN LOOP FOR A GIVEN BAND: MINIMIZATION ITERATIONS ==========
-!  ======================================================================
+   ! ======================================================================
+   ! ====== BEGIN LOOP FOR A GIVEN BAND: MINIMIZATION ITERATIONS ==========
+   ! ======================================================================
    do iline=1,nline
 
-!    ======================================================================
-!    ================= COMPUTE THE RESIDUAL ===============================
-!    ======================================================================
-!    Note that gresid (=steepest-descent vector, Eq.(26) of PRB 55, 10337 (1996) [[cite:Gonze1997]])
-!    is precomputed to garantee cancellation of errors
-!    and allow residuals to reach values as small as 1.0d-24 or better.
-     if (berryopt== 4.or.berryopt== 6.or.berryopt== 7.or.&
-&     berryopt==14.or.berryopt==16.or.berryopt==17) then
+     ! ======================================================================
+     ! ================= COMPUTE THE RESIDUAL ===============================
+     ! ======================================================================
+     ! Note that gresid (=steepest-descent vector, Eq.(26) of PRB 55, 10337 (1996) [[cite:Gonze1997]])
+     ! is precomputed to garantee cancellation of errors
+     ! and allow residuals to reach values as small as 1.0d-24 or better.
+     if (berryopt== 4.or.berryopt== 6.or.berryopt== 7.or. berryopt==14.or.berryopt==16.or.berryopt==17) then
        if (ipert==natom+2) then
          if (opt_gvnlx1/=1) gvnlx1=zero
 !$OMP PARALLEL DO
@@ -589,60 +583,57 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        end do
      end if
 
-!    ======================================================================
-!    =========== PROJECT THE STEEPEST DESCENT DIRECTION ===================
-!    ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
-!    ======================================================================
-!    Project all bands from gresid into direc:
-!    The following projection over the subspace orthogonal to occupied bands
-!    is not optional in the RF case, unlike the GS case.
-!    However, the order of operations could be changed, so that
-!    as to make it only applied at the beginning, to H(1) psi(0),
-!    so, THIS IS TO BE REEXAMINED
-!    Note the subtlety:
-!    -For the generalized eigenPb, S|cgq> is used in place of |cgq>,
-!    in order to apply P_c+ projector (see PRB 73, 235101 (2006) [[cite:Audouze2006]], Eq. (71), (72)
+     ! ======================================================================
+     ! =========== PROJECT THE STEEPEST DESCENT DIRECTION ===================
+     ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
+     ! ======================================================================
+     ! Project all bands from gresid into direc:
+     ! The following projection over the subspace orthogonal to occupied bands
+     ! is not optional in the RF case, unlike the GS case.
+     ! However, the order of operations could be changed, so that
+     ! as to make it only applied at the beginning, to H(1) psi(0),
+     ! so, THIS IS TO BE REEXAMINED
+     ! Note the subtlety:
+     ! -For the generalized eigenPb, S|cgq> is used in place of |cgq>,
+     ! in order to apply P_c+ projector (see PRB 73, 235101 (2006) [[cite:Audouze2006]], Eq. (71), (72)
      if (gen_eigenpb) then
        call projbd(gscq,gresid,-1,igscq,icgq,istwf_k,mgscq,mcgq,nband,npw1,nspinor,&
-&       cgq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+         cgq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
      else
        call projbd(cgq,gresid,-1,icgq,0,istwf_k,mcgq,mgscq,nband,npw1,nspinor,&
-&       dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+         dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
      end if
 
      call cg_zcopy(npw1*nspinor,gresid,direc)
 
-!    ======================================================================
-!    ============== CHECK FOR CONVERGENCE CRITERIA ========================
-!    ======================================================================
+     ! ======================================================================
+     ! ============== CHECK FOR CONVERGENCE CRITERIA ========================
+     ! ======================================================================
 
-!    Compute second-order derivative of the energy using a variational expression
+     ! Compute second-order derivative of the energy using a variational expression
      call dotprod_g(prod1,doti,istwf_k,npw1*nspinor,1,cwavef,gresid,me_g0,mpi_enreg%comm_spinorfft)
      call dotprod_g(prod2,doti,istwf_k,npw1*nspinor,1,cwavef,gh1c,me_g0,mpi_enreg%comm_spinorfft)
      d2te=two*(-prod1+prod2)
+     ! write(std_out,'(a,f14.6,a,f14.6)') 'prod1 = ',prod1,' prod2 = ',prod2 ! Keep this debugging feature!
 
-!    DEBUG Keep this debugging feature !
-!     write(msg,'(a,f14.6,a,f14.6)') 'prod1 = ',prod1,' prod2 = ',prod2
-!     call wrtout(std_out,msg,'PERS')
-!    ENDDEBUG
-
-!    Compute <u_m(1)|H(0)-e_m(0)|u_m(1)>
-!    (<u_m(1)|H(0)-e_m(0).S|u_m(1)> if gen. eigenPb),
-!    that should be positive,
-!    except when the eigenvalue eig_mk(0) is higher than
-!    the lowest non-treated eig_mk+q(0). For insulators, this
-!    has no influence, but for metallic occupations,
-!    the conjugate gradient algorithm breaks down. The solution adopted here
-!    is very crude, and rely upon the fact that occupancies of such
-!    levels should be smaller and smaller with increasing nband, so that
-!    a convergence study will give the right result.
-!    The same trick is also used later.
+     ! Compute <u_m(1)|H(0)-e_m(0)|u_m(1)>
+     ! (<u_m(1)|H(0)-e_m(0).S|u_m(1)> if gen. eigenPb),
+     ! that should be positive,
+     ! except when the eigenvalue eig_mk(0) is higher than
+     ! the lowest non-treated eig_mk+q(0). For insulators, this
+     ! has no influence, but for metallic occupations,
+     ! the conjugate gradient algorithm breaks down. The solution adopted here
+     ! is very crude, and rely upon the fact that occupancies of such
+     ! levels should be smaller and smaller with increasing nband, so that
+     ! a convergence study will give the right result.
+     ! The same trick is also used later.
      u1h0me0u1=-prod1-prod2
-!    Some tolerance is allowed, to account for very small numerical inaccuracies and cancellations.
+
+     ! Some tolerance is allowed, to account for very small numerical inaccuracies and cancellations.
      if(u1h0me0u1<-tol_restart)then
        if (prtvol==-level.or.prtvol==-19) then
          write(msg,'(a,es22.13e3)') '  cgwf3: u1h0me0u1 = ',u1h0me0u1
-         call wrtout(std_out,msg,'PERS')
+         call wrtout(std_out,msg)
        end if
        cwavef =zero
        ghc    =zero
@@ -651,45 +642,44 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        if (usepaw==1) then
          call pawcprj_set_zero(cwaveprj)
        end if
-!      A negative residual will be the signal of this problem ...
+       ! A negative residual will be the signal of this problem ...
        resid=-one
-       call wrtout(std_out,' dfpt_cgwf: problem of minimisation (likely metallic), set resid to -1','PERS')
-!      Number of one-way 3D ffts skipped
+       if (prtvol > 0) call wrtout(std_out,' dfpt_cgwf: problem of minimisation (likely metallic), set resid to -1')
+       ! Number of one-way 3D ffts skipped
        nskip=nskip+(nline-iline+1)
-!      Exit from the loop on iline
-       exit
+
+       exit ! Exit from the loop on iline
      end if
 
-!    Compute residual (squared) norm
+     ! Compute residual (squared) norm
      call sqnorm_g(resid,istwf_k,npw1*nspinor,gresid,me_g0,comm_fft)
      if (prtvol==-level.or.prtvol==-19)then
        write(msg,'(a,a,i3,f14.6,a,a,4es12.4)') ch10,&
-&       ' dfpt_cgwf : iline,eshift     =',iline,eshift,ch10,&
-&       '         resid,prod1,prod2,d2te=',resid,prod1,prod2,d2te
-       call wrtout(std_out,msg,'PERS')
+        ' dfpt_cgwf : iline,eshift     =',iline,eshift,ch10,&
+        '         resid,prod1,prod2,d2te=',resid,prod1,prod2,d2te
+       call wrtout(std_out,msg)
      end if
 
-!    If residual sufficiently small stop line minimizations
+     ! If residual sufficiently small stop line minimizations
      if (resid<tolwfr) then
        if(prtvol>=10)then
          write(msg,'(a,i4,a,i2,a,es12.4)')' dfpt_cgwf: band',band,' converged after ',iline,' line minimizations: resid = ',resid
-         call wrtout(std_out,msg,'PERS')
+         call wrtout(std_out,msg)
        end if
        nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
        exit                         ! Exit from the loop on iline
      end if
 
-!    If user require exiting the job, stop line minimisations
+     ! If user require exiting the job, stop line minimisations
      if (quit==1) then
        write(msg,'(a,i0)')' dfpt_cgwf: user require exiting => skip update of band ',band
-       call wrtout(std_out,msg,'PERS')
+       call wrtout(std_out,msg)
        nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
        exit                         ! Exit from the loop on iline
      end if
 
-!    Check that d2te is decreasing on succeeding lines:
+     ! Check that d2te is decreasing on succeeding lines:
      if (iline/=1) then
-       !if (d2te>d2teold+tol12) then
        if (d2te>d2teold+tol6) then
          write(msg,'(a,i0,a,e14.6,a,e14.6)')'New trial energy at line ',iline,'=',d2te,'is higher than former:',d2teold
          MSG_WARNING(msg)
@@ -697,24 +687,24 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      end if
      d2teold=d2te
 
-!    DEBUG Keep this debugging feature !
-!    call sqnorm_g(dotr,istwf_k,npw1*nspinor,direc,me_g0,comm_fft)
-!    write(std_out,*)' dfpt_cgwf : before precon, direc**2=',dotr
-!    if (gen_eigenpb) then
-!    call dotprod_g(dotr,doti,istwf_k,npw1*nspinor,1,cwaveq,&
-!    &                 gscq(:,1+npw1*nspinor*(band-1)+igscq:npw1*nspinor*band+igscq),me_g0,mpi_enreg%comm_spinorfft)
-!    else
-!    call sqnorm_g(dotr,istwf_k,npw1*nspinor,cwaveq,me_g0,comm_fft)
-!    end if
-!    write(std_out,*)' dfpt_cgwf : before precon, cwaveq**2=',dotr
-!    ENDDEBUG
+     !DEBUG Keep this debugging feature !
+     !call sqnorm_g(dotr,istwf_k,npw1*nspinor,direc,me_g0,comm_fft)
+     !write(std_out,*)' dfpt_cgwf : before precon, direc**2=',dotr
+     !if (gen_eigenpb) then
+     !call dotprod_g(dotr,doti,istwf_k,npw1*nspinor,1,cwaveq,&
+     !&                 gscq(:,1+npw1*nspinor*(band-1)+igscq:npw1*nspinor*band+igscq),me_g0,mpi_enreg%comm_spinorfft)
+     !else
+     !call sqnorm_g(dotr,istwf_k,npw1*nspinor,cwaveq,me_g0,comm_fft)
+     !end if
+     !write(std_out,*)' dfpt_cgwf : before precon, cwaveq**2=',dotr
+     !ENDDEBUG
 
-!    ======================================================================
-!    ======== PRECONDITION THE STEEPEST DESCENT DIRECTION =================
-!    ======================================================================
+     ! ======================================================================
+     ! ======== PRECONDITION THE STEEPEST DESCENT DIRECTION =================
+     ! ======================================================================
 
-!    If wfoptalg>=10, the precondition matrix is kept constant
-!    during iteration ; otherwise it is recomputed
+     ! If wfoptalg>=10, the precondition matrix is kept constant
+     ! during iteration; otherwise it is recomputed
      if (wfoptalg<10.or.iline==1) then
        call cg_precon(cwaveq,zero,istwf_k,kinpw1,npw1,nspinor,me_g0,0,pcon,direc,mpi_enreg%comm_fft)
      else
@@ -727,69 +717,63 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        end do
      end if
 
-!    DEBUG Keep this debugging feature !
-!    call sqnorm_g(dotr,istwf_k,npw1*nspinor,direc,me_g0,comm_fft)
-!    write(std_out,*)' dfpt_cgwf : after precon, direc**2=',dotr
-!    ENDDEBUG
+     !DEBUG Keep this debugging feature !
+     !call sqnorm_g(dotr,istwf_k,npw1*nspinor,direc,me_g0,comm_fft)
+     !write(std_out,*)' dfpt_cgwf : after precon, direc**2=',dotr
+     !ENDDEBUG
 
-!    ======================================================================
-!    ======= PROJECT THE PRECOND. STEEPEST DESCENT DIRECTION ==============
-!    ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
-!    ======================================================================
+     ! ======================================================================
+     ! ======= PROJECT THE PRECOND. STEEPEST DESCENT DIRECTION ==============
+     ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
+     ! ======================================================================
 
-!    Projecting again out all bands:
-!    -For the simple eigenPb, gscq is used as dummy argument
+     ! Projecting again out all bands:
+     ! -For the simple eigenPb, gscq is used as dummy argument
      call projbd(cgq,direc,-1,icgq,igscq,istwf_k,mcgq,mgscq,nband,npw1,nspinor,&
-&     gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+       gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
 
-!    DEBUG Keep this debugging feature !
-!    call sqnorm_g(dotr,istwf_k,npw1*nspinor,direc,me_g0,comm_fft)
-!    write(std_out,*)' dfpt_cgwf : after projbd, direc**2=',dotr
-!    ENDDEBUG
+     !DEBUG Keep this debugging feature !
+     !call sqnorm_g(dotr,istwf_k,npw1*nspinor,direc,me_g0,comm_fft)
+     !write(std_out,*)' dfpt_cgwf : after projbd, direc**2=',dotr
+     !ENDDEBUG
 
-!    ======================================================================
-!    ================= COMPUTE THE CONJUGATE-GRADIENT =====================
-!    ======================================================================
+     ! ======================================================================
+     ! ================= COMPUTE THE CONJUGATE-GRADIENT =====================
+     ! ======================================================================
 
-!    get dot of direction vector with residual vector
+     ! get dot of direction vector with residual vector
      call dotprod_g(dotgg,doti,istwf_k,npw1*nspinor,1,direc,gresid,me_g0,mpi_enreg%comm_spinorfft)
 
-!    At first iteration, gamma is set to zero
      if (iline==1) then
+       ! At first iteration, gamma is set to zero
        gamma=zero
        dotgp=dotgg
        call cg_zcopy(npw1*nspinor,direc,conjgr)
      else
-!      At next iterations, h = g + gamma * h
+       ! At next iterations, h = g + gamma * h
        gamma=dotgg/dotgp
        dotgp=dotgg
        if (prtvol==-level.or.prtvol==-19)then
          write(msg,'(a,2es16.6)') 'dfpt_cgwf: dotgg,gamma = ',dotgg,gamma
-         call wrtout(std_out,msg,'PERS')
+         call wrtout(std_out,msg)
        end if
 !$OMP PARALLEL DO
        do ipw=1,npw1*nspinor
          conjgr(1:2,ipw)=direc(1:2,ipw)+gamma*conjgr(1:2,ipw)
        end do
-       if (prtvol==-level.or.prtvol==-19)then
-         call wrtout(std_out,'dfpt_cgwf: conjugate direction has been found','PERS')
-       end if
+       if (prtvol==-level.or.prtvol==-19) call wrtout(std_out,'dfpt_cgwf: conjugate direction has been found')
      end if
 
-!    ======================================================================
-!    ===== COMPUTE CONTRIBUTIONS TO 1ST AND 2ND DERIVATIVES OF ENERGY =====
-!    ======================================================================
-!    ...along the search direction
+     ! ======================================================================
+     ! ===== COMPUTE CONTRIBUTIONS TO 1ST AND 2ND DERIVATIVES OF ENERGY =====
+     ! ======================================================================
+     ! ...along the search direction
 
-!    Compute dedt, Eq.(29) of of PRB55, 10337 (1997) [[cite:Gonze1997]],
-!    with an additional factor of 2 for the difference
-!    between E(2) and the 2DTE
+     ! Compute dedt, Eq.(29) of of PRB55, 10337 (1997) [[cite:Gonze1997]],
+     ! with an additional factor of 2 for the difference between E(2) and the 2DTE
      call dotprod_g(dedt,doti,istwf_k,npw1*nspinor,1,conjgr,gresid,me_g0,mpi_enreg%comm_spinorfft)
      dedt=-two*two*dedt
-     if((prtvol==-level.or.prtvol==-19.or.prtvol==-20).and.dedt-tol14>0) then
-       write(msg,'(a)') '  CGWF3_WARNING : dedt>0'
-       call wrtout(std_out,msg,'PERS')
-     end if
+     if((prtvol==-level.or.prtvol==-19.or.prtvol==-20).and.dedt-tol14>0) call wrtout(std_out,' CGWF3_WARNING : dedt>0')
      ABI_ALLOCATE(gvnlx_direc,(2,npw1*nspinor))
      ABI_ALLOCATE(gh_direc,(2,npw1*nspinor))
      if (gen_eigenpb)  then
@@ -800,9 +784,9 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      sij_opt=0;if (gen_eigenpb) sij_opt=1
      cpopt=-1+usepaw
      call getghc(cpopt,conjgr,conjgrprj,gh_direc,sconjgr,gs_hamkq,gvnlx_direc,&
-&     eshift,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
+       eshift,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
 
-!    ghc also includes the eigenvalue shift
+     ! ghc also includes the eigenvalue shift
      if (gen_eigenpb) then
 !$OMP PARALLEL DO
        do ipw=1,npw1*nspinor
@@ -815,28 +799,28 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        end do
      end if
 
-!    compute d2edt2, Eq.(30) of of PRB55, 10337 (1997) [[cite:Gonze1997]],
-!    with an additional factor of 2 for the difference
-!    between E(2) and the 2DTE, and neglect of local fields (SC terms)
+     ! compute d2edt2, Eq.(30) of of PRB55, 10337 (1997) [[cite:Gonze1997]],
+     ! with an additional factor of 2 for the difference
+     ! between E(2) and the 2DTE, and neglect of local fields (SC terms)
      call dotprod_g(d2edt2,doti,istwf_k,npw1*nspinor,1,conjgr,gh_direc,me_g0,mpi_enreg%comm_spinorfft)
      d2edt2=two*two*d2edt2
      if(prtvol==-level.or.prtvol==-19)then
        write(msg,'(a,2es14.6)') 'dfpt_cgwf: dedt,d2edt2=',dedt,d2edt2
-       call wrtout(std_out,msg,'PERS')
+       call wrtout(std_out,msg)
      end if
 
-!    ======================================================================
-!    ======= COMPUTE MIXING FACTOR - CHECK FOR CONVERGENCE ===============
-!    ======================================================================
+     ! ======================================================================
+     ! ======= COMPUTE MIXING FACTOR - CHECK FOR CONVERGENCE ===============
+     ! ======================================================================
 
-!    see Eq.(31) of PRB55, 10337 (1997) [[cite:Gonze1997]]
-!
+     ! see Eq.(31) of PRB55, 10337 (1997) [[cite:Gonze1997]]
+     !
      if(d2edt2<-tol_restart)then
-!      This may happen when the eigenvalue eig_mk(0) is higher than
-!      the lowest non-treated eig_mk+q(0). The solution adopted here
-!      is very crude, and rely upon the fact that occupancies of such
-!      levels should be smaller and smaller with increasing nband, so that
-!      a convergence study will give the right result.
+       ! This may happen when the eigenvalue eig_mk(0) is higher than
+       ! the lowest non-treated eig_mk+q(0). The solution adopted here
+       ! is very crude, and rely upon the fact that occupancies of such
+       ! levels should be smaller and smaller with increasing nband, so that
+       ! a convergence study will give the right result.
        theta=zero
 
        cwavef=zero
@@ -846,35 +830,35 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        if (usepaw==1) then
          call pawcprj_set_zero(cwaveprj)
        end if
-!      A negative residual will be the signal of this problem ...
+       ! A negative residual will be the signal of this problem ...
        resid=-two
-       call wrtout(std_out,' dfpt_cgwf: problem of minimisation (likely metallic), set resid to -2',"PERS")
+       if (prtvol > 0) call wrtout(std_out,' dfpt_cgwf: problem of minimisation (likely metallic), set resid to -2')
      else
-!      Here, the value of theta that gives the minimum
+       ! Here, the value of theta that gives the minimum
        theta=-dedt/d2edt2
-!      DEBUG
-!      write(std_out,*)' dfpt_cgwf: dedt,d2edt2=',dedt,d2edt2
-!      ENDDEBUG
+       !write(std_out,*)' dfpt_cgwf: dedt,d2edt2=',dedt,d2edt2
      end if
 
-!    Check that result is above machine precision
+     ! Check that result is above machine precision
      if (one+theta==one) then
-       write(msg, '(a,es16.4)' ) ' dfpt_cgwf: converged with theta=',theta
-       call wrtout(std_out,msg,'PERS')
+       if (prtvol > 0) then
+         write(msg, '(a,es16.4)' ) ' dfpt_cgwf: converged with theta=',theta
+         call wrtout(std_out,msg)
+       end if
        nskip=nskip+2*(nline-iline) ! Number of one-way 3D ffts skipped
        exit                        ! Exit from the loop on iline
      end if
 
-!    ======================================================================
-!    ================ GENERATE NEW |wf>, H|wf>, Vnl|Wf ... ================
-!    ======================================================================
+     ! ======================================================================
+     ! ================ GENERATE NEW |wf>, H|wf>, Vnl|Wf ... ================
+     ! ======================================================================
 
-     call cg_zaxpy(npw1*nspinor,(/theta,zero/),conjgr,cwavef)
-     call cg_zaxpy(npw1*nspinor,(/theta,zero/),gh_direc,ghc)
-     call cg_zaxpy(npw1*nspinor,(/theta,zero/),gvnlx_direc,gvnlxc)
+     call cg_zaxpy(npw1*nspinor, [theta, zero], conjgr,cwavef)
+     call cg_zaxpy(npw1*nspinor, [theta, zero], gh_direc,ghc)
+     call cg_zaxpy(npw1*nspinor, [theta, zero], gvnlx_direc,gvnlxc)
 
      if (gen_eigenpb) then
-       call cg_zaxpy(npw1*nspinor,(/theta,zero/),sconjgr,gsc)
+       call cg_zaxpy(npw1*nspinor, [theta, zero], sconjgr, gsc)
      end if
      if (usepaw==1) then
        call pawcprj_axpby(theta,one,conjgrprj,cwaveprj)
@@ -884,37 +868,37 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      ABI_DEALLOCATE(gvnlx_direc)
      ABI_DEALLOCATE(sconjgr)
 
-!    ======================================================================
-!    =========== CHECK CONVERGENCE AGAINST TRIAL ENERGY ===================
-!    ======================================================================
+     ! ======================================================================
+     ! =========== CHECK CONVERGENCE AGAINST TRIAL ENERGY ===================
+     ! ======================================================================
 
      if(usetolrde/=0) then
-!      Check reduction in trial energy deltae, Eq.(28) of PRB55, 10337 (1997) [[cite:Gonze1997]]
+       ! Check reduction in trial energy deltae, Eq.(28) of PRB55, 10337 (1997) [[cite:Gonze1997]]
        deltae=half*d2edt2*theta**2+theta*dedt
 
        if (iline==1) then
          deold=deltae
-!        The extra factor of two should be removed !
+         ! The extra factor of two should be removed !
        else if (abs(deltae)<tolrde*two*abs(deold) .and. iline/=nline) then
          if(prtvol>=10.or.prtvol==-level.or.prtvol==-19)then
            write(msg, '(a,i4,1x,a,1p,e12.4,a,e12.4,a)' ) &
-&           ' dfpt_cgwf: line',iline,' deltae=',deltae,' < tolrde*',deold,' =>skip lines'
-           call wrtout(std_out,msg,'PERS')
+            ' dfpt_cgwf: line',iline,' deltae=',deltae,' < tolrde*',deold,' =>skip lines'
+           call wrtout(std_out,msg)
          end if
          nskip=nskip+2*(nline-iline) ! Number of one-way 3D ffts skipped
          exit                        ! Exit from the loop on iline
        end if
      end if
 
-!    ======================================================================
-!    ================== END LOOP FOR GIVEN BAND ===========================
-!    ======================================================================
+     ! ======================================================================
+     ! ================== END LOOP FOR GIVEN BAND ===========================
+     ! ======================================================================
 
-!    Note that there are three "exit" instruction inside the loop.
+     ! Note that there are three "exit" instruction inside the loop.
      nlines_done = nlines_done + 1
    end do ! iline
 
-!  Check that final cwavef (Psi^(1)) satisfies the orthogonality condition
+   ! Check that final cwavef (Psi^(1)) satisfies the orthogonality condition
    if (prtvol==-level.or.prtvol==-19) then
      sij_opt=0 ; usevnl=1 ; optlocal=1 ; optnl=2 ; if (gen_eigenpb)  sij_opt=1
      ABI_ALLOCATE(work,(2,npw1*nspinor))
@@ -926,13 +910,13 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        else
          work(:,:)=cgq(:,1+npw1*nspinor*(iband-1)+icgq:npw1*nspinor*iband+icgq)
        end if
-       ! Compute : <Psi^(0)_i,k+q|Psi^(1)_j,k,q>
+       ! Compute: <Psi^(0)_i,k+q|Psi^(1)_j,k,q>
        call dotprod_g(prod1,prod2,istwf_k,npw1*nspinor,2,work,cwavef,me_g0,mpi_enreg%comm_spinorfft)
 
        if (ipert/=natom+10.and.ipert/=natom+11) then
          if (gen_eigenpb) then
            call getgh1c(berryopt,cwave0,cwaveprj0,work1,gberry,work2,gs_hamkq,gvnlx1_saved,idir,ipert,eshift,&
-&           mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+             mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
            work(:,:)=cgq(:,1+npw1*nspinor*(iband-1)+icgq:npw1*nspinor*iband+icgq)
            call dotprod_g(dotr,doti,istwf_k,npw1*nspinor,2,work,work2,me_g0,mpi_enreg%comm_spinorfft)
          else
@@ -951,11 +935,11 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        if(dotr>tol10) then
 !         if (gen_eigenpb) then
 !           write(msg,'(2a,i3,a,2es22.15)') 'CGWF3_WARNING : <Psi^(1)_i,k,q|S^(0)|Psi^(0)_j,k+q>',&
-!&           '+ 1/2<Psi^(0)_i,k|S^(1)|Psi^(0)_j,k+q>, for j= ',iband,' is ',dotr,doti
+!             '+ 1/2<Psi^(0)_i,k|S^(1)|Psi^(0)_j,k+q>, for j= ',iband,' is ',dotr,doti
 !         else
          write(msg,'(a,i3,a,es22.15)') 'CGWF3_WARNING : |<Psi^(0)_i,k+q|Psi^(1)_j,k,q>+amn(i,j)/2|, for j= ',iband,' is ',dotr
 !         end if
-         call wrtout(std_out,msg,'PERS')
+         call wrtout(std_out,msg)
        end if
      end do
      ABI_DEALLOCATE(work)
@@ -966,56 +950,56 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      end if
    end if
 
-!  Check that final cwavef Psi^(1) is Pc.Psi^(1)+delta_Psi^(1)
    if (prtvol==-level.or.prtvol==-19)then
+     !  Check that final cwavef Psi^(1) is Pc.Psi^(1)+delta_Psi^(1)
      ABI_ALLOCATE(cwwork,(2,npw1*nspinor))
      cwwork=cwavef
-!    -Apply Pc to Psi^(1)
+     ! -Apply Pc to Psi^(1)
      if (gen_eigenpb) then
        call projbd(cgq,cwwork,-1,icgq,igscq,istwf_k,mcgq,mgscq,nband,npw1,nspinor,&
-&       gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+         gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
      else
        call projbd(cgq,cwwork,-1,icgq,0,istwf_k,mcgq,mgscq,nband,npw1,nspinor,&
-&       dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+         dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
      end if
-!    -Add delta_Psi^(1)
+     ! -Add delta_Psi^(1)
      if (usedcwavef>0) cwwork=cwwork+dcwavef
      if(ipert==natom+10.or.ipert==natom+11) cwwork=cwwork+rf2%dcwavef(:,1+shift_band:npw1*nspinor+shift_band)
-!    -Compare to Psi^(1)
+     ! -Compare to Psi^(1)
      cwwork=cwwork-cwavef
      call sqnorm_g(dotr,istwf_k,npw1*nspinor,cwwork,me_g0,comm_fft)
      ABI_DEALLOCATE(cwwork)
      if(sqrt(dotr)>tol10) then
 !       if (gen_eigenpb) then
 !         write(msg,'(a,i3,a,es22.15)') &
-!&         'CGWF3_WARNING : |(Pc.Psi^(1)_i,k,q + delta_Psi^(1)_i,k) - Psi^(1)_i,k,q|^2 (band ',band,')=',dotr
+!         'CGWF3_WARNING : |(Pc.Psi^(1)_i,k,q + delta_Psi^(1)_i,k) - Psi^(1)_i,k,q|^2 (band ',band,')=',dotr
 !       else
        write(msg,'(a,es22.15)') 'CGWF3_WARNING : |(Pc.Psi^(1)_i,k,q + delta_Psi^(1)_i,k) - Psi^(1)_i,k,q| = ',sqrt(dotr)
 !       end if
-       call wrtout(std_out,msg,'PERS')
+       call wrtout(std_out,msg)
      end if
    end if
 
-!  Check that final cwavef (Psi^(1)) solves the Sternheimer equation
    if(prtvol==-level.or.prtvol==-19.or.prtvol==-20)then
+     ! Check that final cwavef (Psi^(1)) solves the Sternheimer equation
      ABI_ALLOCATE(cwwork,(2,npw1*nspinor))
      cwwork=cwavef
-!    -Apply Pc to Psi^(1)
+     ! -Apply Pc to Psi^(1)
      if (gen_eigenpb) then
        call projbd(cgq,cwwork,-1,icgq,igscq,istwf_k,mcgq,mgscq,nband,npw1,nspinor,&
-&       gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+         gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
      else
        call projbd(cgq,cwwork,-1,icgq,0,istwf_k,mcgq,mgscq,nband,npw1,nspinor,&
-&       dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+         dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
      end if
-!    - Apply H^(0)-E.S^(0)
+     ! - Apply H^(0)-E.S^(0)
      sij_opt=0;if (gen_eigenpb) sij_opt=1
      cpopt=-1
      ABI_ALLOCATE(work,(2,npw1*nspinor))
      ABI_ALLOCATE(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
      ABI_ALLOCATE(work2,(2,npw1*nspinor))
      call getghc(cpopt,cwwork,conjgrprj,work,work1,gs_hamkq,work2,eshift,&
-&     mpi_enreg,1,prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
+       mpi_enreg,1,prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
      if (gen_eigenpb) then
        cwwork=work-eshift*work1
      else
@@ -1024,39 +1008,39 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      ABI_DEALLOCATE(work)
      ABI_DEALLOCATE(work1)
      ABI_DEALLOCATE(work2)
-!  The following is not mandatory, as Pc has been already applied to Psi^(1)
-!  and Pc^* H^(0) Pc = Pc^* H^(0) = H^(0) Pc (same for S^(0)).
-!  However, in PAW, to apply Pc^* here seems to reduce the numerical error
-!    -Apply Pc^*
+     ! The following is not mandatory, as Pc has been already applied to Psi^(1)
+     ! and Pc^* H^(0) Pc = Pc^* H^(0) = H^(0) Pc (same for S^(0)).
+     ! However, in PAW, to apply Pc^* here seems to reduce the numerical error
+     ! -Apply Pc^*
      if (gen_eigenpb) then
        call projbd(gscq,cwwork,-1,igscq,icgq,istwf_k,mgscq,mcgq,nband,npw1,nspinor,&
-&       cgq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+        cgq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
      else
        call projbd(cgq,cwwork,-1,icgq,0,istwf_k,mcgq,mgscq,nband,npw1,nspinor,&
-&       dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+        dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
      end if
-!    - Add Pc^*(H^(1)-E.S^(1)).Psi^(0)
+     ! - Add Pc^*(H^(1)-E.S^(1)).Psi^(0)
      cwwork=cwwork+gh1c
      call sqnorm_g(dotr,istwf_k,npw1*nspinor,cwwork,me_g0,comm_fft)
      ABI_DEALLOCATE(cwwork)
      write(msg,'(a,i3,a,es22.15,2a,i4)') &
-&     '*** CGWF3 Sternheimer equation test for band ',band,'=',sqrt(dotr),ch10,&
-&     'It should go to zero for large nline : nlines_done = ',nlines_done
-     call wrtout(std_out,msg,'PERS')
+       '*** CGWF3 Sternheimer equation test for band ',band,'=',sqrt(dotr),ch10,&
+       'It should go to zero for large nline : nlines_done = ',nlines_done
+     call wrtout(std_out,msg)
    end if
 
-!  Check that < Psi^(0) | ( H^(0)-eps^(0) S^(0) ) | Psi^(1) > is in agreement with eig^(1)
    if(prtvol==-level.or.prtvol==-19.or.prtvol==-20)then
+     ! Check that < Psi^(0) | ( H^(0)-eps^(0) S^(0) ) | Psi^(1) > is in agreement with eig^(1)
      ABI_ALLOCATE(cwwork,(2,npw1*nspinor))
      cwwork=cwavef
-!    - Apply H^(0)-E.S^(0)
+     ! - Apply H^(0)-E.S^(0)
      sij_opt=0;if (gen_eigenpb) sij_opt=1
      cpopt=-1
      ABI_ALLOCATE(work,(2,npw1*nspinor))
      ABI_ALLOCATE(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
      ABI_ALLOCATE(work2,(2,npw1*nspinor))
      call getghc(cpopt,cwwork,conjgrprj,work,work1,gs_hamkq,work2,eshift,&
-&     mpi_enreg,1,prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
+       mpi_enreg,1,prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
      if (gen_eigenpb) then
        cwwork=work-eshift*work1
      else
@@ -1074,13 +1058,12 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        dotr = sqrt(dotr**2+doti**2)
        if (dotr > tol8) then
          write(msg,'(2(a,i3),a,es22.15)') &
-&         'CGWF3_WARNING < Psi^(0) | ( H^(0)-eps^(0) S^(0) ) | Psi^(1) > for i=',iband,' j=',band,&
+           'CGWF3_WARNING < Psi^(0) | ( H^(0)-eps^(0) S^(0) ) | Psi^(1) > for i=',iband,' j=',band,&
          ' : ',sqrt(dotr**2+doti**2)
-         call wrtout(std_out,msg,'PERS')
+         call wrtout(std_out,msg)
        end if
      end do
-!     write(msg,'(a)') '< Psi^(0) | ( H^(0)-eps^(0) S^(0) ) | Psi^(1) > is done.'
-!     call wrtout(std_out,msg,'PERS')
+     !write(std_out,'(a)') '< Psi^(0) | ( H^(0)-eps^(0) S^(0) ) | Psi^(1) > is done.'
      ABI_DEALLOCATE(work)
      ABI_DEALLOCATE(cwwork)
    end if
@@ -1100,12 +1083,12 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
    end if
    ABI_DATATYPE_DEALLOCATE(conjgrprj)
 
- end if  ! End condition of not being a buffer band
+ end if ! End condition of not being a buffer band
 
-!At the end of the treatment of a set of bands, write the number of one-way 3D ffts skipped
+ ! At the end of the treatment of a set of bands, write the number of one-way 3D ffts skipped
  if (xmpi_paral==1 .and. band==nband .and. prtvol>=10) then
    write(msg,'(a,i0)')' dfpt_cgwf: number of one-way 3D ffts skipped in cgwf3 until now =',nskip
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out,msg)
  end if
 
  ABI_DEALLOCATE(gh1c)

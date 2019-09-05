@@ -68,15 +68,15 @@
 #%%   while finite differences gives :
 #%%   with delta(xred)=0.002,  0.34493521   Ha
 #%%  
-#%%  Cannot be executed in parallel
-#%% --- !ERROR
-#%% message: |
-#%% the number of bands in the spin up case must be equal to
-#%% the number of bands in the spin down case.
-#%% This is not the case for the k point number : 1 
-#%% The number of bands spin up and down are : 5 3 Action : change nband, or use the sequential version
-#%% of ABINIT.
-#%% src_file: chkinp.F90
-#%% src_line: 1181
-#%% ...
+#%%   Cannot be executed in parallel
+#%%   --- !ERROR
+#%%   message: |
+#%%   the number of bands in the spin up case must be equal to
+#%%   the number of bands in the spin down case.
+#%%   This is not the case for the k point number : 1 
+#%%   The number of bands spin up and down are : 5 3 Action : change nband, or use the sequential version
+#%%   of ABINIT.
+#%%   src_file: chkinp.F90
+#%%   src_line: 1181
+#%%   ...
 #%%<END TEST_INFO>

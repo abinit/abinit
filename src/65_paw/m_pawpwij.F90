@@ -26,12 +26,12 @@
 MODULE m_pawpwij
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_fft
 
+ use defs_datatypes,   only : pseudopotential_type
+ use defs_abitypes,    only : MPI_type
  use m_numeric_tools,  only : arth
  use m_geometry,       only : metric
  use m_paw_numeric,    only : paw_jbessel_4spline, paw_spline
@@ -415,8 +415,7 @@ subroutine pawpwij_init(Pwij,npw,qpt_in,gvec,rprimd,Psps,Pawtab,Paw_pwff)
    nq_spl = Paw_pwff(itypat)%nq_spl
    gmet   = Paw_pwff(itypat)%gmet
 
-   ABI_STAT_MALLOC(Pwij(itypat)%mqpgij,(2,npw,lmn2_size), ierr)
-   ABI_CHECK(ierr==0, 'Out of memory in %mqpgij')
+   ABI_MALLOC_OR_DIE(Pwij(itypat)%mqpgij,(2,npw,lmn2_size), ierr)
 
    ! Evaluate oscillator matrix elements mqpgij
    call paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,Paw_pwff(itypat)%qgrid_spl,Paw_pwff(itypat)%pwff_spl,&

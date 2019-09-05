@@ -34,9 +34,12 @@ module m_pred_fire
  use m_abihist
  use m_xfpack
  use m_geometry,    only : mkrdim, fcart2fred, metric, xred2xcart
+ use m_errors, only: unused_var
 
  implicit none
+
  private
+
  public :: pred_fire
 
 contains
@@ -95,11 +98,10 @@ contains
 !! SOURCE
 subroutine pred_fire(ab_mover, ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 
-
 !Arguments ------------------------------------
 !scalars
  type(abimover),intent(in) :: ab_mover
- type(ab_xfh_type),intent(inout)    :: ab_xfh
+ type(ab_xfh_type),intent(inout) :: ab_xfh
  type(abiforstr),intent(in) :: forstr
  type(abihist),intent(inout) :: hist
  integer, intent(in) :: ionmov
@@ -112,9 +114,9 @@ subroutine pred_fire(ab_mover, ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 !scalars
 integer  :: ihist,ihist_prev,ndim
 integer, parameter :: min_downhill=4
-integer  :: ierr,ii,jj,kk
+integer  :: ii,jj,kk
 real(dp),save :: ucvol0
-real(dp) :: ucvol,det
+real(dp) :: ucvol
 real(dp) :: etotal,etotal_prev
 real(dp) :: favg
 ! time step, damping factor initially dtion
@@ -139,11 +141,9 @@ real(dp) :: gprimd(3,3)
 real(dp) :: gmet(3,3)
 real(dp) :: rmet(3,3)
 real(dp) :: fcart(3, ab_mover%natom)
-real(dp) :: acell(3),strten(6), acell_prev(3), acell0(3)
-real(dp) :: rprim(3,3),rprimd(3,3), rprim_prev(3,3), rprimd_prev(3,3), rprimd0(3,3)
+real(dp) :: acell(3),strten(6), acell0(3)
+real(dp) :: rprim(3,3),rprimd(3,3), rprimd0(3,3)
 real(dp) :: xred(3,ab_mover%natom),xcart(3,ab_mover%natom)
-real(dp) :: xred_prev(3,ab_mover%natom),xcart_prev(3,ab_mover%natom)
-real(dp) :: vel_prev(3,ab_mover%natom)
 ! velocity are saved
 real(dp) :: vel(3,ab_mover%natom)
 real(dp) :: residual(3,ab_mover%natom),residual_corrected(3,ab_mover%natom)
@@ -152,7 +152,7 @@ real(dp), allocatable, save:: vin_prev(:)
 ! velocity but correspoing to vin&vout, for ion&cell relaxation
 real(dp),allocatable,save :: vel_ioncell(:)
 
-
+ ABI_UNUSED((/ionmov, ab_xfh%mxfh/))
 
 !***************************************************************************
 !Beginning of executable session

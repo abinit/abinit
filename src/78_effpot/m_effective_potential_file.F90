@@ -240,11 +240,10 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 
   use m_effective_potential
   use m_multibinit_dataset
-  use m_ddb, only : ddb_from_file,ddb_free
+  use m_ddb, only : ddb_from_file
   use m_strain
   use m_crystal, only : crystal_t
   use m_dynmat, only : bigbx9
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -422,7 +421,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 
 ! Deallocation of array
   call crystal%free()
-  call ddb_free(ddb)
+  call ddb%free()
 
 end subroutine effective_potential_file_read
 !!***
@@ -455,8 +454,6 @@ end subroutine effective_potential_file_read
 !! SOURCE
 
 subroutine effective_potential_file_getType(filename,filetype)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -584,7 +581,6 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
 
  use m_ddb
  use m_ddb_hdr
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -701,8 +697,6 @@ end subroutine effective_potential_file_getDimSystem
 !! SOURCE
 
 subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_max)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -843,8 +837,6 @@ end subroutine effective_potential_file_getDimCoeff
 
 subroutine effective_potential_file_getDimStrainCoupling(filename,nrpt,voigt)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: filename
@@ -944,8 +936,6 @@ end subroutine effective_potential_file_getDimStrainCoupling
 !! SOURCE
 
 subroutine effective_potential_file_getDimMD(filename,natom,nstep)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1102,8 +1092,6 @@ end subroutine effective_potential_file_getDimMD
 !! SOURCE
 
 subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -1290,7 +1278,6 @@ end subroutine system_getDimFromXML
  use m_effective_potential, only : effective_potential_type
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_ab7_symmetry
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -2195,7 +2182,7 @@ end subroutine system_getDimFromXML
  ABI_DEALLOCATE(elastic_displacement)
 
 !DEALLOCATION OF TYPES
- call ifc_free(ifcs)
+ call ifcs%free()
  call crystal%free()
 
 end subroutine system_xml2effpot
@@ -2240,7 +2227,6 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  use m_crystal,         only : crystal_t,crystal_print
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_effective_potential, only : effective_potential_type, effective_potential_free
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2344,7 +2330,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 &     ' Extraction of the energy of the structure (unit: Hartree)',ch10
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
-  if (ddb_get_etotal(ddb,effective_potential%energy) == 0) then
+  if (ddb%get_etotal(effective_potential%energy) == 0) then
     if(abs(inp%energy_reference) < tol16)then
       write(message,'(5a)')&
 &      ' Warning : Energy of the reference structure is not specify in',&
@@ -2378,7 +2364,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   rftyp   = 1 ! Blocks obtained by a non-stationary formulation.
   chneut  = 1 ! The ASR for effective charges is imposed
   selectz = 0 ! No selection of some parts of the effective charge tensor
-  iblok = ddb_get_dielt_zeff(ddb,crystal,rftyp,chneut,selectz,dielt,zeff)
+  iblok = ddb%get_dielt_zeff(crystal,rftyp,chneut,selectz,dielt,zeff)
   if (iblok /=0 .and. maxval(abs(dielt)) < 10000) then
     effective_potential%harmonics_terms%epsilon_inf = dielt
     effective_potential%harmonics_terms%zeff = zeff
@@ -2408,7 +2394,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   rfstrs(1:2)=0
   rftyp=4
 
-  call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+  call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
   if (iblok /=0) then
    if(any(abs(inp%strten_reference)>tol16))then
@@ -2502,7 +2488,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   rfstrs(1:2)=3 ! Need uniaxial  both stresses and  shear stresses
   rftyp=1 ! Blocks obtained by a non-stationary formulation.
 ! for both diagonal and shear parts
-  call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+  call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
   if (iblok /=0) then
 !   extraction of the elastic constants from the blkvals (GPa)
@@ -2573,7 +2559,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   rfstrs(:)=0
   rftyp=inp%rfmeth
 
-  call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+  call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
   d2asr = zero
   if (iblok /=0) then
@@ -2583,7 +2569,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   ! Acoustic Sum Rule
   ! In case the interatomic forces are not calculated, the
   ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
-  asrq0 = ddb_get_asrq0(ddb, inp%asr, inp%rfmeth, crystal%xcart)
+  asrq0 = ddb%get_asrq0(inp%asr, inp%rfmeth, crystal%xcart)
 
 !**********************************************************************
 ! Interatomic Forces Calculation
@@ -2623,7 +2609,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
 ! Store the highest frequency
   max_phfq = zero
-  
+
   do iphl1=1,inp%nph1l
 
    ! Initialisation of the phonon wavevector
@@ -2634,7 +2620,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
     ! long-range coulomb interaction through Ewald summation
     call gtdyn9(ddb%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip,ifc%dyewq0,d2cart,crystal%gmet,&
 &     ddb%gprim,mpert,natom,ifc%nrpt,qphnrm(1),qphon(:,1),crystal%rmet,ddb%rprim,ifc%rpt,&
-&     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff)
+&     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff,xmpi_comm_self)
 
     ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
     call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,crystal%indsym,&
@@ -2768,8 +2754,8 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 ! !!Warning eff_pot%ifcs only contains atmfrc,short_atmfrc,ewald_atmfrc,,nrpt and cell!!
 ! rcan,ifc%rpt,wghatm and other quantities
 ! are not needed for effective potential!!!
-  call ifc_free(ifc)
-  call ifc_free(effective_potential%harmonics_terms%ifcs)
+  call ifc%free()
+  call effective_potential%harmonics_terms%ifcs%free()
 
 ! Only conserve the necessary points in rpt
   nrpt_new2 = 0
@@ -2846,7 +2832,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   rfelfd(1:2)=0
   rfstrs(1:2)=3
   rftyp=1
-  call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+  call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
   ABI_ALLOCATE(effective_potential%harmonics_terms%strain_coupling,(6,3,natom))
   effective_potential%harmonics_terms%strain_coupling = zero
@@ -2879,7 +2865,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   ABI_DEALLOCATE(zeff)
   ABI_DEALLOCATE(instrain)
   ABI_DEALLOCATE(d2asr)
-  call asrq0_free(asrq0)
+  call asrq0%free()
 
   write(message,'(a)')ch10
   call wrtout(std_out,message,'COLL')
@@ -2920,7 +2906,6 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 #if defined HAVE_XML
  use iso_c_binding, only : C_CHAR,C_PTR,c_f_pointer
 #endif
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -3344,8 +3329,6 @@ end subroutine coeffs_xml2effpot
 
 subroutine effective_potential_file_readMDfile(filename,hist,option)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,optional :: option
@@ -3459,8 +3442,6 @@ end subroutine effective_potential_file_readMDfile
 
 subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
@@ -3476,8 +3457,10 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 !arrays
  real(dp) :: rprimd_hist(3,3),rprimd_ref(3,3)
  integer :: ncell(3),scale_cell(3)
- integer,allocatable  :: blkval(:),list(:)
- real(dp),allocatable :: xred_hist(:,:),xred_ref(:,:),xcart_ref(:,:),xcart_hist(:,:)
+ integer,allocatable  :: shift(:,:)
+ integer,allocatable  :: list_map(:) !blkval(:),
+ real(dp),allocatable :: xred_ref(:,:) ! xred_hist(:,:),
+ real(dp),allocatable :: list_dist(:),list_reddist(:,:),list_absdist(:,:)
  character(len=500) :: msg
  type(abihist) :: hist_tmp
 ! *************************************************************************
@@ -3546,94 +3529,101 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  call effective_potential_setSupercell(eff_pot,comm,ncell)
 
 !allocation
- ABI_ALLOCATE(blkval,(natom_hist))
- ABI_ALLOCATE(list,(natom_hist))
- ABI_ALLOCATE(xred_hist,(3,natom_hist))
+ ABI_ALLOCATE(shift,(3,natom_hist))
+ ABI_ALLOCATE(list_map,(natom_hist))
+ ABI_ALLOCATE(list_reddist,(3,natom_hist))
+ ABI_ALLOCATE(list_absdist,(3,natom_hist))
+ ABI_ALLOCATE(list_dist,(natom_hist))
  ABI_ALLOCATE(xred_ref,(3,natom_hist))
- ABI_ALLOCATE(xcart_hist,(3,natom_hist))
- ABI_ALLOCATE(xcart_ref,(3,natom_hist))
- blkval = 1
- list   = 0
 
- !Fill xcart_ref/hist and xred_ref/hist 
- 
+ !Putting maping list to zero
+ list_map = 0
+
+ !Fill xcart_ref/hist and xred_ref/hist
+
  call xcart2xred(eff_pot%supercell%natom,eff_pot%supercell%rprimd,&
-&                eff_pot%supercell%xcart,xred_ref)                   ! Get xred_ref 
+&                eff_pot%supercell%xcart,xred_ref)                   ! Get xred_ref
 
- xcart_ref = eff_pot%supercell%xcart                                 ! Get xcart_ref 
- xred_hist = hist%xred(:,:,1)                                        ! Get xred_hist 
- 
- do ib=1,natom_hist
-   if((rprimd_hist(1,1)+rprimd_hist(2,1)+rprimd_hist(3,1)) &  !Shift positions to negative coordinates 
-&     *(1 - xred_hist(1,ib)) < 1)then                         !if close to unit cell boundary
-      xred_hist(1,ib)=xred_hist(1,ib)-1  
-      hist%xred(1,ib,1)=xred_hist(1,ib)
-   end if
-   if((rprimd_hist(1,2)+rprimd_hist(2,2)+rprimd_hist(3,2)) & 
-&     *(1 - xred_hist(2,ib)) < 1 )then 
-      xred_hist(2,ib)=xred_hist(2,ib)-1
-      hist%xred(2,ib,1)=xred_hist(2,ib)
-   end if 
-   if((rprimd_hist(1,3)+rprimd_hist(2,3)+rprimd_hist(3,3)) &
-&     *(1 - xred_hist(3,ib)) < 1 )then 
-      xred_hist(3,ib)=xred_hist(3,ib)-1
-      hist%xred(3,ib,1)=xred_hist(3,ib)
-   end if
- enddo  
 
- call xred2xcart(natom_hist,rprimd_hist,xcart_hist,hist%xred(:,:,1)) ! Get xcart_hist 
+do ia=1,natom_hist !Loop over all reference atoms
+   ! Put temporary lists to zero
+   list_reddist = 0
+   list_absdist = 0
+   list_dist = 0
+   shift = 0
+   do ib=1,natom_hist !Loop over all atoms of distorted structure
+      !Calculate list of reduced distance between reference atom ia and all others
+      list_reddist(:,ib) = hist%xred(:,ib,1) - xred_ref(:,ia)
+      !If the distorted atom is further away than half the unit cell shift it.
+      if(list_reddist(1,ib) > 0.5)then
+         list_reddist(1,ib) = 1 -  list_reddist(1,ib)
+         shift(1,ib) = -1
+      end if
+      if(list_reddist(2,ib) > 0.5)then
+         list_reddist(2,ib) = 1 -  list_reddist(2,ib)
+         shift(2,ib) = -1
+      end if
+      if(list_reddist(3,ib) > 0.5)then
+         list_reddist(3,ib) = 1 -  list_reddist(3,ib)
+         shift(3,ib) = -1
+      end if
+      if(list_reddist(1,ib) < -0.5)then
+         list_reddist(1,ib) = -1 -  list_reddist(1,ib)
+         shift(1,ib) = 1
+      end if
+      if(list_reddist(2,ib) < -0.5)then
+         list_reddist(2,ib) = -1 -  list_reddist(2,ib)
+         shift(2,ib) = 1
+      end if
+      if(list_reddist(3,ib) < -0.5)then
+         list_reddist(3,ib) = -1 -  list_reddist(3,ib)
+         shift(3,ib) = 1
+      end if
+      list_absdist(1,ib) = (rprimd_hist(1,1)+rprimd_hist(2,1)+rprimd_hist(3,1))*list_reddist(1,ib)
+      list_absdist(2,ib) = (rprimd_hist(1,2)+rprimd_hist(2,2)+rprimd_hist(3,2))*list_reddist(2,ib)
+      list_absdist(3,ib) = (rprimd_hist(1,3)+rprimd_hist(2,3)+rprimd_hist(3,3))*list_reddist(3,ib)
+      list_dist(ib) = sqrt(abs(list_absdist(1,ib))**2 + abs(list_absdist(2,ib))**2 + abs(list_absdist(3,ib))**2 )
+   end do !ib
+   !find the closest atom ib
+   list_map(ia) = minloc(list_dist,DIM=1)
+   !If the closest atom ib was shifted, apply and store the shift
+   if(any(shift(:,list_map(ia)) /= 0))then
+      hist%xred(1,list_map(ia),:)= hist%xred(1,list_map(ia),:) + 1*shift(1,list_map(ia))
+      hist%xred(2,list_map(ia),:)= hist%xred(2,list_map(ia),:) + 1*shift(2,list_map(ia))
+      hist%xred(3,list_map(ia),:)= hist%xred(3,list_map(ia),:) + 1*shift(3,list_map(ia))
+   end if
+   !TEST MS
+   !write(*,*) 'Atom', ia,' of reference is matche with', list_map(ia)
+   !write(*,*) 'xred_ref(',xred_ref(:,ia),'), xred_hist(',hist%(:,list_map(ia)),')'
+end do  ! ia
 
  if(need_verbose) then
-   write(msg,'(2a,I2,a,I2,a,I2)') ch10,&
+   write(msg,'(2a,I3,a,I3,a,I3)') ch10,&
 &       ' The size of the supercell for the fit is ',ncell(1),' ',ncell(2),' ',ncell(3)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  end if
 
-!try to map
- do ia=1,natom_hist
-   do ib=1,natom_hist
-     if(blkval(ib)==1)then
-       if(sqrt(abs((xcart_ref(1,ia)-xcart_hist(1,ib)))**2 &          ! Map atoms to each other that are 
-&         +  abs((xcart_ref(2,ia)-xcart_hist(2,ib)))**2   &          ! closer than 1.5 bohr
-&         +  abs((xcart_ref(3,ia)-xcart_hist(3,ib)))**2) < 1.5)then 
-         blkval(ib) = 0
-         list(ib) = ia
-       end if
-     end if
-   end do
- end do
 
-!Check before transfert
- if(.not.all(blkval==0))then
-   write(msg, '(5a)' )&
-&         'Unable to map the molecular dynamic file ',ch10,&
-&         'on the reference supercell structure',ch10,&
-&         'Action: change the MD file'
-     MSG_ERROR(msg)
- end if
-
- do ia=1,natom_hist
-   if(.not.any(list(:)==ia))then
-     write(msg, '(5a)' )&
+   if(any(list_map(:)==0))then
+       write(msg, '(5a)' )&
 &         'Unable to map the molecular dynamic file  ',ch10,&
 &         'on the reference supercell structure',ch10,&
 &         'Action: change the MD file'
-     MSG_ERROR(msg)
+       MSG_ERROR(msg)
    end if
- end do
 
  need_map = .FALSE.
  do ia=1,natom_hist
-   if(list(ia) /= ia) need_map = .TRUE.
+   if(list_map(ia) /= ia) need_map = .TRUE.
  end do
  if(need_map)then
    if(need_verbose) then
      write(msg, '(11a)' )ch10,&
 &      ' --- !WARNING',ch10,&
-&      '     The ordering of the atoms in the hist file is different,',ch10,&
-&      '     of the one built by multibinit. The hist file will be map,',ch10,&
-&      '     on the ordering of multibinit.',ch10,&
+&      '     The ordering of the atoms in the _HIST.nc file is different,',ch10,&
+&      '     of the one built by multibinit. The _HIST.nc file will be mapped,',ch10,&
+&      '     to the ordering of multibinit.',ch10,&
 &      ' ---',ch10
      call wrtout(ab_out,msg,'COLL')
      call wrtout(std_out,msg,'COLL')
@@ -3651,9 +3641,9 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 
 ! reoder array
    do ia=1,natom_hist
-     hist_tmp%xred(:,list(ia),:)=hist%xred(:,ia,:)
-     hist_tmp%fcart(:,list(ia),:)=hist%fcart(:,ia,:)
-     hist_tmp%vel(:,list(ia),:)=hist%vel(:,ia,:)
+     hist_tmp%xred(:,ia,:)  = hist%xred(: ,list_map(ia),:)
+     hist_tmp%fcart(:,ia,:) = hist%fcart(:,list_map(ia),:)
+     hist_tmp%vel(:,ia,:)   = hist%vel(:,list_map(ia),:)
    end do
 
 ! free the old hist and reinit
@@ -3667,15 +3657,15 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
    end do
    hist_tmp%mxhist = nstep_hist
    call abihist_free(hist_tmp)
- end if
+ end if !need map
 
 !deallocation
- ABI_DEALLOCATE(blkval)
- ABI_DEALLOCATE(list)
- ABI_DEALLOCATE(xred_hist)
+ ABI_DEALLOCATE(shift)
+ ABI_DEALLOCATE(list_map)
+ ABI_DEALLOCATE(list_dist)
+ ABI_DEALLOCATE(list_reddist)
+ ABI_DEALLOCATE(list_absdist)
  ABI_DEALLOCATE(xred_ref)
- ABI_DEALLOCATE(xcart_ref)
- ABI_DEALLOCATE(xcart_hist)
 end subroutine effective_potential_file_mapHistToRef
 !!***
 
@@ -3703,8 +3693,6 @@ end subroutine effective_potential_file_mapHistToRef
 !! SOURCE
 
 subroutine effective_potential_file_readDisplacement(filename,disp,nstep,natom)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3768,8 +3756,6 @@ end subroutine effective_potential_file_readDisplacement
 
 subroutine elementfromline(line,nelement)
 
- implicit none
-
 !Arguments ---------------------------------------------
  character(len=*), intent(in) :: line
  integer, intent(out) :: nelement
@@ -3821,8 +3807,6 @@ subroutine elementfromline(line,nelement)
 
  subroutine rdfromline(keyword,line,output)
 
- implicit none
-
 !Arguments ---------------------------------------------
   character(len=*), intent(in) :: keyword,line
   character(len=*), intent(out) :: output
@@ -3872,8 +3856,6 @@ subroutine elementfromline(line,nelement)
 
 recursive subroutine rmtabfromline(line)
 
- implicit none
-
 !Arguments ---------------------------------------------
   character(len=*), intent(inout) :: line
 !Local variables ---------------------------------------
@@ -3915,8 +3897,6 @@ recursive subroutine rmtabfromline(line)
 !! SOURCE
 
  subroutine rdfromline_value(keyword,line,output)
-
- implicit none
 
 !Arguments ---------------------------------------------
   character(len=*), intent(in) :: keyword,line

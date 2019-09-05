@@ -24,9 +24,11 @@
 module m_m1geo
 
  use defs_basis
- use defs_abitypes
+ use m_profiling_abi
  use m_abimover
  use m_abihist
+ use m_dtset
+ use m_dtfil
 
  implicit none
 
@@ -69,7 +71,7 @@ type, public :: m1geo_type
   logical  :: skipcycle      ! .TRUE. when the remaining of the cycle has to be skipped. .FALSE. otherwise.
 ! Arrays
   real(dp) :: rprimd_orig(3,3)   ! rprimd from dtset
-  real(dp),allocatable :: mixesimgf(:)   ! mixesimgf from dtset 
+  real(dp),allocatable :: mixesimgf(:)   ! mixesimgf from dtset
 ! Character string
   character(len=fnlen) :: filnam_ds4
 ! Datatypes
@@ -100,8 +102,6 @@ contains  !=============================================================
 
  subroutine m1geo_init(dtfil,dtset,m1geo_param)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(datafiles_type),target,intent(in) :: dtfil
@@ -110,7 +110,7 @@ contains  !=============================================================
 
 !Local variables
 !integer
- integer :: iatom,ionmov,natom,ncycle,nhisttot,nimage,ntimimage,ntypat
+ integer :: ionmov,natom,ncycle,nhisttot,nimage,ntimimage,ntypat
  real(dp), allocatable :: amu_curr(:)
 
 !************************************************************************
@@ -217,25 +217,14 @@ contains  !=============================================================
 
  subroutine m1geo_destroy(m1geo_param)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(m1geo_type),intent(inout) :: m1geo_param
 
-!Local variables
-!integer
- integer :: iatom,ionmov,natom,nimage,ntimimage,ntypat
-
 !************************************************************************
 
- if(allocated(m1geo_param%mixesimgf))then
-   ABI_FREE(m1geo_param%mixesimgf)
- endif
-
- if (allocated(m1geo_param%ab_xfh_1geo%xfhist))then
-   ABI_FREE(m1geo_param%ab_xfh_1geo%xfhist)
- endif
+ ABI_SFREE(m1geo_param%mixesimgf)
+ ABI_SFREE(m1geo_param%ab_xfh_1geo%xfhist)
 
  call abimover_destroy(m1geo_param%ab_mover)
  call delocint_fin(m1geo_param%deloc)

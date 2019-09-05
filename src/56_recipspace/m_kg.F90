@@ -26,13 +26,14 @@
 
 MODULE m_kg
 
- use defs_abitypes, only : dataset_type, MPI_type
  use defs_basis
  use m_errors
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use m_fftcore,     only : kpgsph, bound
  use m_mpinfo,      only : proc_distrb_cycle
 
@@ -126,8 +127,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 ! *************************************************************************
 
 !This is to treat the case where ecut has not been initialized,
-!for wavelet computations. The default for ecut is -1.0 , allowed
-!only for wavelets calculations
+!for wavelet computations. The default for ecut is -1.0 , allowed only for wavelets calculations
  ecut_pw=ecut
  if(ecut<-tol8)ecut_pw=ten
 
@@ -673,28 +673,23 @@ subroutine ph1d3d(iatom,jatom,kg_k,matblk,natom,npw_k,n1,n2,n3,phkxred,ph1d,ph3d
 
  ABI_ALLOCATE(ph1kxred,(2,-n1:n1))
 
-!ia runs from iatom to jatom
+ ! ia runs from iatom to jatom
  do ia=iatom,jatom
 
-!  iatblk runs from 1 to matblk
+   ! iatblk runs from 1 to matblk
    iatblk=ia-iatom+1
-!write(87,*) iatblk
    shift1=1+n1+(ia-1)*(2*n1+1)
    shift2=1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1)
    shift3=1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1)
-!  Compute product of phkxred by phase for the first component of G vector
+   ! Compute product of phkxred by phase for the first component of G vector
    phkxr=phkxred(1,ia)
    phkxi=phkxred(2,ia)
-!  DEBUG (needed to compare with version prior to 2.0)
-!  phkxr=1.0d0
-!  phkxi=0.0d0
-!  ENDDEBUG
    do i1=-n1,n1
      ph1kxred(1,i1)=ph1d(1,i1+shift1)*phkxr-ph1d(2,i1+shift1)*phkxi
      ph1kxred(2,i1)=ph1d(2,i1+shift1)*phkxr+ph1d(1,i1+shift1)*phkxi
    end do
 
-!  Compute tri-dimensional phase factor
+   ! Compute tri-dimensional phase factor
 !$OMP PARALLEL DO PRIVATE(ig,ph1r,ph1i,ph2r,ph2i,ph3r,ph3i,ph12r,ph12i)
    do ig=1,npw_k
      ph1r=ph1kxred(1,kg_k(1,ig))
@@ -705,15 +700,12 @@ subroutine ph1d3d(iatom,jatom,kg_k,matblk,natom,npw_k,n1,n2,n3,phkxred,ph1d,ph3d
      ph3i=ph1d(2,kg_k(3,ig)+shift3)
      ph12r=ph1r*ph2r-ph1i*ph2i
      ph12i=ph1r*ph2i+ph1i*ph2r
-!if(ig==487) then
-!write(87,*)iatblk,ph3d(1,ig,iatblk),ph12r,ph3r,ph12i,ph3i
-!endif
      ph3d(1,ig,iatblk)=ph12r*ph3r-ph12i*ph3i
      ph3d(2,ig,iatblk)=ph12r*ph3i+ph12i*ph3r
    end do
 !$OMP END PARALLEL DO
  end do
-!write(87,*)ph3d(1,487,8)
+
  ABI_DEALLOCATE(ph1kxred)
 
 end subroutine ph1d3d
@@ -1014,7 +1006,6 @@ subroutine mkkpg(kg,kpg,kpt,nkpg,npw)
 end subroutine mkkpg
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/mkpwind_k
 !! NAME
 !! mkpwind_k
@@ -1150,7 +1141,7 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
 
      ! original code from initberry
      ! iadum(:) = kg(:,kgindex(ikpti) + ipw)
-     
+
      iadum(:) = kg_k(:,ipw)
 
      !          to determine r.l.v. matchings, we transformed the bra vector

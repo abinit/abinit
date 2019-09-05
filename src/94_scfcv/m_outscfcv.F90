@@ -26,9 +26,7 @@
 module m_outscfcv
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
- use defs_abitypes
  use m_abicore
  use m_sort
  use m_efield
@@ -43,7 +41,11 @@ module m_outscfcv
  use m_plowannier
  use m_splines
  use m_ebands
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes,     only : pseudopotential_type, ebands_t
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_io_tools,         only : open_file
  use m_fstrings,         only : strcat, endswith
@@ -70,7 +72,7 @@ module m_outscfcv
  use m_paw_tools,        only : pawprt
  use m_numeric_tools,    only : simpson_int
  use m_epjdos,           only : dos_calcnwrite, partial_dos_fractions, partial_dos_fractions_paw, &
-                                epjdos_t, epjdos_new, epjdos_free, prtfatbands, fatbands_ncwrite
+                                epjdos_t, epjdos_new, prtfatbands, fatbands_ncwrite
  use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
  use m_io_kss,           only : outkss
  use m_multipoles,       only : multipoles_out, out1dm
@@ -82,6 +84,9 @@ module m_outscfcv
  use m_mkrho,            only : read_atomden
  use m_positron,         only : poslifetime, posdoppler
  use m_optics_vloc,      only : optics_vloc
+ use m_green,            only : green_type,compute_green,&
+                                fourier_green,print_green,init_green,destroy_green,init_green_tau
+ use m_self,             only : self_type,initialize_self,rw_self,destroy_self,destroy_self,selfreal2imag_self
 
  implicit none
 
@@ -196,7 +201,7 @@ contains
 !!      compute_coeff_plowannier,crystal_free,crystal_init,datafordmft,denfgr
 !!      destroy_dmft,destroy_oper,destroy_plowannier,dos_calcnwrite,ebands_free
 !!      ebands_init,ebands_interpolate_kpath,ebands_prtbltztrp,ebands_write
-!!      epjdos_free,fatbands_ncwrite,fftdatar_write,free_my_atmtab
+!!      fatbands_ncwrite,fftdatar_write,free_my_atmtab
 !!      get_my_atmtab,init_dmft,init_oper,init_plowannier,ioarr,mag_constr_e
 !!      mlwfovlp,mlwfovlp_qp,multipoles_out,optics_paw,optics_paw_core
 !!      optics_vloc,out1dm,outkss,outwant,partial_dos_fractions
@@ -267,6 +272,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer :: pawprtden
  integer :: iband,nocc,spacecomm,comm_fft,tmp_unt,nfft_tot
  integer :: my_comm_atom
+ integer :: opt_imagonly
 #ifdef HAVE_NETCDF
  integer :: ncid
 #endif
@@ -300,6 +306,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(ebands_t) :: ebands
  type(epjdos_t) :: dos
  type(plowannier_type) :: wan
+ type(self_type) :: selfr
+ type(self_type) :: self
+ type(green_type) :: greenr
 
 ! *************************************************************************
 
@@ -368,6 +377,11 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    ABI_ALLOCATE(my_atmtab, (natom))
    my_atmtab = (/ (iatom, iatom=1, natom) /)
    my_atmtab_allocated = .true.
+ end if
+
+ ! YAML output
+ if (me == master) then
+  call results_gs%yaml_write(ab_out, dtset, crystal, comment="Summary of ground state results")
  end if
 
 !wannier interface
@@ -582,7 +596,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  ! Output of the GSR file (except when we are inside mover)
 #ifdef HAVE_NETCDF
- if (me == master .and. dtset%prtgsr==1 .and. dtset%usewvl == 0) then
+ if (me == master .and. dtset%prtgsr == 1 .and. dtset%usewvl == 0) then
    !.and. (dtset%ionmov /= 0 .or. dtset%optcell /= 0)) then
    fname = strcat(dtfil%filnam_ds(4), "_GSR.nc")
 
@@ -773,12 +787,12 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    if (dtset%prtgeo>0) then
      coordn=dtset%prtgeo
      call bonds_lgth_angles(coordn,dtfil%fnameabo_app_geo,natom,psps%ntypat,&
-&     rprimd,dtset%typat,xred,dtset%znucl)
+      rprimd,dtset%typat,xred,dtset%znucl)
    end if
 
    if (dtset%prtcif > 0) then
      call prt_cif(dtset%brvltt, dtfil%fnameabo_app_cif, natom, dtset%nsym, dtset%ntypat, rprimd, &
-&     dtset%spgaxor, dtset%spgroup, dtset%spgorig, dtset%symrel, dtset%tnons, dtset%typat, xred, dtset%znucl)
+      dtset%spgaxor, dtset%spgroup, dtset%spgorig, dtset%symrel, dtset%tnons, dtset%typat, xred, dtset%znucl)
    end if
 
    call timab(957,2,tsec)
@@ -919,7 +933,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    end if
 #endif
 
-   call epjdos_free(dos)
+   call dos%free()
  end if ! prtdos > 1
 
  call timab(959,2,tsec)
@@ -1067,17 +1081,66 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      write(message,'(2a,i3)') ch10,&
 &     '  Warning: Psichi are renormalized in datafordmft because nbandkss is used',dtset%nbandkss
      call wrtout(std_out,message,'COLL')
-     call init_dmft(dmatpawu,dtset,e_fermie,dtfil%fnameabo_app,dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
+     call init_dmft(dmatpawu,dtset,e_fermie,dtfil%fnameabo_app,&
+&     dtfil%filnam_ds(3),dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
      call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !    ==  compute psichi
      call init_oper(paw_dmft,lda_occup)
 
-     call datafordmft(crystal,cprj,dimcprj,dtset,eigen,e_fermie,&
-&     lda_occup,dtset%mband,dtset%mband,dtset%mkmem,mpi_enreg,&
+     call datafordmft(crystal,cprj,dimcprj,dtset,eigen,e_fermie &
+&     ,lda_occup,dtset%mband,dtset%mband,dtset%mkmem,mpi_enreg,&
 &     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
 &     paw_dmft,paw_ij,pawang,pawtab,psps,usecprj,dtfil%unpaw,dtset%nbandkss)
 
+     opt_imagonly=0
+     if(paw_dmft%dmft_solv>=5) opt_imagonly=1
+
+
+     ! Compute k-resolved spectral function in DMFT.
+     if(dtset%dmft_kspectralfunc==1) then
+      ! Initialize self on real axis
+       call initialize_self(selfr,paw_dmft,wtype='real')
+
+      ! Initialize self on  imag axis
+       call initialize_self(self,paw_dmft)
+
+      ! Initialize green on real axis
+       call init_green(greenr,paw_dmft,opt_oper_ksloc=3,wtype='real')
+
+      ! Read self energy in imag. Matsubara freq (for double counting
+      ! and limit at high frequency)
+       call rw_self(self,paw_dmft,prtopt=5,opt_rw=1,opt_stop=1)
+
+      ! Read self energy on real axis obtained from Maxent
+       call rw_self(selfr,paw_dmft,prtopt=5,opt_rw=1,opt_imagonly=opt_imagonly, &
+     & opt_selflimit=self%oper(self%nw)%matlu,opt_hdc=self%hdc%matlu,pawang=pawang,cryst_struc=crystal)
+
+      ! Check: from self on real axis, recompute self on Imaginary axis.
+       call selfreal2imag_self(selfr,self,paw_dmft%filapp)
+
+      !  paw_dmft%fermie=hdr%fermie ! for tests
+       write(std_out,*) "    Fermi level is",paw_dmft%fermie
+
+       ! selfr does not have any double couting in self%hdc
+       ! hdc from self%hdc has been put in real part of self in rw_self.
+       ! For the LDA BS: use opt_self=0 and fermie=fermie_lda
+
+      ! Compute green  function on real axis
+       call compute_green(crystal,greenr,paw_dmft,pawang,1,selfr,&
+&       opt_self=1,opt_nonxsum=0)
+
+      !write(6,*) "compute green done"
+       if(me==master) then
+         call print_green("from_realaxisself",greenr,5,paw_dmft,&
+&         pawprtvol=3,opt_wt=1)
+        !write(6,*) "print green done"
+       endif
+
+       call destroy_green(greenr)
+       call destroy_self(selfr)
+       call destroy_self(self)
+     endif
      call destroy_dmft(paw_dmft)
      call destroy_oper(lda_occup)
    end if
@@ -1124,7 +1187,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (dtset%prtefg > 0) then
    call timab(967,1,tsec)
    call calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nspden,dtset%nsym,ntypat,&
-&   dtset%paral_kgb,paw_an,pawang,pawrad,pawrhoij,pawtab,&
+&   paw_an,pawang,pawrad,pawrhoij,pawtab,&
 &   dtset%ptcharge,dtset%prtefg,dtset%quadmom,rhor,rprimd,dtset%symrel,&
 &   dtset%tnons,dtset%typat,ucvol,psps%usepaw,xred,psps%zionpsp,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
@@ -1189,7 +1252,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  call crystal%free()
  call ebands_free(ebands)
 
-!Destroy atom table used for parallelism
+ ! Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
  call timab(969,2,tsec)

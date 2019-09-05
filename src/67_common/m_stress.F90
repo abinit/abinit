@@ -27,12 +27,12 @@
 module m_stress
 
  use defs_basis
- use defs_abitypes
  use m_efield
  use m_abicore
  use m_errors
  use m_xmpi
 
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_geometry,         only : metric, stresssym
  use m_fock,             only : fock_type
@@ -173,18 +173,16 @@ contains
 
  subroutine stress(atindx1,berryopt,dtefield,eei,efield,ehart,eii,fock,gsqcut,ixc,kinstr,&
 &                  mgfft,mpi_enreg,mqgrid,n1xccc,n3xccc,natom,nattyp,&
-&                  nfft,ngfft,nlstr,nspden,nsym,ntypat,paral_kgb,psps,pawrad,pawtab,ph1d,&
+&                  nfft,ngfft,nlstr,nspden,nsym,ntypat,psps,pawrad,pawtab,ph1d,&
 &                  prtvol,qgrid,red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
 &                  typat,usefock,usepaw,vdw_tol,vdw_tol_3bt,vdw_xc,&
 &                  vlspl,vxc,vxc_hf,xccc1d,xccc3d,xcccrc,xred,zion,znucl,qvpotzero,&
 &                  electronpositron) ! optional argument
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: berryopt,ixc,mgfft,mqgrid,n1xccc,n3xccc,natom,nfft,nspden
- integer,intent(in) :: nsym,ntypat,paral_kgb,prtvol,usefock,usepaw,vdw_xc
+ integer,intent(in) :: nsym,ntypat,prtvol,usefock,usepaw,vdw_xc
  real(dp),intent(in) :: eei,ehart,eii,gsqcut,vdw_tol,vdw_tol_3bt,qvpotzero
  type(efield_type),intent(in) :: dtefield
  type(pseudopotential_type),intent(in) :: psps
@@ -289,7 +287,7 @@ contains
    ABI_ALLOCATE(gr_dum,(3,natom))
    ABI_ALLOCATE(v_dum,(nfft))
    call mklocl_recipspace(dyfr_dum,eei,gmet,gprimd,gr_dum,gsqcut,lpsstr,mgfft,&
-&   mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,paral_kgb,ph1d,qgrid,&
+&   mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,ph1d,qgrid,&
 &   qprtrb_dum,rhog,ucvol,vlspl,vprtrb_dum,v_dum)
    ABI_DEALLOCATE(dyfr_dum)
    ABI_DEALLOCATE(gr_dum)
@@ -705,8 +703,6 @@ end subroutine stress
 
 subroutine strhar(ehart,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,rprimd,&
 &                 rhog2) ! optional argument
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

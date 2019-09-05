@@ -721,11 +721,11 @@ with_trio_flavor="netcdf"
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf4/4.4.1.1/include -I${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/include"
+with_netcdf_incs="-I${FALLBACKS_HOME}_8.12/${FB}/netcdf4/4.4.1.1/include -I${FALLBACKS_HOME}_8.12/${FB}/netcdf4_fortran/4.4.4/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_PATH}/netcdf4/4.4.1.1/lib -lnetcdf -L/usr/lib/x86_64-linux-gnu/hdf5/serial -lhdf5 -lhdf5_hl"
+with_netcdf_libs="-L${FALLBACKS_HOME}_8.12/${FB}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_HOME}_8.12/${FB}/netcdf4/4.4.1.1/lib -lnetcdf -L/usr/lib/x86_64-linux-gnu/hdf5/serial -lhdf5 -lhdf5_hl"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -885,29 +885,6 @@ with_linalg_libs="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_intel_thread -
 #with_algo_libs="-L/usr/local/lib -llevmar"
 
 # ---------------------------------------------------------------------------- #
-# Mathematical library connector                                               #
-# ---------------------------------------------------------------------------- #
-
-# Flavor of the math library to use (default is none)
-#
-# Supported libraries:
-#
-#   * custom (bypass build-system checks)
-#   * gsl
-#   * mlib
-#   * none   (disable external math support)
-#
-#with_math_flavor="gsl"
-
-# Include flags for the math library (default is unset)
-#
-#with_math_incs="-I/usr/local/include/gsl"
-
-# Link flags for the math library (default is unset)
-#
-#with_math_libs="-L/usr/local/lib/gsl -lgsl"
-
-# ---------------------------------------------------------------------------- #
 # DFT library connector                                                        #
 # ---------------------------------------------------------------------------- #
 
@@ -953,11 +930,11 @@ with_dft_flavor="libxc"
 
 # Include flags for the LibXC library (default is unset)
 #
-with_libxc_incs="-I${FALLBACKS_PATH}/libxc/4.2.3/include"
+with_libxc_incs="-I${FALLBACKS_HOME}_8.12/${FB}/libxc/4.2.3/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L${FALLBACKS_PATH}/libxc/4.2.3/lib -lxc"
+with_libxc_libs="-L${FALLBACKS_HOME}_8.12/${FB}/libxc/4.2.3/lib -lxc"
 
                        # ------------------------------ #
 

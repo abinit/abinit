@@ -23,11 +23,11 @@
 MODULE m_paw_occupancies
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
 
+ use defs_abitypes, only : MPI_type
  use m_pawtab,     only : pawtab_type
  use m_pawrhoij,   only : pawrhoij_type,pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked, &
 &                         pawrhoij_alloc,pawrhoij_free,pawrhoij_inquire_dim
@@ -110,8 +110,6 @@ CONTAINS  !=====================================================================
  subroutine pawmkrhoij(atindx,atindx1,cprj,dimcprj,istwfk,kptopt,mband,mband_cprj,mcprj,mkmem,mpi_enreg,&
 &                      natom,nband,nkpt,nspinor,nsppol,occ,paral_kgb,paw_dmft,pawrhoij,unpaw,usewvl,wtk)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: kptopt,mband,mband_cprj,mcprj,mkmem,natom,nkpt,nspinor,nsppol
@@ -139,7 +137,7 @@ CONTAINS  !=====================================================================
  character(len=500) :: msg
 
 !arrays
- integer :: idum(0), n2buff
+ integer :: n2buff
  integer, allocatable :: req_correl(:,:,:)
  real(dp) :: occup(2)
  real(dp) ABI_ASYNC, allocatable :: buffer_cprj_correl(:,:,:)
@@ -285,7 +283,7 @@ CONTAINS  !=====================================================================
              call pawcprj_pack(dimcprj,cwaveprjb,buffer_cprj_correl(:,:,ibc1))
              do proc_recver=0,mpi_enreg%nproc_band-1
                if (proc_sender /= proc_recver .and. paw_dmft%use_bandc(proc_recver+1)) then
-!                locc_test = At least one of the bands used by proc_recver have a non neglectable occnd 
+!                locc_test = At least one of the bands used by proc_recver have a non neglectable occnd
                  locc_test = .false.
                  do ib_loop=1,nbandc1
                    if(proc_recver == paw_dmft%bandc_proc(ib_loop)) then
@@ -306,7 +304,7 @@ CONTAINS  !=====================================================================
                end if
              end do
            else
-!            locc_test = At least one of the bands used by this proc have a non neglectable occnd 
+!            locc_test = At least one of the bands used by this proc have a non neglectable occnd
              locc_test = .false.
              do ib_loop=1,nbandc1
                if(mpi_enreg%me_band == paw_dmft%bandc_proc(ib_loop)) then
@@ -465,7 +463,7 @@ CONTAINS  !=====================================================================
 !deallocate temporary cwaveprj/cprj storage
  call pawcprj_free(cwaveprj)
  ABI_DATATYPE_DEALLOCATE(cwaveprj)
- 
+
  if(paw_dmft%use_sc_dmft/=0) then
    call pawcprj_free(cwaveprjb)
    ABI_DATATYPE_DEALLOCATE(cwaveprjb)
@@ -565,8 +563,6 @@ end subroutine pawmkrhoij
  subroutine pawaccrhoij(atindx,cplex,cwaveprj,cwaveprj1,ipert,isppol,my_natom,natom,&
 &                       nspinor,occ_k,option,pawrhoij,usetimerev,wtk_k,occ_k_2, &
 &                       comm_atom,mpi_atmtab ) ! optional (parallelism)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1165,8 +1161,6 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
 &                    ntypat,pawrhoij,pawspnorb,pawtab,qphase,spinat,typat,&
 &                    ngrhoij,nlmnmix,use_rhoij_,use_rhoijres,& ! optional arguments
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars

@@ -31,9 +31,11 @@
 module m_entropyDMFT
 
   use defs_basis
-  use defs_abitypes
   use m_errors
+  use m_abicore
   use m_xmpi
+  use m_dtset
+
   use m_energies, only : energies_type, energies_eval_eint
   use m_splines, only : spline_integrate, spline, splint
   use m_pawang, only : pawang_type
@@ -667,6 +669,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
     logical :: nextstep
     integer :: itypat
     integer :: mylambda
+    logical :: is_dfpt=.false.
     real(dp),allocatable :: upawu(:),jpawu(:)
     character(len=100) :: message
 
@@ -716,7 +719,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       call wrtout(std_out,message,"COLL")
       call wrtout(ab_out,message,"COLL")
       call pawpuxinit(dt%dmatpuopt,dt%exchmix,dt%f4of2_sla,dt%f6of2_sla,&
-&        jpawu,dt%lexexch,dt%lpawu,dt%ntypat,pawang,dt%pawprtvol,&
+&        is_dfpt,jpawu,dt%lexexch,dt%lpawu,dt%ntypat,pawang,dt%pawprtvol,&
 &        pawrad,pawtab,upawu,dt%usedmft,dt%useexexch,dt%usepawu)
       ABI_DEALLOCATE(upawu)
       ABI_DEALLOCATE(jpawu)

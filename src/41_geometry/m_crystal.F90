@@ -213,8 +213,14 @@ MODULE m_crystal
    procedure :: symbol_type
    ! Return the atomic symbol from the itypat index.
 
+   procedure :: symbol_iatom
+   ! Return the atomic symbol from the iatom index.
+
    procedure :: adata_type
    ! Return atomic data from the itypat index.
+
+   !procedure :: compare => crystal_compare
+   ! Compare two structures, write warning messages if they differ
 
  end type crystal_t
 
@@ -300,7 +306,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
 !scalars
  integer :: iat,indx,itypat,pinv,isym,nsym_noI
  real(dp) :: tolsym8,ucvol
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer :: symrec(3,3)
  real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3)
@@ -367,7 +373,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
 
  if (PRESENT(symrel).and.PRESENT(tnons).and.PRESENT(symafm)) then
    if (.not.remove_inv) then
-     ! * Just a copy
+     ! Just a copy
      Cryst%nsym= nsym
      ABI_MALLOC(Cryst%symrel,(3,3,nsym))
      ABI_MALLOC(Cryst%symrec,(3,3,nsym))
@@ -559,7 +565,7 @@ end subroutine crystal_free
 !!
 !! SOURCE
 
-subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
+subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
 
 !Arguments ------------------------------------
 !scalars
@@ -586,8 +592,8 @@ subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
  call wrtout(my_unt,msg,my_mode)
  do nu=1,3
    write(msg,'(1x,a,i1,a,3f11.7,2x,a,i1,a,3f11.7)')&
-    'R(',nu,')=',Cryst%rprimd(:,nu)+tol10,&
-    'G(',nu,')=',Cryst%gprimd(:,nu)+tol10 !tol10 is used to be consistent with metric.F90
+    'R(',nu,')=',Cryst%rprimd(:,nu)+tol10, &
+    'G(',nu,')=',Cryst%gprimd(:,nu)+tol10  ! tol10 is used to be consistent with metric.F90
    call wrtout(my_unt,msg,my_mode)
  end do
 
@@ -607,9 +613,10 @@ subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
  call wrtout(my_unt,msg,my_mode)
  if (my_prtvol == -1) return
 
- call print_symmetries(Cryst%nsym,Cryst%symrel,Cryst%tnons,Cryst%symafm,unit=my_unt,mode_paral=my_mode)
-
- if (Cryst%use_antiferro) call wrtout(my_unt,' System has magnetic symmetries ',my_mode)
+ if (my_prtvol > 0) then
+   call print_symmetries(Cryst%nsym,Cryst%symrel,Cryst%tnons,Cryst%symafm,unit=my_unt,mode_paral=my_mode)
+   if (Cryst%use_antiferro) call wrtout(my_unt,' System has magnetic symmetries ',my_mode)
+ end if
 
  call wrtout(my_unt,"Reduced atomic positions [iatom, xred, symbol]:",my_mode)
  do iatom=1,cryst%natom
@@ -753,7 +760,7 @@ pure function isymmorphic(Cryst) result(ans)
 
 ! *************************************************************************
 
- ans = ALL (ABS(Cryst%tnons)<tol6)
+ ans = ALL(ABS(Cryst%tnons) < tol6)
 
 end function isymmorphic
 !!***
@@ -800,7 +807,7 @@ end function isalchemical
 !!
 !! SOURCE
 
-function adata_type(crystal,itypat) result(atom)
+function adata_type(crystal, itypat) result(atom)
 
 !Arguments ------------------------------------
 !scalars
@@ -846,6 +853,34 @@ function symbol_type(crystal, itypat) result(symbol)
  symbol = atom%symbol
 
 end function symbol_type
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/symbol_iatom
+!! NAME
+!!  symbol_iatom
+!!
+!! FUNCTION
+!!  Return the atomic symbol from the iatom index
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+function symbol_iatom(crystal, iatom) result(symbol)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iatom
+ character(len=2) :: symbol
+ class(crystal_t),intent(in) :: crystal
+
+! *************************************************************************
+
+ symbol = crystal%symbol_type(crystal%typat(iatom))
+
+end function symbol_iatom
 !!***
 
 !----------------------------------------------------------------------
@@ -1488,6 +1523,30 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
 
 end subroutine prtposcar
 !!***
+
+!!! !!****f* m_crystal/crystal_yaml_write
+!!! !!
+!!! !! NAME
+!!! !! crystal_yaml_write
+!!! !!
+!!! !! FUNCTION
+!!! !! Write rystal info in YAML format
+!!! !!
+!!! !! PARENTS
+!!! !!
+!!! !! CHILDREN
+!!! !!
+!!! !! SOURCE
+!!!
+!!! subroutine neat_crystal(crystal, iout, comment)
+!!!  class(crystal_t),intent(in) :: crystal
+!!!  integer,intent(in) :: iout
+!!!  character(len=*),intent(in),optional :: comment
+!!!
+!!!  write(std_out, *)"Unused neat_crystal", crystal%natom, iout, trim(comment)
+!!!
+!!! end subroutine neat_crystal
+!!! !!***
 
 END MODULE m_crystal
 !!***

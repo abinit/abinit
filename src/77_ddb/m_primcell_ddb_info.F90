@@ -5,7 +5,7 @@
 !! m_primcell_ddb_info
 !!
 !! FUNCTION
-!! Module for container object passing cell information to SC phonon calculation in abinit 
+!! Module for container object passing cell information to SC phonon calculation in abinit
 !! Container type is defined, and destruction
 !!
 !! COPYRIGHT
@@ -98,9 +98,8 @@ contains
 subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,ntypat,ucvol,&
 &    indsym,symrec,symrel,typat,&
 &    acell,amu,dielt,dyewq0,gmet,gprim,rcan,rmet,rprim,rpt,trans,wghatm,xred,zeff)
- 
+
  use defs_basis
- implicit none
 
 !Arguments ------------------------------------
  type(primcell_ddb_info), intent(inout) :: pcell
@@ -188,7 +187,7 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
   pcell%wghatm = wghatm
   pcell%xred = xred
   pcell%zeff = zeff
-  
+
  end subroutine init_primcell_ddb_info
 !!***
 
@@ -221,9 +220,8 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
 !!
 !! SOURCE
 subroutine read_primcell_ddb_info (filename,pcell)
- 
+
  use defs_basis
- implicit none
 
 !Arguments ------------------------------------
  character(len=*), intent(in) :: filename
@@ -233,7 +231,7 @@ subroutine read_primcell_ddb_info (filename,pcell)
  integer :: unit
  character(len=500) :: msg
  character(len=13):: buffer
- 
+
 ! *************************************************************************
 
   if (open_file(filename,msg,newunit=unit) /= 0) then
@@ -316,7 +314,7 @@ subroutine read_primcell_ddb_info (filename,pcell)
   read(unit,'(3E20.10)') pcell%zeff
 
   close(unit)
-  
+
  end subroutine read_primcell_ddb_info
 !!***
 
@@ -351,9 +349,8 @@ subroutine read_primcell_ddb_info (filename,pcell)
 !!
 !! SOURCE
 subroutine write_primcell_ddb_info (filename,pcell)
- 
+
  use defs_basis
- implicit none
 
 !Arguments ------------------------------------
 
@@ -424,7 +421,7 @@ subroutine write_primcell_ddb_info (filename,pcell)
   write(unit,'(3E20.10)') pcell%zeff
 
   close(unit)
-  
+
  end subroutine write_primcell_ddb_info
 !!***
 
@@ -455,9 +452,8 @@ subroutine write_primcell_ddb_info (filename,pcell)
 !!
 !! SOURCE
 subroutine destroy_primcell_ddb_info (pcell)
- 
+
  use defs_basis
- implicit none
 
 !Arguments ------------------------------------
  type(primcell_ddb_info), intent(inout) :: pcell

@@ -27,11 +27,12 @@
 module m_atm2fft
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_distribfft
 
+ use defs_abitypes, only : mpi_type
  use m_time,        only : timab
  use defs_datatypes,only : pseudopotential_type
  use m_pawtab,      only : pawtab_type
@@ -193,8 +194,6 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 &                  optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
 &                  psps,pawtab,ph1d,qgrid,qprtrb,rhog,strn,strv,ucvol,usepaw,vg,vg1,vg1_core,vprtrb,vspl,&
 &                  is2_in,comm_fft,me_g0,paral_kgb,distribfft) ! optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -992,8 +991,6 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 &                   ph1d,qgrid,qphon,typat,ucvol,usepaw,xred,psps,pawtab,&
 &                   atmrhor1,atmrhog1,atmvlocr1,atmvlocg1,distribfft,gauss,comm_fft,me_g0,optn_in,&
 &                   optn2_in,optv_in,paral_kgb,vspl) ! optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

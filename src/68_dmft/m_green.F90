@@ -27,16 +27,24 @@
  MODULE m_green
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_abicore
  use m_errors
  use m_lib_four
+ use m_splines
 
- use m_io_tools, only : flush_unit, open_file
+ !use defs_abitypes, only : MPI_type
+ use m_crystal, only : crystal_t
+ use m_oper,     only : init_oper, destroy_oper, copy_oper, print_oper, inverse_oper, upfold_oper, &
+                        loc_oper, trace_oper, oper_type
+ use m_paw_dmft, only: paw_dmft_type, construct_nwli_dmft
+ use m_matlu,    only : diff_matlu,print_matlu,trace_matlu, matlu_type, &
+                        sym_matlu,zero_matlu,add_matlu,shift_matlu,init_matlu,destroy_matlu,copy_matlu
+ use m_fstrings, only : int2char4
+ use m_pawang,   only : pawang_type
+ use m_self,     only : self_type
+ use m_io_tools, only : open_file
  use m_time,     only : timab
- use m_oper, only : oper_type
- use m_matlu, only : matlu_type
 
  implicit none
 
@@ -206,11 +214,6 @@ CONTAINS
 
 subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
 
- use m_crystal, only : crystal_t
- use m_oper, only : init_oper
- use m_paw_dmft, only: paw_dmft_type
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !type
@@ -232,11 +235,12 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
    green%w_type="imag"
  endif
 
+
  if(green%w_type=="imag") then
    nw=paw_dmft%dmft_nwlo
    green%omega=>paw_dmft%omega_lo
  else if(green%w_type=="real") then
-   nw=2*paw_dmft%dmft_nwr
+   nw=size(paw_dmft%omega_r)
    green%omega=>paw_dmft%omega_r
  endif
 
@@ -331,10 +335,6 @@ end subroutine init_green
 
 subroutine init_green_tau(green,paw_dmft,opt_ksloc)
 
- use m_oper, only : init_oper
- use m_paw_dmft, only: paw_dmft_type
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !type
@@ -392,9 +392,6 @@ end subroutine init_green_tau
 !! SOURCE
 
 subroutine destroy_green(green)
-
- use m_oper, only : destroy_oper
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -462,10 +459,6 @@ end subroutine destroy_green
 
 subroutine destroy_green_tau(green)
 
- use m_crystal, only : crystal_t
- use m_oper, only : destroy_oper
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(green_type),intent(inout) :: green
@@ -519,10 +512,6 @@ end subroutine destroy_green_tau
 !! SOURCE
 
 subroutine copy_green(green1,green2,opt_tw)
-
- use m_crystal, only : crystal_t
- use m_oper, only : copy_oper
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -585,12 +574,6 @@ end subroutine copy_green
 !! SOURCE
 
 subroutine printocc_green(green,option,paw_dmft,pawprtvol,opt_weissgreen,chtype)
-
- use m_crystal, only : crystal_t
- use m_oper, only : print_oper
- use m_matlu, only : diff_matlu,print_matlu,trace_matlu
- use m_paw_dmft, only : paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -680,6 +663,7 @@ end subroutine printocc_green
 !!         2 print KS green function
 !!         3 print both local and KS green function
 !!         4 print spectral function is green%w_type="real"
+!!         5 print k-resolved spectral function is green%w_type="real"
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  pawprtvol = printing option
 !!  opt_wt=1 print green function as a function of frequency
@@ -697,13 +681,6 @@ end subroutine printocc_green
 
 subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
 
- use m_crystal, only : crystal_t
- use m_oper, only : print_oper
- use m_paw_dmft, only : paw_dmft_type
-
- use m_fstrings, only : int2char4
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(paw_dmft_type), intent(in) :: paw_dmft
@@ -714,7 +691,7 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
 
 !local variables-------------------------------
  integer :: iall,iatom,ib,ifreq,ikpt,im,ispinor,isppol,itau
- integer :: lsub,mbandc,natom,ndim,nkpt,nspinor,nsppol,optwt,spf_unt,spcorb_unt
+ integer :: lsub,mbandc,natom,ndim,nkpt,nspinor,nsppol,optwt,spf_unt,spfkresolved_unt,spcorb_unt
  character(len=2000) :: message
  integer,allocatable :: unitgreenfunc_arr(:)
  integer,allocatable :: unitgreenloc_arr(:)
@@ -887,61 +864,105 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
    ABI_DEALLOCATE(unitgreenloc_arr)
  endif
 
- if((green%w_type=="real".and.option==4).and.green%oper(1)%has_operks==1) then
+ if((green%w_type=="real".and.option>=4).and.green%oper(1)%has_operks==1) then
    write(message,'(a,a)') ch10,"  == About to print spectral function"
    call wrtout(std_out,message,'COLL')
-   tmpfil = trim(paw_dmft%filapp)//'SpFunc-'//trim(char1)
-   if (open_file(tmpfil, message, newunit=spf_unt, status='unknown', form='formatted') /= 0) then
-     MSG_ERROR(message)
-   end if
+   if (option==4) then
+     tmpfil = trim(paw_dmft%filapp)//'SpFunc-'//trim(char1)
+     if (open_file(tmpfil, message, newunit=spf_unt, status='unknown', form='formatted') /= 0) then
+       MSG_ERROR(message)
+     end if
+   endif
+   if (option==5) then
+     tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_SpectralFunction_kresolved_'//trim(char1)
+     if (open_file(tmpfil, message, newunit=spfkresolved_unt, status='unknown', form='formatted') /= 0) then
+       MSG_ERROR(message)
+     end if
+   endif
    ABI_ALLOCATE(sf,(green%nw))
    ABI_ALLOCATE(sf_corr,(green%nw))
    iall=0
-   sf=czero
-   do isppol = 1 , nsppol
-     do ikpt = 1, nkpt
-       do ib=1,mbandc
-         iall=iall+1
+   if (option==5) then
+       do ikpt = 1, nkpt
+         sf=czero
          do ifreq=1,green%nw
-           sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)*green%oper(1)%wtk(ikpt)
-         enddo
-       enddo
-     enddo
-   enddo
-   sf_corr=czero
-   do iatom=1,natom
-     call int2char4(iatom,tag_at)
-     ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
-     tmpfil = trim(paw_dmft%filapp)//'SpFunc-cor_orb-'//trim(char1)//'_iatom'//trim(tag_at)
-     if (open_file(tmpfil, message, newunit=spcorb_unt, status='unknown', form='formatted') /= 0) then
-       MSG_ERROR(message)
-     end if
-     write(message,*) "#", nspinor,nsppol,ndim,green%nw
-     call wrtout(spcorb_unt,message,'COLL')
-     if(green%oper(1)%matlu(iatom)%lpawu.ne.-1) then
-       write(message,*) "#", green%oper(1)%matlu(iatom)%lpawu
-       call wrtout(spcorb_unt,message,'COLL')
-       ndim=2*green%oper(1)%matlu(iatom)%lpawu+1
-       do isppol = 1 , nsppol
-         do ispinor=1, nspinor
-           do im=1,ndim
-             do ifreq=1,green%nw
-               sf_corr(ifreq)=sf_corr(ifreq)+ green%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)
+           do isppol = 1 , nsppol
+             do ib=1,mbandc
+               sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)
              enddo
+           enddo
+           write(message,*) green%omega(ifreq)*Ha_eV,(-aimag(sf(ifreq)))/pi/Ha_eV,ikpt
+           call wrtout(spfkresolved_unt,message,'COLL')
+         enddo
+           write(message,*)
+           call wrtout(spfkresolved_unt,message,'COLL')
+       enddo
+       write(message,*) ch10
+       call wrtout(spfkresolved_unt,message,'COLL')
+!
+!     do isppol = 1 , nsppol
+!       do ikpt = 1, nkpt
+!         do ib=1,mbandc
+!           sf=czero
+!           write(71,*)
+!           write(71,*)  "#", ikpt, ib
+!           do ifreq=1,green%nw
+!             sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)
+!             write(71,*) green%omega(ifreq)*Ha_eV,(-aimag(sf(ifreq)))/pi/Ha_eV,ikpt
+!           enddo
+!         enddo
+!       enddo
+!     enddo
+   endif
+   if (option==4) then
+     do isppol = 1 , nsppol
+       do ikpt = 1, nkpt
+         do ib=1,mbandc
+           do ifreq=1,green%nw
+             sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)*green%oper(1)%wtk(ikpt)
            enddo
          enddo
        enddo
-     endif
-     do ifreq=1,green%nw
-       write(message,*) green%omega(ifreq),(-aimag(sf_corr(ifreq)))/3.141592653589793238_dp
-       call wrtout(spcorb_unt,message,'COLL')
      enddo
-     close(spcorb_unt)
-   enddo
-   do ifreq=1,green%nw
-     write(message,*) green%omega(ifreq),(-aimag(sf(ifreq)))/3.141592653589793238_dp
-     call wrtout(spf_unt,message,'COLL')
-   enddo
+   endif
+   if(paw_dmft%dmft_kspectralfunc==0) then
+     sf_corr=czero
+     do iatom=1,natom
+       call int2char4(iatom,tag_at)
+       ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
+       tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_spectralfunction_orb_'//trim(char1)//'_iatom'//trim(tag_at)
+       if (open_file(tmpfil, message, newunit=spcorb_unt, status='unknown', form='formatted') /= 0) then
+         MSG_ERROR(message)
+       end if
+       write(message,*) "#", nspinor,nsppol,ndim,green%nw
+       call wrtout(spcorb_unt,message,'COLL')
+       if(green%oper(1)%matlu(iatom)%lpawu.ne.-1) then
+         write(message,*) "#", green%oper(1)%matlu(iatom)%lpawu
+         call wrtout(spcorb_unt,message,'COLL')
+         ndim=2*green%oper(1)%matlu(iatom)%lpawu+1
+         do isppol = 1 , nsppol
+           do ispinor=1, nspinor
+             do im=1,ndim
+               do ifreq=1,green%nw
+                 sf_corr(ifreq)=sf_corr(ifreq)+ green%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)
+               enddo
+             enddo
+           enddo
+         enddo
+       endif
+       do ifreq=1,green%nw
+         write(message,*) green%omega(ifreq),(-aimag(sf_corr(ifreq)))/3.141592653589793238_dp
+         call wrtout(spcorb_unt,message,'COLL')
+       enddo
+       close(spcorb_unt)
+     enddo
+   endif
+   if (option==4) then
+     do ifreq=1,green%nw
+       write(message,*) green%omega(ifreq),(-aimag(sf(ifreq)))/3.141592653589793238_dp
+       call wrtout(spf_unt,message,'COLL')
+     enddo
+   endif
    close(spf_unt)
    ABI_DEALLOCATE(sf)
    ABI_DEALLOCATE(sf_corr)
@@ -986,14 +1007,6 @@ end subroutine print_green
 
 subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,&
 &           opt_nonxsum,opt_nonxsum2)
-
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_matlu, only : sym_matlu,zero_matlu,add_matlu,print_matlu,shift_matlu,init_matlu,destroy_matlu,copy_matlu
- use m_oper, only : inverse_oper,loc_oper,print_oper,upfold_oper,init_oper,destroy_oper
- use m_paw_dmft, only : paw_dmft_type
- use m_self, only : self_type
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1132,13 +1145,18 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
      if(green%w_type=="imag") then
        omega_current=cmplx(zero,green%omega(ifreq),kind=dp)
      else if(green%w_type=="real") then
-       omega_current=cmplx(green%omega(ifreq),0.1/27.211_dp,kind=dp)
+       omega_current=cmplx(green%omega(ifreq),paw_dmft%temp,kind=dp)
      endif
      call init_oper(paw_dmft,self_minus_hdc_oper)
      call init_oper(paw_dmft,green_temp)
 
      call add_matlu(self%oper(ifreq)%matlu,self%hdc%matlu,&
 &                   self_minus_hdc_oper%matlu,green%oper(ifreq)%natom,-1)
+! do iatom = 1 , natom
+   !write(6,*) 'self matlu', ifreq, self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
+   !write(6,*) 'self hdc  ', ifreq, self%hdc%matlu(1)%mat(1,1,1,1,1)
+   !write(6,*) 'self_minus_hdc_oper  ', ifreq, self_minus_hdc_oper%matlu(1)%mat(1,1,1,1,1)
+! enddo ! natom
      if(paw_dmft%dmft_solv==4)  then
        call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_shift,0.d0,kind=dp),-1)
        call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_xmu,0.d0,kind=dp),-1)
@@ -1148,7 +1166,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
      end if
 
      procb_ifreq=green%procb(ifreq,:)
-     call upfold_oper(self_minus_hdc_oper,paw_dmft,1,procb=procb_ifreq,iproc=myproc)
+     call upfold_oper(self_minus_hdc_oper,paw_dmft,1,procb=procb_ifreq,iproc=myproc,prt=1)
      do ib1 = 1 , paw_dmft%mbandc
        do ib = 1 , paw_dmft%mbandc
          do ikpt = 1 , paw_dmft%nkpt
@@ -1160,10 +1178,9 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 &               + fermilevel                               &
 &               - paw_dmft%eigen_lda(is,ikpt,ib)) * Id(ib,ib1) &
 &               - self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
-
-
-
-
+          !if(ikpt==2.and.ib==ib1) then
+          !  write(6,*) "self",ib1,ib,ikpt,is,ifreq,self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
+          !endif
 !&               - (self%oper(ifreq)%ks(is,ikpt,ib,ib1)-self%hdc%ks(is,ikpt,ib,ib1))
 !               if(prtopt>5) then
 !               if(ikpt==1.and.(ifreq==1.or.ifreq==3).and.ib==16.and.ib1==16) then
@@ -1249,7 +1266,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 !       ! ok
 !     endif
 ! call flush(std_out)
-     call sym_matlu(cryst_struc,green_temp%matlu,pawang)
+     call sym_matlu(cryst_struc,green_temp%matlu,pawang,paw_dmft)
      call copy_matlu(green_temp%matlu,green%oper(ifreq)%matlu,natom)
 !     if(ifreq==1.and.ifreq==11) then
 !       write(std_out,*) ifreq,nproc,'after sym'
@@ -1366,16 +1383,6 @@ end subroutine compute_green
 
 subroutine integrate_green(cryst_struc,green,paw_dmft&
 &  ,pawang,prtopt,opt_ksloc,opt_after_solver,opt_diff,opt_nonxsum)
-
- use m_pawang, only : pawang_type
- use m_crystal,   only : crystal_t
- use m_matlu,     only : sym_matlu,print_matlu,init_matlu,&
-& destroy_matlu,diff_matlu,zero_matlu
- use m_paw_dmft,  only : paw_dmft_type
- use m_oper,      only : loc_oper,trace_oper,init_oper,destroy_oper
-! use m_oper, only : loc_oper,trace_oper,upfold_oper,print_oper,identity_oper,init_oper,destroy_oper
- use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1523,14 +1530,14 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
      endif
 
 !  - Symetrise: continue sum over k-point: Full BZ
-     call sym_matlu(cryst_struc,green%occup%matlu,pawang)
+     call sym_matlu(cryst_struc,green%occup%matlu,pawang,paw_dmft)
      if(abs(prtopt)>2) then
        write(message,'(a,a,i10,a)') ch10,&
 &       "  = green%occup%matlu from int(gloc(w)) with symetrization"
        call wrtout(std_out,message,'COLL')
        call print_matlu(green%occup%matlu,natom,prtopt=3,opt_diag=-1)
      endif
-     call sym_matlu(cryst_struc,matlu_temp,pawang)
+     call sym_matlu(cryst_struc,matlu_temp,pawang,paw_dmft)
 
 !  - Post-treatment for summation over negative and positive frequencies:
 !    necessary in the case of nspinor==2 AND nspinor==1, but valid anywhere
@@ -1710,7 +1717,7 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
      endif
 
 !  - Symetrise: continue sum over k-point: Full BZ
-     call sym_matlu(cryst_struc,green%occup%matlu,pawang)
+     call sym_matlu(cryst_struc,green%occup%matlu,pawang,paw_dmft)
      if(abs(prtopt)>=2) then
 !       write(message,'(a,a,i10,a)') ch10,&
 !&        "  = green%occup%matlu from projection of int(gks(w)) with symetrization"
@@ -1834,14 +1841,6 @@ end subroutine integrate_green
 
 subroutine icip_green(char1,cryst_struc,green,paw_dmft,pawang,pawprtvol,self,opt_self)
 
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_matlu, only : sym_matlu
- use m_paw_dmft, only : paw_dmft_type
- use m_oper, only : loc_oper
- use m_self, only : self_type
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(crystal_t),intent(in) :: cryst_struc
@@ -1938,13 +1937,6 @@ end subroutine icip_green
 !! SOURCE
 
 subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
-
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_matlu, only : sym_matlu,init_matlu,destroy_matlu,print_matlu
- use m_paw_dmft, only : paw_dmft_type
- use m_oper, only : loc_oper
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2049,7 +2041,7 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
        enddo ! ikpt
      enddo ! isppol
      call loc_oper(green%occup_tau,paw_dmft,1)
-     call sym_matlu(cryst_struc,green%occup_tau%matlu,pawang)
+     call sym_matlu(cryst_struc,green%occup_tau%matlu,pawang,paw_dmft)
      write(message,'(a,a,i10,a)') ch10,"  green%occup_tau%matlu from green_occup_tau%ks"
      call wrtout(std_out,message,'COLL')
      call print_matlu(green%occup_tau%matlu,natom,prtopt=3)
@@ -2231,12 +2223,6 @@ end subroutine fourier_green
 
 subroutine check_fourier_green(cryst_struc,green,paw_dmft,pawang)
 
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : print_matlu
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(crystal_t),intent(in) :: cryst_struc
@@ -2310,9 +2296,6 @@ end subroutine check_fourier_green
 !! SOURCE
 
 subroutine compa_occup_ks(green,paw_dmft)
-
- use m_paw_dmft, only : paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2398,10 +2381,6 @@ end subroutine compa_occup_ks
 !!
 !! SOURCE
 subroutine add_int_fct(ifreq,ff,ldiag,omega_current,option,integral,temp,wgt_wlo,dmft_nwlo)
-
- use defs_basis
- use m_paw_dmft, only : paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2491,9 +2470,6 @@ end subroutine add_int_fct
 !!
 !! SOURCE
 subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
-
- use m_paw_dmft, only : paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2620,10 +2596,6 @@ end subroutine int_fct
 !!
 !! SOURCE
 subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
-
- use m_paw_dmft, only : paw_dmft_type, construct_nwli_dmft
- use m_splines
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2765,11 +2737,6 @@ end subroutine fourier_fct
 
 subroutine spline_fct(fw1,fw2,opt_spline,paw_dmft)
 
- use defs_basis
- use m_paw_dmft, only : paw_dmft_type, construct_nwli_dmft
- use m_splines
- implicit none
-
 !Arguments ------------------------------------
 !type
  integer,intent(in) :: opt_spline
@@ -2840,9 +2807,6 @@ end subroutine spline_fct
 
 subroutine occup_green_tau(green)
 
- use m_matlu, only : shift_matlu
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(green_type),intent(inout) :: green
@@ -2889,7 +2853,6 @@ end subroutine occup_green_tau
 
  function occupfd(eig,fermie,temp)
 
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2934,11 +2897,6 @@ end subroutine occup_green_tau
 
  subroutine distrib_paral(nkpt,nproc,nw,nw_perproc,procb,proct)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- implicit none
-
 !Arguments ------------------------------------
 !type
 ! Integrate analytic tail 1/(iw-mu)
@@ -2955,6 +2913,7 @@ end subroutine occup_green_tau
  procb(:,:)=-1
 
  if(nproc.ge.2*nw) then
+ !write(6,*) "AA"
    ratio=nproc/nw
    ABI_ALLOCATE(proca,(nw,nproc/nw))
    do ir=1,ratio
@@ -2986,6 +2945,7 @@ end subroutine occup_green_tau
    ABI_DEALLOCATE(proca)
 
  else if (nproc.ge.nw) then
+ !write(6,*) "BB"
    do iw=1,nw
      procb(iw,:)= iw
      proct(iw,iw)=1
@@ -2997,7 +2957,9 @@ end subroutine occup_green_tau
    nw_perproc=1
 
  else if (nproc.le.nw) then
+ !write(6,*) "CC"
    ratio=nw/nproc
+ !write(6,*) "ratio", ratio
    do iproc=0,nproc-1
      do iw=1,nw
        if (mod(iw-1,nproc)==iproc) then
@@ -3006,6 +2968,9 @@ end subroutine occup_green_tau
        endif
      enddo
    enddo
+    ! do iw=1,nw
+    !   write(6,*) "iw, iproc", iw, procb(iw,1)
+    ! enddo
    nw_perproc=ratio+1
 !  some procs will compute a number of frequency which is ratio and some
 !  other will compute a number of frequency which is ratio+1.
@@ -3054,19 +3019,6 @@ end subroutine occup_green_tau
 !! SOURCE
 
  subroutine greenldacompute_green(cryst_struc,green,pawang,paw_dmft)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_errors
- use m_abicore
-
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_paw_dmft, only : paw_dmft_type
- use m_oper, only : oper_type,loc_oper
- use m_matlu, only : sym_matlu, print_matlu
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3121,8 +3073,7 @@ end subroutine occup_green_tau
 !======================================================================
 ! Symetrize
 !======================================================================
-   call sym_matlu(cryst_struc,green%oper(ifreq)%matlu,pawang)
-
+   call sym_matlu(cryst_struc,green%oper(ifreq)%matlu,pawang,paw_dmft)
  enddo
  write(message,'(a,2x,a,f13.5)') ch10," == Print LDA Green's function for last frequency"
  call wrtout(std_out,message,'COLL')
@@ -3164,16 +3115,6 @@ end subroutine occup_green_tau
 !! SOURCE
 
 subroutine fermi_green(cryst_struc,green,paw_dmft,pawang,self)
-
- use m_abicore
-
- use defs_basis
- use defs_abitypes
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_paw_dmft, only: paw_dmft_type
- use m_self, only : self_type
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3322,16 +3263,6 @@ end subroutine fermi_green
 subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
 & x_input,x_precision,max_iter,f_precision,ierr_hh,opt_noninter,opt_algo)
 
- use defs_basis
- use defs_abitypes
- use m_abicore
- use m_errors
-
- use m_pawang,    only : pawang_type
- use m_crystal,   only : crystal_t
- use m_paw_dmft,  only: paw_dmft_type
- use m_self,      only : self_type
- implicit none
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst_struc
@@ -3538,15 +3469,8 @@ subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
 subroutine function_and_deriv(cryst_struc,f_precision,green,iter,paw_dmft,pawang,self&
 & ,x_input,x_old,x_precision,Fx,Fxprime,Fxdouble,opt_noninter,option)
 
- use m_abicore
 
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_crystal, only : crystal_t
- use m_paw_dmft, only: paw_dmft_type
- use m_self, only : self_type
- implicit none
+
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst_struc
@@ -3641,15 +3565,8 @@ subroutine function_and_deriv(cryst_struc,f_precision,green,iter,paw_dmft,pawang
 subroutine compute_nb_elec(cryst_struc,green,paw_dmft,pawang,self,&
 &  Fx,opt_noninter,nb_elec_x,fermie)
 
- use m_abicore
 
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_crystal, only : crystal_t
- use m_paw_dmft, only: paw_dmft_type
- use m_self, only : self_type
- implicit none
+
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst_struc
@@ -3713,14 +3630,6 @@ end subroutine newton
 !! SOURCE
 
 subroutine local_ks_green(green,paw_dmft,prtopt)
-
- use defs_basis
- use m_errors
- use m_abicore
-
- use m_crystal, only : crystal_t
- use m_paw_dmft, only : paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !scalars
