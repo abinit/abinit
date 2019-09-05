@@ -4008,8 +4008,7 @@ end subroutine dfpt_flexoout
            frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-two*tmpre
            frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-two*tmpim
 
-           !Multiply by -2 the Ewald contribution (Not sure about this two
-           !factor) 
+           !Multiply by -2 the Ewald contribution 
            tmpre=dyewdqdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)
            tmpim=dyewdqdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)
            dyewdqdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-two*tmpre
@@ -4095,8 +4094,7 @@ end subroutine dfpt_flexoout
            frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-two*tmpre
            frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=zero
 
-           !Multiply by -2 the Ewald contribution (Not sure about this two
-           !factor)
+           !Multiply by -2 the Ewald contribution 
            tmpre=dyewdqdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)
            dyewdqdq(re,iatdir,iatom,istr1dir,istr2dir,iq1dir)=-two*tmpre
            dyewdqdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)=zero
@@ -4422,10 +4420,10 @@ end subroutine dfpt_flexoout
              !Add the type-II T4, frozen wf and Ewald contributions 
              isdqtens_cart(re,iatom,alpha,gamma,beta,delta)= &
            & isdqtens_cart(re,iatom,alpha,gamma,beta,delta) + t4re + &
-           & quarter*tfrre + quarter*tewre
+           & half*tfrre + quarter*tewre
              isdqtens_cart(im,iatom,alpha,gamma,beta,delta)= &
            & isdqtens_cart(im,iatom,alpha,gamma,beta,delta) + t4im + &
-           & quarter*tfrim + quarter*tewim
+           & half*tfrim + quarter*tewim
 
              !Writes the complete q-gradient of internal strain tensor
              write(ab_out,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
@@ -4456,7 +4454,7 @@ end subroutine dfpt_flexoout
              & isdqtens_buffer_cart(4,im,iatom,alpha,gamma,beta,delta)
 
                write(77,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
-             & quarter*tfrre, quarter*tfrim
+             & half*tfrre, half*tfrim
 
                write(78,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
              & quarter*tewre, quarter*tewim
