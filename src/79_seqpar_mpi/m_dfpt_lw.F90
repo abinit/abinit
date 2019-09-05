@@ -1644,10 +1644,10 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
 !scalars
  integer :: ask_accurate,bantot_rbz,bdtot_index,bdtot1_index
  integer :: cplex,formeig,forunit,gscase,icg
- integer :: iatdir,iatom,iatpert,iatpert_cnt,iatpol
+ integer :: ia1,iatdir,iatom,iatpert,iatpert_cnt,iatpol
  integer :: ii,iefipert,iefipert_cnt,ierr,ikg,ikpt,ikpt1,ilm
  integer :: iq1dir,iq2dir,iq1grad,iq1grad_cnt,iq1q2grad,iq1q2grad_var
- integer :: ireadwf0,isppol,istrdir,istrpert,istrtype,istrpert_cnt,istwf_k,jatpert,jj,ka,kb
+ integer :: ireadwf0,isppol,istrdir,istrpert,istrtype,istrpert_cnt,istwf_k,itypat,jatpert,jj,ka,kb
  integer :: lw_flexo,master,matom,matpert,mcg,me,mgfft,mkmem_rbz,mpw,my_nkpt_rbz
  integer :: natpert,nband_k,nefipert,nfftot,nhat1grdim,nkpt_rbz
  integer :: npw_k,npw1_k,nq1grad,nq1q2grad,nstrpert,nsym1,n3xccc
@@ -1656,7 +1656,8 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
  integer :: usexcnhat,useylmgr
  integer,parameter :: formeig1=1
  integer,parameter :: re=1,im=2
- real(dp) :: boxcut,doti,dotr,dum_scl,ecut_eff,ecut,etotal,fermie,gsqcut,residm
+ real(dp) :: boxcut,delad,delag,delbd,delbg
+ real(dp) :: doti,dotr,dum_scl,ecut_eff,ecut,etotal,fac,fermie,gsqcut,residm
  real(dp) :: vres2,wtk_k
  logical :: non_magnetic_xc,t_exist 
  character(len=500) :: msg                   
@@ -1725,7 +1726,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
 ! *************************************************************************
 
  DBG_ENTER("COLL")
- 
+
 !Anounce start of flexoelectric tensor calculation
  write(msg, '(a,80a,a,a,a)' ) ch10,('=',ii=1,80),ch10,&
 &   ' ==> Compute Flexoelectric Tensor Related Magnitudes <== ',ch10
@@ -2779,6 +2780,45 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
      call xmpi_sum(isdqwf_t5,spaceworld,ierr)
    end if
 
+ end if
+
+!Sum the G=0 contribution to the geometric term of the first 
+!q-gradient of the internal !strain tensor
+ if (lw_flexo==1.or.lw_flexo==4) then
+ !  fac=two*pi*pi/ucvol
+    fac=two_pi**2
+
+   !LOOP OVER ATOMIC DISPLACEMENT PERTURBATIONS
+   do iatpert=1,natpert
+     iatom=pert_atdis(1,iatpert)
+     iatdir=pert_atdis(2,iatpert)
+
+     !Determination of the atom type
+     ia1=0
+     itypat=0
+     do ii=1,dtset%ntypat
+       ia1=ia1+nattyp(ii)
+       if(atindx(iatom)<=ia1.and.itypat==0)itypat=ii
+     end do
+
+     !LOOP OVER STRAIN PERTURBATIONS
+     do istrpert= 1, nstrpert
+       ka=pert_strain(3,istrpert)
+       kb=pert_strain(4,istrpert)
+       delad=zero ; if (iatdir==kb) delad=one
+       delbd=zero ; if (ka==kb) delbd=one
+  
+       !LOOP OVER Q1-GRADIENT
+       do iq1grad=1,3
+         delag=zero ; if(iatdir==iq1grad) delag=one
+         delbg=zero ; if(ka==iq1grad) delbg=one
+
+         frwfdq(1,iatom,iatdir,ka,kb,iq1grad)=frwfdq(1,iatom,iatdir,ka,kb,iq1grad)+&
+       & fac*rhog(1,1)*psps%vlspl(1,2,itypat)*(delag*delbd+delad*delbg)
+
+       end do
+     end do
+   end do
  end if
 
 !Anounce finalization of calculations
