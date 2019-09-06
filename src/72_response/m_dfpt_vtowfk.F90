@@ -26,16 +26,19 @@
 module m_dfpt_vtowfk
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
  use m_cgtools
  use m_wfk
  use m_rf2
- use m_rf2_init,         only : rf2_init
+ use m_dtset
+ use m_dtfil
 
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,  only : MPI_type
+ use m_rf2_init,     only : rf2_init
  use m_time,         only : timab
  use m_pawrhoij,     only : pawrhoij_type
  use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, pawcprj_get, pawcprj_copy, pawcprj_zaxpby
@@ -373,9 +376,9 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
 !  If electric field, the derivative of the wf should be read, and multiplied by i.
    if(test_ddk==1) then
-     ii = wfk_findk(ddk_f(1), gs_hamkq%kpt_k)
+     ii = ddk_f(1)%findk(gs_hamkq%kpt_k)
      ABI_CHECK(ii == ikpt, "ii != ikpt, something is wrong with k-point, check kptopt/ngkpt, etc")
-     call wfk_read_bks(ddk_f(1), iband, ikpt, isppol, xmpio_single, cg_bks=gvnlx1)
+     call ddk_f(1)%read_bks(iband, ikpt, isppol, xmpio_single, cg_bks=gvnlx1)
 
 !    Multiplication by -i
 !    MVeithen 021212 : use + i instead,

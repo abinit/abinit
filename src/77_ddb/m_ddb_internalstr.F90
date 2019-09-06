@@ -66,9 +66,9 @@ contains
 !! msize=Maximum size of dynamical matrices and other perturbations (ddk, dde...)
 !! natom=number of atoms in unit cell
 !! nblok=number of total bloks in DDB file
-!! prt_internalstr=if 2 or higher, print force and displacement internal strain, 
-!!                 if 1, print only force internal strain, 
-!!                 if 0, do not print internal strain. 
+!! prt_internalstr=if 2 or higher, print force and displacement internal strain,
+!!                 if 1, print only force internal strain,
+!!                 if 0, do not print internal strain.
 !!
 !! OUTPUT
 !! instrain=force response internal strain tensor
@@ -93,8 +93,6 @@ subroutine ddb_internalstr(asr,&
 & d2asr,iblok,instrain,iout,mpert,&
 !&msize,&
 natom,nblok,prt_internalstr)
-
- implicit none
 
 !Arguments----------------------------------------------
 !scalars

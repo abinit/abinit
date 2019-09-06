@@ -25,9 +25,9 @@ The user should be familiarized with the four basic tutorials of ABINIT,
 see the [[help:index|tutorial home page]]
 After this first tutorial on GW, you should read the [second GW tutorial](gw2).
 
-[TUTORIAL_README]
-
 This tutorial should take about 2 hours.
+
+[TUTORIAL_README]
 
 ## 1 General example of an almost converged GW calculation
   
@@ -51,7 +51,7 @@ So, let us run immediately this calculation, and while it is running, we will
 explain what has been done.
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work_gw1
 cd Work_gw1
 cp ../tgw1_x.files .  # modify this file as usual (see tutorial 1)

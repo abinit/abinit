@@ -25,6 +25,55 @@
 
 module m_dfpt_nstwf
 
+ use defs_basis
+ use m_xmpi
+ use m_errors
+ use m_abicore
+ use m_wfk
+ use m_hamiltonian
+ use m_cgtools
+ use m_nctk
+ use m_dtset
+ use m_dtfil
+
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
+ use m_time,     only : timab
+ use m_io_tools, only : file_exists
+ use m_geometry, only : stresssym
+ use m_dynmat,   only : dfpt_sygra
+ use m_mpinfo,   only : destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle
+ use m_hdr,      only : hdr_skip
+ use m_occ,      only : occeig
+ use m_pawang,   only : pawang_type
+ use m_pawrad,   only : pawrad_type
+ use m_pawtab,   only : pawtab_type
+ use m_paw_an,   only : paw_an_type, paw_an_reset_flags
+ use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
+ use m_pawfgrtab,only : pawfgrtab_type
+ use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, pawrhoij_nullify, &
+&                       pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
+ use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get, pawcprj_copy
+ use m_pawdij,   only : pawdijfr
+ use m_pawfgr,   only : pawfgr_type
+ use m_paw_mkrho,only : pawmkrho
+ use m_paw_nhat, only : pawnhatfr
+ use m_paw_dfpt, only : pawdfptenergy
+ use m_kg,       only : mkkin, kpgstr, mkkpg
+ use m_fft,      only : fftpac
+ use m_spacepar, only : hartrestr, symrhg
+ use m_initylmg, only : initylmg
+ use m_mkffnl,   only : mkffnl
+ use m_getgh1c,  only : getgh1c, getdc1
+ use m_dfpt_mkrho, only : dfpt_accrho
+ use m_atm2fft,    only : dfpt_atm2fft
+ use m_mkcore,     only : dfpt_mkcore
+ use m_dfpt_mkvxc,    only : dfpt_mkvxc, dfpt_mkvxc_noncoll
+ use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
+ use m_mklocl,     only : dfpt_vlocal, vlocalstr
+ use m_cgprj,           only : getcprj
+
  implicit none
 
  private
@@ -168,12 +217,12 @@ contains
 !!      dfpt_scfcv
 !!
 !! CHILDREN
-!!      appdig,destroy_hamiltonian,destroy_mpi_enreg,destroy_rf_hamiltonian
+!!      appdig,destroy_mpi_enreg
 !!      dfpt_accrho,dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll
 !!      dfpt_mkvxcstr,dfpt_sygra,dfpt_vlocal,dotprod_g,dotprod_vn,fftpac
 !!      getcprj,getdc1,getgh1c,hartrestr,init_hamiltonian,init_rf_hamiltonian
-!!      initmpi_seq,initylmg,kpgstr,load_k_hamiltonian,load_k_rf_hamiltonian
-!!      load_kprime_hamiltonian,load_spin_hamiltonian,mkffnl,mkkin,mkkpg,occeig
+!!      initmpi_seq,initylmg,kpgstr
+!!      mkffnl,mkkin,mkkpg,occeig
 !!      paw_an_reset_flags,paw_ij_free,paw_ij_init,paw_ij_nullify
 !!      paw_ij_reset_flags,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
 !!      pawdfptenergy,pawdij2e1kb,pawdijfr,pawmkrho,pawnhatfr,pawrhoij_alloc
@@ -192,52 +241,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &                  pawrhoij1,pawtab,phnons1,ph1d,ph1df,psps,rhog,rhor,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,&
 &                  ucvol,usecprj,usepaw,usexcnhat,useylmgr1,vhartr1,vpsp1,vtrial,vtrial1,vxc,&
 &                  wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr1)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_xmpi
- use m_errors
- use m_abicore
- use m_wfk
- use m_hamiltonian
- use m_cgtools
- use m_nctk
-
- use m_time,     only : timab
- use m_io_tools, only : file_exists
- use m_geometry, only : stresssym
- use m_dynmat,   only : dfpt_sygra
- use m_mpinfo,   only : destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle
- use m_hdr,      only : hdr_skip
- use m_occ,      only : occeig
- use m_pawang,   only : pawang_type
- use m_pawrad,   only : pawrad_type
- use m_pawtab,   only : pawtab_type
- use m_paw_an,   only : paw_an_type, paw_an_reset_flags
- use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
- use m_pawfgrtab,only : pawfgrtab_type
- use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, pawrhoij_nullify, &
-&                       pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
- use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get, pawcprj_copy
- use m_pawdij,   only : pawdijfr
- use m_pawfgr,   only : pawfgr_type
- use m_paw_mkrho,only : pawmkrho
- use m_paw_nhat, only : pawnhatfr
- use m_paw_dfpt, only : pawdfptenergy
- use m_kg,       only : mkkin, kpgstr, mkkpg
- use m_fft,      only : fftpac
- use m_spacepar, only : hartrestr, symrhg
- use m_initylmg, only : initylmg
- use m_mkffnl,   only : mkffnl
- use m_getgh1c,  only : getgh1c, getdc1
- use m_dfpt_mkrho, only : dfpt_accrho
- use m_atm2fft,    only : dfpt_atm2fft
- use m_mkcore,     only : dfpt_mkcore
- use m_dfpt_mkvxc,    only : dfpt_mkvxc, dfpt_mkvxc_noncoll
- use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
- use m_mklocl,     only : dfpt_vlocal, vlocalstr
- use m_cgprj,           only : getcprj
 
 !Arguments -------------------------------
 !scalars
@@ -810,7 +813,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      ikg=0;ikg1=0
 
 !    Continue to initialize the GS/RF Hamiltonian
-     call load_spin_hamiltonian(gs_hamkq,isppol,with_nonlocal=.true.)
+     call gs_hamkq%load_spin(isppol,with_nonlocal=.true.)
      if (need_pawij10) then
        ii=min(isppol,size(e1kbfr_spin,6))
        if (ii>0) e1kbfr => e1kbfr_spin(:,:,:,:,:,ii)
@@ -994,26 +997,26 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !      Load k-dependent part in the Hamiltonian datastructure
        ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamkq%matblk))
-       call load_k_hamiltonian(gs_hamkq,kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
+       call gs_hamkq%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
 &       ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
        if (size(ffnlk)>0) then
-         call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnlk)
+         call gs_hamkq%load_k(ffnl_k=ffnlk)
        else
-         call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnl1)
+         call gs_hamkq%load_k(ffnl_k=ffnl1)
        end if
 
 !      Load k+q-dependent part in the Hamiltonian datastructure
 !          Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
-       call load_kprime_hamiltonian(gs_hamkq,kpt_kp=kpq,npw_kp=npw1_k,istwf_kp=istwf_k,&
+       call gs_hamkq%load_kprime(kpt_kp=kpq,npw_kp=npw1_k,istwf_kp=istwf_k,&
 &       kinpw_kp=kinpw1,kg_kp=kg1_k,kpg_kp=kpg1_k,ffnl_kp=ffnl1_idir1,&
 &       compute_gbound=.true.)
        if (qne0) then
          ABI_ALLOCATE(ph3d1,(2,npw1_k,gs_hamkq%matblk))
-         call load_kprime_hamiltonian(gs_hamkq,ph3d_kp=ph3d1,compute_ph3d=.true.)
+         call gs_hamkq%load_kprime(ph3d_kp=ph3d1,compute_ph3d=.true.)
        end if
 
 !      Load k-dependent part in the 1st-order Hamiltonian datastructure
-       call load_k_rf_hamiltonian(rf_hamkq,npw_k=npw_k,dkinpw_k=dkinpw)
+       call rf_hamkq%load_k(npw_k=npw_k,dkinpw_k=dkinpw)
 
 !      Allocate memory space for one band
        if (need_wfk)  then
@@ -1174,7 +1177,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
                if (ddkfil(idir1)/=0) then
                  !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
                  ik_ddk = indkpt1(ikpt)
-                 call wfk_read_bks(ddks(idir1), iband, ik_ddk, isppol, xmpio_single, cg_bks=gvnlx1)
+                 call ddks(idir1)%read_bks(iband, ik_ddk, isppol, xmpio_single, cg_bks=gvnlx1)
                else
                  gvnlx1=zero
                end if
@@ -1318,7 +1321,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
                if (need_ddk_file.and.ddkfil(idir1)/=0) then
                  !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
                  ik_ddk = indkpt1(ikpt)
-                 call wfk_read_bks(ddks(idir1), iband, ik_ddk, isppol, xmpio_single, cg_bks=gh1)
+                 call ddks(idir1)%read_bks(iband, ik_ddk, isppol, xmpio_single, cg_bks=gh1)
                else
                  gh1=zero
                end if
@@ -1448,7 +1451,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    end do ! End loop over SPINS
 
 !  Free memory used for this type of perturbation
-   call destroy_rf_hamiltonian(rf_hamkq)
+   call rf_hamkq%free()
    if (has_drho)  then
      ABI_DEALLOCATE(drhoaug1)
    end if
@@ -1581,7 +1584,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  if (usepaw==1.and.is_metal_or_qne0) then
    ABI_DEALLOCATE(cs1c)
  end if
- call destroy_hamiltonian(gs_hamkq)
+ call gs_hamkq%free()
 
 !In case of parallelism, sum over processors
  if (xmpi_paral==1)then
@@ -1611,7 +1614,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    do kdir1=1,mdir1
      idir1=jdir1(kdir1)
      if (ddkfil(idir1)/=0)then
-       call wfk_close(ddks(idir1))
+       call ddks(idir1)%close()
      end if
    end do
  end if
@@ -1794,9 +1797,9 @@ end subroutine dfpt_nstpaw
 !!      dfpt_nstdy
 !!
 !! CHILDREN
-!!      destroy_rf_hamiltonian,dotprod_g,gaugetransfo,getgh1c
-!!      init_rf_hamiltonian,load_k_hamiltonian,load_k_rf_hamiltonian
-!!      load_kprime_hamiltonian,mkffnl,mkkpg,timab,wfk_read_bks
+!!      dotprod_g,gaugetransfo,getgh1c
+!!      init_rf_hamiltonian
+!!      mkffnl,mkkpg,timab,wfk_read_bks
 !!
 !! SOURCE
 
@@ -1804,23 +1807,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 &                 icg,icg1,idir,ikpt,ipert,isppol,istwf_k,kg_k,kg1_k,kpt,kpq,&
 &                 mkmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,nband_k,npw_k,npw1_k,nsppol,&
 &                 occ_k,psps,rmet,ddks,wtk_k,ylm,ylm1)
-
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_abicore
- use m_cgtools
- use m_hamiltonian
- use m_errors
- use m_wfk
- use m_xmpi
-
- use m_time,    only : timab
- use m_pawcprj, only : pawcprj_type
- use m_kg,      only : mkkpg
- use m_mkffnl,  only : mkffnl
- use m_getgh1c, only : getgh1c
 
 !Arguments ------------------------------------
 !scalars
@@ -1931,19 +1917,19 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  end if
 
 !Load k-dependent part in the Hamiltonian datastructure
- call load_k_hamiltonian(gs_hamkq,kpt_k=kpt,npw_k=npw_k,istwf_k=istwf_k,&
+ call gs_hamkq%load_k(kpt_k=kpt,npw_k=npw_k,istwf_k=istwf_k,&
 & kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnlk)
 
 !Load k+q-dependent part in the Hamiltonian datastructure
 !    Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
  dimph3d=0;if (.not.ddk) dimph3d=gs_hamkq%matblk
  ABI_ALLOCATE(ph3d,(2,npw1_k,dimph3d))
- call load_kprime_hamiltonian(gs_hamkq,kpt_kp=kpq,npw_kp=npw1_k,istwf_kp=istwf_k,&
+ call gs_hamkq%load_kprime(kpt_kp=kpq,npw_kp=npw1_k,istwf_kp=istwf_k,&
 & kinpw_kp=kinpw1,kg_kp=kg1_k,kpg_kp=kpg1_k,ffnl_kp=ffnl1,&
 & ph3d_kp=ph3d,compute_ph3d=(.not.ddk))
 
 !Load k-dependent part in the 1st-order Hamiltonian datastructure
- call load_k_rf_hamiltonian(rf_hamkq,npw_k=npw_k,dkinpw_k=dkinpw)
+ call rf_hamkq%load_k(npw_k=npw_k,dkinpw_k=dkinpw)
 
 !Take care of the npw and kg records
 !NOTE : one should be able to modify the rwwf routine to take care
@@ -1953,7 +1939,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
    if (ddkfil(idir1)/=0)then
 !    Read npw record
      nsp=dtset%nspinor
-     ik_ddks(idir1) = wfk_findk(ddks(idir1), kpt)
+     ik_ddks(idir1) = ddks(idir1)%findk(kpt)
      ABI_CHECK(ik_ddks(idir1) /= -1, "Cannot find kpt")
      npw_disk = ddks(idir1)%hdr%npwarr(ik_ddks(idir1))
      if (npw_k /= npw_disk) then
@@ -2038,7 +2024,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
              else if( ipert1==dtset%natom+2 )then
                ! TODO: Several tests fail here ifdef HAVE_MPI_IO_DEFAULT
                ! The problem is somehow related to the use of MPI-IO file views!.
-               call wfk_read_bks(ddks(idir1), iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
+               call ddks(idir1)%read_bks(iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
                eig1_bks=eig2_k(1+(iband-1)*2*nband_k:))
                  !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k))
                !write(777,*)"eig2_k, gvnlx1 for band: ",iband,", ikpt: ",ikpt
@@ -2088,7 +2074,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
            end if
          end do
 
-         call destroy_rf_hamiltonian(rf_hamkq)
+         call rf_hamkq%free()
        end if
      end do
    end if     ! ipert /= natom +1
@@ -2112,7 +2098,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
          eig2_k(:) = eig1_k(:)
        else
          if (ddkfil(idir1) /= 0) then
-           call wfk_read_bks(ddks(idir1), iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
+           call ddks(idir1)%read_bks(iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
            eig1_bks=eig2_k(1+(iband-1)*2*nband_k:))
              !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k))
            !write(778,*)"eig2_k, gvnlx1 for band: ",iband,", ikpt: ",ikpt
@@ -2259,10 +2245,6 @@ subroutine gaugetransfo(cg_k,cwavef,cwavef_d,eig_k,eig1_k,iband,nband_k, &
  real(dp) :: cwave0(2,npw1_k*nspinor),eig1(2)
 
 ! *********************************************************************
-
-!DEBUG
-!write(100,*) 'gaugetransfo: ',iband
-!ENDDEBUG
 
    cwavef_d(:,:) = cwavef(:,:)
 

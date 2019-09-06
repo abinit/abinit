@@ -25,8 +25,6 @@
 module m_wfd
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_copy
@@ -34,7 +32,10 @@ module m_wfd
  use m_crystal
  use m_wfk
  use m_hdr
+ use m_distribfft
 
+ use defs_datatypes,   only : pseudopotential_type, ebands_t
+ use defs_abitypes,    only : mpi_type
  use m_gwdefs,         only : one_gw
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa
@@ -4780,13 +4781,13 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 
  ! Master node opens the file and writes the Abinit header.
  if (iam_master) then
-   call wfk_open_write(WfkFile,Hdr,wfk_fname,formeig0,iomode,get_unit(),xmpi_comm_self,write_hdr=.TRUE.,write_frm=.FALSE.)
+   call wfkfile%open_write(Hdr,wfk_fname,formeig0,iomode,get_unit(),xmpi_comm_self,write_hdr=.TRUE.,write_frm=.FALSE.)
  end if
 
  ! Other nodes wait here before opening the same file.
  call xmpi_barrier(Wfd%comm)
  if (.not.iam_master) then
-   call wfk_open_write(WfkFile,Hdr,wfk_fname,formeig0,iomode,get_unit(),xmpi_comm_self,write_hdr=.FALSE.,write_frm=.FALSE.)
+   call wfkfile%open_write(Hdr,wfk_fname,formeig0,iomode,get_unit(),xmpi_comm_self,write_hdr=.FALSE.,write_frm=.FALSE.)
  end if
 
  do spin=1,Wfd%nsppol
@@ -4823,12 +4824,12 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 
        if (band_block(1)==1) then
          ! Write also kg_k, eig_k and occ_k
-         call wfk_write_band_block(WfkFile,band_block,ik_ibz,spin,xmpio_single,&
-&          kg_k=Wfd%Kdata(ik_ibz)%kg_k,cg_k=cg_k,&
-&          eig_k=Bands%eig(:,ik_ibz,spin),occ_k=Bands%occ(:,ik_ibz,spin))
+         call wfkfile%write_band_block(band_block,ik_ibz,spin,xmpio_single,&
+            kg_k=Wfd%Kdata(ik_ibz)%kg_k,cg_k=cg_k, &
+            eig_k=Bands%eig(:,ik_ibz,spin),occ_k=Bands%occ(:,ik_ibz,spin))
        else
          MSG_ERROR("This should not happen in the present version!")
-         !call wfk_write_band_block(WfkFile,band_block,ik_ibz,spin,xmpio_single,cg_k=cg_k(:,1+icg:))
+         !call wfkfile%write_band_block(band_block,ik_ibz,spin,xmpio_single,cg_k=cg_k(:,1+icg:))
        end if
      end do
 
@@ -4838,7 +4839,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
  end do
 
  ! Close the file.
- call wfk_close(Wfkfile)
+ call wfkfile%close()
 
  call cwtime_report(" write all cg" , cpu, wall, gflops)
 
@@ -4980,7 +4981,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       ABI_MALLOC(kg_k,(3,optkg1*npw_disk))
       ABI_MALLOC_OR_DIE(cg_k,(2,mcg), ierr)
 
-      call wfk_read_band_block(Wfk, [1,nband_wfd] , ik_ibz, spin, sc_mode, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k)
+      call wfk%read_band_block([1,nband_wfd] , ik_ibz, spin, sc_mode, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k)
 
       if (wfd%prtvol > 0 .and. Wfd%my_rank==Wfd%master) then
         if (Wfd%nsppol==2) then
@@ -5055,7 +5056,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       mcg = npw_disk*Wfd%nspinor*COUNT(my_readmask(:,ik_ibz,spin))
       ABI_MALLOC_OR_DIE(cg_k,(2,mcg), ierr)
 
-      call wfk_read_bmask(Wfk,my_readmask(:,ik_ibz,spin),ik_ibz,spin,sc_mode,kg_k=kg_k,cg_k=cg_k,eig_k=eig_k)
+      call wfk%read_bmask(my_readmask(:,ik_ibz,spin),ik_ibz,spin,sc_mode,kg_k=kg_k,cg_k=cg_k,eig_k=eig_k)
 
       if (Wfd%my_rank == Wfd%master .and. wfd%prtvol > 0) then
         if (Wfd%nsppol==2) then
@@ -5130,7 +5131,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       ABI_SFREE(work)
       ABI_SFREE(out_cg)
 
-      if (ik_ibz <= 20 .or. mod(ik_ibz, 50) == 0) then
+      if (ik_ibz <= 10 .or. mod(ik_ibz, 50) == 0) then
         write(msg,'(4(a,i0),a)') " Reading k-point [", ik_ibz, "/", wfd%nkibz, "] spin [", spin, "/", wfd%nsppol, "]"
         call cwtime_report(msg, cpu_ks, wall_ks, gflops_ks)
       end if
@@ -5141,7 +5142,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
    MSG_ERROR(sjoin("Wrong method: ", itoa(method)))
  end if
 
- call wfk_close(Wfk)
+ call wfk%close()
  call hdr_free(Hdr)
 
  ABI_FREE(my_readmask)

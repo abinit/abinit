@@ -11,7 +11,7 @@
 !! TODO hexu: Is this already implemented somewhere in abinit.
 !! If not, should this file be moved to the place to make it more general usable?
 !!
-!! MG: Yes, this module should be moved to a lower level directory so that one can reuse it in other 
+!! MG: Yes, this module should be moved to a lower level directory so that one can reuse it in other
 !! parts of the code.
 !!
 !!
@@ -39,7 +39,7 @@ module m_dynmaic_array
   implicit none
 !!***
 
-!!****t* defs_abitypes/real_array_type
+!!****t* m_dynarray/real_array_type
 !! NAME
 !! real_array_type
 !!
@@ -56,7 +56,7 @@ module m_dynmaic_array
   end type real_array_type
 !!***
 
-!!****t* defs_abitypes/int_array_type
+!!****t* m_dynarray/int_array_type
 !! NAME
 !! int_array_type
 !!
@@ -108,7 +108,7 @@ subroutine real_array_type_push(self, val)
       ABI_MALLOC(temp, (self%capacity))
       temp(:self%size-1) = self%data
       !temp gets deallocated
-      ABI_MOVE_ALLOC(temp, self%data) 
+      ABI_MOVE_ALLOC(temp, self%data)
     end if
     self%data(self%size)=val
 
@@ -177,7 +177,7 @@ subroutine int_array_type_push(self, val)
       ABI_MALLOC(temp, (self%capacity))
       temp(:self%size-1) = self%data
       !temp gets deallocated
-      ABI_MOVE_ALLOC(temp, self%data) 
+      ABI_MOVE_ALLOC(temp, self%data)
     end if
     self%data(self%size)=val
 

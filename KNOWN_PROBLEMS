@@ -5,7 +5,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release ABINITv8.11.7 is for development
+The present release ABINITv8.11.9 is for development
 
 0. List of platforms
 1. Batteries of tests
@@ -14,9 +14,9 @@ The present release ABINITv8.11.7 is for development
 ================================================================
 0. Platforms
 
-For ABINITv8.11.7, list closed on 2019 06 03
+For ABINITv8.11.9, list closed on 2019 08 06
 after installation and successful tests for the standard set of platforms,
-as mentioned on 
+as mentioned on
 https://bbportal.abinit.org/#/status
 and
 https://wiki.abinit.org/doku.php?id=bb:builder
@@ -24,14 +24,14 @@ Corresponding configuration files are to be found in doc/build/config-examples
 
 Supported compilers : gfortran, intel fortran, NAG, IBM XLF.
 The following compilers are either obsolete, or considered too unstable/buggy for ABINIT :
-g95, pathscale, open64, PGI . This does not mean that ABINIT will not work, 
+g95, pathscale, open64, PGI . This does not mean that ABINIT will not work,
 but there is no check on the ABINIT testfarm that ABINIT runs correctly with these.
 
 Status, for the different versions of compilers that are supported (or might become soon).
 
-GNU Fortran compiler (presently tested : v5.3, v5.4, v6.3, v6.4, v6.5, v7.2, v7.3, v8.2, v8.3, v9.1)
+GNU Fortran compiler (presently tested : v5.3, v5.4, v6.3, v6.4, v6.5, v7.2, v7.3, v7.4, v8.2, v8.3, v9.1)
 All are mostly OK
-gnu 5.3 : bigdft#14 is disactivated on ubu_gnu_5.3_openmpi 
+gnu 5.3 : bigdft#14 is disactivated on ubu_gnu_5.3_openmpi
 gnu 8.2, 8.3, 9.1 + openmpi : the reading of WFK files using MPIIO is not correct for test mpiio#26
 all gnu : bigdft#14 is disactivated
 
@@ -40,7 +40,7 @@ Ifort 13.1 is OK.
 Ifort 15.0 is mostly OK, except for one test paral#30 (on ubu). Paral KGB.
 Ifort 16.0 is mostly OK, except for one test paral#30 (on ubu). Paral KGB.
 Ifort 17.0 is mostly OK, except for bigdft#06, bigdft#07, v8#156.
-Ifort 18.0 and 19.0 are a bit problematic. 
+Ifort 18.0 and 19.0 are a bit problematic.
  - In "real" conditions (mrgscr and mrgdv), the ADVANCE='NO' specification for the write instruction does not work, but
    it works in simple programs. Thus all tests (and their chain of tests) that rely on mrgscr and mrgdv have been disabled for this compiler.
    Namely, v3#87-91, v67mbpt#37-39, v7#85-89, v8#41-44, v8#61-65
@@ -58,13 +58,13 @@ IBM 15.1 is mostly OK, except for the computation of U in cRPA (tests v7#23,24,2
 =============================================================
 1. Batteries of tests
 
-Compilation of Netcdf and corresponding testing were tried. 
+Compilation of Netcdf and corresponding testing were tried.
 NetCDF is OK for production.
 
-When NetCDF was OK, compilation of ETSFIO and corresponding testing were tried. 
+When NetCDF was OK, compilation of ETSFIO and corresponding testing were tried.
 ETSF_IO is OK for production.
 
-Compilation of BigDFT, and corresponding testing were tried. 
+Compilation of BigDFT, and corresponding testing were tried.
 Bigdft is OK for production.
 
 Compilation of Wannier90, and corresponding testing were tried.
@@ -87,11 +87,11 @@ Use of OpenMP automatically has been tested, and is ready for production.
 Use of Scalapack automatically was not tested, and should NOT be attempted by non-expert users with this version.
 However, link to scalapack is tested.
 
-Memory leaks are tested automatically. 
+Memory leaks are tested automatically.
 
-Speed was not tested. 
+Speed was not tested.
 
-Memory was not tested. 
+Memory was not tested.
 
 
 ===============================================
@@ -105,15 +105,15 @@ The type of the problem is identified as follows :
 NUMERICAL ERROR : the physical result is incorrect,
  but the job does not crash. Moreover,
  the use of the input variables is legitimate.
- This is a very dangerous type of problem. 
+ This is a very dangerous type of problem.
  There are two subclasses :
  - INTERNALLY INCOHERENT
   (the bug can be seen because two sets of
    input variables should give the same results
-   and do not) 
+   and do not)
  - INTRINSIC
   (the bug does not cause incoherency, it can
-   only be seen when comparing results with 
+   only be seen when comparing results with
    those of another code or with experimental results)
  The latter one is the most dangerous, of course ...
 
@@ -122,8 +122,8 @@ CRASH : the code does not produce the result, because
 
 SLOWING DOWN : the physical result is correct,
  but the code does not go as fast as it should.
- For example, the reading of a restart file might 
- not be correct, or the SCF convergence 
+ For example, the reading of a restart file might
+ not be correct, or the SCF convergence
  might not be as fast as it should.
 
 OTHER : some information (not numerical results)
@@ -131,17 +131,17 @@ might be erroneous ...
 
 In each class of problem, one can identify
 MACHINE-DEPENDENT problems (on some platform, this
-problem does not occur, not on others) as well as 
+problem does not occur, not on others) as well as
 GENERAL problems.
 
 Some of the problems listed below
 have been reported by user, but have not yet been
-examined for confirmation, in which case they are 
-labelled "TO BE CONFIRMED". 
+examined for confirmation, in which case they are
+labelled "TO BE CONFIRMED".
 
 =================================================
 
-P2. (XG, 001223 + later) 
+P2. (XG, 001223 + later)
 OTHER  (TO BE DONE)
 GENERAL
 The memory needs are not yet evaluated correctly
@@ -158,7 +158,7 @@ restarting from a different, non-zero, optcell.
 Should be corrected, but documented, now.
 
 
-P15. (XG, 010103) 
+P15. (XG, 010103)
 OTHER
 GENERAL
 Should enforce coding rule related to length of file
@@ -248,19 +248,19 @@ NUMERICAL INACCURACY
 For the treatment of pseudopotentials with pspcod=6 (FHI),
 the non-linear XC core charge is not treated consistently
 in psp6cc.f and in the rest of the code.
-See Don's mail to the developers of 20040527 
+See Don's mail to the developers of 20040527
 See also input variable optnlxccc .
 
 P45.5. (XG050220)
 OTHER : PARALLEL TESTING
 Test_v4#90 (CASINO output) crash in parallel (test_paral on grumpy).
 
-P45.6. (XG050225) 
+P45.6. (XG050225)
 NUMERICAL PROBLEM (with ionmov=12)
 Test_v4#97 has one strange output
 
 P45.17 (B. Andriyevsky 050405)
-Problem of normalisation of the epsilon'' from 
+Problem of normalisation of the epsilon'' from
 the "conducti" code ?!
 A factor of pi (3.1416) might be missing.
 See his mail of 5 April 2005 to the forum.
@@ -270,7 +270,7 @@ P45.18 (D Hamann 050510)
 NUMERICAL ERROR
 With finite-difference ddk calculation
 See his mail of 10 May, 2005.
-(Excerpt : ... 
+(Excerpt : ...
 
 The problem is that 4.4.4 and 4.5.2 WILL run drf.in and produce incorrect
 results, all related to the dataset 3 finite-differend ddk calculation.
@@ -310,7 +310,7 @@ any more time now towards tracking this down.
 
 P46.1. (XG050701)
 PORTABILITY PROBLEM
-Test tutorial Finite electric field 
+Test tutorial Finite electric field
 alas_relaxdion.in (the last one)
 does not work on my PC : it stops before the end.
 
@@ -328,7 +328,7 @@ See his mail of June 27, 2006. See also P8.
 
 
 P53.11 (XG070121)
-Still have to get rid off old iscf value for tutorial and tutorespfn automatic 
+Still have to get rid off old iscf value for tutorial and tutorespfn automatic
 testing, as well as updating tutorial html files.
 Later, get rid off old iscf value in other automatic tests.
 
@@ -359,7 +359,7 @@ Still, should investigate what is the correct answer ...
 P54.7 (XG070601 - actually, much earlier than that, but not documented)
 CRASH : finite electric field with atomic displacements
 Test ffield_7 does not work on my PC, and has been disabled .
-The corresponding section of the ffield tutorial has been commented ... 
+The corresponding section of the ffield tutorial has been commented ...
 
 
 P54.18 (XG070825)
@@ -398,17 +398,17 @@ Numerical problems
 Parallel over band, FFT and k points
 Test R : there are significant differences
 between tR0.out and tR4.out .
-(no problem for physical results, e.g. the energy difference 
+(no problem for physical results, e.g. the energy difference
 during the convergence is less than 0.1mHa, but not much smaller).
 
 
 P56.03 (XG080802)
 PAW with lobpcg algorithm (and band/FFT parallelism), and istwf 0.
 Test W0 : interestingly, it runs correctly in parallel...
-The use of iprcel 45 for dataset 4 has been disabled. 
+The use of iprcel 45 for dataset 4 has been disabled.
  dielmt : 15 largest eigenvalues of the hermitian RPA dielectric matrix
-  1-5  : NaN         NaN         NaN         NaN         NaN 
-  6-10 : NaN         NaN         NaN         NaN         NaN 
+  1-5  : NaN         NaN         NaN         NaN         NaN
+  6-10 : NaN         NaN         NaN         NaN         NaN
   11-15: NaN         NaN         NaN         NaN         NaN
 
 
@@ -444,7 +444,7 @@ The Etsf_io support of density files from PAW is not yet working.
 Thes test etsf_io #10 has been disabled.
 
 P57.06 (XG090110)
-the bin_seq and bin_seqpar tar.gz files contain Makefiles that do not allow to perform the 
+the bin_seq and bin_seqpar tar.gz files contain Makefiles that do not allow to perform the
 seq tests. Only tests_speed ...
 
 P57.08 (JZwanzig090112)
@@ -460,7 +460,7 @@ nor when it's explicitly passed as argument. For the time being, deep_copy_ch1d 
 
 P59.03 (XG090713)
 For Tv4#69 and Tv2#36 , the .cnf file has to use opt=-easy for chpit+intel11.0 .
-Perhaps this will be corrected with a better version of intel 11 ? 
+Perhaps this will be corrected with a better version of intel 11 ?
 Otherwise, should examine why chpit+intel11.0 is so sensitive for these tests, and set back opt=-medium
 
 
@@ -492,9 +492,9 @@ In ABINITv6.0.0, tried to average over the local DOS contributions of degenerate
 writing a new routine dos_degeneratewfs.F90 . Unfortunately, the portability was not improved ?!
 See Tv5#40 .
 (MG160823) dos_fractions_average_m has been removed to reduce memory requirements.
- 
+
 P59.11 (XG090907)
-See mail of BBertrand 
+See mail of BBertrand
 L'algorithme de Broyden pour déterminer un acell optimal ne converge pas
 dans ce réseau rhombohedral
 
@@ -513,11 +513,11 @@ Similar problem in t532 in which the output and the reference _BXSF files should
 P59.16 (SLeroux091015)
 CRASH
 With gfortran compiler,
-if the first dataset has kptopt1 = 0 and the second dataset has kptopt2 = 1, 
+if the first dataset has kptopt1 = 0 and the second dataset has kptopt2 = 1,
 during the deallocation of variables before changing the dataset,
 abinit crash during deallocation of the variable kg in the routine gstate.F90 (line 1434)
-(see tests/v6/t06.in, the commented dataset, for an example of input leading to crash). 
-There's no problem with ifort compiler. 
+(see tests/v6/t06.in, the commented dataset, for an example of input leading to crash).
+There's no problem with ifort compiler.
 
 P59.17 (XG091024)
 Not sure pawprtwf works correctly, see the normalisation of wavefunctions
@@ -536,7 +536,7 @@ Close to one, but why bigger than one ?
 P61.1 (MG100312)
 Check on group closure in v4/t26 and v4/t27 fails if all possible
 product of symmetries is considered (new version of chkgrp).
-The rotational part belong to the input set of symmetries but 
+The rotational part belong to the input set of symmetries but
 the magnetic part differs. To be investigated in more detail.
 For the time being the check on the magnetic part has been removed.
 
@@ -562,7 +562,7 @@ what's happening for the initialisation ... Well, one day or so ...
 
 P63.1 (XG100829)
 In test tutorespfn#ffield_6, the first value of ETOT differs in the MPI and serial versions
-on testf. As they are reference platforms, I had to use opt=-ridiculous. 
+on testf. As they are reference platforms, I had to use opt=-ridiculous.
 However, the test is actually portable
 at the level of the final result. It should not be very difficult to find
 what's happening for the initialisation. See also P62.1 .
@@ -572,7 +572,7 @@ make abirules
 is problematic ... Problems should be solved for v6.4.0 in production ... !
 
 P66.1 (XG110115)
-On chum/pathscale, the test mpiio/Q4  fails 
+On chum/pathscale, the test mpiio/Q4  fails
 
 -P-0000  rwwf.F90:372:BUG
 -P-0000   Reading option of rwwf. One should have npw=npw1
@@ -586,7 +586,7 @@ P66.2 (XG110205)
 Several input variables are not documented or tested, see tests/abirules/Refs/t01.out
 
 P66.3 (XG110206)
-The tutorial PAW3 should be automatically tested, 
+The tutorial PAW3 should be automatically tested,
 especially now that AtomPAW is a plugin of ABINIT.
 A new test directory has been created, to contain
 the tutorials in which a plugin is used !
@@ -605,7 +605,7 @@ So, enable_gpu = no was set in build-example.conf
 enable_gpu = no
 
 P67.1 (XG110307)
-The FFTW3 algorithm cannot be used with DMFT. The default 
+The FFTW3 algorithm cannot be used with DMFT. The default
 setting of fftalg=312 in case the FFTW3 library is present has been
 disactivated in indefo.F90 when usedmft/=0 . Should be reactivated
 when DMFT and FFTW3 are compatible ...
@@ -614,7 +614,7 @@ P67.2 (XG110309)
 There is a lack of portability for the output of Tv5#07, between
 the reference platform and the FFTW3 calculation.
 T5#07 being related to self-consistent electron-positron calculation,
-with iterative self-consistency control that is less flexible than the 
+with iterative self-consistency control that is less flexible than the
 usual one, it has not been possible to adjust the test such as to obtain a better
 portability. However, the final results are OK.
 
@@ -632,7 +632,7 @@ Likely due to numerical precision on the GPU card ?
 P67.5 (XG110511)
 Switching to optforces=2 makes Tparal#T4 crash.
 Also leads to some small modifications, hard to understand,
- in Tparal #O4, #U4, AB4. 
+ in Tparal #O4, #U4, AB4.
 
 P68.1 (XG110528)
 Tests nlo7-10 should be out of tutorespfn ...
@@ -647,7 +647,7 @@ when the gradient is zero, while the kinetic energy density is not zero.
 P610.3 (JMB111201)
 Due to open64 compiler bug, the compilation of  "79_seqpar_mpi/lobpcgwf.F90" crashs
 The optimization is disabled for the folder 'src/79_seqpar_mpi' :
-   fcflags_opt_79_seqpar_mpi = -O0 -m64 -align64 
+   fcflags_opt_79_seqpar_mpi = -O0 -m64 -align64
 
 P611.3 (XG111220)
 Disabled Tv6#102, due to a problem when merged mverstra branch...
@@ -729,20 +729,20 @@ See tests/paral/Refs/tAJ4.out, line 636
 
 P73.2 (SP130516)
 CRASH.
-The tests/tutorespfn/Input/trf2_1.in crashes when changing the k-point grid from 
+The tests/tutorespfn/Input/trf2_1.in crashes when changing the k-point grid from
 ngkpt   4  4  4
-nshiftk   4              
-shiftk   0.0 0.0 0.5    
+nshiftk   4
+shiftk   0.0 0.0 0.5
          0.0 0.5 0.0
          0.5 0.0 0.0
          0.5 0.5 0.5
 to:
 ngkpt   6 6 6
-nshiftk   1             
-shiftk   0.0 0.0 0.0    
+nshiftk   1
+shiftk   0.0 0.0 0.0
 CRASH:
  inwffil.F90:405:ERROR
-   The file trf2_1o_DS1_WFK cannot be used to start the 
+   The file trf2_1o_DS1_WFK cannot be used to start the
   present calculation. It was asked that the wavefunctions be accurate, but
   at least one of the k points could not be generated from a symmetrical one.
   dksqmax=    4.586052E-04
@@ -753,7 +753,7 @@ See http://buildbot-od.abinit.org/builders/green_intel11/builds/34
 
 
 P73.4 (MG130614)
- paral/t76 gets stuck on max2 if #MPI > 2. 
+ paral/t76 gets stuck on max2 if #MPI > 2.
  For the time being, this test is disabled on max2
 
 
@@ -761,12 +761,12 @@ P73.5 (XG130623)
 Place 65_lotf_base and 68_lotf under control of abiauty
 
 P77.1 (XG140527)
-Test paral#27 MPI4 on vishnu had to be disabled, because erroneous echo at the end of the run. 
+Test paral#27 MPI4 on vishnu had to be disabled, because erroneous echo at the end of the run.
 Should be easy to fix, but no time at present.
 
 P711.1 (XG141130)
 Had to disable check-local . To be discussed with Yann.
- 
+
 P801.1 (XG160124)
 The test v6#67 has been disabled for nag compiler on petrus, due to a segmentation fault.
 This happened at the test of trunk/8.0.1-private/1228, after the merge of several branches for which,
@@ -791,7 +791,7 @@ On cronos, the only parallel tests that are working nightly (beyond the usual MP
 tutoparal#tdfpt_03 and 04 with 24 procs. One should enable gspw, mbt and string ones ...
 
 P804.1 (XG160501)
-AIM utility is not maintained anymore, while in few cases, problems are seen. Might use 
+AIM utility is not maintained anymore, while in few cases, problems are seen. Might use
 http://theory.cm.utexas.edu/henkelman/code/bader (and advice using it).
 
 P808.1 (XG160612)
@@ -810,7 +810,7 @@ With abiref_nag_6.1_openmpi, erratically, one test fail with a timeout (900 secs
 Still, this was not the case with petrus_nag. So, for the time being, keep the latter.
 
 P871.1 (XG171106)
-Tutorial positron#4 on bob with Openmp 2 threads, the tolwfr is likely not openmp-shared correcty, because the difference 
+Tutorial positron#4 on bob with Openmp 2 threads, the tolwfr is likely not openmp-shared correcty, because the difference
 with the reference for this quantity can be very large, while the difference for the total energy and other quantities
 is very small.
 

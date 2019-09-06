@@ -27,10 +27,9 @@
 module m_screening_driver
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
+ use m_dtset
  use m_xmpi
  use m_xomp
  use m_errors
@@ -42,7 +41,12 @@ module m_screening_driver
 #endif
  use libxc_functionals
  use m_hdr
+ use m_dtfil
+ use m_distribfft
 
+
+ use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use defs_abitypes,   only : MPI_type
  use m_time,          only : timab
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_fstrings,      only : int2char10, sjoin, strcat, itoa, ltoa, itoa
@@ -1666,8 +1670,8 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  Ep%zcut   =Dtset%zcut
 
  write(msg,'(2a,i4,2a,f10.6,a)')ch10,&
-&  ' GW calculation type              = ',Ep%gwcalctyp,ch10,&
-&  ' zcut to avoid poles in chi0 [eV] = ',Ep%zcut*Ha_eV,ch10
+   ' GW calculation type              = ',Ep%gwcalctyp,ch10,&
+   ' zcut to avoid poles in chi0 [eV] = ',Ep%zcut*Ha_eV,ch10
  call wrtout(std_out,msg,'COLL')
 
  Ep%awtr  =Dtset%awtr
@@ -2069,7 +2073,6 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 
  ! To write the SCR header correctly, with heads and wings, we have
  ! to make sure that q==0, if present, is the first q-point in the list.
- !has_q0=(ANY(normv(Ep%qcalc(:,:),gmet,'G')<GW_TOLQ0)) !commented to avoid problems with sunstudio12
  has_q0=.FALSE.
  do iq=1,Ep%nqcalc
    if (normv(Ep%qcalc(:,iq),gmet,'G')<GW_TOLQ0) then

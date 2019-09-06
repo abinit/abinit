@@ -11,7 +11,7 @@ module m_tdep_phdos
   use m_errors
   use m_abicore
   use m_phonons
-  use m_ifc,              only : ifc_type,ifc_fourq
+  use m_ifc,              only : ifc_type
   use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
   use m_tdep_qpt,         only : Qpoints_type
@@ -108,7 +108,7 @@ subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_N
      if (all(count_wminmax == 0)) exit
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
      wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
-     call phdos_free(phdos)
+     call phdos%free()
      write(msg, "(a, 2f8.5)")"Initial frequency mesh not large enough. Recomputing PHDOS with wmin, wmax: ",wminmax
      call wrtout(std_out, msg)
   end do
@@ -122,7 +122,7 @@ subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_N
   ABI_MALLOC(omega,(3*natom_unitcell,Qpt%nqpt)); omega(:,:)=zero
   open(unit=53,file=trim(InVar%output_prefix)//'omega-abinit.dat')
   do iqpt=1,Qpt%nqpt
-    call ifc_fourq(Ifc,Crystal,Qpt%qpt_red(:,iqpt),omega(:,iqpt),displ(:,iqpt))
+    call ifc%fourq(Crystal,Qpt%qpt_red(:,iqpt),omega(:,iqpt),displ(:,iqpt))
     if (iqpt.le.Qpt%nqpt) then
       if (InVar%Enunit.eq.0) write(53,'(i5,1x,100(f15.6,1x))') iqpt,(omega(ii,iqpt)*Ha_eV*1000,ii=1,3*natom_unitcell)
       if (InVar%Enunit.eq.1) write(53,'(i5,1x,100(f15.6,1x))') iqpt,(omega(ii,iqpt)*Ha_cmm1   ,ii=1,3*natom_unitcell)
@@ -134,7 +134,7 @@ subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_N
 ! Print the DOS
 ! =============
   phdos_fname = trim(InVar%output_prefix)//"_PHDOS"
-  call phdos_print(PHdos,phdos_fname)
+  call phdos%print(phdos_fname)
   domega=(InVar%dosdeltae*Ha_meV)
   integ=0.d0
   do iomega=1,PHdos%nomega

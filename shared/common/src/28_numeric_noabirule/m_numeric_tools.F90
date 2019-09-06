@@ -5538,7 +5538,7 @@ type(vdiff_t) function vdiff_eval(cplex, nr, f1, f2, volume, vd_max) result(vd)
  end if
 
  vd%int_adiff = num * dr
- vd%l1_rerr = num / den
+ call safe_div(num,den,zero,vd%l1_rerr)
 
  stats = stats_eval(abs_diff)
  vd%mean_adiff = stats%mean
@@ -6456,6 +6456,7 @@ end subroutine invcb
 !! SOURCE
 
 elemental subroutine safe_div( n, d, altv, q )
+
 !Arguments ----------------------------------------------
 !scalars
  real(dp), intent(in) :: n, d, altv
@@ -6463,7 +6464,7 @@ elemental subroutine safe_div( n, d, altv, q )
 
 ! *********************************************************************
 
- if ( exponent(n) - exponent(d) >= maxexponent(n) .or. d==0 ) then
+ if ( exponent(n) - exponent(d) >= maxexponent(n) .or. d==zero ) then
     q = altv
  else
     q = n / d

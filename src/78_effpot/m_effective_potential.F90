@@ -27,7 +27,6 @@
 module m_effective_potential
 
  use defs_basis
- use defs_datatypes
  use defs_abitypes
  use m_errors
  use m_abicore
@@ -47,19 +46,15 @@ module m_effective_potential
  use netcdf
 #endif
 
- use m_fstrings,       only : replace, ftoa, itoa, int2char4
- use m_io_tools,       only : open_file,get_unit
+ use m_fstrings,       only : replace, ftoa, itoa
+ use m_io_tools,       only : open_file, get_unit
  use m_dtfil,          only : isfile
  use m_symtk,          only : matr3inv
  use m_effpot_mpi,     only : effpot_mpi_init,effpot_mpi_type,effpot_mpi_free
  use m_abihist,        only : abihist
- use m_special_funcs,  only : factorial
- use m_copy,           only : alloc_copy
  use m_geometry,       only : fred2fcart,fcart2fred, xcart2xred, xred2xcart, metric
- use m_crystal,        only : crystal_t, crystal_init, crystal_print
- use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
- use m_multibinit_dataset, only : multibinit_dtset_type
- use m_dynmat,         only : make_bigbox,q0dy3_apply, q0dy3_calc, dfpt_phfrq
+ use m_crystal,        only : crystal_t, crystal_init
+ !use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
 
  implicit none
 
@@ -206,8 +201,6 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
 &                                   polynomial_conf,phfrq,qpoints,has_anharmonicsTerms,&
 &                                   supercell,zeff)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm,ncoeff,nqpt
@@ -337,9 +330,7 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
 !Allocation of the coefficients
  if(present(coeffs))then
    if(ncoeff /= size(coeffs))then
-     write(msg, '(a)' )&
-&        ' ncoeff has not the same size than coeffs array, '
-     MSG_BUG(msg)
+     MSG_BUG('ncoeff has not the same size than coeffs array')
    end if
    call effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
  end if
@@ -394,8 +385,6 @@ end subroutine effective_potential_init
 !! SOURCE
 
 subroutine effective_potential_initmpi(eff_pot,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -465,8 +454,6 @@ end subroutine effective_potential_initmpi
 
 subroutine effective_potential_free(eff_pot)
 
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
 !array
@@ -524,8 +511,6 @@ end subroutine effective_potential_free
 
 subroutine effective_potential_freeCoeffs(eff_pot)
 
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
 !array
@@ -563,8 +548,6 @@ end subroutine effective_potential_freeCoeffs
 !! SOURCE
 
 subroutine effective_potential_freempi(eff_pot)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -611,8 +594,6 @@ end subroutine effective_potential_freempi
 !! SOURCE
 
 subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -946,7 +927,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 !     end do
 !   end if
 
-   
+
    !call xmpi_bcast(ifc_tmp%short_atmfrc, master, comm, ierr)
    ! Maybe useless
    call xmpi_bcast(eff_pot%harmonics_terms%ifcs%short_atmfrc, master, comm, ierr)
@@ -1001,7 +982,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 !    and cell!!  rcan,ifc%rpt,wghatm and other quantities
 !    are not needed for effective potential!!!
 !  Free ifc before copy
-   call ifc_free(eff_pot%harmonics_terms%ifcs)
+   call eff_pot%harmonics_terms%ifcs%free()
 
 !  Fill the effective potential with new atmfr
     eff_pot%harmonics_terms%ifcs%nrpt = irpt2
@@ -1022,7 +1003,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    end do
 
 !  Free temporary ifc
-   call ifc_free(ifc_tmp)
+   call ifc_tmp%free()
    !ABI_DEALLOCATE(wghatm)
    !Deallocate temporary arrays
    ABI_DEALLOCATE(full_cell)
@@ -1073,8 +1054,6 @@ end subroutine effective_potential_generateDipDip
 !! SOURCE
 
 subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1148,8 +1127,6 @@ end subroutine effective_potential_setCoeffs
 
 subroutine effective_potential_setElastic3rd(eff_pot,elastics)
 
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
 !array
@@ -1192,8 +1169,6 @@ end subroutine effective_potential_setElastic3rd
 !! SOURCE
 
 subroutine effective_potential_setElastic4th(eff_pot,elastics)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1238,8 +1213,6 @@ end subroutine effective_potential_setElastic4th
 !! SOURCE
 
 subroutine effective_potential_setStrainPhononCoupling(eff_pot,natom,phonon_strain)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1287,8 +1260,6 @@ end subroutine effective_potential_setStrainPhononCoupling
 !! SOURCE
 
 subroutine effective_potential_setElasticDispCoupling(eff_pot,natom,elastic_displacement)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1341,8 +1312,6 @@ end subroutine effective_potential_setElasticDispCoupling
 subroutine effective_potential_setConfinement(cutoff_disp,cutoff_strain,eff_pot,factor_disp,&
 &                                             factor_strain,ndisp,power_disp,power_strain,&
 &                                             need_confinement)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1406,8 +1375,6 @@ end subroutine effective_potential_setConfinement
 
 subroutine effective_potential_setSupercell(eff_pot,comm,ncell,supercell)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
@@ -1469,8 +1436,6 @@ end subroutine effective_potential_setSupercell
 !! SOURCE
 
 subroutine effective_potential_print(eff_pot,option,filename)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1590,8 +1555,6 @@ end subroutine effective_potential_print
 !! SOURCE
 
 subroutine effective_potential_printSupercell(eff_pot,supercell)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1718,13 +1681,6 @@ end subroutine effective_potential_printSupercell
 !! This routine print the effective potential into xml format
 !! Several options are available
 !!
-!! COPYRIGHT
-!! Copyright (C) 2000-2019 ABINIT group (AM)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !! filename = the name of output file
 !! eff_pot<type(effective_potential_type)> = effective_potential datatype
@@ -1750,8 +1706,6 @@ end subroutine effective_potential_printSupercell
 !! SOURCE
 
 subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2060,13 +2014,6 @@ end subroutine effective_potential_writeXML
 !! This routine print the effective potential into input of abinit
 !! We can also apply a strain to the structure
 !!
-!! COPYRIGHT
-!! Copyright (C) 2000-2019 ABINIT group (AM)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !! eff_pot<type(effective_potential_type)> = effective_potential datatype
 !! filename = the name of input file
@@ -2083,8 +2030,6 @@ end subroutine effective_potential_writeXML
 !! SOURCE
 
 subroutine effective_potential_writeAbiInput(eff_pot,filename,strain)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2268,8 +2213,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 &                                       displacement,du_delta,strain,xred,&
 &                                       compute_anharmonic,verbose)
 
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
   integer, intent(in) :: natom
@@ -2300,7 +2243,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   real(dp) :: fcart_part(3,natom)
   real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
   real(dp) :: strain_tmp(6),strten_part(6)
-  real(dp) :: energy_coeff_part(eff_pot%anharmonics_terms%ncoeff) 
+  real(dp) :: energy_coeff_part(eff_pot%anharmonics_terms%ncoeff)
   real(dp),allocatable :: xcart(:,:)
   character(len=500) :: msg
 
@@ -2458,7 +2401,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !   ii = ii + 1
 !   if(ii > eff_pot%crystal%natom) ii = 1
 ! end do
- 
+
 !------------------------------------
 ! 3 - Computation of the IFC part :
 !------------------------------------
@@ -2766,8 +2709,6 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
 &                                      xcart_hist,xred_hist,xred_ref,xcart_ref,compute_displacement,&
 &                                      compute_duDelta)
 
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
   integer, intent(in) :: natom,comm
@@ -2845,7 +2786,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   else
     call xred2xcart(natom, rprimd_hist, xcart_hist_tmp, xred_hist)
   end if
-  
+
 ! Fill the reference position and change the cartesian coordinates
 ! if the rprimd is different
   if(has_strain) then
@@ -2867,7 +2808,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   if(need_displacement)then
     displacement(:,:) = zero
     do ii = 1, natom
-      displacement(:,ii) = xcart_hist_tmp(:,ii) - xcart_ref_tmp(:,ii) 
+      displacement(:,ii) = xcart_hist_tmp(:,ii) - xcart_ref_tmp(:,ii)
     end do
   end if
 
@@ -2924,8 +2865,6 @@ end subroutine effective_potential_getDisp
 
 subroutine effective_potential_distributeResidualForces(eff_pot,fcart,natom)
 
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
   integer, intent(in) :: natom
@@ -2976,8 +2915,6 @@ end subroutine effective_potential_distributeResidualForces
 !! SOURCE
 
 pure function effective_potential_compare(e1,e2) result (res)
-!Arguments ------------------------------------
- implicit none
 
 !Arguments ------------------------------------
   type(effective_potential_type), intent(in) :: e1,e2
@@ -3020,8 +2957,6 @@ end function effective_potential_compare
 
 ! subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,ncell,nph1l,option,qph1l)
 
-
-!   implicit none
 
 ! !Arguments ------------------------------------
 ! !scalars
@@ -3189,8 +3124,6 @@ end function effective_potential_compare
 
 ! subroutine effective_potential_printPDOS(eff_pot,filename,ncell,nph1l,option,qph1l)
 
-!   implicit none
-
 ! !Arguments ------------------------------------
 ! !scalars
 !   integer,intent(in) :: nph1l,option
@@ -3265,8 +3198,6 @@ end function effective_potential_compare
 !! SOURCE
 
 subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,ncell,option,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3410,8 +3341,6 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 
  subroutine effective_potential_checkDEV(eff_pot,hist,natom,ntime)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom,ntime
@@ -3458,7 +3387,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
  istep = 4
  xred = hist%xred(:,:,istep)
  rprimd =  hist%rprimd(:,:,istep)
- 
+
  rprimd_ref =  eff_pot%supercell%rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -3466,20 +3395,20 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
  delta = 0.001
  deltalist = (/-2*delta,-delta,real(0.0,dp),delta,2*delta/)
  strain = zero
- 
+
    do ia=1,natom
      do mu=1,3
        write(std_out,*) "atm: ",ia," dir: ",mu
        do ii=1,npt
          delt = deltalist(ii)
 
-!        Get the initial displacement        
+!        Get the initial displacement
          call effective_potential_getDisp(disp,du_delta,natom,rprimd,&
 &                                         eff_pot%supercell%rprimd,1,xred_hist=xred,&
 &                                         xcart_ref=eff_pot%supercell%xcart,&
 &                                         compute_displacement = .true.,compute_duDelta = .true.)
 
-!        Add the delta         
+!        Add the delta
          call xcart2xred(natom, rprimd, disp, disp_red)
          disp_red(mu,ia) = disp_red(mu,ia) + delt
          call xred2xcart(natom, rprimd, disp, disp_red)
@@ -3568,7 +3497,7 @@ forall(ii=1:3)identity(ii,ii)=1
 !  Option 2 => compute the disps within evaluate
    call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
 &                                    xred=xred,compute_anharmonic=.true.,verbose=.false.)
-   
+
  write(std_out,*) "Analyti:",strten(jj)
  write(std_out,*) "FD     :",(-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta) / ucvol
  write(std_out,*) "Diff(%):",abs(100*(strten(jj)-((-diff(5)+8*diff(4)-8*diff(2)+diff(1))&
@@ -3587,13 +3516,6 @@ end subroutine effective_potential_checkDEV
 !! This routine print the effective potential into netcdf format
 !! Several options are available
 !!
-!! COPYRIGHT
-!! Copyright (C) 2000-2019 ABINIT group (AM)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !! filename = the name of output file
 !! eff_pot  = datatype contains the effective potential
@@ -3611,8 +3533,6 @@ end subroutine effective_potential_checkDEV
 !! SOURCE
 
 subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars

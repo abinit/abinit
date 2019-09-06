@@ -1,6 +1,6 @@
-'''
-Define classes useful in several places and structures required by other modules.
-'''
+"""
+Define classes used in several places and structures required by other modules.
+"""
 from __future__ import print_function, division, unicode_literals
 
 import re
@@ -22,16 +22,20 @@ else:
     basestring = basestring
 
 
+def get_yaml_tag(cls):
+    return getattr(cls, '_' + cls.__name__.lstrip('_') + '__yaml_tag', cls.__name__)
+
+
 def normalize_attr(string):
     return '_'.join(re_word.findall(string))  # .lower()
 
 
 class BaseDictWrapper(object):
-    '''
+    """
     Allow attribute access and key access to the values of dictionary to
     keep a consistent behaviour with AutoMap structures. It does not
     inherit from dict but it implements the complete interface.
-    '''
+    """
     is_dict_like = True
 
     def __init__(self, d={}, **kwargs):
@@ -94,6 +98,28 @@ class BaseDictWrapper(object):
         for key in self.__dict__:
             yield key
 
+    def __len__(self):
+        return len(self.__dict__)
+
+    def __eq__(self, other):
+        try:
+            if len(self) != len(other):
+                return False
+
+            for (sk, si) in self.items():
+                if sk not in other or other[sk] != si:
+                    return False
+
+            for key in other:
+                if key not in self:
+                    return False
+            return True
+        except Exception:
+            return False
+
+    def __ne__(self, other):
+        return not self == other
+
     def keys(self):
         return self.__dict__.keys()
 
@@ -102,9 +128,11 @@ class BaseDictWrapper(object):
 
 
 class Undef(float):
-    '''
-        Represent the magic number undef.
-    '''
+    """
+    Represent the magic number undef. In Abinit the value 9.9999999999E+99 is
+    used as a magic number when the value should not be used/have not been
+    computed. Undef() represent this value.
+    """
     _is_undef = True
     yaml_pattern = re.compile('undef')
 
@@ -131,6 +159,9 @@ class Undef(float):
 
 
 class FailDetail(object):
+    """
+    Result of a failed test with additional information.
+    """
     def __init__(self, details):
         self.details = details
 
@@ -142,11 +173,11 @@ class FailDetail(object):
 
 
 class BaseArray(np.ndarray):
-    '''
-        Define a base class for YAML tags converted to numpy compatible
-        objects. Can be used for converting any YAML array of number of any
-        dimension into a numpy compatible array.
-    '''
+    """
+    Define a base class for YAML tags converted to numpy compatible objects. 
+    Can be used for converting any YAML array of number of any
+    dimension into a numpy compatible array.
+    """
 
     # attribute to identify the class without relying on isinstance (unreliable
     # because of sys.path manipulation)
@@ -168,8 +199,7 @@ class BaseArray(np.ndarray):
     def from_seq(cls, s):
         def check_undef(s):
             '''
-                Look for Undef in the original list because numpy convert it to
-                nan
+            Look for Undef in the original list because numpy convert it to nan
             '''
             if hasattr(s, '__iter__'):
                 for el in s:
@@ -184,8 +214,7 @@ class BaseArray(np.ndarray):
         return new
 
     def to_seq(self):
-        # conversion have to be explicit because numpy float are not
-        # recognised as float by yaml
+        # conversion have to be explicit because numpy float are not recognised as float by yaml
         def to_list(arr):
             if len(arr.shape) > 1:
                 return [to_list(line) for line in arr]
@@ -195,9 +224,9 @@ class BaseArray(np.ndarray):
 
 
 class IterStart(object):
-    '''
-        Mark the begining of a iteration of a given iterator.
-    '''
+    """
+    Mark the begining of a iteration of a given iterator.
+    """
     # Don't do this at home, trick to workaround the custom sys.path
     _is_iter_start = True
 

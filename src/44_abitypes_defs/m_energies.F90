@@ -25,18 +25,16 @@
 
 #include "abi_common.h"
 
-
 MODULE m_energies
 
  use defs_basis
  use m_abicore
  use m_errors
  use m_nctk
+ use m_dtset
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
-
- use defs_abitypes, only : dataset_type
 
  implicit none
 
@@ -579,7 +577,7 @@ end subroutine energies_eval_eint
 !! energies_ncwrite
 !!
 !! FUNCTION
-!!  Write the contenct of the datatype in a netcdf file.
+!!  Write the contenc of the datatype in a netcdf file.
 !!
 !! INPUTS
 !!  ncid=NC file handle
