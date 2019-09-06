@@ -3356,7 +3356,6 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
              dyewdqdq(im,mu,ia,nu,iq1,iq2)=dyewdqdq(im,mu,ia,nu,iq1,iq2) + &
            & work(im,mu,ia,nu,ib,iq1,iq2)
            end do
-         & dyewdqdq(re,mu,ia,nu,iq1,iq2),dyewdqdq(im,mu,ia,nu,iq1,iq2)
          end do
        end do
      end do
