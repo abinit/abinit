@@ -15722,13 +15722,15 @@ Variable(
     characteristics=['[[EVOLVING]]'],
     commentdims="Internally, it is represented as rprim(3,3,[[nimage]])",
     text=r"""
-Give, in columnwise entry, the three dimensionless primitive translations in
+Give the three dimensionless primitive translations in
 real space, to be rescaled by [[acell]] and [[scalecart]].
+The three first numbers are the coordinates of the first vector, the next three numbers are the coordinates
+of the second, and the last three the coordinates of the third.
 It is [[EVOLVING]] only if [[ionmov]] == 2 or 22 and [[optcell]]/=0, otherwise it is
 fixed.
 If the Default is used, that is, [[rprim]] is the unity matrix, the three
 dimensionless primitive vectors are three unit vectors in cartesian
-coordinates. Each will be (possibly) multiplied by the corresponding [[acell]]
+coordinates. The coordinates (and hence the length) of each vector will be (possibly) multiplied by the corresponding [[acell]]
 value, then (possibly) stretched along the cartesian coordinates by the
 corresponding [[scalecart]] value, to give the dimensional primitive vectors,
 called [[rprimd]].
@@ -15748,6 +15750,7 @@ direction unchanged) by the appropriate length scale [[acell]](1),
 translations in real space in cartesian coordinates.
 Presently, it is requested that the mixed product (R1xR2).R3 is positive. If
 this is not the case, simply exchange a pair of vectors.
+
 To be more specific, keeping the default value of [[scalecart]] = 1 to simplify
 the matter, [[rprim]] 1 2 3 4 5 6 7 8 9 corresponds to input of the three
 primitive translations R1=(1,2,3) (to be multiplied by [[acell]](1)),
