@@ -15737,9 +15737,9 @@ called [[rprimd]].
 In the general case, the dimensional cartesian coordinates of the crystal
 primitive translations R1p, R2p and R3p, see [[rprimd]], are
 
-  * R1p(i)=[[scalecart]](i)[[rprim]](i,1)*[[acell]](1)
-  * R2p(i)=[[scalecart]](i)[[rprim]](i,2)*[[acell]](2)
-  * R3p(i)=[[scalecart]](i)[[rprim]](i,3)*[[acell]](3)
+  * R1p(i)=[[scalecart]](i)*[[rprim]](i,1)*[[acell]](1)
+  * R2p(i)=[[scalecart]](i)*[[rprim]](i,2)*[[acell]](2)
+  * R3p(i)=[[scalecart]](i)*[[rprim]](i,3)*[[acell]](3)
 
 where i=1,2,3 is the component of the primitive translation (i.e. x, y, and z).
 
