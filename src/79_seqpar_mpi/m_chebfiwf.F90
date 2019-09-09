@@ -122,7 +122,7 @@ module m_chebfiwf
   
   type(xgBlock_t) :: HELPER
  
-  integer :: space, nline !blockdim
+  integer :: space, blockdim, nline !blockdim
   integer :: ipw
 
   integer :: nthreads
@@ -171,6 +171,7 @@ module m_chebfiwf
  
   !Variables
   nline=dtset%nline
+  blockdim=l_mpi_enreg%nproc_band*l_mpi_enreg%bandpp
   !for debug
   l_useria=dtset%useria
    
@@ -397,17 +398,29 @@ module m_chebfiwf
 &                signs,gsc_dummy,l_tim_getghc,cg,l_gvnlc)
 
     else
-      do iband=1,nband
-        shift = (iband-1)*l_npw*l_nspinor
-        call prep_nonlop(choice,l_cpopt,cprj_dum, &
-&       enl_out((iband-1)+1:iband),l_gs_hamk,0,&
-&       eig((iband-1)+1:iband),1,mpi_enreg,1,paw_opt,signs,& !1=blockdim?
+!      do iband=1,nband
+!        shift = (iband-1)*l_npw*l_nspinor
+!        call prep_nonlop(choice,l_cpopt,cprj_dum, &
+!&       enl_out((iband-1)+1:iband),l_gs_hamk,0,&
+!&       eig((iband-1)+1:iband),1,mpi_enreg,1,paw_opt,signs,& 1=blockdim?
+!&       gsc_dummy,l_tim_getghc, &
+!&       cg(:,shift+1:shift+l_npw*l_nspinor),&
+!&       l_gvnlc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
+!&       l_gvnlc(:,:),&
+!&       already_transposed=.false.)
+!      end do
+      
+     do iband=1,nband/blockdim
+       shift = (iband-1)*blockdim*l_npw*l_nspinor
+      call prep_nonlop(choice,l_cpopt,cprj_dum, &
+&       enl_out((iband-1)*blockdim+1:iband*blockdim),l_gs_hamk,0,&
+&       eig((iband-1)*blockdim+1:iband*blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
 &       gsc_dummy,l_tim_getghc, &
-&       cg(:,shift+1:shift+l_npw*l_nspinor),&
+&       cg(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
 !&       l_gvnlc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
 &       l_gvnlc(:,:),&
 &       already_transposed=.false.)
-      end do
+     end do
     end if
     !Compute enlout
 !   do iband=1,nband
