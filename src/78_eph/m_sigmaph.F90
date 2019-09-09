@@ -5182,7 +5182,7 @@ function get_frohlich(cryst,ifc,qpt,nu,phfrq,displ_cart,qdamp,ngvecs,gvecs) resu
  complex(dpc) :: gkqg_lr(ngvecs)
 
 !Local variables ------------------------------
- integer :: iatom, ig
+ integer :: iatom, ig, ii
  real(dp) :: qG_mod, fqdamp, inv_qepsq, wqnu
  complex(dpc) :: cnum
  !arrays
@@ -5198,7 +5198,7 @@ function get_frohlich(cryst,ifc,qpt,nu,phfrq,displ_cart,qdamp,ngvecs,gvecs) resu
    qG_mod = sqrt(sum(qG_cart ** 2))
    if (qG_mod < tol6) cycle
    inv_qepsq = one / dot_product(qG_cart, matmul(ifc%dielt, qG_cart))
-   fqdamp = (j_dpc * four_pi / cryst%ucvol) * inv_qepsq * exp(-qG_mod ** 2 / (four * qdamp))
+   fqdamp = (four_pi / cryst%ucvol) * inv_qepsq * exp(-qG_mod ** 2 / (four * qdamp))
 
    ! Compute gkq_{LR}. Note that in our approx the matrix element does not depend on ib_k.
    cnum = zero
@@ -5209,11 +5209,11 @@ function get_frohlich(cryst,ifc,qpt,nu,phfrq,displ_cart,qdamp,ngvecs,gvecs) resu
      ! Dipoles term
      cnum = cnum + dot_product(qG_cart, matmul(ifc%zeff(:, :, iatom), cdd))
      ! Quadrupoles term
-     !do ii=1,3
-     !  cnum = cnum - j_dpc * dot_product(qG_cart, matmul(ifc%qdrp_cart(:, :, ii, iatom), cdd))
-     !end do
+     do ii=1,3
+       cnum = cnum - j_dpc * dot_product(qG_cart, matmul(ifc%qdrp_cart(:, :, ii, iatom), cdd))
+     end do
    end do
-   gkqg_lr(ig) = cnum * fqdamp
+   gkqg_lr(ig) = cnum * j_dpc * fqdamp
  end do
  gkqg_lr = gkqg_lr / sqrt(two * wqnu)
 
