@@ -308,33 +308,6 @@ program anaddb
  ! Get quadrupole tensor
  iblok = ddb%get_quadrupoles(crystal,3,qdrp_cart)
 
- write(*,*)
- write(*,*) qdrp_cart(:,1,1,1)
- write(*,*) qdrp_cart(:,2,1,1)
- write(*,*) qdrp_cart(:,3,1,1)
-
- write(*,*) qdrp_cart(:,1,2,1)
- write(*,*) qdrp_cart(:,2,2,1)
- write(*,*) qdrp_cart(:,3,2,1)
-
- write(*,*) qdrp_cart(:,1,3,1)
- write(*,*) qdrp_cart(:,2,3,1)
- write(*,*) qdrp_cart(:,3,3,1)
-
- write(*,*)
- write(*,*) qdrp_cart(:,1,1,2)
- write(*,*) qdrp_cart(:,2,1,2)
- write(*,*) qdrp_cart(:,3,1,2)
-
- write(*,*) qdrp_cart(:,1,2,2)
- write(*,*) qdrp_cart(:,2,2,2)
- write(*,*) qdrp_cart(:,3,2,2)
-
- write(*,*) qdrp_cart(:,1,3,2)
- write(*,*) qdrp_cart(:,2,3,2)
- write(*,*) qdrp_cart(:,3,3,2)
-
-
  ! Try to get dielt, in case just the DDE are present
  if (iblok == 0) then
    iblok_tmp = ddb%get_dielt(inp%rfmeth,dielt)
