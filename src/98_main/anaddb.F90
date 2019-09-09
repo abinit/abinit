@@ -111,6 +111,7 @@ program anaddb
  real(dp),allocatable :: fred(:,:),lst(:),phfrq(:)
  real(dp),allocatable :: rsus(:,:,:)
  real(dp),allocatable :: zeff(:,:,:)
+ real(dp),allocatable :: qdrp_cart(:,:,:,:)
  character(len=10) :: procstr
  character(len=24) :: codename
  character(len=24) :: start_datetime
@@ -295,6 +296,7 @@ program anaddb
  ABI_ALLOCATE(eigvec,(2,3,natom,3,natom))
  ABI_ALLOCATE(phfrq,(3*natom))
  ABI_ALLOCATE(zeff,(3,3,natom))
+ ABI_ALLOCATE(qdrp_cart,(3,3,3,natom))
  ABI_ALLOCATE(lst,(inp%nph2l))
 
 !**********************************************************************
@@ -303,6 +305,9 @@ program anaddb
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
  iblok = ddb%get_dielt_zeff(crystal,inp%rfmeth,inp%chneut,inp%selectz,dielt,zeff)
+ ! Get quadrupole tensor
+ iblok = ddb%get_quadrupoles(crystal,3,qdrp_cart)
+
  ! Try to get dielt, in case just the DDE are present
  if (iblok == 0) then
    iblok_tmp = ddb%get_dielt(inp%rfmeth,dielt)
@@ -462,19 +467,19 @@ program anaddb
        ngqpt_coarse(ii) = inp%ngqpt(ii) / inp%qrefine(ii)
      end do
      call ifc_init(Ifc_coarse,Crystal,ddb,&
-       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,ngqpt_coarse,inp%nqshft,inp%q1shft,dielt,zeff,&
+       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,ngqpt_coarse,inp%nqshft,inp%q1shft,dielt,zeff,qdrp_cart,&
        inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
 
      ! Now use the coarse q-mesh to fill the entries in dynmat(q)
      ! on the dense q-mesh that cannot be obtained from the DDB file.
      call ifc_init(Ifc,Crystal,ddb,&
-      inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
+      inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,qdrp_cart,&
       inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm,Ifc_coarse=Ifc_coarse)
      call Ifc_coarse%free()
 
    else
      call ifc_init(Ifc,Crystal,ddb,&
-       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
+       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,qdrp_cart,&
        inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
    end if
 
@@ -617,7 +622,7 @@ program anaddb
      call gtdyn9(ddb%acell,Ifc%atmfrc,dielt,inp%dipdip,&
 &     Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,mpert,natom,&
 &     Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,&
-&     Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff, xmpi_comm_self)
+&     Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff,qdrp_cart,xmpi_comm_self)
 
    else if (inp%ifcflag==0) then
 
@@ -869,6 +874,7 @@ program anaddb
  ABI_DEALLOCATE(lst)
  ABI_DEALLOCATE(phfrq)
  ABI_DEALLOCATE(zeff)
+ ABI_DEALLOCATE(qdrp_cart)
  ABI_DEALLOCATE(instrain)
 
  50 continue

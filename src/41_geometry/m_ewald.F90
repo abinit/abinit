@@ -636,7 +636,7 @@ end subroutine ewald2
 !!
 !! SOURCE
 
-subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff)
+subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff,qdrp_cart)
 
 !Arguments -------------------------------
 !scalars
@@ -645,27 +645,30 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 !arrays
  real(dp),intent(in) :: acell(3),dielt(3,3),gmet(3,3),gprim(3,3),qphon(3)
  real(dp),intent(in) :: rmet(3,3),rprim(3,3),xred(3,natom),zeff(3,3,natom)
+ real(dp),intent(in) :: qdrp_cart(3,3,3,natom)
  real(dp),intent(out) :: dyew(2,3,natom,3,natom)
 
 !Local variables -------------------------
 !scalars
  integer,parameter :: mr=10000,ny2_spline=1024*10
- integer :: i2,ia,ib,ig1,ig2,ig3,ii,ir,ir1,ir2,ir3,jj,mu,newg,newr,ng,nr,nu,ng_expxq
+ integer :: i2,ia,ib,ig1,ig2,ig3,ii,ll,kk,ir,ir1,ir2,ir3,jj,mu,newg,newr,ng,nr,nu,ng_expxq
+ logical :: do_quadrupole
  real(dp),parameter :: fac=4.0_dp/3.0_dp/sqrt(pi)
  real(dp),parameter :: fact2=2.0_dp/sqrt(pi)
  real(dp),parameter :: y2max=64.0_dp, y2min=1.0d-24
- real(dp) :: arg1,arg2,arg3,arga,c123i,c123r,c23i,c23r,detdlt,inv_detdlt
+ real(dp) :: cddi,cddr,cqdi,cqdr,cqqi,cqqr,g3,g4
+ real(dp) :: arg1,arg2,arg3,arga,c123r,c123i,c23i,c23r,detdlt,inv_detdlt
  real(dp) :: direct,eta,fact1,fact3,gsq,recip,reta,reta3,inv4eta
  real(dp) :: minexparg
  real(dp) :: term1,term2,term3,term4,term5,y2,yy,invy,invy2,derfc_yy
  character(len=500) :: message
 !arrays
  real(dp) :: c1i(2*mr+1),c1r(2*mr+1),c2i(2*mr+1),c2r(2*mr+1),c3i(2*mr+1)
- real(dp) :: c3r(2*mr+1),cosqxred(natom),gpq(3),gpqfac(3,3),gpqgpq(3,3)
+ real(dp) :: c3r(2*mr+1),cosqxred(natom),gpq(3),gpqgpq(3,3)
  real(dp) :: invdlt(3,3),ircar(3),ircax(3),rr(3),sinqxred(natom)
  real(dp) :: xredcar(3,natom),xredcax(3,natom),xredicar(3),xredicax(3),xx(3)
  real(dp) :: gprimbyacell(3,3),tsec(2)
- real(dp),allocatable :: dyewt(:,:,:,:,:)
+ real(dp),allocatable :: dyddt(:,:,:,:,:), dydqt(:,:,:,:,:,:), dyqqt(:,:,:,:,:,:,:)
  complex(dpc) :: exp2piqx(natom)
  complex(dpc),allocatable :: expx1(:,:), expx2(:,:), expx3(:,:)
 
@@ -681,9 +684,10 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
  ! This routine is expensive so skip the calculation and return zeros if zeff == zero.
  ! Typically this happens when the DDB file does not contains zeff but dipdip = 1 is used (default).
- if (all(zeff == zero)) then
+ if (all(zeff == zero).and.all(qdrp_cart == zero)) then
    dyew = zero; return
  end if
+ do_quadrupole = any(qdrp_cart /= zero)
 
  ! Keep track of total time spent.
  call timab(1749, 1, tsec)
@@ -720,7 +724,9 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  end if
 #endif
 
- ABI_ALLOCATE(dyewt,(2,3,natom,3,natom))
+ ABI_ALLOCATE(dyddt,(2,3,natom,3,natom))
+ ABI_ALLOCATE(dydqt,(2,3,natom,3,natom,3))
+ ABI_ALLOCATE(dyqqt,(2,3,natom,3,natom,3,3))
 
 ! initialize complex phase factors
  do ia = 1, natom
@@ -754,8 +760,9 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  eta=pi*100.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
  inv4eta = one / four / eta
 
- dyew = zero
- dyewt = zero
+ dyddt = zero
+ dydqt = zero
+ dyqqt = zero
 
 !Sum terms over g space:
  ng=0
@@ -824,15 +831,10 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !              Here calculate the term
                term1=exp(-arg1)/gsq
-               do jj=1,3
-                 do ii=1,3
-                   gpqfac(ii,jj)=gpqgpq(ii,jj)*term1
-                 end do
-               end do
 
 ! MJV: replaced old calls to cos and sin. Checked for 10 tests in v2 that max error is about 6.e-15, usually < 2.e-15
                do ia=1,natom
-                 cosqxred(ia)=real(exp2piqx(ia)*expx1(ig1, ia)*expx2(ig2, ia)*expx3(ig3, ia))
+                 cosqxred(ia)= real(exp2piqx(ia)*expx1(ig1, ia)*expx2(ig2, ia)*expx3(ig3, ia))
                  sinqxred(ia)=aimag(exp2piqx(ia)*expx1(ig1, ia)*expx2(ig2, ia)*expx3(ig3, ia))
                end do
 
@@ -840,7 +842,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                do nu=1,3
                  do ia=1,natom
                    do mu=nu,3
-                     dyewt(1,mu,ia,nu,ia)=dyewt(1,mu,ia,nu,ia)+gpqfac(mu,nu)
+                     dyddt(1,mu,ia,nu,ia)=dyddt(1,mu,ia,nu,ia)+gpqgpq(mu,nu)*term1
                    end do
                  end do
                end do
@@ -848,17 +850,58 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 !              Then, the non-diagonal ones
                do ib=2,natom
                  do ia=1,ib-1
-                   c123r=cosqxred(ia)*cosqxred(ib)+sinqxred(ia)*sinqxred(ib)
-                   c123i=sinqxred(ia)*cosqxred(ib)-cosqxred(ia)*sinqxred(ib)
-!                  The most inner loop
+                   ! phase factor dipole-dipole
+                   cddr=cosqxred(ia)*cosqxred(ib)+sinqxred(ia)*sinqxred(ib)
+                   cddi=sinqxred(ia)*cosqxred(ib)-cosqxred(ia)*sinqxred(ib)
+
+                   ! Dipole-dipole contribution
                    do nu=1,3
                      do mu=nu,3
-                       dyewt(1,mu,ia,nu,ib)=dyewt(1,mu,ia,nu,ib)+gpqfac(mu,nu)*c123r
-                       dyewt(2,mu,ia,nu,ib)=dyewt(2,mu,ia,nu,ib)+gpqfac(mu,nu)*c123i
+                       dyddt(1,mu,ia,nu,ib)=dyddt(1,mu,ia,nu,ib)+gpqgpq(mu,nu)*term1*cddr
+                       dyddt(2,mu,ia,nu,ib)=dyddt(2,mu,ia,nu,ib)+gpqgpq(mu,nu)*term1*cddi
                      end do
                    end do
                  end do
                end do
+
+               if (do_quadrupole) then
+                 do ib=1,natom
+                   do ia=1,natom
+
+                     ! phase factor for dipole-quadrupole
+                     cqdr=cosqxred(ia)*sinqxred(ib)-sinqxred(ia)*cosqxred(ib)
+                     cqdi=cosqxred(ia)*cosqxred(ib)+sinqxred(ia)*sinqxred(ib)
+
+                     ! phase factor quadrupole-quadrupole
+                     cqqr=cosqxred(ia)*cosqxred(ib)+sinqxred(ia)*sinqxred(ib)
+                     cqqi=sinqxred(ia)*cosqxred(ib)-cosqxred(ia)*sinqxred(ib)
+
+                     ! Dipole-quadrupole and quadrupole-quadrupole contribution
+                     do ii=1,3
+                       do jj=1,3
+                         do kk=1,3
+                           g3=gpq(ii)*gpq(jj)*gpq(kk)
+                           dydqt(1,ii,ia,jj,ib,kk)=dydqt(1,ii,ia,jj,ib,kk)+g3*term1*cqdr
+                           dydqt(2,ii,ia,jj,ib,kk)=dydqt(2,ii,ia,jj,ib,kk)+g3*term1*cqdi
+                         end do ! kk
+                       end do ! jj
+                     end do ! ii
+
+                     ! Dipole-quadrupole and quadrupole-quadrupole contribution
+                     do ii=1,3
+                       do jj=1,3
+                         do kk=1,3
+                           do ll=1,3
+                             g4 = gpq(ii)*gpq(jj)*gpq(kk)*gpq(ll)
+                             dyqqt(1,ii,ia,jj,ib,kk,ll)=dyqqt(1,ii,ia,jj,ib,kk,ll)+g4*term1*cqqr
+                             dyqqt(2,ii,ia,jj,ib,kk,ll)=dyqqt(2,ii,ia,jj,ib,kk,ll)+g4*term1*cqqi
+                           end do
+                         end do ! kk
+                       end do ! jj
+                     end do ! ii
+                   end do ! ia
+                 end do ! ib
+               end if
 
              end if ! endif exp() argument is smaller than -minexparg
            end if ! Endif g/=0 :
@@ -873,16 +916,11 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !Multiplies by common factor
  fact1=4.0_dp*pi/ucvol
- do ib=1,natom
-   do ia=1,ib
-     do nu=1,3
-       do mu=nu,3
-         dyewt(1,mu,ia,nu,ib)=dyewt(1,mu,ia,nu,ib)*fact1
-         dyewt(2,mu,ia,nu,ib)=dyewt(2,mu,ia,nu,ib)*fact1
-       end do
-     end do
-   end do
- end do
+ dyddt=dyddt*fact1
+ if (do_quadrupole) then
+   dydqt=dydqt*fact1/two  * two_pi
+   dyqqt=dyqqt*fact1/four * two_pi ** 2
+ end if
 
  reta=sqrt(eta)
  reta3=-eta*reta
@@ -1034,9 +1072,9 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 #endif
                    do nu=1,3
                      do mu=nu,3
-                       dyewt(1,mu,ia,nu,ib)=dyewt(1,mu,ia,nu,ib)+&
+                       dyddt(1,mu,ia,nu,ib)=dyddt(1,mu,ia,nu,ib)+&
 &                       c123r*(xx(nu)*xx(mu)*term5+term4*invdlt(nu,mu))
-                       dyewt(2,mu,ia,nu,ib)=dyewt(2,mu,ia,nu,ib)+&
+                       dyddt(2,mu,ia,nu,ib)=dyddt(2,mu,ia,nu,ib)+&
 &                       c123i*(xx(nu)*xx(mu)*term5+term4*invdlt(nu,mu))
                      end do
                    end do
@@ -1052,7 +1090,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 !                    This is the correction when the atoms are identical
                      do nu=1,3
                        do mu=1,3
-                         dyewt(1,mu,ia,nu,ib)=dyewt(1,mu,ia,nu,ib)+&
+                         dyddt(1,mu,ia,nu,ib)=dyddt(1,mu,ia,nu,ib)+&
 &                         fac*reta3*invdlt(nu,mu) * inv_detdlt
                        end do
                      end do
@@ -1076,8 +1114,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    do nu=1,3
      do ia=ib+1,natom
        do mu=nu,3
-         dyewt(1,mu,ia,nu,ib)=dyewt(1,mu,ib,nu,ia)
-         dyewt(2,mu,ia,nu,ib)=-dyewt(2,mu,ib,nu,ia)
+         dyddt(1,mu,ia,nu,ib)= dyddt(1,mu,ib,nu,ia)
+         dyddt(2,mu,ia,nu,ib)=-dyddt(2,mu,ib,nu,ia)
        end do
      end do
    end do
@@ -1087,8 +1125,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    do nu=2,3
      do ia=1,natom
        do mu=1,nu-1
-         dyewt(1,mu,ia,nu,ib)=dyewt(1,nu,ia,mu,ib)
-         dyewt(2,mu,ia,nu,ib)=dyewt(2,nu,ia,mu,ib)
+         dyddt(1,mu,ia,nu,ib)=dyddt(1,nu,ia,mu,ib)
+         dyddt(2,mu,ia,nu,ib)=dyddt(2,nu,ia,mu,ib)
        end do
      end do
    end do
@@ -1096,17 +1134,37 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !Tests
 !write(std_out,*)' ewald9 : take into account the effective charges '
+ dyew = zero
  do ib=1,natom
    do nu=1,3
      do ia=1,natom
        do mu=1,3
-         do i2=1,2
-           dyew(i2,mu,ia,nu,ib)=zero
+         do ii=1,3
            do jj=1,3
-             do ii=1,3
-               dyew(i2,mu,ia,nu,ib)=dyew(i2,mu,ia,nu,ib) + &
-                zeff(ii,mu,ia)*zeff(jj,nu,ib)*dyewt(i2,ii,ia,jj,ib)
-             end do
+             ! dipole-dipole correction
+             dyew(1,mu,ia,nu,ib)=dyew(1,mu,ia,nu,ib) + &
+              zeff(ii,mu,ia)*zeff(jj,nu,ib)*dyddt(1,ii,ia,jj,ib)
+             dyew(2,mu,ia,nu,ib)=dyew(2,mu,ia,nu,ib) + &
+              zeff(ii,mu,ia)*zeff(jj,nu,ib)*dyddt(2,ii,ia,jj,ib)
+             if (do_quadrupole) then
+               do kk=1,3
+                 ! dipole-quadrupole correction
+                 dyew(1,mu,ia,nu,ib)=dyew(1,mu,ia,nu,ib) + &
+                   (zeff(ii,nu,ib)*qdrp_cart(kk,jj,mu,ia) - &
+                    zeff(ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dydqt(1,ii,ia,jj,ib,kk)
+                 dyew(2,mu,ia,nu,ib)=dyew(2,mu,ia,nu,ib) + &
+                   (zeff(ii,nu,ib)*qdrp_cart(kk,jj,mu,ia) - &
+                    zeff(ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dydqt(2,ii,ia,jj,ib,kk)
+                 ! quadrupole-quadrupole correction
+                 do ll=1,3
+                   dyew(1,mu,ia,nu,ib)=dyew(1,mu,ia,nu,ib) + &
+                   (qdrp_cart(ll,ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dyqqt(1,ii,ia,jj,ib,kk,ll)
+                   dyew(2,mu,ia,nu,ib)=dyew(2,mu,ia,nu,ib) + &
+                   (qdrp_cart(ll,ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dyqqt(2,ii,ia,jj,ib,kk,ll)
+                 end do
+               end do
+             end if
+
            end do
          end do
        end do
@@ -1117,7 +1175,9 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  ABI_DEALLOCATE(expx1)
  ABI_DEALLOCATE(expx2)
  ABI_DEALLOCATE(expx3)
- ABI_DEALLOCATE(dyewt)
+ ABI_DEALLOCATE(dyddt)
+ ABI_DEALLOCATE(dydqt)
+ ABI_DEALLOCATE(dyqqt)
 
  call timab(1749, 2, tsec)
 

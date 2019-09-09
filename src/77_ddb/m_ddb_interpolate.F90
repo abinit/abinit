@@ -205,7 +205,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
      call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart, &
 &     crystal%gmet,ddb%gprim,ddb%mpert,natom,Ifc%nrpt,qptnrm(1), &
 &     qpt, crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,crystal%ucvol, &
-&     Ifc%wghatm,crystal%xred,ifc%zeff, xmpi_comm_self)
+&     Ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart, xmpi_comm_self)
 
    end if
 
