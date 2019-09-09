@@ -290,7 +290,6 @@ contains
     end do
     ! Verifier la constante (/nspden**2)
     this%edc_kin_freeel=this%edc_kin_freeel*this%nfreeel/nspden/nfftf/nspden
-
   end subroutine compute_e_kin_freeel
 
   ! *********************************************************************
@@ -515,16 +514,28 @@ contains
 
     ! *********************************************************************
 
+    ix=ebcut
+    ii=0
+    do while(fermi_dirac(ix,fermie,tsmear)>tiny(0.0))
+      ii=ii+1
+      valuesnel(ii)=fermi_dirac(ix,fermie,tsmear)*hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
+      ! valuesent(ii)=(fermi_dirac(ix,fermie,tsmear)*max(log(fermi_dirac(ix,fermie,tsmear)),-0.001_dp*huge(0.0_dp))+&
+      ! & (1.-fermi_dirac(ix,fermie,tsmear))*log(1.-fermi_dirac(ix,fermie,tsmear)))*&
+      ! & hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
+      write(0,*) ii
+    end do
+
+    nfreeel=simpson(step,valuesnel)
+
     step=(1/ebcut)/mrgrid
     do ii=1,mrgrid
       ix=(ii)*step
-      valuesnel(ii)=fermi_dirac(1./ix,fermie,tsmear)*hightemp_dosfreeel(1/ix,e_shiftfactor,ucvol)/(ix*ix)
+      ! valuesnel(ii)=fermi_dirac(1./ix,fermie,tsmear)*hightemp_dosfreeel(1/ix,e_shiftfactor,ucvol)/(ix*ix)
       valuesent(ii)=(fermi_dirac(1./ix,fermie,tsmear)*max(log(fermi_dirac(1./ix,fermie,tsmear)),-0.001_dp*huge(0.0_dp))+&
       & (1.-fermi_dirac(1./ix,fermie,tsmear))*log(1.-fermi_dirac(1./ix,fermie,tsmear)))*&
       & hightemp_dosfreeel(1/ix,e_shiftfactor,ucvol)/(ix*ix)
     end do
 
-    nfreeel=simpson(step,valuesnel)
     entropy=simpson(step,valuesent)
   end subroutine hightemp_getnfreeel
 
