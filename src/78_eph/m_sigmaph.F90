@@ -675,7 +675,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: gkq2_lr(:,:,:)
  complex(dpc),allocatable :: gkqg_fine(:)
  complex(dpc) :: cp3(3)
- complex(dpc),allocatable :: osc_ks(:,:)
+ complex(dpc),allocatable :: osc_ks(:,:), osc_ks_bs(:)
  complex(dpc),allocatable :: cfact_wr(:), tpp_red(:,:)
  complex(gwpc),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), workq_ug(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
@@ -856,7 +856,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  !osc_ecut = dtset%ecut
  !osc_ecut = one
  if (osc_ecut /= zero .and. need_oscillators) then
-   call wrtout(std_out, sjoin("Computiing oscillator matrix elements with ecut.", ftoa(osc_ecut)))
+   call wrtout(std_out, sjoin("Computing oscillator matrix elements with ecut.", ftoa(osc_ecut)))
    ABI_CHECK(osc_ecut <= wfd%ecut, "osc_ecut cannot be greater than dtset%ecut")
  end if
  !nsheps = 0
@@ -1610,7 +1610,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                end do
              end do
 
-             band_ks = ib_k + bstart_ks - 1
+             !band_ks = ib_k + bstart_ks - 1
              !if (ibsum_kq == band_ks) then
              !if (ibsum_kq == band_ks .and. all(abs(qpt) < tol12)) then
              !  write(std_out,"(a,i0,2a)")" Ene and Oscillator for band: ", band_ks, ", and q-point: ", trim(ktoa(qpt))
@@ -1619,22 +1619,26 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            end do
 
            ! Compute electron-phonon matrix elements for the Frohlich interaction
-           ABI_MALLOC(displ_cart_fine, (2, 3, cryst%natom, natom3))
+           !ABI_MALLOC(displ_cart_fine, (2, 3, cryst%natom, natom3))
            ABI_MALLOC(gkqg_fine, (osc_npw))
+           ABI_MALLOC(osc_ks_bs, (osc_npw))
            gkq2_lr = zero
            do jj=1,sigma%eph_doublegrid%ndiv
              ! get index of q-point
              iq_ibz_fine = sigma%eph_doublegrid%mapping(6, jj)
              if (iq_ibz_fine == iq_ibz) ii = jj
              ! TODO: Compute displ_cart for this q-point in the fine grid
-             qpt_fine = sigma%ephwg%ibz(:,iq_ibz_fine)
-             call ifc%fourq(cryst, qpt_fine, phfrq_fine, displ_cart_fine, comm=sigma%pert_comm%value)
+             qpt_fine   = sigma%ephwg%ibz(:,iq_ibz_fine)
+             phfrq_fine = sigma%ephwg%phfrq_ibz(iq_ibz_fine,:)
+             !call ifc%fourq(cryst, qpt_fine, phfrq_fine, displ_cart_fine, comm=sigma%pert_comm%value)
              do imyp=1,my_npert
                ipc = sigma%my_pinfo(3, imyp)
-               gkqg_fine = sigma%ephwg%get_frohlich(cryst,ifc,iq_ibz_fine,ipc,displ_cart_fine,sigma%qdamp,osc_npw,osc_gvecq)
+               !gkqg_fine = get_frohlich(cryst,ifc,qpt,ipc,phfrq,displ_cart_fine,sigma%qdamp,osc_npw,osc_gvecq)
+               gkqg_fine = get_frohlich(cryst,ifc,qpt_fine,ipc,phfrq_fine,displ_cart,sigma%qdamp,osc_npw,osc_gvecq)
                do ispinor=1,nspinor
                  do ib_k=1,nbcalc_ks
-                   gkq2_lr(jj,ib_k,ipc) = real(sum(gkqg_fine*osc_ks(:,ib_k)))**2 + aimag(sum(gkqg_fine*osc_ks(:,ib_k)))**2
+                   osc_ks_bs = osc_ks((ispinor-1)*osc_npw+1:ispinor*osc_npw,ib_k)
+                   gkq2_lr(jj,ib_k,ipc) = gkq2_lr(jj,ib_k,ipc) + real(sum(gkqg_fine*osc_ks_bs))**2 + aimag(sum(gkqg_fine*osc_ks_bs))**2
                  !  if (ib_k + bstart_ks - 1 == ibsum) gkq2_lr(jj,ib_k,ipc) = real(sum(gkqg_fine))**2 + aimag(sum(gkqg_fine))**2
                  end do
                end do
@@ -1650,7 +1654,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            end do
 
            ABI_FREE(gkqg_fine)
-           ABI_FREE(displ_cart_fine)
+           ABI_FREE(osc_ks_bs)
+           !ABI_FREE(displ_cart_fine)
          end if
 
          ! Accumulate contribution to self-energy
@@ -5147,6 +5152,72 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
    " q-points in the IBZ. (nqibz_eff / nqibz): ", (100.0_dp * cnt) / sigma%nqibz, " [%]"
 
 end subroutine qpoints_oracle
+!!***
+
+!----------------------------------------------------------------------
+!!****f* m_ephwg/ephwg_get_frohlich
+!! NAME
+!! ephwg_from_ebands
+!!
+!! FUNCTION
+!!  Compute the frohlich matrix elements Convenience constructor to initialize the object from an ebands_t object
+!!
+!! INPUTS
+!!  iqpt=index of the qpoint in the IBZ
+!!  oscillator=oscillator matrix elements for the wavefunction to be used
+!!
+
+function get_frohlich(cryst,ifc,qpt,nu,phfrq,displ_cart,qdamp,ngvecs,gvecs) result(gkqg_lr)
+
+!Arguments ------------------------------------
+!scalars
+ type(crystal_t),target,intent(in) :: cryst
+ type(ifc_type),intent(in) :: ifc
+ integer,intent(in)  :: nu,ngvecs
+ real(dp),intent(in) :: qpt(3)
+ real(dp),intent(in) :: qdamp, phfrq(3*cryst%natom)
+ real(dp),intent(in) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
+!arrays
+ integer,intent(in) :: gvecs(3,ngvecs)
+ complex(dpc) :: gkqg_lr(ngvecs)
+
+!Local variables ------------------------------
+ integer :: iatom, ig
+ real(dp) :: qG_mod, fqdamp, inv_qepsq, wqnu
+ complex(dpc) :: cnum
+ !arrays
+ real(dp) :: qG_red(3), qG_cart(3)
+ complex(dpc) :: cdd(3)
+
+ gkqg_lr = zero
+ wqnu = phfrq(nu)
+ if (wqnu < tol8) return
+ do ig=1,ngvecs
+   qG_red = qpt + gvecs(:,ig)
+   qG_cart = two_pi*matmul(cryst%gprimd, qG_red)
+   qG_mod = sqrt(sum(qG_cart ** 2))
+   if (qG_mod < tol6) cycle
+   inv_qepsq = one / dot_product(qG_cart, matmul(ifc%dielt, qG_cart))
+   fqdamp = (j_dpc * four_pi / cryst%ucvol) * inv_qepsq * exp(-qG_mod ** 2 / (four * qdamp))
+
+   ! Compute gkq_{LR}. Note that in our approx the matrix element does not depend on ib_k.
+   cnum = zero
+   do iatom=1,cryst%natom
+     ! This is complex
+     cdd = cmplx(displ_cart(1,:, iatom, nu), displ_cart(2,:, iatom, nu), kind=dpc) * &
+           exp(-j_dpc * two_pi * dot_product(qG_red, cryst%xred(:, iatom)))
+     ! Dipoles term
+     cnum = cnum + dot_product(qG_cart, matmul(ifc%zeff(:, :, iatom), cdd))
+     ! Quadrupoles term
+     !do ii=1,3
+     !  cnum = cnum - j_dpc * dot_product(qG_cart, matmul(ifc%qdrp_cart(:, :, ii, iatom), cdd))
+     !end do
+   end do
+   gkqg_lr(ig) = cnum * fqdamp
+ end do
+ gkqg_lr = gkqg_lr / sqrt(two * wqnu)
+
+end function get_frohlich
 !!***
 
 end module m_sigmaph

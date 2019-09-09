@@ -161,9 +161,6 @@ type, public :: ephwg_t
      procedure :: report_stats => ephwg_report_stats
      ! Report how much memory is being used by this object
 
-     procedure :: get_frohlich => ephwg_get_frohlich
-     ! Compute the contribution to the Frohlich matrix elements for each G vector
-
      procedure :: get_deltas => ephwg_get_deltas
      ! Compute weights for $ \int \delta(\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
 
@@ -234,15 +231,11 @@ type(ephwg_t) function ephwg_new( &
 !Local variables-------------------------------
 !scalars
  integer :: nprocs, my_rank, ik, ierr, out_nkibz
- integer :: nu, iatom
- real(dp) :: fqdamp, wqnu, inv_qepsq
- !complex(dp) :: cnum, cdd(3)
  real(dp) :: cpu, wall, gflops
 !arrays
  real(dp) :: rlatt(3,3)
  integer :: out_kptrlatt(3,3)
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom), phfrq(3*cryst%natom)
- real(dp) :: gkq2_lr(3*cryst%natom), qpt(3), qpt_cart(3)
  real(dp),allocatable :: out_kibz(:,:), out_wtk(:)
 
 !----------------------------------------------------------------------
@@ -289,69 +282,9 @@ type(ephwg_t) function ephwg_new( &
  end do
 
  call xmpi_sum(new%phfrq_ibz, comm, ierr)
- !if (frohl_model == 3) call xmpi_sum(new%frohl_ibz, comm, ierr)
  call cwtime_report(" ephwg_new: ifc_fourq", cpu, wall, gflops)
 
 end function ephwg_new
-!!***
-
-!----------------------------------------------------------------------
-!!****f* m_ephwg/ephwg_get_frohlich
-!! NAME
-!! ephwg_from_ebands
-!!
-!! FUNCTION
-!!  Compute the frohlich matrix elements Convenience constructor to initialize the object from an ebands_t object
-!!
-!! INPUTS
-!!  iqpt=index of the qpoint in the IBZ
-!!  oscillator=oscillator matrix elements for the wavefunction to be used
-!!
-
-function ephwg_get_frohlich(self,cryst,ifc,iqpt,nu,displ_cart,qdamp,ngvecs,gvecs) result(gkqg_lr)
-
-!Arguments ------------------------------------
-!scalars
- class(ephwg_t),target,intent(inout) :: self
- type(crystal_t),target,intent(in) :: cryst
- type(ifc_type),intent(in) :: ifc
- integer,intent(in) :: iqpt,nu,ngvecs
- real(dp) :: qdamp
-!arrays
- integer,intent(in) :: gvecs(3,ngvecs)
- complex(dpc) :: gkqg_lr(ngvecs)
-
-!Local variables ------------------------------
- integer :: iatom, ig
- real(dp) :: qG_mod, fqdamp, wqnu, inv_qepsq
- complex(dpc) :: cnum
- !arrays
- real(dp) :: qG_red(3), qG_cart(3), cdd(3)
- real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
-
- gkqg_lr = zero
- wqnu = self%phfrq_ibz(iqpt,nu); if (wqnu < tol8) return
- do ig=1,ngvecs
-   qG_red = self%ibz(:,iqpt) + gvecs(:,ig)
-   qG_cart = two_pi*matmul(cryst%gprimd, qG_red)
-   qG_mod = sqrt(sum(qG_cart ** 2))
-   if (qG_mod < tol6) cycle
-   inv_qepsq = one / dot_product(qG_cart, matmul(ifc%dielt, qG_cart))
-   fqdamp = (four_pi / cryst%ucvol) * inv_qepsq * exp(-qG_mod ** 2 / (four * qdamp))
-
-   ! Compute gkq_{LR}. Note that in our approx the matrix element does not depend on ib_k.
-   cnum = zero
-   do iatom=1,cryst%natom
-     ! This is complex
-     cdd = cmplx(displ_cart(1,:, iatom, nu), displ_cart(2,:, iatom, nu), kind=dpc) * &
-           exp(-j_dpc * two_pi * dot_product(qG_red, cryst%xred(:, iatom)))
-     cnum = cnum + dot_product(qG_cart, matmul(ifc%zeff(:, :, iatom), cdd))
-   end do
-   gkqg_lr(ig) = cnum * fqdamp
- end do
- gkqg_lr = gkqg_lr / sqrt(two * wqnu)
-
-end function ephwg_get_frohlich
 !!***
 
 !----------------------------------------------------------------------
@@ -768,8 +701,6 @@ subroutine ephwg_report_stats(self)
  mem_tot = mem_tot + self%nq_k * 2 * 4
  ! phonon frequencies
  mem_tot = mem_tot + self%nibz * self%natom3 * dp
- ! Frolich matrix elements
- if (self%frohl_model == 3) mem_tot = mem_tot + self%nibz * self%natom3 * dp
  ! eigenvalues
  mem_tot = mem_tot + self%nibz * self%nbcount * self%nsppol * dp
 
