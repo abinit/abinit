@@ -557,15 +557,15 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      dvdb%qdamp = dtset%frohl_params(4)
    end if
 
-   if (dtset%userra /= zero) then
-     call wrtout(std_out, "Setting dynamic quadrupoles for Silicon to:", ftoa(dtset%userra))
-     do ii=1,dvdb%natom
-       dvdb%qstar(:,:,:,ii) = ((-1) ** (ii + 1)) * abs(levi_civita_3()) * dtset%userra
+   !if (dtset%userra /= zero) then
+   !  call wrtout(std_out, "Setting dynamic quadrupoles for Silicon to:", ftoa(dtset%userra))
+   !  do ii=1,dvdb%natom
+   !    dvdb%qstar(:,:,:,ii) = ((-1) ** (ii + 1)) * abs(levi_civita_3()) * dtset%userra
        !dvdb%qstar(:,:,:,ii) = ((-1) ** (ii + 1)) * abs(levi_civita_3()) * 13.368_dp
        !dvdb%qstar(:,:,:,ii) = ((-1) ** (ii + 1)) * abs(levi_civita_3()) * 14.029_dp
-     end do
-     dvdb%has_quadrupoles = .True.
-   end if
+   !  end do
+   !  dvdb%has_quadrupoles = .True.
+   !end if
 
    dvdb%qstar = qdrp_cart
    if (iblock_quadrupoles /=0) dvdb%has_quadrupoles = .True.

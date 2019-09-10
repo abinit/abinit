@@ -1287,7 +1287,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call sphereboundary(gbound_kq, istwf_kq, kg_kq, wfd%mgfft, npw_kq)
 
          ! Compute "small" G-sphere centered on qpt and gbound for zero-padded FFT for oscillators.
-         call get_kg(qpt, istw1, osc_ecut, cryst%gmet, osc_npw, osc_gvecq)
+         call get_kg(qpt, istw1, abs(osc_ecut), cryst%gmet, osc_npw, osc_gvecq)
          call sphereboundary(osc_gbound_q, istw1, osc_gvecq, wfd%mgfft, osc_npw)
 
          ! Compute correspondence G-sphere --> FFT mesh.
@@ -3033,6 +3033,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    new%nqr = 10  !int(dtset%frohl_params(3))
    new%qrad = new%qrad !/ 2.0_dp  dtset%frohl_params(2)
    new%qdamp = new%qrad !/ four
+   new%qdamp = dtset%frohl_params(4)
    write(std_out,"(a)")" Activating computation of Frohlich self-energy:"
    write(std_out,"(2(a,i0,1x))")" ntheta: ", new%ntheta, "nphi: ", new%nphi
    write(std_out,"((a,i0,1x,a,f6.3,1x,a))")" nqr points: ", new%nqr, "qrad: ", new%qrad, " [Bohr^-1]"
@@ -5167,7 +5168,7 @@ end subroutine qpoints_oracle
 !!***
 
 !----------------------------------------------------------------------
-!!****f* m_ephwg/ephwg_get_frohlich
+!!****f* m_sigma/get_frohlich
 !! NAME
 !! ephwg_from_ebands
 !!
@@ -5222,7 +5223,7 @@ function get_frohlich(cryst,ifc,qpt,nu,phfrq,displ_cart,qdamp,ngvecs,gvecs) resu
      cnum = cnum + dot_product(qG_cart, matmul(ifc%zeff(:, :, iatom), cdd))
      ! Quadrupoles term
      do ii=1,3
-       cnum = cnum - j_dpc * dot_product(qG_cart, matmul(ifc%qdrp_cart(:, :, ii, iatom), cdd))
+       cnum = cnum - j_dpc * cdd(ii) * dot_product(qG_cart, matmul(ifc%qdrp_cart(:, :, ii, iatom), qG_cart))
      end do
    end do
    gkqg_lr(ig) = cnum * j_dpc * fqdamp
