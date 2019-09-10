@@ -1501,14 +1501,13 @@ subroutine prtene(dtset,energies,iout,usepaw)
      write(msg, '(a,es21.14)' ) '    Kinetic energy  = ',energies%e_kinetic
      call wrtout(iout,msg,'COLL')
      call edoc%add_real('kinetic', energies%e_kinetic)
-     call e_components%set('Kinetic energy', r=energies%e_kinetic)
      if(abs(energies%e_kin_freeel)>tiny(0.0_dp)) then
        write(msg, '(a,es21.14)' ) '    Kin. free el. E = ',energies%e_kin_freeel
        call wrtout(iout,msg,'COLL')
-       call e_components%set('Kin. free el. E', r=energies%e_kin_freeel)
+       call edoc%add_real('kinetic free electron',energies%e_kin_freeel)
        write(msg, '(a,es21.14)' ) '    Tot kin. energy = ',energies%e_kin_freeel+energies%e_kinetic
        call wrtout(iout,msg,'COLL')
-       call e_components%set('Tot kin. energy', r=energies%e_kin_freeel+energies%e_kinetic)
+       call edoc%add_real('total kinetic',energies%e_kin_freeel+energies%e_kinetic)
      end if
      if (ipositron/=1) then
        exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
@@ -1638,16 +1637,13 @@ subroutine prtene(dtset,energies,iout,usepaw)
    dc_edoc = yamldoc_open('EnergyTermsDC', '"Double-counting" decomposition of free energy', width=20)
    dc_edoc%use_yaml = dtset%use_yaml
    call dc_edoc%add_real('band_energy', energies%e_eigenvalues)
-
-   call e_components_dc%set('comment', s='"Double-counting" decomposition of free energy')
-   call e_components_dc%set('Band energy', r=energies%e_eigenvalues)
    if(abs(energies%e_kin_freeel)>tiny(0.0_dp)) then
      write(msg, '(a,es21.14)' ) '    Kin. free el E  = ',energies%e_kin_freeel
      call wrtout(iout,msg,'COLL')
-     call e_components%set('Kin. free el E', r=energies%e_kin_freeel)
+     call dc_edoc%add_real('kinetic free electron',energies%e_kin_freeel)
      write(msg, '(a,es21.14)' ) '    DC Kin. free el = ',energies%edc_kin_freeel
      call wrtout(iout,msg,'COLL')
-     call e_components%set('DC Kin. free el', r=energies%edc_kin_freeel)
+     call dc_edoc%add_real('dc kinetic free electron',energies%edc_kin_freeel)
    end if
    if (ipositron/=1) then
      write(msg, '(2(a,es21.14,a),a,es21.14)' ) &

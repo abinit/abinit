@@ -268,18 +268,32 @@ contains
     integer :: ii,ifft,ispden
     real(dp) :: ix,step
     ! Arrays
-    real(dp) :: values(mrgrid)
+    real(dp),dimension(:),allocatable :: values
 
     ! *********************************************************************
+    step=1e-5
+
+    ! Dynamic array find size
+    ix=this%ebcut
+    ii=0
+    do while(fermi_dirac(ix,fermie,tsmear)>tol16)
+      ii=ii+1
+      ix=ix+step
+    end do
+    ABI_ALLOCATE(values,(ii))
 
     ! Computation of e_kin_freeel
-    step=(1/this%ebcut)/mrgrid
-    do ii=1,mrgrid
-      ix=(ii)*step
-      values(ii)=fermi_dirac(1./ix,fermie,tsmear)*&
-      & hightemp_dosfreeel(1/ix,this%e_shiftfactor,this%ucvol)*(1/ix-this%e_shiftfactor)/(ix*ix)
+    ix=this%ebcut
+    ii=0
+    do while(fermi_dirac(ix,fermie,tsmear)>tol16)
+      ii=ii+1
+      values(ii)=fermi_dirac(ix,fermie,tsmear)*&
+      & hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)*(ix-this%e_shiftfactor)
+      ix=ix+step
     end do
-    this%e_kin_freeel=simpson(step,values)
+    if (ii>1) then
+      this%e_kin_freeel=simpson(step,values)
+    end if
 
     ! Computation of edc_kin_freeel
     this%edc_kin_freeel=zero
@@ -510,33 +524,36 @@ contains
     integer :: ii
     real(dp) :: ix,step,ucvol
     ! Arrays
-    real(dp) :: valuesnel(mrgrid),valuesent(mrgrid)
+    real(dp),dimension(:),allocatable :: valuesnel,valuesent
 
     ! *********************************************************************
+    step=1e-5
+
+    ! Dynamic array find size
+    ix=ebcut
+    ii=0
+    do while(fermi_dirac(ix,fermie,tsmear)>1e-16)
+      ii=ii+1
+      ix=ix+step
+    end do
+
+    ABI_ALLOCATE(valuesnel,(ii))
+    ABI_ALLOCATE(valuesent,(ii))
 
     ix=ebcut
     ii=0
-    do while(fermi_dirac(ix,fermie,tsmear)>tiny(0.0))
+    do while(fermi_dirac(ix,fermie,tsmear)>1e-16)
       ii=ii+1
       valuesnel(ii)=fermi_dirac(ix,fermie,tsmear)*hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
-      ! valuesent(ii)=(fermi_dirac(ix,fermie,tsmear)*max(log(fermi_dirac(ix,fermie,tsmear)),-0.001_dp*huge(0.0_dp))+&
-      ! & (1.-fermi_dirac(ix,fermie,tsmear))*log(1.-fermi_dirac(ix,fermie,tsmear)))*&
-      ! & hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
-      write(0,*) ii
+      valuesent(ii)=(fermi_dirac(ix,fermie,tsmear)*log(fermi_dirac(ix,fermie,tsmear))+&
+      & (1.-fermi_dirac(ix,fermie,tsmear))*log(1.-fermi_dirac(ix,fermie,tsmear)))*&
+      & hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
+      ix=ix+step
     end do
-
-    nfreeel=simpson(step,valuesnel)
-
-    step=(1/ebcut)/mrgrid
-    do ii=1,mrgrid
-      ix=(ii)*step
-      ! valuesnel(ii)=fermi_dirac(1./ix,fermie,tsmear)*hightemp_dosfreeel(1/ix,e_shiftfactor,ucvol)/(ix*ix)
-      valuesent(ii)=(fermi_dirac(1./ix,fermie,tsmear)*max(log(fermi_dirac(1./ix,fermie,tsmear)),-0.001_dp*huge(0.0_dp))+&
-      & (1.-fermi_dirac(1./ix,fermie,tsmear))*log(1.-fermi_dirac(1./ix,fermie,tsmear)))*&
-      & hightemp_dosfreeel(1/ix,e_shiftfactor,ucvol)/(ix*ix)
-    end do
-
-    entropy=simpson(step,valuesent)
+    if (ii>1) then
+      nfreeel=simpson(step,valuesnel)
+      entropy=simpson(step,valuesent)
+    end if
   end subroutine hightemp_getnfreeel
 
 end module m_hightemp
