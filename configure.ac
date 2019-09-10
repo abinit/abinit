@@ -35,6 +35,8 @@ Examples of configuration files for clusters are available at
 https://github.com/abinit/abiconfig.
 ])
 
+# Initialize Autoconf
+AC_PREREQ(2.59)
 AC_INIT([ABINIT],[8.11.11],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 8])
 AC_CONFIG_AUX_DIR([config/gnu])
@@ -796,13 +798,6 @@ fi
 AM_CONDITIONAL([DO_BUILD_PSML],
   [test "${sd_libpsml_enable}" = "yes " -a "${sd_libpsml_ok}" = "yes"])
 
-# ETSF_IO library support
-AC_MSG_CHECKING([whether to enable ETSF_IO support])
-AC_MSG_RESULT([${abi_etsf_io_enable}])
-if test "${abi_etsf_io_enable}" = "yes"; then
-  ABI_TRIGGER_ETSF_IO
-  fi
-
                        # ------------------------------ #
 
 # Levmar library support
@@ -975,7 +970,7 @@ CPPFLAGS=""
 
 ABI_MSG_SECTION([Output])
 
-ac_configure_args="${ac_configure_args} --enable-atompaw=${enable_atompaw} --enable-bigdft=${enable_bigdft} --enable-etsf-io=${enable_etsf_io} --enable-libxc=${enable_libxc} --enable-linalg=${enable_linalg} --enable-netcdf=${enable_netcdf} --enable-wannier90=${enable_wannier90} --with-fc-vendor=${abi_fc_vendor} --with-fc-version=${abi_fc_version} --with-tardir='${abinit_tardir}'"
+ac_configure_args="${ac_configure_args} --enable-atompaw=${enable_atompaw} --enable-bigdft=${enable_bigdft} --enable-libxc=${enable_libxc} --enable-linalg=${enable_linalg} --enable-netcdf=${enable_netcdf} --enable-wannier90=${enable_wannier90} --with-fc-vendor=${abi_fc_vendor} --with-fc-version=${abi_fc_version} --with-tardir='${abinit_tardir}'"
 
 # Output files
 # Note: later, add tests/atconfig and tests/atlocal for test suite
@@ -1001,10 +996,6 @@ fi
 if test "${abi_gpu_enable}" = "yes" -a "${abi_linalg_chk_gpu}" != "magma"; then
   ABI_MSG_NOTICE([gpu-without-magma],
     [Suboptimal GPU configuration])
-fi
-if test "${abi_etsf_enable}" = "yes"; then
-  ABI_MSG_NOTICE([etsf_io-deprecated],
-    [Upcoming end of ETSF_IO library support])
 fi
 ABI_MSG_FC_BUGGY(${abi_fc_vendor})
 ABI_MSG_END

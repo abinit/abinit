@@ -1,12 +1,12 @@
-This directory, etsf_io, contains tests which exercise parts 
+This directory, netcdf, contains tests which exercise parts 
 of the ABINIT package, especially those features acquired
 during the development of the ETSF I/O library.
 
 Please, see the README file in the tests directory (above this one) to get help.
 
 
-Tests 1-4 : main ABINIT testing of ETSF_IO, norm-conserving
-Tests 6-8 : wavelets with ETSF_IO output.
-Tests 9-10 : PAW with ETSF_IO
+Tests 1-4 : main ABINIT testing of  ETSF File Format, norm-conserving
+Tests 6-8 : wavelets with  ETSF File Format output.
+Tests 9-10 : PAW with  ETSF File Format
 Tests 21 : test another NETCDF type of file, from molecular dynamics runs.
 Tests 30 : test KB form factors in the netcdf file

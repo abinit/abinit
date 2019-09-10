@@ -1108,7 +1108,7 @@ very quickly, and that is accompanied by a specific analysis by ABINIT, at the
 end of the run, against a hard-coded value of total energy (and possibly
 stresses, forces ...). The echo of the analysis is done in the STATUS file. In
 particular, such built-in tests can be used to check quickly whether ABINIT
-fallbacks have been connected or not (bigdft,  libxc, wannier90). At
+fallbacks have been connected or not (bigdft, netcdf, libxc, wannier90). At
 present, [[builtintest]] = 1... 7 are allowed. See more information in tests/built-in/README.
 """,
 ),

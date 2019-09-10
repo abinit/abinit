@@ -12,7 +12,6 @@ with_test_timeout="1200"
 # External packages
 enable_atompaw="@abi_test_atompaw@"
 enable_bigdft="@abi_test_bigdft@"
-enable_etsf_io="@abi_test_etsf_io@"
 enable_psml="@abi_test_psml@"
 enable_libxc="@abi_test_libxc@"
 enable_wannier90="@abi_test_wannier90@"

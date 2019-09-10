@@ -342,8 +342,9 @@ AC_DEFUN([_ABI_MPI_CHECK_CREATE_TYPE_STRUCT], [
 
                     # ------------------------------------ #
 
+
 # _ABI_MPI_CHECK_IBCAST()
-# -----------------------------------
+# -----------------------
 #
 # Checks whether the MPI library supports MPI_IBCAST (MPI3)
 #
@@ -401,7 +402,9 @@ AC_DEFUN([_ABI_MPI_CHECK_IBCAST],[
 
 ]) # _ABI_MPI_CHECK_IBCAST     
 
+
                     ########################################
+
 
 # _ABI_MPI_CHECK_IALLTOALL()
 # --------------------------
@@ -521,7 +524,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLTOALLV], [
 
 
 # _ABI_MPI_CHECK_IGATHERV()
-# -----------------------------------
+# -------------------------
 #
 # Checks whether the MPI library supports MPI_IGATHERV (MPI3)
 #
@@ -576,7 +579,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IGATHERV],[
 
 
 # _ABI_MPI_CHECK_IALLREDUCE()
-# -----------------------------------
+# ---------------------------
 #
 # Checks whether the MPI library supports MPI_IALLREDUCE (MPI3)
 #
@@ -808,13 +811,14 @@ AC_DEFUN([ABI_MPI_DETECT], [
       fi
 
       # Check the availability of problematic MPI primitives
-      _ABI_MPI_CHECK_CREATE_TYPE_STRUCT
+      _ABI_MPI_CHECK_CREATE_TYPE_STRUCT()
 
       # Check MPI3 extensions (very) important for HPC.
-      _ABI_MPI_CHECK_IALLTOALL
-      _ABI_MPI_CHECK_IALLTOALLV
-      _ABI_MPI_CHECK_IGATHERV
-      _ABI_MPI_CHECK_IALLREDUCE
+      _ABI_MPI_CHECK_IBCAST()
+      _ABI_MPI_CHECK_IALLTOALL()
+      _ABI_MPI_CHECK_IALLTOALLV()
+      _ABI_MPI_CHECK_IGATHERV()
+      _ABI_MPI_CHECK_IALLREDUCE()
 
     fi # sd_mpi_ok
 

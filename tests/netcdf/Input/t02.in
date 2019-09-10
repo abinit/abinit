@@ -1,5 +1,5 @@
 # Crystalline LiF
-# Generation of the KSS file with ETSF_IO
+# Generation of the KSS file with ETSF File Format
 iomode 3
 # Number of datasets: 2-step calculation
 ndtset 2

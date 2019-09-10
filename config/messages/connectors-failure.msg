@@ -9,7 +9,7 @@ To address this issue, you may:
   \\* make sure that the prerequisites of the external
     packages are available and enabled, e.g.
     --with-dft-flavor=\\"libxc+bigdft\\"\\ or
-    --with-trio-flavor=\\"netcdf+etsf_io\\";
+    --with-trio-flavor=\\"netcdf\\";
 
   \\* use the --with-\\*-bins, --with-\\*-incs, and
     --with-\\*-libs options of configure to provide

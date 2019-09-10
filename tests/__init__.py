@@ -145,7 +145,7 @@ _tsuite_dirs = [
     #"buildsys",
     "built-in",
     #"cpu",      This directory is disabled
-    "etsf_io",
+    "netcdf",
     "fast",
     "psml",
     "gpu",
@@ -916,7 +916,6 @@ KNOWN_KEYWORDS = {
     "DOS": "electronic DOS calculations",
     "STS": "STS calculations",
     "CTQMC": "CTQMC method for DMFT",
-    "ETSF_IO": "Tests using ETSF-IO library",
     "netcdf": "Tests using netcdf",
     "WVL": "Wavelets",
     "PIMD": "Path integral molecular dynamics",

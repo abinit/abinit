@@ -154,7 +154,7 @@ ABI_CHARACTERISTICS = [
 ABI_EXTERNAL_PARAMS = OrderedDict([
     ("AUTO_FROM_PSP", "Means that the value is read from the PSP file"),
     ("CUDA", "True if CUDA is enabled (compilation)"),
-    ("ETSF_IO", "True if ETSF_IO is enabled (compilation)"),
+    ("ETSF_IO", "True if NetCDF is enabled (compilation)"),
     ("FFTW3", "True if FFTW3 is enabled (compilation)"),
     ("MPI_IO", "True if MPI_IO is enabled (compilation)"),
     ("NPROC", "Number of processors used for Abinit"),

@@ -18,7 +18,6 @@ fi
   --srcdir="@abinit_srcdir@/fallbacks" \
   --enable-atompaw="@abi_atompaw_fbk@" \
   --enable-bigdft="@abi_bigdft_fbk@" \
-  --enable-etsf_io="@abi_etsf_io_fbk@" \
   --enable-libxc="@abi_libxc_fbk@" \
   --enable-linalg="@abi_linalg_fbk@" \
   --enable-netcdf="@abi_netcdf_fbk@" \
@@ -26,8 +25,6 @@ fi
   --with-fc-vendor="@abi_fc_vendor@" \
   --with-fc-version="@abi_fc_version@" \
   --with-tardir="${HOME}/.abinit/tarballs" \
-  --with-etsf-io-incs="@afb_etsf_io_incs@" \
-  --with-etsf-io-libs="@afb_etsf_io_libs@" \
   --with-libxc-incs="@afb_libxc_incs@" \
   --with-libxc-libs="@afb_libxc_libs@" \
   --with-linalg-incs="@afb_linalg_incs@" \

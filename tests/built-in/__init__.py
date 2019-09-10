@@ -14,7 +14,7 @@ inp_files = [
 "testin_v1.in",
 "testin_v5.in",
 "testin_bigdft.in",
-"testin_etsf_io.in",
 "testin_libxc.in",
+"testin_netcdf.in",
 "testin_wannier90.in",
 ]

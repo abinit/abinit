@@ -22,7 +22,7 @@ FPP="@FPP@"
 FPPFLAGS="@FPPFLAGS@"
 DEFS=""
 INCLUDES=""
-INCLUDES_NAG="@lib_netcdf_incs@ @lib_etsf_io_incs@"
+INCLUDES_NAG="@abi_netcdf_fcflags@"
 
 # Fortran compiler
 FC="@FC_NOWRAP@"

@@ -13,7 +13,7 @@
 
 
 
-# _ABI_CHECK_CC_GNU(COMPILER)
+# _ABI_CC_CHECK_GNU(COMPILER)
 # ---------------------------
 #
 # Checks whether the specified C compiler is the GNU C compiler.
@@ -22,11 +22,11 @@
 #
 # Note: This macro should be called after AC_PROG_CC.
 #
-AC_DEFUN([_ABI_CHECK_CC_GNU],[
-  dnl Do some sanity checking of the arguments
+AC_DEFUN([_ABI_CC_CHECK_GNU],[
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  dnl AC_MSG_CHECKING([if we are using the GNU C compiler])
+  # AC_MSG_CHECKING([if we are using the GNU C compiler])
   cc_info_string=`$1 --version 2>&1 | ${EGREP} '^g?cc' | head -n 1`
   if test "${ac_cv_c_compiler_gnu}" != "yes"; then
     abi_cc_vendor="unknown"
@@ -44,23 +44,23 @@ AC_DEFUN([_ABI_CHECK_CC_GNU],[
     fi
     abi_result="yes"
   fi
-  dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_CC_GNU
+  # AC_MSG_RESULT(${abi_result})
+]) # _ABI_CC_CHECK_GNU
 
 
 
-# _ABI_CHECK_CC_IBM(COMPILER)
+# _ABI_CC_CHECK_IBM(COMPILER)
 # ---------------------------
 #
 # Checks whether the specified C compiler is the IBM XL C compiler.
 # If yes, tries to determine its version number and sets the abi_cc_vendor
 # and abi_cc_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_CC_IBM],[
-  dnl Do some sanity checking of the arguments
+AC_DEFUN([_ABI_CC_CHECK_IBM],[
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  dnl AC_MSG_CHECKING([if we are using the IBM XL C compiler])
+  # AC_MSG_CHECKING([if we are using the IBM XL C compiler])
   cc_info_string=`$1 -qversion 2>&1 | head -n 1`
   cc_garbage=`$1 -qversion 2>&1 | wc -l | sed -e 's/ //g'`
   abi_result=`echo "${cc_info_string}" | grep 'IBM XL C/C++'`
@@ -93,23 +93,23 @@ AC_DEFUN([_ABI_CHECK_CC_IBM],[
     fi
     abi_result="yes"
   fi
-  dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_CC_IBM
+  # AC_MSG_RESULT(${abi_result})
+]) # _ABI_CC_CHECK_IBM
 
 
 
-# _ABI_CHECK_CC_INTEL(COMPILER)
+# _ABI_CC_CHECK_INTEL(COMPILER)
 # -----------------------------
 #
 # Checks whether the specified C compiler is the Intel C compiler.
 # If yes, tries to determine its version number and sets the abi_cc_vendor
 # and abi_cc_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_CC_INTEL],[
-  dnl Do some sanity checking of the arguments
+AC_DEFUN([_ABI_CC_CHECK_INTEL],[
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  dnl AC_MSG_CHECKING([if we are using the Intel C compiler])
+  # AC_MSG_CHECKING([if we are using the Intel C compiler])
   cc_info_string=`$1 -V 2>&1 | head -n 1`
   abi_result=`echo "${cc_info_string}" | grep '^Intel(R) C'`
   if test "${abi_result}" = ""; then
@@ -126,23 +126,23 @@ AC_DEFUN([_ABI_CHECK_CC_INTEL],[
     fi
     abi_result="yes"
   fi
-  dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_CC_INTEL
+  # AC_MSG_RESULT(${abi_result})
+]) # _ABI_CC_CHECK_INTEL
 
 
 
-# _ABI_CHECK_CC_PGI(COMPILER)
+# _ABI_CC_CHECK_PGI(COMPILER)
 # ---------------------------
 #
 # Checks whether the specified C compiler is the Portland Group C compiler.
 # If yes, tries to determine its version number and sets the abi_cc_vendor
 # and abi_cc_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_CC_PGI],[
-  dnl Do some sanity checking of the arguments
+AC_DEFUN([_ABI_CC_CHECK_PGI],[
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  dnl AC_MSG_CHECKING([if we are using the PGI C compiler])
+  # AC_MSG_CHECKING([if we are using the PGI C compiler])
   cc_info_string=`$1 -V 2>&1 | sed -e '/^$/d' | head -n 1`
   abi_result=`echo "${cc_info_string}" | grep '^pgcc'`
   if test "${abi_result}" = ""; then
@@ -159,8 +159,8 @@ AC_DEFUN([_ABI_CHECK_CC_PGI],[
     fi
     abi_result="yes"
   fi
-  dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_CC_PGI
+  # AC_MSG_RESULT(${abi_result})
+]) # _ABI_CC_CHECK_PGI
 
 
 
@@ -168,13 +168,13 @@ AC_DEFUN([_ABI_CHECK_CC_PGI],[
 
 
 
-# _ABI_CHECK_CC_HEADERS()
+# _ABI_CC_CHECK_HEADERS()
 # -----------------------
 #
 # Checks for header files.
 #
-AC_DEFUN([_ABI_CHECK_CC_HEADERS],[
-  dnl Look for standard headers
+AC_DEFUN([_ABI_CC_CHECK_HEADERS],[
+  # Look for standard headers
   AC_HEADER_ASSERT
   AC_CHECK_HEADERS([stdio.h string.h termios.h unistd.h])
   AC_CHECK_HEADERS([errno.h])
@@ -182,7 +182,7 @@ AC_DEFUN([_ABI_CHECK_CC_HEADERS],[
   AC_CHECK_HEADERS([mcheck.h time.h])
   AC_CHECK_HEADERS([sys/ioctl.h sys/resource.h sys/stat.h sys/time.h sys/types.h])
 
-  dnl Look for malloc.h
+  # Look for malloc.h
   CPPFLAGS_MALLOC=""
   AC_CHECK_HEADERS([sys/malloc.h])
   AC_CHECK_HEADERS([malloc.h], [abi_hdr_malloc="yes"], [abi_hdr_malloc="no"])
@@ -190,33 +190,33 @@ AC_DEFUN([_ABI_CHECK_CC_HEADERS],[
     AC_CHECK_HEADERS([malloc/malloc.h],
       [abi_hdr_malloc="yes"], [abi_hdr_malloc="no"])
   fi
-]) # _ABI_CHECK_CC_HEADERS
+]) # _ABI_CC_CHECK_HEADERS
 
 
 
-# _ABI_CHECK_CC_FUNCTIONS()
+# _ABI_CC_CHECK_FUNCTIONS()
 # -------------------------
 #
 # Checks for library functions.
 #
-AC_DEFUN([_ABI_CHECK_CC_FUNCTIONS],[
-  dnl Init AC_MSG_CHECKING([for library functions])
+AC_DEFUN([_ABI_CC_CHECK_FUNCTIONS],[
+  # Init AC_MSG_CHECKING([for library functions])
 
-  dnl AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime]) 
+  # AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime]) 
   AC_CHECK_FUNCS([abort])
   AC_CHECK_FUNCS([mallinfo])
 
-]) # _ABI_CHECK_CC_FUNCTIONS
+]) # _ABI_CC_CHECK_FUNCTIONS
 
 
 
-# _ABI_CHECK_CC_FEATURES()
-# ------------------------
+# _ABI_CC_CHECK_TYPES()
+# ---------------------
 #
 # Checks for typedefs, structures, and compiler characteristics.
 #
-AC_DEFUN([_ABI_CHECK_CC_FEATURES],[
-  dnl Init AC_MSG_CHECKING([for C compiler characteristics])
+AC_DEFUN([_ABI_CC_CHECK_TYPES],[
+  # Init AC_MSG_CHECKING([for C compiler characteristics])
 
   AC_CHECK_SIZEOF(char)
   AC_CHECK_SIZEOF(short)
@@ -235,9 +235,40 @@ AC_DEFUN([_ABI_CHECK_CC_FEATURES],[
   AC_C_CONST
   AC_TYPE_SIZE_T
   AC_C_BIGENDIAN
-  dnl AC_TYPE_PID_T
+  # AC_TYPE_PID_T
 
-]) # _ABI_CHECK_CC_FEATURES
+]) # _ABI_CC_CHECK_TYPES
+
+
+
+# _ABI_CC_CHECK_XML()
+# -------------------
+#
+# Checks for LibXML2, a basic requirement on any decent Unix-like system.
+#
+AC_DEFUN([_ABI_CC_CHECK_XML],[
+  abi_libxml2_fcflags=""
+  abi_libxml2_incs=""
+  abi_libxml2_ldflags=""
+  abi_libxml2_libs=""
+  if test "${enable_xml}" = "yes" -o "${enable_xml}" = "auto"; then
+    AC_LANG_PUSH([C])
+    AM_PATH_XML2([2.7.6], [abi_libxml2_ok="yes"], [abi_libxml2_ok="no"])
+    AC_LANG_POP([C])
+    if test "${abi_libxml2_ok}" = "yes"; then
+      AC_DEFINE([HAVE_XML], 1, [Define to 1 if you want XML support.])
+      abi_libxml2_incs="${XML_CPPFLAGS}"
+      abi_libxml2_libs="${XML_LIBS}"
+    else
+      AC_MSG_WARN([could not find a usable XML library => disabling XML support])
+      enable_xml="no"
+    fi
+  fi
+  AC_SUBST(abi_libxml2_fcflags)
+  AC_SUBST(abi_libxml2_incs)
+  AC_SUBST(abi_libxml2_ldflags)
+  AC_SUBST(abi_libxml2_libs)
+]) # _ABI_CC_CHECK_XML
 
 
 
@@ -251,10 +282,11 @@ AC_DEFUN([_ABI_CHECK_CC_FEATURES],[
 # Explores the capabilities of the C compiler.
 #
 AC_DEFUN([ABI_CC_FEATURES],[
-  dnl Explore compiler peculiarities
-  _ABI_CHECK_CC_HEADERS
-  _ABI_CHECK_CC_FUNCTIONS
-  _ABI_CHECK_CC_FEATURES
+  # Explore compiler peculiarities
+  _ABI_CC_CHECK_HEADERS
+  _ABI_CC_CHECK_FUNCTIONS
+  _ABI_CC_CHECK_TYPES
+  _ABI_CC_CHECK_XML
 ]) # ABI_CC_FEATURES
 
 
@@ -265,12 +297,15 @@ AC_DEFUN([ABI_CC_FEATURES],[
 # Tries to determine which type of C compiler is installed.
 #
 AC_DEFUN([ABI_PROG_CC],[
-  dnl Init
+  # Init
   if test "${abi_cc_vendor}" = ""; then
     abi_cc_vendor="unknown"
   fi
 
-  dnl Look for the C compiler
+  # Preserve environment
+  ABI_ENV_BACKUP
+
+  # Look for the C compiler
   if test "${CC}" != "" -a ! -x "${CC}"; then
     abi_cc_probe=`echo "${CC}" | sed -e 's/ .*//'`
     if test ! -x "${abi_cc_probe}"; then
@@ -282,12 +317,12 @@ AC_DEFUN([ABI_PROG_CC],[
   fi
   AC_PROG_CC
 
-  dnl Fail if no C compiler is available
+  # Fail if no C compiler is available
   if test "${CC}" = ""; then
     AC_MSG_ERROR([no C compiler available])
   fi
 
-  dnl Look for the C preprocessor
+  # Look for the C preprocessor
   if test "${CPP}" != "" -a ! -x "${CPP}"; then
     AC_PATH_PROG([abi_cpp_path], [${CPP}])
     if test "${abi_cpp_path}" = ""; then
@@ -296,45 +331,46 @@ AC_DEFUN([ABI_PROG_CC],[
   fi
   AC_PROG_CPP
 
-  dnl Fail if no C preprocessor is available
+  # Fail if no C preprocessor is available
   if test "${CPP}" = ""; then
     AC_MSG_ERROR([no C preprocessor available])
   fi
 
-  dnl Determine C compiler type (the order is important)
+  # Determine C compiler vendor (the order is critical)
   AC_MSG_CHECKING([which type of compiler we have])
-
-  dnl Always get rid of that one as early as possible
   if test "${abi_cc_vendor}" = "unknown"; then
-    _ABI_CHECK_CC_IBM(${CC})
-  fi
-
-  if test "${abi_cc_vendor}" = "unknown"; then
-    _ABI_CHECK_CC_INTEL(${CC})
+    _ABI_CC_CHECK_IBM(${CC})
   fi
   if test "${abi_cc_vendor}" = "unknown"; then
-    _ABI_CHECK_CC_PGI(${CC})
+    _ABI_CC_CHECK_INTEL(${CC})
   fi
-
-  dnl Check the GNU compiler last, because other compilers are cloning
-  dnl its CLI
   if test "${abi_cc_vendor}" = "unknown"; then
-    _ABI_CHECK_CC_GNU(${CC})
+    _ABI_CC_CHECK_PGI(${CC})
   fi
 
-  dnl Fall back to generic when detection fails
+  # Check the GNU compiler last, because other compilers are cloning
+  # its CLI
+  if test "${abi_cc_vendor}" = "unknown"; then
+    _ABI_CC_CHECK_GNU(${CC})
+  fi
+
+  # Fall back to generic when detection fails
   if test "${abi_cc_vendor}" = "unknown"; then
     abi_cc_vendor="generic"
     abi_cc_version="0.0"
   fi
 
-  dnl Normalize C compiler version
+  # Normalize C compiler version
   abi_cc_version=`echo ${abi_cc_version} | cut -d. -f1-2`
 
-  dnl Display final result
+  # Display final result
   AC_MSG_RESULT([${abi_cc_vendor} ${abi_cc_version}])
 
-  dnl Schedule compiler info for substitution
+  # Restore back CPPFLAGS and CFLAGS
+  CPPFLAGS="${abi_env_CPPFLAGS}"
+  CFLAGS="${abi_env_CFLAGS}"
+
+  # Schedule compiler info for substitution
   AC_SUBST(abi_cc_vendor)
   AC_SUBST(abi_cc_version)
   AC_SUBST(cc_info_string)

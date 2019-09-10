@@ -416,16 +416,6 @@ AC_DEFUN([ABI_INIT_HEADER],[
 
 #endif /* HAVE_MPI */
 
-/* ETSF_IO support */
-#if defined HAVE_ETSF_IO
-
-/* Check that NetCDF is defined */
-#if ! defined HAVE_NETCDF
-#error "HAVE_NETCDF must but defined for ETSF_IO to work"
-#endif
-
-#endif /* HAVE_ETSF_IO */
-
 /* *** END sanity checks *** */
 
 #endif /* _ABINIT_CONFIG_H */])
