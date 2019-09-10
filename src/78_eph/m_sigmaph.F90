@@ -1636,23 +1636,26 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              phfrq_fine = sigma%ephwg%phfrq_ibz(iq_ibz_fine,:)
              !call ifc%fourq(cryst, qpt_fine, phfrq_fine, displ_cart_fine, comm=sigma%pert_comm%value)
              do imyp=1,my_npert
-               ipc = sigma%my_pinfo(3, imyp)
-               !gkqg_fine = get_frohlich(cryst,ifc,qpt_fine,,ipc,phfrq_fine,displ_cart,sigma%qdamp,osc_npw,osc_gvecq)
-               gkqg_fine = get_frohlich(cryst,ifc,qpt_fine,ipc,phfrq_fine,displ_cart,sigma%qdamp,osc_npw,osc_gvecq)
+               nu = sigma%my_pinfo(3, imyp)
+               !gkqg_fine = get_frohlich(cryst,ifc,qpt_fine,nu,phfrq_fine,displ_cart,sigma%qdamp,osc_npw,osc_gvecq)
+               gkqg_fine = get_frohlich(cryst,ifc,qpt_fine,nu,phfrq_fine,displ_cart,sigma%qdamp,osc_npw,osc_gvecq)
                if (osc_ecut > zero) then
                  do ispinor=1,nspinor
                    do ib_k=1,nbcalc_ks
                      osc_ks_bs = osc_ks((ispinor-1)*osc_npw+1:ispinor*osc_npw,ib_k)
-                     gkq2_lr(jj,ib_k,ipc) = gkq2_lr(jj,ib_k,ipc) +  real(sum(gkqg_fine*osc_ks_bs))**2 + &
+                     gkq2_lr(jj,ib_k,imyp) = gkq2_lr(jj,ib_k,imyp) +  real(sum(gkqg_fine*osc_ks_bs))**2 + &
                                                                    aimag(sum(gkqg_fine*osc_ks_bs))**2
                    end do
                  end do
                else
+                 osc_npw = 1
+                 osc_gvecq(:,1) = [0,0,0]
                  do ib_k=1,nbcalc_ks
-                   band_ks = ib_k + bstart_ks - 1
-                   if (ibsum_kq /= band_ks) cycle
-                   gkq2_lr(jj,ib_k,ipc) =  real(sum(gkqg_fine))**2 + &
-                                          aimag(sum(gkqg_fine))**2
+                   ikq_ibz_fine = sigma%eph_doublegrid%mapping(5, jj)
+                   eig0mkq = sigma%eph_doublegrid%ebands_dense%eig(ibsum_kq, ikq_ibz_fine, spin)
+                   if (abs(eig0nk - eig0mkq) < TOL_EDIFF) cycle
+                   gkq2_lr(jj,ib_k,imyp) =  real(sum(gkqg_fine))**2 + &
+                                           aimag(sum(gkqg_fine))**2
                  end do
                end if
              end do
@@ -1820,7 +1823,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
                      ! Add Frohlich contribution
                      gkq2_pf = gkq2
-                     if (sigma%frohl_model == 3) gkq2_pf = gkq2_pf + weight_q * gkq2_lr(jj,ib_k,nu)
+                     if (sigma%frohl_model == 3) gkq2_pf = gkq2_pf + weight_q * gkq2_lr(jj,ib_k,imyp)
 
                      if (sigma%imag_only) then
                        ! Note pi factor from Sokhotski-Plemelj theorem.
