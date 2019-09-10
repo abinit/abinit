@@ -146,6 +146,10 @@ for lib in abinit_corelibs:
   else:
     include_dirs = []
 
+  # FIXME: abisrc.py glitches
+  if ( lib in ["57_iovars", "66_nonlocal", "70_gw"] ):
+    include_dirs.append("33_xc_lowlevel")
+
   # Add special dirs to include list
   include_dirs += ["common", "core"]
 

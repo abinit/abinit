@@ -186,7 +186,7 @@ for bin in main_bins:
     bin_deps = list()
   bin_opt = bin_cnf.get(bin,"optional")
   bin_cppflags = ""
-  bin_fcflags = "@src_incs_fcflags@"
+  bin_fcflags = "@src_common_fcflags@ @src_core_fcflags@"
   bin_ldflags = ""
   bin_libs = ""
 

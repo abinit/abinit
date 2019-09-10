@@ -679,7 +679,7 @@ EOF
 #
 AC_DEFUN([ABI_MPI_INIT], [
   # Delegate most of the init stage to Steredeg
-  SD_MPI_INIT([no optional fail no-cxx], [-lmpi])
+  SD_MPI_INIT([optional fail no-cxx], [-lmpi])
 
   # Init ABINIT MPI variables
   abi_mpi_enable="${sd_mpi_enable}"
