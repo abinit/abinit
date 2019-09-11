@@ -519,6 +519,7 @@ module m_chebfi2
     !print *, "RANK", xmpi_comm_rank(chebfi%spacecom)
     !stop
     
+    !print *, "COUNTER", counter
     !if (counter == 1) stop
     ! Transpose
     if (chebfi%paral_kgb == 1) then
@@ -867,6 +868,7 @@ module m_chebfi2
       !if (counter == 2) stop
     end if 
     
+    !print *, "BEFORE LOOP"
     !stop
     
     do iline = 0, nline - 1 
@@ -881,6 +883,7 @@ module m_chebfi2
 !        stop    
       end if
       
+      !stop
       call debug_helper_colrows(chebfi%X_next, chebfi, "X_next COLROWS BEFORE chebfi_computeNextOrderChebfiPolynom") 
       call debug_helper_colrows(chebfi%xBXColsRows, chebfi, "xBXColsRows BEFORE chebfi_computeNextOrderChebfiPolynom")
       
@@ -890,7 +893,7 @@ module m_chebfi2
       
       call debug_helper_colrows(chebfi%X_next, chebfi, "X_next COLROWS AFTER chebfi_computeNextOrderChebfiPolynom")  
       call debug_helper_colrows(chebfi%xBXColsRows, chebfi, "xBXColsRows AFTER chebfi_computeNextOrderChebfiPolynom") !MPI 1,2 OK
-      
+      !stop
       if (iline == 2) then
 !        print *, "2 after chebfi_computeNextOrderChebfiPolynom"
 !        call xgBlock_setBlock(chebfi%X_next, chebfi%xXColsRows, 1, chebfi%total_spacedim, chebfi%bandpp)  
@@ -1061,6 +1064,8 @@ module m_chebfi2
       
     end do
     
+    !print *, "AFTER LOOP" 
+    !stop
     !call xg_getPointer(chebfi%xAXColsRows, 101) 
     
     if (counter < 8) then
@@ -1226,6 +1231,8 @@ module m_chebfi2
    
     !call xg_getPointer(chebfi%xXColsRows)
     !Filtering done transpose back 
+    !print *, "BEFORE BACKTRANSPOS"
+    !stop
     if (chebfi%paral_kgb == 1) then
     
       call xmpi_barrier(chebfi%spacecom)
@@ -1269,6 +1276,8 @@ module m_chebfi2
       !end if
     end if
     
+    !print *, "AFTER BACKTRANSPOSE"
+    !stop
 !    print *, "************************"
 !    print *, "BITNI POINTERI"
 !    print *, "xXcolsRows"
@@ -1310,8 +1319,9 @@ module m_chebfi2
     maximum =  chebfi_computeResidue(chebfi, residu, pcond)
     call timab(tim_residu, 2, tsec)
     
-    print *, "RESIDUE", maximum
-                       
+    !print *, "RESIDUE", maximum
+    !stop
+                   
     deallocate(nline_bands)
     
     if (xmpi_comm_size(chebfi%spacecom) > 1) then
@@ -1358,6 +1368,7 @@ module m_chebfi2
     !stop
     
     call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X at the end of the CB2 RUN") !MPI 1,2 OK
+    print *, "END OF RUN"
     !stop   
      
   end subroutine chebfi_run
@@ -2301,7 +2312,8 @@ module m_chebfi2
     
     !pcond call
     call timab(tim_pcond,1,tsec)
-    call pcond(chebfi%AX%self)    !zar ovde ne ide AX_swap???
+    !call pcond(chebfi%AX%self)    !zar ovde ne ide AX_swap???
+    call pcond(chebfi%AX_swap)
     call timab(tim_pcond,2,tsec)
     
     !print *, "AX_swap after pcond"
