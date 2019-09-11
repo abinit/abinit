@@ -151,11 +151,7 @@ for lib in abinit_corelibs:
     include_dirs.append("33_xc_lowlevel")
 
   # Add special dirs to include list
-  include_dirs += ["common", "core"]
-
-  # Import interfaces
-  #if ( os.path.exists("src/%s/interfaces_%s.F90" % (lib,lib)) ):
-  #  sources.append("interfaces_%s.F90" % (lib))
+  include_dirs += ["common", "core", "libpaw"]
 
   # Initialize internal variables
   dd_srcs = "lib%s_srcs =" % (lib)

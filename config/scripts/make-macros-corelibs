@@ -109,7 +109,11 @@ inc = ""
 sub = ""
 
 # Process special include dirs
-inc_blocks = {"common": "shared/common/src", "core":"src"}
+inc_blocks = {
+    "common":"shared/common/src",
+    "core":"src",
+    "libpaw":"shared/libpaw",
+}
 for block, subdir in inc_blocks.items():
   inc += "  src_%s_fcflags='" % block
   for incdir in ["incs", "mods"]:

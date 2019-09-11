@@ -113,7 +113,7 @@ else:
   include_dirs = []
 
 # Common and core include lists
-include_dirs = ["common", "core"]
+include_dirs = ["common", "core", "libpaw"]
 
 for tmp in include_dirs:
   inc_list += " \\\n\t@src_%s_fcflags@" % (tmp)
@@ -186,7 +186,7 @@ for bin in main_bins:
     bin_deps = list()
   bin_opt = bin_cnf.get(bin,"optional")
   bin_cppflags = ""
-  bin_fcflags = "@src_common_fcflags@ @src_core_fcflags@"
+  bin_fcflags = "@src_common_fcflags@ @src_core_fcflags@ @src_libpaw_fcflags@"
   bin_ldflags = ""
   bin_libs = ""
 

@@ -504,7 +504,7 @@ ABI_MSG_SECTION([Optimizations])
 abi_optim_flavor="${with_optim_flavor}"
 if test "${abi_debug_source}" = "yes"; then
   if test "${abi_optim_flavor}" != "none"; then
-    AC_MSG_WARN([disabling optimisations])
+    AC_MSG_WARN([disabling optimizations])
   fi
   abi_optim_flavor="none"
 fi
@@ -513,7 +513,7 @@ fi
 # Note: must be done only once debugging is configured
 ABI_OPTIM_INIT([${abi_optim_flavor}])
 
-# FIXME: 20_datashare does not support optimisations
+# FIXME: 20_datashare does not support optimizations
 if test "${abi_optim_flavor}" != "none"; then
   AC_MSG_NOTICE([disabling optimizations for src/20_datashare/])
   fcflags_opt_20_datashare="-O0"
@@ -920,21 +920,6 @@ ABI_OPTIONS_DEFINES
 # ---------------------------------------------------------------------------- #
 
 #
-# Configure subsystems
-#
-
-# Note: options must have been processed, in order to take proper
-# decisions
-
-ABI_MSG_SECTION([Subsystems])
-
-# Init all subsystems
-ABI_SUBSYSTEMS_INIT
-
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-#
 # Buggy Fortran compilers
 #
 
@@ -969,8 +954,6 @@ CPPFLAGS=""
 #
 
 ABI_MSG_SECTION([Output])
-
-ac_configure_args="${ac_configure_args} --enable-atompaw=${enable_atompaw} --enable-bigdft=${enable_bigdft} --enable-libxc=${enable_libxc} --enable-linalg=${enable_linalg} --enable-netcdf=${enable_netcdf} --enable-wannier90=${enable_wannier90} --with-fc-vendor=${abi_fc_vendor} --with-fc-version=${abi_fc_version} --with-tardir='${abinit_tardir}'"
 
 # Output files
 # Note: later, add tests/atconfig and tests/atlocal for test suite

@@ -129,8 +129,7 @@ for parent in abinit_parents:
     "optional": [],
     "subdirs": [],
   }
-  if ( parent != "libpaw" ):
-    lib_specs["subdirs"] += ["incs", "mods"]
+  lib_specs["subdirs"] += ["incs", "mods"]
   for lib in abinit_libs:
     if ( parent == "libpaw" ):
       subdir = "src"
