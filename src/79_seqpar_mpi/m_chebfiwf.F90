@@ -174,7 +174,9 @@ module m_chebfiwf
   blockdim=l_mpi_enreg%nproc_band*l_mpi_enreg%bandpp
   !for debug
   l_useria=dtset%useria
-   
+  !rint *, "BANDPP", l_mpi_enreg%nproc_band*l_mpi_enreg%bandpp
+  !top  
+
   !Depends on istwfk
   if ( l_istwf == 2 ) then ! Real only
     ! SPACE_CR mean that we have complex numbers but no re*im terms only re*re
@@ -343,7 +345,8 @@ module m_chebfiwf
   !print *, "mpi_enreg%comm_bandspinorfft BEFORE CB2", l_mpi_enreg%comm_bandspinorfft 
   
   call chebfi_run(chebfi, xgx0, getghc_gsc1, getBm1X, precond1, xgeigen, xgresidu, counter, l_mpi_enreg) 
-  
+  !stop  
+
   print *, "mpi_enreg%comm_fft AFTER CB2, rank", l_mpi_enreg%comm_fft, xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft)
   print *, "mpi_enreg%comm_band AFTER CB2, rank", l_mpi_enreg%comm_band, xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft)
   !print *, "mpi_enreg%comm_kpt AFTER CB2", l_mpi_enreg%comm_kpt
@@ -379,7 +382,9 @@ module m_chebfiwf
 !    call xgBlock_scale(xgx0,inv_sqrt2,1)
 !    if(l_mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * sqrt2 !not sure what this does exactly
 !  end if
-    
+  
+  print *, "BEFORE CBWF2 NONLOP"
+  !stop  
   ! Compute enlout (nonlocal energy for each band if necessary) This is the best
   ! quick and dirty trick to compute this part in NC. gvnlc cannot be part of
   ! chebfi algorithm 
@@ -398,29 +403,29 @@ module m_chebfiwf
 &                signs,gsc_dummy,l_tim_getghc,cg,l_gvnlc)
 
     else
-!      do iband=1,nband
-!        shift = (iband-1)*l_npw*l_nspinor
-!        call prep_nonlop(choice,l_cpopt,cprj_dum, &
-!&       enl_out((iband-1)+1:iband),l_gs_hamk,0,&
-!&       eig((iband-1)+1:iband),1,mpi_enreg,1,paw_opt,signs,& 1=blockdim?
-!&       gsc_dummy,l_tim_getghc, &
-!&       cg(:,shift+1:shift+l_npw*l_nspinor),&
-!&       l_gvnlc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
-!&       l_gvnlc(:,:),&
-!&       already_transposed=.false.)
-!      end do
-      
+      !do iband=1,nband
+      !  shift = (iband-1)*l_npw*l_nspinor
+      !  print *, "IBAND", iband
+      !  call prep_nonlop(choice,l_cpopt,cprj_dum, &
+      !&       enl_out((iband-1)+1:iband),l_gs_hamk,0,&
+      !&       eig((iband-1)+1:iband),1,mpi_enreg,1,paw_opt,signs,& !1=blockdim?
+      !&       gsc_dummy,l_tim_getghc, &
+      !&       cg(:,shift+1:shift+l_npw*l_nspinor),&
+      !&       l_gvnlc(:,shift+1:shift*l_npw*l_nspinor),&
+      !!&       l_gvnlc(:,:),&
+      !&       already_transposed=.false.)
+      !end do
      do iband=1,nband/blockdim
        shift = (iband-1)*blockdim*l_npw*l_nspinor
-      call prep_nonlop(choice,l_cpopt,cprj_dum, &
+       call prep_nonlop(choice,l_cpopt,cprj_dum, &
 &       enl_out((iband-1)*blockdim+1:iband*blockdim),l_gs_hamk,0,&
 &       eig((iband-1)*blockdim+1:iband*blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
 &       gsc_dummy,l_tim_getghc, &
 &       cg(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
-!&       l_gvnlc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
+!&      l_gvnlc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
 &       l_gvnlc(:,:),&
 &       already_transposed=.false.)
-     end do
+      end do
     end if
     !Compute enlout
 !   do iband=1,nband
@@ -429,6 +434,8 @@ module m_chebfiwf
 !  &     l_gvnlc(:, shift+1:shift+npw*nspinor),mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
 !   end do
   end if
+
+  print *, "AFTER CBWF2 NONLOP"
 
   ABI_FREE(l_gvnlc)
 
@@ -452,6 +459,8 @@ module m_chebfiwf
     MSG_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
   end if
  
+  print *, "END OF CBWF2"
+  !stop
   DBG_EXIT("COLL")
  
   end subroutine chebfiwf2
