@@ -231,6 +231,13 @@ AC_DEFUN([SD_LIBXC_DETECT], [
         AC_MSG_FAILURE([invalid LibXC configuration])
       fi
     fi
+  else
+    sd_libxc_enable="no"
+    sd_libxc_cppflags=""
+    sd_libxc_cflags=""
+    sd_libxc_fcflags=""
+    sd_libxc_ldflags=""
+    sd_libxc_libs=""
   fi
 ])
 

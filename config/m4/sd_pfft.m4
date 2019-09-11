@@ -202,6 +202,12 @@ AC_DEFUN([SD_PFFT_DETECT], [
         AC_MSG_FAILURE([invalid PFFT configuration])
       fi
     fi
+  else
+    sd_pfft_enable="no"
+    sd_pfft_cppflags=""
+    sd_pfft_cflags=""
+    sd_pfft_ldflags=""
+    sd_pfft_libs=""
   fi
 ])
 

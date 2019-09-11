@@ -203,6 +203,12 @@ AC_DEFUN([SD_WANNIER90_DETECT], [
         AC_MSG_FAILURE([invalid Wannier90 configuration])
       fi
     fi
+  else
+    sd_wannier90_enable="no"
+    sd_wannier90_cppflags=""
+    sd_wannier90_fcflags=""
+    sd_wannier90_ldflags=""
+    sd_wannier90_libs=""
   fi
 ])
 

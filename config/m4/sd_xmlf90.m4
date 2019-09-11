@@ -203,6 +203,12 @@ AC_DEFUN([SD_XMLF90_DETECT], [
         AC_MSG_FAILURE([invalid XMLF90 configuration])
       fi
     fi
+  else
+    sd_xmlf90_enable="no"
+    sd_xmlf90_cppflags=""
+    sd_xmlf90_fcflags=""
+    sd_xmlf90_ldflags=""
+    sd_xmlf90_libs=""
   fi
 ])
 

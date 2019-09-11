@@ -207,6 +207,12 @@ AC_DEFUN([SD_FFTW3_DETECT], [
         AC_MSG_FAILURE([invalid FFTW3 configuration])
       fi
     fi
+  else
+    sd_fftw3_enable="no"
+    sd_fftw3_cppflags=""
+    sd_fftw3_cflags=""
+    sd_fftw3_ldflags=""
+    sd_fftw3_libs=""
   fi
 ])
 

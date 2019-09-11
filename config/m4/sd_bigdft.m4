@@ -203,6 +203,12 @@ AC_DEFUN([SD_BIGDFT_DETECT], [
         AC_MSG_FAILURE([invalid BigDFT configuration])
       fi
     fi
+  else
+    sd_bigdft_enable="no"
+    sd_bigdft_cppflags=""
+    sd_bigdft_fcflags=""
+    sd_bigdft_ldflags=""
+    sd_bigdft_libs=""
   fi
 ])
 

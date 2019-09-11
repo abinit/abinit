@@ -253,6 +253,14 @@ AC_DEFUN([SD_NETCDF_DETECT], [
         AC_MSG_FAILURE([invalid NetCDF configuration])
       fi
     fi
+  else
+    sd_netcdf_enable="no"
+    sd_netcdf_cppflags=""
+    sd_netcdf_cflags=""
+    sd_netcdf_cxxflags=""
+    sd_netcdf_fcflags=""
+    sd_netcdf_ldflags=""
+    sd_netcdf_libs=""
   fi
 ])
 

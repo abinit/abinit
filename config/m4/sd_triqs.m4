@@ -223,8 +223,13 @@ AC_DEFUN([SD_TRIQS_DETECT], [
         AC_MSG_FAILURE([invalid TRIQS configuration])
       fi
     fi
-
-
+  else
+    sd_triqs_enable="no"
+    sd_triqs_cppflags=""
+    sd_triqs_cflags=""
+    sd_triqs_cxxflags=""
+    sd_triqs_ldflags=""
+    sd_triqs_libs=""
   fi
 ])
 

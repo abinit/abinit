@@ -203,6 +203,12 @@ AC_DEFUN([SD_LIBPSML_DETECT], [
         AC_MSG_FAILURE([invalid LibPSML configuration])
       fi
     fi
+  else
+    sd_libpsml_enable="no"
+    sd_libpsml_cppflags=""
+    sd_libpsml_fcflags=""
+    sd_libpsml_ldflags=""
+    sd_libpsml_libs=""
   fi
 ])
 

@@ -202,6 +202,12 @@ AC_DEFUN([SD_LEVMAR_DETECT], [
         AC_MSG_FAILURE([invalid Levmar configuration])
       fi
     fi
+  else
+    sd_levmar_enable="no"
+    sd_levmar_cppflags=""
+    sd_levmar_cflags=""
+    sd_levmar_ldflags=""
+    sd_levmar_libs=""
   fi
 ])
 

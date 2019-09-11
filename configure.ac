@@ -679,13 +679,13 @@ SD_FFTW3_INIT([optional skip])
 SD_LEVMAR_INIT([optional fail])
 
 # Init LibPSML
-SD_LIBPSML_INIT([auto optional fail])
+SD_LIBPSML_INIT([optional fail])
 
 # Init LibXC
-SD_LIBXC_INIT([auto no-fortran optional fail])
+SD_LIBXC_INIT([no-fortran optional fail])
 
 # Init PAPI
-SD_NETCDF_INIT([auto no-cxx optional fail])
+SD_NETCDF_INIT([no-cxx optional fail])
 
 # Init PAPI
 SD_PAPI_INIT([optional fail])
@@ -697,7 +697,7 @@ SD_TRIQS_INIT([optional fail])
 SD_WANNIER90_INIT([optional fail], [-lwannier90])
 
 # Init XMLF90
-SD_XMLF90_INIT([auto optional fail])
+SD_XMLF90_INIT([optional fail])
 
                     # ------------------------------------ #
 

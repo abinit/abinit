@@ -191,6 +191,12 @@ AC_DEFUN([SD_PAPI_DETECT], [
         AC_MSG_FAILURE([invalid PAPI configuration])
       fi
     fi
+  else
+    sd_papi_enable="no"
+    sd_papi_cppflags=""
+    sd_papi_cflags=""
+    sd_papi_ldflags=""
+    sd_papi_libs=""
   fi
 ])
 
