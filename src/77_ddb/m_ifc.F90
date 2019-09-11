@@ -274,6 +274,7 @@ subroutine ifc_free(ifc)
  ABI_SFREE(ifc%wtq)
  ABI_SFREE(ifc%qbz)
  ABI_SFREE(ifc%zeff)
+ ABI_SFREE(ifc%qdrp_cart)
  ABI_SFREE(ifc%dynmat)
  !ABI_SFREE(ifc%dynmat_lr)
 
