@@ -140,7 +140,6 @@ for subdir in abinit_other_dirs:
   sub_files = "config/dist/auto-%s.lst" % subdir
   ext += open(sub_files, "rt").read()
 for xtrafile in os.listdir("./config/dist"):
-  print(xtrafile)
   if ( re.match("xtra-.*\\.lst", xtrafile) ):
     ext += file(os.path.join("config","dist",xtrafile),"r").read()
 ext = re.sub("\n"," \\\n\t",ext[:-1])
