@@ -77,7 +77,7 @@ def macros_triggers(name,stamp,m4_changed,m4_init,m4_summary):
 # Changed macro
 def macro_changed(trig_params):
 
-  ret = """\
+    ret = """\
 # ABI_INFO_TRIGGERS_CHANGED()
 # ----------------------
 #
@@ -87,24 +87,24 @@ AC_DEFUN([ABI_INFO_TRIGGERS_CHANGED],[
 @CHANGES@
 ]) # ABI_INFO_TRIGGERS_CHANGED"""
 
-  trig_chgs = ""
-  trig_list = sorted(trig_params.keys())
+    trig_chgs = ""
+    trig_list = sorted(trig_params.keys())
 
-  for pkg in trig_list:
+    for pkg in trig_list:
 
-    opt_name = re.sub("_","-",pkg)
-    if ( trig_params[pkg]["status"] == "new" ):
-      trig_chgs += "  AC_MSG_NOTICE([  * new feature trigger for %s available])\n" % pkg
-      trig_chgs += "  AC_MSG_NOTICE([    >>> --with-%s, --with-%s-incs, --with-%s-libs])\n" % (opt_name,opt_name,opt_name)
-      if ( "default_flavor" in trig_params[pkg] ):
-        trig_chgs += "  AC_MSG_NOTICE([    >>> --with-%s-flavor (default: %s)])\n" % (pkg,trig_params[pkg]["default_flavor"])
-    elif ( trig_params[pkg]["status"] == "removed" ):
-      trig_chgs += "  AC_MSG_NOTICE([  * removed feature trigger for %s])\n" % pkg
+        opt_name = re.sub("_","-",pkg)
+        if ( trig_params[pkg]["status"] == "new" ):
+            trig_chgs += "  AC_MSG_NOTICE([  * new feature trigger for %s available])\n" % pkg
+            trig_chgs += "  AC_MSG_NOTICE([    >>> --with-%s, %s_*FLAGS])\n" % (opt_name,opt_name.upper())
+            if ( "default_flavor" in trig_params[pkg] ):
+                trig_chgs += "  AC_MSG_NOTICE([    >>> --with-%s-flavor (default: %s)])\n" % (pkg,trig_params[pkg]["default_flavor"])
+        elif ( trig_params[pkg]["status"] == "removed" ):
+            trig_chgs += "  AC_MSG_NOTICE([  * removed feature trigger for %s])\n" % pkg
 
     if ( trig_chgs == "" ):
-      trig_chgs = "AC_MSG_NOTICE([no change in feature triggers to report])"
+        trig_chgs = "AC_MSG_NOTICE([no change in feature triggers to report])"
     else:
-      trig_chgs = """\
+        trig_chgs = """\
   AC_MSG_NOTICE([])
   AC_MSG_NOTICE([reporting changes in feature triggers:])
   AC_MSG_NOTICE([])\n""" + trig_chgs
@@ -129,12 +129,12 @@ AC_DEFUN([ABI_TRIGGERS_INIT],[
 ]) # ABI_TRIGGERS_INIT"""
 
     trig_template = """\
-  dnl Init default parameters for @package@
+  # Init default parameters for @package@
   abi_@package@_enable="@default@"
   abi_@package@_init="def"
   abi_@package@_prefix=""
 
-  dnl Command-line options for @package@
+  # Command-line options for @package@
   AC_ARG_WITH([@package@],
     AC_HELP_STRING([--with-@package@],
       [Install prefix to look for @package@, or automatic configuration if set to 'yes' or 'no' (default: @default@)]),
@@ -149,24 +149,27 @@ AC_DEFUN([ABI_TRIGGERS_INIT],[
         abi_@package@_libs="@libraries@"
         abi_@package@_prefix="${withval}"
       fi])@with_flavor@
-  AC_ARG_WITH([@package@-incs],
-    AC_HELP_STRING([--with-@package@-incs],
-      [Include flags for @package@ (default: empty)]),
-    [abi_@package@_enable="yes"; abi_@package@_init="env"])
-  AC_ARG_WITH([@package@-libs],
-    AC_HELP_STRING([--with-@package@-libs],
-      [Library flags for @package@ (default: empty)]),
-    [abi_@package@_enable="yes"; abi_@package@_init="env"])
+  AC_ARG_VAR([@PACKAGE@_CPPFLAGS],
+      [C preprocessing flags for @package@ (default: empty)])
+  AC_ARG_VAR([@PACKAGE@_FCFLAGS],
+      [Fortran flags for @package@ (default: empty)])
+  AC_ARG_VAR([@PACKAGE@_LIBS],
+      [Library flags for @package@ (default: empty)])
 
-  dnl Set up trigger-related variables for @package@
+  if test "${@PACKAGE@_FCFLAGS}${@PACKAGE@_LIBS}" != ""; then
+    abi_@package@_enable="yes"
+    abi_@package@_init="env"
+  fi
+
+  # Set up trigger-related variables for @package@
   abi_@package@_ok="unknown"
   if test "${abi_fbk_enable}" = "yes"; then
     abi_fbk_@package@_ok="@fbk_status@"
   else
-    abi_fbk_@package@_ok="no"
+    abi_fbk_@package@_ok="@nofbk_status@"
   fi@test_flavor@
 
-  dnl Substitute trigger-related variables for @package@
+  # Substitute trigger-related variables for @package@
   AC_SUBST(abi_@package@_enable)@subst_flavor@
   AC_SUBST(abi_@package@_init)
   AC_SUBST(abi_@package@_ok)
@@ -177,19 +180,33 @@ AC_DEFUN([ABI_TRIGGERS_INIT],[
   AC_SUBST(abi_@package@_prefix)
   AC_SUBST(abi_fbk_@package@_ok)"""
 
+    trig_sd_template = """\
+  # Set up trigger-related variables for @package@
+  if test "${abi_fbk_enable}" = "yes"; then
+    abi_fbk_@package@_ok="@fbk_status@"
+  else
+    abi_fbk_@package@_ok="@nofbk_status@"
+  fi
+
+  # Substitute trigger-related variables for @package@
+  AC_SUBST(abi_fbk_@package@_ok)"""
+
     trig_defs = ""
     trig_list = sorted(trig_params.keys())
 
     for pkg in trig_list:
 
-        if ( trig_params[pkg]["detector"] == "steredeg" ):
-            continue
-
-        trig_substs= {"package":pkg, "name":trig_params[pkg]["name"]}
+        trig_substs= {
+            "PACKAGE":pkg.upper(),
+            "package":pkg,
+            "name":trig_params[pkg]["name"],
+        }
         if ( trig_params[pkg]["fallback"] == "yes" ):
-            trig_substs["fbk_status"] = "unknown"
+            trig_substs["fbk_status"] = "avail"
+            trig_substs["nofbk_status"] = "disabled"
         else:
             trig_substs["fbk_status"] = "no"
+            trig_substs["nofbk_status"] = "no"
         if ( trig_params[pkg]["optional"] == "yes" ):
             trig_substs["default"] = "no"
         else:
@@ -219,7 +236,7 @@ AC_DEFUN([ABI_TRIGGERS_INIT],[
             trig_substs["subst_flavor"] = "\n  AC_SUBST(abi_@package@_flavor)"
             trig_substs["test_flavor"] = """
 
-  dnl Check that a permitted flavor value has been specified
+  # Check that a permitted flavor value has been specified
   if test "${abi_@package@_enable}" = "yes"; then
     flavor_values=`echo "${abi_@package@_flavor}" | sed -e 's/+/ /g'`
     tmp_flavor_ok="no"
@@ -249,7 +266,10 @@ AC_DEFUN([ABI_TRIGGERS_INIT],[
 
         # Make 2 passes of substitutions, since some substitutions contain
         # patterns themselves
-        new_def = trig_template
+        if ( trig_params[pkg]["detector"] == "steredeg" ):
+            new_def = trig_sd_template
+        else:
+            new_def = trig_template
         for subst in trig_substs:
             new_def = re.sub("@%s@" % subst,trig_substs[subst],new_def)
         for subst in trig_substs:
@@ -275,7 +295,7 @@ def macro_summary(trig_params):
 #
 AC_DEFUN([ABI_TRIGGERS_SUMMARY],[
 @TRIG_FORMAT@
-  dnl Display configuration
+  # Display configuration
   cat <<EOF
 
 Abinit feature triggers status
@@ -303,7 +323,7 @@ EOF
         trig_form += "  tmp_e_%s=`echo \"${%s_%s_enable}\" | awk '{printf(\"%%-8s\",[$]1);}'`\n" % (pkg,pfx,pkg)
         trig_form += "  tmp_i_%s=`echo \"${%s_%s_init}\" | awk '{printf(\"%%-8s\",[$]1);}'`\n" % (pkg,pfx,pkg)
         trig_form += "  tmp_w_%s=`echo \"${%s_%s_ok}\" | awk '{printf(\"%%-8s\",[$]1);}'`\n" % (pkg,pfx,pkg)
-        trig_form += "  tmp_f_%s=`echo \"${%s_fbk_%s_ok}\" | awk '{printf(\"%%-8s\",[$]1);}'`\n" % (pkg,pfx,pkg)
+        trig_form += "  tmp_f_%s=`echo \"${abi_fbk_%s_ok}\" | awk '{printf(\"%%-8s\",[$]1);}'`\n" % (pkg,pkg)
         trig_stat += "  |%-16s|${tmp_e_%s}|${tmp_i_%s}|${tmp_w_%s}|${tmp_f_%s}|\n" % \
             (pkg,pkg,pkg,pkg,pkg)
     trig_stat += "  +----------------+--------+--------+--------+--------+"

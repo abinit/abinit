@@ -7,4 +7,5 @@ TODO list for the build system
 - [ ] Some libraries remain set even if the sd_enable_* flags are no.
 - [ ] Custom linear algebra libraries are not transmitted.
 - [ ] LibXML2 is never looked for.
+- [ ] Redefine flags in trigger macros depending on programming languages.
 
