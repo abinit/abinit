@@ -57,9 +57,9 @@ cat <<EOF
 Core build parameters
 ---------------------
 
-  * C compiler      : ${abi_cc_vendor} version ${abi_cc_version}
-  * Fortran compiler: ${abi_fc_vendor} version ${abi_fc_version}
-  * architecture    : ${abi_cpu_vendor} ${abi_cpu_model} (${abi_cpu_bits} bits)
+  * C compiler       : ${abi_cc_vendor} version ${abi_cc_version}
+  * Fortran compiler : ${abi_fc_vendor} version ${abi_fc_version}
+  * architecture     : ${abi_cpu_vendor} ${abi_cpu_model} (${abi_cpu_bits} bits)
   * debugging        : ${abi_debug_flavor}
   * optimizations    : ${abi_optim_flavor}
 
@@ -73,9 +73,9 @@ Core build parameters
   * LINALG flavor    : ${abi_linalg_flavor} (libs: ${tmp_rep_linalg_libs})
 
 
-  * XML    enabled  : ${enable_xml}
+  * LibXML2 enabled  : ${abi_libxml2_enable}
 
-${abi_opt_deprecated_count} deprecated options have been used.
+${abi_opt_deprecated_count} deprecated options have been used:${abi_opt_deprecated_used}.
 
 Configuration complete.
 You may now type "make" to build Abinit.

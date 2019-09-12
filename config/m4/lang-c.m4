@@ -247,25 +247,26 @@ AC_DEFUN([_ABI_CC_CHECK_TYPES],[
 # Checks for LibXML2, a basic requirement on any decent Unix-like system.
 #
 AC_DEFUN([_ABI_CC_CHECK_XML],[
+  abi_libxml2_cppflags=""
   abi_libxml2_fcflags=""
-  abi_libxml2_incs=""
   abi_libxml2_ldflags=""
   abi_libxml2_libs=""
-  if test "${enable_xml}" = "yes" -o "${enable_xml}" = "auto"; then
+  if test "${abi_libxml2_enable}" = "yes" -o "${abi_libxml2_enable}" = "auto"; then
     AC_LANG_PUSH([C])
     AM_PATH_XML2([2.7.6], [abi_libxml2_ok="yes"], [abi_libxml2_ok="no"])
     AC_LANG_POP([C])
     if test "${abi_libxml2_ok}" = "yes"; then
-      AC_DEFINE([HAVE_XML], 1, [Define to 1 if you want XML support.])
-      abi_libxml2_incs="${XML_CPPFLAGS}"
+      abi_libxml2_enable="yes"
+      abi_libxml2_cppflags="${XML_CPPFLAGS}"
+      abi_libxml2_fcflags="${XML_CPPFLAGS}"
       abi_libxml2_libs="${XML_LIBS}"
     else
       AC_MSG_WARN([could not find a usable XML library => disabling XML support])
-      enable_xml="no"
+      abi_libxml2_enable="no"
     fi
   fi
+  AC_SUBST(abi_libxml2_cppflags)
   AC_SUBST(abi_libxml2_fcflags)
-  AC_SUBST(abi_libxml2_incs)
   AC_SUBST(abi_libxml2_ldflags)
   AC_SUBST(abi_libxml2_libs)
 ]) # _ABI_CC_CHECK_XML

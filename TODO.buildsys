@@ -1,8 +1,10 @@
 TODO list for the build system
 ==============================
 
-- [ ] Linear algebra is not detected.
-- [ ] abi_fc_vendor and abi_fc_version are not set.
-- [ ] Hints are not applied correctly.
+- [x] Linear algebra is not detected.
+- [x] abi_fc_vendor and abi_fc_version are not set.
+- [x] Hints are not applied correctly.
 - [ ] Some libraries remain set even if the sd_enable_* flags are no.
+- [ ] Custom linear algebra libraries are not transmitted.
+- [ ] LibXML2 is never looked for.
 

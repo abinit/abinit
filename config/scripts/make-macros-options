@@ -67,6 +67,7 @@ def macro_define_header():
 AC_DEFUN([ABI_OPTIONS_DEFINE],[
   dnl Count use of deprecated options
   abi_opt_deprecated_count=0
+  abi_opt_deprecated_used=""
 
 """
 
@@ -557,8 +558,9 @@ for arg in all_args:
   if test "${%s}" != ""; then
     AC_MSG_NOTICE([    >>> --%s = '${%s}' will soon be forbidden!])
     abi_opt_deprecated_count=`expr ${abi_opt_deprecated_count} + 1`
+    abi_opt_deprecated_used="${abi_opt_deprecated_used} %s"
   fi
-""" % (arg2,arg2,arg,arg2,arg)
+""" % (arg2,arg2,arg,arg2,arg,arg)
 
 changed = chg_rem + chg_new + chg_mod + chg_ren + chg_dep
 if ( changed == "" ):
@@ -581,6 +583,7 @@ triggers = ""
 for opt in ac_args["enable"]:
   opt_desc = cnf.get(opt,"description")
   opt_desc = opt_desc[0].lower() + opt_desc[1:]
+  opt_ivar = "abi_" + opt.replace("enable_", "") + "_enable"
   try:
     opt_cnds = cnf.get(opt,"conditionals").split()
   except:
@@ -609,7 +612,7 @@ for opt in ac_args["enable"]:
   if test "${%s}" = "%s"; then
     AC_MSG_NOTICE([triggering the '%s' conditional])
   fi
-  AM_CONDITIONAL([%s],[test "${%s}" = "%s"])""" % (opt,val,cnd,cnd,opt,val)
+  AM_CONDITIONAL([%s],[test "${%s}" = "%s"])""" % (opt_ivar,val,cnd,cnd,opt,val)
 
   if ( len(opt_defs) > 0 ):
     for cpp in opt_defs:
@@ -623,7 +626,7 @@ for opt in ac_args["enable"]:
     AC_MSG_NOTICE([defining the '%s' preprocessing macro])
     AC_DEFINE([%s],1,
       [Define to 1 if you want to %s.])
-  fi""" % (opt,val,cpp,cpp,opt_desc)
+  fi""" % (opt_ivar,val,cpp,cpp,opt_desc)
 
 # Write triggers macro
 m4.write(re.sub("@MACRO@",triggers,macro_triggers_template()))

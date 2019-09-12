@@ -241,7 +241,7 @@ SD_FFT_INIT([fftw3 mkl])
                     # ------------------------------------ #
 
 # Init triggers parameters (must be call after we know about fallbacks)
-# Note: MPI and GPU must be initialised after feature triggers
+# Note: MPI and GPU must be initialized after feature triggers
 ABI_TRIGGERS_INIT
 
 # ---------------------------------------------------------------------------- #
@@ -828,10 +828,13 @@ SD_BIGDFT_DETECT
 # ---------------------------------------------------------------------------- #
 
 #
-# Fallbacks
+# Final check of feature triggers
 #
 
-ABI_MSG_SECTION([Fallbacks])
+ABI_MSG_SECTION([Feature triggers summary])
+
+# Display summary table
+ABI_TRIGGERS_SUMMARY
 
 # Always generate a build script for required fallbacks
 AC_OUTPUT([transient/build-abinit-fallbacks.sh])
@@ -845,18 +848,6 @@ if test "${abi_fbk_required}" = ""; then
 else
   AC_MSG_NOTICE([fallbacks required - you should not run production calculations])
 fi
-
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-#
-# Final check of feature triggers
-#
-
-ABI_MSG_SECTION([Feature triggers summary])
-
-# Display summary table
-ABI_TRIGGERS_SUMMARY
 
 # FIXME: copying linear algebra tarball for now,
 #        ensuring ~/.abinit/tarballs/ exists
