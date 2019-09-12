@@ -1106,6 +1106,14 @@ AC_DEFUN([_ABI_LINALG_SET_VENDOR_FLAGS], [
       abi_linalg_vendor_blas_prqs="-lcblas -latlas"
       ;;
 
+    custom)
+      abi_linalg_vendor_provided="blas lapack"
+      if test "${abi_mpi_enable}" = "yes"; then
+        abi_linalg_vendor_provided="${abi_linalg_vendor_provided} scalapack"
+      fi
+      abi_linalg_vendor_blas_libs="${LINALG_LIBS}"
+      ;;
+
     debian-mpich)
       abi_linalg_vendor_provided="blas lapack scalapack"
       abi_linalg_vendor_blas_libs="-lblas"
