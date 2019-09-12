@@ -1664,7 +1664,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            do imyp=1,my_npert
              ipc = sigma%my_pinfo(3, imyp)
              do ib_k=1,nbcalc_ks
-               gkq2_lr(:,ib_k,ipc) = gkq2_lr(:,ib_k,ipc) - gkq2_lr(ii,ib_k,ipc)
+               gkq2_lr(:,ib_k,imyp) = gkq2_lr(:,ib_k,imyp) - gkq2_lr(ii,ib_k,imyp)
              end do
            end do
 
