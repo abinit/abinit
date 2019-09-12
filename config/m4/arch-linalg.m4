@@ -194,7 +194,7 @@ AC_DEFUN([ABI_LINALG_DETECT], [
 
 
 # ABI_LINALG_DETECT_OLD()
-# -------------------
+# -----------------------
 #
 # Sets all variables needed to handle the optimized linear algebra
 # libraries.
@@ -1147,18 +1147,10 @@ AC_DEFUN([_ABI_LINALG_SET_VENDOR_FLAGS], [
 
     mkl)
       abi_linalg_vendor_provided="blas lapack scalapack"
-      if test "${MKLROOT}" = ""; then
-        if test "${abi_mpi_enable}" = "yes"; then
-          abi_linalg_vendor_ldflags="-mkl=cluster"
-        else
-          abi_linalg_vendor_ldflags="-mkl"
-        fi
+      if test "${abi_mpi_enable}" = "yes"; then
+        abi_linalg_vendor_ldflags="-mkl=cluster"
       else
-        if test -x "${MKLROOT}/tools/mkl_link_tool"; then
-          AC_MSG_NOTICE([using mkl_link_tool to set libraries])
-          abi_linalg_vendor_libs=`${MKLROOT}/tools/mkl_link_tool -c intel_f -libs`
-          abi_linalg_vendor_fcflags=`${MKLROOT}/tools/mkl_link_tool -c intel_f -opts`
-        fi
+        abi_linalg_vendor_ldflags="-mkl"
       fi
       ;;
 
@@ -1173,7 +1165,7 @@ AC_DEFUN([_ABI_LINALG_SET_VENDOR_FLAGS], [
 
     openblas)
       abi_linalg_vendor_provided="blas"
-      abi_linalg_vendor_openblas_libs="-lopenblas"
+      abi_linalg_vendor_blas_libs="-lopenblas"
       ;;
 
     plasma)
@@ -1282,6 +1274,12 @@ AC_DEFUN([_ABI_LINALG_EXPLORE], [
       AC_MSG_WARN([GPU linear algebra exploration not implemented!])
     done
   fi
+
+  # Transmit linear algebra libraries found
+  if test "${abi_mpi_enable}" = "yes"; then
+    abi_linalg_libs="${abi_linalg_libs} ${abi_linalg_vendor_scalapack_libs}"
+  fi
+  abi_linalg_libs="${abi_linalg_libs} ${abi_linalg_vendor_lapack_libs} ${abi_linalg_vendor_blas_libs}"
 
   ABI_ENV_RESTORE
   LIBS="${abi_saved_LIBS}"
