@@ -475,11 +475,11 @@ AC_SUBST(CPPFLAGS_HINTS_EXT)
 ABI_MSG_SECTION([Debugging])
 
 # Init debug flags
-ABI_DEBUG_INIT([${with_debug_flavor}])
+ABI_DEBUG_INIT([${abi_debug_flavor}])
 
 # Activate "design-by-contract" debugging tests when paranoid
 AC_MSG_CHECKING([whether to activate design-by-contract debugging])
-if test "${with_debug_flavor}" = "paranoid"; then
+if test "${abi_debug_flavor}" = "paranoid"; then
   AC_DEFINE([DEBUG_CONTRACT], 1,
     [Define to 1 if you want to activate design-by-contract debugging tests.])
   AC_MSG_RESULT([yes])
@@ -487,7 +487,7 @@ else
   AC_MSG_RESULT([no])
 fi
 AM_CONDITIONAL(DO_BUILD_32_CONTRACT,
-  [test "${with_debug_flavor}" = "paranoid"])
+  [test "${abi_debug_flavor}" = "paranoid"])
 
 # ---------------------------------------------------------------------------- #
 
@@ -502,7 +502,6 @@ AM_CONDITIONAL(DO_BUILD_32_CONTRACT,
 ABI_MSG_SECTION([Optimizations])
 
 # Disable optimizations if debug mode is activated in source files
-abi_optim_flavor="${with_optim_flavor}"
 if test "${abi_debug_source}" = "yes"; then
   if test "${abi_optim_flavor}" != "none"; then
     AC_MSG_WARN([disabling optimizations])
