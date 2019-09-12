@@ -323,6 +323,7 @@ AC_DEFUN([_SD_MPI_INIT_CC], [
         tmp_cc_has_path=`echo "${CC}" | grep '/'`
         if test -z "${tmp_cc_has_path}"; then
           sd_mpi_cc="${with_mpi}/bin/${CC}"
+          test -x "${sd_mpi_cc}" || sd_mpi_cc="${with_mpi}/bin/mpicc"
         else
           sd_mpi_libs="-L${with_mpi}/lib ${sd_mpi_libs_def}"
           AC_MSG_NOTICE([user-defined MPI library flags: ${sd_mpi_libs}])
@@ -429,6 +430,7 @@ AC_DEFUN([_SD_MPI_INIT_CXX], [
         tmp_cxx_has_path=`echo "${CXX}" | grep '/'`
         if test -z "${tmp_cxx_has_path}"; then
           sd_mpi_cxx="${with_mpi}/bin/${CXX}"
+          test -x "${sd_mpi_cxx}" || sd_mpi_cxx="${with_mpi}/bin/mpic++"
         else
           sd_mpi_libs="-L${with_mpi}/lib ${sd_mpi_libs_def}"
           AC_MSG_NOTICE([user-defined MPI library flags: ${sd_mpi_libs}])
@@ -436,7 +438,7 @@ AC_DEFUN([_SD_MPI_INIT_CXX], [
       fi
 
       if test ! -z "${sd_mpi_cxx}"; then
-        AC_MSG_NOTICE([user-defined MPI C compiler: ${sd_mpi_cxx}])
+        AC_MSG_NOTICE([user-defined MPI C++ compiler: ${sd_mpi_cxx}])
         AC_MSG_CHECKING([for an executable MPI C compiler])
         if test -x "${sd_mpi_cxx}"; then
           AC_MSG_RESULT([yes])
@@ -533,6 +535,7 @@ AC_DEFUN([_SD_MPI_INIT_FC], [
         tmp_fc_has_path=`echo "${FC}" | grep '/'`
         if test -z "${tmp_fc_has_path}"; then
           sd_mpi_fc="${with_mpi}/bin/${FC}"
+          test -x "${sd_mpi_fc}" || sd_mpi_fc="${with_mpi}/bin/mpif90"
         else
           sd_mpi_libs="-L${with_mpi}/lib ${sd_mpi_libs_def}"
           AC_MSG_NOTICE([user-defined MPI library flags: ${sd_mpi_libs}])
