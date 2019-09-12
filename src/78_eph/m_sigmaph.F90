@@ -614,7 +614,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,parameter :: useylmgr = 0, useylmgr1 =0, master = 0, ndat1 = 1
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer,parameter :: ngvecs = 1
- integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_frohl,iq_bz_frohl, my_npert
+ integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_frohl,iq_bz_frohl,iq_microzone_frohl,iq_bz_fine,my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj, iw
  integer :: mcgq, mgscq, nband_kq, ig, ispinor, ifft
@@ -1626,10 +1626,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ABI_MALLOC(gkqg_fine, (osc_npw))
            ABI_MALLOC(osc_ks_bs, (osc_npw))
            gkq2_lr = zero
+           iq_microzone_frohl = 0
            do jj=1,sigma%eph_doublegrid%ndiv
-             ! get index of q-point
+             ! get ibz index of q-point
              iq_ibz_fine = sigma%eph_doublegrid%mapping(6, jj)
-             if (iq_ibz_fine == iq_ibz) ii = jj
+             iq_bz_fine  = sigma%eph_doublegrid%mapping(3, jj)
+             ! store the index that corresponds to the central point in the microzone
+             if (iq_bz_fine == iq_bz_frohl) iq_microzone_frohl = jj
              ! TODO: Compute displ_cart for this q-point in the fine grid
              qpt_fine   = sigma%ephwg%ibz(:,iq_ibz_fine)
              phfrq_fine = sigma%ephwg%phfrq_ibz(iq_ibz_fine,:)
@@ -1647,8 +1650,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                    end do
                  end do
                else
-                 osc_npw = 1
-                 osc_gvecq(:,1) = [0,0,0]
                  do ib_k=1,nbcalc_ks
                    ikq_ibz_fine = sigma%eph_doublegrid%mapping(5, jj)
                    eig0mkq = sigma%eph_doublegrid%ebands_dense%eig(ibsum_kq, ikq_ibz_fine, spin)
@@ -1664,7 +1665,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            do imyp=1,my_npert
              ipc = sigma%my_pinfo(3, imyp)
              do ib_k=1,nbcalc_ks
-               gkq2_lr(:,ib_k,imyp) = gkq2_lr(:,ib_k,imyp) - gkq2_lr(ii,ib_k,imyp)
+               gkq2_lr(:,ib_k,imyp) = gkq2_lr(:,ib_k,imyp) - gkq2_lr(iq_microzone_frohl,ib_k,imyp)
              end do
            end do
 
