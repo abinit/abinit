@@ -528,6 +528,8 @@ contains
 
     ! *********************************************************************
     step=1e-5
+    nfreeel=zero
+    entropy=zero
 
     ! Dynamic array find size
     ix=ebcut
