@@ -171,10 +171,10 @@ abi_optchk_ok="yes"
 AC_MSG_NOTICE([checking consistency of command-line options])
 
 # C-CLOCK requires the building of 02_clib
-if test "${enable_cclock}" = "yes"; then
-  if test "${enable_clib}" = "" -o "${enable_clib}" = "no"; then
+if test "${abi_cclock_enable}" = "yes"; then
+  if test "${abi_clib_enable}" = "" -o "${abi_clib_enable}" = "no"; then
     AC_MSG_NOTICE([|---> enabling CLib (required by CClock, experimental!)])
-    enable_clib="yes"
+    abi_clib_enable="yes"
     abi_optchk_ok="no"
   fi
 fi
@@ -183,6 +183,7 @@ fi
 if test "${enable_libpaw}" != "yes"; then
   AC_MSG_NOTICE([|---> forcing internal LibPAW support to 'yes'])
   enable_libpaw="yes"
+  abi_libpaw_enable="yes"
   abi_optchk_ok="no"
 fi
 
@@ -298,7 +299,7 @@ fi
 
 # Wrap Fortran compiler calls if needed or requested
 # Note: must be the last step of basic Fortran configuration
-if test "${enable_fc_wrapper}" = "yes"; then
+if test "${abi_fc_wrapper_enable}" = "yes"; then
   abi_fc_wrap="yes"
 fi
 
@@ -416,7 +417,7 @@ AC_MSG_NOTICE([setting C++ preprocessor vendor to '${abi_xpp_vendor}'])
 AC_MSG_NOTICE([setting Fortran preprocessor vendor to '${abi_fpp_vendor}'])
 
 # Preset flags to have the source building properly
-if test "${enable_hints}" = "yes"; then
+if test "${abi_hints_enable}" = "yes"; then
 
   # C support
   ABI_CPP_HINTS
@@ -436,7 +437,7 @@ if test "${enable_hints}" = "yes"; then
 fi
 
 # Adjust OpenMP flags if not used
-if test "${enable_openmp}" != "yes"; then
+if test "${abi_openmp_enable}" != "yes"; then
   FCFLAGS_OPENMP=""
 fi
 
@@ -642,8 +643,8 @@ ABI_MSG_SECTION([Multicore architecture support])
 
 # OpenMP support
 AC_MSG_CHECKING([whether to enable OpenMP support])
-AC_MSG_RESULT([${enable_openmp}])
-if test "${enable_openmp}" = "yes"; then
+AC_MSG_RESULT([${abi_openmp_enable}])
+if test "${abi_openmp_enable}" = "yes"; then
   AC_MSG_CHECKING([Fortran flags for OpenMP])
   AC_MSG_RESULT([${FCFLAGS_OPENMP}])
   ABI_OMP_CHECK_COLLAPSE
@@ -761,9 +762,9 @@ ABI_MSG_SECTION([Feature triggers])
 # PAPI library support
 SD_PAPI_DETECT
 AC_MSG_CHECKING([whether to enable the internal Abinit timer])
-AC_MSG_RESULT([${enable_timer}])
+AC_MSG_RESULT([${abi_timer_enable}])
 if test "${sd_papi_ok}" != "yes"; then
-  if test "${enable_timer}" = "yes"; then
+  if test "${abi_timer_enable}" = "yes"; then
     AC_DEFINE([HAVE_TIMER_ABINIT], 1,
       [Define to 1 if you want to use the Abinit timer.])
   fi
