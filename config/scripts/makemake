@@ -519,8 +519,10 @@ if ( opts.run_source ):
        *** functions that are not declared inside modules or that   ***
        *** there is a syntax error in the Fortran code or a bug     ***
        *** See above error message.                                 ***
-       *** Please note that procedures outside Fortran modules      ***
-       *** are not allowed any longer. See abisrc.stderr for errors ***
+       ****                                                         ***
+       *** Please note that procedures outside Fortran modules are  ***
+       *** not allowed any longer. See abisrc.stderr for details    ***
+       *** about the errors.                                        ***
        ****************************************************************\n""")
     sys.stderr.write("[%s] Aborting now\n" % (my_name))
     sys.exit(1)

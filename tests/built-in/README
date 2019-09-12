@@ -57,7 +57,7 @@ test_fast:          H2 molecule, determination of the H-H distance by the Broyde
 test_v1:            Yb cristal, self-consistent
 test_v5:            HBe molecule, spin-polarized, determination of forces
 test_bigdft:        H atom within BigDFT
-test_netcdf:       Ca atom with PAW, writing a netCDF wavefunction file.
+test_netcdf:        Ca atom with PAW, writing a NetCDF wavefunction file.
 test_libxc:         Bi atom with PAW, GGA PBE from LibXC
 test_wannier90:     GaAs crystal with few bands.
 

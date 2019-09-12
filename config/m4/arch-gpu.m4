@@ -270,7 +270,7 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
 #
 AC_DEFUN([ABI_GPU_INIT],[
   # Delegate most of the initialization to Steredeg
-  SD_GPU_INIT([no optional warn], [-lopencl])
+  SD_GPU_INIT([optional warn], [-lopencl])
 
   # Init
   abi_gpu_complete="unknown"

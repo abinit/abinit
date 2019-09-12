@@ -98,13 +98,11 @@ AC_DEFUN([ABI_INIT_DIRS],[
   _AC_SRCDIRS(["."])
   abinit_srcdir="${ac_abs_top_srcdir}"
   abinit_builddir="${ac_abs_top_builddir}"
-  abinit_moddir="${abinit_builddir}/src/mods"
-
-  export abinit_srcdir abinit_builddir abinit_moddir
+  
+  export abinit_srcdir abinit_builddir
 
   AC_SUBST(abinit_srcdir)
   AC_SUBST(abinit_builddir)
-  AC_SUBST(abinit_moddir)
 ]) # ABI_INIT_DIRS
 """
 
