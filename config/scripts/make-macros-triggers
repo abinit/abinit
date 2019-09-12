@@ -144,7 +144,7 @@ AC_DEFUN([ABI_TRIGGERS_INIT],[
         abi_@package@_prefix=""
       else
         abi_@package@_enable="yes"
-        abi_@package@_init="pfx"
+        abi_@package@_init="dir"
         abi_@package@_cppflags="@includes@"
         abi_@package@_libs="@libraries@"
         abi_@package@_prefix="${withval}"
