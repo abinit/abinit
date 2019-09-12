@@ -10,9 +10,12 @@
 #          this file as "~/.abinit/build/myhost.ac".
 #
 # You may put this file at the top level of an ABINIT source tree as well,
-# in which case its definitions will apply to this particular tree only.
+# in which case its definitions will apply to this particular tree only. In
+# some situations, you may even want to put it at your current top build
+# directory, in which case it will replace any other config file.
 #
-# Hint: If you do not know the name of your machine, just type "hostname".
+# Hint: If you do not know the name of your machine, just type "hostname"
+#       in a terminal.
 #
 
 #
@@ -29,24 +32,20 @@
 #    an option.
 #
 
-# ---------------------------------------------------------------------------- #
-# Global build options                                                         #
-# ---------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------- #
+# Global build options                                                       #
+# -------------------------------------------------------------------------- #
 
-# Enable 64-bit compiler flags (default is no)
+# Where to install ABINIT (default is /usr/local)
 #
-# Note: when necessary, fine-grained tuning may be achieved by setting
-#       the CPPFLAGS_64BITS, CFLAGS_64BITS, CXXFLAGS_64BITS, and
-#       FCFLAGS_64BITS variables manually.
-#
-#enable_64bit_flags="yes"
+#prefix="${HOME}/hpc"
 
-# Enable debug mode (default is basic)
+# Select debug level (default is basic)
 #
 # Allowed values:
 #
-#     * no       : strip debugging symbols
-#     * yes      : keep debugging symbols and allow for user-defined flags
+#     * none     : strip debugging symbols
+#     * custom   : allow for user-defined debug flags
 #     * basic    : add '-g' option when the compiler allows for it
 #     * verbose  : like basic + definition of the DEBUG_VERBOSE CPP option
 #     * enhanced : disable optimizations and debug verbosely
@@ -60,7 +59,32 @@
 # Note: debug levels are incremental, i.e. the flags of one level are
 # appended to those of the previous ones
 #
-#enable_debug="yes"
+#with_debug_flavor="custom"
+
+# Select optimization level whenever possible (default is standard,
+# except when debugging is in profile mode - see above - in which case
+# optimizations are turned off)
+#
+# Supported levels:
+#
+#     * none       : disable optimizations
+#     * custom     : enable optimizations with user-defined flags
+#     * safe       : build slow and very reliable code
+#     * standard   : build fast and reliable code
+#     * aggressive : build very fast code, regardless of reliability
+#
+# Levels other than no and yes are "profile mode" levels in which
+# user-defined flags are overriden
+#
+# Note:
+#
+#     * this option is ignored when the debug is level is higher than basic
+#
+#with_optim_flavor="aggressive"
+
+# Reduce AVX optimizations in sensitive subprograms (default is no)
+#
+#enable_avx_safe_mode="yes"
 
 # Enable compiler hints (default is yes)
 #
@@ -71,48 +95,19 @@
 #
 #enable_hints="no"
 
-# Select optimization level whenever possible (default is standard,
-# except when debugging is in profile mode - see above - in which case
-# optimizations are turned off)
-#
-# Supported levels:
-#
-#     * no         : disable optimizations
-#     * yes        : enable optimizations with user-defined flags
-#     * safe       : build slow and very reliable code
-#     * standard   : build fast and reliable code
-#     * aggressive : build very fast code, regardless of reliability
-#
-# Levels other than no and yes are "profile mode" levels in which
-# user-defined flags are overriden
-#
-# Note:
-#
-#     * this option is ignored when debugging is in profile mode
-#
-#enable_optim="aggressive"
-
-# Disable vectorization with AVX-enable processor in problematic procedures
-#
-#enable_avx_safe_mode="yes"
-
-# Where to install ABINIT (default is /usr/local)
-#
-#prefix="${HOME}/hpc"
-
-# ---------------------------------------------------------------------------- #
-# C support                                                                    #
-# ---------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------- #
+# C support                                                                  #
+# -------------------------------------------------------------------------- #
 
 # C preprocessor (should not be set in most cases)
 #
 #CPP="/usr/bin/cpp"
 
-# C preprocessor custom debug flags (when enable_debug=yes)
+# C preprocessor custom debug flags (when with_debug_flavor=custom)
 #
 #CPPFLAGS_DEBUG="-DDEV_MG_DEBUG_MODE"
 
-# C preprocessor custom optimization flags (when enable_optim=yes)
+# C preprocessor custom optimization flags (when with_optim_flavor=custom)
 #
 #CPPFLAGS_OPTIM="-DDEV_DIAGO_DP"
 
@@ -131,11 +126,11 @@
 #
 #CC="gcc"
 
-# C compiler custom debug flags (when enable_debug=yes)
+# C compiler custom debug flags (when with_debug_flavor=custom)
 #
 #CFLAGS_DEBUG="-g3"
 
-# C compiler custom optimization flags (when enable_optim=yes)
+# C compiler custom optimization flags (when with_optim_flavor=custom)
 #
 #CFLAGS_OPTIM="-O5"
 
@@ -148,11 +143,13 @@
 #
 #CFLAGS="-O2"
 
-# C linker custom debug flags (when enable_debug=yes)
+                       # ------------------------------ #
+
+# C linker custom debug flags (when with_debug_flavor=custom)
 #
 #CC_LDFLAGS_DEBUG="-Wl,-debug"
 
-# C linker custom optimization flags (when enable_optim=yes)
+# C linker custom optimization flags (when with_optim_flavor=custom)
 #
 #CC_LDFLAGS_OPTIM="-Wl,-ipo"
 
@@ -165,11 +162,11 @@
 #
 #CC_LDFLAGS="-Bstatic"
 
-# C linker custom debug libraries (when enable_debug=yes)
+# C linker custom debug libraries (when with_debug_flavor=custom)
 #
 #CC_LIBS_DEBUG="-ldebug"
 
-# C linker custom optimization libraries (when enable_optim=yes)
+# C linker custom optimization libraries (when with_optim_flavor=custom)
 #
 #CC_LIBS_OPTIM="-lopt_funcs"
 
@@ -182,9 +179,9 @@
 #
 #CC_LIBS="-lrt"
 
-# ---------------------------------------------------------------------------- #
-# C++ support                                                                  #
-# ---------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------- #
+# C++ support                                                                #
+# -------------------------------------------------------------------------- #
 
 # Note: the XPP* environment variables will likely have no effect
 
@@ -192,11 +189,11 @@
 #
 #XPP="/usr/bin/cpp"
 
-# C++ preprocessor custom debug flags (when enable_debug=yes)
+# C++ preprocessor custom debug flags (when with_debug_flavor=custom)
 #
 #XPPFLAGS_DEBUG="-DDEV_MG_DEBUG_MODE"
 
-# C++ preprocessor custom optimization flags (when enable_optim=yes)
+# C++ preprocessor custom optimization flags (when with_optim_flavor=custom)
 #
 #XPPFLAGS_OPTIM="-DDEV_DIAGO_DP"
 
@@ -215,11 +212,11 @@
 #
 #CXX="g++"
 
-# C++ compiler custom debug flags (when enable_debug=yes)
+# C++ compiler custom debug flags (when with_debug_flavor=custom)
 #
 #CXXFLAGS_DEBUG="-g3"
 
-# C++ compiler custom optimization flags (when enable_optim=yes)
+# C++ compiler custom optimization flags (when with_optim_flavor=custom)
 #
 #CXXFLAGS_OPTIM="-O5"
 
@@ -232,11 +229,13 @@
 #
 #CXXFLAGS="-O2"
 
-# C++ linker custom debug flags (when enable_debug=yes)
+                       # ------------------------------ #
+
+# C++ linker custom debug flags (when with_debug_flavor=custom)
 #
 #CXX_LDFLAGS_DEBUG="-Wl,-debug"
 
-# C++ linker custom optimization flags (when enable_optim=yes)
+# C++ linker custom optimization flags (when with_optim_flavor=custom)
 #
 #CXX_LDFLAGS_OPTIM="-Wl,-ipo"
 
@@ -249,11 +248,11 @@
 #
 #CXX_LDFLAGS="-Bstatic"
 
-# C++ linker custom debug libraries (when enable_debug=yes)
+# C++ linker custom debug libraries (when with_debug_flavor=custom)
 #
 #CXX_LIBS_DEBUG="-ldebug"
 
-# C++ linker custom optimization libraries (when enable_optim=yes)
+# C++ linker custom optimization libraries (when with_optim_flavor=custom)
 #
 #CXX_LIBS_OPTIM="-lopt_funcs"
 
@@ -266,19 +265,19 @@
 #
 #CXX_LIBS="-lblitz"
 
-# ---------------------------------------------------------------------------- #
-# Fortran support                                                              #
-# ---------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------- #
+# Fortran support                                                            #
+# -------------------------------------------------------------------------- #
 
 # Fortran preprocessor (should not be set in most cases)
 #
 #FPP="/usr/local/bin/fpp"
 
-# Fortran preprocessor custom debug flags (when enable_debug=yes)
+# Fortran preprocessor custom debug flags (when with_debug_flavor=custom)
 #
 #FPPFLAGS_DEBUG="-DDEV_MG_DEBUG_MODE"
 
-# Fortran preprocessor custom optimization flags (when enable_optim=yes)
+# Fortran preprocessor custom optimization flags (when with_optim_flavor=custom)
 #
 #FPPFLAGS_OPTIM="-DDEV_DIAGO_DP"
 
@@ -301,7 +300,7 @@
 #
 #F77="gfortran"
 
-# Fortran compiler custom debug flags (when enable_debug=yes)
+# Fortran compiler custom debug flags (when with_debug_flavor=custom)
 #
 #FCFLAGS_DEBUG="-g3"
 
@@ -309,7 +308,7 @@
 #
 #FCFLAGS_OPENMP="-fopenmp"
 
-# Fortran compiler custom optimization flags (when enable_optim=yes)
+# Fortran compiler custom optimization flags (when with_optim_flavor=custom)
 #
 #FCFLAGS_OPTIM="-O5"
 
@@ -338,11 +337,11 @@
 #
 #FCFLAGS_HINTS="-ffree-line-length-none"
 
-# Fortran linker custom debug flags (when enable_debug=yes)
+# Fortran linker custom debug flags (when with_debug_flavor=custom)
 #
 #FC_LDFLAGS_DEBUG="-Wl,-debug"
 
-# Fortran linker custom optimization flags (when enable_optim=yes)
+# Fortran linker custom optimization flags (when with_optim_flavor=custom)
 #
 #FC_LDFLAGS_OPTIM="-Wl,-ipo"
 
@@ -355,11 +354,11 @@
 #
 #FC_LDFLAGS="-Bstatic"
 
-# Fortran linker custom debug libraries (when enable_debug=yes)
+# Fortran linker custom debug libraries (when with_debug_flavor=custom)
 #
 #FC_LIBS_DEBUG="-ldebug"
 
-# Fortran linker custom optimization libraries (when enable_optim=yes)
+# Fortran linker custom optimization libraries (when with_optim_flavor=custom)
 #
 #FC_LIBS_OPTIM="-lopt_funcs"
 
@@ -389,9 +388,16 @@
 #
 #enable_stdin="no"
 
-# ---------------------------------------------------------------------------- #
-# Python support                                                               #
-# ---------------------------------------------------------------------------- #
+# Set per-directory Fortran optimizations (useful when a Fortran compiler
+# crashes during the build)
+#
+# Note: this option is not available through the command line
+#
+#fcflags_opt_95_drive="-O0"
+
+# -------------------------------------------------------------------------- #
+# Python support                                                             #
+# -------------------------------------------------------------------------- #
 
 # Flags to pass to the Python interpreter (default is unset)
 #
@@ -401,34 +407,19 @@
 #
 #PYTHON_CPPFLAGS="-I/usr/local/include/numpy"
 
-# ---------------------------------------------------------------------------- #
-# Build customization                                                          #
-# ---------------------------------------------------------------------------- #
-
-# Enable the build of macroave (default is yes)
-#
-#enable_macroave="no"
-
-# Set per-directory Fortran optimizations (useful when a Fortran compiler
-# crashes during the build)
-#
-# Note: this option is not available through the command line
-#
-#fcflags_opt_95_drive="-O0"
-
-# ---------------------------------------------------------------------------- #
-# Libraries and linking                                                        #
-# ---------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------- #
+# Libraries and linking                                                      #
+# -------------------------------------------------------------------------- #
 
 # Set archiver name
 #
 #AR="xiar"
 
-# Archiver custom debug flags (when enable_debug=yes)
+# Archiver custom debug flags (when with_debug_flavor=custom)
 #
 #ARFLAGS_DEBUG=""
 
-# Archiver custom optimization flags (when enable_optim=yes)
+# Archiver custom optimization flags (when with_optim_flavor=custom)
 #
 #ARFLAGS_OPTIM=""
 
@@ -441,34 +432,43 @@
 #
 #ARFLAGS="-X 32_64"
 
-# Some def introduced for MINGW/WINDOW$
-# Set generator of index to archive
+                       # ------------------------------ #
+
+# Note: the following definitions are necessary for MINGW/WINDOW$ only
+#       and should be left unset on other architectures
+
+# Archive index generator
 #RANLIB="ranlib"
 
-# Set generator of list symbols from object files
+# Object symbols lister
 #NM="nm"
 
-# Set the linker
+# Generic linker
 #LD="ld"
 
-# ---------------------------------------------------------------------------- #
-# MPI support                                                                  #
-# ---------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------- #
+# MPI support                                                                #
+# -------------------------------------------------------------------------- #
 
 # Determine whether to build parallel code (default is auto)
 #
 # Permitted values:
 #
-#   * auto : let the configure script auto-detect MPI support
-#   * no   : disable MPI support
-#   * yes  : enable MPI support
+#   * no       : disable MPI support
+#   * yes      : enable MPI support, assuming the compiler is MPI-aware
+#   * <prefix> : look for MPI in the <prefix> directory
 #
 # If left unset, the build system will take all appropriate decisions by
 # itself, and MPI will be enabled only if the build environment supports
 # it. If set to "yes", the configure script will stop if it does not find
 # a working MPI environment.
 #
-#enable_mpi="yes"
+# Note:
+#
+#   * the build system expects to find subdirectories named bin/, lib/,
+#     include/ under the prefix.
+#
+#with_mpi="/usr/local/openmpi-gcc"
 
 # Activate the MPI_IN_PLACE option whenever possible (default is no)
 # WARNING: this feature requires MPI2, ignored if the MPI library
@@ -498,62 +498,50 @@
 #
 #enable_mpi_io_default="no"
 
-# Include flags for the MPI library (default is unset)
+# C preprocessor flags for the MPI library (default is unset)
 #
-#with_mpi_incs="-I/usr/local/include"
+#MPI_CPPFLAGS="-I/usr/local/include"
+
+# Fortran flags for the MPI library (default is unset)
+#
+#MPI_FCFLAGS="-I/usr/local/include"
 
 # Set MPI standard level (default is auto-detected)
-# Note: usually 1 for MPICH or LAM, 2 for OpenMPI
+# Note: all current implementations should support at least level 2
 #
 # Supported levels:
 #
 #   * 1 : use 'mpif.h' header
 #   * 2 : use mpi Fortran module
+#   * 3 : use mpi_f08 Fortran module
 #
 #with_mpi_level="2"
 
 # Link flags for the MPI library (default is unset)
 #
-#with_mpi_libs="-L/usr/local/lib -lmpi"
+#MPI_LIBS="-L/usr/local/lib -lmpi"
 
-# Convenience option: try to set MPI parameters by looking into the
-# specified directory (default is unset)
-#
-# Notes:
-#
-#   * the build system expects to find subdirectories named bin/, lib/,
-#     include/ under the prefix;
-#
-#   * this option is mutually exclusive with the other with_mpi_*
-#     options but with_mpi_level;
-#
-#   * when setting CC, CXX, and/or FC in conjunction with this option,
-#     the MPI compiler wrappers are wrapped themselves, so that the
-#     specified serial compilers are used when building Abinit.
-#
-#with_mpi_prefix="/usr/local/openmpi-gcc"
+# -------------------------------------------------------------------------- #
+# GPU support                                                                #
+# -------------------------------------------------------------------------- #
 
-# Set MPI runner for tests (default is unset)
-# Note: replaces the former with_mpi_runner option
-#
-#MPI_RUNNER="/usr/local/bin/mpiexec"
-
-# Set serial runner for tests (default is unset)
-# Note: this option has no effect yet
-#
-#SERIAL_RUNNER="/usr/local/bin/srun"
-
-# ---------------------------------------------------------------------------- #
-# GPU support                                                                  #
-# ---------------------------------------------------------------------------- #
-
-# Enable GPU library support (default is no)
-#
 # Requirement: go through README.GPU before doing anything
 #
 # Note: this is highly experimental - USE AT YOUR OWN RISKS!
+
+# Trigger and install prefix for GPU libraries and compilers
 #
-#enable_gpu="yes"
+# Permitted values:
+#
+#   * no       : disable GPU support
+#   * yes      : enable GPU support, assuming the build environment
+#                is properly set
+#   * <prefix> : look for GPU in the <prefix> directory
+#
+# Note: The build system expects to find subdirectories named bin/, lib/,
+#       include/ under the prefix.
+#
+#with_gpu="/usr/local/cuda"
 
 # Flavor of the GPU library to use (default is cuda-single)
 #
@@ -565,49 +553,30 @@
 #
 #with_gpu_flavor="cuda-double"
 
-# Include flags for the GPU library (default is unset)
-#
-#with_gpu_incs="-I/usr/local/include/cuda"
-
-# Link flags for the GPU library (default is unset)
-#
-#with_gpu_libs="-L/usr/local/cuda/lib64 -lcublas -lcufft -lcudart"
-
-# Convenience option: try to set GPU parameters by looking into the
-# specified directory (default is unset)
-#
-# Note 1: the build system expects to find subdirectories named bin/, lib/,
-# include/ under the prefix
-#
-# Note 2: this option is mutually exclusive with the other with_gpu_*
-# options
-#
-#with_gpu_prefix="/usr/local/cuda"
-
-                       # ------------------------------ #
-
-#
-# The following options are used to build GPU code
-#
-
 # GPU C preprocessor flags (default is unset)
 #
-#with_gpu_cppflags=""
+#GPU_CPPFLAGS="-I/usr/local/include/cuda"
 
-# GPU C compiler flags (default is unset)
+# GPU C flags (default is unset)
 #
-#with_gpu_cflags=""
+#GPU_CFLAGS="-I/usr/local/include/cuda"
 
-# GPU C linker flags (default is unset)
+# GPU Fortran flags (default is unset)
 #
-#with_gpu_ldflags=""
+#GPU_FCFLAGS="-I/usr/local/include/cuda"
+
+# GPU link flags (default is unset)
+#
+#GPU_LDFLAGS="-L/usr/local/cuda/lib64 -lcublas -lcufft -lcudart"
+
+# GPU link flags (default is unset)
+#
+#GPU_LIBS="-L/usr/local/cuda/lib64 -lcublas -lcufft -lcudart"
 
                        # ------------------------------ #
 
-#
 # Advanced GPU options (experts only)
 #
-
 # DO NOT EDIT THIS SECTION UNLESS YOU *TRULY* KNOW WHAT YOU ARE DOING!
 # In any case, the outcome of setting the following options is highly
 # impredictible.
@@ -632,159 +601,17 @@
 #
 #NVCC_LIBS=""
 
-# ---------------------------------------------------------------------------- #
-# Connectors                                                                   #
-# ---------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------- #
+# Linear algebra support                                                     #
+# -------------------------------------------------------------------------- #
 
-# WARNING: when setting the value of a connector flavor to "custom",
+# WARNING: when setting the value of the linear algebra flavor to "custom",
 #          the associated CPP options may be defined in an impredictable
-#          manner by the build system. In particular, using
-#          --with-linalg-flavor="custom" will systematically enable
-#          support for ScaLAPACK. Checking which CPP options are
-#          enabled by looking at the output of abinit is thus highly
-#          recommended.
+#          manner by the build system. In such a case, checking which
+#          CPP options are enabled by looking at the output of abinit
+#          is thus highly recommended before running production
+#          calculations.
 
-# Enable connectors (default is yes)
-#
-# When connectors are enabled, the build system of Abinit tries to link
-# prioritarily with external libraries. In some cases, when
-# unsuccessful, it can build an internal fallback instead (see the
-# "Fallbacks" section below).
-#
-# Enabling connectors is necessary for packaging and is recommended in
-# most other cases. Rely upon external optimized libraries is always smarter
-# than embedding their source code, as their performance and integration
-# within the local environment are usually significantly better.
-#
-# The connectors are associated to advanced detection mechanisms
-# implemented in the build system of Abinit. On many architectures, if
-# the corresponding libraries have been properly installed, specifying
-# a flavor will suffice to enable the related features.
-#
-#enable_connectors="no"
-
-# ---------------------------------------------------------------------------- #
-# Timer library connector                                                      #
-# ---------------------------------------------------------------------------- #
-
-# Flavor of the timer library to use (default is papi)
-#
-# Supported libraries:
-#
-#   * abinit
-#   * custom (bypass build-system checks)
-#   * gptl   (not implemented)
-#   * none   (disable timer support)
-#   * papi
-#
-#with_timer_flavor="papi"
-
-# Include flags for the timer library (default is unset)
-#
-#with_timer_incs="-I/usr/local/include/papi"
-
-# Link flags for the timer library (default is unset)
-#
-#with_timer_libs="-L/usr/local/lib/papi -lpapi"
-
-# ---------------------------------------------------------------------------- #
-# Transferable I/O (TRIO) connector                                            #
-# ---------------------------------------------------------------------------- #
-
-# Flavor of transferable I/O library to support (default is netcdf)
-#
-# By transferable I/O (TRIO), we mean that the files produced by Abinit
-# will be transferable seamlessly to other computers and codes
-#
-# Supported libraries:
-#
-#   * psml     : XML pseudopotential format io library
-#   * netcdf   : NetCDF file format
-#   * yaml     : YAML output
-#   * none     : disable TRIO support
-#
-# You may specify any combination, using '+' as a separator
-#
-#with_trio_flavor="netcdf"
-
-                       # ------------------------------ #
-
-# Include flags for the psml library (default is unset)
-#
-#with_psml_incs="-I/usr/local/include/psml"
-
-# Link flags for the psml library (default is unset)
-#
-#with_psml_libs="-L/usr/local/lib/psml -lpsml"
-
-                       # ------------------------------ #
-
-# Include flags for the NetCDF library (default is unset)
-#
-#with_netcdf_incs="-I/usr/local/include/netcdf"
-
-# Link flags for the NetCDF library (default is unset)
-#
-#with_netcdf_libs="-L/usr/local/lib/netcdf -lnetcdff -lnetcdf"
-#
-#
-# Enable Netcdf mode in Abinit (use netcdf as default IO library,
-# change the default values of iomode)   
-#
-#enable_netcdf_default="no"
-
-                       # ------------------------------ #
-
-# Include flags for the YAML library (default is unset)
-#
-#with_yaml_incs="-I/opt/etsf/include"
-
-# Link flags for the YAML library (default is unset)
-#
-#with_yaml_libs="-L/opt/etsf/lib -lyaml_fortran"
-
-# ---------------------------------------------------------------------------- #
-# FFT connector                                                                #
-# ---------------------------------------------------------------------------- #
-
-# Flavor of FFT library to support (default is unset)
-#
-# Supported libraries:
-#
-#   * asl
-#   * custom        (bypass build-system checks)
-#   * fftw2
-#   * fftw2-threads
-#   * fftw3
-#   * fftw3-mkl
-#   * fftw3-threads
-#   * fftw3-mpi     (highly experimental)
-#   * dfti          (native MKL FFT library)
-#   * dfti-threads  (threaded MKL FFT library)
-#   * none          (disable external FFT support)
-#   * sgimath
-#
-# Notes:
-#
-#   * By default, Abinit will use the internal Goedecker FFT library
-#   * This connector is highly experimental - USE AT YOUR OWN RISKS!
-#
-#with_fft_flavor="fftw3"
-
-# Include flags for the FFT library (default is unset)
-#
-#with_fft_incs="-I/usr/local/include/fftw"
-
-# Link flags for the FFT library (default is unset)
-#
-#with_fft_libs="-L/usr/local/lib/fftw -lfftw3"
-
-# ---------------------------------------------------------------------------- #
-# Linear algebra connector                                                     #
-# ---------------------------------------------------------------------------- #
-
-# Flavor of linear algebra libraries to use (default is netlib)
-#
 # Supported libraries:
 #
 #   * acml      : AMD Core Math Libraries
@@ -796,13 +623,16 @@
 #   * atlas     : Automatically Tuned Linear Algebra Software
 #                 http://math-atlas.sourceforge.net/
 #
+#   * auto      : automatically look for linear algebra libraries
+#                 depending on the build environment (default)
+#
 #   * custom    : just check user-specified libraries, do not try to
 #                 detect their type
 #
 #   * essl      : IBM Engineering and Scientific Subroutine Library
 #                 http://www-03.ibm.com/systems/software/essl/
 #
-#   * elpa     : Eigen soLvers for Petaflops Applications
+#   * elpa      : Eigen soLvers for Petaflops Applications
 #                 http://elpa.rzg.mpg.de
 #
 #   * goto      : TACC GOTOBLAS2 and Netlib's LAPACK
@@ -815,27 +645,15 @@
 #   * mkl       : Intel Math Kernel Library
 #                 http://software.intel.com/en-us/articles/intel-mkl/
 #
-#   * mlib      : HP Mathematical Software Library
-#                 http://www.hp.com/
-#
 #   * netlib    : Netlib repository reference libraries
 #                 http://www.netlib.org/lapack/index.html
-#
-#   * none      : disable external linear algebra support
 #
 #   * plasma    : Parallel Linear Algebra for Scalable Multicore
 #                 Architectures (requires MPI)
 #                 http://icl.cs.utk.edu/plasma/
-#                 *** SCHEDULED FOR ABINIT 6.14 ***
 #
 #   * scalapack : Netlib BLACS and ScaLAPACK libraries (require MPI)
 #                 http://www.netlib.org/scalapack/
-#
-#   * sgimath   : Silicon Graphics Scientific Mathematical Library
-#                 http://techpubs.sgi.com/library/tpl/cgi-bin/init.cgi
-#
-#   * sunperf   : Sun Performance Library
-#                 http://blogs.oracle.com/hinkthink/entry/sun_performance_library_aka_perflib
 #
 # Notes:
 #
@@ -852,129 +670,248 @@
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
+#   * if with_linalg is set to "no", linear algebra tests will be disabled
+#     and the configuration will be assumed to work as-is by the build
+#     system (USE AT YOUR OWN RISKS)
+#
+#   * with_linalg_incs and with_linalg_libs systematically override the
+#     contents of with_linalg
+#
+
+# Flavor of linear algebra libraries to use (default is netlib)
+#
 #with_linalg_flavor="goto+scalapack"
 
-# Include flags for the external linear algebra libraries (default is unset)
+# Install prefix for the linear algebra libraries
 #
-#with_linalg_incs="-I/usr/local/include"
+#with_linalg="/usr/local"
+
+# Fortran flags for the external linear algebra libraries (default is unset)
+#
+#LINALG_FCFLAGS="-I/usr/local/include"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-#with_linalg_libs="-L/usr/local/lib -llapack -lblas"
+#LINALG_LIBS="-L/usr/local/lib -llapack -lblas"
 
-# ---------------------------------------------------------------------------- #
-# Algorithmic library connector                                                #
-# ---------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------- #
+# Optimized FFT support                                                      #
+# -------------------------------------------------------------------------- #
 
-# Flavor of the algorithmic library to use (default is unset)
-#
 # Supported libraries:
 #
-#   * custom (bypass build-system checks)
-#   * levmar
-#   * none   (disable external algorithm support)
+#   * asl           : NEC Advanced Scientific Library
+#   * auto          : select library depending on build environment (default)
+#   * custom        : bypass build-system checks
+#   * dfti          : native MKL FFT library
+#   * dfti-threads  : threaded MKL FFT library
+#   * fftw3         : serial FFTW3 library
+#   * fftw3-mkl     : FFTW3 over MKL library
+#   * fftw3-threads : threaded FFTW3 library
+#   * fftw3-mpi     : MPI-parallel FFTW3 library
+#   * goedecker     : Abinit internal FFT
 #
-#with_algo_flavor="levmar"
+# Notes:
+#
+#   * only one flavor can be selected at a time, flavors being mutually
+#     exclusive
+#
 
-# Include flags for the algorithmic libraries (default is unset)
+# Install prefix for the FFT library
 #
-#with_algo_incs="-I/usr/local/include"
+#with_fft="/usr/local"
 
-# Link flags for the algorithmic libraries (default is unset)
+# Flavor of FFT library to support (default is auto)
 #
-#with_algo_libs="-L/usr/local/lib -llevmar"
+#with_fft_flavor="fftw3"
 
-# ---------------------------------------------------------------------------- #
-# DFT library connector                                                        #
-# ---------------------------------------------------------------------------- #
+# C preprocessor flags for the FFT library (default is unset)
+#
+#FFT_CPPFLAGS="-I/usr/local/include/fftw"
 
-# Flavor of the DFT library to use (default is atompaw+bigdft+libxc+wannier90)
+# Fortran flags for the FFT library (default is unset)
 #
-# Supported libraries:
+#FFT_FCFLAGS="-I/usr/local/include/fftw"
+
+# Link flags for the FFT library (default is unset)
 #
-#   * atompaw   : PAW dataset generation
-#   * bigdft    : wavelets
-#   * libxc     : exchange-correlation functionals
-#   * none      : disable external DFT support
-#   * wannier90 : Wannier functions
+#FFT_LIBS="-L/usr/local/lib/fftw -lfftw3"
+
+# -------------------------------------------------------------------------- #
+# Feature triggers                                                           #
+# -------------------------------------------------------------------------- #
+
+# Through feature triggers, the build system of Abinit tries to link
+# prioritarily with external libraries to provide the requested
+# functionality. When unsuccessful, Abinit will run in degraded mode,
+# which means that it will provide poor performance and scalability, as
+# well as refuse to run some standard calculations. However, in some
+# cases, for historical reasons, it can resort to a limited internal
+# implementation.
 #
-# You may specify any combination, using '+' as a separator
+# Enabling feature triggers is necessary for packaging and is recommended
+# in most other cases. Relying upon external optimized libraries is always
+# smarter than embedding their source code, as their performance and
+# integration within the local environment are always significantly
+# better.
 #
-#with_dft_flavor="atompaw+libxc+wannier90"
+# The following optional dependencies are sorted by alphabetical order.
+# Please note that some of them may depend on others, as indicated.
+
+# Notes:
+#
+#   * when specifying with_package="prefix", the build system automatically
+#     looks for the relevant libraries in prefix/include and prefix/lib
+#
+#   * the 'with_package' options can also be set to yes or no, to let the
+#     build system find out the corresponding parameters on plaftorms where
+#     the external packages are available system-wide
+#
+#   * the 'with_package_incs' and 'with_package_libs' options systematically
+#     override the settings provided by corresponding 'with_package' options
+#
 
                        # ------------------------------ #
 
-# Full path to the AtomPAW executables (default is unset)
-#
-#with_atompaw_bins="/usr/local/bin"
+# BigDFT (depends on LibXC, see below)
+# Website: http://bigdft.org/
 
-# Include flags for the AtomPAW library (default is unset)
+# Enable BigDFT support (default is no)
 #
-#with_atompaw_incs="-I/usr/local/include/atompaw"
+#with_bigdft="yes"
 
-# Link flags for the AtomPAW library (default is unset)
+# Fortran flags for the BigDFT library (default is unset)
 #
-#with_atompaw_libs="-L/usr/local/lib/atompaw -latompaw"
-
-                       # ------------------------------ #
-
-# Include flags for the BigDFT library (default is unset)
-#
-#with_bigdft_incs="-I/usr/local/include/bigdft"
+#BIGDFT_FCFLAGS="-I/usr/local/include/bigdft"
 
 # Link flags for the BigDFT library (default is unset)
 #
-#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
+#BIGDFT_LIBS="-L/usr/local/lib/bigdft -lbigdft -lpoissonsolver -labinit"
 
                        # ------------------------------ #
 
-# Include flags for the LibXC library (default is unset)
+# Levenberg-Marquardt algorithm
+# Website: http://users.ics.forth.gr/~lourakis/levmar/
+
+# Trigger and install prefix for Levmar (default is unset)
 #
-#with_libxc_incs="-I/opt/etsf/include"
+#with_levmar="yes"
+
+# C preprocessor flags for the Levmar library (default is unset)
+#
+#LEVMAR_CPPFLAGS="-I/opt/etsf/include"
+
+# Fortran flags for the Levmar library (default is unset)
+#
+#LEVMAR_FCFLAGS="-I/opt/etsf/include"
+
+# Link flags for the Levmar library (default is unset)
+#
+#LEVMAR_LIBS="-L/opt/etsf/lib -llevmar"
+
+                       # ------------------------------ #
+
+# LibXC
+# Website: http://www.tddft.org/programs/octopus/wiki/index.php/Libxc
+
+# Trigger and install prefix for LibXC (default is unset)
+#
+#with_libxc="/usr/local"
+
+# C preprocessor flags for the LibXC library (default is unset)
+#
+#LIBXC_CPPFLAGS="-I/usr/local/include"
+
+# Fortran flags for the LibXC library (default is unset)
+#
+#LIBXC_FCFLAGS="-I/usr/local/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-#with_libxc_libs="-L/opt/etsf/lib -lxc"
+#LIBXC_LIBS="-L/usr/local/lib -lxcf90 -lxc"
 
                        # ------------------------------ #
 
-# Full path to the Wannier90 executables (default is unset)
+# NetCDF
+# Website: http://www.unidata.ucar.edu/software/netcdf/
+
+# Trigger and install prefix for NetCDF (default is unset)
 #
-#with_wannier90_bins="/usr/local/bin"
+#with_netcdf="/usr/local"
 
-# Include flags for the Wannier90 library (default is unset)
+# Fortran flags for the NetCDF libraries (default is unset)
 #
-#with_wannier90_incs="-I/usr/local/include/wannier90"
+#NETCDF_FCFLAGS="-I/usr/local/include/netcdf"
 
-# Link flags for the Wannier90 library (default is unset)
+# Link flags for the NetCDF libraries (default is unset)
 #
-#with_wannier90_libs="-L${HOME}/lib/wannier90 -lwannier90"
-
-# Flag to force wannier90 v1.x (autodetected by default, but may not work)
+#NETCDF_LIBS="-L/usr/local/lib/netcdf -lnetcdff -lnetcdf"
 #
-#enable_wannier90_v1="no"
-
-# ---------------------------------------------------------------------------- #
-# LIBXML support
-# ---------------------------------------------------------------------------- #
-
-# Flag to enable LIBXML library
 #
-#enable_xml=no
+# Enable Netcdf mode in Abinit (use netcdf as default IO library,
+# change the default values of accesswff)   
+#
+#enable_netcdf_default="no"
 
-# ---------------------------------------------------------------------------- #
-# DMFT library connector                                                        #
-# ---------------------------------------------------------------------------- #
+                       # ------------------------------ #
 
-# Link with TRIQS library (for CTQMC and rotationally invariant interaction)
-#    (default is no)
+# Enable LibPSML support (default is no)
+#
+#with_libpsml="yes"
+
+# Fortran flags for the LibPSML library (default is unset)
+#
+#LIBPSML_FCFLAGS="-I/usr/local/libpsml-1.1.7/include"
+
+# Link flags for the LibPSML library (default is unset)
+#
+#LIBPSML_LIBS="-L/usr/local/libpsml-1.1.7/lib -lpsml"
+
+                       # ------------------------------ #
+
+# TRIQS DMFT library (for CTQMC and rotationally invariant interaction)
+# Website: https://triqs.ipht.cnrs.fr/1.x/index.html
+
+# Trigger and install prefix for TRIQS (default is unset)
+#
+#with_triqs="/usr/local"
+
+# C preprocessor flags for the TRIQS library (default is unset)
+#
+#TRIQS_CPPFLAGS="-I/usr/local/triqs/include -I/usr/local/cthyb/src/c++/"
+
+# Fortran flags for the TRIQS library (default is unset)
+#
+#TRIQS_FCFLAGS="-I/usr/local/triqs/include -I/usr/local/cthyb/src/c++/"
+
+# Link flags for the TRIQS library (default is unset)
+#
+#TRIQS_LIBS="-L/usr/local/triqs/lib -ltriqs -lcthyb_c"
+
 #    Different versions of TRIQS have differents API. Choose your installed 
 #    version.
 #
 #enable_triqs_v2_0="no"
 #enable_triqs_v1_4="no"
+
+                       # ------------------------------ #
+
+# Enable Wannier90 support (default is no)
 #
-# Include flags for the TRIQS library (default is unset)
+#with_wannier90="yes"
+
+# Fortran flags for the Wannier90 library (default is unset)
+#
+#WANNIER90_FCFLAGS="-I/usr/local/include/wannier90"
+
+# Link flags for the Wannier90 library (default is unset)
+#
+#WANNIER90_LIBS="-L${HOME}/lib/wannier90 -lwannier90"
+
+# Flag to force wannier90 v1.x (autodetected by default, but may not work)
+#
+#enable_wannier90_v1="no"
+
                        # ------------------------------ #
 
 # Enable XMLF90 support (default is no)
@@ -989,44 +926,79 @@
 #
 #XMLF90_LIBS="-L/usr/local/lib -lxmlf90"
 
-#
-#with_triqs_incs="-I/usr/local/triqs/include -I/usr/local/cthyb/src/c++/"
+# -------------------------------------------------------------------------- #
+# Profiling and performance analysis                                         #
+# -------------------------------------------------------------------------- #
 
-# Link flags for the TRIQS library (default is unset)
+# Enable internal Abinit timer (default is yes)
 #
-#with_triqs_libs="-L/usr/local/triqs/lib -ltriqs -lcthyb_c"
+#enable_timer="no"
 
-# ---------------------------------------------------------------------------- #
-# Fallbacks                                                                    #
-# ---------------------------------------------------------------------------- #
+# Enable PAPI support (default is no)
+#
+#with_papi="yes"
 
+# C preprocessor flags for the PAPI library (default is unset)
 #
-# Fallbacks are external packages built within Abinit, in order to
-# facilitate the development and testing of advanced features. They
-# should in principle not be used in production, but replaced by the
-# corresponding connector instead (see above sections).
+#PAPI_CPPFLAGS="-I/usr/local/include/papi"
+
+# Fortran flags for the PAPI library (default is unset)
 #
-# IMPORTANT NOTE: the source tarballs of fallbacks are downloaded from
-#                 internet into ~/.abinit/tarballs/.
+#PAPI_FCFLAGS="-I/usr/local/include/papi"
+
+# Link flags for the PAPI library (default is unset)
+#
+#PAPI_LIBS="-L/usr/local/lib/papi -lpapi"
+
+# -------------------------------------------------------------------------- #
+# Fallbacks                                                                  #
+# -------------------------------------------------------------------------- #
+
+# Fallbacks are external packages pre-built together for Abinit, in order to
+# partly compensate for the absence of required external packages. If used,
+# they will provide lower reliability, performance and scalability than the
+# proper installation of the full-fledged corresponding packages. In any case,
+# they should not be used in production.
+#
+# Fallbacks are enabled when the "with_fallbacks" option below points to
+# an existing and readable directory. If this is not the case, failed
+# detections of external packages will cause configure to abort.
+#
+# Example: if you set with_fallbacks="/path/to/fallbacks", the
+# build system of Abinit will look for:
+#
+#   * executables in /path/to/fallbacks/bin/
+#   * C headers and Fortran modules in /path/to/fallbacks/include/
+#   * libraries in /path/to/fallbacks/lib/
+#
+# when it cannot detect properly installed external packages.
+#
+# Please note that this mechanism will work only if you have built and
+# installed the fallbacks you need beforehand. You can have a look at
+# the following helper script after running configure for more
+# information:
+#
+#   ~abinit-builddir/transient/build-abinit-fallbacks.sh
+#
+# Comprehensive documentation about how to use external packages properly
+# and build fallbacks can be found on the Abinit Wiki, at:
+#
+#   https://wiki.abinit.org/
 #
 
-# Enable fallbacks (default is yes)
+# Prefix for already installed fallbacks (default is unset)
 #
-# Maintainers may use the following to force the build of fallbacks:
-#
-#   * force: will skip connector tests when fallbacks are available.
-#
-# Note: if you disable fallbacks, failing connectors will cause
-# configure to abort.
-#
-#enable_fallbacks="no"
+#with_fallbacks="/opt/abinit-dev/fallbacks/gnu/4.9/mpi"
 
-# ---------------------------------------------------------------------------- #
-# Developer options                                                            #
-# ---------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------- #
+# Developer options                                                          #
+# -------------------------------------------------------------------------- #
 
-# Note: all the following options are disabled by default
-#       (i.e. they have the complementary values to those displayed)
+# Note: all the following options are disabled by default because they
+#       enable the build of highly experimental code (i.e. they have
+#       the complementary default values to those displayed below)
+#
+# Uncomment the following lines at your own risks
 
 # Enable BSE unpacking (gmatteo)
 #
@@ -1040,13 +1012,17 @@
 #
 #enable_gw_dpc="yes"
 
-# Enable memory profiling (waroquiers)
+# Use tetrahedrons from Libtetra (torrent)
 #
-#enable_memory_profiling="yes"
+#enable_libtetra="yes"
 
 # Enable lotf (mancini)
 #
 #enable_lotf="yes"
+
+# Enable memory profiling (waroquiers)
+#
+#enable_memory_profiling="yes"
 
 # Enable OpenMP (gmatteo, torrent)
 #
@@ -1056,43 +1032,38 @@
 #
 #enable_zdot_bugfix="yes"
 
-# ---------------------------------------------------------------------------- #
-# Maintainer options                                                           #
-# ---------------------------------------------------------------------------- #
-
-# Run test suite on 4 processors (default is no)
+# Enable the build of macroave (default is no)
 #
-#enable_fast_check="yes"
+#enable_macroave="yes"
 
-# Activate maintainer checks (default is no)
+# -------------------------------------------------------------------------- #
+# Maintainer options                                                         #
+# -------------------------------------------------------------------------- #
+
+# Enable extra features for expert developers (default is no)
 #
-#enable_maintainer_checks="yes"
+# Note: this option should only be enabled for development versions,
+#       as the extra information could easily confuse non-developers
+#
+# Allowed values:
+#
+#     * no  : disable extra features
+#     * yes : make all extra features available
+#
+#enable_expert="yes"
 
 # Fortran compiler vendor to be used by the build system (default is unset)
 #
-# Note: do not use if you don't know what it is about
+# Note: do not use if you do not know what it is about
 #
 #with_fc_vendor="dummy"
 
 # Fortran compiler version to be used by the build system (default is unset)
 #
-# Note: do not use if you don't know what it is about
+# Note: do not use if you do not know what it is about
 #
 #with_fc_version="0.0"
 
-# ---------------------------------------------------------------------------- #
-# Documentation options                                                        #
-# ---------------------------------------------------------------------------- #
-
-# Markdown flags
+# Maintainer checks (default is no)
 #
-#MDFLAGS=""
-
-# LaTeX flags
-#
-#LTXFLAGS=""
-
-# DviPDF flags
-#
-#PDFFLAGS=""
-
+#enable_maintainer_checks="yes"
