@@ -69,8 +69,25 @@ def main():
   cnf_env.read(envconf_path)
   env_config = list()
   for env in cnf_env.sections():
-    if cnf_env.get(env,"reset") == "no":
-      if not is_ignored(env): env_config.append(env)
+    if ( (cnf_env.get(env,"reset") == "no") and \
+       (not cnf_env.get(env,"status") in ["dropped", "removed"]) ):
+      if not is_ignored(env):
+          env_config.append(env)
+
+  # Extract environment variables from dependencies
+  cnf_dep = MyConfigParser()
+  depconf_path = os.path.join(home_dir, "config", "specs", "dependencies.conf")
+  assert os.path.exists(depconf_path)
+  cnf_dep.read(depconf_path)
+  for dep in cnf_dep.sections():
+    env_config += ["%s_%s" % (dep.upper(), item) for item in ["LDFLAGS", "LIBS"]]
+    langs = cnf_dep.get(dep, "languages").split()
+    if ( "c" in langs ):
+      env_config += ["%s_%s" % (dep.upper(), item) for item in ["CPPFLAGS", "CFLAGS"]]
+    if ( "c++" in langs ):
+      env_config += ["%s_%s" % (dep.upper(), item) for item in ["CXXFLAGS"]]
+    if ( "fortran" in langs ):
+      env_config += ["%s_%s" % (dep.upper(), item) for item in ["FCFLAGS"]]
   env_config.sort()
 
   # Extract options from config file
@@ -98,7 +115,7 @@ def main():
   env_template = list()
   opt_template = list()
 
-  ac_fname = os.path.join(home_dir, "doc/build/config-template.ac")
+  ac_fname = os.path.join(home_dir, "doc/build/config-template.ac8")
   with open(ac_fname, "rt") as fh:
       for line in fh:
         if re_env.match(line):
@@ -116,7 +133,7 @@ def main():
   opt_template.sort()
 
   # Check whether non-trivial option values are found in template
-  ac_fname = os.path.join(home_dir,"doc/build/config-template.ac")
+  ac_fname = os.path.join(home_dir,"doc/build/config-template.ac8")
 
   with open(ac_fname, "rt") as fh:
     tpl_data = fh.read()

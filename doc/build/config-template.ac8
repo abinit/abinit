@@ -498,14 +498,6 @@
 #
 #enable_mpi_io_default="no"
 
-# C preprocessor flags for the MPI library (default is unset)
-#
-#MPI_CPPFLAGS="-I/usr/local/include"
-
-# Fortran flags for the MPI library (default is unset)
-#
-#MPI_FCFLAGS="-I/usr/local/include"
-
 # Set MPI standard level (default is auto-detected)
 # Note: all current implementations should support at least level 2
 #
@@ -517,7 +509,27 @@
 #
 #with_mpi_level="2"
 
-# Link flags for the MPI library (default is unset)
+# C preprocessor flags for MPI (default is unset)
+#
+#MPI_CPPFLAGS="-I/usr/local/include"
+
+# C flags for MPI (default is unset)
+#
+#MPI_CFLAGS=""
+
+# C++ flags for MPI (default is unset)
+#
+#MPI_CXXFLAGS=""
+
+# Fortran flags for MPI (default is unset)
+#
+#MPI_FCFLAGS=""
+
+# Link flags for MPI (default is unset)
+#
+#MPI_LDFLAGS=""
+
+# Library flags for MPI (default is unset)
 #
 #MPI_LIBS="-L/usr/local/lib -lmpi"
 
@@ -560,6 +572,10 @@
 # GPU C flags (default is unset)
 #
 #GPU_CFLAGS="-I/usr/local/include/cuda"
+
+# GPU C++ flags (default is unset)
+#
+#GPU_CXXFLAGS="-std=c++11"
 
 # GPU Fortran flags (default is unset)
 #
@@ -682,15 +698,19 @@
 #
 #with_linalg_flavor="goto+scalapack"
 
-# Install prefix for the linear algebra libraries
+# Install prefix for linear algebra
 #
 #with_linalg="/usr/local"
 
-# Fortran flags for the external linear algebra libraries (default is unset)
+# Fortran flags for linear algebra (default is unset)
 #
 #LINALG_FCFLAGS="-I/usr/local/include"
 
-# Link flags for the external linear algebra libraries (default is unset)
+# Link flags for linear algebra (default is unset)
+#
+#LINALG_LDFLAGS=""
+
+# Library flags for linear algebra (default is unset)
 #
 #LINALG_LIBS="-L/usr/local/lib -llapack -lblas"
 
@@ -721,19 +741,27 @@
 #
 #with_fft="/usr/local"
 
-# Flavor of FFT library to support (default is auto)
+# Flavor of FFT framework to support (default is auto)
 #
 #with_fft_flavor="fftw3"
 
-# C preprocessor flags for the FFT library (default is unset)
+# C preprocessor flags for the FFT framework (default is unset)
 #
 #FFT_CPPFLAGS="-I/usr/local/include/fftw"
 
-# Fortran flags for the FFT library (default is unset)
+# C flags for the FFT framework (default is unset)
+#
+#FFT_CFLAGS="-I/usr/local/include/fftw"
+
+# Fortran flags for the FFT framework (default is unset)
 #
 #FFT_FCFLAGS="-I/usr/local/include/fftw"
 
-# Link flags for the FFT library (default is unset)
+# Link flags for the FFT framework (default is unset)
+#
+#FFT_LDFLAGS="-L/usr/local/lib/fftw -lfftw3"
+
+# Library flags for the FFT framework (default is unset)
 #
 #FFT_LIBS="-L/usr/local/lib/fftw -lfftw3"
 
@@ -780,11 +808,15 @@
 #
 #with_bigdft="yes"
 
-# Fortran flags for the BigDFT library (default is unset)
+# Fortran flags for BigDFT (default is unset)
 #
 #BIGDFT_FCFLAGS="-I/usr/local/include/bigdft"
 
-# Link flags for the BigDFT library (default is unset)
+# Link flags for BigDFT (default is unset)
+#
+#BIGDFT_LDFLAGS=""
+
+# Library flags for BigDFT (default is unset)
 #
 #BIGDFT_LIBS="-L/usr/local/lib/bigdft -lbigdft -lpoissonsolver -labinit"
 
@@ -797,15 +829,23 @@
 #
 #with_levmar="yes"
 
-# C preprocessor flags for the Levmar library (default is unset)
+# C preprocessor flags for Levmar (default is unset)
 #
 #LEVMAR_CPPFLAGS="-I/opt/etsf/include"
 
-# Fortran flags for the Levmar library (default is unset)
+# C flags for Levmar (default is unset)
+#
+#LEVMAR_CFLAGS="-I/opt/etsf/include"
+
+# Fortran flags for Levmar (default is unset)
 #
 #LEVMAR_FCFLAGS="-I/opt/etsf/include"
 
-# Link flags for the Levmar library (default is unset)
+# Link flags for Levmar (default is unset)
+#
+#LEVMAR_LDFLAGS=""
+
+# Library flags for Levmar (default is unset)
 #
 #LEVMAR_LIBS="-L/opt/etsf/lib -llevmar"
 
@@ -818,17 +858,54 @@
 #
 #with_libxc="/usr/local"
 
-# C preprocessor flags for the LibXC library (default is unset)
+# C preprocessor flags for LibXC (default is unset)
 #
 #LIBXC_CPPFLAGS="-I/usr/local/include"
 
-# Fortran flags for the LibXC library (default is unset)
+# C flags for LibXC (default is unset)
+#
+#LIBXC_CFLAGS="-I/usr/local/include"
+
+# Fortran flags for LibXC (default is unset)
 #
 #LIBXC_FCFLAGS="-I/usr/local/include"
 
 # Link flags for the LibXC library (default is unset)
 #
+#LIBXC_LDFLAGS=""
+
+# Library flags for LibXC (default is unset)
+#
 #LIBXC_LIBS="-L/usr/local/lib -lxcf90 -lxc"
+
+                       # ------------------------------ #
+
+# LibXML2
+# Website: http://www.xmlsoft.org/
+
+# Trigger and install prefix for LibXML2 (default is unset)
+#
+#with_libxc="/usr/local"
+
+# C preprocessor flags for LibXML2 (default is unset)
+#
+#LIBXML2_CPPFLAGS="-I/usr/local/include"
+
+# C flags for LibXML2 (default is unset)
+#
+#LIBXML2_CFLAGS="-I/usr/local/include"
+
+# Fortran flags for LibXML2 (default is unset)
+#
+#LIBXML2_FCFLAGS="-I/usr/local/include"
+
+# Link flags for the LibXML2 library (default is unset)
+#
+#LIBXML2_LDFLAGS=""
+
+# Library flags for LibXML2 (default is unset)
+#
+#LIBXML2_LIBS="-L/usr/local/lib -lxcf90 -lxc"
 
                        # ------------------------------ #
 
@@ -876,6 +953,10 @@
 
 # Link flags for the LibPSML library (default is unset)
 #
+#LIBPSML_LDFLAGS=""
+
+# Library flags for LibPSML (default is unset)
+#
 #LIBPSML_LIBS="-L/usr/local/libpsml-1.1.7/lib -lpsml"
 
                        # ------------------------------ #
@@ -891,9 +972,17 @@
 #
 #TRIQS_CPPFLAGS="-I/usr/local/triqs/include -I/usr/local/cthyb/src/c++/"
 
+# C++ flags for the TRIQS library (default is unset)
+#
+#TRIQS_CXXFLAGS="-I/usr/local/triqs/include -I/usr/local/cthyb/src/c++/"
+
 # Fortran flags for the TRIQS library (default is unset)
 #
 #TRIQS_FCFLAGS="-I/usr/local/triqs/include -I/usr/local/cthyb/src/c++/"
+
+# Link flags for the TRIQS library (default is unset)
+#
+#TRIQS_LDFLAGS="-L/usr/local/triqs/lib -ltriqs -lcthyb_c"
 
 # Link flags for the TRIQS library (default is unset)
 #
@@ -917,6 +1006,10 @@
 
 # Link flags for the Wannier90 library (default is unset)
 #
+#WANNIER90_LDFLAGS=""
+
+# Link flags for the Wannier90 library (default is unset)
+#
 #WANNIER90_LIBS="-L${HOME}/lib/wannier90 -lwannier90"
 
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
@@ -932,6 +1025,10 @@
 # Fortran flags for the XMLF90 library (default is unset)
 #
 #XMLF90_FCFLAGS="-I/usr/local/include"
+
+# Link flags for the LibPSML library (default is unset)
+#
+#XMLF90_LDFLAGS=""
 
 # Link flags for the LibPSML library (default is unset)
 #
@@ -953,11 +1050,19 @@
 #
 #PAPI_CPPFLAGS="-I/usr/local/include/papi"
 
+# C flags for the PAPI library (default is unset)
+#
+#PAPI_CFLAGS="-I/usr/local/include/papi"
+
 # Fortran flags for the PAPI library (default is unset)
 #
 #PAPI_FCFLAGS="-I/usr/local/include/papi"
 
 # Link flags for the PAPI library (default is unset)
+#
+#PAPI_LDFLAGS=""
+
+# Library flags for the PAPI library (default is unset)
 #
 #PAPI_LIBS="-L/usr/local/lib/papi -lpapi"
 
