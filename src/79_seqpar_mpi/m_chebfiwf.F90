@@ -358,8 +358,8 @@ module m_chebfiwf
   !print *, "mpi_enreg%comm_bandspinorfft AFTER CB2", l_mpi_enreg%comm_bandspinorfft 
   
   !if (xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft) == 0) then
-  print *, "CB2 RUN FINISHED!"
-  
+  !print *, "CB2 RUN FINISHED!"
+  !stop
   print *, "CB2WF PREPNONLOP pi_enreg%comm_fft, rank", mpi_enreg%comm_fft, xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft)
   print *, "CB2WF PREPNONLOP pi_enreg%comm_band, rank", mpi_enreg%comm_band, xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft)
   !stop
@@ -398,10 +398,12 @@ module m_chebfiwf
     end if
     !Call nonlop
     if (mpi_enreg%paral_kgb==0) then
-
+      print *, "USAO"
       call nonlop(choice,l_cpopt,cprj_dum,enl_out,l_gs_hamk,0,eig,mpi_enreg,nband,1,paw_opt,&
 &                signs,gsc_dummy,l_tim_getghc,cg,l_gvnlc)
 
+      print *, "IZASAO"
+      stop
     else
       !do iband=1,nband
       !  shift = (iband-1)*l_npw*l_nspinor
@@ -436,7 +438,7 @@ module m_chebfiwf
   end if
 
   print *, "AFTER CBWF2 NONLOP"
-
+  stop
   ABI_FREE(l_gvnlc)
 
   ! Free chebfi

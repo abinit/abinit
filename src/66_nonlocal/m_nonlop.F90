@@ -480,7 +480,9 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    force_recompute_ph3d=(.not.(associated(hamk%ph3d_kp)))
    istwf_k=hamk%istwf_kp
  end if
-
+ 
+ print *, "NONLOP1"
+ !stop
  if (npwin==0.or.npwout==0) return
  dimffnlin=size(ffnlin,2);dimffnlout=size(ffnlout,2)
  kpgin_allocated=(.not.associated(kpgin))
@@ -545,7 +547,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    enl_ptr => hamk%ekb
    dimenl1=hamk%dimekb1;dimenl2=hamk%dimekb2;dimekbq=1
  end if
-
+ print *, "NONLOP2"
+ !stop
 !In the case of a derivative with respect to an atomic displacement,
 !and if <g|dVnl/dR|c> is required (signs=2), we only need to compute the
 !derivatives of the projectors associated with the displaced atom.
@@ -650,7 +653,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      ph3dout_    => ph3dout
    end if
  end if
-
+  !print *, "NONLOP3"
+  !stop
 !A specific version of nonlop based on BLAS3 can be used
 !But there are several restrictions
 
@@ -752,7 +756,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    end do
    !$omp end parallel do
  end if
-
+  print *, "NONLOP4"
+  !stop
 !Release temporary storage
  if (iatom_only_>0.and.atom_pert) then
    if (cpopt>=0) then
@@ -783,7 +788,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  if (kpgout_allocated) then
    ABI_DEALLOCATE(kpgout)
  end if
-
+ print *, "NONLOP5"
+ !stop
  call timab(220+tim_nonlop,2,tsec)
 
  DBG_EXIT("COLL")

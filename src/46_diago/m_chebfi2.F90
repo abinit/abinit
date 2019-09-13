@@ -686,6 +686,8 @@ module m_chebfi2
       call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, 1, spacedim, neigenpairs)   !use xAXColsRows instead of AX notion
       call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, 1, spacedim, neigenpairs)
     end if
+
+    !stop
     
     if (counter < 8) then
       !if (counter == 0) then
@@ -711,22 +713,23 @@ module m_chebfi2
 !    print *, "mpi_enreg%comm_kptband BEFORE getAX_BX", mpi_enreg%comm_kptband 
 !    print *, "mpi_enreg%comm_spinorfft BEFORE getAX_BX", mpi_enreg%comm_spinorfft 
 !    print *, "mpi_enreg%comm_bandfft BEFORE getAX_BX", mpi_enreg%comm_bandfft 
-    print *, "mpi_enreg%comm_bandspinorfft BEFORE getAX_BX", mpi_enreg%comm_bandspinorfft 
-    print *, "xXColsRows FFT communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerX, 2)
-    print *, "xXColsRows NBAND communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerX, 3)
-    print *, "xAXColsRows FFT communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerAX, 2)
-    print *, "xAXColsRows NBAND communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerAX, 3)
+    !print *, "mpi_enreg%comm_bandspinorfft BEFORE getAX_BX", mpi_enreg%comm_bandspinorfft 
+    !print *, "xXColsRows FFT communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerX, 2)
+    !print *, "xXColsRows NBAND communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerX, 3)
+   
+     print *, "xAXColsRows FFT communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerAX, 2)
+     print *, "xAXColsRows NBAND communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerAX, 3)
     print *, "xBXColsRows FFT communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerBX, 2)
     print *, "xBXColsRows NBAND communicator BEFORE getAX_BX", xgTransposer_getComm(chebfi%xgTransposerBX, 3)
     
-    
+    !stop
     call timab(tim_getAX_BX,1,tsec)         
     !call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self) 
     !!TODO TODO TODO UNCOMMENT THIS 
     call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)  !OVO SAD MORA SVUDA DA SE MENJA
     call timab(tim_getAX_BX,2,tsec)
     
-    
+    !stop
     print *, "PROSAO getAX_BX"
     print *, "mpi_enreg%comm_fft AFTER getAX_BX", mpi_enreg%comm_fft
     print *, "mpi_enreg%comm_band AFTER getAX_BX", mpi_enreg%comm_band
@@ -1368,7 +1371,7 @@ module m_chebfi2
     !stop
     
     call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X at the end of the CB2 RUN") !MPI 1,2 OK
-    print *, "END OF RUN"
+    !print *, "END OF RUN"
     !stop   
      
   end subroutine chebfi_run
