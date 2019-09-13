@@ -3792,7 +3792,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 
 !Specific allocations and definitions
  ABI_ALLOCATE(frwfdq_bks,(2,nband_k,matom,3,3,3,nq1grad))
- fac=pi*pi/ucvol
+! fac=pi*pi/ucvol
 
 !Generate k+G vectors
  nkpg=3;                                                                                              
@@ -3805,26 +3805,26 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
    iatdir=pert_atdis(2,iatpert)
   
 !  Determination of the atom type
-   ia1=0
-   itypat=0
-   do ii=1,dtset%ntypat
-     ia1=ia1+nattyp(ii)
-     if(atindx(iatom)<=ia1.and.itypat==0)itypat=ii
-   end do
+!   ia1=0
+!   itypat=0
+!   do ii=1,dtset%ntypat
+!     ia1=ia1+nattyp(ii)
+!     if(atindx(iatom)<=ia1.and.itypat==0)itypat=ii
+!   end do
 
    !LOOP OVER STRAIN PERTURBATIONS
    do istrpert= 1, nstrpert
      ka=pert_strain(3,istrpert)
      kb=pert_strain(4,istrpert)
 
-     delad=zero ; if (iatdir==kb) delad=one
-     delbd=zero ; if (ka==kb) delbd=one
+!     delad=zero ; if (iatdir==kb) delad=one
+!     delbd=zero ; if (ka==kb) delbd=one
 
      !LOOP OVER Q1-GRADIENT
      do iq1grad=1,3
 
-       delag=zero ; if(iatdir==iq1grad) delag=one
-       delbg=zero ; if(ka==iq1grad) delbg=one
+!       delag=zero ; if(iatdir==iq1grad) delag=one
+!       delbg=zero ; if(ka==iq1grad) delbg=one
 
        !LOOP OVER BANDS
        do iband=1,nband_k
@@ -3871,12 +3871,11 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
          frwfdq_bks(:,iband,iatom,iatdir,ka,kb,iq1grad)=frwfdq_bks(:,iband,iatom,iatdir,ka,kb,iq1grad)*     &
        & two_pi
 
-         !Finally add the G=0 contribution 
-         frwfdq_g0=(cwave0i(1,1)**2+cwave0i(2,1)**2)*fac*psps%vlspl(1,2,itypat)*&
-       & (delag*delbd+delad*delbg)
-         frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)=frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)+     &
-       & frwfdq_g0
-  
+!         !Finally add the G=0 contribution 
+!         frwfdq_g0=(cwave0i(1,1)**2+cwave0i(2,1)**2)*fac*psps%vlspl(1,2,itypat)*&
+!       & (delag*delbd+delad*delbg)
+!         frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)=frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)+     &
+!       & frwfdq_g0
 
        end do !iband
 
