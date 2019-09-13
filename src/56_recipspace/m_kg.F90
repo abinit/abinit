@@ -1362,7 +1362,7 @@ subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
 
 !Local variables-------------------------------
 !scalars
- integer :: ipw,mu,mua,mub
+ integer :: ipw,mu
  character(len=500) :: message
 !arrays
  real(dp),allocatable :: kpg(:,:)
