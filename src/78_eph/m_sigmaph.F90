@@ -1629,8 +1629,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            iq_microzone_frohl = 0
            do jj=1,sigma%eph_doublegrid%ndiv
              ! get ibz index of q-point
-             iq_ibz_fine = sigma%eph_doublegrid%mapping(6, jj)
-             iq_bz_fine  = sigma%eph_doublegrid%mapping(3, jj)
+             iq_ibz_fine  = sigma%eph_doublegrid%mapping(6, jj)
+             iq_bz_fine   = sigma%eph_doublegrid%mapping(3, jj)
+             ikq_ibz_fine = sigma%eph_doublegrid%mapping(5, jj)
              ! store the index that corresponds to the central point in the microzone
              if (iq_bz_fine == iq_bz_frohl) iq_microzone_frohl = jj
              ! TODO: Compute displ_cart for this q-point in the fine grid
@@ -1639,21 +1640,21 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              !call ifc%fourq(cryst, qpt_fine, phfrq_fine, displ_cart_fine, comm=sigma%pert_comm%value)
              do imyp=1,my_npert
                nu = sigma%my_pinfo(3, imyp)
-               !gkqg_fine = get_frohlich(cryst,ifc,qpt_fine,nu,phfrq_fine,displ_cart,sigma%qdamp,osc_npw,osc_gvecq)
                gkqg_fine = get_frohlich(cryst,ifc,qpt_fine,nu,phfrq_fine,displ_cart,sigma%qdamp,osc_npw,osc_gvecq)
+               ! Use oscilator matrix elements <nk+q|e^{i q.r}|n'k>
                if (osc_ecut > zero) then
                  do ispinor=1,nspinor
                    do ib_k=1,nbcalc_ks
                      osc_ks_bs = osc_ks((ispinor-1)*osc_npw+1:ispinor*osc_npw,ib_k)
                      gkq2_lr(jj,ib_k,imyp) = gkq2_lr(jj,ib_k,imyp) +  real(sum(gkqg_fine*osc_ks_bs))**2 + &
-                                                                   aimag(sum(gkqg_fine*osc_ks_bs))**2
+                                                                     aimag(sum(gkqg_fine*osc_ks_bs))**2
                    end do
                  end do
+               ! Approximate the oscilator matrix elements <nk+q|e^{i q.r}|n'k> as delta{nn'}
                else
                  do ib_k=1,nbcalc_ks
-                   ikq_ibz_fine = sigma%eph_doublegrid%mapping(5, jj)
                    eig0mkq = sigma%eph_doublegrid%ebands_dense%eig(ibsum_kq, ikq_ibz_fine, spin)
-                   if (abs(eig0nk - eig0mkq) < TOL_EDIFF) cycle
+                   if (abs(eig0nk - eig0mkq) > TOL_EDIFF) cycle
                    gkq2_lr(jj,ib_k,imyp) =  real(sum(gkqg_fine))**2 + &
                                            aimag(sum(gkqg_fine))**2
                  end do
@@ -1663,7 +1664,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
            ! We now subtract the contribution from the central point in the microzone
            do imyp=1,my_npert
-             ipc = sigma%my_pinfo(3, imyp)
              do ib_k=1,nbcalc_ks
                gkq2_lr(:,ib_k,imyp) = gkq2_lr(:,ib_k,imyp) - gkq2_lr(iq_microzone_frohl,ib_k,imyp)
              end do
