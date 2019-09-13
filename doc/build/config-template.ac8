@@ -839,15 +839,26 @@
 #
 #with_netcdf="/usr/local"
 
-# Fortran flags for the NetCDF libraries (default is unset)
+# C preprocessing flags for NetCDF (default is unset)
+#
+#NETCDF_CPPFLAGS="-I/usr/local/include/netcdf"
+
+# C flags for NetCDF (default is unset)
+#
+#NETCDF_CFLAGS="-std=c99"
+
+# Fortran flags for NetCDF (default is unset)
 #
 #NETCDF_FCFLAGS="-I/usr/local/include/netcdf"
 
-# Link flags for the NetCDF libraries (default is unset)
+# Link flags for NetCDF (default is unset)
+#
+#NETCDF_LDFLAGS=""
+
+# Library flags for NetCDF (default is unset)
 #
 #NETCDF_LIBS="-L/usr/local/lib/netcdf -lnetcdff -lnetcdf"
-#
-#
+
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
 # change the default values of accesswff)   
 #
