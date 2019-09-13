@@ -3356,9 +3356,6 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
              dyewdqdq(im,mu,ia,nu,iq1,iq2)=dyewdqdq(im,mu,ia,nu,iq1,iq2) + &
            & work(im,mu,ia,nu,ib,iq1,iq2)
            end do
-           write(100,*) "iatom alpha beta gamma delta"
-           write(100,'(5(i5,3x),2(1x,f20.10))') ia,mu,nu,iq1,iq2,&
-         & dyewdqdq(re,mu,ia,nu,iq1,iq2),dyewdqdq(im,mu,ia,nu,iq1,iq2)
          end do
        end do
      end do
