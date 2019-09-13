@@ -9,19 +9,19 @@
 # npkpt 1 npband 16 npfft 8  # 128 MPI processes
 #max_ncpus 500
 use_gemm_nonlop 1 #0
-paral_kgb 1
+#paral_kgb 0
 npband 1
 npfft 1
 #bandpp 192
 
 #Plane wave basis
-ecut 8.
+ecut 10.
 pawecutdg 10.
 
 #Self-consistent cycle parameters
 toldfe 1.d-5
-nstep 10
-nline 6
+nstep 40
+nline 4
 nnsclo 1
 
 #K-points and symetries
