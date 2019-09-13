@@ -1635,7 +1635,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              ! store the index that corresponds to the central point in the microzone
              if (iq_bz_fine == iq_bz_frohl) iq_microzone_frohl = jj
              ! TODO: Compute displ_cart for this q-point in the fine grid
-             qpt_fine   = sigma%ephwg%ibz(:,iq_ibz_fine)
+             qpt_fine   = sigma%ephwg%bz(:,iq_bz_fine)
              phfrq_fine = sigma%ephwg%phfrq_ibz(iq_ibz_fine,:)
              !call ifc%fourq(cryst, qpt_fine, phfrq_fine, displ_cart_fine, comm=sigma%pert_comm%value)
              do imyp=1,my_npert
