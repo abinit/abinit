@@ -3863,19 +3863,13 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
            frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)=frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)+   &
          & half*c0_hatdisdq_c0_bks(1,iband,kb,iatpert)
            frwfdq_bks(2,iband,iatom,iatdir,ka,kb,iq1grad)=frwfdq_bks(2,iband,iatom,iatdir,ka,kb,iq1grad)-   &
-         & half*c0_hatdisdq_c0_bks(2,iband,kb,iatpert)
+         & half*c0_hatdisdq_c0_bks(2,iband,kb,iatpert) 
          end if
 
          !Take into account the two pi factor from the term 
          !(\hat{p}_{k\beta + \frac{q_{\beta}}{2}}) appearing before the double q-derivation
          frwfdq_bks(:,iband,iatom,iatdir,ka,kb,iq1grad)=frwfdq_bks(:,iband,iatom,iatdir,ka,kb,iq1grad)*     &
        & two_pi
-
-!         !Finally add the G=0 contribution 
-!         frwfdq_g0=(cwave0i(1,1)**2+cwave0i(2,1)**2)*fac*psps%vlspl(1,2,itypat)*&
-!       & (delag*delbd+delad*delbg)
-!         frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)=frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)+     &
-!       & frwfdq_g0
 
        end do !iband
 
