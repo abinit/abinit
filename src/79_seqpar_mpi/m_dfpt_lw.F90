@@ -2835,7 +2835,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  end if
  if (lw_flexo==1.or.lw_flexo==4) then
    write(msg, '(a,a,a)' ) ch10, &
-   'Internal strain tensor 1st q-gradient calculation completed ',ch10
+   ' Internal strain tensor 1st q-gradient calculation completed ',ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  end if
