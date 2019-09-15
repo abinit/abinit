@@ -17,7 +17,7 @@ In the main directory, type the command `make` with one of the following keyword
     - test_v1
     - test_v5
     - test_bigdft
-    - test_netcdf 
+    - test_etsf_io 
     - test_libxc
     - test_wannier90 
 
@@ -57,7 +57,7 @@ test_fast:          H2 molecule, determination of the H-H distance by the Broyde
 test_v1:            Yb cristal, self-consistent
 test_v5:            HBe molecule, spin-polarized, determination of forces
 test_bigdft:        H atom within BigDFT
-test_netcdf:        Ca atom with PAW, writing a NetCDF wavefunction file.
+test_etsf_io:       Ca atom with PAW, writing a ETSF_IO wavefunction file.
 test_libxc:         Bi atom with PAW, GGA PBE from LibXC
 test_wannier90:     GaAs crystal with few bands.
 

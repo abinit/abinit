@@ -60,7 +60,6 @@
 #%% authors = D. Caliste
 #%% keywords = PAW
 #%% description = 
-#%%   Ca atom in PAW. Test the output of density in PAW formalism with
-#%%   ETSF File Format. Also test the output of the wavefunctions in PAW
-#%%   formalism with ETSF File Format.
+#%%   Ca atom in PAW. Test the output of density in PAW formalism with ETSF_IO.
+#%%   Also test the output of the wavefunctions in PAW formalism with ETSF_IO.
 #%%<END TEST_INFO>
