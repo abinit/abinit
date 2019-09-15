@@ -907,6 +907,10 @@ ABI_MSG_SECTION([Optional source code])
 # (see config/specs/options.conf for details)
 ABI_OPTIONS_CPP_DEFINES
 
+# Let LibPAW known it is embedded in ABINIT
+AC_DEFINE([HAVE_LIBPAW_ABINIT], 1,
+  [Must be defined to 1 to have LibPAW properly working.])
+
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
 
