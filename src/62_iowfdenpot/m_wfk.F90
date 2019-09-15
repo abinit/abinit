@@ -5117,10 +5117,12 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
      nband_k = owfk%nband(ikf, spin)
      npw_k = owfk%hdr%npwarr(ikf)
 
+     !cg_k = zero
      if (ikin /= -1) then
        ! Read wavefunctions from input WFK file.
        ABI_CHECK(npw_k == iwfk%hdr%npwarr(ikin), "Mismatch in npw_k")
        ABI_CHECK(nband_k == iwfk%nband(ikin, spin), "Mismatch in nband_k")
+       !ABI_CHECK(owfk%hdr%istwfk(ikf) == iwfk%hdristwfk(ikin), "Mismatch in istwfk_k")
        call iwfk%read_band_block([1, nband_k], ikin, spin, xmpio_single, kg_k=kg_k, cg_k=cg_k) !, eig_k=eig_k, occ_k=occ_k)
      else
        ! Fill wavefunctions with fake data (npw_k == 1)

@@ -830,6 +830,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Read wavefunctions.
  call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
+ !call wfd%test_ortho(cryst, pawtab)
 
  ! if PAW, one has to solve a generalized eigenproblem
  ! BE careful here because I will need sij_opt == -1
@@ -845,16 +846,15 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_MALLOC(osc_gbound_q, (2*wfd%mgfft+8, 2))
 
  need_oscillators = 0
- osc_ecut = dtset%userra
+ !osc_ecut = dtset%userra
  !osc_ecut = dtset%ecut
+ osc_ecut = dtset%eph_ecutosc
  !osc_ecut = one
  if (osc_ecut /= zero) then
    need_oscillators = 1
-   call wrtout(std_out, sjoin("Computiing oscillator matrix elements with ecut.", ftoa(osc_ecut)))
+   call wrtout(std_out, sjoin("Computing oscillator matrix elements with ecut.", ftoa(osc_ecut)))
    ABI_CHECK(osc_ecut <= wfd%ecut, "osc_ecut cannot be greater than dtset%ecut")
  end if
- !nsheps = 0
- !call setshells(ecut, npw, nsh, cryst%nsym, cryst%gmet, cryst%gprimd, cryst%symrel, "eps", cryst%ucvol)
 
  !if (sigma%calc_velocity == 1) then
  call cwtime(cpu_ks, wall_ks, gflops_ks, "start", &
@@ -1603,10 +1603,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              end do
 
              band_ks = ib_k + bstart_ks - 1
+             eig0nk = ebands%eig(band_ks, ik_ibz, spin)
+             eig0mkq = ebands%eig(ibsum_kq, ikq_ibz, spin)
+             ! Here it seems there's a bug when istwfk 1 and kerange is used (see v8[161])
              !if (ibsum_kq == band_ks) then
-             if (ibsum_kq == band_ks .and. all(abs(qpt) < tol12)) then
+             !if (ibsum_kq == band_ks .and. all(abs(qpt) < tol12) .and. abs(eig0mkq - eig0nk) < tol6) then
+             if (all(abs(qpt) < tol12) .and. abs(eig0mkq - eig0nk) < tol6) then
                write(std_out,"(a,i0,2a)")" Ene and Oscillator for band: ", band_ks, ", and q-point: ", trim(ktoa(qpt))
-               write(std_out,*)ebands%eig(band_ks, ik_ibz, spin) * Ha_eV, osc_ks(:,1:2,ib_k)
+               write(std_out,*)eig0nk * Ha_eV, osc_ks(:,1:2,ib_k)
              end if
            end do
 
@@ -1796,7 +1800,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                        ! In principle one should rescale by the number of degenerate states but it's
                        ! easier to move all the weight to a single band
                        simag = zero
-                       ! TODO: Check the sign, use retarded convention.
+                       ! TODO: Check the sign, use convention for retarded function
                        if (ibsum_kq == band_ks) simag = -pi * sum(sigma%frohl_deltas_sphcorr(1:2, it, ib_k, nu), dim=1)
                      end if
 

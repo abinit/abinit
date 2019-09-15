@@ -3984,7 +3984,7 @@ Variable(
 The basic ingredients needed to perform both a screening and a sigma
 calculation are the so-called oscillator matrix elements defined as
 
-$$ \langle \mathbf{k-q},b_1 | e^{-i (\mathbf{q+G)} \mathbf{r}} | \mathbf{k}, b_2 \\rangle $$
+$$ \langle \mathbf{k-q},b_1 | e^{-i (\mathbf{q+G)} \mathbf{r}} | \mathbf{k}, b_2 \rangle $$
 
 In reciprocal space, this expression is evaluated by a convolution in which
 the number of reciprocal lattice vectors employed to describe the
@@ -3998,8 +3998,7 @@ variable is used to select the FFT mesh to be used.
 [[fftgw]] is the concatenation of two digits, labelled (A) and (B) whose value
 is internally used to define the value of [[ngfft]](1:3) (see the setmesh.F90 routine).
 
-The first digit (A) defines the augmentation of the FFT grid. Possible values
-are 1, 2 and 3.
+The first digit (A) defines the augmentation of the FFT grid. Possible values are 1, 2 and 3.
 
   * 0 --> Use the FFT grid specified by the user through [[ngfft]](1:3)
   * 1 --> Use a coarse FFT grid which encloses a sphere in reciprocal space whose radius
@@ -19959,6 +19958,35 @@ Alternative to [[getscr]] and [[irdscr]]. The string must be enclosed between qu
 
     getscr_path "../outdata/out_SCR"
 """
+),
+
+Variable(
+    abivarname="eph_ecutosc",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval="0.0 Hartree",
+    mnemonics="Electron-Phonon: Energy CUToff for OSCillator matrix elements",
+    characteristics=['[[ENERGY]]'],
+    text=r"""
+This variable defines the energy cutoff defining the number of G-vectors in the oscillator matrix elements:
+
+$$ \langle \mathbf{k+q},b_1 | e^{+i (\mathbf{q+G)} \mathbf{r}} | \mathbf{k}, b_2 \rangle $$
+
+These quantities are used to compute the long-range part of the e-ph matrix elements that are then used 
+to integrate the Frohlich divergence.
+
+Possible values:
+
+    - = 0 --> Approximate oscillators with $ \delta_{b_1 b_2} $
+    - > 0 --> Use full expression with G-dependence
+    - < 0 --> Deactivate computation of oscillators.
+
+!!! important
+
+    eph_ecutosc cannot be greater than [[ecut]]
+""",
 ),
 
 ]
