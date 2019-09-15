@@ -6,7 +6,7 @@ need_cpp_vars = [
 
 #: List of keywords that are automatically added to all the tests of this suite. 
 keywords = [
-"buildsys",
+"libpaw",
 ]
 
 #: List of input files
@@ -15,8 +15,5 @@ keywords = [
 
 #: List of python scripts. 
 pyscripts = [
-"check-binaries-conf.py",
-"check-build-config.py",
-"check-cpp-options.py",
-"check-forbidden-flags.py",
+"check-libpaw.py"
 ]
