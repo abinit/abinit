@@ -46,7 +46,17 @@ def makefile_header(name,stamp):
 ACLOCAL_AMFLAGS = -I config/m4
 
 AM_DISTCHECK_CONFIGURE_FLAGS = \\
-  --disable-fallbacks --with-trio-flavor="none" --with-dft-flavor="none" \\
+  --without-fallbacks \\
+  --without-bigdft \\
+  --without-levmar \\
+  --without-libpsml \\
+  --without-libxc \\
+  --without-libxml2 \\
+  --without-netcdf \\
+  --without-papi \\
+  --without-triqs \\
+  --without-wannier90 \\
+  --without-xmlf90 \\
   @abi_ac_distcheck@ \\
   PYFLAGS="@PYFLAGS@ -B"
 
