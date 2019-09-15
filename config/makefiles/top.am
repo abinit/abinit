@@ -14,7 +14,7 @@ CLEANFILES += \
 	config.fc_info.tmp
 
 # Files that should not be left in the source tree
-DISTCLEANFILES += fallbacks/Makefile
+DISTCLEANFILES = fallbacks/Makefile
 
 # Files to install
 install-data-local: config.pc

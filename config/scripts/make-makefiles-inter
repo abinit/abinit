@@ -79,7 +79,9 @@ def makefile_subdirs(filename,prefix):
 # Initial setup
 my_name    = "make-makefiles-inter"
 my_configs = {
-  "libs":"config/specs/corelibs.conf"}
+  "libs":"config/specs/corelibs.conf",
+  "bsys":"config/specs/buildsys.conf",
+}
 
 mf_sep = "\n# ---------------------------------------------------------------------------- #\n"
 
@@ -232,3 +234,17 @@ with open("shared/Makefile.am", "w") as mf_shared:
 with open("shared/common/Makefile.am", "w") as mf_common:
   mf_common.write(makefile_header(my_name, now))
   mf_common.write("SUBDIRS = src\n")
+
+# Write makefiles for subsystems
+cnf_bsys = MyConfigParser()
+cnf_bsys.read(my_configs["bsys"])
+for subsys in cnf_bsys.sections():
+  if ( (cnf_bsys.get(subsys, "mode") == "detached") and \
+       (cnf_bsys.get(subsys, "type") == "data") ):
+    sub_path = os.path.join("config", "dist", "auto-%s.lst" % subsys)
+    if ( os.path.exists(sub_path) ):
+      sub_idx = len(subsys) + 1
+      sub_files = [item[sub_idx:].strip() for item in open(sub_path, "r").readlines()]
+      with open(os.path.join(subsys, "Makefile.am"), "w") as mf_sub:
+        mf_sub.write(makefile_header(my_name, now))
+        mf_sub.write("EXTRA_DIST = \\\n  " + " \\\n  ".join(sub_files) + "\n")

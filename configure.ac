@@ -979,13 +979,6 @@ ABI_MSG_SECTION([Output])
 # Note: later, add tests/atconfig and tests/atlocal for test suite
 ABI_OUTPUT
 
-# FIXME: fake makefile until the test farm is upgraded
-${INSTALL} -d -m 755 ${PWD}/fallbacks
-cat >fallbacks/Makefile <<EOF
-all_targets all check mostlyclean clean dist distclean maintainer-clean:
-	@echo "WARNING: this is a soon-to-be-removed fake makefile that does nothing."
-EOF
-
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
 
