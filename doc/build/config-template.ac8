@@ -907,7 +907,7 @@
 
 # Trigger and install prefix for LibXML2 (default is unset)
 #
-#with_libxc="/usr/local"
+#with_libxml2="/usr/local"
 
 # C preprocessor flags for LibXML2 (default is unset)
 #
