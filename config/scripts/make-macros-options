@@ -65,7 +65,7 @@ def macro_define_header():
 # Declares command-line arguments for the "configure" script.
 #
 AC_DEFUN([ABI_OPTIONS_DEFINE],[
-  dnl Count use of deprecated options
+  # Count use of deprecated options
   abi_opt_deprecated_count=0
   abi_opt_deprecated_used=""
 
@@ -155,15 +155,15 @@ def macro_changed_template():
   return """
 
 
-dnl ABI_INFO_OPTIONS_CHANGED()
-dnl --------------------------
-dnl
-dnl Display changes of user interface between versions and warns about
-dnl obsolete uses.
-dnl
+# ABI_INFO_OPTIONS_CHANGED()
+# --------------------------
+#
+# Display changes of user interface between versions and warns about
+# obsolete uses.
+#
 AC_DEFUN([ABI_INFO_OPTIONS_CHANGED],[
 @MACRO@
-]) dnl ABI_INFO_OPTIONS_CHANGED
+]) # ABI_INFO_OPTIONS_CHANGED
 """
 
 
@@ -174,16 +174,16 @@ def macro_parse_template():
   return """
 
 
-dnl ABI_OPTIONS_PARSE()
-dnl -------------------
-dnl
-dnl Parses command-line arguments.
-dnl
+# ABI_OPTIONS_PARSE()
+# -------------------
+#
+# Parses command-line arguments.
+#
 AC_DEFUN([ABI_OPTIONS_PARSE],[
   AC_REQUIRE([AC_PROG_EGREP])
   AC_MSG_NOTICE([parsing command-line options])
 @MACRO@
-]) dnl ABI_OPTIONS_PARSE
+]) # ABI_OPTIONS_PARSE
 """
 
 
@@ -194,16 +194,16 @@ def macro_triggers_template():
   return """
 
 
-dnl ABI_OPTIONS_DEFINES()
-dnl ---------------------
-dnl
-dnl Set switches associated to 'enable_*' options (AC_DEFINE and
-dnl AM_CONDTIONAL).
-dnl
-AC_DEFUN([ABI_OPTIONS_DEFINES],[
+# ABI_OPTIONS_CPP_DEFINES()
+# -------------------------
+#
+# Set switches associated to 'enable_*' options (AC_DEFINE and
+# AM_CONDTIONAL).
+#
+AC_DEFUN([ABI_OPTIONS_CPP_DEFINES],[
   AC_MSG_NOTICE([setting build switches associated to command-line options])
 @MACRO@
-]) dnl ABI_OPTIONS_DEFINES
+]) # ABI_OPTIONS_CPP_DEFINES
 """
 
 
@@ -211,7 +211,7 @@ AC_DEFUN([ABI_OPTIONS_DEFINES],[
 # Option parser generator
 def parse_opt(opt,values):
 
-  ret = "  dnl Parse %s\n" % (opt)
+  ret = "  # Parse %s\n" % (opt)
 
   if ( len(values.split()) > 1 ):
     ret += """  if test "${%s}" != ""; then
@@ -330,7 +330,7 @@ def parse_opt(opt,values):
 
     else:
 
-      ret += """  dnl FIXME: NOT IMPLEMENTED!\n
+      ret += """  # FIXME: NOT IMPLEMENTED!\n
   AC_MSG_WARN([parsing not implemented for value type '%s'])\n""" % values
 
   return ret
@@ -394,8 +394,8 @@ m4.write(macro_define_header())
 defaults = ""
 parse = ""
 for arg in ("enable","with"):
-  m4.write("\n  dnl\n  dnl --%s arguments\n  dnl\n" % (arg))
-  defaults += "\n  dnl\n  dnl --%s arguments\n  dnl\n\n" % (arg)
+  m4.write("\n  #\n  # --%s arguments\n  #\n" % (arg))
+  defaults += "\n  #\n  # --%s arguments\n  #\n\n" % (arg)
   for opt in ac_args[arg]:
     var = re.sub(arg+"_","",opt)
     opt_name = re.sub("_","-",var)
@@ -454,16 +454,16 @@ m4.write(macro_backup_header())
 
 # Process arguments
 for arg in ("enable","with"):
-  m4.write("\n  dnl\n  dnl --%s arguments\n  dnl\n" % (arg))
+  m4.write("\n  #\n  # --%s arguments\n  #\n" % (arg))
   for opt in ac_args[arg]:
     var = re.sub(arg+"_","",opt)
     m4.write("  cmd_%s_%s=\"${%s_%s}\"\n" % (arg,var,arg,var))
 
 # Do not forget "prefix"
 m4.write("""
-  dnl
-  dnl Prefix
-  dnl
+  #
+  # Prefix
+  #
   if test "${prefix}" != "NONE"; then
     cmd_prefix="${prefix}"
   fi
@@ -477,7 +477,7 @@ m4.write(macro_recall_header())
 
 # Process arguments
 for arg in ("enable","with"):
-  m4.write("\n  dnl\n  dnl --%s arguments\n  dnl\n" % (arg))
+  m4.write("\n  #\n  # --%s arguments\n  #\n" % (arg))
   for opt in ac_args[arg]:
     var = re.sub(arg+"_","",opt)
     m4.write("\n  if test \"${cmd_%s_%s}\" != \"\"; then\n    %s_%s=\"${cmd_%s_%s}\"\n  fi\n" % \
@@ -485,9 +485,9 @@ for arg in ("enable","with"):
 
 # Do not forget "prefix"
 m4.write("""
-  dnl
-  dnl Prefix
-  dnl
+  #
+  # Prefix
+  #
   if test "${cmd_prefix}" != ""; then
     prefix="${cmd_prefix}"
   fi
@@ -516,7 +516,7 @@ for arg in all_args:
   # Removed options
   if ( (arg_stat == "removed") or (arg_stat == "dropped") ):
     arg1 = re.sub("_","-",arg)
-    chg_rem += "\n  dnl Removed --%s option" % (arg1)
+    chg_rem += "\n  # Removed --%s option" % (arg1)
     if ( arg_stat == "removed" ):
       chg_rem += "\n  AC_MSG_NOTICE([  * removed option --%s])" % (arg1)
       if ( arg_repl != "" ):
@@ -534,7 +534,7 @@ for arg in all_args:
   # New options
   elif ( arg_stat.startswith("new") ):
     arg2 = re.sub("_","-",arg.split()[0])
-    chg_new += "\n  dnl New --%s option\n" % (arg2)
+    chg_new += "\n  # New --%s option\n" % (arg2)
     chg_new += "  AC_MSG_NOTICE([  * new option --%s is available])\n" % (arg2)
     if ( len(arg.split()) > 1 ):
       chg_new += "  AC_MSG_NOTICE([    (%s)])\n" % (" ".join(arg.split()[1:]))
@@ -543,7 +543,7 @@ for arg in all_args:
   elif ( re.match("changed",arg_stat) ):
     arg1 = re.sub("_","-",arg)
     chg_mod += """
-  dnl UI change for --%s option
+  # UI change for --%s option
   AC_MSG_NOTICE([  * modified option --%s])
   AC_MSG_NOTICE([    (%s)])
   AC_MSG_NOTICE([    please check that --%s="${%s}" is OK for you])
@@ -553,7 +553,7 @@ for arg in all_args:
   elif ( re.match("deprecated",arg_stat) ):
     arg2 = re.sub("_","-",arg)
     chg_dep += """
-  dnl --%s deprecated
+  # --%s deprecated
   AC_MSG_NOTICE([  * deprecated option --%s])
   if test "${%s}" != ""; then
     AC_MSG_NOTICE([    >>> --%s = '${%s}' will soon be forbidden!])
@@ -596,7 +596,7 @@ for opt in ac_args["enable"]:
   if ( len(opt_cnds) + len(opt_defs) > 0 ):
     triggers += """
 
-  dnl Triggers for %s
+  # Triggers for %s
   AC_MSG_CHECKING([whether to %s])
   AC_MSG_RESULT([${%s}])
 """ % (opt,opt_desc,opt)
@@ -624,7 +624,7 @@ for opt in ac_args["enable"]:
       triggers += """
   if test "${%s}" = "%s"; then
     AC_MSG_NOTICE([defining the '%s' preprocessing macro])
-    AC_DEFINE([%s],1,
+    AC_DEFINE([%s], 1,
       [Define to 1 if you want to %s.])
   fi""" % (opt_ivar,val,cpp,cpp,opt_desc)
 

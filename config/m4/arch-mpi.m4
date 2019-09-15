@@ -790,6 +790,9 @@ AC_DEFUN([ABI_MPI_DETECT], [
 
       # Propagate MPI level
       case "${abi_mpi_level}" in
+        1)
+          AC_MSG_ERROR([prehistoric MPI implementations are not supported anymore])
+          ;;
         2)
           AC_DEFINE([HAVE_MPI2], 1,
             [Define to 1 if you have a MPI-2 implementation.])
@@ -797,6 +800,9 @@ AC_DEFUN([ABI_MPI_DETECT], [
         3)
           AC_DEFINE([HAVE_MPI3], 1,
             [Define to 1 if you have a MPI-3 implementation.])
+          ;;
+        *)
+          AC_MSG_ERROR([invalid MPI level: MPI-${abi_mpi_level}])
           ;;
       esac
 

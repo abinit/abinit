@@ -32,23 +32,19 @@ class MyConfigParser(ConfigParser):
 #
 
 dep_levels = {
-  "algo":1,
-  "atompaw":3,
-  "bigdft":3,
-  "etsf_io":2,
-  "fft":1,
-  "libpsml":1,
-  "yaml":1,
-  "libxc":1,
-  "linalg":1,
-  "math":1,
+  "bigdft":6,
+  "fft":3,
+  "levmar":4,
+  "libpsml":4,
+  "libxc":4,
+  "libxml2":0,
+  "linalg":2,
   "mpi":0,
   "gpu":1,
-  "netcdf":1,
-  "timer":1,
+  "netcdf":4,
+  "papi":2,
   "triqs":0, 
-  "wannier90":3,
-  "xml":0  # Comment hexu: Please check. 
+  "wannier90":5,
 }
 
 def main():

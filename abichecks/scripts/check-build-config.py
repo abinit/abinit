@@ -108,6 +108,10 @@ def main():
     else:
       if not is_ignored(opt):
         opt_config.append(opt)
+  opt_config += ["with_%s" % item for item in cnf_dep.sections() \
+    if cnf_dep.get(item, "detector") in ["arch", "steredeg"]]
+  opt_config += ["with_%s_flavor" % item for item in cnf_dep.sections() \
+    if cnf_dep.get(item, "detector") in ["arch"]]
   opt_config.sort()
   opt_removed.sort()
 
@@ -146,7 +150,7 @@ def main():
         tmp_values.remove("no")
       if "yes" in tmp_values:
         tmp_values.remove("yes")
-    except NoOptionError:
+    except:
       tmp_values = list()
 
     for val in tmp_values:

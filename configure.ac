@@ -905,7 +905,7 @@ ABI_MSG_SECTION([Optional source code])
 
 # Defines and conditionals for CPP options
 # (see config/specs/options.conf for details)
-ABI_OPTIONS_DEFINES
+ABI_OPTIONS_CPP_DEFINES
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -936,6 +936,31 @@ AC_SUBST(FFLAGS)
 # Void CPPFLAGS to allow for C/Fortran mixing
 ABI_CPPFLAGS="${CPPFLAGS}"
 CPPFLAGS=""
+
+# ---------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+
+# FIXME: Temporary options to remove
+case "${ABINIT_LEGACY_OPTION}" in
+  etsf_io)
+    AC_DEFINE([HAVE_ETSF_IO], 1,
+     [Define to 1 if you want to use ETSF_IO (obsolete, orphan project).])   
+    ;;
+  mpi1)
+    AC_DEFINE([HAVE_MPI1], 1,
+      [Define to 1 if you have a MPI-1 implementation (obsolete, broken).])
+    ;;
+  wannier90_v1)
+    AC_DEFINE([HAVE_WANNIER90_V1], 1,
+      [Define to 1 if you want to use Wanner90 1.x (awfully obsolete).])
+    ;;
+esac
+
+# FIXME: temporary translation of XML status
+if test "${abi_libxml2_enable}" = "yes"; then
+  AC_DEFINE([HAVE_XML], 1,
+    [Define to 1 if you want to use LibXML2-based XML I/O.])
+fi
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #

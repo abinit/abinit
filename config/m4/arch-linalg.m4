@@ -816,6 +816,36 @@ AC_DEFUN([_ABI_LINALG_CHECK_ELPA_2016], [
 ]) # _ABI_LINALG_CHECK_ELPA_2016
 
 
+# _ABI_LINALG_CHECK_ELPA_2017()
+# -----------------------------
+#
+# Look for a ELPA 2017+ API.
+#
+AC_DEFUN([_ABI_LINALG_CHECK_ELPA_2017], [
+  # Init
+  abi_linalg_has_elpa_2017="no"
+
+  AC_MSG_CHECKING([for ELPA 2017 API support in specified libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      use elpa
+      class(elpa_t),pointer :: e
+      integer,parameter :: na=1,ncol=1,nrow=1 ; integer :: err
+      real*8 :: a(ncol,nrow),ev(na),q(ncol,nrow)
+      call e%eigenvectors(a,ev,q,err)
+      call e%cholesky(a,err)
+    ]])], [abi_linalg_has_elpa_2017="yes"], [abi_linalg_has_elpa_2017="no"])
+  AC_MSG_RESULT([${abi_linalg_has_elpa_2017}])
+
+  if test "${abi_linalg_has_elpa_2017}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_ELPA_2017], 1,
+      [Define to 1 if you have ELPA 2017 API support.])
+    AC_DEFINE([HAVE_ELPA_FORTRAN2008], 1,
+      [Define to 1 if you have ELPA Fortran 2008 API support.])
+  fi
+]) # _ABI_LINALG_CHECK_ELPA_2017
+
+
 # _ABI_LINALG_CHECK_MAGMA_15()
 # ----------------------------
 #
@@ -929,6 +959,7 @@ AC_DEFUN([_ABI_LINALG_SEARCH_ELPA], [
   AC_MSG_RESULT([${abi_linalg_has_elpa}])
 
   if test "${abi_linalg_has_elpa}" = "yes"; then
+    _ABI_LINALG_CHECK_ELPA_2017()
     _ABI_LINALG_CHECK_ELPA_2016()
     _ABI_LINALG_CHECK_ELPA_2015()
     _ABI_LINALG_CHECK_ELPA_2014()

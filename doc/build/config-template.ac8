@@ -470,6 +470,26 @@
 #
 #with_mpi="/usr/local/openmpi-gcc"
 
+# Define MPI flavor (optional, only useful on some systems)
+#
+# Permitted values:
+#
+#   * auto         : Let the build system configure MPI (recommended).
+#
+#   * double-wrapi : Internally wrap the MPI compiler wrappers, only for
+#                    severely bugged and oldish MPI implementations.
+#
+#   * flags        : Do not look for MPI compiler wrappers, only use
+#                    compiler flags to enable MPI.
+#
+#   * native       : Assume that the compilers have native MPI support.
+#
+#   * prefix       : Assume that MPI wrappers are located under
+#                    specified prefix and exclude any other
+#                    configuration.
+#
+#with_mpi_flavor="native"
+
 # Activate the MPI_IN_PLACE option whenever possible (default is no)
 # WARNING: this feature requires MPI2, ignored if the MPI library
 # is not MPI2 compliant.
@@ -645,6 +665,9 @@
 #   * custom    : just check user-specified libraries, do not try to
 #                 detect their type
 #
+#   * easybuild : EasyBuild - Building software with ease
+#                 https://easybuilders.github.io/easybuild/
+#
 #   * essl      : IBM Engineering and Scientific Subroutine Library
 #                 http://www-03.ibm.com/systems/software/essl/
 #
@@ -663,6 +686,9 @@
 #
 #   * netlib    : Netlib repository reference libraries
 #                 http://www.netlib.org/lapack/index.html
+#
+#   * openblas  : OpenBLAS - An Optimized BLAS Library
+#                 https://www.openblas.net/
 #
 #   * plasma    : Parallel Linear Algebra for Scalable Multicore
 #                 Architectures (requires MPI)
@@ -694,13 +720,13 @@
 #     contents of with_linalg
 #
 
-# Flavor of linear algebra libraries to use (default is netlib)
-#
-#with_linalg_flavor="goto+scalapack"
-
 # Install prefix for linear algebra
 #
 #with_linalg="/usr/local"
+
+# Flavor of linear algebra libraries to use (default is netlib)
+#
+#with_linalg_flavor="goto+scalapack"
 
 # Fortran flags for linear algebra (default is unset)
 #
@@ -837,10 +863,6 @@
 #
 #LEVMAR_CFLAGS="-I/opt/etsf/include"
 
-# Fortran flags for Levmar (default is unset)
-#
-#LEVMAR_FCFLAGS="-I/opt/etsf/include"
-
 # Link flags for Levmar (default is unset)
 #
 #LEVMAR_LDFLAGS=""
@@ -895,10 +917,6 @@
 #
 #LIBXML2_CFLAGS="-I/usr/local/include"
 
-# Fortran flags for LibXML2 (default is unset)
-#
-#LIBXML2_FCFLAGS="-I/usr/local/include"
-
 # Link flags for the LibXML2 library (default is unset)
 #
 #LIBXML2_LDFLAGS=""
@@ -941,6 +959,10 @@
 #
 #enable_netcdf_default="no"
 
+# Use the MPI features of NetCDF (default is no) [EXPERIMENTAL]
+#
+#enable_netcdf_mpi="yes"
+
                        # ------------------------------ #
 
 # Enable LibPSML support (default is no)
@@ -968,17 +990,9 @@
 #
 #with_triqs="/usr/local"
 
-# C preprocessor flags for the TRIQS library (default is unset)
-#
-#TRIQS_CPPFLAGS="-I/usr/local/triqs/include -I/usr/local/cthyb/src/c++/"
-
 # C++ flags for the TRIQS library (default is unset)
 #
 #TRIQS_CXXFLAGS="-I/usr/local/triqs/include -I/usr/local/cthyb/src/c++/"
-
-# Fortran flags for the TRIQS library (default is unset)
-#
-#TRIQS_FCFLAGS="-I/usr/local/triqs/include -I/usr/local/cthyb/src/c++/"
 
 # Link flags for the TRIQS library (default is unset)
 #
@@ -987,12 +1001,6 @@
 # Link flags for the TRIQS library (default is unset)
 #
 #TRIQS_LIBS="-L/usr/local/triqs/lib -ltriqs -lcthyb_c"
-
-#    Different versions of TRIQS have differents API. Choose your installed 
-#    version.
-#
-#enable_triqs_v2_0="no"
-#enable_triqs_v1_4="no"
 
                        # ------------------------------ #
 
@@ -1011,10 +1019,6 @@
 # Link flags for the Wannier90 library (default is unset)
 #
 #WANNIER90_LIBS="-L${HOME}/lib/wannier90 -lwannier90"
-
-# Flag to force wannier90 v1.x (autodetected by default, but may not work)
-#
-#enable_wannier90_v1="no"
 
                        # ------------------------------ #
 
@@ -1053,10 +1057,6 @@
 # C flags for the PAPI library (default is unset)
 #
 #PAPI_CFLAGS="-I/usr/local/include/papi"
-
-# Fortran flags for the PAPI library (default is unset)
-#
-#PAPI_FCFLAGS="-I/usr/local/include/papi"
 
 # Link flags for the PAPI library (default is unset)
 #
@@ -1156,18 +1156,6 @@
 # Maintainer options                                                         #
 # -------------------------------------------------------------------------- #
 
-# Enable extra features for expert developers (default is no)
-#
-# Note: this option should only be enabled for development versions,
-#       as the extra information could easily confuse non-developers
-#
-# Allowed values:
-#
-#     * no  : disable extra features
-#     * yes : make all extra features available
-#
-#enable_expert="yes"
-
 # Fortran compiler vendor to be used by the build system (default is unset)
 #
 # Note: do not use if you do not know what it is about
@@ -1180,6 +1168,6 @@
 #
 #with_fc_version="0.0"
 
-# Maintainer checks (default is no)
+# Build debugging instructions present in the source code
 #
-#enable_maintainer_checks="yes"
+#enable_source_debug="yes"
