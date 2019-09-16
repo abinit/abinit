@@ -549,7 +549,7 @@ subroutine phgamma_init(gams, cryst, ifc, fstab, dtset, eph_scalprod, ngqpt, n0,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: qptopt1 = 1
- integer :: my_rank, nproc, iq, ierr, nsppol, natom3
+ integer :: my_rank, nproc, ierr, nsppol, natom3
 !arrays
  integer :: qptrlatt(3,3)
 
@@ -4534,7 +4534,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  integer :: ib1, ib2 ! band_k, band_kq
  real(dp),parameter :: max_occ1 = one
  real(dp) :: cpu, wall, gflops, enemin, enemax
- character(len=500) :: msg
+ !character(len=500) :: msg
  type(krank_t) :: ibz_krank
  type(t_tetrahedron) :: tetra
  character(len=80) :: errorstring
@@ -4878,10 +4878,10 @@ subroutine calc_dbldelta(cryst, ebands, ltetra, bstart, bstop, nqibz, qibz, wtqs
  integer :: ib1, ib2, my_rank, nproc, cnt
  real(dp),parameter :: max_occ1 = one
  real(dp) :: enemin, enemax !cpu, wall, gflops,
- character(len=500) :: msg
+ !character(len=500) :: msg
  type(krank_t) :: ibz_krank
  type(t_tetrahedron) :: tetra
- character(len=80) :: errorstring
+ !character(len=80) :: errorstring
 !arrays
  integer :: nge(3), ngw(3)
  integer,allocatable :: indkpt(:) !, symrecfm(:,:,:)
