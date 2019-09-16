@@ -572,6 +572,7 @@ module m_chebfi2
       print *, "COMM FFT", xgTransposer_getComm(chebfi%xgTransposerX, 2)
       print *, "COMM BAND", xgTransposer_getComm(chebfi%xgTransposerX, 3)
       !stop
+      
       mpi_enreg%comm_fft = xgTransposer_getComm(chebfi%xgTransposerX, 2)
       mpi_enreg%comm_band = xgTransposer_getComm(chebfi%xgTransposerX, 3)
  !     call xgBlock_getSize(chebfi%X,rows,cols)
@@ -1317,11 +1318,12 @@ module m_chebfi2
 
     !print *, "PRE RESIDUE"
     !stop
-    call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X before chebfi_computeResidue:" // str)  !!TODO FROM HERE
+    call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X BEFORE chebfi_computeResidue:" // str)  !!TODO FROM HERE
     call timab(tim_residu, 1, tsec)
     maximum =  chebfi_computeResidue(chebfi, residu, pcond)
     call timab(tim_residu, 2, tsec)
-    
+    call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X AFTER chebfi_computeResidue:" // str)  !!TODO FROM HERE
+
     !print *, "RESIDUE", maximum
     !stop
                    
@@ -1339,11 +1341,12 @@ module m_chebfi2
       call xgTransposer_free(chebfi%xgTransposerX)
       call xgTransposer_free(chebfi%xgTransposerAX)
       call xgTransposer_free(chebfi%xgTransposerBX)
+      
+      mpi_enreg%comm_fft = comm_fft_save
+      mpi_enreg%comm_band = comm_band_save
     end if
     
-    mpi_enreg%comm_fft = comm_fft_save
-    mpi_enreg%comm_band = comm_band_save
-    
+   
     call timab(tim_run,2,tsec)
     
     !stop
@@ -1371,7 +1374,7 @@ module m_chebfi2
     !stop
     
     call debug_helper_linalg(chebfi%X, chebfi, "chebfi%X at the end of the CB2 RUN") !MPI 1,2 OK
-    !print *, "END OF RUN"
+    print *, "END OF RUN"
     !stop   
      
   end subroutine chebfi_run
@@ -2079,6 +2082,8 @@ module m_chebfi2
     !stop   
     
     !print *, "chebfi%paral_kgb", chebfi%paral_kgb
+    call debug_helper_linalg(chebfi%X, chebfi, "RR X before reseting X_NP :" // str)
+
     !stop
      !if (X_NP_TEST == 1) then  
     if (chebfi%paral_kgb == 1 .and. xmpi_comm_size(chebfi%spacecom) > 1) then  !!TODO TODO TODO ovde je problem za 1, izgube se adrese ili sta vec...
@@ -2128,8 +2133,9 @@ module m_chebfi2
       !call xg_setBlock(chebfi%X_NP,chebfi%X_prev,neigenpairs+1,spacedim,neigenpairs)  
       !!TODO UOPSTE NE ZNAM DA LI OVO MOZE DA SE ODRADI SA POSTOJECIM FUNKCIJAMA
       !print *, "USAAAAAAAAAAAAAAAAAAAAAAAAA"
+       call xgBlock_zero(chebfi%X_NP%self)
     end if 
-    call xgBlock_zero(chebfi%X_NP%self)
+    !call xgBlock_zero(chebfi%X_NP%self)
     !end if
     !call debug_helper_linalg(chebfi%X, chebfi, "LINE1777")  !X OK HERE FOR 1 and 2 MPI
     !stop
@@ -2151,7 +2157,8 @@ module m_chebfi2
     
     print *, "REMAINDER", remainder      
     if (remainder == 1) then  !save original cg address into temp
-      !print *, "USAO REMEINDER 1"      
+      print *, "USAO REMEINDER 1"
+      !stop      
       call xgBlock_setBlock(chebfi%X_next, chebfi%AX_swap, 1, spacedim, neigenpairs) 
       call xgBlock_setBlock(chebfi%X, chebfi%BX_swap, 1, spacedim, neigenpairs) 
       call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap, 1, spacedim, neigenpairs) 
@@ -2166,6 +2173,7 @@ module m_chebfi2
       !stop
                             
     else if (remainder == 2) then 
+      print *, "USAO REMEINDER 2"
       call xgBlock_setBlock(chebfi%X_prev, chebfi%AX_swap, 1, spacedim, neigenpairs) 
       call xgBlock_setBlock(chebfi%X, chebfi%BX_swap, 1, spacedim, neigenpairs) 
       call xgBlock_setBlock(chebfi%X_next, chebfi%X_swap, 1, spacedim, neigenpairs)
@@ -2173,7 +2181,8 @@ module m_chebfi2
       call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, & 
                       chebfi%X, A_und_X%self, 0.d0, chebfi%X_swap)     !put X into expected buffer directly
      
-    else if (remainder == 0) then  
+    else if (remainder == 0) then
+      print *, "USAO REMEINDER 0"  
       call xgBlock_setBlock(chebfi%X_prev, chebfi%AX_swap, 1, spacedim, neigenpairs) 
       call xgBlock_setBlock(chebfi%X_next, chebfi%BX_swap, 1, spacedim, neigenpairs) 
       call xgBlock_setBlock(chebfi%X, chebfi%X_swap, 1, spacedim, neigenpairs)
@@ -2206,7 +2215,7 @@ module m_chebfi2
     if (counter < 8) then
       call debug_helper_linalg(chebfi%X_swap, chebfi, "X_swap counter :" // str) 
     end if
-    !print *, "X_SWAP print"
+    print *, "X_SWAP print RRRRRRRRRRRR"
     !stop
                           
     call xgBlock_gemm(chebfi%AX%self%normal, A_und_X%self%normal, 1.0d0, & 
@@ -2315,8 +2324,8 @@ module m_chebfi2
     
     !pcond call
     call timab(tim_pcond,1,tsec)
-    !call pcond(chebfi%AX%self)    !zar ovde ne ide AX_swap???
-    call pcond(chebfi%AX_swap)
+    call pcond(chebfi%AX%self)    !zar ovde ne ide AX_swap???
+    !call pcond(chebfi%AX_swap)
     call timab(tim_pcond,2,tsec)
     
     !print *, "AX_swap after pcond"

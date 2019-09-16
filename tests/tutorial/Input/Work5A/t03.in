@@ -9,7 +9,7 @@
 # npkpt 1 npband 16 npfft 8  # 128 MPI processes
 #max_ncpus 500
 use_gemm_nonlop 1 #0
-#paral_kgb 0
+paral_kgb 1
 npband 1
 npfft 1
 #bandpp 192

@@ -399,11 +399,12 @@ module m_chebfiwf
     !Call nonlop
     if (mpi_enreg%paral_kgb==0) then
       print *, "USAO"
+      !stop
       call nonlop(choice,l_cpopt,cprj_dum,enl_out,l_gs_hamk,0,eig,mpi_enreg,nband,1,paw_opt,&
 &                signs,gsc_dummy,l_tim_getghc,cg,l_gvnlc)
 
       print *, "IZASAO"
-      stop
+      !stop
     else
       !do iband=1,nband
       !  shift = (iband-1)*l_npw*l_nspinor
@@ -438,7 +439,7 @@ module m_chebfiwf
   end if
 
   print *, "AFTER CBWF2 NONLOP"
-  stop
+  !stop
   ABI_FREE(l_gvnlc)
 
   ! Free chebfi
@@ -498,9 +499,10 @@ module m_chebfiwf
     
     call xgBlock_getSize(X,spacedim,blockdim)
 
-    !print *, "spacedim X", spacedim
-    !print *, "blockdim X", blockdim
-    
+    print *, "spacedim X", spacedim
+    print *, "blockdim X", blockdim
+    !stop
+
     !call xgBlock_getSize(AX,spacedim,blockdim)
     
     !print *, "spacedim AX", spacedim
@@ -540,7 +542,8 @@ module m_chebfiwf
       else
         !call xgTransposer_getCPURow(transposer, cpuRow)
         cpuRow = xgTransposer_getRank(transposer, 2)
-        !print *, "CPUROW", cpurow
+        print *, "CPUROW", cpurow
+        !stop
         !l_npw is not same for all processes so the lower formula cannot be like
         !that
         if (cpuRow == 0) then

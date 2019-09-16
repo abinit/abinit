@@ -14,7 +14,7 @@ npfft 1
 #bandpp 96
 
 #Plane wave basis
-ecut 10.
+ecut 8.
 pawecutdg 10.
 
 #Self-consistent cycle parameters

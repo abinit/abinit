@@ -653,7 +653,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      ph3dout_    => ph3dout
    end if
  end if
-  !print *, "NONLOP3"
+  print *, "NONLOP3"
   !stop
 !A specific version of nonlop based on BLAS3 can be used
 !But there are several restrictions
