@@ -294,13 +294,13 @@ for lib in abinit_corelibs:
     for chk in checkers:
       # FIXME: hard-coded for now
       makefile += "\n%s_SOURCES = %s.F90" % (chk,chk)
-      makefile += "\n%s_CPPFLAGS = @abi_netcdf_cppflags@ @abi_linalg_cppflags@ -I$(top_srcdir)/src/incs" % \
+      makefile += "\n%s_CPPFLAGS = @sd_netcdf_cppflags@ @abi_linalg_cppflags@ -I$(top_srcdir)/src/incs" % \
        (chk)
       makefile += "\n%s_LDADD = \\\n\tlib%s.a" % (chk,lib)
       for elc in checkers[chk] + hard_chklibs:
         makefile += " \\\n\t../%s/lib%s.a" % (elc,elc)
       makefile += " \\\n\t@%s@\n" % \
-        ("@ \\\n\t@".join(["abi_netcdf_libs","abi_linalg_libs"]))
+        ("@ \\\n\t@".join(["sd_netcdf_libs","abi_linalg_libs"]))
     makefile += "\ncheck-local:\n"
     for chk in checkers:
       makefile += "\t./%s >%s.log 2>&1; grep '^TEST FAILED' %s.log && echo 'Unit test %s FAILED' || echo 'Unit test %s OK'\n" % \
