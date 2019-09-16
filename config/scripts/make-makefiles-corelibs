@@ -294,7 +294,7 @@ for lib in abinit_corelibs:
     for chk in checkers:
       # FIXME: hard-coded for now
       makefile += "\n%s_SOURCES = %s.F90" % (chk,chk)
-      makefile += "\n%s_CPPFLAGS = @sd_netcdf_cppflags@ @abi_linalg_cppflags@ -I$(top_srcdir)/src/incs" % \
+      makefile += "\n%s_CPPFLAGS = @sd_netcdf_cppflags@ @abi_linalg_cppflags@ -I$(top_srcdir)/shared/common/src/incs -I$(top_srcdir)/src/incs -I$(top_builddir)/shared/common/src/mods -I$(top_builddir)/src/mods" % \
        (chk)
       makefile += "\n%s_LDADD = \\\n\tlib%s.a" % (chk,lib)
       for elc in checkers[chk] + hard_chklibs:
