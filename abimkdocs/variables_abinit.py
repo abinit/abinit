@@ -14451,16 +14451,17 @@ Control the volume of printed output. In particular, this concerns the
 explicit echo of eigenenergies and residuals for all bands and k points in the
 main output file. Also, the analysis of the value and location of the maximal
 density (and magnetization).
-Standard choice is 0. Positive values print more in the output and log files,
+Standard choice is 0. Positive values (all are allowed) generally print more and more in the output and log files,
 while negative values are for debugging (or preprocessing only), and cause the
 code to stop at some point.
 
   * 0 --> The eigenenergies and residuals for all bands and k points are not echoed in the main output file. There are exceptions: the eigenvalues of the first k point are printed at the end of the SCF loop, and also, if [[iscf]] = -2 and [[kptopt]]<=0, the eigenvalues for all the k points are printed anyway, for a maximum of 50 k-points. Due to some subtlety, if for **some** dataset [[prtvol]] is non-zero, the limit for input and output echoes cannot be enforced, so it is like if [[prtvol]] = 1 for **all** the datasets for which [[prtvol]] was set to 0.
-  * 1 --> the eigenvalues for the first 50 k-points are printed in all cases, at the end of the SCF loop.
+  * 1 --> the eigenvalues for the first k-point are printed in all cases, at the end of the SCF loop.
   * 2 --> all the eigenvalues and the residuals are printed at the end of the SCF loop. Also, the analysis of the value and location of the maximal density (and magnetization) is printed.
-  * 3 --> Print memory information for lobpcg
-  * 4 --> Like 3 and prints information of lobpcg algorithm convergence
-  * 10 --> the eigenvalues are printed for every SCF iteration, as well as other additions (to be specified in the future...)
+  * 3 --> Print memory information for lobpcg.
+  * 4 --> Like 3 and prints information of lobpcg algorithm convergence.
+  * 10 --> the eigenvalues are printed for every SCF iteration, as well as other additions.
+  * 11 --> even more information ...
 
 Debugging options:
 
