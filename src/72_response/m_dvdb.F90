@@ -586,7 +586,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
    if (dvdb_check_fform(fform, "read_dvdb", msg) /= 0) then
      MSG_ERROR(sjoin("While reading:", path, ch10, msg))
    end if
-   if (new%debug) call hdr_echo(new%hdr_ref,fform,4,unit=std_out)
+   if (new%debug) call new%hdr_ref%echo(fform, 4, unit=std_out)
 
    rewind(unt)
    read(unt, err=10, iomsg=msg)
@@ -656,7 +656,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
      tmp_pos(idir, ipert, iq_found) = iv1
      new%iv_pinfoq(:,iv1) = [idir, ipert, hdr1%pertcase, iq_found]
 
-     call hdr_free(hdr1)
+     call hdr1%free()
    end do
 
    ! Allocate arrays with correct nqpt dimension
@@ -677,7 +677,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
    call xmpi_bcast(new%version, master, comm, ierr)
    call xmpi_bcast(new%numv1, master, comm, ierr)
    call xmpi_bcast(new%nqpt, master, comm, ierr)
-   call hdr_bcast(new%hdr_ref, master, my_rank, comm)
+   call new%hdr_ref%bcast(master, my_rank, comm)
 
    new%natom = new%hdr_ref%natom
    new%natom3 = 3 * new%hdr_ref%natom
@@ -705,7 +705,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
  end if
 
  ! Init crystal_t from the hdr read from file.
- new%cryst = hdr_get_crystal(new%hdr_ref, timrev2)
+ new%cryst = new%hdr_ref%get_crystal(timrev2)
  new%my_npert = new%natom3
 
  ! Init tables assuming no MPI distribution of perturbations.
@@ -904,7 +904,7 @@ subroutine dvdb_free(db)
  ABI_SFREE(db%qstar)
 
  ! types
- call hdr_free(db%hdr_ref)
+ call db%hdr_ref%free()
  call db%cryst%free()
  call destroy_mpi_enreg(db%mpi_enreg)
 
@@ -4948,7 +4948,7 @@ subroutine dvdb_seek(db, idir, ipert, iqpt)
          do ispden=1,db%nspden
            backspace(unit=db%fh, err=10, iomsg=msg)
          end do
-         ierr = hdr_backspace(db%hdr_ref, db%fh, msg)
+         ierr = db%hdr_ref%backspace(db%fh, msg)
          if (ierr /= 0) goto 10
        end do
        db%current_fpos = pos_wanted; return
@@ -5084,7 +5084,7 @@ integer function my_hdr_skip(unit, idir, ipert, qpt, msg) result(ierr)
    end if
  end if
 
- call hdr_free(tmp_hdr)
+ call tmp_hdr%free()
 
 end function my_hdr_skip
 !!***
@@ -5362,7 +5362,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
    if (dvdb_check_fform(fform, "merge_dvdb", msg) /= 0) then
      MSG_ERROR(sjoin("While reading:", v1files(ii), msg))
    end if
-   if (prtvol > 0) call hdr_echo(hdr1_list(ii), fform, 3, unit=std_out)
+   if (prtvol > 0) call hdr1_list(ii)%echo(fform, 3, unit=std_out)
    if (hdr1_list(ii)%pertcase == 0) then
      MSG_ERROR(sjoin("Found GS potential:", v1files(ii)))
    end if
@@ -5377,7 +5377,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
    write(std_out,"(a,i0,2a)")"- Merging file [",ii,"]: ",trim(v1files(ii))
    jj = ii
    hdr1 => hdr1_list(jj)
-   call hdr_fort_write(hdr1, ount, fform_pot, ierr)
+   call hdr1%fort_write(ount, fform_pot, ierr)
    ABI_CHECK(ierr == 0, "hdr_fort_write returned ierr = 0")
 
    qeq0 = (hdr1%qptn(1)**2+hdr1%qptn(2)**2+hdr1%qptn(3)**2<1.d-14)
@@ -5429,7 +5429,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
  close(ount)
 
  do ii=1,size(hdr1_list)
-   call hdr_free(hdr1_list(ii))
+   call hdr1_list(ii)%free()
  end do
  ABI_DT_FREE(hdr1_list)
 
@@ -7096,7 +7096,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
        ! Write header
        hdr_ref%qptn = qpt
        hdr_ref%pertcase = ipert
-       call hdr_fort_write(hdr_ref, ount, fform_pot, ierr)
+       call hdr_ref%fort_write(ount, fform_pot, ierr)
        ABI_CHECK(ierr == 0, "hdr_fort_write returned ierr = 0")
 
        do ispden=1,nspden
@@ -7183,7 +7183,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
            ! Master writes the file (change also qpt and ipert in hdr%)
            hdr_ref%qptn = qpt
            hdr_ref%pertcase = ipert
-           call hdr_fort_write(hdr_ref, ount, fform_pot, ierr)
+           call hdr_ref%fort_write(ount, fform_pot, ierr)
            ABI_CHECK(ierr == 0, "hdr_fort_write returned ierr = 0")
 
            do ispden=1,nspden
@@ -7209,7 +7209,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
          ipert = (iat-1) * 3 + idir
          hdr_ref%qptn = qpt
          hdr_ref%pertcase = ipert
-         call hdr_fort_write(hdr_ref, ount, fform_pot, ierr)
+         call hdr_ref%fort_write(ount, fform_pot, ierr)
 #ifdef HAVE_NETCDF
          ncerr = nf90_get_var(ncid, nctk_idname(ncid, "v1"), v1scf, &
              start=[1,1,idir,iat,iq], count=[dimv1,nspden,1,1,1])
@@ -7246,7 +7246,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  ABI_FREE(rfpert)
  ABI_FREE(pinfo)
 
- call hdr_free(hdr_ref)
+ call hdr_ref%free()
 
  write(msg, '(2a)') "Interpolation of the electron-phonon coupling potential completed", ch10
  call wrtout([std_out, ab_out], msg, do_flush=.True.)
@@ -7379,7 +7379,7 @@ subroutine dvdb_qdownsample(dvdb, new_dvdb_fname, ngqpt, comm)
      dvdb%hdr_ref%pertcase = ipert
 
      ! Write header
-     call hdr_fort_write(dvdb%hdr_ref, ount, fform_pot, ierr)
+     call dvdb%hdr_ref%fort_write(ount, fform_pot, ierr)
      ABI_CHECK(ierr == 0, "hdr_fort_write returned ierr = 0")
 
      do ispden=1,dvdb%nspden

@@ -344,7 +344,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
        ABI_MALLOC(kg_disk, (3, mpw_disk))
 
        timrev = 2 ! FIXME: Use abinit convention for timrev
-       crystal = hdr_get_crystal(hdr, timrev)
+       crystal = hdr%get_crystal(timrev)
 
        ! For each k-point: read full G-vector list from file, compute KB data and write to file.
        do ikpt=1,nkpt
@@ -402,7 +402,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      ABI_CHECK(xmpi_comm_size(spaceComm) == 1, "Legacy etsf-io code does not support nprocs > 1")
 #ifdef HAVE_ETSF_IO
      call abi_etsf_init(dtset, filnam, 2, .true., hdr%lmn_size, psps, wfs)
-     !crystal = hdr_get_crystal(hdr, 2)
+     !crystal = hdr%get_crystal(2)
      !NCF_CHECK(crystal%ncwrite_path(nctk_ncify(filnam)))
      !call crystal%free()
      !ncerr = ebands_ncwrite_path(gs_ebands, filname, ncid)
@@ -448,7 +448,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      call WffKg(wff2,1)
    else if (wff2%iomode==IO_MODE_ETSF .and. iam_master) then
 #ifdef HAVE_NETCDF
-     NCF_CHECK(hdr_ncwrite(hdr, wff2%unwff, fform, nc_define=.True.))
+     NCF_CHECK(hdr%ncwrite(wff2%unwff, fform, nc_define=.True.))
 #endif
    end if
 
@@ -796,7 +796,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 
  ! FIXME: Use abinit convention for timrev
  timrev = 2
- crystal = hdr_get_crystal(hdr, timrev)
+ crystal = hdr%get_crystal(timrev)
 
  ! TODO
  ! Be careful with response == 1.

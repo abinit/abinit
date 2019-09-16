@@ -135,7 +135,7 @@ program abitk
    ABI_CHECK(fform /= 0, "fform == 0")
    !rdwr = 3; if (prtvol > 0) rdwr = 4
    rdwr = 4
-   call hdr_echo(hdr, fform, rdwr, unit=std_out)
+   call hdr%echo(fform, rdwr, unit=std_out)
 
  case ("ibz")
    ! Print list of kpoints in the IBZ with the corresponding weights
@@ -259,7 +259,7 @@ program abitk
  end select
 
  ! Deallocate memory to make memcheck happy.
- call hdr_free(hdr)
+ call hdr%free()
  call cryst%free()
  call ebands_free(ebands)
 

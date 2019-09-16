@@ -1531,8 +1531,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call gsph_free(Gsph_wfn)
  call vcoul_free(Vcp)
  call em1params_free(Ep)
- call hdr_free(Hdr_wfk)
- call hdr_free(Hdr_local)
+ call Hdr_wfk%free()
+ call Hdr_local%free()
  call ebands_free(KS_BSt)
  call ebands_free(QP_BSt)
  call littlegroup_free(Ltg_q)
@@ -1691,7 +1691,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ! Read parameters from WFK and verifify them.
  call wfk_read_eigenvalues(wfk_fname,energies_p,Hdr_wfk,comm)
  mband = MAXVAL(Hdr_wfk%nband)
- call hdr_vs_dtset(Hdr_wfk,Dtset)
+ call hdr_wfk%vs_dtset(dtset)
  remove_inv=.FALSE.
 
  test_npwkss = 0
@@ -1740,7 +1740,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    MSG_WARNING(msg)
  end if
 
- cryst = hdr_get_crystal(Hdr_wfk, timrev, remove_inv)
+ cryst = Hdr_wfk%get_crystal(timrev, remove_inv)
  call cryst%print(mode_paral='COLL')
 
  ! === Create basic data types for the calculation ===
@@ -2148,7 +2148,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    call pawrhoij_alloc(Pawrhoij,1,Dtset%nspden,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
    call pawrhoij_copy(Hdr_wfk%Pawrhoij,Pawrhoij)
  end if
- call hdr_update(Hdr_out,bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
+ call Hdr_out%update(bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
 
  ABI_FREE(occfact)
  call pawrhoij_free(Pawrhoij)

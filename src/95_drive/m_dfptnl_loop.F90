@@ -420,7 +420,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
          call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rho1r1, &
          hdr_den, pawrhoij1_i1pert, comm_cell, check_hdr=hdr)
-         call hdr_free(hdr_den)
+         call hdr_den%free()
        end if
 
        xccc3d1(:) = zero
@@ -468,7 +468,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
                call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rho3r1, &
                hdr_den, pawrhoij1_i3pert, comm_cell, check_hdr=hdr)
-               call hdr_free(hdr_den)
+               call hdr_den%free()
              end if
 
              xccc3d3(:) = zero
@@ -527,7 +527,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
                      call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rho2r1, &
                      hdr_den, pawrhoij1_i2pert , comm_cell, check_hdr=hdr)
-                     call hdr_free(hdr_den)
+                     call hdr_den%free()
 
 !                    Compute up+down rho1(G) by fft
                      ABI_ALLOCATE(work,(cplex*nfftf))
