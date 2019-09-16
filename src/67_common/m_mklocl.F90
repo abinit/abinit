@@ -1738,7 +1738,7 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
  integer :: i1,i2,i3,ia1,iatom,id1,id2,id3,ig1,ig2,ig3,ii,ii1,im=2
  integer :: itypat,jj,re=1
  real(dp),parameter :: tolfix=1.000000001_dp
- real(dp) :: aa,bb,cc,cutoff,dd,delad,delag,deldg,diff,gfact,gfact1,gfact2,gmag,gq1
+ real(dp) :: aa,bb,cc,cutoff,dd,delad,delag,diff,gfact,gfact1,gfact2,gmag,gq1
  real(dp) :: gq2,gq3,gsquar
  real(dp) :: sfi,sfr,term1,term2,xnorm
  logical :: qeq0
@@ -1763,10 +1763,9 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
    alpha=idir; delta=qdir2; gamma=qdir1
 
    !Kronecker deltas
-   delad=0.0_dp; delag=0.0_dp; deldg=0.0_dp
+   delad=0.0_dp; delag=0.0_dp
    if (alpha==delta) delad=1.0_dp
    if (alpha==gamma) delag=1.0_dp
-   if (delta==gamma) deldg=1.0_dp
 
 !  (In case of a phonon perturbation)
    ABI_ALLOCATE(work1,(2,nfft))
