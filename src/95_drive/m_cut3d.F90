@@ -23,7 +23,6 @@
 MODULE m_cut3d
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_splines
@@ -35,7 +34,9 @@ MODULE m_cut3d
  use m_wfk
  use m_xmpi
  use m_sort
+ use m_distribfft
 
+ use defs_abitypes,      only : MPI_type
  use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists, read_string
  use m_numeric_tools,    only : interpol3d
  use m_symtk,            only : matr3inv
@@ -93,11 +94,6 @@ CONTAINS  !===========================================================
 !!      cut3d
 !!
 !! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
-!!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
 !! SOURCE
 
@@ -207,11 +203,6 @@ end subroutine cut3d_hirsh
 !!      cut3d
 !!
 !! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
-!!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
 !! SOURCE
 
@@ -406,11 +397,6 @@ end subroutine cut3d_lineint
 !!      m_cut3d
 !!
 !! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
-!!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
 !! SOURCE
 
@@ -467,11 +453,6 @@ end subroutine normalize
 !!      cut3d
 !!
 !! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
-!!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
 !! SOURCE
 
@@ -831,11 +812,6 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
 !!      cut3d
 !!
 !! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
-!!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
 !! SOURCE
 
@@ -944,11 +920,6 @@ end subroutine cut3d_pointint
 !!      m_cut3d
 !!
 !! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
-!!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
 !! SOURCE
 
@@ -999,11 +970,6 @@ end subroutine reduce
 !!      cut3d
 !!
 !! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
-!!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
 !! SOURCE
 
@@ -1080,11 +1046,6 @@ end subroutine cut3d_rrho
 !!      m_cut3d
 !!
 !! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
-!!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
 !! SOURCE
 
@@ -1133,11 +1094,6 @@ end subroutine vdot
 !!      cut3d
 !!
 !! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
-!!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
 !! SOURCE
 
@@ -1717,11 +1673,6 @@ end subroutine cut3d_volumeint
 !!      cut3d
 !!
 !! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk_close
-!!      wfk_open_read,wfk_read_band_block,xcart2xred
 !!
 !! SOURCE
 
@@ -1901,8 +1852,8 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !    nband depends on (kpt,spin)
      iomode = iomode_from_fname(wfk_fname)
      call wfk_open_read(Wfk,wfk_fname,formeig0,iomode,get_unit(),xmpi_comm_self)
-     call wfk_read_band_block(Wfk,[1,nband(ckpt)],ckpt,csppol,xmpio_single,cg_k=cg_k,eig_k=eig_k,occ_k=occ_k)
-     call wfk_close(Wfk)
+     call wfk%read_band_block([1,nband(ckpt)],ckpt,csppol,xmpio_single,cg_k=cg_k,eig_k=eig_k,occ_k=occ_k)
+     call wfk%close()
    end if
 
    if (csppol/=oldcsppol .or. ckpt/=oldckpt .or. cband/=oldcband .or. cspinor/=oldcspinor ) then

@@ -26,9 +26,7 @@
 module m_outscfcv
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
- use defs_abitypes
  use m_abicore
  use m_sort
  use m_efield
@@ -43,7 +41,11 @@ module m_outscfcv
  use m_plowannier
  use m_splines
  use m_ebands
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes,     only : pseudopotential_type, ebands_t
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_io_tools,         only : open_file
  use m_fstrings,         only : strcat, endswith
@@ -54,7 +56,6 @@ module m_outscfcv
  use m_results_gs,       only : results_gs_type, results_gs_ncwrite
  use m_ioarr,            only : ioarr, fftdatar_write
  use m_nucprop,          only : calc_efg,calc_fc
- use m_neat,             only : neat_crystal, neat_results_gs
  use m_outwant,          only : outwant
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type, simp_gen, bound_deriv
@@ -71,7 +72,7 @@ module m_outscfcv
  use m_paw_tools,        only : pawprt
  use m_numeric_tools,    only : simpson_int
  use m_epjdos,           only : dos_calcnwrite, partial_dos_fractions, partial_dos_fractions_paw, &
-                                epjdos_t, epjdos_new, epjdos_free, prtfatbands, fatbands_ncwrite
+                                epjdos_t, epjdos_new, prtfatbands, fatbands_ncwrite
  use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
  use m_io_kss,           only : outkss
  use m_multipoles,       only : multipoles_out, out1dm
@@ -84,7 +85,7 @@ module m_outscfcv
  use m_positron,         only : poslifetime, posdoppler
  use m_optics_vloc,      only : optics_vloc
  use m_green,            only : green_type,compute_green,&
-&                      fourier_green,print_green,init_green,destroy_green,init_green_tau
+                                fourier_green,print_green,init_green,destroy_green,init_green_tau
  use m_self,             only : self_type,initialize_self,rw_self,destroy_self,destroy_self,selfreal2imag_self
 
  implicit none
@@ -200,7 +201,7 @@ contains
 !!      compute_coeff_plowannier,crystal_free,crystal_init,datafordmft,denfgr
 !!      destroy_dmft,destroy_oper,destroy_plowannier,dos_calcnwrite,ebands_free
 !!      ebands_init,ebands_interpolate_kpath,ebands_prtbltztrp,ebands_write
-!!      epjdos_free,fatbands_ncwrite,fftdatar_write,free_my_atmtab
+!!      fatbands_ncwrite,fftdatar_write,free_my_atmtab
 !!      get_my_atmtab,init_dmft,init_oper,init_plowannier,ioarr,mag_constr_e
 !!      mlwfovlp,mlwfovlp_qp,multipoles_out,optics_paw,optics_paw_core
 !!      optics_vloc,out1dm,outkss,outwant,partial_dos_fractions
@@ -376,6 +377,11 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    ABI_ALLOCATE(my_atmtab, (natom))
    my_atmtab = (/ (iatom, iatom=1, natom) /)
    my_atmtab_allocated = .true.
+ end if
+
+ ! YAML output
+ if (me == master) then
+  call results_gs%yaml_write(ab_out, dtset, crystal, comment="Summary of ground state results")
  end if
 
 !wannier interface
@@ -927,7 +933,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    end if
 #endif
 
-   call epjdos_free(dos)
+   call dos%free()
  end if ! prtdos > 1
 
  call timab(959,2,tsec)
@@ -1082,7 +1088,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !    ==  compute psichi
      call init_oper(paw_dmft,lda_occup)
 
-     call datafordmft(crystal,cprj,dimcprj,dtset,eigen,e_fermie,dtset%iscf &
+     call datafordmft(crystal,cprj,dimcprj,dtset,eigen,e_fermie &
 &     ,lda_occup,dtset%mband,dtset%mband,dtset%mkmem,mpi_enreg,&
 &     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
 &     paw_dmft,paw_ij,pawang,pawtab,psps,usecprj,dtfil%unpaw,dtset%nbandkss)
@@ -1092,33 +1098,41 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 
      ! Compute k-resolved spectral function in DMFT.
-     if(dtset%iscf<0) then
-      !write(6,*) "datafordmft done"
+     if(dtset%dmft_kspectralfunc==1) then
+      ! Initialize self on real axis
        call initialize_self(selfr,paw_dmft,wtype='real')
-      !write(6,*) "init self done"
+
+      ! Initialize self on  imag axis
        call initialize_self(self,paw_dmft)
-      !write(6,*) "init self done"
+
+      ! Initialize green on real axis
        call init_green(greenr,paw_dmft,opt_oper_ksloc=3,wtype='real')
-      !write(6,*) "init green done with allocation of green%oper"
+
+      ! Read self energy in imag. Matsubara freq (for double counting
+      ! and limit at high frequency)
        call rw_self(self,paw_dmft,prtopt=5,opt_rw=1,opt_stop=1)
-     !write(6,*) "self%hdc outscfcv",self%hdc%matlu(1)%mat(1,1,1,1,1)
-     !write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(1,1,1,1,1)
-     !write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(2,2,1,1,1)
-     !write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(3,3,1,1,1)
-      !write(6,*) "init green done with allocation of green%oper"
-      !write(6,*) "opt_imagonly",opt_imagonly
-       call rw_self(selfr,paw_dmft,prtopt=5,opt_rw=1,opt_imagonly=opt_imagonly, &                
-     &  opt_selflimit=self%oper(self%nw)%matlu,opt_hdc=self%hdc%matlu)
-     !!write(6,*) "self2r",aimag(selfr%oper(489)%matlu(1)%mat(1,1,1,1,1))
-     !write(6,*) "selfr%hdc outscfcv",selfr%hdc%matlu(1)%mat(1,1,1,1,1)
-      !write(6,*) "read self done"
-       call selfreal2imag_self(selfr,self)
-      !write(6,*) "selfreal2imag_self done"
+
+      ! Read self energy on real axis obtained from Maxent
+       call rw_self(selfr,paw_dmft,prtopt=5,opt_rw=1,opt_imagonly=opt_imagonly, &
+     & opt_selflimit=self%oper(self%nw)%matlu,opt_hdc=self%hdc%matlu,pawang=pawang,cryst_struc=crystal)
+
+      ! Check: from self on real axis, recompute self on Imaginary axis.
+       call selfreal2imag_self(selfr,self,paw_dmft%filapp)
+
+      !  paw_dmft%fermie=hdr%fermie ! for tests
+       write(std_out,*) "    Fermi level is",paw_dmft%fermie
+
+       ! selfr does not have any double couting in self%hdc
+       ! hdc from self%hdc has been put in real part of self in rw_self.
+       ! For the LDA BS: use opt_self=0 and fermie=fermie_lda
+
+      ! Compute green  function on real axis
        call compute_green(crystal,greenr,paw_dmft,pawang,1,selfr,&
 &       opt_self=1,opt_nonxsum=0)
+
       !write(6,*) "compute green done"
        if(me==master) then
-         call print_green("forspectralfunction",greenr,5,paw_dmft,&
+         call print_green("from_realaxisself",greenr,5,paw_dmft,&
 &         pawprtvol=3,opt_wt=1)
         !write(6,*) "print green done"
        endif
@@ -1235,14 +1249,10 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    call ebands_interpolate_kpath(ebands, dtset, crystal, [0, 0], dtfil%filnam_ds(4), spacecomm)
  end if
 
- ! YAML output
- call neat_crystal(crystal, ab_out, comment="Summary crystal properties.")
- call neat_results_gs(results_gs, ab_out, ecut, dtset%pawecutdg, comment="Summary of ground states results.")
-
  call crystal%free()
  call ebands_free(ebands)
 
-!Destroy atom table used for parallelism
+ ! Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
  call timab(969,2,tsec)

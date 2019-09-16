@@ -24,8 +24,6 @@
 module m_phpi
 
  use defs_basis
- use defs_abitypes
- use defs_datatypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -42,7 +40,11 @@ module m_phpi
  use m_fft
  use m_hamiltonian
  use m_pawcprj
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_abitypes,     only : mpi_type
  use m_time,            only : cwtime
  use m_fstrings,        only : sjoin, itoa, ftoa, ktoa, ltoa, strcat
  use m_io_tools,        only : iomode_from_fname
@@ -357,7 +359,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  ABI_MALLOC(gkk_m, (2, mband_kq, mband))
 
  ! Compute displacement vectors and phonon frequencies
- call ifc_fourq(ifc,cryst,qpt,phfrq,displ_cart, out_displ_red=displ_red)
+ call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
 
  ! Broadening parameter
  if (dtset%elph2_imagden .gt. tol12) then
@@ -388,7 +390,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
    end do
 
    ! Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamkq,spin,vlocal=vlocal,with_nonlocal=.true.)
+   call gs_hamkq%load_spin(spin,vlocal=vlocal,with_nonlocal=.true.)
 
    do ik=1,nkpt
 
@@ -442,7 +444,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
        call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=.true.)
            !&paw_ij1=paw_ij1,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
            !&mpi_spintab=mpi_enreg%my_isppoltab)
-       call load_spin_rf_hamiltonian(rf_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
+       call rf_hamkq%load_spin(spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
 
        ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
        call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kk,kq,idir,ipert,&                   ! In
@@ -548,7 +550,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
      ABI_FREE(h1kets_kq)
    end do ! ikfs
 
-   call destroy_rf_hamiltonian(rf_hamkq)
+   call rf_hamkq%free()
  end do ! spin
 
  ! Gather the k-points computed by all processes
@@ -589,7 +591,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  ABI_FREE(ylmgr_kq)
  ABI_FREE(blkflg)
 
- call destroy_hamiltonian(gs_hamkq)
+ call gs_hamkq%free()
  call wfd_k%free()
  call wfd_kq%free()
 

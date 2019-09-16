@@ -44,6 +44,7 @@ program test_radsintr
  use m_errors
 
  use m_integrals,     only : radsintr
+
  implicit none
 
 !Arguments ------------------------------------

@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file 
- sed -e 's!2018 ABINIT!2019 ABINIT!' $file > tmp.file
+ sed -e 's!ABI_TUTORIAL!ABI_TESTS/tutorial!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file

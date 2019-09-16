@@ -177,8 +177,6 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
 &                       dvxc,d2vxc,el_temp,exexch,fxcT,grho2,& ! Optional arguments
 &                       hyb_mixing,lrho,tau,vxcgrho,vxclrho,vxctau,xc_funcs,xc_tb09_c) ! Optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,xclevel
@@ -425,8 +423,6 @@ end subroutine drivexc_main
 
 subroutine echo_xc_name (ixc)
 
- implicit none
-
 !Arguments -------------------------------
  integer, intent(in) :: ixc
 
@@ -595,8 +591,6 @@ end subroutine echo_xc_name
 
 subroutine check_kxc(ixc,optdriver)
 
- implicit none
-
 !Arguments -------------------------------
  integer, intent(in) :: ixc,optdriver
 
@@ -680,8 +674,6 @@ end subroutine check_kxc
 
 subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,&
 & add_tfw,xc_funcs) ! Optional
-
- implicit none
 
 !Arguments----------------------
  integer, intent(in) :: ixc,nspden,order
@@ -839,8 +831,6 @@ end subroutine size_dvxc
 
 subroutine xcmult (depsxc,nfft,ngrad,nspden,nspgrad,rhonow)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,ngrad,nspden,nspgrad
@@ -931,8 +921,6 @@ end subroutine xcmult
 !! SOURCE
 
 subroutine mkdenpos(iwarn,nfft,nspden,option,rhonow,xc_denpos)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1166,8 +1154,6 @@ end subroutine mkdenpos
 subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
 &   dvxc,d2vxc,grho2_updn,vxcgrho,el_temp,exexch,fxcT,& !Optional arguments
 &   hyb_mixing,lrho_updn,vxclrho,tau_updn,vxctau,xc_funcs,xc_tb09_c)  !Optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

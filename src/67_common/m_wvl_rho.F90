@@ -32,10 +32,11 @@ module m_wvl_rho
  use m_errors
  use defs_wvltypes
  use m_sort
- use defs_abitypes
  use m_abi2big
  use m_xmpi
+ use m_dtset
 
+ use defs_abitypes,  only : MPI_type
  use m_geometry, only : xred2xcart, metric
  use m_pawrad,   only : pawrad_type, pawrad_init, pawrad_free
  use m_pawtab,   only : pawtab_type
@@ -91,7 +92,6 @@ subroutine wvl_initro(&
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : ELECTRONIC_DENSITY, ext_buffers, ind_positions
 #endif
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: me,natom,ntypat,nfft,nspden
@@ -426,7 +426,6 @@ subroutine wvl_mkrho(dtset, irrzon, mpi_enreg, phnons, rhor, wvl_wfs, wvl_den)
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : sumrho, symmetry_data, ELECTRONIC_DENSITY, communicate_density
 #endif
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -514,8 +513,6 @@ end subroutine wvl_mkrho
 
 subroutine wvl_prcref(dielar,iprcel,my_natom,nfftprc,npawmix,nspden,pawrhoij,&
 & rhoijrespc,usepaw,vresid,vrespc)
-
- implicit none
 
 !Arguments ------------------------------------
  integer , intent(in)  :: iprcel,nfftprc,my_natom,npawmix,nspden,usepaw

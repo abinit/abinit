@@ -26,8 +26,6 @@
 module m_gstateimg
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use defs_rectypes
  use m_abicore
@@ -45,11 +43,14 @@ module m_gstateimg
  use m_io_redirect
  use m_m1geo
  use m_abimover
+ use m_yaml
+ use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_time,         only : timab
  use m_geometry,     only : mkradim, mkrdim, fcart2fred, xred2xcart, metric
  use m_specialmsg,   only : specialmsg_mpisum
- use m_neat,         only : neat_start_iter
  use m_libpaw_tools, only : libpaw_spmsg_mpisum
  use m_pawang,       only : pawang_type
  use m_pawrad,       only : pawrad_type
@@ -502,7 +503,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      call wrtout(ab_out ,msg,'COLL')
      call wrtout(std_out,msg,'PERS')
    end if
-   call neat_start_iter(itimimage, 'timimage', ab_out)
+   call yaml_iterstart('timimage', itimimage, ab_out, dtset%use_yaml)
 
    call timab(704,2,tsec)
 
@@ -535,17 +536,13 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          if (ii==1) write(msg,'(a)' ) ch10
          if (ii >1) write(msg,'(2a)') ch10,ch10
          write(msg,'(6a,i4,a,i4,3a)') trim(msg),&
-&         '--------------------------------------------------------------------------------',ch10,&
-&         ' ',trim(imagealgo_str(dtset%imgmov)),' - CELL # ',ii,'/',dtset%nimage,ch10,&
-&         '--------------------------------------------------------------------------------',ch10
-         if (dtset%prtvolimg==0) then
-           call wrtout(ab_out ,msg,'COLL')
-         end if
-         if (do_write_log) then
-           call wrtout(std_out,msg,'PERS')
-         end if
+           '--------------------------------------------------------------------------------',ch10,&
+           ' ',trim(imagealgo_str(dtset%imgmov)),' - CELL # ',ii,'/',dtset%nimage,ch10,&
+           '--------------------------------------------------------------------------------',ch10
+         if (dtset%prtvolimg==0) call wrtout(ab_out ,msg,'COLL')
+         if (do_write_log) call wrtout(std_out,msg,'PERS')
        end if
-       call neat_start_iter(iimage, 'image', ab_out)
+       call yaml_iterstart('image', iimage, ab_out, dtset%use_yaml)
 
        acell(:)     =res_img(iimage)%acell(:)
        rprim(:,:)   =res_img(iimage)%rprim(:,:)
@@ -678,8 +675,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &         ' ',trim(imagealgo_str(dtset%imgmov)),' has reached energy convergence',ch10,&
 &         ' with Average[Abs(Etotal(t)-Etotal(t-dt))]=',delta_energy,'<tolimg=',dtset%tolimg
        end if
-       call wrtout(ab_out ,msg,'COLL')
-       call wrtout(std_out,msg,'COLL')
+       call wrtout([std_out, ab_out] ,msg,'COLL')
        call timab(707,2,tsec)
        exit   ! exit itimimage
      end if
@@ -886,9 +882,9 @@ subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot
 
 !      Title
        write(msg,'(6a,i4,a,i4,2a)') ch10,&
-&       '----------------------------------------------------------------------',ch10,&
-&       ' ',trim(imagealgo_str),' - CELL # ',ii,'/',nimage_tot,ch10,&
-&       '----------------------------------------------------------------------'
+         '----------------------------------------------------------------------',ch10,&
+         ' ',trim(imagealgo_str),' - CELL # ',ii,'/',nimage_tot,ch10,&
+         '----------------------------------------------------------------------'
        call wrtout(iout,msg,'COLL')
 
 !      Total energy
@@ -897,11 +893,11 @@ subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot
 
 !      Residuals of the SCF cycle
        write(msg,'(3a,4(a,es16.8,a))') ch10,&
-&       ' Residuals from SCF cycle: ',ch10,&
-&       '    Total energy difference        =',resimg_all(ii)%results_gs%deltae,ch10,&
-&       '    Maximal forces difference      =',resimg_all(ii)%results_gs%diffor,ch10,&
-&       '    Max. residual of wave-functions=',resimg_all(ii)%results_gs%residm,ch10,&
-&       '    Density/potential residual (^2)=',resimg_all(ii)%results_gs%res2,ch10
+         ' Residuals from SCF cycle: ',ch10,&
+         '    Total energy difference        =',resimg_all(ii)%results_gs%deltae,ch10,&
+         '    Maximal forces difference      =',resimg_all(ii)%results_gs%diffor,ch10,&
+         '    Max. residual of wave-functions=',resimg_all(ii)%results_gs%residm,ch10,&
+         '    Density/potential residual (^2)=',resimg_all(ii)%results_gs%res2,ch10
        call wrtout(iout,msg,'COLL')
 
 !      Cell parameters
@@ -946,8 +942,7 @@ subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot
 
 !===== 2nd option for the printing volume ===
  if (prtvolimg==2.and.mpi_enreg%me==0) then
-   write(msg,'(a,1x,a)') ch10,&
-&   'Cell   Total_energy[Ha]     deltae       diffor       residm         res2'
+   write(msg,'(a,1x,a)') ch10,'Cell   Total_energy[Ha]     deltae       diffor       residm         res2'
    call wrtout(iout,msg,'COLL')
    do ii=1,nimage_tot
      if (dynimage(ii)==1.or.prt_all_images) then
@@ -1060,7 +1055,6 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
  integer,save :: idum=5
  logical :: is_pimd
  character(len=500) :: msg
-!arrays
 
 ! *************************************************************************
 
@@ -1098,10 +1092,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
  end if
 
 !Prevent writing if iexit==1, which at present only happens for imgmov==6 algo
- if(imgmov/=6 .or. m1geo_param%iexit==0)then
-   call wrtout(ab_out ,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
- endif
+ if(imgmov/=6 .or. m1geo_param%iexit==0) call wrtout([std_out, ab_out] ,msg)
 
  select case(imgmov)
 

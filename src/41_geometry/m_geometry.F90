@@ -510,19 +510,14 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvo
 
  verbose = 0; if (PRESENT(prtvol)) verbose = prtvol
 
- if (kptrlatt(1,2)/=0 .or. kptrlatt(2,1)/=0 .or. &
-&    kptrlatt(1,3)/=0 .or. kptrlatt(3,1)/=0 .or. &
-&    kptrlatt(2,3)/=0 .or. kptrlatt(3,2)/=0 ) then
+ if (kptrlatt(1,2) /= 0 .or. kptrlatt(2,1) /= 0 .or. &
+     kptrlatt(1,3) /= 0 .or. kptrlatt(3,1) /= 0 .or. &
+     kptrlatt(2,3) /= 0 .or. kptrlatt(3,2) /= 0 ) then
    MSG_ERROR('Off-diagonal elements of kptrlatt must be zero')
  end if
 
- n1 = kptrlatt(1,1)
- n2 = kptrlatt(2,2)
- n3 = kptrlatt(3,3)
-
- l1_max = lmax(1)
- l2_max = lmax(2)
- l3_max = lmax(3)
+ n1 = kptrlatt(1,1); n2 = kptrlatt(2,2); n3 = kptrlatt(3,3)
+ l1_max = lmax(1); l2_max = lmax(2); l3_max = lmax(3)
 
  nl=(2*l1_max+1)*(2*l2_max+1)*(2*l3_max+1)
  l0=1+l1_max*(1+(2*l2_max+1)**2+(2*l3_max+1)) ! Index of the origin.
@@ -563,15 +558,13 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvo
         do ii=1,nl
           if (ABS(dist(ii) - dist_min) < TOL_DIST) ndegen(npts) = ndegen(npts) + 1
         end do
-        irvec(1, npts) = in1
-        irvec(2, npts) = in2
-        irvec(3, npts) = in3
+        irvec(:, npts) = [in1, in2, in3]
       end if
      end do !in3
    end do !in2
  end do !in1
 
- if (verbose>=1) then
+ if (verbose >= 1) then
    write(msg,'(a,i0)')' lattice points in Wigner-Seitz supercell: ',npts
    call wrtout(std_out,msg,'COLL')
    do ii=1,npts
@@ -585,7 +578,7 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvo
  do ii=1,npts
    tot = tot + one/ndegen(ii)
  end do
- if (ABS(tot-(n1*n2*n3))>tol8) then
+ if (ABS(tot-(n1*n2*n3)) > tol8) then
    write(msg,'(a,es16.8,a,i0)')'Something wrong in the generation of WS mesh: tot ',tot,' /= ',n1*n2*n3
    MSG_ERROR(msg)
  end if
@@ -1077,17 +1070,17 @@ subroutine fixsym(iatfix,indsym,natom,nsym)
  if (nsym > 1) then
    do iatom=1,natom
      do isym=1,nsym
-!      jatom is the label of a symmetrically related atom
+       ! jatom is the label of a symmetrically related atom
        jatom=indsym(4,isym,iatom)
-!      Thus the atoms jatom and iatom must be fixed along the same directions
-       if ( iatfix(1,jatom) /=  iatfix(1,iatom) .or. &
-&       iatfix(2,jatom) /=  iatfix(2,iatom) .or. &
-&       iatfix(3,jatom) /=  iatfix(3,iatom)       ) then
+       ! Thus the atoms jatom and iatom must be fixed along the same directions
+       if (iatfix(1,jatom) /=  iatfix(1,iatom) .or. &
+           iatfix(2,jatom) /=  iatfix(2,iatom) .or. &
+           iatfix(3,jatom) /=  iatfix(3,iatom)) then
          write(message, '(a,i0,a,i0,7a)' )&
-&         'Atom number ',jatom,' is symmetrically  equivalent to atom number ',iatom,',',ch10,&
-&         'but according to iatfix, iatfixx, iatfixy and iatfixz, they',ch10,&
-&         'are not fixed along the same directions, which is forbidden.',ch10,&
-&         'Action: modify either the symmetry or iatfix(x,y,z) and resubmit.'
+           'Atom number: ',jatom,' is symmetrically  equivalent to atom number: ',iatom,',',ch10,&
+           'but according to iatfix, iatfixx, iatfixy and iatfixz, they',ch10,&
+           'are not fixed along the same directions, which is forbidden.',ch10,&
+           'Action: modify either the symmetry or iatfix(x,y,z) and resubmit.'
          MSG_ERROR(message)
        end if
      end do
@@ -1165,45 +1158,45 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
 
 ! *************************************************************************
 
-!Compute unit cell volume
+ ! Compute unit cell volume
  ucvol=rprimd(1,1)*(rprimd(2,2)*rprimd(3,3)-rprimd(3,2)*rprimd(2,3))+&
-& rprimd(2,1)*(rprimd(3,2)*rprimd(1,3)-rprimd(1,2)*rprimd(3,3))+&
-& rprimd(3,1)*(rprimd(1,2)*rprimd(2,3)-rprimd(2,2)*rprimd(1,3))
+       rprimd(2,1)*(rprimd(3,2)*rprimd(1,3)-rprimd(1,2)*rprimd(3,3))+&
+       rprimd(3,1)*(rprimd(1,2)*rprimd(2,3)-rprimd(2,2)*rprimd(1,3))
 
-!Check that the input primitive translations are not linearly dependent (and none is zero); i.e. ucvol~=0
-!Also ask that the mixed product is positive.
+ ! Check that the input primitive translations are not linearly dependent (and none is zero); i.e. ucvol~=0
+ ! Also ask that the mixed product is positive.
  if (abs(ucvol)<tol12) then
-!  write(std_out,*)"rprimd",rprimd,"ucvol",ucvol
+   !write(std_out,*)"rprimd",rprimd,"ucvol",ucvol
    write(message,'(5a)')&
-&   'Input rprim and acell gives vanishing unit cell volume.',ch10,&
-&   'This indicates linear dependency between primitive lattice vectors',ch10,&
-&   'Action: correct either rprim or acell in input file.'
+     'Input rprim and acell gives vanishing unit cell volume.',ch10,&
+     'This indicates linear dependency between primitive lattice vectors',ch10,&
+     'Action: correct either rprim or acell in input file.'
    MSG_ERROR(message)
  end if
  if (ucvol<zero)then
    write(message,'(2a,3(a,3es16.6,a),7a)')&
-&   'Current rprimd gives negative (R1xR2).R3 . ',ch10,&
-&   'Rprimd =',rprimd(:,1),ch10,&
-&   '        ',rprimd(:,2),ch10,&
-&   '        ',rprimd(:,3),ch10,&
-&   'Action: if the cell size and shape are fixed (optcell==0),',ch10,&
-&   '        exchange two of the input rprim vectors;',ch10,&
-&   '        if you are optimizing the cell size and shape (optcell/=0),',ch10,&
-&   '        maybe the move was too large, and you might try to decrease strprecon.'
+     'Current rprimd gives negative (R1xR2).R3 . ',ch10,&
+     'Rprimd =',rprimd(:,1),ch10,&
+     '        ',rprimd(:,2),ch10,&
+     '        ',rprimd(:,3),ch10,&
+     'Action: if the cell size and shape are fixed (optcell==0),',ch10,&
+     '        exchange two of the input rprim vectors;',ch10,&
+     '        if you are optimizing the cell size and shape (optcell/=0),',ch10,&
+     '        maybe the move was too large, and you might try to decrease strprecon.'
    MSG_ERROR(message)
  end if
 
-!Generates gprimd
+ ! Generate gprimd
  call matr3inv(rprimd,gprimd)
 
-!Write out rprimd, gprimd and ucvol
+ ! Write out rprimd, gprimd and ucvol
  if (iout>=0) then
    write(message,'(2a)')' Real(R)+Recip(G) ','space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):'
    call wrtout(iout,message,'COLL')
    do nu=1,3
      write(message, '(1x,a,i1,a,3f11.7,2x,a,i1,a,3f11.7)' ) &
-&     'R(',nu,')=',rprimd(:,nu)+tol10,&
-&     'G(',nu,')=',gprimd(:,nu)+tol10
+      'R(',nu,')=',rprimd(:,nu)+tol10,&
+      'G(',nu,')=',gprimd(:,nu)+tol10
      call wrtout(iout,message,'COLL')
    end do
    write(message,'(a,1p,e15.7,a)') ' Unit cell volume ucvol=',ucvol+tol10,' bohr^3'
@@ -1211,13 +1204,13 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
    call wrtout(std_out,message,'COLL')
  end if
 
-!Compute real space metric.
+ ! Compute real space metric.
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
 
-!Compute reciprocal space metric.
+ ! Compute reciprocal space metric.
  gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
 
-!Write out the angles
+ ! Write out the angles
  if (iout>=0) then
    angle(1)=acos(rmet(2,3)/sqrt(rmet(2,2)*rmet(3,3)))/two_pi*360.0d0
    angle(2)=acos(rmet(1,3)/sqrt(rmet(1,1)*rmet(3,3)))/two_pi*360.0d0
@@ -1379,7 +1372,6 @@ end subroutine chkrprimd
 !!                handle_error
 !!              end if
 !!
-!!
 !! PARENTS
 !!      driver,mover
 !!
@@ -1449,17 +1441,17 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
      rprimd = alpha * rprimd + (one - alpha) * rprimd_orig
 
      write(dilatmx_errmsg,'(3a,es16.6,4a,es16.6,2a,es16.6,a)')&
-&     'The new primitive vectors rprimd (an evolving quantity)',ch10,&
-&     'are too large with respect to the old rprimd and the accompanying dilatmx:',dilatmx,ch10,&
-&     'This large change of unit cell parameters is not allowed by the present value of dilatmx.',ch10,&
-&     'An adequate value would have been dilatmx_new=',dilatmx_new,ch10,&
-&     'Calculation continues with limited jump, by rescaling the projected move by the factor',alpha,'.'
+       'The new primitive vectors rprimd (an evolving quantity)',ch10,&
+       'are too large with respect to the old rprimd and the accompanying dilatmx: ',dilatmx,ch10,&
+       'This large change of unit cell parameters is not allowed by the present value of dilatmx.',ch10,&
+       'An adequate value would have been dilatmx_new= ',dilatmx_new,ch10,&
+       'Calculation continues with limited jump, by rescaling the projected move by the factor: ',alpha,'.'
    else
      write(message, '(3a,es16.6,2a,es16.6,2a)' )&
-&     'The new primitive vectors rprimd (an evolving quantity)',ch10,&
-&     'are too large, given the initial rprimd and the accompanying dilatmx:',dilatmx,ch10,&
-&     'An adequate value would have been dilatmx_new=',dilatmx_new,ch10,&
-&     'As chkdilatmx=0, assume experienced user. Execution will continue.'
+      'The new primitive vectors rprimd (an evolving quantity)',ch10,&
+      'are too large, given the initial rprimd and the accompanying dilatmx: ',dilatmx,ch10,&
+      'An adequate value would have been dilatmx_new= ',dilatmx_new,ch10,&
+      'As chkdilatmx=0, assume experienced user. Execution will continue.'
      MSG_WARNING(message)
    end if
 

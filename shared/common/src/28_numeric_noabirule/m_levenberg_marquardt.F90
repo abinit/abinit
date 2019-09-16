@@ -1617,8 +1617,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 subroutine lm_fit_print_info(info,msg)
 
-  implicit none
-
   integer, intent(in) :: info
   character(len=500)  :: msg
 
