@@ -968,8 +968,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      and update of rhor to this k-point and this spin polarization.
        print *, "BEFORE VTOFK CALL"
        write(str , *) counter1
-       call xgBlock_map(xgx0,cg(:, icg+1:),3,gs_hamk%istwf_k*npw_k*1,nband_k,mpi_enreg%comm_bandspinorfft) 
+       !call xgBlock_map(xgx0,cg(:, icg+1:),3,gs_hamk%istwf_k*npw_k*1,nband_k,mpi_enreg%comm_bandspinorfft)
+       call xgBlock_map(xgx0,cg(:, icg+1:),3,gs_hamk%istwf_k*npw_k*1,nband_k)
        call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*1, "X BEFORE VTWOFK CALL outer_counter" // str)
+       !stop
        call vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,&
 &       dtset,eig_k,ek_k,ek_k_nd,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 &       ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
