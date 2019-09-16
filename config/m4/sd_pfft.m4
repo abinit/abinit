@@ -342,7 +342,8 @@ AC_DEFUN([_SD_PFFT_CHECK_CONFIG], [
   if test ! -z "${tmp_pfft_vars}" -a ! -z "${with_pfft}"; then
     case "${sd_pfft_policy}" in
       fail)
-        AC_MSG_ERROR([conflicting option settings for PFFT
+        # FIXME: use the new Steredeg specs
+        AC_MSG_WARN([conflicting option settings for PFFT
                   Please use PFFT_CFLAGS + PFFT_LIBS or --with-pfft,
                   not both.])
         ;;

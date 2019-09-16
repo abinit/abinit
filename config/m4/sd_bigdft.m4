@@ -351,7 +351,8 @@ AC_DEFUN([_SD_BIGDFT_CHECK_CONFIG], [
   if test ! -z "${tmp_bigdft_vars}" -a ! -z "${with_bigdft}"; then
     case "${sd_bigdft_policy}" in
       fail)
-        AC_MSG_ERROR([conflicting option settings for BigDFT
+        # FIXME: use the new Steredeg specs
+        AC_MSG_WARN([conflicting option settings for BigDFT
                   Please use BIGDFT_FCFLAGS + BIGDFT_LIBS or --with-bigdft,
                   not both.])
         ;;

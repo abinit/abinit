@@ -347,7 +347,8 @@ AC_DEFUN([_SD_LIBPSML_CHECK_CONFIG], [
   if test ! -z "${tmp_libpsml_vars}" -a ! -z "${with_libpsml}"; then
     case "${sd_libpsml_policy}" in
       fail)
-        AC_MSG_ERROR([conflicting option settings for LibPSML
+        # FIXME: use the new Steredeg specs
+        AC_MSG_WARN([conflicting option settings for LibPSML
                   Please use LIBPSML_FCFLAGS + LIBPSML_LIBS or --with-libpsml,
                   not both.])
         ;;

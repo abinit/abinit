@@ -422,7 +422,8 @@ AC_DEFUN([_SD_LIBXC_CHECK_CONFIG], [
   if test ! -z "${tmp_libxc_vars}" -a ! -z "${with_libxc}"; then
     case "${sd_libxc_policy}" in
       fail)
-        AC_MSG_ERROR([conflicting option settings for LibXC
+        # FIXME: use the new Steredeg specs
+        AC_MSG_WARN([conflicting option settings for LibXC
                   Please use LIBXC_FCFLAGS + LIBXC_LIBS or --with-libxc,
                   not both.])
         ;;

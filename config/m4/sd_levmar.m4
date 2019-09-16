@@ -355,7 +355,8 @@ AC_DEFUN([_SD_LEVMAR_CHECK_CONFIG], [
   if test ! -z "${tmp_levmar_vars}" -a ! -z "${with_levmar}"; then
     case "${sd_levmar_policy}" in
       fail)
-        AC_MSG_ERROR([conflicting option settings for Levmar
+        # FIXME: use the new Steredeg specs
+        AC_MSG_WARN([conflicting option settings for Levmar
                   Please use LEVMAR_CFLAGS + LEVMAR_LIBS or --with-levmar,
                   not both.])
         ;;

@@ -388,7 +388,8 @@ AC_DEFUN([_SD_TRIQS_CHECK_CONFIG], [
   if test ! -z "${tmp_triqs_vars}" -a ! -z "${with_triqs}"; then
     case "${sd_triqs_policy}" in
       fail)
-        AC_MSG_ERROR([conflicting option settings for TRIQS
+        # FIXME: use the new Steredeg specs
+        AC_MSG_WARN([conflicting option settings for TRIQS
                   Please use TRIQS_CXXFLAGS + TRIQS_LIBS or --with-triqs,
                   not both.])
         ;;

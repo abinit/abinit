@@ -344,7 +344,8 @@ AC_DEFUN([_SD_WANNIER90_CHECK_CONFIG], [
   if test ! -z "${tmp_wannier90_vars}" -a ! -z "${with_wannier90}"; then
     case "${sd_wannier90_policy}" in
       fail)
-        AC_MSG_ERROR([conflicting option settings for Wannier90
+        # FIXME: use the new Steredeg specs
+        AC_MSG_WARN([conflicting option settings for Wannier90
                   Please use WANNIER90_FCFLAGS + WANNIER90_LIBS or --with-wannier90,
                   not both.])
         ;;

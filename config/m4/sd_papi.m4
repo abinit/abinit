@@ -345,7 +345,8 @@ AC_DEFUN([_SD_PAPI_CHECK_CONFIG], [
   if test ! -z "${tmp_papi_vars}" -a ! -z "${with_papi}"; then
     case "${sd_papi_policy}" in
       fail)
-        AC_MSG_ERROR([conflicting option settings for PAPI
+        # FIXME: use the new Steredeg specs
+        AC_MSG_WARN([conflicting option settings for PAPI
                   Please use PAPI_CFLAGS + PAPI_LIBS or --with-papi,
                   not both.])
         ;;

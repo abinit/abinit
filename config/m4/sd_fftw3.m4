@@ -361,7 +361,8 @@ AC_DEFUN([_SD_FFTW3_CHECK_CONFIG], [
   if test ! -z "${tmp_fftw3_vars}" -a ! -z "${with_fftw3}"; then
     case "${sd_fftw3_policy}" in
       fail)
-        AC_MSG_ERROR([conflicting option settings for FFTW3
+        # FIXME: use the new Steredeg specs
+        AC_MSG_WARN([conflicting option settings for FFTW3
                   Please use FFTW3_CFLAGS + FFTW3_LIBS or --with-fftw3,
                   not both.])
         ;;

@@ -349,7 +349,8 @@ AC_DEFUN([_SD_XMLF90_CHECK_CONFIG], [
   if test ! -z "${tmp_xmlf90_vars}" -a ! -z "${with_xmlf90}"; then
     case "${sd_xmlf90_policy}" in
       fail)
-        AC_MSG_ERROR([conflicting option settings for XMLF90
+        # FIXME: use the new Steredeg specs
+        AC_MSG_WARN([conflicting option settings for XMLF90
                   Please use XMLF90_FCFLAGS + XMLF90_LIBS or --with-xmlf90,
                   not both.])
         ;;

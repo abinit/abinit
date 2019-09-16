@@ -430,7 +430,8 @@ AC_DEFUN([_SD_NETCDF_CHECK_CONFIG], [
   if test ! -z "${tmp_netcdf_vars}" -a ! -z "${with_netcdf}"; then
     case "${sd_netcdf_policy}" in
       fail)
-        AC_MSG_ERROR([conflicting option settings for NetCDF
+        # FIXME: use the new Steredeg specs
+        AC_MSG_WARN([conflicting option settings for NetCDF
                   Please use NETCDF_FCFLAGS + NETCDF_LIBS or --with-netcdf,
                   not both.])
         ;;
