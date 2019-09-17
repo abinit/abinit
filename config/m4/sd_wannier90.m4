@@ -232,7 +232,8 @@ AC_DEFUN([_SD_WANNIER90_CHECK_USE], [
     CPPFLAGS="${CPPFLAGS} ${sd_wannier90_cppflags}"
     FCFLAGS="${FCFLAGS} ${sd_wannier90_fcflags}"
     LDFLAGS="${LDFLAGS} ${sd_wannier90_ldflags}"
-    LIBS="${sd_wannier90_libs} ${LIBS}"
+    # FIXME: dirty hack to get the detection work in ABINIT (YP)
+    LIBS="${sd_wannier90_libs} ${abi_linalg_libs} ${LIBS}"
   fi
 
   # Check Wannier90 API
