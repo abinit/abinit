@@ -229,6 +229,8 @@ AC_DEFUN([_SD_BIGDFT_CHECK_USE], [
     SD_ESL_ADD_FLAGS
     SD_ESL_ADD_LIBS([${sd_bigdft_libs_def}])
   else
+    # FIXME: dirty hack to get the detection work in ABINIT (YP)
+    sd_linalg_libs="${abi_linalg_libs}"
     CPPFLAGS="${CPPFLAGS} ${sd_linalg_cppflags} ${sd_libxc_cppflags} ${sd_bigdft_cppflags}"
     FCFLAGS="${FCFLAGS} ${sd_linalg_fcflags} ${sd_libxc_fcflags} ${sd_bigdft_fcflags}"
     LDFLAGS="${LDFLAGS} ${sd_linalg_ldflags} ${sd_libxc_ldflags} ${sd_bigdft_ldflags}"
