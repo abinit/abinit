@@ -206,7 +206,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  type(xcdata_type) :: xcdata
 !arrays
  real(dp) :: evxc,tsec(2),vmean(dtset%nspden),vzeeman(dtset%nspden)
- real(dp),allocatable :: rhowk(:,:),Vmagconstr(:,:),vnew(:,:),xcart(:,:)
+ real(dp),allocatable :: rhowk(:,:),v_constr_dft_r(:,:),vnew(:,:),xcart(:,:)
 !real(dp),allocatable :: vzeemanHarm(:,:)   !SPr: debug Zeeman field q/=0 real space
 
 ! *********************************************************************
@@ -447,11 +447,11 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  end if
 
 !Compute the constrained potential for the magnetic moments
- ABI_ALLOCATE(Vmagconstr, (nfft,dtset%nspden))
+ ABI_ALLOCATE(v_constr_dft_r, (nfft,dtset%nspden))
  if (dtset%magconon==1.or.dtset%magconon==2) then
-   Vmagconstr = zero
+   v_constr_dft_r = zero
    call mag_constr(dtset%natom,dtset%spinat,dtset%nspden,dtset%magconon,dtset%magcon_lambda,rprimd, &
-&   mpi_enreg,nfft,ngfft,dtset%ntypat,dtset%ratsph,rhor,dtset%typat,Vmagconstr,xred)
+&   mpi_enreg,nfft,ngfft,dtset%ntypat,dtset%ratsph,rhor,dtset%typat,v_constr_dft_r,xred)
  else
 !  NOTE: mjv 25 May 2013 added this for ibm6 - otherwise gives NaN in vnew after
 !  the addition below, in case magconon==0 and for certain libxc
@@ -459,7 +459,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !  should check libxc test with a proper memory checker (valgrind).
    do ispden=1,dtset%nspden
      do ifft=1,nfft
-       Vmagconstr(ifft,ispden) = zero
+       v_constr_dft_r(ifft,ispden) = zero
      end do
    end do
  end if
@@ -473,7 +473,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !$OMP PARALLEL DO COLLAPSE(2)
      do ispden=1,min(dtset%nspden,2)
        do ifft=1,nfft
-         vnew(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)+vzeeman(ispden)+Vmagconstr(ifft,ispden)
+         vnew(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)+vzeeman(ispden)+v_constr_dft_r(ifft,ispden)
          !vnew(ifft,ispden)=vnew(ifft,ispden)+vzeemanHarm(ifft,ispden)
          if(mod(dtset%fockoptmix,100)==11)vnew(ifft,ispden)=vnew(ifft,ispden)+vxc_hybcomp(ifft,ispden)
          vresidnew(ifft,ispden)=vnew(ifft,ispden)-vtrial(ifft,ispden)
@@ -483,7 +483,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !$OMP PARALLEL DO COLLAPSE(2)
        do ispden=3,4
          do ifft=1,nfft
-           vnew(ifft,ispden)=vxc(ifft,ispden)+vzeeman(ispden)+Vmagconstr(ifft,ispden)
+           vnew(ifft,ispden)=vxc(ifft,ispden)+vzeeman(ispden)+v_constr_dft_r(ifft,ispden)
            !vnew(ifft,ispden)=vnew(ifft,ispden)+vzeemanHarm(ifft,ispden)
            if(mod(dtset%fockoptmix,100)==11)vnew(ifft,ispden)=vnew(ifft,ispden)+vxc_hybcomp(ifft,ispden)
            vresidnew(ifft,ispden)=vnew(ifft,ispden)-vtrial(ifft,ispden)
@@ -559,7 +559,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !$OMP PARALLEL DO COLLAPSE(2)
      do ispden=1,min(dtset%nspden,2)
        do ifft=1,nfft
-         vtrial(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)+vzeeman(ispden)+Vmagconstr(ifft,ispden)
+         vtrial(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)+vzeeman(ispden)+v_constr_dft_r(ifft,ispden)
          !vtrial(ifft,ispden)=vtrial(ifft,ispden)+vzeemanHarm(ifft,ispden)
          if(mod(dtset%fockoptmix,100)==11)vtrial(ifft,ispden)=vtrial(ifft,ispden)+vxc_hybcomp(ifft,ispden)
        end do
@@ -567,7 +567,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      if(dtset%nspden==4) then
 !$OMP PARALLEL DO
        do ifft=1,nfft
-         vtrial(ifft,3:4)=vxc(ifft,3:4)+vzeeman(3:4)+Vmagconstr(ifft,3:4)
+         vtrial(ifft,3:4)=vxc(ifft,3:4)+vzeeman(3:4)+v_constr_dft_r(ifft,3:4)
          !vtrial(ifft,3:4)=vtrial(ifft,3:4)+vzeemanHarm(ifft,3:4)
          if(mod(dtset%fockoptmix,100)==11)vtrial(ifft,3:4)=vtrial(ifft,3:4)+vxc_hybcomp(ifft,3:4)
        end do
@@ -595,7 +595,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 
  end if
 
- ABI_DEALLOCATE(Vmagconstr)
+ ABI_DEALLOCATE(v_constr_dft_r)
  !ABI_DEALLOCATE(vzeemanHarm) !SPr: debug for q/=0 magnetic field
 
  call timab(945,2,tsec)

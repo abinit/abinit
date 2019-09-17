@@ -388,6 +388,343 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
 end subroutine dens_hirsh
 !!***
 
+!!****f* m_dens/get_v_constr_dft_r
+!! NAME
+!! get_v_constr_dft_r
+!!
+!! FUNCTION
+!! This routine is called to compute the real space potential added to the Hamiltonian in the framework
+!! of the constrained DFT. It is made of contributions from each atomic sphere, each governed by parameters
+!! stored in v_constr_dft_lambda, input to the present routine.
+!! The potential can have a zeeman magnetic component, coupled to local spin magnetic moment in the atomic sphere.
+!!
+!! INPUTS
+!!  natom=number of atoms
+!!  nspden = number of spin densities (1 2 or 4)
+!!  rprimd=lattice vectors (dimensionful)
+!!  mpi_enreg=mpi structure with communicator info
+!!  nfft=number of points in standard fft grid
+!!  ngfft=FFT grid dimensions
+!!  ntypat=number of types of atoms
+!!  ratsph=radii for muffin tin spheres of each atom
+!!  typat=types of atoms
+!!  xred=reduced atomic positions
+!!
+!! OUTPUT
+!!  v_constr_dft_r=the constraining potential
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      metric,ptabs_fourdp,timab,xmpi_sum
+!!
+!! SOURCE
+
+subroutine get_v_constr_dft_r(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ratsph, &
+  typat,v_constr_dft_coeffs,v_constr_dft_r,xred)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,nfft,nspden,ntypat
+ real(dp),intent(in) :: v_constr_dft_coeffs(nspden,natom)
+ real(dp),intent(out) :: v_constr_dft_r(nfft,nspden)
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in)  :: typat(natom)
+ integer,intent(in)  :: ngfft(18)
+ real(dp),intent(in) :: ratsph(ntypat)
+ real(dp),intent(in) :: rprimd(3,3)
+ real(dp),intent(in) :: xred(3,natom)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: ishift=5
+ integer :: iatom, ierr
+ integer :: n1a, n1b, n3a, n3b, n2a, n2b
+ integer :: n1, n2, n3
+ integer :: ifft_local
+ integer ::  i1,i2,i3,ix,iy,iz,izloc
+ real(dp) :: dify,difz,fsm,norm,r2atsph,rr1,rr2,rr3,ratsm,ratsm2,r2,r2_11,r2_123,r2_23,rx,ry,rz
+ real(dp) :: ucvol
+ real(dp),parameter :: delta=0.99_dp
+!arrays
+ real(dp), allocatable :: difx(:),rx23(:), ry23(:), rz23(:)
+ real(dp) :: gprimd(3,3),rmet(3,3),gmet(3,3)
+ real(dp) :: tsec(2)
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+
+! ***********************************************************************************************
+
+!We need the metric because it is needed to compute the "box" around each atom
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+ n1 = ngfft(1)
+ n2 = ngfft(2)
+ n3 = ngfft(3)
+
+ ratsm = 0.05_dp ! default value for the smearing region radius - may become input variable later
+
+ v_constr_dft_r = zero
+
+!Get the distrib associated with this fft_grid
+ call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+!Loop over atoms
+!-------------------------------------------
+ do iatom=1,natom
+
+   if(sum(v_constr_dft_coeffs(1:nspden,iatom)**2)<tol12)then
+     cycle
+   endif
+
+!  Define a "box" around the atom
+   r2atsph=1.0000001_dp*ratsph(typat(iatom))**2
+   rr1=sqrt(r2atsph*gmet(1,1))
+   rr2=sqrt(r2atsph*gmet(2,2))
+   rr3=sqrt(r2atsph*gmet(3,3))
+
+   n1a=int((xred(1,iatom)-rr1+ishift)*n1+delta)-ishift*n1
+   n1b=int((xred(1,iatom)+rr1+ishift)*n1      )-ishift*n1
+   n2a=int((xred(2,iatom)-rr2+ishift)*n2+delta)-ishift*n2
+   n2b=int((xred(2,iatom)+rr2+ishift)*n2      )-ishift*n2
+   n3a=int((xred(3,iatom)-rr3+ishift)*n3+delta)-ishift*n3
+   n3b=int((xred(3,iatom)+rr3+ishift)*n3      )-ishift*n3
+
+   ratsm2 = -(ratsm**2 - 2*ratsph(typat(iatom))*ratsm)
+
+   ABI_ALLOCATE(difx,(n1a:n1b))
+   do i1=n1a,n1b
+     difx(i1)=dble(i1)/dble(n1)-xred(1,iatom)
+   enddo ! i1
+
+   do i3=n3a,n3b
+     iz=mod(i3+ishift*n3,n3)
+     if(fftn3_distrib(iz+1)==mpi_enreg%me_fft) then
+       izloc = ffti3_local(iz+1) - 1
+       difz=dble(i3)/dble(n3)-xred(3,iatom)
+       do i2=n2a,n2b
+         iy=mod(i2+ishift*n2,n2)
+         dify=dble(i2)/dble(n2)-xred(2,iatom)
+         rx23=dify*rprimd(1,2)+difz*rprimd(1,3)
+         ry23=dify*rprimd(2,2)+difz*rprimd(2,3)
+         rz23=dify*rprimd(3,2)+difz*rprimd(3,3)
+         r2_23=rx23**2+ry23**2+rz23**2
+         r2_11=rprimd(1,1)**2+rprimd(2,1)**2+rprimd(3,1)**2
+         r2_123=2*(rprimd(1,1)*rx23+rprimd(2,1)*ry23+rprimd(3,1)*rz23)
+         do i1=n1a,n1b
+           r2=(difx(i1)*r2_11+r2_123)*difx(i1)+r2_23
+           if (r2 > r2atsph) cycle
+           fsm = radsmear(r2, r2atsph, ratsm2)
+           ix=mod(i1+ishift*n1,n1)
+!          Identify the fft indexes of the rectangular grid around the atom
+           ifft_local=1+ix+n1*(iy+n2*izloc)
+           v_constr_dft_r(ifft_local,1:nspden)=v_constr_dft_r(ifft_local,1:nspden) + fsm*v_constr_dft_coeff(1:nspden,iatom)
+
+         end do  ! i1
+       end do  ! i2
+     end if  ! if this is my fft slice
+   end do ! i3
+   ABI_DEALLOCATE(difx)
+
+!  end loop over atoms
+ end do
+
+!MPI parallelization
+!TODO: test if xmpi_sum does the correct stuff for a slice of v_constr_dft_r
+ if(mpi_enreg%nproc_fft>1)then
+   call timab(48,1,tsec)
+   call xmpi_sum(v_constr_dft_r,mpi_enreg%comm_fft,ierr)
+   call timab(48,2,tsec)
+ end if
+
+! write (201,*) '# potential 1'
+! write (201,*) v_constr_dft_r(:,1)
+
+! write (202,*) '# potential 2'
+! write (202,*) v_constr_dft_r(:,2)
+
+! if (nspden > 2) then
+!   write (203,*) '# potential 3'
+!   write (203,*) v_constr_dft_r(:,3)
+
+!   write (204,*) '# potential 4'
+!   write (204,*) v_constr_dft_r(:,4)
+! end if
+
+end subroutine get_v_constr_dft_r
+!!***
+
+!!****f* m_dens/mag_penalty
+!! NAME
+!! mag_penalty
+!!
+!! FUNCTION
+!! This routine is called to compute the potential corresponding to constrained magnetic moments using the penalty function algorithm.
+!!
+!! INPUTS
+!!  natom=number of atoms
+!!  spinat=fixed magnetic moments vectors
+!!  nspden = number of spin densities (1 2 or 4)
+!!  magconon=constraining option (on/off); 1=fix only the direction, 2=fix the direction and size
+!!  magcon_lambda=the size of the penalty terms
+!!  rprimd=lattice vectors (dimensionful)
+!!  mpi_enreg=mpi structure with communicator info
+!!  nfft=number of points in standard fft grid
+!!  ngfft=FFT grid dimensions
+!!  ntypat=number of types of atoms
+!!  ratsph=radii for muffin tin spheres of each atom
+!!  rhor=density in real space
+!!  typat=types of atoms
+!!  xred=reduced atomic positions
+!!
+!! OUTPUT
+!!  v_constr_dft_r=the constraining potential
+!!
+!! PARENTS
+!!      energy,rhotov,setvtr
+!!
+!! CHILDREN
+!!      calcdensph,metric,ptabs_fourdp,timab,xmpi_sum
+!!
+!! NOTES
+!!  based on html notes for the VASP implementation at
+!!  http://cms.mpi.univie.ac.at/vasp/vasp/Constraining_direction_magnetic_moments.html
+!!
+!! SOURCE
+
+subroutine mag_penalty(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
+                      mpi_enreg,nfft,ngfft,ntypat,ratsph,rhor, &
+                      typat,v_constr_dft_r,xred)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,magconon,nfft,nspden
+ integer,intent(in) :: ntypat
+ real(dp),intent(in) :: magcon_lambda
+ real(dp),intent(out) :: v_constr_dft_r(nfft,nspden)
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in)  :: typat(natom)
+ integer,intent(in)  :: ngfft(18)
+ real(dp),intent(in) :: ratsph(ntypat)
+ real(dp),intent(in) :: rhor(nfft,nspden)
+ real(dp),intent(in) :: rprimd(3,3)
+ real(dp),intent(in) :: spinat(3,natom)
+ real(dp),intent(in) :: xred(3,natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iatom
+ integer :: cplex1=1
+ real(dp):: cmm_x,cmm_y,cmm_z
+ real(dp) :: intgden_proj,norm,ucvol
+!arrays
+ real(dp) :: v_constr_dft_coeffs(:,:) ! nspden,natom
+ real(dp) :: intgden(:,:) ! nspden,natom
+ real(dp) :: spinat_norm(3,natom)
+ real(dp) :: gprimd(3,3),rmet(3,3),gmet(3,3)
+ real(dp) :: tsec(2)
+
+! ***********************************************************************************************
+
+ ABI_ALLOCATE(v_constr_dft_coeffs,(nspden,natom))
+ ABI_ALLOCATE(intgden,(nspden,natom))
+
+!We need the metric because it is needed in calcdensph.F90
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+!We need the integrated magnetic moments and the smoothing function
+ call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,std_out,ratsph,rhor,rprimd,typat,ucvol,xred,1,cplex1,intgden=intgden)
+
+!Loop over atoms
+!-------------------------------------------
+ do iatom=1,natom
+
+   norm = sqrt(sum(spinat(:,iatom)**2))
+   spinat_norm(:,iatom) = zero
+   if (norm > tol10) then
+     spinat_norm(:,iatom) = spinat(:,iatom) / norm
+   else if (magconon == 1) then
+!    if spinat = 0 and we are imposing the direction only, skip this atom
+     cycle
+   end if
+
+!  Calculate the x- and y-components of the square bracket term
+   cmm_x = zero
+   cmm_y = zero
+   cmm_z = zero
+   intgden_proj = zero
+   if (nspden == 4) then
+     if (magconon==1) then
+!      Calculate the scalar product of the fixed mag. mom. vector and calculated mag. mom. vector
+!      This is actually the size of the projection of the calc. mag. mom. vector on the fixed mag. mom. vector
+       intgden_proj=spinat_norm(1,iatom)*intgden(2,iatom)+ &
+&        spinat_norm(2,iatom)*intgden(3,iatom)+ &
+&        spinat_norm(3,iatom)*intgden(4,iatom)
+
+       cmm_x=intgden(2,iatom)
+       cmm_x=cmm_x-spinat_norm(1,iatom)*intgden_proj
+
+       cmm_y=intgden(3,iatom)
+       cmm_y=cmm_y-spinat_norm(2,iatom)*intgden_proj
+
+     else if (magconon==2 .and. nspden == 4) then
+       cmm_x=intgden(2,iatom)-spinat(1,iatom)
+       cmm_y=intgden(3,iatom)-spinat(2,iatom)
+     end if
+
+!    Calculate the constraining potential for x- and y- components of the mag. mom. vector
+!    Eric Bousquet has derived the relationship between spin components and potential spin matrix elements:
+!    1 = up up     = +z
+!    2 = down down = -z
+!    3 = up down   = +x
+!    4 = down up   = -y
+     v_constr_dft_coeffs(3,iatom)= 2*magcon_lambda*cmm_x
+     v_constr_dft_coeffs(4,iatom)=-2*magcon_lambda*cmm_y
+   end if ! nspden 4
+
+!  Calculate the z-component of the square bracket term
+   if (magconon==1) then
+     if (nspden == 4) then
+       ! m_z - spinat_z * <m | spinat>
+       cmm_z = intgden(4,iatom) - spinat_norm(3,iatom)*intgden_proj
+     else if (nspden == 2) then
+       ! this will be just a sign +/- : are we in the same direction as spinat_z?
+       !    need something more continuous??? To make sure the gradient pushes the state towards FM/AFM?
+       cmm_z = -sign(one, (intgden(1,iatom)-intgden(2,iatom))*spinat_norm(3,iatom))
+     end if
+   else if (magconon==2) then
+     if (nspden == 4) then
+       cmm_z=intgden(4,iatom)-spinat(3,iatom)
+       else if (nspden == 2) then
+         ! this is up spins - down spins - requested moment ~ 0
+         ! EB: note that intgden comes from calcdensph, which, in nspden=2 case, returns
+         ! intgden(1)=rho_up=n+m
+         ! intgden(2)=rho_dn=n-m
+         ! Then, is the following line be
+         ! cmm_z=half*(intgden(1,iatom)-intgden(2,iatom)) - spinat(3,iatom)
+         ! ??
+         cmm_z=intgden(1,iatom)-intgden(2,iatom) - spinat(3,iatom)
+       end if
+     end if
+   endif
+
+!  Calculate the constraining potential for z-component of the mag. mom. vector
+   v_constr_dft_coeffs(1,iatom)= 2*magcon_lambda*cmm_z
+   v_constr_dft_coeffs(2,iatom)=-2*magcon_lambda*cmm_z
+ 
+!Now compute the potential in real space
+ call get_v_constr_dft_r(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ratsph, &
+   typat,v_constr_dft_coeffs,v_constr_dft_r,xred)
+
+ ABI_DEALLOCATE(v_constr_dft_coeffs)
+ ABI_DEALLOCATE(intgden)
+
+end subroutine mag_penalty
+!!***
+
+
 !!****f* m_dens/mag_constr
 !! NAME
 !! mag_constr
@@ -412,7 +749,7 @@ end subroutine dens_hirsh
 !!  xred=reduced atomic positions
 !!
 !! OUTPUT
-!!  Vmagconstr=the constraining potential
+!!  v_constr_dft_r=the constraining potential
 !!
 !! PARENTS
 !!      energy,rhotov,setvtr
@@ -428,14 +765,14 @@ end subroutine dens_hirsh
 
 subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
                       mpi_enreg,nfft,ngfft,ntypat,ratsph,rhor, &
-                      typat,Vmagconstr,xred)
+                      typat,v_constr_dft_r,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,magconon,nfft,nspden
  integer,intent(in) :: ntypat
  real(dp),intent(in) :: magcon_lambda
- real(dp),intent(out) :: Vmagconstr(nfft,nspden)
+ real(dp),intent(out) :: v_constr_dft_r(nfft,nspden)
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in)  :: typat(natom)
@@ -454,7 +791,7 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
  integer :: n1a, n1b, n3a, n3b, n2a, n2b
  integer :: n1, n2, n3
  integer :: ifft_local
- integer ::  i1,i2,i3,ix,iy,iz,izloc,nd3
+ integer ::  i1,i2,i3,ix,iy,iz,izloc
  real(dp) :: arg,intgden_proj,r2atsph,rr1,rr2,rr3,fsm,ratsm,ratsm2,difx,dify,difz,r2,rx,ry,rz
  real(dp) :: norm
  real(dp),parameter :: delta=0.99_dp
@@ -479,10 +816,9 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
  n1 = ngfft(1)
  n2 = ngfft(2)
  n3 = ngfft(3)
- nd3=n3/mpi_enreg%nproc_fft
 
  ratsm = 0.05_dp ! default value for the smearing region radius - may become input variable later
- Vmagconstr = zero
+ v_constr_dft_r = zero
 
 !Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
@@ -572,10 +908,10 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
 !            2 = down down = -z
 !            3 = up down   = +x
 !            4 = down up   = -y
-             Vmagconstr(ifft_local,3)=Vmagconstr(ifft_local,3) + &
+             v_constr_dft_r(ifft_local,3)=v_constr_dft_r(ifft_local,3) + &
 &             2*magcon_lambda*fsm*cmm_x
 !            & 2*magcon_lambda*fsm*(cmm_x*cos(arg)+cmm_y*sin(arg))
-             Vmagconstr(ifft_local,4)=Vmagconstr(ifft_local,4) - &
+             v_constr_dft_r(ifft_local,4)=v_constr_dft_r(ifft_local,4) - &
 &             2*magcon_lambda*fsm*cmm_y
 !            & 2*magcon_lambda*fsm*(cmm_y*cos(arg)+cmm_x*sin(arg))
 !            end do loop on spirals
@@ -607,8 +943,8 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
            end if
 
 !          Calculate the constraining potential for z-component of the mag. mom. vector
-           Vmagconstr(ifft_local,1)=Vmagconstr(ifft_local,1) + 2*magcon_lambda*fsm*cmm_z
-           Vmagconstr(ifft_local,2)=Vmagconstr(ifft_local,2) - 2*magcon_lambda*fsm*cmm_z
+           v_constr_dft_r(ifft_local,1)=v_constr_dft_r(ifft_local,1) + 2*magcon_lambda*fsm*cmm_z
+           v_constr_dft_r(ifft_local,2)=v_constr_dft_r(ifft_local,2) - 2*magcon_lambda*fsm*cmm_z
 !          end do loop on spirals
 
          end do  ! i1
@@ -620,25 +956,25 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
  end do
 
 !MPI parallelization
-!TODO: test if xmpi_sum does the correct stuff for a slice of Vmagconstr
+!TODO: test if xmpi_sum does the correct stuff for a slice of v_constr_dft_r
  if(mpi_enreg%nproc_fft>1)then
    call timab(48,1,tsec)
-   call xmpi_sum(Vmagconstr,mpi_enreg%comm_fft,ierr)
+   call xmpi_sum(v_constr_dft_r,mpi_enreg%comm_fft,ierr)
    call timab(48,2,tsec)
  end if
 
 ! write (201,*) '# potential 1'
-! write (201,*) Vmagconstr(:,1)
+! write (201,*) v_constr_dft_r(:,1)
 
 ! write (202,*) '# potential 2'
-! write (202,*) Vmagconstr(:,2)
+! write (202,*) v_constr_dft_r(:,2)
 
 ! if (nspden > 2) then
 !   write (203,*) '# potential 3'
-!   write (203,*) Vmagconstr(:,3)
+!   write (203,*) v_constr_dft_r(:,3)
 
 !   write (204,*) '# potential 4'
-!   write (204,*) Vmagconstr(:,4)
+!   write (204,*) v_constr_dft_r(:,4)
 ! end if
 
 end subroutine mag_constr
@@ -822,7 +1158,7 @@ end subroutine mag_constr_e
 !!  prtopt = if 1, the default printing is on, otherwise special printing options
 !!
 !! OUTPUT
-!!  intgden(nspden, natom)=intgrated density (magnetization...) for each atom in a sphere of radius ratsph. Optional arg
+!!  intgden(nspden, natom)=integrated density (magnetization...) for each atom in a sphere of radius ratsph. Optional arg
 !!  dentot(nspden)=integrated density (magnetization...) over full u.c. vol, optional argument
 !!  Rest is printing
 !!
@@ -855,7 +1191,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 !scalars
  integer,parameter :: ishift=5
  integer :: i1,i2,i3,iatom,ierr,ifft_local,ix,iy,iz,izloc,n1,n1a,n1b,n2,ifft
- integer :: n2a,n2b,n3,n3a,n3b,nd3,nfftot
+ integer :: n2a,n2b,n3,n3a,n3b,nfftot
  integer :: ii
 !integer :: is,npts(natom)
  integer :: cmplex_den,jfft
@@ -875,7 +1211,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 
 ! *************************************************************************
 
- n1=ngfft(1);n2=ngfft(2);n3=ngfft(3);nd3=n3/mpi_enreg%nproc_fft
+ n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
  nfftot=n1*n2*n3
  intgden_=zero
 

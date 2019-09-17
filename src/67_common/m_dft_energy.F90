@@ -298,7 +298,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  real(dp),allocatable :: kinpw(:),kinpw_sav(:),kxc(:,:),occ_k(:),occblock(:)
  real(dp),allocatable :: ph3d(:,:,:),ph3d_sav(:,:,:)
  real(dp),allocatable :: resid_k(:),rhowfg(:,:),rhowfr(:,:),vlocal(:,:,:,:)
- real(dp),allocatable :: vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),Vmagconstr(:,:)
+ real(dp),allocatable :: vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),v_constr_dft_r(:,:)
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
  type(pawcprj_type),pointer :: cwaveprj_gat(:,:)
@@ -438,17 +438,17 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !the values coming from mag_constr may be different from those calculated
 !calling mag_constr with nfft in setvtr and rhotov
  if (dtset%magconon==1.or.dtset%magconon==2) then
-   ABI_ALLOCATE(Vmagconstr, (nfftf,dtset%nspden))
-   Vmagconstr = zero
+   ABI_ALLOCATE(v_constr_dft_r, (nfftf,dtset%nspden))
+   v_constr_dft_r = zero
    call mag_constr(dtset%natom, dtset%spinat, dtset%nspden, dtset%magconon, dtset%magcon_lambda, rprimd, &
 &   mpi_enreg, nfftf, dtset%ngfft, dtset%ntypat, dtset%ratsph, rhor, &
-&   dtset%typat, Vmagconstr, xred)
+&   dtset%typat, v_constr_dft_r, xred)
    do ispden=1,dtset%nspden
      do ifft=1,nfftf
-       vtrial(ifft,ispden)=vtrial(ifft,ispden)+Vmagconstr(ifft,ispden)
+       vtrial(ifft,ispden)=vtrial(ifft,ispden)+v_constr_dft_r(ifft,ispden)
      end do
    end do
-   ABI_DEALLOCATE(Vmagconstr)
+   ABI_DEALLOCATE(v_constr_dft_r)
  end if
 
 !Compute Hartree energy - use up+down rhor
