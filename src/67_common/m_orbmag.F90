@@ -1069,14 +1069,13 @@ end subroutine rho_norm_check
 !!
 !! SOURCE
 
-subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
-     & mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
-     & rprimd,symrec,usecprj,usepaw,xred,&
-     & smat_all)
+subroutine chern_number(atindx1,cg,cprj,dsdk,dtset,dtorbmag,&
+     & mcg,mcprj,mpi_enreg,nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
+     & rprimd,smat_all_indx,symrec,usecprj,usepaw,xred)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: mcg,mcprj,pwind_alloc,usecprj,usepaw
+  integer,intent(in) :: mcg,mcprj,nband_k,pwind_alloc,usecprj,usepaw
   type(dataset_type),intent(in) :: dtset
   type(MPI_type), intent(inout) :: mpi_enreg
   type(orbmag_type), intent(inout) :: dtorbmag
@@ -1086,24 +1085,23 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
   !arrays
   integer,intent(in) :: atindx1(dtset%natom)
   integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
-  real(dp), intent(in) :: cg(2,mcg),rprimd(3,3),xred(3,dtset%natom)
+  real(dp), intent(in) :: cg(2,mcg),dsdk(2,nband_k,nband_k,dtorbmag%fnkpt,1:3,0:4),rprimd(3,3)
+  real(dp), intent(in) :: smat_all_indx(2,dtorbmag%mband_occ,dtorbmag%mband_occ,dtorbmag%fnkpt,1:6,0:4)
+  real(dp), intent(in) :: xred(3,dtset%natom)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*usepaw)
   type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj*usecprj)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*usepaw)
-  real(dp),optional,target :: smat_all(2,dtorbmag%mband_occ,dtorbmag%mband_occ,dtorbmag%fnkpt,1:6,0:4)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,bdx,bdxc,bfor,bsigma,epsabg,gdir,gdx,gdxc,gdxstor,gfor,gsigma
+  integer :: adir,bdir,bdx,bdxc,bdxstor,bfor,bsigma,epsabg,gdir,gdx,gdxc,gdxstor,gfor,gsigma
   integer :: ikpt,ikptb,ikptg,isppol
-  integer :: my_nspinor,nband_k,nn,n1,n2,n3
+  integer :: my_nspinor,nn,n1,n2
   real(dp) :: deltab,deltag,ucvol
-  complex(dpc) :: IA,IB,t1A,t2A,t3A,t1B,t2B,t3B,t4B
+  complex(dpc) :: IA,t1A,t2A,t3A,IB,t2B
   character(len=500) :: message
   !arrays
   real(dp) :: cnum(2,3),dkb(3),dkg(3),gmet(3,3),gprimd(3,3),rmet(3,3)
-  ! real(dp),allocatable :: smat_all_indx(:,:,:,:,:,:)
-  real(dp),pointer :: smat_all_indx(:,:,:,:,:,:)
 
   ! ***********************************************************************
   ! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
@@ -1116,9 +1114,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
   isppol = 1
   my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
 
-  nband_k = dtorbmag%mband_occ
-
-  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
   ! the smat_all_indx structure holds the <u_nk|S|u_n'k'> overlap matrix
   ! elements. k ranges over the k pts in the FBZ.
@@ -1132,13 +1128,6 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
   ! bdir = 1, gdir = 2 or 3 and gdx = 3,4,5,6; if bdir = 2, gdir = 3 or 1 and gdx = 5,6,1,2;
   ! if bdir = 3, gdir = 1 or 2, gdx = 1,2,3,4.
   ! This storage is mapped as gdxstor = mod(gdx+6-2*bdir,6)
-  if (present(smat_all)) then
-     smat_all_indx=>smat_all
-  else
-     ABI_ALLOCATE(smat_all_indx,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4))
-     call make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
-          & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,smat_all_indx,symrec,xred)
-  end if
 
   cnum(:,:) = zero
   do adir = 1, 3
@@ -1160,6 +1149,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
            bdx = 2*bdir-2+bfor
            ! index of ikpt viewed from neighbor
            bdxc = bdx+bsigma
+           bdxstor=mod(bdx+6-2*gdir,6)
            dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
            deltab = sqrt(DOT_PRODUCT(dkb,dkb))
            do gfor = 1, 2
@@ -1183,27 +1173,20 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
                  do nn = 1, nband_k
                     do n1 = 1, nband_k
                        t1A = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0),KIND=dpc)
-                       t1B = t1A
+                       t2B = cmplx(dsdk(1,n1,nn,ikpt,gdir,bdxstor),dsdk(2,n1,nn,ikpt,gdir,bdxstor),KIND=dpc)
+                       IB=IB+t1A*t2B
                        do n2 = 1, nband_k
                           t2A = cmplx(smat_all_indx(1,n1,n2,ikpt,bdx,gdxstor),smat_all_indx(2,n1,n2,ikpt,bdx,gdxstor),KIND=dpc)
                           t3A = cmplx(smat_all_indx(1,n2,nn,ikptg,gdxc,0),smat_all_indx(2,n2,nn,ikptg,gdxc,0),KIND=dpc)
-
-                          t2B = cmplx(smat_all_indx(1,n1,n2,ikptb,bdxc,0),smat_all_indx(2,n1,n2,ikptb,bdxc,0),KIND=dpc)
-                          do n3 = 1, nband_k
-                             t3B = cmplx(smat_all_indx(1,n2,n3,ikpt,gdx,0),smat_all_indx(2,n2,n3,ikpt,gdx,0),KIND=dpc)
-                             t4B = cmplx(smat_all_indx(1,n3,nn,ikptg,gdxc,0),smat_all_indx(2,n3,nn,ikptg,gdxc,0),KIND=dpc)
-                             IB = IB + t1B*t2B*t3B*t4B
-                          end do ! end loop over n3
-
                           IA = IA + t1A*t2A*t3A
                        end do ! end loop over n2
                     end do ! end loop over n1
                  end do ! end loop over nn
 
-                 cnum(1,adir) = cnum(1,adir) + epsabg*bsigma*gsigma*real(IA-IB)/(2.0*deltab*2.0*deltag)
-                 cnum(2,adir) = cnum(2,adir) + epsabg*bsigma*gsigma*aimag(IA-IB)/(2.0*deltab*2.0*deltag)
-                 ! cnum(1,adir) = cnum(1,adir) + epsabg*bsigma*gsigma*real(IA)/(2.0*deltab*2.0*deltag)
-                 ! cnum(2,adir) = cnum(2,adir) + epsabg*bsigma*gsigma*aimag(IA)/(2.0*deltab*2.0*deltag)
+                 cnum(1,adir) = cnum(1,adir) + epsabg*bsigma*gsigma*real(IA)/(2.0*deltab*2.0*deltag)
+                 cnum(2,adir) = cnum(2,adir) + epsabg*bsigma*gsigma*aimag(IA)/(2.0*deltab*2.0*deltag)
+                 cnum(1,adir) = cnum(1,adir) + epsabg*bsigma*real(IB)/(2.0*deltab)
+                 cnum(2,adir) = cnum(2,adir) + epsabg*bsigma*aimag(IB)/(2.0*deltab)
 
               end do ! end loop over kpts
            end do ! end loop over gfor
@@ -1236,12 +1219,6 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
 
   write(message,'(a,a,a)')ch10,'====================================================',ch10
   call wrtout(ab_out,message,'COLL')
-
-  if(present(smat_all)) then
-     nullify(smat_all_indx)
-  else
-     ABI_DEALLOCATE(smat_all_indx)
-  end if
 
 end subroutine chern_number
 !!***
@@ -4587,14 +4564,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  call cpu_time(finish_time)
  write(std_out,'(a,es16.8)')' orbmag progress: make_smat time ',finish_time-start_time
 
- ! call chern number routine if necessary
- if (dtset%orbmag .EQ. 3) then
-    call chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
-     & mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
-     & rprimd,symrec,usecprj,psps%usepaw,xred,&
-     & smat_all=smat_all_indx)
- end if
-
  ! compute the shifted cprj's <p_k+b|u_k>
  ! call cpu_time(start_time)
  write(std_out,'(a)')' orbmag progress: making <p_k+b|u_k>, step 2 of 6'
@@ -4623,176 +4592,187 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  call cpu_time(finish_time)
  write(std_out,'(a,es16.8)')' orbmag progress: make_dsdk time ',finish_time-start_time
 
+ ! call chern number routine if necessary
+ if ( (dtset%orbmag .EQ. 1) .OR. (dtset%orbmag .EQ. 3) ) then
+    call chern_number(atindx1,cg,cprj,dsdk,dtset,dtorbmag,&
+     & mcg,mcprj,mpi_enreg,nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
+     & rprimd,smat_all_indx,symrec,usecprj,psps%usepaw,xred)
+ end if
 
- ! compute the energies at each k pt
- call cpu_time(start_time)
- write(std_out,'(a)')' orbmag progress: making <u_n1k|H_k|u_n2k>, step 4 of 6'
- ABI_ALLOCATE(eeig,(nband_k,dtset%nkpt))
- call make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,nattyp,nband_k,nfftf,npwarr,&
-      & paw_ij,pawfgr,pawtab,psps,rmet,rprimd,&
-      & vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
- call cpu_time(finish_time)
- write(std_out,'(a,es16.8)')' orbmag progress: make_eeig time ',finish_time-start_time
+ ! continue with computation of orbital magnetization if necessary
+ if ( dtset%orbmag .GT. 1 ) then
+    ! compute the energies at each k pt
+    call cpu_time(start_time)
+    write(std_out,'(a)')' orbmag progress: making <u_n1k|H_k|u_n2k>, step 4 of 6'
+    ABI_ALLOCATE(eeig,(nband_k,dtset%nkpt))
+    call make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,nattyp,nband_k,nfftf,npwarr,&
+         & paw_ij,pawfgr,pawtab,psps,rmet,rprimd,&
+         & vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
+    call cpu_time(finish_time)
+    write(std_out,'(a,es16.8)')' orbmag progress: make_eeig time ',finish_time-start_time
 
- ! compute the <u_kg|H_k|u_kb> matrix elements
- call cpu_time(start_time)
- write(std_out,'(a)')' orbmag progress: making <u_n1k1|H_k2|u_n3k3>, step 5 of 6'
- ABI_ALLOCATE(eeig123,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,1:4))
- call make_eeig123(atindx1,cg,cprj_kb_k,dtorbmag,dtset,eeig123,gmet,mcg,mcprj,&
-      & mpi_enreg,nband_k,nfftf,npwarr,&
-      & paw_ij,pawfgr,pawtab,psps,rprimd,symrec,vectornd,vhartr,vpsp,vxc,with_vectornd,xred)
- call cpu_time(finish_time)
- write(std_out,'(a,es16.8)')' orbmag progress: make_eeig123 time ',finish_time-start_time
-
-
- call cpu_time(start_time)
- write(std_out,'(a)')' orbmag progress: looping over B directions, step 6 of 6'
- do adir = 1, 3
-
-    call make_onsite_l(atindx1,cprj,dtset,adir,mcprj,mpi_enreg,nband_k,onsite_l_dir,pawrad,pawtab)
-    onsite_l(1,adir) = real(onsite_l_dir)
-    onsite_l(2,adir) = aimag(onsite_l_dir)
-
-    call make_S1trace(adir,atindx1,cprj,dtset,eeig,mcprj,mpi_enreg,nattyp,nband_k,pawtab,s1trace_dir)
-    s1trace(1,adir) = real(s1trace_dir)
-    s1trace(2,adir) = aimag(s1trace_dir)
-
-    call make_rhorij1(adir,atindx1,cprj,dtset,mcprj,mpi_enreg,nattyp,nband_k,paw_ij,pawtab,rhorij1_dir)
-    rhorij1(1,adir) = real(rhorij1_dir)
-    rhorij1(2,adir) = aimag(rhorij1_dir)
-
-    if (any(abs(dtset%nucdipmom)>tol8)) then
-       call make_onsite_bm(atindx1,cprj,dtset,adir,mcprj,mpi_enreg,nband_k,onsite_bm_dir,&
-            & pawang,pawrad,pawtab)
-       onsite_bm(1,adir) = real(onsite_bm_dir)
-       onsite_bm(2,adir) = aimag(onsite_bm_dir)
-    else
-       onsite_bm(:,adir) = zero
-    end if
-
-    call make_CCI(adir,CCI_dir,dtorbmag,eeig123,nband_k,smat_all_indx)
-    CCI(1,adir) = real(CCI_dir)
-    CCI(2,adir) = aimag(CCI_dir)
-
-    call make_CCIV_dpdk(adir,dtorbmag,eeig,nband_k,smat_all_indx,CCIV_dir)
-    ! call make_CCIV_dsdk(adir,CCIV_dir,dsdk,dtorbmag,dtset,eeig,mpi_enreg,nband_k)
-    CCIV(1,adir) = real(CCIV_dir)
-    CCIV(2,adir) = aimag(CCIV_dir)
-
-    call make_VVII(adir,dtorbmag,eeig,nband_k,smat_all_indx,VVII_dir)
-    VVII(1,adir) = real(VVII_dir)
-    VVII(2,adir) = aimag(VVII_dir)
-
-    call make_VVIII(adir,atindx1,cprj_kb_k,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
-         & pawtab,smat_all_indx,VVIII_dir)
-    VVIII(1,adir) = real(VVIII_dir)
-    VVIII(2,adir) = aimag(VVIII_dir)
-
-    call make_VVI(adir,atindx1,cprj_kb_k,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
-         & pawtab,smat_all_indx,VVI_dir)
-    VVI(1,adir) = real(VVI_dir)
-    VVI(2,adir) = aimag(VVI_dir)
-
- end do ! end loop over adir
- call cpu_time(finish_time)
- write(std_out,'(a,es16.8)')' orbmag progress: loop over adir time ',finish_time-start_time
-
- ! convert terms to cartesian coordinates as needed
- ! note that terms like <dv/dk| x |dw/dk> computed in reduced coords,
- ! become ucvol*gprimd*<dv/dk| x |dw/dk> when expressed in cartesian coords
- ! onsite_l and onsite_bm are already cartesian
-
- s1trace(1,1:3) = ucvol*MATMUL(gprimd,s1trace(1,1:3))
- s1trace(2,1:3) = ucvol*MATMUL(gprimd,s1trace(2,1:3))
-
- rhorij1(1,1:3) = ucvol*MATMUL(gprimd,rhorij1(1,1:3))
- rhorij1(2,1:3) = ucvol*MATMUL(gprimd,rhorij1(2,1:3))
-
- CCI(1,1:3) = ucvol*MATMUL(gprimd,CCI(1,1:3))
- CCI(2,1:3) = ucvol*MATMUL(gprimd,CCI(2,1:3))
-
- CCIV(1,1:3) = ucvol*MATMUL(gprimd,CCIV(1,1:3))
- CCIV(2,1:3) = ucvol*MATMUL(gprimd,CCIV(2,1:3))
-
- VVII(1,1:3) = ucvol*MATMUL(gprimd,VVII(1,1:3))
- VVII(2,1:3) = ucvol*MATMUL(gprimd,VVII(2,1:3))
-
- VVI(1,1:3) = ucvol*MATMUL(gprimd,VVI(1,1:3))
- VVI(2,1:3) = ucvol*MATMUL(gprimd,VVI(2,1:3))
-
- VVIII(1,1:3) = ucvol*MATMUL(gprimd,VVIII(1,1:3))
- VVIII(2,1:3) = ucvol*MATMUL(gprimd,VVIII(2,1:3))
-
- ! scale for integration over Brillouin zone
- ! pre factor is occ/ucvol*N_k
- ! factor of 2 in numerator is the band occupation (two electrons in normal insulator)
- ! converting integral over k space to a sum gives a factor of Omega_BZ/N_k or 1/ucvol*N_k
- onsite_l(1:2,1:3) = onsite_l(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
- onsite_bm(1:2,1:3) = onsite_bm(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
- s1trace(1:2,1:3) = s1trace(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
- rhorij1(1:2,1:3) = rhorij1(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
- CCI(1:2,1:3) = CCI(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
- VVII(1:2,1:3) = VVII(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
- VVI(1:2,1:3) = VVI(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
- VVIII(1:2,1:3) = VVIII(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
- CCIV(1:2,1:3) = CCIV(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
-
- write(std_out,'(a,3es16.8)')' JWZ debug onsite_l ',onsite_l(1,1),onsite_l(1,2),onsite_l(1,3)
- write(std_out,'(a,3es16.8)')' JWZ debug onsite_bm ',onsite_bm(1,1),onsite_bm(1,2),onsite_bm(1,3)
- write(std_out,'(a,3es16.8)')' JWZ debug s1trace ',s1trace(1,1),s1trace(1,2),s1trace(1,3)
- write(std_out,'(a,3es16.8)')' JWZ debug rhorij1 ',rhorij1(1,1),rhorij1(1,2),rhorij1(1,3)
- write(std_out,'(a,3es16.8)')' JWZ debug CCI ',CCI(1,1),CCI(1,2),CCI(1,3)
- write(std_out,'(a,3es16.8)')' JWZ debug CCIV ',CCIV(1,1),CCIV(1,2),CCIV(1,3)
- write(std_out,'(a,3es16.8)')' JWZ debug VVII ',VVII(1,1),VVII(1,2),VVII(1,3)
- write(std_out,'(a,3es16.8)')' JWZ debug VVI ',VVI(1,1),VVI(1,2),VVI(1,3)
- write(std_out,'(a,3es16.8)')' JWZ debug VVIII ',VVIII(1,1),VVIII(1,2),VVIII(1,3)
-
- ! accumulate in orbmagvec
-
- orbmagvec(1:2,1:3) = onsite_l(1:2,1:3)  &
-                  & + onsite_bm(1:2,1:3) &
-                  & - s1trace(1:2,1:3) &
-                  & + rhorij1(1:2,1:3) &
-                  & + VVII(1:2,1:3) &
-                  & + VVI(1:2,1:3) &
-                  & + VVIII(1:2,1:3) &
-                  & + CCI(1:2,1:3) &
-                  & - CCIV(1:2,1:3)
+    ! compute the <u_kg|H_k|u_kb> matrix elements
+    call cpu_time(start_time)
+    write(std_out,'(a)')' orbmag progress: making <u_n1k1|H_k2|u_n3k3>, step 5 of 6'
+    ABI_ALLOCATE(eeig123,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,1:4))
+    call make_eeig123(atindx1,cg,cprj_kb_k,dtorbmag,dtset,eeig123,gmet,mcg,mcprj,&
+         & mpi_enreg,nband_k,nfftf,npwarr,&
+         & paw_ij,pawfgr,pawtab,psps,rprimd,symrec,vectornd,vhartr,vpsp,vxc,with_vectornd,xred)
+    call cpu_time(finish_time)
+    write(std_out,'(a,es16.8)')' orbmag progress: make_eeig123 time ',finish_time-start_time
 
 
- ! dtorbmag%orbmagvec(1:2,1:3) = two*orbmagvec(1:2,1:3)/(ucvol*dtorbmag%fnkpt)
- dtorbmag%orbmagvec(1:2,1:3) = orbmagvec(1:2,1:3)
+    call cpu_time(start_time)
+    write(std_out,'(a)')' orbmag progress: looping over B directions, step 6 of 6'
+    do adir = 1, 3
 
- write(message,'(a,a,a)')ch10,'====================================================',ch10
- call wrtout(ab_out,message,'COLL')
+       call make_onsite_l(atindx1,cprj,dtset,adir,mcprj,mpi_enreg,nband_k,onsite_l_dir,pawrad,pawtab)
+       onsite_l(1,adir) = real(onsite_l_dir)
+       onsite_l(2,adir) = aimag(onsite_l_dir)
 
- write(message,'(a)')' Orbital magnetization '
- call wrtout(ab_out,message,'COLL')
- write(message,'(a,a)')'----Orbital magnetization is a real vector, given along Cartesian directions----',ch10
- call wrtout(ab_out,message,'COLL')
+       call make_S1trace(adir,atindx1,cprj,dtset,eeig,mcprj,mpi_enreg,nattyp,nband_k,pawtab,s1trace_dir)
+       s1trace(1,adir) = real(s1trace_dir)
+       s1trace(2,adir) = aimag(s1trace_dir)
 
- do adir = 1, 3
-    write(message,'(a,i4,a,2es16.8)')' Orb Mag(',adir,') : real, imag ',&
-         &   dtorbmag%orbmagvec(1,adir),dtorbmag%orbmagvec(2,adir)
+       call make_rhorij1(adir,atindx1,cprj,dtset,mcprj,mpi_enreg,nattyp,nband_k,paw_ij,pawtab,rhorij1_dir)
+       rhorij1(1,adir) = real(rhorij1_dir)
+       rhorij1(2,adir) = aimag(rhorij1_dir)
+
+       if (any(abs(dtset%nucdipmom)>tol8)) then
+          call make_onsite_bm(atindx1,cprj,dtset,adir,mcprj,mpi_enreg,nband_k,onsite_bm_dir,&
+               & pawang,pawrad,pawtab)
+          onsite_bm(1,adir) = real(onsite_bm_dir)
+          onsite_bm(2,adir) = aimag(onsite_bm_dir)
+       else
+          onsite_bm(:,adir) = zero
+       end if
+
+       call make_CCI(adir,CCI_dir,dtorbmag,eeig123,nband_k,smat_all_indx)
+       CCI(1,adir) = real(CCI_dir)
+       CCI(2,adir) = aimag(CCI_dir)
+
+       call make_CCIV_dpdk(adir,dtorbmag,eeig,nband_k,smat_all_indx,CCIV_dir)
+       ! call make_CCIV_dsdk(adir,CCIV_dir,dsdk,dtorbmag,dtset,eeig,mpi_enreg,nband_k)
+       CCIV(1,adir) = real(CCIV_dir)
+       CCIV(2,adir) = aimag(CCIV_dir)
+
+       call make_VVII(adir,dtorbmag,eeig,nband_k,smat_all_indx,VVII_dir)
+       VVII(1,adir) = real(VVII_dir)
+       VVII(2,adir) = aimag(VVII_dir)
+
+       call make_VVIII(adir,atindx1,cprj_kb_k,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
+            & pawtab,smat_all_indx,VVIII_dir)
+       VVIII(1,adir) = real(VVIII_dir)
+       VVIII(2,adir) = aimag(VVIII_dir)
+
+       call make_VVI(adir,atindx1,cprj_kb_k,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
+            & pawtab,smat_all_indx,VVI_dir)
+       VVI(1,adir) = real(VVI_dir)
+       VVI(2,adir) = aimag(VVI_dir)
+
+    end do ! end loop over adir
+    call cpu_time(finish_time)
+    write(std_out,'(a,es16.8)')' orbmag progress: loop over adir time ',finish_time-start_time
+
+    ! convert terms to cartesian coordinates as needed
+    ! note that terms like <dv/dk| x |dw/dk> computed in reduced coords,
+    ! become ucvol*gprimd*<dv/dk| x |dw/dk> when expressed in cartesian coords
+    ! onsite_l and onsite_bm are already cartesian
+
+    s1trace(1,1:3) = ucvol*MATMUL(gprimd,s1trace(1,1:3))
+    s1trace(2,1:3) = ucvol*MATMUL(gprimd,s1trace(2,1:3))
+
+    rhorij1(1,1:3) = ucvol*MATMUL(gprimd,rhorij1(1,1:3))
+    rhorij1(2,1:3) = ucvol*MATMUL(gprimd,rhorij1(2,1:3))
+    
+    CCI(1,1:3) = ucvol*MATMUL(gprimd,CCI(1,1:3))
+    CCI(2,1:3) = ucvol*MATMUL(gprimd,CCI(2,1:3))
+    
+    CCIV(1,1:3) = ucvol*MATMUL(gprimd,CCIV(1,1:3))
+    CCIV(2,1:3) = ucvol*MATMUL(gprimd,CCIV(2,1:3))
+    
+    VVII(1,1:3) = ucvol*MATMUL(gprimd,VVII(1,1:3))
+    VVII(2,1:3) = ucvol*MATMUL(gprimd,VVII(2,1:3))
+    
+    VVI(1,1:3) = ucvol*MATMUL(gprimd,VVI(1,1:3))
+    VVI(2,1:3) = ucvol*MATMUL(gprimd,VVI(2,1:3))
+
+    VVIII(1,1:3) = ucvol*MATMUL(gprimd,VVIII(1,1:3))
+    VVIII(2,1:3) = ucvol*MATMUL(gprimd,VVIII(2,1:3))
+
+    ! scale for integration over Brillouin zone
+    ! pre factor is occ/ucvol*N_k
+    ! factor of 2 in numerator is the band occupation (two electrons in normal insulator)
+    ! converting integral over k space to a sum gives a factor of Omega_BZ/N_k or 1/ucvol*N_k
+    onsite_l(1:2,1:3) = onsite_l(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+    onsite_bm(1:2,1:3) = onsite_bm(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+    s1trace(1:2,1:3) = s1trace(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+    rhorij1(1:2,1:3) = rhorij1(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+    CCI(1:2,1:3) = CCI(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+    VVII(1:2,1:3) = VVII(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+    VVI(1:2,1:3) = VVI(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+    VVIII(1:2,1:3) = VVIII(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+    CCIV(1:2,1:3) = CCIV(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+
+    write(std_out,'(a,3es16.8)')' JWZ debug onsite_l ',onsite_l(1,1),onsite_l(1,2),onsite_l(1,3)
+    write(std_out,'(a,3es16.8)')' JWZ debug onsite_bm ',onsite_bm(1,1),onsite_bm(1,2),onsite_bm(1,3)
+    write(std_out,'(a,3es16.8)')' JWZ debug s1trace ',s1trace(1,1),s1trace(1,2),s1trace(1,3)
+    write(std_out,'(a,3es16.8)')' JWZ debug rhorij1 ',rhorij1(1,1),rhorij1(1,2),rhorij1(1,3)
+    write(std_out,'(a,3es16.8)')' JWZ debug CCI ',CCI(1,1),CCI(1,2),CCI(1,3)
+    write(std_out,'(a,3es16.8)')' JWZ debug CCIV ',CCIV(1,1),CCIV(1,2),CCIV(1,3)
+    write(std_out,'(a,3es16.8)')' JWZ debug VVII ',VVII(1,1),VVII(1,2),VVII(1,3)
+    write(std_out,'(a,3es16.8)')' JWZ debug VVI ',VVI(1,1),VVI(1,2),VVI(1,3)
+    write(std_out,'(a,3es16.8)')' JWZ debug VVIII ',VVIII(1,1),VVIII(1,2),VVIII(1,3)
+
+    ! accumulate in orbmagvec
+
+    orbmagvec(1:2,1:3) = onsite_l(1:2,1:3)  &
+         & + onsite_bm(1:2,1:3) &
+         & - s1trace(1:2,1:3) &
+         & + rhorij1(1:2,1:3) &
+         & + VVII(1:2,1:3) &
+         & + VVI(1:2,1:3) &
+         & + VVIII(1:2,1:3) &
+         & + CCI(1:2,1:3) &
+         & - CCIV(1:2,1:3)
+
+    
+    ! dtorbmag%orbmagvec(1:2,1:3) = two*orbmagvec(1:2,1:3)/(ucvol*dtorbmag%fnkpt)
+    dtorbmag%orbmagvec(1:2,1:3) = orbmagvec(1:2,1:3)
+
+    write(message,'(a,a,a)')ch10,'====================================================',ch10
     call wrtout(ab_out,message,'COLL')
- end do
+    
+    write(message,'(a)')' Orbital magnetization '
+    call wrtout(ab_out,message,'COLL')
+    write(message,'(a,a)')'----Orbital magnetization is a real vector, given along Cartesian directions----',ch10
+    call wrtout(ab_out,message,'COLL')
 
- write(message,'(a,a,a)')ch10,'====================================================',ch10
- call wrtout(ab_out,message,'COLL')
+    do adir = 1, 3
+       write(message,'(a,i4,a,2es16.8)')' Orb Mag(',adir,') : real, imag ',&
+            &   dtorbmag%orbmagvec(1,adir),dtorbmag%orbmagvec(2,adir)
+       call wrtout(ab_out,message,'COLL')
+    end do
 
+    write(message,'(a,a,a)')ch10,'====================================================',ch10
+    call wrtout(ab_out,message,'COLL')
+
+ end if ! end computation and output of orbital magnetization
+    
  ABI_DEALLOCATE(dimlmn)
  do bdx = 1, 6
     do gdxstor = 0, 4
        call pawcprj_free(cprj_kb_k(bdx,gdxstor,:,:))
     end do
  end do
-  ABI_DATATYPE_DEALLOCATE(cprj_kb_k)
-
- ABI_DEALLOCATE(smat_all_indx)
- ABI_DEALLOCATE(eeig)
- ABI_DEALLOCATE(eeig123)
+ ABI_DATATYPE_DEALLOCATE(cprj_kb_k)
  ABI_DEALLOCATE(dsdk)
- ! ABI_DEALLOCATE(dsdk_)
+ ABI_DEALLOCATE(smat_all_indx)
+
+ if (dtset%orbmag .GT. 1) then
+    ABI_DEALLOCATE(eeig)
+    ABI_DEALLOCATE(eeig123)
+ end if
 
 end subroutine orbmag
 !!***
