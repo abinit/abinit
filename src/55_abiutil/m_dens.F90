@@ -444,7 +444,7 @@ subroutine get_v_constr_dft_r(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ra
  integer :: n1, n2, n3
  integer :: ifft_local
  integer ::  i1,i2,i3,ix,iy,iz,izloc
- real(dp) :: dify,difz,fsm,norm,r2atsph,rr1,rr2,rr3,ratsm,ratsm2,r2,r2_11,r2_123,r2_23,rx,ry,rz
+ real(dp) :: dify,difz,fsm,r2atsph,rr1,rr2,rr3,ratsm,ratsm2,r2,r2_11,r2_123,r2_23
  real(dp) :: ucvol
  real(dp),parameter :: delta=0.99_dp
 !arrays
@@ -624,7 +624,6 @@ subroutine mag_penalty(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
  real(dp) :: intgden(:,:) ! nspden,natom
  real(dp) :: spinat_norm(3,natom)
  real(dp) :: gprimd(3,3),rmet(3,3),gmet(3,3)
- real(dp) :: tsec(2)
 
 ! ***********************************************************************************************
 
