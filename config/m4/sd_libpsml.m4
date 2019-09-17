@@ -240,19 +240,24 @@ AC_DEFUN([_SD_LIBPSML_CHECK_USE], [
   for tmp_incs in "" "-I/usr/include"; do
     FCFLAGS="${FCFLAGS} ${tmp_incs}"
     AC_LANG_PUSH([Fortran])
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-      [[
+    AC_LINK_IFELSE([[
+      subroutine psml_die(str)
+        character(len=*), intent(in) :: str
+        write(0,"(a)") str
+        stop
+      end subroutine
+      program main
         use m_psml
         use m_psml_api
-        type(ps_t) :: psxml
-        call ps_destroy(psxml)
-        contains
+        interface
           subroutine psml_die(str)
             character(len=*), intent(in) :: str
-            write(0,"(a)") str
-            stop
-          end subroutine psml_die
-      ]])], [sd_libpsml_ok="yes"], [sd_libpsml_ok="no"])
+          end subroutine
+        end interface
+        type(ps_t) :: psxml
+        call ps_destroy(psxml)
+      end program
+    ]], [sd_libpsml_ok="yes"], [sd_libpsml_ok="no"])
     AC_LANG_POP([Fortran])
     if test "${sd_libpsml_ok}" = "yes"; then
       test "${sd_sys_fcflags}" = "" && sd_sys_fcflags="${tmp_incs}"
