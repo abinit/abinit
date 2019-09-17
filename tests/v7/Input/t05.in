@@ -63,7 +63,7 @@ occopt 7
 tsmear 0.01
 
 toldfe 1.e-10
-nstep 100
+nstep 40
 
 acell 3*5.328
 
