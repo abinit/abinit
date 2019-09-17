@@ -248,8 +248,7 @@ AC_DEFUN([_SD_BIGDFT_CHECK_USE], [
           type(input_variables) :: inputs
           type(atoms_data) :: atoms
           type(restart_objects) :: rst
-          character(len=*),parameter :: routine = "conftest"
-          call init_restart_objects(iproc,inputs,atoms,rst,routine)
+          call init_restart_objects(iproc, inputs, atoms, rst)
       ]])], [sd_bigdft_ok="yes"], [sd_bigdft_ok="no"])
     AC_LANG_POP([Fortran])
     if test "${sd_bigdft_ok}" = "yes"; then
