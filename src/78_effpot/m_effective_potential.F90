@@ -835,7 +835,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    ABI_ALLOCATE(xred_tmp,(3,2*natom_uc))
    ABI_ALLOCATE(xred,(3,supercell%natom))
    ABI_ALLOCATE(zeff_tmp,(3,3,2*natom_uc))
-   ABI_ALLOCATE(qdrp_cart,(3,3,3,natom_uc))
+   ABI_ALLOCATE(qdrp_cart,(3,3,3,2*natom_uc))
    ABI_ALLOCATE(dyew,(2,3,2*natom_uc,3,2*natom_uc))
    ABI_ALLOCATE(dyewq0,(2,3,natom_uc,3,natom_uc))
 

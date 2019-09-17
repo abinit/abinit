@@ -406,6 +406,8 @@ P           mkmem           8
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t89o_DS20_DDB
 Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t89o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -542,6 +544,8 @@ All the independent perturbations are available
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t89o_DS20_DDB
+Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t89o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
