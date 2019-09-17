@@ -246,6 +246,12 @@ AC_DEFUN([_SD_LIBPSML_CHECK_USE], [
         use m_psml_api
         type(ps_t) :: psxml
         call ps_destroy(psxml)
+        contains
+          subroutine psml_die(str)
+            character(len=*), intent(in) :: str
+            write(0,"(a)") str
+            stop
+          end subroutine psml_die
       ]])], [sd_libpsml_ok="yes"], [sd_libpsml_ok="no"])
     AC_LANG_POP([Fortran])
     if test "${sd_libpsml_ok}" = "yes"; then
