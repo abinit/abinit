@@ -25,6 +25,7 @@ spinat2 0 0 3
 # DS 3 constrained direction y, start from different spin wf (DS 2 along z), non collinear spin
 magconon3 1
 spinat3 0 3 0
+toldfe3 2.e-10
 
 # DS 4 constrained direction and amplitude, non collinear spin
 magconon4 2
@@ -48,6 +49,7 @@ nspden6 2
 nsppol6 2 
 getwfk6 0
 nband6 6
+nstep6 25
 
 # DS 7 constrained direction and amplitude, collinear spin
 magconon7 2
