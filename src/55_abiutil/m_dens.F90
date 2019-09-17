@@ -444,11 +444,12 @@ subroutine get_v_constr_dft_r(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ra
  integer :: n1, n2, n3
  integer :: ifft_local
  integer ::  i1,i2,i3,ix,iy,iz,izloc
- real(dp) :: dify,difz,fsm,r2atsph,rr1,rr2,rr3,ratsm,ratsm2,r2,r2_11,r2_123,r2_23
+ real(dp) :: dify,difz,fsm,r2atsph,rr1,rr2,rr3,ratsm,ratsm2,rx23,ry23,rz23
+ real(dp) :: r2,r2_11,r2_123,r2_23
  real(dp) :: ucvol
  real(dp),parameter :: delta=0.99_dp
 !arrays
- real(dp), allocatable :: difx(:),rx23(:), ry23(:), rz23(:)
+ real(dp), allocatable :: difx(:)
  real(dp) :: gprimd(3,3),rmet(3,3),gmet(3,3)
  real(dp) :: tsec(2)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
@@ -519,7 +520,7 @@ subroutine get_v_constr_dft_r(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ra
            ix=mod(i1+ishift*n1,n1)
 !          Identify the fft indexes of the rectangular grid around the atom
            ifft_local=1+ix+n1*(iy+n2*izloc)
-           v_constr_dft_r(ifft_local,1:nspden)=v_constr_dft_r(ifft_local,1:nspden) + fsm*v_constr_dft_coeff(1:nspden,iatom)
+           v_constr_dft_r(ifft_local,1:nspden)=v_constr_dft_r(ifft_local,1:nspden) + fsm*v_constr_dft_coeffs(1:nspden,iatom)
 
          end do  ! i1
        end do  ! i2
@@ -620,8 +621,8 @@ subroutine mag_penalty(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
  real(dp):: cmm_x,cmm_y,cmm_z
  real(dp) :: intgden_proj,norm,ucvol
 !arrays
- real(dp) :: v_constr_dft_coeffs(:,:) ! nspden,natom
- real(dp) :: intgden(:,:) ! nspden,natom
+ real(dp), allocatable :: v_constr_dft_coeffs(:,:) ! nspden,natom
+ real(dp), allocatable :: intgden(:,:) ! nspden,natom
  real(dp) :: spinat_norm(3,natom)
  real(dp) :: gprimd(3,3),rmet(3,3),gmet(3,3)
 
@@ -696,22 +697,23 @@ subroutine mag_penalty(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
    else if (magconon==2) then
      if (nspden == 4) then
        cmm_z=intgden(4,iatom)-spinat(3,iatom)
-       else if (nspden == 2) then
-         ! this is up spins - down spins - requested moment ~ 0
-         ! EB: note that intgden comes from calcdensph, which, in nspden=2 case, returns
-         ! intgden(1)=rho_up=n+m
-         ! intgden(2)=rho_dn=n-m
-         ! Then, is the following line be
-         ! cmm_z=half*(intgden(1,iatom)-intgden(2,iatom)) - spinat(3,iatom)
-         ! ??
-         cmm_z=intgden(1,iatom)-intgden(2,iatom) - spinat(3,iatom)
-       end if
+     else if (nspden == 2) then
+       ! this is up spins - down spins - requested moment ~ 0
+       ! EB: note that intgden comes from calcdensph, which, in nspden=2 case, returns
+       ! intgden(1)=rho_up=n+m
+       ! intgden(2)=rho_dn=n-m
+       ! Then, is the following line be
+       ! cmm_z=half*(intgden(1,iatom)-intgden(2,iatom)) - spinat(3,iatom)
+       ! ??
+       cmm_z=intgden(1,iatom)-intgden(2,iatom) - spinat(3,iatom)
      end if
    endif
 
 !  Calculate the constraining potential for z-component of the mag. mom. vector
    v_constr_dft_coeffs(1,iatom)= 2*magcon_lambda*cmm_z
    v_constr_dft_coeffs(2,iatom)=-2*magcon_lambda*cmm_z
+
+ enddo ! iatom
  
 !Now compute the potential in real space
  call get_v_constr_dft_r(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ratsph, &
