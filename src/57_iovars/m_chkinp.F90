@@ -1399,7 +1399,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 #endif
 
 !  magconon
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'magconon',dt%magconon,3,(/0,1,2/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'magconon',dt%magconon,7,(/0,1,2,3,4,5,6/),iout)
 !!  impose nspden 4 for the moment and spinors
 !   if (dt%magconon == 1) then
 !     if (dt%nspinor /= 2 .or. dt%nspden /= 4) then

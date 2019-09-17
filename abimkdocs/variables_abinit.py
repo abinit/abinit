@@ -8809,11 +8809,11 @@ Variable(
     defaultval=0.01,
     mnemonics="MAGnetization CONstraint LAMBDA parameter",
     text=r"""
-This variable gives the amplitude of the constraint imposed on the
+This variable gives the amplitude of the penalty function imposed on the
 magnetization vectors on each atom (turned on with flag variable
-[[magconon]]). Typical values for [[magcon_lambda]] are 0.001 to 0.1. The SCF convergence
+[[magconon]]=1 to 3). Typical values for [[magcon_lambda]] are 0.001 to 0.1. The SCF convergence
 will be difficult if [[magcon_lambda]] is too large. If [[magcon_lambda]] is too small, the
-constraint will not be very effective and it will give magnetization not close
+penalty will not be very effective and it will give magnetization not close
 to the desired [[spinat]] target. In case of convergence problem, it can help
 to start with a small value of [[magcon_lambda]] and to increase it by reading the
 wavefunction obtained with a lower [[magcon_lambda]] value. See variable [[magconon]] for more details.
@@ -8829,13 +8829,17 @@ Variable(
     defaultval=0,
     mnemonics="turn MAGnetization CONstraint ON",
     text=r"""
-Turns on the imposition of a Lagrangian constraint on the magnetization. For
+Turns on the imposition of a constraint on the magnetization. For
 each atom, the magnetization is calculated in a sphere (radius [[ratsph]]) and
-a constraint is applied to bring it closer to the input values of [[spinat]].
-The constraint can be either on the direction only ([[magconon]] = 1) or on the full
-vector ([[magconon]] = 2). The Lagrangian constraint has an amplitude
+either a penalty function ([[magconon]] = 1 to 3) or a Lagrangian constraint ([[magconon]] = 4 to 6) 
+is applied to bring it to the input values of [[spinat]].
+The constraint can be either on the direction only ([[magconon]] = 1 or 4) or on the full
+vector ([[magconon]] = 2 or 5) or on the amplitude only ([[magconon]] = 3 or 6). 
+In case of the penalty function algorithm ([[magconon]] = 1 to 3), the penalty has an amplitude
 [[magcon_lambda]] which should be neither too big (bad or impossible
-convergence) nor too small (no effect).
+convergence) nor too small (no effect). The penalty function is documented in [[cite:Ma2015]] as being a Lagrange
+approach, which is a misnomer for the algorithm that they describe. It has the drawback of being unable to deliver
+the exact sought value for the magnetization. So, the true Lagrange approach has to be preferred, except for testing purposes.
 """,
 ),
 
