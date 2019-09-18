@@ -302,11 +302,12 @@ program anaddb
 !**********************************************************************
 !**********************************************************************
 
+ ! Get Quadrupole tensor
+ iblok = ddb%get_quadrupoles(crystal,3,qdrp_cart)
+
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
  iblok = ddb%get_dielt_zeff(crystal,inp%rfmeth,inp%chneut,inp%selectz,dielt,zeff)
- ! Get quadrupole tensor
- iblok = ddb%get_quadrupoles(crystal,3,qdrp_cart)
 
  ! Try to get dielt, in case just the DDE are present
  if (iblok == 0) then

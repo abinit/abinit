@@ -693,7 +693,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  call timab(1749, 1, tsec)
 
 !This is the minimum argument of an exponential, with some safety
- minexparg=log(tiny(0._dp))+100!five
+ minexparg=log(tiny(0._dp))+five
 
 #ifdef DEV_USESPLINE
  step = (0.1_dp + y2max - y2min) / (ny2_spline - 1)
