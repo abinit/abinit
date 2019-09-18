@@ -26,12 +26,13 @@ spinat2 0 0 3
 magconon3 1
 spinat3 0 3 0
 toldfe3 2.e-10
-prtvol3 1
+prtvol3 1   # Turn off printing of minimum magnetization location, because not portable
 
 # DS 4 constrained direction and amplitude, non collinear spin
 magconon4 2
 magcon_lambda4 0.01
 spinat4 0 1.5 0 
+prtvol4 1   # Turn off printing of minimum magnetization location, because not portable
 
 # DS 5 : no constraint, collinear spin
 magconon5 0
