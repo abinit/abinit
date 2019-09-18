@@ -26,6 +26,7 @@ spinat2 0 0 3
 magconon3 1
 spinat3 0 3 0
 toldfe3 2.e-10
+prtvol3 1
 
 # DS 4 constrained direction and amplitude, non collinear spin
 magconon4 2
