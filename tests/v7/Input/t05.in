@@ -88,7 +88,7 @@ rprim
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t05.out,      tolnlines = 4, tolabs = 2.0e-4, tolrel = 3.0e-3, fld_options = -easy
+#%%   t05.out,      tolnlines = 7, tolabs = 4.0e-4, tolrel = 7.0e-2, fld_options = -easy
 #%% psp_files = 26fe.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4
@@ -100,6 +100,6 @@ rprim
 #%%   along z (DS2), along y (DS3) and impose value of vector (DS4). Then work in the collinear case, unconstrained (DS5),
 #%%   with constrained direction (DS6), and constrained direction and value (DS7).
 #%%   Total energy in DS1, DS2, DS3 and DS5 are identical (good). Should be also identical in DS6 , but not the case at present.
-#%%   Under checking.
+#%%   Revised by XG
 #%% topics = spinpolarisation, MagMom
 #%%<END TEST_INFO>
