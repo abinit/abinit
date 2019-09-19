@@ -12,7 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <triqs/mpi/boost.hpp>
+//#include <triqs/mpi/boost.hpp>
 
 #if defined HAVE_TRIQS_v2_0
 #include <triqs/h5.hpp>
@@ -45,20 +45,29 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool hist,     /*boolean*/
                      std::complex<double> *f_iw_ptr,                /*pointers*/
                      std::complex<double> *g_iw_ptr,                /*pointers*/
                      double *g_tau, double *gl,                     /*pointers*/
-                     MPI_Fint *MPI_world_ptr ){                     /*pointers*/
+                     int rank ){                     /*pointers*/
+                     //MPI_Fint *MPI_world_ptr ){                     /*pointers*/
   
     cout.setf(ios::fixed);
     //Initialize Boost mpi environment
-    int rank, nprocs;
-    boost::mpi::environment env;
-    {
-        boost::mpi::communicator c;
-        c << MPI_Comm_f2c( *MPI_world_ptr );
-        rank=c.rank();
+    //int rank, nprocs;
+    //boost::mpi::environment env;
+    //{
+    //    boost::mpi::communicator c;
+    //    c << MPI_Comm_f2c( *MPI_world_ptr );
+    //    rank=c.rank();
 
-        MPI_Comm_size(c, &nprocs);
-        std::cout << "Number of processors: " << nprocs << endl;
-    }
+    //    MPI_Comm_size(c, &nprocs);
+    //    std::cout << "Number of processors: " << nprocs << endl;
+    //}
+    // std::cout << endl << "In Ctqmc_triqs_run, before MPI" << endl << endl;
+    // std::cout << endl << "MPI_world_ptr, *MPI_world_ptr, &MPI_world_ptr: "<<MPI_world_ptr<<", "<<*MPI_world_ptr<<", "<<&MPI_world_ptr<<endl<<endl;
+    // MPI_Comm c = MPI_Comm_f2c( *MPI_world_ptr );
+    // int rank, nprocs;
+    // MPI_Comm_rank(c, &rank);
+    // MPI_Comm_size(c, &nprocs);
+    // std::cout << "Number of processors: " << nprocs << endl;
+    std::cout << "Rank: "<< rank << endl;
   
     // Parameters relay from Fortran and default values affectation
     double beta = beta_;                //Temperature inverse 

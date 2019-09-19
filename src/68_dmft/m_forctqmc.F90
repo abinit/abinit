@@ -2595,12 +2595,16 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   !Calling interfaced TRIQS solver subroutine from src/01_triqs_ext package
   !----------------------------------------------------
 #if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
+ write(*,*) "Entering Ctqmc_triqs_run"
+ write(*,*) "paw_dmft%spacecomm: ", paw_dmft%spacecomm
+ write(*,*) "paw_dmft%myproc: ", paw_dmft%myproc
  call Ctqmc_triqs_run (     rot_inv, leg_measure, hist, wrt_files, tot_not,                            &
 &  nflavor, nfreq, ntau , nleg, int(paw_dmft%dmftqmc_n/paw_dmft%nproc),       &
 &  paw_dmft%dmftctqmc_meas*2*2*nflavor, paw_dmft%dmftqmc_therm,               &
 &  verbosity_solver, paw_dmft%dmftqmc_seed,beta,                              &
 &  levels_ptr,  u_mat_ij_ptr, u_mat_ijkl_ptr, fw1_nd_ptr,                     &
-&  g_iw_ptr, gtau_ptr, gl_ptr, paw_dmft%spacecomm                             )
+!&  g_iw_ptr, gtau_ptr, gl_ptr, paw_dmft%spacecomm                             )
+&  g_iw_ptr, gtau_ptr, gl_ptr, paw_dmft%myproc                             )
 #endif
 
   !WRITE(*,*) "Hello Debug"
