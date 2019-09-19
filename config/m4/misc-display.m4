@@ -43,12 +43,12 @@ test "${abi_linalg_flavor}" = "none" -o \
   tmp_rep_linalg_libs="ignored"
 
 # FFT
-if test "${with_fft_libs}" = ""; then
+if test "${sd_fft_init}" = "def"; then
   tmp_rep_fft_libs="auto-detected"
 else
   tmp_rep_fft_libs="user-defined"
 fi
-test "${abi_fft_flavor}" = "none" -o "${abi_fft_flavor}" = "abinit" && \
+test "${sd_fft_flavor}" = "none" && \
   tmp_rep_fft_libs="ignored"
 
 # Display values of important configure options and ending message
@@ -69,7 +69,7 @@ Core build parameters
   * MPI-IO enabled   : ${abi_mpi_io_enable}
   * GPU    enabled   : ${abi_gpu_enable} (flavor: ${abi_gpu_flavor})
 
-  * FFT flavor       : ${abi_fft_flavor} (libs: ${tmp_rep_fft_libs})
+  * FFT flavor       : ${sd_fft_flavor} (libs: ${tmp_rep_fft_libs})
   * LINALG flavor    : ${abi_linalg_flavor} (libs: ${tmp_rep_linalg_libs})
 
 

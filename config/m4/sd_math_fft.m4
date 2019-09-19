@@ -16,14 +16,16 @@ AC_DEFUN([SD_FFT_INIT], [
   sd_fft_fcflags=""
   sd_fft_ldflags=""
   sd_fft_libs=""
+  sd_fft_enable=""
   sd_fft_flavor=""
   sd_fft_init="unknown"
   sd_fft_ok="unknown"
 
   # Set adjustable parameters
+  # FIXME: policy and status are hard-coded for now
   sd_fft_choices="$1"
-  sd_fft_policy=""
-  sd_fft_status=""
+  sd_fft_policy="skip"
+  sd_fft_status="optional"
 
   # Check that proposed choices are valid
   sd_fft_valid_choices="fftw3 mkl pfft"
@@ -50,6 +52,7 @@ AC_DEFUN([SD_FFT_INIT], [
       sd_fft_enable_def="yes"
       ;;
   esac
+  sd_fft_enable="${sd_fft_enable_def}"
 
   # Declare configure option
   sd_fft_help_choices=`echo "${sd_fft_choices}" | sed -e 's/[ ]*/, /g'`
@@ -120,6 +123,9 @@ AC_DEFUN([SD_FFT_SELECT_FLAVOR], [
                     --with-fft-flavor option.])
       fi
       ;;
+    mkl)
+      AC_MSG_WARN([ignored FFT flavor: 'mkl'])
+      ;;
     pfft)
       SD_PFFT_DETECT
       if test "${sd_pfft_ok}" = "yes"; then
@@ -135,11 +141,10 @@ AC_DEFUN([SD_FFT_SELECT_FLAVOR], [
                     --with-fft-flavor option.])
       fi
       ;;
-    mkl)
-      AC_MSG_WARN([ignored FFT flavor: 'mkl'])
-      ;;
     *)
-      AC_MSG_ERROR([unsupported FFT flavor: '${sd_fft_flavor}'])
+      if test "${sd_fft_flavor}" != "none"; then
+        AC_MSG_ERROR([unsupported FFT flavor: '${sd_fft_flavor}'])
+      fi
       ;;
   esac
   sd_fft_ok="yes"
