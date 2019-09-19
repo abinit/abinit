@@ -138,7 +138,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  !scalars
  integer,parameter :: cplex1=1,formeig=0,response=1
  integer :: ask_accurate,bantot,coredens_method,gscase,iatom,idir,ierr,indx,ipert,ireadwf0,iscf_eff,itypat
- integer :: mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim,mk1mem
+ integer :: mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
  integer :: mpert,my_natom,nkxc,nk3xc,ntypat,n3xccc
  integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,sumg0,timrev,tim_mkrho,usexcnhat
  real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,gsqcut_eff,gsqcutc_eff,residm
