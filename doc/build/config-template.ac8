@@ -796,6 +796,36 @@
 
                        # ------------------------------ #
 
+# Install prefix for the DFTI library
+#
+#with_dfti="/usr/local"
+
+# C preprocessor flags for the DFTI library (default is unset)
+#
+#DFTI_CPPFLAGS="-I/usr/local/include/fftw"
+
+# C flags for the DFTI library (default is unset)
+#
+#DFTI_CFLAGS="-I/usr/local/include/fftw"
+
+# Fortran flags for the DFTI library (default is unset)
+#
+#DFTI_FCFLAGS="-I/usr/local/include/fftw"
+
+# Link flags for the DFTI library (default is unset)
+#
+#DFTI_LDFLAGS="-L/usr/local/lib/fftw -ldfti"
+
+# Library flags for the DFTI library (default is unset)
+#
+#DFTI_LIBS="-L/usr/local/lib/fftw -ldfti"
+
+                       # ------------------------------ #
+
+# Install prefix for the FFTW3 library
+#
+#with_fftw3="/usr/local"
+
 # C preprocessor flags for the FFTW3 library (default is unset)
 #
 #FFTW3_CPPFLAGS="-I/usr/local/include/fftw"
@@ -817,6 +847,10 @@
 #FFTW3_LIBS="-L/usr/local/lib/fftw -lfftw3"
 
                        # ------------------------------ #
+
+# Install prefix for the PFFT library
+#
+#with_pfft="/usr/local"
 
 # C preprocessor flags for the PFFT library (default is unset)
 #
@@ -910,6 +944,10 @@
 #
 #LEVMAR_CFLAGS="-I/opt/etsf/include"
 
+# Fortran flags for Levmar (default is unset)
+#
+#LEVMAR_FCFLAGS="-I/opt/etsf/include"
+
 # Link flags for Levmar (default is unset)
 #
 #LEVMAR_LDFLAGS=""
@@ -963,6 +1001,10 @@
 # C flags for LibXML2 (default is unset)
 #
 #LIBXML2_CFLAGS="-I/usr/local/include"
+
+# Fortran flags for LibXML2 (default is unset)
+#
+#LIBXML2_FCFLAGS="-I/usr/local/include"
 
 # Link flags for the LibXML2 library (default is unset)
 #
@@ -1039,7 +1081,11 @@
 
 # C++ flags for the TRIQS library (default is unset)
 #
-#TRIQS_CXXFLAGS="-I/usr/local/triqs/include -I/usr/local/cthyb/src/c++/"
+#TRIQS_CXXFLAGS="-I/usr/local/triqs/include -I/usr/local/cthyb/src/c++"
+
+# Fortran flags for the TRIQS library (default is unset)
+#
+#TRIQS_FCFLAGS="-I/usr/local/triqs/include -I/usr/local/cthyb/src/c++"
 
 # Link flags for the TRIQS library (default is unset)
 #
@@ -1104,6 +1150,10 @@
 # C flags for the PAPI library (default is unset)
 #
 #PAPI_CFLAGS="-I/usr/local/include/papi"
+
+# Fortran flags for the PAPI library (default is unset)
+#
+#PAPI_FCFLAGS="-I/usr/local/include/papi"
 
 # Link flags for the PAPI library (default is unset)
 #

@@ -30,11 +30,13 @@ class MyConfigParser(ConfigParser):
 
 env_ignore = ["DEFS", "LIBS"]
 opt_ignore = [
-  "enable_config_file",
   "fcflags_opt_.*",
-  "group_.*",
   "prefix",
-  "with_config_file"]
+  "with_config_file",
+  "with_fft_flavor",
+  "with_gpu_flavor",
+  "with_mpi_flavor",
+]
 val_ignore = [".*-fallback"]
 
 def is_ignored(keyword):
@@ -80,7 +82,7 @@ def main():
   assert os.path.exists(depconf_path)
   cnf_dep.read(depconf_path)
   for dep in cnf_dep.sections():
-    env_config += ["%s_%s" % (dep.upper(), item) for item in ["LDFLAGS", "LIBS"]]
+    env_config += ["%s_%s" % (dep.upper(), item) for item in ["FCFLAGS", "LDFLAGS", "LIBS"]]
     langs = cnf_dep.get(dep, "languages").split()
     if ( "c" in langs ):
       env_config += ["%s_%s" % (dep.upper(), item) for item in ["CPPFLAGS", "CFLAGS"]]

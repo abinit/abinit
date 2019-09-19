@@ -101,6 +101,21 @@ AC_DEFUN([SD_FFT_DETECT], [
   AC_MSG_CHECKING([for the FFT flavor to use])
   AC_MSG_RESULT([${sd_fft_flavor}])
   case "${sd_fft_flavor}" in
+    dfti)
+      SD_DFTI_DETECT
+      if test "${sd_dfti_ok}" = "yes"; then
+        sd_fft_cppflags="${sd_dfti_cppflags}"
+        sd_fft_cflags="${sd_dfti_cflags}"
+        sd_fft_fcflags="${sd_dfti_fcflags}"
+        sd_fft_ldflags="${sd_dfti_ldflags}"
+        sd_fft_libs="${sd_dfti_libs}"
+      else
+        AC_MSG_ERROR([DFTI is not available
+                    Please adjust configure options to point to a working DFTI
+                    installation or change the requested FFT flavor through the
+                    --with-fft-flavor option.])
+      fi
+      ;;
     fftw3)
       SD_FFTW3_DETECT
       if test "${sd_fftw3_ok}" = "yes"; then

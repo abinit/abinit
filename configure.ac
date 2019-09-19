@@ -101,7 +101,6 @@ ABI_OPTIONS_DEFINE
 # Read config file and ensure that priorities are respected
 ABI_ENV_BACKUP
 ABI_OPTIONS_BACKUP
-test "${enable_config_file}" = "" && enable_config_file="yes"
 ABI_LOAD_OPTIONS
 ABI_OPTIONS_RECALL
 ABI_ENV_RECALL
@@ -666,6 +665,9 @@ ABI_MSG_SECTION([Initialization of optional features])
 # Initialize linear algebra support, using the available information
 # Init BigDFT
 SD_BIGDFT_INIT([optional fail])
+
+# Init DFTI
+SD_DFTI_INIT([optional skip])
 
 # Init FFTW3
 SD_FFTW3_INIT([optional skip])
