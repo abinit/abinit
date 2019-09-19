@@ -88,12 +88,13 @@ AC_DEFUN([SD_FFTW3_INIT], [
   # Declare environment variables
   AC_ARG_VAR([FFTW3_CPPFLAGS], [C preprocessing flags for FFTW3.])
   AC_ARG_VAR([FFTW3_CFLAGS], [C flags for FFTW3.])
+  AC_ARG_VAR([FFTW3_FCFLAGS], [Fortran flags for FFTW3.])
   AC_ARG_VAR([FFTW3_LDFLAGS], [Linker flags for FFTW3.])
   AC_ARG_VAR([FFTW3_LIBS], [Library flags for FFTW3.])
 
   # Detect use of environment variables
   if test "${sd_fftw3_enable}" = "yes" -o "${sd_fftw3_enable}" = "auto"; then
-    tmp_fftw3_vars="${FFTW3_CPPFLAGS}${FFTW3_CFLAGS}${FFTW3_LDFLAGS}${FFTW3_LIBS}"
+    tmp_fftw3_vars="${FFTW3_CPPFLAGS}${FFTW3_CFLAGS}${FFTW3_FCFLAGS}${FFTW3_LDFLAGS}${FFTW3_LIBS}"
     if test "${sd_fftw3_init}" = "def" -a ! -z "${tmp_fftw3_vars}"; then
       sd_fftw3_enable="yes"
       sd_fftw3_init="env"
@@ -113,6 +114,7 @@ AC_DEFUN([SD_FFTW3_INIT], [
       def|yon)
         sd_fftw3_cppflags="${sd_fftw3_cppflags_def}"
         sd_fftw3_cflags="${sd_fftw3_cflags_def}"
+        sd_fftw3_fcflags="${sd_fftw3_fcflags_def}"
         sd_fftw3_ldflags="${sd_fftw3_ldflags_def}"
         sd_fftw3_libs="${sd_fftw3_libs_def}"
         ;;
@@ -120,6 +122,7 @@ AC_DEFUN([SD_FFTW3_INIT], [
       dir)
         sd_fftw3_cppflags="-I${with_fftw3}/include"
         sd_fftw3_cflags="${sd_fftw3_cflags_def}"
+        sd_fftw3_fcflags="${sd_fftw3_fcflags_def}"
         sd_fftw3_ldflags="${sd_fftw3_ldflags_def}"
         sd_fftw3_libs="-L${with_fftw3}/lib ${sd_fftw3_libs_def}"
         ;;
@@ -127,10 +130,12 @@ AC_DEFUN([SD_FFTW3_INIT], [
       env)
         sd_fftw3_cppflags="${sd_fftw3_cppflags_def}"
         sd_fftw3_cflags="${sd_fftw3_cflags_def}"
+        sd_fftw3_fcflags="${sd_fftw3_fcflags_def}"
         sd_fftw3_ldflags="${sd_fftw3_ldflags_def}"
         sd_fftw3_libs="${sd_fftw3_libs_def}"
         test ! -z "${FFTW3_CPPFLAGS}" && sd_fftw3_cppflags="${FFTW3_CPPFLAGS}"
         test ! -z "${FFTW3_CFLAGS}" && sd_fftw3_cflags="${FFTW3_CFLAGS}"
+        test ! -z "${FFTW3_FCFLAGS}" && sd_fftw3_fcflags="${FFTW3_FCFLAGS}"
         test ! -z "${FFTW3_LDFLAGS}" && sd_fftw3_ldflags="${FFTW3_LDFLAGS}"
         test ! -z "${FFTW3_LIBS}" && sd_fftw3_libs="${FFTW3_LIBS}"
         ;;
@@ -150,6 +155,7 @@ AC_DEFUN([SD_FFTW3_INIT], [
     sd_fftw3_init="esl"
     sd_fftw3_cppflags=""
     sd_fftw3_cflags=""
+    sd_fftw3_fcflags=""
     sd_fftw3_ldflags=""
     sd_fftw3_libs=""
   fi
@@ -167,6 +173,7 @@ AC_DEFUN([SD_FFTW3_INIT], [
   AC_SUBST(sd_fftw3_ok)
   AC_SUBST(sd_fftw3_cppflags)
   AC_SUBST(sd_fftw3_cflags)
+  AC_SUBST(sd_fftw3_fcflags)
   AC_SUBST(sd_fftw3_ldflags)
   AC_SUBST(sd_fftw3_libs)
   AC_SUBST(with_fftw3)
@@ -201,6 +208,7 @@ AC_DEFUN([SD_FFTW3_DETECT], [
         sd_fftw3_enable="no"
         sd_fftw3_cppflags=""
         sd_fftw3_cflags=""
+        sd_fftw3_fcflags=""
         sd_fftw3_ldflags=""
         sd_fftw3_libs=""
       else
@@ -211,6 +219,7 @@ AC_DEFUN([SD_FFTW3_DETECT], [
     sd_fftw3_enable="no"
     sd_fftw3_cppflags=""
     sd_fftw3_cflags=""
+    sd_fftw3_fcflags=""
     sd_fftw3_ldflags=""
     sd_fftw3_libs=""
   fi
@@ -235,6 +244,7 @@ AC_DEFUN([_SD_FFTW3_CHECK_USE], [
   else
     CPPFLAGS="${CPPFLAGS} ${sd_fftw3_cppflags}"
     CFLAGS="${CFLAGS} ${sd_fftw3_cflags}"
+    FCFLAGS="${FCFLAGS} ${sd_fftw3_fcflags}"
     LDFLAGS="${LDFLAGS} ${sd_fftw3_ldflags}"
     LIBS="${sd_fftw3_libs} ${LIBS}"
   fi
@@ -402,6 +412,7 @@ AC_DEFUN([_SD_FFTW3_CHECK_CONFIG], [
   if test "${sd_fftw3_enable}" = "implicit"; then
     sd_fftw3_cppflags=""
     sd_fftw3_cflags=""
+    sd_fftw3_fcflags=""
     sd_fftw3_ldflags=""
     sd_fftw3_libs=""
   fi
@@ -429,6 +440,12 @@ AC_DEFUN([_SD_FFTW3_DUMP_CONFIG], [
       AC_MSG_RESULT([none])
     else
       AC_MSG_RESULT([${sd_fftw3_cflags}])
+    fi
+    AC_MSG_CHECKING([for FFTW3 Fortran flags])
+    if test "${sd_fftw3_fcflags}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${sd_fftw3_fcflags}])
     fi
     AC_MSG_CHECKING([for FFTW3 linker flags])
     if test "${sd_fftw3_ldflags}" = ""; then

@@ -22,6 +22,8 @@ AC_DEFUN([SD_FFT_INIT], [
   sd_fft_ok="unknown"
 
   # Set adjustable parameters
+  # FIXME: choices could be defined dynamically depending on which libraries
+  #        have been initialized
   # FIXME: policy and status are hard-coded for now
   sd_fft_choices="$1"
   sd_fft_policy="skip"
@@ -76,15 +78,6 @@ AC_DEFUN([SD_FFT_INIT], [
   # Display configuration
   _SD_FFT_DUMP_CONFIG
 
-  # Init packages for permitted flavors
-  tmp_auto_option=""
-  if test "${sd_fft_flavor}" != "none"; then
-    tmp_auto_option=`echo "${sd_fft_enable_def}" | grep "auto"`
-  fi
-  SD_FFTW3_INIT([${tmp_auto_option} optional skip])
-  SD_PFFT_INIT([${tmp_auto_option} optional skip])
-  unset tmp_auto_option
-
   # Export configuration
   AC_SUBST(sd_fft_cppflags)
   AC_SUBST(sd_fft_cflags)
@@ -104,7 +97,7 @@ AC_DEFUN([SD_FFT_INIT], [
                     # ------------------------------------ #
 
 
-AC_DEFUN([SD_FFT_SELECT_FLAVOR], [
+AC_DEFUN([SD_FFT_DETECT], [
   AC_MSG_CHECKING([for the FFT flavor to use])
   AC_MSG_RESULT([${sd_fft_flavor}])
   case "${sd_fft_flavor}" in
@@ -148,7 +141,7 @@ AC_DEFUN([SD_FFT_SELECT_FLAVOR], [
       ;;
   esac
   sd_fft_ok="yes"
-]) # SD_FFT_SELECT_FLAVOR
+]) # SD_FFT_DETECT
 
 
                     # ------------------------------------ #
