@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file 
- sed -e 's!Vmagconstr!v_constr_dft_r!' $file > tmp.file
+ sed -e 's!mag_constr!mag_penalty!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file

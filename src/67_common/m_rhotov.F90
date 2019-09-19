@@ -43,7 +43,7 @@ module m_rhotov
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype, rhohxcpositron
  use libxc_functionals,  only : libxc_functionals_is_hybrid
  use m_spacepar,         only : hartre
- use m_dens,             only : mag_constr
+ use m_dens,             only : mag_penalty
  use m_rhotoxc,          only : rhotoxc
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_psolver,          only : psolver_rhohxc
@@ -155,7 +155,7 @@ contains
 !!      scfcv
 !!
 !! CHILDREN
-!!      dotprod_vn,hartre,mag_constr,mean_fftr,psolver_rhohxc,rhohxcpositron
+!!      dotprod_vn,hartre,mag_penalty,mean_fftr,psolver_rhohxc,rhohxcpositron
 !!      rhotoxc,sqnorm_v,timab,wvl_psitohpsi,wvl_vtrial_abi2big,xcdata_init
 !!      xchybrid_ncpp_cc,xred2xcart
 !!
@@ -450,7 +450,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  ABI_ALLOCATE(v_constr_dft_r, (nfft,dtset%nspden))
  if (dtset%magconon==1.or.dtset%magconon==2) then
    v_constr_dft_r = zero
-   call mag_constr(dtset%natom,dtset%spinat,dtset%nspden,dtset%magconon,dtset%magcon_lambda,rprimd, &
+   call mag_penalty(dtset%natom,dtset%spinat,dtset%nspden,dtset%magconon,dtset%magcon_lambda,rprimd, &
 &   mpi_enreg,nfft,ngfft,dtset%ntypat,dtset%ratsph,rhor,dtset%typat,v_constr_dft_r,xred)
  else
 !  NOTE: mjv 25 May 2013 added this for ibm6 - otherwise gives NaN in vnew after

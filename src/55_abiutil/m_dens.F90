@@ -42,10 +42,12 @@ MODULE m_dens
 
  private
 
- public :: dens_hirsh      ! Compute the Hirshfeld charges
- public :: mag_constr      ! Compute the potential corresponding to constrained magnetic moments.
- public :: mag_constr_e    ! Compute the energy corresponding to constrained magnetic moments.
- public :: calcdensph      ! Compute and print integral of total density inside spheres around atoms.
+ public :: dens_hirsh              ! Compute the Hirshfeld charges
+ public :: get_v_constr_dft_r      ! Compute the constraining potential (constrained DFT) from constraint parameters
+ public :: mag_penalty             ! Compute the potential corresponding to constrained magnetic moments (using get_v_constr_dft_r) with the penalty function.
+ public :: mag_constr              ! Compute the potential corresponding to constrained magnetic moments.
+ public :: mag_penalty_e           ! Compute the energy corresponding to constrained magnetic moments.
+ public :: calcdensph              ! Compute and print integral of total density inside spheres around atoms.
 !!***
 
 contains
@@ -981,9 +983,9 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
 end subroutine mag_constr
 !!***
 
-!!****f* m_dens/mag_constr_e
+!!****f* m_dens/mag_penalty_e
 !! NAME
-!! mag_constr_e
+!! mag_penalty_e
 !!
 !! FUNCTION
 !! Compute the energy corresponding to constrained magnetic moments.
@@ -1007,7 +1009,7 @@ end subroutine mag_constr
 !! SOURCE
 
 
-subroutine mag_constr_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsph,rhor,rprimd,spinat,typat,xred)
+subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsph,rhor,rprimd,spinat,typat,xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -1129,7 +1131,7 @@ subroutine mag_constr_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspden
 
  ABI_DEALLOCATE (intgden)
 
-end subroutine mag_constr_e
+end subroutine mag_penalty_e
 !!***
 
 !!****f* m_dens/calcdensph
@@ -1164,7 +1166,7 @@ end subroutine mag_constr_e
 !!  Rest is printing
 !!
 !! PARENTS
-!!      dfpt_scfcv,mag_constr,mag_constr_e,outscfcv
+!!      dfpt_scfcv,mag_penalty,mag_constr_e,outscfcv
 !!
 !! CHILDREN
 !!      timab,wrtout,xmpi_sum

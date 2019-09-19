@@ -47,7 +47,7 @@ module m_setvtr
  use m_pawtab,            only : pawtab_type
  use m_jellium,           only : jellium
  use m_spacepar,          only : hartre
- use m_dens,              only : mag_constr
+ use m_dens,              only : mag_penalty
  use m_vdw_dftd2,         only : vdw_dftd2
  use m_vdw_dftd3,         only : vdw_dftd3
  use m_atm2fft,           only : atm2fft
@@ -189,7 +189,7 @@ contains
 !!
 !! CHILDREN
 !!      atm2fft,denspot_set_history,dotprod_vn,ewald,hartre,ionion_realspace
-!!      ionion_surface,jellium,mag_constr,mkcore,mkcore_alt,mkcore_wvl,mklocl
+!!      ionion_surface,jellium,mag_penalty,mkcore,mkcore_alt,mkcore_wvl,mklocl
 !!      psolver_rhohxc,rhohxcpositron,rhotoxc,spatialchempot,timab,vdw_dftd2
 !!      vdw_dftd3,wvl_psitohpsi,wvl_vtrial_abi2big,xcdata_init,xchybrid_ncpp_cc
 !!      xred2xcart
@@ -690,7 +690,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  if (dtset%magconon==1.or.dtset%magconon==2) then
    ABI_ALLOCATE(v_constr_dft_r, (nfft,dtset%nspden))
    v_constr_dft_r = zero
-   call mag_constr(dtset%natom,dtset%spinat,dtset%nspden,dtset%magconon,dtset%magcon_lambda,rprimd, &
+   call mag_penalty(dtset%natom,dtset%spinat,dtset%nspden,dtset%magconon,dtset%magcon_lambda,rprimd, &
 &   mpi_enreg,nfft,ngfft,dtset%ntypat,dtset%ratsph,rhor,dtset%typat,v_constr_dft_r,xred)
    if(dtset%nspden==4)then
      do ispden=1,dtset%nspden ! (SPr: both components should be used? EB: Yes it should be the case, corrected now)
