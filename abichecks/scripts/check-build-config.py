@@ -28,7 +28,7 @@ class MyConfigParser(ConfigParser):
     return str(option)
 
 
-env_ignore = ["DEFS"]
+env_ignore = ["DEFS", "LIBS"]
 opt_ignore = [
   "enable_config_file",
   "fcflags_opt_.*",
