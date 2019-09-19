@@ -2785,7 +2785,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 !Sum the G=0 contribution to the geometric term of the first 
 !q-gradient of the internal !strain tensor
  if (lw_flexo==1.or.lw_flexo==4) then
-    fac=two_pi*pi
+   fac=pi*pi
 
    !LOOP OVER ATOMIC DISPLACEMENT PERTURBATIONS
    do iatpert=1,natpert
