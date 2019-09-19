@@ -108,7 +108,6 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
  real(dp) :: aa,bb,coeff1,coeff2,coeff3,den,factor,h_inv,hh,maxrad
  real(dp) :: rr,rr2,total_charge,total_weight,total_zion,ucvol
  real(dp) :: yp1,ypn
- !character(len=500) :: msg
 !arrays
  integer :: highest(3),lowest(3)
  integer,allocatable :: ncells(:)
@@ -775,7 +774,7 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
  real(dp), allocatable :: intgden(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),ucvol
  real(dp) :: spinat_norm(3,natom)
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *********************************************************************
 
@@ -853,25 +852,25 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
      lVp=lVp+2*magcon_lambda*(intmm(1)*mag_1atom(1)+intmm(2)*mag_1atom(2)+intmm(3)*mag_1atom(3))
    end if
 
-   write(message, *) 'atom             constraining magnetic field'
-   call wrtout(std_out,message,'COLL')
-   write(message, '(I3,A2,E12.5,A2,E12.5,A2,E12.5)') &
+   write(msg, *) 'atom             constraining magnetic field'
+   call wrtout(std_out,msg,'COLL')
+   write(msg, '(I3,A2,E12.5,A2,E12.5,A2,E12.5)') &
    iatom,'  ',magcon_lambda*intmm(1),'  ',magcon_lambda*intmm(2),'  ',magcon_lambda*intmm(3)
-   call wrtout(std_out,message,'COLL')
+   call wrtout(std_out,msg,'COLL')
 
 !  End loop over atoms
 !  -------------------------------------------
  end do
 
 !Printing
- write(message, '(A17,E10.3)' ) ' magcon_lambda    = ',magcon_lambda
- call wrtout(std_out,message,'COLL')
- write(message, '(A17,E12.5)' ) ' Lagrange penalty = ',Epen
- call wrtout(std_out,message,'COLL')
- write(message, '(A17,E12.5)' ) ' E_constraint     = ',Econstr
- call wrtout(std_out,message,'COLL')
- write(message, '(A17,E12.5)' ) ' lVp = ',lVp
- call wrtout(std_out,message,'COLL')
+ write(msg, '(A17,E10.3)' ) ' magcon_lambda    = ',magcon_lambda
+ call wrtout(std_out,msg,'COLL')
+ write(msg, '(A17,E12.5)' ) ' Lagrange penalty = ',Epen
+ call wrtout(std_out,msg,'COLL')
+ write(msg, '(A17,E12.5)' ) ' E_constraint     = ',Econstr
+ call wrtout(std_out,msg,'COLL')
+ write(msg, '(A17,E12.5)' ) ' lVp = ',lVp
+ call wrtout(std_out,msg,'COLL')
 
  ABI_DEALLOCATE (intgden)
 
@@ -941,13 +940,11 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
 !Local variables ------------------------------
 !scalars
  integer,parameter :: ishift=5
- integer :: i1,i2,i3,iatom,ierr,ifft_local,ix,iy,iz,izloc,n1,n1a,n1b,n2,ifft
+ integer :: ii,i1,i2,i3,iatom,ierr,ifft_local,ix,iy,iz,izloc,jatom,n1,n1a,n1b,n2,ifft
  integer :: n2a,n2b,n3,n3a,n3b,nfftot
- integer :: ii
-!integer :: is,npts(natom)
  integer :: cmplex_den,jfft
  real(dp),parameter :: delta=0.99_dp
- real(dp) :: difx,dify,difz,r2,r2atsph,rr1,rr2,rr3,rx,ry,rz
+ real(dp) :: difx,dify,difz,dist_ij,r2,r2atsph,rr1,rr2,rr3,rx,ry,rz
  real(dp) :: fsm, ratsm, ratsm2
  real(dp) :: mag_coll   , mag_x, mag_y, mag_z ! EB
  real(dp) :: mag_coll_im, mag_x_im, mag_y_im, mag_z_im ! SPr
@@ -955,7 +952,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  real(dp) :: rho_tot, rho_tot_im
 ! real(dp) :: rho_up,rho_dn,rho_tot !EB
  logical   :: grid_found
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: intgden_(nspden,natom),tsec(2), my_xred(3, natom), xshift(3, natom)
@@ -1229,177 +1226,177 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  if(prtopt==1) then
 
    if(nspden==1) then
-     write(message, '(4a)' ) &
+     write(msg, '(4a)' ) &
 &     ' Integrated electronic density in atomic spheres:',ch10,&
 &     ' ------------------------------------------------'
-     call wrtout(nunit,message,'COLL')
-     write(message, '(a)' ) ' Atom  Sphere_radius  Integrated_density'
-     call wrtout(nunit,message,'COLL')
+     call wrtout(nunit,msg,'COLL')
+     write(msg, '(a)' ) ' Atom  Sphere_radius  Integrated_density'
+     call wrtout(nunit,msg,'COLL')
      do iatom=1,natom
-       write(message, '(i5,f15.5,f20.8)' ) iatom,ratsph(typat(iatom)),intgden_(1,iatom)
-       call wrtout(nunit,message,'COLL')
+       write(msg, '(i5,f15.5,f20.8)' ) iatom,ratsph(typat(iatom)),intgden_(1,iatom)
+       call wrtout(nunit,msg,'COLL')
      end do
    elseif(nspden==2) then
-     write(message, '(4a)' ) &
+     write(msg, '(4a)' ) &
 &     ' Integrated electronic and magnetization densities in atomic spheres:',ch10,&
 &     ' ---------------------------------------------------------------------'
-     call wrtout(nunit,message,'COLL')
-     write(message, '(3a)' ) ' Note: Diff(up-dn) is a rough ',&
+     call wrtout(nunit,msg,'COLL')
+     write(msg, '(3a)' ) ' Note: Diff(up-dn) is a rough ',&
 &     'approximation of local magnetic moment'
-     call wrtout(nunit,message,'COLL')
-     write(message, '(a)' ) ' Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)'
-     call wrtout(nunit,message,'COLL')
+     call wrtout(nunit,msg,'COLL')
+     write(msg, '(a)' ) ' Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)'
+     call wrtout(nunit,msg,'COLL')
      do iatom=1,natom
-       write(message, '(i5,f10.5,2f13.6,a,f12.6,a,f12.6)' ) iatom,ratsph(typat(iatom)),intgden_(1,iatom),intgden_(2,iatom),&
+       write(msg, '(i5,f10.5,2f13.6,a,f12.6,a,f12.6)' ) iatom,ratsph(typat(iatom)),intgden_(1,iatom),intgden_(2,iatom),&
 &       '  ',(intgden_(1,iatom)+intgden_(2,iatom)),' ',(intgden_(1,iatom)-intgden_(2,iatom))
-       call wrtout(nunit,message,'COLL')
+       call wrtout(nunit,msg,'COLL')
        ! Compute the sum of the magnetization
        sum_mag=sum_mag+intgden_(1,iatom)-intgden_(2,iatom)
        sum_rho_up=sum_rho_up+intgden_(1,iatom)
        sum_rho_dn=sum_rho_dn+intgden_(2,iatom)
        sum_rho_tot=sum_rho_tot+intgden_(1,iatom)+intgden_(2,iatom)
      end do
-     write(message, '(a)') ' ---------------------------------------------------------------------'
-     call wrtout(nunit,message,'COLL')
-     write(message, '(a,2f13.6,a,f12.6,a,f12.6)') '  Sum:         ', sum_rho_up,sum_rho_dn,'  ',sum_rho_tot,' ',sum_mag
-     call wrtout(nunit,message,'COLL')
-     write(message, '(a,f14.6)') ' Total magnetization (from the atomic spheres):       ', sum_mag
-     call wrtout(nunit,message,'COLL')
-     write(message, '(a,f14.6)') ' Total magnetization (exact up - dn):                 ', mag_coll
-     call wrtout(nunit,message,'COLL')
+     write(msg, '(a)') ' ---------------------------------------------------------------------'
+     call wrtout(nunit,msg,'COLL')
+     write(msg, '(a,2f13.6,a,f12.6,a,f12.6)') '  Sum:         ', sum_rho_up,sum_rho_dn,'  ',sum_rho_tot,' ',sum_mag
+     call wrtout(nunit,msg,'COLL')
+     write(msg, '(a,f14.6)') ' Total magnetization (from the atomic spheres):       ', sum_mag
+     call wrtout(nunit,msg,'COLL')
+     write(msg, '(a,f14.6)') ' Total magnetization (exact up - dn):                 ', mag_coll
+     call wrtout(nunit,msg,'COLL')
    ! EB for testing purpose print rho_up, rho_dn and rho_tot
-!    write(message, '(a,3f14.4,2i8)') ' rho_up, rho_dn, rho_tot, nfftot, nfft: ', rho_up,rho_dn,rho_tot,nfft,nfft
-!   call wrtout(nunit,message,'COLL')
+!    write(msg, '(a,3f14.4,2i8)') ' rho_up, rho_dn, rho_tot, nfftot, nfft: ', rho_up,rho_dn,rho_tot,nfft,nfft
+!   call wrtout(nunit,msg,'COLL')
 
    elseif(nspden==4) then
 
-     write(message, '(4a)' ) &
+     write(msg, '(4a)' ) &
 &     ' Integrated electronic and magnetization densities in atomic spheres:',ch10,&
 &     ' ---------------------------------------------------------------------'
-     call wrtout(nunit,message,'COLL')
-     write(message, '(3a)' ) ' Note:      this is a rough approximation of local magnetic moments'
-     call wrtout(nunit,message,'COLL')
-     write(message, '(a)' ) ' Atom   Radius      Total density     mag(x)      mag(y)      mag(z)  '
-     call wrtout(nunit,message,'COLL')
+     call wrtout(nunit,msg,'COLL')
+     write(msg, '(3a)' ) ' Note:      this is a rough approximation of local magnetic moments'
+     call wrtout(nunit,msg,'COLL')
+     write(msg, '(a)' ) ' Atom   Radius      Total density     mag(x)      mag(y)      mag(z)  '
+     call wrtout(nunit,msg,'COLL')
      do iatom=1,natom
-       write(message, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),intgden_(1,iatom),'  ',(intgden_(ix,iatom),ix=2,4)
-       call wrtout(nunit,message,'COLL')
+       write(msg, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),intgden_(1,iatom),'  ',(intgden_(ix,iatom),ix=2,4)
+       call wrtout(nunit,msg,'COLL')
        ! Compute the sum of the magnetization in x, y and z directions
        sum_mag_x=sum_mag_x+intgden_(2,iatom)
        sum_mag_y=sum_mag_y+intgden_(3,iatom)
        sum_mag_z=sum_mag_z+intgden_(4,iatom)
      end do
-     write(message, '(a)') ' ---------------------------------------------------------------------'
-     call wrtout(nunit,message,'COLL')
-!    write(message, '(a,f12.6,f12.6,f12.6)') ' Total magnetization :           ', sum_mag_x,sum_mag_y,sum_mag_z
-     write(message, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (spheres)   ', sum_mag_x,sum_mag_y,sum_mag_z
-     call wrtout(nunit,message,'COLL')
-     write(message, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (exact)     ', mag_x,mag_y,mag_z
-     call wrtout(nunit,message,'COLL')
+     write(msg, '(a)') ' ---------------------------------------------------------------------'
+     call wrtout(nunit,msg,'COLL')
+!    write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization :           ', sum_mag_x,sum_mag_y,sum_mag_z
+     write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (spheres)   ', sum_mag_x,sum_mag_y,sum_mag_z
+     call wrtout(nunit,msg,'COLL')
+     write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (exact)     ', mag_x,mag_y,mag_z
+     call wrtout(nunit,msg,'COLL')
 !    SPr for dfpt debug
-!    write(message, '(a,f12.6)') ' Total density (exact)           ', rho_tot
-!   call wrtout(nunit,message,'COLL')
+!    write(msg, '(a,f12.6)') ' Total density (exact)           ', rho_tot
+!   call wrtout(nunit,msg,'COLL')
    end if
 
  elseif(prtopt==-1) then
 
-   write(message, '(2a)') ch10,' ------------------------------------------------------------------------'
-   call wrtout(nunit,message,'COLL')
+   write(msg, '(2a)') ch10,' ------------------------------------------------------------------------'
+   call wrtout(nunit,msg,'COLL')
 
    if(nspden==1) then
-     write(message, '(4a)' ) &
+     write(msg, '(4a)' ) &
 &     ' Fermi level charge density n_f:',ch10,&
 &     ' ------------------------------------------------------------------------',ch10
    else
-     write(message, '(4a)' ) &
+     write(msg, '(4a)' ) &
 &     ' Fermi level charge density n_f and magnetization m_f:',ch10,&
 &     ' ------------------------------------------------------------------------',ch10
    end if
-   call wrtout(nunit,message,'COLL')
+   call wrtout(nunit,msg,'COLL')
 
    if(cmplex_den==0) then
-     write(message, '(a,f13.8)') '     n_f   = ',rho_tot
+     write(msg, '(a,f13.8)') '     n_f   = ',rho_tot
    else
-     write(message, '(a,f13.8,a,f13.8)') '  Re[n_f]= ', rho_tot,"   Im[n_f]= ",rho_tot_im
+     write(msg, '(a,f13.8,a,f13.8)') '  Re[n_f]= ', rho_tot,"   Im[n_f]= ",rho_tot_im
    end if
-   call wrtout(nunit,message,'COLL')
+   call wrtout(nunit,msg,'COLL')
    if(nspden==2) then
      if(cmplex_den==0) then
-       write(message, '(a,f13.8)') '     m_f    = ', mag_coll
+       write(msg, '(a,f13.8)') '     m_f    = ', mag_coll
      else
-       write(message, '(a,f13.8,a,f13.8)') '  Re[m_f]= ', mag_coll,"   Im[m_f]= ",mag_coll_im
+       write(msg, '(a,f13.8,a,f13.8)') '  Re[m_f]= ', mag_coll,"   Im[m_f]= ",mag_coll_im
      end if
-     call wrtout(nunit,message,'COLL')
+     call wrtout(nunit,msg,'COLL')
    elseif (nspden==4) then
-     write(message, '(a,f13.8)') '     mx_f  = ',mag_x
-     call wrtout(nunit,message,'COLL')
-     write(message, '(a,f13.8)') '     my_f  = ',mag_y
-     call wrtout(nunit,message,'COLL')
-     write(message, '(a,f13.8)') '     mz_f  = ',mag_z
-     call wrtout(nunit,message,'COLL')
+     write(msg, '(a,f13.8)') '     mx_f  = ',mag_x
+     call wrtout(nunit,msg,'COLL')
+     write(msg, '(a,f13.8)') '     my_f  = ',mag_y
+     call wrtout(nunit,msg,'COLL')
+     write(msg, '(a,f13.8)') '     mz_f  = ',mag_z
+     call wrtout(nunit,msg,'COLL')
    end if
 
-   write(message, '(3a)') ch10,' ------------------------------------------------------------------------',ch10
-   call wrtout(nunit,message,'COLL')
+   write(msg, '(3a)') ch10,' ------------------------------------------------------------------------',ch10
+   call wrtout(nunit,msg,'COLL')
 
 
- else if (prtopt==2 .or. prtopt==3 .or. prtopt==4)
+ else if (prtopt==2 .or. prtopt==3 .or. prtopt==4) then
    ! Used in the DFPT case, prtopt=idir+1
 
    if(abs(rho_tot)<1.0d-10) then
      rho_tot=0
    end if
 
-   write(message, '(2a)') ch10,' ------------------------------------------------------------------------'
-   call wrtout(nunit,message,'COLL')
+   write(msg, '(2a)') ch10,' ------------------------------------------------------------------------'
+   call wrtout(nunit,msg,'COLL')
 
    if(nspden==1) then
-     write(message, '(4a)' ) &
+     write(msg, '(4a)' ) &
 &     ' Integral of the first order density n^(1):',ch10,&
 &     ' ------------------------------------------------------------------------',ch10
    else
-     write(message, '(4a)' ) &
+     write(msg, '(4a)' ) &
 &     ' Integrals of the first order density n^(1) and magnetization m^(1):',ch10,&
 &     ' ------------------------------------------------------------------------',ch10
    end if
-   call wrtout(nunit,message,'COLL')
+   call wrtout(nunit,msg,'COLL')
 
    if(cmplex_den==0) then
-     write(message, '(a,e16.8)') '     n^(1)    = ', rho_tot
+     write(msg, '(a,e16.8)') '     n^(1)    = ', rho_tot
    else
-     write(message, '(a,e16.8,a,e16.8)') '  Re[n^(1)] = ', rho_tot,"   Im[n^(1)] = ",rho_tot_im
+     write(msg, '(a,e16.8,a,e16.8)') '  Re[n^(1)] = ', rho_tot,"   Im[n^(1)] = ",rho_tot_im
    end if
-   call wrtout(nunit,message,'COLL')
+   call wrtout(nunit,msg,'COLL')
 
    if(nspden==2) then
 
      if(cmplex_den==0) then
-       write(message, '(a,e16.8)') '     m^(1)    = ', mag_coll
+       write(msg, '(a,e16.8)') '     m^(1)    = ', mag_coll
      else
-       write(message, '(a,e16.8,a,e16.8)') '  Re[m^(1)] = ', mag_coll,"   Im[m^(1)] = ",mag_coll_im
+       write(msg, '(a,e16.8,a,e16.8)') '  Re[m^(1)] = ', mag_coll,"   Im[m^(1)] = ",mag_coll_im
      end if
-     call wrtout(nunit,message,'COLL')
+     call wrtout(nunit,msg,'COLL')
 
    elseif (nspden==4) then
      if(cmplex_den==0) then
-       write(message, '(a,e16.8)') '     mx^(1)   = ', mag_x
-       call wrtout(nunit,message,'COLL')
-       write(message, '(a,e16.8)') '     my^(1)   = ', mag_y
-       call wrtout(nunit,message,'COLL')
-       write(message, '(a,e16.8)') '     mz^(1)   = ', mag_z
-       call wrtout(nunit,message,'COLL')
+       write(msg, '(a,e16.8)') '     mx^(1)   = ', mag_x
+       call wrtout(nunit,msg,'COLL')
+       write(msg, '(a,e16.8)') '     my^(1)   = ', mag_y
+       call wrtout(nunit,msg,'COLL')
+       write(msg, '(a,e16.8)') '     mz^(1)   = ', mag_z
+       call wrtout(nunit,msg,'COLL')
      else
-       write(message, '(a,e16.8,a,e16.8)') '  Re[mx^(1)]= ',  mag_x, "   Im[mx^(1)]= ", mag_x_im
-       call wrtout(nunit,message,'COLL')
-       write(message, '(a,e16.8,a,e16.8)') '  Re[my^(1)]= ',  mag_y, "   Im[my^(1)]= ", mag_y_im
-       call wrtout(nunit,message,'COLL')
-       write(message, '(a,e16.8,a,e16.8)') '  Re[mz^(1)]= ',  mag_z, "   Im[mz^(1)]= ", mag_z_im
-       call wrtout(nunit,message,'COLL')
+       write(msg, '(a,e16.8,a,e16.8)') '  Re[mx^(1)]= ',  mag_x, "   Im[mx^(1)]= ", mag_x_im
+       call wrtout(nunit,msg,'COLL')
+       write(msg, '(a,e16.8,a,e16.8)') '  Re[my^(1)]= ',  mag_y, "   Im[my^(1)]= ", mag_y_im
+       call wrtout(nunit,msg,'COLL')
+       write(msg, '(a,e16.8,a,e16.8)') '  Re[mz^(1)]= ',  mag_z, "   Im[mz^(1)]= ", mag_z_im
+       call wrtout(nunit,msg,'COLL')
      end if
    end if
 
-   write(message, '(3a)') ch10,' ------------------------------------------------------------------------',ch10
-   call wrtout(nunit,message,'COLL')
+   write(msg, '(3a)') ch10,' ------------------------------------------------------------------------',ch10
+   call wrtout(nunit,msg,'COLL')
 
  end if
 
@@ -1517,7 +1514,7 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
  integer :: nx,ny,nz,nfft_tot
  integer :: ii,jj,kk,ind,ispden
  integer :: mpi_comm,mpi_head,mpi_rank,ierr
- real    :: rx,ry,rz
+ real(dp)    :: rx,ry,rz
  integer :: nproc_fft,ir
  character(len=500) :: msg
  character(len=10)  :: outformat
