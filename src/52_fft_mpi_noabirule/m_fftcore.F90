@@ -208,11 +208,11 @@ pure function fftalg_isavailable(fftalg) result(ans)
  fftalgc = mod(fftalg,10)
 
  ! Optional FFT libraries.
-#ifndef HAVE_FFT_FFTW3
+#ifndef HAVE_FFTW3
  if (fftalga == FFT_FFTW3) ans = .FALSE.
 #endif
 
-#ifndef HAVE_FFT_DFTI
+#ifndef HAVE_DFTI
  if (fftalga == FFT_DFTI) ans = .FALSE.
 #endif
 
@@ -294,9 +294,9 @@ pure function fftalg_for_npfft(nproc_fft) result(fftalg)
  if (nproc_fft > 1) fftalg = 401
  !if (nproc_fft > 1) fftalg = 402
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  fftalg = 312
-#elif defined HAVE_FFT_DFTI
+#elif defined HAVE_DFTI
  fftalg = 512
  if (nproc_fft > 1) fftalg = 401  ! MPI-FFT with DFTI is not implemented yet
 #endif
@@ -432,9 +432,9 @@ pure subroutine ngfft_seq(ngfft, n123)
 
  ! Default  for the sequential case.
  fftalg = 112
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  fftalg = 312
-#elif defined HAVE_FFT_DFTI
+#elif defined HAVE_DFTI
  fftalg = 512
 #endif
 

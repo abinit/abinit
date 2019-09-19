@@ -116,7 +116,7 @@ AC_DEFUN([SD_FFT_DETECT], [
                     --with-fft-flavor option.])
       fi
       ;;
-    fftw3)
+    fftw3|fftw3-mpi|fftw3-threads)
       SD_FFTW3_DETECT
       if test "${sd_fftw3_ok}" = "yes"; then
         sd_fft_cppflags="${sd_fftw3_cppflags}"
@@ -156,6 +156,21 @@ AC_DEFUN([SD_FFT_DETECT], [
       ;;
   esac
   sd_fft_ok="yes"
+
+  # FIXME: hard-coded FFTW3 options
+  case "${sd_fft_flavor}" in
+    fftw3-mpi)
+      if test "${sd_mpi_enable}" = "yes"; then
+        AC_DEFINE([HAVE_FFTW3_MPI], 1,
+          [Define to 1 if you have a MPI-enabled FFTW3 library.])
+      fi
+      ;;
+    fftw3-threads)
+      AC_DEFINE([HAVE_FFTW3_THREADS], 1,
+        [Define to 1 if you have a threads-enabled FFTW3 library.])
+      fi
+      ;;
+  esac
 ]) # SD_FFT_DETECT
 
 
