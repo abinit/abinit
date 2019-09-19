@@ -794,6 +794,50 @@
 #
 #FFT_LIBS="-L/usr/local/lib/fftw -lfftw3"
 
+                       # ------------------------------ #
+
+# C preprocessor flags for the FFTW3 library (default is unset)
+#
+#FFTW3_CPPFLAGS="-I/usr/local/include/fftw"
+
+# C flags for the FFTW3 library (default is unset)
+#
+#FFTW3_CFLAGS="-I/usr/local/include/fftw"
+
+# Fortran flags for the FFTW3 library (default is unset)
+#
+#FFTW3_FCFLAGS="-I/usr/local/include/fftw"
+
+# Link flags for the FFTW3 library (default is unset)
+#
+#FFTW3_LDFLAGS="-L/usr/local/lib/fftw -lfftw3"
+
+# Library flags for the FFTW3 library (default is unset)
+#
+#FFTW3_LIBS="-L/usr/local/lib/fftw -lfftw3"
+
+                       # ------------------------------ #
+
+# C preprocessor flags for the PFFT library (default is unset)
+#
+#PFFT_CPPFLAGS="-I/usr/local/include/fftw"
+
+# C flags for the PFFT library (default is unset)
+#
+#PFFT_CFLAGS="-I/usr/local/include/fftw"
+
+# Fortran flags for the PFFT library (default is unset)
+#
+#PFFT_FCFLAGS="-I/usr/local/include/fftw"
+
+# Link flags for the PFFT library (default is unset)
+#
+#PFFT_LDFLAGS="-L/usr/local/lib/fftw -lfftw3"
+
+# Library flags for the PFFT library (default is unset)
+#
+#PFFT_LIBS="-L/usr/local/lib/fftw -lfftw3"
+
 # -------------------------------------------------------------------------- #
 # Feature triggers                                                           #
 # -------------------------------------------------------------------------- #
