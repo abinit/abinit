@@ -25,21 +25,6 @@ AC_DEFUN([SD_FFT_INIT], [
   sd_fft_policy=""
   sd_fft_status=""
 
-  # Process options
-  for kwd in ${sd_fft_options}; do
-    case "${kwd}" in
-      implicit|required|optional)
-        sd_fft_status="${kwd}"
-        ;;
-      fail|skip|warn)
-        sd_fft_policy="${kwd}"
-        ;;
-      *)
-        AC_MSG_ERROR([invalid Steredeg FFTW3 option: '${kwd}'])
-        ;;
-    esac
-  done
-
   # Check that proposed choices are valid
   sd_fft_valid_choices="fftw3 mkl pfft"
   if test -z "${sd_fft_choices}"; then
@@ -113,6 +98,9 @@ AC_DEFUN([SD_FFT_INIT], [
 ]) # SD_FFT_INIT
 
 
+                    # ------------------------------------ #
+
+
 AC_DEFUN([SD_FFT_SELECT_FLAVOR], [
   AC_MSG_CHECKING([for the FFT flavor to use])
   AC_MSG_RESULT([${sd_fft_flavor}])
@@ -124,7 +112,7 @@ AC_DEFUN([SD_FFT_SELECT_FLAVOR], [
         sd_fft_cflags="${sd_fftw3_cflags}"
         sd_fft_fcflags="${sd_fftw3_fcflags}"
         sd_fft_ldflags="${sd_fftw3_ldflags}"
-        sd_fft_libss="${sd_fftw3_libs}"
+        sd_fft_libs="${sd_fftw3_libs}"
       else
         AC_MSG_ERROR([FFTW3 is not available
                     Please adjust configure options to point to a working FFTW3
@@ -139,13 +127,16 @@ AC_DEFUN([SD_FFT_SELECT_FLAVOR], [
         sd_fft_cflags="${sd_pfft_cflags}"
         sd_fft_fcflags="${sd_pfft_fcflags}"
         sd_fft_ldflags="${sd_pfft_ldflags}"
-        sd_fft_libss="${sd_pfft_libs}"
+        sd_fft_libs="${sd_pfft_libs}"
       else
         AC_MSG_ERROR([PFFT is not available
                     Please adjust configure options to point to a working PFFT
                     installation or change the requested FFT flavor through the
                     --with-fft-flavor option.])
       fi
+      ;;
+    mkl)
+      AC_MSG_WARN([ignored FFT flavor: 'mkl'])
       ;;
     *)
       AC_MSG_ERROR([unsupported FFT flavor: '${sd_fft_flavor}'])
