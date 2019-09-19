@@ -235,11 +235,6 @@ ABI_GPU_INIT
 
                     # ------------------------------------ #
 
-# Init main FFT controller
-SD_FFT_INIT([fftw3 mkl])
-
-                    # ------------------------------------ #
-
 # Init triggers parameters (must be call after we know about fallbacks)
 # Note: MPI and GPU must be initialized after feature triggers
 ABI_TRIGGERS_INIT

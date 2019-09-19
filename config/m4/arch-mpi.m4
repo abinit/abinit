@@ -681,6 +681,14 @@ AC_DEFUN([ABI_MPI_INIT], [
   # Delegate most of the init stage to Steredeg
   SD_MPI_INIT([optional fail no-cxx], [-lmpi])
 
+  # Allow MPI flavors
+  AC_ARG_WITH([mpi-flavor],
+    AC_HELP_STRING([--with-mpi-flavor],
+      [Flavor of MPI to use (default: auto),
+       see ~abinit/doc/build/config-template.ac8 for details]),
+    [abi_mpi_flavor="${withval}"],
+    [abi_mpi_flavor="auto"])
+
   # Init ABINIT MPI variables
   abi_mpi_enable="${sd_mpi_enable}"
   abi_mpi_get_library_version="unknown"
@@ -729,8 +737,31 @@ AC_DEFUN([ABI_MPI_INIT], [
 
   fi # abi_mpi_enable
 
+  # Check that a permitted flavor value has been specified
+  if test "${abi_mpi_enable}" = "yes"; then
+    flavor_values=`echo "${abi_mpi_flavor}" | sed -e 's/+/ /g'`
+    tmp_flavor_ok="no"
+    AC_MSG_CHECKING([whether the '${abi_mpi_flavor}' MPI flavor is valid])
+    for chk_flavor in auto double-wrap flags native prefix; do
+      for set_flavor in ${flavor_values}; do
+        if test "${set_flavor}" = "${chk_flavor}"; then
+          tmp_flavor_ok="yes"
+          break
+        fi
+      done
+      test "${tmp_flavor_ok}" = "yes" && break
+    done
+    AC_MSG_RESULT([${tmp_flavor_ok}])
+    if test "${tmp_flavor_ok}" = "no"; then
+      AC_MSG_ERROR([invalid MPI flavor: '${abi_mpi_flavor}'])
+    fi
+  else
+    abi_mpi_flavor="none"
+  fi
+
   # Enable substitution
   AC_SUBST(abi_mpi_enable)
+  AC_SUBST(abi_mpi_flavor)
   AC_SUBST(abi_mpi_fcflags)
   AC_SUBST(abi_mpi_ldflags)
   AC_SUBST(abi_mpi_level)
