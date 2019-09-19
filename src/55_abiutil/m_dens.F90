@@ -43,8 +43,8 @@ MODULE m_dens
  private
 
  public :: dens_hirsh              ! Compute the Hirshfeld charges
- public :: get_v_constr_dft_r      ! Compute the constraining potential (constrained DFT) from constraint parameters
- public :: mag_penalty             ! Compute the potential corresponding to constrained magnetic moments (using get_v_constr_dft_r) with the penalty function.
+ public :: get_nv_constr_dft_r      ! Compute the constraining potential (constrained DFT) from constraint parameters
+ public :: mag_penalty             ! Compute the potential corresponding to constrained magnetic moments (using get_nv_constr_dft_r) with the penalty function.
  public :: mag_penalty_e           ! Compute the energy corresponding to constrained magnetic moments.
  public :: calcdensph              ! Compute and print integral of total density inside spheres around atoms.
 !!***
@@ -389,15 +389,16 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
 end subroutine dens_hirsh
 !!***
 
-!!****f* m_dens/get_v_constr_dft_r
+!!****f* m_dens/get_nv_constr_dft_r
 !! NAME
-!! get_v_constr_dft_r
+!! get_nv_constr_dft_r
 !!
 !! FUNCTION
-!! This routine is called to compute the real space potential added to the Hamiltonian in the framework
-!! of the constrained DFT. It is made of contributions from each atomic sphere, each governed by parameters
-!! stored in v_constr_dft_lambda, input to the present routine.
+!! This routine is called to compute the constrained real space potential or real space density in the framework
+!! of the constrained DFT. The contributions from each atomic sphere, each governed by parameters
+!! stored in coeff_constr_dft, input to the present routine.
 !! The potential can have a zeeman magnetic component, coupled to local spin magnetic moment in the atomic sphere.
+!! The density will have a modified atomic magnetization or atomic charge.
 !!
 !! INPUTS
 !!  natom=number of atoms
@@ -412,7 +413,7 @@ end subroutine dens_hirsh
 !!  xred=reduced atomic positions
 !!
 !! OUTPUT
-!!  v_constr_dft_r=the constraining potential
+!!  nv_constr_dft_r=the constrained potential or density in real space
 !!
 !! PARENTS
 !!
@@ -421,14 +422,14 @@ end subroutine dens_hirsh
 !!
 !! SOURCE
 
-subroutine get_v_constr_dft_r(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ratsph, &
-  typat,v_constr_dft_coeffs,v_constr_dft_r,xred)
+subroutine get_nv_constr_dft_r(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ratsph, &
+  typat,coeffs_constr_dft,nv_constr_dft_r,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nfft,nspden,ntypat
- real(dp),intent(in) :: v_constr_dft_coeffs(nspden,natom)
- real(dp),intent(out) :: v_constr_dft_r(nfft,nspden)
+ real(dp),intent(in) :: coeffs_constr_dft(nspden,natom)
+ real(dp),intent(out) :: nv_constr_dft_r(nfft,nspden)
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in)  :: typat(natom)
@@ -467,7 +468,7 @@ subroutine get_v_constr_dft_r(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ra
 
  ratsm = 0.05_dp ! default value for the smearing region radius - may become input variable later
 
- v_constr_dft_r = zero
+ nv_constr_dft_r = zero
 
 !Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
@@ -476,7 +477,7 @@ subroutine get_v_constr_dft_r(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ra
 !-------------------------------------------
  do iatom=1,natom
 
-   if(sum(v_constr_dft_coeffs(1:nspden,iatom)**2)<tol12)then
+   if(sum(coeffs_constr_dft(1:nspden,iatom)**2)<tol12)then
      cycle
    endif
 
@@ -521,7 +522,7 @@ subroutine get_v_constr_dft_r(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ra
            ix=mod(i1+ishift*n1,n1)
 !          Identify the fft indexes of the rectangular grid around the atom
            ifft_local=1+ix+n1*(iy+n2*izloc)
-           v_constr_dft_r(ifft_local,1:nspden)=v_constr_dft_r(ifft_local,1:nspden) + fsm*v_constr_dft_coeffs(1:nspden,iatom)
+           nv_constr_dft_r(ifft_local,1:nspden)=nv_constr_dft_r(ifft_local,1:nspden) + fsm*coeffs_constr_dft(1:nspden,iatom)
 
          end do  ! i1
        end do  ! i2
@@ -533,28 +534,28 @@ subroutine get_v_constr_dft_r(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ra
  end do
 
 !MPI parallelization
-!TODO: test if xmpi_sum does the correct stuff for a slice of v_constr_dft_r
+!TODO: test if xmpi_sum does the correct stuff for a slice of nv_constr_dft_r
  if(mpi_enreg%nproc_fft>1)then
    call timab(48,1,tsec)
-   call xmpi_sum(v_constr_dft_r,mpi_enreg%comm_fft,ierr)
+   call xmpi_sum(nv_constr_dft_r,mpi_enreg%comm_fft,ierr)
    call timab(48,2,tsec)
  end if
 
 ! write (201,*) '# potential 1'
-! write (201,*) v_constr_dft_r(:,1)
+! write (201,*) nv_constr_dft_r(:,1)
 
 ! write (202,*) '# potential 2'
-! write (202,*) v_constr_dft_r(:,2)
+! write (202,*) nv_constr_dft_r(:,2)
 
 ! if (nspden > 2) then
 !   write (203,*) '# potential 3'
-!   write (203,*) v_constr_dft_r(:,3)
+!   write (203,*) nv_constr_dft_r(:,3)
 
 !   write (204,*) '# potential 4'
-!   write (204,*) v_constr_dft_r(:,4)
+!   write (204,*) nv_constr_dft_r(:,4)
 ! end if
 
-end subroutine get_v_constr_dft_r
+end subroutine get_nv_constr_dft_r
 !!***
 
 !!****f* m_dens/mag_penalty
@@ -581,7 +582,7 @@ end subroutine get_v_constr_dft_r
 !!  xred=reduced atomic positions
 !!
 !! OUTPUT
-!!  v_constr_dft_r=the constraining potential
+!!  nv_constr_dft_r=the constrained potential
 !!
 !! PARENTS
 !!      energy,rhotov,setvtr
@@ -597,14 +598,14 @@ end subroutine get_v_constr_dft_r
 
 subroutine mag_penalty(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
                       mpi_enreg,nfft,ngfft,ntypat,ratsph,rhor, &
-                      typat,v_constr_dft_r,xred)
+                      typat,nv_constr_dft_r,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,magconon,nfft,nspden
  integer,intent(in) :: ntypat
  real(dp),intent(in) :: magcon_lambda
- real(dp),intent(out) :: v_constr_dft_r(nfft,nspden)
+ real(dp),intent(out) :: nv_constr_dft_r(nfft,nspden)
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in)  :: typat(natom)
@@ -622,14 +623,14 @@ subroutine mag_penalty(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
  real(dp):: cmm_x,cmm_y,cmm_z
  real(dp) :: intgden_proj,norm,ucvol
 !arrays
- real(dp), allocatable :: v_constr_dft_coeffs(:,:) ! nspden,natom
+ real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
  real(dp), allocatable :: intgden(:,:) ! nspden,natom
  real(dp) :: spinat_norm(3,natom)
  real(dp) :: gprimd(3,3),rmet(3,3),gmet(3,3)
 
 ! ***********************************************************************************************
 
- ABI_ALLOCATE(v_constr_dft_coeffs,(nspden,natom))
+ ABI_ALLOCATE(coeffs_constr_dft,(nspden,natom))
  ABI_ALLOCATE(intgden,(nspden,natom))
 
 !We need the metric because it is needed in calcdensph.F90
@@ -681,8 +682,8 @@ subroutine mag_penalty(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
 !    2 = down down = -z
 !    3 = up down   = +x
 !    4 = down up   = -y
-     v_constr_dft_coeffs(3,iatom)= 2*magcon_lambda*cmm_x
-     v_constr_dft_coeffs(4,iatom)=-2*magcon_lambda*cmm_y
+     coeffs_constr_dft(3,iatom)= 2*magcon_lambda*cmm_x
+     coeffs_constr_dft(4,iatom)=-2*magcon_lambda*cmm_y
    end if ! nspden 4
 
 !  Calculate the z-component of the square bracket term
@@ -711,16 +712,16 @@ subroutine mag_penalty(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
    endif
 
 !  Calculate the constraining potential for z-component of the mag. mom. vector
-   v_constr_dft_coeffs(1,iatom)= 2*magcon_lambda*cmm_z
-   v_constr_dft_coeffs(2,iatom)=-2*magcon_lambda*cmm_z
+   coeffs_constr_dft(1,iatom)= 2*magcon_lambda*cmm_z
+   coeffs_constr_dft(2,iatom)=-2*magcon_lambda*cmm_z
 
  enddo ! iatom
  
 !Now compute the potential in real space
- call get_v_constr_dft_r(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ratsph, &
-   typat,v_constr_dft_coeffs,v_constr_dft_r,xred)
+ call get_nv_constr_dft_r(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ratsph, &
+   typat,coeffs_constr_dft,nv_constr_dft_r,xred)
 
- ABI_DEALLOCATE(v_constr_dft_coeffs)
+ ABI_DEALLOCATE(coeffs_constr_dft)
  ABI_DEALLOCATE(intgden)
 
 end subroutine mag_penalty
