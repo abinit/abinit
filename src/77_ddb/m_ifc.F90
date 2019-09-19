@@ -819,7 +819,7 @@ subroutine ifc_print(ifc, header, unit, prtvol)
  class(ifc_type),intent(in) :: ifc
 
 !Local variables-------------------------------
- integer :: unt,my_prtvol,iatom,ii
+ integer :: unt,my_prtvol,iatom,ii,idir
  character(len=500) :: msg
 ! *********************************************************************
 
@@ -846,6 +846,12 @@ subroutine ifc_print(ifc, header, unit, prtvol)
  call wrtout(unt, " Effective charges:")
  do iatom=1,ifc%natom
    call wrtout(unt, ltoa(reshape(ifc%zeff(:,:,iatom), [3*3]), fmt="f10.2"))
+ end do
+ call wrtout(unt, " Quadrupolar terms:")
+ do iatom=1,ifc%natom
+   do idir=1,3
+     call wrtout(unt, ltoa(reshape(ifc%qdrp_cart(:,:,idir,iatom), [3*3]), fmt="f10.2"))
+   end do
  end do
 
  call wrtout(unt, sjoin(" Mass of the atoms (atomic mass unit): ", ltoa(ifc%amu)))
