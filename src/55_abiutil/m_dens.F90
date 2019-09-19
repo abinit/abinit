@@ -892,7 +892,8 @@ end subroutine mag_penalty_e
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nspden=number of spin-density components
 !!  ntypat=number of atom types
-!!  nunit=number of the unit for writing
+!!  nunit=number of the unit for printing
+!!  prtopt = if 1, the default printing is on (to unit nunit), if -1, 2, 3, 4, special printing options, if 0 no printing.
 !!  ratsph(ntypat)=radius of spheres around atoms
 !!  rhor(nfft,nspden)=array for electron density in electrons/bohr**3.
 !!   (total in first half and spin-up in second half if nspden=2)
@@ -901,11 +902,13 @@ end subroutine mag_penalty_e
 !!  typat(natom)=type of each atom
 !!  ucvol=unit cell volume in bohr**3
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
-!!  prtopt = if 1, the default printing is on, otherwise special printing options
 !!
 !! OUTPUT
-!!  intgden(nspden, natom)=integrated density (magnetization...) for each atom in a sphere of radius ratsph. Optional arg
 !!  dentot(nspden)=integrated density (magnetization...) over full u.c. vol, optional argument
+!!  intgden(nspden, natom)=integrated density (magnetization...) for each atom in a sphere of radius ratsph. Optional arg
+!!    Note that when intgden is present, the definition of the spherical integration function changes, as it is smoothed.
+!!  intgf2(natom)=integral of the square of the spherical integration function for each atom in a sphere of radius ratsph. Optional arg
+!!    if present, the routine also checks that the spheres do not overlap
 !!  Rest is printing
 !!
 !! PARENTS
@@ -917,7 +920,7 @@ end subroutine mag_penalty_e
 !! SOURCE
 
 subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph,rhor,rprimd,typat,ucvol,xred,&
-&    prtopt,cplex,intgden,dentot)
+&    prtopt,cplex,intgden,dentot,intgf2)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -932,6 +935,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  real(dp),intent(in) :: xred(3,natom)
 !integer,intent(out),optional   :: atgridpts(nfft)
  real(dp),intent(out),optional  :: intgden(nspden,natom)
+ real(dp),intent(out),optional  :: intgf2(natom)
  real(dp),intent(out),optional  :: dentot(nspden)
 !Local variables ------------------------------
 !scalars
@@ -965,12 +969,27 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  ! first unit cell so wrap xred into [0, 1[ interval here.
  call wrap2_zero_one(xred, my_xred, xshift)
 
+!Default value for the smearing region radius  - may become input variable later
  ratsm = zero
- if(present(intgden)) then
-
-   ratsm = 0.05_dp ! default value for the smearing region radius - may become input variable later
-
+ if(present(intgden).or.present(intgf2)) then
+   ratsm = 0.05_dp ! So, the presence of intgden as argument changes the default smearing
  end if
+
+!If intgf2 present, check that the spheres do not overlap. 
+ if(present(intgf2))then
+   do iatom=1,natom
+     do jatom=1,natom
+       dist_ij=dist2(xred(:,iatom),xred(:,jatom),rprimd,1)
+       if(dist_ij-ratsph(typat(iatom))-ratsph(typat(jatom))<tol10)then
+         write(msg,'(a,a,a,i5,a,i5,a,f12.4,a,a,a,f12.4,a,f12.4)')&
+         'In constrained DFT, the spheres around different atoms cannot overlap. See input var ratsph.',ch10,&
+&        'It is found that for atoms ',iatom,' and ',jatom,', the distance is ',dist_ij,' Bohr, while ',ch10,&
+&        'the radii of the spheres are ',ratsph(typat(iatom)),' and ',ratsph(typat(jatom))
+         MSG_ERROR(msg)
+       endif
+     enddo
+   enddo
+ endif
 
 !Get the distrib associated with this fft_grid
  grid_found=.false.
@@ -1028,6 +1047,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
    n3a=int((my_xred(3,iatom)-rr3+ishift)*n3+delta)-ishift*n3
    n3b=int((my_xred(3,iatom)+rr3+ishift)*n3      )-ishift*n3
 
+   !This is the "width" of the zone of smearing, in term of the square of radius
    ratsm2 = (2*ratsph(typat(iatom))-ratsm)*ratsm
 
    do i3=n3a,n3b
@@ -1064,6 +1084,11 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
            !  atgridpts(ii)=ifft_local    !SPr: save grid point index (dbg: to check whether ifft_local is a valid "global" index )
            !end if
 
+           if(present(intgf2))then
+!            intgden_(1,iatom)= integral of the square of the spherical integrating function
+             intgf2(iatom)=intgf2(iatom)+fsm*fsm
+           endif
+
            if(nspden==1) then
 !            intgden_(1,iatom)= integral of total density
              intgden_(1,iatom)=intgden_(1,iatom)+fsm*rhor(ifft_local,1)
@@ -1087,6 +1112,10 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
        end do
      end if
    end do
+
+   if(present(intgf2))then
+     intgf2(iatom)=intgf2(iatom)*ucvol/dble(nfftot)
+   endif
 
    intgden_(:,iatom)=intgden_(:,iatom)*ucvol/dble(nfftot)
 
@@ -1313,8 +1342,8 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
    call wrtout(nunit,message,'COLL')
 
 
- else
- ! prtopt different from 1 and -1 (either 2,3 or 4)
+ else if (prtopt==2 .or. prtopt==3 .or. prtopt==4)
+   ! Used in the DFPT case, prtopt=idir+1
 
    if(abs(rho_tot)<1.0d-10) then
      rho_tot=0

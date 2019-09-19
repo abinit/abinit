@@ -61,7 +61,7 @@ MODULE m_geometry
  public :: bonds_lgth_angles  ! Write GEO file
  public :: randomcellpos      ! Creates unit cell with random atomic positions.
  public :: ioniondist         ! Compute ion-ion distances
- public :: dist2              ! Calculates the distance of v1 and v2 in a crystal by epeating the unit cell
+ public :: dist2              ! Calculates the distance of v1 and v2 in a crystal by repeating the unit cell
  public :: shellstruct        ! Calculates shell structure (multiplicities, radii)
  public :: remove_inversion   ! Remove the inversion symmetry and improper rotations
  public :: symredcart         ! Convert a symmetry operation from reduced coordinates (integers) to cart coords (reals)
@@ -2626,7 +2626,7 @@ end subroutine ioniondist
 !!  dist2
 !!
 !! FUNCTION
-!!  Calculates the distance of v1 and v2 in a crystal by epeating the unit cell
+!!  Calculates the distance of v1 and v2 in a crystal by repeating the unit cell
 !!
 !! INPUTS
 !!  v1,v2
