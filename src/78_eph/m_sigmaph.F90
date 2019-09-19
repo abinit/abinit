@@ -1615,12 +1615,19 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              !if (ibsum_kq == band_ks) then
              !if (ibsum_kq == band_ks .and. all(abs(qpt) < tol12)) then
              !  write(std_out,"(a,i0,2a)")" Ene and Oscillator for band: ", band_ks, ", and q-point: ", trim(ktoa(qpt))
-             !  write(std_out,*)ebands%eig(band_ks, ik_ibz, spin) * Ha_eV, osc_ks(:,1:2,ib_k)
+             !  write(std_out,*)ebands%eig(band_ks, ik_ibz, spin) * Ha_eV, osc_ks(:2,ib_k)
              !end if
            end do
          end if
 
+         ! Accumulate contribution to self-energy
+         eig0mkq = ebands%eig(ibsum_kq, ikq_ibz, spin)
+         ! q-weight for naive integration
+         weight_q = sigma%wtq_k(iq_ibz)
+
          if (osc_ecut /= zero) then
+           !osc_npw = 1
+           !osc_gvecq(:,1) = [0,0,0]
            ! Compute electron-phonon matrix elements for the Frohlich interaction
            !ABI_MALLOC(displ_cart_fine, (2, 3, cryst%natom, natom3))
            ABI_MALLOC(gkqg_fine, (osc_npw))
@@ -1653,7 +1660,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                ! Approximate the oscilator matrix elements <nk+q|e^{i q.r}|n'k> as delta{nn'}
                else
                  do ib_k=1,nbcalc_ks
-                   eig0mkq = sigma%eph_doublegrid%ebands_dense%eig(ibsum_kq, ikq_ibz_fine, spin)
+                   band_ks = ib_k + bstart_ks - 1
+                   eig0nk = ebands%eig(band_ks, ik_ibz, spin)
                    if (abs(eig0nk - eig0mkq) > TOL_EDIFF) cycle
                    gkq2_lr(jj,ib_k,imyp) =  real(sum(gkqg_fine))**2 + &
                                            aimag(sum(gkqg_fine))**2
@@ -1672,11 +1680,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ABI_FREE(gkqg_fine)
            ABI_FREE(osc_ks_bs)
          end if
-
-         ! Accumulate contribution to self-energy
-         eig0mkq = ebands%eig(ibsum_kq, ikq_ibz, spin)
-         ! q-weight for naive integration
-         weight_q = sigma%wtq_k(iq_ibz)
 
          if (sigma%calc_mrta) then
            ! Precompute alpha coefficients.
@@ -1823,7 +1826,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
                      ! Add Frohlich contribution
                      gkq2_pf = gkq2
-                     if (sigma%frohl_model == 3) gkq2_pf = gkq2_pf + weight_q * gkq2_lr(jj,ib_k,imyp)
+                     if (osc_ecut /= 0) then
+                       gkq2_pf = gkq2_pf + weight_q * gkq2_lr(jj,ib_k,imyp)
+                     end if
 
                      if (sigma%imag_only) then
                        ! Note pi factor from Sokhotski-Plemelj theorem.
