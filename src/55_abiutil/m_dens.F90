@@ -599,7 +599,7 @@ end subroutine get_nv_constr_dft_r
 !!
 !! SOURCE
 
- subroutine constrain_denmag(constraint_kinds,intgf2,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
+ subroutine constrain_denmag(constraint_kind,intgf2,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
 & ratsph,rhog,rhor,rprimd,spinat,typat,xred)
 
 !Arguments ------------------------------------
@@ -607,7 +607,7 @@ end subroutine get_nv_constr_dft_r
  integer,intent(in) :: natom,nfft,nspden,ntypat
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- integer,intent(in)  :: constraint_kinds(natom)
+ integer,intent(in)  :: constraint_kind(natom)
  integer,intent(in)  :: intgf2(natom)
  integer,intent(in)  :: ngfft(18)
  integer,intent(in)  :: typat(natom)
@@ -621,12 +621,11 @@ end subroutine get_nv_constr_dft_r
 !scalars
  integer :: iatom
  integer :: cplex1=1
- real(dp):: cmm_x,cmm_y,cmm_z
- real(dp) :: intgden_proj,norm,ucvol
+ real(dp) :: intgden_norm,intgden_proj,norm,ucvol
 !arrays
  real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
  real(dp), allocatable :: intgden(:,:) ! nspden,natom
- real(dp) :: spinat_norm(3,natom)
+ real(dp) :: spinat_normed(3)
  real(dp) :: gprimd(3,3),rmet(3,3),gmet(3,3)
 
 ! ***********************************************************************************************
@@ -647,33 +646,32 @@ end subroutine get_nv_constr_dft_r
 !-------------------------------------------
  do iatom=1,natom
 
-   if(constrained_kinds(iatom)==1 .and. nspden>1)then
+   if(constraint_kind(iatom)==1 .and. nspden>1)then
 
      coeffs_constr_dft(2:nspden,iatom)=(spinat(2:nspden,iatom)-intgden(2:nspden,iatom))/intgf2(iatom)
 
-   else if( (constrained_kinds(iatom)==2 .or. constrained_kinds(iatom)==3) .and. nspden>1)then
+   else if( (constraint_kind(iatom)==2 .or. constraint_kind(iatom)==3) .and. nspden>1)then
 
      norm = sqrt(sum(spinat(:,iatom)**2))
-     spinat_norm(:,iatom) = zero
      if (norm > tol10) then
 
-       if( (constrained_kinds(iatom)==2 )then
+       if( constraint_kind(iatom)==2 )then
          if(nspden==4)then
            !Fix the direction
-           spinat_norm(:,iatom) = spinat(:,iatom) / norm
+           spinat_normed(:) = spinat(:,iatom) / norm
            !Calculate the scalar product of the fixed mag. mom. vector and calculated mag. mom. vector
            !This is actually the size of the projection of the calc. mag. mom. vector on the fixed mag. mom. vector
-           intgden_proj=spinat_norm(1,iatom)*intgden(2,iatom)+ &
-&            spinat_norm(2,iatom)*intgden(3,iatom)+ &
-&            spinat_norm(3,iatom)*intgden(4,iatom)
-           coeffs_constr_dft(2:nspden,iatom)=(spinat_norm(2:nspden,iatom)*intden_proj-intgden(2:nspden,iatom))/intgf2(iatom)
-         else if(nspden===2)then
-           !The direction must be correct, collinear
+           intgden_proj=spinat_normed(1)*intgden(2,iatom)+ &
+&            spinat_normed(2)*intgden(3,iatom)+ &
+&            spinat_normed(3)*intgden(4,iatom)
+           coeffs_constr_dft(2:nspden,iatom)=(spinat_normed(2:nspden)*intgden_proj-intgden(2:nspden,iatom))/intgf2(iatom)
+         else if(nspden==2)then
+           !The direction must be correct, collinear, so no change.
            coeffs_constr_dft(2,iatom)=zero
          endif
-       else if( (constrained_kinds(iatom)==3 )then
-         intgden_norm = sqrt(sum(intgden(2:4,iatom)**2))
-         coeffs_constr_dft(2:nspden,iatom)=(norm/intgden_norm-one)*intgden(2:nspden,iatom))/intgf2(iatom)
+       else if( constraint_kind(iatom)==3 )then
+         intgden_norm = sqrt(sum(intgden(2:nspden,iatom)**2))
+         coeffs_constr_dft(2:nspden,iatom)=(norm/intgden_norm-one)*intgden(2:nspden,iatom)/intgf2(iatom)
        endif
 
      else 
