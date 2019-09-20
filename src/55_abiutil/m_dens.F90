@@ -4,6 +4,8 @@
 !!  m_dens
 !!
 !! FUNCTION
+!! Module containing the definition of the constrained_dft_t data type and methods used to handle it,
+!! and also includes the computation of integrated atomic charge and magnetization, as well as Hirshfeld charges.
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2019 ABINIT group (MT,ILuk,MVer,EB,SPr)
@@ -50,7 +52,59 @@ MODULE m_dens
  public :: calcdensph              ! Compute and print integral of total density inside spheres around atoms.
 !!***
 
-contains
+!----------------------------------------------------------------------
+
+!!****t* m_dens/constrained_dft_t
+!! NAME
+!! constrained_dft_t
+!!
+!! FUNCTION
+!! Structure gathering the relevant information for constrained DFT calculations
+!!
+!! SOURCE
+
+ type,public :: constraint_dft_t
+
+!scalars
+  integer :: natom                           ! Number of atoms
+  integer :: nfftf                           ! Number of FFT grid points (for this processor) for the "fine" grid
+  integer :: nspden                          ! Number of spin-density components
+  integer :: ntypat                          ! Number of type of atoms
+
+!arrays
+
+  integer :: ngfftf(18)                      ! Number of FFT grid points (for this processor) for the "fine" grid
+
+  integer,allocatable :: typat(:)
+  ! typat(natom)
+  ! Type of each natom 
+
+  integer,allocatable :: constraint_kind(:)
+  ! constraint_kind(natom)
+  ! Constraint to be applied to each atom. See corresponding input variable
+
+  real(dp) :: rprimd(3,3)
+  ! Direct lattice vectors, Bohr units.
+
+  real(dp),allocatable :: intgf2(:)
+  ! intgf2(natom)
+  ! Integral of the square of the spherical integrating function, for each atom. 
+  ! Initialized using some xred values, will not change during the SCF cycles, except for exotic algorithms, not in production,
+  ! and even in this case, the change for different xred should be very small.
+
+  real(dp),allocatable :: ratsph(:)
+  ! ratsph(ntypat)
+  ! Radius of the atomic sphere for each type of atom
+
+  real(dp),allocatable :: spinat(:,:)
+  ! spinat(3,natom)
+  ! Target magnetization for each atom. Possibly only the direction or the magnitude, depending on constraint_kind
+ 
+ end type constrained_dft_t
+
+!!***
+
+CONTAINS
 
 !----------------------------------------------------------------------
 
@@ -408,9 +462,9 @@ end subroutine dens_hirsh
 !!  nfft=number of points in standard fft grid
 !!  ngfft=FFT grid dimensions
 !!  ntypat=number of types of atoms
-!!  ratsph=radii for muffin tin spheres of each atom
-!!  typat=types of atoms
-!!  xred=reduced atomic positions
+!!  ratsph(ntypat)=radii for muffin tin spheres of each atom
+!!  typat(natom)=types of atoms
+!!  xred(3,natom)=reduced atomic positions
 !!
 !! OUTPUT
 !!  nv_constr_dft_r=the constrained potential or density in real space
@@ -582,7 +636,7 @@ end subroutine get_nv_constr_dft_r
 !!  ngfft=FFT grid dimensions
 !!  nspden = number of spin densities (1 2 or 4)
 !!  ntypat=number of types of atoms
-!!  ratsph(natom)=radii for muffin tin spheres of each atom
+!!  ratsph(ntypat)=radii for muffin tin spheres of each atom
 !!  rprimd=lattice vectors (dimensioned)
 !!  spinat(3,natom)=magnetic moments vectors, possible targets according to the value of constraint_kinds
 !!  typat(natom)=types of atoms
