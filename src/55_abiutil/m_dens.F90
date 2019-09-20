@@ -46,6 +46,8 @@ MODULE m_dens
 
  public :: dens_hirsh              ! Compute the Hirshfeld charges
  public :: get_nv_constr_dft_r     ! Compute the constraining potential (constrained DFT) from constraint parameters
+ public :: constrained_dft_ini     ! Initialize the constrained_dft datastructure
+ public :: constrained_dft_free    ! Free the constrained_dft datastructure
  public :: constrain_denmag        ! Constrain the local atomic density and/or magnetization from rhor to have target values
  public :: mag_penalty             ! Compute the potential corresponding to constrained magnetic moments (using get_nv_constr_dft_r) with the penalty function.
  public :: mag_penalty_e           ! Compute the energy corresponding to constrained magnetic moments.
@@ -71,6 +73,8 @@ MODULE m_dens
   integer :: nspden                          ! Number of spin-density components
   integer :: ntypat                          ! Number of type of atoms
 
+  real(dp) :: ucvol                          ! Unit cell volume
+
 !arrays
 
   integer :: ngfftf(18)                      ! Number of FFT grid points (for this processor) for the "fine" grid
@@ -82,6 +86,9 @@ MODULE m_dens
   integer,allocatable :: constraint_kind(:)
   ! constraint_kind(natom)
   ! Constraint to be applied to each atom. See corresponding input variable
+
+  real(dp) :: gmet(3,3)
+  ! Reciprocal space metric tensor, Bohr^2 units.
 
   real(dp) :: rprimd(3,3)
   ! Direct lattice vectors, Bohr units.
@@ -612,6 +619,148 @@ subroutine get_nv_constr_dft_r(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,r
 end subroutine get_nv_constr_dft_r
 !!***
 
+!!****f* m_dens/constrained_dft_ini
+!! NAME
+!! constrained_dft_ini
+!!
+!! FUNCTION
+!! Initialize the constrained_dft datastructure.
+!! Mostly copying already available (dtset) information, but also computing intgf2
+
+!!
+!! INPUTS
+!!  constraint_kinds(natom)=for each atom, 0=no constraint,
+!!    1=fix only the magnetization direction, following spinat direction,
+!!    2=fix the magnetization vector to be the spinat one,
+!!    3=fix the magnetization amplitude to be the spinat one, but does not fix its direction
+!!    other future values will constrain the local atomic charge and possibly mix constraints if needed.
+!!  mpi_enreg=mpi structure with communicator info 
+!!  natom=number of atoms
+!!  nfft=number of points in standard fft grid
+!!  ngfft=FFT grid dimensions
+!!  nspden = number of spin densities (1 2 or 4)
+!!  ntypat=number of types of atoms
+!!  ratsph(ntypat)=radii for muffin tin spheres of each atom
+!!  rprimd=lattice vectors (dimensioned)
+!!  spinat(3,natom)=magnetic moments vectors, possible targets according to the value of constraint_kinds
+!!  typat(natom)=types of atoms
+!!  xred(3,natom)=reduced atomic positions
+!!
+!! OUTPUT
+!!  constrained_dft=datastructure that contain the needed information to enforce the density and magnetization constraints
+!!    Most of the data are simply copied from dtset, but also constrained_dft%intgf2(1:natom) is computed from the available data.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine constrained_dft_ini(constrained_dft,constraint_kind,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,&
+& ratsph,rprimd,spinat,typat,xred)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,nfftf,nspden,ntypat
+ type(MPI_type),intent(in) :: mpi_enreg
+ type(constrained_dft_t),intent(out):: constrained_dft
+!arrays
+ integer,intent(in)  :: constraint_kind(natom)
+ integer,intent(in)  :: ngfft(18)
+ integer,intent(in)  :: typat(natom)
+ real(dp),intent(in) :: ratsph(ntypat)
+ real(dp),intent(in) :: rprimd(3,3)
+ real(dp),intent(in) :: spinat(3,natom)
+ real(dp),intent(in) :: xred(3,natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: cplex1=1
+ real(dp) :: ucvol
+!arrays
+ real(dp), allocatable :: intgf2(:) ! natom
+ real(dp), allocatable :: rhor_dum(:,:) ! nfftf,nspden
+ real(dp) :: gprimd(3,3),rmet(3,3),gmet(3,3)
+
+! ***********************************************************************************************
+
+ ABI_ALLOCATE(intgf2,(nspden,natom))
+ ABI_ALLOCATE(rhor_dum,(nfftf,nspden))
+
+!We need the metric because it is needed in calcdensph.F90
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+!We need the integrated magnetic moments and the smoothing function
+ ABI_ALLOCATE(intgden,(nspden,natom))
+ call calcdensph(gmet,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,std_out,ratsph,rhor_dum,rprimd,typat,ucvol,xred,0,cplex1,intgf2=intgf2)
+
+ constrained_dft%gmet   =gmet
+ constrained_dft%natom  =natom
+ constrained_dft%nfftf  =nfftf
+ constrained_dft%ngfftf =ngfftf
+ constrained_dft%nspden =nspden
+ constrained_dft%ntypat =ntypat
+ constrained_dft%rprimd =rprimd
+ constrained_dft%ucvol  =ucvol
+
+ ABI_ALLOCATE(constrained_dft%constraint_kind(natom))
+ ABI_ALLOCATE(constrained_dft%intgf2(natom))
+ ABI_ALLOCATE(constrained_dft%ratsph(ntypat))
+ ABI_ALLOCATE(constrained_dft%spinat(3,natom))
+ ABI_ALLOCATE(constrained_dft%typat(natom))
+
+ constrained_dft%constraint_kind=constraint_kind
+ constrained_dft%intgf2=intgf2
+ constrained_dft%ratsph=ratsph
+ constrained_dft%spinat=spinat
+ constrained_dft%typat=typat
+
+ ABI_DEALLOCATE(intgf2)
+ ABI_DEALLOCATE(rhor_dum
+
+end subroutine constrained_dft_ini
+!!***
+
+
+!!****f* m_dens/constrained_dft_free
+!! NAME
+!! constrained_dft_free
+!!
+!! FUNCTION
+!! Free the constrained_dft datastructure.
+!! Mostly copying already available (dtset) information, but also computing intgf2
+
+!!
+!! INPUTS
+!!  constrained_dft=datastructure that contain the needed information to enforce the density and magnetization constraints
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine constrained_dft_free(constrained_dft)
+
+!Arguments ------------------------------------
+!scalars
+ type(constrained_dft_t),intent(out):: constrained_dft
+
+!Local variables-------------------------------
+
+! ***********************************************************************************************
+
+ ABI_SFREE(constrained_dft%constraint_kind)
+ ABI_SFREE(constrained_dft%intgf2)
+ ABI_SFREE(constrained_dft%ratsph)
+ ABI_SFREE(constrained_dft%spinat)
+ ABI_SFREE(constrained_dft%typat)
+
+end subroutine constrained_dft_free
+!!***
+
 
 !!****f* m_dens/constrain_denmag
 !! NAME
@@ -744,11 +893,12 @@ end subroutine get_nv_constr_dft_r
  ABI_DEALLOCATE(coeffs_constr_dft)
  ABI_DEALLOCATE(intgden)
 
-!Possibly compute the density in reciprocal space
-! If there is some charge constraint ...
-! call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,1,ngfft,0)
+!Possibly compute the density in reciprocal space, if there is some charge constraint
+ if(any(constraint_kind(:))>=10)then
+  call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,1,ngfft,0)
+ endif
 
-end subroutine constrain_denmag
+ end subroutine constrain_denmag
 !!***
 
 !!****f* m_dens/mag_penalty
