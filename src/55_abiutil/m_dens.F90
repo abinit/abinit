@@ -557,6 +557,147 @@ subroutine get_nv_constr_dft_r(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,r
 end subroutine get_nv_constr_dft_r
 !!***
 
+
+!!****f* m_dens/constrain_denmag
+!! NAME
+!! constrain_denmag
+!!
+!! FUNCTION
+!! Constrain the density to fulfill some target local atomic magnetization or local atomic charge (the latter not yet coded).
+!! The kind of constraint is given by constraint_kinds, and the target values are given by spinat, for the local atomic magnetization,
+!! and another future argument (possibly chargeat), for the local atomic charge.
+
+!!
+!! INPUTS
+!!  constraint_kinds(natom)=for each atom, 0=no constraint, 
+!!    1=fix only the magnetization direction, following spinat direction, 
+!!    2=fix the magnetization vector to be the spinat one,
+!!    3=fix the magnetization amplitude to be the spinat one, but does not fix its direction
+!!    other future values will constrain the local atomic charge and possibly mix constraints if needed.
+!!  intgf2(natom)=(precomputed) integral of the square of the spherical integration function for each atom in a sphere of radius ratsph.
+!!  mpi_enreg=mpi structure with communicator info
+!!  natom=number of atoms
+!!  nfft=number of points in standard fft grid
+!!  ngfft=FFT grid dimensions
+!!  nspden = number of spin densities (1 2 or 4)
+!!  ntypat=number of types of atoms
+!!  ratsph(natom)=radii for muffin tin spheres of each atom
+!!  rprimd=lattice vectors (dimensioned)
+!!  spinat(3,natom)=magnetic moments vectors, possible targets according to the value of constraint_kinds
+!!  typat(natom)=types of atoms
+!!  xred(3,natom)=reduced atomic positions
+!!
+!! SIDE EFFECTS
+!!  rhog(2,nfft)=array for Fourier transform of electron density. 
+!!    At output it will be constrained by the charge. So, not modified if only magnetization constraints.
+!!  rhor(nfft,nspden)=array for electron density in el./bohr**3. At output it will be constrained.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine constrain_denmag(constraint_kinds,intgf2,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,
+& ratsph,rhog,rhor,rprimd,spinat,typat,xred)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,nfft,nspden,ntypat
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in)  :: constraint_kinds(natom)
+ integer,intent(in)  :: intgf2(natom)
+ integer,intent(in)  :: ngfft(18)
+ integer,intent(in)  :: typat(natom)
+ real(dp),intent(in) :: ratsph(ntypat)
+ real(dp),intent(inout) :: rhog(2,nfft),rhor(nfft,nspden)
+ real(dp),intent(in) :: rprimd(3,3)
+ real(dp),intent(in) :: spinat(3,natom)
+ real(dp),intent(in) :: xred(3,natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iatom
+ integer :: cplex1=1
+ real(dp):: cmm_x,cmm_y,cmm_z
+ real(dp) :: intgden_proj,norm,ucvol
+!arrays
+ real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
+ real(dp), allocatable :: intgden(:,:) ! nspden,natom
+ real(dp) :: spinat_norm(3,natom)
+ real(dp) :: gprimd(3,3),rmet(3,3),gmet(3,3)
+
+! ***********************************************************************************************
+
+ ABI_ALLOCATE(intgden,(nspden,natom))
+
+!We need the metric because it is needed in calcdensph.F90
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+!We need the integrated magnetic moments and the smoothing function
+ ABI_ALLOCATE(intgden,(nspden,natom))
+ call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,std_out,ratsph,rhor,rprimd,typat,ucvol,xred,1,cplex1,intgden=intgden)
+
+ ABI_ALLOCATE(coeffs_constr_dft,(nspden,natom))
+ coeffs_constr_dft=zero
+
+!Loop over atoms
+!-------------------------------------------
+ do iatom=1,natom
+
+   if(constrained_kinds(iatom)==1 .and. nspden>1)then
+
+     coeffs_constr_dft(2:nspden,iatom)=(spinat(2:nspden,iatom)-intgden(2:nspden,iatom))/intgf2(iatom)
+
+   else if( (constrained_kinds(iatom)==2 .or. constrained_kinds(iatom)==3) .and. nspden>1)then
+
+     norm = sqrt(sum(spinat(:,iatom)**2))
+     spinat_norm(:,iatom) = zero
+     if (norm > tol10) then
+
+       if( (constrained_kinds(iatom)==2 )then
+         if(nspden==4)then
+           !Fix the direction
+           spinat_norm(:,iatom) = spinat(:,iatom) / norm
+           !Calculate the scalar product of the fixed mag. mom. vector and calculated mag. mom. vector
+           !This is actually the size of the projection of the calc. mag. mom. vector on the fixed mag. mom. vector
+           intgden_proj=spinat_norm(1,iatom)*intgden(2,iatom)+ &
+&            spinat_norm(2,iatom)*intgden(3,iatom)+ &
+&            spinat_norm(3,iatom)*intgden(4,iatom)
+           coeffs_constr_dft(2:nspden,iatom)=(spinat_norm(2:nspden,iatom)*intden_proj-intgden(2:nspden,iatom))/intgf2(iatom)
+         else if(nspden===2)then
+           !The direction must be correct, collinear
+           coeffs_constr_dft(2,iatom)=zero
+         endif
+       else if( (constrained_kinds(iatom)==3 )then
+         intgden_norm = sqrt(sum(intgden(2:4,iatom)**2))
+         coeffs_constr_dft(2:nspden,iatom)=(norm/intgden_norm-one)*intgden(2:nspden,iatom))/intgf2(iatom)
+       endif
+
+     else 
+       !In this case, we set the atomic magnetization to zero.
+       coeffs_constr_dft(2:nspden,iatom)=-intgden(2:nspden,iatom)/intgf2(iatom)
+     endif
+       
+   end if
+
+ enddo ! iatom
+
+!Now compute the density rhor 
+ call get_nv_constr_dft_r(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ratsph, &
+   typat,coeffs_constr_dft,rhor,xred)
+
+ ABI_DEALLOCATE(coeffs_constr_dft)
+ ABI_DEALLOCATE(intgden)
+
+!Possibly compute the density in reciprocal space
+! If there is some charge constraint ...
+! call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,1,ngfft,0)
+
+end subroutine constrain_denmag
+!!***
+
 !!****f* m_dens/mag_penalty
 !! NAME
 !! mag_penalty
