@@ -30,7 +30,7 @@ AC_DEFUN([SD_FFT_INIT], [
   sd_fft_status="optional"
 
   # Check that proposed choices are valid
-  sd_fft_valid_choices="fftw3 mkl pfft"
+  sd_fft_valid_choices="dfti dfti-threads fftw3 fftw3-mpi fftw3-threads pfft"
   if test -z "${sd_fft_choices}"; then
     sd_fft_choices="none ${sd_fft_valid_choices}"
   else
@@ -131,9 +131,6 @@ AC_DEFUN([SD_FFT_DETECT], [
                     --with-fft-flavor option.])
       fi
       ;;
-    mkl)
-      AC_MSG_WARN([ignored FFT flavor: 'mkl'])
-      ;;
     pfft)
       SD_PFFT_DETECT
       if test "${sd_pfft_ok}" = "yes"; then
@@ -168,7 +165,6 @@ AC_DEFUN([SD_FFT_DETECT], [
     fftw3-threads)
       AC_DEFINE([HAVE_FFTW3_THREADS], 1,
         [Define to 1 if you have a threads-enabled FFTW3 library.])
-      fi
       ;;
   esac
 ]) # SD_FFT_DETECT
