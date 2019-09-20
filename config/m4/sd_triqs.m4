@@ -251,7 +251,7 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
     SD_ESL_ADD_LIBS([${sd_triqs_libs_def}])
   else
     CPPFLAGS="${CPPFLAGS} ${sd_triqs_cppflags}"
-    CFLAGS="${CFLAGS} ${sd_triqs_cflags}"
+    CXXFLAGS="${CXXFLAGS} ${sd_triqs_cxxflags}"
     LDFLAGS="${LDFLAGS} ${sd_triqs_ldflags}"
     LIBS="${sd_triqs_libs} ${LIBS}"
   fi
