@@ -599,7 +599,7 @@ end subroutine get_nv_constr_dft_r
 !!
 !! SOURCE
 
- subroutine constrain_denmag(constraint_kinds,intgf2,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,
+ subroutine constrain_denmag(constraint_kinds,intgf2,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
 & ratsph,rhog,rhor,rprimd,spinat,typat,xred)
 
 !Arguments ------------------------------------
