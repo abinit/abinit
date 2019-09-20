@@ -18,6 +18,7 @@ AC_DEFUN([SD_TRIQS_INIT], [
   sd_triqs_cppflags=""
   sd_triqs_cflags=""
   sd_triqs_cxxflags=""
+  sd_triqs_fcflags=""
   sd_triqs_ldflags=""
   sd_triqs_libs=""
   sd_triqs_enable=""
@@ -110,6 +111,7 @@ AC_DEFUN([SD_TRIQS_INIT], [
         sd_triqs_cppflags="${sd_triqs_cppflags_def}"
         sd_triqs_cflags="${sd_triqs_cflags_def}"
         sd_triqs_cxxflags="${sd_triqs_cxxflags_def}"
+        sd_triqs_fcflags="${sd_triqs_fcflags_def}"
         sd_triqs_ldflags="${sd_triqs_ldflags_def}"
         sd_triqs_libs="${sd_triqs_libs_def}"
         ;;
@@ -118,6 +120,7 @@ AC_DEFUN([SD_TRIQS_INIT], [
         sd_triqs_cppflags="-I${with_triqs}/include"
         sd_triqs_cflags="${sd_triqs_cflags_def}"
         sd_triqs_cxxflags="${sd_triqs_cxxflags_def}"
+        sd_triqs_fcflags="${sd_triqs_fcflags_def}"
         sd_triqs_ldflags="${sd_triqs_ldflags_def}"
         sd_triqs_libs="-L${with_triqs}/lib ${sd_triqs_libs_def}"
         ;;
@@ -126,11 +129,13 @@ AC_DEFUN([SD_TRIQS_INIT], [
         sd_triqs_cppflags="${sd_triqs_cppflags_def}"
         sd_triqs_cflags="${sd_triqs_cflags_def}"
         sd_triqs_cxxflags="${sd_triqs_cxxflags_def}"
+        sd_triqs_fcflags="${sd_triqs_fcflags_def}"
         sd_triqs_ldflags="${sd_triqs_ldflags_def}"
         sd_triqs_libs="${sd_triqs_libs_def}"
         test ! -z "${TRIQS_CPPFLAGS}" && sd_triqs_cppflags="${TRIQS_CPPFLAGS}"
         test ! -z "${TRIQS_CFLAGS}" && sd_triqs_cflags="${TRIQS_CFLAGS}"
         test ! -z "${TRIQS_CXXFLAGS}" && sd_triqs_cxxflags="${TRIQS_CXXFLAGS}"
+        test ! -z "${TRIQS_FCFLAGS}" && sd_triqs_fcflags="${TRIQS_FCFLAGS}"
         test ! -z "${TRIQS_LDFLAGS}" && sd_triqs_ldflags="${TRIQS_LDFLAGS}"
         test ! -z "${TRIQS_LIBS}" && sd_triqs_libs="${TRIQS_LIBS}"
         ;;
@@ -151,6 +156,7 @@ AC_DEFUN([SD_TRIQS_INIT], [
     sd_triqs_cppflags=""
     sd_triqs_cflags=""
     sd_triqs_cxxflags=""
+    sd_triqs_fcflags=""
     sd_triqs_ldflags=""
     sd_triqs_libs=""
   fi
@@ -168,6 +174,8 @@ AC_DEFUN([SD_TRIQS_INIT], [
   AC_SUBST(sd_triqs_ok)
   AC_SUBST(sd_triqs_cppflags)
   AC_SUBST(sd_triqs_cflags)
+  AC_SUBST(sd_triqs_cxxflags)
+  AC_SUBST(sd_triqs_fcflags)
   AC_SUBST(sd_triqs_ldflags)
   AC_SUBST(sd_triqs_libs)
   AC_SUBST(with_triqs)
@@ -217,6 +225,7 @@ AC_DEFUN([SD_TRIQS_DETECT], [
         sd_triqs_cppflags=""
         sd_triqs_cflags=""
         sd_triqs_cxxflags=""
+        sd_triqs_fcflags=""
         sd_triqs_ldflags=""
         sd_triqs_libs=""
       else
@@ -228,6 +237,7 @@ AC_DEFUN([SD_TRIQS_DETECT], [
     sd_triqs_cppflags=""
     sd_triqs_cflags=""
     sd_triqs_cxxflags=""
+    sd_triqs_fcflags=""
     sd_triqs_ldflags=""
     sd_triqs_libs=""
   fi
@@ -460,6 +470,12 @@ AC_DEFUN([_SD_TRIQS_DUMP_CONFIG], [
       AC_MSG_RESULT([none])
     else
       AC_MSG_RESULT([${sd_triqs_cxxflags}])
+    fi
+    AC_MSG_CHECKING([for TRIQS Fortran flags])
+    if test "${sd_triqs_fcflags}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${sd_triqs_fcflags}])
     fi
     AC_MSG_CHECKING([for TRIQS linker flags])
     if test "${sd_triqs_ldflags}" = ""; then
