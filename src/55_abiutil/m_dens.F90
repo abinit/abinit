@@ -43,7 +43,8 @@ MODULE m_dens
  private
 
  public :: dens_hirsh              ! Compute the Hirshfeld charges
- public :: get_nv_constr_dft_r      ! Compute the constraining potential (constrained DFT) from constraint parameters
+ public :: get_nv_constr_dft_r     ! Compute the constraining potential (constrained DFT) from constraint parameters
+ public :: constrain_denmag        ! Constrain the local atomic density and/or magnetization from rhor to have target values
  public :: mag_penalty             ! Compute the potential corresponding to constrained magnetic moments (using get_nv_constr_dft_r) with the penalty function.
  public :: mag_penalty_e           ! Compute the energy corresponding to constrained magnetic moments.
  public :: calcdensph              ! Compute and print integral of total density inside spheres around atoms.
