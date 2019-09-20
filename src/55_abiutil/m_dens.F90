@@ -63,7 +63,7 @@ MODULE m_dens
 !!
 !! SOURCE
 
- type,public :: constraint_dft_t
+ type,public :: constrained_dft_t
 
 !scalars
   integer :: natom                           ! Number of atoms
