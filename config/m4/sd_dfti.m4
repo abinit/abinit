@@ -251,35 +251,13 @@ AC_DEFUN([_SD_DFTI_CHECK_USE], [
 
   # Check DFTI C API
   AC_MSG_CHECKING([whether the DFTI library works])
-  AC_LANG_PUSH([C])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM(
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
-#     include <dfti.h>
-    ]],
-    [[
-      fftw_plan *plan;
-      fftw_complex *a1, *a2;
-      fftw_execute_dft(plan, a1, a2);
+      call DftiCreateDescriptor
     ]])], [sd_dfti_ok="yes"], [sd_dfti_ok="no"])
-  AC_LANG_POP([C])
+  AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_dfti_ok}])
-
-  # Check DFTI MPI C API
-  if test "${sd_dfti_ok}" = "yes" -a "${sd_mpi_enable}" = "yes"; then
-    AC_MSG_CHECKING([whether the DFTI MPI library works])
-    AC_LANG_PUSH([C])
-    AC_LINK_IFELSE([AC_LANG_PROGRAM(
-      [[
-#       include <dfti-mpi.h>
-      ]],
-      [[
-        fftw_mpi_init();
-      ]])], [sd_dfti_mpi_ok="yes"], [sd_dfti_mpi_ok="no"])
-    AC_LANG_POP([C])
-    AC_MSG_RESULT([${sd_dfti_ok}])
-  else
-    sd_dfti_mpi_ok="no"
-  fi
 
   # Restore environment
   SD_ESL_RESTORE_FLAGS
