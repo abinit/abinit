@@ -414,9 +414,17 @@ for arg in ("enable","with"):
     except:
       opt_vals = None
 
-    m4.write("\n  AC_ARG_%s(%s,\n" % (arg.upper(),opt_name) \
-      + "    AC_HELP_STRING([--%s-%s],\n      [%s (default: %s)]))\n" % \
-        (arg,opt_name,opt_desc,opt_dflt))
+    if ( arg == "enable" ):
+      m4.write("\n  AC_ARG_%s(%s,\n" % (arg.upper(),opt_name) \
+        + "    AC_HELP_STRING([--%s-%s],\n      [%s (default: %s)]),\n" % \
+          (arg,opt_name,opt_desc,opt_dflt) \
+        + "    [abi_%s_enable=\"${enableval}\"],\n" % var \
+        + "    [abi_%s_enable=\"%s\"])\n" % (var, opt_dflt))
+    else:
+      m4.write("\n  AC_ARG_%s(%s,\n" % (arg.upper(),opt_name) \
+        + "    AC_HELP_STRING([--%s-%s],\n      [%s (default: %s)]))\n" % \
+          (arg,opt_name,opt_desc,opt_dflt))
+      
 
     if ( opt_dflt is not None ):
       if ( arg == "enable" ):
@@ -436,6 +444,8 @@ for arg in ("enable","with"):
       parse += "\n"+parse_opt(opt,"no yes")
 
     m4.write("  AC_SUBST(%s_%s)\n" % (arg,var))
+    if ( arg == "enable" ):
+      m4.write("  AC_SUBST(abi_%s_%s)\n" % (var,arg))
 
 # Finish writing define macro
 m4.write(macro_define_footer())
@@ -599,7 +609,7 @@ for opt in ac_args["enable"]:
   # Triggers for %s
   AC_MSG_CHECKING([whether to %s])
   AC_MSG_RESULT([${%s}])
-""" % (opt,opt_desc,opt)
+""" % (opt,opt_desc,opt_ivar)
 
   if ( len(opt_cnds) > 0 ):
     for cnd in opt_cnds:
@@ -612,7 +622,7 @@ for opt in ac_args["enable"]:
   if test "${%s}" = "%s"; then
     AC_MSG_NOTICE([triggering the '%s' conditional])
   fi
-  AM_CONDITIONAL([%s],[test "${%s}" = "%s"])""" % (opt_ivar,val,cnd,cnd,opt,val)
+  AM_CONDITIONAL([%s],[test "${%s}" = "%s"])""" % (opt_ivar,val,cnd,cnd,opt_ivar,val)
 
   if ( len(opt_defs) > 0 ):
     for cpp in opt_defs:
