@@ -692,7 +692,8 @@ end subroutine get_nv_constr_dft_r
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !We need the integrated magnetic moments and the smoothing function
- call calcdensph(gmet,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,std_out,ratsph,rhor_dum,rprimd,typat,ucvol,xred,0,cplex1,intgf2=intgf2)
+ call calcdensph(gmet,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,std_out,&
+&  ratsph,rhor_dum,rprimd,typat,ucvol,xred,0,cplex1,intgf2=intgf2)
 
  constrained_dft%gmet   =gmet
  constrained_dft%natom  =natom
