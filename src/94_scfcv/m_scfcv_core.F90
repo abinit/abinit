@@ -48,6 +48,7 @@ module m_scfcv_core
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
  use m_berryphase_new,   only : update_e_field_vars
+ use m_dens,             only : constrained_dft_t, constrained_dft_init, constrained_dft_free
  use m_time,             only : timab
  use m_fstrings,         only : int2char4, sjoin
  use m_symtk,            only : symmetrize_xred
@@ -415,6 +416,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  real(dp),pointer :: elfr(:,:),grhor(:,:,:),lrhor(:,:)
  real(dp),allocatable :: tauresid(:,:)
  type(scf_history_type) :: scf_history_wf
+ type(constrained_dft_t) :: constrained_dft
 
  type(paw_an_type),allocatable :: paw_an(:)
  type(paw_ij_type),allocatable :: paw_ij(:)
@@ -806,6 +808,12 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    ABI_ALLOCATE(dtn_pc,(0,0))
    ABI_ALLOCATE(grhf,(0,0))
  end if ! iscf>0
+
+!Here initialize the datastructure constrained_dft, for constrained DFT calculations
+ if(any(dtset%constraint_kind(:)/=0))then
+   call constrained_dft_ini(constrained_dft,dtset%constraint_kind,mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,dtset%ntypat,&
+&    dtset%ratsph,rprimd,dtset%spinat,dtset%typat,xred)
+ endif
 
 !Here, allocate arrays for computation of susceptibility and dielectric matrix or for TDDFT
 
@@ -2290,6 +2298,11 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    write(ab_xml_out, "(A)") '      </finalConditions>'
    write(ab_xml_out, "(A)") '    </scfcvLoop>'
  end if
+
+!Free the datastructure constrained_dft, for constrained DFT calculations
+ if(any(dtset%constraint_kind(:)/=0))then
+   call constrained_dft_free(constrained_dft)
+ endif
 
  call timab(249,2,tsec)
  call timab(238,2,tsec)

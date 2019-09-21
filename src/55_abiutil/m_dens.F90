@@ -85,8 +85,8 @@ MODULE m_dens
   ! Type of each natom 
 
   integer,allocatable :: constraint_kind(:)
-  ! constraint_kind(natom)
-  ! Constraint to be applied to each atom. See corresponding input variable
+  ! constraint_kind(ntypat)
+  ! Constraint kind to be applied to each type of atom. See corresponding input variable
 
   real(dp) :: gmet(3,3)
   ! Reciprocal space metric tensor, Bohr^2 units.
@@ -630,7 +630,7 @@ end subroutine get_nv_constr_dft_r
 
 !!
 !! INPUTS
-!!  constraint_kinds(natom)=for each atom, 0=no constraint,
+!!  constraint_kinds(ntypat)=for each type of atom, 0=no constraint,
 !!    1=fix only the magnetization direction, following spinat direction,
 !!    2=fix the magnetization vector to be the spinat one,
 !!    3=fix the magnetization amplitude to be the spinat one, but does not fix its direction
@@ -666,7 +666,7 @@ end subroutine get_nv_constr_dft_r
  type(MPI_type),intent(in) :: mpi_enreg
  type(constrained_dft_t),intent(out):: constrained_dft
 !arrays
- integer,intent(in)  :: constraint_kind(natom)
+ integer,intent(in)  :: constraint_kind(ntypat)
  integer,intent(in)  :: ngfftf(18)
  integer,intent(in)  :: typat(natom)
  real(dp),intent(in) :: ratsph(ntypat)
@@ -703,7 +703,7 @@ end subroutine get_nv_constr_dft_r
  constrained_dft%rprimd =rprimd
  constrained_dft%ucvol  =ucvol
 
- ABI_ALLOCATE(constrained_dft%constraint_kind,(natom))
+ ABI_ALLOCATE(constrained_dft%constraint_kind,(ntypat))
  ABI_ALLOCATE(constrained_dft%intgf2,(natom))
  ABI_ALLOCATE(constrained_dft%ratsph,(ntypat))
  ABI_ALLOCATE(constrained_dft%spinat,(3,natom))
@@ -768,12 +768,12 @@ end subroutine constrained_dft_free
 !!
 !! FUNCTION
 !! Constrain the density to fulfill some target local atomic magnetization or local atomic charge (the latter not yet coded).
-!! The kind of constraint is given by constraint_kinds, and the target values are given by spinat, for the local atomic magnetization,
+!! The kind of constraint is given by constraint_kind, and the target values are given by spinat, for the local atomic magnetization,
 !! and another future argument (possibly chargeat), for the local atomic charge.
 
 !!
 !! INPUTS
-!!  constraint_kinds(natom)=for each atom, 0=no constraint, 
+!!  constraint_kind(ntypat)=for each type of atom, 0=no constraint, 
 !!    1=fix only the magnetization direction, following spinat direction, 
 !!    2=fix the magnetization vector to be the spinat one,
 !!    3=fix the magnetization amplitude to be the spinat one, but does not fix its direction
@@ -787,7 +787,7 @@ end subroutine constrained_dft_free
 !!  ntypat=number of types of atoms
 !!  ratsph(ntypat)=radii for muffin tin spheres of each atom
 !!  rprimd=lattice vectors (dimensioned)
-!!  spinat(3,natom)=magnetic moments vectors, possible targets according to the value of constraint_kinds
+!!  spinat(3,natom)=magnetic moments vectors, possible targets according to the value of constraint_kind
 !!  typat(natom)=types of atoms
 !!  xred(3,natom)=reduced atomic positions
 !!
@@ -810,7 +810,7 @@ end subroutine constrained_dft_free
  integer,intent(in) :: natom,nfft,nspden,ntypat
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- integer,intent(in)  :: constraint_kind(natom)
+ integer,intent(in)  :: constraint_kind(ntypat)
  integer,intent(in)  :: intgf2(natom)
  integer,intent(in)  :: ngfft(18)
  integer,intent(in)  :: typat(natom)
@@ -824,7 +824,7 @@ end subroutine constrained_dft_free
 !scalars
  integer :: iatom
  integer :: cplex1=1
- real(dp) :: intgden_norm,intgden_proj,norm,ucvol
+ real(dp) :: conkind,intgden_norm,intgden_proj,norm,ucvol
 !arrays
  real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
  real(dp), allocatable :: intgden(:,:) ! nspden,natom
@@ -849,16 +849,18 @@ end subroutine constrained_dft_free
 !-------------------------------------------
  do iatom=1,natom
 
-   if(constraint_kind(iatom)==1 .and. nspden>1)then
+   conkind=constraint_kind(typat(iatom))
+
+   if(conkind==1 .and. nspden>1)then
 
      coeffs_constr_dft(2:nspden,iatom)=(spinat(2:nspden,iatom)-intgden(2:nspden,iatom))/intgf2(iatom)
 
-   else if( (constraint_kind(iatom)==2 .or. constraint_kind(iatom)==3) .and. nspden>1)then
+   else if( (conkind==2 .or. conkind==3) .and. nspden>1)then
 
      norm = sqrt(sum(spinat(:,iatom)**2))
      if (norm > tol10) then
 
-       if( constraint_kind(iatom)==2 )then
+       if( conkind==2 )then
          if(nspden==4)then
            !Fix the direction
            spinat_normed(:) = spinat(:,iatom) / norm
@@ -872,7 +874,7 @@ end subroutine constrained_dft_free
            !The direction must be correct, collinear, so no change.
            coeffs_constr_dft(2,iatom)=zero
          endif
-       else if( constraint_kind(iatom)==3 )then
+       else if( conkind==3 )then
          intgden_norm = sqrt(sum(intgden(2:nspden,iatom)**2))
          coeffs_constr_dft(2:nspden,iatom)=(norm/intgden_norm-one)*intgden(2:nspden,iatom)/intgf2(iatom)
        endif

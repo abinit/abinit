@@ -431,6 +431,17 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end do
    end if
 
+!  constraint_kind
+   do itypat=1,ntypat
+     cond_string(1)='itypat';cond_values(1)=itypat
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),3,(/0,1,2/),iout)
+     !Only potential self-consistency is currently allowed with constrained_dft
+     if (dt%iscf>10)) then
+       cond_string(2)='iscf';cond_values(2)=dt%iscf
+       call chkint_eq(2,2,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),1,(/0/),iout)
+     endif
+   enddo
+
 !  densfor_pred
    if(dt%iscf>0)then
      cond_string(1)='iscf';cond_values(1)=dt%iscf
@@ -1399,7 +1410,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 #endif
 
 !  magconon
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'magconon',dt%magconon,7,(/0,1,2,3,4,5,6/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'magconon',dt%magconon,3,(/0,1,2/),iout)
 !!  impose nspden 4 for the moment and spinors
 !   if (dt%magconon == 1) then
 !     if (dt%nspinor /= 2 .or. dt%nspden /= 4) then

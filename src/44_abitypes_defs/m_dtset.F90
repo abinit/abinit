@@ -560,28 +560,29 @@ type, public :: dataset_type
  integer :: wvl_ngauss(2)
 
 !Integer allocatables
- integer, allocatable ::  algalch(:)    ! algalch(ntypalch)
- integer, allocatable ::  bdgw(:,:,:)   ! bdgw(2,nkptgw,nsppol)
- integer, allocatable ::  dynimage(:)   ! dynimage(nimage or mxnimage)
- integer, allocatable ::  efmas_bands(:,:) ! efmas_bands(2,nkptgw)
- integer, allocatable ::  iatfix(:,:)   ! iatfix(3,natom)
- integer, allocatable ::  iatsph(:)     ! iatsph(natsph)
- integer, allocatable ::  istwfk(:)     ! istwfk(nkpt)
- integer, allocatable ::  kberry(:,:)   ! kberry(3,nberry)
- integer, allocatable ::  lexexch(:)    ! lexexch(ntypat)
- integer, allocatable ::  ldaminushalf(:) !lminushalf(ntypat)
- integer, allocatable ::  lpawu(:)      ! lpawu(ntypat)
- integer, allocatable ::  nband(:)      ! nband(nkpt*nsppol)
+ integer, allocatable ::  algalch(:)         ! algalch(ntypalch)
+ integer, allocatable ::  bdgw(:,:,:)        ! bdgw(2,nkptgw,nsppol)
+ integer, allocatable ::  constraint_kind(:) ! constraint_kind(ntypat) 
+ integer, allocatable ::  dynimage(:)        ! dynimage(nimage or mxnimage)
+ integer, allocatable ::  efmas_bands(:,:)   ! efmas_bands(2,nkptgw)
+ integer, allocatable ::  iatfix(:,:)        ! iatfix(3,natom)
+ integer, allocatable ::  iatsph(:)          ! iatsph(natsph)
+ integer, allocatable ::  istwfk(:)          ! istwfk(nkpt)
+ integer, allocatable ::  kberry(:,:)        ! kberry(3,nberry)
+ integer, allocatable ::  lexexch(:)         ! lexexch(ntypat)
+ integer, allocatable ::  ldaminushalf(:)    ! ldaminushalf(ntypat)
+ integer, allocatable ::  lpawu(:)           ! lpawu(ntypat)
+ integer, allocatable ::  nband(:)           ! nband(nkpt*nsppol)
  integer, allocatable ::  plowan_iatom(:)    ! plowan_iatom(plowan_natom)
- integer, allocatable ::  plowan_it(:)     ! plowan_it(plowan_nt*3)
+ integer, allocatable ::  plowan_it(:)       ! plowan_it(plowan_nt*3)
  integer, allocatable ::  plowan_lcalc(:)    ! plowan_lcalc(\sum_iatom plowan_nbl)
- integer, allocatable ::  plowan_nbl(:)     ! plowan_nbl(plowan_natom)
+ integer, allocatable ::  plowan_nbl(:)      ! plowan_nbl(plowan_natom)
  integer, allocatable ::  plowan_projcalc(:) ! plowan_projcalc(\sum_iatom plowan_nbl)
- integer, allocatable ::  prtatlist(:)  ! prtatlist(natom)
- integer, allocatable ::  so_psp(:)     ! so_psp(npsp)
- integer, allocatable ::  symafm(:)     ! symafm(nsym)
- integer, allocatable ::  symrel(:,:,:) ! symrel(3,3,nsym)
- integer, allocatable ::  typat(:)      ! typat(natom)
+ integer, allocatable ::  prtatlist(:)       ! prtatlist(natom)
+ integer, allocatable ::  so_psp(:)          ! so_psp(npsp)
+ integer, allocatable ::  symafm(:)          ! symafm(nsym)
+ integer, allocatable ::  symrel(:,:,:)      ! symrel(3,3,nsym)
+ integer, allocatable ::  typat(:)           ! typat(natom)
 
 !Real
  real(dp) :: adpimd_gamma
@@ -1989,6 +1990,7 @@ subroutine dtset_copy(dtout, dtin)
  call alloc_copy(dtin%algalch, dtout%algalch)
  call alloc_copy(dtin%bdgw, dtout%bdgw)
  call alloc_copy(dtin%bs_loband, dtout%bs_loband)
+ call alloc_copy(dtin%constraint_kind, dtout%constraint_kind)
  call alloc_copy(dtin%dynimage, dtout%dynimage)
  call alloc_copy(dtin%efmas_bands, dtout%efmas_bands)
  call alloc_copy(dtin%iatfix, dtout%iatfix)
@@ -2102,6 +2104,7 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%algalch)
  ABI_SFREE(dtset%bdgw)
  ABI_SFREE(dtset%bs_loband)
+ ABI_SFREE(dtset%constraint_kind)
  ABI_SFREE(dtset%dynimage)
  ABI_SFREE(dtset%efmas_bands)
  ABI_SFREE(dtset%iatfix)
@@ -3026,7 +3029,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
  list_vars=trim(list_vars)//' charge chempot chkdilatmx chkexit chkprim'
- list_vars=trim(list_vars)//' chksymbreak chneut cineb_start coefficients cpus cpum cpuh'
+ list_vars=trim(list_vars)//' chksymbreak chneut cineb_start coefficients constraint_kind cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_qrefine ddb_shiftq dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb'
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'

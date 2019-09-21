@@ -15071,16 +15071,24 @@ Variable(
     vartype="real",
     topics=['printing_prdos', 'MagMom_useful', 'ElecBandStructure_useful', 'ElecDOS_useful'],
     dimensions=['[[ntypat]]'],
-    defaultval=ValueWithConditions({'[[usepaw]] == 1': '[[AUTO_FROM_PSP]]', 'defaultval': 2.0}),
+    defaultval=ValueWithConditions({'[[usepaw]] == 1': '[[AUTO_FROM_PSP]]', 'defaultval': 2.00}),
     mnemonics="Radii of the ATomic SPHere(s)",
     text=r"""
-Relevant only when [[prtdos]] = 3 or [[prtdensph]] = 1.
+Relevant only when [[prtdensph]] = 1, or [[magconon]]/=0, or any([[constraint_kind]](:)/=0) (that is, constrained DFT), or [[prtdos]] = 3.
+
+When [[prtdensph]] = 1:
+
+Provides the radius of the spheres around (all) atoms in which the total
+charge density or magnetization will be integrated.
+
 
 When [[prtdos]] = 3:
 
 Provides the radius of the spheres around the [[natsph]] atoms of indices
 [[iatsph]], in which the local DOS and its angular-momentum projections will
-be analysed. The choice of this radius is quite arbitrary. In a plane-wave
+be analysed. 
+
+The choice of this radius is quite arbitrary. In a plane-wave
 basis set, there is no natural definition of an atomic sphere. However, it
 might be wise to use the following well-defined and physically motivated procedure:
 from the Bader analysis, one can define the radius of the sphere that contains
@@ -15099,13 +15107,10 @@ given radius, behave as a different power of the radius, for the different
 channels s, p, d. At the limit of very small radii, the s component dominates
 the charge contained in the sphere.
 
-When [[prtdensph]] = 1:
-
-Provides the radius of the spheres around (all) atoms in which the total
-charge density will be integrated.
-
 In case of PAW, [[ratsph]] radius has to be greater or equal to PAW radius of
 considered atom type (which is read from the PAW dataset file; see **rc_sph** or **r_paw**).
+
+In case of constrained DFT, note that the sphere for different atoms are not allowed to overlap.
 """,
 ),
 

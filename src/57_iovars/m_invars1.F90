@@ -500,6 +500,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    ABI_ALLOCATE(dtsets(idtset)%acell_orig,(3,mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%algalch,(mxntypat))
    ABI_ALLOCATE(dtsets(idtset)%amu_orig,(mxntypat,mxnimage))
+   ABI_ALLOCATE(dtsets(idtset)%constraint_kind,(mxntypat))
    ABI_ALLOCATE(dtsets(idtset)%corecs,(mxntypat))
    ABI_ALLOCATE(dtsets(idtset)%densty,(mxntypat,4))
    ABI_ALLOCATE(dtsets(idtset)%dynimage,(mxnimage))
@@ -826,6 +827,7 @@ subroutine indefo1(dtset)
 !C
  dtset%cd_customnimfrqs=0
  dtset%chkprim=1
+ dtset%constraint_kind(:)=0
 !D
  dtset%densty(:,:)=zero
  dtset%dfield(:)=zero    !!HONG
@@ -1822,9 +1824,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lexexch',tread,'INT')
    if(tread==1) dtset%lexexch(1:dtset%ntypat)=intarr(1:dtset%ntypat)
  end if
-! LDA minus half keyword
+
+!LDA minus half keyword
  call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'ldaminushalf',tread,'INT')
  if(tread==1) dtset%ldaminushalf(1:dtset%ntypat)=intarr(1:dtset%ntypat)
+
 !Some plowan data
  dtset%plowan_natom=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_natom',tread,'INT')
@@ -1843,6 +1847,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  dtset%macro_uj = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'macro_uj',tread,'INT')
  if(tread==1) dtset%macro_uj=intarr(1)
+
+!Constraint DFT keyword
+ call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'constraint_kind',tread,'INT')
+ if(tread==1) dtset%constraint_kind(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
  ABI_DEALLOCATE(nband)
  ABI_DEALLOCATE(ratsph)
