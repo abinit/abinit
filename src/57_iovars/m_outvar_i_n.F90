@@ -669,7 +669,6 @@ subroutine outvar_i_n (dtsets,iout,&
    narrm(idtset)=dtsets(idtset)%ntypat
    if(idtset==0)narrm(idtset)=mxvals%ntypat
    if (narrm(idtset)>0) intarr(1:narrm(idtset),idtset)=dtsets(idtset)%ldaminushalf(1:narrm(idtset))
-   end if
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'ldaminushalf','INT',multivals%ntypat)
 
