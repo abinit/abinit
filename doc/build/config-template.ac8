@@ -1079,6 +1079,14 @@
 #
 #with_triqs="/usr/local"
 
+# Select the 1.4 version of TRIQS
+#
+#enable_triqs_v1_4="yes"
+
+# Select the 2.0 version of TRIQS
+#
+#enable_triqs_v2_0="yes"
+
 # C++ flags for the TRIQS library (default is unset)
 #
 #TRIQS_CXXFLAGS="-I/usr/local/triqs/include -I/usr/local/cthyb/src/c++"
