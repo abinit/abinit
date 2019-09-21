@@ -666,7 +666,7 @@ end subroutine get_nv_constr_dft_r
  type(constrained_dft_t),intent(out):: constrained_dft
 !arrays
  integer,intent(in)  :: constraint_kind(natom)
- integer,intent(in)  :: ngfft(18)
+ integer,intent(in)  :: ngfftf(18)
  integer,intent(in)  :: typat(natom)
  real(dp),intent(in) :: ratsph(ntypat)
  real(dp),intent(in) :: rprimd(3,3)
@@ -684,14 +684,13 @@ end subroutine get_nv_constr_dft_r
 
 ! ***********************************************************************************************
 
- ABI_ALLOCATE(intgf2,(nspden,natom))
+ ABI_ALLOCATE(intgf2,(natom))
  ABI_ALLOCATE(rhor_dum,(nfftf,nspden))
 
 !We need the metric because it is needed in calcdensph.F90
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !We need the integrated magnetic moments and the smoothing function
- ABI_ALLOCATE(intgden,(nspden,natom))
  call calcdensph(gmet,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,std_out,ratsph,rhor_dum,rprimd,typat,ucvol,xred,0,cplex1,intgf2=intgf2)
 
  constrained_dft%gmet   =gmet
@@ -703,11 +702,11 @@ end subroutine get_nv_constr_dft_r
  constrained_dft%rprimd =rprimd
  constrained_dft%ucvol  =ucvol
 
- ABI_ALLOCATE(constrained_dft%constraint_kind(natom))
- ABI_ALLOCATE(constrained_dft%intgf2(natom))
- ABI_ALLOCATE(constrained_dft%ratsph(ntypat))
- ABI_ALLOCATE(constrained_dft%spinat(3,natom))
- ABI_ALLOCATE(constrained_dft%typat(natom))
+ ABI_ALLOCATE(constrained_dft%constraint_kind,(natom))
+ ABI_ALLOCATE(constrained_dft%intgf2,(natom))
+ ABI_ALLOCATE(constrained_dft%ratsph,(ntypat))
+ ABI_ALLOCATE(constrained_dft%spinat,(3,natom))
+ ABI_ALLOCATE(constrained_dft%typat,(natom))
 
  constrained_dft%constraint_kind=constraint_kind
  constrained_dft%intgf2=intgf2
@@ -716,7 +715,7 @@ end subroutine get_nv_constr_dft_r
  constrained_dft%typat=typat
 
  ABI_DEALLOCATE(intgf2)
- ABI_DEALLOCATE(rhor_dum
+ ABI_DEALLOCATE(rhor_dum)
 
 end subroutine constrained_dft_ini
 !!***
@@ -894,7 +893,7 @@ end subroutine constrained_dft_free
  ABI_DEALLOCATE(intgden)
 
 !Possibly compute the density in reciprocal space, if there is some charge constraint
- if(any(constraint_kind(:))>=10)then
+ if(any(constraint_kind(:)>=10))then
   call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,1,ngfft,0)
  endif
 
