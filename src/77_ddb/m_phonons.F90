@@ -884,9 +884,9 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
          ! direction for symops: symrel here instead of symrec and the inverse of indsym in harmonic_thermo
          my_nsym = crystal%nsym; if (my_qptopt == 3) my_nsym = 1
          do isym=1, my_nsym
-           temp_33 = matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
+           !temp_33 = matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
            ! MG Version
-           !temp_33 = matmul( (transpose(symcart(:,:,isym))), matmul(msqd_atom_tmp, symcart(:,:,isym)) )
+           temp_33 = matmul( (transpose(symcart(:,:,isym))), matmul(msqd_atom_tmp, symcart(:,:,isym)) )
            temp_33 = temp_33 / my_nsym
            jat = crystal%indsym(4,isym,iat)
            do idir=1,3
@@ -1004,9 +1004,9 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
            ! TODO: need to check the direction of the symcart vs transpose or inverse, given that jat is the pre-image of iat...
            my_nsym = crystal%nsym; if (my_qptopt == 3) my_nsym = 1
            do isym=1,my_nsym
-             temp_33 = matmul((symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))))
+             !temp_33 = matmul((symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))))
              ! MG Version
-             !temp_33 = matmul( (transpose(symcart(:,:,isym))), matmul(msqd_atom_tmp, symcart(:,:,isym)) )
+             temp_33 = matmul( (transpose(symcart(:,:,isym))), matmul(msqd_atom_tmp, symcart(:,:,isym)) )
              temp_33 = temp_33 / my_nsym
              jat = crystal%indsym(4,isym,iat)
              do idir=1,3
