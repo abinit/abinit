@@ -33,12 +33,13 @@ MODULE m_dens
  use m_xmpi
  use m_splines
 
- use defs_abitypes, only : MPI_type
- use m_time,        only : timab
+ use defs_abitypes,   only : MPI_type
+ use m_fft,           only : fourdp
+ use m_time,          only : timab
  use m_numeric_tools, only : wrap2_zero_one
- use m_io_tools,    only : open_file
- use m_geometry,    only : dist2, xcart2xred, metric
- use m_mpinfo,      only : ptabs_fourdp
+ use m_io_tools,      only : open_file
+ use m_geometry,      only : dist2, xcart2xred, metric
+ use m_mpinfo,        only : ptabs_fourdp
 
  implicit none
 
