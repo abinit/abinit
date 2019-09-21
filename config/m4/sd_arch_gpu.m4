@@ -59,7 +59,8 @@ AC_DEFUN([SD_GPU_INIT], [
   test -z "${sd_gpu_enable_def}" && sd_gpu_enable_def="no"
   test -z "${sd_gpu_policy}" && sd_gpu_policy="warn"
   test -z "${sd_gpu_status}" && sd_gpu_status="optional"
-  test -z "${sd_gpu_libs_def}" && sd_gpu_libs_def="-lopencl"
+  # FIXME: improve the setting mechanism
+  #test -z "${sd_gpu_libs_def}" && sd_gpu_libs_def="-lopencl"
 
   # Declare main configure option
   AC_ARG_WITH([gpu],
