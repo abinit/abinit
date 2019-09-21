@@ -4938,7 +4938,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  type(hdr_type),pointer :: ihdr
  type(ebands_t) :: iwfk_ebands, fine_ebands
 !arrays
- integer,allocatable :: kf2kin(:), kg_k(:,:), kshe_mask(:,:,:)
+ integer,allocatable :: kf2kin(:), kg_k(:,:) !, kshe_mask(:,:,:)
  real(dp),allocatable :: cg_k(:,:), eig_k(:), occ_k(:), fine_eigen(:,:,:)
 
 ! *************************************************************************
@@ -4949,9 +4949,10 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  my_rank = xmpi_comm_rank(comm); if (my_rank /= master) goto 100
 
  ! Read interpolated ebands and kshe_mask from KERANGE file, build fine_ebands object.
+ ! KERANGE is written by sigtk_kpts_in_erange in m_sigtk module.
 #ifdef HAVE_NETCDF
  NCF_CHECK(nctk_open_read(ncid, kerange_path, xmpi_comm_self))
- ! Read header associated to fine k-mesh
+ ! Read header associated to the fine k-mesh
  call hdr_ncread(fine_hdr, ncid, fform)
  fform_kerange = fform_from_ext("KERANGE.nc")
  ABI_CHECK(fform == fform_kerange, sjoin("Wrong fform. Got: ", itoa(fform), ", Expecting: ", itoa(fform_kerange)))
@@ -4961,7 +4962,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  ABI_MALLOC(fine_eigen, (fine_mband, fine_hdr%nkpt, fine_hdr%nsppol))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "eigenvalues"), fine_eigen))
  !NCF_CHECK(nctk_get_dim(ncid, "nkpt_inerange", nkpt_inerage))
- ABI_MALLOC(kshe_mask, (fine_ebands%nkpt, fine_hdr%nsppol, 2))
+ !ABI_MALLOC(kshe_mask, (fine_hdr%nkpt, fine_hdr%nsppol, 2))
  !NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "kshe_mask"), kshe_mask))
  !ABI_MALLOC(krange2ibz, (nkpt_inerange))
  !NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "krange2ibz"), krange2ibz))
@@ -4977,6 +4978,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
 
  if (my_rank == master) then
    write(std_out, "(2a)")ch10, repeat("=", 92)
+   !call wrtout([std_out, ab_out], msg)
    write(std_out, "(a)")" Generating new WKF file with dense k-mesh:"
    write(std_out, "(2a)")" Take wavefunctions with k-point list from WFK file: ", trim(in_wfkpath)
    write(std_out, "(2a)")" Take eigenvalues and k-point tables from KERANGE file: ", trim(kerange_path)
@@ -5143,7 +5145,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  ABI_FREE(eig_k)
  ABI_FREE(occ_k)
  ABI_FREE(kf2kin)
- ABI_FREE(kshe_mask)
+ !ABI_FREE(kshe_mask)
 
  call cryst%free()
  call ebands_free(iwfk_ebands)

@@ -220,7 +220,7 @@ subroutine phdos_print(PHdos,fname)
  select case (PHdos%prtdos)
  case (1)
    write(msg_method,'(a,es16.8,2a,i0)')&
-&   '# Gaussian method with smearing = ',PHdos%dossmear,unitname,', nqibz =',PHdos%nqibz
+    '# Gaussian method with smearing = ',PHdos%dossmear,unitname,', nqibz =',PHdos%nqibz
  case (2)
    write(msg_method,'(a,i0)')'# Tetrahedron method, nqibz= ',PHdos%nqibz
  case default
@@ -286,12 +286,12 @@ subroutine phdos_print(PHdos,fname)
         tens = zero
      end where
      write(unt_msqd,'(6es17.8,2x)',advance='NO') &
-&        tens(1,1), &
-&        tens(2,2), &
-&        tens(3,3), &
-&        tens(2,3), &
-&        tens(1,3), &
-&        tens(1,2)
+        tens(1,1), &
+        tens(2,2), &
+        tens(3,3), &
+        tens(2,3), &
+        tens(1,3), &
+        tens(1,2)
    end do
    write(unt_msqd,*)
  end do
@@ -577,7 +577,6 @@ end subroutine phdos_free
 !--------------------------------------------------------------------------
 
 !!****f* m_phonons/phdos_init
-!!
 !! NAME
 !! phdos_init
 !!
@@ -586,8 +585,6 @@ end subroutine phdos_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
 !!
 !! PARENTS
 !!
@@ -605,8 +602,9 @@ subroutine phdos_init(phdos, crystal, ifc, dosdeltae, dossmear, wminmax, prtdos)
  real(dp),intent(in) :: dosdeltae,dossmear
  real(dp),intent(in) :: wminmax(2)
 
- !Local variables -------------------------------------------------
+!Local variables -------------------------
  integer :: io
+! *********************************************************************
 
  phdos%ntypat     = crystal%ntypat
  phdos%natom      = crystal%natom
@@ -710,7 +708,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
 !Local variables -------------------------
 !scalars
  integer,parameter :: brav1=1,chksymbreak0=0,bcorr0=0,qptopt1=1,master=0
- integer :: iat,jat,idir,imode,io,iq_ibz,itype,nkpt_fullbz
+ integer :: iat,jat,idir,imode,io,iq_ibz,itype
  integer :: nqbz,ierr,natom,nomega,jdir, isym, nprocs, my_rank, ncid
  logical :: refine_dosdeltae
  real(dp),parameter :: max_occ1=one, gaussmaxarg = sqrt(-log(1.d-90)), max_smallq = 0.0625_dp
@@ -726,14 +724,11 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
  real(dp) :: speedofsound(3),speedofsound_(3)
  real(dp) :: displ(2*3*Crystal%natom*3*Crystal%natom)
  real(dp) :: eigvec(2,3,Crystal%natom,3*Crystal%natom),phfrq(3*Crystal%natom)
- real(dp) :: qlatt(3,3),rlatt(3,3)
- real(dp) :: msqd_atom_tmp(3,3),temp_33(3,3)
- real(dp) :: symcart(3,3,crystal%nsym)
- real(dp) :: syme2_xyza(3, crystal%natom)
+ real(dp) :: qlatt(3,3),rlatt(3,3), msqd_atom_tmp(3,3),temp_33(3,3)
+ real(dp) :: symcart(3,3,crystal%nsym), syme2_xyza(3, crystal%natom)
  real(dp),allocatable :: full_eigvec(:,:,:,:,:),full_phfrq(:,:),new_shiftq(:,:)
  real(dp),allocatable :: qbz(:,:),qibz(:,:),tmp_phfrq(:)
- real(dp),allocatable :: wtq_ibz(:),xvals(:), gvals_wtq(:), wdt(:,:)
- real(dp),allocatable :: energies(:)
+ real(dp),allocatable :: wtq_ibz(:),xvals(:), gvals_wtq(:), wdt(:,:), energies(:)
 
 ! *********************************************************************
 
@@ -745,11 +740,9 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
  if (all(prtdos /= [1, 2])) then
    MSG_BUG(sjoin('prtdos should be 1 or 2, but received', itoa(prtdos)))
  end if
- dosdeltae = dosdeltae_in
- refine_dosdeltae = .false.
+ dosdeltae = dosdeltae_in; refine_dosdeltae = .false.
  if (dosdeltae <= zero) then
-   dosdeltae = -dosdeltae
-   refine_dosdeltae = .true.
+   dosdeltae = -dosdeltae; refine_dosdeltae = .true.
  end if
  if (prtdos == 1 .and. dossmear <= zero) then
    MSG_BUG(sjoin('dossmear should be positive but received', ftoa(dossmear)))
@@ -758,7 +751,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
  call cwtime(cpu, wall, gflops, "start")
 
  ! Get symmetries in cartesian coordinates
- do isym = 1, crystal%nsym
+ do isym=1,crystal%nsym
    call symredcart(crystal%rprimd,crystal%gprimd,symcart(:,:,isym),crystal%symrel(:,:,isym))
  end do
 
@@ -783,10 +776,6 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
  end if
  call wrtout(std_out, msg, 'COLL')
 
- ! TODO
- ! 1) fix bug in tetra if degenerate and update ref files
- ! 2) nshift > 1?
-
  ! This call will set %nqibz and IBZ and BZ arrays
  in_qptrlatt = 0; in_qptrlatt(1, 1) = dos_ngqpt(1); in_qptrlatt(2, 2) = dos_ngqpt(2); in_qptrlatt(3, 3) = dos_ngqpt(3)
 
@@ -799,15 +788,13 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
    ! Convert kptrlatt to double and invert, qlatt here refer to the shortest qpt vectors
    rlatt = new_qptrlatt; call matr3inv(rlatt, qlatt)
 
-   nkpt_fullbz = nqbz
-   ABI_MALLOC(bz2ibz, (nkpt_fullbz))
+   ABI_MALLOC(bz2ibz, (nqbz))
    bz2ibz = bz2ibz_smap(1,:)
 
    call htetra_init(htetraq, bz2ibz, crystal%gprimd, qlatt, qbz, nqbz, qibz, phdos%nqibz, ierr, errstr, comm)
    call cwtime_report(" init_tetra", cpu, wall, gflops)
    ABI_CHECK(ierr == 0, errstr)
-
-   !ABI_FREE(kpt_fullbz)
+   ABI_FREE(bz2ibz)
 
    ! Allocate arrays used to store the entire spectrum, Required to calculate tetra weights.
    ! this may change in the future if Matteo refactorizes the tetra weights as sums over k instead of sums over bands
@@ -815,7 +802,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
    ABI_MALLOC_OR_DIE(full_eigvec, (2, 3, natom, 3*natom, phdos%nqibz), ierr)
    full_eigvec = zero
  end if ! tetra
- ABI_SFREE(bz2ibz)
+
  ABI_SFREE(bz2ibz_smap)
  ABI_FREE(new_shiftq)
 
@@ -827,6 +814,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
 
  nsmallq = zero; speedofsound = zero
  wminmax = [huge(one), -huge(one)]; count_wminmax = 0
+
  do iq_ibz=1,phdos%nqibz
    if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
 
@@ -860,8 +848,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
 
        ! Rotate e(q) to get e(Sq) to account for symmetrical q-points in BZ.
        ! eigenvectors indeed are not invariant under rotation. See e.g. Eq 39-40 of PhysRevB.76.165108 [[cite:Giustino2007]].
-       ! In principle there's a phase due to nonsymmorphic translations
-       ! but we here need |e(Sq)_iatom|**2
+       ! In principle there's a phase due to nonsymmorphic translations but we here need |e(Sq)_iatom|**2
        syme2_xyza = zero
        do iat=1,natom
          do isym=1, crystal%nsym
@@ -898,8 +885,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
          ! the atom is not necessarily invariant under symops, so these contributions should be added to each iat separately
          ! normalization by nsym is done at the end outside the iqpt loop and after the tetrahedron clause
          ! NB: looks consistent with the sym in harmonic thermo, just used in opposite
-         ! direction for symops: symrel here instead of symrec and the inverse of
-         ! indsym in harmonic_thermo
+         ! direction for symops: symrel here instead of symrec and the inverse of indsym in harmonic_thermo
          do isym=1, crystal%nsym
            temp_33 = matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
            jat = crystal%indsym(4,isym,iat)
@@ -969,13 +955,13 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
    do
      ABI_MALLOC(wdt, (phdos%nomega, 2))
      ABI_MALLOC(energies, (phdos%nomega))
-     energies = linspace(phdos%omega_min,phdos%omega_max,phdos%nomega)
+     energies = linspace(phdos%omega_min, phdos%omega_max, phdos%nomega)
 
      do iq_ibz=1,phdos%nqibz
        if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
 
-       ! Compute the weights for this q-point using tetrahedron
        do imode=1,3*natom
+         ! Compute the weights for this q-point using tetrahedron
          tmp_phfrq(:) = full_phfrq(imode,:)
          call htetraq%get_onewk_wvals(iq_ibz,bcorr0,phdos%nomega,energies,max_occ1,phdos%nqibz,tmp_phfrq,wdt)
          wdt = wdt * wtq_ibz(iq_ibz)
@@ -1036,8 +1022,9 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
 
      if (refine_dosdeltae) then
        ! HM: Check if the integration of the DOS is correct, otherwise half dos%deltae and re-run
+       ! MG FIXME: This won't work in parallel because we still have to call xmpi_sum
        call ctrap(phdos%nomega, phdos%phdos, phdos%omega_step, phdos_int)
-       if (abs(phdos_int-crystal%natom*3)>tol2) then
+       if (abs(phdos_int - crystal%natom*3) > tol2) then
          write(msg,'(a,f6.2,a,i4,2a,e10.3,a,e10.3)') "The value of the integral is", phdos_int, &
                       " but it should be", crystal%natom*3, ch10,&
                       "I will decrease dosdeltae from", dosdeltae, " to", dosdeltae/two
@@ -1053,6 +1040,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
      endif
      exit
    end do
+
    call cwtime_report(" accumulate", cpu, wall, gflops)
    ABI_FREE(energies)
    ABI_FREE(wdt)
@@ -1072,7 +1060,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
 #endif
    end if
 
-   ! immediately free this - it contains displ and not eigvec at this stage
+   ! Immediately free this - it contains displ and not eigvec at this stage
    ABI_FREE(full_eigvec)
    ABI_FREE(full_phfrq)
    ABI_FREE(tmp_phfrq)

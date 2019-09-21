@@ -846,13 +846,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_MALLOC(osc_gbound_q, (2*wfd%mgfft+8, 2))
 
  need_oscillators = 0
- !osc_ecut = dtset%userra
- !osc_ecut = dtset%ecut
  osc_ecut = dtset%eph_ecutosc
- !osc_ecut = one
  if (osc_ecut /= zero) then
    need_oscillators = 1
-   call wrtout(std_out, sjoin("Computing oscillator matrix elements with ecut.", ftoa(osc_ecut)))
+   call wrtout(std_out, sjoin("Computing oscillator matrix elements with ecut:", ftoa(osc_ecut)))
    ABI_CHECK(osc_ecut <= wfd%ecut, "osc_ecut cannot be greater than dtset%ecut")
  end if
 
@@ -3603,11 +3600,11 @@ subroutine sigmaph_comp(self,comp)
 
  ABI_CHECK(self%nkcalc == comp%nkcalc, "Difference found in nkcalc.")
  ABI_CHECK(self%max_nbcalc == comp%max_nbcalc, "Difference found in max_nbcalc.")
- ABI_CHECK(self%nsppol == self%nsppol, "Difference found in nsppol.")
- ABI_CHECK(self%ntemp == self%ntemp, "Difference found in ntemp.")
+ ABI_CHECK(self%nsppol == comp%nsppol, "Difference found in nsppol.")
+ ABI_CHECK(self%ntemp == comp%ntemp, "Difference found in ntemp.")
  !ABI_CHECK(natom3 == natom3, "")
- ABI_CHECK(self%nqibz == self%nqibz, "Difference found in nqibz.")
- ABI_CHECK(self%nqbz == self%nqbz, "Difference found in nqbz.")
+ ABI_CHECK(self%nqibz == comp%nqibz, "Difference found in nqibz.")
+ ABI_CHECK(self%nqbz == comp%nqbz, "Difference found in nqbz.")
 
  ! ======================================================
  ! Read data that does not depend on the (kpt, spin) loop.
@@ -3801,7 +3798,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  call wrtout(std_out, sjoin(ch10, repeat("=", 92)))
  msg = sjoin("[", itoa(ikcalc), "/", itoa(self%nkcalc), "]")
  call wrtout(std_out, sjoin(" Computing self-energy matrix elements for k-point:", ktoa(kk), msg))
- ! TODO
+ ! TODO Integrate with spin parallelism.
  spin = 1
  write(msg, "(3(a, i0))")" Treating ", self%nbcalc_ks(ikcalc, spin), " band(s) between: ", &
    self%bstart_ks(ikcalc, spin)," and: ", self%bstart_ks(ikcalc, spin) + self%nbcalc_ks(ikcalc, spin) - 1

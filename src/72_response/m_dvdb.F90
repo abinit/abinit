@@ -53,6 +53,7 @@ module m_dvdb
  use m_dynmat,        only : canat9, get_bigbox_and_weights
  use m_copy,          only : alloc_copy
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
+ use m_ioarr,         only : read_rhor
  use m_fftcore,       only : ngfft_seq
  use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
  use m_fft,           only : fourdp, zerosym
@@ -60,6 +61,7 @@ module m_dvdb
  use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk
  use m_spacepar,      only : symrhg, setsym
  use m_fourier_interpol,only : fourier_interpol
+ use m_pawrhoij,      only : pawrhoij_type
 
  implicit none
 
@@ -294,6 +296,9 @@ module m_dvdb
   logical :: has_quadrupoles = .False.
   ! True if quadrupoles are available.
 
+  logical :: has_efield = .False.
+  ! True if electric field perturbations are available.
+
   integer :: add_lr = 1
    ! Flag defining the treatment of the long range component in the interpolation of the DFPT potentials.
    ! 0 --> No treatment
@@ -322,7 +327,7 @@ module m_dvdb
 
   real(dp) :: dielt(3, 3) = zero
    ! Dielectric tensor in Cartesian coordinates.
-   ! Used to deal with the long-range componenent in the Fourier interpolation.
+   ! Used to deal with the long-range component in the Fourier interpolation.
 
   integer,allocatable :: pos_dpq(:,:,:)
    ! pos_dpq(3, mpert, nqpt)
@@ -389,7 +394,11 @@ module m_dvdb
 
   real(dp),allocatable :: qstar(:,:,:,:)
   ! qstar(3, 3, 3, natom)
-  ! dynamical quadrupole
+  ! dynamical quadrupole in Cartesian coordinates.
+
+  real(dp),allocatable :: v1g_efield(:,:,:,:)
+  ! v1g_efield(nfft, nspden, 3)
+  ! First order potentials due to electric field perturbations in G-space.
 
   type(crystal_t) :: cryst
   ! Crystalline structure read from the the DVDB file.
@@ -902,6 +911,7 @@ subroutine dvdb_free(db)
  ABI_SFREE(db%zeff)
  ABI_SFREE(db%zeff_raw)
  ABI_SFREE(db%qstar)
+ ABI_SFREE(db%v1g_efield)
 
  ! types
  call db%hdr_ref%free()
@@ -984,6 +994,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  write(my_unt,"(a)")sjoin(" Have dielectric tensor:", yesno(db%has_dielt))
  write(my_unt,"(a)")sjoin(" Have Born effective charges:", yesno(db%has_zeff))
  write(my_unt,"(a)")sjoin(" Have quadrupoles:", yesno(db%has_quadrupoles))
+ !write(my_unt,"(a)")sjoin(" Have electric field:", yesno(db%has_efield))
  write(my_unt,"(a)")sjoin(" Treatment of long-range part in V1scf:", itoa(db%add_lr))
  write(my_unt,"(a, f6.1)")" qdamp:", db%qdamp
 
@@ -6819,6 +6830,65 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_path, ddb)
  if (free_ddb) call ddb_ptr%free()
 
 end subroutine dvdb_load_ddb
+!!***
+
+!!****f* m_dvdb/dvdb_load_efield
+!! NAME
+!!  dvdb_load_efield
+!!
+!! FUNCTION
+!!  Load information about the Born effective charges and dielectric tensor from a DDB file
+!!
+!! INPUTS
+!!  pot_paths=List of strings with paths to POT1 files.
+!!  comm=MPI communicator.
+!!
+
+subroutine dvdb_load_efield(dvdb, pot_paths, comm)
+
+!Arguments ------------------------------------
+!scalars
+ class(dvdb_t),intent(inout) :: dvdb
+ integer,intent(in) :: comm
+ character(len=*),intent(in) :: pot_paths(3)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: pawread0 = 0, cplex2 = 2
+ integer :: ii, idir, ipert, nfft, ispden
+ type(hdr_type) :: hdr
+!arrays
+ real(dp),allocatable :: vtrial(:,:)
+ type(pawrhoij_type),allocatable :: pawrhoij(:)
+
+! *************************************************************************
+
+ nfft = product(dvdb%ngfft(1:3))
+ ABI_MALLOC(vtrial, (cplex2*nfft, dvdb%nspden))
+ ABI_CALLOC(dvdb%v1g_efield, (2, nfft, dvdb%nspden, 3))
+ dvdb%has_efield = .True.
+
+ do ii=1,3
+   ! Read DFPT potential.
+   call read_rhor(pot_paths(ii), cplex2, dvdb%nspden, nfft, dvdb%ngfft, pawread0, &
+     dvdb%mpi_enreg, vtrial, hdr, pawrhoij, comm, allow_interp=.True.)
+
+   ! Consistency check
+   idir = mod(hdr%pertcase-1, 3) + 1
+   ipert = (hdr%pertcase - idir) / 3 + 1
+   ABI_CHECK(all(abs(hdr%qptn) < tol12), sjoin("Expecting Gamma point, got qpt:", ktoa(hdr%qptn)))
+   ABI_CHECK(ipert == hdr%natom + 2, sjoin("Expecting efield perturbation, got ipert:", itoa(ipert)))
+   call hdr%free()
+
+   ! Go to G-space
+   do ispden=1,dvdb%nspden
+     call fourdp(cplex2, dvdb%v1g_efield(:,:,ispden,idir), vtrial, -1, dvdb%mpi_enreg, nfft, 1, dvdb%ngfft, 0)
+   end do
+ end do
+
+ ABI_FREE(vtrial)
+
+end subroutine dvdb_load_efield
 !!***
 
 !----------------------------------------------------------------------
