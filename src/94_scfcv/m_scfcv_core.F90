@@ -811,7 +811,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
 !Here initialize the datastructure constrained_dft, for constrained DFT calculations
  if(any(dtset%constraint_kind(:)/=0))then
-   call constrained_dft_ini(constrained_dft,dtset%constraint_kind,mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,dtset%ntypat,&
+   call constrained_dft_ini(constrained_dft,dtset%constraint_kind,dtset%magcon_lambda,&
+&    mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,dtset%ntypat,&
 &    dtset%ratsph,rprimd,dtset%spinat,dtset%typat,xred)
  endif
 
@@ -1804,7 +1805,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      optene=2*optres;if(psps%usepaw==1) optene=2
 
 ! TODO: check if tauresid is needed here too for potential residual in the future for MGGA potential mixing
-     call rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfftf,ngfftf, &
+     call rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfftf,ngfftf, &
 &     nhat,nhatgr,nhatgrdim,nkxc,nvresid,n3xccc,optene,optres,optxc,&
 &     rhog,rhor,rprimd,strsxc,ucvol_local,psps%usepaw,usexcnhat,&
 &     vhartr,vnew_mean,vpsp,vres_mean,res2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&

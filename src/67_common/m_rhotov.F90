@@ -43,7 +43,7 @@ module m_rhotov
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype, rhohxcpositron
  use libxc_functionals,  only : libxc_functionals_is_hybrid
  use m_spacepar,         only : hartre
- use m_dens,             only : mag_penalty
+ use m_dens,             only : constraint_dft_t,mag_penalty
  use m_rhotoxc,          only : rhotoxc
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_psolver,          only : psolver_rhohxc
@@ -70,6 +70,7 @@ contains
 !!
 !! INPUTS
 !!  [add_tfw]=flag controling the addition of Weiszacker gradient correction to Thomas-Fermi kin energy
+!!  constrained_dft <type(constrained_dft_t>=data for constrained dft calculations
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!   | spinmagntarget=input variable that governs fixed moment calculation
 !!   | natom=number of atoms in cell.
@@ -161,7 +162,7 @@ contains
 !!
 !! SOURCE
 
-subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
+subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 &  nhat,nhatgr,nhatgrdim,nkxc,vresidnew,n3xccc,optene,optres,optxc,&
 &  rhog,rhor,rprimd,strsxc,ucvol,usepaw,usexcnhat,&
 &  vhartr,vnew_mean,vpsp,vres_mean,vres2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
@@ -175,6 +176,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(out) :: vres2,vxcavg
  type(MPI_type),intent(inout) :: mpi_enreg
+ type(constrained_dft_t),intent(in) :: constrained_dft
  type(dataset_type),intent(in) :: dtset
  type(electronpositron_type),pointer,optional :: electronpositron
  type(energies_type),intent(inout) :: energies
@@ -448,20 +450,10 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 
 !Compute the constrained potential for the magnetic moments
  ABI_ALLOCATE(v_constr_dft_r, (nfft,dtset%nspden))
+ v_constr_dft_r = zero
  if (dtset%magconon==1.or.dtset%magconon==2) then
-   v_constr_dft_r = zero
    call mag_penalty(dtset%natom,dtset%spinat,dtset%nspden,dtset%magconon,dtset%magcon_lambda,rprimd, &
 &   mpi_enreg,nfft,ngfft,dtset%ntypat,dtset%ratsph,rhor,dtset%typat,v_constr_dft_r,xred)
- else
-!  NOTE: mjv 25 May 2013 added this for ibm6 - otherwise gives NaN in vnew after
-!  the addition below, in case magconon==0 and for certain libxc
-!  functionals!! May need to copy this to setvtr.F90 if the same effect appears.
-!  should check libxc test with a proper memory checker (valgrind).
-   do ispden=1,dtset%nspden
-     do ifft=1,nfft
-       v_constr_dft_r(ifft,ispden) = zero
-     end do
-   end do
  end if
 
  if (optres==0) then
