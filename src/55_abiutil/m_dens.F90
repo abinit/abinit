@@ -815,8 +815,8 @@ end subroutine constrained_dft_free
  type(constrained_dft_t),intent(in) :: constrained_dft
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- real(dp),intent(in) :: rhor(constrained_dft%nfft,constrained_dft%nspden)
- real(dp),intent(in) :: vresid(constrained_dft%nfft,constrained_dft%nspden)
+ real(dp),intent(in) :: rhor(constrained_dft%nfftf,constrained_dft%nspden)
+ real(dp),intent(in) :: vresid(constrained_dft%nfftf,constrained_dft%nspden)
  real(dp),intent(in) :: xred(3,constrained_dft%natom)
 
 !Local variables-------------------------------
@@ -827,6 +827,7 @@ end subroutine constrained_dft_free
 !arrays
  real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
  real(dp), allocatable :: intgden(:,:) ! nspden,natom
+ real(dp), allocatable :: intgres(:,:) ! nspden,natom
  real(dp) :: spinat_normed(3)
 
 ! ***********************************************************************************************
@@ -838,19 +839,19 @@ end subroutine constrained_dft_free
 
 !We need the integrated magnetic moments 
  ABI_ALLOCATE(intgden,(nspden,natom))
- call calcdensph(constrained_dft%gmet,mpi_enreg,natom,nfft,constrained_dft%ngfft,&
+ call calcdensph(constrained_dft%gmet,mpi_enreg,natom,nfftf,constrained_dft%ngfftf,&
 &  nspden,ntypat,std_out,constrained_dft%ratsph,rhor,constrained_dft%rprimd,typat,&
 &  constrained%ucvol,xred,1,cplex1,intgden=intgden)
 
 !We need the integrated residuals
  ABI_ALLOCATE(intgres,(nspden,natom))
- call calcdensph(constrained_dft%gmet,mpi_enreg,natom,nfft,constrained_dft%ngfft,&
+ call calcdensph(constrained_dft%gmet,mpi_enreg,natom,nfftf,constrained_dft%ngfftf,&
 &  nspden,ntypat,std_out,constrained_dft%ratsph,vresid,constrained_dft%rprimd,typat,&
 &  constrained%ucvol,xred,1,cplex1,intgden=intgres)
 
 !The proper combination of intgden and intgres is stored in intgden
  do iatom=1,natom
-   intgden(iatom,:)=constrained_dft%magcon_lambda * intgden(iatom,:) + intgres(iatom,:) / intgf2(iatom)
+   intgden(:,iatom)=constrained_dft%magcon_lambda * intgden(:,iatom) + intgres(:,iatom) / intgf2(iatom)
  enddo
 
  ABI_ALLOCATE(coeffs_constr_dft,(nspden,natom))
@@ -864,7 +865,7 @@ end subroutine constrained_dft_free
 
    if(conkind==1 .and. nspden>1)then
 
-     coeffs_constr_dft(2:nspden,iatom)=intgden(2:nspden,iatom)-spinat(2:nspden,iatom)
+     coeffs_constr_dft(2:nspden,iatom)=intgden(2:nspden,iatom)-constrained_dft%spinat(2:nspden,iatom)
 
    else if( (conkind==2 .or. conkind==3) .and. nspden>1)then
 
@@ -874,7 +875,7 @@ end subroutine constrained_dft_free
        if( conkind==2 )then
          if(nspden==4)then
            !Fix the direction
-           spinat_normed(:) = spinat(:,iatom) / norm
+           spinat_normed(:) = constrained_dft%spinat(:,iatom) / norm
            !Calculate the scalar product of the fixed mag. mom. vector and calculated mag. mom. vector
            !This is actually the size of the projection of the calc. mag. mom. vector on the fixed mag. mom. vector
            intgden_proj=spinat_normed(1)*intgden(2,iatom)+ &
@@ -902,8 +903,8 @@ end subroutine constrained_dft_free
 !THERE IS LIKELY A MODIFICATION TO BE DONE IN ORDER TO TREAT PROPERLY THE DENSITY VS POTENTIAL UPDATE ...
 
 !Now compute the new residual
- call add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ratsph, &
-   typat,coeffs_constr_dft,rhor,xred)
+ call add_atomic_fcts(natom,nspden,constrained_dft%rprimd,mpi_enreg,nfftf,constrained_dft%ngfftf,ntypat,&
+&  constrained_dft%ratsph,constrained_dft%typat,coeffs_constr_dft,rhor,xred)
 
  ABI_DEALLOCATE(coeffs_constr_dft)
  ABI_DEALLOCATE(intgden)
