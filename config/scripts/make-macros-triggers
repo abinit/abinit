@@ -95,7 +95,7 @@ AC_DEFUN([ABI_INFO_TRIGGERS_CHANGED],[
         opt_name = re.sub("_","-",pkg)
         if ( trig_params[pkg]["status"] == "new" ):
             trig_chgs += "  AC_MSG_NOTICE([  * new feature trigger for %s available])\n" % pkg
-            trig_chgs += "  AC_MSG_NOTICE([    >>> --with-%s, %s_*FLAGS])\n" % (opt_name,opt_name.upper())
+            trig_chgs += "  AC_MSG_NOTICE([    >>> --with-%s, %s_*FLAGS])\n" % (opt_name,pkg.upper())
             if ( "default_flavor" in trig_params[pkg] ):
                 trig_chgs += "  AC_MSG_NOTICE([    >>> --with-%s-flavor (default: %s)])\n" % (pkg,trig_params[pkg]["default_flavor"])
         elif ( trig_params[pkg]["status"] == "removed" ):

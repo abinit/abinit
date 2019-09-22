@@ -230,7 +230,13 @@ for parent in abinit_parents:
 # Write shared intermediate Makefile.am files
 with open("shared/Makefile.am", "w") as mf_shared:
   mf_shared.write(makefile_header(my_name, now))
-  mf_shared.write("SUBDIRS = common libpaw\n")
+  mf_shared.write("""\
+SUBDIRS = .
+if DO_BUILD_SHARED_COMMON
+  SUBDIRS += common
+endif
+SUBDIRS += libpaw
+""")
 with open("shared/common/Makefile.am", "w") as mf_common:
   mf_common.write(makefile_header(my_name, now))
   mf_common.write("SUBDIRS = src\n")
