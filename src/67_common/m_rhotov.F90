@@ -43,7 +43,7 @@ module m_rhotov
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype, rhohxcpositron
  use libxc_functionals,  only : libxc_functionals_is_hybrid
  use m_spacepar,         only : hartre
- use m_dens,             only : constrained_dft_t,mag_penalty
+ use m_dens,             only : constrained_dft_t,mag_penalty,constrained_residual
  use m_rhotoxc,          only : rhotoxc
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_psolver,          only : psolver_rhohxc
@@ -484,7 +484,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enr
      end if
 
      !If constrained_dft, must take into account the constraints, and recompute the residual and the new potential
-     if( any(dtset%constraint_kind(:)/=0)then
+     if( any(dtset%constraint_kind(:)/=0))then
        call constrained_residual(constrained_dft,mpi_enreg,rhor,vresidnew,xred)
        vnew(:,:)=vtrial(:,:)+vresidnew(:,:)
      endif
