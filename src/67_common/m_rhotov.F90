@@ -483,6 +483,12 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enr
        end do
      end if
 
+     !If constrained_dft, must take into account the constraints, and recompute the residual and the new potential
+     if( any(dtset%constraint_kind(:)/=0)then
+       call constrained_residual(constrained_dft,mpi_enreg,rhor,vresidnew,xred)
+       vnew(:,:)=vtrial(:,:)+vresidnew(:,:)
+     endif
+
      offset   = 0
 
      if (dtset%iscf==0) vtrial=vnew
