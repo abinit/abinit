@@ -43,7 +43,7 @@ module m_rhotov
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype, rhohxcpositron
  use libxc_functionals,  only : libxc_functionals_is_hybrid
  use m_spacepar,         only : hartre
- use m_dens,             only : constraint_dft_t,mag_penalty
+ use m_dens,             only : constrained_dft_t,mag_penalty
  use m_rhotoxc,          only : rhotoxc
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_psolver,          only : psolver_rhohxc
