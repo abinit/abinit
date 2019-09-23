@@ -42,13 +42,13 @@ use m_pawang
 use m_errors
 use m_ab7_mixing
 use m_mpinfo
+use m_crystal
 
 use defs_abitypes,      only : MPI_type
 use m_io_tools,         only : get_unit
 use m_hamiltonian,      only : gs_hamiltonian_type, copy_hamiltonian
 use m_pawcprj,          only : pawcprj_type
 use m_vcoul,            only : vcoul_t, vcoul_init, vcoul_free
-use m_crystal,          only : crystal_t, crystal_init, crystal_print
 use m_gsphere,          only : gsphere_t, gsph_init, gsph_free, print_gsphere
 use m_bz_mesh,          only : kmesh_t, kmesh_init, kmesh_free, kmesh_print, find_qmesh
 use m_fft,              only : fftpac, fourwf
@@ -2083,7 +2083,7 @@ call crystal_init(dtset%amu_orig(:,1),Cryst,dtset%spgroup,dtset%natom,dtset%npsp
 &                 dtset%xred_orig(:,:,1),dtset%ziontypat,dtset%znucl,timrev,.false.,.false.,title,&
 &                 dtset%symrel,dtset%tnons,dtset%symafm)
 ABI_DEALLOCATE(title)
-call crystal_print(Cryst)
+call Cryst%print()
 
 !TODO : Should be put in a separate build_vc constructor, and should be called right after build_H in the context of optdriver 66.
 if(dtset%optdriver==66) then

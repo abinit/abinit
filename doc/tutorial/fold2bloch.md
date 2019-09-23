@@ -20,9 +20,9 @@ hydrogen atoms, perform self-consistent cycle and plot the corresponding band
 structure. At the end, we will recover the familiar dispersion relation using
 the *fold2Bloch* utility. See also the [[help:fold2bloch]].
 
-[TUTORIAL_README]
-
 This tutorial should take about 1 hour.
+
+[TUTORIAL_README]
 
 ## Creating a Hydrogen supercell structure
   
@@ -65,7 +65,7 @@ In the directory ~abinit/tests/tutorial/Input/Work_fold2Bloch, copy the files
 tests/tutorial/Input/tfold2bloch_1.files and tests/tutorial/Input/tfold2bloch_1.in. 
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work_fold2Bloch
 cd Work_fold2Bloch
 cp ../tfold2bloch_1.files .   # You will need to edit this file.
@@ -93,9 +93,9 @@ order to do this you will need the following scripts:
 1.  energy_eig-abinit.sh
 2.  plot_band.m
     
-which are located at /abinit/doc/tutorial/fold2Bloch_assets/
+which are located at $ABI_HOME/doc/tutorial/fold2Bloch_assets/
 
-Execute the *energy_eig-avinit.sh* script
+Execute the *energy_eig-abinit.sh* script
 
     ./energy_eig-abinit.sh tfold2bloch_1o_DS2_EIG_
 
@@ -262,7 +262,7 @@ After running the script you should see the following graph:
 As you can see the unfolded band structure perfectly reproduces the
 anticipated dispersion relation $E(k)=E_0 - 2A \cos(kb)$. We can even
 estimate the magnitude of the hopping matrix element between adjacent atoms
-VssG = -A. The band width is 4A = (-1) - (-12) = 11 eV which results in VssG = -2.75 eV.
+$V_{ssG} = -A$. The band width is $4A = (-1) - (-12) = 11$ eV which results in $V_{ssG} = -2.75$ eV.
 
 To analyze the results with AbiPy use:
 

@@ -465,7 +465,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
      kgw_m_ksum = kgw - ksum
      call findqg0(iq_bz,g0,kgw_m_ksum,Qmesh%nbz,Qmesh%bz,Sigp%mG0)
 
-     ! Symmetrize the matrix elements ===
+     ! Symmetrize the matrix elements
      ! Sum only q"s in IBZ_k. In this case elements are weighted
      ! according to wtqp and wtqm. wtqm is for time-reversal.
      wtqp=1; wtqm=0

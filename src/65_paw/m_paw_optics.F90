@@ -894,7 +894,7 @@ CONTAINS  !=====================================================================
 
 ! Read the header of the optic files
  call hdr_read_from_fname(hdr, filnam1, fform1, spaceComm)
- call hdr_free(hdr)
+ call hdr%free()
  if (fform1 /= 610) then
    MSG_ERROR("Abinit8 requires an OPT file with fform = 610")
  end if
@@ -1084,7 +1084,7 @@ CONTAINS  !=====================================================================
  ABI_DEALLOCATE(wtk)
  ABI_DEALLOCATE(kpts)
 
- call hdr_free(hdr)
+ call hdr%free()
  call destroy_mpi_enreg(MPI_enreg_seq)
 
  DBG_EXIT("COLL")

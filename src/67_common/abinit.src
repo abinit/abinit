@@ -23,6 +23,7 @@ sources = [
  "m_conducti.F90",
  "m_dft_energy.F90",
  "m_extraprho.F90",
+ "m_ephtk.F90",
  "m_forces.F90",
  "m_forstr.F90",
  "m_cgwf.F90",

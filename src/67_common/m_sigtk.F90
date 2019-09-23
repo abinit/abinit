@@ -708,7 +708,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
    ! Write crystalline structure, fine_hdr and fine_ebands defined on the fine k-mesh.
    ! fine_ebands will be used to compare with the ab-initio NSCF eigenvalues.
-   NCF_CHECK(hdr_ncwrite(fine_hdr, ncid, fform_from_ext("KERANGE.nc"), nc_define=.True.))
+   NCF_CHECK(fine_hdr%ncwrite(ncid, fform_from_ext("KERANGE.nc"), nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(fine_ebands, ncid))
    ncerr = nctk_def_dims(ncid, [nctkdim_t("nkpt_inerange", nkpt_inerange)], defmode=.True.)
@@ -736,7 +736,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 
  call fine_gaps%free()
  call ebands_free(fine_ebands)
- call hdr_free(fine_hdr)
+ call fine_hdr%free()
 
 end subroutine sigtk_kpts_in_erange
 !!***

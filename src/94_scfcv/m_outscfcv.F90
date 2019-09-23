@@ -602,7 +602,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
    ! Write crystal and band structure energies.
    NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
-   NCF_CHECK(hdr_ncwrite(hdr, ncid, fform_den, nc_define=.True.))
+   NCF_CHECK(hdr%ncwrite(ncid, fform_den, nc_define=.True.))
    NCF_CHECK(crystal%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
    ! Add energy, forces, stresses
