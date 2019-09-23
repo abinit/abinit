@@ -66,6 +66,7 @@ AC_DEFUN([SD_FFT_INIT], [
         AC_MSG_ERROR([invalid FFT flavor: '${withval}'])
       fi
       sd_fft_flavor="${withval}"
+      sd_fft_enable="yes"
       sd_fft_init="kwd"
       unset tmp_fft_flavor_ok],
     [ sd_fft_flavor="${sd_fft_flavor_def}"; sd_fft_init="def"])
