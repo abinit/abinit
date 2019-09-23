@@ -132,7 +132,8 @@ AC_DEFUN([SD_FFT_DETECT], [
       fi
       ;;
     fftw3-mkl)
-      chk_linalg_is_mkl=`echo "${sd_linalg_flavor}" | grep "mkl"`
+      # FIXME: linalg should be supportted by Steredeg
+      chk_linalg_is_mkl=`echo "${abi_linalg_flavor}" | grep "mkl"`
       if test "${chk_linalg_is_mkl}" = ""; then
         AC_MSG_ERROR([fftw3-mkl requires MKL for linear algebra])
       fi
