@@ -688,6 +688,9 @@ SD_NETCDF_INIT([no-cxx optional fail])
 # Init PAPI
 SD_PAPI_INIT([optional fail])
 
+# Init PFFT
+SD_PFFT_INIT([optional skip])
+
 # Init TRIQS
 SD_TRIQS_INIT([optional fail])
 

@@ -66,9 +66,29 @@ AC_DEFUN([SD_FFT_INIT], [
         AC_MSG_ERROR([invalid FFT flavor: '${withval}'])
       fi
       sd_fft_flavor="${withval}"
-      sd_fft_init="cmd"
+      sd_fft_init="kwd"
       unset tmp_fft_flavor_ok],
     [ sd_fft_flavor="${sd_fft_flavor_def}"; sd_fft_init="def"])
+
+  # FIXME: linalg should be supported by Steredeg (abi_ -> sd_)
+  if test "${sd_fft_flavor}" = "fft3-mkl"; then
+    chk_linalg_is_mkl=`echo "${abi_linalg_flavor}" | grep "mkl"`
+    if test "${chk_linalg_is_mkl}" = ""; then
+      AC_MSG_ERROR([fftw3-mkl requires MKL for linear algebra])
+    fi
+    unset chk_linalg_is_mkl
+    if test "${sd_fftw3_init}" = "def" -o "${sd_fftw3_init}" = "yon"; then
+      AC_MSG_NOTICE([overriding FFTW3 settings with those of linear algebra])
+      sd_fftw3_enable="yes"
+      sd_fftw3_init="mkl"
+      sd_fftw3_cppflags="${abi_linalg_cppflags}"
+      sd_fftw3_cflags="${abi_linalg_cflags}"
+      sd_fftw3_cxxflags="${abi_linalg_cxxflags}"
+      sd_fftw3_fcflags="${abi_linalg_fcflags}"
+      sd_fftw3_ldflags="${abi_linalg_ldflags}"
+      sd_fftw3_libs="${abi_linalg_libs}"
+    fi
+  fi
 
   # Make sure configuration is correct
   if test "${STEREDEG_BYPASS_CONSISTENCY}" != "yes"; then
@@ -116,38 +136,18 @@ AC_DEFUN([SD_FFT_DETECT], [
                     --with-fft-flavor option.])
       fi
       ;;
-    fftw3|fftw3-mpi|fftw3-threads)
+    fftw3|fftw3-mkl|fftw3-mpi|fftw3-threads)
       SD_FFTW3_DETECT
       if test "${sd_fftw3_ok}" = "yes"; then
-        sd_fft_cppflags="${sd_fftw3_cppflags}"
-        sd_fft_cflags="${sd_fftw3_cflags}"
-        sd_fft_fcflags="${sd_fftw3_fcflags}"
-        sd_fft_ldflags="${sd_fftw3_ldflags}"
-        sd_fft_libs="${sd_fftw3_libs}"
+        if test "${sd_fft_flavor}" != "fftw3-mkl"; then
+          sd_fft_cppflags="${sd_fftw3_cppflags}"
+          sd_fft_cflags="${sd_fftw3_cflags}"
+          sd_fft_fcflags="${sd_fftw3_fcflags}"
+          sd_fft_ldflags="${sd_fftw3_ldflags}"
+          sd_fft_libs="${sd_fftw3_libs}"
+        fi
       else
-        AC_MSG_ERROR([FFTW3 is not available
-                    Please adjust configure options to point to a working FFTW3
-                    installation or change the requested FFT flavor through the
-                    --with-fft-flavor option.])
-      fi
-      ;;
-    fftw3-mkl)
-      # FIXME: linalg should be supportted by Steredeg
-      chk_linalg_is_mkl=`echo "${abi_linalg_flavor}" | grep "mkl"`
-      if test "${chk_linalg_is_mkl}" = ""; then
-        AC_MSG_ERROR([fftw3-mkl requires MKL for linear algebra])
-      fi
-      AC_MSG_NOTICE([overriding FFTW3 settings with those of linear algebra])
-      sd_fftw3_enable="yes"
-      sd_fftw3_init="mkl"
-      sd_fftw3_cppflags="${sd_linalg_cppflags}"
-      sd_fftw3_cflags="${sd_linalg_cflags}"
-      sd_fftw3_fcflags="${sd_linalg_fcflags}"
-      sd_fftw3_ldflags="${sd_linalg_ldflags}"
-      sd_fftw3_libs="${sd_linalg_libs}"
-      SD_FFTW3_DETECT
-      if test "${sd_fftw3_ok}" != "yes"; then
-        AC_MSG_ERROR([FFTW3 within MKL is not available
+        AC_MSG_ERROR([FFTW3 (flavor ${sd_fft_flavor}) is not available
                     Please adjust configure options to point to a working FFTW3
                     installation or change the requested FFT flavor through the
                     --with-fft-flavor option.])
