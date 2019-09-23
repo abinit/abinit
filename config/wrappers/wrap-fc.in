@@ -22,13 +22,13 @@ FPP="@FPP@"
 FPPFLAGS="@FPPFLAGS@"
 DEFS=""
 INCLUDES=""
-INCLUDES_NAG="@abi_netcdf_fcflags@"
+INCLUDES_NAG="@sd_netcdf_fcflags@"
 
 # Fortran compiler
 FC="@FC_NOWRAP@"
 FCFLAGS=""
 abi_fc_vendor="@abi_fc_vendor@"
-fc_debug="@enable_debug@"
+fc_debug="@abi_source_debug_enable@"
 fc_cmdline=""
 fc_modsearch=""
 fc_onepass="no"
@@ -71,9 +71,6 @@ for fc_opt in `echo "${fc_cmdline}" | sed -e 's/ -I[ ]*/ -I/g'`; do
   fc_inc=`echo "${fc_opt}" | grep '^-I'`
   if test "${fc_inc}" != ""; then
     INCLUDES="${INCLUDES} ${fc_opt}"
-    if test "${abi_fc_vendor}" = "nag"; then
-      INCLUDES="${INCLUDES} ${INCLUDES_NAG}"
-    fi
   fi
 
   # Find f90 file names
@@ -109,6 +106,9 @@ for fc_opt in `echo "${fc_cmdline}" | sed -e 's/ -I[ ]*/ -I/g'`; do
     fi
   fi
 done
+if test "${abi_fc_vendor}" = "nag"; then
+  INCLUDES="${INCLUDES} ${INCLUDES_NAG}"
+fi
 
 # ---------------------------------------------------------------------------- #
 
