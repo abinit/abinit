@@ -208,8 +208,26 @@ AC_DEFUN([ABI_OPTIONS_CPP_DEFINES],[
 
 
 
+# Config file values
+def macro_cfg_template():
+
+  return """
+
+
+# ABI_OPTIONS_CFG_TRANSFER()
+# --------------------------
+#
+# Transfer options from the config file to internal variables.
+#
+AC_DEFUN([ABI_OPTIONS_CFG_TRANSFER],[
+@MACRO@
+]) # ABI_OPTIONS_CFG_TRANSFER
+"""
+
+
+
 # Option parser generator
-def parse_opt(opt,values):
+def parse_opt(opt,opt_ivar,values):
 
   ret = "  # Parse %s\n" % (opt)
 
@@ -230,7 +248,7 @@ def parse_opt(opt,values):
       AC_MSG_ERROR([invalid option: %s = ${v}])
     fi
   fi
-""" % (opt,opt,values,opt,"|".join(values.split()),opt)
+""" % (opt_ivar,opt_ivar,values,opt,"|".join(values.split()),opt)
 
   else:
 
@@ -401,6 +419,10 @@ for arg in ("enable","with"):
     opt_name = re.sub("_","-",var)
     opt_desc = cnf.get(opt,"description")
     opt_stat = cnf.get(opt,"status")
+    if ( arg == "enable" ):
+      opt_ivar = "abi_%s_enable" % var
+    else:
+      opt_ivar = "abi_%s" % var
     try:
       opt_dflt = cnf.get(opt,"default")
     except:
@@ -418,8 +440,8 @@ for arg in ("enable","with"):
       m4.write("\n  AC_ARG_%s(%s,\n" % (arg.upper(),opt_name) \
         + "    AC_HELP_STRING([--%s-%s],\n      [%s (default: %s)]),\n" % \
           (arg,opt_name,opt_desc,opt_dflt) \
-        + "    [abi_%s_enable=\"${enableval}\"],\n" % var \
-        + "    [abi_%s_enable=\"%s\"])\n" % (var, opt_dflt))
+        + "    [abi_%s_enable=\"${enableval}\"; abi_%s_init=\"yon\"],\n" % (var,var) \
+        + "    [abi_%s_enable=\"%s\"; abi_%s_init=\"def\"])\n" % (var, opt_dflt, var))
     else:
       m4.write("\n  AC_ARG_%s(%s,\n" % (arg.upper(),opt_name) \
         + "    AC_HELP_STRING([--%s-%s],\n      [%s (default: %s)]))\n" % \
@@ -439,9 +461,9 @@ for arg in ("enable","with"):
         (arg,var,var,opt_nega)
 
     if ( opt_vals is not None ):
-      parse += "\n"+parse_opt(opt,opt_vals)
+      parse += "\n"+parse_opt(opt,opt_ivar,opt_vals)
     elif ( arg == "enable" ):
-      parse += "\n"+parse_opt(opt,"no yes")
+      parse += "\n"+parse_opt(opt,opt_ivar,"no yes")
 
     m4.write("  AC_SUBST(%s_%s)\n" % (arg,var))
     if ( arg == "enable" ):
@@ -482,6 +504,20 @@ m4.write("""
 # Finish writing backup macro
 m4.write(macro_backup_footer())
 
+# Write transfer-from-config-file macro
+transfer = ""
+for arg in ("enable","with"):
+  transfer += "\n  #\n  # --%s arguments\n  #\n" % (arg)
+  for opt in ac_args[arg]:
+    var = re.sub(arg+"_","",opt)
+    if ( arg == "enable" ):
+      transfer += "\n  if test \"${%s_%s}\" != \"\"; then\n    abi_%s_%s=\"${%s_%s}\"\n  fi\n" % \
+        (arg,var,var,arg,arg,var)
+    else:
+      transfer += "\n  if test \"${%s_%s}\" != \"\"; then\n    abi_%s=\"${%s_%s}\"\n  fi\n" % \
+        (arg,var,var,arg,var)
+m4.write(re.sub("@MACRO@", transfer, macro_cfg_template()))
+
 # Start writing recall macro
 m4.write(macro_recall_header())
 
@@ -490,8 +526,12 @@ for arg in ("enable","with"):
   m4.write("\n  #\n  # --%s arguments\n  #\n" % (arg))
   for opt in ac_args[arg]:
     var = re.sub(arg+"_","",opt)
-    m4.write("\n  if test \"${cmd_%s_%s}\" != \"\"; then\n    %s_%s=\"${cmd_%s_%s}\"\n  fi\n" % \
-      (arg,var,arg,var,arg,var))
+    if ( arg == "enable" ):
+      m4.write("\n  if test \"${cmd_%s_%s}\" != \"\"; then\n    abi_%s_%s=\"${cmd_%s_%s}\"\n  fi\n" % \
+        (arg,var,var,arg,arg,var))
+    else:
+      m4.write("\n  if test \"${cmd_%s_%s}\" != \"\"; then\n    %s_%s=\"${cmd_%s_%s}\"\n  fi\n" % \
+        (arg,var,arg,var,arg,var))
 
 # Do not forget "prefix"
 m4.write("""
