@@ -131,6 +131,25 @@ AC_DEFUN([SD_FFT_DETECT], [
                     --with-fft-flavor option.])
       fi
       ;;
+    fftw3-mkl)
+      chk_linalg_is_mkl=`echo "${sd_linalg_flavor}" | grep "mkl"`
+      if test "${chk_linalg_is_mkl}" = ""; then
+        AC_MSG_ERROR([fftw3-mkl requires MKL for linear algebra])
+      fi
+      AC_MSG_NOTICE([overriding FFTW3 settings with those of linear algebra])
+      sd_fftw3_cppflags="${sd_linalg_cppflags}"
+      sd_fftw3_cflags="${sd_linalg_cflags}"
+      sd_fftw3_fcflags="${sd_linalg_fcflags}"
+      sd_fftw3_ldflags="${sd_linalg_ldflags}"
+      sd_fftw3_libs="${sd_linalg_libs}"
+      SD_FFTW3_DETECT
+      if test "${sd_fftw3_ok}" != "yes"; then
+        AC_MSG_ERROR([FFTW3 within MKL is not available
+                    Please adjust configure options to point to a working FFTW3
+                    installation or change the requested FFT flavor through the
+                    --with-fft-flavor option.])
+      fi
+      ;;
     pfft)
       SD_PFFT_DETECT
       if test "${sd_pfft_ok}" = "yes"; then
