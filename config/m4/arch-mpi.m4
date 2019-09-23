@@ -552,12 +552,16 @@ AC_DEFUN([_ABI_MPI_CHECK_IGATHERV],[
 
       integer,parameter :: siz=5,group_size=3
       integer :: SENDBUF(siz), RECVBUF(siz)
-      integer :: SENDCOUNTS(group_size),  SDISPLS(group_size), RECVCOUNTS(group_size),RDISPLS(group_size)
-      integer :: SENDTYPE, RECVTYPE
-      integer :: COMM, REQUEST, IERROR
+      integer :: SDISPLS(group_size), RECVCOUNTS(group_size),RDISPLS(group_size)
+      integer :: SENDCOUNTS, SENDTYPE, RECVTYPE
+      integer :: ROOT=0, COMM, REQUEST, IERROR
 
       call MPI_IGATHERV(SENDBUF,SENDCOUNTS,SENDTYPE,&
-        RECVBUF,RECVCOUNTS,RDISPLS,RECVTYPE,0,COMM,REQUEST,IERR)
+        RECVBUF,RECVCOUNTS,RDISPLS,RECVTYPE,ROOT,COMM,REQUEST,IERROR)
+
+      !int MPI_Igatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf,
+      !                 const int recvcounts[], const int displs[], MPI_Datatype recvtype, int root,
+      !                 MPI_Comm comm, MPI_Request * request)
 
     ]])], [abi_mpi_igatherv_ok="yes"], [abi_mpi_igatherv_ok="no"])
   AC_LANG_POP
@@ -570,6 +574,8 @@ AC_DEFUN([_ABI_MPI_CHECK_IGATHERV],[
   if test "${abi_mpi_igatherv_ok}" = "yes"; then
     AC_DEFINE([HAVE_MPI_IGATHERV],1,
       [Define to 1 if your MPI library supports MPI_IGATHERV.])
+  else
+    AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
 
 ]) # _ABI_MPI_CHECK_IGATHERV

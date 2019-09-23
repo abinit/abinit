@@ -1092,16 +1092,16 @@ AC_DEFUN([_ABI_FC_CHECK_GETPID],[
 ]) # _ABI_FC_CHECK_GETPID
 
 
-# _ABI_CHECK_FC_ON_THE_FLY_SHAPE()
+# _ABI_FC_CHECK_ON_THE_FLY_SHAPE()
 # --------------------------------
 #
 # Checks whether process IDs are available from Fortran. (F2003)
 #
-AC_DEFUN([_ABI_CHECK_FC_ON_THE_FLY_SHAPE],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_ON_THE_FLY_SHAPE],[
+  # Init
   fc_has_getpid="no"
 
-  dnl Look for getpid() support
+  # Look for shape() in routine arguments support
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
@@ -1115,14 +1115,14 @@ AC_DEFUN([_ABI_CHECK_FC_ON_THE_FLY_SHAPE],[
     ]])], [fc_has_on_the_fly_shape="yes"], [fc_has_on_the_fly_shape="no"])
   AC_LANG_POP([Fortran])
 
-  dnl Determine whether to use getpid()
+  # Determine whether to use an enhanced Fortran shape()
   AC_MSG_CHECKING([whether the Fortran compiler can shape arrays on-the-fly])
   AC_MSG_RESULT([${fc_has_on_the_fly_shape}])
   if test "${fc_has_on_the_fly_shape}" = "yes"; then
     AC_DEFINE([HAVE_FC_ON_THE_FLY_SHAPE],1,
       [Define to 1 if your Fortran compiler can shape arrays on-the-fly.])
   fi
-]) # _ABI_CHECK_FC_ON_THE_FLY_SHAPE
+]) # _ABI_FC_CHECK_ON_THE_FLY_SHAPE
 
 
  #############################################################################
@@ -1186,6 +1186,7 @@ AC_DEFUN([ABI_FC_FEATURES],[
   _ABI_FC_CHECK_STREAM_IO
   _ABI_FC_CHECK_CPUTIME
   _ABI_FC_CHECK_TIMING
+  _ABI_FC_CHECK_ON_THE_FLY_SHAPE
 ]) # ABI_FC_FEATURES
 
 
