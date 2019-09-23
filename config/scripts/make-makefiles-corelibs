@@ -166,7 +166,9 @@ for lib in abinit_corelibs:
   obs_print = False
 
   # Initialize build flags
+  # FIXME: hard-coded TRIQS C++ flags
   makefile += "AM_CFLAGS = @ABI_CPPFLAGS@\n"
+  makefile += "AM_CXXFLAGS = $(sd_triqs_cxxflags)\n" % (lib)
   makefile += "AM_FCFLAGS = @FPPFLAGS@ @FCFLAGS_FREEFORM@ @FCFLAGS_MODDIR@ @fcflags_opt_%s@ @sd_sys_fcflags@\n\n" % (lib)
 
   # Initialize includes
