@@ -411,6 +411,9 @@ AC_DEFUN([ABI_GPU_DETECT],[
     AC_MSG_RESULT([${abi_gpu_flavor}])
   fi
 
+  # FIXME: Update GPU libraries
+  sd_gpu_libs="${sd_gpu_libs} ${abi_gpu_libs}"
+
   # Inform Automake
   AM_CONDITIONAL(DO_BUILD_17_GPU_TOOLBOX,[test "${abi_gpu_flavor}" != "none"])
   AM_CONDITIONAL(DO_BUILD_52_MANAGE_CUDA,[test "${abi_gpu_flavor}" = "cuda-double" -o "${abi_gpu_flavor}" = "cuda-single"])
