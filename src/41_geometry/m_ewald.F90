@@ -672,14 +672,6 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  complex(dpc) :: exp2piqx(natom)
  complex(dpc),allocatable :: expx1(:,:), expx2(:,:), expx3(:,:)
 
-!#define DEV_USESPLINE
-#ifdef DEV_USESPLINE
- integer :: jspl
- real(dp) :: aa,bb,cc,dd,step,stepm1,step2div6
- logical,save :: first_call=.True.
- real(dp),save :: t4spl(ny2_spline,2),t5spl(ny2_spline,2),y2vals(ny2_spline)
-#endif
-
 ! *********************************************************************
 
  ! This routine is expensive so skip the calculation and return zeros if zeff == zero.
@@ -694,35 +686,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !This is the minimum argument of an exponential, with some safety
  minexparg=log(tiny(0._dp))+five
-
-#ifdef DEV_USESPLINE
- step = (0.1_dp + y2max - y2min) / (ny2_spline - 1)
- stepm1 = one / step; step2div6 = step**2/six
- if (first_call) then
-   first_call = .False.
-   do ii=1,ny2_spline
-     y2 = y2min + (ii-1) * step
-     y2vals(ii) = y2
-     yy=sqrt(y2)
-     invy=1.0_dp/yy
-     invy2=invy**2
-     derfc_yy = abi_derfc(yy)
-     term2=derfc_yy*invy*invy2
-     term3=fact2*exp(-y2)*invy2
-     term4=-(term2+term3)
-     term5=(3.0_dp*term2+term3*(3.0_dp+2.0_dp*y2))*invy2
-     t4spl(ii,1) = term4
-     t5spl(ii,1) = term5
-   end do
-
-   call spline(y2vals, t4spl(:,1), ny2_spline, zero, zero, t4spl(:,2))
-   call spline(y2vals, t5spl(:,1), ny2_spline, zero, zero, t5spl(:,2))
-   !do ii=1,ny2_spline
-   !  write(345,*)y2vals(ii),t4spl(ii,:),t5spl(ii,:)
-   !end do
-   !write(std_out,*)"spline tables created"; stop
- end if
-#endif
+ !minexparg=-20.0_dp!log(tiny(0._dp))+five
 
  ABI_ALLOCATE(dyddt,(2,3,natom,3,natom))
  ABI_ALLOCATE(dydqt,(2,3,natom,3,natom,3))
@@ -1031,36 +995,6 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 !                Avoid zero denominators in term:
                  if (y2 >= y2min) then
                    newr=1
-! TODO : find a workaround here - the sqrt, erf and exp functions are slow
-!        and for dense q meshes this takes forever
-!        could tabulate and spline the full function of yy on a very fine grid
-!        and look it up there...
-
-#ifdef DEV_USESPLINE
-                   if (y2 > 1.0_dp) then
-                     ! Spline function
-                     jspl = 1 + int((y2 - y2min) * stepm1); dd = y2 - y2vals(jspl)
-                     bb = dd * stepm1
-                     aa = one - bb
-                     cc = aa*(aa**2-one) * step2div6
-                     dd = bb*(bb**2-one) * step2div6
-
-                     term4 = aa*t4spl(jspl,1) + bb*t4spl(jspl+1,1) + cc*t4spl(jspl,2) + dd*t4spl(jspl+1,2)
-                     term5 = aa*t5spl(jspl,1) + bb*t5spl(jspl+1,1) + cc*t5spl(jspl,2) + dd*t5spl(jspl+1,2)
-                   else
-                     ! Evaluate values (the function increases quickly for x --> 0, the spline
-                     ! is unstable and this leads to SIGFPE.
-                     yy=sqrt(y2)
-                     invy=1.0_dp/yy
-                     invy2=invy**2
-                     derfc_yy = abi_derfc(yy)
-                     term2=derfc_yy*invy*invy2
-                     term3=fact2*exp(-y2)*invy2
-                     term4=-(term2+term3)
-                     term5=(3.0_dp*term2+term3*(3.0_dp+2.0_dp*y2))*invy2
-                   end if
-
-#else
                    yy=sqrt(y2)
                    invy=1.0_dp/yy
                    invy2=invy**2
@@ -1069,7 +1003,6 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                    term3=fact2*exp(-y2)*invy2
                    term4=-(term2+term3)
                    term5=(3.0_dp*term2+term3*(3.0_dp+2.0_dp*y2))*invy2
-#endif
                    do nu=1,3
                      do mu=nu,3
                        dyddt(1,mu,ia,nu,ib)=dyddt(1,mu,ia,nu,ib)+&
