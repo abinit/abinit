@@ -443,10 +443,25 @@ for arg in ("enable","with"):
         + "    [abi_%s_enable=\"${enableval}\"; abi_%s_init=\"yon\"],\n" % (var,var) \
         + "    [abi_%s_enable=\"%s\"; abi_%s_init=\"def\"])\n" % (var, opt_dflt, var))
     else:
-      m4.write("\n  AC_ARG_%s(%s,\n" % (arg.upper(),opt_name) \
-        + "    AC_HELP_STRING([--%s-%s],\n      [%s (default: %s)]))\n" % \
-          (arg,opt_name,opt_desc,opt_dflt))
-      
+      tmp_init = "kwd"
+      if ( opt_vals == "@install" ):
+        tmp_init = "dir"
+      tmp_decl = """
+  AC_ARG_WITH({name},
+    AC_HELP_STRING([--with-{cmd}],
+      [{help} (default: {default})]),
+    [ abi_{name}="${{withval}}"
+      case "${{withval}}" in
+        no|yes)
+          abi_{name}_init="yon"
+          ;;
+        *)
+          abi_{name}_init="{init}"
+          ;;
+      esac],
+    [ abi_{name}_init="def"])
+""".format(cmd=opt_name, name=var, help=opt_desc, default=opt_dflt, init=tmp_init)
+      m4.write(tmp_decl)
 
     if ( opt_dflt is not None ):
       if ( arg == "enable" ):
