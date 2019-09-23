@@ -347,7 +347,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
            ABI_FREE(rhog_out)
          end if ! need_fftinterp
 
-         call hdr_free(hdr0)
+         call hdr0%free()
          close(in_unt, err=10, iomsg=errmsg)
        end if ! master
        if (accessfil == 4) call xmpi_bcast(my_fildata,master,spaceComm,ierr)
@@ -483,7 +483,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      end if
    end if
 
-   if (accessfil == 0 .or. accessfil == 3 .or. accessfil == 4) call hdr_free(hdr0)
+   if (accessfil == 0 .or. accessfil == 3 .or. accessfil == 4) call hdr0%free()
 
  ! =======================================
  ! Set up for writing data
@@ -583,7 +583,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
      ! Master in comm_fft creates the file and writes the header.
      if (xmpi_comm_rank(comm_fft) == 0) then
-       call hdr_write_to_fname(hdr, file_etsf, fform)
+       call hdr%write_to_fname(file_etsf, fform)
      end if
      call xmpi_barrier(comm_fft)
 
@@ -756,7 +756,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
    if (open_file(path, msg, newunit=unt, form='unformatted', status='unknown', action="write") /= 0) then
      MSG_ERROR(msg)
    end if
-   call hdr_fort_write(hdr,unt,fform,ierr)
+   call hdr%fort_write(unt, fform, ierr)
    ABI_CHECK(ierr==0,"ierr !=0")
    do ispden=1,nspden
      write(unt, err=10, iomsg=errmsg) (datar(iarr,ispden), iarr=1,cplex * nfft)
@@ -779,7 +779,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
    ABI_CHECK(i3_glob /= n3 +1, "This processor does not have z-planes!")
 
    ! Master writes the header.
-   if (me_fft == master) call hdr_write_to_fname(hdr,path,fform)
+   if (me_fft == master) call hdr%write_to_fname(path, fform)
    call xmpi_barrier(comm_fft) ! TODO: Non-blocking barrier.
 
    call MPI_FILE_OPEN(comm_fft, path, MPI_MODE_RDWR, xmpio_info, unt, mpierr)
@@ -840,7 +840,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
    ! Master writes the header.
    if (xmpi_comm_rank(comm_fft) == master) then
      NCF_CHECK(nctk_open_modify(ncid, file_etsf, xmpi_comm_self))
-     NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
+     NCF_CHECK(hdr%ncwrite(ncid, fform, nc_define=.True.))
      ! Add information on the crystalline structure.
      NCF_CHECK(crystal%ncwrite(ncid))
      if (present(ebands)) then
@@ -922,7 +922,7 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
 ! *************************************************************************
 
  timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
- crystal = hdr_get_crystal(hdr, timrev)
+ crystal = hdr%get_crystal(timrev)
 
  if (present(eigen)) then
      mband = maxval(hdr%nband)
@@ -1196,7 +1196,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
    if (pawread == 1) call pawrhoij_copy(pawrhoij_file, pawrhoij, keep_nspden=.true.)
 
  else
-   call hdr_bcast(ohdr, master, my_rank, comm)
+   call ohdr%bcast(master, my_rank, comm)
    call xmpi_bcast(fform, master, comm, ierr)
 
    ! Eventually copy (or distribute) PAW data
@@ -1205,11 +1205,11 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
        ABI_DT_MALLOC(pawrhoij_file, (ohdr%natom))
        call pawrhoij_nullify(pawrhoij_file)
        call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex_rhoij, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
-&           ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size, qphase=ohdr%pawrhoij(1)%qphase)
+            ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size, qphase=ohdr%pawrhoij(1)%qphase)
      end if
      if (size(ohdr%pawrhoij) /= size(pawrhoij)) then
        call pawrhoij_copy(ohdr%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab, &
-&                         keep_nspden=.true.)
+                          keep_nspden=.true.)
      else
        call pawrhoij_copy(ohdr%pawrhoij,pawrhoij, keep_nspden=.true.)
      end if
@@ -1326,7 +1326,7 @@ integer function fort_denpot_skip(unit, msg) result(ierr)
  end if
 
  nspden = hdr%nspden
- call hdr_free(hdr)
+ call hdr%free()
 
  ! Skip the records with v1.
  do ii=1,nspden

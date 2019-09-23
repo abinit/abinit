@@ -5074,7 +5074,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  ! TODO: Perform consistency check btw Hdr and Wfd.
  ! Output the header of the GS wavefunction file.
  fform = 0
- if (wfd%prtvol /= 0 .and. wfd%my_rank == 0) call hdr_echo(hdr, fform, 4, unit=std_out)
+ if (wfd%prtvol /= 0 .and. wfd%my_rank == 0) call hdr%echo(fform, 4, unit=std_out)
 
  mband_disk = MAXVAL(Hdr%nband)
  ABI_CHECK(Wfd%mband <= mband_disk,"Not enough bands stored on file")
@@ -5292,7 +5292,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  end if
 
  call wfk%close()
- call hdr_free(Hdr)
+ call Hdr%free()
 
  ABI_FREE(my_readmask)
 

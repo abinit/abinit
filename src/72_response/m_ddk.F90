@@ -246,7 +246,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
  ! Get ebands and hdr from WFK file.
  ebands = wfk_read_ebands(wfk_path, comm, out_hdr=hdr)
- cryst = hdr_get_crystal(hdr, 2)
+ cryst = hdr%get_crystal(2)
 
  ! Extract important dimensions from hdr%
  nkpt    = hdr%nkpt
@@ -579,7 +579,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    call wrtout(ab_out, sjoin("- Writing file: ", fname))
    NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
    hdr_tmp%pertcase = 0
-   NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
+   NCF_CHECK(hdr_tmp%ncwrite(ncid, 43, nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
    if (only_diago) then
@@ -612,7 +612,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      !call wrtout(ab_out, sjoin("- Writing file: ", fname))
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
      hdr_tmp%pertcase = 3 * cryst%natom + ii
-     NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
+     NCF_CHECK(hdr_tmp%ncwrite(ncid, 43, nc_define=.True.))
      NCF_CHECK(cryst%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(ebands, ncid))
      ncerr = nctk_def_arrays(ncid, [ &
@@ -623,7 +623,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "h1_matrix_elements"), dipoles(ii,:,:,:,:,:)))
      NCF_CHECK(nf90_close(ncid))
    end do
-   call hdr_free(hdr_tmp)
+   call hdr_tmp%free()
  end if
 #endif
 
@@ -655,7 +655,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  call wfd%free()
  call ebands_free(ebands)
  call cryst%free()
- call hdr_free(hdr)
+ call hdr%free()
 
  ! Block all procs here so that we know output files are available when code returns.
  call xmpi_barrier(comm)

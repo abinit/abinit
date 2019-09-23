@@ -997,8 +997,8 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call gsph_free(Gsph_c)
  call kmesh_free(Kmesh)
  call kmesh_free(Qmesh)
- call hdr_free(Hdr_wfk)
- call hdr_free(Hdr_bse)
+ call Hdr_wfk%free()
+ call Hdr_bse%free()
  call ebands_free(KS_BSt)
  call ebands_free(QP_BSt)
  call vcoul_free(Vcp)
@@ -1020,7 +1020,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call ebands_free(KS_BSt_dense)
    call ebands_free(QP_BSt_dense)
    call vcoul_free(Vcp_dense)
-   call hdr_free(Hdr_wfk_dense)
+   call Hdr_wfk_dense%free()
  end if
 
  ! Optional deallocation for PAW.
@@ -1177,7 +1177,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  call wfk_read_eigenvalues(wfk_fname,energies_p,Hdr_wfk,comm)
  mband = MAXVAL(Hdr_wfk%nband)
 
- call hdr_vs_dtset(Hdr_wfk,Dtset)
+ call hdr_wfk%vs_dtset(dtset)
 
  ! === Create crystal_t data type ===
  !remove_inv= .FALSE. !(nsym_kss/=Hdr_wfk%nsym)
@@ -1185,7 +1185,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
             ! 1 => do not use time-reversal symmetry
             ! 2 => take advantage of time-reversal symmetry
 
- cryst = hdr_get_crystal(Hdr_wfk,timrev,remove_inv)
+ cryst = Hdr_wfk%get_crystal(timrev, remove_inv)
  call cryst%print()
  !
  ! Setup of the k-point list and symmetry tables in the  BZ -----------------------------------
@@ -1623,7 +1623,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
    call pawrhoij_copy(Hdr_wfk%Pawrhoij,Pawrhoij)
  end if
 
- call hdr_update(hdr_bse,bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
+ call hdr_bse%update(bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
 
  ABI_FREE(occfact)
 

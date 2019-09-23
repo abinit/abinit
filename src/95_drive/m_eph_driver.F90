@@ -322,9 +322,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Construct crystal and ebands from the GS WFK file.
  if (use_wfk) then
    call wfk_read_eigenvalues(wfk0_path, gs_eigen, wfk0_hdr, comm)
-   call hdr_vs_dtset(wfk0_hdr, dtset)
+   call wfk0_hdr%vs_dtset(dtset)
 
-   cryst = hdr_get_crystal(wfk0_hdr, timrev2)
+   cryst = wfk0_hdr%get_crystal(timrev2)
    call cryst%print(header="crystal structure from WFK file")
 
    ebands = ebands_from_hdr(wfk0_hdr, maxval(wfk0_hdr%nband), gs_eigen)
@@ -335,9 +335,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (use_wfq) then
    call wfk_read_eigenvalues(wfq_path, gs_eigen, wfq_hdr, comm)
    ! GKA TODO: Have to construct a header with the proper set of q-shifted k-points then compare against file.
-   !call hdr_vs_dtset(wfq_hdr, dtset)
+   !call wfq_hdr%vs_dtset(dtset)
    ebands_kq = ebands_from_hdr(wfq_hdr, maxval(wfq_hdr%nband), gs_eigen)
-   call hdr_free(wfq_hdr)
+   call wfq_hdr%free()
    ABI_FREE(gs_eigen)
  end if
 
@@ -498,7 +498,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    wminmax = zero
    do
      call mkphdos(phdos, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, dtset%ph_smear, dtset%ph_ngqpt, &
-       dtset%ph_nqshift, dtset%ph_qshift, dtfil%filnam_ds(4), wminmax, count_wminmax, comm)
+       dtset%ph_nqshift, dtset%ph_qshift, "", wminmax, count_wminmax, comm)
      if (all(count_wminmax == 0)) exit
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
      wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
@@ -694,7 +694,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call dvdb%free()
  call ddb%free()
  call ifc%free()
- call hdr_free(wfk0_hdr)
+ call wfk0_hdr%free()
  if (use_wfk) call ebands_free(ebands)
  if (use_wfq) call ebands_free(ebands_kq)
  call pawfgr_destroy(pawfgr)

@@ -836,6 +836,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Read wavefunctions.
  call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
+ !call wfd%test_ortho(cryst, pawtab)
 
  ! if PAW, one has to solve a generalized eigenproblem
  ! BE careful here because I will need sij_opt == -1
@@ -850,7 +851,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_MALLOC(gbound_kq, (2*wfd%mgfft+8, 2))
  ABI_MALLOC(osc_gbound_q, (2*wfd%mgfft+8, 2))
 
- osc_ecut = dtset%userra
+ osc_ecut = dtset%eph_ecutosc
  !osc_ecut = dtset%ecut
  !osc_ecut = one
  if (osc_ecut > zero) then
@@ -983,7 +984,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call wrtout([std_out, ab_out], sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
    call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pawrhoij, comm, &
                   allow_interp=.True.)
-   call hdr_free(pot_hdr)
+   call pot_hdr%free()
  end if
 
  if (sigma%nwr > 0) then
@@ -1859,7 +1860,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                        ! In principle one should rescale by the number of degenerate states but it's
                        ! easier to move all the weight to a single band
                        simag = zero
-                       ! TODO: Check the sign, use retarded convention.
+                       ! TODO: Check the sign, use convention for retarded function
                        if (ibsum_kq == band_ks) simag = -pi * sum(sigma%frohl_deltas_sphcorr(1:2, it, ib_k, nu), dim=1)
                      end if
 
@@ -3140,7 +3141,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
    NCF_CHECK(nctk_open_create(self%ncid, path, xmpi_comm_self))
    ncid = self%ncid
 
-   NCF_CHECK(hdr_ncwrite(wfk_hdr, ncid, fform_from_ext("SIGEPH.nc"), nc_define=.True.))
+   NCF_CHECK(wfk_hdr%ncwrite(ncid, fform_from_ext("SIGEPH.nc"), nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
    if (dtset%prtdos /= 0) then
@@ -3664,11 +3665,11 @@ subroutine sigmaph_comp(self,comp)
 
  ABI_CHECK(self%nkcalc == comp%nkcalc, "Difference found in nkcalc.")
  ABI_CHECK(self%max_nbcalc == comp%max_nbcalc, "Difference found in max_nbcalc.")
- ABI_CHECK(self%nsppol == self%nsppol, "Difference found in nsppol.")
- ABI_CHECK(self%ntemp == self%ntemp, "Difference found in ntemp.")
+ ABI_CHECK(self%nsppol == comp%nsppol, "Difference found in nsppol.")
+ ABI_CHECK(self%ntemp == comp%ntemp, "Difference found in ntemp.")
  !ABI_CHECK(natom3 == natom3, "")
- ABI_CHECK(self%nqibz == self%nqibz, "Difference found in nqibz.")
- ABI_CHECK(self%nqbz == self%nqbz, "Difference found in nqbz.")
+ ABI_CHECK(self%nqibz == comp%nqibz, "Difference found in nqibz.")
+ ABI_CHECK(self%nqbz == comp%nqbz, "Difference found in nqbz.")
 
  ! ======================================================
  ! Read data that does not depend on the (kpt, spin) loop.
@@ -3862,7 +3863,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  call wrtout(std_out, sjoin(ch10, repeat("=", 92)))
  msg = sjoin("[", itoa(ikcalc), "/", itoa(self%nkcalc), "]")
  call wrtout(std_out, sjoin(" Computing self-energy matrix elements for k-point:", ktoa(kk), msg))
- ! TODO
+ ! TODO Integrate with spin parallelism.
  spin = 1
  write(msg, "(3(a, i0))")" Treating ", self%nbcalc_ks(ikcalc, spin), " band(s) between: ", &
    self%bstart_ks(ikcalc, spin)," and: ", self%bstart_ks(ikcalc, spin) + self%nbcalc_ks(ikcalc, spin) - 1

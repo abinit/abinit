@@ -1265,7 +1265,7 @@ end subroutine mpi_setup
          if (file_found) then
            call hdr_read_from_fname(hdr0,filden,ii,xmpi_comm_self)
            idum3(1:2)=hdr0%ngfft(2:3);if (file_found) idum3(3)=1
-           call hdr_free(hdr0)
+           call hdr0%free()
            MSG_WARNING("Cannot find filden"//filden)
          end if
        end if

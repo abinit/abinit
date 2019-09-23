@@ -1755,7 +1755,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call read_rhor(Dtfil%filpawdensin, cplex1, nfftf_tot, Wfd%nspden, ngfftf, 1, MPI_enreg_seq, &
        ks_aepaw_rhor, hdr_rhor, tmp_pawrhoij, wfd%comm)
 
-       call hdr_free(hdr_rhor)
+       call hdr_rhor%free()
        call pawrhoij_free(tmp_pawrhoij)
        ABI_FREE(tmp_pawrhoij)
      end if ! Dtset%usepaw==1
@@ -1797,7 +1797,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call read_rhor(Dtfil%filpawdensin, cplex1, nfftf_tot, Wfd%nspden, ngfftf, 1, MPI_enreg_seq, &
        ks_aepaw_rhor, hdr_rhor, tmp_pawrhoij, wfd%comm)
 
-       call hdr_free(hdr_rhor)
+       call hdr_rhor%free()
        call pawrhoij_free(tmp_pawrhoij)
        ABI_FREE(tmp_pawrhoij)
      end if ! Dtset%usepaw==1
@@ -1852,7 +1852,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call read_rhor(Dtfil%filpawdensin, cplex1, nfftf_tot, Wfd%nspden, ngfftf, 1, MPI_enreg_seq, &
        ks_aepaw_rhor, hdr_rhor, tmp_pawrhoij, wfd%comm)
 
-       call hdr_free(hdr_rhor)
+       call hdr_rhor%free()
        call pawrhoij_free(tmp_pawrhoij)
        ABI_FREE(tmp_pawrhoij)
      end if ! Dtset%usepaw==1
@@ -1934,7 +1934,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call read_rhor(pawden_fname, cplex1, nfftf_tot, Wfd%nspden, ngfftf, 1, MPI_enreg_seq, &
        ks_aepaw_rhor, hdr_rhor, tmp_pawrhoij, wfd%comm)
 
-       call hdr_free(hdr_rhor)
+       call hdr_rhor%free()
        call pawrhoij_free(tmp_pawrhoij)
        ABI_FREE(tmp_pawrhoij)
      else
@@ -2423,8 +2423,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call sigma_free(Sr)
  call em1results_free(Er)
  call ppm_free(PPm)
- call hdr_free(Hdr_sigma)
- call hdr_free(Hdr_wfk)
+ call Hdr_sigma%free()
+ call Hdr_wfk%free()
  call ebands_free(KS_BSt)
  call ebands_free(QP_BSt)
  call melements_free(KS_me)
@@ -2712,7 +2712,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  mband = MAXVAL(Hdr_wfk%nband)
 
  remove_inv = .FALSE.
- call hdr_vs_dtset(Hdr_wfk,Dtset)
+ call hdr_wfk%vs_dtset(dtset)
 
  test_npwkss = 0
  call make_gvec_kss(Dtset%nkpt,Dtset%kptns,Hdr_wfk%ecut_eff,Dtset%symmorphi,Dtset%nsym,Dtset%symrel,Dtset%tnons,&
@@ -2763,7 +2763,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  end if
 
  ! Create crystal_t data type
- cryst = hdr_get_crystal(Hdr_wfk, timrev, remove_inv)
+ cryst = Hdr_wfk%get_crystal(timrev, remove_inv)
  call cryst%print()
 
  if (Sigp%npwwfn > ng_kss) then ! cannot use more G"s for the wfs than those stored on file
@@ -2879,7 +2879,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    call pawrhoij_alloc(Pawrhoij,1,Dtset%nspden,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
    call pawrhoij_copy(Hdr_wfk%Pawrhoij,Pawrhoij)
  end if
- call hdr_update(hdr_out,bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
+ call hdr_out%update(bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
 
  ABI_FREE(occfact)
  call pawrhoij_free(Pawrhoij)
