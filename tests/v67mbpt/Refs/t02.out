@@ -1,6 +1,6 @@
 
-.Version 8.11.7 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.8 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -459,33 +459,33 @@ data: !EtotIters |
         6  -8.8716880912528    -9.539E-13 8.968E-11 2.131E-11
 ...
 
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -9.539036227579345E-013, "res2":  2.131351451966095E-011, 
+    "residm":  8.967598675174998E-011, "diffor": undef, 
+}
+etotal    :  -8.87168809125275004E+00
+entropy   :   0.00000000000000000E+00
+fermie    :   2.17655487277611859E-01
+stress_tensor: !CartTensor
+- [  2.76864061740706878E-05,   0.00000000000000000E+00,   0.00000000000000000E+00, ]
+- [  0.00000000000000000E+00,   2.76864061740706878E-05,   0.00000000000000000E+00, ]
+- [  0.00000000000000000E+00,   0.00000000000000000E+00,   2.76864061740706878E-05, ]
+cartesian_forces: !CartForces
+- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
+- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
     1        2.00000          1.71651242
     2        2.00000          1.71651242
---- !ResultsGS
-comment   : Summary of ground states results.
-natom     :        2
-nsppol    :        1
-cutoff_energies: {"ecut":   8.00000000000000000E+00, "pawecutdg":  -1.00000000000000000E+00, }
-convergence: {
-    "deltae":  -9.53903622757934500E-13, "res2":   2.13135145196609473E-11, 
-    "residm":   8.96759867517499773E-11, "diffor": undef, 
-}
-etotal    :  -8.87168809125275004E+00
-entropy   :   0.00000000000000000E+00
-fermie    :   2.17655487277611859E-01
-stress tensor: !Tensor
-- [  2.76864061740706878E-05,   0.00000000000000000E+00,   0.00000000000000000E+00, ]
-- [  0.00000000000000000E+00,   2.76864061740706878E-05,   0.00000000000000000E+00, ]
-- [  0.00000000000000000E+00,   0.00000000000000000E+00,   2.76864061740706878E-05, ]
-
-cartesian forces: !CartForces
-- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
-- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
-...
-
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1200,12 +1200,13 @@ dtset:     3
  E^GW_gap         3.104
  DeltaE^GW_gap    0.578
 
---- !GwSigmaPerturbative
-k point: [   0.000,    0.000,    0.000, ]
-E^0_gap:   2.52645830621329992E+00
-E^GW_gap:   3.10415465048926276E+00
-DeltaE^GW_gap:   5.77696344275962725E-01
-data: !GwSigmaData |
+--- !SelfEnergy_ee
+kpoint: [   0.000,    0.000,    0.000, ]
+spin: 1
+KS_gap     :    2.526
+QP_gap     :    3.104
+Delta_QP_KS:    0.578
+data: !SigmaeeData |
      Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.923 -11.256 -12.387   1.527   0.786  -0.272 -10.945   0.311   6.234
         3   5.923 -11.256 -12.389   1.526   0.786  -0.272 -10.946   0.309   6.232
@@ -1355,12 +1356,13 @@ dtset:     4
  E^GW_gap         3.104
  DeltaE^GW_gap    0.578
 
---- !GwSigmaPerturbative
-k point: [   0.000,    0.000,    0.000, ]
-E^0_gap:   2.52645830621329992E+00
-E^GW_gap:   3.10415465048926276E+00
-DeltaE^GW_gap:   5.77696344275962725E-01
-data: !GwSigmaData |
+--- !SelfEnergy_ee
+kpoint: [   0.000,    0.000,    0.000, ]
+spin: 1
+KS_gap     :    2.526
+QP_gap     :    3.104
+Delta_QP_KS:    0.578
+data: !SigmaeeData |
      Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.923 -11.256 -12.387   1.527   0.786  -0.272 -10.945   0.311   6.234
         3   5.923 -11.256 -12.389   1.526   0.786  -0.272 -10.946   0.309   6.232
@@ -1510,12 +1512,13 @@ dtset:     5
  E^GW_gap         3.104
  DeltaE^GW_gap    0.578
 
---- !GwSigmaPerturbative
-k point: [   0.000,    0.000,    0.000, ]
-E^0_gap:   2.52645830621329992E+00
-E^GW_gap:   3.10415465048926276E+00
-DeltaE^GW_gap:   5.77696344275962725E-01
-data: !GwSigmaData |
+--- !SelfEnergy_ee
+kpoint: [   0.000,    0.000,    0.000, ]
+spin: 1
+KS_gap     :    2.526
+QP_gap     :    3.104
+Delta_QP_KS:    0.578
+data: !SigmaeeData |
      Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.923 -11.256 -12.387   1.527   0.786  -0.272 -10.945   0.311   6.234
         3   5.923 -11.256 -12.389   1.526   0.786  -0.272 -10.946   0.309   6.232

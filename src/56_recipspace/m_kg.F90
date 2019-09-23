@@ -26,13 +26,14 @@
 
 MODULE m_kg
 
- use defs_abitypes, only : dataset_type, MPI_type
  use defs_basis
  use m_errors
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use m_fftcore,     only : kpgsph, bound
  use m_mpinfo,      only : proc_distrb_cycle
 
@@ -1144,7 +1145,7 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
 
      ! original code from initberry
      ! iadum(:) = kg(:,kgindex(ikpti) + ipw)
-     
+
      iadum(:) = kg_k(:,ipw)
 
      !          to determine r.l.v. matchings, we transformed the bra vector

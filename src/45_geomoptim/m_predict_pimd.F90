@@ -27,12 +27,12 @@
 module m_predict_pimd
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_pimd
  use m_xmpi
  use m_results_img
 
+ use defs_abitypes,    only : MPI_type
  use m_geometry,       only : mkradim, mkrdim
  use m_pimd_langevin,  only : pimd_langevin_npt, pimd_langevin_nvt
  use m_pimd_nosehoover, only : pimd_nosehoover_npt, pimd_nosehoover_nvt
@@ -108,8 +108,6 @@ contains
 
 subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,nimage_tot,&
 &                       ntimimage_stored,pimd_param,prtvolimg,results_img)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

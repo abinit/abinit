@@ -26,13 +26,13 @@
 module m_nonlop
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
  use m_cgtools
  use m_gemm_nonlop
 
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_hamiltonian, only : gs_hamiltonian_type, KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
@@ -337,8 +337,6 @@ contains
 subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnlout,&
 &                 paw_opt,signs,svectout,tim_nonlop,vectin,vectout,&
 &                 enl,iatom_only,only_SO,qdir,select_k) !optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -953,8 +951,6 @@ end subroutine nonlop
 &                      mpi_enreg,natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,&
 &                      npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,phkxredin,phkxredout,ph1d,&
 &                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

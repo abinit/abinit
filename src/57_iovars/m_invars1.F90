@@ -31,18 +31,18 @@ module m_invars1
  use m_xmpi
  use m_errors
  use m_atomdata
+ use m_dtset
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
- use defs_abitypes,  only : dataset_type, ab_dimensions
  use m_fstrings, only : inupper, itoa, rmquotes
  use m_geometry, only : mkrdim
- use m_parser,   only : intagm, chkint_ge
+ use m_parser,   only : intagm, chkint_ge, ab_dimensions
  use m_inkpts,   only : inkpts, inqpt
  use m_ingeo,    only : ingeo, invacuum
- use m_symtk,   only : mati3det
+ use m_symtk,    only : mati3det
 
 #if defined HAVE_GPU_CUDA
  use m_gpu_toolbox
@@ -927,7 +927,7 @@ subroutine indefo1(dtset)
  dtset%vel_orig(:,:,:)=zero
  dtset%vel_cell_orig(:,:,:)=zero
 !W
- dtset%wtq=0
+ dtset%wtq=zero
  if (dtset%usepaw==0) dtset%wfoptalg=0
  if (dtset%usepaw/=0) dtset%wfoptalg=10
  if (dtset%optdriver==RUNL_GSTATE.and.dtset%paral_kgb>0) dtset%wfoptalg=14
@@ -2703,6 +2703,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%ph_nqshift = 1
    dtsets(idtset)%ph_smear = 0.00002_dp
    dtsets(idtset)%ddb_ngqpt = [0, 0, 0]
+   dtsets(idtset)%dvdb_ngqpt = [0, 0, 0]
    dtsets(idtset)%ddb_shiftq(:) = zero
 
 ! JB:UNINITIALIZED VALUES (not found in this file neither indefo1)

@@ -28,13 +28,13 @@
 MODULE m_exc_itdiago
 
  use defs_basis
- use defs_abitypes
  use m_bs_defs
  use m_errors
  use m_abicore
  use m_linalg_interfaces
+ use m_hdr
  use m_xmpi
-#if defined HAVE_MPI2
+#ifdef HAVE_MPI2
  use mpi
 #endif
 

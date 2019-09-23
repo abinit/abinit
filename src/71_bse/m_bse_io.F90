@@ -40,7 +40,6 @@ MODULE m_bse_io
  use iso_c_binding
  use m_hdr
 
- use defs_abitypes,    only : Hdr_type
  use m_time,           only : cwtime
  use m_fstrings,       only : toupper
  use m_io_tools,       only : open_file

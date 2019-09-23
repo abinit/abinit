@@ -155,15 +155,10 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
        eph_fermie6     0.00000000E+00 Hartree
          eph_task          -4
         ddb_ngqpt        2    2    2
--          fftalg         312
+       dvdb_ngqpt        2    2    2
+-          fftalg         112
            getddb          20
            getwfk          20
-       getwfkfine1          0
-       getwfkfine2         20
-       getwfkfine3          0
-       getwfkfine4         20
-       getwfkfine5          0
-       getwfkfine6          0
            istwfk        1    0    1    0    0    0    1    0
            jdtset        1    2    3    4    5    6
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -428,6 +423,7 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
+ Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
  asr: 1 dipdip: 1 symdynmat: 1
@@ -495,7 +491,7 @@ Transport calculation results
 
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
 
- mkfilename : getwfkfine/=0, take file _WFK from output of DATASET  20.
+ mkfilename: getwfkfine from: t150o_DS6_WFK
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -557,6 +553,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+ EPH double grid interpolation: will read energies from: t150o_DS6_WFK
+
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
  Symsigma: 1 Timrev: 1
@@ -568,6 +566,7 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
+ Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
  asr: 1 dipdip: 1 symdynmat: 1
@@ -711,6 +710,7 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
+ Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
  asr: 1 dipdip: 1 symdynmat: 1
@@ -778,7 +778,7 @@ Transport calculation results
 
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
 
- mkfilename : getwfkfine/=0, take file _WFK from output of DATASET  20.
+ mkfilename: getwfkfine from: t150o_DS6_WFK
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -846,6 +846,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+ EPH double grid interpolation: will read energies from: t150o_DS6_WFK
+
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
  Symsigma: 1 Timrev: 1
@@ -857,6 +859,7 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
+ Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
  asr: 1 dipdip: 1 symdynmat: 1
@@ -1001,6 +1004,7 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
+ Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
  asr: 1 dipdip: 1 symdynmat: 1
@@ -1138,6 +1142,7 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
+ Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
  asr: 1 dipdip: 1 symdynmat: 1
@@ -1221,6 +1226,7 @@ Transport calculation results
        eph_fermie6     0.00000000E+00 Hartree
          eph_task          -4
         ddb_ngqpt        2    2    2
+       dvdb_ngqpt        2    2    2
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
@@ -1242,12 +1248,6 @@ Transport calculation results
 -          fftalg         312
            getddb          20
            getwfk          20
-       getwfkfine1          0
-       getwfkfine2         20
-       getwfkfine3          0
-       getwfkfine4         20
-       getwfkfine5          0
-       getwfkfine6          0
            jdtset        1    2    3    4    5    6
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      1.89602709E+01
@@ -1437,45 +1437,45 @@ P           mkmem           8
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [3] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
 - Proc.   0 individual time (sec): cpu=          3.6  wall=          3.8

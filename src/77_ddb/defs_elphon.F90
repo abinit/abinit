@@ -40,8 +40,8 @@ module defs_elphon
  use m_errors
  use m_xmpi
 
- use m_kptrank,  only : kptrank_type, destroy_kptrank, copy_kptrank
- use m_crystal,    only : crystal_t
+ use m_krank,   only : krank_t
+ use m_crystal, only : crystal_t
 
  implicit none
 
@@ -73,7 +73,7 @@ module defs_elphon
    integer :: new_nkptirr                     ! number of k-points in irreducible grid
    integer :: my_nkpt                         ! number of k-points on present processor
 
-   type(kptrank_type) :: kptrank_t            ! ranking of all kpoints on phonon calculation grid, and inverse rank
+   type(krank_t) :: krank            ! ranking of all kpoints on phonon calculation grid, and inverse rank
 
    integer, allocatable :: irr2full(:)            ! correspondence of irred kpoints to a full one
    integer, allocatable :: full2irr(:,:)          ! correspondence of full k to one irred kpoints through sym and timrev
@@ -322,8 +322,6 @@ CONTAINS  !=====================================================================
 
 subroutine elph_ds_clean(elph_ds)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(elph_type), intent(inout) :: elph_ds
@@ -331,50 +329,24 @@ subroutine elph_ds_clean(elph_ds)
 ! *************************************************************************
 
  !@elph_type
- if (allocated(elph_ds%qirredtofull))  then
-   ABI_DEALLOCATE(elph_ds%qirredtofull)
- end if
- if (allocated(elph_ds%wtq))  then
-   ABI_DEALLOCATE(elph_ds%wtq)
- end if
- if (allocated(elph_ds%n0))  then
-   ABI_DEALLOCATE(elph_ds%n0)
- end if
- if (allocated(elph_ds%qpt_full))  then
-   ABI_DEALLOCATE(elph_ds%qpt_full)
- end if
- if (allocated(elph_ds%gkk_intweight))  then
-   ABI_DEALLOCATE(elph_ds%gkk_intweight)
- end if
- if (allocated(elph_ds%gkk_qpt))  then
-   ABI_DEALLOCATE(elph_ds%gkk_qpt)
- end if
- if (allocated(elph_ds%gkk_rpt))  then
-   ABI_DEALLOCATE(elph_ds%gkk_rpt)
- end if
- if (allocated(elph_ds%gkk2))  then
-   ABI_DEALLOCATE(elph_ds%gkk2)
- end if
- if (allocated(elph_ds%gamma_qpt))  then
-   ABI_DEALLOCATE(elph_ds%gamma_qpt)
- end if
- if (allocated(elph_ds%gamma_rpt))  then
-   ABI_DEALLOCATE(elph_ds%gamma_rpt)
- end if
- if (allocated(elph_ds%phfrq))  then
-   ABI_DEALLOCATE(elph_ds%phfrq)
- end if
- if (allocated(elph_ds%a2f))  then
-   ABI_DEALLOCATE(elph_ds%a2f)
- end if
- if (allocated(elph_ds%qgrid_data))  then
-   ABI_DEALLOCATE(elph_ds%qgrid_data)
- end if
+ ABI_SFREE(elph_ds%qirredtofull)
+ ABI_SFREE(elph_ds%wtq)
+ ABI_SFREE(elph_ds%n0)
+ ABI_SFREE(elph_ds%qpt_full)
+ ABI_SFREE(elph_ds%gkk_intweight)
+ ABI_SFREE(elph_ds%gkk_qpt)
+ ABI_SFREE(elph_ds%gkk_rpt)
+ ABI_SFREE(elph_ds%gkk2)
+ ABI_SFREE(elph_ds%gamma_qpt)
+ ABI_SFREE(elph_ds%gamma_rpt)
+ ABI_SFREE(elph_ds%phfrq)
+ ABI_SFREE(elph_ds%a2f)
+ ABI_SFREE(elph_ds%qgrid_data)
 
  call elph_k_destroy (elph_ds%k_phon)
  call elph_k_destroy (elph_ds%k_fine)
 
- call destroy_kptrank (elph_ds%k_fine%kptrank_t)
+ call elph_ds%k_fine%krank%free()
 
 end subroutine elph_ds_clean
 !!***
@@ -403,8 +375,6 @@ end subroutine elph_ds_clean
 
 subroutine elph_tr_ds_clean(elph_tr_ds)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(elph_tr_type), intent(inout) :: elph_tr_ds
@@ -412,84 +382,32 @@ subroutine elph_tr_ds_clean(elph_tr_ds)
 ! *************************************************************************
 
  !@elph_tr_type
- if (allocated(elph_tr_ds%el_veloc))  then
-   ABI_DEALLOCATE(elph_tr_ds%el_veloc)
- end if
- if (allocated(elph_tr_ds%FSelecveloc_sq))  then
-   ABI_DEALLOCATE(elph_tr_ds%FSelecveloc_sq)
- end if
- if (allocated(elph_tr_ds%veloc_sq0))  then
-   ABI_DEALLOCATE(elph_tr_ds%veloc_sq0)
- end if
- if (allocated(elph_tr_ds%veloc_sq))  then
-   ABI_DEALLOCATE(elph_tr_ds%veloc_sq)
- end if
- if (allocated(elph_tr_ds%dos_n0))  then
-   ABI_DEALLOCATE(elph_tr_ds%dos_n0)
- end if
- if (allocated(elph_tr_ds%dos_n))  then
-   ABI_DEALLOCATE(elph_tr_ds%dos_n)
- end if
- if (allocated(elph_tr_ds%en_all))  then
-   ABI_DEALLOCATE(elph_tr_ds%en_all)
- end if
- if (allocated(elph_tr_ds%de_all))  then
-   ABI_DEALLOCATE(elph_tr_ds%de_all)
- end if
- if (allocated(elph_tr_ds%gamma_qpt_tr))  then
-   ABI_DEALLOCATE(elph_tr_ds%gamma_qpt_tr)
- end if
- if (allocated(elph_tr_ds%gamma_qpt_trin))  then
-   ABI_DEALLOCATE(elph_tr_ds%gamma_qpt_trin)
- end if
- if (allocated(elph_tr_ds%gamma_qpt_trout))  then
-   ABI_DEALLOCATE(elph_tr_ds%gamma_qpt_trout)
- end if
- if (allocated(elph_tr_ds%gamma_rpt_tr))  then
-   ABI_DEALLOCATE(elph_tr_ds%gamma_rpt_tr)
- end if
- if (allocated(elph_tr_ds%gamma_rpt_trin))  then
-   ABI_DEALLOCATE(elph_tr_ds%gamma_rpt_trin)
- end if
- if (allocated(elph_tr_ds%gamma_rpt_trout))  then
-   ABI_DEALLOCATE(elph_tr_ds%gamma_rpt_trout)
- end if
- if (allocated(elph_tr_ds%a2f_1d_tr))  then
-   ABI_DEALLOCATE(elph_tr_ds%a2f_1d_tr)
- end if
- if (allocated(elph_tr_ds%a2f_1d_trin))  then
-   ABI_DEALLOCATE(elph_tr_ds%a2f_1d_trin)
- end if
- if (allocated(elph_tr_ds%a2f_1d_trout))  then
-   ABI_DEALLOCATE(elph_tr_ds%a2f_1d_trout)
- end if
- if (allocated(elph_tr_ds%tmp_gkk_intweight))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_gkk_intweight)
- end if
- if (allocated(elph_tr_ds%tmp_gkk_intweight1))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_gkk_intweight1)
- end if
- if (allocated(elph_tr_ds%tmp_gkk_intweight2))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_gkk_intweight2)
- end if
- if (allocated(elph_tr_ds%tmp_velocwtk))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_velocwtk)
- end if
- if (allocated(elph_tr_ds%tmp_velocwtk1))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_velocwtk1)
- end if
- if (allocated(elph_tr_ds%tmp_velocwtk2))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_velocwtk2)
- end if
- if (allocated(elph_tr_ds%tmp_vvelocwtk))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_vvelocwtk)
- end if
- if (allocated(elph_tr_ds%tmp_vvelocwtk1))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_vvelocwtk1)
- end if
- if (allocated(elph_tr_ds%tmp_vvelocwtk2))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_vvelocwtk2)
- end if
+ ABI_SFREE(elph_tr_ds%el_veloc)
+ ABI_SFREE(elph_tr_ds%FSelecveloc_sq)
+ ABI_SFREE(elph_tr_ds%veloc_sq0)
+ ABI_SFREE(elph_tr_ds%veloc_sq)
+ ABI_SFREE(elph_tr_ds%dos_n0)
+ ABI_SFREE(elph_tr_ds%dos_n)
+ ABI_SFREE(elph_tr_ds%en_all)
+ ABI_SFREE(elph_tr_ds%de_all)
+ ABI_SFREE(elph_tr_ds%gamma_qpt_tr)
+ ABI_SFREE(elph_tr_ds%gamma_qpt_trin)
+ ABI_SFREE(elph_tr_ds%gamma_qpt_trout)
+ ABI_SFREE(elph_tr_ds%gamma_rpt_tr)
+ ABI_SFREE(elph_tr_ds%gamma_rpt_trin)
+ ABI_SFREE(elph_tr_ds%gamma_rpt_trout)
+ ABI_SFREE(elph_tr_ds%a2f_1d_tr)
+ ABI_SFREE(elph_tr_ds%a2f_1d_trin)
+ ABI_SFREE(elph_tr_ds%a2f_1d_trout)
+ ABI_SFREE(elph_tr_ds%tmp_gkk_intweight)
+ ABI_SFREE(elph_tr_ds%tmp_gkk_intweight1)
+ ABI_SFREE(elph_tr_ds%tmp_gkk_intweight2)
+ ABI_SFREE(elph_tr_ds%tmp_velocwtk)
+ ABI_SFREE(elph_tr_ds%tmp_velocwtk1)
+ ABI_SFREE(elph_tr_ds%tmp_velocwtk2)
+ ABI_SFREE(elph_tr_ds%tmp_vvelocwtk)
+ ABI_SFREE(elph_tr_ds%tmp_vvelocwtk1)
+ ABI_SFREE(elph_tr_ds%tmp_vvelocwtk2)
 
 end subroutine elph_tr_ds_clean
 !!***
@@ -516,8 +434,6 @@ end subroutine elph_tr_ds_clean
 !! SOURCE
 
 subroutine elph_k_copy(elph_k_in, elph_k_out)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -552,7 +468,7 @@ subroutine elph_k_copy(elph_k_in, elph_k_out)
  ABI_ALLOCATE(elph_k_out%kpt,(3,elph_k_out%nkpt))
  elph_k_out%kpt = elph_k_in%kpt
 
- call copy_kptrank(elph_k_in%kptrank_t, elph_k_out%kptrank_t)
+ elph_k_out%krank = elph_k_in%krank%copy()
 
  ABI_ALLOCATE(elph_k_out%irr2full,(elph_k_out%nkptirr))
  elph_k_out%irr2full = elph_k_in%irr2full
@@ -563,7 +479,6 @@ subroutine elph_k_copy(elph_k_in, elph_k_out)
 
  ABI_ALLOCATE(elph_k_out%irredtoGS,(elph_k_out%nkptirr))
  elph_k_out%irredtoGS = elph_k_in%irredtoGS
-
 
 end subroutine elph_k_copy
 !!***
@@ -592,8 +507,6 @@ end subroutine elph_k_copy
 
 subroutine elph_k_destroy(elph_k)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(elph_kgrid_type), intent(inout) :: elph_k
@@ -601,56 +514,24 @@ subroutine elph_k_destroy(elph_k)
 ! *************************************************************************
 
  !@elph_kgrid_type
- if(allocated(elph_k%irr2full)) then
-   ABI_DEALLOCATE (elph_k%irr2full)
- end if
- if(allocated(elph_k%full2irr)) then
-   ABI_DEALLOCATE (elph_k%full2irr)
- end if
- if(allocated(elph_k%full2full)) then
-   ABI_DEALLOCATE (elph_k%full2full)
- end if
- if(allocated(elph_k%irredtoGS)) then
-   ABI_DEALLOCATE (elph_k%irredtoGS)
- end if
- if(allocated(elph_k%new_irredtoGS)) then
-   ABI_DEALLOCATE (elph_k%new_irredtoGS)
- end if
- if(allocated(elph_k%kpt)) then
-   ABI_DEALLOCATE (elph_k%kpt)
- end if
- if(allocated(elph_k%kptirr)) then
-   ABI_DEALLOCATE (elph_k%kptirr)
- end if
- if(allocated(elph_k%new_kptirr)) then
-   ABI_DEALLOCATE (elph_k%new_kptirr)
- end if
- if(allocated(elph_k%my_kpt)) then
-   ABI_DEALLOCATE (elph_k%my_kpt)
- end if
- if(allocated(elph_k%my_ikpt)) then
-   ABI_DEALLOCATE (elph_k%my_ikpt)
- end if
- if(allocated(elph_k%wtk)) then
-   ABI_DEALLOCATE (elph_k%wtk)
- end if
- if(allocated(elph_k%wtq)) then
-   ABI_DEALLOCATE (elph_k%wtq)
- end if
- if(allocated(elph_k%wtkirr)) then
-   ABI_DEALLOCATE (elph_k%wtkirr)
- end if
- if(allocated(elph_k%new_wtkirr)) then
-   ABI_DEALLOCATE (elph_k%new_wtkirr)
- end if
- if(allocated(elph_k%velocwtk)) then
-   ABI_DEALLOCATE (elph_k%velocwtk)
- end if
- if(allocated(elph_k%vvelocwtk)) then
-   ABI_DEALLOCATE (elph_k%vvelocwtk)
- end if
+ ABI_SFREE(elph_k%irr2full)
+ ABI_SFREE(elph_k%full2irr)
+ ABI_SFREE(elph_k%full2full)
+ ABI_SFREE(elph_k%irredtoGS)
+ ABI_SFREE(elph_k%new_irredtoGS)
+ ABI_SFREE(elph_k%kpt)
+ ABI_SFREE(elph_k%kptirr)
+ ABI_SFREE(elph_k%new_kptirr)
+ ABI_SFREE(elph_k%my_kpt)
+ ABI_SFREE(elph_k%my_ikpt)
+ ABI_SFREE(elph_k%wtk)
+ ABI_SFREE(elph_k%wtq)
+ ABI_SFREE(elph_k%wtkirr)
+ ABI_SFREE(elph_k%new_wtkirr)
+ ABI_SFREE(elph_k%velocwtk)
+ ABI_SFREE(elph_k%vvelocwtk)
 
- call destroy_kptrank (elph_k%kptrank_t)
+ call elph_k%krank%free()
 
 end subroutine elph_k_destroy
 !!***
@@ -679,8 +560,6 @@ end subroutine elph_k_destroy
 !! SOURCE
 
 subroutine elph_k_procs(nproc, elph_k)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -756,8 +635,6 @@ end subroutine elph_k_procs
 
 subroutine gam_mult_displ(nbranch, displ_red, gam_bare, gam_now)
 
- implicit none
-
 !Arguments -------------------------------
  integer, intent(in)  :: nbranch
  real(dp), intent(in)  :: displ_red(2,nbranch,nbranch)
@@ -809,8 +686,6 @@ end subroutine gam_mult_displ
 !! SOURCE
 
 subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,qirredtofull,qpttoqpt,gamma_qpt)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1060,7 +935,6 @@ end subroutine complete_gamma
 subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsppol,gamma_qpt_tr,qirredtofull,qpttoqpt)
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments ------------------------------------
 !scalars

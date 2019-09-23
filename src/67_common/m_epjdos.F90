@@ -25,11 +25,10 @@
 module m_epjdos
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
- use m_htetrahedron
+ use m_htetra
  use m_splines
  use m_cgtools
  use m_atomdata
@@ -42,7 +41,9 @@ module m_epjdos
  use m_hdr
  use m_mpinfo
  use m_sort
+ use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_occ,            only : dos_hdr_write
  use m_time,           only : cwtime, timab
@@ -138,10 +139,15 @@ module m_epjdos
    real(dp),allocatable :: fractions_pawt1(:,:,:,:)
    ! fractions_pawt1(nkpt,mband,nsppol,ndosfraction))
 
+   contains
+
+   procedure :: free => epjdos_free
+   ! Free dynamic memory
+
  end type epjdos_t
 
  public :: epjdos_new         ! Create new object
- public :: epjdos_free        ! Free dynamic memory
+
 
  public :: prtfatbands        ! Print PJDOS contributions in xmgrace format.
  public :: fatbands_ncwrite   ! Write PJDOS contributions to netcdf file.
@@ -277,28 +283,18 @@ end function epjdos_new
 subroutine epjdos_free(self)
 
 !Arguments ------------------------------------
- type(epjdos_t),intent(inout) :: self
+ class(epjdos_t),intent(inout) :: self
 
 ! *********************************************************************
 
  ! integer
- if (allocated(self%mlang_type)) then
-   ABI_FREE(self%mlang_type)
- end if
+ ABI_SFREE(self%mlang_type)
 
  ! real
- if (allocated(self%fractions)) then
-   ABI_FREE(self%fractions)
- end if
- if (allocated(self%fractions_m)) then
-   ABI_FREE(self%fractions_m)
- end if
- if (allocated(self%fractions_paw1)) then
-   ABI_FREE(self%fractions_paw1)
- end if
- if (allocated(self%fractions_pawt1)) then
-   ABI_FREE(self%fractions_pawt1)
- end if
+ ABI_SFREE(self%fractions)
+ ABI_SFREE(self%fractions_m)
+ ABI_SFREE(self%fractions_paw1)
+ ABI_SFREE(self%fractions_pawt1)
 
 end subroutine epjdos_free
 !!***
@@ -367,7 +363,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  logical :: bigDOS,iam_master
  character(len=10) :: tag
  character(len=500) :: frmt,frmt_extra,msg
- type(t_htetrahedron) :: tetra
+ type(htetra_t) :: tetra
 !arrays
  integer,allocatable :: unt_atsph(:)
  real(dp) :: list_dp(3)
@@ -409,7 +405,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  tetra = tetra_from_kptrlatt(crystal, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
    dtset%shiftk, dtset%nkpt, dtset%kpt, comm, msg, ierr)
  if (ierr /= 0) then
-   call htetra_free(tetra)
+   call tetra%free()
    MSG_WARNING(msg)
    return
  end if
@@ -429,7 +425,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
      ! Open file for total DOS as well.
      if (open_file(strcat(fildata, '_TOTAL'), msg, newunit=unt_atsph(0), &
-         status='unknown', form='formatted', action="write") /= 0) then
+                   status='unknown', form='formatted', action="write") /= 0) then
        MSG_ERROR(msg)
      end if
 
@@ -437,7 +433,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
        call int2char4(dtset%iatsph(iat),tag)
        ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
        if (open_file(strcat(fildata, '_AT', tag), msg, newunit=unt_atsph(iat), &
-           status='unknown', form='formatted', action="write") /= 0) then
+                     status='unknown', form='formatted', action="write") /= 0) then
          MSG_ERROR(msg)
        end if
      end do
@@ -446,7 +442,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
        call int2char4(iat,tag)
        ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
        if (open_file(strcat(fildata, '_ATEXTRA', tag), msg, newunit=unt_atsph(natsph+iat), &
-           status='unknown', form='formatted', action="write") /= 0) then
+                     status='unknown', form='formatted', action="write") /= 0) then
          MSG_ERROR(msg)
        end if
      end do
@@ -536,7 +532,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
         ! Accumulate total DOS from eigenvalues (this is the **exact** total DOS)
         tmp_eigen(:) = ebands%eig(iband, :, isppol)
-        call htetra_get_onewk(tetra,ikpt,bcorr0,nene,nkpt,tmp_eigen,enemin,enemax,max_occ,wdt)
+        call tetra%get_onewk(ikpt,bcorr0,nene,nkpt,tmp_eigen,enemin,enemax,max_occ,wdt)
         wdt = wdt*ebands%wtk(ikpt)
         eig_dos = eig_dos + wdt
 
@@ -616,14 +612,14 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
          if (prtdosm==0) then
            do iene=1,nene
              write(unt_atsph(iat), fmt=frmt) enemin + (iene-1)*deltaene, &
-&              min(total_dos(iene, i1:i2, 1), dos_max), total_dos(iene, i1:i2,2)
+               min(total_dos(iene, i1:i2, 1), dos_max), total_dos(iene, i1:i2,2)
            end do
          else
            do iene=1,nene
              write(unt_atsph(iat), fmt=frmt) enemin + (iene-1)*deltaene, &
-&              min(total_dos(iene, i1:i2, 1), dos_max),&
-&              total_dos(iene, i1:i2, 2),&
-&              min(dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2,1), dos_max)
+               min(total_dos(iene, i1:i2, 1), dos_max),&
+               total_dos(iene, i1:i2, 2),&
+               min(dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2,1), dos_max)
            end do
          end if
        end do
@@ -634,15 +630,15 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
          if (prtdosm==0) then
            do iene=1,nene
              write(unt_atsph(iat), fmt=frmt_extra) enemin + (iene-1)*deltaene, &
-&             total_dos(iene, i1:i2, 1), &
-&             total_dos(iene, i1:i2, 2)
+              total_dos(iene, i1:i2, 1), &
+              total_dos(iene, i1:i2, 2)
            end do
          else
            do iene=1,nene
              write(unt_atsph(iat), fmt=frmt_extra) enemin + (iene-1)*deltaene, &
-&             total_dos(iene, i1:i2, 1),&
-&             total_dos(iene, i1:i2, 2),&
-&             dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2, 1)
+              total_dos(iene, i1:i2, 1),&
+              total_dos(iene, i1:i2, 2),&
+              dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2, 1)
            end do
          end if
        end do
@@ -657,10 +653,10 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
          i1 = iat*5-4; i2 = iat*5
          do iene=1,nene
            write(unt_atsph(iat), fmt=frmt) enemin + (iene-1)*deltaene, &
-&           min(total_dos(iene,i1:i2,1), dos_max),&
-&           min(total_dos(iene,i1:i2,1) - dos_paw1(iene,i1:i2,1) + dos_pawt1(iene,i1:i2,1), dos_max),&
-&           min(dos_paw1(iene,i1:i2,1), dos_max),&
-&           min(dos_pawt1(iene,i1:i2,1), dos_max)
+            min(total_dos(iene,i1:i2,1), dos_max),&
+            min(total_dos(iene,i1:i2,1) - dos_paw1(iene,i1:i2,1) + dos_pawt1(iene,i1:i2,1), dos_max),&
+            min(dos_paw1(iene,i1:i2,1), dos_max),&
+            min(dos_pawt1(iene,i1:i2,1), dos_max)
          end do
        end do
 
@@ -669,10 +665,10 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
          i1 = iat*5-4; i2 = iat*5
          do iene=1,nene
            write(unt_atsph(iat), fmt=frmt_extra) enemin + (iene-1)*deltaene, &
-&            min(total_dos(iene,i1:i2,1), dos_max),&
-&            min(total_dos(iene,i1:i2,1) - dos_paw1(iene,i1:i2,1) + dos_pawt1(iene,i1:i2,1), dos_max),&
-&            min(dos_paw1(iene,i1:i2,1), dos_max),&
-&            min(dos_pawt1(iene,i1:i2,1), dos_max)
+             min(total_dos(iene,i1:i2,1), dos_max),&
+             min(total_dos(iene,i1:i2,1) - dos_paw1(iene,i1:i2,1) + dos_pawt1(iene,i1:i2,1), dos_max),&
+             min(dos_paw1(iene,i1:i2,1), dos_max),&
+             min(dos_pawt1(iene,i1:i2,1), dos_max)
          end do
        end do
      end if
@@ -718,7 +714,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
    ABI_FREE(dos_pawt1)
  end if
 
- call htetra_free(tetra)
+ call tetra%free()
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2),a)')" tetrahedron: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
@@ -754,86 +750,86 @@ subroutine write_extra_headers()
    if (paw_dos_flag/=1.or.dtset%pawprtdos==2) then
      do iat=1,natsph
        write(unt_atsph(iat), '(3a,i5,a,i5,a,a,es16.6,3a)' ) &
-&       '# Local DOS (columns 2-6) and integrated local DOS (columns 7-11),',ch10,&
-&       '# for atom number iat=',iat,'  iatom=',dtset%iatsph(iat),ch10,&
-&       '# inside sphere of radius ratsph=',dtset%ratsph(dtset%typat(dtset%iatsph(iat))),' Bohr.',ch10,"#"
+        '# Local DOS (columns 2-6) and integrated local DOS (columns 7-11),',ch10,&
+        '# for atom number iat=',iat,'  iatom=',dtset%iatsph(iat),ch10,&
+        '# inside sphere of radius ratsph=',dtset%ratsph(dtset%typat(dtset%iatsph(iat))),' Bohr.',ch10,"#"
 
        if (dtset%usepaw==1.and.dtset%pawprtdos==2) then
          write(unt_atsph(iat), '(3a)' ) &
-&         '# PAW: note that only all-electron on-site part has been used to compute DOS !',ch10,"#"
+          '# PAW: note that only all-electron on-site part has been used to compute DOS !',ch10,"#"
        end if
        if (bigDOS) then
          write(msg, '(a,a)' ) &
-&         '# energy(Ha)   l=0       l=1       l=2       l=3       l=4',&
-&         '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
+          '# energy(Ha)   l=0       l=1       l=2       l=3       l=4',&
+          '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
        else
          write(msg, '(a,a)' ) &
-&         '# energy(Ha)  l=0      l=1      l=2      l=3      l=4',&
-&         '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
+          '# energy(Ha)  l=0      l=1      l=2      l=3      l=4',&
+          '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
        end if
        if (prtdosm>=1) then
          write(msg, '(7a)' ) trim(msg),'          ',&
-&         '  lm=0 0',&
-&         '  lm=1-1  lm=1 0  lm=1 1',&
-&         '  lm=2-2  lm=2-1  lm=2 0  lm=2 1  lm=2 2',&
-&         '  lm=3-3  lm=3-2  lm=3-1  lm=3 0  lm=3 1  lm=3 2  lm=3 3',&
-&         '  lm=4-4  lm=4-3  lm=4-2  lm=4-1  lm=4 0  lm=4 1  lm=4 2  lm=4 3  lm=4 4'
+          '  lm=0 0',&
+          '  lm=1-1  lm=1 0  lm=1 1',&
+          '  lm=2-2  lm=2-1  lm=2 0  lm=2 1  lm=2 2',&
+          '  lm=3-3  lm=3-2  lm=3-1  lm=3 0  lm=3 1  lm=3 2  lm=3 3',&
+          '  lm=4-4  lm=4-3  lm=4-2  lm=4-1  lm=4 0  lm=4 1  lm=4 2  lm=4 3  lm=4 4'
        end if
        write(unt_atsph(iat), "(a)")trim(msg)
      end do
    else
      do iat=1,natsph
        write(unt_atsph(iat), '(9a,i5,a,i5,a,a,es16.6,3a)' ) &
-&       '# Local DOS (columns 2-6),',ch10,&
-&       '#  plane-waves contrib. to DOS (columns 7-11),',ch10,&
-&       '#  AE on-site  contrib. to DOS (columns 12-16),',ch10,&
-&       '# -PS on-site  contrib. to DOS (columns 17-21),',ch10,&
-&       '# for atom number iat=',iat,'  iatom=',dtset%iatsph(iat),ch10,&
-&       '# inside sphere of radius ratsph=',dtset%ratsph(dtset%typat(dtset%iatsph(iat))),' Bohr.',ch10,"#"
+        '# Local DOS (columns 2-6),',ch10,&
+        '#  plane-waves contrib. to DOS (columns 7-11),',ch10,&
+        '#  AE on-site  contrib. to DOS (columns 12-16),',ch10,&
+        '# -PS on-site  contrib. to DOS (columns 17-21),',ch10,&
+        '# for atom number iat=',iat,'  iatom=',dtset%iatsph(iat),ch10,&
+        '# inside sphere of radius ratsph=',dtset%ratsph(dtset%typat(dtset%iatsph(iat))),' Bohr.',ch10,"#"
        if (bigDOS) then
          write(msg, '(4a)' ) &
-&         '#energy(Ha)   l=0       l=1       l=2       l=3       l=4',&
-&         '       (PW)  l=0       l=1       l=2       l=3       l=4',&
-&         '      (Phi)  l=0       l=1       l=2       l=3       l=4',&
-&         '     (tPhi)  l=0       l=1       l=2       l=3       l=4'
+          '#energy(Ha)   l=0       l=1       l=2       l=3       l=4',&
+          '       (PW)  l=0       l=1       l=2       l=3       l=4',&
+          '      (Phi)  l=0       l=1       l=2       l=3       l=4',&
+          '     (tPhi)  l=0       l=1       l=2       l=3       l=4'
        else
          write(msg, '(4a)' ) &
-&         '#energy(Ha)  l=0      l=1      l=2      l=3      l=4',&
-&         '       (PW) l=0      l=1      l=2      l=3      l=4',&
-&         '      (Phi) l=0      l=1      l=2      l=3      l=4',&
-&         '     (tPhi) l=0      l=1      l=2      l=3      l=4'
+          '#energy(Ha)  l=0      l=1      l=2      l=3      l=4',&
+          '       (PW) l=0      l=1      l=2      l=3      l=4',&
+          '      (Phi) l=0      l=1      l=2      l=3      l=4',&
+          '     (tPhi) l=0      l=1      l=2      l=3      l=4'
        end if
        write(unt_atsph(iat), "(a)")trim(msg)
      end do
    end if
    do iat=1,natsph_extra
      write(unt_atsph(natsph+iat), '(3a,i5,2a,es16.6,3a)' ) &
-&     '# Local DOS (columns 2-6) and integrated local DOS (columns 7-11),',ch10,&
-&     '# for non-atomic sphere number iat=',iat,ch10,&
-&     '# of radius ratsph=',dtset%ratsph_extra,' Bohr.',ch10,"#"
+      '# Local DOS (columns 2-6) and integrated local DOS (columns 7-11),',ch10,&
+      '# for non-atomic sphere number iat=',iat,ch10,&
+      '# of radius ratsph=',dtset%ratsph_extra,' Bohr.',ch10,"#"
      if (bigDOS) then
        write(msg, '(a,a)' ) &
-&       '# energy(Ha)   l=0       l=1       l=2       l=3       l=4',&
-&       '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
+        '# energy(Ha)   l=0       l=1       l=2       l=3       l=4',&
+        '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
      else
        write(msg, '(a,a)' ) &
-&       '# energy(Ha)  l=0      l=1      l=2      l=3      l=4',&
-&       '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
+        '# energy(Ha)  l=0      l=1      l=2      l=3      l=4',&
+        '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
      end if
      if (prtdosm>=1) then
        write(msg, '(7a)' ) trim(msg),'          ',&
-&       '  lm=0 0',&
-&       '  lm=1-1  lm=1 0  lm=1 1',&
-&       '  lm=2-2  lm=2-1  lm=2 0  lm=2 1  lm=2 2',&
-&       '  lm=3-3  lm=3-2  lm=3-1  lm=3 0  lm=3 1  lm=3 2  lm=3 3',&
-&       '  lm=4-4  lm=4-3  lm=4-2  lm=4-1  lm=4 0  lm=4 1  lm=4 2  lm=4 3  lm=4 4'
+        '  lm=0 0',&
+        '  lm=1-1  lm=1 0  lm=1 1',&
+        '  lm=2-2  lm=2-1  lm=2 0  lm=2 1  lm=2 2',&
+        '  lm=3-3  lm=3-2  lm=3-1  lm=3 0  lm=3 1  lm=3 2  lm=3 3',&
+        '  lm=4-4  lm=4-3  lm=4-2  lm=4-1  lm=4 0  lm=4 1  lm=4 2  lm=4 3  lm=4 4'
      end if
      write(unt_atsph(natsph+iat), "(a)")trim(msg)
    end do
 
  else if (prtdos==5) then
    write(unitdos, '(a)' )&
-&    '# energy(Ha)     DOS up,up  up,dn  dn,up  dn,dn  sigma_x sigma_y sigma_z  and integrated DOS components'
+     '# energy(Ha)     DOS up,up  up,dn  dn,up  dn,dn  sigma_x sigma_y sigma_z  and integrated DOS components'
  end if ! prtdos value
 
 end subroutine write_extra_headers
@@ -1025,7 +1021,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
           c1 = sy(ll, mm, mm)
           c2 = sy(ll,-mm, mm)
           vect(:) = dcmplx(c1(1) * ylm_k(1:npw_k,ilm) + c2(1) * ylm_k(1:npw_k,jlm), &
-&                         c1(2) * ylm_k(1:npw_k,ilm) + c2(2) * ylm_k(1:npw_k,jlm))
+                          c1(2) * ylm_k(1:npw_k,ilm) + c2(2) * ylm_k(1:npw_k,jlm))
 
        else if (mm < 0) then
           !vect(1,:) =  invsqrt2 * ylm_k(1:npw_k,jlm) !* (-1)**mm
@@ -1033,7 +1029,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
           c1 = sy(ll, mm,  mm)
           c2 = sy(ll,-mm,  mm)
           vect(:) = dcmplx(c1(1) * ylm_k(1:npw_k,ilm) + c2(1) * ylm_k(1:npw_k,jlm),&
-&                         c1(2) * ylm_k(1:npw_k,ilm) + c2(2) * ylm_k(1:npw_k,jlm))
+                          c1(2) * ylm_k(1:npw_k,ilm) + c2(2) * ylm_k(1:npw_k,jlm))
        end if
        vect(:) = dcmplx(real(vect(:)), -aimag(vect(:)))
        !vect(:)%im = -vect(:)%im
@@ -1113,7 +1109,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
          do is=1,nspinor
            do isp=1,nspinor
              func(ixint) =  func(ixint) + real(conjg(values(ixint, is, ilm, iat))*pauli_mat(is,isp,ipauli)*&
-&                                                    values(ixint, isp, ilm, iat))
+                                                     values(ixint, isp, ilm, iat))
            end do
          end do
          func(ixint) = rint(ixint)**2 * func(ixint)
@@ -1162,8 +1158,8 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
      call wrtout(std_out, msg)
      do ll=0,mlang-1
        write(msg,'(a,i1,a,f9.6,a,9f6.3)' )&
-&       ' l=',ll,', charge=',sum_1ll_1atom(1,ll+1,iat),&
-&       ', m=-l,l splitting:',sum_1lm_1atom(1,1+ll**2:(ll+1)**2,iat)
+        ' l=',ll,', charge=',sum_1ll_1atom(1,ll+1,iat),&
+        ', m=-l,l splitting:',sum_1lm_1atom(1,1+ll**2:(ll+1)**2,iat)
        call wrtout(std_out, msg)
      end do ! ll
    end do ! iat
@@ -1171,7 +1167,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
    call wrtout(std_out, msg)
    do ll=0,mlang-1
      write(msg,'(a,i1,a,f9.6,a,f9.6)' )&
-&     ' l=',ll,', charge =',sum_1ll(ll+1),' proportion =',sum_1ll(ll+1)/sum_all
+      ' l=',ll,', charge =',sum_1ll(ll+1),' proportion =',sum_1ll(ll+1)/sum_all
      call wrtout(std_out, msg)
    end do
    write(msg,'(a,a,f10.6)' ) ch10,' Total over all atoms and l=0 to 4 :',sum_all
@@ -1373,8 +1369,7 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
 !  Compute the phases for the whole set of fft vectors
 !  -----------------------------------------------------------------
 
-   call ph1d3d(iatom,iatom,garr,natom,natom,nfft,ngfft(1),ngfft(2),ngfft(3),&
-&   phkxred,ph1d,ph3d)
+   call ph1d3d(iatom,iatom,garr,natom,natom,nfft,ngfft(1),ngfft(2),ngfft(3),phkxred,ph1d,ph3d)
 
 !  For the phase factors, take the compex conjugate, before evaluating the scalar product
    do ifft=1,nfft
@@ -1516,7 +1511,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  character(len=1) :: tag_l,tag_1m,tag_is
  character(len=2) :: tag_2m
  character(len=10) :: tag_il,tag_at,tag_grace
- character(len=1500) :: message
+ character(len=1500) :: msg
  character(len=fnlen) :: tmpfil
  type(atomdata_t) :: atom
 !arrays
@@ -1531,10 +1526,10 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  ndosfraction = dos%ndosfraction; mbesslang = dos%mbesslang
 
  if(dos%prtdosm.ne.0) then
-   write(message,'(3a)')&
-&   'm decomposed dos is activated',ch10, &
-&   'Action: deactivate it with prtdosm=0 !'
-   MSG_ERROR(message)
+   write(msg,'(3a)')&
+    'm decomposed dos is activated',ch10, &
+    'Action: deactivate it with prtdosm=0 !'
+   MSG_ERROR(msg)
  end if
 
  if(dtset%nspinor==2) then
@@ -1548,33 +1543,33 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  mband=dtset%mband
 
  if(natsph>1000) then
-   write(message,'(3a)')&
-&   'Too big number of fat bands!',ch10, &
-&   'Action: decrease natsph in input file !'
-   MSG_ERROR(message)
+   write(msg,'(3a)')&
+    'Too big number of fat bands!',ch10, &
+    'Action: decrease natsph in input file !'
+   MSG_ERROR(msg)
  end if
 
 !--------------  PRINTING IN LOG
  call cwtime(cpu, wall, gflops, "start")
- write(message,'(a,a,a,a,i5,a,a,1000i5)') ch10," ***** Print of fatbands activated ****** ",ch10,&
-& "  Number of atom: natsph = ",natsph,ch10, &
-& "  atoms  are             = ",(dtset%iatsph(iat),iat=1,natsph)
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ write(msg,'(a,a,a,a,i5,a,a,1000i5)') ch10," ***** Print of fatbands activated ****** ",ch10,&
+  "  Number of atom: natsph = ",natsph,ch10, &
+  "  atoms  are             = ",(dtset%iatsph(iat),iat=1,natsph)
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
  iall=0;inbfatbands=0
 
  if(pawfatbnd==1) then
    inbfatbands=mbesslang-1
-   write(message,'(3a)')"  (fatbands are in eV and are given for each value of L)",ch10
+   write(msg,'(3a)')"  (fatbands are in eV and are given for each value of L)",ch10
  else if(pawfatbnd==2) then
-   write(message,'(3a)')"  (fatbands are in eV and are given for each value of L and M)",ch10
+   write(msg,'(3a)')"  (fatbands are in eV and are given for each value of L and M)",ch10
    inbfatbands=(mbesslang-1)**2
  end if
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
 
- write(message,'(a,e12.5,a,e12.5,a)') "  Fermi energy is ",ebands%fermie*Ha_eV," eV = ",ebands%fermie," Ha"
- call wrtout(std_out,message,'COLL')
+ write(msg,'(a,e12.5,a,e12.5,a)') "  Fermi energy is ",ebands%fermie*Ha_eV," eV = ",ebands%fermie," Ha"
+ call wrtout(std_out,msg,'COLL')
 
 !--------------  OPEN AND NAME FILES FOR FATBANDS
  ABI_ALLOCATE(unitfatbands_arr,(natsph*inbfatbands,dtset%nsppol))
@@ -1595,8 +1590,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
          if(pawfatbnd==1) then
            call int2char4(il-1,tag_il)
            ABI_CHECK((tag_il(1:1)/='#'),'Bug: string length too short!')
-           tmpfil = trim(fildata)// &
-&           '_at'//trim(tag_at)//'_'//trim(adjustl(symbol))//'_is'//tag_is//'_l'//trim(tag_il)
+           tmpfil = trim(fildata)//'_at'//trim(tag_at)//'_'//trim(adjustl(symbol))//'_is'//tag_is//'_l'//trim(tag_il)
          else if (pawfatbnd==2) then
            write(tag_l,'(i1)') ll
            mm=il-(ll**2+ll+1)      ! compute m
@@ -1609,24 +1603,24 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
          end if
          !unitfatbands_arr(iall,isppol)=tmp_unit+100+iall-1+(natsph*inbfatbands)*(isppol-1)
          !open (unit=unitfatbands_arr(iall,isppol),file=trim(tmpfil),status='unknown',form='formatted')
-         if (open_file(tmpfil, message, newunit=unitfatbands_arr(iall,isppol), status='unknown',form='formatted') /= 0) then
-           MSG_ERROR(message)
+         if (open_file(tmpfil, msg, newunit=unitfatbands_arr(iall,isppol), status='unknown',form='formatted') /= 0) then
+           MSG_ERROR(msg)
          end if
 
-         write(message,'(a,a,a,i4)') 'opened file : ', trim(tmpfil), ' unit', unitfatbands_arr(iall,isppol)
-         call wrtout(std_out,message,'COLL')
-         write(message,'(9a)') "# ",ch10,"# ABINIT package : FATBAND file ", ch10,&
-&         "# It contains, for each band: the eigenvalues in eV (and the character of the band) as a function of the k-point",&
-&         ch10,"# This file can be read with xmgrace (http://plasma-gate.weizmann.ac.il/Grace/)  ",ch10,"#  "
-         write(unitfatbands_arr(iall,isppol), "(a)")trim(message)
+         write(msg,'(a,a,a,i4)') 'opened file : ', trim(tmpfil), ' unit', unitfatbands_arr(iall,isppol)
+         call wrtout(std_out,msg,'COLL')
+         write(msg,'(9a)') "# ",ch10,"# ABINIT package : FATBAND file ", ch10,&
+           "# It contains, for each band: the eigenvalues in eV (and the character of the band) as a function of the k-point",&
+           ch10,"# This file can be read with xmgrace (http://plasma-gate.weizmann.ac.il/Grace/)  ",ch10,"#  "
+         write(unitfatbands_arr(iall,isppol), "(a)")trim(msg)
          do iband=1,mband
            call int2char4(iband-1,tag_grace)
            ABI_CHECK((tag_grace(1:1)/='#'),'Bug: string length too short!')
-           write(message,'(16a)') ch10,"@    s",trim(tag_grace)," line color 1",&
-&           ch10,"@    s",trim(tag_grace)," errorbar color 2",&
-&           ch10,"@    s",trim(tag_grace)," errorbar riser linewidth 5.0", &
-&           ch10,"@    s",trim(tag_grace)," errorbar linestyle 0"
-           write(unitfatbands_arr(iall,isppol), "(a)")trim(message)
+           write(msg,'(16a)') ch10,"@    s",trim(tag_grace)," line color 1",&
+            ch10,"@    s",trim(tag_grace)," errorbar color 2",&
+            ch10,"@    s",trim(tag_grace)," errorbar riser linewidth 5.0", &
+            ch10,"@    s",trim(tag_grace)," errorbar linestyle 0"
+           write(unitfatbands_arr(iall,isppol), "(a)")trim(msg)
          end do  !iband
          write(unitfatbands_arr(iall,isppol), '(a,a)') ch10,'@type xydy'
        end do   ! isppol
@@ -1693,8 +1687,8 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  ABI_DEALLOCATE(unitfatbands_arr)
 
  call cwtime(cpu,wall,gflops,"stop")
- write(message,'(2(a,f8.2),a)')" prtfatbands: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
- call wrtout(std_out,message,"PERS")
+ write(msg,'(2(a,f8.2),a)')" prtfatbands: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
+ call wrtout(std_out,msg,"PERS")
 
  DBG_EXIT("COLL")
 
@@ -2419,7 +2413,7 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
  integer :: jl,jlmn,jln,jm,klmn,kln,lmn_size,mbesslang,me_band,me_kpt,my_nspinor
  integer :: nband_cprj_k,nband_k,ndosfraction,nprocband,nproc_spkptband,paw_dos_flag,prtdosm
  real(dp) :: cpij,one_over_nproc
- !character(len=500) :: message
+ !character(len=500) :: msg
 !arrays
  integer ,allocatable :: dimcprj_atsph(:)
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)

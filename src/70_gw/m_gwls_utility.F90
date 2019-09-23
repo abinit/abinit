@@ -38,13 +38,13 @@ module m_gwls_utility
 
 ! abinit modules
 use defs_basis
-use defs_datatypes
 use m_abicore
 use m_xmpi
 
 use m_io_tools, only : get_unit
 
 implicit none
+
 private
 
 complex(dpc), public, parameter :: cmplx_i = (0.0_dp,1.0_dp)

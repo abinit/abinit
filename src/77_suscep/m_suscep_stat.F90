@@ -27,11 +27,12 @@
 MODULE m_suscep_stat
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_errors
  use m_abicore
+ use m_distribfft
 
+ use defs_abitypes, only : MPI_type
  use m_time,    only : timab
  use m_pawang,  only : pawang_type
  use m_pawtab,  only : pawtab_type

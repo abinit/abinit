@@ -33,13 +33,14 @@
 
 module m_orbmag
 
-  use defs_abitypes
   use defs_basis
-  use defs_datatypes
   use m_errors
   use m_abicore
   use m_xmpi
+  use m_dtset
 
+  use defs_datatypes,     only : pseudopotential_type
+  use defs_abitypes,      only : MPI_type
   use m_berrytk,          only : smatrix
   use m_cgprj,            only : getcprj
   use m_cgtools,          only : overlap_g
@@ -48,8 +49,7 @@ module m_orbmag
   use m_fourier_interpol, only : transgrid
   use m_geometry,         only : metric
   use m_getghc,           only : getghc
-  use m_hamiltonian,      only : init_hamiltonian,destroy_hamiltonian,&
-       &                         load_spin_hamiltonian,load_k_hamiltonian,gs_hamiltonian_type
+  use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type
   use m_initylmg,         only : initylmg
   use m_kg,               only : getph,mkkin,mkkpg,mkpwind_k,ph1d3d
   use m_kpts,             only : listkk, smpbz
@@ -174,7 +174,10 @@ module m_orbmag
   public :: orbmag
   public :: rho_norm_check
 
+  private :: applyap
+  private :: cpg_dij_cpb
   private :: ctocprjb
+  private :: kgk_ke
   private :: make_CCI
   private :: make_CCIV_dsdk
   private :: make_CCIV_dpdk
@@ -192,7 +195,7 @@ module m_orbmag
   private :: make_VVI
   private :: make_VVII
   private :: make_VVIII
-  
+
 CONTAINS  !========================================================================================
 !!***
 
@@ -941,7 +944,7 @@ subroutine rho_norm_check(atindx1,cg,cprj,dtorbmag,dtset,mpi_enreg,mcg,mcprj,&
   type(pawcprj_type),allocatable :: cprj_k(:,:)
 
   !----------------------------------------------------
-  
+
   isppol = 1
   my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
 
@@ -950,12 +953,12 @@ subroutine rho_norm_check(atindx1,cg,cprj,dtorbmag,dtset,mpi_enreg,mcg,mcprj,&
   call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
   ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natom,dtorbmag%nspinor*dtset%mband))
   call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
-  
+
   nband_k = dtorbmag%mband_occ
 
   trace=zero
   do ikpt = 1, dtorbmag%fnkpt
-           
+
      icprj = dtorbmag%cprjindex(ikpt,isppol)
 
      npw_k = npwarr(ikpt)
@@ -988,9 +991,9 @@ subroutine rho_norm_check(atindx1,cg,cprj,dtorbmag,dtset,mpi_enreg,mcg,mcprj,&
 
   ! final trace: factor of two assumes two electrons per band (normal occupance for an insulator)
   trace = trace*two/dtorbmag%fnkpt
-  
+
   write(std_out,'(a,2i4,es16.8)')'JWZ debug nkpt nband_k trace ',dtorbmag%fnkpt,nband_k,trace
-  
+
   ABI_DEALLOCATE(dimlmn)
   call pawcprj_free(cprj_k)
   ABI_DATATYPE_DEALLOCATE(cprj_k)
@@ -1197,10 +1200,10 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
                     end do ! end loop over n1
                  end do ! end loop over nn
 
-                 cnum(1,adir) = cnum(1,adir) + epsabg*bsigma*gsigma*real(IA-IB)/(2.0*deltab*2.0*deltag) 
-                 cnum(2,adir) = cnum(2,adir) + epsabg*bsigma*gsigma*aimag(IA-IB)/(2.0*deltab*2.0*deltag) 
-                 ! cnum(1,adir) = cnum(1,adir) + epsabg*bsigma*gsigma*real(IA)/(2.0*deltab*2.0*deltag) 
-                 ! cnum(2,adir) = cnum(2,adir) + epsabg*bsigma*gsigma*aimag(IA)/(2.0*deltab*2.0*deltag) 
+                 cnum(1,adir) = cnum(1,adir) + epsabg*bsigma*gsigma*real(IA-IB)/(2.0*deltab*2.0*deltag)
+                 cnum(2,adir) = cnum(2,adir) + epsabg*bsigma*gsigma*aimag(IA-IB)/(2.0*deltab*2.0*deltag)
+                 ! cnum(1,adir) = cnum(1,adir) + epsabg*bsigma*gsigma*real(IA)/(2.0*deltab*2.0*deltag)
+                 ! cnum(2,adir) = cnum(2,adir) + epsabg*bsigma*gsigma*aimag(IA)/(2.0*deltab*2.0*deltag)
 
               end do ! end loop over kpts
            end do ! end loop over gfor
@@ -1216,7 +1219,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
   ! gives number of electrons as expected.
   dtorbmag%chern(1,1:3) = -cnum(2,1:3)*two/(two_pi*ucvol*dtorbmag%fnkpt)
   dtorbmag%chern(2,1:3) =  cnum(1,1:3)*two/(two_pi*ucvol*dtorbmag%fnkpt)
-  
+
   write(message,'(a,a,a)')ch10,'====================================================',ch10
   call wrtout(ab_out,message,'COLL')
 
@@ -1237,7 +1240,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
   if(present(smat_all)) then
      nullify(smat_all_indx)
   else
-     ABI_DEALLOCATE(smat_all_indx) 
+     ABI_DEALLOCATE(smat_all_indx)
   end if
 
 end subroutine chern_number
@@ -1380,21 +1383,21 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_en
   job = 1
   shiftbd = 1
   usepaw = 1
-  
+
   smat_all_(:,:,:,:,:,:) = zero
   has_smat(:,:,:) = .FALSE.
 
   do bdir = 1, 3
      do gg = bdir,bdir+1
         gdir=mod(gg,3)+1
-        
+
         do bfor = 1, 2
            bsigma = -2*bfor+3
            ! index of neighbor 1..6
            bdx = 2*bdir-2+bfor
            ! index of ikpt viewed from neighbor
            bdxc = 2*bdir-2+bfor+bsigma
-           dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)        
+           dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
 
            do gfor = 1, 2
               gsigma=-2*gfor+3
@@ -1416,7 +1419,7 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_en
               !
               ! do ikpt_loc = 1, dtorbmag%fmkmem_max*nsppol
               do ikpt_loc = 1, dtorbmag%fmkmem_max
-  
+
                  ikpt=mpi_enreg%kpt_loc2fbz_sp(me, ikpt_loc,1)
                  ! isppol=mpi_enreg%kpt_loc2fbz_sp(me, ikpt_loc,2)
 
@@ -1567,7 +1570,7 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_en
                  end do ! end loop over dest
 
                  if (ikpt > 0 .and. isppol > 0) then ! if I am treating a kpt, compute the overlaps
-                    
+
                     if ( ikptbi /= ikptb ) then
                        call pawcprj_copy(cprj_kb,cprj_ikn)
                        call pawcprj_symkn(cprj_fkn,cprj_ikn,dtorbmag%atom_indsym,dimlmn,-1,psps%indlmn,&
@@ -1578,7 +1581,7 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_en
                             & dtorbmag%nsym,dtset%ntypat,dtset%typat,dtorbmag%zarot)
                        call pawcprj_copy(cprj_fkn,cprj_kb)
                     end if
-                 
+
                     if ( ikptgi /= ikptg ) then
                        call pawcprj_copy(cprj_kg,cprj_ikn)
                        call pawcprj_symkn(cprj_fkn,cprj_ikn,dtorbmag%atom_indsym,dimlmn,-1,psps%indlmn,&
@@ -1589,17 +1592,17 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_en
                             & dtorbmag%nsym,dtset%ntypat,dtset%typat,dtorbmag%zarot)
                        call pawcprj_copy(cprj_fkn,cprj_kg)
                     end if
-                 
+
                     if (.NOT. has_smat(ikpt,bdx,0)) then
                        call overlap_k1k2_paw(cprj_k,cprj_kb,dkb,gprimd,kk_paw,dtorbmag%lmn2max,&
                             &           dtorbmag%lmn_size,dtset%mband,&
                             &           dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
-                       
+
                        sflag_k=0
                        call smatrix(cg,cgqb,cg1_k,ddkflag,dtm_k,icg,0,itrs,job,nband_k,&
                             &           mcg,countb,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kb,my_nspinor,&
                             &           pwind_kb,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,usepaw)
-                       
+
                        smat_all_(:,:,:,ikpt,bdx,0) = smat_kk(:,:,:)
                        has_smat(ikpt,bdx,0) = .TRUE.
                        if(sourceb.EQ.me) then
@@ -1608,32 +1611,32 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_en
                           has_smat(ikptb,bdxc,0) = .TRUE.
                        end if
                     end if
-                    
+
                     if (.NOT. has_smat(ikpt,bdx,gdx) .AND. .NOT. has_smat(ikpt,gdx,bdx) ) then
-                       
+
                        call overlap_k1k2_paw(cprj_kb,cprj_kg,dkbg,gprimd,kk_paw,dtorbmag%lmn2max,&
                             &             dtorbmag%lmn_size,dtset%mband,&
                             &             dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
-                       
+
                        call mkpwind_k(dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,&
                             &             dtorbmag%indkk_f2ibz,ikptb,ikptg,&
                             &             mpi_enreg,npwarr,pwind_bg,symrec)
-                       
+
                        sflag_k=0
                        call smatrix(cgqb,cgqg,cg1_k,ddkflag,dtm_k,0,0,itrs,job,nband_k,&
                             &             countb,countg,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_kb,npw_kg,my_nspinor,&
                             &             pwind_bg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,usepaw)
-                       
+
                        gdxstor = mod(gdx+6-2*bdir,6)
                        smat_all_(:,:,:,ikpt,bdx,gdxstor) = smat_kk(:,:,:)
-                    
+
                        bdxstor = mod(bdx+6-2*gdir,6)
                        smat_all_(1,:,:,ikpt,gdx,bdxstor) = TRANSPOSE(smat_kk(1,:,:))
                        smat_all_(2,:,:,ikpt,gdx,bdxstor) = -TRANSPOSE(smat_kk(2,:,:))
-                       
+
                        has_smat(ikpt,bdx,gdx) = .TRUE.
                        has_smat(ikpt,gdx,bdx) = .TRUE.
-                       
+
                     end if
 
                     if(allocated(cgqb)) then
@@ -1644,13 +1647,13 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_en
                     end if
 
                  end if ! end check on ikpt > 0
-                 
+
               end do ! end loop over ikpt_loc
-              
+
            end do ! end loop over gfor
 
         end do ! end loop over bfor
-        
+
      end do ! end loop over gg
 
   end do ! end loop over bdir
@@ -1667,7 +1670,7 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_en
      ABI_DEALLOCATE(buffer2)
   end if
 
-  smat_all(1:2,1:nband_k,1:nband_k,1:dtorbmag%fnkpt,1:6,0:4) = smat_all_(1:2,1:nband_k,1:nband_k,1:dtorbmag%fnkpt,1:6,0:4) 
+  smat_all(1:2,1:nband_k,1:nband_k,1:dtorbmag%fnkpt,1:6,0:4) = smat_all_(1:2,1:nband_k,1:nband_k,1:dtorbmag%fnkpt,1:6,0:4)
 
   ABI_DEALLOCATE(dimlmn)
   call pawcprj_free(cprj_k)
@@ -1757,7 +1760,7 @@ subroutine make_onsite_l_k(cprj_k,dtset,idir,nband_k,onsite_l_k,pawrad,pawtab)
   !arrays
   real(dp),allocatable :: ff(:)
 
-!--------------------------------------------------------------------  
+!--------------------------------------------------------------------
 
   onsite_l_k = czero
   do iatom=1,dtset%natom
@@ -1843,14 +1846,14 @@ subroutine make_onsite_l(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite_
   !scalars
   integer :: icprj,ierr,ikpt,ikpt_loc,isppol,me,my_nspinor,ncpgr,nproc,spaceComm
   complex(dpc) :: onsite_l_k
-  
+
   !arrays
   integer :: nattyp_dum(dtset%ntypat)
   integer,allocatable :: dimlmn(:)
   type(pawcprj_type),allocatable :: cprj_k(:,:)
 
   ! ***********************************************************************
-  
+
   ! TODO: generalize to nsppol > 1
   isppol = 1
   my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
@@ -1889,7 +1892,7 @@ subroutine make_onsite_l(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite_
   if(nproc > 1) then
      call xmpi_sum(onsite_l,spaceComm,ierr)
   end if
-  
+
   !---------clean up memory-------------------
 
   ABI_DEALLOCATE(dimlmn)
@@ -1953,7 +1956,7 @@ subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite
   integer :: jl,jm,jlmn,klmn,klm,kln,lpmp,me,mesh_size,my_nspinor,ncpgr,nn,nproc,spaceComm
   real(dp) :: bm1,bm2,d00,d20,d22,dij,intg,scale_conversion
   complex(dpc) :: cpb,cpk
-  
+
   !arrays
   integer :: nattyp_dum(dtset%ntypat)
   integer,allocatable :: dimlmn(:)
@@ -1973,12 +1976,12 @@ subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite
   ! TODO: generalize to nsppol > 1
   isppol = 1
   my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
-  
+
   !Init MPI
   spaceComm=mpi_enreg%comm_cell
   nproc=xmpi_comm_size(spaceComm)
   me = mpi_enreg%me_kpt
-  
+
   ncpgr = cprj(1,1)%ncpgr
   ABI_ALLOCATE(dimlmn,(dtset%natom))
   call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
@@ -1990,7 +1993,7 @@ subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite
   ikpt_loc = 0
   ! loop over all the kpts
   do ikpt = 1, dtset%nkpt
-     
+
      ! if the current kpt is not on the current processor, cycle
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
 
@@ -1998,7 +2001,7 @@ subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite
      icprj= (ikpt_loc - 1)*nband_k
      call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,icprj,ikpt_loc,0,isppol,dtset%mband,&
           &       dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
-     
+
      do iatom=1,dtset%natom
         itypat=dtset%typat(iatom)
         mesh_size=pawtab(itypat)%mesh_size
@@ -2090,9 +2093,9 @@ subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite
   if(nproc > 1) then
      call xmpi_sum(onsite_bm,spaceComm,ierr)
   end if
-  
+
   !---------clean up memory-------------------
-     
+
   ABI_DEALLOCATE(dimlmn)
   call pawcprj_free(cprj_k)
   ABI_DATATYPE_DEALLOCATE(cprj_k)
@@ -2225,14 +2228,14 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
               ! from the one determined from dtorbmag%ikpt_dk(ikpt,bfor,bdir)
               call initylmg(gprimd,kg,kptnsb,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
                    & nband_dum,dtset%nkpt,npwarr,dtset%nsppol,optder,rprimd,ylmb,ylmgrb)
-        
+
               do ikpt=1,dtset%nkpt
 
                  ! if the current kpt is not on the current processor, cycle
                  if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
 
                  if(has_cprj(ikpt,bdx,gdxstor)) cycle !
-                 
+
                  kpointb(:) = kptnsb(:,ikpt)
                  npw_k = npwarr(ikpt)
                  ABI_ALLOCATE(cwavef,(2,npw_k))
@@ -2290,14 +2293,14 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
                          & dtset%mgfft,mpi_enreg,&
                          & dtset%natom,nattyp,dtset%ngfft,dtset%nloalg,npw_k,dtset%nspinor,dtset%ntypat,&
                          & phkxred,ph1d,ph3d,ucvol,psps%useylm)
-              
+
                     call pawcprj_put(atindx1,cwaveprj,cprj_kb_k(bdx,gdxstor,:,:),dtset%natom,&
                          & iband,icprj,ikpt,0,isppol,nband_k,dtset%mkmem,&
                          & dtset%natom,1,nband_k,dimlmn,dtset%nspinor,dtset%nsppol,0,&
                          & mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
 
                  end do ! end loop over bands
-                 
+
                  ABI_DEALLOCATE(kg_k)
                  ABI_DEALLOCATE(ph3d)
                  ABI_DEALLOCATE(kpg_k)
@@ -2399,8 +2402,8 @@ subroutine make_dsdk_FD(atindx1,cprj,dsdk,dtorbmag,dtset,mcprj,mpi_enreg,nband_k
   real(dp),allocatable :: buffer1(:),buffer2(:)
   logical,allocatable :: self_dsdk(:,:)
   type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kgb(:,:)
-  
-  !--------------------------------------------------------------------  
+
+  !--------------------------------------------------------------------
   !Init MPI
   spaceComm=mpi_enreg%comm_cell
   nproc=xmpi_comm_size(spaceComm)
@@ -2465,7 +2468,7 @@ subroutine make_dsdk_FD(atindx1,cprj,dsdk,dtorbmag,dtset,mcprj,mpi_enreg,nband_k
                     ikptgi = dtorbmag%indkk_f2ibz(ikptg,1)
                     icprjgi = dtorbmag%cprjindex(ikptgi,isppol)
                  end if
-                 
+
                  call pawcprj_get(atindx1,cprj_k,cprj(bdx,0,:,:),dtset%natom,1,icprji,ikpti,0,isppol,dtset%mband,&
                       & dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
 
@@ -2506,7 +2509,7 @@ subroutine make_dsdk_FD(atindx1,cprj,dsdk,dtorbmag,dtset,mcprj,mpi_enreg,nband_k
         end do ! end loop over gfor
      end do ! end loop over gg
   end do ! end loop over bdir
-  
+
   !  MPI communicate stuff between everyone
   if (nproc>1) then
      countg = size(dsdk)
@@ -2614,7 +2617,7 @@ subroutine make_dsdk_nonlop(atindx1,cg,dsdk,dtorbmag,dtset,gmet,gprimd,kg,&
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 
-  !--------------------------------------------------------------------  
+  !--------------------------------------------------------------------
   !Init MPI
   spaceComm=mpi_enreg%comm_cell
   nproc=xmpi_comm_size(spaceComm)
@@ -2662,7 +2665,7 @@ subroutine make_dsdk_nonlop(atindx1,cg,dsdk,dtorbmag,dtset,gmet,gprimd,kg,&
        & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=dtset%nucdipmom,&
        & paw_ij=paw_ij)
 
-  call load_spin_hamiltonian(gs_hamk,isppol,with_nonlocal=.true.)
+  call gs_hamk%load_spin(isppol,with_nonlocal=.true.)
 
   dsdk(1:2,1:nband_k,1:nband_k,1:dtorbmag%fnkpt,1:3,0:4) = zero
   do bdir = 1, 3
@@ -2714,11 +2717,11 @@ subroutine make_dsdk_nonlop(atindx1,cg,dsdk,dtorbmag,dtset,gmet,gprimd,kg,&
                     ylm_k(1:npw_k,ilm)=ylm(1+ikg:npw_k+ikg,ilm)
                     ylmgr_k(1:npw_k,1:3,ilm)=ylmgr(1+ikg:npw_k+ikg,1:3,ilm)
                  end do
-                 
+
                  nkpg = 3
                  ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
                  call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
-                 
+
                  ! Compute nonlocal form factors ffnl at all (k+G):
                  ider=1 ! want ffnl and 1st derivative
                  idir=4 ! d ffnl/ dk referenced to cartesian directions
@@ -2729,7 +2732,7 @@ subroutine make_dsdk_nonlop(atindx1,cg,dsdk,dtorbmag,dtset,gmet,gprimd,kg,&
                       &         psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
                       &         npw_k,dtset%ntypat,psps%pspso,psps%qgrid_ff,rmet,&
                       &         psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
-                 
+
                  ! Load k-dependent part in the Hamiltonian datastructure
                  !  - Compute 3D phase factors
                  !  - Prepare various tabs in case of band-FFT parallelism
@@ -2741,8 +2744,8 @@ subroutine make_dsdk_nonlop(atindx1,cg,dsdk,dtorbmag,dtset,gmet,gprimd,kg,&
                  end do
 
                  call ph1d3d(1,dtset%natom,kg_k,dtset%natom,dtset%natom,npw_k,ngfft1,ngfft2,ngfft3,phkxred,ph1d,ph3d)
-              
-                 call load_k_hamiltonian(gs_hamk,kpt_k=kpoint(:),istwf_k=istwf_k,npw_k=npw_k,&
+
+                 call gs_hamk%load_k(kpt_k=kpoint(:),istwf_k=istwf_k,npw_k=npw_k,&
                       &         kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl_k,ph3d_k=ph3d,compute_gbound=.TRUE.)
 
               end if ! end if ikpt > 0 check
@@ -2786,7 +2789,7 @@ subroutine make_dsdk_nonlop(atindx1,cg,dsdk,dtorbmag,dtset,gmet,gprimd,kg,&
                     if (jkpt > 0 .and. jsppol > 0) then ! dest is treating a true kpt
                        jkptg = dtorbmag%ikpt_dk(jkpt,gfor,gdir)
                        jkptgi = dtorbmag%indkk_f2ibz(jkptg,1)
-                         
+
                        if((mpi_enreg%proc_distrb(jkptgi,1,jsppol) == me))  then
                           jcgg = dtorbmag%cgindex(jkptgi,jsppol)
                           tagg = jkptgi + (jsppol - 1)*dtset%nkpt
@@ -2826,7 +2829,7 @@ subroutine make_dsdk_nonlop(atindx1,cg,dsdk,dtorbmag,dtset,gmet,gprimd,kg,&
 
                        dotr = DOT_PRODUCT(ket(1,:),svectout(1,:))+DOT_PRODUCT(ket(2,:),svectout(2,:))
                        doti = DOT_PRODUCT(ket(1,:),svectout(2,:))-DOT_PRODUCT(ket(2,:),svectout(1,:))
-                       
+
                        ! store as <u_n1_k|svectout> = <u_n1 k|dS/dk_bdir|u_nn k>
                        dsdk(1,n1,nn,ikpt,bdir,0) = dotr
                        dsdk(2,n1,nn,ikpt,bdir,0) = doti
@@ -2856,7 +2859,7 @@ subroutine make_dsdk_nonlop(atindx1,cg,dsdk,dtorbmag,dtset,gmet,gprimd,kg,&
                  ABI_DEALLOCATE(kg_k)
 
               end if ! end check on ikpt > 0, isppol > 0
-              
+
            end do ! end loop on ikpt
         end do ! end loop on gfor
      end do ! end loop on gg
@@ -2886,7 +2889,7 @@ subroutine make_dsdk_nonlop(atindx1,cg,dsdk,dtorbmag,dtset,gmet,gprimd,kg,&
   ABI_DEALLOCATE(vect1)
   ABI_DEALLOCATE(vect2)
 
-  call destroy_hamiltonian(gs_hamk)
+  call gs_hamk%free()
 
 end subroutine make_dsdk_nonlop
 !!***
@@ -2955,8 +2958,8 @@ subroutine make_dsdk_cprj(atindx1,cprj,dsdk,dtorbmag,dtset,mcprj,mpi_enreg,nband
   integer,allocatable :: dimlmn(:)
   real(dp),allocatable :: buffer1(:),buffer2(:)
   type(pawcprj_type),allocatable :: cprj_k(:,:)
-  
-  !--------------------------------------------------------------------  
+
+  !--------------------------------------------------------------------
   !Init MPI
   spaceComm=mpi_enreg%comm_cell
   nproc=xmpi_comm_size(spaceComm)
@@ -3012,7 +3015,7 @@ subroutine make_dsdk_cprj(atindx1,cprj,dsdk,dtorbmag,dtset,mcprj,mpi_enreg,nband
 
      end do ! end loop over ikpt
   end do ! end loop over bdir
-  
+
   !  MPI communicate stuff between everyone
   if (nproc>1) then
      countg = size(dsdk)
@@ -3183,14 +3186,14 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
     ABI_DEALLOCATE(cgrvtrial)
  end if
 
- ! add vlocal 
- call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
+ ! add vlocal
+ call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
 
  ! add vectornd if available
  if(has_vectornd) then
-    call load_spin_hamiltonian(gs_hamk,isppol,vectornd=vectornd_pac)
+    call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
  end if
- 
+
  ncpgr = cprj(1,1)%ncpgr
  ABI_ALLOCATE(dimlmn,(dtset%natom))
  call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'R')
@@ -3236,7 +3239,7 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
     nkpg = 3
     ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
     call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
-    
+
     ! Compute nonlocal form factors ffnl at all (k+G):
     ider=0 ! want ffnl and 1st derivative
     idir=4 ! d ffnl/ dk_red in all 3 directions
@@ -3247,12 +3250,12 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
          &         psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
          &         npw_k,dtset%ntypat,psps%pspso,psps%qgrid_ff,rmet,&
          &         psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
-    
+
     !  - Compute 3D phase factors
     !  - Prepare various tabs in case of band-FFT parallelism
     !  - Load k-dependent quantities in the Hamiltonian
     ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
-    call load_k_hamiltonian(gs_hamk,kpt_k=kpoint(:),istwf_k=istwf_k,npw_k=npw_k,&
+    call gs_hamk%load_k(kpt_k=kpoint(:),istwf_k=istwf_k,npw_k=npw_k,&
          &         kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl_k,ph3d_k=ph3d,&
          &         compute_ph3d=.TRUE.,compute_gbound=.TRUE.)
 
@@ -3278,7 +3281,7 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
     icg = icg + npw_k*nband_k
     ikg = ikg + npw_k
     icprj = icprj + nband_k
-    
+
     ABI_DEALLOCATE(ylm_k)
     ABI_DEALLOCATE(ylmgr_k)
     ABI_DEALLOCATE(kpg_k)
@@ -3290,7 +3293,7 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
     ABI_DEALLOCATE(gvnlc)
 
  end do ! end loop over kpts on current processor
- 
+
  !  MPI communicate stuff between everyone
  if (nproc>1) then
     eeig_size = size(eeig)
@@ -3303,7 +3306,7 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
     ABI_DEALLOCATE(buffer2)
  end if
 
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
  ABI_DEALLOCATE(vlocal)
  if(has_vectornd) then
     ABI_DEALLOCATE(vectornd_pac)
@@ -3443,7 +3446,7 @@ subroutine make_S1trace(adir,atindx1,cprj,dtset,eeig,&
   ABI_DEALLOCATE(dimlmn)
   call pawcprj_free(cprj_k)
   ABI_DATATYPE_DEALLOCATE(cprj_k)
-     
+
 end subroutine make_S1trace
 !!***
 
@@ -3572,7 +3575,7 @@ subroutine make_rhorij1(adir,atindx1,cprj,dtset,mcprj,mpi_enreg,&
   ABI_DEALLOCATE(dimlmn)
   call pawcprj_free(cprj_k)
   ABI_DATATYPE_DEALLOCATE(cprj_k)
-     
+
 end subroutine make_rhorij1
 !!***
 
@@ -3675,6 +3678,287 @@ end subroutine make_CCIV_dsdk
 !!***
 
 
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/kgk_ke
+!! NAME
+!! kgk_ke
+!!
+!! FUNCTION
+!! Compute k-shifted kinetic energy: |u_{nkg}> -> T_k |u_{nkg}>
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2017 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!! kkgket(2,npw_kg)
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! As part of the computation of <u_kg|H_k|u_kb>, the kinetic energy at k
+!! must be applied to a wavefunction at kg.
+!! twisted kinetic energy: here we are computing
+!! -\frac{1}{2}<u_kg|e^{-i.k.r}\nabla^2 e^{i.k.r}|u_kb>,
+!! that is, kinetic energy at k between wavefunctions at kg and kb. The correct
+!! formula is htpisq*(ikpt + G_right)^2\delta(G_left,G_right) but it's hard to apply
+!! because the G's have wrap-around shifts (output of mkpwind_k)
+!! for the kpts near and at the edge of the IBZ.
+!! The following approach is based on the bra <u_kg| expansion, because
+!! these G vectors are unshifted (indexed by ipw, not jpw). So we are using
+!! k+G_left = (k-kg) + (kg+G_left) = -dkg + (kg+G_left). When squared we obtain
+!! |kg+G_left|^2 - 2*dkg.(kg+G_left) + |dkg|^2. In this way we only use the G_left
+!! expansion vectors, with no shift, for each k point.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine kgk_ke(dtset,dkg,gmet,kgket,kg_kg,kkgket,kpointg,npw_kg)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: npw_kg
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: kg_kg(3,npw_kg)
+  real(dp),intent(in) :: dkg(3),gmet(3,3),kgket(2,npw_kg),kpointg(3)
+  real(dp),intent(out) :: kkgket(2,npw_kg)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: ipw
+  real(dp) :: dkg2,htpisq,keg
+
+!-----------------------------------------------------------------------
+
+  htpisq = half*(two_pi)**2
+  dkg2=DOT_PRODUCT(dkg(:),MATMUL(gmet(:,:),dkg(:)))
+
+  kkgket(1:2,1:npw_kg) = zero
+
+  do ipw = 1, npw_kg
+
+     ! normal kinetic energy for bra
+     keg=htpisq*dot_product((kpointg(:)+kg_kg(:,ipw)),MATMUL(gmet,(kpointg(:)+kg_kg(:,ipw))))
+
+     ! addition of |dkg|^2
+     keg=keg+htpisq*dkg2
+
+     ! addition of -2*dkg*(kg+G_left)
+     keg=keg-2.0*htpisq*DOT_PRODUCT(dkg(:),MATMUL(gmet,(kpointg(:)+kg_kg(:,ipw))))
+
+     ! application of ecut filter and wavefunction
+     ! after this loop have T_k|kgket> stored in |kkgket>
+     if (keg .GT. dtset%ecut) cycle
+
+     kkgket(1:2,ipw) = keg*kgket(1:2,ipw)
+
+  end do ! end loop over ipw
+
+end subroutine kgk_ke
+!!***
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/cpg_dij_cpb
+!! NAME
+!! cpg_dij_cpb
+!!
+!! FUNCTION
+!! Compute <u_kg|p_i>dij<p_j|u_kb> energy contribution
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2017 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!! cgdijcb
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine cpg_dij_cpb(cgdijcb,cprj_kb,cprj_kg,dtset,nb,ng,nspinor,paw_ij,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: nb,ng,nspinor
+  complex(dpc),intent(out) :: cgdijcb
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  type(pawcprj_type),intent(in) :: cprj_kb(dtset%natom,nspinor*dtset%mband)
+  type(pawcprj_type),intent(in) :: cprj_kg(dtset%natom,nspinor*dtset%mband)
+  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: iatom,ilmn,jlmn,klmn,itypat
+  complex(dpc) :: cdij,cpg,cpb
+
+!-----------------------------------------------------------------------
+
+  cgdijcb = czero
+  do iatom = 1, dtset%natom
+     itypat = dtset%typat(iatom)
+     do ilmn = 1, pawtab(itypat)%lmn_size
+        cpg=cmplx(cprj_kg(iatom,ng)%cp(1,ilmn),cprj_kg(iatom,ng)%cp(2,ilmn),KIND=dpc)
+        do jlmn = 1, pawtab(itypat)%lmn_size
+           cpb=cmplx(cprj_kb(iatom,nb)%cp(1,jlmn),cprj_kb(iatom,nb)%cp(2,jlmn),KIND=dpc)
+           if (jlmn .LE. ilmn) then
+              klmn = (ilmn-1)*ilmn/2 + jlmn
+           else
+              klmn = (jlmn-1)*jlmn/2 + ilmn
+           end if
+           if (paw_ij(iatom)%cplex_dij .EQ. 2) then
+              cdij=cmplx(paw_ij(iatom)%dij(2*klmn-1,1),paw_ij(iatom)%dij(2*klmn,1),KIND=dpc)
+              if (jlmn .GT. ilmn) cdij=conjg(cdij)
+           else
+              cdij=cmplx(paw_ij(iatom)%dij(klmn,1),zero,KIND=dpc)
+           end if
+           cgdijcb = cgdijcb + conjg(cpg)*cdij*cpb
+        end do
+     end do
+  end do
+
+end subroutine cpg_dij_cpb
+!!***
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/applyap
+!! NAME
+!! applyap
+!!
+!! FUNCTION
+!! apply nuclear dipole term A.p
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2017 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+
+subroutine applyap(bra,dkg,dtset,ghc_vectornd,istwf_k,kg_kg,kpointg,mpi_enreg,&
+     & ndat,ngfft4,ngfft5,ngfft6,npw_kg,nvloc,vectornd_pac)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: istwf_k,ndat,ngfft4,ngfft5,ngfft6,npw_kg,nvloc
+  type(dataset_type),intent(in) :: dtset
+  type(MPI_type), intent(inout) :: mpi_enreg
+
+  !arrays
+  integer,intent(in) :: kg_kg(3,npw_kg)
+  real(dp),intent(in) :: bra(2,npw_kg),dkg(3),kpointg(3)
+  real(dp),intent(inout) :: vectornd_pac(ngfft4,ngfft5,ngfft6,nvloc,3)
+  real(dp),intent(out) :: ghc_vectornd(2,npw_kg*ndat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: idat,idir,ipw,tim_fourwf
+  real(dp) :: weight
+  !arrays
+  integer,allocatable :: gbound_kg(:,:)
+  real(dp),allocatable :: gcwavef(:,:,:),ghc1(:,:),kgkpg(:,:),work(:,:,:,:)
+
+!-----------------------------------------------------------------------
+
+  ! add  alpha^2 A.p for nuclear dipoles.
+  ! Do this similarly to the kinetic energy above. Standard expression
+  ! would be <bra|alpha^2 A.2\pi(ikpt + G_right)|cwavef> where A is contained
+  ! in vectornd_pac and applied in real space with fourwf. However, as outlined
+  ! above in kinetic energy section, it's easier to apply to the left and get
+  ! <bra|alpha^2 2\pi(kg - dkg + G_left).A
+
+  ABI_ALLOCATE(gcwavef,(2,npw_kg*ndat,3))
+  gcwavef = zero
+
+  ! obtain (kg - dkg + G)
+  ABI_ALLOCATE(kgkpg,(npw_kg,3))
+  do ipw = 1, npw_kg
+     kgkpg(ipw,:) =  kpointg(:) - dkg(:) + kg_kg(:,ipw)
+  end do
+
+  ! make 2\pi(k+G)c(G)|bra> by element-wise multiplication
+  do idir = 1, 3
+     do idat = 1, ndat
+        gcwavef(1,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg,idir) = &
+             & bra(1,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg)*kgkpg(1:npw_kg,idir)
+        gcwavef(2,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg,idir) = &
+             & bra(2,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg)*kgkpg(1:npw_kg,idir)
+     end do
+  end do
+  gcwavef = gcwavef*two_pi
+
+  ! now apply vector potential in real space through fourwf
+  ABI_ALLOCATE(ghc1,(2,npw_kg*ndat))
+  ABI_ALLOCATE(work,(2,ngfft4,ngfft5,ngfft6*ndat))
+  ABI_ALLOCATE(gbound_kg,(2*dtset%mgfft+8,2))
+
+  ghc_vectornd = zero
+
+  call sphereboundary(gbound_kg,istwf_k,kg_kg,dtset%mgfft,npw_kg)
+
+  tim_fourwf = 1
+  weight = one
+  do idir=1,3
+     call fourwf(1,vectornd_pac(:,:,:,:,idir),gcwavef(:,:,idir),ghc1,work,&
+          & gbound_kg,gbound_kg,istwf_k,kg_kg,kg_kg,dtset%mgfft,mpi_enreg,ndat,&
+          & dtset%ngfft,npw_kg,npw_kg,ngfft4,ngfft5,ngfft6,2,&
+          &     tim_fourwf,weight,weight)
+     ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
+     ! should be faster than explicit loop over ipw as npw_k gets large
+     do idat=1,ndat
+        call DAXPY(npw_kg,FineStructureConstant2,ghc1(1,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg),1,&
+             & ghc_vectornd(1,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg),1)
+        call DAXPY(npw_kg,FineStructureConstant2,ghc1(2,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg),1,&
+             & ghc_vectornd(2,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg),1)
+     end do
+  end do ! idir
+
+  ABI_DEALLOCATE(ghc1)
+  ABI_DEALLOCATE(work)
+  ABI_DEALLOCATE(gbound_kg)
+  ABI_DEALLOCATE(gcwavef)
+  ABI_DEALLOCATE(kgkpg)
+
+end subroutine applyap
+!!***
+
 !{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_eeig123
 !! NAME
@@ -3745,28 +4029,29 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
 
  !Local variables -------------------------
  !scalars
- integer :: bdir,bdx,bdxstor,bdxc,bfor,bsigma,countb,countg,countjb,countjg,cpopt
- integer :: dest,exchn2n3d,gdir,gdx,gdxc,gdxstor,gfor,gg,gsigma
- integer :: iatom,icgb,icgg,icprjbi,icprjgi,idat,idir,ierr
- integer :: ikg1,ikgb,ikgg,ikpt,ikptb,ikptbi,ikptg,ikptgi,ilmn,jlmn,klmn
- integer :: ikpt_loc,ipw,isppol,istwf_k,itypat
- integer :: jcgb,jcgg,jcprjbi,jcprjgi,jkpt,jkptb,jkptbi,jkptg,jkptgi,jpw,jsppol
+ integer :: bdir,bdx,bdxstor,bdxc,bfor,bsigma,countb,countjb,cpopt
+ integer :: dest,exchn2n3d,gdir,gdx,gdxc,gfor,gsigma
+ integer :: icgb,icgg,icprjbi,icprjgi,idir,ierr
+ integer :: ikg1,ikgg,ikpt,ikptb,ikptbi,ikptg,ikptg_loc,ikptgi
+ integer :: ipw,isppol,istwf_k
+ integer :: jcgb,jcprjbi,jkpt,jkptb,jkptbi,jkptg,jpw,jsppol
  integer :: me,my_nspinor,n1,n2dim,ncpgr,ndat,dummy_onpw
  integer :: ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,nn,nproc,npw_kb,npw_kg,ntotcp
- integer :: prtvol,sij_opt,sourceb,sourceg,spaceComm,tagb,tagg,tim_getghc,tim_fourwf,type_calc
- real(dp) :: dkg2,dotr,doti,ecut_eff,htpisq,keg,lambda,weight
- complex(dpc) :: cdij,cgdijcb,cpb,cpg
+ integer :: prtvol,sij_opt,sourceb,spaceComm,tagb,tim_getghc,type_calc
+ real(dp) :: dotr,doti,ecut_eff,htpisq,lambda
+ complex(dpc) :: cgdijcb
  logical :: has_vectornd
  type(gs_hamiltonian_type) :: gs_hamk
 
  !arrays
  integer :: nattyp_dum(dtset%ntypat)
- integer,allocatable :: dimlmn(:),gbound_kg(:,:),kg_kb(:,:),kg_kg(:,:),pwind_bg(:)
- real(dp) ::dkb(3),dkg(3),dkbg(3),kpointb(3),kpointg(3),rhodum(1)
- real(dp),allocatable :: bra(:,:),cwavef(:,:),gcwavef(:,:,:),ghc(:,:),ghc1(:,:),gsc(:,:),gvnlc(:,:),kpg_k_dummy(:,:)
- real(dp),allocatable :: kgkpg(:,:)
- real(dp),allocatable :: buffer(:,:),buffer1(:),buffer2(:),cgqb(:,:),cgqg(:,:),cgrvtrial(:,:),ghc_vectornd(:,:)
- real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vtrial(:,:),work(:,:,:,:)
+ integer,allocatable :: dimlmn(:),kg_kg(:,:),pwind_bg(:),pwind_bg_all(:,:,:)
+ real(dp) ::dkb(3),dkg(3),dkbg(3),kpointg(3),rhodum(1)
+ real(dp),allocatable :: bra(:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
+ real(dp),allocatable :: ket(:,:),kpg_k_dummy(:,:)
+ real(dp),allocatable :: buffer(:,:),buffer1(:),buffer2(:),cgqb(:,:),cgrvtrial(:,:),ghc_vectornd(:,:)
+ real(dp),allocatable :: tkbra(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vtrial(:,:)
+ logical,allocatable :: has_pwind_bg(:,:)
  type(pawcprj_type),allocatable :: cprj_buf(:,:),cprj_kb(:,:),cprj_kg(:,:),cwaveprj(:,:)
 
 
@@ -3787,7 +4072,6 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
  exchn2n3d = 0
  ikg1 = 0
 
-
  ncpgr = cprj(1,0,1,1)%ncpgr
  ABI_ALLOCATE(dimlmn,(dtset%natom))
  call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
@@ -3806,6 +4090,9 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
  end if
 
  ABI_ALLOCATE(pwind_bg,(dtset%mpw))
+
+ ABI_ALLOCATE(pwind_bg_all,(6,4,dtset%mpw))
+ ABI_ALLOCATE(has_pwind_bg,(6,4))
 
  ! input parameters for calls to getghc
  cpopt = -1 ! will not use cprj anyway
@@ -3841,8 +4128,8 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
  ABI_DEALLOCATE(cgrvtrial)
  ABI_DEALLOCATE(vtrial)
 
- ! add vlocal 
- call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.false.)
+ ! add vlocal
+ call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.false.)
 
  ! if vectornd is present, set it up similarly to how it's done for
  ! vtrial. Note that it must be done for the three Cartesian directions. Also, the following
@@ -3858,382 +4145,254 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
     ABI_DEALLOCATE(cgrvtrial)
  end if
 
-
  eeig(1:2,1:nband_k,1:nband_k,1:dtorbmag%fnkpt,1:6,1:4) = zero
- do bdir = 1, 3
-    do gg = bdir,bdir+1
-       gdir=mod(gg,3)+1
-        
-       do bfor = 1, 2
-          bsigma = -2*bfor+3
-          ! index of neighbor 1..6
-          bdx = 2*bdir-2+bfor
-          bdxc = 2*bdir-2+bfor+bsigma
-          bdxstor = mod(bdx+6-2*gdir,6)
-          dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
 
+ !    Loop on the values of ikptg_loc and ikptg :
+ !    ikptg is incremented one by one, and enumerates the k points in the FBZ
+ !    ikptgi refer to the k point numbering in the IBZ
+ !    ikptg_loc differs from ikptg only in the parallel case, and gives
+ !    the index of the k point in the FBZ, in the set treated by the present processor
+ !    NOTE : in order to allow synchronisation, ikpt_loc contain information about
+ !    ikpt AND ISPPOL !
+ !    It means that the following loop is equivalent to a double loop :
+ !    do isppol = 1, nsppol
+ !    do ikpt1 =  1, dtefield%fmkmem
+ !
+ ! do ikpt_loc = 1, dtorbmag%fmkmem_max*nsppol
+ do ikptg_loc = 1, dtorbmag%fmkmem_max
+    ikptg=mpi_enreg%kpt_loc2fbz_sp(me, ikptg_loc,1)
+
+    ! if this k and spin are for me do it
+    if (ikptg > 0) then
+
+       kpointg(:)=dtorbmag%fkptns(:,ikptg)
+       ikptgi = dtorbmag%indkk_f2ibz(ikptg,1)
+       icgg = dtorbmag%cgindex(ikptgi,dtset%nsppol)
+       icprjgi = dtorbmag%cprjindex(ikptgi,isppol)
+       npw_kg = npwarr(ikptgi)
+       ikgg = dtorbmag%fkgindex(ikptg)
+       ABI_ALLOCATE(bra,(2,npw_kg))
+       ABI_ALLOCATE(kg_kg,(3,npw_kg))
+       call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikptg,istwf_k,kg_kg,kpointg,1,mpi_enreg,npw_kg,dummy_onpw)
+
+       ! this is minimal Hamiltonian information, to apply vlocal (and only vlocal) to |u_kg>
+       nkpg = 0
+       ABI_ALLOCATE(kpg_k_dummy,(npw_kg,nkpg))
+
+       call gs_hamk%load_k(kpt_k=kpointg(:),istwf_k=istwf_k,npw_k=npw_kg,&
+            &             kg_k=kg_kg,kpg_k=kpg_k_dummy,compute_gbound=.TRUE.)
+
+       ABI_DEALLOCATE(kpg_k_dummy)
+
+       ABI_ALLOCATE(ghc,(2,npw_kg))
+       ABI_ALLOCATE(tkbra,(2,npw_kg))
+       ABI_ALLOCATE(gsc,(2,npw_kg))
+       ABI_ALLOCATE(gvnlc,(2,npw_kg))
+
+       if (has_vectornd) then
+          ABI_ALLOCATE(ghc_vectornd,(2,npw_kg))
+       end if
+
+       pwind_bg = 0
+       pwind_bg_all = 0
+       has_pwind_bg = .FALSE.
+
+    end if ! end check that ikptg > 0
+
+    do nn = 1, nband_k
+
+       if (ikptg > 0) then
+          bra(1:2,1:npw_kg) = cg(1:2,icgg+(nn-1)*npw_kg+1:icgg+nn*npw_kg)
+          ! apply vlocal to |bra>, store resulting vlocal|bra> in |ghc>
+          call getghc(cpopt,bra,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,ndat,&
+               &               prtvol,sij_opt,tim_getghc,type_calc)
+       end if
+
+       do gdir = 1, 3
           do gfor = 1, 2
-             gsigma=-2*gfor+3
-             ! index of neighbor 1..6
+             gsigma = -2*gfor+3
              gdx = 2*gdir-2+gfor
-             gdxc = 2*gdir-2+gfor+gsigma
-             gdxstor = mod(gdx+6-2*bdir,6)
+             gdxc = gdx+gsigma
              dkg(1:3) = gsigma*dtorbmag%dkvecs(1:3,gdir)
-             dkbg(1:3) = dkg(1:3) - dkb(1:3)
+             ! find the k point for H_k that goes with the current |u_kg>
+             do ikpt = 1, dtorbmag%fnkpt
+                if (ikptg .EQ. dtorbmag%ikpt_dk(ikpt,gfor,gdir)) exit
+             end do
 
-             !    Loop on the values of ikpt_loc and ikpt :
-             !    ikpt is incremented one by one, and number the k points in the FBZ
-             !    ikpt1i refer to the k point numbering in the IBZ
-             !    ikpt_loc differs from ikpt only in the parallel case, and gives
-             !    the index of the k point in the FBZ, in the set treated by the present processor
-             !    NOTE : in order to allow synchronisation, ikpt_loc contain information about
-             !    ikpt AND ISPPOL !
-             !    It means that the following loop is equivalent to a double loop :
-             !    do isppol = 1, nsppol
-             !    do ikpt1 =  1, dtefield%fmkmem
-             !
-             ! do ikpt_loc = 1, dtorbmag%fmkmem_max*nsppol
-             do ikpt_loc = 1, dtorbmag%fmkmem_max
-                ikpt=mpi_enreg%kpt_loc2fbz_sp(me, ikpt_loc,1)
+             if (ikptg > 0) then
+                call pawcprj_get(atindx1,cprj_kg,cprj(gdxc,0,:,:),dtset%natom,1,icprjgi,&
+                     &           ikptgi,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
+                     &           my_nspinor,dtset%nsppol,0)
 
-                ! if this k and spin are for me do it
-                ! if (ikpt1 > 0 .and. isppol > 0) then
-                if (ikpt > 0) then
+                ! apply kinetic energy at k to |u_kg>
+                call kgk_ke(dtset,dkg,gmet,bra,kg_kg,tkbra,kpointg,npw_kg)
 
-                   ikptb = dtorbmag%ikpt_dk(ikpt,bfor,bdir)
-                   kpointb(:)=dtorbmag%fkptns(:,ikptb)
-                   ikptbi = dtorbmag%indkk_f2ibz(ikptb,1)
-                   npw_kb = npwarr(ikptbi)
-                   ikgb = dtorbmag%fkgindex(ikptb)
-                   ABI_ALLOCATE(kg_kb,(3,npw_kb))
-                   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_kb,kpointb,1,mpi_enreg,npw_kb,dummy_onpw)
-                   ! kg_kb(:,1:npw_kb)=kg(:,ikgb+1:ikgb+npw_kb)
-
-                   ikptg = dtorbmag%ikpt_dk(ikpt,gfor,gdir)
-                   kpointg(:)=dtorbmag%fkptns(:,ikptg)
-                   ikptgi = dtorbmag%indkk_f2ibz(ikptg,1)
-                   npw_kg = npwarr(ikptgi)
-                   ikgg = dtorbmag%fkgindex(ikptg)
-                   ABI_ALLOCATE(kg_kg,(3,npw_kg))
-                   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_kg,kpointg,1,mpi_enreg,npw_kg,dummy_onpw)
-                   ! kg_kg(:,1:npw_kg)=kg(:,ikgg+1:ikgg+npw_kg)
-
-                   ! this is minimal Hamiltonian information, to apply vlocal (and only vlocal) to |u_kb>
-                   nkpg = 0
-                   ABI_ALLOCATE(kpg_k_dummy,(npw_kb,nkpg))
-
-                   call load_k_hamiltonian(gs_hamk,kpt_k=kpointb(:),istwf_k=istwf_k,npw_k=npw_kb,&
-                        &             kg_k=kg_kb,kpg_k=kpg_k_dummy,compute_gbound=.TRUE.)
-
-                end if ! end if ikpt > 0 check
-
-                !      --------------------------------------------------------------------------------
-                !      Communication
-                !      --------------------------------------------------------------------------------
-                if (ikpt > 0 .and. isppol > 0) then ! I currently have a true kpt to use
-                   countb = npw_kb*my_nspinor*nband_k
-                   if(allocated(cgqb)) then
-                      ABI_DEALLOCATE(cgqb)
-                   endif
-                   ABI_ALLOCATE(cgqb,(2,countb))
-                   cgqb = zero
-                   sourceb = me
-                   if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikptbi,1,nband_k,isppol,me)) then
-                      ! I need the datas from someone else
-                      sourceb = mpi_enreg%proc_distrb(ikptbi,1,isppol)
-                   end if
-                   countg = npw_kg*my_nspinor*nband_k
-                   if(allocated(cgqg)) then
-                      ABI_DEALLOCATE(cgqg)
-                   end if
-                   ABI_ALLOCATE(cgqg,(2,countg))
-                   cgqg = zero
-                   sourceg = me
-                   if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikptgi,1,nband_k,isppol,me)) then
-                      ! I need the datas from someone else
-                      sourceg = mpi_enreg%proc_distrb(ikptgi,1,isppol)
-                   end if
-                else
-                   sourceb = -1 ! I do not have a kpt to use
-                   sourceg = -1
+                ! apply nuclear dipoles at k to |u_kg>
+                if (has_vectornd) then
+                   call applyap(bra,dkg,dtset,ghc_vectornd,istwf_k,kg_kg,kpointg,mpi_enreg,&
+                        & ndat,ngfft4,ngfft5,ngfft6,npw_kg,gs_hamk%nvloc,vectornd_pac)
                 end if
 
-                do dest=0,nproc-1
-                   if ((dest.EQ.me) .AND. (ikpt.GT.0) .AND. (isppol.GT.0)) then
-                      ! I am destination and I have something to do
-                      if(sourceb.EQ.me) then
-                         ! I am destination and source for kptb
-                         icprjbi = dtorbmag%cprjindex(ikptbi,isppol)
-                         icgb = dtorbmag%cgindex(ikptbi,dtset%nsppol)
-                         call pawcprj_get(atindx1,cprj_kb,cprj(bdxc,0,:,:),dtset%natom,1,icprjbi,&
-                              &         ikptbi,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
-                              &         my_nspinor,dtset%nsppol,0)
-                         cgqb(1:2,1:countb) = cg(1:2,icgb+1:icgb+countb)
-                      else ! sourceb .NE. me
-                         ! receive cgqb (and cprj_kb)
-                         tagb = ikptbi + (isppol - 1)*dtset%nkpt
-                         call xmpi_recv(cgqb,sourceb,tagb,spaceComm,ierr)
-                         call pawcprj_mpi_recv(dtset%natom,n2dim,dimlmn,ncpgr,cprj_kb,sourceb,spaceComm,ierr)
+             end if
+
+
+             do bdir = 1, 3
+                if (bdir .EQ. gdir) cycle
+
+                do bfor = 1, 2
+                   bsigma = -2*bfor+3
+                   bdx = 2*bdir-2+bfor
+                   bdxc = bdx + bsigma
+                   bdxstor = mod(bdx+6-2*gdir,6)
+                   dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
+                   dkbg(1:3) = dkg(1:3) - dkb(1:3)
+                   ikptb = dtorbmag%ikpt_dk(ikpt,bfor,bdir)
+                   ikptbi = dtorbmag%indkk_f2ibz(ikptb,1)
+                   npw_kb = npwarr(ikptbi)
+
+                   !      --------------------------------------------------------------------------------
+                   !      Communication
+                   !      --------------------------------------------------------------------------------
+                   if (ikptg > 0 .and. isppol > 0) then ! I currently have a true kpt to use
+                      countb = npw_kb*my_nspinor*nband_k
+                      if(allocated(cgqb)) then
+                         ABI_DEALLOCATE(cgqb)
+                      endif
+                      ABI_ALLOCATE(cgqb,(2,countb))
+                      cgqb = zero
+                      sourceb = me
+                      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikptbi,1,nband_k,isppol,me)) then
+                         ! I need the datas from someone else
+                         sourceb = mpi_enreg%proc_distrb(ikptbi,1,isppol)
                       end if
-                      if(sourceg.EQ.me) then
-                         ! I am destination and source for kptg
-                         icprjgi = dtorbmag%cprjindex(ikptgi,isppol)
-                         icgg = dtorbmag%cgindex(ikptgi,dtset%nsppol)
-                         call pawcprj_get(atindx1,cprj_kg,cprj(gdxc,0,:,:),dtset%natom,1,icprjgi,&
-                              &           ikptgi,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
-                              &           my_nspinor,dtset%nsppol,0)
-                         cgqg(1:2,1:countg) = cg(1:2,icgg+1:icgg+countg)
-                      else ! sourceg .NE. me
-                         ! receive cgqg (and cprj_kg)
-                         tagg = ikptgi + (isppol - 1)*dtset%nkpt
-                         call xmpi_recv(cgqg,sourceg,tagg,spaceComm,ierr)
-                         call pawcprj_mpi_recv(dtset%natom,n2dim,dimlmn,ncpgr,cprj_kg,sourceg,spaceComm,ierr)
+                   else
+                      sourceb = -1 ! I do not have a kpt to use
+                   end if
+
+                   do dest=0,nproc-1
+                      if ((dest.EQ.me) .AND. (ikptg.GT.0) .AND. (isppol.GT.0)) then
+                         ! I am destination and I have something to do
+                         if(sourceb.EQ.me) then
+                            ! I am destination and source for kptb
+                            icprjbi = dtorbmag%cprjindex(ikptbi,isppol)
+                            icgb = dtorbmag%cgindex(ikptbi,dtset%nsppol)
+                            call pawcprj_get(atindx1,cprj_kb,cprj(bdxc,0,:,:),dtset%natom,1,icprjbi,&
+                                 &         ikptbi,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
+                                 &         my_nspinor,dtset%nsppol,0)
+                            cgqb(1:2,1:countb) = cg(1:2,icgb+1:icgb+countb)
+                         else ! sourceb .NE. me
+                            ! receive cgqb (and cprj_kb)
+                            tagb = ikptbi + (isppol - 1)*dtset%nkpt
+                            call xmpi_recv(cgqb,sourceb,tagb,spaceComm,ierr)
+                            call pawcprj_mpi_recv(dtset%natom,n2dim,dimlmn,ncpgr,cprj_kb,sourceb,spaceComm,ierr)
+                         end if
+                      else if (dest.NE.me) then
+                         ! jkptg is the kpt which is being treated by dest
+                         ! jsppol is his isppol
+                         jkptg = mpi_enreg%kpt_loc2fbz_sp(dest, ikptg_loc,1)
+                         jsppol = mpi_enreg%kpt_loc2fbz_sp(dest, ikptg_loc,2)
+                         if (jkptg > 0 .and. jsppol > 0) then ! dest is treating a true kpt
+
+                            ! find jkpt corresponding to this jkptg
+                            do jkpt = 1, dtorbmag%fnkpt
+                               if (jkptg .EQ. dtorbmag%ikpt_dk(jkpt,gfor,gdir)) exit
+                            end do
+
+                            jkptb = dtorbmag%ikpt_dk(jkpt,bfor,bdir)
+                            jkptbi = dtorbmag%indkk_f2ibz(jkptb,1)
+
+                            if((mpi_enreg%proc_distrb(jkptbi,1,jsppol) == me))  then
+                               jcgb = dtorbmag%cgindex(jkptbi,jsppol)
+                               jcprjbi=dtorbmag%cprjindex(jkptbi,jsppol)
+                               call pawcprj_get(atindx1,cprj_buf,cprj(bdxc,0,:,:),dtset%natom,1,jcprjbi,jkptbi,0,jsppol,&
+                                    & dtset%mband,dtset%mkmem,dtset%natom,dtorbmag%mband_occ,dtorbmag%mband_occ,&
+                                    & my_nspinor,dtset%nsppol,0,mpicomm=mpi_enreg%comm_kpt,&
+                                    & proc_distrb=mpi_enreg%proc_distrb)
+                               tagb = jkptbi + (jsppol - 1)*dtset%nkpt
+                               countjb = npwarr(jkptbi)*my_nspinor*nband_k
+                               ABI_ALLOCATE(buffer,(2,countjb))
+                               buffer(:,1:countjb)  = cg(:,jcgb+1:jcgb+countjb)
+                               call xmpi_send(buffer,dest,tagb,spaceComm,ierr)
+                               ABI_DEALLOCATE(buffer)
+                               call pawcprj_mpi_send(dtset%natom,n2dim,dimlmn,ncpgr,cprj_buf,dest,spaceComm,ierr)
+                            end if ! end check that I am his source
+
+                         end if ! end check that jkptg > 0 and jsppol > 0
+
+                      end if ! test dest .EQ. me and ikpt .GT. 0
+
+                   end do ! end loop over dest
+                   ! end parallel communication
+
+                   if (ikptg > 0) then
+
+                      if ( .NOT. has_pwind_bg(gdx,bdxstor) ) then
+                         call mkpwind_k(-dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,&
+                              &             dtorbmag%indkk_f2ibz,ikptg,ikptb,&
+                              &             mpi_enreg,npwarr,pwind_bg,symrec)
+                         pwind_bg_all(gdx,bdxstor,:) = pwind_bg(:)
+                         has_pwind_bg(gdx,bdxstor) = .TRUE.
+                      else
+                         pwind_bg(:) = pwind_bg_all(gdx,bdxstor,:)
                       end if
-                   else if (dest.NE.me) then
-                      ! jkpt is the kpt which is being treated by dest
-                      ! jsppol is his isppol
-                      jkpt = mpi_enreg%kpt_loc2fbz_sp(dest, ikpt_loc,1)
-                      jsppol = mpi_enreg%kpt_loc2fbz_sp(dest, ikpt_loc,2)
-                      if (jkpt > 0 .and. jsppol > 0) then ! dest is treating a true kpt
-                         
-                         jkptb = dtorbmag%ikpt_dk(jkpt,bfor,bdir)
-                         jkptbi = dtorbmag%indkk_f2ibz(jkptb,1)
-                         jkptg = dtorbmag%ikpt_dk(jkpt,gfor,gdir)
-                         jkptgi = dtorbmag%indkk_f2ibz(jkptg,1)
-                         
-                         if((mpi_enreg%proc_distrb(jkptbi,1,jsppol) == me))  then
-                            jcgb = dtorbmag%cgindex(jkptbi,jsppol)
-                            jcprjbi=dtorbmag%cprjindex(jkptbi,jsppol)
-                            call pawcprj_get(atindx1,cprj_buf,cprj(bdxc,0,:,:),dtset%natom,1,jcprjbi,jkptbi,0,jsppol,&
-                                 & dtset%mband,dtset%mkmem,dtset%natom,dtorbmag%mband_occ,dtorbmag%mband_occ,&
-                                 & my_nspinor,dtset%nsppol,0,mpicomm=mpi_enreg%comm_kpt,&
-                                 & proc_distrb=mpi_enreg%proc_distrb)
-                            tagb = jkptbi + (jsppol - 1)*dtset%nkpt
-                            countjb = npwarr(jkptbi)*my_nspinor*nband_k
-                            ABI_ALLOCATE(buffer,(2,countjb))
-                            buffer(:,1:countjb)  = cg(:,jcgb+1:jcgb+countjb)
-                            call xmpi_send(buffer,dest,tagb,spaceComm,ierr)
-                            ABI_DEALLOCATE(buffer)
-                            call pawcprj_mpi_send(dtset%natom,n2dim,dimlmn,ncpgr,cprj_buf,dest,spaceComm,ierr)
-                         end if ! end check that I am his source
-                         if((mpi_enreg%proc_distrb(jkptgi,1,jsppol) == me))  then
-                            jcgg = dtorbmag%cgindex(jkptgi,jsppol)
-                            jcprjgi=dtorbmag%cprjindex(jkptgi,jsppol)
-                            call pawcprj_get(atindx1,cprj_buf,cprj(gdxc,0,:,:),dtset%natom,1,jcprjgi,jkptgi,0,jsppol,&
-                                 & dtset%mband,dtset%mkmem,dtset%natom,dtorbmag%mband_occ,dtorbmag%mband_occ,&
-                                 & my_nspinor,dtset%nsppol,0,mpicomm=mpi_enreg%comm_kpt,&
-                                 & proc_distrb=mpi_enreg%proc_distrb)
-                            tagg = jkptgi + (jsppol - 1)*dtset%nkpt
-                            countjg = npwarr(jkptgi)*my_nspinor*nband_k
-                            ABI_ALLOCATE(buffer,(2,countjg))
-                            buffer(:,1:countjg)  = cg(:,jcgg+1:jcgg+countjg)
-                            call xmpi_send(buffer,dest,tagg,spaceComm,ierr)
-                            ABI_DEALLOCATE(buffer)
-                            call pawcprj_mpi_send(dtset%natom,n2dim,dimlmn,ncpgr,cprj_buf,dest,spaceComm,ierr)
-                         end if ! end check that I am his source
 
-                      end if ! end check that jkpt > 0 and jsppol > 0
-
-                   end if ! test dest .EQ. me and ikpt .GT. 0
-
-                end do ! end loop over dest
-
-                if (ikpt > 0 .and. isppol > 0) then ! if I am treating a kpt, compute the matrix elements
-
-                   call mkpwind_k(-dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,&
-                        &             dtorbmag%indkk_f2ibz,ikptg,ikptb,&
-                        &             mpi_enreg,npwarr,pwind_bg,symrec)
-
-                   ! apply gs_hamk123 to wavefunctions at kb
-                   ABI_ALLOCATE(cwavef,(2,npw_kb))
-                   ABI_ALLOCATE(ghc,(2,npw_kb))
-                   ABI_ALLOCATE(gsc,(2,npw_kb))
-                   ABI_ALLOCATE(gvnlc,(2,npw_kb))
-
-                   ABI_ALLOCATE(bra,(2,npw_kg))
-
-                   dkg2=DOT_PRODUCT(dkg(:),MATMUL(gmet(:,:),dkg(:)))
-
-                   do nn = 1, nband_k
-                      cwavef(1:2,1:npw_kb) = cgqb(1:2,(nn-1)*npw_kb+1:nn*npw_kb)
-                      ! apply vlocal to |cwavef>, store resulting vlocal|cwavef> in |ghc>
-                      call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,ndat,&
-                           &               prtvol,sij_opt,tim_getghc,type_calc)
+                      ABI_ALLOCATE(ket,(2,npw_kb))
                       do n1 = 1, nband_k
-                         bra(1:2,1:npw_kg) = cgqg(1:2,(n1-1)*npw_kg+1:n1*npw_kg)
-                         dotr=zero;doti=zero
+                         ket(1:2,1:npw_kb) = cgqb(1:2,(n1-1)*npw_kb+1:n1*npw_kb)
 
+                         dotr=zero;doti=zero
                          do ipw=1,npw_kg
                             jpw=pwind_bg(ipw)
                             if(jpw .GT. 0) then
-                               ! here is <bra|vlocal|cwavef> contribution to <bra|H|cwavef>
-                               dotr=dotr+bra(1,ipw)*ghc(1,jpw)+bra(2,ipw)*ghc(2,jpw)
-                               doti=doti+bra(1,ipw)*ghc(2,jpw)-bra(2,ipw)*ghc(1,jpw)
+                               ! here is <u_kg|T_k+vlocal+A_ND.p|u_bg>
+                               ! recall that ghc = (T_k + vlocal+A_ND.p)|u_kg>
 
-                               ! twisted kinetic energy: here we are computing
-                               ! -\frac{1}{2}<u_kg|e^{-i.k.r}\nabla^2 e^{i.k.r}|u_kb>,
-                               ! that is, kinetic energy at k between wavefunctions at kg and kb. The correct
-                               ! formula is htpisq*(ikpt + G_right)^2\delta(G_left,G_right) but it's hard to apply
-                               ! because the G's have wrap-around shifts (output of mkpwind_k)
-                               ! for the kpts near and at the edge of the IBZ.
-                               ! The following approach is based on the bra <u_kg| expansion, because
-                               ! these G vectors are unshifted (indexed by ipw, not jpw). So we are using
-                               ! k+G_left = (k-kg) + (kg+G_left) = -dkg + (kg+G_left). When squared we obtain
-                               ! |kg+G_left|^2 - 2*dkg.(kg+G_left) + |dkg|^2. In this way we only use the G_left
-                               ! expansion vectors, with no shift, for each k point.
+                               dotr=dotr+(ghc(1,ipw)+tkbra(1,ipw))*ket(1,jpw)+(ghc(2,ipw)+tkbra(2,ipw))*ket(2,jpw)
+                               doti=doti+(ghc(1,ipw)+tkbra(1,ipw))*ket(2,jpw)-(ghc(2,ipw)+tkbra(2,ipw))*ket(1,jpw)
 
-                               ! normal kinetic energy for bra
-                               keg=htpisq*dot_product((kpointg(:)+kg_kg(:,ipw)),MATMUL(gmet,(kpointg(:)+kg_kg(:,ipw))))
+                               if (has_vectornd) then
+                                  dotr = dotr + ghc_vectornd(1,ipw)*ket(1,jpw) + ghc_vectornd(2,ipw)*ket(2,jpw)
+                                  doti = doti + ghc_vectornd(1,ipw)*ket(2,jpw) - ghc_vectornd(2,ipw)*ket(1,jpw)
+                               end if
 
-                               ! addition of |dkg|^2
-                               keg=keg+htpisq*dkg2
+                            end if ! end check that jpw > 0
+                         end do ! end loop over npw_kg
 
-                               ! addition of -2*dkg*(kg+G_left)
-                               keg=keg-2.0*htpisq*DOT_PRODUCT(dkg(:),MATMUL(gmet,(kpointg(:)+kg_kg(:,ipw))))
+                         ! compute onsite contribution due to paw_ij%dij
+                         call cpg_dij_cpb(cgdijcb,cprj_kb,cprj_kg,dtset,n1,nn,dtorbmag%nspinor,paw_ij,pawtab)
 
-                               ! application of ecut filter and wavefunction
-                               ! after this loop have <bra|T+vlocal|cwavef>
-                               if (keg < dtset%ecut) then
-                                  dotr=dotr+bra(1,ipw)*keg*cwavef(1,jpw)+bra(2,ipw)*keg*cwavef(2,jpw)
-                                  doti=doti+bra(1,ipw)*keg*cwavef(2,jpw)-bra(2,ipw)*keg*cwavef(1,jpw)
-                               end if ! end keg filter
-                            end if ! end check on jpw > 0
-                         end do ! end loop over ipw
+                         eeig(1,nn,n1,ikpt,gdx,bdxstor) = dotr+real(cgdijcb)
+                         eeig(2,nn,n1,ikpt,gdx,bdxstor) = doti+aimag(cgdijcb)
 
-                         ! ! apply onsite terms through cprjk+b
-                         ! after this have <bra|T+vlocal+Dij|cwavef>
-                         cgdijcb = czero
-                         do iatom = 1, dtset%natom
-                            itypat = dtset%typat(iatom)
-                            do ilmn = 1, pawtab(itypat)%lmn_size
-                               cpg=cmplx(cprj_kg(iatom,n1)%cp(1,ilmn),cprj_kg(iatom,n1)%cp(2,ilmn),KIND=dpc)
-                               do jlmn = 1, pawtab(itypat)%lmn_size
-                                  cpb=cmplx(cprj_kb(iatom,nn)%cp(1,jlmn),cprj_kb(iatom,nn)%cp(2,jlmn),KIND=dpc)
-                                  if (jlmn .LE. ilmn) then
-                                     klmn = (ilmn-1)*ilmn/2 + jlmn
-                                  else
-                                     klmn = (jlmn-1)*jlmn/2 + ilmn
-                                  end if
-                                  if (paw_ij(iatom)%cplex_dij .EQ. 2) then
-                                     cdij=cmplx(paw_ij(iatom)%dij(2*klmn-1,1),paw_ij(iatom)%dij(2*klmn,1),KIND=dpc)
-                                     if (jlmn .GT. ilmn) cdij=conjg(cdij)
-                                  else
-                                     cdij=cmplx(paw_ij(iatom)%dij(klmn,1),zero,KIND=dpc)
-                                  end if
-                                  cgdijcb = cgdijcb + conjg(cpg)*cdij*cpb
-                               end do
-                            end do
-                         end do
-                         eeig(1,n1,nn,ikpt,gdx,bdxstor) = dotr + real(cgdijcb)
-                         eeig(2,n1,nn,ikpt,gdx,bdxstor) = doti + aimag(cgdijcb)
-
-                         ! add  alpha^2 A.p for nuclear dipoles if present.
-                         ! Do this similarly to the kinetic energy above. Standard expression
-                         ! would be <bra|alpha^2 A.2\pi(ikpt + G_right)|cwavef> where A is contained
-                         ! in vectornd_pac and applied in real space with fourwf. However, as outlined
-                         ! above in kinetic energy section, it's easier to apply to the left and get
-                         ! <bra|alpha^2 2\pi(kg - dkg + G_left).A |cwavef>
-                         if(has_vectornd) then
-                            ABI_ALLOCATE(gcwavef,(2,npw_kg*ndat,3))
-                            gcwavef = zero
-                            
-                            ! obtain (kg - dkg + G)
-                            ABI_ALLOCATE(kgkpg,(npw_kg,3))
-                            do ipw = 1, npw_kg
-                               kgkpg(ipw,:) =  kpointg(:) - dkg(:) + kg_kg(:,ipw)
-                            end do
-
-                            ! make 2\pi(k+G)c(G)|bra> by element-wise multiplication
-                            do idir = 1, 3
-                               do idat = 1, ndat
-                                  gcwavef(1,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg,idir) = &
-                                       & bra(1,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg)*kgkpg(1:npw_kg,idir)
-                                  gcwavef(2,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg,idir) = &
-                                       & bra(2,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg)*kgkpg(1:npw_kg,idir)
-                               end do
-                            end do
-                            ABI_DEALLOCATE(kgkpg)
-                            gcwavef = gcwavef*two_pi
-
-                            ! now apply vector potential in real space through fourwf
-                            ABI_ALLOCATE(ghc1,(2,npw_kg*ndat))
-                            ABI_ALLOCATE(work,(2,ngfft4,ngfft5,ngfft6*ndat))
-                            ABI_ALLOCATE(gbound_kg,(2*dtset%mgfft+8,2))
-                            ABI_ALLOCATE(ghc_vectornd,(2,npw_kg*ndat))
-                            ghc_vectornd = zero
-                            
-                            call sphereboundary(gbound_kg,istwf_k,kg_kg,dtset%mgfft,npw_kg)
-
-                            tim_fourwf = 1
-                            weight = one
-                            do idir=1,3
-                               call fourwf(1,vectornd_pac(:,:,:,:,idir),gcwavef(:,:,idir),ghc1,work,&
-                                    & gbound_kg,gbound_kg,istwf_k,kg_kg,kg_kg,dtset%mgfft,mpi_enreg,ndat,&
-                                    & dtset%ngfft,npw_kg,npw_kg,ngfft4,ngfft5,ngfft6,2,&
-                                    &     tim_fourwf,weight,weight)
-                               ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
-                               ! should be faster than explicit loop over ipw as npw_k gets large
-                               do idat=1,ndat
-                                  call DAXPY(npw_kg,FineStructureConstant2,ghc1(1,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg),1,&
-                                       & ghc_vectornd(1,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg),1)
-                                  call DAXPY(npw_kg,FineStructureConstant2,ghc1(2,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg),1,&
-                                       & ghc_vectornd(2,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg),1)
-                               end do
-                            end do ! idir
-
-                            dotr = zero; doti = zero
-                            do ipw=1,npw_kg
-                               jpw=pwind_bg(ipw)
-                               if(jpw .GT. 0) then
-                                  ! here is <bra|alpha^2 A.p |cwavef> contribution to <bra|H|cwavef>
-                                  dotr=dotr+ghc_vectornd(1,ipw)*cwavef(1,jpw)+ghc_vectornd(2,ipw)*cwavef(2,jpw)
-                                  doti=doti+ghc_vectornd(1,ipw)*cwavef(2,jpw)-ghc_vectornd(2,ipw)*cwavef(1,jpw)
-                               end if ! end check on jpw > 0
-                            end do ! end loop over ipw
-
-                            eeig(1,n1,nn,ikpt,gdx,bdxstor) = eeig(1,n1,nn,ikpt,gdx,bdxstor) + dotr 
-                            eeig(2,n1,nn,ikpt,gdx,bdxstor) = eeig(2,n1,nn,ikpt,gdx,bdxstor) + doti
-                         
-                            ABI_DEALLOCATE(ghc1)
-                            ABI_DEALLOCATE(work)
-                            ABI_DEALLOCATE(ghc_vectornd)
-                            ABI_DEALLOCATE(gbound_kg)
-                            ABI_DEALLOCATE(gcwavef)
-                            
-                         end if ! end check on has_vectornd
-                         
                       end do ! end loop over n1
-                   end do ! end loop over nn
+                      ABI_DEALLOCATE(ket)
+                      ABI_DEALLOCATE(cgqb)
 
-                   ABI_DEALLOCATE(cwavef)
-                   ABI_DEALLOCATE(bra)
-                   ABI_DEALLOCATE(ghc)
-                   ABI_DEALLOCATE(gsc)
-                   ABI_DEALLOCATE(gvnlc)
+                   end if ! end check that ikptg > 0
 
-                end if ! end check that ikpt, isppol > 0
+                end do ! end loop over bfor
+             end do ! end loop over bdir
 
-                if(allocated(kg_kb)) then
-                   ABI_DEALLOCATE(kg_kb)
-                end if
-                if(allocated(kg_kg)) then
-                   ABI_DEALLOCATE(kg_kg)
-                end if
-                if(allocated(kpg_k_dummy)) then
-                   ABI_DEALLOCATE(kpg_k_dummy)
-                end if
-                if(allocated(cgqb)) then
-                   ABI_DEALLOCATE(cgqb)
-                end if
-                if(allocated(cgqg)) then
-                   ABI_DEALLOCATE(cgqg)
-                end if
-
-             end do ! end loop over ikpt_loc
           end do ! end loop over gfor
-       end do ! end loop over bfor
-    end do ! end loop over gg
- end do ! end loop over bdir
+       end do ! end loop over gdir
+
+    end do ! end loop over nn
+
+    if (ikptg > 0) then
+       ABI_DEALLOCATE(ghc)
+       ABI_DEALLOCATE(tkbra)
+       ABI_DEALLOCATE(gsc)
+       ABI_DEALLOCATE(gvnlc)
+
+       ABI_DEALLOCATE(bra)
+       ABI_DEALLOCATE(kg_kg)
+       if(allocated(ghc_vectornd)) then
+          ABI_DEALLOCATE(ghc_vectornd)
+       end if
+
+    end if
+
+ end do ! end loop over ikptg_loc
 
  !  MPI communicate stuff between everyone
  if (nproc>1) then
@@ -4262,11 +4421,13 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
  if(has_vectornd) then
     ABI_DEALLOCATE(vectornd_pac)
  endif
- 
+
  ABI_DEALLOCATE(vlocal)
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
 
  ABI_DEALLOCATE(pwind_bg)
+ ABI_DEALLOCATE(pwind_bg_all)
+ ABI_DEALLOCATE(has_pwind_bg)
 
 end subroutine make_eeig123
 !!***
@@ -4389,7 +4550,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  real(dp),allocatable :: dsdk(:,:,:,:,:,:)
  real(dp),allocatable :: eeig(:,:),eeig123(:,:,:,:,:,:),smat_all_indx(:,:,:,:,:,:)
  type(pawcprj_type),allocatable :: cprj_kb_k(:,:,:,:)
- 
+
 
  ! ***********************************************************************
  ! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
@@ -4425,7 +4586,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
       & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,smat_all_indx,symrec,xred)
  call cpu_time(finish_time)
  write(std_out,'(a,es16.8)')' orbmag progress: make_smat time ',finish_time-start_time
- 
+
  ! call chern number routine if necessary
  if (dtset%orbmag .EQ. 3) then
     call chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
@@ -4462,7 +4623,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  call cpu_time(finish_time)
  write(std_out,'(a,es16.8)')' orbmag progress: make_dsdk time ',finish_time-start_time
 
- 
+
  ! compute the energies at each k pt
  call cpu_time(start_time)
  write(std_out,'(a)')' orbmag progress: making <u_n1k|H_k|u_n2k>, step 4 of 6'
@@ -4615,7 +4776,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
          &   dtorbmag%orbmagvec(1,adir),dtorbmag%orbmagvec(2,adir)
     call wrtout(ab_out,message,'COLL')
  end do
-    
+
  write(message,'(a,a,a)')ch10,'====================================================',ch10
  call wrtout(ab_out,message,'COLL')
 
@@ -5086,7 +5247,7 @@ subroutine make_VVIII(adir,atindx1,cprj,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nban
        bdxstor=mod(bdx+6-2*gdir,6)
        dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
        deltab = sqrt(DOT_PRODUCT(dkb,dkb))
-       
+
        do gfor = 1, 2
           gsigma = 3-2*gfor
           gdx = 2*gdir-2+gfor
@@ -5188,9 +5349,9 @@ subroutine make_VVIII(adir,atindx1,cprj,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nban
                 end do ! end nn
                 VVIII_dir = VVIII_dir + half*j_dpc*epsabg*bsigma*gsigma*VVIII/(2.0*deltab*2.0*deltag)
              end if ! end check that ikpt > 0
-             
+
           end do ! end loop over ikpt_loc
-          
+
        end do ! end loop over gfor
     end do ! end loop over bfor
  end do ! end loop over epsabg
@@ -5287,7 +5448,7 @@ subroutine make_VVI(adir,atindx1,cprj,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_
  me=mpi_enreg%me_kpt
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
  isppol = 1
- 
+
  ncpgr = cprj(1,0,1,1)%ncpgr
  ABI_ALLOCATE(dimlmn,(dtset%natom))
  call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
@@ -5320,7 +5481,7 @@ subroutine make_VVI(adir,atindx1,cprj,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_
        bdxstor=mod(bdx+6-2*gdir,6)
        dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
        deltab = sqrt(DOT_PRODUCT(dkb,dkb))
-       
+
        do gfor = 1, 2
           gsigma = 3-2*gfor
           gdx = 2*gdir-2+gfor
@@ -5407,7 +5568,7 @@ subroutine make_VVI(adir,atindx1,cprj,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_
                          do ilmn=1,pawtab(itypat)%lmn_size
                             do jlmn=1,pawtab(itypat)%lmn_size
                                klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
-                               
+
                                cpb = cmplx(cprj_kgb(iatom,n1)%cp(1,ilmn),cprj_kgb(iatom,n1)%cp(2,ilmn),KIND=dpc)
                                cpk = cmplx(cprj_kg(iatom,nn)%cp(1,jlmn),cprj_kg(iatom,nn)%cp(2,jlmn),KIND=dpc)
                                VVI_2 = VVI_2 + conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
@@ -5415,16 +5576,16 @@ subroutine make_VVI(adir,atindx1,cprj,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_
                             end do ! end loop over jlmn
                          end do ! end loop over ilmn
                       end do ! end loop over atoms
-                      
+
                       VVI_1 = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0),KIND=dpc)
 
                       VVI=VVI+VVI_1*VVI_2*ENK
-                      
+
                    end do ! end n1
                 end do ! end nn
                 VVI_dir = VVI_dir + half*j_dpc*epsabg*bsigma*gsigma*VVI/(2.0*deltab*2.0*deltag)
              end if ! end check on ikpt > 0
-             
+
           end do ! end loop over ikpt_loc
 
        end do ! end loop over gfor
@@ -5451,3 +5612,598 @@ end subroutine make_VVI
 
 end module m_orbmag
 !!***
+
+! !! DEPRECATED VERSION OF make_eeig123
+! !! NAME
+! !! make_eeig123
+! !!
+! !! FUNCTION
+! !! Compute matrix elements <u_k+g|H_k|u_k+b>
+! !!
+! !! COPYRIGHT
+! !! Copyright (C) 2003-2017 ABINIT  group
+! !! This file is distributed under the terms of the
+! !! GNU General Public License, see ~abinit/COPYING
+! !! or http://www.gnu.org/copyleft/gpl.txt .
+! !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+! !!
+! !! INPUTS
+! !!
+! !! OUTPUT
+! !! eeig123_mat
+! !!
+! !! SIDE EFFECTS
+! !!
+! !! TODO
+! !!
+! !! NOTES
+! !! See Ceresoli et al, PRB 74, 024408 (2006) [[cite:Ceresoli2006]],
+! !! and Gonze and Zwanziger, PRB 84, 064445 (2011) [[cite:Gonze2011a]].
+! !! The derivative of the density operator is obtained from a discretized formula
+! !! $\partial_\beta \rho_k = \frac{1}{2\Delta}(\rho_{k+b} - \rho_{k-b})$ with
+! !! $\Delta = |b|$. When reduced to wavefunction overlaps the computation amounts to
+! !! multiple calls to smatrix.F90, exactly as in other Berry phase computations, with
+! !! the one additional complication of overlaps like $\langle u_{n,k+b}|u_{n',k+g}\rangle$.
+! !! At this stage mkpwind_k is invoked, which generalizes the code in initberry
+! !! and initorbmag necessary to index plane waves around different k points.
+! !! Direct questions and comments to J Zwanziger
+! !!
+! !! PARENTS
+! !!
+! !! CHILDREN
+! !!
+! !! SOURCE
+
+! subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
+!      & gmet,mcg,mcprj,mpi_enreg,nband_k,nfftf,npwarr,&
+!      & paw_ij,pawfgr,pawtab,psps,&
+!      & rprimd,symrec,vectornd,vhartr,vpsp,vxc,with_vectornd,xred)
+
+!  !Arguments ------------------------------------
+!  !scalars
+!  integer,intent(in) :: mcg,mcprj,nband_k,nfftf,with_vectornd
+!  type(dataset_type),intent(in) :: dtset
+!  type(MPI_type), intent(inout) :: mpi_enreg
+!  type(orbmag_type), intent(inout) :: dtorbmag
+!  type(pawfgr_type),intent(in) :: pawfgr
+!  type(pseudopotential_type),intent(in) :: psps
+
+!  !arrays
+!  integer,intent(in) :: atindx1(dtset%natom)
+!  integer,intent(in) :: npwarr(dtset%nkpt),symrec(3,3,dtset%nsym)
+!  real(dp),intent(in) :: cg(2,mcg),gmet(3,3),rprimd(3,3)
+!  real(dp),intent(in) :: vhartr(nfftf),vpsp(nfftf),vxc(nfftf,dtset%nspden)
+!  real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,3)
+!  real(dp),intent(in) :: xred(3,dtset%natom)
+!  real(dp),intent(out) :: eeig(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,1:4)
+!  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom*psps%usepaw)
+!  type(pawcprj_type),intent(in) ::  cprj(6,0:4,dtset%natom,mcprj)
+!  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
+
+!  !Local variables -------------------------
+!  !scalars
+!  integer :: bdir,bdx,bdxstor,bdxc,bfor,bsigma,countb,countg,countjb,countjg,cpopt
+!  integer :: dest,exchn2n3d,gdir,gdx,gdxc,gdxstor,gfor,gg,gsigma
+!  integer :: iatom,icgb,icgg,icprjbi,icprjgi,idat,idir,ierr
+!  integer :: ikg1,ikgb,ikgg,ikpt,ikptb,ikptbi,ikptg,ikptgi,ilmn,jlmn,klmn
+!  integer :: ikpt_loc,ipw,isppol,istwf_k,itypat
+!  integer :: jcgb,jcgg,jcprjbi,jcprjgi,jkpt,jkptb,jkptbi,jkptg,jkptgi,jpw,jsppol
+!  integer :: me,my_nspinor,n1,n2dim,ncpgr,ndat,dummy_onpw
+!  integer :: ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,nn,nproc,npw_kb,npw_kg,ntotcp
+!  integer :: prtvol,sij_opt,sourceb,sourceg,spaceComm,tagb,tagg,tim_getghc,tim_fourwf,type_calc
+!  real(dp) :: dkg2,dotr,doti,ecut_eff,htpisq,keg,lambda,weight
+!  complex(dpc) :: cdij,cgdijcb,cpb,cpg
+!  logical :: has_vectornd
+!  type(gs_hamiltonian_type) :: gs_hamk
+
+!  !arrays
+!  integer :: nattyp_dum(dtset%ntypat)
+!  integer,allocatable :: dimlmn(:),gbound_kg(:,:),kg_kb(:,:),kg_kg(:,:),pwind_bg(:)
+!  real(dp) ::dkb(3),dkg(3),dkbg(3),kpointb(3),kpointg(3),rhodum(1)
+!  real(dp),allocatable :: bra(:,:),cwavef(:,:),gcwavef(:,:,:),ghc(:,:),ghc1(:,:),gsc(:,:),gvnlc(:,:),kpg_k_dummy(:,:)
+!  real(dp),allocatable :: kgkpg(:,:)
+!  real(dp),allocatable :: buffer(:,:),buffer1(:),buffer2(:),cgqb(:,:),cgqg(:,:),cgrvtrial(:,:),ghc_vectornd(:,:)
+!  real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vtrial(:,:),work(:,:,:,:)
+!  type(pawcprj_type),allocatable :: cprj_buf(:,:),cprj_kb(:,:),cprj_kg(:,:),cwaveprj(:,:)
+
+
+!  !-----------------------------------------------------------------------
+
+!  !Init MPI
+!  spaceComm=mpi_enreg%comm_cell
+!  nproc=xmpi_comm_size(spaceComm)
+!  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+!  me = mpi_enreg%me_kpt
+
+!  ! TODO: generalize to nsppol > 1
+!  isppol = 1
+!  istwf_k = 1
+!  ngfft1=dtset%ngfft(1) ; ngfft2=dtset%ngfft(2) ; ngfft3=dtset%ngfft(3)
+!  ngfft4=dtset%ngfft(4) ; ngfft5=dtset%ngfft(5) ; ngfft6=dtset%ngfft(6)
+!  ecut_eff = dtset%ecut*(dtset%dilatmx)**2
+!  exchn2n3d = 0
+!  ikg1 = 0
+
+
+!  ncpgr = cprj(1,0,1,1)%ncpgr
+!  ABI_ALLOCATE(dimlmn,(dtset%natom))
+!  call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
+!  ABI_DATATYPE_ALLOCATE(cprj_kb,(dtset%natom,dtorbmag%nspinor*dtset%mband))
+!  call pawcprj_alloc(cprj_kb,ncpgr,dimlmn)
+!  ABI_DATATYPE_ALLOCATE(cprj_kg,(dtset%natom,dtorbmag%nspinor*dtset%mband))
+!  call pawcprj_alloc(cprj_kg,ncpgr,dimlmn)
+!  ABI_DATATYPE_ALLOCATE(cwaveprj,(dtset%natom,1))
+!  call pawcprj_alloc(cwaveprj,ncpgr,dimlmn)
+
+!  n2dim = dtorbmag%nspinor*nband_k
+!  ntotcp = n2dim*SUM(dimlmn(:))
+!  if (nproc>1) then
+!     ABI_DATATYPE_ALLOCATE(cprj_buf,(dtset%natom,n2dim))
+!     call pawcprj_alloc(cprj_buf,ncpgr,dimlmn)
+!  end if
+
+!  ABI_ALLOCATE(pwind_bg,(dtset%mpw))
+
+!  ! input parameters for calls to getghc
+!  cpopt = -1 ! will not use cprj anyway
+!  ndat = 1
+!  prtvol = 0
+!  sij_opt = 0
+!  tim_getghc = 0
+!  ! getghc: type_calc 1 means local only
+!  type_calc = 1
+!  lambda = zero
+!  htpisq = 0.5_dp*(two_pi)**2
+
+!  has_vectornd = (with_vectornd .EQ. 1)
+
+!  !==== Initialize most of the Hamiltonian ====
+!  !Allocate all arrays and initialize quantities that do not depend on k and spin.
+!  !gs_hamk is the normal hamiltonian at k
+!  call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
+!       & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,nucdipmom=dtset%nucdipmom,&
+!       & paw_ij=paw_ij)
+
+!  !---------construct local potential------------------
+!  ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))
+!  ! nspden=1 is essentially hard-coded in the following line
+!  vtrial(1:nfftf,1)=vhartr(1:nfftf)+vxc(1:nfftf,1)+vpsp(1:nfftf)
+
+!  ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
+!  call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
+
+!  ABI_ALLOCATE(vlocal,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc))
+!  call fftpac(isppol,mpi_enreg,dtset%nspden,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,dtset%ngfft,cgrvtrial,vlocal,2)
+
+!  ABI_DEALLOCATE(cgrvtrial)
+!  ABI_DEALLOCATE(vtrial)
+
+!  ! add vlocal
+!  call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.false.)
+
+!  ! if vectornd is present, set it up similarly to how it's done for
+!  ! vtrial. Note that it must be done for the three Cartesian directions. Also, the following
+!  ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
+!  if(has_vectornd) then
+!     ABI_ALLOCATE(vectornd_pac,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,3))
+!     ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
+!     do idir = 1, 3
+!        call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,idir))
+!        call fftpac(isppol,mpi_enreg,dtset%nspden,&
+!             & ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,idir),2)
+!     end do
+!     ABI_DEALLOCATE(cgrvtrial)
+!  end if
+
+
+!  eeig(1:2,1:nband_k,1:nband_k,1:dtorbmag%fnkpt,1:6,1:4) = zero
+!  do bdir = 1, 3
+!     do gg = bdir,bdir+1
+!        gdir=mod(gg,3)+1
+
+!        do bfor = 1, 2
+!           bsigma = -2*bfor+3
+!           ! index of neighbor 1..6
+!           bdx = 2*bdir-2+bfor
+!           bdxc = 2*bdir-2+bfor+bsigma
+!           bdxstor = mod(bdx+6-2*gdir,6)
+!           dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
+
+!           do gfor = 1, 2
+!              gsigma=-2*gfor+3
+!              ! index of neighbor 1..6
+!              gdx = 2*gdir-2+gfor
+!              gdxc = 2*gdir-2+gfor+gsigma
+!              gdxstor = mod(gdx+6-2*bdir,6)
+!              dkg(1:3) = gsigma*dtorbmag%dkvecs(1:3,gdir)
+!              dkbg(1:3) = dkg(1:3) - dkb(1:3)
+
+!              !    Loop on the values of ikpt_loc and ikpt :
+!              !    ikpt is incremented one by one, and number the k points in the FBZ
+!              !    ikpt1i refer to the k point numbering in the IBZ
+!              !    ikpt_loc differs from ikpt only in the parallel case, and gives
+!              !    the index of the k point in the FBZ, in the set treated by the present processor
+!              !    NOTE : in order to allow synchronisation, ikpt_loc contain information about
+!              !    ikpt AND ISPPOL !
+!              !    It means that the following loop is equivalent to a double loop :
+!              !    do isppol = 1, nsppol
+!              !    do ikpt1 =  1, dtefield%fmkmem
+!              !
+!              ! do ikpt_loc = 1, dtorbmag%fmkmem_max*nsppol
+!              do ikpt_loc = 1, dtorbmag%fmkmem_max
+!                 ikpt=mpi_enreg%kpt_loc2fbz_sp(me, ikpt_loc,1)
+
+!                 ! if this k and spin are for me do it
+!                 ! if (ikpt1 > 0 .and. isppol > 0) then
+!                 if (ikpt > 0) then
+
+!                    ikptb = dtorbmag%ikpt_dk(ikpt,bfor,bdir)
+!                    kpointb(:)=dtorbmag%fkptns(:,ikptb)
+!                    ikptbi = dtorbmag%indkk_f2ibz(ikptb,1)
+!                    npw_kb = npwarr(ikptbi)
+!                    ikgb = dtorbmag%fkgindex(ikptb)
+!                    ABI_ALLOCATE(kg_kb,(3,npw_kb))
+!                    call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_kb,kpointb,1,mpi_enreg,npw_kb,dummy_onpw)
+!                    ! kg_kb(:,1:npw_kb)=kg(:,ikgb+1:ikgb+npw_kb)
+
+!                    ikptg = dtorbmag%ikpt_dk(ikpt,gfor,gdir)
+!                    kpointg(:)=dtorbmag%fkptns(:,ikptg)
+!                    ikptgi = dtorbmag%indkk_f2ibz(ikptg,1)
+!                    npw_kg = npwarr(ikptgi)
+!                    ikgg = dtorbmag%fkgindex(ikptg)
+!                    ABI_ALLOCATE(kg_kg,(3,npw_kg))
+!                    call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_kg,kpointg,1,mpi_enreg,npw_kg,dummy_onpw)
+!                    ! kg_kg(:,1:npw_kg)=kg(:,ikgg+1:ikgg+npw_kg)
+
+!                    ! this is minimal Hamiltonian information, to apply vlocal (and only vlocal) to |u_kb>
+!                    nkpg = 0
+!                    ABI_ALLOCATE(kpg_k_dummy,(npw_kb,nkpg))
+
+!                    call gs_hamk%load_k(kpt_k=kpointb(:),istwf_k=istwf_k,npw_k=npw_kb,&
+!                         &             kg_k=kg_kb,kpg_k=kpg_k_dummy,compute_gbound=.TRUE.)
+
+!                 end if ! end if ikpt > 0 check
+
+!                 !      --------------------------------------------------------------------------------
+!                 !      Communication
+!                 !      --------------------------------------------------------------------------------
+!                 if (ikpt > 0 .and. isppol > 0) then ! I currently have a true kpt to use
+!                    countb = npw_kb*my_nspinor*nband_k
+!                    if(allocated(cgqb)) then
+!                       ABI_DEALLOCATE(cgqb)
+!                    endif
+!                    ABI_ALLOCATE(cgqb,(2,countb))
+!                    cgqb = zero
+!                    sourceb = me
+!                    if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikptbi,1,nband_k,isppol,me)) then
+!                       ! I need the datas from someone else
+!                       sourceb = mpi_enreg%proc_distrb(ikptbi,1,isppol)
+!                    end if
+!                    countg = npw_kg*my_nspinor*nband_k
+!                    if(allocated(cgqg)) then
+!                       ABI_DEALLOCATE(cgqg)
+!                    end if
+!                    ABI_ALLOCATE(cgqg,(2,countg))
+!                    cgqg = zero
+!                    sourceg = me
+!                    if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikptgi,1,nband_k,isppol,me)) then
+!                       ! I need the datas from someone else
+!                       sourceg = mpi_enreg%proc_distrb(ikptgi,1,isppol)
+!                    end if
+!                 else
+!                    sourceb = -1 ! I do not have a kpt to use
+!                    sourceg = -1
+!                 end if
+
+!                 do dest=0,nproc-1
+!                    if ((dest.EQ.me) .AND. (ikpt.GT.0) .AND. (isppol.GT.0)) then
+!                       ! I am destination and I have something to do
+!                       if(sourceb.EQ.me) then
+!                          ! I am destination and source for kptb
+!                          icprjbi = dtorbmag%cprjindex(ikptbi,isppol)
+!                          icgb = dtorbmag%cgindex(ikptbi,dtset%nsppol)
+!                          call pawcprj_get(atindx1,cprj_kb,cprj(bdxc,0,:,:),dtset%natom,1,icprjbi,&
+!                               &         ikptbi,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
+!                               &         my_nspinor,dtset%nsppol,0)
+!                          cgqb(1:2,1:countb) = cg(1:2,icgb+1:icgb+countb)
+!                       else ! sourceb .NE. me
+!                          ! receive cgqb (and cprj_kb)
+!                          tagb = ikptbi + (isppol - 1)*dtset%nkpt
+!                          call xmpi_recv(cgqb,sourceb,tagb,spaceComm,ierr)
+!                          call pawcprj_mpi_recv(dtset%natom,n2dim,dimlmn,ncpgr,cprj_kb,sourceb,spaceComm,ierr)
+!                       end if
+!                       if(sourceg.EQ.me) then
+!                          ! I am destination and source for kptg
+!                          icprjgi = dtorbmag%cprjindex(ikptgi,isppol)
+!                          icgg = dtorbmag%cgindex(ikptgi,dtset%nsppol)
+!                          call pawcprj_get(atindx1,cprj_kg,cprj(gdxc,0,:,:),dtset%natom,1,icprjgi,&
+!                               &           ikptgi,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
+!                               &           my_nspinor,dtset%nsppol,0)
+!                          cgqg(1:2,1:countg) = cg(1:2,icgg+1:icgg+countg)
+!                       else ! sourceg .NE. me
+!                          ! receive cgqg (and cprj_kg)
+!                          tagg = ikptgi + (isppol - 1)*dtset%nkpt
+!                          call xmpi_recv(cgqg,sourceg,tagg,spaceComm,ierr)
+!                          call pawcprj_mpi_recv(dtset%natom,n2dim,dimlmn,ncpgr,cprj_kg,sourceg,spaceComm,ierr)
+!                       end if
+!                    else if (dest.NE.me) then
+!                       ! jkpt is the kpt which is being treated by dest
+!                       ! jsppol is his isppol
+!                       jkpt = mpi_enreg%kpt_loc2fbz_sp(dest, ikpt_loc,1)
+!                       jsppol = mpi_enreg%kpt_loc2fbz_sp(dest, ikpt_loc,2)
+!                       if (jkpt > 0 .and. jsppol > 0) then ! dest is treating a true kpt
+
+!                          jkptb = dtorbmag%ikpt_dk(jkpt,bfor,bdir)
+!                          jkptbi = dtorbmag%indkk_f2ibz(jkptb,1)
+!                          jkptg = dtorbmag%ikpt_dk(jkpt,gfor,gdir)
+!                          jkptgi = dtorbmag%indkk_f2ibz(jkptg,1)
+
+!                          if((mpi_enreg%proc_distrb(jkptbi,1,jsppol) == me))  then
+!                             jcgb = dtorbmag%cgindex(jkptbi,jsppol)
+!                             jcprjbi=dtorbmag%cprjindex(jkptbi,jsppol)
+!                             call pawcprj_get(atindx1,cprj_buf,cprj(bdxc,0,:,:),dtset%natom,1,jcprjbi,jkptbi,0,jsppol,&
+!                                  & dtset%mband,dtset%mkmem,dtset%natom,dtorbmag%mband_occ,dtorbmag%mband_occ,&
+!                                  & my_nspinor,dtset%nsppol,0,mpicomm=mpi_enreg%comm_kpt,&
+!                                  & proc_distrb=mpi_enreg%proc_distrb)
+!                             tagb = jkptbi + (jsppol - 1)*dtset%nkpt
+!                             countjb = npwarr(jkptbi)*my_nspinor*nband_k
+!                             ABI_ALLOCATE(buffer,(2,countjb))
+!                             buffer(:,1:countjb)  = cg(:,jcgb+1:jcgb+countjb)
+!                             call xmpi_send(buffer,dest,tagb,spaceComm,ierr)
+!                             ABI_DEALLOCATE(buffer)
+!                             call pawcprj_mpi_send(dtset%natom,n2dim,dimlmn,ncpgr,cprj_buf,dest,spaceComm,ierr)
+!                          end if ! end check that I am his source
+!                          if((mpi_enreg%proc_distrb(jkptgi,1,jsppol) == me))  then
+!                             jcgg = dtorbmag%cgindex(jkptgi,jsppol)
+!                             jcprjgi=dtorbmag%cprjindex(jkptgi,jsppol)
+!                             call pawcprj_get(atindx1,cprj_buf,cprj(gdxc,0,:,:),dtset%natom,1,jcprjgi,jkptgi,0,jsppol,&
+!                                  & dtset%mband,dtset%mkmem,dtset%natom,dtorbmag%mband_occ,dtorbmag%mband_occ,&
+!                                  & my_nspinor,dtset%nsppol,0,mpicomm=mpi_enreg%comm_kpt,&
+!                                  & proc_distrb=mpi_enreg%proc_distrb)
+!                             tagg = jkptgi + (jsppol - 1)*dtset%nkpt
+!                             countjg = npwarr(jkptgi)*my_nspinor*nband_k
+!                             ABI_ALLOCATE(buffer,(2,countjg))
+!                             buffer(:,1:countjg)  = cg(:,jcgg+1:jcgg+countjg)
+!                             call xmpi_send(buffer,dest,tagg,spaceComm,ierr)
+!                             ABI_DEALLOCATE(buffer)
+!                             call pawcprj_mpi_send(dtset%natom,n2dim,dimlmn,ncpgr,cprj_buf,dest,spaceComm,ierr)
+!                          end if ! end check that I am his source
+
+!                       end if ! end check that jkpt > 0 and jsppol > 0
+
+!                    end if ! test dest .EQ. me and ikpt .GT. 0
+
+!                 end do ! end loop over dest
+
+!                 if (ikpt > 0 .and. isppol > 0) then ! if I am treating a kpt, compute the matrix elements
+
+!                    call mkpwind_k(-dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,&
+!                         &             dtorbmag%indkk_f2ibz,ikptg,ikptb,&
+!                         &             mpi_enreg,npwarr,pwind_bg,symrec)
+
+!                    ! apply gs_hamk123 to wavefunctions at kb
+!                    ABI_ALLOCATE(cwavef,(2,npw_kb))
+!                    ABI_ALLOCATE(ghc,(2,npw_kb))
+!                    ABI_ALLOCATE(gsc,(2,npw_kb))
+!                    ABI_ALLOCATE(gvnlc,(2,npw_kb))
+
+!                    ABI_ALLOCATE(bra,(2,npw_kg))
+
+!                    dkg2=DOT_PRODUCT(dkg(:),MATMUL(gmet(:,:),dkg(:)))
+
+!                    do nn = 1, nband_k
+!                       cwavef(1:2,1:npw_kb) = cgqb(1:2,(nn-1)*npw_kb+1:nn*npw_kb)
+!                       ! apply vlocal to |cwavef>, store resulting vlocal|cwavef> in |ghc>
+!                       call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,ndat,&
+!                            &               prtvol,sij_opt,tim_getghc,type_calc)
+!                       do n1 = 1, nband_k
+!                          bra(1:2,1:npw_kg) = cgqg(1:2,(n1-1)*npw_kg+1:n1*npw_kg)
+!                          dotr=zero;doti=zero
+
+!                          do ipw=1,npw_kg
+!                             jpw=pwind_bg(ipw)
+!                             if(jpw .GT. 0) then
+!                                ! here is <bra|vlocal|cwavef> contribution to <bra|H|cwavef>
+!                                dotr=dotr+bra(1,ipw)*ghc(1,jpw)+bra(2,ipw)*ghc(2,jpw)
+!                                doti=doti+bra(1,ipw)*ghc(2,jpw)-bra(2,ipw)*ghc(1,jpw)
+
+!                                ! twisted kinetic energy: here we are computing
+!                                ! -\frac{1}{2}<u_kg|e^{-i.k.r}\nabla^2 e^{i.k.r}|u_kb>,
+!                                ! that is, kinetic energy at k between wavefunctions at kg and kb. The correct
+!                                ! formula is htpisq*(ikpt + G_right)^2\delta(G_left,G_right) but it's hard to apply
+!                                ! because the G's have wrap-around shifts (output of mkpwind_k)
+!                                ! for the kpts near and at the edge of the IBZ.
+!                                ! The following approach is based on the bra <u_kg| expansion, because
+!                                ! these G vectors are unshifted (indexed by ipw, not jpw). So we are using
+!                                ! k+G_left = (k-kg) + (kg+G_left) = -dkg + (kg+G_left). When squared we obtain
+!                                ! |kg+G_left|^2 - 2*dkg.(kg+G_left) + |dkg|^2. In this way we only use the G_left
+!                                ! expansion vectors, with no shift, for each k point.
+
+!                                ! normal kinetic energy for bra
+!                                keg=htpisq*dot_product((kpointg(:)+kg_kg(:,ipw)),MATMUL(gmet,(kpointg(:)+kg_kg(:,ipw))))
+
+!                                ! addition of |dkg|^2
+!                                keg=keg+htpisq*dkg2
+
+!                                ! addition of -2*dkg*(kg+G_left)
+!                                keg=keg-2.0*htpisq*DOT_PRODUCT(dkg(:),MATMUL(gmet,(kpointg(:)+kg_kg(:,ipw))))
+
+!                                ! application of ecut filter and wavefunction
+!                                ! after this loop have <bra|T+vlocal|cwavef>
+!                                if (keg < dtset%ecut) then
+!                                   dotr=dotr+bra(1,ipw)*keg*cwavef(1,jpw)+bra(2,ipw)*keg*cwavef(2,jpw)
+!                                   doti=doti+bra(1,ipw)*keg*cwavef(2,jpw)-bra(2,ipw)*keg*cwavef(1,jpw)
+!                                end if ! end keg filter
+!                             end if ! end check on jpw > 0
+!                          end do ! end loop over ipw
+
+!                          ! ! apply onsite terms through cprjk+b
+!                          ! after this have <bra|T+vlocal+Dij|cwavef>
+!                          cgdijcb = czero
+!                          do iatom = 1, dtset%natom
+!                             itypat = dtset%typat(iatom)
+!                             do ilmn = 1, pawtab(itypat)%lmn_size
+!                                cpg=cmplx(cprj_kg(iatom,n1)%cp(1,ilmn),cprj_kg(iatom,n1)%cp(2,ilmn),KIND=dpc)
+!                                do jlmn = 1, pawtab(itypat)%lmn_size
+!                                   cpb=cmplx(cprj_kb(iatom,nn)%cp(1,jlmn),cprj_kb(iatom,nn)%cp(2,jlmn),KIND=dpc)
+!                                   if (jlmn .LE. ilmn) then
+!                                      klmn = (ilmn-1)*ilmn/2 + jlmn
+!                                   else
+!                                      klmn = (jlmn-1)*jlmn/2 + ilmn
+!                                   end if
+!                                   if (paw_ij(iatom)%cplex_dij .EQ. 2) then
+!                                      cdij=cmplx(paw_ij(iatom)%dij(2*klmn-1,1),paw_ij(iatom)%dij(2*klmn,1),KIND=dpc)
+!                                      if (jlmn .GT. ilmn) cdij=conjg(cdij)
+!                                   else
+!                                      cdij=cmplx(paw_ij(iatom)%dij(klmn,1),zero,KIND=dpc)
+!                                   end if
+!                                   cgdijcb = cgdijcb + conjg(cpg)*cdij*cpb
+!                                end do
+!                             end do
+!                          end do
+!                          eeig(1,n1,nn,ikpt,gdx,bdxstor) = dotr + real(cgdijcb)
+!                          eeig(2,n1,nn,ikpt,gdx,bdxstor) = doti + aimag(cgdijcb)
+
+!                          ! add  alpha^2 A.p for nuclear dipoles if present.
+!                          ! Do this similarly to the kinetic energy above. Standard expression
+!                          ! would be <bra|alpha^2 A.2\pi(ikpt + G_right)|cwavef> where A is contained
+!                          ! in vectornd_pac and applied in real space with fourwf. However, as outlined
+!                          ! above in kinetic energy section, it's easier to apply to the left and get
+!                          ! <bra|alpha^2 2\pi(kg - dkg + G_left).A |cwavef>
+!                          if(has_vectornd) then
+!                             ABI_ALLOCATE(gcwavef,(2,npw_kg*ndat,3))
+!                             gcwavef = zero
+
+!                             ! obtain (kg - dkg + G)
+!                             ABI_ALLOCATE(kgkpg,(npw_kg,3))
+!                             do ipw = 1, npw_kg
+!                                kgkpg(ipw,:) =  kpointg(:) - dkg(:) + kg_kg(:,ipw)
+!                             end do
+
+!                             ! make 2\pi(k+G)c(G)|bra> by element-wise multiplication
+!                             do idir = 1, 3
+!                                do idat = 1, ndat
+!                                   gcwavef(1,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg,idir) = &
+!                                        & bra(1,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg)*kgkpg(1:npw_kg,idir)
+!                                   gcwavef(2,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg,idir) = &
+!                                        & bra(2,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg)*kgkpg(1:npw_kg,idir)
+!                                end do
+!                             end do
+!                             ABI_DEALLOCATE(kgkpg)
+!                             gcwavef = gcwavef*two_pi
+
+!                             ! now apply vector potential in real space through fourwf
+!                             ABI_ALLOCATE(ghc1,(2,npw_kg*ndat))
+!                             ABI_ALLOCATE(work,(2,ngfft4,ngfft5,ngfft6*ndat))
+!                             ABI_ALLOCATE(gbound_kg,(2*dtset%mgfft+8,2))
+!                             ABI_ALLOCATE(ghc_vectornd,(2,npw_kg*ndat))
+!                             ghc_vectornd = zero
+
+!                             call sphereboundary(gbound_kg,istwf_k,kg_kg,dtset%mgfft,npw_kg)
+
+!                             tim_fourwf = 1
+!                             weight = one
+!                             do idir=1,3
+!                                call fourwf(1,vectornd_pac(:,:,:,:,idir),gcwavef(:,:,idir),ghc1,work,&
+!                                     & gbound_kg,gbound_kg,istwf_k,kg_kg,kg_kg,dtset%mgfft,mpi_enreg,ndat,&
+!                                     & dtset%ngfft,npw_kg,npw_kg,ngfft4,ngfft5,ngfft6,2,&
+!                                     &     tim_fourwf,weight,weight)
+!                                ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
+!                                ! should be faster than explicit loop over ipw as npw_k gets large
+!                                do idat=1,ndat
+!                                   call DAXPY(npw_kg,FineStructureConstant2,ghc1(1,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg),1,&
+!                                        & ghc_vectornd(1,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg),1)
+!                                   call DAXPY(npw_kg,FineStructureConstant2,ghc1(2,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg),1,&
+!                                        & ghc_vectornd(2,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg),1)
+!                                end do
+!                             end do ! idir
+
+!                             dotr = zero; doti = zero
+!                             do ipw=1,npw_kg
+!                                jpw=pwind_bg(ipw)
+!                                if(jpw .GT. 0) then
+!                                   ! here is <bra|alpha^2 A.p |cwavef> contribution to <bra|H|cwavef>
+!                                   dotr=dotr+ghc_vectornd(1,ipw)*cwavef(1,jpw)+ghc_vectornd(2,ipw)*cwavef(2,jpw)
+!                                   doti=doti+ghc_vectornd(1,ipw)*cwavef(2,jpw)-ghc_vectornd(2,ipw)*cwavef(1,jpw)
+!                                end if ! end check on jpw > 0
+!                             end do ! end loop over ipw
+
+!                             eeig(1,n1,nn,ikpt,gdx,bdxstor) = eeig(1,n1,nn,ikpt,gdx,bdxstor) + dotr
+!                             eeig(2,n1,nn,ikpt,gdx,bdxstor) = eeig(2,n1,nn,ikpt,gdx,bdxstor) + doti
+
+!                             ABI_DEALLOCATE(ghc1)
+!                             ABI_DEALLOCATE(work)
+!                             ABI_DEALLOCATE(ghc_vectornd)
+!                             ABI_DEALLOCATE(gbound_kg)
+!                             ABI_DEALLOCATE(gcwavef)
+
+!                          end if ! end check on has_vectornd
+
+!                       end do ! end loop over n1
+!                    end do ! end loop over nn
+
+!                    ABI_DEALLOCATE(cwavef)
+!                    ABI_DEALLOCATE(bra)
+!                    ABI_DEALLOCATE(ghc)
+!                    ABI_DEALLOCATE(gsc)
+!                    ABI_DEALLOCATE(gvnlc)
+
+!                 end if ! end check that ikpt, isppol > 0
+
+!                 if(allocated(kg_kb)) then
+!                    ABI_DEALLOCATE(kg_kb)
+!                 end if
+!                 if(allocated(kg_kg)) then
+!                    ABI_DEALLOCATE(kg_kg)
+!                 end if
+!                 if(allocated(kpg_k_dummy)) then
+!                    ABI_DEALLOCATE(kpg_k_dummy)
+!                 end if
+!                 if(allocated(cgqb)) then
+!                    ABI_DEALLOCATE(cgqb)
+!                 end if
+!                 if(allocated(cgqg)) then
+!                    ABI_DEALLOCATE(cgqg)
+!                 end if
+
+!              end do ! end loop over ikpt_loc
+!           end do ! end loop over gfor
+!        end do ! end loop over bfor
+!     end do ! end loop over gg
+!  end do ! end loop over bdir
+
+!  !  MPI communicate stuff between everyone
+!  if (nproc>1) then
+!     countb = size(eeig)
+!     ABI_ALLOCATE(buffer1,(countb))
+!     ABI_ALLOCATE(buffer2,(countb))
+!     buffer1(1:countb) = reshape(eeig,(/countb/))
+!     call xmpi_sum(buffer1,buffer2,countb,spaceComm,ierr)
+!     eeig(1:2,1:nband_k,1:nband_k,1:dtorbmag%fnkpt,1:6,1:4) = reshape(buffer2,(/2,nband_k,nband_k,dtorbmag%fnkpt,6,4/))
+!     ABI_DEALLOCATE(buffer1)
+!     ABI_DEALLOCATE(buffer2)
+!  end if
+
+!  ABI_DEALLOCATE(dimlmn)
+!  call pawcprj_free(cprj_kb)
+!  ABI_DATATYPE_DEALLOCATE(cprj_kb)
+!  call pawcprj_free(cprj_kg)
+!  ABI_DATATYPE_DEALLOCATE(cprj_kg)
+!  call pawcprj_free(cwaveprj)
+!  ABI_DATATYPE_DEALLOCATE(cwaveprj)
+!  if (nproc>1) then
+!     call pawcprj_free(cprj_buf)
+!     ABI_DATATYPE_DEALLOCATE(cprj_buf)
+!  end if
+
+!  if(has_vectornd) then
+!     ABI_DEALLOCATE(vectornd_pac)
+!  endif
+
+!  ABI_DEALLOCATE(vlocal)
+!  call gs_hamk%free()
+
+!  ABI_DEALLOCATE(pwind_bg)
+
+! end subroutine make_eeig123
+! !!***

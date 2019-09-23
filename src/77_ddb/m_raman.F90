@@ -81,8 +81,6 @@ contains
 
 subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm,rsus,ucvol)
 
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  integer,intent(in) :: mpert,natom
@@ -304,8 +302,6 @@ end subroutine ramansus
 !! SOURCE
 
 subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsus,ucvol)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars

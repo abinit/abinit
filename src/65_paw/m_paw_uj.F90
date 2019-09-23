@@ -24,11 +24,11 @@
 MODULE m_paw_uj
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_linalg_interfaces
  use m_xmpi
+ use m_dtset
 
  use m_pptools,       only : prmat
  use m_special_funcs, only : iradfnh
@@ -43,6 +43,70 @@ MODULE m_paw_uj
  implicit none
 
  private
+!!***
+
+!----------------------------------------------------------------------
+
+!!****t* m_paw_uj/macro_uj_type
+!! NAME
+!! dtmacro_uj
+!!
+!! FUNCTION
+!! This data type contains the potential shifts and the occupations
+!! for the determination of U and J for the DFT+U calculations.
+!! iuj=1,2: non-selfconsistent calculations. iuj=3,4 selfconsistent calculations.
+!! iuj=2,4  => pawujsh<0 ; iuj=1,3 => pawujsh >0,
+!!
+!! SOURCE
+
+ type, public :: macro_uj_type
+
+! Integer
+  integer :: iuj        ! dataset treated
+  integer :: nat        ! number of atoms U (J) is determined on
+  integer :: ndtset     ! total number of datasets
+  integer :: nspden     ! number of densities treated
+  integer :: macro_uj   ! which mode the determination runs in
+  integer :: pawujat    ! which atom U (J) is determined on
+  integer :: pawprtvol  ! controlling amount of output
+  integer :: option     ! controls the determination of U (1 with compensating charge bath, 2 without)
+  integer :: dmatpuopt  ! controls the renormalisation of the PAW projectors
+
+! Real
+  real(dp) :: diemix    ! mixing parameter
+  real(dp) :: mdist     ! maximal distance of ions
+  real(dp) :: pawujga   ! gamma for inversion of singular matrices
+  real(dp) :: ph0phiint ! integral of phi(:,1)*phi(:,1)
+  real(dp) :: pawujrad  ! radius to which U should be extrapolated.
+  real(dp) :: pawrad    ! radius of the paw atomic data
+
+! Integer arrays
+  integer , allocatable  :: scdim(:)
+  ! size of supercell
+
+! Real arrays
+  real(dp) , allocatable :: occ(:,:)
+  ! occupancies after a potential shift: occ(ispden,nat)
+
+  real(dp) , allocatable :: rprimd(:,:)
+  ! unit cell for symmetrization
+
+  real(dp) , allocatable :: vsh(:,:)
+  ! potential shifts on atoms, dimensions: nspden,nat
+
+  real(dp) , allocatable :: xred(:,:)
+  ! atomic position for symmetrization
+
+  real(dp) , allocatable :: wfchr(:)
+  ! wfchr(1:3): zion, n and l of atom on which projection is done
+  ! wfchr(4:6): coefficients ai of a0+a1*r+a2*r^2, fit to the wfc for r< r_paw
+
+  real(dp), allocatable :: zioneff(:)
+  ! zioneff(ij_proj), "Effective charge"*n "seen" at r_paw, deduced from Phi at r_paw, n:
+  ! pricipal quantum number; good approximation to model wave function outside PAW-sphere through
+
+ end type macro_uj_type
+!!***
 
 !public procedures.
  public :: pawuj_ini  ! Initialize dtpawuj datastructure
@@ -85,8 +149,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine pawuj_ini(dtpawuj,ndtset)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -158,8 +220,6 @@ end subroutine pawuj_ini
 
 subroutine pawuj_free(dtpawuj)
 
- implicit none
-
 !Arguments -------------------------------
  type(macro_uj_type),intent(inout) :: dtpawuj
 
@@ -217,8 +277,6 @@ end subroutine pawuj_free
 !! SOURCE
 
 subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -754,8 +812,6 @@ end subroutine pawuj_det
 subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad,pawtab,ndtpawuj,&
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)                 :: my_natom,natom,ntypat,ndtpawuj
@@ -998,8 +1054,6 @@ end subroutine pawuj_red
 subroutine chiscwrt(chi_org,disv_org,nat_org,sdisv_org,smult_org,nsh_org,chi_sc,&
 & disv_sc,nat_sc,smult_sc,nsh_sc,opt,prtvol)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)              :: nat_org,nsh_org,nsh_sc
@@ -1099,8 +1153,6 @@ end subroutine chiscwrt
 !! SOURCE
 
 subroutine linvmat(inmat,oumat,nat,nam,option,gam,prtvol)
-
- implicit none
 
 !Arguments -------------------------------
 
@@ -1211,8 +1263,6 @@ end subroutine linvmat
 
 subroutine lprtmat(commnt,chan,prtvol,mmat,nat)
 
- implicit none
-
 !Arguments -------------------------------
  integer,intent(in)              :: nat,chan,prtvol
  real(dp),intent(in)             :: mmat(nat,nat)
@@ -1287,8 +1337,6 @@ end subroutine lprtmat
 !! SOURCE
 
 subroutine lcalcu(magv,natom,rprimd,xred,chi,chi0,pawujat,ures,prtvol,gam,opt)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1383,8 +1431,6 @@ end subroutine lcalcu
 !! SOURCE
 
 subroutine blow_pawuj(mat,nj,matt)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -30,13 +30,12 @@ module m_gwls_hamiltonian
 ! local modules
 use m_gwls_utility
 use m_gwls_wf
+use m_dtset
 
 ! abinit modules
 use m_bandfft_kpt
 use m_cgtools
 use defs_basis
-use defs_datatypes
-use defs_abitypes
 use m_abicore
 use m_xmpi
 use m_pawang
@@ -44,19 +43,17 @@ use m_errors
 use m_ab7_mixing
 use m_mpinfo
 
+use defs_abitypes,      only : MPI_type
 use m_io_tools,         only : get_unit
-use m_dtset,            only : dtset_copy, dtset_free
-use m_hamiltonian,      only : gs_hamiltonian_type, copy_hamiltonian, destroy_hamiltonian, &
-&                              load_k_hamiltonian
-use m_paw_dmft,         only : paw_dmft_type
+use m_hamiltonian,      only : gs_hamiltonian_type, copy_hamiltonian
 use m_pawcprj,          only : pawcprj_type
 use m_vcoul,            only : vcoul_t, vcoul_init, vcoul_free
 use m_crystal,          only : crystal_t, crystal_init, crystal_print
-use m_io_kss,           only : make_gvec_kss
 use m_gsphere,          only : gsphere_t, gsph_init, gsph_free, print_gsphere
 use m_bz_mesh,          only : kmesh_t, kmesh_init, kmesh_free, kmesh_print, find_qmesh
 use m_fft,              only : fftpac, fourwf
 use m_getghc,           only : getghc
+use m_io_kss,           only : make_gvec_kss
 
 implicit none
 save
@@ -216,10 +213,7 @@ subroutine DistributeValenceWavefunctions()
 ! susceptibility operator.
 !
 !--------------------------------------------------------------------------------
-implicit none
-
 integer  :: iblk, mb, v
-
 
 real(dp), allocatable :: psik_v(:,:)             !wavefunctions in LA format
 real(dp), allocatable :: psik_v_alltoall(:,:)    !wavefunctions in FFT format
@@ -317,10 +311,8 @@ subroutine DistributeValenceKernel()
 ! A better (forthcoming) algorithm would only distribute the actual kernel,
 ! not all valence bands.
 !--------------------------------------------------------------------------------
-implicit none
 
 integer  :: mb, n
-
 
 real(dp), allocatable :: psik_n(:,:)             !wavefunctions in LA format
 real(dp), allocatable :: psik_n_alltoall(:,:)    !wavefunctions in FFT format
@@ -402,7 +394,6 @@ subroutine pc_k_valence_kernel(psi_inout,n)
 ! array containing the kernel (defined in this module) is already prepared
 ! and ready to be used.
 !================================================================================
-implicit none
 
 real(dp), intent(inout) :: psi_inout(2,npw_g)
 integer , intent(in), optional :: n
@@ -492,8 +483,6 @@ end subroutine pc_k_valence_kernel
 !! SOURCE
 
 subroutine wf_block_distribute(psik, psik_alltoall, direction)
-
-implicit none
 
 !================================================================================
 !
@@ -626,7 +615,6 @@ use m_cgtools
 ! This subroutine computes the exchange energy in band+FFT parallel
 !
 !================================================================================
-implicit none
 real(dp) :: exchange
 
 integer, intent(in) :: e
@@ -762,7 +750,6 @@ end function exchange
 
 function dft_xc_energy(e)
 
-implicit none
 real(dp) :: dft_xc_energy
 integer, intent(in) :: e
 
@@ -882,7 +869,6 @@ subroutine set_precondition(lambda,omega)
 ! TODO :
 ! - eliminate the 2 "if(kinpw(i) < huge(0.0_dp)*1.0d-11)"
 !   since ecutsm = 0.0 always (check if that's true in this gw_sternheimer subroutine).
-implicit none
 
 real(dp), intent(in), optional :: lambda, omega
 
@@ -984,7 +970,6 @@ end subroutine set_precondition
 
 subroutine unset_precondition()
 
-implicit none
 ! *************************************************************************
 
 pcon = one
@@ -1016,8 +1001,6 @@ end subroutine unset_precondition
 
 subroutine precondition(psi_out,psi_in)
 
-implicit none
-
 real(dp), intent(out) :: psi_out(2,npw_g)
 real(dp), intent(in)  :: psi_in(2,npw_g)
 
@@ -1048,14 +1031,12 @@ end subroutine precondition
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
 subroutine precondition_cplx(psi_out,psi_in)
-
-implicit none
 
 complex(dpc), intent(out) :: psi_out(npw_g)
 complex(dpc), intent(in)  :: psi_in(npw_g)
@@ -1087,14 +1068,12 @@ end subroutine precondition_cplx
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
 subroutine sqrt_vc_k(psi_inout)
-
-implicit none
 
 !External variables
 real(dp), intent(inout) :: psi_inout(2,npw_k)
@@ -1131,14 +1110,12 @@ end subroutine sqrt_vc_k
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
 subroutine Hpsik(psi_out,psi_in,cte)
-
-implicit none
 
 !External variables
 real(dp), intent(inout) :: psi_out(2,npw_g)
@@ -1214,14 +1191,12 @@ end subroutine Hpsik
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
 subroutine Hpsikc(psi_out,psi_in,cte)
-
-implicit none
 
 !External variables
 complex(dpc), intent(out) :: psi_out(npw_g)
@@ -1268,7 +1243,6 @@ end subroutine Hpsikc
 !
 !subroutine pc_k(psi_inout,n,eig_e,above)
 !
-!implicit none
 !real(dp), intent(inout) :: psi_inout(2,npw_kb)
 !integer , intent(in), optional :: n
 !real(dp), intent(in), optional :: eig_e
@@ -1344,14 +1318,13 @@ end subroutine Hpsikc
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
 subroutine g_to_r(psi_out,psi_in)
 
-implicit none
 real(dp), intent(out) :: psi_out(2,n4,n5,n6)
 real(dp), intent(in)  :: psi_in(2,npw_g)
 integer :: option, cplex
@@ -1417,14 +1390,13 @@ end subroutine g_to_r
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
 subroutine gr_to_g(psig_out,psir_in,psig_in)
 
-implicit none
 real(dp), intent(in)  :: psir_in(2,n4,n5,n6)
 real(dp), intent(in), optional :: psig_in(2,npw_g)
 real(dp), intent(out) :: psig_out(2,npw_g)
@@ -1480,7 +1452,7 @@ end subroutine gr_to_g
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
@@ -1495,7 +1467,6 @@ subroutine kbkb_to_kb(psik_out,psik_in_1,psik_in_2)
 !
 !
 !----------------------------------------------------------------------------------------------------
-implicit none
 real(dp), intent(out) :: psik_out(2,npw_kb)
 real(dp), intent(inout)  :: psik_in_1(2,npw_kb), psik_in_2(2,npw_kb)
 
@@ -1538,7 +1509,7 @@ end subroutine kbkb_to_kb
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
@@ -1546,7 +1517,6 @@ end subroutine kbkb_to_kb
 subroutine build_vxc(vxc2,nfft2,nspden2)
 !Only transcribe the argument vxc2 in the module; the change from dg to sg is done in build_H (and stored in vxc), since the
 !arguments of fftpac are built in build_H.
-implicit none
 
 !We need the dimensions of vxc since they don't exist yet in the module; build_vxc being called before build_H.
 integer, intent(in) :: nfft2, nspden2
@@ -1578,17 +1548,15 @@ end subroutine build_vxc
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
 subroutine destroy_H
 
-implicit none
-
 call dtset_free(dtset)
-call destroy_hamiltonian(gs_hamk)
+call gs_hamk%free()
 
 call cryst%free()
 call kmesh_free(Kmesh)
@@ -1734,7 +1702,7 @@ end subroutine destroy_H
 !!      copy_hamiltonian,copy_mpi_enreg,crystal_init,crystal_print
 !!      distributevalencekernel,distributevalencewavefunctions,dtset_copy
 !!      fftpac,find_qmesh,gsph_init,hpsik,kmesh_init,kmesh_print
-!!      load_k_hamiltonian,make_gvec_kss,pc_k_valence_kernel,print_gsphere
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere
 !!      set_wf,vcoul_init,wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
@@ -1744,7 +1712,6 @@ subroutine build_H(dtset2,mpi_enreg2,cpopt2,cg2,gs_hamk2,kg_k2,kinpw2)
 !use m_bandfft_kpt
 use m_cgtools
 use m_wfutils
-implicit none
 
 !Arguments of gw_sternheimer, reveived as argument by build_H-------------------------
 type(dataset_type),  intent(in) :: dtset2
@@ -1949,7 +1916,7 @@ else
   ph3d_gather  => ph3d
   kinpw_gather => kinpw
 endif
-call load_k_hamiltonian(gs_hamk,kinpw_k=kinpw_gather,kg_k=kg_k_gather,ffnl_k=ffnl_gather,ph3d_k=ph3d_gather)
+call gs_hamk%load_k(kinpw_k=kinpw_gather,kg_k=kg_k_gather,ffnl_k=ffnl_gather,ph3d_k=ph3d_gather)
 
 gbound = gs_hamk%gbound_k
 

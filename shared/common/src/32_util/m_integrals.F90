@@ -77,8 +77,6 @@ contains
 
 subroutine radsintr(funr,funq,mqgrid,mrgrid,qgrid,rgrid,yq1,yqn)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer , intent(in)  :: mqgrid,mrgrid

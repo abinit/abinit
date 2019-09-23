@@ -26,11 +26,11 @@
 module m_nonlop_ylm
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_abicore
  use m_errors
 
+ use defs_abitypes, only : MPI_type
  use m_geometry,    only : strconv
  use m_kg,          only : ph1d3d, mkkpg
  use m_pawcprj,     only : pawcprj_type
@@ -359,8 +359,6 @@ contains
 &                      mpi_enreg,natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,&
 &                      npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,phkxredin,phkxredout,ph1d,&
 &                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout,cprjin_left,qdir)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

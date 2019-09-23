@@ -177,11 +177,11 @@ be given in the next section.
 *Before starting, you might consider working in a different subdirectory as
 for the other tutorials. Why not Work_paral?*
 
-Copy the `files` file and the input file from the *\$ABI_TUTORIAL*
+Copy the `files` file and the input file from the *\$ABI_TESTS/tutorial*
 directory to your work directory. They are named *tbasepar_1.files* and *tbasepar_1.in*.
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work_paral
 cd Work_paral
 cp ../tbasepar_1.files .   # You will need to edit this file.
@@ -330,7 +330,7 @@ once in a while that all processors are alive.
 
 The parallelization over the spins (up, down) is done along with the one over
 the k-points, so it works exactly the same way. The files
-*tbasepar_2.in* and *tbasepar_2.files* in *\$ABI_TUTORIAL* treat a spin-polarized system
+*tbasepar_2.in* and *tbasepar_2.files* in *\$ABI_TESTS/tutorial* treat a spin-polarized system
 (distorted FCC Iron) with only one k-point in the Irreducible Brillouin Zone.
 This is quite unphysical, and has the sole purpose to show the spin
 parallelism with as few as two processors: the k-point parallelism has
