@@ -1212,6 +1212,28 @@
 #with_fallbacks="/opt/abinit-dev/fallbacks/gnu/4.9/mpi"
 
 # -------------------------------------------------------------------------- #
+# Build workflow                                                             #
+# -------------------------------------------------------------------------- #
+
+# Note: if you do not know what the following is about, just leave it unset.
+
+# Use external ABINIT Common (default is no)
+#
+#with_abinit_common="yes"
+
+# Fortran flags for ABINIT Common (default is unset)
+#
+#ABINIT_COMMON_FCFLAGS="-I/usr/local/include/abinit_common"
+
+# Link flags for ABINIT Common (default is unset)
+#
+#ABINIT_COMMON_LDFLAGS=""
+
+# Library flags for ABINIT Common (default is unset)
+#
+#ABINIT_COMMON_LIBS="-L${HOME}/abinit/lib -labinit_common"
+
+# -------------------------------------------------------------------------- #
 # Developer options                                                          #
 # -------------------------------------------------------------------------- #
 
