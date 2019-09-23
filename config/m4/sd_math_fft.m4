@@ -138,6 +138,8 @@ AC_DEFUN([SD_FFT_DETECT], [
         AC_MSG_ERROR([fftw3-mkl requires MKL for linear algebra])
       fi
       AC_MSG_NOTICE([overriding FFTW3 settings with those of linear algebra])
+      sd_fftw3_enable="yes"
+      sd_fftw3_init="mkl"
       sd_fftw3_cppflags="${sd_linalg_cppflags}"
       sd_fftw3_cflags="${sd_linalg_cflags}"
       sd_fftw3_fcflags="${sd_linalg_fcflags}"
