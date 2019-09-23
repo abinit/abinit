@@ -2603,9 +2603,9 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    ! Automatic grid generation over q-points and spins.
    !if (new%nsppol == 2 .and. mod(nprocs, 2) == 0) then
    !  spin_comm%nproc = 2
-   !  qpt_comm%nproc = nprocs / 2
+   !  new%qpt_comm%nproc = nprocs / 2
    !else
-   !  qpt_comm%nproc = nprocs
+   !  new%qpt_comm%nproc = nprocs
    !end if
 
    !
@@ -2621,15 +2621,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    if (new%my_npert == natom3 .and. nprocs > 1) then
      MSG_WARNING("The number of MPI procs should be divisible by 3*natom to reduce memory requirements!")
    end if
-
-   !do cnt=natom,2,-1
-   !  if (mod(nprocs, cnt) == 0 .and. mod(natom, cnt) == 0) then
-   !    new%pert_comm%nproc = cnt; new%my_npert = natom / cnt; exit
-   !  end if
-   !end do
-   !if (new%my_npert == natom .and. nprocs > 1) then
-   !  MSG_WARNING("The number of MPI procs should be divisible by natom to reduce memory requirements!")
-   !end if
 
    ! Define number of procs for q-points and bands. nprocs is divisible by pert_comm%nproc.
    if (new%imag_only) then

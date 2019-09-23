@@ -33,14 +33,14 @@ module m_chkinp
  use m_xmpi
  use m_xomp
  use libxc_functionals
+ use m_dtset
 
- use defs_datatypes, only : pspheader_type
+ use defs_datatypes,   only : pspheader_type
  use defs_abitypes,    only : MPI_type
  use m_numeric_tools,  only : iseven
  use m_symtk,          only : chkgrp, chkorthsy
  use m_geometry,       only : metric
  use m_fftcore,        only : fftalg_has_mpi
- use m_dtset,          only : dtset_copy, dtset_free, dataset_type
  use m_exit,           only : get_timelimit
  use m_parser,         only : chkdpr, chkint, chkint_eq, chkint_ge, chkint_le, chkint_ne
 
@@ -146,7 +146,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call wrtout(std_out,msg,'COLL')
 
    ! Will test directly on the dataset "dt"
-   call dtset_copy(dt, dtsets(idtset))
+   dt = dtsets(idtset)%copy()
 
    ! Copy or initialize locally a few input dataset values
    fftalg   =dt%ngfft(7)
@@ -3668,7 +3668,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  ** Here ends the checking section **************************************
 
-   call dtset_free(dt)
+   call dt%free()
    ierr_dtset(idtset)=ierr
 
  end do !  End do loop on idtset

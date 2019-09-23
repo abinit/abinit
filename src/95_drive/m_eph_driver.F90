@@ -616,7 +616,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ! Relase nkpt-based arrays in dtset to decreased memory requirement if dense sampling.
  ! EPH routines should not access them after this point.
- if (dtset%eph_task /= 6) call dtset_free_nkpt_arrays(dtset)
+ if (dtset%eph_task /= 6) call dtset%free_nkpt_arrays()
 
  select case (dtset%eph_task)
  case (0)
@@ -691,13 +691,13 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Deallocation for PAW.
  if (dtset%usepaw==1) then
    !call pawrhoij_free(pawrhoij)
-   !ABI_DT_FREE(pawrhoij)
+   !ABI_FREE(pawrhoij)
    !call pawfgrtab_free(pawfgrtab)
-   !ABI_DT_FREE(pawfgrtab)
+   !ABI_FREE(pawfgrtab)
    !call paw_ij_free(paw_ij)
-   !ABI_DT_FREE(paw_ij)
+   !ABI_FREE(paw_ij)
    !call paw_an_free(paw_an)
-   !ABI_DT_FREE(paw_an)
+   !ABI_FREE(paw_an)
  end if
 
  DBG_EXIT('COLL')
