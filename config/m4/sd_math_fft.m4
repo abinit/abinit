@@ -30,7 +30,7 @@ AC_DEFUN([SD_FFT_INIT], [
   sd_fft_status="optional"
 
   # Check that proposed choices are valid
-  sd_fft_valid_choices="dfti dfti-threads fftw3 fftw3-mpi fftw3-threads pfft"
+  sd_fft_valid_choices="dfti dfti-threads fftw3 fftw3-mkl fftw3-mpi fftw3-threads pfft"
   if test -z "${sd_fft_choices}"; then
     sd_fft_choices="none ${sd_fft_valid_choices}"
   else
