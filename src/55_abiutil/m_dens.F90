@@ -95,6 +95,10 @@ MODULE m_dens
   real(dp) :: rprimd(3,3)
   ! Direct lattice vectors, Bohr units.
 
+  real(dp),allocatable :: chargeat(:)
+  ! chargeat(natom)
+  ! Target charge for each atom. Not always used, it depends on the value of constraint_kind
+
   real(dp),allocatable :: intgf2(:)
   ! intgf2(natom)
   ! Integral of the square of the spherical integrating function, for each atom. 
@@ -108,6 +112,10 @@ MODULE m_dens
   real(dp),allocatable :: spinat(:,:)
   ! spinat(3,natom)
   ! Target magnetization for each atom. Possibly only the direction or the magnitude, depending on constraint_kind
+
+  real(dp),allocatable :: ziontypat(:)
+  ! ziontypat(ntypat)
+  ! Ionic charge, per type of atom
  
  end type constrained_dft_t
 
