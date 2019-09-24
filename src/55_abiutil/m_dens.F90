@@ -684,6 +684,7 @@ end subroutine add_atomic_fcts
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(in) :: spinat(3,natom)
  real(dp),intent(in) :: xred(3,natom)
+ real(dp),intent(in) :: ziontypat(ntypat)
 
 !Local variables-------------------------------
 !scalars
@@ -774,7 +775,7 @@ end subroutine constrained_dft_ini
  ABI_SFREE(constrained_dft%ratsph)
  ABI_SFREE(constrained_dft%spinat)
  ABI_SFREE(constrained_dft%typat)
- ABI_SFREE(constrained_dft%ziontypat
+ ABI_SFREE(constrained_dft%ziontypat)
 
 end subroutine constrained_dft_free
 !!***
@@ -839,9 +840,9 @@ end subroutine constrained_dft_free
 
 !Local variables-------------------------------
 !scalars
- integer :: iatom,natom,nfftf,nspden,ntypat
+ integer :: conkind,iatom,natom,nfftf,nspden,ntypat
  integer :: cplex1=1
- real(dp) :: conkind,intgden_norm,intgden_proj,norm
+ real(dp) :: intgden_norm,intgden_proj,norm
 !arrays
  real(dp) :: corr_denmag(4)
  real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
@@ -941,14 +942,14 @@ end subroutine constrained_dft_free
    !Convert from density/magnetization constraint residual to actual coefficient that will multiply the spherical function for the potential
    if(nspden==1)then
      !From charge to potential
-     coeffs_constr_dft(1:2,iatom)=coeff_denmag(1)
+     coeffs_constr_dft(1:2,iatom)=corr_denmag(1)
    else if(nspden==2 .or. nspden==4)then
      !From charge and magnetization to potential 
-     coeffs_constr_dft(1,iatom)=coeff_denmag(1)+coeff_denmag(2)
-     coeffs_constr_dft(2,iatom)=coeff_denmag(1)-coeff_denmag(2)
+     coeffs_constr_dft(1,iatom)=corr_denmag(1)+corr_denmag(2)
+     coeffs_constr_dft(2,iatom)=corr_denmag(1)-corr_denmag(2)
      if(nspden==4)then
-       coeffs_constr_dft(3,iatom)= coeff_denmag(3)
-       coeffs_constr_dft(4,iatom)=-coeff_denmag(4)
+       coeffs_constr_dft(3,iatom)= corr_denmag(3)
+       coeffs_constr_dft(4,iatom)=-corr_denmag(4)
      endif
    endif
 

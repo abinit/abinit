@@ -1041,7 +1041,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer,allocatable :: iatfix(:,:),intarr(:),istwfk(:),nband(:),typat(:)
  real(dp) :: acell(3),rprim(3,3)
 !real(dp) :: field(3)
- real(dp),allocatable :: amu(:),chargat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:),nucdipmom(:,:)
+ real(dp),allocatable :: amu(:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:),nucdipmom(:,:)
  real(dp),allocatable :: ratsph(:),reaalloc(:),spinat(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
  character(len=32) :: cond_string(4)
@@ -1385,7 +1385,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   string,dtset%supercell_latt,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,&
 &   typat,vel,vel_cell,xred,znucl)
 
-   dtset%chrgat(1:3,1:natom)=chrgat(1:3,1:natom)
+   dtset%chrgat(1:natom)=chrgat(1:natom)
    dtset%iatfix(1:3,1:natom)=iatfix(1:3,1:natom)
    dtset%nucdipmom(1:3,1:natom)=nucdipmom(1:3,1:natom)
    dtset%spinat(1:3,1:natom)=spinat(1:3,1:natom)
@@ -2635,7 +2635,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%wvl_crmult  = 6._dp
    dtsets(idtset)%wvl_frmult  = 10._dp
    dtsets(idtset)%wvl_hgrid   = 0.5_dp
-   dtsets(idtset)%wvl_ngauss  =(1,100)
+   dtsets(idtset)%wvl_ngauss  =(/1,100/)
    dtsets(idtset)%wvl_nprccg  = 10
    dtsets(idtset)%w90iniprj   = 1
    dtsets(idtset)%w90prtunk   = 0
@@ -2660,7 +2660,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%bs_calctype=1
    dtsets(idtset)%bs_coupling=0
 
-   dtsets(idtset)%bs_haydock_tol=(0.02_dp,zero)
+   dtsets(idtset)%bs_haydock_tol=(/0.02_dp,zero/)
 
    dtsets(idtset)%bs_loband=0
 !  Take big absolute value numbers, but the the biggest ones, otherwise overflow can happen
