@@ -1572,13 +1572,12 @@ iteration. See [[cite:Henkelman2000a]] for additional details of this method.
 
 Variable(
     abivarname="constraint_kind",
-    varset="rlx",
+    varset="gstate",
     vartype="integer",
-    topics=['TransPath_expert'],
-    dimensions="scalar",
-    defaultval=7,
-    mnemonics="Climbing-Image Nudged Elastic Band: STARTing iteration",
-    requires="[[imgmov]] == 5 and [[neb_algo]] == 2",
+    topics=['ConstrainedDFT_basic'],
+    dimensions=['[[ntypat]]'],
+    defaultval=0,
+    mnemonics="CONSTRAINT KIND in constrained DFT",
     text=r"""
 Gives the index of the first CI-NEB iteration.
 The CI-NEB method constitutes a small modification to the NEB method allowing
@@ -1961,19 +1960,22 @@ When [[delayperm]] is zero, there are no permutation trials.
 ),
 
 Variable(
-    abivarname="chargeat",
+    abivarname="chrgat",
     varset="gstate",
     vartype="real",
-    topics=['MagMom_useful'],
+    topics=['ConstrainedDFT_useful'],
     dimensions=ValueWithConditions({'[[natrd]]<[[natom]]': '[ [[natrd]] ]', 'defaultval': '[ [[natom]] ]'}),
     defaultval=0.0,
     mnemonics="CHARGE of the AToms",
     text=r"""
 Gives the target integrated charge in case of constrained DFT calculations, see [[constraint_kind]].
 Given in atomic unit of charge (=minus the charge of the electron).
-Note that this number is the net charge on the atom: one subtract from the 
+Note that this number is the net positive charge inside the sphere : one subtract from the 
 nucleus charge [[ziontypat]] the integrated valence electron density in a sphere defined by [[ratsph]]. 
-The latter has indeed a negative value.
+The latter has indeed a negative value. Note that if the sphere radius [[ratsph]] is not sufficiently large,
+the amount of electrons will be smaller than expected based on chemical intuition. This means that there
+is in this case a bias toward too positive integrated charges. By contrast, if the sphere radius is too large,
+the spheres will overlap, and the electrons in the interatomic region will be double counted.
 """,
 ),
 
@@ -16374,7 +16376,7 @@ Variable(
     abivarname="spinat",
     varset="gstate",
     vartype="real",
-    topics=['spinpolarisation_basic', 'crystal_useful', 'MagMom_useful'],
+    topics=['spinpolarisation_basic', 'crystal_useful', 'MagMom_useful', 'ConstrainedDFT_useful'],
     dimensions=ValueWithConditions({'[[natrd]]<[[natom]]': '[3, [[natrd]] ]', 'defaultval': '[3, [[natom]] ]'}),
     defaultval=0.0,
     mnemonics="SPIN for AToms",

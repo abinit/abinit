@@ -434,7 +434,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  constraint_kind
    do itypat=1,dt%ntypat
      cond_string(1)='itypat';cond_values(1)=itypat
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),3,(/0,1,2/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),8,(/0,1,2,3,10,11,12,13/),iout)
      !Only potential self-consistency is currently allowed with constrained_dft
      if (dt%iscf>10) then
        cond_string(2)='iscf';cond_values(2)=dt%iscf
