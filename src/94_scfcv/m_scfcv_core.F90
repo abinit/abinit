@@ -811,9 +811,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
 !Here initialize the datastructure constrained_dft, for constrained DFT calculations
  if(any(dtset%constraint_kind(:)/=0))then
-   call constrained_dft_ini(constrained_dft,dtset%constraint_kind,dtset%magcon_lambda,&
+   call constrained_dft_ini(dtset%chargat,constrained_dft,dtset%constraint_kind,dtset%magcon_lambda,&
 &    mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,dtset%ntypat,&
-&    dtset%ratsph,rprimd,dtset%spinat,dtset%typat,xred)
+&    dtset%ratsph,rprimd,dtset%spinat,dtset%typat,xred,dtset%ziontypat)
  endif
 
 !Here, allocate arrays for computation of susceptibility and dielectric matrix or for TDDFT

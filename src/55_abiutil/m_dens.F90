@@ -636,6 +636,7 @@ end subroutine add_atomic_fcts
 
 !!
 !! INPUTS
+!!  chrgat(natom) = target charge for each atom. Not always used, it depends on the value of constraint_kind
 !!  constraint_kinds(ntypat)=for each type of atom, 0=no constraint,
 !!    1=fix only the magnetization direction, following spinat direction,
 !!    2=fix the magnetization vector to be the spinat one,
@@ -653,6 +654,7 @@ end subroutine add_atomic_fcts
 !!  spinat(3,natom)=magnetic moments vectors, possible targets according to the value of constraint_kinds
 !!  typat(natom)=types of atoms
 !!  xred(3,natom)=reduced atomic positions
+!!  ziontypat(ntypat)=ionic charge, per type of atom
 !!
 !! OUTPUT
 !!  constrained_dft=datastructure that contain the needed information to enforce the density and magnetization constraints
@@ -664,8 +666,8 @@ end subroutine add_atomic_fcts
 !!
 !! SOURCE
 
- subroutine constrained_dft_ini(constrained_dft,constraint_kind,magcon_lambda,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,&
-& ratsph,rprimd,spinat,typat,xred)
+ subroutine constrained_dft_ini(chrgat,constrained_dft,constraint_kind,magcon_lambda,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,&
+& ratsph,rprimd,spinat,typat,xred,ziontypat)
 
 !Arguments ------------------------------------
 !scalars
@@ -677,6 +679,7 @@ end subroutine add_atomic_fcts
  integer,intent(in)  :: constraint_kind(ntypat)
  integer,intent(in)  :: ngfftf(18)
  integer,intent(in)  :: typat(natom)
+ real(dp),intent(in) :: chrgat(natom)
  real(dp),intent(in) :: ratsph(ntypat)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(in) :: spinat(3,natom)
@@ -713,17 +716,21 @@ end subroutine add_atomic_fcts
  constrained_dft%rprimd          =rprimd
  constrained_dft%ucvol           =ucvol
 
+ ABI_ALLOCATE(constrained_dft%chrgat,(natom))
  ABI_ALLOCATE(constrained_dft%constraint_kind,(ntypat))
  ABI_ALLOCATE(constrained_dft%intgf2,(natom))
  ABI_ALLOCATE(constrained_dft%ratsph,(ntypat))
  ABI_ALLOCATE(constrained_dft%spinat,(3,natom))
  ABI_ALLOCATE(constrained_dft%typat,(natom))
+ ABI_ALLOCATE(constrained_dft%ziontypat,(ntypat))
 
- constrained_dft%constraint_kind=constraint_kind
- constrained_dft%intgf2=intgf2
- constrained_dft%ratsph=ratsph
- constrained_dft%spinat=spinat
- constrained_dft%typat=typat
+ constrained_dft%chrgat           =chrgat
+ constrained_dft%constraint_kind  =constraint_kind
+ constrained_dft%intgf2           =intgf2
+ constrained_dft%ratsph           =ratsph
+ constrained_dft%spinat           =spinat
+ constrained_dft%typat            =typat
+ constrained_dft%ziontypat        =ziontypat
 
  ABI_DEALLOCATE(intgf2)
  ABI_DEALLOCATE(rhor_dum)
@@ -739,7 +746,6 @@ end subroutine constrained_dft_ini
 !! FUNCTION
 !! Free the constrained_dft datastructure.
 !! Mostly copying already available (dtset) information, but also computing intgf2
-
 !!
 !! INPUTS
 !!  constrained_dft=datastructure that contain the needed information to enforce the density and magnetization constraints
@@ -762,11 +768,13 @@ end subroutine constrained_dft_ini
 
 ! ***********************************************************************************************
 
+ ABI_SFREE(constrained_dft%chrgat)
  ABI_SFREE(constrained_dft%constraint_kind)
  ABI_SFREE(constrained_dft%intgf2)
  ABI_SFREE(constrained_dft%ratsph)
  ABI_SFREE(constrained_dft%spinat)
  ABI_SFREE(constrained_dft%typat)
+ ABI_SFREE(constrained_dft%ziontypat
 
 end subroutine constrained_dft_free
 !!***
@@ -779,11 +787,12 @@ end subroutine constrained_dft_free
 !! FUNCTION
 !! Recompute the residual to take into account the constraints, within constrained DFT.
 !! The kind of constraint is given by constraint_kind, and the target values are given by spinat, for the local atomic magnetization,
-!! and another future argument (possibly chrgat), for the local atomic charge.
+!! and chrgat minus the ioninc charge, for the local atomic charge.
 
 !!
 !! INPUTS
 !!  c_dft <type(constrained_dft_t)>=datastructure for the information related to constrained DFT
+!!   ! chrgat(natom) = target charge for each atom. Not always used, it depends on the value of constraint_kind
 !!   ! constraint_kind(ntypat)=for each type of atom, 0=no constraint, 
 !!   !  1=fix only the magnetization direction, following spinat direction, 
 !!   !  2=fix the magnetization vector to be the spinat one,
@@ -800,6 +809,7 @@ end subroutine constrained_dft_free
 !!   ! rprimd=lattice vectors (dimensioned)
 !!   ! spinat(3,natom)=magnetic moments vectors, possible targets according to the value of constraint_kind
 !!   ! typat(natom)=types of atoms
+!!   ! ziontypat(ntypat)= ionic charge, per type of atom
 !!  mpi_enreg=mpi structure with communicator info
 !!  rhor(nfft,nspden)=array for electron density in el./bohr**3. At output it will be constrained.
 !!  xred(3,natom)=reduced atomic positions
@@ -886,7 +896,8 @@ end subroutine constrained_dft_free
 
    if(conkind >=10)then
 
-!    coeffs_constr_dft(1,iatom)=intgden(1,iatom)-c_dft%chrgat(iatom)
+     !The charge constraint is determined by the target chrgat minus the charge of the ion.
+     coeffs_constr_dft(1,iatom)=intgden(1,iatom)-(c_dft%chrgat(iatom)-c_dft%ziontypat(c_dft%typat(iatom)))
 
    endif
 
