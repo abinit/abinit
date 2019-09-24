@@ -753,7 +753,7 @@ type, public :: dataset_type
  real(dp), allocatable :: amu_orig(:,:)     ! amu(ntypat,nimage)
  real(dp), allocatable :: atvshift(:,:,:)   ! atvshift(16,nsppol,natom)
  real(dp), allocatable :: cd_imfrqs(:)      ! cd_imfrqs(cd_customnimfrqs)
- real(dp), allocatable :: chargeat(:,:)     ! chargeat(natom)
+ real(dp), allocatable :: chargeat(:)       ! chargeat(natom)
  real(dp), allocatable :: chempot(:,:,:)    ! chempot(3,nzchempot,ntypat)
  real(dp), allocatable :: corecs(:)         ! corecs(ntypat)
  real(dp), allocatable :: densty(:,:)       ! densty(ntypat,4)
