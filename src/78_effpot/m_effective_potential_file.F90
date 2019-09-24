@@ -2622,7 +2622,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
     ! long-range coulomb interaction through Ewald summation
     call gtdyn9(ddb%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip,ifc%dyewq0,d2cart,crystal%gmet,&
 &     ddb%gprim,mpert,natom,ifc%nrpt,qphnrm(1),qphon(:,1),crystal%rmet,ddb%rprim,ifc%rpt,&
-&     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff,qdrp_cart,xmpi_comm_self)
+&     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff,qdrp_cart,ifc%ewald_option,xmpi_comm_self)
 
     ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
     call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,crystal%indsym,&

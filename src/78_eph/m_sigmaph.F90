@@ -657,7 +657,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: wqnu,nqnu,gkq2,gkq2_pf,eig0nk,eig0mk,eig0mkq,f_mkq
  real(dp) :: gdw2, gdw2_stern
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
- !real(dp),allocatable :: displ_cart_fine(:,:,:,:)
+ real(dp),allocatable :: displ_cart_fine(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gkq0_atm(:,:,:,:)
@@ -1630,7 +1630,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            !osc_npw = 1
            !osc_gvecq(:,1) = [0,0,0]
            ! Compute electron-phonon matrix elements for the Frohlich interaction
-           !ABI_MALLOC(displ_cart_fine, (2, 3, cryst%natom, natom3))
+           ABI_MALLOC(displ_cart_fine, (2, 3, cryst%natom, natom3))
            ABI_MALLOC(gkqg_fine, (osc_npw))
            ABI_MALLOC(osc_ks_bs, (osc_npw))
            gkq2_lr = zero
@@ -1645,7 +1645,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              ! TODO: Compute displ_cart for this q-point in the fine grid
              qpt_fine   = sigma%ephwg%bz(:,iq_bz_fine)
              phfrq_fine = sigma%ephwg%phfrq_ibz(iq_ibz_fine,:)
-             !call ifc%fourq(cryst, qpt_fine, phfrq_fine, displ_cart_fine, comm=sigma%pert_comm%value)
+             call ifc%fourq(cryst, qpt_fine, phfrq_fine, displ_cart_fine, comm=sigma%pert_comm%value)
              do imyp=1,my_npert
                nu = sigma%my_pinfo(3, imyp)
                gkqg_fine = get_frohlich(cryst,ifc,qpt_fine,nu,phfrq_fine,displ_cart,sigma%qdamp,osc_npw,osc_gvecq)
@@ -1680,6 +1680,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
            ABI_FREE(gkqg_fine)
            ABI_FREE(osc_ks_bs)
+           ABI_FREE(displ_cart_fine)
          end if
 
          if (sigma%calc_mrta) then
