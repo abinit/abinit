@@ -99,15 +99,14 @@ AC_DEFUN([SD_FFT_DETECT], [
         fi
         ;;
       fftw3-mkl)
-        # FIXME: linalg should be supported by Steredeg (abi_ -> sd_)
         sd_fftw3_enable="yes"
         sd_fftw3_init="mkl"
-        sd_fftw3_cppflags="${abi_linalg_cppflags}"
-        sd_fftw3_cflags="${abi_linalg_cflags}"
-        sd_fftw3_cxxflags="${abi_linalg_cxxflags}"
-        sd_fftw3_fcflags="${abi_linalg_fcflags}"
-        sd_fftw3_ldflags="${abi_linalg_ldflags}"
-        sd_fftw3_libs="${abi_linalg_libs}"
+        sd_fftw3_cppflags="${sd_linalg_cppflags}"
+        sd_fftw3_cflags="${sd_linalg_cflags}"
+        sd_fftw3_cxxflags="${sd_linalg_cxxflags}"
+        sd_fftw3_fcflags="${sd_linalg_fcflags}"
+        sd_fftw3_ldflags="${sd_linalg_ldflags}"
+        sd_fftw3_libs="${sd_linalg_libs}"
         SD_FFTW3_DETECT
         if test "${sd_fftw3_ok}" = "yes"; then
           sd_fft_ok="yes"
@@ -326,12 +325,12 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
   fi
 
   # Prepend FFTW3-in-MKL if MKL is present and FFTW3 is not set
-  if test "${abi_linalg_flavor}" = "mkl" -a "${sd_fftw3_enable}" = "no"; then
+  if test "${sd_linalg_flavor}" = "mkl" -a "${sd_fftw3_enable}" = "no"; then
     sd_fft_selected_flavors="fftw3-mkl ${sd_fft_selected_flavors}"
   fi
 
   # Prepend DFTI if linear algebra is MKL
-  if test "${abi_linalg_flavor}" = "mkl"; then
+  if test "${sd_linalg_flavor}" = "mkl"; then
     sd_fft_selected_flavors="dfti ${sd_fft_selected_flavors}"
   fi
 
@@ -350,12 +349,12 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
 # FIXME: linear algebra should be managed by Steredeg
 AC_DEFUN([_SD_DFTI_DETECT], [
   # Init
-  sd_dfti_cppflags="${abi_linalg_}"
-  sd_dfti_cflags="${abi_linalg_}"
-  sd_dfti_cxxflags="${abi_linalg_}"
-  sd_dfti_fcflags="${abi_linalg_}"
-  sd_dfti_ldflags="${abi_linalg_}"
-  sd_dfti_libs="${abi_linalg_}"
+  sd_dfti_cppflags="${sd_linalg_cppflags}"
+  sd_dfti_cflags="${sd_linalg_cflags}"
+  sd_dfti_cxxflags="${sd_linalg_cxxflags}"
+  sd_dfti_fcflags="${sd_linalg_fcflags}"
+  sd_dfti_ldflags="${sd_linalg_ldflags}"
+  sd_dfti_libs="${sd_linalg_libs}"
   sd_dfti_enable="yes"
   sd_dfti_init="mkl"
   sd_dfti_ok="unknown"
