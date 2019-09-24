@@ -478,6 +478,15 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%chneut
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chneut','INT',0)
 
+!chrgat
+ narr=mxvals%natom              ! default size for all datasets
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
+   narrm(idtset)=dtsets(idtset)%natom
+   if(idtset==0)narrm(idtset)=mxvals%natom
+   if (narrm(idtset)>0) dprarr(1:narrm(idtset),idtset)=dtsets(idtset)%chrgat(1:narrm(idtset))
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'chrgat','DPR',multivals%natom)
+
  intarr(1,:)=dtsets(:)%cineb_start
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'cineb_start','INT',0)
 

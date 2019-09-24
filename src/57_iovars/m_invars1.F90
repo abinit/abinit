@@ -500,6 +500,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    ABI_ALLOCATE(dtsets(idtset)%acell_orig,(3,mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%algalch,(mxntypat))
    ABI_ALLOCATE(dtsets(idtset)%amu_orig,(mxntypat,mxnimage))
+   ABI_ALLOCATE(dtsets(idtset)%chrgat,(mxnatom))
    ABI_ALLOCATE(dtsets(idtset)%constraint_kind,(mxntypat))
    ABI_ALLOCATE(dtsets(idtset)%corecs,(mxntypat))
    ABI_ALLOCATE(dtsets(idtset)%densty,(mxntypat,4))
@@ -827,6 +828,7 @@ subroutine indefo1(dtset)
 !C
  dtset%cd_customnimfrqs=0
  dtset%chkprim=1
+ dtset%chrgat(:)=zero
  dtset%constraint_kind(:)=0
 !D
  dtset%densty(:,:)=zero
@@ -974,7 +976,7 @@ end subroutine indefo1
 !!   initialized, while some others will still be initialized later.
 !!   The list of records of dtset initialized in the present routine is:
 !!
-!!       acell_orig,densty,iatfix,kptopt,kptrlatt,
+!!       acell_orig,chrgat,densty,iatfix,kptopt,kptrlatt,
 !!       mkmem,mkqmem,mk1mem,natsph,natvshift,nconeq,nkpt,nkptgw,nkpthf,
 !!       nqptdm,nshiftk,nucdipmom,nzchempot,optdriver,
 !!       rprim_orig,rprimd_orig,shiftk,
@@ -1039,7 +1041,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer,allocatable :: iatfix(:,:),intarr(:),istwfk(:),nband(:),typat(:)
  real(dp) :: acell(3),rprim(3,3)
 !real(dp) :: field(3)
- real(dp),allocatable :: amu(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:),nucdipmom(:,:)
+ real(dp),allocatable :: amu(:),chargat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:),nucdipmom(:,:)
  real(dp),allocatable :: ratsph(:),reaalloc(:),spinat(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
  character(len=32) :: cond_string(4)
@@ -1200,7 +1202,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !---------------------------------------------------------------------------
 
 ! Here, set up quantities that are related to geometrical description of the system (acell,rprim,xred), as well as
-! initial velocity(vel), and spin of atoms (spinat), nuclear dipole moments of atoms (nucdipmom),
+! initial velocity(vel), charge and spin of atoms (chrgat,spinat), nuclear dipole moments of atoms (nucdipmom),
 ! the symmetries (symrel,symafm, and tnons) and the list of fixed atoms (iatfix,iatfixx,iatfixy,iatfixz).
 ! Arrays have already been dimensioned thanks to the knowledge of msym and mx%natom
 
@@ -1363,11 +1365,13 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    vel=dtset%vel_orig(1:3,1:natom,iimage)
    vel_cell=dtset%vel_cell_orig(1:3,1:3,iimage)
    xred=dtset%xred_orig(1:3,1:natom,iimage)
+   ABI_ALLOCATE(chrgat,(natom))
    ABI_ALLOCATE(iatfix,(3,natom))
    ABI_ALLOCATE(nucdipmom,(3,natom))
    ABI_ALLOCATE(spinat,(3,natom))
    ABI_ALLOCATE(typat,(natom))
    ABI_ALLOCATE(znucl,(dtset%npsp))
+   chrgat(1:natom)=dtset%chrgat(1:natom)
    nucdipmom(1:3,1:natom)=dtset%nucdipmom(1:3,1:natom)
    spinat(1:3,1:natom)=dtset%spinat(1:3,1:natom)
    znucl(1:dtset%npsp)=dtset%znucl(1:dtset%npsp)
@@ -1381,10 +1385,12 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   string,dtset%supercell_latt,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,&
 &   typat,vel,vel_cell,xred,znucl)
 
+   dtset%chrgat(1:3,1:natom)=chrgat(1:3,1:natom)
    dtset%iatfix(1:3,1:natom)=iatfix(1:3,1:natom)
    dtset%nucdipmom(1:3,1:natom)=nucdipmom(1:3,1:natom)
    dtset%spinat(1:3,1:natom)=spinat(1:3,1:natom)
    dtset%typat(1:natom)=typat(1:natom)
+   ABI_DEALLOCATE(chrgat)
    ABI_DEALLOCATE(iatfix)
    ABI_DEALLOCATE(nucdipmom)
    ABI_DEALLOCATE(spinat)
