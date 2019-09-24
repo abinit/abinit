@@ -843,6 +843,7 @@ end subroutine constrained_dft_free
  integer :: cplex1=1
  real(dp) :: conkind,intgden_norm,intgden_proj,norm
 !arrays
+ real(dp) :: corr_denmag(4)
  real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
  real(dp), allocatable :: intgden(:,:) ! nspden,natom
  real(dp), allocatable :: intgres(:,:) ! nspden,natom
@@ -865,54 +866,47 @@ end subroutine constrained_dft_free
  call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
 &  c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgres)
 
+ ABI_ALLOCATE(coeffs_constr_dft,(nspden,natom))
+ coeffs_constr_dft=zero
+
 !The proper combination of intgden and intgres is stored in intgden: it is an effective charge/magnetization, to be compared to the target one.
  do iatom=1,natom
 
    !The total charge, conjugate to the average potential
    intgden(1,iatom)=c_dft%magcon_lambda * intgden(1,iatom) + half*(intgres(1,iatom)+intgres(2,iatom))/c_dft%intgf2(iatom)
-
    if(nspden==2)then
-
      !The magnetization along z
      intgden(2,iatom)=c_dft%magcon_lambda * (intgden(2,iatom)-half*intgden(1,iatom)) + (intgres(1,iatom)-intgres(2,iatom))/c_dft%intgf2(iatom)
-
    else if(nspden==4)then
-
      !The magnetization along z
      intgden(2,iatom)=c_dft%magcon_lambda * intgden(2,iatom) + (intgres(1,iatom)-intgres(2,iatom))/c_dft%intgf2(iatom)
      intgden(3,iatom)=c_dft%magcon_lambda * intgden(3,iatom) + intgres(3,iatom) / c_dft%intgf2(iatom)
      intgden(4,iatom)=c_dft%magcon_lambda * intgden(4,iatom) - intgres(4,iatom) / c_dft%intgf2(iatom)
-
    endif
- enddo
 
- ABI_ALLOCATE(coeffs_constr_dft,(nspden,natom))
- coeffs_constr_dft=zero
-
-!Loop over atoms, to obtain the charge/magnetization correction.
- do iatom=1,natom
-
+   !Comparison with the target value, and computation of the correction in terms of density and magnetization errors.
    conkind=c_dft%constraint_kind(c_dft%typat(iatom))
+   corr_denmag(:)=zero
 
    if(conkind >=10)then
 
      !The charge constraint is determined by the target chrgat minus the charge of the ion.
-     coeffs_constr_dft(1,iatom)=intgden(1,iatom)-(c_dft%chrgat(iatom)-c_dft%ziontypat(c_dft%typat(iatom)))
+     corr_denmag(1)=intgden(1,iatom)-(c_dft%chrgat(iatom)-c_dft%ziontypat(c_dft%typat(iatom)))
 
    endif
 
-!HERE
+   if( mod(conkind,10)==1 .and. nspden>1)then
 
-   if(conkind==1 .and. nspden>1)then
+     !Fix the different components of the magnetization vector
+     corr_denmag(2:nspden)=intgden(2:nspden,iatom)-c_dft%spinat(2:nspden,iatom)
 
-     coeffs_constr_dft(2:nspden,iatom)=intgden(2:nspden,iatom)-c_dft%spinat(2:nspden,iatom)
-
-   else if( (conkind==2 .or. conkind==3) .and. nspden>1)then
+   else if( ( mod(conkind,10)==2 .or. mod(conkind,10)==3) .and. nspden>1)then
 
      norm = sqrt(sum(c_dft%spinat(:,iatom)**2))
      if (norm > tol10) then
 
-       if( conkind==2 )then
+       if( mod(conkind,10)==2 )then
+         !Fix the direction of the magnetization vector
          if(nspden==4)then
            !Fix the direction
            spinat_normed(:) = c_dft%spinat(:,iatom) / norm
@@ -926,21 +920,39 @@ end subroutine constrained_dft_free
            !The direction must be correct, collinear, so no change.
            coeffs_constr_dft(2,iatom)=zero
          endif
-       else if( conkind==3 )then
+
+       else if( mod(conkind,10)==3 )then
+
+         !Fix the amplitude of the magnetization vector
          intgden_norm = sqrt(sum(intgden(2:nspden,iatom)**2))
          coeffs_constr_dft(2:nspden,iatom)=(one-norm/intgden_norm)*intgden(2:nspden,iatom)
+
        endif
 
      else 
+
        !In this case, we set the atomic magnetization to zero.
        coeffs_constr_dft(2:nspden,iatom)=intgden(2:nspden,iatom)
+
      endif
        
    end if
 
- enddo ! iatom
+   !Convert from density/magnetization constraint residual to actual coefficient that will multiply the spherical function for the potential
+   if(nspden==1)then
+     !From charge to potential
+     coeffs_constr_dft(1:2,iatom)=coeff_denmag(1)
+   else if(nspden==2 .or. nspden==4)then
+     !From charge and magnetization to potential 
+     coeffs_constr_dft(1,iatom)=coeff_denmag(1)+coeff_denmag(2)
+     coeffs_constr_dft(2,iatom)=coeff_denmag(1)-coeff_denmag(2)
+     if(nspden==4)then
+       coeffs_constr_dft(3,iatom)= coeff_denmag(3)
+       coeffs_constr_dft(4,iatom)=-coeff_denmag(4)
+     endif
+   endif
 
-!THERE IS LIKELY A MODIFICATION TO BE DONE IN ORDER TO TREAT PROPERLY THE DENSITY VS POTENTIAL UPDATE ...
+ enddo
 
 !Now compute the new residual
  call add_atomic_fcts(natom,nspden,c_dft%rprimd,mpi_enreg,nfftf,c_dft%ngfftf,ntypat,&
