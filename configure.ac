@@ -809,6 +809,48 @@ AM_CONDITIONAL([DO_BUILD_67_TRIQS_EXT],
 # Wannier90 library support
 SD_WANNIER90_DETECT
 
+# ---------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+
+#
+# Build workflow
+#
+
+ABI_MSG_SECTION([Build workflow])
+
+# Initialize the low-level routines of ABINIT as an external component
+SD_ABINIT_COMMON_INIT([optional skip])
+
+SD_ABINIT_COMMON_DETECT
+
+                       # ------------------------------ #
+
+AC_MSG_CHECKING([how to build the components of ABINIT])
+abi_build_steps=""
+if test "${sd_abinit_common_ok}" = "yes"; then
+  test "${abi_build_steps}" = "" || abi_build_steps="${abi_build_steps}+"
+  abi_build_steps="${abi_build_steps}common"
+fi
+if test "${sd_libpaw_ok}" = "yes"; then
+  test "${abi_build_steps}" = "" || abi_build_steps="${abi_build_steps}+"
+  abi_build_steps="${abi_build_steps}libpaw"
+fi
+if test "${abi_build_steps}" = ""; then
+  abi_build_steps="monolith"
+else
+  abi_build_steps="${abi_build_steps}+core"
+fi
+AC_MSG_RESULT([${abi_build_steps}])
+
+# Allow the separate build of ABINIT Common
+AM_CONDITIONAL([DO_BUILD_SHARED_COMMON],
+  [test "{sd_abinit_common_ok}" != "yes"])
+
+# Warn the user if support for wavelets is ill-configured
+if test "${abi_build_steps}" = "monolith" -a "${abi_bigdft_enable}" = "yes"; then
+  AC_MSG_WARN([BigDFT will soon require the separate installation of ABINIT Common and LibPAW])
+fi
+
                        # ------------------------------ #
 
 # BigDFT library support (requires linear algebra and LibXC)
@@ -882,46 +924,6 @@ if test "${tmp_trig_errors}" != ""; then
                   (see messages above)
                   Please correct the options of configure to match your
                   actual situation])
-fi
-
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-#
-# Build workflow
-#
-
-ABI_MSG_SECTION([Build workflow])
-
-# Initialize the low-level routines of ABINIT as an external component
-SD_ABINIT_COMMON_INIT([optional skip])
-
-SD_ABINIT_COMMON_DETECT
-
-AC_MSG_CHECKING([how to build the components of ABINIT])
-abi_build_steps=""
-if test "${sd_abinit_common_ok}" = "yes"; then
-  test "${abi_build_steps}" = "" || abi_build_steps="${abi_build_steps}+"
-  abi_build_steps="${abi_build_steps}common"
-fi
-if test "${sd_libpaw_ok}" = "yes"; then
-  test "${abi_build_steps}" = "" || abi_build_steps="${abi_build_steps}+"
-  abi_build_steps="${abi_build_steps}libpaw"
-fi
-if test "${abi_build_steps}" = ""; then
-  abi_build_steps="all-in-one"
-else
-  abi_build_steps="${abi_build_steps}+core"
-fi
-AC_MSG_RESULT([${abi_build_steps}])
-
-# Allow the separate build of ABINIT Common
-AM_CONDITIONAL([DO_BUILD_SHARED_COMMON],
-  [test "{sd_abinit_common_ok}" != "yes"])
-
-# Warn the user if support for wavelets is ill-configured
-if test "${abi_build_steps}" = "all-in-one" -a "${abi_bigdft_enable}" = "yes"; then
-  AC_MSG_WARN([BigDFT will soon require the separate installation of ABINIT Common and LibPAW])
 fi
 
 # ---------------------------------------------------------------------------- #
