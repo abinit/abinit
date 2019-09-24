@@ -20,76 +20,33 @@ AC_DEFUN([SD_FFT_INIT], [
   sd_fft_flavor=""
   sd_fft_init="unknown"
   sd_fft_ok="unknown"
+  sd_fft_selected_flavors=""
 
   # Set adjustable parameters
-  # FIXME: choices could be defined dynamically depending on which libraries
-  #        have been initialized
+  _SD_FFT_INIT_FLAVORS
+
   # FIXME: policy and status are hard-coded for now
-  sd_fft_choices="$1"
   sd_fft_policy="skip"
   sd_fft_status="optional"
-
-  # Check that proposed choices are valid
-  sd_fft_valid_choices="dfti dfti-threads fftw3 fftw3-mkl fftw3-mpi fftw3-threads pfft"
-  if test -z "${sd_fft_choices}"; then
-    sd_fft_choices="none ${sd_fft_valid_choices}"
-  else
-    for tmp_fft_flavor in ${sd_fft_choices}; do
-      tmp_fft_flavor_ok=`echo "${sd_fft_valid_choices}" | grep "${tmp_fft_flavor}"`
-      if test "${tmp_fft_flavor_ok}" = ""; then
-        AC_MSG_ERROR([unsupported default FFT choice: '${tmp_fft_flavor}'])
-      fi
-    done
-    unset tmp_fft_flavor
-    unset tmp_fft_flavor_ok
-  fi
-  sd_fft_flavor_def=`echo "${sd_fft_choices}" | ${AWK} '{print [$]1}'`
 
   # Set reasonable defaults if not provided
   test -z "${sd_fft_policy}" && sd_fft_policy="fail"
   test -z "${sd_fft_status}" && sd_fft_status="optional"
-  test -z "${sd_fft_enable_def}" && sd_fft_enable_def="no"
-  case "${sd_fft_status}" in
-    implicit|required)
-      sd_fft_enable_def="yes"
-      ;;
-  esac
-  sd_fft_enable="${sd_fft_enable_def}"
 
   # Declare configure option
-  sd_fft_help_choices=`echo "${sd_fft_choices}" | sed -e 's/[ ]*/, /g'`
   AC_ARG_WITH([fft-flavor],
     [AS_HELP_STRING([--with-fft-flavor],
       [FFT flavor to select])],
-    [ tmp_fft_flavor_ok=`echo "${sd_fft_choices}" | grep "${withval}"`
+    [ tmp_fft_flavor_ok=`echo "${sd_fft_selected_flavors}" | grep "${withval}"`
       if test "${tmp_fft_flavor_ok}" = ""; then
         AC_MSG_ERROR([invalid FFT flavor: '${withval}'])
       fi
       sd_fft_flavor="${withval}"
       sd_fft_enable="yes"
       sd_fft_init="kwd"
+      sd_fft_selected_flavors="${sd_fft_flavor}"
       unset tmp_fft_flavor_ok],
-    [ sd_fft_flavor="${sd_fft_flavor_def}"; sd_fft_init="def"])
-
-  # FIXME: linalg should be supported by Steredeg (abi_ -> sd_)
-  if test "${sd_fft_flavor}" = "fft3-mkl"; then
-    chk_linalg_is_mkl=`echo "${abi_linalg_flavor}" | grep "mkl"`
-    if test "${chk_linalg_is_mkl}" = ""; then
-      AC_MSG_ERROR([fftw3-mkl requires MKL for linear algebra])
-    fi
-    unset chk_linalg_is_mkl
-    if test "${sd_fftw3_init}" = "def" -o "${sd_fftw3_init}" = "yon"; then
-      AC_MSG_NOTICE([overriding FFTW3 settings with those of linear algebra])
-      sd_fftw3_enable="yes"
-      sd_fftw3_init="mkl"
-      sd_fftw3_cppflags="${abi_linalg_cppflags}"
-      sd_fftw3_cflags="${abi_linalg_cflags}"
-      sd_fftw3_cxxflags="${abi_linalg_cxxflags}"
-      sd_fftw3_fcflags="${abi_linalg_fcflags}"
-      sd_fftw3_ldflags="${abi_linalg_ldflags}"
-      sd_fftw3_libs="${abi_linalg_libs}"
-    fi
-  fi
+    [ sd_fft_enable="unknown"; sd_fft_flavor="unknown"; sd_fft_init="def"])
 
   # Make sure configuration is correct
   if test "${STEREDEG_BYPASS_CONSISTENCY}" != "yes"; then
@@ -119,63 +76,89 @@ AC_DEFUN([SD_FFT_INIT], [
 
 
 AC_DEFUN([SD_FFT_DETECT], [
-  AC_MSG_CHECKING([for the FFT flavor to use])
-  AC_MSG_RESULT([${sd_fft_flavor}])
-  case "${sd_fft_flavor}" in
-    dfti)
-      SD_DFTI_DETECT
-      if test "${sd_dfti_ok}" = "yes"; then
-        sd_fft_cppflags="${sd_dfti_cppflags}"
-        sd_fft_cflags="${sd_dfti_cflags}"
-        sd_fft_fcflags="${sd_dfti_fcflags}"
-        sd_fft_ldflags="${sd_dfti_ldflags}"
-        sd_fft_libs="${sd_dfti_libs}"
-      else
-        AC_MSG_ERROR([DFTI is not available
-                    Please adjust configure options to point to a working DFTI
-                    installation or change the requested FFT flavor through the
-                    --with-fft-flavor option.])
-      fi
-      ;;
-    fftw3|fftw3-mkl|fftw3-mpi|fftw3-threads)
-      SD_FFTW3_DETECT
-      if test "${sd_fftw3_ok}" = "yes"; then
-        if test "${sd_fft_flavor}" != "fftw3-mkl"; then
+  for sd_fft_flavor in ${sd_fft_selected_flavors}; do
+
+    AC_MSG_CHECKING([for the FFT flavor to try])
+    AC_MSG_RESULT([${sd_fft_flavor}])
+    case "${sd_fft_flavor}" in
+      dfti)
+        SD_DFTI_DETECT
+        if test "${sd_dfti_ok}" = "yes"; then
+          sd_fft_cppflags="${sd_dfti_cppflags}"
+          sd_fft_cflags="${sd_dfti_cflags}"
+          sd_fft_fcflags="${sd_dfti_fcflags}"
+          sd_fft_ldflags="${sd_dfti_ldflags}"
+          sd_fft_libs="${sd_dfti_libs}"
+          sd_fft_ok="yes"
+        fi
+        ;;
+      fftw3|fftw3-mpi|fftw3-threads)
+        SD_FFTW3_DETECT
+        if test "${sd_fftw3_ok}" = "yes"; then
           sd_fft_cppflags="${sd_fftw3_cppflags}"
           sd_fft_cflags="${sd_fftw3_cflags}"
           sd_fft_fcflags="${sd_fftw3_fcflags}"
           sd_fft_ldflags="${sd_fftw3_ldflags}"
           sd_fft_libs="${sd_fftw3_libs}"
+          sd_fft_ok="yes"
         fi
-      else
-        AC_MSG_ERROR([FFTW3 (flavor ${sd_fft_flavor}) is not available
-                    Please adjust configure options to point to a working FFTW3
-                    installation or change the requested FFT flavor through the
-                    --with-fft-flavor option.])
-      fi
-      ;;
-    pfft)
-      SD_PFFT_DETECT
-      if test "${sd_pfft_ok}" = "yes"; then
-        sd_fft_cppflags="${sd_pfft_cppflags}"
-        sd_fft_cflags="${sd_pfft_cflags}"
-        sd_fft_fcflags="${sd_pfft_fcflags}"
-        sd_fft_ldflags="${sd_pfft_ldflags}"
-        sd_fft_libs="${sd_pfft_libs}"
-      else
-        AC_MSG_ERROR([PFFT is not available
-                    Please adjust configure options to point to a working PFFT
-                    installation or change the requested FFT flavor through the
-                    --with-fft-flavor option.])
-      fi
-      ;;
-    *)
-      if test "${sd_fft_flavor}" != "none"; then
+        ;;
+      fftw3-mkl)
+        # FIXME: linalg should be supported by Steredeg (abi_ -> sd_)
+        sd_fftw3_enable="yes"
+        sd_fftw3_init="mkl"
+        sd_fftw3_cppflags="${abi_linalg_cppflags}"
+        sd_fftw3_cflags="${abi_linalg_cflags}"
+        sd_fftw3_cxxflags="${abi_linalg_cxxflags}"
+        sd_fftw3_fcflags="${abi_linalg_fcflags}"
+        sd_fftw3_ldflags="${abi_linalg_ldflags}"
+        sd_fftw3_libs="${abi_linalg_libs}"
+        SD_FFTW3_DETECT
+        if test "${sd_fftw3_ok}" = "yes"; then
+          sd_fft_ok="yes"
+        fi
+        sd_fftw3_cppflags=""
+        sd_fftw3_cflags=""
+        sd_fftw3_cxxflags=""
+        sd_fftw3_fcflags=""
+        sd_fftw3_ldflags=""
+        sd_fftw3_libs=""
+        ;;
+      goedecker)
+        AC_MSG_NOTICE([selecting the internal Goedecker FFT implementation])
+        sd_fft_ok="yes"
+        ;;
+      pfft)
+        SD_PFFT_DETECT
+        if test "${sd_pfft_ok}" = "yes"; then
+          sd_fft_cppflags="${sd_pfft_cppflags}"
+          sd_fft_cflags="${sd_pfft_cflags}"
+          sd_fft_fcflags="${sd_pfft_fcflags}"
+          sd_fft_ldflags="${sd_pfft_ldflags}"
+          sd_fft_libs="${sd_pfft_libs}"
+          sd_fft_ok="yes"
+        fi
+        ;;
+      *)
         AC_MSG_ERROR([unsupported FFT flavor: '${sd_fft_flavor}'])
-      fi
-      ;;
-  esac
-  sd_fft_ok="yes"
+        ;;
+    esac
+
+    test "${sd_fft_ok}" = "yes" && break
+
+  done
+
+  # Check that a working FFT implementation has been found
+  if test "${sd_fft_ok}" = "yes"; then
+    sd_fft_enable="yes"
+    AC_MSG_CHECKING([for the actual FFT flavor to use])
+    AC_MSG_RESULT([${sd_fft_flavor}])
+  else
+    AC_MSG_ERROR([invalid FFT configuration
+                  Please adjust configure options to point to a working FFT
+                  installation or change the requested FFT flavor through the
+                  --with-fft-flavor option.])
+  fi
 
   # FIXME: hard-coded FFTW3 options
   case "${sd_fft_flavor}" in
@@ -322,3 +305,42 @@ AC_DEFUN([_SD_FFT_DUMP_CONFIG], [
   AC_MSG_CHECKING([for FFT library flags])
   AC_MSG_RESULT([${sd_fft_libs}])
 ]) # _SD_FFT_DUMP_CONFIG
+
+
+# FIXME: compiler vendors should be managed by Steredeg
+# FIXME: linear algebra should be managed by Steredeg
+AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
+  AC_MSG_CHECKING([which FFT flavors to enable])
+
+  # Start from the internal implementation
+  sd_fft_selected_flavors="goedecker"
+
+  # Prepend PFFT if available
+  if test "${sd_pfft_init}" != ""; then
+    if test "${sd_mpi_ok}" = "yes"; then
+      sd_fft_selected_flavors="pfft ${sd_fft_selected_flavors}"
+    fi
+  fi
+
+  # Prepend FFTW3 if available
+  if test "${sd_fftw3_init}" != ""; then
+    sd_fft_selected_flavors="fftw3 fftw3-threads ${sd_fft_selected_flavors}"
+    if test "${sd_mpi_ok}" = "yes"; then
+      sd_fft_selected_flavors="fftw3-mpi ${sd_fft_selected_flavors}"
+    fi
+  fi
+
+  # Prepend FFTW3-in-MKL if MKL is present and FFTW3 is not set
+  if test "${abi_linalg_flavor}" = "mkl" -a "${sd_fftw3_enable}" = "no"; then
+    sd_fft_selected_flavors="fftw3-mkl ${sd_fft_selected_flavors}"
+  fi
+
+  # Prepend DFTI if linear algebra is MKL
+  if test "${abi_linalg_flavor}" = "mkl"; then
+    if test "${sd_dfti_init}" != ""; then
+      sd_fft_selected_flavors="dfti dfti-threads ${sd_fft_selected_flavors}"
+    fi
+  fi
+
+  AC_MSG_RESULT([${sd_fft_selected_flavors}])
+]) # _SD_FFT_INIT_FLAVORS
