@@ -82,13 +82,8 @@ AC_DEFUN([SD_FFT_DETECT], [
     AC_MSG_RESULT([${sd_fft_flavor}])
     case "${sd_fft_flavor}" in
       dfti)
-        SD_DFTI_DETECT
+        _SD_DFTI_DETECT
         if test "${sd_dfti_ok}" = "yes"; then
-          sd_fft_cppflags="${sd_dfti_cppflags}"
-          sd_fft_cflags="${sd_dfti_cflags}"
-          sd_fft_fcflags="${sd_dfti_fcflags}"
-          sd_fft_ldflags="${sd_dfti_ldflags}"
-          sd_fft_libs="${sd_dfti_libs}"
           sd_fft_ok="yes"
         fi
         ;;
@@ -316,14 +311,14 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
   sd_fft_selected_flavors="goedecker"
 
   # Prepend PFFT if available
-  if test "${sd_pfft_init}" != ""; then
+  if test "${sd_pfft_init}" != "" -a "${sd_pfft_enable}" != "no"; then
     if test "${sd_mpi_ok}" = "yes"; then
       sd_fft_selected_flavors="pfft ${sd_fft_selected_flavors}"
     fi
   fi
 
   # Prepend FFTW3 if available
-  if test "${sd_fftw3_init}" != ""; then
+  if test "${sd_fftw3_init}" != "" -a "${sd_fftw3_enable}" != "no"; then
     sd_fft_selected_flavors="fftw3 fftw3-threads ${sd_fft_selected_flavors}"
     if test "${sd_mpi_ok}" = "yes"; then
       sd_fft_selected_flavors="fftw3-mpi ${sd_fft_selected_flavors}"
@@ -337,10 +332,156 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
 
   # Prepend DFTI if linear algebra is MKL
   if test "${abi_linalg_flavor}" = "mkl"; then
-    if test "${sd_dfti_init}" != ""; then
-      sd_fft_selected_flavors="dfti dfti-threads ${sd_fft_selected_flavors}"
-    fi
+    sd_fft_selected_flavors="dfti ${sd_fft_selected_flavors}"
   fi
 
   AC_MSG_RESULT([${sd_fft_selected_flavors}])
 ]) # _SD_FFT_INIT_FLAVORS
+
+
+                    # ------------------------------------ #
+
+
+#
+# Private internal macros
+#
+
+
+# FIXME: linear algebra should be managed by Steredeg
+AC_DEFUN([_SD_DFTI_DETECT], [
+  # Init
+  sd_dfti_cppflags="${abi_linalg_}"
+  sd_dfti_cflags="${abi_linalg_}"
+  sd_dfti_cxxflags="${abi_linalg_}"
+  sd_dfti_fcflags="${abi_linalg_}"
+  sd_dfti_ldflags="${abi_linalg_}"
+  sd_dfti_libs="${abi_linalg_}"
+  sd_dfti_enable="yes"
+  sd_dfti_init="mkl"
+  sd_dfti_ok="unknown"
+
+  # Display configuration
+  _SD_DFTI_DUMP_CONFIG
+
+  # Check whether we can compile and link a simple program
+  # and update build flags if successful
+  if test "${sd_dfti_enable}" = "auto" -o "${sd_dfti_enable}" = "yes"; then
+    _SD_DFTI_CHECK_USE
+
+    if test "${sd_dfti_ok}" = "yes"; then
+      if test "${sd_dfti_init}" = "esl"; then
+        sd_esl_bundle_libs="${sd_dfti_libs_def} ${sd_esl_bundle_libs}"
+      else
+        LIBS="${sd_dfti_libs} ${LIBS}"
+      fi
+      LDFLAGS="${LDFLAGS} ${sd_dfti_ldflags}"
+
+      AC_DEFINE([HAVE_DFTI], 1,
+        [Define to 1 if you have the DFTI library.])
+    else
+      if test "${sd_dfti_status}" = "optional" -a \
+              "${sd_dfti_init}" = "def"; then
+        sd_dfti_enable="no"
+        sd_dfti_cppflags=""
+        sd_dfti_cflags=""
+        sd_dfti_fcflags=""
+        sd_dfti_ldflags=""
+        sd_dfti_libs=""
+      else
+        AC_MSG_FAILURE([invalid DFTI configuration])
+      fi
+    fi
+  else
+    sd_dfti_enable="no"
+    sd_dfti_cppflags=""
+    sd_dfti_cflags=""
+    sd_dfti_fcflags=""
+    sd_dfti_ldflags=""
+    sd_dfti_libs=""
+  fi
+])
+
+
+                    # ------------------------------------ #
+
+
+#
+# Private macros
+#
+
+
+AC_DEFUN([_SD_DFTI_CHECK_USE], [
+  # Prepare environment
+  SD_ESL_SAVE_FLAGS
+  if test "${sd_dfti_init}" = "esl"; then
+    AC_MSG_NOTICE([will look for DFTI in the installed ESL Bundle])
+    SD_ESL_ADD_FLAGS
+    SD_ESL_ADD_LIBS([${sd_dfti_libs_def}])
+  else
+    CPPFLAGS="${CPPFLAGS} ${sd_dfti_cppflags}"
+    CFLAGS="${CFLAGS} ${sd_dfti_cflags}"
+    FCFLAGS="${FCFLAGS} ${sd_dfti_fcflags}"
+    LDFLAGS="${LDFLAGS} ${sd_dfti_ldflags}"
+    LIBS="${sd_dfti_libs} ${LIBS}"
+  fi
+
+  # Check DFTI C API
+  # FIXME: Very complex to have it work properly, would need a replacement
+  #        of AC_LINK_IFELSE accepting prologues, because of the included
+  #        mkl_dfti.f90 file.
+  AC_MSG_CHECKING([whether the DFTI library works])
+  sd_dfti_ok="yes"
+  AC_MSG_RESULT([${sd_dfti_ok}])
+
+  # Restore environment
+  SD_ESL_RESTORE_FLAGS
+]) # _SD_DFTI_CHECK_USE
+
+
+                    # ------------------------------------ #
+                    # ------------------------------------ #
+
+
+#
+# Utility macros
+#
+
+
+AC_DEFUN([_SD_DFTI_DUMP_CONFIG], [
+  AC_MSG_CHECKING([whether to enable DFTI])
+  AC_MSG_RESULT([${sd_dfti_enable}])
+  if test "${sd_dfti_enable}" != "no"; then
+    AC_MSG_CHECKING([how DFTI parameters have been set])
+    AC_MSG_RESULT([${sd_dfti_init}])
+    AC_MSG_CHECKING([for DFTI C preprocessing flags])
+    if test "${sd_dfti_cppflags}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${sd_dfti_cppflags}])
+    fi
+    AC_MSG_CHECKING([for DFTI C flags])
+    if test "${sd_dfti_cflags}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${sd_dfti_cflags}])
+    fi
+    AC_MSG_CHECKING([for DFTI Fortran flags])
+    if test "${sd_dfti_fcflags}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${sd_dfti_fcflags}])
+    fi
+    AC_MSG_CHECKING([for DFTI linker flags])
+    if test "${sd_dfti_ldflags}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${sd_dfti_ldflags}])
+    fi
+    AC_MSG_CHECKING([for DFTI library flags])
+    if test "${sd_dfti_libs}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${sd_dfti_libs}])
+    fi
+  fi
+]) # _SD_DFTI_DUMP_CONFIG

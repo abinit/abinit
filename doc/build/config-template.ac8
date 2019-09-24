@@ -479,7 +479,7 @@
 #
 #   * auto         : Let the build system configure MPI (recommended).
 #
-#   * double-wrapi : Internally wrap the MPI compiler wrappers, only for
+#   * double-wrap  : Internally wrap the MPI compiler wrappers, only for
 #                    severely bugged and oldish MPI implementations.
 #
 #   * flags        : Do not look for MPI compiler wrappers, only use
@@ -749,7 +749,6 @@
 
 # Supported libraries:
 #
-#   * asl           : NEC Advanced Scientific Library
 #   * auto          : select library depending on build environment (default)
 #   * custom        : bypass build-system checks
 #   * dfti          : native MKL FFT library
@@ -758,6 +757,7 @@
 #   * fftw3-mkl     : FFTW3 over MKL library
 #   * fftw3-threads : threaded FFTW3 library
 #   * fftw3-mpi     : MPI-parallel FFTW3 library
+#   * pfft          : MPI-parallel PFFT library (for maintainers only)
 #   * goedecker     : Abinit internal FFT
 #
 # Notes:
@@ -793,32 +793,6 @@
 # Library flags for the FFT framework (default is unset)
 #
 #FFT_LIBS="-L/usr/local/lib/fftw -lfftw3"
-
-                       # ------------------------------ #
-
-# Install prefix for the DFTI library
-#
-#with_dfti="/usr/local"
-
-# C preprocessor flags for the DFTI library (default is unset)
-#
-#DFTI_CPPFLAGS="-I/usr/local/include/fftw"
-
-# C flags for the DFTI library (default is unset)
-#
-#DFTI_CFLAGS="-I/usr/local/include/fftw"
-
-# Fortran flags for the DFTI library (default is unset)
-#
-#DFTI_FCFLAGS="-I/usr/local/include/fftw"
-
-# Link flags for the DFTI library (default is unset)
-#
-#DFTI_LDFLAGS="-L/usr/local/lib/fftw -ldfti"
-
-# Library flags for the DFTI library (default is unset)
-#
-#DFTI_LIBS="-L/usr/local/lib/fftw -ldfti"
 
                        # ------------------------------ #
 

@@ -667,9 +667,6 @@ ABI_MSG_SECTION([Initialization of optional features])
 # Init BigDFT
 SD_BIGDFT_INIT([optional fail])
 
-# Init DFTI
-SD_DFTI_INIT([optional skip])
-
 # Init FFTW3
 SD_FFTW3_INIT([optional skip])
 
