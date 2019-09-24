@@ -245,7 +245,7 @@ AC_DEFUN([SD_LINALG_INIT],[
       # Set generic flavors first
       sd_linalg_chk_serial="netlib"
       if test "${sd_mpi_enable}" = "yes"; then
-        sd_linalg_chk_mpi="elpa scalapack"
+        sd_linalg_chk_mpi="elpa netlib"
       fi
       if test "${sd_gpu_enable}" = "yes"; then
         sd_linalg_chk_gpu="magma"
@@ -254,13 +254,11 @@ AC_DEFUN([SD_LINALG_INIT],[
       # Refine with vendor-specific flavors
       case "${sd_fc_vendor}" in
         gnu)
-          sd_linalg_chk_serial="atlas netlib"
+          sd_linalg_chk_serial="openblas atlas netlib"
           ;;
         intel)
           sd_linalg_chk_serial="mkl atlas netlib"
-          ;;
-        *)
-          sd_linalg_chk_serial="netlib"
+          sd_linalg_chk_mpi="elpa mkl netlib"
           ;;
       esac
       ;;
@@ -362,9 +360,7 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
   sd_linalg_has_magma="no"
 
   # Prepare environment
-  tmp_saved_CPPFLAGS="${CPPFLAGS}"
-  tmp_saved_FCFLAGS="${FCFLAGS}"
-  tmp_saved_LIBS="${LIBS}"
+  SD_ESL_SAVE_FLAGS
   CPPFLAGS="${CPPFLAGS} ${sd_linalg_cppflags}"
   FCFLAGS="${FCFLAGS} ${sd_linalg_fcflags}"
   LIBS="${sd_linalg_libs} ${sd_gpu_libs} ${sd_mpi_libs} ${LIBS}"
@@ -462,9 +458,7 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
 
   # Restore environment
   AC_LANG_POP([Fortran])
-  CPPFLAGS="${tmp_saved_CPPFLAGS}"
-  FCFLAGS="${tmp_saved_FCFLAGS}"
-  LIBS="${tmp_saved_LIBS}"
+  SD_ESL_RESTORE_FLAGS
 ]) # _SD_LINALG_CHECK_LIBS
 
 
@@ -479,31 +473,25 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
 #
 AC_DEFUN([_SD_LINALG_EXPLORE], [
   # Prepare environment
-  SD_ENV_BACKUP
-  LDFLAGS="${FC_LDFLAGS}"
-  sd_saved_CPPFLAGS="${CPPFLAGS}"
-  sd_saved_CXXFLAGS="${CXXFLAGS}"
-  sd_saved_CFLAGS="${CFLAGS}"
-  sd_saved_FCFLAGS="${FCFLAGS}"
-  sd_saved_LDFLAGS="${LDFLAGS}"
-  sd_saved_LIBS="${LIBS}"
+  SD_ESL_SAVE_FLAGS
 
   # Look for serial linear algebra support
   for tmp_linalg_vendor in ${sd_linalg_chk_serial}; do
 
     # Configure vendor libraries
+    SD_ESL_RESTORE_FLAGS
     _SD_LINALG_SET_VENDOR_FLAGS([${tmp_linalg_vendor}])
-    CPPFLAGS="${sd_saved_CPPFLAGS} ${sd_linalg_vendor_cppflags}"
-    CFLAGS="${sd_saved_CFLAGS} ${sd_linalg_vendor_cflags}"
-    CXXFLAGS="${sd_saved_CXXFLAGS} ${sd_linalg_vendor_cxxflags}"
-    FCFLAGS="${sd_saved_FCFLAGS} ${sd_linalg_vendor_fcflags}"
-    LDFLAGS="${sd_saved_LDFLAGS} ${sd_linalg_vendor_ldflags}"
+    CPPFLAGS="${CPPFLAGS} ${sd_linalg_vendor_cppflags}"
+    CFLAGS="${CFLAGS} ${sd_linalg_vendor_cflags}"
+    CXXFLAGS="${CXXFLAGS} ${sd_linalg_vendor_cxxflags}"
+    FCFLAGS="${FCFLAGS} ${sd_linalg_vendor_fcflags}"
+    LDFLAGS="${LDFLAGS} ${sd_linalg_vendor_ldflags}"
 
     # Look for BLAS
     tmp_linalg_blas_proceed=`echo "${sd_linalg_vendor_provided}" | grep "blas"`
     if test "${tmp_linalg_blas_proceed}" != "" -a \
             "${sd_linalg_has_blas}" != "yes"; then
-      LIBS="${sd_linalg_vendor_blas_libs} ${sd_linalg_vendor_blas_prqs} ${sd_saved_LIBS}"
+      LIBS="${sd_linalg_vendor_blas_libs} ${sd_linalg_vendor_blas_prqs} ${LIBS}"
       AC_MSG_CHECKING([${tmp_linalg_vendor} libraries for BLAS])
       if test "${sd_linalg_vendor_blas_libs}${sd_linalg_vendor_blas_prqs}" = ""; then
         AC_MSG_RESULT([none required])
@@ -538,7 +526,7 @@ AC_DEFUN([_SD_LINALG_EXPLORE], [
       else
        AC_MSG_RESULT([${sd_linalg_vendor_lapack_libs} ${sd_linalg_vendor_lapack_prqs}])
       fi
-      LIBS="${sd_linalg_vendor_lapack_libs} ${sd_linalg_vendor_lapack_prqs} ${sd_linalg_blas_libs} ${sd_saved_LIBS}"
+      LIBS="${sd_linalg_vendor_lapack_libs} ${sd_linalg_vendor_lapack_prqs} ${sd_linalg_blas_libs} ${LIBS}"
       _SD_LINALG_CHECK_LAPACK
       if test "${sd_linalg_has_lapack}" = "yes"; then
          sd_linalg_lapack_libs="${sd_linalg_vendor_lapack_libs} ${sd_linalg_vendor_lapack_prqs}"
@@ -574,8 +562,7 @@ AC_DEFUN([_SD_LINALG_EXPLORE], [
   fi
   sd_linalg_libs="${sd_linalg_libs} ${sd_linalg_vendor_lapack_libs} ${sd_linalg_vendor_blas_libs}"
 
-  SD_ENV_RESTORE
-  LIBS="${sd_saved_LIBS}"
+  SD_ESL_RESTORE_FLAGS
 ]) # SD_LINALG_EXPLORE
 
 
@@ -1102,6 +1089,7 @@ AC_DEFUN([_SD_LINALG_SEARCH_MAGMA], [
   sd_linalg_has_magma="no"
 
   # Look for libraries and routines
+  AC_LANG_PUSH([Fortran])
   AC_SEARCH_LIBS([magmaf_zheevd], $1,
     [sd_linalg_has_magma="yes"], [sd_linalg_has_magma="no"],
     [$2 ${sd_linalg_libs}])
@@ -1111,6 +1099,7 @@ AC_DEFUN([_SD_LINALG_SEARCH_MAGMA], [
     fi
     _SD_LINALG_CHECK_MAGMA_15()
   fi
+  AC_LANG_POP([Fortran])
 ]) # _SD_LINALG_SEARCH_MAGMA
 
 
@@ -1407,8 +1396,6 @@ AC_DEFUN([_SD_LINALG_CHECK_CONFIG], [
 
 
 AC_DEFUN([_SD_LINALG_DUMP_CONFIG], [
-  AC_MSG_CHECKING([whether to enable linear algebra])
-  AC_MSG_RESULT([${sd_linalg_enable}])
   if test "${sd_linalg_enable}" != "no"; then
     AC_MSG_CHECKING([how linear algebra parameters have been set])
     AC_MSG_RESULT([${sd_linalg_init}])
