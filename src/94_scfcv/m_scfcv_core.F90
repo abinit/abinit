@@ -809,9 +809,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    ABI_ALLOCATE(grhf,(0,0))
  end if ! iscf>0
 
-!Here initialize the datastructure constrained_dft, for constrained DFT calculations
- if(any(dtset%constraint_kind(:)/=0))then
-   call constrained_dft_ini(dtset%chrgat,constrained_dft,dtset%constraint_kind,dtset%magcon_lambda,&
+!Here initialize the datastructure constrained_dft, for constrained DFT calculations as well as penalty function constrained magnetization
+ if(any(dtset%constraint_kind(:)/=0).or.magconon/=0)then
+   call constrained_dft_ini(dtset%chrgat,constrained_dft,dtset%constraint_kind,dtset%magconon,dtset%magcon_lambda,&
 &    mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,dtset%ntypat,&
 &    dtset%ratsph,rprimd,dtset%spinat,dtset%typat,xred,dtset%ziontypat)
  endif
@@ -2032,7 +2032,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    if (.not.allocated(nhatgr) ) then
      ABI_ALLOCATE(nhatgr,(0,0,0))
    end if
-   call energy(cg,compch_fft,dtset,electronpositron,&
+   call energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 &   energies,eigen,etotal,gsqcut,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,&
 &   nfftf,ngfftf,nhat,nhatgr,nhatgrdim,npwarr,n3xccc,&
 &   occ,optene,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,pawrhoij,pawtab,&

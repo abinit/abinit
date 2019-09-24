@@ -452,8 +452,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enr
  ABI_ALLOCATE(v_constr_dft_r, (nfft,dtset%nspden))
  v_constr_dft_r = zero
  if (dtset%magconon==1.or.dtset%magconon==2) then
-   call mag_penalty(dtset%natom,dtset%spinat,dtset%nspden,dtset%magconon,dtset%magcon_lambda,rprimd, &
-&   mpi_enreg,nfft,ngfft,dtset%ntypat,dtset%ratsph,rhor,dtset%typat,v_constr_dft_r,xred)
+   call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred) 
  end if
 
  if (optres==0) then

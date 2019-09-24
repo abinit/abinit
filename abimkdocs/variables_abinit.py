@@ -8867,17 +8867,17 @@ Variable(
     defaultval=0,
     mnemonics="turn MAGnetization CONstraint ON",
     text=r"""
-Turns on the imposition of a constraint on the magnetization. For
+Turns on the imposition of a constraint on the magnetization, using a penalty function. For
 each atom, the magnetization is calculated in a sphere (radius [[ratsph]]) and
-either a penalty function ([[magconon]] = 1 to 3) or a Lagrangian constraint ([[magconon]] = 4 to 6) 
-is applied to bring it to the input values of [[spinat]].
-The constraint can be either on the direction only ([[magconon]] = 1 or 4) or on the full
-vector ([[magconon]] = 2 or 5) or on the amplitude only ([[magconon]] = 3 or 6). 
-In case of the penalty function algorithm ([[magconon]] = 1 to 3), the penalty has an amplitude
-[[magcon_lambda]] which should be neither too big (bad or impossible
-convergence) nor too small (no effect). The penalty function is documented in [[cite:Ma2015]] as being a Lagrange
+a penalty function is applied to bring it to the input values of [[spinat]].
+The constraint can be either on the direction only ([[magconon]] = 1) or on the full
+vector ([[magconon]] = 2). The penalty function has an amplitude
+[[magcon_lambda]] that should be neither too big (bad or impossible convergence) nor too small (no effect). 
+The penalty function is documented in [[cite:Ma2015]] as being a Lagrange
 approach, which is a misnomer for the algorithm that they describe. It has the drawback of being unable to deliver
 the exact sought value for the magnetization. So, the true Lagrange approach has to be preferred, except for testing purposes.
+This is provided by the algorithm governed by the input variable [[constraint_kind]], which is actually also much more flexible
+than the implementation corresponding to [[magconon]].
 """,
 ),
 

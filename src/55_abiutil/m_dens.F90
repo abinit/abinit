@@ -77,6 +77,8 @@ MODULE m_dens
   real(dp) :: magcon_lambda                  ! Strength of the atomic spherical constraint
   real(dp) :: ucvol                          ! Unit cell volume
 
+  integer :: magconon                        ! Turn on the penalty function constraint instead of the more powerful constrainedDFT algorithm
+
 !arrays
 
   integer :: ngfftf(18)                      ! Number of FFT grid points (for this processor) for the "fine" grid
@@ -642,6 +644,7 @@ end subroutine add_atomic_fcts
 !!    2=fix the magnetization vector to be the spinat one,
 !!    3=fix the magnetization amplitude to be the spinat one, but does not fix its direction
 !!    other future values will constrain the local atomic charge and possibly mix constraints if needed.
+!!  magconon=type of penalty function (so, not constrained DFT).
 !!  magcon_lambda=strength of the atomic spherical constraint
 !!  mpi_enreg=mpi structure with communicator info 
 !!  natom=number of atoms
@@ -666,12 +669,12 @@ end subroutine add_atomic_fcts
 !!
 !! SOURCE
 
- subroutine constrained_dft_ini(chrgat,constrained_dft,constraint_kind,magcon_lambda,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,&
+ subroutine constrained_dft_ini(chrgat,constrained_dft,constraint_kind,magconon,magcon_lambda,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,&
 & ratsph,rprimd,spinat,typat,xred,ziontypat)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)  :: natom,nfftf,nspden,ntypat
+ integer,intent(in)  :: magconon,natom,nfftf,nspden,ntypat
  real(dp),intent(in) :: magcon_lambda
  type(MPI_type),intent(in) :: mpi_enreg
  type(constrained_dft_t),intent(out):: constrained_dft
@@ -708,6 +711,7 @@ end subroutine add_atomic_fcts
 &  ratsph,rhor_dum,rprimd,typat,ucvol,xred,0,cplex1,intgf2=intgf2)
 
  constrained_dft%gmet            =gmet
+ constrained_dft%magconon        =magconon
  constrained_dft%magcon_lambda   =magcon_lambda
  constrained_dft%natom           =natom
  constrained_dft%nfftf           =nfftf
@@ -974,19 +978,20 @@ end subroutine constrained_dft_free
 !! This routine is called to compute the potential corresponding to constrained magnetic moments using the penalty function algorithm.
 !!
 !! INPUTS
-!!  natom=number of atoms
-!!  spinat=fixed magnetic moments vectors
-!!  nspden = number of spin densities (1 2 or 4)
-!!  magconon=constraining option (on/off); 1=fix only the direction, 2=fix the direction and size
-!!  magcon_lambda=the size of the penalty terms
-!!  rprimd=lattice vectors (dimensionful)
+!!  c_dft <type(constrained_dft_t)>=datastructure for the information related to constrained DFT
+!!   ! magconon=constraining option (on/off); 1=fix only the direction, 2=fix the direction and size
+!!   ! magcon_lambda=strength of the atomic spherical constraint
+!!   ! natom=number of atoms
+!!   ! nfftf=number of points in fine fft grid
+!!   ! ngfftf=FFT grid dimensions
+!!   ! nspden = number of spin densities (1 2 or 4)
+!!   ! ntypat=number of types of atoms
+!!   ! ratsph(ntypat)=radii for muffin tin spheres of each atom
+!!   ! rprimd=lattice vectors (dimensioned)
+!!   ! spinat(3,natom)=magnetic moments vectors, possible targets according to the value of constraint_kind
+!!   ! typat(natom)=types of atoms
 !!  mpi_enreg=mpi structure with communicator info
-!!  nfft=number of points in standard fft grid
-!!  ngfft=FFT grid dimensions
-!!  ntypat=number of types of atoms
-!!  ratsph=radii for muffin tin spheres of each atom
 !!  rhor=density in real space
-!!  typat=types of atoms
 !!  xred=reduced atomic positions
 !!
 !! OUTPUT
@@ -1004,29 +1009,19 @@ end subroutine constrained_dft_free
 !!
 !! SOURCE
 
-subroutine mag_penalty(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
-                      mpi_enreg,nfft,ngfft,ntypat,ratsph,rhor, &
-                      typat,nv_constr_dft_r,xred)
+subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,magconon,nfft,nspden
- integer,intent(in) :: ntypat
- real(dp),intent(in) :: magcon_lambda
- real(dp),intent(out) :: nv_constr_dft_r(nfft,nspden)
+ real(dp),intent(out) :: nv_constr_dft_r(c_dft%nfft,c_dft%nspden)
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- integer,intent(in)  :: typat(natom)
- integer,intent(in)  :: ngfft(18)
- real(dp),intent(in) :: ratsph(ntypat)
- real(dp),intent(in) :: rhor(nfft,nspden)
- real(dp),intent(in) :: rprimd(3,3)
- real(dp),intent(in) :: spinat(3,natom)
- real(dp),intent(in) :: xred(3,natom)
+ real(dp),intent(in) :: rhor(c_dft%nfft,c_dft%nspden)
+ real(dp),intent(in) :: xred(3,c_dft%natom)
 
 !Local variables-------------------------------
 !scalars
- integer :: iatom
+ integer :: iatom,magconon,natom,nfft,nspden,ntypat
  integer :: cplex1=1
  real(dp):: cmm_x,cmm_y,cmm_z
  real(dp) :: intgden_proj,norm,ucvol
@@ -1038,20 +1033,24 @@ subroutine mag_penalty(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
 
 ! ***********************************************************************************************
 
+ magconon=c_dft%magconon
+ natom=c_dft%natom
+ nfft=c_dft%nfftf
+ nspden=c_dft%nspden
+ ntypat=c_dft%ntypat
+
  ABI_ALLOCATE(coeffs_constr_dft,(nspden,natom))
  ABI_ALLOCATE(intgden,(nspden,natom))
 
-!We need the metric because it is needed in calcdensph.F90
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
 !We need the integrated magnetic moments and the smoothing function
- call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,std_out,ratsph,rhor,rprimd,typat,ucvol,xred,1,cplex1,intgden=intgden)
+ call calcdensph(c_dft%gmet,mpi_enreg,natom,nfft,c_dft%ngfft,nspden,ntypat,std_out,c_dft%ratsph,&
+&  rhor,rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgden)
 
 !Loop over atoms
 !-------------------------------------------
  do iatom=1,natom
 
-   norm = sqrt(sum(spinat(:,iatom)**2))
+   norm = sqrt(sum(c_dft%spinat(:,iatom)**2))
    spinat_norm(:,iatom) = zero
    if (norm > tol10) then
      spinat_norm(:,iatom) = spinat(:,iatom) / norm
@@ -1090,8 +1089,8 @@ subroutine mag_penalty(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
 !    2 = down down = -z
 !    3 = up down   = +x
 !    4 = down up   = -y
-     coeffs_constr_dft(3,iatom)= 2*magcon_lambda*cmm_x
-     coeffs_constr_dft(4,iatom)=-2*magcon_lambda*cmm_y
+     coeffs_constr_dft(3,iatom)= 2*c_dft%magcon_lambda*cmm_x
+     coeffs_constr_dft(4,iatom)=-2*c_dft%magcon_lambda*cmm_y
    end if ! nspden 4
 
 !  Calculate the z-component of the square bracket term
@@ -1120,8 +1119,8 @@ subroutine mag_penalty(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
    endif
 
 !  Calculate the constraining potential for z-component of the mag. mom. vector
-   coeffs_constr_dft(1,iatom)= 2*magcon_lambda*cmm_z
-   coeffs_constr_dft(2,iatom)=-2*magcon_lambda*cmm_z
+   coeffs_constr_dft(1,iatom)= 2*c_dft%magcon_lambda*cmm_z
+   coeffs_constr_dft(2,iatom)=-2*c_dft%magcon_lambda*cmm_z
 
  enddo ! iatom
  

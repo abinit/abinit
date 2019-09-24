@@ -47,7 +47,7 @@ module m_setvtr
  use m_pawtab,            only : pawtab_type
  use m_jellium,           only : jellium
  use m_spacepar,          only : hartre
- use m_dens,              only : mag_penalty
+ use m_dens,              only : constrained_dft_t,mag_penalty
  use m_vdw_dftd2,         only : vdw_dftd2
  use m_vdw_dftd3,         only : vdw_dftd3
  use m_atm2fft,           only : atm2fft
@@ -247,6 +247,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  logical :: add_tfw_,is_hybrid_ncpp,non_magnetic_xc,with_vxctau,wvlbigdft
  real(dp), allocatable :: xcart(:,:)
  character(len=500) :: message
+ type(constrained_dft_t) :: constrained_dft
  type(xcdata_type) :: xcdata,xcdatahyb
 !arrays
  real(dp),parameter :: identity(1:4)=(/1._dp,1._dp,0._dp,0._dp/)
@@ -688,10 +689,13 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 
 !Compute the constrained potential for the magnetic moments
  if (dtset%magconon==1.or.dtset%magconon==2) then
+!  Initialize the datastructure constrained_dft, for penalty function constrained magnetization
+   call constrained_dft_ini(dtset%chrgat,constrained_dft,dtset%constraint_kind,dtset%magconon,dtset%magcon_lambda,&
+&    mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,dtset%ntypat,&
+&    dtset%ratsph,rprimd,dtset%spinat,dtset%typat,xred,dtset%ziontypat)
    ABI_ALLOCATE(v_constr_dft_r, (nfft,dtset%nspden))
    v_constr_dft_r = zero
-   call mag_penalty(dtset%natom,dtset%spinat,dtset%nspden,dtset%magconon,dtset%magcon_lambda,rprimd, &
-&   mpi_enreg,nfft,ngfft,dtset%ntypat,dtset%ratsph,rhor,dtset%typat,v_constr_dft_r,xred)
+   call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred)
    if(dtset%nspden==4)then
      do ispden=1,dtset%nspden ! (SPr: both components should be used? EB: Yes it should be the case, corrected now)
        do ifft=1,nfft
@@ -708,6 +712,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
      end do !ifft
    end if
    ABI_DEALLOCATE(v_constr_dft_r)
+   call constrained_dft_free(constrained_dft)
  end if
 
 !Compute parts of total energy depending on potentials

@@ -60,7 +60,7 @@ module m_dft_energy
  use m_paw_occupancies,  only : pawaccrhoij
  use m_fft,              only : fftpac, fourdp
  use m_spacepar,         only : meanvalue_g, hartre
- use m_dens,             only : mag_penalty
+ use m_dens,             only : constrained_dft_t,mag_penalty
  use m_mkrho,            only : mkrho
  use m_mkffnl,           only : mkffnl
  use m_getghc,           only : getghc
@@ -225,7 +225,7 @@ contains
 !!
 !! SOURCE
 
-subroutine energy(cg,compch_fft,dtset,electronpositron,&
+subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 & energies,eigen,etotal,gsqcut,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,nfftf,ngfftf,nhat,&
 & nhatgr,nhatgrdim,npwarr,n3xccc,occ,optene,paw_dmft,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrhoij,pawtab,phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,&
@@ -239,6 +239,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  real(dp),intent(in) :: gsqcut
  real(dp),intent(out) :: compch_fft,etotal
  type(MPI_type),intent(inout) :: mpi_enreg
+ type(constrained_dft_t),intent(in) :: constrained_dft
  type(dataset_type),intent(in) :: dtset
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
@@ -440,9 +441,10 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  if (dtset%magconon==1.or.dtset%magconon==2) then
    ABI_ALLOCATE(v_constr_dft_r, (nfftf,dtset%nspden))
    v_constr_dft_r = zero
-   call mag_penalty(dtset%natom, dtset%spinat, dtset%nspden, dtset%magconon, dtset%magcon_lambda, rprimd, &
-&   mpi_enreg, nfftf, dtset%ngfft, dtset%ntypat, dtset%ratsph, rhor, &
-&   dtset%typat, v_constr_dft_r, xred)
+   call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred)
+!   call mag_penalty(dtset%natom, dtset%spinat, dtset%nspden, dtset%magconon, dtset%magcon_lambda, rprimd, &
+!&   mpi_enreg, nfftf, dtset%ngfft, dtset%ntypat, dtset%ratsph, rhor, &
+!&   dtset%typat, v_constr_dft_r, xred)
    do ispden=1,dtset%nspden
      do ifft=1,nfftf
        vtrial(ifft,ispden)=vtrial(ifft,ispden)+v_constr_dft_r(ifft,ispden)
