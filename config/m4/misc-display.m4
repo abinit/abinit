@@ -36,10 +36,10 @@ if test "${with_linalg_libs}" = ""; then
 else
   tmp_rep_linalg_libs="user-defined"
 fi
-test "${abi_linalg_flavor}" = "netlib-fallback" && \
+test "${sd_linalg_flavor}" = "netlib-fallback" && \
   tmp_rep_linalg_libs="internal"
-test "${abi_linalg_flavor}" = "none" -o \
-     "${abi_linalg_flavor}" = "netlib-fallback" && \
+test "${sd_linalg_flavor}" = "none" -o \
+     "${sd_linalg_flavor}" = "netlib-fallback" && \
   tmp_rep_linalg_libs="ignored"
 
 # FFT
@@ -71,7 +71,7 @@ Core build parameters
   * LibXML2 enabled  : ${abi_libxml2_enable}
 
   * FFT flavor       : ${sd_fft_flavor} (libs: ${tmp_rep_fft_libs})
-  * LINALG flavor    : ${abi_linalg_flavor} (libs: ${tmp_rep_linalg_libs})
+  * LINALG flavor    : ${sd_linalg_flavor} (libs: ${tmp_rep_linalg_libs})
 
   * Build workflow   : ${abi_build_steps}
 

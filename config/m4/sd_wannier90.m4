@@ -229,8 +229,6 @@ AC_DEFUN([_SD_WANNIER90_CHECK_USE], [
     SD_ESL_ADD_FLAGS
     SD_ESL_ADD_LIBS([${sd_wannier90_libs_def}])
   else
-    # FIXME: dirty hack to get the detection work in ABINIT (YP)
-    sd_linalg_libs="${abi_linalg_libs}"
     CPPFLAGS="${CPPFLAGS} ${sd_wannier90_cppflags}"
     FCFLAGS="${FCFLAGS} ${sd_wannier90_fcflags}"
     LDFLAGS="${LDFLAGS} ${sd_wannier90_ldflags}"

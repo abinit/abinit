@@ -697,23 +697,6 @@ SD_WANNIER90_INIT([optional fail], [-lwannier90])
 # Init XMLF90
 SD_XMLF90_INIT([optional fail])
 
-                    # ------------------------------------ #
-
-# Initialize higher-level features using the available information
-# about other architectural aspects (compiler, OpenMP, MPI, GPU, ...)
-# and supported external packages
-
-# Linear algebra configuration
-ABI_LINALG_INIT
-
-# FFT configuration (must be done after linear algebra)
-SD_FFT_INIT
-
-                    # ------------------------------------ #
-
-# Initialize the low-level routines of ABINIT as an external component
-SD_ABINIT_COMMON_INIT([optional skip])
-
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
 
@@ -723,16 +706,20 @@ SD_ABINIT_COMMON_INIT([optional skip])
 
 ABI_MSG_SECTION([Linear algebra support])
 
-ABI_LINALG_DETECT
+SD_LINALG_INIT
+
+SD_LINALG_DETECT
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
 
 #
-# Optimized FFT support
+# Optimized FFT support (must be done after linear algebra is fully configured)
 #
 
 ABI_MSG_SECTION([Optimized FFT support])
+
+SD_FFT_INIT
 
 SD_FFT_DETECT
 
@@ -906,6 +893,9 @@ fi
 
 ABI_MSG_SECTION([Build workflow])
 
+# Initialize the low-level routines of ABINIT as an external component
+SD_ABINIT_COMMON_INIT([optional skip])
+
 SD_ABINIT_COMMON_DETECT
 
 AC_MSG_CHECKING([how to build the components of ABINIT])
@@ -1025,11 +1015,11 @@ ABI_OUTPUT
 ABI_MSG_SECTION([Final remarks])
 
 # The end
-if test "${abi_linalg_flavor}" = "netlib-fallback"; then
+if test "${sd_linalg_flavor}" = "netlib-fallback"; then
   ABI_MSG_NOTICE([linalg-abinit],
     [Suboptimal linear algebra configuration])
 fi
-if test "${abi_gpu_enable}" = "yes" -a "${abi_linalg_chk_gpu}" != "magma"; then
+if test "${abi_gpu_enable}" = "yes" -a "${sd_linalg_chk_gpu}" != "magma"; then
   ABI_MSG_NOTICE([gpu-without-magma],
     [Suboptimal GPU configuration])
 fi

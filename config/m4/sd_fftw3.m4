@@ -105,6 +105,7 @@ AC_DEFUN([SD_FFTW3_INIT], [
   if test "${STEREDEG_BYPASS_CONSISTENCY}" != "yes"; then
     _SD_FFTW3_CHECK_CONFIG
   fi
+
   # Adjust configuration depending on init type
   if test "${sd_fftw3_enable}" = "yes" -o "${sd_fftw3_enable}" = "auto"; then
 

@@ -230,8 +230,6 @@ AC_DEFUN([_SD_ABINIT_COMMON_CHECK_USE], [
     SD_ESL_ADD_FLAGS
     SD_ESL_ADD_LIBS([${sd_abinit_common_libs_def}])
   else
-    # FIXME: dirty hack to get the detection work in ABINIT (YP)
-    sd_linalg_libs="${abi_linalg_libs}"
     CPPFLAGS="${CPPFLAGS} ${sd_abinit_common_cppflags}"
     FCFLAGS="${FCFLAGS} ${sd_abinit_common_fcflags}"
     LDFLAGS="${LDFLAGS} ${sd_abinit_common_ldflags}"
