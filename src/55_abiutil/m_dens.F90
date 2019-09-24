@@ -706,9 +706,11 @@ end subroutine add_atomic_fcts
 !We need the metric because it is needed in calcdensph.F90
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
-!We need the integrated magnetic moments and the smoothing function
- call calcdensph(gmet,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,std_out,&
-&  ratsph,rhor_dum,rprimd,typat,ucvol,xred,0,cplex1,intgf2=intgf2)
+ if(any(constraint_kind(:)/=0))then
+   !We need to precompute intgf2
+   call calcdensph(gmet,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,std_out,&
+&    ratsph,rhor_dum,rprimd,typat,ucvol,xred,0,cplex1,intgf2=intgf2)
+ endif
 
  constrained_dft%gmet            =gmet
  constrained_dft%magconon        =magconon
@@ -1013,10 +1015,11 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
 
 !Arguments ------------------------------------
 !scalars
- real(dp),intent(out) :: nv_constr_dft_r(c_dft%nfft,c_dft%nspden)
+ type(constrained_dft_t),intent(in) :: c_dft
+ real(dp),intent(out) :: nv_constr_dft_r(c_dft%nfftf,c_dft%nspden)
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- real(dp),intent(in) :: rhor(c_dft%nfft,c_dft%nspden)
+ real(dp),intent(in) :: rhor(c_dft%nfftf,c_dft%nspden)
  real(dp),intent(in) :: xred(3,c_dft%natom)
 
 !Local variables-------------------------------
@@ -1028,7 +1031,7 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
 !arrays
  real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
  real(dp), allocatable :: intgden(:,:) ! nspden,natom
- real(dp) :: spinat_norm(3,natom)
+ real(dp) :: spinat_normed(3)
  real(dp) :: gprimd(3,3),rmet(3,3),gmet(3,3)
 
 ! ***********************************************************************************************
@@ -1043,17 +1046,17 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
  ABI_ALLOCATE(intgden,(nspden,natom))
 
 !We need the integrated magnetic moments and the smoothing function
- call calcdensph(c_dft%gmet,mpi_enreg,natom,nfft,c_dft%ngfft,nspden,ntypat,std_out,c_dft%ratsph,&
-&  rhor,rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgden)
+ call calcdensph(c_dft%gmet,mpi_enreg,natom,nfft,c_dft%ngfftf,nspden,ntypat,std_out,c_dft%ratsph,&
+&  rhor,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgden)
 
 !Loop over atoms
 !-------------------------------------------
  do iatom=1,natom
 
    norm = sqrt(sum(c_dft%spinat(:,iatom)**2))
-   spinat_norm(:,iatom) = zero
+   spinat_normed(:) = zero
    if (norm > tol10) then
-     spinat_norm(:,iatom) = spinat(:,iatom) / norm
+     spinat_normed(:) = c_dft%spinat(:,iatom) / norm
    else if (magconon == 1) then
 !    if spinat = 0 and we are imposing the direction only, skip this atom
      cycle
@@ -1068,19 +1071,19 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
      if (magconon==1) then
 !      Calculate the scalar product of the fixed mag. mom. vector and calculated mag. mom. vector
 !      This is actually the size of the projection of the calc. mag. mom. vector on the fixed mag. mom. vector
-       intgden_proj=spinat_norm(1,iatom)*intgden(2,iatom)+ &
-&        spinat_norm(2,iatom)*intgden(3,iatom)+ &
-&        spinat_norm(3,iatom)*intgden(4,iatom)
+       intgden_proj=spinat_normed(1)*intgden(2,iatom)+ &
+&        spinat_normed(2)*intgden(3,iatom)+ &
+&        spinat_normed(3)*intgden(4,iatom)
 
        cmm_x=intgden(2,iatom)
-       cmm_x=cmm_x-spinat_norm(1,iatom)*intgden_proj
+       cmm_x=cmm_x-spinat_normed(1)*intgden_proj
 
        cmm_y=intgden(3,iatom)
-       cmm_y=cmm_y-spinat_norm(2,iatom)*intgden_proj
+       cmm_y=cmm_y-spinat_normed(2)*intgden_proj
 
      else if (magconon==2 .and. nspden == 4) then
-       cmm_x=intgden(2,iatom)-spinat(1,iatom)
-       cmm_y=intgden(3,iatom)-spinat(2,iatom)
+       cmm_x=intgden(2,iatom)-c_dft%spinat(1,iatom)
+       cmm_y=intgden(3,iatom)-c_dft%spinat(2,iatom)
      end if
 
 !    Calculate the constraining potential for x- and y- components of the mag. mom. vector
@@ -1097,15 +1100,15 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
    if (magconon==1) then
      if (nspden == 4) then
        ! m_z - spinat_z * <m | spinat>
-       cmm_z = intgden(4,iatom) - spinat_norm(3,iatom)*intgden_proj
+       cmm_z = intgden(4,iatom) - spinat_normed(3)*intgden_proj
      else if (nspden == 2) then
        ! this will be just a sign +/- : are we in the same direction as spinat_z?
        !    need something more continuous??? To make sure the gradient pushes the state towards FM/AFM?
-       cmm_z = -sign(one, (intgden(1,iatom)-intgden(2,iatom))*spinat_norm(3,iatom))
+       cmm_z = -sign(one, (intgden(1,iatom)-intgden(2,iatom))*spinat_normed(3))
      end if
    else if (magconon==2) then
      if (nspden == 4) then
-       cmm_z=intgden(4,iatom)-spinat(3,iatom)
+       cmm_z=intgden(4,iatom)-c_dft%spinat(3,iatom)
      else if (nspden == 2) then
        ! this is up spins - down spins - requested moment ~ 0
        ! EB: note that intgden comes from calcdensph, which, in nspden=2 case, returns
@@ -1114,7 +1117,7 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
        ! Then, is the following line be
        ! cmm_z=half*(intgden(1,iatom)-intgden(2,iatom)) - spinat(3,iatom)
        ! ??
-       cmm_z=intgden(1,iatom)-intgden(2,iatom) - spinat(3,iatom)
+       cmm_z=intgden(1,iatom)-intgden(2,iatom) - c_dft%spinat(3,iatom)
      end if
    endif
 
@@ -1125,8 +1128,8 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
  enddo ! iatom
  
 !Now compute the potential in real space
- call add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ratsph, &
-   typat,coeffs_constr_dft,nv_constr_dft_r,xred)
+ call add_atomic_fcts(natom,nspden,c_dft%rprimd,mpi_enreg,nfft,c_dft%ngfftf,ntypat,c_dft%ratsph, &
+   c_dft%typat,coeffs_constr_dft,nv_constr_dft_r,xred)
 
  ABI_DEALLOCATE(coeffs_constr_dft)
  ABI_DEALLOCATE(intgden)
@@ -1181,7 +1184,7 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
  real(dp) :: intmm(3), mag_1atom(3)
  real(dp), allocatable :: intgden(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),ucvol
- real(dp) :: spinat_norm(3,natom)
+ real(dp) :: spinat_normed(3)
  character(len=500) :: msg
 
 ! *********************************************************************
@@ -1205,9 +1208,9 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
  do iatom=1,natom
 
    norm = sqrt(sum(spinat(:,iatom)**2))
-   spinat_norm(:,iatom) = zero
+   spinat_normed(:) = zero
    if (norm > tol10) then
-     spinat_norm(:,iatom) = spinat(:,iatom) / norm
+     spinat_normed(:) = spinat(:,iatom) / norm
    else if (magconon == 1) then
 !    if spinat = 0 and we are imposing the direction only, skip this atom
      cycle
@@ -1227,12 +1230,12 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
    intmm = zero
 !  Calculate the square bracket term
    if (magconon==1) then
-     intgden_proj=spinat_norm(1,iatom)*mag_1atom(1)+ &
-&     spinat_norm(2,iatom)*mag_1atom(2)+ &
-&     spinat_norm(3,iatom)*mag_1atom(3)
+     intgden_proj=spinat_normed(1)*mag_1atom(1)+ &
+&     spinat_normed(2)*mag_1atom(2)+ &
+&     spinat_normed(3)*mag_1atom(3)
 
      do ii=1,3
-       intmm(ii)=mag_1atom(ii)-spinat_norm(ii,iatom)*intgden_proj
+       intmm(ii)=mag_1atom(ii)-spinat_normed(ii)*intgden_proj
      end do
 
 !    Calculate the energy Epen corresponding to the constraining potential

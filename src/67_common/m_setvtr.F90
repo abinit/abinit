@@ -47,7 +47,7 @@ module m_setvtr
  use m_pawtab,            only : pawtab_type
  use m_jellium,           only : jellium
  use m_spacepar,          only : hartre
- use m_dens,              only : constrained_dft_t,mag_penalty
+ use m_dens,              only : constrained_dft_t,constrained_dft_ini,constrained_dft_free,mag_penalty
  use m_vdw_dftd2,         only : vdw_dftd2
  use m_vdw_dftd3,         only : vdw_dftd3
  use m_atm2fft,           only : atm2fft
@@ -691,7 +691,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  if (dtset%magconon==1.or.dtset%magconon==2) then
 !  Initialize the datastructure constrained_dft, for penalty function constrained magnetization
    call constrained_dft_ini(dtset%chrgat,constrained_dft,dtset%constraint_kind,dtset%magconon,dtset%magcon_lambda,&
-&    mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,dtset%ntypat,&
+&    mpi_enreg,dtset%natom,dtset%nfft,dtset%ngfft,dtset%nspden,dtset%ntypat,&
 &    dtset%ratsph,rprimd,dtset%spinat,dtset%typat,xred,dtset%ziontypat)
    ABI_ALLOCATE(v_constr_dft_r, (nfft,dtset%nspden))
    v_constr_dft_r = zero

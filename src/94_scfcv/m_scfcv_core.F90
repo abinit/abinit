@@ -810,7 +810,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  end if ! iscf>0
 
 !Here initialize the datastructure constrained_dft, for constrained DFT calculations as well as penalty function constrained magnetization
- if(any(dtset%constraint_kind(:)/=0).or.magconon/=0)then
+ if(any(dtset%constraint_kind(:)/=0).or.dtset%magconon/=0)then
    call constrained_dft_ini(dtset%chrgat,constrained_dft,dtset%constraint_kind,dtset%magconon,dtset%magcon_lambda,&
 &    mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,dtset%ntypat,&
 &    dtset%ratsph,rprimd,dtset%spinat,dtset%typat,xred,dtset%ziontypat)
