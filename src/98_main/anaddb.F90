@@ -623,7 +623,7 @@ program anaddb
      call gtdyn9(ddb%acell,Ifc%atmfrc,dielt,inp%dipdip,&
        Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,mpert,natom,&
        Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,&
-       Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff,qdrp_cart,xmpi_comm_self)
+       Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff,qdrp_cart,Ifc%ewald_option,xmpi_comm_self)
 
    else if (inp%ifcflag==0) then
 

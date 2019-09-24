@@ -389,10 +389,10 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  anaddb_dtset%dipdip=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread,'INT')
  if(tread==1) anaddb_dtset%dipdip=intarr(1)
- if(anaddb_dtset%dipdip<0.or.anaddb_dtset%dipdip>1)then
+ if(anaddb_dtset%dipdip<-1.or.anaddb_dtset%dipdip>1)then
    write(message, '(a,i0,5a)' )&
    'dipdip is ',anaddb_dtset%dipdip,', but the only allowed values',ch10,&
-   'are 0 or 1 .',ch10,'Action: correct dipdip in your input file.'
+   'are -1, 0 or 1 .',ch10,'Action: correct dipdip in your input file.'
    MSG_ERROR(message)
  end if
 

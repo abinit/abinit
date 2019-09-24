@@ -609,6 +609,10 @@ end subroutine ewald2
 !! xred(3,natom)=relative coords of atoms in unit cell (dimensionless)
 !! zeff(3,3,natom)=effective charge on each atom, versus electric
 !!  field and atomic displacement
+!! qdrp_cart(3,3,3,natom)=Quadrupole tensor on each atom in cartesian cordinates
+!! option= 0: use old implementation;
+!!         1: reduce the smalest argument of the exponentials to be evaluated,
+!!            set eta to 1 and skip real space sum, leads to a significant speedup
 !!
 !! OUTPUT
 !! dyew(2,3,natom,3,natom)= Ewald part of the dynamical matrix,
