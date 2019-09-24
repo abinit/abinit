@@ -99,17 +99,4 @@ inp_files = [
 "t92.in",
 "t93.in",
 "t94.in",
-#Electron-phonon
-"t150.in",
-"t151.in",
-"t152.in",
-"t153.in",
-"t154.in",
-"t155.in",
-"t156.in",
-"t157.in",
-"t158.in",
-"t159.in",
-"t160.in",
-"t161.in",
 ]
