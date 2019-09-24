@@ -95,8 +95,8 @@ MODULE m_dens
   real(dp) :: rprimd(3,3)
   ! Direct lattice vectors, Bohr units.
 
-  real(dp),allocatable :: chargeat(:)
-  ! chargeat(natom)
+  real(dp),allocatable :: chrgat(:)
+  ! chrgat(natom)
   ! Target charge for each atom. Not always used, it depends on the value of constraint_kind
 
   real(dp),allocatable :: intgf2(:)
@@ -779,7 +779,7 @@ end subroutine constrained_dft_free
 !! FUNCTION
 !! Recompute the residual to take into account the constraints, within constrained DFT.
 !! The kind of constraint is given by constraint_kind, and the target values are given by spinat, for the local atomic magnetization,
-!! and another future argument (possibly chargeat), for the local atomic charge.
+!! and another future argument (possibly chrgat), for the local atomic charge.
 
 !!
 !! INPUTS
@@ -886,7 +886,7 @@ end subroutine constrained_dft_free
 
    if(conkind >=10)then
 
-     coeffs_constr_dft(1,iatom)=intgden(1,iatom)-c_dft%chargeat(iatom)
+!    coeffs_constr_dft(1,iatom)=intgden(1,iatom)-c_dft%chrgat(iatom)
 
    endif
 
