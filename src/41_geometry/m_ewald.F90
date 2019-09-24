@@ -636,11 +636,12 @@ end subroutine ewald2
 !!
 !! SOURCE
 
-subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff,qdrp_cart)
+subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff,qdrp_cart,option)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,sumg0
+ integer,optional,intent(in) :: option
  real(dp),intent(in) :: ucvol
 !arrays
  real(dp),intent(in) :: acell(3),dielt(3,3),gmet(3,3),gprim(3,3),qphon(3)
@@ -651,7 +652,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 !Local variables -------------------------
 !scalars
  integer,parameter :: mr=10000,ny2_spline=1024*10
- integer :: i2,ia,ib,ig1,ig2,ig3,ii,ll,kk,ir,ir1,ir2,ir3,jj,mu,newg,newr,ng,nr,nu,ng_expxq
+ integer :: ia,ib,ig1,ig2,ig3,ii,ll,kk,ir,ir1,ir2,ir3,jj,mu,newg,newr,ng,nr,nu,ng_expxq
+ integer :: ewald_option
  logical :: do_quadrupole
  real(dp),parameter :: fac=4.0_dp/3.0_dp/sqrt(pi)
  real(dp),parameter :: fact2=2.0_dp/sqrt(pi)
@@ -680,13 +682,14 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    dyew = zero; return
  end if
  do_quadrupole = any(qdrp_cart /= zero)
+ ewald_option = 0; if (present(option)) ewald_option = option
 
  ! Keep track of total time spent.
  call timab(1749, 1, tsec)
 
 !This is the minimum argument of an exponential, with some safety
  minexparg=log(tiny(0._dp))+five
- !minexparg=-20.0_dp!log(tiny(0._dp))+five
+ if (ewald_option == 1) minexparg=-20.0_dp
 
  ABI_ALLOCATE(dyddt,(2,3,natom,3,natom))
  ABI_ALLOCATE(dydqt,(2,3,natom,3,natom,3))
@@ -722,6 +725,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  recip=gmet(1,1)+gmet(1,2)+gmet(1,3)+gmet(2,1)+&
 & gmet(2,2)+gmet(2,3)+gmet(3,1)+gmet(3,2)+gmet(3,3)
  eta=pi*100.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
+ if (ewald_option == 1) eta = one
  inv4eta = one / four / eta
 
  dyddt = zero
@@ -911,23 +915,24 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  inv_detdlt = one / sqrt(detdlt)
  fact3=reta3 * inv_detdlt
 
-!Preparing the loop on real space
+ if (ewald_option /= 1) then
+ ! Preparing the loop on real space
  do ia=1,natom
    do ii=1,3
      xredcar(ii,ia)=(xred(1,ia)*acell(1)*rprim(ii,1)+&
-&     xred(2,ia)*acell(2)*rprim(ii,2)+&
-&     xred(3,ia)*acell(3)*rprim(ii,3) )*reta
+                     xred(2,ia)*acell(2)*rprim(ii,2)+&
+                     xred(3,ia)*acell(3)*rprim(ii,3) )*reta
    end do
  end do
  do ia=1,natom
    do ii=1,3
      xredcax(ii,ia)= invdlt(1,ii)*xredcar(ii,ia)+&
-&     invdlt(2,ii)*xredcar(ii,ia)+&
-&     invdlt(3,ii)*xredcar(ii,ia)
+                     invdlt(2,ii)*xredcar(ii,ia)+&
+                     invdlt(3,ii)*xredcar(ii,ia)
    end do
  end do
 
-!Prepare the evaluation of exp(iq*R)
+ ! Prepare the evaluation of exp(iq*R)
  do ir=-mr,mr
    arg1=-two_pi*qphon(1)*ir
    arg2=-two_pi*qphon(2)*ir
@@ -943,37 +948,37 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  do nr=1,mr
    newr=0
 
-!  Begin big loop on real space vectors
+   ! Begin big loop on real space vectors
    do ir3=-nr,nr
      do ir2=-nr,nr
 
-!      Here, construct the cosine and sine of q*R for components 2 and 3
+       ! Here, construct the cosine and sine of q*R for components 2 and 3
        c23r = c2r(ir2+mr+1) * c3r(ir3+mr+1) - c2i(ir2+mr+1) * c3i(ir3+mr+1)
        c23i = c2i(ir2+mr+1) * c3r(ir3+mr+1) + c2r(ir2+mr+1) * c3i(ir3+mr+1)
 
-!      Also multiplies by fact3, because it is a rather economical place to do so
+       ! Also multiplies by fact3, because it is a rather economical place to do so
        c23r=c23r * fact3
        c23i=c23i * fact3
 
        do ir1=-nr,nr
          if( abs(ir3)==nr .or. abs(ir2)==nr .or. abs(ir1)==nr .or. nr==1 )then
 
-!          This is the real part and imaginary part of the phase factor exp(iq*R)
+           ! This is the real part and imaginary part of the phase factor exp(iq*R)
            c123r = c1r(ir1+mr+1) * c23r - c1i(ir1+mr+1) * c23i
            c123i = c1i(ir1+mr+1) * c23r + c1r(ir1+mr+1) * c23i
 
            do ii=1,3
              ircar(ii)= ( ir1*acell(1)*rprim(ii,1)+&
-&             ir2*acell(2)*rprim(ii,2)+&
-&             ir3*acell(3)*rprim(ii,3) ) * reta
+                          ir2*acell(2)*rprim(ii,2)+&
+                          ir3*acell(3)*rprim(ii,3) ) * reta
            end do
            do ii=1,3
-             ircax(ii)=   invdlt(1,ii)*ircar(ii)+&
-&             invdlt(2,ii)*ircar(ii)+&
-&             invdlt(3,ii)*ircar(ii)
+             ircax(ii)= invdlt(1,ii)*ircar(ii)+&
+                        invdlt(2,ii)*ircar(ii)+&
+                        invdlt(3,ii)*ircar(ii)
            end do
 
-!          Here loops on atoms
+           ! Here loops on atoms
            do ib=1,natom
              do ii=1,3
                xredicar(ii)=ircar(ii)-xredcar(ii,ib)
@@ -987,12 +992,12 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
                y2=rr(1)*xx(1)+rr(2)*xx(2)+rr(3)*xx(3)
 
-!              The atoms should not be too far of each other
+               ! The atoms should not be too far of each other
                if (y2 < y2max) then
-!                Note: erfc(8) is about 1.1e-29, so dont bother with larger y.
-!                Also: exp(-64) is about 1.6e-28, do dont bother with larger y**2 in exp.
+               ! Note: erfc(8) is about 1.1e-29, so dont bother with larger y.
+               ! Also: exp(-64) is about 1.6e-28, do dont bother with larger y**2 in exp.
 
-!                Avoid zero denominators in term:
+                 ! Avoid zero denominators in term:
                  if (y2 >= y2min) then
                    newr=1
                    yy=sqrt(y2)
@@ -1005,26 +1010,24 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                    term5=(3.0_dp*term2+term3*(3.0_dp+2.0_dp*y2))*invy2
                    do nu=1,3
                      do mu=nu,3
-                       dyddt(1,mu,ia,nu,ib)=dyddt(1,mu,ia,nu,ib)+&
-&                       c123r*(xx(nu)*xx(mu)*term5+term4*invdlt(nu,mu))
-                       dyddt(2,mu,ia,nu,ib)=dyddt(2,mu,ia,nu,ib)+&
-&                       c123i*(xx(nu)*xx(mu)*term5+term4*invdlt(nu,mu))
+                       dyddt(1,mu,ia,nu,ib)=dyddt(1,mu,ia,nu,ib)+c123r*(xx(nu)*xx(mu)*term5+term4*invdlt(nu,mu))
+                       dyddt(2,mu,ia,nu,ib)=dyddt(2,mu,ia,nu,ib)+c123i*(xx(nu)*xx(mu)*term5+term4*invdlt(nu,mu))
                      end do
                    end do
                  else
-!                  If zero denominator, the atoms should be identical
+                   ! If zero denominator, the atoms should be identical
                    if (ia/=ib)then
                      write(message, '(5a,i0,a,i0,a)' )&
-&                     'The distance between two atoms seem to vanish.',ch10,&
-&                     'This is not allowed.',ch10,&
-&                     'Action: check the input for the atoms number',ia,' and',ib,'.'
+                       'The distance between two atoms seem to vanish.',ch10,&
+                       'This is not allowed.',ch10,&
+                       'Action: check the input for the atoms number',ia,' and',ib,'.'
                      MSG_ERROR(message)
                    else
-!                    This is the correction when the atoms are identical
+                     ! This is the correction when the atoms are identical
                      do nu=1,3
                        do mu=1,3
                          dyddt(1,mu,ia,nu,ib)=dyddt(1,mu,ia,nu,ib)+&
-&                         fac*reta3*invdlt(nu,mu) * inv_detdlt
+                                  fac*reta3*invdlt(nu,mu) * inv_detdlt
                        end do
                      end do
                    end if
@@ -1037,10 +1040,11 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
      end do ! ir2
    end do ! ir3
 
-!  Check if new shell must be calculated
+   ! Check if new shell must be calculated
    if(newr==0)exit
    if(newr==1 .and. nr==mr) MSG_BUG('mr is too small')
  end do
+ end if ! check if should compute real part
 
 !Now, symmetrizes
  do ib=1,natom-1
