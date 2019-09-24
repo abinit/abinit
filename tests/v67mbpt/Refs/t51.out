@@ -141,10 +141,6 @@ _ WF disk file :      0.099 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
            getden2         -1
            getden3          0
            getden4          0
-           getscr1          0
-           getscr2          0
-           getscr3          0
-           getscr4          3
            getwfk1          0
            getwfk2          0
            getwfk3          2
@@ -677,7 +673,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
- mkfilename : getscr/=0, take file _SCR from output of DATASET   3.
+ mkfilename: getscr from: t51o_DS3_SCR
 
  mkfilename : getbsreso/=0, take file _BSR from output of DATASET   4.
 
@@ -1050,10 +1046,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
            getden2         -1
            getden3          0
            getden4          0
-           getscr1          0
-           getscr2          0
-           getscr3          0
-           getscr4          3
            getwfk1          0
            getwfk2          0
            getwfk3          2

@@ -16,9 +16,9 @@ This tutorial will help you to understand and make use of *optic*.
 Before starting, you should first have some theoretical background.
 We strongly suggest that you first read the first two sections of the [[help:optic]].
 
-[TUTORIAL_README]
-
 This tutorial should take about 1 hour.
+
+[TUTORIAL_README]
 
 ## Computing the momentum matrix elements
 
@@ -26,10 +26,10 @@ This tutorial should take about 1 hour.
 Why not create Work_optic?*
 
 We also need to copy *toptic_1.files* and *toptic_1.in* from 
-*$ABI_TUTORIAL/Input* to *Work_optic*.
+*$ABI_TESTS/tutorial/Input* to *Work_optic*.
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work_optic
 cd Work_optic
 cp ../toptic_1.files . 
@@ -96,7 +96,7 @@ response (up to second order in the current implementation) for the material und
 
 First, read the [[help:optic#input|section 3]] of the Optic help file.
 
-Copy the files *toptic_2.files* and *toptic_2.in* from *$ABI_TUTORIAL/Input* to *Work_optic*:
+Copy the files *toptic_2.files* and *toptic_2.in* from *$ABI_TESTS/tutorial/Input* to *Work_optic*:
 
 ```sh
 cp ../toptic_2.files .

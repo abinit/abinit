@@ -7,7 +7,7 @@
 !!   Driver for EPH calculations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2019 ABINIT group (MG, MVer,GA)
+!!  Copyright (C) 2009-2019 ABINIT group (MG, MVer, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,8 +29,6 @@ module m_eph_driver
  use defs_basis
  use m_errors
  use m_abicore
- use defs_datatypes
- use defs_abitypes
  use m_xmpi
  use m_xomp
  use m_hdr
@@ -38,6 +36,7 @@ module m_eph_driver
  use m_ebands
  use m_dtset
  use m_efmas_defs
+ use m_dtfil
  use m_ddk
  use m_ddb
  use m_dvdb
@@ -45,10 +44,13 @@ module m_eph_driver
  use m_phonons
  use m_nctk
  use m_wfk
+ use m_distribfft
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
+ use defs_datatypes, only : pseudopotential_type, ebands_t
+ use defs_abitypes, only : MPI_type
  use m_io_tools,        only : file_exists
  use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
@@ -227,8 +229,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  comm = xmpi_world; nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
 #ifndef HAVE_MPI_IBCAST
- do ii=1,20
-   MSG_WARNING("Your MPI library does not provide MPI_IBCAST. Calculations will be slow")
+ do ii=1,5
+   MSG_WARNING("Your MPI library does not provide MPI_IBCAST. Calculations parallelized over perturbations will be slow")
  end do
 #endif
 
@@ -664,18 +666,18 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  case (1)
    ! Compute phonon linewidths in metals.
-   call eph_phgamma(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
-     pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+   call eph_phgamma(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ddk, ifc, &
+     pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (2, -2)
    ! Compute electron-phonon matrix elements
-   call eph_gkk(wfk0_path,wfq_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,ebands_kq,dvdb,ifc,&
-     pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+   call eph_gkk(wfk0_path, wfq_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, ebands_kq, dvdb, ifc, &
+     pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (3)
    ! Compute phonon self-energy
-   call eph_phpi(wfk0_path,wfq_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,ebands_kq,dvdb,ifc,&
-     pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+   call eph_phpi(wfk0_path, wfq_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, ebands_kq, dvdb, ifc, &
+     pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (4, -4)
    ! Compute electron self-energy (phonon contribution)

@@ -520,7 +520,7 @@ if ( opts.run_source ):
        *** there is a syntax error in the Fortran code or a bug     ***
        *** See above error message.                                 ***
        *** Please note that procedures outside Fortran modules      ***
-       *** are not allowed any longer.                              ***
+       *** are not allowed any longer. See abisrc.stderr for errors ***
        ****************************************************************\n""")
     sys.stderr.write("[%s] Aborting now\n" % (my_name))
     sys.exit(1)

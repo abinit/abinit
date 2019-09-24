@@ -31,6 +31,7 @@ module m_epweights
  use m_abicore
  use m_errors
  use m_tetrahedron
+ !use m_htetra
  use m_xmpi
 
  use m_symtk,           only : matr3inv
@@ -1408,6 +1409,7 @@ subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax,
  character (len=500) :: message
  character (len=80) :: errstr
  type(t_tetrahedron) :: tetrahedra
+ !type(htetra_t) :: tetrahedra
 
 ! *************************************************************************
 
@@ -1430,7 +1432,10 @@ subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax,
    call matr3inv(rlatt,klatt)
 
    call init_tetra(k_obj%full2full(1,1,:), gprimd,klatt,k_obj%kpt, k_obj%nkpt,&
-&   tetrahedra, ierr, errstr, xmpi_comm_self)
+     tetrahedra, ierr, errstr, xmpi_comm_self)
+   !call htetra_init(tetra, k_obj%full2full(1,1,:), gprimd, klatt, k_obj%kpt, k_obj%nkpt, &
+   !                 k_obk%nkptirr, nkpt_ibz, ierr, errstr, xmpi_comm_self)
+
    ABI_CHECK(ierr==0,errstr)
 
    rcvol = abs (gprimd(1,1)*(gprimd(2,2)*gprimd(3,3)-gprimd(3,2)*gprimd(2,3)) &
@@ -1467,6 +1472,7 @@ subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax,
    ABI_DEALLOCATE(dtweightde)
 
    call destroy_tetra(tetrahedra)
+   !call tetrahedra%free()
 
  else if (telphint == 1) then
 

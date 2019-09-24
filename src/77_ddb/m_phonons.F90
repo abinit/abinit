@@ -29,7 +29,7 @@ module m_phonons
  use m_errors
  use m_xmpi
  use m_abicore
- use m_htetrahedron
+ use m_htetra
  use m_numeric_tools
  use m_crystal
  use m_nctk
@@ -41,15 +41,15 @@ module m_phonons
  use netcdf
 #endif
  use m_supercell
+ use m_dtset
 
  use m_fstrings,        only : itoa, ftoa, sjoin, ktoa, strcat, basename, replace
  use m_symtk,           only : matr3inv
  use m_time,            only : cwtime, cwtime_report
  use m_io_tools,        only : open_file
- use defs_abitypes,     only : dataset_type
  use m_geometry,        only : mkrdim, symredcart, normv
  use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph
- use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new, kpath_free
+ use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new
  use m_ifc,             only : ifc_type
  use m_anaddb_dataset,  only : anaddb_dataset_type
  use m_kpts,            only : kpts_ibz_from_kptrlatt, get_full_kgrid
@@ -434,8 +434,6 @@ end subroutine phdos_print_debye
 !!      anaddb,eph
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -551,8 +549,6 @@ end subroutine phdos_print_thermo
 !!      anaddb,eph
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -691,8 +687,6 @@ end subroutine phdos_init
 !!      anaddb,eph,m_tdep_phdos
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -725,7 +719,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
  real(dp) :: dosdeltae, phdos_int
  character(len=500) :: msg
  character(len=80) :: errstr
- type(t_htetrahedron) :: htetraq
+ type(htetra_t) :: htetraq
 !arrays
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
  integer,allocatable :: bz2ibz_smap(:,:), bz2ibz(:)
@@ -1178,8 +1172,6 @@ end subroutine mkphdos
 !!      anaddb
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1354,8 +1346,6 @@ end subroutine zacharias_supercell_make
 !! PARENTS
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1550,8 +1540,6 @@ end subroutine thermal_supercell_make
 !!      anaddb
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1592,8 +1580,6 @@ end subroutine thermal_supercell_free
 !!      anaddb
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1643,8 +1629,6 @@ end subroutine zacharias_supercell_print
 !!      anaddb
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1697,8 +1681,6 @@ end subroutine thermal_supercell_print
 !!      anaddb,eph
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1783,8 +1765,6 @@ end subroutine phdos_ncwrite
 !!      anaddb
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2024,10 +2004,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
        call phonons_write_gnuplot(prefix, natom, nfineqpath, save_qpoints, save_phfrq)
      end if
 
-   !case (3)
-     !call phonons_writeEPS(natom,nfineqpath,Crystal%ntypat,Crystal%typat, &
-     !  save_phfrq,save_phdispl_cart)
-
    case default
      MSG_WARNING(sjoin("Don't know how to handle prtphbands:", itoa(inp%prtphbands)))
    end select
@@ -2094,8 +2070,6 @@ end subroutine mkphbs
 !!      m_phonons
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2164,8 +2138,6 @@ end subroutine phdos_calc_vsound
 !!      m_phonons
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2231,8 +2203,6 @@ end subroutine phdos_print_vsound
 !!      anaddb
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2392,8 +2362,6 @@ end subroutine phdos_print_msqd
 !!      m_phonons
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2474,8 +2442,6 @@ end subroutine phonons_ncwrite
 !!      m_phonons
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2554,413 +2520,6 @@ end subroutine phonons_write_phfrq
 
 !----------------------------------------------------------------------
 
-!!****f* m_phonons/phonons_writeEPS
-!! NAME
-!! phonons_writeEPS
-!!
-!! FUNCTION
-!!  Write phonons bands in EPS format. This routine should be called by a single processor.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
-!!
-!! SOURCE
-
-subroutine phonons_writeEPS(natom,nqpts,ntypat,typat,phfreq,phdispl_cart)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: natom,nqpts,ntypat
-!arrays
- integer,intent(in) :: typat(natom)
- real(dp),intent(in) :: phfreq(3*natom,nqpts)
- real(dp),intent(in) :: phdispl_cart(2,3*natom,3*natom,nqpts)
-
-!Local variables-------------------------------
-!scalars
- integer :: cunits,EmaxN,EminN,gradRes,kmaxN,kminN,lastPos,pos,posk
- integer :: iatom,ii,imode,iqpt,jj,nqpt
- integer :: option,unt
- real(dp) :: E,Emax,Emin,deltaE
- real(dp) :: facUnit,norm,renorm
- character(len=500) :: msg
- logical :: set_color = .true.
-!array
- complex(dpc) :: displcpx(3*natom,3*natom,nqpts)
- integer,allocatable :: nqptl(:)
- real(dp),allocatable :: phfrq(:),phfrqqm1(:),scale(:)
- real(dp),allocatable :: colorAtom(:,:),color(:,:)
- real(dp),allocatable :: displ(:,:)
- character(len=6),allocatable :: qname(:)
-
-! *********************************************************************
-
-
- if (open_file("PHFRQ.eps", msg, unit=unt, form="formatted", status="unknown", action="write") /= 0) then
-   MSG_ERROR(msg)
- end if
-
-!Multiplication factor for units (from Hartree to cm-1 or THz)
- if(cunits==1) then
-   facUnit=Ha_cmm1
- elseif(cunits==2) then
-   facUnit=Ha_THz
- else
- end if
-
-!Boundings of the plot (only the plot and not what is around)
- EminN=6900
- EmaxN=2400
- kminN=2400
- kmaxN=9600
-
-!convert phdispl_cart in cpx array
- displcpx = dcmplx(phdispl_cart(1,:,:,:),phdispl_cart(2,:,:,:))
-
-!Read the input file, and store the information in a long string of characters
-!strlen from defs_basis module
- option = 1
-
-!Allocate dynamique variables
- ABI_ALLOCATE(phfrqqm1,(3*natom))
- ABI_ALLOCATE(phfrq,(3*natom))
- ABI_ALLOCATE(color,(3,3*natom))
- ABI_ALLOCATE(qname,(nqpts+1))
- ABI_ALLOCATE(scale,(nqpts))
- ABI_ALLOCATE(nqptl,(nqpts))
- ABI_ALLOCATE(colorAtom,(3,natom))
-!colorAtom(1,1:5) : atoms contributing to red (ex : [1 0 0 0 0])
-!colorAtom(2,1:5) : atoms contributing to green (ex : [0 1 0 0 0])
-!colorAtom(3,1:5) : atoms contributing to blue (ex : [0 0 1 1 1])
- ABI_ALLOCATE(displ,(natom,3*natom))
-
-
-
-!TEST_AM TO DO
-!Set Values
- if(ntypat /= 3) then
-   set_color = .false.
- else
-   color = zero
-   do ii=1,natom
-     if(typat(ii)==1) colorAtom(1,ii) = one
-     if(typat(ii)==2) colorAtom(2,ii) = one
-     if(typat(ii)==3) colorAtom(3,ii) = one
-   end do
- end if
-
- Emin = -300.0
- Emax =   800.0
- gradRes = 8
- cunits = 1
- qname(:) = "T"
-!Read end of input file
- ! read(21,*)
- ! read(21,*) (qname(ii),ii=1,nqpts+1)
- ! read(21,*)
- ! read(21,*) (nqptl(ii),ii=1,nqpts)
- ! read(21,*)
- ! read(21,*) (scale(ii),ii=1,nqpts)
- ! read(21,*)
- ! read(21,*)
- ! read(21,*)
- ! read(21,*) (colorAtom(1,ii),ii=1,natom)
- ! read(21,*)
- ! read(21,*) (colorAtom(2,ii),ii=1,natom)
- ! read(21,*)
- ! read(21,*) (colorAtom(3,ii),ii=1,natom)
-!calculate nqpt
- nqpt=0
- do ii=1,nqpts
-   nqpt=nqpt+nqptl(ii)
- end do
-!compute normalisation factor
- renorm=0
- do ii=1,nqpts
-   renorm=renorm+nqptl(ii)*scale(ii)
- end do
- renorm=renorm/nqpt
-!Calculate Emin and Emax
- Emin=Emin/FacUnit
- Emax=Emax/FacUnit
-
-!*******************************************************
-!Begin to write some comments in the eps file
-!This is based to 'xfig'
-
- write(unt,'(a)') '% !PS-Adobe-2.0 EPSF-2.0'
- write(unt,'(a)') '%%Title: band.ps'
- write(unt,'(a)') '%%BoundingBox: 0 0 581 310'
- write(unt,'(a)') '%%Magnification: 1.0000'
-
- write(unt,'(a)') '/$F2psDict 200 dict def'
- write(unt,'(a)') '$F2psDict begin'
- write(unt,'(a)') '$F2psDict /mtrx matrix put'
- write(unt,'(a)') '/col-1 {0 setgray} bind def'
- write(unt,'(a)') '/col0 {0.000 0.000 0.000 srgb} bind def'
- write(unt,'(a)') 'end'
- write(unt,'(a)') 'save'
- write(unt,'(a)') 'newpath 0 310 moveto 0 0 lineto 581 0 lineto 581 310 lineto closepath clip newpath'
- write(unt,'(a)') '-36.0 446.0 translate'
- write(unt,'(a)') '1 -1 scale'
-
- write(unt,'(a)') '/cp {closepath} bind def'
- write(unt,'(a)') '/ef {eofill} bind def'
- write(unt,'(a)') '/gr {grestore} bind def'
- write(unt,'(a)') '/gs {gsave} bind def'
- write(unt,'(a)') '/sa {save} bind def'
- write(unt,'(a)') '/rs {restore} bind def'
- write(unt,'(a)') '/l {lineto} bind def'
- write(unt,'(a)') '/m {moveto} bind def'
- write(unt,'(a)') '/rm {rmoveto} bind def'
- write(unt,'(a)') '/n {newpath} bind def'
- write(unt,'(a)') '/s {stroke} bind def'
- write(unt,'(a)') '/sh {show} bind def'
- write(unt,'(a)') '/slc {setlinecap} bind def'
- write(unt,'(a)') '/slj {setlinejoin} bind def'
- write(unt,'(a)') '/slw {setlinewidth} bind def'
- write(unt,'(a)') '/srgb {setrgbcolor} bind def'
- write(unt,'(a)') '/rot {rotate} bind def'
- write(unt,'(a)') '/sc {scale} bind def'
- write(unt,'(a)') '/sd {setdash} bind def'
- write(unt,'(a)') '/ff {findfont} bind def'
- write(unt,'(a)') '/sf {setfont} bind def'
- write(unt,'(a)') '/scf {scalefont} bind def'
- write(unt,'(a)') '/sw {stringwidth} bind def'
- write(unt,'(a)') '/tr {translate} bind def'
- write(unt,'(a)') '/tnt {dup dup currentrgbcolor'
-
- write(unt,'(a)') '4 -2 roll dup 1 exch sub 3 -1 roll mul add'
- write(unt,'(a)') '4 -2 roll dup 1 exch sub 3 -1 roll mul add'
- write(unt,'(a)') '4 -2 roll dup 1 exch sub 3 -1 roll mul add srgb}'
- write(unt,'(a)') 'bind def'
- write(unt,'(a)') '/shd {dup dup currentrgbcolor 4 -2 roll mul 4 -2 roll mul'
- write(unt,'(a)') ' 4 -2 roll mul srgb} bind def'
- write(unt,'(a)') '/$F2psBegin {$F2psDict begin /$F2psEnteredState save def} def'
- write(unt,'(a)') '/$F2psEnd {$F2psEnteredState restore end} def'
- write(unt,'(a)') '$F2psBegin'
- write(unt,'(a)') '%%Page: 1 1'
- write(unt,'(a)') '10 setmiterlimit'
- write(unt,'(a)') '0.06000 0.06000 sc'
-
-!****************************************************************
-!Begin of the intelligible part of the postcript document
-
- write(unt,'(a)') '%**************************************'
-!****************************************************************
-!Draw the box containing the plot
- write(unt,'(a)') '%****Big Box****'
- write(unt,'(a)') '16 slw'
- write(unt,'(a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ', EmaxN,&
-& ' m ', kmaxN,' ', EmaxN, ' l ', &
-& kmaxN,' ', EminN, ' l ', kminN,' ', EminN, ' l'
- write(unt,'(a)') 'cp gs col0 s gr'
-
-!****************************************************************
-!Write unit on the middle left of the vertical axe
- write(unt,'(a)') '%****Units****'
- if(cunits==1) then
-!  1/lambda
-   write(unt,'(a)') '/Times-Roman ff 270.00 scf sf'
-   write(unt,'(a)') '1425 5650 m'
-   write(unt,'(3a)') 'gs 1 -1 sc  90.0 rot (Frequency ',achar(92),'(cm) col0 sh gr'
-!  cm-1
-   write(unt,'(a)') '/Times-Roman ff 200.00 scf sf'
-   write(unt,'(a)') '1325 4030 m'
-   write(unt,'(a)') 'gs 1 -1 sc 90.0 rot  (-1) col0 sh gr'
-   write(unt,'(a)') '/Times-Roman ff 270.00 scf sf'
-   write(unt,'(a)') '1425 3850 m'
-   write(unt,'(3a)') 'gs 1 -1 sc  90.0 rot (',achar(92),')) col0 sh gr'
- else
-!  Freq
-   write(unt,'(a)') '/Times-Roman ff 270.00 scf sf'
-   write(unt,'(a)') '825 4850 m'
-   write(unt,'(a)') 'gs 1 -1 sc  90.0 rot (Freq) col0 sh gr'
-!  THz
-   write(unt,'(a)') '/Times-Roman ff 270.00 scf sf'
-   write(unt,'(a)') '825 4350 m'
-   write(unt,'(a)') 'gs 1 -1 sc 90.0 rot  (THz) col0 sh gr'
- end if
-!*****************************************************************
-!Write graduation on the vertical axe
- write(unt,'(a)') '%****Vertical graduation****'
- deltaE=(Emax-Emin)/gradRes
-
-!Replacing do loop with real variables with standard g95 do loop
- E=Emin
- do
-!  do E=Emin,(Emax-deltaE/2),deltaE
-   if (E >= (Emax-deltaE/2)-tol6) exit
-   pos=int(((EminN-EmaxN)*E &
-&   +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
-
-!  write the value of energy(or frequence)
-   write(unt,'(a)') '/Times-Roman ff 270.00 scf sf'
-   write(unt,'(i4,a,i4,a)') kminN-800,' ',pos+60,' m'        !-1300 must be CHANGED
-!  as a function of the width of E
-   write(unt,'(a,i6,a)') 'gs 1 -1 sc (', nint(E*facUnit),') col0 sh gr'
-
-!  write a little bar
-   write(unt,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ',pos ,' m ', kminN+100,' ', pos, ' l'
-   write(unt,'(a)') 'gs col0 s gr '
-
-   E = E+deltaE
- end do
-
-!do the same thing for E=Emax (floating point error)
- write(unt,'(a)') '/Times-Roman ff 270.00 scf sf'
- write(unt,'(i4,a,i4,a)') kminN-800,' ',EmaxN+60,' m'        !-1300 must be changed as E
- write(unt,'(a,i6,a)') 'gs 1 -1 sc (', nint(Emax*facUnit),') col0 sh gr'
-
-
-!draw zero line
- E=0
- pos=int(((EminN-EmaxN)*E &
-& +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
- write(unt,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ',pos ,' m ', kmaxN,' ', pos, ' l'
- write(unt,'(a)') 'gs col0 s gr '
-
-
-!******************************************************
-!draw legend of horizontal axe
-!+vertical line
-
- write(unt,'(a)') '%****Horizontal graduation****'
-
- lastPos=kminN
-
- do ii=0,nqpts
-
-   if(ii/=0) then
-     posk=int(((kminN-kmaxN)*(nqptl(ii))) &
-&     *scale(ii)/renorm/(-nqpt))
-   else
-     posk=0
-   end if
-
-   posk=posk+lastPos
-   lastPos=posk
-
-   if(qname(ii+1)=='gamma') then             !GAMMA
-     write(unt,'(a)') '/Symbol ff 270.00 scf sf'
-     write(unt,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
-     write(unt,'(a)') 'gs 1 -1 sc (G) col0 sh gr'
-   elseif(qname(ii+1)=='lambda') then              !LAMBDA
-     write(unt,'(a)') '/Symbol ff 270.00 scf sf'
-     write(unt,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
-     write(unt,'(a)') 'gs 1 -1 sc (L) col0 sh gr'
-   else                                     !autre
-     write(unt,'(a)') '/Times-Roman ff 270.00 scf sf'
-     write(unt,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
-     write(unt,'(a,a1,a)') 'gs 1 -1 sc (',qname(ii+1),') col0 sh gr'
-   end if
-
-
-!  draw vertical line
-   write(unt,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', posk,' ',EminN ,' m ', posk,' ', EmaxN, ' l'
-   write(unt,'(a)') 'gs col0 s gr '
-
-
- end do
-
-
-
-
-!***********************************************************
-!Write the bands (the most important part actually)
-
- write(unt,'(a)') '%****Write Bands****'
-
-
-! read(19,*) (phfrqqm1(ii),ii=1,3*natom)
- jj = 1
- lastPos=kminN
- do iqpt=1,nqpts
-!  Copy frequency of the qpoint
-   phfrqqm1(:) = phfreq(:,iqpt)
-!  Set displacement
-   do ii=1,3*natom
-     do iatom=1,natom
-       displ(iatom,ii) =  real(sqrt(displcpx(3*(iatom-1)+1,ii,iqpt)*   &
-           conjg(displcpx(3*(iatom-1)+1,ii,iqpt)) + &
-&                displcpx(3*(iatom-1)+2,ii,iqpt)*   &
-&          conjg(displcpx(3*(iatom-1)+2,ii,iqpt)) + &
-&               displcpx(3*(iatom-1)+3,ii,iqpt)*   &
-&          conjg(displcpx(3*(iatom-1)+3,ii,iqpt)) ))
-     end do
-   end do
-
-
-   do imode=1,3*natom
-!    normalize displ
-     norm=0
-     do iatom=1,natom
-       norm=norm+displ(iatom,imode)
-     end do
-
-     do iatom=1,natom
-       displ(iatom,imode)=displ(iatom,imode)/norm
-     end do
-
-!    Treat color
-     color(:,imode)=0
-     if(set_color)then
-       do ii=1,natom
-!        Red
-         color(1,imode)=color(1,imode)+displ(ii,imode)*colorAtom(1,ii)
-!        Green
-         color(2,imode)=color(2,imode)+displ(ii,imode)*colorAtom(2,ii)
-!        Blue
-         color(3,imode)=color(3,imode)+displ(ii,imode)*colorAtom(3,ii)
-       end do
-     end if
-
-     pos=int(((EminN-EmaxN)*phfrqqm1(imode) &
-&     +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
-
-     posk=int(((kminN-kmaxN)*(iqpt-1) &
-&        *scale(jj)/renorm/(-nqpts)))
-     posk=posk+lastPos
-     write(unt,'(a,i4,a,i4,a)') 'n ',posk,' ',pos,' m'
-     pos=int(((EminN-EmaxN)*phfrq(imode) &
-&       +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
-     posk=int(((kminN-kmaxN)*(iqpt) &
-&       *scale(jj)/renorm/(-nqpts)))
-     posk=posk+lastPos
-     write(unt,'(i4,a,i4,a)') posk,' ',pos,' l gs'
-
-     if(set_color) then     !(in color)
-       write(unt,'(f6.3,a,f6.3,a,f6.3,a)') color(1,imode),' ', &
-&        color(2,imode),' ',color(3,imode), ' srgb s gr'
-     else
-       write(unt,'(f6.3,a,f6.3,a,f6.3,a)') 0.0,' ', &
-&        0.0,' ',0.0, ' srgb s gr'
-     end if
-   end do
-   lastPos=posk
- end do
-
-
-!**********************************************************
-!Ending the poscript document
- write(unt,'(a)') '$F2psEnd'
- write(unt,'(a)') 'rs'
-
-! *************************************************************************
- close(unt)
-
-end subroutine phonons_writeEPS
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_phonons/phonons_write_xmgrace
 !! NAME
 !! phonons_write_xmgrace
@@ -2983,8 +2542,6 @@ end subroutine phonons_writeEPS
 !!      m_phonons
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -3112,8 +2669,6 @@ end subroutine phonons_write_xmgrace
 !!      m_phonons
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -3242,8 +2797,6 @@ end subroutine phonons_write_gnuplot
 !!      eph
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -3274,7 +2827,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
    MSG_COMMENT("ph_nqpath <= 0 or ph_ndivsm <= 0. Phonon bands won't be produced. Returning")
    return
  end if
- call wrtout(std_out, "Writing phonon bands, use prtphbands 0 to disable this part")
+ call wrtout(std_out, " Writing phonon bands, use prtphbands 0 to disable this part")
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  natom = cryst%natom
@@ -3360,7 +2913,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  ABI_FREE(phdispl_cart)
  ABI_FREE(eigvec)
 
- call kpath_free(qpath)
+ call qpath%free()
 
 end subroutine ifc_mkphbs
 !!***

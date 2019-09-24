@@ -35,6 +35,7 @@ MODULE m_results_gs
  use m_yaml
  use m_crystal
  use m_stream_string
+ use m_dtset
  use m_pair_list
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -44,7 +45,6 @@ MODULE m_results_gs
  use m_io_tools,      only : file_exists
  use m_fstrings,      only : sjoin
  use m_numeric_tools, only : get_trace
- use defs_abitypes,   only : dataset_type
 
  implicit none
 

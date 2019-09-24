@@ -31,13 +31,19 @@ MODULE m_self
  use m_errors
  use m_abicore
 
- use m_oper,     only : oper_type
- use m_matlu,    only : matlu_type
  use m_fstrings, only : int2char4
+ use m_crystal,  only : crystal_t
+ use m_hu, only : hu_type
+ use m_io_tools, only : get_unit
+ use m_pawang, only : pawang_type
+ use m_paw_dmft, only : paw_dmft_type
+ use m_matlu, only : matlu_type, copy_matlu,shift_matlu,diag_matlu,rotate_matlu,init_matlu,destroy_matlu,print_matlu,zero_matlu
+ use m_oper, only : oper_type,init_oper,destroy_oper, loc_oper, print_oper
+ use m_datafordmft, only : compute_levels
 
  implicit none
 
- private 
+ private
 
  public :: alloc_self
  public :: initialize_self
@@ -130,12 +136,6 @@ CONTAINS  !=====================================================================
 
 subroutine alloc_self(self,paw_dmft,opt_oper,wtype)
 
- use defs_basis
- use defs_abitypes
- use m_crystal, only : crystal_t
- use m_oper, only : init_oper
- use m_paw_dmft, only: paw_dmft_type
-
 !Arguments ------------------------------------
 !scalars
 !type
@@ -168,7 +168,7 @@ subroutine alloc_self(self,paw_dmft,opt_oper,wtype)
  self%dmft_nwlo=paw_dmft%dmft_nwlo
  self%dmft_nwli=paw_dmft%dmft_nwli
  self%iself_cv=0
- 
+
  call init_oper(paw_dmft,self%hdc,opt_ksloc=optoper)
  ABI_DATATYPE_ALLOCATE(self%oper,(self%nw))
  do ifreq=1,self%nw
@@ -193,16 +193,16 @@ end subroutine alloc_self
 !!  Initialize self-energy.
 !!
 !! INPUTS
-!!  cryst_struc <type(crystal_t)>=variables related to crystal structure 
+!!  cryst_struc <type(crystal_t)>=variables related to crystal structure
 !!  self <type(self_type)>= variables related to self-energy
 !!  paw_dmft <type(paw_dmft_type)> =  variables related to self-consistent LDA+DMFT calculations.
-!!  opt_read =  not used for the moment 
+!!  opt_read =  not used for the moment
 !!  wtype = "real" Self energy will be computed for real frequencies
 !!        = "imag" Self energy will be computed for imaginary frequencies
 !!
 !! OUTPUTS
 !!  self <type(self_type)>= variables related to self-energy
-!! 
+!!
 !!
 !! PARENTS
 !!      m_dmft,spectral_function
@@ -213,13 +213,6 @@ end subroutine alloc_self
 !! SOURCE
 
 subroutine initialize_self(self,paw_dmft,wtype)
-
- use defs_basis
- use defs_abitypes
- use m_crystal, only : crystal_t
- use m_oper, only : init_oper,loc_oper
- use m_matlu, only : print_matlu
- use m_paw_dmft, only: paw_dmft_type
 
 !Arguments ------------------------------------
 !scalars
@@ -238,7 +231,7 @@ subroutine initialize_self(self,paw_dmft,wtype)
    wtype2="imag"
  endif
 
- 
+
  call alloc_self(self,paw_dmft,opt_oper=2,wtype=wtype2) !  opt_oper=1 is not useful and not implemented
  do ifreq=1,self%nw
    do iatom=1,paw_dmft%natom
@@ -277,10 +270,6 @@ end subroutine initialize_self
 !! SOURCE
 
 subroutine destroy_self(self)
-
- use defs_basis
- use m_crystal, only : crystal_t
- use m_oper, only : destroy_oper
 
 !Arguments ------------------------------------
 !scalars
@@ -321,7 +310,7 @@ end subroutine destroy_self
 !!  option = 1 Do not print double counting.
 !!           2 Print double counting
 !!  paw_dmft <type(paw_dmft_type)> =  variables related to self-consistent LDA+DMFT calculations.
-!!  prtopt = integer which precises the amount of printing in the subroutine called 
+!!  prtopt = integer which precises the amount of printing in the subroutine called
 !!
 !! OUTPUT
 !!  self <type(self_type)>= variables related to self-energy
@@ -335,11 +324,6 @@ end subroutine destroy_self
 !! SOURCE
 
 subroutine print_self(self,prtdc,paw_dmft,prtopt)
-
- use defs_basis
- use m_oper, only : print_oper
- use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : print_matlu
 
 !Arguments ------------------------------------
 !type
@@ -379,12 +363,12 @@ end subroutine print_self
 !!
 !! INPUTS
 !!  charge_loc(cryst_struc%natom,paw_dmft%nsppol+1)= total charge for correlated electrons on a given atom, and for spin
-!!  cryst_struc <type(crystal_t)>=variables related to crystal structure 
+!!  cryst_struc <type(crystal_t)>=variables related to crystal structure
 !!  hu <type(hu_type)>= variables related to the interaction between electrons
 !!  self <type(self_type)>= variables related to self-energy
 !!  dmft_dc = 1 Full localized Limit double counting.
 !!           2 Around Mean Field (without SO)
-!!           0 not double counting 
+!!           0 not double counting
 !!  prtopt = integer which precises the amount of printing (not used here)
 !!
 !! OUTPUT
@@ -400,11 +384,6 @@ end subroutine print_self
 !! SOURCE
 
 subroutine dc_self(charge_loc,cryst_struc,hu,self,dmft_dc,prtopt)
-
- use defs_basis
- use m_crystal, only : crystal_t
- use m_paw_dmft, only : paw_dmft_type
- use m_hu, only : hu_type
 
 !Arguments ------------------------------------
 !type
@@ -463,17 +442,17 @@ subroutine dc_self(charge_loc,cryst_struc,hu,self,dmft_dc,prtopt)
                  self%hdc%matlu(iatom)%mat(m1,m1,isppol,ispinor,ispinor)=  &
 &                  hu(cryst_struc%typat(iatom))%upawu * charge_loc(iatom,2-isppol+1) &
 &                  +  (hu(cryst_struc%typat(iatom))%upawu - hu(cryst_struc%typat(iatom))%jpawu )&
-&                  *charge_loc(iatom,isppol)*(float(2*lpawu))/(float(2*lpawu+1)) 
+&                  *charge_loc(iatom,isppol)*(float(2*lpawu))/(float(2*lpawu+1))
                 else  if(nsppol==1) then
                   self%hdc%matlu(iatom)%mat(m1,m1,isppol,ispinor,ispinor)=  &
 &                   hu(cryst_struc%typat(iatom))%upawu * charge_loc(iatom,isppol) &
 &                    +  (hu(cryst_struc%typat(iatom))%upawu - hu(cryst_struc%typat(iatom))%jpawu )&
-&                   *charge_loc(iatom,isppol)*(float(2*lpawu))/(float(2*lpawu+1)) 
+&                   *charge_loc(iatom,isppol)*(float(2*lpawu))/(float(2*lpawu+1))
                 endif
 !                 write(std_out,*) "AMF",  charge_loc(iatom,2-isppol+1)
 !                 write(std_out,*) "AMF",  charge_loc(iatom,isppol+1)
 !                 write(std_out,*) "AMF",  lpawu
-!                 write(std_out,*) "AMF",  hu(cryst_struc%typat(iatom))%upawu 
+!                 write(std_out,*) "AMF",  hu(cryst_struc%typat(iatom))%upawu
 !                 write(std_out,*) "AMF", self%hdc%matlu(iatom)%mat(m1,m1,isppol,ispinor,ispinor)
              endif
            else
@@ -497,12 +476,12 @@ end subroutine dc_self
 !! rw_self
 !!
 !! FUNCTION
-!!  
+!!
 !!
 !! INPUTS
 !!  self <type(self_type)>= variables related to self-energy
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
-!!  prtopt = integer which precises the amount of printing 
+!!  prtopt = integer which precises the amount of printing
 !!  opt_rw = 1  Read Self-Energy.
 !!           2  Write Self-Energy.
 !!           3  Impose Self-Energy.
@@ -519,21 +498,9 @@ end subroutine dc_self
 
 subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,opt_selflimit,opt_hdc,opt_stop,pawang,cryst_struc)
 
- use defs_basis
- use defs_abitypes
-
- use m_io_tools, only : get_unit
- use m_crystal, only : crystal_t
- use m_pawang, only : pawang_type
- use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : copy_matlu,shift_matlu,diag_matlu,rotate_matlu,init_matlu,destroy_matlu,print_matlu,zero_matlu
- use m_oper, only : oper_type,init_oper,destroy_oper
- use m_datafordmft, only : compute_levels
-
 !Arguments ------------------------------------
 !type
  type(self_type),intent(inout) :: self
- !type(MPI_type), intent(in) :: mpi_enreg
  type(paw_dmft_type), intent(inout) :: paw_dmft
  integer,intent(in) :: prtopt
  integer,intent(in),optional :: opt_rw,istep_iter,opt_imagonly
@@ -658,7 +625,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    call print_matlu(self%oper(2)%matlu,natom,1,compl=1,opt_exp=1)
    call diag_matlu(energy_level%matlu,level_diag,natom,&
 &   prtopt=prtopt,eigvectmatlu=eigvectmatlu,&
-&   test=paw_dmft%dmft_solv)  
+&   test=paw_dmft%dmft_solv)
    write(message,'(a,2x,a,f13.5)') ch10,&
 &   " == Print Diagonalized levels for Fermi Level=",paw_dmft%fermie
    call wrtout(std_out,message,'COLL')
@@ -741,7 +708,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
            if(self%w_type=="real") then
              if (optrw==1) then
                tmpfil = trim(paw_dmft%filnamei)//'Self_ra-omega_iatom'//trim(tag_at)//'_isppol'//tag_is
-             else 
+             else
                tmpfil = trim(paw_dmft%filapp)//'Self_ra-omega_iatom'//trim(tag_at)//'_isppol'//tag_is
              endif
            else
@@ -827,7 +794,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 &             ,"####",natom,nsppol,nspinor,ndim,self%nw,paw_dmft%fermie
              call wrtout(unitselffunc_arr(iall),message,'COLL')
            else if(optrw==1.and.iexist2==1.and.readimagonly==0) then
-             read(unitselffunc_arr(iall),*) 
+             read(unitselffunc_arr(iall),*)
              read(unitselffunc_arr(iall),*,iostat=ioerr)&
 &              chtemp,natom_read,nsppol_read,nspinor_read,ndim_read,nw_read,fermie_read
              if(ioerr<0) then
@@ -841,7 +808,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 &               ch10,"     nspinor",nspinor_read,&
 &               ch10,"     ndim",ndim_read, &
 &               ch10,"     nw",nw_read, &
-&               ch10,"     Fermi level",fermie_read 
+&               ch10,"     Fermi level",fermie_read
                call wrtout(std_out,message,'COLL')
                if((natom/=natom_read).or.(nsppol_read/=nsppol).or.&
 &                (nspinor/=nspinor_read).or.(nw_read/=self%nw)) then
@@ -851,7 +818,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 &                 ch10,"     nspinor",nspinor,&
 &                 ch10,"     ndim",ndim, &
 &                 ch10,"     nw",self%nw, &
-&                 ch10,"     Fermi level",paw_dmft%fermie 
+&                 ch10,"     Fermi level",paw_dmft%fermie
                  call wrtout(std_out,message,'COLL')
                  message = "Dimensions in self are not correct"
                  if(readimagonly==1.or.present(opt_stop)) then
@@ -1077,7 +1044,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                  self%hdc%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)=czero
                enddo
              enddo
-           else 
+           else
             write(std_out,*) "     self%hdc fixed in kramerskronig_self"
            endif
            close(unitselffunc_arr(iall))
@@ -1107,11 +1074,11 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    end do
    ABI_DATATYPE_DEALLOCATE(eigvectmatlu)
    ABI_DEALLOCATE(unitselfrot) ! 7 is the max ndim possible
- endif 
+ endif
 !   - For the Tentative rotation of the self-energy file (end destroy)
 
 !  ===========================
-!  == Error messages 
+!  == Error messages
 !  ===========================
  if(optrw==1) then
 !   call xmpi_barrier(spacecomm)
@@ -1166,13 +1133,13 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    else ! test read successfull
 !   call xmpi_barrier(spacecomm)
 !! lignes 924-928 semblent inutiles puisque la valeur de paw_dmft%fermie creee
-!! en ligne 927 est ecrasee en ligne 992. BA+jmb 
+!! en ligne 927 est ecrasee en ligne 992. BA+jmb
 !!     ABI_ALLOCATE(fermie_read2,(1))
 !!     fermie_read2(1)=fermie_read
 !!     call xmpi_sum(fermie_read2,spacecomm ,ier)
 !!     paw_dmft%fermie=fermie_read2(1)
 !!     ABI_DEALLOCATE(fermie_read2)
-  
+
 !  ===========================
 !   bcast to other proc
 !  ===========================
@@ -1183,7 +1150,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      fermie_read2=zero
    !write(std_out,*) self%nw
      if(myproc==master) then
-     
+
 !               == Send read data to all process
        icount=0
        fermie_read2(1)=fermie_read
@@ -1225,7 +1192,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      endif
 !    call xmpi_bcast(buffer,master,spacecomm ,ier)
 !    call xmpi_sum(iexit,spacecomm ,ier)
-!!JB call xmpi_barrier(spacecomm) 
+!!JB call xmpi_barrier(spacecomm)
      call xmpi_sum(buffer,spacecomm ,ier)
 !!JB call xmpi_barrier(spacecomm)
 
@@ -1352,7 +1319,7 @@ end subroutine rw_self
 !! new_self
 !!
 !! FUNCTION
-!!  
+!!
 !!  Mix Old and New self_energy with the mixing coefficient dmft_mxsf
 !!
 !! INPUTS
@@ -1373,12 +1340,6 @@ end subroutine rw_self
 !! SOURCE
 
 subroutine new_self(self,self_new,paw_dmft,opt_mix)
-
- use defs_basis
- use defs_abitypes
- use m_crystal, only : crystal_t
- use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : copy_matlu
 
 !Arguments ------------------------------------
 !type
@@ -1443,11 +1404,11 @@ subroutine new_self(self,self_new,paw_dmft,opt_mix)
  call wrtout(std_out,message,'COLL')
  if(diff_self<paw_dmft%dmft_fermi_prec.and.sum_self>tol6.and.paw_dmft%idmftloop>=2) then
     write(message,'(a,8x,a,e9.2,a,8x,a)') ch10, "Change of self =<", paw_dmft%dmft_fermi_prec,&
-&    ch10,"DMFT Loop: Self Energy is converged" 
+&    ch10,"DMFT Loop: Self Energy is converged"
     call wrtout(std_out,message,'COLL')
     self%iself_cv=1
  else
-    write(message,'(a,8x,a)') ch10,"DMFT Loop: Self Energy is not converged" 
+    write(message,'(a,8x,a)') ch10,"DMFT Loop: Self Energy is not converged"
     call wrtout(std_out,message,'COLL')
     self%iself_cv=0
  endif
@@ -1477,12 +1438,6 @@ end subroutine new_self
 !! SOURCE
 
 subroutine make_qmcshift_self(cryst_struc,hu,self,apply)
-
- use defs_basis
- use m_paw_dmft, only : paw_dmft_type
- use m_crystal, only : crystal_t
- use m_hu, only : hu_type
- use m_matlu, only : shift_matlu
 
 !Arguments ------------------------------------
 !type
@@ -1575,10 +1530,6 @@ end subroutine make_qmcshift_self
 !! SOURCE
 
 subroutine kramerskronig_self(self,selflimit,selfhdc,filapp)
-
- use defs_basis
- use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : matlu_type,copy_matlu,print_matlu
 
 !Arguments ------------------------------------
 !type
@@ -1678,8 +1629,8 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,filapp)
                  write(67,*)  self%omega(ifreq),real(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))&
                  ,aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
                enddo
-               write(67,*) 
-               !write(68,*) 
+               write(67,*)
+               !write(68,*)
                !!!!!!!!!! Z renormalization
 !               i0=389
 !               slope=(selftemp_re(i0+1)-selftemp_re(i0))/&
@@ -1702,7 +1653,7 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,filapp)
  enddo ! iatom
  close(67)
      !write(6,*) "self1",aimag(self%oper(489)%matlu(1)%mat(1,1,1,1,1))
-               
+
  ABI_DEALLOCATE(selftemp_re)
  ABI_DEALLOCATE(selftemp_imag)
 
@@ -1731,10 +1682,6 @@ end subroutine kramerskronig_self
 !! SOURCE
 
 subroutine selfreal2imag_self(selfr,self,filapp)
-
- use defs_basis
- use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : matlu_type,copy_matlu
 
 !Arguments ------------------------------------
 !type
@@ -1769,7 +1716,7 @@ subroutine selfreal2imag_self(selfr,self,filapp)
                do jfreq=1,selfr%nw-1
                !  write(6700,*)  selfr%omega(jfreq),aimag(selfr%oper(jfreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
                enddo
-               !  write(6700,*) 
+               !  write(6700,*)
                do ifreq=1,self%nw
                  selftempmatsub(ifreq)=czero
                  do jfreq=1,selfr%nw-1
@@ -1777,11 +1724,11 @@ subroutine selfreal2imag_self(selfr,self,filapp)
  &                   aimag(selfr%oper(jfreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))  &
  &                   /(cmplx(zero,self%omega(ifreq),kind=dp)-selfr%omega(jfreq))   &
  &                 * (selfr%omega(jfreq+1)-selfr%omega(jfreq))
-                 enddo 
+                 enddo
                  selftempmatsub(ifreq)=selftempmatsub(ifreq)/pi
                  write(672,*)  self%omega(ifreq),real(selftempmatsub(ifreq)),aimag(selftempmatsub(ifreq))
                enddo
-                 write(672,*)  
+                 write(672,*)
              enddo
            enddo
          enddo
@@ -1790,7 +1737,7 @@ subroutine selfreal2imag_self(selfr,self,filapp)
    endif ! lpawu=/-1
  enddo ! iatom
  close(672)
-               
+
  ABI_DEALLOCATE(selftempmatsub)
 
 

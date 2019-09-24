@@ -57,6 +57,5 @@ znucl 6
 #%% authors = G. Brunin, M. Giantomassi
 #%% keywords = NC, DFPT, EPH
 #%% description = 
-#%%   WARNING: This code is still under development. Use at your own risk.
 #%%   Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
 #%%<END TEST_INFO>
