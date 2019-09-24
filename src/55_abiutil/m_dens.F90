@@ -886,7 +886,7 @@ end subroutine constrained_dft_free
 
    if(conkind >=10)then
 
-     coeffs_constr_dft(1,iatom)=intgden(1,iatom)-c_dft%chargeat(1,iatom)
+     coeffs_constr_dft(1,iatom)=intgden(1,iatom)-c_dft%chargeat(iatom)
 
    endif
 
