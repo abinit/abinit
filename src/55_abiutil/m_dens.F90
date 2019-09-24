@@ -847,19 +847,42 @@ end subroutine constrained_dft_free
  call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
 &  c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgres)
 
-!The proper combination of intgden and intgres is stored in intgden
+!The proper combination of intgden and intgres is stored in intgden: it is an effective charge/magnetization, to be compared to the target one.
  do iatom=1,natom
-   intgden(:,iatom)=c_dft%magcon_lambda * intgden(:,iatom) + intgres(:,iatom) / c_dft%intgf2(iatom)
+
+   !The total charge, conjugate to the average potential
+   intgden(1,iatom)=c_dft%magcon_lambda * intgden(1,iatom) + half*(intgres(1,iatom)+intgres(2,iatom))/c_dft%intgf2(iatom)
+
+   if(nspden==2)then
+
+     !The magnetization along z
+     intgden(2,iatom)=c_dft%magcon_lambda * (intgden(2,iatom)-half*intgden(1,iatom)) + (intgres(1,iatom)-intgres(2,iatom))/c_dft%intgf2(iatom)
+
+   else if(nspden==4)then
+
+     !The magnetization along z
+     intgden(2,iatom)=c_dft%magcon_lambda * intgden(2,iatom) + (intgres(1,iatom)-intgres(2,iatom))/c_dft%intgf2(iatom)
+     intgden(3,iatom)=c_dft%magcon_lambda * intgden(3,iatom) + intgres(3,iatom) / c_dft%intgf2(iatom)
+     intgden(4,iatom)=c_dft%magcon_lambda * intgden(4,iatom) - intgres(4,iatom) / c_dft%intgf2(iatom)
+
+   endif
  enddo
 
  ABI_ALLOCATE(coeffs_constr_dft,(nspden,natom))
  coeffs_constr_dft=zero
 
-!Loop over atoms
-!-------------------------------------------
+!Loop over atoms, to obtain the charge/magnetization correction.
  do iatom=1,natom
 
    conkind=c_dft%constraint_kind(c_dft%typat(iatom))
+
+   if(conkind >=10)then
+
+     coeffs_constr_dft(1,iatom)=intgden(1,iatom)-c_dft%chargeat(1,iatom)
+
+   endif
+
+!HERE
 
    if(conkind==1 .and. nspden>1)then
 

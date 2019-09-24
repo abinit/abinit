@@ -1571,6 +1571,26 @@ iteration. See [[cite:Henkelman2000a]] for additional details of this method.
 ),
 
 Variable(
+    abivarname="constraint_kind",
+    varset="rlx",
+    vartype="integer",
+    topics=['TransPath_expert'],
+    dimensions="scalar",
+    defaultval=7,
+    mnemonics="Climbing-Image Nudged Elastic Band: STARTing iteration",
+    requires="[[imgmov]] == 5 and [[neb_algo]] == 2",
+    text=r"""
+Gives the index of the first CI-NEB iteration.
+The CI-NEB method constitutes a small modification to the NEB method allowing
+a rigorous convergence to the saddle point. As the image with the highest
+energy has to be identified, the calculation begins with several iterations of
+the standard NEB algorithm. The effective CI-NEB begins at the [[cineb_start]]
+iteration. See [[cite:Henkelman2000a]] for additional details of this method.
+""",
+),
+
+
+Variable(
     abivarname="cpuh",
     varset="gstate",
     vartype="real",
@@ -1937,6 +1957,23 @@ accelerated search of minima. Still in development.
 See the routine moldyn.F90 and [[signperm]] for additional information.
 
 When [[delayperm]] is zero, there are no permutation trials.
+""",
+),
+
+Variable(
+    abivarname="chargeat",
+    varset="gstate",
+    vartype="real",
+    topics=['MagMom_useful'],
+    dimensions=ValueWithConditions({'[[natrd]]<[[natom]]': '[ [[natrd]] ]', 'defaultval': '[ [[natom]] ]'}),
+    defaultval=0.0,
+    mnemonics="CHARGE of the AToms",
+    text=r"""
+Gives the target integrated charge in case of constrained DFT calculations, see [[constraint_kind]].
+Given in atomic unit of charge (=minus the charge of the electron).
+Note that this number is the net charge on the atom: one subtract from the 
+nucleus charge [[ziontypat]] the integrated valence electron density in a sphere defined by [[ratsph]]. 
+The latter has indeed a negative value.
 """,
 ),
 
@@ -3093,8 +3130,10 @@ Variable(
     mnemonics="Energy CUToff",
     characteristics=['[[ENERGY]]'],
     text=r"""
-Used for kinetic energy cutoff which controls number of planewaves at given k point by:
-(1/2)[(2 Pi)*(k+Gmax)]  2  =[[ecut]] for Gmax.
+Used to define the kinetic energy cutoff which controls the number of planewaves at given k point. The allowed
+plane waves are those with kinetic energy lower than [[ecut]], which translates to the following constraint
+on the planewave vector $\vec{G}$ in reciprocal space
+$\frac{1}{2}(2\pi)^2 (\vec{k}+\vec{G})^2<$[[ecut]].
 
 All planewaves inside this "basis sphere" centered at k are included in the basis (except if [[dilatmx]] is defined).
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[ecut]] has the
@@ -3183,14 +3222,14 @@ cell shape and size without smoothing the total energy curve (a dangerous
 thing to do), use a very small [[ecutsm]], on the order of one microHartree.
 
 Technical information:
-See [[cite:Bernasconi1995]] for a related method using constant pressure molecular dynamics.
+See Appendix B of [[cite:Laflamme2016]].
 [[ecutsm]] allows one to define an effective kinetic energy for plane waves, close
-to, but lower than the maximal kinetic energy [[ecut]]. For kinetic energies
+to, but lower than, the maximal kinetic energy [[ecut]]. For kinetic energies
 less than [[ecut]]-[[ecutsm]], nothing is modified, while between
-[[ecut]]-[[ecutsm]] and [[ecut]], the kinetic energy is multiplied by:
-1.0 / ( x  2  (3+x-6x  2  +3x  3  ))
-where x = ([[ecut]] - kinetic_energy)/[[ecutsm]]
-Note that x 2  ( 3+x-6x  2  +3x  3  ) is 0 at x=0, with vanishing derivative,
+[[ecut]]-[[ecutsm]] and [[ecut]], the kinetic energy is multiplied by
+$1.0 / ( x^2(3+x-6x^2+3x^3 ))$,
+where x = ([[ecut]] - kinetic_energy)/[[ecutsm]].
+Note that $x^2(3+x-6x^2+3x^3)$ is 0 at x=0, with vanishing derivative,
 and that at x=1, it is 1, with also vanishing derivative.
 If [[ecutsm]] is zero, the unmodified kinetic energy is used.
 [[ecutsm]] can be specified in Ha (the default), Ry, eV or Kelvin, since
@@ -4211,12 +4250,9 @@ Gives the internal friction coefficient (atomic units) for Langevin dynamics
 (when [[ionmov]] = 9): fixed temperature simulations with random forces.
 
 The equation of motion is:
-
-    M  I  d  2  R  I  /dt  2  = F  I  - [[friction]] M  I  dR  I  /dt - F_random I
-
-where F_random  I  is a Gaussian random force with average zero, and variance 2 [[friction]] M  I  kT.
-The atomic unit of friction is hartrees*electronic mass*(atomic time
-units)/Bohr  2. See [[cite:Chelikowsky2000]] for additional information.
+$M_I \frac{d^2 R_I}{dt^2}= F_I -$[[friction]]$*M_I \frac{d R_I}{dt} - F_{random,I}$,
+where $F_{random,I}$ is a Gaussian random force with average zero and variance [[friction]]$*2M_IkT$.
+The atomic unit of [[friction]] is Hartree*Electronic mass*(atomic unit of Time)/Bohr^2. See [[cite:Chelikowsky2000]] for additional information.
 """,
 ),
 
@@ -16343,7 +16379,8 @@ Variable(
     defaultval=0.0,
     mnemonics="SPIN for AToms",
     text=r"""
-Gives the initial electronic spin-magnetization for each atom, in unit of $\hbar/2$.
+Gives the initial electronic spin-magnetization for each atom, in unit of $\hbar/2$,
+as well as, in case of fixed magnetization calculations (see [[constraint_kind]] and [[magconon]]), the target value of the magnetization.
 
 Note that if [[nspden]] = 2, the z-component must be given for each atom, in
 triplets (0 0 z-component).
@@ -16351,7 +16388,7 @@ For example, the electron of an hydrogen atom can be spin up (0 0 1.0) or spin
 down (0 0 -1.0).
 
 This value is only used to create the first exchange and correlation
-potential, and is not used anymore afterwards.
+potential.
 It is not checked against the initial occupation numbers [[occ]] for each spin
 channel.
 It is meant to give an easy way to break the spin symmetry, and to allow to
