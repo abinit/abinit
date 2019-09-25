@@ -75,6 +75,9 @@ module m_anaddb_dataset
   integer :: elaflag
   integer :: elphflag
   integer :: enunit
+#ifdef MR_DEV
+  integer :: flexoflag
+#endif
   integer :: gkk2write
   integer :: gkk_rptwrite
   integer :: gkqwrite
@@ -598,6 +601,19 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 
 !F
+
+#ifdef MR_DEV
+ anaddb_dtset%flexoflag=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'flexoflag',tread,'INT')
+ if(tread==1) anaddb_dtset%flexoflag=intarr(1)
+ if(anaddb_dtset%flexoflag<0.or.anaddb_dtset%flexoflag>4)then
+   write(message,'(3a,i0,5a)' )&
+   ' flexoflag is ',anaddb_dtset%flexoflag,', but the only allowed values',ch10,&
+   'are 0, 1,2,3,4  .',ch10,'Action: correct flexoflag in your input file.'
+   MSG_ERROR(message)
+ end if
+#endif
+
  anaddb_dtset%freeze_displ = zero
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'freeze_displ',tread,'DPR')
  if(tread==1) anaddb_dtset%freeze_displ=dprarr(1)
@@ -1741,12 +1757,18 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
 
 !The flags
  if (anaddb_dtset%dieflag/=0 .or. anaddb_dtset%ifcflag/=0 .or. &
+#ifdef MR_DEV
+     anaddb_dtset%flexoflag/=0 .or. &
+#endif
      anaddb_dtset%nlflag/=0 .or. anaddb_dtset%thmflag/=0 .or. &
      anaddb_dtset%elaflag/=0 .or. anaddb_dtset%elphflag/=0 .or. &
      anaddb_dtset%polflag/=0 .or. anaddb_dtset%instrflag/=0 .or. &
      anaddb_dtset%piezoflag/=0) then
    write(nunit,'(a)')' Flags :'
    if(anaddb_dtset%dieflag/=0)write(nunit,'(3x,a9,3i10)')'  dieflag',anaddb_dtset%dieflag
+#ifdef MR_DEV
+   if(anaddb_dtset%flexoflag/=0)write(nunit,'(3x,a9,3i10)')'flexoflag',anaddb_dtset%flexoflag
+#endif 
    if(anaddb_dtset%ifcflag/=0)write(nunit,'(3x,a9,3i10)')'  ifcflag',anaddb_dtset%ifcflag
    if(anaddb_dtset%nlflag/=0)write(nunit,'(3x,a9,3i10)')'   nlflag',anaddb_dtset%nlflag
    if(anaddb_dtset%thmflag/=0)write(nunit,'(3x,a9,3i10)')'  thmflag',anaddb_dtset%thmflag
@@ -2120,7 +2142,7 @@ subroutine anaddb_chkvars(string)
  list_vars=trim(list_vars)//' ep_b_min ep_b_max ep_int_gkk ep_keepbands ep_nqpt ep_nspline ep_prt_yambo'
  list_vars=trim(list_vars)//' elphsmear elph_fermie ep_extrael ep_qptlist'
 !F
- list_vars=trim(list_vars)//' freeze_displ frmax frmin'
+ list_vars=trim(list_vars)//' flexoflag freeze_displ frmax frmin'
 !G
  list_vars=trim(list_vars)//' gkk2write gkk_rptwrite gkqwrite gruns_nddbs'
 !H
