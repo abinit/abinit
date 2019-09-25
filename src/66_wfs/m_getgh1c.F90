@@ -1742,28 +1742,27 @@ ABI_ALLOCATE(dqdqkinpw,(npw_k))
 !===== Load the k/k+q dependent parts of the Hamiltonian
 
 !Load k-dependent part in the Hamiltonian datastructure
-
  ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamkq%matblk))
- call load_k_hamiltonian(gs_hamkq,kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
+ call gs_hamkq%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
 & ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
  if (size(ffnlk)>0) then
-   call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnlk)
+   call gs_hamkq%load_k(ffnl_k=ffnlk)
  else
-   call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnl1)
+   call gs_hamkq%load_k(ffnl_k=ffnl1)
  end if
 
 !Load k+q-dependent part in the Hamiltonian datastructure
 !    Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
- call load_kprime_hamiltonian(gs_hamkq,kpt_kp=kpq,npw_kp=npw1_k,istwf_kp=istwf_k,&
+ call gs_hamkq%load_kprime(kpt_kp=kpq,npw_kp=npw1_k,istwf_kp=istwf_k,&
 & kinpw_kp=kinpw1,kg_kp=kg1_k,kpg_kp=kpg1_k,ffnl_kp=ffnl1,&
 & compute_gbound=.true.)
  if (qne0) then
    ABI_ALLOCATE(ph3d1,(2,npw1_k,gs_hamkq%matblk))
-   call load_kprime_hamiltonian(gs_hamkq,ph3d_kp=ph3d1,compute_ph3d=.true.)
+   call gs_hamkq%load_kprime(ph3d_kp=ph3d1,compute_ph3d=.true.)
  end if
 
 !Load k-dependent part in the 1st-order Hamiltonian datastructure
- call load_k_rf_hamiltonian(rf_hamkq,npw_k=npw_k,dkinpw_k=dqdqkinpw)
+ call rf_hamkq%load_k(npw_k=npw_k,dkinpw_k=dqdqkinpw)
 
 end subroutine getgh1dqc_setup
 !!***

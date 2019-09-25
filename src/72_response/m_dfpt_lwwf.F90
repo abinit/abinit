@@ -31,6 +31,7 @@ module m_dfpt_lwwf
  use defs_basis
  use defs_abitypes
  use defs_datatypes
+ use m_dtset
  use m_errors
  use m_profiling_abi
  use m_hamiltonian
@@ -291,7 +292,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    !Initializes rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
    call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
  & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.false.)
+   call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.false.)
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
@@ -328,7 +329,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    end do !iband
 
    !Clean the electric field rf_hamiltonian
-   call destroy_rf_hamiltonian(rf_hamkq)
+   call rf_hamkq%free()
 
    !Deallocations
    ABI_DEALLOCATE(kpg_k)
@@ -382,7 +383,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
    call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
    & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+   call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.true.)
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
@@ -420,7 +421,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    end do !iband
 
    !Clean the atomic displacement rf_hamiltonian
-   call destroy_rf_hamiltonian(rf_hamkq)
+   call rf_hamkq%free()
 
    !Deallocations
    ABI_DEALLOCATE(kpg_k)
@@ -468,7 +469,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  !Atomic displacements
  do iatpert=1,natpert
    !k-point index check
-   ii = wfk_findk(wfk_t_atdis(iatpert), kpt(:))
+   ii = wfk_t_atdis(iatpert)%findk(kpt(:))
    ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt in atomic displacement wf1 file")
    !npw check
    npw_disk = wfk_t_atdis(iatpert)%hdr%npwarr(ii)
@@ -484,7 +485,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  !Electric field
  do iq2grad=1,nq2grad
    !k-point index check
-   ii = wfk_findk(wfk_t_efield(iq2grad), kpt(:))
+   ii = wfk_t_efield(iq2grad)%findk(kpt(:))
    ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1 in electric field wf1 file")
    !npw check
    npw_disk = wfk_t_efield(iq2grad)%hdr%npwarr(ii)
@@ -500,7 +501,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  !ddk 
  do iq1grad=1,nq1grad
    !k-point index check
-   ii = wfk_findk(wfk_t_ddk(iq1grad), kpt(:))
+   ii = wfk_t_ddk(iq1grad)%findk(kpt(:))
    ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1 in ddk wf1 file")
    !npw check
    npw_disk = wfk_t_ddk(iq1grad)%hdr%npwarr(ii)
@@ -516,7 +517,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  !dkdk 
  do iq1q2grad=1,nq1q2grad
    !k-point index check
-   ii = wfk_findk(wfk_t_dkdk(iq1q2grad), kpt(:))
+   ii = wfk_t_dkdk(iq1q2grad)%findk(kpt(:))
    ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1 in dkdk wf1 file")
    !npw check
    npw_disk = wfk_t_dkdk(iq1q2grad)%hdr%npwarr(ii)
@@ -551,7 +552,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    !Initializes rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
    call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
  & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+   call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.true.)
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
@@ -568,7 +569,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
      do iq2grad=1,nq2grad
 
        !Read electric field wf1
-       call wfk_read_bks(wfk_t_efield(iq2grad), iband, indkpt1(ikpt), &
+       call wfk_t_efield(iq2grad)%read_bks( iband, indkpt1(ikpt), &
      & isppol, xmpio_single, cg_bks=cg1_efield)
 
        !Compute < g |\partial_{gamma} H^{(0)} | u_{i,k}^{E_{\delta}} >
@@ -580,7 +581,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
        do iatpert=1,natpert
 
          !Read atomic displacement wf1
-         call wfk_read_bks(wfk_t_atdis(iatpert), iband, indkpt1(ikpt), &
+         call wfk_t_atdis(iatpert)%read_bks( iband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_atdis)
 
          !calculate: 
@@ -598,7 +599,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    end do !iband
 
    !Clean the ddk rf_hamiltonian
-   call destroy_rf_hamiltonian(rf_hamkq)
+   call rf_hamkq%free()
 
    !Deallocations
    ABI_DEALLOCATE(kpg_k)
@@ -629,7 +630,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    do iatpert=1,natpert
 
      !Read atomic displacement wf1
-     call wfk_read_bks(wfk_t_atdis(iatpert), iband, indkpt1(ikpt), &
+     call wfk_t_atdis(iatpert)%read_bks( iband, indkpt1(ikpt), &
    & isppol, xmpio_single, cg_bks=cg1_atdis)
 
      !LOOP OVER q1-GRADIENT
@@ -639,7 +640,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
        do jband=1,nband_k
 
          !Read ddk wf1
-         call wfk_read_bks(wfk_t_ddk(iq1grad), jband, indkpt1(ikpt), &
+         call wfk_t_ddk(iq1grad)%read_bks( jband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_ddk)
 
          !Calculate: < u_{i,k}^{\tau_{\kappa\beta}} | u_{j,k}^{k_{\gamma}} >
@@ -673,7 +674,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 
        !Read dkdk wf1
        if (iq1q2grad<=6) then
-         call wfk_read_bks(wfk_t_dkdk(iq1q2grad), iband, indkpt1(ikpt), &
+         call wfk_t_dkdk(iq1q2grad)%read_bks( iband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_dkdk)
          cg1_dkdk_ar(iq1q2grad,:,:)=cg1_dkdk 
        else
@@ -697,7 +698,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    do iq2grad=1,nq2grad
 
      !Read electric field wf1
-     call wfk_read_bks(wfk_t_efield(iq2grad), iband, indkpt1(ikpt), &
+     call wfk_t_efield(iq2grad)%read_bks( iband, indkpt1(ikpt), &
    & isppol, xmpio_single, cg_bks=cg1_efield)
 
      !LOOP OVER q1-GRADIENT
@@ -707,7 +708,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
        do jband=1,nband_k
 
          !Read ddk wf1
-         call wfk_read_bks(wfk_t_ddk(iq1grad), jband, indkpt1(ikpt), &
+         call wfk_t_ddk(iq1grad)%read_bks( jband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_ddk)
 
          !Calculate: < u_{j,k}^{k_{\gamma}} | u_{i,k}^{E_{\delta}} >
@@ -780,7 +781,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
      call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-     call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
+     call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,q1grad(2,iq1grad), &
@@ -803,7 +804,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
        do iq2grad=1,nq2grad
 
          !Read electric field wf1
-         call wfk_read_bks(wfk_t_efield(iq2grad), iband, indkpt1(ikpt), &
+         call wfk_t_efield(iq2grad)%read_bks( iband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_efield)
 
          !Calculate:
@@ -822,7 +823,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
      end do !iband
 
      !Clean the rf_hamiltonian
-     call destroy_rf_hamiltonian(rf_hamkq)
+     call rf_hamkq%free()
 
      !Deallocations
      ABI_DEALLOCATE(kpg_k)
@@ -1179,7 +1180,7 @@ subroutine dfpt_flexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k
    !Initializes rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
    call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
  & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.false.)
+   call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.false.)
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
@@ -1217,7 +1218,7 @@ subroutine dfpt_flexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k
    end do !iband
 
    !Clean the electric field rf_hamiltonian
-   call destroy_rf_hamiltonian(rf_hamkq)
+   call rf_hamkq%free()
 
    !Deallocations
    ABI_DEALLOCATE(kpg_k)
@@ -1271,7 +1272,7 @@ subroutine dfpt_flexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k
    !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
    call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
    & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+   call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.true.)
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
@@ -1309,7 +1310,7 @@ subroutine dfpt_flexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k
    end do !iband
 
    !Clean the atomic displacement rf_hamiltonian
-   call destroy_rf_hamiltonian(rf_hamkq)
+   call rf_hamkq%free()
 
    !Deallocations
    ABI_DEALLOCATE(kpg_k)
@@ -1354,7 +1355,7 @@ c0_VefielddQ_c1strain_bks=zero
  !Electric field
  do iefipert=1,nefipert
    !k-point index check
-   ii = wfk_findk(wfk_t_efield(iefipert), kpt(:))
+   ii = wfk_t_efield(iefipert)%findk(kpt(:))
    ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1 in electric field wf1 file")
    !npw check
    npw_disk = wfk_t_efield(iefipert)%hdr%npwarr(ii)
@@ -1370,7 +1371,7 @@ c0_VefielddQ_c1strain_bks=zero
  !ddk 
  do iq1grad=1,nq1grad
    !k-point index check
-   ii = wfk_findk(wfk_t_ddk(iq1grad), kpt(:))
+   ii = wfk_t_ddk(iq1grad)%findk( kpt(:))
    ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1 in ddk wf1 file")
    !npw check
    npw_disk = wfk_t_ddk(iq1grad)%hdr%npwarr(ii)
@@ -1388,7 +1389,7 @@ c0_VefielddQ_c1strain_bks=zero
    ka=pert_strain(3,istrpert)
    kb=pert_strain(4,istrpert)
    !k-point index check
-   ii = wfk_findk(wfk_t_strain(ka,kb), kpt(:))
+   ii = wfk_t_strain(ka,kb)%findk( kpt(:))
    ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1 in strain wf1 file")
    !npw check
    npw_disk = wfk_t_strain(ka,kb)%hdr%npwarr(ii)
@@ -1404,7 +1405,7 @@ c0_VefielddQ_c1strain_bks=zero
  !dkdk 
  do iq1q2grad=1,nq1q2grad
    !k-point index check
-   ii = wfk_findk(wfk_t_dkdk(iq1q2grad), kpt(:))
+   ii = wfk_t_dkdk(iq1q2grad)%findk(kpt(:))
    ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1 in dkdk wf1 file")
    !npw check
    npw_disk = wfk_t_dkdk(iq1q2grad)%hdr%npwarr(ii)
@@ -1439,7 +1440,7 @@ c0_VefielddQ_c1strain_bks=zero
    !Initializes rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
    call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
  & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+   call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.true.)
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
@@ -1459,7 +1460,7 @@ c0_VefielddQ_c1strain_bks=zero
 
        !Read strain field wf1
        if (ka>=kb) then
-         call wfk_read_bks(wfk_t_strain(ka,kb), iband, indkpt1(ikpt), &
+         call wfk_t_strain(ka,kb)%read_bks( iband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_strain)
          cg1_strain_ar(ka,kb,:,:)=cg1_strain
        else
@@ -1475,7 +1476,7 @@ c0_VefielddQ_c1strain_bks=zero
        do iefipert=1,nefipert
 
          !Read electric field wf1
-         call wfk_read_bks(wfk_t_efield(iefipert), iband, indkpt1(ikpt), &
+         call wfk_t_efield(iefipert)%read_bks( iband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_efield)
 
          !calculate: 
@@ -1493,7 +1494,7 @@ c0_VefielddQ_c1strain_bks=zero
    end do !iband
 
    !Clean the ddk rf_hamiltonian
-   call destroy_rf_hamiltonian(rf_hamkq)
+   call rf_hamkq%free()
 
    !Deallocations
    ABI_DEALLOCATE(kpg_k)
@@ -1524,7 +1525,7 @@ c0_VefielddQ_c1strain_bks=zero
    do iefipert=1,nefipert
 
      !Read electric field wf1
-     call wfk_read_bks(wfk_t_efield(iefipert), iband, indkpt1(ikpt), &
+     call wfk_t_efield(iefipert)%read_bks( iband, indkpt1(ikpt), &
    & isppol, xmpio_single, cg_bks=cg1_efield)
 
      !LOOP OVER q1-GRADIENT
@@ -1534,7 +1535,7 @@ c0_VefielddQ_c1strain_bks=zero
        do jband=1,nband_k
 
          !Read ddk wf1
-         call wfk_read_bks(wfk_t_ddk(iq1grad), jband, indkpt1(ikpt), &
+         call wfk_t_ddk(iq1grad)%read_bks( jband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_ddk)
 
          !Calculate: < u_{i,k}^{E_{\alpha}} | u_{j,k}^{k_{\gamma}} >
@@ -1571,7 +1572,7 @@ c0_VefielddQ_c1strain_bks=zero
 
      !Read strain field wf1
      if (ka>=kb) then
-       call wfk_read_bks(wfk_t_strain(ka,kb), iband, indkpt1(ikpt), &
+       call wfk_t_strain(ka,kb)%read_bks( iband, indkpt1(ikpt), &
      & isppol, xmpio_single, cg_bks=cg1_strain)
        cg1_strain_ar(ka,kb,:,:)=cg1_strain
      else
@@ -1585,7 +1586,7 @@ c0_VefielddQ_c1strain_bks=zero
        do jband=1,nband_k
 
          !Read ddk wf1
-         call wfk_read_bks(wfk_t_ddk(iq1grad), jband, indkpt1(ikpt), &
+         call wfk_t_ddk(iq1grad)%read_bks( jband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_ddk)
 
          !Calculate: < u_{j,k}^{k_{\gamma}} | u_{i,k}^{n_{\beta\delta}} >
@@ -1618,7 +1619,7 @@ c0_VefielddQ_c1strain_bks=zero
 
        !Read dkdk wf1
        if (iq1q2grad<=6) then
-         call wfk_read_bks(wfk_t_dkdk(iq1q2grad), iband, indkpt1(ikpt), &
+         call wfk_t_dkdk(iq1q2grad)%read_bks( iband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_dkdk)
          cg1_dkdk_ar(iq1q2grad,:,:)=cg1_dkdk 
        else
@@ -1693,7 +1694,7 @@ c0_VefielddQ_c1strain_bks=zero
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
      call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-     call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1dqdq,with_nonlocal=.true.)
+     call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dqdq,with_nonlocal=.true.)
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,q1grad(2,iq1grad), &
@@ -1716,7 +1717,7 @@ c0_VefielddQ_c1strain_bks=zero
        do iefipert=1,nefipert
 
          !Read electric field wf1
-         call wfk_read_bks(wfk_t_efield(iefipert), iband, indkpt1(ikpt), &
+         call wfk_t_efield(iefipert)%read_bks( iband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_efield)
 
          !calculate: 
@@ -1732,7 +1733,7 @@ c0_VefielddQ_c1strain_bks=zero
      end do !iband
 
      !Clean the rf_hamiltonian
-     call destroy_rf_hamiltonian(rf_hamkq)
+     call rf_hamkq%free()
 
      !Deallocations
      ABI_DEALLOCATE(kpg_k)
@@ -2061,7 +2062,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
    !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
    call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
    & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+   call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.true.)
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
@@ -2099,7 +2100,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
    end do !jband
 
    !Clean the atomic displacement rf_hamiltonian
-   call destroy_rf_hamiltonian(rf_hamkq)
+   call rf_hamkq%free()
 
    !Deallocations
    ABI_DEALLOCATE(kpg_k)
@@ -2136,7 +2137,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
  !Atomic displacements
  do iatpert=1,natpert
    !k-point index check
-   ii = wfk_findk(wfk_t_atdis(iatpert), kpt(:))
+   ii = wfk_t_atdis(iatpert)%findk( kpt(:))
    ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt in atomic displacement wf1 file")
    !npw check
    npw_disk = wfk_t_atdis(iatpert)%hdr%npwarr(ii)
@@ -2152,7 +2153,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
  !ddk 
  do iq1grad=1,nq1grad
    !k-point index check
-   ii = wfk_findk(wfk_t_ddk(iq1grad), kpt(:))
+   ii = wfk_t_ddk(iq1grad)%findk( kpt(:))
    ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1 in ddk wf1 file")
    !npw check
    npw_disk = wfk_t_ddk(iq1grad)%hdr%npwarr(ii)
@@ -2191,7 +2192,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
    !Initializes rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
    call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
  & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+   call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.true.)
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
@@ -2208,7 +2209,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
      do jatpert=1,natpert
 
        !Read atomic displacement wf1
-       call wfk_read_bks(wfk_t_atdis(jatpert), iband, indkpt1(ikpt), &
+       call wfk_t_atdis(jatpert)%read_bks( iband, indkpt1(ikpt), &
      & isppol, xmpio_single, cg_bks=cg1_jatdis)
 
        !Compute < g |\partial_{gamma} H^{(0)} | u_{i,k}^{\tau_{\kappa'\beta}} >
@@ -2220,7 +2221,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
        do iatpert=1,natpert
 
          !Read atomic displacement wf1
-         call wfk_read_bks(wfk_t_atdis(iatpert), iband, indkpt1(ikpt), &
+         call wfk_t_atdis(iatpert)%read_bks( iband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_iatdis)
 
          !calculate: 
@@ -2238,7 +2239,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
    end do !iband
 
    !Clean the ddk rf_hamiltonian
-   call destroy_rf_hamiltonian(rf_hamkq)
+   call rf_hamkq%free()
 
    !Deallocations
    ABI_DEALLOCATE(kpg_k)
@@ -2269,7 +2270,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
    do iatpert=1,natpert
 
      !Read atomic displacement wf1
-     call wfk_read_bks(wfk_t_atdis(iatpert), iband, indkpt1(ikpt), &
+     call wfk_t_atdis(iatpert)%read_bks( iband, indkpt1(ikpt), &
    & isppol, xmpio_single, cg_bks=cg1_iatdis)
 
      !LOOP OVER q1-GRADIENT
@@ -2279,7 +2280,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
        do jband=1,nband_k
 
          !Read ddk wf1
-         call wfk_read_bks(wfk_t_ddk(iq1grad), jband, indkpt1(ikpt), &
+         call wfk_t_ddk(iq1grad)%read_bks( jband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_ddk)
 
          !Calculate: < u_{i,k}^{\tau_{\kappa\alpha}} | u_{j,k}^{k_{\gamma}} >
@@ -2349,7 +2350,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
      call init_rf_hamiltonian(2,gs_hamkq,jpert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-     call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
+     call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,jdir,jpert,q1grad(2,iq1grad), &
@@ -2372,7 +2373,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
        do iatpert=1,natpert
 
          !Read atomic displacement wf1
-         call wfk_read_bks(wfk_t_atdis(iatpert), iband, indkpt1(ikpt), &
+         call wfk_t_atdis(iatpert)%read_bks( iband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_iatdis)
 
          !Calculate:
@@ -2388,7 +2389,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
      end do !iband
 
      !Clean the rf_hamiltonian
-     call destroy_rf_hamiltonian(rf_hamkq)
+     call rf_hamkq%free()
 
      !Deallocations
      ABI_DEALLOCATE(kpg_k)
@@ -2727,7 +2728,7 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
    call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
    & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+   call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.true.)
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
@@ -2765,7 +2766,7 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    end do !iband
 
    !Clean the atomic displacement rf_hamiltonian
-   call destroy_rf_hamiltonian(rf_hamkq)
+   call rf_hamkq%free()
 
    !Deallocations
    ABI_DEALLOCATE(kpg_k)
@@ -2814,7 +2815,7 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
    call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
    & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+   call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.true.)
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
@@ -2852,7 +2853,7 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    end do !iband
 
    !Clean the atomic displacement rf_hamiltonian
-   call destroy_rf_hamiltonian(rf_hamkq)
+   call rf_hamkq%free()
 
    !Deallocations
    ABI_DEALLOCATE(kpg_k)
@@ -2895,7 +2896,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
  !Atomic displacements
  do iatpert=1,natpert
    !k-point index check
-   ii = wfk_findk(wfk_t_atdis(iatpert), kpt(:))
+   ii = wfk_t_atdis(iatpert)%findk( kpt(:))
    ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt in atomic displacement wf1 file")
    !npw check
    npw_disk = wfk_t_atdis(iatpert)%hdr%npwarr(ii)
@@ -2911,7 +2912,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
  !ddk 
  do iq1grad=1,nq1grad
    !k-point index check
-   ii = wfk_findk(wfk_t_ddk(iq1grad), kpt(:))
+   ii = wfk_t_ddk(iq1grad)%findk( kpt(:))
    ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1 in ddk wf1 file")
    !npw check
    npw_disk = wfk_t_ddk(iq1grad)%hdr%npwarr(ii)
@@ -2929,7 +2930,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
    ka=pert_strain(3,istrpert)
    kb=pert_strain(4,istrpert)
    !k-point index check
-   ii = wfk_findk(wfk_t_strain(ka,kb), kpt(:))
+   ii = wfk_t_strain(ka,kb)%findk( kpt(:))
    ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1 in strain wf1 file")
    !npw check
    npw_disk = wfk_t_strain(ka,kb)%hdr%npwarr(ii)
@@ -2964,7 +2965,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
    !Initializes rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
    call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
  & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+   call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.true.)
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
@@ -2984,7 +2985,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
 
        !Read strain field wf1
        if (ka>=kb) then
-         call wfk_read_bks(wfk_t_strain(ka,kb), iband, indkpt1(ikpt), &
+         call wfk_t_strain(ka,kb)%read_bks( iband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_strain)
          cg1_strain_ar(ka,kb,:,:)=cg1_strain
        else
@@ -3000,7 +3001,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
        do iatpert=1,natpert
 
          !Read atomic displacement wf1
-         call wfk_read_bks(wfk_t_atdis(iatpert), iband, indkpt1(ikpt), &
+         call wfk_t_atdis(iatpert)%read_bks( iband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_atdis)
 
          !calculate: 
@@ -3018,7 +3019,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
    end do !iband
 
    !Clean the ddk rf_hamiltonian
-   call destroy_rf_hamiltonian(rf_hamkq)
+   call rf_hamkq%free()
 
    !Deallocations
    ABI_DEALLOCATE(kpg_k)
@@ -3048,7 +3049,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
    do iatpert=1,natpert
 
      !Read atomic displacement wf1
-     call wfk_read_bks(wfk_t_atdis(iatpert), iband, indkpt1(ikpt), &
+     call wfk_t_atdis(iatpert)%read_bks( iband, indkpt1(ikpt), &
    & isppol, xmpio_single, cg_bks=cg1_atdis)
 
      !LOOP OVER q1-GRADIENT
@@ -3058,7 +3059,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
        do jband=1,nband_k
 
          !Read ddk wf1
-         call wfk_read_bks(wfk_t_ddk(iq1grad), jband, indkpt1(ikpt), &
+         call wfk_t_ddk(iq1grad)%read_bks( jband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_ddk)
 
          !Calculate: < u_{i,k}^{\tau_{\kappa\alpha}} | u_{j,k}^{k_{\gamma}} >
@@ -3095,7 +3096,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
 
      !Read strain field wf1
      if (ka>=kb) then
-       call wfk_read_bks(wfk_t_strain(ka,kb), iband, indkpt1(ikpt), &
+       call wfk_t_strain(ka,kb)%read_bks( iband, indkpt1(ikpt), &
      & isppol, xmpio_single, cg_bks=cg1_strain)
        cg1_strain_ar(ka,kb,:,:)=cg1_strain
      else
@@ -3109,7 +3110,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
        do jband=1,nband_k
 
          !Read ddk wf1
-         call wfk_read_bks(wfk_t_ddk(iq1grad), jband, indkpt1(ikpt), &
+         call wfk_t_ddk(iq1grad)%read_bks( jband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_ddk)
 
          !Calculate: < u_{j,k}^{k_{\gamma}} | u_{i,k}^{n_{\beta\delta}} >
@@ -3195,7 +3196,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
      call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-     call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1dqdq,with_nonlocal=.true.)
+     call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dqdq,with_nonlocal=.true.)
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,q1grad(2,iq1grad), &
@@ -3218,7 +3219,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
        do iatpert=1,natpert
 
          !Read atomic displacement wf1
-         call wfk_read_bks(wfk_t_atdis(iatpert), iband, indkpt1(ikpt), &
+         call wfk_t_atdis(iatpert)%read_bks( iband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_atdis)
 
          !calculate: 
@@ -3234,7 +3235,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
      end do !iband
 
      !Clean the rf_hamiltonian
-     call destroy_rf_hamiltonian(rf_hamkq)
+     call rf_hamkq%free()
 
      !Deallocations
      ABI_DEALLOCATE(kpg_k)
@@ -3297,7 +3298,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
      call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-     call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
+     call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,q1grad(2,iq1grad), &
@@ -3323,7 +3324,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
     
          !Read strain field wf1
          if (ka>=kb) then
-           call wfk_read_bks(wfk_t_strain(ka,kb), iband, indkpt1(ikpt), &
+           call wfk_t_strain(ka,kb)%read_bks( iband, indkpt1(ikpt), &
          & isppol, xmpio_single, cg_bks=cg1_strain)
            cg1_strain_ar(ka,kb,:,:)=cg1_strain
          else
@@ -3346,7 +3347,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
      end do !iband
 
      !Clean the rf_hamiltonian
-     call destroy_rf_hamiltonian(rf_hamkq)
+     call rf_hamkq%free()
 
      !Deallocations
      ABI_DEALLOCATE(kpg_k)
@@ -3656,7 +3657,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
      call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-     call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
+     call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,iq1grad, &
@@ -3686,7 +3687,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
      end do !iband
 
      !Clean the rf_hamiltonian
-     call destroy_rf_hamiltonian(rf_hamkq)
+     call rf_hamkq%free()
 
      !Deallocations
      ABI_DEALLOCATE(kpg_k)
@@ -3736,7 +3737,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
        !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
        call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
        & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-       call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
+       call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 
        !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
        call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,iq1grad, &
@@ -3760,7 +3761,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
        end do !iband
 
        !Clean the rf_hamiltonian
-       call destroy_rf_hamiltonian(rf_hamkq)
+       call rf_hamkq%free()
 
        !Deallocations
        ABI_DEALLOCATE(kpg_k)

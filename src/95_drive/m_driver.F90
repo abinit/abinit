@@ -203,7 +203,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_gwls_sternheimer, only : gwls_sternheimer
  use m_nonlinear,        only : nonlinear
  use m_drivexc,          only : echo_xc_name
- use m_neat,             only : neat_start_iter
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&

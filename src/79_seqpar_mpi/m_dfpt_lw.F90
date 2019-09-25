@@ -33,6 +33,8 @@ module m_dfpt_lw
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
+ use m_dtset
+ use m_dtfil
  use m_profiling_abi
  use m_xmpi
  use m_errors
@@ -144,7 +146,7 @@ contains
 !!  ebands_free, fftdatar_write_from_hdr, 
 !!  fourdp, getcut, getmpw, getph, hdr_init, hdr_update, init_hamiltonian, 
 !!  initmpi_band, initylmg, inwffil, kpgio, load_spin_hamiltonian,
-!!  hartredq, read_rhor, rf2_getidirs, setsym, symkpt, WffClose, wfk_close, 
+!!  hartredq, read_rhor, rf2_getidirs, setsym, symkpt, WffClose,  
 !!  wfk_open_read, wrtout, xmpi_sum
 !!
 !! SOURCE
@@ -865,7 +867,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    ikg=0
 
 !  Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamkq,isppol,with_nonlocal=.true.)
+   call gs_hamkq%load_spin(isppol,with_nonlocal=.true.)
 
 !  BIG FAT k POINT LOOP
    do ikpt=1,nkpt_rbz
@@ -944,16 +946,16 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !Close response function files
  do iatpert=1,natpert
-   call wfk_close(wfk_t_atdis(iatpert))
+   call wfk_t_atdis(iatpert)%close()
  end do
  do iq1grad=1,nq1grad
-   call wfk_close(wfk_t_ddk(iq1grad))
+   call wfk_t_ddk(iq1grad)%close()
  end do
  do iq2grad=1,nq2grad
-   call wfk_close(wfk_t_efield(iq2grad))
+   call wfk_t_efield(iq2grad)%close()
  end do
  do iq1q2grad=1,nq1q2grad
-   call wfk_close(wfk_t_dkdk(iq1q2grad))
+   call wfk_t_dkdk(iq1q2grad)%close()
  end do
 
 !=== MPI communications ==================
@@ -1176,9 +1178,10 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
            d3etot(1,iq2dir,iq2pert,iatdir,iatom,iq1dir,iq1pert)=tmpre
            d3etot(2,iq2dir,iq2pert,iatdir,iatom,iq1dir,iq1pert)=tmpim
 
-           !Calculate and write the q-gradient of the polarization response
-           dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-two*tmpim/ucvol
-           dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=two*tmpre/ucvol
+           !Calculate and write the q-gradient of the polarization response 
+           !(without the inverse volume factor)
+           dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-two*tmpim
+           dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=two*tmpre
  
            if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1 .and. qdrflg(iatom,iatdir,iq1dir,iq2dir)==1 ) then
 
@@ -1260,6 +1263,7 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
            d3etot(2,iq2dir,iq2pert,iatdir,iatom,iq1dir,iq1pert)=tmpim
 
            !Calculate and write the q-gradient of the polarization response
+           !(without the inverse volume factor)
            dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-two*tmpim/ucvol
            dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=0.0_dp
 
@@ -1458,6 +1462,7 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
 !Write the q-gradient of the Polarization response
  write(ab_out,*)' q-gradient of the polarization response '
  write(ab_out,*)' to an atomic displacementatom, in cartesian coordinates,'
+ write(ab_out,*)' (1/ucvol factor not included),'
  write(ab_out,*)' efidir   atom   atddir   qgrdir          real part        imaginary part'
  do iq1dir=1,3
    do iq2dir=1,3
@@ -1593,7 +1598,7 @@ end subroutine dfpt_qdrpout
 !!  getcut,getmpw,getph,hdr_init,hdr_update,
 !!  initmpi_band,init_hamiltonian,initylmg,inwffil,kpgio
 !!  load_spin_hamiltonian,hartredq,rf2_getidirs,read_rhor,
-!!  setsym,symkpt,WffClose,wfk_close,wfk_open_read,wrtout,xmpi_sum
+!!  setsym,symkpt,WffClose,wfk_open_read,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2602,7 +2607,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    ikg=0
 
 !  Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamkq,isppol,with_nonlocal=.true.)
+   call gs_hamkq%load_spin(isppol,with_nonlocal=.true.)
 
 !  BIG FAT k POINT LOOP
    do ikpt=1,nkpt_rbz
@@ -2729,25 +2734,25 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 !Close response function files
  if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then
    do iatpert=1,natpert
-     call wfk_close(wfk_t_atdis(iatpert))
+     call wfk_t_atdis(iatpert)%close()
    end do
  end if
  if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) then
    do istrpert=1,nstrpert
      ka=pert_strain(3,istrpert)
      kb=pert_strain(4,istrpert)
-     call wfk_close(wfk_t_strain(ka,kb))
+     call wfk_t_strain(ka,kb)%close()
    end do
  end if
  do iq1grad=1,nq1grad
-   call wfk_close(wfk_t_ddk(iq1grad))
+   call wfk_t_ddk(iq1grad)%close()
  end do
  if (lw_flexo==1.or.lw_flexo==2) then
    do iefipert=1,nefipert
-     call wfk_close(wfk_t_efield(iefipert))
+     call wfk_t_efield(iefipert)%close()
    end do
    do iq1q2grad=1,nq1q2grad
-     call wfk_close(wfk_t_dkdk(iq1q2grad))
+     call wfk_t_dkdk(iq1q2grad)%close()
    end do
  end if
 

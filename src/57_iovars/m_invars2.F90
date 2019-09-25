@@ -785,7 +785,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
 #ifdef MR_DEV
 !LONG WAVE integer input variables
- if(dtset%optdriver==RUNL_LONGWAVE) then
+!FIXME
+! if(dtset%optdriver==RUNL_LONGWAVE) then
    tread_key=0
 
    call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert1_atpol',tread,'INT')
@@ -861,7 +862,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prepalw',tread,'INT')
    if(tread==1) dtset%prepalw=intarr(1)
- end if
+! end if
 #endif
 
  ! Recursion input variables

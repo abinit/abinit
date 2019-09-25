@@ -29,12 +29,14 @@
 module m_longwave
     
  use defs_basis
- use m_profiling_abi
+! use m_profiling_abi
  use m_errors
  use m_xmpi
  use defs_datatypes
- use defs_abitypes
+ use defs_abitypes, only : MPI_type
  use defs_wvltypes
+ use m_dtset
+ use m_dtfil
  use m_xcdata
  use m_hdr
  use m_ebands
@@ -212,7 +214,6 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Init spaceworld
  spaceworld=mpi_enreg%comm_cell
  my_natom=mpi_enreg%my_natom
- 
 
 !Define FFT grid(s) sizes (be careful !)
 !See NOTES in the comments at the beginning of this file.
@@ -540,7 +541,6 @@ ecore=zero
 !  Close DDB
    close(dtfil%unddb)
  end if
-
 
 !Deallocate arrays
  ABI_DEALLOCATE(atindx)

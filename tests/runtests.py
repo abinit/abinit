@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """This script executes the ABINIT suite of automatic tests."""
 from __future__ import print_function, division, absolute_import #, unicode_literals
 
