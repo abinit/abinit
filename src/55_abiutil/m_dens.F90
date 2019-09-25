@@ -467,12 +467,14 @@ end subroutine dens_hirsh
 !! add_atomic_fcts
 !!
 !! FUNCTION
-!! This routine is called to add the atomic spherical functions to some input function (usually an input potential residual).
+!! This routine is called to assemble the atomic spherical functions, and, if option/=0,  
+!! to add it to some input function (usually an input potential residual).
 !! The contributions from each atomic sphere are governed by parameters coeff_constr_dft, input to the present routine.
 !!
 !! INPUTS
 !!  natom=number of atoms
 !!  nspden = number of spin densities (1 2 or 4)
+!!  option= if 0, the sum of the atomic spherical functions is returned in nv_constr_dft_r; if non-zero, they are added to nv_constr_dft_r
 !!  rprimd=lattice vectors (dimensionful)
 !!  mpi_enreg=mpi structure with communicator info
 !!  nfft=number of points in standard fft grid
@@ -492,12 +494,12 @@ end subroutine dens_hirsh
 !!
 !! SOURCE
 
-subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ratsph, &
+subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,option,ratsph, &
   typat,coeffs_constr_dft,nv_constr_dft_r,xred)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,nfft,nspden,ntypat
+ integer,intent(in) :: natom,nfft,nspden,ntypat,option
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in)  :: typat(natom)
@@ -538,7 +540,9 @@ subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,ratsp
 
  ratsm = 0.05_dp ! default value for the smearing region radius - may become input variable later
 
- nv_constr_dft_r = zero
+ if(option==0)then
+   nv_constr_dft_r = zero
+ endif
 
 !Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
@@ -846,9 +850,9 @@ end subroutine constrained_dft_free
 
 !Local variables-------------------------------
 !scalars
- integer :: conkind,iatom,natom,nfftf,nspden,ntypat
+ integer :: conkind,iatom,natom,nfftf,nspden,ntypat,option
  integer :: cplex1=1
- real(dp) :: intgden_norm,intgden_proj,norm
+ real(dp) :: intgden_norm,intgden_proj,norm,ratio
 !arrays
  real(dp) :: corr_denmag(4)
  real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
@@ -873,32 +877,46 @@ end subroutine constrained_dft_free
  call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
 &  c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgres)
 
+!DEBUG
+ write(std_out,*)
+ write(std_out,*) ' constrained_residual : intgden(1,2), intgres(1,2)',intgden(1,2), intgres(1,2)
+ write(std_out,*)
+!ENDDEBUG
+
  ABI_ALLOCATE(coeffs_constr_dft,(nspden,natom))
  coeffs_constr_dft=zero
 
 !The proper combination of intgden and intgres is stored in intgden: it is an effective charge/magnetization, to be compared to the target one.
  do iatom=1,natom
 
-   !The total charge, conjugate to the average potential
-   intgden(1,iatom)=c_dft%magcon_lambda * intgden(1,iatom) + half*(intgres(1,iatom)+intgres(2,iatom))/c_dft%intgf2(iatom)
-   if(nspden==2)then
+   ratio=one/(c_dft%intgf2(iatom)*c_dft%magcon_lambda)
+
+   if(nspden==1)then
+     !The total charge, conjugate to the potential
+     intgden(1,iatom)= intgden(1,iatom) + ratio* intgres(1,iatom)
+   else if(nspden==2)then
+     !The total charge, conjugate to the average potential
+     intgden(1,iatom)= intgden(1,iatom) + ratio* half*(intgres(1,iatom)+intgres(2,iatom))
      !The magnetization along z
-     intgden(2,iatom)=c_dft%magcon_lambda * (intgden(2,iatom)-half*intgden(1,iatom)) + (intgres(1,iatom)-intgres(2,iatom))/c_dft%intgf2(iatom)
+     intgden(2,iatom)=(intgden(2,iatom)-half*intgden(1,iatom)) + ratio * (intgres(1,iatom)-intgres(2,iatom))
    else if(nspden==4)then
-     !The magnetization along z
-     intgden(2,iatom)=c_dft%magcon_lambda * intgden(2,iatom) + (intgres(1,iatom)-intgres(2,iatom))/c_dft%intgf2(iatom)
-     intgden(3,iatom)=c_dft%magcon_lambda * intgden(3,iatom) + intgres(3,iatom) / c_dft%intgf2(iatom)
-     intgden(4,iatom)=c_dft%magcon_lambda * intgden(4,iatom) - intgres(4,iatom) / c_dft%intgf2(iatom)
+     !The total charge, conjugate to the average potential
+     intgden(1,iatom)= intgden(1,iatom) + ratio * half*(intgres(1,iatom)+intgres(2,iatom))
+     !The three components of the magnetization 
+     intgden(2,iatom)= intgden(2,iatom) + ratio * (intgres(1,iatom)-intgres(2,iatom))
+     intgden(3,iatom)= intgden(3,iatom) + ratio * intgres(3,iatom) 
+     intgden(4,iatom)= intgden(4,iatom) - ratio * intgres(4,iatom) 
    endif
 
-   !Comparison with the target value, and computation of the correction in terms of density and magnetization errors.
+   !Comparison with the target value, and computation of the correction in terms of density and magnetization coefficients.
    conkind=c_dft%constraint_kind(c_dft%typat(iatom))
    corr_denmag(:)=zero
 
    if(conkind >=10)then
 
-     !The charge constraint is determined by the target chrgat minus the charge of the ion.
-     corr_denmag(1)=intgden(1,iatom)-(c_dft%chrgat(iatom)-c_dft%ziontypat(c_dft%typat(iatom)))
+     !The electronic constraint is such that the ziontypat charge minus (the electronic charge is negative) the atomic electronic density 
+     !intgden gives the target charge chrgat. 
+     corr_denmag(1)=intgden(1,iatom)+c_dft%chrgat(iatom)-c_dft%ziontypat(c_dft%typat(iatom))
 
    endif
 
@@ -922,33 +940,44 @@ end subroutine constrained_dft_free
            intgden_proj=spinat_normed(1)*intgden(2,iatom)+ &
 &            spinat_normed(2)*intgden(3,iatom)+ &
 &            spinat_normed(3)*intgden(4,iatom)
-           coeffs_constr_dft(2:nspden,iatom)=intgden(2:nspden,iatom)-spinat_normed(2:nspden)*intgden_proj 
+           corr_denmag(2:nspden)=intgden(2:nspden,iatom)-spinat_normed(2:nspden)*intgden_proj 
          else if(nspden==2)then
            !The direction must be correct, collinear, so no change.
-           coeffs_constr_dft(2,iatom)=zero
+           corr_denmag(2)=zero
          endif
 
        else if( mod(conkind,10)==3 )then
 
          !Fix the amplitude of the magnetization vector
          intgden_norm = sqrt(sum(intgden(2:nspden,iatom)**2))
-         coeffs_constr_dft(2:nspden,iatom)=(one-norm/intgden_norm)*intgden(2:nspden,iatom)
+         corr_denmag(2:nspden)=(one-norm/intgden_norm)*intgden(2:nspden,iatom)
 
        endif
 
      else 
 
        !In this case, we set the atomic magnetization to zero.
-       coeffs_constr_dft(2:nspden,iatom)=intgden(2:nspden,iatom)
+       corr_denmag(2:nspden)=intgden(2:nspden,iatom)
 
      endif
        
    end if
 
+   !Preconditioning by a global factor. Might be improved in the future ...
+   corr_denmag(:)=corr_denmag(:) * c_dft%magcon_lambda
+
+!DEBUG
+   write(std_out,*)' '
+   write(std_out,*)' constrained residual : corr_denmag(:)=',corr_denmag(:) 
+   write(std_out,*)' constrained residual : set to zero, for debugging purposes '
+   write(std_out,*)' '
+   corr_denmag(:)=zero
+!ENDDEBUG
+
    !Convert from density/magnetization constraint residual to actual coefficient that will multiply the spherical function for the potential
    if(nspden==1)then
      !From charge to potential
-     coeffs_constr_dft(1:2,iatom)=corr_denmag(1)
+     coeffs_constr_dft(1,iatom)=corr_denmag(1)
    else if(nspden==2 .or. nspden==4)then
      !From charge and magnetization to potential 
      coeffs_constr_dft(1,iatom)=corr_denmag(1)+corr_denmag(2)
@@ -961,8 +990,9 @@ end subroutine constrained_dft_free
 
  enddo
 
-!Now compute the new residual
- call add_atomic_fcts(natom,nspden,c_dft%rprimd,mpi_enreg,nfftf,c_dft%ngfftf,ntypat,&
+!Now compute the new residual, by adding the spherical functionsl
+ option=1
+ call add_atomic_fcts(natom,nspden,c_dft%rprimd,mpi_enreg,nfftf,c_dft%ngfftf,ntypat,option,&
 &  c_dft%ratsph,c_dft%typat,coeffs_constr_dft,vresid,xred)
 
  ABI_DEALLOCATE(coeffs_constr_dft)
@@ -1024,15 +1054,14 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
 
 !Local variables-------------------------------
 !scalars
- integer :: iatom,magconon,natom,nfft,nspden,ntypat
+ integer :: iatom,magconon,natom,nfft,nspden,ntypat,option
  integer :: cplex1=1
  real(dp):: cmm_x,cmm_y,cmm_z
- real(dp) :: intgden_proj,norm,ucvol
+ real(dp) :: intgden_proj,norm
 !arrays
  real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
  real(dp), allocatable :: intgden(:,:) ! nspden,natom
  real(dp) :: spinat_normed(3)
- real(dp) :: gprimd(3,3),rmet(3,3),gmet(3,3)
 
 ! ***********************************************************************************************
 
@@ -1128,7 +1157,8 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
  enddo ! iatom
  
 !Now compute the potential in real space
- call add_atomic_fcts(natom,nspden,c_dft%rprimd,mpi_enreg,nfft,c_dft%ngfftf,ntypat,c_dft%ratsph, &
+ option=0 
+ call add_atomic_fcts(natom,nspden,c_dft%rprimd,mpi_enreg,nfft,c_dft%ngfftf,ntypat,option,c_dft%ratsph, &
    c_dft%typat,coeffs_constr_dft,nv_constr_dft_r,xred)
 
  ABI_DEALLOCATE(coeffs_constr_dft)
@@ -1385,19 +1415,23 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  end if
 
 !If intgf2 present, check that the spheres do not overlap. 
+!Well, at present, there is no check of the distance between a sphere and its own image in another cell ...
+!But anyhow, this restriction should be lifted in the next stage of development of this algorithm ...
  if(present(intgf2))then
-   do iatom=1,natom
-     do jatom=1,natom
-       dist_ij=dist2(xred(:,iatom),xred(:,jatom),rprimd,1)
-       if(dist_ij-ratsph(typat(iatom))-ratsph(typat(jatom))<tol10)then
-         write(msg,'(a,a,a,i5,a,i5,a,f12.4,a,a,a,f12.4,a,f12.4)')&
-         'In constrained DFT, the spheres around different atoms cannot overlap. See input var ratsph.',ch10,&
-&        'It is found that for atoms ',iatom,' and ',jatom,', the distance is ',dist_ij,' Bohr, while ',ch10,&
-&        'the radii of the spheres are ',ratsph(typat(iatom)),' and ',ratsph(typat(jatom))
-         MSG_ERROR(msg)
-       endif
+   if(natom>1)then
+     do iatom=1,natom-1
+       do jatom=iatom+1,natom
+         dist_ij=dist2(xred(:,iatom),xred(:,jatom),rprimd,1)
+         if(dist_ij-ratsph(typat(iatom))-ratsph(typat(jatom))<tol10)then
+           write(msg,'(a,a,a,i5,a,i5,a,f12.4,a,a,a,f12.4,a,f12.4)')&
+           'In constrained DFT, the spheres around different atoms cannot overlap. See input var ratsph.',ch10,&
+&          'It is found that for atoms ',iatom,' and ',jatom,', the distance is ',dist_ij,' Bohr, while ',ch10,&
+&          'the radii of the spheres are ',ratsph(typat(iatom)),' and ',ratsph(typat(jatom))
+           MSG_ERROR(msg)
+         endif
+       enddo
      enddo
-   enddo
+   endif
  endif
 
 !Get the distrib associated with this fft_grid
