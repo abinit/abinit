@@ -114,6 +114,7 @@ AC_DEFUN([SD_LIBXC_INIT], [
   if test "${STEREDEG_BYPASS_CONSISTENCY}" != "yes"; then
     _SD_LIBXC_CHECK_CONFIG
   fi
+
   # Adjust configuration depending on init type
   if test "${sd_libxc_enable}" = "yes" -o "${sd_libxc_enable}" = "auto"; then
 
