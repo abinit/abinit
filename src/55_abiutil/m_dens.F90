@@ -879,7 +879,7 @@ end subroutine constrained_dft_free
 
 !DEBUG
  write(std_out,*)
- write(std_out,*) ' constrained_residual : intgden(1,1), intgres(1,1)',intgden(1,1), intgres(1,1)
+ write(std_out,*) ' constrained_residual : intgden(1,:), intgres(1,:)',intgden(1,:), intgres(1,:)
  intgres(:,:)=zero
  write(std_out,*) ' constrained_residual : zeroed intgres, for debugging purposes'
  write(std_out,*)
@@ -915,10 +915,10 @@ end subroutine constrained_dft_free
    corr_denmag(:)=zero
 
 !DEBUG
-   if(iatom==1)then
-     write(std_out,*)' constrained residual, 1 : iatom,intgden(1,1)=',iatom,intgden(1,1)
-     write(std_out,*)' constrained residual, 1 : c_dft%chrgat(1)=',c_dft%chrgat(1)
-   endif
+!  if(iatom==1)then
+     write(std_out,*)' constrained residual, 1 : iatom,intgden(1,iatom)=',iatom,intgden(1,iatom)
+     write(std_out,*)' constrained residual, 1 : c_dft%chrgat(iatom)=',c_dft%chrgat(iatom)
+!  endif
 !ENDDEBUG
 
 
@@ -928,13 +928,13 @@ end subroutine constrained_dft_free
      !intgden gives the target charge chrgat. 
      corr_denmag(1)=intgden(1,iatom)+c_dft%chrgat(iatom)-c_dft%ziontypat(c_dft%typat(iatom))
 
-!DEBUG
-     if(iatom==1)then
-       write(std_out,*)' constrained residual, 2 : iatom,corr_denmag(1)=',corr_denmag(1)
-     endif
-!ENDDEBUG
-
    endif
+
+!DEBUG
+!    if(iatom==1)then
+       write(std_out,*)' constrained residual, 2 : iatom,corr_denmag(:)=',corr_denmag(:)
+!    endif
+!ENDDEBUG
 
    if( mod(conkind,10)==1 .and. nspden>1)then
 
@@ -983,9 +983,9 @@ end subroutine constrained_dft_free
    corr_denmag(:)=corr_denmag(:) * c_dft%magcon_lambda
 
 !DEBUG
-   if(iatom==1)then
+!  if(iatom==1)then
      write(std_out,*)' constrained residual : corr_denmag(:)=',corr_denmag(:) 
-   endif
+!  endif
 !ENDDEBUG
 
    !Convert from density/magnetization constraint residual to actual coefficient that will multiply the spherical function for the potential
