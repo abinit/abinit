@@ -879,7 +879,9 @@ end subroutine constrained_dft_free
 
 !DEBUG
  write(std_out,*)
- write(std_out,*) ' constrained_residual : intgden(1,2), intgres(1,2)',intgden(1,2), intgres(1,2)
+ write(std_out,*) ' constrained_residual : intgden(1,1), intgres(1,1)',intgden(1,1), intgres(1,1)
+ intgres(:,:)=zero
+ write(std_out,*) ' constrained_residual : zeroed intgres, for debugging purposes'
  write(std_out,*)
 !ENDDEBUG
 
@@ -912,11 +914,25 @@ end subroutine constrained_dft_free
    conkind=c_dft%constraint_kind(c_dft%typat(iatom))
    corr_denmag(:)=zero
 
+!DEBUG
+   if(iatom==1)then
+     write(std_out,*)' constrained residual, 1 : iatom,intgden(1,1)=',iatom,intgden(1,1)
+     write(std_out,*)' constrained residual, 1 : c_dft%chrgat(1)=',c_dft%chrgat(1)
+   endif
+!ENDDEBUG
+
+
    if(conkind >=10)then
 
      !The electronic constraint is such that the ziontypat charge minus (the electronic charge is negative) the atomic electronic density 
      !intgden gives the target charge chrgat. 
      corr_denmag(1)=intgden(1,iatom)+c_dft%chrgat(iatom)-c_dft%ziontypat(c_dft%typat(iatom))
+
+!DEBUG
+     if(iatom==1)then
+       write(std_out,*)' constrained residual, 2 : iatom,corr_denmag(1)=',corr_denmag(1)
+     endif
+!ENDDEBUG
 
    endif
 
@@ -967,11 +983,9 @@ end subroutine constrained_dft_free
    corr_denmag(:)=corr_denmag(:) * c_dft%magcon_lambda
 
 !DEBUG
-   write(std_out,*)' '
-   write(std_out,*)' constrained residual : corr_denmag(:)=',corr_denmag(:) 
-   write(std_out,*)' constrained residual : set to zero, for debugging purposes '
-   write(std_out,*)' '
-   corr_denmag(:)=zero
+   if(iatom==1)then
+     write(std_out,*)' constrained residual : corr_denmag(:)=',corr_denmag(:) 
+   endif
 !ENDDEBUG
 
    !Convert from density/magnetization constraint residual to actual coefficient that will multiply the spherical function for the potential
@@ -989,6 +1003,10 @@ end subroutine constrained_dft_free
    endif
 
  enddo
+
+!DEBUG
+ write(std_out,*)' constrained residual : coeffs_constr_dft(1,:)=',coeffs_constr_dft(1,:)
+!ENDDEBUG
 
 !Now compute the new residual, by adding the spherical functionsl
  option=1

@@ -1376,7 +1376,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    spinat(1:3,1:natom)=dtset%spinat(1:3,1:natom)
    znucl(1:dtset%npsp)=dtset%znucl(1:dtset%npsp)
 
-   call ingeo(acell,amu,dtset,bravais,dtset%genafm(1:3),iatfix,&
+   call ingeo(acell,amu,bravais,chrgat,dtset,dtset%genafm(1:3),iatfix,&
 &   dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
 &   msym,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
 &   dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
