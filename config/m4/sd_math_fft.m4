@@ -308,6 +308,7 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
 
   # Start from the internal implementation
   sd_fft_selected_flavors="goedecker"
+  tmp_linalg_has_mkl=`echo "${sd_linalg_flavor}" | grep "mkl"`
 
   # Prepend PFFT if available
   if test "${sd_pfft_init}" != "" -a "${sd_pfft_enable}" != "no"; then
@@ -325,16 +326,19 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
   fi
 
   # Prepend FFTW3-in-MKL if MKL is present and FFTW3 is not set
-  if test "${sd_linalg_flavor}" = "mkl" -a "${sd_fftw3_enable}" = "no"; then
+  if test "${tmp_linalg_has_mkl}" != "" -a "${sd_fftw3_enable}" = "no"; then
     sd_fft_selected_flavors="fftw3-mkl ${sd_fft_selected_flavors}"
   fi
 
   # Prepend DFTI if linear algebra is MKL
-  if test "${sd_linalg_flavor}" = "mkl"; then
+  if test "${tmp_linalg_has_mkl}" != ""; then
     sd_fft_selected_flavors="dfti ${sd_fft_selected_flavors}"
   fi
 
   AC_MSG_RESULT([${sd_fft_selected_flavors}])
+
+  # Clean-up the mess
+  unset tmp_linalg_has_mkl
 ]) # _SD_FFT_INIT_FLAVORS
 
 
