@@ -518,8 +518,7 @@ contains
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
     do istep = 1 , self%params%ntime
-       call self%lattice_mover%run_one_step(self%pots, displacement=self%lattice_mover%displacement, &
-                                            spin=self%spin_mover%Stmp)
+       call self%lattice_mover%run_one_step(self%pots, spin=self%spin_mover%Stmp)
        write(msg, "(A13, 4X,  I13)")  "Latt_Iter", istep
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
