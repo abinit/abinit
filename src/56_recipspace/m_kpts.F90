@@ -31,6 +31,7 @@ module m_kpts
  use m_crystal
  use m_sort
  use m_krank
+ use m_htetra
  use m_xmpi
 
  use m_time,           only : timab
@@ -40,7 +41,6 @@ module m_kpts
  use m_fstrings,       only : sjoin, itoa, ltoa
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_geometry,       only : metric
- use m_htetrahedron,   only : t_htetrahedron, htetra_init
  use m_symkpt,         only : symkpt, symkpt_new
 
  implicit none
@@ -219,7 +219,7 @@ end subroutine kpts_ibz_from_kptrlatt
 !!  comm= MPI communicator
 !!
 !! OUTPUT
-!!  tetra<t_htetrahedron>=Tetrahedron object, fully initialized if ierr == 0.
+!!  tetra<htetra_t>=Tetrahedron object, fully initialized if ierr == 0.
 !!  msg=Error message if ierr /= 0
 !!  ierr=Exit status
 !!
@@ -231,8 +231,8 @@ end subroutine kpts_ibz_from_kptrlatt
 !!
 !! SOURCE
 
-type(t_htetrahedron) function tetra_from_kptrlatt( &
-&  cryst, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, comm, msg, ierr) result (htetra)
+type(htetra_t) function tetra_from_kptrlatt( &
+  cryst, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, comm, msg, ierr) result (htetra)
 
 !Arguments ------------------------------------
 !scalars

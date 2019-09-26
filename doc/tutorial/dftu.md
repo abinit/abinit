@@ -14,9 +14,9 @@ variables controlling this type of calculation.
 It is supposed that you already know how to do PAW calculations using ABINIT.
 Please follow the two tutorials on PAW in ABINIT ([PAW1](paw1), [PAW2](paw2)), if this is not the case.
 
-[TUTORIAL_README]
-
 This tutorial should take about 1 hour to complete.
+
+[TUTORIAL_README]
 
 ## 0 Short summary of the DFT+U method
   
@@ -56,10 +56,10 @@ However, the two methods generally give similar results.
 for the other tutorials. Why not Work_dftu?
 In what follows, the names of files will be mentioned as if you were in this subdirectory.*
 
-Copy the files *tdftu_1.in* and *tdftu_x.files* from *\$ABI_TUTORIAL/Input* to your *Work_dftu* directory with:
+Copy the files *tdftu_1.in* and *tdftu_x.files* from *\$ABI_TESTS/tutorial/Input* to your *Work_dftu* directory with:
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work_dftu
 cd Work_dftu
 cp ../tdftu_x.files .  # You will need to edit this file.
@@ -271,7 +271,7 @@ electrons for each spin independently and the complete interactions $U(m_1,m_2,m
 As in the preceding run, we will start with a fixed density matrix for d
 orbitals. You might now start your calculation, with the *tdftu_4.in* and
 *tdftu_4.files*, or skip the calculation, and rely on the reference file
-provided in the *\$ABI_TUTORIAL/Refs* directory. Examine the *tdftu_4.in* file. 
+provided in the *\$ABI_TESTS/tutorial/Refs* directory. Examine the *tdftu_4.in* file. 
 
 {% dialog tests/tutorial/Input/tdftu_4.in %}
 

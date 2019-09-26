@@ -152,7 +152,7 @@ ph_qpath9
 ############
 # DATASET 10
 ############
-# Interpolate DFPT potentials, produce v1qavg file  along q-path
+# Interpolate DFPT potentials, produce v1qavg file along q-path
 eph_task10 -15
 getdvdb_path10  "t160o_DS20_DVDB"
 

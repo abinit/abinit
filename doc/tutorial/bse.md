@@ -13,21 +13,21 @@ can be found in the [[theory:bse|Bether-Salpeter notes]].
 
 The user should be familiarized with the four basic tutorials of ABINIT and the [first GW tutorial](gw1).
 
-[TUTORIAL_README]
-
-This tutorial should take about one hour to be completed.
-
 Visualisation tools are NOT covered in this tutorial.
 Powerful visualisation procedures have been developed in the Abipy context,
 relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
 and the [Abipy tutorials](https://github.com/abinit/abitutorials).
+
+This tutorial should take about one hour to be completed.
+
+[TUTORIAL_README]
 
 ## Preparatory steps (WFK and the SCR file)
   
 *Before starting, you might consider to work in a different subdirectory as
 for the other tutorials. Why not Work_bs?*
 
-Copy the files file *\$ABI_TUTORIAL/Input/tbs_1.files* 
+Copy the files file *\$ABI_TESTS/tutorial/Input/tbs_1.files* 
 in the working directory *Work_bs*.
 Now run immediately the calculation with the command:
     
@@ -35,7 +35,7 @@ Now run immediately the calculation with the command:
 
 so that we can analyze the input file while the code is running.
 
-The input file is located in *\$ABI_TUTORIAL/Input/tbs_1.in*. 
+The input file is located in *\$ABI_TESTS/tutorial/Input/tbs_1.in*. 
 The header reports a brief description of the calculation so read it carefully. 
 Don't worry if some parts are not clear to you as we are going to discuss the
 calculation in step by step fashion.
@@ -129,7 +129,7 @@ rename these precious files using more meaningful names *e.g.*:
   
 This section is intended to show how to perform a standard excitonic
 calculation within the Tamm-Dancoff approximation (TDA) using the Haydock iterative technique. 
-The input file is *\$ABI_TUTORIAL/tutorial/Input/tbs_2.in*.
+The input file is *\$ABI_TESTS/tutorial/tutorial/Input/tbs_2.in*.
 
 Before running the job, we have to connect this calculation with the output
 results produced in *tbs_1.in*.
@@ -145,14 +145,14 @@ for doing so will be clear afterwards once we discuss the input file.
 This job lasts 1-2 minutes on a modern machine so it is worth running it
 before inspecting the input file.
 
-Copy the files file *\$ABI_TUTORIAL/Input/tbs_2.files* in the working
+Copy the files file *\$ABI_TESTS/tutorial/Input/tbs_2.files* in the working
 directory and issue:
     
     abinit < tbs_2.files > tbs_2.log 2> err &
 
 to put the job in background so that we can examine *tbs_2.in*.
 
-Now open *\$ABI_TUTORIAL/Input/tbs_2.in* in your preferred editor and go
+Now open *\$ABI_TESTS/tutorial/Input/tbs_2.in* in your preferred editor and go
 to the next section where we discuss the most important variables governing a
 typical BS computation.
 
@@ -507,7 +507,7 @@ study should be done once converged values for the other parameters have been al
 In this section we take advantage of the multi-dataset capabilities of ABINIT
 to perform calculations with different values for [[bs_loband]] and [[nband]]
 
-Before running the test take some time to read the input file *\$ABI_TUTORIAL/Input/tbs_3.in*.
+Before running the test take some time to read the input file *\$ABI_TESTS/tutorial/Input/tbs_3.in*.
 
 {% dialog tests/tutorial/Input/tbs_3.in %}
 
@@ -613,7 +613,7 @@ provided that, in the input file, we replace [[irdwfk]] and [[irdscr]] with
 ## Convergence with respect to the number of planewaves in the screening
   
 First of all, before running the calculation, take some time to understand
-what is done in *\$ABI_TUTORIAL/Input/tbs_4.in*.
+what is done in *\$ABI_TESTS/tutorial/Input/tbs_4.in*.
 
 The structure of the input file is very similar to the one of *tbs_3.in*, the
 main difference is in the first section:
@@ -637,7 +637,7 @@ block of the initial matrix. A WARNING message is issued if the value
 specified in the input file is larger than the one available in the SCR file.
 
 Now we can finally run the calculation. As usual, we have to copy
-*\$ABI_TUTORIAL/Input/tbs_4.files* in the working directory *Work_bs*,
+*\$ABI_TESTS/tutorial/Input/tbs_4.files* in the working directory *Work_bs*,
 then we have to create a bunch of symbolic links for the input WFK and SCR files:
     
     ln -s 444_SCR tbs_4i_DS1_SCR
@@ -689,7 +689,7 @@ part since it requires the generation of new WFK files and of the new SCR file
 for each k-mesh (the list of k-points for the wavefunctions and the set of
 q-points in the screening must be consistent with each other).
 
-The file *\$ABI_TUTORIAL/Input/tbs_5.in* gathers the different steps of
+The file *\$ABI_TESTS/tutorial/Input/tbs_5.in* gathers the different steps of
 a standard BS calculation (generation of two WFK file, screening calculation,
 BS run) into a single input. The calculation is done with the converged
 parameters found in the previous studies, only [[ngkpt]] has been intentionally left undefined.

@@ -18,6 +18,8 @@ cores (up to 64).
 You are supposed to know already some basics of parallelism in ABINIT,
 explained in the tutorial [A first introduction to ABINIT in parallel](basepar).
 
+[TUTORIAL_README]
+
 ## 1 Wavelets variables and parallelism
   
 The parallelism with the wavelet formalism can be used for two purposes: to
