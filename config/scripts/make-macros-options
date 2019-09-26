@@ -448,13 +448,16 @@ for arg in ("enable","with"):
         + "    [abi_%s_enable=\"${enableval}\"; abi_%s_init=\"yon\"],\n" % (var,var) \
         + "    [abi_%s_enable=\"%s\"; abi_%s_init=\"def\"])\n" % (var, opt_dflt, var))
     else:
+      tmp_dflt = ""
+      if ( not opt_dflt is None ):
+        tmp_dflt = opt_dflt
       tmp_init = "kwd"
       if ( opt_vals == "@install" ):
         tmp_init = "dir"
       tmp_decl = """
   AC_ARG_WITH({name},
     AC_HELP_STRING([--with-{cmd}],
-      [{help} (default: {default})]),
+      [{help} (default: '{default}')]),
     [ abi_{name}="${{withval}}"
       case "${{withval}}" in
         no|yes)
@@ -464,8 +467,8 @@ for arg in ("enable","with"):
           abi_{name}_init="{init}"
           ;;
       esac],
-    [ abi_{name}_init="def"])
-""".format(cmd=opt_name, name=var, help=opt_desc, default=opt_dflt, init=tmp_init)
+    [ abi_{name}_init="def"; abi_{name}="{default}"])
+""".format(cmd=opt_name, name=var, help=opt_desc, default=tmp_dflt, init=tmp_init)
       m4.write(tmp_decl)
 
     if ( opt_dflt is not None ):

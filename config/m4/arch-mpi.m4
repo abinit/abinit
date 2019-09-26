@@ -697,11 +697,9 @@ AC_DEFUN([ABI_MPI_INIT], [
 
   # Init ABINIT MPI variables
   abi_mpi_enable="${sd_mpi_enable}"
+  abi_mpi_fc_level="${abi_mpi_level}"
   abi_mpi_get_library_version="unknown"
   abi_mpi_init="${sd_mpi_init}"
-  abi_mpi_inplace_enable="${enable_mpi_inplace}"
-  abi_mpi_io_enable="${enable_mpi_io}"
-  abi_mpi_level="${with_mpi_level}"
 
   # Init ABINIT MPI build flags
   abi_mpi_cppflags=""
@@ -885,10 +883,10 @@ AC_DEFUN([ABI_MPI_DUMP], [
   AC_MSG_NOTICE([])
   AC_MSG_NOTICE([Configure options:])
   AC_MSG_NOTICE([])
-  AC_MSG_NOTICE([  * enable_mpi_inplace = ${enable_mpi_inplace}])
-  AC_MSG_NOTICE([  * enable_mpi_io      = ${enable_mpi_io}])
-  AC_MSG_NOTICE([  * with_mpi           = ${with_mpi}])
-  AC_MSG_NOTICE([  * with_mpi_level     = ${with_mpi_level}])
+  AC_MSG_NOTICE([  * enable_mpi_inplace = '${enable_mpi_inplace}'])
+  AC_MSG_NOTICE([  * enable_mpi_io      = '${enable_mpi_io}'])
+  AC_MSG_NOTICE([  * with_mpi           = '${with_mpi}'])
+  AC_MSG_NOTICE([  * with_mpi_level     = '${with_mpi_level}'])
   AC_MSG_NOTICE([])
   AC_MSG_NOTICE([Internal parameters])
   AC_MSG_NOTICE([])
