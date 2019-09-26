@@ -363,7 +363,10 @@ def parse_opt(opt,opt_ivar,values):
 
 # Initial setup
 my_name    = "make-macros-options"
-my_configs = ["config/specs/options.conf"]
+my_configs = {
+  "deps":"config/specs/dependencies.conf",
+  "opts":"config/specs/options.conf",
+}
 my_output  = "config/m4/auto-options.m4"
 
 # Check if we are in the top of the ABINIT source tree
@@ -374,8 +377,9 @@ if ( not os.path.exists("configure.ac") or
   sys.exit(1)
 
 # Read config file(s)
-cnf = MyConfigParser()
-for cnf_file in my_configs:
+cnf_deps = MyConfigParser()
+cnf_opts = MyConfigParser()
+for cnf_file in my_configs.values():
   if ( not os.path.exists(cnf_file) ):
     print("%s: Could not find config file (%s)." % (my_name,cnf_file))
     print("%s: Aborting now." % my_name)
@@ -385,14 +389,15 @@ for cnf_file in my_configs:
 now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
 
 # Init
-cnf.read(my_configs[0])
+cnf_deps.read(my_configs["deps"])
+cnf_opts.read(my_configs["opts"])
 re_en = re.compile("enable_")
 re_wi = re.compile("with_")
-all_args = cnf.sections()
+all_args = cnf_opts.sections()
 all_args.sort()
 ac_args = { "enable":list(), "with":list() }
 for arg in all_args:
-  arg_stat = cnf.get(arg,"status")
+  arg_stat = cnf_opts.get(arg,"status")
   if ( (arg_stat != "removed") and (arg_stat != "dropped") ):
     if ( arg.startswith("enable_") ):
       ac_args["enable"].append(arg)
@@ -417,22 +422,22 @@ for arg in ("enable","with"):
   for opt in ac_args[arg]:
     var = re.sub(arg+"_","",opt)
     opt_name = re.sub("_","-",var)
-    opt_desc = cnf.get(opt,"description")
-    opt_stat = cnf.get(opt,"status")
+    opt_desc = cnf_opts.get(opt,"description")
+    opt_stat = cnf_opts.get(opt,"status")
     if ( arg == "enable" ):
       opt_ivar = "abi_%s_enable" % var
     else:
       opt_ivar = "abi_%s" % var
     try:
-      opt_dflt = cnf.get(opt,"default")
+      opt_dflt = cnf_opts.get(opt,"default")
     except:
       opt_dflt = None
     try:
-      opt_nega = cnf.get(opt,"negative")
+      opt_nega = cnf_opts.get(opt,"negative")
     except:
       opt_nega = ""
     try:
-      opt_vals = cnf.get(opt,"values")
+      opt_vals = cnf_opts.get(opt,"values")
     except:
       opt_vals = None
 
@@ -505,6 +510,11 @@ for arg in ("enable","with"):
   for opt in ac_args[arg]:
     var = re.sub(arg+"_","",opt)
     m4.write("  cmd_%s_%s=\"${%s_%s}\"\n" % (arg,var,arg,var))
+for dep in sorted(cnf_deps.sections()):
+  if (cnf_deps.get(dep, "detector") == "steredeg" ):
+    m4.write("  cmd_with_%s=\"${with_%s}\"\n" % (dep,dep))
+    if ( cnf_deps.has_option(dep, "flavors") ):
+      m4.write("  cmd_with_%s_flavor=\"${with_%s_flavor}\"\n" % (dep,dep))
 
 # Do not forget "prefix"
 m4.write("""
@@ -542,11 +552,19 @@ for arg in ("enable","with"):
   for opt in ac_args[arg]:
     var = re.sub(arg+"_","",opt)
     if ( arg == "enable" ):
-      m4.write("\n  if test \"${cmd_%s_%s}\" != \"\"; then\n    abi_%s_%s=\"${cmd_%s_%s}\"\n  fi\n" % \
+      m4.write("  if test \"${cmd_%s_%s}\" != \"\"; then\n    abi_%s_%s=\"${cmd_%s_%s}\"\n  fi\n" % \
         (arg,var,var,arg,arg,var))
     else:
-      m4.write("\n  if test \"${cmd_%s_%s}\" != \"\"; then\n    %s_%s=\"${cmd_%s_%s}\"\n  fi\n" % \
+      m4.write("  if test \"${cmd_%s_%s}\" != \"\"; then\n    %s_%s=\"${cmd_%s_%s}\"\n  fi\n" % \
         (arg,var,arg,var,arg,var))
+for dep in sorted(cnf_deps.sections()):
+  if (cnf_deps.get(dep, "detector") == "steredeg" ):
+    m4.write("  if test \"${cmd_with_%s}\" != \"\"; then\n    with_%s=\"${cmd_with_%s}\"\n  fi\n" % \
+      (dep,dep,dep))
+    if ( cnf_deps.has_option(dep, "flavors") ):
+      m4.write("  if test \"${cmd_with_%s_flavor}\" != \"\"; then\n    with_%s_flavor=\"${cmd_with_%s_flavor}\"\n  fi\n" % \
+      (dep,dep,dep))
+
 
 # Do not forget "prefix"
 m4.write("""
@@ -572,9 +590,9 @@ chg_ren = ""
 for arg in all_args:
 
   # Init
-  arg_stat = cnf.get(arg,"status")
+  arg_stat = cnf_opts.get(arg,"status")
   try:
-    arg_repl = cnf.get(arg,"use_instead")
+    arg_repl = cnf_opts.get(arg,"use_instead")
   except:
     arg_repl = ""
 
@@ -646,15 +664,15 @@ m4.write(re.sub("@MACRO@",parse,macro_parse_template()))
 triggers = ""
 
 for opt in ac_args["enable"]:
-  opt_desc = cnf.get(opt,"description")
+  opt_desc = cnf_opts.get(opt,"description")
   opt_desc = opt_desc[0].lower() + opt_desc[1:]
   opt_ivar = "abi_" + opt.replace("enable_", "") + "_enable"
   try:
-    opt_cnds = cnf.get(opt,"conditionals").split()
+    opt_cnds = cnf_opts.get(opt,"conditionals").split()
   except:
     opt_cnds = list()
   try:
-    opt_defs = cnf.get(opt,"defines").split()
+    opt_defs = cnf_opts.get(opt,"defines").split()
   except:
     opt_defs = list()
 
@@ -707,7 +725,7 @@ if ( tmp != "" ):
 dumper = open("config.dump.in","a")
 dumper.write("# Command-line options (script: %s)\n" % (my_name))
 for arg in all_args:
-  arg_stat = cnf.get(arg,"status")
+  arg_stat = cnf_opts.get(arg,"status")
   if ( (arg_stat != "removed") and \
        (arg_stat != "dropped") and \
        (not re.match("group", arg)) ):
