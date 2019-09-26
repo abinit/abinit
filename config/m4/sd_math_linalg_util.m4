@@ -64,7 +64,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_EXTS], [
 
   if test "${sd_linalg_has_gemm3m}" = "yes"; then
     AC_DEFINE([HAVE_LINALG_GEMM3M], 1,
-      [Define to 1 if you have ?GEMM3M BLAS3 extensions.])
+      [Define to 1 if you have GEMM3M BLAS3 extensions.])
   fi
 ]) # _SD_LINALG_CHECK_BLAS_EXTS
 
@@ -88,7 +88,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_MKL_EXTS], [
 
   if test "${sd_linalg_mkl_has_imatcopy}" = "yes"; then
     AC_DEFINE([HAVE_LINALG_MKL_IMATCOPY], 1,
-      [Define to 1 if you have mkl_?imatcopy extensions.])
+      [Define to 1 if you have MKL imatcopy extensions.])
   fi
 
   # mkl_omatcopy family
@@ -104,7 +104,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_MKL_EXTS], [
 
   if test "${sd_linalg_mkl_has_omatcopy}" = "yes"; then
     AC_DEFINE([HAVE_LINALG_MKL_OMATCOPY], 1,
-      [Define to 1 if you have mkl_?omatcopy extensions.])
+      [Define to 1 if you have MKL omatcopy extensions.])
   fi
 
   # mkl_omatadd family
@@ -120,7 +120,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_MKL_EXTS], [
 
   if test "${sd_linalg_mkl_has_omatadd}" = "yes"; then
     AC_DEFINE([HAVE_LINALG_MKL_OMATADD], 1,
-      [Define to 1 if you have mkl_?omatadd extensions.])
+      [Define to 1 if you have MKL omatadd extensions.])
   fi
 
   # mkl_threads support functions
@@ -218,7 +218,7 @@ AC_DEFUN([_SD_LINALG_CHECK_SCALAPACK], [
 #
 AC_DEFUN([_SD_LINALG_CHECK_ELPA_2013], [
   # Init
-  sd_linalg_has_elpa_2013="no"
+  sd_linalg_has_elpa_2013="unknown"
 
   AC_MSG_CHECKING([for ELPA 2013 API support in specified libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
@@ -247,7 +247,7 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2013], [
 #
 AC_DEFUN([_SD_LINALG_CHECK_ELPA_2014], [
   # Init
-  sd_linalg_has_elpa_2014="no"
+  sd_linalg_has_elpa_2014="unknown"
 
   AC_MSG_CHECKING([for ELPA 2014 API support in specified libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
@@ -278,7 +278,7 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2014], [
 #
 AC_DEFUN([_SD_LINALG_CHECK_ELPA_2015], [
   # Init
-  sd_linalg_has_elpa_2015="no"
+  sd_linalg_has_elpa_2015="unknown"
 
   AC_MSG_CHECKING([for ELPA 2015 API support in specified libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
@@ -310,7 +310,7 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2015], [
 #
 AC_DEFUN([_SD_LINALG_CHECK_ELPA_2016], [
   # Init
-  sd_linalg_has_elpa_2016="no"
+  sd_linalg_has_elpa_2016="unknown"
 
   AC_MSG_CHECKING([for ELPA 2016 API support in specified libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
@@ -343,7 +343,7 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2016], [
 #
 AC_DEFUN([_SD_LINALG_CHECK_ELPA_2017], [
   # Init
-  sd_linalg_has_elpa_2017="no"
+  sd_linalg_has_elpa_2017="unknown"
 
   AC_MSG_CHECKING([for ELPA 2017 API support in specified libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
@@ -376,7 +376,7 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2017], [
 #
 AC_DEFUN([_SD_LINALG_CHECK_MAGMA_15], [
   # Init
-  sd_linalg_has_magma_15="no"
+  sd_linalg_has_magma_15="unknown"
 
   AC_MSG_CHECKING([for magma_init/magma_finalize support in specified MAGMA libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
@@ -403,7 +403,7 @@ AC_DEFUN([_SD_LINALG_CHECK_MAGMA_15], [
 #
 AC_DEFUN([_SD_LINALG_SEARCH_BLACS], [
   # Init
-  sd_linalg_has_blacs="no"
+  sd_linalg_has_blacs="unknown"
 
   # Look for libraries and routines
   AC_SEARCH_LIBS([blacs_gridinit], $1,
@@ -455,7 +455,7 @@ AC_DEFUN([_SD_LINALG_SEARCH_BLAS], [
 #
 AC_DEFUN([_SD_LINALG_SEARCH_ELPA], [
   # Init
-  sd_linalg_has_elpa="no"
+  sd_linalg_has_elpa="unknown"
 
   # Look for libraries and routines
   # Has to rewrite AC_SEARCH_LIBS because of mandatory F90 module
@@ -507,7 +507,7 @@ AC_DEFUN([_SD_LINALG_SEARCH_ELPA], [
 #
 AC_DEFUN([_SD_LINALG_SEARCH_LAPACK], [
   # Init
-  sd_linalg_has_lapack="no"
+  sd_linalg_has_lapack="unknown"
 
   # Look for libraries and routines
   AC_SEARCH_LIBS([zhpev], $1,
@@ -531,7 +531,7 @@ AC_DEFUN([_SD_LINALG_SEARCH_LAPACK], [
 #
 AC_DEFUN([_SD_LINALG_SEARCH_LAPACKE], [
   # Init
-  sd_linalg_has_lapacke="no"
+  sd_linalg_has_lapacke="unknown"
 
   # Look for libraries and routines
   AC_MSG_CHECKING([for library containing zhpev_ C API])
@@ -574,7 +574,7 @@ AC_DEFUN([_SD_LINALG_SEARCH_LAPACKE], [
 #
 AC_DEFUN([_SD_LINALG_SEARCH_MAGMA], [
   # Init
-  sd_linalg_has_magma="no"
+  sd_linalg_has_magma="unknown"
 
   # Look for libraries and routines
   AC_LANG_PUSH([Fortran])
@@ -601,7 +601,7 @@ AC_DEFUN([_SD_LINALG_SEARCH_MAGMA], [
 #
 AC_DEFUN([_SD_LINALG_SEARCH_PLASMA], [
   # Init
-  sd_linalg_has_plasma="no"
+  sd_linalg_has_plasma="unknown"
 
   # Look for libraries and routines
   AC_SEARCH_LIBS([plasma_zhegv], $1,
@@ -625,7 +625,7 @@ AC_DEFUN([_SD_LINALG_SEARCH_PLASMA], [
 #
 AC_DEFUN([_SD_LINALG_SEARCH_SCALAPACK], [
   # Init
-  sd_linalg_has_scalapack="no"
+  sd_linalg_has_scalapack="unknown"
 
   # Look for libraries and routines
   AC_SEARCH_LIBS([pzheevx], $1,

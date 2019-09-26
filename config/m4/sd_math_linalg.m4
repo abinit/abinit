@@ -258,17 +258,16 @@ AC_DEFUN([SD_LINALG_DETECT], [
     def|yon)
       AC_MSG_RESULT([explore])
       _SD_LINALG_EXPLORE
-      _SD_LINALG_DUMP_CONFIG
       ;;
     dir|env)
       AC_MSG_RESULT([verify])
-      _SD_LINALG_DUMP_CONFIG
       _SD_LINALG_CHECK_LIBS
       ;;
     *)
       AC_MSG_ERROR([unsupported linear algebra init type: '${sd_linalg_init}'])
       ;;
   esac
+  _SD_LINALG_DUMP_CONFIG
 ]) # SD_LINALG_DETECT
 
 
