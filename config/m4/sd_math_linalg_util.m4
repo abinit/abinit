@@ -163,6 +163,52 @@ AC_DEFUN([_SD_LINALG_CHECK_LAPACK], [
 
 
                     # ------------------------------------ #
+                    # ------------------------------------ #
+
+
+# _SD_LINALG_CHECK_BLACS()
+# ------------------------
+#
+# Check whether the build environment provides BLACS.
+#
+AC_DEFUN([_SD_LINALG_CHECK_BLACS], [
+  sd_linalg_has_blacs="unknown"
+
+  AC_MSG_CHECKING([for BLACS support in the specified libraries])
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      call blacs_gridinit
+    ]])], [sd_linalg_has_blacs="yes"], [sd_linalg_has_blacs="no"])
+  AC_LANG_POP([Fortran])
+  AC_MSG_RESULT([${sd_linalg_has_blacs}])
+]) # _SD_LINALG_CHECK_BLACS
+
+
+                    # ------------------------------------ #
+
+
+# _SD_LINALG_CHECK_SCALAPACK()
+# ----------------------------
+#
+# Check whether the build environment provides ScaLAPACK.
+#
+AC_DEFUN([_SD_LINALG_CHECK_SCALAPACK], [
+  sd_linalg_has_scalapack="unknown"
+
+  AC_MSG_CHECKING([for ScaLAPACK support in the specified libraries])
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      call pzheevx
+    ]])], [sd_linalg_has_scalapack="yes"], [sd_linalg_has_scalapack="no"])
+  AC_LANG_POP([Fortran])
+  AC_MSG_RESULT([${sd_linalg_has_scalapack}])
+]) # _SD_LINALG_CHECK_SCALAPACK
+
+
+                    # ------------------------------------ #
+                    # ------------------------------------ #
 
 
 # _SD_LINALG_CHECK_ELPA_2013()

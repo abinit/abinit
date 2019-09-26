@@ -54,8 +54,10 @@ AC_DEFUN([SD_LINALG_INIT], [
   sd_linalg_has_elpa_2016="unknown"
   sd_linalg_has_plasma="unknown"
   sd_linalg_has_magma="unknown"
-  sd_linalg_gpu="unknown"
-  sd_linalg_mpi="unknown"
+  sd_linalg_gpu_ok="unknown"
+  sd_linalg_mpi_ok="unknown"
+  sd_linalg_mpiacc_ok="unknown"
+  sd_linalg_serial_ok="unknown"
   sd_linalg_provided=""
 
   # Set adjustable parameters
@@ -201,7 +203,7 @@ AC_DEFUN([SD_LINALG_INIT], [
 
 AC_DEFUN([SD_LINALG_INIT_FLAVOR], [
   # Init internal parameters
-  sd_linalg_valid_flavors="auto acml atlas custom easybuild elpa essl magma mkl netlib openblas plasma"
+  sd_linalg_valid_flavors="auto acml atlas easybuild elpa essl magma mkl netlib none openblas plasma"
   sd_linalg_flavor=""
   sd_linalg_flavor_init="unknown"
   sd_linalg_flavor_gpu=""
@@ -251,13 +253,15 @@ AC_DEFUN([SD_LINALG_INIT_FLAVOR], [
 # libraries.
 #
 AC_DEFUN([SD_LINALG_DETECT], [
-  # Explore the system for if the user did not specify anything
+  AC_MSG_CHECKING([how to detect linear algebra libraries])
   case "${sd_linalg_init}" in
-    def|kwd|yon)
+    def|yon)
+      AC_MSG_RESULT([explore])
       _SD_LINALG_EXPLORE
       _SD_LINALG_DUMP_CONFIG
       ;;
     dir|env)
+      AC_MSG_RESULT([verify])
       _SD_LINALG_DUMP_CONFIG
       _SD_LINALG_CHECK_LIBS
       ;;
@@ -375,28 +379,97 @@ AC_DEFUN([_SD_LINALG_CHECK_CONFIG], [
 
 
 AC_DEFUN([_SD_LINALG_CHECK_FLAVOR], [
-  if test "${sd_linalg_flavor}" != "auto"; then
+  # Display configured flavor
+  AC_MSG_CHECKING([for the requested linear algebra flavor])
+  AC_MSG_RESULT([${sd_linalg_flavor}])
+
+  if test "${sd_linalg_flavor}" = "auto"; then
+
+    # Make sure linear algebra is enabled
+    sd_linalg_enable="yes"
+
+    # Set generic flavors first
+    sd_linalg_chk_serial="netlib"
+    if test "${sd_mpi_enable}" = "yes"; then
+      sd_linalg_chk_mpi="netlib"
+      sd_linalg_chk_mpiacc="elpa"
+    fi
+    if test "${sd_gpu_enable}" = "yes"; then
+      sd_linalg_chk_gpu="magma"
+    fi
+
+    # Refine with vendor-specific flavors
+    case "${sd_fc_vendor}" in
+      gnu)
+        sd_linalg_chk_serial="openblas atlas netlib"
+        ;;
+      intel)
+        sd_linalg_chk_serial="mkl atlas netlib"
+        sd_linalg_chk_mpi="mkl netlib"
+        ;;
+    esac
+
+  else
 
     # Reformat flavor
-    sd_linalg_iter=`echo "${sd_linalg_flavor}" | tr '+' '\n' | sort -u | awk '{printf " %s", [$]1}'`
+    tmp_linalg_netlib_explicit=`echo "${sd_linalg_flavor}" | grep "netlib"`
+    sd_linalg_iter=`echo "${sd_linalg_flavor}" | tr '+' '\n' | grep -v "netlib" | sort -u | awk '{printf " %s", [$]1} END{printf "\n"}'`
+    sd_linalg_iter=`echo "${sd_linalg_iter}" | sed -e 's/^[ ]*//'`
 
-    # Check serial and parallel flavor unicity
+    # The 'none' flavor excludes any other one
+    tmp_linalg_none=`echo "${sd_linalg_iter}" | grep "none"`
+    if test "${tmp_linalg_none}" != ""; then
+      if test "${sd_linalg_iter}" != "none"; then
+        AC_MSG_ERROR([the linear algebra flavor cannot be 'none' and
+                  something else at the same time])
+      fi
+    fi
+    unset tmp_linalg_none
+
+    # Check flavor unicity for each detection sequence
     for tmp_linalg_flavor in ${sd_linalg_iter}; do
       case "${tmp_linalg_flavor}" in
-        magma)
-          if test "${sd_linalg_chk_gpu}" != ""; then
-            AC_MSG_ERROR([only one GPU linear algebra flavor is permitted])
+        easybuild|mkl)
+          if test "${sd_linalg_chk_serial}" != ""; then
+            AC_MSG_ERROR([only one serial linear algebra flavor is permitted])
           fi
-          sd_linalg_chk_gpu="${tmp_linalg_flavor}"
-          ;;
-        plasma)
-          if test "${sd_linalg_chk_mpi}" != ""; then
-            AC_MSG_ERROR([only one MPI linear algebra flavor is permitted])
+          sd_linalg_chk_serial="${tmp_linalg_flavor}"
+          if test "${sd_mpi_enable}" = "yes"; then
+            if test "${sd_linalg_chk_mpi}" != ""; then
+              AC_MSG_ERROR([only one MPI linear algebra flavor is permitted])
+            fi
+            sd_linalg_chk_mpi="${tmp_linalg_flavor}"
           fi
-          sd_linalg_chk_mpi="${tmp_linalg_flavor}"
           ;;
         elpa)
-          sd_linalg_chk_mpiacc="${tmp_linalg_flavor}"
+          if test "${sd_mpi_enable}" = "yes"; then
+            if test "${sd_linalg_chk_mpiacc}" != ""; then
+              AC_MSG_ERROR([only one MPI acceleration linear algebra flavor is permitted])
+            fi
+            sd_linalg_chk_mpiacc="${tmp_linalg_flavor}"
+          else
+            AC_MSG_NOTICE([ignoring '${tmp_linalg_flavor}', since MPI is disabled])
+          fi
+          ;;
+        magma)
+          if test "${sd_gpu_enable}" = "yes"; then
+            if test "${sd_linalg_chk_gpu}" != ""; then
+              AC_MSG_ERROR([only one GPU linear algebra flavor is permitted])
+            fi
+            sd_linalg_chk_gpu="${tmp_linalg_flavor}"
+          else
+            AC_MSG_NOTICE([ignoring '${tmp_linalg_flavor}', since GPU is disabled])
+          fi
+          ;;
+        plasma)
+          if test "${sd_mpi_enable}" = "yes"; then
+            if test "${sd_linalg_chk_mpi}" != ""; then
+              AC_MSG_ERROR([only one MPI linear algebra flavor is permitted])
+            fi
+            sd_linalg_chk_mpi="${tmp_linalg_flavor}"
+          else
+            AC_MSG_NOTICE([ignoring '${tmp_linalg_flavor}', since MPI is disabled])
+          fi
           ;;
         *)
           if test "${sd_linalg_chk_serial}" != ""; then
@@ -405,51 +478,46 @@ AC_DEFUN([_SD_LINALG_CHECK_FLAVOR], [
           sd_linalg_chk_serial="${tmp_linalg_flavor}"
           ;;
       esac
-      _SD_LINALG_SET_VENDOR_FLAGS([${tmp_linalg_flavor}])
     done
-    if test "${sd_linalg_chk_serial}" = ""; then
-      AC_MSG_ERROR([you must choose a serial linear algebra flavor])
-    fi
 
-  fi   # sd_linalg_flavor != auto
+    # Some vendors only provide a partial serial linear algebra support
+    case "${sd_linalg_chk_serial}" in
+      atlas|openblas)
+        if test "${tmp_linalg_netlib_explicit}" = ""; then
+          sd_linalg_chk_serial="${sd_linalg_chk_serial} netlib"
+        fi
+        ;;
+    esac
 
-  # Init specific flavors
-  AC_MSG_CHECKING([for the requested linear algebra support])
-  AC_MSG_RESULT([${sd_linalg_flavor}])
-  case "${sd_linalg_flavor}" in
-
-    auto)
-      # Set generic flavors first
-      sd_linalg_chk_serial="netlib"
-      if test "${sd_mpi_enable}" = "yes"; then
-        sd_linalg_chk_mpi="netlib"
-      fi
-      if test "${sd_gpu_enable}" = "yes"; then
-        sd_linalg_chk_gpu="magma"
-      fi
-
-      # Refine with vendor-specific flavors
-      case "${sd_fc_vendor}" in
-        gnu)
-          sd_linalg_chk_serial="openblas atlas netlib"
+    # Handle the explicit 'netlib' case
+    if test "${tmp_linalg_netlib_explicit}" != ""; then
+      case "${sd_linalg_chk_serial}" in
+        atlas|openblas)
+          sd_linalg_chk_serial="${sd_linalg_chk_serial} netlib"
+          if test "${sd_mpi_enable}" = "yes"; then
+            if test "${sd_linalg_chk_mpi}" = ""; then
+              sd_linalg_chk_mpi="netlib"
+            fi
+          fi
           ;;
-        intel)
-          sd_linalg_chk_serial="mkl atlas netlib"
-          sd_linalg_chk_mpi="elpa mkl netlib"
+        *)
+          if test "${sd_linalg_chk_serial}" = ""; then
+            sd_linalg_chk_serial="netlib"
+          fi
           ;;
       esac
-      ;;
+    fi
+    unset tmp_linalg_netlib_explicit
 
-    none)
-      AC_MSG_WARN([bypassing linear algebra tests])
-      sd_linalg_has_blas="yes"
-      sd_linalg_has_lapack="yes"
-      sd_linalg_serial="yes"
-      sd_linalg_mpi="no"
-      sd_linalg_gpu="no"
-      ;;
+    # At this point we can assume that the serial detection sequence is set,
+    # unless we want to bypass linear algebra tests
+    if test "${sd_linalg_flavor}" != "none"; then
+      if test "${sd_linalg_chk_serial}" = ""; then
+        sd_linalg_chk_serial="netlib"
+      fi
+    fi
 
-  esac
+  fi   # sd_linalg_flavor = auto
 
   # Display detection sequences
   AC_MSG_CHECKING([for the serial linear algebra detection sequence])
@@ -458,17 +526,27 @@ AC_DEFUN([_SD_LINALG_CHECK_FLAVOR], [
   else
     AC_MSG_RESULT([${sd_linalg_chk_serial}])
   fi
-  AC_MSG_CHECKING([for the MPI linear algebra detection sequence])
-  if test "${sd_linalg_chk_mpi}" = ""; then
-    AC_MSG_RESULT([none])
-  else
-    AC_MSG_RESULT([${sd_linalg_chk_mpi}])
+  if test "${sd_mpi_enable}" = "yes"; then
+    AC_MSG_CHECKING([for the MPI linear algebra detection sequence])
+    if test "${sd_linalg_chk_mpi}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${sd_linalg_chk_mpi}])
+    fi
+    AC_MSG_CHECKING([for the MPI acceleration linear algebra detection sequence])
+    if test "${sd_linalg_chk_mpiacc}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${sd_linalg_chk_mpiacc}])
+    fi
   fi
-  AC_MSG_CHECKING([for the GPU linear algebra detection sequence])
-  if test "${sd_linalg_chk_gpu}" = ""; then
-    AC_MSG_RESULT([none])
-  else
-    AC_MSG_RESULT([${sd_linalg_chk_gpu}])
+  if test "${sd_gpu_enable}" = "yes"; then
+    AC_MSG_CHECKING([for the GPU linear algebra detection sequence])
+    if test "${sd_linalg_chk_gpu}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${sd_linalg_chk_gpu}])
+    fi
   fi
 ]) # _SD_LINALG_CHECK_FLAVOR
 
@@ -477,6 +555,8 @@ AC_DEFUN([_SD_LINALG_DUMP_CONFIG], [
   if test "${sd_linalg_enable}" != "no"; then
     AC_MSG_CHECKING([how linear algebra parameters have been set])
     AC_MSG_RESULT([${sd_linalg_init}])
+    AC_MSG_CHECKING([for the actual linear algebra flavor])
+    AC_MSG_RESULT([${sd_linalg_flavor}])
     AC_MSG_CHECKING([for linear algebra C preprocessing flags])
     if test "${sd_linalg_cppflags}" = ""; then
       AC_MSG_RESULT([none])

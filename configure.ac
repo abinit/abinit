@@ -707,6 +707,7 @@ SD_XMLF90_INIT([optional fail])
 ABI_MSG_SECTION([Linear algebra support])
 
 SD_LINALG_INIT
+SD_LINALG_INIT_FLAVOR
 
 SD_LINALG_DETECT
 
