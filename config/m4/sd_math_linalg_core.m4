@@ -82,7 +82,7 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
     [[
       zhpev_;
     ]])],
-    [sd_linalg_has_lapacke="yes"; sd_linalg_provided="${sd_linalg_provided} lapacke],
+    [sd_linalg_has_lapacke="yes"; sd_linalg_provided="${sd_linalg_provided} lapacke"],
     [sd_linalg_has_lapacke="no"])
   AC_LANG_POP([C])
   AC_MSG_RESULT([${sd_linalg_has_lapacke}])
@@ -107,7 +107,7 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
           use plasma
           call plasma_zhegv
         ]])],
-        [sd_linalg_has_plasma="yes"; sd_linalg_provided="${sd_linalg_provided} plasma],
+        [sd_linalg_has_plasma="yes"; sd_linalg_provided="${sd_linalg_provided} plasma"],
         [sd_linalg_has_plasma="no"])
       AC_LANG_POP([Fortran])
     fi
@@ -122,7 +122,7 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
         [[
           call blacs_gridinit
         ]])],
-        [sd_linalg_has_blacs="yes"; sd_linalg_provided="${sd_linalg_provided} blacs],
+        [sd_linalg_has_blacs="yes"; sd_linalg_provided="${sd_linalg_provided} blacs"],
         [sd_linalg_has_blacs="no"])
       AC_LANG_POP([Fortran])
       AC_MSG_RESULT([${sd_linalg_has_blacs}])
@@ -134,7 +134,7 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
         [[
           call pzheevx
         ]])],
-        [sd_linalg_has_scalapack="yes"; sd_linalg_provided="${sd_linalg_provided} scalapack],
+        [sd_linalg_has_scalapack="yes"; sd_linalg_provided="${sd_linalg_provided} scalapack"],
         [sd_linalg_has_scalapack="no"])
       AC_LANG_POP([Fortran])
       AC_MSG_RESULT([${sd_linalg_has_scalapack}])
@@ -151,7 +151,7 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
         integer :: comm1, comm2, success
         success = get_elpa_communicators(comm, n, n, comm1, comm2)
       ]])],
-      [sd_linalg_has_elpa="yes"; sd_linalg_provided="${sd_linalg_provided} elpa],
+      [sd_linalg_has_elpa="yes"; sd_linalg_provided="${sd_linalg_provided} elpa"],
       [sd_linalg_has_elpa="no"])
     AC_LANG_POP([Fortran])
     AC_MSG_RESULT([${sd_linalg_has_elpa}])
@@ -198,7 +198,7 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
       [[
         call magmaf_zhegvd
       ]])],
-      [sd_linalg_has_magma="yes"; sd_linalg_provided="${sd_linalg_provided} magma],
+      [sd_linalg_has_magma="yes"; sd_linalg_provided="${sd_linalg_provided} magma"],
       [sd_linalg_has_magma="no"])
     AC_LANG_POP([Fortran])
     AC_MSG_RESULT([${sd_linalg_has_magma}])
@@ -240,9 +240,9 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
           sd_linalg_flavor="${sd_linalg_flavor}+magma"
         fi
       fi
+    else
+      sd_linalg_flavor="none"
     fi
-  else
-    sd_linalg_flavor="none"
   fi
 
   # Restore environment

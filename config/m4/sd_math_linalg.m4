@@ -553,7 +553,7 @@ AC_DEFUN([_SD_LINALG_CHECK_FLAVOR], [
 AC_DEFUN([_SD_LINALG_DUMP_CONFIG], [
   if test "${sd_linalg_enable}" != "no"; then
     AC_MSG_CHECKING([how linear algebra parameters have been set])
-    AC_MSG_RESULT([${sd_linalg_init}])
+    AC_MSG_RESULT([${sd_linalg_init} (flavor: ${sd_linalg_flavor_init})])
     AC_MSG_CHECKING([for the actual linear algebra flavor])
     AC_MSG_RESULT([${sd_linalg_flavor}])
     AC_MSG_CHECKING([for linear algebra C preprocessing flags])
