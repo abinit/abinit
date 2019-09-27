@@ -33,9 +33,6 @@ opt_ignore = [
   "fcflags_opt_.*",
   "prefix",
   "with_config_file",
-  "with_fft_flavor",
-  "with_gpu_flavor",
-  "with_mpi_flavor",
 ]
 val_ignore = [".*-fallback"]
 
@@ -113,7 +110,7 @@ def main():
   opt_config += ["with_%s" % item for item in cnf_dep.sections() \
     if cnf_dep.get(item, "detector") in ["arch", "steredeg"]]
   opt_config += ["with_%s_flavor" % item for item in cnf_dep.sections() \
-    if cnf_dep.get(item, "detector") in ["arch"]]
+    if cnf_dep.has_option(item, "flavors")]
   opt_config.sort()
   opt_removed.sort()
 

@@ -731,6 +731,18 @@
 #
 #with_linalg_flavor="goto+scalapack"
 
+# C preprocessing flags for linear algebra (default is unset)
+#
+#LINALG_CPPFLAGS="-I/usr/local/include"
+
+# C flags for linear algebra (default is unset)
+#
+#LINALG_CFLAGS="-m64"
+
+# C++ flags for linear algebra (default is unset)
+#
+#LINALG_CXXFLAGS="-m64"
+
 # Fortran flags for linear algebra (default is unset)
 #
 #LINALG_FCFLAGS="-I/usr/local/include"
