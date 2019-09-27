@@ -725,13 +725,30 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
                   properly configured])
       fi
       sd_linalg_vendor_provided="blas lapack blacs scalapack"
-      sd_linalg_vendor_cppflags="-I${MKLROOT}/include"
-      sd_linalg_vendor_fcflags="-I${MKLROOT}/include"
-      if test "${sd_mpi_enable}" = "yes"; then
-        sd_linalg_vendor_ldflags="-mkl=cluster"
-      else
-        sd_linalg_vendor_ldflags="-mkl"
-      fi
+      case "${sd_fc_vendor}" in
+        gnu)
+          sd_linalg_vendor_cppflags="-I${MKLROOT}/include"
+          sd_linalg_vendor_cflags="-m64"
+          sd_linalg_vendor_cxxflags="-m64"
+          sd_linalg_vendor_fcflags="-m64 -I${MKLROOT}/include"
+          sd_linalg_vendor_blas_libs="-L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl"
+          if test "${sd_mpi_enable}" = "yes"; then
+            sd_linalg_vendor_blas_libs="-L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_scalapack_lp64 -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -lmkl_blacs_intelmpi_lp64 -lpthread -lm -ldl"
+          fi
+          ;;
+        intel)
+          sd_linalg_vendor_cppflags="-I${MKLROOT}/include"
+          sd_linalg_vendor_fcflags="-I${MKLROOT}/include"
+          if test "${sd_mpi_enable}" = "yes"; then
+            sd_linalg_vendor_ldflags="-mkl=cluster"
+          else
+            sd_linalg_vendor_ldflags="-mkl"
+          fi
+          ;;
+        *)
+          AC_MSG_ERROR([MKL is only supported with GNU and Intel compilers])
+          ;;
+      esac
       ;;
 
     netlib)

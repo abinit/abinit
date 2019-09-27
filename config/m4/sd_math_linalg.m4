@@ -400,10 +400,13 @@ AC_DEFUN([_SD_LINALG_CHECK_FLAVOR], [
     # Refine with vendor-specific flavors
     case "${sd_fc_vendor}" in
       gnu)
-        sd_linalg_chk_serial="openblas atlas netlib"
+        if test "${MKLROOT}" != ""; then
+          sd_linalg_chk_serial="mkl ${sd_linalg_chk_serial}"
+        fi
+        sd_linalg_chk_serial="openblas atlas ${sd_linalg_chk_serial}"
         ;;
       intel)
-        sd_linalg_chk_serial="mkl atlas netlib"
+        sd_linalg_chk_serial="mkl atlas ${sd_linalg_chk_serial}"
         sd_linalg_chk_mpi="mkl netlib"
         ;;
     esac
