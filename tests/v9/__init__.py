@@ -11,16 +11,16 @@ keywords = [
 #: List of input files
 inp_files = [
 #Electron-phonon
-"t150.in",
-"t151.in",
-"t152.in",
-"t153.in",
-"t154.in",
-"t155.in",
-"t156.in",
-"t157.in",
-"t158.in",
-"t159.in",
-"t160.in",
-"t161.in",
+"t50.in",
+"t51.in",
+"t52.in",
+"t53.in",
+"t54.in",
+"t55.in",
+"t56.in",
+"t57.in",
+"t58.in",
+"t59.in",
+"t60.in",
+"t61.in",
 ]
