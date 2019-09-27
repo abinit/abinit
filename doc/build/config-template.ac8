@@ -665,20 +665,14 @@
 #   * auto      : automatically look for linear algebra libraries
 #                 depending on the build environment (default)
 #
-#   * custom    : just check user-specified libraries, do not try to
-#                 detect their type
-#
 #   * easybuild : EasyBuild - Building software with ease
 #                 https://easybuilders.github.io/easybuild/
-#
-#   * essl      : IBM Engineering and Scientific Subroutine Library
-#                 http://www-03.ibm.com/systems/software/essl/
 #
 #   * elpa      : Eigen soLvers for Petaflops Applications
 #                 http://elpa.rzg.mpg.de
 #
-#   * goto      : TACC GOTOBLAS2 and Netlib's LAPACK
-#                 http://www.tacc.utexas.edu/tacc-projects/gotoblas2
+#   * essl      : IBM Engineering and Scientific Subroutine Library
+#                 http://www-03.ibm.com/systems/software/essl/
 #
 #   * magma     : Matrix Algebra on GPU and Multicore Architectures
 #                 (MAGMA minimal version>=1.1.0, requires Cuda)
@@ -688,7 +682,11 @@
 #                 http://software.intel.com/en-us/articles/intel-mkl/
 #
 #   * netlib    : Netlib repository reference libraries
-#                 http://www.netlib.org/lapack/index.html
+#                 http://www.netlib.org/lapack/
+#                 http://www.netlib.org/scalapack/
+#
+#   * none      : just check user-specified libraries, do not try to
+#                 detect their type
 #
 #   * openblas  : OpenBLAS - An Optimized BLAS Library
 #                 https://www.openblas.net/
@@ -696,9 +694,6 @@
 #   * plasma    : Parallel Linear Algebra for Scalable Multicore
 #                 Architectures (requires MPI)
 #                 http://icl.cs.utk.edu/plasma/
-#
-#   * scalapack : Netlib BLACS and ScaLAPACK libraries (require MPI)
-#                 http://www.netlib.org/scalapack/
 #
 # Notes:
 #

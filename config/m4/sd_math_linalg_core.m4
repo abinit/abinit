@@ -583,6 +583,11 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
       sd_linalg_vendor_blas_libs="-lacml -lacml_mv"
       ;;
 
+    asl)
+      sd_linalg_vendor_provided="blas lapack lapacke blacs scalapack"
+      sd_linalg_vendor_blas_libs="-lasl"
+      ;;
+
     atlas)
       sd_linalg_vendor_provided="blas"
       sd_linalg_vendor_blas_libs="-lf77blas -lcblas -latlas"
@@ -617,6 +622,8 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
 
     essl)
       sd_linalg_vendor_provided="blas lapack lapacke blacs scalapack"
+      sd_linalg_vendor_cflags="-qessl"
+      sd_linalg_vendor_cxxflags="-qessl"
       sd_linalg_vendor_fcflags="-qessl"
       sd_linalg_vendor_ldflags="-qessl"
       sd_linalg_vendor_blas_libs="-lessl"

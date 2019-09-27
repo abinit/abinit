@@ -203,7 +203,7 @@ AC_DEFUN([SD_LINALG_INIT], [
 
 AC_DEFUN([SD_LINALG_INIT_FLAVOR], [
   # Init internal parameters
-  sd_linalg_valid_flavors="auto acml atlas easybuild elpa essl magma mkl netlib none openblas plasma"
+  sd_linalg_valid_flavors="auto acml asl atlas easybuild elpa essl magma mkl netlib none openblas plasma"
   sd_linalg_flavor=""
   sd_linalg_flavor_init="unknown"
   sd_linalg_flavor_gpu=""
@@ -268,6 +268,23 @@ AC_DEFUN([SD_LINALG_DETECT], [
       ;;
   esac
   _SD_LINALG_DUMP_CONFIG
+
+  # Define vendor-specific C preprocessing options
+  tmp_linalg_iter=`echo "${sd_linalg_flavor}" | sed -e 's/+/ /g'`
+  for tmp_linalg_vendor in ${tmp_linalg_iter}; do
+    case "${tmp_linalg_vendor}" in
+      asl)
+        AC_DEFINE([HAVE_LINALG_ASL], 1,
+          [Define to 1 if you have the ASL linear algebra library.])
+        ;;
+      essl)
+        AC_DEFINE([HAVE_LINALG_ESSL], 1,
+          [Define to 1 if you have the ESSL linear algebra library.])
+        ;;
+    esac
+  done
+  unset tmp_linalg_iter
+  unset tmp_linalg_vendor
 ]) # SD_LINALG_DETECT
 
 
