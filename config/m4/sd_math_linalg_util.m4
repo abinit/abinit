@@ -25,7 +25,9 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS], [
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       call zgemm
-    ]])], [sd_linalg_has_blas="yes"], [sd_linalg_has_blas="no"])
+    ]])],
+    [sd_linalg_has_blas="yes"; sd_linalg_provided="${sd_linalg_provided} blas"],
+    [sd_linalg_has_blas="no"])
   AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_has_blas}])
 ]) # _SD_LINALG_CHECK_BLAS
@@ -76,7 +78,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_EXTS], [
 #
 AC_DEFUN([_SD_LINALG_CHECK_BLAS_MKL_EXTS], [
   # mkl_imatcopy family
-  AC_MSG_CHECKING([for mkl_imatcopy in specified libraries])
+  AC_MSG_CHECKING([for mkl_imatcopy in the specified libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       call mkl_simatcopy
@@ -92,7 +94,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_MKL_EXTS], [
   fi
 
   # mkl_omatcopy family
-  AC_MSG_CHECKING([for mkl_omatcopy in specified libraries])
+  AC_MSG_CHECKING([for mkl_omatcopy in the specified libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       call mkl_somatcopy
@@ -108,7 +110,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_MKL_EXTS], [
   fi
 
   # mkl_omatadd family
-  AC_MSG_CHECKING([for mkl_omatadd in specified libraries])
+  AC_MSG_CHECKING([for mkl_omatadd in the specified libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       call mkl_somatadd
@@ -124,7 +126,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_MKL_EXTS], [
   fi
 
   # mkl_threads support functions
-  AC_MSG_CHECKING([for mkl_set/get_threads in specified libraries])
+  AC_MSG_CHECKING([for mkl_set/get_threads in the specified libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       integer :: a
@@ -156,10 +158,35 @@ AC_DEFUN([_SD_LINALG_CHECK_LAPACK], [
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       call zhpev
-    ]])], [sd_linalg_has_lapack="yes"], [sd_linalg_has_lapack="no"])
+    ]])],
+    [sd_linalg_has_lapack="yes"; sd_linalg_provided="${sd_linalg_provided} lapack"],
+    [sd_linalg_has_lapack="no"])
   AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_has_lapack}])
 ]) # _SD_LINALG_CHECK_LAPACK
+
+
+
+# _SD_LINALG_CHECK_LAPACKE()
+# --------------------------
+#
+# Check whether the build environment provides LAPACKE.
+#
+AC_DEFUN([_SD_LINALG_CHECK_LAPACKE], [
+  sd_linalg_has_lapacke="unknown"
+
+  AC_MSG_CHECKING([for LAPACKE C API support in the specified libraries])
+  AC_LANG_PUSH([C])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM(
+    [#include <lapacke.h>],
+    [[
+      zhpev_;
+    ]])],
+    [sd_linalg_has_lapacke="yes"; sd_linalg_provided="${sd_linalg_provided} lapacke"],
+    [sd_linalg_has_lapacke="no"])
+  AC_LANG_POP([C])
+  AC_MSG_RESULT([${sd_linalg_has_lapacke}])
+]) # _SD_LINALG_CHECK_LAPACKE
 
 
                     # ------------------------------------ #
@@ -179,7 +206,9 @@ AC_DEFUN([_SD_LINALG_CHECK_BLACS], [
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       call blacs_gridinit
-    ]])], [sd_linalg_has_blacs="yes"], [sd_linalg_has_blacs="no"])
+    ]])],
+    [sd_linalg_has_blacs="yes"; sd_linalg_provided="${sd_linalg_provided} blacs"],
+    [sd_linalg_has_blacs="no"])
   AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_has_blacs}])
 ]) # _SD_LINALG_CHECK_BLACS
@@ -201,14 +230,99 @@ AC_DEFUN([_SD_LINALG_CHECK_SCALAPACK], [
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       call pzheevx
-    ]])], [sd_linalg_has_scalapack="yes"], [sd_linalg_has_scalapack="no"])
+    ]])],
+    [sd_linalg_has_scalapack="yes"; sd_linalg_provided="${sd_linalg_provided} scalapack"],
+    [sd_linalg_has_scalapack="no"])
   AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_has_scalapack}])
+
+  if test "${sd_linalg_has_scalapack}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_SCALAPACK], 1,
+      [Define to 1 if you have the ScaLAPACK linear algebra library.])
+  fi
 ]) # _SD_LINALG_CHECK_SCALAPACK
 
 
                     # ------------------------------------ #
                     # ------------------------------------ #
+
+
+# _SD_LINALG_CHECK_PLASMA()
+# -------------------------
+#
+# Look for PLASMA (requires LAPACKE).
+#
+AC_DEFUN([_SD_LINALG_CHECK_PLASMA], [
+  sd_linalg_has_plasma="unknown"
+
+  AC_MSG_CHECKING([for PLASMA support in the specified libraries])
+  sd_linalg_chk_plasma="${sd_linalg_has_lapacke}"
+  if test "${sd_linalg_chk_plasma}" = "yes"; then
+    AC_LANG_PUSH([Fortran])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      [[
+        use plasma
+        call plasma_zhegv
+      ]])],
+      [sd_linalg_has_plasma="yes"; sd_linalg_provided="${sd_linalg_provided} plasma"],
+      [sd_linalg_has_plasma="no"])
+    AC_LANG_POP([Fortran])
+  else
+    sd_linalg_has_plasma="no"
+  fi
+  AC_MSG_RESULT([${sd_linalg_has_plasma}])
+
+  if test "${sd_linalg_has_plasma}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_PLASMA], 1,
+      [Define to 1 if you have the PLASMA linear algebra library.])
+  fi
+]) # _SD_LINALG_CHECK_PLASMA
+
+
+                    # ------------------------------------ #
+                    # ------------------------------------ #
+
+
+# _SD_LINALG_CHECK_ELPA()
+# -----------------------
+#
+# Look for the ELPA library.
+#
+AC_DEFUN([_SD_LINALG_CHECK_ELPA], [
+  sd_linalg_has_elpa="unknown"
+
+  AC_MSG_CHECKING([for ELPA support in the specified libraries])
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      use elpa1
+      integer,parameter :: n=1, comm=1
+      integer :: comm1, comm2, success
+      success = get_elpa_communicators(comm, n, n, comm1, comm2)
+    ]])],
+    [sd_linalg_has_elpa="yes"; sd_linalg_provided="${sd_linalg_provided} elpa"],
+    [sd_linalg_has_elpa="no"])
+  AC_LANG_POP([Fortran])
+  AC_MSG_RESULT([${sd_linalg_has_elpa}])
+
+  if test "${sd_linalg_has_elpa}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_ELPA], 1,
+      [Define to 1 if you have the ELPA linear algebra library.])
+    _SD_LINALG_CHECK_ELPA_2017
+    if test "${sd_linalg_has_elpa_2017}" != "yes"; then
+      _SD_LINALG_CHECK_ELPA_2016
+    fi
+    if test "${sd_linalg_has_elpa_2016}" != "yes"; then
+      _SD_LINALG_CHECK_ELPA_2015
+    fi
+    if test "${sd_linalg_has_elpa_2015}" != "yes"; then
+      _SD_LINALG_CHECK_ELPA_2014
+    fi
+    if test "${sd_linalg_has_elpa_2014}" != "yes"; then
+      _SD_LINALG_CHECK_ELPA_2013
+    fi
+  fi
+]) # _SD_LINALG_CHECK_ELPA
 
 
 # _SD_LINALG_CHECK_ELPA_2013()
@@ -217,10 +331,9 @@ AC_DEFUN([_SD_LINALG_CHECK_SCALAPACK], [
 # Look for a ELPA 2013 API.
 #
 AC_DEFUN([_SD_LINALG_CHECK_ELPA_2013], [
-  # Init
   sd_linalg_has_elpa_2013="unknown"
 
-  AC_MSG_CHECKING([for ELPA 2013 API support in specified libraries])
+  AC_MSG_CHECKING([for ELPA 2013 API support in the specified libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       use elpa1
@@ -246,10 +359,9 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2013], [
 # Look for a ELPA 2014 API.
 #
 AC_DEFUN([_SD_LINALG_CHECK_ELPA_2014], [
-  # Init
   sd_linalg_has_elpa_2014="unknown"
 
-  AC_MSG_CHECKING([for ELPA 2014 API support in specified libraries])
+  AC_MSG_CHECKING([for ELPA 2014 API support in the specified libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       use elpa1
@@ -277,10 +389,9 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2014], [
 # Look for a ELPA 2015 API.
 #
 AC_DEFUN([_SD_LINALG_CHECK_ELPA_2015], [
-  # Init
   sd_linalg_has_elpa_2015="unknown"
 
-  AC_MSG_CHECKING([for ELPA 2015 API support in specified libraries])
+  AC_MSG_CHECKING([for ELPA 2015 API support in the specified libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       use elpa1
@@ -309,10 +420,9 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2015], [
 # Look for a ELPA 2016 API.
 #
 AC_DEFUN([_SD_LINALG_CHECK_ELPA_2016], [
-  # Init
   sd_linalg_has_elpa_2016="unknown"
 
-  AC_MSG_CHECKING([for ELPA 2016 API support in specified libraries])
+  AC_MSG_CHECKING([for ELPA 2016 API support in the specified libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       use elpa1
@@ -342,10 +452,9 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2016], [
 # Look for a ELPA 2017+ API.
 #
 AC_DEFUN([_SD_LINALG_CHECK_ELPA_2017], [
-  # Init
   sd_linalg_has_elpa_2017="unknown"
 
-  AC_MSG_CHECKING([for ELPA 2017 API support in specified libraries])
+  AC_MSG_CHECKING([for ELPA 2017 API support in the specified libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       use elpa
@@ -367,6 +476,33 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2017], [
 
 
                     # ------------------------------------ #
+                    # ------------------------------------ #
+
+
+# _SD_LINALG_CHECK_MAGMA()
+# ------------------------
+#
+# Look for the MAGMA library (requires GPU support).
+#
+AC_DEFUN([_SD_LINALG_CHECK_MAGMA], [
+  sd_linalg_has_magma_15="unknown"
+
+  AC_MSG_CHECKING([for MAGMA (version>=1.1.0) support in the specified libraries])
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      call magmaf_zhegvd
+    ]])],
+    [sd_linalg_has_magma="yes"; sd_linalg_provided="${sd_linalg_provided} magma"],
+    [sd_linalg_has_magma="no"])
+  AC_LANG_POP([Fortran])
+  AC_MSG_RESULT([${sd_linalg_has_magma}])
+  if test "${sd_linalg_has_magma}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_MAGMA], 1,
+      [Define to 1 if you have the MAGMA linear algebra library.])
+    _SD_LINALG_CHECK_MAGMA_15
+  fi
+]) # _SD_LINALG_CHECK_MAGMA
 
 
 # _SD_LINALG_CHECK_MAGMA_15()
@@ -375,10 +511,9 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2017], [
 # Look for MAGMA >=1.5 (requires magma_init and magma_finalize).
 #
 AC_DEFUN([_SD_LINALG_CHECK_MAGMA_15], [
-  # Init
   sd_linalg_has_magma_15="unknown"
 
-  AC_MSG_CHECKING([for magma_init/magma_finalize support in specified MAGMA libraries])
+  AC_MSG_CHECKING([for MAGMA 1.5 support in the specified libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       call magmaf_init
@@ -391,249 +526,3 @@ AC_DEFUN([_SD_LINALG_CHECK_MAGMA_15], [
       [Define to 1 if you have MAGMA >=1.5 API support])
   fi
 ]) # _SD_LINALG_CHECK_MAGMA_15
-
-
-                    # ------------------------------------ #
-
-
-# _SD_LINALG_SEARCH_BLACS(BLACS, EXTRA_LIBS)
-# ------------------------------------------
-#
-# Look for a BLACS implementation.
-#
-AC_DEFUN([_SD_LINALG_SEARCH_BLACS], [
-  # Init
-  sd_linalg_has_blacs="unknown"
-
-  # Look for libraries and routines
-  AC_SEARCH_LIBS([blacs_gridinit], $1,
-    [sd_linalg_has_blacs="yes"], [sd_linalg_has_blacs="no"],
-    [$2 ${sd_linalg_libs}])
-  if test "${sd_linalg_has_blacs}" = "yes"; then
-    if test "${ac_cv_search_blacs_gridinit}" != "none required"; then
-      sd_linalg_libs="${ac_cv_search_blacs_gridinit} $2 ${sd_linalg_libs}"
-    fi
-  fi
-]) # _SD_LINALG_SEARCH_BLACS
-
-
-                    # ------------------------------------ #
-
-
-# _SD_LINALG_SEARCH_BLAS(BLAS, EXTRA_LIBS)
-# ----------------------------------------
-#
-# Look for a BLAS implementation.
-#
-AC_DEFUN([_SD_LINALG_SEARCH_BLAS], [
-  # Init
-  sd_linalg_has_blas="unknown"
-
-  # Look for libraries and routines
-  AC_MSG_CHECKING([for libraries that may contain BLAS]) 
-  AC_MSG_RESULT([$1])
-  AC_LANG_PUSH([Fortran])
-  AC_SEARCH_LIBS([zgemm], $1,
-    [sd_linalg_has_blas="yes"], [sd_linalg_has_blas="no"],
-    [$2 ${sd_linalg_libs}])
-  AC_LANG_POP([Fortran])
-  if test "${sd_linalg_has_blas}" = "yes"; then
-    if test "${ac_cv_search_zgemm}" != "none required"; then
-      sd_linalg_libs="${ac_cv_search_zgemm} $2 ${sd_linalg_libs}"
-    fi
-  fi
-]) # _SD_LINALG_SEARCH_BLAS
-
-
-                    # ------------------------------------ #
-
-
-# _SD_LINALG_SEARCH_ELPA(ELPA, EXTRA_LIBS)
-# ----------------------------------------
-#
-# Look for a ELPA implementation.
-#
-AC_DEFUN([_SD_LINALG_SEARCH_ELPA], [
-  # Init
-  sd_linalg_has_elpa="unknown"
-
-  # Look for libraries and routines
-  # Has to rewrite AC_SEARCH_LIBS because of mandatory F90 module
-  AC_MSG_CHECKING([for the ELPA library])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[
-      use elpa1
-      integer, parameter :: n=1, comm=1
-      integer :: comm1, comm2, success
-      success = get_elpa_communicators(comm, n, n, comm1, comm2)
-    ]])], [sd_linalg_has_elpa="yes"], [sd_linalg_has_elpa="no"])
-  if test "${sd_linalg_has_elpa}" = "no"; then
-    tmp_saved_LIBS="${LIBS}"
-    for test_lib in $1; do
-      LIBS="-l${test_lib} $2 ${tmp_saved_LIBS}"
-      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-        [[
-          use elpa1
-          integer, parameter :: n=1, comm=1
-          integer :: comm1, comm2, success
-          success = get_elpa_communicators(comm, n, n, comm1, comm2)
-        ]])], [sd_linalg_has_elpa="yes"], [sd_linalg_has_elpa="no"])
-      if test "${sd_linalg_has_elpa}" = "yes"; then
-        sd_linalg_libs="-l${test_lib} $2 ${sd_linalg_libs}"
-        break
-      fi
-      LIBS="${tmp_saved_LIBS}"
-    done
-  fi
-  AC_MSG_RESULT([${sd_linalg_has_elpa}])
-
-  if test "${sd_linalg_has_elpa}" = "yes"; then
-    _SD_LINALG_CHECK_ELPA_2017()
-    _SD_LINALG_CHECK_ELPA_2016()
-    _SD_LINALG_CHECK_ELPA_2015()
-    _SD_LINALG_CHECK_ELPA_2014()
-    _SD_LINALG_CHECK_ELPA_2013()
-  fi
-]) # _SD_LINALG_SEARCH_ELPA
-
-
-                    # ------------------------------------ #
-
-
-# _SD_LINALG_SEARCH_LAPACK(LAPACK, EXTRA_LIBS)
-# --------------------------------------------
-#
-# Look for a LAPACK implementation.
-#
-AC_DEFUN([_SD_LINALG_SEARCH_LAPACK], [
-  # Init
-  sd_linalg_has_lapack="unknown"
-
-  # Look for libraries and routines
-  AC_SEARCH_LIBS([zhpev], $1,
-    [sd_linalg_has_lapack="yes"], [sd_linalg_has_lapack="no"],
-    [$2 ${sd_linalg_libs}])
-  if test "${sd_linalg_has_lapack}" = "yes"; then
-    if test "${ac_cv_search_zhpev}" != "none required"; then
-      sd_linalg_libs="${ac_cv_search_zhpev} $2 ${sd_linalg_libs}"
-    fi
-  fi
-]) # _SD_LINALG_SEARCH_LAPACK
-
-
-                    # ------------------------------------ #
-
-
-# _SD_LINALG_SEARCH_LAPACKE(LAPACKE, EXTRA_LIBS)
-# ----------------------------------------------
-#
-# Look for a LAPACKE C API implementation.
-#
-AC_DEFUN([_SD_LINALG_SEARCH_LAPACKE], [
-  # Init
-  sd_linalg_has_lapacke="unknown"
-
-  # Look for libraries and routines
-  AC_MSG_CHECKING([for library containing zhpev_ C API])
-  AC_LANG_PUSH([C])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM(
-    [#include <lapacke.h>],
-    [[
-      zhpev_;
-    ]])], [sd_linalg_has_lapacke="yes"], [sd_linalg_has_lapacke="no"])
-  if test "${sd_linalg_has_lapacke}" = "no"; then
-    tmp_saved_LIBS="${LIBS}"
-    for test_lib in $1; do
-      LIBS="-l${test_lib} $2 ${tmp_saved_LIBS}"
-      AC_LINK_IFELSE([AC_LANG_PROGRAM(
-        [#include <lapacke.h>],
-        [[
-          zhpev_;
-        ]])], [sd_linalg_has_lapacke="yes"], [sd_linalg_has_lapacke="no"])
-      if test "${sd_linalg_has_lapacke}" = "yes"; then
-        sd_linalg_libs="-l${test_lib} $2 ${sd_linalg_libs}"
-        break
-      fi  
-    done
-    if test "${sd_linalg_has_lapacke}" = "no"; then
-      LIBS="${tmp_saved_LIBS}"
-    fi
-  fi
-  AC_LANG_POP([C])
-  AC_MSG_RESULT([${sd_linalg_has_lapacke}])
-]) # _SD_LINALG_SEARCH_LAPACKE
-
-
-                    # ------------------------------------ #
-
-
-# _SD_LINALG_SEARCH_MAGMA(MAGMA, EXTRA_LIBS)
-# ------------------------------------------
-#
-# Look for a MAGMA implementation.
-#
-AC_DEFUN([_SD_LINALG_SEARCH_MAGMA], [
-  # Init
-  sd_linalg_has_magma="unknown"
-
-  # Look for libraries and routines
-  AC_LANG_PUSH([Fortran])
-  AC_SEARCH_LIBS([magmaf_zheevd], $1,
-    [sd_linalg_has_magma="yes"], [sd_linalg_has_magma="no"],
-    [$2 ${sd_linalg_libs}])
-  if test "${sd_linalg_has_magma}" = "yes"; then
-    if test "${ac_cv_search_magmaf_zheevd}" != "none required"; then
-      sd_linalg_libs="${ac_cv_search_magmaf_zheevd} $2 ${sd_linalg_libs}"
-    fi
-    _SD_LINALG_CHECK_MAGMA_15()
-  fi
-  AC_LANG_POP([Fortran])
-]) # _SD_LINALG_SEARCH_MAGMA
-
-
-                    # ------------------------------------ #
-
-
-# _SD_LINALG_SEARCH_PLASMA(PLASMA, EXTRA_LIBS)
-# --------------------------------------------
-#
-# Look for a PLASMA implementation.
-#
-AC_DEFUN([_SD_LINALG_SEARCH_PLASMA], [
-  # Init
-  sd_linalg_has_plasma="unknown"
-
-  # Look for libraries and routines
-  AC_SEARCH_LIBS([plasma_zhegv], $1,
-    [sd_linalg_has_plasma="yes"], [sd_linalg_has_plasma="no"],
-    [$2 ${sd_linalg_libs}])
-  if test "${sd_linalg_has_plasma}" = "yes"; then
-    if test "${ac_cv_search_plasma_zhegv}" != "none required"; then
-      sd_linalg_libs="${ac_cv_search_plasma_zhegv} $2 ${sd_linalg_libs}"
-    fi
-  fi
-]) # _SD_LINALG_SEARCH_PLASMA
-
-
-                    # ------------------------------------ #
-
-
-# _SD_LINALG_SEARCH_SCALAPACK(SCALAPACK, EXTRA_LIBS)
-# --------------------------------------------------
-#
-# Look for a ScaLAPACK implementation.
-#
-AC_DEFUN([_SD_LINALG_SEARCH_SCALAPACK], [
-  # Init
-  sd_linalg_has_scalapack="unknown"
-
-  # Look for libraries and routines
-  AC_SEARCH_LIBS([pzheevx], $1,
-    [sd_linalg_has_scalapack="yes"], [sd_linalg_has_scalapack="no"],
-    [$2 ${sd_linalg_libs}])
-  if test "${sd_linalg_has_scalapack}" = "yes"; then
-    if test "${ac_cv_search_pzheevx}" != "none required"; then
-      sd_linalg_libs="${ac_cv_search_pzheevx} $2 ${sd_linalg_libs}"
-    fi
-  fi
-]) # _SD_LINALG_SEARCH_SCALAPACK

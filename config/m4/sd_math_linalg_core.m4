@@ -45,16 +45,7 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
   LIBS="${sd_linalg_libs} ${sd_gpu_libs} ${sd_mpi_libs} ${LIBS}"
 
   # BLAS?
-  AC_MSG_CHECKING([for BLAS support in specified libraries])
-  AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[
-      call zgemm
-    ]])],
-    [sd_linalg_has_blas="yes"; sd_linalg_provided="${sd_linalg_provided} blas"],
-    [sd_linalg_has_blas="no"])
-  AC_LANG_POP([Fortran])
-  AC_MSG_RESULT([${sd_linalg_has_blas}])
+  _SD_LINALG_CHECK_BLAS
 
   # BLAS extensions?
   _SD_LINALG_CHECK_BLAS_EXTS
@@ -63,29 +54,14 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
   _SD_LINALG_CHECK_BLAS_MKL_EXTS
 
   # LAPACK?
-  AC_MSG_CHECKING([for LAPACK support in specified libraries])
-  AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[
-      call zhpev
-    ]])],
-    [sd_linalg_has_lapack="yes"; sd_linalg_provided="${sd_linalg_provided} lapack"],
-    [sd_linalg_has_lapack="no"])
-  AC_LANG_POP([Fortran])
-  AC_MSG_RESULT([${sd_linalg_has_lapack}])
+  if test "${sd_linalg_has_blas}" = "yes"; then
+    _SD_LINALG_CHECK_LAPACK
+  fi
 
   # LAPACKE?
-  AC_MSG_CHECKING([for LAPACKE C API support in specified libraries])
-  AC_LANG_PUSH([C])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM(
-    [#include <lapacke.h>],
-    [[
-      zhpev_;
-    ]])],
-    [sd_linalg_has_lapacke="yes"; sd_linalg_provided="${sd_linalg_provided} lapacke"],
-    [sd_linalg_has_lapacke="no"])
-  AC_LANG_POP([C])
-  AC_MSG_RESULT([${sd_linalg_has_lapacke}])
+  if test "${sd_linalg_has_lapack}" = "yes"; then
+    _SD_LINALG_CHECK_LAPACKE
+  fi
 
   # Validate the serial linear algebra support
   if test "${sd_linalg_has_blas}" = "yes" -a \
@@ -98,78 +74,22 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
   if test "${sd_mpi_enable}" = "yes"; then
 
     # PLASMA?
-    AC_MSG_CHECKING([for PLASMA support in specified libraries])
-    sd_linalg_chk_plasma="${sd_linalg_has_lapacke}"
-    if test "${sd_linalg_chk_plasma}" = "yes"; then
-      AC_LANG_PUSH([Fortran])
-      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-        [[
-          use plasma
-          call plasma_zhegv
-        ]])],
-        [sd_linalg_has_plasma="yes"; sd_linalg_provided="${sd_linalg_provided} plasma"],
-        [sd_linalg_has_plasma="no"])
-      AC_LANG_POP([Fortran])
-    fi
-    AC_MSG_RESULT([${sd_linalg_has_plasma}])
+    _SD_LINALG_CHECK_PLASMA
 
     if test "${sd_linalg_has_plasma}" != "yes"; then
 
       # BLACS?
-      AC_MSG_CHECKING([for BLACS support in specified libraries])
-      AC_LANG_PUSH([Fortran])
-      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-        [[
-          call blacs_gridinit
-        ]])],
-        [sd_linalg_has_blacs="yes"; sd_linalg_provided="${sd_linalg_provided} blacs"],
-        [sd_linalg_has_blacs="no"])
-      AC_LANG_POP([Fortran])
-      AC_MSG_RESULT([${sd_linalg_has_blacs}])
+      _SD_LINALG_CHECK_BLACS
 
       # ScaLAPACK?
-      AC_MSG_CHECKING([for ScaLAPACK support in specified libraries])
-      AC_LANG_PUSH([Fortran])
-      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-        [[
-          call pzheevx
-        ]])],
-        [sd_linalg_has_scalapack="yes"; sd_linalg_provided="${sd_linalg_provided} scalapack"],
-        [sd_linalg_has_scalapack="no"])
-      AC_LANG_POP([Fortran])
-      AC_MSG_RESULT([${sd_linalg_has_scalapack}])
+      if test "${sd_linalg_has_blacs}" = "yes"; then
+        _SD_LINALG_CHECK_SCALAPACK
+      fi
 
     fi
 
     # ELPA
-    AC_MSG_CHECKING([for ELPA support in specified libraries])
-    AC_LANG_PUSH([Fortran])
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-      [[
-        use elpa1
-        integer,parameter :: n=1, comm=1
-        integer :: comm1, comm2, success
-        success = get_elpa_communicators(comm, n, n, comm1, comm2)
-      ]])],
-      [sd_linalg_has_elpa="yes"; sd_linalg_provided="${sd_linalg_provided} elpa"],
-      [sd_linalg_has_elpa="no"])
-    AC_LANG_POP([Fortran])
-    AC_MSG_RESULT([${sd_linalg_has_elpa}])
-    if test "${sd_linalg_has_elpa}" = "yes"; then
-      _SD_LINALG_CHECK_ELPA_2017
-      if test "${sd_linalg_has_elpa_2017}" != "yes"; then
-        _SD_LINALG_CHECK_ELPA_2016
-      fi
-      if test "${sd_linalg_has_elpa_2016}" != "yes"; then
-        _SD_LINALG_CHECK_ELPA_2015
-      fi
-      if test "${sd_linalg_has_elpa_2015}" != "yes"; then
-        _SD_LINALG_CHECK_ELPA_2014
-      fi
-      if test "${sd_linalg_has_elpa_2014}" != "yes"; then
-        _SD_LINALG_CHECK_ELPA_2013
-      fi
-    fi
+    _SD_LINALG_CHECK_ELPA
 
   fi
 
@@ -192,19 +112,7 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
   if test "${sd_gpu_enable}" = "yes"; then
 
     # MAGMA?
-    AC_MSG_CHECKING([for MAGMA (version>=1.1.0) support in specified libraries])
-    AC_LANG_PUSH([Fortran])
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-      [[
-        call magmaf_zhegvd
-      ]])],
-      [sd_linalg_has_magma="yes"; sd_linalg_provided="${sd_linalg_provided} magma"],
-      [sd_linalg_has_magma="no"])
-    AC_LANG_POP([Fortran])
-    AC_MSG_RESULT([${sd_linalg_has_magma}])
-    if test "${sd_linalg_has_magma}" = "yes"; then
-      _SD_LINALG_CHECK_MAGMA_15
-    fi
+    _SD_LINALG_CHECK_MAGMA
 
   fi
 
