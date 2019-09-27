@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Sep 2018.
-- ( at 15h06 )
+.Starting date : Fri 27 Sep 2019.
+- ( at 15h53 )
   
-- input  file    -> t156.in
-- output file    -> t156.out
-- root for input  files -> t156i
-- root for output files -> t156o
+- input  file    -> t56.in
+- output file    -> t56.out
+- root for input  files -> t56i
+- root for output files -> t56o
 
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -340,10 +340,12 @@ P           mkmem           8
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t156o_DS20_WFK
-- Reading DDB from file: t156o_DS20_DDB
-- Reading DVDB from file: t156o_DS20_DVDB
-- Reading EFMAS information from file: t156i_DS1_EFMAS.nc
+- Reading GS states from WFK file: t56o_DS20_WFK
+- Reading DDB from file: t56o_DS20_DDB
+- Reading DVDB from file: t56o_DS20_DVDB
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
@@ -351,7 +353,7 @@ P           mkmem           8
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-- Cannot find dielectric tensor and Born effective charges in DDB file: t156o_DS20_DDB
+- Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -438,6 +440,9 @@ P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of q-points in the IBZ treated by this proc: 3 of 3
 P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 1 of 1
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
@@ -491,17 +496,19 @@ Transport calculation results
 
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
 
- mkfilename: getwfkfine from: t150o_DS6_WFK
+ mkfilename: getwfkfine from: t50o_DS6_WFK
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t156o_DS20_WFK
-- Reading DDB from file: t156o_DS20_DDB
-- Reading DVDB from file: t156o_DS20_DVDB
-- Reading EFMAS information from file: t156i_DS2_EFMAS.nc
+- Reading GS states from WFK file: t56o_DS20_WFK
+- Reading DDB from file: t56o_DS20_DDB
+- Reading DVDB from file: t56o_DS20_DVDB
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
@@ -509,7 +516,7 @@ Transport calculation results
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-- Cannot find dielectric tensor and Born effective charges in DDB file: t156o_DS20_DDB
+- Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -553,7 +560,7 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
- EPH double grid interpolation: will read energies from: t150o_DS6_WFK
+ EPH double grid interpolation: will read energies from: t50o_DS6_WFK
 
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
@@ -581,6 +588,9 @@ P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of q-points in the IBZ treated by this proc: 3 of 3
 P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 1 of 1
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
@@ -639,10 +649,12 @@ Transport calculation results
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t156o_DS20_WFK
-- Reading DDB from file: t156o_DS20_DDB
-- Reading DVDB from file: t156o_DS20_DVDB
-- Reading EFMAS information from file: t156i_DS3_EFMAS.nc
+- Reading GS states from WFK file: t56o_DS20_WFK
+- Reading DDB from file: t56o_DS20_DDB
+- Reading DVDB from file: t56o_DS20_DVDB
+
+
+
  Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
@@ -656,7 +668,7 @@ Transport calculation results
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-- Cannot find dielectric tensor and Born effective charges in DDB file: t156o_DS20_DDB
+- Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -725,6 +737,9 @@ P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of q-points in the IBZ treated by this proc: 3 of 3
 P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 1 of 1
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
@@ -778,17 +793,19 @@ Transport calculation results
 
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
 
- mkfilename: getwfkfine from: t150o_DS6_WFK
+ mkfilename: getwfkfine from: t50o_DS6_WFK
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t156o_DS20_WFK
-- Reading DDB from file: t156o_DS20_DDB
-- Reading DVDB from file: t156o_DS20_DVDB
-- Reading EFMAS information from file: t156i_DS4_EFMAS.nc
+- Reading GS states from WFK file: t56o_DS20_WFK
+- Reading DDB from file: t56o_DS20_DDB
+- Reading DVDB from file: t56o_DS20_DVDB
+
+
+
  Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
@@ -802,7 +819,7 @@ Transport calculation results
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-- Cannot find dielectric tensor and Born effective charges in DDB file: t156o_DS20_DDB
+- Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -846,7 +863,7 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
- EPH double grid interpolation: will read energies from: t150o_DS6_WFK
+ EPH double grid interpolation: will read energies from: t50o_DS6_WFK
 
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
@@ -874,6 +891,9 @@ P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of q-points in the IBZ treated by this proc: 3 of 3
 P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 1 of 1
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
@@ -932,10 +952,12 @@ Transport calculation results
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t156o_DS20_WFK
-- Reading DDB from file: t156o_DS20_DDB
-- Reading DVDB from file: t156o_DS20_DVDB
-- Reading EFMAS information from file: t156i_DS5_EFMAS.nc
+- Reading GS states from WFK file: t56o_DS20_WFK
+- Reading DDB from file: t56o_DS20_DDB
+- Reading DVDB from file: t56o_DS20_DVDB
+
+
+
  Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
@@ -950,7 +972,7 @@ Transport calculation results
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-- Cannot find dielectric tensor and Born effective charges in DDB file: t156o_DS20_DDB
+- Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -1019,6 +1041,9 @@ P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of q-points in the IBZ treated by this proc: 3 of 3
 P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 1 of 1
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
@@ -1077,10 +1102,12 @@ Transport calculation results
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t156o_DS20_WFK
-- Reading DDB from file: t156o_DS20_DDB
-- Reading DVDB from file: t156o_DS20_DVDB
-- Reading EFMAS information from file: t156i_DS6_EFMAS.nc
+- Reading GS states from WFK file: t56o_DS20_WFK
+- Reading DDB from file: t56o_DS20_DDB
+- Reading DVDB from file: t56o_DS20_DVDB
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
@@ -1088,7 +1115,7 @@ Transport calculation results
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-- Cannot find dielectric tensor and Born effective charges in DDB file: t156o_DS20_DDB
+- Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -1157,6 +1184,9 @@ P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of q-points in the IBZ treated by this proc: 3 of 3
 P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 1 of 1
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
