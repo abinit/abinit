@@ -101,20 +101,20 @@ AC_DEFUN([SD_FFT_DETECT], [
       fftw3-mkl)
         sd_fftw3_enable="yes"
         sd_fftw3_init="mkl"
-        sd_fftw3_cppflags="${sd_linalg_cppflags}"
+        sd_fftw3_cppflags="${sd_linalg_cppflags} -I${MKLROOT}/include/fftw"
         sd_fftw3_cflags="${sd_linalg_cflags}"
         sd_fftw3_cxxflags="${sd_linalg_cxxflags}"
-        sd_fftw3_fcflags="${sd_linalg_fcflags}"
+        sd_fftw3_fcflags="${sd_linalg_fcflags} -I${MKLROOT}/include/fftw"
         sd_fftw3_ldflags="${sd_linalg_ldflags}"
         sd_fftw3_libs="${sd_linalg_libs}"
         SD_FFTW3_DETECT
         if test "${sd_fftw3_ok}" = "yes"; then
           sd_fft_ok="yes"
         fi
-        sd_fftw3_cppflags=""
+        sd_fftw3_cppflags="-I${MKLROOT}/include/fftw"
         sd_fftw3_cflags=""
         sd_fftw3_cxxflags=""
-        sd_fftw3_fcflags=""
+        sd_fftw3_fcflags="-I${MKLROOT}/include/fftw"
         sd_fftw3_ldflags=""
         sd_fftw3_libs=""
         ;;
