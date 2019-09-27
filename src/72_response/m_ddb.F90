@@ -3451,7 +3451,12 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    call ddb_hdr_free(ddb_hdr)
  end do
 
+#ifdef MR_DEV
+ mpert=matom+8
+#else 
  mpert=matom+6
+#endif
+
  msize=3*mpert*3*mpert
  if(mblktyp==3)msize=msize*3*mpert
 
