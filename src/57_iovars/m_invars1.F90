@@ -2508,7 +2508,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    end do
    dtsets(idtset)%prt1dm=0
    dtsets(idtset)%pvelmax(:)=one
-   dtsets(idtset)%pw_unbal_thresh=40.
+   dtsets(idtset)%pw_unbal_thresh=40._dp
 !  Q
    dtsets(idtset)%qmass(:)=ten
    dtsets(idtset)%qprtrb(1:3)=0
@@ -2516,6 +2516,8 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%quadmom(:) = zero
 !  R
    dtsets(idtset)%random_atpos=0
+   dtsets(idtset)%ratsm=zero
+   if (any(dtsets(idtset)%constraint_kind(1:natom)>0)) dtsets(idtset)%ratsm=0.05_dp
    dtsets(idtset)%ratsph_extra=two
    dtsets(idtset)%recefermi=zero
    dtsets(idtset)%recgratio=1
@@ -2548,7 +2550,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%slabwsrad=zero
    dtsets(idtset)%slk_rankpp=1000
    dtsets(idtset)%smdelta=0
-   dtsets(idtset)%spbroad=0.1
+   dtsets(idtset)%spbroad=0.1_dp
    dtsets(idtset)%spgaxor = -1
    dtsets(idtset)%spgorig = -1
    dtsets(idtset)%spinmagntarget=-99.99_dp

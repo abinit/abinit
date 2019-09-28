@@ -75,6 +75,7 @@ MODULE m_dens
   integer :: ntypat                          ! Number of type of atoms
 
   real(dp) :: magcon_lambda                  ! Strength of the atomic spherical constraint
+  real(dp) :: ratsm                          ! Smearing width for ratsph
   real(dp) :: ucvol                          ! Unit cell volume
 
   integer :: magconon                        ! Turn on the penalty function constraint instead of the more powerful constrainedDFT algorithm
@@ -656,6 +657,7 @@ end subroutine add_atomic_fcts
 !!  ngfft=FFT grid dimensions
 !!  nspden = number of spin densities (1 2 or 4)
 !!  ntypat=number of types of atoms
+!!  ratsm=smearing width for ratsph
 !!  ratsph(ntypat)=radii for muffin tin spheres of each atom
 !!  rprimd=lattice vectors (dimensioned)
 !!  spinat(3,natom)=magnetic moments vectors, possible targets according to the value of constraint_kinds
@@ -674,12 +676,12 @@ end subroutine add_atomic_fcts
 !! SOURCE
 
  subroutine constrained_dft_ini(chrgat,constrained_dft,constraint_kind,magconon,magcon_lambda,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,&
-& ratsph,rprimd,spinat,typat,xred,ziontypat)
+& ratsm,ratsph,rprimd,spinat,typat,xred,ziontypat)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)  :: magconon,natom,nfftf,nspden,ntypat
- real(dp),intent(in) :: magcon_lambda
+ real(dp),intent(in) :: magcon_lambda,ratsm
  type(MPI_type),intent(in) :: mpi_enreg
  type(constrained_dft_t),intent(out):: constrained_dft
 !arrays
@@ -713,7 +715,7 @@ end subroutine add_atomic_fcts
  if(any(constraint_kind(:)/=0))then
    !We need to precompute intgf2
    call calcdensph(gmet,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,std_out,&
-&    ratsph,rhor_dum,rprimd,typat,ucvol,xred,0,cplex1,intgf2=intgf2)
+&    ratsm,ratsph,rhor_dum,rprimd,typat,ucvol,xred,0,cplex1,intgf2=intgf2)
  endif
 
  constrained_dft%gmet            =gmet
@@ -724,6 +726,7 @@ end subroutine add_atomic_fcts
  constrained_dft%ngfftf          =ngfftf
  constrained_dft%nspden          =nspden
  constrained_dft%ntypat          =ntypat
+ constrained_dft%ratsm           =ratsm
  constrained_dft%rprimd          =rprimd
  constrained_dft%ucvol           =ucvol
 
@@ -816,6 +819,7 @@ end subroutine constrained_dft_free
 !!   ! ngfftf=FFT grid dimensions
 !!   ! nspden = number of spin densities (1 2 or 4)
 !!   ! ntypat=number of types of atoms
+!!   ! ratsm=smearing width for ratsph
 !!   ! ratsph(ntypat)=radii for muffin tin spheres of each atom
 !!   ! rprimd=lattice vectors (dimensioned)
 !!   ! spinat(3,natom)=magnetic moments vectors, possible targets according to the value of constraint_kind
@@ -870,12 +874,12 @@ end subroutine constrained_dft_free
 !We need the integrated magnetic moments 
  ABI_ALLOCATE(intgden,(nspden,natom))
  call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
-&  c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgden)
+&  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgden)
 
 !We need the integrated residuals
  ABI_ALLOCATE(intgres,(nspden,natom))
  call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
-&  c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres)
+&  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres)
 
  ABI_ALLOCATE(coeffs_constr_dft,(nspden,natom))
  coeffs_constr_dft=zero
@@ -986,7 +990,7 @@ end subroutine constrained_dft_free
 !DEBUG
 !We need the integrated residuals
 ! call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
-!&  c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres)
+!&  c_dft*ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres)
 !ENDDEBUG
 
  ABI_DEALLOCATE(coeffs_constr_dft)
@@ -1012,6 +1016,7 @@ end subroutine constrained_dft_free
 !!   ! ngfftf=FFT grid dimensions
 !!   ! nspden = number of spin densities (1 2 or 4)
 !!   ! ntypat=number of types of atoms
+!!   ! ratsm=smearing width for ratsph
 !!   ! ratsph(ntypat)=radii for muffin tin spheres of each atom
 !!   ! rprimd=lattice vectors (dimensioned)
 !!   ! spinat(3,natom)=magnetic moments vectors, possible targets according to the value of constraint_kind
@@ -1069,7 +1074,7 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
  ABI_ALLOCATE(intgden,(nspden,natom))
 
 !We need the integrated magnetic moments and the smoothing function
- call calcdensph(c_dft%gmet,mpi_enreg,natom,nfft,c_dft%ngfftf,nspden,ntypat,std_out,c_dft%ratsph,&
+ call calcdensph(c_dft%gmet,mpi_enreg,natom,nfft,c_dft%ngfftf,nspden,ntypat,std_out,c_dft,ratsm,c_dft%ratsph,&
 &  rhor,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgden)
 
 !Loop over atoms
@@ -1187,12 +1192,12 @@ end subroutine mag_penalty
 !! SOURCE
 
 
-subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsph,rhor,rprimd,spinat,typat,xred)
+subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,spinat,typat,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,magconon,nspden,nfft,ntypat
- real(dp),intent(in) :: magcon_lambda
+ real(dp),intent(in) :: magcon_lambda,ratsm
 !arrays
  integer, intent(in) :: ngfft(18),typat(natom)
  real(dp),intent(in) :: spinat(3,natom), rprimd(3,3)
@@ -1220,7 +1225,7 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
 
 !We need the integrated magnetic moments
  cplex1=1
- call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,std_out,ratsph,rhor,rprimd,typat,ucvol,xred,&
+ call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,std_out,ratsm,ratsph,rhor,rprimd,typat,ucvol,xred,&
 & 1,cplex1,intgden=intgden)
 
  Epen=0
@@ -1329,6 +1334,7 @@ end subroutine mag_penalty_e
 !!  ntypat=number of atom types
 !!  nunit=number of the unit for printing
 !!  prtopt = if 1, the default printing is on (to unit nunit), if -1, 2, 3, 4, special printing options, if 0 no printing.
+!!  ratsm=smearing width for ratsph
 !!  ratsph(ntypat)=radius of spheres around atoms
 !!  rhor(nfft,nspden)=array for electron density in electrons/bohr**3.
 !!   (total in first half and spin-up in second half if nspden=2)
@@ -1354,13 +1360,13 @@ end subroutine mag_penalty_e
 !!
 !! SOURCE
 
-subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph,rhor,rprimd,typat,ucvol,xred,&
+subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,ratsph,rhor,rprimd,typat,ucvol,xred,&
 &    prtopt,cplex,intgden,dentot,intgf2)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in)        :: natom,nfft,nspden,ntypat,nunit
- real(dp),intent(in)       :: ucvol
+ real(dp),intent(in)       :: ratsm,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
  integer ,intent(in)       :: prtopt
  integer, intent(in)       :: cplex
@@ -1401,12 +1407,6 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  ! This routine is not able to handle xred positions that are "far" from the
  ! first unit cell so wrap xred into [0, 1[ interval here.
  call wrap2_zero_one(xred, my_xred, xshift)
-
-!Default value for the smearing region radius  - may become input variable later
- ratsm = zero
- if(present(intgden).or.present(intgf2)) then
-   ratsm = 0.05_dp ! So, the presence of intgden as argument changes the default smearing
- end if
 
 !If intgf2 present, check that the spheres do not overlap. 
 !Well, at present, there is no check of the distance between a sphere and its own image in another cell ...
