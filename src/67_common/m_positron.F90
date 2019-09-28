@@ -697,7 +697,7 @@ type(fock_type),pointer, intent(inout) :: fock
        nelect=nelect+dtset%ziontypat(dtset%typat(iatom))
      end do
      maxocc=two/real(dtset%nsppol*dtset%nspinor,dp)
-     nocc=(nelect-tol8)/maxocc + 1
+     nocc=int((nelect-tol8)/maxocc) + 1
      nocc=min(nocc,dtset%nband(1)*dtset%nsppol)
      occlast=nelect-maxocc*(nocc-1)
      ABI_ALLOCATE(scocc,(dtset%nband(1)*dtset%nsppol))

@@ -950,7 +950,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (dtset%magconon /= 0) then
 !  calculate final value of terms for magnetic constraint: "energy" term, lagrange multiplier term, and atomic contributions
    call mag_penalty_e(dtset%magconon,dtset%magcon_lambda,mpi_enreg,&
-&   natom,nfft,ngfft,nspden,ntypat,dtset%ratsph,rhor,rprimd,dtset%spinat,dtset%typat,xred)
+&   natom,nfft,ngfft,nspden,ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%spinat,dtset%typat,xred)
  end if
 
  call timab(961,1,tsec)

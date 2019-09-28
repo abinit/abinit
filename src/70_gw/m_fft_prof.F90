@@ -2008,11 +2008,11 @@ function empty_cache(kbsize) result(fake)
 
  if (kbsize <= 0) RETURN
 
- sz = (100. * kbsize) / dp
+ sz = int((100._dp * kbsize) / dp)
 
  ABI_MALLOC(chunk,(sz))
  call random_number(chunk)
- fake = SUM(chunk) ! Need a result, otherwise some smart compiler could skip the call.
+ fake = int(SUM(chunk)) ! Need a result, otherwise some smart compiler could skip the call.
  ABI_FREE(chunk)
 
 !----------------------------------------------------------------------

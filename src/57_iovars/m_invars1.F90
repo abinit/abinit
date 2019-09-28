@@ -2517,7 +2517,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 !  R
    dtsets(idtset)%random_atpos=0
    dtsets(idtset)%ratsm=zero
-   if (any(dtsets(idtset)%constraint_kind(1:natom)>0)) dtsets(idtset)%ratsm=0.05_dp
+   if (any(dtsets(idtset)%constraint_kind(1:dtsets(idtset)%natom)>0)) dtsets(idtset)%ratsm=0.05_dp
    dtsets(idtset)%ratsph_extra=two
    dtsets(idtset)%recefermi=zero
    dtsets(idtset)%recgratio=1
