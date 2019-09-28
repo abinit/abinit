@@ -4,21 +4,22 @@
 
 
 #Constrained DFT data
- constraint_kind2   10  0  # Dataset 2 is constrained DFT for the charge on atom 1
+ constraint_kind2   11   # Dataset 2 is constrained DFT for the magnetization
  magcon_lambda      2
- chrgat  0.5  0.0
+ spinat       0.0 0.0   0.3
+              0.0 0.0  -0.3 
 
 #Definition of the atomic spheres
  ratsph    1.0  1.0
 
 #System description
  acell 15 10 10
- ntypat  2     # IMPORTANT : one needs to define two kinds of atoms, despite that both are hydrogen,
-               # in order to constrain the charge for atom 1, and not to impose a constraint for atom 2 !
- znucl  1.0 1.0
+ ntypat  1 
+ znucl  1.0 
  natom 2
- typat  1 2
+ typat  2*1 
 
+ nsppol 1    nspden 2
  nband 1
 
  xcart    -1.1  0.0 0.0
@@ -34,7 +35,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t24.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t25.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% psp_files = 1h.pspnc, 1h.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
@@ -42,6 +43,6 @@
 #%% authors = X. Gonze
 #%% references = 
 #%% keywords = 
-#%% description = H2 diatomic molecule, static, to check the constrained DFT implementation with constrained charges 
-#%%  Constrain the charge around atom 1 to the value 0.5
+#%% description = H2 diatomic molecule, static, to check the constrained DFT implementation with constrained magnetization
+#%%  Constrain the magnetization around atom 1 to spin up 0.3 and around atom 2 to spin down 0.3
 #%%<END TEST_INFO>
