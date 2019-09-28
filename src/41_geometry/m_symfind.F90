@@ -306,8 +306,9 @@ contains
    do iclass=2,nclass
      spinatcl2=spinatcl(1,iclass)**2+spinatcl(2,iclass)**2+spinatcl(3,iclass)**2
      nucdipmomcl2=nucdipmomcl(1,iclass)**2+nucdipmomcl(2,iclass)**2+nucdipmomcl(3,iclass)**2
-     if( (natomcl(iclass)<natom0 .and. &
-&             (spinatcl20<tolsym .or. spinatcl2>tolsym .or. nucdipmomcl20<tolsym .or. nucdipmomcl2>tolsym))  &
+     if( (natomcl(iclass)<natom0 &
+&          .and. .not. (spinatcl20>tolsym .and. spinatcl2<tolsym) &
+&          .and. .not. (nucdipmomcl20>tolsym .and. nucdipmomcl2<tolsym) )  &
 &     .or. (spinatcl20<tolsym .and. spinatcl2>tolsym) &
 &     .or. (nucdipmomcl20<tolsym .and. nucdipmomcl2>tolsym)                        )then
        iclass0=iclass
