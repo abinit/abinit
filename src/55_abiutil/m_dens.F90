@@ -875,15 +875,7 @@ end subroutine constrained_dft_free
 !We need the integrated residuals
  ABI_ALLOCATE(intgres,(nspden,natom))
  call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
-&  c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgres)
-
-!DEBUG
- write(std_out,*)
- write(std_out,*) ' constrained_residual : intgden(1,:), intgres(1,:)',intgden(1,:), intgres(1,:)
- intgres(:,:)=zero
- write(std_out,*) ' constrained_residual : zeroed intgres, for debugging purposes'
- write(std_out,*)
-!ENDDEBUG
+&  c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres)
 
  ABI_ALLOCATE(coeffs_constr_dft,(nspden,natom))
  coeffs_constr_dft=zero
@@ -895,46 +887,34 @@ end subroutine constrained_dft_free
 
    if(nspden==1)then
      !The total charge, conjugate to the potential
-     intgden(1,iatom)= intgden(1,iatom) + ratio* intgres(1,iatom)
+     intgden(1,iatom)= intgden(1,iatom) - ratio* intgres(1,iatom)
    else if(nspden==2)then
      !The total charge, conjugate to the average potential
-     intgden(1,iatom)= intgden(1,iatom) + ratio* half*(intgres(1,iatom)+intgres(2,iatom))
+     intgden(1,iatom)= intgden(1,iatom) - ratio* half*(intgres(1,iatom)+intgres(2,iatom))
      !The magnetization along z
-     intgden(2,iatom)=(intgden(2,iatom)-half*intgden(1,iatom)) + ratio * (intgres(1,iatom)-intgres(2,iatom))
+     intgden(2,iatom)=(intgden(2,iatom)-half*intgden(1,iatom)) - ratio * (intgres(1,iatom)-intgres(2,iatom))
    else if(nspden==4)then
      !The total charge, conjugate to the average potential
-     intgden(1,iatom)= intgden(1,iatom) + ratio * half*(intgres(1,iatom)+intgres(2,iatom))
+     intgden(1,iatom)= intgden(1,iatom) - ratio * half*(intgres(1,iatom)+intgres(2,iatom))
      !The three components of the magnetization 
-     intgden(2,iatom)= intgden(2,iatom) + ratio * (intgres(1,iatom)-intgres(2,iatom))
-     intgden(3,iatom)= intgden(3,iatom) + ratio * intgres(3,iatom) 
-     intgden(4,iatom)= intgden(4,iatom) - ratio * intgres(4,iatom) 
+     intgden(2,iatom)= intgden(2,iatom) - ratio * (intgres(1,iatom)-intgres(2,iatom))
+     intgden(3,iatom)= intgden(3,iatom) - ratio * intgres(3,iatom) 
+     intgden(4,iatom)= intgden(4,iatom) + ratio * intgres(4,iatom) 
    endif
 
    !Comparison with the target value, and computation of the correction in terms of density and magnetization coefficients.
    conkind=c_dft%constraint_kind(c_dft%typat(iatom))
    corr_denmag(:)=zero
 
-!DEBUG
-!  if(iatom==1)then
-     write(std_out,*)' constrained residual, 1 : iatom,intgden(1,iatom)=',iatom,intgden(1,iatom)
-     write(std_out,*)' constrained residual, 1 : c_dft%chrgat(iatom)=',c_dft%chrgat(iatom)
-!  endif
-!ENDDEBUG
-
-
    if(conkind >=10)then
 
      !The electronic constraint is such that the ziontypat charge minus (the electronic charge is negative) the atomic electronic density 
      !intgden gives the target charge chrgat. 
-     corr_denmag(1)=intgden(1,iatom)+c_dft%chrgat(iatom)-c_dft%ziontypat(c_dft%typat(iatom))
+!    corr_denmag(1)=intgden(1,iatom)+c_dft%chrgat(iatom)-c_dft%ziontypat(c_dft%typat(iatom))
+!    Uses the usual electronic charge definition, instead of the total nucleus-electronic charge
+     corr_denmag(1)=intgden(1,iatom)-c_dft%chrgat(iatom)
 
    endif
-
-!DEBUG
-!    if(iatom==1)then
-       write(std_out,*)' constrained residual, 2 : iatom,corr_denmag(:)=',corr_denmag(:)
-!    endif
-!ENDDEBUG
 
    if( mod(conkind,10)==1 .and. nspden>1)then
 
@@ -982,12 +962,6 @@ end subroutine constrained_dft_free
    !Preconditioning by a global factor. Might be improved in the future ...
    corr_denmag(:)=corr_denmag(:) * c_dft%magcon_lambda
 
-!DEBUG
-!  if(iatom==1)then
-     write(std_out,*)' constrained residual : corr_denmag(:)=',corr_denmag(:) 
-!  endif
-!ENDDEBUG
-
    !Convert from density/magnetization constraint residual to actual coefficient that will multiply the spherical function for the potential
    if(nspden==1)then
      !From charge to potential
@@ -1004,14 +978,16 @@ end subroutine constrained_dft_free
 
  enddo
 
-!DEBUG
- write(std_out,*)' constrained residual : coeffs_constr_dft(1,:)=',coeffs_constr_dft(1,:)
-!ENDDEBUG
-
 !Now compute the new residual, by adding the spherical functionsl
  option=1
  call add_atomic_fcts(natom,nspden,c_dft%rprimd,mpi_enreg,nfftf,c_dft%ngfftf,ntypat,option,&
 &  c_dft%ratsph,c_dft%typat,coeffs_constr_dft,vresid,xred)
+
+!DEBUG
+!We need the integrated residuals
+! call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
+!&  c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres)
+!ENDDEBUG
 
  ABI_DEALLOCATE(coeffs_constr_dft)
  ABI_DEALLOCATE(intgden)
@@ -1686,14 +1662,23 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  sum_rho_dn=zero
  sum_rho_tot=zero
 
- if(prtopt==1) then
+ if(prtopt==1 .or. prtopt==11) then
 
    if(nspden==1) then
-     write(msg, '(4a)' ) &
-&     ' Integrated electronic density in atomic spheres:',ch10,&
-&     ' ------------------------------------------------'
-     call wrtout(nunit,msg,'COLL')
-     write(msg, '(a)' ) ' Atom  Sphere_radius  Integrated_density'
+     if(prtopt==1)then
+       write(msg, '(4a)' ) &
+&       ' Integrated electronic density in atomic spheres:',ch10,&
+&       ' ------------------------------------------------'
+       call wrtout(nunit,msg,'COLL')
+       write(msg, '(a)' ) ' Atom  Sphere_radius  Integrated_density'
+     else if(prtopt==11)then
+       !This is for debugging purposes
+       write(msg, '(4a)' ) &
+&       ' Integrated potential residual in atomic spheres:',ch10,&
+&       ' ------------------------------------------------'
+       call wrtout(nunit,msg,'COLL')
+       write(msg, '(a)' ) ' Atom  Sphere_radius  Integrated_potresid'
+     endif 
      call wrtout(nunit,msg,'COLL')
      do iatom=1,natom
        write(msg, '(i5,f15.5,f20.8)' ) iatom,ratsph(typat(iatom)),intgden_(1,iatom)
