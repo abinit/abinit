@@ -1598,6 +1598,10 @@ Note that while a spherical integral around an atom might reasonably well captur
  so that the sum of such magnetizations might be reasonably close to the total magnetization of the solid, 
 such a procedure hardly gives the total charge of the solid: the space between the spheres is too large when the spheres do not overlap,
 and overlapping spheres will not deliver the correct total charge of the system.
+
+Note that [[constraint_kind]] defines constraints for types of atoms, not for specific atoms. Atoms of the same type are supposed to incur the same constraint. If the use needs to impose different constraints on atoms of the same type (in principle), it is possible (and easy) to pretend
+that they belong to different types, even if they are using the same pseudopotential file. There is an example 
+in test [[test:v8#24]], the hydrogen dimer, where the charge around the first atom is constrained, and the charge around the second atom is left free.
 """,
 ),
 
