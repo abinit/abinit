@@ -2470,7 +2470,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     270.500     270.474
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note:      this is a rough approximation of local magnetic moments
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
     1   2.30000       17.203716     -0.000011   -0.000006    0.000027
     2   2.30000       17.203715      0.000011    0.000006   -0.000027
@@ -3372,7 +3372,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     270.500     270.474
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note:      this is a rough approximation of local magnetic moments
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
     1   2.30000       17.062835      0.002780    0.001107    1.448127
     2   2.30000       17.062833     -0.002781   -0.001109   -1.448127
@@ -4280,7 +4280,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     270.500     270.474
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note:      this is a rough approximation of local magnetic moments
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
     1   2.30000       17.061916      0.002147    0.002319    1.446122
     2   2.30000       17.061917     -0.002147   -0.002319   -1.446121

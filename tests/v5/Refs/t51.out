@@ -745,7 +745,7 @@ Result for kinetic energy density :
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note:      this is a rough approximation of local magnetic moments
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
     1   2.00000        1.518753      0.000178    0.002969    0.602950
  ---------------------------------------------------------------------
@@ -877,7 +877,7 @@ Result for kinetic energy density :
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note:      this is a rough approximation of local magnetic moments
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
     1   2.00000        1.518428      0.000175    0.002929    0.594765
  ---------------------------------------------------------------------
@@ -1016,7 +1016,7 @@ Result for kinetic energy density :
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note:      this is a rough approximation of local magnetic moments
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
     1   2.00000        1.518753      0.000178    0.002969    0.602950
  ---------------------------------------------------------------------
@@ -1148,7 +1148,7 @@ Result for kinetic energy density :
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note:      this is a rough approximation of local magnetic moments
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
     1   2.00000        1.518428      0.000175    0.002929    0.594765
  ---------------------------------------------------------------------
