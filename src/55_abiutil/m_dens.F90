@@ -914,9 +914,9 @@ end subroutine constrained_dft_free
 
      !The electronic constraint is such that the ziontypat charge minus (the electronic charge is negative) the atomic electronic density 
      !intgden gives the target charge chrgat. 
-!    corr_denmag(1)=intgden(1,iatom)+c_dft%chrgat(iatom)-c_dft%ziontypat(c_dft%typat(iatom))
+     corr_denmag(1)=intgden(1,iatom)+c_dft%chrgat(iatom)-c_dft%ziontypat(c_dft%typat(iatom))
 !    Uses the usual electronic charge definition, instead of the total nucleus-electronic charge
-     corr_denmag(1)=intgden(1,iatom)-c_dft%chrgat(iatom)
+!    corr_denmag(1)=intgden(1,iatom)-c_dft%chrgat(iatom)
 
    endif
 
