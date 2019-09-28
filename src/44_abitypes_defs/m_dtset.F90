@@ -1026,7 +1026,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
    maxocc=2.0_dp/real(dtset%nsppol*dtset%nspinor,dp)
 
 !  Determine the number of bands fully or partially occupied
-   nocc=(dtset%nelect-1.0d-8)/maxocc + 1
+   nocc=int((dtset%nelect-1.0d-8)/maxocc) + 1
 !  Occupation number of the highest level
    occlast=dtset%nelect-maxocc*(nocc-1)
    !write(std_out,*)' maxocc,nocc,occlast=',maxocc,nocc,occlast
@@ -1916,7 +1916,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%postoldff          = dtin%postoldff
  dtout%ppmfrq             = dtin%ppmfrq
  dtout%pw_unbal_thresh    = dtin%pw_unbal_thresh
- dtout%ratsm              = dtin%ratsm        
+ dtout%ratsm              = dtin%ratsm
  dtout%ratsph_extra       = dtin%ratsph_extra
  dtout%recrcut            = dtin%recrcut
  dtout%recefermi          = dtin%recefermi

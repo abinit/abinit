@@ -1074,8 +1074,8 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
  ABI_ALLOCATE(intgden,(nspden,natom))
 
 !We need the integrated magnetic moments and the smoothing function
- call calcdensph(c_dft%gmet,mpi_enreg,natom,nfft,c_dft%ngfftf,nspden,ntypat,std_out,c_dft,ratsm,c_dft%ratsph,&
-&  rhor,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgden)
+ call calcdensph(c_dft%gmet,mpi_enreg,natom,nfft,c_dft%ngfftf,nspden,ntypat,std_out,&
+&  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgden)
 
 !Loop over atoms
 !-------------------------------------------
@@ -1386,7 +1386,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
  integer :: cmplex_den,jfft
  real(dp),parameter :: delta=0.99_dp
  real(dp) :: difx,dify,difz,dist_ij,r2,r2atsph,rr1,rr2,rr3,rx,ry,rz
- real(dp) :: fsm, ratsm, ratsm2
+ real(dp) :: fsm, ratsm2
  real(dp) :: mag_coll   , mag_x, mag_y, mag_z ! EB
  real(dp) :: mag_coll_im, mag_x_im, mag_y_im, mag_z_im ! SPr
  real(dp) :: sum_mag, sum_mag_x,sum_mag_y,sum_mag_z,sum_rho_up,sum_rho_dn,sum_rho_tot ! EB
