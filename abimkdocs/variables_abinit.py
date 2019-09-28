@@ -1579,12 +1579,25 @@ Variable(
     defaultval=0,
     mnemonics="CONSTRAINT KIND in constrained DFT",
     text=r"""
-Gives the index of the first CI-NEB iteration.
-The CI-NEB method constitutes a small modification to the NEB method allowing
-a rigorous convergence to the saddle point. As the image with the highest
-energy has to be identified, the calculation begins with several iterations of
-the standard NEB algorithm. The effective CI-NEB begins at the [[cineb_start]]
-iteration. See [[cite:Henkelman2000a]] for additional details of this method.
+Defines, for each type of atom, the kind of constraint imposed by constrained DFT (also turns on the constrained DFT algorithm).
+When [[constraint_kind]] is zero for an atom type, there is not constraint applied to this atom type.
+Otherwise, different constraints can be imposed on the total charge (ion+electronic) and/or magnetization, computed
+inside a sphere of radius [[ratsph]], possibly smeared within a width [[ratsm]]. 
+Such integrated charge might be imposed to be equal to [[chrgat]], while the magnetization might be compared to [[spinat]].
+
+When [[constraint_kind]] is 10 or above, the charge constraint will be imposed.
+The first digit of [[constraint_kind]] govers the magnetization constraint:
+
+  When [[constraint_kind]]=1 or 11, the exact value (vector in the non-collinear case, amplitude and sign in the colinear case) of the magnetization is constrained;
+  When [[constraint_kind]]=2 or 12, only the direction is constrained (only applicable to the non-collinear case);
+  When [[constraint_kind]]=3 or 13, only the magnitude is constrained.
+
+For the algorithm, see [[topic:ConstrainedDFT]]. The balance between the potential residual, and the density/magnetization constraint is governed by [[magcon_lambda]]. The spherical integral is governed by [[ratsph]] and [[ratsm]]. 
+
+Note that while a spherical integral around an atom might reasonably well capture the magnetization of an atom within a solid or within a molecule,
+ so that the sum of such magnetizations might be reasonably close to the total magnetization of the solid, 
+such a procedure hardly gives the total charge of the solid: the space between the spheres is too large when the spheres do not overlap,
+and overlapping spheres will not deliver the correct total charge of the system.
 """,
 ),
 
