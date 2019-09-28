@@ -2662,7 +2662,8 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%bs_calctype=1
    dtsets(idtset)%bs_coupling=0
 
-   dtsets(idtset)%bs_haydock_tol=(/0.02_dp,zero/)
+!  dtsets(idtset)%bs_haydock_tol=(/0.02_dp,zero/)
+   dtsets(idtset)%bs_haydock_tol=(0.02_dp,zero)
 
    dtsets(idtset)%bs_loband=0
 !  Take big absolute value numbers, but the the biggest ones, otherwise overflow can happen
