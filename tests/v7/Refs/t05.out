@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 19 Sep 2019.
-- ( at 06h36 )
+.Starting date : Sat 28 Sep 2019.
+- ( at 17h02 )
   
 - input  file    -> t05.in
 - output file    -> t05.out
@@ -356,6 +356,7 @@ P           mkmem7          3
            prtvol6          2
            prtvol7          2
            prt1dm           1
+            ratsm      5.00000000E-02 Bohr
             rprim     -5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01 -5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01 -5.0000000000E-01
@@ -683,11 +684,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     150.625     150.514
  io1dm : about to open file t05o_DS1_1DM
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note:      this is a rough approximation of local magnetic moments
+ Radius=ratsph(iatom), smearing ratsm=  0.0500. mag(i)=approximate local magnetic moment.
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        5.557624      0.000000    0.000000    0.478757
+    1   2.00000        5.503780      0.000000    0.000000    0.477948
  ---------------------------------------------------------------------
- Total magnetization (spheres)       0.000000    0.000000    0.478757
+ Total magnetization (spheres)       0.000000    0.000000    0.477948
  Total magnetization (exact)         0.000000    0.000000    0.494847
 ================================================================================
 
@@ -871,11 +872,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     150.625     150.514
  io1dm : about to open file t05o_DS2_1DM
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note:      this is a rough approximation of local magnetic moments
+ Radius=ratsph(iatom), smearing ratsm=  0.0500. mag(i)=approximate local magnetic moment.
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        5.557624      0.000000    0.000000    0.478757
+    1   2.00000        5.503780      0.000000    0.000000    0.477948
  ---------------------------------------------------------------------
- Total magnetization (spheres)       0.000000    0.000000    0.478757
+ Total magnetization (spheres)       0.000000    0.000000    0.477948
  Total magnetization (exact)         0.000000    0.000000    0.494847
 ================================================================================
 
@@ -1093,11 +1094,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     150.625     150.514
  io1dm : about to open file t05o_DS3_1DM
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note:      this is a rough approximation of local magnetic moments
+ Radius=ratsph(iatom), smearing ratsm=  0.0500. mag(i)=approximate local magnetic moment.
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        5.557623     -0.000000    0.478738   -0.000000
+    1   2.00000        5.503779     -0.000000    0.477930    0.000000
  ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000000    0.478738   -0.000000
+ Total magnetization (spheres)      -0.000000    0.477930    0.000000
  Total magnetization (exact)        -0.000000    0.494835    0.000000
 ================================================================================
 
@@ -1226,11 +1227,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     150.625     150.514
  io1dm : about to open file t05o_DS4_1DM
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note:      this is a rough approximation of local magnetic moments
+ Radius=ratsph(iatom), smearing ratsm=  0.0500. mag(i)=approximate local magnetic moment.
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        5.552167     -0.000000    1.534473   -0.000000
+    1   2.00000        5.497907      0.000000    1.531858    0.000000
  ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000000    1.534473   -0.000000
+ Total magnetization (spheres)       0.000000    1.531858    0.000000
  Total magnetization (exact)         0.000000    1.593742    0.000000
 ================================================================================
 
@@ -1360,12 +1361,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     150.625     150.514
  io1dm : about to open file t05o_DS5_1DM
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0500. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     3.018190     2.539434      5.557624     0.478757
+    1   2.00000     2.990864     2.485590      5.476454     0.505274
  ---------------------------------------------------------------------
-  Sum:              3.018190     2.539434      5.557624     0.478757
- Total magnetization (from the atomic spheres):             0.478757
+  Sum:              2.990864     2.485590      5.476454     0.505274
+ Total magnetization (from the atomic spheres):             0.505274
  Total magnetization (exact up - dn):                       0.494847
 ================================================================================
 
@@ -1569,12 +1570,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     150.625     150.514
  io1dm : about to open file t05o_DS6_1DM
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0500. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     4.180281     1.397590      5.577871     2.782691
+    1   2.00000     4.152334     1.345190      5.497524     2.807144
  ---------------------------------------------------------------------
-  Sum:              4.180281     1.397590      5.577871     2.782691
- Total magnetization (from the atomic spheres):             2.782691
+  Sum:              4.152334     1.345190      5.497524     2.807144
+ Total magnetization (from the atomic spheres):             2.807144
  Total magnetization (exact up - dn):                       2.750000
 ================================================================================
 
@@ -1770,12 +1771,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     150.625     150.514
  io1dm : about to open file t05o_DS7_1DM
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0500. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     3.911079     1.645885      5.556964     2.265194
+    1   2.00000     3.883039     1.592293      5.475332     2.290745
  ---------------------------------------------------------------------
-  Sum:              3.911079     1.645885      5.556964     2.265194
- Total magnetization (from the atomic spheres):             2.265194
+  Sum:              3.883039     1.592293      5.475332     2.290745
+ Total magnetization (from the atomic spheres):             2.290745
  Total magnetization (exact up - dn):                       2.250028
 ================================================================================
 
@@ -2124,6 +2125,7 @@ P           mkmem7          3
            prtvol6          2
            prtvol7          2
            prt1dm           1
+            ratsm      5.00000000E-02 Bohr
             rprim     -5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01 -5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01 -5.0000000000E-01
@@ -2443,10 +2445,10 @@ P           mkmem7          3
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         17.3  wall=         17.5
+- Proc.   0 individual time (sec): cpu=         15.0  wall=         18.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  18 WARNINGs and  26 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.3  wall=         17.5
++Overall time at end (sec) : cpu=         15.0  wall=         18.6

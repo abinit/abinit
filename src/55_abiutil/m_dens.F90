@@ -1689,8 +1689,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
 &     ' Integrated electronic and magnetization densities in atomic spheres:',ch10,&
 &     ' ---------------------------------------------------------------------'
      call wrtout(nunit,msg,'COLL')
-     write(msg, '(3a)' ) ' Note: Diff(up-dn) is a rough ',&
-&     'approximation of local magnetic moment'
+     write(msg, '(a,f8.4,a)' ) ' Radius=ratsph(iatom), smearing ratsm=',ratsm,'. Diff(up-dn)=approximate z local magnetic moment.'
      call wrtout(nunit,msg,'COLL')
      write(msg, '(a)' ) ' Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)'
      call wrtout(nunit,msg,'COLL')
@@ -1722,7 +1721,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
 &     ' Integrated electronic and magnetization densities in atomic spheres:',ch10,&
 &     ' ---------------------------------------------------------------------'
      call wrtout(nunit,msg,'COLL')
-     write(msg, '(3a)' ) ' Note:      this is a rough approximation of local magnetic moments'
+     write(msg, '(a,f8.4,a)' ) ' Radius=ratsph(iatom), smearing ratsm=',ratsm,'. mag(i)=approximate local magnetic moment.'
      call wrtout(nunit,msg,'COLL')
      write(msg, '(a)' ) ' Atom   Radius      Total density     mag(x)      mag(y)      mag(z)  '
      call wrtout(nunit,msg,'COLL')
