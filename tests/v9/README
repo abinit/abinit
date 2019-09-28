@@ -7,10 +7,12 @@ Please, see the README file in the tests directory (above this one) to get help.
 
 ------------------------------------------------------------------
 
-* Tests 1-40 concern ground state 
+* Tests 1-20 concern ground state 
 
-* Tests 41-100 concern response functions including Nonlinear(+PAW) and 2nd order Sternheimer equation and e-ph
+* Tests 21-40 concern GW/BSE
 
-* Tests 111-149 concern GW/BSE
+* Tests 41-50 concern response functions except electron-phonon 
+
+* Tests 51-... concern electron-phonon
 
 ------------------------------------------------------------------
