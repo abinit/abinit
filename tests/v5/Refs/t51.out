@@ -466,7 +466,7 @@ Result for kinetic energy density :
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     1.060851     0.457904      1.518755     0.602947
  ---------------------------------------------------------------------
@@ -598,7 +598,7 @@ Result for kinetic energy density :
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     1.056600     0.461824      1.518424     0.594776
  ---------------------------------------------------------------------
