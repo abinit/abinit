@@ -8,6 +8,7 @@ prtvol 2
 ndtset 7
 
 magcon_lambda 0.05
+ratsm 0.05
 
 nspinor 2 nspden 4
 so_psp 0

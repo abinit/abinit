@@ -15104,21 +15104,40 @@ in which [[ntypat]] differs from [[npsp]])
 ),
 
 Variable(
+    abivarname="ratsm",
+    varset="gstate",
+    vartype="real",
+    topics=['printing_prdos', 'MagMom_useful', 'ConstrainedDFT_useful'],
+    dimensions="scalar",
+    defaultval=ValueWithConditions({'any([[constraint_kind]] > 1)': 0.05, 'defaultval': 0.00}),
+    mnemonics="Radii of the ATomic spheres SMearing",
+    text=r"""
+Smearing width for the atomic spheres whose radius is determined by [[ratsph]].
+For each spherical zone around each atom, the integrating function goes 
+from 1.0 to 0.0 in an interval from [[ratsph]]-[[ratsm]] to [[ratsph]].
+The function is the same as the one used to smear the kinetic energy, see [[ecutsm]].
+""",
+),
+
+
+Variable(
     abivarname="ratsph",
     varset="gstate",
     vartype="real",
-    topics=['printing_prdos', 'MagMom_useful', 'ElecBandStructure_useful', 'ElecDOS_useful'],
+    topics=['printing_prdos', 'MagMom_useful', 'ElecBandStructure_useful', 'ElecDOS_useful', 'ConstrainedDFT_basic'],
     dimensions=['[[ntypat]]'],
     defaultval=ValueWithConditions({'[[usepaw]] == 1': '[[AUTO_FROM_PSP]]', 'defaultval': 2.00}),
     mnemonics="Radii of the ATomic SPHere(s)",
     text=r"""
 Relevant only when [[prtdensph]] = 1, or [[magconon]]/=0, or any([[constraint_kind]](:)/=0) (that is, constrained DFT), or [[prtdos]] = 3.
-
-When [[prtdensph]] = 1:
-
-Provides the radius of the spheres around (all) atoms in which the total
+In most cases (see later for [[prtdos]] = 3), provides the radius of the spheres around each atom in which the total
 charge density or magnetization will be integrated.
-
+The integral within the sphere is obtained by a sum over real space FFT points
+inside the sphere, multiplied by a function that is one inside the sphere, except in a small boundary zone determined by [[ratsm]],
+where this fonction goes smoothly from 1 to 0.
+In case of PAW, [[ratsph]] radius has to be greater or equal to PAW radius of
+considered atom type (which is read from the PAW dataset file; see **rc_sph** or **r_paw**).
+In case of constrained DFT, note that the sphere for different atoms are not allowed to overlap.
 
 When [[prtdos]] = 3:
 
@@ -15144,11 +15163,6 @@ between the s, p and d components. Indeed, the integrated charge within a
 given radius, behave as a different power of the radius, for the different
 channels s, p, d. At the limit of very small radii, the s component dominates
 the charge contained in the sphere.
-
-In case of PAW, [[ratsph]] radius has to be greater or equal to PAW radius of
-considered atom type (which is read from the PAW dataset file; see **rc_sph** or **r_paw**).
-
-In case of constrained DFT, note that the sphere for different atoms are not allowed to overlap.
 """,
 ),
 
