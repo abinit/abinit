@@ -914,9 +914,9 @@ end subroutine constrained_dft_free
 
      !The electronic constraint is such that the ziontypat charge minus (the electronic charge is negative) the atomic electronic density 
      !intgden gives the target charge chrgat. 
-!    corr_denmag(1)=intgden(1,iatom)+c_dft%chrgat(iatom)-c_dft%ziontypat(c_dft%typat(iatom))
+     corr_denmag(1)=intgden(1,iatom)+c_dft%chrgat(iatom)-c_dft%ziontypat(c_dft%typat(iatom))
 !    Uses the usual electronic charge definition, instead of the total nucleus-electronic charge
-     corr_denmag(1)=intgden(1,iatom)-c_dft%chrgat(iatom)
+!    corr_denmag(1)=intgden(1,iatom)-c_dft%chrgat(iatom)
 
    endif
 
@@ -1670,6 +1670,10 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
 &       ' Integrated electronic density in atomic spheres:',ch10,&
 &       ' ------------------------------------------------'
        call wrtout(nunit,msg,'COLL')
+       if(ratsm>tol8)then
+         write(msg, '(a,f8.4,a)' ) ' Radius=ratsph(iatom), smearing ratsm=',ratsm,'.'
+         call wrtout(nunit,msg,'COLL')
+       endif
        write(msg, '(a)' ) ' Atom  Sphere_radius  Integrated_density'
      else if(prtopt==11)then
        !This is for debugging purposes
@@ -1677,6 +1681,10 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
 &       ' Integrated potential residual in atomic spheres:',ch10,&
 &       ' ------------------------------------------------'
        call wrtout(nunit,msg,'COLL')
+       if(ratsm>tol8)then
+         write(msg, '(a,f8.4,a)' ) ' Radius=ratsph(iatom), smearing ratsm=',ratsm,'.'
+         call wrtout(nunit,msg,'COLL')
+       endif
        write(msg, '(a)' ) ' Atom  Sphere_radius  Integrated_potresid'
      endif 
      call wrtout(nunit,msg,'COLL')

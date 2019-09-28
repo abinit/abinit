@@ -1,33 +1,28 @@
-# Hydrogen diatomic molecule for tests--static force
+# Hydrogen diatomic molecule for tests--constrained DFT
 
- ndtset 1
-#jdtset 1
- jdtset 3
+ ndtset 2
 
- iscf 2
- diemix 0.5
- diemac 1.0
 
- constraint_kind1   0  0
- constraint_kind   10  0
+#Constrained DFT data
+ constraint_kind2   10  0  # Dataset 2 is constrained DFT for the charge on atom 1
+ magcon_lambda      2
+ chrgat  0.5  0.0
 
- chrgat2 0.6  0.0
- chrgat3 0.5  0.0
- chrgat4 0.4  0.0
- chrgat5 0.3  0.0
-
- ratsph 1.0  1.0
- xcart    -1.1  0 0 1.1 0 0
+#Definition of the atomic spheres
+ ratsph    1.0  1.0
 
 #System description
  acell 15 10 10
- ntypat  2     # VERY IMPORTANT : one needs to define two kinds of atoms, despite that both are hydrogen,
+ ntypat  2     # IMPORTANT : one needs to define two kinds of atoms, despite that both are hydrogen,
                # in order to constrain the charge for atom 1, and not to impose a constraint for atom 2 !
  znucl  1.0 1.0
  natom 2
  typat  1 2
 
  nband 1
+
+ xcart    -1.1  0.0 0.0
+           1.1  0.0 0.0
 
 #Computational parameters
  tolwfr 1.0d-14
@@ -48,4 +43,5 @@
 #%% references = 
 #%% keywords = 
 #%% description = H2 diatomic molecule, static, to check the constrained DFT implementation with constrained charges 
+#%%  Constrain the chargearound atom 1 to the value 0.5
 #%%<END TEST_INFO>
