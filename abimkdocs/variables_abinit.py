@@ -945,7 +945,7 @@ Variable(
     vartype="real",
     topics=['BSE_expert'],
     dimensions=[2],
-    defaultval=[0.02, 0],
+    defaultval=[0.02, 0.0],
     mnemonics="Bethe-Salpeter HAYDOCK TOLerance",
     requires="[[optdriver]] == 99 and [[bs_algorithm]] == 2",
     text=r"""
@@ -959,9 +959,11 @@ value indicates that the converge error is estimated by averaging over the entir
 
 **bs_haydock_tol(2)** defines the quantity that will be checked for convergence:
 
-  * 0 --> both the real and the imaginary part must converge
-  * 1 --> only the real part
-  * 2 --> only the imaginary part
+  * 0.0 --> both the real and the imaginary part must converge
+  * 1.0 --> only the real part
+  * 2.0 --> only the imaginary part
+
+(The latter are real numbers, tolerance is 1.0d-6).
 """,
 ),
 
@@ -1601,7 +1603,7 @@ and overlapping spheres will not deliver the correct total charge of the system.
 
 Note that [[constraint_kind]] defines constraints for types of atoms, not for specific atoms. Atoms of the same type are supposed to incur the same constraint. If the use needs to impose different constraints on atoms of the same type (in principle), it is possible (and easy) to pretend
 that they belong to different types, even if they are using the same pseudopotential file. There is an example 
-in test [[test:v8#24]], the hydrogen dimer, where the charge around the first atom is constrained, and the charge around the second atom is left free.
+in test [[test:v8_24]], the hydrogen dimer, where the charge around the first atom is constrained, and the charge around the second atom is left free.
 """,
 ),
 

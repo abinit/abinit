@@ -675,7 +675,8 @@ end subroutine add_atomic_fcts
 !!
 !! SOURCE
 
- subroutine constrained_dft_ini(chrgat,constrained_dft,constraint_kind,magconon,magcon_lambda,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,&
+ subroutine constrained_dft_ini(chrgat,constrained_dft,constraint_kind,&
+& magconon,magcon_lambda,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,&
 & ratsm,ratsph,rprimd,spinat,typat,xred,ziontypat)
 
 !Arguments ------------------------------------

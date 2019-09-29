@@ -2301,7 +2301,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  end if
 
 !Free the datastructure constrained_dft, for constrained DFT calculations
- if(any(dtset%constraint_kind(:)/=0))then
+ if(any(dtset%constraint_kind(:)/=0).or.dtset%magconon/=0)then
    call constrained_dft_free(constrained_dft)
  endif
 
