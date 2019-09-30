@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Sep 2019.
-- ( at 07h18 )
+.Starting date : Mon 30 Sep 2019.
+- ( at 07h07 )
   
 - input  file    -> tucrpa_2.in
 - output file    -> tucrpa_2_MPI24.out
@@ -842,8 +842,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
  For an atomic wfn truncated at rmax =      2.2000
      The norm of the wfn is                    =      0.8418
-     The bare interaction (no renormalization) =     16.3156 eV
-     The bare interaction (for a renorm. wfn ) =     23.0248 eV
+     The bare interaction (no renormalization) =     16.0038 eV
+     The bare interaction (for a renorm. wfn ) =     22.5848 eV
  =======================================================================
 
 
@@ -10221,8 +10221,8 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
 
  For an atomic wfn truncated at rmax =      2.2000
      The norm of the wfn is                    =      0.8418
-     The bare interaction (no renormalization) =     16.3156 eV
-     The bare interaction (for a renorm. wfn ) =     23.0248 eV
+     The bare interaction (no renormalization) =     16.0038 eV
+     The bare interaction (for a renorm. wfn ) =     22.5848 eV
  =======================================================================
 
 
@@ -14206,10 +14206,10 @@ P           mkmem           2
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=        432.6  wall=        434.2
+- Proc.   0 individual time (sec): cpu=        436.2  wall=        437.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=      10395.1  wall=      10418.4
++Overall time at end (sec) : cpu=      10472.7  wall=      10495.9
