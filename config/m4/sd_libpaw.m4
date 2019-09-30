@@ -150,6 +150,9 @@ AC_DEFUN([SD_LIBPAW_INIT], [
     sd_libpaw_libs=""
   fi
 
+  # Display configuration
+  _SD_LIBPAW_DUMP_CONFIG
+
   # Export configuration
   AC_SUBST(sd_libpaw_options)
   AC_SUBST(sd_libpaw_enable_def)
@@ -170,9 +173,6 @@ AC_DEFUN([SD_LIBPAW_INIT], [
 
 
 AC_DEFUN([SD_LIBPAW_DETECT], [
-  # Display configuration
-  _SD_LIBPAW_DUMP_CONFIG
-
   # Check whether we can compile and link a simple program
   # and update build flags if successful
   if test "${sd_libpaw_enable}" = "auto" -o "${sd_libpaw_enable}" = "yes"; then

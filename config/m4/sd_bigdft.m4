@@ -172,9 +172,6 @@ AC_DEFUN([SD_BIGDFT_INIT], [
 
 
 AC_DEFUN([SD_BIGDFT_DETECT], [
-  # Display configuration
-  _SD_BIGDFT_DUMP_CONFIG
-
   # Check whether we can compile and link a simple program
   # and update build flags if successful
   if test "${sd_bigdft_enable}" = "auto" -o "${sd_bigdft_enable}" = "yes"; then
@@ -191,6 +188,8 @@ AC_DEFUN([SD_BIGDFT_DETECT], [
 
       AC_DEFINE([HAVE_BIGDFT], 1,
         [Define to 1 if you have the BigDFT library.])
+
+      _SD_BIGDFT_DUMP_CONFIG
     else
       if test "${sd_bigdft_status}" = "optional" -a \
               "${sd_bigdft_init}" = "def"; then

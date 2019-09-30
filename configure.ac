@@ -655,10 +655,6 @@ ABI_GPU_DETECT
 
 ABI_MSG_SECTION([Initialization of optional features])
 
-# Initialize linear algebra support, using the available information
-# Init BigDFT
-SD_BIGDFT_INIT([optional fail])
-
 # Init FFTW3
 SD_FFTW3_INIT([optional skip])
 
@@ -823,6 +819,14 @@ SD_LIBPAW_DETECT
 
                        # ------------------------------ #
 
+# Init BigDFT (requires knowledge about ABINIT Common and LibPAW)
+SD_BIGDFT_INIT([optional fail])
+
+# BigDFT library support (requires linear algebra and LibXC)
+SD_BIGDFT_DETECT
+
+                       # ------------------------------ #
+
 AC_MSG_CHECKING([how to build the components of ABINIT])
 abi_build_steps=""
 if test "${sd_abinit_common_ok}" = "yes"; then
@@ -832,6 +836,10 @@ fi
 if test "${sd_libpaw_ok}" = "yes"; then
   test "${abi_build_steps}" = "" || abi_build_steps="${abi_build_steps}+"
   abi_build_steps="${abi_build_steps}libpaw"
+fi
+if test "${sd_bigdft_ok}" = "yes"; then
+  test "${abi_build_steps}" = "" || abi_build_steps="${abi_build_steps}+"
+  abi_build_steps="${abi_build_steps}bigdft"
 fi
 if test "${abi_build_steps}" = ""; then
   abi_build_steps="monolith"
@@ -856,11 +864,6 @@ AC_DEFINE([HAVE_LIBPAW_ABINIT], 1,
 if test "${abi_build_steps}" = "monolith" -a "${abi_bigdft_enable}" = "yes"; then
   AC_MSG_WARN([BigDFT will soon require the separate installation of ABINIT Common and LibPAW])
 fi
-
-                       # ------------------------------ #
-
-# BigDFT library support (requires linear algebra and LibXC)
-SD_BIGDFT_DETECT
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
