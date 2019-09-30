@@ -296,50 +296,6 @@ AC_SUBST(fc_mod_fcflags)
 # ---------------------------------------------------------------------------- #
 
 #
-# Libraries and linking
-#
-
-ABI_MSG_SECTION([Libraries and linking])
-
-# Preserve environment
-ABI_ENV_BACKUP
-
-# Disable shared objects (may change in a distant future)
-# Note: Libtool-provided macro
-#AC_DISABLE_SHARED
-
-# Look for archiver
-if test "${AR}" = ""; then
-  AC_CHECK_PROGS(AR,[ar xiar])
-fi
-
-# Set archiver command flag
-test "${ARFLAGS_CMD}" = "" && ARFLAGS_CMD="rc"
-AC_SUBST(ARFLAGS_CMD)
-
-# Look for ranlib
-AC_PROG_RANLIB
-
-# Look for linker (not used for now)
-#AC_PROG_LD
-
-# Restore back compile flags
-CFLAGS="${abi_env_CFLAGS}"
-CXXFLAGS="${abi_env_CXXFLAGS}"
-FCFLAGS="${abi_env_FCFLAGS}"
-
-# We want to be able access the archiver from anywhere
-AC_SUBST(AR)
-AC_SUBST(ARFLAGS)
-
-# Report the use of libtool-related options
-AC_SUBST(enable_shared)
-AC_SUBST(enable_static)
-AC_SUBST(with_gnu_ld)
-
-# ---------------------------------------------------------------------------- #
-
-#
 # Hints
 #
 
@@ -419,7 +375,7 @@ if test "${abi_hints_enable}" = "yes"; then
   ABI_FC_HINTS
 
   # Library archiver support
-  ABI_AR_HINTS
+  #ABI_AR_HINTS
 
 fi
 
@@ -435,9 +391,17 @@ fi
 
 # Display Fortran preprocessing parameters
 AC_MSG_CHECKING([which Fortran preprocessor to use])
-AC_MSG_RESULT([${FPP}])
+if test "${FPP}" = ""; then
+  AC_MSG_RESULT([none])
+else
+  AC_MSG_RESULT([${FPP}])
+fi
 AC_MSG_CHECKING([which Fortran preprocessor flags to apply])
-AC_MSG_RESULT([${FPPFLAGS}])
+if test "${FPPFLAGS}" = ""; then
+  AC_MSG_RESULT([none])
+else
+  AC_MSG_RESULT([${FPPFLAGS}])
+fi
 
 # Display Fortran compiler wrapper status
 AC_MSG_CHECKING([whether to wrap Fortran compiler calls])
@@ -527,6 +491,35 @@ ABI_INIT_TARGET
 ABINIT_BINARY_PACKAGE="${PACKAGE}-${VERSION}_${ABINIT_TARGET}"
 AC_SUBST(ABINIT_BINARY_PACKAGE)
 
+# Preserve environment
+ABI_ENV_BACKUP
+
+# Look for archiver
+if test "${AR}" = ""; then
+  AC_CHECK_PROGS(AR,[ar xiar])
+fi
+
+# Set archiver command flag
+test "${ARFLAGS_CMD}" = "" && ARFLAGS_CMD="rc"
+AC_SUBST(ARFLAGS_CMD)
+
+# Look for ranlib
+AC_PROG_RANLIB
+
+# Restore back compile flags
+CFLAGS="${abi_env_CFLAGS}"
+CXXFLAGS="${abi_env_CXXFLAGS}"
+FCFLAGS="${abi_env_FCFLAGS}"
+
+# We want to be able access the archiver from anywhere
+AC_SUBST(AR)
+AC_SUBST(ARFLAGS)
+
+# Report the use of libtool-related options
+AC_SUBST(enable_shared)
+AC_SUBST(enable_static)
+AC_SUBST(with_gnu_ld)
+
 # Final adjustments for library archiver
 test "${ARFLAGS}" = "" && \
   ARFLAGS="${ARFLAGS_DEBUG} ${ARFLAGS_OPTIM} ${ARFLAGS_HINTS} ${ARFLAGS_EXTRA} ${ARFLAGS_CMD}"
@@ -556,6 +549,14 @@ test "${FC_LDFLAGS}" = "" && \
 test "${FC_LIBS}" = "" && \
   FC_LIBS="${FC_LIBS_DEBUG} ${FC_LIBS_OPTIM} ${FC_LIBS_HINTS} ${FC_LIBS_EXTRA}"
 
+# Final adjustments for preprocessors
+test "${CPPFLAGS}" = "" && \
+  CPPFLAGS="${CPPFLAGS_DEBUG} ${CPPFLAGS_OPTIM} ${CPPFLAGS_HINTS} ${CPPFLAGS_EXTRA}"
+test "${XPPFLAGS}" = "" && \
+  XPPFLAGS="${XPPFLAGS_DEBUG} ${XPPFLAGS_OPTIM} ${XPPFLAGS_HINTS} ${XPPFLAGS_EXTRA}"
+test "${FPPFLAGS}" = "" -a "${abi_fc_wrap}" = "no" && \
+  FPPFLAGS="${FPPFLAGS_DEBUG} ${FPPFLAGS_OPTIM} ${FPPFLAGS_HINTS} ${FPPFLAGS_EXTRA}"
+
 # FIXME: temporary workaround for Macs
 if test "${abi_cpu_platform}" = "apple"; then
   AC_MSG_WARN([${abi_cpu_platform} is not able to handle full link information])
@@ -564,14 +565,6 @@ else
   AC_MSG_NOTICE([static builds may be performed])
   FC_LIBS="${FC_LIBS} ${FCLIBS}"
 fi
-
-# Final adjustments for preprocessors
-test "${CPPFLAGS}" = "" && \
-  CPPFLAGS="${CPPFLAGS_DEBUG} ${CPPFLAGS_OPTIM} ${CPPFLAGS_HINTS} ${CPPFLAGS_EXTRA}"
-test "${XPPFLAGS}" = "" && \
-  XPPFLAGS="${XPPFLAGS_DEBUG} ${XPPFLAGS_OPTIM} ${XPPFLAGS_HINTS} ${XPPFLAGS_EXTRA}"
-test "${FPPFLAGS}" = "" -a "${abi_fc_wrap}" = "no" && \
-  FPPFLAGS="${FPPFLAGS_DEBUG} ${FPPFLAGS_OPTIM} ${FPPFLAGS_HINTS} ${FPPFLAGS_EXTRA}"
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
