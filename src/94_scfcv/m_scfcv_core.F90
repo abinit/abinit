@@ -2300,10 +2300,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    write(ab_xml_out, "(A)") '    </scfcvLoop>'
  end if
 
-!Free the datastructure constrained_dft, for constrained DFT calculations
- if(any(dtset%constraint_kind(:)/=0).or.dtset%magconon/=0)then
-   call constrained_dft_free(constrained_dft)
- endif
+!Free the datastructure constrained_dft
+ call constrained_dft_free(constrained_dft)
 
  call timab(249,2,tsec)
  call timab(238,2,tsec)

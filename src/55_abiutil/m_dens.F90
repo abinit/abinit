@@ -717,6 +717,8 @@ end subroutine add_atomic_fcts
    !We need to precompute intgf2
    call calcdensph(gmet,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,std_out,&
 &    ratsm,ratsph,rhor_dum,rprimd,typat,ucvol,xred,0,cplex1,intgf2=intgf2)
+ else
+   intgf2=zero
  endif
 
  constrained_dft%gmet            =gmet
@@ -783,13 +785,13 @@ end subroutine constrained_dft_ini
 
 ! ***********************************************************************************************
 
- ABI_SFREE(constrained_dft%chrgat)
- ABI_SFREE(constrained_dft%constraint_kind)
- ABI_SFREE(constrained_dft%intgf2)
- ABI_SFREE(constrained_dft%ratsph)
- ABI_SFREE(constrained_dft%spinat)
- ABI_SFREE(constrained_dft%typat)
- ABI_SFREE(constrained_dft%ziontypat)
+ if(allocated(constrained_dft%chrgat))           ABI_SFREE(constrained_dft%chrgat)
+ if(allocated(constrained_dft%constraint_kind))  ABI_SFREE(constrained_dft%constraint_kind)
+ if(allocated(constrained_dft%intgf2))           ABI_SFREE(constrained_dft%intgf2)
+ if(allocated(constrained_dft%ratsph))           ABI_SFREE(constrained_dft%ratsph)
+ if(allocated(constrained_dft%spinat))           ABI_SFREE(constrained_dft%spinat)
+ if(allocated(constrained_dft%typat))            ABI_SFREE(constrained_dft%typat)
+ if(allocated(constrained_dft%ziontypat))        ABI_SFREE(constrained_dft%ziontypat)
 
 end subroutine constrained_dft_free
 !!***
