@@ -21,7 +21,6 @@
 AC_DEFUN([ABI_DEBUG_INIT],[
   dnl Init
   abi_debug_flavor="$1"
-  abi_debug_source="${enable_source_debug}"
   abi_debug_verbose="no"
 
   dnl Display debugging status
@@ -105,18 +104,18 @@ AC_DEFUN([ABI_DEBUG_INIT],[
       abi_debug_verbose="yes"
       ;;
     paranoid|naughty)
-      abi_debug_source="yes"
+      abi_source_debug_enable="yes"
       abi_debug_verbose="yes"
       ;;
   esac
 
   dnl Define DEBUG_MODE preprocessing option
   AC_MSG_CHECKING([whether to activate debug mode in source files])
-  if test "${abi_debug_source}" = "yes"; then
+  if test "${abi_source_debug_enable}" = "yes"; then
     AC_DEFINE([DEBUG_MODE],1,
       [Define to 1 to build debugging instructions in the source code.])
   fi
-  AC_MSG_RESULT([${abi_debug_source}])
+  AC_MSG_RESULT([${abi_source_debug_enable}])
 
   dnl Define DEBUG_VERBOSE preprocessing option
   AC_MSG_CHECKING([whether to activate verbose debug messages in source files])
