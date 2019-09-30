@@ -824,6 +824,11 @@ SD_ABINIT_COMMON_INIT([optional skip])
 
 SD_ABINIT_COMMON_DETECT
 
+# Initialize the LibPAW routines as an external component
+SD_LIBPAW_INIT([optional skip])
+
+SD_LIBPAW_DETECT
+
                        # ------------------------------ #
 
 AC_MSG_CHECKING([how to build the components of ABINIT])
@@ -846,6 +851,10 @@ AC_MSG_RESULT([${abi_build_steps}])
 # Allow the separate build of ABINIT Common
 AM_CONDITIONAL([DO_BUILD_SHARED_COMMON],
   [test "{sd_abinit_common_ok}" != "yes"])
+
+# Allow the separate build of LibPAW
+AM_CONDITIONAL([DO_BUILD_SHARED_LIBPAW],
+  [test "{sd_libpaw_ok}" != "yes"])
 
 # Warn the user if support for wavelets is ill-configured
 if test "${abi_build_steps}" = "monolith" -a "${abi_bigdft_enable}" = "yes"; then

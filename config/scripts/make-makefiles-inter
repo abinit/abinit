@@ -235,7 +235,9 @@ SUBDIRS = .
 if DO_BUILD_SHARED_COMMON
   SUBDIRS += common
 endif
-SUBDIRS += libpaw
+if DO_BUILD_SHARED_LIBPAW
+  SUBDIRS += libpaw
+endif
 """)
 with open("shared/common/Makefile.am", "w") as mf_common:
   mf_common.write(makefile_header(my_name, now))

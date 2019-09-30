@@ -173,9 +173,6 @@ AC_DEFUN([SD_ABINIT_COMMON_INIT], [
 
 
 AC_DEFUN([SD_ABINIT_COMMON_DETECT], [
-  # Display configuration
-  _SD_ABINIT_COMMON_DUMP_CONFIG
-
   # Check whether we can compile and link a simple program
   # and update build flags if successful
   if test "${sd_abinit_common_enable}" = "auto" -o "${sd_abinit_common_enable}" = "yes"; then
@@ -192,6 +189,8 @@ AC_DEFUN([SD_ABINIT_COMMON_DETECT], [
 
       AC_DEFINE([HAVE_ABINIT_COMMON], 1,
         [Define to 1 if you have the ABINIT Common library.])
+
+      _SD_ABINIT_COMMON_DUMP_CONFIG
     else
       if test "${sd_abinit_common_status}" = "optional" -a \
               "${sd_abinit_common_init}" = "def"; then

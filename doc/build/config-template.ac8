@@ -1214,6 +1214,28 @@
 #
 #ABINIT_COMMON_LIBS="-L${HOME}/abinit/lib -labinit_common"
 
+                       # ------------------------------ #
+
+# Use external LibPAW (default is no)
+#
+#with_libpaw="yes"
+
+# C flags for LibPAW (default is unset)
+#
+#LIBPAW_FCFLAGS="-I/usr/local/include/libpaw"
+
+# Fortran flags for LibPAW (default is unset)
+#
+#LIBPAW_FCFLAGS="-I/usr/local/include/libpaw"
+
+# Link flags for LibPAW (default is unset)
+#
+#LIBPAW_LDFLAGS=""
+
+# Library flags for LibPAW (default is unset)
+#
+#LIBPAW_LIBS="-L${HOME}/abinit_shared/lib -lpaw"
+
 # -------------------------------------------------------------------------- #
 # Developer options                                                          #
 # -------------------------------------------------------------------------- #
