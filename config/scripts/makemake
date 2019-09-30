@@ -350,6 +350,8 @@ if ( opts.run_clean ):
     "rm -f shared/common/src/14_hidewrite/m_build_info.F90")
 
   print_header(my_name, "Subsystems")
+  run_script(my_name, "Removing copied files in shared/common",
+    "/bin/rm -f shared/common/AUTHORS shared/common/COPYING shared/common/ChangeLog shared/common/NEWS shared/common/README shared/common/README.md")
   for subsys in bcnf.sections():
     if ( bcnf.get(subsys, "type") == "subsystem" ):
       for subdir in bcnf.get(subsys, "subdirs").split():
@@ -573,6 +575,8 @@ if ( opts.run_subsystems ):
     "./config/scripts/make-file-lists")
   run_script(my_name, "Generating macros for subsystems",
     "./config/scripts/make-macros-subsystems")
+  run_script(my_name, "Populating required files in shared/common",
+    "/bin/cp -f AUTHORS COPYING ChangeLog NEWS README README.md shared/common")
 else:
   print_message(my_name, "*** Skipping synchronization of subsystems ***")
 
