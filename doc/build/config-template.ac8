@@ -1220,9 +1220,13 @@
 #
 #with_libpaw="yes"
 
+# C preprocessing flags for LibPAW (default is unset)
+#
+#LIBPAW_CPPFLAGS="-I/usr/local/include/libpaw"
+
 # C flags for LibPAW (default is unset)
 #
-#LIBPAW_FCFLAGS="-I/usr/local/include/libpaw"
+#LIBPAW_CFLAGS="-std=c99"
 
 # Fortran flags for LibPAW (default is unset)
 #
