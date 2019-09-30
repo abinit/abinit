@@ -179,14 +179,6 @@ if test "${abi_cclock_enable}" = "yes"; then
   fi
 fi
 
-# LibPAW must always be on for now
-if test "${enable_libpaw}" != "yes"; then
-  AC_MSG_NOTICE([|---> forcing internal LibPAW support to 'yes'])
-  enable_libpaw="yes"
-  abi_libpaw_enable="yes"
-  abi_optchk_ok="no"
-fi
-
 # Closing remarks
 if test "${abi_optchk_ok}" = "yes"; then
   AC_MSG_NOTICE([|---> all OK])
@@ -856,6 +848,10 @@ AM_CONDITIONAL([DO_BUILD_SHARED_COMMON],
 AM_CONDITIONAL([DO_BUILD_SHARED_LIBPAW],
   [test "{sd_libpaw_ok}" != "yes"])
 
+# FIXME: Let LibPAW know it is embedded in ABINIT
+AC_DEFINE([HAVE_LIBPAW_ABINIT], 1,
+  [Must be defined to 1 to have LibPAW properly working.])
+
 # Warn the user if support for wavelets is ill-configured
 if test "${abi_build_steps}" = "monolith" -a "${abi_bigdft_enable}" = "yes"; then
   AC_MSG_WARN([BigDFT will soon require the separate installation of ABINIT Common and LibPAW])
@@ -948,10 +944,6 @@ ABI_MSG_SECTION([Optional source code])
 # Defines and conditionals for CPP options
 # (see config/specs/options.conf for details)
 ABI_OPTIONS_CPP_DEFINES
-
-# Let LibPAW known it is embedded in ABINIT
-AC_DEFINE([HAVE_LIBPAW_ABINIT], 1,
-  [Must be defined to 1 to have LibPAW properly working.])
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
