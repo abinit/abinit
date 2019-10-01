@@ -1459,7 +1459,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
        '-   Remaining memory at the end of the calculation is ',memtot
    else
      ! This msg will make the test fail if the memory leak occurs on master (no dash in the first column)
-     write(msg,'(2a,2(a,i0),3a,f12.4,1x,9a)') &
+     write(msg,'(2a,2(a,i0),3a,f12.4,1x,11a)') &
        'MEMORY CONSUMPTION REPORT:',ch10, &
        '   There were ',nalloc,' allocations and ',nfree,' deallocations',ch10, &
        '   Remaining memory at the end of the calculation: ',memtot * b2Mb, " (Mb)", ch10, &
