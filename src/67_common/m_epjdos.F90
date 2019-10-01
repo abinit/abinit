@@ -1756,7 +1756,7 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
  ABI_CHECK(fform /= 0, "Cannot find fform associated to FATBANDS.nc")
 
  ! Write header, crystal structure and band energies.
- NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
+ NCF_CHECK(hdr%ncwrite(ncid, fform, nc_define=.True.))
  NCF_CHECK(crystal%ncwrite(ncid))
  NCF_CHECK(ebands_ncwrite(ebands, ncid))
 

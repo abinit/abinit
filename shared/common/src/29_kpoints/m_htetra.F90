@@ -858,9 +858,9 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 
  ! Volume of all tetrahedra should be the same as that of tetra 1
  ! this is the volume of 1 tetrahedron, should be coherent with notation in Lehmann & Taut
- k1(:) = gprimd(:,1)*klatt(1,1) +  gprimd(:,2)*klatt(2,1) +  gprimd(:,3)*klatt(3,1)
- k2(:) = gprimd(:,1)*klatt(1,2) +  gprimd(:,2)*klatt(2,2) +  gprimd(:,3)*klatt(3,2)
- k3(:) = gprimd(:,1)*klatt(1,3) +  gprimd(:,2)*klatt(2,3) +  gprimd(:,3)*klatt(3,3)
+ k1(:) = gprimd(:,1)*klatt(1,1) + gprimd(:,2)*klatt(2,1) + gprimd(:,3)*klatt(3,1)
+ k2(:) = gprimd(:,1)*klatt(1,2) + gprimd(:,2)*klatt(2,2) + gprimd(:,3)*klatt(3,2)
+ k3(:) = gprimd(:,1)*klatt(1,3) + gprimd(:,2)*klatt(2,3) + gprimd(:,3)*klatt(3,3)
  tetra%vv = abs(k1(1)*(k2(2)*k3(3)-k2(3)*k3(2))- &
                 k1(2)*(k2(1)*k3(3)-k2(3)*k3(1))+ &
                 k1(3)*(k2(1)*k3(2)-k2(2)*k3(1))) / 6.d0 / rcvol
