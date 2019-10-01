@@ -588,6 +588,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: enough = 50
  integer :: iband,ik1,ik2,ik3,ikgrid,ikpt,indx
  integer :: isppol,isym,maxband,minband,nk1,nk2,nk3,nkptfull,ubxsf,timrev
  integer :: symkptrank, nsymfm, isymfm
@@ -602,9 +603,8 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 
  ierr = 0
 
-! Error if klatt is no simple orthogonal lattice (in red space)
-! for generalization to MP grids, need new version of XCrysDen
-
+ ! Error if klatt is no simple orthogonal lattice (in red space)
+ ! for generalization to MP grids, need new version of XCrysDen
  if (kptrlatt(1,2)/=0 .or. kptrlatt(1,3)/=0 .or. kptrlatt(2,1)/=0 .or. &
      kptrlatt(2,3)/=0 .or. kptrlatt(3,1)/=0 .or. kptrlatt(3,2)/=0 ) then
    write(msg,'(3a)')&
@@ -614,9 +614,9 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
    ierr = ierr + 1
  end if
 
-! Error if there are not at least 2 kpts in each direction:
-! kptrank will fail for the intermediate points below
- if ( abs(kptrlatt(1,1))<2 .or. abs(kptrlatt(2,2))<2 .or. abs(kptrlatt(3,3))<2) then
+ ! Error if there are not at least 2 kpts in each direction:
+ ! kptrank will fail for the intermediate points below
+ if (abs(kptrlatt(1,1)) < 2 .or. abs(kptrlatt(2,2)) < 2 .or. abs(kptrlatt(3,3)) < 2) then
    write(msg,'(3a)')&
     'You need at least 2 points in each direction in k space to output BXSF files ',ch10,&
     'Action: use an augmented k-grid for the GS calculation (at least 2x2x2) '
@@ -635,14 +635,14 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
  if (ierr /= 0) return
 
  ! Compute reciprocal space metric.
- gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
+ gmet = MATMUL(TRANSPOSE(gprimd), gprimd)
 
  if (use_afm) then
    nsymfm = 0
    do isym = 1, nsym
      if (symafm(isym) == 1) nsymfm = nsymfm+1
    end do
-   ABI_MALLOC(symrecfm,(3,3,nsymfm))
+   ABI_MALLOC(symrecfm, (3,3,nsymfm))
    isymfm = 0
    do isym = 1, nsym
      if (symafm(isym) == 1) then
@@ -652,42 +652,42 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
    end do
  else
    nsymfm = nsym
-   ABI_MALLOC(symrecfm,(3,3,nsymfm))
+   ABI_MALLOC(symrecfm, (3,3,nsymfm))
    symrecfm = symrec
  end if
 
-!Xcrysden uses aperiodical data-grid
- nk1 = kptrlatt(1,1)
- nk2 = kptrlatt(2,2)
- nk3 = kptrlatt(3,3)
- nkptfull=(nk1+1)*(nk2+1)*(nk3+1)
+ ! Xcrysden uses aperiodic data-grid (images are included in the grid)
+ nk1 = kptrlatt(1,1); nk2 = kptrlatt(2,2); nk3 = kptrlatt(3,3)
+ nkptfull = (nk1+1) * (nk2+1) * (nk3+1)
 
- ABI_MALLOC(fulltoirred,(nkptfull))
- timrev=0; if (use_tr) timrev=1
+ ABI_MALLOC(fulltoirred, (nkptfull))
+ timrev = 0; if (use_tr) timrev=1
 
  krank = krank_new(nkptirred, kptirred, nsym=nsymfm, symrec=symrecfm, time_reversal=use_tr)
 
-!Xcrysden employs the C-ordering for the Fermi Surface.
+ ! Xcrysden employs the C-ordering for the Fermi Surface (x-y-z)
  ikgrid=0
  do ik1=0,nk1
    do ik2=0,nk2
      do ik3=0,nk3
 
-       ikgrid=ikgrid+1
-       kptgrid(1)=DBLE(ik1)/kptrlatt(1,1)
-       kptgrid(2)=DBLE(ik2)/kptrlatt(2,2)
-       kptgrid(3)=DBLE(ik3)/kptrlatt(3,3)
+       ikgrid = ikgrid+1
+       kptgrid(1) = DBLE(ik1)/kptrlatt(1,1)
+       kptgrid(2) = DBLE(ik2)/kptrlatt(2,2)
+       kptgrid(3) = DBLE(ik3)/kptrlatt(3,3)
 
        ! Find correspondence between the Xcrysden grid and the IBZ
        symkptrank = krank%get_rank(kptgrid)
        fulltoirred(ikgrid) = krank%invrank(symkptrank)
 
        if (fulltoirred(ikgrid) < 1) then
-         write(msg,'(a,3es16.8,2a,i0,2a)')&
-          'kpt = ',kptgrid,ch10,' with rank ', symkptrank, ch10,&
-          'has no symmetric among the k-points used in the GS calculation '
-         ierr=ierr + 1
-         MSG_WARNING(msg)
+         if (ierr <= enough) then
+           write(msg,'(a,3es16.8,2a,i0,2a)')&
+            'kpt = ',kptgrid,ch10,' with rank ', symkptrank, ch10,&
+            'has no symmetric among the k-points used in the GS calculation '
+           MSG_WARNING(msg)
+         end if
+         ierr = ierr + 1
        end if
 
      end do !ik1
@@ -696,41 +696,35 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 
  call krank%free()
 
- if (ierr/=0) then
-   ABI_FREE(fulltoirred)
-   MSG_ERROR("Bug")
-   RETURN
- end if
+ ABI_CHECK(ierr == 0, "See above warnings")
 
- if (abs(ewind) < tol12 ) then ! Keep all bands.
+ if (abs(ewind) < tol12 ) then
+   ! Keep all bands.
    minband=1
    maxband=mband
- else ! Select a subset of bands.
+ else
+   ! Select a subset of bands.
    minband = mband
    maxband = 0
    ene=abs(ewind)
    do isppol=1,nsppol
      do iband=1,mband
-       if(minval(eigen(iband,:,isppol))-fermie < -ene) then
-         minband = iband
-       end if
+       if(minval(eigen(iband,:,isppol))-fermie < -ene) minband = iband
      end do
      do iband=mband,1,-1
-       if (maxval(eigen(iband,:,isppol))-fermie > ene) then
-         maxband = iband
-       end if
+       if (maxval(eigen(iband,:,isppol))-fermie > ene) maxband = iband
      end do
    end do ! isppol
 
  end if ! abs(energy_window)
 
- ! Dump the results on file
- if (open_file(fname,msg,newunit=ubxsf,status='unknown',form='formatted') /=0) then
+ ! Dump results to file
+ if (open_file(fname,msg, newunit=ubxsf, status='unknown', action="write", form='formatted') /= 0 ) then
    MSG_WARNING(msg)
    ierr=ierr +1; RETURN
  end if
 
-! Write header
+ ! Write header
  write(ubxsf,*)' BEGIN_INFO'
  write(ubxsf,*)'   #'
  write(ubxsf,*)'   # this is a Band-XCRYSDEN-Structure-File for Visualization of Fermi Surface'
@@ -755,14 +749,14 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
  write(ubxsf,*)' ',(maxband-minband+1)*nsppol
  write(ubxsf,*)' ',nk1+1,nk2+1,nk3+1
  write(ubxsf,*)' ',shiftk(:,1)
-!NOTE : Angstrom units are used in the BXSF format
+ ! Angstrom units are used in the BXSF format
  write(ubxsf,*)' ',gprimd(:,1)/Bohr_Ang
  write(ubxsf,*)' ',gprimd(:,2)/Bohr_Ang
  write(ubxsf,*)' ',gprimd(:,3)/Bohr_Ang
 
-!print out data for all relevant bands and full kpt grid (redundant, yes)
-!for each kpt in full zone, find equivalent irred kpt and print eigenval
- indx=0
+ ! print out data for all relevant bands and full kpt grid (redundant, yes)
+ ! for each kpt in full zone, find equivalent irred kpt and print eigenval
+ indx = 0
  do iband=minband,maxband
    do isppol=1,nsppol
      write(ubxsf,*)' BAND: ',indx+minband
@@ -773,7 +767,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 
  write(ubxsf,*)'  END_BANDGRID_3D'
  write(ubxsf,*)' END_BLOCK_BANDGRID_3D'
- close (ubxsf)
+ close(ubxsf)
 
  ABI_FREE(fulltoirred)
  ABI_FREE(symrecfm)

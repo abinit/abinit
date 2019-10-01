@@ -2015,7 +2015,7 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
  end if
 
  ABI_FREE(gs_eigen)
- call hdr_free(hdr)
+ call hdr%free()
 
 end function ebands_from_file
 !!***
@@ -2077,8 +2077,8 @@ type(crystal_t) function crystal_from_file(path, comm) result(new)
     call hdr_read_from_fname(hdr, path, fform, comm)
     ABI_CHECK(fform /= 0, "fform == 0")
     timrev = 2 !; (if kpts_timrev_from_kptopt(hdr%kptopt) == 0) timrev = 1
-    new = hdr_get_crystal(hdr, timrev)
-    call hdr_free(hdr)
+    new = hdr%get_crystal(timrev)
+    call hdr%free()
  end if
 
 end function crystal_from_file

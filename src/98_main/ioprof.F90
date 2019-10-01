@@ -166,7 +166,7 @@ program ioprof
      call hdr_read_from_fname(hdr,hdr_fnames(ii),fform,comm)
      ABI_CHECK(fform/=0,"fform==0")
 
-     call hdr_echo(hdr,fform,4,unit=std_out)
+     call hdr%echo(fform,4,unit=std_out)
 
      do feg=1,size(formeigs)
        formeig = formeigs(feg)
@@ -236,7 +236,7 @@ program ioprof
        end do ! iomode
      end do ! formeig
 
-     call hdr_free(hdr)
+     call hdr%free()
    end do
 
  case default
