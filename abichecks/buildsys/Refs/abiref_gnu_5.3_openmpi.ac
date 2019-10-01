@@ -1052,7 +1052,7 @@ enable_memory_profiling="no"
 
 # Activate maintainer checks (default is no)
 #
-enable_maintainer_checks="no"
+enable_maintainer_checks="yes"
 
 # Fortran compiler vendor to be used by the build system (default is unset)
 #
