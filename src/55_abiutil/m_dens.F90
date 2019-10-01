@@ -779,7 +779,7 @@ end subroutine constrained_dft_ini
 
 !Arguments ------------------------------------
 !scalars
- type(constrained_dft_t),intent(out):: constrained_dft
+ type(constrained_dft_t),intent(inout):: constrained_dft
 
 !Local variables-------------------------------
 
