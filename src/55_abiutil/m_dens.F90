@@ -785,27 +785,13 @@ end subroutine constrained_dft_ini
 
 ! ***********************************************************************************************
 
- if(allocated(constrained_dft%chrgat))then
-   ABI_SFREE(constrained_dft%chrgat)
- endif
- if(allocated(constrained_dft%constraint_kind))then
-   ABI_SFREE(constrained_dft%constraint_kind)
- endif
- if(allocated(constrained_dft%intgf2))then
-   ABI_SFREE(constrained_dft%intgf2)
- endif
- if(allocated(constrained_dft%ratsph))then
-   ABI_SFREE(constrained_dft%ratsph)
- endif
- if(allocated(constrained_dft%spinat))then
-   ABI_SFREE(constrained_dft%spinat)
- endif
- if(allocated(constrained_dft%typat))then
-   ABI_SFREE(constrained_dft%typat)
- endif
- if(allocated(constrained_dft%ziontypat))then
-   ABI_SFREE(constrained_dft%ziontypat)
- endif
+ ABI_SFREE(constrained_dft%chrgat)
+ ABI_SFREE(constrained_dft%constraint_kind)
+ ABI_SFREE(constrained_dft%intgf2)
+ ABI_SFREE(constrained_dft%ratsph)
+ ABI_SFREE(constrained_dft%spinat)
+ ABI_SFREE(constrained_dft%typat)
+ ABI_SFREE(constrained_dft%ziontypat)
 
 end subroutine constrained_dft_free
 !!***
