@@ -224,8 +224,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  ! one of the basic abinit objects and it should be passed to this routine.
 
  gw_timrev=1; if (timrev==1) gw_timrev=2 !different conventions are used in GW and abinit!!
-
- cryst = hdr_get_crystal(Hdr, gw_timrev)
+ cryst = hdr%get_crystal(gw_timrev)
  call kmesh_init(Kibz_mesh,Cryst,nkibz,kibz,Dtset%kptopt)
  wtk_ibz=Kibz_mesh%wt
  call cryst%free()
@@ -277,9 +276,9 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  end do
 
  call ebands_init(bantot_ibz,QP_bst,Dtset%nelect,doccde_ibz,eigen_ibz,istwfk_ibz,kibz,nband_ibz,&
-&  nkibz,npwarr_ibz,nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact_ibz,wtk_ibz,&
-&  dtset%charge,dtset%kptopt,dtset%kptrlatt_orig,dtset%nshiftk_orig,dtset%shiftk_orig,&
-&  dtset%kptrlatt,dtset%nshiftk,dtset%shiftk)
+  nkibz,npwarr_ibz,nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact_ibz,wtk_ibz,&
+  dtset%charge,dtset%kptopt,dtset%kptrlatt_orig,dtset%nshiftk_orig,dtset%shiftk_orig,&
+  dtset%kptrlatt,dtset%nshiftk,dtset%shiftk)
 
  ABI_FREE(kibz)
  ABI_FREE(wtk_ibz)

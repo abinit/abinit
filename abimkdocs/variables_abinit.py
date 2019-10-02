@@ -3984,7 +3984,7 @@ Variable(
 The basic ingredients needed to perform both a screening and a sigma
 calculation are the so-called oscillator matrix elements defined as
 
-$$ \langle \mathbf{k-q},b_1 | e^{-i (\mathbf{q+G)} \mathbf{r}} | \mathbf{k}, b_2 \\rangle $$
+$$ \langle \mathbf{k-q},b_1 | e^{-i (\mathbf{q+G)} \mathbf{r}} | \mathbf{k}, b_2 \rangle $$
 
 In reciprocal space, this expression is evaluated by a convolution in which
 the number of reciprocal lattice vectors employed to describe the
@@ -3998,8 +3998,7 @@ variable is used to select the FFT mesh to be used.
 [[fftgw]] is the concatenation of two digits, labelled (A) and (B) whose value
 is internally used to define the value of [[ngfft]](1:3) (see the setmesh.F90 routine).
 
-The first digit (A) defines the augmentation of the FFT grid. Possible values
-are 1, 2 and 3.
+The first digit (A) defines the augmentation of the FFT grid. Possible values are 1, 2 and 3.
 
   * 0 --> Use the FFT grid specified by the user through [[ngfft]](1:3)
   * 1 --> Use a coarse FFT grid which encloses a sphere in reciprocal space whose radius
@@ -19714,8 +19713,9 @@ Variable(
 This variable defines the Cartesian grid of MPI processors used for EPH calculations.
 If not specified in the input, the code will generate this grid automatically using the total number of processors 
 and the basic dimensions of the job computed at runtime.
-At present (|today|), this variable is supported only in the calculation of the e-ph self-energy 
-i.e. [[eph_task]] 4 or -4. In all the other tasks, this variable is ignored.
+At present (|today|), this variable is supported only in the calculation of the phonon einewidths ([[eph_task]] 1)
+and in the computation of the e-ph self-energy ([[eph_task]] 4 or -4).
+In all the other tasks, this variable is ignored.
 
 Preliminary considerations:
 
@@ -19730,14 +19730,22 @@ In what follows, we explain briefly the pros and cons of the different MPI-level
 the discussion to the different calculations activated by [[eph_task]].
 
 The parallelization over perturbations (**np**) is network intensive but it allows one to decrease the memory
-needed for the DFPT potentials.
+needed for the DFPT potentials especially when computing the e-ph self-energy.
 The maximum valus for **np** is 3 * [[natom]] and the workload is equally distributed provided **np** 
 divides 3 * [[natom]] equally. 
 Using **np** == [[natom]] usually gives good parallel efficiency.
 
-The parallelization over bands (**nb**) has limited scalability that depends on the number of bands includes 
+The parallelization over bands (**nb**) has limited scalability that depends on the number of bands included
 in the self-energy but it allows one to reduce the memory
-allocated for the wavefunctions, especially when we have to sum over empty states.
+allocated for the wavefunctions, especially when we have to sum over empty states in the e-ph self-energy.
+
+[[eph_task]] = +1
+    By default, the code uses all the processes for the (k-point, spin) parallelism.
+    Since the number of k-points around the FS is usually large, this parallelization scheme is OK in most of the cases.
+    When the number of processes becomes comparable to the number of k-points around the FS, 
+    it makes sense to activate the q-point parallelism.
+    The parallelism over perturbations should be used to reduce the memory allocated for the interpolation of the DFPT potentials.
+    The band parallelism is not supported in this part.
 
 [[eph_task]] = +4
     Parallelization over bands allows one to reduce the memory needed for the wavefunctions but
@@ -19950,6 +19958,35 @@ Alternative to [[getscr]] and [[irdscr]]. The string must be enclosed between qu
 
     getscr_path "../outdata/out_SCR"
 """
+),
+
+Variable(
+    abivarname="eph_ecutosc",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval="0.0 Hartree",
+    mnemonics="Electron-Phonon: Energy CUToff for OSCillator matrix elements",
+    characteristics=['[[ENERGY]]'],
+    text=r"""
+This variable defines the energy cutoff defining the number of G-vectors in the oscillator matrix elements:
+
+$$ \langle \mathbf{k+q},b_1 | e^{+i (\mathbf{q+G)} \mathbf{r}} | \mathbf{k}, b_2 \rangle $$
+
+These quantities are used to compute the long-range part of the e-ph matrix elements that are then used 
+to integrate the Frohlich divergence.
+
+Possible values:
+
+    - = 0 --> Approximate oscillators with $ \delta_{b_1 b_2} $
+    - > 0 --> Use full expression with G-dependence
+    - < 0 --> Deactivate computation of oscillators.
+
+!!! important
+
+    eph_ecutosc cannot be greater than [[ecut]]
+""",
 ),
 
 ]

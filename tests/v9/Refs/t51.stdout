@@ -1,6 +1,6 @@
 
-.Version 8.11.1 of MRGDDB 
-.(MPI version, prepared for a x86_64_darwin16.7.0_gnu4.8 computer) 
+.Version 8.9.2 of MRGDDB 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  MRGDDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,75 +14,67 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 17 Oct 2018.
-- ( at 02h06 )
+.Starting date : Mon 10 Sep 2018.
+- ( at 15h05 )
   
   Give name for output derivative database : 
- t158_out_DDB
+ t53o_DS20_DDB
   Give short description of the derivative database :
- LiF; Very rough 2x2x2 special point grid; low ecut.
+ C in diamond structure; Very rough 2x2x2 special point grid; low ecut.
   Give number of input ddbs, or 1 if input GS file
            3
   Give name for derivative database number           1  : 
- t157o_DS4_DDB
+ t50o_DS3_DDB
   Give name for derivative database number           2  : 
- t157o_DS5_DDB
+ t50o_DS4_DDB
   Give name for derivative database number           3  : 
- t157o_DS6_DDB
- Opening DDB file: t157o_DS4_DDB
-  inprep8 : nband(1)=          10
+ t50o_DS5_DDB
+ Opening DDB file: t50o_DS3_DDB
+  inprep8 : nband(1)=           8
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01  0.00000000000000D+00  0.00000000000000D+00
-             0.00000000000000D+00  0.00000000000000D+00  0.00000000000000D+00
-             0.00000000000000D+00
- Opening DDB file: t157o_DS5_DDB
-  inprep8 : nband(1)=          10
+             0.00000000000000D+00  0.00000000000000D+00
+ Opening DDB file: t50o_DS4_DDB
+  inprep8 : nband(1)=           8
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01  0.00000000000000D+00  0.00000000000000D+00
-             0.00000000000000D+00  0.00000000000000D+00  0.00000000000000D+00
-             0.00000000000000D+00
- Opening DDB file: t157o_DS6_DDB
-  inprep8 : nband(1)=          10
+             0.00000000000000D+00  0.00000000000000D+00
+ Opening DDB file: t50o_DS5_DDB
+  inprep8 : nband(1)=           8
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01  0.00000000000000D+00  0.00000000000000D+00
-             0.00000000000000D+00  0.00000000000000D+00  0.00000000000000D+00
-             0.00000000000000D+00
- Opening DDB file: t157o_DS4_DDB
-  inprep8 : nband(1)=          10
+             0.00000000000000D+00  0.00000000000000D+00
+ Opening DDB file: t50o_DS3_DDB
+  inprep8 : nband(1)=           8
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01  0.00000000000000D+00  0.00000000000000D+00
-             0.00000000000000D+00  0.00000000000000D+00  0.00000000000000D+00
-             0.00000000000000D+00
- Opening DDB file: t157o_DS5_DDB
-  inprep8 : nband(1)=          10
+             0.00000000000000D+00  0.00000000000000D+00
+ Opening DDB file: t50o_DS4_DDB
+  inprep8 : nband(1)=           8
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01  0.00000000000000D+00  0.00000000000000D+00
-             0.00000000000000D+00  0.00000000000000D+00  0.00000000000000D+00
-             0.00000000000000D+00
- Opening DDB file: t157o_DS6_DDB
-  inprep8 : nband(1)=          10
+             0.00000000000000D+00  0.00000000000000D+00
+ Opening DDB file: t50o_DS5_DDB
+  inprep8 : nband(1)=           8
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01  0.00000000000000D+00  0.00000000000000D+00
-             0.00000000000000D+00  0.00000000000000D+00  0.00000000000000D+00
-             0.00000000000000D+00
+             0.00000000000000D+00  0.00000000000000D+00
   read the input derivative database information
- Opening DDB file: t157o_DS4_DDB
-  inprep8 : nband(1)=          10
+ Opening DDB file: t50o_DS3_DDB
+  inprep8 : nband(1)=           8
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01  0.00000000000000D+00  0.00000000000000D+00
-             0.00000000000000D+00  0.00000000000000D+00  0.00000000000000D+00
-             0.00000000000000D+00
- About to open file t157o_DS4_DDB
+             0.00000000000000D+00  0.00000000000000D+00
+ About to open file t50o_DS3_DDB
  read     1 blocks from the input DDB
 
  read the input derivative database number     2
- Opening DDB file: t157o_DS5_DDB
-  inprep8 : nband(1)=          10
+ Opening DDB file: t50o_DS4_DDB
+  inprep8 : nband(1)=           8
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01  0.00000000000000D+00  0.00000000000000D+00
-             0.00000000000000D+00  0.00000000000000D+00  0.00000000000000D+00
-             0.00000000000000D+00
- About to open file t157o_DS5_DDB
+             0.00000000000000D+00  0.00000000000000D+00
+ About to open file t50o_DS4_DDB
  compare the current and input DDB information
  Will try to merge this input DDB with the current one.
  Current number of bloks =    1
@@ -90,13 +82,12 @@
  Now, current number of bloks =    2
 
  read the input derivative database number     3
- Opening DDB file: t157o_DS6_DDB
-  inprep8 : nband(1)=          10
+ Opening DDB file: t50o_DS5_DDB
+  inprep8 : nband(1)=           8
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01  0.00000000000000D+00  0.00000000000000D+00
-             0.00000000000000D+00  0.00000000000000D+00  0.00000000000000D+00
-             0.00000000000000D+00
- About to open file t157o_DS6_DDB
+             0.00000000000000D+00  0.00000000000000D+00
+ About to open file t50o_DS5_DDB
  compare the current and input DDB information
  Will try to merge this input DDB with the current one.
  Current number of bloks =    2

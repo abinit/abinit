@@ -1,0 +1,18 @@
+This directory, v9, contains tests which
+are related to the development of the various development in
+version 9.x.x of Abinit
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+
+------------------------------------------------------------------
+
+* Tests 1-20 concern ground state 
+
+* Tests 21-40 concern GW/BSE
+
+* Tests 41-50 concern response functions except electron-phonon 
+
+* Tests 51-... concern electron-phonon
+
+------------------------------------------------------------------

@@ -2509,8 +2509,7 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
 
  outfile = trim(basename) // '_BTRAP'
  write(msg, '(3a)')ch10,' Will write phonon FREQS in BoltzTrap format to file ',trim(outfile)
- call wrtout(ab_out,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
 
  if (open_file(outfile,msg,newunit=unit_btrap,status="replace") /= 0) then
    MSG_ERROR(msg)
