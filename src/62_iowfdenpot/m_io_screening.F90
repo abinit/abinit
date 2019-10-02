@@ -554,7 +554,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
 
    if (iomode==IO_MODE_FORTRAN .or. iomode==IO_MODE_MPI) then
      ! Write the abinit header.
-     call hdr_fort_write(hscr%hdr, unt, fform, ierr)
+     call hscr%hdr%fort_write(unt, fform, ierr)
      ABI_CHECK(ierr == 0, "hdr_fort_write retured ierr != 0")
 
      write(unt, err=10, iomsg=errmsg)hscr%titles
@@ -584,7 +584,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
 #ifdef HAVE_NETCDF
      ncid = unt
      ! Write the abinit header, rewinding of the file (if any) is done here.
-     NCF_CHECK(hdr_ncwrite(hscr%hdr, ncid, fform, nc_define=.True.))
+     NCF_CHECK(hscr%hdr%ncwrite(ncid, fform, nc_define=.True.))
 
      ! Define dimensions
      ! Part 2) of etsf-io specifications
@@ -592,13 +592,13 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
      ! and I'm not gonna allocate extra memory just to have up up, down down
      ! Besides number_of_spins should be replaced by `number_of_spins_dielectric_function`
      ! Should add spin_dependent attribute.
-     ncerr = nctk_def_dims(ncid, [&
-       nctkdim_t("complex", 2), nctkdim_t("number_of_reduced_dimensions", 3),&
+     ncerr = nctk_def_dims(ncid, [ &
+       nctkdim_t("complex", 2), nctkdim_t("number_of_reduced_dimensions", 3), &
        nctkdim_t("number_of_frequencies_dielectric_function", hscr%nomega), &
-       nctkdim_t("number_of_qpoints_dielectric_function", hscr%nqibz),&
-       nctkdim_t("number_of_qpoints_gamma_limit", hscr%nqlwl),&
-       nctkdim_t("number_of_spins", hscr%hdr%nsppol),&
-       nctkdim_t("nI", hscr%nI), nctkdim_t("nJ", hscr%nJ),&
+       nctkdim_t("number_of_qpoints_dielectric_function", hscr%nqibz), &
+       nctkdim_t("number_of_qpoints_gamma_limit", hscr%nqlwl), &
+       nctkdim_t("number_of_spins", hscr%hdr%nsppol), &
+       nctkdim_t("nI", hscr%nI), nctkdim_t("nJ", hscr%nJ), &
        nctkdim_t("number_of_coefficients_dielectric_function", hscr%npwe)], defmode=.True.)
      NCF_CHECK(ncerr)
 
@@ -1014,7 +1014,7 @@ subroutine hscr_bcast(hscr,master,my_rank,comm)
  call xmpi_bcast(hscr%omega,master,comm,ierr)
 
  ! Communicate the Abinit header.
- call hdr_bcast(hscr%Hdr,master,my_rank,comm)
+ call hscr%Hdr%bcast(master, my_rank, comm)
 
 ! HSCR_NEW
  call xmpi_bcast(hscr%awtr, master, comm, ierr)
@@ -1105,7 +1105,7 @@ subroutine hscr_free(hscr)
  ABI_SFREE(hscr%qlwl)
  ABI_SFREE(hscr%omega)
 
- call hdr_free(hscr%Hdr)
+ call hscr%Hdr%free()
 
  DBG_EXIT("COLL")
 

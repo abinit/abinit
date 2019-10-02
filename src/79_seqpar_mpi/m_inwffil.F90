@@ -956,13 +956,8 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
    end if
  end if
 
-!Clean hdr0
- !if (ireadwf==1)then
- !  if( restart==2 .or. localrdwf==1 .or. master==me)then
- !    call hdr_free(hdr0)
- !  end if
- !end if
- call hdr_free(hdr0)
+ !Clean hdr0
+ call hdr0%free()
 
  call timab(716,2,tsec)
  call timab(717,1,tsec)

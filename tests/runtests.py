@@ -534,7 +534,7 @@ unexpected behaviour if the pickle database is not up-to-date with the tests ava
     cprint(msg, "yellow")
 
     if ncpus_used < 0.3 * ncpus_detected:
-        msg = ("[TIP] runtests.py is using %s CPUs but your architecture has %s CPUs\n"
+        msg = ("[TIP] runtests.py is using %s CPUs but your architecture has %s CPUs (including Hyper-Threading if Intel)\n"
               "You may want to use python processes to speed up the execution\n"
               "Use `runtests -jNUM` to run with NUM processes" % (ncpus_used, ncpus_detected))
         cprint(msg, "blue")

@@ -3344,11 +3344,11 @@ subroutine initaim(aim_dtset,znucl_batom)
    end if
  end if
  ABI_CHECK(fform0 /= 0, "hdr_read returned fform == 0")
- call hdr_bcast(hdr,master,me,comm)
+ call hdr%bcast(master, me, comm)
 
 !Echo part of the header
- call hdr_echo(hdr, fform0, 4, unit=std_out)
- call hdr_echo(hdr, fform0, 4, unit=untout)
+ call hdr%echo(fform0, 4, unit=std_out)
+ call hdr%echo(fform0, 4, unit=untout)
 
  natom=hdr%natom
  ngfft(1:3)=hdr%ngfft(:)
@@ -3372,8 +3372,7 @@ subroutine initaim(aim_dtset,znucl_batom)
  zionpsp(:)=hdr%zionpsp(:)
  xred(:,:)=hdr%xred(:,:)
 
-!This is to deallocate records of hdr
- call hdr_free(hdr)
+ call hdr%free()
 
 !-------------------------------------------------------------------------------
 

@@ -115,19 +115,19 @@ kptopt7   1
 #%% [setup]
 #%% executable = abinit
 #%% exclude_builders = .*_intel_1[89].0_.*
-#%% test_chain = t157.in, t158.in, t159.in, t160.in, t161.in
+#%% test_chain = t57.in, t58.in, t59.in, t60.in, t61.in
 #%% [files]
 #%% files_to_test = 
-#%%   t157.out, tolnlines = 180, tolabs = 1.1e-3, tolrel = 1.1;
-#%%   t157o_DS7_KERANGE, tolnlines = 0, tolabs = 1.1e-6, tolrel = 1.0e-4
+#%%   t57.out, tolnlines = 180, tolabs = 1.1e-3, tolrel = 1.1;
+#%%   t57o_DS7_KERANGE, tolnlines = 0, tolabs = 1.1e-6, tolrel = 1.0e-4
 #%% psp_files = 03-Li.psp, 09-F.psp
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [shell]
 #%% post_commands = 
-#%%  ww_cp t157o_DS2_WFK t160o_DS20_WFK;
-#%%  ww_cp t157o_DS2_WFK t161o_DS20_WFK;
-#%%  ww_cp t157o_DS1_DEN t161o_DS20_DEN;
+#%%  ww_cp t57o_DS2_WFK t60o_DS20_WFK;
+#%%  ww_cp t57o_DS2_WFK t61o_DS20_WFK;
+#%%  ww_cp t57o_DS1_DEN t61o_DS20_DEN;
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH

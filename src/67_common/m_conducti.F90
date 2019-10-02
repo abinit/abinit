@@ -180,7 +180,7 @@ contains
 
 ! Read the header of the optic files
  call hdr_read_from_fname(hdr, filnam1, fform1, spaceComm)
- call hdr_free(hdr)
+ call hdr%free()
  if (fform1 /= 610) then
    MSG_ERROR("Abinit8 requires an OPT file with fform = 610")
  end if
@@ -507,7 +507,7 @@ contains
  ABI_DEALLOCATE(doccde)
  ABI_DEALLOCATE(wtk)
 
- call hdr_free(hdr)
+ call hdr%free()
 
 end subroutine conducti_paw
 !!***
@@ -621,7 +621,7 @@ end subroutine conducti_paw
 
 ! Read the header of the OPT2 file.
  call hdr_read_from_fname(hdr, filnam2, fform2, spaceComm)
- call hdr_free(hdr)
+ call hdr%free()
 
  if (fform2 /= 611) then
    MSG_ERROR("Abinit8 requires an OPT2 file with fform = 611")
@@ -807,7 +807,7 @@ end subroutine conducti_paw
  ABI_DEALLOCATE(occ)
  ABI_DEALLOCATE(wtk)
 
- call hdr_free(hdr)
+ call hdr%free()
 
 end subroutine conducti_paw_core
 !!***
@@ -1468,7 +1468,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  ABI_DEALLOCATE(Stp)
  ABI_DEALLOCATE(Kth)
 
- call hdr_free(hdr)
+ call hdr%free()
 
  end subroutine conducti_nc
 !!***
@@ -1802,7 +1802,7 @@ end subroutine msig
 
 ! Read the header of the OPT2 file.
  call hdr_read_from_fname(hdr, filnam2, fform2, spaceComm)
- call hdr_free(hdr)
+ call hdr%free()
 
  if (fform2 /= 611) then
    MSG_ERROR("Abinit8 requires an OPT2 file with fform = 611")
@@ -1998,7 +1998,7 @@ end subroutine msig
  ABI_DEALLOCATE(occ)
  ABI_DEALLOCATE(wtk)
 
- call hdr_free(hdr)
+ call hdr%free()
 
 end subroutine emispec_paw
 !!***

@@ -1431,12 +1431,12 @@ subroutine abinit_doctor(prefix, print_mem_report)
 !scalars
  integer,parameter :: master=0
  integer :: do_mem_report, my_rank
- character(len=500) :: msg
+ character(len=5000) :: msg
 #ifdef HAVE_MEM_PROFILING
  integer :: ii,ierr,unt
  integer(i8b) :: memtot, nalloc, nfree
  character(len=fnlen) :: path
- character(len=2000) :: errmsg
+ character(len=5000) :: errmsg
 #endif
 
 ! *************************************************************************
@@ -1459,7 +1459,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
        '-   Remaining memory at the end of the calculation is ',memtot
    else
      ! This msg will make the test fail if the memory leak occurs on master (no dash in the first column)
-     write(msg,'(2a,2(a,i0),3a,f12.4,1x,9a)') &
+     write(msg,'(2a,2(a,i0),3a,f12.4,9a)') &
        'MEMORY CONSUMPTION REPORT:',ch10, &
        '   There were ',nalloc,' allocations and ',nfree,' deallocations',ch10, &
        '   Remaining memory at the end of the calculation: ',memtot * b2Mb, " (Mb)", ch10, &
