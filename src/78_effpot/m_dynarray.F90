@@ -328,7 +328,9 @@ subroutine int2d_array_type_push(self, val)
 
     class(int2d_array_type), intent(inout):: self
     integer :: val(:)
+
     integer, allocatable :: temp(:,:)
+
     self%size=self%size+1
     if(self%size==1) then
       self%capacity=8

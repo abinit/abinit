@@ -34,7 +34,7 @@
 
 ! TODO hexu:
 ! sync ihist_latt when with lattice dynamics
-! add average , variance, etc (should they be here?)
+! add average, variance, etc (should they be here?)
 ! structural information and some parameters are no longer 
 ! used here. They should be removed form this file.
 
@@ -212,8 +212,6 @@ contains
     ABI_ALLOCATE(self%itime, (mxhist))
 
     ABI_ALLOCATE(self%ihist_latt, (mxhist))
-
-
 
     ! TODO: add observable allocation here.
 

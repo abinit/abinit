@@ -82,8 +82,8 @@ module m_slc_primitive_potential
      !procedure :: set_niuv_1term
      procedure :: set_oiju
      procedure :: set_oiju_1term
-     !procedure :: set_tijuv
-     !procedure :: set_tijuv_1term
+     procedure :: set_tijuv
+     procedure :: set_tijuv_1term
      procedure :: load_from_files
      procedure :: read_netcdf
      procedure :: read_liu
@@ -465,7 +465,7 @@ contains
 
   !------------------------------------
   ! add one entry to sparse liu matrix
-  ! untested!!!
+  ! TODO: test
   !------------------------------------
   subroutine set_liu_1term(self, ii, uu, Ru, val)
     class(slc_primitive_potential_t), intent(inout) :: self
@@ -529,6 +529,61 @@ contains
     call self%oiju%add_entry(ind=[indRj, indRu, ii, jj, uu], val=val)
 
   end subroutine set_oiju_1term
+
+  !----------------------------------------
+  ! store tijuv parameters in sparse matrix
+  ! TODO: test
+  !----------------------------------------
+  subroutine set_tijuv(self, nn, ilist, jlist, ulist, vlist, Rjlist, Rulist, Rvlist, vallist)
+
+    class(slc_primitive_potential_t), intent(inout) :: self
+    integer,                          intent(inout) :: nn
+    integer,                          intent(in)    :: ilist(nn)
+    integer,                          intent(in)    :: jlist(nn)
+    integer,                          intent(in)    :: ulist(nn)
+    integer,                          intent(in)    :: vlist(nn)
+    integer,                          intent(in)    :: Rjlist(3,nn)
+    integer,                          intent(in)    :: Rulist(3,nn)
+    integer,                          intent(in)    :: Rvlist(3,nn)
+    real(dp),                         intent(in)    :: vallist(nn)
+
+    integer :: idx
+   
+    call self%tijuv%initialize(mshape=[-1, -1, -1, self%nspin*3, self%nspin*3, self%natom*3, self%natom*3])
+    
+    if (xmpi_comm_rank(xmpi_world)==0) then
+      do idx=1, nn
+        call self%set_tijuv_1term(ilist(idx), jlist(idx), ulist(idx), vlist(idx), Rjlist(:,idx), Rulist(:,idx), Rvlist(:,idx), vallist(idx))
+      end do
+    endif
+
+  end subroutine set_tijuv
+
+  !-------------------------------------
+  ! add one entry to sparse oiju matrix
+  ! TODO: test
+  !-------------------------------------
+  subroutine set_tijuv_1term(self, ii, jj, uu, vv, Rj, Ru, Rv, val)
+    class(slc_primitive_potential_t), intent(inout) :: self
+    integer,                          intent(in)    :: ii    
+    integer,                          intent(in)    :: jj
+    integer,                          intent(in)    :: uu
+    integer,                          intent(in)    :: vv
+    integer,                          intent(in)    :: Rj(3)
+    integer,                          intent(in)    :: Ru(3)
+    integer,                          intent(in)    :: Rv(3)
+    real(dp),                         intent(in)    :: val
+
+    integer :: indRj, indRu, indRv
+    
+    call self%tRjlist%push_unique(Rj, position=indRj)
+    call self%tRulist%push_unique(Ru, position=indRu)
+    call self%tRvlist%push_unique(Rv, position=indRv)
+    
+    call self%tijuv%add_entry(ind=[indRj, indRu, indRv, ii, jj, uu, vv], val=val)
+
+  end subroutine set_tijuv_1term
+
 
   !-----------------------------------------------------------------
   ! transfer parameter information from primitive cell to supercell
@@ -636,13 +691,110 @@ contains
     if(scpot%has_biquad) then
       if(self%has_biquad) then
         call self%tijuv%sum_duplicates()
-        !call self%set_tijuv_sc(scpot, scmaker)
+        call self%set_tijuv_sc(scpot, scmaker)
       else
         write(std_out,'(A50)') 'No parameters for biquadratic coupling available'
         scpot%has_biquad = .False.
       endif
     endif
   end subroutine fill_tijuv
+
+  !------------------------------
+  ! fill liu terms in supercell
+  ! TODO: test
+  !------------------------------
+  subroutine set_liu_sc(self, scpot, scmaker)
+    class(slc_primitive_potential_t), intent(inout) :: self
+    type(slc_potential_t),            intent(inout) :: scpot
+    type(supercell_maker_t),          intent(inout) :: scmaker
+        
+    integer :: icell, Ru_prim(3), liu_ind(3), iRu, i_prim, u_prim, inz
+    integer :: ngroup
+    integer, allocatable :: i_sc(:), u_sc(:), Ru_sc(:,:)
+    integer, allocatable :: i1list(:), ise(:)
+    real(dp) :: val_sc(scmaker%ncells)
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+    if(iam_master) then
+      call scpot%liu_sc%initialize(mshape=[-1, self%nspin*3, self%natom*3])
+    endif
+
+    do inz=1, self%liu%nnz
+      liu_ind=self%liu%get_ind_inz(inz)
+      iRu=liu_ind(1)
+      i_prim=liu_ind(2)
+      u_prim=liu_ind(3)
+      Ru_prim=self%lRulist%data(:,iRu)
+      call scmaker%trans_i(nbasis=self%nspin*3, i=i_prim, i_sc=i_sc) 
+      call scmaker%trans_j_and_Rj(nbasis=self%natom*3, j=u_prim, Rj=Ru_prim, j_sc=u_sc, Rj_sc=Ru_sc)
+      val_sc(:)= self%liu%val%data(inz)
+      do icell=1, scmaker%ncells
+        !call scpot%add_liu_term(i_sc(icell), u_sc(icell), val_sc(icell))
+      end do
+      ABI_SFREE(i_sc)
+      ABI_SFREE(u_sc)
+      ABI_SFREE(Ru_sc)
+    end do
+    
+    call scpot%liu_sc%group_by_1dim(ngroup, i1list, ise)
+
+  end subroutine set_liu_sc
+
+  !------------------------------
+  ! fill niuv terms in supercell
+  ! TODO: test
+  !------------------------------
+  subroutine set_niuv_sc(self, scpot, scmaker)
+    class(slc_primitive_potential_t), intent(inout) :: self
+    type(slc_potential_t),            intent(inout) :: scpot
+    type(supercell_maker_t),          intent(inout) :: scmaker
+        
+    integer :: icell, Ru_prim(3), Rv_prim(3), niuv_ind(5), iRu, iRv, i_prim, u_prim, v_prim, inz
+    integer :: ngroup
+    integer, allocatable :: i_sc(:), u_sc(:), v_sc(:), Ru_sc(:,:), Rv_sc(:,:)
+    integer, allocatable :: i1list(:), ise(:)
+    real(dp) :: val_sc(scmaker%ncells)
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+    if(iam_master) then
+      call scpot%niuv_sc%initialize(mshape=[-1, -1, self%nspin*3, self%natom*3, self%natom*3])
+    endif
+
+    do inz=1, self%niuv%nnz
+      niuv_ind=self%niuv%get_ind_inz(inz)
+      iRu=niuv_ind(1)
+      iRv=niuv_ind(2)
+      i_prim=niuv_ind(3)
+      u_prim=niuv_ind(4)
+      v_prim=niuv_ind(5)
+      Ru_prim=self%nRulist%data(:,iRu)
+      Rv_prim=self%nRvlist%data(:,iRv)
+      call scmaker%trans_i(nbasis=self%nspin*3, i=i_prim, i_sc=i_sc) 
+      call scmaker%trans_j_and_Rj(nbasis=self%natom*3, j=u_prim, Rj=Ru_prim, j_sc=u_sc, Rj_sc=Ru_sc)
+      call scmaker%trans_j_and_Rj(nbasis=self%natom*3, j=v_prim, Rj=Rv_prim, j_sc=v_sc, Rj_sc=Rv_sc)
+      val_sc(:)= self%niuv%val%data(inz)
+      do icell=1, scmaker%ncells
+        !call scpot%add_niuv_term(i_sc(icell), u_sc(icell), v_sc(icell), val_sc(icell))
+      end do
+      ABI_SFREE(i_sc)
+      ABI_SFREE(u_sc)
+      ABI_SFREE(v_sc)
+      ABI_SFREE(Ru_sc)
+      ABI_SFREE(Rv_sc)
+    end do
+    
+    call scpot%niuv_sc%group_by_1dim(ngroup, i1list, ise)
+
+  end subroutine set_niuv_sc
+
 
   !------------------------------
   ! fill oiju terms in supercell
@@ -684,11 +836,11 @@ contains
       do icell=1, scmaker%ncells
         call scpot%add_oiju_term(i_sc(icell), j_sc(icell), u_sc(icell), val_sc(icell))
       end do
-      if(allocated(i_sc)) ABI_DEALLOCATE(i_sc)
-      if(allocated(j_sc)) ABI_DEALLOCATE(j_sc)
-      if(allocated(u_sc)) ABI_DEALLOCATE(u_sc)
-      if(allocated(Rj_sc)) ABI_DEALLOCATE(Rj_sc)
-      if(allocated(Ru_sc)) ABI_DEALLOCATE(Ru_sc)
+      ABI_SFREE(i_sc)
+      ABI_SFREE(j_sc)
+      ABI_SFREE(u_sc)
+      ABI_SFREE(Rj_sc)
+      ABI_SFREE(Ru_sc)
     end do
     
     call scpot%oiju_sc%group_by_1dim(ngroup, i1list, ise)
@@ -735,13 +887,13 @@ contains
       do icell=1, scmaker%ncells
         call scpot%add_tijuv_term(i_sc(icell), j_sc(icell), u_sc(icell), v_sc(icell), val_sc(icell))
       end do
-      if(allocated(i_sc)) ABI_DEALLOCATE(i_sc)
-      if(allocated(j_sc)) ABI_DEALLOCATE(j_sc)
-      if(allocated(u_sc)) ABI_DEALLOCATE(u_sc)
-      if(allocated(v_sc)) ABI_DEALLOCATE(v_sc)
-      if(allocated(Rj_sc)) ABI_DEALLOCATE(Rj_sc)
-      if(allocated(Ru_sc)) ABI_DEALLOCATE(Ru_sc)
-      if(allocated(Rv_sc)) ABI_DEALLOCATE(Rv_sc)
+      ABI_SFREE(i_sc)
+      ABI_SFREE(j_sc)
+      ABI_SFREE(u_sc)
+      ABI_SFREE(v_sc)
+      ABI_SFREE(Rj_sc)
+      ABI_SFREE(Ru_sc)
+      ABI_SFREE(Rv_sc)
     end do
     
     call scpot%tijuv_sc%group_by_1dim(ngroup, i1list, ise)

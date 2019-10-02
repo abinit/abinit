@@ -57,8 +57,8 @@ module m_spmat_NDCOO
   type, public :: ndcoo_mat_t
      integer :: ndim=0                  ! number of dimensions
      integer :: nnz=0                   ! Number of (None-zero) entries. 
-     integer, allocatable :: mshape(:)  ! the shape of the matrix. len(mshpae)=ndim.
-     ! Note that it is not checked if the index by the shaped. If a the shape for some
+     integer, allocatable :: mshape(:)  ! the shape of the matrix. len(mshape)=ndim.
+     ! Note that it is not checked if the index by the shaped. If the shape for some
      ! dimension is unkown, it can be set to -1.
      type(int2d_array_type) :: ind      ! The index array
      type(real_array_type) :: val       ! The value array

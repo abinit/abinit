@@ -67,6 +67,8 @@ module  m_slc_potential
      procedure :: finalize
      procedure :: set_params
      procedure :: set_supercell
+     !procedure :: add_liu_term
+     !procedure :: add_niuv_term
      procedure :: add_oiju_term
      procedure :: add_tijuv_term
      procedure :: calculate
@@ -173,6 +175,41 @@ contains
   end subroutine set_supercell
 
 
+  !-----------------------------------------------------
+  ! add different coupling terms to supercell potential
+  ! TODO: test liu, niuv, tijuv
+  !-----------------------------------------------------
+  subroutine add_liu_term(self, i, u, val)
+    class(slc_potential_t), intent(inout) :: self
+    integer,                intent(in)    :: i, u
+    real(dp),               intent(in)    :: val
+
+    integer :: master, my_rank, comm, nproc
+    logical :: iam_master
+
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    if(iam_master) then
+       call self%liu_sc%add_entry(ind=[i,u],val=val)
+    endif
+  end subroutine add_liu_term
+
+
+  subroutine add_niuv_term(self, i, u, v,  val)
+    class(slc_potential_t), intent(inout) :: self
+    integer,                intent(in)    :: i, u, v
+    real(dp),               intent(in)    :: val
+
+    integer :: master, my_rank, comm, nproc
+    logical :: iam_master
+
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    if(iam_master) then
+       call self%niuv_sc%add_entry(ind=[i,u,v],val=val)
+    endif
+  end subroutine add_niuv_term
+
+
+
   subroutine add_oiju_term(self, i,j,u, val)
     class(slc_potential_t), intent(inout) :: self
     integer,                intent(in)    :: i, j, u
@@ -201,6 +238,10 @@ contains
     endif
   end subroutine add_tijuv_term
 
+
+  !-----------------------------------------------------------------
+  ! Calculate forces, magnetic fields and energy for coupling terms
+  !-----------------------------------------------------------------
 
   subroutine calculate(self, displacement, strain, spin, lwf, &
        force, stress, bfield, lwf_force, energy)
