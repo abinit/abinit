@@ -28,10 +28,10 @@
 module m_outwant
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_hdr
+ use m_dtset
 
  use m_io_tools,   only : open_file
  use m_symtk,      only : matr3inv
@@ -99,8 +99,6 @@ contains
 !! SOURCE
 
 subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwant)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

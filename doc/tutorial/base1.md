@@ -28,9 +28,9 @@ Powerful visualisation procedures have been developed in the Abipy context,
 relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
 and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
-[TUTORIAL_README]
-
 This tutorial should take about 2 hours.
+
+[TUTORIAL_README]
 
 ## Computing the (pseudo) total energy and some associated quantities
 
@@ -45,7 +45,7 @@ Go to the Tutorial directory (that we refer as `~abinit/tests/tutorial/Input`).
 
 ```sh
 cd ~abinit/tests/tutorial/Input
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 ```
 
 In that directory, you will find the necessary input files to run the examples related to this tutorial. 
@@ -56,10 +56,10 @@ Perturbation Theory ("Response functions") capabilities in the directory `~abini
 -->
 
 For this tutorial, we need a working directory. 
-So, you should create a *Work* subdirectory inside $ABI_TUTORIAL with the commands:
+So, you should create a *Work* subdirectory inside $ABI_TESTS/tutorial with the commands:
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work   # ~abinit/tests/tutorial/Input/Work
 cd Work
 ```
@@ -87,7 +87,7 @@ Modify the first and second lines of *tbase1_x.files* file, so that it reads:
 
 Later, you will **modify again** these lines, to treat more cases.
 Make sure that the last line, gives the correct location of the pseudopotential file.
-Close *tbase1_x.files* then copy *$ABI_TUTORIAL/Input/tbase1_1.in* in *Work*:
+Close *tbase1_x.files* then copy *$ABI_TESTS/tutorial/Input/tbase1_1.in* in *Work*:
 
     cp ../tbase1_1.in .
 
@@ -111,7 +111,7 @@ tbase1_1.out         tbase1_1o_EBANDS.agr tbase1_1o_GSR.nc     tbase1_x.files
 Different output files have been created, including a *log* file, the standard error file *err* 
 and the output file *tbase1_1.out*. 
 To check that everything is correct, you can make a diff of
-*tbase1_1.out* with the reference file *$ABI_TUTORIAL/Refs/tbase1_1.out*
+*tbase1_1.out* with the reference file *$ABI_TESTS/tutorial/Refs/tbase1_1.out*
 
 ```sh
 diff tbase1_1.out ../../Refs/tbase1_1.out | less
@@ -473,11 +473,11 @@ You should likely have a look at the section that describes the [[irdwfk]] and
 [[getwfk]] input variables: in particular, look at the meaning of *getwfk -1*
 Also, define explicitly the number of states (or supercell "bands") to be one, using the input variable [[nband]]. 
 
-The input file *\$ABI_TUTORIAL/Input/tbase1_2.in* is an example of file that will do the job,
+The input file *\$ABI_TESTS/tutorial/Input/tbase1_2.in* is an example of file that will do the job,
 
 {% dialog tests/tutorial/Input/tbase1_2.in %}
 
-while *\$ABI_TUTORIAL/Refs/tbase1_2.out* is the reference output file.
+while *\$ABI_TESTS/tutorial/Refs/tbase1_2.out* is the reference output file.
 
 {% dialog tests/tutorial/Refs/tbase1_2.out %}
 

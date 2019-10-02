@@ -14,6 +14,8 @@ interest in M&ouml;ssbauer, NMR, and NQR spectroscopy, namely:
 
 This tutorial should take about 1 hour.
 
+[TUTORIAL_README]
+
 ## Electric field gradient
   
 Various spectroscopies, including nuclear magnetic resonance and nuclear

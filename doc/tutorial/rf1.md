@@ -18,17 +18,17 @@ In order to learn the use of the associated codes *mrgddb* and *anaddb*,
 to produce phonon band structures and the associated
 thermodynamical properties, please consult the [second tutorial on DFPT](rf2).
 
-[TUTORIAL_README]
-
 This tutorial should take about 2 hours.
+
+[TUTORIAL_README]
 
 ## 1 The ground-state geometry of AlAs
   
 *Before beginning, you might consider to work in a different subdirectory as for the other tutorials. 
-Why not create Work_rf1 in \$ABI_TUTORESPFN/Input?*
+Why not create Work_rf1 in \$ABI_TESTS/tutorespfn/Input?*
 
 ```sh
-cd $ABI_TUTORESPFN/Input
+cd $ABI_TESTS/tutorespfn/Input
 mkdir Work_rf1
 cd Work_rf1
 cp ../trf1_x.files .   # You will need to edit this file.
@@ -38,8 +38,8 @@ cp ../trf1_1.in .
 !!! important
 
     The reference directory that contains the example files for the
-    tutorial is no more `$ABI_TUTORIAL`(as for the basic tutorials and the
-    specialized, non-DFPT ones), but `$ABI_TUTORESPFN`.
+    tutorial is no more `$ABI_TESTS/tutorial`(as for the basic tutorials and the
+    specialized, non-DFPT ones), but `$ABI_TESTS/tutorespfn`.
     This will be the case for all the DFPT based part of the tutorial.
 
 The file *trf1_x.files* lists the file names and root names. 
@@ -56,7 +56,7 @@ The first listed in *trf1_x.files* (for Al) will define the first type of atom o
 It might be the first time that you encounter this situation (more than one type of atoms) in the
 tutorials, at variance with the first four basic tutorials.
 
-You can also copy the file *\$ABI_TUTORESPFN/Input/trf1_1.in* in *Work_rf1*. 
+You can also copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_1.in* in *Work_rf1*. 
 This is your input file. You should read it carefully.
 
 {% dialog tests/tutorespfn/Input/trf1_1.in %}
@@ -132,7 +132,7 @@ For the time being, in order to be able to perform a direct comparison with the 
 a DFPT calculation, we choose as a perturbation the displacement of the Al
 atom along the first axis of the reduced coordinates.
 
-You can copy the file *\$ABI_TUTORESPFN/Input/trf1_2.in* in *Work_rf1*.
+You can copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_2.in* in *Work_rf1*.
 This is your input file. You should open it and briefly look at the two
 changes with respect to *trf1_1.in*:
 the change of [[xred]], and the reading of the wavefunction file, using the [[irdwfk]] input variable. 
@@ -233,7 +233,7 @@ case, taking a finer XC grid will allow one to reduce this effect.
 We now compute the second derivative of the total energy with respect to the
 same atomic displacement through the DFPT capabilities of ABINIT.
 
-You can copy the file *\$ABI_TUTORESPFN/Input/trf1_3.in* in *Work_rf1*.
+You can copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_3.in* in *Work_rf1*.
 This is your input file. You should examine it. The changes with respect to
 *trf1_1.in* are all gathered in the first part of this file, before
     
@@ -306,7 +306,7 @@ DFPT approach calls for some accuracy considerations. These can be found in
 ## 4 DFPT calculation of the dynamical matrix at $\Gamma$
   
 We are now in the position to compute the full dynamical matrix at the $\Gamma$ point (q=0). 
-You can copy the file *\$ABI_TUTORESPFN/Input/trf1_4.in* in *Work_rf1*. 
+You can copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_4.in* in *Work_rf1*. 
 This is your input file.
 
 As for test rf1_3, the changes with respect to *trf1_1.in* are
@@ -398,7 +398,7 @@ section of the present tutorial. The sections to be read are:
 
 You are now in the position to compute the full dynamical matrix at $\Gamma$ (q=0), 
 including the coupling with an homogeneous electric field. 
-You can copy *\$ABI_TUTORESPFN/Input/trf1_5.in* in *Work_rf1*.
+You can copy *\$ABI_TESTS/tutorespfn/Input/trf1_5.in* in *Work_rf1*.
 This is your input file. 
 
 {% dialog tests/tutorespfn/Input/trf1_5.in tests/tutorespfn/Refs/trf1_5.out %}
@@ -563,7 +563,7 @@ In any case, the computation within the reciprocal space DFPT formalism is more
 efficient than the real space frozen-phonon technique since the use of supercells is
 completely avoided with DFPT. For an explanation of this fact, see for example section IV of [[cite:Gonze1997]].
 
-You can copy the file *\$ABI_TUTORESPFN/Input/trf1_6.in* in *Work_rf1*.
+You can copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_6.in* in *Work_rf1*.
 This is your input file.
 
 {% dialog tests/tutorespfn/Input/trf1_6.in tests/tutorespfn/Refs/trf1_6.out %}

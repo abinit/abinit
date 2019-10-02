@@ -32,14 +32,15 @@
 MODULE m_mep
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
+ use m_dtset
  use m_xmpi
 
+ use defs_abitypes, only : MPI_type
  use m_geometry,    only : fred2fcart, fcart2fred, xcart2xred, xred2xcart, metric
  use m_bfgs,        only : hessupdt
- use m_results_img, only : results_img_type,gather_array_img
+ use m_results_img, only : results_img_type, gather_array_img
 
  implicit none
 
@@ -122,8 +123,6 @@ CONTAINS
 
 subroutine mep_init(dtset,mep_param)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(dataset_type),target,intent(in) :: dtset
@@ -181,41 +180,21 @@ end subroutine mep_init
 
 subroutine mep_destroy(mep_param)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(mep_type),intent(inout) :: mep_param
 
 !************************************************************************
 
- if (allocated(mep_param%bfgs_xprev)) then
-   ABI_DEALLOCATE(mep_param%bfgs_xprev)
- end if
- if (allocated(mep_param%gbfgs_hess))     then
-   ABI_DEALLOCATE(mep_param%gbfgs_hess)
- end if
- if (allocated(mep_param%bfgs_fprev)) then
-   ABI_DEALLOCATE(mep_param%bfgs_fprev)
- end if
- if (allocated(mep_param%lbfgs_hess))     then
-   ABI_DEALLOCATE(mep_param%lbfgs_hess)
- end if
- if (allocated(mep_param%qmin_vel))     then
-   ABI_DEALLOCATE(mep_param%qmin_vel)
- end if
- if (allocated(mep_param%rk4_xcart1)) then
-   ABI_DEALLOCATE(mep_param%rk4_xcart1)
- end if
- if (allocated(mep_param%rk4_fcart1)) then
-   ABI_DEALLOCATE(mep_param%rk4_fcart1)
- end if
- if (allocated(mep_param%rk4_fcart2)) then
-   ABI_DEALLOCATE(mep_param%rk4_fcart2)
- end if
- if (allocated(mep_param%rk4_fcart3)) then
-   ABI_DEALLOCATE(mep_param%rk4_fcart3)
- end if
+ ABI_SFREE(mep_param%bfgs_xprev)
+ ABI_SFREE(mep_param%gbfgs_hess)
+ ABI_SFREE(mep_param%bfgs_fprev)
+ ABI_SFREE(mep_param%lbfgs_hess)
+ ABI_SFREE(mep_param%qmin_vel)
+ ABI_SFREE(mep_param%rk4_xcart1)
+ ABI_SFREE(mep_param%rk4_fcart1)
+ ABI_SFREE(mep_param%rk4_fcart2)
+ ABI_SFREE(mep_param%rk4_fcart3)
 
  nullify(mep_param%iatfix)
 
@@ -260,8 +239,6 @@ end subroutine mep_destroy
 !! SOURCE
 
 subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,ndynimage,nimage,rprimd,xcart,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -360,8 +337,6 @@ end subroutine mep_steepest
 !! SOURCE
 
 subroutine mep_qmin(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,rprimd,xcart,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -490,8 +465,6 @@ end subroutine mep_qmin
 
 subroutine mep_lbfgs(fcart,itime,list_dynimage,mep_param,natom,ndynimage,&
 &                    nimage,rprimd,xcart,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -676,8 +649,6 @@ end subroutine mep_lbfgs
 
 subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
 &                    ndynimage,nimage,nimage_tot,rprimd,xcart,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1001,8 +972,6 @@ end subroutine mep_gbfgs
 
 subroutine mep_rk4(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,rprimd,xcart,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itime,natom,ndynimage,nimage
@@ -1161,8 +1130,6 @@ end subroutine mep_rk4
 
 function mep_img_dotp(vect1,vect2)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp) :: mep_img_dotp
@@ -1210,8 +1177,6 @@ end function mep_img_dotp
 
 function mep_img_norm(vect)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp) :: mep_img_norm
@@ -1251,8 +1216,6 @@ end function mep_img_norm
 !! SOURCE
 
 function mep_img_dotp_red(rmet,vect1,vect2)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1309,8 +1272,6 @@ end function mep_img_dotp_red
 !! SOURCE
 
 function mep_img_norm_red(rmet,vect)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

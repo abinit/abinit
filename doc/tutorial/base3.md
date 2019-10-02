@@ -14,14 +14,14 @@ This tutorial aims at showing you how to get the following physical properties, 
 
 You will learn about the use of k-points, as well as the smearing of the plane-wave kinetic energy cut-off.
 
-[TUTORIAL_README]
-
-This tutorial should take about 1 hour.
-
 Visualisation tools are NOT covered in this tutorial.
 Powerful visualisation procedures have been developed in the Abipy context,
 relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
 and the [Abipy tutorials](https://github.com/abinit/abitutorials).
+
+This tutorial should take about 1 hour.
+
+[TUTORIAL_README]
 
 ## Computing the total energy of silicon at a fixed number of k-points
 
@@ -34,7 +34,7 @@ You can copy it in the *Work3* directory and change it as you did in the
 You can also copy the file *tbase3_1.in* inside the *Work3* directory with: 
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work3
 cd Work3
 cp ../tbase3_x.files .   # You will need to edit this file.
@@ -149,10 +149,10 @@ In order to understand k-point grids, you should read [[cite:Monkhorst1976]].
 Well, maybe not immediately. In the meantime, you can try the above-mentioned convergence study.
 
 The input file *tbase3_3.in* is an example, 
-while *$ABI_TUTORIAL/Refs/tbase3_3.out* is a reference output file.
+while *$ABI_TESTS/tutorial/Refs/tbase3_3.out* is a reference output file.
 
 ```sh
-cd $ABI_TUTORIAL/Work3
+cd $ABI_TESTS/tutorial/Work3
 cp ../tbase3_3.in .
 ```
 
@@ -188,11 +188,11 @@ For the automatic optimisation of cell volume, use:
 You should read the indications about [[dilatmx]] and [[ecutsm]]. 
 Do not test all the k-point grids, only those with **nkpt** 2 and 10.
 
-The input file *$ABI_TUTORIAL/Input/tbase3_4.in* is an example,
+The input file *$ABI_TESTS/tutorial/Input/tbase3_4.in* is an example,
 
 {% dialog tests/tutorial/Input/tbase3_4.in %}
 
-while *$ABI_TUTORIAL/Refs/tbase3_4.out* is a reference output file.  
+while *$ABI_TESTS/tutorial/Refs/tbase3_4.out* is a reference output file.  
 
 {% dialog tests/tutorial/Refs/tbase3_4.out %}
 
@@ -269,11 +269,11 @@ in which you output the density ([[prtden]] 1), and, for the second dataset:
 * the only tolerance criterion admitted for non-self-consistent calculations is [[tolwfr]]. 
   You should set it to 1.0d-10 (or so), and suppress [[toldfe]].
 
-The input file *$ABI_TUTORIAL/Input/tbase3_5.in* is an example, 
+The input file *$ABI_TESTS/tutorial/Input/tbase3_5.in* is an example, 
 
 {% dialog tests/tutorial/Input/tbase3_5.in %}
 
-while *$ABI_TUTORIAL/Refs/tbase3_5.out* is a reference output file.
+while *$ABI_TESTS/tutorial/Refs/tbase3_5.out* is a reference output file.
 
 {% dialog tests/tutorial/Refs/tbase3_5.out %}
 

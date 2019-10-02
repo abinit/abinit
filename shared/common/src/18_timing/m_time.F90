@@ -597,7 +597,7 @@ subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, comm)
    avg_type = ""
  end if
  if (present(pre_str)) call wrtout(std_out, pre_str)
- call wrtout(std_out, sjoin(tag, "done. cpu:", sec2str(cpu), ", wall:", sec2str(wall), avg_type), &
+ call wrtout(std_out, sjoin(tag, "completed. cpu:", sec2str(cpu), ", wall:", sec2str(wall), avg_type), &
      do_flush=.True.)
  if (present(end_str)) call wrtout(std_out, end_str)
  call cwtime(cpu, wall, gflops, "start")

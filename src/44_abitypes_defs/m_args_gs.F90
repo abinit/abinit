@@ -118,8 +118,6 @@ CONTAINS
 
 subroutine args_gs_init(args_gs,amu,mixalch,dmatpawu,upawu,jpawu,rprimd_orig)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in),target :: amu(:),dmatpawu(:,:,:,:),jpawu(:),mixalch(:,:),upawu(:)
@@ -165,8 +163,6 @@ end subroutine args_gs_init
 !! SOURCE
 
 subroutine args_gs_free(args_gs)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays

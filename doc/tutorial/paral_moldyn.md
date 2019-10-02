@@ -16,10 +16,10 @@ explained in the tutorial
 [A first introduction to ABINIT in parallel](basepar), and 
 [ground state with plane waves](paral_gspw).
 
-[TUTORIAL_README]
-
 This tutorial should take about 1.5 hour to be done and requires to have at
 least a 200 CPU core parallel computer.
+
+[TUTORIAL_README]
 
 ## 1 Summary of the molecular dynamics method
   
@@ -50,9 +50,9 @@ abinit.files or the use of a specific submission file.
 for the other tutorials. Why not Work_paral_moldyn?*
 
 In what follows, the name of files are mentioned as if you were in this subdirectory.  
-All the input files can be found in the *\$ABI_TUTOPARAL/Input directory*.
+All the input files can be found in the *\$ABI_TESTS/tutoparal/Input directory*.
 You can compare your results with several reference output files located in
-*\$ABI_TUTOPARAL/Refs* (for the present tutorial they are named tmoldyn_*.out).
+*\$ABI_TESTS/tutoparal/Refs* (for the present tutorial they are named tmoldyn_*.out).
 
 ## 2 Performing molecular dynamics with ABINIT
   

@@ -28,13 +28,14 @@
 MODULE m_electronpositron
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_energies
  use m_xmpi
  use m_cgtools
+ use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use m_pawtab,   only : pawtab_type
  use m_paw_an,   only : paw_an_type
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy

@@ -58,7 +58,6 @@ program multibinit
   use m_parser,     only : instrng
   use m_dtset,      only : chkvars
   use m_dtfil,      only : isfile
-
 !Arguments -----------------------------------
 
   use m_multibinit_dataset
@@ -179,6 +178,7 @@ program multibinit
   if(args%multibinit_F03_mode==1) then
      ! Use the F03 mode, which has only spin and a simple harmonic lattice now
      ! After everything is migrated, it will becomes default and multibinit_main will be deprecated.
+     print *, "********)))))))))"
      call multibinit_main2(filnam)
   else
      call multibinit_main(filnam, args%dry_run)
