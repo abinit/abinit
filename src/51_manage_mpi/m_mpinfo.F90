@@ -38,13 +38,13 @@ MODULE m_mpinfo
  use m_xmpi
  use m_sort
  use m_distribfft
+ use m_dtset
 
  use defs_abitypes,   only : MPI_type
  use m_fstrings,      only : sjoin, ltoa
  use m_io_tools,      only : file_exists, open_file
  use m_libpaw_tools,  only : libpaw_write_comm_set
  use m_paral_atom,    only : get_my_natom, get_my_atmtab
- use m_dtset,         only : get_npert_rbz, dataset_type
 
  implicit none
 
@@ -1873,7 +1873,7 @@ subroutine initmpi_pert(dtset,mpi_enreg)
    MSG_ERROR('Error in MPI distribution! Change your proc(s) distribution or use autoparal>0.')
  end if
 
- call get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
+ call dtset%get_npert_rbz(nband_rbz, nkpt_rbz, npert)
 
  if (dtset%nppert>=1) then
    if (mpi_enreg%comm_cell/=mpi_enreg%comm_world) then

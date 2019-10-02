@@ -1431,12 +1431,12 @@ subroutine abinit_doctor(prefix, print_mem_report)
 !scalars
  integer,parameter :: master=0
  integer :: do_mem_report, my_rank
- character(len=500) :: msg
+ character(len=5000) :: msg
 #ifdef HAVE_MEM_PROFILING
  integer :: ii,ierr,unt
  integer(i8b) :: memtot, nalloc, nfree
  character(len=fnlen) :: path
- character(len=2000) :: errmsg
+ character(len=5000) :: errmsg
 #endif
 
 ! *************************************************************************

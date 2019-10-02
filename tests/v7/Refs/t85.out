@@ -183,24 +183,6 @@ P This job should need less than                      12.634 Mbytes of memory.
 _ WF disk file :      3.127 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-
- DATASET   10 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
-================================================================================
- Values of the parameters that define the memory need for DATASET 10 (RF).
-     intxc =       0      iscf =      -3    lmnmax =       6     lnmax =       6
-     mgfft =      12  mpssoang =       3    mqgrid =    3001     natom =       1
-  nloc_mem =       1    nspden =       1   nspinor =       1    nsppol =       1
-      nsym =      48    n1xccc =    2501    ntypat =       1    occopt =       7
-   xclevel =       2
--    mband =           5        mffmem =           1         mkmem =         512
--   mkqmem =         512        mk1mem =         512           mpw =          80
-      nfft =        1728          nkpt =         512
-================================================================================
-P This job should need less than                      12.524 Mbytes of memory.
-  Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      3.127 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
-================================================================================
-
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -216,16 +198,6 @@ _ WF disk file :      3.127 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
               amu      2.69815390E+01
              ecut      6.00000000E+00 Hartree
 -          fftalg         312
-           getden1          0
-           getden2          0
-           getden3          0
-           getden4          0
-           getden5          0
-           getden6          0
-           getden7          0
-           getden8          0
-           getden9          0
-           getden10         1
            getwfk1          0
            getwfk2          1
            getwfk3          1
@@ -235,17 +207,6 @@ _ WF disk file :      3.127 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
            getwfk7          1
            getwfk8          1
            getwfk9          1
-           getwfk10         1
-             iscf1          7
-             iscf2          7
-             iscf3          7
-             iscf4          7
-             iscf5          7
-             iscf6          7
-             iscf7          7
-             iscf8          7
-             iscf9          7
-             iscf10        -3
            istwfk1       2    0    0    0    3    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
                          7    0    0    0    0    0    0    0    0
@@ -289,14 +250,9 @@ _ WF disk file :      3.127 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
                          0    0    0    0    0    0    0    0    0    0
                          0    0    1    0    0    0    1    0    0    0
                          0    0    0    0    0    0    0    0    0    0
-           istwfk10      1    0    0    0    1    0    0    0    0    0
-                         0    0    0    0    0    0    0    0    0    0
-                         0    0    0    0    0    0    0    0    0    0
-                         0    0    1    0    0    0    1    0    0    0
-                         0    0    0    0    0    0    0    0    0    0
                        outvar_i_n : Printing only first  50 k-points.
               ixc          11
-           jdtset        1    2    3    4    5    6    7    8    9   10
+           jdtset        1    2    3    4    5    6    7    8    9
               kpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
                        1.25000000E-01  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -726,56 +682,6 @@ _ WF disk file :      3.127 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
                       -1.25000000E-01 -3.75000000E-01  0.00000000E+00
                        0.00000000E+00 -2.50000000E-01  0.00000000E+00
                        1.25000000E-01 -2.50000000E-01  0.00000000E+00
-              kpt10    0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       1.25000000E-01  0.00000000E+00  0.00000000E+00
-                       2.50000000E-01  0.00000000E+00  0.00000000E+00
-                       3.75000000E-01  0.00000000E+00  0.00000000E+00
-                       5.00000000E-01  0.00000000E+00  0.00000000E+00
-                      -3.75000000E-01  0.00000000E+00  0.00000000E+00
-                      -2.50000000E-01  0.00000000E+00  0.00000000E+00
-                      -1.25000000E-01  0.00000000E+00  0.00000000E+00
-                       0.00000000E+00  1.25000000E-01  0.00000000E+00
-                       1.25000000E-01  1.25000000E-01  0.00000000E+00
-                       2.50000000E-01  1.25000000E-01  0.00000000E+00
-                       3.75000000E-01  1.25000000E-01  0.00000000E+00
-                       5.00000000E-01  1.25000000E-01  0.00000000E+00
-                      -3.75000000E-01  1.25000000E-01  0.00000000E+00
-                      -2.50000000E-01  1.25000000E-01  0.00000000E+00
-                      -1.25000000E-01  1.25000000E-01  0.00000000E+00
-                       0.00000000E+00  2.50000000E-01  0.00000000E+00
-                       1.25000000E-01  2.50000000E-01  0.00000000E+00
-                       2.50000000E-01  2.50000000E-01  0.00000000E+00
-                       3.75000000E-01  2.50000000E-01  0.00000000E+00
-                       5.00000000E-01  2.50000000E-01  0.00000000E+00
-                      -3.75000000E-01  2.50000000E-01  0.00000000E+00
-                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
-                      -1.25000000E-01  2.50000000E-01  0.00000000E+00
-                       0.00000000E+00  3.75000000E-01  0.00000000E+00
-                       1.25000000E-01  3.75000000E-01  0.00000000E+00
-                       2.50000000E-01  3.75000000E-01  0.00000000E+00
-                       3.75000000E-01  3.75000000E-01  0.00000000E+00
-                       5.00000000E-01  3.75000000E-01  0.00000000E+00
-                      -3.75000000E-01  3.75000000E-01  0.00000000E+00
-                      -2.50000000E-01  3.75000000E-01  0.00000000E+00
-                      -1.25000000E-01  3.75000000E-01  0.00000000E+00
-                       0.00000000E+00  5.00000000E-01  0.00000000E+00
-                       1.25000000E-01  5.00000000E-01  0.00000000E+00
-                       2.50000000E-01  5.00000000E-01  0.00000000E+00
-                       3.75000000E-01  5.00000000E-01  0.00000000E+00
-                       5.00000000E-01  5.00000000E-01  0.00000000E+00
-                      -3.75000000E-01  5.00000000E-01  0.00000000E+00
-                      -2.50000000E-01  5.00000000E-01  0.00000000E+00
-                      -1.25000000E-01  5.00000000E-01  0.00000000E+00
-                       0.00000000E+00 -3.75000000E-01  0.00000000E+00
-                       1.25000000E-01 -3.75000000E-01  0.00000000E+00
-                       2.50000000E-01 -3.75000000E-01  0.00000000E+00
-                       3.75000000E-01 -3.75000000E-01  0.00000000E+00
-                       5.00000000E-01 -3.75000000E-01  0.00000000E+00
-                      -3.75000000E-01 -3.75000000E-01  0.00000000E+00
-                      -2.50000000E-01 -3.75000000E-01  0.00000000E+00
-                      -1.25000000E-01 -3.75000000E-01  0.00000000E+00
-                       0.00000000E+00 -2.50000000E-01  0.00000000E+00
-                       1.25000000E-01 -2.50000000E-01  0.00000000E+00
                        outvar_i_n : Printing only first  50 k-points.
            kptopt1          1
            kptopt2          3
@@ -786,7 +692,6 @@ _ WF disk file :      3.127 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
            kptopt7          3
            kptopt8          3
            kptopt9          3
-           kptopt10         3
          kptrlatt        8    0    0      0    8    0      0    0    8
           kptrlen      4.24264069E+01
 P           mkmem1         29
@@ -798,7 +703,6 @@ P           mkmem6        512
 P           mkmem7        512
 P           mkmem8        512
 P           mkmem9        512
-P           mkmem10       512
 P          mkqmem1         29
 P          mkqmem2        512
 P          mkqmem3        512
@@ -808,7 +712,6 @@ P          mkqmem6        512
 P          mkqmem7        512
 P          mkqmem8        512
 P          mkqmem9        512
-P          mkqmem10       512
 P          mk1mem1         29
 P          mk1mem2        512
 P          mk1mem3        512
@@ -818,7 +721,6 @@ P          mk1mem6        512
 P          mk1mem7        512
 P          mk1mem8        512
 P          mk1mem9        512
-P          mk1mem10       512
             natom           1
             nband1          5
             nband2          5
@@ -829,7 +731,6 @@ P          mk1mem10       512
             nband7          5
             nband8          5
             nband9          5
-            nband10         5
            nbdbuf1          0
            nbdbuf2          2
            nbdbuf3          2
@@ -839,8 +740,7 @@ P          mk1mem10       512
            nbdbuf7          2
            nbdbuf8          2
            nbdbuf9          2
-           nbdbuf10         2
-           ndtset          10
+           ndtset           9
             ngfft          12      12      12
              nkpt1         29
              nkpt2        512
@@ -851,7 +751,6 @@ P          mk1mem10       512
              nkpt7        512
              nkpt8        512
              nkpt9        512
-             nkpt10       512
              nqpt1          0
              nqpt2          1
              nqpt3          1
@@ -861,7 +760,6 @@ P          mk1mem10       512
              nqpt7          1
              nqpt8          1
              nqpt9          1
-             nqpt10         1
             nstep          50
              nsym          48
            ntypat           1
@@ -1302,57 +1200,6 @@ P          mk1mem10       512
                        2.000000  1.000000  0.000000  0.000000  0.000000
                        2.000000  1.000000  0.000000  0.000000  0.000000
                        prtocc : prtvol=0, do not print more k-points.
-              occ10    2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       2.000000  1.000000  0.000000  0.000000  0.000000
-                       prtocc : prtvol=0, do not print more k-points.
            occopt           7
         optdriver1          0
         optdriver2          1
@@ -1363,7 +1210,6 @@ P          mk1mem10       512
         optdriver7          1
         optdriver8          1
         optdriver9          1
-        optdriver10         1
            prtpot           1
             prtwf1          1
             prtwf2          0
@@ -1374,7 +1220,6 @@ P          mk1mem10       512
             prtwf7          0
             prtwf8          0
             prtwf9          0
-            prtwf10         1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -1384,18 +1229,7 @@ P          mk1mem10       512
               qpt7    -2.50000000E-01  2.50000000E-01  0.00000000E+00
               qpt8     5.00000000E-01  5.00000000E-01  0.00000000E+00
               qpt9    -2.50000000E-01  5.00000000E-01  2.50000000E-01
-              qpt10    0.00000000E+00  0.00000000E+00  0.00000000E+00
             rfdir           1       1       1
-           rfelfd1          0
-           rfelfd2          0
-           rfelfd3          0
-           rfelfd4          0
-           rfelfd5          0
-           rfelfd6          0
-           rfelfd7          0
-           rfelfd8          0
-           rfelfd9          0
-           rfelfd10         2
            rfphon1          0
            rfphon2          1
            rfphon3          1
@@ -1405,7 +1239,6 @@ P          mk1mem10       512
            rfphon7          1
            rfphon8          1
            rfphon9          1
-           rfphon10         0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -1443,7 +1276,6 @@ P          mk1mem10       512
            tolvrs7     1.00000000E-07
            tolvrs8     1.00000000E-07
            tolvrs9     1.00000000E-07
-           tolvrs10    0.00000000E+00
            tolwfr1     1.00000000E-14
            tolwfr2     0.00000000E+00
            tolwfr3     0.00000000E+00
@@ -1453,7 +1285,6 @@ P          mk1mem10       512
            tolwfr7     0.00000000E+00
            tolwfr8     0.00000000E+00
            tolwfr9     0.00000000E+00
-           tolwfr10    1.00000000E-14
            tsmear      4.00000000E-02 Hartree
             typat      1
               wtk1       0.00195    0.01563    0.01563    0.01563    0.00781    0.01172
@@ -1533,15 +1364,6 @@ P          mk1mem10       512
                          0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
                          0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
                          0.00195    0.00195
-              wtk10      0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
-                         0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
-                         0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
-                         0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
-                         0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
-                         0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
-                         0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
-                         0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
-                         0.00195    0.00195
                        outvars : Printing only first  50 k-points.
             znucl       13.00000
 
@@ -1564,8 +1386,6 @@ P          mk1mem10       512
  chkinp: Checking input parameters for consistency, jdtset=   8.
 
  chkinp: Checking input parameters for consistency, jdtset=   9.
-
- chkinp: Checking input parameters for consistency, jdtset=  10.
 
 ================================================================================
 == DATASET  1 ==================================================================
@@ -3288,365 +3108,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
  Phonon frequencies in cm-1    :
 -  2.088409E+02  2.392700E+02  2.392700E+02
 
-================================================================================
-== DATASET 10 ==================================================================
--   nproc =    1
-
- mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
-
- mkfilename : getden/=0, take file _DEN from output of DATASET   1.
-
- Exchange-correlation functional for the present dataset will be:
-  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
- Citation for XC functional:
-  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
-
- Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
- R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
- R(3)=  3.7500000  3.7500000  0.0000000  G(3)=  0.1333333  0.1333333 -0.1333333
- Unit cell volume ucvol=  1.0546875E+02 bohr^3
- Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- setup1 : take into account q-point for computing boxcut.
-
- getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  12  12  12
-         ecut(hartree)=      6.000   => boxcut(ratio)=   2.05208
-
---- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
-- Al    ONCVPSP  r_core=  1.77  1.77  1.71
-- 13.00000   3.00000    150709                znucl, zion, pspdat
-    8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
-    5.99000000000000    0.65000000000000    0.00000000000000   rchrg,fchrg,qchrg
-     nproj     2     2     2
-     extension_switch     1
-  pspatm : epsatm=    5.28546056
-         --- l  ekb(1:nproj) -->
-             0    5.190663    0.741808
-             1    7.659439    0.819933
-             2  -21.179474   -1.097800
- pspatm: atomic psp has been read  and splines computed
-
---------------------------------------------------------------------------------
-
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
-
- ==>  initialize data related to q vector <== 
-
- The list of irreducible perturbations for this q vector is:
-    1)    idir= 1    ipert=   2
-    2)    idir= 2    ipert=   2
-    3)    idir= 3    ipert=   2
-
-================================================================================
-
---------------------------------------------------------------------------------
- Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
- Perturbation : derivative vs k along direction   1
- The set of symmetries contains only one element for this perturbation.
- symkpt : not enough symmetry to change the number of k points.
-
---------------------------------------------------------------------------------
-
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
---------------------------------------------------------------------------------
-
- dfpt_looppert : total number of electrons, from k and k+q
-  fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
- Initialisation of the first-order wave-functions :
-  ireadwf=   0
-
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -6.4016633494184     -6.402E+00 4.270E+01 0.000E+00
- ETOT  2  -6.4016864814821     -2.313E-05 2.614E-02 0.000E+00
- ETOT  3  -6.4016864842424     -2.760E-09 1.081E-02 0.000E+00
- ETOT  4  -6.4016864842427     -3.055E-13 6.833E-03 0.000E+00
- ETOT  5  -6.4016864842427     -2.665E-15 4.426E-03 0.000E+00
- ETOT  6  -6.4016864842427      0.000E+00 2.064E-03 0.000E+00
- ETOT  7  -6.4016864842427      0.000E+00 1.979E-03 0.000E+00
- ETOT  8  -6.4016864842427      0.000E+00 6.480E-04 0.000E+00
- ETOT  9  -6.4016864842427      0.000E+00 8.303E-04 0.000E+00
- ETOT 10  -6.4016864842427      0.000E+00 2.544E-04 0.000E+00
- ETOT 11  -6.4016864842427      8.882E-16 3.410E-04 0.000E+00
- ETOT 12  -6.4016864842427     -8.882E-16 1.024E-04 0.000E+00
- ETOT 13  -6.4016864842427      0.000E+00 1.387E-04 0.000E+00
- ETOT 14  -6.4016864842427      0.000E+00 4.134E-05 0.000E+00
- ETOT 15  -6.4016864842427      0.000E+00 5.622E-05 0.000E+00
- ETOT 16  -6.4016864842427      0.000E+00 1.671E-05 0.000E+00
- ETOT 17  -6.4016864842427      0.000E+00 2.274E-05 0.000E+00
- ETOT 18  -6.4016864842427      0.000E+00 6.754E-06 0.000E+00
- ETOT 19  -6.4016864842427      0.000E+00 9.195E-06 0.000E+00
- ETOT 20  -6.4016864842427      0.000E+00 2.731E-06 0.000E+00
- ETOT 21  -6.4016864842427      0.000E+00 3.717E-06 0.000E+00
- ETOT 22  -6.4016864842427      0.000E+00 1.104E-06 0.000E+00
- ETOT 23  -6.4016864842427      0.000E+00 1.503E-06 0.000E+00
- ETOT 24  -6.4016864842427      0.000E+00 4.463E-07 0.000E+00
- ETOT 25  -6.4016864842427      0.000E+00 6.075E-07 0.000E+00
- ETOT 26  -6.4016864842427      0.000E+00 1.804E-07 0.000E+00
- ETOT 27  -6.4016864842427      0.000E+00 2.456E-07 0.000E+00
- ETOT 28  -6.4016864842427      0.000E+00 7.295E-08 0.000E+00
- ETOT 29  -6.4016864842427      1.776E-15 9.929E-08 0.000E+00
- ETOT 30  -6.4016864842427      0.000E+00 2.949E-08 0.000E+00
- ETOT 31  -6.4016864842427     -1.776E-15 4.014E-08 0.000E+00
- ETOT 32  -6.4016864842427      1.776E-15 1.192E-08 0.000E+00
- ETOT 33  -6.4016864842427      0.000E+00 1.623E-08 0.000E+00
- ETOT 34  -6.4016864842427     -1.776E-15 4.820E-09 0.000E+00
- ETOT 35  -6.4016864842427      0.000E+00 6.560E-09 0.000E+00
- ETOT 36  -6.4016864842427      0.000E+00 1.949E-09 0.000E+00
- ETOT 37  -6.4016864842427      0.000E+00 2.652E-09 0.000E+00
- ETOT 38  -6.4016864842427      0.000E+00 7.879E-10 0.000E+00
- ETOT 39  -6.4016864842427      0.000E+00 1.072E-09 0.000E+00
- ETOT 40  -6.4016864842427      0.000E+00 3.185E-10 0.000E+00
- ETOT 41  -6.4016864842427      0.000E+00 4.335E-10 0.000E+00
- ETOT 42  -6.4016864842427      0.000E+00 1.288E-10 0.000E+00
- ETOT 43  -6.4016864842427      0.000E+00 1.762E-10 0.000E+00
- ETOT 44  -6.4016864842427      0.000E+00 5.207E-11 0.000E+00
- ETOT 45  -6.4016864842427      0.000E+00 7.365E-11 0.000E+00
- ETOT 46  -6.4016864842427      0.000E+00 2.105E-11 0.000E+00
- ETOT 47  -6.4016864842427      0.000E+00 3.078E-11 0.000E+00
- ETOT 48  -6.4016864842427      0.000E+00 8.511E-12 0.000E+00
- ETOT 49  -6.4016864842427      0.000E+00 1.287E-11 0.000E+00
- ETOT 50  -6.4016864842427      0.000E+00 3.441E-12 0.000E+00
-
- scprqt:  WARNING -
-  nstep=   50 was not enough SCF cycles to converge;
-  maximum residual=  3.441E-12 exceeds tolwfr=  1.000E-14
-
-================================================================================
-
- ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=  -40.000E-03; max=  34.408E-13
- dfpt_looppert : ek2=    1.2633093633E+01
-          f-sum rule ratio=    1.0338426061E+00
- prteigrs : about to open file t85_1WF1_EIG
- Expectation of eigenvalue derivatives (hartree) for nkpt= 512  k points:
-  (in case of degenerate eigenvalues, averaged derivative)
- kpt#   1, nband=  5, wtk=  0.00195, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.00000    0.00000    0.00000    0.00000   -0.00000
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-
- Eight components of 2nd-order total energy (hartree) are
- 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   3.85308349E-01 eigvalue=  -2.13632887E-02  local=  -1.75059360E-01
- 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -1.30606304E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
- 7,8,9: eventually, occupation + non-local contributions
-    edocc=   6.07838973E+00     enl0=   1.34411044E-01   enl1=   2.57257484E-01
- 1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -6.40168648E+00
-  No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.6401686484E+01 Ha. Also 2DEtotal=   -0.174198748274E+03 eV
-    (  non-var. 2DEtotal :   -6.4016864803E+00 Ha)
-
---------------------------------------------------------------------------------
- Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
- Perturbation : derivative vs k along direction   2
- The set of symmetries contains only one element for this perturbation.
- symkpt : not enough symmetry to change the number of k points.
-
---------------------------------------------------------------------------------
-
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
---------------------------------------------------------------------------------
-
- dfpt_looppert : total number of electrons, from k and k+q
-  fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
- Initialisation of the first-order wave-functions :
-  ireadwf=   0
-
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -6.4016918728525     -6.402E+00 4.301E+01 0.000E+00
- ETOT  2  -6.4017150502245     -2.318E-05 2.650E-02 0.000E+00
- ETOT  3  -6.4017150530232     -2.799E-09 1.100E-02 0.000E+00
- ETOT  4  -6.4017150530234     -2.629E-13 6.967E-03 0.000E+00
- ETOT  5  -6.4017150530234      0.000E+00 4.528E-03 0.000E+00
- ETOT  6  -6.4017150530234      0.000E+00 2.116E-03 0.000E+00
- ETOT  7  -6.4017150530234      0.000E+00 2.037E-03 0.000E+00
- ETOT  8  -6.4017150530234      0.000E+00 6.679E-04 0.000E+00
- ETOT  9  -6.4017150530234      0.000E+00 8.594E-04 0.000E+00
- ETOT 10  -6.4017150530234      0.000E+00 2.637E-04 0.000E+00
- ETOT 11  -6.4017150530234      0.000E+00 3.548E-04 0.000E+00
- ETOT 12  -6.4017150530234      1.776E-15 1.067E-04 0.000E+00
- ETOT 13  -6.4017150530234      0.000E+00 1.452E-04 0.000E+00
- ETOT 14  -6.4017150530234      0.000E+00 4.334E-05 0.000E+00
- ETOT 15  -6.4017150530234      0.000E+00 5.914E-05 0.000E+00
- ETOT 16  -6.4017150530234      0.000E+00 1.761E-05 0.000E+00
- ETOT 17  -6.4017150530234      0.000E+00 2.406E-05 0.000E+00
- ETOT 18  -6.4017150530234      0.000E+00 7.159E-06 0.000E+00
- ETOT 19  -6.4017150530234      0.000E+00 9.780E-06 0.000E+00
- ETOT 20  -6.4017150530234      0.000E+00 2.910E-06 0.000E+00
- ETOT 21  -6.4017150530234      0.000E+00 3.976E-06 0.000E+00
- ETOT 22  -6.4017150530234      0.000E+00 1.183E-06 0.000E+00
- ETOT 23  -6.4017150530234      0.000E+00 1.616E-06 0.000E+00
- ETOT 24  -6.4017150530234      0.000E+00 4.810E-07 0.000E+00
- ETOT 25  -6.4017150530234      0.000E+00 6.569E-07 0.000E+00
- ETOT 26  -6.4017150530234      0.000E+00 1.955E-07 0.000E+00
- ETOT 27  -6.4017150530234      0.000E+00 2.670E-07 0.000E+00
- ETOT 28  -6.4017150530234      0.000E+00 7.948E-08 0.000E+00
- ETOT 29  -6.4017150530234      0.000E+00 1.086E-07 0.000E+00
- ETOT 30  -6.4017150530234      0.000E+00 3.231E-08 0.000E+00
- ETOT 31  -6.4017150530234      0.000E+00 4.413E-08 0.000E+00
- ETOT 32  -6.4017150530234      0.000E+00 1.314E-08 0.000E+00
- ETOT 33  -6.4017150530234      0.000E+00 1.794E-08 0.000E+00
- ETOT 34  -6.4017150530234      0.000E+00 5.340E-09 0.000E+00
- ETOT 35  -6.4017150530234      0.000E+00 7.292E-09 0.000E+00
- ETOT 36  -6.4017150530234      0.000E+00 2.171E-09 0.000E+00
- ETOT 37  -6.4017150530234      0.000E+00 2.964E-09 0.000E+00
- ETOT 38  -6.4017150530234     -1.776E-15 8.825E-10 0.000E+00
- ETOT 39  -6.4017150530234      0.000E+00 1.205E-09 0.000E+00
- ETOT 40  -6.4017150530234      1.776E-15 3.588E-10 0.000E+00
- ETOT 41  -6.4017150530234      0.000E+00 4.899E-10 0.000E+00
- ETOT 42  -6.4017150530234      0.000E+00 1.459E-10 0.000E+00
- ETOT 43  -6.4017150530234      0.000E+00 1.992E-10 0.000E+00
- ETOT 44  -6.4017150530234     -1.776E-15 5.929E-11 0.000E+00
- ETOT 45  -6.4017150530234      0.000E+00 8.096E-11 0.000E+00
- ETOT 46  -6.4017150530234      0.000E+00 2.410E-11 0.000E+00
- ETOT 47  -6.4017150530234      0.000E+00 3.291E-11 0.000E+00
- ETOT 48  -6.4017150530234      0.000E+00 9.799E-12 0.000E+00
- ETOT 49  -6.4017150530234      0.000E+00 1.338E-11 0.000E+00
- ETOT 50  -6.4017150530234      0.000E+00 3.984E-12 0.000E+00
-
- scprqt:  WARNING -
-  nstep=   50 was not enough SCF cycles to converge;
-  maximum residual=  3.984E-12 exceeds tolwfr=  1.000E-14
-
-================================================================================
-
- ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=  -40.000E-03; max=  39.838E-13
- dfpt_looppert : ek2=    1.2633093633E+01
-          f-sum rule ratio=    1.0338473085E+00
- prteigrs : about to open file t85_1WF1_EIG
- Expectation of eigenvalue derivatives (hartree) for nkpt= 512  k points:
-  (in case of degenerate eigenvalues, averaged derivative)
- kpt#   1, nband=  5, wtk=  0.00195, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.00000   -0.00000    0.00000    0.00000    0.00000
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-
- Eight components of 2nd-order total energy (hartree) are
- 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   3.84999323E-01 eigvalue=  -2.14059523E-02  local=  -1.74711713E-01
- 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -1.30606899E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
- 7,8,9: eventually, occupation + non-local contributions
-    edocc=   6.07867748E+00     enl0=   1.34155903E-01   enl1=   2.57259752E-01
- 1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -6.40171505E+00
-  No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.6401715053E+01 Ha. Also 2DEtotal=   -0.174199525670E+03 eV
-    (  non-var. 2DEtotal :   -6.4017150493E+00 Ha)
-
---------------------------------------------------------------------------------
- Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
- Perturbation : derivative vs k along direction   3
- The set of symmetries contains only one element for this perturbation.
- symkpt : not enough symmetry to change the number of k points.
-
---------------------------------------------------------------------------------
-
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
---------------------------------------------------------------------------------
-
- dfpt_looppert : total number of electrons, from k and k+q
-  fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
- Initialisation of the first-order wave-functions :
-  ireadwf=   0
-
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -6.4016632881728     -6.402E+00 4.294E+01 0.000E+00
- ETOT  2  -6.4016864399415     -2.315E-05 2.593E-02 0.000E+00
- ETOT  3  -6.4016864427159     -2.774E-09 1.073E-02 0.000E+00
- ETOT  4  -6.4016864427162     -2.736E-13 6.763E-03 0.000E+00
- ETOT  5  -6.4016864427162     -8.882E-16 4.371E-03 0.000E+00
- ETOT  6  -6.4016864427162     -8.882E-16 2.037E-03 0.000E+00
- ETOT  7  -6.4016864427162      0.000E+00 1.947E-03 0.000E+00
- ETOT  8  -6.4016864427162      8.882E-16 6.357E-04 0.000E+00
- ETOT  9  -6.4016864427162      0.000E+00 8.140E-04 0.000E+00
- ETOT 10  -6.4016864427162     -8.882E-16 2.484E-04 0.000E+00
- ETOT 11  -6.4016864427162      8.882E-16 3.329E-04 0.000E+00
- ETOT 12  -6.4016864427162     -1.776E-15 9.962E-05 0.000E+00
- ETOT 13  -6.4016864427162      0.000E+00 1.349E-04 0.000E+00
- ETOT 14  -6.4016864427162      0.000E+00 4.008E-05 0.000E+00
- ETOT 15  -6.4016864427162      0.000E+00 5.447E-05 0.000E+00
- ETOT 16  -6.4016864427162     -8.882E-16 1.614E-05 0.000E+00
- ETOT 17  -6.4016864427162      8.882E-16 2.195E-05 0.000E+00
- ETOT 18  -6.4016864427162      0.000E+00 6.498E-06 0.000E+00
- ETOT 19  -6.4016864427162      0.000E+00 8.842E-06 0.000E+00
- ETOT 20  -6.4016864427162      0.000E+00 2.617E-06 0.000E+00
- ETOT 21  -6.4016864427162      0.000E+00 3.561E-06 0.000E+00
- ETOT 22  -6.4016864427162      8.882E-16 1.054E-06 0.000E+00
- ETOT 23  -6.4016864427162      0.000E+00 1.434E-06 0.000E+00
- ETOT 24  -6.4016864427162     -8.882E-16 4.246E-07 0.000E+00
- ETOT 25  -6.4016864427162      8.882E-16 5.776E-07 0.000E+00
- ETOT 26  -6.4016864427162      0.000E+00 1.710E-07 0.000E+00
- ETOT 27  -6.4016864427162     -8.882E-16 2.326E-07 0.000E+00
- ETOT 28  -6.4016864427162      0.000E+00 6.889E-08 0.000E+00
- ETOT 29  -6.4016864427162      0.000E+00 9.370E-08 0.000E+00
- ETOT 30  -6.4016864427162      0.000E+00 2.775E-08 0.000E+00
- ETOT 31  -6.4016864427162      0.000E+00 3.774E-08 0.000E+00
- ETOT 32  -6.4016864427162      0.000E+00 1.118E-08 0.000E+00
- ETOT 33  -6.4016864427162      0.000E+00 1.520E-08 0.000E+00
- ETOT 34  -6.4016864427162     -8.882E-16 4.501E-09 0.000E+00
- ETOT 35  -6.4016864427162      8.882E-16 6.313E-09 0.000E+00
- ETOT 36  -6.4016864427162     -8.882E-16 1.813E-09 0.000E+00
- ETOT 37  -6.4016864427162      0.000E+00 2.649E-09 0.000E+00
- ETOT 38  -6.4016864427162      8.882E-16 7.303E-10 0.000E+00
- ETOT 39  -6.4016864427162      0.000E+00 1.112E-09 0.000E+00
- ETOT 40  -6.4016864427162      0.000E+00 2.942E-10 0.000E+00
- ETOT 41  -6.4016864427162      0.000E+00 4.666E-10 0.000E+00
- ETOT 42  -6.4016864427162      0.000E+00 1.185E-10 0.000E+00
- ETOT 43  -6.4016864427162      0.000E+00 1.958E-10 0.000E+00
- ETOT 44  -6.4016864427162      0.000E+00 4.772E-11 0.000E+00
- ETOT 45  -6.4016864427162      0.000E+00 8.221E-11 0.000E+00
- ETOT 46  -6.4016864427162      0.000E+00 1.922E-11 0.000E+00
- ETOT 47  -6.4016864427162      0.000E+00 3.451E-11 0.000E+00
- ETOT 48  -6.4016864427162      0.000E+00 7.743E-12 0.000E+00
- ETOT 49  -6.4016864427162      0.000E+00 1.449E-11 0.000E+00
- ETOT 50  -6.4016864427162     -8.882E-16 3.119E-12 0.000E+00
-
- scprqt:  WARNING -
-  nstep=   50 was not enough SCF cycles to converge;
-  maximum residual=  3.119E-12 exceeds tolwfr=  1.000E-14
-
-================================================================================
-
- ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=  -40.000E-03; max=  31.187E-13
- dfpt_looppert : ek2=    1.2633093633E+01
-          f-sum rule ratio=    1.0338427770E+00
- prteigrs : about to open file t85_1WF1_EIG
- Expectation of eigenvalue derivatives (hartree) for nkpt= 512  k points:
-  (in case of degenerate eigenvalues, averaged derivative)
- kpt#   1, nband=  5, wtk=  0.00195, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.00000    0.00000   -0.00000   -0.00000   -0.00000
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-
- Eight components of 2nd-order total energy (hartree) are
- 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   3.84917118E-01 eigvalue=  -2.14172875E-02  local=  -1.74619271E-01
- 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -1.30606326E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
- 7,8,9: eventually, occupation + non-local contributions
-    edocc=   6.07872346E+00     enl0=   1.34082421E-01   enl1=   2.57259727E-01
- 1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -6.40168644E+00
-  No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.6401686443E+01 Ha. Also 2DEtotal=   -0.174198747144E+03 eV
-    (  non-var. 2DEtotal :   -6.4016864388E+00 Ha)
-================================================================================
-
- ---- first-order wavefunction calculations are completed ----
-
-
- respfn : d/dk was computed, but no 2DTE, so no DDB output.
-
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -3663,7 +3124,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
            etotal7     3.7141660847E-01
            etotal8     7.4374140654E-01
            etotal9     9.2143252116E-01
-           etotal10   -6.4016864427E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -3674,16 +3134,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
             fcart8     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart9     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
-           getden1          0
-           getden2          0
-           getden3          0
-           getden4          0
-           getden5          0
-           getden6          0
-           getden7          0
-           getden8          0
-           getden9          0
-           getden10         1
            getwfk1          0
            getwfk2          1
            getwfk3          1
@@ -3693,17 +3143,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
            getwfk7          1
            getwfk8          1
            getwfk9          1
-           getwfk10         1
-             iscf1          7
-             iscf2          7
-             iscf3          7
-             iscf4          7
-             iscf5          7
-             iscf6          7
-             iscf7          7
-             iscf8          7
-             iscf9          7
-             iscf10        -3
            istwfk1       2    0    0    0    3    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
                          7    0    0    0    0    0    0    0    0
@@ -3747,14 +3186,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
                          0    0    0    0    0    0    0    0    0    0
                          0    0    1    0    0    0    1    0    0    0
                          0    0    0    0    0    0    0    0    0    0
-           istwfk10      1    0    0    0    1    0    0    0    0    0
-                         0    0    0    0    0    0    0    0    0    0
-                         0    0    0    0    0    0    0    0    0    0
-                         0    0    1    0    0    0    1    0    0    0
-                         0    0    0    0    0    0    0    0    0    0
                        outvar_i_n : Printing only first  50 k-points.
               ixc          11
-           jdtset        1    2    3    4    5    6    7    8    9   10
+           jdtset        1    2    3    4    5    6    7    8    9
               kpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
                        1.25000000E-01  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -4184,56 +3618,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
                       -1.25000000E-01 -3.75000000E-01  0.00000000E+00
                        0.00000000E+00 -2.50000000E-01  0.00000000E+00
                        1.25000000E-01 -2.50000000E-01  0.00000000E+00
-              kpt10    0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       1.25000000E-01  0.00000000E+00  0.00000000E+00
-                       2.50000000E-01  0.00000000E+00  0.00000000E+00
-                       3.75000000E-01  0.00000000E+00  0.00000000E+00
-                       5.00000000E-01  0.00000000E+00  0.00000000E+00
-                      -3.75000000E-01  0.00000000E+00  0.00000000E+00
-                      -2.50000000E-01  0.00000000E+00  0.00000000E+00
-                      -1.25000000E-01  0.00000000E+00  0.00000000E+00
-                       0.00000000E+00  1.25000000E-01  0.00000000E+00
-                       1.25000000E-01  1.25000000E-01  0.00000000E+00
-                       2.50000000E-01  1.25000000E-01  0.00000000E+00
-                       3.75000000E-01  1.25000000E-01  0.00000000E+00
-                       5.00000000E-01  1.25000000E-01  0.00000000E+00
-                      -3.75000000E-01  1.25000000E-01  0.00000000E+00
-                      -2.50000000E-01  1.25000000E-01  0.00000000E+00
-                      -1.25000000E-01  1.25000000E-01  0.00000000E+00
-                       0.00000000E+00  2.50000000E-01  0.00000000E+00
-                       1.25000000E-01  2.50000000E-01  0.00000000E+00
-                       2.50000000E-01  2.50000000E-01  0.00000000E+00
-                       3.75000000E-01  2.50000000E-01  0.00000000E+00
-                       5.00000000E-01  2.50000000E-01  0.00000000E+00
-                      -3.75000000E-01  2.50000000E-01  0.00000000E+00
-                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
-                      -1.25000000E-01  2.50000000E-01  0.00000000E+00
-                       0.00000000E+00  3.75000000E-01  0.00000000E+00
-                       1.25000000E-01  3.75000000E-01  0.00000000E+00
-                       2.50000000E-01  3.75000000E-01  0.00000000E+00
-                       3.75000000E-01  3.75000000E-01  0.00000000E+00
-                       5.00000000E-01  3.75000000E-01  0.00000000E+00
-                      -3.75000000E-01  3.75000000E-01  0.00000000E+00
-                      -2.50000000E-01  3.75000000E-01  0.00000000E+00
-                      -1.25000000E-01  3.75000000E-01  0.00000000E+00
-                       0.00000000E+00  5.00000000E-01  0.00000000E+00
-                       1.25000000E-01  5.00000000E-01  0.00000000E+00
-                       2.50000000E-01  5.00000000E-01  0.00000000E+00
-                       3.75000000E-01  5.00000000E-01  0.00000000E+00
-                       5.00000000E-01  5.00000000E-01  0.00000000E+00
-                      -3.75000000E-01  5.00000000E-01  0.00000000E+00
-                      -2.50000000E-01  5.00000000E-01  0.00000000E+00
-                      -1.25000000E-01  5.00000000E-01  0.00000000E+00
-                       0.00000000E+00 -3.75000000E-01  0.00000000E+00
-                       1.25000000E-01 -3.75000000E-01  0.00000000E+00
-                       2.50000000E-01 -3.75000000E-01  0.00000000E+00
-                       3.75000000E-01 -3.75000000E-01  0.00000000E+00
-                       5.00000000E-01 -3.75000000E-01  0.00000000E+00
-                      -3.75000000E-01 -3.75000000E-01  0.00000000E+00
-                      -2.50000000E-01 -3.75000000E-01  0.00000000E+00
-                      -1.25000000E-01 -3.75000000E-01  0.00000000E+00
-                       0.00000000E+00 -2.50000000E-01  0.00000000E+00
-                       1.25000000E-01 -2.50000000E-01  0.00000000E+00
                        outvar_i_n : Printing only first  50 k-points.
            kptopt1          1
            kptopt2          3
@@ -4244,7 +3628,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
            kptopt7          3
            kptopt8          3
            kptopt9          3
-           kptopt10         3
          kptrlatt        8    0    0      0    8    0      0    0    8
           kptrlen      4.24264069E+01
 P           mkmem1         29
@@ -4256,7 +3639,6 @@ P           mkmem6        512
 P           mkmem7        512
 P           mkmem8        512
 P           mkmem9        512
-P           mkmem10       512
 P          mkqmem1         29
 P          mkqmem2        512
 P          mkqmem3        512
@@ -4266,7 +3648,6 @@ P          mkqmem6        512
 P          mkqmem7        512
 P          mkqmem8        512
 P          mkqmem9        512
-P          mkqmem10       512
 P          mk1mem1         29
 P          mk1mem2        512
 P          mk1mem3        512
@@ -4276,7 +3657,6 @@ P          mk1mem6        512
 P          mk1mem7        512
 P          mk1mem8        512
 P          mk1mem9        512
-P          mk1mem10       512
             natom           1
             nband1          5
             nband2          5
@@ -4287,7 +3667,6 @@ P          mk1mem10       512
             nband7          5
             nband8          5
             nband9          5
-            nband10         5
            nbdbuf1          0
            nbdbuf2          2
            nbdbuf3          2
@@ -4297,8 +3676,7 @@ P          mk1mem10       512
            nbdbuf7          2
            nbdbuf8          2
            nbdbuf9          2
-           nbdbuf10         2
-           ndtset          10
+           ndtset           9
             ngfft          12      12      12
              nkpt1         29
              nkpt2        512
@@ -4309,7 +3687,6 @@ P          mk1mem10       512
              nkpt7        512
              nkpt8        512
              nkpt9        512
-             nkpt10       512
              nqpt1          0
              nqpt2          1
              nqpt3          1
@@ -4319,7 +3696,6 @@ P          mk1mem10       512
              nqpt7          1
              nqpt8          1
              nqpt9          1
-             nqpt10         1
             nstep          50
              nsym          48
            ntypat           1
@@ -4760,57 +4136,6 @@ P          mk1mem10       512
                        2.000000  0.000002  0.000000  0.000000  0.000000
                        2.000000  0.001930  0.000000  0.000000  0.000000
                        prtocc : prtvol=0, do not print more k-points.
-              occ10    2.000000  0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000002  0.000000  0.000000  0.000000
-                       2.000000  1.721790  0.000000  0.000000  0.000000
-                       2.000000  2.000000  0.000000  0.000000  0.000000
-                       2.000000  1.721790  0.000000  0.000000  0.000000
-                       2.000000  0.000002  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.224739  0.000000  0.000000  0.000000
-                       2.000000  1.999926  0.000000  0.000000  0.000000
-                       2.000000  1.981537  0.000000  0.000000  0.000000
-                       2.000000  0.001930  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000002  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000000  0.000000  0.000000  0.000000
-                       2.000000  0.000010  0.000000  0.000000  0.000000
-                       2.000000  1.656821  0.000000  0.000000  0.000000
-                       2.000000  1.990510  0.000407  0.000000  0.000000
-                       2.000000  0.087391  0.000106  0.000000  0.000000
-                       2.000000  0.001930  0.000000  0.000000  0.000000
-                       2.000000  1.721790  0.000000  0.000000  0.000000
-                       2.000000  0.224739  0.000000  0.000000  0.000000
-                       2.000000  0.000010  0.000000  0.000000  0.000000
-                       2.000000  0.000336  0.000000  0.000000  0.000000
-                       2.000000  0.561095  0.002032  0.000000  0.000000
-                       1.988018  1.930728  1.264506  0.000000  0.000000
-                       2.000000  1.990510  0.000407  0.000000  0.000000
-                       2.000000  1.981537  0.000000  0.000000  0.000000
-                       2.000000  2.000000  0.000000  0.000000  0.000000
-                       2.000000  1.999926  0.000000  0.000000  0.000000
-                       2.000000  1.656821  0.000000  0.000000  0.000000
-                       2.000000  0.561095  0.002032  0.000000  0.000000
-                       1.999909  1.960109  0.000000  0.000000  0.000000
-                       2.000000  0.561095  0.002032  0.000000  0.000000
-                       2.000000  1.656821  0.000000  0.000000  0.000000
-                       2.000000  1.999926  0.000000  0.000000  0.000000
-                       2.000000  1.721790  0.000000  0.000000  0.000000
-                       2.000000  1.981537  0.000000  0.000000  0.000000
-                       2.000000  1.990510  0.000407  0.000000  0.000000
-                       1.988018  1.930728  1.264506  0.000000  0.000000
-                       2.000000  0.561095  0.002032  0.000000  0.000000
-                       2.000000  0.000336  0.000000  0.000000  0.000000
-                       2.000000  0.000010  0.000000  0.000000  0.000000
-                       2.000000  0.224739  0.000000  0.000000  0.000000
-                       2.000000  0.000002  0.000000  0.000000  0.000000
-                       2.000000  0.001930  0.000000  0.000000  0.000000
-                       prtocc : prtvol=0, do not print more k-points.
            occopt           7
         optdriver1          0
         optdriver2          1
@@ -4821,7 +4146,6 @@ P          mk1mem10       512
         optdriver7          1
         optdriver8          1
         optdriver9          1
-        optdriver10         1
            prtpot           1
             prtwf1          1
             prtwf2          0
@@ -4832,7 +4156,6 @@ P          mk1mem10       512
             prtwf7          0
             prtwf8          0
             prtwf9          0
-            prtwf10         1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -4842,18 +4165,7 @@ P          mk1mem10       512
               qpt7    -2.50000000E-01  2.50000000E-01  0.00000000E+00
               qpt8     5.00000000E-01  5.00000000E-01  0.00000000E+00
               qpt9    -2.50000000E-01  5.00000000E-01  2.50000000E-01
-              qpt10    0.00000000E+00  0.00000000E+00  0.00000000E+00
             rfdir           1       1       1
-           rfelfd1          0
-           rfelfd2          0
-           rfelfd3          0
-           rfelfd4          0
-           rfelfd5          0
-           rfelfd6          0
-           rfelfd7          0
-           rfelfd8          0
-           rfelfd9          0
-           rfelfd10         2
            rfphon1          0
            rfphon2          1
            rfphon3          1
@@ -4863,7 +4175,6 @@ P          mk1mem10       512
            rfphon7          1
            rfphon8          1
            rfphon9          1
-           rfphon10         0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -4919,7 +4230,6 @@ P          mk1mem10       512
            tolvrs7     1.00000000E-07
            tolvrs8     1.00000000E-07
            tolvrs9     1.00000000E-07
-           tolvrs10    0.00000000E+00
            tolwfr1     1.00000000E-14
            tolwfr2     0.00000000E+00
            tolwfr3     0.00000000E+00
@@ -4929,7 +4239,6 @@ P          mk1mem10       512
            tolwfr7     0.00000000E+00
            tolwfr8     0.00000000E+00
            tolwfr9     0.00000000E+00
-           tolwfr10    1.00000000E-14
            tsmear      4.00000000E-02 Hartree
             typat      1
               wtk1       0.00195    0.01563    0.01563    0.01563    0.00781    0.01172
@@ -5001,15 +4310,6 @@ P          mk1mem10       512
                          0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
                          0.00195    0.00195
               wtk9       0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
-                         0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
-                         0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
-                         0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
-                         0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
-                         0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
-                         0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
-                         0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
-                         0.00195    0.00195
-              wtk10      0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
                          0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
                          0.00195    0.00195    0.00195    0.00195    0.00195    0.00195
                          0.00195    0.00195    0.00195    0.00195    0.00195    0.00195

@@ -23,20 +23,20 @@
 >>> Enter name of POT file 2 : 
 >>> Enter name of POT file 3 : 
 >>> Enter name of POT file 4 : 
-- Reading header of file [1]: t150o_DS3_POT1
-- Merging file [1]: t150o_DS3_POT1
-- Reading header of file [2]: t150o_DS4_POT1
-- Merging file [2]: t150o_DS4_POT1
-- Reading header of file [3]: t150o_DS4_POT2
-- Merging file [3]: t150o_DS4_POT2
-- Reading header of file [4]: t150o_DS5_POT1
-- Merging file [4]: t150o_DS5_POT1
+- Reading header of file [1]: t50o_DS3_POT1
+- Merging file [1]: t50o_DS3_POT1
+- Reading header of file [2]: t50o_DS4_POT1
+- Merging file [2]: t50o_DS4_POT1
+- Reading header of file [3]: t50o_DS4_POT2
+- Merging file [3]: t50o_DS4_POT2
+- Reading header of file [4]: t50o_DS5_POT1
+- Merging file [4]: t50o_DS5_POT1
 Merged successfully 4 files
-- Analyzing DVDB file: t153o_DS20_DVDB ...
-- dvdb_new completed. cpu-time:  0.00 [s] , wall-time:  0.01 [s]
+- Analyzing DVDB file: t53o_DS20_DVDB ...
+- dvdb_new completed. cpu:  0.00 [s] , wall:  0.00 [s]
  ==== Info on the dvdb% object ====
  DVDB version: 2
- File path: t153o_DS20_DVDB
+ File path: t53o_DS20_DVDB
  Number of v1scf potentials: 4
  Number of q-points in DVDB: 3
 -P Number of CPUs for parallelism over perturbations: 1
