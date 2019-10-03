@@ -276,7 +276,7 @@ program mrgscr
  end if
 
  timrev=2 ! This should be read from kptopt
- cryst = hdr_get_crystal(HScr0%Hdr,timrev,remove_inv=.FALSE.)
+ cryst = HScr0%Hdr%get_crystal(timrev,remove_inv=.FALSE.)
 
  kptopt=1
  call kmesh_init(Kmesh,Cryst,HScr0%Hdr%nkpt,Hscr0%Hdr%kptns,kptopt)
@@ -649,7 +649,7 @@ program mrgscr
 
      call read_rhor(fname_rho, cplex1, nfft, Hscr0%Hdr%nspden, ngfft, 1, MPI_enreg, rhor, hdr_rhor, pawrhoij, comm)
 
-     call hdr_free(hdr_rhor)
+     call hdr_rhor%free()
      call pawrhoij_free(pawrhoij)
      ABI_FREE(pawrhoij)
 

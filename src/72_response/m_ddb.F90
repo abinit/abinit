@@ -34,6 +34,7 @@ MODULE m_ddb
  use m_ddb_hdr
  use m_dtset
 
+ use m_io_tools,       only : file_exists
  use defs_datatypes,   only : pseudopotential_type
  use m_fstrings,       only : sjoin, itoa, ktoa
  use m_numeric_tools,  only : mkherm
@@ -150,6 +151,9 @@ MODULE m_ddb
 
     procedure :: get_dielt => ddb_get_dielt
      ! Reads the Dielectric Tensor
+
+    procedure :: get_quadrupoles => ddb_get_quadrupoles
+     ! Reads the Quadrupoles
 
     procedure :: get_dchidet => ddb_get_dchidet
      ! Reads the non-linear optical susceptibility tensor and the
@@ -378,7 +382,7 @@ subroutine ddb_malloc(ddb, msize, nblok, natom, ntypat)
  ddb%msize = msize
  ddb%nblok = nblok
  ddb%natom = natom
- ddb%mpert = natom+6
+ ddb%mpert = natom+MPERT_MAX
  ddb%ntypat = ntypat
 
  ! integer
@@ -1124,7 +1128,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
  integer,parameter :: msppol=2,mtyplo=6
  integer :: iblok,isym
  integer :: nsize,timrev
- integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
+ integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,npert
  real(dp),parameter :: tolsym8=tol8
  character(len=500) :: message
  type(ddb_hdr_type) :: ddb_hdr
@@ -1232,14 +1236,15 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
 
    else if (ddb%typ(iblok) == 3) then
 
-     nsize=3*mpert*3*mpert*3*mpert
-     ABI_MALLOC(tmpflg,(3,mpert,3,mpert,3,mpert))
-     ABI_MALLOC(tmpval,(2,3,mpert,3,mpert,3,mpert))
-     ABI_MALLOC(rfpert,(3,mpert,3,mpert,3,mpert))
+     npert = 8
+     nsize=3*npert*3*npert*3*npert
+     ABI_MALLOC(tmpflg,(3,npert,3,npert,3,npert))
+     ABI_MALLOC(tmpval,(2,3,npert,3,npert,3,npert))
+     ABI_MALLOC(rfpert,(3,npert,3,npert,3,npert))
 
-     tmpflg(:,:,:,:,:,:) = reshape(ddb%flg(1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
-     tmpval(1,:,:,:,:,:,:) = reshape(ddb%val(1,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
-     tmpval(2,:,:,:,:,:,:) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
+     tmpflg(:,:,:,:,:,:) = reshape(ddb%flg(1:nsize,iblok), shape = (/3,npert,3,npert,3,npert/))
+     tmpval(1,:,:,:,:,:,:) = reshape(ddb%val(1,1:nsize,iblok), shape = (/3,npert,3,npert,3,npert/))
+     tmpval(2,:,:,:,:,:,:) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,npert,3,npert,3,npert/))
 
 !    Set the elements that are zero by symmetry for raman and
 !    non-linear optical susceptibility tensors
@@ -1248,10 +1253,10 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
      rfpert(:,1:natom,:,natom+2,:,natom+2) = 1
      rfpert(:,natom+2,:,1:natom,:,natom+2) = 1
      rfpert(:,natom+2,:,natom+2,:,1:natom) = 1
-     call sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
-     do i1pert = 1,mpert
-       do i2pert = 1,mpert
-         do i3pert = 1,mpert
+     call sytens(indsym,npert,natom,nsym,rfpert,symrec,symrel)
+     do i1pert = 1,npert
+       do i2pert = 1,npert
+         do i3pert = 1,npert
            do i1dir=1,3
              do i2dir=1,3
                do i3dir=1,3
@@ -1267,16 +1272,16 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
        end do
      end do
 
-     call d3sym(tmpflg,tmpval,indsym,mpert,natom,nsym,symrec,symrel)
+     call d3sym(tmpflg,tmpval,indsym,npert,natom,nsym,symrec,symrel)
 
-     ABI_MALLOC(d3cart,(2,3,mpert,3,mpert,3,mpert))
-     ABI_MALLOC(car3flg,(3,mpert,3,mpert,3,mpert))
+     ABI_MALLOC(d3cart,(2,3,npert,3,npert,3,npert))
+     ABI_MALLOC(car3flg,(3,npert,3,npert,3,npert))
 
-     call nlopt(tmpflg,car3flg,tmpval,d3cart,gprimd,mpert,natom,rprimd,ucvol)
+     call nlopt(tmpflg,car3flg,tmpval,d3cart,gprimd,npert,natom,rprimd,ucvol)
 
-     ddb%flg(1:nsize,iblok) = reshape(car3flg, shape = (/3*mpert*3*mpert*3*mpert/))
-     ddb%val(1,1:nsize,iblok) = reshape(d3cart(1,:,:,:,:,:,:), shape = (/3*mpert*3*mpert*3*mpert/))
-     ddb%val(2,1:nsize,iblok) = reshape(d3cart(2,:,:,:,:,:,:), shape = (/3*mpert*3*mpert*3*mpert/))
+     ddb%flg(1:nsize,iblok) = reshape(car3flg, shape = (/3*npert*3*npert*3*npert/))
+     ddb%val(1,1:nsize,iblok) = reshape(d3cart(1,:,:,:,:,:,:), shape = (/3*npert*3*npert*3*npert/))
+     ddb%val(2,1:nsize,iblok) = reshape(d3cart(2,:,:,:,:,:,:), shape = (/3*npert*3*npert*3*npert/))
 
      ABI_FREE(d3cart)
      ABI_FREE(car3flg)
@@ -1617,7 +1622,7 @@ subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, crystal, com
    MSG_ERROR(sjoin("input natom:",itoa(natom),"does not agree with DDB value:",itoa(natom)))
  end if
 
- mpert = natom+6
+ mpert = natom+MPERT_MAX
  msize=3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
 
  ! Allocate arrays depending on msym (which is actually fixed to nsym inside inprep8)
@@ -2476,6 +2481,91 @@ integer function ddb_get_dielt(ddb, rftyp, dielt) result(iblok)
  end if ! iblok not found
 
 end function ddb_get_dielt
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb/ddb_get_quadrupoles
+!!
+!! NAME
+!!  ddb_get_quadrupoles
+!!
+!! FUNCTION
+!! Reads the Dielectric Tensor from the DDB file
+!!
+!! INPUTS
+!!  ddb<type(ddb_type)>=Derivative database.
+!!  rftyp  = 1 if non-stationary block
+!!           2 if stationary block
+!!           3 if third order derivatives
+!!
+!! OUTPUT
+!!  quadrupoles(3,3) = Macroscopic dielectric tensor
+!!  iblok=Index of the block containing the data. 0 if block is not found.
+!!
+!! NOTES
+!!  quadrupoles is initialized to zero if the derivatives are not available in the DDB file.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function ddb_get_quadrupoles(ddb, crystal, rftyp, quadrupoles) result(iblok)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: rftyp
+ class(ddb_type),intent(in) :: ddb
+ type(crystal_t),intent(in) :: crystal
+!arrays
+ real(dp),intent(out) :: quadrupoles(3,3,3,ddb%natom)
+
+!Local variables -------------------------
+!scalars
+ integer :: ii, jj, iatdir, iatom, iq1dir, iq2dir
+ integer :: quad_unt
+ character(len=500) :: msg
+!arrays
+ integer :: rfelfd(4),rfphon(4),rfstrs(4)
+ real(dp) :: qphnrm(3),qphon(3,3)
+
+! *********************************************************************
+
+ ! Look for the Gamma Block in the DDB
+ qphon(:,:)=zero
+ qphnrm(:)=one
+ rfphon(1:2)=1
+ rfelfd(1:2)=1
+ rfstrs(1:2)=8
+
+ call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+
+ ! Read the dielectric tensor only if the Gamma-block was found in the DDB
+ ! In case it was not found, iblok = 0
+ iblok = 0
+ quadrupoles=zero
+
+ !Temporary hack to read the quadrupole tensor from a text file
+ if (.not.file_exists("quadrupoles_cart.out")) return
+ quad_unt = 71
+ open(unit=quad_unt,file="quadrupoles_cart.out",action="read")
+ do ii=1,2
+   read(quad_unt,*) msg
+ end do
+
+ do ii=1,3
+   do jj=1,3*3*crystal%natom
+     read(quad_unt,'(4(i5,3x),2(1x,f20.10))') iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
+     !write(*,*) iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
+   end do
+   read(quad_unt,'(a)') msg
+ end do
+ close(quad_unt)
+ iblok = 1
+
+end function ddb_get_quadrupoles
 !!***
 
 !----------------------------------------------------------------------
@@ -3451,12 +3541,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    call ddb_hdr_free(ddb_hdr)
  end do
 
-#ifdef MR_DEV
- mpert=matom+8
-#else 
- mpert=matom+6
-#endif
-
+ mpert=matom+MPERT_MAX
  msize=3*mpert*3*mpert
  if(mblktyp==3)msize=msize*3*mpert
 
@@ -3782,7 +3867,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  end do
 
- mpert=matom+6
+ mpert=matom+MPERT_MAX
  msize=3*mpert*3*mpert
  if(mblktyp==3)msize=msize*3*mpert
 

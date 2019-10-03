@@ -140,7 +140,7 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
 !arrays
  integer,allocatable :: atifc0(:)
  real(dp) :: dielt(3,3)
- real(dp),allocatable :: zeff(:,:,:)
+ real(dp),allocatable :: zeff(:,:,:), qdrp_cart(:,:,:,:)
 
 ! ************************************************************************
 
@@ -156,7 +156,7 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
  ddbun = get_unit()
  do ivol=1,new%nvols
    call wrtout(ab_out, sjoin(" Reading DDB file:", ddb_paths(ivol)))
-   call ddb_hdr_open_read(ddb_hdr,ddb_paths(ivol),ddbun,DDB_VERSION, dimonly=1)
+   call ddb_hdr_open_read(ddb_hdr, ddb_paths(ivol), ddbun, DDB_VERSION, dimonly=1)
    natom = ddb_hdr%natom
 
    call ddb_hdr_free(ddb_hdr)
@@ -166,12 +166,13 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
    call ddb_from_file(new%ddb_vol(ivol), ddb_paths(ivol), inp%brav, natom, natifc0, atifc0, new%cryst_vol(ivol), comm)
    ABI_FREE(atifc0)
    if (my_rank == master) then
-     call crystal_print(new%cryst_vol(ivol), header=sjoin("Structure for ivol:", itoa(ivol)), unit=ab_out, prtvol=-1)
+     call new%cryst_vol(ivol)%print(header=sjoin("Structure for ivol:", itoa(ivol)), unit=ab_out, prtvol=-1)
    end if
 
    ! Get Dielectric Tensor and Effective Charges
    ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
    ABI_MALLOC(zeff, (3,3,natom))
+   ABI_CALLOC(qdrp_cart, (3,3,3,natom))
    iblock = new%ddb_vol(ivol)%get_dielt_zeff(new%cryst_vol(ivol), inp%rfmeth, inp%chneut, inp%selectz, dielt, zeff)
    if (iblock == 0) then
      call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_paths(ivol)))
@@ -182,8 +183,9 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
 
    call ifc_init(new%ifc_vol(ivol), new%cryst_vol(ivol), new%ddb_vol(ivol),&
      inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
-     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
+     qdrp_cart,inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
    ABI_FREE(zeff)
+   ABI_FREE(qdrp_cart)
  end do
 
  ! Consistency check

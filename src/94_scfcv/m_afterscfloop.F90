@@ -988,13 +988,13 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Update the content of the header (evolving variables)
  bantot=hdr%bantot
  if (dtset%positron==0) then
-   call hdr_update(hdr,bantot,etotal,energies%e_fermie,residm,rprimd,occ,&
-&   pawrhoij,xred,dtset%amu_orig(:,1),&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call hdr%update(bantot,etotal,energies%e_fermie,residm,rprimd,occ,&
+     pawrhoij,xred,dtset%amu_orig(:,1),&
+     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  else
-   call hdr_update(hdr,bantot,electronpositron%e0,energies%e_fermie,residm,rprimd,occ,&
-&   pawrhoij,xred,dtset%amu_orig(:,1),&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call hdr%update(bantot,electronpositron%e0,energies%e_fermie,residm,rprimd,occ,&
+     pawrhoij,xred,dtset%amu_orig(:,1),&
+     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
 #ifdef HAVE_LOTF

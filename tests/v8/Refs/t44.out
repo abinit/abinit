@@ -339,6 +339,8 @@ P           mkmem           8
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
 Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t44o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -433,6 +435,9 @@ P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of q-points in the IBZ treated by this proc: 3 of 3
 P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 2 of 2
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
@@ -546,6 +551,8 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
 Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t44o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -622,6 +629,9 @@ P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of q-points in the IBZ treated by this proc: 3 of 3
 P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 2 of 2
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
@@ -734,6 +744,8 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
 Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t44o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -819,6 +831,8 @@ Interpolation of the electron-phonon coupling potential completed
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
+Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t44o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -915,6 +929,9 @@ P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of q-points in the IBZ treated by this proc: 8 of 8
 P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 2 of 2
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
@@ -1030,6 +1047,8 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
 Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t44o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1126,6 +1145,9 @@ P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of q-points in the IBZ treated by this proc: 8 of 8
 P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 2 of 2
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
@@ -1224,6 +1246,8 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
 Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t44o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1303,6 +1327,9 @@ P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of q-points in the IBZ treated by this proc: 8 of 8
 P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 2 of 2
  Reading GS KS potential for Sternheimer from: t41o_DS1_POT
  Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
 ================================================================================

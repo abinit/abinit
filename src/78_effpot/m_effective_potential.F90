@@ -621,7 +621,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
  real(dp) :: acell(3)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: buff_ewald(:,:,:,:,:,:),dyew(:,:,:,:,:), dyewq0(:,:,:,:,:)
- real(dp),allocatable :: xred(:,:),xred_tmp(:,:),zeff_tmp(:,:,:)
+ real(dp),allocatable :: xred(:,:),xred_tmp(:,:),zeff_tmp(:,:,:),qdrp_cart(:,:,:,:)
  type(supercell_type) :: supercell
  type(ifc_type) :: ifc_tmp
  integer, allocatable :: full_cell(:,:)
@@ -835,6 +835,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    ABI_ALLOCATE(xred_tmp,(3,2*natom_uc))
    ABI_ALLOCATE(xred,(3,supercell%natom))
    ABI_ALLOCATE(zeff_tmp,(3,3,2*natom_uc))
+   ABI_ALLOCATE(qdrp_cart,(3,3,3,2*natom_uc))
    ABI_ALLOCATE(dyew,(2,3,2*natom_uc,3,2*natom_uc))
    ABI_ALLOCATE(dyewq0,(2,3,natom_uc,3,natom_uc))
 
@@ -843,6 +844,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    xred(:,:)       = zero
    xred_tmp(:,:)   = zero
    zeff_tmp(:,:,:) = zero
+   qdrp_cart       = zero
    sumg0           = 0
    acell           = one
 
@@ -867,7 +869,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
        call ewald9(acell,eff_pot%harmonics_terms%epsilon_inf,dyewq0,&
 &                  gmet,gprimd,natom_uc,real((/0,0,0/),dp),rmet,&
 &                  supercell%rprimd,sumg0,ucvol,xred_tmp(:,1:natom_uc),&
-&                  eff_pot%harmonics_terms%zeff)
+&                  eff_pot%harmonics_terms%zeff,qdrp_cart)
        buff_ewald(:,:,:,:,:,irpt) = dyewq0
      else
        first_coordinate  = ((my_irpt(irpt)-1)*natom_uc) + 1
@@ -877,7 +879,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
        call ewald9(acell,eff_pot%harmonics_terms%epsilon_inf,dyew,gmet,gprimd,&
 &                  int(2*natom_uc),real((/0,0,0/),dp),&
 &                  rmet,supercell%rprimd,&
-&                  sumg0,ucvol,xred_tmp,zeff_tmp)
+&                  sumg0,ucvol,xred_tmp,zeff_tmp,qdrp_cart)
        buff_ewald(:,:,:,:,:,irpt) = &
 &           dyew(:,:,1:natom_uc,:,natom_uc+1:2*natom_uc)
      end if
@@ -889,6 +891,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    ABI_DEALLOCATE(xred_tmp)
    ABI_DEALLOCATE(xred)
    ABI_DEALLOCATE(zeff_tmp)
+   ABI_DEALLOCATE(qdrp_cart)
    ABI_DEALLOCATE(dyew)
    ABI_DEALLOCATE(dyewq0)
 
