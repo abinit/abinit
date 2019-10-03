@@ -19,23 +19,23 @@ to introduce the density-functional perturbation theory (DFPT) features of
 ABINIT before starting this tutorial. You will learn to use additional DFPT
 features of ABINIT, and to use relevant parts of the associated codes Mrgddb and Anaddb.
 
-[TUTORIAL_README]
-
-This tutorial should take about two hours.
-
 Visualisation tools are NOT covered in this tutorial.
 Powerful visualisation procedures have been developed in the Abipy context,
 relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
 and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
+This tutorial should take about two hours.
+
+[TUTORIAL_README]
+
 ## 1 The ground-state geometry of (hypothetical) wurtzite AlAs
 
 *Before beginning, you might consider working in a different subdirectory as for the other tutorials. 
-Why not create Work_elast in \$ABI_TUTORESPFN/Input?*
-You should also copy the files *telast_1.files* and *telast_1.in* from *\$ABI_TUTORESPFN/Input* to *Work_elast*. 
+Why not create Work_elast in \$ABI_TESTS/tutorespfn/Input?*
+You should also copy the files *telast_1.files* and *telast_1.in* from *\$ABI_TESTS/tutorespfn/Input* to *Work_elast*. 
 
 ```sh
-cd $ABI_TUTORESPFN/Input
+cd $ABI_TESTS/tutorespfn/Input
 mkdir Work_elast
 cd Work_elast
 cp ../telast_1.files . 

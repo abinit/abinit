@@ -32,10 +32,12 @@
 MODULE m_results_out
 
  use defs_basis
- use defs_abitypes
+ use m_dtset
  use m_errors
  use m_abicore
  use m_xmpi
+
+ use defs_abitypes, only : MPI_type
 
  implicit none
 
@@ -187,8 +189,6 @@ CONTAINS
 
 subroutine init_results_out(dtsets,option_alloc,option_size,mpi_enregs,&
 &          mxnatom,mxnband,mxnkpt,mxnpsp,mxnsppol,mxntypat,results_out)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -356,8 +356,6 @@ end subroutine init_results_out
 
 subroutine destroy_results_out(results_out)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  type(results_out_type),intent(inout) :: results_out(:)
@@ -449,8 +447,6 @@ end subroutine destroy_results_out
 !! SOURCE
 
 subroutine copy_results_out(results_out_in,results_out_out)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -599,8 +595,6 @@ end subroutine copy_results_out
 
 subroutine gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_results_all,&
 &                             master,allgather,only_one_per_img) ! optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

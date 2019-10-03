@@ -56,6 +56,7 @@ module m_wfk
  use m_abicore
  use m_build_info
  use m_errors
+ use m_dtset
 #ifdef HAVE_MPI2
  use mpi
 #endif
@@ -74,7 +75,7 @@ module m_wfk
 #endif
  use m_clib
 
- use defs_abitypes,  only : hdr_type, dataset_type, MPI_type
+ use defs_abitypes,  only : MPI_type
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_wvltypes,  only : wvl_internal_type
  use m_geometry,     only : metric
@@ -371,7 +372,7 @@ subroutine wfk_open_read(Wfk,fname,formeig,iomode,funt,comm,Hdr_out)
  call hdr_read_from_fname(Wfk%Hdr,fname,Wfk%fform,comm)
  ABI_CHECK(Wfk%fform/=0,"fform ==0")
 
- if (Wfk%debug) call hdr_echo(Wfk%Hdr,Wfk%fform,4,unit=std_out)
+ if (Wfk%debug) call Wfk%Hdr%echo(Wfk%fform, 4, unit=std_out)
 
  ! Copy the header if required.
  if (present(Hdr_out)) call hdr_copy(Wfk%Hdr,Hdr_out)
@@ -515,8 +516,8 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
 
  ! Master writes fform and the Header (write it afterwards if IO_MODE_ETSF)
  if (Wfk%my_rank==Wfk%master .and. do_write_hdr .and. iomode /= IO_MODE_ETSF) then
-   call hdr_write_to_fname(Wfk%Hdr,Wfk%fname,Wfk%fform)
-   if (Wfk%debug) call hdr_echo(Wfk%Hdr,Wfk%fform,4,unit=std_out)
+   call Wfk%Hdr%write_to_fname(Wfk%fname, Wfk%fform)
+   if (Wfk%debug) call Wfk%Hdr%echo(Wfk%fform, 4, unit=std_out)
  end if
  call xmpi_barrier(Wfk%comm)
 
@@ -564,7 +565,7 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
 
    call hdr_mpio_skip(Wfk%fh,fform,Wfk%hdr_offset)
    ABI_CHECK(fform == Wfk%fform,"fform != Wfk%fform")
-   !call hdr_echo(wfk%Hdr, wfk%fform, 4, unit=std_out)
+   !call wfk%Hdr%echo(wfk%fform, 4, unit=std_out)
 
    ! Precompute offsets for MPI-IO access
    if (Wfk%hdr_offset > 0) then
@@ -720,7 +721,7 @@ subroutine wfk_close(Wfk, delete)
  end if
 
  ! Free memory.
- call hdr_free(Wfk%Hdr)
+ call Wfk%Hdr%free()
 
  ABI_SFREE(Wfk%nband)
  ABI_SFREE(Wfk%recn_ks)
@@ -780,7 +781,7 @@ subroutine wfk_print(wfk,unit,header,prtvol)
  call wrtout(my_unt,msg)
  call wrtout(my_unt, sjoin(" iomode = ",itoa(wfk%iomode)))
 
- call hdr_echo(wfk%hdr, wfk%fform, rdwr4 ,unit=my_unt)
+ call wfk%hdr%echo(wfk%fform, rdwr4 ,unit=my_unt)
 
 end subroutine wfk_print
 !!***
@@ -949,7 +950,7 @@ subroutine wfk_ncdef_dims_vars(ncid, hdr, fform, write_hdr, iskss)
  do_write_hdr = .True.; if (present(write_hdr)) do_write_hdr = write_hdr
  my_iskss = .False.; if (present(iskss)) my_iskss = iskss
  if (do_write_hdr) then
-   NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
+   NCF_CHECK(hdr%ncwrite(ncid, fform, nc_define=.True.))
  end if
 
  ! Add the etsf header.
@@ -2709,7 +2710,7 @@ type(ebands_t) function wfk_read_ebands(path, comm, out_hdr) result(ebands)
  if (present(out_hdr)) call hdr_copy(hdr, out_hdr)
 
  ABI_FREE(eigen)
- call hdr_free(hdr)
+ call hdr%free()
 
 end function wfk_read_ebands
 !!***
@@ -2856,7 +2857,7 @@ subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
 
  ! Broadcast data
  if (xmpi_comm_size(comm) > 1) then
-   call hdr_bcast(Hdr_out,master,my_rank,comm)
+   call Hdr_out%bcast(master, my_rank, comm)
    mband = MAXVAL(Hdr_out%nband)
    if (my_rank/=master) then
      ABI_MALLOC(eigen, (mband,Hdr_out%nkpt,Hdr_out%nsppol))
@@ -2991,7 +2992,7 @@ subroutine wfk_read_h1mat(fname, eigen, hdr_out, comm)
 
  ! Broadcast data
  if (xmpi_comm_size(comm) > 1) then
-   call hdr_bcast(hdr_out,master,my_rank,comm)
+   call hdr_out%bcast(master, my_rank, comm)
 
    mband = maxval(Hdr_out%nband)
    if (my_rank/=master) then
@@ -3860,7 +3861,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
  ABI_MALLOC(eig_ki, ((2*mband)**iwfk%formeig*mband) )
  ABI_MALLOC(occ_ki, (mband))
 
- cryst = hdr_get_crystal(iwfk%hdr, 2)
+ cryst = iwfk%hdr%get_crystal(2)
 
  ! Build new header for owfk. This is the most delicate part since all the arrays in hdr_full
  ! that depend on k-points must be consistent with kfull and nkfull.
@@ -3890,7 +3891,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
 
  out_iomode = iomode_from_fname(out_path)
  call owfk%open_write(hdr_kfull, out_path, iwfk%formeig, out_iomode, get_unit(), xmpi_comm_self)
- call hdr_free(hdr_kfull)
+ call hdr_kfull%free()
 
  ! workspace array for BZ wavefunction block.
  mpw_kf = maxval(ebands_full%npwarr)
@@ -4285,7 +4286,7 @@ subroutine wfk_prof(wfk_fname, formeig, nband, comm)
        call WffOpen(iomode,comm,wfk_fname,ierr,wff,master,my_rank,wfk_unt) !,spaceComm_mpiio) ! optional argument
        ABI_CHECK(ierr==0,"ierr!=0")
 
-       call hdr_free(Hdr)
+       call Hdr%free()
        call hdr_io(fform,Hdr,1,wff)
        call WffKg(wff,optkg1)
 
@@ -4331,7 +4332,7 @@ subroutine wfk_prof(wfk_fname, formeig, nband, comm)
    end do
  end do
 
- call hdr_free(Hdr)
+ call Hdr%free()
 
 end subroutine wfk_prof
 !!***
@@ -4868,8 +4869,8 @@ subroutine wfk_diff(fname1,fname2,formeig,comm,ierr)
  call wfk1%close()
  call wfk2%close()
 
- call hdr_free(Hdr1)
- call hdr_free(Hdr2)
+ call Hdr1%free()
+ call Hdr2%free()
 
 end subroutine wfk_diff
 !!***
@@ -4937,7 +4938,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  type(hdr_type),pointer :: ihdr
  type(ebands_t) :: iwfk_ebands, fine_ebands
 !arrays
- integer,allocatable :: kf2kin(:), kg_k(:,:), kshe_mask(:,:,:)
+ integer,allocatable :: kf2kin(:), kg_k(:,:) !, kshe_mask(:,:,:)
  real(dp),allocatable :: cg_k(:,:), eig_k(:), occ_k(:), fine_eigen(:,:,:)
 
 ! *************************************************************************
@@ -4948,9 +4949,10 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  my_rank = xmpi_comm_rank(comm); if (my_rank /= master) goto 100
 
  ! Read interpolated ebands and kshe_mask from KERANGE file, build fine_ebands object.
+ ! KERANGE is written by sigtk_kpts_in_erange in m_sigtk module.
 #ifdef HAVE_NETCDF
  NCF_CHECK(nctk_open_read(ncid, kerange_path, xmpi_comm_self))
- ! Read header associated to fine k-mesh
+ ! Read header associated to the fine k-mesh
  call hdr_ncread(fine_hdr, ncid, fform)
  fform_kerange = fform_from_ext("KERANGE.nc")
  ABI_CHECK(fform == fform_kerange, sjoin("Wrong fform. Got: ", itoa(fform), ", Expecting: ", itoa(fform_kerange)))
@@ -4960,7 +4962,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  ABI_MALLOC(fine_eigen, (fine_mband, fine_hdr%nkpt, fine_hdr%nsppol))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "eigenvalues"), fine_eigen))
  !NCF_CHECK(nctk_get_dim(ncid, "nkpt_inerange", nkpt_inerage))
- ABI_MALLOC(kshe_mask, (fine_ebands%nkpt, fine_hdr%nsppol, 2))
+ !ABI_MALLOC(kshe_mask, (fine_hdr%nkpt, fine_hdr%nsppol, 2))
  !NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "kshe_mask"), kshe_mask))
  !ABI_MALLOC(krange2ibz, (nkpt_inerange))
  !NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "krange2ibz"), krange2ibz))
@@ -4976,6 +4978,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
 
  if (my_rank == master) then
    write(std_out, "(2a)")ch10, repeat("=", 92)
+   !call wrtout([std_out, ab_out], msg)
    write(std_out, "(a)")" Generating new WKF file with dense k-mesh:"
    write(std_out, "(2a)")" Take wavefunctions with k-point list from WFK file: ", trim(in_wfkpath)
    write(std_out, "(2a)")" Take eigenvalues and k-point tables from KERANGE file: ", trim(kerange_path)
@@ -4999,14 +5002,14 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
 
  if (my_rank == master .and. dtset%prtvol > 0) then
    fform = 0
-   call hdr_echo(iwfk%hdr, fform, 3, unit=std_out, header="Header of iwfk file")
-   call hdr_echo(fine_hdr, fform, 3, unit=std_out, header="Header of fine_hdr")
+   call iwfk%hdr%echo(fform, 3, unit=std_out, header="Header of iwfk file")
+   call fine_hdr%echo(fform, 3, unit=std_out, header="Header of fine_hdr")
  end if
 
  ihdr => iwfk%hdr
  mband = iwfk%mband; nsppol = iwfk%nsppol; nspinor = iwfk%nspinor
 
- cryst = hdr_get_crystal(iwfk%hdr, 2)
+ cryst = iwfk%hdr%get_crystal(2)
 
  ! Find correspondence fine kmesh --> input WFK and handle possible mismatch
  !TODO: Write specialized routine wrapping listkk to find mapping without O(N2) scaling.
@@ -5100,7 +5103,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
 #endif
  end if
 
- call hdr_free(fine_hdr)
+ call fine_hdr%free()
 
  ! Allocate workspace arrays for wavefunction block.
  mpw = maxval(fine_ebands%npwarr)
@@ -5116,10 +5119,12 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
      nband_k = owfk%nband(ikf, spin)
      npw_k = owfk%hdr%npwarr(ikf)
 
+     !cg_k = zero
      if (ikin /= -1) then
        ! Read wavefunctions from input WFK file.
        ABI_CHECK(npw_k == iwfk%hdr%npwarr(ikin), "Mismatch in npw_k")
        ABI_CHECK(nband_k == iwfk%nband(ikin, spin), "Mismatch in nband_k")
+       !ABI_CHECK(owfk%hdr%istwfk(ikf) == iwfk%hdristwfk(ikin), "Mismatch in istwfk_k")
        call iwfk%read_band_block([1, nband_k], ikin, spin, xmpio_single, kg_k=kg_k, cg_k=cg_k) !, eig_k=eig_k, occ_k=occ_k)
      else
        ! Fill wavefunctions with fake data (npw_k == 1)
@@ -5140,7 +5145,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  ABI_FREE(eig_k)
  ABI_FREE(occ_k)
  ABI_FREE(kf2kin)
- ABI_FREE(kshe_mask)
+ !ABI_FREE(kshe_mask)
 
  call cryst%free()
  call ebands_free(iwfk_ebands)

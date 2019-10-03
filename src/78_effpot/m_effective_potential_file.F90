@@ -2224,7 +2224,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  use m_ddb
  use m_ifc
  use m_copy,            only : alloc_copy
- use m_crystal,         only : crystal_t,crystal_print
+ use m_crystal,         only : crystal_t
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_effective_potential, only : effective_potential_type, effective_potential_free
 

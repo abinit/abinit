@@ -27,8 +27,6 @@
 module m_afterscfloop
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_energies
  use m_errors
@@ -36,14 +34,17 @@ module m_afterscfloop
  use m_efield
  use m_ab7_mixing
  use m_hdr
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes,     only : pseudopotential_type
+ use defs_abitypes,      only : mpi_type
  use m_time,             only : timab
  use m_xmpi,             only : xmpi_sum, xmpi_comm_rank,xmpi_comm_size
  use m_geometry,         only : xred2xcart, metric
  use m_crystal,          only : prtposcar
  use m_results_gs ,      only : results_gs_type
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype, exchange_electronpositron
- use m_dtset,            only : dtset_copy, dtset_free
  use m_paw_dmft,         only : paw_dmft_type
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type
@@ -985,13 +986,13 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Update the content of the header (evolving variables)
  bantot=hdr%bantot
  if (dtset%positron==0) then
-   call hdr_update(hdr,bantot,etotal,energies%e_fermie,residm,rprimd,occ,&
-&   pawrhoij,xred,dtset%amu_orig(:,1),&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call hdr%update(bantot,etotal,energies%e_fermie,residm,rprimd,occ,&
+     pawrhoij,xred,dtset%amu_orig(:,1),&
+     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  else
-   call hdr_update(hdr,bantot,electronpositron%e0,energies%e_fermie,residm,rprimd,occ,&
-&   pawrhoij,xred,dtset%amu_orig(:,1),&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call hdr%update(bantot,electronpositron%e0,energies%e_fermie,residm,rprimd,occ,&
+     pawrhoij,xred,dtset%amu_orig(:,1),&
+     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
 #ifdef HAVE_LOTF

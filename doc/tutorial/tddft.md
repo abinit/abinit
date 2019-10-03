@@ -14,9 +14,9 @@ This tutorial aims at showing how to get the following physical properties, for 
 
 in the Casida approach, within Time-Dependent Density Functional Theory.
 
-[TUTORIAL_README]
-
 This tutorial should take about 30 minutes.
+
+[TUTORIAL_README]
 
 ## Brief theoretical introduction
   
@@ -110,7 +110,7 @@ for the other tutorials. Why not Work_tddft?*
 Copy the files *ttddft_x.files* and *ttddft_1.in* in *Work_tddft*:
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work_tddft
 cd Work_tddft
 cp ../ttddft_x.files .

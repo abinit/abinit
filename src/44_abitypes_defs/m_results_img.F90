@@ -32,13 +32,13 @@
 MODULE m_results_img
 
  use defs_basis
- use defs_abitypes
  use m_energies
  use m_abicore
  use m_results_gs
  use m_errors
  use m_xmpi
 
+ use defs_abitypes, only : mpi_type
  use m_geometry,   only : mkrdim, xred2xcart
 
  implicit none

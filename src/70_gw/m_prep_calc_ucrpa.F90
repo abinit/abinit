@@ -31,13 +31,13 @@
 MODULE m_prep_calc_ucrpa
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_gwdefs!,        only : czero_gw, cone_gw, j_gw, sigparams_t
  use m_xmpi
  use m_defs_ptgroups
  use m_errors
 
+ use defs_datatypes,  only : pseudopotential_type, ebands_t
  use m_time,          only : timab
  use m_hide_blas,     only : xdotc
  use m_geometry,      only : normv

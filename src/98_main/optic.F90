@@ -80,8 +80,6 @@
 program optic
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_errors
  use m_xmpi
  use m_xomp
@@ -98,6 +96,7 @@ program optic
  use netcdf
 #endif
 
+ use defs_datatypes,   only : ebands_t
  use m_specialmsg,     only : specialmsg_getcount, herald
  use m_time ,          only : asctime, timein
  use m_symtk,          only : mati3inv, matr3inv
@@ -322,7 +321,7 @@ program optic
 
  end if
 
- call hdr_bcast(hdr,master,my_rank,comm)
+ call hdr%bcast(master, my_rank, comm)
  !TODO put parameters in datastructure
  call xmpi_bcast(broadening,master,comm,ierr)
  call xmpi_bcast(domega,master,comm,ierr)
@@ -525,7 +524,7 @@ program optic
 
    ! Add header, crystal, and ks_ebands
    ! Note that we write the KS bands without EPH interaction (if any).
-   NCF_CHECK(hdr_ncwrite(hdr, optic_ncid, 666, nc_define=.True.))
+   NCF_CHECK(hdr%ncwrite(optic_ncid, 666, nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(optic_ncid))
    NCF_CHECK(ebands_ncwrite(ks_ebands, optic_ncid))
 
@@ -752,7 +751,7 @@ program optic
  ABI_DEALLOCATE(symcart)
  ABI_DEALLOCATE(pmat)
 
- call hdr_free(hdr)
+ call hdr%free()
  call ebands_free(ks_ebands)
  call cryst%free()
 

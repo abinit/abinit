@@ -98,8 +98,6 @@ CONTAINS
 
 subroutine array2_gwpc_free(Array)
 
- implicit none
-
 !Arguments ------------------------------------
  type(array2_gwpc_t),intent(inout) :: Array
 

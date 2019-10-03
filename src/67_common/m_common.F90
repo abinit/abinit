@@ -50,6 +50,7 @@ module m_common
  use m_xpapi
  use m_yaml
  use m_invars2
+ use m_dtset
 
  use m_fstrings,          only : indent, endswith, sjoin
  use m_electronpositron,  only : electronpositron_type
@@ -57,10 +58,10 @@ module m_common
  use m_pair_list,         only : pair_list
  use m_geometry,          only : mkrdim, metric
  use m_kg,                only : getcut
- use m_parser,            only : parsefile
+ use m_parser,            only : parsefile, ab_dimensions
  use m_invars1,           only : invars0, invars1m, indefo
  use m_time,              only : timab, time_set_papiopt
- use defs_abitypes,       only : dataset_type, ab_dimensions, hdr_type, MPI_type
+ use defs_abitypes,       only : MPI_type
  use defs_datatypes,      only : pspheader_type, ebands_t
  use m_pspheads,          only : inpspheads, pspheads_comm
 
@@ -2014,7 +2015,7 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
  end if
 
  ABI_FREE(gs_eigen)
- call hdr_free(hdr)
+ call hdr%free()
 
 end function ebands_from_file
 !!***
@@ -2076,8 +2077,8 @@ type(crystal_t) function crystal_from_file(path, comm) result(new)
     call hdr_read_from_fname(hdr, path, fform, comm)
     ABI_CHECK(fform /= 0, "fform == 0")
     timrev = 2 !; (if kpts_timrev_from_kptopt(hdr%kptopt) == 0) timrev = 1
-    new = hdr_get_crystal(hdr, timrev)
-    call hdr_free(hdr)
+    new = hdr%get_crystal(timrev)
+    call hdr%free()
  end if
 
 end function crystal_from_file

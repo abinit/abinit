@@ -27,7 +27,6 @@
 MODULE m_pspheads
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_errors
  use m_hash_md5
@@ -43,6 +42,7 @@ MODULE m_pspheads
  use funct_pwscf  ! pwscf module for naming xc functionals
  use m_xmpi
 
+ use defs_datatypes, only : pspheader_type
  use m_time,     only : timab
  use m_io_tools, only : open_file
  use m_fstrings, only : basename, lstrip, sjoin, startswith
@@ -744,7 +744,7 @@ subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
 !arrays
 
 ! *********************************************************************
- 
+
  if (option==1) then
    call rdpawpsxml_header(ecut_tmp,filnam,paw_setuploc)
    paw_setuploc%idgrid= paw_setuploc%radial_grid(1)%id

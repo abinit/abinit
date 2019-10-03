@@ -925,8 +925,6 @@ end function abi_derfc
 
 subroutine GAMMA_FUNCTION(X,GA)
 
-  implicit none
-
 !       ====================================================
 !       Purpose: This program computes the gamma function
 !                Gamma(x) using subroutine GAMMA

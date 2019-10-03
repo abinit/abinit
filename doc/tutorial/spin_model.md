@@ -17,8 +17,6 @@ With this lesson, you will learn to:
 
 The TB2J python package, which can be used to generate a spin model, can be found on the ABINIT gitlab website at https://gitlab.abinit.org/xuhe/TB2J. This package will be included in the ABINIT package in the future. 
 
-
-
 [TUTORIAL_README]
 
 ## 1 Heisenberg Model formalism

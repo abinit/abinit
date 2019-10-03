@@ -23,12 +23,12 @@
 MODULE m_paw_mkrho
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
 
- use m_time, only : timab
+ use defs_abitypes,      only : MPI_type
+ use m_time,             only : timab
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type,pawrad_deducer0
  use m_pawtab,           only : pawtab_type,pawtab_get_lsize
@@ -143,8 +143,6 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 &          pawtab,qphon,rhopsg,rhopsr,rhor,rprimd,symafm,symrec,typat,ucvol,usewvl,xred,&
 &          pawang_sym,pawnhat,pawrhoij0,rhog) ! optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: compute_rhor_rhog,cplex,idir,ipert,my_natom,natom,nspden,nsym,ntypat,paral_kgb,pawprtvol
@@ -196,7 +194,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
    msg='  pawrhoij0 must be present when ipert>0 !'
    MSG_BUG(msg)
  end if
- 
+
 !Symetrize PAW occupation matrix and store it in packed storage
  call timab(557,1,tsec)
  option=1;choice=1
@@ -243,7 +241,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 & rhodum,pawnhat_ptr,pawrhoij_ptr,pawrhoij0_ptr,pawtab,qphon,rprimd,ucvol,usewvl,xred,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 & comm_fft=mpi_enreg%comm_fft,paral_kgb=paral_kgb,me_g0=mpi_enreg%me_g0,&
-& distribfft=mpi_enreg%distribfft,mpi_comm_wvl=mpi_enreg%comm_wvl) 
+& distribfft=mpi_enreg%distribfft,mpi_comm_wvl=mpi_enreg%comm_wvl)
 
  if (compute_rhor_rhog/=0) then
 !  Transfer pseudo density from coarse grid to fine grid
@@ -342,8 +340,6 @@ end subroutine pawmkrho
  subroutine denfgr(atindx1,gmet,spaceComm_in,my_natom,natom,nattyp,ngfft,nhat,nspinor,nsppol,nspden,ntypat, &
 & pawfgr,pawrad,pawrhoij,pawtab,prtvol,rhor,rhor_paw,rhor_n_one,rhor_nt_one,rprimd,typat,ucvol,xred,&
 & abs_n_tilde_nt_diff,znucl,mpi_atmtab,comm_atom) ! Optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

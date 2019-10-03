@@ -25,7 +25,6 @@
 MODULE m_screen
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_hide_blas
  use m_errors

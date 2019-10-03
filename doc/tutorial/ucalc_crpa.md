@@ -20,9 +20,9 @@ The first GW tutorial in ABINIT ([GW](gw1)) is useful to learn how
 to compute the screening, and how to converge the relevant parameters
 (energy cutoffs and number of bands for the polarizability).
 
-[TUTORIAL_README]
-
 This tutorial should take two hours to complete (you should have access to more than 8 processors).
+
+[TUTORIAL_README]
 
 ## 1 The cRPA method to compute effective interaction: summary and key parameters
   
@@ -85,12 +85,12 @@ Several parameters (both physical and technical) are important for the cRPA calc
 *Before continuing, you might consider to work in a different subdirectory as
 for the other tutorials. Why not Work_crpa?
 In what follows, the name of files are mentioned as if you were in this subdirectory.
-All the input files can be found in the `$ABI_TUTOPARAL/Input` directory.*
+All the input files can be found in the `$ABI_TESTS/tutoparal/Input` directory.*
 
-Copy the files *tucrpa_1.in* and *tucrpa_1.files* from *ABI_TUTOPARAL/Input* to *Work_crpa* with:
+Copy the files *tucrpa_1.in* and *tucrpa_1.files* from *ABI_TESTS/tutoparal/Input* to *Work_crpa* with:
 
 ```sh
-cd $ABI_TUTOPARAL/Input
+cd $ABI_TESTS/tutoparal/Input
 mkdir Work_crpa
 cd Work_crpa
 cp ../tucrpa_1.files . 

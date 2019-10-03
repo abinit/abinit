@@ -27,8 +27,6 @@
 module m_scfcv_core
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use defs_rectypes
  use m_xmpi
@@ -43,7 +41,12 @@ module m_scfcv_core
  use m_hdr
  use m_xcdata
  use m_cgtools
+ use m_dtfil
+ use m_distribfft
 
+
+ use defs_datatypes,     only : pseudopotential_type
+ use defs_abitypes,      only : MPI_type
  use m_berryphase_new,   only : update_e_field_vars
  use m_time,             only : timab
  use m_fstrings,         only : int2char4, sjoin
@@ -77,7 +80,7 @@ module m_scfcv_core
  use m_paw_correlations, only : setnoccmmp,setrhoijpbe0
  use m_orbmag,           only : orbmag_type
  use m_paw_mkrho,        only : pawmkrho
- use m_paw_uj,           only : pawuj_red
+ use m_paw_uj,           only : pawuj_red, macro_uj_type
  use m_paw_dfpt,         only : pawgrnl
  use m_fock,             only : fock_type, fock_init, fock_destroy, fock_ACE_destroy, fock_common_destroy, &
                                 fock_BZ_destroy, fock_update_exc, fock_updatecwaveocc
@@ -1942,10 +1945,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !      Don't use parallelism over atoms because only me=0 accesses here
        bantot=hdr%bantot
        if (dtset%positron==0) then
-         call hdr_update(hdr,bantot,etotal,energies%e_fermie,residm,&
+         call hdr%update(bantot,etotal,energies%e_fermie,residm,&
 &         rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
        else
-         call hdr_update(hdr,bantot,electronpositron%e0,energies%e_fermie,residm,&
+         call hdr%update(bantot,electronpositron%e0,energies%e_fermie,residm,&
 &         rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
        end if
      end if
@@ -2761,7 +2764,6 @@ end subroutine etotfor
 subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 & nattyp,npwarr,pawtab,scf_history_wf)
 
- !use m_scf_history
  use m_cgcprj,  only : dotprod_set_cgcprj, dotprodm_sumdiag_cgcprj, lincom_cgcprj, cgcprj_cholesky
 
 !Arguments ------------------------------------

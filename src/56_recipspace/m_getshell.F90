@@ -121,8 +121,6 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 & kpt3,mkmem,mkmem_max,mvwtk,&
 & nkpt2,nkpt3,nneigh,nshiftk,rmet,rprimd,shiftk,wtk2, comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: kptopt,mkmem,nkpt2,nkpt3,comm

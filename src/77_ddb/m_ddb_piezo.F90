@@ -93,8 +93,6 @@ contains
 
 subroutine ddb_piezo(inp,blkval,dielt_rlx,elast,iblok,instrain,iout,mpert,natom,nblok,piezo,ucvol,ncid)
 
- implicit none
-
 !Arguments-------------------------------------------
 !scalars
  integer,intent(in) :: iblok,iout,mpert,natom,nblok,ncid

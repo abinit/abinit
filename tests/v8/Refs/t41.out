@@ -127,11 +127,6 @@ _ WF disk file :      1.299 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
 -          fftalg         312
-           getden1          0
-           getden2          1
-           getden3          0
-           getden4          0
-           getden5          0
            getwfk1          0
            getwfk2          0
            getwfk3          1
@@ -384,6 +379,7 @@ P          mk1mem5         64
         optdriver3          1
         optdriver4          1
         optdriver5          1
+           prtpot           1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -642,7 +638,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     320.922     320.859
 == DATASET  2 ==================================================================
 -   nproc =    1
 
- mkfilename : getden/=0, take file _DEN from output of DATASET   1.
+ mkfilename: getden from: t41o_DS1_DEN
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -1517,11 +1513,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     320.922     320.859
             fcart5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
-           getden1          0
-           getden2          1
-           getden3          0
-           getden4          0
-           getden5          0
            getwfk1          0
            getwfk2          0
            getwfk3          1
@@ -1774,6 +1765,7 @@ P          mk1mem5         64
         optdriver3          1
         optdriver4          1
         optdriver5          1
+           prtpot           1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00
