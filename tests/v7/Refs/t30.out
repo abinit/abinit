@@ -411,7 +411,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1169.259    1169.216
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.35000     5.958830     5.958830     11.917660     0.000000
     2   1.92520     3.275331     3.275331      6.550662    -0.000000
@@ -783,7 +783,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1169.259    1169.216
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.35000     5.958796     5.958580     11.917376     0.000217
     2   1.92520     3.275333     3.275331      6.550664     0.000002
@@ -995,7 +995,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1169.259    1169.216
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.35000     5.960516     5.957624     11.918140     0.002892
     2   1.92520     3.275366     3.275351      6.550717     0.000015
@@ -1207,7 +1207,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1169.259    1169.216
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.35000     5.956797     5.954685     11.911481     0.002112
     2   1.92520     3.275420     3.275424      6.550844    -0.000004

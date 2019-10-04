@@ -527,7 +527,7 @@ end subroutine unset_mpi_enreg_fft
 !!
 !! PARENTS
 !!      dfpt_eltfrhar,dfpt_eltfrloc,dfpt_vlocal,fftpac,fourdp,hartre,hartrestr
-!!      indirect_parallel_Fourier,initro,laplacian,m_fock,m_ioarr,mag_constr
+!!      indirect_parallel_Fourier,initro,laplacian,m_fock,m_ioarr,mag_penalty
 !!      make_efg_el,mkcore,mkcore_paw,mklocl_realspace,mklocl_recipspace
 !!      moddiel,out1dm,posdoppler,prcrskerker2,strhar,symrhg,vlocalstr,xcden
 !!      xcpot

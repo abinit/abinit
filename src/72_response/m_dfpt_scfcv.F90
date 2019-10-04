@@ -840,9 +840,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         phnons1,ph1d,dtset%prtvol,psps,rhorfermi_mq,rmet,rprimd,symaf1,symrc1,symrl1,&
 &         ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1)
        end if
-!        call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
-!&        dtset%ntypat,ab_out,dtset%ratsph,rhorfermi,rprimd,dtset%typat,ucvol,xred,&
-!&        -1,cplex) !dbg
 
      end if
 
@@ -979,7 +976,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
 !  SPr: don't remove the following comments for debugging
 !  call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
-!&   dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
+!&   dtset%ntypat,ab_out,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
 !&   idir+1,cplex)
 !     write(*,*) ' n ( 1,2)',intgden(1,1),' ',intgden(1,2)
 !     write(*,*) ' mx( 1,2)',intgden(2,1),' ',intgden(2,2)
@@ -1405,7 +1402,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    if(ipert==dtset%natom+5) then
      prtopt=idir+1;
      call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
-&     dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
+&     dtset%ntypat,ab_out,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
 &     prtopt,cplex,intgden=intgden,dentot=dentot)
      !debug: write out the vtk first-order density components
 !    call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
