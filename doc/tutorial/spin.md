@@ -140,7 +140,7 @@ are more up than down electrons at the Fermi level.
 That the magnetization points upwards is fortuitous, and we can get it
 pointing downwards by changing the sign of the initial [[spinat]].  
 Indeed, in the absence of spin-orbit coupling, there is no relation between
-the direction of magnetization and the cristal axes.  
+the direction of magnetization and the crystal axes.  
 If we start with a [[spinat]] of 0, the magnetization remains 0. [[spinat]]
 serves two purposes: it is a way to initially break the spin symmetry (up/down), and also
 to start with a reasonable magnetic moment, close enough to the final one (in spin DFT,
