@@ -38,6 +38,7 @@
 module m_spin_mover
 
   use defs_basis
+  use netcdf
   use m_errors
   use m_abicore
   use m_xmpi
@@ -269,7 +270,9 @@ contains
     ! read Spin and set as initial state
     ierr =nf90_inq_varid(ncid, "S", varid)
     NCF_CHECK_MSG(ierr, "when reading S")
-    ierr = nf90_get_var(ncid=ncid, varid=varid, values=self%Stmp(:,:), start=ntime-1, count=1)
+    ! TODO: Check if dimensions for start and count are okay
+    ierr = nf90_get_var(ncid=ncid, varid=varid, values=self%Stmp(:,:), start=(/ntime-1, ntime-1/), count=(/1,1/))
+
     NCF_CHECK_MSG(ierr, "when reading S from spin hist file")
 
     ! close file

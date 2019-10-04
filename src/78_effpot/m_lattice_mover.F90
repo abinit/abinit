@@ -158,10 +158,12 @@ contains
   !    if mode=1, use a Boltzman distribution to init the velocities.
   !    if mode=2, ...
   !-------------------------------------------------------------------!
-  subroutine set_initial_state(self, mode)
+  subroutine set_initial_state(self, mode, restart_hist_fname)
     ! set initial positions, spin, etc
     class(lattice_mover_t), intent(inout) :: self
     integer, optional, intent(in) :: mode
+    character(len=fnlen), optional, intent(in) :: restart_hist_fname
+
     real(dp) :: xi(3, self%natom)
     integer :: i
 

@@ -102,6 +102,7 @@ module m_multibinit_cell
      logical :: has_spin=.False.
      logical :: has_lwf=.False.
      logical :: has_electron=.False.
+     real(dp), allocatable :: Sref(:,:)
      type(mbcell_lattice_t) :: lattice
      type(mbcell_spin_t) :: spin
      type(mbcell_lwf_t) :: lwf
@@ -171,11 +172,11 @@ contains
   !> @param[in] ispin_prim:  id in primitive cell for each spin
   !----------------------------------------------------------------------
   subroutine set_spin(self,nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, rvec,  ispin_prim, Sref)
-    class(mbcell_t) , intent(inout):: self
-    integer, intent(in) :: nspin
-    real(dp), intent(in) :: ms(nspin), rprimd(3,3), spin_positions(3, nspin), gyro_ratio(nspin), gilbert_damping(nspin)
+    class(mbcell_t),  intent(inout):: self
+    integer,          intent(in)   :: nspin
+    real(dp),         intent(in)   :: ms(nspin), rprimd(3,3), spin_positions(3, nspin), gyro_ratio(nspin), gilbert_damping(nspin)
     real(dp), optional, intent(in) :: Sref(3, nspin)
-    integer, optional, intent(in) :: rvec(3, nspin), ispin_prim(nspin)
+    integer,  optional, intent(in) :: rvec(3, nspin), ispin_prim(nspin)
     self%has_spin=.True.
     call self%spin%initialize(nspin)
     call self%spin%set(nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, rvec, ispin_prim, Sref)
