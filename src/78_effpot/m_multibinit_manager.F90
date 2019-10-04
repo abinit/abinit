@@ -408,7 +408,8 @@ contains
     class(mb_manager_t), intent(inout) :: self
     if (self%params%spin_dynamics>0) then
        call self%spin_mover%initialize(params=self%params,&
-            & supercell=self%supercell, rng=self%rng)
+            & supercell=self%supercell, rng=self%rng, &
+            & restart_hist_fname=trim(self%filenames(2))//"_spinhist.nc")
     end if
 
 

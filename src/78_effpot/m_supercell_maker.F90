@@ -85,6 +85,10 @@ module m_supercell_maker
      procedure :: trans_j_and_Rj_noalloc
      procedure :: trans_jlist_and_Rj
      procedure :: rvec_for_each
+
+     ! Wave like quantities:
+     procedure :: generate_wave_scalar   ! s=s0*e^{ikR}
+     procedure :: generate_spin_wave_vectorlist  !vector with rotation angle= 2pi k * R
   end type supercell_maker_t
 
   public :: scmaker_unittest
@@ -371,7 +375,7 @@ contains
        do iA=1 , nA
           counter=counter+1
           A_sc(:,counter) = rotate_by_angle_around_axis( &
-               &angle=two_pi* DOT_PRODUCT(kpoint,  self%rvecs(:, icell)), &
+               & angle=two_pi* DOT_PRODUCT(kpoint,  self%rvecs(:, icell)), &
                & axis=axis, vec=A(:, iA))
        end do
     end do
