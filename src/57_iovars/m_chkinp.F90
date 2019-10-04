@@ -2509,6 +2509,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        MSG_ERROR_NOSTOP(message, ierr)
      end if
    end if
+   if (dt%positron/=0.and.mgga==1) then
+     message='Electron-positron calculation is not compatible with meta-GGA XC functional!'
+     MSG_ERROR_NOSTOP(message, ierr)
+   end if
    if (dt%positron/=0.and.dt%ionmov==5) then
      cond_string(1)='ionmov' ; cond_values(1)=dt%ionmov
      call chkint_eq(1,1,cond_string,cond_values,ierr,'positron',dt%positron,1,(/0/),iout)
@@ -3135,19 +3139,20 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='usekden' ; cond_values(1)=dt%usekden
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usewvl',usewvl,1,(/0/),iout)
      cond_string(1)='usekden' ; cond_values(1)=dt%usekden
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',usepaw,1,(/0/),iout)
+!     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',usepaw,1,(/0/),iout)
      cond_string(1)='usekden' ; cond_values(1)=dt%usekden
      call chkint_eq(1,1,cond_string,cond_values,ierr,'intxc',dt%intxc,1,(/0/),iout)
-     do ipsp=1,npsp
+!     do ipsp=1,npsp
 !      Check that xccc is zero (metaGGAs cannot be used at present with non-linear core corrections)
-       if ( pspheads(ipsp)%xccc/=0 ) then
-         write(message, '(3a,i0,3a)' )&
-&         'When usekden is non-zero, it is not possible to use pseudopotentials with a non-linear core correction.',ch10,&
-&         'However, for pseudopotential number ',ipsp,', there is such a core correction.',ch10,&
-&         'Action: either set usekden=0 in input file, or change this pseudopotential file.'
-         MSG_ERROR_NOSTOP(message, ierr)
-       end if
-     end do
+
+!       if ( pspheads(ipsp)%xccc/=0 ) then
+!         write(message, '(3a,i0,3a)' )&
+!&         'When usekden is non-zero, it is not possible to use pseudopotentials with a non-linear core correction.',ch10,&
+!&         'However, for pseudopotential number ',ipsp,', there is such a core correction.',ch10,&
+!&         'Action: either set usekden=0 in input file, or change this pseudopotential file.'
+!         MSG_ERROR_NOSTOP(message, ierr)
+!       end if
+!     end do
    end if
 
 !  usepawu and lpawu

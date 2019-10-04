@@ -2964,6 +2964,7 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
  real(dp),allocatable :: workf(:,:,:,:,:),workr(:,:,:,:,:)
 
 ! *************************************************************************
+
  ABI_CHECK(ndat == 1, "ndat != 1 should be tested")
 
  ! Keep track of timing

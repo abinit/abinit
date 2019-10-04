@@ -2353,7 +2353,61 @@ end subroutine paw_setup_copy
      read(funit,*) (paw_setup%pseudo_core_density%data(ir),ir=1,mesh_size)
      cycle
    end if
+!  --Read core density CORE_DENSITY
+   if (line(1:31)=='<ae_core_kinetic_energy_density') then
+     paw_setup%ae_core_kinetic_energy_density%tread=.true.
+     call paw_rdfromline(" grid",line,strg,ierr)
+     if (strg == "" ) strg = "unknown"
+     paw_setup%ae_core_kinetic_energy_density%grid=trim(strg)
+     do ii=1,paw_setup%ngrid
+       if(trim(paw_setup%ae_core_kinetic_energy_density%grid)==trim(paw_setup%radial_grid(ii)%id)) then
+         mesh_size=paw_setup%radial_grid(ii)%iend-paw_setup%radial_grid(ii)%istart+1
+         exit
+       end if
+     end do
+     call paw_rdfromline(" rc",line,strg,ierr)
+     if (strg /= "" ) then
+       if (len(trim(strg))<=30) then
+         strg1=trim(strg)
+         read(unit=strg1,fmt=*) rc(1)
+       else
+         read(unit=strg,fmt=*) rc(1)
+       end if
+     end if
+     LIBPAW_ALLOCATE(paw_setup%ae_core_kinetic_energy_density%data,(mesh_size))
+     !MGNAG v7[62]
+     ! Runtime Error: m_pawxmlps_cpp.f90, line 1657: 
+     ! Record too long for input bufferProgram terminated by I/O error on unit 9 
+     ! (File="/home/buildbot/ABINIT_OD/petrus_nag/gmatteo_7.7.1-training/tests/Psps_for_tests/Al.LDA",Formatted,Sequential)
+     read(funit,*) (paw_setup%ae_core_kinetic_energy_density%data(ir),ir=1,mesh_size)
+     cycle
+   end if
 
+!  --Read pseudized core density CORETAIL_DENSITY
+   if (line(1:35)=='<pseudo_core_kinetic_energy_density') then
+     paw_setup%pseudo_core_kinetic_energy_density%tread=.true.
+     call paw_rdfromline(" grid",line,strg,ierr)
+     if (strg == "" ) strg = "unknown"
+     paw_setup%pseudo_core_kinetic_energy_density%grid=trim(strg)
+     do ii=1,paw_setup%ngrid
+       if(trim(paw_setup%pseudo_core_kinetic_energy_density%grid)==trim(paw_setup%radial_grid(ii)%id)) then
+         mesh_size=paw_setup%radial_grid(ii)%iend-paw_setup%radial_grid(ii)%istart+1
+         exit
+       end if
+     end do
+     call paw_rdfromline(" rc",line,strg,ierr)
+     if (strg /= "" ) then
+       if (len(trim(strg))<=30) then
+         strg1=trim(strg)
+         read(unit=strg1,fmt=*) rc(2)
+       else
+         read(unit=strg,fmt=*) rc(2)
+       end if
+     end if
+     LIBPAW_ALLOCATE(paw_setup%pseudo_core_kinetic_energy_density%data,(mesh_size))
+     read(funit,*) (paw_setup%pseudo_core_kinetic_energy_density%data(ir),ir=1,mesh_size)
+     cycle
+   end if
 !  --Read pseudized valence density PSEUDO_VALENCE_DENSITY
    if (line(1:23)=='<pseudo_valence_density') then
      paw_setup%pseudo_valence_density%tread=.true.

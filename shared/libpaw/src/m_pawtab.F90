@@ -137,6 +137,11 @@ MODULE m_pawtab
   integer :: basis_size
    ! Number of elements for the paw nl basis on the considered atom type
 
+  integer :: has_coretau
+   ! Flag controling use of core kinetic enrgy density (AE and pseudo)
+   ! if 1, [t]coretau() is allocated.
+   ! if 2, [t]coretau() is computed and stored.
+
   integer :: has_fock
    ! if 1, onsite matrix elements of the core-valence Fock operator are allocated
    ! if 2, onsite matrix elements of the core-valence Fock operator are computed and stored
@@ -229,6 +234,9 @@ MODULE m_pawtab
   integer :: core_mesh_size
    ! Dimension of radial mesh for core density
 
+  integer :: coretau_mesh_size
+   ! Dimension of radial mesh for core density
+
   integer :: vminus_mesh_size
    ! Dimension of radial mesh for vminushalf
 
@@ -307,6 +315,10 @@ MODULE m_pawtab
    ! Gives 1/q d(tNvale(q))/dq for q=0
    ! (tNvale(q) = FT of pseudo valence density)
 
+  real(dp) :: dtaucdq0
+   ! Gives 1/q d(tTAUcore(q))/dq for q=0
+   ! (tTAUcore(q) = FT of pseudo core kinetic density)
+
   real(dp) :: ex_cc
    ! Exchange energy for the core-core interaction of the Fock operator
 
@@ -334,6 +346,9 @@ MODULE m_pawtab
 
   real(dp) :: rcore
    ! Radius of core corrections (rcore >= rpaw)
+
+  real(dp) :: rtaucore
+   ! Radius of kinetic core corrections (rtaucore >= rpaw)
 
   real(dp) :: shape_sigma
    ! Sigma parameter in gaussian shapefunction (shape_type=2)
@@ -383,6 +398,10 @@ MODULE m_pawtab
   real(dp), allocatable :: coredens(:)
    ! coredens(mesh_size)
    ! Gives the core density of the atom
+
+  real(dp), allocatable :: coretau(:)
+   ! coretau(mesh_size)
+   ! Gives the kinetic energy density of the atom
 
   real(dp), allocatable :: dij0(:)
    ! dij0(lmn2_size)
@@ -511,15 +530,26 @@ MODULE m_pawtab
    ! Nonlocal part of the overlap operator
 
   real(dp), allocatable :: tcoredens(:,:)
-   ! tcoredens(core_mesh_size,1)
+   ! tcoretau(core_mesh_size,1)
    ! Gives the pseudo core density of the atom
    ! In PAW+WVL:
-   !  tcoredens(core_mesh_size,2:6)
+   !  tcoretau(core_mesh_size,2:6)
    !  are the first to the fifth derivatives of the pseudo core density.
+
+ real(dp), allocatable :: tcoretau(:,:)
+   ! tcoretau(coretau_mesh_size,1)
+   ! Gives the pseudo core kinetic energy density of the atom
+   ! In PAW+WVL:
+   !  tcoretau (coretau_mesh_size,2:6)
+   !  are the first to the fifth derivatives of the pseudo kinetic energy core density.
 
   real(dp), allocatable :: tcorespl(:,:)
    ! tcorespl(mqgrid,2)
    ! Gives the pseudo core density in reciprocal space on a regular grid
+
+  real(dp), allocatable :: ttaucorespl(:,:)
+   ! ttaucorespl(mqgrid,2)
+   ! Gives the pseudo kinetic core density in reciprocal space on a regular grid
 
   real(dp), allocatable :: tnablaphi(:,:)
    ! tphi(partialwave_mesh_size,basis_size)
@@ -639,6 +669,7 @@ subroutine pawtab_nullify_0D(Pawtab)
  Pawtab%has_kij=0
  Pawtab%has_tproj=0
  Pawtab%has_tvale=0
+ Pawtab%has_coretau=0
  Pawtab%has_vhtnzc=0
  Pawtab%has_vhnzc=0
  Pawtab%has_vminushalf=0
@@ -670,6 +701,7 @@ subroutine pawtab_nullify_0D(Pawtab)
  Pawtab%mesh_size=0
  Pawtab%partialwave_mesh_size=0
  Pawtab%core_mesh_size=0
+ Pawtab%coretau_mesh_size=0
  Pawtab%vminus_mesh_size=0
  Pawtab%tnvale_mesh_size=0
  Pawtab%shape_type=-10
@@ -764,6 +796,9 @@ subroutine pawtab_free_0D(Pawtab)
  if (allocated(Pawtab%coredens))  then
    LIBPAW_DEALLOCATE(Pawtab%coredens)
  end if
+ if (allocated(Pawtab%coretau))  then
+   LIBPAW_DEALLOCATE(Pawtab%coretau)
+ end if
  if (allocated(Pawtab%dij0))  then
    LIBPAW_DEALLOCATE(Pawtab%dij0)
  end if
@@ -851,8 +886,14 @@ subroutine pawtab_free_0D(Pawtab)
  if (allocated(Pawtab%tcoredens))  then
    LIBPAW_DEALLOCATE(Pawtab%tcoredens)
  end if
+ if (allocated(Pawtab%tcoretau))  then
+   LIBPAW_DEALLOCATE(Pawtab%tcoretau)
+ end if
  if (allocated(Pawtab%tcorespl))  then
    LIBPAW_DEALLOCATE(Pawtab%tcorespl)
+ end if
+ if (allocated(Pawtab%ttaucorespl))  then
+   LIBPAW_DEALLOCATE(Pawtab%ttaucorespl)
  end if
  if (allocated(Pawtab%tnablaphi))  then
    LIBPAW_DEALLOCATE(Pawtab%tphi)
@@ -896,6 +937,7 @@ subroutine pawtab_free_0D(Pawtab)
 !They are set from input data and must be kept
 !Pawtab%has_kij=0
 !Pawtab%has_tproj=0
+!Pawtab%has_coretau=0
 !Pawtab%has_tvale=0
 !Pawtab%has_vhtnzc=0
 !Pawtab%has_vhnzc=0
@@ -928,6 +970,7 @@ subroutine pawtab_free_0D(Pawtab)
  Pawtab%mesh_size=0
  Pawtab%partialwave_mesh_size=0
  Pawtab%core_mesh_size=0
+ Pawtab%coretau_mesh_size=0
  Pawtab%vminus_mesh_size=0
  Pawtab%tnvale_mesh_size=0
  Pawtab%shape_type=-10
@@ -987,11 +1030,12 @@ end subroutine pawtab_free_1D
 !!
 !! SOURCE
 
-subroutine pawtab_set_flags_0D(Pawtab,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
-&                              has_vhtnzc,has_nabla,has_nablaphi,has_shapefncg,has_wvl)
+subroutine pawtab_set_flags_0D(Pawtab,has_coretau,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
+&                              has_vhtnzc,has_nabla,has_nablaphi,has_shapefncg,has_vminushalf,has_wvl)
 
 !Arguments ------------------------------------
- integer,intent(in),optional :: has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,has_vhtnzc
+ integer,intent(in),optional :: has_coretau,has_fock,has_kij,has_tproj,has_tvale
+ integer,intent(in),optional :: has_vhnzc,has_vhtnzc,has_vminushalf
  integer,intent(in),optional :: has_nabla,has_nablaphi,has_shapefncg,has_wvl
  type(pawtab_type),intent(inout) :: Pawtab
 
@@ -1002,25 +1046,29 @@ subroutine pawtab_set_flags_0D(Pawtab,has_fock,has_kij,has_tproj,has_tvale,has_v
  !@pawtab_type
 
  Pawtab%has_fock      =0
- Pawtab%has_kij      =0
- Pawtab%has_tproj    =0
- Pawtab%has_tvale    =0
- Pawtab%has_vhnzc    =0
- Pawtab%has_vhtnzc   =0
- Pawtab%has_nabla    =0
- Pawtab%has_nablaphi =0
- Pawtab%has_shapefncg=0
- Pawtab%has_wvl      =0
- if (present(has_fock))     Pawtab%has_fock=has_fock
- if (present(has_kij))      Pawtab%has_kij=has_kij
- if (present(has_tproj))    Pawtab%has_tproj=has_tproj
- if (present(has_tvale))    Pawtab%has_tvale=has_tvale
- if (present(has_vhnzc))    Pawtab%has_vhnzc=has_vhnzc
- if (present(has_vhtnzc))   Pawtab%has_vhtnzc=has_vhtnzc
- if (present(has_nabla))    Pawtab%has_nabla=has_nabla
- if (present(has_nablaphi)) Pawtab%has_nablaphi=has_nablaphi
- if (present(has_shapefncg))Pawtab%has_shapefncg=has_shapefncg
- if (present(has_wvl))      Pawtab%has_wvl=has_wvl
+ Pawtab%has_kij       =0
+ Pawtab%has_tproj     =0
+ Pawtab%has_tvale     =0
+ Pawtab%has_coretau   =0
+ Pawtab%has_vhnzc     =0
+ Pawtab%has_vhtnzc    =0
+ Pawtab%has_nabla     =0
+ Pawtab%has_nablaphi  =0
+ Pawtab%has_shapefncg =0
+ Pawtab%has_vminushalf=0
+ Pawtab%has_wvl       =0
+ if (present(has_fock))      Pawtab%has_fock=has_fock
+ if (present(has_kij))       Pawtab%has_kij=has_kij
+ if (present(has_tproj))     Pawtab%has_tproj=has_tproj
+ if (present(has_tvale))     Pawtab%has_tvale=has_tvale
+ if (present(has_coretau))   Pawtab%has_coretau=has_coretau
+ if (present(has_vhnzc))     Pawtab%has_vhnzc=has_vhnzc
+ if (present(has_vhtnzc))    Pawtab%has_vhtnzc=has_vhtnzc
+ if (present(has_nabla))     Pawtab%has_nabla=has_nabla
+ if (present(has_nablaphi))  Pawtab%has_nablaphi=has_nablaphi
+ if (present(has_shapefncg) )Pawtab%has_shapefncg=has_shapefncg
+ if (present(has_vminushalf))Pawtab%has_vminushalf=has_vminushalf
+ if (present(has_wvl))       Pawtab%has_wvl=has_wvl
 
 end subroutine pawtab_set_flags_0D
 !!***
@@ -1033,19 +1081,20 @@ end subroutine pawtab_set_flags_0D
 !!
 !! FUNCTION
 !!  Set flags controlling optional arrays in an array of pawtab datastructures
-!!
+!! if (present(has_tvale))    Pawtab%has_tvale=has_tvale
+
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine pawtab_set_flags_1D(Pawtab,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
-&                              has_vhtnzc,has_nabla,has_nablaphi,has_shapefncg,has_wvl)
+subroutine pawtab_set_flags_1D(Pawtab,has_coretau,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
+&                              has_vhtnzc,has_nabla,has_nablaphi,has_shapefncg,has_vminushalf,has_wvl)
 
 !Arguments ------------------------------------
- integer,intent(in),optional :: has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,has_vhtnzc
- integer,intent(in),optional :: has_nabla,has_nablaphi,has_shapefncg,has_wvl
+ integer,intent(in),optional :: has_coretau,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,has_vhtnzc
+ integer,intent(in),optional :: has_nabla,has_nablaphi,has_shapefncg,has_vminushalf,has_wvl
  type(pawtab_type),intent(inout) :: Pawtab(:)
 
 !Local variables-------------------------------
@@ -1060,25 +1109,29 @@ subroutine pawtab_set_flags_1D(Pawtab,has_fock,has_kij,has_tproj,has_tvale,has_v
 
  do ii=1,nn
    Pawtab(ii)%has_fock      =0
-   Pawtab(ii)%has_kij      =0
-   Pawtab(ii)%has_tproj    =0
-   Pawtab(ii)%has_tvale    =0
-   Pawtab(ii)%has_vhnzc    =0
-   Pawtab(ii)%has_vhtnzc   =0
-   Pawtab(ii)%has_nabla    =0
-   Pawtab(ii)%has_nablaphi =0
-   Pawtab(ii)%has_shapefncg=0
-   Pawtab(ii)%has_wvl          =0
-   if (present(has_fock))     Pawtab(ii)%has_fock=has_fock
-   if (present(has_kij))      Pawtab(ii)%has_kij=has_kij
-   if (present(has_tproj))    Pawtab(ii)%has_tproj=has_tproj
-   if (present(has_tvale))    Pawtab(ii)%has_tvale=has_tvale
-   if (present(has_vhnzc))    Pawtab(ii)%has_vhnzc=has_vhnzc
-   if (present(has_vhtnzc))   Pawtab(ii)%has_vhtnzc=has_vhtnzc
-   if (present(has_nabla))    Pawtab(ii)%has_nabla=has_nabla
-   if (present(has_nablaphi))    Pawtab(ii)%has_nablaphi=has_nablaphi
-   if (present(has_shapefncg))Pawtab(ii)%has_shapefncg=has_shapefncg
-   if (present(has_wvl))      Pawtab(ii)%has_wvl=has_wvl
+   Pawtab(ii)%has_kij       =0
+   Pawtab(ii)%has_tproj     =0
+   Pawtab(ii)%has_tvale     =0
+   Pawtab(ii)%has_coretau   =0
+   Pawtab(ii)%has_vhnzc     =0
+   Pawtab(ii)%has_vhtnzc    =0
+   Pawtab(ii)%has_nabla     =0
+   Pawtab(ii)%has_nablaphi  =0
+   Pawtab(ii)%has_shapefncg =0
+   Pawtab(ii)%has_vminushalf=0
+   Pawtab(ii)%has_wvl       =0
+   if (present(has_fock))      Pawtab(ii)%has_fock=has_fock
+   if (present(has_kij))       Pawtab(ii)%has_kij=has_kij
+   if (present(has_tproj))     Pawtab(ii)%has_tproj=has_tproj
+   if (present(has_tvale))     Pawtab(ii)%has_tvale=has_tvale
+   if (present(has_coretau))   Pawtab(ii)%has_coretau=has_coretau
+   if (present(has_vhnzc))     Pawtab(ii)%has_vhnzc=has_vhnzc
+   if (present(has_vhtnzc))    Pawtab(ii)%has_vhtnzc=has_vhtnzc
+   if (present(has_nabla))     Pawtab(ii)%has_nabla=has_nabla
+   if (present(has_nablaphi))  Pawtab(ii)%has_nablaphi=has_nablaphi
+   if (present(has_shapefncg)) Pawtab(ii)%has_shapefncg=has_shapefncg
+   if (present(has_vminushalf))Pawtab(ii)%has_vminushalf=has_vminushalf
+   if (present(has_wvl))       Pawtab(ii)%has_wvl=has_wvl
  end do
 
 end subroutine pawtab_set_flags_1D
@@ -1168,9 +1221,13 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Size of radial mesh for [pseudo] core density... ',Pawtab(ityp)%core_mesh_size
   call wrtout(my_unt,msg,my_mode)
+  write(msg,'(a,i4)')'  Size of radial mesh for [pseudo] kin core density',Pawtab(ityp)%coretau_mesh_size
+  call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Size of radial mesh for pseudo valence density.. ',Pawtab(ityp)%tnvale_mesh_size
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  No of Q-points for tcorespl and tvalespl ....... ',Pawtab(ityp)%mqgrid
+  call wrtout(my_unt,msg,my_mode)
+  write(msg,'(a,i4)')'  No of Q-points for ttaucorespl and tvalespl .... ',Pawtab(ityp)%mqgrid
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  No of Q-points for the radial shape functions .. ',Pawtab(ityp)%mqgrid_shp
   call wrtout(my_unt,msg,my_mode)
@@ -1206,15 +1263,15 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   call wrtout(my_unt,msg,my_mode)
 
   ! "Has" flags
-  if (Pawtab(ityp)%has_fock/=0) then
-    write(msg,'(a,i4)')'  Has Fock   ..................................... ',Pawtab(ityp)%has_fock
-    call wrtout(my_unt,msg,my_mode)
-  end if
+  write(msg,'(a,i4)')'  Has Fock  ...................................... ',Pawtab(ityp)%has_fock
+  call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Has kij   ...................................... ',Pawtab(ityp)%has_kij
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Has tproj ...................................... ',Pawtab(ityp)%has_tproj
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Has tvale ...................................... ',Pawtab(ityp)%has_tvale
+  call wrtout(my_unt,msg,my_mode)
+  write(msg,'(a,i4)')'  Has coretau .................................... ',Pawtab(ityp)%has_coretau
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Has vhtnzc ..................................... ',Pawtab(ityp)%has_vhtnzc
   call wrtout(my_unt,msg,my_mode)
@@ -1224,7 +1281,7 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Has nabla ...................................... ',Pawtab(ityp)%has_nabla
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,i4)')'  Has nablaphi ...................................... ',Pawtab(ityp)%has_nablaphi
+  write(msg,'(a,i4)')'  Has nablaphi ................................... ',Pawtab(ityp)%has_nablaphi
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Has shapefuncg ................................. ',Pawtab(ityp)%has_shapefncg
   call wrtout(my_unt,msg,my_mode)
@@ -1240,6 +1297,10 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,es16.8)')'  1/q d(tNvale(q))/dq for q=0 .....................',Pawtab(ityp)%dnvdq0
   call wrtout(my_unt,msg,my_mode)
+  if (Pawtab(ityp)%has_coretau/=0) then
+    write(msg,'(a,es16.8)')'  1/q d(tTAUcore(q))/dq for q=0 ...................',Pawtab(ityp)%dtaucdq0
+    call wrtout(my_unt,msg,my_mode)
+  end if
   if (Pawtab(ityp)%has_fock/=0) then
     write(msg,'(a,es16.8)')'  Core-core Fock energy  ..........................',Pawtab(ityp)%ex_cc
     call wrtout(my_unt,msg,my_mode)
@@ -1405,10 +1466,10 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 !scalars
  integer :: ierr,ii,me,nn_dpr,nn_dpr_arr,nn_int,nn_int_arr
  integer :: siz_indklmn,siz_indlmn,siz_klmntomn,siz_kmix,siz_lnproju,siz_orbitals
- integer :: siz_coredens,siz_dij0,siz_dltij,siz_dshpfunc,siz_eijkl,siz_eijkl_sr,siz_euijkl,siz_euij_fll,siz_fk,siz_gammaij
+ integer :: siz_coredens,siz_coretau,siz_dij0,siz_dltij,siz_dshpfunc,siz_eijkl,siz_eijkl_sr,siz_euijkl,siz_euij_fll,siz_fk,siz_gammaij
  integer :: siz_gnorm,siz_fock,siz_kij,siz_nabla_ij,siz_nablaphi,siz_phi,siz_phiphj,siz_phiphjint,siz_ph0phiint
  integer :: siz_qgrid_shp,siz_qijl,siz_rad_for_spline,siz_rhoij0,siz_shape_alpha
- integer :: siz_shape_q,siz_shapefunc,siz_shapefncg,siz_sij,siz_tcoredens,siz_tcorespl
+ integer :: siz_shape_q,siz_shapefunc,siz_shapefncg,siz_sij,siz_tcoredens,siz_tcoretau,siz_tcorespl,siz_ttaucorespl
  integer :: siz_tnablaphi,siz_tphi,siz_tphitphj,siz_tproj,siz_tvalespl,siz_vee,siz_vex,siz_vhtnzc
  integer :: siz_vhnzc,siz_vminushalf,siz_zioneff
  integer :: siz_wvlpaw,siz_wvl_pngau,siz_wvl_parg,siz_wvl_pfac
@@ -1436,10 +1497,10 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Integers (read from psp file)
 !-------------------------------------------------------------------------
-!  basis_size,has_fock,has_kij,has_shapefncg,has_nabla,has_nablaphi,has_tproj,has_tvale,has_vhtnzc,has_vhnzc,has_vminushalf
-!  has_wvl,ij_size,l_size,lmn_size,lmn2_size,mesh_size,partialwave_mesh_size,core_mesh_size, vminus_mesh_size
+!  basis_size,has_fock,has_kij,has_shapefncg,has_nabla,has_nablaphi,has_tproj,has_tvale,has_taucore,has_vhtnzc,has_vhnzc,has_vminushalf
+!  has_wvl,ij_size,l_size,lmn_size,lmn2_size,mesh_size,partialwave_mesh_size,core_mesh_size,coretau_mesh_size, vminus_mesh_size
 !  tnvale_mesh_size,mqgrid,shape_lambda,shape_type,usetcore,usexcnhat
-   nn_int=nn_int+25
+   nn_int=nn_int+26
 
 !Integers (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
@@ -1448,8 +1509,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Reals (read from psp file)
 !-------------------------------------------------------------------------
-!  beta,dncdq0,d2ncdq0,dnvdq0,ex_cc,exccore,rpaw,rshp,rcore,shape_sigma
-   nn_dpr=nn_dpr+10
+!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,ex_cc,exccore,rpaw,rshp,rcore,rtaucore,shape_sigma
+   nn_dpr=nn_dpr+12
 
 !Reals (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
@@ -1500,10 +1561,10 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Reals arrays (read from psp file)
 !-------------------------------------------------------------------------
-   siz_coredens=0 ; siz_dij0=0     ; siz_kij=0      ; siz_fock=0
+   siz_coredens=0 ; siz_coretau=0; siz_dij0=0     ; siz_kij=0      ; siz_fock=0
    siz_nablaphi=0   ; siz_phi=0      ; siz_rhoij0=0   ; siz_shape_alpha=0
-   siz_shape_q=0  ; siz_shapefunc=0; siz_tcoredens=0
-   siz_tcorespl=0 ; siz_tphi=0     ; siz_tnablaphi=0  ; siz_tproj=0
+   siz_shape_q=0  ; siz_shapefunc=0; siz_tcoredens=0 ; siz_tcoretau=0
+   siz_tcorespl=0 ; siz_ttaucorespl=0 ; siz_tphi=0     ; siz_tnablaphi=0  ; siz_tproj=0
    siz_tvalespl=0 ; siz_vhtnzc=0   ; siz_vhnzc=0
    siz_vminushalf=0
    nn_int=nn_int+17
@@ -1513,6 +1574,12 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      if (siz_coredens/=pawtab%core_mesh_size) &
 &      msg=trim(msg)//' coredens'
      nn_dpr=nn_dpr+siz_coredens
+   end if
+   if (allocated(pawtab%coretau)) then
+     siz_coretau=size(pawtab%coretau)             !(coretau_mesh_size)
+     if (siz_coretau/=pawtab%coretau_mesh_size) &
+&      msg=trim(msg)//' coretau'
+     nn_dpr=nn_dpr+siz_coretau
    end if
    if (allocated(pawtab%dij0)) then
      siz_dij0=size(pawtab%dij0)                     !(lmn2_size)
@@ -1565,10 +1632,21 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 &      msg=trim(msg)//' tcoredens'
      nn_dpr=nn_dpr+siz_tcoredens
    end if
+   if (allocated(pawtab%tcoretau)) then
+     siz_tcoretau=size(pawtab%tcoretau)           !(coretau_mesh_size,1 or 6)
+     if (siz_tcoretau/=pawtab%coretau_mesh_size.and.siz_tcoretau/=6*pawtab%coretau_mesh_size) &
+&      msg=trim(msg)//' tcoretau'
+     nn_dpr=nn_dpr+siz_tcoretau
+   end if
    if (allocated(pawtab%tcorespl)) then
      siz_tcorespl=size(pawtab%tcorespl)             !(mqgrid,2)
      if (siz_tcorespl/=pawtab%mqgrid*2) msg=trim(msg)//' tcorespl'
      nn_dpr=nn_dpr+siz_tcorespl
+   end if
+   if (allocated(pawtab%ttaucorespl)) then
+     siz_ttaucorespl=size(pawtab%ttaucorespl)             !(mqgrid,2)
+     if (siz_ttaucorespl/=pawtab%mqgrid*2) msg=trim(msg)//' ttaucorespl'
+     nn_dpr=nn_dpr+siz_ttaucorespl
    end if
    if (allocated(pawtab%tnablaphi)) then
      siz_tnablaphi=size(pawtab%tnablaphi)                     !(partialwave_mesh_size, basis_size)
@@ -1815,6 +1893,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_int(ii)=siz_indlmn  ;ii=ii+1
    list_int(ii)=siz_orbitals  ;ii=ii+1
    list_int(ii)=siz_coredens  ;ii=ii+1
+   list_int(ii)=siz_coretau  ;ii=ii+1
    list_int(ii)=siz_dij0  ;ii=ii+1
    list_int(ii)=siz_fock  ;ii=ii+1
    list_int(ii)=siz_kij  ;ii=ii+1
@@ -1825,7 +1904,9 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_int(ii)=siz_shape_q  ;ii=ii+1
    list_int(ii)=siz_shapefunc  ;ii=ii+1
    list_int(ii)=siz_tcoredens  ;ii=ii+1
+   list_int(ii)=siz_tcoretau  ;ii=ii+1
    list_int(ii)=siz_tcorespl  ;ii=ii+1
+   list_int(ii)=siz_ttaucorespl  ;ii=ii+1
    list_int(ii)=siz_tnablaphi  ;ii=ii+1
    list_int(ii)=siz_tphi  ;ii=ii+1
    list_int(ii)=siz_tproj  ;ii=ii+1
@@ -1843,6 +1924,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_int(ii)=pawtab%has_nablaphi ; ii=ii+1
    list_int(ii)=pawtab%has_tproj  ;ii=ii+1
    list_int(ii)=pawtab%has_tvale  ;ii=ii+1
+   list_int(ii)=pawtab%has_coretau  ;ii=ii+1
    list_int(ii)=pawtab%has_vhtnzc  ;ii=ii+1
    list_int(ii)=pawtab%has_vhnzc  ;ii=ii+1
    list_int(ii)=pawtab%has_vminushalf  ;ii=ii+1
@@ -1854,6 +1936,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_int(ii)=pawtab%mesh_size  ;ii=ii+1
    list_int(ii)=pawtab%partialwave_mesh_size  ;ii=ii+1
    list_int(ii)=pawtab%core_mesh_size  ;ii=ii+1
+   list_int(ii)=pawtab%coretau_mesh_size  ;ii=ii+1
    list_int(ii)=pawtab%vminus_mesh_size  ;ii=ii+1
    list_int(ii)=pawtab%tnvale_mesh_size  ;ii=ii+1
    list_int(ii)=pawtab%mqgrid  ;ii=ii+1
@@ -1973,6 +2056,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    siz_indlmn=list_int(ii)  ;ii=ii+1
    siz_orbitals=list_int(ii)  ;ii=ii+1
    siz_coredens=list_int(ii)  ;ii=ii+1
+   siz_coretau=list_int(ii)  ;ii=ii+1
    siz_dij0=list_int(ii)  ;ii=ii+1
    siz_fock=list_int(ii)  ;ii=ii+1
    siz_kij=list_int(ii)  ;ii=ii+1
@@ -1983,7 +2067,9 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    siz_shape_q=list_int(ii)  ;ii=ii+1
    siz_shapefunc=list_int(ii)  ;ii=ii+1
    siz_tcoredens=list_int(ii)  ;ii=ii+1
+   siz_tcoretau=list_int(ii)  ;ii=ii+1
    siz_tcorespl=list_int(ii)  ;ii=ii+1
+   siz_ttaucorespl=list_int(ii)  ;ii=ii+1
    siz_tnablaphi=list_int(ii)  ;ii=ii+1
    siz_tphi=list_int(ii)  ;ii=ii+1
    siz_tproj=list_int(ii)  ;ii=ii+1
@@ -2001,6 +2087,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    pawtab%has_nablaphi=list_int(ii) ; ii=ii+1
    pawtab%has_tproj=list_int(ii)  ;ii=ii+1
    pawtab%has_tvale=list_int(ii)  ;ii=ii+1
+   pawtab%has_coretau=list_int(ii)  ;ii=ii+1
    pawtab%has_vhtnzc=list_int(ii)  ;ii=ii+1
    pawtab%has_vhnzc=list_int(ii)  ;ii=ii+1
    pawtab%has_vminushalf=list_int(ii)  ;ii=ii+1
@@ -2012,6 +2099,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    pawtab%mesh_size=list_int(ii)  ;ii=ii+1
    pawtab%partialwave_mesh_size=list_int(ii)  ;ii=ii+1
    pawtab%core_mesh_size=list_int(ii)  ;ii=ii+1
+   pawtab%coretau_mesh_size=list_int(ii)  ;ii=ii+1
    pawtab%vminus_mesh_size=list_int(ii)  ;ii=ii+1
    pawtab%tnvale_mesh_size=list_int(ii)  ;ii=ii+1
    pawtab%mqgrid=list_int(ii)  ;ii=ii+1
@@ -2162,16 +2250,22 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_dpr(ii)=pawtab%dncdq0  ;ii=ii+1
    list_dpr(ii)=pawtab%d2ncdq0  ;ii=ii+1
    list_dpr(ii)=pawtab%dnvdq0  ;ii=ii+1
+   list_dpr(ii)=pawtab%dtaucdq0  ;ii=ii+1
    list_dpr(ii)=pawtab%ex_cc   ;ii=ii+1
    list_dpr(ii)=pawtab%exccore  ;ii=ii+1
    list_dpr(ii)=pawtab%rpaw  ;ii=ii+1
    list_dpr(ii)=pawtab%rshp  ;ii=ii+1
    list_dpr(ii)=pawtab%rcore  ;ii=ii+1
+   list_dpr(ii)=pawtab%rtaucore  ;ii=ii+1
    list_dpr(ii)=pawtab%shape_sigma  ;ii=ii+1
 !Reals arrays (read from psp file)
    if (siz_coredens>0) then
      list_dpr(ii:ii+siz_coredens-1)=pawtab%coredens(1:siz_coredens)
      ii=ii+siz_coredens
+   end if
+   if (siz_coretau>0) then
+     list_dpr(ii:ii+siz_coretau-1)=pawtab%coretau(1:siz_coretau)
+     ii=ii+siz_coretau
    end if
    if (siz_dij0>0) then
      list_dpr(ii:ii+siz_dij0-1)=pawtab%dij0(1:siz_dij0)
@@ -2213,9 +2307,17 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      list_dpr(ii:ii+siz_tcoredens-1)=reshape(pawtab%tcoredens,(/siz_tcoredens/))
      ii=ii+siz_tcoredens
    end if
+   if (siz_tcoretau>0) then
+     list_dpr(ii:ii+siz_tcoretau-1)=reshape(pawtab%tcoretau,(/siz_tcoretau/))
+     ii=ii+siz_tcoretau
+   end if
    if (siz_tcorespl>0) then
      list_dpr(ii:ii+siz_tcorespl-1)=reshape(pawtab%tcorespl,(/siz_tcorespl/))
      ii=ii+siz_tcorespl
+   end if
+   if (siz_ttaucorespl>0) then
+     list_dpr(ii:ii+siz_ttaucorespl-1)=reshape(pawtab%ttaucorespl,(/siz_ttaucorespl/))
+     ii=ii+siz_ttaucorespl
    end if
    if (siz_tnablaphi>0) then
      list_dpr(ii:ii+siz_tnablaphi-1)=reshape(pawtab%tnablaphi,(/siz_tnablaphi/))
@@ -2392,20 +2494,30 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    pawtab%dncdq0=list_dpr(ii)  ;ii=ii+1
    pawtab%d2ncdq0=list_dpr(ii)  ;ii=ii+1
    pawtab%dnvdq0=list_dpr(ii)  ;ii=ii+1
+   pawtab%dtaucdq0=list_dpr(ii)  ;ii=ii+1
    pawtab%ex_cc=list_dpr(ii)  ;ii=ii+1
    pawtab%exccore=list_dpr(ii)  ;ii=ii+1
    pawtab%rpaw=list_dpr(ii)  ;ii=ii+1
    pawtab%rshp=list_dpr(ii)  ;ii=ii+1
    pawtab%rcore=list_dpr(ii)  ;ii=ii+1
+   pawtab%rtaucore=list_dpr(ii)  ;ii=ii+1
    pawtab%shape_sigma=list_dpr(ii)  ;ii=ii+1
 !Reals arrays (read from psp file)
    if (allocated(pawtab%coredens)) then
      LIBPAW_DEALLOCATE(pawtab%coredens)
    end if
+   if (allocated(pawtab%coretau)) then
+     LIBPAW_DEALLOCATE(pawtab%coretau)
+   end if
    if (siz_coredens>0) then
      LIBPAW_ALLOCATE(pawtab%coredens,(pawtab%core_mesh_size))
      pawtab%coredens=list_dpr(ii:ii+pawtab%core_mesh_size-1)
      ii=ii+siz_coredens
+   end if
+   if (siz_coretau>0) then
+     LIBPAW_ALLOCATE(pawtab%coretau,(pawtab%coretau_mesh_size))
+     pawtab%coretau=list_dpr(ii:ii+pawtab%coretau_mesh_size-1)
+     ii=ii+siz_coretau
    end if
    if (allocated(pawtab%dij0)) then
      LIBPAW_DEALLOCATE(pawtab%dij0)
@@ -2488,6 +2600,15 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      pawtab%tcoredens=reshape(list_dpr(ii:ii+siz_tcoredens-1),(/pawtab%core_mesh_size,sz2/))
      ii=ii+siz_tcoredens
    end if
+   if (allocated(pawtab%tcoretau)) then
+     LIBPAW_DEALLOCATE(pawtab%tcoretau)
+   end if
+   if (siz_tcoretau>0) then
+     sz2=siz_tcoretau/pawtab%coretau_mesh_size
+     LIBPAW_ALLOCATE(pawtab%tcoretau,(pawtab%coretau_mesh_size,sz2))
+     pawtab%tcoretau=reshape(list_dpr(ii:ii+siz_tcoretau-1),(/pawtab%coretau_mesh_size,sz2/))
+     ii=ii+siz_tcoretau
+   end if
    if (allocated(pawtab%tcorespl)) then
      LIBPAW_DEALLOCATE(pawtab%tcorespl)
    end if
@@ -2495,6 +2616,14 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      LIBPAW_ALLOCATE(pawtab%tcorespl,(pawtab%mqgrid,2))
      pawtab%tcorespl=reshape(list_dpr(ii:ii+siz_tcorespl-1),(/pawtab%mqgrid,2/))
      ii=ii+siz_tcorespl
+   end if
+   if (allocated(pawtab%ttaucorespl)) then
+     LIBPAW_DEALLOCATE(pawtab%ttaucorespl)
+   end if
+   if (siz_ttaucorespl>0) then
+     LIBPAW_ALLOCATE(pawtab%ttaucorespl,(pawtab%mqgrid,2))
+     pawtab%ttaucorespl=reshape(list_dpr(ii:ii+siz_ttaucorespl-1),(/pawtab%mqgrid,2/))
+     ii=ii+siz_ttaucorespl
    end if
   if (allocated(pawtab%tnablaphi)) then
      LIBPAW_DEALLOCATE(pawtab%tnablaphi)

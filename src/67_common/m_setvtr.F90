@@ -130,7 +130,6 @@ contains
 !!   |      rhor(:,2:4) => {m_x,m_y,m_z}
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  [taug(2,nfftf*dtset%usekden)]=array for Fourier transform of kinetic energy density
 !!  [taur(nfftf,nspden*dtset%usekden)]=array for kinetic energy density
 !!  ucvol = unit cell volume (bohr^3)
 !!  usexcnhat= -PAW only- 1 if nhat density has to be taken into account in Vxc
@@ -173,6 +172,7 @@ contains
 !!  [vxctau(nfftf,dtset%nspden,4*dtset%usekden)]=derivative of XC energy density with respect to
 !!    kinetic energy density (metaGGA cases) (optional output)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
+!!  [xccctau3d(n3xccc)]=3D core electron kinetic energy density for XC core correction, bohr^-3
 !!
 !! NOTES
 !!  In case of PAW calculations:
@@ -200,7 +200,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &  nattyp,nfft,ngfft,ngrvdw,nhat,nhatgr,nhatgrdim,nkxc,ntypat,n1xccc,n3xccc,&
 &  optene,pawrad,pawtab,ph1d,psps,rhog,rhor,rmet,rprimd,strsxc,&
 &  ucvol,usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,xccc3d,xred,&
-&  electronpositron,taug,taur,vxc_hybcomp,vxctau,add_tfw) ! optionals arguments
+&  electronpositron,taur,vxc_hybcomp,vxctau,add_tfw,xcctau3d) ! optionals arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -222,7 +222,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  real(dp),intent(in) :: nhat(nfft,dtset%nspden*psps%usepaw)
  real(dp),intent(in) :: nhatgr(:,:,:) !(nfft,dtset%nspden,3*nhatgrdim)
  real(dp),intent(in) :: rhog(2,nfft)
- real(dp),intent(in),optional :: taug(2,nfft*dtset%usekden)
  real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
  real(dp),intent(inout) :: ph1d(2,3*(2*mgfft+1)*dtset%natom)
  real(dp),intent(inout) :: rhor(nfft,dtset%nspden),vhartr(nfft),vpsp(nfft)
@@ -231,6 +230,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  real(dp),intent(out),optional :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(out),optional :: vxc_hybcomp(:,:) ! (nfft,nspden)
  real(dp),intent(inout) :: xccc3d(n3xccc)
+ real(dp),intent(inout),optional ::xcctau3d(n3xccc*dtset%usekden)
  real(dp),intent(in) :: xred(3,dtset%natom)
  real(dp),intent(out) :: grchempottn(3,dtset%natom)
  real(dp),intent(out) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc),strsxc(6)
@@ -239,7 +239,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 
 !Local variables-------------------------------
 !scalars
- integer :: coredens_method,mpi_comm_sphgrid,nk3xc
+ integer :: coredens_method,coretau_method,mpi_comm_sphgrid,nk3xc
  integer :: iatom,ifft,ipositron,ispden,nfftot
  integer :: optatm,optdyfr,opteltfr,optgr,option,option_eff,optn,optn2,optstr,optv,vloc_method
  real(dp) :: doti,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
@@ -252,7 +252,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  real(dp) :: dummy6(6),tsec(2)
  real(dp) :: grewtn_fake(3,1)
  real(dp) :: dummy_in(0)
- real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0)
+ real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0)
  real(dp) :: strn_dummy6(6), strv_dummy6(6)
  real(dp) :: vzeeman(4)
  real(dp),allocatable :: grtn(:,:),dyfr_dum(:,:,:),gr_dum(:,:)
@@ -359,6 +359,10 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  if (psps%nc_xccc_gspace==1) coredens_method=1
  if (psps%nc_xccc_gspace==0) coredens_method=2
  if (psps%usewvl==1) coredens_method=2
+ coretau_method=0
+ if (dtset%usekden==1.and.psps%usepaw==1) then
+   coretau_method=1;if (psps%nc_xccc_gspace==0) coretau_method=2
+ end if
 !In some specific cases, XC has to be handled as non-magnetic
  non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
@@ -369,6 +373,18 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    optn=0;if (coredens_method==1) optn=n3xccc/nfft
    optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optn2=1
    call atm2fft(atindx1,xccc3d,vpsp,dummy_out1,dummy_out2,dummy_out3,dummy_in,&
+&   gmet,gprimd,dummy_out4,dummy_out5,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
+&   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,dtset%qprtrb,&
+&   dummy_in,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dummy_in,dummy_in,dummy_in,dtset%vprtrb,psps%vlspl,&
+&   comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
+&   paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
+   call timab(552,2,tsec)
+ end if
+ if (coretau_method==1) then
+   call timab(552,1,tsec)
+   optv=0;optn=1
+   optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optn2=4
+   call atm2fft(atindx1,xcctau3d,dummy_out6,dummy_out1,dummy_out2,dummy_out3,dummy_in,&
 &   gmet,gprimd,dummy_out4,dummy_out5,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
 &   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,dtset%qprtrb,&
 &   dummy_in,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dummy_in,dummy_in,dummy_in,dtset%vprtrb,psps%vlspl,&
@@ -420,6 +436,21 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &     psps%xcccrc,xred,wvl%den,wvl%descr,mpi_comm_wvl=mpi_enreg%comm_wvl)
 #endif
    end if
+   ABI_DEALLOCATE(gr_dum)
+   ABI_DEALLOCATE(dyfr_dum)
+   call timab(92,2,tsec)
+   call timab(91,1,tsec)
+ end if
+ if (coretau_method==2) then
+   call timab(91,2,tsec)
+   call timab(92,1,tsec)
+   option=1
+   ABI_ALLOCATE(gr_dum,(3,dtset%natom))
+   ABI_ALLOCATE(dyfr_dum,(3,3,dtset%natom))
+   call mkcore_alt(atindx1,dummy6,dyfr_dum,gr_dum,dtset%icoulomb,mpi_enreg,dtset%natom,&
+&   nfft,dtset%nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
+&   ucvol,vxc,psps%xcccrc,psps%xccc1d,xcctau3d,xred,pawrad,pawtab,psps%usepaw,&
+&   usekden=.true.)
    ABI_DEALLOCATE(gr_dum)
    ABI_DEALLOCATE(dyfr_dum)
    call timab(92,2,tsec)
@@ -525,7 +556,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
            call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &           nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &           option_eff,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&           taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+&           taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,xcctau3d=xcctau3d)
          else
 !          Only when is_hybrid_ncpp, and moreover, the xc functional is not the auxiliary xc functional, then call xchybrid_ncpp_cc
            call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
@@ -542,7 +573,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
              call rhotoxc(energies%e_hybcomp_E0,kxc,mpi_enreg,nfft,ngfft,&
 &             nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &             option,rhor,rprimd,strsxc,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
-&             taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+&             taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
            else
              call xchybrid_ncpp_cc(dtset,energies%e_hybcomp_E0,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
 &             strsxc,vxcavg,xccc3d,vxc=vxc_hybcomp)
@@ -563,7 +594,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &         option,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&         taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
+&         taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
 &         electronpositron=electronpositron)
        end if
 
@@ -749,17 +780,17 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
      if (dtset%usepaw==0.or.usexcnhat/=0) then
        call dotprod_vn(1,rhor,energies%e_xcdc,doti,nfft,nfftot,dtset%nspden,1,vxc,ucvol_local,&
 &       mpi_comm_sphgrid=mpi_comm_sphgrid)
-       if (with_vxctau) then
-         call dotprod_vn(1,taur,e_xcdc_vxctau,doti,nfft,nfftot,dtset%nspden,1,vxctau(:,:,1),&
-&         ucvol_local,mpi_comm_sphgrid=mpi_comm_sphgrid)
-         energies%e_xcdc=energies%e_xcdc+e_xcdc_vxctau
-       end if
      else
        ABI_ALLOCATE(rhowk,(nfft,dtset%nspden))
        rhowk=rhor-nhat
        call dotprod_vn(1,rhowk,energies%e_xcdc,doti,nfft,nfftot,dtset%nspden,1,vxc,ucvol_local,&
-&       mpi_comm_sphgrid=mpi_comm_sphgrid)
+&                      mpi_comm_sphgrid=mpi_comm_sphgrid)
        ABI_DEALLOCATE(rhowk)
+     end if
+     if (with_vxctau) then
+       call dotprod_vn(1,taur,e_xcdc_vxctau,doti,nfft,nfftot,dtset%nspden,1,vxctau(:,:,1),&
+&                      ucvol_local,mpi_comm_sphgrid=mpi_comm_sphgrid)
+       energies%e_xcdc=energies%e_xcdc+e_xcdc_vxctau
      end if
      if (ipositron==2) energies%e_xcdc=energies%e_xcdc-electronpositron%e_xcdc
    else
@@ -777,10 +808,10 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 end subroutine setvtr
 !!***
 
-!!****m* m_setvtr/spatialchempot
+!!****m* m_setvtr/spatialchempo
+!!t
 !! NAME
 !!  spatialchempot
-!!
 !! FUNCTION
 !!  Treat spatially varying chemical potential.
 !!  Compute energy and derivative with respect to dimensionless reduced atom coordinates of the

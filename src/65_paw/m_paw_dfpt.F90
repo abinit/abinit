@@ -291,28 +291,40 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
      if (nzlmopt_a==1) lmselect_tmp(:)=lmselect_a(:)
 !    Compute on-site 1st-order densities
      call pawdensities(compch,cplex_a,iatom_tot,lmselect_tmp,lmselect_a,&
-&     lm_size_a,0,nhat1,nspden,nzlmopt_a,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
-&     pawrad(itypat),pawrhoij_a(iatom),pawtab(itypat),rho1,trho1)
+&     lm_size_a,nhat1,nspden,nzlmopt_a,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
+&     pawrad(itypat),pawrhoij_a(iatom),pawtab(itypat),rho1,trho1,0)
      ABI_DEALLOCATE(lmselect_tmp)
 !    Compute on-site 1st-order xc potentials
      if (pawxcdev/=0) then
        call pawxcm_dfpt(pawtab(itypat)%coredens,cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxc1,&
-&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,optvxc,&
+&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,optvxc,&
 &       pawang,pawrad(itypat),rho1,usecore,0,&
 &       paw_an1(iatom)%vxc1,xclevel)
-       call pawxcm_dfpt(pawtab(itypat)%tcoredens(:,1),&
-&       cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxct1,&
-&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,optvxc,&
-&       pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,&
-&       paw_an1(iatom)%vxct1,xclevel)
-     else
-       call pawxc_dfpt(pawtab(itypat)%coredens,cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxc1,&
-&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,optvxc,&
+!       call pawxcm_dfpt(pawtab(itypat)%coredens,cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxc1,&
+!&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,optvxc,&
+!&       pawang,pawrad(itypat),rho1,usecore,0,&
+!&       paw_an1(iatom)%vxc1,xclevel)
+       call pawxcm_dfpt(pawtab(itypat)%coredens,cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxc1,&
+&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,optvxc,&
 &       pawang,pawrad(itypat),rho1,usecore,0,&
-&       paw_an0(iatom)%vxc1,paw_an1(iatom)%vxc1,xclevel)
+&       paw_an1(iatom)%vxc1,xclevel)
+!       call pawxcm_dfpt(pawtab(itypat)%tcoredens(:,1),&
+!&       cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxct1,&
+!&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,optvxc,&
+!&       pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,&
+!&       paw_an1(iatom)%vxct1,xclevel)
+     else
+       call pawxcm_dfpt(pawtab(itypat)%coredens,cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxc1,&
+&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,optvxc,&
+&       pawang,pawrad(itypat),rho1,usecore,0,&
+&       paw_an1(iatom)%vxc1,xclevel)
+!       call pawxc_dfpt(pawtab(itypat)%coredens,cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxc1,&
+!&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,optvxc,&
+!&       pawang,pawrad(itypat),rho1,usecore,0,&
+!&       paw_an0(iatom)%vxc1,paw_an1(iatom)%vxc1,xclevel)
        call pawxc_dfpt(pawtab(itypat)%tcoredens(:,1),&
 &       cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxct1,&
-&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,optvxc,&
+&       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,optvxc,&
 &       pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,&
 &       paw_an0(iatom)%vxct1,paw_an1(iatom)%vxct1,xclevel)
      end if
@@ -336,21 +348,21 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
    if (nzlmopt_b==1) lmselect_tmp(:)=lmselect_b(:)
 !  Compute on-site 1st-order densities
    call pawdensities(compch,cplex_b,iatom_tot,lmselect_tmp,lmselect_b,&
-&   lm_size_b,0,nhat1,nspden,nzlmopt_b,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
-&   pawrad(itypat),pawrhoij_b(iatom),pawtab(itypat),rho1,trho1)
+&   lm_size_b,nhat1,nspden,nzlmopt_b,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
+&   pawrad(itypat),pawrhoij_b(iatom),pawtab(itypat),rho1,trho1,0)
    ABI_DEALLOCATE(lmselect_tmp)
 !  Compute contributions to 1st-order (or 2nd-order) energy
    if (pawxcdev/=0) then
      ABI_ALLOCATE(kxc_dum,(mesh_size,pawang%angl_size,0))
      call pawxcm_dfpt(pawtab(itypat)%coredens,cplex_b,cplex_vxc1,eexc,ixc,kxc_dum,&
-&     lm_size_b,lmselect_b,nhat1,0,non_magnetic_xc,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
+&     lm_size_b,lmselect_b,nhat1,0,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
 &     rho1,usecore,0,paw_an1(iatom)%vxc1,xclevel,d2enxc_im=eexc_im)
 
      delta_energy_xc(1)=delta_energy_xc(1)+eexc
      delta_energy_xc(2)=delta_energy_xc(2)+eexc_im
      call pawxcm_dfpt(pawtab(itypat)%tcoredens(:,1),&
 &     cplex_b,cplex_vxc1,eexc,ixc,kxc_dum,&
-&     lm_size_b,lmselect_b,nhat1,0,non_magnetic_xc,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
+&     lm_size_b,lmselect_b,nhat1,0,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
 &     trho1,usetcore,2*usexcnhat,paw_an1(iatom)%vxct1,xclevel,&
 &     d2enxc_im=eexc_im)
      ABI_DEALLOCATE(kxc_dum)
@@ -359,13 +371,13 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
    else
      ABI_ALLOCATE(kxc_dum,(mesh_size,lm_size_b,0))
      call pawxc_dfpt(pawtab(itypat)%coredens,cplex_b,cplex_vxc1,eexc,ixc,kxc_dum,&
-&     lm_size_b,lmselect_b,nhat1,0,non_magnetic_xc,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
+&     lm_size_b,lmselect_b,nhat1,0,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
 &     rho1,usecore,0,paw_an0(iatom)%vxc1,paw_an1(iatom)%vxc1,xclevel,d2enxc_im=eexc_im)
      delta_energy_xc(1)=delta_energy_xc(1)+eexc
      delta_energy_xc(2)=delta_energy_xc(2)+eexc_im
      call pawxc_dfpt(pawtab(itypat)%tcoredens(:,1),&
 &     cplex_b,cplex_vxc1,eexc,ixc,kxc_dum,&
-&     lm_size_b,lmselect_b,nhat1,0,non_magnetic_xc,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
+&     lm_size_b,lmselect_b,nhat1,0,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
 &     trho1,usetcore,2*usexcnhat,paw_an0(iatom)%vxct1,paw_an1(iatom)%vxct1,xclevel,&
 &     d2enxc_im=eexc_im)
      ABI_DEALLOCATE(kxc_dum)

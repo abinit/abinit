@@ -529,7 +529,7 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,ir,ishift,mgga,ngrad,nspgrad
+ integer :: ii,ir,ishift,ngrad,nspgrad,use_laplacian
  logical :: test_nhat
  real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
  real(dp) :: coeffim_grho,coeffim_grho_corr,coeffim_grho_dn,coeffim_grho_up
@@ -552,7 +552,7 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  end if
 
 !metaGGA contributions are not taken into account here
- mgga=0
+ use_laplacian=0
 
 !PAW: substract 1st-order compensation density from 1st-order density
  test_nhat=((nhat1dim==1).and.(usexcnhat==0.or.nhat1grdim==1))
@@ -719,7 +719,7 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  end if
 
  vxc1(:,:)=zero
- call xcpot(cplex,dnexcdn,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden,&
+ call xcpot(cplex,dnexcdn,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,nspden,&
 & nspgrad,qphon,rho1now,vxc1)
 
 !call filterpot(paral_kgb,cplex,gmet,gsqcut,nfft,ngfft,nspden,qphon,vxc1)

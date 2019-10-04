@@ -12,7 +12,7 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
+!! PARENTS=
 !!
 !! CHILDREN
 !!
@@ -154,12 +154,12 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  integer,parameter :: npspmax=50
  integer,save :: dimekb_old=0,ifirst=1,ixc_old=-1,lmnmax_old=0,lnmax_old=0
  integer,save :: mpssoang_old=0,mqgridff_old=0,mqgridvl_old=0,optnlxccc_old=-1
- integer,save :: paw_size_old=-1,pawxcdev_old=-1,positron_old=-2,usepaw_old=-1
+ integer,save :: paw_size_old=-1,pawxcdev_old=-1,positron_old=-2,usekden_old=-1,usepaw_old=-1
  integer,save :: usexcnhat_old=-1,usewvl_old=-1,useylm_old=-1
  integer :: comm_mpi_,ierr,ii,ilang,ilmn,ilmn0,iproj,ipsp,ipspalch
  integer :: ispin,itypalch,itypat,mtypalch,npsp,npspalch,ntypalch
  integer :: ntypat,ntyppure,paw_size
- logical :: has_kij,has_tproj,has_tvale,has_nabla,has_shapefncg,has_vminushalf,has_wvl
+ logical :: has_coretau,has_kij,has_tproj,has_tvale,has_nabla,has_shapefncg,has_vminushalf,has_wvl
  real(dp),save :: ecore_old=zero,gsqcut_old=zero,gsqcutdg_old=zero
  real(dp) :: dq,epsatm_psp,qmax,rmax,xcccrc
  character(len=500) :: message
@@ -168,8 +168,8 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  type(nctab_t) :: nctab_dum
  type(nctab_t),pointer :: nctab_ptr
 !arrays
- integer :: paw_options(9)
- integer,save :: paw_options_old(9)=(/-1,-1,-1,-1,-1,-1,-1,-1,-1/)
+ integer :: paw_options(10)
+ integer,save :: paw_options_old(10)=(/-1,-1,-1,-1,-1,-1,-1,-1,-1,-1/)
  integer,save :: pspso_old(npspmax),pspso_zero(npspmax)
  integer,allocatable :: indlmn_alch(:,:,:),new_pspso(:)
  integer,pointer :: indlmn(:,:)
@@ -236,6 +236,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    has_wvl=(dtset%usewvl==1.or.dtset%icoulomb/=0)
    has_tproj=(dtset%usewvl==1) ! projectors will be free at the end of the psp reading
    has_vminushalf=(maxval(dtset%ldaminushalf)==1)
+   has_coretau=(dtset%usekden>=1)
    if (has_kij)       paw_options(1)=1
    if (has_tvale)     paw_options(2)=1
    if (has_nabla)     paw_options(5)=1
@@ -243,6 +244,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    if (has_wvl)       paw_options(7)=1
    if (has_tproj)     paw_options(8)=1
    if (has_vminushalf)paw_options(9)=1
+   if (has_coretau)   paw_options(10)=1
    !if (dtset%prtvclmb /= 0) then
    paw_options(3) = 1
    paw_options(4) = 1
@@ -286,6 +288,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 & .or. positron_old /= dtset%positron      &
 & .or. usewvl_old /= dtset%usewvl          &
 & .or. paw_size_old /= paw_size            &
+& .or. usekden_old/=dtset%usekden          &
 & .or. usexcnhat_old/=dtset%usexcnhat_orig &
 & .or. any(paw_options_old(:)/=paw_options(:)) &
 & .or. sum(new_pspso(:))/=0                &
@@ -327,11 +330,8 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
      call pawtab_set_flags(pawtab,has_kij=paw_options(1),has_tvale=paw_options(2),&
 &     has_vhnzc=paw_options(3),has_vhtnzc=paw_options(4),&
 &     has_nabla=paw_options(5),has_shapefncg=paw_options(6),&
-&     has_wvl=paw_options(7),has_tproj=paw_options(8))
-! the following have to be included in pawtab_set_flags
-     do ipsp=1,psps%ntypat
-       pawtab(ipsp)%has_vminushalf=dtset%ldaminushalf(ipsp)
-     end do
+&     has_wvl=paw_options(7),has_tproj=paw_options(8),&
+&     has_vminushalf=paw_options(9),has_coretau=paw_options(10))
    end if
 
 !  Read atomic pseudopotential data and get transforms
@@ -366,6 +366,10 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
          call pspatm(dq,dtset,dtfil,ekb,epsatm(ipsp),ffspl,indlmn,ipsp,&
 &         pawrad(ipsp),pawtab(ipsp),psps,vlspl,dvlspl,xcccrc,xccc1d,nctab_dum,&
 &         comm_mpi=comm_mpi_)
+         if (dtset%usefock==1.and.pawtab(ipsp)%has_fock==0) then
+           message='The PAW data file does not contain Fock information. Change the PAW data file!'
+           MSG_BUG(message)
+         end if
        end if
 
        ! Copy data to psps datastructure.
@@ -617,6 +621,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  pawxcdev_old=dtset%pawxcdev
  positron_old=dtset%positron
  usewvl_old = dtset%usewvl
+ usekden_old = dtset%usekden
  usexcnhat_old=dtset%usexcnhat_orig
  paw_size_old=paw_size
  ecore_old=ecore
