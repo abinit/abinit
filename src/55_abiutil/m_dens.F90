@@ -1429,7 +1429,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
        enddo
      enddo
    endif
-   intgf2(iatom)=zero
+   intgf2(:)=zero
  endif
 
 !Get the distrib associated with this fft_grid
