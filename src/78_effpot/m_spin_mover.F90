@@ -91,6 +91,7 @@ module m_spin_mover
      procedure :: initialize
      procedure :: finalize
      procedure :: set_initial_state
+     procedure :: read_hist_spin_state
      procedure, private :: run_one_step_DM => spin_mover_t_run_one_step_DM
      procedure, private :: run_one_step_HeunP => spin_mover_t_run_one_step_HeunP
      procedure, private :: run_one_step_MC=> spin_mover_t_run_one_step_MC
@@ -126,11 +127,12 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine initialize(self, params, supercell, rng)
+  subroutine initialize(self, params, supercell, rng, restart_hist_fname)
     class(spin_mover_t), intent(inout) :: self
     type(multibinit_dtset_type), target :: params
     type(mbsupercell_t), target :: supercell
     type(rng_t), target, intent(in) :: rng
+    character(len=fnlen), optional, intent(in) :: restart_hist_fname
     !real(dp):: damping(self%supercell%nspin)
     integer ::  nspin
 
@@ -206,7 +208,8 @@ contains
             &     spin_temperature=params%spin_temperature)
     endif
 
-    call self%set_initial_state(mode=params%spin_init_state)
+    call self%set_initial_state(mode=params%spin_init_state, &
+         & restart_hist_fname=restart_hist_fname)
 
     ! observable
     if(iam_master) then
@@ -227,22 +230,70 @@ contains
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     if (iam_master) then
-      call self%prepare_ncfile(params, trim(fname)//'_spinhist.nc')
-      call self%spin_ncfile%write_one_step(self%hist)
+       call self%prepare_ncfile(params, trim(fname)//'_spinhist.nc')
+       call self%spin_ncfile%write_one_step(self%hist)
     endif
   end subroutine set_ncfile_name
 
 
   !-------------------------------------------------------------------!
-  !set_initial_state:
+  ! read_hist_spin_state
+  !  read the last step of spin from hist file.
+  !  and save if to self%Stmp
   !-------------------------------------------------------------------!
-  subroutine set_initial_state(self, mode)
+  subroutine read_hist_spin_state(self, fname)
+    class(spin_mover_t), intent(inout) :: self
+    character(len=fnlen), intent(in) :: fname
+    integer :: ierr, ncid, varid
+    integer :: nspin, ntime
+    ! open file
+    ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
+    NCF_CHECK_MSG(ierr, "Open netcdf file")
+
+    ! sanity check. If the hist file is consistent with the current calculation
+    ierr=nf90_inq_dimid(ncid, "nspin", nspin )
+    NCF_CHECK_MSG(ierr, "nspin")
+
+    if (nspin /= self%nspin) then
+       MSG_ERROR("The number of spins in histfile is not equal to the present calculation. &
+            &Please check if the file is consistent.")
+    end if
+
+
+    ierr=nf90_inq_dimid(ncid, "ntime", ntime)
+    NCF_CHECK_MSG(ierr, "ntime")
+
+
+    ! TODO: more check ???
+
+    ! read Spin and set as initial state
+    ierr =nf90_inq_varid(ncid, "S", varid)
+    NCF_CHECK_MSG(ierr, "when reading S")
+    ierr = nf90_get_var(ncid=ncid, varid=varid, values=self%Stmp(:,:), start=ntime-1, count=1)
+    NCF_CHECK_MSG(ierr, "when reading S from spin hist file")
+
+    ! close file
+    ierr=nf90_close(ncid)
+    NCF_CHECK_MSG(ierr, "Close netcdf file")
+
+  end subroutine read_hist_spin_state
+
+  !-------------------------------------------------------------------!
+  !set_initial_state:
+  ! mode: which configuration to use
+  !   1. FM (all along z axis)
+  !   2. Random 
+  !   3. reference state from potential file
+  !   4. using spin configuration
+  !   5. Restart from last calculation by reading the hist netcdf file.
+  !-------------------------------------------------------------------!
+  subroutine set_initial_state(self, mode,  restart_hist_fname)
     class(spin_mover_t), intent(inout) :: self
     integer, optional, intent(in) :: mode
+    character(len=fnlen), optional, intent(in) :: restart_hist_fname
     integer :: i, m
     character(len=500) :: msg
 
-    
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
@@ -253,55 +304,77 @@ contains
        else
           m=1
        end if
-    if(m==2) then
-       ! set all spin to z direction.
-       self%Stmp(1,:)=0.0d0
-       self%Stmp(2,:)=0.0d0
-       self%Stmp(3,:)=1.0d0
-    else if (m==1) then
-       ! randomize S using uniform random number
-       write(msg,*) "Initial spin set to random value."
-       call wrtout(ab_out,msg,'COLL')
-       call wrtout(std_out,msg,'COLL')
-       call random_number(self%Stmp)
-       self%Stmp=self%Stmp-0.5
-       do i=1, self%nspin
-          self%Stmp(:,i)=self%Stmp(:,i)/sqrt(sum(self%Stmp(:, i)**2))
-       end do
-    else
-       write(msg,*) "Error: Set initial spin: mode should be 2(FM) or 1 (random). Others are not yet implemented."
-       call wrtout(ab_out,msg,'COLL')
-       call wrtout(std_out,msg,'COLL')
-
-    end if
-    call self%hist%set_vars(S=self%Stmp, Snorm=self%supercell%spin%ms, &
-         &  time=0.0_dp, ihist_latt=0, inc=.True.)
-   endif
-   call xmpi_bcast(self%Stmp, 0, comm, ierr)
- end subroutine set_initial_state
 
 
- !-------------------------------------------------------------------!
- ! prepare_ncfile:
- !-------------------------------------------------------------------!
- subroutine prepare_ncfile(self,  params, fname)
-   class(spin_mover_t), intent(inout) :: self
-   type(multibinit_dtset_type) :: params
-   character(len=*), intent(in) :: fname
+       if(m==2) then
+          ! set all spin to z direction.
+          self%Stmp(1,:)=0.0d0
+          self%Stmp(2,:)=0.0d0
+          self%Stmp(3,:)=1.0d0
+       else if (m==1) then
+          ! randomize S using uniform random number
+          write(msg,*) "Initial spin set to random value."
+          call wrtout(ab_out,msg,'COLL')
+          call wrtout(std_out,msg,'COLL')
+          call random_number(self%Stmp)
+          self%Stmp=self%Stmp-0.5
+          do i=1, self%nspin
+             self%Stmp(:,i)=self%Stmp(:,i)/sqrt(sum(self%Stmp(:, i)**2))
+          end do
+       else if (m==3) then
+          ! set spin to reference state using the reference qpoint and rotation axis from potential file
+          do i=1, self%nspin
+             self%Stmp(:,:) = self%supercell%Sref(:,:)
+          end do
+       else if (m==4) then
+          ! set spin to reference state using the input variables.
+          ! TODO: input variables to be added
+          ! TODO: modify the following to use input vars.
+          !call sc_maker%generate_spin_wave_vectorlist( A=self%supercell%unitcell%Sref, &
+          !     & kpoint=self%supercell%unitcell%ref_qpoint, &
+          !     & axis=self%supercell%unitcell%ref_rotate_axis, &
+          !     & A_sc=self%Stmp)
+          MSG_BUG("User specified initial spin state using Sprim, qpoint, rotate axis is not yet implemented.")
+       else if (m==5) then
+          ! read from last step of hist file
+          if (.not. present(restart_hist_fname)) then
+             MSG_BUG("Spin initialize mode set to 5, but restart_hist_fname is not used.")
+          end if
+          call self%read_hist_spin_state(fname=restart_hist_fname)
+       else
+          MSG_ERROR( "Error: Set initial spin: mode should be  1, 2, 3,4, 5. Others are not yet implemented." )
+          call wrtout(ab_out,msg,'COLL')
+          call wrtout(std_out,msg,'COLL')
 
-   integer :: master, my_rank, comm, nproc
-   logical :: iam_master
-   call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+       end if
+       call self%hist%set_vars(S=self%Stmp, Snorm=self%supercell%spin%ms, &
+            &  time=0.0_dp, ihist_latt=0, inc=.True.)
+    endif
+    call xmpi_bcast(self%Stmp, 0, comm, ierr)
+  end subroutine set_initial_state
 
-   if(iam_master) then
-      call self%spin_ncfile%initialize( trim(fname), params%spin_write_traj)
-      call self%spin_ncfile%def_spindynamics_var(self%hist )
-      call self%spin_ncfile%def_observable_var(self%spin_ob)
-      !call spin_ncfile_t_write_primitive_cell(self%spin_ncfile, self%spin_primitive)
-      call self%spin_ncfile%write_supercell(self%supercell)
-      call self%spin_ncfile%write_parameters(params)
-   endif
- end subroutine prepare_ncfile
+
+  !-------------------------------------------------------------------!
+  ! prepare_ncfile:
+  !-------------------------------------------------------------------!
+  subroutine prepare_ncfile(self,  params, fname)
+    class(spin_mover_t), intent(inout) :: self
+    type(multibinit_dtset_type) :: params
+    character(len=*), intent(in) :: fname
+
+    integer :: master, my_rank, comm, nproc
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+    if(iam_master) then
+       call self%spin_ncfile%initialize( trim(fname), params%spin_write_traj)
+       call self%spin_ncfile%def_spindynamics_var(self%hist )
+       call self%spin_ncfile%def_observable_var(self%spin_ob)
+       !call spin_ncfile_t_write_primitive_cell(self%spin_ncfile, self%spin_primitive)
+       call self%spin_ncfile%write_supercell(self%supercell)
+       call self%spin_ncfile%write_parameters(params)
+    endif
+  end subroutine prepare_ncfile
 
 
 
@@ -408,7 +481,7 @@ contains
     end do
     call self%mps%allgatherv_dp2d(self%Stmp, 3, buffer=self%buffer)
   end subroutine spin_mover_t_run_one_step_HeunP
-!!***
+  !!***
 
   !----------------------------------------------------------------------
   !> @brief rotate spin with a rotation matrix
@@ -779,9 +852,9 @@ contains
           ! set temperature
           ! TODO make this into a subroutine set_params
           self%params%spin_temperature=T
-        endif
-        call self%set_temperature(temperature=T)
-        if(iam_master) then
+       endif
+       call self%set_temperature(temperature=T)
+       if(iam_master) then
           call self%hist%set_params(spin_nctime=self%params%spin_nctime, &
                &     spin_temperature=T)
           call self%spin_ob%reset(self%params)
@@ -866,7 +939,7 @@ contains
   end subroutine run_MvT
   !!***
 
- !!****f* m_spin_mover/current_spin
+  !!****f* m_spin_mover/current_spin
   !!
   !! NAME
   !! current_spin
@@ -893,7 +966,7 @@ contains
     i=self%hist%findIndex(step=0)
     ret => self%hist%S(:,:,i)
   end function current_spin
-!!***
+  !!***
 
 
 

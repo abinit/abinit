@@ -115,11 +115,13 @@ contains
 
 
   subroutine set_spin_primcell(self, natoms, unitcell, positions, &
-       nspin, index_spin, spinat, gyroratios, damping_factors )
+       & nspin, index_spin, spinat, gyroratios, damping_factors, &
+       & ref_spin_qpoint, ref_spin_rotate_axis )
     class(spin_primitive_potential_t), intent(inout) :: self
     integer, intent(inout):: natoms, nspin, index_spin(:)
     real(dp), intent(inout):: unitcell(3, 3),  positions(3,natoms), &
          spinat(3,natoms), gyroratios(nspin), damping_factors(nspin)
+    real(dp), optional, intent(inout) :: ref_spin_qpoint(3), ref_spin_rotate_axis
     integer :: iatom, ispin
     real(dp) :: ms(nspin), spin_positions(3, nspin)
     integer :: master, my_rank, comm, nproc, ierr
@@ -140,7 +142,8 @@ contains
           end if
        end do
     endif
-    call self%primcell%set_spin(nspin, ms, unitcell,  spin_positions, gyroratios, damping_factors)
+    call self%primcell%set_spin(nspin, ms, unitcell,  spin_positions, gyroratios, damping_factors, &
+         & Sref=spinat,  ref_spin_qpoint, ref_spin_rotate_axis)
   end subroutine set_spin_primcell
 
 
@@ -191,6 +194,7 @@ contains
 
     integer :: nspin, natom
     real(dp) :: cell(3,3)
+    real(dp) :: ref_spin_qpoint(3), ref_spin_rotate_axis(3)
     integer, allocatable :: index_spin(:)
     real(dp), allocatable :: spinat(:,:)
     real(dp), allocatable :: xcart(:,:)
@@ -252,6 +256,16 @@ contains
 
     xcart(:,:)=xcart(:,:)/ Bohr_Ang
 
+    ierr =nf90_inq_varid(ncid, "ref_spin_qpoint", varid)
+    NCF_CHECK_MSG(ierr, "ref_spin_qpoint")
+    ierr = nf90_get_var(ncid, varid, ref_spin_qpoint)
+    NCF_CHECK_MSG(ierr, "ref_spin_qpoint")
+
+    ierr =nf90_inq_varid(ncid, "ref_spin_rotate_axis", varid)
+    NCF_CHECK_MSG(ierr, "ref_spin_rotate_axis")
+    ierr = nf90_get_var(ncid, varid, ref_spin_rotate_axis)
+    NCF_CHECK_MSG(ierr, "ref_spin_rotate_axis")
+
     ierr =nf90_inq_varid(ncid, "spinat", varid)
     NCF_CHECK_MSG(ierr, "spinat")
     ierr = nf90_get_var(ncid, varid, spinat)
@@ -275,7 +289,8 @@ contains
 
     call self%set_spin_primcell( natoms=natom, unitcell=cell, positions=xcart, &
          & nspin=nspin, index_spin=index_spin, spinat=spinat, &
-         & gyroratios=gyroratio, damping_factors=gilbert_damping )
+         & gyroratios=gyroratio, damping_factors=gilbert_damping &
+         & Sref=spinat, ref_spin_qpoint=ref_spin_qpoint, ref_spin_rotate_axis=ref_spin_rotate_axis)
 
     ABI_SFREE(xcart)
     ABI_SFREE(spinat)
