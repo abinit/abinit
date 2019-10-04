@@ -500,6 +500,8 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    ABI_ALLOCATE(dtsets(idtset)%acell_orig,(3,mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%algalch,(mxntypat))
    ABI_ALLOCATE(dtsets(idtset)%amu_orig,(mxntypat,mxnimage))
+   ABI_ALLOCATE(dtsets(idtset)%chrgat,(mxnatom))
+   ABI_ALLOCATE(dtsets(idtset)%constraint_kind,(mxntypat))
    ABI_ALLOCATE(dtsets(idtset)%corecs,(mxntypat))
    ABI_ALLOCATE(dtsets(idtset)%densty,(mxntypat,4))
    ABI_ALLOCATE(dtsets(idtset)%dynimage,(mxnimage))
@@ -826,6 +828,8 @@ subroutine indefo1(dtset)
 !C
  dtset%cd_customnimfrqs=0
  dtset%chkprim=1
+ dtset%chrgat(:)=zero
+ dtset%constraint_kind(:)=0
 !D
  dtset%densty(:,:)=zero
  dtset%dfield(:)=zero    !!HONG
@@ -972,7 +976,7 @@ end subroutine indefo1
 !!   initialized, while some others will still be initialized later.
 !!   The list of records of dtset initialized in the present routine is:
 !!
-!!       acell_orig,densty,iatfix,kptopt,kptrlatt,
+!!       acell_orig,chrgat,densty,iatfix,kptopt,kptrlatt,
 !!       mkmem,mkqmem,mk1mem,natsph,natvshift,nconeq,nkpt,nkptgw,nkpthf,
 !!       nqptdm,nshiftk,nucdipmom,nzchempot,optdriver,
 !!       rprim_orig,rprimd_orig,shiftk,
@@ -1037,7 +1041,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer,allocatable :: iatfix(:,:),intarr(:),istwfk(:),nband(:),typat(:)
  real(dp) :: acell(3),rprim(3,3)
 !real(dp) :: field(3)
- real(dp),allocatable :: amu(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:),nucdipmom(:,:)
+ real(dp),allocatable :: amu(:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:),nucdipmom(:,:)
  real(dp),allocatable :: ratsph(:),reaalloc(:),spinat(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
  character(len=32) :: cond_string(4)
@@ -1198,7 +1202,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !---------------------------------------------------------------------------
 
 ! Here, set up quantities that are related to geometrical description of the system (acell,rprim,xred), as well as
-! initial velocity(vel), and spin of atoms (spinat), nuclear dipole moments of atoms (nucdipmom),
+! initial velocity(vel), charge and spin of atoms (chrgat,spinat), nuclear dipole moments of atoms (nucdipmom),
 ! the symmetries (symrel,symafm, and tnons) and the list of fixed atoms (iatfix,iatfixx,iatfixy,iatfixz).
 ! Arrays have already been dimensioned thanks to the knowledge of msym and mx%natom
 
@@ -1361,16 +1365,18 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    vel=dtset%vel_orig(1:3,1:natom,iimage)
    vel_cell=dtset%vel_cell_orig(1:3,1:3,iimage)
    xred=dtset%xred_orig(1:3,1:natom,iimage)
+   ABI_ALLOCATE(chrgat,(natom))
    ABI_ALLOCATE(iatfix,(3,natom))
    ABI_ALLOCATE(nucdipmom,(3,natom))
    ABI_ALLOCATE(spinat,(3,natom))
    ABI_ALLOCATE(typat,(natom))
    ABI_ALLOCATE(znucl,(dtset%npsp))
+   chrgat(1:natom)=dtset%chrgat(1:natom)
    nucdipmom(1:3,1:natom)=dtset%nucdipmom(1:3,1:natom)
    spinat(1:3,1:natom)=dtset%spinat(1:3,1:natom)
    znucl(1:dtset%npsp)=dtset%znucl(1:dtset%npsp)
 
-   call ingeo(acell,amu,dtset,bravais,dtset%genafm(1:3),iatfix,&
+   call ingeo(acell,amu,bravais,chrgat,dtset,dtset%genafm(1:3),iatfix,&
 &   dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
 &   msym,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
 &   dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
@@ -1379,10 +1385,12 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   string,dtset%supercell_latt,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,&
 &   typat,vel,vel_cell,xred,znucl)
 
+   dtset%chrgat(1:natom)=chrgat(1:natom)
    dtset%iatfix(1:3,1:natom)=iatfix(1:3,1:natom)
    dtset%nucdipmom(1:3,1:natom)=nucdipmom(1:3,1:natom)
    dtset%spinat(1:3,1:natom)=spinat(1:3,1:natom)
    dtset%typat(1:natom)=typat(1:natom)
+   ABI_DEALLOCATE(chrgat)
    ABI_DEALLOCATE(iatfix)
    ABI_DEALLOCATE(nucdipmom)
    ABI_DEALLOCATE(spinat)
@@ -1822,9 +1830,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lexexch',tread,'INT')
    if(tread==1) dtset%lexexch(1:dtset%ntypat)=intarr(1:dtset%ntypat)
  end if
-! LDA minus half keyword
+
+!LDA minus half keyword
  call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'ldaminushalf',tread,'INT')
  if(tread==1) dtset%ldaminushalf(1:dtset%ntypat)=intarr(1:dtset%ntypat)
+
 !Some plowan data
  dtset%plowan_natom=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_natom',tread,'INT')
@@ -1843,6 +1853,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  dtset%macro_uj = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'macro_uj',tread,'INT')
  if(tread==1) dtset%macro_uj=intarr(1)
+
+!Constraint DFT keyword
+ call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'constraint_kind',tread,'INT')
+ if(tread==1) dtset%constraint_kind(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
  ABI_DEALLOCATE(nband)
  ABI_DEALLOCATE(ratsph)
@@ -2495,7 +2509,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    end do
    dtsets(idtset)%prt1dm=0
    dtsets(idtset)%pvelmax(:)=one
-   dtsets(idtset)%pw_unbal_thresh=40.
+   dtsets(idtset)%pw_unbal_thresh=40._dp
 !  Q
    dtsets(idtset)%qmass(:)=ten
    dtsets(idtset)%qprtrb(1:3)=0
@@ -2503,6 +2517,8 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%quadmom(:) = zero
 !  R
    dtsets(idtset)%random_atpos=0
+   dtsets(idtset)%ratsm=zero
+   if (any(dtsets(idtset)%constraint_kind(1:dtsets(idtset)%ntypat)>0)) dtsets(idtset)%ratsm=0.05_dp
    dtsets(idtset)%ratsph_extra=two
    dtsets(idtset)%recefermi=zero
    dtsets(idtset)%recgratio=1
@@ -2535,7 +2551,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%slabwsrad=zero
    dtsets(idtset)%slk_rankpp=1000
    dtsets(idtset)%smdelta=0
-   dtsets(idtset)%spbroad=0.1
+   dtsets(idtset)%spbroad=0.1_dp
    dtsets(idtset)%spgaxor = -1
    dtsets(idtset)%spgorig = -1
    dtsets(idtset)%spinmagntarget=-99.99_dp
@@ -2622,7 +2638,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%wvl_crmult  = 6._dp
    dtsets(idtset)%wvl_frmult  = 10._dp
    dtsets(idtset)%wvl_hgrid   = 0.5_dp
-   dtsets(idtset)%wvl_ngauss  =(1,100)
+   dtsets(idtset)%wvl_ngauss  =(/1,100/)
    dtsets(idtset)%wvl_nprccg  = 10
    dtsets(idtset)%w90iniprj   = 1
    dtsets(idtset)%w90prtunk   = 0
@@ -2647,7 +2663,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%bs_calctype=1
    dtsets(idtset)%bs_coupling=0
 
-   dtsets(idtset)%bs_haydock_tol=(0.02_dp,zero)
+   dtsets(idtset)%bs_haydock_tol=(/0.02_dp,zero/)
 
    dtsets(idtset)%bs_loband=0
 !  Take big absolute value numbers, but the the biggest ones, otherwise overflow can happen

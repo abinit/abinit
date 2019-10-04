@@ -61,7 +61,7 @@ MODULE m_geometry
  public :: bonds_lgth_angles  ! Write GEO file
  public :: randomcellpos      ! Creates unit cell with random atomic positions.
  public :: ioniondist         ! Compute ion-ion distances
- public :: dist2              ! Calculates the distance of v1 and v2 in a crystal by epeating the unit cell
+ public :: dist2              ! Calculates the distance of v1 and v2 in a crystal by repeating the unit cell
  public :: shellstruct        ! Calculates shell structure (multiplicities, radii)
  public :: remove_inversion   ! Remove the inversion symmetry and improper rotations
  public :: symredcart         ! Convert a symmetry operation from reduced coordinates (integers) to cart coords (reals)
@@ -1123,7 +1123,7 @@ end subroutine fixsym
 !!      ks_ddiago,linear_optics_paw,m_ab7_symmetry,m_crystal,m_cut3d,m_ddb
 !!      m_dens,m_effective_potential,m_effective_potential_file,m_fft
 !!      m_fft_prof,m_fit_data,m_hamiltonian,m_io_kss,m_ioarr,m_mep,m_pawpwij
-!!      m_screening,m_tdep_latt,m_use_ga,m_vcoul,m_wfk,mag_constr,mag_constr_e
+!!      m_screening,m_tdep_latt,m_use_ga,m_vcoul,m_wfk,mag_penalty,mag_constr_e
 !!      memory_eval,mkcore_wvl,mlwfovlp_qp,moddiel,mpi_setup,mrgscr,newrho
 !!      newvtr,nres2vres,odamix,optic,pawgrnl,prcref,prcref_PMA,pred_bfgs
 !!      pred_delocint,pred_isothermal,pred_langevin,pred_lbfgs,pred_nose
@@ -2626,7 +2626,7 @@ end subroutine ioniondist
 !!  dist2
 !!
 !! FUNCTION
-!!  Calculates the distance of v1 and v2 in a crystal by epeating the unit cell
+!!  Calculates the distance of v1 and v2 in a crystal by repeating the unit cell
 !!
 !! INPUTS
 !!  v1,v2

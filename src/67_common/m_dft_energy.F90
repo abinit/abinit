@@ -60,7 +60,7 @@ module m_dft_energy
  use m_paw_occupancies,  only : pawaccrhoij
  use m_fft,              only : fftpac, fourdp
  use m_spacepar,         only : meanvalue_g, hartre
- use m_dens,             only : mag_constr
+ use m_dens,             only : constrained_dft_t,mag_penalty
  use m_mkrho,            only : mkrho
  use m_mkffnl,           only : mkffnl
  use m_getghc,           only : getghc
@@ -216,7 +216,7 @@ contains
 !!      bandfft_kpt_restoretabs,bandfft_kpt_savetabs,destroy_hamiltonian
 !!      dotprod_vn,fftpac,fourdp,gpu_finalize_ffnl_ph3d,gpu_update_ffnl_ph3d
 !!      hartre,init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian
-!!      mag_constr,make_gemm_nonlop,meanvalue_g,metric,mkffnl,mkkin,mkresi
+!!      mag_penalty,make_gemm_nonlop,meanvalue_g,metric,mkffnl,mkkin,mkresi
 !!      mkrho,nonlop,pawaccrhoij,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
 !!      pawmknhat,pawrhoij_alloc,pawrhoij_free,pawrhoij_free_unpacked
 !!      pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,prep_bandfft_tabs
@@ -225,7 +225,7 @@ contains
 !!
 !! SOURCE
 
-subroutine energy(cg,compch_fft,dtset,electronpositron,&
+subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 & energies,eigen,etotal,gsqcut,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,nfftf,ngfftf,nhat,&
 & nhatgr,nhatgrdim,npwarr,n3xccc,occ,optene,paw_dmft,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrhoij,pawtab,phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,&
@@ -239,6 +239,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  real(dp),intent(in) :: gsqcut
  real(dp),intent(out) :: compch_fft,etotal
  type(MPI_type),intent(inout) :: mpi_enreg
+ type(constrained_dft_t),intent(in) :: constrained_dft
  type(dataset_type),intent(in) :: dtset
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
@@ -298,7 +299,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  real(dp),allocatable :: kinpw(:),kinpw_sav(:),kxc(:,:),occ_k(:),occblock(:)
  real(dp),allocatable :: ph3d(:,:,:),ph3d_sav(:,:,:)
  real(dp),allocatable :: resid_k(:),rhowfg(:,:),rhowfr(:,:),vlocal(:,:,:,:)
- real(dp),allocatable :: vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),Vmagconstr(:,:)
+ real(dp),allocatable :: vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),v_constr_dft_r(:,:)
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
  type(pawcprj_type),pointer :: cwaveprj_gat(:,:)
@@ -435,20 +436,21 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
 !Compute the constrained potential for the magnetic moments
 !NOTE: here in energy.F90 rhor and vtrial are given on nfftf grid
-!the values coming from mag_constr may be different from those calculated
-!calling mag_constr with nfft in setvtr and rhotov
+!the values coming from mag_penalty may be different from those calculated
+!calling mag_penalty with nfft in setvtr and rhotov
  if (dtset%magconon==1.or.dtset%magconon==2) then
-   ABI_ALLOCATE(Vmagconstr, (nfftf,dtset%nspden))
-   Vmagconstr = zero
-   call mag_constr(dtset%natom, dtset%spinat, dtset%nspden, dtset%magconon, dtset%magcon_lambda, rprimd, &
-&   mpi_enreg, nfftf, dtset%ngfft, dtset%ntypat, dtset%ratsph, rhor, &
-&   dtset%typat, Vmagconstr, xred)
+   ABI_ALLOCATE(v_constr_dft_r, (nfftf,dtset%nspden))
+   v_constr_dft_r = zero
+   call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred)
+!   call mag_penalty(dtset%natom, dtset%spinat, dtset%nspden, dtset%magconon, dtset%magcon_lambda, rprimd, &
+!&   mpi_enreg, nfftf, dtset%ngfft, dtset%ntypat, dtset%ratsph, rhor, &
+!&   dtset%typat, v_constr_dft_r, xred)
    do ispden=1,dtset%nspden
      do ifft=1,nfftf
-       vtrial(ifft,ispden)=vtrial(ifft,ispden)+Vmagconstr(ifft,ispden)
+       vtrial(ifft,ispden)=vtrial(ifft,ispden)+v_constr_dft_r(ifft,ispden)
      end do
    end do
-   ABI_DEALLOCATE(Vmagconstr)
+   ABI_DEALLOCATE(v_constr_dft_r)
  end if
 
 !Compute Hartree energy - use up+down rhor

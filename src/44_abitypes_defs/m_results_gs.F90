@@ -256,10 +256,11 @@ subroutine init_results_gs(natom,nsppol,results_gs,only_part)
 
  full_init=.true.;if (present(only_part)) full_init=(.not.only_part)
 
+ results_gs%berryopt=0
  results_gs%natom  =natom
  results_gs%ngrvdw =0
  results_gs%nsppol =nsppol
- results_gs%berryopt=zero
+
  results_gs%deltae =zero
  results_gs%diffor =zero
  results_gs%entropy=zero
@@ -352,10 +353,11 @@ subroutine init_results_gs_array(natom,nsppol,results_gs,only_part)
    do ii=1,results_gs_size2
      do jj=1,results_gs_size1
 
+       results_gs(jj,ii)%berryopt=0
        results_gs(jj,ii)%natom  =natom
        results_gs(jj,ii)%ngrvdw =0
        results_gs(jj,ii)%nsppol =nsppol
-       results_gs(jj,ii)%berryopt=zero
+
        results_gs(jj,ii)%deltae =zero
        results_gs(jj,ii)%diffor =zero
        results_gs(jj,ii)%entropy=zero

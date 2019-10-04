@@ -560,28 +560,29 @@ type, public :: dataset_type
  integer :: wvl_ngauss(2)
 
 !Integer allocatables
- integer, allocatable ::  algalch(:)    ! algalch(ntypalch)
- integer, allocatable ::  bdgw(:,:,:)   ! bdgw(2,nkptgw,nsppol)
- integer, allocatable ::  dynimage(:)   ! dynimage(nimage or mxnimage)
- integer, allocatable ::  efmas_bands(:,:) ! efmas_bands(2,nkptgw)
- integer, allocatable ::  iatfix(:,:)   ! iatfix(3,natom)
- integer, allocatable ::  iatsph(:)     ! iatsph(natsph)
- integer, allocatable ::  istwfk(:)     ! istwfk(nkpt)
- integer, allocatable ::  kberry(:,:)   ! kberry(3,nberry)
- integer, allocatable ::  lexexch(:)    ! lexexch(ntypat)
- integer, allocatable ::  ldaminushalf(:) !lminushalf(ntypat)
- integer, allocatable ::  lpawu(:)      ! lpawu(ntypat)
- integer, allocatable ::  nband(:)      ! nband(nkpt*nsppol)
+ integer, allocatable ::  algalch(:)         ! algalch(ntypalch)
+ integer, allocatable ::  bdgw(:,:,:)        ! bdgw(2,nkptgw,nsppol)
+ integer, allocatable ::  constraint_kind(:) ! constraint_kind(ntypat) 
+ integer, allocatable ::  dynimage(:)        ! dynimage(nimage or mxnimage)
+ integer, allocatable ::  efmas_bands(:,:)   ! efmas_bands(2,nkptgw)
+ integer, allocatable ::  iatfix(:,:)        ! iatfix(3,natom)
+ integer, allocatable ::  iatsph(:)          ! iatsph(natsph)
+ integer, allocatable ::  istwfk(:)          ! istwfk(nkpt)
+ integer, allocatable ::  kberry(:,:)        ! kberry(3,nberry)
+ integer, allocatable ::  lexexch(:)         ! lexexch(ntypat)
+ integer, allocatable ::  ldaminushalf(:)    ! ldaminushalf(ntypat)
+ integer, allocatable ::  lpawu(:)           ! lpawu(ntypat)
+ integer, allocatable ::  nband(:)           ! nband(nkpt*nsppol)
  integer, allocatable ::  plowan_iatom(:)    ! plowan_iatom(plowan_natom)
- integer, allocatable ::  plowan_it(:)     ! plowan_it(plowan_nt*3)
+ integer, allocatable ::  plowan_it(:)       ! plowan_it(plowan_nt*3)
  integer, allocatable ::  plowan_lcalc(:)    ! plowan_lcalc(\sum_iatom plowan_nbl)
- integer, allocatable ::  plowan_nbl(:)     ! plowan_nbl(plowan_natom)
+ integer, allocatable ::  plowan_nbl(:)      ! plowan_nbl(plowan_natom)
  integer, allocatable ::  plowan_projcalc(:) ! plowan_projcalc(\sum_iatom plowan_nbl)
- integer, allocatable ::  prtatlist(:)  ! prtatlist(natom)
- integer, allocatable ::  so_psp(:)     ! so_psp(npsp)
- integer, allocatable ::  symafm(:)     ! symafm(nsym)
- integer, allocatable ::  symrel(:,:,:) ! symrel(3,3,nsym)
- integer, allocatable ::  typat(:)      ! typat(natom)
+ integer, allocatable ::  prtatlist(:)       ! prtatlist(natom)
+ integer, allocatable ::  so_psp(:)          ! so_psp(npsp)
+ integer, allocatable ::  symafm(:)          ! symafm(nsym)
+ integer, allocatable ::  symrel(:,:,:)      ! symrel(3,3,nsym)
+ integer, allocatable ::  typat(:)           ! typat(natom)
 
 !Real
  real(dp) :: adpimd_gamma
@@ -661,6 +662,7 @@ type, public :: dataset_type
  real(dp) :: postoldff
  real(dp) :: ppmfrq
  real(dp) :: pw_unbal_thresh
+ real(dp) :: ratsm
  real(dp) :: ratsph_extra
  real(dp) :: recrcut
  real(dp) :: recefermi
@@ -752,6 +754,7 @@ type, public :: dataset_type
  real(dp), allocatable :: amu_orig(:,:)     ! amu(ntypat,nimage)
  real(dp), allocatable :: atvshift(:,:,:)   ! atvshift(16,nsppol,natom)
  real(dp), allocatable :: cd_imfrqs(:)      ! cd_imfrqs(cd_customnimfrqs)
+ real(dp), allocatable :: chrgat(:)         ! chrgat(natom)
  real(dp), allocatable :: chempot(:,:,:)    ! chempot(3,nzchempot,ntypat)
  real(dp), allocatable :: corecs(:)         ! corecs(ntypat)
  real(dp), allocatable :: densty(:,:)       ! densty(ntypat,4)
@@ -1037,7 +1040,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
    maxocc=2.0_dp/real(dtset%nsppol*dtset%nspinor,dp)
 
 !  Determine the number of bands fully or partially occupied
-   nocc=(dtset%nelect-1.0d-8)/maxocc + 1
+   nocc=int((dtset%nelect-1.0d-8)/maxocc) + 1
 !  Occupation number of the highest level
    occlast=dtset%nelect-maxocc*(nocc-1)
    !write(std_out,*)' maxocc,nocc,occlast=',maxocc,nocc,occlast
@@ -1927,6 +1930,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%postoldff          = dtin%postoldff
  dtout%ppmfrq             = dtin%ppmfrq
  dtout%pw_unbal_thresh    = dtin%pw_unbal_thresh
+ dtout%ratsm              = dtin%ratsm
  dtout%ratsph_extra       = dtin%ratsph_extra
  dtout%recrcut            = dtin%recrcut
  dtout%recefermi          = dtin%recefermi
@@ -2003,6 +2007,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  call alloc_copy(dtin%algalch, dtout%algalch)
  call alloc_copy(dtin%bdgw, dtout%bdgw)
  call alloc_copy(dtin%bs_loband, dtout%bs_loband)
+ call alloc_copy(dtin%constraint_kind, dtout%constraint_kind)
  call alloc_copy(dtin%dynimage, dtout%dynimage)
  call alloc_copy(dtin%efmas_bands, dtout%efmas_bands)
  call alloc_copy(dtin%iatfix, dtout%iatfix)
@@ -2028,6 +2033,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  call alloc_copy(dtin%acell_orig, dtout%acell_orig)
  call alloc_copy(dtin%amu_orig, dtout%amu_orig)
  call alloc_copy(dtin%atvshift, dtout%atvshift)
+ call alloc_copy(dtin%chrgat, dtout%chrgat)
  call alloc_copy(dtin%cd_imfrqs, dtout%cd_imfrqs)
  call alloc_copy(dtin%chempot, dtout%chempot)
  call alloc_copy(dtin%corecs, dtout%corecs)
@@ -2116,6 +2122,7 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%algalch)
  ABI_SFREE(dtset%bdgw)
  ABI_SFREE(dtset%bs_loband)
+ ABI_SFREE(dtset%constraint_kind)
  ABI_SFREE(dtset%dynimage)
  ABI_SFREE(dtset%efmas_bands)
  ABI_SFREE(dtset%iatfix)
@@ -2145,6 +2152,7 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%amu_orig)
  ABI_SFREE(dtset%atvshift)
  ABI_SFREE(dtset%cd_imfrqs)
+ ABI_SFREE(dtset%chrgat)
  ABI_SFREE(dtset%chempot)
  ABI_SFREE(dtset%corecs)
  ABI_SFREE(dtset%densty)
@@ -3039,8 +3047,8 @@ subroutine chkvars(string)
 !C
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
- list_vars=trim(list_vars)//' charge chempot chkdilatmx chkexit chkprim'
- list_vars=trim(list_vars)//' chksymbreak chneut cineb_start coefficients cpus cpum cpuh'
+ list_vars=trim(list_vars)//' chrgat charge chempot chkdilatmx chkexit chkprim'
+ list_vars=trim(list_vars)//' chksymbreak chneut cineb_start coefficients constraint_kind cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_qrefine ddb_shiftq dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb'
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'
@@ -3172,7 +3180,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' q1shft qmass qprtrb qpt qptdm qptnrm qph1l'
  list_vars=trim(list_vars)//' qptopt qptrlatt quadmom'
 !R
- list_vars=trim(list_vars)//' random_atpos ratsph ratsph_extra rcut'
+ list_vars=trim(list_vars)//' random_atpos ratsm ratsph ratsph_extra rcut'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
  list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'

@@ -1,0 +1,48 @@
+# Hydrogen diatomic molecule for tests--constrained DFT
+
+ ndtset 2
+
+
+#Constrained DFT data
+ constraint_kind2   11   # Dataset 2 is constrained DFT for the magnetization
+ magcon_lambda      2
+ spinat       0.0 0.0   0.3
+              0.0 0.0  -0.3 
+
+#Definition of the atomic spheres
+ ratsph    1.0  1.0
+
+#System description
+ acell 15 10 10
+ ntypat  1 
+ znucl  1.0 
+ natom 2
+ typat  2*1 
+
+ nsppol 1    nspden 2
+ nband 1
+
+ xcart    -1.1  0.0 0.0
+           1.1  0.0 0.0
+
+#Computational parameters
+ tolwfr 1.0d-14
+ nstep  20
+ ecut 5
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t25.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% psp_files = 1h.pspnc, 1h.pspnc
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% references = 
+#%% keywords = 
+#%% description = H2 diatomic molecule, static, to check the constrained DFT implementation with constrained magnetization
+#%%  Constrain the magnetization around atom 1 to spin up 0.3 and around atom 2 to spin down 0.3
+#%%<END TEST_INFO>

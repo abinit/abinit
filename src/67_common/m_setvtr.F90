@@ -47,7 +47,7 @@ module m_setvtr
  use m_pawtab,            only : pawtab_type
  use m_jellium,           only : jellium
  use m_spacepar,          only : hartre
- use m_dens,              only : mag_constr
+ use m_dens,              only : constrained_dft_t,constrained_dft_ini,constrained_dft_free,mag_penalty
  use m_vdw_dftd2,         only : vdw_dftd2
  use m_vdw_dftd3,         only : vdw_dftd3
  use m_atm2fft,           only : atm2fft
@@ -189,7 +189,7 @@ contains
 !!
 !! CHILDREN
 !!      atm2fft,denspot_set_history,dotprod_vn,ewald,hartre,ionion_realspace
-!!      ionion_surface,jellium,mag_constr,mkcore,mkcore_alt,mkcore_wvl,mklocl
+!!      ionion_surface,jellium,mag_penalty,mkcore,mkcore_alt,mkcore_wvl,mklocl
 !!      psolver_rhohxc,rhohxcpositron,rhotoxc,spatialchempot,timab,vdw_dftd2
 !!      vdw_dftd3,wvl_psitohpsi,wvl_vtrial_abi2big,xcdata_init,xchybrid_ncpp_cc
 !!      xred2xcart
@@ -247,6 +247,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  logical :: add_tfw_,is_hybrid_ncpp,non_magnetic_xc,with_vxctau,wvlbigdft
  real(dp), allocatable :: xcart(:,:)
  character(len=500) :: message
+ type(constrained_dft_t) :: constrained_dft
  type(xcdata_type) :: xcdata,xcdatahyb
 !arrays
  real(dp),parameter :: identity(1:4)=(/1._dp,1._dp,0._dp,0._dp/)
@@ -258,7 +259,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  real(dp) :: vzeeman(4)
  real(dp),allocatable :: grtn(:,:),dyfr_dum(:,:,:),gr_dum(:,:)
  real(dp),allocatable :: rhojellg(:,:),rhojellr(:),rhowk(:,:),vjell(:)
- real(dp),allocatable :: Vmagconstr(:,:),rhog_dum(:,:)
+ real(dp),allocatable :: v_constr_dft_r(:,:),rhog_dum(:,:)
 
 ! *********************************************************************
 
@@ -688,14 +689,17 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 
 !Compute the constrained potential for the magnetic moments
  if (dtset%magconon==1.or.dtset%magconon==2) then
-   ABI_ALLOCATE(Vmagconstr, (nfft,dtset%nspden))
-   Vmagconstr = zero
-   call mag_constr(dtset%natom,dtset%spinat,dtset%nspden,dtset%magconon,dtset%magcon_lambda,rprimd, &
-&   mpi_enreg,nfft,ngfft,dtset%ntypat,dtset%ratsph,rhor,dtset%typat,Vmagconstr,xred)
+!  Initialize the datastructure constrained_dft, for penalty function constrained magnetization
+   call constrained_dft_ini(dtset%chrgat,constrained_dft,dtset%constraint_kind,dtset%magconon,dtset%magcon_lambda,&
+&    mpi_enreg,dtset%natom,dtset%nfft,dtset%ngfft,dtset%nspden,dtset%ntypat,dtset%ratsm,&
+&    dtset%ratsph,rprimd,dtset%spinat,dtset%typat,xred,dtset%ziontypat)
+   ABI_ALLOCATE(v_constr_dft_r, (nfft,dtset%nspden))
+   v_constr_dft_r = zero
+   call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred)
    if(dtset%nspden==4)then
      do ispden=1,dtset%nspden ! (SPr: both components should be used? EB: Yes it should be the case, corrected now)
        do ifft=1,nfft
-         vtrial(ifft,ispden) = vtrial(ifft,ispden) + Vmagconstr(ifft,ispden)
+         vtrial(ifft,ispden) = vtrial(ifft,ispden) + v_constr_dft_r(ifft,ispden)
        end do !ifft
      end do !ispden
    else if(dtset%nspden==2)then
@@ -703,11 +707,12 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !      TODO : MJV: check that magnetic constraint works also for nspden 2 or add input variable condition
 !              EB: ispden=2 is rho_up only: to be tested
 !             SPr: for ispden=2, both components should be used (e.g. see definition for vzeeman)?
-       vtrial(ifft,1) = vtrial(ifft,1) + Vmagconstr(ifft,1) !SPr: added the first component here
-       vtrial(ifft,2) = vtrial(ifft,2) + Vmagconstr(ifft,2)
+       vtrial(ifft,1) = vtrial(ifft,1) + v_constr_dft_r(ifft,1) !SPr: added the first component here
+       vtrial(ifft,2) = vtrial(ifft,2) + v_constr_dft_r(ifft,2)
      end do !ifft
    end if
-   ABI_DEALLOCATE(Vmagconstr)
+   ABI_DEALLOCATE(v_constr_dft_r)
+   call constrained_dft_free(constrained_dft)
  end if
 
 !Compute parts of total energy depending on potentials
