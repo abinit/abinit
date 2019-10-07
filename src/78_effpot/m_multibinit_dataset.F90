@@ -854,10 +854,13 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  if(multibinit_dtset%dynamics/=0.and.multibinit_dtset%dynamics/=6.and.&
 &   multibinit_dtset%dynamics/=12.and.multibinit_dtset%dynamics/=13.and.&
 &   multibinit_dtset%dynamics/=27.and.&
+&   multibinit_dtset%dynamics/=9.and.&
+&   multibinit_dtset%dynamics/=2.and.&
+&   multibinit_dtset%dynamics/=22.and.&
 &   multibinit_dtset%dynamics/=24.and.multibinit_dtset%dynamics/=25) then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'dynamics is',multibinit_dtset%dynamics,', but the only allowed values',ch10,&
-&   'are 6,12,24,25 or  13 (see ionmov in abinit documentation).',ch10,&
+&   'are 2,6,9,12,22,24,25 or  13 (see ionmov in abinit documentation).',ch10,&
 &   'Action: correct dynamics in your input file.'
    MSG_ERROR(message)
  end if

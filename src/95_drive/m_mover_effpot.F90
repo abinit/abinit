@@ -327,7 +327,7 @@ implicit none
 !    else
 !    Need to init some values
    ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
-   symrel = 1
+   symrel = reshape((/1,0,0,0,1,0,0,0,1/),shape(symrel)) 
    call alloc_copy(symrel,dtset%symrel)
    ABI_ALLOCATE(tnons,(3,dtset%nsym))
    tnons = zero
@@ -513,7 +513,7 @@ implicit none
    ab_xfh%nxfh = 0
    ab_xfh%mxfh = 1
    ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
-   if (any((/2,3,10,11,22/)==dtset%ionmov)) then
+   if (any((/3,10,11/)==dtset%ionmov)) then
      write(message, '(3a)' )&
 &     ' This dynamics can not be used with effective potential',ch10,&
 &     'Action: correct dynamics input'

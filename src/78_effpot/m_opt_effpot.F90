@@ -1,4 +1,4 @@
-   !!****m* ABINIT/m_opt_effpot
+!!****m* ABINIT/m_opt_effpot
 !!
 !! NAME
 !! m_opt_effpot
@@ -506,7 +506,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 
        !Get List of high order cross Terms for term if ndisp > 1
        to_skip = .true.
-       if(eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp>1)then 
+       if(eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp>1 .or. & 
+&	  eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp /= 0 .and. &
+&         eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%nstrain /= 0)then 
          call opt_getHOcrossdisp(HOcrossdisp_terms,ncombi2,to_skip,eff_pot%anharmonics_terms%coefficients(iterm),order_ran,comm)
        endif 
        !Skip term if it doesn't need bounding 
@@ -633,9 +635,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
                 call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                               natom_sc,ntime,fit_data%training_set%sqomega,&
  &                                               compute_anharmonic=.TRUE.,print_file=.FALSE.)
-             
                 if(iam_master)write(*,*) "(msef+mses)/(msef_ini+mses_ini) after_opt: ", (msef+mses)/(msef_ini+mses_ini)
-             
                 msef_ini = msef
                 mses_ini = mses
            endif
@@ -660,6 +660,24 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL') 
  !  call opt_effpot(eff_pot,nterm,terms,hist,comm,print_anh=.FALSE.)
+
+!  Print the standard devition of final model 
+      write(message,'(6a,ES24.16,6a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
+ &                    ' Mean Standard Deviation values of the effective-potential',ch10,&
+ &                    ' with respect to the training-set after attempted bounding (meV/atm):',&
+ &               ch10,'   Energy          : ',&
+ &               mse*Ha_EV*1000*factor ,ch10,&
+ &                    ' Goal function values of the effective.potential',ch10,& 
+ &                    ' with respect to the test-set (eV^2/A^2):',ch10,&
+ &                    '   Forces+Stresses : ',&
+ &               (msef+mses)*(HaBohr_meVAng)**2,ch10,&
+ &                    '   Forces          : ',&
+ &               msef*(HaBohr_meVAng)**2,ch10,&
+ &                    '   Stresses        : ',&
+ &               mses*(HaBohr_meVAng)**2,ch10
+      call wrtout(ab_out,message,'COLL')
+      call wrtout(std_out,message,'COLL')
+
 
   !DEALLOCATION 
   ABI_DEALLOCATE(symbols)
@@ -1136,6 +1154,11 @@ enddo
 !check=.TRUE. checks for duplicate terms
 call polynomial_coeff_init(coeff,nterm_of_term,term,terms,check=.TRUE.)
 
+if(nterm_of_term /= term%nterm)then 
+  write(*,*) "nterm_of_term changed after deleting strain"
+endif
+
+
 end subroutine opt_filterdisp
 !!***
 
@@ -1270,7 +1293,8 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,to_cycle,term_in,power_disp,comm)
 !scalars
  integer ::  ndisp,nterm_of_term,nterm_tot_tmp
  integer ::  order_start,order_stop,norder
- integer ::  ii, icombi,idisp,iterm_of_term 
+ integer ::  ii, icombi,idisp,iterm_of_term
+ integer :: ncombi_tot 
 !reals
  real(dp) :: coeff_ini 
 !arrays
@@ -1346,20 +1370,34 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,to_cycle,term_in,power_disp,comm)
        call opt_getCombisforterm(order_start,order_stop,ndisp,ncombi,ncombi_order,comm)
              
        ! Allocate terms with ncombi free space to work with 
-       ABI_DATATYPE_ALLOCATE(terms_out,(ncombi)) 
-            
+       if(had_strain)then 
+          ABI_DATATYPE_ALLOCATE(terms_out,(3*ncombi))
+          ncombi_tot = 3*ncombi  
+       else 
+          ABI_DATATYPE_ALLOCATE(terms_out,(ncombi)) 
+          ncombi_tot = ncombi 
+       endif     
        ! Copy current term to the ncombination elemenst a the end in array terms 
        ! change the value of their coefficient to a start value
        ! The start is estimed to not be larger then half the initial term's value
        ! This is because higher order terms should have smaller coefficients 
-       do icombi=1,ncombi 
-           terms_out(icombi) = term
+       do icombi=1,ncombi_tot
+           if(icombi <= ncombi)then
+              terms_out(icombi) = term
+           else
+              terms_out(icombi) = term_in
+           endif
            coeff_ini = 0.01 !abs(terms_out(icombi)%coefficient / 2)
            terms_out(icombi)%coefficient = coeff_ini
            ! Set the power of all terms we want to add to two. We find the correct power later
            ! Change the weight of the term to 1 (even terms have allways weight=1)
            do iterm_of_term=1,nterm_of_term 
              terms_out(icombi)%terms(iterm_of_term)%weight = 1
+             if(icombi > ncombi .and. icombi <= 2*ncombi)then 
+                terms_out(icombi)%terms(iterm_of_term)%power_strain = 2
+	     elseif(icombi>2*ncombi)then
+                terms_out(icombi)%terms(iterm_of_term)%power_strain = 4
+             endif 
              do idisp=1,ndisp
                 terms_out(icombi)%terms(iterm_of_term)%power_disp(idisp) = 2
              enddo !idisp
@@ -1371,8 +1409,14 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,to_cycle,term_in,power_disp,comm)
        if(had_strain) call polynomial_coeff_free(term)  
        
        ! Get high order combinations 
-       call opt_getHoTerms(terms_out,order_start,order_stop,ndisp,ncombi,ncombi_order,comm) 
-       
+       if(had_strain)then           
+          call opt_getHoTerms(terms_out(:ncombi),order_start,order_stop,ndisp,ncombi,ncombi_order,comm) 
+	  call opt_getHoTerms(terms_out(ncombi+1:),order_start,order_stop,ndisp,ncombi,ncombi_order,comm) 
+	  call opt_getHoTerms(terms_out(2*ncombi+1:),order_start,order_stop,ndisp,ncombi,ncombi_order,comm) 
+          ncombi = ncombi_tot
+       else 
+          call opt_getHoTerms(terms_out,order_start,order_stop,ndisp,ncombi,ncombi_order,comm) 
+       endif
        !DEALLOCATION 
        ABI_DEALLOCATE(ncombi_order)
 
