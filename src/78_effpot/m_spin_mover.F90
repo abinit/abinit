@@ -281,20 +281,21 @@ contains
 
   end subroutine read_hist_spin_state
 
-  !-------------------------------------------------------------------!
+  !----------------------------------------------------------------------!
   !set_initial_state:
   ! mode: which configuration to use
-  !   1. FM (all along z axis)
-  !   2. Random 
-  !   3. reference state from potential file
-  !   4. using spin configuration
-  !   5. Restart from last calculation by reading the hist netcdf file.
-  !-------------------------------------------------------------------!
+  !   1. Random
+  !   2. reference state from potential file
+  !   3. FM (all along z axis)
+  !   4. spin configuration using qpoint and rotation axis (e.g. for AFM)
+  !   5. Restart from last entry of hist netcdf file
+  !----------------------------------------------------------------------!
   subroutine set_initial_state(self, mode,  restart_hist_fname)
-    class(spin_mover_t), intent(inout) :: self
-    integer, optional, intent(in) :: mode
-    character(len=fnlen), optional, intent(in) :: restart_hist_fname
-    integer :: i, m
+    class(spin_mover_t),            intent(inout) :: self
+    integer,              optional, intent(in)    :: mode
+    character(len=fnlen), optional, intent(in)    :: restart_hist_fname
+
+    integer :: i, init_mode
     character(len=500) :: msg
 
     integer :: master, my_rank, comm, nproc, ierr
@@ -303,20 +304,21 @@ contains
 
     if(iam_master) then
        if (present(mode)) then
-          m=mode
+          init_mode=mode
        else
-          m=1
+          init_mode=1
        end if
-
-
-       if(m==2) then
-          ! set all spin to z direction.
-          self%Stmp(1,:)=0.0d0
-          self%Stmp(2,:)=0.0d0
-          self%Stmp(3,:)=1.0d0
-       else if (m==1) then
-          ! randomize S using uniform random number
-          write(msg,*) "Initial spin set to random value."
+       !NH: shouldn't this be handled by the input variable checks?
+       if (init_mode>5) then
+          MSG_ERROR( "Error: Set initial spin: mode should be  1, 2, 3, 4, 5. Others are not yet implemented." )
+          call wrtout(ab_out,msg,'COLL')
+          call wrtout(std_out,msg,'COLL')
+       end if
+       
+       select case (init_mode)
+         case (1)
+           ! randomize S using uniform random number
+          write(msg,*) "Initial spins set to random values."
           call wrtout(ab_out,msg,'COLL')
           call wrtout(std_out,msg,'COLL')
           call random_number(self%Stmp)
@@ -324,12 +326,19 @@ contains
           do i=1, self%nspin
              self%Stmp(:,i)=self%Stmp(:,i)/sqrt(sum(self%Stmp(:, i)**2))
           end do
-       else if (m==3) then
+        case (2)
           ! set spin to reference state using the reference qpoint and rotation axis from potential file
           do i=1, self%nspin
              self%Stmp(:,:) = self%supercell%Sref(:,:)
           end do
-       else if (m==4) then
+
+        case (3)
+          ! set all spin to z direction.
+          self%Stmp(1,:)=0.0d0
+          self%Stmp(2,:)=0.0d0
+          self%Stmp(3,:)=1.0d0
+
+        case (4)       
           ! set spin to reference state using the input variables.
           ! TODO: input variables to be added
           ! TODO: modify the following to use input vars.
@@ -338,20 +347,19 @@ contains
           !     & axis=self%supercell%unitcell%ref_rotate_axis, &
           !     & A_sc=self%Stmp)
           MSG_BUG("User specified initial spin state using Sprim, qpoint, rotate axis is not yet implemented.")
-       else if (m==5) then
+
+        case (5)
           ! read from last step of hist file
           if (.not. present(restart_hist_fname)) then
              MSG_BUG("Spin initialize mode set to 5, but restart_hist_fname is not used.")
           end if
           call self%read_hist_spin_state(fname=restart_hist_fname)
-       else
-          MSG_ERROR( "Error: Set initial spin: mode should be  1, 2, 3,4, 5. Others are not yet implemented." )
-          call wrtout(ab_out,msg,'COLL')
-          call wrtout(std_out,msg,'COLL')
+       
+       end select
 
-       end if
        call self%hist%set_vars(S=self%Stmp, Snorm=self%supercell%spin%ms, &
             &  time=0.0_dp, ihist_latt=0, inc=.True.)
+
     endif
     call xmpi_bcast(self%Stmp, 0, comm, ierr)
   end subroutine set_initial_state
