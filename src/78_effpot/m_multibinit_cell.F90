@@ -65,9 +65,9 @@ module m_multibinit_cell
      integer :: nspin   ! number of spin
      real(dp) :: rprimd(3,3)   ! cell parameters
      real(dp), allocatable :: ms(:)   ! magnetic moments  array(nspin)
-     real(dp), allocatable :: Sref(:,:)   ! spin orientation  array(3,nspin)
-     real(dp) :: ref_qpoint(3)   ! Reference Q point
-     real(dp) :: ref_rotate_axis(3)   ! Reference Q point
+     real(dp), allocatable :: Sref(:,:)   ! spin orientation of reference structure, array(3,nspin)
+     real(dp) :: ref_qpoint(3)   ! q point to construct reference spin structure
+     real(dp) :: ref_rotate_axis(3)   ! rotation axis to construct reference spin structure
      real(dp), allocatable :: gyro_ratio(:) ! gyromagnetic ratio array(nspin)
      real(dp), allocatable :: gilbert_damping(:) ! damping factor defined for each spin
      real(dp), allocatable :: spin_positions(:,:) ! poistions of spin (cartesion)
@@ -102,12 +102,12 @@ module m_multibinit_cell
      logical :: has_spin=.False.
      logical :: has_lwf=.False.
      logical :: has_electron=.False.
-     real(dp), allocatable :: Sref(:,:)
+     !real(dp), allocatable :: Sref(:,:)
      type(mbcell_lattice_t) :: lattice
      type(mbcell_spin_t) :: spin
      type(mbcell_lwf_t) :: lwf
    contains
-     procedure:: initialize
+     procedure :: initialize
      procedure :: finalize
      procedure :: set_lattice   ! intialize the lattice
      procedure :: set_spin      ! initilzie the spin
@@ -121,7 +121,7 @@ module m_multibinit_cell
   !----------------------------------------------------------------------
   type, public, extends(mbcell_t):: mbsupercell_t
      integer :: sc_matrix(3,3)   ! supercell matrix
-     integer :: ncell            ! number of cells in supercell
+     integer :: ncell            ! number of cells in supercell !NH: this already exists in supercell_maker!
      type(supercell_maker_t), pointer :: supercell_maker  ! pointer to a helper class object
      type(mbcell_t), pointer :: unitcell  ! pointer to the unitcell which the supercell is built from
    contains
@@ -141,7 +141,7 @@ contains
   end subroutine initialize
 
   !----------------------------------------------------------------------
-  !> @brief set the lattice subtype infor
+  !> @brief set the lattice subtype information
   !>
   !> @param[in]  natom: number of atoms
   !> @param[in]  cell:  cell parameter matrix (3,3)
@@ -162,7 +162,7 @@ contains
   !----------------------------------------------------------------------
   !> @brief initialize spin sub type
   !>
-  !> @param[in]  nspin: number of spin
+  !> @param[in] nspin: number of spin
   !> @param[in] ms: magnetic moments
   !> @param[in] rprimd:  cell pareters
   !> @param[in] spin_positions:  the cartesion coordinates of spins
@@ -406,7 +406,7 @@ contains
   !> @param[in] rvec: R vectors for cell in supercell
   !> @param[in] ispin_prim:  id in primitive cell for each spin
   !----------------------------------------------------------------------
-  Subroutine spin_set(self, nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, &
+  subroutine spin_set(self, nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, &
        & rvec, ispin_prim, Sref, ref_qpoint, ref_rotate_axis)
     class(mbcell_spin_t) , intent(inout):: self
     integer, intent(in) :: nspin
@@ -414,9 +414,12 @@ contains
          &spin_positions(3, nspin), gyro_ratio(nspin), gilbert_damping(nspin)
     integer, optional, intent(in) :: rvec(3, nspin), ispin_prim(nspin)
     real(dp), optional, intent(in) :: Sref(3, nspin), ref_qpoint(3), ref_rotate_axis(3)
+
     integer :: i
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
+    character(len=500):: msg
+
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     if (iam_master) then
        self%ms(:) = ms(:)
@@ -440,6 +443,10 @@ contains
        if (present(Sref)) then
           self%Sref(:,:) = Sref
        else
+          write(msg,*) "No reference spin structure specified, using ferromagnetic along z-axis"
+          call wrtout(ab_out,msg,'COLL')
+          call wrtout(std_out,msg,'COLL')
+
           self%Sref(1,:) = 0.0_dp
           self%Sref(2,:) = 0.0_dp
           self%Sref(3,:) = 1.0_dp

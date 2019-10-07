@@ -143,7 +143,7 @@ module m_multibinit_dataset
   integer :: spin_var_temperature
   integer :: spin_write_traj
 
-  ! TODO nh: add parameters for spin-lattice coupling
+  ! parameters for spin-lattice coupling
   integer :: slc_coupling
 
 ! Real(dp)
@@ -189,6 +189,9 @@ module m_multibinit_dataset
   real(dp) :: spin_mag_field(3)  ! external magnetic field
   real(dp) :: spin_qpoint(3)
   real(dp) :: spin_sia_k1dir(3)
+  real(dp) :: spin_init_qpoint(3) ! qpoint to specify initial spin configuration
+  real(dp) :: spin_init_rotate_axis(3) ! rotation axis to specify initial spin configuration  
+
 ! Integer arrays
   integer, allocatable :: atifc(:)
   ! atifc(natom)
@@ -403,7 +406,9 @@ multibinit_dtset%slc_coupling=0
 
  multibinit_dtset%spin_mag_field(:)=zero
  multibinit_dtset%spin_qpoint(:)=zero
-
+ multibinit_dtset%spin_init_qpoint(:)=zero
+ multibinit_dtset%spin_init_rotate_axis(:)=(/1.0, 0.0, 0.0/)
+ 
  multibinit_dtset%spin_sia_k1dir(:)=(/0.0,0.0,1.0/)
 
 
@@ -1225,10 +1230,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_init_state',tread,'INT')
  if(tread==1) multibinit_dtset%spin_init_state=intarr(1)
  if(multibinit_dtset%spin_init_state<1 .or. &
-      &   multibinit_dtset%spin_init_state>2) then
+      &   multibinit_dtset%spin_init_state>5) then
     write(message, '(a,i8,a,a,a,a,a)' )&
          &   'spin_init_state is',multibinit_dtset%spin_init_state,', but the only allowed values',ch10,&
-         &   'are 1 and 2.',ch10,&
+         &   'are 1, 2, 3, 4, and 5.',ch10,&
          &   'Action: correct spin_init_state in your input file.'
     MSG_ERROR(message)
  end if
@@ -1311,6 +1316,27 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_qpoint',tread,'DPR')
  if(tread==1) multibinit_dtset%spin_qpoint(1:3)= dprarr(1:3)
 
+ multibinit_dtset%spin_init_qpoint= zero
+ if(3>marr)then
+    marr=3
+    ABI_DEALLOCATE(intarr)
+    ABI_DEALLOCATE(dprarr)
+    ABI_ALLOCATE(intarr,(marr))
+    ABI_ALLOCATE(dprarr,(marr))
+ end if
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_init_qpoint',tread,'DPR')
+ if(tread==1) multibinit_dtset%spin_init_qpoint(1:3)= dprarr(1:3)
+
+ multibinit_dtset%spin_init_rotate_axis= [1.0, 0.0, 0.0]
+ if(3>marr)then
+    marr=3
+    ABI_DEALLOCATE(intarr)
+    ABI_DEALLOCATE(dprarr)
+    ABI_ALLOCATE(intarr,(marr))
+    ABI_ALLOCATE(dprarr,(marr))
+ end if
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_init_rotate_axis',tread,'DPR')
+ if(tread==1) multibinit_dtset%spin_init_rotate_axis(1:3)= dprarr(1:3)
 
  multibinit_dtset%spin_sia_add=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_sia_add',tread,'INT')
@@ -1339,7 +1365,6 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     dprarr(1:3)=dprarr(1:3)/sqrt(sum(dprarr(1:3)**2))
     multibinit_dtset%spin_sia_k1dir(1:3)= dprarr(1:3)
  endif
-
 
  multibinit_dtset%spin_temperature=325
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_temperature',tread,'DPR')
@@ -1407,7 +1432,6 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
          &   'Action: correct spin_tolvar in your input file.'
     MSG_ERROR(message)
  end if
-
  
  multibinit_dtset%spin_var_temperature=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_var_temperature',tread,'INT')
@@ -2353,6 +2377,12 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
     write(nunit,'(13x,a15)')   'spin_qpoint'
     write(nunit,'(28x,3es12.5)')   (multibinit_dtset%spin_qpoint(ii),ii=1,3)
     write(nunit, '(13x, a15, I12.1)') 'spin_init_state', multibinit_dtset%spin_init_state
+    if(multibinit_dtset%spin_init_state==4) then
+      write(nunit,'(13x,a18)')   'spin_init_qpoint'
+      write(nunit,'(28x,3es12.5)')   (multibinit_dtset%spin_init_qpoint(ii),ii=1,3)
+      write(nunit,'(13x,a25)')   'spin_init_rotate_axis'
+      write(nunit,'(28x,3es12.5)')   (multibinit_dtset%spin_init_rotate_axis(ii),ii=1,3)
+    endif
     write(nunit, '(6x, a22, I12.1)') 'spin_var_temperature', multibinit_dtset%spin_var_temperature
     write(nunit, '(6x, a22, 5x, F10.5)') 'spin_temperature_start', multibinit_dtset%spin_temperature_start
     write(nunit, '(6x, a22, 5x, F10.5)') 'spin_temperature_end', multibinit_dtset%spin_temperature_end

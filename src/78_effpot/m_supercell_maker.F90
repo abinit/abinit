@@ -323,7 +323,7 @@ contains
   !> @brief generate a wave like quantity. A_sc(R) = A(0)* exp(ikR)
   !>  The A_sc will be allocated. size : (ndim, nA*ncells)
   !>   NOTE: This generate a density wave. For a spin wave,
-  !>         use generate_rotate_wave_vectorlist.
+  !>         use generate_spin_wave_vectorlist.
   !> @param [in] A: a vector quantity. dimension (xyz, iA)
   !> @param [in] kpoint: the wave vector
   !> @param [out] A_sc: indices in supercell.
@@ -351,7 +351,8 @@ contains
 
 
   !-----------------------------------------------------------------------
-  !> @brief generate a spin wave  quantity. rotate by theta(R) = 2pi * k.dot.R, around axis.
+  !> @brief generate a spin wave  quantity. 
+  !>  rotate by theta(R) = 2pi * k.dot.R, around axis.
   !>  The A_sc will be allocated. size : (ndim, nA*ncells)
   !> @param [in] A: a vector quantity. dimension (xyz, iA)
   !> @param [in] kpoint: the wave vector

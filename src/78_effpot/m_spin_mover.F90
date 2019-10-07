@@ -80,6 +80,7 @@ module m_spin_mover
      integer :: nspin, method
      real(dp), allocatable :: gyro_ratio(:), damping(:), gamma_L(:), H_lang_coeff(:), ms(:), Stmp(:,:), Stmp2(:,:)
      real(dp), allocatable :: Heff_tmp(:,:), Htmp(:,:), Hrotate(:,:), H_lang(:,:), buffer(:,:)
+     real(dp) :: init_qpoint(3), init_rotate_axis(3) ! qpoint and rotation axis to set up initial spin configuration
      !type(rng_t) :: rng
      type(spin_hist_t) :: hist
      logical :: gamma_l_calculated
@@ -154,6 +155,10 @@ contains
        if(params%spin_dynamics>=0) then
           self%method=params%spin_dynamics
        endif
+       if(params%spin_init_state==4) then
+         self%init_qpoint = params%spin_init_qpoint
+         self%init_rotate_axis = params%spin_init_rotate_axis
+       endif
     end if
     if(params%spin_dynamics==3) then ! Monte carlo
        call self%spin_mc%initialize(nspin=nspin, angle=1.0_dp, temperature=params%spin_temperature)
@@ -209,8 +214,7 @@ contains
             &     spin_temperature=params%spin_temperature)
     endif
 
-    call self%set_initial_state(mode=params%spin_init_state, &
-         & restart_hist_fname=restart_hist_fname)
+    call self%set_initial_state(mode=params%spin_init_state, restart_hist_fname=restart_hist_fname)
 
     ! observable
     if(iam_master) then
@@ -290,7 +294,7 @@ contains
   !   4. spin configuration using qpoint and rotation axis (e.g. for AFM)
   !   5. Restart from last entry of hist netcdf file
   !----------------------------------------------------------------------!
-  subroutine set_initial_state(self, mode,  restart_hist_fname)
+  subroutine set_initial_state(self, mode, restart_hist_fname)
     class(spin_mover_t),            intent(inout) :: self
     integer,              optional, intent(in)    :: mode
     character(len=fnlen), optional, intent(in)    :: restart_hist_fname
@@ -308,7 +312,8 @@ contains
        else
           init_mode=1
        end if
-       !NH: shouldn't this be handled by the input variable checks?
+
+       !NH: this is already handled by the input variable checks, remove?
        if (init_mode>5) then
           MSG_ERROR( "Error: Set initial spin: mode should be  1, 2, 3, 4, 5. Others are not yet implemented." )
           call wrtout(ab_out,msg,'COLL')
@@ -329,25 +334,30 @@ contains
         case (2)
           ! set spin to reference state using the reference qpoint and rotation axis from potential file
           do i=1, self%nspin
-             self%Stmp(:,:) = self%supercell%Sref(:,:)
+             self%Stmp(:,:) = self%supercell%spin%Sref(:,:)
           end do
 
         case (3)
+          write(msg,*) "Initial spins set to ferromagnetic along z-axis."
+          call wrtout(ab_out,msg,'COLL')
+          call wrtout(std_out,msg,'COLL')
+
           ! set all spin to z direction.
           self%Stmp(1,:)=0.0d0
           self%Stmp(2,:)=0.0d0
           self%Stmp(3,:)=1.0d0
 
         case (4)       
-          ! set spin to reference state using the input variables.
-          ! TODO: input variables to be added
-          ! TODO: modify the following to use input vars.
-          !call sc_maker%generate_spin_wave_vectorlist( A=self%supercell%unitcell%Sref, &
-          !     & kpoint=self%supercell%unitcell%ref_qpoint, &
-          !     & axis=self%supercell%unitcell%ref_rotate_axis, &
-          !     & A_sc=self%Stmp)
-          MSG_BUG("User specified initial spin state using Sprim, qpoint, rotate axis is not yet implemented.")
+          write(msg,*) "Initial spins set according to spin_init_qpoint and spin_init_rotate_axis."
+          call wrtout(ab_out,msg,'COLL')
+          call wrtout(std_out,msg,'COLL')
 
+          ! set inital spin state using the input variables.
+          call self%supercell%supercell_maker%generate_spin_wave_vectorlist( A=self%supercell%unitcell%spin%Sref, &
+             & kpoint=self%init_qpoint, &
+             & axis=self%init_rotate_axis, &
+             & A_sc=self%Stmp)
+   
         case (5)
           ! read from last step of hist file
           if (.not. present(restart_hist_fname)) then

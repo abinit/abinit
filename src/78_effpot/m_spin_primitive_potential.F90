@@ -121,7 +121,7 @@ contains
     class(spin_primitive_potential_t), intent(inout) :: self
     integer,                           intent(inout) :: natoms, nspin, index_spin(:)
     real(dp),                          intent(inout) :: unitcell(3, 3),  positions(3,natoms)
-    real(dp),                          intent(inout) :: spinat(3,natoms), gyroratios(nspin), damping_factors(nspin)
+    real(dp),                          intent(inout) :: spinat(3, natoms), gyroratios(nspin), damping_factors(nspin)
     real(dp),                optional, intent(inout) :: Sref(3, natoms), ref_spin_qpoint(3), ref_spin_rotate_axis(3)
 
     integer :: iatom, ispin
