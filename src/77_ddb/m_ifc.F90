@@ -326,6 +326,8 @@ end subroutine ifc_free
 !! rifcsph=radius for cutoff of IFC.
 !! comm=MPI communicator.
 !! [Ifc_coarse]=Optional.
+!! [dipquad] = if 1, atmfrc has been build without dipole-quadrupole part
+!! [quadquad] = if 1, atmfrc has been build without quadrupole-quadrupole part
 !!
 !! OUTPUT
 !! Ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
@@ -341,7 +343,11 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
   rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
   prtsrlr,enunit, & ! TODO: TO BE REMOVED
   comm, &
+#ifdef MR_DEV
+  Ifc_coarse,dipquad,quadquad) ! Optional
+#else
   Ifc_coarse) ! Optional
+#endif
 
 !Arguments ------------------------------------
  integer,intent(in) :: asr,brav,dipdip,symdynmat,nqshft,rfmeth,nsphere,comm
@@ -350,6 +356,10 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  type(crystal_t),intent(in) :: Crystal
  type(ddb_type),intent(in) :: ddb
  type(ifc_type),optional,intent(in) :: Ifc_coarse
+#ifdef MR_DEV
+ integer,optional,intent(in) :: dipquad, quadquad
+#endif
+
 !arrays
  integer,intent(in) :: ngqpt_in(3)
  real(dp),intent(in) :: q1shft(3,nqshft)
@@ -424,8 +434,18 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    sumg0=0
    qpt(:)=zero
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
+#ifdef MR_DEV
+   if (present(dipquad).and.present(quadquad)) then
+   call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
+               Crystal%xred,zeff,qdrp_cart,ifc%ewald_option,dipquad=dipquad,quadquad=quadquad)
+   else
    call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                Crystal%xred,zeff,qdrp_cart,ifc%ewald_option)
+   end if
+#else
+   call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
+               Crystal%xred,zeff,qdrp_cart,ifc%ewald_option)
+#endif
    call q0dy3_calc(natom,dyewq0,dyew,Ifc%asr)
    ABI_FREE(dyew)
  end if
@@ -520,8 +540,18 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      end if
      qpt(:)=qbz(:,iqpt)
      sumg0=0
+#ifdef MR_DEV
+     if (present(dipquad).and.present(quadquad)) then
+       call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
+                 Crystal%xred,zeff,qdrp_cart,ifc%ewald_option,dipquad=dipquad,quadquad=quadquad)
+     else
+       call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
+                 Crystal%xred,zeff,qdrp_cart,ifc%ewald_option)
+     end if
+#else
      call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                  Crystal%xred,zeff,qdrp_cart,ifc%ewald_option)
+#endif
      call q0dy3_apply(natom,dyewq0,dyew)
      plus=0
      call nanal9(dyew,Ifc%dynmat,iqpt,natom,nqbz,plus)
@@ -650,7 +680,16 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ifc%omega_minmax(1) = huge(one); ifc%omega_minmax(2) = -huge(one)
  do iq_ibz=1,ifc%nqibz
    if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
+#ifdef MR_DEV
+   if (present(dipquad).and.present(quadquad)) then
+     call ifc_fourq(ifc, crystal, ifc%qibz(:,iq_ibz), phfrq, displ_cart,&
+     dipquad=dipquad,quadquad=quadquad)
+   else
+     call ifc_fourq(ifc, crystal, ifc%qibz(:,iq_ibz), phfrq, displ_cart)
+   end if
+#else
    call ifc_fourq(ifc, crystal, ifc%qibz(:,iq_ibz), phfrq, displ_cart)
+#endif
    ifc%omega_minmax(1) = min(ifc%omega_minmax(1), minval(phfrq))
    ifc%omega_minmax(2) = max(ifc%omega_minmax(2), maxval(phfrq))
  end do
@@ -668,7 +707,17 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    call wrtout(std_out, msg)
    do iqpt=1,nqbz
      qpt(:)=Ifc%qbz(:,iqpt)
+#ifdef MR_DEV
+     if (present(dipquad).and.present(quadquad)) then
+       call ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,out_eigvec=eigvec,&
+     dipquad=dipquad,quadquad=quadquad)
+     else
+       call ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,out_eigvec=eigvec)
+     end if
+#else
      call ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,out_eigvec=eigvec)
+
+#endif
 
      ! OmegaSRLR: Perform decomposition of dynamical matrix
      ! MG: FIXME I don't think the implementation is correct when q !=0
@@ -893,6 +942,8 @@ end subroutine ifc_print
 !!       "cart" if qpt defines a direction in Cartesian coordinates
 !!       "reduced" if qpt defines a direction in reduced coordinates
 !!  [comm]: MPI communicator
+!! [dipquad] = if 1, atmfrc has been build without dipole-quadrupole part
+!! [quadquad] = if 1, atmfrc has been build without quadrupole-quadrupole part
 !!
 !! OUTPUT
 !!  phfrq(3*natom) = Phonon frequencies in Hartree
@@ -913,6 +964,9 @@ end subroutine ifc_print
 
 subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
                      nanaqdir, comm, &                              ! Optional [in]
+#ifdef MR_DEV
+                     dipquad, quadquad, &
+#endif
                      out_d2cart, out_eigvec, out_displ_red, dwdq)   ! Optional [out]
 
 !Arguments ------------------------------------
@@ -921,6 +975,9 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
  class(ifc_type),intent(in) :: Ifc
  type(crystal_t),intent(in) :: Crystal
  integer,optional,intent(in) :: comm
+#ifdef MR_DEV
+ integer,optional,intent(in) :: dipquad, quadquad
+#endif
 !arrays
  real(dp),intent(in) :: qpt(3)
  real(dp),intent(out) :: displ_cart(2,3,Crystal%natom,3*Crystal%natom)
@@ -968,9 +1025,21 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
  end if
 
  ! The dynamical matrix d2cart is calculated here:
+#ifdef MR_DEV
+ if (present(dipquad).and.present(quadquad)) then
+ call gtdyn9(Ifc%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,Ifc%gprim,Ifc%mpert,natom,&
+   Ifc%nrpt,qphnrm,my_qpt,Crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,Ifc%zeff,&
+   Ifc%qdrp_cart,Ifc%ewald_option,comm_,dipquad=dipquad,quadquad=quadquad)
+ else
  call gtdyn9(Ifc%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,Ifc%gprim,Ifc%mpert,natom,&
    Ifc%nrpt,qphnrm,my_qpt,Crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,Ifc%zeff,&
    Ifc%qdrp_cart,Ifc%ewald_option,comm_)
+ end if
+#else
+ call gtdyn9(Ifc%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,Ifc%gprim,Ifc%mpert,natom,&
+   Ifc%nrpt,qphnrm,my_qpt,Crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,Ifc%zeff,&
+   Ifc%qdrp_cart,Ifc%ewald_option,comm_)
+#endif
 
  ! Calculate the eigenvectors and eigenvalues of the dynamical matrix
  call dfpt_phfrq(Ifc%amu,displ_cart,d2cart,eigval,eigvec,Crystal%indsym,&

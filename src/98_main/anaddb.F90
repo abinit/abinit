@@ -193,7 +193,7 @@ program anaddb
 
  call ddb_hdr_free(ddb_hdr)
 
- mpert=natom+6
+ mpert=natom+MPERT_MAX
  msize=3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
 
  ! Read the input file, and store the information in a long string of characters
@@ -461,6 +461,30 @@ program anaddb
    write(msg, '(a,f11.3,a,f11.3,a)' )'-begin at tcpu',tcpu-tcpui,'  and twall',twall-twalli,' sec'
    call wrtout([std_out, ab_out], msg)
 
+#ifdef MR_DEV
+   if (any(inp%qrefine(:) > 1)) then
+     ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
+     ! Build the IFCs using the coarse q-mesh.
+     do ii = 1, 3
+       ngqpt_coarse(ii) = inp%ngqpt(ii) / inp%qrefine(ii)
+     end do
+     call ifc_init(Ifc_coarse,Crystal,ddb,&
+       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,ngqpt_coarse,inp%nqshft,inp%q1shft,dielt,zeff,qdrp_cart,&
+       inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm,dipquad=inp%dipquad,quadquad=inp%quadquad)
+
+     ! Now use the coarse q-mesh to fill the entries in dynmat(q)
+     ! on the dense q-mesh that cannot be obtained from the DDB file.
+     call ifc_init(Ifc,Crystal,ddb,&
+      inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,qdrp_cart,&
+      inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm,Ifc_coarse=Ifc_coarse,dipquad=inp%dipquad,quadquad=inp%quadquad)
+     call Ifc_coarse%free()
+
+   else
+     call ifc_init(Ifc,Crystal,ddb,&
+       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,qdrp_cart,&
+       inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm,dipquad=inp%dipquad,quadquad=inp%quadquad)
+   end if
+#else
    if (any(inp%qrefine(:) > 1)) then
      ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
      ! Build the IFCs using the coarse q-mesh.
@@ -483,6 +507,7 @@ program anaddb
        inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,qdrp_cart,&
        inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
    end if
+#endif
 
    call ifc%print(unit=std_out)
 
@@ -578,7 +603,11 @@ program anaddb
 !**********************************************************************
 
  ! Now treat the first list of vectors (without non-analyticities)
+#ifdef MR_DEV
+ call mkphbs(Ifc,Crystal,inp,ddb,asrq0,filnam(2),comm,dipquad=inp%dipquad,quadquad=inp%quadquad)
+#else
  call mkphbs(Ifc,Crystal,inp,ddb,asrq0,filnam(2),comm)
+#endif 
 
 !***********************************************************************
 
@@ -620,10 +649,18 @@ program anaddb
 
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
+#ifdef MR_DEV
+     call gtdyn9(ddb%acell,Ifc%atmfrc,dielt,inp%dipdip,&
+       Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,mpert,natom,&
+       Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,&
+       Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff,qdrp_cart,Ifc%ewald_option,xmpi_comm_self,&
+       dipquad=inp%dipquad,quadquad=inp%quadquad)
+#else
      call gtdyn9(ddb%acell,Ifc%atmfrc,dielt,inp%dipdip,&
        Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,mpert,natom,&
        Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,&
        Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff,qdrp_cart,Ifc%ewald_option,xmpi_comm_self)
+#endif
 
    else if (inp%ifcflag==0) then
 

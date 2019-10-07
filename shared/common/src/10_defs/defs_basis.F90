@@ -317,7 +317,7 @@ module defs_basis
 
 ! Parameter to compute the maximum index of the perturbation
 #ifdef MR_DEV
-  integer,parameter,public :: MPERT_MAX = 8
+  integer,parameter,public :: MPERT_MAX = 6
 #else 
   integer,parameter,public :: MPERT_MAX = 6
 #endif

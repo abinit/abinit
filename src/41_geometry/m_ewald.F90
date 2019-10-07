@@ -613,6 +613,8 @@ end subroutine ewald2
 !! option= 0: use old implementation;
 !!         1: reduce the smalest argument of the exponentials to be evaluated,
 !!            set eta to 1 and skip real space sum, leads to a significant speedup
+!! [dipquad] = if 1, atmfrc has been build without dipole-quadrupole part
+!! [quadquad] = if 1, atmfrc has been build without quadrupole-quadrupole part
 !!
 !! OUTPUT
 !! dyew(2,3,natom,3,natom)= Ewald part of the dynamical matrix,
@@ -640,13 +642,21 @@ end subroutine ewald2
 !!
 !! SOURCE
 
-subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff,qdrp_cart,option)
+subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff, &
+#ifdef MR_DEV
+      qdrp_cart,option,dipquad,quadquad)
+#else
+      qdrp_cart,option)
+#endif
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,sumg0
  integer,optional,intent(in) :: option
  real(dp),intent(in) :: ucvol
+#ifdef MR_DEV
+ integer,optional,intent(in) :: dipquad, quadquad
+#endif
 !arrays
  real(dp),intent(in) :: acell(3),dielt(3,3),gmet(3,3),gprim(3,3),qphon(3)
  real(dp),intent(in) :: rmet(3,3),rprim(3,3),xred(3,natom),zeff(3,3,natom)
@@ -848,7 +858,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                      cqqr=cosqxred(ia)*cosqxred(ib)+sinqxred(ia)*sinqxred(ib)
                      cqqi=sinqxred(ia)*cosqxred(ib)-cosqxred(ia)*sinqxred(ib)
 
-                     ! Dipole-quadrupole and quadrupole-quadrupole contribution
+                     ! Dipole-quadrupole contribution
                      do ii=1,3
                        do jj=1,3
                          do kk=1,3
@@ -859,7 +869,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                        end do ! jj
                      end do ! ii
 
-                     ! Dipole-quadrupole and quadrupole-quadrupole contribution
+                     ! Quadrupole-quadrupole contribution
                      do ii=1,3
                        do jj=1,3
                          do kk=1,3
@@ -1089,20 +1099,30 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
               zeff(ii,mu,ia)*zeff(jj,nu,ib)*dyddt(2,ii,ia,jj,ib)
              if (do_quadrupole) then
                do kk=1,3
-                 ! dipole-quadrupole correction
-                 dyew(1,mu,ia,nu,ib)=dyew(1,mu,ia,nu,ib) + &
-                   (zeff(ii,nu,ib)*qdrp_cart(kk,jj,mu,ia) - &
-                    zeff(ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dydqt(1,ii,ia,jj,ib,kk)
-                 dyew(2,mu,ia,nu,ib)=dyew(2,mu,ia,nu,ib) + &
-                   (zeff(ii,nu,ib)*qdrp_cart(kk,jj,mu,ia) - &
-                    zeff(ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dydqt(2,ii,ia,jj,ib,kk)
-                 ! quadrupole-quadrupole correction
-                 do ll=1,3
+#ifdef MR_DEV
+                 if (present(dipquad).and.dipquad==1) then
+#endif
+                   ! dipole-quadrupole correction
                    dyew(1,mu,ia,nu,ib)=dyew(1,mu,ia,nu,ib) + &
-                   (qdrp_cart(ll,ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dyqqt(1,ii,ia,jj,ib,kk,ll)
+                     (zeff(ii,nu,ib)*qdrp_cart(kk,jj,mu,ia) - &
+                      zeff(ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dydqt(1,ii,ia,jj,ib,kk)
                    dyew(2,mu,ia,nu,ib)=dyew(2,mu,ia,nu,ib) + &
-                   (qdrp_cart(ll,ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dyqqt(2,ii,ia,jj,ib,kk,ll)
-                 end do
+                     (zeff(ii,nu,ib)*qdrp_cart(kk,jj,mu,ia) - &
+                      zeff(ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dydqt(2,ii,ia,jj,ib,kk)
+#ifdef MR_DEV
+                 end if
+                 ! quadrupole-quadrupole correction
+                 if (present(quadquad).and.quadquad==1) then
+#endif
+                   do ll=1,3
+                     dyew(1,mu,ia,nu,ib)=dyew(1,mu,ia,nu,ib) + &
+                     (qdrp_cart(ll,ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dyqqt(1,ii,ia,jj,ib,kk,ll)
+                     dyew(2,mu,ia,nu,ib)=dyew(2,mu,ia,nu,ib) + &
+                     (qdrp_cart(ll,ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dyqqt(2,ii,ia,jj,ib,kk,ll)
+                   end do
+#ifdef MR_DEV
+                 end if
+#endif
                end do
              end if
 

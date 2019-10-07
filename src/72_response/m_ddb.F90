@@ -2557,7 +2557,11 @@ integer function ddb_get_quadrupoles(ddb, crystal, rftyp, quadrupoles) result(ib
 
  do ii=1,3
    do jj=1,3*3*crystal%natom
+#ifdef MR_DEV
+     read(quad_unt,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
+#else
      read(quad_unt,'(4(i5,3x),2(1x,f20.10))') iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
+#endif
      !write(*,*) iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
    end do
    read(quad_unt,'(a)') msg

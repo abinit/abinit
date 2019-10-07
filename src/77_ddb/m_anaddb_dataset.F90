@@ -69,6 +69,9 @@ module m_anaddb_dataset
   integer :: chneut
   integer :: dieflag
   integer :: dipdip
+#ifdef MR_DEV
+  integer :: dipquad
+#endif
   integer :: dossum
   integer :: ep_scalprod
   integer :: eivec
@@ -125,6 +128,9 @@ module m_anaddb_dataset
   integer :: telphint
   integer :: thmflag
   integer :: qgrid_type
+#ifdef MR_DEV
+  integer :: quadquad
+#endif
   integer :: ep_b_min
   integer :: ep_b_max
   integer :: ep_int_gkk
@@ -398,6 +404,18 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    'are -1, 0 or 1 .',ch10,'Action: correct dipdip in your input file.'
    MSG_ERROR(message)
  end if
+
+#ifdef MR_DEV
+ anaddb_dtset%dipquad=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipquad',tread,'INT')
+ if(tread==1) anaddb_dtset%dipquad=intarr(1)
+ if(anaddb_dtset%dipquad<-1.or.anaddb_dtset%dipquad>1)then
+   write(message, '(a,i0,5a)' )&
+   'dipquad is ',anaddb_dtset%dipquad,', but the only allowed values',ch10,&
+   'are 0 or 1 .',ch10,'Action: correct dipquad in your input file.'
+   MSG_ERROR(message)
+ end if
+#endif 
 
  anaddb_dtset%ep_scalprod = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ep_scalprod',tread,'INT')
@@ -1161,6 +1179,18 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    end if
  end do
 
+#ifdef MR_DEV
+ anaddb_dtset%quadquad=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'quadquad',tread,'INT')
+ if(tread==1) anaddb_dtset%quadquad=intarr(1)
+ if(anaddb_dtset%quadquad<-1.or.anaddb_dtset%quadquad>1)then
+   write(message, '(a,i0,5a)' )&
+   'quadquad is ',anaddb_dtset%quadquad,', but the only allowed values',ch10,&
+   'are 0 or 1 .',ch10,'Action: correct quadquad in your input file.'
+   MSG_ERROR(message)
+ end if
+#endif 
+
 !R
 
  anaddb_dtset%ramansr=0
@@ -1809,6 +1839,10 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
  if(anaddb_dtset%ifcflag/=0)then
    write(nunit,'(a)')' Interatomic Force Constants Inputs :'
    write(nunit,'(3x,a9,3i10)')'   dipdip',anaddb_dtset%dipdip
+#if MR_DEV
+   write(nunit,'(3x,a9,3i10)')'   dipquad',anaddb_dtset%dipquad
+   write(nunit,'(3x,a9,3i10)')'   quadquad',anaddb_dtset%quadquad
+#endif
    if(anaddb_dtset%nsphere/=0)write(nunit,'(3x,a9,3i10)')'  nsphere',anaddb_dtset%nsphere
    if(abs(anaddb_dtset%rifcsph)>tol10)write(nunit,'(3x,a9,E16.6)')'  nsphere',anaddb_dtset%rifcsph
    write(nunit,'(3x,a9,3i10)')'   ifcana',anaddb_dtset%ifcana
@@ -2136,7 +2170,11 @@ subroutine anaddb_chkvars(string)
 !C
  list_vars=trim(list_vars)//' chneut'
 !D
+#ifdef MR_DEV
+ list_vars=trim(list_vars)//' dieflag dipdip dipquad dossum dosdeltae dossmear dostol'
+#else
  list_vars=trim(list_vars)//' dieflag dipdip dossum dosdeltae dossmear dostol'
+#endif
 !E
  list_vars=trim(list_vars)//' ep_scalprod eivec elaflag elphflag enunit'
  list_vars=trim(list_vars)//' ep_b_min ep_b_max ep_int_gkk ep_keepbands ep_nqpt ep_nspline ep_prt_yambo'
@@ -2163,7 +2201,11 @@ subroutine anaddb_chkvars(string)
  list_vars=trim(list_vars)//' piezoflag polflag prtddb prtdos prt_ifc prtmbm prtfsurf'
  list_vars=trim(list_vars)//' prtnest prtphbands prtsrlr prtvol prtbltztrp'
 !Q
+#ifdef MR_DEV
+ list_vars=trim(list_vars)//' qrefine qgrid_type q1shft q2shft qnrml1 qnrml2 qpath qph1l qph2l quadquad'
+#else
  list_vars=trim(list_vars)//' qrefine qgrid_type q1shft q2shft qnrml1 qnrml2 qpath qph1l qph2l'
+#endif
 !R
  list_vars=trim(list_vars)//' ramansr relaxat relaxstr rfmeth rifcsph'
 !S
