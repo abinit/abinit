@@ -1,5 +1,5 @@
 # C in diamond structure. 
-# Very rough 2x2x2 q-point grid; low ecut.
+# Very rough ab-initio 2x2x2 q-point grid; low ecut.
 
 ndtset 2
 
@@ -19,19 +19,31 @@ nshiftk  1
 shiftk   0.0 0.0 0.0
 
 ddb_ngqpt 2 2 2  # q-mesh used to produce the DDB file (must be consistent with DDB data)
+eph_ngqpt_fine 4 4 4
+
+# Interpolate onto 4 4 4 in the first dataset and read new DVDB file in dataset 2
+eph_task1    5
+
+eph_task2   -4
+getdvdb2    -1
 
 ############
-# Dataset 1
+# EPH related parameters
 ############
-symsigma1  0
-symsigma2  1
+symsigma  1
 
 optdriver  7
 nband      8
-eph_task   -4
 tmesh 5 295 2
+eph_extrael 1e-6
+occopt 3
 
 gw_qprange 2
+
+###########
+# Use of the tetrahedron integration
+###########
+eph_intmeth 2
 
 # Structure 
 acell 3*6.70346805
@@ -46,10 +58,10 @@ znucl 6
 #%% [setup]
 #%% executable = abinit
 #%% exclude_builders = .*_intel_1[789].0_.*
-#%% test_chain = t150.in, t151.in, t152.in, t153.in, t154.in, t155.in, t156.in
+#%% test_chain = t50.in, t51.in, t52.in, t53.in, t54.in, t55.in, t56.in
 #%% [files]
 #%% files_to_test = 
-#%%   t153.out, tolnlines = 10, tolabs = 1.1e-3, tolrel = 2.0e-2
+#%%   t54.out, tolnlines = 30, tolabs = 450, tolrel = 2.0e-2
 #%% psp_files = 6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 10
@@ -58,4 +70,5 @@ znucl 6
 #%% keywords = NC, DFPT, EPH
 #%% description = 
 #%%   Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
+#%%   Use of the tetrahedron method for the electron linewidth
 #%%<END TEST_INFO>

@@ -117,8 +117,7 @@ type(krank_t) function krank_new(nkpt, kpt, nsym, symrec, time_reversal) result(
 
 !Local variables -------------------------
 !scalars
- integer :: ikpt, isym, symkptrank, irank
- integer :: timrev, itim
+ integer :: ikpt, isym, symkptrank, irank, timrev, itim
  double precision :: smallestlen
  character(len=500) :: msg
 !arrays
@@ -126,7 +125,7 @@ type(krank_t) function krank_new(nkpt, kpt, nsym, symrec, time_reversal) result(
 
 ! *********************************************************************
 
-! find smallest linear length
+ ! find smallest linear length
  smallestlen = one
  do ikpt=1, nkpt
    if (abs(kpt(1,ikpt)) > tol10) smallestlen = min(smallestlen, abs(kpt(1,ikpt)))
@@ -153,10 +152,8 @@ type(krank_t) function krank_new(nkpt, kpt, nsym, symrec, time_reversal) result(
    if (.not. time_reversal) timrev = 1
  end if
 
-!Ensure kpt(i)+one is positive, and the smallest
-!difference between kpts should be larger than 1/100
-!ie ngkpt < 100.
-! the following fills invrank for the k-points in the list provided (may be only the irred kpts)
+ ! Ensure kpt(i)+one is positive, and the smallest difference between kpts should be larger than 1/100 ie ngkpt < 100.
+ ! the following fills invrank for the k-points in the list provided (may be only the irred kpts)
  do ikpt=1,nkpt
    irank = krank%get_rank(kpt(:,ikpt))
 
@@ -167,9 +164,9 @@ type(krank_t) function krank_new(nkpt, kpt, nsym, symrec, time_reversal) result(
    krank%invrank(irank) = ikpt
  end do
 
-! if symrec is provided, fill invrank with appropriate irred kpt indices
-! for symmetry completion: kptrank_t%invrank points to the irred k-point
-! equivalent to the k-point whose rank is provided
+ ! if symrec is provided, fill invrank with appropriate irred kpt indices
+ ! for symmetry completion: kptrank_t%invrank points to the irred k-point
+ ! equivalent to the k-point whose rank is provided
  if (present(symrec)) then
    if(.not. present(nsym)) then
      TETRA_ERROR("need both symrec and nsym arguments together")
@@ -193,7 +190,6 @@ end function krank_new
 !----------------------------------------------------------------------
 
 !!****f* m_krank/get_rank
-!!
 !! NAME
 !! get_rank
 !!
@@ -341,6 +337,7 @@ type(krank_t) function krank_copy(krank_in) result(krank_out)
  class(krank_t), intent(in) :: krank_in
 
 ! *********************************************************************
+
  krank_out%max_linear_density = krank_in%max_linear_density
  krank_out%min_rank = krank_in%min_rank
  krank_out%max_rank = krank_in%max_rank
@@ -420,12 +417,12 @@ subroutine krank_dump (krank, unout)
 
   write(unout, *)
   write(unout, '(a)') ' Dump of the contents of a krank_t structure with k-point rank information'
-  write(unout, '(a,I8)') ' max linear density of points in 3 directions: max_linear_density = ',  krank%max_linear_density
-  write(unout, '(a,I8)') ' maximum rank for any point in grid: max_rank = ',  krank%max_rank
-  write(unout, '(a,I8)') ' number of points in input grid: npoints = ',  krank%npoints
+  write(unout, '(a,i0)') ' max linear density of points in 3 directions: max_linear_density = ',  krank%max_linear_density
+  write(unout, '(a,i0)') ' maximum rank for any point in grid: max_rank = ',  krank%max_rank
+  write(unout, '(a,i0)') ' number of points in input grid: npoints = ',  krank%npoints
   write(unout, *)
   write(unout, '(a)') ' invrank array = '
-  write(unout, '(I4)') krank%invrank(:)
+  write(unout, '(i0)') krank%invrank(:)
   write(unout, *)
 
 end subroutine krank_dump

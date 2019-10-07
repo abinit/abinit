@@ -543,9 +543,9 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
 !Here, rprimd, xred and occ are available
  etot=hdr%etot ; fermie=hdr%fermie ; residm=hdr%residm
 !If parallelism over atom, hdr is distributed
- call hdr_update(hdr,bantot,etot,fermie,&
-& residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
-& comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
+ call hdr%update(bantot,etot,fermie,&
+   residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
+   comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
 
 !Clean band structure datatype (should use it more in the future !)
  call ebands_free(bstruct)
@@ -766,7 +766,7 @@ end if
 !    MT july 2013: Should we read rhoij from the density file ?
    call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor, &
    hdr_den, pawrhoij_read, spaceworld, check_hdr=hdr)
-   call hdr_free(hdr_den)
+   call hdr_den%free()
 
    if (rdwrpaw/=0) then
      call pawrhoij_bcast(pawrhoij_read,hdr%pawrhoij,0,spaceworld)
@@ -1329,8 +1329,8 @@ end if
  ABI_DATATYPE_DEALLOCATE(paw_ij)
  ABI_DATATYPE_DEALLOCATE(pawfgrtab)
 
-!Clean the header
- call hdr_free(hdr)
+ ! Clean the header
+ call hdr%free()
 
 !As the etotal energy has no meaning here, we set it to zero
 !(to avoid meaningless side-effects when comparing ouputs...)
