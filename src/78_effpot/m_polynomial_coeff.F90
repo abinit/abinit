@@ -2079,18 +2079,18 @@ i0 = 0
 write(std_out,*) "DEBUG shape list_symcoeff(:,:,:):", shape(list_symcoeff) 
 write(std_out,*) "DEBUG shape size(list_symcoeff,2):", size(list_symcoeff(1,:,1))
 ncoeff_symsym = size(list_symcoeff(1,:,1))
-write(std_out,*) "DEBUG list_symcoeff(:,11,:) for coeff 1:" 
+write(std_out,*) "DEBUG list_symcoeff(:,1,:) for coeff 1:" 
 do ii=1,nsym 
   write(std_out,*) "******************"
   write(std_out,*) "nsym: ", ii 
   write(std_out,*) "------------------" 
-  write(std_out,*) "direction list_symcoeff(1,11,", ii,"): ", list_symcoeff(1,11,ii)  
-  write(std_out,*) "atom1     list_symcoeff(2,11,", ii,"): ", list_symcoeff(2,11,ii)  
-  write(std_out,*) "atom2     list_symcoeff(3,11,", ii,"): ", list_symcoeff(3,11,ii)  
-  write(std_out,*) "irpt      list_symcoeff(4,11,", ii,"): ", list_symcoeff(4,11,ii) !,"cell: ", cell(:,list_symcoeff(4,1,ii))
-  write(std_out,*) "weight    list_symcoeff(5,11,", ii,"): ", list_symcoeff(5,11,ii)  
-  write(std_out,*) "index sym list_symcoeff(6,11,", ii,"): ", list_symcoeff(6,11,ii) 
-  ia = list_symcoeff(6,11,ii)  
+  write(std_out,*) "direction list_symcoeff(1,1,", ii,"): ", list_symcoeff(1,1,ii)  
+  write(std_out,*) "atom1     list_symcoeff(2,1,", ii,"): ", list_symcoeff(2,1,ii)  
+  write(std_out,*) "atom2     list_symcoeff(3,1,", ii,"): ", list_symcoeff(3,1,ii)  
+  write(std_out,*) "irpt      list_symcoeff(4,1,", ii,"): ", list_symcoeff(4,1,ii) !,"cell: ", cell(:,list_symcoeff(4,1,ii))
+  write(std_out,*) "weight    list_symcoeff(5,1,", ii,"): ", list_symcoeff(5,1,ii)  
+  write(std_out,*) "index sym list_symcoeff(6,1,", ii,"): ", list_symcoeff(6,1,ii) 
+  ia = list_symcoeff(6,1,ii)  
   if(ia /= 0)then 
   write(std_out,*) "------------------" 
   write(std_out,*) "Symmetric Term from list_symcoeff:" 
