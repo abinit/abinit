@@ -1735,9 +1735,9 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
      end do
    end do 
    !MS only keep terms with ia == 1 
-   !if (list_symcoeff_tmp2(2,icoeff,1) /= 1)then 
-   !    list_symcoeff_tmp2(:,icoeff,1) = 0 
-   !endif
+   if (list_symcoeff_tmp2(2,icoeff,1) /= 1)then 
+       list_symcoeff_tmp2(:,icoeff,1) = 0 
+   endif
  end do
 
 !4/ Recount the number of coeff after step 3
@@ -2236,6 +2236,7 @@ write(std_out,*) "DEBUG: Number of Compatible Coeffs: ", ii
    ABI_ALLOCATE(list_combination_tmp,(1,1))
  end if
 
+if(iam_master)then
 write(std_out,*) "DEBUG: reduce zero combinations"
  !Reduce zero combinations
  i0 = 0 
@@ -2303,9 +2304,8 @@ do i=1,ncombination
         else !else loop over symmetries to fina symmetry operation that projects term j on i 
           isym = 2
           do while(isym <= nsym)
-             list_combination_cmp_tmp(1)=list_combination_tmp(1,j)
              !Get equivalent term indexes for symmetry isym
-             do idisp=2,power_disps(2)
+             do idisp=1,power_disps(2)
                 if(list_combination_tmp(idisp,j) /= 0 .and. list_combination_tmp(idisp,j) <= ncoeff_symsym )then
                    list_combination_cmp_tmp(idisp)=list_symcoeff(6,list_combination_tmp(idisp,j),isym)
                 else if(list_combination_tmp(idisp,j) > ncoeff_symsym)then
@@ -2365,7 +2365,7 @@ write(std_out,*) "DEBUG: Transfer irreducible ones"
  ABI_ALLOCATE(list_combination_tmp,(power_disps(2),i0))
  list_combination_tmp = list_combination_tmp2 
  ABI_DEALLOCATE(list_combination_tmp2)
- 
+end if !iam_master
 
 
  ABI_DEALLOCATE(xcart)
