@@ -1733,7 +1733,11 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
          list_symcoeff_tmp2(:,icoeff2,1) = 0
        end if
      end do
-   end do
+   end do 
+   !MS only keep terms with ia == 1 
+   !if (list_symcoeff_tmp2(2,icoeff,1) /= 1)then 
+   !    list_symcoeff_tmp2(:,icoeff,1) = 0 
+   !endif
  end do
 
 !4/ Recount the number of coeff after step 3
@@ -1919,7 +1923,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 !Local variables-------------------------------
 !scalar
  integer :: ia,ib,icoeff,icoeff2,icoeff3,ierr,ii,ij,irpt,irpt_ref,iterm,i0
- integer :: lim1,lim2,lim3,tmp_ind1,tmp_ind2,i,j,k,cnt
+ integer :: lim1,lim2,lim3,tmp_ind1,tmp_ind2,i,j,k,cnt,idisp,isym,istrain
  integer :: master,my_rank,my_ncoeff,my_newncoeff,natom,ncombination,ncoeff_max,ncoeff_sym
  integer :: ncoeff_symsym
  integer :: ncoeff_alone,ndisp_max,nproc,nrpt,nsym,nterm,nstr_sym,r1,r2,r3,my_size
@@ -1930,7 +1934,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 !arrays
  integer :: ncell(3)
  integer,allocatable :: buffsize(:),buffdispl(:)
- integer,allocatable :: cell(:,:),compatibleCoeffs(:,:)
+ integer,allocatable :: cell(:,:),compatibleCoeffs(:,:),list_combination_cmp_tmp(:)
  integer,allocatable :: list_symcoeff(:,:,:),list_symstr(:,:,:),list_coeff(:),list_combination(:,:)
  integer,allocatable :: list_combination_tmp(:,:),list_combination_tmp2(:,:)
  integer,allocatable  :: my_coefflist(:),my_coeffindexes(:),my_newcoeffindexes(:)
@@ -2070,6 +2074,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  call polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,&
 &                              natom,nstr_sym,ncoeff_sym,nrpt,range_ifc,sc_size=sc_size)
 
+if(iam_master)then 
 i0 = 0 
 write(std_out,*) "DEBUG shape list_symcoeff(:,:,:):", shape(list_symcoeff) 
 write(std_out,*) "DEBUG shape size(list_symcoeff,2):", size(list_symcoeff(1,:,1))
@@ -2117,7 +2122,7 @@ write(std_out,*) "******************"
 !   write(std_out,*) "index sym list_symcoeff(6,", ii,",1): ", list_symcoeff(6,ii,1) 
 !   write(std_out,*) "------------------" 
 !enddo
-
+endif
 
  ABI_DEALLOCATE(dist)
  ABI_DEALLOCATE(rpt)
@@ -2286,19 +2291,64 @@ enddo
 write(std_out,*) "DEBUG: finish sorting combinations"
 write(std_out,*) "DEBUG: start counting doubles"
 !2.Figure out equal ones 
+ABI_ALLOCATE(list_combination_cmp_tmp,(power_disps(2)))
 i0 = 0
 do i=1,ncombination 
    if(any(list_combination_tmp(:,i) /= 0))then 
      do j=i+1,ncombination
+        !If term j is equivalent to term i delet it
         if(all(list_combination_tmp(:,i) == list_combination_tmp(:,j)))then
            list_combination_tmp(:,j) = 0
-           i0 = i0 + 1 
-        endif
-     enddo  
-   else
-     cycle 
-   end if 
-end do 
+           i0 = i0 + 1
+        else !else loop over symmetries to fina symmetry operation that projects term j on i 
+          isym = 2
+          do while(isym <= nsym)
+             list_combination_cmp_tmp(1)=list_combination_tmp(1,j)
+             !Get equivalent term indexes for symmetry isym
+             do idisp=2,power_disps(2)
+                if(list_combination_tmp(idisp,j) /= 0 .and. list_combination_tmp(idisp,j) <= ncoeff_symsym )then
+                   list_combination_cmp_tmp(idisp)=list_symcoeff(6,list_combination_tmp(idisp,j),isym)
+                else if(list_combination_tmp(idisp,j) > ncoeff_symsym)then
+                   istrain = list_combination_tmp(idisp,j) - ncoeff_symsym  
+                   list_combination_cmp_tmp(idisp)=list_symstr(istrain,isym,1)
+                else 
+                   list_combination_cmp_tmp(idisp) = 0 
+                endif 
+             enddo
+!   write(std_out,*) "DEBUG list_combination_tmp before sort:", list_combination_tmp(:,i)
+             !Sort the new symmetric indexes for comparision
+             ij=2 
+             k=2
+             do while(ij <= size(list_combination_cmp_tmp(:))) 
+                k = ij
+                cnt = 1
+                do while(k >= 2 .and. cnt == 1) 
+                   if(list_combination_cmp_tmp(k-1) > list_combination_cmp_tmp(k) .and. list_combination_cmp_tmp(k) > 0)then 
+                        tmp_ind1 = list_combination_cmp_tmp(k-1) 
+                        tmp_ind2 = list_combination_cmp_tmp(k)
+                        list_combination_cmp_tmp(k) = tmp_ind1
+                        list_combination_cmp_tmp(k-1) = tmp_ind2
+                        k=k-1
+                   else 
+                     cnt = cnt +1
+                   end if
+                end do ! whlie k>=2
+                ij = ij+1
+             end do ! while ij< size(list..)
+             !Compare. If equivalent delete term j
+             if(all(list_combination_tmp(:,i) == list_combination_cmp_tmp(:)))then
+                list_combination_tmp(:,j) = 0
+                i0 = i0 + 1
+                isym = nsym +1 
+             else 
+                isym = isym + 1
+             endif
+          enddo !isym 
+        endif ! all(list_combinaton...)
+     enddo ! j=i+1,ncombination
+   end if ! any(list_combination_tmp /= 0 ) 
+end do !i=1,ncombination 
+ABI_DEALLOCATE(list_combination_cmp_tmp)
 write(std_out,*) "DEBUG: finish counting doubles"
 write(std_out,*) "DEBUG: Transfer irreducible ones"
  ABI_ALLOCATE(list_combination_tmp2,(power_disps(2),ncombination-i0))
