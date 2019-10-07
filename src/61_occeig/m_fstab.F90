@@ -692,7 +692,8 @@ subroutine fstab_print(fstab, header, unit, prtvol)
 !Local variables-------------------------------
 !scalars
  integer :: my_unt,my_prtvol,spin
- type(fstab_t),pointer :: fs
+ class(fstab_t),pointer :: fs
+! typw(fstab_t),pointer :: fs
  character(len=500) :: msg
 
 ! *************************************************************************
