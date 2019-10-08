@@ -211,19 +211,14 @@ ABI_FALLBACKS_INIT
 # Prepare MPI support
 ABI_MPI_INIT
 
+# Prepare GPU support
+# Note: must be done after MPI
+ABI_GPU_INIT
+
 # GPU support requires MPI
 if test "${abi_gpu_enable}" = "yes" -a "${abi_mpi_enable}" != "yes"; then
   AC_MSG_ERROR([GPU support requires MPI])
 fi
-
-# ScaLAPACK support requires MPI
-if test "${abi_scalapack_enable}" = "yes" -a "${abi_mpi_enable}" != "yes"; then
-  AC_MSG_ERROR([ScaLAPACK support requires MPI])
-fi
-
-# Prepare GPU support
-# Note: must be done after MPI
-ABI_GPU_INIT
 
                     # ------------------------------------ #
 

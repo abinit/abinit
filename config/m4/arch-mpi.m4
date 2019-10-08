@@ -685,7 +685,7 @@ EOF
 #
 AC_DEFUN([ABI_MPI_INIT], [
   # Delegate most of the init stage to Steredeg
-  SD_MPI_INIT([optional fail no-cxx], [-lmpi])
+  SD_MPI_INIT([optional fail], [-lmpi])
 
   # Allow MPI flavors
   AC_ARG_WITH([mpi-flavor],
@@ -704,6 +704,7 @@ AC_DEFUN([ABI_MPI_INIT], [
   # Init ABINIT MPI build flags
   abi_mpi_cppflags=""
   abi_mpi_cflags=""
+  abi_mpi_cxxflags=""
   abi_mpi_fcflags=""
   abi_mpi_ldflags=""
   abi_mpi_libs=""
@@ -711,13 +712,14 @@ AC_DEFUN([ABI_MPI_INIT], [
   # Init ABINIT MPI build parameters
   if test "${abi_mpi_enable}" = "yes" -o "${abi_mpi_enable}" = "auto"; then
 
-    if test "${abi_mpi_level}" != ""; then
-      AC_MSG_WARN([forcing MPI level to ${abi_mpi_level} might make the build fail])
+    if test "${with_mpi_level}" != ""; then
+      AC_MSG_WARN([forcing MPI level to ${with_mpi_level} might make the build fail])
     fi
 
     if test "${sd_mpi_cc_set}" != "yes" -o "${sd_mpi_fc_set}" != "yes"; then
       abi_mpi_cppflags="${sd_mpi_cppflags}"
       abi_mpi_cflags="${sd_mpi_cflags}"
+      abi_mpi_cxxflags="${sd_mpi_cxxflags}"
       abi_mpi_fcflags="${sd_mpi_fcflags}"
       abi_mpi_ldflags="${sd_mpi_ldflags}"
       abi_mpi_libs="${sd_mpi_libs}"
@@ -733,6 +735,9 @@ AC_DEFUN([ABI_MPI_INIT], [
     abi_mpi_init="cmd"
     abi_mpi_inplace_enable="no"
     abi_mpi_io_enable="no"
+    abi_mpi_cppflags=""
+    abi_mpi_cflags=""
+    abi_mpi_cxxflags=""
     abi_mpi_fcflags=""
     abi_mpi_ldflags=""
     abi_mpi_level=""
@@ -766,6 +771,9 @@ AC_DEFUN([ABI_MPI_INIT], [
   # Enable substitution
   AC_SUBST(abi_mpi_enable)
   AC_SUBST(abi_mpi_flavor)
+  AC_SUBST(abi_mpi_cppflags)
+  AC_SUBST(abi_mpi_cflags)
+  AC_SUBST(abi_mpi_cxxflags)
   AC_SUBST(abi_mpi_fcflags)
   AC_SUBST(abi_mpi_ldflags)
   AC_SUBST(abi_mpi_level)
