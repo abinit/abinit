@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 17 Mar 2019.
-- ( at 13h01 )
+.Starting date : Fri 27 Sep 2019.
+- ( at 15h55 )
   
-- input  file    -> t161.in
-- output file    -> t161.out
-- root for input  files -> t161i
-- root for output files -> t161o
+- input  file    -> t61.in
+- output file    -> t61.out
+- root for input  files -> t61i
+- root for output files -> t61o
 
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
@@ -313,10 +313,10 @@ P           mkmem3         29
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t161o_DS20_WFK
+-inwffil : will read wavefunctions from disk file t61o_DS20_WFK
 
 ================================================================================
- prteigrs : about to open file t161o_DS1_EIG
+ prteigrs : about to open file t61o_DS1_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   1.74E-17  1.81E-17  3.00E-17  3.78E-17  8.11E-17  9.79E-17  4.91E-17  5.43E-17
   3.33E-17  4.28E-17
@@ -376,7 +376,7 @@ P           mkmem3         29
     2      2.03812811310319     2.03812811310319     2.03812811310319
  length scales=  1.000000000000  1.000000000000  1.000000000000 bohr
               =  0.529177208590  0.529177208590  0.529177208590 angstroms
- prteigrs : about to open file t161o_DS1_EIG
+ prteigrs : about to open file t61o_DS1_EIG
  Eigenvalues (hartree) for nkpt=   7  k points:
  kpt#   1, nband= 10, wtk=  0.00195, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.72526   -0.00709   -0.00709   -0.00709    0.30658    0.84023    0.84023    0.84023
@@ -413,9 +413,11 @@ P           mkmem3         29
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading DDB from file: t161o_DS20_DDB
-- Reading DVDB from file: t161o_DS20_DVDB
-- Reading EFMAS information from file: t161i_DS2_EFMAS.nc
+- Reading DDB from file: t61o_DS20_DDB
+- Reading DVDB from file: t61o_DS20_DVDB
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -443,7 +445,7 @@ P           mkmem3         29
          2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
          2         3    4.262070E-16    4.262070E-16   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
-- Found dielectric tensor and Born effective charges in DDB file: t161o_DS20_DDB
+- Found dielectric tensor and Born effective charges in DDB file: t61o_DS20_DDB
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -509,10 +511,12 @@ Interpolation of the electron-phonon coupling potential completed
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t161o_DS1_WFK
-- Reading DDB from file: t161o_DS20_DDB
-- Reading DVDB from file: t161o_DS2_DVDB
-- Reading EFMAS information from file: t161i_DS3_EFMAS.nc
+- Reading GS states from WFK file: t61o_DS1_WFK
+- Reading DDB from file: t61o_DS20_DDB
+- Reading DVDB from file: t61o_DS2_DVDB
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -540,7 +544,7 @@ Interpolation of the electron-phonon coupling potential completed
          2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
          2         3    4.262070E-16    4.262070E-16   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
-- Found dielectric tensor and Born effective charges in DDB file: t161o_DS20_DDB
+- Found dielectric tensor and Born effective charges in DDB file: t61o_DS20_DDB
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -634,6 +638,9 @@ P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of q-points in the IBZ treated by this proc: 29 of 29
 P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 6 of 6
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
@@ -844,45 +851,45 @@ P           mkmem3         29
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [3] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
 - Proc.   0 individual time (sec): cpu=         23.6  wall=         23.9

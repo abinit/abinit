@@ -4,7 +4,7 @@
 !! m_hdr
 !!
 !! FUNCTION
-!! This module contains the definition of the abinit header (TODO) and its methods
+!! This module contains the definition of the abinit header and its methods
 !! If you have to change the hdr, pay attention to the following subroutines:
 !!
 !!   hdr_malloc, hdr_init_lowlvl, hdr_free, hdr_bcast and the IO routines
@@ -238,41 +238,61 @@ module m_hdr
   ! EVOLVING variable, only for paw
   type(pawrhoij_type), allocatable :: pawrhoij(:)
 
-  ! TODO
-  !contains
-  !procedure
+  contains
+
+  procedure :: free => hdr_free
+  ! Deallocates the components of the header.
+
+  procedure :: get_nelect_from_occ => hdr_get_nelect_from_occ
+   ! Returns the number of electrons calculated from the occupation factors Hdr%occ
+
+  procedure :: ncwrite => hdr_ncwrite
+   ! Writes the header and fform to a Netcdf file.
+
+  procedure :: vs_dtset => hdr_vs_dtset
+   ! Check the compatibility of header with dtset.
+
+  procedure :: get_crystal => hdr_get_crystal
+   ! Return the crystal structure stored in the header.
+
+  procedure :: bcast => hdr_bcast
+   ! Broadcast the header.
+
+  procedure :: update => hdr_update
+   ! Update the header.
+
+  procedure :: write_to_fname => hdr_write_to_fname
+   ! Write the header (requires a string with the file name).
+
+  procedure :: fort_write => hdr_fort_write
+   ! Writes the header and fform to unformatted file
+
+  procedure :: backspace => hdr_backspace
+   ! Backspace the header (Fortran IO).
+
+  procedure :: echo => hdr_echo
+   ! Echo the header.
 
  end type hdr_type
 !!***
+
+ public :: hdr_init                ! Initialize the header and most of its content from dtset and psps.
+ public :: hdr_init_lowlvl         ! Low level initialization method for Hdr (no dtset).
+ public :: hdr_copy                ! Deep copy of the Header.
+ public :: hdr_mpio_skip           ! Skip the abinit header using MPI-IO routines.
+                                   ! Return the offset of the first Fortran record after the header.
+ public :: hdr_bsize_frecords      ! Compute the size of the Fortran records from the header and formeig.
+ public :: hdr_read_from_fname     ! Read the header (requires a string with the file name).
+ public :: hdr_skip                ! Skip the header.
+ public :: hdr_io                  ! IO of the header.
+ public :: hdr_fort_read           ! Reads the header from a logical unit associated to an unformatted file.
+ public :: hdr_ncread              ! Reads the header from a Netcdf file.
+ public :: hdr_check               ! Compare two headers.
 
  public :: abifile_from_varname
  public :: abifile_from_fform
  public :: fform_from_ext          ! Return the value of fform to be used from the file extension.
  public :: varname_from_fname      ! Return the name of the netcdf variable stored in a file from the file extension.
-
- public :: hdr_init                ! Initialize the header and most of its content from dtset and psps.
- public :: hdr_init_lowlvl         ! Low level initialization method for Hdr (no dtset).
- public :: hdr_free                ! Deallocates the components of the header.
- public :: hdr_copy                ! Deep copy of the Header.
- public :: hdr_nelect_fromocc      ! Returns the number of electrons calculated from the occupation factors Hdr%occ
- public :: hdr_mpio_skip           ! Skip the abinit header using MPI-IO routines.
-                                   ! Return the offset of the first Fortran record after the header.
- public :: hdr_bsize_frecords      ! Compute the size of the Fortran records from the header and formeig.
- public :: hdr_bcast               ! Broadcast the header.
- public :: hdr_update              ! Update the header.
- public :: hdr_read_from_fname     ! Read the header (requires a string with the file name).
- public :: hdr_write_to_fname      ! Write the header (requires a string with the file name).
- public :: hdr_skip                ! Skip the header.
- public :: hdr_io                  ! IO of the header.
- public :: hdr_echo                ! Echo the header.
- public :: hdr_fort_read           ! Reads the header from a logical unit associated to an unformatted file.
- public :: hdr_ncread              ! Reads the header from a Netcdf file.
- public :: hdr_fort_write          ! Writes the header and fform to unformatted file
- public :: hdr_backspace           ! Backspace the header (Fortran IO).
- public :: hdr_ncwrite             ! Writes the header and fform to a Netcdf file.
- public :: hdr_check               ! Compare two headers.
- public :: hdr_vs_dtset            ! Check the compatibility of header with dtset.
- public :: hdr_get_crystal         ! Return the crystal structure stored in the header.
 
  ! Generic interface of the routines hdr_skip
  interface hdr_skip
@@ -812,7 +832,7 @@ end subroutine test_abifiles
 !!
 !! FUNCTION
 !!  Allocate memory from dimensions with the exception of pawrhoij.
-!!  This is a private routine. Client code should used hdr_init, hdr_fort_read ...
+!!  This is a private routine. Client code should use hdr_init, hdr_fort_read.
 !!
 !! PARENTS
 !!      m_hdr
@@ -830,7 +850,7 @@ subroutine hdr_malloc(hdr, bantot, nkpt, nsppol, npsp, natom, ntypat, nsym, nshi
 ! *************************************************************************
 
  !@hdt_type
- call hdr_free(hdr)
+ call hdr%free()
 
  ABI_MALLOC(hdr%istwfk, (nkpt))
  ABI_MALLOC(hdr%nband, (nkpt*nsppol))
@@ -895,7 +915,7 @@ end subroutine hdr_malloc
 !! SOURCE
 
 subroutine hdr_init(ebands,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl, &
-&                   mpi_atmtab,comm_atom) ! optional arguments (parallelism)
+                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
 !Arguments ------------------------------------
 !scalars
@@ -1183,7 +1203,7 @@ subroutine hdr_copy(Hdr_in,Hdr_cp)
    nspden_rhoij = Hdr_in%Pawrhoij(1)%nspden
    ABI_DT_MALLOC(Hdr_cp%Pawrhoij,(Hdr_in%natom))
    call pawrhoij_alloc(Hdr_cp%Pawrhoij,cplex_rhoij,nspden_rhoij,Hdr_in%nspinor,Hdr_in%nsppol,Hdr_in%typat,&
-&                      lmnsize=Hdr_in%lmn_size(1:Hdr_in%ntypat),qphase=qphase_rhoij)
+                       lmnsize=Hdr_in%lmn_size(1:Hdr_in%ntypat),qphase=qphase_rhoij)
    call pawrhoij_copy(Hdr_in%Pawrhoij,Hdr_cp%Pawrhoij)
  end if
 
@@ -1192,9 +1212,9 @@ end subroutine hdr_copy
 
 !----------------------------------------------------------------------
 
-!!****f* m_hdr/hdr_nelect_fromocc
+!!****f* m_hdr/hdr_get_nelect_from_occ
 !! NAME
-!! hdr_nelect_fromocc
+!! hdr_get_nelect_from_occ
 !!
 !! FUNCTION
 !!  Return the number of electrons from the occupation numbers
@@ -1212,7 +1232,7 @@ end subroutine hdr_copy
 !!
 !! SOURCE
 
-real(dp) pure function hdr_nelect_fromocc(Hdr) result(nelect)
+real(dp) pure function hdr_get_nelect_from_occ(Hdr) result(nelect)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1233,7 +1253,7 @@ real(dp) pure function hdr_nelect_fromocc(Hdr) result(nelect)
    end do
  end do
 
-end function hdr_nelect_fromocc
+end function hdr_get_nelect_from_occ
 !!***
 
 !----------------------------------------------------------------------
@@ -1271,12 +1291,12 @@ end function hdr_nelect_fromocc
 !! SOURCE
 
 subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
-&  codvsn,pertcase,natom,nsym,nspden,ecut,pawecutdg,ecutsm,dilatmx,&
-&  intxc,ixc,stmbias,usewvl,pawcpxocc,pawspnorb,ngfft,ngfftdg,so_psp,qptn,&
-&  rprimd,xred,symrel,tnons,symafm,typat,amu,icoulomb,&
-&  kptopt,nelect,charge,kptrlatt_orig,kptrlatt,&
-&  nshiftk_orig,nshiftk,shiftk_orig,shiftk,&
-&  mpi_atmtab,comm_atom) ! optional arguments (parallelism)
+  codvsn,pertcase,natom,nsym,nspden,ecut,pawecutdg,ecutsm,dilatmx,&
+  intxc,ixc,stmbias,usewvl,pawcpxocc,pawspnorb,ngfft,ngfftdg,so_psp,qptn,&
+  rprimd,xred,symrel,tnons,symafm,typat,amu,icoulomb,&
+  kptopt,nelect,charge,kptrlatt_orig,kptrlatt,&
+  nshiftk_orig,nshiftk,shiftk_orig,shiftk,&
+  mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
 !Arguments ------------------------------------
 !scalars
@@ -1403,18 +1423,18 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
    call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
                              nspden=nspden,spnorb=pawspnorb,cpxocc=pawcpxocc,qpt=qptn)
    ABI_DT_MALLOC(hdr%pawrhoij,(natom))
-   !Values of nspden/nspinor/nsppol are dummy ones; they are overwritten later (by hdr_update)
+   ! Values of nspden/nspinor/nsppol are dummy ones; they are overwritten later (by hdr_update)
    if (present(comm_atom)) then
      if (present(mpi_atmtab)) then
        call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden_rhoij,nspinor,nsppol,typat,qphase=qphase_rhoij,&
-&                          pawtab=pawtab,comm_atom=comm_atom,mpi_atmtab=mpi_atmtab)
+                           pawtab=pawtab,comm_atom=comm_atom,mpi_atmtab=mpi_atmtab)
      else
        call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden_rhoij,nspinor,nsppol,typat,qphase=qphase_rhoij,&
-&                          pawtab=pawtab,comm_atom=comm_atom)
+                           pawtab=pawtab,comm_atom=comm_atom)
      end if
    else
      call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden_rhoij,nspinor,nsppol,typat,qphase=qphase_rhoij,&
-&                        pawtab=pawtab)
+                         pawtab=pawtab)
    end if
  end if
 
@@ -1531,8 +1551,8 @@ subroutine hdr_read_from_fname(Hdr,fname,fform,comm)
 
  ! Broadcast fform and the header.
  if (xmpi_comm_size(comm) > 1) then
-   call hdr_bcast(Hdr,master,my_rank,comm)
-   call xmpi_bcast(fform,master,comm,mpierr)
+   call hdr%bcast(master, my_rank, comm)
+   call xmpi_bcast(fform, master, comm, mpierr)
  end if
 
 end subroutine hdr_read_from_fname
@@ -1581,7 +1601,7 @@ subroutine hdr_write_to_fname(Hdr,fname,fform)
    if (open_file(fname,msg,newunit=fh,form="unformatted", status="unknown") /= 0) then
      MSG_ERROR(msg)
    end if
-   call hdr_fort_write(Hdr,fh,fform,ierr)
+   call hdr%fort_write(fh, fform, ierr)
    ABI_CHECK(ierr==0, sjoin("Error while writing Abinit header to file:", fname))
    close(fh)
 
@@ -1594,7 +1614,7 @@ subroutine hdr_write_to_fname(Hdr,fname,fform)
      NCF_CHECK_MSG(nctk_open_create(fh, fname, xmpi_comm_self), sjoin("Creating file:",  fname))
    end if
 
-   NCF_CHECK(hdr_ncwrite(Hdr, fh, fform, nc_define=.True.))
+   NCF_CHECK(hdr%ncwrite(fh, fform, nc_define=.True.))
    NCF_CHECK(nf90_close(fh))
 #else
    MSG_ERROR("netcdf support not enabled")
@@ -1632,7 +1652,7 @@ end subroutine hdr_write_to_fname
 !!
 !! SOURCE
 
-subroutine hdr_mpio_skip(mpio_fh,fform,offset)
+subroutine hdr_mpio_skip(mpio_fh, fform, offset)
 
 !Arguments ------------------------------------
  integer,intent(in) :: mpio_fh
@@ -1667,7 +1687,7 @@ subroutine hdr_mpio_skip(mpio_fh,fform,offset)
  if (ANY(fform == [1,2,51,52,101,102] )) then
    ! This is the old format !read (unitfi) codvsn,fform
    headform=22
-   write(msg,'(3a,i0,4a)')&
+   write(msg,'(3a,i0,4a)') &
      "ABINIT version: ",trim(abinit_version)," cannot read old files with headform: ",headform,ch10,&
      "produced by previous versions. Use an old ABINIT version to read this file or ",ch10,&
      "regenerate your files with version >= 8.0."
@@ -1681,7 +1701,7 @@ subroutine hdr_mpio_skip(mpio_fh,fform,offset)
  end if
 
  if (headform < 80) then
-   write(msg,'(3a,i0,4a)')&
+   write(msg,'(3a,i0,4a)') &
      "ABINIT version: ",trim(abinit_version)," cannot read old files with headform: ",headform,ch10,&
      "produced by previous versions. Use an old ABINIT version to read this file or ",ch10,&
      "regenerate your files with version >= 8.0."
@@ -1887,8 +1907,8 @@ subroutine hdr_io_wfftype(fform,hdr,rdwr,wff)
  DBG_ENTER("COLL")
 
  if ( wff%iomode==IO_MODE_FORTRAN .or. &
-& (wff%iomode==IO_MODE_FORTRAN_MASTER .and.wff%master==wff%me).or. &
-& (wff%iomode==IO_MODE_MPI  .and.wff%master==wff%me)    ) then
+     (wff%iomode==IO_MODE_FORTRAN_MASTER .and.wff%master==wff%me).or. &
+     (wff%iomode==IO_MODE_MPI  .and.wff%master==wff%me) ) then
    call hdr_io_int(fform,hdr,rdwr,wff%unwff)
    ! Master node **MUST** flush the output buffer so that the
    ! other nodes can read headform and therefore the Fortran marker length when MPI-IO is used
@@ -1901,7 +1921,7 @@ subroutine hdr_io_wfftype(fform,hdr,rdwr,wff)
    if (wff%iomode==IO_MODE_FORTRAN_MASTER .or. wff%iomode==IO_MODE_MPI) then
      if (wff%spaceComm/=MPI_COMM_SELF) then
        call MPI_BCAST(fform,1,MPI_INTEGER,wff%master,wff%spaceComm,ierr)
-       call hdr_bcast(hdr,wff%master,wff%me,wff%spaceComm)
+       call hdr%bcast(wff%master, wff%me, wff%spaceComm)
      end if
      wff%headform=hdr%headform
      if(wff%iomode==IO_MODE_MPI)then
@@ -1998,7 +2018,7 @@ subroutine hdr_io_int(fform,hdr,rdwr,unitfi)
 
  case (2, 6)
    ! Writing the header of an unformatted file
-   call hdr_fort_write(Hdr,unitfi,fform,ierr,rewind=(rdwr==2))
+   call hdr%fort_write(unitfi, fform, ierr, rewind=(rdwr==2))
 
  case (3, 4)
    !  Writing the header of a formatted file
@@ -2289,7 +2309,7 @@ subroutine hdr_skip_wfftype(wff,ierr)
    read(unit, err=10, iomsg=errmsg) codvsn,headform ! fform
 
    if (headform==1   .or. headform==2   .or. &
-       headform==51  .or. headform==52  .or.   &
+       headform==51  .or. headform==52  .or. &
        headform==101 .or. headform==102 ) headform=22
 
    if (headform < 80) then
@@ -2421,7 +2441,7 @@ end subroutine hdr_skip_wfftype
 !! SOURCE
 
 subroutine hdr_update(hdr,bantot,etot,fermie,residm,rprimd,occ,pawrhoij,xred,amu, &
-&                     comm_atom,mpi_atmtab) ! optional arguments (parallelism)
+                      comm_atom,mpi_atmtab) ! optional arguments (parallelism)
 
 !Arguments ------------------------------------
 !scalars
@@ -2496,7 +2516,7 @@ end subroutine hdr_update
 !!
 !! SOURCE
 
-subroutine hdr_bcast(hdr,master,me,comm)
+subroutine hdr_bcast(hdr, master, me, comm)
 
 !Arguments ------------------------------------
  integer, intent(in) :: master,me,comm
@@ -2770,7 +2790,7 @@ subroutine hdr_bcast(hdr,master,me,comm)
      index=0;index2=0
      ABI_DT_MALLOC(hdr%pawrhoij,(natom))
      call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden,hdr%nspinor,hdr%nsppol,hdr%typat,&
-&                        lmnsize=hdr%lmn_size,qphase=qphase)
+                         lmnsize=hdr%lmn_size,qphase=qphase)
      do iatom=1,natom
        nsel=list_int(1+index)
        lmn2_size=hdr%pawrhoij(iatom)%lmn2_size
@@ -2854,7 +2874,7 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
  read(unit, err=10, iomsg=errmsg) hdr%codvsn,hdr%headform,fform
 
  if (hdr%headform < 80) then
-   write(msg,'(3a,i0,4a)')&
+   write(msg,'(3a,i0,4a)') &
      "ABINIT version: ",trim(abinit_version)," cannot read old files with headform: ",hdr%headform,ch10,&
      "produced by previous versions. Use an old ABINIT version to read this file or ",ch10,&
      "regenerate your files with version >= 8.0."

@@ -300,7 +300,7 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 
          call read_rhor(fiden1i, cplex, dtset%nspden, nfft, dtset%ngfft, rdwrpaw, mpi_enreg, rho1r1, &
          hdr_den, rhoij_dum, comm_cell, check_hdr=hdr)
-         call hdr_free(hdr_den)
+         call hdr_den%free()
        end if
 
        xccc3d1(:) = 0._dp
@@ -339,7 +339,7 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 
                call read_rhor(fiden1i, cplex, dtset%nspden, nfft, dtset%ngfft, rdwrpaw, mpi_enreg, rho3r1, &
                hdr_den, rhoij_dum, comm_cell, check_hdr=hdr)
-               call hdr_free(hdr_den)
+               call hdr_den%free()
              end if
 
              xccc3d3(:) = 0._dp
@@ -414,7 +414,7 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 
                      call read_rhor(fiden1i, cplex, dtset%nspden, nfft, dtset%ngfft, rdwrpaw, mpi_enreg, rho2r1, &
                      hdr_den, rhoij_dum, comm_cell, check_hdr=hdr)
-                     call hdr_free(hdr_den)
+                     call hdr_den%free()
 
 !                    Compute up+down rho1(G) by fft
                      ABI_ALLOCATE(work,(cplex*nfft))

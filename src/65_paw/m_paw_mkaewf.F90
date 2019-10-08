@@ -319,14 +319,13 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 
  fname = trim(dtfil%filnam_ds(4))//'_PAWAVES.nc'
  write(msg,'(2a)')' Opening file for AE PAW wave functions: ',trim(fname)
- call wrtout(std_out,msg,'PERS')
- call wrtout(ab_out,msg,'PERS')
+ call wrtout([std_out, ab_out], msg, 'PERS')
 
  if (xmpi_comm_rank(comm_cell) == master) then
    NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
 
-   fform=602
-   NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
+   fform = 602
+   NCF_CHECK(hdr%ncwrite(ncid, fform, nc_define=.True.))
 
    ! Define wavefunctions in real space on the dense FFT mesh
    ! Fortran layout:
@@ -723,7 +722,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  ABI_FREE(phk_atm)
  call pawfgrtab_free(local_pawfgrtab)
 
-!Destroy atom table used for parallelism
+ ! Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
  DBG_EXIT("COLL")

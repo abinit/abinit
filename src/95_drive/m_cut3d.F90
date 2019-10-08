@@ -1001,7 +1001,7 @@ subroutine cut3d_rrho(path,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
    end if
    call hdr_fort_read(hdr, unt, fform)
    ABI_CHECK(fform /= 0, sjoin("Error while reading:", path))
-   call hdr_free(hdr)
+   call hdr%free()
 
    do ispden=1,nspden
      read(unit=unt) grid_full(1:nr1,1:nr2,1:nr3,ispden)

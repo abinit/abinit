@@ -420,7 +420,7 @@ type(fock_type),pointer, intent(inout) :: fock
        fname=trim(dtfil%fildensin);if (dtset%positron==2) fname=trim(dtfil%fildensin)//'_POSITRON'
        call read_rhor(trim(fname), cplex1, dtset%nspden, nfft, ngfft, rdwrpaw, mpi_enreg, electronpositron%rhor_ep, &
        hdr_den, electronpositron%pawrhoij_ep, comm_cell, check_hdr=hdr)
-       etotal_read = hdr_den%etot; call hdr_free(hdr_den)
+       etotal_read = hdr_den%etot; call hdr_den%free()
        call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,1,ngfft,0)
        if (dtset%usepaw==1.and.allocated(electronpositron%nhat_ep)) then
          call pawmknhat(occtmp,1,0,0,0,0,gprimd,my_natom,dtset%natom,nfft,ngfft,0,&
@@ -697,7 +697,7 @@ type(fock_type),pointer, intent(inout) :: fock
        nelect=nelect+dtset%ziontypat(dtset%typat(iatom))
      end do
      maxocc=two/real(dtset%nsppol*dtset%nspinor,dp)
-     nocc=(nelect-tol8)/maxocc + 1
+     nocc=int((nelect-tol8)/maxocc) + 1
      nocc=min(nocc,dtset%nband(1)*dtset%nsppol)
      occlast=nelect-maxocc*(nocc-1)
      ABI_ALLOCATE(scocc,(dtset%nband(1)*dtset%nsppol))

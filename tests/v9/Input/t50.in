@@ -82,19 +82,19 @@
 #%% [setup]
 #%% executable = abinit
 #%% exclude_builders = .*_intel_1[789].0_.*
-#%% test_chain = t150.in, t151.in, t152.in, t153.in, t154.in, t155.in, t156.in
+#%% test_chain = t50.in, t51.in, t52.in, t53.in, t54.in, t55.in, t56.in
 #%% [files]
 #%% files_to_test = 
-#%%   t150.out, tolnlines = 30, tolabs = 1.1e-3, tolrel = 1.1
+#%%   t50.out, tolnlines = 30, tolabs = 1.1e-3, tolrel = 1.1
 #%% psp_files = 6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [shell]
 #%% post_commands = 
-#%%  ww_mv t150o_DS2_WFK t153o_DS20_WFK; 
-#%%  ww_cp t153o_DS20_WFK t154o_DS20_WFK; 
-#%%  ww_cp t153o_DS20_WFK t155o_DS20_WFK; 
-#%%  ww_cp t153o_DS20_WFK t156o_DS20_WFK; 
+#%%  ww_mv t50o_DS2_WFK t53o_DS20_WFK; 
+#%%  ww_cp t53o_DS20_WFK t54o_DS20_WFK; 
+#%%  ww_cp t53o_DS20_WFK t55o_DS20_WFK; 
+#%%  ww_cp t53o_DS20_WFK t56o_DS20_WFK; 
 #%% [extra_info]
 #%% authors = G. Brunin, M. Giantomassi
 #%% keywords = NC, DFPT, EPH
