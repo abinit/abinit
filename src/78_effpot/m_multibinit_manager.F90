@@ -406,10 +406,12 @@ contains
   !-------------------------------------------------------------------!
   subroutine set_movers(self)
     class(mb_manager_t), intent(inout) :: self
+    character(len=fnlen) :: fname
     if (self%params%spin_dynamics>0) then
+       fname=trim(self%filenames(2))//"_spinhist_input.nc"
        call self%spin_mover%initialize(params=self%params,&
             & supercell=self%supercell, rng=self%rng, &
-            & restart_hist_fname=trim(self%filenames(2))//"_spinhist.nc")
+            & restart_hist_fname=fname)
     end if
 
 
@@ -493,8 +495,11 @@ contains
     call self%sc_maker%initialize(diag(self%params%ncell))
     call self%fill_supercell()
     call self%set_movers()
+    call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
     call self%spin_mover%run_time(self%pots)
     call self%lattice_mover%run_time(self%pots)
+
+    call self%spin_mover%spin_ncfile%close()
   end subroutine run_spin_latt_dynamics
 
   !-------------------------------------------------------------------!
@@ -514,6 +519,8 @@ contains
     call self%sc_maker%initialize(diag(self%params%ncell))
     call self%fill_supercell()
     call self%set_movers()
+
+    call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
     ! use
     msg=repeat("=", 90)
     call wrtout(std_out,msg,'COLL')
@@ -532,6 +539,8 @@ contains
     msg=repeat("=", 90)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
+
+    call self%spin_mover%spin_ncfile%close()
   end subroutine run_coupled_spin_latt_dynamics
 
 

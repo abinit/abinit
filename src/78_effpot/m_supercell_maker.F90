@@ -366,6 +366,7 @@ contains
     real(dp), intent(in) ::  axis(3)
     real(dp), allocatable, intent(inout) :: A_sc(:, :)
     integer :: icell, iA, nA, counter, ndim
+    real(dp):: angle
     ndim=size(A, 1)
     nA=size(A,2)
     if(.not. allocated(A_sc)) then
@@ -375,6 +376,7 @@ contains
     do icell = 1, self%ncells
        do iA=1 , nA
           counter=counter+1
+          angle=two_pi* DOT_PRODUCT(kpoint,  self%rvecs(:, icell))
           A_sc(:,counter) = rotate_by_angle_around_axis( &
                & angle=two_pi* DOT_PRODUCT(kpoint,  self%rvecs(:, icell)), &
                & axis=axis, vec=A(:, iA))

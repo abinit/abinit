@@ -38,7 +38,10 @@
 module m_spin_mover
 
   use defs_basis
+  use m_nctk
+#if defined HAVE_NETCDF
   use netcdf
+#endif
   use m_errors
   use m_abicore
   use m_xmpi
@@ -233,7 +236,7 @@ contains
     character(len=fnlen), intent(in) :: fname
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
     if (iam_master) then
        call self%prepare_ncfile(params, trim(fname)//'_spinhist.nc')
        call self%spin_ncfile%write_one_step(self%hist)
@@ -252,21 +255,23 @@ contains
     integer :: ierr, ncid, varid
     integer :: nspin, ntime
     ! open file
+
+#if defined HAVE_NETCDF
     ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
-    NCF_CHECK_MSG(ierr, "Open netcdf file")
+    NCF_CHECK_MSG(ierr, "The spin_init_mode is set to 5. But open netcdf file "//trim(fname)//" Failed. ")
 
     ! sanity check. If the hist file is consistent with the current calculation
-    ierr=nf90_inq_dimid(ncid, "nspin", nspin )
-    NCF_CHECK_MSG(ierr, "nspin")
+    ierr=nctk_get_dim(ncid, "nspin" , nspin)
+    NCF_CHECK_MSG(ierr, "when reading nspin")
 
     if (nspin /= self%nspin) then
        MSG_ERROR("The number of spins in histfile is not equal to the present calculation. &
-            &Please check if the file is consistent.")
+            & Please check if the file is consistent.")
     end if
 
 
-    ierr=nf90_inq_dimid(ncid, "ntime", ntime)
-    NCF_CHECK_MSG(ierr, "ntime")
+    ierr=nctk_get_dim(ncid, "ntime", ntime)
+    NCF_CHECK_MSG(ierr, "when reading ntime")
 
 
     ! TODO: more check ???
@@ -275,13 +280,16 @@ contains
     ierr =nf90_inq_varid(ncid, "S", varid)
     NCF_CHECK_MSG(ierr, "when reading S")
     ! TODO: Check if dimensions for start and count are okay
-    ierr = nf90_get_var(ncid=ncid, varid=varid, values=self%Stmp(:,:), start=(/ntime-1, ntime-1/), count=(/1,1/))
+    ierr = nf90_get_var(ncid=ncid, varid=varid, values=self%Stmp(:,:), start=(/1, 1, ntime/), count=(/3, nspin,1/))
 
     NCF_CHECK_MSG(ierr, "when reading S from spin hist file")
 
     ! close file
     ierr=nf90_close(ncid)
     NCF_CHECK_MSG(ierr, "Close netcdf file")
+#else
+    MSG_ERROR("spin_init_state set to 5 but abinit is not compiled with netcdf.")
+#endif 
 
   end subroutine read_hist_spin_state
 
@@ -319,7 +327,7 @@ contains
           call wrtout(ab_out,msg,'COLL')
           call wrtout(std_out,msg,'COLL')
        end if
-       
+
        select case (init_mode)
          case (1)
            ! randomize S using uniform random number
@@ -347,7 +355,7 @@ contains
           self%Stmp(2,:)=0.0d0
           self%Stmp(3,:)=1.0d0
 
-        case (4)       
+        case (4)
           write(msg,*) "Initial spins set according to spin_init_qpoint and spin_init_rotate_axis."
           call wrtout(ab_out,msg,'COLL')
           call wrtout(std_out,msg,'COLL')
@@ -357,14 +365,14 @@ contains
              & kpoint=self%init_qpoint, &
              & axis=self%init_rotate_axis, &
              & A_sc=self%Stmp)
-   
+
         case (5)
           ! read from last step of hist file
           if (.not. present(restart_hist_fname)) then
              MSG_BUG("Spin initialize mode set to 5, but restart_hist_fname is not used.")
           end if
           call self%read_hist_spin_state(fname=restart_hist_fname)
-       
+
        end select
 
        call self%hist%set_vars(S=self%Stmp, Snorm=self%supercell%spin%ms, &

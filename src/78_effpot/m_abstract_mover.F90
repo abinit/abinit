@@ -142,6 +142,7 @@ contains
     MSG_ERROR("set_initial_state not implemented for this mover")
     ABI_UNUSED_A(self)
     ABI_UNUSED(mode)
+    ABI_UNUSED(restart_hist_fname)
   end subroutine set_initial_state
 
   !-------------------------------------------------------------------!

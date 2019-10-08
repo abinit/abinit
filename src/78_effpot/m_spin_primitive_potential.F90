@@ -122,7 +122,7 @@ contains
     integer,                           intent(inout) :: natoms, nspin, index_spin(:)
     real(dp),                          intent(inout) :: unitcell(3, 3),  positions(3,natoms)
     real(dp),                          intent(inout) :: spinat(3, natoms), gyroratios(nspin), damping_factors(nspin)
-    real(dp),                optional, intent(inout) :: Sref(3, natoms), ref_spin_qpoint(3), ref_spin_rotate_axis(3)
+    real(dp),                optional, intent(inout) :: Sref(3, nspin), ref_spin_qpoint(3), ref_spin_rotate_axis(3)
 
     integer :: iatom, ispin
     real(dp) :: ms(nspin), spin_positions(3, nspin)
@@ -145,7 +145,7 @@ contains
        end do
     endif
     call self%primcell%set_spin(nspin, ms, unitcell,  spin_positions, gyroratios, damping_factors, &
-         & Sref=spinat)
+         & Sref=Sref, ref_qpoint=ref_spin_qpoint, ref_rotate_axis=ref_spin_rotate_axis)
   end subroutine set_spin_primcell
 
 
@@ -197,6 +197,7 @@ contains
     integer :: nspin, natom
     real(dp) :: cell(3,3)
     real(dp) :: ref_spin_qpoint(3), ref_spin_rotate_axis(3)
+    real(dp), allocatable :: ref_spin_orientation(:, :)
     integer, allocatable :: index_spin(:)
     real(dp), allocatable :: spinat(:,:)
     real(dp), allocatable :: xcart(:,:)
@@ -244,6 +245,7 @@ contains
     ABI_ALLOCATE(index_spin, (natom))
     ABI_ALLOCATE(gyroratio, (nspin))
     ABI_ALLOCATE(gilbert_damping, (nspin))
+    ABI_ALLOCATE(ref_spin_orientation, (3, nspin))
 
     ierr =nf90_inq_varid(ncid, "ref_cell", varid)
     NCF_CHECK_MSG(ierr, "ref_cell")
@@ -257,6 +259,11 @@ contains
     NCF_CHECK_MSG(ierr, "ref_xcart")
 
     xcart(:,:)=xcart(:,:)/ Bohr_Ang
+
+    ierr =nf90_inq_varid(ncid, "ref_spin_orientation", varid)
+    NCF_CHECK_MSG(ierr, "ref_spin_orientation")
+    ierr = nf90_get_var(ncid, varid, ref_spin_orientation)
+    NCF_CHECK_MSG(ierr, "ref_spin_orientation")
 
     ierr =nf90_inq_varid(ncid, "ref_spin_qpoint", varid)
     NCF_CHECK_MSG(ierr, "ref_spin_qpoint")
@@ -292,14 +299,14 @@ contains
     call self%set_spin_primcell( natoms=natom, unitcell=cell, positions=xcart, &
          & nspin=nspin, index_spin=index_spin, spinat=spinat, &
          & gyroratios=gyroratio, damping_factors=gilbert_damping, &
-         & Sref=spinat, ref_spin_qpoint=ref_spin_qpoint, ref_spin_rotate_axis=ref_spin_rotate_axis)
+         & Sref=ref_spin_orientation, ref_spin_qpoint=ref_spin_qpoint, ref_spin_rotate_axis=ref_spin_rotate_axis)
 
     ABI_SFREE(xcart)
     ABI_SFREE(spinat)
     ABI_SFREE(index_spin)
     ABI_SFREE(gyroratio)
     ABI_SFREE(gilbert_damping)
-
+    ABI_SFREE(ref_spin_orientation)
 
     !== read exchange terms
     ierr=nf90_inq_dimid(ncid, "spin_exchange_nterm", spin_exchange_nterm)

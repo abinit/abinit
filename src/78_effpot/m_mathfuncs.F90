@@ -381,7 +381,7 @@ contains
     r(:)=axis(:)/norm * sin(half_angle)
     w=cos(half_angle)
     ! (w, r) is the quaternion
-    vec2(:) = vec2(:) + 2.0 * cross(r, (cross(r, vec) + w*vec))
+    vec2(:) = vec(:) + 2.0 * cross(r, (cross(r, vec) + w*vec))
   end function rotate_by_angle_around_axis
 
 end module m_mathfuncs
