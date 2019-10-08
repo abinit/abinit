@@ -1946,7 +1946,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  character(len=500) :: message
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_tmp
  type(polynomial_term_type),dimension(:),allocatable :: terms
-! character(len=fnlen) :: filename
+ character(len=fnlen) :: filename
 ! *************************************************************************
 
  !MPI variables
@@ -2291,17 +2291,25 @@ do i=1,ncombination
 enddo
 write(std_out,*) "DEBUG: finish sorting combinations"
 write(std_out,*) "DEBUG: start counting doubles"
+!write(std_out,*) "DEBUG: ncoeff_symsym: ", ncoeff_symsym
+!do i=1,ncombination 
+!   if(all(list_combination_tmp(:,i) > ncoeff_symsym))then 
+!      write(std_out,*) "DEBUG: list_combination_tmp(:,",i,"): ",list_combination_tmp(:,i) 
+!   end if 
+!end do
+
+
 !2.Figure out equal ones 
 ABI_ALLOCATE(list_combination_cmp_tmp,(power_disps(2)))
 i0 = 0
 do i=1,ncombination 
-   if(any(list_combination_tmp(:,i) /= 0))then 
+   if(any(list_combination_tmp(:,i) /= 0))then !.and. any(list_combination_tmp(:,i) <= ncoeff_symsym))then 
      do j=i+1,ncombination
         !If term j is equivalent to term i delet it
         if(all(list_combination_tmp(:,i) == list_combination_tmp(:,j)))then
            list_combination_tmp(:,j) = 0
            i0 = i0 + 1
-        else !else loop over symmetries to fina symmetry operation that projects term j on i 
+        else !else loop over symmetries to find symmetry operation that projects term j on i 
           isym = 2
           do while(isym <= nsym)
              !Get equivalent term indexes for symmetry isym
@@ -2310,7 +2318,7 @@ do i=1,ncombination
                    list_combination_cmp_tmp(idisp)=list_symcoeff(6,list_combination_tmp(idisp,j),isym)
                 else if(list_combination_tmp(idisp,j) > ncoeff_symsym)then
                    istrain = list_combination_tmp(idisp,j) - ncoeff_symsym  
-                   list_combination_cmp_tmp(idisp)=list_symstr(istrain,isym,1)
+                   list_combination_cmp_tmp(idisp)=list_symstr(istrain,isym,1) + ncoeff_symsym
                 else 
                    list_combination_cmp_tmp(idisp) = 0 
                 endif 
@@ -2611,10 +2619,10 @@ write(std_out,*) "DEBUG shape list_symcoeff(:,:,:) before termsfromlist:", shape
    end if
  end do
 
-!  if(iam_master)then
-!    filename = "terms_set.xml"
-!    call polynomial_coeff_writeXML(coefficients,my_newncoeff,filename=filename)
-!  end if
+  if(iam_master)then
+    filename = "terms_set.xml"
+    call polynomial_coeff_writeXML(coefficients,my_newncoeff,filename=filename)
+  end if
   
  if(need_verbose)then
    write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10
@@ -3093,6 +3101,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
          if(ndisp_out == 0 .and. nstrain > 0)then 
             nmodel_tot = nmodel_tot + 1 
             if(need_compute)list_combination(1:power_disp,nmodel_tot) = index_coeff
+            write(std_out,*) "DEBUG index_coeff: ", index_coeff
          else !Else construct symmetric terms of atomic displacement (pure disp or disp/strain)
             ABI_ALLOCATE(dummylist,(0))
             write(std_out,*) "DEBUG index_coeff: ", index_coeff
