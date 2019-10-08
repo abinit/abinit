@@ -78,8 +78,8 @@ module m_slc_primitive_potential
      procedure:: finalize
      procedure :: set_liu
      procedure :: set_liu_1term
-     !procedure :: set_niuv
-     !procedure :: set_niuv_1term
+     procedure :: set_niuv
+     procedure :: set_niuv_1term
      procedure :: set_oiju
      procedure :: set_oiju_1term
      procedure :: set_tijuv
@@ -95,8 +95,8 @@ module m_slc_primitive_potential
      procedure :: fill_niuv
      procedure :: fill_oiju
      procedure :: fill_tijuv
-     !procedure :: set_liu_sc
-     !procedure :: set_niuv_sc
+     procedure :: set_liu_sc
+     procedure :: set_niuv_sc
      procedure :: set_oiju_sc
      procedure :: set_tijuv_sc
   end type slc_primitive_potential_t
@@ -422,8 +422,8 @@ contains
       !change units from eV to Ha and Ang to Bohr
       vallist(:) = vallist(:)*eV_Ha*(Bohr_Ang*Bohr_Ang)
   
-      !fill the sparse matrix for liu parameters
-      !call self%set_tijuv(ndata, ilist, jlist, ulist, vlist, Rjlist, Rulist, Rvlist vallist)
+      !fill the sparse matrix for tijuv parameters
+      call self%set_tijuv(ndata, ilist, jlist, ulist, vlist, Rjlist, Rulist, Rvlist, vallist)
 
       ABI_SFREE(ilist)
       ABI_SFREE(jlist)
@@ -481,6 +481,55 @@ contains
     call self%liu%add_entry(ind=[indRu, ii, uu], val=val)
 
   end subroutine set_liu_1term
+
+  !----------------------------------------
+  ! store niuv parameters in sparse matrix
+  ! TODO: test
+  !----------------------------------------
+  subroutine set_niuv(self, nn, ilist, ulist, vlist, Rulist, Rvlist, vallist)
+
+    class(slc_primitive_potential_t), intent(inout) :: self
+    integer,                          intent(inout) :: nn
+    integer,                          intent(in)    :: ilist(nn)
+    integer,                          intent(in)    :: ulist(nn)
+    integer,                          intent(in)    :: vlist(nn)
+    integer,                          intent(in)    :: Rulist(3,nn)
+    integer,                          intent(in)    :: Rvlist(3,nn)
+    real(dp),                         intent(in)    :: vallist(nn)
+
+    integer :: idx
+   
+    call self%niuv%initialize(mshape=[-1, -1, self%nspin*3, self%natom*3, self%natom*3])
+    
+    if (xmpi_comm_rank(xmpi_world)==0) then
+      do idx=1, nn
+        call self%set_niuv_1term(ilist(idx), ulist(idx), vlist(idx), Rulist(:,idx), Rvlist(:,idx), vallist(idx))
+      end do
+    endif
+
+  end subroutine set_niuv
+
+  !-------------------------------------
+  ! add one entry to sparse niuv matrix
+  !-------------------------------------
+  subroutine set_niuv_1term(self, ii, uu, vv, Ru, Rv, val)
+    class(slc_primitive_potential_t), intent(inout) :: self
+    integer,                          intent(in)    :: ii    
+    integer,                          intent(in)    :: uu
+    integer,                          intent(in)    :: vv
+    integer,                          intent(in)    :: Ru(3)
+    integer,                          intent(in)    :: Rv(3)
+    real(dp),                         intent(in)    :: val
+
+    integer :: indRu, indRv
+    
+    call self%nRulist%push_unique(Ru, position=indRu)
+    call self%nRvlist%push_unique(Rv, position=indRv)
+    
+    call self%niuv%add_entry(ind=[indRu, indRv, ii, uu, vv], val=val)
+
+  end subroutine set_niuv_1term
+
 
   !----------------------------------------
   ! store oiju parameters in sparse matrix
@@ -643,7 +692,7 @@ contains
     if(scpot%has_bilin) then
       if(self%has_bilin) then !did we actually find this in the netcdf file
         call self%liu%sum_duplicates()
-        !call self%set_liu_sc(scpot, scmaker)
+        call self%set_liu_sc(scpot, scmaker)
       else
         write(std_out,'(A47)') 'No parameters for bilinear coupling available'
         scpot%has_bilin = .False.
@@ -659,7 +708,7 @@ contains
     if(scpot%has_linquad) then
       if(self%has_linquad) then
         call self%niuv%sum_duplicates()
-        !call self%set_niuv_sc(scpot, scmaker)
+        call self%set_niuv_sc(scpot, scmaker)
       else
         write(std_out,'(A55)') 'No parameters for linear-quadratic coupling available'
         scpot%has_linquad = .False.
