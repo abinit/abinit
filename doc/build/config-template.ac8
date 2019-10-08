@@ -997,6 +997,35 @@
 
                        # ------------------------------ #
 
+# HDF5
+# Website: https://www.hdfgroup.org/
+
+# Trigger and install prefix for HDF5 (default is unset)
+#
+#with_hdf5="/usr/local"
+
+# C preprocessing flags for HDF5 (default is unset)
+#
+#HDF5_CPPFLAGS="-I/usr/local/include/hdf5"
+
+# C flags for HDF5 (default is unset)
+#
+#HDF5_CFLAGS="-std=c99"
+
+# Fortran flags for HDF5 (default is unset)
+#
+#HDF5_FCFLAGS="-I/usr/local/include/hdf5"
+
+# Link flags for HDF5 (default is unset)
+#
+#HDF5_LDFLAGS=""
+
+# Library flags for HDF5 (default is unset)
+#
+#HDF5_LIBS="-L/usr/local/lib/hdf5 -lhdf5 -lhdf5_hl"
+
+                       # ------------------------------ #
+
 # NetCDF
 # Website: http://www.unidata.ucar.edu/software/netcdf/
 

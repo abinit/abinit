@@ -68,7 +68,9 @@ Core build parameters
   * MPI    in-place  : ${abi_mpi_inplace_enable}
   * MPI-IO enabled   : ${abi_mpi_io_enable}
   * GPU    enabled   : ${abi_gpu_enable} (flavor: ${abi_gpu_flavor})
+
   * LibXML2 enabled  : ${abi_libxml2_enable}
+  * HDF5 enabled     : ${sd_hdf5_enable} (MPI support: ${sd_hdf5_mpi_ok})
 
   * FFT flavor       : ${sd_fft_flavor} (libs: ${tmp_rep_fft_libs})
   * LINALG flavor    : ${sd_linalg_flavor} (libs: ${tmp_rep_linalg_libs})

@@ -643,6 +643,9 @@ ABI_GPU_DETECT
 
 ABI_MSG_SECTION([Initialization of optional features])
 
+# Init HDF5
+SD_HDF5_INIT([optional fail no-fortran])
+
 # Init FFTW3
 SD_FFTW3_INIT([optional skip])
 
@@ -738,7 +741,10 @@ fi
 
                        # ------------------------------ #
 
-# NetCDF library support
+# HDF5 library support
+SD_HDF5_DETECT
+
+# NetCDF library support (must be done after HDF5)
 SD_NETCDF_DETECT
 # FIXME: quick workaround
 if test "${sd_netcdf_ok}" = "yes"; then
