@@ -303,7 +303,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp) :: tsec(2),vxcmean(4)
  real(dp),allocatable :: d2vxc_b(:,:),depsxc(:,:),depsxc_apn(:,:),dvxc_apn(:),dvxc_b(:,:)
  real(dp),allocatable :: exc_b(:),fxc_b(:),fxc_apn(:),grho2_apn(:),grho2_b_updn(:,:),lrhonow(:,:),lrho_b_updn(:,:)
- real(dp),allocatable :: m_norm(:),nhat_up(:),nhatnow(:,:,:),rho_b_updn(:,:),rho_b(:),rhonow_apn(:,:,:)
+ real(dp),allocatable :: m_norm(:),nhat_up(:),rho_b_updn(:,:),rho_b(:),rhonow_apn(:,:,:)
  real(dp),allocatable :: tau_b_updn(:,:),vxc_apn(:,:),vxcgr_apn(:),vxcgrho_b(:,:),vxcrho_b_updn(:,:)
  real(dp),allocatable :: vxc_b_apn(:),vxc_ep(:),vxctau_b_updn(:,:),vxclrho_b_updn(:,:)
  real(dp),allocatable,target :: rhonow(:,:,:),taunow(:,:,:)
@@ -486,7 +486,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !  Test: has a compensation density to be added/substracted (PAW) ?
    need_nhat=(nhatdim==1.and.usexcnhat==0)
-   need_nhatgr=(nhatdim==1.and.nhatgrdim==1.and.ngrad==2)
+   need_nhatgr=(nhatdim==1.and.nhatgrdim==1.and.ngrad==2.and.xcdata%intxc==0)
    test_nhat=(need_nhat.or.need_nhatgr)
 
 !  The different components of depsxc will be
@@ -642,6 +642,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    ABI_ALLOCATE(lrhonow,(nfft,nspden_eff*use_laplacian))
 
 !  ====================================================================
+!  ====================================================================
 !  Loop on unshifted or shifted grids
    do ishift=0,xcdata%intxc
 
@@ -661,28 +662,14 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      end if
 
 !    PAW+GGA: add "exact" gradients of compensation density
+     !if (test_nhat.and.usexcnhat==1.and.ishift==0) then
      if (test_nhat.and.usexcnhat==1) then
-       if (ishift==0) then
-         if (nspden==nspden_eff) then
-           rhonow(:,1:nspden,1)=rhocorval(:,1:nspden)+nhat(:,1:nspden)
-         else if (nspden==4) then
-           rhonow(:,1,1)=rhocorval(:,1)+nhat(:,1)
-           rhonow(:,2,1)=rhocorval(:,2)+nhat_up(:)
-         end if
-       else
-         if (nspden==nspden_eff) then
-           ABI_ALLOCATE(nhatnow,(nfft,nspden,1))
-           call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,1,nspden,qphon,nhat,nhatnow)
-           rhonow(:,1:nspden,1)=rhonow(:,1:nspden,1)+nhatnow(:,1:nspden,1)
-         else if (nspden==4) then
-           ABI_ALLOCATE(nhatnow,(nfft,1,1))
-           call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,1,1,qphon,nhat(:,1),nhatnow)
-           rhonow(:,1,1)=rhonow(:,1,1)+nhatnow(:,1,1)
-           call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,1,1,qphon,nhat_up,nhatnow)
-           rhonow(:,2,1)=rhonow(:,2,1)+nhatnow(:,1,1)
-         end if
-         ABI_DEALLOCATE(nhatnow)
-        end if
+       if (nspden==nspden_eff) then
+         rhonow(:,1:nspden,1)=rhocorval(:,1:nspden)+nhat(:,1:nspden)
+       else if (nspden==4) then
+         rhonow(:,1,1)=rhocorval(:,1)+nhat(:,1)
+         rhonow(:,2,1)=rhocorval(:,2)+nhat_up(:)
+       end if
        if (ngrad==2.and.nhatgrdim==1.and.nspden==nspden_eff) then
          do ii=1,3
            jj=ii+1

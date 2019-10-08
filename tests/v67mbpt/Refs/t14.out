@@ -771,8 +771,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     329.625     329.613
   Size of radial mesh ............................  434
   Size of radial mesh for partial waves...........  434
   Size of radial mesh for [pseudo] core density...  434
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..  551
   No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for ttaucorespl and tvalespl .... 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -782,13 +784,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     329.625     329.613
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    2
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -6.40710543E+00
@@ -813,8 +818,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     329.625     329.613
   Size of radial mesh ............................  443
   Size of radial mesh for partial waves...........  443
   Size of radial mesh for [pseudo] core density...  443
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
   No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for ttaucorespl and tvalespl .... 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -824,13 +831,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     329.625     329.613
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    2
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -4.95103786E+00
@@ -1065,8 +1075,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     329.625     329.613
   Size of radial mesh ............................  434
   Size of radial mesh for partial waves...........  434
   Size of radial mesh for [pseudo] core density...  434
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..  551
   No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for ttaucorespl and tvalespl .... 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -1076,13 +1088,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     329.625     329.613
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    2
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -6.40710543E+00
@@ -1107,8 +1122,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     329.625     329.613
   Size of radial mesh ............................  443
   Size of radial mesh for partial waves...........  443
   Size of radial mesh for [pseudo] core density...  443
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
   No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for ttaucorespl and tvalespl .... 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -1118,13 +1135,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     329.625     329.613
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    2
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -4.95103786E+00

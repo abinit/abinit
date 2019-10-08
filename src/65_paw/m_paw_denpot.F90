@@ -497,7 +497,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
        e1xc=e1xc+eexc
        e1xcdc=e1xcdc+eexcdc
      end if
-     print *,size(paw_an(iatom)%vxctau1(:,:,:))
      if (option<2.or.temp_vxc) paw_an(iatom)%vxc1(:,:,:)=vxc_tmp(:,:,:)
      if (usekden==1) paw_an(iatom)%vxctau1(:,:,:)=vxctau_tmp(:,:,:)
      if (need_kxc .and.nkxc1>0 ) paw_an(iatom)%kxc1(:,:,:) =kxc_tmp(:,:,:)
@@ -549,7 +548,8 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
          call pawxc(pawtab(itypat)%tcoredens(:,1),&
 &         eexc,eexcdc,ixc,kxc_tmp,k3xc_tmp,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,nkxc1,nk3xc1,non_magnetic_xc,mesh_size,nspden,option,&
-&         pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,usekden,vxc_tmp,xclevel,xc_denpos,taucore=pawtab(itypat)%tcoretau,taur=ttau1,vxctau=vxctau_tmp)
+&         pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,usekden,vxc_tmp,xclevel,xc_denpos,&
+&         taucore=pawtab(itypat)%tcoretau,taur=ttau1,vxctau=vxctau_tmp)
        else
          call pawxc_dfpt(pawtab(itypat)%tcoredens(:,1),&
 &         cplex,cplex,eexc,ixc,paw_an0(iatom)%kxct1,lm_size,&
