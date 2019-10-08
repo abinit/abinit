@@ -2813,9 +2813,10 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   ABI_DEALLOCATE(new_re_g_iw)
   ABI_DEALLOCATE(new_im_g_iw)
   ABI_DEALLOCATE(new_g_tau)
-  ABI_DEALLOCATE(new_gl)
+  ABI_DEALLOCATE(new_gl) 
 #endif
 #endif
+ elseif paw_dmft%dmft_solv == 6 || paw_dmft%dmft_solv == 7 then
   !Calling interfaced TRIQS solver subroutine from src/01_triqs_ext package
   !----------------------------------------------------
 #if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
