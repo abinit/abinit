@@ -212,6 +212,9 @@ AC_DEFUN([SD_LIBXC_DETECT], [
       if test "${sd_libxc_init}" = "esl"; then
         sd_esl_bundle_libs="${sd_libxc_libs_def} ${sd_esl_bundle_libs}"
       else
+        CPPFLAGS="${CPPFLAGS} ${sd_libxc_cppflags}"
+        CFLAGS="${CFLAGS} ${sd_libxc_cflags}"
+        CXXFLAGS="${CXXFLAGS} ${sd_libxc_cxxflags}"
         FCFLAGS="${FCFLAGS} ${sd_libxc_fcflags}"
         LIBS="${sd_libxc_libs} ${LIBS}"
       fi
