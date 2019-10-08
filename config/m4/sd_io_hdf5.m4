@@ -95,6 +95,7 @@ AC_DEFUN([SD_HDF5_INIT], [
         sd_hdf5_enable="${withval}"
         sd_hdf5_init="yon"
       else
+        sd_hdf5_prefix="${withval}"
         sd_hdf5_enable="yes"
         sd_hdf5_init="dir"
       fi],
@@ -142,7 +143,6 @@ AC_DEFUN([SD_HDF5_INIT], [
         ;;
 
       dir)
-        sd_hdf5_prefix="${with_hdf5}"
         sd_hdf5_cppflags="-I${sd_hdf5_prefix}/include"
         sd_hdf5_cflags="${sd_hdf5_cflags_def}"
         sd_hdf5_cxxflags="${sd_hdf5_cxxflags_def}"
@@ -554,14 +554,14 @@ AC_DEFUN([_SD_HDF5_CHECK_COMPILERS], [
 
   if test "${sd_hdf5_h5cc}" != ""; then
 
+    AC_MSG_CHECKING([for the HDF5 install prefix])
     if test "${sd_hdf5_prefix}" = ""; then
-      AC_MSG_CHECKING([for the HDF5 install prefix])
       sd_hdf5_prefix=`${sd_hdf5_h5cc} -showconfig | grep 'Installation point:' | awk '{print [$]NF}'`
-      if test "${sd_hdf5_prefix}" = ""; then
-        AC_MSG_RESULT([none])
-      else
-        AC_MSG_RESULT([${sd_hdf5_prefix}])
-      fi
+    fi
+    if test "${sd_hdf5_prefix}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${sd_hdf5_prefix}])
     fi
 
     AC_MSG_CHECKING([for the HDF5 build flavor])
