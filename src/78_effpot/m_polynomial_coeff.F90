@@ -2074,7 +2074,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  call polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,&
 &                              natom,nstr_sym,ncoeff_sym,nrpt,range_ifc,sc_size=sc_size)
 
-if(iam_master)then 
+!if(iam_master)then 
 i0 = 0 
 write(std_out,*) "DEBUG shape list_symcoeff(:,:,:):", shape(list_symcoeff) 
 write(std_out,*) "DEBUG shape size(list_symcoeff,2):", size(list_symcoeff(1,:,1))
@@ -2122,7 +2122,7 @@ write(std_out,*) "******************"
 !   write(std_out,*) "index sym list_symcoeff(6,", ii,",1): ", list_symcoeff(6,ii,1) 
 !   write(std_out,*) "------------------" 
 !enddo
-endif
+!endif
 
  ABI_DEALLOCATE(dist)
  ABI_DEALLOCATE(rpt)
@@ -2232,6 +2232,7 @@ write(std_out,*) "DEBUG: Number of Compatible Coeffs: ", ii
    ABI_DEALLOCATE(list_coeff)
    ABI_DEALLOCATE(compatibleCoeffs)
 !   write(std_out,*) "DEBUG: list_combination after call to CCL:", list_combination_tmp
+
  else
    ABI_ALLOCATE(list_combination_tmp,(1,1))
  end if
@@ -2309,55 +2310,57 @@ do i=1,ncombination
         if(all(list_combination_tmp(:,i) == list_combination_tmp(:,j)))then
            list_combination_tmp(:,j) = 0
            i0 = i0 + 1
-        else !else loop over symmetries to find symmetry operation that projects term j on i 
-          isym = 2
-          do while(isym <= nsym)
-             !Get equivalent term indexes for symmetry isym
-             do idisp=1,power_disps(2)
-                if(list_combination_tmp(idisp,j) /= 0 .and. list_combination_tmp(idisp,j) <= ncoeff_symsym )then
-                   list_combination_cmp_tmp(idisp)=list_symcoeff(6,list_combination_tmp(idisp,j),isym)
-                else if(list_combination_tmp(idisp,j) > ncoeff_symsym)then
-                   istrain = list_combination_tmp(idisp,j) - ncoeff_symsym  
-                   list_combination_cmp_tmp(idisp)=list_symstr(istrain,isym,1) + ncoeff_symsym
-                else 
-                   list_combination_cmp_tmp(idisp) = 0 
-                endif 
-             enddo
+!        else !else loop over symmetries to find symmetry operation that projects term j on i 
+!          isym = 2
+!          do while(isym <= nsym)
+!             !Get equivalent term indexes for symmetry isym
+!             do idisp=1,power_disps(2)
+!                if(list_combination_tmp(idisp,j) /= 0 .and. list_combination_tmp(idisp,j) <= ncoeff_symsym )then
+!                   list_combination_cmp_tmp(idisp)=list_symcoeff(6,list_combination_tmp(idisp,j),isym)
+!                else if(list_combination_tmp(idisp,j) > ncoeff_symsym)then
+!                   istrain = list_combination_tmp(idisp,j) - ncoeff_symsym  
+!                   list_combination_cmp_tmp(idisp)=list_symstr(istrain,isym,1) + ncoeff_symsym
+!                else 
+!                   list_combination_cmp_tmp(idisp) = 0 
+!                endif 
+!             enddo
 !   write(std_out,*) "DEBUG list_combination_tmp before sort:", list_combination_tmp(:,i)
              !Sort the new symmetric indexes for comparision
-             ij=2 
-             k=2
-             do while(ij <= size(list_combination_cmp_tmp(:))) 
-                k = ij
-                cnt = 1
-                do while(k >= 2 .and. cnt == 1) 
-                   if(list_combination_cmp_tmp(k-1) > list_combination_cmp_tmp(k) .and. list_combination_cmp_tmp(k) > 0)then 
-                        tmp_ind1 = list_combination_cmp_tmp(k-1) 
-                        tmp_ind2 = list_combination_cmp_tmp(k)
-                        list_combination_cmp_tmp(k) = tmp_ind1
-                        list_combination_cmp_tmp(k-1) = tmp_ind2
-                        k=k-1
-                   else 
-                     cnt = cnt +1
-                   end if
-                end do ! whlie k>=2
-                ij = ij+1
-             end do ! while ij< size(list..)
-             !Compare. If equivalent delete term j
-             if(all(list_combination_tmp(:,i) == list_combination_cmp_tmp(:)))then
-                list_combination_tmp(:,j) = 0
-                i0 = i0 + 1
-                isym = nsym +1 
-             else 
-                isym = isym + 1
-             endif
-          enddo !isym 
+!             ij=2 
+!             k=2
+!             do while(ij <= size(list_combination_cmp_tmp(:))) 
+!                k = ij
+!                cnt = 1
+!                do while(k >= 2 .and. cnt == 1) 
+!                   if(list_combination_cmp_tmp(k-1) > list_combination_cmp_tmp(k) .and. list_combination_cmp_tmp(k) > 0)then 
+!                        tmp_ind1 = list_combination_cmp_tmp(k-1) 
+!                        tmp_ind2 = list_combination_cmp_tmp(k)
+!                        list_combination_cmp_tmp(k) = tmp_ind1
+!                        list_combination_cmp_tmp(k-1) = tmp_ind2
+!                        k=k-1
+!                   else 
+!                     cnt = cnt +1
+!                   end if
+!                end do ! whlie k>=2
+!                ij = ij+1
+!             end do ! while ij< size(list..)
+!             !Compare. If equivalent delete term j
+!             if(all(list_combination_tmp(:,i) == list_combination_cmp_tmp(:)))then
+!                list_combination_tmp(:,j) = 0
+!                i0 = i0 + 1
+!                isym = nsym +1 
+!             else 
+!                isym = isym + 1
+!             endif
+!          enddo !isym 
         endif ! all(list_combinaton...)
      enddo ! j=i+1,ncombination
    end if ! any(list_combination_tmp /= 0 ) 
 end do !i=1,ncombination 
 ABI_DEALLOCATE(list_combination_cmp_tmp)
 write(std_out,*) "DEBUG: finish counting doubles"
+write(std_out,*) "DEBUG: ncombination - i0 after counting doubles: ", ncombination - i0 
+write(std_out,*) "DEBUG: ncombination after counting doubles: ", ncombination 
 write(std_out,*) "DEBUG: Transfer irreducible ones"
  ABI_ALLOCATE(list_combination_tmp2,(power_disps(2),ncombination-i0))
  i0 = 0 
@@ -2369,6 +2372,7 @@ write(std_out,*) "DEBUG: Transfer irreducible ones"
  enddo
  write(std_out,*) "DEBUG: finish reduce doubles"
  ncombination = i0
+ write(std_out,*) "DEBUG: ncombination after reduce: ", ncombination
  ABI_DEALLOCATE(list_combination_tmp)
  ABI_ALLOCATE(list_combination_tmp,(power_disps(2),i0))
  list_combination_tmp = list_combination_tmp2 
@@ -3405,6 +3409,7 @@ subroutine generateTermsFromList(cell,index_coeff,list_coeff,list_str,ncoeff,ndi
        ib   = list_coeff(3,index_coeff(idisp),isym)
        irpt = list_coeff(4,index_coeff(idisp),isym)
        weight = weight*list_coeff(5,index_coeff(idisp),isym)
+       write(std_out,*) "DEBUG: index(,",idisp,")", index_coeff(idisp),"isym", isym, "irpt", irpt 
 !      Fill First term arrays
        atindx(1,idisp) = ia; atindx(2,idisp) = ib;
        dir_int(idisp) = mu
