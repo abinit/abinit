@@ -509,7 +509,9 @@ AC_DEFUN([_SD_MPI_CHECK_CXX_API], [
 #include <mpi.h>
     ]],
     [[
-      MPI::Init()
+      int *argc;
+      char ***argv;
+      MPI_Init(argc, argv);
     ]])], [sd_mpi_cxx_api_ok="yes"], [sd_mpi_cxx_api_ok="no"])
   AC_LANG_POP([C++])
   AC_MSG_RESULT([${sd_mpi_cxx_api_ok}])
