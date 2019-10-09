@@ -4,7 +4,7 @@
 
 
 #Constrained DFT data
- constraint_kind2   11   # Dataset 2 is constrained DFT for the magnetization
+ constraint_kind2   1  # Dataset 2 is constrained DFT for the magnetization
  magcon_lambda      2
  spinat       0.0 0.0   0.3
               0.0 0.0  -0.3 
