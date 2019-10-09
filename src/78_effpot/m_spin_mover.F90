@@ -362,12 +362,12 @@ contains
           call wrtout(ab_out,msg,'COLL')
           call wrtout(std_out,msg,'COLL')
 
-          ! set all spin to z direction to then rotate
-          self%Stmp(1,:)=0.0d0
-          self%Stmp(2,:)=0.0d0
-          self%Stmp(3,:)=1.0d0
+          ! set inital spin state using the input variables
+          ! set spin to ferromagnetic along init_orientation then rotate
+          do i=1, 3
+            self%Stmp(i,:)=self%init_orientation(i)
+          enddo
 
-          ! set inital spin state using the input variables.
           call self%supercell%supercell_maker%generate_spin_wave_vectorlist( A=self%Stmp, &
              & kpoint=self%init_qpoint, axis=self%init_rotate_axis, A_sc=self%Stmp)
    
