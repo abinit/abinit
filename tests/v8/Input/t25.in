@@ -1,10 +1,12 @@
 # Hydrogen diatomic molecule for tests--constrained DFT
 
- ndtset 3
+ ndtset 5
 
 #Constrained DFT 
  constraint_kind2   1   # Dataset 2 is constrained DFT for the collinear magnetization
  constraint_kind3  11   # Dataset 3 is constrained DFT for the collinear magnetization and charge
+ constraint_kind4   3   # Dataset 4 is constrained DFT for the collinear magnetization amplitude
+ constraint_kind5   2   # Dataset 5 is constrained DFT for the collinear magnetization direction (actually not useful !)
 
 #Constrained DFT data
  magcon_lambda      2   
@@ -14,6 +16,7 @@
 
 #Definition of the atomic spheres
  ratsph    1.0  1.0
+ ratsm     0.05
 
 #System description
  acell 15 10 10
@@ -49,4 +52,5 @@
 #%% description = H2 diatomic molecule, static, to check the constrained DFT implementation in case nspden=2
 #%%  DS2 Constrain the collinear magnetization around atom 1 to be +0.08 and around atom 2 to be -0.08
 #%%  DS3 Constrain the collinear magnetization around atom 1 to be +0.08 and around atom 2 to be -0.08, and the total charge of both to be 0.69.
+#%%  DS4 Constrain the collinear magnetization amplitude around atom 1 to be +0.08 and around atom 2 to be -0.08. Same result as DS2.
 #%%<END TEST_INFO>
