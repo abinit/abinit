@@ -250,22 +250,46 @@ contains
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
  
     integer :: ii
+    real(dp) :: eslc, beta
     real(dp) :: f1(1:3*self%natom), disp(1:3*self%natom), b1(1:3*self%nspin), sp(1:3*self%nspin)
-    real(dp) :: btmp(3, self%nspin)
+    real(dp) :: btmp(3, self%nspin), bslc(1:3*self%nspin), fslc(1:3*self%natom)
 
     sp(:) = reshape(spin, (/ 3*self%nspin /))
     disp(:) = reshape(displacement, (/ 3*self%natom /))
 
+    beta = 0.5_dp
+
     ! oiju contribution
     if(present(bfield)) then
-      b1(:) = 0.0d0
-      call self%oiju_sc%vec_product(1, sp, 3, disp, 2, b1)
-      ! test permutation sym      call self%oiju_sc%vec_product(2, sp, 3, disp, 1, b1)
-      btmp = reshape(b1, (/ 3, self%nspin /))
+      bslc(:) = 0.0d0
+      if(self%has_bilin) then
+        b1(:) = 0.0d0
+        call self%liu_sc%vec_product2d(2, disp, 1, b1)
+        bslc(:) = bslc(:) + b1(:)
+      endif      
+      if(self%has_linquad) then
+        b1(:) = 0.0d0
+        call self%niuv_sc%vec_product(2, disp, 3, disp, 1, b1)
+        bslc(:) = bslc(:) + beta*b1(:)
+      endif      
+      if(self%has_quadlin) then
+        b1(:) = 0.0d0
+        call self%oiju_sc%vec_product(1, sp, 3, disp, 2, b1)
+        ! test permutation sym      call self%oiju_sc%vec_product(2, sp, 3, disp, 1, b1)
+        bslc(:) = bslc(:) + 2.0d0*beta*b1(:)
+      endif
+      if(self%has_biquad) then
+        b1(:) = 0.0d0
+        call self%tijuv_sc%vec_product4d(1, sp, 3, disp, 4, disp, 2, b1)
+        bslc(:) = bslc(:) + beta*b1(:)
+      endif
+      btmp = reshape(bslc, (/ 3, self%nspin /))
       do ii = 1, self%nspin
-        btmp(:, ii) = btmp(:,ii)/self%ms(ii)
+        btmp(:,ii) = btmp(:,ii)/self%ms(ii)
       enddo
       bfield(:,:) = bfield(:,:) + btmp(:,:)
+
+      ! TESTING: write magnetic fields to a file
       write(201,*) 'Magnetic fields are'
       do ii = 1, self%nspin
         if(dot_product(bfield(:,ii), bfield(:,ii)).gt.1d-16) then
@@ -274,10 +298,38 @@ contains
       enddo
     endif
 
+    if(present(force) .or. present(energy)) then
+      bslc(:) = 0.0d0
+      eslc = 0.0d0
+      if(self%has_bilin) then
+        f1(:) = 0.0d0
+        call self%liu_sc%vec_product2d(1, sp, 2, f1)
+        fslc(:) = fslc(:) + f1(:)
+        eslc = eslc - dot_product(f1, disp)
+      endif      
+      if(self%has_linquad) then
+        f1(:) = 0.0d0
+        call self%niuv_sc%vec_product(1, sp, 2, disp, 3, f1)
+        fslc(:) = fslc(:) + 2.0d0*beta*f1(:)
+        eslc = eslc - beta*dot_product(f1, disp)
+      endif      
+      if(self%has_quadlin) then
+        f1(:) = 0.0d0
+        call self%oiju_sc%vec_product(1, sp, 2, sp, 3, f1)
+        fslc(:) = fslc(:) + beta*f1(:)
+        eslc = eslc - beta*dot_product(f1, disp)
+      endif
+      if(self%has_biquad) then
+        f1(:) = 0.0d0
+        call self%tijuv_sc%vec_product4d(1, sp, 2, sp, 3, disp, 4, f1)
+        fslc(:) = fslc(:) + beta*f1(:)
+        eslc = eslc - 0.5_dp*beta*dot_product(f1, disp)
+      endif
+    endif !energy or force
+
     if(present(force)) then
-      f1(:) = 0.0d0
-      call self%oiju_sc%vec_product(1, sp, 2, sp, 3, f1)
-      force(:,:) = force(:,:) + reshape(f1, (/ 3, self%natom /))
+      force(:,:) = force(:,:) + reshape(fslc, (/3, self%natom /))
+      !TESTING write forces to file
       write(200,*) 'Forces are'
       do ii = 1, self%natom
         if(dot_product(force(:,ii), force(:,ii)).gt.1d-16) then
@@ -286,20 +338,7 @@ contains
       enddo
     endif
 
-    if(present(energy)) then
-      if(present(bfield)) then
-        b1=reshape(btmp, (/ 3*self%nspin /))
-        energy = energy + dot_product(b1, sp)
-      else 
-        if(present(force)) then
-          energy = energy - 0.5_dp*dot_product(f1, disp)
-        else
-          f1(:) = 0.0d0
-          call self%oiju_sc%vec_product(1, sp, 2, sp, 3, f1)
-          energy = energy + dot_product(f1, disp)
-        endif
-      endif   
-    endif
+    if(present(energy)) energy=eslc
  
   end subroutine calculate
 

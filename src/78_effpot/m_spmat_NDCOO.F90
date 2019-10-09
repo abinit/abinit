@@ -75,8 +75,9 @@ module m_spmat_NDCOO
      procedure :: get_ind_inz           ! get the z'th indices.
      procedure :: get_ind               ! get the indices for all in a dimension
      procedure :: group_by_1dim         ! group the matrix by first dimension
-     procedure :: mv1vec                ! multiply vector
-     procedure :: vec_product           ! multiply 3d matrix with two vectors
+     procedure :: mv1vec                ! multiply vector, return NDCOO entity with one dimension less
+     procedure :: vec_product2d         ! multiply 2d matrix with one vector, return vector
+     procedure :: vec_product           ! multiply 3d matrix with two vectors, return vector
      procedure :: vec_product4d         ! multiply 4d matrix with three vectors
      !procedure :: print
   end type ndcoo_mat_t
@@ -309,18 +310,47 @@ contains
 
 
   ! matrix vector product. 
-  subroutine mv1vec(self, vec, i, res)
+  ! TODO: test!!!
+  subroutine mv1vec(self, vec, iv, res)
     class(ndcoo_mat_t), intent(inout) :: self
-    real(dp), intent(in) :: vec(:)
-    integer ,intent(in) :: i               !
+    real(dp),           intent(in)    :: vec(:)
+    integer,            intent(in)    :: iv  ! which index is used for multiplication
     class(ndcoo_mat_t), intent(inout) :: res ! result
-    !integer :: iind
-    !TODO: to be implemented
-    ABI_UNUSED_A(self)
-    ABI_UNUSED_A(vec)
-    ABI_UNUSED_A(i)
-    ABI_UNUSED_A(res)
+
+    integer :: iind, iiv, j, jv 
+    ! TODO: turn this into a meaningful error message
+    if(self%ndim .ne. res%ndim+1) then
+      stop
+    endif
+    do iind =1 , self%nnz
+      iiv=self%ind%data(iv, iind)
+      jv=0
+      do j=1, self%ndim
+        if(j.ne.iv) then
+          jv=jv+1
+          res%ind%data(jv, iind)=self%ind%data(jv, iind)
+        endif
+      enddo
+      res%val%data(iind)=self%val%data(iind)*vec(iiv)  
+    end do
+    call sum_duplicates(res)
+
   end subroutine mv1vec
+
+  subroutine vec_product2d(self, iv, veci, rv, res)
+    class(ndcoo_mat_t), intent(inout) :: self
+    real(dp), intent(in) :: veci(:)
+    integer ,intent(in) :: iv, rv               !
+    real(dp), intent(inout) :: res(:)
+    integer :: iind, iiv, irv
+    do iind =1 , self%nnz
+      iiv=self%ind%data(iv, iind)
+      irv=self%ind%data(rv, iind)
+      res(irv) = res(irv) + self%val%data(iind) * veci(iiv)
+    end do
+  end subroutine vec_product2d
+
+
 
   ! matrix vector vector  product. matrix should be dim3.
   ! n(vector)=ndim-1
