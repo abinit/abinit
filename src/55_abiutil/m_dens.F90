@@ -861,7 +861,7 @@ end subroutine constrained_dft_free
  integer :: cplex1=1
  real(dp) :: intgden_norm,intgden_proj,norm,ratio
 !arrays
- real(dp) :: corr_denmag(4)
+ real(dp) :: corr_denmag(4),intgr(4)
  real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
  real(dp), allocatable :: intgden(:,:) ! nspden,natom
  real(dp), allocatable :: intgres(:,:) ! nspden,natom
@@ -890,24 +890,30 @@ end subroutine constrained_dft_free
 !The proper combination of intgden and intgres is stored in intgden: it is an effective charge/magnetization, to be compared to the target one.
  do iatom=1,natom
 
-   ratio=one/(c_dft%intgf2(iatom)*c_dft%magcon_lambda)
-
-   if(nspden==1)then
-     !The total charge, conjugate to the potential
-     intgden(1,iatom)= intgden(1,iatom) - ratio* intgres(1,iatom)
-   else if(nspden==2)then
-     !The total charge, conjugate to the average potential
-     intgden(1,iatom)= intgden(1,iatom) - ratio* half*(intgres(1,iatom)+intgres(2,iatom))
-     !The magnetization along z
-     intgden(2,iatom)=(intgden(2,iatom)-half*intgden(1,iatom)) - ratio * (intgres(1,iatom)-intgres(2,iatom))
-   else if(nspden==4)then
-     !The total charge, conjugate to the average potential
-     intgden(1,iatom)= intgden(1,iatom) - ratio * half*(intgres(1,iatom)+intgres(2,iatom))
-     !The three components of the magnetization 
-     intgden(2,iatom)= intgden(2,iatom) - ratio * (intgres(1,iatom)-intgres(2,iatom))
-     intgden(3,iatom)= intgden(3,iatom) - ratio * intgres(3,iatom) 
-     intgden(4,iatom)= intgden(4,iatom) + ratio * intgres(4,iatom) 
+   if(nspden/=4)then
+     intgr(1:nspden)=intgres(1:nspden,iatom)
+   else
+     !Change the potential residual to the density+magnetization convention
+     intgr(1)=half*(intgres(1,iatom)+intgres(2,iatom))
+     intgr(2)= intgres(1,iatom)-intgres(2,iatom)
+     intgr(3)= intgres(3,iatom)
+     intgr(4)=-intgres(4,iatom)
    endif
+
+   ratio=one/(c_dft%intgf2(iatom)*c_dft%magcon_lambda)
+   intgr(1:nspden)=intgden(1:nspden,iatom)-ratio*intgr(1:nspden)
+
+   if(nspden/=2)then
+     intgden(1:nspden,iatom)=intgr(1:nspden)
+   else
+     !Change the (up,down) atomic density to the charge + spin convention
+     intgden(1,iatom)=half*(intgr(1)+intgr(2))
+     intgden(2,iatom)=(intgr(1)-intgr(2))
+   endif
+
+!DEBUG
+   write(std_out,*)' m_dens/constrained_residuals after selection of charge+spin : iatom,intgden(1:nspden,iatom)=',iatom,intgden(1:nspden,iatom)
+!ENDDEBUG
 
    !Comparison with the target value, and computation of the correction in terms of density and magnetization coefficients.
    conkind=c_dft%constraint_kind(c_dft%typat(iatom))
@@ -966,6 +972,10 @@ end subroutine constrained_dft_free
        
    end if
 
+!DEBUG
+   write(std_out,*)' m_dens/constrained_residuals : iatom,corr_denmag(1:nspden)=',iatom,corr_denmag(1:nspden)
+!ENDDEBUG
+
    !Preconditioning by a global factor. Might be improved in the future ...
    corr_denmag(:)=corr_denmag(:) * c_dft%magcon_lambda
 
@@ -983,6 +993,10 @@ end subroutine constrained_dft_free
      endif
    endif
 
+!DEBUG
+   write(std_out,*)' m_dens/constrained_residuals : iatom,coeffs_constr_dft(1:nspden,iatom)=',iatom,coeffs_constr_dft(1:nspden,iatom)
+!ENDDEBUG
+
  enddo
 
 !Now compute the new residual, by adding the spherical functionsl
@@ -992,8 +1006,8 @@ end subroutine constrained_dft_free
 
 !DEBUG
 !We need the integrated residuals
-! call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
-!&  c_dft*ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres)
+  call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
+ &  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres)
 !ENDDEBUG
 
  ABI_DEALLOCATE(coeffs_constr_dft)
