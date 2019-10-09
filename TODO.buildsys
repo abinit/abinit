@@ -9,3 +9,10 @@ TODO list for the build system
 - [ ] LibXML2 is never looked for.
 - [ ] Redefine flags in trigger macros depending on programming languages.
 
+
+Notes
+-----
+
+The tutoparal_tucrpa_2_MPI24 test is unstable and fails randomly. This affects
+the cronos2_gnu_7.4_paral bot. Bernard Amadon is looking for a solution.
+
