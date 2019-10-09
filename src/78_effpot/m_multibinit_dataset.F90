@@ -191,6 +191,7 @@ module m_multibinit_dataset
   real(dp) :: spin_sia_k1dir(3)
   real(dp) :: spin_init_qpoint(3) ! qpoint to specify initial spin configuration
   real(dp) :: spin_init_rotate_axis(3) ! rotation axis to specify initial spin configuration  
+  real(dp) :: spin_init_orientation(3) ! spin orientation in primitive cell which is then rotated
 
 ! Integer arrays
   integer, allocatable :: atifc(:)
@@ -408,6 +409,7 @@ multibinit_dtset%slc_coupling=0
  multibinit_dtset%spin_qpoint(:)=zero
  multibinit_dtset%spin_init_qpoint(:)=zero
  multibinit_dtset%spin_init_rotate_axis(:)=(/1.0, 0.0, 0.0/)
+ multibinit_dtset%spin_init_orientation(:)=(/0.0, 0.0, 1.0/)
  
  multibinit_dtset%spin_sia_k1dir(:)=(/0.0,0.0,1.0/)
 
@@ -1304,6 +1306,16 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     MSG_ERROR(message)
  end if
  
+ multibinit_dtset%spin_init_orientation= [0.0, 0.0, 1.0]
+ if(3>marr)then
+    marr=3
+    ABI_DEALLOCATE(intarr)
+    ABI_DEALLOCATE(dprarr)
+    ABI_ALLOCATE(intarr,(marr))
+    ABI_ALLOCATE(dprarr,(marr))
+ end if
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_init_orientation',tread,'DPR')
+ if(tread==1) multibinit_dtset%spin_init_orientation(1:3)= dprarr(1:3)
 
  multibinit_dtset%spin_qpoint= zero
  if(3>marr)then
@@ -2378,6 +2390,8 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
     write(nunit,'(28x,3es12.5)')   (multibinit_dtset%spin_qpoint(ii),ii=1,3)
     write(nunit, '(13x, a15, I12.1)') 'spin_init_state', multibinit_dtset%spin_init_state
     if(multibinit_dtset%spin_init_state==4) then
+      write(nunit,'(13x,a25)')   'spin_init_orientation'
+      write(nunit,'(28x,3es12.5)')   (multibinit_dtset%spin_init_orientation(ii),ii=1,3)
       write(nunit,'(13x,a18)')   'spin_init_qpoint'
       write(nunit,'(28x,3es12.5)')   (multibinit_dtset%spin_init_qpoint(ii),ii=1,3)
       write(nunit,'(13x,a25)')   'spin_init_rotate_axis'

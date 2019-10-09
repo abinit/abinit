@@ -84,6 +84,7 @@ module m_spin_mover
      real(dp), allocatable :: gyro_ratio(:), damping(:), gamma_L(:), H_lang_coeff(:), ms(:), Stmp(:,:), Stmp2(:,:)
      real(dp), allocatable :: Heff_tmp(:,:), Htmp(:,:), Hrotate(:,:), H_lang(:,:), buffer(:,:)
      real(dp) :: init_qpoint(3), init_rotate_axis(3) ! qpoint and rotation axis to set up initial spin configuration
+     real(dp) :: init_orientation(3) ! spin orientation in primitive cell which is then rotated
      !type(rng_t) :: rng
      type(spin_hist_t) :: hist
      logical :: gamma_l_calculated
@@ -161,6 +162,7 @@ contains
        if(params%spin_init_state==4) then
          self%init_qpoint = params%spin_init_qpoint
          self%init_rotate_axis = params%spin_init_rotate_axis
+         self%init_orientation = params%spin_init_orientation
        endif
     end if
     if(params%spin_dynamics==3) then ! Monte carlo
