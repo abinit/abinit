@@ -879,6 +879,13 @@ end subroutine constrained_dft_free
  call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
 &  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgden)
 
+!DEBUG
+ write(std_out,*)' m_dens/constrained_residuals after computing integrated magnetic moments'
+ do iatom=1,natom
+   write(std_out,*)'iatom,intgden(1:nspden,iatom)=',iatom,intgden(1:nspden,iatom)
+ enddo
+!ENDDEBUG
+
 !We need the integrated residuals
  ABI_ALLOCATE(intgres,(nspden,natom))
  call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
@@ -891,7 +898,7 @@ end subroutine constrained_dft_free
  do iatom=1,natom
 
    if(nspden/=4)then
-     intgr(1:nspden)=intgres(1:nspden,iatom)
+     intgr(1:nspden)=intgres(1:nspden,iatom)/real(nspden)
    else
      !Change the potential residual to the density+magnetization convention
      intgr(1)=half*(intgres(1,iatom)+intgres(2,iatom))
@@ -902,6 +909,13 @@ end subroutine constrained_dft_free
 
    ratio=one/(c_dft%intgf2(iatom)*c_dft%magcon_lambda)
    intgr(1:nspden)=intgden(1:nspden,iatom)-ratio*intgr(1:nspden)
+!DEBUG
+!  This is the correct coding in the charge case
+!  intgr(1:nspden)=intgden(1:nspden,iatom)-ratio*intgr(1:nspden)
+!  This is the penalty function approach. WORKS FOR NSPDEN=2
+!  intgr(1:nspden)=intgden(1:nspden,iatom)
+!  intgr(1:nspden)=intgden(1:nspden,iatom)-ratio*half*intgr(1:nspden)
+!ENDDEBUG
 
    if(nspden/=2)then
      intgden(1:nspden,iatom)=intgr(1:nspden)
@@ -932,7 +946,8 @@ end subroutine constrained_dft_free
    if( mod(conkind,10)==1 .and. nspden>1)then
 
      !Fix the different components of the magnetization vector
-     corr_denmag(2:nspden)=intgden(2:nspden,iatom)-c_dft%spinat(2:nspden,iatom)
+     if(nspden==2)corr_denmag(2)=intgden(2,iatom)-c_dft%spinat(3,iatom)
+     if(nspden==4)corr_denmag(2:4)=intgden(2:4,iatom)-c_dft%spinat(1:3,iatom)
 
    else if( ( mod(conkind,10)==2 .or. mod(conkind,10)==3) .and. nspden>1)then
 
@@ -949,7 +964,7 @@ end subroutine constrained_dft_free
            intgden_proj=spinat_normed(1)*intgden(2,iatom)+ &
 &            spinat_normed(2)*intgden(3,iatom)+ &
 &            spinat_normed(3)*intgden(4,iatom)
-           corr_denmag(2:nspden)=intgden(2:nspden,iatom)-spinat_normed(2:nspden)*intgden_proj 
+           corr_denmag(2:nspden)=intgden(2:nspden,iatom)-spinat_normed(1:3)*intgden_proj 
          else if(nspden==2)then
            !The direction must be correct, collinear, so no change.
            corr_denmag(2)=zero
@@ -994,12 +1009,14 @@ end subroutine constrained_dft_free
    endif
 
 !DEBUG
-   write(std_out,*)' m_dens/constrained_residuals : iatom,coeffs_constr_dft(1:nspden,iatom)=',iatom,coeffs_constr_dft(1:nspden,iatom)
+   write(std_out,*)' m_dens/constrained_residuals out with : iatom,coeffs_constr_dft(1:nspden,iatom)=',iatom,coeffs_constr_dft(1:nspden,iatom)
+!FOR TESTING PURPOSES ONLY 
+!  coeffs_constr_dft(:,iatom)=zero
 !ENDDEBUG
 
  enddo
 
-!Now compute the new residual, by adding the spherical functionsl
+!Now compute the new residual, by adding the spherical functions
  option=1
  call add_atomic_fcts(natom,nspden,c_dft%rprimd,mpi_enreg,nfftf,c_dft%ngfftf,ntypat,option,&
 &  c_dft%ratsph,c_dft%typat,coeffs_constr_dft,vresid,xred)

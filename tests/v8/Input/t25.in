@@ -2,12 +2,11 @@
 
  ndtset 2
 
-
 #Constrained DFT data
  constraint_kind2   1   # Dataset 2 is constrained DFT for the magnetization
- magcon_lambda      2
- spinat       0.0 0.0   0.3
-              0.0 0.0  -0.3 
+ magcon_lambda      2   
+ spinat       0.0 0.0   0.08
+              0.0 0.0  -0.08
 
 #Definition of the atomic spheres
  ratsph    1.0  1.0
@@ -19,7 +18,7 @@
  natom 2
  typat  2*1 
 
- nsppol 1    nspden 2
+ nsppol 1    nspden 2  # Antiferromagnetic case
  nband 1
 
  xcart    -1.1  0.0 0.0
@@ -44,5 +43,5 @@
 #%% references = 
 #%% keywords = 
 #%% description = H2 diatomic molecule, static, to check the constrained DFT implementation with constrained magnetization
-#%%  Constrain the magnetization around atom 1 to spin up 0.3 and around atom 2 to spin down 0.3
+#%%  Constrain the collinear magnetization around atom 1 to be +0.08 and around atom 2 to be -0.08
 #%%<END TEST_INFO>
