@@ -179,6 +179,15 @@ if test "${abi_cclock_enable}" = "yes"; then
   fi
 fi
 
+# Only one of MPI I/O and NetCDF I/O can be the default
+if test "${abi_netcdf_default_enable}" = "yes"; then
+  if test "${abi_mpi_io_default_enable}" = "yes"; then
+    AC_MSG_NOTICE([|---> disabling MPI I/O as default I/O mode (conflicts with NetCDF)])
+    abi_mpi_io_default_enable="no"
+    abi_optchk_ok="no"
+  fi
+fi
+
 # Closing remarks
 if test "${abi_optchk_ok}" = "yes"; then
   AC_MSG_NOTICE([|---> all OK])
@@ -743,6 +752,19 @@ fi
 
 # HDF5 library support
 SD_HDF5_DETECT
+
+# Parallel NetCDF requires a few conditions to work
+if test "${abi_netcdf_mpi_enable}" = "yes"; then
+  if test "${sd_mpi_ok}" != "yes"; then
+    AC_MSG_ERROR([parallel NetCDF requested but MPI is not available])
+  fi
+  if test "${abi_mpi_io_enable}" != "yes"; then
+    AC_MSG_ERROR([parallel NetCDF requested but MPI I/O is disabled])
+  fi
+  if test "${sd_hdf5_mpi_ok}" != "yes"; then
+    AC_MSG_ERROR([parallel NetCDF requested but parallel HDF5 is not available])
+  fi
+fi
 
 # NetCDF library support (must be done after HDF5)
 SD_NETCDF_DETECT
