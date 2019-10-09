@@ -1,17 +1,22 @@
 # Hydrogen diatomic molecule for tests--constrained DFT
 
- ndtset 5
+ ndtset 6
+ udtset 3 2
+#ndtset 1
+#jdtset 2
+#nnsclo 3
 
 #Constrained DFT 
- constraint_kind2   1   # Dataset 2 is constrained DFT for the collinear magnetization
- constraint_kind3  11   # Dataset 3 is constrained DFT for the collinear magnetization and charge
- constraint_kind4   3   # Dataset 4 is constrained DFT for the collinear magnetization amplitude
- constraint_kind5   2   # Dataset 5 is constrained DFT for the collinear magnetization direction (actually not useful !)
+ constraint_kind?1   1   # Dataset 11 and 21 are constrained DFT for the magnetization
+ constraint_kind?2  11   # Dataset 12 and 22 are constrained DFT for the magnetization and charge
+#constraint_kind?3   3   # Dataset 13 and 23 are constrained DFT for the magnetization amplitude
+#constraint_kind?4   2   # Dataset 14 and 24 are constrained DFT for the magnetization direction 
 
 #Constrained DFT data
  magcon_lambda      2   
- spinat       0.0 0.0   0.08
-              0.0 0.0  -0.08
+ spinat1?       0.0 0.0   0.08    0.0   0.0  -0.08
+ spinat2?       0.0 0.0   0.08    0.08  0.0  -0.08
+ spinat3?       0.0 0.0   0.08    0.0   0.08 -0.08
  chrgat      2*0.69 
 
 #Definition of the atomic spheres
@@ -22,18 +27,19 @@
  acell 15 10 10
  ntypat  1 
  znucl  1.0 
+ so_psp 0
  natom 2
  typat  2*1 
 
- nsppol 1    nspden 2  # Antiferromagnetic case
- nband 1
+ nspden 4  nspinor 2   # Non-collinear case
+ nband 2
 
  xcart    -1.1  0.0 0.0
            1.1  0.0 0.0
 
 #Computational parameters
- tolwfr 1.0d-14
- nstep  20
+ tolvrs 1.0d-8
+ nstep  35
  ecut 5
 
 #%%<BEGIN TEST_INFO>
@@ -41,7 +47,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t25.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t26.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% psp_files = 1h.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
@@ -53,4 +59,5 @@
 #%%  DS2 Constrain the collinear magnetization around atom 1 to be +0.08 and around atom 2 to be -0.08
 #%%  DS3 Constrain the collinear magnetization around atom 1 to be +0.08 and around atom 2 to be -0.08, and the total charge of both to be 0.69.
 #%%  DS4 Constrain the collinear magnetization amplitude around atom 1 to be +0.08 and around atom 2 to be -0.08. Same result as DS2.
+#%%  DS5 Constrain the collinear magnetization direction. Same result as DS1.
 #%%<END TEST_INFO>
