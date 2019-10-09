@@ -38,8 +38,8 @@ AC_DEFUN([SD_NETCDF_INIT], [
   sd_netcdf_ldflags_def="$7"
 
   # Process options
-  sd_netcdf_enable_cxx="yes"
   sd_netcdf_enable_def="auto"
+  sd_netcdf_enable_cxx="yes"
   sd_netcdf_enable_fc="yes"
   sd_netcdf_policy="fail"
   sd_netcdf_status="optional"
@@ -69,11 +69,6 @@ AC_DEFUN([SD_NETCDF_INIT], [
   # Set reasonable defaults if not provided
   test -z "${sd_netcdf_enable_cxx}" && sd_netcdf_enable_cxx="yes"
   test -z "${sd_netcdf_enable_fc}" && sd_netcdf_enable_fc="yes"
-  if test "${sd_netcdf_enable_fc}" = "yes"; then
-    test -z "${sd_netcdf_libs_def}" && sd_netcdf_libs_def="-lnetcdff -lnetcdf"
-  else
-    test -z "${sd_netcdf_libs_def}" && sd_netcdf_libs_def="-lnetcdf"
-  fi
   test -z "${sd_netcdf_status}" && sd_netcdf_status="optional"
   test -z "${sd_netcdf_policy}" && sd_netcdf_policy="fail"
   test -z "${sd_netcdf_enable_def}" && sd_netcdf_enable_def="no"
@@ -82,6 +77,16 @@ AC_DEFUN([SD_NETCDF_INIT], [
       sd_netcdf_enable_def="yes"
       ;;
   esac
+  tmp_netcdf_def_libs="yes"
+  test -z "${sd_netcdf_libs_def}" && tmp_netcdf_def_libs="no"
+  if test "${tmp_netcdf_def_libs}" = "no"; then
+    sd_netcdf_libs_def="-lnetcdf"
+    test "${sd_netcdf_enable_cxx}" = "yes" && \
+      sd_netcdf_libs_def="-lnetcdf_c++ ${sd_netcdf_libs_def}"
+    test "${sd_netcdf_enable_fc}" = "yes" && \
+      sd_netcdf_libs_def="-lnetcdff ${sd_netcdf_libs_def}"
+  fi
+  unset tmp_netcdf_def_libs
 
   # Declare configure option
   # TODO: make it switchable for the implicit case 
@@ -239,6 +244,11 @@ AC_DEFUN([SD_NETCDF_DETECT], [
 
       AC_DEFINE([HAVE_NETCDF], 1,
         [Define to 1 if you have the NetCDF library.])
+
+      if test "${sd_mpi_ok}" = "yes" -a "${sd_netcdf_mpi_ok}" = "yes"; then
+        AC_DEFINE([HAVE_NETCDF_MPI], 1,
+          [Define to 1 if you have a parallel NetCDF library.])
+      fi
     else
       if test "${sd_netcdf_status}" = "optional" -a \
               "${sd_netcdf_init}" = "def"; then
@@ -283,13 +293,16 @@ AC_DEFUN([_SD_NETCDF_CHECK_USE], [
   else
     CPPFLAGS="${CPPFLAGS} ${sd_netcdf_cppflags}"
     CFLAGS="${CFLAGS} ${sd_netcdf_cflags}"
-    FCFLAGS="${FCFLAGS} ${sd_netcdf_fcflags}"
+    test "${sd_netcdf_enable_cxx}" = "yes" && \
+      CXXFLAGS="${CXXFLAGS} ${sd_netcdf_cxxflags}"
+    test "${sd_netcdf_enable_fc}" = "yes" && \
+      FCFLAGS="${FCFLAGS} ${sd_netcdf_fcflags}"
     LDFLAGS="${LDFLAGS} ${sd_netcdf_ldflags}"
     LIBS="${sd_netcdf_libs} ${LIBS}"
   fi
 
   # Check NetCDF C API
-  AC_MSG_CHECKING([whether the NetCDF library works])
+  AC_MSG_CHECKING([whether the NetCDF C interface works])
   AC_LANG_PUSH([C])
   AC_LINK_IFELSE([AC_LANG_PROGRAM(
     [[
@@ -303,8 +316,21 @@ AC_DEFUN([_SD_NETCDF_CHECK_USE], [
   AC_MSG_RESULT([${sd_netcdf_c_ok}])
 
   # Check NetCDF C++ API
-  # FIXME: To be implemented
-  sd_netcdf_cxx_ok="no"
+  if test "${sd_netcdf_c_ok}" = "yes" -a "${sd_netcdf_enable_cxx}" = "yes"; then
+    AC_MSG_CHECKING([whether the NetCDF C++ interface works])
+    AC_LANG_PUSH([C++])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM(
+      [[
+#include <netcdf>
+using namespace std;
+using namespace netCDF;
+      ]],
+      [[
+        NcFile dataFile("conftest.nc", NcFile::replace);
+      ]])], [sd_netcdf_cxx_ok="yes"], [sd_netcdf_cxx_ok="no"])
+    AC_LANG_POP([C++])
+    AC_MSG_RESULT([${sd_netcdf_cxx_ok}])
+  fi
 
   # Check NetCDF Fortran API
   if test "${sd_netcdf_c_ok}" = "yes" -a "${sd_netcdf_enable_fc}" = "yes"; then
