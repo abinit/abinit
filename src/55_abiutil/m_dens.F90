@@ -899,7 +899,7 @@ end subroutine constrained_dft_free
 
    if(nspden/=4)then
      intgr(1:nspden)=intgres(1:nspden,iatom)/real(nspden)
-   else
+   else if(nspden==4)then
      !Change the potential residual to the density+magnetization convention
      intgr(1)=half*(intgres(1,iatom)+intgres(2,iatom))
      intgr(2)= intgres(1,iatom)-intgres(2,iatom)
@@ -920,9 +920,9 @@ end subroutine constrained_dft_free
    if(nspden/=2)then
      intgden(1:nspden,iatom)=intgr(1:nspden)
    else
-     !Change the (up,down) atomic density to the charge + spin convention
-     intgden(1,iatom)=half*(intgr(1)+intgr(2))
-     intgden(2,iatom)=(intgr(1)-intgr(2))
+     !Change the (up,down) atomic density to the total charge + spin convention
+     intgden(1,iatom)=intgr(1)+intgr(2)
+     intgden(2,iatom)=intgr(1)-intgr(2)
    endif
 
 !DEBUG
