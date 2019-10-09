@@ -708,15 +708,17 @@ end subroutine add_atomic_fcts
 ! ***********************************************************************************************
 
  ABI_ALLOCATE(intgf2,(natom))
- ABI_ALLOCATE(rhor_dum,(nfftf,nspden))
 
 !We need the metric because it is needed in calcdensph.F90
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  if(any(constraint_kind(:)/=0))then
    !We need to precompute intgf2
+   ABI_ALLOCATE(rhor_dum,(nfftf,nspden))
+   rhor_dum(:,:)=zero
    call calcdensph(gmet,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,std_out,&
 &    ratsm,ratsph,rhor_dum,rprimd,typat,ucvol,xred,0,cplex1,intgf2=intgf2)
+   ABI_DEALLOCATE(rhor_dum)
  else
    intgf2=zero
  endif
@@ -750,7 +752,6 @@ end subroutine add_atomic_fcts
  constrained_dft%ziontypat        =ziontypat
 
  ABI_DEALLOCATE(intgf2)
- ABI_DEALLOCATE(rhor_dum)
 
 end subroutine constrained_dft_ini
 !!***
@@ -902,9 +903,9 @@ end subroutine constrained_dft_free
    else if(nspden==4)then
      !Change the potential residual to the density+magnetization convention
      intgr(1)=half*(intgres(1,iatom)+intgres(2,iatom))
-     intgr(2)= intgres(1,iatom)-intgres(2,iatom)
-     intgr(3)= intgres(3,iatom)
-     intgr(4)=-intgres(4,iatom)
+     intgr(2)= intgres(3,iatom)
+     intgr(3)=-intgres(4,iatom)
+     intgr(4)=half*(intgres(1,iatom)-intgres(2,iatom))
    endif
 
    ratio=one/(c_dft%intgf2(iatom)*c_dft%magcon_lambda)
@@ -1000,11 +1001,11 @@ end subroutine constrained_dft_free
      coeffs_constr_dft(1,iatom)=corr_denmag(1)
    else if(nspden==2 .or. nspden==4)then
      !From charge and magnetization to potential 
-     coeffs_constr_dft(1,iatom)=corr_denmag(1)+corr_denmag(2)
-     coeffs_constr_dft(2,iatom)=corr_denmag(1)-corr_denmag(2)
+     coeffs_constr_dft(1,iatom)=corr_denmag(1)+corr_denmag(4)
+     coeffs_constr_dft(2,iatom)=corr_denmag(1)-corr_denmag(4)
      if(nspden==4)then
-       coeffs_constr_dft(3,iatom)= corr_denmag(3)
-       coeffs_constr_dft(4,iatom)=-corr_denmag(4)
+       coeffs_constr_dft(3,iatom)= corr_denmag(2)
+       coeffs_constr_dft(4,iatom)=-corr_denmag(3)
      endif
    endif
 
@@ -1432,7 +1433,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
  character(len=500) :: msg,msg1
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
- real(dp) :: intg(4),tsec(2) 
+ real(dp) :: intg(4),rhomag(2,4),tsec(2) 
  real(dp) :: intgden_(nspden,natom), my_xred(3, natom), xshift(3, natom)
 
 ! *************************************************************************
@@ -1603,87 +1604,41 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
  end do
 
 ! EB  - Compute magnetization of the whole cell
-! SPr - in case of complex density array set cmplex_den to one
- cmplex_den=0
-
- if(cplex==2) then
-
-   cmplex_den=1
-
- end if
-
+ rhomag(:,:)=zero
  if(nspden==2) then
-   mag_coll=zero
-   mag_coll_im=zero
-   rho_tot=zero
-   rho_tot_im=zero
    do ifft=1,nfft
-     jfft=(cmplex_den+1)*ifft
-!    rho_up=rho_up+rhor(ifft,2)
-!    rho_dn=rho_dn+(rhor(ifft,2)-rhor(ifft,1))
-     rho_tot=rho_tot+rhor(jfft-cmplex_den,1)             ! real parts of density and magnetization
-     mag_coll=mag_coll+2*rhor(jfft-cmplex_den,2)-rhor(jfft-cmplex_den,1)
-
-     rho_tot_im=rho_tot_im+rhor(jfft,1)                  ! imaginary parts of density and magnetization
-     mag_coll_im=mag_coll_im+2*rhor(jfft,2)-rhor(jfft,1) ! in case of real array both are equal to corresponding real parts
+     jfft=1+cplex*(ifft-1)
+     rhomag(1:cplex,1)=rhomag(1:cplex,1)+rhor(jfft:jfft+cplex-1,1) ! real & imag part of density 
+     rhomag(1:cplex,2)=rhomag(1:cplex,2)+2*rhor(jfft:jfft+cplex-1,2)-rhor(jfft:jfft+cplex-1,1) ! real & imag part of magnetization
    end do
-   mag_coll=mag_coll*ucvol/dble(nfftot)
-   rho_tot =rho_tot *ucvol/dble(nfftot)
-
-   mag_coll_im=mag_coll_im*ucvol/dble(nfftot)
-   rho_tot_im =rho_tot_im *ucvol/dble(nfftot)
-!  rho_up=rho_up*ucvol/dble(nfftot)
-!  rho_dn=rho_dn*ucvol/dble(nfftot)
-!  rho_tot=rho_tot*ucvol/dble(nfftot)
  else if(nspden==4) then
-   rho_tot=0
-   rho_tot_im=0
-   mag_x=0
-   mag_y=0
-   mag_z=0
-   mag_x_im=0
-   mag_y_im=0
-   mag_z_im=0
    do ifft=1,nfft
-     jfft=(cmplex_den+1)*ifft
-     rho_tot=rho_tot+rhor(jfft-cmplex_den,1)
-     mag_x=mag_x+rhor(jfft-cmplex_den,2)
-     mag_y=mag_y+rhor(jfft-cmplex_den,3)
-     mag_z=mag_z+rhor(jfft-cmplex_den,4)
-     rho_tot_im=rho_tot_im+rhor(jfft,1)
-     mag_x_im=mag_x_im+rhor(jfft,2)
-     mag_y_im=mag_y_im+rhor(jfft,3)
-     mag_z_im=mag_z_im+rhor(jfft,4)
+     jfft=1+cplex*(ifft-1)
+     rhomag(1:cplex,1:nspden)=rhomag(1:cplex,1:nspden)+rhor(jfft:jfft+cplex-1,1:nspden)    
    end do
-   rho_tot=rho_tot*ucvol/dble(nfftot)
-   mag_x=mag_x*ucvol/dble(nfftot)
-   mag_y=mag_y*ucvol/dble(nfftot)
-   mag_z=mag_z*ucvol/dble(nfftot)
-   rho_tot_im=rho_tot_im*ucvol/dble(nfftot)
-   mag_x_im=mag_x_im*ucvol/dble(nfftot)
-   mag_y_im=mag_y_im*ucvol/dble(nfftot)
-   mag_z_im=mag_z_im*ucvol/dble(nfftot)
  end if
+
+ rhomag(1:cplex,1:nspden)=rhomag(1:cplex,1:nspden)*ucvol/dble(nfftot)
 
 !MPI parallelization
  if(mpi_enreg%nproc_fft>1)then
    call timab(48,1,tsec)
    call xmpi_sum(intgden_,mpi_enreg%comm_fft,ierr)
-   call xmpi_sum(rho_tot,mpi_enreg%comm_fft,ierr)  ! EB
-   call xmpi_sum(mag_coll,mpi_enreg%comm_fft,ierr) ! EB
-
-   call xmpi_sum(rho_tot_im,mpi_enreg%comm_fft,ierr)
-   call xmpi_sum(mag_coll_im,mpi_enreg%comm_fft,ierr)
-!  call xmpi_sum(rho_up,mpi_enreg%comm_fft,ierr)  ! EB
-!  call xmpi_sum(rho_dn,mpi_enreg%comm_fft,ierr)  ! EB
-   call xmpi_sum(mag_x,mpi_enreg%comm_fft,ierr)    ! EB
-   call xmpi_sum(mag_y,mpi_enreg%comm_fft,ierr)    ! EB
-   call xmpi_sum(mag_z,mpi_enreg%comm_fft,ierr)    ! EB
-   call xmpi_sum(mag_x_im,mpi_enreg%comm_fft,ierr)    ! EB
-   call xmpi_sum(mag_y_im,mpi_enreg%comm_fft,ierr)    ! EB
-   call xmpi_sum(mag_z_im,mpi_enreg%comm_fft,ierr)    ! EB
+   call xmpi_sum(rhomag,mpi_enreg%comm_fft,ierr)
    call timab(48,2,tsec)
  end if
+
+ if(nspden==2)then
+   rho_tot=rhomag(1,1) ; mag_coll=rhomag(1,2)
+   if(cplex==2)then
+     rho_tot_im=rhomag(2,1) ; mag_coll_im=rhomag(2,2)
+   endif
+ else if(nspden==4)then
+   rho_tot=rhomag(1,1) ; mag_x=rhomag(1,2) ; mag_y=rhomag(1,3) ; mag_z=rhomag(1,4) 
+   if(cplex==2)then
+     rho_tot_im=rhomag(1,2) ; mag_x_im=rhomag(2,2) ; mag_y=rhomag(2,3) ; mag_z=rhomag(2,4) 
+   endif
+ endif
 
 !Printing
  sum_mag=zero
@@ -1730,7 +1685,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
      if(option== 1 .and. nspden==2) msg=' Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)'
      if(option== 1 .and. nspden==4) msg=' Atom   Radius      Total density     mag(x)      mag(y)      mag(z) '
      if(option==11 .and. nspden==2) msg=' Atom    Radius    up_potential dn_potential  Sum(up+dn)  Diff(up-dn)'
-     if(option==11 .and. nspden==4) msg=' Atom   Radius      Potential           B(x)        B(y)        B(z) '
+     if(option==11 .and. nspden==4) msg=' Atom   Radius        Potential         B(x)        B(y)        B(z) '
      call wrtout(nunit,msg,'COLL')
 
    endif
@@ -1761,7 +1716,13 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
    elseif(nspden==4) then
 
      do iatom=1,natom
-       write(msg, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),intgden_(1,iatom),'  ',(intgden_(ix,iatom),ix=2,4)
+       if(option==1)then
+         write(msg, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),intgden_(1,iatom),'  ',(intgden_(ix,iatom),ix=2,4)
+       else
+         write(msg, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),&
+&          half*(intgden_(1,iatom)+intgden_(2,iatom)),'  ',intgden_(3,iatom),-intgden_(4,iatom),&
+&          half*(intgden_(1,iatom)-intgden_(2,iatom))
+       endif
        call wrtout(nunit,msg,'COLL')
        ! Compute the sum of the magnetization in x, y and z directions
        sum_mag_x=sum_mag_x+intgden_(2,iatom)
