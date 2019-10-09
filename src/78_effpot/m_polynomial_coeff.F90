@@ -1706,17 +1706,25 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
  do icoeff = 1,ncoeff
    if(.not.(all(list_symcoeff_tmp2(:,icoeff,1)==0)))then
      do mu=1,3
-       if(min_range(mu) > cell(mu,list_symcoeff_tmp2(4,icoeff,1)) .or. &
+       if( -max_range(mu) > cell(mu,list_symcoeff_tmp2(4,icoeff,1)) .or. &
 &       cell(mu,list_symcoeff_tmp2(4,icoeff,1)) > max_range(mu))then
          list_symcoeff_tmp2(:,icoeff,:)=0
          exit
        end if
      end do
    end if
+   !MS only keep terms with ia == 1 
+   !if (list_symcoeff_tmp2(2,icoeff,1) /= 1)then 
+   !    list_symcoeff_tmp2(:,icoeff,1) = 0 
+   !endif
  end do
+
+write(std_out,*) "DEBUG: min_range(:): ", min_range(:) 
+write(std_out,*) "DEBUG: max_range(:): ", max_range(:) 
 
 !3/ Remove useless terms like opposites
  do icoeff = 1,ncoeff
+   if(.not.(all(list_symcoeff_tmp2(:,icoeff,1)==0)))then
    do isym = 1,nsym
      !icoeff2 = list_symcoeff_tmp2(6,icoeff,isym)
      !if (icoeff2> icoeff)then
@@ -1733,11 +1741,8 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
          list_symcoeff_tmp2(:,icoeff2,1) = 0
        end if
      end do
-   end do 
-   !MS only keep terms with ia == 1 
-   if (list_symcoeff_tmp2(2,icoeff,1) /= 1)then 
-       list_symcoeff_tmp2(:,icoeff,1) = 0 
-   endif
+   end do
+   end if  
  end do
 
 !4/ Recount the number of coeff after step 3
@@ -1934,7 +1939,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 !arrays
  integer :: ncell(3)
  integer,allocatable :: buffsize(:),buffdispl(:)
- integer,allocatable :: cell(:,:),compatibleCoeffs(:,:),list_combination_cmp_tmp(:)
+ integer,allocatable :: cell(:,:),compatibleCoeffs(:,:),compatibleCoeffs_sym(:,:),list_combination_cmp_tmp(:)
  integer,allocatable :: list_symcoeff(:,:,:),list_symstr(:,:,:),list_coeff(:),list_combination(:,:)
  integer,allocatable :: list_combination_tmp(:,:),list_combination_tmp2(:,:)
  integer,allocatable  :: my_coefflist(:),my_coeffindexes(:),my_newcoeffindexes(:)
@@ -2088,6 +2093,7 @@ do ii=1,nsym
   write(std_out,*) "atom1     list_symcoeff(2,1,", ii,"): ", list_symcoeff(2,1,ii)  
   write(std_out,*) "atom2     list_symcoeff(3,1,", ii,"): ", list_symcoeff(3,1,ii)  
   write(std_out,*) "irpt      list_symcoeff(4,1,", ii,"): ", list_symcoeff(4,1,ii) !,"cell: ", cell(:,list_symcoeff(4,1,ii))
+  write(std_out,*) "cell(:,", list_symcoeff(4,1,ii),"): ", cell(:,list_symcoeff(4,1,ii))
   write(std_out,*) "weight    list_symcoeff(5,1,", ii,"): ", list_symcoeff(5,1,ii)  
   write(std_out,*) "index sym list_symcoeff(6,1,", ii,"): ", list_symcoeff(6,1,ii) 
   ia = list_symcoeff(6,1,ii)  
@@ -2150,7 +2156,7 @@ write(std_out,*) "DEBUG: What is ncoeff_tot: ", ncoeff_tot
 !      if both icoeff are strain => check the flag
 !      Otherwise cycle (we keep the term)
        if(icoeff>ncoeff_sym.and.icoeff2<=ncoeff_sym)cycle
-       if(icoeff2<=ncoeff_sym.and.icoeff2>ncoeff_sym)cycle
+       if(icoeff<=ncoeff_sym.and.icoeff2>ncoeff_sym)cycle
        if((icoeff>ncoeff_sym.or.icoeff2>ncoeff_sym).and.&
 &       .not.need_anharmstr.and..not.need_spcoupling) then
          compatibleCoeffs(icoeff,icoeff2) = 0
@@ -2177,6 +2183,37 @@ write(std_out,*) "DEBUG: What is ncoeff_tot: ", ncoeff_tot
        end if
      end do !end  icoeff 
    end do !icoeff2
+
+
+!ABI_ALLOCATE(compatibleCoeffs_sym,(ncoeff_symsym,ncoeff_symsym))
+!Check compatibility of symmetric coefficients
+!   do icoeff=1,ncoeff_symsym
+!     do icoeff2=1,ncoeff_symsym
+!!      Select case:
+!!      if both icoeff are displacement => check the distance
+!!      if both icoeff are strain => check the flag
+!!      Otherwise cycle (we keep the term)
+!         if(distance_supercell(xcart(:,list_symcoeff(2,icoeff,1)),&
+!&                  xcart(:,list_symcoeff(2,icoeff2,1)),rprimd,&
+!&                  cell(:,1),cell(:,1))>=cutoff.or.&
+!&         distance_supercell(xcart(:,list_symcoeff(2,icoeff,1)),&
+!&                  xcart(:,list_symcoeff(3,icoeff2,1)),rprimd,&
+!&                  cell(:,1),cell(:,list_symcoeff(4,icoeff2,1)))>=cutoff.or.&
+!&         distance_supercell(xcart(:,list_symcoeff(3,icoeff,1)),&
+!&                  xcart(:,list_symcoeff(2,icoeff2,1)),rprimd,&
+!&                  cell(:,list_symcoeff(4,icoeff,1)),cell(:,1))>=cutoff.or.&
+!&         distance_supercell(xcart(:,list_symcoeff(3,icoeff,1)),&
+!&                  xcart(:,list_symcoeff(3,icoeff2,1)),rprimd,&
+!&                  cell(:,list_symcoeff(4,icoeff,1)),&
+!&                  cell(:,list_symcoeff(4,icoeff2,1)))>=cutoff)then
+!!TEST_AM
+!           compatibleCoeffs(icoeff,icoeff2) = 0
+!           compatibleCoeffs(icoeff2,icoeff) = 0
+!!TEST_AM
+!         end if
+!       end if
+!     end do !end  icoeff 
+!   end do !icoeff2
 ii = 0
    do icoeff=1,ncoeff_tot
      do icoeff2=1,ncoeff_tot
@@ -3409,7 +3446,6 @@ subroutine generateTermsFromList(cell,index_coeff,list_coeff,list_str,ncoeff,ndi
        ib   = list_coeff(3,index_coeff(idisp),isym)
        irpt = list_coeff(4,index_coeff(idisp),isym)
        weight = weight*list_coeff(5,index_coeff(idisp),isym)
-       write(std_out,*) "DEBUG: index(,",idisp,")", index_coeff(idisp),"isym", isym, "irpt", irpt 
 !      Fill First term arrays
        atindx(1,idisp) = ia; atindx(2,idisp) = ib;
        dir_int(idisp) = mu
