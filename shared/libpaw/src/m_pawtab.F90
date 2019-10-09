@@ -150,7 +150,6 @@ MODULE m_pawtab
    ! if 1, onsite matrix elements of the kinetic operator are allocated
    ! if 2, onsite matrix elements of the kinetic operator are computed and stored
 
-
   integer :: has_shapefncg
    ! if 1, the spherical Fourier transforms of the radial shape functions are allocated
    ! if 2, the spherical Fourier transforms of the radial shape functions are computed and stored
@@ -279,7 +278,7 @@ MODULE m_pawtab
    ! usepawu= 1 ; use PAW+U formalism (Full localized limit)
    ! usepawu= 2 ; use PAW+U formalism (Around Mean Field)
    ! usepawu= 3 ; use PAW+U formalism (Around Mean Field) - Alternative
-   ! usepawu= 4 ; use PAW+U formalism (FLL) without polarization in the XC 
+   ! usepawu= 4 ; use PAW+U formalism (FLL) without polarization in the XC
    ! usepawu=-1 ; use PAW+U formalism (FLL) - No use of the occupation matrix - Experimental
    ! usepawu=-2 ; use PAW+U formalism (AMF) - No use of the occupation matrix - Experimental
    ! usepawu=10 ; use PAW+U within DMFT
@@ -1497,10 +1496,10 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Integers (read from psp file)
 !-------------------------------------------------------------------------
-!  basis_size,has_fock,has_kij,has_shapefncg,has_nabla,has_nablaphi,has_tproj,has_tvale,has_taucore,has_vhtnzc,has_vhnzc,has_vminushalf
-!  has_wvl,ij_size,l_size,lmn_size,lmn2_size,mesh_size,partialwave_mesh_size,core_mesh_size,coretau_mesh_size, vminus_mesh_size
+!  basis_size,has_coretau,has_fock,has_kij,has_shapefncg,has_nabla,has_nablaphi,has_tproj,has_tvale,has_vhtnzc,has_vhnzc,has_vminushalf
+!  has_wvl,ij_size,l_size,lmn_size,lmn2_size,mesh_size,core_mesh_size,coretau_mesh_size,vminus_mesh_size,partialwave_mesh_size
 !  tnvale_mesh_size,mqgrid,shape_lambda,shape_type,usetcore,usexcnhat
-   nn_int=nn_int+26
+   nn_int=nn_int+27
 
 !Integers (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
@@ -1561,13 +1560,13 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Reals arrays (read from psp file)
 !-------------------------------------------------------------------------
-   siz_coredens=0 ; siz_coretau=0; siz_dij0=0     ; siz_kij=0      ; siz_fock=0
-   siz_nablaphi=0   ; siz_phi=0      ; siz_rhoij0=0   ; siz_shape_alpha=0
-   siz_shape_q=0  ; siz_shapefunc=0; siz_tcoredens=0 ; siz_tcoretau=0
-   siz_tcorespl=0 ; siz_ttaucorespl=0 ; siz_tphi=0     ; siz_tnablaphi=0  ; siz_tproj=0
-   siz_tvalespl=0 ; siz_vhtnzc=0   ; siz_vhnzc=0
+   siz_coredens=0 ; siz_coretau=0    ; siz_dij0=0     ; siz_kij=0        ; siz_fock=0
+   siz_nablaphi=0 ; siz_phi=0        ; siz_rhoij0=0   ; siz_shape_alpha=0
+   siz_shape_q=0  ; siz_shapefunc=0  ; siz_tcoredens=0; siz_tcoretau=0
+   siz_tcorespl=0 ; siz_ttaucorespl=0; siz_tphi=0     ; siz_tnablaphi=0  ; siz_tproj=0
+   siz_tvalespl=0 ; siz_vhtnzc=0     ; siz_vhnzc=0
    siz_vminushalf=0
-   nn_int=nn_int+17
+   nn_int=nn_int+22
 
    if (allocated(pawtab%coredens)) then
      siz_coredens=size(pawtab%coredens)             !(core_mesh_size)
@@ -1597,7 +1596,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      nn_dpr=nn_dpr+siz_kij
    end if
    if (allocated(pawtab%nablaphi)) then
-     siz_phi=size(pawtab%nablaphi)                       !(partialwave_mesh_size, basis_size)
+     siz_phi=size(pawtab%nablaphi)                  !(partialwave_mesh_size, basis_size)
      if (siz_nablaphi/=pawtab%partialwave_mesh_size*pawtab%basis_size) msg=trim(msg)//' nablaphi'
      nn_dpr=nn_dpr+siz_nablaphi
    end if
@@ -1633,7 +1632,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      nn_dpr=nn_dpr+siz_tcoredens
    end if
    if (allocated(pawtab%tcoretau)) then
-     siz_tcoretau=size(pawtab%tcoretau)           !(coretau_mesh_size,1 or 6)
+     siz_tcoretau=size(pawtab%tcoretau)             !(coretau_mesh_size,1 or 6)
      if (siz_tcoretau/=pawtab%coretau_mesh_size.and.siz_tcoretau/=6*pawtab%coretau_mesh_size) &
 &      msg=trim(msg)//' tcoretau'
      nn_dpr=nn_dpr+siz_tcoretau
@@ -1644,12 +1643,12 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      nn_dpr=nn_dpr+siz_tcorespl
    end if
    if (allocated(pawtab%ttaucorespl)) then
-     siz_ttaucorespl=size(pawtab%ttaucorespl)             !(mqgrid,2)
+     siz_ttaucorespl=size(pawtab%ttaucorespl)       !(mqgrid,2)
      if (siz_ttaucorespl/=pawtab%mqgrid*2) msg=trim(msg)//' ttaucorespl'
      nn_dpr=nn_dpr+siz_ttaucorespl
    end if
    if (allocated(pawtab%tnablaphi)) then
-     siz_tnablaphi=size(pawtab%tnablaphi)                     !(partialwave_mesh_size, basis_size)
+     siz_tnablaphi=size(pawtab%tnablaphi)           !(partialwave_mesh_size, basis_size)
      if (siz_tnablaphi/=pawtab%partialwave_mesh_size*pawtab%basis_size) msg=trim(msg)//' tnablaphi'
      nn_dpr=nn_dpr+siz_tnablaphi
    end if
@@ -1680,7 +1679,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      nn_dpr=nn_dpr+siz_vhnzc
    end if
    if (allocated(pawtab%vminushalf)) then
-     siz_vminushalf=size(pawtab%vminushalf)                 !(mesh_size)
+     siz_vminushalf=size(pawtab%vminushalf)         !(mesh_size)
      if (siz_vminushalf/=pawtab%vminus_mesh_size) msg=trim(msg)//' vvminushalf'
      nn_dpr=nn_dpr+siz_vminushalf
    end if
