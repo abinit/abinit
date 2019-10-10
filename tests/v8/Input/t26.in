@@ -2,15 +2,10 @@
 
  ndtset 6
  udtset 3 2
-#ndtset 1
-#jdtset 2
-#nnsclo 3
 
 #Constrained DFT 
  constraint_kind?1   1   # Dataset 11 and 21 are constrained DFT for the magnetization
  constraint_kind?2  11   # Dataset 12 and 22 are constrained DFT for the magnetization and charge
-#constraint_kind?3   3   # Dataset 13 and 23 are constrained DFT for the magnetization amplitude
-#constraint_kind?4   2   # Dataset 14 and 24 are constrained DFT for the magnetization direction 
 
 #Constrained DFT data
  magcon_lambda      2   
@@ -47,7 +42,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t26.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t26.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
 #%% psp_files = 1h.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
@@ -55,9 +50,6 @@
 #%% authors = X. Gonze
 #%% references = 
 #%% keywords = 
-#%% description = H2 diatomic molecule, static, to check the constrained DFT implementation in case nspden=2
-#%%  DS2 Constrain the collinear magnetization around atom 1 to be +0.08 and around atom 2 to be -0.08
-#%%  DS3 Constrain the collinear magnetization around atom 1 to be +0.08 and around atom 2 to be -0.08, and the total charge of both to be 0.69.
-#%%  DS4 Constrain the collinear magnetization amplitude around atom 1 to be +0.08 and around atom 2 to be -0.08. Same result as DS2.
-#%%  DS5 Constrain the collinear magnetization direction. Same result as DS1.
+#%% description = H2 diatomic molecule, static, to check the constrained DFT implementation in case nspden=4
+#%%  Check jointly the charge and vector magnetization constraints, with differing vector orientations.
 #%%<END TEST_INFO>
