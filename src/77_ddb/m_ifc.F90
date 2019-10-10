@@ -693,6 +693,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      write(ab_out, '(a)' )'    '                            
    end do
    write(ab_out, '(a)' )' ...Finish IFC writting '
+   ABI_FREE(dist)
  end if
 #endif
 
