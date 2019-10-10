@@ -42,7 +42,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t26.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
+#%%   t26.out, tolnlines = 1, tolabs = 4.000e-08, tolrel = 3.000e-08, fld_options = -medium
 #%% psp_files = 1h.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
