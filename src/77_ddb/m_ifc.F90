@@ -682,7 +682,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      do ib=1, natom
        do irpt = 1, ifc%nrpt
          ii=ii+1
-         write(ab_out, '(i4,a,i6,a,i8)' )ii,' interaction with atom',ib,'cell',irpt
+         write(ab_out, '(i8,a,i6,a,i8)' )ii,' interaction with atom',ib,' cell',irpt
          write(ab_out, '(a,es16.6)' )' with distance ', dist(ia,ib,irpt)
          do nu=1,3
            write(ab_out, '(1x,3f9.5)' ) (Ifc%atmfrc(mu,ia,nu,ib,irpt)+tol10,mu=1,3)
