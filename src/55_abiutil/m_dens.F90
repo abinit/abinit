@@ -1001,8 +1001,8 @@ end subroutine constrained_dft_free
      coeffs_constr_dft(1,iatom)=corr_denmag(1)
    else if(nspden==2 .or. nspden==4)then
      !From charge and magnetization to potential 
-     coeffs_constr_dft(1,iatom)=corr_denmag(1)+corr_denmag(4)
-     coeffs_constr_dft(2,iatom)=corr_denmag(1)-corr_denmag(4)
+     coeffs_constr_dft(1,iatom)=corr_denmag(1)+corr_denmag(nspden)
+     coeffs_constr_dft(2,iatom)=corr_denmag(1)-corr_denmag(nspden)
      if(nspden==4)then
        coeffs_constr_dft(3,iatom)= corr_denmag(2)
        coeffs_constr_dft(4,iatom)=-corr_denmag(3)
