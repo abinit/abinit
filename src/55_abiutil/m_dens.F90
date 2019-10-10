@@ -1420,7 +1420,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
  integer,parameter :: ishift=5
  integer :: ii,i1,i2,i3,iatom,ierr,ifft_local,ix,iy,iz,izloc,jatom,n1,n1a,n1b,n2,ifft
  integer :: n2a,n2b,n3,n3a,n3b,nfftot
- integer :: cmplex_den,jfft
+ integer :: jfft
  real(dp),parameter :: delta=0.99_dp
  real(dp) :: difx,dify,difz,dist_ij,r2,r2atsph,rr1,rr2,rr3,rx,ry,rz
  real(dp) :: fsm, ratsm2
@@ -1636,7 +1636,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
  else if(nspden==4)then
    rho_tot=rhomag(1,1) ; mag_x=rhomag(1,2) ; mag_y=rhomag(1,3) ; mag_z=rhomag(1,4) 
    if(cplex==2)then
-     rho_tot_im=rhomag(1,2) ; mag_x_im=rhomag(2,2) ; mag_y=rhomag(2,3) ; mag_z=rhomag(2,4) 
+     rho_tot_im=rhomag(2,1) ; mag_x_im=rhomag(2,2) ; mag_y_im=rhomag(2,3) ; mag_z_im=rhomag(2,4) 
    endif
  endif
 
@@ -1757,14 +1757,14 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
    end if
    call wrtout(nunit,msg,'COLL')
 
-   if(cmplex_den==0) then
+   if(cplex==1) then
      write(msg, '(a,f13.8)') '     n_f   = ',rho_tot
    else
      write(msg, '(a,f13.8,a,f13.8)') '  Re[n_f]= ', rho_tot,"   Im[n_f]= ",rho_tot_im
    end if
    call wrtout(nunit,msg,'COLL')
    if(nspden==2) then
-     if(cmplex_den==0) then
+     if(cplex==1) then
        write(msg, '(a,f13.8)') '     m_f    = ', mag_coll
      else
        write(msg, '(a,f13.8,a,f13.8)') '  Re[m_f]= ', mag_coll,"   Im[m_f]= ",mag_coll_im
@@ -1804,7 +1804,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
    end if
    call wrtout(nunit,msg,'COLL')
 
-   if(cmplex_den==0) then
+   if(cplex==1) then
      write(msg, '(a,e16.8)') '     n^(1)    = ', rho_tot
    else
      write(msg, '(a,e16.8,a,e16.8)') '  Re[n^(1)] = ', rho_tot,"   Im[n^(1)] = ",rho_tot_im
@@ -1813,7 +1813,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
 
    if(nspden==2) then
 
-     if(cmplex_den==0) then
+     if(cplex==1) then
        write(msg, '(a,e16.8)') '     m^(1)    = ', mag_coll
      else
        write(msg, '(a,e16.8,a,e16.8)') '  Re[m^(1)] = ', mag_coll,"   Im[m^(1)] = ",mag_coll_im
@@ -1821,7 +1821,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
      call wrtout(nunit,msg,'COLL')
 
    elseif (nspden==4) then
-     if(cmplex_den==0) then
+     if(cplex==1) then
        write(msg, '(a,e16.8)') '     mx^(1)   = ', mag_x
        call wrtout(nunit,msg,'COLL')
        write(msg, '(a,e16.8)') '     my^(1)   = ', mag_y
