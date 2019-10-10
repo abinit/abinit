@@ -62,6 +62,7 @@ nspden7 2
 nsppol7 2 
 getwfk7 0
 nband7 6
+toldfe7 1.05e-10
 
 nband 14
 occopt 7

@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu 10 Oct 2019.
-- ( at 12h39 )
+- ( at 20h00 )
   
 - input  file    -> t05.in
 - output file    -> t05.out
@@ -576,7 +576,7 @@ P           mkmem7          3
            toldfe4     1.00000000E-10 Hartree
            toldfe5     1.00000000E-10 Hartree
            toldfe6     1.00000000E-10 Hartree
-           toldfe7     1.00000000E-10 Hartree
+           toldfe7     1.05000000E-10 Hartree
             typat      1
               wtk1       0.12500    0.50000    0.25000    0.12500
               wtk2       0.12500    0.50000    0.25000    0.12500
@@ -1762,7 +1762,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     150.625     150.514
  ETOT 20  -22.760545453376     7.43E-11 1.37E-06 1.20E-17 2.250
 
  At SCF step   20, etot is converged : 
-  for the second time, diff in etot=  7.430E-11 < toldfe=  1.000E-10
+  for the second time, diff in etot=  7.430E-11 < toldfe=  1.050E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  6.10344720E-02  sigma(3 2)=  0.00000000E+00
@@ -2360,7 +2360,7 @@ P           mkmem7          3
            toldfe4     1.00000000E-10 Hartree
            toldfe5     1.00000000E-10 Hartree
            toldfe6     1.00000000E-10 Hartree
-           toldfe7     1.00000000E-10 Hartree
+           toldfe7     1.05000000E-10 Hartree
             typat      1
               wtk1       0.12500    0.50000    0.25000    0.12500
               wtk2       0.12500    0.50000    0.25000    0.12500
@@ -2446,10 +2446,10 @@ P           mkmem7          3
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         17.3  wall=         18.0
+- Proc.   0 individual time (sec): cpu=         15.6  wall=         16.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  18 WARNINGs and  26 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.3  wall=         18.0
++Overall time at end (sec) : cpu=         15.6  wall=         16.1
