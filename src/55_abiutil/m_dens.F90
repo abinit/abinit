@@ -927,7 +927,8 @@ end subroutine constrained_dft_free
    endif
 
 !DEBUG
-   write(std_out,*)' m_dens/constrained_residuals after selection of charge+spin : iatom,intgden(1:nspden,iatom)=',iatom,intgden(1:nspden,iatom)
+   write(std_out,*)' m_dens/constrained_residuals after selection of charge+spin : iatom,intgden(1:nspden,iatom)=',&
+&    iatom,intgden(1:nspden,iatom)
 !ENDDEBUG
 
    !Comparison with the target value, and computation of the correction in terms of density and magnetization coefficients.
@@ -1010,7 +1011,8 @@ end subroutine constrained_dft_free
    endif
 
 !DEBUG
-   write(std_out,*)' m_dens/constrained_residuals out with : iatom,coeffs_constr_dft(1:nspden,iatom)=',iatom,coeffs_constr_dft(1:nspden,iatom)
+   write(std_out,*)' m_dens/constrained_residuals out with : iatom,coeffs_constr_dft(1:nspden,iatom)=',&
+&    iatom,coeffs_constr_dft(1:nspden,iatom)
 !FOR TESTING PURPOSES ONLY 
 !  coeffs_constr_dft(:,iatom)=zero
 !ENDDEBUG
