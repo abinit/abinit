@@ -664,33 +664,35 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  end do
 
 #ifdef MR_DEV
- !Write the short-range ifc in case quadrupoles play a role
- if (abs(dipdip)==1.and.any(Ifc%qdrp_cart/=zero)) then
+! Write the short-range ifc in case quadrupoles play a role
+ if (abs(Ifc%dipdip)==1.and.any(qdrp_cart/=zero)) then
    ! Compute the distances between atoms
    ! dist(ia,ib,irpt) contains the distance from atom ia to atom ib in unit cell
    ! irpt.
    ABI_MALLOC(dist,(natom,natom,Ifc%nrpt))
-   call dist9(ddb%acell,dist,gprim,natom,IFC%nrpt,Ifc%rcan,rprim,Ifc%rpt)
+   call dist9(ddb%acell,dist,gprim,natom,Ifc%nrpt,rcan,rprim,Ifc%rpt)
 
-   write(std_out, '(a)' )'    '                            
-   write(std_out, '(a)' )' Short-range IFCs after removing dipole and quadrupole Ewald contributions '
-   write(std_out, '(a)' )' (not ordered by distance) '
+   write(ab_out, '(a)' )'    '                            
+   write(ab_out, '(a)' )' Short-range IFCs after removing dipole and quadrupole Ewald contributions '
+   write(ab_out, '(a)' )' (not ordered by distance) '
+   write(ab_out, '(a)' )' Start IFC writting... '
    do ia=1,natom
      write(ab_out,'(a,i4)' )' generic atom number',ia
      ii=0
      do ib=1, natom
-       do irpt = 1, ifc_tmp%nrpt
+       do irpt = 1, ifc%nrpt
          ii=ii+1
-         write(std_out, '(i4,a,i6,a,i8)' )ii,' interaction with atom',ib,'cell',irpt
-         write(std_out, '(a,es16.6)' )' with distance ', dist(ia,ib,irpt)
+         write(ab_out, '(i4,a,i6,a,i8)' )ii,' interaction with atom',ib,'cell',irpt
+         write(ab_out, '(a,es16.6)' )' with distance ', dist(ia,ib,irpt)
          do nu=1,3
-           write(std_out, '(1x,3f9.5)' ) (Ifc%atmfrc(mu,ia,nu,ib,irpt)+tol10,mu=1,3)
+           write(ab_out, '(1x,3f9.5)' ) (Ifc%atmfrc(mu,ia,nu,ib,irpt)+tol10,mu=1,3)
          end do
-         write(std_out, '(a)' )'    '                            
+         write(ab_out, '(a)' )'    '                            
        end do
      end do
-     write(std_out, '(a)' )'    '                            
+     write(ab_out, '(a)' )'    '                            
    end do
+   write(ab_out, '(a)' )' ...Finish IFC writting '
  end if
 #endif
 
