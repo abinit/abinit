@@ -372,6 +372,9 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 !Local variables -------------------------
 !scalars
  integer,parameter :: timrev1=1,iout0=0,chksymbreak0=0
+#ifdef MR_DEV
+ integer :: ia,ib,mu,nu
+#endif
  integer :: mpert,iout,iqpt,mqpt,nsym,ntypat,iq_ibz,iq_bz,ii,natom
  integer :: nqbz,option,plus,sumg0,irpt,irpt_new
  integer :: nprocs,my_rank,my_ierr,ierr
@@ -391,6 +394,9 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  real(dp),allocatable :: dyew(:,:,:,:,:),out_d2cart(:,:,:,:,:)
  real(dp),allocatable :: dynmatfull(:,:,:,:,:,:),dynmat_sr(:,:,:,:,:,:),dynmat_lr(:,:,:,:,:,:) ! for OmegaSRLR
  real(dp),allocatable :: wtq(:),wtq_folded(:),qbz(:,:)
+#ifdef MR_DEV
+ real(dp),allocatable :: dist(:,:,:)
+#endif
 
 !******************************************************************
 
@@ -656,6 +662,37 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      irpt_new = irpt_new + 1
    end if
  end do
+
+#ifdef MR_DEV
+ !Write the short-range ifc in case quadrupoles play a role
+ if (abs(dipdip)==1.and.any(Ifc%qdrp_cart/=zero)) then
+   ! Compute the distances between atoms
+   ! dist(ia,ib,irpt) contains the distance from atom ia to atom ib in unit cell
+   ! irpt.
+   ABI_MALLOC(dist,(natom,natom,Ifc%nrpt))
+   call dist9(ddb%acell,dist,gprim,natom,IFC%nrpt,Ifc%rcan,rprim,Ifc%rpt)
+
+   write(std_out, '(a)' )'    '                            
+   write(std_out, '(a)' )' Short-range IFCs after removing dipole and quadrupole Ewald contributions '
+   write(std_out, '(a)' )' (not ordered by distance) '
+   do ia=1,natom
+     write(ab_out,'(a,i4)' )' generic atom number',ia
+     ii=0
+     do ib=1, natom
+       do irpt = 1, ifc_tmp%nrpt
+         ii=ii+1
+         write(std_out, '(i4,a,i6,a,i8)' )ii,' interaction with atom',ib,'cell',irpt
+         write(std_out, '(a,es16.6)' )' with distance ', dist(ia,ib,irpt)
+         do nu=1,3
+           write(std_out, '(1x,3f9.5)' ) (Ifc%atmfrc(mu,ia,nu,ib,irpt)+tol10,mu=1,3)
+         end do
+         write(std_out, '(a)' )'    '                            
+       end do
+     end do
+     write(std_out, '(a)' )'    '                            
+   end do
+ end if
+#endif
 
  !write(std_out,*)"nrpt before filter:", ifc_tmp%nrpt, ", after: ", ifc%nrpt
  !do irpt=1,ifc%nrpt

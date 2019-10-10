@@ -1118,6 +1118,9 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                    dyew(2,mu,ia,nu,ib)=dyew(2,mu,ia,nu,ib) + &
                      (zeff(ii,nu,ib)*qdrp_cart(kk,jj,mu,ia) - &
                       zeff(ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dydqt(2,ii,ia,jj,ib,kk)
+                   if ( abs(dyew(1,mu,ia,nu,ib)) > 1.d-6 .or. abs(dyew(2,mu,ia,nu,ib)) > 1.d-6 ) then 
+                     write(99,*) dyew(1,mu,ia,nu,ib),dyew(2,mu,ia,nu,ib)
+                   end if
 #ifdef MR_DEV
                  end if
 
@@ -1130,6 +1133,9 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                      dyew(2,mu,ia,nu,ib)=dyew(2,mu,ia,nu,ib) + &
                      (qdrp_cart(ll,ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dyqqt(2,ii,ia,jj,ib,kk,ll)
                    end do
+                   if ( abs(dyew(1,mu,ia,nu,ib)) > 1.d-6 .or. abs(dyew(2,mu,ia,nu,ib)) > 1.d-6 ) then 
+                     write(100,*) dyew(1,mu,ia,nu,ib),dyew(2,mu,ia,nu,ib)
+                   end if
 #ifdef MR_DEV
                  end if
 #endif
