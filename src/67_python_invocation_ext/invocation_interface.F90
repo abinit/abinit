@@ -24,9 +24,9 @@ MODULE INVOKE_PYTHON
 ! 
 ! =====================================================================
 
-    subroutine Invoke_python_triqs (comm, filapp_in) bind(c)
+    subroutine Invoke_python_triqs (rank, filapp_in) bind(c)
       use iso_c_binding
-      integer, value, intent(in) :: comm
+      integer, value, intent(in) :: rank
       character(kind=c_char) :: filapp_in(*)
     end subroutine Invoke_python_triqs
  

@@ -24,10 +24,10 @@ int execute_python_file(const char* filename);
 int close_python_interpreter();
 
 extern "C"{
-    void invoke_python_triqs(MPI_Fint *mpi_comm, char* filapp_in);
+    void invoke_python_triqs(int rank, char* filapp_in);
 }
 #else
 extern "C"{
-    void invoke_python_triqs(int comm, char* filapp_in);
+    void invoke_python_triqs(int rank, char* filapp_in);
 }
 #endif

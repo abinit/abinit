@@ -210,28 +210,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  integer :: unt,unt2
 ! Var added to the code for TRIQS_CTQMC test and default value -----------------------------------------------------------
  logical(kind=1) :: leg_measure = .true.
-
-!----------
-!Variables for writing out the NETCDF file
-!----------
- integer(kind=4) :: ncid
- integer(kind=4) :: dim_one_id, dim_nflavor_id, dim_nwlo_id, dim_nwli_id
- integer(kind=4) :: dim_qmc_l_id, dim_nleg_id
- integer(kind=4), dimension(2) :: dim_u_mat_ij_id
- integer(kind=4), dimension(3) :: dim_fw1_id, dim_g_iw_id, dim_gl_id, dim_gtau_id
- integer(kind=4), dimension(4) :: dim_u_mat_ijkl_id
- integer(kind=4) :: var_rot_inv_id, var_leg_measure_id, var_hist_id, var_wrt_files_id
- integer(kind=4) :: var_tot_not_id, var_n_orbitals_id, var_n_freq_id, var_n_tau_id, var_n_l_id, var_n_cycles_id
- integer(kind=4) :: var_cycle_length_id, var_ntherm_id, var_verbo_id, var_seed_id, var_beta_id
- integer(kind=4) :: var_levels_id, var_u_mat_ij_id, var_u_mat_ijkl_id, var_real_fw1_nd_id, var_imag_fw1_nd_id
- integer(kind=4) :: var_real_g_iw_id, var_imag_g_iw_id, var_gtau_id, var_gl_id, var_spacecomm_id
-
- integer(kind=4) :: varid
- complex :: i
- real(dp), allocatable, target :: new_re_g_iw(:,:,:), new_im_g_iw(:,:,:)
- real(dp), allocatable, target :: new_g_tau(:,:,:), new_gl(:,:,:)
-!----------
-
 ! ************************************************************************
  mbandc=paw_dmft%mbandc
  nkpt=paw_dmft%nkpt
@@ -2521,18 +2499,39 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
  type(c_ptr) :: levels_ptr, fw1_nd_ptr, u_mat_ij_ptr, u_mat_ijkl_ptr, g_iw_ptr, gtau_ptr, gl_ptr
  real(dp), allocatable :: jbes(:)
  character(len=500) :: message
- integer :: ifreq, iflavor1
+ integer :: itau, ifreq, iflavor1
  integer :: iflavor2,iflavor,nflavor,iflavor3,itypat
  integer :: nfreq,ntau,nleg,ileg
  integer :: verbosity_solver ! min 0 -> max 3
  logical(kind=1) :: rot_inv = .false.
-#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
  logical(kind=1) :: hist = .false.
  logical(kind=1) :: wrt_files = .true.
  logical(kind=1) :: tot_not = .true.
-#endif
  real(dp) :: beta,besp,bespp,xx
  complex(dpc) :: u_nl
+
+!----------
+!Variables for writing out the NETCDF file
+!----------
+ integer(kind=4) :: ncid
+ integer(kind=4) :: dim_one_id, dim_nflavor_id, dim_nwlo_id, dim_nwli_id
+ integer(kind=4) :: dim_qmc_l_id, dim_nleg_id
+ integer(kind=4), dimension(2) :: dim_u_mat_ij_id
+ integer(kind=4), dimension(3) :: dim_fw1_id, dim_g_iw_id, dim_gl_id, dim_gtau_id
+ integer(kind=4), dimension(4) :: dim_u_mat_ijkl_id
+ integer(kind=4) :: var_rot_inv_id, var_leg_measure_id, var_hist_id, var_wrt_files_id
+ integer(kind=4) :: var_tot_not_id, var_n_orbitals_id, var_n_freq_id, var_n_tau_id, var_n_l_id, var_n_cycles_id
+ integer(kind=4) :: var_cycle_length_id, var_ntherm_id, var_verbo_id, var_seed_id, var_beta_id
+ integer(kind=4) :: var_levels_id, var_u_mat_ij_id, var_u_mat_ijkl_id, var_real_fw1_nd_id, var_imag_fw1_nd_id
+ integer(kind=4) :: var_real_g_iw_id, var_imag_g_iw_id, var_gtau_id, var_gl_id, var_spacecomm_id
+
+ integer(kind=4) :: varid
+ logical :: file_exists
+ complex :: i
+
+ real(dp), allocatable, target :: new_re_g_iw(:,:,:), new_im_g_iw(:,:,:)
+ real(dp), allocatable, target :: new_g_tau(:,:,:), new_gl(:,:,:)
+!----------
 ! ************************************************************************
 
  ! fw1_nd: Hybridation
@@ -2767,7 +2766,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   call nf_check(nf90_close(ncid))
  
   ! Invoking python to execute the script
-  call Invoke_python_triqs (paw_dmft%spacecomm, trim(paw_dmft%filnamei)//c_null_char)
+  call Invoke_python_triqs (paw_dmft%myproc, trim(paw_dmft%filnamei)//c_null_char)
  
   ! Allocating the fortran variables for the results
   ABI_ALLOCATE(new_re_g_iw,(nflavor,nflavor, paw_dmft%dmft_nwli))
@@ -2776,6 +2775,14 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   ABI_ALLOCATE(new_gl,(nflavor,nflavor, nleg))
   i = (0, 1)
   
+  ! Check if file exists
+  INQUIRE(FILE="triqs_for_dft.nc", EXIST=file_exists)
+  if(.not. file_exists) then
+   write(message,'(2a)') ch10,' Cannot find file "triqs_for_dft.nc! Make sure the python script writes it with the right name and at the right place!.'
+   call wrtout(std_out,message,'COLL')
+   MSG_ERROR(message)
+  endif
+
   ! Opening the NETCDF file
   call nf_check(nf90_open("triqs_for_dft.nc", nf90_nowrite, ncid))
  
@@ -2816,7 +2823,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   ABI_DEALLOCATE(new_gl) 
 #endif
 #endif
- elseif paw_dmft%dmft_solv == 6 || paw_dmft%dmft_solv == 7 then
+ elseif(paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then
   !Calling interfaced TRIQS solver subroutine from src/01_triqs_ext package
   !----------------------------------------------------
 #if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4

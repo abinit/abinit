@@ -22,9 +22,9 @@
 #include <fstream>
 #include <iomanip>
 
-#if defined HAVE_MPI
-#include <mpi.h>
-#endif
+// #if defined HAVE_MPI
+// #include <mpi.h>
+// #endif
 
 #include "invoke_python.hpp"
 
@@ -126,14 +126,14 @@ int close_python_interpreter() {
  * ****************/
 
 // Function to invoke python and run the script
-void invoke_python_triqs(MPI_Fint *mpi_comm, char* filapp_in) {
-	MPI_Comm comm;
-	comm = MPI_Comm_f2c(*mpi_comm);
+void invoke_python_triqs(int rank, char* filapp_in) {
+	// MPI_Comm comm;
+	// comm = MPI_Comm_f2c(*mpi_comm);
 
-	int ierr, rank;
-	ierr = MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	// int ierr, rank;
+	// ierr = MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-	MPI_Barrier(MPI_COMM_WORLD);
+	// MPI_Barrier(MPI_COMM_WORLD);
 
 	if (rank == 0) fprintf(stdout, "invoke_python_triqs: beginning\n");
 
@@ -164,18 +164,18 @@ void invoke_python_triqs(MPI_Fint *mpi_comm, char* filapp_in) {
 	execute_python_file(triqs_filename.c_str());
 	if (rank == 0) fprintf(stdout, "invoke_python_triqs: script runned\n");
 
-	int final;
-	MPI_Finalized(&final);
-	if (final) {
-		fprintf(stderr, "MPI is finalized on node %i\n", rank);
-	}
+	// int final;
+	// MPI_Finalized(&final);
+	// if (final) {
+	// 	fprintf(stderr, "MPI is finalized on node %i\n", rank);
+	// }
 
 	// Close python
 	close_python_interpreter();
-	MPI_Barrier(MPI_COMM_WORLD);
+	// MPI_Barrier(MPI_COMM_WORLD);
 }
 #else
-void invoke_python_triqs(int comm, char* filapp_in) {
+void invoke_python_triqs(int rank, char* filapp_in) {
 	// Should never get here
 	fprintf(stdout, "SHOULD NOT BE HERE!\n");
 }
