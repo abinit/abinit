@@ -514,9 +514,9 @@
 #
 #enable_mpi_io="yes"
 
-# Enable MPI-IO mode in Abinit (use MPI-IO as default IO library,
+# Enable MPI-IO mode in Abinit (use MPI I/O as default I/O library,
 # change the default values of iomode)   
-# Beware that not all the features of Abinit support MPI-IO,
+# Beware that not all the features of Abinit support MPI I/O,
 # This options is mainly used by developers for debugging purposes.
 #
 #enable_mpi_io_default="no"
@@ -1053,14 +1053,10 @@
 #
 #NETCDF_LIBS="-L/usr/local/lib/netcdf -lnetcdff -lnetcdf"
 
-# Enable Netcdf mode in Abinit (use netcdf as default IO library,
+# Enable Netcdf mode in Abinit (use netcdf as default I/O library,
 # change the default values of accesswff)   
 #
 #enable_netcdf_default="no"
-
-# Use the MPI features of NetCDF (default is no) [EXPERIMENTAL]
-#
-#enable_netcdf_mpi="yes"
 
                        # ------------------------------ #
 
