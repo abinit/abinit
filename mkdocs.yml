@@ -52,6 +52,7 @@ pages:
     - topics/BandOcc.md
     - topics/BSE.md
     - topics/BoundingProcess.md
+    - topics/ConstrainedDFT.md
     - topics/ConstrainedPol.md
     - topics/Control.md
     - topics/Coulomb.md

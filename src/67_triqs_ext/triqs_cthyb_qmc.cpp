@@ -12,9 +12,10 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <triqs/mpi/boost.hpp>
 
-#if defined HAVE_TRIQS_v2_0
+#if defined HAVE_TRIQS_v1_4
+#include <triqs/mpi/boost.hpp>
+#elif defined HAVE_TRIQS_v2_0
 #include <triqs/h5.hpp>
 #endif
 
@@ -45,9 +46,14 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool hist,     /*boolean*/
                      std::complex<double> *f_iw_ptr,                /*pointers*/
                      std::complex<double> *g_iw_ptr,                /*pointers*/
                      double *g_tau, double *gl,                     /*pointers*/
+#if defined HAVE_TRIQS_v1_4
                      MPI_Fint *MPI_world_ptr ){                     /*pointers*/
-  
+#else
+                     int rank ){                     /*pointers*/
+#endif
+
     cout.setf(ios::fixed);
+#if defined HAVE_TRIQS_v1_4
     //Initialize Boost mpi environment
     int rank, nprocs;
     boost::mpi::environment env;
@@ -59,7 +65,10 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool hist,     /*boolean*/
         MPI_Comm_size(c, &nprocs);
         std::cout << "Number of processors: " << nprocs << endl;
     }
-  
+#else
+    std::cout << "Rank: "<< rank << endl;
+#endif
+
     // Parameters relay from Fortran and default values affectation
     double beta = beta_;                //Temperature inverse 
     int num_orbitals = n_orbitals;

@@ -692,7 +692,10 @@ subroutine fstab_print(fstab, header, unit, prtvol)
 !Local variables-------------------------------
 !scalars
  integer :: my_unt,my_prtvol,spin
- type(fstab_t),pointer :: fs
+ class(fstab_t),pointer :: fs
+! changed from type() to class() based on fortran compile error message
+! by NP
+! type(fstab_t),pointer :: fs
  character(len=500) :: msg
 
 ! *************************************************************************
