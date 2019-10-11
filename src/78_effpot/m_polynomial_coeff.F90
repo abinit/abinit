@@ -1288,7 +1288,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 !scalar
  integer :: ia,ib,icoeff,icoeff2,icoeff_tot,icoeff_tmp,idisy1,idisy2,ii
  integer :: ipesy1,ipesy2,isym,irpt,irpt3,irpt_ref,irpt_sym
- integer :: jj,jsym,mu,doubles
+ integer :: jj,jsym,mu
  integer :: ncoeff,ncoeff2,ncoeff3,ncoeff_max,nu
  integer :: nsym,shift_atm1(3)
  integer :: shift_atm2(3)
@@ -1706,7 +1706,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
  do icoeff = 1,ncoeff
    if(.not.(all(list_symcoeff_tmp2(:,icoeff,1)==0)))then
      do mu=1,3
-       if( -max_range(mu) > cell(mu,list_symcoeff_tmp2(4,icoeff,1)) .or. &
+       if( min_range(mu) > cell(mu,list_symcoeff_tmp2(4,icoeff,1)) .or. &
 &       cell(mu,list_symcoeff_tmp2(4,icoeff,1)) > max_range(mu))then
          list_symcoeff_tmp2(:,icoeff,:)=0
          exit
@@ -1747,19 +1747,11 @@ write(std_out,*) "DEBUG: max_range(:): ", max_range(:)
 
 !4/ Recount the number of coeff after step 3
  ncoeff2 = 0
- doubles  = 0
  isym = 0
 write(std_out,*) "DEBUG ncoeff2 after 2.5.3: ", ncoeff2
  do icoeff = 1,ncoeff
    if(.not.(all(list_symcoeff_tmp2(:,icoeff,1)==0)))then
      ncoeff2 = ncoeff2 + 1
-     !do isym = 1,nsym 
-     !  icoeff2 = list_symcoeff_tmp2(6,icoeff,isym)
-     !  if (icoeff2> icoeff)then
-     !    doubles = doubles +1
-     !  write(std_out,*) "DEBUG: doubles: ", doubles
-     !  end if
-     !end do 
    end if
  end do
 
@@ -2348,48 +2340,48 @@ do i=1,ncombination
            list_combination_tmp(:,j) = 0
            i0 = i0 + 1
 !        else !else loop over symmetries to find symmetry operation that projects term j on i 
-!          isym = 2
-!          do while(isym <= nsym)
-!             !Get equivalent term indexes for symmetry isym
-!             do idisp=1,power_disps(2)
-!                if(list_combination_tmp(idisp,j) /= 0 .and. list_combination_tmp(idisp,j) <= ncoeff_symsym )then
-!                   list_combination_cmp_tmp(idisp)=list_symcoeff(6,list_combination_tmp(idisp,j),isym)
-!                else if(list_combination_tmp(idisp,j) > ncoeff_symsym)then
-!                   istrain = list_combination_tmp(idisp,j) - ncoeff_symsym  
-!                   list_combination_cmp_tmp(idisp)=list_symstr(istrain,isym,1) + ncoeff_symsym
-!                else 
-!                   list_combination_cmp_tmp(idisp) = 0 
-!                endif 
-!             enddo
+          isym = 2
+          do while(isym <= nsym)
+             !Get equivalent term indexes for symmetry isym
+             do idisp=1,power_disps(2)
+                if(list_combination_tmp(idisp,j) /= 0 .and. list_combination_tmp(idisp,j) <= ncoeff_symsym )then
+                   list_combination_cmp_tmp(idisp)=list_symcoeff(6,list_combination_tmp(idisp,j),isym)
+                else if(list_combination_tmp(idisp,j) > ncoeff_symsym)then
+                   istrain = list_combination_tmp(idisp,j) - ncoeff_symsym  
+                   list_combination_cmp_tmp(idisp)=list_symstr(istrain,isym,1) + ncoeff_symsym
+                else 
+                   list_combination_cmp_tmp(idisp) = 0 
+                endif 
+             enddo
 !   write(std_out,*) "DEBUG list_combination_tmp before sort:", list_combination_tmp(:,i)
-             !Sort the new symmetric indexes for comparision
-!             ij=2 
-!             k=2
-!             do while(ij <= size(list_combination_cmp_tmp(:))) 
-!                k = ij
-!                cnt = 1
-!                do while(k >= 2 .and. cnt == 1) 
-!                   if(list_combination_cmp_tmp(k-1) > list_combination_cmp_tmp(k) .and. list_combination_cmp_tmp(k) > 0)then 
-!                        tmp_ind1 = list_combination_cmp_tmp(k-1) 
-!                        tmp_ind2 = list_combination_cmp_tmp(k)
-!                        list_combination_cmp_tmp(k) = tmp_ind1
-!                        list_combination_cmp_tmp(k-1) = tmp_ind2
-!                        k=k-1
-!                   else 
-!                     cnt = cnt +1
-!                   end if
-!                end do ! whlie k>=2
-!                ij = ij+1
-!             end do ! while ij< size(list..)
-!             !Compare. If equivalent delete term j
-!             if(all(list_combination_tmp(:,i) == list_combination_cmp_tmp(:)))then
-!                list_combination_tmp(:,j) = 0
-!                i0 = i0 + 1
-!                isym = nsym +1 
-!             else 
-!                isym = isym + 1
-!             endif
-!          enddo !isym 
+            !Sort the new symmetric indexes for comparision
+             ij=2 
+             k=2
+             do while(ij <= size(list_combination_cmp_tmp(:))) 
+                k = ij
+                cnt = 1
+                do while(k >= 2 .and. cnt == 1) 
+                   if(list_combination_cmp_tmp(k-1) > list_combination_cmp_tmp(k) .and. list_combination_cmp_tmp(k) > 0)then 
+                        tmp_ind1 = list_combination_cmp_tmp(k-1) 
+                        tmp_ind2 = list_combination_cmp_tmp(k)
+                        list_combination_cmp_tmp(k) = tmp_ind1
+                        list_combination_cmp_tmp(k-1) = tmp_ind2
+                        k=k-1
+                   else 
+                     cnt = cnt +1
+                   end if
+                end do ! whlie k>=2
+                ij = ij+1
+             end do ! while ij< size(list..)
+             !Compare. If equivalent delete term j
+             if(all(list_combination_tmp(:,i) == list_combination_cmp_tmp(:)))then
+                list_combination_tmp(:,j) = 0
+                i0 = i0 + 1
+                isym = nsym +1 
+             else 
+                isym = isym + 1
+             endif
+          enddo !isym 
         endif ! all(list_combinaton...)
      enddo ! j=i+1,ncombination
    end if ! any(list_combination_tmp /= 0 ) 
@@ -3012,7 +3004,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
 !Local variables ---------------------------------------
 !scalar
  integer :: icoeff1,icoeff2,nbody_in,ii,jj,nbody_count,nmodel_tot_test
- integer :: isym_in_test,idisp_in_test,ndisp_test,ndisp_out,nstrain
+ integer :: isym_in_test,idisp_in_test,ndisp_test,ndisp_out,nstrain,nmodel_start
  logical :: need_compute,compatible,possible,need_anharmstr,need_spcoupling
  logical :: need_only_odd_power,need_only_even_power,compute_test
 !arrays
@@ -3148,10 +3140,10 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
             write(std_out,*) "DEBUG index_coeff: ", index_coeff
             write(std_out,*) "DEBUG ndisp_out: ", ndisp_out
             write(std_out,*) "DEBUG nstrain: ", nstrain
-            compute_test = need_compute
-            call computeSymmetricCombinations(nmodel_tot,list_combination,list_coeff,1,1,ndisp_out,nsym,&
+            nmodel_start = nmodel_tot
+            call computeSymmetricCombinations(nmodel_tot,list_combination,list_coeff,list_str,1,1,ndisp_out,nsym,&
                                               dummylist,index_coeff,power_disp_max,nmodel,ncoeff_sym,&
-&                                             nstrain,compute_test) 
+&                                             nstrain,nmodel_start+1,need_compute) 
             write(std_out,*) "DEBUG nmodel_tot: ", nmodel_tot
             !nmodel_tot = nmodel_tot + nmodel_tot_test 
             ABI_DEALLOCATE(dummylist)
@@ -3221,32 +3213,34 @@ end subroutine computeCombinationFromList
 !!
 !! SOURCE
 
-recursive subroutine computeSymmetricCombinations(ncombi,list_combination,list_symcoeff,isym_in,&
+recursive subroutine computeSymmetricCombinations(ncombi,list_combination,list_symcoeff,list_symstr,isym_in,&
 &                                               idisp_in,ndisp,nsym,index_isym_in,index_coeff_in,&
-&                                               ndisp_max,ncombinations,ncoeff,nstrain,compute)
+&                                               ndisp_max,ncombinations,ncoeff,nstrain,ncombi_start,compute)
  
  implicit none
 
 !Arguments ------------------------------------
 integer,intent(inout) :: ncombi
 integer,intent(in)    :: ndisp,nsym,ndisp_max,ncombinations,ncoeff,nstrain
-integer,intent(in)    :: isym_in,idisp_in
+integer,intent(in)    :: isym_in,idisp_in,ncombi_start
 logical,intent(in)    :: compute 
 !scalar
 !arrays
 integer,intent(inout) :: list_combination(ndisp_max,ncombinations)
 integer,intent(in)    :: list_symcoeff(6,ncoeff,nsym),index_coeff_in(ndisp+nstrain)
+integer,intent(in)    :: list_symstr(6,nsym,2)
 integer,intent(in)    :: index_isym_in(idisp_in-1)
 !Local variables-------------------------------
 !scalar
-integer :: isym,idisp
-logical :: need_compute 
+integer :: isym,idisp,ncombi_to_test
+logical :: need_compute,irreducible  
 !arrays
 integer :: index_coeff_tmp(ndisp)
 integer,allocatable :: index_isym(:)
 !Source
 ! *************************************************************************
 
+irreducible = .TRUE.
 !Only start the function if start-symmetry is smaller than maximum symmetry
 !and start displacement is smaller than maximum displacement
 !otherwise pass through
@@ -3274,25 +3268,34 @@ if(isym_in <= nsym .and. idisp_in <= ndisp)then
            if(any(index_coeff_tmp == 0))then ! If symmetry doesn't point to another term write zeros to filter after
               list_combination(:,ncombi) = 0 
            else
+             ! Set combination
              list_combination(:ndisp,ncombi) = index_coeff_tmp 
+             if(nstrain /= 0)then !If SP coupling copy strain index
+                list_combination(ndisp+1:ndisp+nstrain,ncombi) = index_coeff_in(ndisp+1:ndisp+nstrain) !TODO Check if shouldn't use index from list_symstr
+             end if
+             ! Check if combination is irreducible 
+             ncombi_to_test = (ncombi-1) - ncombi_start
+!             write(std_out,*) "DEBUG ncombi,ncombi_start and ncombi_to_test: ", ncombi,ncombi_start,ncombi_to_test
+             if(ncombi_to_test >= 2)then
+                irreducible = check_irreducibility(list_combination(:,ncombi),list_combination(:,ncombi_start:ncombi-1),&
+&                                                list_symcoeff,list_symstr,ncoeff,nsym,ncombi_to_test,ndisp_max)
+             endif
+             ! If not delete (set to zero)
+             if(.not. irreducible) list_combination(:,ncombi) = 0
              !write(std_out,*) "DEBUG, index_coeff_in,: ", index_coeff_in,"ndisp: ", ndisp
              !write(std_out,*) "DEBUG, index_coeff_tmp,: ", index_coeff_in,"ndisp: ", ndisp            
-             if(nstrain /= 0)then !If SP coupling copy strain index
-                list_combination(ndisp+1:ndisp+nstrain,ncombi) = index_coeff_in(ndisp+1:ndisp+nstrain)
-             end if
            end if
          end if ! need compute
        end if !ndisp == 1 .and isym == 1
      end if !(idisp_in == ndisp)
      
-     call computeSymmetricCombinations(ncombi,list_combination,list_symcoeff,isym,idisp_in+1,ndisp,& 
+     call computeSymmetricCombinations(ncombi,list_combination,list_symcoeff,list_symstr,isym,idisp_in+1,ndisp,& 
 &                                      nsym,index_isym(2:),index_coeff_in,ndisp_max,ncombinations,&
-&                                      ncoeff,nstrain,compute)
+&                                      ncoeff,nstrain,ncombi_start,compute)
      
   enddo !isym=isym_in,nsym
   ABI_DEALLOCATE(index_isym)
 endif!(isym <= nsym)
-
 
 end subroutine computeSymmetricCombinations
 
@@ -3861,6 +3864,181 @@ pure function coeffs_list_conc(coeff_list1,coeff_list2) result (coeff_list_out)
  coeff_list_out(ncoeff1+1:) = coeff_list2   
  
 end function coeffs_list_conc
+!!***
+
+!!****f* m_polynomial_coeff/sort_combination
+!! NAME
+!! sort_combination
+!!
+!! FUNCTION
+!!
+!! Sort a list of integer from small to large if it contains zeros will be put to highest indexe 
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine sort_combination(combination,n_int)
+!Arguments ------------------------------------
+ implicit none
+
+!Arguments ------------------------------------
+ !scalar 
+ integer,intent(in) :: n_int 
+ !array
+ integer,intent(inout) :: combination(n_int)
+!local
+!variable
+  integer :: j,k,cnt,tmp_int1,tmp_int2
+!array
+! *************************************************************************
+
+j=2
+do while(j <= n_int) 
+   k = j
+   cnt = 1
+   do while(k >= 2 .and. cnt == 1) 
+      if(combination(k-1) > combination(k) .and. combination(k) > 0)then 
+           tmp_int1 = combination(k-1) 
+           tmp_int2 = combination(k)
+           combination(k) = tmp_int1
+           combination(k-1) = tmp_int2
+           k=k-1
+      else 
+        cnt = cnt + 1 
+      end if
+   end do
+   j = j+1
+end do 
+ 
+end subroutine sort_combination
+!!***
+
+!!****f* m_polynomial_coeff/sort_combination_list
+!! NAME
+!! sort_combination_list
+!!
+!! FUNCTION
+!!
+!! Sort a list of integer list from small to large if it contains zeros will be put to highest index
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine sort_combination_list(combination_list,n_int,n_list)
+!Arguments ------------------------------------
+ implicit none
+
+!Arguments ------------------------------------
+ !scalar 
+ integer,intent(in) :: n_int,n_list
+ !array
+ integer,intent(inout) :: combination_list(n_int,n_list)
+!local
+!variable
+  integer :: i
+!array
+! *************************************************************************
+
+do i=1,n_list 
+   call sort_combination(combination_list(:,i),n_int)  
+end do 
+ 
+end subroutine sort_combination_list
+
+
+!!****f* m_polynomial_coeff/check_irreducibility
+!! NAME
+!! check_irreducibility
+!!
+!! FUNCTION
+!!
+!! checks irreducibility of combination of terms with respect to crystal symmetry
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!! 
+!! logical :: irreducible -> TRUE: no other equal term exists in list_combination
+!!                        -> FALSE: a other equivalent erm exists already
+!!
+!! SOURCE
+
+function check_irreducibility(combination,list_combination,list_symcoeff,list_symstr,ncoeff_sym,nsym,ncombination,ndisp)&
+&                             result(irreducible)
+!Arguments ------------------------------------
+ implicit none
+
+!Arguments ------------------------------------
+ !scalar 
+ integer,intent(in) :: ncoeff_sym,ncombination,ndisp,nsym
+ logical :: irreducible !output
+ !array
+ integer,intent(inout) :: combination(ndisp),list_combination(ndisp,ncombination)
+ integer,intent(in) :: list_symcoeff(6,ncoeff_sym,nsym)
+ integer,intent(in) :: list_symstr(6,nsym,2)
+!local
+!variable
+  integer :: icombi,istrain,idisp,i,isym
+!array
+  integer :: combination_cmp_tmp(ndisp)
+! *************************************************************************
+
+ ! sort input combinations
+ !write(std_out,*) "DEBUG call sort_combination_lsit"
+ call sort_combination_list(list_combination,size(list_combination,1),size(list_combination,2))
+ !write(std_out,*) "DEBUG sort_combination in check_irreducibility"
+ call sort_combination(combination,size(combination))
+ icombi = 1
+ irreducible = .TRUE.
+ !write(std_out,*) "DEBUG: list_combination1", list_combination(:,1)
+ !write(std_out,*) "DEBUG: list_combination2", list_combination(:,2)
+ !write(std_out,*) "DEBUG: combination: ", combination
+ !write(std_out,*) "DEBUG: ncombination: ", combination
+ do while(icombi <= ncombination .and. irreducible .eqv. .TRUE.) 
+   if(any(list_combination(:,icombi) /= 0))then !.and. any(list_combination(:,i) <= ncoeff_symsym))then 
+     !If term j is equivalent to term i delet it
+     if(all(list_combination(:,icombi) == combination(:)))then
+        irreducible = .FALSE.
+        return
+     else !else loop over symmetries to find symmetry operation that projects term j on i 
+       isym = 2
+       do while(isym <= nsym)
+          !Get equivalent term indexes for symmetry isym
+          do idisp=1,ndisp
+             if(combination(idisp) /= 0 .and. combination(idisp) <= ncoeff_sym)then
+                combination_cmp_tmp(idisp)=list_symcoeff(6,combination(idisp),isym)
+             else if(combination(idisp) > ncoeff_sym)then
+                istrain = combination(idisp) - ncoeff_sym
+                combination_cmp_tmp(idisp)=list_symstr(istrain,isym,1) + ncoeff_sym
+             else 
+                combination_cmp_tmp(idisp) = 0 
+             endif 
+          enddo
+!   we(std_out,*) "DEBUG list_combination before sort:", list_combination(:,i)
+         !Sort the new symmetric indexes for comparision
+         call sort_combination(combination_cmp_tmp,size(combination_cmp_tmp)) 
+         !Compare. If equivalent break (term not irreducible
+          if(all(list_combination(:,icombi) == combination_cmp_tmp(:)))then
+             irreducible = .FALSE.
+             return
+          else 
+             isym = isym + 1
+          endif
+       enddo !isym 
+     endif ! all(list_combinaton...)
+   end if ! any(list_combination /= 0 )
+   icombi = icombi + 1 
+end do !i=1,ncombination 
+
+return 
+
+end function check_irreducibility
 !!***
 
 end module m_polynomial_coeff
