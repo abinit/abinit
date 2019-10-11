@@ -148,19 +148,6 @@ AC_DEFUN([SD_TRIQS_INIT], [
 
   fi
 
-  # Override the default configuration if the ESL Bundle is available
-  # Note: The setting of the build flags is done once for all
-  #       ESL-bundled packages
-  if test "${sd_triqs_init}" = "def" -a ! -z "${ESL_BUNDLE_PREFIX}"; then
-    sd_triqs_init="esl"
-    sd_triqs_cppflags=""
-    sd_triqs_cflags=""
-    sd_triqs_cxxflags=""
-    sd_triqs_fcflags=""
-    sd_triqs_ldflags=""
-    sd_triqs_libs=""
-  fi
-
   # Display configuration
   _SD_TRIQS_DUMP_CONFIG
 
@@ -195,12 +182,12 @@ AC_DEFUN([SD_TRIQS_DETECT], [
     _SD_TRIQS_CHECK_USE
 
     if test "${sd_triqs_ok}" = "yes"; then
-      if test "${sd_triqs_init}" = "esl"; then
-        sd_esl_bundle_libs="${sd_triqs_libs_def} ${sd_esl_bundle_libs}"
-      else
-        LIBS="${sd_triqs_libs} ${LIBS}"
-      fi
+      CPPFLAGS="${CPPFLAGS} ${sd_triqs_cppflags}"
+      CFLAGS="${CFLAGS} ${sd_triqs_cflags}"
+      CXXFLAGS="${CXXFLAGS} ${sd_triqs_cxxflags}"
+      FCFLAGS="${FCFLAGS} ${sd_triqs_fcflags}"
       LDFLAGS="${LDFLAGS} ${sd_triqs_ldflags}"
+      LIBS="${sd_triqs_libs} ${LIBS}"
 
       AC_DEFINE([HAVE_TRIQS], 1,
         [Define to 1 if you have the TRIQS library.])
@@ -255,16 +242,60 @@ AC_DEFUN([SD_TRIQS_DETECT], [
 AC_DEFUN([_SD_TRIQS_CHECK_USE], [
   # Prepare environment
   SD_ESL_SAVE_FLAGS
-  if test "${sd_triqs_init}" = "esl"; then
-    AC_MSG_NOTICE([will look for TRIQS in the installed ESL Bundle])
-    SD_ESL_ADD_FLAGS
-    SD_ESL_ADD_LIBS([${sd_triqs_libs_def}])
-  else
-    CPPFLAGS="${CPPFLAGS} ${sd_triqs_cppflags}"
-    CXXFLAGS="${CXXFLAGS} ${sd_triqs_cxxflags}"
-    LDFLAGS="${LDFLAGS} ${sd_triqs_ldflags}"
-    LIBS="${sd_triqs_libs} ${LIBS}"
+  CPPFLAGS="${CPPFLAGS} ${sd_triqs_cppflags}"
+  CXXFLAGS="${CXXFLAGS} ${sd_triqs_cxxflags}"
+  LDFLAGS="${LDFLAGS} ${sd_triqs_ldflags}"
+  LIBS="${sd_triqs_libs} ${LIBS}"
+
+  # Check TRIQS C++ API
+  AC_MSG_CHECKING([whether the TRIQS library works])
+  AC_LANG_PUSH([C++])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM(
+    [[
+#     include <solver_core.hpp>
+#     include <triqs/h5.hpp>
+      using namespace std;
+      using namespace triqs_cthyb;
+    ]],
+    [[
+      std::vector<std::pair<std::string, indices_type>> gf_struct;
+    ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="2.0"], [sd_triqs_ok="no"])
+  AC_LANG_POP([C++])
+  AC_MSG_RESULT([${sd_triqs_ok}])
+
+  # Check old TRIQS C++ API
+  if test "${sd_triqs_ok}" != "yes"; then
+    AC_MSG_CHECKING([whether the TRIQS library has an old API])
+    AC_LANG_PUSH([C++])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM(
+      [[
+#       include <triqs/gfs.hpp>
+        using namespace triqs::gfs;
+        using triqs::clef::placeholder;
+      ]],
+      [[
+        double beta = 1;
+        int nw      = 100;
+        auto g      = gf<imfreq>{{beta, Fermion, nw}, {1, 1}};
+        placeholder<0> w_;
+        g(w_) << 1 / (w_ - 3);
+      ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="1.4"], [sd_triqs_ok="no"])
+    AC_LANG_POP([C++])
+    AC_MSG_RESULT([${sd_triqs_ok}])
   fi
+
+  # Restore environment
+  SD_ESL_RESTORE_FLAGS
+]) # _SD_TRIQS_CHECK_USE
+
+
+AC_DEFUN([_SD_TRIQS_CHECK_USE_OLD], [
+  # Prepare environment
+  SD_ESL_SAVE_FLAGS
+  CPPFLAGS="${CPPFLAGS} ${sd_triqs_cppflags}"
+  CXXFLAGS="${CXXFLAGS} ${sd_triqs_cxxflags}"
+  LDFLAGS="${LDFLAGS} ${sd_triqs_ldflags}"
+  LIBS="${sd_triqs_libs} ${LIBS}"
 
   # Check TRIQS C++ API
   AC_MSG_CHECKING([whether the TRIQS library works])

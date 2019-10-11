@@ -16,3 +16,17 @@ Notes
 The tutoparal_tucrpa_2_MPI24 test is unstable and fails randomly. This affects
 the cronos2_gnu_7.4_paral bot. Bernard Amadon is looking for a solution.
 
+About TRIQS
+-----------
+
+export CXXFLAGS="-std=gnu++17 -fconcepts"
+# gnu++17 is mendatory for triqs, fconcepts removes warnings
+
+export with_triqs_incs="-I/home/gingras1/py_env2/py2_triqs2.0_cthyb1.5/include/python2.7 -I/home/gingras1/py_env2/py2_triqs2.0_cthyb1.5/lib/python2.7/site-packages/numpy/core/include -I/home/gingras1/projects/rrg-cotemich-ac/gingras1/Lib/Briaree_TRIQS-2.0.8/cthyb.build/c++ -I/home/gingras1/projects/rrg-cotemich-ac/gingras1/Lib/Briaree_TRIQS-2.0.8/install/include -I/home/gingras1/projects/rrg-cotemich-ac/gingras1/Lib/Briaree_TRIQS-2.0.8/cthyb.src/c++/triqs_cthyb"
+# One needs the include folder of the python executable and of its numpy package, along with the cthyb.build/c++ folder, the general include folder of TRIQS+CTHYB and the cthyb.src/c++/triqs_cthyb folder from the source of CTHYB 
+
+export with_triqs_libs="-L/home/gingras1/projects/rrg-cotemich-ac/gingras1/Lib/Briaree_TRIQS-2.0.8/install/lib -ltriqs -lcthyb_c"
+# One needs to link the libtriqs and libcthyb_c files from install/lib of TRIQS 
+
+# Now these three variables should be defined in the .ac file when configuring
+gcc triqs_2.0.cpp $CXXFLAGS $with_triqs_incs $with_triqs_libs -o main
