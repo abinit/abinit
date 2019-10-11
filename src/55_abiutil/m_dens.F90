@@ -856,7 +856,7 @@ end subroutine constrained_dft_free
 !scalars
  integer :: conkind,iatom,info,natom,nfftf,nspden,ntypat,option
  integer :: cplex1=1
- real(dp) :: intgden_norm,intgden_proj,norm,ratio
+ real(dp) :: intgd,intgden_norm,intgden_proj,norm,ratio
 !arrays
  integer :: ipiv(c_dft%natom)
  real(dp) :: corr_denmag(4),intgr(4)
@@ -905,8 +905,14 @@ end subroutine constrained_dft_free
 !The proper combination of intgden and intgres is stored in intgden: it is an effective charge/magnetization, to be compared to the target one.
  do iatom=1,natom
 
-   if(nspden/=4)then
-     intgr(1:nspden)=intgres(1:nspden,iatom)/real(nspden)
+   if(nspden==1)then
+     intgr(1)=intgres(1,iatom)
+   else if(nspden==2)then
+     intgr(1)=half*(intgres(1,iatom)+intgres(2,iatom))
+     intgr(2)=half*(intgres(1,iatom)-intgres(2,iatom))
+     intgd           =intgden(1,iatom)+intgden(2,iatom)
+     intgden(2,iatom)=intgden(1,iatom)-intgden(2,iatom)
+     intgden(1,iatom)=intgd
    else if(nspden==4)then
      !Change the potential residual to the density+magnetization convention
      intgr(1)=half*(intgres(1,iatom)+intgres(2,iatom))
@@ -918,15 +924,7 @@ end subroutine constrained_dft_free
 !DEBUG WARNING: THIS WILL ONLY WORK FOR DIAGONAL intgf2
    ratio=one/(c_dft%magcon_lambda*c_dft%intgf2(iatom,iatom))
 !ENDDEBUG
-   intgr(1:nspden)=intgden(1:nspden,iatom)-ratio*intgr(1:nspden)
-
-   if(nspden/=2)then
-     intgden(1:nspden,iatom)=intgr(1:nspden)
-   else
-     !Change the (up,down) atomic density to the total charge + spin convention
-     intgden(1,iatom)=intgr(1)+intgr(2)
-     intgden(2,iatom)=intgr(1)-intgr(2)
-   endif
+   intgden(1:nspden,iatom)=intgden(1:nspden,iatom)-ratio*intgr(1:nspden)
 
 !DEBUG
    write(std_out,*)' m_dens/constrained_residuals after selection of charge+spin : iatom,intgden(1:nspden,iatom)=',&
