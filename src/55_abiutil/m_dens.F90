@@ -905,7 +905,7 @@ end subroutine constrained_dft_free
    endif
 
 !DEBUG WARNING: THIS WILL ONLY WORK FOR DIAGONAL inv_intgf2
-   ratio=one/(c_dft%inv_intgf2(iatom,iatom)*c_dft%magcon_lambda)
+   ratio=c_dft%inv_intgf2(iatom,iatom)/c_dft%magcon_lambda
 !ENDDEBUG
    intgr(1:nspden)=intgden(1:nspden,iatom)-ratio*intgr(1:nspden)
 
@@ -1614,8 +1614,8 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
      call timab(48,2,tsec)
    end if
 !  Invert the matrix inv_intgf2
-   call dsytrf('U',inv_intgf2,natom,ipiv,work,2*natom,info)
-   call dsytri('U',inv_intgf2,natom,ipiv,work,info)
+   call dsytrf('U',natom,inv_intgf2,natom,ipiv,work,2*natom,info)
+   call dsytri('U',natom,inv_intgf2,natom,ipiv,work,info)
  end if
 
 !-------------------------------------------
