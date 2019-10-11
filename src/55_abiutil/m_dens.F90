@@ -864,7 +864,7 @@ end subroutine constrained_dft_free
  real(dp), allocatable :: intgden(:,:) ! nspden,natom
  real(dp), allocatable :: intgres(:,:) ! nspden,natom
  real(dp), allocatable :: intgr(:,:) ! nspden,natom
- real(dp) :: inv_intgf2(c_dft%natom,c_dft%natom),work(2*c_dft%natom) 
+ real(dp) :: intgf2(c_dft%natom,c_dft%natom),work(2*c_dft%natom) 
  real(dp) :: spinat_normed(3)
 
 ! ***********************************************************************************************
@@ -880,7 +880,7 @@ end subroutine constrained_dft_free
 &  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgden)
 
 !DEBUG
- write(std_out,*)' m_dens/constrained_residuals after computing integrated magnetic moments'
+ write(std_out,*)' m_dens/constrained_residuals : after computing integrated magnetic moments'
  do iatom=1,natom
    write(std_out,*)'iatom,intgden(1:nspden,iatom)=',iatom,intgden(1:nspden,iatom)
  enddo
@@ -888,34 +888,49 @@ end subroutine constrained_dft_free
 
 !We need the integrated residuals
  ABI_ALLOCATE(intgres,(nspden,natom))
- ABI_ALLOCATE(intgr,(nspden,natom))
+ ABI_ALLOCATE(intgr,(natom,nspden))
  call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
 &  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres)
 
+!DEBUG
+ write(std_out,*)' m_dens/constrained_residuals : after computing integrated residuals'
+ do iatom=1,natom
+   write(std_out,*)'iatom,intgres(1:nspden,iatom)=',iatom,intgres(1:nspden,iatom)
+ enddo
+!ENDDEBUG
+
+!DEBUG
+ write(std_out,*)' m_dens/constrained_residuals : intgf2 values '
+ do iatom=1,natom
+   write(std_out,*)'iatom,c_dft%intgf2(iatom,1:natom)=',iatom,c_dft%intgf2(iatom,1:natom)
+ enddo
+!ENDDEBUG
+
 !Make the proper combination of intgres, to single out the scalar potential residual and the magnetic field potential residuals for x,y,z.
+!Also exchanges the spin and atom idices to prepare the solution of the linear system of equation
  do iatom=1,natom
    if(nspden==1)then
-     intgr(1,iatom)=intgres(1,iatom)
+     intgr(iatom,1)=intgres(1,iatom)
    else if(nspden==2)then
-     intgr(1,iatom)=half*(intgres(1,iatom)+intgres(2,iatom))
-     intgr(2,iatom)=half*(intgres(1,iatom)-intgres(2,iatom))
+     intgr(iatom,1)=half*(intgres(1,iatom)+intgres(2,iatom))
+     intgr(iatom,2)=half*(intgres(1,iatom)-intgres(2,iatom))
    else if(nspden==4)then
      !Change the potential residual to the density+magnetization convention
-     intgr(1,iatom)=half*(intgres(1,iatom)+intgres(2,iatom))
-     intgr(2,iatom)= intgres(3,iatom)
-     intgr(3,iatom)=-intgres(4,iatom)
-     intgr(4,iatom)=half*(intgres(1,iatom)-intgres(2,iatom))
+     intgr(iatom,1)=half*(intgres(1,iatom)+intgres(2,iatom))
+     intgr(iatom,2)= intgres(3,iatom)
+     intgr(iatom,3)=-intgres(4,iatom)
+     intgr(iatom,4)=half*(intgres(1,iatom)-intgres(2,iatom))
    endif
  enddo
 
-!In case there is an overlap between spheres, must multiply by the inverse of intgf2, 
+!In case there is an overlap between spheres, must solve the linear system of equations
 !and take into account non-diagonal elements only for the set of atoms for which there is a constraint. 
 !This can be different for the
 !charge residual or for the spin residual (but for the spin constraints, the set of atoms is inclusive of all constraints)
  do ii=1,2 ! Charge, then spin
-   inv_intgf2(:,:)=zero
+   intgf2(:,:)=zero
    do iatom=1,natom
-     inv_intgf2(iatom,iatom)=c_dft%intgf2(iatom,iatom)
+     intgf2(iatom,iatom)=c_dft%intgf2(iatom,iatom)
    enddo
    do iatom=1,natom-1
      do jatom=iatom,natom 
@@ -924,34 +939,70 @@ end subroutine constrained_dft_free
          if(ii==1)then
            if(c_dft%constraint_kind(c_dft%typat(iatom))>=10 .and. &
 &             c_dft%constraint_kind(c_dft%typat(jatom))>=10         )then
-             inv_intgf2(iatom,jatom)=c_dft%intgf2(iatom,jatom)
-             inv_intgf2(jatom,iatom)=c_dft%intgf2(iatom,jatom)
+             intgf2(iatom,jatom)=c_dft%intgf2(iatom,jatom)
+             intgf2(jatom,iatom)=c_dft%intgf2(iatom,jatom)
            endif
          endif
          !In the spin case, must have both atoms with constraints not ending with 0
          if(ii==2)then
            if(mod(c_dft%constraint_kind(c_dft%typat(iatom)),10)/=0 .and. &
 &             mod(c_dft%constraint_kind(c_dft%typat(jatom)),10)/=0        )then
-             inv_intgf2(iatom,jatom)=c_dft%intgf2(iatom,jatom)
-             inv_intgf2(jatom,iatom)=c_dft%intgf2(iatom,jatom)
+             intgf2(iatom,jatom)=c_dft%intgf2(iatom,jatom)
+             intgf2(jatom,iatom)=c_dft%intgf2(iatom,jatom)
            endif
          endif
        endif
      enddo
    enddo
-   !Invert the matrix inv_intgf2 in place
-   call dsytrf('U',natom,inv_intgf2,natom,ipiv,work,2*natom,info)
-   call dsytri('U',natom,inv_intgf2,natom,ipiv,work,info)
-   !Combine the residuals
-   do iatom=1,natom
-     if(ii==1)intgres(1,iatom)=zero
-     if(ii==2 .and. nspden>1)intgres(2:nspden,iatom)=zero
-     do jatom=1,natom
-       if(ii==1)intgres(1,iatom)=intgres(1,iatom)+inv_intgf2(iatom,jatom)*intgr(1,jatom) 
-       if(ii==2 .and. nspden>1)intgres(2:nspden,iatom)=intgres(2:nspden,iatom)+inv_intgf2(iatom,jatom)*intgr(2:nspden,jatom) 
-     enddo
-   enddo
+
+!DEBUG
+ write(std_out,*)' m_dens/constrained_residuals : intgf2 before inversion '
+ do iatom=1,natom
+   write(std_out,*)'iatom,intgf2(iatom,1:natom)=',iatom,intgf2(iatom,1:natom)
  enddo
+!ENDDEBUG
+
+   !Solve the linear system of equation, for the different spins
+   call dsytrf('U',natom,intgf2,natom,ipiv,work,2*natom,info)
+!  call dsytri('U',natom,intgf2,natom,ipiv,work,info)
+   if(ii==1)then
+     call dsytrs('U',natom,1,intgf2,natom,ipiv,intgr,natom,info)
+   else if(ii==2 .and. nspden>1)then
+     call dsytrs('U',natom,nspden-1,intgf2,natom,ipiv,intgr(1:natom,2:nspden),natom,info)
+   endif
+
+   !Store the new residuals
+    do iatom=1,natom
+      if(ii==1)intgres(1,iatom)=intgr(iatom,1)
+      if(ii==2)intgres(2:nspden,iatom)=intgr(iatom,2:nspden)
+    enddo
+
+
+!DEBUG
+! write(std_out,*)' m_dens/constrained_residuals : intgf2 after inversion '
+! do iatom=1,natom
+!   write(std_out,*)'iatom,intgf2(iatom,1:natom)=',iatom,intgf2(iatom,1:natom)
+! enddo
+!ENDDEBUG
+
+   !Combine the residuals
+!  do iatom=1,natom
+!    if(ii==1)intgres(1,iatom)=zero
+!    if(ii==2 .and. nspden>1)intgres(2:nspden,iatom)=zero
+!    do jatom=1,natom
+!      if(ii==1)intgres(1,iatom)=intgres(1,iatom)+intgf2(iatom,jatom)*intgr(1,jatom) 
+!      if(ii==2 .and. nspden>1)intgres(2:nspden,iatom)=intgres(2:nspden,iatom)+intgf2(iatom,jatom)*intgr(2:nspden,jatom) 
+!    enddo
+!  enddo
+
+ enddo
+
+!DEBUG
+ write(std_out,*)' m_dens/constrained_residuals : after solving the linear system of equations '
+ do iatom=1,natom
+   write(std_out,*)'iatom,intgres(1:nspden,iatom)=',iatom,intgres(1:nspden,iatom)
+ enddo
+!ENDDEBUG
  
  ABI_ALLOCATE(coeffs_constr_dft,(nspden,natom))
  coeffs_constr_dft=zero
@@ -1502,6 +1553,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
    dist_ij(1,1)=dist2(xred(:,1),xred(:,1),rprimd,-1)
    do iatom=1,natom
      dist_ij(iatom,iatom)=dist_ij(1,1)
+     overlap_ij(iatom,iatom)=1
      do jatom=iatom,natom
        if(iatom/=jatom)dist_ij(iatom,jatom)=dist2(xred(:,iatom),xred(:,jatom),rprimd,1)
        if(dist_ij(iatom,jatom)-ratsph(typat(iatom))-ratsph(typat(jatom))<tol10)then
@@ -1509,11 +1561,11 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
          neighbor_overlap=1
 !DEBUG
 !Will be removed when the intgf2 will have been correctly used to mix the residuals, which is not yet the case
-         write(msg,'(a,a,a,i5,a,i5,a,f12.4,a,a,a,f12.4,a,f12.4)')&
-           'In constrained DFT, the spheres around different atoms cannot overlap. See input var ratsph.',ch10,&
-&          'It is found that for atoms ',iatom,' and ',jatom,', the distance is ',dist_ij,' Bohr, while ',ch10,&
-&          'the radii of the spheres are ',ratsph(typat(iatom)),' and ',ratsph(typat(jatom))
-         MSG_ERROR(msg)
+!         write(msg,'(a,a,a,i5,a,i5,a,f12.4,a,a,a,f12.4,a,f12.4)')&
+!           'In constrained DFT, the spheres around different atoms cannot overlap. See input var ratsph.',ch10,&
+!&          'It is found that for atoms ',iatom,' and ',jatom,', the distance is ',dist_ij,' Bohr, while ',ch10,&
+!&          'the radii of the spheres are ',ratsph(typat(iatom)),' and ',ratsph(typat(jatom))
+!         MSG_ERROR(msg)
 !ENDDEBUG
        endif
      enddo

@@ -38,6 +38,7 @@ inp_files = [
 "t25.in",
 "t26.in",
 "t27.in",
+"t28.in",
 "t30.in",
 "t31.in",
 "t32.in",
