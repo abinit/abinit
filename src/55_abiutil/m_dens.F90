@@ -102,8 +102,8 @@ MODULE m_dens
   ! chrgat(natom)
   ! Target charge for each atom. Not always used, it depends on the value of constraint_kind
 
-  real(dp),allocatable :: inv_intgf2(:,:)
-  ! inv_intgf2(natom,natom)
+  real(dp),allocatable :: intgf2(:,:)
+  ! intgf2(natom,natom)
   ! Inverse of the overlap of the spherical integrating functions, for each atom. 
   ! Initialized using some xred values, will not change during the SCF cycles, except for exotic algorithms, not in production,
 
@@ -636,7 +636,7 @@ end subroutine add_atomic_fcts
 !!
 !! FUNCTION
 !! Initialize the constrained_dft datastructure.
-!! Mostly copying already available (dtset) information, but also computing inv_intgf2
+!! Mostly copying already available (dtset) information, but also computing intgf2
 
 !!
 !! INPUTS
@@ -664,7 +664,7 @@ end subroutine add_atomic_fcts
 !!
 !! OUTPUT
 !!  constrained_dft=datastructure that contain the needed information to enforce the density and magnetization constraints
-!!    Most of the data are simply copied from dtset, but also constrained_dft%inv_intgf2(natom,natom) is computed from the available data.
+!!    Most of the data are simply copied from dtset, but also constrained_dft%intgf2(natom,natom) is computed from the available data.
 !!
 !! PARENTS
 !!
@@ -698,26 +698,26 @@ end subroutine add_atomic_fcts
  integer :: cplex1=1
  real(dp) :: ucvol
 !arrays
- real(dp), allocatable :: inv_intgf2(:,:) ! natom,natom
+ real(dp), allocatable :: intgf2(:,:) ! natom,natom
  real(dp), allocatable :: rhor_dum(:,:) ! nfftf,nspden
  real(dp) :: gprimd(3,3),rmet(3,3),gmet(3,3)
 
 ! ***********************************************************************************************
 
- ABI_ALLOCATE(inv_intgf2,(natom,natom))
+ ABI_ALLOCATE(intgf2,(natom,natom))
 
 !We need the metric because it is needed in calcdensph.F90
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  if(any(constraint_kind(:)/=0))then
-   !We need to precompute inv_intgf2
+   !We need to precompute intgf2
    ABI_ALLOCATE(rhor_dum,(nfftf,nspden))
    rhor_dum(:,:)=zero
    call calcdensph(gmet,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,std_out,&
-&    ratsm,ratsph,rhor_dum,rprimd,typat,ucvol,xred,0,cplex1,inv_intgf2=inv_intgf2)
+&    ratsm,ratsph,rhor_dum,rprimd,typat,ucvol,xred,0,cplex1,intgf2=intgf2)
    ABI_DEALLOCATE(rhor_dum)
  else
-   inv_intgf2=zero
+   intgf2=zero
  endif
 
  constrained_dft%gmet            =gmet
@@ -734,7 +734,7 @@ end subroutine add_atomic_fcts
 
  ABI_ALLOCATE(constrained_dft%chrgat,(natom))
  ABI_ALLOCATE(constrained_dft%constraint_kind,(ntypat))
- ABI_ALLOCATE(constrained_dft%inv_intgf2,(natom,natom))
+ ABI_ALLOCATE(constrained_dft%intgf2,(natom,natom))
  ABI_ALLOCATE(constrained_dft%ratsph,(ntypat))
  ABI_ALLOCATE(constrained_dft%spinat,(3,natom))
  ABI_ALLOCATE(constrained_dft%typat,(natom))
@@ -742,13 +742,13 @@ end subroutine add_atomic_fcts
 
  constrained_dft%chrgat           =chrgat
  constrained_dft%constraint_kind  =constraint_kind
- constrained_dft%inv_intgf2       =inv_intgf2
+ constrained_dft%intgf2           =intgf2
  constrained_dft%ratsph           =ratsph
  constrained_dft%spinat           =spinat
  constrained_dft%typat            =typat
  constrained_dft%ziontypat        =ziontypat
 
- ABI_DEALLOCATE(inv_intgf2)
+ ABI_DEALLOCATE(intgf2)
 
 end subroutine constrained_dft_ini
 !!***
@@ -784,7 +784,7 @@ end subroutine constrained_dft_ini
 
  ABI_SFREE(constrained_dft%chrgat)
  ABI_SFREE(constrained_dft%constraint_kind)
- ABI_SFREE(constrained_dft%inv_intgf2)
+ ABI_SFREE(constrained_dft%intgf2)
  ABI_SFREE(constrained_dft%ratsph)
  ABI_SFREE(constrained_dft%spinat)
  ABI_SFREE(constrained_dft%typat)
@@ -812,7 +812,7 @@ end subroutine constrained_dft_free
 !!   !  2=fix the magnetization vector to be the spinat one,
 !!   !  3=fix the magnetization amplitude to be the spinat one, but does not fix its direction
 !!   !  other future values will constrain the local atomic charge and possibly mix constraints if needed.
-!!   ! inv_intgf2(natom,natom)=(precomputed) inverse of the overlap of the spherical integration functions for each atom in a sphere of radius ratsph.
+!!   ! intgf2(natom,natom)=(precomputed) inverse of the overlap of the spherical integration functions for each atom in a sphere of radius ratsph.
 !!   ! magcon_lambda=strength of the atomic spherical constraint
 !!   ! natom=number of atoms
 !!   ! nfftf=number of points in fine fft grid
@@ -888,8 +888,17 @@ end subroutine constrained_dft_free
  call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
 &  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres)
 
+!In case there is an overlap between spheres, must multiply by the inverse of intgf2, 
+!only for the set of atoms for which there is a constraint, and this can be different for the
+!charge residual or for the spin residual
+!
+
  ABI_ALLOCATE(coeffs_constr_dft,(nspden,natom))
  coeffs_constr_dft=zero
+
+!  Invert the matrix inv_intgf2
+!  call dsytrf('U',natom,inv_intgf2,natom,ipiv,work,2*natom,info)
+!  call dsytri('U',natom,inv_intgf2,natom,ipiv,work,info)
 
 !The proper combination of intgden and intgres is stored in intgden: it is an effective charge/magnetization, to be compared to the target one.
  do iatom=1,natom
@@ -904,8 +913,8 @@ end subroutine constrained_dft_free
      intgr(4)=half*(intgres(1,iatom)-intgres(2,iatom))
    endif
 
-!DEBUG WARNING: THIS WILL ONLY WORK FOR DIAGONAL inv_intgf2
-   ratio=c_dft%inv_intgf2(iatom,iatom)/c_dft%magcon_lambda
+!DEBUG WARNING: THIS WILL ONLY WORK FOR DIAGONAL intgf2
+   ratio=one/(c_dft%magcon_lambda*c_dft%intgf2(iatom,iatom))
 !ENDDEBUG
    intgr(1:nspden)=intgden(1:nspden,iatom)-ratio*intgr(1:nspden)
 
@@ -1378,7 +1387,7 @@ end subroutine mag_penalty_e
 !!  dentot(nspden)=integrated density (magnetization...) over full u.c. vol, optional argument
 !!  intgden(nspden, natom)=integrated density (magnetization...) for each atom in a sphere of radius ratsph. Optional arg
 !!    Note that when intgden is present, the definition of the spherical integration function changes, as it is smoothed.
-!!  inv_intgf2(natom,natom)=inverse of the overlaps of the spherical integration functions for each atom in a sphere of radius ratsph. Optional arg
+!!  intgf2(natom,natom)=inverse of the overlaps of the spherical integration functions for each atom in a sphere of radius ratsph. Optional arg
 !!  Rest is printing 
 !!
 !! PARENTS
@@ -1390,7 +1399,7 @@ end subroutine mag_penalty_e
 !! SOURCE
 
 subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,ratsph,rhor,rprimd,typat,ucvol,xred,&
-&    option,cplex,intgden,dentot,inv_intgf2)
+&    option,cplex,intgden,dentot,intgf2)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1405,7 +1414,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
  real(dp),intent(in) :: xred(3,natom)
 !integer,intent(out),optional   :: atgridpts(nfft)
  real(dp),intent(out),optional  :: intgden(nspden,natom)
- real(dp),intent(out),optional  :: inv_intgf2(natom,natom)
+ real(dp),intent(out),optional  :: intgf2(natom,natom)
  real(dp),intent(out),optional  :: dentot(nspden)
 !Local variables ------------------------------
 !scalars
@@ -1440,11 +1449,11 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
  ! first unit cell so wrap xred into [0, 1[ interval here.
  call wrap2_zero_one(xred, my_xred, xshift)
 
-!If inv_intgf2 present, check that the spheres do not overlap. If they overlap, one needs to treat explicitly the neighbors.
- if(present(inv_intgf2))then
+!If intgf2 present, check that the spheres do not overlap. If they overlap, one needs to treat explicitly the neighbors.
+ if(present(intgf2))then
    neighbor_overlap=0
    dist_ij(:,:)=zero
-   inv_intgf2(:,:)=zero
+   intgf2(:,:)=zero
    overlap_ij(:,:)=0
    dist_ij(1,1)=dist2(xred(:,1),xred(:,1),rprimd,-1)
    do iatom=1,natom
@@ -1455,7 +1464,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
          overlap_ij(iatom,jatom)=1
          neighbor_overlap=1
 !DEBUG
-!Will be removed when the inv_intgf2 will have been correctly used to mix the residuals, which is not yet the case
+!Will be removed when the intgf2 will have been correctly used to mix the residuals, which is not yet the case
          write(msg,'(a,a,a,i5,a,i5,a,f12.4,a,a,a,f12.4,a,f12.4)')&
            'In constrained DFT, the spheres around different atoms cannot overlap. See input var ratsph.',ch10,&
 &          'It is found that for atoms ',iatom,' and ',jatom,', the distance is ',dist_ij,' Bohr, while ',ch10,&
@@ -1545,9 +1554,9 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
 
            ifft_local=1+ix+n1*(iy+n2*izloc)
 
-           if(present(inv_intgf2))then
+           if(present(intgf2))then
 !            intgden_(1,iatom)= integral of the square of the spherical integrating function
-             if(neighbor_overlap==0)inv_intgf2(iatom,iatom)=inv_intgf2(iatom,iatom)+fsm*fsm
+             if(neighbor_overlap==0)intgf2(iatom,iatom)=intgf2(iatom,iatom)+fsm*fsm
              if(neighbor_overlap==1)fsm_atom(ifft_local,iatom)=fsm_atom(ifft_local,iatom)+fsm
            endif
 !          Integral of density or potential residual
@@ -1558,8 +1567,8 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
      end if
    end do
 
-   if(present(inv_intgf2) .and. neighbor_overlap==0)then
-     inv_intgf2(iatom,iatom)=inv_intgf2(iatom,iatom)*ucvol/dble(nfftot)
+   if(present(intgf2) .and. neighbor_overlap==0)then
+     intgf2(iatom,iatom)=intgf2(iatom,iatom)*ucvol/dble(nfftot)
    endif
 
    intg(:)=intg(:)*ucvol/dble(nfftot)
@@ -1576,8 +1585,8 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
  end do ! iatom
 !-------------------------------------------
 !
-! In case inv_intgf2 must be computed, while the atoms overlap, a double loop over atoms is needed
- if(present(inv_intgf2) .and. neighbor_overlap==1)then
+! In case intgf2 must be computed, while the atoms overlap, a double loop over atoms is needed
+ if(present(intgf2) .and. neighbor_overlap==1)then
    do iatom=1,natom
      do jatom=iatom,natom
        if(overlap_ij(iatom,jatom)/=0)then
@@ -1590,32 +1599,29 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
                do i1=1,n1
                  ix=mod(i1,n1)
                  ifft_local=1+ix+n1*(iy+n2*izloc)
-                 inv_intgf2(iatom,jatom)=inv_intgf2(iatom,jatom)+fsm_atom(ifft_local,iatom)*fsm_atom(ifft_local,jatom)
+                 intgf2(iatom,jatom)=intgf2(iatom,jatom)+fsm_atom(ifft_local,iatom)*fsm_atom(ifft_local,jatom)
                enddo
              enddo
            endif
          enddo ! i3 
-         inv_intgf2(iatom,jatom)=inv_intgf2(iatom,jatom)*ucvol/dble(nfftot)
+         intgf2(iatom,jatom)=intgf2(iatom,jatom)*ucvol/dble(nfftot)
        endif
      enddo
      if(iatom/=1)then
        do jatom=1,iatom-1
-         inv_intgf2(iatom,jatom)=inv_intgf2(jatom,iatom)
+         intgf2(iatom,jatom)=intgf2(jatom,iatom)
        enddo
      endif
    enddo
  endif  
 
 !MPI parallelization
- if(present(inv_intgf2)) then
+ if(present(intgf2)) then
    if(mpi_enreg%nproc_fft>1)then
      call timab(48,1,tsec)
-     call xmpi_sum(inv_intgf2,mpi_enreg%comm_fft,ierr)
+     call xmpi_sum(intgf2,mpi_enreg%comm_fft,ierr)
      call timab(48,2,tsec)
    end if
-!  Invert the matrix inv_intgf2
-   call dsytrf('U',natom,inv_intgf2,natom,ipiv,work,2*natom,info)
-   call dsytri('U',natom,inv_intgf2,natom,ipiv,work,info)
  end if
 
 !-------------------------------------------
