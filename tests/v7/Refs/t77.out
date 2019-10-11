@@ -775,6 +775,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.333      84.147
   >Total DC energy in eV        = -5.37223618913754E+03
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.54866924E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  4.54866924E-03  sigma(3 1)=  0.00000000E+00
@@ -963,6 +965,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.333      84.147
   >Total DC energy in eV        = -5.37223618912082E+03
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.55055743E-03  sigma(3 2)=  3.52111821E-10
   sigma(2 2)=  4.55052797E-03  sigma(3 1)= -6.46069917E-08
@@ -1103,6 +1107,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.333      84.147
  13      -2.319      -1.555      -0.720      -0.639      -0.358
  14      -2.319      -1.555      -0.720      -0.639      -0.358
 
+ Print the psichi coefficients in data.plowann
+
 ======================================================================
  Calculating and writing out Kohn-Sham electronic Structure file
  Using conjugate gradient wavefunctions and energies (kssform=3)
@@ -1200,6 +1206,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.333      84.147
   >Total energy in eV           = -5.37223619154371E+03
   >Total DC energy in eV        = -5.37223618912082E+03
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.55056227E-03  sigma(3 2)=  2.74133524E-10
@@ -1799,6 +1807,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.333      84.147
  39      -2.003      -1.467      -0.902      -0.808      -0.384
  40      -2.126      -1.234      -1.161      -0.752      -0.361
  41      -2.223      -1.539      -0.978      -0.574      -0.361
+
+ Print the psichi coefficients in data.plowann
 
 ======================================================================
  Calculating and writing out Kohn-Sham electronic Structure file
@@ -2591,6 +2601,7 @@ P           mkmem4         41
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [3] A brief introduction to the ABINIT software package.
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
@@ -2603,6 +2614,7 @@ P           mkmem4         41
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -

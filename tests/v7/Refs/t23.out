@@ -278,6 +278,29 @@ P           mkmem3          8
         optforces2          2
         optforces3          0
         pawecutdg      5.00000000E+00 Hartree
+     plowan_bandi1          0
+     plowan_bandi2          0
+     plowan_bandi3         21
+     plowan_bandf1          0
+     plowan_bandf2          0
+     plowan_bandf3         25
+   plowan_compute1          0
+   plowan_compute2          0
+   plowan_compute3          1
+     plowan_natom1          0
+     plowan_natom2          0
+     plowan_natom3          1
+        plowan_nt1          0
+        plowan_nt2          0
+        plowan_nt3          1
+ plowan_realspace1          0
+ plowan_realspace2          0
+ plowan_realspace3          1
+        plowan_it3       0    0    0
+     plowan_iatom3       1
+       plowan_nbl3       1
+     plowan_lcalc3       2
+  plowan_projcalc3       7
           ppmodel           3
           spgroup1        221
           spgroup2          1
@@ -344,9 +367,6 @@ P           mkmem3          8
            tolvrs      1.00000000E-15
            tsmear      3.67490000E-03 Hartree
             typat      1  2  3  3  3
-          usedmft1          0
-          usedmft2          0
-          usedmft3          1
           usepawu           1
            useylm           1
               wtk1       0.12500    0.37500    0.37500    0.12500
@@ -688,6 +708,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     148.625     148.536
   >Total DC energy in eV        = -3.91070197752165E+03
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.81023902E-02  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.81023902E-02  sigma(3 1)=  0.00000000E+00
@@ -940,6 +962,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     148.625     148.536
   >Total DC energy in eV        = -3.91070197752141E+03
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.81023902E-02  sigma(3 2)= -3.55017299E-14
   sigma(2 2)=  2.81023902E-02  sigma(3 1)= -3.49100445E-13
@@ -982,14 +1006,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     148.625     148.536
 -inwffil : will read wavefunctions from disk file t23o_DS2_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     148.625     148.536
 
--       ( number of procs used in dmft ) =  1
-
 
  ******************************************
  DFT+DMFT Method is used
  ******************************************
-
- DMFT uses the Hubbard one solver
 
 ================================================================================
 
@@ -1100,6 +1120,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     148.625     148.536
 
 
 
+
+ ======================================================================================
+
+ == Start computation of Projected Local Orbitals Wannier functions ==  -1
+
+ == Lower and upper values of the selected bands   21   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is :  7
+
+ == For each k-point of the path, gives the eigenvalues (in eV) of the Hamiltonian in the Wannier basis
+
+   (The band structure is shifted by fermie =      11.9976 eV )
+
+ Wannier band structure for atom  1
+ 1       0.000       0.000       0.000       0.301       0.301
+ 2      -0.218      -0.000       0.000       0.311       1.902
+ 3      -0.218      -0.000       0.000       0.311       1.902
+ 4       0.660       1.592       2.081       2.081       2.744
+ 5      -0.218      -0.000       0.000       0.311       1.902
+ 6       0.660       1.592       2.081       2.081       2.744
+ 7       0.660       1.592       2.081       2.081       2.744
+ 8      -0.000       0.000       0.000       5.953       5.953
+
+ Print the psichi coefficients in data.plowann
 
 ======================================================================
  Calculating and writing out Kohn-Sham electronic Structure file
@@ -1212,6 +1259,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     148.625     148.536
   >Total energy in eV           = -3.91070197751927E+03
   >Total DC energy in eV        = -3.91070197752141E+03
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.81023902E-02  sigma(3 2)= -6.48397369E-15
@@ -1433,6 +1482,29 @@ P           mkmem3          8
         optforces2          2
         optforces3          0
         pawecutdg      5.00000000E+00 Hartree
+     plowan_bandi1          0
+     plowan_bandi2          0
+     plowan_bandi3         21
+     plowan_bandf1          0
+     plowan_bandf2          0
+     plowan_bandf3         25
+   plowan_compute1          0
+   plowan_compute2          0
+   plowan_compute3          1
+     plowan_natom1          0
+     plowan_natom2          0
+     plowan_natom3          1
+        plowan_nt1          0
+        plowan_nt2          0
+        plowan_nt3          1
+ plowan_realspace1          0
+ plowan_realspace2          0
+ plowan_realspace3          1
+        plowan_it3       0    0    0
+     plowan_iatom3       1
+       plowan_nbl3       1
+     plowan_lcalc3       2
+  plowan_projcalc3       7
           ppmodel           3
           spgroup1        221
           spgroup2          1
@@ -1505,9 +1577,6 @@ P           mkmem3          8
            tolvrs      1.00000000E-15
            tsmear      3.67490000E-03 Hartree
             typat      1  2  3  3  3
-          usedmft1          0
-          usedmft2          0
-          usedmft3          1
           usepawu           1
            useylm           1
               wtk1       0.12500    0.37500    0.37500    0.12500
@@ -1580,8 +1649,10 @@ P           mkmem3          8
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [5] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
@@ -1592,6 +1663,7 @@ P           mkmem3          8
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - Proc.   0 individual time (sec): cpu=         20.7  wall=         20.9
 
