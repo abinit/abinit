@@ -890,11 +890,28 @@ end subroutine constrained_dft_free
  call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
 &  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres)
 
+!Make the proper combination of intgres, to single out the scalar potential residual and the magnetic field potential residuals for x,y,z.
+ do iatom=1,natom
+   if(nspden==1)then
+     intgr(1)=intgres(1,iatom)
+   else if(nspden==2)then
+     intgr(1)=half*(intgres(1,iatom)+intgres(2,iatom))
+     intgr(2)=half*(intgres(1,iatom)-intgres(2,iatom))
+   else if(nspden==4)then
+     !Change the potential residual to the density+magnetization convention
+     intgr(1)=half*(intgres(1,iatom)+intgres(2,iatom))
+     intgr(2)= intgres(3,iatom)
+     intgr(3)=-intgres(4,iatom)
+     intgr(4)=half*(intgres(1,iatom)-intgres(2,iatom))
+   endif
+   intgres(1:nspden,iatom)=intgr(1:nspden)
+ enddo
+
 !In case there is an overlap between spheres, must multiply by the inverse of intgf2, 
 !only for the set of atoms for which there is a constraint, and this can be different for the
-!charge residual or for the spin residual
-!
+!charge residual or for the spin residual (but for the spin constraints, the set of atoms is inclusive of all constraints)
 
+ 
  ABI_ALLOCATE(coeffs_constr_dft,(nspden,natom))
  coeffs_constr_dft=zero
 
@@ -905,26 +922,16 @@ end subroutine constrained_dft_free
 !The proper combination of intgden and intgres is stored in intgden: it is an effective charge/magnetization, to be compared to the target one.
  do iatom=1,natom
 
-   if(nspden==1)then
-     intgr(1)=intgres(1,iatom)
-   else if(nspden==2)then
-     intgr(1)=half*(intgres(1,iatom)+intgres(2,iatom))
-     intgr(2)=half*(intgres(1,iatom)-intgres(2,iatom))
+   if(nspden==2)then
      intgd           =intgden(1,iatom)+intgden(2,iatom)
      intgden(2,iatom)=intgden(1,iatom)-intgden(2,iatom)
      intgden(1,iatom)=intgd
-   else if(nspden==4)then
-     !Change the potential residual to the density+magnetization convention
-     intgr(1)=half*(intgres(1,iatom)+intgres(2,iatom))
-     intgr(2)= intgres(3,iatom)
-     intgr(3)=-intgres(4,iatom)
-     intgr(4)=half*(intgres(1,iatom)-intgres(2,iatom))
    endif
 
 !DEBUG WARNING: THIS WILL ONLY WORK FOR DIAGONAL intgf2
    ratio=one/(c_dft%magcon_lambda*c_dft%intgf2(iatom,iatom))
 !ENDDEBUG
-   intgden(1:nspden,iatom)=intgden(1:nspden,iatom)-ratio*intgr(1:nspden)
+   intgden(1:nspden,iatom)=intgden(1:nspden,iatom)-ratio*intgres(1:nspden,iatom)
 
 !DEBUG
    write(std_out,*)' m_dens/constrained_residuals after selection of charge+spin : iatom,intgden(1:nspden,iatom)=',&
