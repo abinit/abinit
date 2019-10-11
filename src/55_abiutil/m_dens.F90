@@ -904,7 +904,7 @@ end subroutine constrained_dft_free
      intgr(3)=-intgres(4,iatom)
      intgr(4)=half*(intgres(1,iatom)-intgres(2,iatom))
    endif
-   intgres(1:nspden,iatom)=intgr(1:nspden)
+   intgres(1:nspden,iatom)=intgr(1:nspden)/c_dft%intgf2(iatom,iatom)
  enddo
 
 !In case there is an overlap between spheres, must multiply by the inverse of intgf2, 
@@ -928,10 +928,9 @@ end subroutine constrained_dft_free
      intgden(1,iatom)=intgd
    endif
 
-!DEBUG WARNING: THIS WILL ONLY WORK FOR DIAGONAL intgf2
-   ratio=one/(c_dft%magcon_lambda*c_dft%intgf2(iatom,iatom))
-!ENDDEBUG
-   intgden(1:nspden,iatom)=intgden(1:nspden,iatom)-ratio*intgres(1:nspden,iatom)
+   !Assemble the modified residual, also taking into account a global preconditioning factor. 
+   !This might be improved in the future, treating separately the preconditioning for the charge, the longitudinal spin, the transverse spin
+   intgden(1:nspden,iatom)=intgden(1:nspden,iatom) - intgres(1:nspden,iatom)/c_dft%magcon_lambda
 
 !DEBUG
    write(std_out,*)' m_dens/constrained_residuals after selection of charge+spin : iatom,intgden(1:nspden,iatom)=',&
