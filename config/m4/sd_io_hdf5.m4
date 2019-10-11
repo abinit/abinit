@@ -536,7 +536,7 @@ AC_DEFUN([_SD_HDF5_CHECK_COMPILERS], [
         dir)
           for tmp_h5cc in ${tmp_h5cc_search}; do
             if test -x "${sd_hdf5_prefix}/bin/${tmp_h5cc}"; then
-              sd_hdf5_h5cc="${tmp_h5cc}"
+              sd_hdf5_h5cc="${sd_hdf5_prefix}/bin/${tmp_h5cc}"
               break
             fi
           done
