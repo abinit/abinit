@@ -188,7 +188,7 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
  real(dp) :: coordat(3),coord23_1,coord23_2,coord23_3,diff1,diff2,diff3,gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp) :: vperp(3),width(3)
  real(dp),allocatable :: coord1(:,:),local_den(:,:,:,:)
- real(dp),allocatable :: step(:,:),sum_den(:,:,:),work(:)
+ real(dp),allocatable :: step(:,:),sum_den(:,:,:)
  real(dp),allocatable :: xcartcells(:,:,:),xred(:,:),yder2(:)
 
 ! *********************************************************************
@@ -284,7 +284,6 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
 !at each point in the primitive cell
  ABI_ALLOCATE(local_den,(nrx,nry,nrz,natom))
  ABI_ALLOCATE(step,(2,mpoint))
- ABI_ALLOCATE(work,(mpoint))
  ABI_ALLOCATE(yder2,(mpoint))
  ABI_ALLOCATE(coord1,(3,nrx))
  coeff1=one/nrx
@@ -454,7 +453,6 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
  ABI_DEALLOCATE(ncells)
  ABI_DEALLOCATE(step)
  ABI_DEALLOCATE(sum_den)
- ABI_DEALLOCATE(work)
  ABI_DEALLOCATE(xcartcells)
  ABI_DEALLOCATE(xred)
  ABI_DEALLOCATE(yder2)
@@ -1412,11 +1410,11 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
 !Local variables ------------------------------
 !scalars
  integer,parameter :: ishift=5
- integer :: i1,i2,i3,iatom,ierr,ifft_local,ix,iy,iz,izloc,jatom,n1,n1a,n1b,n2,ifft
+ integer :: i1,i2,i3,iatom,ierr,ifft_local,info,ix,iy,iz,izloc,jatom,n1,n1a,n1b,n2,ifft
  integer :: neighbor_overlap,n2a,n2b,n3,n3a,n3b,nfftot
  integer :: jfft
  real(dp),parameter :: delta=0.99_dp
- real(dp) :: difx,dify,difz,dist_ij,r2,r2atsph,rr1,rr2,rr3,rx,ry,rz
+ real(dp) :: difx,dify,difz,r2,r2atsph,rr1,rr2,rr3,rx,ry,rz
  real(dp) :: fsm, ratsm2
  real(dp) :: mag_coll   , mag_x, mag_y, mag_z ! EB
  real(dp) :: mag_coll_im, mag_x_im, mag_y_im, mag_z_im ! SPr
@@ -1429,7 +1427,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
  integer :: ipiv(natom),overlap_ij(natom,natom)
  real(dp) :: intg(4),rhomag(2,4),tsec(2) 
  real(dp) :: dist_ij(natom,natom),intgden_(nspden,natom)
- real(dp) :: my_xred(3, natom), xshift(3, natom)
+ real(dp) :: my_xred(3, natom), work(2*natom), xshift(3, natom)
  real(dp), allocatable :: fsm_atom(:,:)
 
 ! *************************************************************************
@@ -1549,7 +1547,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
 
            if(present(inv_intgf2))then
 !            intgden_(1,iatom)= integral of the square of the spherical integrating function
-             if(neighbor_overlap==0)inv_intgf2(iatom)=inv_intgf2(iatom)+fsm*fsm
+             if(neighbor_overlap==0)inv_intgf2(iatom,iatom)=inv_intgf2(iatom,iatom)+fsm*fsm
              if(neighbor_overlap==1)fsm_atom(ifft_local,iatom)=fsm_atom(ifft_local,iatom)+fsm
            endif
 !          Integral of density or potential residual
@@ -1616,8 +1614,8 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
      call timab(48,2,tsec)
    end if
 !  Invert the matrix inv_intgf2
-   call sytrf(inv_intgf2,ipiv)
-   call sytri(inv_intgf2,ipiv)
+   call dsytrf('U',inv_intgf2,natom,ipiv,work,2*natom,info)
+   call dsytri('U',inv_intgf2,natom,ipiv,work,info)
  end if
 
 !-------------------------------------------
