@@ -104,7 +104,7 @@ MODULE m_dens
 
   real(dp),allocatable :: intgf2(:,:)
   ! intgf2(natom,natom)
-  ! Inverse of the overlap of the spherical integrating functions, for each atom. 
+  ! Overlap of the spherical integrating functions, for each atom. 
   ! Initialized using some xred values, will not change during the SCF cycles, except for exotic algorithms, not in production,
 
   real(dp),allocatable :: ratsph(:)
@@ -812,7 +812,7 @@ end subroutine constrained_dft_free
 !!   !  2=fix the magnetization vector to be the spinat one,
 !!   !  3=fix the magnetization amplitude to be the spinat one, but does not fix its direction
 !!   !  other future values will constrain the local atomic charge and possibly mix constraints if needed.
-!!   ! intgf2(natom,natom)=(precomputed) inverse of the overlap of the spherical integration functions for each atom in a sphere of radius ratsph.
+!!   ! intgf2(natom,natom)=(precomputed) overlap of the spherical integration functions for each atom in a sphere of radius ratsph.
 !!   ! magcon_lambda=strength of the atomic spherical constraint
 !!   ! natom=number of atoms
 !!   ! nfftf=number of points in fine fft grid
@@ -854,16 +854,17 @@ end subroutine constrained_dft_free
 
 !Local variables-------------------------------
 !scalars
- integer :: conkind,iatom,info,natom,nfftf,nspden,ntypat,option
+ integer :: conkind,iatom,ii,jatom,info,natom,nfftf,nspden,ntypat,option
  integer :: cplex1=1
- real(dp) :: intgd,intgden_norm,intgden_proj,norm,ratio
+ real(dp) :: intgd,intgden_norm,intgden_proj,norm
 !arrays
  integer :: ipiv(c_dft%natom)
- real(dp) :: corr_denmag(4),intgr(4)
+ real(dp) :: corr_denmag(4)
  real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
  real(dp), allocatable :: intgden(:,:) ! nspden,natom
  real(dp), allocatable :: intgres(:,:) ! nspden,natom
- real(dp) :: work(2*c_dft%natom) 
+ real(dp), allocatable :: intgr(:,:) ! nspden,natom
+ real(dp) :: inv_intgf2(c_dft%natom,c_dft%natom),work(2*c_dft%natom) 
  real(dp) :: spinat_normed(3)
 
 ! ***********************************************************************************************
@@ -887,37 +888,73 @@ end subroutine constrained_dft_free
 
 !We need the integrated residuals
  ABI_ALLOCATE(intgres,(nspden,natom))
+ ABI_ALLOCATE(intgr,(nspden,natom))
  call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
 &  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres)
 
 !Make the proper combination of intgres, to single out the scalar potential residual and the magnetic field potential residuals for x,y,z.
  do iatom=1,natom
    if(nspden==1)then
-     intgr(1)=intgres(1,iatom)
+     intgr(1,iatom)=intgres(1,iatom)
    else if(nspden==2)then
-     intgr(1)=half*(intgres(1,iatom)+intgres(2,iatom))
-     intgr(2)=half*(intgres(1,iatom)-intgres(2,iatom))
+     intgr(1,iatom)=half*(intgres(1,iatom)+intgres(2,iatom))
+     intgr(2,iatom)=half*(intgres(1,iatom)-intgres(2,iatom))
    else if(nspden==4)then
      !Change the potential residual to the density+magnetization convention
-     intgr(1)=half*(intgres(1,iatom)+intgres(2,iatom))
-     intgr(2)= intgres(3,iatom)
-     intgr(3)=-intgres(4,iatom)
-     intgr(4)=half*(intgres(1,iatom)-intgres(2,iatom))
+     intgr(1,iatom)=half*(intgres(1,iatom)+intgres(2,iatom))
+     intgr(2,iatom)= intgres(3,iatom)
+     intgr(3,iatom)=-intgres(4,iatom)
+     intgr(4,iatom)=half*(intgres(1,iatom)-intgres(2,iatom))
    endif
-   intgres(1:nspden,iatom)=intgr(1:nspden)/c_dft%intgf2(iatom,iatom)
  enddo
 
 !In case there is an overlap between spheres, must multiply by the inverse of intgf2, 
-!only for the set of atoms for which there is a constraint, and this can be different for the
+!and take into account non-diagonal elements only for the set of atoms for which there is a constraint. 
+!This can be different for the
 !charge residual or for the spin residual (but for the spin constraints, the set of atoms is inclusive of all constraints)
-
+ do ii=1,2 ! Charge, then spin
+   inv_intgf2(:,:)=zero
+   do iatom=1,natom
+     inv_intgf2(iatom,iatom)=c_dft%intgf2(iatom,iatom)
+   enddo
+   do iatom=1,natom-1
+     do jatom=iatom,natom 
+       if(c_dft%intgf2(iatom,jatom)>tol8)then
+         !In the charge case, must have both atoms with constraints bigger than 10
+         if(ii==1)then
+           if(c_dft%constraint_kind(c_dft%typat(iatom))>=10 .and. &
+&             c_dft%constraint_kind(c_dft%typat(jatom))>=10         )then
+             inv_intgf2(iatom,jatom)=c_dft%intgf2(iatom,jatom)
+             inv_intgf2(jatom,iatom)=c_dft%intgf2(iatom,jatom)
+           endif
+         endif
+         !In the spin case, must have both atoms with constraints not ending with 0
+         if(ii==2)then
+           if(mod(c_dft%constraint_kind(c_dft%typat(iatom)),10)/=0 .and. &
+&             mod(c_dft%constraint_kind(c_dft%typat(jatom)),10)/=0        )then
+             inv_intgf2(iatom,jatom)=c_dft%intgf2(iatom,jatom)
+             inv_intgf2(jatom,iatom)=c_dft%intgf2(iatom,jatom)
+           endif
+         endif
+       endif
+     enddo
+   enddo
+   !Invert the matrix inv_intgf2 in place
+   call dsytrf('U',natom,inv_intgf2,natom,ipiv,work,2*natom,info)
+   call dsytri('U',natom,inv_intgf2,natom,ipiv,work,info)
+   !Combine the residuals
+   do iatom=1,natom
+     if(ii==1)intgres(1,iatom)=zero
+     if(ii==2 .and. nspden>1)intgres(2:nspden,iatom)=zero
+     do jatom=1,natom
+       if(ii==1)intgres(1,iatom)=intgres(1,iatom)+inv_intgf2(iatom,jatom)*intgr(1,jatom) 
+       if(ii==2 .and. nspden>1)intgres(2:nspden,iatom)=intgres(2:nspden,iatom)+inv_intgf2(iatom,jatom)*intgr(2:nspden,jatom) 
+     enddo
+   enddo
+ enddo
  
  ABI_ALLOCATE(coeffs_constr_dft,(nspden,natom))
  coeffs_constr_dft=zero
-
-!  Invert the matrix inv_intgf2
-!  call dsytrf('U',natom,inv_intgf2,natom,ipiv,work,2*natom,info)
-!  call dsytri('U',natom,inv_intgf2,natom,ipiv,work,info)
 
 !The proper combination of intgden and intgres is stored in intgden: it is an effective charge/magnetization, to be compared to the target one.
  do iatom=1,natom
@@ -1039,6 +1076,7 @@ end subroutine constrained_dft_free
  ABI_DEALLOCATE(coeffs_constr_dft)
  ABI_DEALLOCATE(intgden)
  ABI_DEALLOCATE(intgres)
+ ABI_DEALLOCATE(intgr)
 
  end subroutine constrained_residual
 !!***
@@ -1393,7 +1431,7 @@ end subroutine mag_penalty_e
 !!  dentot(nspden)=integrated density (magnetization...) over full u.c. vol, optional argument
 !!  intgden(nspden, natom)=integrated density (magnetization...) for each atom in a sphere of radius ratsph. Optional arg
 !!    Note that when intgden is present, the definition of the spherical integration function changes, as it is smoothed.
-!!  intgf2(natom,natom)=inverse of the overlaps of the spherical integration functions for each atom in a sphere of radius ratsph. Optional arg
+!!  intgf2(natom,natom)=overlaps of the spherical integration functions for each atom in a sphere of radius ratsph. Optional arg
 !!  Rest is printing 
 !!
 !! PARENTS
