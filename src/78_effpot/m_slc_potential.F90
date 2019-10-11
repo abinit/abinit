@@ -254,7 +254,7 @@ contains
     real(dp) :: f1(1:3*self%natom), disp(1:3*self%natom), b1(1:3*self%nspin), sp(1:3*self%nspin)
     real(dp) :: btmp(3, self%nspin), bslc(1:3*self%nspin), fslc(1:3*self%natom)
 
-    sp(:) = reshape(spin, (/ 3*self%nspin /))
+    sp(:) = reshape(spin, (/ 3*self%nspin /))-reshape(self%supercell%spin%Sref, (/ 3*self%nspin/))
     disp(:) = reshape(displacement, (/ 3*self%natom /))
 
     beta = 0.5_dp
