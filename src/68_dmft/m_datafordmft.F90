@@ -876,12 +876,12 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
                        else if(x2my2d) then
                          if(m1==5) then
                            m1_x2my2d=1
-                           write(unt,'(3i6,3x,2f23.15)') isppol, iat, m1,&
+                           write(unt,'(4i6,3x,2f23.15)') isppol, ispinor, iat, m1,&
 &                           real(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_x2my2d))/chinorm,&
 &                           aimag(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_x2my2d))/chinorm
                          end if
                        else
-                         write(unt,'(3i6,3x,2f23.15)') isppol, iat, m1,&
+                         write(unt,'(4i6,3x,2f23.15)') isppol, ispinor, iat, m1,&
 &                         real(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1))/chinorm,&
 &                         aimag(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1))/chinorm
                        end if

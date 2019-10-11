@@ -2050,6 +2050,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    end if
    rewind(temp_unt)
    read(temp_unt,*)
+   read(temp_unt,*)
    read(temp_unt,*) msg, ib1, ib2
    close(temp_unt)
  end if
