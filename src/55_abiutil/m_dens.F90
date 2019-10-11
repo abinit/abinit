@@ -854,14 +854,16 @@ end subroutine constrained_dft_free
 
 !Local variables-------------------------------
 !scalars
- integer :: conkind,iatom,natom,nfftf,nspden,ntypat,option
+ integer :: conkind,iatom,info,natom,nfftf,nspden,ntypat,option
  integer :: cplex1=1
  real(dp) :: intgden_norm,intgden_proj,norm,ratio
 !arrays
+ integer :: ipiv(c_dft%natom)
  real(dp) :: corr_denmag(4),intgr(4)
  real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
  real(dp), allocatable :: intgden(:,:) ! nspden,natom
  real(dp), allocatable :: intgres(:,:) ! nspden,natom
+ real(dp) :: work(2*c_dft%natom) 
  real(dp) :: spinat_normed(3)
 
 ! ***********************************************************************************************
@@ -1419,7 +1421,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
 !Local variables ------------------------------
 !scalars
  integer,parameter :: ishift=5
- integer :: i1,i2,i3,iatom,ierr,ifft_local,info,ix,iy,iz,izloc,jatom,n1,n1a,n1b,n2,ifft
+ integer :: i1,i2,i3,iatom,ierr,ifft_local,ix,iy,iz,izloc,jatom,n1,n1a,n1b,n2,ifft
  integer :: neighbor_overlap,n2a,n2b,n3,n3a,n3b,nfftot
  integer :: jfft
  real(dp),parameter :: delta=0.99_dp
@@ -1433,10 +1435,10 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
  character(len=500) :: msg,msg1
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
- integer :: ipiv(natom),overlap_ij(natom,natom)
+ integer :: overlap_ij(natom,natom)
  real(dp) :: intg(4),rhomag(2,4),tsec(2) 
  real(dp) :: dist_ij(natom,natom),intgden_(nspden,natom)
- real(dp) :: my_xred(3, natom), work(2*natom), xshift(3, natom)
+ real(dp) :: my_xred(3, natom), xshift(3, natom)
  real(dp), allocatable :: fsm_atom(:,:)
 
 ! *************************************************************************
