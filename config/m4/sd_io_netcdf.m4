@@ -365,6 +365,22 @@ using namespace netCDF;
     test "${sd_netcdf_fortran_ok}" != "yes" && sd_netcdf_ok="no"
   fi
 
+  # Check if we can do parallel I/O
+  if test "${sd_netcdf_ok}" = "yes" -a "${sd_hdf5_mpi_ok}" = "yes"; then
+    AC_MSG_CHECKING([whether NetCDF has parallel I/O in Fortran])
+    AC_LANG_PUSH([Fortran])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      [[
+        use mpi
+        use netcdf
+        integer :: ierr, ncid
+        ierr = nf90_create("conftest.nc", ior(NF90_NETCDF4, NF90_MPIPOSIX), &
+          ncid, comm=MPI_COMM_WORLD, info=MPI_INFO_NULL)
+      ]])], [sd_netcdf_mpi_ok="yes"], [sd_netcdf_mpi_ok="no"])
+    AC_LANG_POP([Fortran])
+    AC_MSG_RESULT([${sd_netcdf_mpi_ok}])
+  fi
+
   # Restore environment
   SD_ESL_RESTORE_FLAGS
 ]) # _SD_NETCDF_CHECK_USE
