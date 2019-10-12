@@ -1991,6 +1991,12 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
 
  end if ! option/=0 
 
+!DEBUG
+ if(.false.)then
+   call printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,'DEN.vtk')
+ endif
+!ENDDEBUG
+
 end subroutine calcdensph
 !!***
 
