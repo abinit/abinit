@@ -667,8 +667,11 @@ SD_LIBPSML_INIT([optional fail])
 # Init LibXC
 SD_LIBXC_INIT([no-fortran optional fail])
 
-# Init PAPI
-SD_NETCDF_INIT([no-cxx optional fail])
+# Init NetCDF
+SD_NETCDF_INIT([optional fail])
+
+# Init NetCDF-Fortran
+SD_NETCDF_FORTRAN_INIT([optional fail])
 
 # Init PAPI
 SD_PAPI_INIT([optional fail])
@@ -768,10 +771,9 @@ fi
 
 # NetCDF library support (must be done after HDF5)
 SD_NETCDF_DETECT
-# FIXME: quick workaround
-if test "${sd_netcdf_ok}" = "yes"; then
-  sd_netcdf_fcflags="${sd_netcdf_fcflags} ${sd_netcdf_cppflags}"
-fi
+
+# NetCDF library support (must be done after HDF5)
+SD_NETCDF_FORTRAN_DETECT
 
 # XMLF90 library support
 SD_XMLF90_DETECT

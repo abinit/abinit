@@ -1051,12 +1051,41 @@
 
 # Library flags for NetCDF (default is unset)
 #
-#NETCDF_LIBS="-L/usr/local/lib/netcdf -lnetcdff -lnetcdf"
+#NETCDF_LIBS="-L/usr/local/lib/netcdf -lnetcdf"
 
 # Enable Netcdf mode in Abinit (use netcdf as default I/O library,
 # change the default values of accesswff)   
 #
 #enable_netcdf_default="no"
+
+                       # ------------------------------ #
+
+# NetCDF-Fortran
+# Website: http://www.unidata.ucar.edu/software/netcdf/
+
+# Trigger and install prefix for NetCDF-Fortran (default is unset)
+#
+#with_netcdf_fortran="/usr/local"
+
+# C preprocessing flags for NetCDF-Fortran (default is unset)
+#
+#NETCDF_FORTRAN_CPPFLAGS="-I/usr/local/include/netcdf_fortran"
+
+# C flags for NetCDF-Fortran (default is unset)
+#
+#NETCDF_FORTRAN_CFLAGS=""
+
+# Fortran flags for NetCDF-Fortran (default is unset)
+#
+#NETCDF_FORTRAN_FCFLAGS="-I/usr/local/include/netcdf_fortran"
+
+# Link flags for NetCDF-Fortran (default is unset)
+#
+#NETCDF_FORTRAN_LDFLAGS=""
+
+# Library flags for NetCDF-Fortran (default is unset)
+#
+#NETCDF_FORTRAN_LIBS="-L/usr/local/lib/netcdf_fortran -lnetcdff"
 
                        # ------------------------------ #
 
