@@ -1709,6 +1709,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
        enddo
      endif
    enddo
+   ABI_DEALLOCATE(fsm_atom)
  endif  
 
 !MPI parallelization
