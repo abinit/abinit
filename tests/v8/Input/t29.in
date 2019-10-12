@@ -53,4 +53,8 @@
 #%% description = H2 diatomic molecule, static, to check the constrained DFT implementation in case nspden=4
 #%%   with mixed constraints (different for different atomic types), and also fixing the amplitude or the direction.
 #%%   Case where the spheres overlap 
+#%%   Interestingly, in the case where only the magnitude of the magnetization on the second atom is fixed,
+#%%   without fixing its charge, the optimal configuration gives a 90 degree difference of magnetization direction for both atoms.
+#%%   It would be interesting to understand the meaning of such results, and see whether one is not in a local minimum.
+#%%   A full mapping of the energy as a function of both magnitude and direction of the magnetization of the second atom would be interesting ...
 #%%<END TEST_INFO>
