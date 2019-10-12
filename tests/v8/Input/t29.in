@@ -11,7 +11,7 @@
 
 #Constrained DFT data
  magcon_lambda      2   
- spinat        0.0 0.0   0.6     0.4   0.0  -0.4 
+ spinat        0.0 0.0   0.6     sqrt(0.18)   0.0  -sqrt(0.18)
  chrgat        0.0               0.0
 
 #Definition of the atomic spheres
