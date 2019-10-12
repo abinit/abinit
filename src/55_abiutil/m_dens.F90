@@ -202,16 +202,6 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  nfftot=nrx*nry*nrz
-!DEBUG
-!do k3=1,nrz
-!do k2=1,nry
-!do k1=1,nrx
-!total_charge=total_charge+grid_den(k1,k2,k3)
-!end do
-!end do
-!end do
-!write(std_out,*)' total_charge=',total_charge*ucvol/dble(nfftot)
-!ENDDEBUG
 
  ABI_ALLOCATE(xred,(3,natom))
  call xcart2xred(natom,rprimd,xcart,xred)
@@ -378,18 +368,6 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
  do iatom=1,natom
    sum_den(:,:,:)=sum_den(:,:,:)+local_den(:,:,:,iatom)
  end do
-
-!DEBUG
-!do k3=1,nrz
-!do k2=1,nry
-!do k1=1,nrx
-!write(std_out,'(3i4,3es16.6)' )k1,k2,k3,local_den(k1,k2,k3,1:2),sum_den(k1,k2,k3)
-!end do
-!end do
-!end do
-!write(std_out,*)' hirsh : before accumulate the integral of the density'
-!ENDDEBUG
-
 
 !Accumulate the integral of the density, to get Hirshfeld charges
 !There is a minus sign because the electron has a negative charge
@@ -879,32 +857,11 @@ end subroutine constrained_dft_free
  call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
 &  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgden)
 
-!DEBUG
- write(std_out,*)' m_dens/constrained_residuals : after computing integrated magnetic moments'
- do iatom=1,natom
-   write(std_out,*)'iatom,intgden(1:nspden,iatom)=',iatom,intgden(1:nspden,iatom)
- enddo
-!ENDDEBUG
-
 !We need the integrated residuals
  ABI_ALLOCATE(intgres,(nspden,natom))
  ABI_ALLOCATE(intgr,(natom,nspden))
  call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
 &  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres)
-
-!DEBUG
- write(std_out,*)' m_dens/constrained_residuals : after computing integrated residuals'
- do iatom=1,natom
-   write(std_out,*)'iatom,intgres(1:nspden,iatom)=',iatom,intgres(1:nspden,iatom)
- enddo
-!ENDDEBUG
-
-!DEBUG
- write(std_out,*)' m_dens/constrained_residuals : intgf2 values '
- do iatom=1,natom
-   write(std_out,*)'iatom,c_dft%intgf2(iatom,1:natom)=',iatom,c_dft%intgf2(iatom,1:natom)
- enddo
-!ENDDEBUG
 
 !Make the proper combination of intgres, to single out the scalar potential residual and the magnetic field potential residuals for x,y,z.
 !Also exchanges the spin and atom idices to prepare the solution of the linear system of equation
@@ -955,13 +912,6 @@ end subroutine constrained_dft_free
      enddo
    enddo
 
-!DEBUG
- write(std_out,*)' m_dens/constrained_residuals : intgf2 before inversion '
- do iatom=1,natom
-   write(std_out,*)'iatom,intgf2(iatom,1:natom)=',iatom,intgf2(iatom,1:natom)
- enddo
-!ENDDEBUG
-
    !Solve the linear system of equation, for the different spins
    call dsytrf('U',natom,intgf2,natom,ipiv,work,2*natom,info)
 !  call dsytri('U',natom,intgf2,natom,ipiv,work,info)
@@ -977,33 +927,8 @@ end subroutine constrained_dft_free
       if(ii==2)intgres(2:nspden,iatom)=intgr(iatom,2:nspden)
     enddo
 
-
-!DEBUG
-! write(std_out,*)' m_dens/constrained_residuals : intgf2 after inversion '
-! do iatom=1,natom
-!   write(std_out,*)'iatom,intgf2(iatom,1:natom)=',iatom,intgf2(iatom,1:natom)
-! enddo
-!ENDDEBUG
-
-   !Combine the residuals
-!  do iatom=1,natom
-!    if(ii==1)intgres(1,iatom)=zero
-!    if(ii==2 .and. nspden>1)intgres(2:nspden,iatom)=zero
-!    do jatom=1,natom
-!      if(ii==1)intgres(1,iatom)=intgres(1,iatom)+intgf2(iatom,jatom)*intgr(1,jatom) 
-!      if(ii==2 .and. nspden>1)intgres(2:nspden,iatom)=intgres(2:nspden,iatom)+intgf2(iatom,jatom)*intgr(2:nspden,jatom) 
-!    enddo
-!  enddo
-
  enddo
 
-!DEBUG
- write(std_out,*)' m_dens/constrained_residuals : after solving the linear system of equations '
- do iatom=1,natom
-   write(std_out,*)'iatom,intgres(1:nspden,iatom)=',iatom,intgres(1:nspden,iatom)
- enddo
-!ENDDEBUG
- 
  ABI_ALLOCATE(coeffs_constr_dft,(nspden,natom))
  coeffs_constr_dft=zero
 
@@ -1019,11 +944,6 @@ end subroutine constrained_dft_free
    !Assemble the modified residual, also taking into account a global preconditioning factor. 
    !This might be improved in the future, treating separately the preconditioning for the charge, the longitudinal spin, the transverse spin
    intgden(1:nspden,iatom)=intgden(1:nspden,iatom) - intgres(1:nspden,iatom)/c_dft%magcon_lambda
-
-!DEBUG
-   write(std_out,*)' m_dens/constrained_residuals after selection of charge+spin : iatom,intgden(1:nspden,iatom)=',&
-&    iatom,intgden(1:nspden,iatom)
-!ENDDEBUG
 
    !Comparison with the target value, and computation of the correction in terms of density and magnetization coefficients.
    conkind=c_dft%constraint_kind(c_dft%typat(iatom))
@@ -1083,10 +1003,6 @@ end subroutine constrained_dft_free
        
    end if
 
-!DEBUG
-   write(std_out,*)' m_dens/constrained_residuals : iatom,corr_denmag(1:nspden)=',iatom,corr_denmag(1:nspden)
-!ENDDEBUG
-
    !Preconditioning by a global factor. Might be improved in the future ...
    corr_denmag(:)=corr_denmag(:) * c_dft%magcon_lambda
 
@@ -1104,25 +1020,12 @@ end subroutine constrained_dft_free
      endif
    endif
 
-!DEBUG
-   write(std_out,*)' m_dens/constrained_residuals out with : iatom,coeffs_constr_dft(1:nspden,iatom)=',&
-&    iatom,coeffs_constr_dft(1:nspden,iatom)
-!FOR TESTING PURPOSES ONLY 
-!  coeffs_constr_dft(:,iatom)=zero
-!ENDDEBUG
-
  enddo
 
 !Now compute the new residual, by adding the spherical functions
  option=1
  call add_atomic_fcts(natom,nspden,c_dft%rprimd,mpi_enreg,nfftf,c_dft%ngfftf,ntypat,option,&
 &  c_dft%ratsph,c_dft%typat,coeffs_constr_dft,vresid,xred)
-
-!DEBUG
-!We need the integrated residuals
-  call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
- &  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres)
-!ENDDEBUG
 
  ABI_DEALLOCATE(coeffs_constr_dft)
  ABI_DEALLOCATE(intgden)
@@ -1559,14 +1462,6 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
        if(dist_ij(iatom,jatom)-ratsph(typat(iatom))-ratsph(typat(jatom))<tol10)then
          overlap_ij(iatom,jatom)=1
          neighbor_overlap=1
-!DEBUG
-!Will be removed when the intgf2 will have been correctly used to mix the residuals, which is not yet the case
-!         write(msg,'(a,a,a,i5,a,i5,a,f12.4,a,a,a,f12.4,a,f12.4)')&
-!           'In constrained DFT, the spheres around different atoms cannot overlap. See input var ratsph.',ch10,&
-!&          'It is found that for atoms ',iatom,' and ',jatom,', the distance is ',dist_ij,' Bohr, while ',ch10,&
-!&          'the radii of the spheres are ',ratsph(typat(iatom)),' and ',ratsph(typat(jatom))
-!         MSG_ERROR(msg)
-!ENDDEBUG
        endif
      enddo
    enddo
@@ -1991,7 +1886,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
 
  end if ! option/=0 
 
-!DEBUG
+!DEBUG BUT KEEP
  if(.false.)then
    call printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,'DEN.vtk')
  endif
