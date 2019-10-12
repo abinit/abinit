@@ -13797,12 +13797,7 @@ is computed can be tuned thanks to [[dosdeltae]].
 If [[prtdos]] = 1, the smeared density of states is obtained from the
 eigenvalues, properly weighted at each k point using [[wtk]], and smeared
 according to [[occopt]] and [[tsmear]]. All levels that are present in the
-calculation are taken into account (occupied and unoccupied). Note that
-[[occopt]] must be between 3 and 7. Also note that the sampling of the
-Brillouin Zone that is needed to get a converged DOS is usually much finer
-than the sampling needed to converge the total energy or the geometry of the
-system, unless [[tsmear]] is very large (hence the DOS is not obtained
-properly). A separate convergence study is needed.
+calculation are taken into account (occupied and unoccupied). 
 In order to compute the DOS of an insulator with [[prtdos]] = 1, compute its
 density thanks to a self-consistent calculation (with a non-metallic
 [[occopt]] value, 0, 1 or 2), then use [[prtdos]] = 1, together with
@@ -13810,13 +13805,20 @@ density thanks to a self-consistent calculation (with a non-metallic
 smearing. If [[prtdos]] = 1, the name of the DOS file is the root name for the
 output files, followed by "_DOS".
 
+ * Note 1: [[occopt]] must be between 3 and 7. 
+ * Note 2: The sampling of the Brillouin Zone that is needed to get a converged DOS
+ is usually much finer than the sampling needed to converge the total energy or the geometry of the
+system, unless [[tsmear]] is very large (hence the DOS is not obtained
+properly). A separate convergence study is needed.
+
+
 If [[prtdos]] = 2, the DOS is computed using the tetrahedron method. As in the
 case of [[prtdos]] = 1, all levels that are present in the calculation are taken
 into account (occupied and unoccupied). In this case, the k-points must have
 been defined using the input variable [[ngkpt]] or the input variable
 [[kptrlatt]]. There must be at least two non-equivalent points in the
-Irreducible Brillouin Zone to use [[prtdos]] = 2. It is strongly advised to use
-a non-shifted k-point grid ([[shiftk]] 0 0 0): such grids contain naturally
+Irreducible Brillouin Zone to use [[prtdos]] = 2. It is strongly advised that you use
+a non-shifted k-point grid ([[shiftk]] 0 0 0): such grids naturally contain
 more extremal points (band minima and maxima at Gamma or at the zone-
 boundaries) than shifted grids, and lead to more non-equivalent points than
 shifted grids, for the same grid spacing. There is no need to take care of the
@@ -13841,16 +13843,16 @@ done, and the file denomination is similar to the [[prtdos]] = 2 case. However,
 three additional input variables might be provided, describing the atoms that
 are the center of the sphere (input variables [[natsph]] and [[iatsph]]), as
 well as the radius of this sphere (input variable [[ratsph]]).
-In case of PAW, [[ratsph]] radius has to be greater or equal to largest PAW
+In case of PAW, [[ratsph]] radius has to be greater or equal to the largest PAW
 radius of the atom types considered (which is read from the PAW atomic data
-file; see rc_sph or r_paw). Additional printing and/or approximations in PAW
+file; see rc_sph or r_paw). Additionally, printing and/or approximations in PAW
 mode can be controlled with [[pawprtdos]] keyword (in
 particular,[[pawprtdos]] = 2 can be used to compute quickly a very good
 approximation of the DOS).
 
-Note 1: when [[prtdos]] = 3, it is possible to output m-decomposed LDOS in _DOS
+ * Note 1: when [[prtdos]] = 3, it is possible to output m-decomposed LDOS in _DOS
 file; simply use [[prtdosm]] keyword.
-Note 2: the integrated total DOS in spheres around atoms can be obtained when
+ * Note 2: the integrated total DOS in spheres around atoms can be obtained when
 [[prtdensph]] flag is activated. It can be compared to the integrated DOS
 provided in _DOS file when [[prtdos]] = 3.
 
