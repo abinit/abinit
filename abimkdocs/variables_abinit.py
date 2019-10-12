@@ -1580,6 +1580,7 @@ Variable(
     dimensions=['[[ntypat]]'],
     defaultval=0,
     mnemonics="CONSTRAINT KIND in constrained DFT",
+    requires="[[iscf]] > 1 and [[iscf]] < 10 and [[ionmov]] /= 4",
     text=r"""
 If [[constraint_kind]] is non-zero for at least one type of atom,
 the constrained DFT algorithm is activated.
@@ -1597,7 +1598,9 @@ When [[constraint_kind]]=1 or 11, the exact value (vector in the non-collinear c
 When [[constraint_kind]]=2 or 12, only the direction is constrained (only meaningful in the non-collinear case);
 When [[constraint_kind]]=3 or 13, only the magnitude is constrained.
 
-For the algorithm, see [[topic:ConstrainedDFT]]. The balance between the potential residual, and the density/magnetization constraint is governed by [[magcon_lambda]]. The spherical integral is governed by [[ratsph]] and [[ratsm]]. 
+For the algorithm, see [[topic:ConstrainedDFT]]. It makes important use of the potential residual,
+so the algorithm works only with [[iscf]] between 2 and 9. 
+The balance between the potential residual, and the density/magnetization constraint is governed by [[magcon_lambda]]. The spherical integral is governed by [[ratsph]] and [[ratsm]]. 
 
 Note that while a spherical integral around an atom might reasonably well capture the magnetization of an atom within a solid or within a molecule,
  so that the sum of such magnetizations might be reasonably close to the total magnetization of the solid, 
@@ -1609,6 +1612,8 @@ Atoms of the same type are supposed to incur the same constraint.
 If the user wants to impose different constraints on atoms of the same type (in principle), it is possible (and easy) to pretend
 that they belong to different types, even if the same pseudopotential file is used for these atoms. There is an example 
 in test [[test:v8_24]], the hydrogen dimer, where the charge around the first atom is constrained, and the charge around the second atom is left free.
+
+Incidentally, [[ionmov]]==4 is not allowed in the present implementation of constrained DFT because the motion of atoms and simultaneous computation of constraints would be difficult to handle. 
 """,
 ),
 
