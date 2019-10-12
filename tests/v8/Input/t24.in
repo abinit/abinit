@@ -8,7 +8,7 @@
  ratsph2           1.0  1.0  # Non-overlapping spheres
 
  constraint_kind3   10   10  # Dataset 3 is constrained DFT for the charge on both atoms
- chrgat3           0.0  0.0  # Impose neutrality of atoms (this is possible only because the spheres overlap sufficiently)
+ chrgat3           0.0  0.0  # Impose neutrality of atoms 
  ratsph3           2.0  2.0  # Overlapping spheres are treated correctly
 
  constraint_kind4   10   10  # Dataset 4 is constrained DFT for the charge on both atoms
@@ -39,7 +39,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = ubu_intel_17.0_openmpi
+##%% exclude_builders = ubu_intel_17.0_openmpi
 #%% [files]
 #%% files_to_test = 
 #%%   t24.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
@@ -51,5 +51,5 @@
 #%% references = 
 #%% keywords = 
 #%% description = H2 diatomic molecule, static, to check the constrained DFT implementation with constrained charges 
-#%%  Constrain the charge around atom 1 to the value 0.5, then work with both atoms
+#%%  Constrain the charge around atom 1 to the value 0.5, then work with both atoms and larger spheres
 #%%<END TEST_INFO>
