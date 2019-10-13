@@ -608,7 +608,7 @@ AC_DEFUN([_SD_HDF5_CHECK_COMPILERS], [
     fi
 
     AC_MSG_CHECKING([for HDF5 high-level libraries])
-    tmp_hdf5_hl=`${sd_hdf5_h5cc} -showconfig | grep 'High Level library:' | awk '{print [$]NF}'`
+    tmp_hdf5_hl=`${sd_hdf5_h5cc} -showconfig | grep 'High@<:@ \-@:>@@<:@Ll@:>@evel library:' | awk '{print [$]NF}'`
     if test "${tmp_hdf5_hl}" = "yes"; then
       sd_hdf5_libs_hl="-lhdf5_hl"
       test "${sd_hdf5_enable_fc}" = "yes" -a "${sd_hdf5_has_fc}" = "yes" && \
