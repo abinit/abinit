@@ -264,7 +264,7 @@ AC_DEFUN([_SD_NETCDF_FORTRAN_CHECK_USE], [
 
   # Check if we can do parallel I/O
   if test "${sd_netcdf_fortran_ok}" = "yes" -a "${sd_hdf5_mpi_ok}" = "yes"; then
-    AC_MSG_CHECKING([whether NetCDF has parallel I/O in Fortran])
+    AC_MSG_CHECKING([whether the NetCDF Fortran interface has parallel I/O])
     AC_LANG_PUSH([Fortran])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],
       [[
