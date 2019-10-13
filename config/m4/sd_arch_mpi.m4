@@ -261,7 +261,8 @@ AC_DEFUN([SD_MPI_DETECT], [
     tmp_mpi_ok="yes"
     if test "${sd_mpi_cc_ok}" = "yes"; then
       if test "${sd_mpi_enable_cxx}" = "yes" -a "${sd_mpi_cxx_ok}" != "yes"; then
-        tmp_mpi_ok="no"
+        #tmp_mpi_ok="no"
+        AC_MSG_WARN([MPI C++ support is broken])
       fi
       if test "${sd_mpi_enable_fc}" = "yes" -a "${sd_mpi_fc_ok}" != "yes"; then
         tmp_mpi_ok="no"
@@ -402,8 +403,8 @@ AC_DEFUN([_SD_MPI_CHECK_CC_API], [
 #include <mpi.h>
     ]],
     [[
-      int *argc;
-      char **argv;
+      int *argc = NULL;
+      char ***argv = NULL;
       MPI_Init(argc, argv);
     ]])], [sd_mpi_cc_api_ok="yes"], [sd_mpi_cc_api_ok="no"])
   AC_LANG_POP([C])
@@ -506,11 +507,12 @@ AC_DEFUN([_SD_MPI_CHECK_CXX_API], [
   AC_LANG_PUSH([C++])
   AC_LINK_IFELSE([AC_LANG_PROGRAM(
     [[
-#include <mpi.h>
+#     include <mpi>
+      using namespace std;
     ]],
     [[
-      int *argc;
-      char ***argv;
+      int *argc = 0;
+      char ***argv = 0;
       MPI_Init(argc, argv);
     ]])], [sd_mpi_cxx_api_ok="yes"], [sd_mpi_cxx_api_ok="no"])
   AC_LANG_POP([C++])
