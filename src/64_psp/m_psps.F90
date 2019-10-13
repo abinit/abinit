@@ -33,6 +33,7 @@ module m_psps
  use m_xmpi
  use m_nctk
  use m_copy
+ use m_dtset
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -41,7 +42,6 @@ module m_psps
  use m_io_tools,      only : open_file
  use m_symtk,         only : matr3inv
  use defs_datatypes,  only : pspheader_type, pseudopotential_type, pseudopotential_gth_type, nctab_t
- use defs_abitypes,   only : dataset_type
  use m_paw_numeric,   only : paw_spline
  use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free, simp_gen
  use m_pawpsp,        only : pawpsp_cg

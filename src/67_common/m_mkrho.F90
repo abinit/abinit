@@ -27,12 +27,13 @@
 module m_mkrho
 
  use defs_basis
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_xmpi
  use m_errors
+ use m_dtset
 
+ use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
  use m_fftcore,      only : sphereboundary
  use m_fft,          only : fftpac, zerosym, fourwf, fourdp
@@ -1462,7 +1463,7 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
    ABI_ALLOCATE(value_fft,(5,nitems,nproc))
    ABI_ALLOCATE(index_fft,(2,2,nitems,nproc))
    value_fft(:,:,:)=zero
-   index_fft(:,:,:,:)=zero
+   index_fft(:,:,:,:)=0
    value_fft(1,:,me + 1)=value(1,1,:)
    value_fft(2,:,me + 1)=value(2,1,:)
    value_fft(3,:,me + 1)=value(1,2,:)

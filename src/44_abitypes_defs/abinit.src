@@ -22,6 +22,7 @@ sources = [
  "m_args_gs.F90",
  "m_distribfft.F90",
  "m_dtset.F90",
+ "m_dtfil.F90",
  "m_efield.F90",
  "m_efmas_defs.F90",
  "m_energies.F90",

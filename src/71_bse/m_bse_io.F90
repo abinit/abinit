@@ -40,7 +40,6 @@ MODULE m_bse_io
  use iso_c_binding
  use m_hdr
 
- use defs_abitypes,    only : Hdr_type
  use m_time,           only : cwtime
  use m_fstrings,       only : toupper
  use m_io_tools,       only : open_file
@@ -115,7 +114,7 @@ subroutine exc_write_bshdr(funt,Bsp,Hdr)
  character(len=500) :: errmsg
  ! *************************************************************************
 
- call hdr_fort_write(Hdr, funt, fform_1002, ierr)
+ call hdr%fort_write(funt, fform_1002, ierr)
  ABI_CHECK(ierr == 0, "hdr_fort_write returned ierr != 0")
  write(funt, err=10, iomsg=errmsg) BSp%nreh,BSp%nkbz
 
@@ -180,7 +179,7 @@ subroutine exc_read_bshdr(funt,Bsp,fform,ierr)
 
  read(funt, err=10, iomsg=errmsg) nreh_read, nkbz_read
 
- call hdr_free(Hdr)
+ call Hdr%free()
 
  if (ANY(nreh_read/=BSp%nreh)) then
    call wrtout(std_out,"Wrong number of e-h transitions","COLL")

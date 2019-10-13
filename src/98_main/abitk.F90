@@ -34,7 +34,7 @@
 program abitk
 
  use defs_basis
- use defs_abitypes
+ use m_abicore
  use m_build_info
  use m_xmpi
  use m_errors
@@ -135,7 +135,7 @@ program abitk
    ABI_CHECK(fform /= 0, "fform == 0")
    !rdwr = 3; if (prtvol > 0) rdwr = 4
    rdwr = 4
-   call hdr_echo(hdr, fform, rdwr, unit=std_out)
+   call hdr%echo(fform, rdwr, unit=std_out)
 
  case ("ibz")
    ! Print list of kpoints in the IBZ with the corresponding weights
@@ -168,7 +168,7 @@ program abitk
 
  case ("crystal_print")
     call get_path_cryst(path, cryst, comm)
-    call crystal_print(cryst, unit=std_out, prtvol=prtvol)
+    call cryst%print(unit=std_out, prtvol=prtvol)
 
  case ("ebands_print", "ebands_xmgrace", "ebands_gnuplot")
    call get_path_ebands(path, ebands, comm)
@@ -189,6 +189,7 @@ program abitk
      edos = ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
      call edos%write(strcat(basename(path), "_EDOS"))
      call edos%free()
+
    else if (command == "ebands_jdos") then
      !jdos = ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
      !call jdos%write(strcat(basename(path), "_EJDOS"))
@@ -258,7 +259,7 @@ program abitk
  end select
 
  ! Deallocate memory to make memcheck happy.
- call hdr_free(hdr)
+ call hdr%free()
  call cryst%free()
  call ebands_free(ebands)
 

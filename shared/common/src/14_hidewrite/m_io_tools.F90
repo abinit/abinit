@@ -194,7 +194,7 @@ logical function file_exists(fname)
 
 ! *********************************************************************
 
- inquire(file=fname,exist=file_exists)
+ inquire(file=fname, exist=file_exists)
 
 end function file_exists
 !!***

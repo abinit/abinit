@@ -25,15 +25,18 @@
 
 module m_berryphase_new
 
- use defs_abitypes
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use m_efield
  use m_errors
  use m_abicore
  use m_xmpi
+ use m_hdr
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,  only : MPI_type
  use m_berrytk,      only : smatrix, polcart
  use m_cgprj,        only : ctocprj
  use m_fftcore,      only : kpgsph
@@ -174,8 +177,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 &  nkpt,calc_pol_ddk,pawrhoij,pawtab,pel,pelev,pion,ptot,red_ptot,pwind,&  !!REC
 &  pwind_alloc,pwnsfac,&
 &  rprimd,typat,ucvol,unit_out,usecprj,usepaw,xred,zion)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: lmnmax,mband,mcg,mcprj,mkmem,mpw,my_natom,natom,nkpt
@@ -1806,8 +1807,6 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 &  scfcv_level,scfcv_quit,scfcv_step,ucvol,unit_out,&
 &  usepaw,xred,ylm,ylmgr)
 
-  implicit none
-
   !Arguments ------------------------------------
   integer, intent(in) :: idir,mcg,mkmem,mpw,my_natom,natom,nkpt,ntypat
   integer, intent(in) :: pwind_alloc,scfcv_level,scfcv_quit,scfcv_step,unit_out,usepaw
@@ -2309,8 +2308,6 @@ end subroutine update_e_field_vars
 
 subroutine prtefield(dtset,dtefield,iunit,rprimd)
 
-  implicit none
-
   !Arguments ------------------------------------
   integer :: iunit
   real(dp),intent(in) :: rprimd(3,3)
@@ -2714,8 +2711,6 @@ subroutine init_e_field_vars(dtefield,dtset,gmet,gprimd,kg,&
      &              mpi_enreg,npwarr,occ,pawang,pawrad,pawtab,psps,&
      &              pwind,pwind_alloc,pwnsfac,rprimd,symrec,xred)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(out) :: pwind_alloc
@@ -2861,8 +2856,6 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      &              nsym,ntypat,occ,pawang,pawrad,pawtab,psps,&
      &              pwind,pwind_alloc,pwnsfac,&
      &              rprimd,symrec,typat,usepaw,xred)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars

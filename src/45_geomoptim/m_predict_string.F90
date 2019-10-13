@@ -27,13 +27,13 @@
 module m_predict_string
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_splines
  use m_mep
  use m_errors
  use m_xmpi
 
+ use defs_abitypes, only : MPI_type
  use m_results_img, only : results_img_type, gather_array_img, get_geometry_img
 
  implicit none
@@ -103,8 +103,6 @@ contains
 
 subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg,natom,&
 &                         ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

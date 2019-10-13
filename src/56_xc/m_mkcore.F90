@@ -27,12 +27,12 @@
 module m_mkcore
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
  use m_linalg_interfaces
 
+ use defs_abitypes, only : mpi_type
  use m_geometry,   only : strconv
  use m_time,       only : timab
  use m_mpinfo,     only : ptabs_fourdp

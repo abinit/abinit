@@ -26,14 +26,14 @@
 module m_outvar_i_n
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_errors
  use m_results_out
  use m_errors
+ use m_dtset
 
- use m_parser,  only : prttagm, prttagm_images
+ use m_parser,  only : prttagm, prttagm_images, ab_dimensions
 
  implicit none
 
@@ -664,14 +664,13 @@ subroutine outvar_i_n (dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr, narrm,ncid,ndtset_alloc,'lexexch','INT',multivals%ntypat)
 
 !ldaminushalf
+ narr=mxvals%ntypat             ! default size for all datasets
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=dtsets(idtset)%ntypat
    if(idtset==0)narrm(idtset)=mxvals%ntypat
-   if (narrm(idtset)>0) then
-     intarr(1:narrm(idtset),idtset)=dtsets(idtset)%ldaminushalf(1:narrm(idtset))
-   end if
+   if (narrm(idtset)>0) intarr(1:narrm(idtset),idtset)=dtsets(idtset)%ldaminushalf(1:narrm(idtset))
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr, narrm,ncid,ndtset_alloc,'ldaminushalf','INT',multivals%ntypat)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'ldaminushalf','INT',multivals%ntypat)
 
 !localrdwf
  intarr(1,:)=dtsets(:)%localrdwf
@@ -682,9 +681,7 @@ subroutine outvar_i_n (dtsets,iout,&
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=dtsets(idtset)%ntypat
    if(idtset==0)narrm(idtset)=mxvals%ntypat
-   if (narrm(idtset)>0) then
-     intarr(1:narrm(idtset),idtset)=dtsets(idtset)%lpawu(1:narrm(idtset))
-   end if
+   if (narrm(idtset)>0) intarr(1:narrm(idtset),idtset)=dtsets(idtset)%lpawu(1:narrm(idtset))
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'lpawu','INT',multivals%ntypat)
 

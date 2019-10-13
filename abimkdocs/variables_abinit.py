@@ -945,7 +945,7 @@ Variable(
     vartype="real",
     topics=['BSE_expert'],
     dimensions=[2],
-    defaultval=[0.02, 0],
+    defaultval=[0.02, 0.0],
     mnemonics="Bethe-Salpeter HAYDOCK TOLerance",
     requires="[[optdriver]] == 99 and [[bs_algorithm]] == 2",
     text=r"""
@@ -959,9 +959,11 @@ value indicates that the converge error is estimated by averaging over the entir
 
 **bs_haydock_tol(2)** defines the quantity that will be checked for convergence:
 
-  * 0 --> both the real and the imaginary part must converge
-  * 1 --> only the real part
-  * 2 --> only the imaginary part
+  * 0.0 --> both the real and the imaginary part must converge
+  * 1.0 --> only the real part
+  * 2.0 --> only the imaginary part
+
+(The latter are real numbers, tolerance is 1.0d-6).
 """,
 ),
 
@@ -1571,6 +1573,42 @@ iteration. See [[cite:Henkelman2000a]] for additional details of this method.
 ),
 
 Variable(
+    abivarname="constraint_kind",
+    varset="gstate",
+    vartype="integer",
+    topics=['ConstrainedDFT_basic'],
+    dimensions=['[[ntypat]]'],
+    defaultval=0,
+    mnemonics="CONSTRAINT KIND in constrained DFT",
+    text=r"""
+Defines, for each type of atom, the kind of constraint imposed by constrained DFT (also turns on the constrained DFT algorithm).
+When [[constraint_kind]] is zero for an atom type, there is not constraint applied to this atom type.
+Otherwise, different constraints can be imposed on the total charge (ion+electronic) and/or magnetization, computed
+inside a sphere of radius [[ratsph]], possibly smeared within a width [[ratsm]]. 
+Such integrated charge might be imposed to be equal to [[chrgat]], while the magnetization might be compared to [[spinat]].
+
+When [[constraint_kind]] is 10 or above, the charge constraint will be imposed.
+The first digit of [[constraint_kind]] govers the magnetization constraint:
+
+  When [[constraint_kind]]=1 or 11, the exact value (vector in the non-collinear case, amplitude and sign in the colinear case) of the magnetization is constrained;
+  When [[constraint_kind]]=2 or 12, only the direction is constrained (only applicable to the non-collinear case);
+  When [[constraint_kind]]=3 or 13, only the magnitude is constrained.
+
+For the algorithm, see [[topic:ConstrainedDFT]]. The balance between the potential residual, and the density/magnetization constraint is governed by [[magcon_lambda]]. The spherical integral is governed by [[ratsph]] and [[ratsm]]. 
+
+Note that while a spherical integral around an atom might reasonably well capture the magnetization of an atom within a solid or within a molecule,
+ so that the sum of such magnetizations might be reasonably close to the total magnetization of the solid, 
+such a procedure hardly gives the total charge of the solid: the space between the spheres is too large when the spheres do not overlap,
+and overlapping spheres will not deliver the correct total charge of the system.
+
+Note that [[constraint_kind]] defines constraints for types of atoms, not for specific atoms. Atoms of the same type are supposed to incur the same constraint. If the use needs to impose different constraints on atoms of the same type (in principle), it is possible (and easy) to pretend
+that they belong to different types, even if they are using the same pseudopotential file. There is an example 
+in test [[test:v8_24]], the hydrogen dimer, where the charge around the first atom is constrained, and the charge around the second atom is left free.
+""",
+),
+
+
+Variable(
     abivarname="cpuh",
     varset="gstate",
     vartype="real",
@@ -1941,6 +1979,26 @@ When [[delayperm]] is zero, there are no permutation trials.
 ),
 
 Variable(
+    abivarname="chrgat",
+    varset="gstate",
+    vartype="real",
+    topics=['ConstrainedDFT_useful'],
+    dimensions=ValueWithConditions({'[[natrd]]<[[natom]]': '[ [[natrd]] ]', 'defaultval': '[ [[natom]] ]'}),
+    defaultval=0.0,
+    mnemonics="CHARGE of the AToms",
+    text=r"""
+Gives the target integrated charge in case of constrained DFT calculations, see [[constraint_kind]].
+Given in atomic unit of charge (=minus the charge of the electron).
+Note that this number is the net positive charge inside the sphere : one subtract from the 
+nucleus charge [[ziontypat]] the integrated valence electron density in a sphere defined by [[ratsph]]. 
+The latter has indeed a negative value. Note that if the sphere radius [[ratsph]] is not sufficiently large,
+the amount of electrons will be smaller than expected based on chemical intuition. This means that there
+is in this case a bias toward too positive integrated charges. By contrast, if the sphere radius is too large,
+the spheres will overlap, and the electrons in the interatomic region will be double counted.
+""",
+),
+
+Variable(
     abivarname="densfor_pred",
     varset="dev",
     vartype="integer",
@@ -2143,19 +2201,20 @@ Used for screening length (in Bohr) of the model dielectric function, diagonal
 in reciprocal space. By default, given in Bohr atomic units (1
 Bohr=0.5291772108 Angstrom), although Angstrom can be specified, if preferred,
 since [[dielng]] has the '[[LENGTH]]' characteristics.
-This model dielectric function is as follows ($\kk$ being a wavevector):
+This model dielectric function is as follows (${\bf K}$ being a wavevector):
+
 \begin{equation}
-diel(\kk) = \frac{ 1 + [[dielng]]^2 \kk^2 }{ \left( 1/[[diemac]] + [[dielng]]^2 \kk^2  \right) [[diemix]] } \nonumber
+\epsilon({\bf K}) = \frac{ 1 + [[dielng]]^2 {\bf K}^2 }{ \left( 1/[[diemac]] + [[dielng]]^2 {\bf K}^2  \right) [[diemix]] } \nonumber
 \end{equation}
 
 The inverse of this model dielectric function will be applied to the residual,
-to give the preconditioned change of potential. Right at $\kk$=0, $diel(\kk)$ is imposed to be 1.
+to give the preconditioned change of potential. Right at ${\bf K}$=0, $\epsilon({\bf K})$ is imposed to be 1.
 
 If the preconditioning were perfect, the change of potential would lead to an
 exceedingly fast solution of the self-consistency problem (two or three
 steps). The present model dielectric function is excellent for rather
 homogeneous unit cells.
-When $\kk$->0, it tends to the macroscopic dielectric constant, eventually
+When ${\bf K}$->0, it tends to the macroscopic dielectric constant, eventually
 divided by the mixing factor [[diemix]] (or [[diemixmag]]  for magnetization).
 For metals, simply put [[diemac]] to a very large value ($10^6$ is OK)
 The screening length [[dielng]] governs the length scale to go from the
@@ -3092,8 +3151,10 @@ Variable(
     mnemonics="Energy CUToff",
     characteristics=['[[ENERGY]]'],
     text=r"""
-Used for kinetic energy cutoff which controls number of planewaves at given k point by:
-(1/2)[(2 Pi)*(k+Gmax)]  2  =[[ecut]] for Gmax.
+Used to define the kinetic energy cutoff which controls the number of planewaves at given k point. The allowed
+plane waves are those with kinetic energy lower than [[ecut]], which translates to the following constraint
+on the planewave vector $\vec{G}$ in reciprocal space
+$\frac{1}{2}(2\pi)^2 (\vec{k}+\vec{G})^2<$[[ecut]].
 
 All planewaves inside this "basis sphere" centered at k are included in the basis (except if [[dilatmx]] is defined).
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[ecut]] has the
@@ -3182,14 +3243,14 @@ cell shape and size without smoothing the total energy curve (a dangerous
 thing to do), use a very small [[ecutsm]], on the order of one microHartree.
 
 Technical information:
-See [[cite:Bernasconi1995]] for a related method using constant pressure molecular dynamics.
+See Appendix B of [[cite:Laflamme2016]].
 [[ecutsm]] allows one to define an effective kinetic energy for plane waves, close
-to, but lower than the maximal kinetic energy [[ecut]]. For kinetic energies
+to, but lower than, the maximal kinetic energy [[ecut]]. For kinetic energies
 less than [[ecut]]-[[ecutsm]], nothing is modified, while between
-[[ecut]]-[[ecutsm]] and [[ecut]], the kinetic energy is multiplied by:
-1.0 / ( x  2  (3+x-6x  2  +3x  3  ))
-where x = ([[ecut]] - kinetic_energy)/[[ecutsm]]
-Note that x 2  ( 3+x-6x  2  +3x  3  ) is 0 at x=0, with vanishing derivative,
+[[ecut]]-[[ecutsm]] and [[ecut]], the kinetic energy is multiplied by
+$1.0 / ( x^2(3+x-6x^2+3x^3 ))$,
+where x = ([[ecut]] - kinetic_energy)/[[ecutsm]].
+Note that $x^2(3+x-6x^2+3x^3)$ is 0 at x=0, with vanishing derivative,
 and that at x=1, it is 1, with also vanishing derivative.
 If [[ecutsm]] is zero, the unmodified kinetic energy is used.
 [[ecutsm]] can be specified in Ha (the default), Ry, eV or Kelvin, since
@@ -3983,7 +4044,7 @@ Variable(
 The basic ingredients needed to perform both a screening and a sigma
 calculation are the so-called oscillator matrix elements defined as
 
-$$ \langle \mathbf{k-q},b_1 | e^{-i (\mathbf{q+G)} \mathbf{r}} | \mathbf{k}, b_2 \\rangle $$
+$$ \langle \mathbf{k-q},b_1 | e^{-i (\mathbf{q+G)} \mathbf{r}} | \mathbf{k}, b_2 \rangle $$
 
 In reciprocal space, this expression is evaluated by a convolution in which
 the number of reciprocal lattice vectors employed to describe the
@@ -3997,8 +4058,7 @@ variable is used to select the FFT mesh to be used.
 [[fftgw]] is the concatenation of two digits, labelled (A) and (B) whose value
 is internally used to define the value of [[ngfft]](1:3) (see the setmesh.F90 routine).
 
-The first digit (A) defines the augmentation of the FFT grid. Possible values
-are 1, 2 and 3.
+The first digit (A) defines the augmentation of the FFT grid. Possible values are 1, 2 and 3.
 
   * 0 --> Use the FFT grid specified by the user through [[ngfft]](1:3)
   * 1 --> Use a coarse FFT grid which encloses a sphere in reciprocal space whose radius
@@ -4210,12 +4270,9 @@ Gives the internal friction coefficient (atomic units) for Langevin dynamics
 (when [[ionmov]] = 9): fixed temperature simulations with random forces.
 
 The equation of motion is:
-
-    M  I  d  2  R  I  /dt  2  = F  I  - [[friction]] M  I  dR  I  /dt - F_random I
-
-where F_random  I  is a Gaussian random force with average zero, and variance 2 [[friction]] M  I  kT.
-The atomic unit of friction is hartrees*electronic mass*(atomic time
-units)/Bohr  2. See [[cite:Chelikowsky2000]] for additional information.
+$M_I \frac{d^2 R_I}{dt^2}= F_I -$[[friction]]$*M_I \frac{d R_I}{dt} - F_{random,I}$,
+where $F_{random,I}$ is a Gaussian random force with average zero and variance [[friction]]$*2M_IkT$.
+The atomic unit of [[friction]] is Hartree*Electronic mass*(atomic unit of Time)/Bohr^2. See [[cite:Chelikowsky2000]] for additional information.
 """,
 ),
 
@@ -8808,11 +8865,11 @@ Variable(
     defaultval=0.01,
     mnemonics="MAGnetization CONstraint LAMBDA parameter",
     text=r"""
-This variable gives the amplitude of the constraint imposed on the
+This variable gives the amplitude of the penalty function imposed on the
 magnetization vectors on each atom (turned on with flag variable
-[[magconon]]). Typical values for [[magcon_lambda]] are 0.001 to 0.1. The SCF convergence
+[[magconon]]=1 to 3). Typical values for [[magcon_lambda]] are 0.001 to 0.1. The SCF convergence
 will be difficult if [[magcon_lambda]] is too large. If [[magcon_lambda]] is too small, the
-constraint will not be very effective and it will give magnetization not close
+penalty will not be very effective and it will give magnetization not close
 to the desired [[spinat]] target. In case of convergence problem, it can help
 to start with a small value of [[magcon_lambda]] and to increase it by reading the
 wavefunction obtained with a lower [[magcon_lambda]] value. See variable [[magconon]] for more details.
@@ -8828,13 +8885,17 @@ Variable(
     defaultval=0,
     mnemonics="turn MAGnetization CONstraint ON",
     text=r"""
-Turns on the imposition of a Lagrangian constraint on the magnetization. For
+Turns on the imposition of a constraint on the magnetization, using a penalty function. For
 each atom, the magnetization is calculated in a sphere (radius [[ratsph]]) and
-a constraint is applied to bring it closer to the input values of [[spinat]].
+a penalty function is applied to bring it to the input values of [[spinat]].
 The constraint can be either on the direction only ([[magconon]] = 1) or on the full
-vector ([[magconon]] = 2). The Lagrangian constraint has an amplitude
-[[magcon_lambda]] which should be neither too big (bad or impossible
-convergence) nor too small (no effect).
+vector ([[magconon]] = 2). The penalty function has an amplitude
+[[magcon_lambda]] that should be neither too big (bad or impossible convergence) nor too small (no effect). 
+The penalty function is documented in [[cite:Ma2015]] as being a Lagrange
+approach, which is a misnomer for the algorithm that they describe. It has the drawback of being unable to deliver
+the exact sought value for the magnetization. So, the true Lagrange approach has to be preferred, except for testing purposes.
+This is provided by the algorithm governed by the input variable [[constraint_kind]], which is actually also much more flexible
+than the implementation corresponding to [[magconon]].
 """,
 ),
 
@@ -11261,14 +11322,18 @@ Variable(
     mnemonics="NUClear DIPole MOMents",
     requires="[[usepaw]] = 1; [[pawcpxocc]] = 2; [[kptopt]] > 2",
     text=r"""
-Places an array of nuclear magnetic dipole moments on the atomic positions,
-useful for computing the magnetization in the presence of nuclear dipoles and
-thus the chemical shielding by the converse method. The presence of these
-dipoles breaks time reversal symmetry and lowers the overall spatial symmetry.
+Places an array of nuclear magnetic dipole moments on the atomic
+positions, useful for computing the magnetization in the presence of
+nuclear dipoles and thus the chemical shielding by the converse method
+[[cite:Thonhauser2009]]. The presence of these dipoles breaks time
+reversal symmetry and lowers the overall spatial symmetry.  The dipole
+moment values are entered in atomic units. For reference, note that
+one Bohr magneton has value $1/2$ in atomic units, while one nuclear
+Bohr magneton has value $2.7321\times 10^{-4}$ in atomic units.
 """,
 ),
 
-Variable(
+    Variable(
     abivarname="nwfshist",
     varset="gstate",
     vartype="integer",
@@ -11884,12 +11949,28 @@ Variable(
     defaultval=0,
     mnemonics="ORBital MAGnetization",
     characteristics=['[[DEVELOP]]'],
-    requires="""[[usepaw]] == 1
-[[kptopt]] == 3
-[[NPROC]] == 1""",
+    requires="""[[usepaw]] == 1;
+[[usexcnhat]] == 0;
+[[nspinor]] == 1;
+[[paral_atom]] == 0;
+[[paral_kgb]] == 0;
+[[kptopt]] > 2 """,
     text=r"""
-Compute quantities related to orbital magnetization. Currently only the Chern
-number calculated.
+Compute quantities related to orbital magnetization. The
+    implementation assumes an insulator, so no empty or partially
+    filled bands, and currently restricted to [[nspinor]] 1. Such
+    insulators have orbital magnetization zero, except in the presence
+    of nonzero nuclear dipole moments, see [[nucdipmom]].  [[orbmag]]
+    is parallelized over k points only. The implementation follows the
+    theory outlined in [[cite:Gonze2011a]] extended to the PAW case;
+    see also [[cite:Ceresoli2006]]. The computed results are returned in the
+    standard output file, search for "Orbital magnetization" and "Chern number".
+
+* [[orbmag]] = 1: Compute Chern number [[cite:Ceresoli2006]]. This computation is
+    faster than the full [[orbmag]] calculation, and a nonzero value indicates a circulating
+    electronic current.
+* [[orbmag]] = 2: Compute electronic orbital magnetization.
+* [[orbmag]] = 3: Compute both Chern number and electronic orbital magnetization.
 """,
 ),
 
@@ -14430,16 +14511,17 @@ Control the volume of printed output. In particular, this concerns the
 explicit echo of eigenenergies and residuals for all bands and k points in the
 main output file. Also, the analysis of the value and location of the maximal
 density (and magnetization).
-Standard choice is 0. Positive values print more in the output and log files,
+Standard choice is 0. Positive values (all are allowed) generally print more and more in the output and log files,
 while negative values are for debugging (or preprocessing only), and cause the
 code to stop at some point.
 
   * 0 --> The eigenenergies and residuals for all bands and k points are not echoed in the main output file. There are exceptions: the eigenvalues of the first k point are printed at the end of the SCF loop, and also, if [[iscf]] = -2 and [[kptopt]]<=0, the eigenvalues for all the k points are printed anyway, for a maximum of 50 k-points. Due to some subtlety, if for **some** dataset [[prtvol]] is non-zero, the limit for input and output echoes cannot be enforced, so it is like if [[prtvol]] = 1 for **all** the datasets for which [[prtvol]] was set to 0.
-  * 1 --> the eigenvalues for the first 50 k-points are printed in all cases, at the end of the SCF loop.
+  * 1 --> the eigenvalues for the first k-point are printed in all cases, at the end of the SCF loop.
   * 2 --> all the eigenvalues and the residuals are printed at the end of the SCF loop. Also, the analysis of the value and location of the maximal density (and magnetization) is printed.
-  * 3 --> Print memory information for lobpcg
-  * 4 --> Like 3 and prints information of lobpcg algorithm convergence
-  * 10 --> the eigenvalues are printed for every SCF iteration, as well as other additions (to be specified in the future...)
+  * 3 --> Print memory information for lobpcg.
+  * 4 --> Like 3 and prints information of lobpcg algorithm convergence.
+  * 10 --> the eigenvalues are printed for every SCF iteration, as well as other additions.
+  * 11 --> even more information ...
 
 Debugging options:
 
@@ -15040,21 +15122,48 @@ in which [[ntypat]] differs from [[npsp]])
 ),
 
 Variable(
+    abivarname="ratsm",
+    varset="gstate",
+    vartype="real",
+    topics=['printing_prdos', 'MagMom_useful', 'ConstrainedDFT_useful'],
+    dimensions="scalar",
+    defaultval=ValueWithConditions({'any([[constraint_kind]] > 1)': 0.05, 'defaultval': 0.00}),
+    mnemonics="Radii of the ATomic spheres SMearing",
+    text=r"""
+Smearing width for the atomic spheres whose radius is determined by [[ratsph]].
+For each spherical zone around each atom, the integrating function goes 
+from 1.0 to 0.0 in an interval from [[ratsph]]-[[ratsm]] to [[ratsph]].
+The function is the same as the one used to smear the kinetic energy, see [[ecutsm]].
+""",
+),
+
+
+Variable(
     abivarname="ratsph",
     varset="gstate",
     vartype="real",
-    topics=['printing_prdos', 'MagMom_useful', 'ElecBandStructure_useful', 'ElecDOS_useful'],
+    topics=['printing_prdos', 'MagMom_useful', 'ElecBandStructure_useful', 'ElecDOS_useful', 'ConstrainedDFT_basic'],
     dimensions=['[[ntypat]]'],
-    defaultval=ValueWithConditions({'[[usepaw]] == 1': '[[AUTO_FROM_PSP]]', 'defaultval': 2.0}),
+    defaultval=ValueWithConditions({'[[usepaw]] == 1': '[[AUTO_FROM_PSP]]', 'defaultval': 2.00}),
     mnemonics="Radii of the ATomic SPHere(s)",
     text=r"""
-Relevant only when [[prtdos]] = 3 or [[prtdensph]] = 1.
+Relevant only when [[prtdensph]] = 1, or [[magconon]]/=0, or any([[constraint_kind]](:)/=0) (that is, constrained DFT), or [[prtdos]] = 3.
+In most cases (see later for [[prtdos]] = 3), provides the radius of the spheres around each atom in which the total
+charge density or magnetization will be integrated.
+The integral within the sphere is obtained by a sum over real space FFT points
+inside the sphere, multiplied by a function that is one inside the sphere, except in a small boundary zone determined by [[ratsm]],
+where this fonction goes smoothly from 1 to 0.
+In case of PAW, [[ratsph]] radius has to be greater or equal to PAW radius of
+considered atom type (which is read from the PAW dataset file; see **rc_sph** or **r_paw**).
+In case of constrained DFT, note that the sphere for different atoms are not allowed to overlap.
 
 When [[prtdos]] = 3:
 
 Provides the radius of the spheres around the [[natsph]] atoms of indices
 [[iatsph]], in which the local DOS and its angular-momentum projections will
-be analysed. The choice of this radius is quite arbitrary. In a plane-wave
+be analysed. 
+
+The choice of this radius is quite arbitrary. In a plane-wave
 basis set, there is no natural definition of an atomic sphere. However, it
 might be wise to use the following well-defined and physically motivated procedure:
 from the Bader analysis, one can define the radius of the sphere that contains
@@ -15072,14 +15181,6 @@ between the s, p and d components. Indeed, the integrated charge within a
 given radius, behave as a different power of the radius, for the different
 channels s, p, d. At the limit of very small radii, the s component dominates
 the charge contained in the sphere.
-
-When [[prtdensph]] = 1:
-
-Provides the radius of the spheres around (all) atoms in which the total
-charge density will be integrated.
-
-In case of PAW, [[ratsph]] radius has to be greater or equal to PAW radius of
-considered atom type (which is read from the PAW dataset file; see **rc_sph** or **r_paw**).
 """,
 ),
 
@@ -15701,22 +15802,24 @@ Variable(
     characteristics=['[[EVOLVING]]'],
     commentdims="Internally, it is represented as rprim(3,3,[[nimage]])",
     text=r"""
-Give, in columnwise entry, the three dimensionless primitive translations in
+Give the three dimensionless primitive translations in
 real space, to be rescaled by [[acell]] and [[scalecart]].
+The three first numbers are the coordinates of the first vector, the next three numbers are the coordinates
+of the second, and the last three the coordinates of the third.
 It is [[EVOLVING]] only if [[ionmov]] == 2 or 22 and [[optcell]]/=0, otherwise it is
 fixed.
 If the Default is used, that is, [[rprim]] is the unity matrix, the three
 dimensionless primitive vectors are three unit vectors in cartesian
-coordinates. Each will be (possibly) multiplied by the corresponding [[acell]]
+coordinates. The coordinates (and hence the length) of each vector will be (possibly) multiplied by the corresponding [[acell]]
 value, then (possibly) stretched along the cartesian coordinates by the
 corresponding [[scalecart]] value, to give the dimensional primitive vectors,
 called [[rprimd]].
 In the general case, the dimensional cartesian coordinates of the crystal
 primitive translations R1p, R2p and R3p, see [[rprimd]], are
 
-  * R1p(i)=[[scalecart]](i)[[rprim]](i,1)*[[acell]](1)
-  * R2p(i)=[[scalecart]](i)[[rprim]](i,2)*[[acell]](2)
-  * R3p(i)=[[scalecart]](i)[[rprim]](i,3)*[[acell]](3)
+  * R1p(i)=[[scalecart]](i)*[[rprim]](i,1)*[[acell]](1)
+  * R2p(i)=[[scalecart]](i)*[[rprim]](i,2)*[[acell]](2)
+  * R3p(i)=[[scalecart]](i)*[[rprim]](i,3)*[[acell]](3)
 
 where i=1,2,3 is the component of the primitive translation (i.e. x, y, and z).
 
@@ -15727,6 +15830,7 @@ direction unchanged) by the appropriate length scale [[acell]](1),
 translations in real space in cartesian coordinates.
 Presently, it is requested that the mixed product (R1xR2).R3 is positive. If
 this is not the case, simply exchange a pair of vectors.
+
 To be more specific, keeping the default value of [[scalecart]] = 1 to simplify
 the matter, [[rprim]] 1 2 3 4 5 6 7 8 9 corresponds to input of the three
 primitive translations R1=(1,2,3) (to be multiplied by [[acell]](1)),
@@ -16005,13 +16109,13 @@ sphere which has the same volume as the average volume per particle in a
 homogeneous electron gas with density $n_{bulk}$, so:
 
 \begin{equation}
-      1/n_{bulk} = 4/3\: \pi [[slabwsrad]]^3 \nonumber
+      \frac{1}{n_{bulk}} = \frac{4 \pi}{3} [[slabwsrad]]^3 \nonumber
 \end{equation}
 
 For example, the bulk aluminum fcc lattice constant is $a$=4.0495 Angstroms
 [WebElements](https://www.webelements.com/), each cubic centered cell includes 4 Al atoms and each atom
 has 3 valence electrons, so the average volume per electron is $a^3/12$=37.34
-Bohr$^3$ which has to be equal to $4/3\: \pi r_s^3$. Consequently Al has approximately
+Bohr$^3$ which has to be equal to $\frac{4 \pi}{3} r_s^3$. Consequently Al has approximately
 $r_s$=2.07 Bohr, while for example magnesium has $r_s$=2.65 Bohr, sodium 3.99 Bohr.
 By default, given in Bohr atomic units (1 Bohr=0.5291772108 Angstroms).
 """,
@@ -16068,10 +16172,12 @@ to be orthogonal to the other ones, so the length of the cell along z is
 
 Together with [[slabwsrad]] they define the jellium positive charge density
 distribution $n_{+}(x,y,z)$ in this way:
+
 \begin{eqnarray}
       n_{+}(x,y,z) &=& n_{bulk} \quad  \text{if} \quad [[slabzbeg]] \leq z \leq [[slabzend]] \nonumber \\
                    &=& 0        \quad  \text{otherwise}                                    \nonumber
 \end{eqnarray}
+
 so the positive charge density is invariant along the xy plane as well as the
 electrostatic potential generated by it.
 """,
@@ -16113,11 +16219,11 @@ When [[smdelta]] in non-zero, it will trigger the calculation of the imaginary
 part of the second-order electronic eigenvalues, which can be related to the
 electronic lifetimes. The delta function is evaluated using:
 
-  * when [[smdelta]] == 1, Fermi-Dirac smearing: $$\\frac{0.25}{(cosh(\\frac{x}{2.0}))^2}$$
-  * when [[smdelta]] == 2, Cold smearing by Marzari using the parameter $a=-0.5634$ (minimization of the bump): $$\\frac{e^{-x^2}}{\sqrt{\pi}}1.5\ d_0+x(-a\ 1.5\ d_0+x(-1.0\ d_0+a\ x))$$
+  * when [[smdelta]] == 1, Fermi-Dirac smearing: $\frac{0.25}{(cosh(\frac{x}{2.0}))^2}$
+  * when [[smdelta]] == 2, Cold smearing by Marzari using the parameter $a=-0.5634$ (minimization of the bump): $\frac{e^{-x^2}}{\sqrt{\pi}}\left(1.5+x(-a\ 1.5+x(-1.0+a\ x))\right)$
   * when [[smdelta]] == 3, Cold smearing by Marzari using the parameter $a=-0.8165$ (monotonic function in the tail): as 2 but different $a$
   * when [[smdelta]] == 4, Smearing of Methfessel and Paxton ([[cite:Methfessel1989]]) with Hermite polynomial of degree 2, corresponding to "Cold smearing" of N. Marzari with $a=0$ (so, same smeared delta function as smdelta=2, with different $a$).
-  * when [[smdelta]] == 5, Gaussian smearing: $$\\frac{1.0\ d_0\ e^{-x^2}}{\sqrt{\pi}}$$
+  * when [[smdelta]] == 5, Gaussian smearing: $\frac{e^{-x^2}}{\sqrt{\pi}}$
 """,
 ),
 
@@ -16302,12 +16408,13 @@ Variable(
     abivarname="spinat",
     varset="gstate",
     vartype="real",
-    topics=['spinpolarisation_basic', 'crystal_useful', 'MagMom_useful'],
+    topics=['spinpolarisation_basic', 'crystal_useful', 'MagMom_useful', 'ConstrainedDFT_useful'],
     dimensions=ValueWithConditions({'[[natrd]]<[[natom]]': '[3, [[natrd]] ]', 'defaultval': '[3, [[natom]] ]'}),
     defaultval=0.0,
     mnemonics="SPIN for AToms",
     text=r"""
-Gives the initial electronic spin-magnetization for each atom, in unit of $\hbar/2$.
+Gives the initial electronic spin-magnetization for each atom, in unit of $\hbar/2$,
+as well as, in case of fixed magnetization calculations (see [[constraint_kind]] and [[magconon]]), the target value of the magnetization.
 
 Note that if [[nspden]] = 2, the z-component must be given for each atom, in
 triplets (0 0 z-component).
@@ -16315,7 +16422,7 @@ For example, the electron of an hydrogen atom can be spin up (0 0 1.0) or spin
 down (0 0 -1.0).
 
 This value is only used to create the first exchange and correlation
-potential, and is not used anymore afterwards.
+potential.
 It is not checked against the initial occupation numbers [[occ]] for each spin
 channel.
 It is meant to give an easy way to break the spin symmetry, and to allow to
@@ -16560,7 +16667,7 @@ The symmetries found as "antiferro magnetic" ([[symafm]] = -1) are used to
 symmetrize density and magnetization in the following cases:
 
   * antiferromagnetism ([[nsppol]] = 1, [[nspinor]] = 1, [[nspden]] = 2)
-  * non-collinear magnetism ([[nsppol]] = 1, [[nspinor]] = 2, [[nspden]] = 4)
+  * non-collinear magnetism ([[nsppol]] = 1, [[nspinor]] = 2, [[nspden]] = 4) (although no automatic test is provided - make your own checks !)
 
 In other cases they are not used.
 """,
@@ -19688,7 +19795,9 @@ Variable(
 This variable defines the Cartesian grid of MPI processors used for EPH calculations.
 If not specified in the input, the code will generate this grid automatically using the total number of processors 
 and the basic dimensions of the job computed at runtime.
-At present (|today|), this variable is supported only in the calculation of the e-ph self-energy.
+At present (|today|), this variable is supported only in the calculation of the phonon einewidths ([[eph_task]] 1)
+and in the computation of the e-ph self-energy ([[eph_task]] 4 or -4).
+In all the other tasks, this variable is ignored.
 
 Preliminary considerations:
 
@@ -19703,29 +19812,43 @@ In what follows, we explain briefly the pros and cons of the different MPI-level
 the discussion to the different calculations activated by [[eph_task]].
 
 The parallelization over perturbations (**np**) is network intensive but it allows one to decrease the memory
-needed for the DFPT potentials.
+needed for the DFPT potentials especially when computing the e-ph self-energy.
 The maximum valus for **np** is 3 * [[natom]] and the workload is equally distributed provided **np** 
 divides 3 * [[natom]] equally. 
 Using **np** == [[natom]] usually gives good parallel efficiency.
 
-The parallelization over bands (**nb**) has limited scalability but it allows one to reduce the memory
-allocated for the wavefunctions, especially when we have to sum over empty states.
+The parallelization over bands (**nb**) has limited scalability that depends on the number of bands included
+in the self-energy but it allows one to reduce the memory
+allocated for the wavefunctions, especially when we have to sum over empty states in the e-ph self-energy.
+
+[[eph_task]] = +1
+    By default, the code uses all the processes for the (k-point, spin) parallelism.
+    Since the number of k-points around the FS is usually large, this parallelization scheme is OK in most of the cases.
+    When the number of processes becomes comparable to the number of k-points around the FS, 
+    it makes sense to activate the q-point parallelism.
+    The parallelism over perturbations should be used to reduce the memory allocated for the interpolation of the DFPT potentials.
+    The band parallelism is not supported in this part.
 
 [[eph_task]] = +4
-:   Parallelization over k-points and spin is not yet implemented hence use 1 for these entries.
     Parallelization over bands allows one to reduce the memory needed for the wavefunctions but
     this level is less efficient than the parallelization over q-points and perturbations.
     To avoid load and memory imbalance, **nb** should divide [[nband]].
     We suggest to increase the number of procs for bands until the memory allocated for the wavefunctions
-    decreases to a reasonable level and then use the remaining procs for **nq** and **np** in this order.
+    decreases to a reasonable level and then use the remaining procs for **nq** and **np** in this order 
+    until these levels start to saturate.
+    The MPI parallelism over k-points and spins is efficient at the level of the wall-time 
+    but it requires HDF5 + MPI-IO support and memory does not scale. Use these additional levels if the memory requirements
+    are under control and you need to boost the calculation. Note also that in this case the output results are written to
+    different text files, only the SIGEPH.nc file will contains all the k-points and spins.
+
 
 [[eph_task]] = -4
-:   Parallelization over k-points and spin is not yet implemented hence use 1 for these entries.
     The number of bands in the self-energy sum is usually small so it does not make sense to
     parallelize along this dimension. The parallelization over q-points seem to be more efficient than
     the one over perturbations although it introduces some load imbalance because, due to memory reasons, 
     the code distributes the q-points in the IBZ (nqibz) instead of the q-points in the full BZ (nqbz).
-    Moreover non all the q-points in the IBZ contribute to the imaginary part of $$\Sigma_nk$$ 
+    Moreover non all the q-points in the IBZ contribute to the imaginary part of $$\Sigma_nk$$.
+    The MPI parallelism over k-points and spins is supported with similar behaviour as in **eph_task** +4.
 
 
 !!! important
@@ -19917,6 +20040,35 @@ Alternative to [[getscr]] and [[irdscr]]. The string must be enclosed between qu
 
     getscr_path "../outdata/out_SCR"
 """
+),
+
+Variable(
+    abivarname="eph_ecutosc",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval="0.0 Hartree",
+    mnemonics="Electron-Phonon: Energy CUToff for OSCillator matrix elements",
+    characteristics=['[[ENERGY]]'],
+    text=r"""
+This variable defines the energy cutoff defining the number of G-vectors in the oscillator matrix elements:
+
+$$ \langle \mathbf{k+q},b_1 | e^{+i (\mathbf{q+G)} \mathbf{r}} | \mathbf{k}, b_2 \rangle $$
+
+These quantities are used to compute the long-range part of the e-ph matrix elements that are then used 
+to integrate the Frohlich divergence.
+
+Possible values:
+
+    - = 0 --> Approximate oscillators with $ \delta_{b_1 b_2} $
+    - > 0 --> Use full expression with G-dependence
+    - < 0 --> Deactivate computation of oscillators.
+
+!!! important
+
+    eph_ecutosc cannot be greater than [[ecut]]
+""",
 ),
 
 ]

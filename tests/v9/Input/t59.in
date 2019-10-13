@@ -1,0 +1,30 @@
+t59o_DVDB
+8
+t57o_DS4_POT1  
+t57o_DS4_POT4  
+t57o_DS5_POT1
+t57o_DS5_POT2
+t57o_DS5_POT4
+t57o_DS5_POT5
+t57o_DS6_POT1
+t57o_DS6_POT4
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgdv
+#%% exclude_builders = .*_intel_1[89].0_.*
+#%% test_chain = t57.in, t58.in, t59.in, t60.in, t61.in
+#%% [files]
+#%% files_to_test =
+#%%   t59.stdout, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [shell]
+#%% post_commands = 
+#%%  ww_cp t59o_DVDB t60o_DS20_DVDB;
+#%%  ww_cp t59o_DVDB t61o_DS20_DVDB
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH
+#%% description = Merge the DFPT POT files produced in t57.in
+#%%<END TEST_INFO>

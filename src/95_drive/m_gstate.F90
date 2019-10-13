@@ -26,8 +26,6 @@
 module m_gstate
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_rectypes
  use m_errors
  use m_xmpi
@@ -48,7 +46,10 @@ module m_gstate
  use m_nctk
  use m_hdr
  use m_ebands
+ use m_dtfil
 
+ use defs_datatypes,     only : pseudopotential_type, ebands_t
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_symtk,            only : matr3inv
  use m_io_tools,         only : open_file
@@ -75,7 +76,7 @@ module m_gstate
  use m_paw_occupancies,  only : initrhoij
  use m_paw_correlations, only : pawpuxinit
  use m_orbmag,           only : initorbmag,destroy_orbmag,orbmag_type
- use m_paw_uj,           only : pawuj_ini,pawuj_free,pawuj_det
+ use m_paw_uj,           only : pawuj_ini,pawuj_free,pawuj_det, macro_uj_type
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
                                 electronpositron_calctype
@@ -583,9 +584,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Update header, with evolving variables, when available
 !Here, rprimd, xred and occ are available
  etot=hdr%etot ; fermie=hdr%fermie ; residm=hdr%residm
- call hdr_update(hdr,bantot,etot,fermie,&
-& residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
-& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ call hdr%update(bantot,etot,fermie,&
+   residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
+   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
  ! PW basis set: test if the problem is ill-defined.
  if (dtset%usewvl == 0 .and. dtset%tfkinfunc /= 2) then
@@ -769,8 +770,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (psps%usepaw==1.and.dtfil%ireadwf==1)then
    call pawrhoij_copy(hdr%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 !  Has to update header again (because pawrhoij has changed)  -  MT 2007-10-22: Why ?
-!  call hdr_update(hdr,bantot,etot,fermie,residm,rprimd,occ,pawrhoij,xred,args_gs%amu, &
-!  &                  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+!  call hdr%update(bantot,etot,fermie,residm,rprimd,occ,pawrhoij,xred,args_gs%amu, &
+!  &               comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
 !###########################################################
@@ -1064,7 +1065,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        if (dtset%usewvl==0) then
          call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
          mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr, allow_interp=.True.)
-         results_gs%etotal = hdr_den%etot; call hdr_free(hdr_den)
+         results_gs%etotal = hdr_den%etot; call hdr_den%free()
        else
          fform=52 ; accessfil=0
          if (dtset%iomode == IO_MODE_MPI ) accessfil=4
@@ -1074,16 +1075,16 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        end if
 
        if (rdwrpaw/=0) then
-         call hdr_update(hdr,bantot,etot,fermie,residm,&
-&         rprimd,occ,pawrhoij,xred,args_gs%amu,&
-&         comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+         call hdr%update(bantot,etot,fermie,residm,&
+           rprimd,occ,pawrhoij,xred,args_gs%amu,&
+           comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
        end if
 
        ! Read kinetic energy density
        if(dtfil%ireadkden/=0 .and. dtset%usekden==1 )then
          call read_rhor(dtfil%filkdensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
          mpi_enreg, taur, hdr_den, pawrhoij, comm, check_hdr=hdr, allow_interp=.True.)
-         call hdr_free(hdr_den)
+         call hdr_den%free()
        end if
 
 !      Compute up+down rho(G) by fft
@@ -1180,12 +1181,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
      mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
      results_gs%etotal = hdr_den%etot; results_gs%energies%e_fermie = hdr_den%fermie
-     call hdr_free(hdr_den)
+     call hdr_den%free()
 
      if(dtfil%ireadkden/=0 .and. dtset%usekden==1)then
        call read_rhor(dtfil%filkdensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
        mpi_enreg, taur, hdr_den, pawrhoij, comm, check_hdr=hdr)
-       call hdr_free(hdr_den)
+       call hdr_den%free()
      end if
 
 !    Compute up+down rho(G) by fft
@@ -1373,9 +1374,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !! end if
 
 !Update the header, before using it
- call hdr_update(hdr,bantot,results_gs%etotal,results_gs%energies%e_fermie,&
-& results_gs%residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
-& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ call hdr%update(bantot,results_gs%etotal,results_gs%energies%e_fermie,&
+   results_gs%residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
+   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
  ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
  doccde=zero
@@ -1695,8 +1696,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call CleanRec(rec_set)
  end if
 
-!Clean the header
- call hdr_free(hdr)
+ call hdr%free()
  call ebands_free(ebands)
 
  if (me == master .and. dtset%prtxml == 1) then

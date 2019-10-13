@@ -27,10 +27,10 @@
 MODULE m_dyson_solver
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_errors
  use m_abicore
+ use m_dtfil
 
  use m_time,          only : timab
  use m_gwdefs,        only : sigparams_t
@@ -196,11 +196,11 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
 
          if (smrt>0.1/Ha_eV) then
            write(msg,'(3a,i0,a,i0,2a,2(f22.15,2a))')&
-&            'Values of Re Sig_c are not linear ',ch10,&
-&            'band index = ',jb,' spin|component = ',is_idx,ch10,&
-&            'root mean square= ',smrt,ch10,&
-&            'estimated slope = ',alpha,ch10,&
-&            'Omega [eV] SigC [eV]'
+             'Values of Re Sig_c are not linear ',ch10,&
+             'band index = ',jb,' spin|component = ',is_idx,ch10,&
+             'root mean square= ',smrt,ch10,&
+             'estimated slope = ',alpha,ch10,&
+             'Omega [eV] SigC [eV]'
            MSG_WARNING(msg)
            do io=1,Sr%nomega4sd
              write(msg,'(2f8.4)')e0pde(io)*Ha_eV,scme(io)*Ha_eV
@@ -358,8 +358,8 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
 
       if (.not.converged) then
         write(msg,'(a,i0,3a,f8.4,a,f8.4)')&
-&         'Newton-Raphson method not converged after ',NR_MAX_NITER,' iterations. ',ch10,&
-&         'Absolute Error = ',ABS(ctdpc),' > ',NR_ABS_ROOT_ERR
+          'Newton-Raphson method not converged after ',NR_MAX_NITER,' iterations. ',ch10,&
+          'Absolute Error = ',ABS(ctdpc),' > ',NR_ABS_ROOT_ERR
         MSG_WARNING(msg)
       end if
       !

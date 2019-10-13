@@ -30,8 +30,20 @@
 module m_rf2_init
 
  use defs_basis
+ use m_xmpi
  use m_errors
+ use m_wfk
+ use m_hamiltonian
+ use m_cgtools
+ use m_rf2
  use m_abicore
+ use m_dtset
+ use m_dtfil
+
+ use m_time   , only : timab
+ use defs_abitypes, only : MPI_type
+ use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_copy,pawcprj_get,pawcprj_free,pawcprj_output
+ use m_cgprj,   only : getcprj
 
  implicit none
 
@@ -103,23 +115,9 @@ contains
 subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_hamkq,ibg,icg,idir,ikpt,ipert,isppol,mkmem,&
                      mpi_enreg,mpw,nband_k,nsppol,rf_hamkq,rf_hamk_dir2,occ_k,rocceig,ddk_f)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_xmpi
- use m_errors
- use m_wfk
- use m_hamiltonian
- use m_cgtools
- use m_rf2
- use m_time   , only : timab
- use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_copy,pawcprj_get,pawcprj_free,pawcprj_output
- use m_cgprj,   only : getcprj
-
 ! *************************************************************************
 !Arguments -------------------------------
 !scalars
-
  integer,intent(in) :: ibg,icg,idir,ipert,isppol,ikpt
  integer,intent(in) :: mkmem,mpw,nband_k,nsppol
  type(datafiles_type),intent(in) :: dtfil

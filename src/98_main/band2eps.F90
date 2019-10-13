@@ -39,7 +39,6 @@
 program band2eps
 
  use defs_basis
- use defs_abitypes
  use m_abimover
  use m_build_info
  use m_xmpi
@@ -54,12 +53,11 @@ program band2eps
  use m_fstrings,      only : int2char4, tolower, inupper
  use m_time,          only : asctime
  use m_parser,        only : instrng
+
  implicit none
 
 !Arguments -----------------------------------
-
 !Local variables-------------------------------
-!no_abirules
  integer,parameter :: master=0
  character(len=fnlen) :: filnam(4)
  real(dp) :: E,deltaE
