@@ -178,7 +178,7 @@ AC_DEFUN([SD_NETCDF_FORTRAN_DETECT], [
   _SD_NETCDF_FORTRAN_DUMP_CONFIG
 
   # Check if NetCDF has been enabled
-  if test "${sd_netcdf_ok}" != "yes"; then
+  if test "${sd_netcdf_fortran_enable}" != "no" -a "${sd_netcdf_ok}" != "yes"; then
     if test "${sd_netcdf_fortran_init}" = "def"; then
       sd_netcdf_fortran_enable="no"
     else

@@ -178,7 +178,7 @@ AC_DEFUN([SD_NETCDF_CXX_DETECT], [
   _SD_NETCDF_CXX_DUMP_CONFIG
 
   # Check if NetCDF has been enabled
-  if test "${sd_netcdf_ok}" != "yes"; then
+  if test "${sd_netcdf_cxx_enable}" != "no" -a "${sd_netcdf_ok}" != "yes"; then
     if test "${sd_netcdf_cxx_init}" = "def"; then
       sd_netcdf_cxx_enable="no"
     else
