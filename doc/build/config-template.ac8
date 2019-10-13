@@ -1004,6 +1004,13 @@
 #
 #with_hdf5="/usr/local"
 
+# Location of the h5cc (or h5pcc) compiler (default is unset)
+#
+# Note: This parameter can greatly help the build system of ABINIT in
+#       selecting the correct version of HDF5.
+#
+#H5CC="/opt/local/hdf5-serial/bin/h5cc"
+
 # C preprocessing flags for HDF5 (default is unset)
 #
 #HDF5_CPPFLAGS="-I/usr/local/include/hdf5"

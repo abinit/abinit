@@ -87,6 +87,8 @@ def main():
       env_config += ["%s_%s" % (dep.upper(), item) for item in ["CXXFLAGS"]]
     if ( "fortran" in langs ):
       env_config += ["%s_%s" % (dep.upper(), item) for item in ["FCFLAGS"]]
+    if ( cnf_dep.has_option(dep, "extra_vars") ):
+      env_config += cnf_dep.get(dep, "extra_vars").split()
   env_config.sort()
 
   # Extract options from config file
