@@ -102,6 +102,7 @@ AC_DEFUN([SD_HDF5_INIT], [
     [ sd_hdf5_enable="${sd_hdf5_enable_def}"; sd_hdf5_init="def"])
 
   # Declare environment variables
+  AC_ARG_VAR([H5CC], [HDF5-aware C compiler.])
   AC_ARG_VAR([HDF5_CPPFLAGS], [C preprocessing flags for HDF5.])
   AC_ARG_VAR([HDF5_CFLAGS], [C flags for HDF5.])
   AC_ARG_VAR([HDF5_CXXFLAGS], [C flags for HDF5.])
@@ -109,15 +110,29 @@ AC_DEFUN([SD_HDF5_INIT], [
   AC_ARG_VAR([HDF5_LDFLAGS], [Linker flags for HDF5.])
   AC_ARG_VAR([HDF5_LIBS], [Library flags for HDF5.])
 
+  # Detect use of HDF5-aware compiler
+  if test "${sd_hdf5_init}" = "def" -a ! -z "${H5CC}"; then
+    sd_hdf5_enable="yes"
+    sd_hdf5_init="exe"
+  fi
+
   # Detect use of environment variables
-  if test "${sd_hdf5_enable}" = "yes" -o "${sd_hdf5_enable}" = "auto"; then
+  if test "${sd_hdf5_enable}" != "no" -o "${sd_hdf5_init}" = "def"; then
     tmp_hdf5_vars="${HDF5_CPPFLAGS}${HDF5_CFLAGS}${HDF5_LDFLAGS}${HDF5_LIBS}"
     if test "${sd_hdf5_enable_fc}" = "yes"; then
       tmp_hdf5_vars="${tmp_hdf5_vars}${HDF5_FCFLAGS}"
     fi
-    if test "${sd_hdf5_init}" = "def" -a ! -z "${tmp_hdf5_vars}"; then
-      sd_hdf5_enable="yes"
-      sd_hdf5_init="env"
+    if test ! -z "${tmp_hdf5_vars}"; then
+      case "${sd_hdf5_init}" in
+        def)
+          sd_hdf5_enable="yes"
+          sd_hdf5_init="env"
+          ;;
+        exe)
+          AC_MSG_ERROR([HDF5 environment variables conflict with H5CC
+                  Please set H5CC or HDF5_*FLAGS, not both])
+          ;;
+      esac
     fi
   fi
 
@@ -132,7 +147,7 @@ AC_DEFUN([SD_HDF5_INIT], [
     # Set HDF5-specific flags
     case "${sd_hdf5_init}" in
 
-      def|yon)
+      def|exe|yon)
         sd_hdf5_cppflags="${sd_hdf5_cppflags_def}"
         sd_hdf5_cflags="${sd_hdf5_cflags_def}"
         sd_hdf5_cxxflags="${sd_hdf5_cxxflags_def}"
@@ -222,7 +237,9 @@ AC_DEFUN([SD_HDF5_DETECT], [
   # Check whether we can compile and link a simple program
   # and update build flags if successful
   if test "${sd_hdf5_enable}" = "auto" -o "${sd_hdf5_enable}" = "yes"; then
-    _SD_HDF5_CHECK_COMPILERS
+    if test "${sd_hdf5_init}" != "env"; then
+      _SD_HDF5_CHECK_COMPILERS
+    fi
     if test "${sd_hdf5_h5cc}" = ""; then
       AC_MSG_ERROR([could not find the HDF5 C compiler
                   Please set the H5CC environment variable to a valid HDF5
@@ -527,28 +544,31 @@ AC_DEFUN([_SD_HDF5_CHECK_CONFIG], [
 
 AC_DEFUN([_SD_HDF5_CHECK_COMPILERS], [
   if test "${H5CC}" = ""; then
-    if test "${sd_hdf5_init}" != "env"; then
-      tmp_h5cc_search="h5cc"
-      if test "${sd_mpi_ok}" = "yes"; then
-        tmp_h5cc_search="h5pcc ${tmp_h5cc_search}"
-      fi
-      case "${sd_hdf5_init}" in
-        dir)
-          for tmp_h5cc in ${tmp_h5cc_search}; do
-            if test -x "${sd_hdf5_prefix}/bin/${tmp_h5cc}"; then
-              sd_hdf5_h5cc="${sd_hdf5_prefix}/bin/${tmp_h5cc}"
-              break
-            fi
-          done
-          ;;
-        *)
-          AC_CHECK_PROGS([sd_hdf5_h5cc], [${tmp_h5cc_search}])
-          ;;
-      esac
-      unset tmp_h5cc_search
-      unset tmp_h5cc
-    fi   # sd_hdf5_init != "env"
+    tmp_h5cc_search="h5cc"
+    if test "${sd_mpi_ok}" = "yes"; then
+      tmp_h5cc_search="h5pcc ${tmp_h5cc_search}"
+    fi
+    case "${sd_hdf5_init}" in
+      dir)
+        for tmp_h5cc in ${tmp_h5cc_search}; do
+          if test -x "${sd_hdf5_prefix}/bin/${tmp_h5cc}"; then
+            sd_hdf5_h5cc="${sd_hdf5_prefix}/bin/${tmp_h5cc}"
+            break
+          fi
+        done
+        ;;
+      *)
+        AC_CHECK_PROGS([sd_hdf5_h5cc], [${tmp_h5cc_search}])
+        ;;
+    esac
+    unset tmp_h5cc_search
+    unset tmp_h5cc
   else
+    ${H5CC} -show >/dev/null 2>&1
+    if test "${?}" != "0"; then
+      AC_MSG_ERROR([invalid HDF5-aware compiler:
+                  H5CC = '${H5CC}'])
+    fi
     sd_hdf5_h5cc="${H5CC}"
   fi   # H5CC = ""
 
@@ -614,27 +634,25 @@ AC_DEFUN([_SD_HDF5_CHECK_COMPILERS], [
 
   fi   # sd_hdf5_cc != ""
 
-  if test "${sd_hdf5_init}" != "env"; then
-    tmp_hdf5_incs=""
-    tmp_hdf5_libs=""
-    for arg in `${sd_hdf5_h5cc} -show`; do
-      case ${arg} in
-        -I*)
-          tmp_hdf5_incs="${tmp_hdf5_incs} ${arg}"
-          ;;
-        -L*)
-          tmp_hdf5_libs="${tmp_hdf5_libs} ${arg}"
-          ;;
-      esac
-    done
-    sd_hdf5_cppflags="${sd_hdf5_cppflags} ${tmp_hdf5_incs}"
-    test "${sd_hdf5_enable_fc}" = "yes" && \
-      sd_hdf5_fcflags="${sd_hdf5_fcflags} ${tmp_hdf5_incs}"
-    sd_hdf5_libs="${tmp_hdf5_libs} ${sd_hdf5_libs_hl} ${sd_hdf5_libs} ${sd_hdf5_libs_extra}"
-    unset arg
-    unset tmp_hdf5_incs
-    unset tmp_hdf5_libs
-  fi   # sd_hdf5_init != "env"
+  tmp_hdf5_incs=""
+  tmp_hdf5_libs=""
+  for arg in `${sd_hdf5_h5cc} -show`; do
+    case ${arg} in
+      -I*)
+        tmp_hdf5_incs="${tmp_hdf5_incs} ${arg}"
+        ;;
+      -L*)
+        tmp_hdf5_libs="${tmp_hdf5_libs} ${arg}"
+        ;;
+    esac
+  done
+  sd_hdf5_cppflags="${sd_hdf5_cppflags} ${tmp_hdf5_incs}"
+  test "${sd_hdf5_enable_fc}" = "yes" && \
+    sd_hdf5_fcflags="${sd_hdf5_fcflags} ${tmp_hdf5_incs}"
+  sd_hdf5_libs="${tmp_hdf5_libs} ${sd_hdf5_libs_hl} ${sd_hdf5_libs} ${sd_hdf5_libs_extra}"
+  unset arg
+  unset tmp_hdf5_incs
+  unset tmp_hdf5_libs
 ]) # _SD_HDF5_CHECK_COMPILERS
 
 
