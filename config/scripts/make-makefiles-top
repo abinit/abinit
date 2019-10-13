@@ -46,13 +46,19 @@ def makefile_header(name,stamp):
 ACLOCAL_AMFLAGS = -I config/m4
 
 AM_DISTCHECK_CONFIGURE_FLAGS = \\
+  --without-abinit-common \\
   --without-bigdft \\
+  --without-fftw3 \\
+  --without-hdf5 \\
   --without-levmar \\
+  --without-libpaw \\
   --without-libpsml \\
   --without-libxc \\
   --without-libxml2 \\
   --without-netcdf \\
+  --without-netcdf-fortran \\
   --without-papi \\
+  --without-pfft \\
   --without-triqs \\
   --without-wannier90 \\
   --without-xmlf90 \\
