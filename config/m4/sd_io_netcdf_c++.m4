@@ -23,6 +23,7 @@ AC_DEFUN([SD_NETCDF_CXX_INIT], [
   sd_netcdf_cxx_libs=""
   sd_netcdf_cxx_enable=""
   sd_netcdf_cxx_init="unknown"
+  sd_netcdf_cxx_mpi_ok="unknown"
   sd_netcdf_cxx_ok="unknown"
 
   # Set adjustable parameters
@@ -257,23 +258,27 @@ AC_DEFUN([_SD_NETCDF_CXX_CHECK_USE], [
   AC_MSG_RESULT([${sd_netcdf_cxx_ok}])
 
   # Check if we can do parallel I/O
-  if test "${sd_netcdf_cxx_ok}" = "yes" -a "${sd_hdf5_mpi_ok}" = "yes"; then
-    AC_MSG_CHECKING([whether the NetCDF C++ interface has parallel I/O in Fortran])
-    AC_LANG_PUSH([C++])
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-      [[
-#       include <mpi.h>
-#       include <netcdf4>
-        using namespace::netcdf;
-      ]],
-      [[
-        MPI::Comm & mpiComm = MPI::COMM_WORLD;
-        mpiComm.Set_errhandler(MPI::ERRORS_THROW_EXCEPTIONS);
-        MPI::Info mpiInfo = MPI::INFO_NULL;
-        netcdf::NcFile ncFile(mpiComm, mpiInfo, "conftest.nc", netcdf::NcFile::Replace);
-      ]])], [sd_netcdf_cxx_mpi_ok="yes"], [sd_netcdf_cxx_mpi_ok="no"])
-    AC_LANG_POP([C++])
-    AC_MSG_RESULT([${sd_netcdf_cxx_mpi_ok}])
+  if test "${sd_netcdf_cxx_ok}" = "yes" -a "${sd_mpi_ok}" = "yes"; then
+    if test "${sd_hdf5_mpi_ok}" = "yes"; then
+      AC_MSG_CHECKING([whether the NetCDF C++ interface has parallel I/O in Fortran])
+      AC_LANG_PUSH([C++])
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+        [[
+#         include <mpi.h>
+#         include <netcdf4>
+          using namespace::netcdf;
+        ]],
+        [[
+          MPI::Comm & mpiComm = MPI::COMM_WORLD;
+          mpiComm.Set_errhandler(MPI::ERRORS_THROW_EXCEPTIONS);
+          MPI::Info mpiInfo = MPI::INFO_NULL;
+          netcdf::NcFile ncFile(mpiComm, mpiInfo, "conftest.nc", netcdf::NcFile::Replace);
+        ]])], [sd_netcdf_cxx_mpi_ok="yes"], [sd_netcdf_cxx_mpi_ok="no"])
+      AC_LANG_POP([C++])
+      AC_MSG_RESULT([${sd_netcdf_cxx_mpi_ok}])
+    else
+      sd_netcdf_cxx_mpi_ok="no"
+    fi
   fi
 
   # Restore environment
