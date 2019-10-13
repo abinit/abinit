@@ -21,6 +21,7 @@ AC_DEFUN([SD_NETCDF_CXX_INIT], [
   sd_netcdf_cxx_fcflags=""
   sd_netcdf_cxx_ldflags=""
   sd_netcdf_cxx_libs=""
+  sd_netcdf_cxx_prefix=""
   sd_netcdf_cxx_enable=""
   sd_netcdf_cxx_init="unknown"
   sd_netcdf_cxx_mpi_ok="unknown"
@@ -75,6 +76,7 @@ AC_DEFUN([SD_NETCDF_CXX_INIT], [
       else
         sd_netcdf_cxx_enable="yes"
         sd_netcdf_cxx_init="dir"
+        sd_netcdf_cxx_prefix="${withval}"
       fi],
     [ sd_netcdf_cxx_enable="${sd_netcdf_cxx_enable_def}"; sd_netcdf_cxx_init="def"])
 
@@ -116,12 +118,12 @@ AC_DEFUN([SD_NETCDF_CXX_INIT], [
         ;;
 
       dir)
-        sd_netcdf_cxx_cppflags="-I${with_netcdf}/include"
+        sd_netcdf_cxx_cppflags="${sd_netcdf_cxx_cppflags_def} -I${sd_netcdf_cxx_prefix}/include"
         sd_netcdf_cxx_cflags="${sd_netcdf_cxx_cflags_def}"
         sd_netcdf_cxx_cxxflags="${sd_netcdf_cxx_cxxflags_def}"
-        sd_netcdf_cxx_fcflags="${sd_netcdf_cxx_fcflags_def} -I${with_netcdf}/include"
+        sd_netcdf_cxx_fcflags="${sd_netcdf_cxx_fcflags_def} -I${sd_netcdf_cxx_prefix}/include"
         sd_netcdf_cxx_ldflags="${sd_netcdf_cxx_ldflags_def}"
-        sd_netcdf_cxx_libs="-L${with_netcdf}/lib ${sd_netcdf_cxx_libs_def}"
+        sd_netcdf_cxx_libs="-L${sd_netcdf_cxx_prefix}/lib ${sd_netcdf_cxx_libs_def} ${sd_netcdf_cxx_libs}"
         ;;
 
       env)
@@ -369,7 +371,7 @@ AC_DEFUN([_SD_NETCDF_CXX_CHECK_CONFIG], [
   # Environment variables conflict with --with-* options
   tmp_netcdf_cxx_vars="${NETCDF_CXX_CPPFLAGS}${NETCDF_CXX_CFLAGS}${NETCDF_CXX_FCFLAGS}${NETCDF_CXX_LDFLAGS}${NETCDF_CXX_LIBS}"
   tmp_netcdf_cxx_invalid="no"
-  if test ! -z "${tmp_netcdf_cxx_vars}" -a ! -z "${with_netcdf}"; then
+  if test ! -z "${tmp_netcdf_cxx_vars}" -a ! -z "${sd_netcdf_cxx_prefix}"; then
     case "${sd_netcdf_cxx_policy}" in
       fail)
         # FIXME: use the new Steredeg specs

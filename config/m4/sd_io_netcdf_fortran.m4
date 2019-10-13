@@ -21,6 +21,7 @@ AC_DEFUN([SD_NETCDF_FORTRAN_INIT], [
   sd_netcdf_fortran_fcflags=""
   sd_netcdf_fortran_ldflags=""
   sd_netcdf_fortran_libs=""
+  sd_netcdf_fortran_prefix=""
   sd_netcdf_fortran_enable=""
   sd_netcdf_fortran_init="unknown"
   sd_netcdf_fortran_mpi_ok="unknown"
@@ -75,6 +76,7 @@ AC_DEFUN([SD_NETCDF_FORTRAN_INIT], [
       else
         sd_netcdf_fortran_enable="yes"
         sd_netcdf_fortran_init="dir"
+        sd_netcdf_fortran_prefix="${withval}"
       fi],
     [ sd_netcdf_fortran_enable="${sd_netcdf_fortran_enable_def}"; sd_netcdf_fortran_init="def"])
 
@@ -116,12 +118,12 @@ AC_DEFUN([SD_NETCDF_FORTRAN_INIT], [
         ;;
 
       dir)
-        sd_netcdf_fortran_cppflags="-I${with_netcdf}/include"
+        sd_netcdf_fortran_cppflags="${sd_netcdf_fortran_cppflags_def} -I${sd_etcdf_fortran_prefix}/include"
         sd_netcdf_fortran_cflags="${sd_netcdf_fortran_cflags_def}"
         sd_netcdf_fortran_cxxflags="${sd_netcdf_fortran_cxxflags_def}"
-        sd_netcdf_fortran_fcflags="${sd_netcdf_fortran_fcflags_def} -I${with_netcdf}/include"
+        sd_netcdf_fortran_fcflags="${sd_netcdf_fortran_fcflags_def} -I${sd_netcdf_fortran_prefix}/include"
         sd_netcdf_fortran_ldflags="${sd_netcdf_fortran_ldflags_def}"
-        sd_netcdf_fortran_libs="-L${with_netcdf}/lib ${sd_netcdf_fortran_libs_def}"
+        sd_netcdf_fortran_libs="-L${sd_netcdf_fortran_prefix}/lib ${sd_netcdf_fortran_libs_def} ${sd_netcdf_fortran_libs}"
         ;;
 
       env)
@@ -371,7 +373,7 @@ AC_DEFUN([_SD_NETCDF_FORTRAN_CHECK_CONFIG], [
   # Environment variables conflict with --with-* options
   tmp_netcdf_fortran_vars="${NETCDF_FORTRAN_CPPFLAGS}${NETCDF_FORTRAN_CFLAGS}${NETCDF_FORTRAN_FCFLAGS}${NETCDF_FORTRAN_LDFLAGS}${NETCDF_FORTRAN_LIBS}"
   tmp_netcdf_fortran_invalid="no"
-  if test ! -z "${tmp_netcdf_fortran_vars}" -a ! -z "${with_netcdf}"; then
+  if test ! -z "${tmp_netcdf_fortran_vars}" -a ! -z "${sd_netcdf_fortran_prefix}"; then
     case "${sd_netcdf_fortran_policy}" in
       fail)
         # FIXME: use the new Steredeg specs
