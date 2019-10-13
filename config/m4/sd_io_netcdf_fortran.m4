@@ -102,6 +102,7 @@ AC_DEFUN([SD_NETCDF_FORTRAN_INIT], [
   if test "${STEREDEG_BYPASS_CONSISTENCY}" != "yes"; then
     _SD_NETCDF_FORTRAN_CHECK_CONFIG
   fi
+
   # Adjust configuration depending on init type
   if test "${sd_netcdf_fortran_enable}" = "yes" -o "${sd_netcdf_fortran_enable}" = "auto"; then
 
@@ -175,6 +176,15 @@ AC_DEFUN([SD_NETCDF_FORTRAN_INIT], [
 AC_DEFUN([SD_NETCDF_FORTRAN_DETECT], [
   # Display configuration
   _SD_NETCDF_FORTRAN_DUMP_CONFIG
+
+  # Check if NetCDF has been enabled
+  if test "${sd_netcdf_ok}" != "yes"; then
+    if test "${sd_netcdf_fortran_init}" = "def"; then
+      sd_netcdf_fortran_enable="no"
+    else
+      AC_MSG_ERROR([NetCDF is not available])
+    fi
+  fi
 
   # Check whether we can compile and link a simple program
   # and update build flags if successful
