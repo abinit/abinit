@@ -1232,10 +1232,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_init_state',tread,'INT')
  if(tread==1) multibinit_dtset%spin_init_state=intarr(1)
  if(multibinit_dtset%spin_init_state<1 .or. &
-      &   multibinit_dtset%spin_init_state>5) then
+      &   multibinit_dtset%spin_init_state>4) then
     write(message, '(a,i8,a,a,a,a,a)' )&
          &   'spin_init_state is',multibinit_dtset%spin_init_state,', but the only allowed values',ch10,&
-         &   'are 1, 2, 3, 4, and 5.',ch10,&
+         &   'are 1, 2, 3, and 4.',ch10,&
          &   'Action: correct spin_init_state in your input file.'
     MSG_ERROR(message)
  end if
@@ -2389,7 +2389,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
     write(nunit,'(13x,a15)')   'spin_qpoint'
     write(nunit,'(28x,3es12.5)')   (multibinit_dtset%spin_qpoint(ii),ii=1,3)
     write(nunit, '(13x, a15, I12.1)') 'spin_init_state', multibinit_dtset%spin_init_state
-    if(multibinit_dtset%spin_init_state==4) then
+    if(multibinit_dtset%spin_init_state==3) then
       write(nunit,'(13x,a25)')   'spin_init_orientation'
       write(nunit,'(28x,3es12.5)')   (multibinit_dtset%spin_init_orientation(ii),ii=1,3)
       write(nunit,'(13x,a18)')   'spin_init_qpoint'

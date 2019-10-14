@@ -341,24 +341,19 @@ contains
           do i=1, self%nspin
              self%Stmp(:,i)=self%Stmp(:,i)/sqrt(sum(self%Stmp(:, i)**2))
           end do
+
         case (2)
           ! set spin to reference state using the reference qpoint and rotation axis from potential file
+          write(msg,*) "Initial spins set to reference configuration."
+          call wrtout(ab_out,msg,'COLL')
+          call wrtout(std_out,msg,'COLL')
+
           do i=1, self%nspin
              self%Stmp(:,:) = self%supercell%spin%Sref(:,:)
           end do
 
         case (3)
-          write(msg,*) "Initial spins set to ferromagnetic along z-axis."
-          call wrtout(ab_out,msg,'COLL')
-          call wrtout(std_out,msg,'COLL')
-
-          ! set all spin to z direction.
-          self%Stmp(1,:)=0.0d0
-          self%Stmp(2,:)=0.0d0
-          self%Stmp(3,:)=1.0d0
-
-        case (4)
-          write(msg,*) "Initial spins set according to spin_init_qpoint and spin_init_rotate_axis."
+          write(msg,*) "Initial spins set according to spin_init_ variables."
           call wrtout(ab_out,msg,'COLL')
           call wrtout(std_out,msg,'COLL')
 
@@ -368,10 +363,10 @@ contains
             self%Stmp(i,:)=self%init_orientation(i)
           enddo
 
-          call self%supercell%supercell_maker%generate_spin_wave_vectorlist( A=self%Stmp, &
+          call self%supercell%supercell_maker%generate_spin_wave_vectorlist(A=self%Stmp, &
              & kpoint=self%init_qpoint, axis=self%init_rotate_axis, A_sc=self%Stmp)
    
-        case (5)
+        case (4)
           ! read from last step of hist file
           if (.not. present(restart_hist_fname)) then
              MSG_BUG("Spin initialize mode set to 5, but restart_hist_fname is not used.")
