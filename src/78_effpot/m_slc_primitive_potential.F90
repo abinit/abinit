@@ -251,7 +251,7 @@ contains
     if(ncerr /= NF90_NOERR) then
       ndata = 0
     else
-      self%has_bilin=.True.
+      self%has_linquad=.True.
       ncerr = nctk_get_dim(ncid, "spin_lattice_Niuv_number_of_entries", ndata)
       ABI_ALLOCATE(ilist, (ndata))
       ABI_ALLOCATE(ulist, (ndata))
@@ -386,7 +386,7 @@ contains
     if(ncerr /= NF90_NOERR) then
       ndata = 0
     else
-      self%has_bilin=.True.
+      self%has_biquad=.True.
       ncerr = nctk_get_dim(ncid, "spin_lattice_Tijuv_number_of_entries", ndata)
       ABI_ALLOCATE(ilist, (ndata))
       ABI_ALLOCATE(jlist, (ndata))
