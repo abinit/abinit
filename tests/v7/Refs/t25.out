@@ -139,6 +139,15 @@ P           mkmem           8
            occopt           3
         optdriver           4
         pawecutdg      5.00000000E+00 Hartree
+   plowan_compute          10
+     plowan_natom           1
+        plowan_nt           1
+ plowan_realspace           1
+        plowan_it5       0    0    0
+     plowan_iatom5       1
+       plowan_nbl5       1
+     plowan_lcalc5       2
+  plowan_projcalc5       7
           ppmodel           3
           spgroup           1
            tolvrs      1.00000000E-10
@@ -561,16 +570,42 @@ P           mkmem           8
 
 
 
+ cRPA calculations using wannier weights from data.plowann
+
+ == Lower and upper values of the selected bands    0    0
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is :  7
+
+ == Lower and upper values of the selected bands   21   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is :  7
+Reading of the Wannier weights from data.plowann
+
+ == Lower and upper values of the selected bands   21   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is :  7
+ Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
  
 ==== Calculation of the screened interaction ====
 
  Read K and Q mesh
+ Read l and bands from wanbz          21          25           5
 
- Read wannier in iBZ
-
- == cRPA Calculation of Interaction for atom             1
 
  ==Calculation of the bare interaction  V m==
+ 
+==Definition of the orbitals==
+  Only one orbital
+  Orbital with l=           2 on atom           1 with spin's orientations Up-Up
 
   Diagonal bare interaction
    1  4.814
@@ -601,7 +636,8 @@ P           mkmem           8
 
    bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.0136   -0.0000
 
-  Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
+ 
+ Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
  -      1      2      3      4      5
    1  4.814  0.008  0.008  0.008  0.002
    2  0.008  4.814  0.004  0.008  0.007
@@ -647,13 +683,18 @@ P           mkmem           8
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.0099    0.0000
 
-  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
+ 
+ Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  0.115  0.006  0.007  0.006  0.002
    2  0.006  0.115  0.004  0.006  0.006
    3  0.007  0.004  0.169  0.003  0.010
    4  0.006  0.006  0.003  0.115  0.006
    5  0.002  0.006  0.010  0.006  0.169
+ 
+==Reminder of the orbitals==
+  Only one orbital
+  Orbital with l=           2 on atom           1 with spin's orientations Up-Up
  
   -------------------------------------------------------------
             Average U and J as a function of frequency
@@ -759,6 +800,15 @@ P           mkmem           8
            occopt           3
         optdriver           4
         pawecutdg      5.00000000E+00 Hartree
+   plowan_compute          10
+     plowan_natom           1
+        plowan_nt           1
+ plowan_realspace           1
+        plowan_it5       0    0    0
+     plowan_iatom5       1
+       plowan_nbl5       1
+     plowan_lcalc5       2
+  plowan_projcalc5       7
           ppmodel           3
           spgroup           1
            strten5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -834,6 +884,7 @@ P           mkmem           8
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [5] A brief introduction to the ABINIT software package.
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
@@ -846,6 +897,7 @@ P           mkmem           8
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - Proc.   0 individual time (sec): cpu=          5.4  wall=          5.4
 

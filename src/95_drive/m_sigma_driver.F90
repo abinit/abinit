@@ -307,7 +307,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  type(Pawrhoij_type),allocatable :: KS_Pawrhoij(:),QP_pawrhoij(:),prev_Pawrhoij(:),tmp_pawrhoij(:)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
- type(plowannier_type) :: wanbz,wanibz
+ type(plowannier_type) :: wanbz,wanibz,wanibz_in
  type(operwan_realspace_type), allocatable :: rhot1(:,:)
 !************************************************************************
 
@@ -2062,8 +2062,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      read(temp_unt,*) msg, ib1, ib2
      close(temp_unt)
    else
-   ib1=dtset%plowan_bandi
-   ib2=dtset%plowan_bandf
+     if (open_file("data.plowann",msg,newunit=temp_unt,form="formatted", status="unknown") /= 0) then
+       MSG_ERROR(msg)
+     end if
+     rewind(temp_unt)
+     read(temp_unt,*)
+     read(temp_unt,*)
+     read(temp_unt,'(a7,2i4)') msg, ib1, ib2
+     close(temp_unt)
  endif
 endif
 
@@ -2129,8 +2135,8 @@ endif
      call init_plowannier(dtset%plowan_bandf,dtset%plowan_bandi,dtset%plowan_compute,dtset%plowan_iatom,&
        &dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,dtset%plowan_nbl,dtset%plowan_nt,&
        &dtset%plowan_projcalc,dtset%acell_orig,dtset%kpt,dtset%nimage,dtset%nkpt,dtset%nspinor,&
-       &dtset%nsppol,dtset%wtk,wanibz)
-     call get_plowannier(wanibz)
+       &dtset%nsppol,dtset%wtk,wanibz_in)
+     call get_plowannier(wanibz_in,wanibz,dtset)
      call fullbz_plowannier(dtset,kmesh,cryst,wanibz,wanbz)
      ABI_DATATYPE_ALLOCATE(rhot1,(sigp%npwx,Qmesh%nibz))
      do pwx=1,sigp%npwx

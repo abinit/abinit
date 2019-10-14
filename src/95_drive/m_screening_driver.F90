@@ -264,7 +264,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(Pawrhoij_type),allocatable :: Pawrhoij(:),prev_Pawrhoij(:)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
- type(plowannier_type) :: wanbz,wanibz
+ type(plowannier_type) :: wanbz,wanibz,wanibz_in
 
 !************************************************************************
 
@@ -1084,8 +1084,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call init_plowannier(Dtset%plowan_bandf,Dtset%plowan_bandi,Dtset%plowan_compute,&
 &Dtset%plowan_iatom,Dtset%plowan_it,Dtset%plowan_lcalc,Dtset%plowan_natom,&
 &Dtset%plowan_nbl,Dtset%plowan_nt,Dtset%plowan_projcalc,Dtset%acell_orig,&
-&Dtset%kpt,Dtset%nimage,Dtset%nkpt,Dtset%nspinor,Dtset%nsppol,Dtset%wtk,wanibz)
-   call get_plowannier(wanibz)
+&Dtset%kpt,Dtset%nimage,Dtset%nkpt,Dtset%nspinor,Dtset%nsppol,Dtset%wtk,wanibz_in)
+   call get_plowannier(wanibz_in,wanibz,Dtset)
    call fullbz_plowannier(Dtset,Kmesh,Cryst,wanibz,wanbz)
  endif
  do iqibz=1,Qmesh%nibz

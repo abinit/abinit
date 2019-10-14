@@ -3288,7 +3288,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    !   dtset%usedmft=0
    ! end if
 
-   if ((dtset%ucrpa > 0 .and. dtset%plowan_compute == 0).or.(dtset%usepawu /= 0 .and. dtset%usedmft/=0)) then
+   if ((dtset%ucrpa > 0 .and. dtset%plowan_natom == 0).or.(dtset%usepawu /= 0 .and. dtset%usedmft/=0)) then
+
      dtset%plowan_natom=1
      dtset%plowan_nbl(:)=1
      dtset%plowan_nt=1

@@ -495,7 +495,7 @@ subroutine init_plowannier(plowan_bandf,plowan_bandi,plowan_compute,plowan_iatom
      write(message,'(3a,2i6)') "  Number of wannier functions is larger than" ,&
      &" number of Kohn Sham bands used for Wannier functions: decrease the number of Wannier functions", &
      &" or increase the number of bands ",norbtot,wan%bandf_wan-wan%bandi_wan+1
-     MSG_ERROR(message)
+     !MSG_ERROR(message)
    endif
    if(plowan_compute==2) then
      write(message,'(3a)')  ch10,' == plowan_compute=2 => off diag blocks in the k-space Wannier Hamiltonian matrix',&
@@ -796,7 +796,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 
 
 ! Drive the normalization of the psichis
-opt = 0 ! 
+opt = 1 ! 
         ! 0 : normalization k-point by k-point
         ! 1 : normalization of the sum over k-points
 
@@ -2384,15 +2384,18 @@ end subroutine compute_coeff_plowannier
 !! open_file,
 !! SOURCE
 
- subroutine get_plowannier(wan)
+ subroutine get_plowannier(wan_in,wan_out,dtset)
 
  use m_abicore
+ use defs_abitypes
  use m_io_tools,  only : open_file
  use m_specialmsg, only : wrtout
  implicit none
 
  !Arguments-------------------------
- type(plowannier_type),intent(inout) :: wan
+ type(plowannier_type),intent(inout) :: wan_in
+ type(plowannier_type),intent(inout) :: wan_out
+ type(dataset_type),intent(in) :: dtset
  !Local variables-------------------
  character(len=500) :: msg
  integer :: unt,iatom,spin,ikpt,iband,ibandc,il,ispinor,im,dummy,natom,bandi,bandf,nbl,nspin,nkpt
@@ -2403,41 +2406,49 @@ end subroutine compute_coeff_plowannier
   MSG_ERROR(msg)
  end if
  rewind(unt)
-
  
+
  !Reading of the header of data.plowann
  read(unt,'(a22,i2)') msg, natom
  read(unt,*)
  read(unt,'(a7,2i4)') msg, bandi,bandf
  read(unt,'(a26,i2)') msg, nbl
- do iatom=1,wan%natom_wan
+ do iatom=1,wan_in%natom_wan
    read(unt,*)
  enddo
  read(unt,'(a16,i2)') msg, nspin
  read(unt,'(a19,i4)') msg, nkpt
+
  !Testing the header
- if (natom /= wan%natom_wan .OR. bandi /=wan%bandi_wan .OR. bandf /=wan%bandf_wan .OR.&
-& nbl/= sum(wan%nbl_atom_wan(:)) .OR. nspin /= wan%nsppol .OR. nkpt/=wan%nkpt ) then
+ if (natom /= wan_in%natom_wan .OR.&
+& nbl/= sum(wan_in%nbl_atom_wan(:)) .OR. nspin /= wan_in%nsppol .OR. nkpt/=wan_in%nkpt ) then
    write(msg,'(a,3i3)')"Not the same atoms or bands in both datasets",natom,bandi,bandf
    MSG_ERROR(msg)
  endif
+
+ call init_plowannier(bandf,bandi,dtset%plowan_compute,&
+     &dtset%plowan_iatom,dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,&
+     &dtset%plowan_nbl,dtset%plowan_nt,dtset%plowan_projcalc,dtset%acell_orig,&
+     &dtset%kpt,dtset%nimage,dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%wtk,wan_out)
+
+ call destroy_plowannier(wan_in)
 
  write(msg,'(a)')"Reading of the Wannier weights from data.plowann"
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
  !Reading of the psichis 
- do ikpt=1,wan%nkpt
+ do ikpt=1,wan_out%nkpt
    read(unt,*)
-    do spin=1,wan%nsppol
-      do ispinor=1,wan%nspinor
-        do iband=wan%bandi_wan,wan%bandf_wan
-          ibandc=iband-wan%bandi_wan+1
+    do spin=1,wan_out%nsppol
+      do ispinor=1,wan_out%nspinor
+        do iband=wan_out%bandi_wan,wan_out%bandf_wan
+          ibandc=iband-wan_out%bandi_wan+1
           read(unt,*)
-          do iatom=1,wan%natom_wan
-            do il=1,wan%nbl_atom_wan(iatom)
-              do im=1,2*wan%latom_wan(iatom)%lcalc(il)+1
+          do iatom=1,wan_out%natom_wan
+            do il=1,wan_out%nbl_atom_wan(iatom)
+              do im=1,2*wan_out%latom_wan(iatom)%lcalc(il)+1
                 read(unt,'(8x,3i3,2x,2f23.15)')dummy,dummy,dummy,xx,yy
-                wan%psichi(ikpt,ibandc,iatom)%atom(il)%matl(im,spin,ispinor)=cmplx(xx,yy)
+                wan_out%psichi(ikpt,ibandc,iatom)%atom(il)%matl(im,spin,ispinor)=cmplx(xx,yy)
               enddo!m
             enddo!l
           enddo!atom
@@ -2493,7 +2504,7 @@ end subroutine get_plowannier
   
 
    sym=kmesh%nbz/kmesh%nibz
-   call init_plowannier(dtset%plowan_bandf,dtset%plowan_bandi,dtset%plowan_compute,&
+   call init_plowannier(wanibz%bandf_wan,wanibz%bandi_wan,dtset%plowan_compute,&
      &dtset%plowan_iatom,dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,&
      &dtset%plowan_nbl,dtset%plowan_nt,dtset%plowan_projcalc,dtset%acell_orig,&
      &dtset%kpt,dtset%nimage,dtset%nkpt*sym,dtset%nspinor,dtset%nsppol,dtset%wtk,wanbz)
@@ -2526,29 +2537,33 @@ end subroutine get_plowannier
        enddo
      enddo
    else if (cryst%nsym>1) then
-!     do ik_bz=1,kmesh%nbz
-!       call get_BZ_item(kmesh,ik_bz,kbz,ik_ibz,isym,itim)
-!       do iatom=1,wanibz%natom_wan
-!         at_indx=cryst%indsym(4,isym,wanibz%iatom_wan(iatom))
-!         do spin=1,wanibz%nspppol
-!           do ispinor=1,wanibz%nspinor
-!             do il1=1,wanibz%nbl_atom_wan(iatom)
-!                do il2=1,wanibz%nbl_atom_wan(iatom)
-!                  do im1=1,wanibz%2*latom_wan(iatom)%lcalc(l1)
-!                    do im2=1,wanibz%2*latom_wan(iatom)%lcalc(l2)
-!                      do iband=wanibz%bandi_wan,wanibz%bandf_wan
-!                        ibandc=iband-wanibz%bandi_wan+1
-!                        wanbz%psichi(ik_bz,ibandc,iatom)%atom(il1)%matl(im1,spin,ispinor)=&
-!                          &
-!                          enddo
-!                      enddo
-!                    enddo
-!                  enddo
-!                enddo
-!              enddo
-!            enddo
-!          enddo
-!        enddo
+     write(msg,*) "nsym/=1 is not supported"
+     MSG_ERROR(msg)
+     
+    ! do ik_bz=1,kmesh%nbz
+    !   call get_BZ_item(kmesh,ik_bz,kbz,ik_ibz,isym,itim)
+    !   do iatom=1,wanibz%natom_wan
+    !     at_indx=cryst%indsym(4,isym,wanibz%iatom_wan(iatom))
+    !     do spin=1,wanibz%nspppol
+    !       do ispinor=1,wanibz%nspinor
+    !         do il1=1,wanibz%nbl_atom_wan(iatom)
+    !            do il2=1,wanibz%nbl_atom_wan(iatom)
+    !              do im1=1,wanibz%2*latom_wan(iatom)%lcalc(l1)
+    !                do im2=1,wanibz%2*latom_wan(iatom)%lcalc(l2)
+    !                  do iband=wanibz%bandi_wan,wanibz%bandf_wan
+    !                    ibandc=iband-wanibz%bandi_wan+1
+    !                    wanbz%psichi(ik_bz,ibandc,iatom)%atom(il1)%matl(im1,spin,ispinor)=&
+    !                      &wanbz%psichi(ik_bz,ibandc,iatom)%atom(il1)%matl(im1,spin,ispinor)+&
+    !                      &wanibz%psichi(ik_ibz,ibandc,iatom)%atom(il1)
+    !                      enddo
+    !                  enddo
+    !                enddo
+    !              enddo
+    !            enddo
+    !          enddo
+    !        enddo
+    !      enddo
+    !    enddo
       endif
       call destroy_plowannier(wanibz)
     end subroutine fullbz_plowannier
