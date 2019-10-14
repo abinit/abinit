@@ -396,7 +396,7 @@ end subroutine def_observable_var
     ! dims 
     ! vars
     call ab_define_var(self%ncid, (/self%three/), qpoint_id, NF90_DOUBLE,&
-         & "spin_qpoint", "spin QPOINT", "dimensionless")
+         & "spin_projection_qpoint", "spin QPOINT", "dimensionless")
     ! TODO should change ncell to 3*3 matrix
     call ab_define_var(self%ncid, (/self%three/), ncell_id, NF90_INT, "ncell",&
          & "supercell matrix (only diagonal)", "dimensionless")
@@ -417,7 +417,7 @@ end subroutine def_observable_var
 
     ncerr=nf90_enddef(self%ncid)
     ! put vars
-    ncerr=nf90_put_var(self%ncid, qpoint_id, params%spin_qpoint)
+    ncerr=nf90_put_var(self%ncid, qpoint_id, params%spin_projection_qpoint)
     ncerr=nf90_put_var(self%ncid, ncell_id, params%ncell)
     ncerr=nf90_put_var(self%ncid, temperature_id, params%spin_temperature*Ha_K)
     ncerr=nf90_put_var(self%ncid, dt_id, params%spin_dt*Time_Sec)

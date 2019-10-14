@@ -141,7 +141,7 @@ contains
     ABI_ALLOCATE(self%Avg_Mst_sub_norm, (self%nsublatt))
 
     do i =1, self%nspin
-       self%Ms_coeff(i) = real(exp(i2pi * dot_product(params%spin_qpoint, supercell%spin%Rvec(:,i))))
+       self%Ms_coeff(i) = real(exp(i2pi * dot_product(params%spin_projection_qpoint, supercell%spin%Rvec(:,i))))
     end do
 
     call reset(self, params)

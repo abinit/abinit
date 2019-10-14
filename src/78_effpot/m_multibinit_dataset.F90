@@ -187,7 +187,7 @@ module m_multibinit_dataset
   real(dp) :: spin_tolvar !covariance
 
   real(dp) :: spin_mag_field(3)  ! external magnetic field
-  real(dp) :: spin_qpoint(3)
+  real(dp) :: spin_projection_qpoint(3) ! qpoint to check if spin configuration is random
   real(dp) :: spin_sia_k1dir(3)
   real(dp) :: spin_init_qpoint(3) ! qpoint to specify initial spin configuration
   real(dp) :: spin_init_rotate_axis(3) ! rotation axis to specify initial spin configuration  
@@ -406,10 +406,11 @@ multibinit_dtset%slc_coupling=0
  multibinit_dtset%strten_reference(:)= zero
 
  multibinit_dtset%spin_mag_field(:)=zero
- multibinit_dtset%spin_qpoint(:)=zero
+ multibinit_dtset%spin_projection_qpoint(:)=zero
  multibinit_dtset%spin_init_qpoint(:)=zero
  multibinit_dtset%spin_init_rotate_axis(:)=(/1.0, 0.0, 0.0/)
  multibinit_dtset%spin_init_orientation(:)=(/0.0, 0.0, 1.0/)
+
  
  multibinit_dtset%spin_sia_k1dir(:)=(/0.0,0.0,1.0/)
 
@@ -1317,7 +1318,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_init_orientation',tread,'DPR')
  if(tread==1) multibinit_dtset%spin_init_orientation(1:3)= dprarr(1:3)
 
- multibinit_dtset%spin_qpoint= zero
+ multibinit_dtset%spin_projection_qpoint= zero
  if(3>marr)then
     marr=3
     ABI_DEALLOCATE(intarr)
@@ -1325,8 +1326,8 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     ABI_ALLOCATE(intarr,(marr))
     ABI_ALLOCATE(dprarr,(marr))
  end if
- call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_qpoint',tread,'DPR')
- if(tread==1) multibinit_dtset%spin_qpoint(1:3)= dprarr(1:3)
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_projection_qpoint',tread,'DPR')
+ if(tread==1) multibinit_dtset%spin_projection_qpoint(1:3)= dprarr(1:3)
 
  multibinit_dtset%spin_init_qpoint= zero
  if(3>marr)then
@@ -2386,8 +2387,8 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
     write(nunit, '(13x, a15, I12.1)') 'spin_sia_add', multibinit_dtset%spin_sia_add
     write(nunit, '(13x, a15, ES15.5)') 'spin_sia_k1amp', multibinit_dtset%spin_sia_k1amp
     write(nunit, '(13x, a15, 3ES15.5)') 'spin_sia_k1dir', (multibinit_dtset%spin_sia_k1dir(ii), ii=1,3)
-    write(nunit,'(13x,a15)')   'spin_qpoint'
-    write(nunit,'(28x,3es12.5)')   (multibinit_dtset%spin_qpoint(ii),ii=1,3)
+    write(nunit,'(13x,a15)')   'spin_projection_qpoint'
+    write(nunit,'(28x,3es12.5)')   (multibinit_dtset%spin_projection_qpoint(ii),ii=1,3)
     write(nunit, '(13x, a15, I12.1)') 'spin_init_state', multibinit_dtset%spin_init_state
     if(multibinit_dtset%spin_init_state==3) then
       write(nunit,'(13x,a25)')   'spin_init_orientation'
