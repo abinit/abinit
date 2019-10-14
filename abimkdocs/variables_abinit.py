@@ -1580,30 +1580,40 @@ Variable(
     dimensions=['[[ntypat]]'],
     defaultval=0,
     mnemonics="CONSTRAINT KIND in constrained DFT",
+    requires="[[iscf]] > 1 and [[iscf]] < 10 and [[ionmov]] /= 4",
     text=r"""
-Defines, for each type of atom, the kind of constraint imposed by constrained DFT (also turns on the constrained DFT algorithm).
+If [[constraint_kind]] is non-zero for at least one type of atom,
+the constrained DFT algorithm is activated.
+[[constraint_kind]] defines, for each type of atom, the kind of constraint(s) imposed by constrained DFT. 
 When [[constraint_kind]] is zero for an atom type, there is not constraint applied to this atom type.
 Otherwise, different constraints can be imposed on the total charge (ion+electronic) and/or magnetization, computed
 inside a sphere of radius [[ratsph]], possibly smeared within a width [[ratsm]]. 
-Such integrated charge might be imposed to be equal to [[chrgat]], while the magnetization might be compared to [[spinat]].
+Such integrated ion+electronic charge might be imposed to be equal to [[chrgat]], while the magnetization might be compared to [[spinat]].
+The first digit of [[constraint_kind]] defines the constraint on the charge, while the second digit defines the constraint on the
+magnetization.
 
 When [[constraint_kind]] is 10 or above, the charge constraint will be imposed.
-The first digit of [[constraint_kind]] govers the magnetization constraint:
 
-  When [[constraint_kind]]=1 or 11, the exact value (vector in the non-collinear case, amplitude and sign in the colinear case) of the magnetization is constrained;
-  When [[constraint_kind]]=2 or 12, only the direction is constrained (only applicable to the non-collinear case);
-  When [[constraint_kind]]=3 or 13, only the magnitude is constrained.
+When [[constraint_kind]]=1 or 11, the exact value (vector in the non-collinear case, amplitude and sign in the collinear case) of the magnetization is constrained;
+When [[constraint_kind]]=2 or 12, only the direction is constrained (only meaningful in the non-collinear case);
+When [[constraint_kind]]=3 or 13, only the magnitude is constrained.
 
-For the algorithm, see [[topic:ConstrainedDFT]]. The balance between the potential residual, and the density/magnetization constraint is governed by [[magcon_lambda]]. The spherical integral is governed by [[ratsph]] and [[ratsm]]. 
+For the algorithm, see [[topic:ConstrainedDFT]]. It makes important use of the potential residual,
+so the algorithm works only with [[iscf]] between 2 and 9. 
+The balance between the potential residual, and the density/magnetization constraint is governed by [[magcon_lambda]]. The spherical integral is governed by [[ratsph]] and [[ratsm]]. 
 
 Note that while a spherical integral around an atom might reasonably well capture the magnetization of an atom within a solid or within a molecule,
  so that the sum of such magnetizations might be reasonably close to the total magnetization of the solid, 
 such a procedure hardly gives the total charge of the solid: the space between the spheres is too large when the spheres do not overlap,
-and overlapping spheres will not deliver the correct total charge of the system.
+while overlapping spheres will not deliver the correct total charge of the system.
 
-Note that [[constraint_kind]] defines constraints for types of atoms, not for specific atoms. Atoms of the same type are supposed to incur the same constraint. If the use needs to impose different constraints on atoms of the same type (in principle), it is possible (and easy) to pretend
-that they belong to different types, even if they are using the same pseudopotential file. There is an example 
+Note that [[constraint_kind]] defines constraints for types of atoms, not for specific atoms. 
+Atoms of the same type are supposed to incur the same constraint. 
+If the user wants to impose different constraints on atoms of the same type (in principle), it is possible (and easy) to pretend
+that they belong to different types, even if the same pseudopotential file is used for these atoms. There is an example 
 in test [[test:v8_24]], the hydrogen dimer, where the charge around the first atom is constrained, and the charge around the second atom is left free.
+
+Incidentally, [[ionmov]]==4 is not allowed in the present implementation of constrained DFT because the motion of atoms and simultaneous computation of constraints would be difficult to handle. 
 """,
 ),
 
