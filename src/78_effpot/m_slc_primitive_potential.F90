@@ -782,7 +782,7 @@ contains
       call scmaker%trans_j_and_Rj(nbasis=self%natom*3, j=u_prim, Rj=Ru_prim, j_sc=u_sc, Rj_sc=Ru_sc)
       val_sc(:)= self%liu%val%data(inz)
       do icell=1, scmaker%ncells
-        !call scpot%add_liu_term(i_sc(icell), u_sc(icell), val_sc(icell))
+        call scpot%add_liu_term(i_sc(icell), u_sc(icell), val_sc(icell))
       end do
       ABI_SFREE(i_sc)
       ABI_SFREE(u_sc)

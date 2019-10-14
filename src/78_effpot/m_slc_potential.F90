@@ -67,8 +67,8 @@ module  m_slc_potential
      procedure :: finalize
      procedure :: set_params
      procedure :: set_supercell
-     !procedure :: add_liu_term
-     !procedure :: add_niuv_term
+     procedure :: add_liu_term
+     procedure :: add_niuv_term
      procedure :: add_oiju_term
      procedure :: add_tijuv_term
      procedure :: calculate
