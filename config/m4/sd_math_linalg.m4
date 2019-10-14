@@ -253,21 +253,61 @@ AC_DEFUN([SD_LINALG_INIT_FLAVOR], [
 # libraries.
 #
 AC_DEFUN([SD_LINALG_DETECT], [
-  AC_MSG_CHECKING([how to detect linear algebra libraries])
-  case "${sd_linalg_init}" in
-    def|yon)
-      AC_MSG_RESULT([explore])
-      _SD_LINALG_EXPLORE
-      ;;
-    dir|env)
-      AC_MSG_RESULT([verify])
-      _SD_LINALG_CHECK_LIBS
-      ;;
-    *)
-      AC_MSG_ERROR([unsupported linear algebra init type: '${sd_linalg_init}'])
-      ;;
-  esac
-  _SD_LINALG_DUMP_CONFIG
+  if test "${sd_linalg_enable}" = "auto" -o "${sd_linalg_enable}" = "yes"; then
+
+    AC_MSG_CHECKING([how to detect linear algebra libraries])
+    case "${sd_linalg_init}" in
+      def|yon)
+        AC_MSG_RESULT([explore])
+        _SD_LINALG_EXPLORE
+        ;;
+      dir|env)
+        AC_MSG_RESULT([verify])
+        _SD_LINALG_CHECK_LIBS
+        ;;
+      *)
+        AC_MSG_ERROR([unsupported linear algebra init type: '${sd_linalg_init}'])
+        ;;
+    esac
+    _SD_LINALG_DUMP_CONFIG
+
+    # Check if minimum requirements are fulfilled
+    if test "${sd_linalg_serial_ok}" != "yes"; then
+      case "${sd_linalg_policy}" in
+        fail)
+          if test "${sd_linalg_enable}" = "auto"; then
+            sd_linalg_enable="no"
+          else
+            AC_MSG_ERROR([linear algebra does not work])
+          fi
+          ;;
+        skip)
+          sd_linalg_enable="no"
+          ;;
+        warn)
+          AC_MSG_WARN([linear algebra does not work])
+          ;;
+      esac
+    fi
+
+  fi   # sd_linalg_enable = auto | yes
+
+  # Wipe-out configuration if linear algebra is finally disabled
+  if test "${sd_linalg_enable}" = "no"; then
+    sd_linalg_flavor="none"
+    sd_linalg_cppflags=""
+    sd_linalg_cflags=""
+    sd_linalg_fcflags=""
+    sd_linalg_ldflags=""
+    sd_linalg_libs=""
+  fi
+
+  # Check that parallel minimum requirements are fulfilled, when relevant
+  if test "${sd_linalg_serial_ok}" = "yes" -a "${sd_mpi_ok}" = "yes"; then
+    if test "${sd_linalg_mpi_ok}" != "yes"; then
+      AC_MSG_WARN([parallel linear algebra is not available])
+    fi
+  fi
 
   # Define vendor-specific C preprocessing options
   tmp_linalg_iter=`echo "${sd_linalg_flavor}" | sed -e 's/+/ /g'`
@@ -575,7 +615,11 @@ AC_DEFUN([_SD_LINALG_DUMP_CONFIG], [
     AC_MSG_CHECKING([how linear algebra parameters have been set])
     AC_MSG_RESULT([${sd_linalg_init} (flavor: ${sd_linalg_flavor_init})])
     AC_MSG_CHECKING([for the actual linear algebra flavor])
-    AC_MSG_RESULT([${sd_linalg_flavor}])
+    if test "${sd_linalg_flavor}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${sd_linalg_flavor}])
+    fi
     AC_MSG_CHECKING([for linear algebra C preprocessing flags])
     if test "${sd_linalg_cppflags}" = ""; then
       AC_MSG_RESULT([none])
