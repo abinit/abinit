@@ -400,6 +400,7 @@ AC_DEFUN([_SD_MPI_CHECK_CC_API], [
   AC_LANG_PUSH([C])
   AC_LINK_IFELSE([AC_LANG_PROGRAM(
     [[
+#include <stdlib.h>
 #include <mpi.h>
     ]],
     [[
