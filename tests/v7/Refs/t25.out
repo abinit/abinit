@@ -147,7 +147,7 @@ P           mkmem           8
      plowan_iatom5       1
        plowan_nbl5       1
      plowan_lcalc5       2
-  plowan_projcalc5       7
+  plowan_projcalc5      -2
           ppmodel           3
           spgroup           1
            tolvrs      1.00000000E-10
@@ -577,14 +577,14 @@ P           mkmem           8
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is :  7
+ == Value of the projectors      for atom 1 is : -2
 
  == Lower and upper values of the selected bands   21   25
  == Number of atoms                                      1
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is :  7
+ == Value of the projectors      for atom 1 is : -2
 Reading of the Wannier weights from data.plowann
 
  == Lower and upper values of the selected bands   21   25
@@ -592,7 +592,7 @@ Reading of the Wannier weights from data.plowann
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is :  7
+ == Value of the projectors      for atom 1 is : -2
  Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
  
 ==== Calculation of the screened interaction ====
@@ -808,7 +808,7 @@ P           mkmem           8
      plowan_iatom5       1
        plowan_nbl5       1
      plowan_lcalc5       2
-  plowan_projcalc5       7
+  plowan_projcalc5      -2
           ppmodel           3
           spgroup           1
            strten5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00

@@ -796,9 +796,14 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 
 
 ! Drive the normalization of the psichis
-opt = 1 ! 
-        ! 0 : normalization k-point by k-point
-        ! 1 : normalization of the sum over k-points
+ if (dtset%plowan_projcalc(1) == -2 .or. dtset%ucrpa /= 0 ) then 
+   opt = 1
+ else 
+   opt=0
+ end if
+! 
+        ! 0 : normalization k-point by k-point (normal use of plowan)
+        ! 1 : normalization of the sum over k-points (use with crpa old keywords)
 
 
 ! Internal variables (could be put one day as input variables of ABINIT).
@@ -982,6 +987,14 @@ opt = 1 !
      proj = wan%projector_wan(iatom)%lproj(il)
      itypat = dtset%typat(wan%iatom_wan(iatom))
      lmn_size = pawtab(itypat)%lmn_size
+     ! modif proj if proj == -2 ---> usemdft has been used
+     if (proj==-2) then
+       do ilmn = 1,lmn_size 
+         if ( psps%indlmn(1,ilmn,itypat) .eq. l .and. psps%indlmn(2,ilmn,itypat) .eq. 0 .and. proj .eq. -2 ) then
+           proj=psps%indlmn(5,ilmn,itypat)
+         end if
+       end do
+     end if
      ! check if the choice of proj is coherent with the value of l
      do ilmn = 1,lmn_size
        if (psps%indlmn(1,ilmn,itypat).eq. l .and. psps%indlmn(2,ilmn,itypat) .eq. 0) then

@@ -300,7 +300,7 @@ P           mkmem3          8
      plowan_iatom3       1
        plowan_nbl3       1
      plowan_lcalc3       2
-  plowan_projcalc3       7
+  plowan_projcalc3      -2
           ppmodel           3
           spgroup1        221
           spgroup2          1
@@ -1130,7 +1130,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     148.625     148.536
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is :  7
+ == Value of the projectors      for atom 1 is : -2
 
  == For each k-point of the path, gives the eigenvalues (in eV) of the Hamiltonian in the Wannier basis
 
@@ -1504,7 +1504,7 @@ P           mkmem3          8
      plowan_iatom3       1
        plowan_nbl3       1
      plowan_lcalc3       2
-  plowan_projcalc3       7
+  plowan_projcalc3      -2
           ppmodel           3
           spgroup1        221
           spgroup2          1

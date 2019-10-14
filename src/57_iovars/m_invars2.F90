@@ -3289,7 +3289,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    ! end if
 
    if ((dtset%ucrpa > 0 .and. dtset%plowan_natom == 0).or.(dtset%usepawu /= 0 .and. dtset%usedmft/=0)) then
-
      dtset%plowan_natom=1
      dtset%plowan_nbl(:)=1
      dtset%plowan_nt=1
@@ -3300,7 +3299,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        if (lpawu/=-1) then
          dtset%plowan_lcalc(:)=lpawu
          dtset%plowan_iatom(:)=iatom
-         dtset%plowan_projcalc(:)=3*dtset%plowan_lcalc+1
+         dtset%plowan_projcalc(:)=-2
        end if
      end do
      dtset%plowan_bandi=dtset%dmftbandi
