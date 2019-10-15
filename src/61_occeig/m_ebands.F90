@@ -149,7 +149,7 @@ MODULE m_ebands
    integer :: intmeth
    ! 1 for gaussian, 2 tetra
 
-   real(dp) :: broad=zero
+   real(dp) :: broad = zero
    ! Gaussian broadening
 
    real(dp) :: step
@@ -159,12 +159,12 @@ MODULE m_ebands
    ! mesh(nw)
 
    real(dp),allocatable :: dos(:,:)
-   ! dos(nw,0:nsppol)
+   ! dos(nw, 0:nsppol)
    ! Total DOS, spin up and spin down component.
 
    real(dp),allocatable :: idos(:,:)
-   ! idos(nw,0:nsppol)
-   ! Integrated DOS, spin up and spin down component.
+   ! idos(nw, 0:nsppol)
+   ! Integrated DOS: (total, spin up, spin down) component.
 
    real(dp),allocatable :: gef(:)
    ! gef(0:nsppol)
@@ -951,7 +951,7 @@ end subroutine ebands_copy
 !!
 !! SOURCE
 
-subroutine ebands_print(ebands,header,unit,prtvol,mode_paral)
+subroutine ebands_print(ebands, header, unit, prtvol, mode_paral)
 
 !Arguments ------------------------------------
 !scalars
@@ -1379,7 +1379,7 @@ end function get_valence_idx
 !!  get_bands_from_erange
 !!
 !! FUNCTION
-!! Return the indices of the mix and max band within an energy window.
+!! Return the indices of the min and max band index within an energy window.
 !!
 !! INPUTS
 !!  elow, ehigh: Min and max energy
@@ -2253,7 +2253,7 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
  ndiff = ebands%nelect - SUM(nelect_spin)
  if (my_prtvol > 0) then
    write(msg,'(2a,f6.2,2a,f7.4)')ch10,&
-    ' Total number of electrons = ', sum(nelect_spin),ch10,&
+    ' Total number of electrons: ', sum(nelect_spin),ch10,&
     ' Input and calculated no. of electrons differ by ',ndiff
    call wrtout(std_out, msg)
  end if
@@ -2907,7 +2907,7 @@ end function ebands_ncwrite_path
 !!
 !! SOURCE
 
-type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) result(edos)
+type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm) result(edos)
 
 !Arguments ------------------------------------
 !scalars
@@ -3297,12 +3297,30 @@ subroutine edos_print(edos, unit)
 
  unt = std_out; if (present(unit)) unt = unit
 
- write(unt,'(a,es16.8,a)')' Fermi level: ',edos%mesh(edos%ief)*Ha_eV," [eV]"
- write(unt,"(a,es16.8)")" Total electron DOS at Fermi level in states/eV : ",edos%gef(0) / Ha_eV
+ write(unt,'(a,es16.8,a)')' Fermi level: ',edos%mesh(edos%ief) * Ha_eV, " (eV)"
+ write(unt,"(a,es16.8)")" Total electron DOS at Fermi level in states/eV: ", edos%gef(0) / Ha_eV
  if (edos%nsppol == 2) then
-   write(unt,"(a,es16.8)")"   Spin up:  ",edos%gef(1) / Ha_eV
-   write(unt,"(a,es16.8)")"   Spin down:",edos%gef(2) / Ha_eV
+   write(unt,"(a,es16.8)")"   g(eF) for spin up:  ", edos%gef(1) / Ha_eV
+   write(unt,"(a,es16.8)")"   g(eF) for spin down:", edos%gef(2) / Ha_eV
  end if
+ write(unt,"(a,f6.1)")" Total number of electrons at eF: ", edos%idos(edos%ief, 0)
+ if (edos%nsppol == 2) then
+   write(unt,"(a,es16.8)")"   N(eF) for spin up:  ", edos%idos(edos%ief, 1)
+   write(unt,"(a,es16.8)")"   N(eF) for spin down:", edos%idos(edos%ief, 2)
+ end if
+
+ select case (edos%intmeth)
+ case (1)
+   write(unt, "(a,f6.4,a,es16.8,a)") &
+     " Gaussian method with broadening: ", edos%broad * Ha_eV, "(eV) and mesh step:", edos%mesh * Ha_eV, " (eV)"
+ case (2)
+   write(unt, "(a,es16.8,a)")" Linear tetrahedron method with mesh step:", edos%step * Ha_eV, " (eV)"
+ case (3)
+   write(unt, "(a,es16.8,a)")" Linear tetrahedron method with Blochl corrections and mesh step:", edos%step * Ha_eV, " (eV)"
+ case default
+   MSG_ERROR(sjoin("Wrong intmeth:", itoa(edos%intmeth)))
+ end select
+ write(unt, "(a)")""
 
 end subroutine edos_print
 !!***
@@ -3338,8 +3356,7 @@ end subroutine edos_print
 !!
 !! SOURCE
 
-integer function ebands_write_nesting(ebands,cryst,filepath,prtnest,tsmear,fermie_nest,&
-  qpath_vertices,errmsg) result(skipnest)
+integer function ebands_write_nesting(ebands,cryst,filepath,prtnest,tsmear,fermie_nest,qpath_vertices,errmsg) result(skip)
 
 !Arguments ------------------------------------
  class(ebands_t),intent(in) :: ebands
@@ -3360,16 +3377,16 @@ integer function ebands_write_nesting(ebands,cryst,filepath,prtnest,tsmear,fermi
 
 ! *********************************************************************
 
- skipnest = 0; errmsg = ""
+ skip = 0; errmsg = ""
  if (any(ebands%nband /= ebands%nband(1))) then
    errmsg = 'mknesting can not handle variable nband(1:nkpt). Skipped.'//&
      ch10//' Correct input file to get nesting output'
-   skipnest = 1; return
+   skip = 1; return
  end if
 
  if (ebands%nshiftk /= 1) then
    errmsg = 'mknesting does not support nshiftk > 1. Change ngkpt and shiftk to have only one shift after inkpts'
-   skipnest = 1; return
+   skip = 1; return
  end if
 
  ! FIXME: needs to be generalized to complete the k grid for one of the arguments to mknesting
@@ -3491,8 +3508,8 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
  ABI_MALLOC(bz2ibz, (nkfull*sppoldbl,6))
 
  timrev = kpts_timrev_from_kptopt(inb%kptopt)
- call listkk(dksqmax,cryst%gmet,bz2ibz,inb%kptns,kfull,inb%nkpt,nkfull,cryst%nsym,&
-   sppoldbl,cryst%symafm,cryst%symrel,timrev,comm,use_symrec=.False.)
+ call listkk(dksqmax, cryst%gmet, bz2ibz, inb%kptns, kfull, inb%nkpt, nkfull, cryst%nsym, &
+   sppoldbl, cryst%symafm, cryst%symrel, timrev, comm, use_symrec=.False.)
 
  ABI_MALLOC(wtk, (nkfull))
  wtk = one / nkfull ! weights normalized to one
@@ -3756,9 +3773,9 @@ type(ebands_t) function ebands_chop(self, bstart, bstop) result(new)
  mband  = bstop-bstart+1
  nkpt   = self%nkpt
  nsppol = self%nsppol
- ABI_MALLOC(new%eig,(mband,nkpt,nsppol))
- ABI_MALLOC(new%occ,(mband,nkpt,nsppol))
- ABI_MALLOC(new%doccde,(mband,nkpt,nsppol))
+ ABI_MALLOC(new%eig, (mband,nkpt,nsppol))
+ ABI_MALLOC(new%occ, (mband,nkpt,nsppol))
+ ABI_MALLOC(new%doccde, (mband,nkpt,nsppol))
 
  new%mband  = mband
  new%nband  = mband

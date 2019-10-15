@@ -1161,7 +1161,7 @@ contains
      end do
 
      NCF_CHECK(nctk_open_create(ncid, abiwan_fname, xmpi_comm_self))
-     NCF_CHECK(hdr_ncwrite(hdr, ncid, fform_from_ext("ABIWAN"), nc_define=.True.))
+     NCF_CHECK(hdr%ncwrite(ncid, fform_from_ext("ABIWAN"), nc_define=.True.))
      NCF_CHECK(crystal%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(ebands, ncid))
 

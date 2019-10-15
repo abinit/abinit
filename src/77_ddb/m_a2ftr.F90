@@ -43,7 +43,6 @@ module m_a2ftr
  use m_ifc,             only : ifc_type
  use m_dynmat,          only : ftgam_init, ftgam
  use m_epweights,       only : d2c_wtq, ep_ph_weights, ep_el_weights, ep_ph_weights
- use m_fstab,           only : mkqptequiv
 
  implicit none
 

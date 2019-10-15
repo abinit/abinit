@@ -25,7 +25,7 @@
 
 # Initialize Autoconf
 AC_PREREQ(2.62)
-AC_INIT([ABINIT-Bindings],[8.11.11],
+AC_INIT([ABINIT-Bindings],[8.11.12],
   [https://bugs.launchpad.net/abinit/],[abinit-bindings])
 AC_REVISION([Autotools support for the ABINIT Bindings])
 AC_CONFIG_AUX_DIR([config/gnu])

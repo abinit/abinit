@@ -1,5 +1,5 @@
 
-.Version 8.1.6 of ABINIT 
+.Version 8.11.11 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 12 Nov 2018.
-- ( at 02h08 )
+.Starting date : Sun 29 Sep 2019.
+- ( at 15h32 )
   
 - input  file    -> t51.in
 - output file    -> t51.out
@@ -34,7 +34,7 @@
 -    mband =          10        mffmem =           1         mkmem =          10
        mpw =         295          nfft =        8000          nkpt =          10
 ================================================================================
-P This job should need less than                       3.357 Mbytes of memory.
+P This job should need less than                       3.321 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.452 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.452 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          14        mffmem =           1         mkmem =           3
        mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       2.096 Mbytes of memory.
+P This job should need less than                       2.059 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.196 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.196 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          15        mffmem =           1         mkmem =           3
        mpw =         266          nfft =        5832          nkpt =           3
 ================================================================================
-P This job should need less than                       2.450 Mbytes of memory.
+P This job should need less than                       2.418 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
@@ -85,7 +85,7 @@ _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =           3
        mpw =         266          nfft =        5832          nkpt =           3
 ================================================================================
-P This job should need less than                       2.357 Mbytes of memory.
+P This job should need less than                       2.325 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.099 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
@@ -111,9 +111,9 @@ _ WF disk file :      0.099 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
  bs_haydock_niter2        100
  bs_haydock_niter3        100
  bs_haydock_niter4       1000
-   bs_haydock_tol1     2.00000000E-02  2.00000000E-02
-   bs_haydock_tol2     2.00000000E-02  2.00000000E-02
-   bs_haydock_tol3     2.00000000E-02  2.00000000E-02
+   bs_haydock_tol1     2.00000000E-02  0.00000000E+00
+   bs_haydock_tol2     2.00000000E-02  0.00000000E+00
+   bs_haydock_tol3     2.00000000E-02  0.00000000E+00
    bs_haydock_tol4    -1.00000000E-03  0.00000000E+00
         bs_loband1          0
         bs_loband2          0
@@ -346,8 +346,8 @@ P           mkmem4          3
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/ygillet_tdepoptic/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/ygillet_tdepoptic/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__magcon/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__magcon/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -446,6 +446,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
     Total energy(eV)= -2.41518910763937E+02 ; Band energy (Ha)=   2.2814322551E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.38568146E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.38568146E-05  sigma(3 1)=  0.00000000E+00
@@ -543,8 +545,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/ygillet_tdepoptic/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/ygillet_tdepoptic/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__magcon/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__magcon/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -619,8 +621,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
         0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000 -15.822  -0.000   0.036   0.000   0.036   0.000   0.036   0.000
-       -0.000   0.000  -7.860   0.000  -0.254   0.000  -0.254  -0.000  -0.254
+    2   0.000 -15.822  -0.000   0.036   0.000   0.036  -0.000   0.036   0.000
+       -0.000   0.000  -7.860   0.000  -0.254   0.000  -0.254   0.000  -0.254
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =  50.4477
@@ -632,10 +634,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.020   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
-     -0.000   0.002   0.002  -0.007  -0.007   0.007   0.007  -0.002  -0.002
+      0.000   0.002   0.002  -0.007  -0.007   0.007   0.007  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
       0.020   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
-     -0.000  -0.002  -0.002   0.007   0.007  -0.007  -0.007   0.002   0.002
+      0.000  -0.002  -0.002   0.007   0.007  -0.007  -0.007   0.002   0.002
 
 
 
@@ -646,10 +648,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -15.044  -2.218   4.391  -2.058  -3.587  -2.058  -3.587  -2.058  -3.587
-       -0.000  -2.218  -4.391  -2.058   3.587  -2.058   3.587  -2.058   3.587
+        0.000  -2.218  -4.391  -2.058   3.587  -2.058   3.587  -2.058   3.587
 
-    2  -2.218 -12.123  -0.000   0.100   0.000   0.100   0.000   0.100   0.000
-        2.218  -0.000  -6.848   0.000   0.446   0.000   0.446   0.000   0.446
+    2  -2.218 -12.123   0.000   0.100   0.000   0.100  -0.000   0.100  -0.000
+        2.218   0.000  -6.848  -0.000   0.446  -0.000   0.446  -0.000   0.446
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     53.67  [%]
 
@@ -663,7 +665,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
         0.000  -4.427   0.402  -0.402   4.427  -0.402   4.427  -4.427   0.402
 
     2  -4.427 -14.156  -0.000   0.260   0.000   0.260  -0.000  -1.040   0.000
-        4.427   0.000  -4.842  -0.000   1.478  -0.000   1.478  -0.000  -0.988
+        4.427  -0.000  -4.842   0.000   1.478   0.000   1.478  -0.000  -0.988
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     49.10  [%]
 
@@ -1007,9 +1009,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  bs_haydock_niter2        100
  bs_haydock_niter3        100
  bs_haydock_niter4       1000
-   bs_haydock_tol1     2.00000000E-02  2.00000000E-02
-   bs_haydock_tol2     2.00000000E-02  2.00000000E-02
-   bs_haydock_tol3     2.00000000E-02  2.00000000E-02
+   bs_haydock_tol1     2.00000000E-02  0.00000000E+00
+   bs_haydock_tol2     2.00000000E-02  0.00000000E+00
+   bs_haydock_tol3     2.00000000E-02  0.00000000E+00
    bs_haydock_tol4    -1.00000000E-03  0.00000000E+00
         bs_loband1          0
         bs_loband2          0
@@ -1261,51 +1263,51 @@ P           mkmem4          3
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [3] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          9.6  wall=         10.9
+- Proc.   0 individual time (sec): cpu=          9.6  wall=         10.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  21 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.6  wall=         10.9
+.Delivered  21 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=          9.6  wall=         10.0

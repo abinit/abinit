@@ -78,7 +78,7 @@ module m_outscfcv
  use m_multipoles,       only : multipoles_out, out1dm
  use m_mlwfovlp_qp,      only : mlwfovlp_qp
  use m_paw_mkaewf,       only : pawmkaewf
- use m_dens,             only : mag_constr_e, calcdensph
+ use m_dens,             only : mag_penalty_e, calcdensph
  use m_mlwfovlp,         only : mlwfovlp
  use m_datafordmft,      only : datafordmft
  use m_mkrho,            only : read_atomden
@@ -202,7 +202,7 @@ contains
 !!      destroy_dmft,destroy_oper,destroy_plowannier,dos_calcnwrite,ebands_free
 !!      ebands_init,ebands_interpolate_kpath,ebands_prtbltztrp,ebands_write
 !!      fatbands_ncwrite,fftdatar_write,free_my_atmtab
-!!      get_my_atmtab,init_dmft,init_oper,init_plowannier,ioarr,mag_constr_e
+!!      get_my_atmtab,init_dmft,init_oper,init_plowannier,ioarr,mag_penalty_e
 !!      mlwfovlp,mlwfovlp_qp,multipoles_out,optics_paw,optics_paw_core
 !!      optics_vloc,out1dm,outkss,outwant,partial_dos_fractions
 !!      partial_dos_fractions_paw,pawmkaewf,pawprt,pawrhoij_copy
@@ -602,7 +602,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
    ! Write crystal and band structure energies.
    NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
-   NCF_CHECK(hdr_ncwrite(hdr, ncid, fform_den, nc_define=.True.))
+   NCF_CHECK(hdr%ncwrite(ncid, fform_den, nc_define=.True.))
    NCF_CHECK(crystal%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
    ! Add energy, forces, stresses
@@ -942,15 +942,15 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Output of integrated density inside atomic spheres
  if (dtset%prtdensph==1.and.dtset%usewvl==0)then
    call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,&
-&   ntypat,ab_out,dtset%ratsph,rhor,rprimd,dtset%typat,ucvol,xred,1,cplex1)
+&   ntypat,ab_out,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,ucvol,xred,1,cplex1)
  end if
 
  call timab(960,2,tsec)
 
  if (dtset%magconon /= 0) then
 !  calculate final value of terms for magnetic constraint: "energy" term, lagrange multiplier term, and atomic contributions
-   call mag_constr_e(dtset%magconon,dtset%magcon_lambda,mpi_enreg,&
-&   natom,nfft,ngfft,nspden,ntypat,dtset%ratsph,rhor,rprimd,dtset%spinat,dtset%typat,xred)
+   call mag_penalty_e(dtset%magconon,dtset%magcon_lambda,mpi_enreg,&
+&   natom,nfft,ngfft,nspden,ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%spinat,dtset%typat,xred)
  end if
 
  call timab(961,1,tsec)

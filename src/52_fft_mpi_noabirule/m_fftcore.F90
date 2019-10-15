@@ -1198,8 +1198,7 @@ end subroutine getng
 !!
 !! SOURCE
 
-subroutine sphereboundary(gbound,istwf_k,kg_k,mgfft,npw)
-
+subroutine sphereboundary(gbound, istwf_k, kg_k, mgfft, npw)
 
 !Arguments ------------------------------------
 !scalars
@@ -4509,8 +4508,7 @@ end subroutine kpgcount
 !!
 !! SOURCE
 
-subroutine get_kg(kpoint,istwf_k,ecut,gmet,npw_k,kg_k)
-
+subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k)
 
 !Arguments ------------------------------------
 !scalars
@@ -4573,7 +4571,7 @@ end subroutine get_kg
 !!
 !! SOURCE
 
-subroutine kgindex(indpw_k,kg_k,mask,mpi_enreg,ngfft,npw_k)
+subroutine kgindex(indpw_k, kg_k, mask, mpi_enreg, ngfft, npw_k)
 
 
 !Arguments ------------------------------------
@@ -4627,7 +4625,7 @@ subroutine kgindex(indpw_k,kg_k,mask,mpi_enreg,ngfft,npw_k)
      indpw_k(ig)=0
      mask(ig)=.false.
    end if
-   if (any(kg_k(:,ig)>ngfft(1:3)/2) .or. any(kg_k(:,ig)<-(ngfft(1:3)-1)/2) ) then
+   if (any(kg_k(:,ig) > ngfft(1:3)/2) .or. any(kg_k(:,ig) < -(ngfft(1:3)-1)/2) ) then
      write(msg,'(a,3(i0,1x),a)')" The G-vector: ",kg_k(:, ig)," falls outside the FFT box. Increase boxcutmin (?)"
      MSG_ERROR(msg)
    end if

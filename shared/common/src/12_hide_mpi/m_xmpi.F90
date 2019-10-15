@@ -191,6 +191,7 @@ MODULE m_xmpi
  public :: xmpi_split_work            ! Splits tasks inside communicator using blocks
  public :: xmpi_split_block           ! Splits tasks inside communicator using block distribution.
  public :: xmpi_split_cyclic          ! Splits tasks inside communicator using cyclic distribution.
+ public :: xmpi_split_list            ! Splits list of indices inside communicator using block distribution.
  public :: xmpi_distab
  public :: xmpi_distrib_with_replicas ! Distribute tasks among MPI ranks (replicas are allowed)
 
@@ -2279,6 +2280,57 @@ end subroutine xmpi_split_cyclic
 
 !----------------------------------------------------------------------
 
+!!****f* m_xmpi/xmpi_split_list
+!! NAME
+!!  xmpi_split_list
+!!
+!! FUNCTION
+!!  Splits list of itmes inside communicator using block distribution.
+!!  Used for the MPI parallelization of simple loops.
+!!
+!! INPUTS
+!!  ntasks:Number of items in list (global)
+!!  list(ntasks): List of indices
+!!  comm: MPI communicator.
+!!
+!! OUTPUT
+!!  my_ntasks: Number of tasks received by this rank. May be zero if ntasks > nprocs.
+!!  my_inds(my_ntasks): List of tasks treated by this rank. Allocated by the routine. May be zero-sized.
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+subroutine xmpi_split_list(ntasks, list, comm, my_ntasks, my_inds)
+
+!Arguments ------------------------------------
+ integer,intent(in)  :: ntasks, comm
+ integer,intent(out) :: my_ntasks
+ integer,intent(in) :: list(ntasks)
+ integer,allocatable,intent(out) :: my_inds(:)
+
+!Local variables-------------------------------
+ integer :: my_start, my_stop
+
+! *************************************************************************
+
+ call xmpi_split_work(ntasks, comm, my_start, my_stop)
+
+ my_ntasks = my_stop - my_start + 1
+
+ if (my_stop >= my_start) then
+   ABI_MALLOC(my_inds, (my_ntasks))
+   my_inds = list(my_start:my_stop)
+ else
+   my_ntasks = 0
+   ABI_MALLOC(my_inds, (0))
+ end if
+
+end subroutine xmpi_split_list
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_xmpi/xmpi_split_work2_i4b
 !! NAME
 !!  xmpi_split_work2_i4b
@@ -2423,7 +2475,7 @@ end subroutine xmpi_split_work2_i8b
 !!
 !! SOURCE
 
-subroutine xmpi_distab_4D(nprocs,task_distrib)
+subroutine xmpi_distab_4D(nprocs, task_distrib)
 
 !Arguments ------------------------------------
  integer,intent(in) :: nprocs

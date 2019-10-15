@@ -3,7 +3,7 @@
 # RESONANT-ONLY calculation
 # Coulomb term constructed with full W(G1,G2)
 # Scissor operator energy =  5.2000 [eV]
-# Tolerance =  0.0200 0.0200
+# Tolerance =  0.0200 0.0000
 # npweps  = 27
 # npwwfn  = 307
 # nbands  = 7
