@@ -29,7 +29,7 @@ We also need to copy *toptic_1.files* and *toptic_1.in* from
 *$ABI_TESTS/tutorial/Input* to *Work_optic*.
 
 ```sh
-cd $ABI_TESTS/tutorial/Input
+cd $ABI_TESTS/tutorespfn/Input
 mkdir Work_optic
 cd Work_optic
 cp ../toptic_1.files . 
