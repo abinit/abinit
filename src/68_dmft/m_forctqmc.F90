@@ -107,9 +107,12 @@ subroutine nf_check(istatus)
 implicit none
 integer, intent (in) :: istatus
 
+character(len=500) :: message
+
 #ifdef HAVE_NETCDF
  if (istatus /= nf90_noerr) then
-     write(std_err,*) trim(adjustl(nf90_strerror(istatus)))
+     write(message,'(2a)') ch10,trim(adjustl(nf90_strerror(istatus)))
+     MSG_ERROR(message)
  end if
 #endif
 
