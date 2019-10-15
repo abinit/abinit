@@ -62,7 +62,7 @@ Variable(
     defaultval="1.d-3 Ha",
     mnemonics="Delta OMEGA",
     text=r"""
-This parameter species the step size $\Delta\omega$ for the grid over which the
+This parameter specifies the step size $\Delta\omega$ for the grid over which the
 optic utility computes the susceptibilities. The maximum energy is set by the
 companion parameter [[optic:maxomega]]. The susceptibilities are thus computed at
 [[optic:maxomega]]/[[optic:domega]] energy points (zero excluded). In order
@@ -98,7 +98,7 @@ Variable(
     defaultval="1 Ha",
     mnemonics="MAXimum value of OMEGA",
     text=r"""
-This parameter species the maximum energy for the grid over which the
+This parameter specifies the maximum energy for the grid over which the
 optic utility computes the susceptibilities. The grid step size is set by the
 companion parameter [[optic:domega]]. The susceptibilities are thus computed at
 [[optic:maxomega]]/[[optic:domega]] energy points (zero excluded). In order
@@ -134,7 +134,7 @@ Variable(
     defaultval=0,
     mnemonics="NUMber of LINear COMPonents",
     text=r"""
-This parameter species how many components (out of 9 possible)
+This parameter specifies how many components (out of 9 possible)
 of the linear optical dielectric tensor to calculate.
 Some of these may be either equal to each other, or zero, depending upon the
 symmetry of the material (for detail see [[cite:Draxl2006]]).
@@ -152,7 +152,7 @@ Variable(
     defaultval=0,
     mnemonics="NUMber of NON-LINear COMPonents",
     text=r"""
-This parameter species how many components (out of 27 possible)
+This parameter specifies how many components (out of 27 possible)
 of the second-order nonlinear optical dielectric tensor to calculate.
 Some of these may be either equal to each other, or zero, depending upon the
 symmetry of the material (for detail see [[cite:Draxl2006]]).
