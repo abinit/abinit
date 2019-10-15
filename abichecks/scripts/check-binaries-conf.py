@@ -32,19 +32,22 @@ class MyConfigParser(ConfigParser):
 #
 
 dep_levels = {
-  "bigdft":6,
-  "fft":3,
-  "levmar":4,
-  "libpsml":4,
-  "libxc":4,
+  "bigdft":10,
+  "fft":8,
+  "levmar":9,
+  "libpsml":9,
+  "libxc":9,
   "libxml2":0,
-  "linalg":2,
-  "mpi":0,
-  "gpu":1,
-  "netcdf":4,
-  "papi":2,
-  "triqs":0, 
-  "wannier90":5,
+  "linalg":7,
+  "mpi":1,
+  "gpu":2,
+  "hdf5":4,
+  "netcdf":5,
+  "netcdf_fortran":6,
+  "papi":3,
+  "triqs":3, 
+  "wannier90":9,
+  "xmlf90":3,
 }
 
 def main():
