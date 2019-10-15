@@ -665,7 +665,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
 #ifdef MR_DEV
 ! Write the short-range ifc in case quadrupoles play a role
- if (abs(Ifc%dipdip)==1.and.any(qdrp_cart/=zero)) then
+! if (abs(Ifc%dipdip)==1.and.any(qdrp_cart/=zero)) then
    ! Compute the distances between atoms
    ! dist(ia,ib,irpt) contains the distance from atom ia to atom ib in unit cell
    ! irpt.
@@ -685,7 +685,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
          write(ab_out, '(i8,a,i6,a,i8)' )ii,' interaction with atom',ib,' cell',irpt
          write(ab_out, '(a,es16.6)' )' with distance ', dist(ia,ib,irpt)
          do nu=1,3
-           write(ab_out, '(1x,3f9.5)' ) (Ifc%atmfrc(mu,ia,nu,ib,irpt)+tol10,mu=1,3)
+           write(ab_out, '(1x,3f16.10)' ) (Ifc%atmfrc(mu,ia,nu,ib,irpt)+tol10,mu=1,3)
          end do
          write(ab_out, '(a)' )'    '                            
        end do
@@ -694,7 +694,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    end do
    write(ab_out, '(a)' )' ...Finish IFC writting '
    ABI_FREE(dist)
- end if
+! end if
 #endif
 
  !write(std_out,*)"nrpt before filter:", ifc_tmp%nrpt, ", after: ", ifc%nrpt
