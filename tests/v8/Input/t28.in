@@ -10,12 +10,12 @@
 
 #Constrained DFT data
  magcon_lambda      2   
- spinat       0.0 0.0   0.08
-              0.0 0.0  -0.08
- chrgat      2*0.69 
+ spinat       0.0 0.0   0.70
+              0.0 0.0  -0.70
+ chrgat      2*0.0
 
 #Definition of the atomic spheres
- ratsph    1.0  1.0
+ ratsph    2.0  2.0
  ratsm     0.05
 
 #System description
@@ -41,7 +41,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t25.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t28.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% psp_files = 1h.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
@@ -49,8 +49,8 @@
 #%% authors = X. Gonze
 #%% references = 
 #%% keywords = 
-#%% description = H2 diatomic molecule, static, to check the constrained DFT implementation in case nspden=2
-#%%  DS2 Constrain the collinear magnetization around atom 1 to be +0.08 and around atom 2 to be -0.08
-#%%  DS3 Constrain the collinear magnetization around atom 1 to be +0.08 and around atom 2 to be -0.08, and the total charge of both to be 0.69.
-#%%  DS4 Constrain the collinear magnetization amplitude around atom 1 to be +0.08 and around atom 2 to be -0.08. Same result as DS2.
+#%% description = H2 diatomic molecule, static, to check the constrained DFT implementation in case nspden=2 with sphere overlap
+#%%  DS2 Constrain the collinear magnetization around atom 1 to be +0.70 and around atom 2 to be -0.70
+#%%  DS3 Constrain the collinear magnetization around atom 1 to be +0.70 and around atom 2 to be -0.70, and the total charge of both to be 0.00.
+#%%  DS4 Constrain the collinear magnetization amplitude around atom 1 to be +0.70 and around atom 2 to be -0.70. Same result as DS2.
 #%%<END TEST_INFO>

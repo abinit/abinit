@@ -61,6 +61,27 @@ _MY_NAME = os.path.basename(__file__)[:-3] + "-" + __version__
 # Helper functions and tools
 
 
+def my_getlogin():
+    """
+    Returns the user logged in to the controlling terminal of the process.
+
+    https://stackoverflow.com/questions/4399617/python-os-getlogin-problem
+    """
+    username = "No_username"
+    if hasattr(os, 'getlogin'):
+        try:
+            username = os.getlogin()
+        except Exception: # FileNotFoundError
+            try:
+                import pwd
+                getlogin = lambda: pwd.getpwuid(os.getuid())[0]
+                username = getlogin()
+            except Exception:
+                username = "No_username_tried_pwd"
+
+    return username
+
+
 @makeunique
 def genid():
     '''
@@ -1023,11 +1044,7 @@ class BuildEnvironment(object):
 
         self.uname = platform.uname()
         self.hostname = gethostname().split(".")[0]
-
-        if hasattr(os, 'getlogin'):
-            self.username = os.getlogin()
-        else:
-            self.username = "No_username"
+        self.username = my_getlogin()
 
         self.build_dir = os.path.abspath(build_dir)
         self.configh_path = os.path.join(self.build_dir, "config.h")
@@ -2336,10 +2353,7 @@ class BaseTest(object):
         ##################################################
         # Document Name Space that serves as the substitution
         # namespace for instantiating a doc template.
-        if hasattr(os, 'getlogin'):
-            username = os.getlogin()
-        else:
-            username = "No_username"
+        username = my_getlogin()
 
         DNS = {
             "self": self,
@@ -3585,10 +3599,7 @@ class AbinitTestSuite(object):
             with open(os.path.join(self.workdir, "results.txt"), "wt") as fh:
                 pprint_table(table, out=fh)
 
-            if hasattr(os, 'getlogin'):
-                username = os.getlogin()
-            else:
-                username = "No_username"
+            username = my_getlogin()
 
             # Create the HTML index.
             DNS = {
