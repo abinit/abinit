@@ -12,15 +12,14 @@ Constrained Density Functional Theory imposes constraints on the charge density 
 integrals of the charge density and magnetization (real-space functions) inside spheres are constrained to user-defined
 values. This is described in e.g. [[cite:Kaduk2012]] or [[cite:Ma2015]].
 
-The algorithm implemented in ABINIT is a clear improvement of the algorithm reported in [[cite:Kaduk2012]], 
-initially reported in [[cite:Wu2005]], in that there is no double-loop cycle, but a direct (and thus faster) determined of the density or magnetization under constraint. 
-A description of the ABINIT algorithm should be published sooner or later.
+The algorithm implemented in ABINIT (to be published in 2020) is a clear improvement of the algorithm reported in both papers.
+The algorithm in [[cite:Kaduk2012]], 
+initially reported in [[cite:Wu2005]], implements a double-loop cycle, which is avoided in the present implementation.
 It is also an improvement on the algorithm presented in [[cite:Ma2015]], based on a penalty function (it is NOT a Lagrage multiplier approach, unlike claimed by these authors) also implemented in ABINIT,
 see [[topic:MagMom]], in that it imposes to arbitrary numerical precision the constraint, instead of an approximate one with a tunable accuracy under the control of
-[[magcon_lambda]],
-and is not subject to instabilities that have been observed when [[magcon_lambda]] becomes larger and larger.
-
-THIS TOPIC WILL BE FURTHER ENLARGED AFTER PUBLICATION OF THE ABOVE_MENTIONED ARTICLE.
+[[magcon_lambda]].
+The present algorithm is also not subject to instabilities that have been observed when [[magcon_lambda]] becomes larger and larger
+in the [[cite:Wu2005]] algorithm.
 
 ## Related Input Variables
 
