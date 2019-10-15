@@ -317,7 +317,7 @@ copyright: Copyright &copy; 2018-2019 The Abinit Group
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 8.11.11
+    version: 8.11.12
     previous_published_versions: [] #8.2.0
     social:
         - type: github-alt
