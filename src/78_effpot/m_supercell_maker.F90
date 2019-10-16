@@ -377,9 +377,7 @@ contains
        do iA=1 , nA
           counter=counter+1
           angle=two_pi* DOT_PRODUCT(kpoint,  self%rvecs(:, icell))
-          A_sc(:,counter) = rotate_by_angle_around_axis( &
-               & angle=two_pi* DOT_PRODUCT(kpoint,  self%rvecs(:, icell)), &
-               & axis=axis, vec=A(:, iA))
+          A_sc(:,counter) = rotate_by_angle_around_axis(angle=angle, axis=axis, vec=A(:, iA))
        end do
     end do
   end subroutine generate_spin_wave_vectorlist

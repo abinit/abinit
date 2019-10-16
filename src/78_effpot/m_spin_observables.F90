@@ -106,7 +106,7 @@ module m_spin_observables
 contains
 
 
-  subroutine initialize(self, supercell , params)
+  subroutine initialize(self, supercell, params)
 
     class(spin_observable_t) :: self
     type(mbsupercell_t) :: supercell
@@ -121,7 +121,6 @@ contains
     self%nspin=supercell%spin%nspin
     self%nsublatt=maxval(supercell%spin%ispin_prim)
 
-
     ABI_ALLOCATE(self%S, (3, self%nspin))
     ABI_ALLOCATE(self%Snorm, (self%nspin))
 
@@ -134,14 +133,13 @@ contains
        self%nspin_sub(self%isublatt(i)) = self%nspin_sub(self%isublatt(i)) + 1
     end do
 
-    ABI_ALLOCATE(self%Ms_coeff,(self%nspin) )
-    ABI_ALLOCATE(self%Mst_sub,(3, self%nsublatt) )
+    ABI_ALLOCATE(self%Ms_coeff,(self%nspin))
+    ABI_ALLOCATE(self%Mst_sub, (3, self%nsublatt))
     ABI_ALLOCATE(self%Mst_sub_norm, (self%nsublatt))
-
     ABI_ALLOCATE(self%Avg_Mst_sub_norm, (self%nsublatt))
 
-    do i =1, self%nspin
-       self%Ms_coeff(i) = real(exp(i2pi * dot_product(params%spin_projection_qpoint, supercell%spin%Rvec(:,i))))
+    do i = 1, self%nspin
+      self%Ms_coeff(i) = real(exp(i2pi * dot_product(params%spin_projection_qpoint, supercell%spin%rvec(:,i))))
     end do
 
     call reset(self, params)
