@@ -149,7 +149,8 @@ contains
 #if defined HAVE_NETCDF
     write(std_out,*) "Write iteration in spin history file "//trim(self%filename)//"."
     !  Create netCDF file
-    ncerr = nf90_create(path=trim(filename),cmode=NF90_CLOBBER,ncid=self%ncid)
+    ncerr = nf90_create(path=trim(filename), cmode=NF90_CLOBBER, ncid=self%ncid)
+
     self%isopen=.True.
     !NCF_CHECK_MSG(ncerr, "create netcdf history file")
 #endif
@@ -164,9 +165,12 @@ contains
     class(spin_ncfile_t), intent(inout) :: self
     type(spin_hist_t),intent(in) :: hist
     integer :: ncerr
-    ! define dimensions
+
 #if defined HAVE_NETCDF
+    ncerr = nf90_redef(self%ncid)
+    
     !write(std_out,*) "Defining variables in spinhist.nc file."
+    ! define dimensions
     ncerr=nf90_def_dim(self%ncid, "three", 3, self%three)
     ncerr=nf90_def_dim(self%ncid, "nspin", hist%nspin, self%nspin )
     ncerr=nf90_def_dim(self%ncid, "ntime", nf90_unlimited, self%ntime)
@@ -194,6 +198,7 @@ contains
          &         self%itime_id, NF90_INT, "itime", "index of time in spin timeline", "1")
     ncerr=nf90_enddef(self%ncid)
 #endif
+  
   end subroutine def_spindynamics_var
 
 
@@ -205,6 +210,7 @@ contains
     class(spin_ncfile_t), intent(inout) :: self
     type(spin_observable_t), intent(in) :: ob
     integer ncerr
+
 #if defined HAVE_NETCDF
     ncerr = nf90_redef(self%ncid)
     ncerr = nf90_def_dim(self%ncid, "nsublatt", ob%nsublatt, self%nsublatt)
@@ -357,15 +363,14 @@ end subroutine def_observable_var
     ! sc_matric
 
 #if defined HAVE_NETCDF
-     ncerr=nf90_redef(self%ncid)
+    ncerr=nf90_redef(self%ncid)
 
-    ! call ab_define_var(self%ncid, (/self%three, self%three /), rprimd_id,&
+    !call ab_define_var(self%ncid, (/self%three, self%three /), rprimd_id,&
     !      & NF90_DOUBLE, "rprimd", "primitive cell vectors in real space with&
     !      & units", "bohr")
-    call ab_define_var(self%ncid, (/self%three, self%nspin/), pos_id,&
-         & NF90_DOUBLE, "xcart_spin","position of spin in cartesian&
-         & coordinates", "bohr")
-    call ab_define_var(self%ncid, (/self%three, self%nspin/), rvec_id,&
+    call ab_define_var(self%ncid, (/self%three, self%nspin/), pos_id, &
+         & NF90_DOUBLE, "xcart_spin","position of spin in cartesian coordinates", "bohr")
+    call ab_define_var(self%ncid, (/self%three, self%nspin/), rvec_id, &
           & NF90_INT, "Rvec", "R vector for spin in supercell", "dimensionless")
     call ab_define_var(self%ncid, (/self%nspin/), ispin_prim_id,&
           & NF90_INT, "ispin_prim", "index of spin in primitive cell", "dimensionless")
