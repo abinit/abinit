@@ -24,7 +24,7 @@ AC_DEFUN([ABI_OMP_CHECK_COLLAPSE],[
 
   dnl Check whether OpenMP's COLLAPSE is working
   AC_LANG_PUSH([Fortran])
-  AC_MSG_CHECKING([whether OpenMP's COLLAPSE works])
+  AC_MSG_CHECKING([whether OpenMP COLLAPSE works])
   AC_RUN_IFELSE([AC_LANG_PROGRAM([],
     [[
       integer :: alfa,i,levels
