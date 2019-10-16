@@ -378,7 +378,7 @@ contains
     integer,                          intent(in)    :: ncid    
 
     integer :: ncerr, dimid, ndata, varid
-    integer, allocatable :: ilist(:), jlist(:), ulist(:), vlist(:)
+    integer, allocatable :: ilist(:), jlist(:,:), ulist(:,:), vlist(:,:)
     integer, allocatable :: Rjlist(:,:), Rulist(:,:), Rvlist(:,:)
     real(dp), allocatable :: vallist(:)
 
@@ -389,31 +389,26 @@ contains
       self%has_biquad=.True.
       ncerr = nctk_get_dim(ncid, "spin_lattice_Tijuv_number_of_entries", ndata)
       ABI_ALLOCATE(ilist, (ndata))
-      ABI_ALLOCATE(jlist, (ndata))
-      ABI_ALLOCATE(ulist, (ndata))
-      ABI_ALLOCATE(vlist, (ndata))
-      ABI_ALLOCATE(Rjlist, (3, ndata))
-      ABI_ALLOCATE(Rulist, (3, ndata))
-      ABI_ALLOCATE(Rvlist, (3, ndata))
+      ABI_ALLOCATE(jlist, (4, ndata))
+      ABI_ALLOCATE(ulist, (4, ndata))
+      ABI_ALLOCATE(vlist, (4, ndata))
       ABI_ALLOCATE(vallist, (ndata))
 
       varid = nctk_idname(ncid, "spin_lattice_Tijuv_ilist")
       ncerr = nf90_get_var(ncid, varid, ilist)
       call netcdf_check(ncerr, "when reading Tijuv_ilist") 
 
+      varid = nctk_idname(ncid, "spin_lattice_Tijuv_jlist")
+      ncerr = nf90_get_var(ncid, varid, jlist)
+      call netcdf_check(ncerr, "when reading Tijuv_jlist")
+
       varid = nctk_idname(ncid, "spin_lattice_Tijuv_ulist")
       ncerr = nf90_get_var(ncid, varid, ulist)
       call netcdf_check(ncerr, "when reading Tijuv_ulist")
-      varid = nctk_idname(ncid, "spin_lattice_Tijuv_Rulist")
-      ncerr = nf90_get_var(ncid, varid, Rulist)
-      call netcdf_check(ncerr, "when reading Tijuv_Rulist")
 
       varid = nctk_idname(ncid, "spin_lattice_Tijuv_vlist")
       ncerr = nf90_get_var(ncid, varid, ulist)
       call netcdf_check(ncerr, "when reading Tijuv_vlist")
-      varid = nctk_idname(ncid, "spin_lattice_Tijuv_Rvlist")
-      ncerr = nf90_get_var(ncid, varid, Rulist)
-      call netcdf_check(ncerr, "when reading Tijuv_Rvlist")
 
       varid = nctk_idname(ncid, "spin_lattice_Tijuv_valuelist")
       ncerr = nf90_get_var(ncid, varid, vallist)
@@ -423,15 +418,12 @@ contains
       vallist(:) = vallist(:)*eV_Ha*(Bohr_Ang*Bohr_Ang)
   
       !fill the sparse matrix for tijuv parameters
-      call self%set_tijuv(ndata, ilist, jlist, ulist, vlist, Rjlist, Rulist, Rvlist, vallist)
+      call self%set_tijuv(ndata, ilist, jlist, ulist, vlist, vallist)
 
       ABI_SFREE(ilist)
       ABI_SFREE(jlist)
       ABI_SFREE(ulist)
       ABI_SFREE(vlist)
-      ABI_SFREE(Rjlist)
-      ABI_SFREE(Rulist)
-      ABI_SFREE(Rvlist)
       ABI_SFREE(vallist)
     endif
 
@@ -583,17 +575,17 @@ contains
   ! store tijuv parameters in sparse matrix
   ! TODO: test
   !----------------------------------------
-  subroutine set_tijuv(self, nn, ilist, jlist, ulist, vlist, Rjlist, Rulist, Rvlist, vallist)
+  subroutine set_tijuv(self, nn, ilist, jlist, ulist, vlist, vallist)
 
     class(slc_primitive_potential_t), intent(inout) :: self
     integer,                          intent(inout) :: nn
     integer,                          intent(in)    :: ilist(nn)
-    integer,                          intent(in)    :: jlist(nn)
-    integer,                          intent(in)    :: ulist(nn)
-    integer,                          intent(in)    :: vlist(nn)
-    integer,                          intent(in)    :: Rjlist(3,nn)
-    integer,                          intent(in)    :: Rulist(3,nn)
-    integer,                          intent(in)    :: Rvlist(3,nn)
+    integer,                          intent(in)    :: jlist(4, nn)
+    integer,                          intent(in)    :: ulist(4, nn)
+    integer,                          intent(in)    :: vlist(4, nn)
+    !integer,                          intent(in)    :: Rjlist(3,nn)
+    !integer,                          intent(in)    :: Rulist(3,nn)
+    !integer,                          intent(in)    :: Rvlist(3,nn)
     real(dp),                         intent(in)    :: vallist(nn)
 
     integer :: idx
@@ -602,7 +594,8 @@ contains
     
     if (xmpi_comm_rank(xmpi_world)==0) then
       do idx=1, nn
-        call self%set_tijuv_1term(ilist(idx), jlist(idx), ulist(idx), vlist(idx), Rjlist(:,idx), Rulist(:,idx), Rvlist(:,idx), vallist(idx))
+        call self%set_tijuv_1term(ilist(idx), jlist(1, idx), ulist(1, idx), vlist(1, idx), & 
+                                & jlist(2:4,idx), ulist(2:4,idx), vlist(2:4,idx), vallist(idx))
       end do
     endif
 
