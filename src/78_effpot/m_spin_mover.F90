@@ -52,7 +52,6 @@ module m_spin_mover
   use m_spin_potential, only:  spin_potential_t
   use m_spin_hist, only: spin_hist_t
   use m_spin_ncfile, only: spin_ncfile_t
-  use m_spin_observables, only: spin_observable_t
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
@@ -159,7 +158,7 @@ contains
        if(params%spin_dynamics>=0) then
           self%method=params%spin_dynamics
        endif
-       if(params%spin_init_state==4) then
+       if(params%spin_init_state==3) then
          self%init_qpoint = params%spin_init_qpoint
          self%init_rotate_axis = params%spin_init_rotate_axis
          self%init_orientation = params%spin_init_orientation
@@ -219,8 +218,12 @@ contains
             &     spin_temperature=params%spin_temperature)
     endif
 
-    call self%set_initial_state(mode=params%spin_init_state, restart_hist_fname=restart_hist_fname)
-
+    if(present(restart_hist_fname)) then 
+      call self%set_initial_state(mode=params%spin_init_state, restart_hist_fname=restart_hist_fname)
+    else
+      call self%set_initial_state(mode=params%spin_init_state)
+    endif
+      
     ! observable
     if(iam_master) then
        call self%spin_ob%initialize(self%supercell, params)
@@ -260,15 +263,14 @@ contains
 
 #if defined HAVE_NETCDF
     ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
-    NCF_CHECK_MSG(ierr, "The spin_init_mode is set to 5. But open netcdf file "//trim(fname)//" Failed. ")
+    NCF_CHECK_MSG(ierr, "The spin_init_mode is set to 4. But opening netcdf file "//trim(fname)//" Failed. ")
 
     ! sanity check. If the hist file is consistent with the current calculation
     ierr=nctk_get_dim(ncid, "nspin" , nspin)
     NCF_CHECK_MSG(ierr, "when reading nspin")
 
     if (nspin /= self%nspin) then
-       MSG_ERROR("The number of spins in histfile is not equal to the present calculation. &
-            & Please check if the file is consistent.")
+       MSG_ERROR("The number of spins in histfile is not equal to the present calculation. Please check if the file is consistent.")
     end if
 
 
@@ -290,20 +292,19 @@ contains
     ierr=nf90_close(ncid)
     NCF_CHECK_MSG(ierr, "Close netcdf file")
 #else
-    MSG_ERROR("spin_init_state set to 5 but abinit is not compiled with netcdf.")
+    MSG_ERROR("spin_init_state set to 4 but abinit is not compiled with netcdf.")
 #endif 
 
   end subroutine read_hist_spin_state
 
-  !----------------------------------------------------------------------!
+  !----------------------------------------------------------------------------!
   !set_initial_state:
   ! mode: which configuration to use
   !   1. Random
   !   2. reference state from potential file
-  !   3. FM (all along z axis)
-  !   4. spin configuration using qpoint and rotation axis (e.g. for AFM)
-  !   5. Restart from last entry of hist netcdf file
-  !----------------------------------------------------------------------!
+  !   3. spin configuration using qpoint and rotation axis (e.g. for FM or AFM)
+  !   4. Restart from last entry of hist netcdf file
+  !----------------------------------------------------------------------------!
   subroutine set_initial_state(self, mode, restart_hist_fname)
     class(spin_mover_t),            intent(inout) :: self
     integer,              optional, intent(in)    :: mode
@@ -314,6 +315,8 @@ contains
 
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
+    real(dp), allocatable :: Sprim(:,:)
+
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
     if(iam_master) then
@@ -324,8 +327,8 @@ contains
        end if
 
        !NH: this is already handled by the input variable checks, remove?
-       if (init_mode>5) then
-          MSG_ERROR( "Error: Set initial spin: mode should be  1, 2, 3, 4, 5. Others are not yet implemented." )
+       if (init_mode>4) then
+          MSG_ERROR( "Error: Set initial spin: mode should be  1, 2, 3, 4. Others are not yet implemented." )
           call wrtout(ab_out,msg,'COLL')
           call wrtout(std_out,msg,'COLL')
        end if
@@ -341,40 +344,39 @@ contains
           do i=1, self%nspin
              self%Stmp(:,i)=self%Stmp(:,i)/sqrt(sum(self%Stmp(:, i)**2))
           end do
+
         case (2)
           ! set spin to reference state using the reference qpoint and rotation axis from potential file
+          write(msg,*) "Initial spins set to reference configuration."
+          call wrtout(ab_out,msg,'COLL')
+          call wrtout(std_out,msg,'COLL')
+
           do i=1, self%nspin
              self%Stmp(:,:) = self%supercell%spin%Sref(:,:)
           end do
 
         case (3)
-          write(msg,*) "Initial spins set to ferromagnetic along z-axis."
+          write(msg,*) "Initial spins set according to spin_init_ variables."
           call wrtout(ab_out,msg,'COLL')
           call wrtout(std_out,msg,'COLL')
 
-          ! set all spin to z direction.
-          self%Stmp(1,:)=0.0d0
-          self%Stmp(2,:)=0.0d0
-          self%Stmp(3,:)=1.0d0
-
-        case (4)
-          write(msg,*) "Initial spins set according to spin_init_qpoint and spin_init_rotate_axis."
-          call wrtout(ab_out,msg,'COLL')
-          call wrtout(std_out,msg,'COLL')
+          ABI_ALLOCATE(Sprim, (3,self%hist%nspin_prim) )
 
           ! set inital spin state using the input variables
           ! set spin to ferromagnetic along init_orientation then rotate
           do i=1, 3
-            self%Stmp(i,:)=self%init_orientation(i)
+            Sprim(i,:)=self%init_orientation(i)
           enddo
 
-          call self%supercell%supercell_maker%generate_spin_wave_vectorlist( A=self%Stmp, &
+          call self%supercell%supercell_maker%generate_spin_wave_vectorlist(A=Sprim, &
              & kpoint=self%init_qpoint, axis=self%init_rotate_axis, A_sc=self%Stmp)
    
-        case (5)
+          ABI_SFREE(SPrim)
+
+        case (4)
           ! read from last step of hist file
           if (.not. present(restart_hist_fname)) then
-             MSG_BUG("Spin initialize mode set to 5, but restart_hist_fname is not used.")
+             MSG_BUG("Spin initialize mode set to 4, but restart_hist_fname is not used.")
           end if
           call self%read_hist_spin_state(fname=restart_hist_fname)
 
@@ -391,7 +393,7 @@ contains
   !-------------------------------------------------------------------!
   ! prepare_ncfile:
   !-------------------------------------------------------------------!
-  subroutine prepare_ncfile(self,  params, fname)
+  subroutine prepare_ncfile(self, params, fname)
     class(spin_mover_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
     character(len=*), intent(in) :: fname
@@ -402,7 +404,7 @@ contains
 
     if(iam_master) then
        call self%spin_ncfile%initialize( trim(fname), params%spin_write_traj)
-       call self%spin_ncfile%def_spindynamics_var(self%hist )
+       call self%spin_ncfile%def_spindynamics_var(self%hist)
        call self%spin_ncfile%def_observable_var(self%spin_ob)
        !call spin_ncfile_t_write_primitive_cell(self%spin_ncfile, self%spin_primitive)
        call self%spin_ncfile%write_supercell(self%supercell)
