@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 17 Oct 2018.
-- ( at 23h47 )
+.Starting date : Fri 27 Sep 2019.
+- ( at 15h52 )
   
-- input  file    -> t157.in
-- output file    -> t157.out
-- root for input  files -> t157i
-- root for output files -> t157o
+- input  file    -> t57.in
+- output file    -> t57.out
+- root for input  files -> t57i
+- root for output files -> t57o
 
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
@@ -821,7 +821,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  1.000000000000  1.000000000000  1.000000000000 bohr
               =  0.529177208590  0.529177208590  0.529177208590 angstroms
- prteigrs : about to open file t157o_DS1_EIG
+ prteigrs : about to open file t57o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.00709   Average Vxc (hartree)=  -0.36371
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 10, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -845,6 +845,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
  Other information on the energy :
     Total energy(eV)= -6.85798403249496E+02 ; Band energy (Ha)=  -1.7087690089E+00
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.81619451E-04  sigma(3 2)=  0.00000000E+00
@@ -880,7 +882,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
 
 
 ================================================================================
- prteigrs : about to open file t157o_DS2_EIG
+ prteigrs : about to open file t57o_DS2_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   1.74E-17  1.81E-17  3.00E-17  3.78E-17  8.11E-17  9.79E-17  4.91E-17  5.43E-17
   3.33E-17  4.28E-17  9.53E-17  5.80E-17  6.99E-17  6.08E-18  4.56E-17  5.93E-17
@@ -921,7 +923,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
     2      2.03812811310319     2.03812811310319     2.03812811310319
  length scales=  1.000000000000  1.000000000000  1.000000000000 bohr
               =  0.529177208590  0.529177208590  0.529177208590 angstroms
- prteigrs : about to open file t157o_DS2_EIG
+ prteigrs : about to open file t57o_DS2_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 28, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.72526   -0.00709   -0.00709   -0.00709    0.30658    0.84023    0.84023    0.84023
@@ -954,7 +956,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
          ecut(hartree)=     35.000   => boxcut(ratio)=   1.79502
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -973,7 +975,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1008,7 +1010,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
  Mean square residual over all n,k,spin=  -40.000E-03; max=  98.229E-18
  dfpt_looppert : ek2=    3.1935982812E+01
           f-sum rule ratio=    9.9947855721E-01
- prteigrs : about to open file t157_1WF1_EIG
+ prteigrs : about to open file t57_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  64  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1038,7 +1040,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1063,7 +1065,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
  Mean square residual over all n,k,spin=  -40.000E-03; max=  98.229E-18
  dfpt_looppert : ek2=    3.1935982812E+01
           f-sum rule ratio=    9.9947854932E-01
- prteigrs : about to open file t157_1WF1_EIG
+ prteigrs : about to open file t57_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  64  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1093,7 +1095,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1130,7 +1132,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
  Mean square residual over all n,k,spin=  -40.000E-03; max=  98.229E-18
  dfpt_looppert : ek2=    3.1935982812E+01
           f-sum rule ratio=    9.9947855460E-01
- prteigrs : about to open file t157_1WF1_EIG
+ prteigrs : about to open file t57_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  64  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1197,7 +1199,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
          ecut(hartree)=     35.000   => boxcut(ratio)=   1.79502
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1247,7 +1249,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1265,9 +1267,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
  ETOT  9  0.80206161234036     -6.661E-15 5.114E-08 9.271E-15
 
  At SCF step    9       vres2   =  9.27E-15 < tolvrs=  1.00E-12 =>converged.
--open ddk wf file :t157o_DS3_1WF7
--open ddk wf file :t157o_DS3_1WF8
--open ddk wf file :t157o_DS3_1WF9
+-open ddk wf file :t57o_DS3_1WF7
+-open ddk wf file :t57o_DS3_1WF8
+-open ddk wf file :t57o_DS3_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1303,7 +1305,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1322,9 +1324,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
  ETOT 10  0.77325237226673      2.910E-11 5.537E-06 9.612E-14
 
  At SCF step   10       vres2   =  9.61E-14 < tolvrs=  1.00E-12 =>converged.
--open ddk wf file :t157o_DS3_1WF7
--open ddk wf file :t157o_DS3_1WF8
--open ddk wf file :t157o_DS3_1WF9
+-open ddk wf file :t57o_DS3_1WF7
+-open ddk wf file :t57o_DS3_1WF8
+-open ddk wf file :t57o_DS3_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1359,12 +1361,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: t157o_DS3_1WF7
+-dfpt_looppert : read the wavefunctions from file: t57o_DS3_1WF7
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -18.882057256487     -1.888E+01 6.329E+02 6.800E+02
@@ -1378,9 +1380,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
  ETOT  9  -19.135191825129      2.842E-14 6.660E-10 3.537E-13
 
  At SCF step    9       vres2   =  3.54E-13 < tolvrs=  1.00E-12 =>converged.
--open ddk wf file :t157o_DS3_1WF7
--open ddk wf file :t157o_DS3_1WF8
--open ddk wf file :t157o_DS3_1WF9
+-open ddk wf file :t57o_DS3_1WF7
+-open ddk wf file :t57o_DS3_1WF8
+-open ddk wf file :t57o_DS3_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1715,7 +1717,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1746,10 +1748,10 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1802,10 +1804,10 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1857,10 +1859,10 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1914,10 +1916,10 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2125,7 +2127,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2164,10 +2166,10 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2219,10 +2221,10 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t157o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t57o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2386,7 +2388,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t157o_DS1_WFK
+- Reading GS states from WFK file: t57o_DS1_WFK
 
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/03-Li.psp
@@ -3374,48 +3376,48 @@ P          mk1mem7          8
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
 - implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze1997
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
 -
 - [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
 - interatomic force constants from density-functional perturbation theory,
 - X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze1997a
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [4] ABINIT : First-principles approach of materials and nanosystem properties.
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [5] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - Proc.   0 individual time (sec): cpu=        198.3  wall=        208.6
 

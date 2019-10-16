@@ -33,14 +33,14 @@ module m_chkinp
  use m_xmpi
  use m_xomp
  use libxc_functionals
+ use m_dtset
 
- use defs_datatypes, only : pspheader_type
+ use defs_datatypes,   only : pspheader_type
  use defs_abitypes,    only : MPI_type
  use m_numeric_tools,  only : iseven
  use m_symtk,          only : chkgrp, chkorthsy
  use m_geometry,       only : metric
  use m_fftcore,        only : fftalg_has_mpi
- use m_dtset,          only : dtset_copy, dtset_free, dataset_type
  use m_exit,           only : get_timelimit
  use m_parser,         only : chkdpr, chkint, chkint_eq, chkint_ge, chkint_le, chkint_ne
 
@@ -146,7 +146,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call wrtout(std_out,msg,'COLL')
 
    ! Will test directly on the dataset "dt"
-   call dtset_copy(dt, dtsets(idtset))
+   dt = dtsets(idtset)%copy()
 
    ! Copy or initialize locally a few input dataset values
    fftalg   =dt%ngfft(7)
@@ -430,6 +430,22 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        end do
      end do
    end if
+
+!  constraint_kind
+   do itypat=1,dt%ntypat
+     cond_string(1)='itypat';cond_values(1)=itypat
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),8,(/0,1,2,3,10,11,12,13/),iout)
+     !Only potential self-consistency is currently allowed with constrained_dft
+     if (dt%iscf>10) then
+       cond_string(2)='iscf';cond_values(2)=dt%iscf
+       call chkint_eq(2,2,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),1,(/0/),iout)
+     endif
+     if (dt%ionmov==4) then
+       cond_string(2)='ionmov';cond_values(2)=dt%ionmov
+       call chkint_eq(2,2,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),1,(/0/),iout)
+     endif
+
+   enddo
 
 !  densfor_pred
    if(dt%iscf>0)then
@@ -3695,7 +3711,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  ** Here ends the checking section **************************************
 
-   call dtset_free(dt)
+   call dt%free()
    ierr_dtset(idtset)=ierr
 
  end do !  End do loop on idtset

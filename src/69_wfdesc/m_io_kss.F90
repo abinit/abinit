@@ -45,7 +45,7 @@ MODULE m_io_kss
  use m_pawcprj
  use m_pawfgr
  use m_dtfil
-
+ use m_dtset
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -54,7 +54,6 @@ MODULE m_io_kss
  use m_fstrings,         only : sjoin, itoa, strcat
  use m_hide_lapack,      only : xheevx, xhegvx
  use m_geometry,         only : metric, remove_inversion
- use m_dtset,            only : dtset_copy, dtset_free, dataset_type
  use m_mpinfo,           only : destroy_mpi_enreg, proc_distrb_cycle
  use m_fftcore,          only : get_kg, sphere
  use m_fft,              only : fftpac
@@ -213,7 +212,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
  end do
 
 !Change dimension in the local Dtset_cpy as well.
- call dtset_copy(Dtset_cpy, Dtset)
+ dtset_cpy = Dtset%copy()
  Dtset_cpy%mpw   = kss_npw
  Dtset_cpy%mband = nbandksseff
 
@@ -327,7 +326,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
    MSG_ERROR(sjoin("Unsupported value for iomode:", itoa(iomode)))
  END SELECT
 
- call dtset_free(Dtset_cpy)
+ call Dtset_cpy%free()
  call my_Hdr%free()
 
  DBG_EXIT("COLL")

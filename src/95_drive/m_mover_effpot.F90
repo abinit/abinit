@@ -243,7 +243,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !     to mover scfcv_args or effective_potential...
 !***************************************************************
 !  Free dtset
-   call dtset_free(dtset)
+   call dtset%free()
 
 !  Set mpi_eng
    mpi_enreg%comm_cell  = comm
@@ -1007,7 +1007,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
    !   ABI_DATATYPE_DEALLOCATE(pawtab)
    !   ABI_DEALLOCATE(npwtot)
    ! end if
-   call dtset_free(dtset)
+   call dtset%free()
    call destroy_results_gs(results_gs)
    call scfcv_destroy(scfcv_args)
    call destroy_mpi_enreg(mpi_enreg)

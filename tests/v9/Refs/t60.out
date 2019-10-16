@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 30 May 2019.
-- ( at 17h43 )
+.Starting date : Fri 27 Sep 2019.
+- ( at 15h55 )
   
-- input  file    -> t160.in
-- output file    -> t160.out
-- root for input  files -> t160i
-- root for output files -> t160o
+- input  file    -> t60.in
+- output file    -> t60.out
+- root for input  files -> t60i
+- root for output files -> t60o
 
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
@@ -411,19 +411,21 @@ P           mkmem           8
 == DATASET  1 ==================================================================
 -   nproc =    1
 
- mkfilename: getwfk from: t160o_DS20_WFK
+ mkfilename: getwfk from: t60o_DS20_WFK
 
- mkfilename: getddb from: t160o_DS20_DDB
+ mkfilename: getddb from: t60o_DS20_DDB
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t160o_DS20_WFK
-- Reading DDB from file: t160o_DS20_DDB
-- Reading DVDB from file: t160o_DS20_DVDB
-- Reading EFMAS information from file: t160i_DS1_EFMAS.nc
+- Reading GS states from WFK file: t60o_DS20_WFK
+- Reading DDB from file: t60o_DS20_DDB
+- Reading DVDB from file: t60o_DS20_DVDB
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -453,7 +455,6 @@ P           mkmem           8
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t160o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t160o_DS20_DDB
-Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -630,20 +631,22 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
 == DATASET  2 ==================================================================
 -   nproc =    1
 
- mkfilename: getwfk from: t160o_DS20_WFK
+ mkfilename: getwfk from: t60o_DS20_WFK
 
- mkfilename: getddb from: t160o_DS20_DDB
+ mkfilename: getddb from: t60o_DS20_DDB
 
- mkfilename: getdvdb from: t160o_DS20_DVDB
+ mkfilename: getdvdb from: t60o_DS20_DVDB
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading DDB from file: t160o_DS20_DDB
-- Reading DVDB from file: t160o_DS20_DVDB
-- Reading EFMAS information from file: t160i_DS2_EFMAS.nc
+- Reading DDB from file: t60o_DS20_DDB
+- Reading DVDB from file: t60o_DS20_DVDB
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -728,9 +731,9 @@ Interpolation of the electron-phonon coupling potential completed
 == DATASET  3 ==================================================================
 -   nproc =    1
 
- mkfilename: getwfk from: t160o_DS20_WFK
+ mkfilename: getwfk from: t60o_DS20_WFK
 
- mkfilename: getddb from: t160o_DS20_DDB
+ mkfilename: getddb from: t60o_DS20_DDB
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
 
@@ -739,10 +742,12 @@ Interpolation of the electron-phonon coupling potential completed
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t160o_DS20_WFK
-- Reading DDB from file: t160o_DS20_DDB
-- Reading DVDB from file: t160o_DS2_DVDB
-- Reading EFMAS information from file: t160i_DS3_EFMAS.nc
+- Reading GS states from WFK file: t60o_DS20_WFK
+- Reading DDB from file: t60o_DS20_DDB
+- Reading DVDB from file: t60o_DS2_DVDB
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -935,9 +940,9 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
 == DATASET  4 ==================================================================
 -   nproc =    1
 
- mkfilename: getwfk from: t160o_DS20_WFK
+ mkfilename: getwfk from: t60o_DS20_WFK
 
- mkfilename: getddb from: t160o_DS20_DDB
+ mkfilename: getddb from: t60o_DS20_DDB
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
 
@@ -946,10 +951,12 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t160o_DS20_WFK
-- Reading DDB from file: t160o_DS20_DDB
-- Reading DVDB from file: t160o_DS2_DVDB
-- Reading EFMAS information from file: t160i_DS4_EFMAS.nc
+- Reading GS states from WFK file: t60o_DS20_WFK
+- Reading DDB from file: t60o_DS20_DDB
+- Reading DVDB from file: t60o_DS2_DVDB
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1141,9 +1148,9 @@ Transport calculation results
 == DATASET  5 ==================================================================
 -   nproc =    1
 
- mkfilename: getwfk from: t160o_DS20_WFK
+ mkfilename: getwfk from: t60o_DS20_WFK
 
- mkfilename: getddb from: t160o_DS20_DDB
+ mkfilename: getddb from: t60o_DS20_DDB
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
 
@@ -1152,10 +1159,12 @@ Transport calculation results
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t160o_DS20_WFK
-- Reading DDB from file: t160o_DS20_DDB
-- Reading DVDB from file: t160o_DS2_DVDB
-- Reading EFMAS information from file: t160i_DS5_EFMAS.nc
+- Reading GS states from WFK file: t60o_DS20_WFK
+- Reading DDB from file: t60o_DS20_DDB
+- Reading DVDB from file: t60o_DS2_DVDB
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1259,9 +1268,9 @@ Interpolation of the electron-phonon coupling potential completed
 == DATASET  6 ==================================================================
 -   nproc =    1
 
- mkfilename: getwfk from: t160o_DS20_WFK
+ mkfilename: getwfk from: t60o_DS20_WFK
 
- mkfilename: getddb from: t160o_DS20_DDB
+ mkfilename: getddb from: t60o_DS20_DDB
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
 
@@ -1270,10 +1279,12 @@ Interpolation of the electron-phonon coupling potential completed
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t160o_DS20_WFK
-- Reading DDB from file: t160o_DS20_DDB
-- Reading DVDB from file: t160o_DS2_DVDB
-- Reading EFMAS information from file: t160i_DS6_EFMAS.nc
+- Reading GS states from WFK file: t60o_DS20_WFK
+- Reading DDB from file: t60o_DS20_DDB
+- Reading DVDB from file: t60o_DS2_DVDB
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1437,9 +1448,9 @@ Transport calculation results
 == DATASET  7 ==================================================================
 -   nproc =    1
 
- mkfilename: getwfk from: t160o_DS20_WFK
+ mkfilename: getwfk from: t60o_DS20_WFK
 
- mkfilename: getddb from: t160o_DS20_DDB
+ mkfilename: getddb from: t60o_DS20_DDB
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET  20.
 
@@ -1448,10 +1459,12 @@ Transport calculation results
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t160o_DS20_WFK
-- Reading DDB from file: t160o_DS20_DDB
-- Reading DVDB from file: t160o_DS20_DVDB
-- Reading EFMAS information from file: t160i_DS7_EFMAS.nc
+- Reading GS states from WFK file: t60o_DS20_WFK
+- Reading DDB from file: t60o_DS20_DDB
+- Reading DVDB from file: t60o_DS20_DVDB
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1596,9 +1609,9 @@ Transport calculation results
 == DATASET  8 ==================================================================
 -   nproc =    1
 
- mkfilename: getwfk from: t160o_DS20_WFK
+ mkfilename: getwfk from: t60o_DS20_WFK
 
- mkfilename: getddb from: t160o_DS20_DDB
+ mkfilename: getddb from: t60o_DS20_DDB
 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET  20.
 
@@ -1607,10 +1620,12 @@ Transport calculation results
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t160o_DS20_WFK
-- Reading DDB from file: t160o_DS20_DDB
-- Reading DVDB from file: t160o_DS20_DVDB
-- Reading EFMAS information from file: t160i_DS8_EFMAS.nc
+- Reading GS states from WFK file: t60o_DS20_WFK
+- Reading DDB from file: t60o_DS20_DDB
+- Reading DVDB from file: t60o_DS20_DVDB
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1784,21 +1799,23 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
 == DATASET  9 ==================================================================
 -   nproc =    1
 
- mkfilename: getwfk from: t160o_DS20_WFK
+ mkfilename: getwfk from: t60o_DS20_WFK
 
- mkfilename: getddb from: t160o_DS20_DDB
+ mkfilename: getddb from: t60o_DS20_DDB
 
- mkfilename: getdvdb from: t160o_DS20_DVDB
+ mkfilename: getdvdb from: t60o_DS20_DVDB
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t160o_DS20_WFK
-- Reading DDB from file: t160o_DS20_DDB
-- Reading DVDB from file: t160o_DS20_DVDB
-- Reading EFMAS information from file: t160i_DS9_EFMAS.nc
+- Reading GS states from WFK file: t60o_DS20_WFK
+- Reading DDB from file: t60o_DS20_DDB
+- Reading DVDB from file: t60o_DS20_DVDB
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1876,21 +1893,23 @@ All the independent perturbations are available
 == DATASET 10 ==================================================================
 -   nproc =    1
 
- mkfilename: getwfk from: t160o_DS20_WFK
+ mkfilename: getwfk from: t60o_DS20_WFK
 
- mkfilename: getddb from: t160o_DS20_DDB
+ mkfilename: getddb from: t60o_DS20_DDB
 
- mkfilename: getdvdb from: t160o_DS20_DVDB
+ mkfilename: getdvdb from: t60o_DS20_DVDB
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t160o_DS20_WFK
-- Reading DDB from file: t160o_DS20_DDB
-- Reading DVDB from file: t160o_DS20_DVDB
-- Reading EFMAS information from file: t160i_DS10_EFMAS.nc
+- Reading GS states from WFK file: t60o_DS20_WFK
+- Reading DDB from file: t60o_DS20_DDB
+- Reading DVDB from file: t60o_DS20_DVDB
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194

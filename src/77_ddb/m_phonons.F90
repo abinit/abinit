@@ -875,8 +875,8 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
          do idir=1,3
            do jdir=1,3
              msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) + ( &
-                   eigvec(1,idir,iat,imode)* eigvec(1,jdir,iat,imode) &
-                +  eigvec(2,idir,iat,imode)* eigvec(2,jdir,iat,imode) )
+                   eigvec(1,idir,iat,imode) * eigvec(1,jdir,iat,imode) &
+                +  eigvec(2,idir,iat,imode) * eigvec(2,jdir,iat,imode) )
            end do
          end do
 
@@ -997,9 +997,9 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
            do idir=1,3
              do jdir=1,3
                msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) + ( &
-                     full_eigvec(1,idir,iat,imode,iq_ibz)* full_eigvec(1,jdir,iat,imode,iq_ibz) &
-                  +  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz) ) !* gvals_wtq
-             end do ! jdie
+                     full_eigvec(1,idir,iat,imode,iq_ibz) * full_eigvec(1,jdir,iat,imode,iq_ibz) &
+                  +  full_eigvec(2,idir,iat,imode,iq_ibz) * full_eigvec(2,jdir,iat,imode,iq_ibz) )
+             end do
            end do
 
            ! Symmetrize matrices to get full sum of tensor over all BZ, not just IBZ.
@@ -1093,6 +1093,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
    call xmpi_sum(phdos%pjdos_int, comm, ierr)
  end if
 
+#if 0
  !my_nsym = crystal%nsym; if (my_qptopt == 3) my_nsym = 1
  !ABI_MALLOC(work_msqd, (phdos%nomega, 3, 3, crystal%natom))
  !work_msqd = phdos%msqd_dos_atom
@@ -1108,6 +1109,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
  !end do
  !ABI_FREE(work_msqd)
  !phdos%msqd_dos_atom = phdos%msqd_dos_atom / my_nsym
+#endif
 
  ! normalize by mass and factor of 2, now added in the printout to agree with harmonic_thermo
  ! do iat=1, natom

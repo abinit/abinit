@@ -63,7 +63,6 @@ module m_dfpt_loopert
  use m_fft,        only : fourdp
  use m_fftcore,    only : fftcore_set_mixprec
  use m_kg,         only : getcut, getmpw, kpgio, getph
- use m_dtset,      only : dtset_copy, dtset_free
  use m_iowf,       only : outwf
  use m_ioarr,      only : read_rhor
  use m_pawang,     only : pawang_type, pawang_init, pawang_free
@@ -435,7 +434,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  nullify(dtset_tmp)
  if (dtset%prepgkk/=0) then ! .and. dtset%use_nonscf_gkk==1) then !Later uncomment this - in scf case rhor1_save is used below only for testing
    ABI_DATATYPE_ALLOCATE(dtset_tmp,)
-   call dtset_copy(dtset_tmp, dtset)
+   dtset_tmp = dtset%copy()
  else
    dtset_tmp => dtset
  end if
@@ -2460,7 +2459,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  if (dtset%prepgkk /= 0) then ! .and. dtset%use_nonscf_gkk == 1) then !Later uncomment this - in scf case rhor1_save is used below only for testing
    ABI_DEALLOCATE(rhor1_save)
    ABI_DEALLOCATE(blkflg_save)
-   call dtset_free (dtset_tmp)
+   call dtset_tmp%free()
    ABI_DATATYPE_DEALLOCATE(dtset_tmp)
  end if
 

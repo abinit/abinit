@@ -57,7 +57,6 @@ module m_driver
  use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
  use m_fftw3,        only : fftw3_init_threads, fftw3_cleanup
  use m_psps,         only : psps_init_global, psps_init_from_dtset, psps_free
- use m_dtset,        only : dtset_copy, dtset_free, dtset_free_nkpt_arrays, find_getdtset
  use m_mpinfo,       only : mpi_distrib_is_ok
  use m_dtfil,        only : dtfil_init, dtfil_init_img
  use m_respfn_driver,    only : respfn
@@ -321,7 +320,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    end if
 
 !  Copy input variables into a local dtset.
-   call dtset_copy(dtset, dtsets(idtset))
+   dtset = dtsets(idtset)%copy()
 
 !  Set other values
    dtset%jdtset = jdtset
@@ -420,7 +419,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !      Gather contributions to results_out from images, if needed
        if (test_img.and.mpi_enregs(idtset)%me_cell==0.and.(.not.results_gathered)) then
          call gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_results_all, &
-&         allgather=.true.,only_one_per_img=.true.)
+           allgather=.true.,only_one_per_img=.true.)
          results_gathered=.true.
        end if
        if ((.not.test_img).or.mpi_enregs(idtset)%me_cell==0) then
@@ -799,8 +798,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    case (RUNL_EPH)
-     call dtset_free_nkpt_arrays(dtsets(0))
-     call dtset_free_nkpt_arrays(dtsets(idtset))
+     call dtsets(0)%free_nkpt_arrays()
+     call dtsets(idtset)%free_nkpt_arrays()
      call eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 #ifdef MR_DEV
@@ -891,10 +890,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    ! several problems in outvars since one should take into account
    ! the new dimensions (e.g. nkptgw) and their maximum value.
    ! For the time being, we continue to pass a copy of dtsets(idtset).
-   !call dtset_free(dtsets(idtset))
-   !call dtset_copy(dtsets(idtset),dtset)
+   !call dtsets(idtset)%free()
+   !call dtsets(idtset) = dtset%copy()
 
-   call dtset_free(dtset)
+   call dtset%free()
 
    ABI_DEALLOCATE(occ)
    ABI_DEALLOCATE(xred)

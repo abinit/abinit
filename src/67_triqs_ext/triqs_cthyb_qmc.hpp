@@ -19,7 +19,12 @@ extern "C"{
     void ctqmc_triqs_run( bool rot_inv, bool leg_measure, bool hist, bool wrt_files, bool tot_not,
                           int n_orbitals, int n_freq, int n_tau, int n_l, int n_cycles_, int cycle_length, int ntherm, int verbo,int seed,  
                           double beta_,
-                          double *epsi, double *umat_ij, double *umat_ijkl, std::complex<double> *delta_iw_ptr, std::complex<double> *g_iw_ptr, double *g_tau, double *gl, MPI_Fint *MPI_world_ptr );
+                          double *epsi, double *umat_ij, double *umat_ijkl, std::complex<double> *delta_iw_ptr, std::complex<double> *g_iw_ptr, double *g_tau, double *gl,
+#if defined HAVE_TRIQS_v1_4
+                          MPI_Fint *MPI_world_ptr );
+#else
+			  int rank );
+#endif
 
 //COMMENTED: Class name changed in TRIQS 1.4
 //    many_body_operator<double> init_Hamiltonian( double *eps, int nflavor, double *U );

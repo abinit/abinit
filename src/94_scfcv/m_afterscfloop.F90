@@ -37,7 +37,6 @@ module m_afterscfloop
  use m_dtset
  use m_dtfil
 
-
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : mpi_type
  use m_time,             only : timab
@@ -46,7 +45,6 @@ module m_afterscfloop
  use m_crystal,          only : prtposcar
  use m_results_gs ,      only : results_gs_type
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype, exchange_electronpositron
- use m_dtset,            only : dtset_copy, dtset_free
  use m_paw_dmft,         only : paw_dmft_type
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type

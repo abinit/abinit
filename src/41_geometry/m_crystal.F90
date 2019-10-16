@@ -819,7 +819,7 @@ function adata_type(crystal, itypat) result(atom)
 
 ! *************************************************************************
 
- call atomdata_from_znucl(atom,crystal%znucl(itypat))
+ call atomdata_from_znucl(atom, crystal%znucl(itypat))
 
 end function adata_type
 !!***
