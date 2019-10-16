@@ -414,7 +414,6 @@ contains
             & restart_hist_fname=fname)
     end if
 
-
     if (self%params%dynamics>0) then
        call self%set_lattice_mover()
     end if

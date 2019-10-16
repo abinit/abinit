@@ -70,7 +70,7 @@ module m_multibinit_cell
      real(dp) :: ref_rotate_axis(3)   ! rotation axis to construct reference spin structure
      real(dp), allocatable :: gyro_ratio(:) ! gyromagnetic ratio array(nspin)
      real(dp), allocatable :: gilbert_damping(:) ! damping factor defined for each spin
-     real(dp), allocatable :: spin_positions(:,:) ! poistions of spin (cartesion)
+     real(dp), allocatable :: spin_positions(:,:) ! positions of spin (cartesian)
      integer, allocatable ::  ispin_prim(:) ! index of primitive cell
      integer, allocatable ::  rvec(:,:) ! R cell vectors for each spin (for supercell)
    contains
