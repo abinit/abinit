@@ -74,7 +74,7 @@ Moreover, we emphasize that in general the results of a sum-over-states approach
 typically converges quite slowly with the k point mesh. Thus it is of extra importance to
 test convergence carefully.
 
-The run takes several minutes on a 2.8 GHz PC. The files *toptic_1o_DS3_WFK*,
+The run take a few minutes on a 2.8 GHz PC. The files *toptic_1o_DS3_WFK*,
 *toptic_1o_DS4_1WF7*, *toptic_1o_DS5_1WF8* and *toptic_1o_DS6_1WF9* are the four
 files requested for the Optic run.
 The first file contains the wavefunctions for the filled and empty states in the entire
