@@ -440,6 +440,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        cond_string(2)='iscf';cond_values(2)=dt%iscf
        call chkint_eq(2,2,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),1,(/0/),iout)
      endif
+     if (dt%ionmov==4) then
+       cond_string(2)='ionmov';cond_values(2)=dt%ionmov
+       call chkint_eq(2,2,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),1,(/0/),iout)
+     endif
+
    enddo
 
 !  densfor_pred
