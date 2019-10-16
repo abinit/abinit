@@ -180,12 +180,12 @@ if test "${abi_cclock_enable}" = "yes"; then
 fi
 
 # Only one of MPI I/O and NetCDF I/O can be the default
-if test "${abi_netcdf_default_enable}" = "yes"; then
-  if test "${abi_mpi_io_default_enable}" = "yes"; then
-    AC_MSG_NOTICE([|---> disabling MPI I/O as default I/O mode (conflicts with NetCDF)])
-    abi_mpi_io_default_enable="no"
-    abi_optchk_ok="no"
-  fi
+if test "${abi_netcdf_default_enable}" = "yes" -a \
+        "${abi_mpi_io_default_enable}" = "yes"; then
+  AC_MSG_ERROR([MPI I/O and NetCDF are mutually exclusive default I/O modes
+                  These maintainer options should only be used for testing
+                  purposes. Please do not use them unless you really know
+                  what you are doing.])
 fi
 
 # Closing remarks
