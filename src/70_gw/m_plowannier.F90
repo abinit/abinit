@@ -796,11 +796,13 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 
 
 ! Drive the normalization of the psichis
- if (dtset%plowan_projcalc(1) == -2 .or. dtset%ucrpa /= 0 ) then 
-   opt = 1
- else 
-   opt=0
- end if
+
+if (dtset%plowan_projcalc(1)==-2)then
+  opt=1 
+  if (dtset%ucrpa >= 1 .or. dtset%dmft_kspectralfunc==1) opt = 0 
+else
+  opt=0
+end if
 ! 
         ! 0 : normalization k-point by k-point (normal use of plowan)
         ! 1 : normalization of the sum over k-points (use with crpa old keywords)
@@ -2494,13 +2496,14 @@ end subroutine get_plowannier
 !! 
 !! SOURCE
 
- subroutine fullbz_plowannier(dtset,kmesh,cryst,wanibz,wanbz)
+ subroutine fullbz_plowannier(dtset,kmesh,cryst,pawang,wanibz,wanbz)
    
    use m_abicore
    use m_specialmsg, only : wrtout
    use defs_abitypes
    use m_bz_mesh, only : kmesh_t, get_BZ_item
    use m_crystal, only : crystal_t
+   use m_pawang, only  : pawang_type
    implicit none
 
 !Arguments-------------------------
@@ -2509,9 +2512,11 @@ end subroutine get_plowannier
    type(dataset_type),intent(in) :: dtset
    type(kmesh_t),intent(in) :: kmesh
    type(crystal_t),intent(in) :: cryst
+   type(pawang_type),intent(in) :: pawang
 !Local variables----------------------
    character(len=500) :: msg
    integer :: unt,sym,iatom,spin,ik_bz,iband,ibandc,il,ispinor,im,dummy,natom,bandi,bandf,ik_ibz,isym,itim
+   integer :: il1, il2, l1, l2, im1, im2, at_indx,indx, iat,m1,m2,l
    real(dp) :: kbz(3)
 !*****************************************************************************************
   
@@ -2520,7 +2525,7 @@ end subroutine get_plowannier
    call init_plowannier(wanibz%bandf_wan,wanibz%bandi_wan,dtset%plowan_compute,&
      &dtset%plowan_iatom,dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,&
      &dtset%plowan_nbl,dtset%plowan_nt,dtset%plowan_projcalc,dtset%acell_orig,&
-     &dtset%kpt,dtset%nimage,dtset%nkpt*sym,dtset%nspinor,dtset%nsppol,dtset%wtk,wanbz)
+     &dtset%kpt,dtset%nimage,kmesh%nbz,dtset%nspinor,dtset%nsppol,dtset%wtk,wanbz)
   
    write(msg,'(a)')" Reconstruction of the full Brillouin Zone using data.plowann in the IBZ"
    call wrtout(std_out,msg,'COLL');call wrtout(ab_out,msg,'COLL')
@@ -2550,36 +2555,40 @@ end subroutine get_plowannier
        enddo
      enddo
    else if (cryst%nsym>1) then
-     write(msg,*) "nsym/=1 is not supported"
-     MSG_ERROR(msg)
-     
-    ! do ik_bz=1,kmesh%nbz
-    !   call get_BZ_item(kmesh,ik_bz,kbz,ik_ibz,isym,itim)
-    !   do iatom=1,wanibz%natom_wan
-    !     at_indx=cryst%indsym(4,isym,wanibz%iatom_wan(iatom))
-    !     do spin=1,wanibz%nspppol
-    !       do ispinor=1,wanibz%nspinor
-    !         do il1=1,wanibz%nbl_atom_wan(iatom)
-    !            do il2=1,wanibz%nbl_atom_wan(iatom)
-    !              do im1=1,wanibz%2*latom_wan(iatom)%lcalc(l1)
-    !                do im2=1,wanibz%2*latom_wan(iatom)%lcalc(l2)
-    !                  do iband=wanibz%bandi_wan,wanibz%bandf_wan
-    !                    ibandc=iband-wanibz%bandi_wan+1
-    !                    wanbz%psichi(ik_bz,ibandc,iatom)%atom(il1)%matl(im1,spin,ispinor)=&
-    !                      &wanbz%psichi(ik_bz,ibandc,iatom)%atom(il1)%matl(im1,spin,ispinor)+&
-    !                      &wanibz%psichi(ik_ibz,ibandc,iatom)%atom(il1)
-    !                      enddo
-    !                  enddo
-    !                enddo
-    !              enddo
-    !            enddo
-    !          enddo
-    !        enddo
-    !      enddo
-    !    enddo
-      endif
-      call destroy_plowannier(wanibz)
-    end subroutine fullbz_plowannier
+    do ik_bz=1,kmesh%nbz
+      call get_BZ_item(kmesh,ik_bz,kbz,ik_ibz,isym,itim)
+      do iatom=1,wanbz%natom_wan
+        indx=cryst%indsym(4,isym,wanibz%iatom_wan(iatom))
+!Link beetween full list and wan list of atom
+        do iat=1,wanbz%natom_wan
+          if (indx==wanbz%iatom_wan(iat))then
+            at_indx=iat
+          end if
+        end do
+!
+        do spin=1,wanibz%nsppol
+          do ispinor=1,wanibz%nspinor
+            do il=1,wanibz%nbl_atom_wan(iatom)
+              l=wanibz%latom_wan(iatom)%lcalc(il)
+              do m1=1,2*l+1
+                do m2=1,2*l+1
+                  do iband=wanibz%bandi_wan,wanibz%bandf_wan
+                    ibandc=iband-wanibz%bandi_wan+1
+                    wanbz%psichi(ik_bz,ibandc,iatom)%atom(il)%matl(m1,spin,ispinor)=&
+                      &wanbz%psichi(ik_bz,ibandc,iatom)%atom(il)%matl(m1,spin,ispinor)+&
+                      &wanibz%psichi(ik_ibz,ibandc,at_indx)%atom(il)%matl(m2,spin,ispinor)&
+                      &*pawang%zarot(m2,m1,l+1,isym)
+                  end do
+                enddo
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+  end if
+  call destroy_plowannier(wanibz)
+end subroutine fullbz_plowannier
 
 
 !!****f* m_plowannier/destroy_plowannier

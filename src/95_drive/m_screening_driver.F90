@@ -1086,7 +1086,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 &Dtset%plowan_nbl,Dtset%plowan_nt,Dtset%plowan_projcalc,Dtset%acell_orig,&
 &Dtset%kpt,Dtset%nimage,Dtset%nkpt,Dtset%nspinor,Dtset%nsppol,Dtset%wtk,wanibz_in)
    call get_plowannier(wanibz_in,wanibz,Dtset)
-   call fullbz_plowannier(Dtset,Kmesh,Cryst,wanibz,wanbz)
+   call fullbz_plowannier(Dtset,Kmesh,Cryst,Pawang,wanibz,wanbz)
  endif
  do iqibz=1,Qmesh%nibz
    call timab(306,1,tsec)

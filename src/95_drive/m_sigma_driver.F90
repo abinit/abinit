@@ -2137,7 +2137,7 @@ endif
        &dtset%plowan_projcalc,dtset%acell_orig,dtset%kpt,dtset%nimage,dtset%nkpt,dtset%nspinor,&
        &dtset%nsppol,dtset%wtk,wanibz_in)
      call get_plowannier(wanibz_in,wanibz,dtset)
-     call fullbz_plowannier(dtset,kmesh,cryst,wanibz,wanbz)
+     call fullbz_plowannier(dtset,kmesh,cryst,pawang,wanibz,wanbz)
      ABI_DATATYPE_ALLOCATE(rhot1,(sigp%npwx,Qmesh%nibz))
      do pwx=1,sigp%npwx
        do ibz=1,Qmesh%nibz

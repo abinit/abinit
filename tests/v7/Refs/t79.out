@@ -329,6 +329,49 @@ P           mkmem           4
         pawprtdos4          0
         pawprtdos5          0
         pawprtvol           3
+     plowan_bandi1          0
+     plowan_bandi2          0
+     plowan_bandi3         12
+     plowan_bandi4          0
+     plowan_bandi5          0
+     plowan_bandf1          0
+     plowan_bandf2          0
+     plowan_bandf3         25
+     plowan_bandf4          0
+     plowan_bandf5          0
+   plowan_compute1          0
+   plowan_compute2          0
+   plowan_compute3          1
+   plowan_compute4         10
+   plowan_compute5         10
+     plowan_natom           1
+        plowan_nt           1
+ plowan_realspace           1
+        plowan_it1       0    0    0
+        plowan_it2       0    0    0
+        plowan_it3       0    0    0
+        plowan_it4       0    0    0
+        plowan_it5       0    0    0
+     plowan_iatom1       1
+     plowan_iatom2       1
+     plowan_iatom3       1
+     plowan_iatom4       1
+     plowan_iatom5       1
+       plowan_nbl1       1
+       plowan_nbl2       1
+       plowan_nbl3       1
+       plowan_nbl4       1
+       plowan_nbl5       1
+     plowan_lcalc1       2
+     plowan_lcalc2       2
+     plowan_lcalc3       2
+     plowan_lcalc4       2
+     plowan_lcalc5       2
+  plowan_projcalc1      -2
+  plowan_projcalc2      -2
+  plowan_projcalc3      -2
+  plowan_projcalc4      -2
+  plowan_projcalc5      -2
           ppmodel           2
            prtdos1          0
            prtdos2          3
@@ -377,11 +420,6 @@ P           mkmem           4
             typat      1  2  3  3  3
             ucrpa           1
      ucrpa_window     -1.8374662699E-01  1.8374662699E-01 Hartree
-          usedmft1          0
-          usedmft2          0
-          usedmft3          1
-          usedmft4          0
-          usedmft5          0
           usepawu           1
            useylm           1
               wtk        0.29630    0.44444    0.22222    0.03704
@@ -766,6 +804,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   >Total DC energy in eV        = -3.89415339801387E+03
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.22496961E-02  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.22496961E-02  sigma(3 1)=  0.00000000E+00
@@ -1070,6 +1110,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   >Total DC energy in eV        = -3.89415339801412E+03
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.22496367E-02  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.22496367E-02  sigma(3 1)=  0.00000000E+00
@@ -1130,14 +1172,10 @@ P newkpt: treating     25 bands with npw=     124 for ikpt=   3 by node    0
 P newkpt: treating     25 bands with npw=     136 for ikpt=   4 by node    0
 _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 
--       ( number of procs used in dmft ) =  1
-
 
  ******************************************
- DFT+DMFT Method is used
+ LDA+U Method used: FLL
  ******************************************
-
- DMFT uses the Hubbard one solver
 
  =======================================================================
   == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
@@ -1277,6 +1315,29 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 
 
 
+ ======================================================================================
+
+ == Start computation of Projected Local Orbitals Wannier functions ==  -1
+
+ == Lower and upper values of the selected bands   12   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+
+ == For each k-point of the path, gives the eigenvalues (in eV) of the Hamiltonian in the Wannier basis
+
+   (The band structure is shifted by fermie =      15.6640 eV )
+
+ Wannier band structure for atom  1
+ 1      -1.646      -1.646       3.514       4.044       4.044
+ 2       0.862       2.652       2.817       3.626       4.760
+ 3      -1.943      -0.389       0.505       3.068       3.068
+ 4      -4.108      -4.108      -1.964      -1.964      -1.964
+
+ Print the psichi coefficients in data.plowann
+
 ======================================================================
  Calculating and writing out Kohn-Sham electronic Structure file
  Using conjugate gradient wavefunctions and energies (kssform=3)
@@ -1376,6 +1437,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   >Total energy in eV           = -3.89415339828357E+03
   >Total DC energy in eV        = -3.89415339801386E+03
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.22496984E-02  sigma(3 2)=  0.00000000E+00
@@ -1783,6 +1846,29 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   2    2.000000E+00    0.000000E+00
   3    4.000000E+00    0.000000E+00
   4    6.000000E+00    0.000000E+00
+
+ == Lower and upper values of the selected bands    0    0
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+
+ == Lower and upper values of the selected bands   12   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+Reading of the Wannier weights from data.plowann
+
+ == Lower and upper values of the selected bands   12   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+ Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
 
 
 --------------------------------------------------------------------------------
@@ -2364,16 +2450,42 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 
 
 
+ cRPA calculations using wannier weights from data.plowann
+
+ == Lower and upper values of the selected bands    0    0
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+
+ == Lower and upper values of the selected bands   12   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+Reading of the Wannier weights from data.plowann
+
+ == Lower and upper values of the selected bands   12   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+ Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
  
 ==== Calculation of the screened interaction ====
 
  Read K and Q mesh
+ Read l and bands from wanbz          12          25           5
 
- Read wannier in iBZ
-
- == cRPA Calculation of Interaction for atom             1
 
  ==Calculation of the bare interaction  V m==
+ 
+==Definition of the orbitals==
+  Only one orbital
+  Orbital with l=           2 on atom           1 with spin's orientations Up-Up
 
   Diagonal bare interaction
    1  9.505
@@ -2404,7 +2516,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 
    bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2510   -0.0000
 
-  Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
+ 
+ Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
  -      1      2      3      4      5
    1  9.505  0.255  0.255  0.241  0.041
    2  0.255  9.504  0.095  0.241  0.202
@@ -2450,7 +2563,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2305    0.0000
 
-  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
+ 
+ Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  5.540  0.229  0.234  0.221  0.040
    2  0.229  5.555  0.089  0.222  0.186
@@ -2490,7 +2604,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2298   -0.0002
 
-  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
+ 
+ Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  5.377  0.228  0.234  0.220  0.040
    2  0.228  5.401  0.088  0.221  0.186
@@ -2530,7 +2645,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2287   -0.0006
 
-  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
+ 
+ Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  5.201  0.226  0.234  0.220  0.040
    2  0.226  5.196  0.088  0.221  0.185
@@ -2570,13 +2686,18 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2231   -0.0012
 
-  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
+ 
+ Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  4.334  0.221  0.227  0.216  0.040
    2  0.221  4.311  0.086  0.215  0.181
    3  0.227  0.086  4.108  0.088  0.172
    4  0.216  0.215  0.088  4.535  0.185
    5  0.040  0.181  0.172  0.185  4.158
+ 
+==Reminder of the orbitals==
+  Only one orbital
+  Orbital with l=           2 on atom           1 with spin's orientations Up-Up
  
   -------------------------------------------------------------
             Average U and J as a function of frequency
@@ -2903,6 +3024,49 @@ P           mkmem           4
         pawprtdos4          0
         pawprtdos5          0
         pawprtvol           3
+     plowan_bandi1          0
+     plowan_bandi2          0
+     plowan_bandi3         12
+     plowan_bandi4          0
+     plowan_bandi5          0
+     plowan_bandf1          0
+     plowan_bandf2          0
+     plowan_bandf3         25
+     plowan_bandf4          0
+     plowan_bandf5          0
+   plowan_compute1          0
+   plowan_compute2          0
+   plowan_compute3          1
+   plowan_compute4         10
+   plowan_compute5         10
+     plowan_natom           1
+        plowan_nt           1
+ plowan_realspace           1
+        plowan_it1       0    0    0
+        plowan_it2       0    0    0
+        plowan_it3       0    0    0
+        plowan_it4       0    0    0
+        plowan_it5       0    0    0
+     plowan_iatom1       1
+     plowan_iatom2       1
+     plowan_iatom3       1
+     plowan_iatom4       1
+     plowan_iatom5       1
+       plowan_nbl1       1
+       plowan_nbl2       1
+       plowan_nbl3       1
+       plowan_nbl4       1
+       plowan_nbl5       1
+     plowan_lcalc1       2
+     plowan_lcalc2       2
+     plowan_lcalc3       2
+     plowan_lcalc4       2
+     plowan_lcalc5       2
+  plowan_projcalc1      -2
+  plowan_projcalc2      -2
+  plowan_projcalc3      -2
+  plowan_projcalc4      -2
+  plowan_projcalc5      -2
           ppmodel           2
            prtdos1          0
            prtdos2          3
@@ -2961,11 +3125,6 @@ P           mkmem           4
             typat      1  2  3  3  3
             ucrpa           1
      ucrpa_window     -1.8374662699E-01  1.8374662699E-01 Hartree
-          usedmft1          0
-          usedmft2          0
-          usedmft3          1
-          usedmft4          0
-          usedmft5          0
           usepawu           1
            useylm           1
               wtk        0.29630    0.44444    0.22222    0.03704
@@ -3039,13 +3198,14 @@ P           mkmem           4
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [6] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.

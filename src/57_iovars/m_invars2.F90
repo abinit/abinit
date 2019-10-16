@@ -3265,30 +3265,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%plowan_projcalc(1:sumnbl)=intarr(1:sumnbl)
  !end if
 
-   ! if (dtset%ucrpa > 0 .and. dtset%plowan_compute==0) then
-     
-   ! end if
-   ! if () then
-   !   dtset%plowan_natom=1
-   !   dtset%plowan_nbl(:)=1
-   !   dtset%plowan_nt=1
-   !   dtset%plowan_it(:)=0
-   !   dtset%plowan_realspace=1
-   !   do iatom=1,dtset%natom
-   !     lpawu=dtset%lpawu(dtset%typat(iatom))
-   !     if (lpawu/=-1) then
-   !       dtset%plowan_lcalc(:)=lpawu
-   !       dtset%plowan_iatom(:)=iatom
-   !       dtset%plowan_projcalc(:)=2*dtset%plowan_lcalc+1
-   !     end if
-   !   end do
-   !   dtset%plowan_bandi=dtset%dmftbandi
-   !   dtset%plowan_bandf=dtset%dmftbandf
-   !   dtset%plowan_compute=1
-   !   dtset%usedmft=0
-   ! end if
 
-   if ((dtset%ucrpa > 0 .and. dtset%plowan_natom == 0).or.(dtset%usepawu /= 0 .and. dtset%usedmft/=0)) then
+   if ((dtset%ucrpa > 0 .and. dtset%plowan_natom == 0).or.(dtset%nbandkss /= 0 .and. dtset%usedmft/=0)) then
      dtset%plowan_natom=1
      dtset%plowan_nbl(:)=1
      dtset%plowan_nt=1
@@ -3304,17 +3282,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      end do
      dtset%plowan_bandi=dtset%dmftbandi
      dtset%plowan_bandf=dtset%dmftbandf
-     if (dtset%usepawu /= 0 .and. dtset%usedmft/=0) then
+     if (dtset%nbandkss /= 0 .and. dtset%usedmft/=0) then
        dtset%plowan_compute=1
        dtset%usedmft=0
-     else if (ALL(dtset%ucrpa_bands/=(/-1,-1/)) .or. ALL(dtset%ucrpa_window/=(/-1,-1/))) then
+     else if (dtset%optdriver==3) then
        dtset%plowan_compute=10
-       !dtset%plowan_bandi=dtset%dmftbandi
-       !dtset%plowan_bandf=dtset%dmftbandf
-     else if(dtset%ecutsigx>0_dp ) then
+     else if(dtset%optdriver==4) then
        dtset%plowan_compute=10
-       !dtset%plowan_bandi=dtset%dmftbandi
-       !dtset%plowan_bandf=dtset%dmftbandf
      end if
    end if
    
