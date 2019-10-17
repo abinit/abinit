@@ -436,10 +436,10 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
      j0ln=jln*(jln-1)/2
      do iln=1,jln
        kln=j0ln+iln
-       pawtab(itypat)%phiphj  (1:mesh_size,kln)=pawtab(itypat)%phi (1:mesh_size,iln)&
-&       *pawtab(itypat)%phi (1:mesh_size,jln)
+       pawtab(itypat)%phiphj(1:mesh_size,kln)=pawtab(itypat)%phi(1:mesh_size,iln)&
+&                                            *pawtab(itypat)%phi(1:mesh_size,jln)
        pawtab(itypat)%tphitphj(1:mesh_size,kln)=pawtab(itypat)%tphi(1:mesh_size,iln)&
-&       *pawtab(itypat)%tphi(1:mesh_size,jln)
+&                                              *pawtab(itypat)%tphi(1:mesh_size,jln)
      end do
    end do
 

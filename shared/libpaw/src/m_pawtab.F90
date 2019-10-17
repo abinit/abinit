@@ -1496,10 +1496,11 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Integers (read from psp file)
 !-------------------------------------------------------------------------
-!  basis_size,has_coretau,has_fock,has_kij,has_shapefncg,has_nabla,has_nablaphi,has_tproj,has_tvale,has_vhtnzc,has_vhnzc,has_vminushalf
-!  has_wvl,ij_size,l_size,lmn_size,lmn2_size,mesh_size,core_mesh_size,coretau_mesh_size,vminus_mesh_size,partialwave_mesh_size
+!  basis_size,has_coretau,has_fock,has_kij,has_shapefncg,has_nabla,has_nablaphi,has_tproj
+!  has_tvale,has_vhtnzc,has_vhnzc,has_vminushalf,has_wvl,ij_size,l_size,lmn_size,lmn2_size
+!  mesh_size,partialwave_mesh_size,core_mesh_size,coretau_mesh_size,vminus_mesh_size
 !  tnvale_mesh_size,mqgrid,shape_lambda,shape_type,usetcore,usexcnhat
-   nn_int=nn_int+27
+   nn_int=nn_int+28
 
 !Integers (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
@@ -1561,11 +1562,10 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 !Reals arrays (read from psp file)
 !-------------------------------------------------------------------------
    siz_coredens=0 ; siz_coretau=0    ; siz_dij0=0     ; siz_kij=0        ; siz_fock=0
-   siz_nablaphi=0 ; siz_phi=0        ; siz_rhoij0=0   ; siz_shape_alpha=0
+   siz_phi=0      ; siz_nablaphi=0   ;  siz_rhoij0=0   ; siz_shape_alpha=0
    siz_shape_q=0  ; siz_shapefunc=0  ; siz_tcoredens=0; siz_tcoretau=0
    siz_tcorespl=0 ; siz_ttaucorespl=0; siz_tphi=0     ; siz_tnablaphi=0  ; siz_tproj=0
-   siz_tvalespl=0 ; siz_vhtnzc=0     ; siz_vhnzc=0
-   siz_vminushalf=0
+   siz_tvalespl=0 ; siz_vhtnzc=0     ; siz_vhnzc=0    ; siz_vminushalf=0
    nn_int=nn_int+22
 
    if (allocated(pawtab%coredens)) then
@@ -1894,10 +1894,10 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_int(ii)=siz_coredens  ;ii=ii+1
    list_int(ii)=siz_coretau  ;ii=ii+1
    list_int(ii)=siz_dij0  ;ii=ii+1
-   list_int(ii)=siz_fock  ;ii=ii+1
    list_int(ii)=siz_kij  ;ii=ii+1
-   list_int(ii)=siz_nablaphi; ii=ii+1
+   list_int(ii)=siz_fock  ;ii=ii+1
    list_int(ii)=siz_phi  ;ii=ii+1
+   list_int(ii)=siz_nablaphi; ii=ii+1
    list_int(ii)=siz_rhoij0  ;ii=ii+1
    list_int(ii)=siz_shape_alpha  ;ii=ii+1
    list_int(ii)=siz_shape_q  ;ii=ii+1
@@ -1906,8 +1906,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_int(ii)=siz_tcoretau  ;ii=ii+1
    list_int(ii)=siz_tcorespl  ;ii=ii+1
    list_int(ii)=siz_ttaucorespl  ;ii=ii+1
-   list_int(ii)=siz_tnablaphi  ;ii=ii+1
    list_int(ii)=siz_tphi  ;ii=ii+1
+   list_int(ii)=siz_tnablaphi  ;ii=ii+1
    list_int(ii)=siz_tproj  ;ii=ii+1
    list_int(ii)=siz_tvalespl  ;ii=ii+1
    list_int(ii)=siz_vhtnzc  ;ii=ii+1
@@ -2057,10 +2057,10 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    siz_coredens=list_int(ii)  ;ii=ii+1
    siz_coretau=list_int(ii)  ;ii=ii+1
    siz_dij0=list_int(ii)  ;ii=ii+1
-   siz_fock=list_int(ii)  ;ii=ii+1
    siz_kij=list_int(ii)  ;ii=ii+1
-   siz_nablaphi=list_int(ii)  ;ii=ii+1
+   siz_fock=list_int(ii)  ;ii=ii+1
    siz_phi=list_int(ii)  ;ii=ii+1
+   siz_nablaphi=list_int(ii)  ;ii=ii+1
    siz_rhoij0=list_int(ii)  ;ii=ii+1
    siz_shape_alpha=list_int(ii)  ;ii=ii+1
    siz_shape_q=list_int(ii)  ;ii=ii+1
@@ -2069,8 +2069,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    siz_tcoretau=list_int(ii)  ;ii=ii+1
    siz_tcorespl=list_int(ii)  ;ii=ii+1
    siz_ttaucorespl=list_int(ii)  ;ii=ii+1
-   siz_tnablaphi=list_int(ii)  ;ii=ii+1
    siz_tphi=list_int(ii)  ;ii=ii+1
+   siz_tnablaphi=list_int(ii)  ;ii=ii+1
    siz_tproj=list_int(ii)  ;ii=ii+1
    siz_tvalespl=list_int(ii)  ;ii=ii+1
    siz_vhtnzc=list_int(ii)  ;ii=ii+1
@@ -2278,13 +2278,13 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      list_dpr(ii:ii+siz_kij-1)=pawtab%kij(1:siz_kij)
      ii=ii+siz_kij
    end if
-   if (siz_nablaphi>0) then
-     list_dpr(ii:ii+siz_nablaphi-1)=reshape(pawtab%nablaphi,(/siz_nablaphi/))
-     ii=ii+siz_nablaphi
-   end if
    if (siz_phi>0) then
      list_dpr(ii:ii+siz_phi-1)=reshape(pawtab%phi,(/siz_phi/))
      ii=ii+siz_phi
+   end if
+   if (siz_nablaphi>0) then
+     list_dpr(ii:ii+siz_nablaphi-1)=reshape(pawtab%nablaphi,(/siz_nablaphi/))
+     ii=ii+siz_nablaphi
    end if
    if (siz_rhoij0>0) then
      list_dpr(ii:ii+siz_rhoij0-1)=pawtab%rhoij0(1:siz_rhoij0)
@@ -2318,13 +2318,13 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      list_dpr(ii:ii+siz_ttaucorespl-1)=reshape(pawtab%ttaucorespl,(/siz_ttaucorespl/))
      ii=ii+siz_ttaucorespl
    end if
-   if (siz_tnablaphi>0) then
-     list_dpr(ii:ii+siz_tnablaphi-1)=reshape(pawtab%tnablaphi,(/siz_tnablaphi/))
-     ii=ii+siz_tnablaphi
-   end if
    if (siz_tphi>0) then
      list_dpr(ii:ii+siz_tphi-1)=reshape(pawtab%tphi,(/siz_tphi/))
      ii=ii+siz_tphi
+   end if
+   if (siz_tnablaphi>0) then
+     list_dpr(ii:ii+siz_tnablaphi-1)=reshape(pawtab%tnablaphi,(/siz_tnablaphi/))
+     ii=ii+siz_tnablaphi
    end if
    if (siz_tproj>0) then
      list_dpr(ii:ii+siz_tproj-1)=reshape(pawtab%tproj,(/siz_tproj/))
@@ -2542,14 +2542,6 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      pawtab%kij=list_dpr(ii:ii+pawtab%lmn2_size-1)
      ii=ii+siz_kij
    end if
-   if (allocated(pawtab%nablaphi)) then
-     LIBPAW_DEALLOCATE(pawtab%nablaphi)
-   end if
-   if (siz_nablaphi>0) then
-     LIBPAW_ALLOCATE(pawtab%nablaphi,(pawtab%partialwave_mesh_size,pawtab%basis_size))
-     pawtab%nablaphi=reshape(list_dpr(ii:ii+siz_nablaphi-1),(/pawtab%partialwave_mesh_size,pawtab%basis_size/))
-     ii=ii+siz_nablaphi
-   end if
    if (allocated(pawtab%phi)) then
      LIBPAW_DEALLOCATE(pawtab%phi)
    end if
@@ -2557,6 +2549,14 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      LIBPAW_ALLOCATE(pawtab%phi,(pawtab%partialwave_mesh_size,pawtab%basis_size))
      pawtab%phi=reshape(list_dpr(ii:ii+siz_phi-1),(/pawtab%partialwave_mesh_size,pawtab%basis_size/))
      ii=ii+siz_phi
+   end if
+   if (allocated(pawtab%nablaphi)) then
+     LIBPAW_DEALLOCATE(pawtab%nablaphi)
+   end if
+   if (siz_nablaphi>0) then
+     LIBPAW_ALLOCATE(pawtab%nablaphi,(pawtab%partialwave_mesh_size,pawtab%basis_size))
+     pawtab%nablaphi=reshape(list_dpr(ii:ii+siz_nablaphi-1),(/pawtab%partialwave_mesh_size,pawtab%basis_size/))
+     ii=ii+siz_nablaphi
    end if
    if (allocated(pawtab%rhoij0)) then
      LIBPAW_DEALLOCATE(pawtab%rhoij0)
@@ -2624,6 +2624,14 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      pawtab%ttaucorespl=reshape(list_dpr(ii:ii+siz_ttaucorespl-1),(/pawtab%mqgrid,2/))
      ii=ii+siz_ttaucorespl
    end if
+   if (allocated(pawtab%tphi)) then
+     LIBPAW_DEALLOCATE(pawtab%tphi)
+   end if
+   if (siz_tphi>0) then
+     LIBPAW_ALLOCATE(pawtab%tphi,(pawtab%partialwave_mesh_size,pawtab%basis_size))
+     pawtab%tphi=reshape(list_dpr(ii:ii+siz_tphi-1),(/pawtab%partialwave_mesh_size,pawtab%basis_size/))
+     ii=ii+siz_tphi
+   end if
   if (allocated(pawtab%tnablaphi)) then
      LIBPAW_DEALLOCATE(pawtab%tnablaphi)
    end if
@@ -2631,14 +2639,6 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      LIBPAW_ALLOCATE(pawtab%tnablaphi,(pawtab%partialwave_mesh_size,pawtab%basis_size))
      pawtab%tphi=reshape(list_dpr(ii:ii+siz_tnablaphi-1),(/pawtab%partialwave_mesh_size,pawtab%basis_size/))
      ii=ii+siz_tnablaphi
-   end if
-   if (allocated(pawtab%tnablaphi)) then
-     LIBPAW_DEALLOCATE(pawtab%tnablaphi)
-   end if
-   if (siz_tphi>0) then
-     LIBPAW_ALLOCATE(pawtab%tphi,(pawtab%partialwave_mesh_size,pawtab%basis_size))
-     pawtab%tphi=reshape(list_dpr(ii:ii+siz_tphi-1),(/pawtab%partialwave_mesh_size,pawtab%basis_size/))
-     ii=ii+siz_tphi
    end if
    if (allocated(pawtab%tproj)) then
      LIBPAW_DEALLOCATE(pawtab%tproj)
