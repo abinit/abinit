@@ -233,7 +233,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: optcut,optgr0,optgr1,optgr2,option,option_test,option_dij,optrad,optrhoij,psp_gencond
  integer :: my_rank,rhoxsp_method,comm,use_aerhor,use_umklp,usexcnhat
  integer :: ioe0j,spin,io,jb,nomega_sigc
- integer :: temp_unt,ncid,dim,nnn,dummy
+ integer :: temp_unt,ncid,dim,nnn
  integer :: work_size,nstates_per_proc,my_nbks
  integer :: iatom1,iatom2,il1,il2,pos1,pos2,im1,im2,ispinor1,ispinor2
  !integer :: jb_qp,ib_ks,ks_irr
@@ -241,9 +241,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
  real(dp) :: ucvol,vxcavg,vxcavg_qp
- real(dp) :: gwc_gsq,gwx_gsq,gw_gsq,cpu,wall,gflops
+ real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
- complex(dpc) :: max_degw,cdummy,xx
+ complex(dpc) :: max_degw,cdummy
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,pawden_fname
