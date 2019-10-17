@@ -4175,7 +4175,7 @@ subroutine dfpt_lw_doutput(blkflg,d3,mpert,natom,ntypat,unddb)
 
 !Write the block type and number of elements
  write(unddb,*)' '
- write(unddb, '(a,i8)' )' 3rd derivatives (long wave)  - # elements :',nelmts
+ write(unddb, '(a,i8)' )' 3rd derivatives              - # elements :',nelmts
 
 !Write the phonon wavevectors
  write(unddb, '(a,3es16.8,f6.1)' )' qpt',(ddb%qpt(ii,1),ii=1,3),ddb%nrm(1,1)

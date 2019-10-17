@@ -405,7 +405,11 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  ! TODO: This dimension should be encapsulated somewhere. We don't want to
  ! change the entire code if someone adds a new kind of perturbation.
+#ifdef MR_DEV
+ mpert = Crystal%natom + MPERT_MAX; iout = ab_out
+#else
  mpert = Crystal%natom + 6; iout = ab_out
+#endif
 
  rprim = ddb%rprim; gprim = ddb%gprim
 
