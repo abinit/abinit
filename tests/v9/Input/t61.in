@@ -1,0 +1,98 @@
+# LiF Very rough 2x2x2 q-point grid; low ecut.
+ndtset 3
+
+# Global parameters.
+ecut   35
+tolwfr 1e-16
+#mixprec 1
+boxcutmin 1.7
+prtphdos 0
+
+# K-mesh (must equal the one used to produce the WFK file)
+ngkpt    4 4 4
+nshiftk  1
+shiftk   0.0 0.0 0.0
+
+ph_nqpath 3
+ph_qpath 
+  0 0 0 
+  0.5 0 0
+  0.5 0.5 0
+
+# Global variables
+nband     10
+#nband     7
+symsigma  1
+tmesh 0 300 2
+prteliash 1
+ddb_ngqpt 2 2 2  # q-mesh used to produce the DDB file (must be consistent with DDB data)
+
+############
+# DATASET 1
+############
+optdriver1 0
+getkerange_path1 "t57o_DS7_KERANGE.nc"
+getden1   20    # Read DEN wavefunctions from DS20_DEN
+getwfk1   20    # Init GS wavefunctions from DS20_WFK
+iscf1 -2
+kptopt1 0
+
+############
+# DATASET 2
+############
+# interpolate DVDB
+optdriver2 7
+eph_task2 5
+getddb2   20      # Read DDB files from DS20_DDB
+getdvdb2  20
+#eph_ngqpt_fine2 4 4 4
+eph_ngqpt_fine2 8 8 8
+
+############
+# DATASET 3
+############
+optdriver3 7
+eph_task3 -4
+getwfk3     1    # Read GS wavefunctions from o_DS1_WFK
+getddb3   20     # Read DDB files from DS20_DDB
+getdvdb3   -1
+eph_intmeth3 2
+eph_ngqpt_fine3 8 8 8 
+sigma_erange3 0.2 0.2 eV   # Select kpts in fine mesh within this energy window.
+ngkpt3    8 8 8
+nshiftk3  1
+shiftk3   0.0 0.0 0.0
+
+############################################################################################
+#                                         STRUCTURE
+############################################################################################
+acell    1.0    1.0    1.0
+xred
+   0.0000000000    0.0000000000    0.0000000000
+   0.5000000000    0.5000000000    0.5000000000
+rprim
+   0.0000000000    3.8515039575    3.8515039575
+   3.8515039575    0.0000000000    3.8515039575
+   3.8515039575    3.8515039575    0.0000000000
+typat 1 2
+natom 2
+ntypat 2
+znucl 3 9
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = .*_intel_1[89].0_.*
+#%% test_chain = t57.in, t58.in, t59.in, t60.in, t61.in
+#%% [files]
+#%% files_to_test = 
+#%%   t61.out, tolnlines = 30, tolabs = 20.0, tolrel = 5.0e-2
+#%% psp_files = 03-Li.psp, 09-F.psp
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH
+#%% description = 
+#%%   Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
+#%%<END TEST_INFO>

@@ -32,13 +32,19 @@ MODULE m_results_gs
  use m_xmpi
  use m_energies
  use m_errors
+ use m_yaml
+ use m_crystal
+ use m_stream_string
+ use m_dtset
+ use m_pair_list
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
- use m_io_tools,  only : file_exists
- use m_fstrings,  only : sjoin
+ use m_io_tools,      only : file_exists
+ use m_fstrings,      only : sjoin
+ use m_numeric_tools, only : get_trace
 
  implicit none
 
@@ -184,6 +190,11 @@ MODULE m_results_gs
    ! The "sy" prefix refer to the fact that this gradient has been
    ! symmetrized.
 
+ contains
+
+  procedure :: yaml_write => results_gs_yaml_write
+    ! Write the most important results in Yaml format.
+
  end type results_gs_type
 
 !public procedures.
@@ -238,7 +249,6 @@ subroutine init_results_gs(natom,nsppol,results_gs,only_part)
 !Local variables-------------------------------
 !scalars
  logical :: full_init
-!arrays
 
 !************************************************************************
 
@@ -246,10 +256,11 @@ subroutine init_results_gs(natom,nsppol,results_gs,only_part)
 
  full_init=.true.;if (present(only_part)) full_init=(.not.only_part)
 
+ results_gs%berryopt=0
  results_gs%natom  =natom
  results_gs%ngrvdw =0
  results_gs%nsppol =nsppol
- results_gs%berryopt=zero
+
  results_gs%deltae =zero
  results_gs%diffor =zero
  results_gs%entropy=zero
@@ -342,10 +353,11 @@ subroutine init_results_gs_array(natom,nsppol,results_gs,only_part)
    do ii=1,results_gs_size2
      do jj=1,results_gs_size1
 
+       results_gs(jj,ii)%berryopt=0
        results_gs(jj,ii)%natom  =natom
        results_gs(jj,ii)%ngrvdw =0
        results_gs(jj,ii)%nsppol =nsppol
-       results_gs(jj,ii)%berryopt=zero
+
        results_gs(jj,ii)%deltae =zero
        results_gs(jj,ii)%diffor =zero
        results_gs(jj,ii)%entropy=zero
@@ -426,33 +438,16 @@ subroutine destroy_results_gs(results_gs)
  results_gs%ngrvdw=0
  results_gs%nsppol=0
  results_gs%berryopt=0
- if (allocated(results_gs%fcart))   then
-   ABI_DEALLOCATE(results_gs%fcart)
- end if
- if (allocated(results_gs%fred))    then
-   ABI_DEALLOCATE(results_gs%fred)
- end if
- if (allocated(results_gs%gaps))    then
-   ABI_DEALLOCATE(results_gs%gaps)
- end if
- if (allocated(results_gs%gresid))  then
-   ABI_DEALLOCATE(results_gs%gresid)
- end if
- if (allocated(results_gs%grewtn))  then
-   ABI_DEALLOCATE(results_gs%grewtn)
- end if
- if (allocated(results_gs%grchempottn))  then
-   ABI_DEALLOCATE(results_gs%grchempottn)
- end if
- if (allocated(results_gs%grvdw))  then
-   ABI_DEALLOCATE(results_gs%grvdw)
- end if
- if (allocated(results_gs%grxc))    then
-   ABI_DEALLOCATE(results_gs%grxc)
- end if
- if (allocated(results_gs%synlgr))  then
-   ABI_DEALLOCATE(results_gs%synlgr)
- end if
+
+ ABI_SFREE(results_gs%fcart)
+ ABI_SFREE(results_gs%fred)
+ ABI_SFREE(results_gs%gaps)
+ ABI_SFREE(results_gs%gresid)
+ ABI_SFREE(results_gs%grewtn)
+ ABI_SFREE(results_gs%grchempottn)
+ ABI_SFREE(results_gs%grvdw)
+ ABI_SFREE(results_gs%grxc)
+ ABI_SFREE(results_gs%synlgr)
 
 end subroutine destroy_results_gs
 !!***
@@ -503,33 +498,16 @@ subroutine destroy_results_gs_array(results_gs)
        results_gs(jj,ii)%ngrvdw=0
        results_gs(jj,ii)%nsppol=0
        results_gs(jj,ii)%berryopt=0
-       if (allocated(results_gs(jj,ii)%fcart))   then
-         ABI_DEALLOCATE(results_gs(jj,ii)%fcart)
-       end if
-       if (allocated(results_gs(jj,ii)%fred))    then
-         ABI_DEALLOCATE(results_gs(jj,ii)%fred)
-       end if
-       if (allocated(results_gs(jj,ii)%gaps))   then
-         ABI_DEALLOCATE(results_gs(jj,ii)%gaps)
-       end if
-       if (allocated(results_gs(jj,ii)%gresid))  then
-         ABI_DEALLOCATE(results_gs(jj,ii)%gresid)
-       end if
-       if (allocated(results_gs(jj,ii)%grewtn))  then
-         ABI_DEALLOCATE(results_gs(jj,ii)%grewtn)
-       end if
-       if (allocated(results_gs(jj,ii)%grchempottn))  then
-         ABI_DEALLOCATE(results_gs(jj,ii)%grchempottn)
-       end if
-       if (allocated(results_gs(jj,ii)%grvdw))  then
-         ABI_DEALLOCATE(results_gs(jj,ii)%grvdw)
-       end if
-       if (allocated(results_gs(jj,ii)%grxc))    then
-         ABI_DEALLOCATE(results_gs(jj,ii)%grxc)
-       end if
-       if (allocated(results_gs(jj,ii)%synlgr))  then
-         ABI_DEALLOCATE(results_gs(jj,ii)%synlgr)
-       end if
+
+       ABI_SFREE(results_gs(jj,ii)%fcart)
+       ABI_SFREE(results_gs(jj,ii)%fred)
+       ABI_SFREE(results_gs(jj,ii)%gaps)
+       ABI_SFREE(results_gs(jj,ii)%gresid)
+       ABI_SFREE(results_gs(jj,ii)%grewtn)
+       ABI_SFREE(results_gs(jj,ii)%grchempottn)
+       ABI_SFREE(results_gs(jj,ii)%grvdw)
+       ABI_SFREE(results_gs(jj,ii)%grxc)
+       ABI_SFREE(results_gs(jj,ii)%synlgr)
      end do
    end do
 
@@ -564,7 +542,7 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
 
 !Arguments ------------------------------------
 !arrays
- type(results_gs_type),intent(in) :: results_gs_in
+ class(results_gs_type),intent(in) :: results_gs_in
  type(results_gs_type),intent(inout) :: results_gs_out !vz_i
 
 !Local variables-------------------------------
@@ -582,30 +560,14 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  nsppol_out =results_gs_out%nsppol
 
  if (natom_in>natom_out) then
-   if (allocated(results_gs_out%fcart))   then
-     ABI_DEALLOCATE(results_gs_out%fcart)
-   end if
-   if (allocated(results_gs_out%fred))    then
-     ABI_DEALLOCATE(results_gs_out%fred)
-   end if
-   if (allocated(results_gs_out%gresid))  then
-     ABI_DEALLOCATE(results_gs_out%gresid)
-   end if
-   if (allocated(results_gs_out%grewtn))  then
-     ABI_DEALLOCATE(results_gs_out%grewtn)
-   end if
-  if (allocated(results_gs_out%grchempottn))  then
-     ABI_DEALLOCATE(results_gs_out%grchempottn)
-   end if
-   if (allocated(results_gs_out%grvdw))  then
-     ABI_DEALLOCATE(results_gs_out%grvdw)
-   end if
-   if (allocated(results_gs_out%grxc))    then
-     ABI_DEALLOCATE(results_gs_out%grxc)
-   end if
-   if (allocated(results_gs_out%synlgr))  then
-     ABI_DEALLOCATE(results_gs_out%synlgr)
-   end if
+   ABI_SFREE(results_gs_out%fcart)
+   ABI_SFREE(results_gs_out%fred)
+   ABI_SFREE(results_gs_out%gresid)
+   ABI_SFREE(results_gs_out%grewtn)
+   ABI_SFREE(results_gs_out%grchempottn)
+   ABI_SFREE(results_gs_out%grvdw)
+   ABI_SFREE(results_gs_out%grxc)
+   ABI_SFREE(results_gs_out%synlgr)
 
    if (allocated(results_gs_in%fcart))   then
      ABI_ALLOCATE(results_gs_out%fcart,(3,natom_in))
@@ -634,9 +596,7 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  end if
 
  if (nsppol_in>nsppol_out) then
-   if (allocated(results_gs_out%gaps))   then
-     ABI_DEALLOCATE(results_gs_out%gaps)
-   end if
+   ABI_SFREE(results_gs_out%gaps)
    if (allocated(results_gs_in%gaps))    then
      ABI_ALLOCATE(results_gs_out%gaps,(3,nsppol_in))
    end if
@@ -700,13 +660,13 @@ end subroutine copy_results_gs
 !!
 !! SOURCE
 
-integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
+integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
  real(dp),intent(in) :: ecut,pawecutdg
- type(results_gs_type),intent(in) :: res
+ class(results_gs_type),intent(in) :: res
 
 !Local variables-------------------------------
 !scalars
@@ -778,6 +738,99 @@ contains
  end function vid
 
 end function results_gs_ncwrite
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_results_gs/results_gs_yaml_write
+!!
+!! NAME
+!! results_gs_yaml_write
+!!
+!! FUNCTION
+!! Write results_gs in yaml format to unit iout
+!!
+!! INPUTS
+!!  results <type(results_gs_type)>=miscellaneous information about the system after ground state computation
+!!  iout= unit of output file
+!!  [comment] optional comment for the final document
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
+
+ class(results_gs_type),intent(in) :: results
+ type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: iout
+ character(len=*),intent(in),optional :: comment
+
+!Local variables-------------------------------
+ integer,parameter :: width=10
+ integer :: ii
+ type(yamldoc_t) :: ydoc
+ type(pair_list) :: dict
+ real(dp) :: strten(3,3), abc(3)
+
+!************************************************************************
+
+ if (present(comment)) then
+   ydoc = yamldoc_open('ResultsGS', comment, width=width)
+ else
+   ydoc = yamldoc_open('ResultsGS', '', width=width)
+ end if
+ ydoc%use_yaml = dtset%use_yaml
+
+ call ydoc%add_int('natom', results%natom)
+ call ydoc%add_int('nsppol', results%nsppol)
+ call ydoc%add_int('nspinor', dtset%nspinor)
+ call ydoc%add_int('nspden', dtset%nspden)
+ call ydoc%add_real("nelect", dtset%nelect)
+ call ydoc%add_real("charge", dtset%charge)
+
+ call dict%set('ecut', r=dtset%ecut)
+ call dict%set('pawecutdg', r=dtset%pawecutdg)
+ call ydoc%add_dict('cutoff_energies', dict)
+ call dict%free()
+
+ call dict%set('deltae', r=results%deltae)
+ call dict%set('res2', r=results%res2)
+ call dict%set('residm', r=results%residm)
+ call dict%set('diffor', r=results%diffor)
+ call ydoc%add_dict('convergence', dict, multiline_trig=2)
+ call dict%free()
+
+ abc(:) = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
+ call ydoc%add_real1d('abc', cryst%angdeg)
+ call ydoc%add_real1d('alpha_beta_gamma_angles', cryst%angdeg)
+ call ydoc%add_real('etotal', results%etotal)
+ call ydoc%add_real('entropy', results%entropy)
+ call ydoc%add_real('fermie', results%fermie)
+
+ strten(1,1) = results%strten(1)
+ strten(2,2) = results%strten(2)
+ strten(3,3) = results%strten(3)
+ strten(2,3) = results%strten(4)
+ strten(3,2) = results%strten(4)
+ strten(1,3) = results%strten(5)
+ strten(3,1) = results%strten(5)
+ strten(1,2) = results%strten(6)
+ strten(2,1) = results%strten(6)
+
+ call ydoc%add_real2d('stress_tensor', strten, tag='CartTensor')
+ ! Add results in GPa as well
+ !strten = strten * HaBohr3_GPa
+ !call ydoc%add_real2d('stress_tensor_GPa', strten, tag='CartTensor')
+ !call ydoc%add_real('pressure_GPa', get_trace(strten) / three)
+
+ call ydoc%add_real2d('cartesian_forces', results%fcart, tag='CartForces')
+ call ydoc%write_and_free(iout)
+
+end subroutine results_gs_yaml_write
 !!***
 
 !----------------------------------------------------------------------

@@ -26,7 +26,6 @@
 module m_rhotoxc
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_abicore
  use m_errors
@@ -35,6 +34,7 @@ module m_rhotoxc
  use m_xc_vdw
  use libxc_functionals
 
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_geometry,         only : metric
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype

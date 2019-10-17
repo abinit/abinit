@@ -86,7 +86,7 @@ contains
 !!\end{equation} }}
 !!
 !! WARNINGS
-!! Warning : the fifth derivative is not yet delivered.
+!! Warning: the fifth derivative is not yet delivered.
 !!
 !! PARENTS
 !!      psp1in,psp5in

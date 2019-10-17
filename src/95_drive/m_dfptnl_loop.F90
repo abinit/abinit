@@ -150,25 +150,25 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 & d3etot_1,d3etot_2,d3etot_3,d3etot_4,d3etot_5,d3etot_6,d3etot_7,d3etot_8,d3etot_9)
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
-
  use m_errors
  use m_abicore
  use m_hdr
  use m_nctk
  use m_wffile
  use m_wfk
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_io_tools,    only : file_exists
  use m_kg,          only : getph
  use m_inwffil,     only : inwffil
  use m_fft,         only : fourdp
  use m_ioarr,       only : read_rhor
- use m_hamiltonian, only : destroy_hamiltonian,destroy_rf_hamiltonian,gs_hamiltonian_type,&
-                           init_hamiltonian,init_rf_hamiltonian,rf_hamiltonian_type
+ use m_hamiltonian, only : gs_hamiltonian_type, init_hamiltonian
  use m_pawdij,      only : pawdij, pawdijfr, symdij
  use m_pawfgr,      only : pawfgr_type
  use m_pawfgrtab,   only : pawfgrtab_type
@@ -420,7 +420,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
          call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rho1r1, &
          hdr_den, pawrhoij1_i1pert, comm_cell, check_hdr=hdr)
-         call hdr_free(hdr_den)
+         call hdr_den%free()
        end if
 
        xccc3d1(:) = zero
@@ -468,7 +468,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
                call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rho3r1, &
                hdr_den, pawrhoij1_i3pert, comm_cell, check_hdr=hdr)
-               call hdr_free(hdr_den)
+               call hdr_den%free()
              end if
 
              xccc3d3(:) = zero
@@ -527,7 +527,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
                      call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rho2r1, &
                      hdr_den, pawrhoij1_i2pert , comm_cell, check_hdr=hdr)
-                     call hdr_free(hdr_den)
+                     call hdr_den%free()
 
 !                    Compute up+down rho1(G) by fft
                      ABI_ALLOCATE(work,(cplex*nfftf))
@@ -745,7 +745,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
 !                  Eventually close the dot file
                    do ii=1,nwffile
-                     call wfk_close(ddk_f(ii))
+                     call ddk_f(ii)%close()
                    end do
 
 !                   if (psps%usepaw==1) then
@@ -767,7 +767,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  end do     ! i1pert
 
 !More memory cleaning
- call destroy_hamiltonian(gs_hamkq)
+ call gs_hamkq%free()
 
  ABI_DEALLOCATE(cg1)
  ABI_DEALLOCATE(cg2)

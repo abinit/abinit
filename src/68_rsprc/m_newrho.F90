@@ -27,9 +27,20 @@
 module m_newrho
 
  use defs_basis
+ use defs_wvltypes
  use m_errors
  use m_abicore
+ use m_ab7_mixing
+ use m_abi2big
+ use m_dtset
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,     only : MPI_type
+ use m_time,     only : timab
+ use m_geometry, only : metric
+ use m_pawtab,   only : pawtab_type
+ use m_pawrhoij, only : pawrhoij_type,pawrhoij_filter
+ use m_prcref,   only : prcref
  use m_wvl_rho, only : wvl_prcref
  use m_fft,     only : fourdp
 
@@ -167,22 +178,6 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 &  nresid,ntypat,n1xccc,pawrhoij,pawtab,&
 &  ph1d,psps,rhog,rhor,rprimd,susmat,usepaw,vtrial,wvl,wvl_den,xred,&
 &  taug,taur,tauresid)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wvltypes
- use m_errors
- use m_abicore
- use m_ab7_mixing
- use m_abi2big
-
- use m_time,     only : timab
- use m_geometry, only : metric
- use m_pawtab,   only : pawtab_type
- use m_pawrhoij, only : pawrhoij_type,pawrhoij_filter
- use m_prcref,   only : prcref
- implicit none
 
 !Arguments-------------------------------
 !scalars
@@ -612,8 +607,10 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 
 !Fourier transform the density
  if (ispmix==1.and.nfft==nfftmix) then
+   !Real space mixing, no need to transform rhomag
    rhor(:,1:dtset%nspden)=rhomag(:,1:dtset%nspden)
    if(dtset%usewvl==0) then
+     !Get rhog from rhor(:,1)
      call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
    end if
    if (dtset%usekden>0) then
@@ -623,6 +620,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
      end if
    end if
  else if (nfft==nfftmix) then
+   !Reciprocal mixing space mixing, need to generate rhor in real space from rhomag in reciprocal space
    do ispden=1,dtset%nspden
      call fourdp(1,rhomag(:,ispden),rhor(:,ispden),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
    end do

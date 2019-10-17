@@ -41,6 +41,7 @@ MODULE m_pawang
  public :: pawang_free        ! Free memory
  public :: pawang_lsylm       ! Compute the LS operator in the real spherical harmonics basis
  public :: initang            ! Initialize angular mesh for PAW calculations
+ public :: make_angular_mesh  ! Build angular mesh from ntheta, nphi
 
  ! MGPAW: Private?
  public :: gauleg
@@ -211,9 +212,11 @@ subroutine pawang_init(Pawang,gnt_option,nabgnt_option,usekden,lmax,nphi,nsym,nt
 !arrays
  real(dp),allocatable :: rgnt_tmp(:)
  real(dp),allocatable :: nablargnt_tmp(:)
+
 ! *************************************************************************
- 
+
  !@Pawang_type
+
  Pawang%l_max=lmax+1
  Pawang%l_size_max=2*Pawang%l_max-1
  Pawang%nsym=nsym
@@ -253,7 +256,7 @@ subroutine pawang_init(Pawang,gnt_option,nabgnt_option,usekden,lmax,nphi,nsym,nt
  else
    Pawang%ylm_size=0
  end if
- 
+
  Pawang%gnt_option=gnt_option
  if (Pawang%gnt_option==1.or.Pawang%gnt_option==2) then
    if (Pawang%gnt_option==1) then
@@ -667,6 +670,85 @@ end subroutine initang
 
 !----------------------------------------------------------------------
 
+!!****f* m_pawang/make_angular_mesh
+!! NAME
+!! make_angular_mesh
+!!
+!! FUNCTION
+!!  Build angular mesh from ntheta, nphi.
+!!
+!! INPUTS
+!!   ntheta: Number of sample points in the theta dir
+!!   nphi: Number of sample points in the phi dir
+!!
+!! OUTPUT
+!!   angl_size: Total number of sample points in the angular mesh. (ntheta * nphi)
+!!   vers_cart(3, angl_size): For each point of the angular mesh, gives the Cartesian coordinates
+!!     of the corresponding point on an unitary sphere.
+!!  angwgth(angl_size):
+!!     For each point of the angular mesh, gives the weight of the corresponding point on an unitary sphere.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_angular_mesh(ntheta, nphi, angl_size, vers_cart, angwgth)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ntheta, nphi
+ integer,intent(out) :: angl_size
+ real(dp),allocatable,intent(out) :: vers_cart(:,:)
+ real(dp),allocatable,intent(out) :: angwgth(:)
+
+!Local variables ------------------------------
+!scalars
+ integer :: it, ip, npoints
+ real(dp) :: ang, con, cos_phi, cos_theta, sin_phi, sin_theta
+!arrays
+ real(dp),allocatable :: th(:),wth(:)
+
+! *************************************************************************
+
+ LIBPAW_ALLOCATE(th, (ntheta))
+ LIBPAW_ALLOCATE(wth, (ntheta))
+
+ con = two_pi / nphi
+ call gauleg(-one, one, th, wth, ntheta)
+
+ ! Initialize vers_cart and angular weights angwgth
+ ! NB: summing over f * angwgth gives the spherical average 1/(4pi) \int domega f(omega)
+ angl_size = ntheta * nphi
+ LIBPAW_ALLOCATE(vers_cart, (3, angl_size))
+ LIBPAW_ALLOCATE(angwgth, (angl_size))
+ npoints = 0
+ do it = 1, ntheta
+   cos_theta = th(it)
+   sin_theta = sqrt(one - cos_theta*cos_theta)
+   do ip = 1, nphi
+     ang = con * (ip-1)
+     cos_phi = cos(ang); sin_phi = sin(ang)
+     npoints = npoints + 1
+     vers_cart(1, npoints) = sin_theta * cos_phi
+     vers_cart(2, npoints) = sin_theta * sin_phi
+     vers_cart(3, npoints) = cos_theta
+     ! Normalization required
+     angwgth(npoints) = wth(it) / (two * nphi)
+   end do
+ end do
+ !write(std_out, *)"Sum angwgth: ", sum(angwgth)
+ !write(std_out, *)"int sig(theta): ", sum(angwgth * sqrt(one - vers_cart(3, :) **2))
+ !write(std_out, *)pi/4
+
+ LIBPAW_DEALLOCATE(th)
+ LIBPAW_DEALLOCATE(wth)
+
+end subroutine make_angular_mesh
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_pawang/gauleg
 !! NAME
 !! gauleg
@@ -704,7 +786,6 @@ end subroutine initang
  integer :: ii,jj
  real(dp),parameter :: tol=1.d-13
  real(dp) :: p1,p2,p3,pi,xl,pp,xmean,z,z1
-!arrays
 
 !************************************************************************
 

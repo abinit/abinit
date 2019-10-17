@@ -19,10 +19,10 @@
 !! OUTPUT
 !!
 !! NOTES
-!!  * Routines tagged with "@type_name" are strongly connected to the definition of the data type. 
-!!    Strongly connected means that the proper functioning of the implementation relies on the 
+!!  * Routines tagged with "@type_name" are strongly connected to the definition of the data type.
+!!    Strongly connected means that the proper functioning of the implementation relies on the
 !!    assumption that the tagged procedure is consistent with the type declaration.
-!!    Every time a developer changes the structure "type_name" adding new entries, he/she has to make sure 
+!!    Every time a developer changes the structure "type_name" adding new entries, he/she has to make sure
 !!    that all the strongly connected routines are changed accordingly to accommodate the modification of the data type
 !!    Typical examples of strongly connected routines are creation, destruction or reset methods.
 !!
@@ -44,8 +44,8 @@ MODULE m_pawfgr
  use m_errors
  use m_abicore
  use m_xmpi
+ use m_dtset
 
- use defs_abitypes, only : dataset_type
  use m_kg,       only : getcut
 
  implicit none
@@ -315,15 +315,15 @@ subroutine pawfgr_destroy(Pawfgr)
  DBG_ENTER("COLL")
 
 !@Pawfgr_type
- 
-  if (associated(Pawfgr%coatofin))  then
-    ABI_DEALLOCATE(Pawfgr%coatofin)
-  end if
-  if (associated(Pawfgr%fintocoa))  then
-    ABI_DEALLOCATE(Pawfgr%fintocoa)
-  end if
 
-  Pawfgr%usefinegrid=0
+ if (associated(Pawfgr%coatofin))  then
+   ABI_DEALLOCATE(Pawfgr%coatofin)
+ end if
+ if (associated(Pawfgr%fintocoa))  then
+   ABI_DEALLOCATE(Pawfgr%fintocoa)
+ end if
+
+ Pawfgr%usefinegrid=0
 
  DBG_EXIT("COLL")
 

@@ -96,8 +96,6 @@ subroutine dfpt_mkffkg(choice,ffkg,ffnl,gmet,idir,indlmn,ipw1,ispinor,itypat,&
 &                  kg_k,kpg_k,kpgx,kpt,lmnmax,mblkpw,ndgxdt,nffkg,nffnl,nincpw,nkpg,nlang,&
 &                  npw,ntens,ntypat,parity)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice,idir,ipw1,ispinor,itypat,lmnmax,mblkpw,ndgxdt
@@ -663,8 +661,6 @@ end subroutine dfpt_mkffkg
 subroutine mkffkg(choice,ffkg,ffnl,gmet,idir,indlmn,ipw1,ispinor,itypat,&
 &                  kg_k,kpg_k,kpgx,kpt,lmnmax,mblkpw,ndgxdt,nffkg,nffnl,nincpw,nkpg,nlang,&
 &                  npw,ntens,ntypat,parity)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

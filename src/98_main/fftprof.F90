@@ -76,7 +76,6 @@
 program fftprof
 
  use defs_basis
- use defs_abitypes
  use m_build_info
  use m_xmpi
  use m_xomp
@@ -85,6 +84,7 @@ program fftprof
  use m_abicore
  use m_dfti
 
+ use defs_abitypes,only : MPI_type
  use m_fstrings,   only : lower
  use m_specialmsg, only : specialmsg_getcount, herald
  use m_io_tools,   only : flush_unit

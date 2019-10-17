@@ -18,21 +18,21 @@ This tutorial aims at showing how to get the following physical properties:
 
 You will learn to use features of ABINIT which deal with spin.  
 
-[TUTORIAL_README]
-
 This tutorial should take about 1.5 hour.
+
+[TUTORIAL_README]
 
 ## 1 A ferromagnetic material: *bcc* Fe
   
 *Before beginning, you might consider to work in a different subdirectory, as
 for the other tutorials. Why not Work_spin?*
 
-The file *tspin_x.files* in *\$ABI_TUTORIAL/Input* lists the file names and root names. 
+The file *tspin_x.files* in *\$ABI_TESTS/tutorial/Input* lists the file names and root names. 
 while *tspin_1.in* is our input file.
 You can copy these two files in the *Work_spin* directory with:
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work_spin
 cd Work_spin
 cp ../tspin_x.files .  # Change it, when needed, as usual.
@@ -140,7 +140,7 @@ are more up than down electrons at the Fermi level.
 That the magnetization points upwards is fortuitous, and we can get it
 pointing downwards by changing the sign of the initial [[spinat]].  
 Indeed, in the absence of spin-orbit coupling, there is no relation between
-the direction of magnetization and the cristal axes.  
+the direction of magnetization and the crystal axes.  
 If we start with a [[spinat]] of 0, the magnetization remains 0. [[spinat]]
 serves two purposes: it is a way to initially break the spin symmetry (up/down), and also
 to start with a reasonable magnetic moment, close enough to the final one (in spin DFT,
@@ -165,7 +165,7 @@ To describe such a structure, a unit cell with two atoms is sufficient, [0,0,0] 
 [1/2,0,1/2].  
 The atoms will be given opposite magnetization with the help of the variable [[spinat]].  
   
-Copy the file *$ABI_TUTORIAL/Input/tspin_2.in* in *Work_spin*.
+Copy the file *$ABI_TESTS/tutorial/Input/tspin_2.in* in *Work_spin*.
 
 {% dialog tests/tutorial/Input/tspin_2.in %}
 
@@ -266,7 +266,7 @@ not make any hypotheses on its magnetic structure, and run the calculation
 like the one for fcc Fe, anticipating only that the two spin directions are going to be different.
 We will not even assume that the initial spins are of the same magnitude.  
   
-You can copy the file *$ABI_TUTORIAL/Input/tspin_3.in* to *Work_spin*.
+You can copy the file *$ABI_TESTS/tutorial/Input/tspin_3.in* to *Work_spin*.
 
 {% dialog tests/tutorial/Input/tspin_3.in %}
 
@@ -368,7 +368,7 @@ Replace the last line of the tspin_x.files by
     
     ../../../Psps_for_tests/73ta.hghsc  
 
-You can copy the file *$ABI_TUTORIAL/Input/tspin_5.in* in *Work_spin*.
+You can copy the file *$ABI_TESTS/tutorial/Input/tspin_5.in* in *Work_spin*.
 
 {% dialog tests/tutorial/Input/tspin_5.in %}
 
@@ -466,7 +466,7 @@ Replace the last line of the tspin_x.files by:
 
     ../../../Psps_for_tests/83bi.paw  
 
-You can copy the file *$ABI_TUTORIAL/Input/tspin_6.in* in *Work_spin*
+You can copy the file *$ABI_TESTS/tutorial/Input/tspin_6.in* in *Work_spin*
 (one Bismuth atom in a large cell). Change the file names in
 *tspin_x.files* accordingly, then run the calculation. It takes about 10 seconds on a recent computer. 
 

@@ -124,6 +124,12 @@ MODULE m_numeric_tools
    module procedure get_trace_cdp
  end interface get_trace
 
+ !interface cart_prod33
+ !  module procedure cart_prod33_int
+ !  module procedure cart_prod33_rdp
+ !  module procedure cart_prod33_cdp
+ !end interface cart_prod33
+
  interface get_diag
    module procedure get_diag_int
    module procedure get_diag_rdp
@@ -296,7 +302,7 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-pure function arth_int(start,step,nn)
+pure function arth_int(start, step, nn)
 
 
 !Arguments ------------------------------------
@@ -338,7 +344,7 @@ end function arth_int
 !!
 !! SOURCE
 
-pure function arth_rdp(start,step,nn)
+pure function arth_rdp(start, step, nn)
 
 
 !Arguments ------------------------------------
@@ -1596,7 +1602,7 @@ pure function bisect_rdp(AA,xx) result(loc)
 
  nn=SIZE(AA); ascnd=(AA(nn)>=AA(1))
  !
- ! === Initialize lower and upper limits ===
+ ! Initialize lower and upper limits
  jl=0; ju=nn+1
  do
    if (ju-jl<=1) EXIT
@@ -1608,7 +1614,7 @@ pure function bisect_rdp(AA,xx) result(loc)
    end if
  end do
  !
- ! === Set the output, being careful with the endpoints ===
+ ! Set the output, being careful with the endpoints
  if (xx==AA(1)) then
    loc=1
  else if (xx==AA(nn)) then
@@ -1651,8 +1657,8 @@ pure function bisect_int(AA,xx) result(loc)
 ! *********************************************************************
 
  nn=SIZE(AA) ; ascnd=(AA(nn)>=AA(1))
- !
- ! === Initialize lower and upper limits ===
+
+ ! Initialize lower and upper limits
  jl=0 ; ju=nn+1
  do
   if (ju-jl<=1) EXIT
@@ -1664,7 +1670,7 @@ pure function bisect_int(AA,xx) result(loc)
   end if
  end do
  !
- ! === Set the output, being careful with the endpoints ===
+ ! Set the output, being careful with the endpoints
  if (xx==AA(1)) then
   loc=1
  else if (xx==AA(nn)) then
@@ -5538,7 +5544,7 @@ type(vdiff_t) function vdiff_eval(cplex, nr, f1, f2, volume, vd_max) result(vd)
  end if
 
  vd%int_adiff = num * dr
- vd%l1_rerr = num / den
+ call safe_div(num,den,zero,vd%l1_rerr)
 
  stats = stats_eval(abs_diff)
  vd%mean_adiff = stats%mean
@@ -6456,6 +6462,7 @@ end subroutine invcb
 !! SOURCE
 
 elemental subroutine safe_div( n, d, altv, q )
+
 !Arguments ----------------------------------------------
 !scalars
  real(dp), intent(in) :: n, d, altv
@@ -6463,7 +6470,7 @@ elemental subroutine safe_div( n, d, altv, q )
 
 ! *********************************************************************
 
- if ( exponent(n) - exponent(d) >= maxexponent(n) .or. d==0 ) then
+ if ( exponent(n) - exponent(d) >= maxexponent(n) .or. d==zero ) then
     q = altv
  else
     q = n / d

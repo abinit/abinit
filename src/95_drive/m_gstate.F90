@@ -26,8 +26,6 @@
 module m_gstate
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_rectypes
  use m_errors
  use m_xmpi
@@ -44,12 +42,14 @@ module m_gstate
  use m_bandfft_kpt
  use m_invovl
  use m_gemm_nonlop
- use m_htetrahedron
  use m_wfk
  use m_nctk
  use m_hdr
  use m_ebands
+ use m_dtfil
 
+ use defs_datatypes,     only : pseudopotential_type, ebands_t
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_symtk,            only : matr3inv
  use m_io_tools,         only : open_file
@@ -76,7 +76,7 @@ module m_gstate
  use m_paw_init,         only : pawinit,paw_gencond
  use m_paw_correlations, only : pawpuxinit
  use m_orbmag,           only : initorbmag,destroy_orbmag,orbmag_type
- use m_paw_uj,           only : pawuj_ini,pawuj_free,pawuj_det
+ use m_paw_uj,           only : pawuj_ini,pawuj_free,pawuj_det, macro_uj_type
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
                                 electronpositron_calctype
@@ -111,8 +111,8 @@ module m_gstate
  use defs_wvltypes,      only : wvl_data,coulomb_operator,wvl_wf_type
 #if defined HAVE_BIGDFT
  use BigDFT_API,         only : wvl_timing => timing,xc_init,xc_end,XC_MIXED,XC_ABINIT,&
-&                               local_potential_dimensions,nullify_gaussian_basis, &
-&                               copy_coulomb_operator,deallocate_coulomb_operator
+                                local_potential_dimensions,nullify_gaussian_basis, &
+                                copy_coulomb_operator,deallocate_coulomb_operator
 #else
  use defs_wvltypes,      only : coulomb_operator
 #endif
@@ -284,7 +284,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  real(dp) :: fatvshift
  type(crystal_t) :: cryst
  type(ebands_t) :: bstruct,ebands
- !type(t_htetrahedron) :: tetra
  type(efield_type) :: dtefield
  type(electronpositron_type),pointer :: electronpositron
  type(hdr_type) :: hdr,hdr_den
@@ -576,9 +575,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Update header, with evolving variables, when available
 !Here, rprimd, xred and occ are available
  etot=hdr%etot ; fermie=hdr%fermie ; residm=hdr%residm
- call hdr_update(hdr,bantot,etot,fermie,&
-& residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
-& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ call hdr%update(bantot,etot,fermie,&
+   residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
+   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
  ! PW basis set: test if the problem is ill-defined.
  if (dtset%usewvl == 0 .and. dtset%tfkinfunc /= 2) then
@@ -762,8 +761,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (psps%usepaw==1.and.dtfil%ireadwf==1)then
    call pawrhoij_copy(hdr%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 !  Has to update header again (because pawrhoij has changed)  -  MT 2007-10-22: Why ?
-!  call hdr_update(hdr,bantot,etot,fermie,residm,rprimd,occ,pawrhoij,xred,args_gs%amu, &
-!  &                  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+!  call hdr%update(bantot,etot,fermie,residm,rprimd,occ,pawrhoij,xred,args_gs%amu, &
+!  &               comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
 !###########################################################
@@ -1057,7 +1056,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        if (dtset%usewvl==0) then
          call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
          mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr, allow_interp=.True.)
-         results_gs%etotal = hdr_den%etot; call hdr_free(hdr_den)
+         results_gs%etotal = hdr_den%etot; call hdr_den%free()
        else
          fform=52 ; accessfil=0
          if (dtset%iomode == IO_MODE_MPI ) accessfil=4
@@ -1067,16 +1066,16 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        end if
 
        if (rdwrpaw/=0) then
-         call hdr_update(hdr,bantot,etot,fermie,residm,&
-&         rprimd,occ,pawrhoij,xred,args_gs%amu,&
-&         comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+         call hdr%update(bantot,etot,fermie,residm,&
+           rprimd,occ,pawrhoij,xred,args_gs%amu,&
+           comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
        end if
 
        ! Read kinetic energy density
        if(dtfil%ireadkden/=0 .and. dtset%usekden==1 )then
          call read_rhor(dtfil%filkdensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
          mpi_enreg, taur, hdr_den, pawrhoij, comm, check_hdr=hdr, allow_interp=.True.)
-         call hdr_free(hdr_den)
+         call hdr_den%free()
        end if
 
 !      Compute up+down rho(G) by fft
@@ -1173,12 +1172,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
      mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
      results_gs%etotal = hdr_den%etot; results_gs%energies%e_fermie = hdr_den%fermie
-     call hdr_free(hdr_den)
+     call hdr_den%free()
 
      if(dtfil%ireadkden/=0 .and. dtset%usekden==1)then
        call read_rhor(dtfil%filkdensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
        mpi_enreg, taur, hdr_den, pawrhoij, comm, check_hdr=hdr)
-       call hdr_free(hdr_den)
+       call hdr_den%free()
      end if
 
 !    Compute up+down rho(G) by fft
@@ -1366,9 +1365,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !! end if
 
 !Update the header, before using it
- call hdr_update(hdr,bantot,results_gs%etotal,results_gs%energies%e_fermie,&
-& results_gs%residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
-& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ call hdr%update(bantot,results_gs%etotal,results_gs%energies%e_fermie,&
+   results_gs%residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
+   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
  ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
  doccde=zero
@@ -1426,18 +1425,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    wfkfull_path = strcat(dtfil%filnam_ds(4), "_FULL_WFK")
    if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
    call wfk_tofullbz(filnam, dtset, psps, pawtab, wfkfull_path)
-
-   ! Write tetrahedron tables.
-   !cryst = hdr_get_crystal(hdr, 2)
-   !tetra = tetra_from_kptrlatt(cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
-   !dtset%shiftk, dtset%nkpt, dtset%kptns, xmpi_comm_self, message, ierr)
-   !if (ierr == 0) then
-   !  call tetra_write(tetra, dtset%nkpt, dtset%kptns, strcat(dtfil%filnam_ds(4), "_TETRA"))
-   !else
-   !  MSG_WARNING(sjoin("Cannot produce TETRA file", ch10, message))
-   !end if
-
-   !call destroy_tetra(tetra)
    call cryst%free()
  end if
 
@@ -1518,7 +1505,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    mpert = dtset%natom + 6 ; msize = 3*mpert
 
 !  create a ddb structure with just one blok
-   call ddb_malloc(ddb,msize,1,dtset%natom,dtset%ntypat)
+   call ddb%malloc(msize,1,dtset%natom,dtset%ntypat)
 
    ddb%flg = 0
    ddb%qpt = zero
@@ -1530,7 +1517,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ddb%typ(1) = 0
      ddb%val(1,1,1) = results_gs%etotal
      ddb%flg(1,1) = 1
-     call ddb_write_blok(ddb,1,choice,dtset%mband,mpert,msize,dtset%nkpt,dtfil%unddb)
+     call ddb%write_block(1,choice,dtset%mband,mpert,msize,dtset%nkpt,dtfil%unddb)
    end if
 
 !  Write gradients to the DDB
@@ -1565,9 +1552,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ddb%val(1,indx+1:indx+6,1) = results_gs%strten(1:6)
    end if
 
-   call ddb_write_blok(ddb,1,choice,dtset%mband,mpert,msize,dtset%nkpt,dtfil%unddb)
-
-   call ddb_free(ddb)
+   call ddb%write_block(1,choice,dtset%mband,mpert,msize,dtset%nkpt,dtfil%unddb)
+   call ddb%free()
 
 !  Close DDB
    close(dtfil%unddb)
@@ -1701,8 +1687,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call CleanRec(rec_set)
  end if
 
-!Clean the header
- call hdr_free(hdr)
+ call hdr%free()
  call ebands_free(ebands)
 
  if (me == master .and. dtset%prtxml == 1) then

@@ -1,3 +1,7 @@
+'''
+Main home of the test engine. Define the class used to traverse the data tree
+while checking constraints as well as a few utility classes linked to that process.
+'''
 from __future__ import print_function, division, unicode_literals
 from .common import BaseDictWrapper, string, basestring
 
@@ -56,6 +60,9 @@ class Failure(Issue):
 
 
 class DetailedFailure(Failure):
+    '''
+        Represent the fail of a test when more info are available.
+    '''
     def __init__(self, conf, msg, details):
         self.details = details
         Issue.__init__(self, conf, msg)
@@ -65,7 +72,7 @@ class DetailedFailure(Failure):
 
 
 class Success(Issue):
-    pass
+    'Represent the success of a test.'
 
 
 class Tester(object):
@@ -77,15 +84,15 @@ class Tester(object):
         self.tested = tested_docs
         self.conf = config
         self.issues = []
-        self.issues = []
 
     def check_this(self, name, ref, tested):
         '''
-            Check constraints applying to the 'tested' node (of name 'name')
-            against 'ref'
+            Check constraints applying to the 'tested' node of name 'name'
+            against 'ref' and recursively apply on children.
         '''
 
         def analyze(success, cons):
+            'Analyse the result of a constraint check.'
             if success:
                 msg = '{} ok'.format(cons.name)
                 self.issues.append(Success(self.conf, msg))
@@ -108,6 +115,7 @@ class Tester(object):
             constraints = self.conf.get_constraints_for(ref)
 
             if self.conf.debug:
+                # on debug mode, don't catch errors to keep the backtrace
                 for cons in constraints:
                     success = cons.check(ref, tested, self.conf)
                     analyze(success, cons)
@@ -151,6 +159,9 @@ class Tester(object):
             elif (hasattr(ref, '__iter__')
                   and not getattr(ref, 'has_no_child', False)
                   and not isinstance(ref, basestring)):
+                # strings have __iter__ but should not be browsed
+                # user may want to neutralize the browsing of an iterable
+                # using has_no_child (for example BaseArray)
                 for index, (vref, vtest) in enumerate(zip(ref, tested)):
                     self.check_this(string(index), vref, vtest)
 
@@ -162,19 +173,20 @@ class Tester(object):
         for cons in top_cons:
             if top_cons[cons].apply_to('this'):
                 # FIXME How to define and use top level constraints applying on
-                # this like equations ?
+                # this like equations ? Is it worth it ?
                 raise NotImplementedError('Top level constraints are not yet'
                                           ' implemented')
-            # else:  if it does not apply on this it apply on a deeper level
-            # so it is managed later
 
+        # browse document from the reference file
         for doc_id, ref_doc in self.ref.items():
             if doc_id not in self.tested:
                 msg = ('Document ({}) is not present in the tested file.'
                        .format(doc_id))
                 self.issues.append(Failure(self.conf, msg))
+
+            # enter filters and start checking the docuement
             with self.conf.use_filter(ref_doc.iterators):
-                self.check_this(ref_doc.obj['label'], ref_doc.obj,
+                self.check_this(ref_doc.tag, ref_doc.obj,
                                 self.tested[doc_id].obj)
 
         return self.issues

@@ -353,10 +353,6 @@ P           mkmem          42
 == DATASET  1 ==================================================================
 -   nproc =    1
 
---- !IterStart
-dtset:     1
-...
-
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
@@ -529,7 +525,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     197.917     197.880
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.01261     8.117478     6.032180     14.149658     2.085298
  ---------------------------------------------------------------------
@@ -680,28 +676,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     197.917     197.880
      0.00000    0.00000    0.00000    0.00000    0.15661
 
 
-
----
-label     : results_gs
-comment   : Summary of ground states results.
-natom     :        1
-nsppol    :        2
-cutoff energies: {"ecut":   1.40000000000000000E+01, "pawecutdg":   3.00000000000000000E+01, }
-convergence: {
-    "deltae":  -4.30022595310219913E-08, "res2":   2.47690622388644998E-05, 
-    "residm":   1.28612445270849876E-03, "diffor": undef, 
-}
-etotal    :  -1.24299774292025717E+02
-entropy   :   0.00000000000000000E+00
-fermie    :   3.16152990328027239E-01
-stress tensor: !Tensor
-- [  7.02333807383354047E-04,   0.00000000000000000E+00,   0.00000000000000000E+00, ]
-- [  0.00000000000000000E+00,   7.02333807383520581E-04,   0.00000000000000000E+00, ]
-- [  0.00000000000000000E+00,   0.00000000000000000E+00,   7.02333807383437314E-04, ]
-
-cartesian forces: !CartForces
-- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
-...
 
 ================================================================================
 
@@ -1546,35 +1520,6 @@ cartesian forces: !CartForces
   >Total energy in eV           = -3.38236887197167E+03
   >Total DC energy in eV        = -3.38239696944171E+03
 --------------------------------------------------------------------------------
---- !ETOT
-label               : Etot
-comment             : Components of total free energy (in Hartree)
-Kinetic energy      :  8.744094325426797099E+00
-Hartree energy      :  2.398670660137675981E+01
-XC energy           : -1.162737075835318201E+01
-Ewald energy        : -8.610385980353156299E+01
-PsPCore             :  6.079639132907460386E+00
-Loc. psp. energy    : -6.926092526657062365E+01
-Spherical terms     :  3.882148035075399406E+00
-Internal E          : -1.242995677336689511E+02
-'-kT*entropy'       : -2.065583567482055447E-04
-Etotal              : -1.242997742920257025E+02
-Total energy(eV)    : -3.382368871971671524E+03
-...
-
---- !ETOT
-label               : Etot DC
-comment             : '"Double-counting" decomposition of free energy'
-Band energy         : -1.333312824136444519E+01
-Ewald energy        : -8.610385980353156299E+01
-PspCore energy      :  6.079639132907460386E+00
-'Dble-C XC-energy'  : -2.033885033488826366E+01
-Spherical terms     : -1.060440104986138721E+01
-Internal E          : -1.243006002967381960E+02
-'-kT*entropy'       : -2.065583567482055447E-04
-Etotal (DC)         : -1.243008068550949474E+02
-Total DC energy(eV) : -3.382368871971671524E+03
-...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)

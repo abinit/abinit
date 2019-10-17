@@ -4,10 +4,10 @@
 !! m_pptools
 !!
 !! FUNCTION
-!!  Helper functions used for simple post-processing.
+!!  Helper functions used for post-processing.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2019 ABINIT group (MG,ZL, MJV, BXu)
+!! Copyright (C) 2002-2019 ABINIT group (MG, ZL, MJV, BXu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@ MODULE m_pptools
  use defs_basis
  use m_errors
  use m_abicore
- use m_kptrank
+ use m_krank
 
  use m_io_tools,        only : open_file
  use m_fstrings,        only : sjoin, itoa
@@ -204,16 +204,16 @@ subroutine printxsf(n1,n2,n3,datagrid,basis,origin,natom,ntypat,typat,xcart,znuc
  write(nunit,*) natom, ' 1'
  do iatom = 1,natom
    write(nunit,'(i9,3(3X,ES17.10))') NINT(znucl(typat(iatom))), &  ! WARNING alchemy not supported by XCrysden
-&  Bohr_Ang*tau(1,iatom), &
-&  Bohr_Ang*tau(2,iatom), &
-&  Bohr_Ang*tau(3,iatom)
+     Bohr_Ang*tau(1,iatom), &
+     Bohr_Ang*tau(2,iatom), &
+     Bohr_Ang*tau(3,iatom)
  end do
  write(nunit,'(1X,A)') 'ATOMS'
  do iatom = 1,natom
    write(nunit,'(i9,3(3X,ES17.10))') NINT(znucl(typat(iatom))), & ! WARNING alchemy not supported by XCrysden
-&  Bohr_Ang*tau(1,iatom), &
-&  Bohr_Ang*tau(2,iatom), &
-&  Bohr_Ang*tau(3,iatom)
+     Bohr_Ang*tau(1,iatom), &
+     Bohr_Ang*tau(2,iatom), &
+     Bohr_Ang*tau(3,iatom)
  end do
 
  write(nunit,'(a)')' BEGIN_BLOCK_DATAGRID3D'
@@ -588,12 +588,13 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: enough = 50
  integer :: iband,ik1,ik2,ik3,ikgrid,ikpt,indx
  integer :: isppol,isym,maxband,minband,nk1,nk2,nk3,nkptfull,ubxsf,timrev
  integer :: symkptrank, nsymfm, isymfm
  real(dp) :: ene
  character(len=500) :: msg
- type(kptrank_type) :: kptrank_t
+ type(krank_t) :: krank
 !arrays
  integer,allocatable :: fulltoirred(:),symrecfm(:,:,:)
  real(dp) :: kptgrid(3),gmet(3,3)
@@ -602,32 +603,31 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 
  ierr = 0
 
-! Error if klatt is no simple orthogonal lattice (in red space)
-! for generalization to MP grids, need new version of XCrysDen
-
- if ( kptrlatt(1,2)/=0 .or. kptrlatt(1,3)/=0 .or. kptrlatt(2,1)/=0 .or. &
-& kptrlatt(2,3)/=0 .or. kptrlatt(3,1)/=0 .or. kptrlatt(3,2)/=0 ) then
+ ! Error if klatt is no simple orthogonal lattice (in red space)
+ ! for generalization to MP grids, need new version of XCrysDen
+ if (kptrlatt(1,2)/=0 .or. kptrlatt(1,3)/=0 .or. kptrlatt(2,1)/=0 .or. &
+     kptrlatt(2,3)/=0 .or. kptrlatt(3,1)/=0 .or. kptrlatt(3,2)/=0 ) then
    write(msg,'(3a)')&
-&   'kptrlatt should be diagonal, for the FS calculation ',ch10,&
-&   'Action: use an orthogonal k-grid for the GS calculation '
+    'kptrlatt should be diagonal, for the FS calculation ',ch10,&
+    'Action: use an orthogonal k-grid for the GS calculation '
    MSG_COMMENT(msg)
    ierr = ierr + 1
  end if
 
-! Error if there are not at least 2 kpts in each direction:
-! kptrank will fail for the intermediate points below
- if ( abs(kptrlatt(1,1))<2 .or. abs(kptrlatt(2,2))<2 .or. abs(kptrlatt(3,3))<2) then
+ ! Error if there are not at least 2 kpts in each direction:
+ ! kptrank will fail for the intermediate points below
+ if (abs(kptrlatt(1,1)) < 2 .or. abs(kptrlatt(2,2)) < 2 .or. abs(kptrlatt(3,3)) < 2) then
    write(msg,'(3a)')&
-&   'You need at least 2 points in each direction in k space to output BXSF files ',ch10,&
-&   'Action: use an augmented k-grid for the GS calculation (at least 2x2x2) '
+    'You need at least 2 points in each direction in k space to output BXSF files ',ch10,&
+    'Action: use an augmented k-grid for the GS calculation (at least 2x2x2) '
    MSG_COMMENT(msg)
    ierr = ierr + 1
  end if
 
  if (ANY(ABS(shiftk) > tol10)) then
    write(msg,'(3a)')&
-&   'Origin of the k-grid should be (0,0,0) for the FS calculation ',ch10,&
-&   'Action: use a non-shifted k-grid for the GS calculation. Returning '
+    'Origin of the k-grid should be (0,0,0) for the FS calculation ',ch10,&
+    'Action: use a non-shifted k-grid for the GS calculation. Returning '
    MSG_COMMENT(msg)
    ierr = ierr + 1
  end if
@@ -635,14 +635,14 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
  if (ierr /= 0) return
 
  ! Compute reciprocal space metric.
- gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
+ gmet = MATMUL(TRANSPOSE(gprimd), gprimd)
 
  if (use_afm) then
    nsymfm = 0
    do isym = 1, nsym
      if (symafm(isym) == 1) nsymfm = nsymfm+1
    end do
-   ABI_MALLOC(symrecfm,(3,3,nsymfm))
+   ABI_MALLOC(symrecfm, (3,3,nsymfm))
    isymfm = 0
    do isym = 1, nsym
      if (symafm(isym) == 1) then
@@ -652,85 +652,79 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
    end do
  else
    nsymfm = nsym
-   ABI_MALLOC(symrecfm,(3,3,nsymfm))
+   ABI_MALLOC(symrecfm, (3,3,nsymfm))
    symrecfm = symrec
  end if
 
-!Xcrysden uses aperiodical data-grid
- nk1 = kptrlatt(1,1)
- nk2 = kptrlatt(2,2)
- nk3 = kptrlatt(3,3)
- nkptfull=(nk1+1)*(nk2+1)*(nk3+1)
+ ! Xcrysden uses aperiodic data-grid (images are included in the grid)
+ nk1 = kptrlatt(1,1); nk2 = kptrlatt(2,2); nk3 = kptrlatt(3,3)
+ nkptfull = (nk1+1) * (nk2+1) * (nk3+1)
 
- ABI_MALLOC(fulltoirred,(nkptfull))
- timrev=0; if (use_tr) timrev=1
+ ABI_MALLOC(fulltoirred, (nkptfull))
+ timrev = 0; if (use_tr) timrev=1
 
- call mkkptrank (kptirred,nkptirred,kptrank_t, nsym=nsymfm, symrec=symrecfm, time_reversal=use_tr)
+ krank = krank_new(nkptirred, kptirred, nsym=nsymfm, symrec=symrecfm, time_reversal=use_tr)
 
-!Xcrysden employs the C-ordering for the Fermi Surface.
+ ! Xcrysden employs the C-ordering for the Fermi Surface (x-y-z)
  ikgrid=0
  do ik1=0,nk1
    do ik2=0,nk2
      do ik3=0,nk3
 
-       ikgrid=ikgrid+1
-       kptgrid(1)=DBLE(ik1)/kptrlatt(1,1)
-       kptgrid(2)=DBLE(ik2)/kptrlatt(2,2)
-       kptgrid(3)=DBLE(ik3)/kptrlatt(3,3)
+       ikgrid = ikgrid+1
+       kptgrid(1) = DBLE(ik1)/kptrlatt(1,1)
+       kptgrid(2) = DBLE(ik2)/kptrlatt(2,2)
+       kptgrid(3) = DBLE(ik3)/kptrlatt(3,3)
 
-       ! Find correspondence between the Xcrysden grid and the IBZ ===
-       call get_rank_1kpt (kptgrid, symkptrank, kptrank_t)
-       fulltoirred(ikgrid) = kptrank_t%invrank(symkptrank)
+       ! Find correspondence between the Xcrysden grid and the IBZ
+       symkptrank = krank%get_rank(kptgrid)
+       fulltoirred(ikgrid) = krank%invrank(symkptrank)
 
        if (fulltoirred(ikgrid) < 1) then
-         write(msg,'(a,3es16.8,2a,i0,2a)')&
-&         'kpt = ',kptgrid,ch10,' with rank ', symkptrank, ch10,&
-&         'has no symmetric among the k-points used in the GS calculation '
-         ierr=ierr + 1
-         MSG_WARNING(msg)
+         if (ierr <= enough) then
+           write(msg,'(a,3es16.8,2a,i0,2a)')&
+            'kpt = ',kptgrid,ch10,' with rank ', symkptrank, ch10,&
+            'has no symmetric among the k-points used in the GS calculation '
+           MSG_WARNING(msg)
+         end if
+         ierr = ierr + 1
        end if
 
      end do !ik1
    end do !ik2
  end do !ik3
 
- call destroy_kptrank(kptrank_t)
+ call krank%free()
 
- if (ierr/=0) then
-   ABI_FREE(fulltoirred)
-   MSG_ERROR("Bug")
-   RETURN
- end if
+ ABI_CHECK(ierr == 0, "See above warnings")
 
- if (abs(ewind) < tol12 ) then ! Keep all bands.
+ if (abs(ewind) < tol12 ) then
+   ! Keep all bands.
    minband=1
    maxband=mband
- else ! Select a subset of bands.
+ else
+   ! Select a subset of bands.
    minband = mband
    maxband = 0
    ene=abs(ewind)
    do isppol=1,nsppol
      do iband=1,mband
-       if(minval(eigen(iband,:,isppol))-fermie < -ene) then
-         minband = iband
-       end if
+       if(minval(eigen(iband,:,isppol))-fermie < -ene) minband = iband
      end do
      do iband=mband,1,-1
-       if (maxval(eigen(iband,:,isppol))-fermie > ene) then
-         maxband = iband
-       end if
+       if (maxval(eigen(iband,:,isppol))-fermie > ene) maxband = iband
      end do
    end do ! isppol
 
  end if ! abs(energy_window)
 
- ! Dump the results on file
- if (open_file(fname,msg,newunit=ubxsf,status='unknown',form='formatted') /=0) then
+ ! Dump results to file
+ if (open_file(fname,msg, newunit=ubxsf, status='unknown', action="write", form='formatted') /= 0 ) then
    MSG_WARNING(msg)
    ierr=ierr +1; RETURN
  end if
 
-! Write header
+ ! Write header
  write(ubxsf,*)' BEGIN_INFO'
  write(ubxsf,*)'   #'
  write(ubxsf,*)'   # this is a Band-XCRYSDEN-Structure-File for Visualization of Fermi Surface'
@@ -755,14 +749,14 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
  write(ubxsf,*)' ',(maxband-minband+1)*nsppol
  write(ubxsf,*)' ',nk1+1,nk2+1,nk3+1
  write(ubxsf,*)' ',shiftk(:,1)
-!NOTE : Angstrom units are used in the BXSF format
+ ! Angstrom units are used in the BXSF format
  write(ubxsf,*)' ',gprimd(:,1)/Bohr_Ang
  write(ubxsf,*)' ',gprimd(:,2)/Bohr_Ang
  write(ubxsf,*)' ',gprimd(:,3)/Bohr_Ang
 
-!print out data for all relevant bands and full kpt grid (redundant, yes)
-!for each kpt in full zone, find equivalent irred kpt and print eigenval
- indx=0
+ ! print out data for all relevant bands and full kpt grid (redundant, yes)
+ ! for each kpt in full zone, find equivalent irred kpt and print eigenval
+ indx = 0
  do iband=minband,maxband
    do isppol=1,nsppol
      write(ubxsf,*)' BAND: ',indx+minband
@@ -773,7 +767,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 
  write(ubxsf,*)'  END_BANDGRID_3D'
  write(ubxsf,*)' END_BLOCK_BANDGRID_3D'
- close (ubxsf)
+ close(ubxsf)
 
  ABI_FREE(fulltoirred)
  ABI_FREE(symrecfm)
@@ -852,26 +846,26 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
 !Error if klatt is no simple orthogonal lattice (in red space)
 !for generalization to MP grids, need new version of XCrysDen
 
- if ( kptrlatt(1,2)/=0 .or. kptrlatt(1,3)/=0 .or. kptrlatt(2,1)/=0 .or. &
-& kptrlatt(2,3)/=0 .or. kptrlatt(3,1)/=0 .or. kptrlatt(3,2)/=0 ) then
+ if (kptrlatt(1,2)/=0 .or. kptrlatt(1,3)/=0 .or. kptrlatt(2,1)/=0 .or. &
+     kptrlatt(2,3)/=0 .or. kptrlatt(3,1)/=0 .or. kptrlatt(3,2)/=0 ) then
    write(msg,'(3a)')&
-&   'kptrlatt should be diagonal, for the FS calculation ',ch10,&
-&   'action: use an orthogonal k-grid for the GS calculation '
+    'kptrlatt should be diagonal, for the FS calculation ',ch10,&
+    'action: use an orthogonal k-grid for the GS calculation '
    MSG_COMMENT(msg)
    ierr=ierr+1
  end if
 
  if (ANY(ABS(shiftk(:,:))>tol10)) then
    write(msg,'(3a)')&
-&   'Origin of the k-grid should be (0,0,0) for the FS calculation ',ch10,&
-&   'Action: use a non-shifted k-grid for the GS calculation. Returning '
+    'Origin of the k-grid should be (0,0,0) for the FS calculation ',ch10,&
+    'Action: use a non-shifted k-grid for the GS calculation. Returning '
    MSG_COMMENT(msg)
    ierr=ierr+1
  end if
 
  if (ierr/=0) RETURN
 
-!Xcrysden uses aperiodical data-grid
+ ! Xcrysden uses aperiodical data-grid
  nk1 = kptrlatt(1,1)
  nk2 = kptrlatt(2,2)
  nk3 = kptrlatt(3,3)
@@ -880,7 +874,7 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
  ABI_ALLOCATE(fulltoirred,(nkptfull))
  timrev=0; if (use_tr) timrev=1
 
-!Xcrysden employs the C-ordering for the Fermi Surface.
+ !Xcrysden employs C-ordering for the Fermi Surface.
  ierr = 0
  ikgrid=0
  do ik1=0,nk1
@@ -895,8 +889,8 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
        call wrap2_pmhalf(kptgrid(2),kpt(2),res)
        call wrap2_pmhalf(kptgrid(3),kpt(3),res)
 
-!      === Find correspondence between the Xcrysden grid and the IBZ ===
-!      * If AFM case, use only Ferromagetic symmetries.
+       ! === Find correspondence between the Xcrysden grid and the IBZ ===
+       ! If AFM case, use only Ferromagetic symmetries.
        found=.FALSE.
        irred: do ikpt1=1,nkptirred
          do itim=0,timrev
@@ -904,12 +898,12 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
              if (use_afm.and.symafm(isym)==-1) CYCLE
              timsign = one-two*itim
              kptsym(:) = timsign*(symrec(:,1,isym)*kptirred(1,ikpt1) + &
-&             symrec(:,2,isym)*kptirred(2,ikpt1) + &
-&             symrec(:,3,isym)*kptirred(3,ikpt1))
+                                  symrec(:,2,isym)*kptirred(2,ikpt1) + &
+                                  symrec(:,3,isym)*kptirred(3,ikpt1))
              call wrap2_pmhalf(kptsym(1),kconv(1),res)
              call wrap2_pmhalf(kptsym(2),kconv(2),res)
              call wrap2_pmhalf(kptsym(3),kconv(3),res)
-!            * is kconv equivalent to kpt?
+             ! is kconv equivalent to kpt?
              ss= (kpt(1)-kconv(1))**2 + (kpt(2)-kconv(2))**2 + (kpt(3)-kconv(3))**2
              if (ss < tol6) then
                found=.TRUE.
@@ -923,7 +917,7 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
 
        if (.not.found) then
          write(msg,'(a,3es16.8,2a)')&
-&         ' kpt = ',kpt,ch10,' has no symmetric among the irred k-points used in the GS calculation '
+          ' kpt = ',kpt,ch10,' has no symmetric among the irred k-points used in the GS calculation '
          ierr=ierr+1
          MSG_ERROR(msg)
        end if
@@ -938,10 +932,12 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
    RETURN
  end if
 
- if (abs(ewind) < tol12 ) then ! Keep all bands.
+ if (abs(ewind) < tol12 ) then
+   ! Keep all bands.
    minband=1
    maxband=mband
- else ! Select a subset of bands.
+ else
+   ! Select a subset of bands.
    minband = mband
    maxband = 0
    ene=abs(ewind)
@@ -960,14 +956,14 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
 
  end if ! abs(energy_window)
 
-!=== Dump the results on file ===
+ ! Dump the results on file ===
  if (open_file(fname,msg,newunit=uvtk,status='unknown',form='formatted') /= 0) then
    ABI_DEALLOCATE(fulltoirred)
    MSG_WARNING(msg)
    ierr=ierr +1; RETURN
  end if
 
-!write header
+ ! write header
  write(uvtk,"(a)") '# vtk DataFile Version 2.0'
  write(uvtk,"(a)") 'Eigen values for the Fermi surface'
  write(uvtk,"(a)") 'ASCII'
@@ -980,14 +976,14 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
    do ik2 = 0, nk2
      do ik1 = 0, nk1
        write(uvtk,'(3es16.8)') dble(ik1)/nk1*gprimd(1,1)+ &
-&       dble(ik2)/nk2*gprimd(1,2)+ &
-&       dble(ik3)/nk3*gprimd(1,3), &
-&       dble(ik1)/nk1*gprimd(2,1)+ &
-&       dble(ik2)/nk2*gprimd(2,2)+ &
-&       dble(ik3)/nk3*gprimd(2,3), &
-&       dble(ik1)/nk1*gprimd(3,1)+ &
-&       dble(ik2)/nk2*gprimd(3,2)+ &
-&       dble(ik3)/nk3*gprimd(3,3)
+                               dble(ik2)/nk2*gprimd(1,2)+ &
+                               dble(ik3)/nk3*gprimd(1,3), &
+                               dble(ik1)/nk1*gprimd(2,1)+ &
+                               dble(ik2)/nk2*gprimd(2,2)+ &
+                               dble(ik3)/nk3*gprimd(2,3), &
+                               dble(ik1)/nk1*gprimd(3,1)+ &
+                               dble(ik2)/nk2*gprimd(3,2)+ &
+                               dble(ik3)/nk3*gprimd(3,3)
      end do
    end do
  end do

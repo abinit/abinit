@@ -143,11 +143,11 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
 
 #ifdef HAVE_NETCDF
  timrev = 2; if (any(wfk%hdr%kptopt == [3, 4])) timrev = 1
- cryst = hdr_get_crystal(wfk%hdr, timrev)
+ cryst = wfk%hdr%get_crystal(timrev)
 
  NCF_CHECK(nctk_open_create(ncid, strcat(seedname, "_FOLD2BLOCH.nc"), xmpi_comm_self))
  fform = fform_from_ext("FOLD2BLOCH.nc")
- NCF_CHECK(hdr_ncwrite(wfk%hdr, ncid, fform, nc_define=.True.))
+ NCF_CHECK(wfk%hdr%ncwrite(ncid, fform, nc_define=.True.))
  NCF_CHECK(cryst%ncwrite(ncid))
  NCF_CHECK(ebands_ncwrite(ebands, ncid))
 
@@ -210,7 +210,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
      call progress(ikpt,nkpt,kpts(:,ikpt)) !Write progress information
 
      !Read a block of data
-     call wfk_read_band_block(wfk, [1, nband(ikpt)], ikpt, csppol, xmpio_single, kg_k=kg, cg_k=cg, eig_k=eig)
+     call wfk%read_band_block([1, nband(ikpt)], ikpt, csppol, xmpio_single, kg_k=kg, cg_k=cg, eig_k=eig)
 
      !Determine unfolded K point states
      call newk(kpts(1,ikpt),kpts(2,ikpt),kpts(3,ikpt),folds(1),folds(2),folds(3),nkval)
@@ -271,7 +271,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
      close(outfile1)
    end if
  end do
- call wfk_close(wfk)
+ call wfk%close()
 
  ABI_FREE(kpts)
  ABI_FREE(nband)

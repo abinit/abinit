@@ -27,11 +27,11 @@
 module m_dfpt_mkvxc
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xc_noncoll
 
+ use defs_abitypes,     only : MPI_type
  use m_time,     only : timab
  use m_symtk,    only : matr3inv
  use m_xctk,     only : xcden, xcpot

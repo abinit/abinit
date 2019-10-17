@@ -34,9 +34,10 @@
 module m_frskerker1
 
   use defs_basis
-  use defs_abitypes
   use m_abicore
+  use m_dtset
 
+  use defs_abitypes, only : MPI_type
   use m_spacepar,  only : laplacian
   use m_numeric_tools, only : dotproduct
 

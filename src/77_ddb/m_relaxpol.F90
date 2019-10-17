@@ -37,7 +37,6 @@ module m_relaxpol
  use m_dynmat,    only : symdyma
  use m_crystal,   only : crystal_t
 
-
  implicit none
 
  private
@@ -109,8 +108,6 @@ contains
 subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 & mpert,msize,natfix,natom,nstrfix,pel,red_ptot,relaxat,relaxstr,&
 & strten,targetpol,usepaw)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars

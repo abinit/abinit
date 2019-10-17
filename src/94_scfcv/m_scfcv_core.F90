@@ -27,8 +27,6 @@
 module m_scfcv_core
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use defs_rectypes
  use m_xmpi
@@ -43,8 +41,14 @@ module m_scfcv_core
  use m_hdr
  use m_xcdata
  use m_cgtools
+ use m_dtfil
+ use m_distribfft
 
+
+ use defs_datatypes,     only : pseudopotential_type
+ use defs_abitypes,      only : MPI_type
  use m_berryphase_new,   only : update_e_field_vars
+ use m_dens,             only : constrained_dft_t, constrained_dft_ini, constrained_dft_free
  use m_time,             only : timab
  use m_fstrings,         only : int2char4, sjoin
  use m_symtk,            only : symmetrize_xred
@@ -77,7 +81,7 @@ module m_scfcv_core
  use m_paw_correlations, only : setnoccmmp,setrhoijpbe0
  use m_orbmag,           only : orbmag_type
  use m_paw_mkrho,        only : pawmkrho
- use m_paw_uj,           only : pawuj_red
+ use m_paw_uj,           only : pawuj_red, macro_uj_type
  use m_paw_dfpt,         only : pawgrnl
  use m_fock,             only : fock_type, fock_init, fock_destroy, fock_ACE_destroy, fock_common_destroy, &
                                 fock_BZ_destroy, fock_update_exc, fock_updatecwaveocc
@@ -337,8 +341,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  integer,parameter :: level=110,response=0,cplex1=1
  integer :: afford,bantot,choice
  integer :: computed_forces,cplex,cplex_hf,ctocprj_choice,dbl_nnsclo,dielop,dielstrt,dimdmat
- integer :: forces_needed,errid,has_vxctau,has_dijhat,has_dijnd,has_dijU,has_vhartree,has_dijfock,history_size,usefock
-!integer :: dtset_iprcel
+ integer :: forces_needed,errid,has_vxctau,has_dijhat,has_dijnd,has_dijU,has_vhartree,has_dijfock
+ integer :: history_size,usefock
  integer :: iatom,ider,idir,ierr,ii,ikpt,impose_dmat,denpot
  integer :: initialized0,iorder_cprj,ipert,ipositron,isave_den,isave_kden,iscf10,ispden
  integer :: ispmix,istep,istep_fock_outer,istep_mix,istep_updatedfock,itypat,izero,lmax_diel,lpawumax,mband_cprj
@@ -412,6 +416,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  real(dp),pointer :: elfr(:,:),grhor(:,:,:),lrhor(:,:)
  real(dp),allocatable :: tauresid(:,:)
  type(scf_history_type) :: scf_history_wf
+ type(constrained_dft_t) :: constrained_dft
 
  type(paw_an_type),allocatable :: paw_an(:)
  type(paw_ij_type),allocatable :: paw_ij(:)
@@ -736,6 +741,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    ABI_ALLOCATE(dimcprj,(0))
    ABI_ALLOCATE(dimcprj_srt,(0))
    ABI_ALLOCATE(nhat,(0,0))
+   ABI_ALLOCATE(xcctau3d,(0))
    ABI_DATATYPE_ALLOCATE(paw_ij,(0))
    ABI_DATATYPE_ALLOCATE(paw_an,(0))
    ABI_DATATYPE_ALLOCATE(pawfgrtab,(0))
@@ -803,6 +809,13 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    ABI_ALLOCATE(dtn_pc,(0,0))
    ABI_ALLOCATE(grhf,(0,0))
  end if ! iscf>0
+
+!Here initialize the datastructure constrained_dft, for constrained DFT calculations as well as penalty function constrained magnetization
+ if(any(dtset%constraint_kind(:)/=0).or.dtset%magconon/=0)then
+   call constrained_dft_ini(dtset%chrgat,constrained_dft,dtset%constraint_kind,dtset%magconon,dtset%magcon_lambda,&
+&    mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,dtset%ntypat,&
+&    dtset%ratsm,dtset%ratsph,rprimd,dtset%spinat,dtset%typat,xred,dtset%ziontypat)
+ endif
 
 !Here, allocate arrays for computation of susceptibility and dielectric matrix or for TDDFT
 
@@ -1307,9 +1320,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !    The following steps have been gathered in the setvtr routine:
 !    - get Ewald energy and Ewald forces
 !    - compute local ionic pseudopotential vpsp
-!    - eventually compute 3D core electron density xccc3d
-!    - eventually compute 3D core kinetic energy density
-!    - eventually compute vxc and vhartr
+!    - possibly compute 3D core electron density xccc3d
+!    - possibly compute 3D core kinetic energy density
+!    - possibly compute vxc and vhartr
 !    - set up vtrial
 
      optene = 4 * optres
@@ -1791,7 +1804,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      optene=2*optres;if(psps%usepaw==1) optene=2
 
 ! TODO: check if tauresid is needed here too for potential residual in the future for MGGA potential mixing
-     call rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfftf,ngfftf, &
+     call rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfftf,ngfftf, &
 &     nhat,nhatgr,nhatgrdim,nkxc,nvresid,n3xccc,optene,optres,optxc,&
 &     rhog,rhor,rprimd,strsxc,ucvol_local,psps%usepaw,usexcnhat,&
 &     vhartr,vnew_mean,vpsp,vres_mean,res2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
@@ -1940,10 +1953,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !      Don't use parallelism over atoms because only me=0 accesses here
        bantot=hdr%bantot
        if (dtset%positron==0) then
-         call hdr_update(hdr,bantot,etotal,energies%e_fermie,residm,&
+         call hdr%update(bantot,etotal,energies%e_fermie,residm,&
 &         rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
        else
-         call hdr_update(hdr,bantot,electronpositron%e0,energies%e_fermie,residm,&
+         call hdr%update(bantot,electronpositron%e0,energies%e_fermie,residm,&
 &         rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
        end if
      end if
@@ -2018,7 +2031,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    if (.not.allocated(nhatgr) ) then
      ABI_ALLOCATE(nhatgr,(0,0,0))
    end if
-   call energy(cg,compch_fft,dtset,electronpositron,&
+   call energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 &   energies,eigen,etotal,gsqcut,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,&
 &   nfftf,ngfftf,nhat,nhatgr,nhatgrdim,npwarr,n3xccc,&
 &   occ,optene,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,pawrhoij,pawtab,&
@@ -2221,10 +2234,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  if(allocated(vectornd)) then
     ABI_DEALLOCATE(vectornd)
  end if
- 
- if(allocated(xcctau3d)) then
-    ABI_DEALLOCATE(xcctau3d)
- end if
 
  if((nstep>0.and.dtset%iscf>0).or.dtset%iscf==-1) then
    ABI_DEALLOCATE(dielinv)
@@ -2236,7 +2245,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  ABI_DEALLOCATE(susmat)
  ABI_DEALLOCATE(ph1ddiel)
  ABI_DEALLOCATE(ylmdiel)
- !end if
 
  if (psps%usepaw==1) then
    if (dtset%iscf>0) then
@@ -2268,6 +2276,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  ABI_DATATYPE_DEALLOCATE(paw_an)
  ABI_DATATYPE_DEALLOCATE(paw_ij)
  ABI_DEALLOCATE(nhat)
+ ABI_DEALLOCATE(xcctau3d)
  ABI_DEALLOCATE(dimcprj_srt)
  ABI_DEALLOCATE(dimcprj)
 
@@ -2290,6 +2299,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    write(ab_xml_out, "(A)") '      </finalConditions>'
    write(ab_xml_out, "(A)") '    </scfcvLoop>'
  end if
+
+!Free the datastructure constrained_dft
+ call constrained_dft_free(constrained_dft)
 
  call timab(249,2,tsec)
  call timab(238,2,tsec)
@@ -2600,8 +2612,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 
 !    See similar section in m_energies.F90
 !    XG 20181025 This gives a variational energy in case of NCPP with all bands occupied - not yet for metals.
-     if (usepaw==0) etotal = etotal + energies%e_nlpsp_vfock - energies%e_fock0 
-!    XG 20181025 I was expecting the following to give also a variational energy in case of PAW, but this is not true. 
+     if (usepaw==0) etotal = etotal + energies%e_nlpsp_vfock - energies%e_fock0
+!    XG 20181025 I was expecting the following to give also a variational energy in case of PAW, but this is not true.
 !    if (usepaw==1) etotal = etotal + energies%e_paw + energies%e_nlpsp_vfock - energies%e_fock0
 !    XG 20181025 So, the following is giving a non-variational expression ...
      if (usepaw==1) etotal = etotal + energies%e_paw + energies%e_fock
@@ -2764,7 +2776,6 @@ end subroutine etotfor
 subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 & nattyp,npwarr,pawtab,scf_history_wf)
 
- !use m_scf_history
  use m_cgcprj,  only : dotprod_set_cgcprj, dotprodm_sumdiag_cgcprj, lincom_cgcprj, cgcprj_cholesky
 
 !Arguments ------------------------------------

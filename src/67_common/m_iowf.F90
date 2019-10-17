@@ -23,10 +23,10 @@
 MODULE m_iowf
 
  use defs_basis
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_errors
+ use m_dtset
  use m_xmpi
  use m_wffile
  use m_abi_etsf
@@ -38,6 +38,7 @@ MODULE m_iowf
  use m_hdr
  use m_ebands
 
+ use defs_abitypes, only : MPI_type
  use m_time,           only : cwtime, cwtime_report, timab
  use m_io_tools,       only : get_unit, flush_unit, iomode2str
  use m_fstrings,       only : endswith, sjoin
@@ -178,10 +179,10 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  if (mpi_enreg%paral_kgb==1.and.dtset%iomode==IO_MODE_FORTRAN) then
    spaceWorld=mpi_enreg%comm_kpt
    write(msg,'(7a)') &
-&   'WF file is written using standard Fortran I/O',ch10,&
-&   'and Kpt-band-FFT parallelization is active !',ch10,&
-&   'This is only allowed for testing purposes.',ch10,&
-&   'The produced WF file will be incomplete and not useable.'
+   'WF file is written using standard Fortran I/O',ch10,&
+   'and Kpt-band-FFT parallelization is active !',ch10,&
+   'This is only allowed for testing purposes.',ch10,&
+   'The produced WF file will be incomplete and not useable.'
    MSG_WARNING(msg)
  end if
 
@@ -193,10 +194,10 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  if (mpi_enreg%paral_hf==1.and.dtset%iomode==IO_MODE_FORTRAN) then
    spaceWorld=mpi_enreg%comm_kpt
    write(msg,'(7a)') &
-&   'WF file is written using standard Fortran I/O',ch10,&
-&   'and HF parallelization is active !',ch10,&
-&   'This is only allowed for testing purposes.',ch10,&
-&   'The produced WF file will be incomplete and not useable.'
+   'WF file is written using standard Fortran I/O',ch10,&
+   'and HF parallelization is active !',ch10,&
+   'This is only allowed for testing purposes.',ch10,&
+   'The produced WF file will be incomplete and not useable.'
    MSG_WARNING(msg)
  end if
 
@@ -241,8 +242,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  end do
 
  write(msg,'(a,2p,e12.4,a,e12.4)')' Mean square residual over all n,k,spin= ',resims,'; max=',residm
- call wrtout(ab_out,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
 
  band_index=0
  nkpt_eff=nkpt
@@ -258,22 +258,16 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 !      Find largest residual over all bands for given k point
        residk=maxval(resid(1+band_index:nband_k+band_index))
        write(msg,'(1x,3f8.4,3x,i2,1p,e13.5,a)')kptns(1:3,ikpt),spin,residk,' kpt; spin; max resid(k); each band:'
-       if(dtset%prtvol>=2)then
-         call wrtout(ab_out,msg,'COLL')
-       endif
+       if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
        call wrtout(std_out,msg,'COLL')
        do ii=0,(nband_k-1)/8
          write(msg,'(1x,1p,8e9.2)')(resid(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
-         if(dtset%prtvol>=2)then
-           call wrtout(ab_out,msg,'COLL')
-         endif
+         if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
          call wrtout(std_out,msg,'COLL')
        end do
      else if(ikpt==nkpt_eff+1)then
        write(msg,'(2a)')' outwf : prtvol=0 or 1, do not print more k-points.',ch10
-       if(dtset%prtvol>=2)then
-         call wrtout(ab_out,msg,'COLL')
-       endif
+       if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
        call wrtout(std_out,msg,'COLL')
      end if
      band_index=band_index+nband_k
@@ -302,7 +296,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      ! Write KB form factors. Only master works. G-vectors are read from file to avoid
      ! having to deal with paral_kgb distribution.
      if (me == master .and. dtset%prtkbff == 1 .and. dtset%iomode == IO_MODE_ETSF .and. dtset%usepaw == 0) then
-       ABI_CHECK(done, "cg_ncwrite was not able to generate WFK.nc in parallel. Perphase hdf5 is not working")
+       ABI_CHECK(done, "cg_ncwrite was not able to generate WFK.nc in parallel. Perhaps hdf5 is not working")
        path = nctk_ncify(filnam)
        call wrtout(std_out, sjoin("Writing KB form factors to:", path))
        NCF_CHECK(nctk_open_modify(ncid, path, xmpi_comm_self))
@@ -350,7 +344,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
        ABI_MALLOC(kg_disk, (3, mpw_disk))
 
        timrev = 2 ! FIXME: Use abinit convention for timrev
-       crystal = hdr_get_crystal(hdr, timrev)
+       crystal = hdr%get_crystal(timrev)
 
        ! For each k-point: read full G-vector list from file, compute KB data and write to file.
        do ikpt=1,nkpt
@@ -408,7 +402,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      ABI_CHECK(xmpi_comm_size(spaceComm) == 1, "Legacy etsf-io code does not support nprocs > 1")
 #ifdef HAVE_ETSF_IO
      call abi_etsf_init(dtset, filnam, 2, .true., hdr%lmn_size, psps, wfs)
-     !crystal = hdr_get_crystal(hdr, 2)
+     !crystal = hdr%get_crystal(2)
      !NCF_CHECK(crystal%ncwrite_path(nctk_ncify(filnam)))
      !call crystal%free()
      !ncerr = ebands_ncwrite_path(gs_ebands, filname, ncid)
@@ -454,7 +448,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      call WffKg(wff2,1)
    else if (wff2%iomode==IO_MODE_ETSF .and. iam_master) then
 #ifdef HAVE_NETCDF
-     NCF_CHECK(hdr_ncwrite(hdr, wff2%unwff, fform, nc_define=.True.))
+     NCF_CHECK(hdr%ncwrite(wff2%unwff, fform, nc_define=.True.))
 #endif
    end if
 
@@ -802,7 +796,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 
  ! FIXME: Use abinit convention for timrev
  timrev = 2
- crystal = hdr_get_crystal(hdr, timrev)
+ crystal = hdr%get_crystal(timrev)
 
  ! TODO
  ! Be careful with response == 1.
@@ -1049,7 +1043,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      ABI_MALLOC_OR_DIE(cg_k,(2,mpw*my_nspinor*mband), ierr)
 
      if (iam_master) then
-       call wfk_open_write(wfk,hdr,path,formeig,iomode,get_unit(),xmpi_comm_self,write_hdr=.True.)
+       call wfk%open_write(hdr,path,formeig,iomode,get_unit(),xmpi_comm_self,write_hdr=.True.)
 
        NCF_CHECK(crystal%ncwrite(wfk%fh))
        !write(std_out,*)"after crystal_ncwrite"
@@ -1102,11 +1096,11 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
          ! Master writes this block of bands.
          if (iam_master) then
            if (response == 0) then
-             call wfk_write_band_block(wfk,[1,nband_k],ikpt,spin,xmpio_single,kg_k=kg_k,cg_k=cg_k,&
+             call wfk%write_band_block([1,nband_k],ikpt,spin,xmpio_single,kg_k=kg_k,cg_k=cg_k,&
                eig_k=gs_ebands%eig(:,ikpt,spin),occ_k=gs_ebands%occ(:,ikpt,spin))
              !write(std_out,*)"cg_k",cg_k(:,1:2)
            else
-             call wfk_write_band_block(wfk,[1,nband_k],ikpt,spin,xmpio_single,kg_k=kg_k,cg_k=cg_k)
+             call wfk%write_band_block([1,nband_k],ikpt,spin,xmpio_single,kg_k=kg_k,cg_k=cg_k)
            end if
          end if
 
@@ -1121,7 +1115,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      ABI_FREE(kg_k)
      ABI_FREE(cg_k)
 
-     if (iam_master) call wfk_close(wfk)
+     if (iam_master) call wfk%close()
      call xmpi_barrier(comm_cell)
 
      done = .True.

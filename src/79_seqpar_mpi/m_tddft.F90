@@ -30,16 +30,18 @@
 module m_tddft
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
  use m_wffile
  use m_sort
+ use m_dtset
+ use m_dtfil
 #if defined HAVE_MPI2
  use mpi
 #endif
 
+ use defs_abitypes, only : MPI_type
  use m_io_tools, only : get_unit
  use m_symtk,    only : matr3inv
  use m_time,     only : timab

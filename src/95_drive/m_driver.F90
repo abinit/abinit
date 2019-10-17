@@ -25,6 +25,56 @@
 
 module m_driver
 
+ use defs_basis
+ use defs_datatypes
+ use defs_wvltypes
+ use m_errors
+ use m_dtset
+ use m_dtfil
+ use m_results_out
+ use m_results_respfn
+ use m_yaml
+ use m_xmpi
+ use m_xomp
+ use m_abi_linalg
+ use m_abicore
+ use m_exit
+ use m_fftcore
+ use libxc_functionals
+#if defined DEV_YP_VDWXC
+ use m_xc_vdw
+#endif
+ use m_xgScalapack
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,  only : MPI_type
+ use m_time,         only : timab
+ use m_xg,           only : xg_finalize
+ use m_libpaw_tools, only : libpaw_write_comm_set
+ use m_geometry,     only : mkrdim, xcart2xred, xred2xcart, chkdilatmx
+ use m_pawang,       only : pawang_type, pawang_free
+ use m_pawrad,       only : pawrad_type, pawrad_free
+ use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
+ use m_fftw3,        only : fftw3_init_threads, fftw3_cleanup
+ use m_psps,         only : psps_init_global, psps_init_from_dtset, psps_free
+ use m_mpinfo,       only : mpi_distrib_is_ok
+ use m_dtfil,        only : dtfil_init, dtfil_init_img
+ use m_respfn_driver,    only : respfn
+ use m_screening_driver, only : screening
+ use m_sigma_driver,     only : sigma
+ use m_bethe_salpeter,   only : bethe_salpeter
+ use m_eph_driver,       only : eph
+ use m_wfk_analyze,      only : wfk_analyze
+ use m_gstateimg,        only : gstateimg
+ use m_gwls_sternheimer, only : gwls_sternheimer
+ use m_nonlinear,        only : nonlinear
+ use m_drivexc,          only : echo_xc_name
+
+#if defined HAVE_BIGDFT
+ use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
+&                        mpi_environment_set,bigdft_mpi, f_malloc_set_status
+#endif
+
  implicit none
 
  private
@@ -110,54 +160,6 @@ contains
 
 subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &                 mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,results_out)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wvltypes
- use m_errors
- use m_results_out
- use m_results_respfn
- use m_xmpi
- use m_xomp
- use m_abi_linalg
- use m_abicore
- use m_exit
- use m_fftcore
- use libxc_functionals
-#if defined DEV_YP_VDWXC
- use m_xc_vdw
-#endif
- use m_xgScalapack
-
- use m_time,         only : timab
- use m_xg,           only : xg_finalize
- use m_libpaw_tools, only : libpaw_write_comm_set
- use m_geometry,     only : mkrdim, xcart2xred, xred2xcart, chkdilatmx
- use m_pawang,       only : pawang_type, pawang_free
- use m_pawrad,       only : pawrad_type, pawrad_free
- use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
- use m_fftw3,        only : fftw3_init_threads, fftw3_cleanup
- use m_psps,         only : psps_init_global, psps_init_from_dtset, psps_free
- use m_dtset,        only : dtset_copy, dtset_free, dtset_free_nkpt_arrays, find_getdtset
- use m_mpinfo,       only : mpi_distrib_is_ok
- use m_dtfil,        only : dtfil_init, dtfil_init_img
- use m_respfn_driver,    only : respfn
- use m_screening_driver, only : screening
- use m_sigma_driver,     only : sigma
- use m_bethe_salpeter,   only : bethe_salpeter
- use m_eph_driver,       only : eph
- use m_wfk_analyze,      only : wfk_analyze
- use m_gstateimg,        only : gstateimg
- use m_gwls_sternheimer, only : gwls_sternheimer
- use m_nonlinear,        only : nonlinear
- use m_drivexc,          only : echo_xc_name
- use m_neat,             only : neat_start_iter
-
-#if defined HAVE_BIGDFT
- use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
-&                        mpi_environment_set,bigdft_mpi, f_malloc_set_status
-#endif
 
  !Arguments ------------------------------------
  !scalars
@@ -267,7 +269,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    end if
 
 !  Copy input variables into a local dtset.
-   call dtset_copy(dtset, dtsets(idtset))
+   dtset = dtsets(idtset)%copy()
 
 !  Set other values
    dtset%jdtset = jdtset
@@ -291,7 +293,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    write(message,'(3a)') trim(message),ch10,' '
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'PERS')     ! PERS is choosen to make debugging easier
-   call neat_start_iter(jdtset, 'dtset', ab_out);
+   call yaml_iterstart('dtset', jdtset, ab_out, dtset%use_yaml)
 
    if ( dtset%np_slk == 0 ) then
      call xgScalapack_config(SLK_DISABLED,dtset%slk_rankpp)
@@ -366,7 +368,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !      Gather contributions to results_out from images, if needed
        if (test_img.and.mpi_enregs(idtset)%me_cell==0.and.(.not.results_gathered)) then
          call gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_results_all, &
-&         allgather=.true.,only_one_per_img=.true.)
+           allgather=.true.,only_one_per_img=.true.)
          results_gathered=.true.
        end if
        if ((.not.test_img).or.mpi_enregs(idtset)%me_cell==0) then
@@ -745,8 +747,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    case (RUNL_EPH)
-     call dtset_free_nkpt_arrays(dtsets(0))
-     call dtset_free_nkpt_arrays(dtsets(idtset))
+     call dtsets(0)%free_nkpt_arrays()
+     call dtsets(idtset)%free_nkpt_arrays()
      call eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    case default
@@ -830,10 +832,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    ! several problems in outvars since one should take into account
    ! the new dimensions (e.g. nkptgw) and their maximum value.
    ! For the time being, we continue to pass a copy of dtsets(idtset).
-   !call dtset_free(dtsets(idtset))
-   !call dtset_copy(dtsets(idtset),dtset)
+   !call dtsets(idtset)%free()
+   !call dtsets(idtset) = dtset%copy()
 
-   call dtset_free(dtset)
+   call dtset%free()
 
    ABI_DEALLOCATE(occ)
    ABI_DEALLOCATE(xred)

@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file 
- sed -e 's!2018 ABINIT!2019 ABINIT!' $file > tmp.file
+ sed -e 's!Note:      this is a rough approximation of local magnetic moments!Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file

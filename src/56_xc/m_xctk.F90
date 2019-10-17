@@ -27,10 +27,10 @@
 module m_xctk
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
 
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_mpinfo,   only : ptabs_fourdp
  use m_fft_mesh, only : phase
