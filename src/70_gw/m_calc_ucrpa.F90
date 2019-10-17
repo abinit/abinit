@@ -86,7 +86,7 @@ contains
 !! SOURCE
 
  subroutine calc_ucrpa(itypatcor,cryst,Kmesh,lpawu,M1_q_m,Qmesh,npwe,&
-& npw,nsym,rhot1_q_m,nomega,omegamin,omegamax,bandinf,bandsup,optimisation,ucvol,Wfd,fname,plowan_compute,rhot1,wanbz)
+& npw,nsym,nomega,omegamin,omegamax,bandinf,bandsup,optimisation,ucvol,Wfd,fname,plowan_compute,rhot1,wanbz)
 
  use defs_basis
  use m_abicore
@@ -124,7 +124,6 @@ contains
  type(crystal_t),intent(in) :: Cryst
  type(operwan_realspace_type),intent(in) :: rhot1(npw,Qmesh%nibz)
  type(plowannier_type),intent(in) :: wanbz
- complex(dpc), intent(in) :: rhot1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,npw,Qmesh%nibz)
  complex(dpc), intent(in) :: M1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,npw,Qmesh%nibz)
 
 !Local variables ------------------------------
@@ -696,7 +695,7 @@ contains
       
         write(message,*)  "BARE INTERACTION"
         call wrtout(std_out,message,'COLL')
-        call checkk(V_m,1,mbband*nspinor,tol,1,0,uu,jj,"bare interaction",mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
+        call checkk(V_m,1,mbband*nspinor,1,0,uu,jj,"bare interaction",mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
         !call print_U(mbband1,mbband2,mbband3,mbband4,nspinor,V_m)
 !  ========================================================================
 !  ------------------------------------------------------------------------
@@ -954,11 +953,11 @@ contains
           END SELECT
     ! tolerance of the symetry of screened U.
           tol=1E-2
-          call checkk(U_m,1,mbband*nspinor,tol,0,iomega,uu,jj,"UminusVbare",mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
+          call checkk(U_m,1,mbband*nspinor,0,iomega,uu,jj,"UminusVbare",mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
           U_m=V_m+U_m
           write(message,*)  "UCRPA interaction"
           call wrtout(std_out,message,'COLL')
-          call checkk(U_m,1,mbband*nspinor,tol,1,iomega,uomega(iomega),jomega(iomega),&
+          call checkk(U_m,1,mbband*nspinor,1,iomega,uomega(iomega),jomega(iomega),&
             &"cRPA interaction",mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
           if (spin1==1 .and. spin2==1) then
             ispin=1
@@ -1034,7 +1033,7 @@ contains
           if(nomega==1)  omega(iomega)=omegamin
         enddo
         call print_orbitals(1,1,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,2)
-        call print_uj_spin(nomega,uspin,jspin,wanbz%nsppol,omega,omegamin,omegamax,one_orbital)
+        call print_uj_spin(nomega,uspin,jspin,omega,one_orbital)
       endif
       if (wanbz%nsppol/=1)then
         ABI_DEALLOCATE(uspin)
@@ -1124,12 +1123,11 @@ contains
  end if
  END FUNCTION findkmq
 
- SUBROUTINE checkk(Interaction,m_inf,m_sup,tol,prtopt,ifreq,uu,jj,utype,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
+ SUBROUTINE checkk(Interaction,m_inf,m_sup,prtopt,ifreq,uu,jj,utype,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
 
  implicit none
  integer, intent(in) :: m_inf,m_sup,ifreq,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital
  complex(dpc), intent(in) :: Interaction(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor)
- real(dp), intent(in)    :: tol
  complex(dpc), intent(out)    :: uu,jj
  character(len=*), intent(in) :: utype
  integer :: prtopt
@@ -1486,13 +1484,12 @@ endif
  end subroutine print_orbitals
 
 
- subroutine print_uj_spin(nomega,uspin,jspin,nsppol,omega,omegamin,omegamax,one_orbital)
+ subroutine print_uj_spin(nomega,uspin,jspin,omega,one_orbital)
    implicit none
-   integer,intent(in) :: nomega,nsppol,one_orbital
+   integer,intent(in) :: nomega,one_orbital
    complex(dpc),intent(in) :: uspin(4,nomega)
    complex(dpc),intent(in) :: jspin(4,nomega)
    real(dp),intent(in) :: omega(nomega)
-   real(dp), intent(in) :: omegamin,omegamax
    integer :: iomega,ispin
    real(dp) :: uomega(nomega),jomega(nomega)
    character(len=500)::message
