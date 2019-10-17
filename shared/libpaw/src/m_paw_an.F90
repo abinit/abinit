@@ -1042,7 +1042,7 @@ subroutine paw_an_gather(Paw_an_in,paw_an_gathered,master,comm_atom,mpi_atmtab)
 !Compute sizes of buffers
  buf_int_size=0;buf_dp_size=0
  do ij=1,my_natom
-   buf_int_size=buf_int_size+17+size(paw_an_in(ij)%lmselect)
+   buf_int_size=buf_int_size+18+size(paw_an_in(ij)%lmselect)
  end do
  do ij=1,my_natom
    paw_an_in1=>paw_an_in(ij)
@@ -2120,7 +2120,7 @@ subroutine paw_an_isendreceive_fillbuffer(paw_an, atmtab_send,atm_indx_send,npaw
    iatom_tot=atmtab_send(ipaw_an_send)
    ij = atm_indx_send(iatom_tot)
    paw_an1=>paw_an(ij)
-   buf_int_size=buf_int_size+17+size(paw_an1%lmselect)
+   buf_int_size=buf_int_size+18+size(paw_an1%lmselect)
    if (paw_an1%has_vxc==2) then
      buf_dp_size=buf_dp_size+size(paw_an1%vxc1)
      buf_dp_size=buf_dp_size+size(paw_an1%vxct1)
