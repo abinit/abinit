@@ -131,13 +131,13 @@ contains
 !scalars
  real(dp) :: x
  real(dp) :: t1,t2
- real(dp):: tol,eVnorme
+ real(dp):: tol
  complex(dpc) :: uu,jj
 
  complex :: nC,ualter
 
  integer :: iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,ispin,one_orbital
- integer :: iat,im_paral,iqalloc,ib1,ib2,m1,m2,m3,m4,iqibz,mbband1,mbband2,mbband3,mbband4,spin1,spin2
+ integer :: im_paral,iqalloc,ib1,ib2,m1,m2,m3,m4,iqibz,mbband1,mbband2,mbband3,mbband4,spin1,spin2
  integer :: ierr,ik_bz,ik_ibz,iq_ibz,i,iG1,iG2,iG,iiG,iomega,iomega1,ispinor1,ispinor2,ispinor3,ispinor4
  integer :: lpawu_read,nkibz,nbband,nkbz,nprocs,nqalloc,nqibz,ms1,ms2,ms3,ms4,mbband,nspinor
  integer :: isym_kgw,iik,unt
@@ -148,7 +148,7 @@ contains
  logical :: bug=.FALSE.
  logical :: lscr_one
 
- character(len=500) :: message,print_spin
+ character(len=500) :: message
 
 !arrays
  complex(dpc), allocatable :: V_m(:,:,:,:)
@@ -958,7 +958,8 @@ contains
           U_m=V_m+U_m
           write(message,*)  "UCRPA interaction"
           call wrtout(std_out,message,'COLL')
-          call checkk(U_m,1,mbband*nspinor,tol,1,iomega,uomega(iomega),jomega(iomega),"cRPA interaction",mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
+          call checkk(U_m,1,mbband*nspinor,tol,1,iomega,uomega(iomega),jomega(iomega),&
+            &"cRPA interaction",mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
           if (spin1==1 .and. spin2==1) then
             ispin=1
           else if(spin1==1 .and. spin2==2) then
@@ -1131,9 +1132,8 @@ contains
  real(dp), intent(in)    :: tol
  complex(dpc), intent(out)    :: uu,jj
  character(len=*), intent(in) :: utype
- integer     :: i,j
  integer :: prtopt
- logical        :: bug=.FALSE.
+
 
 !==Check correctness
  ! write(message,*)  "== Check == "
@@ -1409,7 +1409,8 @@ endif
        if (il1==il2 .and. il3==il4 .and. il3==il1)then
          write(message,*)" Only one orbital"
          call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
-         write(message,*)" Orbital with l=",wanbz%latom_wan(iatom1)%lcalc(il1),"on atom",wanbz%iatom_wan(iatom1),"with spin's orientations",print_spin
+         write(message,*)" Orbital with l=",wanbz%latom_wan(iatom1)%lcalc(il1),&
+           &"on atom",wanbz%iatom_wan(iatom1),"with spin's orientations",print_spin
          call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
        else
          write(message,*)"Different orbitals on atom",wanbz%iatom_wan(iatom1),"with spin's orientations",print_spin
@@ -1427,7 +1428,8 @@ endif
        if(il1==il2 .and. il3==il4 .and. il1==il3)then
          write(message,*)" Different position of the same orbital"
          call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
-         write(message,*)" Orbitals with l=",wanbz%latom_wan(iatom1)%lcalc(il1),"on atom",wanbz%iatom_wan(iatom1),"with spin's orientations",print_spin
+         write(message,*)" Orbitals with l=",wanbz%latom_wan(iatom1)%lcalc(il1),&
+           &"on atom",wanbz%iatom_wan(iatom1),"with spin's orientations",print_spin
          call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
          write(message,*)"  orbital 1 at postion ",wanbz%nposition(iatom1)%pos(pos1,:)
          call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
@@ -1467,13 +1469,17 @@ endif
      else
        write(message,*)"Different atoms, in different postions with spin's orientations",print_spin
        call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
-       write(message,*)"  orbital 1 with l=",wanbz%latom_wan(iatom1)%lcalc(il1),"on atom",wanbz%iatom_wan(iatom1),"at position ",wanbz%nposition(iatom1)%pos(pos1,:)
+       write(message,*)"  orbital 1 with l=",wanbz%latom_wan(iatom1)%lcalc(il1),&
+         &"on atom",wanbz%iatom_wan(iatom1),"at position ",wanbz%nposition(iatom1)%pos(pos1,:)
        call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
-       write(message,*)"  orbital 2 with l=",wanbz%latom_wan(iatom2)%lcalc(il2),"on atom",wanbz%iatom_wan(iatom2),"at position ",wanbz%nposition(iatom2)%pos(pos2,:)
+       write(message,*)"  orbital 2 with l=",wanbz%latom_wan(iatom2)%lcalc(il2),&
+         &"on atom",wanbz%iatom_wan(iatom2),"at position ",wanbz%nposition(iatom2)%pos(pos2,:)
        call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
-       write(message,*)"  orbital 3 with l=",wanbz%latom_wan(iatom3)%lcalc(il3),"on atom",wanbz%iatom_wan(iatom3),"at position ",wanbz%nposition(iatom3)%pos(pos3,:)
+       write(message,*)"  orbital 3 with l=",wanbz%latom_wan(iatom3)%lcalc(il3),&
+         &"on atom",wanbz%iatom_wan(iatom3),"at position ",wanbz%nposition(iatom3)%pos(pos3,:)
        call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
-       write(message,*)"  orbital 4 with l=",wanbz%latom_wan(iatom4)%lcalc(il4),"on atom",wanbz%iatom_wan(iatom4),"at position ",wanbz%nposition(iatom4)%pos(pos4,:)
+       write(message,*)"  orbital 4 with l=",wanbz%latom_wan(iatom4)%lcalc(il4),&
+         &"on atom",wanbz%iatom_wan(iatom4),"at position ",wanbz%nposition(iatom4)%pos(pos4,:)
        call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
      endif
    endif

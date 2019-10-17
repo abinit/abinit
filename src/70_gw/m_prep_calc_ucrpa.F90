@@ -232,7 +232,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  type(pawcprj_type),allocatable :: Cprj_kgw(:,:),Cprj_ksum(:,:)
  type(pawpwij_t),allocatable :: Pwij_qg(:),Pwij_fft(:)
  type(esymm_t),pointer :: QP_sym(:)
- type(plowannier_type) :: wan
+ !type(plowannier_type) :: wan
  logical     :: ecriture=.FALSE.
  logical     :: l_ucrpa,luwindow
  integer     :: g0_dump(3),iq_ibz_dump,dumint(2)
