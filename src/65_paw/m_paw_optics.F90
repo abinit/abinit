@@ -24,13 +24,16 @@
 MODULE m_paw_optics
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_errors
  use m_wffile
  use m_abicore
  use m_hdr
+ use m_dtset
+ use m_dtfil
 
+
+ use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
  use m_io_tools,     only : open_file,get_unit
  use m_pawpsp,       only : pawpsp_read_corewf
@@ -891,7 +894,7 @@ CONTAINS  !=====================================================================
 
 ! Read the header of the optic files
  call hdr_read_from_fname(hdr, filnam1, fform1, spaceComm)
- call hdr_free(hdr)
+ call hdr%free()
  if (fform1 /= 610) then
    MSG_ERROR("Abinit8 requires an OPT file with fform = 610")
  end if
@@ -1081,7 +1084,7 @@ CONTAINS  !=====================================================================
  ABI_DEALLOCATE(wtk)
  ABI_DEALLOCATE(kpts)
 
- call hdr_free(hdr)
+ call hdr%free()
  call destroy_mpi_enreg(MPI_enreg_seq)
 
  DBG_EXIT("COLL")

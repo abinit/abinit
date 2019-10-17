@@ -145,10 +145,10 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 !dielectric tensor (there should be more than one atom in the unit cell)
  if(natom==1)then
    write(message, '(6a)' )&
-&   ' ddb_diel : WARNING -',ch10,&
-&   '  When there is only one atom in the unit cell',ch10,&
-&   '  cell, the dielectric tensor is frequency-independent.',&
-&   '  Consequently, dieflag has been reset to 2 . '
+     ' ddb_diel : WARNING -',ch10,&
+     '  When there is only one atom in the unit cell',ch10,&
+     '  cell, the dielectric tensor is frequency-independent.',&
+     '  Consequently, dieflag has been reset to 2 . '
    call wrtout(std_out,message,'COLL')
    call wrtout(iout,message,'COLL')
    dieflag=2
@@ -177,8 +177,8 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 
    if (anaddb_dtset%alphon > 0) then
      write(message, '(3a)' )&
-&     ' The alphon input variable is non-zero, will mix the degenerate phonon modes',ch10,&
-&     ' in order to align the mode effective charges with the cartesian axes.'
+      ' The alphon input variable is non-zero, will mix the degenerate phonon modes',ch10,&
+      ' in order to align the mode effective charges with the cartesian axes.'
      call wrtout(std_out,message,'COLL')
      call wrtout(iout,message,'COLL')
      call alignph(amu,displ,d2cart,mpert,natom,Crystal%ntypat,phfrq,Crystal%typat)
@@ -208,12 +208,8 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
        end do
      end do
 
-!DEBUG
-!           write(std_out,'(a,i4,a,12es16.6)')'imode=',imode,&
-!&           ' displ(:,:,imode)',displ(:,:,imode)
-!           write(std_out,'(a,i4,a,6es16.6)')'imode=',imode,&
-!&           ' fact_oscstr(:,:,imode)=',fact_oscstr(:,:,imode)
-!ENDDEBUG
+    !write(std_out,'(a,i4,a,12es16.6)')'imode=',imode,' displ(:,:,imode)',displ(:,:,imode)
+    !write(std_out,'(a,i4,a,6es16.6)')'imode=',imode,' fact_oscstr(:,:,imode)=',fact_oscstr(:,:,imode)
 
    end do
 
@@ -349,13 +345,13 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
    if (abs(phfrq(1))>abs(phfrq(4)))then
 !    This means that there is at least one mode with truly negative frequency
      write(message, '(12a,4es16.8)' )&
-&     'The lowest mode appears to be a "true" negative mode,',ch10,&
-&     'and not an acoustic mode. This precludes the computation',ch10,&
-&     'of the frequency-dependent dielectric tensor.',ch10,&
-&     'Action : likely there is no action to be taken, although you,',ch10,&
-&     'could try to raise your convergence parameters (ecut and k-points).',ch10,&
-&     'For your information, here are the four lowest frequencies :',ch10,&
-&     (phfrq(ii),ii=1,4)
+      'The lowest mode appears to be a "true" negative mode,',ch10,&
+      'and not an acoustic mode. This precludes the computation',ch10,&
+      'of the frequency-dependent dielectric tensor.',ch10,&
+      'Action : likely there is no action to be taken, although you,',ch10,&
+      'could try to raise your convergence parameters (ecut and k-points).',ch10,&
+      'For your information, here are the four lowest frequencies :',ch10,&
+       (phfrq(ii),ii=1,4)
      MSG_ERROR(message)
    end if
 
@@ -414,17 +410,17 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 
    if (nfreq>10 .and. my_rank == master) then
      write(iout, '(a,a,a,a,a,a,a,a)' )&
-&     ' ddb_diel : the number of frequencies is larger',&
-&     ' than 10 => I will consider only',ch10,&
-&     ' the three principal directions, assume that the tensor',ch10,&
-&     ' is diagonalized, and give dielectric constant and ',ch10,&
-&     ' reflectivities.'
+      ' ddb_diel : the number of frequencies is larger',&
+      ' than 10 => I will consider only',ch10,&
+      ' the three principal directions, assume that the tensor',ch10,&
+      ' is diagonalized, and give dielectric constant and ',ch10,&
+      ' reflectivities.'
      write(iout, '(a,a)' )&
-&     ' Frequency(Hartree)    Dielectric constant   ',&
-&     '             Reflectivity    '
+      ' Frequency(Hartree)    Dielectric constant   ',&
+      '             Reflectivity    '
      write(iout, '(a,a)' )&
-&     '                     x           y          z',&
-&     '          x        y        z'
+      '                     x           y          z',&
+      '          x        y        z'
    end if
 
 !  Loop on frequencies
@@ -483,8 +479,8 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 
 !  Prepare the output
    write(message, '(a,a,a,a)' ) ch10,&
-&   ' Generalized Lyddane-Sachs-Teller relation at zero frequency :',ch10,&
-&   ' Direction                     Dielectric constant'
+    ' Generalized Lyddane-Sachs-Teller relation at zero frequency :',ch10,&
+    ' Direction                     Dielectric constant'
    call wrtout(std_out,message,'COLL')
    call wrtout(iout,message,'COLL')
 

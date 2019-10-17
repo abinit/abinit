@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group ()
+!!  Copyright (C) 2008-2019 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,6 +29,43 @@ module m_mover_effpot
  use defs_basis
  use m_errors
  use m_abicore
+ use m_dtset
+ use m_dtfil
+ use m_abimover
+ use m_build_info
+ use m_scf_history
+ use defs_wvltypes
+ use m_xmpi
+ use m_phonons
+ use m_strain
+ use m_effective_potential_file
+ use m_supercell
+ use m_psps
+ use m_args_gs
+ use m_ifc
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
+ use m_geometry, only : xcart2xred, xred2xcart
+ use m_multibinit_dataset, only : multibinit_dtset_type
+ use m_effective_potential,only : effective_potential_type
+ use m_fit_polynomial_coeff, only : polynomial_coeff_writeXML, &
+   fit_polynomial_coeff_fit, genereList, fit_polynomial_coeff_getPositive,fit_polynomial_coeff_getCoeffBound
+ use m_polynomial_coeff,only : polynomial_coeff_getNorder
+! use m_pawang,       only : pawang_type, pawang_free
+! use m_pawrad,       only : pawrad_type, pawrad_free
+! use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
+! use m_pawxmlps, only : paw_setup, ipsp2xml, rdpawpsxml, &
+!&                       paw_setup_copy, paw_setup_free, getecutfromxml
+ use m_abihist, only : abihist
+ use m_ewald
+ use m_mpinfo,           only : init_mpi_enreg,destroy_mpi_enreg
+ use m_copy            , only : alloc_copy
+ use m_electronpositron, only : electronpositron_type
+ use m_scfcv,            only : scfcv_t, scfcv_run,scfcv_destroy
+ use m_results_gs,       only : results_gs_type,init_results_gs,destroy_results_gs
+ use m_mover,            only : mover
+ use m_io_tools,         only : get_unit, open_file
 
  implicit none
 
@@ -47,12 +84,6 @@ contains
 !!
 !! FUNCTION
 !! this routine is driver for using mover with effective potential
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (AM)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  inp = input of multibinit
@@ -85,49 +116,6 @@ contains
 
 subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 
- use defs_basis
- use defs_abitypes
- use m_abicore
- use defs_datatypes
- use m_errors
- use m_abimover
- use m_build_info
- use m_scf_history
- use defs_wvltypes
- use m_xmpi
- use m_abimover
- use m_phonons
- use m_strain
- use m_effective_potential_file
- use m_supercell
- use m_psps
- use m_args_gs
-
- use m_geometry, only : xcart2xred, xred2xcart
- use m_multibinit_dataset, only : multibinit_dtset_type
- use m_effective_potential,only : effective_potential_type
- use m_fit_polynomial_coeff, only : polynomial_coeff_writeXML
- use m_fit_polynomial_coeff, only : fit_polynomial_coeff_fit,genereList
- use m_fit_polynomial_coeff, only : fit_polynomial_coeff_getPositive,fit_polynomial_coeff_getCoeffBound
- use m_electronpositron,   only : electronpositron_type
- use m_polynomial_coeff,only : polynomial_coeff_getNorder
-! use m_pawang,       only : pawang_type, pawang_free
-! use m_pawrad,       only : pawrad_type, pawrad_free
-! use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
-! use m_pawxmlps, only : paw_setup, ipsp2xml, rdpawpsxml, &
-!&                       paw_setup_copy, paw_setup_free, getecutfromxml
- use m_dtset,  only : dtset_free
- use m_abihist, only : abihist
- use m_ifc
- use m_ewald
- use m_mpinfo,           only : init_mpi_enreg,destroy_mpi_enreg
- use m_copy            , only : alloc_copy
- use m_electronpositron, only : electronpositron_type
- use m_scfcv,            only : scfcv_t, scfcv_run,scfcv_destroy
- use m_results_gs,       only : results_gs_type,init_results_gs,destroy_results_gs
- use m_mover,            only : mover
- use m_io_tools,         only : get_unit, open_file
-implicit none
 
 !Arguments --------------------------------
 !scalar
@@ -186,7 +174,7 @@ implicit none
  real(dp) :: vel_cell(3,3),rprimd(3,3)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
  character(len=fnlen) :: filename
- character(len=50) :: name_file 
+ character(len=50) :: name_file
  character(len=200):: term_name
 !character(len=fnlen) :: filename_psp(3)
  type(electronpositron_type),pointer :: electronpositron
@@ -255,7 +243,7 @@ implicit none
 !     to mover scfcv_args or effective_potential...
 !***************************************************************
 !  Free dtset
-   call dtset_free(dtset)
+   call dtset%free()
 
 !  Set mpi_eng
    mpi_enreg%comm_cell  = comm
@@ -552,35 +540,35 @@ implicit none
      write(message, '((80a),3a)' ) ('-',ii=1,80), ch10,&
 &     '-Monte Carlo / Molecular Dynamics ',ch10
 
-     ! Marcus: if wanted analyze anharmonic terms of effective potential && 
+     ! Marcus: if wanted analyze anharmonic terms of effective potential &&
      ! and print anharmonic contribution to file anharmonic_energy_terms.out
-     ! Open File and write header 
+     ! Open File and write header
      ncoeff = effective_potential%anharmonics_terms%ncoeff
-     name_file='anharmonic_energy_terms.out' 
+     name_file='anharmonic_energy_terms.out'
      unit_out = get_unit()
-     if(inp%analyze_anh_pot == 1)then 
+     if(inp%analyze_anh_pot == 1)then
        open(unit=unit_out,file=name_file,status='replace',form='formatted')
        write(unit_out,*) '#---------------------------------------------#'
        write(unit_out,*) '#    Anharmonic Terms Energy Contribution     #'
        write(unit_out,*) '#---------------------------------------------#'
        write(unit_out,*) ''
        write(unit_out,'(A,I5)') 'Number of Terms: ', ncoeff
-       write(unit_out,*) '' 
-       write(unit_out,'(A)') 'Terms     Names' 
+       write(unit_out,*) ''
+       write(unit_out,'(A)') 'Terms     Names'
        do icoeff=1,ncoeff
          term_name = effective_potential%anharmonics_terms%coefficients(icoeff)%name
          write(unit_out,'(I5,A,A)') icoeff,'     ',trim(term_name)
-       enddo  
-       write(unit_out,*) ''  
+       enddo
+       write(unit_out,*) ''
        write(unit_out,'(A)',advance='no')  'Cycle/Terms'
        do icoeff=1,ncoeff
          if(icoeff<ncoeff)then
          write(unit_out,'(I5)',advance='no') icoeff
-         else 
+         else
          write(unit_out,'(I5)',advance='yes') icoeff
          endif
-       enddo  
-     end if 
+       enddo
+     end if
 
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
@@ -1019,7 +1007,7 @@ implicit none
    !   ABI_DATATYPE_DEALLOCATE(pawtab)
    !   ABI_DEALLOCATE(npwtot)
    ! end if
-   call dtset_free(dtset)
+   call dtset%free()
    call destroy_results_gs(results_gs)
    call scfcv_destroy(scfcv_args)
    call destroy_mpi_enreg(mpi_enreg)

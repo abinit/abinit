@@ -41,14 +41,15 @@
 module m_rec
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_rectypes
  use m_abicore
  use m_errors
  use m_xmpi
  use m_sort
+ use m_dtset
 
+ use defs_datatypes,    only : pseudopotential_type
+ use defs_abitypes,     only : mpi_type
  use m_exp_mat,         only : exp_mat
  use m_numeric_tools,   only : set2unit
  use m_special_funcs,   only : gamma_function

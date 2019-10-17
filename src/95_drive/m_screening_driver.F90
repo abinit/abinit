@@ -27,10 +27,9 @@
 module m_screening_driver
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
+ use m_dtset
  use m_xmpi
  use m_xomp
  use m_errors
@@ -42,7 +41,13 @@ module m_screening_driver
 #endif
  use libxc_functionals
  use m_hdr
+ use m_dtfil
+ use m_distribfft
+ use m_crystal
 
+
+ use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use defs_abitypes,   only : MPI_type
  use m_time,          only : timab
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_fstrings,      only : int2char10, sjoin, strcat, itoa, ltoa, itoa
@@ -51,7 +56,6 @@ module m_screening_driver
  use m_geometry,      only : normv, vdotw, mkrdim, metric
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_free, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
- use m_crystal,       only : crystal_t, crystal_print
  use m_ebands,        only : ebands_update_occ, ebands_copy, get_valence_idx, get_occupied, apply_scissor, &
                              ebands_free, ebands_has_metal_scheme, ebands_ncwrite, ebands_init
  use m_bz_mesh,       only : kmesh_t, kmesh_init, kmesh_free, littlegroup_t, littlegroup_free, littlegroup_init, &
@@ -532,10 +536,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    nbvw=MAXVAL(ibocc)
    nbcw=Ep%nbnds-nbvw
    write(msg,'(4a,i0,2a,i0,2a,i0,a)')ch10,&
-&   '- screening: taking advantage of time-reversal symmetry ',ch10,&
-&   '- Maximum band index for partially occupied states nbvw = ',nbvw,ch10,&
-&   '- Remaining bands to be divided among processors   nbcw = ',nbcw,ch10,&
-&   '- Number of bands treated by each node ~',nbcw/nprocs,ch10
+    '- screening: taking advantage of time-reversal symmetry ',ch10,&
+    '- Maximum band index for partially occupied states nbvw = ',nbvw,ch10,&
+    '- Remaining bands to be divided among processors   nbcw = ',nbcw,ch10,&
+    '- Number of bands treated by each node ~',nbcw/nprocs,ch10
    call wrtout(ab_out,msg,'COLL')
    if (Cryst%timrev/=2) then
      MSG_ERROR('Time-reversal cannot be used since cryst%timrev/=2')
@@ -1315,7 +1319,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      dim_kxcg=0
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
 
-!  @WC: bootstrap --
+!  bootstrap --
    case (-3, -4, -5, -6, -7, -8)
      ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
      if (Dtset%gwgamma>-5) then
@@ -1325,7 +1329,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        MSG_WARNING('EXPERIMENTAL: Bootstrap kernel (head-only) is being added to screening')
        approx_type=5
      else
-       MSG_WARNING('EXPERIMENTAL: Bootstrap kernel (RPA-type, head-only) is being added to screening')
+       MSG_WARNING('EXPERIMENTAL: RPA Bootstrap kernel is being added to screening')
        approx_type=6
      end if
      dim_kxcg=0
@@ -1333,7 +1337,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ! 1 -> TESTELECTRON, vertex in chi0 *and* sigma
      ! 0 -> TESTPARTICLE, vertex in chi0 only
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
-!--@WC
+!
 
    case default
      MSG_ERROR(sjoin("Wrong gwgamma:", itoa(dtset%gwgamma)))
@@ -1527,8 +1531,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call gsph_free(Gsph_wfn)
  call vcoul_free(Vcp)
  call em1params_free(Ep)
- call hdr_free(Hdr_wfk)
- call hdr_free(Hdr_local)
+ call Hdr_wfk%free()
+ call Hdr_local%free()
  call ebands_free(KS_BSt)
  call ebands_free(QP_BSt)
  call littlegroup_free(Ltg_q)
@@ -1666,8 +1670,8 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  Ep%zcut   =Dtset%zcut
 
  write(msg,'(2a,i4,2a,f10.6,a)')ch10,&
-&  ' GW calculation type              = ',Ep%gwcalctyp,ch10,&
-&  ' zcut to avoid poles in chi0 [eV] = ',Ep%zcut*Ha_eV,ch10
+   ' GW calculation type              = ',Ep%gwcalctyp,ch10,&
+   ' zcut to avoid poles in chi0 [eV] = ',Ep%zcut*Ha_eV,ch10
  call wrtout(std_out,msg,'COLL')
 
  Ep%awtr  =Dtset%awtr
@@ -1687,7 +1691,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ! Read parameters from WFK and verifify them.
  call wfk_read_eigenvalues(wfk_fname,energies_p,Hdr_wfk,comm)
  mband = MAXVAL(Hdr_wfk%nband)
- call hdr_vs_dtset(Hdr_wfk,Dtset)
+ call hdr_wfk%vs_dtset(dtset)
  remove_inv=.FALSE.
 
  test_npwkss = 0
@@ -1731,13 +1735,13 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    Ep%nbnds=mband
    Dtset%nband(:)=mband
    write(msg,'(4a,i4,a)')ch10,&
-&    ' Number of bands found less then required. ',ch10,&
-&    ' Calculation will proceed with nbnds = ',mband,ch10
+     ' Number of bands found less then required. ',ch10,&
+     ' Calculation will proceed with nbnds = ',mband,ch10
    MSG_WARNING(msg)
  end if
 
- cryst = hdr_get_crystal(Hdr_wfk, timrev, remove_inv)
- call crystal_print(Cryst,mode_paral='COLL')
+ cryst = Hdr_wfk%get_crystal(timrev, remove_inv)
+ call cryst%print(mode_paral='COLL')
 
  ! === Create basic data types for the calculation ===
  ! * Kmesh defines the k-point sampling for the wavefunctions.
@@ -2069,7 +2073,6 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 
  ! To write the SCR header correctly, with heads and wings, we have
  ! to make sure that q==0, if present, is the first q-point in the list.
- !has_q0=(ANY(normv(Ep%qcalc(:,:),gmet,'G')<GW_TOLQ0)) !commented to avoid problems with sunstudio12
  has_q0=.FALSE.
  do iq=1,Ep%nqcalc
    if (normv(Ep%qcalc(:,iq),gmet,'G')<GW_TOLQ0) then
@@ -2145,7 +2148,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    call pawrhoij_alloc(Pawrhoij,1,Dtset%nspden,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
    call pawrhoij_copy(Hdr_wfk%Pawrhoij,Pawrhoij)
  end if
- call hdr_update(Hdr_out,bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
+ call Hdr_out%update(bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
 
  ABI_FREE(occfact)
  call pawrhoij_free(Pawrhoij)

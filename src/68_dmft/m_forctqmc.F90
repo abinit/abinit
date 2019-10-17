@@ -7,7 +7,7 @@
 !! Prepare CTQMC and call CTQMC
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2019 ABINIT group (BAmadon, VPlanes)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,6 +31,33 @@
 MODULE m_forctqmc
 
  use defs_basis
+ use m_errors
+ use m_xmpi
+ use m_abicore
+ use m_Ctqmc
+ use m_CtqmcInterface
+ use m_Ctqmcoffdiag
+ use m_CtqmcoffdiagInterface
+ use m_GreenHyb
+ use m_data4entropyDMFT
+
+ use m_pawang, only : pawang_type
+ use m_crystal, only : crystal_t
+ use m_green, only : green_type,occup_green_tau,print_green,printocc_green,spline_fct,copy_green,init_green,destroy_green,&
+& int_fct,greenldacompute_green,fourier_green
+ use m_paw_dmft, only : paw_dmft_type
+ use m_hide_lapack,         only : xginv
+ use m_oper, only : oper_type,destroy_oper,init_oper,inverse_oper
+ use m_self, only : self_type
+ use m_matlu, only : matlu_type,sym_matlu, print_matlu, &
+& diag_matlu,init_matlu,destroy_matlu,rotate_matlu,checkdiag_matlu,checkreal_matlu, &
+& copy_matlu, diff_matlu, slm2ylm_matlu, shift_matlu, prod_matlu,fac_matlu,&
+& add_matlu,printplot_matlu,identity_matlu,zero_matlu
+ use m_hu, only : hu_type,rotatevee_hu,vee_ndim2tndim_hu_r
+ use m_io_tools, only : flush_unit, open_file
+ use m_datafordmft, only : hybridization_asymptotic_coefficient,compute_levels
+ use m_special_funcs, only : sbf8
+ use m_paw_numeric, only : jbessel=>paw_jbessel
 
  implicit none
 
@@ -45,19 +72,13 @@ MODULE m_forctqmc
 !!***
 
 contains
+
 !!****f* m_forctqmc/qmc_prep_ctqmc
 !! NAME
 !! qmc_prep_ctqmc
 !!
 !! FUNCTION
 !! Prepare and call the qmc subroutines
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon,VPlanes)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=crystal structure data
@@ -90,37 +111,6 @@ contains
 !! SOURCE
 
 subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,weiss)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_errors
- use m_xmpi
-
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_green, only : green_type,occup_green_tau,print_green,printocc_green,spline_fct,copy_green,init_green,destroy_green,&
-& int_fct,greenldacompute_green,fourier_green
- use m_paw_dmft, only : paw_dmft_type
- use m_hide_lapack,         only : xginv
- use m_oper, only : oper_type,destroy_oper,init_oper,inverse_oper
- use m_self, only : self_type
- use m_matlu, only : matlu_type,sym_matlu, print_matlu, &
-& diag_matlu,init_matlu,destroy_matlu,rotate_matlu,checkdiag_matlu,checkreal_matlu, &
-& copy_matlu, diff_matlu, slm2ylm_matlu, shift_matlu, prod_matlu,fac_matlu,&
-& add_matlu,printplot_matlu,identity_matlu,zero_matlu
- use m_hu, only : hu_type,rotatevee_hu,vee_ndim2tndim_hu_r
- use m_Ctqmc
- use m_CtqmcInterface
- use m_Ctqmcoffdiag
- use m_CtqmcoffdiagInterface
- use m_GreenHyb
- use m_data4entropyDMFT
- !use m_self, only : self_type,initialize_self,destroy_self,print_self,rw_self
- use m_io_tools, only : flush_unit, open_file
- use m_datafordmft, only : hybridization_asymptotic_coefficient,compute_levels
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1284,7 +1274,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
      if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
        !because size allocation problem with TRIQS paw_dmft%dmft_nwlo must be >= paw_dmft%dmft_nwli
-       ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwli,nflavor,nflavor)) 
+       ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwli,nflavor,nflavor))
        open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
      else
        if(paw_dmft%dmft_solv==5) then
@@ -1325,7 +1315,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          call data4entropyDMFT_setDocc(paw_dmft%forentropyDMFT,iatom,docc)
          ABI_DEALLOCATE(docc)
          !DO iflavor = 1, nflavor
-         !  hybrid%Hybrid%Greens(iflavor)%oper(1:this%samples) = gtmp(1:this%samples,iflavor) 
+         !  hybrid%Hybrid%Greens(iflavor)%oper(1:this%samples) = gtmp(1:this%samples,iflavor)
          !  CALL GreenHyb_forFourier(this%Greens(iflavor), Gomega=Gw(:,iflavor), omega=Gw(:,this%flavors+1))
          !END DO
 
@@ -1453,7 +1443,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
 
    end if
-  
+
  end do ! iatom
 ! =========================================================================================
 !  End big loop over atoms to compute hybridization and do the CTQMC
@@ -1707,13 +1697,6 @@ end subroutine qmc_prep_ctqmc
 !! FUNCTION
 !! Setup ultra simple hybridization to test CTQMC in simple situations.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !! temp = temperature
 !! dmftqmc_l = number of times slices
@@ -1724,7 +1707,7 @@ end subroutine qmc_prep_ctqmc
 !! umod = value of U
 !! hybri_limit= limit of F
 !! weiss_for_rot= weiss function
-!! hybri_coeff 
+!! hybri_coeff
 !!
 !! SIDE EFFECTS
 !!
@@ -1740,27 +1723,12 @@ end subroutine qmc_prep_ctqmc
 subroutine testcode_ctqmc_b(energy_level,hybri_coeff,weiss_for_rot,dmftqmc_l,fw1_nd,levels_ctqmc,&
 &   levels_ctqmc_nd,hybri_limit,temp,umod,opt_diag,opt_fk)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_errors
- use m_ctqmc
- use m_CtqmcInterface
- use m_greenhyb
- !use m_self, only : self_type,initialize_self,destroy_self,print_self,rw_self
- use m_io_tools, only : flush_unit
- use m_oper, only : oper_type
- use m_matlu, only : matlu_type
- use m_green, only : green_type
- use m_hide_lapack,         only : xginv
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: dmftqmc_l,opt_diag,opt_fk
  real(dp), intent(in) :: temp
  real(dp), intent(out) :: umod(2,2)
- real(dp), intent(inout) :: levels_ctqmc(:) 
+ real(dp), intent(inout) :: levels_ctqmc(:)
  complex(dpc), intent(out) :: fw1_nd(:,:,:)
  complex(dpc),  intent(inout) :: levels_ctqmc_nd(:,:)
  complex(dpc),  intent(inout) :: hybri_limit(:,:)
@@ -1831,13 +1799,6 @@ end subroutine testcode_ctqmc_b
 !! FUNCTION
 !! Setup ultra simple hybridization to test CTQMC in simple situations.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !! gtmp_nd
 !! gw_tmp_nd
@@ -1870,16 +1831,6 @@ end subroutine testcode_ctqmc_b
 subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hybri_limit,&
 &   nflavor,opt,temp,testrot,testcode,umod)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_errors
- use m_ctqmc
- use m_CtqmcInterface
- use m_greenhyb
- !use m_self, only : self_type,initialize_self,destroy_self,print_self,rw_self
- use m_io_tools, only : flush_unit
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2131,13 +2082,6 @@ end subroutine testcode_ctqmc
 !!  Put values of green function from ctqmc into green datatype
 !!  Symetrize over spin if calculation is non magnetic
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  paw_dmft <type(paw_dmft_type)>= DMFT data structure
 !!  gtmp_nd(dmftqmc_l,nflavor,nflavor) = Green's fct in imag time (with off diag terms)
@@ -2146,8 +2090,8 @@ end subroutine testcode_ctqmc
 !!  gw_tmp(nb_of_frequency,nflavor+1) =Green's fct in imag freq (diag)
 !!  iatom = atoms on which the calculation has been done
 !!  leg_measure = logical, to Legendre Measurement or not (if done Green function is frequency is computed)
-!!  opt_nondiag = integer, it activated, then 
-!!  
+!!  opt_nondiag = integer, it activated, then
+!!
 !! OUTPUT
 !!  green <type(green_type)>= green's function
 !!
@@ -2165,25 +2109,13 @@ end subroutine testcode_ctqmc
 
 subroutine ctqmcoutput_to_green(green,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom,leg_measure,opt_nondiag)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_errors
- use m_ctqmc
- use m_CtqmcInterface
- use m_greenhyb
- !use m_self, only : self_type,initialize_self,destroy_self,print_self,rw_self
- use m_paw_dmft, only : paw_dmft_type
- use m_green, only : green_type
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(paw_dmft_type), intent(in)  :: paw_dmft
  type(green_type), intent(inout) :: green
  real(dp), allocatable, intent(in) :: gtmp_nd(:,:,:)
  complex(dpc), allocatable, intent(in) :: gw_tmp(:,:)
- complex(dpc), allocatable, intent(in) :: gw_tmp_nd(:,:,:) 
+ complex(dpc), allocatable, intent(in) :: gw_tmp_nd(:,:,:)
  real(dp), allocatable, intent(in) :: gtmp(:,:)
  integer, intent(in) :: iatom,opt_nondiag
  logical(kind=1), intent(in) :: leg_measure
@@ -2289,13 +2221,6 @@ end subroutine ctqmcoutput_to_green
 !!  Symetrize imaginary time Green's function in a peculiar case
 !!  (dmft_solv=8 and natom=1). Should be moved later.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  paw_dmft <type(paw_dmft_type)>= DMFT data structure
 !!  gtmp_nd(dmftqmc_l,nflavor,nflavor) = Green's fct in imag time (with off diag terms)
@@ -2305,7 +2230,7 @@ end subroutine ctqmcoutput_to_green
 !!  cryst_struc <type(crystal_t)>=crystal structure data
 !!  pawang <type(pawang)>=paw angular mesh and related data
 !!  iatom = atoms on which the calculation has been done
-!!  
+!!
 !! OUTPUT
 !!
 !!
@@ -2322,24 +2247,12 @@ end subroutine ctqmcoutput_to_green
 
 subroutine ctqmcoutput_printgreen(cryst_struc,eigvectmatlu,pawang,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_errors
- use m_crystal, only : crystal_t
- !use m_self, only : self_type,initialize_self,destroy_self,print_self,rw_self
- use m_io_tools, only :  open_file
- use m_pawang, only : pawang_type
- use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : init_matlu, rotate_matlu,slm2ylm_matlu,sym_matlu,destroy_matlu,matlu_type
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(paw_dmft_type), intent(in)  :: paw_dmft
  real(dp), allocatable, intent(inout) :: gtmp_nd(:,:,:)
  complex(dpc), allocatable, intent(in) :: gw_tmp(:,:)
- complex(dpc), allocatable, intent(in) :: gw_tmp_nd(:,:,:) 
+ complex(dpc), allocatable, intent(in) :: gw_tmp_nd(:,:,:)
  real(dp), allocatable, intent(in) :: gtmp(:,:)
  type(crystal_t),intent(in) :: cryst_struc
  integer, intent(in) :: iatom
@@ -2487,13 +2400,6 @@ end subroutine ctqmcoutput_printgreen
 !!  Call TRIQS solver and perform calculation of Green's function using
 !!  Legendre coefficients.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  paw_dmft <type(paw_dmft_type)>= DMFT data structure
 !!  cryst_struc <type(crystal_t)>=crystal structure data
@@ -2504,7 +2410,7 @@ end subroutine ctqmcoutput_printgreen
 !!  fw1_nd(dmft_nwlo,nflavor,nflavor) = Hybridization fct in imag time (with off diag terms)
 !!  leg_measure = logical, true is legendre measurement is activated
 !!  iatom= index of atom
-!!  
+!!
 !! OUTPUT
 !!
 !!
@@ -2521,27 +2427,10 @@ end subroutine ctqmcoutput_printgreen
 
 subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_nd,fw1_nd,leg_measure,iatom)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_errors
- use m_xmpi
- use m_special_funcs, only : sbf8
- use m_crystal, only : crystal_t
- !use m_self, only : self_type,initialize_self,destroy_self,print_self,rw_self
- use m_io_tools, only : flush_unit, open_file
- use m_paw_numeric, only : jbessel=>paw_jbessel
- use m_pawang, only : pawang_type
- use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : init_matlu, rotate_matlu,slm2ylm_matlu,sym_matlu,destroy_matlu,matlu_type
- use m_hu, only : hu_type,vee_ndim2tndim_hu_r
-
 #if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
  use TRIQS_CTQMC !Triqs module
 #endif
  use ISO_C_BINDING
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2549,10 +2438,10 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
  type(crystal_t),intent(in) :: cryst_struc
  type(hu_type), intent(in) :: hu(cryst_struc%ntypat)
  real(dp), allocatable, target, intent(inout) :: gtmp_nd(:,:,:)
- complex(dpc), allocatable, target, intent(inout) :: gw_tmp_nd(:,:,:) 
- complex(dpc), allocatable, target, intent(in) :: fw1_nd(:,:,:) 
- real(dp), allocatable, target, intent(inout) ::  levels_ctqmc(:) 
- logical(kind=1), intent(in) :: leg_measure 
+ complex(dpc), allocatable, target, intent(inout) :: gw_tmp_nd(:,:,:)
+ complex(dpc), allocatable, target, intent(in) :: fw1_nd(:,:,:)
+ real(dp), allocatable, target, intent(inout) ::  levels_ctqmc(:)
+ logical(kind=1), intent(in) :: leg_measure
  integer, intent(in) :: iatom
 
 !Local variables ------------------------------
@@ -2600,7 +2489,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
  else !obviously paw_dmft%dmft_solv==7 with rot invariant terms
    rot_inv = .true.
  end if
- 
+
  nfreq = paw_dmft%dmft_nwli
  !paw_dmft%dmft_nwlo = paw_dmft%dmft_nwli !transparent for user
  ntau  = paw_dmft%dmftqmc_l !(2*paw_dmft%dmftqmc_l)+1 !nfreq=paw_dmft%dmft_nwli
@@ -2711,7 +2600,8 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
 &  paw_dmft%dmftctqmc_meas*2*2*nflavor, paw_dmft%dmftqmc_therm,               &
 &  verbosity_solver, paw_dmft%dmftqmc_seed,beta,                              &
 &  levels_ptr,  u_mat_ij_ptr, u_mat_ijkl_ptr, fw1_nd_ptr,                     &
-&  g_iw_ptr, gtau_ptr, gl_ptr, paw_dmft%spacecomm                             )
+!&  g_iw_ptr, gtau_ptr, gl_ptr, paw_dmft%spacecomm                             )
+&  g_iw_ptr, gtau_ptr, gl_ptr, paw_dmft%myproc                             )
 #endif
 
   !WRITE(*,*) "Hello Debug"
@@ -2782,7 +2672,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
  ABI_DEALLOCATE( u_mat_ijkl_tmp )
  ABI_DEALLOCATE( u_mat_ij )
 
-   
+
   !  Compute Green's function in imaginary freq using Legendre coefficients
   ! -----------------------------------------------------------------------
  if (leg_measure) then

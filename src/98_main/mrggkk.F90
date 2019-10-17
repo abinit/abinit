@@ -48,7 +48,6 @@
 program mrggkk
 
  use defs_basis
- use defs_abitypes
  use m_build_info
  use m_abicore
  use m_xmpi
@@ -80,7 +79,6 @@ program mrggkk
  character(len=24) :: codename
  character(len=500) :: message
  character(len=fnlen) :: file1wf,filegkk,filegs,outfile
- type(MPI_type) :: mpi_enreg
  type(hdr_type) :: hdr,hdr1
  type(wfk_t) :: GS_wfk,PH_wfk
 !arrays
@@ -101,9 +99,6 @@ program mrggkk
 #ifdef HAVE_MEM_PROFILING
  call abimem_init(0)
 #endif
-
-!Default for sequential use
- call initmpi_seq(mpi_enreg)
 
  codename='MRGGKK'//repeat(' ',18)
 
@@ -189,9 +184,9 @@ program mrggkk
 !Copy header of GS file to output.
  if (binascii /= 2) then
    if (rdwrout == 4) then
-     call hdr_echo(GS_wfk%Hdr, GS_wfk%fform, rdwrout)
+     call GS_wfk%Hdr%echo(GS_wfk%fform, rdwrout)
    else
-     call hdr_fort_write(GS_wfk%Hdr, unitout, GS_wfk%fform, ierr)
+     call GS_wfk%Hdr%fort_write(unitout, GS_wfk%fform, ierr)
      ABI_CHECK(ierr == 0 , "hdr_fort_write returned ierr != 0")
    end if
  end if
@@ -251,9 +246,9 @@ program mrggkk
 !  copy header of 1WF file to output
    if (binascii /= 2) then
      if (rdwrout == 4) then
-       call hdr_echo(hdr1, PH_wfk%fform, rdwrout)
+       call hdr1%echo(PH_wfk%fform, rdwrout)
      else
-       call hdr_fort_write(hdr1, unitout, PH_wfk%fform, ierr)
+       call hdr1%fort_write(unitout, PH_wfk%fform, ierr)
        ABI_CHECK(ierr == 0 , "hdr_fort_write returned ierr != 0")
      end if
    else
@@ -312,9 +307,8 @@ program mrggkk
 
    ABI_FREE(eig_k)
 
-!  clean header to deallocate everything
-   call hdr_free(hdr1)
-
+   ! clean header to deallocate everything
+   call hdr1%free()
    call PH_wfk%close()
  end do
 
@@ -369,9 +363,9 @@ program mrggkk
 !    copy header of 1WF file to output
      if (binascii /= 2) then
        if (rdwrout == 4) then
-         call hdr_echo(hdr1, fform, rdwrout)
+         call hdr1%echo(fform, rdwrout)
        else
-         call hdr_fort_write(hdr1, unitout, fform, ierr)
+         call hdr1%fort_write(unitout, fform, ierr)
          ABI_CHECK(ierr == 0 , "hdr_fort_write returned ierr != 0")
        end if
      else
@@ -412,13 +406,13 @@ program mrggkk
        end do
        if (binascii==2) write(unitout,'(2a)') ch10, ch10
      end do
-     call hdr_free(hdr1)
+     call hdr1%free()
    end do !  end loop over 1wf segments in small gkk file
 
    ABI_FREE(eig_k)
 
    close (unitgkk)
-   call hdr_free(hdr)
+   call hdr%free()
  end do !end loop over small gkk files
 
  close(unitout)
@@ -427,8 +421,6 @@ program mrggkk
  call wrtout(std_out,message,'COLL')
 
  call flush_unit(std_out)
-
- call destroy_mpi_enreg(mpi_enreg)
 
  call abinit_doctor("__mrggkk")
 

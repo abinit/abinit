@@ -18,10 +18,10 @@ ABINIT, [PAW1](paw1) and [PAW2](paw2).
 Also the [DFT+U tutorial](dftu) in ABINIT might be useful to know some basic
 variables common to DFT+_U_ and DFT+DMFT.
 
-[TUTORIAL_README]
+This tutorial should take about one hour to complete 
+(less if you have access to several processors).
 
-This tutorial should take one hour to complete 
-(especially if you have access to several processors).
+[TUTORIAL_README]
 
 ## 1 The DFT+DMFT method: summary and key parameters
   
@@ -71,14 +71,14 @@ Several parameters (both physical and technical) needs to be discussed for a DFT
 
 ## 2 Electronic Structure of SrVO3 in LDA
   
-*You might create a subdirectory of the *\$ABI_TUTOPARAL* directory, and use it for the tutorial. 
+*You might create a subdirectory of the *\$ABI_TESTS/tutoparal* directory, and use it for the tutorial. 
 In what follows, the names of files will be mentioned as if you were in this subdirectory*
 
-Copy the files *tdmft_1.in* and *dmft_x.files* from *\$ABI_TUTOPARAL* in your Work
+Copy the files *tdmft_1.in* and *dmft_x.files* from *\$ABI_TESTS/tutoparal* in your Work
 directory,
 
 ```sh
-cd $ABI_TUTOPARAL/Input
+cd $ABI_TESTS/tutoparal/Input
 mkdir Work_dfmt
 cd Work_dmft
 cp ../tdmft_x.files . 

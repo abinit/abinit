@@ -29,8 +29,6 @@
 module m_elphon
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_elphon
  use m_abicore
  use m_krank
@@ -39,6 +37,7 @@ module m_elphon
  use m_hdr
  use m_ebands
 
+ use defs_datatypes,    only : ebands_t
  use m_fstrings,        only : int2char4
  use m_io_tools,        only : open_file, is_open, get_unit
  use m_time,            only : timein
@@ -54,7 +53,6 @@ module m_elphon
  use m_eliashberg_1d,   only : eliashberg_1d
  use m_iogkk,           only : read_el_veloc,  read_gkk
  use m_bz_mesh,         only : make_path
- use m_fstab,           only : mkqptequiv
  use m_epweights,       only : d2c_weights, ep_el_weights, ep_fs_weights
  use m_a2ftr,           only : mka2f_tr, mka2f_tr_lova, get_tau_k
  use m_symkpt,          only : symkpt
@@ -352,7 +350,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  end if
 
 !the following is for the non master nodes
- call hdr_bcast(hdr,master,me,comm)
+ call hdr%bcast(master, me, comm)
  call xmpi_bcast(nband, master,comm,ierr)
  elph_ds%nband = nband
 
@@ -624,7 +622,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
      call hdr_fort_read(hdr1, unitfskgrid, fform)
      ABI_CHECK(fform/=0,'denser grid GKK header was mis-read. fform == 0')
    end if
-   call hdr_bcast(hdr1,master,me,comm)
+   call hdr1%bcast(master,me,comm)
 
    ABI_ALLOCATE(eigenGS_fine,(nband,hdr1%nkpt,elph_ds%nsppol))
 
@@ -650,7 +648,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    call order_fs_kpts(hdr1%kptns, hdr1%nkpt, elph_ds%k_fine%kptirr,&
 &   elph_ds%k_fine%nkptirr,elph_ds%k_fine%irredtoGS)
 
-   call hdr_free(hdr1)
+   call hdr1%free()
 
    call mkFSkgrid (elph_ds%k_fine, Cryst%nsym, Cryst%symrec, timrev)
 
@@ -1383,7 +1381,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  call ebands_free(Bst)
  call elph_ds_clean(elph_ds)
  call elph_tr_ds_clean(elph_tr_ds)
- call hdr_free(hdr)
+ call hdr%free()
 
  ABI_DEALLOCATE(coskr)
  ABI_DEALLOCATE(sinkr)
@@ -1809,7 +1807,7 @@ subroutine rchkGSheader (hdr,natom,nband,unitgkk)
    MSG_ERROR(message)
  end if
 
- call hdr_echo(hdr, fform, 4, unit=std_out)
+ call hdr%echo(fform, 4, unit=std_out)
 
  nband=hdr%nband(1)
 

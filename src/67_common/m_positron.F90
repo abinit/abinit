@@ -27,8 +27,6 @@
 module m_positron
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_efield
  use m_errors
  use m_abicore
@@ -38,7 +36,11 @@ module m_positron
  use m_hdr
  use m_xmpi
  use m_bandfft_kpt
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_special_funcs,  only : sbf8
  use m_ioarr,    only : ioarr, read_rhor
  use m_pawang,   only : pawang_type, realgaunt
@@ -46,7 +48,7 @@ module m_positron
  use m_pawtab,   only : pawtab_type
  use m_paw_ij,   only : paw_ij_type
  use m_pawfgrtab,only : pawfgrtab_type
- use m_pawrhoij,only : pawrhoij_type, pawrhoij_copy, pawrhoij_alloc, pawrhoij_free,&
+ use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_alloc, pawrhoij_free,&
                        pawrhoij_nullify, pawrhoij_gather, pawrhoij_inquire_dim, pawrhoij_symrhoij
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_send, &
                         pawcprj_mpi_recv, pawcprj_free, pawcprj_copy, pawcprj_bcast
@@ -59,19 +61,19 @@ module m_positron
  use m_mkrho,           only : initro
  use m_paw_occupancies, only : initrhoij, pawaccrhoij
  use m_gammapositron, only : gammapositron, gammapositron_fft
- use m_forstr,          only : forstr
+ use m_forstr,        only : forstr
  use m_pawxc,         only : pawxcsum
  use m_paw_denpot,    only : pawdensities
  use m_drivexc,       only : mkdenpos
 
  use m_paw_sphharm, only : initylmr
- use m_pawpsp,  only : pawpsp_read_corewf
- use m_crystal, only : crystal_t
- use m_mpinfo,  only : ptabs_fourdp,set_mpi_enreg_fft,unset_mpi_enreg_fft,destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle
- use m_io_tools,only : open_file,close_unit,get_unit
- use m_fftcore, only : sphereboundary
- use m_prep_kgb,        only : prep_fourwf
- use m_fft,            only : fourwf, fourdp
+ use m_pawpsp,      only : pawpsp_read_corewf
+ use m_crystal,     only : crystal_t
+ use m_mpinfo,      only : ptabs_fourdp,set_mpi_enreg_fft,unset_mpi_enreg_fft,destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle
+ use m_io_tools,    only : open_file,close_unit,get_unit
+ use m_fftcore,     only : sphereboundary
+ use m_prep_kgb,    only : prep_fourwf
+ use m_fft,         only : fourwf, fourdp
 
  implicit none
 
@@ -418,7 +420,7 @@ type(fock_type),pointer, intent(inout) :: fock
        fname=trim(dtfil%fildensin);if (dtset%positron==2) fname=trim(dtfil%fildensin)//'_POSITRON'
        call read_rhor(trim(fname), cplex1, dtset%nspden, nfft, ngfft, rdwrpaw, mpi_enreg, electronpositron%rhor_ep, &
        hdr_den, electronpositron%pawrhoij_ep, comm_cell, check_hdr=hdr)
-       etotal_read = hdr_den%etot; call hdr_free(hdr_den)
+       etotal_read = hdr_den%etot; call hdr_den%free()
        call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,1,ngfft,0)
        if (dtset%usepaw==1.and.allocated(electronpositron%nhat_ep)) then
          call pawmknhat(occtmp,1,0,0,0,0,gprimd,my_natom,dtset%natom,nfft,ngfft,0,&
@@ -695,7 +697,7 @@ type(fock_type),pointer, intent(inout) :: fock
        nelect=nelect+dtset%ziontypat(dtset%typat(iatom))
      end do
      maxocc=two/real(dtset%nsppol*dtset%nspinor,dp)
-     nocc=(nelect-tol8)/maxocc + 1
+     nocc=int((nelect-tol8)/maxocc) + 1
      nocc=min(nocc,dtset%nband(1)*dtset%nsppol)
      occlast=nelect-maxocc*(nocc-1)
      ABI_ALLOCATE(scocc,(dtset%nband(1)*dtset%nsppol))

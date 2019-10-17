@@ -26,9 +26,7 @@
 module m_outscfcv
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
- use defs_abitypes
  use m_abicore
  use m_sort
  use m_efield
@@ -43,7 +41,11 @@ module m_outscfcv
  use m_plowannier
  use m_splines
  use m_ebands
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes,     only : pseudopotential_type, ebands_t
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_io_tools,         only : open_file
  use m_fstrings,         only : strcat, endswith
@@ -70,20 +72,20 @@ module m_outscfcv
  use m_paw_tools,        only : pawprt
  use m_numeric_tools,    only : simpson_int
  use m_epjdos,           only : dos_calcnwrite, partial_dos_fractions, partial_dos_fractions_paw, &
-                                epjdos_t, epjdos_new, epjdos_free, prtfatbands, fatbands_ncwrite
+                                epjdos_t, epjdos_new, prtfatbands, fatbands_ncwrite
  use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
  use m_io_kss,           only : outkss
  use m_multipoles,       only : multipoles_out, out1dm
  use m_mlwfovlp_qp,      only : mlwfovlp_qp
  use m_paw_mkaewf,       only : pawmkaewf
- use m_dens,             only : mag_constr_e, calcdensph
+ use m_dens,             only : mag_penalty_e, calcdensph
  use m_mlwfovlp,         only : mlwfovlp
  use m_datafordmft,      only : datafordmft
  use m_mkrho,            only : read_atomden
  use m_positron,         only : poslifetime, posdoppler
  use m_optics_vloc,      only : optics_vloc
  use m_green,            only : green_type,compute_green,&
-&                      fourier_green,print_green,init_green,destroy_green,init_green_tau
+                                fourier_green,print_green,init_green,destroy_green,init_green_tau
  use m_self,             only : self_type,initialize_self,rw_self,destroy_self,destroy_self,selfreal2imag_self
 
  implicit none
@@ -199,8 +201,8 @@ contains
 !!      compute_coeff_plowannier,crystal_free,crystal_init,datafordmft,denfgr
 !!      destroy_dmft,destroy_oper,destroy_plowannier,dos_calcnwrite,ebands_free
 !!      ebands_init,ebands_interpolate_kpath,ebands_prtbltztrp,ebands_write
-!!      epjdos_free,fatbands_ncwrite,fftdatar_write,free_my_atmtab
-!!      get_my_atmtab,init_dmft,init_oper,init_plowannier,ioarr,mag_constr_e
+!!      fatbands_ncwrite,fftdatar_write,free_my_atmtab
+!!      get_my_atmtab,init_dmft,init_oper,init_plowannier,ioarr,mag_penalty_e
 !!      mlwfovlp,mlwfovlp_qp,multipoles_out,optics_paw,optics_paw_core
 !!      optics_vloc,out1dm,outkss,outwant,partial_dos_fractions
 !!      partial_dos_fractions_paw,pawmkaewf,pawprt,pawrhoij_copy
@@ -600,7 +602,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
    ! Write crystal and band structure energies.
    NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
-   NCF_CHECK(hdr_ncwrite(hdr, ncid, fform_den, nc_define=.True.))
+   NCF_CHECK(hdr%ncwrite(ncid, fform_den, nc_define=.True.))
    NCF_CHECK(crystal%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
    ! Add energy, forces, stresses
@@ -931,7 +933,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    end if
 #endif
 
-   call epjdos_free(dos)
+   call dos%free()
  end if ! prtdos > 1
 
  call timab(959,2,tsec)
@@ -940,15 +942,15 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Output of integrated density inside atomic spheres
  if (dtset%prtdensph==1.and.dtset%usewvl==0)then
    call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,&
-&   ntypat,ab_out,dtset%ratsph,rhor,rprimd,dtset%typat,ucvol,xred,1,cplex1)
+&   ntypat,ab_out,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,ucvol,xred,1,cplex1)
  end if
 
  call timab(960,2,tsec)
 
  if (dtset%magconon /= 0) then
 !  calculate final value of terms for magnetic constraint: "energy" term, lagrange multiplier term, and atomic contributions
-   call mag_constr_e(dtset%magconon,dtset%magcon_lambda,mpi_enreg,&
-&   natom,nfft,ngfft,nspden,ntypat,dtset%ratsph,rhor,rprimd,dtset%spinat,dtset%typat,xred)
+   call mag_penalty_e(dtset%magconon,dtset%magcon_lambda,mpi_enreg,&
+&   natom,nfft,ngfft,nspden,ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%spinat,dtset%typat,xred)
  end if
 
  call timab(961,1,tsec)

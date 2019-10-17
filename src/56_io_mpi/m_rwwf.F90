@@ -27,7 +27,6 @@
 module m_rwwf
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_wffile
  use m_abicore
@@ -40,6 +39,7 @@ module m_rwwf
  use netcdf
 #endif
 
+ use defs_abitypes, only : mpi_type
  use m_time,   only : timab
 
  implicit none

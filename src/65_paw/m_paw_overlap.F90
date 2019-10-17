@@ -25,14 +25,13 @@
 MODULE m_paw_overlap
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
 
+ use defs_abitypes, only : MPI_type
  use m_special_funcs, only : sbf8
  use m_efield, only : efield_type
-
  use m_pawang, only : pawang_type
  use m_pawcprj, only : pawcprj_type
  use m_pawrad, only : pawrad_type,simp_gen
@@ -102,8 +101,6 @@ CONTAINS  !=====================================================================
 
  subroutine overlap_k1k2_paw(cprj_k1,cprj_k2,dk,gprimd,k1k2_paw,lmn2max,lmnsize,mband,&
 &                           natom,nspinor,ntypat,pawang,pawrad,pawtab,typat,xred)
-
- implicit none
 
 !Arguments---------------------------
 !scalars
@@ -226,8 +223,6 @@ CONTAINS  !=====================================================================
 & g1,gprimd,kpt,mband,mbandw,mkmem,mpi_enreg,&
 & natom,nband,nkpt,nspinor,nsppol,ntypat,pawang,pawrad,pawtab,rprimd,&
 & seed_name,typat,xred)
-
- implicit none
 
 !Arguments---------------------------
 !scalars
@@ -638,8 +633,6 @@ CONTAINS  !=====================================================================
 
  subroutine smatrix_k_paw(cprj_k,cprj_kb,dtefield,kdir,kfor,mband,natom,smat_k_paw,typat)
 
- implicit none
-
 !Arguments---------------------------
 !scalars
  integer,intent(in) :: kdir,kfor,mband,natom
@@ -737,8 +730,6 @@ CONTAINS  !=====================================================================
 
  subroutine qijb_kk(calc_qijb,dkvecs,expibi,gprimd,lmn2max,natom,ntypat,&
 &                   pawang,pawrad,pawtab,typat)
-
- implicit none
 
 !Arguments---------------------------
 !scalars
@@ -879,8 +870,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine expibi(calc_expibi,dkvecs,natom,xred)
-
- implicit none
 
 !Arguments---------------------------
 !scalars

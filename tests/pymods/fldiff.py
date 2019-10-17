@@ -347,16 +347,16 @@ class Result(object):
             if ndiff_lines > tolnlines:
                 msg = 'failed: erroneous lines {ndiff_lines} > {tolnlines}'
             elif abs_error > tolabs * fact and rel_error < tolrel:
-                msg = 'failed: absolute error {abs_error:.4} > {tolabs}'
+                msg = 'failed: abs error {abs_error:.4} > {tolabs}'
             elif rel_error > tolrel * fact and abs_error < tolabs:
-                msg = 'failed: relative error {rel_error:.4} > {tolrel}'
+                msg = 'failed: rel error {rel_error:.4} > {tolrel}'
             elif abs_error > tolabs * fact and rel_error > tolrel * fact:
-                msg = ('failed: absolute error {abs_error:.4} > {tolabs},'
-                       ' relative error {rel_error:.4} > {tolrel}')
+                msg = ('failed: abs error {abs_error:.4} > {tolabs},'
+                       ' rel error {rel_error:.4} > {tolrel}')
             else:
                 status = 'passed'
-                msg = ('passed: absolute error {abs_error:.4} < {tolabs},'
-                       ' relative error {rel_error:.4} < {tolrel}')
+                msg = ('passed: abs error {abs_error:.4} < {tolabs},'
+                       ' rel error {rel_error:.4} < {tolrel}')
 
             msg = msg.format(**locs)
 
