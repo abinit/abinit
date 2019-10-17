@@ -1264,7 +1264,7 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
 
            !Calculate and write the q-gradient of the polarization response
            !(without the inverse volume factor)
-           dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-two*tmpim/ucvol
+           dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-two*tmpim
            dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=0.0_dp
 
            if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1 .and. qdrflg(iatom,iatdir,iq1dir,iq2dir)==1 ) then

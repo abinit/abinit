@@ -512,6 +512,8 @@ end subroutine ddb_bcast
 !!   2 => stationary formulation of the 2nd derivative
 !!   3 => third derivative of total energy
 !!   4 => first-order derivatives of total energy
+!!  33 => long wave third order derivatives of total energy
+!! [rfqvec(4)] = 1=> d/dq (optional)
 !!
 !! OUTPUT
 !! iblok= number of the block that corresponds to the specifications
@@ -525,8 +527,11 @@ end subroutine ddb_bcast
 !!
 !! SOURCE
 
-
+#ifdef MR_DEV
+subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqvec)
+#else
 subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+#endif
 
 !Arguments -------------------------------
 !scalars
@@ -536,6 +541,9 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 !arrays
  integer,intent(in) :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp),intent(inout) :: qphnrm(3),qphon(3,3)
+#ifdef MR_DEV
+ integer,optional,intent(in) :: rfqvec(4)
+#endif
 
 !Local variables -------------------------
 !scalars
@@ -546,6 +554,9 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
  integer :: gamma(3)
  integer,allocatable :: worki(:,:)
  real(dp) :: qpt(3)
+#ifdef MR_DEV
+ integer :: rfqvec_(4)
+#endif
 
 ! *********************************************************************
 
@@ -555,8 +566,13 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 !Get the number of derivative
  if(rftyp==1.or.rftyp==2)then
    nder=2
+#ifdef MR_DEV
+ else if(rftyp==3.or.rftyp==33)then
+   nder=3
+#else
  else if(rftyp==3)then
    nder=3
+#endif
  else if(rftyp==0)then
    nder=0
  else if(rftyp==4)then
@@ -592,7 +608,11 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
    call gamma9(gamma(ider),qphon(1:3,ider),qphnrm(ider),DDB_QTOL)
 
    if(gamma(ider)==0)then
+#ifdef MR_DEV
+     if(rfstrs(ider)/=0.or.rfelfd(ider)/=0.or.rfqvec(ider)/=0)then
+#else
      if(rfstrs(ider)/=0.or.rfelfd(ider)/=0)then
+#endif
        write(message, '(a,a)' )&
 &       'Not yet able to handle stresses or electric fields',ch10,&
 &       'with non-zero wavevector.'
@@ -604,6 +624,10 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 !Initialise the perturbation table
  ABI_MALLOC(worki,(mpert,4))
  worki(:,1:nder)=0
+
+#ifdef MR_DEV
+ rfqvec_(:)=0; if(present(rfqvec))rfqvec_(:)=rfqvec(:)
+#endif
 
 !Build the perturbation table
  do ider=1,nder
@@ -621,6 +645,12 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
    if(rfelfd(ider)==2.or.rfelfd(ider)==3)then
      worki(natom+2,ider)=1
    end if
+#ifdef MR_DEV
+!  Then the ddq
+   if(rfqvec_(ider)==1)then
+     worki(natom+8,ider)=1
+   end if
+#endif
 !  Then the uniaxial stress
    if(rfstrs(ider)==1.or.rfstrs(ider)==3)then
      worki(natom+3,ider)=1
@@ -735,6 +765,15 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
      call wrtout(std_out,message,'COLL')
      write(message, '(a,i3)' )' Type (rfmeth) =',rftyp
      call wrtout(std_out,message,'COLL')
+#ifdef MR_DEV
+     write(message, '(a)' ) ' ider qphon(3)         qphnrm   rfphon rfelfd rfstrs rfqvec'
+     call wrtout(std_out,message,'COLL')
+     do ider=1,nder
+       write(message, '(i4,4f6.2,4i7)' )&
+       ider,(qphon(ii,ider),ii=1,3),qphnrm(ider),rfphon(ider),rfelfd(ider),rfstrs(ider),rfqvec_(ider)
+       call wrtout(std_out,message,'COLL')
+     end do
+#else
      write(message, '(a)' ) ' ider qphon(3)         qphnrm   rfphon rfelfd rfstrs'
      call wrtout(std_out,message,'COLL')
      do ider=1,nder
@@ -742,6 +781,7 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
        ider,(qphon(ii,ider),ii=1,3),qphnrm(ider),rfphon(ider),rfelfd(ider),rfstrs(ider)
        call wrtout(std_out,message,'COLL')
      end do
+#endif
    end if
  end if
 
@@ -1314,9 +1354,16 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
      ABI_MALLOC(d3cart,(2,3,mpert,3,mpert,3,mpert))
      ABI_MALLOC(car3flg,(3,mpert,3,mpert,3,mpert))
 
-     call lwcart(tmpflg,car3flg,tmpval,d3cart,gprimd,mpert,natom,rprimd,ucvol)
+     call lwcart(tmpflg,car3flg,tmpval,d3cart,gprimd,mpert,natom,rprimd)
      
+     ddb%flg(1:nsize,iblok) = reshape(car3flg, shape = (/3*mpert*3*mpert*3*mpert/))
+     ddb%val(1,1:nsize,iblok) = reshape(d3cart(1,:,:,:,:,:,:), shape = (/3*mpert*3*mpert*3*mpert/))
+     ddb%val(2,1:nsize,iblok) = reshape(d3cart(2,:,:,:,:,:,:), shape = (/3*mpert*3*mpert*3*mpert/))
 
+     ABI_FREE(d3cart)
+     ABI_FREE(car3flg)
+     ABI_FREE(tmpflg)
+     ABI_FREE(tmpval)
 #endif
    end if
  end do ! iblok
@@ -2526,16 +2573,18 @@ end function ddb_get_dielt
 !!  ddb_get_quadrupoles
 !!
 !! FUNCTION
-!! Reads the Dielectric Tensor from the DDB file
+!! Reads the Dynamic Quadrupoles Tensor from the DDB file
 !!
 !! INPUTS
 !!  ddb<type(ddb_type)>=Derivative database.
+!!  Crystal<type(crystal_t)>=Crystal structure parameters
 !!  rftyp  = 1 if non-stationary block
 !!           2 if stationary block
 !!           3 if third order derivatives
+!!          33 if long wave third order derivatives
 !!
 !! OUTPUT
-!!  quadrupoles(3,3) = Macroscopic dielectric tensor
+!!  quadrupoles(3,3,3,natom) = Dynamic Quadrupole tensor
 !!  iblok=Index of the block containing the data. 0 if block is not found.
 !!
 !! NOTES
@@ -2564,6 +2613,7 @@ integer function ddb_get_quadrupoles(ddb, crystal, rftyp, quadrupoles) result(ib
  character(len=500) :: msg
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
+ integer :: rfqvec(4)
  real(dp) :: qphnrm(3),qphon(3,3)
 
 ! *********************************************************************
@@ -2571,38 +2621,25 @@ integer function ddb_get_quadrupoles(ddb, crystal, rftyp, quadrupoles) result(ib
  ! Look for the Gamma Block in the DDB
  qphon(:,:)=zero
  qphnrm(:)=one
- rfphon(1:2)=1
- rfelfd(1:2)=1
- rfstrs(1:2)=8
+ rfphon(3)=1
+ rfelfd(3)=1
+ rfstrs(:)=0
+ rfqvec(3)=1
 
- call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+ call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqvec=rfqvec)
 
- ! Read the dielectric tensor only if the Gamma-block was found in the DDB
+ ! Compute the quadrupole tensor only if the Gamma-block was found in the DDB
  ! In case it was not found, iblok = 0
- iblok = 0
  quadrupoles=zero
 
- !Temporary hack to read the quadrupole tensor from a text file
- if (.not.file_exists("quadrupoles_cart.out")) return
- quad_unt = 71
- open(unit=quad_unt,file="quadrupoles_cart.out",action="read")
- do ii=1,2
-   read(quad_unt,*) msg
- end do
+ if (iblok /= 0) then
+   write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
+   ' Dynamical Quadrupoles Tensor ',ch10
+   call wrtout([std_out, ab_out], msg)
 
- do ii=1,3
-   do jj=1,3*3*crystal%natom
-#ifdef MR_DEV
-     read(quad_unt,'(4(i5,3x),2(1x,f20.10))') iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
-#else
-     read(quad_unt,'(4(i5,3x),2(1x,f20.10))') iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
-#endif
-     !write(*,*) iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
-   end do
-   read(quad_unt,'(a)') msg
- end do
- close(quad_unt)
- iblok = 1
+   call dtqdrp(ddb%val(:,:,iblok),ddb%mpert,ddb%natom,quadrupoles)
+
+ end if
 
 end function ddb_get_quadrupoles
 !!***
@@ -4273,7 +4310,6 @@ end subroutine dfpt_lw_doutput
 !!  mpert =maximum number of ipert
 !!  natom= number of atoms
 !!  rprimd(3,3)=dimensional primitive translations (bohr)
-!!  ucvol=unit cell volume (bohr^3)
 !!
 !! OUTPUT
 !! carflg(3,mpert,3,mpert,3,mpert)=1 if the element of d3cart has been calculated, 0 otherwise
@@ -4287,12 +4323,11 @@ end subroutine dfpt_lw_doutput
 !!
 !! SOURCE
 
-subroutine lwcart(blkflg,carflg,d3,d3cart,gprimd,mpert,natom,rprimd,ucvol)
+subroutine lwcart(blkflg,carflg,d3,d3cart,gprimd,mpert,natom,rprimd)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: mpert,natom
- real(dp),intent(in) :: ucvol
 !arrays
  integer,intent(in) :: blkflg(3,mpert,3,mpert,3,mpert)
  integer,intent(out) :: carflg(3,mpert,3,mpert,3,mpert)
@@ -4302,6 +4337,7 @@ subroutine lwcart(blkflg,carflg,d3,d3cart,gprimd,mpert,natom,rprimd,ucvol)
 !Local variables -------------------------
 !scalars
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
+ integer :: ii
 !arrays
  integer :: flg1(3),flg2(3)
  real(dp) :: vec1(3),vec2(3)
@@ -4309,6 +4345,7 @@ subroutine lwcart(blkflg,carflg,d3,d3cart,gprimd,mpert,natom,rprimd,ucvol)
 ! *******************************************************************
 
 !Transform to cartesian coordinates
+ d3cart(:,:,:,:,:,:,:) = d3(:,:,:,:,:,:,:)
  carflg(:,:,:,:,:,:) = 0
 
  do i1pert = 1, mpert
@@ -4317,33 +4354,39 @@ subroutine lwcart(blkflg,carflg,d3,d3cart,gprimd,mpert,natom,rprimd,ucvol)
 
        do i2dir = 1, 3
          do i3dir = 1, 3
+           do ii= 1, 2
 
-           vec1(:) = d3cart(1,:,i1pert,i2dir,i2pert,i3dir,i3pert)
-           flg1(:) = blkflg(:,i1pert,i2dir,i2pert,i3dir,i3pert)
-           call cart39(flg1,flg2,gprimd,i1pert,natom,rprimd,vec1,vec2)
-           d3cart(1,:,i1pert,i2dir,i2pert,i3dir,i3pert) = vec2(:)
-           carflg(:,i1pert,i2dir,i2pert,i3dir,i3pert) = flg2(:)
+             vec1(:) = d3cart(ii,:,i1pert,i2dir,i2pert,i3dir,i3pert)
+             flg1(:) = blkflg(:,i1pert,i2dir,i2pert,i3dir,i3pert)
+             call cart39(flg1,flg2,gprimd,i1pert,natom,rprimd,vec1,vec2)
+             d3cart(ii,:,i1pert,i2dir,i2pert,i3dir,i3pert) = vec2(:)
+             carflg(:,i1pert,i2dir,i2pert,i3dir,i3pert) = flg2(:)
 
+           end do
          end do
        end do
 
        do i1dir = 1, 3
          do i3dir = 1, 3
-           vec1(:) = d3cart(1,i1dir,i1pert,:,i2pert,i3dir,i3pert)
-           flg1(:) = blkflg(i1dir,i1pert,:,i2pert,i3dir,i3pert)
-           call cart39(flg1,flg2,gprimd,i2pert,natom,rprimd,vec1,vec2)
-           d3cart(1,i1dir,i1pert,:,i2pert,i3dir,i3pert) = vec2(:)
-           carflg(i1dir,i1pert,:,i2pert,i3dir,i3pert) = flg2(:)
+           do ii= 1, 2
+             vec1(:) = d3cart(ii,i1dir,i1pert,:,i2pert,i3dir,i3pert)
+             flg1(:) = blkflg(i1dir,i1pert,:,i2pert,i3dir,i3pert)
+             call cart39(flg1,flg2,gprimd,i2pert,natom,rprimd,vec1,vec2)
+             d3cart(ii,i1dir,i1pert,:,i2pert,i3dir,i3pert) = vec2(:)
+             carflg(i1dir,i1pert,:,i2pert,i3dir,i3pert) = flg2(:)
+           end do
          end do
        end do
 
        do i1dir = 1, 3
          do i2dir = 1, 3
-           vec1(:) = d3cart(1,i1dir,i1pert,i2dir,i2pert,:,i3pert)
-           flg1(:) = blkflg(i1dir,i1pert,i2dir,i2pert,:,i3pert)
-           call cart39(flg1,flg2,gprimd,i3pert,natom,rprimd,vec1,vec2)
-           d3cart(1,i1dir,i1pert,i2dir,i2pert,:,i3pert) = vec2(:)
-           carflg(i1dir,i1pert,i2dir,i2pert,:,i3pert) = flg2(:)
+           do ii= 1, 2
+             vec1(:) = d3cart(ii,i1dir,i1pert,i2dir,i2pert,:,i3pert)
+             flg1(:) = blkflg(i1dir,i1pert,i2dir,i2pert,:,i3pert)
+             call cart39(flg1,flg2,gprimd,i3pert,natom,rprimd,vec1,vec2)
+             d3cart(ii,i1dir,i1pert,i2dir,i2pert,:,i3pert) = vec2(:)
+             carflg(i1dir,i1pert,i2dir,i2pert,:,i3pert) = flg2(:)
+           end do
          end do
        end do
 
@@ -4351,8 +4394,99 @@ subroutine lwcart(blkflg,carflg,d3,d3cart,gprimd,mpert,natom,rprimd,ucvol)
    end do
  end do
 
+! do i3pert=1,mpert
+!   do i3dir=1,3
+!     do i2pert=1,mpert
+!       do i2dir=1,3
+!         do i1pert=1,mpert
+!           do i1dir=1,3
+!             if (carflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+!               write(100,'(1x,6i3,2f14.7)') &
+!             & i1dir, i1pert, i2dir, i2pert, i3dir, i3pert, &
+!             & d3cart(1,i1dir, i1pert, i2dir, i2pert, i3dir, i3pert), &
+!             & d3cart(2,i1dir, i1pert, i2dir, i2pert, i3dir, i3pert)
+!             end if
+!           end do
+!         end do
+!       end do
+!     end do
+!   end do
+! end do
+ 
 end subroutine lwcart
 !!***
+
+!!****f* m_ddb/dtqdrp
+!! NAME
+!! dtqdrp
+!!
+!! FUNCTION
+!! Reads the Dynamical Quadrupole Tensor
+!! in the Gamma Block coming from the Derivative Data Base
+!! (long wave third-order derivatives).
+!!
+!! INPUTS
+!! blkval(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies
+!! natom= number of atoms in unit cell
+!! mpert =maximum number of ipert
+!!
+!! OUTPUT
+!! quadrupoles(3,3,3,natom) = Dynamical Quadrupoles
+!!
+!! PARENTS
+!!      m_ddb
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dtqdrp(blkval,mpert,natom,quadrupoles)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: mpert,natom
+!arrays
+ real(dp),intent(in) :: blkval(2,3*mpert*3*mpert*3*mpert)
+ real(dp),intent(out) :: quadrupoles(3,3,3,natom)
+
+!Local variables -------------------------
+!scalars
+ integer :: elfd,iatd,iatom,qvecd
+ logical :: iwrite
+!arrays
+ real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert),dvoigt(3,6)
+
+! *********************************************************************
+
+ d3cart(1,:,:,:,:,:,:) = reshape(blkval(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
+ d3cart(2,:,:,:,:,:,:) = reshape(blkval(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
+
+!Extraction of quadrupoles (need symmetrization wrt qvecd and elfd) 
+ do iatom = 1,natom
+   do iatd = 1,3
+     do elfd = 1,3
+       do qvecd = 1,elfd-1
+         quadrupoles(qvecd,elfd,iatd,iatom) = -two* &
+       (d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)+d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8))
+         quadrupoles(elfd,qvecd,iatd,iatom) = quadrupoles(qvecd,elfd,iatd,iatom) 
+       end do
+       quadrupoles(elfd,elfd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
+     end do
+   end do
+ end do
+
+! do qvecd = 1,3
+!   do elfd = 1,3
+!     do iatd = 1,3
+!       do iatom = 1,natom
+!         write(100,'(4(i5,3x),1x,f20.10)') elfd,iatom,iatd,qvecd,quadrupoles(qvecd,elfd,iatd,iatom)
+!       end do
+!     end do
+!   end do
+! end do
+
+ end subroutine dtqdrp
+
 #endif
 
 end module m_ddb

@@ -303,7 +303,7 @@ program anaddb
 !**********************************************************************
 
  ! Get Quadrupole tensor
- iblok = ddb%get_quadrupoles(crystal,3,qdrp_cart)
+ iblok = ddb%get_quadrupoles(crystal,33,qdrp_cart)
 
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
