@@ -2559,8 +2559,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
    if (dt%positron/=0.and.mgga==1) then
-     message='Electron-positron calculation is not compatible with meta-GGA XC functional!'
-     MSG_ERROR_NOSTOP(message, ierr)
+     msg='Electron-positron calculation is not compatible with meta-GGA XC functional!'
+     MSG_ERROR_NOSTOP(msg, ierr)
    end if
    if (dt%positron/=0.and.dt%ionmov==5) then
      cond_string(1)='ionmov' ; cond_values(1)=dt%ionmov
@@ -3184,9 +3184,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',usepaw,1,(/0/),iout)
      cond_string(1)='usekden' ; cond_values(1)=dt%usekden
      call chkint_eq(1,1,cond_string,cond_values,ierr,'intxc',dt%intxc,1,(/0/),iout)
-!     do ipsp=1,npsp
+     do ipsp=1,npsp
 !      Check that xccc is zero (NCPP metaGGAs cannot be used at present with non-linear core corrections)
-       if (pspheads(ipsp)%xccc/=0.and.usepaw==0 then
+       if (pspheads(ipsp)%xccc/=0.and.usepaw==0) then
          write(msg, '(5a,i0,3a)' )&
 &         'When usekden/=0, it is not possible to use norm-conserving pseudopotentials',ch10,&
 &         'with a non-linear core correction.',ch10,&
