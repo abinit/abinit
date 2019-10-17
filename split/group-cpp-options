@@ -21,6 +21,7 @@ tree_map = {"libpaw": ["39_libpaw"]}
 with open(os.path.join("split", "cpp-options.yml"), "r") as yaml_file:
     cpp_options = yaml.load(yaml_file, Loader=MyLoader)["cpp_options"]
 
+# TODO: ignore m_cppopts_dumper.F90
 cpp_map = {}
 for key, topdir in abinit_trees.items():
     for root, dirs, files in os.walk(topdir):
