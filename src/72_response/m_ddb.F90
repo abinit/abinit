@@ -891,6 +891,10 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
    ddb%typ(iblok)=4
  else if(name==' 2nd eigenvalue derivatives   - ' .or. name==' 2rd eigenvalue derivatives   - ')then
    ddb%typ(iblok)=5
+#ifdef MR_DEV
+ else if(name==' 3rd derivatives (long wave)  - ')then
+   ddb%typ(iblok)=33
+#endif 
  else
    write(message,'(6a)')&
    'The following string appears in the DDB in place of',&
@@ -923,7 +927,11 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
    end do
 
 !  Read the 3rd derivative block
+#ifdef MR_DEV
+ else if(ddb%typ(iblok)==3.or.ddb%typ(iblok)==33)then
+#else
  else if(ddb%typ(iblok)==3)then
+#endif
 
 !  First check if there is enough space to read it
    if(msize<(3*mpert*3*mpert*3*mpert))then
@@ -3044,6 +3052,10 @@ subroutine ddb_write_block(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
    write(nunit, '(a,i8)' )' 1st derivatives              - # elements :',nelmts
  else if (ddb%typ(iblok) == 5) then
    write(nunit, '(a,i8)' )' 2nd eigenvalue derivatives   - # elements :',nelmts
+#ifdef MR_DEV
+ else if(ddb%typ(iblok)==33) then
+   write(nunit, '(a,i8)' )' 3rd derivatives (long wave)  - # elements :',nelmts
+#endif
  end if
 
 !Write the 2nd derivative block
@@ -3070,7 +3082,11 @@ subroutine ddb_write_block(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
    end if
 
 !  Write the 3rd derivative block
+#ifdef MR_DEV
+ else if(ddb%typ(iblok)==3.or.ddb%typ(iblok)==33)then
+#else
  else if(ddb%typ(iblok)==3)then
+#endif
 
 !  Write the phonon wavevectors
    write(nunit, '(a,3es16.8,f6.1)' )' qpt',(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
@@ -3547,7 +3563,12 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  mpert=matom+MPERT_MAX
  msize=3*mpert*3*mpert
+
+#ifdef MR_DEV
+ if(mblktyp==3.or.mblktyp==33)msize=msize*3*mpert
+#else
  if(mblktyp==3)msize=msize*3*mpert
+#endif 
 
  call ddb%malloc(msize, mblok, matom, mtypat)
 
@@ -3668,7 +3689,11 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
          tmerge=1
          if(ddb%typ(iblok1)==1.or.ddb%typ(iblok1)==2)then
            nq=1
+#ifdef MR_DEV
+         else if(ddb%typ(iblok1)==3.or.ddb%typ(iblok1)==33)then
+#else
          else if(ddb%typ(iblok1)==3)then
+#endif
 !          Note : do not merge permutation related elements ....
            nq=3
          else if(ddb%typ(iblok1)==4 .or. ddb%typ(iblok1)==0)then
@@ -4175,7 +4200,7 @@ subroutine dfpt_lw_doutput(blkflg,d3,mpert,natom,ntypat,unddb)
 
 !Write the block type and number of elements
  write(unddb,*)' '
- write(unddb, '(a,i8)' )' 3rd derivatives              - # elements :',nelmts
+ write(unddb, '(a,i8)' )' 3rd derivatives (long wave)  - # elements :',nelmts
 
 !Write the phonon wavevectors
  write(unddb, '(a,3es16.8,f6.1)' )' qpt',(ddb%qpt(ii,1),ii=1,3),ddb%nrm(1,1)
