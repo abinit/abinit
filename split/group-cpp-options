@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+
+import os
+import re
+import yaml
+try:
+    from yaml import CDumper as MyDumper
+    from yaml import CLoader as MyLoader
+except ImportError:
+    from yaml import Dumper as MyDumper
+    from yaml import Loader as MyLoader
+
+
+abinit_trees = {
+    "common": os.path.join("shared", "common", "src"),
+    "libpaw": os.path.join("shared", "libpaw", "src"),
+    "core": "src",
+}
+tree_map = {"libpaw": ["39_libpaw"]}
+
+with open(os.path.join("split", "cpp-options.yml"), "r") as yaml_file:
+    cpp_options = yaml.load(yaml_file, Loader=MyLoader)["cpp_options"]
+
+cpp_map = {}
+for key, topdir in abinit_trees.items():
+    for root, dirs, files in os.walk(topdir):
+        mark = os.path.basename(root)
+        if mark != "src":
+            if not key in tree_map:
+                tree_map[key] = []
+            tree_map[key].append(mark)
+        text = []
+        for src in [item for item in files \
+                if item.endswith(".F90") or item.endswith(".f90")]:
+            text += [line for line in open(os.path.join(root, src), "r").readlines() \
+                    if line.startswith("#")]
+        text = "".join(text)
+        for opt in cpp_options:
+            if re.search(opt, text):
+                if not opt in cpp_map:
+                    cpp_map[opt] = []
+                if mark == "src":
+                    cpp_map[opt].append("39_libpaw")
+                else:
+                    cpp_map[opt].append(mark)
+
+map_data = {
+        "tree_map": tree_map,
+        "cpp_map":cpp_map,
+}
+with open(os.path.join("split", "cpp_map.yml"), "w") as map_file:
+    map_file.write(yaml.dump(map_data, Dumper=MyDumper) + "\n")
