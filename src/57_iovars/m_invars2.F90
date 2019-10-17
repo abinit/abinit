@@ -3247,7 +3247,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_nt',tread,'INT')
  if(tread==1) dtset%plowan_nt=intarr(1)
 
- !if (dtset%plowan_compute>0) then
+! if (dtset%plowan_compute>0) then
    call intagm(dprarr,intarr,jdtset,marr,3*dtset%plowan_nt,string(1:lenstr),'plowan_it',tread,'INT')
    if(tread==1) dtset%plowan_it(1:3*dtset%plowan_nt)=intarr(1:3*dtset%plowan_nt)
 
@@ -3263,7 +3263,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
    call intagm(dprarr,intarr,jdtset,marr,sumnbl,string(1:lenstr),'plowan_projcalc',tread,'INT')
    if(tread==1) dtset%plowan_projcalc(1:sumnbl)=intarr(1:sumnbl)
- !end if
+! end if
 
 
    if ((dtset%ucrpa > 0 .and. dtset%plowan_natom == 0).or.(dtset%nbandkss /= 0 .and. dtset%usedmft/=0)) then

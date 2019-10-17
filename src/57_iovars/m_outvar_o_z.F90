@@ -388,7 +388,7 @@ contains
  narr=100
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=3*dtsets(idtset)%plowan_nt
-   if(idtset==0)narrm(idtset)=100
+   !if(idtset==0)narrm(idtset)=100
    if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>=0) then
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_it(1:narrm(idtset))
    end if
@@ -400,7 +400,7 @@ contains
  narr=mxvals%natom
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=dtsets(idtset)%plowan_natom
-   if(idtset==0)narrm(idtset)=mxvals%natom
+   !if(idtset==0)narrm(idtset)=mxvals%natom
    if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>=0) then
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_iatom(1:narrm(idtset))
    end if
@@ -411,7 +411,7 @@ contains
  narr=mxvals%natom
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=dtsets(idtset)%plowan_natom
-   if(idtset==0)narrm(idtset)=mxvals%natom
+   !if(idtset==0)narrm(idtset)=mxvals%natom
    if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>=0) then
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_nbl(1:narrm(idtset))
    end if
@@ -422,7 +422,7 @@ contains
  narr=12*mxvals%natom
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=sum(dtsets(idtset)%plowan_nbl(1:dtsets(idtset)%plowan_natom))
-   if(idtset==0)narrm(idtset)=12*mxvals%natom
+   !if(idtset==0)narrm(idtset)=12*mxvals%natom
    if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>=0) then
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_lcalc(1:narrm(idtset))
    end if
@@ -433,7 +433,7 @@ contains
  narr=12*mxvals%natom
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=sum(dtsets(idtset)%plowan_nbl(1:dtsets(idtset)%plowan_natom))
-   if(idtset==0)narrm(idtset)=12*mxvals%natom
+   !if(idtset==0)narrm(idtset)=12*mxvals%natom
    if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>=0) then
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_projcalc(1:narrm(idtset))
    end if

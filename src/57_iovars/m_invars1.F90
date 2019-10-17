@@ -356,6 +356,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    ! Read plowan_compute
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_compute',tread,'INT')
    if(tread==1) dtsets(idtset)%plowan_compute=intarr(1)
+   
 
    ! Read user* variables
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useria',tread,'INT')
@@ -528,13 +529,13 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    ABI_ALLOCATE(dtsets(idtset)%shiftk,(3,MAX_NSHIFTK))
    ABI_ALLOCATE(dtsets(idtset)%typat,(mxnatom))
    ABI_ALLOCATE(dtsets(idtset)%upawu,(mxntypat,mxnimage))
-!   if (dtsets(idtset)%plowan_compute>0) then
+! if (dtsets(idtset)%plowan_compute>0) then
    ABI_ALLOCATE(dtsets(idtset)%plowan_iatom,(mxnatom))
    ABI_ALLOCATE(dtsets(idtset)%plowan_it,(100*3))
    ABI_ALLOCATE(dtsets(idtset)%plowan_nbl,(mxnatom))
    ABI_ALLOCATE(dtsets(idtset)%plowan_lcalc,(12*mxnatom))
    ABI_ALLOCATE(dtsets(idtset)%plowan_projcalc,(12*mxnatom))
-!   endif
+!endif
    ABI_ALLOCATE(dtsets(idtset)%vel_orig,(3,mxnatom,mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%vel_cell_orig,(3,3,mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%xred_orig,(3,mxnatom,mxnimage))
@@ -1845,10 +1846,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_nt',tread,'INT')
  if(tread==1) dtset%plowan_natom=intarr(1)
 
- if (dtset%ucrpa > 0 .and. dtset%plowan_compute==0) then
-   dtset%plowan_natom=1
-   dtset%plowan_nt=1
- endif
+ !if (dtset%ucrpa > 0 .and. dtset%plowan_compute==0) then
+   !dtset%plowan_natom=1
+   !dtset%plowan_nt=1
+ !endif
+
 !PAW potential zero keyword
  dtset%usepotzero=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepotzero',tread,'INT')
