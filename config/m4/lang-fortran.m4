@@ -670,6 +670,40 @@ AC_DEFUN([_ABI_CHECK_FC_DTARRAYS],[
 ]) # _ABI_CHECK_FC_DTARRAYS
 
 
+# _ABI_CHECK_FC_IEEE_ARITHMETIC()
+# --------------------
+#
+# Checks whether the Fortran compiler supports the intrinsic module IEEE_ARITHMETIC
+#
+AC_DEFUN([_ABI_CHECK_FC_IEEE_ARITHMETIC],[
+  dnl Init
+  fc_has_ieee_arithmetic="no"
+
+  AC_MSG_CHECKING([whether the Fortran compiler supports IEEE_ARITHMETIC])
+
+  dnl Try to compile a piece of code that uses the module.
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
+    [[
+      use, intrinsic :: ieee_arithmetic
+      real :: val
+
+      if (ieee_is_nan(val)) then  ! NaN
+        write(*,*)"Hello NAN"
+      end if
+
+    ]])], [fc_has_ieee_arithmetic="yes"])
+  AC_LANG_POP()
+
+  if test "${fc_has_ieee_arithmetic}" = "yes"; then
+    AC_DEFINE([HAVE_FC_IEEE_ARITHMETIC],1, 
+      [Define to 1 if your Fortran compiler supports IEEE_ARITHMETIC module.])
+  fi
+
+  AC_MSG_RESULT(${fc_has_ieee_arithmetic})
+]) # _ABI_CHECK_FC_IEEE_ARITHMETIC
+
+
  ##############################################################################
 
 # _ABI_CHECK_FC_IEEE_EXCEPTIONS()
@@ -1171,6 +1205,7 @@ AC_DEFUN([ABI_FC_FEATURES],[
   _ABI_CHECK_FC_SYSTEM
   _ABI_CHECK_FC_CONTIGUOUS
   _ABI_CHECK_FC_DTARRAYS
+  _ABI_CHECK_FC_IEEE_ARITHMETIC
   _ABI_CHECK_FC_IEEE_EXCEPTIONS
   _ABI_CHECK_FC_IOMSG
   _ABI_CHECK_FC_ISO_C_BINDING
