@@ -3167,6 +3167,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
          pawtab%partialwave_mesh_size=pawrad%mesh_size
          pawtab%mesh_size=pawrad_ifromr(pawrad,pawtab%rpaw)+5
          pawtab%mesh_size=min(pawtab%mesh_size,pawrad%mesh_size)
+         if (pawtab%mesh_size>pawrad%mesh_size-2) pawtab%mesh_size=pawrad%mesh_size
          imainmesh=imsh
          exit
        end if
@@ -3184,11 +3185,10 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 &        *pawrad%rad(1+shft:pawtab%partialwave_mesh_size)
    if (shft==1) pawtab%phi(1,ib)=zero
  end do
- write(msg,'(a,i4)') &
-& ' mmax= ',mmax
+ write(msg,'(a,i4)') ' mmax= ',mmax
  call wrtout(ab_out,msg,'COLL')
- call wrtout(std_out,  msg,'COLL')
- pawtab%mesh_size=pawrad%mesh_size
+ call wrtout(std_out,msg,'COLL')
+
 !---------------------------------
 !Read pseudo wave-functions (tphi)
 
@@ -3276,7 +3276,6 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 & ' Radial grid used for projectors is grid ',iprojmesh
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,  msg,'COLL')
-
 
 !---------------------------------
 !Read core density (coredens)

@@ -31,7 +31,7 @@ module m_pawxmlps
  use fox_sax
 #endif
 
- use m_pawrad     , only : pawrad_type, pawrad_init, pawrad_free, bound_deriv
+ use m_pawrad     , only : pawrad_type, pawrad_init, pawrad_free, pawrad_ifromr, bound_deriv
  use m_paw_numeric, only : paw_spline, paw_splint
 
  implicit none
@@ -2689,8 +2689,8 @@ end subroutine paw_setup_copy
 
 !Local variables ---------------------------------------
  integer :: funit,iaewf,ii,imeshae,imsh,ir,igrid,icor,ierr,maxmeshz,mesh_size,nmesh,shft
- logical :: endfile,found, tread
- type(pawrad_type) :: tmpmesh
+ logical :: endfile,found,tread
+ real(dp) :: yp1,ypn
  character(len=100) :: msg,version
  character (len=XML_RECL) :: line,readline
  character (len=XML_RECL) :: strg
@@ -2925,14 +2925,19 @@ end subroutine paw_setup_copy
    end do
  end if
 
-!Start a reading loop
- iaewf=0
- endfile=.false.
+!Initialize radial meshes
+ do imsh=1,nmesh
+   call pawrad_init(radmesh(imsh))
+ end do
+
+ maxmeshz=maxval(radmesh(:)%mesh_size)
  LIBPAW_DATATYPE_ALLOCATE(gridwf,(nphicor))
  LIBPAW_DATATYPE_ALLOCATE(statewf,(nphicor))
- maxmeshz=pawrad%mesh_size
- LIBPAW_ALLOCATE(phitmp,(nphicor,maxmeshz))
+ LIBPAW_ALLOCATE(phitmp,(maxmeshz,nphicor))
+ phitmp(:,:)=zero
 
+!Start of reading loop
+ iaewf=0 ; endfile=.false.
  do while (.not.endfile)
    read(funit,'(a)',err=11,end=11) readline
    line=adjustl(readline);goto 21
@@ -2954,7 +2959,7 @@ end subroutine paw_setup_copy
          exit
        end if
      end do
-     read(funit,*) (phitmp(iaewf,ir),ir=1,mesh_size)
+     read(funit,*) (phitmp(ir,iaewf),ir=1,mesh_size)
      cycle
    end if
 !  End of reading loop
@@ -2964,7 +2969,8 @@ end subroutine paw_setup_copy
    LIBPAW_ALLOCATE(ncor,(nphicor))
    LIBPAW_ALLOCATE(lcor,(nphicor))
    LIBPAW_ALLOCATE(energy_cor,(nphicor))
-   LIBPAW_ALLOCATE(phi_cor,(maxmeshz,nphicor))
+   LIBPAW_ALLOCATE(phi_cor,(pawrad%mesh_size,nphicor))
+   phi_cor(:,:)=zero
    do ii=1,nphicor
      ncor(ii)=corestate(ii)%nn
      lcor(ii)=corestate(ii)%ll
@@ -2975,30 +2981,21 @@ end subroutine paw_setup_copy
      if ((pawrad%mesh_type/=radmesh(imeshae)%mesh_type) &
 &    .or.(pawrad%rstep/=radmesh(imeshae)%rstep) &
 &    .or.(pawrad%lstep/=radmesh(imeshae)%lstep)) then
-       if(maxmeshz>pawrad%mesh_size) then
-         write(msg, '(3a)' )&
-&         '  rdpawpsxml_core:maxmeshz>pawrad%mesh_size',ch10,&
-&         '  change pseudopotential'
-         MSG_ERROR(msg)
-       end if
-       call pawrad_init(tmpmesh,mesh_size=maxmeshz,mesh_type=radmesh(imeshae)%mesh_type,&
-&                 rstep=radmesh(imeshae)%rstep,lstep=radmesh(imeshae)%lstep)
-       LIBPAW_ALLOCATE(work,(maxmeshz))
-       call bound_deriv(phitmp(ii,:),tmpmesh,maxmeshz,radmesh(imeshae)%rstep,radmesh(imeshae)%lstep)
-       call paw_spline(tmpmesh%rad,phitmp(ii,:),maxmeshz,radmesh(imeshae)%rstep,radmesh(imeshae)%lstep,work)
-       call paw_splint(maxmeshz,tmpmesh%rad,phitmp(ii,:),work,maxmeshz,tmpmesh%rad(1:maxmeshz),phi_cor(1:maxmeshz,ii))
-       phi_cor(1:maxmeshz,ii)=phi_cor(1:maxmeshz,ii)*tmpmesh%rad(1:maxmeshz)
+       mesh_size=radmesh(imeshae)%mesh_size
+       LIBPAW_ALLOCATE(work,(mesh_size))
+       call bound_deriv(phitmp(1:mesh_size,ii),radmesh(imeshae),mesh_size,yp1,ypn)
+       call paw_spline(radmesh(imeshae)%rad(1:mesh_size),phitmp(1:mesh_size,ii),mesh_size,yp1,ypn,work(1:mesh_size))
+       ir=pawrad%mesh_size
+       if (radmesh(imeshae)%rmax<pawrad%rmax+tol8) ir=pawrad_ifromr(pawrad,radmesh(imeshae)%rmax)-1
+       call paw_splint(mesh_size,radmesh(imeshae)%rad(1:mesh_size),phitmp(1:mesh_size,ii),work(1:mesh_size),&
+&                      ir,pawrad%rad(1:ir),phi_cor(1:ir,ii))
+       phi_cor(1:ir,ii)=phi_cor(1:ir,ii)*pawrad%rad(1:ir)
        LIBPAW_DEALLOCATE(work)
-       call pawrad_free(tmpmesh)
      else
-       call pawrad_init(tmpmesh,mesh_size=maxmeshz,mesh_type=radmesh(imeshae)%mesh_type,&
-&                 rstep=radmesh(imeshae)%rstep,lstep=radmesh(imeshae)%lstep)
        shft=mesh_shift(imeshae)
-       phi_cor(1+shft:radmesh(imeshae)%mesh_size,ii)=phitmp(ii,1:radmesh(imeshae)%mesh_size-shft)
-       phi_cor(1+shft:maxmeshz,ii)=phi_cor(1+shft:maxmeshz,ii)*tmpmesh%rad(1+shft:maxmeshz)
-       if (radmesh(imeshae)%mesh_size<maxmeshz) phi_cor(radmesh(imeshae)%mesh_size+1:maxmeshz,ii)=zero
+       mesh_size=min(radmesh(imeshae)%mesh_size,pawrad%mesh_size)
+       phi_cor(1+shft:mesh_size,ii)=phitmp(1:mesh_size-shft,ii)*radmesh(imeshae)%rad(1:mesh_size-shft)
        if (shft==1) phi_cor(1,ii)=zero
-       call pawrad_free(tmpmesh)
      end if
    end do
  end if
