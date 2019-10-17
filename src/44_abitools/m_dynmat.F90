@@ -906,8 +906,13 @@ subroutine cart39(flg1,flg2,gprimd,ipert,natom,rprimd,vec1,vec2)
      if(flg2(idir)==0)vec2(idir)=zero
    end do
 
+#ifdef MR_DEV
+!  Treat electric field and qvec perturbations
+ else if(ipert==natom+2.or.ipert==natom+8) then
+#else
 !  Treat electric field perturbation
  else if(ipert==natom+2) then
+#endif 
 !  OCL SCALAR
    do idir=1,3
      vec2(idir)=zero
