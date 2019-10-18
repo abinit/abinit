@@ -1271,9 +1271,9 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%spin_nctime=100
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_nctime',tread,'INT')
  if(tread==1) multibinit_dtset%spin_nctime=intarr(1)
- if(multibinit_dtset%spin_nctime<0)then
+ if(multibinit_dtset%spin_nctime<=0)then
     write(message, '(a,i0,a,a,a)' )&
-         &   'spin_nctime is',multibinit_dtset%spin_nctime,', which is lower than 0 .',ch10,&
+         &   'spin_nctime is',multibinit_dtset%spin_nctime,', which is lower than 1 .',ch10,&
          &   'Action: correct spin_nctime in your input file.'
     MSG_ERROR(message)
  end if
