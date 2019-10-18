@@ -11685,7 +11685,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Number of projectors on which U or EXX acts ....    2
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
-  Has Fock   .....................................    2
+  Has Fock  ......................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
@@ -11733,7 +11733,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
-  Has Fock   .....................................    2
+  Has Fock  ......................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
@@ -11780,7 +11780,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
-  Has Fock   .....................................    2
+  Has Fock  ......................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
@@ -12699,7 +12699,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Number of projectors on which U or EXX acts ....    2
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
-  Has Fock   .....................................    2
+  Has Fock  ......................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
@@ -12747,7 +12747,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
-  Has Fock   .....................................    2
+  Has Fock  ......................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
@@ -12794,7 +12794,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
-  Has Fock   .....................................    2
+  Has Fock  ......................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
