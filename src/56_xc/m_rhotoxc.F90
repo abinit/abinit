@@ -307,7 +307,8 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp),allocatable :: tau_b_updn(:,:),vxc_apn(:,:),vxcgr_apn(:),vxcgrho_b(:,:),vxcrho_b_updn(:,:)
  real(dp),allocatable :: vxc_b_apn(:),vxc_ep(:),vxctau_b_updn(:,:),vxclrho_b_updn(:,:)
  real(dp),allocatable,target :: rhonow(:,:,:),taunow(:,:,:)
- real(dp),ABI_CONTIGUOUS pointer :: rhocorval(:,:),rhonow_ptr(:,:,:),rhor_(:,:),taucorval(:,:),taur_(:,:)
+ real(dp),pointer :: rhocorval(:,:),rhor_(:,:),taucorval(:,:),taur_(:,:)
+ real(dp),ABI_CONTIGUOUS pointer :: rhonow_ptr(:,:,:)
  real(dp) :: deltae_vdw,exc_vdw
  real(dp) :: decdrho_vdw(xcdata%nspden),decdgrho_vdw(3,xcdata%nspden)
  real(dp) :: strsxc_vdw(3,3)
