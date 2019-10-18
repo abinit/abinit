@@ -24,7 +24,7 @@ abinit_incs = {
     "core": "41_incs",
 }
 
-with open(os.path.join("split", "cpp-options.yml"), "r") as yaml_file:
+with open(os.path.join("split", "abinit_cpp_options.yml"), "r") as yaml_file:
     cpp_options = yaml.load(yaml_file, Loader=MyLoader)["cpp_options"]
 
 cpp_map = {}
