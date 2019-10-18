@@ -1,0 +1,191 @@
+# LiF Very rough 2x2x2 q-point grid; low ecut.
+
+ndtset 10
+
+getwfk_path  "t60o_DS20_WFK"
+getddb_path  "t60o_DS20_DDB"
+
+#getwfk   20    # Read GS wavefunctions from DS20_WFK
+#getddb   20    # Read DDB files from DS20_DDB
+
+# Global parameters.
+ecut   35
+tolwfr 1e-16
+mixprec 1
+boxcutmin 1.1
+prtphdos 0
+symv1scf 1
+dvdb_add_lr 1
+
+# K-mesh (must equal the one used to produce the WFK file)
+ngkpt    4 4 4
+nshiftk  1
+shiftk   0.0 0.0 0.0
+
+ddb_ngqpt 2 2 2  # q-mesh used to produce the DDB file (must be consistent with DDB data)
+
+ph_nqpath 3
+ph_qpath 
+  0 0 0 
+  0.5 0 0
+  0.5 0.5 0
+
+nfreqsp 100
+freqspmax 2.0 eV
+prteliash 1
+
+# Global
+optdriver  7
+nband      20
+
+symsigma  1
+tmesh 0 300 2
+
+# This just to test (part of) the restart code
+eph_restart 1
+
+############
+# DATASET 1
+############
+eph_task1  4
+gw_qprange1 4
+sigma_ngkpt1 2 2 2
+
+############
+# DATASET 2
+############
+# interpolate DVDB
+eph_task2 5
+eph_ngqpt_fine2 4 4 4
+getdvdb_path2  "t60o_DS20_DVDB"
+
+############
+# DATASET 3
+############
+eph_task3 4
+gw_qprange3 4
+sigma_ngkpt3 2 2 2
+sigma_bsum_range3 2 4
+# Use interpolated DVDB produced in dataset 2
+getdvdb3  2
+eph_ngqpt_fine3 4 4 4
+
+############
+# DATASET 4
+############
+eph_task4 -4
+gw_qprange4 4
+sigma_ngkpt4 2 2 2
+#sigma_bsum_range4 1 7
+eph_intmeth4 2  # Tetra are more stable when bands are selected. No long-range Lorentzian.
+# Use interpolated DVDB produced in dataset 2
+getdvdb4   2
+eph_ngqpt_fine4 4 4 4
+
+############
+# DATASET 5
+############
+# Interpolate DVDB along q-path
+eph_task5 -5
+getdvdb5   2
+
+ph_nqpath5 5
+ph_qpath5
+  0 0 0 
+  0.15 0 0
+  0.25 0 0
+  0.35 0 0
+  0.5 0.0 0
+
+############
+# DATASET 6
+############
+# Test erange and tolerance on tetra weigts
+eph_task6 -4
+eph_intmeth6 2  
+sigma_ngkpt6 2 2 2
+sigma_erange6  0.5 0.5 eV
+eph_tols_idelta6 1e-6 1e-6
+getdvdb6  2
+eph_ngqpt_fine6 4 4 4
+
+############
+# DATASET 7
+############
+# Build W(r,R) using 2x2x2 q-mesh and interpolate DFPT potentials to compute IM(Sigma)
+# Same parameters as previous dataset except for getdvdb
+eph_task7 -4
+eph_intmeth7 2  
+sigma_ngkpt7 2 2 2
+sigma_erange7  0.5 0.5 eV
+eph_tols_idelta7 1e-6 1e-6
+getdvdb7  20
+eph_ngqpt_fine7 4 4 4
+
+############
+# DATASET 8
+############
+# Build W(r,R) using 2x2x2 q-mesh and interpolate DFPT potentials to compute Re + Im
+# Same parameters as dataset 3 except for getdvdb
+eph_task8  4
+gw_qprange8 4
+sigma_ngkpt8 2 2 2
+sigma_bsum_range8 2 4
+eph_ngqpt_fine8 4 4 4
+getdvdb8  20
+
+############
+# DATASET 9
+############
+# Interpolate DFPT potentials, produce v1qavg file  along q-path
+eph_task9 15
+getdvdb_path9  "t60o_DS20_DVDB"
+
+ph_nqpath9 5
+ph_qpath9
+  0 0 0 
+  0.15 0 0
+  0.25 0 0
+  0.35 0 0
+  0.5 0.0 0
+
+############
+# DATASET 10
+############
+# Interpolate DFPT potentials, produce v1qavg file along q-path
+eph_task10 -15
+getdvdb_path10  "t60o_DS20_DVDB"
+
+############################################################################################
+#                                         STRUCTURE
+############################################################################################
+ acell    1.0    1.0    1.0
+ xred
+    0.0000000000    0.0000000000    0.0000000000
+    0.5000000000    0.5000000000    0.5000000000
+ rprim
+    0.0000000000    3.8515039575    3.8515039575
+    3.8515039575    0.0000000000    3.8515039575
+    3.8515039575    3.8515039575    0.0000000000
+ typat 1 2
+ natom 2
+ ntypat 2
+ znucl 3 9
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = .*_intel_1[89].0_.*
+#%% test_chain = t57.in, t58.in, t59.in, t60.in, t61.in
+#%% [files]
+#%% files_to_test = 
+#%%   t60.out, tolnlines = 45, tolabs = 0.4, tolrel = 0.1
+#%% psp_files = 03-Li.psp, 09-F.psp
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH
+#%% description = 
+#%%   Calculation of the Fan-Migdal self-energy matrix elements in LiF.
+#%%<END TEST_INFO>

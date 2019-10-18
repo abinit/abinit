@@ -1,0 +1,56 @@
+# Hydrogen diatomic molecule for tests--constrained DFT
+
+ ndtset 4
+
+#Constrained DFT 
+ constraint_kind1   1  1  
+ constraint_kind2   1  0  
+ constraint_kind3   1  2  
+ constraint_kind4   1  3  
+
+#Constrained DFT data
+ magcon_lambda      2   
+ spinat1       0.0 0.0   0.08    0.0   0.0  -0.08
+ spinat2       0.0 0.0   0.08    0.0   0.0  -0.08
+ spinat3       0.0 0.0   0.08    0.08  0.0  -0.08
+ spinat4       0.0 0.0   0.08    0.08  0.0  -0.08
+
+#Definition of the atomic spheres
+ ratsph    1.0  1.0
+ ratsm     0.05
+
+#System description
+ acell 15 10 10
+ ntypat  2 
+ znucl  1.0  1.0
+ so_psp 0 0
+ natom 2
+ typat  1 2
+
+ nspden 4  nspinor 2   # Non-collinear case
+ nband 2
+
+ xcart    -1.1  0.0 0.0
+           1.1  0.0 0.0
+
+#Computational parameters
+ tolvrs 1.0d-8
+ nstep  35
+ ecut 5
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t27.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% psp_files = 1h.pspnc, 1h.pspnc
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% references = 
+#%% keywords = 
+#%% description = H2 diatomic molecule, static, to check the constrained DFT implementation in case nspden=4
+#%%   with mixed constraints (different for different atomic types), and also fixing the amplitude or the direction
+#%%<END TEST_INFO>

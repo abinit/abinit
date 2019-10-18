@@ -5,7 +5,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release ABINITv8.11.9 is for development
+The present release ABINITv8.11.11 is for development
 
 0. List of platforms
 1. Batteries of tests
@@ -14,7 +14,7 @@ The present release ABINITv8.11.9 is for development
 ================================================================
 0. Platforms
 
-For ABINITv8.11.9, list closed on 2019 08 06
+For ABINITv8.11.11, list closed on 2019 10 14
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
 https://bbportal.abinit.org/#/status
@@ -823,5 +823,9 @@ The tolerance is extremely large. Why is this test lacking so much portability ?
 At least this portability problem should be commented upon ?!
 
 P811.1 (XG190619)
-Test v8_t156 (for electron-phonon) on Ubu Intel 17
+Test v8_t156 (for electron-phonon, become v9_t56) on Ubu Intel 17
 The kptgw input variables, with default values  is echoed, while the reference does not include it. Should track why it is printed.
+
+P811.2 (XG190930)
+Test v8_t24 on Ubu Intel 17
+Numerical results are wrong. But on everyother machine, it is OK. Should clarify ...

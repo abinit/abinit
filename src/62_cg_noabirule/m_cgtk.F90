@@ -84,8 +84,8 @@ contains
 !!
 !! SOURCE
 
-subroutine cgtk_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
-  npw1,kg1,npw2,kg2,istwf1,istwf2,cg1,cg2,work_ngfft,work)
+subroutine cgtk_rotate(cryst, kpt1, isym, itimrev, shiftg, nspinor, ndat, &
+  npw1, kg1, npw2, kg2, istwf1, istwf2, cg1, cg2, work_ngfft, work)
 
 !Arguments ------------------------------------
 !scalars

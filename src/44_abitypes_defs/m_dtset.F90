@@ -560,28 +560,29 @@ type, public :: dataset_type
  integer :: wvl_ngauss(2)
 
 !Integer allocatables
- integer, allocatable ::  algalch(:)    ! algalch(ntypalch)
- integer, allocatable ::  bdgw(:,:,:)   ! bdgw(2,nkptgw,nsppol)
- integer, allocatable ::  dynimage(:)   ! dynimage(nimage or mxnimage)
- integer, allocatable ::  efmas_bands(:,:) ! efmas_bands(2,nkptgw)
- integer, allocatable ::  iatfix(:,:)   ! iatfix(3,natom)
- integer, allocatable ::  iatsph(:)     ! iatsph(natsph)
- integer, allocatable ::  istwfk(:)     ! istwfk(nkpt)
- integer, allocatable ::  kberry(:,:)   ! kberry(3,nberry)
- integer, allocatable ::  lexexch(:)    ! lexexch(ntypat)
- integer, allocatable ::  ldaminushalf(:) !lminushalf(ntypat)
- integer, allocatable ::  lpawu(:)      ! lpawu(ntypat)
- integer, allocatable ::  nband(:)      ! nband(nkpt*nsppol)
+ integer, allocatable ::  algalch(:)         ! algalch(ntypalch)
+ integer, allocatable ::  bdgw(:,:,:)        ! bdgw(2,nkptgw,nsppol)
+ integer, allocatable ::  constraint_kind(:) ! constraint_kind(ntypat) 
+ integer, allocatable ::  dynimage(:)        ! dynimage(nimage or mxnimage)
+ integer, allocatable ::  efmas_bands(:,:)   ! efmas_bands(2,nkptgw)
+ integer, allocatable ::  iatfix(:,:)        ! iatfix(3,natom)
+ integer, allocatable ::  iatsph(:)          ! iatsph(natsph)
+ integer, allocatable ::  istwfk(:)          ! istwfk(nkpt)
+ integer, allocatable ::  kberry(:,:)        ! kberry(3,nberry)
+ integer, allocatable ::  lexexch(:)         ! lexexch(ntypat)
+ integer, allocatable ::  ldaminushalf(:)    ! ldaminushalf(ntypat)
+ integer, allocatable ::  lpawu(:)           ! lpawu(ntypat)
+ integer, allocatable ::  nband(:)           ! nband(nkpt*nsppol)
  integer, allocatable ::  plowan_iatom(:)    ! plowan_iatom(plowan_natom)
- integer, allocatable ::  plowan_it(:)     ! plowan_it(plowan_nt*3)
+ integer, allocatable ::  plowan_it(:)       ! plowan_it(plowan_nt*3)
  integer, allocatable ::  plowan_lcalc(:)    ! plowan_lcalc(\sum_iatom plowan_nbl)
- integer, allocatable ::  plowan_nbl(:)     ! plowan_nbl(plowan_natom)
+ integer, allocatable ::  plowan_nbl(:)      ! plowan_nbl(plowan_natom)
  integer, allocatable ::  plowan_projcalc(:) ! plowan_projcalc(\sum_iatom plowan_nbl)
- integer, allocatable ::  prtatlist(:)  ! prtatlist(natom)
- integer, allocatable ::  so_psp(:)     ! so_psp(npsp)
- integer, allocatable ::  symafm(:)     ! symafm(nsym)
- integer, allocatable ::  symrel(:,:,:) ! symrel(3,3,nsym)
- integer, allocatable ::  typat(:)      ! typat(natom)
+ integer, allocatable ::  prtatlist(:)       ! prtatlist(natom)
+ integer, allocatable ::  so_psp(:)          ! so_psp(npsp)
+ integer, allocatable ::  symafm(:)          ! symafm(nsym)
+ integer, allocatable ::  symrel(:,:,:)      ! symrel(3,3,nsym)
+ integer, allocatable ::  typat(:)           ! typat(natom)
 
 !Real
  real(dp) :: adpimd_gamma
@@ -661,6 +662,7 @@ type, public :: dataset_type
  real(dp) :: postoldff
  real(dp) :: ppmfrq
  real(dp) :: pw_unbal_thresh
+ real(dp) :: ratsm
  real(dp) :: ratsph_extra
  real(dp) :: recrcut
  real(dp) :: recefermi
@@ -752,6 +754,7 @@ type, public :: dataset_type
  real(dp), allocatable :: amu_orig(:,:)     ! amu(ntypat,nimage)
  real(dp), allocatable :: atvshift(:,:,:)   ! atvshift(16,nsppol,natom)
  real(dp), allocatable :: cd_imfrqs(:)      ! cd_imfrqs(cd_customnimfrqs)
+ real(dp), allocatable :: chrgat(:)         ! chrgat(natom)
  real(dp), allocatable :: chempot(:,:,:)    ! chempot(3,nzchempot,ntypat)
  real(dp), allocatable :: corecs(:)         ! corecs(ntypat)
  real(dp), allocatable :: densty(:,:)       ! densty(ntypat,4)
@@ -854,6 +857,7 @@ type, public :: dataset_type
  integer :: eph_frohlichm != 0
  real(dp) :: eph_fsmear != 0.01
  real(dp) :: eph_fsewin != 0.04
+ real(dp) :: eph_ecutosc = zero
  !real(dp) :: eph_alpha_gmin = zero !sqrt(5)
  real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
  integer :: eph_phrange(2) = 0
@@ -915,15 +919,28 @@ type, public :: dataset_type
  character(len=fnlen) :: getscr_path = ABI_NOFILE
  !character(len=fnlen) :: getsigeph_path = ABI_NOFILE
 
+ contains
+
+ procedure :: chkneu => dtset_chkneu
+   ! Check neutrality of system based on band occupancies and valence charges of pseudo-atoms.
+
+ procedure :: copy => dtset_copy
+   ! Copy object.
+
+ procedure :: free => dtset_free
+   ! Free dynamic memory.
+
+ procedure :: free_nkpt_arrays => dtset_free_nkpt_arrays
+   ! Free arrays that depend on input nkpt (used in EPH code)
+
+ procedure :: get_npert_rbz => dtset_get_npert_rbz
+   ! Get the number of effective pertubation done in looper3, nkpt_rbz, nband_rbz
+
+ procedure :: testsusmat => dtset_testsusmat
+   ! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
+
  end type dataset_type
 !!***
-
- public :: dtset_chkneu            ! Check neutrality of system based on band occupancies and valence charges of pseudo-atoms.
- public :: dtset_copy              ! Copy object.
- public :: dtset_free              ! Free dynamic memory.
- public :: dtset_free_nkpt_arrays  ! Free arrays that depend on input nkpt (used in EPH code)
- public :: get_npert_rbz           ! Get the number of effective pertubation done in looper3, nkpt_rbz, nband_rbz
- public :: testsusmat              ! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
 
  public :: find_getdtset           ! Find the number of the dataset (iget) for a given value of a "get" variable (getvalue)
  public :: macroin                 ! Treat "macro" input variables
@@ -982,13 +999,13 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine dtset_chkneu(charge,dtset,occopt)
+subroutine dtset_chkneu(dtset, charge, occopt)
 
 !Arguments ------------------------------------
 !scalars
+ class(dataset_type),intent(inout) :: dtset
  integer,intent(in) :: occopt
  real(dp),intent(in) :: charge
- type(dataset_type),intent(inout) :: dtset
 
 !Local variables-------------------------------
 !scalars
@@ -1023,7 +1040,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
    maxocc=2.0_dp/real(dtset%nsppol*dtset%nspinor,dp)
 
 !  Determine the number of bands fully or partially occupied
-   nocc=(dtset%nelect-1.0d-8)/maxocc + 1
+   nocc=int((dtset%nelect-1.0d-8)/maxocc) + 1
 !  Occupation number of the highest level
    occlast=dtset%nelect-maxocc*(nocc-1)
    !write(std_out,*)' maxocc,nocc,occlast=',maxocc,nocc,occlast
@@ -1039,7 +1056,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
        (abs(dtset%spinmagntarget)<tol8.and.dtset%nspden==1))then
 
 !      Use a temporary array for defining occupation numbers
-       ABI_ALLOCATE(tmpocc,(dtset%nband(1)*dtset%nsppol))
+       ABI_MALLOC(tmpocc,(dtset%nband(1)*dtset%nsppol))
 !      First do it for fully occupied bands
        if (1<nocc) tmpocc(1:nocc-1)=maxocc
 !      Then, do it for highest occupied band
@@ -1064,7 +1081,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
            end do
          end do
        end if
-       ABI_DEALLOCATE(tmpocc)
+       ABI_FREE(tmpocc)
 
      ! Second, treat the case in which one imposes the spin magnetization (only possible for nspden==2)
      ! Also treat antiferromagnetic case (nsppol==1, nspden==2), although spinmagntarget must be zero
@@ -1244,12 +1261,11 @@ end subroutine dtset_chkneu
 !!
 !! SOURCE
 
-subroutine dtset_copy(dtout, dtin)
+type(dataset_type) function dtset_copy(dtin) result(dtout)
 
 !Arguments ------------------------------------
 !scalars
  class(dataset_type),intent(in) :: dtin
- type(dataset_type),intent(out) :: dtout
 
 ! *************************************************************************
 
@@ -1366,6 +1382,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%eph_frohlichm      = dtin%eph_frohlichm
  dtout%eph_fsmear         = dtin%eph_fsmear
  dtout%eph_fsewin         = dtin%eph_fsewin
+ dtout%eph_ecutosc        = dtin%eph_ecutosc
  !dtout%eph_alpha_gmin     = dtin%eph_alpha_gmin
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
  dtout%eph_np_pqbks       = dtin%eph_np_pqbks
@@ -1913,6 +1930,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%postoldff          = dtin%postoldff
  dtout%ppmfrq             = dtin%ppmfrq
  dtout%pw_unbal_thresh    = dtin%pw_unbal_thresh
+ dtout%ratsm              = dtin%ratsm
  dtout%ratsph_extra       = dtin%ratsph_extra
  dtout%recrcut            = dtin%recrcut
  dtout%recefermi          = dtin%recefermi
@@ -1989,6 +2007,7 @@ subroutine dtset_copy(dtout, dtin)
  call alloc_copy(dtin%algalch, dtout%algalch)
  call alloc_copy(dtin%bdgw, dtout%bdgw)
  call alloc_copy(dtin%bs_loband, dtout%bs_loband)
+ call alloc_copy(dtin%constraint_kind, dtout%constraint_kind)
  call alloc_copy(dtin%dynimage, dtout%dynimage)
  call alloc_copy(dtin%efmas_bands, dtout%efmas_bands)
  call alloc_copy(dtin%iatfix, dtout%iatfix)
@@ -2014,6 +2033,7 @@ subroutine dtset_copy(dtout, dtin)
  call alloc_copy(dtin%acell_orig, dtout%acell_orig)
  call alloc_copy(dtin%amu_orig, dtout%amu_orig)
  call alloc_copy(dtin%atvshift, dtout%atvshift)
+ call alloc_copy(dtin%chrgat, dtout%chrgat)
  call alloc_copy(dtin%cd_imfrqs, dtout%cd_imfrqs)
  call alloc_copy(dtin%chempot, dtout%chempot)
  call alloc_copy(dtin%corecs, dtout%corecs)
@@ -2064,7 +2084,7 @@ subroutine dtset_copy(dtout, dtin)
 
  DBG_EXIT("COLL")
 
-end subroutine dtset_copy
+end function dtset_copy
 !!***
 
 !----------------------------------------------------------------------
@@ -2102,6 +2122,7 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%algalch)
  ABI_SFREE(dtset%bdgw)
  ABI_SFREE(dtset%bs_loband)
+ ABI_SFREE(dtset%constraint_kind)
  ABI_SFREE(dtset%dynimage)
  ABI_SFREE(dtset%efmas_bands)
  ABI_SFREE(dtset%iatfix)
@@ -2131,6 +2152,7 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%amu_orig)
  ABI_SFREE(dtset%atvshift)
  ABI_SFREE(dtset%cd_imfrqs)
+ ABI_SFREE(dtset%chrgat)
  ABI_SFREE(dtset%chempot)
  ABI_SFREE(dtset%corecs)
  ABI_SFREE(dtset%densty)
@@ -2303,9 +2325,9 @@ subroutine find_getdtset(dtsets,getvalue,getname,idtset,iget,miximage,mxnimage,n
 end subroutine find_getdtset
 !!***
 
-!!****f* m_dtset/get_npert_rbz
+!!****f* m_dtset/dtset_get_npert_rbz
 !! NAME
-!! get_npert_rbz
+!! dtset_get_npert_rbz
 !!
 !! FUNCTION
 !! Get the number of effective pertubation done in looper3, nkpt_rbz, nband_rbz
@@ -2327,7 +2349,7 @@ end subroutine find_getdtset
 !!
 !! SOURCE
 
-subroutine get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
+subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 
 !Arguments ------------------------------------
 !scalars
@@ -2357,23 +2379,23 @@ subroutine get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  mpert=dtset%natom+6
  if(dtset%natom+10/=0.or.dtset%natom+11/=0) mpert=dtset%natom+11
 
- ABI_ALLOCATE(symrec,(3,3,dtset%nsym))
+ ABI_MALLOC(symrec,(3,3,dtset%nsym))
 !Get the symmetry matrices in terms of reciprocal basis
  do isym=1,dtset%nsym
    call mati3inv(dtset%symrel(:,:,isym),symrec(:,:,isym))
  end do
 
- ABI_ALLOCATE(indsym,(4,dtset%nsym,dtset%natom))
+ ABI_MALLOC(indsym,(4,dtset%nsym,dtset%natom))
 !Obtain a list of rotated atom labels:
  tolsym8=tol8
  call symatm(indsym,dtset%natom,dtset%nsym,symrec,dtset%tnons,tolsym8,dtset%typat,dtset%xred_orig)
 
- ABI_ALLOCATE(symq,(4,2,dtset%nsym))
+ ABI_MALLOC(symq,(4,2,dtset%nsym))
  timrev=1
  call littlegroup_q(dtset%nsym,dtset%qptn,symq,symrec,dtset%symafm,timrev)
 
 !Initialize the list of perturbations rfpert
- ABI_ALLOCATE(rfpert,(mpert))
+ ABI_MALLOC(rfpert,(mpert))
  rfpert(:)=0
  if(dtset%rfphon==1)rfpert(dtset%rfatpol(1):dtset%rfatpol(2))=1
 
@@ -2394,10 +2416,10 @@ subroutine get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 
  if(dtset%rfmagn==1) rfpert(dtset%natom+5)=1
 
- ABI_ALLOCATE(pertsy,(3,mpert))
+ ABI_MALLOC(pertsy,(3,mpert))
  call irreducible_set_pert(indsym,mpert,dtset%natom,dtset%nsym,pertsy,dtset%rfdir,rfpert,symq,symrec,dtset%symrel)
  npert=0
-! ABI_ALLOCATE(pert_tmp,(3*mpert))
+! ABI_MALLOC(pert_tmp,(3*mpert))
 
 ! do ipert=1,mpert
 !   do idir=1,3
@@ -2436,7 +2458,7 @@ subroutine get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 
 !Determine existence of pertubations and of pertubation symmetries
 !Create array with pertubations which have to be calculated
- ABI_ALLOCATE(pert_tmp,(2,3*(dtset%natom+6)+18))
+ ABI_MALLOC(pert_tmp,(2,3*(dtset%natom+6)+18))
 
  do ipert=1,mpert
    if (ipert<dtset%natom+10) then
@@ -2453,8 +2475,8 @@ subroutine get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
        if (ipert>=dtset%natom+10) then
          to_compute_this_pert = 1
        else if ((pertsy(idir,ipert)==1).or.&
-&         ((dtset%prepanl == 1).and.(ipert == dtset%natom+2)).or.&
-&         ((dtset%prepgkk == 1).and.(ipert <= dtset%natom))  ) then
+          ((dtset%prepanl == 1).and.(ipert == dtset%natom+2)).or.&
+          ((dtset%prepgkk == 1).and.(ipert <= dtset%natom))  ) then
          to_compute_this_pert = 1
        end if
        if (to_compute_this_pert /= 0) then
@@ -2471,13 +2493,13 @@ subroutine get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
      end if ! Test of existence of perturbation
    end do
  end do
- ABI_ALLOCATE(pert_calc,(2,npert))
+ ABI_MALLOC(pert_calc,(2,npert))
  do icase=1,npert
    pert_calc(:,icase)=pert_tmp(:,icase)
  end do
- ABI_DEALLOCATE(pert_tmp)
- ABI_DEALLOCATE(pertsy)
- ABI_DEALLOCATE(rfpert)
+ ABI_FREE(pert_tmp)
+ ABI_FREE(pertsy)
+ ABI_FREE(rfpert)
 
 ! Write YAML doc with the list of irreducible perturbations. Example.
 !
@@ -2517,7 +2539,7 @@ subroutine get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 
  write(std_out,'(a)')"..."
 
-! ABI_ALLOCATE(pert_calc,(npert))
+! ABI_MALLOC(pert_calc,(npert))
 ! do icase=1,npert
 !   pert_calc(icase) = pert_tmp(icase)
 ! end do
@@ -2525,8 +2547,8 @@ subroutine get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  call mkrdim(dtset%acell_orig(1:3,1),dtset%rprim_orig(1:3,1:3,1),rprimd)
  call metric(gmet,gprimd,std_out,rmet,rprimd,ucvol)
 
- ABI_ALLOCATE(nkpt_rbz,(npert))
- ABI_ALLOCATE(indkpt1,(dtset%nkpt,npert))
+ ABI_MALLOC(nkpt_rbz,(npert))
+ ABI_MALLOC(indkpt1,(dtset%nkpt,npert))
  indkpt1=0
 
  do icase=1,npert
@@ -2542,9 +2564,9 @@ subroutine get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
    ipert = pert_calc(1,icase)
    idir = pert_calc(2,icase)
 
-   ABI_ALLOCATE(symrl1_tmp,(3,3,dtset%nsym))
-   ABI_ALLOCATE(symaf1,(dtset%nsym))
-   ABI_ALLOCATE(tnons1_tmp,(3,dtset%nsym))
+   ABI_MALLOC(symrl1_tmp,(3,3,dtset%nsym))
+   ABI_MALLOC(symaf1,(dtset%nsym))
+   ABI_MALLOC(tnons1_tmp,(3,dtset%nsym))
 !  MJV TODO: check whether prepgkk should be used here
    if (dtset%prepanl /= 1 .and. dtset%berryopt /=4 .and. dtset%berryopt /=6 .and. dtset%berryopt /=7 .and. &
 &   dtset%berryopt /=14 .and. dtset%berryopt /=16 .and. dtset%berryopt /=17) then   !!HONG
@@ -2554,20 +2576,20 @@ subroutine get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
    else
      nsym1 = 1
    end if
-   ABI_DEALLOCATE(tnons1_tmp)
-   ABI_DEALLOCATE(symaf1)
+   ABI_FREE(tnons1_tmp)
+   ABI_FREE(symaf1)
 
-   ABI_ALLOCATE(symrc1,(3,3,nsym1))
-   ABI_ALLOCATE(symrl1,(3,3,nsym1))
+   ABI_MALLOC(symrc1,(3,3,nsym1))
+   ABI_MALLOC(symrl1,(3,3,nsym1))
    symrl1(:,:,1:nsym1)=symrl1_tmp(:,:,1:nsym1)
-   ABI_DEALLOCATE(symrl1_tmp)
+   ABI_FREE(symrl1_tmp)
    do isym=1,nsym1
      call mati3inv(symrl1(:,:,isym),symrc1(:,:,isym))
    end do
-   ABI_DEALLOCATE(symrl1)
+   ABI_FREE(symrl1)
 
-   ABI_ALLOCATE(wtk_folded,(dtset%nkpt))
-   ABI_ALLOCATE(bz2ibz_smap, (6, dtset%nkpt))
+   ABI_MALLOC(wtk_folded,(dtset%nkpt))
+   ABI_MALLOC(bz2ibz_smap, (6, dtset%nkpt))
    timrev_pert=timrev
    if(dtset%ieig2rf>0) then
      call symkpt(0,gmet,indkpt1(:,icase),std_out,dtset%kptns,dtset%nkpt,nkpt_rbz(icase),&
@@ -2576,17 +2598,17 @@ subroutine get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 !    For the time being, the time reversal symmetry is not used
 !    for ddk, elfd, mgfd perturbations.
      if(ipert==dtset%natom+1 .or. ipert==dtset%natom+10 .or. ipert==dtset%natom+11 .or. &
-&     ipert==dtset%natom+2 .or. dtset%berryopt==4 .or. dtset%berryopt==6 .or. dtset%berryopt==7  &
-&     .or. dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17 )timrev_pert=0  !!HONG
+        ipert==dtset%natom+2 .or. dtset%berryopt==4 .or. dtset%berryopt==6 .or. dtset%berryopt==7  &
+        .or. dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17 )timrev_pert=0  !!HONG
      call symkpt(0,gmet,indkpt1(:,icase),std_out,dtset%kptns,dtset%nkpt,nkpt_rbz(icase),&
      nsym1,symrc1,timrev_pert,dtset%wtk,wtk_folded, bz2ibz_smap, xmpi_comm_self)
    end if
-   ABI_DEALLOCATE(bz2ibz_smap)
-   ABI_DEALLOCATE(wtk_folded)
-   ABI_DEALLOCATE(symrc1)
+   ABI_FREE(bz2ibz_smap)
+   ABI_FREE(wtk_folded)
+   ABI_FREE(symrc1)
  end do
 
- ABI_ALLOCATE(nband_rbz,(maxval(nkpt_rbz)*dtset%nsppol,npert))
+ ABI_MALLOC(nband_rbz,(maxval(nkpt_rbz)*dtset%nsppol,npert))
  nband_rbz=zero
  do icase=1,npert
    do isppol=1,dtset%nsppol
@@ -2604,18 +2626,18 @@ subroutine get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 
  end do
 
- ABI_DEALLOCATE(indkpt1)
- ABI_DEALLOCATE(symq)
- ABI_DEALLOCATE(symrec)
- ABI_DEALLOCATE(indsym)
- ABI_DEALLOCATE(pert_calc)
+ ABI_FREE(indkpt1)
+ ABI_FREE(symq)
+ ABI_FREE(symrec)
+ ABI_FREE(indsym)
+ ABI_FREE(pert_calc)
 
-end subroutine get_npert_rbz
+end subroutine dtset_get_npert_rbz
 !!***
 
-!!****f* m_dtset/testsusmat
+!!****f* m_dtset/dtset_testsusmat
 !! NAME
-!! testsusmat
+!! dtset_testsusmat
 !!
 !! FUNCTION
 !! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
@@ -2640,13 +2662,13 @@ end subroutine get_npert_rbz
 !!
 !! SOURCE
 
-subroutine testsusmat(compute,dielop,dielstrt,dtset,istep)
+logical function dtset_testsusmat(dtset, dielop, dielstrt, istep) result(compute)
 
 !Arguments-------------------------------
 !scalars
  integer,intent(in) :: dielop,dielstrt,istep
- logical,intent(out) :: compute
- type(dataset_type),intent(in) :: dtset
+ !logical,intent(out) :: compute
+ class(dataset_type),intent(in) :: dtset
 
 ! *********************************************************************
 
@@ -2661,7 +2683,7 @@ subroutine testsusmat(compute,dielop,dielstrt,dtset,istep)
  if (istep==1 .and. dielop>=2) compute=.TRUE.
  if (istep==dielstrt .and. dielop>=1) compute=.TRUE.
 
-end subroutine testsusmat
+end function dtset_testsusmat
 !!***
 
 !!****f* m_dtset/macroin
@@ -2734,8 +2756,8 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
   !Read parameters
    marr=dtsets(idtset)%npsp;if (dtsets(idtset)%npsp<3) marr=3
    marr=max(marr,dtsets(idtset)%nimage)
-   ABI_ALLOCATE(intarr,(marr))
-   ABI_ALLOCATE(dprarr,(marr))
+   ABI_MALLOC(intarr,(marr))
+   ABI_MALLOC(dprarr,(marr))
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"accuracy",tread,'INT')
 
@@ -2899,8 +2921,8 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
    else
      if (ecutmax(3)>zero) dtsets(idtset)%ecut=ecutmax(3)
    end if
-   ABI_DEALLOCATE(intarr)
-   ABI_DEALLOCATE(dprarr)
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
  end do
 
 end subroutine macroin
@@ -2946,7 +2968,7 @@ subroutine macroin2(dtsets,ndtset_alloc)
 
 !Local variables -------------------------------
 !scalars
- integer :: idtset,pawujat              !,jdtset
+ integer :: idtset,pawujat
 
 !******************************************************************
 
@@ -3025,8 +3047,8 @@ subroutine chkvars(string)
 !C
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
- list_vars=trim(list_vars)//' charge chempot chkdilatmx chkexit chkprim'
- list_vars=trim(list_vars)//' chksymbreak chneut cineb_start coefficients cpus cpum cpuh'
+ list_vars=trim(list_vars)//' chrgat charge chempot chkdilatmx chkexit chkprim'
+ list_vars=trim(list_vars)//' chksymbreak chneut cineb_start coefficients constraint_kind cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_qrefine ddb_shiftq dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb'
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'
@@ -3051,7 +3073,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit eshift'
  list_vars=trim(list_vars)//' esmear exchmix exchn2n3d extrapwf eph_frohlichm eph_phrange'
- list_vars=trim(list_vars)//' eph_tols_idelta eph_intmeth eph_extrael eph_fermie eph_frohlich eph_fsmear'
+ list_vars=trim(list_vars)//' eph_tols_idelta eph_intmeth eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_fsmear'
  list_vars=trim(list_vars)//' eph_fsewin eph_mustar eph_ngqpt_fine eph_np_pqbks eph_restart '
  list_vars=trim(list_vars)//' eph_stern eph_task eph_transport eph_use_ftinterp'
 !F
@@ -3159,7 +3181,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' q1shft qmass qprtrb qpt qptdm qptnrm qph1l'
  list_vars=trim(list_vars)//' qptopt qptrlatt quadmom'
 !R
- list_vars=trim(list_vars)//' random_atpos ratsph ratsph_extra rcut'
+ list_vars=trim(list_vars)//' random_atpos ratsm ratsph ratsph_extra rcut'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
  list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'

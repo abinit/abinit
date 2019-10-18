@@ -99,6 +99,7 @@ module m_spin_mover
      procedure :: read_hist_spin_state
      procedure, private :: run_one_step_DM => spin_mover_t_run_one_step_DM
      procedure, private :: run_one_step_HeunP => spin_mover_t_run_one_step_HeunP
+     procedure, private :: run_one_step_dummy=> spin_mover_t_run_one_step_dummy
      procedure, private :: run_one_step_MC=> spin_mover_t_run_one_step_MC
      procedure :: run_one_step => spin_mover_t_run_one_step
      procedure :: run_time => spin_mover_t_run_time
@@ -356,7 +357,7 @@ contains
           end do
 
         case (3)
-          write(msg,*) "Initial spins set according to spin_init_ variables."
+          write(msg,*) "Initial spins set according to spin_init_* variables."
           call wrtout(ab_out,msg,'COLL')
           call wrtout(std_out,msg,'COLL')
 
@@ -375,8 +376,12 @@ contains
 
         case (4)
           ! read from last step of hist file
+          write(msg,'(a,a,a)') "Initial spins set to input spin hist file ",&
+             &  trim(restart_hist_fname), '.'  
+          call wrtout(ab_out,msg,'COLL')
+          call wrtout(std_out,msg,'COLL')
           if (.not. present(restart_hist_fname)) then
-             MSG_BUG("Spin initialize mode set to 4, but restart_hist_fname is not used.")
+             MSG_ERROR("Spin initialize mode set to 4, but restart_hist_fname is not used.")
           end if
           call self%read_hist_spin_state(fname=restart_hist_fname)
 
@@ -519,6 +524,60 @@ contains
   end subroutine spin_mover_t_run_one_step_HeunP
   !!***
 
+
+
+  !!****f* m_spin_mover/spin_mover_t_run_one_step_dummy
+  !!
+  !! NAME
+  !!  spin_mover_t_run_one_step_dummy
+  !!
+  !! FUNCTION
+  !! run one spin step using dummy method
+  !!
+  !! INPUTS
+  !! effpot: abstract_potential_t type.
+  !! S_in : input spin. (3*nspin)
+  !!
+  !! OUTPUT
+  !! etot: energy (scalar)
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine spin_mover_t_run_one_step_dummy(self, effpot, S_in, etot, displacement, strain, lwf)
+    !class (spin_mover_t), intent(inout):: self
+    class(spin_mover_t), intent(inout):: self
+    class(abstract_potential_t), intent(inout) :: effpot
+
+    real(dp), optional, intent(inout):: displacement(:,:), &
+         strain(:,:), lwf(:)
+    real(dp), intent(inout) :: S_in(3,self%nspin)
+    real(dp), intent(out) ::  etot
+    integer :: i
+    real(dp) :: dSdt(3), Htmp(3), Ri(3)
+
+    ! predict
+    etot=0.0
+    self%Heff_tmp(:,:)=0.0
+    call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf, spin=S_in, bfield=self%Heff_tmp, energy=etot)
+    call self%get_Langevin_Heff(self%H_lang)
+    do i=self%mps%istart, self%mps%iend
+       Htmp=self%Heff_tmp(:,i)+self%H_lang(:,i)
+       !Ri = cross(S_in(:,i),Htmp)
+       !dSdt = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S_in(:,i), Ri))
+       Ri=S_in(:,i)!+dSdt*self%dt
+       Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
+       self%Stmp(:,i)=Ri
+    end do
+    call self%mps%allgatherv_dp2d(self%Stmp2, 3, buffer=self%buffer)
+
+  end subroutine spin_mover_t_run_one_step_dummy
+  !!***
+
+
+
   !----------------------------------------------------------------------
   !> @brief rotate spin with a rotation matrix
   !>
@@ -626,7 +685,11 @@ contains
           MSG_ERROR("Monte carlo not implemented for lattice and lwf yet.")
        endif
        call self%run_one_step_MC(effpot, self%Stmp, etot)
+    else if (self%method==20) then
+       call self%run_one_step_dummy(effpot=effpot, S_in=self%Stmp, etot=etot, &
+            displacement=displacement, strain=strain, lwf=lwf)
     end if
+
     ! do not inc until time is set to hist.
     ! run one step does not know about time. So it will be done in the outer loop.
     if(self%mps%irank==0) then

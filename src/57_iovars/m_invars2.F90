@@ -1265,6 +1265,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fsewin',tread,'ENE')
  if(tread==1) dtset%eph_fsewin=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_ecutosc',tread,'ENE')
+ if(tread==1) dtset%eph_ecutosc=dprarr(1)
+
  !call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_alpha_gmin',tread,'DPR')
  !if(tread==1) dtset%eph_alpha_gmin=dprarr(1)
 
@@ -1794,6 +1797,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'magcon_lambda',tread,'DPR')
  if(tread==1) dtset%magcon_lambda=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ratsm',tread,'DPR')
+ if(tread==1) dtset%ratsm=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optforces',tread,'INT')
  if(tread==1) dtset%optforces=intarr(1)
@@ -3166,7 +3172,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! If iscf>0, check the charge of the system, and compute nelect.
  occopt_tmp=occopt
  if(getocc/=0)occopt_tmp=1
- call dtset_chkneu(charge,dtset,occopt_tmp)
+ call dtset%chkneu(charge, occopt_tmp)
 
  ! Now that the occupation numbers have been initialized, can meaningfully define nbandhf.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandhf',tread,'INT')
