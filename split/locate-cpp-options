@@ -65,7 +65,7 @@ map_data = {
         "tree_map": tree_map,
         "cpp_map":cpp_map,
 }
-with open(os.path.join("split", "cpp_map.yml"), "w") as map_file:
+with open(os.path.join("split", "abinit_cpp_map.yml"), "w") as map_file:
     yaml.dump(map_data, stream=map_file, Dumper=MyDumper,
         default_flow_style=False,
         explicit_start=True,

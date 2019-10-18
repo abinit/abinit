@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+
+import os
+import re
+import yaml
+try:
+    from yaml import CDumper as MyDumper
+    from yaml import CLoader as MyLoader
+except ImportError:
+    from yaml import Dumper as MyDumper
+    from yaml import Loader as MyLoader
+
+
+with open(os.path.join("split", "abinit_cpp_map.yml"), "r") as yaml_file:
+    cpp_data = yaml.load(yaml_file, Loader=MyLoader)
+
+cpp_map = cpp_data["cpp_map"]
+tree_map = cpp_data["tree_map"]
+
+cpp_options = sorted(cpp_map.keys())
+cpp_cats = {}
+for key, val in tree_map.items():
+    for srcdir in val:
+        cpp_cats[srcdir] = key
+
+cpp_by_cats = {}
+cpp_in_cats = {key: [] for key in tree_map.keys()}
+for opt in cpp_options:
+    opt_cats = {key: 0 for key in tree_map.keys()} 
+    for srcdir in cpp_map[opt].keys():
+        opt_cats[cpp_cats[srcdir]] += 1
+        cpp_in_cats[cpp_cats[srcdir]].append(opt)
+    cpp_by_cats[opt] = opt_cats
+
+for key, val in cpp_in_cats.items():
+    cpp_in_cats[key] = sorted(list(set(val)))
+
+cpp_exclusive = {key: [] for key in tree_map.keys()}
+for cpp_cat, cpp_opts in cpp_in_cats.items():
+    exc_opts = []
+    for other_cat, other_opts in cpp_in_cats.items():
+        if other_cat != cpp_cat:
+            exc_opts += [item for item in cpp_opts \
+                    if not item in other_opts + exc_opts]
+    cpp_exclusive[cpp_cat] = sorted(list(set(exc_opts)))
+
+stats_data = {
+        "cpp_classes": cpp_in_cats,
+        "categories": cpp_by_cats,
+        "exclusive": cpp_exclusive,
+}
+
+with open(os.path.join("split", "abinit_cpp_stats.yml"), "w") as map_file:
+    yaml.dump(stats_data, stream=map_file, Dumper=MyDumper,
+        default_flow_style=False,
+        explicit_start=True,
+        explicit_end=True,
+        version=(1, 1),
+        indent=2)
