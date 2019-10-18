@@ -13,15 +13,20 @@ except ImportError:
 
 abinit_trees = {
     "common": os.path.join("shared", "common", "src"),
-    "libpaw": os.path.join("shared", "libpaw", "src"),
+    "libpaw": os.path.join("shared", "libpaw"),
     "core": "src",
 }
 tree_map = {"libpaw": ["39_libpaw"]}
 
+abinit_incs = {
+    "common": "01_incs",
+    "libpaw": "39_incs",
+    "core": "41_incs",
+}
+
 with open(os.path.join("split", "cpp-options.yml"), "r") as yaml_file:
     cpp_options = yaml.load(yaml_file, Loader=MyLoader)["cpp_options"]
 
-# TODO: ignore m_cppopts_dumper.F90
 cpp_map = {}
 for key, topdir in abinit_trees.items():
     for root, dirs, files in os.walk(topdir):
@@ -30,24 +35,40 @@ for key, topdir in abinit_trees.items():
             if not key in tree_map:
                 tree_map[key] = []
             tree_map[key].append(mark)
-        text = []
         for src in [item for item in files \
-                if item.endswith(".F90") or item.endswith(".f90")]:
-            text += [line for line in open(os.path.join(root, src), "r").readlines() \
+                if (item.endswith(".F90") or item.endswith(".f90") or \
+                item.endswith(".h")) and \
+                (not item.startswith("m_cppopts_dumper"))]:
+            text = [line for line in open(os.path.join(root, src), "r").readlines() \
                     if line.startswith("#")]
-        text = "".join(text)
-        for opt in cpp_options:
-            if re.search(opt, text):
-                if not opt in cpp_map:
-                    cpp_map[opt] = []
-                if mark == "src":
-                    cpp_map[opt].append("39_libpaw")
-                else:
-                    cpp_map[opt].append(mark)
+            text = "".join(text)
+            if mark == "incs":
+                mark = abinit_incs[key]
+            elif mark == "src":
+                mark = "39_libpaw"
+            for opt in cpp_options:
+                if re.search(opt, text):
+                    if not opt in cpp_map:
+                        cpp_map[opt] = {mark: []}
+                    if not mark in cpp_map[opt]:
+                        cpp_map[opt][mark] = []
+                    cpp_map[opt][mark].append(src)
+
+for key, val in tree_map.items():
+    tree_map[key] = [item for item in val \
+            if re.match("[0-9][0-9]", item) or item in ["incs"]]
+    tree_map[key] = [abinit_incs[key] if item == "incs" else item \
+            for item in tree_map[key]]
+    tree_map[key].sort()
 
 map_data = {
         "tree_map": tree_map,
         "cpp_map":cpp_map,
 }
 with open(os.path.join("split", "cpp_map.yml"), "w") as map_file:
-    map_file.write(yaml.dump(map_data, Dumper=MyDumper) + "\n")
+    yaml.dump(map_data, stream=map_file, Dumper=MyDumper,
+        default_flow_style=False,
+        explicit_start=True,
+        explicit_end=True,
+        version=(1, 1),
+        indent=2)
