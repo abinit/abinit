@@ -10226,14 +10226,6 @@ P newkpt: treating     50 bands with npw=     753 for ikpt=  30 by node   14
 P newkpt: treating     50 bands with npw=     753 for ikpt=  31 by node   15
 P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
 
--       ( number of procs used in dmft ) = 24
-
-
- ******************************************
- DFT+DMFT Method is used
- ******************************************
-
- DMFT check: no solver and U=J=0
 
  =======================================================================
   == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
