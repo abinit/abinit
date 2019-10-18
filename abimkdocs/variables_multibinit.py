@@ -901,6 +901,8 @@ Flag to run spin dynamics.
 
 * 3 --> Run Monte Carlo.
 
+* 20 --> Dummy mover. Spin will not rotate. For test only.
+
 The HeunP method does less computation for each step,
 whereas the Depondt-Mertens method allow larger time step.
 For system with very simple interaction terms, HeunP could be faster.
@@ -917,13 +919,12 @@ Variable(
     defaultval=1,
     mnemonics="SPIN INITial STATE",
     text=r"""
-Flag to initialize spin state. (only option 1 and 2 are implemented.)
+Flag to initialize spin state.
 
-* 0 --> Read from spinhist netcdf file.
 
 * 1 --> Random spin state using uniform random numbers.
 
-* 2 --> Ferromagnetic state.
+* 2 --> Random spin state using uniform random numbers.
 
 * 3 --> State with q-vector using [[multibinit:spin_qpoint]]
 

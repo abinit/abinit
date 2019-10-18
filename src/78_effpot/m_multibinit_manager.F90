@@ -77,6 +77,7 @@ module m_multibinit_manager
   use m_lattice_verlet_mover, only: lattice_verlet_mover_t
   use m_lattice_berendsen_NVT_mover, only: lattice_berendsen_NVT_mover_t
   use m_lattice_berendsen_NPT_mover, only: lattice_berendsen_NPT_mover_t
+  use m_lattice_dummy_mover, only: lattice_dummy_mover_t
 
   ! Spin lattice coupling
   use m_slc_primitive_potential, only: slc_primitive_potential_t
@@ -437,6 +438,8 @@ contains
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_berendsen_NVT_mover_t, self%lattice_mover)
     case(104)   ! Berendsen NPT (not yet avaliable)
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_berendsen_NPT_mover_t, self%lattice_mover)
+    case(120)   ! Dummy mover (Do not move atoms, For test only.)
+       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_dummy_mover_t, self%lattice_mover)
     end select
     call self%lattice_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
   end subroutine set_lattice_mover

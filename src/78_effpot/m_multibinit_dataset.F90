@@ -838,9 +838,9 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%nctime=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nctime',tread,'INT')
  if(tread==1) multibinit_dtset%nctime=intarr(1)
- if(multibinit_dtset%nctime<0)then
+ if(multibinit_dtset%nctime<=0)then
    write(message, '(a,i0,a,a,a)' )&
-&   'nctime is',multibinit_dtset%ntime,', which is lower than 0 .',ch10,&
+&   'nctime is',multibinit_dtset%ntime,', which is not positive .',ch10,&
 &   'Action: correct nctime in your input file.'
    MSG_ERROR(message)
  end if
@@ -865,14 +865,21 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
       &   multibinit_dtset%dynamics/=27.and.&
       &   multibinit_dtset%dynamics/=24.and.multibinit_dtset%dynamics/=25 .and. &
       &   multibinit_dtset%dynamics/=101.and.multibinit_dtset%dynamics/=102 .and. & 
-      &   multibinit_dtset%dynamics/=103   &
+      &   multibinit_dtset%dynamics/=103.and.multibinit_dtset%dynamics/=120    &
     ) then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'dynamics is',multibinit_dtset%dynamics,', but the only allowed values',ch10,&
-&   'are 6,12,24,25 or  13, 101, 102, 103 (see ionmov in abinit documentation).',ch10,&
+&   'are 6,12,24,25 or  13, 101, 102, 103 120 (see ionmov in abinit documentation).',ch10,&
 &   'Action: correct dynamics in your input file.'
    MSG_ERROR(message)
  end if
+
+ if(multibinit_dtset%dynamics==120) then
+    write(message, '(a,i8,a)' )&
+         &   'dynamics is',multibinit_dtset%dynamics,'The atoms will not move. For test only!'
+    MSG_WARNING(message)
+ end if
+
 
 !L
  multibinit_dtset%latt_compressibility=0.0
@@ -1219,13 +1226,20 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%spin_dynamics=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_dynamics',tread,'INT')
  if(tread==1) multibinit_dtset%spin_dynamics=intarr(1)
- if(  multibinit_dtset%spin_dynamics > 3) then
+ if( .not. (multibinit_dtset%spin_dynamics <= 3 .or. multibinit_dtset%spin_dynamics==20) ) then
     write(message, '(a,i8,a,a,a,a,a)' )&
          &   'spin_dynamics is',multibinit_dtset%spin_dynamics,', but the only allowed values',ch10,&
-         &   'are 0, 1, 2, and 3 and negative values.',ch10,&
+         &   'are 0, 1, 2, 3 and 20 and negative values.',ch10,&
          &   'Action: correct spin_dynamics in your input file.'
     MSG_ERROR(message)
  end if
+
+ if(multibinit_dtset%spin_dynamics == 20) then
+    write(message, '(a,i8,a)' )&
+         &   'spin_dynamics is',multibinit_dtset%spin_dynamics,', spins will not move. For test only!!'
+    MSG_WARNING(message)
+ end if
+
 
  
  multibinit_dtset%spin_init_state=1

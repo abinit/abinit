@@ -170,12 +170,12 @@ contains
     if(mode==1) then ! using a boltzmann distribution. 
        ! Should only be used for a constant Temperature mover
        ! which includes:
-       !102:    Langevin
-       !103:    Brendesen
+       !   102:    Langevin
+       !   103:    Brendesen
        if (.not.( &
           self%latt_dynamics==101 .or.  &  ! TODO remove
           self%latt_dynamics==102 .or. self%latt_dynamics==103 ) ) then
-          MSG_BUG("Only set lattice initial state with a Boltzmann distribution in a constant T mover.")
+          MSG_ERROR("Only set lattice initial state with a Boltzmann distribution in a constant T mover.")
        end if
        call self%rng%rand_normal_array(xi, 3*self%natom)
        do i=1, self%natom
@@ -183,8 +183,15 @@ contains
        end do
        call self%force_stationary()
        self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)
-    !else
+    else if(mode==2) then ! Use reference structure and 0 velocity.
        ! other modes.
+       if(self%latt_dynamics==102 .or. self%latt_dynamics==103 ) then
+           MSG_ERROR("Displacement and velocity set to zero in a NVT mover.")
+       end if
+       do i=1, self%natom
+          self%current_vcart(:,i) = 0.0
+       end do
+       self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)
     end if
   end subroutine set_initial_state
 
