@@ -574,9 +574,9 @@ CONTAINS  !=====================================================================
  if (xmlcorewf) filecore=filecore(1:iln-3)//'corewf.xml'
  inquire(file=filecore,exist=ex)
  if (ex) then
-   !Use <filepsp>.corewf[.xml]
+   !Use <filepsp>.corewf.xml or <filepsp>.corewf.abinit
    call pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,pawrad(1),phi_cor,&
-&   filename=filecore)
+&                          filename=filecore)
  else
    !Use default name
    call pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,pawrad(1),phi_cor)

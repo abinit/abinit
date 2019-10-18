@@ -2110,7 +2110,8 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
          write(unit=filename,fmt='(a,i1)') 'corewf.abinit',itypat
          inquire(file=filename,exist=ex)
          if (.not.ex) then
-           msg='Core wave-functions file is missing!'
+           write(msg,'(4a)') 'Core wave-functions file is missing!',ch10,&
+&                            'Looking for: ',trim(filename)
            MSG_ERROR(msg)
          end if
        end if
