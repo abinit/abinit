@@ -1241,7 +1241,7 @@
 # the following helper script after running configure for more
 # information:
 #
-#   ~abinit-builddir/transient/build-abinit-fallbacks.sh
+#   ~abinit-builddir/fallbacks/build-abinit-fallbacks.sh
 #
 # Comprehensive documentation about how to use external packages properly
 # and build fallbacks can be found on the Abinit Wiki, at:

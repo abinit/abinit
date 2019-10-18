@@ -896,7 +896,7 @@ ABI_MSG_SECTION([Feature triggers summary])
 ABI_TRIGGERS_SUMMARY
 
 # Always generate a build script for required fallbacks
-AC_OUTPUT([transient/build-abinit-fallbacks.sh])
+AC_OUTPUT([fallbacks/build-abinit-fallbacks.sh])
 
 # Check that we have all required fallbacks
 ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])
@@ -924,7 +924,7 @@ if test "${abi_fbk_linalg}" = "yes"; then
     fi
 
     AC_MSG_NOTICE([installing linear algebra fallback tarball to '${tmp_abinit_tardir}'])
-    ${INSTALL} -m 644 "${abinit_srcdir}/transient/${tmp_linalg_tarball}" \
+    ${INSTALL} -m 644 "${abinit_srcdir}/fallbacks/${tmp_linalg_tarball}" \
       "${tmp_abinit_tardir}"
   fi
 fi

@@ -25,12 +25,12 @@ provide them within the Abinit source tree, under the
 fallbacks/ subdirectory.
 
 In order to help you, we have created a script named
-build-abinit-fallbacks.sh in the transient/ subdirectory of
+build-abinit-fallbacks.sh in the fallbacks/ subdirectory of
 the Abinit build directory. To build the fallbacks required
 for the current Abinit configuration, you can run this
 script through the following commands:
 
-cd transient
+cd fallbacks
 /bin/sh ./build-abinit-fallbacks.sh
 
 The configure script will now fail. You will need to run it
