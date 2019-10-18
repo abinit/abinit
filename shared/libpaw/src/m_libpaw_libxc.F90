@@ -596,7 +596,7 @@ contains
    end do
 
 #else
-   ABI_UNUSED(xc_tb09_c)
+   if (.False.) write(std_out,*)xc_tb09_c
 #endif
 
  end do
