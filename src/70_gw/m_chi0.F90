@@ -217,7 +217,6 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  type(plowannier_type),intent(inout) :: wan
  type(paw_pwaves_lmn_t),intent(in) :: Paw_onsite(Cryst%natom)
 
-
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_fourdp=1,enough=10,two_poles=2,one_pole=1,ndat1=1
@@ -299,7 +298,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,luwindow,&
 & nspinor,nsppol,pawang,dtset%prtvol,ucrpa_bands)
  endif
- 
+
  ks_energy => KS_BSt%eig
  qp_energy => QP_BSt%eig; qp_occ => QP_BSt%occ
 

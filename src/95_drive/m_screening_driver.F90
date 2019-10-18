@@ -1109,7 +1109,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    iqcalc = iqcalc + 1
 
    bar=REPEAT('-',80)
-   write(msg,'(4a,1x,a,i3,a,f9.6,2(",",f9.6),3a)')ch10,ch10,bar,ch10,&
+   write(msg,'(4a,1x,a,i2,a,f9.6,2(",",f9.6),3a)')ch10,ch10,bar,ch10,&
 &   ' q-point number ',label,'        q = (',(Qmesh%ibz(ii,iqibz),ii=1,3),') [r.l.u.]',ch10,bar
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
@@ -1124,7 +1124,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ABI_MALLOC(chi0_lwing,(Ep%npwe*Ep%nI,Ep%nomega,3))
      ABI_MALLOC(chi0_uwing,(Ep%npwe*Ep%nJ,Ep%nomega,3))
      ABI_MALLOC(chi0_head,(3,3,Ep%nomega))
-
 
      call cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 &     Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,nfftgw,&
@@ -1144,8 +1143,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        ABI_MALLOC(chi0intra_lwing,(Ep%npwe*Ep%nI,Ep%nomega,3))
        ABI_MALLOC(chi0intra_uwing,(Ep%npwe*Ep%nJ,Ep%nomega,3))
        ABI_MALLOC(chi0intra_head,(3,3,Ep%nomega))
-       
-       
+
        call chi0q0_intraband(Wfd,Cryst,Ep,Psps,QP_BSt,Gsph_epsG0,Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,use_tr,Dtset%usepawu,&
        ngfft_gw,chi0intra,chi0intra_head,chi0intra_lwing,chi0intra_uwing)
 

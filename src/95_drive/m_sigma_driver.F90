@@ -47,7 +47,6 @@ module m_sigma_driver
  use m_dtfil
  use m_crystal
 
-
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
  use m_time,          only : timab
@@ -2050,7 +2049,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! prevents me from refactoring the code. In particular I want to store the self-energy
  ! results inside the sigma_results datatypes hence one needs to know all the dimensions
  ! at the beginning of the execution (e.g. in setup_sigma) so that one can easily allocate the arrays in the type.
- 
  if(Dtset%ucrpa>=1) then
    !Read the band
    if (dtset%plowan_compute<10)then

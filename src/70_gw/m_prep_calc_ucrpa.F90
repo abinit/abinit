@@ -236,7 +236,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  logical     :: ecriture=.FALSE.
  logical     :: l_ucrpa,luwindow
  integer     :: g0_dump(3),iq_ibz_dump,dumint(2)
- 
+
 !************************************************************************
 
  l_ucrpa=.true.
@@ -283,7 +283,6 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
      MSG_ERROR(msg)
    endif
  endif
-
 
  ! === End of read Wannier function coefficients for Ucrpa
 
@@ -427,7 +426,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 
    nhat12_grdim=0
    if (use_pawnhat==1) then ! Compensation charge for \phi_a^*\phi_b
-     call wrtout(std_out," Using nhat12","COLL")
+     call wrtout(std_out,"Using nhat12","COLL")
      ABI_ALLOCATE(nhat12  ,(2,gwx_nfftot,nspinor**2))
      ABI_ALLOCATE(grnhat12,(2,gwx_nfftot,nspinor**2,3*nhat12_grdim))
    end if

@@ -1056,7 +1056,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  end if
 
  call timab(963,2,tsec)
- if(dtset%plowan_compute>0) then
+ if(dtset%plowan_compute>0 .and. dtset%plowan_compute<10) then
    write(message,'(2a,i3)') ch10,&
 &   ' ====================================================================================== '
    call wrtout(std_out,message,'COLL')
