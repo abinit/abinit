@@ -261,19 +261,46 @@ contains
     xcart(:,:)=xcart(:,:)/ Bohr_Ang
 
     ierr =nf90_inq_varid(ncid, "spin_ref_orientation", varid)
-    NCF_CHECK_MSG(ierr, "spin_ref_orientation")
-    ierr = nf90_get_var(ncid, varid, ref_spin_orientation)
-    NCF_CHECK_MSG(ierr, "spin_ref_orientation")
+    if(ierr==NF90_NOERR) then
+      ierr = nf90_get_var(ncid, varid, ref_spin_orientation)
+      NCF_CHECK_MSG(ierr, "spin_ref_orientation")
+    else
+      MSG_WARNING("Could not read spin_ref_orientation from nc file, will use z-direction.")
+      ref_spin_orientation(1,:)=0.0d0
+      ref_spin_orientation(2,:)=0.0d0
+      ref_spin_orientation(3,:)=1.0d0
+    endif  
+
+    !NCF_CHECK_MSG(ierr, "spin_ref_orientation")
+    !ierr = nf90_get_var(ncid, varid, ref_spin_orientation)
+    !NCF_CHECK_MSG(ierr, "spin_ref_orientation")
 
     ierr =nf90_inq_varid(ncid, "spin_ref_qpoint", varid)
-    NCF_CHECK_MSG(ierr, "spin_ref_qpoint")
-    ierr = nf90_get_var(ncid, varid, ref_spin_qpoint)
-    NCF_CHECK_MSG(ierr, "spin_ref_qpoint")
+    if(ierr==NF90_NOERR) then
+      ierr = nf90_get_var(ncid, varid, ref_spin_qpoint)
+      NCF_CHECK_MSG(ierr, "spin_ref_qpoint")
+    else
+      MSG_WARNING("Could not read spin_ref_qpoint from nc file, will use Gamma point.")
+      ref_spin_qpoint(:)=0.0d0
+    endif
+    !NCF_CHECK_MSG(ierr, "spin_ref_qpoint")
+    !ierr = nf90_get_var(ncid, varid, ref_spin_qpoint)
+    !NCF_CHECK_MSG(ierr, "spin_ref_qpoint")
 
     ierr =nf90_inq_varid(ncid, "spin_ref_rotate_axis", varid)
-    NCF_CHECK_MSG(ierr, "spin_ref_rotate_axis")
-    ierr = nf90_get_var(ncid, varid, ref_spin_rotate_axis)
-    NCF_CHECK_MSG(ierr, "spin_ref_rotate_axis")
+    if(ierr==NF90_NOERR) then
+      ierr = nf90_get_var(ncid, varid, ref_spin_rotate_axis)
+      NCF_CHECK_MSG(ierr, "spin_ref_rotate_axis")
+    else
+      MSG_WARNING("Could not read spin_ref_rotate_axis from nc file, will use x-axis.")
+      ref_spin_rotate_axis(1)=1.0d0
+      ref_spin_rotate_axis(2)=0.0d0
+      ref_spin_rotate_axis(3)=0.0d0
+    endif
+
+    !NCF_CHECK_MSG(ierr, "spin_ref_rotate_axis")
+    !ierr = nf90_get_var(ncid, varid, ref_spin_rotate_axis)
+    !NCF_CHECK_MSG(ierr, "spin_ref_rotate_axis")
 
     ierr =nf90_inq_varid(ncid, "spinat", varid)
     NCF_CHECK_MSG(ierr, "spinat")

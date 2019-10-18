@@ -444,9 +444,7 @@ contains
        if (present(Sref)) then
           self%Sref(:,:) = Sref
        else
-          write(msg,*) "No reference spin structure specified, using ferromagnetic along z-axis"
-          call wrtout(ab_out,msg,'COLL')
-          call wrtout(std_out,msg,'COLL')
+          MSG_WARNING("No reference spin structure specified, using ferromagnetic along z-axis")
 
           self%Sref(1,:) = 0.0_dp
           self%Sref(2,:) = 0.0_dp
