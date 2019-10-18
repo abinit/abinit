@@ -260,20 +260,20 @@ contains
 
     xcart(:,:)=xcart(:,:)/ Bohr_Ang
 
-    ierr =nf90_inq_varid(ncid, "ref_spin_orientation", varid)
-    NCF_CHECK_MSG(ierr, "ref_spin_orientation")
+    ierr =nf90_inq_varid(ncid, "spin_ref_orientation", varid)
+    NCF_CHECK_MSG(ierr, "spin_ref_orientation")
     ierr = nf90_get_var(ncid, varid, ref_spin_orientation)
-    NCF_CHECK_MSG(ierr, "ref_spin_orientation")
+    NCF_CHECK_MSG(ierr, "spin_ref_orientation")
 
-    ierr =nf90_inq_varid(ncid, "ref_spin_qpoint", varid)
-    NCF_CHECK_MSG(ierr, "ref_spin_qpoint")
+    ierr =nf90_inq_varid(ncid, "spin_ref_qpoint", varid)
+    NCF_CHECK_MSG(ierr, "spin_ref_qpoint")
     ierr = nf90_get_var(ncid, varid, ref_spin_qpoint)
-    NCF_CHECK_MSG(ierr, "ref_spin_qpoint")
+    NCF_CHECK_MSG(ierr, "spin_ref_qpoint")
 
-    ierr =nf90_inq_varid(ncid, "ref_spin_rotate_axis", varid)
-    NCF_CHECK_MSG(ierr, "ref_spin_rotate_axis")
+    ierr =nf90_inq_varid(ncid, "spin_ref_rotate_axis", varid)
+    NCF_CHECK_MSG(ierr, "spin_ref_rotate_axis")
     ierr = nf90_get_var(ncid, varid, ref_spin_rotate_axis)
-    NCF_CHECK_MSG(ierr, "ref_spin_rotate_axis")
+    NCF_CHECK_MSG(ierr, "spin_ref_rotate_axis")
 
     ierr =nf90_inq_varid(ncid, "spinat", varid)
     NCF_CHECK_MSG(ierr, "spinat")
