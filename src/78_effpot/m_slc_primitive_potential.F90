@@ -371,7 +371,6 @@ contains
 
   !-----------------------------------------
   ! reading tijuv parameters from ncdf file
-  ! TODO: test
   !-----------------------------------------
   subroutine read_tijuv(self, ncid)
     class(slc_primitive_potential_t), intent(inout) :: self
@@ -379,7 +378,6 @@ contains
 
     integer :: ncerr, dimid, ndata, varid
     integer, allocatable :: ilist(:), jlist(:,:), ulist(:,:), vlist(:,:)
-    integer, allocatable :: Rjlist(:,:), Rulist(:,:), Rvlist(:,:)
     real(dp), allocatable :: vallist(:)
 
     ncerr = nf90_inq_dimid(ncid, "spin_lattice_Tijuv_number_of_entries", dimid)
@@ -407,7 +405,7 @@ contains
       call netcdf_check(ncerr, "when reading Tijuv_ulist")
 
       varid = nctk_idname(ncid, "spin_lattice_Tijuv_vlist")
-      ncerr = nf90_get_var(ncid, varid, ulist)
+      ncerr = nf90_get_var(ncid, varid, vlist)
       call netcdf_check(ncerr, "when reading Tijuv_vlist")
 
       varid = nctk_idname(ncid, "spin_lattice_Tijuv_valuelist")
@@ -552,6 +550,7 @@ contains
 
   !-------------------------------------
   ! add one entry to sparse oiju matrix
+  ! TODO: test
   !-------------------------------------
   subroutine set_oiju_1term(self, ii, jj, uu, Rj, Ru, val)
     class(slc_primitive_potential_t), intent(inout) :: self
@@ -573,7 +572,6 @@ contains
 
   !----------------------------------------
   ! store tijuv parameters in sparse matrix
-  ! TODO: test
   !----------------------------------------
   subroutine set_tijuv(self, nn, ilist, jlist, ulist, vlist, vallist)
 
@@ -583,9 +581,6 @@ contains
     integer,                          intent(in)    :: jlist(4, nn)
     integer,                          intent(in)    :: ulist(4, nn)
     integer,                          intent(in)    :: vlist(4, nn)
-    !integer,                          intent(in)    :: Rjlist(3,nn)
-    !integer,                          intent(in)    :: Rulist(3,nn)
-    !integer,                          intent(in)    :: Rvlist(3,nn)
     real(dp),                         intent(in)    :: vallist(nn)
 
     integer :: idx
@@ -602,8 +597,7 @@ contains
   end subroutine set_tijuv
 
   !-------------------------------------
-  ! add one entry to sparse oiju matrix
-  ! TODO: test
+  ! add one entry to sparse tijuv matrix
   !-------------------------------------
   subroutine set_tijuv_1term(self, ii, jj, uu, vv, Rj, Ru, Rv, val)
     class(slc_primitive_potential_t), intent(inout) :: self

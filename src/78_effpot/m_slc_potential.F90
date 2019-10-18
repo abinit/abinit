@@ -108,8 +108,8 @@ contains
 
     if(self%has_bilin) call self%liu_sc%finalize()
     if(self%has_quadlin) call self%oiju_sc%finalize()
-    !if(self%has_linquad) call self%niuv%finalize() 
-    !if(self%has_biquad) call self%tijuv%finalize()
+    if(self%has_linquad) call self%niuv_sc%finalize() 
+    if(self%has_biquad) call self%tijuv_sc%finalize()
 
     call self%mpsspin%finalize()
     call self%mpslatt%finalize()
@@ -259,7 +259,7 @@ contains
 
     beta = 0.5_dp
 
-    ! oiju contribution
+    ! Magnetic field
     if(present(bfield)) then
       bslc(:) = 0.0d0
       if(self%has_bilin) then
@@ -298,8 +298,9 @@ contains
       enddo
     endif
 
+    ! Force and energy
     if(present(force) .or. present(energy)) then
-      bslc(:) = 0.0d0
+      fslc(:) = 0.0d0
       eslc = 0.0d0
       if(self%has_bilin) then
         f1(:) = 0.0d0
