@@ -357,7 +357,7 @@ contains
           end do
 
         case (3)
-          write(msg,*) "Initial spins set according to spin_init_ variables."
+          write(msg,*) "Initial spins set according to spin_init_* variables."
           call wrtout(ab_out,msg,'COLL')
           call wrtout(std_out,msg,'COLL')
 
@@ -376,8 +376,12 @@ contains
 
         case (4)
           ! read from last step of hist file
+          write(msg,'(a,a,a)') "Initial spins set to input spin hist file ",&
+             &  trim(restart_hist_fname), '.'  
+          call wrtout(ab_out,msg,'COLL')
+          call wrtout(std_out,msg,'COLL')
           if (.not. present(restart_hist_fname)) then
-             MSG_BUG("Spin initialize mode set to 4, but restart_hist_fname is not used.")
+             MSG_ERROR("Spin initialize mode set to 4, but restart_hist_fname is not used.")
           end if
           call self%read_hist_spin_state(fname=restart_hist_fname)
 

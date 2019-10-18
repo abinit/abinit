@@ -869,7 +869,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
       &   multibinit_dtset%dynamics/=103.and.multibinit_dtset%dynamics/=120    &
     ) then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'dynamics is',multibinit_dtset%dynamics,', but the only allowed values',ch10,&
+&   'dynamics is ',multibinit_dtset%dynamics,', but the only allowed values',ch10,&
 &   'are 6,12,24,25 or  13, 101, 102, 103 120 (see ionmov in abinit documentation).',ch10,&
 &   'Action: correct dynamics in your input file.'
    MSG_ERROR(message)
@@ -877,7 +877,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
  if(multibinit_dtset%dynamics==120) then
     write(message, '(a,i8,a)' )&
-         &   'dynamics is',multibinit_dtset%dynamics,'The atoms will not move. For test only!'
+         &   'dynamics is ',multibinit_dtset%dynamics,'The atoms will not move. For test only!'
     MSG_WARNING(message)
  end if
 
@@ -1229,7 +1229,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  if(tread==1) multibinit_dtset%spin_dynamics=intarr(1)
  if( .not. (multibinit_dtset%spin_dynamics <= 3 .or. multibinit_dtset%spin_dynamics==20) ) then
     write(message, '(a,i8,a,a,a,a,a)' )&
-         &   'spin_dynamics is',multibinit_dtset%spin_dynamics,', but the only allowed values',ch10,&
+         &   'spin_dynamics is ',multibinit_dtset%spin_dynamics,', but the only allowed values',ch10,&
          &   'are 0, 1, 2, 3 and 20 and negative values.',ch10,&
          &   'Action: correct spin_dynamics in your input file.'
     MSG_ERROR(message)
@@ -1237,7 +1237,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
  if(multibinit_dtset%spin_dynamics == 20) then
     write(message, '(a,i8,a)' )&
-         &   'spin_dynamics is',multibinit_dtset%spin_dynamics,', spins will not move. For test only!!'
+         &   'spin_dynamics is ',multibinit_dtset%spin_dynamics,', spins will not move. For test only!!'
     MSG_WARNING(message)
  end if
 
@@ -1273,7 +1273,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  if(tread==1) multibinit_dtset%spin_nctime=intarr(1)
  if(multibinit_dtset%spin_nctime<=0)then
     write(message, '(a,i0,a,a,a)' )&
-         &   'spin_nctime is',multibinit_dtset%spin_nctime,', which is lower than 1 .',ch10,&
+         &   'spin_nctime is ',multibinit_dtset%spin_nctime,', which is lower than 1 .',ch10,&
          &   'Action: correct spin_nctime in your input file.'
     MSG_ERROR(message)
  end if
