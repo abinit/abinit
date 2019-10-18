@@ -859,9 +859,9 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 !Local variables-------------------------------
 !scalars
  integer :: ii,ilm,ipts,ir,ispden,iwarn,lm_size_eff,mgga,ndvxc,nd2vxc,ngr2,ngrad
- integer :: nkxc_updn,npts,nspden_eff,nspden_updn,nspgrad,nvxcdgr,nvxcdlr,order,use_laplacian
- logical :: ismgga,libpaw_libxc_ismgga
- real(dp) :: dvdn,dvdz,enxcr,factor,vxcrho,factor2
+ integer :: nkxc_updn,npts,nspden_eff,nspden_updn,nspgrad,nvxcdgr,order,use_laplacian
+ logical :: ismgga
+ real(dp) :: enxcr,factor,vxcrho,factor2
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: dgxc(:),dnexcdn(:,:),drho(:),d2rho(:),drhocore(:),dvxcdgr(:,:),dvxcdlr(:,:),dvxci(:,:),d2vxci(:,:)
@@ -1033,7 +1033,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
        LIBPAW_ALLOCATE(tau_updn,(nrad,nspden_updn)) 
        if (use_laplacian==1) then
          LIBPAW_ALLOCATE(d2ylmdr,(3,npts,pawang%ylm_size))
-       end if      
+       end if
      end if
      do ilm=1,pawang%ylm_size
        do ipts=1,npts
@@ -1043,7 +1043,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
            factor2=pawang%ylmrgr(4,ilm,ipts)*pawang%anginit(1,ipts)+pawang%ylmrgr(5,ilm,ipts)*pawang%anginit(2,ipts)&
 &                 +pawang%ylmrgr(6,ilm,ipts)*pawang%anginit(3,ipts)
            d2ylmdr(1,ipts,ilm)=pawang%ylmrgr(4,ilm,ipts)-factor2*pawang%anginit(1,ipts)
-	   d2ylmdr(2,ipts,ilm)=pawang%ylmrgr(5,ilm,ipts)-factor2*pawang%anginit(2,ipts)
+           d2ylmdr(2,ipts,ilm)=pawang%ylmrgr(5,ilm,ipts)-factor2*pawang%anginit(2,ipts)
            d2ylmdr(3,ipts,ilm)=pawang%ylmrgr(6,ilm,ipts)-factor2*pawang%anginit(3,ipts)
          end if
        end do
@@ -1192,7 +1192,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
        mag(1:nrad,ipts,1:3)=mag_(1:nrad,1:3)
        call pawxc_rotate_mag(rhonow(:,:,1),rho_updn,mag_,nrad)
      end if
-     
+
 !    Make the density positive everywhere (but do not care about gradients)
      call pawxc_mkdenpos_wrapper(iwarn,nrad,nspden_updn,0,rho_updn,xc_denpos)
 
@@ -1201,7 +1201,6 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 &                               order,rho_updn,use_laplacian,vxci,xclevel, &
 &                               dvxc=dvxci,d2vxc=d2vxci,grho2=grho2_updn,lrho=lrho_updn, &
 &                               tau=tau_updn,vxctau=vxctau,vxcgrho=dvxcdgr,vxclrho=dvxcdlr)
-     
 
 !    ----------------------------------------------------------------------
 !    ----- Accumulate and store XC kernel and its derivative

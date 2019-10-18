@@ -179,12 +179,11 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !Local variables ---------------------------------------
 !scalars
  integer :: cplex,cplex_dij,cplex_rhoij,has_kxc,has_k3xc
- integer :: iatom,iatom_tot,idum,ierr,ii,ipositron,iq,iq0_dij,iq0_rhoij
- integer :: irhoij,ispden,itypat,itypat0
- integer :: jrhoij,kklmn,klmn,klmnq,lm_size,lmn2_size,mesh_size
+ integer :: iatom,iatom_tot,idum,ierr,ipositron,iq,iq0_dij,iq0_rhoij
+ integer :: itypat,itypat0,lm_size,lmn2_size,mesh_size
  integer :: my_comm_atom,ndij,nkxc1,nk3xc1,nsppol,opt_compch
  integer :: qphase,usecore,usepawu,usetcore,usexcnhat,usenhat,usefock,usekden
- logical :: cplex_eq_two,keep_vhartree,my_atmtab_allocated,need_kxc,need_k3xc,non_magnetic_xc
+ logical :: keep_vhartree,my_atmtab_allocated,need_kxc,need_k3xc,non_magnetic_xc
  logical :: paral_atom,pawu_new_algo,temp_vxc
  real(dp) :: e1t10,e1xc,e1xcdc,efock,efockdc,eexc,eexcdc,eexdctemp
  real(dp) :: eexc_val,eexcdc_val,eexex,eexexdc,eextemp,eh2
@@ -485,7 +484,8 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
        if (ipert==0) then
          call pawxc(pawtab(itypat)%coredens,eexc,eexcdc,ixc,kxc_tmp,k3xc_tmp,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,nkxc1,nk3xc1,non_magnetic_xc,mesh_size,nspden,option,&
-&         pawang,pawrad(itypat),rho1,usecore,0,usekden,vxc_tmp,xclevel,xc_denpos,taucore=pawtab(itypat)%coretau,taur=tau1,vxctau=vxctau_tmp)
+&         pawang,pawrad(itypat),rho1,usecore,0,usekden,vxc_tmp,xclevel,xc_denpos,&
+&         taucore=pawtab(itypat)%coretau,taur=tau1,vxctau=vxctau_tmp)
        else
          call pawxc_dfpt(pawtab(itypat)%coredens,cplex,cplex,eexc,ixc,paw_an0(iatom)%kxc1,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,paw_an0(iatom)%nkxc1,mesh_size,nspden,option,&

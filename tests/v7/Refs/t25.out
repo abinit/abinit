@@ -350,8 +350,7 @@ P           mkmem           8
   Size of radial mesh for [pseudo] core density... 1505
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl .......  100
-  No of Q-points for ttaucorespl and tvalespl ....  100
+  No of Q-points for tcorespl/tvalespl/ttaucorespl  100
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -402,8 +401,7 @@ P           mkmem           8
   Size of radial mesh for [pseudo] core density... 1068
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl .......  100
-  No of Q-points for ttaucorespl and tvalespl ....  100
+  No of Q-points for tcorespl/tvalespl/ttaucorespl  100
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -449,8 +447,7 @@ P           mkmem           8
   Size of radial mesh for [pseudo] core density...  350
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl .......  100
-  No of Q-points for ttaucorespl and tvalespl ....  100
+  No of Q-points for tcorespl/tvalespl/ttaucorespl  100
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1

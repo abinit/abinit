@@ -624,8 +624,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
      vhartr=vhartr+electronpositron%vha_ep
    end if
  end if
-!TEST
-write(78,*) vxc
 
 !Compute the trial potential
 !-------------------------------------------------------------

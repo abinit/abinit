@@ -1564,8 +1564,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   Size of radial mesh for [pseudo] core density... 1505
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl ....... 3001
-  No of Q-points for ttaucorespl and tvalespl .... 3001
+  No of Q-points for tcorespl/tvalespl/ttaucorespl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -1616,8 +1615,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   Size of radial mesh for [pseudo] core density... 1068
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl ....... 3001
-  No of Q-points for ttaucorespl and tvalespl .... 3001
+  No of Q-points for tcorespl/tvalespl/ttaucorespl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -1663,8 +1661,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   Size of radial mesh for [pseudo] core density...  350
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl ....... 3001
-  No of Q-points for ttaucorespl and tvalespl .... 3001
+  No of Q-points for tcorespl/tvalespl/ttaucorespl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -2172,8 +2169,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   Size of radial mesh for [pseudo] core density... 1505
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl .......  300
-  No of Q-points for ttaucorespl and tvalespl ....  300
+  No of Q-points for tcorespl/tvalespl/ttaucorespl  300
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -2224,8 +2220,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   Size of radial mesh for [pseudo] core density... 1068
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl .......  300
-  No of Q-points for ttaucorespl and tvalespl ....  300
+  No of Q-points for tcorespl/tvalespl/ttaucorespl  300
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -2271,8 +2266,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
   Size of radial mesh for [pseudo] core density...  350
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl .......  300
-  No of Q-points for ttaucorespl and tvalespl ....  300
+  No of Q-points for tcorespl/tvalespl/ttaucorespl  300
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1

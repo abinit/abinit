@@ -433,8 +433,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
            iatom=jatom(iat)
            call pawdij_print_dij(paw_ij_all(iatom)%dij,paw_ij_all(iatom)%cplex_dij,&
 &                  paw_ij_all(iatom)%qphase,iatom,dtset%natom,paw_ij_all(iatom)%nspden,&
-&                  paw_ij_all(iatom)%nsppol,test_value=valmx,unit=unitfi,&
-&                  Ha_or_eV=unt,opt_prtvol=dtset%pawprtvol)
+&                  test_value=valmx,unit=unitfi,Ha_or_eV=unt,opt_prtvol=dtset%pawprtvol)
          end do
        end if
        msg=' '

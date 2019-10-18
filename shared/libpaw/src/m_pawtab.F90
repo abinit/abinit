@@ -1224,9 +1224,7 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Size of radial mesh for pseudo valence density.. ',Pawtab(ityp)%tnvale_mesh_size
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,i4)')'  No of Q-points for tcorespl and tvalespl ....... ',Pawtab(ityp)%mqgrid
-  call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,i4)')'  No of Q-points for ttaucorespl and tvalespl .... ',Pawtab(ityp)%mqgrid
+  write(msg,'(a,i4)')'  No of Q-points for tcorespl/tvalespl/ttaucorespl ',Pawtab(ityp)%mqgrid
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  No of Q-points for the radial shape functions .. ',Pawtab(ityp)%mqgrid_shp
   call wrtout(my_unt,msg,my_mode)
@@ -1465,14 +1463,14 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 !scalars
  integer :: ierr,ii,me,nn_dpr,nn_dpr_arr,nn_int,nn_int_arr
  integer :: siz_indklmn,siz_indlmn,siz_klmntomn,siz_kmix,siz_lnproju,siz_orbitals
- integer :: siz_coredens,siz_coretau,siz_dij0,siz_dltij,siz_dshpfunc,siz_eijkl,siz_eijkl_sr,siz_euijkl,siz_euij_fll,siz_fk,siz_gammaij
- integer :: siz_gnorm,siz_fock,siz_kij,siz_nabla_ij,siz_nablaphi,siz_phi,siz_phiphj,siz_phiphjint,siz_ph0phiint
- integer :: siz_qgrid_shp,siz_qijl,siz_rad_for_spline,siz_rhoij0,siz_shape_alpha
- integer :: siz_shape_q,siz_shapefunc,siz_shapefncg,siz_sij,siz_tcoredens,siz_tcoretau,siz_tcorespl,siz_ttaucorespl
- integer :: siz_tnablaphi,siz_tphi,siz_tphitphj,siz_tproj,siz_tvalespl,siz_vee,siz_vex,siz_vhtnzc
- integer :: siz_vhnzc,siz_vminushalf,siz_zioneff
- integer :: siz_wvlpaw,siz_wvl_pngau,siz_wvl_parg,siz_wvl_pfac
- integer :: siz_wvl_rholoc_rad,siz_wvl_rholoc_d,sz1,sz2
+ integer :: siz_coredens,siz_coretau,siz_dij0,siz_dltij,siz_dshpfunc,siz_eijkl,siz_eijkl_sr
+ integer :: siz_euijkl,siz_euij_fll,siz_fk,siz_gammaij,siz_gnorm,siz_fock,siz_kij,siz_nabla_ij
+ integer :: siz_nablaphi,siz_phi,siz_phiphj,siz_phiphjint,siz_ph0phiint,siz_qgrid_shp,siz_qijl
+ integer :: siz_rad_for_spline,siz_rhoij0,siz_shape_alpha,siz_shape_q,siz_shapefunc
+ integer :: siz_shapefncg,siz_sij,siz_tcoredens,siz_tcoretau,siz_tcorespl,siz_ttaucorespl
+ integer :: siz_tnablaphi,siz_tphi,siz_tphitphj,siz_tproj,siz_tvalespl,siz_vee,siz_vex
+ integer :: siz_vhtnzc,siz_vhnzc,siz_vminushalf,siz_zioneff,siz_wvlpaw,siz_wvl_pngau
+ integer :: siz_wvl_parg,siz_wvl_pfac,siz_wvl_rholoc_rad,siz_wvl_rholoc_d,sz1,sz2
  logical :: full_broadcast
  character (len=500) :: msg,msg0
 !arrays

@@ -738,7 +738,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
          call pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
 &                      pawang,pawrad(itypat),pawtab(itypat),paw_an(iatom)%vxc1,&
 &                      paw_an(iatom)%vxct1,usexcnhat,mgga=mgga,vxctau1=paw_an(iatom)%vxctau1,vxcttau1=paw_an(iatom)%vxcttau1)
-         
+
        end if
        if (dijxc_need) paw_ij(iatom)%dijxc(:,:)=dijxc(:,:)
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+dijxc(:,:)
@@ -1478,10 +1478,10 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
 
 !Local variables ---------------------------------------
 !scalars
- integer :: angl_size,iaxis,idij,idijend,ij_size,ilm,ils,ils1,ilslm,ipts,ir,ir1,isel,isel2,ispden
- integer :: jlm,j0lm,klm1,klm2,klmn,klmn1,klmn2,klm,kln,l_size,lm0,lmax,lmin,lm_size,lmn2_size
+ integer :: angl_size,iaxis,idij,idijend,ij_size,ilm,ils,ils1,ilslm,ipts,ir,ir1,isel,ispden
+ integer :: jlm,j0lm,klmn1,klmn2,klmn,klm,kln,l_size,lm0,lmax,lmin,lm_size,lmn2_size
  integer :: ilmn,jlmn,iln,jln
- integer :: mesh_size,mggacomp,mm,nsploop
+ integer :: mesh_size,mm,nsploop
  real(dp) :: tmp,vi,vr,vxcijhat,vxcijhat_i
  character(len=500) :: msg
  logical :: mggabool
@@ -1489,20 +1489,9 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
  real(dp),allocatable :: dijxc_idij(:),ff(:),gg(:),ggtaubaribarj(:),ggtauij(:),vxcij1(:),vxcij2(:),yylmr(:,:),yylmgr(:,:)
  real(dp),allocatable :: vxctaubaribarj1(:),vxctauij1(:),fftaubaribarj(:),fftauij(:)
  real(dp),allocatable :: tphibartphjbar(:),tphitphj(:),phibarphjbar(:),phiphj(:)
+
 ! *************************************************************************
 
-! check if MetaGGA is activated
-   mggabool=present(mgga).and.(mgga==1)
-   mggacomp=merge(1,0,mggabool)
-
-   if ((mggacomp==1).and.(.not.present(vxctau1))) then
-     msg="vxctau1 needs to be present for MetaGGA"
-     MSG_BUG(msg) 
-   end if
-   if ((mggacomp==1).and.(.not.present(vxcttau1))) then
-     msg="vxcttau1 needs to be present for MetaGGA"
-     MSG_BUG(msg) 
-   end if
 !Useful data
  lm_size=pawtab%lcut_size**2
  lmn2_size=pawtab%lmn2_size
@@ -1523,6 +1512,17 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
    MSG_BUG(msg)
  end if
 
+!Check if MetaGGA is activated
+ mggabool=.false. ; if (present(mgga)) mggabool=(mgga==1)
+ if (mggabool.and.(.not.present(vxctau1))) then
+   msg="vxctau1 needs to be present for MetaGGA"
+   MSG_BUG(msg)
+ end if
+ if (mggabool.and.(.not.present(vxcttau1))) then
+   msg="vxcttau1 needs to be present for MetaGGA"
+   MSG_BUG(msg)
+ end if
+
 !Precompute products Ylm*Ylpmp
  lmax=1+maxval(pawtab%indklmn(4,1:lmn2_size))
  LIBPAW_ALLOCATE(yylmr,(lmax**2*(lmax**2+1)/2,angl_size))
@@ -1537,7 +1537,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
  end do
 
 !Precompute products \nabla Ylm*\nabla Ylpmp
- if (mggacomp==1) then 
+ if (mggabool) then
    lmax=1+maxval(pawtab%indklmn(4,1:lmn2_size))
    LIBPAW_ALLOCATE(yylmgr,(lmax**2*(lmax**2+1)/2,angl_size))
    do ipts=1,angl_size
@@ -1552,6 +1552,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
      end do
    end do
  end if
+
 !Init memory
  dijxc=zero
  LIBPAW_ALLOCATE(dijxc_idij,(qphase*lmn2_size))
@@ -1559,7 +1560,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
  LIBPAW_ALLOCATE(vxcij2,(qphase*l_size))
  LIBPAW_ALLOCATE(ff,(mesh_size))
  LIBPAW_ALLOCATE(gg,(mesh_size))
- if (mggacomp==1) then
+ if (mggabool) then
    LIBPAW_ALLOCATE(vxctaubaribarj1,(qphase*ij_size))
    LIBPAW_ALLOCATE(vxctauij1,(qphase*ij_size))
    LIBPAW_ALLOCATE(fftaubaribarj,(mesh_size))
@@ -1599,7 +1600,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
               call simp_gen(vxcij1(kln),ff,pawrad)
            end do
            ! if Meta GGA compute \langle \nabla \phi_{i} \vert \mu_{xc} \vert \nabla \phi_{j} \rangle
-           if (mggacomp==1) then
+           if (mggabool) then
              vxctaubaribarj1=zero
              vxctauij1=zero
              do klmn=1,lmn2_size
@@ -1608,7 +1609,6 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
                kln=pawtab%indklmn(2,klmn)  ! (iln,jln)
                iln=pawtab%indlmn(5,ilmn)   ! (l,n) orbital 1
                jln=pawtab%indlmn(5,jlmn)   ! (l,n) orbital 2
-   
 
                tphibartphjbar(1:mesh_size)=pawtab%tnablaphi(1:mesh_size,iln)*pawtab%tnablaphi(1:mesh_size,jln)
                tphitphj(1:mesh_size)=pawtab%tphi(1:mesh_size,iln)*pawtab%tphi(1:mesh_size,jln)
@@ -1639,8 +1639,9 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
              call simp_gen(vxcij1(2*kln-1),ff,pawrad)
              call simp_gen(vxcij1(2*kln  ),gg,pawrad)
            end do
+
            ! if Meta GGA compute \langle \nabla \phi_{i} \vert \mu_{xc} \vert \nabla \phi_{j} \rangle
-           if (mggacomp==1) then
+           if (mggabool) then
              vxctaubaribarj1=zero
              vxctauij1=zero
              do klmn=1,lmn2_size
@@ -1660,7 +1661,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
 &                                   -vxcttau1(ir1-1,ipts,ispden)*tphibartphjbar(ir)
                  fftauij(ir)=vxctau1(ir1-1,ipts,ispden)*phiphj(ir) &
 &                                  -vxcttau1(ir1-1,ipts,ispden)*tphitphj(ir)
-                   
+
                  ggtaubaribarj(ir)=vxctau1(ir1,ipts,ispden)*phibarphjbar(ir) &
 &                                   -vxcttau1(ir1,ipts,ispden)*tphibartphjbar(ir)
                  ggtauij(ir)=vxctau1(ir1,ipts,ispden)*phiphj(ir) &
@@ -1672,7 +1673,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
                 call simp_gen(vxctauij1(2*kln-1  ),ggtauij,pawrad)
               end do
             end if
-             
+
          end if
 
 !        ===== Vxc_ij_2 (tmp) =====
@@ -1683,7 +1684,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
                ff(1:mesh_size)=vxct1(1:mesh_size,ipts,ispden) &
 &                 *pawtab%shapefunc(1:mesh_size,ils) &
 &                 *pawrad%rad(1:mesh_size)**2
-               if (mggacomp==1) then
+               if (mggabool) then
                  ff(1:mesh_size)=ff(1:mesh_size)+vxcttau1(1:mesh_size,ipts,ispden)&
                                                 *pawtab%shapefunc(1:mesh_size,ils) &
 &                                               *pawrad%rad(1:mesh_size)**2
@@ -1713,7 +1714,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
              dijxc_idij(klmn)=dijxc_idij(klmn) &
 &                            +vxcij1(kln)*pawang%angwgth(ipts)*yylmr(klm,ipts)*four_pi 
              ! if Meta GGA, add the tau depending terms
-             if (mggacomp==1) then 
+             if (mggabool) then
                dijxc_idij(klmn)=dijxc_idij(klmn) &
                                +half*vxctaubaribarj1(kln)*pawang%angwgth(ipts)*yylmr(klm,ipts)*four_pi &
                                +half*vxctauij1(kln)*pawang%angwgth(ipts)*yylmgr(klm,ipts)*four_pi
@@ -1824,7 +1825,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
  LIBPAW_DEALLOCATE(vxcij2)
  LIBPAW_DEALLOCATE(ff)
  LIBPAW_DEALLOCATE(gg)
- if (mggacomp==1) then
+ if (mggabool) then
    LIBPAW_DEALLOCATE(vxctaubaribarj1)
    LIBPAW_DEALLOCATE(vxctauij1)
    LIBPAW_DEALLOCATE(fftaubaribarj)
@@ -2175,7 +2176,7 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
  real(dp) :: vi,vr
  character(len=500) :: msg
 !arrays
- real(dp) :: rdum(1)
+ real(dp) :: rdum1(1),rdum2(2)
  real(dp),allocatable :: dijhat_idij(:),prod(:)
 
 ! *************************************************************************
@@ -2201,7 +2202,7 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
    end if
    LIBPAW_ALLOCATE(pawfgrtab%gylm,(nfgd,lm_size))
    pawfgrtab%gylm_allocated=2;optgr0=1
-   call pawgylm(pawfgrtab%gylm,rdum,rdum,lm_size,nfgd,optgr0,0,0,pawtab,pawfgrtab%rfgd)
+   call pawgylm(pawfgrtab%gylm,rdum1,rdum2,lm_size,nfgd,optgr0,0,0,pawtab,pawfgrtab%rfgd)
  end if
 
 !Eventually compute exp(i.q.r) factors for the current atom (if not already done)
@@ -4673,7 +4674,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
  integer :: il,il0,ilmn,iln,iln0,ilpm,indexi,indexii,indexj,indexjj,indexjj0,indexk,indexkc,indexkc_q
  integer :: iplex,iq,irot,ispden,itypat,j0lmn,jl,jl0,jlmn,jln,jln0,jlpm,jspden
  integer :: klmn,klmnc,kspden,lmn_size,lmn2_size,mi,mj,my_comm_atom,my_cplex_dij,my_ndij,my_qphase
- integer :: mu,natinc,ndij0,ndij1,nu,optsym,qphase,sz1,sz2
+ integer :: mu,natinc,ndij0,ndij1,nu,qphase,sz1,sz2
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used with non-collinear magnetism
  logical :: antiferro,has_qphase,my_atmtab_allocated,noncoll,paral_atom,use_afm
 !DEBUG_ALTERNATE_ALGO
@@ -4688,7 +4689,6 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
  integer :: nsym_used(2)
  integer, pointer :: indlmn(:,:)
  integer,pointer :: my_atmtab(:)
- integer :: idum(0)
  real(dp) :: dijc(2),fact(2),factsym(2),phase(2)
  real(dp) :: rotdij(2,2,2),rotmag(2,3,2),sumdij(2,2,2),summag(2,3,2)
  real(dp),allocatable :: dijnew(:,:,:),dijtmp(:,:),symrec_cart(:,:,:)
@@ -4781,8 +4781,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
    do iatom=1,my_natom,natinc
      iatom_tot=iatom; if (paral_atom) iatom_tot=my_atmtab(iatom)
      call pawdij_print_dij(paw_ij(iatom)%dij,paw_ij(iatom)%cplex_dij,paw_ij(iatom)%qphase,&
-&                iatom_tot,natom,paw_ij(iatom)%nspden,paw_ij(iatom)%nsppol,&
-&                opt_prtvol=pawprtvol,mode_paral=wrt_mode)
+&                iatom_tot,natom,paw_ij(iatom)%nspden,opt_prtvol=pawprtvol,mode_paral=wrt_mode)
    end do
    call wrtout(std_out,"",wrt_mode)
  end if
@@ -5313,8 +5312,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
    do iatom=1,my_natom,natinc
      iatom_tot=iatom; if (paral_atom) iatom_tot=my_atmtab(iatom)
      call pawdij_print_dij(paw_ij(iatom)%dij,paw_ij(iatom)%cplex_dij,paw_ij(iatom)%qphase,&
-&                iatom_tot,natom,paw_ij(iatom)%nspden,paw_ij(iatom)%nsppol,&
-&                opt_prtvol=pawprtvol,mode_paral=wrt_mode)
+&                iatom_tot,natom,paw_ij(iatom)%nspden,opt_prtvol=pawprtvol,mode_paral=wrt_mode)
    end do
    call wrtout(std_out,"",wrt_mode)
  end if
@@ -5691,7 +5689,6 @@ end subroutine pawdij_gather
 !!  iatom=current atom
 !!  natom=total number of atoms in the system
 !!  nspden=number of spin density components
-!!  nsppol = number of spin polarizations
 !!  [Ha_or_eV]= 1: output in hartrees, 2: output in eV
 !!  [opt_prtvol]= >=0 if up to 12 components of _ij matrix have to be printed
 !!                 <0 if all components of ij_ matrix have to be printed (optional)
@@ -5712,14 +5709,14 @@ end subroutine pawdij_gather
 !!
 !! SOURCE
 
-subroutine pawdij_print_dij(dij,cplex_dij,qphase,iatom,natom,nspden,nsppol,&
+subroutine pawdij_print_dij(dij,cplex_dij,qphase,iatom,natom,nspden,&
 &           test_value,title_msg,unit,Ha_or_eV,opt_prtvol,mode_paral) ! Optional arguments
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex_dij,iatom,natom,nspden,nsppol,qphase
+ integer,intent(in) :: cplex_dij,iatom,natom,nspden,qphase
  integer,optional,intent(in) :: Ha_or_eV,opt_prtvol,unit
  real(dp),intent(in),optional :: test_value
  character(len=4),optional,intent(in) :: mode_paral

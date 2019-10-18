@@ -438,7 +438,7 @@ contains
 !! INPUTS
 !! ixc=XC code for Abinit
 !! nspden=number of spin-density components
-!! xc_tb09_c=special argument for the Tran-Blaha 2009 functional
+!! [xc_tb09_c]=special argument for the Tran-Blaha 2009 functional
 !!
 !! SIDE EFFECTS
 !! [xc_functionals(2)]=<type(libpaw_libxc_type)>, optional argument
@@ -595,6 +595,8 @@ contains
      end if
    end do
 
+#else
+   ABI_UNUSED(xc_tb09_c)
 #endif
 
  end do
@@ -1018,6 +1020,7 @@ end function libpaw_libxc_ismgga
  end if
 
  end function libpaw_libxc_needs_laplacian
+!!***
 
 !----------------------------------------------------------------------
 

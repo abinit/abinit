@@ -1750,8 +1750,9 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  real(dp) :: tmp_qgrid(1),tmp_q2vq(1)
  real(dp),allocatable :: ncorwk(:),nhat(:),nhatwk(:),nwk(:),r2k(:)
  real(dp),allocatable :: rtncor(:),rttaucor(:),rtnval(:),rvlocr(:)
- real(dp),allocatable :: vbare(:),vh(:),vhnzc(:)
- real(dp),allocatable :: vxc1(:),vxc2(:),work1(:),work1b(:),work2(:),work3(:),work4(:)
+ real(dp),allocatable :: vbare(:),vh(:),vhnzc(:),vxc1(:),vxc2(:)
+ real(dp),allocatable,target :: work1(:),work2(:),work3(:)
+ real(dp),pointer :: tmp1(:),tmp2(:),tmp3(:),tmp4(:),tmp5(:)
  logical :: tmp_lmselect(1)
 
 ! *************************************************************************
@@ -2180,9 +2181,9 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
        LIBPAW_ALLOCATE(vxc1,(msz*nspden))
        LIBPAW_ALLOCATE(vxc2,(msz*nspden))
        LIBPAW_ALLOCATE(work1,(msz))
-       LIBPAW_ALLOCATE(work1b,(msz))
        LIBPAW_ALLOCATE(work2,(msz*nspden))
        LIBPAW_ALLOCATE(work3,(msz*nspden))
+       tmp1 => work1
        work2(1:msz)=nwk
        work3(1:msz)=nhatwk
        if (nspden==2) work2(msz+1:2*msz)=half*nwk
@@ -2194,23 +2195,22 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 &         pawang_tmp,vloc_mesh,pawxcdev,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
          vxc1=vxc1/sqrt(four_pi);vxc2=vxc2/sqrt(four_pi) ! Deduce Vxc from its first moment
        else
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,work1b,1,tmp_lmselect,work3,0,0,non_magnetic_xc,msz,nspden,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,tmp1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,msz,nspden,5,&
 &         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,0,usekden,vxc1,xclevel,xc_denpos)
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,work1b,1,tmp_lmselect,work3,0,0,non_magnetic_xc,msz,nspden,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,tmp1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,msz,nspden,5,&
 &         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,2,usekden,vxc2,xclevel,xc_denpos)
        end if
        LIBPAW_DEALLOCATE(nwk)
        LIBPAW_DEALLOCATE(ncorwk)
        LIBPAW_DEALLOCATE(nhatwk)
        LIBPAW_DEALLOCATE(work1)
-       LIBPAW_DEALLOCATE(work1b)
        LIBPAW_DEALLOCATE(work2)
        LIBPAW_DEALLOCATE(work3)
      else
        LIBPAW_ALLOCATE(vxc1,(msz))
        LIBPAW_ALLOCATE(vxc2,(msz))
        LIBPAW_ALLOCATE(work1,(msz))
-       LIBPAW_ALLOCATE(work1b,(msz))
+       tmp1 => work1
        if (pawxcdev/=0) then
          call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
@@ -2218,16 +2218,15 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 &         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
          vxc1=vxc1/sqrt(four_pi);vxc2=vxc2/sqrt(four_pi) ! Deduce Vxc from its first moment
        else
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,work1b,1,tmp_lmselect,nhatwk,0,0,non_magnetic_xc,msz,1,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,tmp1,1,tmp_lmselect,nhatwk,0,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,0,usekden,vxc1,xclevel,xc_denpos)
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,work1b,1,tmp_lmselect,nhatwk,0,0,non_magnetic_xc,msz,1,5,&
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,tmp1,1,tmp_lmselect,nhatwk,0,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,2,usekden,vxc2,xclevel,xc_denpos)
        end if
        LIBPAW_DEALLOCATE(nwk)
        LIBPAW_DEALLOCATE(ncorwk)
        LIBPAW_DEALLOCATE(nhatwk)
        LIBPAW_DEALLOCATE(work1)
-       LIBPAW_DEALLOCATE(work1b)
      endif
 !    Compute difference of XC potentials
      if (usexcnhat==0.and.pawtab%usexcnhat/=0)  vxc1(1:msz)=vxc2(1:msz)-vxc1(1:msz)
@@ -2514,24 +2513,22 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 #endif
 
  LIBPAW_ALLOCATE(work1,(core_mesh%mesh_size*nspden))
- LIBPAW_ALLOCATE(work1b,(core_mesh%mesh_size*nspden))
- LIBPAW_ALLOCATE(work2,(core_mesh%mesh_size*nspden))
+ LIBPAW_ALLOCATE(work2,(core_mesh%mesh_size))
  LIBPAW_ALLOCATE(work3,(1))
- LIBPAW_ALLOCATE(work4,(core_mesh%mesh_size))
- work1(:)=zero
- 
+ work1(:)=zero;work2(:)=zero;work3(:)=zero
+ tmp1 => work1 ; tmp2 => work1 ; tmp3 => work1 ; tmp4 => work1 ; tmp5 => work1
+
  if (pawxcdev/=0) then
-   call pawxcm(ncore,pawtab%exccore,yp1,0,ixc,work4,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
-&   nspden,4,pawang_tmp,core_mesh,pawxcdev,work1,1,0,work2,xclevel,xc_denpos)
+   call pawxcm(ncore,pawtab%exccore,yp1,0,ixc,work2,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
+&   nspden,4,pawang_tmp,core_mesh,pawxcdev,work1,1,0,tmp1,xclevel,xc_denpos)
  else
-   call pawxc(ncore,pawtab%exccore,yp1,ixc,work4,work1b,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
-&   nspden,4,pawang_tmp,core_mesh,work1,1,0,usekden,work2,xclevel,xc_denpos,taucore=work1,taur=work1,vxctau=work1)
+   call pawxc(ncore,pawtab%exccore,yp1,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
+&   nspden,4,pawang_tmp,core_mesh,tmp1,1,0,usekden,tmp2,xclevel,xc_denpos,taucore=tmp3,taur=tmp4,vxctau=tmp5)
  end if
+
  LIBPAW_DEALLOCATE(work1)
- LIBPAW_DEALLOCATE(work1b)
  LIBPAW_DEALLOCATE(work2)
  LIBPAW_DEALLOCATE(work3)
- LIBPAW_DEALLOCATE(work4)
 
 !==================================================
 !Compute atomic contribution to Dij (Dij0)
@@ -3463,7 +3460,8 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    end if
    LIBPAW_ALLOCATE(taucore,(coretau_mesh%mesh_size))
    shft=mesh_shift(itaucoremesh)
-   taucore(1+shft:coretau_mesh%mesh_size)=paw_setuploc%ae_core_kinetic_energy_density%data(1:coretau_mesh%mesh_size-shft)/sqrt(fourpi)
+   taucore(1+shft:coretau_mesh%mesh_size)= &
+&   paw_setuploc%ae_core_kinetic_energy_density%data(1:coretau_mesh%mesh_size-shft)/sqrt(fourpi)
    if (shft==1) call pawrad_deducer0(taucore,coretau_mesh%mesh_size,coretau_mesh)
    pawtab%coretau_mesh_size=pawtab%mesh_size
    if(save_core_msz) pawtab%coretau_mesh_size=coretau_mesh%mesh_size
@@ -3499,7 +3497,8 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    end if
    LIBPAW_ALLOCATE(ttaucore,(coretau_mesh%mesh_size))
    shft=mesh_shift(itaucoremesh)
-   ttaucore(1+shft:coretau_mesh%mesh_size)=paw_setuploc%pseudo_core_kinetic_energy_density%data(1:coretau_mesh%mesh_size-shft)/sqrt(fourpi)
+   ttaucore(1+shft:coretau_mesh%mesh_size)= &
+&   paw_setuploc%pseudo_core_kinetic_energy_density%data(1:coretau_mesh%mesh_size-shft)/sqrt(fourpi)
    if (shft==1) call pawrad_deducer0(ttaucore,coretau_mesh%mesh_size,coretau_mesh)
    if(save_core_msz)  then
      LIBPAW_ALLOCATE(pawtab%tcoretau,(pawtab%coretau_mesh_size,6))
