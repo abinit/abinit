@@ -587,7 +587,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    else
      rhocorval => rhor_
    end if
-   if (n3xctau>0.or.nspden_eff/=nspden) then
+   if (mgga==1.and.(n3xctau>0.or.nspden_eff/=nspden)) then
      ABI_ALLOCATE(taucorval,(nfft,nspden_eff))
      if (nspden==nspden_eff) then
        taucorval(:,1:nspden)=taur_(:,1:nspden)
