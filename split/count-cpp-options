@@ -37,12 +37,13 @@ for key, val in cpp_in_cats.items():
 
 cpp_exclusive = {key: [] for key in tree_map.keys()}
 for cpp_cat, cpp_opts in cpp_in_cats.items():
-    exc_opts = []
+    exc_opts = cpp_opts
     for other_cat, other_opts in cpp_in_cats.items():
         if other_cat != cpp_cat:
-            exc_opts += [item for item in cpp_opts \
-                    if not item in other_opts + exc_opts]
-    cpp_exclusive[cpp_cat] = sorted(list(set(exc_opts)))
+            for opt in other_opts:
+                if opt in exc_opts:
+                    exc_opts.remove(opt)
+    cpp_exclusive[cpp_cat] = sorted(exc_opts)
 
 stats_data = {
         "cpp_classes": cpp_in_cats,
