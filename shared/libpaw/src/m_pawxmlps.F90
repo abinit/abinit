@@ -2669,7 +2669,7 @@ end subroutine paw_setup_copy
 !!  paw_setup=pseudopotential data structure
 !!
 !! PARENTS
-!!      m_pawpsp
+!!      m_pawpsprdpawpsxml_core
 !!
 !! CHILDREN
 !!      paw_rdfromline

@@ -1410,7 +1410,7 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
    end if
    if (.not.ex) then
 !    Core WF file: new format XML
-     filename_='corewf.abinit.xml';ex=.false.
+     filename_='corewf.xml';ex=.false.
      inquire(file=trim(filename_),iostat=ios,exist=ex)
      if (ios/=0) then
        write(msg,'(3a)') 'INQUIRE returns an error for file ',trim(filename_),'!'
@@ -1447,7 +1447,7 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
    unt = libpaw_get_free_unit()
    open(unt,file=trim(filename_),form='formatted',action="read")
    read(unt,*) ! skip title
-   read(unt,*) ! skip method,nspinor,nsppol
+   read(unt,*) ! skip relativism,method,nspinor,nsppol
    read(unt,*) ! skip zatom,zcore,pspdat
    read(unt,*) ! skip pspcod,pspxc,lmax
    read(unt,*) ! skip pspfmt,creatorID
