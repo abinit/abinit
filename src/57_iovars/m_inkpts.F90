@@ -267,7 +267,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 #endif
    end if
    call xmpi_bcast(krange2ibz, master, comm, ierr)
-   call hdr_bcast(hdr, master, my_rank, comm)
+   call hdr%bcast(master, my_rank, comm)
    ! Hdr contains kpts in the IBZ. Extract data corresponding to pockets via krange2ibz.
    nshiftk = hdr%nshiftk; nshiftk_orig = hdr%nshiftk_orig
    istwfk = hdr%istwfk(krange2ibz(:))
@@ -277,7 +277,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    kpt = hdr%kptns(:, krange2ibz(:)) !; kpthf(3,nkpthf)
    shiftk(:,1:nshiftk) = hdr%shiftk; shiftk_orig(:, 1:nshiftk_orig) = hdr%shiftk_orig
    wtk = hdr%wtk(krange2ibz(:))
-   call hdr_free(hdr)
+   call hdr%free()
    kptnrm = one
    ABI_FREE(krange2ibz)
 

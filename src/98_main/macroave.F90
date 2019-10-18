@@ -322,7 +322,7 @@ program macroave
    end if
 
 !  For debugging
-!  call hdr_echo(hdr,fform,4,std_out)
+!  call hdr%echo(fform,4,std_out)
 
    do I = 1, 3
      MESH(I) = HDR%NGFFT(I)
@@ -333,7 +333,7 @@ program macroave
    NSPIN = HDR%NSPPOL
    nspden = hdr%nspden
    ABI_CHECK(hdr%nspinor == 1, "nspinor == 2 not coded")
-   call hdr_free(hdr)
+   call hdr%free()
 
    NPT = MESH(1) * MESH(2) * MESH(3)
    ABI_ALLOCATE( RHO,(NPT,NSPIN))

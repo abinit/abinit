@@ -817,7 +817,7 @@ end function time_get_papiopt
 !!      listkk,lobpcgwf,m_ab7_invars_f90,m_ab7_mixing,m_cgtools,m_dyson_solver
 !!      m_fftcore,m_fftw3,m_fock,m_green,m_haydock,m_hexc,m_invovl,m_iowf
 !!      m_lobpcg,m_lobpcg2,m_lobpcgwf,m_paral_pert,m_sg2002,m_wfutils,m_xg
-!!      m_xgScalapack,mag_constr,mkcore,mkcore_paw,mkcore_wvl,mkffnl
+!!      m_xgScalapack,mag_penalty,mkcore,mkcore_paw,mkcore_wvl,mkffnl
 !!      mklocl_realspace,mklocl_recipspace,mkresi,mkrho,newkpt,newocc,newrho
 !!      newvtr,nhatgrid,nlenergyrec,nonlinear,nonlop,odamix,opernla_ylm
 !!      optics_paw,optics_paw_core,optics_vloc,outkss,outscfcv,pareigocc

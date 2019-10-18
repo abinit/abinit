@@ -323,3 +323,4 @@ tests/built-in/Input/fort.98
 tests/built-in/Input/testin_wannier90o_EBANDS.agr
 doc/input-web/*~
 mac-1P0-225.ac
+doc/topics/ConstrainedDFT.md

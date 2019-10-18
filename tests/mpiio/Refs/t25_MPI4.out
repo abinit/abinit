@@ -365,7 +365,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   1.11202     0.715319     0.715319      1.430637     0.000000
     2   1.11202     0.720653     0.720653      1.441307     0.000000
