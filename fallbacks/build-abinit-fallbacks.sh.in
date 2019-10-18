@@ -1,36 +1,34 @@
 #!/bin/sh
 
 # Init
-fallbacks_prefix="PREFIX"
+fallbacks_prefix="@abinit_builddir@/fallbacks/install/@abi_fc_vendor@/@abi_fc_version@"
 
-# Check that the installation prefix has been set
-if test "${fallbacks_prefix}" = "PREFIX"; then
-  echo "Please edit ${0} and set"
-  echo "the 'fallbacks_prefix' variable at the top of the file"
-  echo "to the absolute path where you wish to install the fallbacks."
-  echo "Then run again this script."
-  exit 1
-fi
+# Unpack tarball
+cd @abinit_builddir@/fallbacks
+tar xzf @abinit_srcdir@/fallbacks/abinit-fallbacks-[0-9].[0-9].[0-9].tar.gz
+cd abinit-fallbacks-*
 
 # Configure
-@abinit_srcdir@/fallbacks/configure \
+./configure \
   --prefix="${fallbacks_prefix}" \
   --srcdir="@abinit_srcdir@/fallbacks" \
-  --enable-atompaw="@abi_atompaw_fbk@" \
-  --enable-bigdft="@abi_bigdft_fbk@" \
-  --enable-libxc="@abi_libxc_fbk@" \
-  --enable-linalg="@abi_linalg_fbk@" \
-  --enable-netcdf="@abi_netcdf_fbk@" \
-  --enable-wannier90="@abi_wannier90_fbk@" \
+  --enable-atompaw="" \
+  --enable-bigdft="yes" \
+  --enable-libxc="yes" \
+  --enable-linalg="yes" \
+  --enable-netcdf="yes" \
+  --enable-wannier90="yes" \
   --with-fc-vendor="@abi_fc_vendor@" \
   --with-fc-version="@abi_fc_version@" \
   --with-tardir="${HOME}/.abinit/tarballs" \
-  --with-libxc-incs="@afb_libxc_incs@" \
-  --with-libxc-libs="@afb_libxc_libs@" \
-  --with-linalg-incs="@afb_linalg_incs@" \
-  --with-linalg-libs="@afb_linalg_libs@" \
-  --with-netcdf-incs="@afb_netcdf_incs@" \
-  --with-netcdf-libs="@afb_netcdf_libs@" \
+  --with-libxc-incs="@sd_libxc_cppflags@" \
+  --with-libxc-libs="@sd_libxc_libs@" \
+  --with-linalg-incs="@sd_linalg_fcflags@" \
+  --with-linalg-libs="@sd_linalg_libs@" \
+  --with-netcdf4-incs="@sd_netcdf_cppflags@" \
+  --with-netcdf4-libs="@sd_netcdf_libs@" \
+  --with-netcdf4-fortran-incs="@sd_netcdf_fortran_cppflags@" \
+  --with-netcdf4-fortran-libs="@sd_netcdf_fortran_libs@" \
   CC="@CC@" \
   CXX="@CXX@" \
   FC="@FC@"
