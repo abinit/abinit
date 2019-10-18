@@ -3401,7 +3401,6 @@ subroutine init_operwan_realspace(wan,operwan_realspace)
 
 !Local variables----------------------------
   integer :: iatom1,iatom2,n1,n2,pos1,pos2,il1,il2
- 
 
   ABI_DATATYPE_ALLOCATE(operwan_realspace%atom_index,(wan%natom_wan,wan%natom_wan))
   do iatom1 = 1,wan%natom_wan
@@ -3418,8 +3417,8 @@ subroutine init_operwan_realspace(wan,operwan_realspace)
             do il2 = 1,wan%nbl_atom_wan(iatom2)
               n1=2*wan%latom_wan(iatom1)%lcalc(il1)+1
               n2=2*wan%latom_wan(iatom2)%lcalc(il2)+1
-ABI_ALLOCATE(operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)
-%atom(il1,il2)%matl,(n1,n2,wan%nsppol,wan%nspinor,wan%nspinor))
+              ABI_ALLOCATE(operwan_realspace%atom_index(iatom1,iatom2)%position\
+              (pos1,pos2)%atom(il1,il2)%matl,(n1,n2,wan%nsppol,wan%nspinor,wan%nspinor))
               operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl = czero
             end do
          end do
@@ -3430,6 +3429,8 @@ ABI_ALLOCATE(operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)
 
 end subroutine init_operwan_realspace
 !!***
+
+
 
 !!****f* m_plowannier/destroy_operwan_realspace
 !! NAME
