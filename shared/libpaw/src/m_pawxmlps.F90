@@ -1527,6 +1527,7 @@ end subroutine paw_setup_copy
 !!***
 
 !-------------------------------------------------------------------------
+
 !!****f* m_pawxmlps/rdpawpsxml_header
 !! NAME
 !! rdpawpsxml_header
@@ -1914,6 +1915,7 @@ end subroutine paw_setup_copy
 !!***
 
 !-------------------------------------------------------------------------
+
 !!****f* m_pawxmlps/rdpawpsxml
 !! NAME
 !! rdpawpsxml
@@ -2353,6 +2355,7 @@ end subroutine paw_setup_copy
      read(funit,*) (paw_setup%pseudo_core_density%data(ir),ir=1,mesh_size)
      cycle
    end if
+
 !  --Read core density CORE_DENSITY
    if (line(1:31)=='<ae_core_kinetic_energy_density') then
      paw_setup%ae_core_kinetic_energy_density%tread=.true.
@@ -2408,6 +2411,7 @@ end subroutine paw_setup_copy
      read(funit,*) (paw_setup%pseudo_core_kinetic_energy_density%data(ir),ir=1,mesh_size)
      cycle
    end if
+
 !  --Read pseudized valence density PSEUDO_VALENCE_DENSITY
    if (line(1:23)=='<pseudo_valence_density') then
      paw_setup%pseudo_valence_density%tread=.true.
@@ -2459,6 +2463,7 @@ end subroutine paw_setup_copy
      read(funit,*) (paw_setup%zero_potential%data(ir),ir=1,mesh_size)
      cycle
    end if
+
 !  --Read external potential
    if (line(1:25)=='<LDA_minus_half_potential') then
      paw_setup%LDA_minus_half_potential%tread=.true.
@@ -2484,6 +2489,7 @@ end subroutine paw_setup_copy
      read(funit,*) (paw_setup%LDA_minus_half_potential%data(ir),ir=1,mesh_size)
      cycle
    end if
+
 !  --Read Vloc for Abinit potential VLOC_ION
    if (line(1:37)=='<kresse_joubert_local_ionic_potential') then
      paw_setup%kresse_joubert_local_ionic_potential%tread=.true.
@@ -2660,7 +2666,6 @@ end subroutine paw_setup_copy
      cycle
    end if
 
-
 !  --Read the Atompaw input file
    ir=0
    if ((line(1:13)=='<!-- Program:').and.(ir==1)) then
@@ -2706,6 +2711,7 @@ end subroutine paw_setup_copy
  
  end subroutine rdpawpsxml
 !!***
+
 !-------------------------------------------------------------------------
 
 !!****f* m_pawxmlps/rdpawpsxml_core
@@ -3073,8 +3079,8 @@ end subroutine paw_setup_copy
 
  end subroutine rdpawpsxml_core
 !!***
-!-------------------------------------------------------------------------
 
+!-------------------------------------------------------------------------
 
 end module m_pawxmlps
 !!***

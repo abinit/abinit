@@ -568,7 +568,12 @@ contains
    xc_func%has_vxc=(iand(flags,LIBPAW_XC_FLAGS_HAVE_VXC)>0)
    xc_func%has_fxc=(iand(flags,LIBPAW_XC_FLAGS_HAVE_FXC)>0)
    xc_func%has_kxc=(iand(flags,LIBPAW_XC_FLAGS_HAVE_KXC)>0)
-   xc_func%needs_laplacian=(iand(flags,LIBPAW_XC_FLAGS_NEEDS_LAPLACIAN)>0)
+
+!  Retrieve parameters for metaGGA functionals
+   if (xc_func%family==LIBPAW_XC_FAMILY_MGGA.or. &
+&      xc_func%family==LIBPAW_XC_FAMILY_HYB_MGGA) then
+     xc_func%needs_laplacian=(iand(flags,LIBPAW_XC_FLAGS_NEEDS_LAPLACIAN)>0)
+   end if
 
 !  Retrieve parameters for hybrid functionals
    if (xc_func%family==LIBPAW_XC_FAMILY_HYB_GGA.or. &
@@ -974,9 +979,11 @@ function libpaw_libxc_ismgga(xc_functionals)
  if (.not.libpaw_xc_constants_initialized) call libpaw_libxc_constants_load()
 
  if (present(xc_functionals)) then
-   libpaw_libxc_ismgga =(any(xc_functionals%family==LIBPAW_XC_FAMILY_MGGA))
+   libpaw_libxc_ismgga=(any(xc_functionals%family==LIBPAW_XC_FAMILY_MGGA) .or. &
+&                       any(xc_functionals%family==LIBPAW_XC_FAMILY_HYB_MGGA))
  else
-   libpaw_libxc_ismgga =(any(paw_xc_global%family==LIBPAW_XC_FAMILY_MGGA))
+   libpaw_libxc_ismgga=(any(paw_xc_global%family==LIBPAW_XC_FAMILY_MGGA) .or. &
+&                       any(paw_xc_global%family==LIBPAW_XC_FAMILY_HYB_MGGA))
  end if
 
 end function libpaw_libxc_ismgga

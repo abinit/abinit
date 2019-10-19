@@ -577,7 +577,12 @@ contains
    xc_func%has_vxc=(iand(flags,XC_FLAGS_HAVE_VXC)>0)
    xc_func%has_fxc=(iand(flags,XC_FLAGS_HAVE_FXC)>0)
    xc_func%has_kxc=(iand(flags,XC_FLAGS_HAVE_KXC)>0)
-   xc_func%needs_laplacian=(iand(flags,XC_FLAGS_NEEDS_LAPLACIAN)>0)
+
+!  Retrieve parameters for metaGGA functionals
+   if (xc_func%family==XC_FAMILY_MGGA.or. &
+&      xc_func%family==XC_FAMILY_HYB_MGGA) then
+     xc_func%needs_laplacian=(iand(flags,XC_FLAGS_NEEDS_LAPLACIAN)>0)
+   end if
 
 !  Retrieve parameters for hybrid functionals
    if (xc_func%family==XC_FAMILY_HYB_GGA.or.xc_func%family==XC_FAMILY_HYB_MGGA) then
@@ -585,7 +590,7 @@ contains
      xc_func%hyb_mixing=real(alpha_c,kind=dp)
      xc_func%hyb_mixing_sr=real(beta_c,kind=dp)
      xc_func%hyb_range=real(omega_c,kind=dp)
-   endif
+   end if
 
 !  Dump functional information
    call c_f_pointer(xc_get_info_name(xc_func%conf),strg_c)
@@ -1015,16 +1020,12 @@ function libxc_functionals_ismgga(xc_functionals)
  if (.not.libxc_constants_initialized) call libxc_functionals_constants_load()
 
  if (present(xc_functionals)) then
-   libxc_functionals_ismgga =(any(xc_functionals%family==XC_FAMILY_MGGA))
+   libxc_functionals_ismgga=(any(xc_functionals%family==XC_FAMILY_MGGA) .or. &
+&                            any(xc_functionals%family==XC_FAMILY_HYB_MGGA))
  else
-   libxc_functionals_ismgga =(any(xc_global%family==XC_FAMILY_MGGA))
+   libxc_functionals_ismgga=(any(xc_global%family==XC_FAMILY_MGGA) .or. &
+&                            any(xc_global%family==XC_FAMILY_HYB_MGGA))
  end if
-
-!DEBUG
-! write(std_out,*)' libxc_functionals_ismgga : present(xc_functionals)=',present(xc_functionals)
-!write(std_out,*)' libxc_functionals_ismgga : xc_func%abi_ixc=',xc_func%abi_ixc
-! write(std_out,*)' libxc_functionals_ismgga : libxc_functionals_ismgga=',libxc_functionals_ismgga
-!ENDDEBUG
 
 end function libxc_functionals_ismgga
 !!***

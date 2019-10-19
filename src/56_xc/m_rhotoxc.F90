@@ -1304,6 +1304,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  call timab(81,2,tsec)
 
  DBG_EXIT("COLL")
+
 end subroutine rhotoxc
 !!***
 

@@ -171,8 +171,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 &          atvshift,fatvshift,natvshift,nucdipmom,&
 &          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr,mgga)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex,enunit,ipert,my_natom,natom,nfft,nfftot
@@ -201,8 +199,12 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
 !Local variables ---------------------------------------
 !scalars
+!Possible algos for PAW+U: 1=using occupation matrix n_i,,2=using PAW matrix rho_ij
+ integer, parameter :: PAWU_ALGO_1=1,PAWU_ALGO_2=2
+ integer, parameter :: PAWU_FLL=1,PAWU_AMF=2
  integer :: cplex_dij,iatom,iatom_tot,idij,ipositron,itypat,klmn,klmn1,lm_size,lmn2_size
- integer :: lpawu,my_comm_atom,my_comm_grid,natvshift_,ndij,nsploop,nsppol,qphase,usexcnhat
+ integer :: lpawu,my_comm_atom,my_comm_grid,natvshift_,ndij,nsploop,nsppol
+ integer :: pawu_algo,pawu_dblec,qphase,usepawu,usexcnhat
  logical :: dij_available,dij_need,dij_prereq
  logical :: dij0_available,dij0_need,dij0_prereq
  logical :: dijexxc_available,dijexxc_need,dijexxc_prereq
@@ -217,7 +219,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  logical :: dijxcval_available,dijxcval_need,dijxcval_prereq
  logical :: dijU_available,dijU_need,dijU_prereq
  logical :: has_nucdipmom,my_atmtab_allocated
- logical :: need_to_print,paral_atom,pawu_new_algo,v_dijhat_allocated
+ logical :: need_to_print,paral_atom,v_dijhat_allocated
  real(dp) :: hyb_mixing_,hyb_mixing_sr_
  character(len=500) :: msg
 !arrays
@@ -359,9 +361,11 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
    lm_size=paw_an(iatom)%lm_size
    lmn2_size=paw_ij(iatom)%lmn2_size
    ndij=paw_ij(iatom)%ndij
+   usepawu=pawtab(itypat)%usepawu
+   pawu_algo=merge(PAWU_ALGO_1,PAWU_ALGO_2,ipert<=0.and.usepawu>=0)
+   pawu_dblec=merge(PAWU_FLL,PAWU_AMF,abs(usepawu)==1.or.abs(usepawu)==4)
    need_to_print=((abs(pawprtvol)>=1).and. &
 &   (iatom_tot==1.or.iatom_tot==natom.or.pawprtvol<0))
-   pawu_new_algo=(pawtab(itypat)%usepawu==5.or.pawtab(itypat)%usepawu==6)
 
 !  === Determine which conditions and prerequisites are fulfilled for Dij ===
 
@@ -390,12 +394,11 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
    dijso_prereq=(paw_ij(iatom)%has_dijso==2.or.&
 &               (paw_an(iatom)%has_vhartree>0.and.paw_an(iatom)%has_vxc>0))
 !  DijU: not available for positron; only for LDA+U
-   dijU_available=(pawtab(itypat)%usepawu>0.and.ipositron/=1.and. &
-&                 (ipert<=0.or.pawu_new_algo))
+   dijU_available=(pawtab(itypat)%usepawu/=0.and.ipositron/=1)
    dijU_prereq=(paw_ij(iatom)%has_dijU==2.or.paw_ij(iatom)%has_pawu_occ>0.or. &
-&               (pawu_new_algo.and.paw_ij(iatom)%has_dijU>0))
+&              (paw_ij(iatom)%has_dijU>0))
 !  DijExxc: not available for RF, positron; only for local exact exch. ; Vxc_ex needed
-   dijexxc_available=(pawtab(itypat)%useexexch>0.and.ipert<=0.and.ipositron/=1)
+   dijexxc_available=(pawtab(itypat)%useexexch/=0.and.ipert<=0.and.ipositron/=1)
    dijexxc_prereq=(paw_ij(iatom)%has_dijexxc==2.or.paw_ij(iatom)%has_exexch_pot>0)
 !  DijXC^hat: not available for RF ; Vxc needed
    dijxchat_available=(ipert<=0)
@@ -626,7 +629,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 !    ===== Need to compute Dij0
        dij0(:)=pawtab(itypat)%dij0(:)
        if (ipositron==1) dij0(:)=two*pawtab(itypat)%kij(:)-dij0(:)
-       if (pawtab(itypat)%usepawu==5) dij0(:)=dij0(:)+pawtab(itypat)%euij_fll(:)
+       if (pawu_algo==PAWU_ALGO_2.and.pawu_dblec==PAWU_FLL) dij0(:)=dij0(:)+pawtab(itypat)%euij_fll(:)
        if (dij0_need) paw_ij(iatom)%dij0(:)=dij0(:)
      end if
 
@@ -737,8 +740,8 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        else
          call pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
 &                      pawang,pawrad(itypat),pawtab(itypat),paw_an(iatom)%vxc1,&
-&                      paw_an(iatom)%vxct1,usexcnhat,mgga=mgga,vxctau1=paw_an(iatom)%vxctau1,vxcttau1=paw_an(iatom)%vxcttau1)
-
+&                      paw_an(iatom)%vxct1,usexcnhat,mgga=mgga,&
+&                      vxctau1=paw_an(iatom)%vxctau1,vxcttau1=paw_an(iatom)%vxcttau1)
        end if
        if (dijxc_need) paw_ij(iatom)%dijxc(:,:)=dijxc(:,:)
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+dijxc(:,:)
@@ -842,13 +845,13 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
 !    ===== Need to compute DijU
        LIBPAW_ALLOCATE(dijpawu,(cplex_dij*qphase*lmn2_size,ndij))
-       if (pawu_new_algo) then
+       if (pawu_algo==PAWU_ALGO_2) then
          call pawdiju_euijkl(dijpawu,cplex_dij,qphase,ndij,pawrhoij(iatom),pawtab(itypat))
        else
          lpawu=pawtab(itypat)%lpawu
          LIBPAW_POINTER_ALLOCATE(vpawu,(cplex_dij,lpawu*2+1,lpawu*2+1,ndij))
-         if (pawtab(itypat)%usepawu>=10) vpawu=zero ! if dmft, do not apply U in LDA+U
-         if (pawtab(itypat)%usepawu< 10) then
+         if (usepawu>=10) vpawu=zero ! if dmft, do not apply U in LDA+U
+         if (usepawu< 10) then
            call pawpupot(cplex_dij,ndij,paw_ij(iatom)%noccmmp,paw_ij(iatom)%nocctot,&
 &                        pawprtvol,pawtab(itypat),vpawu)
          end if
@@ -964,7 +967,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        call pawdijxc(dijxcval,cplex_dij,1,ndij,nspden,nsppol,&
 &                    pawang,pawrad(itypat),pawtab(itypat),paw_an(iatom)%vxc1_val,&
 &                    paw_an(iatom)%vxct1_val,0,mgga=mgga)
-
      end if
      paw_ij(iatom)%dijxc_val(1:cplex_dij*lmn2_size,:)=dijxcval(1:cplex_dij*lmn2_size,:)
      LIBPAW_DEALLOCATE(dijxcval)
@@ -1095,8 +1097,6 @@ end subroutine pawdij
 
 subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: nspden,qphase
@@ -1116,7 +1116,7 @@ subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
 
 !Check data consistency
  if (size(dijhartree,1)/=qphase*pawtab%lmn2_size) then
-   msg='invalid size for DijHartree !'
+   msg='invalid size for DijHartree!'
    MSG_BUG(msg)
  end if
  if (pawrhoij%qphase<qphase) then
@@ -1209,8 +1209,6 @@ end subroutine pawdijhartree
 !! SOURCE
 
 subroutine pawdijfock(dijfock_vv,dijfock_cv,cplex_dij,qphase,hyb_mixing,hyb_mixing_sr,ndij,pawrhoij,pawtab)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1462,8 +1460,6 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
 &                   pawang,pawrad,pawtab,vxc1,vxct1,usexcnhat,&
 &                   mgga,vxctau1,vxcttau1) ! optional
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex_dij,ndij,nspden,nsppol,qphase,usexcnhat
@@ -1486,7 +1482,8 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
  character(len=500) :: msg
  logical :: mggabool
 !arrays
- real(dp),allocatable :: dijxc_idij(:),ff(:),gg(:),ggtaubaribarj(:),ggtauij(:),vxcij1(:),vxcij2(:),yylmr(:,:),yylmgr(:,:)
+ real(dp),allocatable :: dijxc_idij(:),ff(:),gg(:),ggtaubaribarj(:)
+ real(dp),allocatable :: ggtauij(:),vxcij1(:),vxcij2(:),yylmr(:,:),yylmgr(:,:)
  real(dp),allocatable :: vxctaubaribarj1(:),vxctauij1(:),fftaubaribarj(:),fftauij(:)
  real(dp),allocatable :: tphibartphjbar(:),tphitphj(:),phibarphjbar(:),phiphj(:)
 
@@ -1597,7 +1594,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
              ff(1:mesh_size)= &
 &               vxc1(1:mesh_size,ipts,ispden)*pawtab%phiphj(1:mesh_size,kln) &
 &              -vxct1(1:mesh_size,ipts,ispden)*pawtab%tphitphj(1:mesh_size,kln)
-              call simp_gen(vxcij1(kln),ff,pawrad)
+             call simp_gen(vxcij1(kln),ff,pawrad)
            end do
            ! if Meta GGA compute \langle \nabla \phi_{i} \vert \mu_{xc} \vert \nabla \phi_{j} \rangle
            if (mggabool) then
@@ -1833,6 +1830,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
    LIBPAW_DEALLOCATE(ggtaubaribarj)
    LIBPAW_DEALLOCATE(ggtauij)
  end if
+
 end subroutine pawdijxc
 !!***
 
@@ -1886,8 +1884,6 @@ end subroutine pawdijxc
 
 subroutine pawdijxcm(dijxc,cplex_dij,qphase,lmselect,ndij,nspden,nsppol,&
 &                    pawang,pawrad,pawtab,vxc1,vxct1,usexcnhat)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -2152,8 +2148,6 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
 &                    natom,ndij,ngrid,ngridtot,nspden,nsppol,pawang,pawfgrtab,&
 &                    pawtab,Pot,qphon,ucvol,xred,&
 &                    mpi_comm_grid) ! Optional argument
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -2447,8 +2441,6 @@ end subroutine pawdijhat
 
 subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex_dij,ndij
@@ -2461,7 +2453,7 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 !Local variables ---------------------------------------
 !scalars
  integer :: idir,ilmn,il,im,iln,ilm,jlmn,jl,jm,jlm,jln,klmn,kln,mesh_size
- real(dp) :: intgr3,RecipAlpha2
+ real(dp) :: intgr3
  complex(dpc) :: lms
  logical :: ndmom
 !arrays
@@ -2475,10 +2467,6 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
  indlmn => pawtab%indlmn
  mesh_size=pawtab%mesh_size
  LIBPAW_ALLOCATE(ff,(mesh_size))
-
- 
- RecipAlpha2 = 1.d0/(InvFineStruct*InvFineStruct)
- ! real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
 
 !Check data consistency
  if (cplex_dij/=2) then
@@ -2521,8 +2509,10 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 ! matrix element <S il im|L_idir|S jl jm>
          call slxyzs(il,im,idir,jl,jm,lms)
 
-         dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + intgr3*dreal(lms)*nucdipmom(idir)*RecipAlpha2
-         dijnd(2*klmn,1) = dijnd(2*klmn,1) + intgr3*dimag(lms)*nucdipmom(idir)*RecipAlpha2
+         dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + &
+              & intgr3*dreal(lms)*nucdipmom(idir)*FineStructureConstant2
+         dijnd(2*klmn,1) = dijnd(2*klmn,1) + &
+              & intgr3*dimag(lms)*nucdipmom(idir)*FineStructureConstant2
 
        end do
 
@@ -2594,8 +2584,6 @@ end subroutine pawdijnd
 
 subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
 &                   pawang,pawrad,pawtab,pawxcdev,spnorbscl,vh1,vxc1)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -2797,8 +2785,6 @@ end subroutine pawdijso
 
 subroutine pawdiju(dijpawu,cplex_dij,qphase,ndij,nsppol,pawtab,vpawu,&
 &                  natvshift,atvshift,fatvshift) ! optional arguments
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -3021,8 +3007,6 @@ end subroutine pawdiju
 !! SOURCE
 
 subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -3248,8 +3232,6 @@ end subroutine pawdiju_euijkl
 
 subroutine pawdijexxc(dijexxc,cplex_dij,qphase,lmselect,ndij,nspden,nsppol,&
 &                     pawang,pawrad,pawtab,vpawx,vxc_ex)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -3566,8 +3548,6 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
 &          option,paw_ij1,pawang,pawfgrtab,pawrad,pawtab,qphase,qphon,rprimd,ucvol,&
 &          vpsp1,vtrial,vxc,xred,&
 &          mpi_atmtab,comm_atom,mpi_comm_grid) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4205,8 +4185,6 @@ end subroutine pawdijfr
  subroutine pawpupot(cplex_dij,ndij,noccmmp,nocctot,&
 &                    pawprtvol,pawtab,vpawu)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex_dij,ndij,pawprtvol
@@ -4237,6 +4215,10 @@ end subroutine pawdijfr
  lpawu=pawtab%lpawu
 
 !Check data consistency
+ if(pawtab%usepawu<0) then
+   msg = "usepawu<0 not allowed!"
+   MSG_BUG(msg)
+ end if
  if(option_interaction==3.and.pawtab%usepawu>=10) then
    msg = "Option_interaction==3 is not compatible with usepawu>=10 in pawpupot"
    MSG_ERROR(msg)
@@ -4491,8 +4473,6 @@ end subroutine pawdijfr
 
  subroutine pawxpot(ndij,pawprtvol,pawrhoij,pawtab,vpawx)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ndij,pawprtvol
@@ -4652,8 +4632,6 @@ end subroutine pawdijfr
 subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 &                 paw_ij,pawang,pawprtvol,pawtab,rprimd,symafm,symrec, &
 &                 mpi_atmtab,comm_atom,qphon) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -5326,7 +5304,6 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
  contains
    function symdij_symcart(aprim,bprim,symred)
 
-   implicit none
    real(dp) :: symdij_symcart(3,3)
    integer,intent(in) :: symred(3,3)
    real(dp),intent(in) :: aprim(3,3),bprim(3,3)
@@ -5400,8 +5377,6 @@ end subroutine symdij
 subroutine symdij_all(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,&
 &                     paw_ij,pawang,pawprtvol,pawtab,rprimd,symafm,symrec,&
 &                     mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -5546,8 +5521,6 @@ end subroutine symdij_all
 !! SOURCE
 
 subroutine pawdij_gather(dij_in,dij_out,comm_atom,mpi_atmtab)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5700,8 +5673,6 @@ end subroutine pawdij_gather
 !! OUTPUT
 !! (Only writing)
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      m_pawdij
 !!
@@ -5711,8 +5682,6 @@ end subroutine pawdij_gather
 
 subroutine pawdij_print_dij(dij,cplex_dij,qphase,iatom,natom,nspden,&
 &           test_value,title_msg,unit,Ha_or_eV,opt_prtvol,mode_paral) ! Optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

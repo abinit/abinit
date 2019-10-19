@@ -13,7 +13,7 @@
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!  FOR DEVELOPPERS: in order to preserve the portability of libPAW library,
+!!  FOR DEVELOPERS: in order to preserve the portability of libPAW library,
 !!  please consult ~abinit/src/??_libpaw/libpaw-coding-rules.txt
 !!
 !! SOURCE
@@ -42,6 +42,7 @@ module m_pawxc
  use m_pawrad,      only : pawrad_type, nderiv_gen, pawrad_deducer0, simp_gen
 
  implicit none
+
  private
 
  public :: pawxc          ! Compute xc correlation potential and energies inside a paw sphere. USE (r,theta,phi)
@@ -53,9 +54,8 @@ module m_pawxc
  public :: pawxcmpositron ! Compute electron-positron correlation potential and energies inside a PAW sphere. USE (L,M) MOMENTS
  public :: pawxcm_dfpt    ! Compute 1st-order change of XC potential and contrib
                           !   to 2nd-order change of XC ene inside a PAW sphere. USE (L,M) MOMENTS
- public :: pawxc_get_nkxc ! Compute sze of XC kernel (Kxc) according to spin polarization and XC type
-!Public functions
- public :: pawxc_get_usekden !Assess whether kinetic energy density has to be computed
+ public :: pawxc_get_nkxc    ! Compute size of XC kernel (Kxc) according to spin polarization and XC type
+ public :: pawxc_get_usekden ! Assess whether kinetic energy density has to be computed
 
 !Private procedures
  private :: pawxcsph                   ! Compute XC energy and potential for a spherical density rho(r) given as (up,dn)
@@ -139,8 +139,6 @@ subroutine pawxc_xcpositron_wrapper(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_
 &                                   rhoer,rhopr,vxce,vxcegr,vxcp,&
 &                                   dvxce,dvxcp) ! optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixcpositron,ngr,npt
@@ -182,8 +180,6 @@ contains
 
 subroutine pawxc_xcpositron_abinit()
 
- implicit none
-
 ! *************************************************************************
 
  if(present(dvxce) .and. present(dvxcp)) then
@@ -220,8 +216,6 @@ end subroutine pawxc_xcpositron_abinit
 !! SOURCE
 
 subroutine pawxc_xcpositron_local()
-
- implicit none
 
  character(len=*), parameter :: msg='xcpositron only available in ABINIT!'
 
@@ -270,8 +264,6 @@ end subroutine pawxc_xcpositron_wrapper
 
 subroutine pawxc_size_dvxc_wrapper(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order)
 
- implicit none
-
 !Arguments----------------------
  integer, intent(in) :: ixc,nspden,order
  integer, intent(out) :: ndvxc,nd2vxc,ngr2,nvxcdgr
@@ -305,8 +297,6 @@ contains
 !! SOURCE
 
 subroutine pawxc_size_dvxc_local()
-
- implicit none
 
 ! *************************************************************************
 
@@ -434,8 +424,6 @@ end subroutine pawxc_size_dvxc_wrapper
 
 subroutine pawxc_xcmult_wrapper(depsxc,nfft,ngrad,nspden,nspgrad,rhonow)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,ngrad,nspden,nspgrad
@@ -472,8 +460,6 @@ contains
 !! SOURCE
 
 subroutine pawxc_xcmult_local()
-
- implicit none
 
 !Local variables-------------------------------
 !scalars
@@ -548,8 +534,6 @@ end subroutine pawxc_xcmult_wrapper
 
 subroutine pawxc_mkdenpos_wrapper(iwarn,nfft,nspden,option,rhonow,xc_denpos)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,nspden,option
@@ -587,8 +571,6 @@ contains
 !! SOURCE
 
 subroutine pawxc_mkdenpos_local()
-
- implicit none
 
 !Local variables-------------------------------
 !scalars
@@ -735,7 +717,7 @@ function pawxc_get_usekden()
 !!  nhat(nrad,lm_size,nspden)=compensation density
 !!                                        (total in 1st half and spin-up in 2nd half if nspden=2)
 !!  nkxc=second dimension of the kxc array. If /=0, the exchange-correlation kernel must be computed
-!!  non_magnetic_xc= true if usepawu==4
+!!  non_magnetic_xc= if true, handle density/potential as non-magnetic (even if it is)
 !!  nrad=size of radial mesh for densities/potentials (might be different from pawrad%mesh_size)
 !!  nspden=number of spin-density components
 !!  option=0  compute both XC energies (direct+double-counting) and potential
@@ -831,11 +813,9 @@ function pawxc_get_usekden()
 !!      rotate_back_mag_dfpt
 !!
 !! SOURCE
-subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3xc,non_magnetic_xc,nrad,nspden,option,&
-&                pawang,pawrad,rhor,usecore,usexcnhat,usekden,vxc,xclevel,xc_denpos,&
+subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3xc,non_magnetic_xc,&
+&                nrad,nspden,option,pawang,pawrad,rhor,usecore,usexcnhat,usekden,vxc,xclevel,xc_denpos,&
 &                taucore,taur,vxctau) !optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -856,6 +836,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
  real(dp),intent(out) :: k3xc(nrad,pawang%angl_size,nk3xc)
  real(dp),intent(out),target :: vxc(nrad,pawang%angl_size,nspden)
  real(dp),intent(out),target,optional :: vxctau(nrad*usekden,pawang%angl_size*usekden,nspden*usekden)
+
 !Local variables-------------------------------
 !scalars
  integer :: ii,ilm,ipts,ir,ispden,iwarn,lm_size_eff,mgga,ndvxc,nd2vxc,ngr2,ngrad
@@ -864,9 +845,11 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
  real(dp) :: enxcr,factor,vxcrho,factor2
  character(len=500) :: msg
 !arrays
- real(dp),allocatable :: dgxc(:),dnexcdn(:,:),drho(:),d2rho(:),drhocore(:),dvxcdgr(:,:),dvxcdlr(:,:),dvxci(:,:),d2vxci(:,:)
- real(dp),allocatable :: dylmdr(:,:,:),d2ylmdr(:,:,:),exci(:),ff(:),grho2_updn(:,:),gxc(:,:,:,:)
- real(dp),allocatable :: rhoarr(:,:),rho_updn(:,:),lrho_updn(:,:),tauarr(:,:),tau_updn(:,:),vxci(:,:)
+ real(dp),allocatable :: dgxc(:),dnexcdn(:,:),drho(:),d2rho(:),drhocore(:),dvxcdgr(:,:)
+ real(dp),allocatable :: dvxcdlr(:,:),dvxci(:,:),d2vxci(:,:),dylmdr(:,:,:),d2ylmdr(:,:,:)
+ real(dp),allocatable :: exci(:),ff(:),grho2_updn(:,:),gxc(:,:,:,:)
+ real(dp),allocatable :: rhoarr(:,:),rho_updn(:,:),lrho_updn(:,:),tauarr(:,:)
+ real(dp),allocatable :: tau_updn(:,:),vxci(:,:)
  real(dp),allocatable,target :: mag(:,:,:),rhohat(:,:,:),rhonow(:,:,:),taunow(:,:)
  real(dp), pointer :: mag_(:,:),rho_(:,:,:),tau_(:,:,:)
  real(dp), LIBPAW_CONTIGUOUS pointer :: vxc_diag(:,:),vxc_nc(:,:),vxc_updn(:,:,:)
@@ -1088,19 +1071,14 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
        if (nspden==2.and.mgga==1) tauarr(1:nrad,2)=tauarr(1:nrad,2)+half*taucore(1:nrad);
      end if
 
-!    Optionally suppressed magnetic part.
-     if(non_magnetic_xc) then
-       if(nspden==2) then
-         rhoarr(:,2)=rhoarr(:,1)/two
-       endif
-       if(nspden==4) then
-         rhoarr(:,2)=zero
-         rhoarr(:,3)=zero
-         rhoarr(:,4)=zero
-       endif
+!    Optionally suppress magnetic part.
+     if (non_magnetic_xc) then
+       if(nspden==2) rhoarr(:,2)=rhoarr(:,1)*half
+       if(nspden==4) rhoarr(:,2:4)=zero
      endif
 
      rhonow(1:nrad,1:nspden,1)=rhoarr(1:nrad,1:nspden)
+
 !    GGA: compute gradient of density
      if (xclevel==2) then
        rhonow(:,:,2:5)=zero
@@ -1121,6 +1099,13 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
            end if
          end do
        end do
+       if (non_magnetic_xc) then
+         do ii=1,3
+           if(nspden==2) rhonow(1:nrad,2,1+ii)=rhonow(1:nrad,1,1+ii)*half
+           if(nspden==4) rhonow(1:nrad,2:4,1+ii)=zero
+         end do
+       end if
+
 !      Compute the laplacian of the density
        if (use_laplacian==1) then
          LIBPAW_ALLOCATE(d2rho,(nrad))
@@ -1157,6 +1142,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
          end if
        end if
      end if
+
 !    Storage of density (and gradient) in (up,dn) format
      if (nspden==1) then
        rho_updn(1:nrad,1)=rhonow(1:nrad,1,1)*half
@@ -1564,8 +1550,6 @@ subroutine pawxcpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmselec
 &                        nhat,nhat_ep,nrad,nspden,option,pawang,pawrad,posdensity0_limit,&
 &                        rhor,rhor_ep,usecore,usexcnhat,vxc,xc_denpos)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: calctype,ixcpositron,lm_size,nrad,nspden,option,usecore,usexcnhat
@@ -1794,6 +1778,7 @@ end subroutine pawxcpositron
 !!  nhat1(cplex_den*nrad,lm_size,nspden)=first-order change of compensation density
 !!                                        (total in 1st half and spin-up in 2nd half if nspden=2)
 !!  nkxc=second dimension of the kxc array
+!!  non_magnetic_xc= if true, handle density/potential as non-magnetic (even if it is)
 !!  nrad=size of radial mesh for densities/potentials (might be different from pawrad%mesh_size)
 !!  nspden=number of spin-density components
 !!  option=0  compute both 2nd-order XC energy and 1st-order potential
@@ -1871,16 +1856,16 @@ end subroutine pawxcpositron
 !!
 !! SOURCE
 
-subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nhat1,nkxc,nrad,nspden,&
-&                 option,pawang,pawrad,rhor1,usecore,usexcnhat,vxc,vxc1,xclevel,&
+subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nhat1,&
+&                 nkxc,non_magnetic_xc,nrad,nspden,option,pawang,pawrad,rhor1,&
+&                 usecore,usexcnhat,vxc,vxc1,xclevel,&
 &                 d2enxc_im) ! optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex_den,cplex_vxc,ixc,lm_size,nkxc,nrad,nspden,option
  integer,intent(in) :: usecore,usexcnhat,xclevel
+ logical,intent(in) :: non_magnetic_xc
  real(dp),intent(out) :: d2enxc
  real(dp),intent(out),optional :: d2enxc_im
  type(pawang_type),intent(in) :: pawang
@@ -2063,6 +2048,12 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
        if (nspden==2) rho1arr(:,2)=rho1arr(:,2)+half*corexc1(:)
      end if
 
+!    Optionally suppress magnetic part
+     if(non_magnetic_xc) then
+       if(nspden==2) rho1arr(:,2)=rho1arr(:,1)*half
+       if(nspden==4) rho1arr(:,2:4)=zero
+     endif
+
 !    Non-collinear magnetism: rotate magnetization and get a collinear density
      if (nspden==4) then
        !Store non rotated rho^(1) for future use
@@ -2232,6 +2223,14 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
          end if
        end if
        LIBPAW_DEALLOCATE(drho1)
+
+!      Optionally suppress magnetic part
+       if(non_magnetic_xc) then
+         do ii=1,3
+           if(nspden==2) grho1arr(:,2,ii)=grho1arr(:,1,ii)*half
+           if(nspden==4) grho1arr(:,2:4,ii)=zero
+         end do
+       endif
 
 !      Apply XC kernel
 !      Will compute Vxc^(1) as: vxc1 - Nabla .dot. gxc1
@@ -2713,8 +2712,6 @@ end subroutine pawxc_dfpt
 
  subroutine pawxcsph(exc,exexch,ixc,kxc,nkxc,nrad,nspden,pawrad,rho_updn,vxc,xclevel)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: exexch,ixc,nkxc,nrad,nspden,xclevel
@@ -2983,8 +2980,6 @@ end subroutine pawxcsph
 
 
 subroutine pawxcsph_dfpt(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho1_updn,vxc1,xclevel)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3298,8 +3293,6 @@ end subroutine pawxcsph_dfpt
 
  subroutine pawxcsphpositron(calctype,fxc,ixcpositron,nrad,pawrad,posdensity0_limit,rho,rho_ep,vxce,vxcp)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: calctype,ixcpositron,nrad
@@ -3421,8 +3414,6 @@ end subroutine pawxcsphpositron
 
  subroutine pawxcsum(cplex1,cplex2,cplexsum,lmselect1,lmselect2,lm_size,nrad,nsums,&
 &                    option,pawang,rho1,rho2,sum1,sum2)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3721,7 +3712,7 @@ end subroutine pawxcsphpositron
 !!  nhat(nrad,lm_size,nspden)=compensation density
 !!                                        (total in 1st half and spin-up in 2nd half if nspden=2)
 !!  nkxc=second dimension of the kxc array. If /=0, the exchange-correlation kernel must be computed
-!!  non_magnetic_xc= true if usepawu==4
+!!  non_magnetic_xc= if true, handle density/potential as non-magnetic (even if it is)
 !!  nrad=size of radial mesh for densities/potentials (might be different from pawrad%mesh_size)
 !!  nspden=number of spin-density components
 !!  option=0 compute both XC energies (direct+double-counting) and potential (and Kernel)
@@ -3802,10 +3793,9 @@ end subroutine pawxcsphpositron
 !!
 !! SOURCE
 
- subroutine pawxcm(corexc,enxc,enxcdc,exexch,ixc,kxc,lm_size,lmselect,nhat,nkxc,non_magnetic_xc,nrad,nspden,option,&
-&                  pawang,pawrad,pawxcdev,rhor,usecore,usexcnhat,vxc,xclevel,xc_denpos)
-
- implicit none
+ subroutine pawxcm(corexc,enxc,enxcdc,exexch,ixc,kxc,lm_size,lmselect,nhat,nkxc,&
+&                  non_magnetic_xc,nrad,nspden,option,pawang,pawrad,pawxcdev,rhor,&
+&                  usecore,usexcnhat,vxc,xclevel,xc_denpos)
 
 !Arguments ------------------------------------
 !scalars
@@ -3888,9 +3878,18 @@ end subroutine pawxcsphpositron
 !rho_updn contains the effective density used for XC
 !with core density and/or compensation density eventually included
 !-----------------------------------------------------------------
+
  LIBPAW_ALLOCATE(rho_updn,(nrad,lm_size,nspden))
  rho_updn(:,:,:)=rhor(:,:,:)
  if (usexcnhat==2) rho_updn(:,:,:)=rho_updn(:,:,:)+nhat(:,:,:)
+
+!Optionally suppressed magnetic part
+ if(non_magnetic_xc) then
+   if(nspden==2) rho_updn(:,:,2)=rho_updn(:,:,1)*half
+   if(nspden==4) rho_updn(:,:,2:4)=zero
+ endif
+
+!Add core density
  if (usecore==1) then
    if (nspden==1.or.nspden==4) then
      rho_updn(:,1,1)=rho_updn(:,1,1)+sqfpi*corexc(:)
@@ -3899,18 +3898,6 @@ end subroutine pawxcsphpositron
      rho_updn(:,1,2)=rho_updn(:,1,2)+sqfpi2*corexc(:)
    end if
  end if
-
-
- if(non_magnetic_xc) then
-   if(nspden==2) then
-     rho_updn(:,:,2)=rho_updn(:,:,1)/two
-   endif
-   if(nspden==4) then
-     rho_updn(:,:,2)=zero
-     rho_updn(:,:,3)=zero
-     rho_updn(:,:,4)=zero
-   endif
- endif
 
 !In case of collinear magnetism, separate up and down contributions
  if (nspden==2) then
@@ -4496,25 +4483,19 @@ end subroutine pawxcsphpositron
 !------------------------------------------
  if (option==0.or.option==2) then
 
-!  Build appropriate density
-   if (usexcnhat==1) then
-     if (nspden==1.or.nspden==4) then
-       rho_updn(:,:,:)=rho_updn(:,:,:)+nhat(:,:,:)
-     else if (nspden==2) then
-       rho_updn(:,:,1)=rho_updn(:,:,1)+nhat(:,:,2)
-       rho_updn(:,:,2)=rho_updn(:,:,2)+nhat(:,:,1)-nhat(:,:,2)
-     end if
-   end if
-   if (usecore==1) then
-     if (nspden==1.or.nspden==4) then
-       rho_updn(:,1,1)=rho_updn(:,1,1)-sqfpi*corexc(:)
-     else if (nspden==2) then
-       rho_updn(:,1,1)=rho_updn(:,1,1)-sqfpi2*corexc(:)
-       rho_updn(:,1,2)=rho_updn(:,1,2)-sqfpi2*corexc(:)
-     end if
+   LIBPAW_ALLOCATE(ff,(nrad))
+
+!  Build appropriate density (without core density)
+   rho_updn(:,:,:)=rhor(:,:,:)
+   if (usexcnhat>0) rho_updn(:,:,:)=rho_updn(:,:,:)+nhat(:,:,:)
+   if (nspden==2) then
+     do ilm=1,lm_size
+       ff(:)=rho_updn(:,ilm,2)
+       rho_updn(:,ilm,2)=rho_updn(:,ilm,1)-ff(:)
+       rho_updn(:,ilm,1)=ff(:)
+     end do
    end if
 
-   LIBPAW_ALLOCATE(ff,(nrad))
    ff(1:nrad)=zero
 
 !  Non magnetic or collinear magnetic system:
@@ -4570,6 +4551,7 @@ end subroutine pawxcsphpositron
 !!  nhat1(cplex_den*nrad,lm_size,nspden)=first-order change of compensation density
 !!                                        (total in 1st half and spin-up in 2nd half if nspden=2)
 !!  nkxc=second dimension of the kxc array
+!!  non_magnetic_xc= if true, handle density/potential as non-magnetic (even if it is)
 !!  nrad=size of radial mesh for densities/potentials (might be different from pawrad%mesh_size)
 !!  nspden=number of spin-density components
 !!  option=0  compute both 2nd-order XC energy and 1st-order potential
@@ -4603,16 +4585,16 @@ end subroutine pawxcsphpositron
 !!
 !! SOURCE
 
- subroutine pawxcm_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nhat1,nkxc,nrad,nspden,&
-&                   option,pawang,pawrad,rhor1,usecore,usexcnhat,vxc1,xclevel,&
+ subroutine pawxcm_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nhat1,&
+&                   nkxc,non_magnetic_xc,nrad,nspden,option,pawang,pawrad,rhor1,usecore,&
+&                   usexcnhat,vxc1,xclevel,&
 &                   d2enxc_im) ! optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex_den,cplex_vxc,ixc,lm_size,nkxc,nrad,nspden,option
  integer,intent(in) :: usecore,usexcnhat,xclevel
+ logical,intent(in) :: non_magnetic_xc
  real(dp),intent(out) :: d2enxc
  real(dp),intent(out),optional :: d2enxc_im
  type(pawang_type),intent(in) :: pawang
@@ -4711,6 +4693,12 @@ end subroutine pawxcsphpositron
    end if
  end if
 
+!Optionally suppressed magnetic part
+ if(non_magnetic_xc) then
+   if(nspden==2) rho1_updn(:,:,2)=rho1_updn(:,:,1)*half
+   if(nspden==4) rho1_updn(:,:,2:4)=zero
+ endif
+
 !In case of collinear magnetism, separate up and down contributions
  if (nspden==2) then
    LIBPAW_ALLOCATE(ff,(cplex_den*nrad))
@@ -4783,10 +4771,24 @@ end subroutine pawxcsphpositron
 !----------------------------------------------------------------------
  if (option/=1) then
 
-!  For usexnhat=1 particular case, add now compensation density
-   if (usexcnhat==1) then
-     rho1_updn(:,:,1)=rho1_updn(:,:,1)+nhat1(:,:,nspden)
-     if (nspden==2) rho1_updn(:,:,2)=rho1_updn(:,:,2)+nhat1(:,:,1)-nhat1(:,:,2)
+   if (.not.non_magnetic_xc) then
+!    For usexnhat=1 particular case, add now compensation density
+     if (usexcnhat==1) then
+       rho1_updn(:,:,1)=rho1_updn(:,:,1)+nhat1(:,:,nspden)
+       if (nspden==2) rho1_updn(:,:,2)=rho1_updn(:,:,2)+nhat1(:,:,1)-nhat1(:,:,2)
+     end if
+   else
+!    Has to be magnetic here
+     rho1_updn(:,:,:)=rhor1(:,:,:)
+     if (usexcnhat>0) rho1_updn(:,:,:)=rho1_updn(:,:,:)+nhat1(:,:,:)
+     if (usecore==1) then
+       if (nspden==1.or.nspden==4) then
+         rho1_updn(:,1,1)=rho1_updn(:,1,1)+sqfpi*corexc1(:)
+       else if (nspden==2) then
+         rho1_updn(:,1,1)=rho1_updn(:,1,1)+sqfpi*corexc1(:)
+         rho1_updn(:,1,2)=rho1_updn(:,1,2)+sqfpi2*corexc1(:)
+       end if
+     end if
    end if
 
    LIBPAW_ALLOCATE(ff,(nrad))
@@ -4936,8 +4938,6 @@ end subroutine pawxcsphpositron
 subroutine pawxcmpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmselect,lmselect_ep,&
 &                         nhat,nhat_ep,nrad,nspden,option,pawang,pawrad,pawxcdev,posdensity0_limit,&
 &                         rhor,rhor_ep,usecore,usexcnhat,vxc,xc_denpos)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5436,8 +5436,6 @@ end subroutine pawxcmpositron
 
  subroutine pawxc_get_nkxc(nkxc,nspden,xclevel)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nspden,xclevel
@@ -5501,8 +5499,6 @@ end subroutine pawxcmpositron
 &           order,rho,use_laplacian,vxcrho,xclevel, &
 &           dvxc,d2vxc,el_temp,exexch,fxcT,grho2,lrho,tau,vxcgrho,vxclrho,vxctau) ! Optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,xclevel,use_laplacian
@@ -5521,8 +5517,6 @@ end subroutine pawxcmpositron
 ! *************************************************************************
 
 !One could add here a section for other codes (i.e. BigDFT, ...)
-
-
 #if defined HAVE_LIBPAW_ABINIT
  call pawxc_drivexc_abinit()
 #elif defined HAVE_LIBXC
@@ -5556,8 +5550,6 @@ contains
 !! SOURCE
 
 subroutine pawxc_drivexc_abinit()
-
- implicit none
 
 ! *************************************************************************
 
@@ -5601,8 +5593,6 @@ end subroutine pawxc_drivexc_abinit
 !! SOURCE
 
 subroutine pawxc_drivexc_libxc()
-
- implicit none
 
 ! *************************************************************************
 
@@ -5706,8 +5696,6 @@ end subroutine pawxc_drivexc_wrapper
 
  subroutine pawxc_rotate_mag(rho_in,rho_out,mag,vectsize,mag_norm_out,rho_out_format)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: vectsize
@@ -5798,8 +5786,6 @@ end subroutine pawxc_rotate_mag
 
  subroutine pawxc_rotate_back_mag(vxc_in,vxc_out,mag,vectsize)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: vectsize
@@ -5872,8 +5858,6 @@ end subroutine pawxc_rotate_back_mag
 !! SOURCE
 
  subroutine pawxc_rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

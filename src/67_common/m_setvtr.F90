@@ -814,8 +814,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 end subroutine setvtr
 !!***
 
-!!****m* m_setvtr/spatialchempo
-!!t
+!!****m* m_setvtr/spatialchempot
 !! NAME
 !!  spatialchempot
 !! FUNCTION

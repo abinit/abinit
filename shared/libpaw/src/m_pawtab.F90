@@ -529,18 +529,15 @@ MODULE m_pawtab
    ! Nonlocal part of the overlap operator
 
   real(dp), allocatable :: tcoredens(:,:)
-   ! tcoretau(core_mesh_size,1)
+   ! tcoredens(core_mesh_size,1)
    ! Gives the pseudo core density of the atom
    ! In PAW+WVL:
-   !  tcoretau(core_mesh_size,2:6)
+   !  tcoredens(core_mesh_size,2:6)
    !  are the first to the fifth derivatives of the pseudo core density.
 
- real(dp), allocatable :: tcoretau(:,:)
-   ! tcoretau(coretau_mesh_size,1)
+ real(dp), allocatable :: tcoretau(:)
+   ! tcoretau(coretau_mesh_size)
    ! Gives the pseudo core kinetic energy density of the atom
-   ! In PAW+WVL:
-   !  tcoretau (coretau_mesh_size,2:6)
-   !  are the first to the fifth derivatives of the pseudo kinetic energy core density.
 
   real(dp), allocatable :: tcorespl(:,:)
    ! tcorespl(mqgrid,2)
@@ -1631,7 +1628,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    end if
    if (allocated(pawtab%tcoretau)) then
      siz_tcoretau=size(pawtab%tcoretau)             !(coretau_mesh_size,1 or 6)
-     if (siz_tcoretau/=pawtab%coretau_mesh_size.and.siz_tcoretau/=6*pawtab%coretau_mesh_size) &
+     if (siz_tcoretau/=pawtab%coretau_mesh_size) &
 &      msg=trim(msg)//' tcoretau'
      nn_dpr=nn_dpr+siz_tcoretau
    end if
@@ -2503,13 +2500,13 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    if (allocated(pawtab%coredens)) then
      LIBPAW_DEALLOCATE(pawtab%coredens)
    end if
-   if (allocated(pawtab%coretau)) then
-     LIBPAW_DEALLOCATE(pawtab%coretau)
-   end if
    if (siz_coredens>0) then
      LIBPAW_ALLOCATE(pawtab%coredens,(pawtab%core_mesh_size))
      pawtab%coredens=list_dpr(ii:ii+pawtab%core_mesh_size-1)
      ii=ii+siz_coredens
+   end if
+   if (allocated(pawtab%coretau)) then
+     LIBPAW_DEALLOCATE(pawtab%coretau)
    end if
    if (siz_coretau>0) then
      LIBPAW_ALLOCATE(pawtab%coretau,(pawtab%coretau_mesh_size))
@@ -2601,9 +2598,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      LIBPAW_DEALLOCATE(pawtab%tcoretau)
    end if
    if (siz_tcoretau>0) then
-     sz2=siz_tcoretau/pawtab%coretau_mesh_size
-     LIBPAW_ALLOCATE(pawtab%tcoretau,(pawtab%coretau_mesh_size,sz2))
-     pawtab%tcoretau=reshape(list_dpr(ii:ii+siz_tcoretau-1),(/pawtab%coretau_mesh_size,sz2/))
+     LIBPAW_ALLOCATE(pawtab%tcoretau,(pawtab%coretau_mesh_size))
+     pawtab%tcoretau=list_dpr(ii:ii+pawtab%coretau_mesh_size-1)
      ii=ii+siz_tcoretau
    end if
    if (allocated(pawtab%tcorespl)) then

@@ -638,6 +638,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  ABI_ALLOCATE(vpsp,(nfftf))
  ABI_ALLOCATE(vxc,(nfftf,dtset%nspden))
  ABI_ALLOCATE(vxctau,(nfftf,dtset%nspden,4*dtset%usekden))
+
  wfmixalg=dtset%fockoptmix/100
  use_hybcomp=0
  if(mod(dtset%fockoptmix,100)==11)use_hybcomp=1
@@ -651,9 +652,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  n1xccc=0;if (psps%n1xccc/=0) n1xccc=psps%n1xccc
  n3xccc=0;if (psps%n1xccc/=0) n3xccc=nfftf
  ABI_ALLOCATE(xccc3d,(n3xccc))
+
 !Allocations/initializations for PAW only
  lpawumax=-1
-
  if(psps%usepaw==1) then
 !  Variables/arrays related to the fine FFT grid
    ABI_ALLOCATE(xcctau3d,(nfftf*dtset%usekden))

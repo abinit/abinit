@@ -194,6 +194,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enr
  real(dp),intent(out),optional :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(out),optional :: vxc_hybcomp(:,:) ! (nfft,nspden)
  real(dp),intent(out),optional :: xcctau3d(n3xccc)
+
 !Local variables-------------------------------
 !scalars
  integer :: nk3xc,ifft,ipositron,ispden,nfftot,offset
@@ -210,7 +211,6 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enr
 !real(dp),allocatable :: vzeemanHarm(:,:)   !SPr: debug Zeeman field q/=0 real space
 
 ! *********************************************************************
-
 
  DBG_ENTER("COLL")
 
