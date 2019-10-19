@@ -3500,8 +3500,8 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    ttaucore(1+shft:coretau_mesh%mesh_size)= &
 &   paw_setuploc%pseudo_core_kinetic_energy_density%data(1:coretau_mesh%mesh_size-shft)/sqrt(fourpi)
    if (shft==1) call pawrad_deducer0(ttaucore,coretau_mesh%mesh_size,coretau_mesh)
-   LIBPAW_ALLOCATE(pawtab%tcoretau,(pawtab%coretau_mesh_size))
-   pawtab%tcoretau(1:pawtab%coretau_mesh_size)=ttaucore(1:pawtab%coretau_mesh_size)
+   LIBPAW_ALLOCATE(pawtab%tcoretau,(pawtab%coretau_mesh_size,1))
+   pawtab%tcoretau(1:pawtab%coretau_mesh_size,1)=ttaucore(1:pawtab%coretau_mesh_size)
    pawtab%has_coretau=2
    write(msg,'(a,i1)') &
 &   ' Radial grid used for (t)taucore kinetic density is grid ',itaucoremesh

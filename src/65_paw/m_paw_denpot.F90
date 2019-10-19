@@ -557,7 +557,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 &         eexc,eexcdc,ixc,kxc_tmp,k3xc_tmp,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,nkxc1,nk3xc1,non_magnetic_xc,mesh_size,nspden,option,&
 &         pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,usekden,vxc_tmp,xclevel,xc_denpos,&
-&         taucore=pawtab(itypat)%tcoretau,taur=ttau1,vxctau=vxctau_tmp)
+&         taucore=pawtab(itypat)%tcoretau(:,1),taur=ttau1,vxctau=vxctau_tmp)
        else
          call pawxc_dfpt(pawtab(itypat)%tcoredens(:,1),&
 &         cplex,cplex,eexc,ixc,paw_an0(iatom)%kxct1,lm_size,&
