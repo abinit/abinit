@@ -1410,7 +1410,7 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
    end if
    if (.not.ex) then
 !    Core WF file: new format XML
-     filename_='corewf.abinit.xml';ex=.false.
+     filename_='corewf.xml';ex=.false.
      inquire(file=trim(filename_),iostat=ios,exist=ex)
      if (ios/=0) then
        write(msg,'(3a)') 'INQUIRE returns an error for file ',trim(filename_),'!'
@@ -1447,7 +1447,7 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
    unt = libpaw_get_free_unit()
    open(unt,file=trim(filename_),form='formatted',action="read")
    read(unt,*) ! skip title
-   read(unt,*) ! skip method,nspinor,nsppol
+   read(unt,*) ! skip relativism,method,nspinor,nsppol
    read(unt,*) ! skip zatom,zcore,pspdat
    read(unt,*) ! skip pspcod,pspxc,lmax
    read(unt,*) ! skip pspfmt,creatorID
@@ -1934,6 +1934,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
    call pawpsp_nl(ffspl,pawtab%indlmn,pawtab%lmn_size,lnmax,mqgrid_ff,qgrid_ff,&
 &                 tproj_mesh,tproj)
  end if
+
 !==========================================================
 !Compute eventually compensation charge radius (i.e. radius for shape functions)
 
@@ -3253,6 +3254,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
          pawtab%partialwave_mesh_size=pawrad%mesh_size
          pawtab%mesh_size=pawrad_ifromr(pawrad,pawtab%rpaw)+5
          pawtab%mesh_size=min(pawtab%mesh_size,pawrad%mesh_size)
+         if (pawtab%mesh_size>pawrad%mesh_size-2) pawtab%mesh_size=pawrad%mesh_size
          imainmesh=imsh
          exit
        end if
@@ -3270,11 +3272,9 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 &        *pawrad%rad(1+shft:pawtab%partialwave_mesh_size)
    if (shft==1) pawtab%phi(1,ib)=zero
  end do
- write(msg,'(a,i4)') &
-& ' mmax= ',mmax
+ write(msg,'(a,i4)') ' mmax= ',mmax
  call wrtout(ab_out,msg,'COLL')
- call wrtout(std_out,  msg,'COLL')
- pawtab%mesh_size=pawrad%mesh_size
+ call wrtout(std_out,msg,'COLL')
 
 !---------------------------------
 !Read pseudo wave-functions (tphi)

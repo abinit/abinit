@@ -11667,9 +11667,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Max L+1 leading to non-zero Gaunt (pawlcutd) ...    5
   lmn2_size ......................................  171
   lmnmix_sz ......................................  171
-  Size of radial mesh ............................  910
+  Size of radial mesh ............................  592
   Size of radial mesh for partial waves...........  910
-  Size of radial mesh for [pseudo] core density...  910
+  Size of radial mesh for [pseudo] core density...  592
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..  910
   No of Q-points for tcorespl/tvalespl/ttaucorespl 3001
@@ -11718,9 +11718,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Max L+1 leading to non-zero Gaunt (pawlcutd) ...    5
   lmn2_size ......................................  171
   lmnmix_sz ......................................  171
-  Size of radial mesh ............................ 1500
+  Size of radial mesh ............................ 1084
   Size of radial mesh for partial waves........... 1500
-  Size of radial mesh for [pseudo] core density... 1500
+  Size of radial mesh for [pseudo] core density... 1084
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density.. 1500
   No of Q-points for tcorespl/tvalespl/ttaucorespl 3001
@@ -11765,9 +11765,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Max L+1 leading to non-zero Gaunt (pawlcutd) ...    3
   lmn2_size ......................................   36
   lmnmix_sz ......................................   36
-  Size of radial mesh ............................ 2001
+  Size of radial mesh ............................ 1311
   Size of radial mesh for partial waves........... 2001
-  Size of radial mesh for [pseudo] core density... 2001
+  Size of radial mesh for [pseudo] core density... 1311
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density.. 2001
   No of Q-points for tcorespl/tvalespl/ttaucorespl 3001
@@ -12681,9 +12681,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Max L+1 leading to non-zero Gaunt (pawlcutd) ...    5
   lmn2_size ......................................  171
   lmnmix_sz ......................................  171
-  Size of radial mesh ............................  910
+  Size of radial mesh ............................  592
   Size of radial mesh for partial waves...........  910
-  Size of radial mesh for [pseudo] core density...  910
+  Size of radial mesh for [pseudo] core density...  592
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..  910
   No of Q-points for tcorespl/tvalespl/ttaucorespl  300
@@ -12732,9 +12732,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Max L+1 leading to non-zero Gaunt (pawlcutd) ...    5
   lmn2_size ......................................  171
   lmnmix_sz ......................................  171
-  Size of radial mesh ............................ 1500
+  Size of radial mesh ............................ 1084
   Size of radial mesh for partial waves........... 1500
-  Size of radial mesh for [pseudo] core density... 1500
+  Size of radial mesh for [pseudo] core density... 1084
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density.. 1500
   No of Q-points for tcorespl/tvalespl/ttaucorespl  300
@@ -12779,9 +12779,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Max L+1 leading to non-zero Gaunt (pawlcutd) ...    3
   lmn2_size ......................................   36
   lmnmix_sz ......................................   36
-  Size of radial mesh ............................ 2001
+  Size of radial mesh ............................ 1311
   Size of radial mesh for partial waves........... 2001
-  Size of radial mesh for [pseudo] core density... 2001
+  Size of radial mesh for [pseudo] core density... 1311
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density.. 2001
   No of Q-points for tcorespl/tvalespl/ttaucorespl  300
