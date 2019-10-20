@@ -863,43 +863,44 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 !----- Check options
 !----------------------------------------------------------------------
 
+!Some flags
+ nkxc_updn=merge(nkxc-3,nkxc,nkxc==6.or.nkxc==22)
  ismgga=libxc_functionals_ismgga()
  mgga=merge(1,0,ismgga)
  use_laplacian=mgga ! TEMPORARY
 
+!Compatibility tests
  if (mgga==1.and.usekden==0) then
    msg='Kinetic energy density needs to be computed'
    MSG_ERROR(msg)
  end if
- if ((usekden==1).and.(.not.present(taur))) then
-   msg='taur needs to be present'
-   MSG_ERROR(msg)
+ if (usekden==1) then
+   if (.not.present(taur)) then
+     msg='taur needs to be present'
+     MSG_ERROR(msg)
+   else if (size(taur)==0) then
+     msg='taur must be of non zero size'
+     MSG_ERROR(msg)
+   end if
+   if (.not.present(taucore)) then
+     msg='taucore needs to be present'
+     MSG_ERROR(msg)
+   else if (size(taucore)==0) then
+     msg='taucore must be of non zero size'
+     MSG_ERROR(msg)
+   end if
+   if (.not.present(vxctau)) then
+     msg='vxctau needs to be present'
+     MSG_ERROR(msg)
+   else if (size(vxctau)==0) then
+     msg='vxctau must be of non zero size'
+    MSG_ERROR(msg)
+   end if 
+   !For call in m_pawpsp/pawpsp_calc do not compute density laplacian
+   if (size(taur)==size(taucore).and.size(taur)==size(vxctau)) then
+     use_laplacian=0
+   end if
  end if
- if (usekden==1.and.size(taur)==0) then
-    msg='taur must be of non zero size'
-   MSG_ERROR(msg)
- end if
- if ((usekden==1).and.(.not.present(taucore))) then
-   msg='taucore needs to be present'
-   MSG_ERROR(msg)
- end if
- if (usekden==1.and.size(taucore)==0) then
-    msg='taucore must be of non zero size'
-   MSG_ERROR(msg)
- end if
- if ((usekden==1).and.(.not.present(vxctau))) then
-   msg='vxctau needs to be present'
-   MSG_ERROR(msg)
- end if
- if (usekden==1.and.size(vxctau)==0) then
-    msg='vxctau must be of non zero size'
-   MSG_ERROR(msg)
- end if 
- ! for call in m_pawpsp/pawpsp_calc do not compute density laplacian
- if (usekden==1.and.size(taur)==size(taucore).and.size(taur)==size(vxctau)) then
-   use_laplacian=0
- end if
- nkxc_updn=merge(nkxc-3,nkxc,nkxc==6.or.nkxc==22)
  if(nspden==4.and.nk3xc>0) then
    msg='K3xc for nspden=4 not implemented!'
    MSG_ERROR(msg)
