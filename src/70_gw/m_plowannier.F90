@@ -288,14 +288,14 @@ type, public :: plowannier_type
   integer, allocatable :: position(:,:)
   ! size natom,3, gives the position of the cell for this atom (rprim coordinates)
 
-  real,allocatable :: kpt(:,:)
+  real(dp),allocatable :: kpt(:,:)
   ! gives the coordinates in the BZ of the kpoint
   ! size (3,nkpt)
 
-  real,allocatable :: wtk(:)
+  real(dp),allocatable :: wtk(:)
   !weight of each kpoint
 
-  real,allocatable :: acell(:)
+  real(dp),allocatable :: acell(:)
   !size of the cell
 
 end type plowannier_type
@@ -383,6 +383,7 @@ subroutine init_plowannier(plowan_bandf,plowan_bandi,plowan_compute,plowan_iatom
 
  !! generally
  ABI_ALLOCATE(wan%kpt,(3,size(kpt,2)))
+ print*,"Hello"
  wan%kpt = kpt
  ABI_ALLOCATE(wan%iatom_wan,(wan%natom_wan))
  ABI_ALLOCATE(wan%nbl_atom_wan,(wan%natom_wan))
