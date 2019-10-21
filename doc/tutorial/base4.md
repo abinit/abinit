@@ -254,7 +254,7 @@ This would not be a big problem, but you would miss some error cancellation.
 
 The answer to this problem is given in the input file *$ABI_TESTS/tutorial/Input/tbase4_4.in*.
 
-{% dialog tests/tutorial/Input/tbase4_1.in %}
+{% dialog tests/tutorial/Input/tbase4_4.in %}
 
 The procedure to do the exact translation of the k-point grid will not be explained here (sorry for this). 
 If you do not see how to do it, just use homogeneous simple cubic grids, with about the same resolution 
