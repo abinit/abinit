@@ -4454,7 +4454,7 @@ subroutine dtqdrp(blkval,mpert,natom,quadrupoles)
  integer :: elfd,iatd,iatom,qvecd
  logical :: iwrite
 !arrays
- real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert),dvoigt(3,6)
+ real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert)
 
 ! *********************************************************************
 
@@ -4474,6 +4474,20 @@ subroutine dtqdrp(blkval,mpert,natom,quadrupoles)
      end do
    end do
  end do
+
+ iwrite = ab_out > 0
+
+ if (iwrite) then
+   write(ab_out,*)' atom   dir       Qxx         Qyy         Qzz         Qyz         Qxz         Qxy'
+   do iatom= 1, natom
+      write(ab_out,'(2x,i3,3x,a3,2x,6f12.6)') iatom, 'x',quadrupoles(1,1,1,iatom),quadrupoles(2,2,1,iatom),quadrupoles(3,3,1,iatom), &
+     & quadrupoles(2,3,1,iatom),quadrupoles(1,3,1,iatom),quadrupoles(1,3,1,iatom)
+      write(ab_out,'(2x,i3,3x,a3,2x,6f12.6)') iatom, 'y',quadrupoles(1,1,2,iatom),quadrupoles(2,2,2,iatom),quadrupoles(3,3,2,iatom), &
+     & quadrupoles(2,3,2,iatom),quadrupoles(1,3,2,iatom),quadrupoles(1,2,2,iatom)
+      write(ab_out,'(2x,i3,3x,a3,2x,6f12.6)') iatom, 'z',quadrupoles(1,1,3,iatom),quadrupoles(2,2,3,iatom),quadrupoles(3,3,3,iatom), &
+     & quadrupoles(2,3,3,iatom),quadrupoles(1,3,3,iatom),quadrupoles(1,2,3,iatom)
+   end do
+ end if
 
 ! do qvecd = 1,3
 !   do elfd = 1,3
