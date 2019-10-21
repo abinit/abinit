@@ -1892,7 +1892,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  integer :: ylmr_normchoice,ylmr_npts,ylmr_option
  logical,parameter :: include_nhat_in_gamma=.false.,state_dependent=.true.
  logical,parameter :: kgamma_only_positron=.true.,wf_conjugate=.false.
- logical :: cprj_paral_band,ex,mykpt,mykpt_pos,usetimerev
+ logical :: cprj_paral_band,ex,mykpt,mykpt_pos,usetimerev,abinitcorewf,xmlcorewf
  real(dp) :: arg,bessarg,cpi,cpr,cp11,cp12,cp21,cp22,gammastate,intg
  real(dp) :: lambda_v1,lambda_v2,lambda_core,lambda_pw,occ_el,occ_pos
  real(dp) :: pnorm,pr,rate,rate_ipm,ratec,ratec_ipm,rate_paw,rate_paw_ipm
@@ -2099,13 +2099,19 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 !  Reading of core wave functions
    if (mpi_enreg%me_cell==0) then
      do itypat=1,dtset%ntypat
-       filename=trim(filpsp(itypat))//'.corewf'
+       filename=trim(filpsp(itypat)) ; iln=len(trim(filename))
+       abinitcorewf=.false. ; if (iln>3) abinitcorewf=(filename(iln-6:iln)=='.abinit')
+       xmlcorewf=.false. ; if (iln>3) xmlcorewf=(filename(iln-3:iln)=='.xml')
+       if ((.not.xmlcorewf).and.(.not.abinitcorewf)) filename=filename(1:iln)//'.corewf'
+       if (abinitcorewf) filename=filename(1:iln-6)//'corewf.abinit'
+       if (xmlcorewf) filename=filename(1:iln-3)//'corewf.xml'
        inquire(file=filename,exist=ex)
        if (.not.ex) then
          write(unit=filename,fmt='(a,i1)') 'corewf.abinit',itypat
          inquire(file=filename,exist=ex)
          if (.not.ex) then
-           msg='Core wave-functions file is missing!'
+           write(msg,'(4a)') 'Core wave-functions file is missing!',ch10,&
+&                            'Looking for: ',trim(filename)
            MSG_ERROR(msg)
          end if
        end if
