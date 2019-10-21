@@ -383,8 +383,7 @@ subroutine init_plowannier(plowan_bandf,plowan_bandi,plowan_compute,plowan_iatom
 
  !! generally
  ABI_ALLOCATE(wan%kpt,(3,size(kpt,2)))
- print*,"Hello"
- wan%kpt = kpt
+  wan%kpt = kpt
  ABI_ALLOCATE(wan%iatom_wan,(wan%natom_wan))
  ABI_ALLOCATE(wan%nbl_atom_wan,(wan%natom_wan))
  wan%nbl_atom_wan = 0
