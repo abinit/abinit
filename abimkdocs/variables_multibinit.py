@@ -928,7 +928,7 @@ Flag to initialize spin state.
 
 * 2 --> Reference spin state from potential file if present.
 
-* 3 --> State with q-vector using [[multibinit:spin_init_qpoint, and multibinit:spin_init_orientaion]]. If these two variables are not given, default FM state with all spin along Z axis.
+* 3 --> State with q-vector using [[multibinit:spin_init_qpoint, multibinit:spin_init_rotate_axis, and multibinit:spin_init_orientation]]. If these three variables are not given, default FM state with all spins along z-axis.
 
 * 4 --> Restart from last step of input spin hist file. "{output}_spinhist_input.nc". 
 """,
@@ -993,7 +993,7 @@ And they are not used for calculating the observables.
 
 
 Variable(
-    abivarname="spin_init_orientaion@multibinit",
+    abivarname="spin_init_orientation@multibinit",
     varset="multibinit",
     vartype="real",
     topics=['SpinDynamicsMultibinit_basic'],
