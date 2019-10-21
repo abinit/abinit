@@ -230,14 +230,34 @@ external dependencies and related aspects like the fallbacks.
 Best candidates for a refactoring
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Could be only in src:
+*14_hidewrite/m_cppopts_dumper.F90* could be moved to the upper part of ABINIT
+if it were not used by m_errors. Exclusively because of this module, a lot of
+detection code that is only useful for ABINIT Core would have to be duplicated
+into ABINIT Common.
 
-- HAVE_GPU_*, if m_abi_linalg is moved upwards.
-- HAVE_GW_DPC, if removed from defs_basis and abi_common.h.
-- HAVE_LEVMAR, if a low-level C subdirectory is created upwards.
-- HAVE_MEM_PROFILING, if removed from m_errors (abinit_doctor) and abi_common.h.
-- HAVE_NETCDF_DEFAULT, if removed from m_nctk or the latter moved upwards.
-- HAVE_NETCDF_MPI, if m_nctk is moved upwards.
+CPP options which are used almost uniquely in one block and only once in
+another block point to a few easy refactoring operations:
+
+- by stopping to use CPP options related to legacy Fortran standards (Fortran
+  90/95) and assuming that Fortran compilers support Fortran 2003, the build
+  systems of ABINIT Common and LibPAW could be simplified substantially;
+- getting rid of the *HAVE_ETSF_IO* CPP option, which has been replaced by a
+  direct implementation of the ETSF File Format;
+- moving linear algebra-related Fortran modules from ABINIT Common to ABINIT
+  Core.
+
+In a second round, the following CPP options could be used exclusively in
+ABINIT Common:
+
+- HAVE_GPU_*, if the GPU-related modules and C headers, as well as
+  m_abi_linalg are moved to ABINIT Core;
+- HAVE_GW_DPC, if moved away from defs_basis and abi_common.h;
+- HAVE_LEVMAR, if a low-level C subdirectory is created upwards;
+- HAVE_MEM_PROFILING, if moved away from m_errors (abinit_doctor) and
+  abi_common.h;
+- HAVE_NETCDF_DEFAULT, if moved away from m_nctk or the latter moved to ABINIT
+  Core;
+- HAVE_NETCDF_MPI, if m_nctk is moved to ABINIT Core.
 
 The *HAVE_GW_DPC* option could be used exclusively in ABINIT Core if:
 
@@ -245,12 +265,6 @@ The *HAVE_GW_DPC* option could be used exclusively in ABINIT Core if:
 - *28_numeric_noabirule/m_array.F90* is moved upwards.
 
 All these possible refactoring operations only involve small efforts, which is
-why they should be discussed among the core developers of ABINIT.
-
-
-Further possible refactoring
-----------------------------
-
-*14_hidewrite/m_cppopts_dumper.F90* could be moved to the upper part of ABINIT
-if it were not used by m_errors.
+why they should be discussed among the core developers of ABINIT before
+starting ABINIT 9.
 
