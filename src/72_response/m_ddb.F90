@@ -3962,7 +3962,11 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  mpert=matom+MPERT_MAX
  msize=3*mpert*3*mpert
+#ifdef MR_DEV
+ if(mblktyp==3.or.mblktyp==33)msize=msize*3*mpert
+#else
  if(mblktyp==3)msize=msize*3*mpert
+#endif
 
 !write(std_out,*),'msize',msize,'mpert',mpert,'mblktyp',mblktyp
  call ddb%malloc(msize, mblok, matom, mtypat)
@@ -4201,9 +4205,6 @@ end subroutine mblktyp5
 !! NOTES
 !! - d3 holds the third-order derivatives before computing
 !!   the permutations of the perturbations.
-!! - the dimension 6 of the 4th argument in d3 is used to define
-!!   both up and down extradiagonal strain perturbations.                          
-!!   Necessary because their q-gradient is not symmetric. 
 !!
 !! PARENTS
 !!      longwave
@@ -4230,7 +4231,7 @@ subroutine dfpt_lw_doutput(blkflg,d3,mpert,natom,ntypat,unddb)
 
 !*************************************************************************
 
- msize = 54*mpert*mpert*mpert
+ msize = 27*mpert*mpert*mpert
  call ddb_malloc(ddb,msize,1,natom,ntypat)
 
  ddb%nrm = one

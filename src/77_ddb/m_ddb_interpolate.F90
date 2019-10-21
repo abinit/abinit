@@ -146,6 +146,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 
 #ifdef MR_DEV
  mpert = natom + MPERT_MAX
+ msize = 3 * mpert * 3 * mpert  ; if (mtyp==3.or.mtyp==33) msize=msize*3*mpert
 #else
  mpert = natom + 6
 #endif 
