@@ -1287,15 +1287,14 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
 
    else if (ddb%typ(iblok) == 3) then
 
-     npert = 8
-     nsize=3*npert*3*npert*3*npert
-     ABI_MALLOC(tmpflg,(3,npert,3,npert,3,npert))
-     ABI_MALLOC(tmpval,(2,3,npert,3,npert,3,npert))
-     ABI_MALLOC(rfpert,(3,npert,3,npert,3,npert))
+     nsize=3*mpert*3*mpert*3*mpert
+     ABI_MALLOC(tmpflg,(3,mpert,3,mpert,3,mpert))
+     ABI_MALLOC(tmpval,(2,3,mpert,3,mpert,3,mpert))
+     ABI_MALLOC(rfpert,(3,mpert,3,mpert,3,mpert))
 
-     tmpflg(:,:,:,:,:,:) = reshape(ddb%flg(1:nsize,iblok), shape = (/3,npert,3,npert,3,npert/))
-     tmpval(1,:,:,:,:,:,:) = reshape(ddb%val(1,1:nsize,iblok), shape = (/3,npert,3,npert,3,npert/))
-     tmpval(2,:,:,:,:,:,:) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,npert,3,npert,3,npert/))
+     tmpflg(:,:,:,:,:,:) = reshape(ddb%flg(1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
+     tmpval(1,:,:,:,:,:,:) = reshape(ddb%val(1,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
+     tmpval(2,:,:,:,:,:,:) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
 
 !    Set the elements that are zero by symmetry for raman and
 !    non-linear optical susceptibility tensors
@@ -1304,10 +1303,10 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
      rfpert(:,1:natom,:,natom+2,:,natom+2) = 1
      rfpert(:,natom+2,:,1:natom,:,natom+2) = 1
      rfpert(:,natom+2,:,natom+2,:,1:natom) = 1
-     call sytens(indsym,npert,natom,nsym,rfpert,symrec,symrel)
-     do i1pert = 1,npert
-       do i2pert = 1,npert
-         do i3pert = 1,npert
+     call sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
+     do i1pert = 1,mpert
+       do i2pert = 1,mpert
+         do i3pert = 1,mpert
            do i1dir=1,3
              do i2dir=1,3
                do i3dir=1,3
@@ -1323,16 +1322,16 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
        end do
      end do
 
-     call d3sym(tmpflg,tmpval,indsym,npert,natom,nsym,symrec,symrel)
+     call d3sym(tmpflg,tmpval,indsym,mpert,natom,nsym,symrec,symrel)
 
-     ABI_MALLOC(d3cart,(2,3,npert,3,npert,3,npert))
-     ABI_MALLOC(car3flg,(3,npert,3,npert,3,npert))
+     ABI_MALLOC(d3cart,(2,3,mpert,3,mpert,3,mpert))
+     ABI_MALLOC(car3flg,(3,mpert,3,mpert,3,mpert))
 
-     call nlopt(tmpflg,car3flg,tmpval,d3cart,gprimd,npert,natom,rprimd,ucvol)
+     call nlopt(tmpflg,car3flg,tmpval,d3cart,gprimd,mpert,natom,rprimd,ucvol)
 
-     ddb%flg(1:nsize,iblok) = reshape(car3flg, shape = (/3*npert*3*npert*3*npert/))
-     ddb%val(1,1:nsize,iblok) = reshape(d3cart(1,:,:,:,:,:,:), shape = (/3*npert*3*npert*3*npert/))
-     ddb%val(2,1:nsize,iblok) = reshape(d3cart(2,:,:,:,:,:,:), shape = (/3*npert*3*npert*3*npert/))
+     ddb%flg(1:nsize,iblok) = reshape(car3flg, shape = (/3*mpert*3*mpert*3*mpert/))
+     ddb%val(1,1:nsize,iblok) = reshape(d3cart(1,:,:,:,:,:,:), shape = (/3*mpert*3*mpert*3*mpert/))
+     ddb%val(2,1:nsize,iblok) = reshape(d3cart(2,:,:,:,:,:,:), shape = (/3*mpert*3*mpert*3*mpert/))
 
      ABI_FREE(d3cart)
      ABI_FREE(car3flg)

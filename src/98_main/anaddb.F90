@@ -123,6 +123,9 @@ program anaddb
  type(phonon_dos_type) :: Phdos
  type(ifc_type) :: Ifc,Ifc_coarse
  type(ddb_type) :: ddb
+#ifdef MR_DEV
+ type(ddb_type) :: ddb_lw
+#endif
  type(ddb_hdr_type) :: ddb_hdr
  type(asrq0_t) :: asrq0
  type(crystal_t) :: Crystal
@@ -223,6 +226,7 @@ program anaddb
 
  ! Open output files and ab_out (might change its name if needed)
  ! MJV 1/2010 : now output file is open, but filnam(2) continues unmodified
+
  ! so the other output files are overwritten instead of accumulating.
  if (iam_master) then
    tmpfilename = filnam(2)
@@ -248,6 +252,14 @@ program anaddb
 
  call ddb_from_file(ddb,filnam(3),inp%brav,natom,inp%natifc,inp%atifc,Crystal,comm, prtvol=inp%prtvol)
  nsym = Crystal%nsym
+
+#ifdef MR_DEV
+ ! A new ddb is necessary for the quadrupoles due to incompability of it with authomatic reshapes
+ ! that ddb%val and ddb%flg experience when passed as arguments of some routines
+ if (mtyp==33) then
+   call ddb_copy(ddb, ddb_lw)
+ end if
+#endif
 
  ! Acoustic Sum Rule
  ! In case the interatomic forces are not calculated, the
@@ -926,6 +938,9 @@ program anaddb
  call ddb%free()
  call anaddb_dtset_free(inp)
  call thermal_supercell_free(inp%ntemper, thm_scells)
+#ifdef MR_DEV
+ call ddb_lw%free()
+#endif
 
  if (sum(abs(inp%thermal_supercell))>0 .and. inp%ifcflag==1) then
    ABI_FREE(thm_scells)
