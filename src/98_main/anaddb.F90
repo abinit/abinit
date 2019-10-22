@@ -92,7 +92,7 @@ program anaddb
  integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
  integer,parameter :: rftyp4=4
  integer :: comm,iatom,iblok,iblok_stress,iblok_tmp,idir,ii,index
- integer :: ierr,iphl2,lenstr,mtyp,mpert,msize,natom,nblok,nsize
+ integer :: ierr,iphl2,lenstr,mtyp,mpert,msize,natom
  integer :: nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid,prt_internalstr
  logical :: iam_master
  integer :: rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
@@ -257,36 +257,7 @@ program anaddb
  ! A new ddb is necessary for the quadrupoles due to incompability of it with authomatic reshapes
  ! that ddb%val and ddb%flg experience when passed as arguments of some routines
  if (mtyp==33) then
-   call ddb_copy(ddb, ddb_lw)
-   call ddb%free()
-   nsize=3*mpert*3*mpert
-   nblok=ddb_lw%nblok-count(ddb_lw%typ(:)==33)
-   call ddb%malloc(nsize, nblok, natom, ntypat)
-   
- ! Copy dimensions and static variables.
-   ddb%msize = nsize
-   ddb%mpert = ddb_lw%mpert
-   ddb%nblok = nblok
-   ddb%natom = ddb_lw%natom
-   ddb%ntypat = ddb_lw%ntypat
-   ddb%occopt = ddb_lw%occopt
-   ddb%prtvol = ddb_lw%prtvol
-  
-   ddb%rprim = ddb_lw%rprim
-   ddb%gprim = ddb_lw%gprim
-   ddb%acell = ddb_lw%acell
-
- ! Copy the allocatable arrays.
-   ddb%amu(:) = ddb_lw%amu(:)
-   do ii=1,ddb_lw%nblok
-     if (ddb_lw%typ(ii)/=33) then
-       ddb%flg(:,ii)   = ddb_lw%flg(1:nsize,ii)
-       ddb%val(:,:,ii) = ddb_lw%val(:,1:nsize,ii)
-       ddb%typ(ii)     = ddb_lw%typ(ii)
-       ddb%nrm(:,ii)   = ddb_lw%nrm(:,ii)
-       ddb%qpt(:,ii)   = ddb_lw%qpt(:,ii)
-     end if
-   end do
+   call ddb_lw_copy(ddb,ddb_lw,mpert,natom,ntypat)
  end if
 #endif
 

@@ -144,12 +144,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  mtyp = max(ddb_hdr%mblktyp, 2)  ! Limited to 2nd derivatives of total energy
  ddb_hdr%mblktyp = mtyp
 
-#ifdef MR_DEV
- mpert = natom + MPERT_MAX
- msize = 3 * mpert * 3 * mpert  ; if (mtyp==3.or.mtyp==33) msize=msize*3*mpert
-#else
  mpert = natom + 6
-#endif 
  msize = 3 * mpert * 3 * mpert  !; if (mtyp==3) msize=msize*3*mpert
  nsize = 3 * mpert * 3 * mpert
  nblok = nqpt_fine
