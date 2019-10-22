@@ -65,6 +65,7 @@ MODULE m_ddb
                             ! coordinates
  public :: ddb_lw_copy      ! Copy the ddb object after reading the long wave 3rd order derivatives
                             ! into a new ddb_lw and resizes ddb as for 2nd order derivatives 
+ public :: dtciflexo        
 #endif
 
  integer,public,parameter :: DDB_VERSION=100401
@@ -4525,6 +4526,71 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
  end if
 
  end subroutine dtqdrp
+
+!!****f* m_ddb/dtciflexo
+!! NAME
+!! dtciflexo
+!!
+!! FUNCTION
+!! Reads the Clamped Ion Flexoelectric Tensor
+!! in the Gamma Block coming from the Derivative Data Base
+!! (long wave third-order derivatives).
+!!
+!! INPUTS
+!! blkval(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies
+!! mpert =maximum number of ipert
+!! natom= number of atoms in unit cell
+!! ucvol= unit cell volume
+!!
+!! OUTPUT
+!! ciflexo(3,3,3,3) = type-II Clamped Ion Flexoelectric Tensor
+!!
+!! PARENTS
+!!      m_ddb
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: mpert,natom
+ real(dp),intent(in) :: ucvol
+!arrays
+ real(dp),intent(in) :: blkval(2,3*mpert*3*mpert*3*mpert)
+ real(dp),intent(out) :: ciflexo(3,3,3,natom)
+
+!Local variables -------------------------
+!scalars
+ integer :: elfd,istrs,strsd,strsd1,strsd2,strst,qvecd
+ logical :: iwrite
+ real(dp) :: fac
+!arrays
+ integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
+ real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert)
+
+! *********************************************************************
+
+ d3cart(1,:,:,:,:,:,:) = reshape(blkval(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
+ d3cart(2,:,:,:,:,:,:) = reshape(blkval(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
+
+!Extraction of CI flexoelectric tensor
+ fac=two/ucvol
+ do qvecd=1,3
+   do istrs=1,6
+     strsd1=alpha(istrs)
+     strsd2=beta(istrs)
+     strst=natom+3; if (istrs>3) strst=natom+4
+     strsd=istrs; if (istrs>3) strsd=istrs-3
+     do elfd=1,3
+       ciflexo(elfd,qvecd,strsd1,strsd2)=-fac*d3cart(2,elfd,natom+2,strsd,strst,qvecd,natom+8)
+     end do
+   end do
+ end do
+
+ end subroutine dtciflexo
 
 !!****f* m_ddb/ddb_lw_copy
 !! NAME

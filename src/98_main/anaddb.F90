@@ -83,6 +83,9 @@ program anaddb
  use m_ddb_elast,      only : ddb_elast
  use m_ddb_piezo,      only : ddb_piezo
  use m_ddb_internalstr, only : ddb_internalstr
+#ifdef MR_DEV
+ use m_ddb_flexo
+#endif
 
  implicit none
 
@@ -324,7 +327,7 @@ program anaddb
  if ((inp%dipquad==1.or.inp%quadquad==1).and.iblok == 0) then
    call wrtout(std_out, "--- !WARNING")
    call wrtout(std_out, sjoin("- Cannot find Dynamical Quadrupoles tensor in DDB file:", filnam(3)))
-   call wrtout(std_out, "dipquad=1 or quadquad=1 requires the DDB file to include the long wave 3rd derivatives")
+   call wrtout(std_out, "dipquad=1 or quadquad=1 requires the DDB file to include the corresponding long wave 3rd derivatives")
  end if
 
  ! Get Dielectric Tensor and Effective Charges
@@ -926,11 +929,18 @@ program anaddb
 !**********************************************************************
 
 #ifdef MR_DEV
- if (inp%flexoflag==1 .or. inp%flexoflag==2) then
-   ! Here treating the electronic contribution to the flexoelectric tensor
+ if (inp%flexoflag/=0 ) then
+   ! Here treating the flexoelectric tensor
+   write(msg, '(a,a,(80a),a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
+   ' Calculation of the tensors related to flexoelectric effetc',ch10
+   call wrtout([std_out, ab_out], msg)
 
+   ! Compute and print the contributions to the piezoelectric tensor
+   call ddb_flexo(ddb,ddb_lw,crystal,filnam(3),inp%flexoflag)
  end if
 #endif
+
+!**********************************************************************
 
  ! Free memory
  ABI_FREE(displ)
