@@ -2574,11 +2574,15 @@ end function ddb_get_dielt
 !!  ddb_get_quadrupoles
 !!
 !! FUNCTION
-!! Reads the Dynamic Quadrupoles Tensor from the DDB file
+!! Reads the Dynamic Quadrupoles or the P^(1) tensor from the DDB file
 !!
 !! INPUTS
 !!  ddb<type(ddb_type)>=Derivative database.
 !!  Crystal<type(crystal_t)>=Crystal structure parameters
+!!  lwsym  = 0 do not symmetrize the tensor wrt efield and qvec derivative 
+!!             |-> 1st gradient of polarization response to atomic displacement
+!!         = 1 symmetrize the tensor wrt efield and qvec derivative 
+!!             |-> dynamic quadrupoles
 !!  rftyp  = 1 if non-stationary block
 !!           2 if stationary block
 !!           3 if third order derivatives
@@ -2597,11 +2601,11 @@ end function ddb_get_dielt
 !!
 !! SOURCE
 
-integer function ddb_get_quadrupoles(ddb, crystal, rftyp, quadrupoles) result(iblok)
+integer function ddb_get_quadrupoles(ddb, crystal, lwsym,rftyp, quadrupoles) result(iblok)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: rftyp
+ integer,intent(in) :: lwsym,rftyp
  class(ddb_type),intent(in) :: ddb
  type(crystal_t),intent(in) :: crystal
 !arrays
@@ -2634,11 +2638,16 @@ integer function ddb_get_quadrupoles(ddb, crystal, rftyp, quadrupoles) result(ib
  quadrupoles=zero
 
  if (iblok /= 0) then
-   write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
-   ' Dynamical Quadrupoles Tensor ',ch10
+   if (lwsym==1) then
+     write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
+     ' Dynamical Quadrupoles Tensor ',ch10
+   else if (lwsym==0) then
+     write(msg, '(2a,(122a),4a)' ) ch10,('=',ii=1,122),ch10,ch10,&
+     ' First moment of Polarization induced by atomic displacement (1/ucvol factor not included) ',ch10
+   endif
    call wrtout([std_out, ab_out], msg)
 
-   call dtqdrp(ddb%val(:,:,iblok),ddb%mpert,ddb%natom,quadrupoles)
+   call dtqdrp(ddb%val(:,:,iblok),lwsym,ddb%mpert,ddb%natom,quadrupoles)
 
  end if
 
@@ -4423,17 +4432,21 @@ end subroutine lwcart
 !! dtqdrp
 !!
 !! FUNCTION
-!! Reads the Dynamical Quadrupole Tensor
+!! Reads the Dynamical Quadrupole or the P^(1) Tensor
 !! in the Gamma Block coming from the Derivative Data Base
 !! (long wave third-order derivatives).
 !!
 !! INPUTS
 !! blkval(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies
+!! lwsym  = 0 do not symmetrize the tensor wrt efield and qvec derivative 
+!!             |-> 1st gradient of polarization response to atomic displacement
+!!        = 1 symmetrize the tensor wrt efield and qvec derivative 
+!!             |-> dynamic quadrupoles
 !! natom= number of atoms in unit cell
 !! mpert =maximum number of ipert
 !!
 !! OUTPUT
-!! quadrupoles(3,3,3,natom) = Dynamical Quadrupoles
+!! lwtens(3,3,3,natom) = Dynamical Quadrupoles or P^(1) tensor
 !!
 !! PARENTS
 !!      m_ddb
@@ -4442,14 +4455,14 @@ end subroutine lwcart
 !!
 !! SOURCE
 
-subroutine dtqdrp(blkval,mpert,natom,quadrupoles)
+subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,natom
+ integer,intent(in) :: lwsym,mpert,natom
 !arrays
  real(dp),intent(in) :: blkval(2,3*mpert*3*mpert*3*mpert)
- real(dp),intent(out) :: quadrupoles(3,3,3,natom)
+ real(dp),intent(out) :: lwtens(3,3,3,natom)
 
 !Local variables -------------------------
 !scalars
@@ -4468,11 +4481,16 @@ subroutine dtqdrp(blkval,mpert,natom,quadrupoles)
    do iatd = 1,3
      do elfd = 1,3
        do qvecd = 1,elfd-1
-         quadrupoles(qvecd,elfd,iatd,iatom) = -two* &
-       (d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)+d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8))
-         quadrupoles(elfd,qvecd,iatd,iatom) = quadrupoles(qvecd,elfd,iatd,iatom) 
+         if (lwsym==1) then
+           lwtens(qvecd,elfd,iatd,iatom) = -two* &
+         (d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)+d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8))
+           lwtens(elfd,qvecd,iatd,iatom) = lwtens(qvecd,elfd,iatd,iatom) 
+         else if (lwsym==0) then
+           lwtens(qvecd,elfd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)
+           lwtens(elfd,qvecd,iatd,iatom) = -two*d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8)
+         end if
        end do
-       quadrupoles(elfd,elfd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
+       lwtens(elfd,elfd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
      end do
    end do
  end do
@@ -4480,15 +4498,30 @@ subroutine dtqdrp(blkval,mpert,natom,quadrupoles)
  iwrite = ab_out > 0
 
  if (iwrite) then
-   write(ab_out,*)' atom   dir       Qxx         Qyy         Qzz         Qyz         Qxz         Qxy'
-   do iatom= 1, natom
-      write(ab_out,'(2x,i3,3x,a3,2x,6f12.6)') iatom, 'x',quadrupoles(1,1,1,iatom),quadrupoles(2,2,1,iatom),quadrupoles(3,3,1,iatom), &
-     & quadrupoles(2,3,1,iatom),quadrupoles(1,3,1,iatom),quadrupoles(1,3,1,iatom)
-      write(ab_out,'(2x,i3,3x,a3,2x,6f12.6)') iatom, 'y',quadrupoles(1,1,2,iatom),quadrupoles(2,2,2,iatom),quadrupoles(3,3,2,iatom), &
-     & quadrupoles(2,3,2,iatom),quadrupoles(1,3,2,iatom),quadrupoles(1,2,2,iatom)
-      write(ab_out,'(2x,i3,3x,a3,2x,6f12.6)') iatom, 'z',quadrupoles(1,1,3,iatom),quadrupoles(2,2,3,iatom),quadrupoles(3,3,3,iatom), &
-     & quadrupoles(2,3,3,iatom),quadrupoles(1,3,3,iatom),quadrupoles(1,2,3,iatom)
-   end do
+   if (lwsym==1) then
+     write(ab_out,*)' atom   dir       Qxx         Qyy         Qzz         Qyz         Qxz         Qxy'
+     do iatom= 1, natom
+        write(ab_out,'(2x,i3,3x,a3,2x,6f12.6)') iatom, 'x',lwtens(1,1,1,iatom),lwtens(2,2,1,iatom),lwtens(3,3,1,iatom), &
+       & lwtens(2,3,1,iatom),lwtens(1,3,1,iatom),lwtens(1,2,1,iatom)
+        write(ab_out,'(2x,i3,3x,a3,2x,6f12.6)') iatom, 'y',lwtens(1,1,2,iatom),lwtens(2,2,2,iatom),lwtens(3,3,2,iatom), &
+       & lwtens(2,3,2,iatom),lwtens(1,3,2,iatom),lwtens(1,2,2,iatom)
+        write(ab_out,'(2x,i3,3x,a3,2x,6f12.6)') iatom, 'z',lwtens(1,1,3,iatom),lwtens(2,2,3,iatom),lwtens(3,3,3,iatom), &
+       & lwtens(2,3,3,iatom),lwtens(1,3,3,iatom),lwtens(1,2,3,iatom)
+     end do
+   else if (lwsym==0) then
+     write(ab_out,*)' atom   dir       Pxx         Pyy         Pzz         Pyz         Pxz         Pxy         Pzy         Pzx         Pyx'
+     do iatom= 1, natom
+        write(ab_out,'(2x,i3,3x,a3,2x,9f12.6)') iatom, 'x',lwtens(1,1,1,iatom),lwtens(2,2,1,iatom),lwtens(3,3,1,iatom), &
+       & lwtens(2,3,1,iatom),lwtens(1,3,1,iatom),lwtens(1,2,1,iatom), &
+       & lwtens(3,2,1,iatom),lwtens(3,1,1,iatom),lwtens(2,1,1,iatom)
+        write(ab_out,'(2x,i3,3x,a3,2x,9f12.6)') iatom, 'y',lwtens(1,1,2,iatom),lwtens(2,2,2,iatom),lwtens(3,3,2,iatom), &
+       & lwtens(2,3,2,iatom),lwtens(1,3,2,iatom),lwtens(1,2,2,iatom), &
+       & lwtens(3,2,2,iatom),lwtens(3,1,2,iatom),lwtens(2,1,2,iatom)
+        write(ab_out,'(2x,i3,3x,a3,2x,9f12.6)') iatom, 'z',lwtens(1,1,3,iatom),lwtens(2,2,3,iatom),lwtens(3,3,3,iatom), &
+       & lwtens(2,3,3,iatom),lwtens(1,3,3,iatom),lwtens(1,2,3,iatom), &
+       & lwtens(3,2,3,iatom),lwtens(3,1,3,iatom),lwtens(2,1,3,iatom)
+     end do
+   endif
  end if
 
  end subroutine dtqdrp

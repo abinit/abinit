@@ -859,7 +859,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  ABI_ALLOCATE(zeff,(3,3,natom))
  ABI_ALLOCATE(qdrp_cart,(3,3,3,natom))
  iblok = ddb%get_dielt_zeff(ucell_ddb,1,1,0,dielt,zeff)
- iblok = ddb%get_quadrupoles(ucell_ddb,3,qdrp_cart)
+ iblok = ddb%get_quadrupoles(ucell_ddb,1,3,qdrp_cart)
 
  ! Try to get dielt, in case just the DDE are present
  if (iblok == 0) then

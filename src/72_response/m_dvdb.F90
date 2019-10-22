@@ -6828,7 +6828,7 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_path, ddb)
  end if
 
  ! Read the quadrupoles
- iblock_quadrupoles = ddb_ptr%get_quadrupoles(cryst_ddb, 3, dvdb%qstar)
+ iblock_quadrupoles = ddb_ptr%get_quadrupoles(cryst_ddb, 1, 3, dvdb%qstar)
  if (iblock_quadrupoles /=0) dvdb%has_quadrupoles = .True.
 
  call cryst_ddb%free()

@@ -456,7 +456,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
 
  ! Read the quadrupoles
- iblock_quadrupoles = ddb%get_quadrupoles(cryst_ddb, 3, qdrp_cart)
+ iblock_quadrupoles = ddb%get_quadrupoles(cryst_ddb, 1, 3, qdrp_cart)
  if (my_rank == master) then
    if (iblock_quadrupoles == 0) then
      call wrtout(ab_out, sjoin("- Cannot find quadrupole tensor in DDB file:", ddb_path))

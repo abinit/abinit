@@ -92,7 +92,7 @@ program anaddb
  integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
  integer,parameter :: rftyp4=4
  integer :: comm,iatom,iblok,iblok_stress,iblok_tmp,idir,ii,index
- integer :: ierr,iphl2,lenstr,mtyp,mpert,msize,natom
+ integer :: ierr,iphl2,lenstr,lwsym,mtyp,mpert,msize,natom
  integer :: nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid,prt_internalstr
  logical :: iam_master
  integer :: rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
@@ -319,7 +319,13 @@ program anaddb
 !**********************************************************************
 
  ! Get Quadrupole tensor
- iblok = ddb_lw%get_quadrupoles(crystal,33,qdrp_cart)
+ lwsym=1
+ iblok = ddb_lw%get_quadrupoles(crystal,lwsym,33,qdrp_cart)
+ if ((inp%dipquad==1.or.inp%quadquad==1).and.iblok == 0) then
+   call wrtout(std_out, "--- !WARNING")
+   call wrtout(std_out, sjoin("- Cannot find Dynamical Quadrupoles tensor in DDB file:", filnam(3)))
+   call wrtout(std_out, "dipquad=1 or quadquad=1 requires the DDB file to include the long wave 3rd derivatives")
+ end if
 
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
@@ -918,6 +924,13 @@ program anaddb
  end if
 
 !**********************************************************************
+
+#ifdef MR_DEV
+ if (inp%flexoflag==1 .or. inp%flexoflag==2) then
+   ! Here treating the electronic contribution to the flexoelectric tensor
+
+ end if
+#endif
 
  ! Free memory
  ABI_FREE(displ)
