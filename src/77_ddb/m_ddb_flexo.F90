@@ -315,7 +315,7 @@ subroutine dtmixflexo(asr,d2asr,blkval2d,blkval,mixflexo,mpert,natom,pol1,ucvol)
 
 !Local variables -------------------------
 !scalars
- integer :: elfd,iat,iatd,jat,jatd,qvecd
+ integer :: elfd,iat,iatd,ivar,jat,jatd,jvar,kat,katd,qvecd
  logical :: iwrite
  character(len=500) :: msg
 !arrays
@@ -324,6 +324,7 @@ subroutine dtmixflexo(asr,d2asr,blkval2d,blkval,mixflexo,mpert,natom,pol1,ucvol)
  real(dp) :: phi1(3,natom,3,natom,3)
  real(dp) :: piezofr(3,natom,3,3)
  real(dp) :: psinvdm(3*natom,3*natom)
+ real(dp) :: intstrn(3,3,3,natom)
 
 ! *********************************************************************
 
@@ -363,6 +364,41 @@ subroutine dtmixflexo(asr,d2asr,blkval2d,blkval,mixflexo,mpert,natom,pol1,ucvol)
 !Calculate the ion-relaxed internal strain tensor
  !First we need to obtain the pseudo-inverse of the dynamical matrix 
  call dm_psinv(asr,blkval2d,d2asr,ab_out,psinvdm,mpert,natom)
+
+ !Perfom the product with the piezo force-response
+ intstrn(:,:,:,:)=zero
+ do qvecd=1,3
+   do katd=1,3
+     ivar=0
+     do iatd=1,3
+       do iat=1,natom
+         ivar=ivar+1
+         jvar=0
+         do jatd=1,3
+           do jat=1,natom
+             jvar=jvar+1
+
+             intstrn(qvecd,katd,iatd,iat)= intstrn(qvecd,katd,iatd,iat) + &
+           psinvdm(ivar,jvar)*piezofr(jatd,jat,katd,qvecd)
+
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+ write(ab_out,*)"  "
+ do qvecd=1,3
+   do katd=1,3
+     ivar=0
+     do iatd=1,3
+       do iat=1,natom
+         write(ab_out,'(4i3,f12.6)') iat, iatd, katd, qvecd, intstrn(qvecd,katd,iatd,iat)
+       end do
+     end do
+   end do
+ end do
 
 !Print results
 ! iwrite = ab_out > 0
