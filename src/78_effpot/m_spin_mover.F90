@@ -361,14 +361,17 @@ contains
           call wrtout(ab_out,msg,'COLL')
           call wrtout(std_out,msg,'COLL')
 
+          self%hist%nspin_prim=INT(REAL(self%nspin)/REAL(self%supercell%ncell))
+
           ABI_ALLOCATE(Sprim, (3,self%hist%nspin_prim) )
 
           ! set inital spin state using the input variables
           ! set spin to ferromagnetic along init_orientation then rotate
-          do i=1, 3
-            Sprim(i,:)=self%init_orientation(i)
+          do i=1, self%hist%nspin_prim
+            Sprim(:,i)=self%init_orientation(:)
           enddo
-
+          self%Stmp(:,:) = 0.0d0
+          
           call self%supercell%supercell_maker%generate_spin_wave_vectorlist(A=Sprim, &
              & kpoint=self%init_qpoint, axis=self%init_rotate_axis, A_sc=self%Stmp)
    
