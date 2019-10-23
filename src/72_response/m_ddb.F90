@@ -2613,7 +2613,7 @@ integer function ddb_get_quadrupoles(ddb, crystal, lwsym,rftyp, quadrupoles) res
 
 !Local variables -------------------------
 !scalars
- integer :: ii, jj, iatdir, iatom, iq1dir, iq2dir
+ integer :: ii 
  integer :: quad_unt
  character(len=500) :: msg
 !arrays
