@@ -1626,6 +1626,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              vkk_norm2 = dot_product(vk, vk)
              alpha_mrta(ib_k) = zero
              if (vkk_norm2 > tol6) alpha_mrta(ib_k) = one - dot_product(vkq, vk) / vkk_norm2 ** 2
+             !if (vkk_norm2 > tol6) alpha_mrta(ib_k) = one - dot_product(vkq, vk) / (vkk * vkq)
            end do
          end if
 

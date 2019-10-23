@@ -175,13 +175,22 @@ for the whole Brillouin zone, e.g. from 1 to 5, but this would have been more ti
 
 In the output file, one finds the quasiparticle energy at $\Gamma$, for the lowest band:
     
-    k =    0.000   0.000   0.000
+```yaml
+--- !SelfEnergy_ee
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    0.000
+QP_gap     :    0.000
+Delta_QP_KS:    0.000
+data: !SigmaeeData |
      Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1    -3.762    -9.451    -3.762     5.689   -15.049     5.676     0.777    -0.287    -9.390     0.060    -3.701    -3.684
+        1    -3.762    -9.451    -3.762     5.689   -15.617     5.940     0.761    -0.313    -9.623    -0.173    -3.934    -3.988
+...
+```
     
 (the last column is the relevant quantity). The updated Fermi energy is also mentioned:
     
-     New Fermi energy:     2.469501E-01 Ha ,    6.719854E+00 eV
+     New Fermi energy :        2.558310E-01 Ha ,    6.961515E+00 eV
 
 The last information is not printed in case of [[gwcalctyp]] lower than 10.
 
