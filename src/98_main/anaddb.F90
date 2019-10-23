@@ -935,7 +935,7 @@ program anaddb
    ' Calculation of the tensors related to flexoelectric effetc',ch10
    call wrtout([std_out, ab_out], msg)
 
-   ! Compute and print the contributions to the piezoelectric tensor
+   ! Compute and print the contributions to the flexoelectric tensor
    call ddb_flexo(ddb,ddb_lw,crystal,filnam(3),inp%flexoflag)
  end if
 #endif
