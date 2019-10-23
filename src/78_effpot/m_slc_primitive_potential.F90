@@ -188,8 +188,7 @@ contains
     integer,                          intent(in)    :: ncid    
 
     integer :: ncerr, dimid, ndata, varid
-    integer, allocatable :: ilist(:), ulist(:)
-    integer, allocatable :: Rulist(:,:)
+    integer, allocatable :: ilist(:), ulist(:,:)
     real(dp), allocatable :: vallist(:)
 
     ncerr = nf90_inq_dimid(ncid, "spin_lattice_Liu_number_of_entries", dimid)
@@ -199,8 +198,7 @@ contains
       self%has_bilin=.True.
       ncerr = nctk_get_dim(ncid, "spin_lattice_Liu_number_of_entries", ndata)
       ABI_ALLOCATE(ilist, (ndata))
-      ABI_ALLOCATE(ulist, (ndata))
-      ABI_ALLOCATE(Rulist, (3, ndata))
+      ABI_ALLOCATE(ulist, (4,ndata))
       ABI_ALLOCATE(vallist, (ndata))
 
       varid = nctk_idname(ncid, "spin_lattice_Liu_ilist")
@@ -210,9 +208,6 @@ contains
       varid = nctk_idname(ncid, "spin_lattice_Liu_ulist")
       ncerr = nf90_get_var(ncid, varid, ulist)
       call netcdf_check(ncerr, "when reading Liu_ulist")
-      varid = nctk_idname(ncid, "spin_lattice_Liu_Rulist")
-      ncerr = nf90_get_var(ncid, varid, Rulist)
-      call netcdf_check(ncerr, "when reading Liu_Rulist")
 
       varid = nctk_idname(ncid, "spin_lattice_Liu_valuelist")
       ncerr = nf90_get_var(ncid, varid, vallist)
@@ -222,11 +217,10 @@ contains
       vallist(:) = vallist(:)*eV_Ha*Bohr_Ang
   
       !fill the sparse matrix for liu parameters
-      call self%set_liu(ndata, ilist, ulist, Rulist, vallist)
+      call self%set_liu(ndata, ilist, ulist, vallist)
 
       ABI_SFREE(ilist)
       ABI_SFREE(ulist)
-      ABI_SFREE(Rulist)
       ABI_SFREE(vallist)
     endif
 
@@ -243,8 +237,7 @@ contains
     integer,                          intent(in)    :: ncid    
 
     integer :: ncerr, dimid, ndata, varid
-    integer, allocatable :: ilist(:), ulist(:), vlist(:)
-    integer, allocatable :: Rulist(:,:), Rvlist(:,:)
+    integer, allocatable :: ilist(:), ulist(:,:), vlist(:,:)
     real(dp), allocatable :: vallist(:)
 
     ncerr = nf90_inq_dimid(ncid, "spin_lattice_Niuv_number_of_entries", dimid)
@@ -254,10 +247,8 @@ contains
       self%has_linquad=.True.
       ncerr = nctk_get_dim(ncid, "spin_lattice_Niuv_number_of_entries", ndata)
       ABI_ALLOCATE(ilist, (ndata))
-      ABI_ALLOCATE(ulist, (ndata))
-      ABI_ALLOCATE(vlist, (ndata))
-      ABI_ALLOCATE(Rulist, (3, ndata))
-      ABI_ALLOCATE(Rvlist, (3, ndata))
+      ABI_ALLOCATE(ulist, (4,ndata))
+      ABI_ALLOCATE(vlist, (4,ndata))
       ABI_ALLOCATE(vallist, (ndata))
 
       varid = nctk_idname(ncid, "spin_lattice_Niuv_ilist")
@@ -267,16 +258,10 @@ contains
       varid = nctk_idname(ncid, "spin_lattice_Niuv_ulist")
       ncerr = nf90_get_var(ncid, varid, ulist)
       call netcdf_check(ncerr, "when reading Niuv_ulist")
-      varid = nctk_idname(ncid, "spin_lattice_Niuv_Rulist")
-      ncerr = nf90_get_var(ncid, varid, Rulist)
-      call netcdf_check(ncerr, "when reading Niuv_Rulist")
 
       varid = nctk_idname(ncid, "spin_lattice_Niuv_vlist")
       ncerr = nf90_get_var(ncid, varid, ulist)
       call netcdf_check(ncerr, "when reading Niuv_vlist")
-      varid = nctk_idname(ncid, "spin_lattice_Niuv_Rvlist")
-      ncerr = nf90_get_var(ncid, varid, Rulist)
-      call netcdf_check(ncerr, "when reading Niuv_Rvlist")
 
       varid = nctk_idname(ncid, "spin_lattice_Niuv_valuelist")
       ncerr = nf90_get_var(ncid, varid, vallist)
@@ -286,13 +271,11 @@ contains
       vallist(:) = vallist(:)*eV_Ha*(Bohr_Ang*Bohr_Ang)
   
       !fill the sparse matrix for liu parameters
-      !call self%set_niuv(ndata, ilist, ulist, vlist, Rulist, Rvlist vallist)
+      call self%set_niuv(ndata, ilist, ulist, vlist, vallist)
 
       ABI_SFREE(ilist)
       ABI_SFREE(ulist)
       ABI_SFREE(vlist)
-      ABI_SFREE(Rulist)
-      ABI_SFREE(Rvlist)
       ABI_SFREE(vallist)
     endif
 
@@ -433,13 +416,12 @@ contains
   ! store liu parameters in sparse matrix
   ! TODO: test
   !---------------------------------------
-  subroutine set_liu(self, nn, ilist, ulist, Rulist, vallist)
+  subroutine set_liu(self, nn, ilist, ulist, vallist)
 
     class(slc_primitive_potential_t), intent(inout) :: self
     integer,                          intent(inout) :: nn
     integer,                          intent(in)    :: ilist(nn)
-    integer,                          intent(in)    :: ulist(nn)
-    integer,                          intent(in)    :: Rulist(3,nn)
+    integer,                          intent(in)    :: ulist(4,nn)
     real(dp),                         intent(in)    :: vallist(nn)
 
     integer :: idx
@@ -448,7 +430,7 @@ contains
     
     if (xmpi_comm_rank(xmpi_world)==0) then
       do idx=1, nn
-        call self%set_liu_1term(ilist(idx), ulist(idx), Rulist(:,idx), vallist(idx))
+        call self%set_liu_1term(ilist(idx), ulist(1,idx), ulist(2:4,idx), vallist(idx))
       end do
     endif
   end subroutine set_liu
@@ -476,15 +458,13 @@ contains
   ! store niuv parameters in sparse matrix
   ! TODO: test
   !----------------------------------------
-  subroutine set_niuv(self, nn, ilist, ulist, vlist, Rulist, Rvlist, vallist)
+  subroutine set_niuv(self, nn, ilist, ulist, vlist, vallist)
 
     class(slc_primitive_potential_t), intent(inout) :: self
     integer,                          intent(inout) :: nn
     integer,                          intent(in)    :: ilist(nn)
-    integer,                          intent(in)    :: ulist(nn)
-    integer,                          intent(in)    :: vlist(nn)
-    integer,                          intent(in)    :: Rulist(3,nn)
-    integer,                          intent(in)    :: Rvlist(3,nn)
+    integer,                          intent(in)    :: ulist(4,nn)
+    integer,                          intent(in)    :: vlist(4,nn)
     real(dp),                         intent(in)    :: vallist(nn)
 
     integer :: idx
@@ -493,7 +473,7 @@ contains
     
     if (xmpi_comm_rank(xmpi_world)==0) then
       do idx=1, nn
-        call self%set_niuv_1term(ilist(idx), ulist(idx), vlist(idx), Rulist(:,idx), Rvlist(:,idx), vallist(idx))
+        call self%set_niuv_1term(ilist(idx), ulist(1,idx), vlist(1,idx), ulist(2:4,idx), vlist(2:4,idx), vallist(idx))
       end do
     endif
 

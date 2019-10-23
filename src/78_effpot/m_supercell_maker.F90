@@ -361,10 +361,10 @@ contains
   !-----------------------------------------------------------------------
   subroutine generate_spin_wave_vectorlist(self, A, kpoint, axis, A_sc)
     class(supercell_maker_t), intent(inout) :: self
-    real(dp), intent(in) :: A(:, :)
+    real(dp), intent(in) :: A(:, :) !(3, dimension of primitive cell)
     real(dp), intent(in) ::  kpoint(3)
     real(dp), intent(in) ::  axis(3)
-    real(dp), allocatable, intent(inout) :: A_sc(:, :)
+    real(dp), allocatable, intent(inout) :: A_sc(:, :) !(3, dimension of supercell)
     integer :: icell, iA, nA, counter, ndim
     real(dp):: angle
     ndim=size(A, 1)
@@ -374,7 +374,7 @@ contains
     end if
     counter=0
     do icell = 1, self%ncells
-       do iA=1 , nA
+       do iA=1, nA
           counter=counter+1
           angle=two_pi* DOT_PRODUCT(kpoint,  self%rvecs(:, icell))
           A_sc(:,counter) = rotate_by_angle_around_axis(angle=angle, axis=axis, vec=A(:, iA))
