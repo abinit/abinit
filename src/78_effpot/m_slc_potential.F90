@@ -241,6 +241,7 @@ contains
 
   !-----------------------------------------------------------------
   ! Calculate forces, magnetic fields and energy for coupling terms
+  ! TODO: precalculate terms containing Sref?
   !-----------------------------------------------------------------
 
   subroutine calculate(self, displacement, strain, spin, lwf, &
@@ -251,10 +252,12 @@ contains
  
     integer :: ii
     real(dp) :: eslc, beta
-    real(dp) :: f1(1:3*self%natom), disp(1:3*self%natom), b1(1:3*self%nspin), sp(1:3*self%nspin)
+    real(dp) :: disp(1:3*self%natom), sp(1:3*self%nspin), spref(1:3*self%nspin) 
+    real(dp) :: f1(1:3*self%natom), b1(1:3*self%nspin)
     real(dp) :: btmp(3, self%nspin), bslc(1:3*self%nspin), fslc(1:3*self%natom)
 
-    sp(:) = reshape(spin, (/ 3*self%nspin /))-reshape(self%supercell%spin%Sref, (/ 3*self%nspin/))
+    sp(:) = reshape(spin, (/ 3*self%nspin /))
+    spref(:) = reshape(self%supercell%spin%Sref, (/ 3*self%nspin/))
     disp(:) = reshape(displacement, (/ 3*self%natom /))
 
     beta = 0.5_dp
@@ -292,9 +295,9 @@ contains
       ! TESTING: write magnetic fields to a file
       write(201,*) 'Magnetic fields are'
       do ii = 1, self%nspin
-        if(dot_product(bfield(:,ii), bfield(:,ii)).gt.1d-16) then
+        !if(dot_product(bfield(:,ii), bfield(:,ii)).gt.1d-16) then
           write(201,*) ii, bfield(:,ii)
-        endif
+        !endif
       enddo
     endif
 
@@ -307,24 +310,40 @@ contains
         call self%liu_sc%vec_product2d(1, sp, 2, f1)
         fslc(:) = fslc(:) + f1(:)
         eslc = eslc - dot_product(f1, disp)
+        f1(:) = 0.0d0
+        call self%liu_sc%vec_product2d(1, spref, 2, f1)
+        fslc(:) = fslc(:) - f1(:)
+        eslc = eslc + dot_product(f1, disp)
       endif      
       if(self%has_linquad) then
         f1(:) = 0.0d0
         call self%niuv_sc%vec_product(1, sp, 2, disp, 3, f1)
         fslc(:) = fslc(:) + 2.0d0*beta*f1(:)
         eslc = eslc - beta*dot_product(f1, disp)
+        f1(:) = 0.0d0
+        call self%niuv_sc%vec_product(1, spref, 2, disp, 3, f1)
+        fslc(:) = fslc(:) - 2.0d0*beta*f1(:)
+        eslc = eslc + beta*dot_product(f1, disp)
       endif      
       if(self%has_quadlin) then
         f1(:) = 0.0d0
         call self%oiju_sc%vec_product(1, sp, 2, sp, 3, f1)
         fslc(:) = fslc(:) + beta*f1(:)
         eslc = eslc - beta*dot_product(f1, disp)
+        f1(:) = 0.0d0
+        call self%oiju_sc%vec_product(1, spref, 2, spref, 3, f1)
+        fslc(:) = fslc(:) - beta*f1(:)
+        eslc = eslc + beta*dot_product(f1, disp)
       endif
       if(self%has_biquad) then
         f1(:) = 0.0d0
         call self%tijuv_sc%vec_product4d(1, sp, 2, sp, 3, disp, 4, f1)
         fslc(:) = fslc(:) + beta*f1(:)
         eslc = eslc - 0.5_dp*beta*dot_product(f1, disp)
+        f1(:) = 0.0d0
+        call self%tijuv_sc%vec_product4d(1, spref, 2, spref, 3, disp, 4, f1)
+        fslc(:) = fslc(:) - beta*f1(:)
+        eslc = eslc + 0.5_dp*beta*dot_product(f1, disp)
       endif
     endif !energy or force
 
@@ -333,14 +352,14 @@ contains
       !TESTING write forces to file
       write(200,*) 'Forces are'
       do ii = 1, self%natom
-        if(dot_product(force(:,ii), force(:,ii)).gt.1d-16) then
+        !if(dot_product(force(:,ii), force(:,ii)).gt.1d-16) then
           write(200,*) ii, force(:,ii)
-        endif
+        !endif
       enddo
     endif
 
     if(present(energy)) energy=eslc
- 
+    
   end subroutine calculate
 
 
