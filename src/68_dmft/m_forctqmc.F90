@@ -59,7 +59,7 @@ MODULE m_forctqmc
  use m_special_funcs, only : sbf8
  use m_paw_numeric, only : jbessel=>paw_jbessel
 #ifdef HAVE_NETCDF
-  use netcdf !If calling TRIQS via python invokation, write a .nc file
+  use netcdf !If calling TRIQS via python invocation, write a .nc file
 #endif
 
  implicit none
@@ -2475,7 +2475,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
 #if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
  use TRIQS_CTQMC !Triqs module
 #endif
-#if defined HAVE_MPI
+#if defined HAVE_PYTHON_INVOCATION
  use INVOKE_PYTHON
 #endif
  use ISO_C_BINDING
@@ -2668,8 +2668,9 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   call wrtout(std_out,message,'COLL')
   MSG_ERROR(message)
 #else
-#ifndef HAVE_MPI
-  write(message,'(2a)') ch10,' MPI requiered! For some reasons, MPI is necessitated (mpich) to communicate with TRIQS.'
+#ifndef HAVE_PYTHON_INVOCATION
+  write(message,'(23a)') ch10,' Python invocation flag requiered! You need to install ABINIT with ',&
+   'enable_python_invocation = yes" in your "configure.ac" file.'
   call wrtout(std_out,message,'COLL')
   MSG_ERROR(message)
 #else
