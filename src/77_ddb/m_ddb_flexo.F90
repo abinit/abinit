@@ -33,9 +33,10 @@ module m_ddb_flexo
  use m_profiling_abi
  use m_errors
 
- use m_fstrings,       only : sjoin
+ use m_fstrings,       only : itoa,sjoin
  use m_ddb
  use m_crystal,        only : crystal_t
+ use m_dynmat,       only : asria_corr
 
  implicit none
 
@@ -55,6 +56,8 @@ contains
 !! Get all the contributions to the flexoelectric tensor
 !!
 !! INPUTS
+!!  asr= if /=0 acustic sume rule is imposed on the dynamical matrix
+!!  d2asr(2,3,natom,3,natom)=ASR-correction
 !!  ddb<type(ddb_type)>=2nd order derivative database.
 !!  ddb<type(ddb_type)>=Long wave 3rd order derivative database.
 !!  Crystal<type(crystal_t)>=Crystal structure parameters
@@ -77,18 +80,21 @@ contains
 !!
 !! SOURCE
 
-subroutine ddb_flexo(ddb,ddb_lw,crystal,filnamddb,flexoflg)
+subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg)
     
  implicit none
 
 !Arguments ------------------------------------
- integer , intent(in)  :: flexoflg
+!scalars
+ integer , intent(in)  :: asr,flexoflg
  class(ddb_type),intent(in) :: ddb,ddb_lw
  type(crystal_t),intent(in) :: crystal
  character(len=fnlen) :: filnamddb
+!arrays
+ real(dp),intent(in) :: d2asr(2,3,ddb%natom,3,ddb%natom)
 
 !Local variables-------------------------------
- integer :: iblok,lwsym
+ integer :: iblok,jblok,lwsym
 ! real(dp) :: 
  character(len=500) :: msg
 
@@ -150,7 +156,22 @@ subroutine ddb_flexo(ddb,ddb_lw,crystal,filnamddb,flexoflg)
      call wrtout(std_out, "flexoflag=1 or 3 requires the DDB file to include the corresponding long wave 3rd derivatives")
    end if
 
-   call dtmixflexo(ddb_lw%val(:,:,iblok),mixflexo,ddb%mpert,ddb%natom,pol1,crystal%ucvol)
+   ! Look for the Gamma Block of the dynamical matrix in the DDB
+   qphon(:,:)=zero
+   qphnrm(:)=one
+   rfphon(:)=0;rfphon(1:2)=1
+   rfelfd(:)=0
+   rfelfd(:)=0
+  
+   call ddb%get_block(jblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,1)
+
+   if (jblok == 0) then
+     call wrtout(std_out, "--- !WARNING")
+     call wrtout(std_out, sjoin("- Cannot find Gamma point Dynamical Matrix in DDB file:", filnamddb))
+     call wrtout(std_out, "flexoflag=1 or 3 requires the DDB file to include the corresponding 2nd derivatives")
+   end if
+
+   call dtmixflexo(asr,d2asr,ddb%val(:,:,jblok),ddb_lw%val(:,:,iblok),mixflexo,ddb%mpert,ddb%natom,pol1,crystal%ucvol)
 
  end if
 
@@ -260,6 +281,9 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !! contribution to the flexoelectric tensor.
 !!
 !! INPUTS
+!! asr= if /=0 acustic sume rule is imposed on the dynamical matrix
+!! d2asr(2,3,natom,3,natom)=ASR-correction
+!! blkval2d(2,3,mpert,3,mpert)= 2nd derivatives wrt two atom displacements (at least)
 !! blkval(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies for Phi^(1) tensor
 !! mpert =maximum number of ipert
 !! natom= number of atoms in unit cell
@@ -276,27 +300,30 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !!
 !! SOURCE
 
-subroutine dtmixflexo(blkval,mixflexo,mpert,natom,pol1,ucvol)
+subroutine dtmixflexo(asr,d2asr,blkval2d,blkval,mixflexo,mpert,natom,pol1,ucvol)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,natom
+ integer,intent(in) :: asr,mpert,natom
  real(dp),intent(in) :: ucvol
 !arrays
+ real(dp),intent(in) :: d2asr(2,3,mpert,3,mpert)
+ real(dp),intent(in) :: blkval2d(2,3,mpert,3,mpert)
  real(dp),intent(in) :: blkval(2,3*mpert*3*mpert*3*mpert)
  real(dp),intent(inout) :: pol1(3,3,3,natom)
  real(dp),intent(out) :: mixflexo(3,3,3,3)
 
 !Local variables -------------------------
 !scalars
- integer :: elfd,iat,iatd,jat,jatd,ivarA,qvecd
+ integer :: elfd,iat,iatd,jat,jatd,qvecd
  logical :: iwrite
- real(dp) :: fac
  character(len=500) :: msg
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
  real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert)
  real(dp) :: phi1(3,natom,3,natom,3)
+ real(dp) :: piezofr(3,natom,3,3)
+ real(dp) :: psinvdm(3*natom,3*natom)
 
 ! *********************************************************************
 
@@ -318,6 +345,24 @@ subroutine dtmixflexo(blkval,mixflexo,mpert,natom,pol1,ucvol)
      end do
    end do
  end do
+
+!Calculate the piezoelectric force-response tensor
+ piezofr(:,:,:,:)=zero
+ do qvecd=1,3
+   do iat=1,natom
+     do iatd=1,3
+       do jatd=1,3
+         do jat=1,natom
+           piezofr(iatd,iat,jatd,qvecd)=piezofr(iatd,iat,jatd,qvecd) + phi1(iatd,iat,jatd,jat,qvecd)
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Calculate the ion-relaxed internal strain tensor
+ !First we need to obtain the pseudo-inverse of the dynamical matrix 
+ call dm_psinv(asr,blkval2d,d2asr,ab_out,psinvdm,mpert,natom)
 
 !Print results
 ! iwrite = ab_out > 0
@@ -344,5 +389,301 @@ subroutine dtmixflexo(blkval,mixflexo,mpert,natom,pol1,ucvol)
  end subroutine dtmixflexo
 !!***
 
+!!****f* m_ddb/dm_psinv
+!! NAME
+!! dm_psinv
+!!
+!! FUNCTION
+!! Computes the pseudoinverse of the dynamical matrix (PRB 72, 035105 (2005)).
+!! This piece of code is copied from m_ddb_internalstr.F90.
+!!
+!! INPUTS
+!! asr= if /=0 acustic sume rule is imposed on the dynamical matrix
+!! blkval(2,3,mpert,3,mpert)= 2nd derivatives wrt two atom displacements (at least)
+!! d2asr(2,3,natom,3,natom)=ASR-correction
+!! iout=out file number
+!! mpert=maximum number of ipert
+!! natom=number of atoms in unit cell
+!! 
+!! OUTPUT
+!! kmatrix(3*natom,3*natom) = array with the pseudo-inverse of dynamical matrix
+!!
+!! PARENTS
+!!      m_ddb_flexo
+!!
+!! CHILDREN
+!!      asria_corr,wrtout,zhpev
+!!
+!! SOURCE
+
+ subroutine dm_psinv(asr,blkval,d2asr,iout,kmatrix,mpert,natom)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: asr,iout,mpert,natom
+!arrays
+ real(dp),intent(in) :: blkval(2,3,mpert,3,mpert)
+ real(dp),intent(in) :: d2asr(2,3,natom,3,natom)
+ real(dp),intent(out) :: kmatrix(3*natom,3*natom)
+
+!Local variables -------------------------
+!scalars
+ integer :: ii1,ipertA,ivarA
+ integer :: ii2,ipertB,ivarB
+ integer :: ier
+ character(len=500) :: message
+!arrays
+ real(dp) :: Amatr(3*natom-3,3*natom-3),Apmatr(3*natom,3*natom)
+ real(dp) :: Bmatr(2,((3*natom-3)*(3*natom-2))/2)
+ real(dp) :: Bpmatr(2,(3*natom*(3*natom+1))/2),Cmatr(3*natom-3,3*natom-3)
+ real(dp) :: Cpmatr(3*natom,3*natom),Nmatr(3*natom,3*natom)
+ real(dp) :: eigval(3*natom-3),eigvalp(3*natom),eigvec(2,3*natom-3,3*natom-3)
+ real(dp) :: eigvecp(2,3*natom,3*natom)
+ real(dp) :: zhpev1(2,2*3*natom-4)
+ real(dp) :: zhpev1p(2,2*3*natom-1),zhpev2(3*3*natom-5),zhpev2p(3*3*natom-2)
+ real(dp) :: d2cart(2,3*natom,3*natom)
+
+! *********************************************************************
+
+ d2cart = zero
+ do ipertA=1,natom
+   do ii1=1,3
+     ivarA=ii1+3*(ipertA-1)
+     do ipertB=1,natom
+       do ii2=1,3
+         ivarB=ii2+3*(ipertB-1)
+         d2cart(1,ivarA,ivarB)=blkval(1,ii1,ipertA,ii2,ipertB)
+       end do
+     end do
+   end do
+ end do
+
+!Eventually impose the acoustic sum rule
+!FIXME: this might depend on ifcflag: impose that it is 0 or generalize
+ call asria_corr(asr,d2asr,d2cart,natom,natom)
+ !call asrq0_apply(asrq0, natom, mpert, msize, crystal%xcart, d2cart)
+ kmatrix = d2cart(1,:,:)
+ Apmatr(:,:)=kmatrix(:,:)
+
+!DEBUG
+!write(std_out,'(/,a,/)')'the force constant matrix'
+!do ivarA=1,3*natom
+!write(std_out,'(/)')
+!do ivarB=1,3*natom
+!write(std_out,'(es16.6)')kmatrix(ivarB,ivarA)
+!end do
+!end do
+!ENDDEBUG
+
+ Nmatr(:,:)=0.0_dp
+ do ivarA=1,3*natom
+   do ivarB=1,3*natom
+     if (mod(ivarA,3)==0 .and. mod(ivarB,3)==0)then
+       Nmatr(ivarA,ivarB)=one
+     end if
+     if (mod(ivarA,3)==1 .and. mod(ivarB,3)==1)then
+       Nmatr(ivarA,ivarB)=one
+     end if
+     if (mod(ivarA,3)==2 .and. mod(ivarB,3)==2)then
+       Nmatr(ivarA,ivarB)=one
+     end if
+   end do
+ end do
+
+!DEBUG
+!do ivarA=1,3*natom
+!write(std_out,'(/)')
+!do ivarB=1,3*natom
+!write(std_out,'(es16.6)')Nmatr(ivarB,ivarA)
+!end do
+!end do
+!ENDDEBUG
+
+!starting the pseudoinverting processes
+!then get the eigenvectors of the big matrix,give values to matrixBp
+ Bpmatr=0.0_dp
+ ii1=1
+ do ivarA=1,3*natom
+   do ivarB=1,ivarA
+     Bpmatr(1,ii1)=Nmatr(ivarB,ivarA)
+     ii1=ii1+1
+   end do
+ end do
+
+!Bpmatr(2,:) is the imaginary part of the force matrix
+!then call the subroutines CHPEV and ZHPEV to get the eigenvectors
+ call ZHPEV ('V','U',3*natom,Bpmatr,eigvalp,eigvecp,3*natom,zhpev1p,zhpev2p,ier)
+ ABI_CHECK(ier == 0, sjoin("ZHPEV returned:", itoa(ier)))
+
+!DEBUG
+!the eigenval and eigenvec
+!write(std_out,'(/,a,/)')'the eigenvalues and eigenvectors'
+!do ivarA=1,3*natom
+!write(std_out,'(/)')
+!write(std_out,'(es16.6)')eigvalp(ivarA)
+!end do
+!do ivarA=1,3*natom
+!write(std_out,'(/)')
+!do ivarB=1,3*natom
+!write(std_out,'(es16.6)')eigvecp(1,ivarB,ivarA)
+!end do
+!end do
+!ENDDEBUG
+
+!Then do the multiplication to get the reduced matrix,in two steps
+!After this the force constant matrix is decouple in two bloks,
+!acoustic and optical ones
+ Cpmatr(:,:)=0.0_dp
+ do ivarA=1,3*natom
+   do ivarB=1,3*natom
+     do ii1=1,3*natom
+       Cpmatr(ivarA,ivarB)=Cpmatr(ivarA,ivarB)+eigvecp(1,ii1,ivarA)*Apmatr(ii1,ivarB)
+     end do
+   end do
+ end do
+
+ Apmatr(:,:)=0.0_dp
+ do ivarA=1,3*natom
+   do ivarB=1,3*natom
+     do ii1=1,3*natom
+       Apmatr(ivarA,ivarB)=Apmatr(ivarA,ivarB)+Cpmatr(ivarA,ii1)*eigvecp(1,ii1,ivarB)
+     end do
+   end do
+ end do
+
+!DEBUG
+!the blok diago
+!write(std_out,'(/,a,/)')'matrixAp'
+!do ivarA=1,3*natom
+!write(std_out,'(/)')
+!do ivarB=1,3*natom
+!write(std_out,'(es16.6)')Apmatr(ivarA,ivarB)
+!end do
+!end do
+!ENDDEBUG
+
+!Check the last three eigenvalues whether too large or not
+ ivarB=0
+ do ivarA=3*natom-2,3*natom
+   if (ABS(Apmatr(ivarA,ivarA))>tol6)then
+     ivarB=1
+   end if
+ end do
+
+ if(ivarB==1)then
+   write(message,'(a,a,a,a,a,a,a,a,3es16.6)')ch10,&
+&   '  Acoustic sum rule violation met : the eigenvalues of accoustic mode',ch10,&
+&   '  are too large at Gamma point.',ch10,&
+&   '  Increase cutoff energy or k-points sampling.',ch10,&
+&   '  The three eigenvalues are:',Apmatr(3*natom-2,3*natom-2),Apmatr(3*natom-1,natom-1),Apmatr(3*natom,3*natom)
+   MSG_WARNING(message)
+   call wrtout(iout,message,'COLL')
+ end if
+
+!Give the value of reduced matrix form Apmatr to Amatr
+ do ivarA=1,3*natom-3
+   do ivarB=1,3*natom-3
+     Amatr(ivarA,ivarB)=Apmatr(ivarA,ivarB)
+   end do
+ end do
+
+!Now the reduced matrix is in the matrixA, the convert it
+!first give the give the value of matixB from matrixA
+ ii1=1
+ do ivarA=1,3*natom-3
+   do ivarB=1,ivarA
+     Bmatr(1,ii1)=Amatr(ivarB,ivarA)
+     ii1=ii1+1
+   end do
+ end do
+ Bmatr(2,:)=0.0_dp
+
+!Call the subroutines CHPEV and ZHPEV to get the eigenvectors and the eigenvalues
+ call ZHPEV ('V','U',3*natom-3,Bmatr,eigval,eigvec,3*natom-3,zhpev1,zhpev2,ier)
+ ABI_CHECK(ier == 0, sjoin("ZHPEV returned:", itoa(ier)))
+
+!Check the unstable phonon modes, if the first is negative then print
+!warning message
+ if(eigval(1)<-1.0*tol8)then
+   write(message,'(9a)') ch10,&
+&   ' --- !WARNING',ch10,&
+&   '     Unstable eigenvalue detected in force constant matrix at Gamma point',ch10,&
+&   '     The system under calculation is physically unstable.',ch10,&
+&   ' ---',ch10
+   call wrtout(std_out,message,'COLL')
+ end if
+
+!Do the matrix mutiplication to get pseudoinverse inverse matrix
+ Cmatr(:,:)=0.0_dp
+ Amatr(:,:)=0.0_dp
+ do ivarA=1,3*natom-3
+   Cmatr(ivarA,ivarA)=1.0_dp/eigval(ivarA)
+ end do
+
+ do ivarA=1,3*natom-3
+   do ivarB=1,3*natom-3
+     do ii1=1,3*natom-3
+       Amatr(ivarA,ivarB)=Amatr(ivarA,ivarB)+eigvec(1,ivarA,ii1)*Cmatr(ii1,ivarB)
+     end do
+   end do
+ end do
+
+
+!The second multiplication
+ Cmatr(:,:)=0.0_dp
+ do ivarA=1,3*natom-3
+   do ivarB=1,3*natom-3
+     do ii1=1,3*natom-3
+       Cmatr(ivarA,ivarB)=Cmatr(ivarA,ivarB)+ Amatr(ivarA,ii1)*eigvec(1,ivarB,ii1)
+     end do
+   end do
+ end do
+
+!DEBUG
+!write(std_out,'(/,a,/)')'the pseudo inverse of the force matrix'
+!do ivarA=1,3*natom
+!write(std_out,'(/)')
+!do ivarB=1,3*natom
+!write(std_out,'(es16.6)')Cmatr(ivarA,ivarB)
+!end do
+!end do
+!ENDDEBUG
+
+!So now the inverse of the reduced matrix is in the matrixC
+!now do another mutilplication to get the pseudoinverse of the original
+ Cpmatr(:,:)=0.0_dp
+ Apmatr(:,:)=0.0_dp
+ do ivarA=1,3*natom-3
+   do ivarB=1,3*natom-3
+     Cpmatr(ivarA,ivarB)=Cmatr(ivarA,ivarB)
+   end do
+ end do
+
+!Now times the eigvecp
+ do ivarA=1,3*natom
+   do ivarB=1,3*natom
+     do ii1=1,3*natom
+       Apmatr(ivarA,ivarB)=Apmatr(ivarA,ivarB)+eigvecp(1,ivarA,ii1)*&
+&       Cpmatr(ii1,ivarB)
+     end do
+   end do
+ end do
+ Cpmatr(:,:)=0.0_dp
+ do ivarA=1,3*natom
+   do ivarB=1,3*natom
+     do ii1=1,3*natom
+       Cpmatr(ivarA,ivarB)=Cpmatr(ivarA,ivarB)+ Apmatr(ivarA,ii1)*eigvecp(1,ivarB,ii1)
+     end do
+   end do
+ end do
+
+!Now the inverse is in Cpmatr
+ kmatrix(:,:)=Cpmatr(:,:)
+!transfer the inverse of k-matrix back to the k matrix
+!so now the inverse of k matrix is in the kmatrix
+!ending the part for pseudoinversing the K matrix
+
+ end subroutine dm_psinv
+!!***
 end module m_ddb_flexo
 !!***
