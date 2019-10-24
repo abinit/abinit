@@ -96,8 +96,8 @@ contains
 !!  === optional inputs ===
 !!  [add_tfw]=flag controling the addition of Weiszacker gradient correction to Thomas-Fermi kin energy
 !!  [taur(nfftf,xcdata%nspden*xcdata%usekden)]=array for kinetic energy density
-!!  [taug(2,nfftf*xcdata%usekden)]=array for Fourier transform of kinetic energy density
 !!  [xc_funcs(2)]= <type(libxc_functional_type)>, optional : libxc XC functionals. Must be coherent with xcdata.
+!!  [xccctau3d(n3xccc)]=3D core electron kinetic energy density for XC core correction (bohr^-3)
 !!
 !! OUTPUT
 !!  enxc=returned exchange and correlation energy (hartree).
@@ -258,7 +258,7 @@ contains
 subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option, &
 & rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
-& add_tfw,exc_vdw_out,electronpositron,k3xc,taug,taur,vhartr,vxctau,xc_funcs) ! optional arguments
+& add_tfw,exc_vdw_out,electronpositron,k3xc,taur,vhartr,vxctau,xc_funcs,xcctau3d) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -277,8 +277,10 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp),intent(in) :: nhatgr(nfft,xcdata%nspden,3*nhatgrdim)
  real(dp),intent(in),target :: rhor(nfft,xcdata%nspden)
  real(dp),intent(in) :: rprimd(3,3),xccc3d(n3xccc)
+ real(dp),intent(in),optional :: xcctau3d(:)
  real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vxc(nfft,xcdata%nspden)
- real(dp),intent(in),optional :: taug(:,:),taur(:,:),vhartr(nfft)
+ real(dp),intent(in),optional :: vhartr(nfft)
+ real(dp),intent(in),target,optional :: taur(:,:)
  real(dp),intent(out),optional :: k3xc(1:nfft,1:nk3xc),vxctau(:,:,:)
  type(libxc_functional_type),intent(inout),optional :: xc_funcs(2)
 
@@ -286,14 +288,14 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !scalars
  integer :: auxc_ixc,cplex,ierr,ifft,ii,ixc,ixc_from_lib,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
  integer :: jj,mpts,ndvxc,nd2vxc,nfftot,ngr,ngr2,ngrad,ngrad_apn,nkxc_eff,npts
- integer :: nspden,nspden_apn,nspden_eff,nspden_updn,nspgrad,nvxcgrho,order,mgga,usefxc
- integer :: nproc_fft,comm_fft
- logical :: add_tfw_,isgga,ismgga,is_hybrid
+ integer :: nspden,nspden_apn,nspden_eff,nspden_updn,nspgrad,nvxcgrho,n3xctau,order,mgga,usefxc
+ integer :: nproc_fft,comm_fft,use_laplacian
+ logical :: my_add_tfw
  real(dp),parameter :: mot=-one/3.0_dp
  real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,epsxc,exc_str,factor,m_norm_min,s1,s2,s3
  real(dp) :: strdiag,strsxc1_tot,strsxc2_tot,strsxc3_tot,strsxc4_tot
  real(dp) :: strsxc5_tot,strsxc6_tot,ucvol
- logical :: allow3,test_nhat,need_nhat,need_nhatgr,with_vxctau
+ logical :: test_nhat,need_nhat,need_nhatgr,with_vxctau
  character(len=500) :: message
  real(dp) :: hyb_mixing, hyb_mixing_sr, hyb_range
 !arrays
@@ -301,22 +303,18 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp) :: tsec(2),vxcmean(4)
  real(dp),allocatable :: d2vxc_b(:,:),depsxc(:,:),depsxc_apn(:,:),dvxc_apn(:),dvxc_b(:,:)
  real(dp),allocatable :: exc_b(:),fxc_b(:),fxc_apn(:),grho2_apn(:),grho2_b_updn(:,:),lrhonow(:,:),lrho_b_updn(:,:)
- real(dp),allocatable :: m_norm(:),nhat_up(:),rho_b_updn(:,:),rho_b(:),rhocorval(:,:),rhonow_apn(:,:,:)
+ real(dp),allocatable :: m_norm(:),nhat_up(:),rho_b_updn(:,:),rho_b(:),rhonow_apn(:,:,:)
  real(dp),allocatable :: tau_b_updn(:,:),vxc_apn(:,:),vxcgr_apn(:),vxcgrho_b(:,:),vxcrho_b_updn(:,:)
  real(dp),allocatable :: vxc_b_apn(:),vxc_ep(:),vxctau_b_updn(:,:),vxclrho_b_updn(:,:)
- real(dp),allocatable,target :: rhonow(:,:,:)
- real(dp),ABI_CONTIGUOUS pointer :: rhonow_ptr(:,:,:),rhor_(:,:)
+ real(dp),allocatable,target :: rhonow(:,:,:),taunow(:,:,:)
+ real(dp),pointer :: rhocorval(:,:),rhor_(:,:),taucorval(:,:),taur_(:,:)
+ real(dp),ABI_CONTIGUOUS pointer :: rhonow_ptr(:,:,:)
  real(dp) :: deltae_vdw,exc_vdw
  real(dp) :: decdrho_vdw(xcdata%nspden),decdgrho_vdw(3,xcdata%nspden)
  real(dp) :: strsxc_vdw(3,3)
  type(libxc_functional_type) :: xc_funcs_auxc(2)
 
 ! *************************************************************************
-
- DBG_ENTER("COLL")
-
-!Just to keep taug as an argument while in development
- ABI_UNUSED(taug(1,1))
 
 ! Note: the following cases seem to never be tested (should be fixed)
 !      - ipositron==2 and ngrad_apn==2
@@ -325,73 +323,65 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
  call timab(81,1,tsec)
 
+!Optional arguments
+ my_add_tfw=.false.;if (present(add_tfw)) my_add_tfw=add_tfw
+
+!Useful scalars
  nspden=xcdata%nspden
  ixc=xcdata%ixc
  auxc_ixc=xcdata%auxc_ixc
+ mgga=0;use_laplacian=0
+ n3xctau=0
 
- isgga=.false. ; ismgga=.false. ; is_hybrid=.false.
- if(ixc<0)then
-   if(present(xc_funcs))then
-     isgga=libxc_functionals_isgga(xc_functionals=xc_funcs)
-     ismgga=libxc_functionals_ismgga(xc_functionals=xc_funcs)
-     is_hybrid=libxc_functionals_is_hybrid(xc_functionals=xc_funcs)
-   else
-     isgga=libxc_functionals_isgga()
-     ismgga=libxc_functionals_ismgga()
-     is_hybrid=libxc_functionals_is_hybrid()
-   end if
+!ngrad=1 is for LDAs or LSDs, ngrad=2 is for GGAs
+ ngrad=1;if(xcdata%xclevel==2)ngrad=2
+!ixc 31 to 34 are for mgga test purpose only (fake functionals based on LDA but need the gradients too)
+ if(ixc>=31 .and. ixc<=34)ngrad=2
+!Thomas-Fermi-Weiszacker is a gradient correction
+ if(my_add_tfw) ngrad=2
+
+!nspden_updn: 1 for non-polarized, 2 for polarized
+ nspden_updn=min(nspden,2)
+
+!nspden_eff: effective value of nspden used to compute gradients of density:
+!  1 for non-polarized system,
+!  2 for collinear polarized system or LDA (can be reduced to a collinear system)
+!  4 for non-collinear polarized system and GGA
+ nspden_eff=nspden_updn;if (nspden==4.and.ngrad==2) nspden_eff=4
+
+!Number of kcxc components depends on option (force LDA type if option==10 or 12)
+ nkxc_eff=nkxc;if (option==10.or.option==12) nkxc_eff=min(nkxc,3)
+
+!The variable order indicates to which derivative of the energy
+!the computation must be done. Computing exc and vxc needs order=1 .
+!Meaningful values are 1, 2, 3. Lower than 1 is the same as 1, and larger
+!than 3 is the same as 3.
+!order=1 or 2 supported for all LSD and GGA ixc
+!order=3 supported only for ixc=3 and ixc=7
+ order=1
+ if(option==2.or.option==10.or.option==12)order=2
+ if(option==-2)order=-2
+ if(option==3)order=3
+
+!Sizes of local arrays
+ if (present(xc_funcs)) then
+   call size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden_updn,nvxcgrho,order,add_tfw=my_add_tfw,xc_funcs=xc_funcs)
+ else
+   call size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden_updn,nvxcgrho,order,add_tfw=my_add_tfw)
  end if
 
 !Check options
- if(option==3)then
-   allow3=(ixc > 0).and.(ixc /= 3).and.(ixc /= 7).and.(ixc /= 8)
-   if(.not.allow3)then
-     allow3=(ixc < 0).and. isgga .and. ismgga
-   end if
-   if(allow3)then
-     write(message, '(3a,i0)' )&
-&     'Third-order xc kernel can only be computed for ixc = 0, 3, 7 or 8,',ch10,&
-&     'while it is found to be',ixc
-     MSG_ERROR(message)
-   end if
+ if(option==3.and.nd2vxc==0.and.ixc/=0)then
+   write(message, '(3a,i0)' )&
+&   'Third-order xc kernel can only be computed for ixc = 0, 3, 7 or 8,',ch10,&
+&   'while it is found to be ',ixc
+   MSG_ERROR(message)
  end if
  if(nspden==4.and.xcdata%xclevel==2.and.(abs(option)==2))then
    MSG_BUG('When nspden==4 and GGA, the absolute value of option cannot be 2 !')
  end if
-
-!Is the functional a MGGA?
- mgga=0;if(ixc>=31 .and. ixc<=34) mgga=1
- if (ixc<0.and.ismgga) mgga=1
- if (mgga==1) then
-   if (.not.present(taur)) then
-     message='taur arg must be present for metaGGA!'
-     MSG_BUG(message)
-   end if
-   if (size(taur)/=nfft*nspden*xcdata%usekden) then
-     message='invalid size for taur!'
-     MSG_BUG(message)
-   end if
- end if
- with_vxctau=(present(vxctau).and.present(taur))
- if (with_vxctau) with_vxctau=(size(vxctau)>0)
- if (with_vxctau) then
-   if (size(vxctau)/=nfft*nspden*xcdata%usekden*4) then
-     message='invalid size for vxctau!'
-     MSG_BUG(message)
-   end if
- end if
-
- if(ixc>0)then
-   if(present(xc_funcs))then
-     write(message, '(a,i0,2a,i0,2a)')&
-&     'The value of ixc specified in input, ixc = ',ixc,ch10,&
-&     'is not coherent with the presence of optional argument xc_funcs'
-     MSG_BUG(message)
-   end if
- end if
-
- if(ixc<0)then
-   if(present(xc_funcs))then
+ if(ixc<0) then 
+   if (present(xc_funcs)) then
      ixc_from_lib=libxc_functionals_ixc(xc_functionals=xc_funcs)
    else
      ixc_from_lib=libxc_functionals_ixc()
@@ -406,6 +396,50 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    end if
  end if
 
+!Is the functional a MGGA?
+ if (ixc<0)then 
+   if (present(xc_funcs)) then
+     if (libxc_functionals_ismgga(xc_functionals=xc_funcs)) mgga=1
+     if (libxc_functionals_needs_laplacian(xc_functionals=xc_funcs)) use_laplacian=1
+   else
+     if (libxc_functionals_ismgga()) mgga=1
+     if (libxc_functionals_needs_laplacian()) use_laplacian=1
+   end if
+ else if(ixc>=31.and.ixc<=34) then
+   mgga=1;use_laplacian=1
+ end if
+ if (mgga==1) then
+   if (.not.present(taur)) then
+     message='taur arg must be present for metaGGA!'
+     MSG_BUG(message)
+   end if
+   if (size(taur)/=nfft*nspden*xcdata%usekden) then
+     message='invalid size for taur!'
+     MSG_BUG(message)
+   end if
+   if (present(xcctau3d)) then
+     n3xctau=size(xcctau3d)
+     if (n3xctau/=0.and.n3xctau/=nfft) then
+       message='invalid size for xccctau3d!'
+       MSG_BUG(message)
+     end if
+   end if
+ end if
+ with_vxctau=(present(vxctau).and.present(taur))
+ if (with_vxctau) with_vxctau=(size(vxctau)>0)
+ if (with_vxctau) then
+   if (size(vxctau)/=nfft*nspden*xcdata%usekden*4) then
+     message='invalid size for vxctau!'
+     MSG_BUG(message)
+   end if
+ end if
+ if(mgga==1.and.nspden==4)then
+   !mGGA en NC-magnetism: how do we rotate tau kinetic enrgy density?
+   message='meta-GGA not comptatible with non-colinear magnetism!'
+   MSG_ERROR(message)
+ end if
+
+!MPI FFT communicator
  comm_fft = mpi_enreg%comm_fft; nproc_fft = mpi_enreg%nproc_fft
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
@@ -418,7 +452,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  iwarn=0
  nfftot=ngfft(1)*ngfft(2)*ngfft(3)
  usefxc=0;if (ixc==50) usefxc=1
- add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
 
 !Initializations
  enxc=zero
@@ -446,32 +479,16 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  strsxc_vdw(:,:) = zero
 
 
- if ((xcdata%xclevel==0.or.ixc==0).and.(.not.add_tfw_)) then
+ if ((xcdata%xclevel==0.or.ixc==0).and.(.not.my_add_tfw)) then
 !  No xc at all is applied (usually for testing)
    MSG_WARNING('Note that no xc is applied (ixc=0).')
 
  else if (ixc/=20) then
 
-!  ngrad=1 is for LDAs or LSDs, ngrad=2 is for GGAs
-   ngrad=1;if(xcdata%xclevel==2)ngrad=2
-!  ixc 31 to 34 are for mgga test purpose only (fake functionals based on LDA but need the gradients too)
-   if(ixc>=31 .and. ixc<=34)ngrad=2
-!  Thomas-Fermi-Weiszacker is a gradient correction
-   if(add_tfw_) ngrad=2
 !  Test: has a compensation density to be added/substracted (PAW) ?
    need_nhat=(nhatdim==1.and.usexcnhat==0)
-   need_nhatgr=(nhatdim==1.and.nhatgrdim==1.and.ngrad==2)
+   need_nhatgr=(nhatdim==1.and.nhatgrdim==1.and.ngrad==2.and.xcdata%intxc==0)
    test_nhat=(need_nhat.or.need_nhatgr)
-!  nspden_updn: 1 for non-polarized, 2 for polarized
-   nspden_updn=min(nspden,2)
-!  nspden_eff: effective value of nspden used to compute gradients of density:
-!  1 for non-polarized system,
-!  2 for collinear polarized system or LDA (can be reduced to a collinear system)
-!  4 for non-collinear polarized system and GGA
-   nspden_eff=nspden_updn;if (nspden==4.and.ngrad==2) nspden_eff=4
-
-!  Number of kcxc components depends on option (force LDA type if option==10 or 12)
-   nkxc_eff=nkxc;if (option==10.or.option==12) nkxc_eff=min(nkxc,3)
 
 !  The different components of depsxc will be
 !  for nspden=1,   depsxc(:,1)=d(rho.exc)/d(rho) == (depsxcdrho) == (vxcrho)
@@ -480,18 +497,18 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !  == (1/2 * 1/|grho_up| * depsxcd|grho_up|) +  1/|grho| * depsxcd|grho|
 !  (vxcgrho=1/|grho| * depsxcd|grho|)
 !  (do not forget : |grad rho| /= |grad rho_up| + |grad rho_down|
-!  and if mgga,    depsxc(:,3)=d(rho.exc)/d(lapl rho) == (depsxcdlrho) == (vxclrho)
+!  and if use_laplacian, depsxc(:,3)=d(rho.exc)/d(lapl rho) == (depsxcdlrho) == (vxclrho)
 !
 !  for nspden>=2,  depsxc(:,1)=d(rho.exc)/d(rho_up) == (depsxcdrho_up) == (vxcrho_up)
 !  depsxc(:,2)=d(rho.exc)/d(rho_down) == (depsxcdrho_dn) == (vxcrho_dn)
 !  and if ngrad=2, depsxc(:,3)=1/|grad rho_up|*d(rho.exc)/d(|grad rho_up|) == (1/|grho_up| * depsxcd|grho_up|) == (vxcgrho_up)
 !  depsxc(:,4)=1/|grad rho_down|*d(rho.exc)/d(|grad rho_down|) == (1/|grho_dn| * depsxcd|grho_dn|) == (vxcgrho_dn)
 !  depsxc(:,5)=1/|grad rho|*d(rho.exc)/d(|grad rho|) == (1/|grho| * depsxcd|grho|) == (vxcgrho)
-!  and if mgga,     depsxc(:,6)=d(rho.exc)/d(lapl rho_up) == (depsxcdlrho_up) == (vxclrho_up)
+!  and if use_laplacian, depsxc(:,6)=d(rho.exc)/d(lapl rho_up) == (depsxcdlrho_up) == (vxclrho_up)
 !  depsxc(:,7)=d(rho.exc)/d(lapl rho_dn) == (depsxcdlrho_dn) == (vxclrho_dn)
 !  Note: if nspden=4, rho_up=(rho+|m|)/2, rho_down=(rho-|m|)/2
    nspgrad=nspden_updn*ngrad;if(nspden_updn==2.and.ngrad==2)nspgrad=5
-   if(mgga==1) nspgrad=nspgrad+nspden_updn
+   if(use_laplacian==1) nspgrad=nspgrad+nspden_updn
    ABI_ALLOCATE(depsxc,(nfft,nspgrad))
    depsxc(:,:)=zero
 
@@ -518,6 +535,15 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        if(nspden==2) rhor_(:,2)=rhor_(:,1)*half
        if(nspden==4) rhor_(:,2:4)=zero
      endif
+   end if
+   if (mgga==1) then
+     if(non_magnetic_xc) then
+       ABI_ALLOCATE(taur_,(nfft,nspden))
+       if(nspden==2) taur_(:,2)=taur_(:,1)*half
+       if(nspden==4) taur_(:,2:4)=zero
+     else
+       taur_ => taur
+     end if
    end if
 
 !  Some initializations for the electron-positron correlation
@@ -558,6 +584,18 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      else
        rhocorval=zero
      end if
+   else
+     rhocorval => rhor_
+   end if
+   if (mgga==1.and.(n3xctau>0.or.nspden_eff/=nspden)) then
+     ABI_ALLOCATE(taucorval,(nfft,nspden_eff))
+     if (nspden==nspden_eff) then
+       taucorval(:,1:nspden)=taur_(:,1:nspden)
+     else
+       taucorval=zero
+     end if
+   else
+     taucorval => taur_
    end if
 
 !  Add core electron density to effective density
@@ -565,6 +603,12 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      rhocorval(:,1)=rhocorval(:,1)+xccc3d(:)
      if(nspden_eff==2) then
        rhocorval(:,2)=rhocorval(:,2)+half*xccc3d(:)
+     end if
+   end if
+   if (n3xctau>0) then
+     taucorval(:,1)=taucorval(:,1)+xcctau3d(:)
+     if(nspden_eff==2) then
+       taucorval(:,2)=taucorval(:,2)+half*xcctau3d(:)
      end if
    end if
 
@@ -579,8 +623,8 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
          if (m_norm(ifft)>m_norm_min) then
            nhat_up(ifft)=half*(nhat(ifft,1) &
 &           +(rhor_(ifft,2)*nhat(ifft,2) &
-&           +rhor_(ifft,3)*nhat(ifft,3) &
-&           +rhor_(ifft,4)*nhat(ifft,4))/m_norm(ifft))
+&            +rhor_(ifft,3)*nhat(ifft,3) &
+&            +rhor_(ifft,4)*nhat(ifft,4))/m_norm(ifft))
          else
            nhat_up(ifft)=half*(nhat(ifft,1) &
 &           +sqrt(nhat(ifft,2)**2+nhat(ifft,3)**2+nhat(ifft,4)**2))
@@ -588,15 +632,17 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        end do
        rhocorval(:,1)=rhocorval(:,1)-nhat(:,1)
        rhocorval(:,2)=rhocorval(:,2)-nhat_up(:)
-!      end if
      end if
    end if
 
 !  rhonow will contain effective density (and gradients if GGA)
+!  taunow will contain effective kinetic energy density (if MetaGGA)
 !  lrhonow will contain the laplacian if we have a MGGA
    ABI_ALLOCATE(rhonow,(nfft,nspden_eff,ngrad*ngrad))
-   ABI_ALLOCATE(lrhonow,(nfft,nspden_eff*mgga))
+   ABI_ALLOCATE(taunow,(nfft,nspden_eff,mgga))
+   ABI_ALLOCATE(lrhonow,(nfft,nspden_eff*use_laplacian))
 
+!  ====================================================================
 !  ====================================================================
 !  Loop on unshifted or shifted grids
    do ishift=0,xcdata%intxc
@@ -604,46 +650,26 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !    Set up density on unshifted or shifted grid (will be in rhonow(:,:,1)),
 !    as well as the gradient of the density, also on the unshifted
 !    or shifted grid (will be in rhonow(:,:,2:4)), if needed.
-     if ((n3xccc==0).and.(.not.test_nhat).and.(nspden_eff==nspden)) then
-       if (mgga==1) then
-         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
-&         qphon,rhor_,rhonow,lrhonow=lrhonow)
-       else
-         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,qphon,rhor_,rhonow)
-       end if
-     else if ((ishift>0).and.(test_nhat)) then
-       if (mgga==1) then
-         call xcden(cplex,gprimd,0,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
-&         qphon,rhocorval,rhonow,lrhonow=lrhonow)
-       else
-         call xcden(cplex,gprimd,0,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,qphon,rhocorval,rhonow)
-       end if
+     if (use_laplacian==1) then
+       call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
+&                 qphon,rhocorval,rhonow,lrhonow=lrhonow)
      else
-       if (mgga==1) then
-         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
-&         qphon,rhocorval,rhonow,lrhonow=lrhonow)
-       else
-         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,qphon,rhocorval,rhonow)
-       end if
+       call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
+&                 qphon,rhocorval,rhonow)
+     end if
+     if (mgga==1) then 
+       call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,1,nspden_eff,&
+&                 qphon,taucorval,taunow)
      end if
 
-!    -PAW+GGA: add "exact" gradients of compensation density
+!    PAW+GGA: add "exact" gradients of compensation density
+     !if (test_nhat.and.usexcnhat==1.and.ishift==0) then
      if (test_nhat.and.usexcnhat==1) then
-       if (ishift==0) then
-         if (nspden==nspden_eff) then
-           rhonow(:,1:nspden,1)=rhocorval(:,1:nspden)+nhat(:,1:nspden)
-         else if (nspden==4) then
-           rhonow(:,1,1)=rhocorval(:,1)+nhat(:,1)
-           rhonow(:,2,1)=rhocorval(:,2)+nhat_up(:)
-         end if
-       else
-         if (nspden==nspden_eff) then
-           rhocorval(:,1:nspden)=rhocorval(:,1:nspden)+nhat(:,1:nspden)
-         else if (nspden==4) then
-           rhocorval(:,1)=rhocorval(:,1)+nhat(:,1)
-           rhocorval(:,2)=rhocorval(:,2)+nhat_up(:)
-         end if
-         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,1,nspden_eff,qphon,rhocorval,rhonow)
+       if (nspden==nspden_eff) then
+         rhonow(:,1:nspden,1)=rhocorval(:,1:nspden)+nhat(:,1:nspden)
+       else if (nspden==4) then
+         rhonow(:,1,1)=rhocorval(:,1)+nhat(:,1)
+         rhonow(:,2,1)=rhocorval(:,2)+nhat_up(:)
        end if
        if (ngrad==2.and.nhatgrdim==1.and.nspden==nspden_eff) then
          do ii=1,3
@@ -661,6 +687,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      if (ishift==xcdata%intxc) then
        if (n3xccc>0.or.test_nhat.or.nspden_eff/=nspden)  then
          ABI_DEALLOCATE(rhocorval)
+       end if
+       if (mgga==1.and.(n3xccc>0.or.nspden_eff/=nspden))  then
+         ABI_DEALLOCATE(taucorval)
        end if
        if (test_nhat.and.nspden/=nspden_eff.and.usexcnhat==1)  then
          ABI_DEALLOCATE(nhat_up)
@@ -687,8 +716,10 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
          end do
        end if
        rhonow(:,2,1)=half*(rhonow(:,1,1)+m_norm(:))
+       if (mgga==1) then
+         taunow(:,2,1)=half*(taunow(:,1,1)+m_norm(:))
+       end if
      end if
-
 !    Make the density positive everywhere (but do not care about gradients)
      call mkdenpos(iwarn,nfft,nspden_updn,1,rhonow(:,1:nspden_updn,1),xcdata%xc_denpos)
 
@@ -702,16 +733,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
      mpts=4000;if (mgga==1) mpts=nfft
 
-!    The variable order indicates to which derivative of the energy
-!    the computation must be done. Computing exc and vxc needs order=1 .
-!    Meaningful values are 1, 2, 3. Lower than 1 is the same as 1, and larger
-!    than 3 is the same as 3.
-!    order=1 or 2 supported for all LSD and GGA ixc
-!    order=3 supported only for ixc=3 and ixc=7
-     order=1
-     if(option==2.or.option==10.or.option==12)order=2
-     if(option==-2)order=-2
-     if(option==3)order=3
      do ifft=1,nfft,mpts
 !      npts=mpts
 !      npts is the number of points to be treated in this bunch
@@ -723,12 +744,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        ABI_ALLOCATE(rho_b_updn,(npts,nspden_updn))
        ABI_ALLOCATE(vxcrho_b_updn,(npts,nspden_updn))
        vxcrho_b_updn(:,:)=zero
-!      Allocation of optional arguments
-       if(present(xc_funcs))then
-         call size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden_updn,nvxcgrho,order,add_tfw=add_tfw_,xc_funcs=xc_funcs)
-       else
-         call size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden_updn,nvxcgrho,order,add_tfw=add_tfw_)
-       end if
 
 !      Allocation of optional arguments
        ABI_ALLOCATE(dvxc_b,(npts,ndvxc))
@@ -736,9 +751,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        ABI_ALLOCATE(vxcgrho_b,(npts,nvxcgrho))
        ABI_ALLOCATE(grho2_b_updn,(npts,ngr2))
        ABI_ALLOCATE(fxc_b,(npts*usefxc))
-       ABI_ALLOCATE(lrho_b_updn,(npts,nspden_updn*mgga))
-       ABI_ALLOCATE(vxclrho_b_updn,(npts,nspden_updn*mgga))
+       ABI_ALLOCATE(lrho_b_updn,(npts,nspden_updn*use_laplacian))
        ABI_ALLOCATE(tau_b_updn,(npts,nspden_updn*mgga))
+       ABI_ALLOCATE(vxclrho_b_updn,(npts,nspden_updn*use_laplacian))
        ABI_ALLOCATE(vxctau_b_updn,(npts,nspden_updn*mgga))
 
        do ipts=ifft,ifft+npts-1
@@ -751,8 +766,8 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
              grho2_b_updn(indx,1)=quarter*(rhonow(ipts,1,2)**2+rhonow(ipts,1,3)**2+rhonow(ipts,1,4)**2)
            end if
            if (mgga==1) then
-             tau_b_updn(indx,1)=taur(ipts,1)*half
-             lrho_b_updn(indx,1)=lrhonow(ipts,1)*half
+             tau_b_updn(indx,1)=taunow(ipts,1,1)*half
+             if (use_laplacian==1) lrho_b_updn(indx,1)=lrhonow(ipts,1)*half
            end if
          else
            rho_b_updn(indx,1)=rhonow(ipts,2,1)
@@ -769,27 +784,28 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 &             rhonow(ipts,1,4)**2
            end if
            if (mgga==1) then
-             tau_b_updn(indx,1)=taur(ipts,2)
-             tau_b_updn(indx,2)=taur(ipts,1)-taur(ipts,2)
-             lrho_b_updn(indx,1)=lrhonow(ipts,2)
-             lrho_b_updn(indx,2)=lrhonow(ipts,1)-lrhonow(ipts,2)
+             tau_b_updn(indx,1)=taunow(ipts,2,1)
+             tau_b_updn(indx,2)=taunow(ipts,1,1)-taunow(ipts,2,1)
+             if (use_laplacian==1) then
+               lrho_b_updn(indx,1)=lrhonow(ipts,2)
+               lrho_b_updn(indx,2)=lrhonow(ipts,1)-lrhonow(ipts,2)
+             end if
            end if
          end if
        end do
-
 !      In case of a hybrid functional, if one needs to compute the auxiliary GGA Kxc, a separate call to drivexc_main
 !      is first needed to compute Kxc using such auxiliary GGA,
 !      before calling again drivexc_main using the correct functional for Exc and Vxc
+       
        if(xcdata%usefock==1 .and. auxc_ixc/=0)then
          if (auxc_ixc<0) then
            call libxc_functionals_init(auxc_ixc,nspden,xc_functionals=xc_funcs_auxc)
          end if
          call drivexc_main(exc_b,auxc_ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
-&         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
+&         rho_b_updn,0,vxcrho_b_updn,xcdata%xclevel, &
 &         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
 &         lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
-&         fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel,xc_funcs=xc_funcs_auxc, &
-&         xc_tb09_c=xcdata%xc_tb09_c)
+&         fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel,xc_funcs=xc_funcs_auxc)
 !        Transfer the xc kernel
          if (nkxc_eff==1.and.ndvxc==15) then
            kxc(ifft:ifft+npts-1,1)=half*(dvxc_b(1:npts,1)+dvxc_b(1:npts,9)+dvxc_b(1:npts,10))
@@ -802,33 +818,34 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            call libxc_functionals_end(xc_functionals=xc_funcs_auxc)
          end if
        end if
-
-!      Call to main XC driver
-       if(present(xc_funcs))then
+       if (present(xc_funcs)) then
          call libxc_functionals_get_hybridparams(hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
-&         hyb_range=hyb_range,xc_functionals=xc_funcs)
-         call drivexc_main(exc_b,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
-&         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
-&         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
-&         lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
-&         fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel,xc_funcs=xc_funcs, &
-&         xc_tb09_c=xcdata%xc_tb09_c)
+&                                                hyb_range=hyb_range,xc_functionals=xc_funcs)
        else
          call libxc_functionals_get_hybridparams(hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
-&         hyb_range=hyb_range)
+&                                                hyb_range=hyb_range)
+       end if
+
+!      Call to main XC driver
+       if (present(xc_funcs)) then
          call drivexc_main(exc_b,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
-&         rho_b_updn,vxcrho_b_updn,xcdata%xclevel, &
+&         rho_b_updn,use_laplacian,vxcrho_b_updn,xcdata%xclevel, &
 &         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
 &         lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
-&         fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel, &
-&         xc_tb09_c=xcdata%xc_tb09_c)
+&         fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel,xc_funcs=xc_funcs)
+       else
+         call drivexc_main(exc_b,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
+&         rho_b_updn,use_laplacian,vxcrho_b_updn,xcdata%xclevel, &
+&         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b, &
+&         lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
+&         fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel)
        end if
 
 !      Gradient Weiszacker correction to a Thomas-Fermi functional
-       if (add_tfw_) then
+       if (my_add_tfw) then
          vxcgrho_b(:,:)=zero
          call xctfw(xcdata%tphysel,exc_b,fxc_b,usefxc,rho_b_updn,vxcrho_b_updn,npts,nspden_updn, &
-&         vxcgrho_b,nvxcgrho,grho2_b_updn,ngr2)
+&                   vxcgrho_b,nvxcgrho,grho2_b_updn,ngr2)
        end if
 
 !      Accumulate enxc, strsxc and store vxc (and eventually kxc)
@@ -923,18 +940,20 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !        For meta-GGAs, add the laplacian term (vxclrho) and kinetic energy density term (vxctau)
          if (mgga==1) then
            if (nspden_updn==1)then
-             depsxc(ipts,3)   = vxclrho_b_updn(indx,1)
+             if (use_laplacian==1) depsxc(ipts,3) = vxclrho_b_updn(indx,1)
              if (with_vxctau) vxctau(ipts,1,1) = vxctau_b_updn(indx,1)
            else if (nspden_updn==2)then
-             depsxc(ipts,6)   = vxclrho_b_updn(indx,1)
-             depsxc(ipts,7)   = vxclrho_b_updn(indx,2)
+             if (use_laplacian==1) then
+               depsxc(ipts,6)   = vxclrho_b_updn(indx,1)
+               depsxc(ipts,7)   = vxclrho_b_updn(indx,2)
+             end if
              if (with_vxctau)then
                vxctau(ipts,1,1) = vxctau_b_updn(indx,1)
                vxctau(ipts,2,1) = vxctau_b_updn(indx,2)
              end if
            end if
          end if
-
+      
        end do
 
 !      Additional electron-positron correlation terms
@@ -1099,32 +1118,31 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !    If GGA, multiply the gradient of the density by the proper
 !    local partial derivatives of the XC functional
+     rhonow_ptr => rhonow
      if (ipositron==2) then
        ABI_ALLOCATE(rhonow_ptr,(nfft,nspden_eff,ngrad*ngrad))
        rhonow_ptr=rhonow
-     else
-       rhonow_ptr => rhonow
      end if
      if(ngrad==2 .and. ixc/=13)then
        call xcmult(depsxc,nfft,ngrad,nspden_eff,nspgrad,rhonow_ptr)
      end if
-
+    
 !    Compute contribution from this grid to vxc, and ADD to existing vxc
      if (nspden/=4) then
        if(with_vxctau)then
-         call xcpot(cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
+         call xcpot(cplex,depsxc,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
 &         qphon,rhonow_ptr,vxc,vxctau=vxctau)
        else
-         call xcpot(cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
+         call xcpot(cplex,depsxc,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
 &         qphon,rhonow_ptr,vxc)
        end if
-
+   
      else
 
 !      If non-collinear magnetism, restore potential in proper axis before adding it
        ABI_ALLOCATE(vxcrho_b_updn,(nfft,4))
        vxcrho_b_updn=zero
-       call xcpot(cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
+       call xcpot(cplex,depsxc,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
 &       qphon,rhonow_ptr,vxcrho_b_updn)
        do ifft=1,nfft
          dvdn=half*(vxcrho_b_updn(ifft,1)+vxcrho_b_updn(ifft,2))
@@ -1156,7 +1174,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        end if
        ABI_ALLOCATE(vxc_apn,(nfft,nspden_apn))
        vxc_apn=zero
-       call xcpot(cplex,depsxc_apn,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad_apn,&
+       call xcpot(cplex,depsxc_apn,gprimd,ishift,0,mpi_enreg,nfft,ngfft,ngrad_apn,&
 &       nspden_apn,ngrad_apn,qphon,rhonow_apn,vxc_apn)
        vxc(:,1)=vxc(:,1)+vxc_apn(:,1)
        if (nspden_updn==2) vxc(:,2)=vxc(:,2)+vxc_apn(:,1)
@@ -1220,11 +1238,15 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    ABI_DEALLOCATE(depsxc)
    ABI_DEALLOCATE(rhonow)
    ABI_DEALLOCATE(lrhonow)
-   if (nspden==4)  then
-     ABI_DEALLOCATE(m_norm)
-   end if
+   ABI_DEALLOCATE(taunow)
    if (need_nhat.or.non_magnetic_xc) then
      ABI_DEALLOCATE(rhor_)
+   end if
+   if ((mgga==1).and.(non_magnetic_xc)) then
+     ABI_DEALLOCATE(taur_)
+   end if
+   if (allocated(m_norm))  then
+     ABI_DEALLOCATE(m_norm)
    end if
 
  end if

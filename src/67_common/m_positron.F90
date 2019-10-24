@@ -43,7 +43,8 @@ module m_positron
  use defs_abitypes, only : MPI_type
  use m_special_funcs,  only : sbf8
  use m_ioarr,    only : ioarr, read_rhor
- use m_pawang,   only : pawang_type, realgaunt
+ use m_pawang,   only : pawang_type
+ use m_paw_sphharm,     only : realgaunt
  use m_pawrad,   only : pawrad_type, simp_gen, nderiv_gen
  use m_pawtab,   only : pawtab_type
  use m_paw_ij,   only : paw_ij_type
@@ -1179,11 +1180,11 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
        opt_dens=1;if (include_nhat_in_gamma) opt_dens=0
        call pawdensities(rdum,cplex,iatom,lmselect,lmselect_dum,lm_size,nhat1,nspden_ep,1,&
 &       0,opt_dens,-1,0,pawang,0,pawrad(itypat),pawrhoij(iatom),&
-&       pawtab(itypat),rho1,trho1)
+&       pawtab(itypat),rho1,trho1,0)
        lmselect_ep(:)=.true.
        call pawdensities(rdum,cplex,iatom,lmselect_ep,lmselect_dum,lm_size,nhat1_ep,nspden_ep,1,&
 &       0,opt_dens,-1,0,pawang,0,pawrad(itypat),pawrhoij_ep_(iatom),&
-&       pawtab(itypat),rho1_ep,trho1_ep)
+&       pawtab(itypat),rho1_ep,trho1_ep,0)
 
 !      For state dependent scheme in Doppler                                       =====
 !      Compute "on-site" densities (n1, ntild1, nhat1) for a given electron state j=====
@@ -1191,7 +1192,7 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
          opt_dens=1;if (include_nhat_in_gamma) opt_dens=0
          call pawdensities(rdum,cplex,iatom,lmselect,lmselect_dum,lm_size,nhat1_j,nspden_ep,1,&
 &         0,opt_dens,-1,0,pawang,0,pawrad(itypat),pawrhoij_dop_el(iatom),&
-&         pawtab(itypat),rho1_j,trho1_j)
+&         pawtab(itypat),rho1_j,trho1_j,0)
        end if
 
 !      Compute contribution to annihilation rate:
@@ -1892,7 +1893,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  integer :: ylmr_normchoice,ylmr_npts,ylmr_option
  logical,parameter :: include_nhat_in_gamma=.false.,state_dependent=.true.
  logical,parameter :: kgamma_only_positron=.true.,wf_conjugate=.false.
- logical :: cprj_paral_band,ex,mykpt,mykpt_pos,usetimerev
+ logical :: cprj_paral_band,ex,mykpt,mykpt_pos,usetimerev,abinitcorewf,xmlcorewf
  real(dp) :: arg,bessarg,cpi,cpr,cp11,cp12,cp21,cp22,gammastate,intg
  real(dp) :: lambda_v1,lambda_v2,lambda_core,lambda_pw,occ_el,occ_pos
  real(dp) :: pnorm,pr,rate,rate_ipm,ratec,ratec_ipm,rate_paw,rate_paw_ipm
@@ -2099,13 +2100,19 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 !  Reading of core wave functions
    if (mpi_enreg%me_cell==0) then
      do itypat=1,dtset%ntypat
-       filename=trim(filpsp(itypat))//'.corewf'
+       filename=trim(filpsp(itypat)) ; iln=len(trim(filename))
+       abinitcorewf=.false. ; if (iln>3) abinitcorewf=(filename(iln-6:iln)=='.abinit')
+       xmlcorewf=.false. ; if (iln>3) xmlcorewf=(filename(iln-3:iln)=='.xml')
+       if ((.not.xmlcorewf).and.(.not.abinitcorewf)) filename=filename(1:iln)//'.corewf'
+       if (abinitcorewf) filename=filename(1:iln-6)//'corewf.abinit'
+       if (xmlcorewf) filename=filename(1:iln-3)//'corewf.xml'
        inquire(file=filename,exist=ex)
        if (.not.ex) then
          write(unit=filename,fmt='(a,i1)') 'corewf.abinit',itypat
          inquire(file=filename,exist=ex)
          if (.not.ex) then
-           msg='Core wave-functions file is missing!'
+           write(msg,'(4a)') 'Core wave-functions file is missing!',ch10,&
+&                            'Looking for: ',trim(filename)
            MSG_ERROR(msg)
          end if
        end if
@@ -3442,11 +3449,11 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
  opt_dens=1;if (include_nhat_in_gamma) opt_dens=0
  call pawdensities(rdum,cplex,iatom,lmselect,lmselect_dum,lm_size,nhat1,nspden_ep,1,&
 & 0,opt_dens,-1,0,pawang,0,pawrad(itypat),pawrhoij(iatom),&
-& pawtab(itypat),rho1,trho1)
+& pawtab(itypat),rho1,trho1,0)
  lmselect_ep(:)=.true.
  call pawdensities(rdum,cplex,iatom,lmselect_ep,lmselect_dum,lm_size,nhat1_ep,nspden_ep,1,&
 & 0,opt_dens,-1,0,pawang,0,pawrad(itypat),pawrhoij_ep_(iatom),&
-& pawtab(itypat),rho1_ep,trho1_ep)
+& pawtab(itypat),rho1_ep,trho1_ep,0)
 !Compute contribution to annihilation rate
 
  ABI_ALLOCATE(rhocore,(mesh_size))
