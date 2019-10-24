@@ -315,7 +315,7 @@ subroutine dtmixflexo(asr,d2asr,blkval2d,blkval,mixflexo,mpert,natom,pol1,ucvol)
 
 !Local variables -------------------------
 !scalars
- integer :: elfd,iat,iatd,ivar,jat,jatd,jvar,kat,katd,qvecd
+ integer :: elfd,iat,iatd,ivar,jat,jatd,jvar,kat,katd,qvecd,qvecd2
  logical :: iwrite
  character(len=500) :: msg
 !arrays
@@ -386,27 +386,46 @@ subroutine dtmixflexo(asr,d2asr,blkval2d,blkval,mixflexo,mpert,natom,pol1,ucvol)
    end do
  end do
 
+ !Finally calculate the mixed contribution to the FxE tensor
+  mixflexo(:,:,:,:)=zero
+  do elfd=1,3
+    do qvecd=1,3
+      do katd=1,3
+        do qvecd2=1,3
+          do iatd=1,3
+            do iat=1,natom
+
+              mixflexo(elfd,qvecd,katd,qvecd2)=mixflexo(elfd,qvecd,katd,qvecd2) - &
+            pol1(elfd,qvecd,iatd,iat)*intstrn(qvecd2,katd,iatd,iat)
+
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
 !Print results
-! iwrite = ab_out > 0
-! if (iwrite) then
-!   write(msg,'(3a)')ch10,' Type-II electronic flexoelectric tensor (clamped ion) ',ch10
-!   call wrtout(ab_out,msg,'COLL')
-!   write(ab_out,*)'      xx          yy          zz          yz          xz          xy          zy          zx          yx'
-!   do ivarA=1,6
-!     elfd=alpha(ivarA)
-!     qvecd=beta(ivarA)
-!     write(ab_out,'(9f12.6)') ciflexo(elfd,qvecd,1,1),ciflexo(elfd,qvecd,2,2),ciflexo(elfd,qvecd,3,3),&
-!                              ciflexo(elfd,qvecd,2,3),ciflexo(elfd,qvecd,1,3),ciflexo(elfd,qvecd,1,2),&
-!                              ciflexo(elfd,qvecd,3,2),ciflexo(elfd,qvecd,3,1),ciflexo(elfd,qvecd,2,1)
-!   end do
-!   do ivarA=4,6
-!     elfd=beta(ivarA)
-!     qvecd=alpha(ivarA)
-!     write(ab_out,'(9f12.6)') ciflexo(elfd,qvecd,1,1),ciflexo(elfd,qvecd,2,2),ciflexo(elfd,qvecd,3,3),&
-!                              ciflexo(elfd,qvecd,2,3),ciflexo(elfd,qvecd,1,3),ciflexo(elfd,qvecd,1,2),&
-!                              ciflexo(elfd,qvecd,3,2),ciflexo(elfd,qvecd,3,1),ciflexo(elfd,qvecd,2,1)
-!   end do
-! end if
+ iwrite = ab_out > 0
+ if (iwrite) then
+   write(msg,'(3a)')ch10,' Type-II mixed contribution to flexoelectric tensor ',ch10
+   call wrtout(ab_out,msg,'COLL')
+   write(ab_out,*)'      xx          yy          zz          yz          xz          xy          zy          zx          yx'
+   do ivar=1,6
+     elfd=alpha(ivar)
+     qvecd=beta(ivar)
+     write(ab_out,'(9f12.6)') mixflexo(elfd,qvecd,1,1),mixflexo(elfd,qvecd,2,2),mixflexo(elfd,qvecd,3,3),&
+                              mixflexo(elfd,qvecd,2,3),mixflexo(elfd,qvecd,1,3),mixflexo(elfd,qvecd,1,2),&
+                              mixflexo(elfd,qvecd,3,2),mixflexo(elfd,qvecd,3,1),mixflexo(elfd,qvecd,2,1)
+   end do
+   do ivar=4,6
+     elfd=beta(ivar)
+     qvecd=alpha(ivar)
+     write(ab_out,'(9f12.6)') mixflexo(elfd,qvecd,1,1),mixflexo(elfd,qvecd,2,2),mixflexo(elfd,qvecd,3,3),&
+                              mixflexo(elfd,qvecd,2,3),mixflexo(elfd,qvecd,1,3),mixflexo(elfd,qvecd,1,2),&
+                              mixflexo(elfd,qvecd,3,2),mixflexo(elfd,qvecd,3,1),mixflexo(elfd,qvecd,2,1)
+   end do
+ end if
 
  end subroutine dtmixflexo
 !!***
