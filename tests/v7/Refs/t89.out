@@ -394,7 +394,9 @@ P           mkmem           8
 - Reading GS states from WFQ file: t89o_DS2_WFQ
 - Reading DDB from file: t89o_DS20_DDB
 - Reading DVDB from file: t89o_DS20_DVDB
-- Reading EFMAS information from file: t89i_DS3_EFMAS.nc
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
@@ -529,7 +531,9 @@ All the independent perturbations are available
 - Reading GS states from WFQ file: t89o_DS2_WFQ
 - Reading DDB from file: t89o_DS20_DDB
 - Reading DVDB from file: t89o_DS20_DVDB
-- Reading EFMAS information from file: t89i_DS4_EFMAS.nc
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333

@@ -543,20 +543,18 @@ subroutine gsph_fft_tabs(Gsph,g0,mgfft,ngfft,use_padfft,gmg0_gbound,gmg0_ifft)
  ! Evaluate the tables needed for the padded FFT performed in rhotwg. Note that we have
  ! to pass G-G0 to sphereboundary instead of G as we need FFT results on the shifted G-sphere,
  ! If Gamma is not inside G-G0 one has to disable FFT padding as sphereboundary will give wrong tables.
- if (use_padfft==1) then
-   call sphereboundary(gmg0_gbound,1,gmg0,mgfft,ng)
- end if
+ if (use_padfft == 1) call sphereboundary(gmg0_gbound,1,gmg0,mgfft,ng)
 
  call initmpi_seq(MPI_enreg_seq) ! No FFT parallelism.
  call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
 
- ABI_MALLOC(kg_mask,(ng))
- call kgindex(gmg0_ifft,gmg0,kg_mask,MPI_enreg_seq,ngfft,ng)
+ ABI_MALLOC(kg_mask, (ng))
+ call kgindex(gmg0_ifft, gmg0, kg_mask, MPI_enreg_seq, ngfft, ng)
 
  ABI_CHECK(ALL(kg_mask),"FFT para not yet implemented")
  ABI_FREE(kg_mask)
 
- ABI_DEALLOCATE(gmg0)
+ ABI_FREE(gmg0)
  call destroy_mpi_enreg(MPI_enreg_seq)
 
 end subroutine gsph_fft_tabs
@@ -1735,53 +1733,51 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
 
 !******************************************************************
 
- DBG_ENTER("COLL")
-!
-!=== Check coherence of input variables ecut, npw, and nsh ===
-!1-> one at least should be non-null
+ ! Check coherence of input variables ecut, npw, and nsh.
+ ! 1-> one at least should be non-null
  if (npw==0.and.nsh==0.and.ecut<=tol6) then
    write(msg,'(8a)')&
-&   'One of the three variables ecut',TRIM(tag),', npw',TRIM(tag),', or nsh',TRIM(tag),ch10,&
-&   'must be non-null. Returning.'
+    'One of the three variables ecut',TRIM(tag),', npw',TRIM(tag),', or nsh',TRIM(tag),ch10,&
+    'must be non-null. Returning.'
    MSG_COMMENT(msg)
    RETURN
  end if
-!2-> one and only one should be non-null
+ ! 2-> one and only one should be non-null
  if (npw/=0.and.nsh/=0) then
    write(msg,'(6a)')&
-&   'Only one of the two variables npw',TRIM(tag),' and nsh',TRIM(tag),ch10,&
-&   'can be non-null. Modify the value of one of these in input file.'
+    'Only one of the two variables npw',TRIM(tag),' and nsh',TRIM(tag),ch10,&
+    'can be non-null. Modify the value of one of these in input file.'
    MSG_ERROR(msg)
  end if
  if (ecut>tol6.and.npw/=0) then
    write(msg,'(6a)')&
-&   'Only one of the two variables ecut',TRIM(tag),' and npw',TRIM(tag),ch10,&
-&   'can be non-null. Modify the value of one of these in input file.'
+    'Only one of the two variables ecut',TRIM(tag),' and npw',TRIM(tag),ch10,&
+    'can be non-null. Modify the value of one of these in input file.'
    MSG_ERROR(msg)
  end if
  if (ecut>tol6.and.nsh/=0) then
    write(msg,'(6a)')&
-&   'Only one of the two variables ecut',TRIM(tag),' and nsh',TRIM(tag),ch10,&
-&   'can be non-null Action : modify the value of one of these in input file.'
+    'Only one of the two variables ecut',TRIM(tag),' and nsh',TRIM(tag),ch10,&
+    'can be non-null Action : modify the value of one of these in input file.'
    MSG_ERROR(msg)
  end if
-!
-!=== Calculates an upper bound for npw ===
-!* gctr is center of the g-vector sphere
+
+ ! Calculate an upper bound for npw.
+ ! gctr is center of the g-vector sphere
  gctr(:)= [zero,zero,zero]
  if (ecut>tol6) then
-!  The average number of plane-waves in the cutoff sphere is given by:
-!  npwave = (2*ecut)**(3/2)*ucvol/(6*pi**2)
-!  The upper bound is calculated as npwwrk=int(scale * npwave) + pad
+   ! The average number of plane-waves in the cutoff sphere is given by:
+   ! npwave = (2*ecut)**(3/2)*ucvol/(6*pi**2)
+   ! The upper bound is calculated as npwwrk=int(scale * npwave) + pad
    npwave=NINT(ucvol*(two*ecut)**1.5_dp/(six*pi**2))
    npwwrk=NINT(DBLE(npwave)*scale)+pad
    ecut_trial=ecut
  else if (npw/=0) then
-!  npw is given in the input
+   ! npw is given in the input
    npwwrk=NINT(DBLE(npw)*scale)+pad
    ecut_trial=(six*pi**2*npw/ucvol)**two_thirds/two
  else
-!  If nsh is given in the input
+   ! If nsh is given in the input
    npwwrk=nsh*18+2*pad
    ecut_trial=(six*pi**2*nsh*18/ucvol)**two_thirds/two
  end if
@@ -1790,7 +1786,7 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
 
  ABI_MALLOC(gvec,(3,npwwrk))
  ifound=0
- do while(ifound==0)
+ do while (ifound==0)
    !write(msg,'(a,f8.2)')' setshells : ecut_trial = ',ecut_trial
    !call wrtout(std_out,msg,'COLL')
    exchn2n3d=0 ! For the time being, no exchange of n2 and n3
@@ -1805,19 +1801,20 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
      gnorm(ig)=zero
      do ii=1,3
        gnorm(ig)=gnorm(ig)+(gvec(1,ig)*gprimd(ii,1)+&
-&       gvec(2,ig)*gprimd(ii,2)+&
-&       gvec(3,ig)*gprimd(ii,3))**2
+                            gvec(2,ig)*gprimd(ii,2)+&
+                            gvec(3,ig)*gprimd(ii,3))**2
      end do
    end do
    call sort_dp(npw_found,gnorm,insort,tol14)
+
    ABI_MALLOC(npw_sh,(npw_found))
    ABI_MALLOC(gnorm_sh,(npw_found))
    ABI_MALLOC(gvec_sh,(3,npw_found))
    npw_sh(:)=0
    gnorm_sh(:)=zero
    gvec_sh(:,:)=0
-!  Count the number of shells:
-!  (search for the G-vectors generating the others by symmetry)
+   ! Count the number of shells:
+   ! (search for the G-vectors generating the others by symmetry)
    nsh_found=0
 
    do ig=1,npw_found
@@ -1829,12 +1826,12 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
          isym=1
          do while ((.not.found).and.(isym<=nsym))
            geq(:)=(symrel(1,:,isym)*gvec(1,insort(ig))+&
-&           symrel(2,:,isym)*gvec(2,insort(ig))+&
-&           symrel(3,:,isym)*gvec(3,insort(ig)))
+                  symrel(2,:,isym)*gvec(2,insort(ig))+&
+                  symrel(3,:,isym)*gvec(3,insort(ig)))
 
            found=((geq(1)==gvec_sh(1,ish)).and.&
-&           (geq(2)==gvec_sh(2,ish)).and.&
-&           (geq(3)==gvec_sh(3,ish)))
+                  (geq(2)==gvec_sh(2,ish)).and.&
+                  (geq(3)==gvec_sh(3,ish)))
            isym=isym+1
          end do
        end if
@@ -1854,17 +1851,17 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
    ecut_found=two*pi**2*gnorm(npw_found)
 
    if(ecut>tol6) then
-!    ecut is given in the input
+     ! ecut is given in the input
      if (ecut_found<ecut-0.1) then
        write(msg,'(3a,e14.6,9a,e14.6,3a)')&
-&       'The value ecut',TRIM(tag),'=',ecut,' given in the input file leads to',ch10,&
-&       'the same values for nsh',TRIM(tag),' and npw',TRIM(tag),' as ecut',TRIM(tag),'=',ecut_found,ch10,&
-&       'This value will be adopted for the calculation.',ch10
+        'The value ecut',TRIM(tag),'=',ecut,' given in the input file leads to',ch10,&
+        'the same values for nsh',TRIM(tag),' and npw',TRIM(tag),' as ecut',TRIM(tag),'=',ecut_found,ch10,&
+        'This value will be adopted for the calculation.',ch10
        MSG_WARNING(msg)
      end if
      ifound=1
    else if (npw/=0) then
-!    If npw is given in the input
+     ! If npw is given in the input
      if (npw_found==npw) then
        ecut_found=two*pi**2*gnorm(npw_found)
        ifound=1
@@ -1875,9 +1872,9 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
          nsh_found=nsh_found+1
          npw_found=npw_found+npw_sh(nsh_found)
        end do
-!      check that the shell is closed
+       ! check that the shell is closed
        if(npw_found>npw) then
-!        shell not closed
+         ! shell not closed
          npw_found=npw_found-npw_sh(nsh_found)
          nsh_found=nsh_found-1
          do while (ABS(gnorm_sh(nsh_found)-gnorm_sh(nsh_found+1))<0.000001)
@@ -1885,16 +1882,16 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
            nsh_found=nsh_found-1
          end do
          write(msg,'(3a,i6,5a,i6,3a)')&
-&         'The value npw',TRIM(tag),'=',npw,' given in the input file does not close the shell',ch10,&
-&         'The lower closed-shell is obtained for a value npw',TRIM(tag),'=',npw_found,ch10,&
-&         'This value will be adopted for the calculation.',ch10
+          'The value npw',TRIM(tag),'=',npw,' given in the input file does not close the shell',ch10,&
+          'The lower closed-shell is obtained for a value npw',TRIM(tag),'=',npw_found,ch10,&
+          'This value will be adopted for the calculation.',ch10
          MSG_WARNING(msg)
        end if
        ecut_found=two*pi**2*gnorm(npw_found)
        ifound=1
      end if
    else if (nsh/=0) then
-!    If nsh is given in the input
+     ! If nsh is given in the input
      if (nsh_found==nsh) then
        ecut_found=two*pi**2*gnorm(npw_found)
        ifound=1
@@ -1911,9 +1908,9 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
            npw_found=npw_found+npw_sh(nsh_found)
          end do
          write(msg,'(3a,i6,5a,i6,3a)')&
-&         'The value nsh',TRIM(tag),'=',nsh,' given in the input file corresponds to the same',ch10,&
-&         'cut-off energy as for closed-shell upto nsh',TRIM(tag),'=',nsh_found,ch10,&
-&         'This value will be adopted for the calculation.',ch10
+          'The value nsh',TRIM(tag),'=',nsh,' given in the input file corresponds to the same',ch10,&
+          'cut-off energy as for closed-shell upto nsh',TRIM(tag),'=',nsh_found,ch10,&
+          'This value will be adopted for the calculation.',ch10
          MSG_WARNING(msg)
        end if
        ecut_found=two*pi**2*gnorm(npw_found)
@@ -1934,7 +1931,7 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
      nsh=nsh_found
    end if
 
- end do !while(ifound==0)
+ end do ! while(ifound==0)
 
  call destroy_mpi_enreg(MPI_enreg_seq)
 
@@ -1944,8 +1941,6 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
  ABI_FREE(gvec_sh)
  ABI_FREE(insort)
  ABI_FREE(npw_sh)
-
- DBG_EXIT("COLL")
 
 end subroutine setshells
 !!***
@@ -2409,7 +2404,7 @@ subroutine symg(kg_diel,npwdiel,nsym,phdiel,sym_g,symrel,tmrev_g,tnons)
 !scalars
  integer :: g1,g2,g3,ipw,isym,j1,j2,j3,m1m,m1p,m2m,m2p,m3m,m3p,symmg,trevg
  real(dp) :: arg,tau1,tau2,tau3
- !character(len=500) :: message
+ !character(len=500) :: msg
 !arrays
  integer,allocatable :: grid(:,:,:)
 
@@ -2428,7 +2423,7 @@ subroutine symg(kg_diel,npwdiel,nsym,phdiel,sym_g,symrel,tmrev_g,tnons)
 
 !Set up grid, that associate to each point the index of the
 !corresponding planewave, if there is one
- ABI_ALLOCATE(grid,(m1m:m1p,m2m:m2p,m3m:m3p))
+ ABI_MALLOC(grid, (m1m:m1p,m2m:m2p,m3m:m3p))
  grid(:,:,:)=0
  do ipw=1,npwdiel
    g1=kg_diel(1,ipw)
@@ -2486,7 +2481,7 @@ subroutine symg(kg_diel,npwdiel,nsym,phdiel,sym_g,symrel,tmrev_g,tnons)
    end do
  end do
 
- ABI_DEALLOCATE(grid)
+ ABI_FREE(grid)
 
 end subroutine symg
 !!***

@@ -43,7 +43,7 @@ module m_rhotov
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype, rhohxcpositron
  use libxc_functionals,  only : libxc_functionals_is_hybrid
  use m_spacepar,         only : hartre
- use m_dens,             only : mag_constr
+ use m_dens,             only : constrained_dft_t,mag_penalty,constrained_residual
  use m_rhotoxc,          only : rhotoxc
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_psolver,          only : psolver_rhohxc
@@ -70,6 +70,7 @@ contains
 !!
 !! INPUTS
 !!  [add_tfw]=flag controling the addition of Weiszacker gradient correction to Thomas-Fermi kin energy
+!!  constrained_dft <type(constrained_dft_t>=data for constrained dft calculations
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!   | spinmagntarget=input variable that governs fixed moment calculation
 !!   | natom=number of atoms in cell.
@@ -101,7 +102,6 @@ contains
 !!   |      rhor(:,1)   => rho_upup + rho_dwndwn
 !!   |      rhor(:,2:4) => {m_x,m_y,m_z}
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  [taug(2,nfftf*dtset%usekden)]=array for Fourier transform of kinetic energy density
 !!  [taur(nfftf,nspden*dtset%usekden)]=array for kinetic energy density
 !!  ucvol = unit cell volume (Bohr**3)
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
@@ -155,17 +155,17 @@ contains
 !!      scfcv
 !!
 !! CHILDREN
-!!      dotprod_vn,hartre,mag_constr,mean_fftr,psolver_rhohxc,rhohxcpositron
+!!      dotprod_vn,hartre,mag_penalty,mean_fftr,psolver_rhohxc,rhohxcpositron
 !!      rhotoxc,sqnorm_v,timab,wvl_psitohpsi,wvl_vtrial_abi2big,xcdata_init
 !!      xchybrid_ncpp_cc,xred2xcart
 !!
 !! SOURCE
 
-subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
+subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 &  nhat,nhatgr,nhatgrdim,nkxc,vresidnew,n3xccc,optene,optres,optxc,&
 &  rhog,rhor,rprimd,strsxc,ucvol,usepaw,usexcnhat,&
 &  vhartr,vnew_mean,vpsp,vres_mean,vres2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
-&  electronpositron,taug,taur,vxc_hybcomp,vxctau,add_tfw) ! optional arguments
+&  electronpositron,taur,vxc_hybcomp,vxctau,add_tfw,xcctau3d) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -175,6 +175,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(out) :: vres2,vxcavg
  type(MPI_type),intent(inout) :: mpi_enreg
+ type(constrained_dft_t),intent(in) :: constrained_dft
  type(dataset_type),intent(in) :: dtset
  type(electronpositron_type),pointer,optional :: electronpositron
  type(energies_type),intent(inout) :: energies
@@ -189,10 +190,10 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  real(dp),intent(inout) :: xccc3d(n3xccc),xred(3,dtset%natom)
  real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vnew_mean(dtset%nspden)
  real(dp),intent(out) :: vres_mean(dtset%nspden),vresidnew(nfft,dtset%nspden)
- real(dp),intent(in),optional :: taug(2,nfft*dtset%usekden)
  real(dp),intent(in),optional :: taur(nfft,dtset%nspden*dtset%usekden)
  real(dp),intent(out),optional :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(out),optional :: vxc_hybcomp(:,:) ! (nfft,nspden)
+ real(dp),intent(out),optional :: xcctau3d(n3xccc)
 
 !Local variables-------------------------------
 !scalars
@@ -206,7 +207,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  type(xcdata_type) :: xcdata
 !arrays
  real(dp) :: evxc,tsec(2),vmean(dtset%nspden),vzeeman(dtset%nspden)
- real(dp),allocatable :: rhowk(:,:),Vmagconstr(:,:),vnew(:,:),xcart(:,:)
+ real(dp),allocatable :: rhowk(:,:),v_constr_dft_r(:,:),vnew(:,:),xcart(:,:)
 !real(dp),allocatable :: vzeemanHarm(:,:)   !SPr: debug Zeeman field q/=0 real space
 
 ! *********************************************************************
@@ -269,7 +270,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,&
 &         rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&         taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+&         taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,xcctau3d=xcctau3d)
          if(mod(dtset%fockoptmix,100)==11)then
            energies%e_xc=energies%e_xc*dtset%auxc_scal
            vxc(:,:)=vxc(:,:)*dtset%auxc_scal
@@ -282,11 +283,10 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
        call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,&
 &       rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&       taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
-&       electronpositron=electronpositron)
+&       taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
+&       electronpositron=electronpositron,xcctau3d=xcctau3d)
      end if
      call timab(941,2,tsec)
-
    elseif (.not. wvlbigdft) then
 !    Use the free boundary solver.
      call timab(943,1,tsec)
@@ -447,21 +447,10 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  end if
 
 !Compute the constrained potential for the magnetic moments
- ABI_ALLOCATE(Vmagconstr, (nfft,dtset%nspden))
+ ABI_ALLOCATE(v_constr_dft_r, (nfft,dtset%nspden))
+ v_constr_dft_r = zero
  if (dtset%magconon==1.or.dtset%magconon==2) then
-   Vmagconstr = zero
-   call mag_constr(dtset%natom,dtset%spinat,dtset%nspden,dtset%magconon,dtset%magcon_lambda,rprimd, &
-&   mpi_enreg,nfft,ngfft,dtset%ntypat,dtset%ratsph,rhor,dtset%typat,Vmagconstr,xred)
- else
-!  NOTE: mjv 25 May 2013 added this for ibm6 - otherwise gives NaN in vnew after
-!  the addition below, in case magconon==0 and for certain libxc
-!  functionals!! May need to copy this to setvtr.F90 if the same effect appears.
-!  should check libxc test with a proper memory checker (valgrind).
-   do ispden=1,dtset%nspden
-     do ifft=1,nfft
-       Vmagconstr(ifft,ispden) = zero
-     end do
-   end do
+   call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred) 
  end if
 
  if (optres==0) then
@@ -473,7 +462,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !$OMP PARALLEL DO COLLAPSE(2)
      do ispden=1,min(dtset%nspden,2)
        do ifft=1,nfft
-         vnew(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)+vzeeman(ispden)+Vmagconstr(ifft,ispden)
+         vnew(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)+vzeeman(ispden)+v_constr_dft_r(ifft,ispden)
          !vnew(ifft,ispden)=vnew(ifft,ispden)+vzeemanHarm(ifft,ispden)
          if(mod(dtset%fockoptmix,100)==11)vnew(ifft,ispden)=vnew(ifft,ispden)+vxc_hybcomp(ifft,ispden)
          vresidnew(ifft,ispden)=vnew(ifft,ispden)-vtrial(ifft,ispden)
@@ -483,13 +472,19 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !$OMP PARALLEL DO COLLAPSE(2)
        do ispden=3,4
          do ifft=1,nfft
-           vnew(ifft,ispden)=vxc(ifft,ispden)+vzeeman(ispden)+Vmagconstr(ifft,ispden)
+           vnew(ifft,ispden)=vxc(ifft,ispden)+vzeeman(ispden)+v_constr_dft_r(ifft,ispden)
            !vnew(ifft,ispden)=vnew(ifft,ispden)+vzeemanHarm(ifft,ispden)
            if(mod(dtset%fockoptmix,100)==11)vnew(ifft,ispden)=vnew(ifft,ispden)+vxc_hybcomp(ifft,ispden)
            vresidnew(ifft,ispden)=vnew(ifft,ispden)-vtrial(ifft,ispden)
          end do
        end do
      end if
+
+     !If constrained_dft, must take into account the constraints, and recompute the residual and the new potential
+     if( any(dtset%constraint_kind(:)/=0))then
+       call constrained_residual(constrained_dft,mpi_enreg,rhor,vresidnew,xred)
+       vnew(:,1:dtset%nspden)=vtrial(:,1:dtset%nspden)+vresidnew(:,1:dtset%nspden)
+     endif
 
      offset   = 0
 
@@ -559,7 +554,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !$OMP PARALLEL DO COLLAPSE(2)
      do ispden=1,min(dtset%nspden,2)
        do ifft=1,nfft
-         vtrial(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)+vzeeman(ispden)+Vmagconstr(ifft,ispden)
+         vtrial(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)+vzeeman(ispden)+v_constr_dft_r(ifft,ispden)
          !vtrial(ifft,ispden)=vtrial(ifft,ispden)+vzeemanHarm(ifft,ispden)
          if(mod(dtset%fockoptmix,100)==11)vtrial(ifft,ispden)=vtrial(ifft,ispden)+vxc_hybcomp(ifft,ispden)
        end do
@@ -567,7 +562,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      if(dtset%nspden==4) then
 !$OMP PARALLEL DO
        do ifft=1,nfft
-         vtrial(ifft,3:4)=vxc(ifft,3:4)+vzeeman(3:4)+Vmagconstr(ifft,3:4)
+         vtrial(ifft,3:4)=vxc(ifft,3:4)+vzeeman(3:4)+v_constr_dft_r(ifft,3:4)
          !vtrial(ifft,3:4)=vtrial(ifft,3:4)+vzeemanHarm(ifft,3:4)
          if(mod(dtset%fockoptmix,100)==11)vtrial(ifft,3:4)=vtrial(ifft,3:4)+vxc_hybcomp(ifft,3:4)
        end do
@@ -595,7 +590,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 
  end if
 
- ABI_DEALLOCATE(Vmagconstr)
+ ABI_DEALLOCATE(v_constr_dft_r)
  !ABI_DEALLOCATE(vzeemanHarm) !SPr: debug for q/=0 magnetic field
 
  call timab(945,2,tsec)

@@ -210,10 +210,10 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
  ! Costruct crystal and ebands from the GS WFK file.
  call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm) !,gs_occ)
- call hdr_vs_dtset(wfk0_hdr, dtset)
+ call wfk0_hdr%vs_dtset(dtset)
 
- cryst = hdr_get_crystal(wfk0_hdr, timrev2)
- call crystal_print(cryst,header="crystal structure from WFK file")
+ cryst = wfk0_hdr%get_crystal(timrev2)
+ call cryst%print(header="crystal structure from WFK file")
 
  ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)
 
@@ -325,7 +325,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
      gsqcut_shp = two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
      call pawinit(gnt_option,gsqcut_shp,zero,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,cryst%nsym,dtset%pawntheta,pawang,Pawrad,&
-&     dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usepotzero)
+&     dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,0,dtset%usepotzero)
      call timab(553,2,tsec)
 
      ! Update internal values
@@ -472,7 +472,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  call wfd%free()
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
- call hdr_free(wfk0_hdr)
+ call wfk0_hdr%free()
 
  ! Deallocation for PAW.
  if (dtset%usepaw==1) then

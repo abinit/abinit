@@ -44,7 +44,7 @@ module m_mpi_setup
  use m_mpinfo,       only : init_mpi_enreg, mpi_distrib_is_ok, initmpi_atom, proc_distrb_cycle, &
                             initmpi_grid, initmpi_pert, initmpi_img, distrb2, distrb2_hf, initmpi_world
  use m_libpaw_tools, only : libpaw_write_comm_set
- use m_dtset,        only : get_npert_rbz, dataset_type
+ use m_dtset,        only : dataset_type
  use m_kg,           only : getmpw
  use m_dtfil,        only : mkfilename
 
@@ -250,7 +250,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
    ! Dump the list of irreducible perturbations and exit.
    if (dtsets(idtset)%paral_rf==-1.and.optdriver/=RUNL_NONLINEAR) then
-     call get_npert_rbz(dtsets(idtset),nband_rbz,nkpt_rbz,npert)
+     call dtsets(idtset)%get_npert_rbz(nband_rbz, nkpt_rbz, npert)
      ABI_DEALLOCATE(nband_rbz)
      ABI_DEALLOCATE(nkpt_rbz)
      iexit = iexit + 1
@@ -1165,7 +1165,7 @@ end subroutine mpi_setup
  npp_min=1;npp_max=1;npert_eff=1
  if (optdriver==RUNL_RESPFN) then
    if (dtset%paral_rf==1) then
-     call get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert_eff)
+     call dtset%get_npert_rbz(nband_rbz, nkpt_rbz, npert_eff)
      do jj=1,npert_eff
        ii=dtset%nsppol*nkpt_rbz(jj)*maxval(nband_rbz(:,jj))
        nkpt_eff=max(nkpt_eff,ii)
@@ -1265,7 +1265,7 @@ end subroutine mpi_setup
          if (file_found) then
            call hdr_read_from_fname(hdr0,filden,ii,xmpi_comm_self)
            idum3(1:2)=hdr0%ngfft(2:3);if (file_found) idum3(3)=1
-           call hdr_free(hdr0)
+           call hdr0%free()
            MSG_WARNING("Cannot find filden"//filden)
          end if
        end if

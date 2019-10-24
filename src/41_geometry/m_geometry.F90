@@ -61,7 +61,7 @@ MODULE m_geometry
  public :: bonds_lgth_angles  ! Write GEO file
  public :: randomcellpos      ! Creates unit cell with random atomic positions.
  public :: ioniondist         ! Compute ion-ion distances
- public :: dist2              ! Calculates the distance of v1 and v2 in a crystal by epeating the unit cell
+ public :: dist2              ! Calculates the distance of v1 and v2 in a crystal by repeating the unit cell
  public :: shellstruct        ! Calculates shell structure (multiplicities, radii)
  public :: remove_inversion   ! Remove the inversion symmetry and improper rotations
  public :: symredcart         ! Convert a symmetry operation from reduced coordinates (integers) to cart coords (reals)
@@ -1123,7 +1123,7 @@ end subroutine fixsym
 !!      ks_ddiago,linear_optics_paw,m_ab7_symmetry,m_crystal,m_cut3d,m_ddb
 !!      m_dens,m_effective_potential,m_effective_potential_file,m_fft
 !!      m_fft_prof,m_fit_data,m_hamiltonian,m_io_kss,m_ioarr,m_mep,m_pawpwij
-!!      m_screening,m_tdep_latt,m_use_ga,m_vcoul,m_wfk,mag_constr,mag_constr_e
+!!      m_screening,m_tdep_latt,m_use_ga,m_vcoul,m_wfk,mag_penalty,mag_constr_e
 !!      memory_eval,mkcore_wvl,mlwfovlp_qp,moddiel,mpi_setup,mrgscr,newrho
 !!      newvtr,nres2vres,odamix,optic,pawgrnl,prcref,prcref_PMA,pred_bfgs
 !!      pred_delocint,pred_isothermal,pred_langevin,pred_lbfgs,pred_nose
@@ -2626,12 +2626,14 @@ end subroutine ioniondist
 !!  dist2
 !!
 !! FUNCTION
-!!  Calculates the distance of v1 and v2 in a crystal by epeating the unit cell
+!!  Calculates the distance of v1 and v2 in a crystal by repeating the unit cell
 !!
 !! INPUTS
 !!  v1,v2
 !!  rprimd: dimensions of the unit cell. if not given 1,0,0/0,1,0/0,0,1 is assumed
-!!  option: 0 v1, v2 given in cartesian coordinates (default) / 1 v1,v2 given in reduced coordinates
+!!  option: 0 v1, v2 given in cartesian coordinates (default) 
+!!          1 v1,v2 given in reduced coordinates 
+!!         -1 v1 and v2 are supposed equal, and the routine returns the length of the smallest Bravais lattice vector
 !!
 !! OUTPUT
 !!  dist2
@@ -2683,8 +2685,10 @@ function dist2(v1,v2,rprimd,option)
  end if
  if(opt==0)then
    dred(:)=gprimd(1,:)*dv(1)+gprimd(2,:)*dv(2)+gprimd(3,:)*dv(3)
- else
+ else if(opt==1)then
    dred(:)=dv(:)
+ else if(opt==-1)then
+   dred(:)=zero
  end if
 
 !Wrap in the ]-1/2,1/2] interval
@@ -2710,14 +2714,16 @@ function dist2(v1,v2,rprimd,option)
 !Use all relevant primitive real space lattice vectors to find the minimal difference vector
  min2=huge(zero)
  do i1=-limits(1),limits(1)
+   dtot(1)=dwrap(1)+i1
    do i2=-limits(2),limits(2)
+     dtot(2)=dwrap(2)+i2
      do i3=-limits(3),limits(3)
-       dtot(1)=dwrap(1)+i1
-       dtot(2)=dwrap(2)+i2
-       dtot(3)=dwrap(3)+i3
-       norm2=dtot(1)*rmet(1,1)*dtot(1)+dtot(2)*rmet(2,2)*dtot(2)+dtot(3)*rmet(3,3)*dtot(3)+&
-&       2*(dtot(1)*rmet(1,2)*dtot(2)+dtot(2)*rmet(2,3)*dtot(3)+dtot(3)*rmet(3,1)*dtot(1))
-       min2=min(norm2,min2)
+       if(opt/=-1.or.i1/=0.or.i2/=0.or.i3/=0)then
+         dtot(3)=dwrap(3)+i3
+         norm2=dtot(1)*rmet(1,1)*dtot(1)+dtot(2)*rmet(2,2)*dtot(2)+dtot(3)*rmet(3,3)*dtot(3)+&
+&         2*(dtot(1)*rmet(1,2)*dtot(2)+dtot(2)*rmet(2,3)*dtot(3)+dtot(3)*rmet(3,1)*dtot(1))
+         min2=min(norm2,min2)
+       endif
      end do
    end do
  end do
