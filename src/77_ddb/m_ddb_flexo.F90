@@ -94,7 +94,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg)
  real(dp),intent(in) :: d2asr(2,3,ddb%natom,3,ddb%natom)
 
 !Local variables-------------------------------
- integer :: iblok,jblok,lwsym
+ integer :: fblok,iblok,jblok,lwsym
 ! real(dp) :: 
  character(len=500) :: msg
 
@@ -156,12 +156,28 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg)
      call wrtout(std_out, "flexoflag=1 or 3 requires the DDB file to include the corresponding long wave 3rd derivatives")
    end if
 
+   ! Look for th block that contains the forces 
+   qphon(:,:)=zero
+   qphnrm(:)=one
+   rfphon(4)=1
+   rfelfd(:)=0
+   rfstrs(:)=0
+   call ddb%get_block(fblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,4)
+
+   if (fblok == 0) then
+     call wrtout(std_out, "--- !WARNING")
+     call wrtout(std_out, sjoin("- Cannot find forces in DDB file:", filnamddb))
+     call wrtout(std_out, "If there are nonzero residual atomic forces on the structure") 
+     call wrtout(std_out, "flexoflag=1 or 3 will produce an improper piezoelectric force response tensor")
+     call wrtout(std_out, "and a wrong value for the  mixed contribution to the flexoelectric tensor")
+   end if
+
    ! Look for the Gamma Block of the dynamical matrix in the DDB
    qphon(:,:)=zero
    qphnrm(:)=one
    rfphon(:)=0;rfphon(1:2)=1
    rfelfd(:)=0
-   rfelfd(:)=0
+   rfstrs(:)=0
   
    call ddb%get_block(jblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,1)
 
@@ -171,7 +187,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg)
      call wrtout(std_out, "flexoflag=1 or 3 requires the DDB file to include the corresponding 2nd derivatives")
    end if
 
-   call dtmixflexo(asr,d2asr,ddb%val(:,:,jblok),ddb_lw%val(:,:,iblok),mixflexo,ddb%mpert,ddb%natom,pol1,crystal%ucvol)
+   call dtmixflexo(asr,d2asr,ddb%val(:,:,fblok),ddb%val(:,:,jblok),ddb_lw%val(:,:,iblok),mixflexo,ddb%mpert,ddb%natom,pol1,crystal%ucvol)
 
  end if
 
@@ -283,6 +299,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !! INPUTS
 !! asr= if /=0 acustic sume rule is imposed on the dynamical matrix
 !! d2asr(2,3,natom,3,natom)=ASR-correction
+!! blkval1d(2,3,mpert,3,mpert)= 1st derivative wrt atom displacements (at least)
 !! blkval2d(2,3,mpert,3,mpert)= 2nd derivatives wrt two atom displacements (at least)
 !! blkval(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies for Phi^(1) tensor
 !! mpert =maximum number of ipert
@@ -300,7 +317,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !!
 !! SOURCE
 
-subroutine dtmixflexo(asr,d2asr,blkval2d,blkval,mixflexo,mpert,natom,pol1,ucvol)
+subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,mixflexo,mpert,natom,pol1,ucvol)
 
 !Arguments -------------------------------
 !scalars
@@ -308,6 +325,7 @@ subroutine dtmixflexo(asr,d2asr,blkval2d,blkval,mixflexo,mpert,natom,pol1,ucvol)
  real(dp),intent(in) :: ucvol
 !arrays
  real(dp),intent(in) :: d2asr(2,3,mpert,3,mpert)
+ real(dp),intent(in) :: blkval1d(1,3,mpert,3,mpert)
  real(dp),intent(in) :: blkval2d(2,3,mpert,3,mpert)
  real(dp),intent(in) :: blkval(2,3*mpert*3*mpert*3*mpert)
  real(dp),intent(inout) :: pol1(3,3,3,natom)
@@ -321,10 +339,11 @@ subroutine dtmixflexo(asr,d2asr,blkval2d,blkval,mixflexo,mpert,natom,pol1,ucvol)
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
  real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert)
+ real(dp) :: forces(3,natom)
+ real(dp) :: intstrn(3,3,3,natom)
  real(dp) :: phi1(3,natom,3,natom,3)
  real(dp) :: piezofr(3,natom,3,3)
  real(dp) :: psinvdm(3*natom,3*natom)
- real(dp) :: intstrn(3,3,3,natom)
 
 ! *********************************************************************
 
@@ -347,7 +366,14 @@ subroutine dtmixflexo(asr,d2asr,blkval2d,blkval,mixflexo,mpert,natom,pol1,ucvol)
    end do
  end do
 
-!Calculate the piezoelectric force-response tensor
+!Extraction of the forces to acount for the improper contribution
+ do iatd=1,3
+   do iat=1,natom
+     forces(iatd,iat)=-blkval1d(1,iatd,iat,1,1)
+   end do
+ end do
+
+!Calculate the piezoelectric force-response tensor including the improper contribution
  piezofr(:,:,:,:)=zero
  do qvecd=1,3
    do iat=1,natom
@@ -356,6 +382,7 @@ subroutine dtmixflexo(asr,d2asr,blkval2d,blkval,mixflexo,mpert,natom,pol1,ucvol)
          do jat=1,natom
            piezofr(iatd,iat,jatd,qvecd)=piezofr(iatd,iat,jatd,qvecd) + phi1(iatd,iat,jatd,jat,qvecd)
          end do
+         if (iatd==qvecd) piezofr(iatd,iat,jatd,qvecd)=piezofr(iatd,iat,jatd,qvecd) + forces(jatd,iat)
        end do
      end do
    end do
