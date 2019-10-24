@@ -117,6 +117,7 @@ character(len=500) :: message
 #endif
 
 end subroutine nf_check
+!!***
 
 
 !!****f* m_forctqmc/qmc_prep_ctqmc
