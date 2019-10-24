@@ -369,32 +369,18 @@ subroutine dtmixflexo(asr,d2asr,blkval2d,blkval,mixflexo,mpert,natom,pol1,ucvol)
  intstrn(:,:,:,:)=zero
  do qvecd=1,3
    do katd=1,3
-     ivar=0
      do iatd=1,3
        do iat=1,natom
-         ivar=ivar+1
-         jvar=0
+         ivar=(iat-1)*3+iatd
          do jatd=1,3
            do jat=1,natom
-             jvar=jvar+1
+             jvar=(jat-1)*3+jatd
 
              intstrn(qvecd,katd,iatd,iat)= intstrn(qvecd,katd,iatd,iat) + &
            psinvdm(ivar,jvar)*piezofr(jatd,jat,katd,qvecd)
 
            end do
          end do
-       end do
-     end do
-   end do
- end do
-
- write(ab_out,*)"  "
- do qvecd=1,3
-   do katd=1,3
-     ivar=0
-     do iatd=1,3
-       do iat=1,natom
-         write(ab_out,'(4i3,f12.6)') iat, iatd, katd, qvecd, intstrn(qvecd,katd,iatd,iat)
        end do
      end do
    end do

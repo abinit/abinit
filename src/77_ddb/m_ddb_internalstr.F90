@@ -463,7 +463,6 @@ natom,nblok,prt_internalstr)
 
 !Now do simple mulplication to obtain the displacement response
 !internal strain tensor
-
  instrain_dis(:,:)=0.0_dp
  do ivarA=1,6
    do ivarB=1,3*natom
