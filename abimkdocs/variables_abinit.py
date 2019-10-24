@@ -11343,7 +11343,7 @@ Bohr magneton has value $2.7321\times 10^{-4}$ in atomic units.
 """,
 ),
 
-    Variable(
+Variable(
     abivarname="nwfshist",
     varset="gstate",
     vartype="integer",

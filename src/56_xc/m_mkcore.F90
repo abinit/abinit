@@ -33,9 +33,9 @@ module m_mkcore
  use m_linalg_interfaces
 
  use defs_abitypes, only : mpi_type
- use m_geometry,   only : strconv
- use m_time,       only : timab
- use m_mpinfo,     only : ptabs_fourdp
+ use m_geometry,    only : strconv
+ use m_time,        only : timab
+ use m_mpinfo,      only : ptabs_fourdp
  use m_sort,        only : sort_dp
  use m_pawrad,      only : pawrad_type, pawrad_init, pawrad_free
  use m_pawtab,      only : pawtab_type
@@ -591,6 +591,7 @@ end subroutine mkcore
 !!  xcccrc(ntypat)=XC core correction cutoff radius (bohr) for each atom type
 !!  xccc1d(n1xccc,6,ntypat)=1D core charge function and 5 derivatives for each atom type
 !!  xred(3,natom)=reduced coordinates for atoms in unit cell
+!!  [usekden]= --optional-- if TRUE, output the kinetic enrgy density instead of the density
 !!
 !! OUTPUT
 !!  === if option==1 ===
@@ -619,15 +620,17 @@ end subroutine mkcore
 
 subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,nspden,&
 &          nattyp,ntypat,n1,n1xccc,n2,n3,option,rprimd,ucvol,vxc,xcccrc,xccc1d,&
-&          xccc3d,xred,pawrad,pawtab,usepaw)
+&          xccc3d,xred,pawrad,pawtab,usepaw,&
+&          usekden) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: icoulomb,n1,n1xccc,n2,n3,natom,nfft,nspden,ntypat,option,usepaw
+ logical,intent(in),optional :: usekden
  real(dp),intent(in) :: ucvol
  type(mpi_type),intent(in) :: mpi_enreg
  type(pawrad_type),intent(in) :: pawrad(:)
- type(pawtab_type),intent(in) :: pawtab(:)
+ type(pawtab_type),target,intent(in) :: pawtab(:)
 !arrays
  integer,intent(in) :: atindx1(natom),nattyp(ntypat)
  real(dp),intent(in) :: rprimd(3,3),xccc1d(n1xccc,6,ntypat)
@@ -640,9 +643,9 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !scalars
  integer :: i1,i2,i3,iat,iatm,iatom,ier,ipts
  integer :: ishift,ishift1,ishift2,ishift3
- integer :: itypat,ixp,jj,jpts,me_fft,mrange,mu
+ integer :: itypat,ixp,jj,jpts,me_fft,mrange,msz,mu
  integer :: nfftot,npts,npts12,nu
- logical :: letsgo
+ logical :: letsgo,usekden_
  real(dp) :: aa,bb,cc,dd,delta,delta2div6,deltam1
  real(dp) :: diff,difmag,fact,range,range2
  real(dp) :: rangem1,rdiff1,rdiff2,rdiff3
@@ -661,19 +664,25 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
  real(dp) :: scale(3),tau(3),tsec(2),tt(3)
  real(dp),allocatable :: dtcore(:),d2tcore(:),rnorm(:)
  real(dp),allocatable :: rrdiff(:,:),tcore(:)
- real(dp), ABI_CONTIGUOUS pointer :: vxc_eff(:)
+ real(dp), ABI_CONTIGUOUS pointer :: corespl(:,:),vxc_eff(:)
 
 !************************************************************************
 
  call timab(12,1,tsec)
 
-!Make sure option is acceptable
+!Make sure options are acceptable
+ usekden_=.false.;if (present(usekden)) usekden_=usekden
  if (option<0.or.option>4) then
    write(message, '(a,i12,a,a,a)' )&
     'option=',option,' is not allowed.',ch10,&
     'Must be 1, 2, 3 or 4.'
    MSG_BUG(message)
  end if
+ if (usekden_.and.usepaw==0) then
+   message='usekden=1 and NCPP is not allowed!'
+   MSG_BUG(message)
+ end if
+
 
 !Zero out only the appropriate array according to option:
  if (option==1) then
@@ -746,9 +755,16 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !  Skip loop if this type has no core charge
    if (abs(range)<1.d-16) cycle
 
-!  PAW: create mesh for core density
+!  PAW: select core density type and create mesh
    if (usepaw==1) then
-     call pawrad_init(core_mesh,mesh_size=pawtab(itypat)%core_mesh_size,&
+     if (usekden_) then
+       msz=pawtab(itypat)%coretau_mesh_size
+       corespl => pawtab(itypat)%tcoretau
+     else
+       msz=pawtab(itypat)%core_mesh_size
+       corespl => pawtab(itypat)%tcoredens
+     end if
+     call pawrad_init(core_mesh,mesh_size=msz,&
 &     mesh_type=pawrad(itypat)%mesh_type,&
 &     rstep=pawrad(itypat)%rstep,lstep=pawrad(itypat)%lstep)
    end if
@@ -860,22 +876,19 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
          if (option==1.or.option==3) then
 !          Evaluate fit of core density
            call paw_splint(core_mesh%mesh_size,core_mesh%rad, &
-&           pawtab(itypat)%tcoredens(:,1), &
-&           pawtab(itypat)%tcoredens(:,3),&
+&           corespl(:,1),corespl(:,3),&
 &           npts,rnorm(1:npts),tcore(1:npts))
          end if
          if (option>=2) then
 !          Evaluate fit of 1-der of core density
            call paw_splint(core_mesh%mesh_size,core_mesh%rad, &
-&           pawtab(itypat)%tcoredens(:,2), &
-&           pawtab(itypat)%tcoredens(:,4),&
+&           corespl(:,2),corespl(:,4),&
 &           npts,rnorm(1:npts),dtcore(1:npts))
          end if
          if (option==4) then
 !          Evaluate fit of 2nd-der of core density
            call paw_splint(core_mesh%mesh_size,core_mesh%rad, &
-&           pawtab(itypat)%tcoredens(:,3), &
-&           pawtab(itypat)%tcoredens(:,5),&
+&           corespl(:,3),corespl(:,5),&
 &           npts,rnorm(1:npts),d2tcore(1:npts))
          end if
        else
