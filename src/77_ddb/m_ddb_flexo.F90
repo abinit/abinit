@@ -153,7 +153,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg)
    if (iblok == 0) then
      call wrtout(std_out, "--- !WARNING")
      call wrtout(std_out, sjoin("- Cannot find P^(1) tensor in DDB file:", filnamddb))
-     call wrtout(std_out, "flexoflag=1 or 3 requires the DDB file to include the corresponding long wave 3rd derivatives")
+     call wrtout(std_out, "   flexoflag=1 or 3 requires the DDB file to include the corresponding long wave 3rd derivatives")
    end if
 
    ! Look for th block that contains the forces 
@@ -167,9 +167,9 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg)
    if (fblok == 0) then
      call wrtout(std_out, "--- !WARNING")
      call wrtout(std_out, sjoin("- Cannot find forces in DDB file:", filnamddb))
-     call wrtout(std_out, "If there are nonzero residual atomic forces on the structure") 
-     call wrtout(std_out, "flexoflag=1 or 3 will produce an improper piezoelectric force response tensor")
-     call wrtout(std_out, "and a wrong value for the  mixed contribution to the flexoelectric tensor")
+     call wrtout(std_out, "   If there are nonzero residual atomic forces on the structure") 
+     call wrtout(std_out, "   flexoflag=1 or 3 will produce an improper piezoelectric force response tensor")
+     call wrtout(std_out, "   and a wrong value for the  mixed contribution to the flexoelectric tensor")
    end if
 
    ! Look for the Gamma Block of the dynamical matrix in the DDB
@@ -184,7 +184,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg)
    if (jblok == 0) then
      call wrtout(std_out, "--- !WARNING")
      call wrtout(std_out, sjoin("- Cannot find Gamma point Dynamical Matrix in DDB file:", filnamddb))
-     call wrtout(std_out, "flexoflag=1 or 3 requires the DDB file to include the corresponding 2nd derivatives")
+     call wrtout(std_out, "   flexoflag=1 or 3 requires the DDB file to include the corresponding 2nd derivatives")
    end if
 
    call dtmixflexo(asr,d2asr,ddb%val(:,:,fblok),ddb%val(:,:,jblok),ddb_lw%val(:,:,iblok),mixflexo,ddb%mpert,ddb%natom,pol1,crystal%ucvol)
@@ -435,6 +435,18 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,mixflexo,mpert,natom,po
 !Print results
  iwrite = ab_out > 0
  if (iwrite) then
+   write(msg,'(3a)')ch10,' Displacement-response internal strain tensor from long-wave magnitudes ',ch10
+   call wrtout(ab_out,msg,'COLL')
+   write(ab_out,*)' atom   dir        xx          yy          zz          yz          xz          xy'
+   do iat=1,natom
+     write(ab_out,'(2x,i3,3x,a3,2x,6f12.6)') iat, 'x', intstrn(1,1,1,iat),intstrn(2,2,1,iat),intstrn(3,3,1,iat),&
+                                                         intstrn(2,3,1,iat),intstrn(1,3,1,iat),intstrn(1,2,1,iat)
+     write(ab_out,'(2x,i3,3x,a3,2x,6f12.6)') iat, 'y', intstrn(1,1,2,iat),intstrn(2,2,2,iat),intstrn(3,3,2,iat),&
+                                                         intstrn(2,3,2,iat),intstrn(1,3,2,iat),intstrn(1,2,2,iat)
+     write(ab_out,'(2x,i3,3x,a3,2x,6f12.6)') iat, 'z', intstrn(1,1,3,iat),intstrn(2,2,3,iat),intstrn(3,3,3,iat),&
+                                                         intstrn(2,3,3,iat),intstrn(1,3,3,iat),intstrn(1,2,3,iat)
+   end do 
+
    write(msg,'(3a)')ch10,' Type-II mixed contribution to flexoelectric tensor ',ch10
    call wrtout(ab_out,msg,'COLL')
    write(ab_out,*)'      xx          yy          zz          yz          xz          xy          zy          zx          yx'
