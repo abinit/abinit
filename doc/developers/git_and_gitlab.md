@@ -1,0 +1,358 @@
+---
+authors: MG, XG
+---
+
+# HowTo guide for developers
+
+This page is intended as a quick reference to solve problems commonly encountered when developing in Abinit.
+
+## Git tutorial for beginners
+
+If you are not familiar with `git`, we would strongly advise to watch this youtube tutorial:
+
+<iframe width="1384" height="629" src="https://www.youtube.com/embed/HVsySz-h9r4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+For further info about git please consult the [official git documentation](https://git-scm.com/).
+Remember that one can access the online help on the command line with the syntax:
+
+    git COMMAND --help
+
+
+!!! tip
+
+    [Most commonly used git tips and tricks](https://github.com/git-tips/tips)
+
+    https://ohmyz.sh/
+
+In the next sections, we assume you are familiar with the basic commands and we explain how to configure git
+to interoperate with the [ABINIT gitlab server](https://gitlab.abinit.org/).
+
+## Initial configuration
+
+<!--
+As an Abinit Developer, you may want to make it easier and more comfortable for you to access the
+relevant repositories and tune your access parameters whenever needed, without having to restart from scratch
+every time you change something. There are two software components you need to tweak in order to achieve this: SSH and Git.
+Here, we will suppose that you have already configured your Gitlab account properly and added 
+the relevant SSH public keys to your profile, and that you have opened a terminal.
+-->
+To be able to push your contributions to the Abinit Forge, you need to add the 
+following section to your *~/.ssh/config*.
+Just create the file if it does not exist.
+
+```
+Host abinit-forge
+    HostName gitlab.abinit.org
+    User git
+    ServerAliveInterval 52
+    Compression yes
+```
+
+You will then be able to use the *abinit-forge* hostname to clone, pull, and push to your repository.
+If this is the very first time you use git,
+we urge you to set the following global parameters before doing anything else:
+
+```sh
+mkdir -p $HOME/.config/git
+git config --global user.name "Firstname Lastname"
+git config --global user.email "someone@someserver.somedomain"
+git config --global core.editor "my_preferred_editor"
+git config --global core.excludesFile "$HOME/.config/git/ignore"
+git config --global color.ui "auto"
+git config --global merge.conflictstyle "diff3"
+```
+
+where you replace *Firstname*, *Lastname*, *someone@someserver.somedomain*, and *my_preferred_editor*, 
+by your respective first name, last name, email address, and preferred editor.
+
+<!--
+Once you have configured SSH to access the Abinit Forge, if this is the only remote address you use, 
+the only thing you have to do with Git is using the abinit-forge keyword when dealing with the Forge.
+-->
+To clone your repository, execute:
+
+    git clone abinit-forge:DEVELOPER/abinit
+
+where DEVELOPER must be replaced by by your Abinit Forge login.
+<!--
+If you had already cloned your repository before setting SSH and want to benefit from this new configuration, 
+just go to the top directory of your Abinit working tree and type:
+    git remote set-url origin abinit-forge:DEVELOPER/abinit
+-->
+
+## gitlab: ABINIT specificities
+
+Every *physical* ABINIT developer has his/her specific gitlab **user_id** e.g. *gonze*.
+An additional *virtual* developer, called **trunk**, is also defined.
+<!--
+===== Standard names (projects, ID, branches) =====
+On the ABINIT gitlab server, an ABINIT project can be defined, specifically for you, 
+with address <color blue>git@gitlab.abinit.org</color>:<color red>user_id</color><color blue>/abinit.git</color>. 
+In order to do this, log on https://gitlab.abinit.org, go to "Explore projects", find "Trunk / Abinit" (+perhaps select "All"), 
+then click on the "Fork" button. You need to contact Jean-Michel Beuken to have access to the ABINIT gitlab.
+In order to start to work locally (not on the ABINIT gitlab server, but on your own machine), 
+you should setup the SSH environment for gitlab, as described  
+[[developers:git:specificities_git_abinit#Setup_of_the_ssh_environment|in the last section of this document]]. 
+In particular on some machines you need to have an ssh agent running with your rsa key already available, 
+so that git finds it when it runs ssh.
+-->
+
+You have by default a **master** branch and a **develop** branch in your repo, 
+but it is possible to create and work on other branches. 
+Note that, according to the [gitflow branching model](http://nvie.com/posts/a-successful-git-branching-model), 
+the **master** branch will be of little use for the *physical* developers (including you), as we will see later, 
+while the **develop** and **release-** branches will be quite important for normal developments.
+
+### (Quick start) Cloning from gitlab
+
+In order to clone from the gitlab repository to your local repository, the recommended command is:
+
+    git clone gitlab:user_id/abinit.git -b <color magenta>develop</color>
+
+where **user_id** is to be replaced by the adequate name.
+[Additional explanation: the normal "clone" command from the gitlab repository to his/her gitlab repository on his/her local machine is: 
+
+<color blue>git clone git@gitlab.abinit.org:</color><color red>user_id</color><color blue>/abinit.git</color> \\
+
+However, with the proper SSH environment, the following "clone" command can be used : \\
+<color blue>git clone gitlab:</color><color red>user_id</color><color blue>/abinit.git</color> \\
+This will clone the <color magenta>master</color>, while the usual working branch is the
+<color magenta>develop</color> branch, that can be obtained directly with the above-mentioned command.]\\
+
+After some modifications, using the git commands (e.g. git add, git commit ...), 
+you can push on the gitlab server thanks to:
+
+    git push
+
+or
+
+    git push --tags
+
+if tags have been introduced.
+
+In order for the modifications to be merged in the trunk, a merge request has to be issued, as described later.
+The same might be done for other branches, created from the local <color magenta>develop</color> one, using the commands:
+
+<color blue>git branch </color><color magenta>another_branch</color> \\
+<color blue>git checkout </color><color magenta>another_branch</color> \\
+
+For pushing, the first time, use:
+
+    git push -u origin another_branch
+
+You are able to create your own additional branches, either locally or on gitlab. 
+The name is your own choice.
+
+### Git branches
+
+In the ABINIT+git workflow:
+
+  * By default, all branches pushed on gitlab might be tested on-demand by the user.
+  * In order to be merged in the trunk, the branch has to be **on-track**, 
+    [[developers:git:specificities_git_abinit#what_is_an_on-track_branch|as explained later]]. 
+    You have to issue a "merge request" on gitlab (to the <color red>trunk</color> virtual developer).
+  * Only branches that are **on-track** and that have succeeded (or passed) all the automatic tests 
+    are considered for merge (as was the case previously).
+
+The *develop* branch corresponds to the development stage. 
+The *release-* branches corresponds to release candidates or hotfix branches. 
+It is slightly simpler than the gitflow naming scheme.
+
+!!! tip
+
+    In the git philosophy, branches are often created, then merged, then destroyed. 
+    The ABINIT developer is encouraged to take advantage of this flexibility. 
+
+### How to trigger the action of buildbot? (On-demand)
+
+The developer has to use the git on-demand form on the ABINIT buildbot portal 
+([[https://bbportal.abinit.org|https://bbportal.abinit.org]])//. 
+The authentification is made with login/password of gitlab.
+
+One important feature has to be taken into account: with git, each commit is characterized 
+by a SHA-1 code (40 hexadecimal characters). 
+The four first characters actually define the commit with 1 combination out of 65536 4-character combinations, 
+while the five first characters define the commit with 1 combination out of 1048576 5-character combinations.
+
+Gitlab knows the repository of the different users, the existing branches, as well as the SHA-1 code of each commit. 
+The three following fields must be defined by the developer for buildbot to know which is the revision of ABINIT to be run:
+
+  - “User” : choose one of the existing User_ID from the menu. Default value : <color red>user_id</color> .
+  - “Branch” : choose one of the existing User_ID from the menu. Default value : <color magenta>develop</color>.
+  - “Commit” : the developer can enter a free text with the first hexadecimal characters of the SHA-1 code of the commit (in case different commits of the user on the branch have the same first characters, the last commit will be taken by buildbot). Default value : the last commit of User/Branch.
+
+### What is an on-track branch?
+
+For a branch to be **on-track**, a specific commit must be contained in the past history of the branch. 
+This specific commit will be tagged in *trunk/develop* and corresponds to the release of a new version (not necessarly a public version).
+For a *release-* branch to be **on-track**, not only a specific commit must 
+be contained in the past history of the branch, but also the commit that starts the next development version **cannot** be present. 
+Only one among the *release-* branches is **on-track** at any time.
+
+As an example, suppose we were on ABINIT v8.9.x, and want to start preparing a release 8.10.0 (for production) 
+and a new v8.11.0 (for development):
+
+  * a branch entitled <color magenta>release-8.10.0</color> will be forked from the <color magenta>develop</color> branch ;
+  * after this branching, the first commit in the <color magenta>release-8.10.0</color> branch will be tagged start-8.10.0, while the first commit in the <color magenta>develop</color> branch will be tagged start-8.11.0,
+  * for a <color magenta>develop</color> branch to be considered **on-track** (and eligible for a merge request), the commit tagged start-8.11.0 will have to be present ;
+  * for a <color magenta>release-8.10.0</color> branch to be considered **on-track** (and eligible for a merge request), the commit tagged start-8.10.0 will have to be present, while it will be forbidden to contain the commit tagged start-8.11.0 .
+
+In complement to the start of a X.Y.Z version being tagged as "start-X.Y.Z",
+the commit that ends some X.Y.Z version of ABINIT will be tagged "X.Y.Z".
+
+### What is shown in the Buildbot Status table?
+
+(See the Buildbot Status at https://bbportal.abinit.org/#/status)
+
+The Buildbot Status table shows a summary of the recent results obtained by the test farm for alll active branches.
+If you want to see all the results, select the **filters**: all + all, then click on the **update button**.
+The default selection of bots, that is the *night* set, should be adequate for all merge requests.
+The selection capabilities of the Buildbot Status table are rather extended, you have to play a bit wit them.
+
+(By the way, the behaviour of this Buildbot Status table when changing the selections has still some problems -as of May 2018-. Do not hesitate to click on the update button, and the "Grouping" button -the latter back and forth-, sorry for the inconvenience).
+
+### How and when will the merge in the master branch be done?
+
+In order for your development to be incorporated, there should be **merge request**
+from your specific *branch to the *trunk*.
+For most branches, the merge request will be to the trunk/develop> branch.
+(See the list of merge requests at https://bbportal.abinit.org/#/mr)
+
+However, when a *release-* branch is ready to be merged, 
+the merge request should target the corresponding *trunk/release-*</color> branch.
+The master branch is only used by the trunk. So, never issue a merge request to trunk/master.
+
+You are supposed to merge, inside your branches, specific tagged branches from trunk,
+in order to avoid divergences. These specific tagged branches will be advertised. 
+As [[developers:git:specificities_git_abinit#what_is_an_on-track_branch|mentioned earlier]], 
+the presence of such tagged commits allows one to identify whether the branch is **on-track**, before an automatic testing to be done.
+
+### How to synchronize with the "trunk" virtual user?
+
+In order to keep your branches up to date with those 
+of the trunk, you should first define git@gitlab.abinit.org:trunk/abinit.git as a remote:
+
+   git remote add trunk gitlab:trunk/abinit.git
+
+Then, in order to synchronize, in a first step, issue:
+
+   git fetch trunk
+
+then, if the develop branch is to be updated, supposing it is checked out, merge trunk/develop in your develop:
+
+   git merge remotes/trunk/develop
+
+You can combine the last two commands in one as:
+
+   git pull trunk develop
+
+If, on the contrary, a new branch (e.g. a release branch, let's says 8.8 to fix the ideas) has to be created:
+
+   git branch release-8.8 start-8.8.1    # this creates the branch release-8.8 from the start-8.8.1 tag
+   git checkout release-8.8
+   git merge remotes/trunk/release-8.8
+   git push -u origin release-8.8
+
+That's it! 
+You can now make modifications in your release-8.8, then issue a merge request to the trunk/release-8.8.
+
+### Additional info: how to not mess with your branches ? ... show-branch ...
+
+To see which branches are present in your current repository, use:
+
+    git show-branch -a
+
+documented [here](https://git-scm.com/docs/git-show-branch).
+
+This should also list the remotes (if not add -r). An example output:
+
+<code>
+* [develop] Merge branch 'develop' of gitlab:trunk/abinit into develop
+ ! [master] Minor modif, to initialize v8.7.3 modified:   KNOWN_PROBLEMS
+  ! [origin/HEAD] Minor modif, to initialize v8.7.3 modified:   KNOWN_PROBLEMS
+   ! [origin/develop] Merge branch 'develop' of gitlab:trunk/abinit into develop
+    ! [origin/master] Minor modif, to initialize v8.7.3 modified:   KNOWN_PROBLEMS
+     ! [trunk/develop] Import inside gitlab develop, the modifications from v8.6.2 to v8.6.3
+      ! [trunk/master] Minor modif, to initialize v8.7.3 modified:   KNOWN_PROBLEMS
+</code>
+
+The syntax is compact but a bit barbaric: the first section gives you the branches which are actually present, 
+with a star for the one currently checked out. The other branches are offset by 1 space.
+
+<code>
+-  -    [develop] Merge branch 'develop' of gitlab:trunk/abinit into develop
+*  + +  [trunk/develop] Import inside gitlab develop, the modifications from v8.6.2 to v8.6.3
+</code>
+
+The second section shows commits and tell you the relation between the branches. 
+Commits are marked with a + in each column for each branch they are included in, and merges with a -. 
+Note that the master branches are never used, the top commit is a merge of trunk into the current develop, 
+and the second commit is contained in the currently active, the origin/develop (of which it is just a clone), 
+and the trunk/develop branches.
+
+### Additional info: Setup of the SSH environment
+
+In order to avoid typing your password every time you issue a command that accesses gitlab,
+you have to introduce your public keys in your profile. See <https://gitlab.abinit.org/profile/keys>.
+
+On your local machine, generate a ssh key of <color red>RSA</color> type only <color red>WITHOUT passphrase</color>:
+
+  ssh-keygen -t rsa
+
+and call it *id_rsa_gitlab*.
+Then add a section in the  ~/.ssh/config file:
+
+  host gitlab
+   Hostname gitlab.abinit.org
+   User git
+   KeepAlive yes
+   IdentityFile ~/.ssh/id_rsa_gitlab
+
+and then, copy the public key *id_rsa_gitlab.pub* on gitlab.
+
+Now, you can use (on your local machine) the following syntax :\\
+<color blue>git clone gitlab:</color><color red>user_id</color><color blue>/abinit.git</color> \\
+instead of the above-mentioned\\
+<color blue>git clone git@gitlab.abinit.org:</color><color red>user_id</color><color blue>/abinit.git</color>
+
+To be sure the key is proposed each time git calls ssh, you can use ssh-agent:
+
+  ssh-agent # this starts the agent, and provides the process id
+  # execute the 3 lines of commands that ssh-agent proposes, e.g.
+  SSH_AUTH_SOCK=/tmp/ssh-ngsERHER3K1HS/agent.15589; export SSH_AUTH_SOCK;
+  SSH_AGENT_PID=15590; export SSH_AGENT_PID;
+  echo Agent pid 15590;
+  ssh add ~/.ssh/id_rsa_gitlab # add the corresponding ssh key for gitlab
+
+## How to clone your repository with git and track `trunk`
+
+To clone your repository on your `localhost`:
+
+    git clone
+
+To track `trunk`:
+
+    git remote add trunk
+
+To show the list of remote branches:
+
+    git remote -v
+
+To merge the `develop` branch of `trunk` in your branch:
+
+    git checkout develop
+    git pull trunk develop
+
+To push to the gilab server:
+
+    git push origin develop
+
+
+!!! tip
+
+    To access the online help use: `git COMMAND --help`
+
+
+!!! important
+
+    gitflow: You should always send pull requests to trunk/develop

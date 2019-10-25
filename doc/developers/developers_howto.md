@@ -4,40 +4,74 @@ authors: MG, XG
 
 # HowTo guide for developers
 
-This page is intended as a quick reference to solve problems commonly encountered
-when developing new features in Abinit.
+This page is intended as a quick reference to solve problems commonly encountered when developing in Abinit.
+
+## How to generate the configure script via *makemake*
+
+Abinit uses the standard `configure && make` approach to build from source.
+Note, however, that the developmental version does not contain the `configure` script
+because the script is automatically generated using python machinery and configuration files 
+hosted in the `~abinit/config` directory.
+To generate the `configure` script, execute the `makemake` script:
+
+    cd ~abinit
+    ./config/scripts/makemake
+
+To run `makemake`, you will need a recent version of the python interpreter and
+[m4](https://www.gnu.org/software/m4/), [autoconf](https://www.gnu.org/software/autoconf/),
+and [automake](https://www.gnu.org/software/automake/).
+If these tools are not installed on your machine, you need to compile/install from source or use
+your preferred package manager to install them.
+I usually use the [conda](https://docs.conda.io/en/latest/) package manager with the syntax:
+
+    conda install m4 autoconf automake
+
+!!! important
+
+    Remember to run `makemake` every time you add/remove a Fortran file or a new directory or you
+    change parts the buildsystem i.e. the files in ~abinit/config
+
+## Tutorials for beginners
+
+<embed src="https://wiki.abinit.org/lib/exe/fetch.php?media=build:installing_abinit.pdf" type="application/pdf" width="100%" height="480px">
+
+## How to build Abinit
+
+Developers should build Abinit inside a **build** directory i.e. a directrory that is **separated** 
+from the source tree in order to keep the source directory as clean as possible and allow for multiple builds.
+I usually use the naming scheme: `_build_[compiler_version]` so
 
 
-<!--
-## Checklist
+```sh
+mkdir _build_gcc
+cd _build_gcc
+../configure --with-config-file=gcc.ac
+make -j8  # use 8 processes to compile
+```
 
-Checklist
+Once the build is completed, one can run the test suite with:
 
-1. Introduction.
-2. Check list
+```sh
+cd tests
+../../tests/runtests.py v1 -j8
+```
 
-*******************************************************************
+!!! tip
 
-1. Introduction
+    Remember to run the tests as frequently as possible while developing new features
+    in order to spot possible regressions or incompatibilities.
+    Trust me, you can save a lot of time if you run `runtests.py` systematically.
+    You can also start by writing immediately a test following the
+    [test driven development](https://en.wikipedia.org/wiki/Test-driven_development) approach
+    in order to facilitate the design of the user-interface and the API implementation.
 
-A few days before the developers sent their contributions
-for the merge, it is worth that they examine whether they
-have not forgotten to do "something". 
-This is the aim of this checklist.
+## How to browse the source files
 
-2. Check list
-
-Have you mentioned your initials (or full name) in the
-copyright of the routine you have modified ?
-
-Have you set up one (or a few) test cases, so as to provide
-the input and output files as references, to check that
-the merge of your routines has been succesful?
-The CPU time of this test should exceed 30secs on a PC at 400MHz,
-or 15 secs on a better workstation.
--->
-
-## How to add a new input variable 
+I love to use new technologies for my developments but I also know that the environments tipically found
+in supercomputing centers are not user-friendly so it is important to know how to get the work done with
+minimal requirements and without fancy editors such as [atom](https://atom.io/) or [pycharm](https://www.jetbrains.com/pycharm/).
+Obviously Linux tools such as `grep`, `find` are great there are other tools that are easy to install and play well
+with standard Linux editors such as `vim` and `emacs`.
 
 !!! tip
 
@@ -51,6 +85,64 @@ or 15 secs on a better workstation.
 
     See [here](https://andrew.stwrt.ca/posts/vim-ctags/) for more tips.
 
+For the integrarion with `vim` see
+
+For `emacs` see
+
+## How to debug with gdb
+
+In this section, we focus on the.
+
+    gdb path_to_abinit_executable
+    run < run.files
+    bt
+
+!!! tip
+
+    Remeber to compile the code with the `-g` option. Avoid debugging code compiled with -O3.
+    In some tricky cases, you may need to resort to -O0 or use `print` statements to avoid miscompilation.
+
+
+For a more complete introduction to gdb, we suggest this youtube tutorial:
+
+<iframe width="1384" height="629" src="https://www.youtube.com/embed/bWH-nL7v5F4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+
+## Basic conventions
+
+* All Fortran procedures should be declared in modules and imported by client code with the `use` statements
+* Module names usually start with `m_`
+* CPP macros and standard imports
+* Low-level code is located in low-level directories
+* Avoid cyclic dependencies inside a directory
+
+We use lot of CPP macros defined in `abi_common.h` to wrap basic Fortran statements.
+Please, familiarize yourself with the definitions in `abi_common.h`.
+In particular:
+
+* **Never ever** use Fortran `stop` to abort but handle the error with `MSG_ERROR(msg)` or `MSG_BUG(msg)`
+* Return an exit status if low-level procedure and let the caller handler the error.
+* Use `call wrtout(unit, ...)` instead of `print` or `write(*,*)`
+* Use `ABI_MALLOC(array, (3, 3))` instead of `allocated(array(3, 3))`
+* Use `ABI_FREE(array)` to deallocate memory or the `ABI_SFREE` variant if you need to check the allocation status.
+
+!!! important
+
+    Abinit uses specialized logic to track Fortran **allocations** and **deallocations** in order to spot possible memory leaks
+
+## How to add a new Fortran file
+
+* Create the F90 module and `git add` it
+* Register the F90 file in the `abinit.src` file (avoid duplicated names in the public API, **abisrc.py** will complain about that)
+* Rerun `makemake` in the source directory
+* Rerun `configure` and `make` (possibly `make clean`)
+
+!!! important
+
+    Special case
+
+
+## How to add a new Abinit input variable
 
 Let's focus on the procedure required to add a new Abinit variable.
 To make things as simple as possible, we neglect the case of dimensions such as *nkpt* or *nsym*
@@ -62,7 +154,7 @@ To add a new variables follow the below steps:
 
 - The default value can be specified in two different ways:
 
-    * in the **declaration** of the Fortran type if the size is known at compile time 
+    * in the **declaration** of the Fortran type if the size is known at compile time
       and the initial value does not depend on other variables.
     * in the **indefo** routine if the value must be computed at runtime.
 
@@ -74,7 +166,7 @@ To add a new variables follow the below steps:
 
 - Read the variable in the **invars2** (if it is not a basic dimension).
 
-- Change one of the outvars routines (**outvar_a_h**, **outvar_i_n**, **outvar_o_z**) to print the variable 
+- Change one of the outvars routines (**outvar_a_h**, **outvar_i_n**, **outvar_o_z**) to print the variable
   according to the first letter of the new variable
 
 - The logic for checking the consistency of input variables goes to **chkinp**.
@@ -84,19 +176,18 @@ Finally,
 
     make clean && make -j8
 
-since you *broke* the [ABI](https://en.wikipedia.org/wiki/Application_binary_interface) 
-of a public datastructure and all the object files depending on this datastructure must be recompiled 
+since you *broke* the [ABI](https://en.wikipedia.org/wiki/Application_binary_interface)
+of a public datastructure and all the object files depending on this datastructure must be recompiled
 (if you are developing a library, you should release a new major version!)
 
 No, it's not a typo, ABIs and APIs are different concepts!
 From this detailed answer on [stackoverflow](https://stackoverflow.com/questions/2171177/what-is-an-application-binary-interface-abi)
 
->   If you expand, say, a 16-bit data structure field into a 32-bit field, then already-compiled code 
-    that uses that data structure will not be accessing that field (or any following it) correctly. 
-    Accessing data structure members gets converted into memory addresses and offsets during compilation 
-    and if the data structure changes, then these offsets will not point to what the code is expecting 
+>   If you expand, say, a 16-bit data structure field into a 32-bit field, then already-compiled code
+    that uses that data structure will not be accessing that field (or any following it) correctly.
+    Accessing data structure members gets converted into memory addresses and offsets during compilation
+    and if the data structure changes, then these offsets will not point to what the code is expecting
     them to point to and the results are unpredictable at best.
-
 
 For the treatment of dimensions see **invars0**, **invars1m**
 
@@ -113,60 +204,47 @@ In order to introduce a test, one needs to:
 
 -  Insert the test in the list of tests to be done, by adding its name in **tests/v8/\_\_init\_\_.py**.
 
--  Document the test by adding a commented section inside the input file 
+-  Document the test by adding a commented section inside the input file
    (edit an existing input file to follow its style)
 
-- Declare the pseudopotentials, the flow of actions, the files to be analyzed, the tolerances for the test, 
-  inside this documentation. For the tolerances, start with 
-  
+- Declare the pseudopotentials, the flow of actions, the files to be analyzed, the tolerances for the test,
+  inside this documentation. For the tolerances, start with
+
         tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-    
+
   The different fields control how strictly the test results will be analysed:
 
   *  the maximum floating point difference found must be less than tolabs,
   *  the maximum relative difference less than tolrel, for each line individually,
-  *  **tolnlines** is the maximal number of lines found to be different between the output and reference file 
+  *  **tolnlines** is the maximal number of lines found to be different between the output and reference file
      (within another tolerance that can be tuned by the option **opt=-medium**, **opt=-easy** or **opt=-ridiculous**,
      see the added section in other input files).
 
 The scripts *tests/Scripts/fldiff.pl* and *tests/Scripts/reportdiff.pl* analyze the output.
 
-If this procedure fails, contact the code maintainers in order adjust the test case. 
-This might mean modifying the tolerances files. 
+If this procedure fails, contact the code maintainers in order adjust the test case.
+This might mean modifying the tolerances files.
 Unless you are really expert, let the maintainer do the final adjustment.
 
 !!! important
 
-    Please, try to keep preferably the total time per test case to less than 10 seconds.  
+    Please, try to keep preferably the total time per test case to less than 10 seconds.
     30 seconds is a maximum for most test cases. Going being this needs exceptional reasons.
 
-Supposing now that you have introduced a new test case. 
+Supposing now that you have introduced a new test case.
 It can be used, with the other tests of the ABINIT test suite, through different channels:
 
 *  these tests can be triggered on the test farm Web Page.
 
-*  locally (on your machine), the whole set of sequential tests, or particular tests or series of tests, 
+*  locally (on your machine), the whole set of sequential tests, or particular tests or series of tests,
    can be triggered by issuing, in the ABINIT/tests directory, the command *./runtests.py*.
-   (see the many capabilities of this scripts by issuing *./runtests.py --help*). 
+   (see the many capabilities of this scripts by issuing *./runtests.py --help*).
    Other sets of calculations can be triggered, as described by issuing *make help*.
    The result will appear in a new subdirectory *Test_suite*
 
-<!--
-Additional note: 
-The code uses a Pickle database (test_suite.cpkl) to store the set of objects representing the tests of the test suite. 
-Remember to regenerate the database after any change to the TEST_INFO section or any modification of the configuration 
-parameters of the test suite (__init__.py files). runtests.py provides the handy option -r (regenerate) 
-to automatically regenerate the database before running the tests.
--->
-
-Last but not least: are you sure that your modifications do not deteriorate the performance of the code 
+Last but not least: are you sure that your modifications do not deteriorate the performance of the code
 in the regime where your modifications are not used?
 You should inspect your modifications for both memory use and CPU time.
-
-<!-- 
-Include external files. Note that these files are also used by buildbot to 
-provide hints when one of the tests fail so we have to keep them in separated files.
--->
 
 {% include doc/developers/robodoc.doc.txt %}
 
