@@ -928,7 +928,7 @@ Flag to initialize spin state.
 
 * 2 --> Reference spin state from potential file if present.
 
-* 3 --> State with q-vector using [[multibinit:spin_init_qpoint, multibinit:spin_init_rotate_axis, and multibinit:spin_init_orientation]]. If these three variables are not given, default FM state with all spins along z-axis.
+* 3 --> State with q-vector using [[multibinit:spin_init_qpoint, multibinit:spin_init_rotate_axis, and multibinit:spin_init_orientation]]. Please check default values for those variables.
 
 * 4 --> Restart from last step of input spin hist file. "{output}_spinhist_input.nc". 
 """,
