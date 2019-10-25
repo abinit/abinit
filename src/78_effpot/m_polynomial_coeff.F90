@@ -1713,14 +1713,21 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
        end if
      end do
    end if
-   !MS only keep terms with ia == 1 
-   !if (list_symcoeff_tmp2(2,icoeff,1) /= 1)then 
-   !    list_symcoeff_tmp2(:,icoeff,1) = 0 
-   !endif
+   if(.not.(all(list_symcoeff_tmp2(:,icoeff,1)==0)))then
+     !write(std_out,*) "DEBUG: icoeff", icoeff
+     !write(std_out,*) "DEBUG: list_symcoeff_tmp2(:,icoeff,1)", list_symcoeff_tmp2(:,icoeff,1)
+     !write(std_out,*) "DEBUG:list_symcoeff_tmp2(4,icoeff,1):", list_symcoeff_tmp2(4,icoeff,1) 
+     !MS only keep terms with ia == 2 or ib == 2
+     if (list_symcoeff_tmp2(2,icoeff,1) /= 2 .and. list_symcoeff_tmp2(3,icoeff,1) /= 2)then 
+         list_symcoeff_tmp2(:,icoeff,1) = 0
+     else if(list_symcoeff_tmp2(2,icoeff,1) /= 2 .and. list_symcoeff_tmp2(3,icoeff,1) == 2 .and. any(cell(:,list_symcoeff_tmp2(4,icoeff,1)) /= 0))then 
+         list_symcoeff_tmp2(:,icoeff,1) = 0
+     endif  !MS only keep terms with ia == 1 
+   endif
  end do
 
-write(std_out,*) "DEBUG: min_range(:): ", min_range(:) 
-write(std_out,*) "DEBUG: max_range(:): ", max_range(:) 
+!write(std_out,*) "DEBUG: min_range(:): ", min_range(:) 
+!write(std_out,*) "DEBUG: max_range(:): ", max_range(:) 
 
 !3/ Remove useless terms like opposites
  do icoeff = 1,ncoeff
@@ -2071,40 +2078,41 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  call polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,&
 &                              natom,nstr_sym,ncoeff_sym,nrpt,range_ifc,sc_size=sc_size)
 
-!if(iam_master)then 
-i0 = 0 
-write(std_out,*) "DEBUG shape list_symcoeff(:,:,:):", shape(list_symcoeff) 
-write(std_out,*) "DEBUG shape size(list_symcoeff,2):", size(list_symcoeff(1,:,1))
 ncoeff_symsym = size(list_symcoeff(1,:,1))
-write(std_out,*) "DEBUG list_symcoeff(:,1,:) for coeff 1:" 
-do ii=1,nsym 
-  write(std_out,*) "******************"
-  write(std_out,*) "nsym: ", ii 
-  write(std_out,*) "------------------" 
-  write(std_out,*) "direction list_symcoeff(1,1,", ii,"): ", list_symcoeff(1,1,ii)  
-  write(std_out,*) "atom1     list_symcoeff(2,1,", ii,"): ", list_symcoeff(2,1,ii)  
-  write(std_out,*) "atom2     list_symcoeff(3,1,", ii,"): ", list_symcoeff(3,1,ii)  
-  write(std_out,*) "irpt      list_symcoeff(4,1,", ii,"): ", list_symcoeff(4,1,ii) !,"cell: ", cell(:,list_symcoeff(4,1,ii))
-  write(std_out,*) "cell(:,", list_symcoeff(4,1,ii),"): ", cell(:,list_symcoeff(4,1,ii))
-  write(std_out,*) "weight    list_symcoeff(5,1,", ii,"): ", list_symcoeff(5,1,ii)  
-  write(std_out,*) "index sym list_symcoeff(6,1,", ii,"): ", list_symcoeff(6,1,ii) 
-  ia = list_symcoeff(6,1,ii)  
-  if(ia /= 0)then 
-  write(std_out,*) "------------------" 
-  write(std_out,*) "Symmetric Term from list_symcoeff:" 
-  write(std_out,*) "direction list_symcoeff(1,", ia,",1): ", list_symcoeff(1,ia,1)  
-  write(std_out,*) "atom1     list_symcoeff(2,", ia,",1): ", list_symcoeff(2,ia,1)  
-  write(std_out,*) "atom2     list_symcoeff(3,", ia,",1): ", list_symcoeff(3,ia,1)  
-  write(std_out,*) "irpt      list_symcoeff(4,", ia,",1): ", list_symcoeff(4,ia,1) !,"cell: ", cell(:,list_symcoeff(4,1,ii))
-  write(std_out,*) "weight    list_symcoeff(5,", ia,",1): ", list_symcoeff(5,ia,1)  
-  write(std_out,*) "index sym list_symcoeff(6,", ia,",",ii,"): ", list_symcoeff(6,ia,ii)  
-  write(std_out,*) "index sym list_symcoeff(6,", ia,",1): ", list_symcoeff(6,ia,1)  
-  else 
-    i0 = i0 + 1
-  endif 
-end do 
 
-write(std_out,*) "******************"
+!if(iam_master)then 
+!i0 = 0 
+!write(std_out,*) "DEBUG shape list_symcoeff(:,:,:):", shape(list_symcoeff) 
+!write(std_out,*) "DEBUG shape size(list_symcoeff,2):", size(list_symcoeff(1,:,1))
+!write(std_out,*) "DEBUG list_symcoeff(:,1,:) for coeff 1:" 
+!do ii=1,nsym 
+!  write(std_out,*) "******************"
+!  write(std_out,*) "nsym: ", ii 
+!  write(std_out,*) "------------------" 
+!  write(std_out,*) "direction list_symcoeff(1,1,", ii,"): ", list_symcoeff(1,1,ii)  
+!  write(std_out,*) "atom1     list_symcoeff(2,1,", ii,"): ", list_symcoeff(2,1,ii)  
+!  write(std_out,*) "atom2     list_symcoeff(3,1,", ii,"): ", list_symcoeff(3,1,ii)  
+!  write(std_out,*) "irpt      list_symcoeff(4,1,", ii,"): ", list_symcoeff(4,1,ii) !,"cell: ", cell(:,list_symcoeff(4,1,ii))
+!  write(std_out,*) "cell(:,", list_symcoeff(4,1,ii),"): ", cell(:,list_symcoeff(4,1,ii))
+!  write(std_out,*) "weight    list_symcoeff(5,1,", ii,"): ", list_symcoeff(5,1,ii)  
+!  write(std_out,*) "index sym list_symcoeff(6,1,", ii,"): ", list_symcoeff(6,1,ii) 
+!  ia = list_symcoeff(6,1,ii)  
+!  if(ia /= 0)then 
+!  write(std_out,*) "------------------" 
+!  write(std_out,*) "Symmetric Term from list_symcoeff:" 
+!  write(std_out,*) "direction list_symcoeff(1,", ia,",1): ", list_symcoeff(1,ia,1)  
+!  write(std_out,*) "atom1     list_symcoeff(2,", ia,",1): ", list_symcoeff(2,ia,1)  
+!  write(std_out,*) "atom2     list_symcoeff(3,", ia,",1): ", list_symcoeff(3,ia,1)  
+!  write(std_out,*) "irpt      list_symcoeff(4,", ia,",1): ", list_symcoeff(4,ia,1) !,"cell: ", cell(:,list_symcoeff(4,1,ii))
+!  write(std_out,*) "weight    list_symcoeff(5,", ia,",1): ", list_symcoeff(5,ia,1)  
+! ! write(std_out,*) "index sym list_symcoeff(6,", ia,",",ii,"): ", list_symcoeff(6,ia,ii)  
+!  write(std_out,*) "index sym list_symcoeff(6,", ia,",1): ", list_symcoeff(6,ia,1)  
+!  else 
+!    i0 = i0 + 1
+!  endif 
+!end do 
+
+!write(std_out,*) "******************"
 !write(std_out,*) "i0 is: ", i0 
 ! 
 !write(std_out,*) "DEBUG WHAT ?! " 
@@ -4002,62 +4010,24 @@ function check_irreducibility(combination,list_combination,list_symcoeff,list_sy
   integer :: combination_cmp_tmp(ndisp)
   integer,allocatable :: index_irred_tmp(:) 
 ! *************************************************************************
- !MPI variables
- !master = 0
- !nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
- !iam_master = (my_rank == master)
-
- !cut loop to processes
- !ncombi_alone = mod(ncombination,nproc)
- !my_ncombi_simple = int(aint(real(ncombination,sp)/(nproc))) 
- !search = .TRUE.
- !write(std_out,*) "DEBGUG, ncombi_alone", ncombi_alone
- !write(std_out,*) "DEBGUG, my_ncombi_simple", my_ncombi_simple
- !write(std_out,*) "DEBGUG, nproc-ncombi_alone", nproc - ncombi_alone
- 
-!if(my_ncombi_simple > 0)then
-! if(my_rank == (nproc-ncombi_alone) .and. ncombi_alone /= 0 ) then
-!   my_ncombi = my_ncombi_simple  + 1
-!   my_ncombi_start = my_ncombi * my_rank + 1
-!   my_ncombi = my_ncombi_start + my_ncombi
-! else if(my_rank >(nproc-ncombi_alone) .and. ncombi_alone /= 0)then 
-!   my_ncombi = my_ncombi_simple  + 1
-!   my_ncombi_start = my_ncombi_simple * my_rank + 1 + my_rank - nproc + ncombi_alone
-!   my_ncombi = my_ncombi_start + my_ncombi
-! else
-!   my_ncombi = my_ncombi_simple 
-!   my_ncombi_start = my_ncombi * my_rank + 1
-!   my_ncombi = my_ncombi_start + my_ncombi
-! end if
-!else 
-! if(my_rank <= ncombination)then 
-!    my_ncombi = 1
-!    my_ncombi_start = my_rank + 1 
-    !my_ncombi = my_ncombi_start 
-! else 
-!    my_ncombi = 0
-!    search = .FALSE.
-! endif 
-!endif 
- 
-! write(std_out,*) "DEBGUG, my_rank", my_rank 
-! write(std_out,*) "DEBGUG, my_ncombi", my_ncombi
-! write(std_out,*) "DEBGUG, my_ncombi_start", my_ncombi_start
-
  ! sort input combinations
  !write(std_out,*) "DEBUG call sort_combination_lsit"
  call sort_combination_list(list_combination,size(list_combination,1),size(list_combination,2))
  !write(std_out,*) "DEBUG sort_combination in check_irreducibility"
  call sort_combination(combination,size(combination))
+ 
+ !Initialize variables
  icombi = 1
  irreducible = .TRUE.
  !do icombi=1,ncombination
  ! write(std_out,*) "DEBUG: list_combination i:",icombi,": ", list_combination(:,icombi)
- !enddo 
- icombi = 1
-! write(std_out,*) "DEBUG: shape(list_combination)", shape(list_combination(:,:))
+ !enddo
+ !MS DEBUG 
+ ! write(std_out,*) "DEBUG: shape(list_combination)", shape(list_combination(:,:))
  !write(std_out,*) "DEBUG: combination: ", combination
  !write(std_out,*) "DEBUG: ncombination: ", ncombination
+ 
+ !Loop over non reducable combinations
  do while(icombi <= size(index_irred) .and. irreducible .eqv. .TRUE.) 
    !if(all(list_combination(:,index_irred(icombi)) /= 0))then !.and. any(list_combination(:,i) <= ncoeff_symsym))then 
      !If term j is equivalent to term i delet it
@@ -4103,7 +4073,7 @@ ABI_DEALLOCATE(index_irred)
 ABI_ALLOCATE(index_irred,(size(index_irred_tmp)+1))
 index_irred(:size(index_irred_tmp)) = index_irred_tmp 
 index_irred(size(index_irred)) = ncombination + 1
-write(std_out,*) "DEBUG: index_irred", index_irred
+!write(std_out,*) "DEBUG: index_irred", index_irred
 return 
 
 end function check_irreducibility
