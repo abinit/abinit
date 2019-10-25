@@ -2641,9 +2641,9 @@ integer function ddb_get_quadrupoles(ddb, crystal, lwsym,rftyp, quadrupoles) res
 
  if (iblok /= 0) then
    if (lwsym==1) then
-     write(msg, '(3a)' ) ch10, ' Dynamical Quadrupoles Tensor ',ch10
+     write(msg, '(3a)' ) ch10, ' Dynamical Quadrupoles Tensor (units: e·Bohr)',ch10
    else if (lwsym==0) then
-     write(msg, '(3a)' ) ch10,' First moment of Polarization induced by atomic displacement (1/ucvol factor not included) ',ch10
+     write(msg, '(3a)' ) ch10,' First moment of Polarization induced by atomic displacement (1/ucvol factor not included) (units: e·Bohr) ',ch10
    endif
    call wrtout([std_out, ab_out], msg,'COLL')
 

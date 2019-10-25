@@ -251,6 +251,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
  logical :: iwrite
  real(dp) :: fac
  character(len=500) :: msg
+ real(dp),parameter :: confac=e_Cb/Bohr_meter*1.d9
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
  real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert)
@@ -260,7 +261,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
  d3cart(1,:,:,:,:,:,:) = reshape(blkval(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
  d3cart(2,:,:,:,:,:,:) = reshape(blkval(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
 
-!Extraction of the macroscopic polarization induced by an atomic displacement (P^(1) tensor) 
+!Extraction of the clamped-ion flexoelectric coeficients 
  fac=two/ucvol
  do qvecd=1,3
    do istrs=1,6
@@ -269,7 +270,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
      strst=natom+3; if (istrs>3) strst=natom+4
      strsd=istrs; if (istrs>3) strsd=istrs-3
      do elfd=1,3
-       ciflexo(elfd,qvecd,strsd1,strsd2)=-fac*d3cart(2,elfd,natom+2,strsd,strst,qvecd,natom+8)
+       ciflexo(elfd,qvecd,strsd1,strsd2)=-fac*d3cart(2,elfd,natom+2,strsd,strst,qvecd,natom+8)*confac
        if (istrs>3) ciflexo(elfd,qvecd,strsd2,strsd1)=ciflexo(elfd,qvecd,strsd1,strsd2)
      end do
    end do
@@ -278,7 +279,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !Print results
  iwrite = ab_out > 0
  if (iwrite) then
-   write(msg,'(3a)')ch10,' Type-II electronic flexoelectric tensor (clamped ion) ',ch10
+   write(msg,'(3a)')ch10,' Type-II electronic (clapmed ion) flexoelectric tensor (units= nC/m) ',ch10
    call wrtout([ab_out,std_out],msg,'COLL')
    write(msg,*)'      xx          yy          zz          yz          xz          xy          zy          zx          yx'
    call wrtout([ab_out,std_out],msg,'COLL')
@@ -354,6 +355,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,mixflexo,mpert,n
 !scalars
  integer :: elfd,iat,iatd,ivar,jat,jatd,jvar,kat,katd,qvecd,qvecd2
  logical :: iwrite
+ real(dp),parameter :: confac=e_Cb/Bohr_meter*1.d9
  character(len=500) :: msg
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
@@ -452,7 +454,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,mixflexo,mpert,n
             do iat=1,natom
 
               mixflexo(elfd,qvecd,katd,qvecd2)=mixflexo(elfd,qvecd,katd,qvecd2) - &
-            pol1(elfd,qvecd,iatd,iat)*intstrn(qvecd2,katd,iatd,iat)
+            pol1(elfd,qvecd,iatd,iat)*intstrn(qvecd2,katd,iatd,iat)*confac
 
            end do
          end do
@@ -464,7 +466,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,mixflexo,mpert,n
 !Print results
  iwrite = ab_out > 0
  if (iwrite) then
-   write(msg,'(3a)')ch10,' Force-response internal strain tensor from long-wave magnitudes ',ch10
+   write(msg,'(3a)')ch10,' Force-response internal strain tensor from long-wave magnitudes (units: Hartree/Bohr)',ch10
    call wrtout([ab_out,std_out],msg,'COLL')
    write(msg,*)' atom   dir        xx          yy          zz          yz          xz          xy'
    call wrtout([ab_out,std_out],msg,'COLL')
@@ -480,7 +482,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,mixflexo,mpert,n
      call wrtout([ab_out,std_out],msg,'COLL')
    end do 
 
-   write(msg,'(3a)')ch10,' Displacement-response internal strain tensor from long-wave magnitudes ',ch10
+   write(msg,'(3a)')ch10,' Displacement-response internal strain tensor from long-wave magnitudes (units: Hartree/Bohr)',ch10
    call wrtout([ab_out,std_out],msg,'COLL')
    write(msg,*)' atom   dir        xx          yy          zz          yz          xz          xy'
    call wrtout([ab_out,std_out],msg,'COLL')
@@ -496,7 +498,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,mixflexo,mpert,n
      call wrtout([ab_out,std_out],msg,'COLL')
    end do 
 
-   write(msg,'(3a)')ch10,' Type-II mixed contribution to flexoelectric tensor ',ch10
+   write(msg,'(3a)')ch10,' Type-II mixed contribution to flexoelectric tensor (units: nC/m)',ch10
    call wrtout([ab_out,std_out],msg,'COLL')
    write(msg,*)'      xx          yy          zz          yz          xz          xy          zy          zx          yx'
    call wrtout([ab_out,std_out],msg,'COLL')
