@@ -8,62 +8,76 @@ This page is intended as a quick reference to solve problems commonly encountere
 
 ## How to generate the configure script via *makemake*
 
-Abinit uses the standard `configure && make` approach to build from source.
+Abinit uses the standard `configure && make` approach to build the application from source.
 Note, however, that the developmental version does not contain the `configure` script
-because the script is automatically generated using python machinery and configuration files 
+because the script is automatically generated using python and configuration files
 hosted in the `~abinit/config` directory.
-To generate the `configure` script, execute the `makemake` script:
+To generate the `configure` script and other files required by the build system,, execute the `makemake` python script
+with:
 
     cd ~abinit
     ./config/scripts/makemake
 
-To run `makemake`, you will need a recent version of the python interpreter and
+In order to run `makemake`, you will need a recent version of the python interpreter as well as
 [m4](https://www.gnu.org/software/m4/), [autoconf](https://www.gnu.org/software/autoconf/),
 and [automake](https://www.gnu.org/software/automake/).
-If these tools are not installed on your machine, you need to compile/install from source or use
+If these tools are not installed on your machine, you need to compile and install from source or use
 your preferred package manager to install them.
-I usually use the [conda](https://docs.conda.io/en/latest/) package manager with the syntax:
+I usually use the [conda](https://docs.conda.io/en/latest/) package manager and:
 
     conda install m4 autoconf automake
 
 !!! important
 
-    Remember to run `makemake` every time you add/remove a Fortran file or a new directory or you
-    change parts the buildsystem i.e. the files in ~abinit/config
+    Remember to run *makemake* every time you add/remove a Fortran file or a new directory or you
+    change parts the buildsystem *i.e.* the files in *~abinit/config*.
 
-## Tutorials for beginners
+A detailed description of the configuration options supported by the build system is given in this guide by Marc:
 
-<embed src="https://wiki.abinit.org/lib/exe/fetch.php?media=build:installing_abinit.pdf" type="application/pdf" width="100%" height="480px">
+<embed src="https://wiki.abinit.org/lib/exe/fetch.php?media=build:installing_abinit.pdf"
+type="application/pdf" width="100%" height="480px">
 
 ## How to build Abinit
 
-Developers should build Abinit inside a **build** directory i.e. a directrory that is **separated** 
+Developers are invited to build Abinit inside a **build** directory *i.e.* a directory that is **separated**
 from the source tree in order to keep the source directory as clean as possible and allow for multiple builds.
-I usually use the naming scheme: `_build_[compiler_version]` so
-
+I usually use the naming scheme: `_build_[compiler_name]` for the build directory and an external file
+(e.g. *gcc.ac*) to store the configuration options that are passed to *configure* via the *--with-config-file* option:
 
 ```sh
 mkdir _build_gcc
 cd _build_gcc
 ../configure --with-config-file=gcc.ac
+
 make -j8  # use 8 processes to compile
 ```
 
-Once the build is completed, one can run the test suite with:
+Examples of configuration files for clusters can be found in the [abiconfig package](https://github.com/abinit/abiconfig).
+
+Once the build is completed, run the tests in the *v1* directory with:
 
 ```sh
 cd tests
 ../../tests/runtests.py v1 -j8
 ```
 
+Use
+
+    ../../tests/runtests.py --help
+
+to list the available options.
+A more detailed discussion is given in [this page](testsuite_howto).
+
+[![asciicast](https://asciinema.org/a/40324.png)](https://asciinema.org/a/40324)
+
 !!! tip
 
     Remember to run the tests as frequently as possible while developing new features
     in order to spot possible regressions or incompatibilities.
-    Trust me, you can save a lot of time if you run `runtests.py` systematically.
+    Trust me, you can save a lot of time if you run *runtests.py* systematically.
     You can also start by writing immediately a test following the
     [test driven development](https://en.wikipedia.org/wiki/Test-driven_development) approach
-    in order to facilitate the design of the user-interface and the API implementation.
+    in order to facilitate the design of the user-interface and the implementation of the API.
 
 ## How to browse the source files
 
@@ -103,9 +117,10 @@ In this section, we focus on the.
     In some tricky cases, you may need to resort to -O0 or use `print` statements to avoid miscompilation.
 
 
-For a more complete introduction to gdb, we suggest this youtube tutorial:
+For a more complete introduction to *gdb*, we suggest this youtube tutorial:
 
-<iframe width="1384" height="629" src="https://www.youtube.com/embed/bWH-nL7v5F4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="1384" height="629" src="https://www.youtube.com/embed/bWH-nL7v5F4" frameborder="0"
+allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 
 ## Basic conventions
@@ -145,9 +160,8 @@ In particular:
 ## How to add a new Abinit input variable
 
 Let's focus on the procedure required to add a new Abinit variable.
-To make things as simple as possible, we neglect the case of dimensions such as *nkpt* or *nsym*
+To make things as simple as possible, we neglect the case of dimensions such as [[nkpt]] or [[nsym]]
 whose value may depend on the dataset.
-
 To add a new variables follow the below steps:
 
 - Add the new variable to `dataset_type`. Remember that the name cannot end with a digit (multidataset syntax)
@@ -245,6 +259,40 @@ It can be used, with the other tests of the ABINIT test suite, through different
 Last but not least: are you sure that your modifications do not deteriorate the performance of the code
 in the regime where your modifications are not used?
 You should inspect your modifications for both memory use and CPU time.
+
+## Code Coverage
+
+In computer science, [code coverage](http://en.wikipedia.org/wiki/Code_coverage)
+is a measure used to describe the degree to which the source code
+of a program is tested by a particular test suite.
+A program with high code coverage has been more thoroughly tested and has a lower chance of containing
+software bugs than a program with low code coverage.
+Many different metrics can be used to calculate code coverage; some of the most basic
+are the percent of program subroutines and the percent of program statements called
+during execution of the test suite.
+We aim that the test suite covers all the functionalities of ABINIT.
+
+### How does it work?
+
+ABINIT is built with special options such that every function that is executed in the program
+is mapped back to the function points in the source code.
+A `.gcno` file is generated when the source file is compiled with the GCC *-ftest-coverage* option.
+It contains information to reconstruct the basic block graphs and assign source line numbers to blocks.
+More info are available in the [Gvoc page](https://gcc.gnu.org/onlinedocs/gcc-9.1.0/gcc/index.html#toc-gcov---a-Test-Coverage-Program).
+A *.gcda* file is generated when a program containing object files built with the GCC *-fprofile-arcs* option is executed.
+A separate *.gcda* file is created for each object file compiled with this option.
+It contains arc transition counts, and some summary information.
+Finally, we use [lcov](http://ltp.sourceforge.net/coverage/lcov.php) to analyze the *.gcda* files for generating a html report
+
+### How to trigger a coverage report?
+
+There is one slave dedicated to *on-demand* execution of branches by the developers
+that produces a code coverage report, at present, **higgs_gnu_7.3_cov**.
+It can be launched by the general [https://bbportal.abinit.org](on-demand interface)
+(contact Jean-Michel or Xavier if you do not yet have access to it).
+Code coverage reports from recent runs of the tests are available [here](http://coverage.abinit.org).
+If you see parts of the code which are not well tested, please contribute to improving coverage by writing new tests!
+
 
 {% include doc/developers/robodoc.doc.txt %}
 
