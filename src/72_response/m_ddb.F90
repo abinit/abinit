@@ -2631,6 +2631,8 @@ integer function ddb_get_quadrupoles(ddb, crystal, lwsym,rftyp, quadrupoles) res
  rfstrs(:)=0
  rfqvec(3)=1
 
+ write(msg,'(2a)') ch10, ' Extract quadrupoles or P^(1) coefficients from 3DTE'
+ call wrtout(std_out, msg,'COLL')
  call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqvec=rfqvec)
 
  ! Compute the quadrupole tensor only if the Gamma-block was found in the DDB
@@ -2639,13 +2641,11 @@ integer function ddb_get_quadrupoles(ddb, crystal, lwsym,rftyp, quadrupoles) res
 
  if (iblok /= 0) then
    if (lwsym==1) then
-     write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
-     ' Dynamical Quadrupoles Tensor ',ch10
+     write(msg, '(3a)' ) ch10, ' Dynamical Quadrupoles Tensor ',ch10
    else if (lwsym==0) then
-     write(msg, '(2a,(122a),4a)' ) ch10,('=',ii=1,122),ch10,ch10,&
-     ' First moment of Polarization induced by atomic displacement (1/ucvol factor not included) ',ch10
+     write(msg, '(3a)' ) ch10,' First moment of Polarization induced by atomic displacement (1/ucvol factor not included) ',ch10
    endif
-   call wrtout([std_out, ab_out], msg)
+   call wrtout([std_out, ab_out], msg,'COLL')
 
    call dtqdrp(ddb%val(:,:,iblok),lwsym,ddb%mpert,ddb%natom,quadrupoles)
 
@@ -4468,6 +4468,7 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
 !scalars
  integer :: elfd,iatd,iatom,qvecd
  logical :: iwrite
+ character(len=500) :: msg
 !arrays
  real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert)
 
@@ -4499,27 +4500,35 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
 
  if (iwrite) then
    if (lwsym==1) then
-     write(ab_out,*)' atom   dir       Qxx         Qyy         Qzz         Qyz         Qxz         Qxy'
+     write(msg,*)' atom   dir       Qxx         Qyy         Qzz         Qyz         Qxz         Qxy'
+     call wrtout([ab_out,std_out],msg,'COLL')
      do iatom= 1, natom
-        write(ab_out,'(2x,i3,3x,a3,2x,6f12.6)') iatom, 'x',lwtens(1,1,1,iatom),lwtens(2,2,1,iatom),lwtens(3,3,1,iatom), &
-       & lwtens(2,3,1,iatom),lwtens(1,3,1,iatom),lwtens(1,2,1,iatom)
-        write(ab_out,'(2x,i3,3x,a3,2x,6f12.6)') iatom, 'y',lwtens(1,1,2,iatom),lwtens(2,2,2,iatom),lwtens(3,3,2,iatom), &
-       & lwtens(2,3,2,iatom),lwtens(1,3,2,iatom),lwtens(1,2,2,iatom)
-        write(ab_out,'(2x,i3,3x,a3,2x,6f12.6)') iatom, 'z',lwtens(1,1,3,iatom),lwtens(2,2,3,iatom),lwtens(3,3,3,iatom), &
-       & lwtens(2,3,3,iatom),lwtens(1,3,3,iatom),lwtens(1,2,3,iatom)
+       write(msg,'(2x,i3,3x,a3,2x,6f12.6)') iatom, 'x',lwtens(1,1,1,iatom),lwtens(2,2,1,iatom),lwtens(3,3,1,iatom), &
+     & lwtens(2,3,1,iatom),lwtens(1,3,1,iatom),lwtens(1,2,1,iatom)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6f12.6)') iatom, 'y',lwtens(1,1,2,iatom),lwtens(2,2,2,iatom),lwtens(3,3,2,iatom), &
+     & lwtens(2,3,2,iatom),lwtens(1,3,2,iatom),lwtens(1,2,2,iatom)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6f12.6)') iatom, 'z',lwtens(1,1,3,iatom),lwtens(2,2,3,iatom),lwtens(3,3,3,iatom), &
+     & lwtens(2,3,3,iatom),lwtens(1,3,3,iatom),lwtens(1,2,3,iatom)
+       call wrtout([ab_out,std_out],msg,'COLL')
      end do
    else if (lwsym==0) then
-     write(ab_out,*)' atom   dir       Pxx         Pyy         Pzz         Pyz         Pxz         Pxy         Pzy         Pzx         Pyx'
+     write(msg,*)' atom   dir       Pxx         Pyy         Pzz         Pyz         Pxz         Pxy         Pzy         Pzx         Pyx'
+     call wrtout([ab_out,std_out],msg,'COLL')
      do iatom= 1, natom
-        write(ab_out,'(2x,i3,3x,a3,2x,9f12.6)') iatom, 'x',lwtens(1,1,1,iatom),lwtens(2,2,1,iatom),lwtens(3,3,1,iatom), &
-       & lwtens(2,3,1,iatom),lwtens(1,3,1,iatom),lwtens(1,2,1,iatom), &
-       & lwtens(3,2,1,iatom),lwtens(3,1,1,iatom),lwtens(2,1,1,iatom)
-        write(ab_out,'(2x,i3,3x,a3,2x,9f12.6)') iatom, 'y',lwtens(1,1,2,iatom),lwtens(2,2,2,iatom),lwtens(3,3,2,iatom), &
-       & lwtens(2,3,2,iatom),lwtens(1,3,2,iatom),lwtens(1,2,2,iatom), &
-       & lwtens(3,2,2,iatom),lwtens(3,1,2,iatom),lwtens(2,1,2,iatom)
-        write(ab_out,'(2x,i3,3x,a3,2x,9f12.6)') iatom, 'z',lwtens(1,1,3,iatom),lwtens(2,2,3,iatom),lwtens(3,3,3,iatom), &
-       & lwtens(2,3,3,iatom),lwtens(1,3,3,iatom),lwtens(1,2,3,iatom), &
-       & lwtens(3,2,3,iatom),lwtens(3,1,3,iatom),lwtens(2,1,3,iatom)
+       write(msg,'(2x,i3,3x,a3,2x,9f12.6)') iatom, 'x',lwtens(1,1,1,iatom),lwtens(2,2,1,iatom),lwtens(3,3,1,iatom), &
+     & lwtens(2,3,1,iatom),lwtens(1,3,1,iatom),lwtens(1,2,1,iatom), &
+     & lwtens(3,2,1,iatom),lwtens(3,1,1,iatom),lwtens(2,1,1,iatom)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,9f12.6)') iatom, 'y',lwtens(1,1,2,iatom),lwtens(2,2,2,iatom),lwtens(3,3,2,iatom), &
+     & lwtens(2,3,2,iatom),lwtens(1,3,2,iatom),lwtens(1,2,2,iatom), &
+     & lwtens(3,2,2,iatom),lwtens(3,1,2,iatom),lwtens(2,1,2,iatom)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,9f12.6)') iatom, 'z',lwtens(1,1,3,iatom),lwtens(2,2,3,iatom),lwtens(3,3,3,iatom), &
+     & lwtens(2,3,3,iatom),lwtens(1,3,3,iatom),lwtens(1,2,3,iatom), &
+     & lwtens(3,2,3,iatom),lwtens(3,1,3,iatom),lwtens(2,1,3,iatom)
+       call wrtout([ab_out,std_out],msg,'COLL')
      end do
    endif
  end if

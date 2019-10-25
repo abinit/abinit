@@ -36,7 +36,7 @@ module m_ddb_flexo
  use m_fstrings,       only : itoa,sjoin
  use m_ddb
  use m_crystal,        only : crystal_t
- use m_dynmat,       only : asria_corr
+ use m_dynmat,       only : asria_corr,cart39
 
  implicit none
 
@@ -121,9 +121,12 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg)
    rfstrs(3)=3
    rfqvec(3)=1
   
+   write(msg, '(2a)' ) ch10," Extract the electronic flexoelectric coeficients from 3DTE"
+   call wrtout(std_out,msg,'COLL') 
    call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,33,rfqvec=rfqvec)
   
    if (iblok == 0) then
+     call wrtout(std_out, "  ")
      call wrtout(std_out, "--- !WARNING")
      call wrtout(std_out, sjoin("- Cannot find clamped ion FxE tensor in DDB file:", filnamddb))
      call wrtout(std_out, "flexoflag=1 or 2 requires the DDB file to include the corresponding long wave 3rd derivatives")
@@ -148,9 +151,12 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg)
    rfstrs(3)=0
    rfqvec(3)=1
   
+   write(msg, '(2a)' ) ch10," Extract the Phi^(1) coeficients from 3DTE"
+   call wrtout(std_out,msg,'COLL') 
    call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,33,rfqvec=rfqvec)
 
    if (iblok == 0) then
+     call wrtout(std_out, "  ")
      call wrtout(std_out, "--- !WARNING")
      call wrtout(std_out, sjoin("- Cannot find P^(1) tensor in DDB file:", filnamddb))
      call wrtout(std_out, "   flexoflag=1 or 3 requires the DDB file to include the corresponding long wave 3rd derivatives")
@@ -162,9 +168,13 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg)
    rfphon(4)=1
    rfelfd(:)=0
    rfstrs(:)=0
+
+   write(msg, '(2a)' ) ch10," Extract the forces from 1DTE"
+   call wrtout(std_out,msg,'COLL') 
    call ddb%get_block(fblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,4)
 
    if (fblok == 0) then
+     call wrtout(std_out, "  ")
      call wrtout(std_out, "--- !WARNING")
      call wrtout(std_out, sjoin("- Cannot find forces in DDB file:", filnamddb))
      call wrtout(std_out, "   If there are nonzero residual atomic forces on the structure") 
@@ -179,15 +189,19 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg)
    rfelfd(:)=0
    rfstrs(:)=0
   
+   write(msg, '(2a)' ) ch10," Extract the Dynamical Matrix from 2DTE"
+   call wrtout(std_out,msg,'COLL') 
    call ddb%get_block(jblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,1)
 
    if (jblok == 0) then
+     call wrtout(std_out, "  ")
      call wrtout(std_out, "--- !WARNING")
      call wrtout(std_out, sjoin("- Cannot find Gamma point Dynamical Matrix in DDB file:", filnamddb))
      call wrtout(std_out, "   flexoflag=1 or 3 requires the DDB file to include the corresponding 2nd derivatives")
    end if
 
-   call dtmixflexo(asr,d2asr,ddb%val(:,:,fblok),ddb%val(:,:,jblok),ddb_lw%val(:,:,iblok),mixflexo,ddb%mpert,ddb%natom,pol1,crystal%ucvol)
+   call dtmixflexo(asr,d2asr,ddb%val(:,:,fblok),ddb%val(:,:,jblok),ddb_lw%val(:,:,iblok),crystal%gprimd,mixflexo,&
+  & ddb%mpert,ddb%natom,pol1,crystal%rprimd,crystal%ucvol)
 
  end if
 
@@ -265,21 +279,24 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
  iwrite = ab_out > 0
  if (iwrite) then
    write(msg,'(3a)')ch10,' Type-II electronic flexoelectric tensor (clamped ion) ',ch10
-   call wrtout(ab_out,msg,'COLL')
-   write(ab_out,*)'      xx          yy          zz          yz          xz          xy          zy          zx          yx'
+   call wrtout([ab_out,std_out],msg,'COLL')
+   write(msg,*)'      xx          yy          zz          yz          xz          xy          zy          zx          yx'
+   call wrtout([ab_out,std_out],msg,'COLL')
    do ivarA=1,6
      elfd=alpha(ivarA)
      qvecd=beta(ivarA)
-     write(ab_out,'(9f12.6)') ciflexo(elfd,qvecd,1,1),ciflexo(elfd,qvecd,2,2),ciflexo(elfd,qvecd,3,3),&
-                              ciflexo(elfd,qvecd,2,3),ciflexo(elfd,qvecd,1,3),ciflexo(elfd,qvecd,1,2),&
-                              ciflexo(elfd,qvecd,3,2),ciflexo(elfd,qvecd,3,1),ciflexo(elfd,qvecd,2,1)
+     write(msg,'(9f12.6)') ciflexo(elfd,qvecd,1,1),ciflexo(elfd,qvecd,2,2),ciflexo(elfd,qvecd,3,3),&
+                           ciflexo(elfd,qvecd,2,3),ciflexo(elfd,qvecd,1,3),ciflexo(elfd,qvecd,1,2),&
+                           ciflexo(elfd,qvecd,3,2),ciflexo(elfd,qvecd,3,1),ciflexo(elfd,qvecd,2,1)
+     call wrtout([ab_out,std_out],msg,'COLL')
    end do
    do ivarA=4,6
      elfd=beta(ivarA)
      qvecd=alpha(ivarA)
-     write(ab_out,'(9f12.6)') ciflexo(elfd,qvecd,1,1),ciflexo(elfd,qvecd,2,2),ciflexo(elfd,qvecd,3,3),&
-                              ciflexo(elfd,qvecd,2,3),ciflexo(elfd,qvecd,1,3),ciflexo(elfd,qvecd,1,2),&
-                              ciflexo(elfd,qvecd,3,2),ciflexo(elfd,qvecd,3,1),ciflexo(elfd,qvecd,2,1)
+     write(msg,'(9f12.6)') ciflexo(elfd,qvecd,1,1),ciflexo(elfd,qvecd,2,2),ciflexo(elfd,qvecd,3,3),&
+                           ciflexo(elfd,qvecd,2,3),ciflexo(elfd,qvecd,1,3),ciflexo(elfd,qvecd,1,2),&
+                           ciflexo(elfd,qvecd,3,2),ciflexo(elfd,qvecd,3,1),ciflexo(elfd,qvecd,2,1)
+     call wrtout([ab_out,std_out],msg,'COLL')
    end do
  end if
 
@@ -317,7 +334,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !!
 !! SOURCE
 
-subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,mixflexo,mpert,natom,pol1,ucvol)
+subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,mixflexo,mpert,natom,pol1,rprimd,ucvol)
 
 !Arguments -------------------------------
 !scalars
@@ -325,10 +342,12 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,mixflexo,mpert,natom,po
  real(dp),intent(in) :: ucvol
 !arrays
  real(dp),intent(in) :: d2asr(2,3,mpert,3,mpert)
- real(dp),intent(in) :: blkval1d(1,3,mpert,3,mpert)
+ real(dp),intent(in) :: blkval1d(2,3,mpert,3,mpert)
  real(dp),intent(in) :: blkval2d(2,3,mpert,3,mpert)
  real(dp),intent(in) :: blkval(2,3*mpert*3*mpert*3*mpert)
+ real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(inout) :: pol1(3,3,3,natom)
+ real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(out) :: mixflexo(3,3,3,3)
 
 !Local variables -------------------------
@@ -339,11 +358,13 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,mixflexo,mpert,natom,po
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
  real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert)
- real(dp) :: forces(3,natom)
+ real(dp) :: redforces(3,natom),forces(3,natom)
  real(dp) :: intstrn(3,3,3,natom)
  real(dp) :: phi1(3,natom,3,natom,3)
  real(dp) :: piezofr(3,natom,3,3)
  real(dp) :: psinvdm(3*natom,3*natom)
+ integer :: flg1(3),flg2(3)
+ real(dp) :: vec1(3),vec2(3)
 
 ! *********************************************************************
 
@@ -366,11 +387,19 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,mixflexo,mpert,natom,po
    end do
  end do
 
-!Extraction of the forces to acount for the improper contribution
- do iatd=1,3
-   do iat=1,natom
-     forces(iatd,iat)=-blkval1d(1,iatd,iat,1,1)
+!Extraction of the forces and conversion to cartesian coordinates 
+!to acount for the improper contribution
+ do iat=1,natom
+   do iatd=1,3
+     redforces(iatd,iat)=-blkval1d(1,iatd,iat,1,1)
    end do
+ end do
+ forces(:,:)=redforces(:,:)
+ flg1(:)=1
+ do iat=1,natom
+   vec1(:)=forces(:,iat)
+   call cart39(flg1,flg2,gprimd,iat,natom,rprimd,vec1,vec2)
+   forces(:,iat)=vec2(:)
  end do
 
 !Calculate the piezoelectric force-response tensor including the improper contribution
@@ -435,34 +464,57 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,mixflexo,mpert,natom,po
 !Print results
  iwrite = ab_out > 0
  if (iwrite) then
-   write(msg,'(3a)')ch10,' Displacement-response internal strain tensor from long-wave magnitudes ',ch10
-   call wrtout(ab_out,msg,'COLL')
-   write(ab_out,*)' atom   dir        xx          yy          zz          yz          xz          xy'
+   write(msg,'(3a)')ch10,' Force-response internal strain tensor from long-wave magnitudes ',ch10
+   call wrtout([ab_out,std_out],msg,'COLL')
+   write(msg,*)' atom   dir        xx          yy          zz          yz          xz          xy'
+   call wrtout([ab_out,std_out],msg,'COLL')
    do iat=1,natom
-     write(ab_out,'(2x,i3,3x,a3,2x,6f12.6)') iat, 'x', intstrn(1,1,1,iat),intstrn(2,2,1,iat),intstrn(3,3,1,iat),&
+     write(msg,'(2x,i3,3x,a3,2x,6f12.6)') iat, 'x', piezofr(1,iat,1,1),piezofr(1,iat,2,2),piezofr(1,iat,3,3),&
+                                                    piezofr(1,iat,2,3),piezofr(1,iat,1,3),piezofr(1,iat,1,2)
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6f12.6)') iat, 'y', piezofr(2,iat,1,1),piezofr(2,iat,2,2),piezofr(2,iat,3,3),&
+                                                    piezofr(2,iat,2,3),piezofr(2,iat,1,3),piezofr(2,iat,1,2)
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6f12.6)') iat, 'z', piezofr(3,iat,1,1),piezofr(3,iat,2,2),piezofr(3,iat,3,3),&
+                                                    piezofr(3,iat,2,3),piezofr(3,iat,1,3),piezofr(3,iat,1,2)
+     call wrtout([ab_out,std_out],msg,'COLL')
+   end do 
+
+   write(msg,'(3a)')ch10,' Displacement-response internal strain tensor from long-wave magnitudes ',ch10
+   call wrtout([ab_out,std_out],msg,'COLL')
+   write(msg,*)' atom   dir        xx          yy          zz          yz          xz          xy'
+   call wrtout([ab_out,std_out],msg,'COLL')
+   do iat=1,natom
+     write(msg,'(2x,i3,3x,a3,2x,6f12.6)') iat, 'x', intstrn(1,1,1,iat),intstrn(2,2,1,iat),intstrn(3,3,1,iat),&
                                                          intstrn(2,3,1,iat),intstrn(1,3,1,iat),intstrn(1,2,1,iat)
-     write(ab_out,'(2x,i3,3x,a3,2x,6f12.6)') iat, 'y', intstrn(1,1,2,iat),intstrn(2,2,2,iat),intstrn(3,3,2,iat),&
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6f12.6)') iat, 'y', intstrn(1,1,2,iat),intstrn(2,2,2,iat),intstrn(3,3,2,iat),&
                                                          intstrn(2,3,2,iat),intstrn(1,3,2,iat),intstrn(1,2,2,iat)
-     write(ab_out,'(2x,i3,3x,a3,2x,6f12.6)') iat, 'z', intstrn(1,1,3,iat),intstrn(2,2,3,iat),intstrn(3,3,3,iat),&
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6f12.6)') iat, 'z', intstrn(1,1,3,iat),intstrn(2,2,3,iat),intstrn(3,3,3,iat),&
                                                          intstrn(2,3,3,iat),intstrn(1,3,3,iat),intstrn(1,2,3,iat)
+     call wrtout([ab_out,std_out],msg,'COLL')
    end do 
 
    write(msg,'(3a)')ch10,' Type-II mixed contribution to flexoelectric tensor ',ch10
-   call wrtout(ab_out,msg,'COLL')
-   write(ab_out,*)'      xx          yy          zz          yz          xz          xy          zy          zx          yx'
+   call wrtout([ab_out,std_out],msg,'COLL')
+   write(msg,*)'      xx          yy          zz          yz          xz          xy          zy          zx          yx'
+   call wrtout([ab_out,std_out],msg,'COLL')
    do ivar=1,6
      elfd=alpha(ivar)
      qvecd=beta(ivar)
-     write(ab_out,'(9f12.6)') mixflexo(elfd,qvecd,1,1),mixflexo(elfd,qvecd,2,2),mixflexo(elfd,qvecd,3,3),&
-                              mixflexo(elfd,qvecd,2,3),mixflexo(elfd,qvecd,1,3),mixflexo(elfd,qvecd,1,2),&
-                              mixflexo(elfd,qvecd,3,2),mixflexo(elfd,qvecd,3,1),mixflexo(elfd,qvecd,2,1)
+     write(msg,'(9f12.6)') mixflexo(elfd,qvecd,1,1),mixflexo(elfd,qvecd,2,2),mixflexo(elfd,qvecd,3,3),&
+                           mixflexo(elfd,qvecd,2,3),mixflexo(elfd,qvecd,1,3),mixflexo(elfd,qvecd,1,2),&
+                           mixflexo(elfd,qvecd,3,2),mixflexo(elfd,qvecd,3,1),mixflexo(elfd,qvecd,2,1)
+     call wrtout([ab_out,std_out],msg,'COLL')
    end do
    do ivar=4,6
      elfd=beta(ivar)
      qvecd=alpha(ivar)
-     write(ab_out,'(9f12.6)') mixflexo(elfd,qvecd,1,1),mixflexo(elfd,qvecd,2,2),mixflexo(elfd,qvecd,3,3),&
-                              mixflexo(elfd,qvecd,2,3),mixflexo(elfd,qvecd,1,3),mixflexo(elfd,qvecd,1,2),&
-                              mixflexo(elfd,qvecd,3,2),mixflexo(elfd,qvecd,3,1),mixflexo(elfd,qvecd,2,1)
+     write(msg,'(9f12.6)') mixflexo(elfd,qvecd,1,1),mixflexo(elfd,qvecd,2,2),mixflexo(elfd,qvecd,3,3),&
+                           mixflexo(elfd,qvecd,2,3),mixflexo(elfd,qvecd,1,3),mixflexo(elfd,qvecd,1,2),&
+                           mixflexo(elfd,qvecd,3,2),mixflexo(elfd,qvecd,3,1),mixflexo(elfd,qvecd,2,1)
+     call wrtout([ab_out,std_out],msg,'COLL')
    end do
  end if
 
