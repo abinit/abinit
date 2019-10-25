@@ -327,66 +327,59 @@ contains
           init_mode=1
        end if
 
-       !NH: this is already handled by the input variable checks, remove?
-       if (init_mode>4) then
-          MSG_ERROR( "Error: Set initial spin: mode should be  1, 2, 3, 4. Others are not yet implemented." )
-          call wrtout(ab_out,msg,'COLL')
-          call wrtout(std_out,msg,'COLL')
-       end if
-
        select case (init_mode)
          case (1)
            ! randomize S using uniform random number
-          write(msg,*) "Initial spins set to random values."
-          call wrtout(ab_out,msg,'COLL')
-          call wrtout(std_out,msg,'COLL')
-          call random_number(self%Stmp)
-          self%Stmp=self%Stmp-0.5
-          do i=1, self%nspin
+           write(msg,*) "Initial spins set to random values."
+           call wrtout(ab_out,msg,'COLL')
+           call wrtout(std_out,msg,'COLL')
+           call random_number(self%Stmp)
+           self%Stmp=self%Stmp-0.5
+           do i=1, self%nspin
              self%Stmp(:,i)=self%Stmp(:,i)/sqrt(sum(self%Stmp(:, i)**2))
-          end do
+           end do
 
-        case (2)
-          ! set spin to reference state using the reference qpoint and rotation axis from potential file
-          write(msg,*) "Initial spins set to reference configuration."
-          call wrtout(ab_out,msg,'COLL')
-          call wrtout(std_out,msg,'COLL')
+         case (2)
+           ! set spin to reference state using the reference qpoint and rotation axis from potential file
+           write(msg,*) "Initial spins set to reference configuration."
+           call wrtout(ab_out,msg,'COLL')
+           call wrtout(std_out,msg,'COLL')
 
-          do i=1, self%nspin
+           do i=1, self%nspin
              self%Stmp(:,:) = self%supercell%spin%Sref(:,:)
-          end do
+           end do
 
-        case (3)
-          write(msg,*) "Initial spins set according to spin_init_* variables."
-          call wrtout(ab_out,msg,'COLL')
-          call wrtout(std_out,msg,'COLL')
+         case (3)
+           write(msg,*) "Initial spins set according to spin_init_* variables."
+           call wrtout(ab_out,msg,'COLL')
+           call wrtout(std_out,msg,'COLL')
 
-          self%hist%nspin_prim=INT(REAL(self%nspin)/REAL(self%supercell%ncell))
+           self%hist%nspin_prim=INT(REAL(self%nspin)/REAL(self%supercell%ncell))
 
-          ABI_ALLOCATE(Sprim, (3,self%hist%nspin_prim) )
+           ABI_ALLOCATE(Sprim, (3,self%hist%nspin_prim) )
 
-          ! set inital spin state using the input variables
-          ! set spin to ferromagnetic along init_orientation then rotate
-          do i=1, self%hist%nspin_prim
-            Sprim(:,i)=self%init_orientation(:)
-          enddo
-          self%Stmp(:,:) = 0.0d0
+           ! set inital spin state using the input variables
+           ! set spin to ferromagnetic along init_orientation then rotate
+           do i=1, self%hist%nspin_prim
+             Sprim(:,i)=self%init_orientation(:)
+           enddo
+           self%Stmp(:,:) = 0.0d0
           
-          call self%supercell%supercell_maker%generate_spin_wave_vectorlist(A=Sprim, &
-             & kpoint=self%init_qpoint, axis=self%init_rotate_axis, A_sc=self%Stmp)
+           call self%supercell%supercell_maker%generate_spin_wave_vectorlist(A=Sprim, &
+              & kpoint=self%init_qpoint, axis=self%init_rotate_axis, A_sc=self%Stmp)
    
-          ABI_SFREE(SPrim)
+           ABI_SFREE(SPrim)
 
-        case (4)
-          ! read from last step of hist file
-          write(msg,'(a,a,a)') "Initial spins set to input spin hist file ",&
-             &  trim(restart_hist_fname), '.'  
-          call wrtout(ab_out,msg,'COLL')
-          call wrtout(std_out,msg,'COLL')
-          if (.not. present(restart_hist_fname)) then
+         case (4)
+           ! read from last step of hist file
+           write(msg,'(a,a,a)') "Initial spins set to input spin hist file ",&
+              &  trim(restart_hist_fname), '.'  
+           call wrtout(ab_out,msg,'COLL')
+           call wrtout(std_out,msg,'COLL')
+           if (.not. present(restart_hist_fname)) then
              MSG_ERROR("Spin initialize mode set to 4, but restart_hist_fname is not used.")
-          end if
-          call self%read_hist_spin_state(fname=restart_hist_fname)
+           end if
+           call self%read_hist_spin_state(fname=restart_hist_fname)
 
        end select
 
