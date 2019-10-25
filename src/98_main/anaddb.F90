@@ -322,12 +322,14 @@ program anaddb
 !**********************************************************************
 
  ! Get Quadrupole tensor
+ write(msg,'(2a,(80a),2a)') ch10,('=',ii=1,80)
+ call wrtout([ab_out,std_out],msg,'COLL')
  lwsym=1
  iblok = ddb_lw%get_quadrupoles(crystal,lwsym,33,qdrp_cart)
  if ((inp%dipquad==1.or.inp%quadquad==1).and.iblok == 0) then
    call wrtout(std_out, "--- !WARNING")
    call wrtout(std_out, sjoin("- Cannot find Dynamical Quadrupoles tensor in DDB file:", filnam(3)))
-   call wrtout(std_out, "dipquad=1 or quadquad=1 requires the DDB file to include the corresponding long wave 3rd derivatives")
+   call wrtout(std_out, "  dipquad=1 or quadquad=1 requires the DDB file to include the corresponding long wave 3rd derivatives")
  end if
 
  ! Get Dielectric Tensor and Effective Charges
