@@ -671,17 +671,26 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
 
 !Local variables -------------------------
 !scalars
- integer :: elfd,iat,iatd,ivar,jat,jatd,jvar,kat,katd,qvecd,qvecd2
+ integer :: elfd,iat,iatd,istrs,ivar,jat,jatd,jvar,kat,katd,strsd
+ integer :: strsd1,strsd2,strst,qvecd,qvecd2
  logical :: iwrite
+ real(dp) :: fac
  real(dp),parameter :: confac=e_Cb/Bohr_meter*1.d9
  character(len=500) :: msg
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
+ real(dp) :: frcelast_t2(3,3,3,3)
+ real(dp) :: qsrbkt_t1(3,3,3,3)
  real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert)
  real(dp) :: flexofr(3,natom,3,3)
+ real(dp) :: isdq(3,natom,3,3,3)
  real(dp) :: roundbkt(3,3,3,3,natom)
  real(dp) :: phi1(3,natom,3,natom,3)
  real(dp) :: stress(3,3)
+
+!tmp
+ integer :: i,j,k,l
+ real(dp) :: delik,deljk,delil,deljl
 
 ! *********************************************************************
 
@@ -695,7 +704,7 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
  stress(1,3)=blkval1d(1,2,natom+4,1,1);stress(3,1)=stress(1,3)
  stress(1,2)=blkval1d(1,3,natom+4,1,1);stress(2,1)=stress(1,2)
  
-!Calculate the round bracket tensor of Born and Huang
+!Calculate the sublattice-dependent round bracket tensor of PRB 88,174106 (2013)
 !First we need to extract the Phi^(1) tensor
  d3cart(1,:,:,:,:,:,:) = reshape(blkvalB(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
  d3cart(2,:,:,:,:,:,:) = reshape(blkvalB(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
@@ -725,13 +734,125 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
              + phi1(iatd,iat,katd,kat,qvecd)*intstrn(qvecd2,jatd,katd,kat)
              end do
            end do
+!         write(100,'(5i3,1x,f12.6)') iat, iatd,qvecd,jatd,qvecd2,roundbkt(iatd,qvecd,jatd,qvecd2,iat)
          end do
        end do
      end do
    end do
  end do
 
+!Calculate now the Lagrange elastic tensors 
+!First we need to extract the tensor with the q-gradient of the internal strain
+ d3cart(1,:,:,:,:,:,:) = reshape(blkvalA(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
+ d3cart(2,:,:,:,:,:,:) = reshape(blkvalA(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
 
+ do istrs=1,6
+   strsd1=alpha(istrs)
+   strsd2=beta(istrs)
+   strst=natom+3; if (istrs>3) strst=natom+4
+   strsd=istrs; if (istrs>3) strsd=istrs-3
+   do qvecd=1,3
+     do iat=1,natom
+       do iatd=1,3
+         isdq(iatd,iat,qvecd,strsd1,strsd2)=-two*d3cart(1,iatd,iat,strsd,strst,qvecd,natom+8)
+         if (istrs>3) isdq(iatd,iat,qvecd,strsd2,strsd1)=isdq(iatd,iat,qvecd,strsd1,strsd2)
+       end do
+     end do
+   end do
+ end do
+
+!Now compute the type-II frozen-ion elastic tensor (without stress corrected)
+ frcelast_t2(:,:,:,:)=zero
+ fac=one/ucvol
+ do strsd2=1,3
+   do strsd1=1,3
+     do qvecd=1,3
+       do iatd=1,3
+         do iat=1,natom
+           frcelast_t2(iatd,qvecd,strsd1,strsd2)=frcelast_t2(iatd,qvecd,strsd1,strsd2) + &
+        &  isdq(iatd,iat,qvecd,strsd1,strsd2)*fac
+         end do
+!         write(100,'(4i3,1x,f12.6)') iatd,qvecd,strsd1,strsd2, frcelast_t2(iatd,qvecd,strsd1,strsd2)
+       end do
+     end do
+   end do
+ end do
+
+!Now convert to type-I to obtain the square bracketed tesnor of Born and Huang
+ do qvecd=1,3
+   do strsd2=1,3
+     do strsd1=1,3
+       do iatd=1,3
+         qsrbkt_t1(iatd,strsd1,strsd2,qvecd)=half*(frcelast_t2(iatd,qvecd,strsd1,strsd2) + &
+       & frcelast_t2(iatd,strsd2,strsd1,qvecd))
+       end do
+     end do
+   end do
+ end do
+
+!Now correct the stress in the square bracketed tesnor tensor
+ do qvecd=1,3
+   do strsd2=1,3
+     do strsd1=1,3
+       do iatd=1,3
+         if (iatd==strsd1) then
+           qsrbkt_t1(iatd,strsd1,strsd2,qvecd)=qsrbkt_t1(iatd,strsd1,strsd2,qvecd) - stress(strsd2,qvecd)
+         endif
+       end do
+     end do
+   end do
+ end do
+
+!Now convert back to type-II in order to obtain the frozen ion Lagrange elastic tensor.
+ frcelast_t2(:,:,:,:)=zero
+ do iatd=1,3
+   do qvecd=1,3
+     do strsd1=1,3
+       do strsd2=1,3
+         frcelast_t2(iatd,qvecd,strsd1,strsd2)=qsrbkt_t1(iatd,strsd1,qvecd,strsd2) + &
+       & qsrbkt_t1(iatd,strsd2,strsd1,qvecd)-qsrbkt_t1(iatd,qvecd,strsd2,strsd1)
+       end do
+     end do
+   end do
+ end do
+
+!MR: kept for testing only. If uncommented the resulting tensor must agree with Hamman's one
+!do i=1,3
+!   do j=1,3
+!     do k=1,3
+!       delik=0.d0; if(i==k) delik=1.d0
+!       deljk=0.d0; if(j==k) deljk=1.d0
+!       do l=1,3
+!         delil=0.d0; if(i==l) delil=1.d0
+!         deljl=0.d0; if(j==l) deljl=1.d0
+
+!         frcelast_t2(i,j,k,l)=frcelast_t2(i,j,k,l) + &
+!       & 0.5d0*( deljk*stress(i,l) + delik*stress(j,l) + delil*stress(j,k) &
+!       & + deljl*stress(i,k) )
+
+!       end do
+!     end do
+!   end do
+! end do
+
+ 
+ iwrite = ab_out > 0
+ if (iwrite) then
+   write(msg,'(3a)')ch10,' Lagrange elastic tensor from long wave magnitudes (clamped ion) (units= 10^-2 GPa^-1) ',ch10
+   call wrtout([ab_out,std_out],msg,'COLL')
+   write(msg,*)'      xx          yy          zz          yz          xz          xy'
+   call wrtout([ab_out,std_out],msg,'COLL')
+   frcelast_t2(:,:,:,:)=frcelast_t2(:,:,:,:)*HaBohr3_GPa/100.00_dp
+   do ivar=1,6
+     iatd=alpha(ivar)
+     qvecd=beta(ivar)
+     write(msg,'(9f12.6)') frcelast_t2(iatd,qvecd,1,1), frcelast_t2(iatd,qvecd,2,2),frcelast_t2(iatd,qvecd,3,3), &
+                           frcelast_t2(iatd,qvecd,2,3), frcelast_t2(iatd,qvecd,1,3),frcelast_t2(iatd,qvecd,1,2)
+
+     call wrtout([ab_out,std_out],msg,'COLL')
+   end do
+
+ end if
  DBG_EXIT("COLL")
 
  end subroutine dtlattflexo
