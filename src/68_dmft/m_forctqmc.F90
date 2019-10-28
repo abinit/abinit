@@ -2676,8 +2676,8 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   MSG_ERROR(message)
 #else
   ! Creating the NETCDF file
-  write(std_out, '(2a)') ch10, "    Creating NETCDF file: dft_for_triqs.nc"
-  call nf_check(nf90_create("dft_for_triqs.nc", NF90_CLOBBER, ncid))
+  write(std_out, '(2a)') ch10, "    Creating NETCDF file: abinit_output_for_py.nc"
+  call nf_check(nf90_create("abinit_output_for_py.nc", NF90_CLOBBER, ncid))
  
   ! Defining the dimensions of the variables to write in the NETCDF file
   call nf_check(nf90_def_dim(ncid, "one", 1, dim_one_id))
@@ -2781,15 +2781,15 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   i = (0, 1)
   
   ! Check if file exists
-  INQUIRE(FILE="triqs_for_dft.nc", EXIST=file_exists)
+  INQUIRE(FILE="py_output_for_abinit.nc", EXIST=file_exists)
   if(.not. file_exists) then
-   write(message,'(2a)') ch10,' Cannot find file "triqs_for_dft.nc! Make sure the python script writes it with the right name and at the right place!.'
+   write(message,'(2a)') ch10,' Cannot find file "py_output_for_abinit.nc! Make sure the python script writes it with the right name and at the right place!.'
    call wrtout(std_out,message,'COLL')
    MSG_ERROR(message)
   endif
 
   ! Opening the NETCDF file
-  call nf_check(nf90_open("triqs_for_dft.nc", nf90_nowrite, ncid))
+  call nf_check(nf90_open("py_output_for_abinit.nc", nf90_nowrite, ncid))
  
   ! Read from the file
   ! Re{G_iw}
