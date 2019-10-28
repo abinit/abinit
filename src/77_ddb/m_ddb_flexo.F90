@@ -109,6 +109,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
  real(dp) :: lattflexo(3,3,3,3)
  real(dp) :: mixflexo(3,3,3,3)
  real(dp) :: pol1(3,3,3,ddb%natom)
+ real(dp) :: psinvdm(3*ddb%natom,3*ddb%natom)
  
 ! *************************************************************************
 
@@ -214,7 +215,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
    end if
 
    call dtmixflexo(asr,d2asr,ddb%val(:,:,kblok),ddb%val(:,:,jblok),ddb_lw%val(:,:,iblok),crystal%gprimd,&
-  & intstrn,intstrn_only,mixflexo,ddb%mpert,ddb%natom,pol1,crystal%rprimd,crystal%ucvol)
+  & intstrn,intstrn_only,mixflexo,ddb%mpert,ddb%natom,pol1,psinvdm,crystal%rprimd,crystal%ucvol)
 
  end if
 
@@ -283,8 +284,8 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
      call wrtout(std_out, "  to compute the Lagrange Elastic Tensor ")
    end if
 
-   call dtlattflexo(ddb%val(:,:,lblok),ddb_lw%val(:,:,jblok),ddb_lw%val(:,:,iblok),&
-  & intstrn,lattflexo,ddb%mpert,ddb%natom,crystal%ucvol,zeff)
+   call dtlattflexo(ddb%amu,ddb%val(:,:,lblok),ddb_lw%val(:,:,jblok),ddb_lw%val(:,:,iblok),&
+  & intstrn,lattflexo,ddb%mpert,ddb%natom,crystal%ntypat,psinvdm,crystal%typat,crystal%ucvol,zeff)
 
  end if
 
@@ -418,6 +419,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !! OUTPUT
 !! mixflexo(3,3,3,3) = type-II mixed contribution to the Flexoelectric Tensor
 !! intstrn(3,3,3,natom) = relaxed-ion internal strain tensor
+!! psinvdm(3*natom,3*natom) = pseudo inverse of dynamical matrix
 !!
 !! PARENTS
 !!      m_ddb
@@ -426,7 +428,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !!
 !! SOURCE
 
-subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_only,mixflexo,mpert,natom,pol1,rprimd,ucvol)
+subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_only,mixflexo,mpert,natom,pol1,psinvdm,rprimd,ucvol)
 
 !Arguments -------------------------------
 !scalars
@@ -441,6 +443,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
  real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(out) :: intstrn(3,3,3,natom)
  real(dp),intent(inout) :: pol1(3,3,3,natom)
+ real(dp),intent(out) :: psinvdm(3*natom,3*natom)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(out) :: mixflexo(3,3,3,3)
 
@@ -456,7 +459,6 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
  real(dp) :: redforces(3,natom),forces(3,natom)
  real(dp) :: phi1(3,natom,3,natom,3)
  real(dp) :: piezofr(3,natom,3,3)
- real(dp) :: psinvdm(3*natom,3*natom)
  integer :: flg1(3),flg2(3)
  real(dp) :: vec1(3),vec2(3)
 
@@ -578,7 +580,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
      call wrtout([ab_out,std_out],msg,'COLL')
    end do 
 
-   write(msg,'(3a)')ch10,' Displacement-response internal strain tensor from long-wave magnitudes (units: Hartree/Bohr)',ch10
+   write(msg,'(3a)')ch10,' Displacement-response internal strain tensor from long-wave magnitudes (units: Hartree)',ch10
    call wrtout([ab_out,std_out],msg,'COLL')
    write(msg,*)' atom   dir        xx          yy          zz          yz          xz          xy'
    call wrtout([ab_out,std_out],msg,'COLL')
@@ -635,6 +637,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 !! It also computes and writes the Lagrangian Elastic tensor.
 !!
 !! INPUTS
+!! amu(ntypat)=mass each atom type in the unit cell 
 !! blkval1d(2,3,mpert,3,mpert)= 1st derivative wrt stress (at least)
 !! blkval2d(2,3,mpert,3,mpert)= 2nd derivatives wrt atom displacements and electric field (at least)
 !! blkvalA(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies for FxE force response tensor
@@ -642,6 +645,8 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 !! intstrn(3,3,3,natom) = relaxed-ion internal strain tensor
 !! mpert =maximum number of ipert
 !! natom= number of atoms in unit cell
+!! psinvdm(3*natom,3*natom) = pseudo inverse of dynamical matrix 
+!! typat(natom)= Type of each atom in the unit cell
 !! ucvol= unit cell volume
 !!
 !! OUTPUT
@@ -654,18 +659,22 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 !!
 !! SOURCE
 
-subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,ucvol,zeff)
+subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,&
+                     & ntypat,psinvdm,typat,ucvol,zeff)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,natom
+ integer,intent(in) :: mpert,natom,ntypat
  real(dp),intent(in) :: ucvol
 
 !arrays
+ integer,intent(in) :: typat(natom)
+ real(dp),intent(in) :: amu(ntypat)
  real(dp),intent(in) :: blkval1d(2,3,mpert,3,mpert)
  real(dp),intent(in) :: blkvalA(2,3*mpert*3*mpert*3*mpert)
  real(dp),intent(in) :: blkvalB(2,3*mpert*3*mpert*3*mpert)
  real(dp),intent(in) :: intstrn(3,3,3,natom)
+ real(dp),intent(in) :: psinvdm(3*natom,3*natom)
  real(dp),intent(in) :: zeff(3,3,natom)
  real(dp),intent(out) :: lattflexo(3,3,3,3)
 
@@ -674,15 +683,16 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
  integer :: elfd,iat,iatd,istrs,ivar,jat,jatd,jvar,kat,katd,strsd
  integer :: strsd1,strsd2,strst,qvecd,qvecd2
  logical :: iwrite
- real(dp) :: fac
+ real(dp) :: fac,mtot
  real(dp),parameter :: confac=e_Cb/Bohr_meter*1.d9
  character(len=500) :: msg
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
  real(dp) :: frcelast_t2(3,3,3,3)
+ real(dp) :: Csupkap(3,natom,3,3,3)
  real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert)
- real(dp) :: flexofr(3,natom,3,3)
- real(dp) :: isdq(3,natom,3,3,3)
+ real(dp) :: flexois(3,natom,3,3,3)
+ real(dp) :: flexofr(3,natom,3,3,3)
  real(dp) :: phi1(3,natom,3,natom,3)
  real(dp) :: ricelast_t2(3,3,3,3)
  real(dp) :: roundbkt(3,3,3,3),roundbkt_k(3,3,3,3,natom)
@@ -744,6 +754,7 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
 
 !Calculate now the Lagrange elastic tensors 
 !First we need to extract the tensor with the q-gradient of the internal strain
+!(a.k.a flexoelectric force response tensor) 
  d3cart(1,:,:,:,:,:,:) = reshape(blkvalA(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
  d3cart(2,:,:,:,:,:,:) = reshape(blkvalA(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
 
@@ -755,8 +766,8 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
    do qvecd=1,3
      do iat=1,natom
        do iatd=1,3
-         isdq(iatd,iat,qvecd,strsd1,strsd2)=-two*d3cart(1,iatd,iat,strsd,strst,qvecd,natom+8)
-         if (istrs>3) isdq(iatd,iat,qvecd,strsd2,strsd1)=isdq(iatd,iat,qvecd,strsd1,strsd2)
+         flexofr(iatd,iat,qvecd,strsd1,strsd2)=-two*d3cart(1,iatd,iat,strsd,strst,qvecd,natom+8)
+         if (istrs>3) flexofr(iatd,iat,qvecd,strsd2,strsd1)=flexofr(iatd,iat,qvecd,strsd1,strsd2)
        end do
      end do
    end do
@@ -771,7 +782,7 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
        do iatd=1,3
          do iat=1,natom
            frcelast_t2(iatd,qvecd,strsd1,strsd2)=frcelast_t2(iatd,qvecd,strsd1,strsd2) + &
-        &  isdq(iatd,iat,qvecd,strsd1,strsd2)*fac
+        &  flexofr(iatd,iat,qvecd,strsd1,strsd2)*fac
          end do
 !         write(100,'(4i3,1x,f12.6)') iatd,qvecd,strsd1,strsd2, frcelast_t2(iatd,qvecd,strsd1,strsd2)
        end do
@@ -817,7 +828,7 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
    end do
  end do
 
-!MR: kept for testing only. If uncommented the resulting elastic tensors must agree with Hamman's ones
+!MR: kept for testing only. If uncommented the resulting elastic tensors must agree with HWRV's ones
 ! do i=1,3
 !   do j=1,3
 !     do k=1,3
@@ -836,7 +847,7 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
 !   end do
 ! end do
 
-!Now compute the rount bracketed tesnor of Born and Huang 
+!Now compute the rount bracketed tensor of Born and Huang 
 !and sum with the clamped ion elastic tensor to obtain the relaxed ion one
  roundbkt(:,:,:,:)=zero
  do strsd2=1,3
@@ -853,7 +864,80 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
      end do
    end do
  end do
- 
+
+!In last place compute the lattice contribution to the FxE tensor
+!First obtain the C^{\kappa} tensor of Eq. 59 of PRB 88,174106 (2013) 
+ do strsd2=1,3
+   do strsd1=1,3
+     do qvecd=1,3
+       do iatd=1,3
+         do iat=1,natom
+           Csupkap(iatd,iat,qvecd,strsd1,strsd2)=flexofr(iatd,iat,qvecd,strsd1,strsd2) + &
+         & roundbkt_k(iatd,qvecd,strsd1,strsd2,iat) 
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Then separate the mass-dependent part using the ion relaxed Lagrange elastic tensor
+ mtot=zero
+ do iat=1,natom
+   mtot=mtot + amu(typat(iat))
+ end do
+
+ do strsd2=1,3
+   do strsd1=1,3
+     do qvecd=1,3
+       do iatd=1,3
+         do iat=1,natom
+           Csupkap(iatd,iat,qvecd,strsd1,strsd2)=Csupkap(iatd,iat,qvecd,strsd1,strsd2) - &
+         & amu(typat(iat))/mtot*ucvol*ricelast_t2(iatd,qvecd,strsd1,strsd2)
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Now compute the type-II flexoelectric internal strain tensor
+ flexois(:,:,:,:,:)=zero
+ do strsd2=1,3
+   do strsd1=1,3
+     do qvecd=1,3
+       do iat=1,natom
+         do iatd=1,3
+           ivar=(iat-1)*3+iatd
+           do jat=1,natom
+             do jatd=1,3
+               jvar=(jat-1)*3+jatd
+               flexois(iatd,iat,qvecd,strsd1,strsd2)=flexois(iatd,iat,qvecd,strsd1,strsd2) + &
+             & psinvdm(ivar,jvar)*Csupkap(jatd,jat,qvecd,strsd1,strsd2)
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+             
+!Finally multiply by the effective charges to obtain the FxE tensor
+ lattflexo(:,:,:,:)=zero
+ do strsd2=1,3
+   do strsd1=1,3
+     do qvecd=1,3
+       do elfd=1,3
+         do iat=1,natom
+           do iatd=1,3
+             lattflexo(elfd,qvecd,strsd1,strsd2)=lattflexo(elfd,qvecd,strsd1,strsd2) + &
+           & zeff(elfd,iatd,iat)*flexois(iatd,iat,qvecd,strsd1,strsd2)/ucvol*confac
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+
  iwrite = ab_out > 0
  if (iwrite) then
    write(msg,'(3a)')ch10,' Lagrange elastic tensor from long wave magnitudes (clamped ion) (units= 10^-2 GPa^-1) ',ch10
@@ -883,6 +967,53 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
 
      call wrtout([ab_out,std_out],msg,'COLL')
    end do
+
+   write(msg,'(3a)')ch10,' Displacement-response flexoelectric internal strain tensor',ch10
+   call wrtout([ab_out,std_out],msg,'COLL')
+   write(msg,*)' atom   dir        xx          yy          zz          yz          xz          xy'
+   call wrtout([ab_out,std_out],msg,'COLL')
+   do iat=1,natom
+     write(msg,'(2x,i3,3x,a3,2x,6f12.6)') iat, 'xx', flexois(1,iat,1,1,1),flexois(1,iat,1,2,2),flexois(1,iat,1,3,3),&
+                                                   & flexois(1,iat,1,2,3),flexois(1,iat,1,1,3),flexois(1,iat,1,1,2)  
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6f12.6)') iat, 'yy', flexois(2,iat,2,1,1),flexois(2,iat,2,2,2),flexois(2,iat,2,3,3),&
+                                                   & flexois(2,iat,2,2,3),flexois(2,iat,2,1,3),flexois(2,iat,2,1,2)  
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6f12.6)') iat, 'zz', flexois(3,iat,3,1,1),flexois(3,iat,3,2,2),flexois(3,iat,3,3,3),&
+                                                   & flexois(3,iat,3,2,3),flexois(3,iat,3,1,3),flexois(3,iat,3,1,2)  
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6f12.6)') iat, 'yz', flexois(2,iat,3,1,1),flexois(2,iat,3,2,2),flexois(2,iat,3,3,3),&
+                                                   & flexois(2,iat,3,2,3),flexois(2,iat,3,1,3),flexois(2,iat,3,1,2)  
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6f12.6)') iat, 'xz', flexois(1,iat,3,1,1),flexois(1,iat,3,2,2),flexois(1,iat,3,3,3),&
+                                                   & flexois(1,iat,3,2,3),flexois(1,iat,3,1,3),flexois(1,iat,3,1,2)  
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6f12.6)') iat, 'xy', flexois(1,iat,2,1,1),flexois(1,iat,2,2,2),flexois(1,iat,2,3,3),&
+                                                   & flexois(1,iat,2,2,3),flexois(1,iat,2,1,3),flexois(1,iat,2,1,2)  
+     call wrtout([ab_out,std_out],msg,'COLL')
+   end do
+
+   write(msg,'(3a)')ch10,' Type-II lattice contribution to flexoelectric tensor (units= nC/m) ',ch10
+   call wrtout([ab_out,std_out],msg,'COLL')
+   write(msg,*)'      xx          yy          zz          yz          xz          xy          zy          zx          yx'
+   call wrtout([ab_out,std_out],msg,'COLL')
+   do ivar=1,6
+     elfd=alpha(ivar)
+     qvecd=beta(ivar)
+     write(msg,'(9f12.6)') lattflexo(elfd,qvecd,1,1),lattflexo(elfd,qvecd,2,2),lattflexo(elfd,qvecd,3,3),&
+                           lattflexo(elfd,qvecd,2,3),lattflexo(elfd,qvecd,1,3),lattflexo(elfd,qvecd,1,2),&
+                           lattflexo(elfd,qvecd,3,2),lattflexo(elfd,qvecd,3,1),lattflexo(elfd,qvecd,2,1)
+     call wrtout([ab_out,std_out],msg,'COLL')
+   end do
+   do ivar=4,6
+     elfd=beta(ivar)
+     qvecd=alpha(ivar)
+     write(msg,'(9f12.6)') lattflexo(elfd,qvecd,1,1),lattflexo(elfd,qvecd,2,2),lattflexo(elfd,qvecd,3,3),&
+                           lattflexo(elfd,qvecd,2,3),lattflexo(elfd,qvecd,1,3),lattflexo(elfd,qvecd,1,2),&
+                           lattflexo(elfd,qvecd,3,2),lattflexo(elfd,qvecd,3,1),lattflexo(elfd,qvecd,2,1)
+     call wrtout([ab_out,std_out],msg,'COLL')
+   end do
+
  end if
  DBG_EXIT("COLL")
 
