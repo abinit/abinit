@@ -440,6 +440,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        cond_string(2)='iscf';cond_values(2)=dt%iscf
        call chkint_eq(2,2,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),1,(/0/),iout)
      endif
+     if (dt%ionmov==4) then
+       cond_string(2)='ionmov';cond_values(2)=dt%ionmov
+       call chkint_eq(2,2,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),1,(/0/),iout)
+     endif
+
    enddo
 
 !  densfor_pred
@@ -2553,6 +2558,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
    end if
+   if (dt%positron/=0.and.mgga==1) then
+     msg='Electron-positron calculation is not compatible with meta-GGA XC functional!'
+     MSG_ERROR_NOSTOP(msg, ierr)
+   end if
    if (dt%positron/=0.and.dt%ionmov==5) then
      cond_string(1)='ionmov' ; cond_values(1)=dt%ionmov
      call chkint_eq(1,1,cond_string,cond_values,ierr,'positron',dt%positron,1,(/0/),iout)
@@ -3172,14 +3181,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='usekden' ; cond_values(1)=dt%usekden
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usewvl',usewvl,1,(/0/),iout)
      cond_string(1)='usekden' ; cond_values(1)=dt%usekden
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',usepaw,1,(/0/),iout)
+!     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',usepaw,1,(/0/),iout)
      cond_string(1)='usekden' ; cond_values(1)=dt%usekden
      call chkint_eq(1,1,cond_string,cond_values,ierr,'intxc',dt%intxc,1,(/0/),iout)
      do ipsp=1,npsp
-!      Check that xccc is zero (metaGGAs cannot be used at present with non-linear core corrections)
-       if ( pspheads(ipsp)%xccc/=0 ) then
-         write(msg, '(3a,i0,3a)' )&
-&         'When usekden is non-zero, it is not possible to use pseudopotentials with a non-linear core correction.',ch10,&
+!      Check that xccc is zero (NCPP metaGGAs cannot be used at present with non-linear core corrections)
+       if (pspheads(ipsp)%xccc/=0.and.usepaw==0) then
+         write(msg, '(5a,i0,3a)' )&
+&         'When usekden/=0, it is not possible to use norm-conserving pseudopotentials',ch10,&
+&         'with a non-linear core correction.',ch10,&
 &         'However, for pseudopotential number ',ipsp,', there is such a core correction.',ch10,&
 &         'Action: either set usekden=0 in input file, or change this pseudopotential file.'
          MSG_ERROR_NOSTOP(msg, ierr)

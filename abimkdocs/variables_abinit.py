@@ -1580,30 +1580,40 @@ Variable(
     dimensions=['[[ntypat]]'],
     defaultval=0,
     mnemonics="CONSTRAINT KIND in constrained DFT",
+    requires="[[iscf]] > 1 and [[iscf]] < 10 and [[ionmov]] /= 4",
     text=r"""
-Defines, for each type of atom, the kind of constraint imposed by constrained DFT (also turns on the constrained DFT algorithm).
+If [[constraint_kind]] is non-zero for at least one type of atom,
+the constrained DFT algorithm is activated.
+[[constraint_kind]] defines, for each type of atom, the kind of constraint(s) imposed by constrained DFT. 
 When [[constraint_kind]] is zero for an atom type, there is not constraint applied to this atom type.
 Otherwise, different constraints can be imposed on the total charge (ion+electronic) and/or magnetization, computed
 inside a sphere of radius [[ratsph]], possibly smeared within a width [[ratsm]]. 
-Such integrated charge might be imposed to be equal to [[chrgat]], while the magnetization might be compared to [[spinat]].
+Such integrated ion+electronic charge might be imposed to be equal to [[chrgat]], while the magnetization might be compared to [[spinat]].
+The first digit of [[constraint_kind]] defines the constraint on the charge, while the second digit defines the constraint on the
+magnetization.
 
 When [[constraint_kind]] is 10 or above, the charge constraint will be imposed.
-The first digit of [[constraint_kind]] govers the magnetization constraint:
 
-  When [[constraint_kind]]=1 or 11, the exact value (vector in the non-collinear case, amplitude and sign in the colinear case) of the magnetization is constrained;
-  When [[constraint_kind]]=2 or 12, only the direction is constrained (only applicable to the non-collinear case);
-  When [[constraint_kind]]=3 or 13, only the magnitude is constrained.
+When [[constraint_kind]]=1 or 11, the exact value (vector in the non-collinear case, amplitude and sign in the collinear case) of the magnetization is constrained;
+When [[constraint_kind]]=2 or 12, only the direction is constrained (only meaningful in the non-collinear case);
+When [[constraint_kind]]=3 or 13, only the magnitude is constrained.
 
-For the algorithm, see [[topic:ConstrainedDFT]]. The balance between the potential residual, and the density/magnetization constraint is governed by [[magcon_lambda]]. The spherical integral is governed by [[ratsph]] and [[ratsm]]. 
+For the algorithm, see [[topic:ConstrainedDFT]]. It makes important use of the potential residual,
+so the algorithm works only with [[iscf]] between 2 and 9. 
+The balance between the potential residual, and the density/magnetization constraint is governed by [[magcon_lambda]]. The spherical integral is governed by [[ratsph]] and [[ratsm]]. 
 
 Note that while a spherical integral around an atom might reasonably well capture the magnetization of an atom within a solid or within a molecule,
  so that the sum of such magnetizations might be reasonably close to the total magnetization of the solid, 
 such a procedure hardly gives the total charge of the solid: the space between the spheres is too large when the spheres do not overlap,
-and overlapping spheres will not deliver the correct total charge of the system.
+while overlapping spheres will not deliver the correct total charge of the system.
 
-Note that [[constraint_kind]] defines constraints for types of atoms, not for specific atoms. Atoms of the same type are supposed to incur the same constraint. If the use needs to impose different constraints on atoms of the same type (in principle), it is possible (and easy) to pretend
-that they belong to different types, even if they are using the same pseudopotential file. There is an example 
+Note that [[constraint_kind]] defines constraints for types of atoms, not for specific atoms. 
+Atoms of the same type are supposed to incur the same constraint. 
+If the user wants to impose different constraints on atoms of the same type (in principle), it is possible (and easy) to pretend
+that they belong to different types, even if the same pseudopotential file is used for these atoms. There is an example 
 in test [[test:v8_24]], the hydrogen dimer, where the charge around the first atom is constrained, and the charge around the second atom is left free.
+
+Incidentally, [[ionmov]]==4 is not allowed in the present implementation of constrained DFT because the motion of atoms and simultaneous computation of constraints would be difficult to handle. 
 """,
 ),
 
@@ -11333,7 +11343,7 @@ Bohr magneton has value $2.7321\times 10^{-4}$ in atomic units.
 """,
 ),
 
-    Variable(
+Variable(
     abivarname="nwfshist",
     varset="gstate",
     vartype="integer",
@@ -13797,12 +13807,7 @@ is computed can be tuned thanks to [[dosdeltae]].
 If [[prtdos]] = 1, the smeared density of states is obtained from the
 eigenvalues, properly weighted at each k point using [[wtk]], and smeared
 according to [[occopt]] and [[tsmear]]. All levels that are present in the
-calculation are taken into account (occupied and unoccupied). Note that
-[[occopt]] must be between 3 and 7. Also note that the sampling of the
-Brillouin Zone that is needed to get a converged DOS is usually much finer
-than the sampling needed to converge the total energy or the geometry of the
-system, unless [[tsmear]] is very large (hence the DOS is not obtained
-properly). A separate convergence study is needed.
+calculation are taken into account (occupied and unoccupied). 
 In order to compute the DOS of an insulator with [[prtdos]] = 1, compute its
 density thanks to a self-consistent calculation (with a non-metallic
 [[occopt]] value, 0, 1 or 2), then use [[prtdos]] = 1, together with
@@ -13810,13 +13815,20 @@ density thanks to a self-consistent calculation (with a non-metallic
 smearing. If [[prtdos]] = 1, the name of the DOS file is the root name for the
 output files, followed by "_DOS".
 
+ * Note 1: [[occopt]] must be between 3 and 7. 
+ * Note 2: The sampling of the Brillouin Zone that is needed to get a converged DOS
+ is usually much finer than the sampling needed to converge the total energy or the geometry of the
+system, unless [[tsmear]] is very large (hence the DOS is not obtained
+properly). A separate convergence study is needed.
+
+
 If [[prtdos]] = 2, the DOS is computed using the tetrahedron method. As in the
 case of [[prtdos]] = 1, all levels that are present in the calculation are taken
 into account (occupied and unoccupied). In this case, the k-points must have
 been defined using the input variable [[ngkpt]] or the input variable
 [[kptrlatt]]. There must be at least two non-equivalent points in the
-Irreducible Brillouin Zone to use [[prtdos]] = 2. It is strongly advised to use
-a non-shifted k-point grid ([[shiftk]] 0 0 0): such grids contain naturally
+Irreducible Brillouin Zone to use [[prtdos]] = 2. It is strongly advised that you use
+a non-shifted k-point grid ([[shiftk]] 0 0 0): such grids naturally contain
 more extremal points (band minima and maxima at Gamma or at the zone-
 boundaries) than shifted grids, and lead to more non-equivalent points than
 shifted grids, for the same grid spacing. There is no need to take care of the
@@ -13841,16 +13853,16 @@ done, and the file denomination is similar to the [[prtdos]] = 2 case. However,
 three additional input variables might be provided, describing the atoms that
 are the center of the sphere (input variables [[natsph]] and [[iatsph]]), as
 well as the radius of this sphere (input variable [[ratsph]]).
-In case of PAW, [[ratsph]] radius has to be greater or equal to largest PAW
+In case of PAW, [[ratsph]] radius has to be greater or equal to the largest PAW
 radius of the atom types considered (which is read from the PAW atomic data
-file; see rc_sph or r_paw). Additional printing and/or approximations in PAW
+file; see rc_sph or r_paw). Additionally, printing and/or approximations in PAW
 mode can be controlled with [[pawprtdos]] keyword (in
 particular,[[pawprtdos]] = 2 can be used to compute quickly a very good
 approximation of the DOS).
 
-Note 1: when [[prtdos]] = 3, it is possible to output m-decomposed LDOS in _DOS
+ * Note 1: when [[prtdos]] = 3, it is possible to output m-decomposed LDOS in _DOS
 file; simply use [[prtdosm]] keyword.
-Note 2: the integrated total DOS in spheres around atoms can be obtained when
+ * Note 2: the integrated total DOS in spheres around atoms can be obtained when
 [[prtdensph]] flag is activated. It can be compared to the integrated DOS
 provided in _DOS file when [[prtdos]] = 3.
 
