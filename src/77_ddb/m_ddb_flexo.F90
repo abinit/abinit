@@ -96,11 +96,12 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
  real(dp),intent(in) :: zeff(3,3,ddb%natom)
 
 !Local variables-------------------------------
- integer :: iblok,jblok,kblok,lblok,lwsym
- logical :: intstrn_only
+ integer :: elfd,iblok,ivar,jblok,kblok,lblok,lwsym,qvecd
+ logical :: intstrn_only,iwrite
  character(len=500) :: msg
 
 !arrays
+ integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  integer :: rfqvec(4)
  real(dp) :: qphnrm(3),qphon(3,3)
@@ -110,12 +111,14 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
  real(dp) :: mixflexo(3,3,3,3)
  real(dp) :: pol1(3,3,3,ddb%natom)
  real(dp) :: psinvdm(3*ddb%natom,3*ddb%natom)
+ real(dp) :: totflexo(3,3,3,3)
  
 ! *************************************************************************
 
  DBG_ENTER("COLL")
  
 ! First get the clamped-ion flexoelectric tensor
+ ciflexo(:,:,:,:)=zero
  if (flexoflg==1.or.flexoflg==2) then
   
    ! Look for the Gamma Block in the DDB
@@ -144,6 +147,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
 ! Then get the mixed contribution to the flexoelectric tensor
  !Activate the calculation of internal strain necessary for lattice mediated contribution.
  intstrn_only=.false.;if (flexoflg==4) intstrn_only=.true.
+ mixflexo(:,:,:,:)=zero
  if (flexoflg==1.or.flexoflg==3.or.intstrn_only) then
 
    ! Extract the P^(1) tensor from the DDB
@@ -220,6 +224,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
  end if
 
 ! Finally get the lattice mediated contribution to the flexoelectric tensor
+ lattflexo(:,:,:,:)=zero
  if (flexoflg==1.or.flexoflg==4) then
 
    rfphon(:)=0
@@ -288,6 +293,34 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
   & intstrn,lattflexo,ddb%mpert,ddb%natom,crystal%ntypat,psinvdm,crystal%typat,crystal%ucvol,zeff)
 
  end if
+
+!Merge the three contributions and print the total FxE tensor
+ totflexo(:,:,:,:)=ciflexo(:,:,:,:)+mixflexo(:,:,:,:)+lattflexo(:,:,:,:)
+
+ iwrite = ab_out > 0
+ if (iwrite) then
+   write(msg,'(3a)')ch10,' TOTAL flexoelectric tensor (units= nC/m) ',ch10
+   call wrtout([ab_out,std_out],msg,'COLL')
+   write(msg,*)'      xx          yy          zz          yz          xz          xy          zy          zx          yx'
+   call wrtout([ab_out,std_out],msg,'COLL')
+   do ivar=1,6
+     elfd=alpha(ivar)
+     qvecd=beta(ivar)
+     write(msg,'(9f12.6)') totflexo(elfd,qvecd,1,1),totflexo(elfd,qvecd,2,2),totflexo(elfd,qvecd,3,3),&
+                           totflexo(elfd,qvecd,2,3),totflexo(elfd,qvecd,1,3),totflexo(elfd,qvecd,1,2),&
+                           totflexo(elfd,qvecd,3,2),totflexo(elfd,qvecd,3,1),totflexo(elfd,qvecd,2,1)
+     call wrtout([ab_out,std_out],msg,'COLL')
+   end do
+   do ivar=4,6
+     elfd=beta(ivar)
+     qvecd=alpha(ivar)
+     write(msg,'(9f12.6)') totflexo(elfd,qvecd,1,1),totflexo(elfd,qvecd,2,2),totflexo(elfd,qvecd,3,3),&
+                           totflexo(elfd,qvecd,2,3),totflexo(elfd,qvecd,1,3),totflexo(elfd,qvecd,1,2),&
+                           totflexo(elfd,qvecd,3,2),totflexo(elfd,qvecd,3,1),totflexo(elfd,qvecd,2,1)
+     call wrtout([ab_out,std_out],msg,'COLL')
+   end do
+ end if
+
 
  DBG_EXIT("COLL")
 
@@ -580,7 +613,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
      call wrtout([ab_out,std_out],msg,'COLL')
    end do 
 
-   write(msg,'(3a)')ch10,' Displacement-response internal strain tensor from long-wave magnitudes (units: Hartree)',ch10
+   write(msg,'(3a)')ch10,' Displacement-response internal strain tensor from long-wave magnitudes (units: Bohr)',ch10
    call wrtout([ab_out,std_out],msg,'COLL')
    write(msg,*)' atom   dir        xx          yy          zz          yz          xz          xy'
    call wrtout([ab_out,std_out],msg,'COLL')
@@ -940,7 +973,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
 
  iwrite = ab_out > 0
  if (iwrite) then
-   write(msg,'(3a)')ch10,' Lagrange elastic tensor from long wave magnitudes (clamped ion) (units= 10^-2 GPa^-1) ',ch10
+   write(msg,'(3a)')ch10,' Lagrange elastic tensor from long wave magnitudes (clamped ion) (units= 10^2 GPa) ',ch10
    call wrtout([ab_out,std_out],msg,'COLL')
    write(msg,*)'      xx          yy          zz          yz          xz          xy'
    call wrtout([ab_out,std_out],msg,'COLL')
@@ -954,7 +987,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
      call wrtout([ab_out,std_out],msg,'COLL')
    end do
 
-   write(msg,'(3a)')ch10,' Lagrange elastic tensor from long wave magnitudes (relaxed ion) (units= 10^-2 GPa^-1) ',ch10
+   write(msg,'(3a)')ch10,' Lagrange elastic tensor from long wave magnitudes (relaxed ion) (units= 10^2 GPa) ',ch10
    call wrtout([ab_out,std_out],msg,'COLL')
    write(msg,*)'      xx          yy          zz          yz          xz          xy'
    call wrtout([ab_out,std_out],msg,'COLL')
