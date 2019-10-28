@@ -680,12 +680,13 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
  real(dp) :: frcelast_t2(3,3,3,3)
- real(dp) :: qsrbkt_t1(3,3,3,3)
  real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert)
  real(dp) :: flexofr(3,natom,3,3)
  real(dp) :: isdq(3,natom,3,3,3)
- real(dp) :: roundbkt(3,3,3,3,natom)
  real(dp) :: phi1(3,natom,3,natom,3)
+ real(dp) :: ricelast_t2(3,3,3,3)
+ real(dp) :: roundbkt(3,3,3,3),roundbkt_k(3,3,3,3,natom)
+ real(dp) :: sqrbkt_t1(3,3,3,3)
  real(dp) :: stress(3,3)
 
 !tmp
@@ -722,7 +723,7 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
  end do
 
 !Now perform the multiplication with the internal strain
- roundbkt(:,:,:,:,:)=zero
+ roundbkt_k(:,:,:,:,:)=zero
  do iat=1,natom
    do iatd=1,3
      do qvecd2=1,3
@@ -730,11 +731,11 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
          do qvecd=1,3
            do katd=1,3
              do kat=1,natom
-               roundbkt(iatd,qvecd,jatd,qvecd2,iat)=roundbkt(iatd,qvecd,jatd,qvecd2,iat) &
+               roundbkt_k(iatd,qvecd,jatd,qvecd2,iat)=roundbkt_k(iatd,qvecd,jatd,qvecd2,iat) &
              + phi1(iatd,iat,katd,kat,qvecd)*intstrn(qvecd2,jatd,katd,kat)
              end do
            end do
-!         write(100,'(5i3,1x,f12.6)') iat, iatd,qvecd,jatd,qvecd2,roundbkt(iatd,qvecd,jatd,qvecd2,iat)
+!         write(100,'(5i3,1x,f12.6)') iat, iatd,qvecd,jatd,qvecd2,roundbkt_k(iatd,qvecd,jatd,qvecd2,iat)
          end do
        end do
      end do
@@ -783,7 +784,7 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
    do strsd2=1,3
      do strsd1=1,3
        do iatd=1,3
-         qsrbkt_t1(iatd,strsd1,strsd2,qvecd)=half*(frcelast_t2(iatd,qvecd,strsd1,strsd2) + &
+         sqrbkt_t1(iatd,strsd1,strsd2,qvecd)=half*(frcelast_t2(iatd,qvecd,strsd1,strsd2) + &
        & frcelast_t2(iatd,strsd2,strsd1,qvecd))
        end do
      end do
@@ -796,7 +797,7 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
      do strsd1=1,3
        do iatd=1,3
          if (iatd==strsd1) then
-           qsrbkt_t1(iatd,strsd1,strsd2,qvecd)=qsrbkt_t1(iatd,strsd1,strsd2,qvecd) - stress(strsd2,qvecd)
+           sqrbkt_t1(iatd,strsd1,strsd2,qvecd)=sqrbkt_t1(iatd,strsd1,strsd2,qvecd) - stress(strsd2,qvecd)
          endif
        end do
      end do
@@ -809,15 +810,15 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
    do qvecd=1,3
      do strsd1=1,3
        do strsd2=1,3
-         frcelast_t2(iatd,qvecd,strsd1,strsd2)=qsrbkt_t1(iatd,strsd1,qvecd,strsd2) + &
-       & qsrbkt_t1(iatd,strsd2,strsd1,qvecd)-qsrbkt_t1(iatd,qvecd,strsd2,strsd1)
+         frcelast_t2(iatd,qvecd,strsd1,strsd2)=sqrbkt_t1(iatd,strsd1,qvecd,strsd2) + &
+       & sqrbkt_t1(iatd,strsd2,strsd1,qvecd)-sqrbkt_t1(iatd,qvecd,strsd2,strsd1)
        end do
      end do
    end do
  end do
 
-!MR: kept for testing only. If uncommented the resulting tensor must agree with Hamman's one
-!do i=1,3
+!MR: kept for testing only. If uncommented the resulting elastic tensors must agree with Hamman's ones
+! do i=1,3
 !   do j=1,3
 !     do k=1,3
 !       delik=0.d0; if(i==k) delik=1.d0
@@ -835,6 +836,23 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
 !   end do
 ! end do
 
+!Now compute the rount bracketed tesnor of Born and Huang 
+!and sum with the clamped ion elastic tensor to obtain the relaxed ion one
+ roundbkt(:,:,:,:)=zero
+ do strsd2=1,3
+   do strsd1=1,3
+     do qvecd=1,3
+       do iatd=1,3
+         do iat=1,natom
+           roundbkt(iatd,qvecd,strsd1,strsd2)=roundbkt(iatd,qvecd,strsd1,strsd2) + &
+         & roundbkt_k(iatd,qvecd,strsd1,strsd2,iat)*fac
+         end do
+         ricelast_t2(iatd,qvecd,strsd1,strsd2)=frcelast_t2(iatd,qvecd,strsd1,strsd2) + &
+       & roundbkt(iatd,qvecd,strsd1,strsd2)
+       end do
+     end do
+   end do
+ end do
  
  iwrite = ab_out > 0
  if (iwrite) then
@@ -852,6 +870,19 @@ subroutine dtlattflexo(blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,uc
      call wrtout([ab_out,std_out],msg,'COLL')
    end do
 
+   write(msg,'(3a)')ch10,' Lagrange elastic tensor from long wave magnitudes (relaxed ion) (units= 10^-2 GPa^-1) ',ch10
+   call wrtout([ab_out,std_out],msg,'COLL')
+   write(msg,*)'      xx          yy          zz          yz          xz          xy'
+   call wrtout([ab_out,std_out],msg,'COLL')
+   ricelast_t2(:,:,:,:)=ricelast_t2(:,:,:,:)*HaBohr3_GPa/100.00_dp
+   do ivar=1,6
+     iatd=alpha(ivar)
+     qvecd=beta(ivar)
+     write(msg,'(9f12.6)') ricelast_t2(iatd,qvecd,1,1), ricelast_t2(iatd,qvecd,2,2),ricelast_t2(iatd,qvecd,3,3), &
+                           ricelast_t2(iatd,qvecd,2,3), ricelast_t2(iatd,qvecd,1,3),ricelast_t2(iatd,qvecd,1,2)
+
+     call wrtout([ab_out,std_out],msg,'COLL')
+   end do
  end if
  DBG_EXIT("COLL")
 
