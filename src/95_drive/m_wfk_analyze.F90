@@ -325,7 +325,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
      gsqcut_shp = two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
      call pawinit(gnt_option,gsqcut_shp,zero,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,cryst%nsym,dtset%pawntheta,pawang,Pawrad,&
-&     dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usepotzero)
+&     dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,0,dtset%usepotzero)
      call timab(553,2,tsec)
 
      ! Update internal values

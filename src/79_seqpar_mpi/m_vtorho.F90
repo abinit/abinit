@@ -1692,7 +1692,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          else
            write(message, '(a,i0,3a,i0,a,f7.3,5a)' )&
 &           'For k-point number ',ikpt,', and',ch10,&
-&           'for spin polarization',isppol,'the minimal occupation factor is',min_occ,'.',ch10,&
+&           'for spin polarization ',isppol, ' the minimal occupation factor is',min_occ,'.',ch10,&
 &           'An adequate monitoring of convergence requires it to be at most 0.01_dp.',ch10,&
 &           'Action: increase slightly the number of bands.'
          end if

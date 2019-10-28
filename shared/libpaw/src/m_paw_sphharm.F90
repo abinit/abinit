@@ -56,7 +56,10 @@ MODULE m_paw_sphharm
  public :: create_slm2ylm  ! For a given angular momentum lcor, compute slm2ylm
  public :: create_mlms2jmj ! For a given angular momentum lcor, give the rotation matrix msml2jmj
  public :: setsym_ylm      ! Compute rotation matrices expressed in the basis of real spherical harmonics
+ public :: gaunt           ! Gaunt coeffients for complex Yml
+ public :: realgaunt       ! Compute "real Gaunt coefficients" with "real spherical harmonics"
  public :: setnabla_ylm    ! Compute rotation matrices expressed in the basis of real spherical harmonics
+ public :: nablarealgaunt  ! Compute the integrals of nablaSlimi.nablaySjmj Slkmk on the PAW spheres
 !!***
 
 CONTAINS
@@ -2864,8 +2867,505 @@ end subroutine setsym_ylm
 
  end subroutine setnabla_ylm
 !!***
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/rfactorial
+!! NAME
+!! rfactorial
+!!
+!! FUNCTION
+!! Private function
+!! Calculates N! as a double precision real.
+!!
+!! INPUTS
+!!   nn=number to use
+!!
+!! OUTPUT
+!!   factorial= n! (real)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+elemental function rfactorial(nn)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: nn
+ real(dp) :: rfactorial
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: ii
+
+! *********************************************************************
+
+ rfactorial=one
+ do ii=2,nn
+   rfactorial=rfactorial*ii
+ end do
+
+end function rfactorial
+!!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/perms
+!! NAME
+!! perms
+!!
+!! FUNCTION
+!! Private function
+!! Returns N!/(N-k)!  if N>=0 and N>k ; otherwise 0 is returned
+!!
+!! INPUTS
+!!   kk=number k to use
+!!   nn=number N to use
+!!
+!! OUTPUT
+!!   perms= n!/(n-k)!
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function perms(nn,kk)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: kk,nn
+ real(dp) :: perms
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: ii
+ real(dp) :: pp
+
+! *********************************************************************
+
+ if (nn>=0.and.nn>=kk) then
+   pp=1._dp
+   do ii=nn-kk+1,nn
+     pp=pp*ii
+   end do
+ else
+   pp=0._dp
+ end if
+
+ perms=pp
+
+end function perms
+!!***
+
+!----------------------------------------------------------------------
+!!****f* m_pawang/gaunt
+!! NAME
+!! gaunt
+!!
+!! FUNCTION
+!! Returns gaunt coefficient, i.e.
+!!   the integral of Sqrt[4 \pi] Y*(l_i,m_i) Y*(ll,mm) Y(l_j,m_j)
+!!   See the 3-j and 6-j symbols by Rotenberg, etc., (Technology Press, 1959), pg.5.
+!!
+!! INPUTS
+!!   ll,mm,l1,l2,m1,m2= six quantum numbers defining the Gaunt coef.
+!!
+!! OUTPUT
+!!   gaunt(ll,mm,l1,l2,m1,m2)=the value of the integral
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function gaunt(ll,mm,l1,m1,l2,m2)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: l1,l2,ll,m1,m2,mm
+ real(dp) :: gaunt
+
+!Local variables ------------------------------
+!scalars
+ integer :: i1,i2,j1,j1half,j2,j2half,j3,j3half,j_half,jj,k1,k2,n1,n2
+ real(dp) :: argument,sign,sum,xx,yy
+ logical :: ok
+
+!************************************************************************
+
+ gaunt=zero;sum=zero;ok =.true.
+
+ if((-m1-mm+m2) /= 0) ok = .false.
+ if(abs(m1) > l1) ok = .false.
+ if(abs(mm) > ll) ok = .false.
+ if(abs(m2) > l2) ok = .false.
+
+ jj = l1 + ll + l2
+ if (mod(jj,2)/=0) ok = .false.
+ j1 = jj-2*l2
+ j2 = jj-2*ll
+ j3 = jj-2*l1
+
+ if (j1<0 .or. j2<0 .or. j3<0) ok = .false.
+
+ if (ok) then
+
+   xx = (2 * l1 + 1) * (2 * ll + 1) * (2 * l2 + 1)
+
+   j1half = j1/2
+   j2half = j2/2
+   j3half = j3/2
+   j_half = jj/2
+
+   gaunt = (-1)**j1half * sqrt(xx)
+   gaunt = gaunt * rfactorial(j2)*rfactorial(j3)/rfactorial(jj+1)
+   gaunt = gaunt * rfactorial(j_half)/(rfactorial(j1half)&
+&                * rfactorial(j2half)*rfactorial(j3half))
+
+   yy = rfactorial(l2 + m2) * rfactorial(l2 - m2)
+
+   if (mm>=0) then
+     yy = yy * perms(ll+mm,2*mm)
+   else
+     yy = yy / perms(ll-mm,-2*mm)
+   end if
+
+   if (m1>=0) then
+     yy = yy / perms(l1+m1,2*m1)
+   else
+     yy = yy * perms(l1-m1,-2*m1)
+   end if
+
+   gaunt = gaunt * sqrt(yy)
+
+   i1 = l2 - ll - m1
+   i2 = l2 - l1 + mm
+   k1 = -min(0, i1, i2)
+   n1 = l1 + m1
+   n2 = ll - mm
+   k2 = min(j1, n1, n2)
+
+   sign = 1._dp
+   if(k1>0) sign = (-1._dp)**k1
+
+   argument = sign     * perms(n1,k1)/rfactorial(k1)
+   argument = argument * perms(n2,k1)/rfactorial(i1 + k1)
+   argument = argument * perms(j1,k1)/rfactorial(i2 + k1)
+   sum = sum + argument
+
+   sign = -sign
+   k1 = k1 + 1
+   do while(k1 <= k2)
+     argument = sign     * perms(n1, k1)/rfactorial(k1)
+     argument = argument * perms(n2, k1)/rfactorial(i1 + k1)
+     argument = argument * perms(j1, k1)/rfactorial(i2 + k1)
+     sum = sum + argument
+     sign = -sign
+     k1 = k1 + 1
+   end do
+
+ end if
+
+ gaunt = gaunt * sum
+
+ end function gaunt
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawang/realgaunt
+!! NAME
+!! realgaunt
+!!
+!! FUNCTION
+!! This routine compute "real Gaunt coefficients", i.e. gaunt
+!! coefficients according to "real spherical harmonics"
+!!
+!! INPUTS
+!!  l_max= max. value of ang. momentum l+1;  Gaunt coeffs up to
+!!          [(2*l_max-1,m),(l_max,m),(l_max,m)] are computed
+!!
+!! OUTPUT
+!!  gntselect((2*l_max-1)**2,l_max**2*(l_max**2+1)/2)=
+!!          selection rules for Gaunt coefficients
+!!          if Gaunt coeff. is zero, gntselect=0
+!!          if Gaunt coeff. is non-zero, gntselect is the index of
+!!                           the coeff. in realgnt(:) array
+!!  ngnt= number of non-zero Gaunt coefficients
+!!  realgnt((2*l_max-1)**2*l_max**4)= non-zero real Gaunt coefficients
+!!
+!! PARENTS
+!!      m_paw_slater,m_pawang,m_pawpwij
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine realgaunt(l_max,ngnt,gntselect,realgnt)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: l_max
+ integer,intent(out) :: ngnt
+!arrays
+ integer,intent(out) :: gntselect((2*l_max-1)**2,l_max**2*(l_max**2+1)/2)
+ real(dp),intent(out) :: realgnt((2*l_max-1)**2*(l_max)**4)
+
+!Local variables ------------------------------
+!scalars
+ integer :: ilm1,ilm2,ilmp1,k0lm1,klm1,l1,l2,ll,lp1,m1,m2,mm,mm1,mm2,mm3,mp1
+ real(dp) :: c11,c12,c21,c22,c31,c32,fact,realgnt_tmp
+!arrays
+ integer,allocatable :: ssgn(:)
+ type(coeff3_type), allocatable :: coeff(:)
+
+!************************************************************************
+
+!Initialize output arrays with zeros.
+ gntselect = 0; realgnt = zero
+
+!Compute matrix cc where Sl=cc*Yl (Sl=real sph. harm.)
+!------------------------------------------------
+ LIBPAW_DATATYPE_ALLOCATE(coeff,(4*l_max-3))
+ do ll=1,4*l_max-3
+   LIBPAW_ALLOCATE(coeff(ll)%value,(2,2*ll-1,2*ll-1))
+   coeff(ll)%value(:,:,:)=zero
+   coeff(ll)%value(1,ll,ll)=one
+   do mm=1,ll-1
+     coeff(ll)%value(1,ll+mm,ll+mm)= (-1._dp)**mm/sqrt(2._dp)
+     coeff(ll)%value(1,ll-mm,ll+mm)= ( 1._dp)    /sqrt(2._dp)
+     coeff(ll)%value(2,ll+mm,ll-mm)=-(-1._dp)**mm/sqrt(2._dp)
+     coeff(ll)%value(2,ll-mm,ll-mm)= ( 1._dp)    /sqrt(2._dp)
+   end do
+ end do
+
+ LIBPAW_ALLOCATE(ssgn,(l_max**2))
+ ssgn(:)=1
+ if (l_max>0) then
+   do l1=1,l_max-1
+     ilm1=1+l1**2+l1
+     do m1=-l1,-1
+       ssgn(ilm1+m1)=-1
+     end do
+   end do
+ end if
+
+ ngnt=0
+
+!Loop on (lp1,mp1)
+!------------------------------------------------
+ do lp1=0,l_max-1
+   do mp1=-lp1,lp1
+     ilmp1=1+lp1**2+lp1+mp1
+     k0lm1=ilmp1*(ilmp1-1)/2
+
+!    Loop on (l1,m1)<=(lp1,mp1)
+!    ------------------------------------------------
+     do l1=0,l_max-1
+       do m1=-l1,l1
+         ilm1=1+l1**2+l1+m1
+
+         if (ilm1<=ilmp1) then
+
+           klm1=k0lm1+ilm1
+           gntselect(:,klm1)=0
+
+!          Loop on (l2,m2)
+!          ------------------------------------------------
+           do l2=abs(l1-lp1),l1+lp1,2
+             do m2=-l2,l2
+               ilm2=1+l2**2+l2+m2
+
+!              Real Gaunt coeffs selection rules
+!              ------------------------------------------------
+               if ((l2<=l1+lp1).and.&
+&               (((m1== mp1).and.((m2==0).or.(m2==2*abs(mp1)))).or.&
+&               ((m1==-mp1).and.(m2==-abs(m1)-abs(mp1))).or.&
+&               ((abs(m1)/=(abs(mp1)).and.&
+&               ((m2==ssgn(ilm1)*ssgn(ilmp1)*   (abs(m1)+abs(mp1))).or.&
+&               (m2==ssgn(ilm1)*ssgn(ilmp1)*abs(abs(m1)-abs(mp1)))&
+               ))))) then
+
+!                Compute selected real Gaunt coefficient
+!                ------------------------------------------------
+                 realgnt_tmp=zero
+                 do mm1=-l1,l1
+                   c11=coeff(l1+1)%value(1,l1+mm1+1,l1+m1+1)
+                   c12=coeff(l1+1)%value(2,l1+mm1+1,l1+m1+1)
+                   do mm2= -lp1,lp1
+                     c21=coeff(lp1+1)%value(1,lp1+mm2+1,lp1+mp1+1)
+                     c22=coeff(lp1+1)%value(2,lp1+mm2+1,lp1+mp1+1)
+                     do mm3= -l2,l2
+                       c31=coeff(l2+1)%value(1,l2+mm3+1,l2+m2+1)
+                       c32=coeff(l2+1)%value(2,l2+mm3+1,l2+m2+1)
+                       fact=c11*c21*c31  -  c12*c22*c31&
+&                       -c11*c22*c32  -  c12*c21*c32
+                       if((abs(fact)>=tol12).and.(mm3==-mm2-mm1)) &
+&                       realgnt_tmp=realgnt_tmp+fact*(-1)**mm2 &
+&                       *gaunt(l2,mm3,l1,mm1,lp1,-mm2)
+                     end do
+                   end do
+                 end do
+
+!                Count additional non-zero real Gaunt coeffs
+!                ------------------------------------------------
+                 if (abs(realgnt_tmp)>=tol12) then
+                   ngnt=ngnt+1
+                   gntselect(ilm2,klm1)=ngnt
+                   realgnt(ngnt)=realgnt_tmp/sqrt(four_pi)
+                 end if
+
+!                End loops
+!                ------------------------------------------------
+               end if
+             end do
+           end do
+         end if
+       end do
+     end do
+   end do
+ end do
+
+!Deallocate memory
+!------------------------------------------------
+ do ll=1,4*l_max-3
+   LIBPAW_DEALLOCATE(coeff(ll)%value)
+ end do
+ LIBPAW_DATATYPE_DEALLOCATE(coeff)
+ LIBPAW_DEALLOCATE(ssgn)
+
+end subroutine realgaunt
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/nablarealgaunt
+!! NAME
+!! nablarealgaunt
+!!
+!! FUNCTION
+!! Evaluate inegrals involving spherical harmonics and their gradient.
+!! These integrals are angular part for <nablaphi|nablaphj> and <tnablaphi|tnablaphj>.
+!!
+!! INPUTS
+!!  mpsang=1+ max. angular momentum
+!!
+!! OUTPUT
+!! nnablagnt= number of non zero integrals
+!! nabgauntselect(mpsang**2,mpsang**2,mpsang**2)= stores the index of the non zero integrals
+!! nablagaunt((mpsang**2)**3)= stores the integrals' values
+!!  NOTES
+!!  
+!! PARENTS
+!! 
+!! m_pawang
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine nablarealgaunt(mpsang,nnablagnt,nabgauntselect,nablagaunt) 
+ implicit none
+
+ !Arguments ---------------------------------------------
+ !scalars
+ integer, intent(in) :: mpsang
+ integer, intent(out) :: nnablagnt
+ !array
+ integer,intent(out) :: nabgauntselect(mpsang**2,mpsang**2,mpsang**2)
+ real(dp),intent(out) :: nablagaunt((mpsang**2)**3)
+
+ !Local variables ---------------------------------------
+ !array
+
+
+nabgauntselect(:,:,:)=-1
+nablagaunt(:)=zero
+
+
+
+if (mpsang>=2) then
+  nabgauntselect(1,2,2)=1  ; nablagaunt(1)=0.5641895835477563_dp !(1/sqrt(pi)) 
+  nabgauntselect(1,3,3)=2  ; nablagaunt(2)=0.5641895835477563_dp !(1/sqrt(pi))
+  nabgauntselect(1,4,4)=3  ; nablagaunt(3)=0.5641895835477563_dp !(1/sqrt(pi))
+  nnablagnt=3
+end if
+
+if (mpsang>=3) then
+
+
+ nabgauntselect(7,2,2)=4  ; nablagaunt(4)=0.126156626101008_dp !\frac{1}{2\sqrt{5\pi}}
+ nabgauntselect(9,2,2)=5 ; nablagaunt(5)=0.2185096861184158_dp !\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(6,2,3)=6 ; nablagaunt(6)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(5,2,4)=7 ; nablagaunt(7)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(4,2,5)=8 ; nablagaunt(8)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(3,2,6)=9 ; nablagaunt(9)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(2,2,7)=10 ; nablagaunt(10)=-0.37846987830302403_dp !\frac{-3}{2\sqrt{5\pi}}
+ nabgauntselect(2,2,9)=11 ; nablagaunt(11)=-0.6555290583552474_dp !\frac{-1.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(6,3,2)=12 ; nablagaunt(12)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(7,3,3)=13 ; nablagaunt(13)=-0.252313252202016_dp !-\frac{1}{\sqrt{5\pi}}
+ nabgauntselect(8,3,4)=14 ; nablagaunt(14)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(2,3,6)=15 ; nablagaunt(15)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(3,3,7)=16 ; nablagaunt(16)=0.75693974607408354_dp !\frac{3}{\sqrt{5\pi}
+ nabgauntselect(4,3,8)=17 ; nablagaunt(17)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(5,4,2)=18 ; nablagaunt(18)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(8,4,3)=19 ; nablagaunt(19)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(7,4,4)=20 ; nablagaunt(20)=0.126156626101008_dp !\frac{1}{2\sqrt{5\pi}}
+ nabgauntselect(9,4,4)=21 ; nablagaunt(21)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(2,4,5)=22 ; nablagaunt(22)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(4,4,7)=23 ; nablagaunt(23)=-0.37846987830302403_dp !\frac{-3}{2\sqrt{5\pi}}
+ nabgauntselect(3,4,8)=24 ; nablagaunt(24)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(4,4,9)=25 ; nablagaunt(25)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(4,5,2)=26 ; nablagaunt(26)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(2,5,4)=27 ; nablagaunt(27)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(1,5,5)=28 ; nablagaunt(28)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
+ nabgauntselect(7,5,5)=29 ; nablagaunt(29)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
+ nabgauntselect(8,5,6)=30 ; nablagaunt(30)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+ nabgauntselect(5,5,7)=31 ; nablagaunt(31)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
+ nabgauntselect(6,5,8)=32 ; nablagaunt(32)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+ nabgauntselect(3,6,2)=33 ; nablagaunt(33)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(2,6,3)=34 ; nablagaunt(34)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(8,6,5)=35 ; nablagaunt(35)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+ nabgauntselect(1,6,6)=36 ; nablagaunt(36)=1.692568750643269_dp !\dfrac{3}{\sqrt{\pi}}
+ nabgauntselect(7,6,6)=37 ; nablagaunt(37)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
+ nabgauntselect(9,6,6)=38 ; nablagaunt(38)=-0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+ nabgauntselect(6,6,7)=39 ; nablagaunt(39)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
+ nabgauntselect(5,6,8)=40 ; nablagaunt(40)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+ nabgauntselect(6,6,9)=41 ; nablagaunt(41)=-0.4682350416823196_dp !-\frac{3}{14}\sqrt{\frac{15}{\pi}}
+ nabgauntselect(2,7,2)=42 ; nablagaunt(42)=-0.37846987830302403_dp!\frac{-3}{2\sqrt{5\pi}}
+ nabgauntselect(3,7,3)=43 ; nablagaunt(43)=0.7569397566060481_dp !\frac{3}{\sqrt{5\pi}}
+ nabgauntselect(4,7,4)=44 ; nablagaunt(44)=-0.37846987830302403_dp!\frac{-3}{2\sqrt{5\pi}}
+ nabgauntselect(5,7,5)=45 ; nablagaunt(45)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
+ nabgauntselect(6,7,6)=46 ; nablagaunt(46)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
+ nabgauntselect(1,7,7)=47 ; nablagaunt(47)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
+ nabgauntselect(7,7,7)=48 ; nablagaunt(48)=0.5406712547186058_dp !\frac{3}{7}\sqrt{\frac{5}{\pi}}
+ nabgauntselect(8,7,8)=49 ; nablagaunt(49)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
+ nabgauntselect(9,7,9)=50 ; nablagaunt(50)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
+ nabgauntselect(4,8,3)=51 ; nablagaunt(51)=0.6555290583552474_dp  !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
+ nabgauntselect(3,8,4)=52 ; nablagaunt(52)=0.6555290583552474_dp !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
+ nabgauntselect(6,8,5)=53 ; nablagaunt(53)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+ nabgauntselect(5,8,6)=54 ; nablagaunt(54)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+ nabgauntselect(8,8,7)=55 ; nablagaunt(55)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
+ nabgauntselect(1,8,8)=56 ; nablagaunt(56)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
+ nabgauntselect(7,8,8)=57 ; nablagaunt(57)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
+ nabgauntselect(9,8,8)=58 ; nablagaunt(58)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+ nabgauntselect(8,8,9)=59 ; nablagaunt(59)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+ nabgauntselect(9,2,2)=60 ; nablagaunt(60)=0.2185096861184158_dp !!!!! \frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+ nabgauntselect(9,4,4)=61 ; nablagaunt(61)=0.6555290583552474_dp !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
+ nabgauntselect(6,9,6)=62 ; nablagaunt(62)=-0.4682350416823196_dp !-\frac{3}{14}\sqrt{\frac{15}{\pi}}
+ nabgauntselect(9,9,7)=63 ; nablagaunt(63)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
+ nabgauntselect(8,9,8)=64 ; nablagaunt(64)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+ nabgauntselect(1,9,9)=65 ; nablagaunt(65)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
+ nabgauntselect(7,9,9)=66 ; nablagaunt(66)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
+ nabgauntselect(4,9,4)=67 ; nablagaunt(67)=0.6555290583552474_dp !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
+ nnablagnt=67
+ end if
+
+end subroutine nablarealgaunt
+
 
 END MODULE m_paw_sphharm
 !!***

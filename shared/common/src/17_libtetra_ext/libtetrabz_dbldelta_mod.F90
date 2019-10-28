@@ -212,6 +212,7 @@ SUBROUTINE libtetrabz_dbldelta2(nb,ej,w)
   !
   INTEGER :: ib, ii, indx(3)
   REAL(8) :: a(3,3), e(3), V
+  REAL(8) :: ediff(3)
   character(len=500) :: msg
   !
   DO ib = 1, nb
@@ -231,7 +232,12 @@ SUBROUTINE libtetrabz_dbldelta2(nb,ej,w)
      CALL libtetrabz_sort(3,e,indx)
      !
      DO ii = 1, 3
-        a(1:3,ii) = (0d0 - e(ii)) / (e(1:3) - e(ii))
+        ediff = e(1:3) - e(ii)
+        where (abs(ediff) < 1.e-10)
+          ediff = 1.e-10
+        end where
+        a(1:3,ii) = (0d0 - e(ii)) / ediff
+        !a(1:3,ii) = (0d0 - e(ii)) / (e(1:3) - e(ii))
      END DO
      !
      IF((e(1) < 0d0 .AND. 0d0 <= e(2)) .OR. (e(1) <= 0d0 .AND. 0d0 < e(2))) THEN

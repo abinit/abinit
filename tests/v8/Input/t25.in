@@ -1,16 +1,22 @@
 # Hydrogen diatomic molecule for tests--constrained DFT
 
- ndtset 2
+ ndtset 5
 
+#Constrained DFT 
+ constraint_kind2   1   # Dataset 2 is constrained DFT for the collinear magnetization
+ constraint_kind3  11   # Dataset 3 is constrained DFT for the collinear magnetization and charge
+ constraint_kind4   3   # Dataset 4 is constrained DFT for the collinear magnetization amplitude
+ constraint_kind5   2   # Dataset 5 is constrained DFT for the collinear magnetization direction (actually not useful !)
 
 #Constrained DFT data
- constraint_kind2   11   # Dataset 2 is constrained DFT for the magnetization
- magcon_lambda      2
- spinat       0.0 0.0   0.3
-              0.0 0.0  -0.3 
+ magcon_lambda      2   
+ spinat       0.0 0.0   0.08
+              0.0 0.0  -0.08
+ chrgat      2*0.69 
 
 #Definition of the atomic spheres
  ratsph    1.0  1.0
+ ratsm     0.05
 
 #System description
  acell 15 10 10
@@ -19,7 +25,7 @@
  natom 2
  typat  2*1 
 
- nsppol 1    nspden 2
+ nsppol 1    nspden 2  # Antiferromagnetic case
  nband 1
 
  xcart    -1.1  0.0 0.0
@@ -36,13 +42,15 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t25.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 1h.pspnc, 1h.pspnc
+#%% psp_files = 1h.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. Gonze
 #%% references = 
 #%% keywords = 
-#%% description = H2 diatomic molecule, static, to check the constrained DFT implementation with constrained magnetization
-#%%  Constrain the magnetization around atom 1 to spin up 0.3 and around atom 2 to spin down 0.3
+#%% description = H2 diatomic molecule, static, to check the constrained DFT implementation in case nspden=2
+#%%  DS2 Constrain the collinear magnetization around atom 1 to be +0.08 and around atom 2 to be -0.08
+#%%  DS3 Constrain the collinear magnetization around atom 1 to be +0.08 and around atom 2 to be -0.08, and the total charge of both to be 0.69.
+#%%  DS4 Constrain the collinear magnetization amplitude around atom 1 to be +0.08 and around atom 2 to be -0.08. Same result as DS2.
 #%%<END TEST_INFO>
