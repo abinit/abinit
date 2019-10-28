@@ -462,7 +462,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        do idat=1,ndat
          do ipw=1,npw_k2
            ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)       =ghc1(1:2,ipw+(idat-1)*npw_k2)+ghc4(1:2,ipw+(idat-1)*npw_k2)
-           ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+npw_k2)=ghc3(1:2,ipw+(idat-1)*npw_k2)+ghc2(1:2,ipw+(idat-1)*npw_k2)
+           ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc3(1:2,ipw+(idat-1)*npw_k2)+ghc2(1:2,ipw+(idat-1)*npw_k2)
          end do
        end do
      else
@@ -477,7 +477,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        else if (nspinor2TreatedByThisProc) then
          do idat=1,ndat
            do ipw=1,npw_k2
-             ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)=ghc3(1:2,ipw+(idat-1)*npw_k2)+ghc2(1:2,ipw+(idat-1)*npw_k2)
+             ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc3(1:2,ipw+(idat-1)*npw_k2)+ghc2(1:2,ipw+(idat-1)*npw_k2)
            end do
          end do
        end if
@@ -628,7 +628,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !============================================================
 
 !  Assemble modified kinetic, local and nonlocal contributions
-!  to <G|H|C(n,k)>. Take also into account build-in debugging.
+   !  to <G|H|C(n,k)>. Take also into account build-in debugging.
    if(prtvol/=-level)then
      do idat=1,ndat
        if (k1_eq_k2) then
