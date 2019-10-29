@@ -63,6 +63,7 @@ module m_polynomial_coeff
  private :: computeSymmetricCombinations 
  private :: getCoeffFromList
  private :: generateTermsFromList
+ private :: reduce_zero_combinations
 !!***
 
 !!****t* m_polynomial_coeff/polynomial_coeff_type
@@ -2359,11 +2360,8 @@ if(my_ncombi /= 0)then
   enddo
 endif 
 
-!write(std_out,*) "irank_ncombi:, ", irank_ncombi
-
 ABI_ALLOCATE(my_list_combination,(power_disps(2),irank_ncombi(my_rank+1)))
 my_list_combination = zero 
-
 if(my_ncombi_end <= nirred_comb-1)then 
    my_list_combination(:,:my_ncombi) = list_combination_tmp(:,index_irredcomb_fix(my_ncombi_start)+1:index_irredcomb_fix(my_ncombi_end+1))
 !   write(std_out,*) "DEBUG: shape(my_list_combination),my_rank", shape(my_list_combination),my_rank,my_ncombi_start,my_ncombi_end,index_irredcomb_fix(my_ncombi_end+1)-index_irredcomb_fix(my_ncombi_start)
@@ -2372,41 +2370,41 @@ else if(my_ncombi_end == nirred_comb)then
 !   write(std_out,*) "DEBUG: shape(my_list_combination),my_rank", shape(my_list_combination),my_rank,my_ncombi_start,my_ncombi_end,size(list_combination_tmp,2)-index_irredcomb_fix(my_ncombi_start)
 endif 
 
-my_ncombi = size(my_list_combination)
-ABI_DEALLOCATE(list_combination_tmp) 
-ABI_ALLOCATE(list_combination_tmp,(power_disps(2),maxval(irank_ncombi)*nproc))
-ABI_ALLOCATE(offsets,(nproc))
+write(std_out,*) "DEBUG: reduce zero combinations on my_rank: ", my_rank
+call reduce_zero_combinations(my_list_combination)
+write(std_out,*) "DEBUG: finish reduce zero combinations"
 
+my_ncombi = size(my_list_combination)
 call xmpi_barrier(comm)
 call xmpi_allgather(my_ncombi,irank_ncombi,comm,ierr)
+
+ABI_DEALLOCATE(list_combination_tmp) 
+ABI_ALLOCATE(list_combination_tmp,(power_disps(2),sum(irank_ncombi)))
+ABI_ALLOCATE(offsets,(nproc))
 do i=1,nproc 
    if(i == 1)then 
       offsets(i) = 0
    else 
-      offsets(i) = sum(irank_ncombi(:i-1))
+      if(irank_ncombi(i) /= 0)then
+         offsets(i) = sum(irank_ncombi(:i-1)) + power_disps(2)*(i-1)
+      else
+         offsets(i) = sum(irank_ncombi(:i-1)) 
+      endif
    endif
 enddo 
-!write(std_out,*) "Offsets: ", offsets
+write(std_out,*) "Offsets: ", offsets
+write(std_out,*) "irank_ncombi: ", irank_ncombi
 
-!list_combination_tmp = 0 
+list_combination_tmp = 0 
 !write(std_out,*) "DEBUG: shape(list_combination_tmp)", shape(list_combination_tmp)
 !Get irredecuble terms from all procs 
 write(std_out,*) "DEBUG: call xmpi_barrier"
 !write(std_out,*) "DEBUG: maxval(irank_ncombi),nproc", irank_ncombi,maxval(irank_ncombi),nproc
 call xmpi_barrier(comm)
-write(std_out,*) "DEBUG: call xmpi_gather"
+write(std_out,*) "DEBUG: call xmpi_gatherv"
 call xmpi_gatherv(my_list_combination,size(my_list_combination),list_combination_tmp,irank_ncombi,offsets,master,comm,ierr)
 
-!write(std_out,*) "DEBUG: shape(list_combination_tmp)", shape(list_combination_tmp)
-
-
-
-!Get irredecuble terms from all procs 
-!write(std_out,*) "DEBUG: call xmpi_barrier"
-!call xmpi_barrier(comm)
-!write(std_out,*) "DEBUG: call xmpi_sum"
-!call xmpi_sum(list_combination_tmp,comm,ierr)
-
+write(std_out,*) "DEBUG: shape(list_combination_tmp)", shape(list_combination_tmp)
 
 ABI_DEALLOCATE(my_list_combination)
 ABI_DEALLOCATE(irank_combi_start)
@@ -2415,29 +2413,10 @@ ABI_DEALLOCATE(irank_ncombi)
 ABI_DEALLOCATE(offsets)
 
 if(iam_master)then
-write(std_out,*) "DEBUG: reduce zero combinations"
- !Reduce zero combinations
- i0 = 0 
- do ii=1,ncombination
-   if(any(list_combination_tmp(:,ii) /= 0))then 
-      i0 = i0 + 1
-   endif  
- enddo
-
- ABI_ALLOCATE(list_combination_tmp2,(power_disps(2),i0))
- i0 = 0 
- do ii=1,ncombination
-   if(any(list_combination_tmp(:,ii) /= 0))then 
-      i0 = i0+1
-      list_combination_tmp2(:,i0) = list_combination_tmp(:,ii)
-   endif  
- enddo
- ncombination = i0
- ABI_DEALLOCATE(list_combination_tmp)
- ABI_ALLOCATE(list_combination_tmp,(power_disps(2),i0))
- list_combination_tmp = list_combination_tmp2 
- ABI_DEALLOCATE(list_combination_tmp2)
-write(std_out,*) "DEBUG: finish reduce zero combinations"
+  write(std_out,*) "DEBUG: reduce zero combinations on master"
+  call reduce_zero_combinations(list_combination_tmp)
+  write(std_out,*) "DEBUG: finish reduce zero combinations"
+  ncombination = size(list_combination_tmp,2)
 end if !iam_master
 
 
@@ -4110,6 +4089,59 @@ index_irred(size(index_irred)) = ncombination + 1
 return 
 
 end function check_irreducibility
+!!***
+
+!!****f* m_polynomial_coeff/reduce_zero_combinations
+!! NAME
+!! reduce_zero_combinations
+!!
+!! FUNCTION
+!!
+!! Sort out list of zeros in a list of integers
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine reduce_zero_combinations(combination_list)
+!Arguments ------------------------------------
+ implicit none
+
+!Arguments ------------------------------------
+ !scalar 
+ !array
+ integer,allocatable,intent(inout) :: combination_list(:,:)
+!local
+!variable
+  integer :: i,j
+  integer,allocatable :: combination_list_tmp(:,:)
+!array
+! *************************************************************************
+
+ !Reduce zero combinations
+ i = 0 
+ do j=1,size(combination_list,2)
+   if(any(combination_list(:,j) /= 0))then 
+      i = i + 1
+   endif  
+ enddo
+
+ ABI_ALLOCATE(combination_list_tmp,(size(combination_list,1),i))
+ i = 0 
+ do j=1,size(combination_list,2)
+   if(any(combination_list(:,j) /= 0))then 
+      i = i + 1
+      combination_list_tmp(:,i) = combination_list(:,j)
+   endif  
+ enddo
+ ABI_DEALLOCATE(combination_list)
+ ABI_ALLOCATE(combination_list,(size(combination_list_tmp,1),i))
+ combination_list = combination_list_tmp
+ ABI_DEALLOCATE(combination_list_tmp)
+ 
+end subroutine reduce_zero_combinations
 !!***
 
 end module m_polynomial_coeff
