@@ -1939,7 +1939,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 !arrays
  integer :: ncell(3)
  integer,allocatable :: buffsize(:),buffdispl(:),index_irredcomb(:),dummylist(:),index_irred(:)
- integer,allocatable :: index_irredcomb_fix(:)
+ integer,allocatable :: index_irredcomb_fix(:),offsets(:)
  integer,allocatable :: cell(:,:),compatibleCoeffs(:,:),compatibleCoeffs_sym(:,:),list_combination_cmp_tmp(:)
  integer,allocatable :: list_symcoeff(:,:,:),list_symstr(:,:,:),list_coeff(:),list_combination(:,:)
  integer,allocatable :: list_combination_tmp(:,:),list_combination_tmp2(:,:),irank_combi_start(:),irank_combi_end(:)
@@ -2330,7 +2330,7 @@ call xmpi_allgather(my_ncombi_start,irank_combi_start,comm,ierr)
 call xmpi_allgather(my_ncombi_end,irank_combi_end,comm,ierr)
 call xmpi_allgather(my_ncombi,irank_ncombi,comm,ierr)
 
-write(std_out,*) "index_irredcomb:, ", index_irredcomb 
+!write(std_out,*) "irank_combi_start:, ", irank_combi_start 
   write(message,'(1a)')' Compute irreducible symmetric combinations of combinations of irreducibel terms'
 if(my_ncombi /= 0)then 
   do i=my_ncombi_start,my_ncombi_end
@@ -2359,32 +2359,45 @@ if(my_ncombi /= 0)then
   enddo
 endif 
 
-write(std_out,*) "index_irredcomb_fix:, ", index_irredcomb_fix
+!write(std_out,*) "irank_ncombi:, ", irank_ncombi
 
-ABI_ALLOCATE(my_list_combination,(power_disps(2),maxval(irank_ncombi)))
+ABI_ALLOCATE(my_list_combination,(power_disps(2),irank_ncombi(my_rank+1)))
 my_list_combination = zero 
 
 if(my_ncombi_end <= nirred_comb-1)then 
-   my_list_combination(:,:irank_ncombi(my_rank+1)) = list_combination_tmp(:,index_irredcomb_fix(my_ncombi_start)+1:index_irredcomb_fix(my_ncombi_end+1))
-   write(std_out,*) "DEBUG: shape(my_list_combination),my_rank", shape(my_list_combination),my_rank,my_ncombi_start,my_ncombi_end,index_irredcomb_fix(my_ncombi_end+1)-index_irredcomb_fix(my_ncombi_start)
+   my_list_combination(:,:my_ncombi) = list_combination_tmp(:,index_irredcomb_fix(my_ncombi_start)+1:index_irredcomb_fix(my_ncombi_end+1))
+!   write(std_out,*) "DEBUG: shape(my_list_combination),my_rank", shape(my_list_combination),my_rank,my_ncombi_start,my_ncombi_end,index_irredcomb_fix(my_ncombi_end+1)-index_irredcomb_fix(my_ncombi_start)
 else if(my_ncombi_end == nirred_comb)then  
-   my_list_combination(:,:irank_ncombi(my_rank+1)) = list_combination_tmp(:,index_irredcomb_fix(my_ncombi_start)+1:)
-   write(std_out,*) "DEBUG: shape(my_list_combination),my_rank", shape(my_list_combination),my_rank,my_ncombi_start,my_ncombi_end,size(list_combination_tmp,2)-index_irredcomb_fix(my_ncombi_start)
+   my_list_combination(:,:my_ncombi) = list_combination_tmp(:,index_irredcomb_fix(my_ncombi_start)+1:)
+!   write(std_out,*) "DEBUG: shape(my_list_combination),my_rank", shape(my_list_combination),my_rank,my_ncombi_start,my_ncombi_end,size(list_combination_tmp,2)-index_irredcomb_fix(my_ncombi_start)
 endif 
 
-
+my_ncombi = size(my_list_combination)
 ABI_DEALLOCATE(list_combination_tmp) 
 ABI_ALLOCATE(list_combination_tmp,(power_disps(2),maxval(irank_ncombi)*nproc))
+ABI_ALLOCATE(offsets,(nproc))
+
+call xmpi_barrier(comm)
+call xmpi_allgather(my_ncombi,irank_ncombi,comm,ierr)
+do i=1,nproc 
+   if(i == 1)then 
+      offsets(i) = 0
+   else 
+      offsets(i) = sum(irank_ncombi(:i-1))
+   endif
+enddo 
+!write(std_out,*) "Offsets: ", offsets
+
 !list_combination_tmp = 0 
-write(std_out,*) "DEBUG: shape(list_combination_tmp)", shape(list_combination_tmp)
+!write(std_out,*) "DEBUG: shape(list_combination_tmp)", shape(list_combination_tmp)
 !Get irredecuble terms from all procs 
 write(std_out,*) "DEBUG: call xmpi_barrier"
-write(std_out,*) "DEBUG: maxval(irank_ncombi),nproc", irank_ncombi,maxval(irank_ncombi),nproc
+!write(std_out,*) "DEBUG: maxval(irank_ncombi),nproc", irank_ncombi,maxval(irank_ncombi),nproc
 call xmpi_barrier(comm)
 write(std_out,*) "DEBUG: call xmpi_gather"
-call xmpi_gather(my_list_combination,size(my_list_combination),list_combination_tmp,size(my_list_combination),master,comm,ierr)
+call xmpi_gatherv(my_list_combination,size(my_list_combination),list_combination_tmp,irank_ncombi,offsets,master,comm,ierr)
 
-write(std_out,*) "DEBUG: shape(list_combination_tmp)", shape(list_combination_tmp)
+!write(std_out,*) "DEBUG: shape(list_combination_tmp)", shape(list_combination_tmp)
 
 
 
@@ -2399,6 +2412,7 @@ ABI_DEALLOCATE(my_list_combination)
 ABI_DEALLOCATE(irank_combi_start)
 ABI_DEALLOCATE(irank_combi_end)
 ABI_DEALLOCATE(irank_ncombi)
+ABI_DEALLOCATE(offsets)
 
 if(iam_master)then
 write(std_out,*) "DEBUG: reduce zero combinations"
