@@ -1230,7 +1230,7 @@ end if
        call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
        do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
          write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
-         call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+         call wrtout(std_out,mat_writing,'COLL'); !call wrtout(ab_out,mat_writing,'COLL')
        enddo
      !endif
    end do
@@ -1251,7 +1251,7 @@ end if
        call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
        do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
          write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
-         call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+         call wrtout(std_out,mat_writing,'COLL'); !call wrtout(ab_out,mat_writing,'COLL')
        enddo
      !endif
    end do
