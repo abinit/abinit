@@ -326,27 +326,49 @@ end subroutine def_observable_var
 
 #if defined HAVE_NETCDF
      ncerr=nf90_redef(self%ncid)
+
+
+
      ncerr=nf90_def_dim(self%ncid, "prim_natoms", prim%lattice%natom, natom )
      ncerr=nf90_def_dim(self%ncid, "prim_nspins", prim%spin%nspin, nspin)
 
-     ncerr=nf90_def_var(self%ncid, "prim_rprimd", NF90_DOUBLE, &
-          & [self%three, self%three], rprimd_id)
-     ncerr=nf90_def_var(self%ncid, "prim_ms", NF90_DOUBLE, &
-          & [nspin], ms_id)
-     ncerr=nf90_def_var(self%ncid, "prim_spin_xcart", NF90_DOUBLE, &
-          & [ self%three, nspin], spin_xcart_id)
-     ncerr=nf90_def_var(self%ncid, "ref_spin_orientation", NF90_DOUBLE, &
-          & [self%three, nspin], ref_spin_orientation_id)
-     ncerr=nf90_def_var(self%ncid, "ref_spin_qpoint", NF90_DOUBLE, &
-          & [self%three], ref_spin_orientation_id)
-     ncerr=nf90_def_var(self%ncid, "ref_spin_rotate_axis", NF90_DOUBLE, &
-          & [self%three], ref_spin_rotate_axis_id)
-     ncerr=nf90_def_var(self%ncid, "prim_gilbert_damping", NF90_DOUBLE, &
-          & [nspin], gilbert_damping_id)
-     ncerr=nf90_def_var(self%ncid, "prim_gyro_ratio", NF90_DOUBLE, &
-          & [nspin], gyro_ratio_id)
+     call ab_define_var(self%ncid, [self%three, self%three], rprimd_id, &
+          & NF90_DOUBLE, "prim_rprimd","PRIMitive cell Real space PRIMitive translations, Dimensional", "bohr")
+     call ab_define_var(self%ncid, [nspin], ms_id, &
+          & NF90_DOUBLE, "prim_ms","PRIMitive cell Magnetic moment Scalar", "muB")
+     call ab_define_var(self%ncid, [self%three, nspin], spin_xcart_id, &
+          & NF90_DOUBLE, "prim_spin_xcart","PRIMitive cell X Cartesian coordinates", "bohr")
+     call ab_define_var(self%ncid, [self%three, nspin], ref_spin_orientation_id, &
+          & NF90_DOUBLE, "prim_ref_spin_orientation","PRIMitive cell REFerence SPIN ORIENTATION", "unitless")
+     call ab_define_var(self%ncid, [self%three], ref_spin_qpoint_id, &
+          & NF90_DOUBLE, "prim_ref_spin_qpoint","PRIMitive cell REFerence SPIN QPOINT", "unitless")
+     call ab_define_var(self%ncid, [self%three], ref_spin_rotate_axis_id, &
+          & NF90_DOUBLE, "prim_ref_spin_rotate_axis","PRIMitive cell REFerence SPIN ROTATE AXIS", "unitless")
 
-!     !ncerr=nf90_def_var(self%ncid, "prim_typat", NF90_INT, [self%natoms],  self%typat_id)
+     call ab_define_var(self%ncid, [nspin], gilbert_damping_id, &
+          & NF90_DOUBLE, "prim_gilbert_damping","PRIMitive cell GILBERT DAMPING", "a.u.")
+
+     call ab_define_var(self%ncid, [nspin], gyro_ratio_id, &
+          & NF90_DOUBLE, "prim_gyro_ratio","PRIMitive cell GYROmagnetic RATIO", "a.u.")
+
+
+
+!      ncerr=nf90_def_var(self%ncid, "prim_ms", NF90_DOUBLE, &
+!           & [nspin], ms_id)
+!      ncerr=nf90_def_var(self%ncid, "prim_spin_xcart", NF90_DOUBLE, &
+!           & [ self%three, nspin], spin_xcart_id)
+!      ncerr=nf90_def_var(self%ncid, "prim_ref_spin_orientation", NF90_DOUBLE, &
+!           & [self%three, nspin], ref_spin_orientation_id)
+!      ncerr=nf90_def_var(self%ncid, "prim_ref_spin_qpoint", NF90_DOUBLE, &
+!           & [self%three], ref_spin_orientation_id)
+!      ncerr=nf90_def_var(self%ncid, "prim_ref_spin_rotate_axis", NF90_DOUBLE, &
+!           & [self%three], ref_spin_rotate_axis_id)
+!      ncerr=nf90_def_var(self%ncid, "prim_gilbert_damping", NF90_DOUBLE, &
+!           & [nspin], gilbert_damping_id)
+!      ncerr=nf90_def_var(self%ncid, "prim_gyro_ratio", NF90_DOUBLE, &
+!           & [nspin], gyro_ratio_id)
+
+! !     !ncerr=nf90_def_var(self%ncid, "prim_typat", NF90_INT, [self%natoms],  self%typat_id)
 !     !ncerr=nf90_def_var(self%ncid, "prim_znucl", NF90_DOUBLE, [self%ntypat],  self%znucl_id)
 !     ncerr=nf90_def_var(self%ncid, "prim_spin_index", NF90_DOUBLE, &
 !          & [self%natoms], self%spin_index_id)

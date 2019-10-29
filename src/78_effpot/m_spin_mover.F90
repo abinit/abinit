@@ -371,10 +371,10 @@ contains
             Sprim(:,i)=self%init_orientation(:)
           enddo
           self%Stmp(:,:) = 0.0d0
-          
+
           call self%supercell%supercell_maker%generate_spin_wave_vectorlist(A=Sprim, &
              & kpoint=self%init_qpoint, axis=self%init_rotate_axis, A_sc=self%Stmp)
-   
+
           ABI_SFREE(SPrim)
 
         case (4)
