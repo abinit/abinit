@@ -2171,6 +2171,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_RESPFN/),iout)
    end if
    !PAW+Linear Response+GGA function restricted to pawxcdev=0
+   !PAW+response_to_strain only allowed for LDA
    if (dt%usepaw==1.and.dt%optdriver==RUNL_RESPFN) then
      allow=(dt%ixc>0).and.((dt%ixc>=11.and.dt%ixc<=16).or.(dt%ixc>=23.and.dt%ixc<=39))
      if(.not.allow) allow=(dt%ixc<0).and.libxc_functionals_isgga()
@@ -2188,6 +2189,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &         '  - This is restricted to pawxcdev=0!',ch10,&
 &         '  - Be careful to run the preparatory Ground-State calculations also with pawxcdev=0!'
          MSG_WARNING(msg)
+       end if
+       if (dt%rfstrs/=0) then
+         write(msg,'(3a)' )&
+&         'You are performing a DFPT+PAW calculation using a GGA XC functional:',ch10,&
+&         '  Response to strain perturbation is not yet available!'
+         MSG_ERROR_NOSTOP(msg, ierr)
        end if
      end if
    end if
