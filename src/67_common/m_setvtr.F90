@@ -534,9 +534,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    if(istep==1 .or. moved_rhor==1 .or. dtset%positron<0 .or. mod(dtset%fockoptmix,100)==11) option=1
    if (nkxc>0) option=2
    if (dtset%iscf==-1) option=-2
-!  Not yet able to deal fully with the full XC kernel in case of GGA + spin
-   option_eff=option
-   if (option==2.and.xcdata%xclevel==2.and.(nkxc==3-2*mod(xcdata%nspden,2))) option_eff=12
 
    if (ipositron/=1) then
      if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
@@ -551,6 +548,9 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
        end if
 !      Use the periodic solver to compute Hxc
        nk3xc=1
+!      Not yet able to deal fully with the full XC kernel in case of GGA + spin
+       option_eff=option;if (option==2.and.xcdata%xclevel==2.and.(nkxc==3-2*mod(xcdata%nspden,2))) option_eff=12
+
        if (ipositron==0) then
 
 !        Compute energies%e_xc and associated quantities
