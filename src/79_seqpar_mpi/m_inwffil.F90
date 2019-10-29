@@ -3161,7 +3161,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
              seed=(iband-1)*npw2*nspinor2 + (ispinor-1)*npw2 + ipw
            else
              seed=kg2(1,ipw)*npwtot*npwtot + kg2(2,ipw)*npwtot + kg2(3,ipw)
-             seed=iband*seed*nspinor2 + (ispinor-1)*seed
+             seed=(iband*nspinor2+ispinor-1)*seed
            end if
 
            if(randalg == 0) then
