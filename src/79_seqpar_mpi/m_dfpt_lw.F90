@@ -81,7 +81,7 @@ contains
 !!  dfpt_qdrpole
 !!
 !! FUNCTION
-!!  This routine computes the elements of the quadrupole tensor as the 
+!!  This routine computes the elements of the quadrupole and the P^(1) tensor as the 
 !!  second order q-gradient (d2/dq1dq2) of the charge response to an atomic 
 !!  displacement (see, e.g., M.Royo and M. Stengel to be published).
 !!  The atoms and atomic displacements directions that are evaluated 
@@ -135,7 +135,13 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
+!!  For historical reasons the Quadrupole and P^(1) tensor has been obtained from
+!!  the q-gradient of E^{\tau_{\kappa\beta}* \epsilon_{alpha}}. This is 
+!!  different from the equations appearing in PRX 9, 021050 (2019) which
+!!  stand for the q-gradient of E^{\epsilon_{alpha}* \tau_{\kappa\beta}}.
+!!  By this reason there is an additional -1 factor here when computing 
+!!  the physical observables. 
+!! 
 !! PARENTS
 !!   
 !!  respfn
@@ -1257,7 +1263,7 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
 
          if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1) then
 
-           !Calculate ans save the third order energy derivative
+           !Calculate and save the third order energy derivative
            tmpim=eqgradhart(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iq2grad,iq1grad)
            d3etot(1,iq2dir,iq2pert,iatdir,iatom,iq1dir,iq1pert)=zero
            d3etot(2,iq2dir,iq2pert,iatdir,iatom,iq1dir,iq1pert)=tmpim
