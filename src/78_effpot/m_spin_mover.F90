@@ -414,7 +414,7 @@ contains
        call self%spin_ncfile%initialize( trim(fname), params%spin_write_traj)
        call self%spin_ncfile%def_spindynamics_var(self%hist)
        call self%spin_ncfile%def_observable_var(self%spin_ob)
-       !call spin_ncfile_t_write_primitive_cell(self%spin_ncfile, self%spin_primitive)
+       call self%spin_ncfile%write_primitive_cell(self%supercell%unitcell)
        call self%spin_ncfile%write_supercell(self%supercell)
        call self%spin_ncfile%write_parameters(params)
     endif
