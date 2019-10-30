@@ -1382,7 +1382,7 @@ end if
  !! 1) allocate operwan_realspace
  !! -------------------------------------------------------------
 if (dtset%plowan_realspace >= 1) then
-    call init_operwan_realspace(wan,operwan_realspace)
+  call init_operwan_realspace(wan,operwan_realspace)
 endif
 
 ! ABI_DATATYPE_ALLOCATE(operwan_realspace,(wan%natom_wan,wan%natom_wan))
@@ -1670,8 +1670,7 @@ endif
  !! -------------------------------------------------------------
  !! End Transform the Wannier operator in real space (in eV)
  !! n) deallocate operwan_realspace
- !! -------------------------------------------------------------
-   call destroy_operwan_realspace(wan,operwan_realspace)
+ !! ------------------------------------------------------------
 !   do iatom1 = 1,wan%natom_wan
 !     do iatom2 = 1,wan%natom_wan
 !       do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
@@ -1688,6 +1687,9 @@ endif
 !     end do
 !   end do
 !   ABI_DATATYPE_DEALLOCATE(operwan_realspace%atom_index)
+ endif
+ if (dtset%plowan_realspace >= 1) then
+   call destroy_operwan_realspace(wan,operwan_realspace)
  endif
  
  ! ----------------------------------------------------------------------------------------
