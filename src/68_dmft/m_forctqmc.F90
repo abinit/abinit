@@ -1385,7 +1385,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        else if ((paw_dmft%dmft_solv>=6.and.paw_dmft%dmft_solv<=7).or.paw_dmft%dmft_solv==9) then
        ! =================================================================
 
-         if ( paw_dmft%dmft_solv==9.and.(paw_dmft%dmftqmc_l >= (2*paw_dmft%dmft_nwli)+1) ) then
+         if ( paw_dmft%dmft_solv==9.or.(paw_dmft%dmftqmc_l >= (2*paw_dmft%dmft_nwli)+1) ) then
 
            call ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_nd,fw1_nd,leg_measure,iatom)
 
