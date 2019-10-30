@@ -178,9 +178,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !Keep track of total time spent in getghc:
  call timab(200+tim_getghc,1,tsec)
 
- !print *, "ndat", ndat
- !stop
-
 !Structured debugging if prtvol==-level
  if(prtvol==-level)then
    write(msg,'(80a,a,a)') ('=',ii=1,80),ch10,' getghc : enter, debugging '
@@ -227,8 +224,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    MSG_BUG(msg)
  end if
  if (size(ghc)<2*npw_k2*my_nspinor*ndat) then
-   !print *, "size(ghc)", size(ghc)
-   !print *, "2*npw_k2*my_nspinor*ndat", 2*npw_k2*my_nspinor*ndat
    msg='wrong size for ghc!'
    MSG_BUG(msg)
  end if
@@ -498,7 +493,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      ABI_DEALLOCATE(cwavef2)
    end if
    ABI_DEALLOCATE(work)
-   print *, "mpi_enreg%comm_fft getghc", mpi_enreg%comm_fft
 !  Retrieve eventually original FFT distrib
    if(have_to_reequilibrate) then
      if(ndat > 1 ) then
@@ -595,10 +589,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
      if (gs_ham%usepaw==0) gsc_ptr => nonlop_dum
      if (gs_ham%usepaw==1) gsc_ptr => gsc
-     !stop
      call nonlop(choice,cpopt_here,cwaveprj_nonlop,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
 &     nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlxc,select_k=select_k_)
-     !stop
      if (gs_ham%usepaw==1 .and. has_fock)then
        if (fock_get_getghc_call(fock)==1) then
          ABI_ALLOCATE(gvnlc,(2,npw_k2*my_nspinor*ndat))
@@ -1347,7 +1339,6 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
    index_gsc=index_gsc+npw_k*my_nspinor
  end do
 
- print *, "mpi_enreg%comm_band getgsc", mpi_enreg%comm_band
 !Reduction in case of parallelization
  if ((xmpi_paral==1)) then
    call timab(48,1,tsec)
@@ -1482,13 +1473,9 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 
  ! *************************************************************************
 
- !print *, "ndat",ndat
- !stop
-
  select_k_default = 1; if ( present(select_k) ) select_k_default = select_k
 
  spacedim = size(cwavef,dim=2)/ndat
-
     !$omp parallel default (none) private(ithread,nthreads,chunk,firstband,lastband,residuchunk,firstelt,lastelt, is_nested), &
     !$omp& shared(cwavef,ghc,gsc, gvnlxc,spacedim,ndat,kg_fft_k,kg_fft_kp,gs_ham,cwaveprj,mpi_enreg), &
     !$omp& firstprivate(cpopt,lambda,prtvol,sij_opt,tim_getghc,type_calc,select_k_default)
@@ -1514,9 +1501,6 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
    lastband = firstband+chunk
  end if
  
- !print *, "lastband-firstband+1", lastband-firstband+1
- !stop
-
  if ( lastband /= 0 ) then
    firstelt = (firstband-1)*spacedim+1
    lastelt = lastband*spacedim

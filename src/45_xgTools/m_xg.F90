@@ -6,7 +6,7 @@
 !! FUNCTION
 !! This is a module to manage and help developer with 2D arrays for low level routines.
 !! Particularly, it manages memory for allocations and deallocations (see xg_routines),
-!! It handles MPI, complex and real values (*8 kind only) automatically.
+!! It handles MPI, complex and real values (*8 kind only) staticmatically.
 !! It is also possible to build sub-block of an array and work on it very easily (see xgBlock_routines)
 !! Several routines are also available for performing blas/lapack which again
 !! manage the type and MPI (and openmp if needed)
@@ -153,7 +153,6 @@ module m_xg
   public :: xg_associated
   
   public :: xgBlock_setBlock
-  public :: xgBlock_setBlock1
   public :: xgBlock_set
   public :: xgBlock_map
   public :: xgBlock_reverseMap
@@ -479,11 +478,8 @@ module m_xg
         MSG_ERROR("Bad size for real array")
       end if
       cptr = getClocR(size(array,dim=1),size(array,dim=2),array)
-      !print *, "array", array
       call c_f_pointer(cptr,xgBlock%vecR,(/ rows, cols /))
-      !print *, "XGVEC"
-      !print *, xgBlock%vecR
-    xgBlock%trans = 't'
+      xgBlock%trans = 't'
     case ( SPACE_C )
       if ( fullsize/2 < cols*rows .or. mod(fullsize/2,rows) /= 0) then
         MSG_ERROR("Bad size for complex array")
@@ -499,7 +495,6 @@ module m_xg
     xgBlock%cols = cols
     xgBlock%normal = 'n'
     if ( present(comm) ) xgBlock%spacedim_comm = comm
-    !print *, "MAPIRANO"
   end subroutine xgBlock_map
 !!***
 
@@ -518,11 +513,7 @@ module m_xg
 
     select case (xgBlock%space)
     case ( SPACE_R,SPACE_CR )
-      !print *, "xgBlock%cols*xgBlock%Ldim", xgBlock%cols*xgBlock%Ldim
-      !print *, "cols*rows", cols*rows
       if ( xgBlock%cols*xgBlock%Ldim < cols*rows ) then
-          write(std_out,*) xgBlock%cols,xgBlock%Ldim,cols,rows
-          write(std_out,*) xgBlock%cols*xgBlock%Ldim,cols*rows
           MSG_ERROR("Bad reverseMapping")
           stop
       end if
@@ -530,10 +521,6 @@ module m_xg
       call c_f_pointer(cptr,array,(/ rows, cols /))
     case ( SPACE_C )
       if ( xgBlock%cols*xgBlock%Ldim < cols*rows ) then
-          print *, "cols", cols
-          print *, "rows", rows
-          print *, "xgBlock%cols", xgBlock%cols
-          print *, "xgBlock%Ldim", xgBlock%Ldim
           MSG_ERROR("Bad complex reverseMapping")
           stop
       end if
@@ -704,10 +691,6 @@ module m_xg
     type(c_ptr) :: cptr
 
     if ( (fcol+cols-1 ) > xgblockA%cols ) then
-      print *, "xgblockA%cols", xgblockA%cols
-      print *, "fcol", fcol
-      print *, "cols", cols  
-      print *, "fcol+cols-1", fcol+cols-1  
       MSG_ERROR("Too many columns")
     endif
     if ( rows > xgblockA%rows ) then
@@ -975,12 +958,6 @@ module m_xg
       MSG_ERROR("Not same space")
     end if
 
-    !print *, "USAO U GEMM"
-    !print *, "xgBlockW%rows", xgBlockW%rows
-    !print *, "xgBlockW%cols", xgBlockW%cols
-    !stop
-    !stop
-
     if ( transa == 'n' ) then
       K = xgBlockA%cols
     else
@@ -989,16 +966,10 @@ module m_xg
 
     select case(xgBlockA%space)
     case (SPACE_R,SPACE_CR)
-      print *, "PRE DGEMM"
-      call dgemm(transa,transb,xgBlockW%rows, xgBlockW%cols, K, &
+     call dgemm(transa,transb,xgBlockW%rows, xgBlockW%cols, K, &
         alpha,xgBlockA%vecR, xgBlockA%LDim, &
         xgBlockB%vecR, xgBlockB%LDim, beta,xgBlockW%vecR,xgBlockW%LDim)
-      print *, "NAKON DGEMM"
-      print *, "transa", transa
-      print *, "xgBlockA%trans", xgBlockA%trans
-      print *, "xgBlockW%spacedim_comm", xgBlockW%spacedim_comm
-      !stop
-      if ( transa == xgBlockA%trans .and. (beta) < 1d-10) then
+     if ( transa == xgBlockA%trans .and. (beta) < 1d-10) then
         call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K)
       end if
     case(SPACE_C)
@@ -1504,7 +1475,6 @@ module m_xg
     call checkResize(iwork,liwork,5*xgBlockA%rows+3)
 
     select case(xgBlockA%space)
-
     case (SPACE_R,SPACE_CR)
       call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+6*xgBlockA%rows+1)
 
@@ -1931,7 +1901,7 @@ module m_xg
  subroutine xgBlock_saxpyR(xgBlock1, da, xgBlock2)
 
 
-!This section has been created automatically by the script Abilint (TD).
+!This section has been created staticmatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_saxpyR'
@@ -1967,7 +1937,7 @@ module m_xg
   subroutine xgBlock_saxpyC(xgBlock1, da, xgBlock2)
 
 
-!This section has been created automatically by the script Abilint (TD).
+!This section has been created staticmatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_saxpyC'
@@ -2108,10 +2078,9 @@ module m_xg
       end do
       !$omp end parallel do
     end select
-    !print *, "BEFORE SUM"
-    !stop
+    
     call xmpi_sum(dot%vecR,xgBlock%spacedim_comm,icol)
-    !print *, "AFTER SUM"
+    
     if ( present(max_val) ) then
       max_val = maxval(dot%vecR(1:xgBlock%cols,1))
     end if
@@ -2131,7 +2100,7 @@ module m_xg
  subroutine xgBlock_colwiseDotProduct(xgBlockA,xgBlockB,dot,max_val,max_elt,min_val,min_elt)
 
 
-!This section has been created automatically by the script Abilint (TD).
+!This section has been created staticmatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_colwiseDotProduct'
@@ -2146,7 +2115,7 @@ module m_xg
     integer         , intent(  out), optional :: min_elt 
     integer :: icol, irow
     double precision,external :: ddot
-    double complex,external :: zdotc		!conjugated dot product
+    double complex,external :: zdotc !conjugated dot product
 
     select case(xgBlockA%space)
     case(SPACE_R,SPACE_CR)   
@@ -2200,7 +2169,7 @@ module m_xg
   subroutine xgBlock_colwiseDivision(xgBlockA, xgBlockB, divResult,max_val,max_elt,min_val,min_elt)
 
 
-!This section has been created automatically by the script Abilint (TD).
+!This section has been created staticmatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xgBlock_colwiseDivision'
@@ -2260,7 +2229,7 @@ module m_xg
         min_elt = minloc(dble(divResult%vecC(1:xgBlockA%rows,1:xgBlockA%cols))) 
       end if
     end select
-    		
+   
   end subroutine xgBlock_colwiseDivision
 
 
@@ -2405,7 +2374,7 @@ module m_xg
     case (SPACE_C)
       !$omp parallel do
       do i = 1, xgBlock%cols
-        xgBlock%vecC = dcmplx(0.d0)
+        xgBlock%vecC(:,i) = dcmplx(0.d0)
       end do
     end select
 
@@ -2422,10 +2391,6 @@ module m_xg
     type(xgBlock_t), intent(inout) :: xgBlock
     integer :: i
 
-
-    !print *, "JEDINICE"
-    !print *, "xgBlock%rows", xgBlock%rows
-    !print *, "xgBlock%cols", xgBlock%cols
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
       !$omp parallel do
@@ -2435,9 +2400,7 @@ module m_xg
     case (SPACE_C)
       !!$omp parallel do
       do i = 1, min(xgBlock%rows,xgBlock%cols)
-        !print *, "POSTAVLJAM"
         xgBlock%vecC(i,i) = dcmplx(1.d0)
-        !print *, xgBlock%vecC(i,i)
       end do
     end select
 
@@ -2606,10 +2569,6 @@ module m_xg
     case (SPACE_R,SPACE_CR)
       write(ccols,'(i4)') xgBlock%cols
       fstring = '(1x,'//trim(adjustl(ccols))//'ES22.14)'
-      !print *, "xgBlock%rows", xgBlock%rows
-      !print *, "xgBlock%cols",  xgBlock%cols
-      !write(outunit,*) xgBLock%vecR
-      !print *, xgBLock%vecR
       do i = 1, xgBlock%rows
           write(outunit,fstring) (/ (xgBlock%vecR(i,j), j = 1, xgBlock%cols) /)
       end do
@@ -2645,8 +2604,6 @@ module m_xg
   end subroutine xg_finalize
 !!***
 
-
-
   subroutine xg_getPointer(xgBlock, outunit) 
     use iso_c_binding
     type(xgBlock_t), intent(in) :: xgBlock
@@ -2663,61 +2620,10 @@ module m_xg
         !cptr = getClocC(xgBlock%Ldim,xgBlock%cols,xgBlock%vecC(:,:))
         cptr = loc(xgBlock%vecC(:,:))
     end select
-   ! i = cptr
-    !print *, cptr
     write(str , *) (cptr)
     write(outunit,*) str
   end subroutine xg_getPointer
 
-
-  subroutine xgBlock_setBlock1(xgBlockA,xgBlockB, frow, fcol, rows, cols)
-    use iso_c_binding
-    type(xgBlock_t), intent(inout) :: xgBlockA
-    type(xgBlock_t), intent(inout) :: xgBlockB
-    integer, intent(in) :: frow
-    integer, intent(in) :: fcol
-    integer, intent(in) :: rows
-    integer, intent(in) :: cols
-    type(c_ptr) :: cptr
-
-    if ( (fcol+cols-1 ) > xgblockA%cols ) then
-      print *, "xgblockA%cols", xgblockA%cols
-      print *, "fcol", fcol
-      print *, "cols", cols  
-      print *, "fcol+cols-1", fcol+cols-1  
-      MSG_ERROR("Too many columns")
-    endif
-    if ( (frow+rows-1) > xgblockA%rows ) then
-      print *, "frow", frow
-      print *, "rows", rows
-      print *, "xgblockA%rows", xgblockA%rows
-      print *, "frow+rows-1", frow+rows-1
-      MSG_ERROR("Too many rows")
-    end if
-
-    xgBlockB%space = xgBlockA%space
-    xgBlockB%rows = rows
-    xgBlockB%LDim = xgBlockA%LDim
-    xgBlockB%cols = cols
-    xgBlockB%trans = xgBlockA%trans
-    xgBlockB%normal = xgBlockA%normal
-    xgBlockB%spacedim_comm= xgBlockA%spacedim_comm
-    
-    !print *, "frow", frow
-    !print *, "frow+rows-1", frow+rows-1
-    !stop
-
-    select case(xgBlockA%space)
-    case (SPACE_R,SPACE_CR)
-      cptr = getClocR(xgBlockA%LDim,xgBlockA%cols,xgBlockA%vecR(frow:frow+rows-1,fcol:fcol+cols-1))
-      call c_f_pointer(cptr,xgBlockB%vecR,(/ rows,cols /))
-    case(SPACE_C)
-      cptr = getClocC(xgBlockA%LDim,xgBlockA%cols,xgBlockA%vecC(frow:frow+rows-1,fcol:fcol+cols-1))
-      call c_f_pointer(cptr,xgBlockB%vecC,(/ rows,cols /))
-    end select
-
-  end subroutine xgBlock_setBlock1
-  
   function xg_associated(xgB) result (tf)
 
     type(xgBlock_t), intent(inout) :: xgB
@@ -2731,9 +2637,6 @@ module m_xg
       tf = .FALSE.
     end if
   end function xg_associated
-  
-
-  
-
+ 
 end module m_xg
 !!***

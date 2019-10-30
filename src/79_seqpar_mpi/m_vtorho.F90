@@ -91,8 +91,6 @@ module m_vtorho
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif
 
- use m_xg
-
  implicit none
 
  private
@@ -394,9 +392,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: occopt_bigdft
 #endif
 
- type(xgBlock_t) :: xgx0
- character(len=15) :: str
- integer :: counter1 = 0
 
 ! *********************************************************************
 
@@ -966,20 +961,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      Compute the eigenvalues, wavefunction, residuals,
 !      contributions to kinetic energy, nonlocal energy, forces,
 !      and update of rhor to this k-point and this spin polarization.
-       print *, "BEFORE VTOFK CALL"
-       write(str , *) counter1
-       !call xgBlock_map(xgx0,cg(:, icg+1:),3,gs_hamk%istwf_k*npw_k*1,nband_k,mpi_enreg%comm_bandspinorfft)
-       call xgBlock_map(xgx0,cg(:, icg+1:),3,gs_hamk%istwf_k*npw_k*1,nband_k)
-       call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*1, "X BEFORE VTWOFK CALL outer_counter" // str)
-       !stop
        call vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,&
 &       dtset,eig_k,ek_k,ek_k_nd,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 &       ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
 &       mpi_enreg,dtset%mpw,natom,nband_k,dtset%nkpt,nnsclo_now,npw_k,npwarr,&
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
 &       rhoaug,paw_dmft,dtset%wtk(ikpt),zshift)
-
-       call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*1, "X AFTER VTWOFK CALL outer_counter" // str)
        call timab(985,1,tsec)
 
 #if defined HAVE_GPU_CUDA
@@ -1103,7 +1090,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
 
      call timab(986,2,tsec)
-     counter1 = counter1 + 1
    end do ! End loop over spins
 
    call timab(988,1,tsec)
@@ -2519,42 +2505,5 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
 
 end subroutine cgq_builder
 !!***
-
-subroutine debug_helper_linalg(debugBlock, npw, line)
-      
-  type(xgBlock_t) , intent(inout) :: debugBlock
-  type(integer) , intent(in) :: npw
-  character(*) , intent(in) :: line
-  type(xgBlock_t) :: HELPER
-    
-  integer, parameter :: FROW = 1, FCOL = 1, DROWS = 1, DCOLS = 10
-     
-  call xmpi_barrier(xmpi_world)
-
-  if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
-    write(100,*) (line)
-    !stop
-    call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
-    call xgBlock_print(HELPER, 100) 
-    !stop
-    write(101,*) (line)
-    call xgBlock_setBlock1(debugBlock, HELPER, npw/2+1, FCOL, DROWS, DCOLS) 
-    call xgBlock_print(HELPER, 101)    
-  else
-    if (xmpi_comm_rank(xmpi_world) == 0) then
-      write(200,*) (line)
-      call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
-      call xgBlock_print(HELPER, 200)
-    else 
-      write(201,*) (line)
-      call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
-      call xgBlock_print(HELPER, 201)
-    end if
-  end if
-
-  call xmpi_barrier(xmpi_world)
-
-end subroutine debug_helper_linalg
-
 end module m_vtorho
 !!***

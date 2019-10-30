@@ -53,7 +53,7 @@ module m_vtowfk
  use m_prep_kgb,    only : prep_nonlop, prep_fourwf
  use m_fft,         only : fourwf
  
- use m_xg
+
 
  implicit none
 
@@ -213,9 +213,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: subham(:),subovl(:),subvnlx(:),totvnlx(:,:),wfraug(:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
  
- type(xgBlock_t) :: xgx0
- character(len=15) :: str
- integer, save :: counter = 0
 
 ! **********************************************************************
 
@@ -407,42 +404,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    =========================================================================
        else if (wfopta10 == 1) then
          if ( .not. newchebfi) then
-           !print *, "OLD CB"
            call chebfi(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,gsc,kinpw,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
-         else
-           !print *, "gs_hamk%istwf_k", gs_hamk%istwf_k
-           !print *, "gs_hamk%istwf_k*npw_k*my_nspinor", gs_hamk%istwf_k*npw_k*my_nspinor
-           !print *, "nband_k", nband_k
-           !stop
-
-           call xgBlock_map(xgx0,cg(:, icg+1:),3,gs_hamk%istwf_k*npw_k*my_nspinor,nband_k,mpi_enreg%comm_bandspinorfft) 
-           write(str , *) inonsc
-           !if (counter == 3) then
-           call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*my_nspinor, "BEFORE chebfiwf2 inonsc: " // str)
-             !stop
-           !end if
-           !stop
-           !if (counter  3) then
-             print *, "mpi_enreg%comm_fft BEFORE chebfiwf2, rank", &
-               mpi_enreg%comm_fft, xmpi_comm_rank(mpi_enreg%comm_bandspinorfft)
-             print *, "mpi_enreg%comm_band BEFORE chebfiwf2, rank", & 
-               mpi_enreg%comm_band, xmpi_comm_rank(mpi_enreg%comm_bandspinorfft)
-             !stop
-           !end if
-           
+         else          
            call chebfiwf2(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,&
-&           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k, counter)
-           call debug_helper_linalg(xgx0, gs_hamk%istwf_k*npw_k*my_nspinor, "AFTER chebfiwf2 inonsc: " // str)
-           counter = counter + 1
-           
-             print *, "mpi_enreg%comm_fft AFTER chebfiwf2, rank", &
-               mpi_enreg%comm_fft, xmpi_comm_rank(mpi_enreg%comm_bandspinorfft)
-             print *, "mpi_enreg%comm_band AFTER chebfiwf2, rank", & 
-               mpi_enreg%comm_band, xmpi_comm_rank(mpi_enreg%comm_bandspinorfft)
-           !stop
-           !if (inonsc == 2) stop
-           !stop 
+&           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)          
          end if            
        end if
 
@@ -521,6 +487,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
    ortalgo=mpi_enreg%paral_kgb
    if ((wfoptalg/=14 .and. wfoptalg /= 1 .and. wfoptalg /= 11) .or. dtset%ortalg>0) then
+     print *,"ORTHO CALL 1"
+     !stop
      call pw_orthon(icg,igsc,istwf_k,mcg,mgsc,npw_k*my_nspinor,nband_k,ortalgo,gsc,gs_hamk%usepaw,cg,&
 &     mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
    end if
@@ -538,9 +506,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end if
    end if
 
-   !print *, "residk", residk
-   !print *, "dtset%tolwfr", dtset%tolwfr
-   !print *, "dtset%toldfe", dtset%toldfe
    if (iscf < 0) then
      if (residk > dtset%tolwfr .and. residk < tol7) then
        if (fftcore_mixprec == 1) call wrtout(std_out, " Approaching NSCF convergence. Activating FFT in double-precision")
@@ -1323,43 +1288,6 @@ subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useove
 
 end subroutine fxphas
 !!***
-
-  
-subroutine debug_helper_linalg(debugBlock, npw, line)
-      
-  type(xgBlock_t) , intent(inout) :: debugBlock
-  type(integer) , intent(in) :: npw
-  character(*) , intent(in) :: line
-  type(xgBlock_t) :: HELPER
-    
-  integer, parameter :: FROW = 1, FCOL = 1, DROWS = 1, DCOLS = 10
-     
-  call xmpi_barrier(xmpi_world)
-
-  if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
-    write(100,*) (line)
-    !stop
-    call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
-    call xgBlock_print(HELPER, 100) 
-    !stop
-    write(101,*) (line)
-    call xgBlock_setBlock1(debugBlock, HELPER, npw/2+1, FCOL, DROWS, DCOLS) 
-    call xgBlock_print(HELPER, 101)    
-  else
-    if (xmpi_comm_rank(xmpi_world) == 0) then
-      write(200,*) (line)
-      call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
-      call xgBlock_print(HELPER, 200)
-    else 
-      write(201,*) (line)
-      call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
-      call xgBlock_print(HELPER, 201)
-    end if
-  end if
-
-  call xmpi_barrier(xmpi_world)
-
-end subroutine debug_helper_linalg
-
+ 
 end module m_vtowfk
 !!***

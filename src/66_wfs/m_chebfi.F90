@@ -35,8 +35,6 @@ module m_chebfi
  use m_rayleigh_ritz
  use m_invovl
  
- use m_xg
-
  use m_time,          only : timab
  use m_cgtools,       only : dotprod_g
  use m_bandfft_kpt,   only : bandfft_kpt, bandfft_kpt_get_ikpt
@@ -168,8 +166,6 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  integer, parameter :: timer_chebfi = 1600, timer_alltoall = 1601, timer_apply_inv_ovl = 1602, timer_rotation = 1603
  integer, parameter :: timer_subdiago = 1604, timer_subham = 1605, timer_ortho = 1606, timer_getghc = 1607
  integer, parameter :: timer_residuals = 1608, timer_update_eigen = 1609, timer_sync = 1610
-
-  !type(xgBlock_t) :: xgx0
   
 
 ! *************************************************************************
@@ -188,16 +184,6 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  pcon = (27+kinpw*(18+kinpw*(12+8*kinpw))) / (27+kinpw*(18+kinpw*(12+8*kinpw)) + 16*kinpw**4)
 
  ghc=zero; gvnlxc=zero
-
- !call xgBlock_map(xgx0,cg,SPACE_CR,2*npw*nspinor,nband,mpi_enreg%comm_bandspinorfft) 
- !call debug_helper(xgx0, mpi_enreg%comm_bandspinorfft, mpi_enreg%bandpp) 
- !stop
-
- !print *, "AJDE" 
- print *, "xmpi_comm_rank(comm)", xmpi_comm_rank(mpi_enreg%comm_bandspinorfft)
- print *, "xmpi_comm_size(comm)", xmpi_comm_size(mpi_enreg%comm_bandspinorfft)
- 
- !stop
 
  ! Initialize the _filter pointers. Depending on paral_kgb, they might point to the actual arrays or to _alltoall variables
  if (dtset%paral_kgb == 1) then
@@ -222,9 +208,8 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
 
    ! Load balancing, so that each processor has approximately the same number of converged and non-converged bands
    ! for two procs, rearrange 1 2 3 4 5 6 as 1 4 2 5 3 6
-   !
-   
-   !stop
+   ! 
+  
    ! trick to save memory: ghc has the necessary size, and will be overwritten afterwards anyway
 #define cg_loadbalanced ghc
    shift = 0
@@ -235,10 +220,6 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
        shift = shift + npw*nspinor
      end do
    end do
-! call xgBlock_map(xcgLinalg,cg_loadbalanced,SPACE_C,npw,nband,mpi_enreg"regtyt)
-!  call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,1,debug_rank)
-!  call tester()
-!  call xgTransposer_free(xgTransposer)
 
    ! Transpose input cg into cg_alloall1. cg_alltoall1 is now (npw_filter, nband_filter)
    call timab(timer_alltoall, 1, tsec)
@@ -267,7 +248,6 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    ghc_filter => ghc
    gvnlxc_filter => gvnlxc
  end if
-  !stop
  ! from here to the next alltoall, all computation is done on _filter variables, agnostic
  ! to whether it's nband x npw (paral_kgb == 0) or ndatarecv*bandpp (paral_kgb = 1)
 
@@ -294,17 +274,12 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    cpopt = -1
  end if
 
- !call xgBlock_map(xgx0,cg_filter,SPACE_CR,2*npw_filter*nspinor,nband_filter,mpi_enreg%comm_bandspinorfft) 
-    
- !call debug_helper(xgx0, mpi_enreg%comm_bandspinorfft, mpi_enreg%bandpp) 
- !stop
  !======================================================================================================
  ! Data in npfft x npband distribution. First getghc, update eigenvalues and residuals
  !======================================================================================================
  !write(message, *) 'First getghc'
  !call wrtout(std_out,message,'COLL')
 
- !stop
 
  ! get_ghc on cg
  call timab(timer_getghc, 1, tsec)
@@ -317,7 +292,6 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  end if
  call timab(timer_getghc, 2, tsec)
  
- !stop
  ! Debug barrier: should be invisible
  call timab(timer_sync, 1, tsec)
  call xmpi_barrier(mpi_enreg%comm_band)
@@ -349,24 +323,10 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    end if
    resids_filter(iband) = SUM(residvec_filter**2)
  end do
- 
- !print *, "resids_filter", resids_filter(1:10)
- !print *, "nband_filter", nband_filter
- !stop
- !print *, "xmpi_sum"
- !stop
- 
- !call xmpi_sum(resids_filter,mpi_enreg%comm_fft,ierr)
- 
- !print *, "resids_filter", resids_filter(1:10)
- !print *, "nband_filter", nband_filter
- !stop
- 
+  
  call xmpi_max(MAXVAL(eig(1:nband_filter)),maxeig,mpi_enreg%comm_band,ierr)
  call xmpi_min(MINVAL(eig(1:nband_filter)),mineig,mpi_enreg%comm_band,ierr)
  filter_low = maxeig
- !print *, "maxeig", maxeig
- !stop
  
  call timab(timer_update_eigen, 2, tsec)
  
@@ -751,31 +711,6 @@ function cheb_oracle(x, a, b, tol, nmax) result(n)
 
 end function cheb_oracle
 !!***
-
- subroutine debug_helper(debugBlock, comm, bandpp)
-      
-    type(xgBlock_t) , intent(inout) :: debugBlock
-    type(integer) , intent(in) :: comm
-    type(integer), intent(in) :: bandpp
-    type(xgBlock_t) :: HELPER
-    
-    integer, parameter :: DEBUG_ROWS = 20
-    integer, parameter :: DEBUG_COLUMNS = 2
-
-    !print *, "xmpi_comm_rank(comm)", xmpi_comm_rank(comm)
-    
-    call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-    call xgBlock_print(HELPER, 100+xmpi_comm_rank(comm)) 
- 
-    if (xmpi_comm_size(comm) == 1) then !only one MPI proc
-      call xgBlock_setBlock(debugBlock, HELPER, bandpp/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
-      call xgBlock_print(HELPER, 100+xmpi_comm_rank(comm)+1) 
-    end if
-    
-    print *, "debugBlock%rows", rows(debugBlock)
-    print *, "debugBlock%cols", cols(debugBlock)
-
-  end subroutine debug_helper
 
 end module m_chebfi
 !!***
