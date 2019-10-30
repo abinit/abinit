@@ -1227,7 +1227,7 @@ end if
    do ikpt = 1,wan%nkpt
     ! if (ikpt<=5)then
        write(message,*)char(10)," For ikpt=",ikpt,"the normalization matrix is before normalization :"
-       call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,message,'COLL'); !call wrtout(ab_out,message,'COLL')
        do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
          write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
          call wrtout(std_out,mat_writing,'COLL'); !call wrtout(ab_out,mat_writing,'COLL')
@@ -1248,7 +1248,7 @@ end if
    do ikpt = 1,wan%nkpt
      !if (ikpt<=5)then
        write(message,*)char(10)," For ikpt=",ikpt,"the normalization matrix is after normalization :"
-       call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,message,'COLL'); !call wrtout(ab_out,message,'COLL')
        do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
          write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
          call wrtout(std_out,mat_writing,'COLL'); !call wrtout(ab_out,mat_writing,'COLL')

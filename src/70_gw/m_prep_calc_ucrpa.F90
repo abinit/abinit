@@ -964,7 +964,9 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  ABI_DEALLOCATE(vc_sqrt_qbz)
  ABI_DEALLOCATE(ktabr)
 ! ABI_DEALLOCATE(proc_distrb)
- if (plowan_compute<10) ABI_DEALLOCATE(coeffW_BZ)
+ if (plowan_compute<10) then
+   ABI_DEALLOCATE(coeffW_BZ)
+ endif
 
 
  call timab(430,2,tsec) ! csigme (SigX)
