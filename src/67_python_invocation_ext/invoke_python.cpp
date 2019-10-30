@@ -137,14 +137,14 @@ void invoke_python_triqs(int rank, char* filapp_in) {
 
 	if (rank == 0) fprintf(stdout, "invoke_python_triqs: beginning\n");
 
-	// Path to the TRIQS python interpreter path and impurity solver script
-	string triqs_filename = string(filapp_in) += "_TRIQS_script.py";
-	string triqs_python_path = string(filapp_in) += "_TRIQS_python_lib";
+	// Path to the python interpreter path and impurity solver script
+	string triqs_filename = string(filapp_in) += "_PY_INVOCATION_script.py";
+	string triqs_python_path = string(filapp_in) += "_PY_INVOCATION_python_lib";
 	triqs_python_path = "./" + triqs_python_path;
 
 	// Check whether python_lib exists
 	if (!ifstream(triqs_python_path.c_str())) {
-		throw invalid_argument("The _TRIQS_python_lib file does not exist! TRIQS cannot be called.");
+		throw invalid_argument("The _PY_INVOCATION_python_lib file does not exist! Python cannot be called.");
 		exit(0);
 	}
 
@@ -157,7 +157,7 @@ void invoke_python_triqs(int rank, char* filapp_in) {
 
 	// Check whether the file exists
 	if (!ifstream(triqs_filename.c_str())) {
-		throw invalid_argument("The _TRIQS.py file does not exist! TRIQS cannot be called.");
+		throw invalid_argument("The _PY_INVOCATION_script.py file does not exist! Python cannot be called.");
 		exit(0);
 	}
 
