@@ -40,8 +40,6 @@ module m_prep_kgb
  use m_getghc,      only : multithreaded_getghc
  use m_fft,         only : fourwf
  
- use m_xg
-
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
 #endif
@@ -145,7 +143,6 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
  real(dp),pointer :: gwavef_alltoall_sym(:,:)
  real(dp),pointer :: swavef_alltoall_sym(:,:)
  
- type(xgBlock_t) :: xgx0
 
 ! *************************************************************************
 
@@ -173,17 +170,6 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 !Check sizes
  mcg=2*gs_hamk%npw_fft_k*my_nspinor*bandpp
  if (do_transpose) mcg=2*gs_hamk%npw_k*my_nspinor*blocksize
- 
- !print *, "gs_hamk%npw_fft_k", 2*gs_hamk%npw_fft_k
- !print *, "blocksize", blocksize
- !print *, "bandpp", bandpp
- !stop
- 
- !TODO OVDE SAM NESTO USRAO
- !call xgBlock_map(xgx0,cwavef,SPACE_CR,2*gs_hamk%npw_fft_k*my_nspinor,blocksize,mpi_enreg%comm_bandspinorfft) 
- 
- !call debug_helper(xgx0, blocksize) 
- !stop
  
  if (size(cwavef)<mcg) then
    msg='wrong size for cwavef!'
@@ -214,7 +200,6 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 
  spaceComm=mpi_enreg%comm_fft
  if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_band
- print *, "prep_getghc spaceComm", spaceComm
 
  ikpt_this_proc=bandfft_kpt_get_ikpt()
 
@@ -255,8 +240,6 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
    gvnlxc_alltoall1(:,:)=zero
    cwavef_alltoall1(:,:)=zero
    gwavef_alltoall1(:,:)=zero
-   !print *, "USAO OVDE"
-   !stop
  end if
  ABI_ALLOCATE(cwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
  ABI_ALLOCATE(gwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
@@ -285,14 +268,10 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
    end if
    call timab(545,2,tsec)
  else
-   !print *, "CHEAT"
-   !stop
    ! Here, we cheat, and use DCOPY to bypass some compiler's overzealous bound-checking
    ! (ndatarecv*my_nspinor*bandpp might be greater than the declared size of cwavef)
    call DCOPY(2*ndatarecv*my_nspinor*bandpp, cwavef, 1, cwavef_alltoall2, 1)
  end if
-
- !stop
 
  if(gs_hamk%istwf_k==2) then
    old_me_g0=mpi_enreg%me_g0
@@ -305,16 +284,12 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 
 !====================================================================
  if ((.not.(flag_inv_sym)) .and. (bandpp==1)) then
-   !print *, "flag_inv_sym 1"
-   !stop
    if (do_transpose .and. mpi_enreg%paral_spinor==0.and.my_nspinor==2)then
      call timab(632,3,tsec)
 !    Sort to have all ispinor=1 first, then all ispinor=2
      call prep_sort_wavef_spin(nproc_band,my_nspinor,ndatarecv,recvcounts,rdispls,index_wavef_spband)
      cwavef_alltoall2(:,:)=cwavef_alltoall1(:,index_wavef_spband)
      call timab(632,2,tsec)
-     !print *, "prep sort"
-     !stop
    end if
 
    call timab(635,3,tsec)
@@ -335,9 +310,6 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 !  -------------------------------------------------------------
 !  Computation of the index to class the waves functions below bandpp
 !  -------------------------------------------------------------
-   print *, "flag_inv_sym 2"
-   print *, "bandpp", bandpp
-   !stop
    if(do_transpose) then
      call timab(632,3,tsec)
      call prep_index_wavef_bandpp(nproc_band,bandpp,&
@@ -348,7 +320,6 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
      cwavef_alltoall2(:,:) = cwavef_alltoall1(:,index_wavef_band)
      call timab(632,2,tsec)
    end if
-   !stop
 !  ----------------------
 !  Fourier transformation
 !  ----------------------
@@ -356,7 +327,6 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
    call multithreaded_getghc(cpopt,cwavef_alltoall2,cwaveprj,gwavef_alltoall2,swavef_alltoall2,gs_hamk,&
 &   gvnlxc_alltoall2,lambda,mpi_enreg,bandpp,prtvol,sij_opt,tim_getghc,0)
    call timab(636,2,tsec)
-   !stop
 !  -----------------------------------------------------
 !  Sorting of waves functions below the processors
 !  -----------------------------------------------------
@@ -369,14 +339,11 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
      call timab(634,2,tsec)
    end if
 
-
  else if (flag_inv_sym) then
-   print *, "flag_inv_sym 3"
 !  -------------------------------------------------------------
 !  Computation of the index to class the waves functions below bandpp
 !  -------------------------------------------------------------
    if(do_transpose) then
-     !print *, "do_transpose"
      call timab(632,3,tsec)
      call prep_index_wavef_bandpp(nproc_band,bandpp,&
 &     my_nspinor,ndatarecv,&
@@ -388,7 +355,6 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 !  -------------------------------------------------------
      cwavef_alltoall2(:,:) = cwavef_alltoall1(:,index_wavef_band)
    end if
-   !stop
 
 !  ------------------------------------------------------------
 !  We associate the waves functions by two
@@ -402,9 +368,6 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 &   ewavef_alltoall_sym,&
 &   index_wavef_send)
 
-   print *, "ndatarecv_tot", ndatarecv_tot
-   print *, "bandpp_sym", bandpp_sym
-  ! stop
 !  ------------------------------------------------------------
 !  Allocation
 !  ------------------------------------------------------------
@@ -685,38 +648,21 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    if(already_transposed) do_transpose = .false.
  end if
  
- !print *, "already_transposed", already_transposed
-
  nproc_band = mpi_enreg%nproc_band
  bandpp     = mpi_enreg%bandpp
  spaceComm=mpi_enreg%comm_fft
  if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_band
- print *, "prepnonlop spaceComm", spaceComm
  my_nspinor=max(1,hamk%nspinor/mpi_enreg%nproc_spinor)
  nspinortot=hamk%nspinor
 
 !Check sizes
  npw=hamk%npw_k;if (.not.do_transpose) npw=hamk%npw_fft_k
- 
- !debug
- !print *, "hamk%npw_k", hamk%npw_k
- !print *, "hamk%npw_fft_k", hamk%npw_fft_k
- !stop
- !print *, "size(cwavef)", size(cwavef)
- !print *, "2*npw*my_nspinor*blocksize", 2*npw*my_nspinor*blocksize
- !stop
- 
-! print *, "size(cwavef)", size(cwavef)
-! print *, "2*npw*my_nspinor*blocksize", 2*npw*my_nspinor*blocksize
- !stop
- 
-
- 
+  
  if (size(cwavef)/=2*npw*my_nspinor*blocksize) then
    msg = 'Incorrect size for cwavef!'
    MSG_BUG(msg)
  end if
- !stop
+
  if(choice/=0.and.signs==2) then
    if (paw_opt/=3) then
      if (size(gvnlc)/=2*npw*my_nspinor*blocksize) then
@@ -731,18 +677,14 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
      end if
    end if
  end if
-! print *, "size(cwaveprj)", size(cwaveprj)
-! print *, "hamk%natom*my_nspinor*mpi_enreg%bandpp", hamk%natom*my_nspinor*mpi_enreg%bandpp
-! print *, "hamk%natom", hamk%natom
-! print *, "mpi_enreg%bandpp", mpi_enreg%bandpp
- !stop
+
  if(cpopt>=0) then
    if (size(cwaveprj)/=hamk%natom*my_nspinor*mpi_enreg%bandpp) then
      msg = 'Incorrect size for cwaveprj!'
      MSG_BUG(msg)
    end if
  end if
- !stop
+
  ABI_ALLOCATE(sendcountsloc,(nproc_band))
  ABI_ALLOCATE(sdisplsloc   ,(nproc_band))
  ABI_ALLOCATE(recvcountsloc,(nproc_band))
@@ -808,7 +750,6 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 !=====================================================================
  if (bandpp==1) then
 
-
    if (do_transpose .and. mpi_enreg%paral_spinor==0.and.nspinortot==2) then !Sort WF by spin
      call prep_sort_wavef_spin(nproc_band,my_nspinor,ndatarecv,recvcounts,rdispls,index_wavef_band)
      cwavef_alltoall2(:, :)=cwavef_alltoall1(:,index_wavef_band)
@@ -862,7 +803,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  if (allocated(index_wavef_band)) then
    ABI_DEALLOCATE(index_wavef_band)
  end if
-
+ 
 !Transpose the gsc_alltoall or gvlnc_alltoall tabs
 !according to the paw_opt and signs values
  if(do_transpose) then
@@ -919,7 +860,6 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  end if
 
  call timab(570,2,tsec)
-
  DBG_EXIT('COLL')
 
 end subroutine prep_nonlop
@@ -1027,7 +967,6 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  ABI_CHECK((mpi_enreg%bandpp==ndat),'BUG: bandpp/=ndat')
 
  spaceComm=mpi_enreg%comm_band
- print *, "prep_fourwf spaceComm", spaceComm
  nproc_band = mpi_enreg%nproc_band
  nproc_fft  = mpi_enreg%nproc_fft
  bandpp     = mpi_enreg%bandpp
@@ -2115,39 +2054,6 @@ subroutine prep_sort_wavef_spin(nproc_band,nspinor,ndatarecv,recvcounts,rdispls,
 
 end subroutine prep_sort_wavef_spin
 !!***
-
-  subroutine debug_helper(debugBlock, nbands)
-      
-    type(xgBlock_t) , intent(inout) :: debugBlock
-    type(integer) , intent(in) :: nbands
-    type(xgBlock_t) :: HELPER
-    
-    integer :: DEBUG_ROWS = 20
-    integer :: DEBUG_COLUMNS = 2
-
-!    call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-!    call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)) 
-! 
-!    if (xmpi_comm_size(chebfi%spacecom) == 1) then !only one MPI proc
-!      call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
-!      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)+1) 
-!    end if
-    
-    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
-      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-      call xgBlock_print(HELPER, 200+xmpi_comm_rank(xmpi_world)) 
-      
-      call xgBlock_setBlock(debugBlock, HELPER, nbands/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
-      call xgBlock_print(HELPER, 200+xmpi_comm_rank(xmpi_world)+1) 
-    else
-      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-      call xgBlock_print(HELPER, 100+xmpi_comm_rank(xmpi_world)) 
-    end if
-    
-    !print *, "debugBlock%rows", rows(debugBlock)
-    !print *, "debugBlock%cols", cols(debugBlock)
-
-  end subroutine debug_helper
 
 end module m_prep_kgb
 !!***
