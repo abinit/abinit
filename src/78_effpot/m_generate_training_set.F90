@@ -121,7 +121,7 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
   integer :: ii,iconfig,natom_uc,direction
   character(len=500) :: message
   INTEGER                            :: n
-  INTEGER                            :: i
+  INTEGER                            :: i, iseed
   INTEGER, DIMENSION(:), ALLOCATABLE :: seed
 
 !arrays
@@ -139,7 +139,7 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
 
  if ( .not. DEBUG ) then
     CALL RANDOM_SEED(size = n)
-    MALLOC(seed,(n))
+    ABI_ALLOCATE(seed,(n))
     seed =  iseed + (/ (i - 1, i = 1, n) /)
 
     CALL RANDOM_SEED(PUT = seed+xmpi_comm_rank(xmpi_world))
