@@ -31,6 +31,9 @@
 MODULE m_dmft
 
  use defs_basis
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
  use m_xmpi
  use m_errors
  use m_abicore

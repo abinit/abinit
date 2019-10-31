@@ -15,7 +15,7 @@ using namespace std;
 using triqs::operators::many_body_operator_generic; //ADDED Instead
 
 extern "C"{
-  
+
     void ctqmc_triqs_run( bool rot_inv, bool leg_measure, bool hist, bool wrt_files, bool tot_not,
                           int n_orbitals, int n_freq, int n_tau, int n_l, int n_cycles_, int cycle_length, int ntherm, int verbo,int seed,  
                           double beta_,
