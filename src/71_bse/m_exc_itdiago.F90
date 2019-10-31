@@ -28,13 +28,13 @@
 MODULE m_exc_itdiago
 
  use defs_basis
- use defs_abitypes
  use m_bs_defs
  use m_errors
  use m_abicore
  use m_linalg_interfaces
+ use m_hdr
  use m_xmpi
-#if defined HAVE_MPI2
+#ifdef HAVE_MPI2
  use mpi
 #endif
 
@@ -1074,69 +1074,69 @@ subroutine exc_cholesky_ortho()
 
 !Local variables ------------------------------
  integer :: my_info,ii,jj,ipack,ierr
+ logical,parameter :: use_unpacked = .False.
 !arrays
  complex(dpc),allocatable :: overlap(:,:),povlp(:)
 
 !************************************************************************
 
  ! 1) overlap_ij =  <phi_i|phi_j>
- ABI_MALLOC(overlap,(nstates,nstates))
+ ABI_MALLOC(overlap, (nstates,nstates))
 
-#if defined HAVE_BSE_UNPACKED
- overlap = czero
+ if (use_unpacked) then
+   overlap = czero
 
- call ZGEMM('C','N',nstates,nstates,my_nt,cone,phi_block,my_nt,phi_block,my_nt,czero,overlap,nstates)
- call xmpi_sum(overlap,comm,ierr)
+   call ZGEMM('C','N',nstates,nstates,my_nt,cone,phi_block,my_nt,phi_block,my_nt,czero,overlap,nstates)
+   call xmpi_sum(overlap,comm,ierr)
 
- do ii=1,nstates
-   overlap(ii,ii)=REAL(overlap(ii,ii),kind=dp)
- end do
-
- ! 2) Cholesky factorization: overlap = U^H U with U upper triangle matrix.
- call ZPOTRF('U',nstates,overlap,nstates,my_info)
- if (my_info/=0)  then
-   write(msg,'(a,i3)')' ZPOTRF returned info= ',my_info
-   MSG_ERROR(msg)
- end if
-
-#else
-
- ! 1) Calculate overlap_ij =  <phi_i|phi_j> in packed form.
- ABI_MALLOC(povlp,(nstates*(nstates+1)/2))
- povlp = czero; ipack=0
- do jj=1,nstates
-   do ii=1,jj
-     ipack=ipack+1
-     povlp(ipack) = DOT_PRODUCT( phi_block(my_t1:my_t2,ii), phi_block(my_t1:my_t2,jj) )
-     if (ii==jj) povlp(ipack) = REAL(povlp(ipack),kind=dp)
+   do ii=1,nstates
+     overlap(ii,ii)=REAL(overlap(ii,ii),kind=dp)
    end do
- end do
- call xmpi_sum(povlp,comm,ierr)
 
- ! 2) Cholesky factorization: overlap = U^H U with U upper triangle matrix.
- call ZPPTRF("U",nstates,povlp,my_info)
- if (my_info/=0)  then
-   write(msg,'(a,i3)')' ZPPTRF returned info= ',my_info
-   MSG_ERROR(msg)
- end if
- !call xmpi_sum(povlp,comm,ierr)
- !povlp=povlp/nproc
+   ! 2) Cholesky factorization: overlap = U^H U with U upper triangle matrix.
+   call ZPOTRF('U',nstates,overlap,nstates,my_info)
+   if (my_info/=0)  then
+     write(msg,'(a,i3)')' ZPOTRF returned info= ',my_info
+     MSG_ERROR(msg)
+   end if
 
- !unpack povlp to prepare call to ZTRSM.
- ipack=0
- do jj=1,nstates
-   do ii=1,jj
-     ipack=ipack+1
-     if (ii/=jj) then
-       overlap(ii,jj)=      povlp(ipack)
-       overlap(jj,ii)=CONJG(povlp(ipack))
-     else
-       overlap(ii,ii)=REAL(povlp(ipack),kind=dp)
-     end if
+ else
+   ! 1) Calculate overlap_ij =  <phi_i|phi_j> in packed form.
+   ABI_MALLOC(povlp,(nstates*(nstates+1)/2))
+   povlp = czero; ipack=0
+   do jj=1,nstates
+     do ii=1,jj
+       ipack=ipack+1
+       povlp(ipack) = DOT_PRODUCT( phi_block(my_t1:my_t2,ii), phi_block(my_t1:my_t2,jj) )
+       if (ii==jj) povlp(ipack) = REAL(povlp(ipack),kind=dp)
+     end do
    end do
- end do
- ABI_FREE(povlp)
-#endif
+   call xmpi_sum(povlp,comm,ierr)
+
+   ! 2) Cholesky factorization: overlap = U^H U with U upper triangle matrix.
+   call ZPPTRF("U",nstates,povlp,my_info)
+   if (my_info/=0)  then
+     write(msg,'(a,i3)')' ZPPTRF returned info= ',my_info
+     MSG_ERROR(msg)
+   end if
+   !call xmpi_sum(povlp,comm,ierr)
+   !povlp=povlp/nproc
+
+   !unpack povlp to prepare call to ZTRSM.
+   ipack=0
+   do jj=1,nstates
+     do ii=1,jj
+       ipack=ipack+1
+       if (ii/=jj) then
+         overlap(ii,jj)=      povlp(ipack)
+         overlap(jj,ii)=CONJG(povlp(ipack))
+       else
+         overlap(ii,ii)=REAL(povlp(ipack),kind=dp)
+       end if
+     end do
+   end do
+   ABI_FREE(povlp)
+ end if
 
  ! Check if this can be done with Scalapack. Direct PZTRSM is not provided
 

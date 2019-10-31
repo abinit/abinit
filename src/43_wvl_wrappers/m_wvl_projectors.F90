@@ -27,12 +27,12 @@
 module m_wvl_projectors
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use m_errors
  use m_abicore
  use m_atomdata
 
+ use defs_datatypes, only : pseudopotential_type
  use m_geometry,     only : xred2xcart
 
  implicit none

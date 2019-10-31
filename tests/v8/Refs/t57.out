@@ -160,6 +160,12 @@ _ WF disk file :      0.281 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
         ddb_ngqpt4       0    0    0
         ddb_ngqpt5       0    0    0
         ddb_ngqpt6       1    1    1
+       dvdb_ngqpt1       0    0    0
+       dvdb_ngqpt2       0    0    0
+       dvdb_ngqpt3       0    0    0
+       dvdb_ngqpt4       0    0    0
+       dvdb_ngqpt5       0    0    0
+       dvdb_ngqpt6       1    1    1
 -          fftalg         312
            getddb1          0
            getddb2          0
@@ -1916,6 +1922,12 @@ message: |
         ddb_ngqpt4       0    0    0
         ddb_ngqpt5       0    0    0
         ddb_ngqpt6       1    1    1
+       dvdb_ngqpt1       0    0    0
+       dvdb_ngqpt2       0    0    0
+       dvdb_ngqpt3       0    0    0
+       dvdb_ngqpt4       0    0    0
+       dvdb_ngqpt5       0    0    0
+       dvdb_ngqpt6       1    1    1
            etotal1    -5.5386471108E+01
            etotal2    -2.0593241427E+01
            etotal3    -5.0518883538E+01

@@ -27,8 +27,6 @@
 module m_vtorho
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_xmpi
@@ -38,11 +36,15 @@ module m_vtorho
  use m_efield
  use m_cgtools
  use m_gemm_nonlop
+ use m_hdr
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes,       only : pseudopotential_type
+ use defs_abitypes,        only : MPI_type
  use m_time,               only : timab
  use m_geometry,           only : xred2xcart
  use m_occ,                only : newocc
- use m_dtset,              only : testsusmat
  use m_pawang,             only : pawang_type
  use m_pawtab,             only : pawtab_type
  use m_paw_ij,             only : paw_ij_type
@@ -51,8 +53,7 @@ module m_vtorho
  use m_pawcprj,            only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim
  use m_pawfgr,             only : pawfgr_type
  use m_energies,           only : energies_type
- use m_hamiltonian,        only : init_hamiltonian,destroy_hamiltonian, &
-                                  load_spin_hamiltonian, load_k_hamiltonian, gs_hamiltonian_type
+ use m_hamiltonian,        only : init_hamiltonian, gs_hamiltonian_type
  use m_bandfft_kpt,        only : bandfft_kpt, bandfft_kpt_type, bandfft_kpt_set_ikpt, &
                                   bandfft_kpt_savetabs, bandfft_kpt_restoretabs, prep_bandfft_tabs
  use m_electronpositron,   only : electronpositron_type,electronpositron_calctype
@@ -730,12 +731,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
 
 !    Continue to initialize the Hamiltonian
-     call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
+     call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
      if (with_vxctau) then
-       call load_spin_hamiltonian(gs_hamk,isppol,vxctaulocal=vxctaulocal)
+       call gs_hamk%load_spin(isppol,vxctaulocal=vxctaulocal)
      end if
      if (has_vectornd) then
-        call load_spin_hamiltonian(gs_hamk,isppol,vectornd=vectornd_pac)
+        call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
      end if
 
      call timab(982,2,tsec)
@@ -884,7 +885,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !             ABI_DEALLOCATE(gs_hamk%nucdipmom_k)
 !          end if
 !          ABI_ALLOCATE(gs_hamk%nucdipmom_k,(npw_k*(npw_k+1)/2))
-!          call load_k_hamiltonian(gs_hamk,nucdipmom_k=nucdipmom_k)
+!          call gs_hamk%load_k(nucdipmom_k=nucdipmom_k)
 !        end if
 
 
@@ -895,12 +896,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
 
        if(usefock_ACE/=0) then
-         call load_k_hamiltonian(gs_hamk,kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
+         call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
 &         kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,fockACE_k=fock%fockACE(ikpt,isppol),ph3d_k=ph3d,&
 &         compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
 &         compute_gbound=(mpi_enreg%paral_kgb/=1))
        else
-         call load_k_hamiltonian(gs_hamk,kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
+         call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
 &         kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
 &         compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
 &         compute_gbound=(mpi_enreg%paral_kgb/=1))
@@ -911,7 +912,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          if (istep<=1) then
            call prep_bandfft_tabs(gs_hamk,ikpt,dtset%mkmem,mpi_enreg)
          end if
-         call load_k_hamiltonian(gs_hamk,npw_fft_k=my_bandfft_kpt%ndatarecv, &
+         call gs_hamk%load_k(npw_fft_k=my_bandfft_kpt%ndatarecv, &
 &         gbound_k =my_bandfft_kpt%gbound, &
 &         kinpw_k  =my_bandfft_kpt%kinpw_gather, &
 &         kg_k     =my_bandfft_kpt%kg_k_gather, &
@@ -1691,7 +1692,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          else
            write(message, '(a,i0,3a,i0,a,f7.3,5a)' )&
 &           'For k-point number ',ikpt,', and',ch10,&
-&           'for spin polarization',isppol,'the minimal occupation factor is',min_occ,'.',ch10,&
+&           'for spin polarization ',isppol, ' the minimal occupation factor is',min_occ,'.',ch10,&
 &           'An adequate monitoring of convergence requires it to be at most 0.01_dp.',ch10,&
 &           'Action: increase slightly the number of bands.'
          end if
@@ -1815,7 +1816,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !  Eventually compute the susceptibility matrix and the
 !  dielectric matrix when istep_mix is equal to 1 or dielstrt
    call timab(996,1,tsec)
-   call testsusmat(computesusmat,dielop,dielstrt,dtset,istep_mix) !test if the matrix is to be computed
+   computesusmat = dtset%testsusmat(dielop, dielstrt, istep_mix) !test if the matrix is to be computed
    if(computesusmat) then
      dielar(1)=dtset%diecut;dielar(2)=dtset%dielng
      dielar(3)=dtset%diemac;dielar(4)=dtset%diemix
@@ -1838,7 +1839,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
  end if ! end condition on iscf
 
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
 
  if (psps%usepaw==1) then
    if (usecprj==0) then

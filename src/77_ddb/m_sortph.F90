@@ -118,8 +118,6 @@ end subroutine end_sortph
 
 subroutine sortph(eigvec,displ,filnam, natom,phfrq)
 
-implicit none
-
 !Arguments -----------------------------------
 !scalars
 integer,intent(in) :: natom

@@ -2,9 +2,9 @@
 !!****m* ABINIT/m_data4entropyDMFT
 !! NAME
 !!  m_data4entropyDMFT
-!! 
-!! FUNCTION 
-!!  FIXME: add description. 
+!!
+!! FUNCTION
+!!  FIXME: add description.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
@@ -31,8 +31,8 @@
 module m_data4entropyDMFT
 
   use defs_basis
-  use defs_abitypes
   use m_errors
+  use m_abicore
 
   implicit none
 
@@ -256,7 +256,7 @@ subroutine data4entropyDMFT_setDocc(this,iatom,Docc,Nocc)
                               " maxnflavor=", maxnflavor
         MSG_ERROR(message)
       end if
-      
+
       do iflavor1 = 1, (2*size(Nocc,1)+1)
         do iflavor2 = 1, (2*size(Nocc,1)+1)
           this%docc(iflavor2,iflavor1,iatom) = Nocc(iflavor1)*Nocc(iflavor2)

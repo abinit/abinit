@@ -30,7 +30,8 @@ module m_kpts
  use m_abicore
  use m_crystal
  use m_sort
- use m_kptrank
+ use m_krank
+ use m_htetra
  use m_xmpi
 
  use m_time,           only : timab
@@ -40,9 +41,7 @@ module m_kpts
  use m_fstrings,       only : sjoin, itoa, ltoa
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_geometry,       only : metric
- use m_tetrahedron,    only : t_tetrahedron, init_tetra, destroy_tetra
- use m_htetrahedron,   only : t_htetrahedron, htetra_init
- use m_symkpt,         only : symkpt
+ use m_symkpt,         only : symkpt, symkpt_new
 
  implicit none
 
@@ -50,7 +49,7 @@ module m_kpts
 
  public :: kpts_timrev_from_kptopt   ! Returns the value of timrev from kptopt
  public :: kpts_ibz_from_kptrlatt    ! Determines the IBZ, the weights and the BZ from kptrlatt
- public :: tetra_from_kptrlatt       ! Create an instance of `t_tetrahedron` from kptrlatt and shiftk
+ public :: tetra_from_kptrlatt       ! Create an instance from kptrlatt and shiftk
  public :: symkchk                   ! Checks that the set of k points has the full space group symmetry,
                                      ! modulo time reversal if appropriate.
  public :: listkk                    ! Find correspondence between two set of k-points.
@@ -130,12 +129,13 @@ end function kpts_timrev_from_kptopt
 !!  kbz(3,nkbz) = k-points in the BZ.
 !!  [new_kptrlatt] = New value of kptrlatt returned by getkgrid
 !!  [new_shiftk(3,new_nshiftk)] = New set of shifts returned by getkgrid
+!!  [bz2ibz(6,nkbz)]=Mapping BZ --> IBZ
 !!
 !! PARENTS
 !!      m_dvdb,m_ebands,m_gruneisen,m_ifc,m_kpts,m_phgamma,m_phonons,m_sigmaph
 !!
 !! CHILDREN
-!!      getkgrid,init_tetra,kpts_ibz_from_kptrlatt,listkk
+!!      getkgrid,kpts_ibz_from_kptrlatt,listkk
 !!
 !! SOURCE
 
@@ -157,39 +157,33 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: iout0=0,chksymbreak0=0,iscf2=2
- integer :: my_nshiftk,ii
- integer,allocatable :: indkpt(:),bz2ibz_smap(:,:)
+ integer,parameter :: iout0 = 0, chksymbreak0 = 0, iscf2=2
+ integer :: my_nshiftk
  real(dp) :: kptrlen
 !arrays
- integer,parameter :: vacuum0(3)=[0, 0, 0]
+ integer,parameter :: vacuum0(3) = [0, 0, 0]
  integer :: my_kptrlatt(3,3)
+ integer,allocatable :: indkpt(:),bz2ibz_smap(:,:)
  real(dp) :: my_shiftk(3,MAX_NSHIFTK)
 
 ! *********************************************************************
 
  ! Copy kptrlatt and shifts because getkgrid can change them
  ! Be careful as getkgrid expects shiftk(3,MAX_NSHIFTK).
- ABI_CHECK(nshiftk > 0 .and. nshiftk <= MAX_NSHIFTK, sjoin("nshiftk must be in 1 and", itoa(MAX_NSHIFTK)))
+ ABI_CHECK(nshiftk > 0 .and. nshiftk <= MAX_NSHIFTK, sjoin("nshiftk must be between 1 and", itoa(MAX_NSHIFTK)))
  my_nshiftk = nshiftk; my_shiftk = zero; my_shiftk(:,1:nshiftk) = shiftk
  my_kptrlatt = kptrlatt
 
  call getkgrid_low(chksymbreak0,iout0,iscf2,kibz,kptopt,my_kptrlatt,kptrlen,&
-   cryst%nsym,-1,nkibz,my_nshiftk,cryst%nsym,cryst%rprimd,my_shiftk,cryst%symafm,cryst%symrel,vacuum0,wtk,&
-   indkpt,bz2ibz_smap,fullbz=kbz)
+   cryst%nsym,-1,nkibz,my_nshiftk,cryst%nsym,cryst%rprimd,my_shiftk,cryst%symafm,&
+   cryst%symrel,vacuum0,wtk,indkpt,bz2ibz_smap,fullbz=kbz)
 
  if (present(bz2ibz)) then
-   nkbz = size(kbz, dim=2)
-   ABI_CALLOC(bz2ibz,(6,nkbz))
-   if(kptopt==1 .or. kptopt==2 .or. kptopt==4)then
-     bz2ibz = bz2ibz_smap
-   else
-     bz2ibz(1,:) = [(ii,ii=1,nkbz)]
-   end if
+   ABI_MOVE_ALLOC(bz2ibz_smap, bz2ibz)
+ else
+   ABI_SFREE(bz2ibz_smap)
  endif
-
  ABI_SFREE(indkpt)
- ABI_SFREE(bz2ibz_smap)
 
  nkbz = size(kbz, dim=2)
 
@@ -212,7 +206,7 @@ end subroutine kpts_ibz_from_kptrlatt
 !! tetra_from_kptrlatt
 !!
 !! FUNCTION
-!!  Create an instance of `t_tetrahedron` from kptrlatt and shiftk
+!!  Create an instance from kptrlatt and shiftk
 !!
 !! INPUTS
 !!  cryst<cryst_t>=Crystalline structure.
@@ -225,7 +219,7 @@ end subroutine kpts_ibz_from_kptrlatt
 !!  comm= MPI communicator
 !!
 !! OUTPUT
-!!  tetra<t_tetrahedron>=Tetrahedron object, fully initialized if ierr == 0.
+!!  tetra<htetra_t>=Tetrahedron object, fully initialized if ierr == 0.
 !!  msg=Error message if ierr /= 0
 !!  ierr=Exit status
 !!
@@ -233,12 +227,12 @@ end subroutine kpts_ibz_from_kptrlatt
 !!      gstate,wfk_analyze
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
+!!      listkk,smpbz
 !!
 !! SOURCE
 
-type(t_htetrahedron) function tetra_from_kptrlatt( &
-&  cryst, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, comm, msg, ierr) result (htetra)
+type(htetra_t) function tetra_from_kptrlatt( &
+  cryst, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, comm, msg, ierr) result (htetra)
 
 !Arguments ------------------------------------
 !scalars
@@ -375,20 +369,19 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
 
  if(timrev/=1 .and. timrev/=0)then
    write(errmsg, '(3a,i0,a)' )&
-&   'timrev should be 0 or 1, while',ch10,&
-&   'it is equal to ',timrev,'.'
+    'timrev should be 0 or 1, while',ch10,&
+    'it is equal to ',timrev,'.'
    ierr = 1; return
  end if
 
  if(nsym/=1)then
-!  Find the identity symmetry operation
+   ! Find the identity symmetry operation
    do isym=1,nsym
      tident=1
      do jj=1,3
        if(symrec(jj,jj,isym)/=1)tident=0
        do ii=1,3
-         if( ii/=jj .and.&
-&         symrec(ii,jj,isym)/=0)tident=0
+         if( ii/=jj .and.symrec(ii,jj,isym)/=0)tident=0
        end do
      end do
      if(tident==1)then
@@ -449,11 +442,11 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
 
        end do ! End secondary loop over k-points
        if (imatch/=1) then
-         write(errmsg, '(a,a,a,i4,a,i4,a,a,a,a)' )&
-&         'k-point set must have full space-group symmetry',ch10,&
-&         'there is no match for kpt',ikpt,' transformed by symmetry',isym,ch10,&
-&         'Action: change kptopt to 2 or 3 and/or change or use shiftk',ch10,&
-&         'shiftk = 0 0 0 is always a safe choice.'
+         write(errmsg, '(a,a,a,i0,a,i0,a,a,a,a)' )&
+          'k-point set must have full space-group symmetry',ch10,&
+          'there is no match for kpt: ',ikpt,' transformed by symmetry: ',isym,ch10,&
+          'Action: change kptopt to 2 or 3 and/or change or use shiftk',ch10,&
+          'shiftk = 0 0 0 is always a safe choice.'
          ierr = 2; return
        end if
 
@@ -461,8 +454,7 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
    end do ! End primary loop over k-points
 
    write(msg,'(a)')' symkchk : k-point set has full space-group symmetry.'
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg, 'COLL')
  end if
 
 end function symkchk
@@ -708,6 +700,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
          ! Besides, one should use symrel^{-1 T} to keep the correspondence between isym -> R or S
          do itimrev=0,timrev_used
            do isym=1,nsym_used
+           !do itimrev=0,timrev_used
 
              ! Select magnetic characteristic of symmetries
              if (isppol == 1 .and. symafm(isym) == -1) cycle
@@ -988,6 +981,7 @@ end subroutine getkgrid
 !! If nkpt/=0  the following are also output:
 !!   kpt(3,nkpt)=reduced coordinates of k points.
 !!   wtk(nkpt)=weight assigned to each k point.
+!! bz2ibz_smap(nkbz, 6)= Mapping BZ --> IBZ.
 !! [fullbz(3,nkpt_fullbz)]=k-points generated in the full Brillouin zone.
 !!   In output: allocated array with the list of k-points in the BZ.
 !! [kpthf(3,nkpthf)]=k-points generated in the full Brillouin zone, possibly downsampled (for Fock).
@@ -1354,9 +1348,9 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
  !call cwtime_report(' shifts', cpu, wall, gflops)
 
- if (PRESENT(downsampling))then
+ if (present(downsampling))then
    call smpbz(brav,iout,kptrlatt2,mkpt,nkpthf_computed,nshiftk2,option,shiftk2,spkpt,downsampling=downsampling)
-   if (PRESENT(kpthf) .and. nkpthf/=0) then
+   if (present(kpthf) .and. nkpthf/=0) then
      ! Returns list of k-points in the Full BZ, possibly downsampled for Fock
      kpthf = spkpt(:,1:nkpthf)
    end if
@@ -1366,32 +1360,51 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  call smpbz(brav,iout,kptrlatt2,mkpt,nkpt_fullbz,nshiftk2,option,shiftk2,spkpt)
  !call cwtime_report(' smpbz', cpu, wall, gflops)
 
- if (PRESENT(fullbz)) then
-   ! Returns list of k-points in the Full BZ.
-   ABI_ALLOCATE(fullbz,(3,nkpt_fullbz))
-   fullbz = spkpt(:,1:nkpt_fullbz)
- end if
-
  if(kptopt==1 .or. kptopt==2 .or. kptopt==4)then
 
    ABI_ALLOCATE(indkpt,(nkpt_fullbz))
    ABI_ALLOCATE(kpt_fullbz,(3,nkpt_fullbz))
+   ABI_ALLOCATE(bz2ibz_smap, (6, nkpt_fullbz))
+#if 1
    ABI_ALLOCATE(wtk_fullbz,(nkpt_fullbz))
    ABI_ALLOCATE(wtk_folded,(nkpt_fullbz))
-   ABI_ALLOCATE(bz2ibz_smap, (6, nkpt_fullbz))
 
    kpt_fullbz(:,:)=spkpt(:,1:nkpt_fullbz)
    wtk_fullbz(1:nkpt_fullbz)=1.0_dp/dble(nkpt_fullbz)
 
    timrev=1;if (kptopt==4) timrev=0
 
+   indkpt = 0
    call symkpt(chksymbreak,gmet,indkpt,iout,kpt_fullbz,nkpt_fullbz,&
-&   nkpt_computed,nsym_used,symrec,timrev,wtk_fullbz,wtk_folded, bz2ibz_smap, xmpi_comm_self)
+&   nkpt_computed,nsym_used,symrec,timrev,wtk_fullbz,wtk_folded,bz2ibz_smap,xmpi_comm_self)
 
    ABI_DEALLOCATE(symrec)
    ABI_DEALLOCATE(wtk_fullbz)
 
+   !do ikpt=1,nkpt_fullbz
+   !  write(*,*) ikpt, indkpt(ikpt), bz2ibz_smap(1,ikpt), indkpt(bz2ibz_smap(1,ikpt))
+   !end do
+#else
+   kpt_fullbz(:,:)=spkpt(:,1:nkpt_fullbz)
+
+   timrev=1;if (kptopt==4) timrev=0
+
+   call symkpt_new(chksymbreak,gmet,indkpt,iout,kpt_fullbz,nkpt_fullbz,&
+&   nkpt_computed,nsym_used,symrec,timrev,bz2ibz_smap,xmpi_comm_self)
+
+   ABI_DEALLOCATE(symrec)
+   ABI_CALLOC(wtk_folded,(nkpt_fullbz))
+   do ii=1,nkpt_fullbz
+    ikpt = indkpt(bz2ibz_smap(1,ii))
+    wtk_folded(ikpt) = wtk_folded(ikpt) + one
+   end do
+   wtk_folded = wtk_folded / nkpt_fullbz
+#endif
+
  else if(kptopt==3)then
+   ABI_CALLOC(bz2ibz_smap, (6, nkpt_fullbz))
+   bz2ibz_smap(1,:) = [(ii,ii=1,nkpt_fullbz)]
+   bz2ibz_smap(2,:) = 1 !isym
    nkpt_computed=nkpt_fullbz
  end if
  !call cwtime_report(' symkpt', cpu, wall, gflops)
@@ -1425,7 +1438,13 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
      end do
    end if
 
-   ABI_DEALLOCATE(kpt_fullbz)
+   if (present(fullbz)) then
+     ! Returns list of k-points in the Full BZ.
+     ABI_MOVE_ALLOC(kpt_fullbz,fullbz)
+   else
+     ABI_DEALLOCATE(kpt_fullbz)
+   end if
+
    ABI_DEALLOCATE(wtk_folded)
 
  else if(kptopt==3)then
@@ -1433,6 +1452,12 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
    if(nkpt_use/=0)then
      kpt(:,1:nkpt_use)=spkpt(:,1:nkpt_use)
      if(iscf>1 .or. iscf==-3 .or. iscf==-1.or.iscf==-2)wtk(1:nkpt_use)=1.0_dp/dble(nkpt_use)
+   end if
+
+   if (present(fullbz)) then
+     ! Returns list of k-points in the Full BZ.
+     ABI_ALLOCATE(fullbz,(3,nkpt_fullbz))
+     fullbz = spkpt(:,1:nkpt_fullbz)
    end if
 
  end if
@@ -1498,7 +1523,7 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,nkpt_fullbz,nshift
  integer :: ikpt,isym,itim,timrev
  integer :: symrankkpt
  character(len=500) :: msg
- type(kptrank_type) :: kptrank_t
+ type(krank_t) :: krank
 !arrays
  integer :: inv_symrel(3,3,nsym)
  real(dp) :: k2(3)
@@ -1513,12 +1538,10 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,nkpt_fullbz,nshift
 
  call get_kpt_fullbz(kpt_fullbz,kptrlatt,nkpt_fullbz,nshiftk,shiftk)
 
-!make full k-point rank arrays
- call mkkptrank (kpt,nkpt,kptrank_t)
+ ! make full k-point rank arrays
+ krank = krank_new(nkpt, kpt)
 
-!
-!find equivalence to irred kpoints in kpt
-!
+ !find equivalence to irred kpoints in kpt
  indkpt(:) = 0
  timrev=1 ! includes the time inversion symmetry
  do ikpt=1,nkpt_fullbz
@@ -1526,11 +1549,11 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,nkpt_fullbz,nshift
      do itim=1,(1-2*timrev),-2
 
        k2(:) = itim*(inv_symrel(:,1,isym)*kpt_fullbz(1,ikpt) + &
-&       inv_symrel(:,2,isym)*kpt_fullbz(2,ikpt) + &
-&       inv_symrel(:,3,isym)*kpt_fullbz(3,ikpt))
+                     inv_symrel(:,2,isym)*kpt_fullbz(2,ikpt) + &
+                     inv_symrel(:,3,isym)*kpt_fullbz(3,ikpt))
 
-       call get_rank_1kpt (k2,symrankkpt,kptrank_t)
-       if (kptrank_t%invrank(symrankkpt) /= -1) indkpt(ikpt) = kptrank_t%invrank(symrankkpt)
+       symrankkpt = krank%get_rank(k2)
+       if (krank%invrank(symrankkpt) /= -1) indkpt(ikpt) = krank%invrank(symrankkpt)
 
      end do ! loop time reversal symmetry
    end do !  loop sym ops
@@ -1541,7 +1564,7 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,nkpt_fullbz,nshift
    end if
  end do !  loop full kpts
 
- call destroy_kptrank (kptrank_t)
+ call krank%free()
 
 end subroutine get_full_kgrid
 !!***

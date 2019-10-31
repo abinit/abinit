@@ -63,7 +63,7 @@
 - Merging file [14]: t85o_DS9_POT2
 Merged successfully 14 files
 - Analyzing DVDB file: t88o_DS20_DVDB ...
-- dvdb_new completed. cpu-time:  0.01 [s] , wall-time:  0.02 [s]
+- dvdb_new completed. cpu:  0.00 [s] , wall:  0.00 [s]
  ==== Info on the dvdb% object ====
  DVDB version: 2
  File path: t88o_DS20_DVDB
@@ -71,7 +71,7 @@ Merged successfully 14 files
  Number of q-points in DVDB: 8
 -P Number of CPUs for parallelism over perturbations: 1
 -P Number of perturbations treated by this CPU: 3
- Activate symmetrization of v1scf(r): no
+ Option for symmetrization of v1scf(r): 0
  List of q-points: min(10, nqpt)
 [ 1 ] [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 [ 2 ] [ 2.5000E-01,  0.0000E+00,  0.0000E+00]
@@ -81,8 +81,11 @@ Merged successfully 14 files
 [ 6 ] [-2.5000E-01,  2.5000E-01,  0.0000E+00]
 [ 7 ] [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
 [ 8 ] [-2.5000E-01,  5.0000E-01,  2.5000E-01]
- Have dielectric tensor and Born effective charges: no
- Add LR term in polar materials: yes
+ Have dielectric tensor: no
+ Have Born effective charges: no
+ Have quadrupoles: no
+ Treatment of long-range part in V1scf: 1
+ qdamp:  -1.0
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes

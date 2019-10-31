@@ -26,5 +26,9 @@ exit_status=`cat robodoc.err | wc -l`
 #rm -rf robodoc-html tmp-robodoc
 #cat ./doc/developers/robodoc.doc.txt >> robodoc.err
 
+if test $exit_status -ne 0 ; then
+    cat robodoc.err
+fi
+
 echo "Exit status: " $exit_status
 exit $exit_status

@@ -27,14 +27,15 @@
 module m_outvar_o_z
 
  use defs_basis
- use defs_abitypes
+
  use m_errors
  use m_results_out
  use m_abicore
  use m_xmpi
+ use m_dtset
 
  use m_geometry,     only : mkrdim, xred2xcart
- use m_parser,       only : prttagm, prttagm_images
+ use m_parser,       only : prttagm, prttagm_images, ab_dimensions
 
  implicit none
 
@@ -130,13 +131,12 @@ contains
 !scalars
  integer,parameter :: nkpt_max=50
  integer :: iat,icount,idtset,ii,iimage,ndtset_alloc_tmp
- integer :: narr!,jdtset
+ integer :: narr
  integer :: multi_kptopt
  integer :: natom
  integer :: nimage,nnos,nsym
  integer :: ntypalch,ntypat,size1,size2,tnkpt,timopt_default,tmpimg0
  logical :: compute_static_images
-! character(len=4) :: appen
  character(len=1) :: firstchar_gpu
 !arrays
  integer,allocatable :: narrm(:)
@@ -697,6 +697,9 @@ contains
  intarr(1,:)=dtsets(:)%random_atpos
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'random_atpos','INT',0)
 
+ dprarr(1,:)=dtsets(:)%ratsm
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ratsm','LEN',0)
+
  do idtset=0, ndtset_alloc
    do ii = 1, ntypat
      dprarr(ii,idtset) = dtsets(idtset)%ratsph(ii)
@@ -852,6 +855,11 @@ contains
  dprarr(1,:)=dtsets(:)%sigma_erange(1)
  dprarr(2,:)=dtsets(:)%sigma_erange(2)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'sigma_erange','ENE',0)
+
+ intarr(1,:)=dtsets(:)%transport_ngkpt(1)
+ intarr(2,:)=dtsets(:)%transport_ngkpt(2)
+ intarr(3,:)=dtsets(:)%transport_ngkpt(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'transport_ngkpt','INT',0)
 
  intarr(1,:)=dtsets(:)%sigma_ngkpt(1)
  intarr(2,:)=dtsets(:)%sigma_ngkpt(2)

@@ -55,6 +55,7 @@ MODULE m_xmpi
 
 #ifdef HAVE_MPI
  ! MPI constants used in abinit. Make sure that a corresponding fake value is provided for the sequential version.
+ integer,public,parameter :: xmpi_paral          = 1
  integer,public,parameter :: xmpi_world          = MPI_COMM_WORLD
  integer,public,parameter :: xmpi_comm_self      = MPI_COMM_SELF
  integer,public,parameter :: xmpi_undefined      = MPI_UNDEFINED
@@ -64,21 +65,22 @@ MODULE m_xmpi
  integer,public,parameter :: xmpi_any_source     = MPI_ANY_SOURCE
  integer,public,parameter :: xmpi_request_null   = MPI_REQUEST_NULL
  integer,public,parameter :: xmpi_msg_len        = MPI_MAX_ERROR_STRING ! Length of fortran string used to store MPI error strings.
- integer,public,parameter :: xmpi_paral          = 1
  integer,public,parameter :: xmpi_info_null      = MPI_INFO_NULL
  integer,public,parameter :: xmpi_success        = MPI_SUCCESS
 #else
- ! Fake replacements for the sequential version.
- integer,public,parameter :: xmpi_world          = 0
- integer,public,parameter :: xmpi_comm_self      = 0
- integer,public,parameter :: xmpi_undefined      =-32765
- integer,public,parameter :: xmpi_undefined_rank =-32766
- integer,public,parameter :: xmpi_comm_null      = 0
- integer,public,parameter :: xmpi_group_null     = 0
- integer,public,parameter :: xmpi_any_source     = 0
- integer,public,parameter :: xmpi_request_null   = 738197504
- integer,public,parameter :: xmpi_msg_len        = 1000
+ ! Fake replacements for the sequential version. Values are taken from
+ ! http://www.mit.edu/course/13/13.715/sun-hpc-ct-8.2.1/Linux/sun/include/mpif-common.h
+ ! Please use these conventions when adding new replacements in order to avoid collisions between values.
  integer,public,parameter :: xmpi_paral          = 0
+ integer,public,parameter :: xmpi_world          = 0
+ integer,public,parameter :: xmpi_comm_self      = 1
+ integer,public,parameter :: xmpi_undefined      =-32766
+ integer,public,parameter :: xmpi_undefined_rank =-32766
+ integer,public,parameter :: xmpi_comm_null      = 2
+ integer,public,parameter :: xmpi_group_null     = 0
+ integer,public,parameter :: xmpi_any_source     = -1
+ integer,public,parameter :: xmpi_request_null   = 0
+ integer,public,parameter :: xmpi_msg_len        = 1000
  integer,public,parameter :: xmpi_info_null      = 0
  integer,public,parameter :: xmpi_success        = 0
 #endif
@@ -134,8 +136,32 @@ MODULE m_xmpi
  integer,save, public ABI_PROTECTED :: xmpi_count_requests = 0
  ! Count number of requests (+1 for each call to non-blocking API, -1 for each call to xmpi_wait)
  ! This counter should be zero at the end of the run if all requests have been released)
+!!***
 
 !----------------------------------------------------------------------
+
+!!****t* m_xmpi/xcomm_t
+!! NAME
+!! xcomm_t
+!!
+!! FUNCTION
+!!  A small object storing the MPI communicator, the rank of the processe and the size of the communicator.
+!!  Provides helper functions to perform typical operations and parallelize loops.
+!!  The datatype is initialized with xmpi_comm_self
+!!
+!! SOURCE
+
+ type, public :: xcomm_t
+   integer :: value = xmpi_comm_self
+   integer :: nproc = 1
+   integer :: me = 0
+ contains
+   ! procedure :: iam_master => xcomm_iam_master
+   procedure :: skip => xcomm_skip
+   procedure :: set_to_null => xcomm_set_to_null
+   procedure :: set_to_self => xcomm_set_to_self
+   procedure :: free => xcomm_free
+ end type xcomm_t
 !!***
 
 ! Public procedures.
@@ -162,7 +188,10 @@ MODULE m_xmpi
  public :: xmpi_request_free          ! Hides MPI_REQUEST_FREE from MPI library.
  public :: xmpi_comm_set_errhandler   ! Hides MPI_COMM_SET_ERRHANDLER from MPI library.
  public :: xmpi_error_string          ! Return a string describing the error from ierr.
- public :: xmpi_split_work
+ public :: xmpi_split_work            ! Splits tasks inside communicator using blocks
+ public :: xmpi_split_block           ! Splits tasks inside communicator using block distribution.
+ public :: xmpi_split_cyclic          ! Splits tasks inside communicator using cyclic distribution.
+ public :: xmpi_split_list            ! Splits list of indices inside communicator using block distribution.
  public :: xmpi_distab
  public :: xmpi_distrib_with_replicas ! Distribute tasks among MPI ranks (replicas are allowed)
 
@@ -2095,10 +2124,10 @@ end subroutine xmpi_comm_set_errhandler
 
 !!****f* m_xmpi/xmpi_split_work_i4b
 !! NAME
-!!  split_work_i4b
+!!  xmpi_split_work_i4b
 !!
 !! FUNCTION
-!!  Splits the number of tasks, ntasks, among nprocs processors. 
+!!  Splits the number of tasks, ntasks, among nprocs processors.
 !!  Used for the MPI parallelization of simple loops.
 !!
 !! INPUTS
@@ -2126,7 +2155,7 @@ end subroutine xmpi_comm_set_errhandler
 !!
 !! SOURCE
 
-subroutine xmpi_split_work_i4b(ntasks,comm,my_start,my_stop)
+subroutine xmpi_split_work_i4b(ntasks, comm, my_start, my_stop)
 
 !Arguments ------------------------------------
  integer,intent(in)  :: ntasks,comm
@@ -2152,6 +2181,152 @@ subroutine xmpi_split_work_i4b(ntasks,comm,my_start,my_stop)
  end if
 
 end subroutine xmpi_split_work_i4b
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_split_block
+!! NAME
+!!  xmpi_split_block
+!!
+!! FUNCTION
+!!  Splits tasks inside communicator using cyclic distribution.
+!!  Used for the MPI parallelization of simple loops.
+!!
+!! INPUTS
+!!  ntasks: number of tasks
+!!  comm: MPI communicator.
+!!
+!! OUTPUT
+!!  my_ntasks: Number of tasks received by this rank. May be zero if ntasks > nprocs.
+!!  my_inds(my_ntasks): List of tasks treated by this rank. Allocated by the routine. May be zero-sized.
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+subroutine xmpi_split_block(ntasks, comm, my_ntasks, my_inds)
+
+!Arguments ------------------------------------
+ integer,intent(in)  :: ntasks, comm
+ integer,intent(out) :: my_ntasks
+ integer,allocatable,intent(out) :: my_inds(:)
+
+!Local variables-------------------------------
+ integer :: ii, istart, istop
+
+! *************************************************************************
+
+ call xmpi_split_work(ntasks, comm, istart, istop)
+ my_ntasks = istop - istart + 1
+ ABI_MALLOC(my_inds, (my_ntasks))
+ if (my_ntasks > 0) my_inds = [(istart + (ii - 1), ii=1, my_ntasks)]
+
+end subroutine xmpi_split_block
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_split_cyclic
+!! NAME
+!!  xmpi_split_cyclic
+!!
+!! FUNCTION
+!!  Splits tasks inside communicator using cyclic distribution.
+!!  Used for the MPI parallelization of simple loops.
+!!
+!! INPUTS
+!!  ntasks: number of tasks
+!!  comm: MPI communicator.
+!!
+!! OUTPUT
+!!  my_ntasks: Number of tasks received by this rank. May be zero if ntasks > nprocs.
+!!  my_inds(my_ntasks): List of tasks treated by this rank. Allocated by the routine. May be zero-sized.
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+subroutine xmpi_split_cyclic(ntasks, comm, my_ntasks, my_inds)
+
+!Arguments ------------------------------------
+ integer,intent(in)  :: ntasks, comm
+ integer,intent(out) :: my_ntasks
+ integer,allocatable,intent(out) :: my_inds(:)
+
+!Local variables-------------------------------
+ integer :: ii, cnt, itask, my_rank, nprocs
+
+! *************************************************************************
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ do ii=1,2
+   if (ii == 2) then
+     ABI_MALLOC(my_inds, (my_ntasks))
+   end if
+   cnt = 0
+   do itask=1,ntasks
+     if (mod(itask, nprocs) == my_rank) then
+       cnt = cnt + 1
+       if (ii == 2) my_inds(cnt) = itask
+     end if
+   end do
+   if (ii == 1) my_ntasks = cnt
+ end do
+
+end subroutine xmpi_split_cyclic
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_split_list
+!! NAME
+!!  xmpi_split_list
+!!
+!! FUNCTION
+!!  Splits list of itmes inside communicator using block distribution.
+!!  Used for the MPI parallelization of simple loops.
+!!
+!! INPUTS
+!!  ntasks:Number of items in list (global)
+!!  list(ntasks): List of indices
+!!  comm: MPI communicator.
+!!
+!! OUTPUT
+!!  my_ntasks: Number of tasks received by this rank. May be zero if ntasks > nprocs.
+!!  my_inds(my_ntasks): List of tasks treated by this rank. Allocated by the routine. May be zero-sized.
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+subroutine xmpi_split_list(ntasks, list, comm, my_ntasks, my_inds)
+
+!Arguments ------------------------------------
+ integer,intent(in)  :: ntasks, comm
+ integer,intent(out) :: my_ntasks
+ integer,intent(in) :: list(ntasks)
+ integer,allocatable,intent(out) :: my_inds(:)
+
+!Local variables-------------------------------
+ integer :: my_start, my_stop
+
+! *************************************************************************
+
+ call xmpi_split_work(ntasks, comm, my_start, my_stop)
+
+ my_ntasks = my_stop - my_start + 1
+
+ if (my_stop >= my_start) then
+   ABI_MALLOC(my_inds, (my_ntasks))
+   my_inds = list(my_start:my_stop)
+ else
+   my_ntasks = 0
+   ABI_MALLOC(my_inds, (0))
+ end if
+
+end subroutine xmpi_split_list
 !!***
 
 !----------------------------------------------------------------------
@@ -2300,7 +2475,7 @@ end subroutine xmpi_split_work2_i8b
 !!
 !! SOURCE
 
-subroutine xmpi_distab_4D(nprocs,task_distrib)
+subroutine xmpi_distab_4D(nprocs, task_distrib)
 
 !Arguments ------------------------------------
  integer,intent(in) :: nprocs
@@ -2320,7 +2495,7 @@ subroutine xmpi_distab_4D(nprocs,task_distrib)
  n4= SIZE(task_distrib,DIM=4)
  ntasks = n1*n2*n3*n4
 
- ABI_ALLOCATE(list,(ntasks))
+ ABI_MALLOC(list, (ntasks))
  list=-999
 
  ntpblock  = ntasks/nprocs
@@ -2347,7 +2522,7 @@ subroutine xmpi_distab_4D(nprocs,task_distrib)
 
  if (ANY(task_distrib==-999)) call xmpi_abort(msg="task_distrib == -999")
 
- ABI_DEALLOCATE(list)
+ ABI_FREE(list)
 
 end subroutine xmpi_distab_4D
 !!***
@@ -2635,10 +2810,10 @@ subroutine xmpio_get_info_frm(bsize_frm,mpi_type_frm,comm)
 
    if (ii==iimax.and.bsize_frm<=0) then
      write(std_out,'(7a)') &
-&      'Error during FORTRAN file record marker detection:',ch10,&
-&      'It was not possible to read/write a small file!',ch10,&
-&      'ACTION: check your access permissions to the file system.',ch10,&
-&      'Common sources of this problem: quota limit exceeded, R/W incorrect permissions, ...'
+       'Error during FORTRAN file record marker detection:',ch10,&
+       'It was not possible to read/write a small file!',ch10,&
+       'ACTION: check your access permissions to the file system.',ch10,&
+       'Common sources of this problem: quota limit exceeded, R/W incorrect permissions, ...'
      call xmpi_abort()
    else
      !write(std_out,'(a,i0)')' Detected FORTRAN record mark length: ',bsize_frm
@@ -4301,20 +4476,20 @@ subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_ty
 
 !************************************************************************
 
- if ( sizes(1) /= SUM(block_sizes(1,1:2)) .or. &
-&     sizes(2) /= SUM(block_sizes(2,1:2)) ) then
+ if (sizes(1) /= SUM(block_sizes(1,1:2)) .or. &
+     sizes(2) /= SUM(block_sizes(2,1:2)) ) then
    write(std_out,*)" xmpio_create_coldistr_from_fp3blocks: Inconsistency between block_sizes ans sizes "
    call xmpi_abort()
  end if
 
- if ( block_sizes(1,1)/=block_sizes(2,1) .or.&
-&     block_sizes(1,2)/=block_sizes(2,2) ) then
+ if (block_sizes(1,1) /= block_sizes(2,1) .or.&
+     block_sizes(1,2) /= block_sizes(2,2) ) then
    write(std_out,*)" xmpio_create_coldistr_from_fp3blocks: first two blocks must be square"
    call xmpi_abort()
  end if
 
- if ( block_sizes(2,3)/=block_sizes(2,2) .or.&
-&     block_sizes(1,3)/=block_sizes(1,1) ) then
+ if (block_sizes(2,3) /= block_sizes(2,2) .or.&
+     block_sizes(1,3) /= block_sizes(1,1) ) then
    write(std_out,*)" xmpio_create_coldistr_from_fp3blocks: Full matrix must be square"
    call xmpi_abort()
  end if
@@ -4452,6 +4627,36 @@ subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_ty
 end subroutine xmpio_create_coldistr_from_fp3blocks
 !!***
 #endif
+
+ !type(xcomm_t) function from_mpi_int(comm_value) result(new)
+ !  new%value = comm_value
+ !  new%nproc  xmpi_comm_size(comm_value)
+ !  new%me  xmpi_comm_rank(comm_value)
+ !end function from_mpi_int
+ !pure logical function xcomm_iam_master(self)
+ !  class(xcomm_t),intent(in) :: self
+ !  xcomm_iam_master = self%me == 0
+ !end function xcomm_iam_master
+ pure logical function xcomm_skip(self, iter)
+   class(xcomm_t),intent(in) :: self
+   integer,intent(in) :: iter
+   xcomm_skip = mod(iter, self%nproc) /= self%me
+ end function xcomm_skip
+ subroutine xcomm_set_to_self(self)
+   class(xcomm_t),intent(inout) :: self
+   call self%free()
+   self%value = xmpi_comm_self; self%me = 0; self%nproc = 1
+ end subroutine xcomm_set_to_self
+ subroutine xcomm_set_to_null(self)
+   class(xcomm_t),intent(inout) :: self
+   call self%free()
+   self%value = xmpi_comm_null
+ end subroutine xcomm_set_to_null
+ subroutine xcomm_free(self)
+   class(xcomm_t),intent(inout) :: self
+   call xmpi_comm_free(self%value)
+   self%me = -1; self%nproc = 0
+ end subroutine xcomm_free
 
 END MODULE m_xmpi
 !!***

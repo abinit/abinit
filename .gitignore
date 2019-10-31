@@ -56,6 +56,8 @@ topology.so
 *.tmp
 *.pyc
 *.[ao]
+*.stderr
+*.stdout
 buildbot.ac
 tests/TestBot_MPI*/*
 /.abilint
@@ -313,8 +315,6 @@ src/*/test_*
 !tests_*F90
 abichecks/special.py
 abienv.txt
-fallbacks/make.stderr
-make.stderr
 makefile.sed
 tests/testcfg.py
 CheckFB.py
@@ -323,3 +323,4 @@ tests/built-in/Input/fort.98
 tests/built-in/Input/testin_wannier90o_EBANDS.agr
 doc/input-web/*~
 mac-1P0-225.ac
+doc/topics/ConstrainedDFT.md

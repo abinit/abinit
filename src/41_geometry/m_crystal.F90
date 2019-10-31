@@ -213,16 +213,21 @@ MODULE m_crystal
    procedure :: symbol_type
    ! Return the atomic symbol from the itypat index.
 
+   procedure :: symbol_iatom
+   ! Return the atomic symbol from the iatom index.
+
    procedure :: adata_type
    ! Return atomic data from the itypat index.
 
    !procedure :: compare => crystal_compare
    ! Compare two structures, write warning messages if they differ
 
+   procedure :: print => crystal_print
+   ! Print dimensions and basic info stored in the object
+
  end type crystal_t
 
  public :: crystal_init            ! Main Creation method.
- public :: crystal_print           ! Print dimensions and basic info stored in the object
 
  public :: symbols_crystal         ! Return an array with the atomic symbol:["Sr","Ru","O1","O2","O3"]
  public :: prt_cif                 ! Print CIF file.
@@ -569,7 +574,7 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
  integer,optional,intent(in) :: unit,prtvol
  character(len=*),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
- type(crystal_t),intent(in) :: Cryst
+ class(crystal_t),intent(in) :: Cryst
 
 !Local variables-------------------------------
  integer :: my_unt,my_prtvol,nu,iatom
@@ -804,7 +809,7 @@ end function isalchemical
 !!
 !! SOURCE
 
-function adata_type(crystal,itypat) result(atom)
+function adata_type(crystal, itypat) result(atom)
 
 !Arguments ------------------------------------
 !scalars
@@ -814,7 +819,7 @@ function adata_type(crystal,itypat) result(atom)
 
 ! *************************************************************************
 
- call atomdata_from_znucl(atom,crystal%znucl(itypat))
+ call atomdata_from_znucl(atom, crystal%znucl(itypat))
 
 end function adata_type
 !!***
@@ -850,6 +855,34 @@ function symbol_type(crystal, itypat) result(symbol)
  symbol = atom%symbol
 
 end function symbol_type
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/symbol_iatom
+!! NAME
+!!  symbol_iatom
+!!
+!! FUNCTION
+!!  Return the atomic symbol from the iatom index
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+function symbol_iatom(crystal, iatom) result(symbol)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iatom
+ character(len=2) :: symbol
+ class(crystal_t),intent(in) :: crystal
+
+! *************************************************************************
+
+ symbol = crystal%symbol_type(crystal%typat(iatom))
+
+end function symbol_iatom
 !!***
 
 !----------------------------------------------------------------------
@@ -1062,7 +1095,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
    symbols(itypat) = atom%symbol
    write(symbols_long(itypat),'(a2,a78)') symbols(itypat),REPEAT(CHAR(0),78)
    write(psp_desc(itypat),'(2a)') &
-&    cryst%title(itypat)(1:MIN(80,LEN_TRIM(cryst%title(itypat)))),REPEAT(CHAR(0),MAX(0,80-LEN_TRIM(cryst%title(itypat))))
+     cryst%title(itypat)(1:MIN(80,LEN_TRIM(cryst%title(itypat)))),REPEAT(CHAR(0),MAX(0,80-LEN_TRIM(cryst%title(itypat))))
  end do
 
  ! Write data.
@@ -1171,7 +1204,7 @@ end function crystal_ncwrite_path
 !! SOURCE
 
 subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
-&   spgaxor, spgroup, spgorig, symrel, tnon, typat, xred, znucl)
+                   spgaxor, spgroup, spgorig, symrel, tnon, typat, xred, znucl)
 
 !Arguments ------------------------------------
 !scalars
@@ -1188,10 +1221,7 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
 
 !Local variables -------------------------------
 !scalars
- integer :: unitcif
- integer :: iatom, isym
- integer :: sporder
- integer :: itypat, nat_this_type
+ integer :: unitcif, iatom, isym, sporder, itypat, nat_this_type
  real(dp) :: ucvol
  type(atomdata_t) :: atom
 !arrays
@@ -1202,22 +1232,20 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
  character(len=10) :: str_nat_type
  character(len=100) :: chemformula
  character(len=500) :: msg
- real(dp) :: angle(3)
- real(dp) :: gprimd(3,3)
- real(dp) :: rmet(3,3), gmet(3,3)
+ real(dp) :: angle(3), gprimd(3,3), rmet(3,3), gmet(3,3)
 
 !*************************************************************************
 
-!open file in append mode xlf and other compilers refuse append mode
+ ! open file in append mode xlf and other compilers refuse append mode
  if (open_file(ciffname,msg,newunit=unitcif) /=0) then
    MSG_WARNING(msg)
    return
  end if
 
-!print title for dataset
+ ! print title for dataset
  write (unitcif,'(a)') 'data_set'
 
-!print cell parameters a,b,c, angles, volume
+ ! print cell parameters a,b,c, angles, volume
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  angle(1)=acos(rmet(2,3)/sqrt(rmet(2,2)*rmet(3,3)))/two_pi*360.0_dp
  angle(2)=acos(rmet(1,3)/sqrt(rmet(1,1)*rmet(3,3)))/two_pi*360.0_dp
@@ -1231,7 +1259,7 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
  write (unitcif,'(a,E20.10)') '_cell_angle_gamma                  ', angle(3)
  write (unitcif,'(a,E20.10)') '_cell_volume                       ', ucvol*(Bohr_Ang)**3
 
-!print reduced positions
+ ! print reduced positions
  write (unitcif,'(a)') 'loop_'
  write (unitcif,'(a,E20.10)') '  _atom_site_label                   '
  write (unitcif,'(a,E20.10)') '  _atom_site_fract_x                 '
@@ -1242,12 +1270,10 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
    write (unitcif,'(2a,3E20.10)') '  ', atom%symbol, xred(:,iatom)
  end do
 
-!
 !other specs in CIF dictionary which may be useful:
 !GEOM_BOND GEOM_ANGLE GEOM_TORSION
-!
 
-!print chemical composition in simplest form
+ ! print chemical composition in simplest form
  chemformula = "'"
  do itypat = 1, ntypat
    nat_this_type = 0
@@ -1261,7 +1287,7 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
  chemformula = trim(chemformula) // "'"
  write (unitcif,'(2a)') '_chemical_formula_analytical              ', chemformula
 
-!FIXME: check that brvltt is correctly used here - is it equal to bravais(1) in the invars routines?
+ !FIXME: check that brvltt is correctly used here - is it equal to bravais(1) in the invars routines?
  if (brvltt==1) then
    write (unitcif,'(a)') '_symmetry_cell_setting             triclinic'
  else if(brvltt==2)then
@@ -1280,7 +1306,7 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
 
  call spgdata(brvsb,intsb,intsbl,ptintsb,ptschsb,schsb,spgaxor,spgroup,sporder,spgorig)
 
-!print symmetry operations
+ ! print symmetry operations
  write (unitcif,'(a,I6)') "_symmetry_Int_Tables_number          ", spgroup
  write (unitcif,'(5a)') "_symmetry_space_group_name_H-M        '", brvsb, " ", trim(intsb), "'"
  write (unitcif,'(a)') ''
@@ -1291,7 +1317,7 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
    write (unitcif,'(2a)') '  ', trim(tmpstring)
  end do
 
- close (unitcif)
+ close(unitcif)
 
 end subroutine prt_cif
 !!***
@@ -1447,8 +1473,7 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
    end if
    chem_formula = trim(chem_formula) // symbol // trim(natoms_this_type_str)
  end do
- write (iout,'(2a)') "ABINIT generated POSCAR file. Title string - should be chemical formula... ",&
-& trim(chem_formula)
+ write (iout,'(2a)') "ABINIT generated POSCAR file. Title string - should be chemical formula... ",trim(chem_formula)
 
  write (iout,'(E24.14)') -ucvol*Bohr_Ang*Bohr_Ang*Bohr_Ang
  write (iout,'(3E24.14,1x)') Bohr_Ang*rprimd(:,1) ! (angstr? bohr?)

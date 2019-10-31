@@ -59,6 +59,7 @@ module m_libpaw_libxc_funcs
  public :: libpaw_libxc_getvxc             ! Return XC potential and energy, from input density
  public :: libpaw_libxc_isgga              ! Return TRUE if the XC functional is GGA or meta-GGA
  public :: libpaw_libxc_ismgga             ! Return TRUE if the XC functional is meta-GGA
+ public :: libpaw_libxc_needs_laplacian    ! Return TRUE if functional uses LAPLACIAN
  public :: libpaw_libxc_is_hybrid          ! Return TRUE if the XC functional is hybrid (GGA or meta-GGA)
  public :: libpaw_libxc_has_kxc            ! Return TRUE if Kxc (3rd der) is available for the XC functional
  public :: libpaw_libxc_nspin              ! The number of spin components for the XC functionals
@@ -68,7 +69,7 @@ module m_libpaw_libxc_funcs
 
 !Private functions
  private :: libpaw_libxc_constants_load    ! Load libXC constants from C headers
- private :: libpaw_libxc_set_tb09          ! Compute c parameter for Tran-Blaha 2009 functional
+ private :: libpaw_libxc_compute_tb09      ! Compute c parameter for Tran-Blaha 2009 functional
 #ifdef LIBPAW_ISO_C_BINDING
  private :: char_f_to_c                    ! Convert a string from Fortran to C
  private :: char_c_to_f                    ! Convert a string from C to Fortran
@@ -88,6 +89,7 @@ module m_libpaw_libxc_funcs
  integer,public,save :: LIBPAW_XC_FLAGS_HAVE_FXC       =  4
  integer,public,save :: LIBPAW_XC_FLAGS_HAVE_KXC       =  8
  integer,public,save :: LIBPAW_XC_FLAGS_HAVE_LXC       = 16
+ integer,public,save :: LIBPAW_XC_FLAGS_NEEDS_LAPLACIAN= 32768
  integer,public,save :: LIBPAW_XC_EXCHANGE             =  0
  integer,public,save :: LIBPAW_XC_CORRELATION          =  1
  integer,public,save :: LIBPAW_XC_EXCHANGE_CORRELATION =  2
@@ -106,9 +108,11 @@ module m_libpaw_libxc_funcs
    logical  :: has_vxc         ! TRUE is vxc is available for the functional
    logical  :: has_fxc         ! TRUE is fxc is available for the functional
    logical  :: has_kxc         ! TRUE is kxc is available for the functional
+   logical  :: needs_laplacian ! TRUE is functional needs laplacian of density
    real(dp) :: hyb_mixing      ! Hybrid functional: mixing factor of Fock contribution (default=0)
    real(dp) :: hyb_mixing_sr   ! Hybrid functional: mixing factor of SR Fock contribution (default=0)
    real(dp) :: hyb_range       ! Range (for separation) for a hybrid functional (default=0)
+   real(dp) :: xc_tb09_c       ! Special TB09 functional parameter
 #ifdef LIBPAW_ISO_C_BINDING
    type(C_PTR),pointer :: conf => null() ! C pointer to the functional itself
 #endif
@@ -245,11 +249,12 @@ module m_libpaw_libxc_funcs
 !
  interface
    subroutine libpaw_xc_get_flags_constants(xc_cst_flags_have_exc,xc_cst_flags_have_vxc, &
-              xc_cst_flags_have_fxc,xc_cst_flags_have_kxc,xc_cst_flags_have_lxc) &
+              xc_cst_flags_have_fxc,xc_cst_flags_have_kxc,xc_cst_flags_have_lxc, &
+&             xc_cst_flags_needs_lapl) &
 &             bind(C,name="libpaw_xc_get_flags_constants")
      use iso_c_binding, only : C_INT
      integer(C_INT) :: xc_cst_flags_have_exc,xc_cst_flags_have_vxc,xc_cst_flags_have_fxc, &
-&                      xc_cst_flags_have_kxc,xc_cst_flags_have_lxc
+&                      xc_cst_flags_have_kxc,xc_cst_flags_have_lxc,xc_cst_flags_needs_lapl
    end subroutine libpaw_xc_get_flags_constants
  end interface
 !
@@ -352,12 +357,13 @@ contains
   LIBPAW_XC_FAMILY_OEP           = int(i6)
   LIBPAW_XC_FAMILY_HYB_GGA       = int(i7)
   LIBPAW_XC_FAMILY_HYB_MGGA      = int(i8)
-  call libpaw_xc_get_flags_constants(i1,i2,i3,i4,i5)
+  call libpaw_xc_get_flags_constants(i1,i2,i3,i4,i5,i6)
   LIBPAW_XC_FLAGS_HAVE_EXC       = int(i1)
   LIBPAW_XC_FLAGS_HAVE_VXC       = int(i2)
   LIBPAW_XC_FLAGS_HAVE_FXC       = int(i3)
   LIBPAW_XC_FLAGS_HAVE_KXC       = int(i4)
   LIBPAW_XC_FLAGS_HAVE_LXC       = int(i5)
+  LIBPAW_XC_FLAGS_NEEDS_LAPLACIAN= int(i6)
   call libpaw_xc_get_kind_constants(i1,i2,i3,i4)
   LIBPAW_XC_EXCHANGE             = int(i1)
   LIBPAW_XC_CORRELATION          = int(i2)
@@ -432,6 +438,7 @@ contains
 !! INPUTS
 !! ixc=XC code for Abinit
 !! nspden=number of spin-density components
+!! [xc_tb09_c]=special argument for the Tran-Blaha 2009 functional
 !!
 !! SIDE EFFECTS
 !! [xc_functionals(2)]=<type(libpaw_libxc_type)>, optional argument
@@ -443,11 +450,14 @@ contains
 !!
 !! SOURCE
 
- subroutine libpaw_libxc_init(ixc,nspden,xc_functionals)
+ subroutine libpaw_libxc_init(ixc,nspden,xc_functionals,&
+&                             xc_tb09_c) ! optional argument
+
 
 !Arguments ------------------------------------
  integer, intent(in) :: nspden
  integer, intent(in) :: ixc
+ real(dp),intent(in),optional :: xc_tb09_c
  type(libpaw_libxc_type),intent(inout),optional,target :: xc_functionals(2)
 !Local variables-------------------------------
  integer :: ii,nspden_eff
@@ -496,9 +506,11 @@ contains
    xc_func%has_vxc=.false.
    xc_func%has_fxc=.false.
    xc_func%has_kxc=.false.
+   xc_func%needs_laplacian=.false.
    xc_func%hyb_mixing=zero
    xc_func%hyb_mixing_sr=zero
    xc_func%hyb_range=zero
+   xc_func%xc_tb09_c=99.99_dp
 
    if (xc_func%id<=0) cycle
 
@@ -538,6 +550,15 @@ contains
      call libpaw_xc_func_set_params(xc_func%conf,param_c,npar_c)
    end if
 
+!  Special treatment for XC_MGGA_X_TB09  functional
+   if (xc_func%id==libpaw_libxc_getid('XC_MGGA_X_TB09')) then
+     if (.not.present(xc_tb09_c)) then
+       msg='xc_tb09_c argument is mandatory for TB09 functional!'
+       MSG_BUG(msg)
+     end if
+     xc_func%xc_tb09_c=xc_tb09_c
+   end if
+
 !  Get functional kind
    xc_func%kind=int(libpaw_xc_get_info_kind(xc_func%conf))
 
@@ -547,6 +568,12 @@ contains
    xc_func%has_vxc=(iand(flags,LIBPAW_XC_FLAGS_HAVE_VXC)>0)
    xc_func%has_fxc=(iand(flags,LIBPAW_XC_FLAGS_HAVE_FXC)>0)
    xc_func%has_kxc=(iand(flags,LIBPAW_XC_FLAGS_HAVE_KXC)>0)
+
+!  Retrieve parameters for metaGGA functionals
+   if (xc_func%family==LIBPAW_XC_FAMILY_MGGA.or. &
+&      xc_func%family==LIBPAW_XC_FAMILY_HYB_MGGA) then
+     xc_func%needs_laplacian=(iand(flags,LIBPAW_XC_FLAGS_NEEDS_LAPLACIAN)>0)
+   end if
 
 !  Retrieve parameters for hybrid functionals
    if (xc_func%family==LIBPAW_XC_FAMILY_HYB_GGA.or. &
@@ -573,6 +600,8 @@ contains
      end if
    end do
 
+#else
+   if (.False.) write(std_out,*)xc_tb09_c
 #endif
 
  end do
@@ -629,9 +658,11 @@ end subroutine libpaw_libxc_init
    xc_func%has_vxc=.false.
    xc_func%has_fxc=.false.
    xc_func%has_kxc=.false.
+   xc_func%needs_laplacian=.false.
    xc_func%hyb_mixing=zero
    xc_func%hyb_mixing_sr=zero
    xc_func%hyb_range=zero
+   xc_func%xc_tb09_c=99.99_dp
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
    if (associated(xc_func%conf)) then
      call xc_func_end(xc_func%conf)
@@ -948,12 +979,54 @@ function libpaw_libxc_ismgga(xc_functionals)
  if (.not.libpaw_xc_constants_initialized) call libpaw_libxc_constants_load()
 
  if (present(xc_functionals)) then
-   libpaw_libxc_ismgga =(any(xc_functionals%family==LIBPAW_XC_FAMILY_MGGA))
+   libpaw_libxc_ismgga=(any(xc_functionals%family==LIBPAW_XC_FAMILY_MGGA) .or. &
+&                       any(xc_functionals%family==LIBPAW_XC_FAMILY_HYB_MGGA))
  else
-   libpaw_libxc_ismgga =(any(paw_xc_global%family==LIBPAW_XC_FAMILY_MGGA))
+   libpaw_libxc_ismgga=(any(paw_xc_global%family==LIBPAW_XC_FAMILY_MGGA) .or. &
+&                       any(paw_xc_global%family==LIBPAW_XC_FAMILY_HYB_MGGA))
  end if
 
 end function libpaw_libxc_ismgga
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_libpaw_libxc/libpaw_libxc_needs_laplacian
+!! NAME
+!!  libpaw_libxc_needs_laplacian
+!!
+!! FUNCTION
+!!  Test function to identify whether the presently used functional
+!!  needs the laplacian of the density or not
+!!
+!! INPUTS
+!! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+!!                     Handle for XC functionals
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ function libpaw_libxc_needs_laplacian(xc_functionals)
+
+!Arguments ------------------------------------
+ implicit none
+ logical :: libpaw_libxc_needs_laplacian
+ type(libpaw_libxc_type),intent(in),optional :: xc_functionals(2)
+
+! *************************************************************************
+
+ libpaw_libxc_needs_laplacian = .false.
+
+ if (present(xc_functionals)) then
+   libpaw_libxc_needs_laplacian=(any(xc_functionals%needs_laplacian))
+ else
+   libpaw_libxc_needs_laplacian=(any(paw_xc_global%needs_laplacian))
+ end if
+
+ end function libpaw_libxc_needs_laplacian
 !!***
 
 !----------------------------------------------------------------------
@@ -1083,21 +1156,19 @@ end function libpaw_libxc_nspin
 !! nspden=number of spin-density components
 !! order=requested order of derivation
 !! rho(npts,nspden)=electronic density
-!! grho2(npts,nspden)=squared gradient of the density
-!! lrho(npts,nspden)=laplacian of the density
-!! tau(npts,nspden)= kinetic energy density
-!! xc_tb09_c=input value for the TB09 C parameter;
-!!           if set to 99, C is computed from rho and grho2
+!! [grho2(npts,nspden)]=squared gradient of the density
+!! [lrho(npts,nspden)]=laplacian of the density
+!! [tau(npts,nspden)]= kinetic energy density
 !!
 !! OUTPUT
 !! exc(npts)=XC energy density
 !! vxc(npts,nspden)=derivative of the energy density wrt to the density
-!! vxclrho(npts,nspden)=derivative of the energy density wrt to the density laplacian
-!! vxctau(npts,nspden)=derivative of the energy density wrt to the kinetic energy density
-!! dvxc(npts,ndvxc)=2nd derivative of the energy density wrt to the density
-!! vxcgr(npts,3)=2nd derivative of the energy density wrt to the gradient
-!!               2nd derivative of the energy density wrt to the density and the gradient
-!! d2vxc(npts,nd2vxc)=3rd derivative of the energy density wrt to the density
+!! [vxclrho(npts,nspden)]=derivative of the energy density wrt to the density laplacian
+!! [vxctau(npts,nspden)]=derivative of the energy density wrt to the kinetic energy density
+!! [dvxc(npts,ndvxc)]=2nd derivative of the energy density wrt to the density
+!! [vxcgr(npts,3)]=2nd derivative of the energy density wrt to the gradient
+!!                 2nd derivative of the energy density wrt to the density and the gradient
+!! [d2vxc(npts,nd2vxc)]=3rd derivative of the energy density wrt to the density
 !!
 !! SIDE EFFECTS
 !! [xc_functionals(2)]=<type(libpaw_libxc_type)>, optional argument
@@ -1110,7 +1181,7 @@ end function libpaw_libxc_nspin
 !! SOURCE
 
  subroutine libpaw_libxc_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho,exc,vxc,&
-&           grho2,vxcgr,lrho,vxclrho,tau,vxctau,dvxc,d2vxc,xc_tb09_c,xc_functionals) ! Optional arguments
+&           grho2,vxcgr,lrho,vxclrho,tau,vxctau,dvxc,d2vxc,xc_functionals) ! Optional arguments
 
 !Arguments ------------------------------------
  integer, intent(in) :: ndvxc,nd2vxc,npts,nspden,order
@@ -1124,13 +1195,11 @@ end function libpaw_libxc_nspin
  real(dp),intent(out),optional :: vxctau(npts,nspden)
  real(dp),intent(out),optional :: dvxc(npts,ndvxc)
  real(dp),intent(out),optional :: d2vxc(npts,nd2vxc)
- real(dp),intent(in),optional :: xc_tb09_c
  type(libpaw_libxc_type),intent(inout),optional,target :: xc_functionals(2)
 !Local variables -------------------------------
 !scalars
  integer  :: ii,ipts
- logical :: is_gga,is_mgga
- real(dp) :: xc_tb09_c_
+ logical :: is_gga,is_mgga,needs_laplacian
  character(len=500) :: msg
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
  type(C_PTR) :: rho_c,sigma_c,lrho_c,tau_c
@@ -1159,14 +1228,23 @@ end function libpaw_libxc_nspin
 
  is_gga =libpaw_libxc_isgga (xc_funcs)
  is_mgga=libpaw_libxc_ismgga(xc_funcs)
+ needs_laplacian=(libpaw_libxc_needs_laplacian(xc_funcs).and.present(lrho))
 
  if (is_gga.and.(.not.present(grho2))) then
    msg='GGA needs gradient of density!'
    MSG_BUG(msg)
  end if
- if (is_mgga.and.((.not.present(lrho)).or.(.not.present(tau)))) then
-   msg='meta-GGA needs laplacian of density or tau!'
-   MSG_BUG(msg)
+ if (is_mgga) then
+   if (present(vxctau).and.(.not.present(tau))) then
+     msg='meta-GGA needs tau!'
+     MSG_BUG(msg)
+   end if
+   if (needs_laplacian) then
+     if (present(vxclrho).and.(.not.present(lrho))) then
+       msg='meta-GGA needs lrho!'
+       MSG_BUG(msg)
+     end if
+   end if
  endif    
 
 !Inititalize all output arrays to zero
@@ -1188,13 +1266,13 @@ end function libpaw_libxc_nspin
    if (xc_funcs(ii)%has_vxc) then
      vxc_c(ii)=c_loc(vxctmp)
      vsigma_c(ii)=c_loc(vsigma)
-     vlrho_c(ii)=c_loc(vlrho)
      vtau_c(ii)=c_loc(vtau)
+     vlrho_c(ii)=c_loc(vlrho)
    else
      vxc_c(ii)=C_NULL_PTR
      vsigma_c(ii)=c_NULL_PTR
-     vlrho_c(ii)=C_NULL_PTR
      vtau_c(ii)=C_NULL_PTR
+     vlrho_c(ii)=C_NULL_PTR
    end if
    if ((xc_funcs(ii)%has_fxc).and.(order**2>1)) then
      v2rho2_c(ii)=c_loc(v2rho2)
@@ -1220,16 +1298,15 @@ end function libpaw_libxc_nspin
    sigma=zero ; sigma_c=c_loc(sigma)
  end if
  if (is_mgga) then
-   lrhotmp=zero ; lrho_c=c_loc(lrhotmp)
    tautmp=zero ; tau_c=c_loc(tautmp)
+   lrhotmp=zero ; lrho_c=c_loc(lrhotmp)
  end if
 #endif
 
 !Some mGGA functionals require a special treatment
  if (is_mgga) then
    !TB09 functional requires the c parameter to be set
-   xc_tb09_c_=99._dp;if (present(xc_tb09_c)) xc_tb09_c_=xc_tb09_c
-   call libpaw_libxc_set_tb09(npts,nspden,rho,grho2,xc_tb09_c_,xc_funcs)
+   call libpaw_libxc_compute_tb09(npts,nspden,rho,grho2,xc_funcs)
  end if
 
 !Loop over points
@@ -1257,11 +1334,11 @@ end function libpaw_libxc_nspin
    end if
    if (is_mgga) then
      if (nspden==1) then
-       lrhotmp(1:nspden) = two*lrho(ipts,1:nspden)
        tautmp(1:nspden) = two*tau(ipts,1:nspden)
+       if (needs_laplacian) lrhotmp(1:nspden) = two*lrho(ipts,1:nspden)
      else
-       lrhotmp(1:nspden) = lrho(ipts,1:nspden)
        tautmp(1:nspden) = tau(ipts,1:nspden)
+       if (needs_laplacian) lrhotmp(1:nspden) = lrho(ipts,1:nspden)
      end if
    end if
 
@@ -1379,11 +1456,11 @@ end function libpaw_libxc_nspin
          vxcgr(ipts,3) = vxcgr(ipts,3) + vsigma(2)
        end if
      end if
-     if (is_mgga.and.present(vxclrho)) then
-       vxclrho(ipts,1:nspden) = vxclrho(ipts,1:nspden) + vlrho(1:nspden)
-     end if
      if (is_mgga.and.present(vxctau)) then
        vxctau(ipts,1:nspden)  = vxctau(ipts,1:nspden)  + vtau(1:nspden)
+     end if
+     if (is_mgga.and.needs_laplacian.and.present(vxclrho)) then
+       vxclrho(ipts,1:nspden) = vxclrho(ipts,1:nspden) + vlrho(1:nspden)
      end if
 
    end do ! ii
@@ -1705,9 +1782,9 @@ end function libpaw_libxc_gga_from_hybrid
 
 !----------------------------------------------------------------------
 
-!!****f* m_libpaw_libxc_funcs/libpaw_libxc_set_tb09
+!!****f* m_libpaw_libxc_funcs/libpaw_libxc_compute_tb09
 !! NAME
-!!  libpaw_libxc_set_tb09
+!!  libpaw_libxc_compute_tb09
 !!
 !! FUNCTION
 !!  Compute c parameter for Tran-Blaha 2009 functional and set it
@@ -1717,8 +1794,6 @@ end function libpaw_libxc_gga_from_hybrid
 !! nspden=number of spin-density components
 !! rho(npts,nspden)=electronic density
 !! grho2(npts,nspden)=squared gradient of the density
-!! xc_tb09_c=input value for the TB09 C parameter;
-!!           if set to 99, C is computed from rho and grho2
 !!
 !! OUTPUT
 !!
@@ -1733,17 +1808,16 @@ end function libpaw_libxc_gga_from_hybrid
 !!
 !! SOURCE
 
- subroutine libpaw_libxc_set_tb09(npts,nspden,rho,grho2,xc_tb09_c,xc_functionals)
+ subroutine libpaw_libxc_compute_tb09(npts,nspden,rho,grho2,xc_functionals)
 
 !Arguments ------------------------------------
  integer, intent(in) :: npts,nspden
  real(dp),intent(in)  :: rho(npts,nspden),grho2(npts,2*min(nspden,2)-1)
- real(dp),intent(in) :: xc_tb09_c
  type(libpaw_libxc_type),intent(inout),optional,target :: xc_functionals(2)
 !Local variables -------------------------------
 !scalars
  integer  :: ii,ipts
- logical :: is_mgga_tb09
+ logical :: fixed_c_tb09,is_mgga_tb09
  real(dp) :: cc
  character(len=500) :: msg
 !arrays
@@ -1766,16 +1840,19 @@ end function libpaw_libxc_gga_from_hybrid
  end if
 
  is_mgga_tb09=(any(xc_funcs%id==libpaw_libxc_getid('XC_MGGA_X_TB09')))
+ fixed_c_tb09=(any(abs(xc_funcs%xc_tb09_c-99.99_dp)>tol12))
 
  if (is_mgga_tb09) then
 
 !  C is fixed by the user
-   if (abs(xc_tb09_c-99._dp)>tol12) then
-     cc=xc_tb09_c
+   if (fixed_c_tb09) then
+     cc=zero
+     do ii=1,2
+       if (abs(xc_funcs(ii)%xc_tb09_c-99.99_dp)>tol12) cc=xc_funcs(ii)%xc_tb09_c
+     end do
      write(msg,'(2a,f9.6)' ) ch10,&
-&      'In the mGGA functional TB09, c is fixed by the user and is equal to ',cc
+&    'In the mGGA functional TB09, c is fixed by the user and is equal to ',cc
      call wrtout(std_out,msg,'COLL')
-
 !  C is computed
    else
      LIBPAW_ALLOCATE(gnon,(npts))
@@ -1807,7 +1884,7 @@ end function libpaw_libxc_gga_from_hybrid
    end do
  end if
 
-end subroutine libpaw_libxc_set_tb09
+end subroutine libpaw_libxc_compute_tb09
 !!***
 
 !----------------------------------------------------------------------

@@ -27,11 +27,11 @@
 module m_out_acknowl
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
+ use m_dtset
 
  use m_fstrings,     only : prep_dash
+ use defs_datatypes, only : pspheader_type
 
  implicit none
 
@@ -218,7 +218,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
  ref(13)=' Large scale ab initio calculations based on three levels of parallelization'//ch10//&
   ' F. Bottin, S. Leroux, A. Knyazev, G. Zerah, Comput. Mat. Science 42, 329, (2008).'
- comment(13)=' Comment: in case LOBPCG algorithm is used (wfoptalg=4/14).'//ch10//&
+ comment(13)=' Comment: in case LOBPCG algorithm is used (wfoptalg=4/14/114).'//ch10//&
   ' Strong suggestion to cite this paper in your publications.'//ch10//&
   ' This paper is also available at http://www.arxiv.org/abs/0707.3405'//ch10//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#bottin2008'
@@ -447,7 +447,8 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
    if(dtsets(idtset)%gwcomp/=0)cite(12)=1
 
 !  If paral_kgb/=0 and LOBPCG, cite Bottin2008
-   if(dtsets(idtset)%paral_kgb/=0.and.(dtsets(idtset)%wfoptalg==4.or.dtsets(idtset)%wfoptalg==14))cite(13)=1
+   if(dtsets(idtset)%paral_kgb/=0.and. &
+&    (dtsets(idtset)%wfoptalg==4.or.dtsets(idtset)%wfoptalg==14.or.dtsets(idtset)%wfoptalg==114))cite(13)=1
 
 !  If ucrpa/=0, cite Amadon2014
    if(dtsets(idtset)%ucrpa/=0) cite(26)=1

@@ -72,8 +72,6 @@ MODULE m_io_tools
    module procedure prompt_rdp2D
  end interface
 
-  integer,parameter :: STDIN=std_in
-  integer,parameter :: STDOUT=std_out_default
   integer,parameter :: MIN_UNIT_NUMBER=10  ! Fortran does not define the range for logical unit numbers (they not be negative)
 #ifdef FC_NAG
   integer,parameter :: MAX_UNIT_NUMBER=64    ! There's a serious problem in Nag6.0. In principle
@@ -91,8 +89,6 @@ MODULE m_io_tools
 
   integer,parameter :: IO_NO_AVAILABLE_UNIT  =-1   ! No units are available for Fortran I/O
   integer,parameter :: IO_FILE_NOT_ASSOCIATED=-2   ! File is not associated with any unit
-
-  !integer,save,public ABI_PROTECTED :: IO_MODE_DEFAULT=-1
 
 CONTAINS  !===========================================================
 !!***
@@ -198,7 +194,7 @@ logical function file_exists(fname)
 
 ! *********************************************************************
 
- inquire(file=fname,exist=file_exists)
+ inquire(file=fname, exist=file_exists)
 
 end function file_exists
 !!***
@@ -254,7 +250,7 @@ subroutine delete_file(fname,ierr)
 
  if (is_open_fname(fname)) then
    tmp_unt = get_unit_from_fname(fname)
-   if ( tmp_unt == IO_FILE_NOT_ASSOCIATED ) then
+   if (tmp_unt == IO_FILE_NOT_ASSOCIATED) then
     write(std_out,*) "File is opened but no associated unit found!"
     ierr=112
     RETURN
@@ -365,7 +361,7 @@ end function is_open_fname
 !!  prompt_int0D
 !!
 !! FUNCTION
-!!  A primitive prompt. Writes msg on STDOUT and reads the value entered by the user.
+!!  A primitive prompt. Writes msg on std_out and reads the value entered by the user.
 !!
 !! INPUTS
 !!
@@ -389,15 +385,13 @@ subroutine prompt_int0D(msg,ivalue)
 
  ios=-1 ; PS=PS1
  do while (ios/=0)
-  write(STDOUT,'(a)',ADVANCE='NO')PS//TRIM(msg)//BLANK
-  call flush_unit(STDOUT)
-  read(STDIN,*,IOSTAT=ios)ivalue
-  if (ios==IO_EOT) then
-    call prompt_exit()
-  endif
+  write(std_out,'(a)',ADVANCE='NO')PS//TRIM(msg)//BLANK
+  call flush_unit(std_out)
+  read(std_in,*,IOSTAT=ios)ivalue
+  if (ios==IO_EOT) call prompt_exit()
   PS=PS2
  end do
- write(STDOUT,*)
+ write(std_out,*)
 
 end subroutine prompt_int0D
 !!***
@@ -409,7 +403,7 @@ end subroutine prompt_int0D
 !!  prompt_rdp0d
 !!
 !! FUNCTION
-!!  A primitive prompt. Writes msg on STDOUT and reads the value entered by the user.
+!!  A primitive prompt. Writes msg on std_out and reads the value entered by the user.
 !!
 !! INPUTS
 !!
@@ -433,16 +427,13 @@ subroutine prompt_rdp0D(msg,rvalue)
 
  ios=-1 ; PS=PS1
  do while (ios/=0)
-  write(STDOUT,'(a)',ADVANCE='NO')PS//TRIM(msg)//BLANK
-  call flush_unit(STDOUT)
-  read(STDIN,*,IOSTAT=ios)rvalue
-  if (ios==IO_EOT) then
-    call prompt_exit()
-  endif
-
+  write(std_out,'(a)',ADVANCE='NO')PS//TRIM(msg)//BLANK
+  call flush_unit(std_out)
+  read(std_in,*,IOSTAT=ios)rvalue
+  if (ios==IO_EOT) call prompt_exit()
   PS=PS2
  end do
- write(STDOUT,*)
+ write(std_out,*)
 
 end subroutine prompt_rdp0D
 !!***
@@ -454,7 +445,7 @@ end subroutine prompt_rdp0D
 !!  prompt_string
 !!
 !! FUNCTION
-!!  A primitive prompt. Writes msg on STDOUT and reads the value entered by the user.
+!!  A primitive prompt. Writes msg on std_out and reads the value entered by the user.
 !!  If strip_comment is True (default), all the characters after "#" or "!" are ignored.
 !!
 !! INPUTS
@@ -484,14 +475,13 @@ subroutine prompt_string(msg,string,strip_comment)
 
  ios=-1 ; PS=PS1
  do while (ios/=0)
-   write(STDOUT,'(a)',ADVANCE='NO')PS//TRIM(msg)//BLANK
-   call flush_unit(STDOUT)
-   read(STDIN,'(a)',IOSTAT=ios)string
+   write(std_out,'(a)',ADVANCE='NO')PS//TRIM(msg)//BLANK
+   call flush_unit(std_out)
+   read(std_in,'(a)',IOSTAT=ios)string
    if (ios==IO_EOT) call prompt_exit()
-
    PS=PS2
  end do
- write(STDOUT,*)
+ write(std_out,*)
 
  if (do_strip) then
    ic = INDEX(string, "#"); if (ic /= 0) string(:) = string(:ic-1)
@@ -508,7 +498,7 @@ end subroutine prompt_string
 !!  prompt_int1D
 !!
 !! FUNCTION
-!!  A primitive prompt. Writes msg on STDOUT and reads the value entered by the user.
+!!  A primitive prompt. Writes msg on std_out and reads the value entered by the user.
 !!
 !! INPUTS
 !!
@@ -533,16 +523,13 @@ subroutine prompt_int1D(msg,ivect)
 
  ios=-1 ; PS=PS1
  do while (ios/=0)
-   write(STDOUT,'(a)',ADVANCE='NO')PS//TRIM(msg)//BLANK
-   call flush_unit(STDOUT)
-   read(STDIN,*,IOSTAT=ios)ivect(:)
-   if (ios==IO_EOT) then
-     call prompt_exit()
-   endif
-
+   write(std_out,'(a)',ADVANCE='NO')PS//TRIM(msg)//BLANK
+   call flush_unit(std_out)
+   read(std_in,*,IOSTAT=ios)ivect(:)
+   if (ios==IO_EOT) call prompt_exit()
    PS=PS2
  end do
- write(STDOUT,*)
+ write(std_out,*)
 
 end subroutine prompt_int1D
 !!***
@@ -554,7 +541,7 @@ end subroutine prompt_int1D
 !!  prompt_int2d
 !!
 !! FUNCTION
-!!  A primitive prompt. Writes msg on STDOUT and reads the value entered by the user.
+!!  A primitive prompt. Writes msg on std_out and reads the value entered by the user.
 !!
 !! INPUTS
 !!
@@ -578,16 +565,13 @@ subroutine prompt_int2D(msg,iarr)
 
  ios=-1 ; PS=PS1
  do while (ios/=0)
-   write(STDOUT,'(a)',ADVANCE='NO')PS//TRIM(msg)//BLANK
-   call flush_unit(STDOUT)
-   read(STDIN,*,IOSTAT=ios)iarr(:,:)
-   if (ios==IO_EOT) then
-     call prompt_exit()
-   endif
-
+   write(std_out,'(a)',ADVANCE='NO')PS//TRIM(msg)//BLANK
+   call flush_unit(std_out)
+   read(std_in,*,IOSTAT=ios)iarr(:,:)
+   if (ios==IO_EOT) call prompt_exit()
    PS=PS2
  end do
- write(STDOUT,*)
+ write(std_out,*)
 
 end subroutine prompt_int2D
 !!***
@@ -599,7 +583,7 @@ end subroutine prompt_int2D
 !!  prompt_rdp1D
 !!
 !! FUNCTION
-!!  A primitive prompt. Writes msg on STDOUT and reads the value entered by the user.
+!!  A primitive prompt. Writes msg on std_out and reads the value entered by the user.
 !!
 !! INPUTS
 !!
@@ -623,16 +607,13 @@ subroutine prompt_rdp1D(msg,rvect)
 
  ios=-1 ; PS=PS1
  do while (ios/=0)
-   write(STDOUT,'(a)',ADVANCE='NO')PS//TRIM(msg)//BLANK
-   call flush_unit(STDOUT)
-   read(STDIN,*,IOSTAT=ios)rvect(:)
-   if (ios==IO_EOT) then
-     call prompt_exit()
-   endif
-
+   write(std_out,'(a)',ADVANCE='NO')PS//TRIM(msg)//BLANK
+   call flush_unit(std_out)
+   read(std_in,*,IOSTAT=ios)rvect(:)
+   if (ios==IO_EOT) call prompt_exit()
    PS=PS2
  end do
- write(STDOUT,*)
+ write(std_out,*)
 
 end subroutine prompt_rdp1D
 !!***
@@ -644,7 +625,7 @@ end subroutine prompt_rdp1D
 !!  prompt_rdp2D
 !!
 !! FUNCTION
-!!  A primitive prompt. Writes msg on STDOUT and reads the value entered by the user.
+!!  A primitive prompt. Writes msg on std_out and reads the value entered by the user.
 !!
 !! INPUTS
 !!
@@ -668,15 +649,13 @@ subroutine prompt_rdp2D(msg,rarr)
 
  ios=-1 ; PS=PS1
  do while (ios/=0)
-   write(STDOUT,'(a)',ADVANCE='NO')PS//TRIM(msg)//BLANK
-   call flush_unit(STDOUT)
-   read(STDIN,*,IOSTAT=ios)rarr(:,:)
-   if (ios==IO_EOT) then
-     call prompt_exit()
-   endif
+   write(std_out,'(a)',ADVANCE='NO')PS//TRIM(msg)//BLANK
+   call flush_unit(std_out)
+   read(std_in,*,IOSTAT=ios)rarr(:,:)
+   if (ios==IO_EOT) call prompt_exit()
    PS=PS2
  end do
- write(STDOUT,*)
+ write(std_out,*)
 
 end subroutine prompt_rdp2D
 !!***
@@ -688,7 +667,7 @@ end subroutine prompt_rdp2D
 !!  prompt_exit
 !!
 !! FUNCTION
-!!  A primitive prompt. Writes msg on STDOUT and reads the value entered by the user.
+!!  A primitive prompt. Writes msg on std_out and reads the value entered by the user.
 !!
 !! INPUTS
 !!
@@ -708,13 +687,13 @@ subroutine prompt_exit()
  character(len=IO_MAX_LEN) :: ans
 ! *********************************************************************
 
- write(STDOUT,*)
+ write(std_out,*)
  ios=-1 ; iask=0
  do while (ios/=0.or.(ans/='y'.or.ans/='n'))
    iask=iask+1
-   write(STDOUT,'(a)')' Do you really want to exit (y/n)? '
-   call flush_unit(STDOUT)
-   read(STDIN,*,IOSTAT=ios)ans
+   write(std_out,'(a)')' Do you really want to exit (y/n)? '
+   call flush_unit(std_out)
+   read(std_in,*,IOSTAT=ios)ans
    if (ans=='y'.or.iask>NASK) STOP
    if (ans=='n') RETURN
  end do
@@ -751,7 +730,7 @@ integer function read_string(string, unit) result(ios)
  integer :: ipos,unt
 ! *********************************************************************
 
- unt=STDIN; if (present(unit)) unt=unit
+ unt=std_in; if (present(unit)) unt=unit
 
  read(unt,'(a)', iostat=ios) string  ! read input line
  if (ios/=0) return
@@ -938,7 +917,6 @@ pure function iomode_from_fname(fname) result(iomode)
 #else
    iomode = IO_MODE_FORTRAN
 #endif
-   !if (IO_MODE_DEFAULT /= -1) iomode = IO_MODE_DEFAULT
  end if
 
 end function iomode_from_fname

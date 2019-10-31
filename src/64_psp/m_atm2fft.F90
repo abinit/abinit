@@ -27,11 +27,12 @@
 module m_atm2fft
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_distribfft
 
+ use defs_abitypes, only : mpi_type
  use m_time,        only : timab
  use defs_datatypes,only : pseudopotential_type
  use m_pawtab,      only : pawtab_type
@@ -56,13 +57,13 @@ contains
 !! atm2fft
 !!
 !! FUNCTION
-!! This routine sums atomic functions (density or potential) defined
+!! This routine sums atomic functions (density, kinetic density or potential) defined
 !! (in rec. space) on a radial grid to get global quantities on the
 !! fine FFT grid. It can also compute contribution to energy derivatives
 !! of these atomic functions.
 !!
 !! Possible options:
-!!   optn=1: compute a sum of local atomic densities or contrib. to energy derivatives
+!!   optn=1: compute a sum of local atomic [kinetic] densities or contrib. to energy derivatives
 !!   optv=1: compute a sum of local atomic potentials or contrib. to energy derivatives
 !!
 !!   optatm =1: computes sum of atomic potentials/densities
@@ -154,6 +155,7 @@ contains
 !!          if optn2=1: n^AT is the atomic PAW PS core density stored in array pawtab%tcorespl()
 !!                   2: n^AT is the atomic PAW PS valence density stored in array pawtab%tvalespl()
 !!                   3: n^AT is a gaussian density: n(g)=gauss(1,ityp)*exp[-(gauss(2,ityp)*G)^2]
+!!                   4: n^AT is the atomic PAW PS core kinetic density stored in array pawtab%ttaucorespl()
 !! Note: optv and optn can be activated together
 !!
 !! Options controlling which contrib. to Etot derivatives are computed:
@@ -236,7 +238,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  type(mpi_type) :: mpi_enreg_fft
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- real(dp), ABI_CONTIGUOUS pointer :: tvalespl(:,:),tcorespl(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: tvalespl(:,:),tcorespl(:,:),ttaucorespl(:,:)
  integer,save :: idx(12)=(/1,1,2,2,3,3,3,2,3,1,2,1/)
  integer  :: delta(6)=(/1,1,1,0,0,0/)
  real(dp) :: dgm(3,3,6),d2gm(3,3,6,6),gcart(3),tsec(2)
@@ -256,10 +258,8 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  end if
 
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
-
  me_fft=ngfft(11)
  nproc_fft=ngfft(10)
-
 
 !Get the distrib associated with this fft_grid
  if (present(distribfft)) then
@@ -373,9 +373,11 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
    if (usepaw == 1) then
      tcorespl => pawtab(itypat)%tcorespl
      tvalespl => pawtab(itypat)%tvalespl
+     ttaucorespl => pawtab(itypat)%ttaucorespl
    else
      tcorespl => psps%nctab(itypat)%tcorespl
      tvalespl => psps%nctab(itypat)%tvalespl
+     ttaucorespl => null()
    end if
 
    do i3=1,n3
@@ -449,6 +451,8 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                  n_at=(aa*tvalespl(jj,1)+bb*tvalespl(jj+1,1)+cc*tvalespl(jj,2)+dd*tvalespl(jj+1,2))
                else if (optn2==3) then
                  n_at=gauss1*exp(-gsquar*alf2pi2)
+               else if (optn2==4) then
+                 n_at=(aa*ttaucorespl(jj,1)+bb*ttaucorespl(jj+1,1)+cc*ttaucorespl(jj,2)+dd*ttaucorespl(jj+1,2))
                else
                  n_at=zero
                end if
@@ -562,6 +566,8 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                      end if
                    else if (optn2==3) then
                      dn_at=-two*gauss1*alf2pi2
+                   else if (optn2==4.and.usepaw==1) then
+                     dn_at=pawtab(itypat)%dtaucdq0
                    end if
                    if (opteltfr==1) then
                      d2n_at = 0
@@ -572,9 +578,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                      ff=(3._dp*bb**2-1._dp)*tcorespl(jj+1,2) &
 &                     -(3._dp*aa**2-1._dp)*tcorespl(jj,2)
 !                    Also get nc''(q)
-                     if (opteltfr==1) then
-                       gg=aa*tcorespl(jj,2)+bb*tcorespl(jj+1,2)
-                     end if
+                     if (opteltfr==1) gg=aa*tcorespl(jj,2)+bb*tcorespl(jj+1,2)
                    else if (optn2==2) then
                      ee=tvalespl(jj+1,1)-tvalespl(jj,1)
                      ff=(3._dp*bb**2-1._dp)*tvalespl(jj+1,2) &
@@ -585,7 +589,12 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                      end if
                    else if (optn2==3) then
                      dn_at=-two*gauss1*alf2pi2*exp(-gsquar*alf2pi2)
-                   else
+                   else if (optn2==4.and.usepaw==1) then
+                     ee=ttaucorespl(jj+1,1)-ttaucorespl(jj,1)
+                     ff=(3._dp*bb**2-1._dp)*ttaucorespl(jj+1,2) &
+&                     -(3._dp*aa**2-1._dp)*ttaucorespl(jj,2)
+!                    Also get nc''(q)
+                     if (opteltfr==1) gg=aa*ttaucorespl(jj,2)+bb*ttaucorespl(jj+1,2)
                    end if
                    dn_at  = (ee*dqm1+ff*dqdiv6)/gmag
                    if (opteltfr==1) then
@@ -862,7 +871,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
  DBG_EXIT("COLL")
 
- contains
+   contains 
 
    function gsq_atm(i1,i2,i3)
 

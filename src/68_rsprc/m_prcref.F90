@@ -27,18 +27,18 @@
 module m_prcref
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_errors
  use m_abicore
  use m_xmpi
  use m_xcdata
-
  use m_frskerker1
  use m_frskerker2
  use mod_prc_memory
+ use m_dtset
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_numeric_tools, only : dotproduct
  use m_geometry, only : xcart2xred, metric
@@ -49,7 +49,6 @@ module m_prcref
  use m_fftcore,  only : kgindex
  use m_fft,      only : zerosym, indirect_parallel_fourier, fourdp
  use m_kg,       only : getph
- use m_dtset,    only : testsusmat
  use m_spacepar, only : hartre, laplacian
  use m_distribfft, only : init_distribfft_seq
  use m_forces,     only : fresid
@@ -345,7 +344,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 !    With dielop=2, the matrices will be computed when istep=dielstrt and 1
      dielop=1
      if(modulo(dtset%iprcel,100)>=41)dielop=2
-     call testsusmat(computediel,dielop,dielstrt,dtset,istep) !test if the matrix is to be computed
+     computediel = dtset%testsusmat(dielop, dielstrt, istep) !test if the matrix is to be computed
      if(computediel) then
 !      Compute the inverse dielectric matrix from the susceptibility matrix
 !      There are two routines for the RPA matrix, while for the electronic
@@ -995,7 +994,7 @@ end subroutine prcref
 !    With dielop=2, the matrices will be computed when istep=dielstrt and 1
      dielop=1
      if(modulo(dtset%iprcel,100)>=41)dielop=2
-     call testsusmat(computediel,dielop,dielstrt,dtset,istep) !test if the matrix is to be computed
+     computediel = dtset%testsusmat(dielop, dielstrt, istep) !test if the matrix is to be computed
      if(computediel) then
 !      Compute the inverse dielectric matrix from the susceptibility matrix
 !      There are two routines for the RPA matrix, while for the electronic
@@ -2505,7 +2504,7 @@ subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,v
 !******************************************************************
  vrespc=vresid !starting point
  ! put the laplacian of the residuals into deltaW
- call laplacian(gprimd,mpi_enreg,nfft,nspden,ngfft,rdfuncr=vrespc,laplacerdfuncr=deltaW,g2cart_out=g2cart) 
+ call laplacian(gprimd,mpi_enreg,nfft,nspden,ngfft,rdfuncr=vrespc,laplacerdfuncr=deltaW,g2cart_out=g2cart)
 
 !call laplacian(vrespc,buffer,ngfft,gprimd) ! put the laplacian of the residuals into deltaW
 !do ifft=1,nfft

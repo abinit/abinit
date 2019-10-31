@@ -8,6 +8,19 @@ This page gives hints on how to set parameters for a parallel calculation with t
 
 ## Introduction
 
+Running ABINIT in parallel (MPI 10 processors) can be as simple as:
+```
+mpirun -n 10 abinit < files_file
+```
+or (MPI 10 processors + OpenMP 4 threads):
+```
+export OMP_NUM_THREADS=4
+mpirun -n 10 abinit -c 4 < files_file > log 2> err   
+```
+
+In the latter, the standard output of the application is redirected to `log` while `err` collects the standard error.
+The command *mpirun* might possibly be replaced by *mpiexec* depending on your system.
+
 * For ground-state calculations, the code has been parallelized (MPI-based parallelism) on the k-points, on the spins, on the spinor components, on the bands, and on the FFT grid and plane wave coefficients. For the k-point and spin parallelisations (using MPI), the communication load is generally very small. This allows it to be used on a cluster of workstations. However, the number of nodes that can be used in parallel might be small, and depends strongly on the physics of the problem. A combined FFT / band parallelisation (LOBPCG)is available [[cite:Bottin2008]], and has shown very large speed up (>1000) on powerful computers with a large number of processors and high-speed interconnect. The combination of FFT / band / k point and spin parallelism is also available, and quite efficient for such computers. Available for norm-conserving as well as PAW cases. Automatic determination of the best combination of parallelism levels is available. Use of MPIIO is mandatory for the largest speed ups to be observed. 
 * Chebyshev filtering (Chebfi) is a method to solve the linear eigenvalue problem, and can be used as a SCF solver in Abinit. It is implemented in Abinit [[cite:Levitt2015]]. The design goal is for Chebfi to replace LOBPCG as the solver of choice for large-scale computations in Abinit. By performing less orthogonalizations and diagonalizations than LOBPCG, scaling to higher processor counts is possible. A manual to use Chebfi is available [[pdf:howto_chebfi.pdf|here]] 
 * For ground-state calculations, with a set of images (e.g. nudged elastic band method, the string method, the path-integral molecular dynamics, the genetic algorithm), MPI-based parallelism is used. The work load for the different images has been distributed, and this parallelism can be combined with the parallelism described in point hereabove, leading to speed-up beyond 5000. 

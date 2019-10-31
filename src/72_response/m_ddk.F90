@@ -33,8 +33,10 @@ MODULE m_ddk
  use m_xmpi
  use m_nctk
  use m_hdr
- use m_kptrank
+ use m_dtset
+ use m_krank
  use m_fstab
+ use m_crystal
  use m_wfd
  use m_mpinfo
  use m_cgtools
@@ -48,13 +50,10 @@ MODULE m_ddk
 #endif
 
  use m_fstrings,      only : strcat, sjoin, itoa, endswith, ktoa
- use m_symtk,         only : matr3inv
  use m_io_tools,      only : iomode_from_fname
  use m_time,          only : cwtime, sec2str
- use defs_abitypes,   only : hdr_type, dataset_type, MPI_type
+ use defs_abitypes,   only : MPI_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
- use m_geometry,      only : mkradim
- use m_crystal,       only : crystal_t
  use m_vkbr,          only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
  use m_pawtab,        only : pawtab_type
  use m_wfk,           only : wfk_read_ebands, wfk_read_h1mat
@@ -64,104 +63,21 @@ MODULE m_ddk
  private
 !!***
 
- integer,private,parameter :: DDK_NOMODE    = 0
- integer,private,parameter :: DDK_READMODE  = 1
- integer,private,parameter :: DDK_WRITEMODE = 2
-
-!----------------------------------------------------------------------
-
-!!****t* m_ddk/ddk_t
-!! NAME
-!!  ddk_t
-!!
-!! FUNCTION
-!!  object containing ddk derivatives ([H,r] proportional to band velocities)
-!!
-!! SOURCE
-
- type,public :: ddk_t
-
-  integer :: comm
-  ! MPI communicator used for IO.
-
-  !integer :: version
-  ! File format version read from file.
-
-  integer :: iomode=IO_MODE_FORTRAN
-  ! Method used to access the DDK file:
-  !   IO_MODE_FORTRAN for usual Fortran IO routines
-  !   IO_MODE_MPI if MPI/IO routines.
-  !   IO_MODE_ETSF netcdf files in etsf format
-
-  integer :: rw_mode = DDK_NOMODE
-   ! (Read|Write) mode
-
-  integer :: nsppol
-   ! Number of spin polarizations.
-
-  integer :: nspinor
-   ! Number of spinor components.
-
-  integer :: nene
-    ! Number of energy points we may need the fsavg at
-
-  integer :: nkfs
-    ! Number of k-points on the Fermi-surface (FS-BZ).
-
-  integer :: maxnb
-   ! Max number of bands on the FS.
-   ! TODO: Maybe maxnbfs
-
-  integer :: usepaw
-   ! 1 if PAW calculation, 0 otherwise
-
-  integer :: prtvol=0
-   ! Verbosity level
-
-  logical :: debug=.False.
-   ! Debug flag
-
-  character(len=fnlen) :: paths(3) = ABI_NOFILE
-   ! File name
-
-  real(dp) :: acell(3),rprim(3,3),gprim(3,3)
-   ! TODO: Are these really needed?
-
-  real(dp), allocatable :: velocity (:,:,:,:)
-   ! (3,maxnb,nkfs,nsppol)
-   ! velocity on the FS in cartesian coordinates.
-
-  real(dp), allocatable :: velocity_fsavg (:,:,:)
-   ! (3,nene,nsppol)
-   ! velocity on the FS in cartesian coordinates.
-
-  logical :: use_ncddk(3)
-   ! True if we are readin DDK matrix elements from EVK.nc instead of WFK file
-
-  type(crystal_t) :: cryst
-   ! Crystal structure read from file
-
- end type ddk_t
-
- public :: ddk_init              ! Initialize the object.
- public :: ddk_read_fsvelocities ! Read FS velocities from file.
- public :: ddk_fs_average_veloc  ! find FS average of velocity squared
- public :: ddk_free              ! Close the file and release the memory allocated.
- public :: ddk_print             ! output values
  public :: ddk_red2car           ! Convert band velocities from cartesian to reduced coordinates
- public :: ddk_compute           ! Calculate ddk matrix elements. Save result on disk.
+ public :: ddk_compute           ! Calculate ddk matrix elements. Save result to disk.
 !!***
 
  type, private :: ham_targets_t
-   real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:)
-   real(dp),allocatable :: kpg_k(:,:),kpg1_k(:,:)
-   real(dp),allocatable :: ph3d(:,:,:),ph3d1(:,:,:)
-   real(dp),allocatable :: dkinpw(:),kinpw1(:)
+   real(dp),allocatable :: ffnlk(:,:,:,:), ffnl1(:,:,:,:)
+   real(dp),allocatable :: kpg_k(:,:), kpg1_k(:,:)
+   real(dp),allocatable :: ph3d(:,:,:), ph3d1(:,:,:)
+   real(dp),allocatable :: dkinpw(:), kinpw1(:)
    contains
      procedure :: free => ham_targets_free   ! Free memory.
  end type ham_targets_t
 
-!!****t* m_ddk/ddkop_t
+
+ !!****t* m_ddk/ddkop_t
 !! NAME
 !!  ddkop_t
 !!
@@ -193,12 +109,16 @@ MODULE m_ddk
 
   real(dp) :: dfpt_sciss = zero
 
+  real(dp) :: rprimd(3,3)
+
+  type(MPI_type),pointer :: mpi_enreg => null()
+
   type(gs_hamiltonian_type) :: gs_hamkq(3)
 
   type(rf_hamiltonian_type) :: rf_hamkq(3)
 
   type(ham_targets_t), private :: htg(3)
-  ! Store arrays that are targetted by the hamiltonians.
+  ! Store arrays targetted by the hamiltonians.
 
   real(dp), private, allocatable :: gh1c(:,:,:)
    !gh1c, (2, mpw*nspinor, 3))
@@ -214,8 +134,11 @@ MODULE m_ddk
    procedure :: apply => ddkop_apply
     ! Apply dH/dk to input wavefunction.
 
-   procedure :: get_velocity => ddkop_get_velocity
-    ! Compute matrix element.
+   procedure :: get_braket => ddkop_get_braket
+    ! Compute matrix element (complex results) in cartesian coords.
+
+   procedure :: get_vdiag => ddkop_get_vdiag
+    ! Compute diagonal matrix element (real) in cartesian coords.
 
    procedure :: free => ddkop_free
     ! Free memory.
@@ -230,78 +153,6 @@ MODULE m_ddk
 !!***
 
 CONTAINS
-
-!----------------------------------------------------------------------
-
-!!****f* m_ddk/ddk_init
-!! NAME
-!!  ddk_init
-!!
-!! FUNCTION
-!!  Initialize the object from file. This is a COLLECTIVE procedure that must be called
-!!  by each process in the MPI communicator comm.
-!!
-!! INPUTS
-!!   paths=3 Filenames (could be either DFPT WFK files of DKK.nc files.
-!!   comm=MPI communicator.
-!!
-!! PARENTS
-!!      eph
-!!
-!! CHILDREN
-!!      wrtout
-!!
-!! SOURCE
-
-subroutine ddk_init(ddk, paths, comm)
-
-!Arguments ------------------------------------
-!scalars
- character(len=*),intent(in) :: paths(3)
- integer,intent(in) :: comm
- type(ddk_t),intent(inout) :: ddk
-
-!Local variables-------------------------------
-!scalars
- integer,parameter :: timrev2=2,fform2=2
- integer :: my_rank, restart, restartpaw, ii
-!arrays
- integer :: fforms(3)
- type(hdr_type) :: hdrs(3)
-
-!************************************************************************
-
- my_rank = xmpi_comm_rank(comm)
- ddk%paths = paths; ddk%comm = comm
- ddk%iomode = iomode_from_fname(paths(1))
-
- ! In this calls everything is broadcast properly to the whole comm
- do ii=1,3
-   ddk%use_ncddk(ii) = endswith(paths(ii), "_EVK.nc")
-   call hdr_read_from_fname(hdrs(ii), paths(ii), fforms(ii), comm)
-   if (ddk%debug) call hdr_echo(hdrs(ii), fforms(ii), 4, unit=std_out)
-   ! check that 2 headers are compatible
-   if (ii > 1) call hdr_check(fform2, fform2, hdrs(ii-1), hdrs(ii), 'COLL', restart, restartpaw)
- end do
-
- ddk%nsppol = hdrs(1)%nsppol
- ddk%nspinor = hdrs(1)%nspinor
- ddk%usepaw = hdrs(1)%usepaw
- ABI_CHECK(ddk%usepaw == 0, "PAW not yet supported")
-
- ! Init crystal_t
- ddk%cryst = hdr_get_crystal(hdrs(1), timrev2)
-
- ! Compute rprim, and gprimd. Used for slow FFT q--r if multiple shifts
- call mkradim(ddk%acell,ddk%rprim,ddk%cryst%rprimd)
- call matr3inv(ddk%rprim,ddk%gprim)
-
- do ii=1,3
-   call hdr_free(hdrs(ii))
- end do
-
-end subroutine ddk_init
-!!***
 
 !----------------------------------------------------------------------
 
@@ -395,7 +246,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
  ! Get ebands and hdr from WFK file.
  ebands = wfk_read_ebands(wfk_path, comm, out_hdr=hdr)
- cryst = hdr_get_crystal(hdr, 2)
+ cryst = hdr%get_crystal(2)
 
  ! Extract important dimensions from hdr%
  nkpt    = hdr%nkpt
@@ -549,7 +400,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
        if (dtset%useria /= 666) then
          call wfd%copy_cg(ib_v, ik, spin, cg_v)
-         call ddkop%apply(ebands%eig(ib_v, ik, spin), npw_k, wfd%nspinor, cg_v, cwaveprj, wfd%mpi_enreg)
+         call ddkop%apply(ebands%eig(ib_v, ik, spin), npw_k, wfd%nspinor, cg_v, cwaveprj)
        else
          ug_v(1:npw_k*nspinor) = wfd%wave(ib_v,ik,spin)%ug
        end if
@@ -563,7 +414,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
          if (dtset%useria /= 666) then
            call wfd%copy_cg(ib_c, ik, spin, cg_c)
-           vv = ddkop%get_velocity(ebands%eig(ib_c, ik, spin), istwf_k, npw_k, nspinor, wfd%mpi_enreg%me_g0, cg_c)
+           vv = ddkop%get_braket(ebands%eig(ib_c, ik, spin), istwf_k, npw_k, nspinor, cg_c, mode="reduced")
            !if (ib_v == ib_c) vv(2, :) = zero
 
            if (only_diago) then
@@ -629,7 +480,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
  call cwtime(cpu_all, wall_all, gflops_all, "stop")
  call wrtout(std_out, sjoin("Calculation completed. cpu-time:", sec2str(cpu_all), ",wall-time:", &
-   sec2str(wall_all)), do_flush=.True.)
+             sec2str(wall_all)), do_flush=.True.)
 
  ABI_FREE(ug_c)
  ABI_FREE(ug_v)
@@ -697,7 +548,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      call ebands_copy(ebands,ebands_tmp)
      call ebands_set_scheme(ebands_tmp, ebands%occopt, ebands%tsmear, dtset%spinmagntarget, dtset%prtvol)
      call gaps%free()
-     ierr = get_gaps(ebands_tmp,gaps)
+     ierr = get_gaps(ebands_tmp, gaps)
      call ebands_free(ebands_tmp)
    end if
    do spin=1,ebands%nsppol
@@ -728,7 +579,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    call wrtout(ab_out, sjoin("- Writing file: ", fname))
    NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
    hdr_tmp%pertcase = 0
-   NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
+   NCF_CHECK(hdr_tmp%ncwrite(ncid, 43, nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
    if (only_diago) then
@@ -761,7 +612,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      !call wrtout(ab_out, sjoin("- Writing file: ", fname))
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
      hdr_tmp%pertcase = 3 * cryst%natom + ii
-     NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
+     NCF_CHECK(hdr_tmp%ncwrite(ncid, 43, nc_define=.True.))
      NCF_CHECK(cryst%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(ebands, ncid))
      ncerr = nctk_def_arrays(ncid, [ &
@@ -772,7 +623,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "h1_matrix_elements"), dipoles(ii,:,:,:,:,:)))
      NCF_CHECK(nf90_close(ncid))
    end do
-   call hdr_free(hdr_tmp)
+   call hdr_tmp%free()
  end if
 #endif
 
@@ -804,7 +655,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  call wfd%free()
  call ebands_free(ebands)
  call cryst%free()
- call hdr_free(hdr)
+ call hdr%free()
 
  ! Block all procs here so that we know output files are available when code returns.
  call xmpi_barrier(comm)
@@ -814,259 +665,94 @@ end subroutine ddk_compute
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddk/ddk_read_fsvelocities
-!! NAME
-!!  ddk_read_fsvelocities
-!!
-!! FUNCTION
-!!  Read FS velocities from DDK files. Returned in ddk%velocity
-!!
-!! INPUTS
-!!   fstab(ddk%nsppol)=Tables with the correspondence between points of the Fermi surface (FS)
-!!     and the k-points in the IBZ
-!!   comm=MPI communicator
-!!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
-!!      wrtout
-!!
-!! SOURCE
-
-subroutine ddk_read_fsvelocities(ddk, fstab, comm)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: comm
- type(ddk_t),intent(inout) :: ddk
- type(fstab_t),target,intent(in) :: fstab(ddk%nsppol)
-
-!Local variables-------------------------------
-!scalars
- integer :: idir, ikfs, isppol, ik_ibz, ii
- integer :: symrankkpt, ikpt_ddk,iband, bd2tot_index
- integer :: bstart_k, nband_k, nband_in, vdim
-#ifdef HAVE_NETCDF
- integer :: ncid, varid, nc_fform
-#endif
- type(hdr_type) :: hdr1
- type(kptrank_type) :: kptrank_t
- type(fstab_t), pointer :: fs
- character(len=500) :: msg
-!arrays
- real(dp), allocatable :: eigen1(:), velocityp(:,:)
-
-!************************************************************************
-
- if (ddk%rw_mode /= DDK_NOMODE) then
-   MSG_ERROR("ddk should be in ddk_NOMODE before open_read is called.")
- end if
- ddk%rw_mode = DDK_READMODE
-
- ddk%maxnb = maxval(fstab(:)%maxnb)
- ddk%nkfs = maxval(fstab(:)%nkfs)
- ABI_MALLOC(ddk%velocity, (3,ddk%maxnb,ddk%nkfs,ddk%nsppol))
-
- call wrtout(std_out, sjoin('Read DDK FILES with iomode=', itoa(ddk%iomode)), 'COLL')
- do idir = 1,3
-   ! Open the files. All procs in comm receive hdr1 and eigen1
-   if (ddk%use_ncddk(idir)) then
-#ifdef HAVE_NETCDF
-     NCF_CHECK(nctk_open_read(ncid, ddk%paths(ii), comm))
-     call hdr_ncread(hdr1, ncid, nc_fform)
-     varid = nctk_idname(ncid, "h1_matrix_elements")
-     ABI_MALLOC(eigen1, (2*hdr1%mband*hdr1%mband*hdr1%nkpt*ddk%nsppol))
-     !NCF_CHECK(nctk_set_collective(ncid, varid))
-     NCF_CHECK(nf90_get_var(ncid, varid, eigen1, count=[2, hdr1%mband, hdr1%mband, hdr1%nkpt, hdr1%nsppol]))
-     NCF_CHECK(nf90_close(ncid))
-#else
-     MSG_ERROR("Netcdf not available!")
-#endif
-   else
-     call wfk_read_h1mat(ddk%paths(idir), eigen1, hdr1, comm)
-   end if
-   nband_in = maxval(hdr1%nband)
-
-   ! need correspondence hash between the DDK and the fs k-points
-   call mkkptrank (hdr1%kptns,hdr1%nkpt,kptrank_t)
-   do isppol=1,ddk%nsppol
-     fs => fstab(isppol)
-     do ikfs=1,fs%nkfs
-       ik_ibz = fs%istg0(1,ikfs)
-       call get_rank_1kpt (fs%kpts(:,ikfs),symrankkpt, kptrank_t)
-       ikpt_ddk = kptrank_t%invrank(symrankkpt)
-       if (ikpt_ddk == -1) then
-         write(msg, "(3a)")&
-           "Error in correspondence between ddk and fsk kpoint sets",ch10,&
-           "kpt sets in fsk and ddk files must agree."
-         MSG_ERROR(msg)
-       end if
-
-       bd2tot_index=2*nband_in**2*(ikpt_ddk-1) + 2*nband_in**2*hdr1%nkpt*(isppol-1)
-       bstart_k = fs%bstcnt_ibz(1, ik_ibz)
-       nband_k = fs%bstcnt_ibz(2, ik_ibz)
-       ! first derivative eigenvalues for k-point. Diagonal of eigen1 is real -> only use that part
-       do iband = bstart_k, bstart_k+nband_k-1
-         ddk%velocity(idir, iband-bstart_k+1, ikfs, isppol)=eigen1(bd2tot_index + 2*nband_in*(iband-1) + iband)
-       end do
-     end do
-   end do
-
-   ABI_FREE(eigen1)
-   call destroy_kptrank(kptrank_t)
-   call hdr_free(hdr1)
- end do ! idir
-
- ! process the eigenvalues(1): rotate to cartesian and divide by 2 pi
- ! use DGEMM better here on whole matrix and then reshape?
- vdim = ddk%maxnb*ddk%nkfs*ddk%nsppol
- ABI_MALLOC(velocityp, (3,vdim))
- velocityp = zero
- call dgemm('n','n',3,vdim,3,one,ddk%cryst%rprimd,3,ddk%velocity,3,zero,velocityp,3)
-
-! do isppol = 1, ddk%nsppol
-!   do ikpt = 1, ddk%nkfs
-!     do iband = 1, ddk%maxnb
-!       tmpveloc = ddk%velocity (:, iband, ikpt, isppol)
-!       call dgemm('n','n',3,3,3,one,ddk%cryst%rprimd,3,tmpveloc,3,zero,tmpveloc2,3)
-!       ddk%velocity (:, iband, ikpt, isppol) = tmpveloc2
-!     end do
-!   end do
-! end do
-
- ddk%velocity = reshape (velocityp, [3,ddk%maxnb,ddk%nkfs,ddk%nsppol])
-
- ABI_FREE(velocityp)
- call destroy_kptrank (kptrank_t)
-
-end subroutine ddk_read_fsvelocities
-!!***
+!!!!     !!****f* m_ddk/ddk_fs_average_veloc
+!!!!     !! NAME
+!!!!     !!  ddk_fs_average_veloc
+!!!!     !!
+!!!!     !! FUNCTION
+!!!!     !!  Perform Fermi surface average of velocity squared then square rooted, print and store in ddk object
+!!!!     !!
+!!!!     !! INPUTS
+!!!!     !!   ddk = object with electron band velocities
+!!!!     !!   fstab(ddk%nsppol)=Tables with the correspondence between points of the Fermi surface (FS)
+!!!!     !!     and the k-points in the IBZ
+!!!!     !!   comm=MPI communicator
+!!!!     !!
+!!!!     !! PARENTS
+!!!!     !!      m_phgamma
+!!!!     !!
+!!!!     !! CHILDREN
+!!!!     !!      wrtout
+!!!!     !!
+!!!!     !! SOURCE
+!!!!
+!!!!     subroutine ddk_fs_average_veloc(ddk, ebands, fstab, eph_fsmear)
+!!!!
+!!!!     !Arguments ------------------------------------
+!!!!     !scalars
+!!!!     !integer,intent(in) :: comm  ! could distribute this over k in the future
+!!!!      real(dp),intent(in) :: eph_fsmear
+!!!!      type(ebands_t),intent(in) :: ebands
+!!!!      type(ddk_t),intent(inout) :: ddk
+!!!!      type(fstab_t),target,intent(in) :: fstab(ddk%nsppol)
+!!!!
+!!!!     !Local variables-------------------------------
+!!!!     !scalars
+!!!!      integer :: idir, ikfs, isppol, ik_ibz, iene
+!!!!      integer :: iband, mnb, nband_k
+!!!!      type(fstab_t), pointer :: fs
+!!!!     !arrays
+!!!!      real(dp), allocatable :: wtk(:)
+!!!!
+!!!!     !************************************************************************
+!!!!
+!!!!      ddk%nene = fstab(1)%nene
+!!!!      ABI_MALLOC(ddk%velocity_fsavg, (3,ddk%nene,ddk%nsppol))
+!!!!      ddk%velocity_fsavg = zero
+!!!!
+!!!!      mnb = 1
+!!!!      do isppol=1,ddk%nsppol
+!!!!        fs => fstab(isppol)
+!!!!        mnb = max(mnb, maxval(fs%bstart_cnt_ibz(2, :)))
+!!!!      end do
+!!!!      ABI_MALLOC(wtk, (mnb))
+!!!!
+!!!!      do isppol=1,ddk%nsppol
+!!!!        fs => fstab(isppol)
+!!!!        do iene = 1, fs%nene
+!!!!          do ikfs=1,fs%nkfs
+!!!!            ik_ibz = fs%indkk_fs(1,ikfs)
+!!!!            nband_k = fs%bstart_cnt_ibz(2, ik_ibz)
+!!!!            call fs%get_weights_ibz(ebands, ik_ibz, isppol, eph_fsmear, wtk, iene)
+!!!!
+!!!!            do idir = 1,3
+!!!!              do iband = 1, nband_k
+!!!!                ddk%velocity_fsavg(idir, iene, isppol) = ddk%velocity_fsavg(idir, iene, isppol) + &
+!!!!     &             wtk(iband) * ddk%velocity(idir, iband, ikfs, isppol)**2
+!!!!     !&             fs%tetra_wtk_ene(iband,ik_ibz,iene) * ddk%velocity(idir, iband, ikfs, isppol)**2
+!!!!              end do
+!!!!            end do ! idir
+!!!!          end do ! ikfs
+!!!!        end do ! iene
+!!!!       ! sqrt is element wise on purpose
+!!!!        ddk%velocity_fsavg(:,:,isppol) = sqrt(ddk%velocity_fsavg(:,:,isppol)) / dble(fs%nkfs)
+!!!!      end do ! isppol
+!!!!
+!!!!      ABI_DEALLOCATE(wtk)
+!!!!
+!!!!     end subroutine ddk_fs_average_veloc
+!!!!     !!***
 
 !----------------------------------------------------------------------
-
-!!****f* m_ddk/ddk_fs_average_veloc
-!! NAME
-!!  ddk_fs_average_veloc
-!!
-!! FUNCTION
-!!  Perform Fermi surface average of velocity squared then square rooted, print and store in ddk object
-!!
-!! INPUTS
-!!   ddk = object with electron band velocities
-!!   fstab(ddk%nsppol)=Tables with the correspondence between points of the Fermi surface (FS)
-!!     and the k-points in the IBZ
-!!   comm=MPI communicator
-!!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
-!!      wrtout
-!!
-!! SOURCE
-
-subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
-
-!Arguments ------------------------------------
-!scalars
-!integer,intent(in) :: comm  ! could distribute this over k in the future
- real(dp),intent(in) :: sigmas(:)
- type(ebands_t),intent(in) :: ebands
- type(ddk_t),intent(inout) :: ddk
- type(fstab_t),target,intent(in) :: fstab(ddk%nsppol)
-
-!Local variables-------------------------------
-!scalars
- integer :: idir, ikfs, isppol, ik_ibz, iene
- integer :: iband, mnb, nband_k, nsig
- type(fstab_t), pointer :: fs
-!arrays
- real(dp), allocatable :: wtk(:,:)
-
-!************************************************************************
-
- ddk%nene = fstab(1)%nene
- ABI_MALLOC(ddk%velocity_fsavg, (3,ddk%nene,ddk%nsppol))
- ddk%velocity_fsavg = zero
-
- nsig = size(sigmas, dim=1)
- mnb = 1
- do isppol=1,ddk%nsppol
-   fs => fstab(isppol)
-   mnb = max(mnb, maxval(fs%bstcnt_ibz(2, :)))
- end do
- ABI_MALLOC(wtk, (nsig,mnb))
-
- do isppol=1,ddk%nsppol
-   fs => fstab(isppol)
-   do iene = 1, fs%nene
-     do ikfs=1,fs%nkfs
-       ik_ibz = fs%istg0(1,ikfs)
-       nband_k = fs%bstcnt_ibz(2, ik_ibz)
-       call fstab_weights_ibz(fs, ebands, ik_ibz, isppol, sigmas, wtk, iene)
-
-       do idir = 1,3
-         do iband = 1, nband_k
-           ddk%velocity_fsavg(idir, iene, isppol) = ddk%velocity_fsavg(idir, iene, isppol) + &
-&             wtk(1,iband) * ddk%velocity(idir, iband, ikfs, isppol)**2
-!&             fs%tetra_wtk_ene(iband,ik_ibz,iene) * ddk%velocity(idir, iband, ikfs, isppol)**2
-         end do
-       end do ! idir
-     end do ! ikfs
-   end do ! iene
-  ! sqrt is element wise on purpose
-   ddk%velocity_fsavg(:,:,isppol) = sqrt(ddk%velocity_fsavg(:,:,isppol)) / dble(fs%nkfs)
- end do ! isppol
-
- ABI_DEALLOCATE(wtk)
-
-end subroutine ddk_fs_average_veloc
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_ddk/ddk_free
-!! NAME
-!!  ddk_free
-!!
-!! FUNCTION
-!! Close the file and release the memory allocated.
-!!
-!! PARENTS
-!!      eph
-!!
-!! CHILDREN
-!!      wrtout
-!!
-!! SOURCE
-
-subroutine ddk_free(ddk)
-
-!Arguments ------------------------------------
-!scalars
- type(ddk_t),intent(inout) :: ddk
-
-!************************************************************************
-
- ! integer arrays
-
- ! real arrays
- ABI_SFREE(ddk%velocity)
- ABI_SFREE(ddk%velocity_fsavg)
-
- ! types
- call ddk%cryst%free()
-
-end subroutine ddk_free
-!!***
 
 !----------------------------------------------------------------------
 
 !!****f* m_ddk/ddk_red2car
 !! NAME
+!!  ddk_red2car
 !!
 !! FUNCTION
+!!  Convert ddk matrix elemen from reduced coordinates to cartesian coordinates.
 !!
 !! INPUTS
 !!
@@ -1088,7 +774,12 @@ subroutine ddk_red2car(rprimd, vred, vcar)
 !Local variables -------------------------------
  real(dp) :: vtmp(2,3)
 
+!************************************************************************
+ ! vcar = vred; return
+
  ! Go to cartesian coordinates (same as pmat2cart routine)
+ ! V_cart = 1/(2pi) * Rprimd x V_red
+ ! where V_red is the derivative computed in the DFPT routines (derivative wrt reduced component).
  vtmp(1,:) = rprimd(:,1)*vred(1,1) &
             +rprimd(:,2)*vred(1,2) &
             +rprimd(:,3)*vred(1,3)
@@ -1098,67 +789,6 @@ subroutine ddk_red2car(rprimd, vred, vcar)
  vcar = vtmp / two_pi
 
 end subroutine ddk_red2car
-!!***
-
-
-!----------------------------------------------------------------------
-
-!!****f* m_ddk/ddk_print
-!! NAME
-!!  ddk_print
-!!
-!! FUNCTION
-!!  Print info on the object.
-!!
-!! INPUTS
-!! [unit]=the unit number for output
-!! [prtvol]=verbosity level
-!! [mode_paral]=either "COLL" or "PERS"
-!!
-!! OUTPUT
-!!  Only printing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
-!!
-!! SOURCE
-
-subroutine ddk_print(ddk, header, unit, prtvol, mode_paral)
-
-!Arguments ------------------------------------
-!scalars
- integer,optional,intent(in) :: prtvol,unit
- character(len=4),optional,intent(in) :: mode_paral
- character(len=*),optional,intent(in) :: header
- type(ddk_t),intent(in) :: ddk
-
-!Local variables-------------------------------
-!scalars
- integer :: my_unt,my_prtvol
- character(len=4) :: my_mode
- character(len=500) :: msg
-
-! *************************************************************************
-
- my_unt =std_out; if (PRESENT(unit)) my_unt   =unit
- my_prtvol=0    ; if (PRESENT(prtvol)) my_prtvol=prtvol
- my_mode='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
-
- msg=' ==== Info on the ddk% object ==== '
- if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
- call wrtout(my_unt,msg,my_mode)
-
- write(std_out,*)"Number of FS bands: ",ddk%maxnb
- write(std_out,*)"Number of FS k-points: ",ddk%nkfs
- write(std_out,*)"Number of spin channels: ",ddk%nsppol
- write(std_out,*)"Paths to files: "
- write(std_out,*)"  ", trim(ddk%paths(1))
- write(std_out,*)"  ", trim(ddk%paths(2))
- write(std_out,*)"  ", trim(ddk%paths(3))
-
-end subroutine ddk_print
 !!***
 
 !----------------------------------------------------------------------
@@ -1194,7 +824,7 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngf
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
- type(MPI_type),intent(in) :: mpi_enreg
+ type(MPI_type),target,intent(in) :: mpi_enreg
  integer,intent(in) :: mpw
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -1208,13 +838,15 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngf
 ! *************************************************************************
 
  ABI_CHECK(dtset%usepaw == 0, "PAW not tested/implemented!")
- ABI_UNUSED((/mpi_enreg%paral_kgb/))
 
  new%inclvkb = dtset%inclvkb
  new%usepaw = dtset%usepaw
  new%ipert = cryst%natom + 1
  new%dfpt_sciss = dtset%dfpt_sciss
  new%mpw = mpw
+
+ new%rprimd = cryst%rprimd
+ new%mpi_enreg => mpi_enreg
 
  ! Not used because vlocal1 is not applied.
  nfft = product(ngfft(1:3))
@@ -1247,10 +879,19 @@ end function ddkop_new
 
 !!****f* m_ddk/ddkop_setup_spin_kpoint
 !! NAME
+!!  ddkop_setup_spin_kpoint
 !!
 !! FUNCTION
+!!  Prepare internal tables that depend on k-point/spin
 !!
 !! INPUTS
+!!  dtset<dataset_type>=All input variables for this dataset.
+!!  cryst<crystal_t>=Crystal structure.
+!!  psps<pseudopotential_type>=Variables related to pseudopotentials.
+!!  spin: spin index
+!!  kpoint(3): K-point in reduced coordinates.
+!!  istwkf_k: defines storage of wavefunctions for this k-point
+!!  npw_k: Number of planewaves.
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
 !!
 !! PARENTS
@@ -1293,15 +934,14 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
  end if
 
  ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
- ABI_MALLOC(ylmgr1_k, (npw_k,3+6*(optder/2),psps%mpsang**2*psps%useylm*useylmgr1))
+ ABI_MALLOC(ylmgr1_k, (npw_k, 3+6*(optder/2), psps%mpsang**2*psps%useylm*useylmgr1))
 
- if (psps%useylm == 1) then ! .and. self%inclvkb /= 0
+ if (psps%useylm == 1) then
    ! Fake MPI_type for sequential part. dummy_nband and nsppol1 are not used in sequential mode.
    call initmpi_seq(mpienreg_seq)
-   dummy_nband = 0
-   npwarr = npw_k
-   call initylmg(cryst%gprimd,kg_k,kpoint,nkpt1,mpienreg_seq,psps%mpsang,npw_k,dummy_nband,nkpt1,&
-      npwarr,nsppol1,optder,cryst%rprimd,ylm_k,ylmgr1_k)
+   dummy_nband = 0; npwarr = npw_k
+   call initylmg(cryst%gprimd, kg_k, kpoint, nkpt1, mpienreg_seq, psps%mpsang, npw_k, dummy_nband, nkpt1, &
+      npwarr, nsppol1, optder, cryst%rprimd, ylm_k, ylmgr1_k)
    call destroy_mpi_enreg(mpienreg_seq)
  end if
 
@@ -1309,20 +949,18 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
    call self%htg(idir)%free()
 
    ! Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(self%gs_hamkq(idir), spin, with_nonlocal=.true.)
-   call load_spin_rf_hamiltonian(self%rf_hamkq(idir), spin, with_nonlocal=.true.)
-
-   !if (self%inclvkb /= 0) then
+   call self%gs_hamkq(idir)%load_spin(spin, with_nonlocal=.true.)
+   call self%rf_hamkq(idir)%load_spin(spin, with_nonlocal=.true.)
 
    ! We need ffnl1 and dkinpw for 3 dirs. Note that the Hamiltonian objects use pointers to keep a reference
    ! to the output results of this routine.
    ! This is the reason why we need to store the targets in self%htg
-   call getgh1c_setup(self%gs_hamkq(idir),self%rf_hamkq(idir),dtset,psps,kpoint,kpoint,idir,self%ipert, & ! In
-     cryst%natom,cryst%rmet,cryst%gprimd,cryst%gmet,istwf_k,npw_k,npw_k, &             ! In
-     useylmgr1,kg_k,ylm_k,kg_k,ylm_k,ylmgr1_k, &                                       ! In
-     self%htg(idir)%dkinpw,nkpg,nkpg1,self%htg(idir)%kpg_k,self%htg(idir)%kpg1_k, &    ! Out
-     self%htg(idir)%kinpw1,self%htg(idir)%ffnlk,self%htg(idir)%ffnl1, &                ! Out
-     self%htg(idir)%ph3d, self%htg(idir)%ph3d1)                                        ! Out
+   call getgh1c_setup(self%gs_hamkq(idir), self%rf_hamkq(idir), dtset, psps, kpoint, kpoint, idir, self%ipert, & ! In
+     cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, npw_k, npw_k, &            ! In
+     useylmgr1, kg_k, ylm_k, kg_k, ylm_k, ylmgr1_k, &                                       ! In
+     self%htg(idir)%dkinpw, nkpg, nkpg1, self%htg(idir)%kpg_k, self%htg(idir)%kpg1_k, &     ! Out
+     self%htg(idir)%kinpw1, self%htg(idir)%ffnlk, self%htg(idir)%ffnl1, &                   ! Out
+     self%htg(idir)%ph3d, self%htg(idir)%ph3d1)                                             ! Out
  end do
 
  ABI_FREE(ylm_k)
@@ -1335,17 +973,23 @@ end subroutine ddkop_setup_spin_kpoint
 
 !!****f* m_ddk/ddkop_apply
 !! NAME
+!!  ddkop_apply
 !!
 !! FUNCTION
+!!  Apply velocity operator dH/dk to wavefunction in G-space. Store results in object.
 !!
 !! INPUTS
-!!  cwave(2,npw*nspinor)=input wavefunction, in reciprocal space
+!!  eig0nk: Eigenvalue associated to the wavefunction.
+!!  npw_k: Number of planewaves.
+!!  nspinor: Number of spinor components.
+!!  cwave(2,npw_k*nspinor)=input wavefunction in reciprocal space
 !!  cwaveprj(natom,nspinor*usecprj)=<p_lmn|C> coefficients for wavefunction |C> (and 1st derivatives)
 !!     if not allocated or size=0, they are locally computed (and not sorted)!!
 !!
-!! OUTPUT
-!! gh1c(2,npw1*nspinor)= <G|H^(1)|C> or  <G|H^(1)-lambda.S^(1)|C> on the k+q sphere
-!!                     (only kinetic+non-local parts if optlocal=0)
+!! SIDE EFFECTS
+!! Stores:
+!!  gh1c(2,npw1*nspinor)= <G|H^(1)|C> or  <G|H^(1)-lambda.S^(1)|C> on the k+q sphere
+!!                        (only kinetic+non-local parts if optlocal=0)
 !!
 !! PARENTS
 !!
@@ -1353,17 +997,13 @@ end subroutine ddkop_setup_spin_kpoint
 !!
 !! SOURCE
 
-subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj, mpi_enreg)
+subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
 
 !Arguments ------------------------------------
 !scalars
  class(ddkop_t),intent(inout) :: self
  integer,intent(in) :: npw_k, nspinor
- type(MPI_type),intent(in) :: mpi_enreg
  real(dp),intent(in) :: eig0nk
-
-!Local variables-------------------------------
-!scalars
 !arrays
  real(dp),intent(inout) :: cwave(2,npw_k*nspinor)
  type(pawcprj_type),intent(inout) :: cwaveprj(:,:)
@@ -1390,14 +1030,14 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj, mpi_enreg)
    eshift = self%eig0nk - self%dfpt_sciss
    do idir=1,3
      sij_opt = self%gs_hamkq(idir)%usepaw
-     call getgh1c(berryopt0,cwave,cwaveprj,self%gh1c(:,:,idir),&
-       grad_berry,self%gs1c(:,:,idir),self%gs_hamkq(idir),gvnlx1,idir,self%ipert,eshift,mpi_enreg,optlocal0, &
-       optnl,opt_gvnlx1,self%rf_hamkq(idir),sij_opt,tim_getgh1c,usevnl0)
+     call getgh1c(berryopt0, cwave, cwaveprj, self%gh1c(:,:,idir), &
+       grad_berry, self%gs1c(:,:,idir), self%gs_hamkq(idir), gvnlx1, idir, self%ipert, eshift, self%mpi_enreg, optlocal0, &
+       optnl, opt_gvnlx1, self%rf_hamkq(idir), sij_opt, tim_getgh1c, usevnl0)
    end do
 
  else
-   ! optnl 0 with DDK does not work as expected. So I treat the kinetic term explicitly
-   ! without calling getgh1c.
+   ! optnl 0 with DDK does not work as expected.
+   ! So I treat the kinetic term explicitly without calling getgh1c.
    do idir=1,3
      kinpw1 => self%gs_hamkq(idir)%kinpw_kp
      dkinpw => self%rf_hamkq(idir)%dkinpw_k
@@ -1419,10 +1059,93 @@ end subroutine ddkop_apply
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddk/ddkop_get_velocity
+!!****f* m_ddk/ddkop_get_braket
 !! NAME
+!!  ddkop_get_braket
 !!
 !! FUNCTION
+!!  Compute matrix element in Cartesian coordinates.
+!!
+!! INPUTS
+!!  eig0mk: Eigenvalue associated to the "bra" wavefunction
+!!  istwkf_k: defines storage of wavefunctions for this k-point
+!!  npw_k: Number of planewaves.
+!!  nspinor: Number of spinor components.
+!!  brag(2,npw_k*nspinor)=input wavefunction in reciprocal space
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function ddkop_get_braket(self, eig0mk, istwf_k, npw_k, nspinor, brag, mode) result(vk)
+
+!Arguments ------------------------------------
+!scalars
+ class(ddkop_t),intent(in) :: self
+ integer,intent(in) :: istwf_k, npw_k, nspinor
+ real(dp),intent(in) :: eig0mk
+ character(len=*),optional,intent(in) :: mode
+!arrays
+ real(dp),intent(in) :: brag(2*npw_k*nspinor)
+ real(dp) :: vk(2,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: idir
+ real(dp) :: doti
+!arrays
+ real(dp) :: dotarr(2), vk_red(2, 3)
+ character(len=50) :: my_mode
+
+!************************************************************************
+
+ if (self%usepaw == 0) then
+   ! <u_(iband,k+q)^(0)|H_(k+q,k)^(1)|u_(jband,k)^(0)>  (NC psps)
+   do idir=1,3
+     dotarr = cg_zdotc(npw_k * nspinor, brag, self%gh1c(:,:,idir))
+     if (istwf_k > 1) then
+       !dum = two * j_dpc * AIMAG(dum); if (vkbr%istwfk==2) dum = dum - j_dpc * AIMAG(gamma_term)
+       doti = two * dotarr(2)
+       if (istwf_k == 2 .and. self%mpi_enreg%me_g0 == 1) then
+         ! nspinor always 1
+         ! TODO: Recheck this part but it should be ok.
+         doti = doti - (brag(1) * self%gh1c(2,1,idir) - brag(2) * self%gh1c(1,1,idir))
+       end if
+       dotarr(2) = doti; dotarr(1) = zero
+     end if
+     vk(:, idir) = dotarr
+   end do
+ else
+   MSG_ERROR("PAW Not Implemented")
+   ! <u_(iband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(jband,k)^(0)> (PAW)
+   ! eshiftkq = half * (eig0mk - self%eig0nk)
+   ABI_UNUSED(eig0mk)
+ end if
+
+ my_mode = "cart"; if (present(mode)) my_mode = mode
+ select case (mode)
+ case ("cart")
+   vk_red = vk
+   call ddk_red2car(self%rprimd, vk_red, vk)
+ case ("reduced")
+   continue
+ case default
+   MSG_ERROR(sjoin("Invalid vaue for mode:", mode))
+ end select
+
+end function ddkop_get_braket
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddk/ddkop_get_vdiag
+!! NAME
+!!  ddkop_get_vdiag
+!!
+!! FUNCTION
+!!  Simplified interface to compute the diagonal matrix element of the velocity operator in cartesian coords.
 !!
 !! INPUTS
 !!
@@ -1432,56 +1155,39 @@ end subroutine ddkop_apply
 !!
 !! SOURCE
 
-function ddkop_get_velocity(self, eig0mk, istwf_k, npw_k, nspinor, me_g0, brag) result(vv)
+function ddkop_get_vdiag(self, eig0nk, istwf_k, npw_k, nspinor, cwave, cwaveprj, mode) result(vk)
 
 !Arguments ------------------------------------
 !scalars
- class(ddkop_t),intent(in) :: self
- integer,intent(in) :: istwf_k, npw_k, nspinor, me_g0
- real(dp),intent(in) :: eig0mk
+ class(ddkop_t),intent(inout) :: self
+ integer,intent(in) :: istwf_k, npw_k, nspinor
+ real(dp),intent(in) :: eig0nk
+ character(len=*),optional,intent(in) :: mode
 !arrays
- real(dp),intent(in) :: brag(npw_k*nspinor)
- real(dp) :: vv(2, 3)
+ real(dp),intent(inout) :: cwave(2,npw_k*nspinor)
+ type(pawcprj_type),intent(inout) :: cwaveprj(:,:)
+ real(dp) :: vk(3)
 
 !Local variables-------------------------------
-!scalars
- integer :: idir
- real(dp) :: doti
+ character(len=50) :: my_mode
 !arrays
- real(dp) :: dotarr(2)
+ real(dp) :: cvk(2, 3)
 
 !************************************************************************
 
- if (self%usepaw == 0) then
-   !<u_(iband,k+q)^(0)|H_(k+q,k)^(1)|u_(jband,k)^(0)>  (NC psps)
-   do idir=1,3
-     dotarr = cg_zdotc(npw_k * nspinor, brag, self%gh1c(:,:,idir))
-     if (istwf_k > 1) then
-       !dum = two * j_dpc * AIMAG(dum); if (vkbr%istwfk==2) dum = dum - j_dpc * AIMAG(gamma_term)
-       doti = two * dotarr(2)
-       if (istwf_k == 2 .and. me_g0 == 1) then
-         ! nspinor always 1
-         ! TODO: Recheck this part but it should be ok.
-         doti = doti - (brag(1) * self%gh1c(2,1,idir) - brag(2) * self%gh1c(1,1,idir))
-       end if
-       dotarr(2) = doti; dotarr(1) = zero
-     end if
-     vv(:, idir) = dotarr
-   end do
- else
-   MSG_ERROR("PAW Not Implemented")
-   ! <u_(iband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(jband,k)^(0)> (PAW)
-   ! eshiftkq = half * (eig0mk - self%eig0nk)
-   ABI_UNUSED(eig0mk)
- end if
+ my_mode = "cart"; if (present(mode)) my_mode = mode
+ call self%apply(eig0nk, npw_k, nspinor, cwave, cwaveprj)
+ cvk = self%get_braket(eig0nk, istwf_k, npw_k, nspinor, cwave, mode=my_mode)
+ vk = cvk(1, :)
 
-end function ddkop_get_velocity
+end function ddkop_get_vdiag
 !!***
 
 !----------------------------------------------------------------------
 
 !!****f* m_ddk/ddkop_free
 !! NAME
+!!  ddkop_free
 !!
 !! FUNCTION
 !!  Free memory
@@ -1510,10 +1216,12 @@ subroutine ddkop_free(self)
  ABI_SFREE(self%gs1c)
 
  do idir=1,3
-   call destroy_hamiltonian(self%gs_hamkq(idir))
+   call self%gs_hamkq(idir)%free()
    call self%htg(idir)%free()
-   call destroy_rf_hamiltonian(self%rf_hamkq(idir))
+   call self%rf_hamkq(idir)%free()
  end do
+
+ self%mpi_enreg => null()
 
 end subroutine ddkop_free
 !!***

@@ -1,5 +1,5 @@
 
-.Version 8.9.0 of ABINIT 
+.Version 8.11.12 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 12 Nov 2018.
-- ( at 02h08 )
+.Starting date : Mon 21 Oct 2019.
+- ( at 23h40 )
   
 - input  file    -> t93.in
 - output file    -> t93.out
@@ -255,8 +255,8 @@ P           mkmem           3
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.13033
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_quick_prs/tests/Psps_for_tests/Si_r.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_quick_prs/tests/Psps_for_tests/Si_r.psp8
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/Si_r.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/Si_r.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    160518                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -383,6 +383,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     534.875     534.793
     Total energy(eV)= -2.27660945879132E+02 ; Band energy (Ha)=  -1.8875475881E-02
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.88625423E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -3.88625423E-04  sigma(3 1)=  0.00000000E+00
@@ -418,8 +420,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     534.875     534.793
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_quick_prs/tests/Psps_for_tests/Si_r.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_quick_prs/tests/Psps_for_tests/Si_r.psp8
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/Si_r.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/Si_r.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    160518                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -513,7 +515,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     534.875     534.793
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
        -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000 -16.633  -0.000   0.159   0.010   0.157  -0.002   0.165  -0.008
+    2   0.000 -16.633   0.000   0.159   0.010   0.157  -0.002   0.165  -0.008
        -0.000  -0.000  -8.023   0.010  -0.085  -0.002  -0.083  -0.008  -0.091
 
   chi0(G,G') at the    2 th omega   1.0714   0.0000 [eV]
@@ -783,10 +785,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     534.875     534.793
    Upper and lower wings at the   17 th omega   0.0000   8.4649 [eV]
        1       2       3       4       5       6       7       8       9
       0.088   0.005  -0.005  -0.014   0.014   0.014  -0.014  -0.005   0.005
-     -0.000   0.005   0.005  -0.014  -0.014   0.014   0.014  -0.005  -0.005
+      0.000   0.005   0.005  -0.014  -0.014   0.014   0.014  -0.005  -0.005
        1       2       3       4       5       6       7       8       9
       0.088   0.005  -0.005  -0.014   0.014   0.014  -0.014  -0.005   0.005
-     -0.000  -0.005  -0.005   0.014   0.014  -0.014  -0.014   0.005   0.005
+      0.000  -0.005  -0.005   0.014   0.014  -0.014  -0.014   0.005   0.005
 
 
    Upper and lower wings at the   18 th omega   0.0000  16.7088 [eV]
@@ -801,10 +803,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     534.875     534.793
    Upper and lower wings at the   19 th omega   0.0000  29.7951 [eV]
        1       2       3       4       5       6       7       8       9
       0.228   0.005  -0.005  -0.015   0.015   0.015  -0.015  -0.005   0.005
-     -0.000   0.005   0.005  -0.015  -0.015   0.015   0.015  -0.005  -0.005
+      0.000   0.005   0.005  -0.015  -0.015   0.015   0.015  -0.005  -0.005
        1       2       3       4       5       6       7       8       9
       0.228   0.005  -0.005  -0.015   0.015   0.015  -0.015  -0.005   0.005
-     -0.000  -0.005  -0.005   0.015   0.015  -0.015  -0.015   0.005   0.005
+      0.000  -0.005  -0.005   0.015   0.015  -0.015  -0.015   0.005   0.005
 
 
    Upper and lower wings at the   20 th omega   0.0000  50.5684 [eV]
@@ -1169,109 +1171,115 @@ _setup2: Arith. and geom. avg. npw (full set) are     534.875     534.793
 
  Perturbative Calculation
 
- k =    0.000   0.000   0.000
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-    1  -7.349 -10.465 -16.458   6.515   0.516  -0.940 -10.196   0.270  -7.080
-    1   0.000   0.000   0.000   0.963   0.000   0.000   0.496   0.496   0.496
-    2  -7.349 -10.465 -16.458   6.515   0.516  -0.940 -10.196   0.270  -7.080
-    2   0.000   0.000   0.000   0.963   0.000   0.000   0.496   0.496   0.496
-    3   4.767 -11.454 -13.581   2.853   0.822  -0.216 -10.857   0.597   5.365
-    3   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
-    4   4.767 -11.454 -13.581   2.853   0.822  -0.216 -10.857   0.597   5.365
-    4   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
-    5   4.767 -11.454 -13.581   2.853   0.822  -0.216 -10.857   0.597   5.365
-    5   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
-    6   4.767 -11.454 -13.581   2.853   0.822  -0.216 -10.857   0.597   5.365
-    6   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
-    7   4.767 -11.454 -13.581   2.853   0.822  -0.216 -10.857   0.597   5.365
-    7   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
-    8   4.767 -11.454 -13.581   2.853   0.822  -0.216 -10.857   0.597   5.365
-    8   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
-    9   7.206  -9.989  -4.952  -3.597   0.829  -0.207  -8.796   1.194   8.399
-    9   0.000   0.000   0.000  -0.005   0.000   0.000  -0.004  -0.004  -0.004
-   10   7.206  -9.989  -4.952  -3.597   0.829  -0.207  -8.796   1.194   8.399
-   10   0.000   0.000   0.000  -0.005   0.000   0.000  -0.004  -0.004  -0.004
-   11   7.206  -9.989  -4.952  -3.597   0.829  -0.207  -8.796   1.194   8.399
-   11   0.000   0.000   0.000  -0.005   0.000   0.000  -0.004  -0.004  -0.004
-   12   7.206  -9.989  -4.952  -3.597   0.829  -0.207  -8.796   1.194   8.399
-   12   0.000   0.000   0.000  -0.005   0.000   0.000  -0.004  -0.004  -0.004
-   13   7.206  -9.989  -4.952  -3.597   0.829  -0.207  -8.796   1.194   8.399
-   13   0.000   0.000   0.000  -0.005   0.000   0.000  -0.004  -0.004  -0.004
-   14   7.206  -9.989  -4.952  -3.597   0.829  -0.207  -8.796   1.194   8.399
-   14   0.000   0.000   0.000  -0.005   0.000   0.000  -0.004  -0.004  -0.004
+--- !SelfEnergy_ee
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    2.438
+QP_gap     :    3.035
+Delta_QP_KS:    0.596
+data: !SigmaeeData |
+     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        1  -7.349 -10.465 -16.458   6.515   0.516  -0.940 -10.196   0.270  -7.080
+        1   0.000   0.000   0.000   0.963   0.000   0.000   0.496   0.496   0.496
+        2  -7.349 -10.465 -16.458   6.515   0.516  -0.940 -10.196   0.270  -7.080
+        2   0.000   0.000   0.000   0.963   0.000   0.000   0.496   0.496   0.496
+        3   4.767 -11.454 -13.581   2.853   0.822  -0.216 -10.857   0.597   5.365
+        3   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
+        4   4.767 -11.454 -13.581   2.853   0.822  -0.216 -10.857   0.597   5.365
+        4   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
+        5   4.767 -11.454 -13.581   2.853   0.822  -0.216 -10.857   0.597   5.365
+        5   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
+        6   4.767 -11.454 -13.581   2.853   0.822  -0.216 -10.857   0.597   5.365
+        6   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
+        7   4.767 -11.454 -13.581   2.853   0.822  -0.216 -10.857   0.597   5.365
+        7   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
+        8   4.767 -11.454 -13.581   2.853   0.822  -0.216 -10.857   0.597   5.365
+        8   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
+        9   7.206  -9.989  -4.952  -3.597   0.829  -0.207  -8.796   1.194   8.399
+        9   0.000   0.000   0.000  -0.005   0.000   0.000  -0.004  -0.004  -0.004
+       10   7.206  -9.989  -4.952  -3.597   0.829  -0.207  -8.796   1.194   8.399
+       10   0.000   0.000   0.000  -0.005   0.000   0.000  -0.004  -0.004  -0.004
+       11   7.206  -9.989  -4.952  -3.597   0.829  -0.207  -8.796   1.194   8.399
+       11   0.000   0.000   0.000  -0.005   0.000   0.000  -0.004  -0.004  -0.004
+       12   7.206  -9.989  -4.952  -3.597   0.829  -0.207  -8.796   1.194   8.399
+       12   0.000   0.000   0.000  -0.005   0.000   0.000  -0.004  -0.004  -0.004
+       13   7.206  -9.989  -4.952  -3.597   0.829  -0.207  -8.796   1.194   8.399
+       13   0.000   0.000   0.000  -0.005   0.000   0.000  -0.004  -0.004  -0.004
+       14   7.206  -9.989  -4.952  -3.597   0.829  -0.207  -8.796   1.194   8.399
+       14   0.000   0.000   0.000  -0.005   0.000   0.000  -0.004  -0.004  -0.004
+...
 
- E^0_gap          2.438
- E^GW_gap         3.035
- DeltaE^GW_gap    0.596
+--- !SelfEnergy_ee
+kpoint     : [   0.500,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    2.774
+QP_gap     :    3.360
+Delta_QP_KS:    0.586
+data: !SigmaeeData |
+     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        1  -4.965 -10.902 -15.960   5.479   0.818  -0.222 -10.558   0.345  -4.620
+        1   0.000   0.000   0.000   0.929   0.000   0.000   0.760   0.760   0.760
+        2  -4.965 -10.902 -15.960   5.479   0.818  -0.222 -10.558   0.345  -4.620
+        2   0.000   0.000   0.000   0.929   0.000   0.000   0.760   0.760   0.760
+        3  -2.343 -10.158 -13.761   3.925   1.127   0.113  -9.796   0.362  -1.981
+        3   0.000   0.000   0.000   0.211   0.000   0.000   0.238   0.238   0.238
+        4  -2.343 -10.158 -13.761   3.925   1.127   0.113  -9.796   0.362  -1.981
+        4   0.000   0.000   0.000   0.211   0.000   0.000   0.238   0.238   0.238
+        5   3.523 -11.154 -13.419   2.937   0.892  -0.121 -10.554   0.600   4.123
+        5   0.000   0.000   0.000   0.020   0.000   0.000   0.018   0.018   0.018
+        6   3.523 -11.154 -13.419   2.937   0.892  -0.121 -10.554   0.600   4.123
+        6   0.000   0.000   0.000   0.020   0.000   0.000   0.018   0.018   0.018
+        7   3.523 -11.154 -13.419   2.937   0.892  -0.121 -10.554   0.600   4.123
+        7   0.000   0.000   0.000   0.020   0.000   0.000   0.018   0.018   0.018
+        8   3.523 -11.154 -13.419   2.937   0.892  -0.121 -10.554   0.600   4.123
+        8   0.000   0.000   0.000   0.020   0.000   0.000   0.018   0.018   0.018
+        9   6.297 -10.044  -5.069  -3.620   0.875  -0.143  -8.858   1.186   7.483
+        9   0.000   0.000   0.000  -0.001   0.000   0.000  -0.000  -0.000  -0.000
+       10   6.297 -10.044  -5.069  -3.620   0.875  -0.143  -8.858   1.186   7.483
+       10   0.000   0.000   0.000  -0.001   0.000   0.000  -0.000  -0.000  -0.000
+       11   7.959  -9.582  -4.467  -3.573   0.813  -0.230  -8.329   1.253   9.213
+       11   0.000   0.000   0.000  -0.064   0.000   0.000  -0.052  -0.052  -0.052
+       12   7.959  -9.582  -4.467  -3.573   0.813  -0.230  -8.329   1.253   9.213
+       12   0.000   0.000   0.000  -0.064   0.000   0.000  -0.052  -0.052  -0.052
+       13   7.959  -9.582  -4.467  -3.573   0.813  -0.230  -8.329   1.253   9.213
+       13   0.000   0.000   0.000  -0.064   0.000   0.000  -0.052  -0.052  -0.052
+       14   7.959  -9.582  -4.467  -3.573   0.813  -0.230  -8.329   1.253   9.213
+       14   0.000   0.000   0.000  -0.064   0.000   0.000  -0.052  -0.052  -0.052
+...
 
-
- k =    0.500   0.000   0.000
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-    1  -4.965 -10.902 -15.960   5.479   0.818  -0.222 -10.558   0.345  -4.620
-    1   0.000   0.000   0.000   0.929   0.000   0.000   0.760   0.760   0.760
-    2  -4.965 -10.902 -15.960   5.479   0.818  -0.222 -10.558   0.345  -4.620
-    2   0.000   0.000   0.000   0.929   0.000   0.000   0.760   0.760   0.760
-    3  -2.343 -10.158 -13.761   3.925   1.127   0.113  -9.796   0.362  -1.981
-    3   0.000   0.000   0.000   0.211   0.000   0.000   0.238   0.238   0.238
-    4  -2.343 -10.158 -13.761   3.925   1.127   0.113  -9.796   0.362  -1.981
-    4   0.000   0.000   0.000   0.211   0.000   0.000   0.238   0.238   0.238
-    5   3.523 -11.154 -13.419   2.937   0.892  -0.121 -10.554   0.600   4.123
-    5   0.000   0.000   0.000   0.020   0.000   0.000   0.018   0.018   0.018
-    6   3.523 -11.154 -13.419   2.937   0.892  -0.121 -10.554   0.600   4.123
-    6   0.000   0.000   0.000   0.020   0.000   0.000   0.018   0.018   0.018
-    7   3.523 -11.154 -13.419   2.937   0.892  -0.121 -10.554   0.600   4.123
-    7   0.000   0.000   0.000   0.020   0.000   0.000   0.018   0.018   0.018
-    8   3.523 -11.154 -13.419   2.937   0.892  -0.121 -10.554   0.600   4.123
-    8   0.000   0.000   0.000   0.020   0.000   0.000   0.018   0.018   0.018
-    9   6.297 -10.044  -5.069  -3.620   0.875  -0.143  -8.858   1.186   7.483
-    9   0.000   0.000   0.000  -0.001   0.000   0.000  -0.000  -0.000  -0.000
-   10   6.297 -10.044  -5.069  -3.620   0.875  -0.143  -8.858   1.186   7.483
-   10   0.000   0.000   0.000  -0.001   0.000   0.000  -0.000  -0.000  -0.000
-   11   7.959  -9.582  -4.467  -3.573   0.813  -0.230  -8.329   1.253   9.213
-   11   0.000   0.000   0.000  -0.064   0.000   0.000  -0.052  -0.052  -0.052
-   12   7.959  -9.582  -4.467  -3.573   0.813  -0.230  -8.329   1.253   9.213
-   12   0.000   0.000   0.000  -0.064   0.000   0.000  -0.052  -0.052  -0.052
-   13   7.959  -9.582  -4.467  -3.573   0.813  -0.230  -8.329   1.253   9.213
-   13   0.000   0.000   0.000  -0.064   0.000   0.000  -0.052  -0.052  -0.052
-   14   7.959  -9.582  -4.467  -3.573   0.813  -0.230  -8.329   1.253   9.213
-   14   0.000   0.000   0.000  -0.064   0.000   0.000  -0.052  -0.052  -0.052
-
- E^0_gap          2.774
- E^GW_gap         3.360
- DeltaE^GW_gap    0.586
-
-
- k =    0.500   0.500   0.000
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-    1  -3.136 -10.893 -15.119   4.957   0.876  -0.142 -10.252   0.641  -2.495
-    1   0.000   0.000   0.000   0.591   0.000   0.000   0.517   0.517   0.517
-    2  -3.136 -10.893 -15.119   4.957   0.876  -0.142 -10.252   0.641  -2.495
-    2   0.000   0.000   0.000   0.591   0.000   0.000   0.517   0.517   0.517
-    3  -3.136 -10.893 -15.119   4.957   0.876  -0.142 -10.252   0.641  -2.495
-    3   0.000   0.000   0.000   0.591   0.000   0.000   0.517   0.517   0.517
-    4  -3.136 -10.893 -15.119   4.957   0.876  -0.142 -10.252   0.641  -2.495
-    4   0.000   0.000   0.000   0.591   0.000   0.000   0.517   0.517   0.517
-    5   1.808 -10.623 -13.164   2.947   0.906  -0.104 -10.255   0.368   2.176
-    5   0.000   0.000   0.000   0.109   0.000   0.000   0.099   0.099   0.099
-    6   1.808 -10.623 -13.164   2.947   0.906  -0.104 -10.255   0.368   2.176
-    6   0.000   0.000   0.000   0.109   0.000   0.000   0.099   0.099   0.099
-    7   1.808 -10.623 -13.164   2.947   0.906  -0.104 -10.255   0.368   2.176
-    7   0.000   0.000   0.000   0.109   0.000   0.000   0.099   0.099   0.099
-    8   1.808 -10.623 -13.164   2.947   0.906  -0.104 -10.255   0.368   2.176
-    8   0.000   0.000   0.000   0.109   0.000   0.000   0.099   0.099   0.099
-    9   5.335  -8.820  -4.259  -3.510   0.849  -0.179  -7.928   0.892   6.227
-    9   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
-   10   5.335  -8.820  -4.259  -3.510   0.849  -0.179  -7.928   0.892   6.227
-   10   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
-   11   5.335  -8.820  -4.259  -3.510   0.849  -0.179  -7.928   0.892   6.227
-   11   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
-   12   5.335  -8.820  -4.259  -3.510   0.849  -0.179  -7.928   0.892   6.227
-   12   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
-
- E^0_gap          3.526
- E^GW_gap         4.050
- DeltaE^GW_gap    0.524
-
+--- !SelfEnergy_ee
+kpoint     : [   0.500,    0.500,    0.000, ]
+spin       : 1
+KS_gap     :    3.526
+QP_gap     :    4.050
+Delta_QP_KS:    0.524
+data: !SigmaeeData |
+     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        1  -3.136 -10.893 -15.119   4.957   0.876  -0.142 -10.252   0.641  -2.495
+        1   0.000   0.000   0.000   0.591   0.000   0.000   0.517   0.517   0.517
+        2  -3.136 -10.893 -15.119   4.957   0.876  -0.142 -10.252   0.641  -2.495
+        2   0.000   0.000   0.000   0.591   0.000   0.000   0.517   0.517   0.517
+        3  -3.136 -10.893 -15.119   4.957   0.876  -0.142 -10.252   0.641  -2.495
+        3   0.000   0.000   0.000   0.591   0.000   0.000   0.517   0.517   0.517
+        4  -3.136 -10.893 -15.119   4.957   0.876  -0.142 -10.252   0.641  -2.495
+        4   0.000   0.000   0.000   0.591   0.000   0.000   0.517   0.517   0.517
+        5   1.808 -10.623 -13.164   2.947   0.906  -0.104 -10.255   0.368   2.176
+        5   0.000   0.000   0.000   0.109   0.000   0.000   0.099   0.099   0.099
+        6   1.808 -10.623 -13.164   2.947   0.906  -0.104 -10.255   0.368   2.176
+        6   0.000   0.000   0.000   0.109   0.000   0.000   0.099   0.099   0.099
+        7   1.808 -10.623 -13.164   2.947   0.906  -0.104 -10.255   0.368   2.176
+        7   0.000   0.000   0.000   0.109   0.000   0.000   0.099   0.099   0.099
+        8   1.808 -10.623 -13.164   2.947   0.906  -0.104 -10.255   0.368   2.176
+        8   0.000   0.000   0.000   0.109   0.000   0.000   0.099   0.099   0.099
+        9   5.335  -8.820  -4.259  -3.510   0.849  -0.179  -7.928   0.892   6.227
+        9   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
+       10   5.335  -8.820  -4.259  -3.510   0.849  -0.179  -7.928   0.892   6.227
+       10   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
+       11   5.335  -8.820  -4.259  -3.510   0.849  -0.179  -7.928   0.892   6.227
+       11   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
+       12   5.335  -8.820  -4.259  -3.510   0.849  -0.179  -7.928   0.892   6.227
+       12   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
+...
 
  New Fermi energy :        2.129863E-01 Ha ,    5.795651E+00 eV
  New Exchange energy :    -2.081521E+00 Ha ,   -5.664107E+01 eV
@@ -1478,56 +1486,56 @@ P           mkmem           3
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - [2] Optimized norm-conserving Vanderbilt pseudopotentials.
 - D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
 - Comment: Some pseudopotential generated using the ONCVPSP code were used.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#hamann2013
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
 -
-- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [5] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         19.3  wall=         19.5
+- Proc.   0 individual time (sec): cpu=         19.2  wall=         19.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  20 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.3  wall=         19.5
+.Delivered  20 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=         19.2  wall=         19.4

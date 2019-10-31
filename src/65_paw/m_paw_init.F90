@@ -26,14 +26,13 @@ MODULE m_paw_init
  use m_errors
  use m_abicore
  use m_splines
-
- use defs_abitypes,  only : dataset_type
+ use m_dtset
 
  use m_time,    only : timab
  use m_pawpsp,  only : pawpsp_nl
  use m_paw_atom,only : atompaw_shpfun
  use m_pawang,  only : pawang_type, pawang_init, pawang_free
- use m_pawrad,  only : pawrad_type, simp_gen, nderiv_gen, poisson
+ use m_pawrad,  only : pawrad_type, simp_gen, nderiv_gen, poisson, pawrad_deducer0
  use m_pawtab,  only : pawtab_type
  use m_paw_numeric, only : paw_derfc
 
@@ -118,6 +117,7 @@ CONTAINS  !=====================================================================
 !!     %shape_sigma=Sigma parameter in gaussian shape function
 !!     %tphi(mesh_size,basis_size)=PAW atomic pseudowavefunctions
 !!  pawxcdev=Choice of XC development (0=no dev. (use of angular mesh) ; 1=dev. on moments)
+!!  usekden= 1 is kinetic energy density has to be computed, 0 otherwise
 !!  xclevel=XC functional level (1=LDA, 2=GGA)
 !!
 !! OUTPUT
@@ -167,13 +167,11 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nphi,nsym,ntheta,&
-&                  pawang,pawrad,pawspnorb,pawtab,pawxcdev,xclevel,usepotzero)
-
- implicit none
+&                  pawang,pawrad,pawspnorb,pawtab,pawxcdev,xclevel,usekden,usepotzero)
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: gnt_option,lcutdens,lmix,mpsang,nphi,nsym,ntheta
+ integer,intent(in) :: gnt_option,lcutdens,lmix,mpsang,nphi,nsym,ntheta,usekden
  integer,intent(in) :: pawspnorb,pawxcdev,xclevel,usepotzero
  real(dp),intent(in) :: gsqcut_eff,hyb_range_fock
  type(pawang_type),intent(inout) :: pawang
@@ -187,14 +185,14 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
  integer :: basis_size,i0lm,i0ln,ij_size,il,ilm,ilmn,iln,iloop,iq,isel,isel1
  integer :: itypat,j0lm,j0lmn,j0ln,jl,jlm,jlmn,jln,klm,klm1
  integer :: klmn,klmn1,kln,kln1,l_size,ll,lm0,lmax,lmax1,lmin,lmin1,lmn2_size
- integer :: lmn_size,lmnmix,mesh_size,meshsz,mm,ntypat,usexcnhat,use_ls_ylm,use_ylm
+ integer :: lmn_size,lmnmix,mesh_size,meshsz,mm,nabgnt_option,ntypat,pw_mesh_size,usexcnhat,use_ls_ylm,use_ylm
  real(dp) :: dq,gnrm,intg,ql,ql1,rg,rg1,vh1,yp1,ypn
  character(len=500) :: message
 !arrays
  integer,allocatable :: indl(:,:),klm_diag(:),kmix_tmp(:)
  integer, ABI_CONTIGUOUS pointer :: indlmn(:,:)
  real(dp) :: tsec(2)
- real(dp),allocatable :: ff(:),gg(:),hh(:),indklmn_(:,:),intvhatl(:)
+ real(dp),allocatable :: der(:),ff(:),gg(:),hh(:),indklmn_(:,:),intvhatl(:)
  real(dp),allocatable :: rad(:),rgl(:,:),vhatijl(:,:),vhatl(:),work(:)
  real(dp),pointer :: eijkl(:,:)
 
@@ -203,7 +201,8 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
  DBG_ENTER("COLL")
 
  call timab(553,1,tsec)
-
+! if kinetic energy density is used, set nabgnt_option to 1 for nablagaunt computation 
+ nabgnt_option=0 ; if (usekden>=1) nabgnt_option=1
  ntypat=size(pawtab)
  if (size(pawrad)/=ntypat) then
    MSG_BUG('pawrad and pawtab should have the same size!')
@@ -222,8 +221,7 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
  use_ylm=0;if (pawxcdev==0) use_ylm=1
  use_ls_ylm=0;if (pawspnorb>0) use_ls_ylm=1
  call pawang_free(pawang)
- call pawang_init(pawang,gnt_option,mpsang-1,nphi,nsym,ntheta,pawxcdev,use_ls_ylm,use_ylm,xclevel)
-
+ call pawang_init(pawang,gnt_option,nabgnt_option,usekden,mpsang-1,nphi,nsym,ntheta,pawxcdev,use_ls_ylm,use_ylm,xclevel)
  usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
 
 !*******************
@@ -421,7 +419,55 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
    ABI_DEALLOCATE(kmix_tmp)
 
 !  ==================================================
-!  5- COMPUTE Qijl TERMS AND Sij MATRIX
+!  5- STORE SOME USEFUL QUANTITIES FROM PARTIAL WAVES
+
+   if (allocated(pawtab(itypat)%phiphj))  then
+     ABI_DEALLOCATE(pawtab(itypat)%phiphj)
+   end if
+   if (allocated(pawtab(itypat)%tphitphj))  then
+     ABI_DEALLOCATE(pawtab(itypat)%tphitphj)
+   end if
+   ABI_ALLOCATE(pawtab(itypat)%phiphj,(mesh_size,ij_size))
+   ABI_ALLOCATE(pawtab(itypat)%tphitphj,(mesh_size,ij_size))
+   do jln=1,basis_size
+     j0ln=jln*(jln-1)/2
+     do iln=1,jln
+       kln=j0ln+iln
+       pawtab(itypat)%phiphj(1:mesh_size,kln)=pawtab(itypat)%phi(1:mesh_size,iln)&
+&                                            *pawtab(itypat)%phi(1:mesh_size,jln)
+       pawtab(itypat)%tphitphj(1:mesh_size,kln)=pawtab(itypat)%tphi(1:mesh_size,iln)&
+&                                              *pawtab(itypat)%tphi(1:mesh_size,jln)
+     end do
+   end do
+
+   if (usekden==1)  then
+     pawtab(itypat)%has_nablaphi=1
+     pw_mesh_size=pawtab(itypat)%partialwave_mesh_size
+     if (allocated(pawtab(itypat)%nablaphi)) then
+       ABI_DEALLOCATE(pawtab(itypat)%nablaphi)
+     end if
+     ABI_ALLOCATE(pawtab(itypat)%nablaphi,(pw_mesh_size,basis_size))
+     if (allocated(pawtab(itypat)%tnablaphi)) then
+       ABI_DEALLOCATE(pawtab(itypat)%tnablaphi)
+     end if
+     ABI_ALLOCATE(pawtab(itypat)%tnablaphi,(pw_mesh_size,basis_size))
+     ABI_ALLOCATE(der,(pw_mesh_size))
+     do iln=1,basis_size
+       call nderiv_gen(der,pawtab(itypat)%phi(1:pw_mesh_size,iln),&
+&                      pawrad(itypat))
+       pawtab(itypat)%nablaphi(2:,iln)=der(2:) &
+&          -pawtab(itypat)%phi(2:pw_mesh_size,iln)/pawrad(itypat)%rad(2:pw_mesh_size)
+       call nderiv_gen(der,pawtab(itypat)%tphi(1:pw_mesh_size,iln),pawrad(itypat))
+       pawtab(itypat)%tnablaphi(2:,iln)=der(2:) &
+&          -pawtab(itypat)%tphi(2:pw_mesh_size,iln)/pawrad(itypat)%rad(2:pw_mesh_size)
+       call pawrad_deducer0(pawtab(itypat)%nablaphi,size(pawtab(itypat)%nablaphi),pawrad(itypat))
+       call pawrad_deducer0(pawtab(itypat)%tnablaphi,size(pawtab(itypat)%tnablaphi),pawrad(itypat))
+     end do
+     ABI_DEALLOCATE(der)
+   end if
+
+!  ==================================================
+!  6- COMPUTE Qijl TERMS AND Sij MATRIX
 
 !  Store some usefull quantities
    if (allocated(pawtab(itypat)%phiphj))  then
@@ -579,7 +625,7 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
 
 !  ==================================================
 !  7- COMPUTE gamma_ij TERMS
-!  corrections to get the background right
+!  Corrections to get the background right
 
    if (pawtab(itypat)%usepotzero==1) then
      if (allocated(pawtab(itypat)%gammaij))  then
@@ -674,8 +720,6 @@ end subroutine pawinit
 
 subroutine paw_gencond(Dtset,gnt_option,mode,call_pawinit)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: gnt_option
  logical,intent(out) :: call_pawinit
@@ -684,7 +728,7 @@ subroutine paw_gencond(Dtset,gnt_option,mode,call_pawinit)
 
 !Local variables-------------------------------
 !scalars
- integer,save :: gencond(9)=(/-1,-1,-1,-1,-1,-1,-1,-1,-1/)
+ integer,save :: gencond(10)=(/-1,-1,-1,-1,-1,-1,-1,-1,-1,-1/)
 
 ! *********************************************************************
 
@@ -692,19 +736,19 @@ subroutine paw_gencond(Dtset,gnt_option,mode,call_pawinit)
  select case (mode)
  case ("test")
 
-   if (gencond(1)/=Dtset%pawlcutd .or.gencond(2)/=Dtset%pawlmix  .or.&
-&   gencond(3)/=Dtset%pawnphi  .or.gencond(4)/=Dtset%pawntheta.or.&
-&   gencond(5)/=Dtset%pawspnorb.or.gencond(6)/=Dtset%pawxcdev.or.&
-&   gencond(7)/=Dtset%nsym     .or.gencond(8)/=gnt_option.or.&
-&   gencond(9)/=Dtset%usepotzero) call_pawinit = .True.
+   if (gencond(1)/=Dtset%pawlcutd  .or.gencond(2) /=Dtset%pawlmix  .or.&
+&      gencond(3)/=Dtset%pawnphi   .or.gencond(4) /=Dtset%pawntheta.or.&
+&      gencond(5)/=Dtset%pawspnorb .or.gencond(6) /=Dtset%pawxcdev .or.&
+&      gencond(7)/=Dtset%nsym      .or.gencond(8) /=gnt_option     .or.&
+&      gencond(9)/=Dtset%usepotzero.or.gencond(10)/=Dtset%usekden) call_pawinit = .True.
 
  case ("save")
     ! Update internal values
-   gencond(1)=Dtset%pawlcutd ; gencond(2)=Dtset%pawlmix
-   gencond(3)=Dtset%pawnphi  ; gencond(4)=Dtset%pawntheta
-   gencond(5)=Dtset%pawspnorb; gencond(6)=Dtset%pawxcdev
-   gencond(7)=Dtset%nsym     ; gencond(8)=gnt_option
-   gencond(9)=Dtset%usepotzero
+   gencond(1)=Dtset%pawlcutd  ; gencond(2) =Dtset%pawlmix
+   gencond(3)=Dtset%pawnphi   ; gencond(4) =Dtset%pawntheta
+   gencond(5)=Dtset%pawspnorb ; gencond(6) =Dtset%pawxcdev
+   gencond(7)=Dtset%nsym      ; gencond(8) =gnt_option
+   gencond(9)=Dtset%usepotzero; gencond(10)=Dtset%usekden
 
  case ("reset")
    gencond = -1

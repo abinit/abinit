@@ -10,9 +10,8 @@ udtset    1 5 #3 5
 ecut      10
 nband     4
 toldff    1.0d-8
-#nstep     8
- nstep    10  # Very strange : with nstep=8 on green-bb + g95, there is a problem with the allocations in nonlinear.F90
-              # With nstep=7 or nstep=9, or the present nstep=10, there is no problem ...
+nstep    10  
+              
 ixc       3
 diemac    2
 

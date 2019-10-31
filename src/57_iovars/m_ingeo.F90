@@ -27,12 +27,12 @@
 module m_ingeo
 
  use defs_basis
- use defs_abitypes
  use m_intagm_img
  use m_abicore
  use m_errors
  use m_atomdata
  use m_sort
+ use m_dtset
 
  use m_symtk,      only : mati3inv, chkorthsy, symrelrot, mati3det, symmetrize_rprimd, symmetrize_xred, symatm
  use m_spgbuilder, only : gensymspgr, gensymshub, gensymshub4
@@ -95,6 +95,7 @@ contains
 !! acell(3)=length of primitive vectors
 !! amu(ntypat)=mass of each atomic type
 !! bravais(11)=characteristics of Bravais lattice (see symlatt.F90)
+!! chrgat(natom)=target charge for each atom. Not always used, it depends on the value of constraint_kind
 !! genafm(3)=magnetic translation generator (in case of Shubnikov group type IV)
 !! iatfix(3,natom)=indices for atoms fixed along some (or all) directions
 !! jellslab=not zero if jellslab keyword is activated
@@ -140,7 +141,7 @@ contains
 !!
 !! SOURCE
 
-subroutine ingeo (acell,amu,dtset,bravais,&
+subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 & genafm,iatfix,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
 & msym,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
 & nucdipmom,nzchempot,pawspnorb,&
@@ -163,6 +164,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  integer,intent(inout) :: symafm(msym) !vz_i
  integer,intent(inout) :: symrel(3,3,msym) !vz_i
  integer,intent(out) :: typat(natom)
+ real(dp),intent(inout) :: chrgat(natom)
  real(dp),intent(inout) :: nucdipmom(3,natom)
  real(dp),intent(in) :: ratsph(ntypat)
  real(dp),intent(inout) :: spinat(3,natom)
@@ -564,6 +566,13 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  if(tread==1) chkprim=intarr(1)
 
  if(nobj/=0)then
+
+!  chrgat is read for each atom, from 1 to natom
+   call intagm(dprarr,intarr,jdtset,marr,natom,string(1:lenstr),'chrgat',tread,'DPR')
+   if(tread==1) then
+     chrgat(1:natom) = dprarr(1:natom)
+   end if
+
 !  Spinat is read for each atom, from 1 to natom
    call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'spinat',tread,'DPR')
    if(tread==1) then
@@ -606,6 +615,10 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
  else ! nobj==0
 
+!  chrgat is read for each irreducible atom, from 1 to natrd
+   call intagm(dprarr,intarr,jdtset,marr,natrd,string(1:lenstr),'chrgat',tread,'DPR')
+   if(tread==1)chrgat(1:natrd) = dprarr(1:natrd)
+
 !  Spinat is read for each irreducible atom, from 1 to natrd
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'spinat',tread,'DPR')
    if(tread==1)spinat(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , (/3,natrd/) )
@@ -624,6 +637,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
              iatom_supercell = iatom_supercell + 1
              xcart(:,iatom_supercell) = xcart_read(:,iatom) &
 &            + matmul(rprimd_read,(/i1-1,i2-1,i3-1/))
+             chrgat(iatom_supercell) = chrgat(iatom)
              spinat(1:3,iatom_supercell) = spinat(1:3,iatom)
              typat(iatom_supercell) = typat_read(iatom)
            end do
@@ -827,7 +841,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
      if(natom/=natrd.and.multiplicity == 1)then
 !      Generate the full set of atoms from its knowledge in the irreducible part.
-       call fillcell(natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym,typat,xred)
+       call fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym,typat,xred)
      end if
 
 !    Check whether the symmetry operations are consistent with the lattice vectors
@@ -892,7 +906,8 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
 
        call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&       nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,nucdipmom)
+&       nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+&       chrgat=chrgat,nucdipmom=nucdipmom)
 
 !      If the tolerance on symmetries is bigger than 1.e-8, symmetrize the atomic positions
        if(tolsym>1.00001e-8)then
@@ -1223,11 +1238,11 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
  character(len=500) :: message
 !arrays
  integer :: objarf(3),objbrf(3)
- integer,allocatable :: objaat(:),objbat(:),vaclst(:)
+ integer,allocatable :: objaat(:),objbat(:),typat_full(:),vaclst(:)
  real(dp) :: axis2(3),axis3(3),axisa(3),axisb(3),objaax(6),objaro(4),objatr(12)
  real(dp) :: objbax(6),objbro(4),objbtr(12),parall(3),perpen(3),rotated(3)
  real(dp) :: vectora(3),vectorb(3)
- real(dp),allocatable :: typat_full(:),xcart_full(:,:)
+ real(dp),allocatable :: xcart_full(:,:)
  integer,allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:)
 
@@ -1819,6 +1834,7 @@ end subroutine ingeobld
 !! with the symmetry operations and the atoms from the asymetric unit cell.
 !!
 !! INPUTS
+!!  chrgat(natom)=target charge for each atom. Not always used, it depends on the value of constraint_kind
 !!  natrd = number of atoms in the assymetric unit cell
 !!  natom = total number of atoms (to be checked)
 !!  nsym = number of symmetry operations
@@ -1852,7 +1868,7 @@ end subroutine ingeobld
 !!
 !! SOURCE
 
-subroutine fillcell(natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym,typat,xred)
+subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym,typat,xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -1862,7 +1878,7 @@ subroutine fillcell(natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym
  integer,intent(inout) :: typat(natom)
  real(dp),intent(in) :: tolsym
  real(dp),intent(in) :: tnons(3,nsym)
- real(dp),intent(inout) :: nucdipmom(3,natom),spinat(3,natom),xred(3,natom)
+ real(dp),intent(inout) :: chrgat(natom),nucdipmom(3,natom),spinat(3,natom),xred(3,natom)
 
 !Local variables ------------------------------
 !scalars
@@ -1871,7 +1887,7 @@ subroutine fillcell(natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym
 !arrays
  integer :: bcktypat(nsym*natrd)
  real(dp) :: bckat(3),bcknucdipmom(3,nsym*natrd)
- real(dp) :: bckspinat(3,nsym*natrd),bckxred(3,nsym*natrd)
+ real(dp) :: bckchrgat(nsym*natrd),bckspinat(3,nsym*natrd),bckxred(3,nsym*natrd)
 
 ! *************************************************************************
 
@@ -1923,6 +1939,7 @@ subroutine fillcell(natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym
        curat=curat+1
        bckxred(:,curat)=bckat
        bcktypat(curat)=typat(jj)
+       bckchrgat(curat)=chrgat(jj)
        bcknucdipmom(:,curat)=nucdipmom(:,jj)
        bckspinat(:,curat)=spinat(:,jj)*symafm(ii)
      end if
@@ -1958,6 +1975,7 @@ subroutine fillcell(natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym
 !Assignment of symmetry to xred
  xred(:,1:natom)=bckxred(:,1:natom)
  typat(1:natom)=bcktypat(1:natom)
+ chrgat(1:natom)=bckchrgat(1:natom)
  nucdipmom(1:3,1:natom)=bcknucdipmom(1:3,1:natom)
  spinat(1:3,1:natom)=bckspinat(1:3,1:natom)
 

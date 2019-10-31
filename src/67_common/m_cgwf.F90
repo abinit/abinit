@@ -27,13 +27,13 @@
 module m_cgwf
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_xmpi
  use m_abicore
  use m_cgtools
  use m_efield
 
+ use defs_abitypes,   only : MPI_type
  use m_time,          only : timab
  use m_numeric_tools, only : rhophi
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_copy, &
@@ -159,8 +159,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &                nspinor,nsppol,ortalg,prtvol,pwind,&
 &                pwind_alloc,pwnsfac,pwnsfacq,quit,resid,subham,subovl,&
 &                subvnlx,tolrde,tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: berryopt,chkexit,icg,igsc,ikpt,inonsc,isppol
@@ -1392,8 +1390,6 @@ end subroutine cgwf
 subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
 &  efield_dot,iline,nkpt,nstr,hel,phase_end,phase_init,sdeg,sinth,thetam)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iline,nkpt
@@ -1708,8 +1704,6 @@ end subroutine linemin
 subroutine etheta(bcut,chc,detovc,detovd,dhc,dhd,efield_dot,e0,e1,&
 &    hel,nkpt,nstr,sdeg,theta)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpt
@@ -1837,8 +1831,6 @@ end subroutine etheta
 subroutine mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
 &                    isubh,isubo,mcg,mgsc,nband_k,nbdblock,npw_k,&
 &                    nspinor,subham,subovl,subvnlx,use_subovl,use_subvnlx,me_g0)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2076,10 +2068,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
 &                          gs_hamk,iband,icg,ikpt,isppol,mband,mcg,mcgq,mkgq,mpi_enreg,mpw,natom,nkpt,&
 &                          npw,npwarr,nspinor,nsppol,pwind,pwind_alloc,pwnsfac,pwnsfacq)
 
-  implicit none
-
   !Arguments ------------------------------------
-
   !scalars
   integer,intent(in) :: iband,icg,ikpt,isppol,mband,mcg,mcgq
   integer,intent(in) :: mkgq,mpw,natom,nkpt,npw,nspinor,nsppol,pwind_alloc

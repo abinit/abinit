@@ -11,9 +11,9 @@ This tutorial aims at showing how to compute atomic datasets for the Projector A
 You will learn how to generate these atomic datasets and how to control their softness and transferability.
 You already should know how to use ABINIT in the PAW case (see the tutorial [PAW1](paw1) ).
 
-[TUTORIAL_README]
-  
 This tutorial should take about 2h00.
+
+[TUTORIAL_README]
 
 ## 1. The PAW atomic dataset - introduction
   
@@ -82,7 +82,7 @@ correctly the generation of PAW atomic datasets:
 for the other tutorials. Why not `Work_paw2`?*
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work_paw2
 cd Work_paw2
 ```
@@ -567,8 +567,8 @@ wave basis_ needed to reach a given accuracy. If the _cut-off energy_ defining t
 _plane waves basis_ is too high (higher than 20 Hartree),
 some changes have to be made in the input file.
  
-Copy *\$ABI_TUTORIAL/Input/tpaw2_x.files* and
-*\$ABI_TUTORIAL/Input/tpaw2_1.in* in your working directory.
+Copy *\$ABI_TESTS/tutorial/Input/tpaw2_x.files* and
+*\$ABI_TESTS/tutorial/Input/tpaw2_1.in* in your working directory.
 Edit *tpaw2_1.in*, and activate the 8 datasets.
 Run ABINIT with them.
 
@@ -707,7 +707,7 @@ Results are below:
 
 The last step is to examine carefully the physical quantities obtained with our PAW dataset.
 
-Copy *\$ABI_TUTORIAL/Input/tpaw2_2.in* in your working directory.
+Copy *\$ABI_TESTS/tutorial/Input/tpaw2_2.in* in your working directory.
 Edit it, activate the 8 datasets,
 change *tpaw2_x.files* to use *\$ABI_HOME/doc/tutorial/paw2_assets/Ni.GGA-PBE-paw.abinit.rrkj* psp file
 (obtained from *Ni.atompaw.input2 file*).
@@ -835,7 +835,7 @@ with:
 
 Run ATOMPAW.
 You get a new psp file for ABINIT.
-Run ABINIT with it using the *$ABI_TUTORIAL/Input/tpaw2_1.in* file.
+Run ABINIT with it using the *$ABI_TESTS/tutorial/Input/tpaw2_1.in* file.
 Compare the results with those obtained in section 7.
 
 You can try several values for $g_{max}$ (keeping $\frac{\gamma}{g_{max}}$ and $W$ constant) and

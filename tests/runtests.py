@@ -525,16 +525,16 @@ unexpected behaviour if the pickle database is not up-to-date with the tests ava
     # Run the tested selected by the user.
     if omp_nthreads == 0:
         ncpus_used = mpi_nprocs * py_nprocs
-        msg = ("Running %s test(s) with MPI_procs=%s, py_nprocs=%s..."
+        msg = ("Running %s test(s) with MPI_procs: %s, py_nprocs: %s"
                % (test_suite.full_length, mpi_nprocs, py_nprocs))
     else:
         ncpus_used = mpi_nprocs * omp_nthreads * py_nprocs
-        msg = ("Running %s test(s) with MPI_nprocs=%s, OMP_nthreads=%s, py_nprocs=%s..."
+        msg = ("Running %s test(s) with MPI_nprocs: %s, OMP_nthreads: %s, py_nprocs: %s"
                % (test_suite.full_length, mpi_nprocs, omp_nthreads, py_nprocs))
     cprint(msg, "yellow")
 
     if ncpus_used < 0.3 * ncpus_detected:
-        msg = ("[TIP] runtests.py is using %s CPUs but your architecture has %s CPUs\n"
+        msg = ("[TIP] runtests.py is using %s CPUs but your architecture has %s CPUs (including Hyper-Threading if Intel)\n"
               "You may want to use python processes to speed up the execution\n"
               "Use `runtests -jNUM` to run with NUM processes" % (ncpus_used, ncpus_detected))
         cprint(msg, "blue")
