@@ -852,7 +852,7 @@ with_fft_libs="-L/opt/local/lib -lfftw3 -lfftw3f"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="custom+scalapack"
+with_linalg_flavor="custom"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
@@ -860,7 +860,7 @@ with_linalg_incs="-I/opt/local/include"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/opt/local/lib -lscalapack -lopenblas"
+with_linalg_libs="-L/opt/local/lib -lopenblas"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -900,7 +900,7 @@ with_linalg_libs="-L/opt/local/lib -lscalapack -lopenblas"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="libxc+atompaw"
+with_dft_flavor="libxc+wannier90+atompaw"
 
                        # ------------------------------ #
 
@@ -940,15 +940,15 @@ with_libxc_libs="-L/opt/local/lib -lxc"
 
 # Full path to the Wannier90 executables (default is unset)
 #
-#with_wannier90_bins="/usr/local/bin"
+with_wannier90_bins="/opt/local/bin"
 
 # Include flags for the Wannier90 library (default is unset)
 #
-#with_wannier90_incs="-I/usr/local/include/wannier90"
+with_wannier90_incs="-I/opt/local/include"
 
 # Link flags for the Wannier90 library (default is unset)
 #
-#with_wannier90_libs="-L${HOME}/lib/wannier90 -lwannier90"
+with_wannier90_libs="-L/opt/local/lib -lwannier"
 
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #
