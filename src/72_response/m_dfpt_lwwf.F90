@@ -3594,9 +3594,9 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
  real(dp),allocatable :: dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:)
  real(dp),allocatable :: frwfdq_bks(:,:,:,:,:,:,:)
- real(dp),allocatable :: gh1dqc(:,:),gvloc1dqc(:,:),gvnl1dqc(:,:)
- real(dp),allocatable :: ghatdisdqdq_c0m(:,:,:,:,:,:)
- real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg1_k(:,:),ph3d(:,:,:),ph3d1(:,:,:)
+ real(dp),allocatable :: gh1dqc(:,:),gh1dqpkc(:,:),gvloc1dqc(:,:),gvnl1dqc(:,:)
+ real(dp),allocatable :: c0_ghatdisdqdq_pk_c0(:,:,:,:,:,:)
+ real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg1_k(:,:),kpg_pk(:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1dq(:,:,:,:), dum_vpsp(:)
  real(dp),allocatable :: vpsp1(:),vpsp1dq(:), dum_ylmgr1_k(:,:,:),part_ylmgr_k(:,:,:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
@@ -3705,12 +3705,18 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
  ABI_DEALLOCATE(part_ylmgr_k)
 
 !-----------------------------------------------------------------------------------------------
-!  2nd q-gradient of atomic displacement 1st order hamiltonian projected on gs wfs: 
-!  < g | H^{\tau_{\kappa\alpha}_{\gamma\delta} | u_{i,k}^{(0)} >
+!  2nd q-gradient of atomic displacement 1st order hamiltonian · momentum operator : 
+!  <u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\gamma\delta} (k+G)_{\beta} | u_{i,k}^{(0)} >
 !-----------------------------------------------------------------------------------------------
 
 !Specific allocations
- ABI_ALLOCATE(ghatdisdqdq_c0m,(2,npw_k*dtset%nspinor,nband_k,3,3,natpert))
+ ABI_ALLOCATE(gh1dqpkc,(2,npw_k*dtset%nspinor))
+ ABI_ALLOCATE(c0_ghatdisdqdq_pk_c0,(2,nband_k,3,3,3,natpert))
+
+!Generate k+G vectors
+ nkpg=3
+ ABI_ALLOCATE(kpg_pk,(npw_k,nkpg)) 
+ call mkkpg(kg_k,kpg_pk,kpt,nkpg,npw_k)  
 
 !LOOP OVER ATOMIC DISPLACEMENT PERTURBATIONS
  do iatpert=1,natpert
@@ -3753,10 +3759,22 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
          !Read ket ground-state wavefunctions
          cwave0i(:,:)=cg(:,1+(iband-1)*npw_k*dtset%nspinor+icg:iband*npw_k*dtset%nspinor+icg)
 
-        !Compute < g |H^{\tau_{\kappa\alpha}}_{\gamma\delta} | u_{i,k}^{(0)} >
-        call getgh1dqc(cwave0i,dum_cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq, &
-        & idir,ipert,mpi_enreg,optlocal,optnl,iq1grad,rf_hamkq,qdir2=iq2grad)
-        ghatdisdqdq_c0m(:,:,iband,iq1grad,iq2grad,iatpert)=gh1dqc(:,:)
+         !Compute < g |H^{\tau_{\kappa\alpha}}_{\gamma\delta} | u_{i,k}^{(0)} >
+         call getgh1dqc(cwave0i,dum_cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq, &
+         & idir,ipert,mpi_enreg,optlocal,optnl,iq1grad,rf_hamkq,qdir2=iq2grad)
+
+         !LOOP OVER ONE OF THE STRAIN DIRECTIONS
+         do ka=1,3
+           do ipw=1,npw_k
+             gh1dqpkc(:,ipw)=gh1dqc(:,ipw)*kpg_pk(ipw,ka)
+           end do
+
+           call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cwave0i,gh1dqpkc, &
+         & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+
+           c0_ghatdisdqdq_pk_c0(1,iband,ka,iq1grad,iq2grad,iatpert)=dotr
+           c0_ghatdisdqdq_pk_c0(2,iband,ka,iq1grad,iq2grad,iatpert)=doti
+         end do 
 
        end do !iband
 
@@ -3780,12 +3798,16 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 
 !Deallocations
  ABI_DEALLOCATE(dum_cwaveprj)
+ ABI_DEALLOCATE(gh1dqc)
+ ABI_DEALLOCATE(gh1dqpkc)
  ABI_DEALLOCATE(gvloc1dqc)
  ABI_DEALLOCATE(gvnl1dqc)
  ABI_DEALLOCATE(vpsp1dq)
  ABI_DEALLOCATE(vlocal1dq)
  ABI_DEALLOCATE(dum_vpsp)
  ABI_DEALLOCATE(dum_vlocal)
+ ABI_DEALLOCATE(kpg_pk)
+ ABI_DEALLOCATE(cwave0i)
 
 !--------------------------------------------------------------------------------------
 ! Acumulates the three frozen wf terms of the q-gradient of the internal strain
@@ -3795,60 +3817,29 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
  ABI_ALLOCATE(frwfdq_bks,(2,nband_k,matom,3,3,3,nq1grad))
 ! fac=pi*pi/ucvol
 
-!Generate k+G vectors
- nkpg=3;                                                                                              
- ABI_ALLOCATE(kpg_k,(npw_k,nkpg))                                                                    
- call mkkpg(kg_k,kpg_k,kpt,nkpg,npw_k)  
 
 !LOOP OVER ATOMIC DISPLACEMENT PERTURBATIONS
  do iatpert= 1, natpert
    iatom=pert_atdis(1,iatpert)
    iatdir=pert_atdis(2,iatpert)
   
-!  Determination of the atom type
-!   ia1=0
-!   itypat=0
-!   do ii=1,dtset%ntypat
-!     ia1=ia1+nattyp(ii)
-!     if(atindx(iatom)<=ia1.and.itypat==0)itypat=ii
-!   end do
-
    !LOOP OVER STRAIN PERTURBATIONS
    do istrpert= 1, nstrpert
      ka=pert_strain(3,istrpert)
      kb=pert_strain(4,istrpert)
 
-!     delad=zero ; if (iatdir==kb) delad=one
-!     delbd=zero ; if (ka==kb) delbd=one
-
      !LOOP OVER Q1-GRADIENT
      do iq1grad=1,3
-
-!       delag=zero ; if(iatdir==iq1grad) delag=one
-!       delbg=zero ; if(ka==iq1grad) delbg=one
 
        !LOOP OVER BANDS
        do iband=1,nband_k
 
          if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
 
-         !First complete the term involving the 2nd q-gradient of atdis Hamiltonian:
-         !<u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\gamma\delta} (k+G)_{\beta} | u_{i,k}^{(0)} >
-         !--------------------------------------------------------------------------
-         !Read ket ground-state wavefunctions
-         cwave0i(:,:)=cg(:,1+(iband-1)*npw_k*dtset%nspinor+icg:iband*npw_k*dtset%nspinor+icg)
-
-         !LOOP OVER PLANE-WAVES
-         do ipw=1,npw_k
-           gh1dqc(:,ipw)=ghatdisdqdq_c0m(:,ipw,iband,iq1grad,kb,iatpert)*kpg_k(ipw,ka)
-         end do
-
-         call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cwave0i,gh1dqc, &
-       & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-
-         !Accumulate this term. Take here into account the -i·(-i)^{\dagger} prefactors.
-         frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)=dotr
-         frwfdq_bks(2,iband,iatom,iatdir,ka,kb,iq1grad)=-doti
+         !First accumulate the term involving the 2nd q-gradient of atdis Hamiltonian:
+         !Take here into account the -i·(-i)^{\dagger} prefactors.
+         frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)=c0_ghatdisdqdq_pk_c0(1,iband,ka,iq1grad,kb,iatpert)
+         frwfdq_bks(2,iband,iatom,iatdir,ka,kb,iq1grad)=-c0_ghatdisdqdq_pk_c0(2,iband,ka,iq1grad,kb,iatpert)
 
          !Next complete the other two terms involving the 1st q-gradient of atdis Hamiltonian:
          !<u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\gamma} \frac{\delta_{\beta\delta}}{2} | u_{i,k}^{(0)} >
@@ -3908,8 +3899,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 
 !Deallocations
  ABI_DEALLOCATE(c0_hatdisdq_c0_bks)
- ABI_DEALLOCATE(ghatdisdqdq_c0m)
- ABI_DEALLOCATE(gh1dqc)
+ ABI_DEALLOCATE(c0_ghatdisdqdq_pk_c0)
  ABI_DEALLOCATE(frwfdq_bks)
 
 
