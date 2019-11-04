@@ -248,6 +248,12 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    MSG_BUG(msg)
  end if
 
+ if(dtset%prtvol>2)then
+   write(msg,'(2a,i5,2x,a,3f9.5)')ch10,' Quadrupoles calculation; k pt #',ikpt,'k=',&
+&   kpt(:)
+   call wrtout(std_out,msg,'PERS')
+ end if
+
 !Additional definitions
  tim_getgh1c=0
 
@@ -1135,6 +1141,12 @@ subroutine dfpt_flexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k
    MSG_BUG(msg)
  end if
 
+ if(dtset%prtvol>2)then
+   write(msg,'(2a,i5,2x,a,3f9.5)')ch10,' Electronic FxE tensor calculation; k pt #',ikpt,'k=',&
+&   kpt(:)
+   call wrtout(std_out,msg,'PERS')
+ end if
+
 !Additional definitions
  tim_getgh1c=0
 
@@ -2014,6 +2026,12 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 
  DBG_ENTER("COLL")
 
+ if(dtset%prtvol>2)then
+   write(msg,'(2a,i5,2x,a,3f9.5)')ch10,' First q-moment IFCs calculation; k pt #',ikpt,'k=',&
+&   kpt(:)
+   call wrtout(std_out,msg,'PERS')
+ end if
+
 !Additional definitions
  tim_getgh1c=0
 
@@ -2673,6 +2691,12 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+
+ if(dtset%prtvol>2)then
+   write(msg,'(2a,i5,2x,a,3f9.5)')ch10,' First q-moment internal strain calculation; k pt #',ikpt,'k=',&
+&   kpt(:)
+   call wrtout(std_out,msg,'PERS')
+ end if
 
 !Additional definitions
  tim_getgh1c=0
