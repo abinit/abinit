@@ -5,8 +5,8 @@ authors: MG, XG
 # HowTo use git and the gitlab server
 
 This page is intended as a quick reference to *git* and its integration
-with the [ABINIT gitlab server](https://gitlab.abinit.org/).
-If you are not familiar with *git*, we would strongly advise to watch this youtube tutorial:
+with the Abinit project.
+If you are not familiar with *git*, we would strongly advise to watch this tutorial:
 
 <iframe width="1384" height="629" src="https://www.youtube.com/embed/HVsySz-h9r4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
@@ -20,24 +20,15 @@ For further information about *git*, please consult the [official documentation]
 
     See also this page with the [most commonly used git tips and tricks](https://github.com/git-tips/tips)
 
-In the next sections, we explain how to configure *git* to interoperate with the [ABINIT gitlab server](https://gitlab.abinit.org/).
-It is assumed you are already familiar with the the *shell*, *ssh* and basic *git* commands.
-We also suppose you already have a account on the internal gitlab server (please contact Jean-Michel Beuken to create an account).
+In the next sections, we explain how to configure *git* to interoperate with the 
+our [ABINIT gitlab server](https://gitlab.abinit.org/).
+It is assumed you you already have an account on our **internal** gitlab server 
+Note that having an account on gitlab.com or github.com is not enough since we run our own instance 
+of the gilab server. You need to contact Jean-Michel to have an account created for your.
+    
 
 ## Initial configuration
 
-To be able to push your contributions to the Abinit Forge, you need to add the
-following section to your *~/.ssh/config* file
-
-```
-Host abinit-forge
-    HostName gitlab.abinit.org
-    User git
-    ServerAliveInterval 52
-    Compression yes
-```
-
-so that one can use the *abinit-forge* hostname to *clone*, *pull*, and *push* to your repository.
 If this is the very first time you use *git*, please set the following global parameters before doing anything else:
 
 ```sh
@@ -52,17 +43,65 @@ git config --global merge.conflictstyle "diff3"
 
 Replace *Firstname*, *Lastname*, *someone@someserver.somedomain*, and *my_preferred_editor*,
 by your respective first name, last name, email address, and preferred editor.
+
+To be able to **push your contributions** to the Abinit Forge, you need to add the
+following section to your *~/.ssh/config* file
+
+```
+Host abinit-forge
+HostName gitlab.abinit.org
+    User git
+    ServerAliveInterval 52
+    Compression yes
+```
+
+so that one can use the **abinit-forge** hostname to **clone**, **pull**, and **push** to your repository.
+
+For further info, please consult the [official documention](https://gitlab.abinit.org/help/ssh/README.md)
+
 To clone your repository, execute:
 
     git clone abinit-forge:DEVELOPER/abinit
 
 where DEVELOPER must be replaced by your Abinit Forge login.
-<!--
-If you had already cloned your repository before setting SSH and want to benefit from this new configuration,
-just go to the top directory of your Abinit working tree and type:
-    git remote set-url origin abinit-forge:DEVELOPER/abinit
--->
-Every ABINIT developer has his/her specific gitlab **user_id** e.g. *gonze*.
+
+In order to avoid typing your password every time you issue a command that accesses gitlab,
+you have to introduce your public keys in your profile.
+See <https://gitlab.abinit.org/profile/keys>.
+On your local machine, generate a RSA ssh key **WITHOUT** passphrase:
+
+    ssh-keygen -t rsa
+
+and call it *id_rsa_gitlab*. Then add a section in the *~/.ssh/config file*:
+
+```
+host gitlab
+  Hostname gitlab.abinit.org
+  User git
+  KeepAlive yes
+  IdentityFile ~/.ssh/id_rsa_gitlab
+```
+
+Finally, copy the public key *id_rsa_gitlab.pub* on gitlab.
+Now, you can use (on your local machine) the following syntax:
+
+    git clone gitlab:user_id/abinit.git
+
+instead of:
+
+    git clone git@gitlab.abinit.org:user_id/abinit.git
+
+To be sure the key is proposed each time git calls ssh, you can use ssh-agent:
+
+    ssh-agent # this starts the agent, and provides the process id
+    # execute the 3 lines of commands that ssh-agent proposes, e.g.
+    SSH_AUTH_SOCK=/tmp/ssh-ngsERHER3K1HS/agent.15589; export SSH_AUTH_SOCK;
+    SSH_AGENT_PID=15590; export SSH_AGENT_PID;
+    echo Agent pid 15590;
+    ssh add ~/.ssh/id_rsa_gitlab # add the corresponding ssh key for gitlab
+
+
+Every developer has his/her specific gitlab **user_id** e.g. *gonze*.
 An additional *virtual* developer, called **trunk**, is also defined.
 <!--
 ===== Standard names (projects, ID, branches) =====
@@ -77,18 +116,6 @@ so that git finds it when it runs ssh.
 -->
 You have by default a **master** branch and a **develop** branch in your repo,
 but it is also possible to create and work in other branches.
-
-!!! important
-
-    Note that, according to the [gitflow branching model](http://nvie.com/posts/a-successful-git-branching-model),
-    the **master** branch will be of little use for the *physical* developers (including you)
-    while the **develop** and **release-*** branches will be quite important for normal developments.
-    In a nutshell, new developments are always merged in **trunk/develop** while **trunk/master** contains
-    the stable version. Finally, **release-*** branches are mainly used for bug fixes and minor changes
-    that should be included in the next release.
-
-
-![](https://miro.medium.com/max/1400/1*9yJY7fyscWFUVRqnx0BM6A.png)
 
 To clone from the gitlab repository to your local repository, the recommended command is:
 
@@ -124,12 +151,24 @@ For pushing, the first time, use:
 You are able to create your own additional branches, either locally or on gitlab.
 The name is your own choice.
 
+
+!!! important
+
+    Note that, according to the [gitflow branching model](http://nvie.com/posts/a-successful-git-branching-model),
+    the **master** branch will be of little use for the *physical* developers (including you)
+    while the **develop** and **release-*** branches will be quite important for normal developments.
+    In a nutshell, new developments are always merged in **trunk/develop** while **trunk/master** contains
+    the stable version. Finally, **release-** branches are mainly used for bug fixes and minor changes
+    that should be included in the next release.
+
+    ![](https://miro.medium.com/max/1400/1*9yJY7fyscWFUVRqnx0BM6A.png)
+
 ### Git branches
 
 In the ABINIT + git workflow:
 
   * In order to be merged in the trunk, the branch has to be **on-track**, as explained later
-  * You have to issue a "merge request" on gitlab (usually to *trunk/develop*).
+  * You have to issue a "merge request" on gitlab (usually to **trunk/develop**).
   * By default, all branches pushed on gitlab might be tested on-demand by the user.
   * Only branches that are **on-track** and that have succeeded (or passed) all the automatic tests
     are considered for merge (as was the case previously).
@@ -246,79 +285,8 @@ If, on the contrary, a new branch (e.g. a release branch, let's says 8.8 to fix 
 
 That's it! You can now make modifications in your release-8.8, then issue a merge request to the trunk/release-8.8.
 
-### Additional info: how to not mess with your branches?
-
-To see which branches are present in your current repository, use:
-
-    git show-branch -a
-
-documented [here](https://git-scm.com/docs/git-show-branch).
-
-This should also list the remotes (if not add -r). An example output:
-
-```
-* [develop] Merge branch 'develop' of gitlab:trunk/abinit into develop
- ! [master] Minor modif, to initialize v8.7.3 modified:   KNOWN_PROBLEMS
-  ! [origin/HEAD] Minor modif, to initialize v8.7.3 modified:   KNOWN_PROBLEMS
-   ! [origin/develop] Merge branch 'develop' of gitlab:trunk/abinit into develop
-    ! [origin/master] Minor modif, to initialize v8.7.3 modified:   KNOWN_PROBLEMS
-     ! [trunk/develop] Import inside gitlab develop, the modifications from v8.6.2 to v8.6.3
-      ! [trunk/master] Minor modif, to initialize v8.7.3 modified:   KNOWN_PROBLEMS
-```
-
-The syntax is compact but a bit barbaric: the first section gives you the branches which are actually present,
-with a star for the one currently checked out. The other branches are offset by 1 space.
-
-```
--  -    [develop] Merge branch 'develop' of gitlab:trunk/abinit into develop
-*  + +  [trunk/develop] Import inside gitlab develop, the modifications from v8.6.2 to v8.6.3
-```
-
-The second section shows commits and tell you the relation between the branches.
-Commits are marked with a + in each column for each branch they are included in, and merges with a -.
-Note that the master branches are never used, the top commit is a merge of trunk into the current develop,
-and the second commit is contained in the currently active, the origin/develop (of which it is just a clone),
-and the trunk/develop branches.
-
-### Additional info: Setup of the SSH environment
-
-In order to avoid typing your password every time you issue a command that accesses gitlab,
-you have to introduce your public keys in your profile.
-See <https://gitlab.abinit.org/profile/keys>.
-On your local machine, generate a RSA ssh key **WITHOUT** passphrase:
-
-    ssh-keygen -t rsa
-
-and call it *id_rsa_gitlab*. Then add a section in the *~/.ssh/config file*:
-
-```
-  host gitlab
-    Hostname gitlab.abinit.org
-    User git
-    KeepAlive yes
-    IdentityFile ~/.ssh/id_rsa_gitlab
-```
-
-Finally, copy the public key *id_rsa_gitlab.pub* on gitlab.
-Now, you can use (on your local machine) the following syntax:
-
-    git clone gitlab:user_id/abinit.git
-
-instead of:
-
-    git clone git@gitlab.abinit.org:user_id/abinit.git
-
-To be sure the key is proposed each time git calls ssh, you can use ssh-agent:
-
-    ssh-agent # this starts the agent, and provides the process id
-    # execute the 3 lines of commands that ssh-agent proposes, e.g.
-    SSH_AUTH_SOCK=/tmp/ssh-ngsERHER3K1HS/agent.15589; export SSH_AUTH_SOCK;
-    SSH_AGENT_PID=15590; export SSH_AGENT_PID;
-    echo Agent pid 15590;
-    ssh add ~/.ssh/id_rsa_gitlab # add the corresponding ssh key for gitlab
-
 <!--
-
+### Additional info: Setup of the SSH environment
 ## How to clone your repository with git and track `trunk`
 
 To clone your repository on your `localhost`:
@@ -351,5 +319,4 @@ To push to the gilab server:
 !!! important
 
     gitflow: You should always send pull requests to trunk/develop
-
 -->

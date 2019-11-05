@@ -40,8 +40,10 @@ def my_unicode(s):
 
 def escape(text, tag=None, cls=None):
     """Escape HTML entities in ``text`` string. Enclose new text in ``tag`` if tag with class ``cls``."""
-    import cgi
-    text = cgi.escape(text, quote=True)
+    #import cgi
+    #text = cgi.escape(text, quote=True)
+    import html
+    text = html.escape(text, quote=True)
     if tag:
         text = '<{tag} class="{cls}">\n{text}\n</{tag}>\n'.format(tag=tag, text=text, cls=cls if cls else "")
     return text
@@ -855,9 +857,9 @@ The bibtex file is available [here](../abiref.bib).
 
         tutorial_readme = """
 
-!!! note 
+!!! note
 
-    Supposing you made your own install of ABINIT, the input files to run the examples 
+    Supposing you made your own install of ABINIT, the input files to run the examples
     are in the *~abinit/tests/* directory where *~abinit* is the absolute path of the abinit top-level directory.
     If you have NOT made your own install, ask your system administrator where to find the package, especially the executable and test files.
 

@@ -4,45 +4,40 @@ authors: MG, XG
 
 # HowTo guide for developers
 
-This page is intended as a quick reference to solve problems commonly encountered when developing in Abinit.
+This page is intended as a quick reference to solve some of the problems
+that are commonly encountered when developing within the Abinit project.
 
 ## How to generate the configure script via *makemake*
 
-Abinit uses the standard `configure && make` approach to build the application from source.
-Note, however, that the developmental version does not contain the `configure` script
-because the script is automatically generated using python and configuration files
-hosted in the `~abinit/config` directory.
-To generate the `configure` script and other files required by the build system,, execute the `makemake` python script
-with:
+Abinit uses the standard **configure && make** [approach](https://thoughtbot.com/blog/the-magic-behind-configure-make-make-install)
+to build from source.
+Note, however, that the developmental version does not contain the *configure* script.
+To generate the *configure* script and the other files required by the build system,
+execute **makemake** with:
 
     cd ~abinit
     ./config/scripts/makemake
 
-In order to run `makemake`, you will need a recent version of the python interpreter as well as
+In order to run *makemake*, you will need a recent version of the python interpreter as well as
 [m4](https://www.gnu.org/software/m4/), [autoconf](https://www.gnu.org/software/autoconf/),
 and [automake](https://www.gnu.org/software/automake/).
-If these tools are not installed on your machine, you need to compile and install from source or use
+If these tools are not installed on your machine, you need to compile them from source or use
 your preferred package manager to install them.
 I usually use the [conda](https://docs.conda.io/en/latest/) package manager and:
 
-    conda install m4 autoconf automake
+    conda install m4 autoconf automake -c conda-forge
 
 !!! important
 
     Remember to run *makemake* every time you add/remove a Fortran file or a new directory or you
     change parts the buildsystem *i.e.* the files in *~abinit/config*.
 
-A detailed description of the configuration options supported by the build system is given in this guide by Marc:
-
-<embed src="https://wiki.abinit.org/lib/exe/fetch.php?media=build:installing_abinit.pdf"
-type="application/pdf" width="100%" height="480px">
-
 ## How to build Abinit
 
-Developers are invited to build Abinit inside a **build** directory *i.e.* a directory that is **separated**
+Developers are invited to build the executables inside a **build** directory *i.e.* a directory that is **separated**
 from the source tree in order to keep the source directory as clean as possible and allow for multiple builds.
 I usually use the naming scheme: `_build_[compiler_name]` for the build directory and an external file
-(e.g. *gcc.ac*) to store the configuration options that are passed to *configure* via the *--with-config-file* option:
+(e.g. *gcc.ac*) storing the configuration options that can be passed to *configure* via the **--with-config-file** option:
 
 ```sh
 mkdir _build_gcc
@@ -52,16 +47,27 @@ cd _build_gcc
 make -j8  # use 8 processes to compile
 ```
 
-Examples of configuration files for clusters can be found in the [abiconfig package](https://github.com/abinit/abiconfig).
+Note that the name of the options in the *config-file* is in normalized form that is obtained by:
 
-Once the build is completed, run the tests in the *v1* directory with:
+* removing the initial `--` from the option name
+* replacing `-` with underscore `_` everywhere
+
+so `--with-mpi-prefix` becomes `with_mpi_prefix`.
+Examples of configuration files for clusters can be found in the [abiconfig package](https://github.com/abinit/abiconfig).
+A detailed description of the configuration options supported by the build system is given in this guide by Marc:
+
+<embed src="https://wiki.abinit.org/lib/exe/fetch.php?media=build:installing_abinit.pdf"
+type="application/pdf" width="100%" height="480px">
+
+Once the build is completed, it is a good idea to make sure the executable works as expected by running
+the tests in the *v1* directory with:
 
 ```sh
 cd tests
-../../tests/runtests.py v1 -j8
+../../tests/runtests.py v1 -j4
 ```
 
-Use
+As usual, use:
 
     ../../tests/runtests.py --help
 
@@ -72,44 +78,48 @@ A more detailed discussion is given in [this page](testsuite_howto).
 
 !!! tip
 
-    Remember to run the tests as frequently as possible while developing new features
+    Remember to run the tests as **frequently** as possible while developing new features
     in order to spot possible regressions or incompatibilities.
-    Trust me, you can save a lot of time if you run *runtests.py* systematically.
-    You can also start by writing immediately a test following the
-    [test driven development](https://en.wikipedia.org/wiki/Test-driven_development) approach
-    in order to facilitate the design of the user-interface and the implementation of the API.
+    Trust me, you can save a lot of time if you run *runtests.py* systematically!
 
 ## How to browse the source files
 
-I love to use new technologies for my developments but I also know that the environments tipically found
-in supercomputing centers are not user-friendly so it is important to know how to get the work done with
-minimal requirements and without fancy editors such as [atom](https://atom.io/) or [pycharm](https://www.jetbrains.com/pycharm/).
-Obviously Linux tools such as `grep`, `find` are great there are other tools that are easy to install and play well
-with standard Linux editors such as `vim` and `emacs`.
+The HTML documentation generated by Robodoc is available at 
+[this page](https://www.abinit.org/sites/default/files/robodoc-html/masterindex.html).
 
-!!! tip
+If you need a tool to navigate the Abinit code inside the editor while programming, I would sugest 
+[exuberant-ctags](http://ctags.sourceforge.net/).
+To generate a **tags** file containing the list of procedures, modules, datatypes for all files inside *~abinit/src*, use:
 
-    I assume you already know how to use [ctags](http://ctags.sourceforge.net/)
-    to find routines, functions and datatypes in the source tree
-    (you don't use grep to browse the code, do you?)
-    so I'm not going to provide the full path to the F90 files as one can easily open the
-    declaration of `dataset_type` with:
+    cd ~abinit/src 
+    ctags -R 
 
-        cd ~abinit/src && ctags -R && vi -t dataset_type
+Now one can open the file with the declaration of *dataset_type* directly from the terminal with:
 
-    See [here](https://andrew.stwrt.ca/posts/vim-ctags/) for more tips.
+    vi -t dataset_type
 
-For the integrarion with `vim` see
+Inside the editor, you can go directly to a tag definition by entering the following in vim command mode:
 
-For `emacs` see
+    :tag dataset_type
+
+More tips for vim users are available [here](https://andrew.stwrt.ca/posts/vim-ctags/).
+For `emacs` see [this page](https://www.emacswiki.org/emacs/EmacsTags).
+
 
 ## How to debug with gdb
 
-In this section, we focus on the.
+Load the executable in *gdb* with
 
     gdb path_to_abinit_executable
-    run < run.files
-    bt
+
+Run the code with the *run* command and redirect the standard input with:
+
+    (gdb) run < run.files
+
+Wait for the error e.g. SIGSEGV, then print the **backtrace** with:
+
+    (gdb) bt
+
 
 !!! tip
 
@@ -122,7 +132,7 @@ For a more complete introduction to *gdb*, we suggest this youtube tutorial:
 <iframe width="1384" height="629" src="https://www.youtube.com/embed/bWH-nL7v5F4" frameborder="0"
 allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-
+<!--
 ## Basic conventions
 
 * All Fortran procedures should be declared in modules and imported by client code with the `use` statements
@@ -144,29 +154,26 @@ In particular:
 !!! important
 
     Abinit uses specialized logic to track Fortran **allocations** and **deallocations** in order to spot possible memory leaks
+-->
 
 ## How to add a new Fortran file
 
 * Create the F90 module and `git add` it
 * Register the F90 file in the `abinit.src` file (avoid duplicated names in the public API, **abisrc.py** will complain about that)
 * Rerun `makemake` in the source directory
-* Rerun `configure` and `make` (possibly `make clean`)
-
-!!! important
-
-    Special case
-
+* Rerun `configure` and `make` in the build directory (possibly `make clean && make`)
 
 ## How to add a new Abinit input variable
 
-Let's focus on the procedure required to add a new Abinit variable.
-To make things as simple as possible, we neglect the case of dimensions such as [[nkpt]] or [[nsym]]
-whose value may depend on the dataset.
+This section documents the procedure required to add a new Abinit input variable.
+To make things as simple as possible, we ignore the (more complicated) case of dimensions
+such as [[nkpt]] or [[nsym]] whose value may depend on the dataset.
 To add a new variables follow the below steps:
 
-- Add the new variable to `dataset_type`. Remember that the name cannot end with a digit (multidataset syntax)
+- Add the new variable to **dataset_type**.
+  Remember that the name cannot end with a digit as this enters into conflict with the multidataset syntax.
 
-- The default value can be specified in two different ways:
+- The default value of the new input variable can be specified in two different ways:
 
     * in the **declaration** of the Fortran type if the size is known at compile time
       and the initial value does not depend on other variables.
@@ -186,6 +193,9 @@ To add a new variables follow the below steps:
 - The logic for checking the consistency of input variables goes to **chkinp**.
   Use the routines *chkint_eq*, *chkint_ne*, *chkint_ge*, *chkint_le*, *chkdpr*.
 
+- Add the documentation of the new variable to `~abinit/abimkdocs/variables_CODE.py`.
+  following the instructions given in [this section](abimkdocs/#how-to-addmodify-an-input-variable).
+
 Finally,
 
     make clean && make -j8
@@ -194,8 +204,8 @@ since you *broke* the [ABI](https://en.wikipedia.org/wiki/Application_binary_int
 of a public datastructure and all the object files depending on this datastructure must be recompiled
 (if you are developing a library, you should release a new major version!)
 
-No, it's not a typo, ABIs and APIs are different concepts!
-From this detailed answer on [stackoverflow](https://stackoverflow.com/questions/2171177/what-is-an-application-binary-interface-abi)
+No, it's not a typo, **ABIs** and **APIs** are two different concepts!
+From this answer on [stackoverflow](https://stackoverflow.com/questions/2171177/what-is-an-application-binary-interface-abi)
 
 >   If you expand, say, a 16-bit data structure field into a 32-bit field, then already-compiled code
     that uses that data structure will not be accessing that field (or any following it) correctly.
@@ -234,8 +244,6 @@ In order to introduce a test, one needs to:
      (within another tolerance that can be tuned by the option **opt=-medium**, **opt=-easy** or **opt=-ridiculous**,
      see the added section in other input files).
 
-The scripts *tests/Scripts/fldiff.pl* and *tests/Scripts/reportdiff.pl* analyze the output.
-
 If this procedure fails, contact the code maintainers in order adjust the test case.
 This might mean modifying the tolerances files.
 Unless you are really expert, let the maintainer do the final adjustment.
@@ -272,19 +280,7 @@ are the percent of program subroutines and the percent of program statements cal
 during execution of the test suite.
 We aim that the test suite covers all the functionalities of ABINIT.
 
-### How does it work?
-
-ABINIT is built with special options such that every function that is executed in the program
-is mapped back to the function points in the source code.
-A `.gcno` file is generated when the source file is compiled with the GCC *-ftest-coverage* option.
-It contains information to reconstruct the basic block graphs and assign source line numbers to blocks.
-More info are available in the [Gvoc page](https://gcc.gnu.org/onlinedocs/gcc-9.1.0/gcc/index.html#toc-gcov---a-Test-Coverage-Program).
-A *.gcda* file is generated when a program containing object files built with the GCC *-fprofile-arcs* option is executed.
-A separate *.gcda* file is created for each object file compiled with this option.
-It contains arc transition counts, and some summary information.
-Finally, we use [lcov](http://ltp.sourceforge.net/coverage/lcov.php) to analyze the *.gcda* files for generating a html report
-
-### How to trigger a coverage report?
+How to trigger a coverage report?
 
 There is one slave dedicated to *on-demand* execution of branches by the developers
 that produces a code coverage report, at present, **higgs_gnu_7.3_cov**.
@@ -292,6 +288,21 @@ It can be launched by the general [https://bbportal.abinit.org](on-demand interf
 (contact Jean-Michel or Xavier if you do not yet have access to it).
 Code coverage reports from recent runs of the tests are available [here](http://coverage.abinit.org).
 If you see parts of the code which are not well tested, please contribute to improving coverage by writing new tests!
+
+
+!!! info
+
+    How does it work?
+
+    ABINIT is built with special options such that every function that is executed in the program
+    is mapped back to the function points in the source code.
+    A `.gcno` file is generated when the source file is compiled with the GCC *-ftest-coverage* option.
+    It contains information to reconstruct the basic block graphs and assign source line numbers to blocks.
+    More info are available in the [Gvoc page](https://gcc.gnu.org/onlinedocs/gcc-9.1.0/gcc/index.html#toc-gcov---a-Test-Coverage-Program).
+    A *.gcda* file is generated when a program containing object files built with the GCC *-fprofile-arcs* option is executed.
+    A separate *.gcda* file is created for each object file compiled with this option.
+    It contains arc transition counts, and some summary information.
+    Finally, we use [lcov](http://ltp.sourceforge.net/coverage/lcov.php) to analyze the *.gcda* files for generating a html report
 
 
 {% include doc/developers/robodoc.doc.txt %}
