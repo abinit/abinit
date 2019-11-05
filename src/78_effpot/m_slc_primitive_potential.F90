@@ -285,59 +285,59 @@ contains
 
   !---------------------------------------
   ! reading oiju parameters from ncdf file
-  ! TODO: change variable names
   !---------------------------------------
   subroutine read_oiju(self, ncid)  
     class(slc_primitive_potential_t), intent(inout) :: self
     integer,                          intent(in)    :: ncid    
 
     integer :: ncerr, dimid, ndata, varid
-    integer, allocatable :: ilist(:), jlist(:), ulist(:), vlist(:)
-    integer, allocatable :: Rjlist(:,:), Rulist(:,:), Rvlist(:,:)
+    integer, allocatable :: jRjlist(:,:), uRulist(:,:)
+    ! (4, ndata), including j and Rj, u and Ru
+
+    integer, allocatable :: ilist(:), jlist(:), ulist(:)
+    integer, allocatable :: Rjlist(:,:), Rulist(:,:)
     real(dp), allocatable :: vallist(:)
 
-    ncerr = nf90_inq_dimid(ncid, "Oiju_ndata", dimid)
+    ncerr = nf90_inq_dimid(ncid, "spin_lattice_Oiju_number_of_entries", dimid)
     if(ncerr /= NF90_NOERR) then
       write(std_out,'(A20)') 'No O_iju term found'
     else
       self%has_quadlin=.True.
-      ncerr = nctk_get_dim(ncid, "Oiju_ndata", ndata)
+      ncerr = nctk_get_dim(ncid, "spin_lattice_Oiju_number_of_entries", ndata)
       ABI_ALLOCATE(ilist, (ndata))
       ABI_ALLOCATE(jlist, (ndata))
       ABI_ALLOCATE(ulist, (ndata))
       ABI_ALLOCATE(Rjlist, (3, ndata))
       ABI_ALLOCATE(Rulist, (3, ndata))
+      ABI_ALLOCATE(jRjlist, (4, ndata))
+      ABI_ALLOCATE(uRulist, (4, ndata))
       ABI_ALLOCATE(vallist, (ndata))
 
-      varid = nctk_idname(ncid, "Oiju_ilist")
+      varid = nctk_idname(ncid, "spin_lattice_Oiju_ilist")
       ncerr = nf90_get_var(ncid, varid, ilist)
-      call netcdf_check(ncerr, "when reading Oiju_ilist")
+      call netcdf_check(ncerr, "when reading spin_lattice_Oiju_ilist")
 
-      varid = nctk_idname(ncid, "Oiju_jlist")
-      ncerr = nf90_get_var(ncid, varid, jlist)
-      call netcdf_check(ncerr, "when reading Oiju_jlist")
+      varid = nctk_idname(ncid, "spin_lattice_Oiju_jlist")
+      ncerr = nf90_get_var(ncid, varid, jRjlist)
+      call netcdf_check(ncerr, "when reading spin_lattice_Oiju_jlist")
+      jlist(:)=jRjlist(1, :)
+      Rjlist(:,:)=jRjlist(2:4, :)
 
-      varid = nctk_idname(ncid, "Oiju_ulist")
-      ncerr = nf90_get_var(ncid, varid, ulist)
-      call netcdf_check(ncerr, "when reading Oiju_ulist")
+      varid = nctk_idname(ncid, "spin_lattice_Oiju_ulist")
+      ncerr = nf90_get_var(ncid, varid, uRulist)
+      call netcdf_check(ncerr, "when reading spin_lattice_Oiju_ulist")
+      ulist(:)=uRulist(1, :)
+      Rulist(:,:)=uRulist(2:4, :)
 
-      varid = nctk_idname(ncid, "Oiju_Rjlist")
-      ncerr = nf90_get_var(ncid, varid, Rjlist)
-      call netcdf_check(ncerr, "when reading Oiju_Rjlist")
-
-      varid = nctk_idname(ncid, "Oiju_Rulist")
-      ncerr = nf90_get_var(ncid, varid, Rulist)
-      call netcdf_check(ncerr, "when reading Oiju_Rulist")
-
-      varid = nctk_idname(ncid, "Oiju_vallist")
+      varid = nctk_idname(ncid, "spin_lattice_Oiju_vallist")
       ncerr = nf90_get_var(ncid, varid, vallist)
-      call netcdf_check(ncerr, "when reading Oiju_vallist")
+      call netcdf_check(ncerr, "when reading spin_lattice_Oiju_vallist")
 
       write(std_out,'(A8,I10,A11)') 'O_iju: ', ndata, 'terms read'  
 
       !change units from eV to Ha and Ang to Bohr
       vallist(:) = vallist(:)*eV_Ha*Bohr_Ang
-  
+
       !fill the sparse matrix for oiju parameters
       call self%set_oiju(ndata, ilist, jlist, ulist, Rjlist, Rulist, vallist)
 
@@ -347,7 +347,8 @@ contains
       ABI_SFREE(Rjlist)
       ABI_SFREE(Rulist)
       ABI_SFREE(vallist)
-
+      ABI_SFREE(jRjlist)
+      ABI_SFREE(uRulist)
     endif
 
   end subroutine read_oiju
@@ -633,9 +634,13 @@ contains
       ! fill different coupling terms
       if (iam_master) then
         call self%fill_liu(scpot, scmaker)
+        print *, "filling Oiju supercell" 
         call self%fill_oiju(scpot, scmaker)
+        print *, "Oiju supercell filled"
         call self%fill_niuv(scpot, scmaker)
+        print *, "filling Tijuv supercell" 
         call self%fill_tijuv(scpot, scmaker)
+        print *, "Tijuv supercell filled"
 
         !Write information which terms are used
         write(std_out,'(A55)') 'Using the following terms for the spin-lattice coupling'

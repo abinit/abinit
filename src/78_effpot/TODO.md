@@ -8,14 +8,13 @@ This file list the things to do for multibinit
 ### [TODO] Update the automatic tests (hexu) [time: November, 2019]
 ### [TODO] Add more autotests. (Nicole) [time: November, 2019??]
       - list of SLC tests?
-### [TODO] Finalize the format of potential netcdf file and spin hist file. (hexu & Nicole) [time: December]
+### [Ongoing] Finalize the format of potential netcdf file and spin hist file. (hexu & Nicole) [time: December]
       - Oiju format updated.
-### [TODO] documentation for the file formats. (Nicole @ hexu)
+### [TODO] documentation for the file formats. (Nicole & hexu)
 #### [TODO] use reduced coordinates instead of cartersian? Do we have the final decision? (hexu)  [time: November]
-### [TODO] Full workflow of fitting parameters. (hexu) [time: November]
+### [Ongoing] Full workflow of fitting parameters. (hexu) [time: November]
 ### [TODO] Update the tutorials and other documentations. (Nicole & hexu) [time: November]
 ### [TODO] Tutorial for spin-lattice coupling???
-
 
 
 ## Genenal structure
@@ -110,6 +109,10 @@ State:
  - Other terms are also implemented. Test to be done.
 
 ### [TODO??] Implement advanced integration algorithm for spin/lattice dynamics
+
+### [TODO] Optimize Tijuv terms so the time is acceptable. (Nicole & hexu) [time: Now]
+
+### [TODO] Implement full procedure of coupled SLC dynamics. (Nicole)
 
 ---
 ## Lattice wannier function
