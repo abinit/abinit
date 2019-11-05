@@ -2453,13 +2453,17 @@ if(iam_master)then
   ncombination = size(list_combination_tmp,2)
   ABI_ALLOCATE(index_irred,(1)) 
   index_irred = 1
+  if(need_spcoupling)then !Check irreducibility of strain-phonon terms 
   do i=2,ncombination
-     irreducible = check_irreducibility(list_combination_tmp(:,i),list_combination_tmp(:,:i-1),list_symcoeff,list_symstr,ncoeff_symsym,nsym,i-1,power_disps(2),index_irred,comm)
-     if(.not. irreducible) list_combination_tmp(:,i) = 0
+     if(any(list_combination_tmp(:,i) > ncoeff_symsym))then
+        irreducible = check_irreducibility(list_combination_tmp(:,i),list_combination_tmp(:,:i-1),list_symcoeff,list_symstr,ncoeff_symsym,nsym,i-1,power_disps(2),index_irred,comm)
+        if(.not. irreducible) list_combination_tmp(:,i) = 0
+     endif
   enddo
   call reduce_zero_combinations(list_combination_tmp)
-  write(std_out,*) "DEBUG: finish reduce zero combinations"
   ncombination = size(list_combination_tmp,2)
+  endif
+  write(std_out,*) "DEBUG: finish reduce zero combinations"
   ABI_DEALLOCATE(index_irred) 
 end if !iam_master
 
