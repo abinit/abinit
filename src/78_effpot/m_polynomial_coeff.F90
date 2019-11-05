@@ -1713,28 +1713,28 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
        end if
      end do
    end if
-!   if(.not.(all(list_symcoeff_tmp2(:,icoeff,1)==0)))then
-    !write(std_out,*) "DEBUG: icoeff", icoeff
-    !write(std_out,*) "DEBUG: list_symcoeff_tmp2(:,icoeff,1)", list_symcoeff_tmp2(:,icoeff,1)
-    !write(std_out,*) "DEBUG:list_symcoeff_tmp2(4,icoeff,1):", list_symcoeff_tmp2(4,icoeff,1) 
-    !MS only keep terms with ia == 2 or ib == 2
-!     if (list_symcoeff_tmp2(2,icoeff,1) /= 1 .and. list_symcoeff_tmp2(3,icoeff,1) /= 1)then 
-!         list_symcoeff_tmp2(:,icoeff,1) = 0
-!     else if(list_symcoeff_tmp2(2,icoeff,1) /= 1 .and. list_symcoeff_tmp2(3,icoeff,1) == 1 .and. any(cell(:,list_symcoeff_tmp2(4,icoeff,1)) /= 0))then 
-!         list_symcoeff_tmp2(:,icoeff,1) = 0
-!     endif  !MS only keep terms with ia == 1 
-!   endif
    if(.not.(all(list_symcoeff_tmp2(:,icoeff,1)==0)))then
-   !write(std_out,*) "DEBUG: icoeff", icoeff
-   !write(std_out,*) "DEBUG: list_symcoeff_tmp2(:,icoeff,1)", list_symcoeff_tmp2(:,icoeff,1)
-   !write(std_out,*) "DEBUG:list_symcoeff_tmp2(4,icoeff,1):", list_symcoeff_tmp2(4,icoeff,1) 
-   !MS only keep terms with ia == 2 or ib == 2
-     if (list_symcoeff_tmp2(2,icoeff,1) /= 1 .or. list_symcoeff_tmp2(3,icoeff,1) /= 1)then
+  !write(std_out,*) "DEBUG: icoeff", icoeff
+  !write(std_out,*) "DEBUG: list_symcoeff_tmp2(:,icoeff,1)", list_symcoeff_tmp2(:,icoeff,1)
+  !write(std_out,*) "DEBUG:list_symcoeff_tmp2(4,icoeff,1):", list_symcoeff_tmp2(4,icoeff,1) 
+  !MS only keep terms with ia == 2 or ib == 2
+     if (list_symcoeff_tmp2(2,icoeff,1) /= 1 .and. list_symcoeff_tmp2(3,icoeff,1) /= 1)then 
          list_symcoeff_tmp2(:,icoeff,1) = 0
-   !else if(list_symcoeff_tmp2(2,icoeff,1) /= 1 .and. list_symcoeff_tmp2(3,icoeff,1) == 1 .and. any(cell(:,list_symcoeff_tmp2(4,icoeff,1)) /= 0))then 
-   !    list_symcoeff_tmp2(:,icoeff,1) = 0
+     else if(list_symcoeff_tmp2(2,icoeff,1) /= 1 .and. list_symcoeff_tmp2(3,icoeff,1) == 1 .and. any(cell(:,list_symcoeff_tmp2(4,icoeff,1)) /= 0))then 
+         list_symcoeff_tmp2(:,icoeff,1) = 0
      endif  !MS only keep terms with ia == 1 
    endif
+!   if(.not.(all(list_symcoeff_tmp2(:,icoeff,1)==0)))then
+  !write(std_out,*) "DEBUG: icoeff", icoeff
+  !write(std_out,*) "DEBUG: list_symcoeff_tmp2(:,icoeff,1)", list_symcoeff_tmp2(:,icoeff,1)
+  !write(std_out,*) "DEBUG:list_symcoeff_tmp2(4,icoeff,1):", list_symcoeff_tmp2(4,icoeff,1) 
+  !MS only keep terms with ia == 2 or ib == 2
+!     if (list_symcoeff_tmp2(2,icoeff,1) /= 3 .or. list_symcoeff_tmp2(3,icoeff,1) /= 3)then
+!         list_symcoeff_tmp2(:,icoeff,1) = 0
+  !else if(list_symcoeff_tmp2(2,icoeff,1) /= 1 .and. list_symcoeff_tmp2(3,icoeff,1) == 1 .and. any(cell(:,list_symcoeff_tmp2(4,icoeff,1)) /= 0))then 
+  !    list_symcoeff_tmp2(:,icoeff,1) = 0
+!     endif  !MS only keep terms with ia == 1 
+!   endif
  end do
 
 !write(std_out,*) "DEBUG: min_range(:): ", min_range(:) 
@@ -1773,8 +1773,8 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
    end if
  end do
 
-write(std_out,*) "DEBUG ncoeff after 2.5.3: ", ncoeff
-write(std_out,*) "DEBUG ncoeff2 after 2.5.3: ", ncoeff2
+!write(std_out,*) "DEBUG ncoeff after 2.5.3: ", ncoeff
+!write(std_out,*) "DEBUG ncoeff2 after 2.5.3: ", ncoeff2
 
  ABI_DEALLOCATE(list_symcoeff_tmp)
  ABI_ALLOCATE(list_symcoeff_tmp,(6,ncoeff,nsym))
@@ -1796,7 +1796,7 @@ ncoeff3 = 0
      ncoeff3 = ncoeff3 + 1
    end if
  end do
-write(std_out,*) "DEBUG ncoeff3 after 2.5.3: ", ncoeff3
+!write(std_out,*) "DEBUG ncoeff3 after 2.5.3: ", ncoeff3
 
 !4.2 Put irreducible terms in front of list_symcoeff_tmp3 
 !    Store index of irreducible terms
@@ -2160,9 +2160,9 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
      call wrtout(std_out,message,'COLL')
    end if
 
-write(std_out,*) "DEBUG: What is ncoeff_tot: ", ncoeff_tot
-write(std_out,*) "DEBUG: What is ncoeff_sym: ", ncoeff_sym
-write(std_out,*) "DEBUG: What is ncoeff_symsym: ", ncoeff_symsym
+!write(std_out,*) "DEBUG: What is ncoeff_tot: ", ncoeff_tot
+!write(std_out,*) "DEBUG: What is ncoeff_sym: ", ncoeff_sym
+!write(std_out,*) "DEBUG: What is ncoeff_symsym: ", ncoeff_symsym
    do icoeff=1,ncoeff_symsym+nstr_sym
      do icoeff2=1,ncoeff_symsym+nstr_sym
 !      Select case:
@@ -2260,7 +2260,7 @@ ii = 0
      end do 
    end do 
 
-write(std_out,*) "DEBUG: Number of Compatible Coeffs: ", ii
+!write(std_out,*) "DEBUG: Number of Compatible Coeffs: ", ii
 
 !  Compute all the combination of coefficient up to the given order  (get the number)
    if(need_verbose)then
@@ -2290,19 +2290,22 @@ write(std_out,*) "DEBUG: Number of Compatible Coeffs: ", ii
      write(message,'(1a)')' Compute the combinations'
      call wrtout(std_out,message,'COLL')
    end if
- 
-   write(std_out,*) "DEBUG combinations: ", ncombination
-   write(std_out,*) "DEBUG nirred_comb: ", nirred_comb
+   if(iam_master)then
+     write(std_out,*) "DEBUG combinations: ", ncombination
+     write(std_out,*) "DEBUG nirred_comb: ", nirred_comb
+   endif 
    ABI_ALLOCATE(list_coeff,(0))
    ABI_ALLOCATE(index_irredcomb,(nirred_comb))
    ABI_ALLOCATE(list_combination_tmp,(power_disps(2),ncombination))
-   write(std_out,*) "DEBUG shape list_combination_tmp: ", shape(list_combination_tmp)
+   !write(std_out,*) "DEBUG shape list_combination_tmp: ", shape(list_combination_tmp)
    icoeff  = 1
    icoeff2 = 0
    iirred_comb = 0
    list_combination_tmp = 0
-   write(std_out,*) "DEBUG: list_coeff before first call to CCL:", list_coeff
-   write(std_out,*) "DEBUG: ncoeff:", ncoeff_sym
+   if(iam_master)then
+     !write(std_out,*) "DEBUG: list_coeff before first call to CCL:", list_coeff
+     write(std_out,*) "DEBUG: ncoeff:", ncoeff_sym
+   endif
    call computeCombinationFromList(cell,compatibleCoeffs,list_symcoeff,list_symstr,&
 &                   list_coeff,list_combination_tmp,index_irredcomb,icoeff,max_power_strain,icoeff2,natom,&
 &                   ncoeff_sym,ncoeff_symsym,iirred_comb,nirred_comb,nstr_sym,ncombination,nrpt,nsym,1,power_disps(1),power_disps(2),&
@@ -2366,7 +2369,7 @@ call xmpi_allgather(my_ncombi,irank_ncombi,comm,ierr)
   write(message,'(1a)')' Compute irreducible symmetric combinations of combinations of irreducibel terms'
 if(my_ncombi /= 0)then 
   do i=my_ncombi_start,my_ncombi_end
-     write(std_out,*) "iii is: ", i
+     !write(std_out,*) "iii is: ", i
      ABI_ALLOCATE(dummylist,(0))
      ABI_ALLOCATE(index_irred,(1)) 
      index_irred = 1
@@ -2424,19 +2427,19 @@ do i=1,nproc
       endif
    endif
 enddo 
-write(std_out,*) "Offsets: ", offsets
-write(std_out,*) "irank_ncombi: ", irank_ncombi
+!write(std_out,*) "Offsets: ", offsets
+!write(std_out,*) "irank_ncombi: ", irank_ncombi
 
 list_combination_tmp = 0 
 !write(std_out,*) "DEBUG: shape(list_combination_tmp)", shape(list_combination_tmp)
 !Get irredecuble terms from all procs 
-write(std_out,*) "DEBUG: call xmpi_barrier"
+!write(std_out,*) "DEBUG: call xmpi_barrier"
 !write(std_out,*) "DEBUG: maxval(irank_ncombi),nproc", irank_ncombi,maxval(irank_ncombi),nproc
 call xmpi_barrier(comm)
-write(std_out,*) "DEBUG: call xmpi_gatherv"
+!write(std_out,*) "DEBUG: call xmpi_gatherv"
 call xmpi_gatherv(my_list_combination,size(my_list_combination),list_combination_tmp,irank_ncombi,offsets,master,comm,ierr)
 
-write(std_out,*) "DEBUG: shape(list_combination_tmp)", shape(list_combination_tmp)
+!write(std_out,*) "DEBUG: shape(list_combination_tmp)", shape(list_combination_tmp)
 
 ABI_DEALLOCATE(my_list_combination)
 ABI_DEALLOCATE(irank_combi_start)
@@ -2496,7 +2499,7 @@ end if !iam_master
  ABI_DEALLOCATE(buffsize)
  ABI_DEALLOCATE(list_combination_tmp)
 
-write(std_out,*) "DEBUG shape list_symcoeff(:,:,:) before termsfromlist:", shape(list_symcoeff) 
+!write(std_out,*) "DEBUG shape list_symcoeff(:,:,:) before termsfromlist:", shape(list_symcoeff) 
  !Compute the coefficients from the list of combination
  if(need_verbose .and. nproc > 1)then
    write(message,'(1a)')' Compute the coefficients'
@@ -2508,7 +2511,7 @@ write(std_out,*) "DEBUG shape list_symcoeff(:,:,:) before termsfromlist:", shape
  ncoeff_max = my_ncoeff
  ABI_ALLOCATE(terms,(nterm))
  do ii=1,my_ncoeff
-   write(std_out,*) "DEBUG list_combination(:,",ii,"): ", list_combination(:,ii)
+   !write(std_out,*) "DEBUG list_combination(:,",ii,"): ", list_combination(:,ii)
    call generateTermsFromList(cell,list_combination(:,ii),list_symcoeff,list_symstr,ncoeff_symsym,&
 &                             ndisp_max,nrpt,nstr_sym,nsym,nterm,terms)
    call polynomial_coeff_init(one,nterm,coeffs_tmp(ii),terms(1:nterm),check=.true.)
@@ -3184,7 +3187,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
             nmodel_tot = nmodel_tot + 1
             nirred_comb = nirred_comb +1  
             if(need_compute)list_combination(1:power_disp,nmodel_tot) = index_coeff
-            write(std_out,*) "DEBUG index_coeff: ", index_coeff
+            !write(std_out,*) "DEBUG index_coeff: ", index_coeff
          else !Else counst symmetric terms of atomic displacement (pure disp or disp/strain)
               !Store index for each combination of irreducible terms to later parallely compute symmetric combinations
             ABI_ALLOCATE(dummylist,(0))
@@ -3192,11 +3195,11 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
             index_irred = 1
             nirred_comb = nirred_comb +1 
             iirred_comb = iirred_comb +1 
-            write(std_out,*) "DEBUG index_coeff: ", index_coeff
-            write(std_out,*) "DEBUG ndisp_out: ", ndisp_out
-            write(std_out,*) "DEBUG nstrain: ", nstrain
+            !write(std_out,*) "DEBUG index_coeff: ", index_coeff
+            !write(std_out,*) "DEBUG ndisp_out: ", ndisp_out
+            !write(std_out,*) "DEBUG nstrain: ", nstrain
             nmodel_start = nmodel_tot
-            write(std_out,*) "DEBUG nmodel_start: ", nmodel_start
+            !write(std_out,*) "DEBUG nmodel_start: ", nmodel_start
             if(need_compute)then 
                list_combination(:,nmodel_start+1) = 0 
                index_irredcomb(iirred_comb) = nmodel_start 
@@ -3205,7 +3208,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
             call computeSymmetricCombinations(nmodel_tot,list_combination,list_coeff,list_str,1,1,ndisp_out,nsym,&
                                               dummylist,index_coeff,power_disp_max,nmodel,ncoeff_sym,&
 &                                             nstr,nstrain,nmodel_start+1,compatibleCoeffs,index_irred,compute_sym,comm) 
-            write(std_out,*) "DEBUG nmodel_tot: ", nmodel_tot
+            !write(std_out,*) "DEBUG nmodel_tot: ", nmodel_tot
             !nmodel_tot = nmodel_tot + nmodel_tot_test 
             ABI_DEALLOCATE(dummylist)
             ABI_DEALLOCATE(index_irred)
@@ -3331,15 +3334,17 @@ if(isym_in <= nsym .and. idisp_in <= ndisp)then
               index_coeff_tmp(idisp) = list_symcoeff(6,index_coeff_in(idisp),index_isym(idisp))
            end do !idisp=1,ndisp
            !Check if symmetric combination is allowed 
-           do idisp=1,ndisp-1
-              do idisp2=idisp+1,ndisp
-                 if(compatibleCoeffs(index_coeff_tmp(idisp),index_coeff_tmp(idisp2)) == 0) then 
-                    index_coeff_tmp = 0
-                    exit 
-                 end if
-              enddo 
-              if(all(index_coeff_tmp == 0))exit
-           enddo 
+           if(.not. any(index_coeff_tmp == 0))then ! Check if term is allowed by distance
+              do idisp=1,ndisp-1
+                 do idisp2=idisp+1,ndisp
+                    if(compatibleCoeffs(index_coeff_tmp(idisp),index_coeff_tmp(idisp2)) == 0) then 
+                       index_coeff_tmp = 0
+                       exit 
+                    end if
+                 enddo 
+                 if(all(index_coeff_tmp == 0))exit
+              enddo
+           endif 
            if(any(index_coeff_tmp == 0))then ! If symmetry doesn't point to another term or isn't allowed due to distance write zeros to filter after
               list_combination(:,ncombi) = 0 
            else
