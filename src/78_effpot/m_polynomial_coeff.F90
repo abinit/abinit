@@ -1947,7 +1947,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  integer :: ncombi_alone,my_ncombi_simple,my_ncombi_start,my_ncombi_end,my_ncombi
  real(dp):: norm
  logical :: iam_master,need_anharmstr,need_spcoupling,need_distributed,need_verbose
- logical :: need_only_odd_power,need_only_even_power,compute_sym
+ logical :: need_only_odd_power,need_only_even_power,compute_sym,irreducible
 !arrays
  integer :: ncell(3)
  integer,allocatable :: buffsize(:),buffdispl(:),index_irredcomb(:),dummylist(:),index_irred(:)
@@ -2448,10 +2448,19 @@ ABI_DEALLOCATE(irank_ncombi)
 ABI_DEALLOCATE(offsets)
 
 if(iam_master)then
-  write(std_out,*) "DEBUG: reduce zero combinations on master"
+  write(std_out,*) "DEBUG: reduce zero combination on master"
+  call reduce_zero_combinations(list_combination_tmp)
+  ncombination = size(list_combination_tmp,2)
+  ABI_ALLOCATE(index_irred,(1)) 
+  index_irred = 1
+  do i=2,ncombination
+     irreducible = check_irreducibility(list_combination_tmp(:,i),list_combination_tmp(:,:i-1),list_symcoeff,list_symstr,ncoeff_symsym,nsym,i-1,power_disps(2),index_irred,comm)
+     if(.not. irreducible) list_combination_tmp(:,i) = 0
+  enddo
   call reduce_zero_combinations(list_combination_tmp)
   write(std_out,*) "DEBUG: finish reduce zero combinations"
   ncombination = size(list_combination_tmp,2)
+  ABI_DEALLOCATE(index_irred) 
 end if !iam_master
 
 
@@ -4044,12 +4053,25 @@ end subroutine sort_combination_list
 !! checks irreducibility of combination of terms with respect to crystal symmetry
 !!
 !! INPUTS
+!! combination: combination of integers icoeff representing term A_x-B_x to check 
+!! list_combination: list of combination against which combinatino will be checked 
+!! list_symcoeff: list of coefficients containig information connecting the integers in combination 
+!!                and list_combination to bodies (A_x-B_x) of difference of atomic displacements 
+!! list_symstr: list of strain with symmetry properties connecting icoeff>ncoeff_sym to strains of given direction
+!! ncoeff_sym:  number of bodies (A_x-B_x) containing all symmetric equivalents 
+!! nsym:        number of symmetries in the crystal system 
+!! ncombination: number of combinations -> defines size of list_combination 
+!! ndisp:        number of displacements that is maximum order of combinations 
+!! index_irred:  list of index of irreducible terms (that are non-zero) in list_combination  
+!! 
+!!
 !!
 !! OUTPUT
 !! 
 !! logical :: irreducible -> TRUE: no other equal term exists in list_combination
-!!                        -> FALSE: a other equivalent erm exists already
+!!                        -> FALSE: a other equivalent term exists already
 !!
+!! SIDE_EFFECT: if combination is irreducible (that means irreducible = .FALSE.) the index of the irreduc!!              irreducible coefficient is added to index_irred
 !! SOURCE
 
 function check_irreducibility(combination,list_combination,list_symcoeff,list_symstr,ncoeff_sym,nsym,ncombination,ndisp,index_irred,comm)&
@@ -4096,7 +4118,7 @@ function check_irreducibility(combination,list_combination,list_symcoeff,list_sy
  !Loop over non reducable combinations
  do while(icombi <= size(index_irred) .and. irreducible .eqv. .TRUE.) 
    !if(all(list_combination(:,index_irred(icombi)) /= 0))then !.and. any(list_combination(:,i) <= ncoeff_symsym))then 
-     !If term j is equivalent to term i delet it
+     !If term j is equivalent to term i delete it
      if(all(list_combination(:,index_irred(icombi)) == combination(:)))then
         irreducible = .FALSE.
         return
