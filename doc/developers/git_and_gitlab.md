@@ -20,11 +20,11 @@ For further information about *git*, please consult the [official documentation]
 
     See also this page with the [most commonly used git tips and tricks](https://github.com/git-tips/tips)
 
-In the next sections, we explain how to configure *git* to interoperate with the 
+In the next sections, we explain how to configure *git* to interoperate with
 our [ABINIT gitlab server](https://gitlab.abinit.org/).
-It is assumed you you already have an account on our **internal** gitlab server 
-Note that having an account on gitlab.com or github.com is not enough since we run our own instance 
-of the gilab server. You need to contact Jean-Michel to have an account created for your.
+It is assumed you already have an account on our **internal gitlab server**
+Note that having an account on gitlab.com or github.com is not enough since we run our own server 
+(you need to contact Jean-Michel to have an account created for you).
     
 
 ## Initial configuration
