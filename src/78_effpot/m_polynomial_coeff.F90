@@ -1714,28 +1714,28 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
      end do
    end if
    if(.not.(all(list_symcoeff_tmp2(:,icoeff,1)==0)))then
-  !write(std_out,*) "DEBUG: icoeff", icoeff
-  !write(std_out,*) "DEBUG: list_symcoeff_tmp2(:,icoeff,1)", list_symcoeff_tmp2(:,icoeff,1)
-  !write(std_out,*) "DEBUG:list_symcoeff_tmp2(4,icoeff,1):", list_symcoeff_tmp2(4,icoeff,1) 
-  !MS only keep terms with ia == 2 or ib == 2
+ !write(std_out,*) "DEBUG: icoeff", icoeff
+ !write(std_out,*) "DEBUG: list_symcoeff_tmp2(:,icoeff,1)", list_symcoeff_tmp2(:,icoeff,1)
+ !write(std_out,*) "DEBUG:list_symcoeff_tmp2(4,icoeff,1):", list_symcoeff_tmp2(4,icoeff,1) 
+ !MS only keep terms with ia == 2 or ib == 2
      if (list_symcoeff_tmp2(2,icoeff,1) /= 1 .and. list_symcoeff_tmp2(3,icoeff,1) /= 1)then 
          list_symcoeff_tmp2(:,icoeff,1) = 0
      else if(list_symcoeff_tmp2(2,icoeff,1) /= 1 .and. list_symcoeff_tmp2(3,icoeff,1) == 1 .and. any(cell(:,list_symcoeff_tmp2(4,icoeff,1)) /= 0))then 
          list_symcoeff_tmp2(:,icoeff,1) = 0
      endif  !MS only keep terms with ia == 1 
    endif
-!   if(.not.(all(list_symcoeff_tmp2(:,icoeff,1)==0)))then
-  !write(std_out,*) "DEBUG: icoeff", icoeff
-  !write(std_out,*) "DEBUG: list_symcoeff_tmp2(:,icoeff,1)", list_symcoeff_tmp2(:,icoeff,1)
-  !write(std_out,*) "DEBUG:list_symcoeff_tmp2(4,icoeff,1):", list_symcoeff_tmp2(4,icoeff,1) 
-  !MS only keep terms with ia == 2 or ib == 2
-!     if (list_symcoeff_tmp2(2,icoeff,1) /= 3 .or. list_symcoeff_tmp2(3,icoeff,1) /= 3)then
-!         list_symcoeff_tmp2(:,icoeff,1) = 0
-  !else if(list_symcoeff_tmp2(2,icoeff,1) /= 1 .and. list_symcoeff_tmp2(3,icoeff,1) == 1 .and. any(cell(:,list_symcoeff_tmp2(4,icoeff,1)) /= 0))then 
-  !    list_symcoeff_tmp2(:,icoeff,1) = 0
-!     endif  !MS only keep terms with ia == 1 
-!   endif
- end do
+!  if(.not.(all(list_symcoeff_tmp2(:,icoeff,1)==0)))then
+ !write(std_out,*) "DEBUG: icoeff", icoeff
+ !write(std_out,*) "DEBUG: list_symcoeff_tmp2(:,icoeff,1)", list_symcoeff_tmp2(:,icoeff,1)
+ !write(std_out,*) "DEBUG:list_symcoeff_tmp2(4,icoeff,1):", list_symcoeff_tmp2(4,icoeff,1) 
+ !MS only keep terms with ia == 2 or ib == 2
+!    if (list_symcoeff_tmp2(2,icoeff,1) /= 1 .or. list_symcoeff_tmp2(3,icoeff,1) /= 1)then
+!        list_symcoeff_tmp2(:,icoeff,1) = 0
+!!else if(list_symcoeff_tmp2(2,icoeff,1) /= 1 .and. list_symcoeff_tmp2(3,icoeff,1) == 1 .and. any(cell(:,list_symcoeff_tmp2(4,icoeff,1)) /= 0))then 
+!!    list_symcoeff_tmp2(:,icoeff,1) = 0
+!    endif  !MS only keep terms with ia == 1 
+!  endif
+end do
 
 !write(std_out,*) "DEBUG: min_range(:): ", min_range(:) 
 !write(std_out,*) "DEBUG: max_range(:): ", max_range(:) 
@@ -1955,7 +1955,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  integer,allocatable :: cell(:,:),compatibleCoeffs(:,:),compatibleCoeffs_sym(:,:),list_combination_cmp_tmp(:)
  integer,allocatable :: list_symcoeff(:,:,:),list_symstr(:,:,:),list_coeff(:),list_combination(:,:)
  integer,allocatable :: list_combination_tmp(:,:),list_combination_tmp2(:,:),irank_combi_start(:),irank_combi_end(:)
- integer,allocatable :: irank_ncombi(:)
+ integer,allocatable :: irank_ncombi(:),my_index_irredcomb(:)
  integer,allocatable  :: my_coefflist(:),my_coeffindexes(:),my_newcoeffindexes(:),my_list_combination(:,:)
  real(dp) :: rprimd(3,3),range_ifc(3)
  real(dp),allocatable :: dist(:,:,:,:),rpt(:,:)
@@ -2250,18 +2250,19 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
 !       end if
 !     end do !end  icoeff 
 !   end do !icoeff2
-ii = 0
-   do icoeff=1,ncoeff_tot
-     do icoeff2=1,ncoeff_tot
-         if(compatibleCoeffs(icoeff,icoeff2) .ne. 0)then 
-		ii = ii + 1
+!ii = 0
+!   do icoeff=1,ncoeff_tot
+!     do icoeff2=1,ncoeff_tot
+!         if(compatibleCoeffs(icoeff,icoeff2) .ne. 0)then 
+!		ii = ii + 1
 !               write(std_out,*) "ii: ", ii
-         end if  
-     end do 
-   end do 
+!         end if  
+!     end do 
+!   end do 
 
 !write(std_out,*) "DEBUG: Number of Compatible Coeffs: ", ii
 
+if(iam_master)then
 !  Compute all the combination of coefficient up to the given order  (get the number)
    if(need_verbose)then
      write(message,'(1a)')' Compute the number of possible combinations'
@@ -2315,12 +2316,19 @@ ii = 0
    ABI_DEALLOCATE(list_coeff)
 !   write(std_out,*) "DEBUG: list_combination after call to CCL:", list_combination_tmp
 
-! else
-!   ABI_ALLOCATE(list_combination_tmp,(1,1))
-! end if
+    nirred_comb = size(index_irredcomb) 
+    ncombination = size(list_combination_tmp,2)
+ else
+   ABI_ALLOCATE(list_combination_tmp,(1,1))
+ end if !if(iam_master)
+!Bcast information about irreducible combinations
+call xmpi_bcast(nirred_comb, master, comm, ierr)
+call xmpi_bcast(ncombination, master, comm, ierr)
+if(.not.iam_master)then 
+   ABI_ALLOCATE(index_irredcomb,(nirred_comb))
+endif 
+call xmpi_bcast(index_irredcomb, master, comm, ierr)
 
-
-nirred_comb = size(index_irredcomb) 
 ncombi_alone = mod(nirred_comb,nproc)
 my_ncombi_simple = int(aint(real(nirred_comb,sp)/(nproc))) 
 ABI_ALLOCATE(index_irredcomb_fix,(nirred_comb))
@@ -2350,25 +2358,51 @@ do i=1,nproc
    if(my_ncombi_end <= nirred_comb -1)then  
       my_ncombi = index_irredcomb(my_ncombi_end+1)-index_irredcomb(my_ncombi_start)
    else if(my_ncombi_end == nirred_comb)then 
-      my_ncombi = size(list_combination_tmp,2) - index_irredcomb(my_ncombi_start)
+      my_ncombi = ncombination - index_irredcomb(my_ncombi_start)
    else 
       my_ncombi = 0 
-   endif  
+   endif 
+   !if(my_rank == i-1)then 
+   !   write(std_out,*) "my_rank,my_ncombi_start,my_ncombi_end, my_ncombi:", my_rank,my_ncombi_start,my_ncombi_end,my_ncombi
+   !endif 
 enddo 
-
 
 ABI_ALLOCATE(irank_combi_start,(nproc))
 ABI_ALLOCATE(irank_combi_end,(nproc))
 ABI_ALLOCATE(irank_ncombi,(nproc))
-call xmpi_barrier(comm)
 call xmpi_allgather(my_ncombi_start,irank_combi_start,comm,ierr)
 call xmpi_allgather(my_ncombi_end,irank_combi_end,comm,ierr)
 call xmpi_allgather(my_ncombi,irank_ncombi,comm,ierr)
+ABI_ALLOCATE(offsets,(nproc))
+offsets(1)=0
+do i=2,nproc 
+   offsets(i) = sum(irank_ncombi(:i-1))*power_disps(2) 
+enddo
+ABI_ALLOCATE(buffsize,(nproc))
+do i=1,nproc
+   buffsize(i) = irank_ncombi(i)*power_disps(2)
+enddo
 
+ABI_ALLOCATE(my_list_combination,(power_disps(2),irank_ncombi(my_rank+1)))
+my_list_combination = 0 
+!write(std_out,*) "irank_nccombi:, ", irank_ncombi,"offsets", offsets
+!write(std_out,*) "index_irredcomb:, ", index_irredcomb
+call xmpi_scatterv(list_combination_tmp,buffsize,offsets,my_list_combination,size(my_list_combination),master,comm,ierr)
+ABI_DEALLOCATE(buffsize)
+ABI_DEALLOCATE(list_combination_tmp)
+!do i=1,size(my_list_combination,2)
+!   if(any(my_list_combination(:,i) /= 0))then 
+!     write(std_out,*) "my_rank", my_rank,"combination i: ", i,"is non zero:", my_list_combination(:,i)
+!   end if
+!enddo  
 !write(std_out,*) "irank_combi_start:, ", irank_combi_start 
   write(message,'(1a)')' Compute irreducible symmetric combinations of combinations of irreducibel terms'
 if(my_ncombi /= 0)then 
-  do i=my_ncombi_start,my_ncombi_end
+  ABI_ALLOCATE(my_index_irredcomb,(my_ncombi_end-my_ncombi_start+1))
+  do i=0,my_ncombi_end-my_ncombi_start 
+     my_index_irredcomb(i+1) = index_irredcomb(my_ncombi_start+i) - index_irredcomb(my_ncombi_start)
+  end do
+  do i=1,size(my_index_irredcomb)
      !write(std_out,*) "iii is: ", i
      ABI_ALLOCATE(dummylist,(0))
      ABI_ALLOCATE(index_irred,(1)) 
@@ -2377,17 +2411,17 @@ if(my_ncombi /= 0)then
      ndisp = 0 
      nstrain = 0
      do ii = 1,power_disps(2)
-        if(list_combination_tmp(ii,index_irredcomb(i)+1) > 0 .and. list_combination_tmp(ii,index_irredcomb(i)+1) <= ncoeff_symsym)then 
+        if(my_list_combination(ii,my_index_irredcomb(i)+1) > 0 .and. my_list_combination(ii,my_index_irredcomb(i)+1) <= ncoeff_symsym)then 
            ndisp = ndisp + 1 
-        else if(list_combination_tmp(ii,index_irredcomb(i)+1) >= ncoeff_symsym)then 
+        else if(my_list_combination(ii,my_index_irredcomb(i)+1) >= ncoeff_symsym)then 
            nstrain = nstrain + 1 
         endif 
      enddo 
      compute_sym = .true.
      !write(std_out,*) "DEBUG list_combination_tmp(:ndisp+nstrain,index_irredcomb(i)+1):", list_combination_tmp(:ndisp+nstrain,index_irredcomb(i)+1)
      !write(std_out,*) "DEBUG index_irredcomb(i)+1,ndisp,nstrain:", index_irredcomb(i)+1,ndisp,nstrain
-     call computeSymmetricCombinations(index_irredcomb(i),list_combination_tmp,list_symcoeff,list_symstr,1,1,ndisp,nsym,&
-                                       dummylist,list_combination_tmp(:ndisp+nstrain,index_irredcomb(i)+1),power_disps(2),size(list_combination_tmp,2),ncoeff_symsym,&
+     call computeSymmetricCombinations(my_index_irredcomb(i),my_list_combination,list_symcoeff,list_symstr,1,1,ndisp,nsym,&
+                                       dummylist,my_list_combination(:ndisp+nstrain,my_index_irredcomb(i)+1),power_disps(2),irank_ncombi(my_rank+1),ncoeff_symsym,&
 &                                      nstr_sym,nstrain,index_irredcomb(i)+1,compatibleCoeffs,index_irred,compute_sym,comm) 
      ABI_DEALLOCATE(dummylist)
      ABI_DEALLOCATE(index_irred) 
@@ -2395,15 +2429,15 @@ if(my_ncombi /= 0)then
 endif 
 
 ABI_DEALLOCATE(compatibleCoeffs)
-ABI_ALLOCATE(my_list_combination,(power_disps(2),irank_ncombi(my_rank+1)))
-my_list_combination = zero 
-if(my_ncombi_end <= nirred_comb-1)then 
-   my_list_combination(:,:my_ncombi) = list_combination_tmp(:,index_irredcomb_fix(my_ncombi_start)+1:index_irredcomb_fix(my_ncombi_end+1))
+!ABI_ALLOCATE(my_list_combination,(power_disps(2),irank_ncombi(my_rank+1)))
+!my_list_combination = zero 
+!if(my_ncombi_end <= nirred_comb-1)then 
+!   my_list_combination(:,:my_ncombi) = list_combination_tmp(:,index_irredcomb_fix(my_ncombi_start)+1:index_irredcomb_fix(my_ncombi_end+1))
 !   write(std_out,*) "DEBUG: shape(my_list_combination),my_rank", shape(my_list_combination),my_rank,my_ncombi_start,my_ncombi_end,index_irredcomb_fix(my_ncombi_end+1)-index_irredcomb_fix(my_ncombi_start)
-else if(my_ncombi_end == nirred_comb)then  
-   my_list_combination(:,:my_ncombi) = list_combination_tmp(:,index_irredcomb_fix(my_ncombi_start)+1:)
+!else if(my_ncombi_end == nirred_comb)then  
+!   my_list_combination(:,:my_ncombi) = list_combination_tmp(:,index_irredcomb_fix(my_ncombi_start)+1:)
 !   write(std_out,*) "DEBUG: shape(my_list_combination),my_rank", shape(my_list_combination),my_rank,my_ncombi_start,my_ncombi_end,size(list_combination_tmp,2)-index_irredcomb_fix(my_ncombi_start)
-endif 
+!endif 
 
 write(std_out,*) "DEBUG: reduce zero combinations on my_rank: ", my_rank
 call reduce_zero_combinations(my_list_combination)
@@ -2413,19 +2447,11 @@ my_ncombi = size(my_list_combination)
 call xmpi_barrier(comm)
 call xmpi_allgather(my_ncombi,irank_ncombi,comm,ierr)
 
-ABI_DEALLOCATE(list_combination_tmp) 
 ABI_ALLOCATE(list_combination_tmp,(power_disps(2),sum(irank_ncombi)))
-ABI_ALLOCATE(offsets,(nproc))
+!ABI_ALLOCATE(offsets,(nproc))
+offsets(1) = 0 
 do i=1,nproc 
-   if(i == 1)then 
-      offsets(i) = 0
-   else 
-      if(irank_ncombi(i) /= 0)then
-         offsets(i) = sum(irank_ncombi(:i-1)) + power_disps(2)*(i-1)
-      else
-         offsets(i) = sum(irank_ncombi(:i-1)) 
-      endif
-   endif
+   offsets(i) = sum(irank_ncombi(:i-1))*power_disps(2)
 enddo 
 !write(std_out,*) "Offsets: ", offsets
 !write(std_out,*) "irank_ncombi: ", irank_ncombi
@@ -2435,12 +2461,17 @@ list_combination_tmp = 0
 !Get irredecuble terms from all procs 
 !write(std_out,*) "DEBUG: call xmpi_barrier"
 !write(std_out,*) "DEBUG: maxval(irank_ncombi),nproc", irank_ncombi,maxval(irank_ncombi),nproc
-call xmpi_barrier(comm)
+!call xmpi_barrier(comm)
 !write(std_out,*) "DEBUG: call xmpi_gatherv"
-call xmpi_gatherv(my_list_combination,size(my_list_combination),list_combination_tmp,irank_ncombi,offsets,master,comm,ierr)
+ABI_ALLOCATE(buffsize,(nproc)) 
+do i = 1,nproc 
+   buffsize(i) = irank_ncombi(i)*power_disps(2)
+enddo 
+call xmpi_gatherv(my_list_combination,size(my_list_combination),list_combination_tmp,buffsize,offsets,master,comm,ierr)
 
 !write(std_out,*) "DEBUG: shape(list_combination_tmp)", shape(list_combination_tmp)
 
+ABI_DEALLOCATE(buffsize) 
 ABI_DEALLOCATE(my_list_combination)
 ABI_DEALLOCATE(irank_combi_start)
 ABI_DEALLOCATE(irank_combi_end)
