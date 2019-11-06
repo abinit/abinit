@@ -1,5 +1,5 @@
 
-.Version 8.11.8 of ABINIT 
+.Version 8.11.11 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu7.4 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,17 +14,17 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 19 Jun 2019.
-- ( at 11h16 )
+.Starting date : Mon 30 Sep 2019.
+- ( at 07h07 )
   
 - input  file    -> tucrpa_2.in
 - output file    -> tucrpa_2_MPI24.out
 - root for input  files -> tucrpa_2_MPI24i
 - root for output files -> tucrpa_2_MPI24o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -722,9 +722,9 @@ P           mkmem           2
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -742,9 +742,9 @@ P           mkmem           2
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -762,9 +762,9 @@ P           mkmem           2
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -10095,8 +10095,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
 
 
-
-
           ===> extra information on forces <===
  ewald contribution to reduced grads
     1       0.000000000000      0.000000000000      0.000000000000
@@ -11475,9 +11473,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -11495,9 +11493,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -11515,9 +11513,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -11669,11 +11667,12 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Max L+1 leading to non-zero Gaunt (pawlcutd) ...    5
   lmn2_size ......................................  171
   lmnmix_sz ......................................  171
-  Size of radial mesh ............................  910
+  Size of radial mesh ............................  592
   Size of radial mesh for partial waves...........  910
-  Size of radial mesh for [pseudo] core density...  910
+  Size of radial mesh for [pseudo] core density...  592
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..  910
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/ttaucorespl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    3
   shape_lambda ...................................    0
@@ -11686,14 +11685,16 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Number of projectors on which U or EXX acts ....    2
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
-  Has Fock   .....................................    2
+  Has Fock  ......................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    2
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -2.38787323E+01
@@ -11717,11 +11718,12 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Max L+1 leading to non-zero Gaunt (pawlcutd) ...    5
   lmn2_size ......................................  171
   lmnmix_sz ......................................  171
-  Size of radial mesh ............................ 1500
+  Size of radial mesh ............................ 1084
   Size of radial mesh for partial waves........... 1500
-  Size of radial mesh for [pseudo] core density... 1500
+  Size of radial mesh for [pseudo] core density... 1084
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density.. 1500
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/ttaucorespl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................    0
@@ -11731,14 +11733,16 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
-  Has Fock   .....................................    2
+  Has Fock  ......................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    2
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -3.50169981E+01
@@ -11761,11 +11765,12 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Max L+1 leading to non-zero Gaunt (pawlcutd) ...    3
   lmn2_size ......................................   36
   lmnmix_sz ......................................   36
-  Size of radial mesh ............................ 2001
+  Size of radial mesh ............................ 1311
   Size of radial mesh for partial waves........... 2001
-  Size of radial mesh for [pseudo] core density... 2001
+  Size of radial mesh for [pseudo] core density... 1311
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density.. 2001
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/ttaucorespl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................    0
@@ -11775,14 +11780,16 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
-  Has Fock   .....................................    2
+  Has Fock  ......................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    2
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -4.77231787E+00
@@ -12480,9 +12487,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -12500,9 +12507,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -12520,9 +12527,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -12674,11 +12681,12 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Max L+1 leading to non-zero Gaunt (pawlcutd) ...    5
   lmn2_size ......................................  171
   lmnmix_sz ......................................  171
-  Size of radial mesh ............................  910
+  Size of radial mesh ............................  592
   Size of radial mesh for partial waves...........  910
-  Size of radial mesh for [pseudo] core density...  910
+  Size of radial mesh for [pseudo] core density...  592
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..  910
-  No of Q-points for tcorespl and tvalespl .......  300
+  No of Q-points for tcorespl/tvalespl/ttaucorespl  300
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    3
   shape_lambda ...................................    0
@@ -12691,14 +12699,16 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Number of projectors on which U or EXX acts ....    2
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
-  Has Fock   .....................................    2
+  Has Fock  ......................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    0
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -2.38787323E+01
@@ -12722,11 +12732,12 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Max L+1 leading to non-zero Gaunt (pawlcutd) ...    5
   lmn2_size ......................................  171
   lmnmix_sz ......................................  171
-  Size of radial mesh ............................ 1500
+  Size of radial mesh ............................ 1084
   Size of radial mesh for partial waves........... 1500
-  Size of radial mesh for [pseudo] core density... 1500
+  Size of radial mesh for [pseudo] core density... 1084
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density.. 1500
-  No of Q-points for tcorespl and tvalespl .......  300
+  No of Q-points for tcorespl/tvalespl/ttaucorespl  300
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................    0
@@ -12736,14 +12747,16 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
-  Has Fock   .....................................    2
+  Has Fock  ......................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    0
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -3.50169981E+01
@@ -12766,11 +12779,12 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Max L+1 leading to non-zero Gaunt (pawlcutd) ...    3
   lmn2_size ......................................   36
   lmnmix_sz ......................................   36
-  Size of radial mesh ............................ 2001
+  Size of radial mesh ............................ 1311
   Size of radial mesh for partial waves........... 2001
-  Size of radial mesh for [pseudo] core density... 2001
+  Size of radial mesh for [pseudo] core density... 1311
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density.. 2001
-  No of Q-points for tcorespl and tvalespl .......  300
+  No of Q-points for tcorespl/tvalespl/ttaucorespl  300
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................    0
@@ -12780,14 +12794,16 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
-  Has Fock   .....................................    2
+  Has Fock  ......................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    0
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -4.77231787E+00
@@ -14137,32 +14153,32 @@ P           mkmem           2
 - [1] Screened Coulomb interaction calculations: cRPA implementation and applications 
 - to dynamical screening and self-consistency in uranium dioxide and cerium
 - B. Amadon, T. Applencourt and F. Bruneval  Phys. Rev. B 89, 125110 (2014).
-- Comment : Describes the cRPA implementation of the screened Coulomb interaction in PAW
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#amadon2014
+- Comment: Describes the cRPA implementation of the screened Coulomb interaction in PAW
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2014
 -
 - [2] Plane-wave based electronic structure calculations for correlated materials.
 - using dynamical mean-field theory and projected local orbitals,
 - B. Amadon, F. Lechermann, A. Georges, F. Jollet, T.O. Wehling, A.I. Lichenstein,
 - Phys. Rev. B 77, 205112 (2008).
-- Comment : to be cited in case the computation of overlap operator for Wannier90 interface within PAW is used,
+- Comment: to be cited in case the computation of overlap operator for Wannier90 interface within PAW is used,
 - i.e. prtwant=2 and usepaw=1. The paper describes also the DFT+DMFT implementation on Wannier functions
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#amadon2008
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008
 -
 - [3] Gamma and beta cerium: LDA+U calculations of ground-state parameters.
 - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
-- Comment : LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#amadon2008a
+- Comment: LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008a
 -
 - [4] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
-- Comment : PAW calculations. Strong suggestion to cite this paper.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#torrent2008
+- Comment: PAW calculations. Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
 - [5] Libxc: A library of exchange and correlation functionals for density functional theory.
 - M.A.L. Marques, M.J.T. Oliveira, T. Burnus, Computer Physics Communications 183, 2227 (2012).
-- Comment : to be cited when LibXC is used (negative value of ixc)
+- Comment: to be cited when LibXC is used (negative value of ixc)
 - Strong suggestion to cite this paper.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#marques2012
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#marques2012
 -
 - [6] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
@@ -14176,42 +14192,42 @@ P           mkmem           2
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [7] ABINIT : First-principles approach of materials and nanosystem properties.
+- [7] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [8] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=        447.2  wall=        449.0
+- Proc.   0 individual time (sec): cpu=        436.2  wall=        437.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=      10748.2  wall=      10773.2
++Overall time at end (sec) : cpu=      10472.7  wall=      10495.9

@@ -43,6 +43,7 @@ module m_bethe_salpeter
  use m_hdr
  use m_dtset
  use m_dtfil
+ use m_crystal
 
  use defs_datatypes,    only : pseudopotential_type, ebands_t
  use defs_abitypes,     only : MPI_type
@@ -56,7 +57,6 @@ module m_bethe_salpeter
  use m_fftcore,         only : print_ngfft
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt, setmesh
  use m_fft,             only : fourdp
- use m_crystal,         only : crystal_t, crystal_print
  use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_free, get_ng0sh, kmesh_print, get_BZ_item, find_qmesh, make_mesh
  use m_double_grid,     only : double_grid_t, double_grid_init, double_grid_free
  use m_ebands,          only : ebands_init, ebands_print, ebands_copy, ebands_free, &
@@ -384,7 +384,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
      gsqcut_shp=two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
      call pawinit(gnt_option,gsqcut_shp,zero,Dtset%pawlcutd,Dtset%pawlmix,&
 &     Psps%mpsang,Dtset%pawnphi,Cryst%nsym,Dtset%pawntheta,Pawang,Pawrad,&
-&     Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%xclevel,Dtset%usepotzero)
+&     Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%xclevel,0,Dtset%usepotzero)
 
      ! Update internal values
      call paw_gencond(Dtset,gnt_option,"save",call_pawinit)
@@ -997,8 +997,8 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call gsph_free(Gsph_c)
  call kmesh_free(Kmesh)
  call kmesh_free(Qmesh)
- call hdr_free(Hdr_wfk)
- call hdr_free(Hdr_bse)
+ call Hdr_wfk%free()
+ call Hdr_bse%free()
  call ebands_free(KS_BSt)
  call ebands_free(QP_BSt)
  call vcoul_free(Vcp)
@@ -1020,7 +1020,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call ebands_free(KS_BSt_dense)
    call ebands_free(QP_BSt_dense)
    call vcoul_free(Vcp_dense)
-   call hdr_free(Hdr_wfk_dense)
+   call Hdr_wfk_dense%free()
  end if
 
  ! Optional deallocation for PAW.
@@ -1151,14 +1151,6 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  real(dp),pointer :: energies_p(:,:,:)
  complex(dpc),allocatable :: gw_energy(:,:,:)
  type(Pawrhoij_type),allocatable :: Pawrhoij(:)
-!Interp@BSE
- !integer :: mode
- !integer :: kmult(3)
- !integer :: unt
- !integer :: rl_nb
- !logical :: interp_params_exists, prepare, sum_overlaps
- !namelist /interp_params/ mode,kmult,prepare,rl_nb,sum_overlaps
- !character(len=fnlen) :: tmp_fname
 
 !************************************************************************
 
@@ -1185,7 +1177,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  call wfk_read_eigenvalues(wfk_fname,energies_p,Hdr_wfk,comm)
  mband = MAXVAL(Hdr_wfk%nband)
 
- call hdr_vs_dtset(Hdr_wfk,Dtset)
+ call hdr_wfk%vs_dtset(dtset)
 
  ! === Create crystal_t data type ===
  !remove_inv= .FALSE. !(nsym_kss/=Hdr_wfk%nsym)
@@ -1193,8 +1185,8 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
             ! 1 => do not use time-reversal symmetry
             ! 2 => take advantage of time-reversal symmetry
 
- cryst = hdr_get_crystal(Hdr_wfk,timrev,remove_inv)
- call crystal_print(Cryst)
+ cryst = Hdr_wfk%get_crystal(timrev, remove_inv)
+ call cryst%print()
  !
  ! Setup of the k-point list and symmetry tables in the  BZ -----------------------------------
  if (Dtset%chksymbreak==0) then
@@ -1631,7 +1623,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
    call pawrhoij_copy(Hdr_wfk%Pawrhoij,Pawrhoij)
  end if
 
- call hdr_update(hdr_bse,bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
+ call hdr_bse%update(bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
 
  ABI_FREE(occfact)
 

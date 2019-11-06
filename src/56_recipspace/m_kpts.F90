@@ -369,20 +369,19 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
 
  if(timrev/=1 .and. timrev/=0)then
    write(errmsg, '(3a,i0,a)' )&
-&   'timrev should be 0 or 1, while',ch10,&
-&   'it is equal to ',timrev,'.'
+    'timrev should be 0 or 1, while',ch10,&
+    'it is equal to ',timrev,'.'
    ierr = 1; return
  end if
 
  if(nsym/=1)then
-!  Find the identity symmetry operation
+   ! Find the identity symmetry operation
    do isym=1,nsym
      tident=1
      do jj=1,3
        if(symrec(jj,jj,isym)/=1)tident=0
        do ii=1,3
-         if( ii/=jj .and.&
-&         symrec(ii,jj,isym)/=0)tident=0
+         if( ii/=jj .and.symrec(ii,jj,isym)/=0)tident=0
        end do
      end do
      if(tident==1)then
@@ -443,11 +442,11 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
 
        end do ! End secondary loop over k-points
        if (imatch/=1) then
-         write(errmsg, '(a,a,a,i4,a,i4,a,a,a,a)' )&
-&         'k-point set must have full space-group symmetry',ch10,&
-&         'there is no match for kpt',ikpt,' transformed by symmetry',isym,ch10,&
-&         'Action: change kptopt to 2 or 3 and/or change or use shiftk',ch10,&
-&         'shiftk = 0 0 0 is always a safe choice.'
+         write(errmsg, '(a,a,a,i0,a,i0,a,a,a,a)' )&
+          'k-point set must have full space-group symmetry',ch10,&
+          'there is no match for kpt: ',ikpt,' transformed by symmetry: ',isym,ch10,&
+          'Action: change kptopt to 2 or 3 and/or change or use shiftk',ch10,&
+          'shiftk = 0 0 0 is always a safe choice.'
          ierr = 2; return
        end if
 
@@ -455,8 +454,7 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
    end do ! End primary loop over k-points
 
    write(msg,'(a)')' symkchk : k-point set has full space-group symmetry.'
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg, 'COLL')
  end if
 
 end function symkchk

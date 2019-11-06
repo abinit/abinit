@@ -354,15 +354,19 @@ one can evaluate the GW energies for each state.
 
 The final results are:
     
-    k =    0.000   0.000   0.000
-    Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-       4   5.967 -11.268 -13.253   1.814   0.770  -0.299 -11.400  -0.132   5.835
-       5   8.472 -10.056  -5.573  -3.856   0.770  -0.298  -9.573   0.483   8.955
-
-    E^0_gap          2.505
-    E^GW_gap         3.120
-    DeltaE^GW_gap    0.614
-
+```yaml
+--- !SelfEnergy_ee
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    2.505
+QP_gap     :    3.120
+Delta_QP_KS:    0.614
+data: !SigmaeeData |
+     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        4   5.967 -11.268 -13.253   1.814   0.770  -0.299 -11.400  -0.132   5.835
+        5   8.472 -10.056  -5.573  -3.856   0.770  -0.298  -9.573   0.483   8.955
+...
+```
 
 For the desired **k**-point ($\Gamma$ point), for state 4, then state 5, one finds different information:
 
@@ -831,18 +835,23 @@ the previously determined parameters.
 
 You should obtain the following results:
 
-    k =    0.000   0.000   0.000
-    Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-       4   5.915 -11.254 -12.748   0.958   0.765  -0.307 -11.664  -0.410   5.505
-       5   8.445 -10.065  -5.869  -3.877   0.766  -0.306  -9.820   0.245   8.690
-   
-    E^0_gap          2.530
-    E^GW_gap         3.185
-    DeltaE^GW_gap    0.655
-    
+```yaml
+--- !SelfEnergy_ee
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    2.513
+QP_gap     :    3.140
+Delta_QP_KS:    0.627
+data: !SigmaeeData |
+     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        4   5.951 -11.271 -13.260   1.449   0.766  -0.305 -11.685  -0.414   5.537
+        5   8.464 -10.056  -5.572  -4.207   0.767  -0.304  -9.843   0.213   8.677
+...
+```
 
-So that the LDA energy gap in $\Gamma$ is about 2.53 eV, while the GW correction is
-about 0.64 eV, so that the GW band gap found is 3.17 eV.
+    
+So that the LDA energy gap in $\Gamma$ is about 2.51 eV, while the GW correction is
+about 0.63 eV, so that the GW band gap found is 3.14 eV.
 
 One can compare now what have been obtained to what one can get from the literature.
     

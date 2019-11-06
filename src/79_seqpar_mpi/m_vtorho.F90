@@ -46,7 +46,6 @@ module m_vtorho
  use m_time,               only : timab
  use m_geometry,           only : xred2xcart
  use m_occ,                only : newocc
- use m_dtset,              only : testsusmat
  use m_pawang,             only : pawang_type
  use m_pawtab,             only : pawtab_type
  use m_paw_ij,             only : paw_ij_type
@@ -1703,7 +1702,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          else
            write(message, '(a,i0,3a,i0,a,f7.3,5a)' )&
 &           'For k-point number ',ikpt,', and',ch10,&
-&           'for spin polarization',isppol,'the minimal occupation factor is',min_occ,'.',ch10,&
+&           'for spin polarization ',isppol, ' the minimal occupation factor is',min_occ,'.',ch10,&
 &           'An adequate monitoring of convergence requires it to be at most 0.01_dp.',ch10,&
 &           'Action: increase slightly the number of bands.'
          end if
@@ -1837,7 +1836,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !  Eventually compute the susceptibility matrix and the
 !  dielectric matrix when istep_mix is equal to 1 or dielstrt
    call timab(996,1,tsec)
-   call testsusmat(computesusmat,dielop,dielstrt,dtset,istep_mix) !test if the matrix is to be computed
+   computesusmat = dtset%testsusmat(dielop, dielstrt, istep_mix) !test if the matrix is to be computed
    if(computesusmat) then
      dielar(1)=dtset%diecut;dielar(2)=dtset%dielng
      dielar(3)=dtset%diemac;dielar(4)=dtset%diemix

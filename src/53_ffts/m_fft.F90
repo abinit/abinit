@@ -529,8 +529,7 @@ end subroutine fftbox_execute_op_dpc
 !!
 !! SOURCE
 
-subroutine fft_ug_dp(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ug,ur)
-
+subroutine fft_ug_dp(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug, ur)
 
 !Arguments ------------------------------------
 !scalars
@@ -632,7 +631,7 @@ end subroutine fft_ug_spc
 !!
 !! SOURCE
 
-subroutine fft_ug_dpc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ug,ur)
+subroutine fft_ug_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug, ur)
 
 
 !Arguments ------------------------------------
@@ -948,7 +947,7 @@ end subroutine fftpad_spc
 !!
 !! SOURCE
 
-subroutine fftpad_dpc(ff,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
+subroutine fftpad_dpc(ff, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound)
 
 
 !Arguments ------------------------------------
@@ -2931,7 +2930,7 @@ end subroutine fourwf
 !!
 !! SOURCE
 
-subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
+subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fourdp)
 
 
 !Arguments ------------------------------------
@@ -2958,6 +2957,7 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
  real(dp),allocatable :: workf(:,:,:,:,:),workr(:,:,:,:,:)
 
 ! *************************************************************************
+
  ABI_CHECK(ndat == 1, "ndat != 1 should be tested")
 
  ! Keep track of timing

@@ -973,6 +973,7 @@ with_wannier90_libs="-L${FALLBACKS_HOME}_8.12/${FB}/wannier90/2.0.1.1/lib -lwann
 #
 #enable_triqs_v2_0="no"
 #enable_triqs_v1_4="no"
+#enable_python_invocation="no"
 #
 # Include flags for the TRIQS library (default is unset)
 #

@@ -544,7 +544,7 @@ CONTAINS  !=====================================================================
  integer :: me,me_kpt,my_nspinor,nband_cprj_k,nband_k,nphicor
  integer :: sender,spaceComm_bandspin,spaceComm_k,spaceComm_w
  integer :: iomode,fformopt
- logical :: already_has_nabla,cprj_paral_band,ex,mykpt
+ logical :: already_has_nabla,cprj_paral_band,ex,mykpt,abinitcorewf,xmlcorewf
  character(len=fnlen) :: filecore
  real(dp) :: cpnm1,cpnm2
 !arrays
@@ -566,12 +566,17 @@ CONTAINS  !=====================================================================
 !------------------------------------------------------------------------------------------------
 
 !Note: core WF is read for itypat=1
- filecore=trim(filpsp(1))//'.corewf'
+ filecore=trim(filpsp(1)) ; iln=len(trim(filecore))
+ abinitcorewf=.false. ; if (iln>3) abinitcorewf=(filecore(iln-6:iln)=='.abinit')
+ xmlcorewf=.false. ; if (iln>3) xmlcorewf=(filecore(iln-3:iln)=='.xml')
+ if ((.not.xmlcorewf).and.(.not.abinitcorewf)) filecore=filecore(1:iln)//'.corewf'
+ if (abinitcorewf) filecore=filecore(1:iln-6)//'corewf.abinit'
+ if (xmlcorewf) filecore=filecore(1:iln-3)//'corewf.xml'
  inquire(file=filecore,exist=ex)
  if (ex) then
-   !Use <filepsp>.corewf
+   !Use <filepsp>.corewf.xml or <filepsp>.corewf.abinit
    call pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,pawrad(1),phi_cor,&
-&   filename=filecore)
+&                          filename=filecore)
  else
    !Use default name
    call pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,pawrad(1),phi_cor)
@@ -894,7 +899,7 @@ CONTAINS  !=====================================================================
 
 ! Read the header of the optic files
  call hdr_read_from_fname(hdr, filnam1, fform1, spaceComm)
- call hdr_free(hdr)
+ call hdr%free()
  if (fform1 /= 610) then
    MSG_ERROR("Abinit8 requires an OPT file with fform = 610")
  end if
@@ -1084,7 +1089,7 @@ CONTAINS  !=====================================================================
  ABI_DEALLOCATE(wtk)
  ABI_DEALLOCATE(kpts)
 
- call hdr_free(hdr)
+ call hdr%free()
  call destroy_mpi_enreg(MPI_enreg_seq)
 
  DBG_EXIT("COLL")
