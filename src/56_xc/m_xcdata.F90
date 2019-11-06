@@ -100,9 +100,6 @@ module m_xcdata
   real(dp) :: xc_denpos
     ! density positivity value
 
-  real(dp) :: xc_tb09_c
-    ! Parameter for Tran-Blaha functional
-
  end type xcdata_type
 !----------------------------------------------------------------------
 
@@ -130,7 +127,6 @@ contains
 !!  [tphysel = Physical temperature (for temperature-dependent functional)]
 !!  [usekden = 1 if the XC functional depends on the kinetic energy density]
 !!  [vdw_xc = Choice of van-der-Waals density functional]
-!!  [xc_tb09_c = Parameter for Tran-Blaha functional]
 !!
 !! OUTPUT
 !!  xcdata <type(xcdata_type)>= the data to calculate exchange-correlation are initialized
@@ -146,12 +142,12 @@ contains
 !!
 !! SOURCE
 
-subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,tphysel,usekden,vdw_xc,xc_tb09_c,xc_denpos)
+subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,tphysel,usekden,vdw_xc,xc_denpos)
 
 !Arguments ------------------------------------
 !scalars
  integer, intent(in),optional :: auxc_ixc,intxc,ixc,nspden,usekden,vdw_xc
- real(dp),intent(in),optional :: hyb_mixing,nelect,tphysel,xc_denpos,xc_tb09_c
+ real(dp),intent(in),optional :: hyb_mixing,nelect,tphysel,xc_denpos
  type(dataset_type), intent(in),optional :: dtset
  type(xcdata_type), intent(out) :: xcdata
 !Local variables-------------------------------
@@ -173,14 +169,12 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,
    xcdata%nelect=dtset%nelect
    xcdata%tphysel=dtset%tphysel
    xcdata%xc_denpos=dtset%xc_denpos
-   xcdata%xc_tb09_c=dtset%xc_tb09_c
 
  else
    if(.not.(present(auxc_ixc).and.present(intxc).and.present(ixc).and.&
 &           present(usekden).and.present(vdw_xc).and.present(hyb_mixing).and.&
 &           present(nelect).and.present(nspden).and.&
-&           present(tphysel).and.present(xc_denpos).and.&
-&           present(xc_tb09_c)))then
+&           present(tphysel).and.present(xc_denpos)))then
      write(message,'(a)') &
 &     ' If dtset is not provided, all the other optional arguments must be provided, which is not the case.'
      MSG_BUG(message)
@@ -198,7 +192,6 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,
  if(present(nelect))    xcdata%nelect=nelect
  if(present(tphysel))   xcdata%tphysel=tphysel
  if(present(xc_denpos)) xcdata%xc_denpos=xc_denpos
- if(present(xc_tb09_c))  xcdata%xc_tb09_c=xc_tb09_c
 
 !Compute xclevel
  call get_xclevel(xcdata%ixc,xclevel,usefock=usefock)

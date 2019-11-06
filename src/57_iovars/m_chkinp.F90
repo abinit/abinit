@@ -515,7 +515,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          cond_string(1)='dmft_kspectralfunc' ; cond_values(1)=1
          call chkint_eq(0,1,cond_string,cond_values,ierr,'iscf',dt%iscf,2,(/-2,-3/),iout)
        endif
-       if((dt%dmft_solv<6.or.dt%dmft_solv>7).and.dt%ucrpa==0) then
+       if((dt%dmft_solv<6.or.dt%dmft_solv>7).and.dt%ucrpa==0.and.dt%dmft_solv/=9) then
          cond_string(1)='usedmft' ; cond_values(1)=1
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwlo',dt%dmft_nwlo,1,iout)
          cond_string(1)='usedmft' ; cond_values(1)=1
@@ -532,7 +532,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_mxsf',dt%dmft_mxsf,-1,one,iout)
        cond_string(1)='usedmft' ; cond_values(1)=1
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,9,(/-2,-1,0,1,2,5,6,7,8/),iout)
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,10,(/-2,-1,0,1,2,5,6,7,8,9/),iout)
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_tolfreq',dt%dmft_tolfreq,-1,0.01_dp,iout)
        cond_string(1)='usedmft' ; cond_values(1)=1
@@ -561,7 +561,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_t2g',dt%dmft_t2g,2,(/0,1/),iout)
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_x2my2d',dt%dmft_x2my2d,2,(/0,1/),iout)
-       if (dt%dmft_solv>=4.and.dt%ucrpa==0) then
+       if (dt%dmft_solv>=4.and.dt%ucrpa==0.and.dt%dmft_solv/=9) then
          cond_string(1)='usedmft' ; cond_values(1)=1
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_l',dt%dmftqmc_l,1,iout)
          cond_string(1)='usedmft' ; cond_values(1)=1
@@ -581,11 +581,19 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          cond_string(1)='dmft_solv' ; cond_values(1)=5
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_meas',dt%dmftctqmc_meas,1,iout)
 #if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
-         if (dt%dmft_solv==6.or.dt%dmft_solv==7) then
+         if (dt%dmft_solv==6.or.dt%dmft_solv==7.or.dt%dmft_solv==9) then
            cond_string(1)='dmft_solv' ; cond_values(1)=5
            call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_l',dt%dmftqmc_l,2*dt%dmft_nwli+1,iout)
            cond_string(1)='usedmft' ; cond_values(1)=1
            call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_nleg',dt%dmftctqmc_triqs_nleg,1,iout)
+         end if
+#endif
+#if !defined HAVE_PYTHON_INVOCATION
+         if (dt%dmft_solv==9) then
+           write(msg,'(2a)')&
+&           'ABINIT must have been compiled with the flag enable_python_invocation="yes" in order to allow', &
+&           ' dmft_solv==9. You need to recompile ABINIT or change the value of dmft_solv.'
+           MSG_ERROR(msg)
          end if
 #endif
        end if
@@ -2171,6 +2179,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_RESPFN/),iout)
    end if
    !PAW+Linear Response+GGA function restricted to pawxcdev=0
+   !PAW+response_to_strain only allowed for LDA
    if (dt%usepaw==1.and.dt%optdriver==RUNL_RESPFN) then
      allow=(dt%ixc>0).and.((dt%ixc>=11.and.dt%ixc<=16).or.(dt%ixc>=23.and.dt%ixc<=39))
      if(.not.allow) allow=(dt%ixc<0).and.libxc_functionals_isgga()
@@ -2188,6 +2197,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &         '  - This is restricted to pawxcdev=0!',ch10,&
 &         '  - Be careful to run the preparatory Ground-State calculations also with pawxcdev=0!'
          MSG_WARNING(msg)
+       end if
+       if (dt%rfstrs/=0) then
+         write(msg,'(3a)' )&
+&         'You are performing a DFPT+PAW calculation using a GGA XC functional:',ch10,&
+&         '  Response to strain perturbation is not yet available!'
+         MSG_ERROR_NOSTOP(msg, ierr)
        end if
      end if
    end if
@@ -2557,6 +2572,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &       'Action: choose another psp file.'
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
+   end if
+   if (dt%positron/=0.and.mgga==1) then
+     msg='Electron-positron calculation is not compatible with meta-GGA XC functional!'
+     MSG_ERROR_NOSTOP(msg, ierr)
    end if
    if (dt%positron/=0.and.dt%ionmov==5) then
      cond_string(1)='ionmov' ; cond_values(1)=dt%ionmov
@@ -3177,14 +3196,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='usekden' ; cond_values(1)=dt%usekden
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usewvl',usewvl,1,(/0/),iout)
      cond_string(1)='usekden' ; cond_values(1)=dt%usekden
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',usepaw,1,(/0/),iout)
+!     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',usepaw,1,(/0/),iout)
      cond_string(1)='usekden' ; cond_values(1)=dt%usekden
      call chkint_eq(1,1,cond_string,cond_values,ierr,'intxc',dt%intxc,1,(/0/),iout)
      do ipsp=1,npsp
-!      Check that xccc is zero (metaGGAs cannot be used at present with non-linear core corrections)
-       if ( pspheads(ipsp)%xccc/=0 ) then
-         write(msg, '(3a,i0,3a)' )&
-&         'When usekden is non-zero, it is not possible to use pseudopotentials with a non-linear core correction.',ch10,&
+!      Check that xccc is zero (NCPP metaGGAs cannot be used at present with non-linear core corrections)
+       if (pspheads(ipsp)%xccc/=0.and.usepaw==0) then
+         write(msg, '(5a,i0,3a)' )&
+&         'When usekden/=0, it is not possible to use norm-conserving pseudopotentials',ch10,&
+&         'with a non-linear core correction.',ch10,&
 &         'However, for pseudopotential number ',ipsp,', there is such a core correction.',ch10,&
 &         'Action: either set usekden=0 in input file, or change this pseudopotential file.'
          MSG_ERROR_NOSTOP(msg, ierr)

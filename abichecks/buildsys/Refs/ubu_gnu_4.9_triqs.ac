@@ -973,6 +973,7 @@ with_libxc_libs="-L${FALLBACKS_HOME}_8.12/${FB}/libxc/4.2.3/lib -lxc"
 #
 #enable_triqs_v2_0="no"
 enable_triqs_v1_4="yes"
+enable_python_invocation="yes"
 #
 # Include flags for the TRIQS library (default is unset)
 #

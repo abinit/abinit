@@ -348,6 +348,7 @@ contains
      MSG_ERROR(message)
    end if
    rewind(unt)
+ read(unt,*) message
    read(unt,*) message, lpawu_read
    read(unt,*) message, ib1, ib2
    close(unt)

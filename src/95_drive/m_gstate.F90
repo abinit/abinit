@@ -72,8 +72,8 @@ module m_gstate
  use m_pawrhoij,         only : pawrhoij_type, pawrhoij_copy, pawrhoij_free
  use m_paw_dmft,         only : init_sc_dmft,destroy_sc_dmft,print_sc_dmft,paw_dmft_type,readocc_dmft
  use m_paw_sphharm,      only : setsym_ylm
- use m_paw_init,         only : pawinit,paw_gencond
  use m_paw_occupancies,  only : initrhoij
+ use m_paw_init,         only : pawinit,paw_gencond
  use m_paw_correlations, only : pawpuxinit
  use m_orbmag,           only : initorbmag,destroy_orbmag,orbmag_type
  use m_paw_uj,           only : pawuj_ini,pawuj_free,pawuj_det, macro_uj_type
@@ -472,18 +472,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  comm_psp=mpi_enreg%comm_cell;if (dtset%usewvl==1) comm_psp=mpi_enreg%comm_wvl
  if (dtset%nimage>1) psps%mixalch(:,:)=args_gs%mixalch(:,:) ! mixalch can evolve for some image algos
  call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,pawrad,pawtab,psps,rprimd,comm_mpi=comm_psp)
-
  call timab(701,2,tsec)
  call timab(33,3,tsec)
- if (psps%usepaw==1.and.dtset%usefock==1)then
-   do itypat=1,dtset%ntypat
-     if(pawtab(itypat)%has_fock==0) then
-       write(message, '(a)' )&
-&       'The PAW data file does not contain Fock information. Change the PAW data file.'
-       MSG_BUG(message)
-     end if
-   end do
- end if
+
 !In case of isolated computations, ecore must set to zero
 !because its contribution is counted in the ewald energy as the ion-ion interaction.
  if (dtset%icoulomb == 1) ecore = zero
@@ -965,7 +956,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      hyb_range_fock=zero;if (dtset%ixc<0) call libxc_functionals_get_hybridparams(hyb_range=hyb_range_fock)
      call pawinit(gnt_option,gsqcut_shp,hyb_range_fock,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
-&     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usepotzero)
+&     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usekden,dtset%usepotzero)
 
      ! Update internal values
      call paw_gencond(Dtset,gnt_option,"save",call_pawinit)
