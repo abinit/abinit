@@ -45,7 +45,7 @@ module m_pawpsp
  use m_paw_numeric, only: paw_splint, paw_spline, paw_smooth, paw_jbessel_4spline
  use m_paw_atom, only: atompaw_shapebes, atompaw_vhnzc, atompaw_shpfun, &
 &                     atompaw_dij0, atompaw_kij
- use m_pawxc, only: pawxc, pawxcm
+ use m_pawxc, only: pawxc, pawxcm, pawxc_get_usekden
  use m_paw_gaussfit, only: gaussfit_projector
 
  implicit none
@@ -1654,6 +1654,7 @@ end subroutine pawpsp_rw_atompaw
 !!
 !! INPUTS
 !!  core_mesh<type(pawrad_type)>= radial mesh for the core density
+!!  [coretau_mesh<type(pawrad_type)>]=radial mesh for the core kinetic energy density
 !!  imainmesh= serial number of the main mesh
 !!  ixc=exchange-correlation choice from main routine data file
 !!  lnmax=max. number of (l,n) components over all type of psps
@@ -1669,6 +1670,7 @@ end subroutine pawpsp_rw_atompaw
 !!  qgrid_vl(mqgrid_vl)=values of q on grid from 0 to qmax (bohr^-1) for Vloc
 !!  radmesh(nmesh)<type(pawrad_type)>=paw radial meshes and related data
 !!  tncore(core_mesh%mesh_size)= pseudo core density
+!!  [ttaucore(coretau_mesh%mesh_size)]= pseudo core kinetic energy density
 !!  tproj(tproj_mesh%mesh_size)= non-local projectors in real space
 !!  tproj_mesh<type(pawrad_type)>= radial mesh for the projectors
 !!  usexcnhat=0 if compensation charge density is not included in XC terms
@@ -1707,7 +1709,8 @@ end subroutine pawpsp_rw_atompaw
 subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 &          mmax,mqgrid_ff,mqgrid_vl,ncore,nmesh,pawrad,pawtab,pawxcdev,pspversion,&
 &          qgrid_ff,qgrid_vl,radmesh,tncore,tnvale,tproj,tproj_mesh,usexcnhat,vale_mesh,&
-&          vloc_mesh,vlocopt,vlocr,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl)
+&          vloc_mesh,vlocopt,vlocr,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl,&
+&          ttaucore,coretau_mesh) !optional
 
 !Arguments ------------------------------------
 !scalars
@@ -1718,10 +1721,12 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  real(dp),intent(in) :: xc_denpos,zion,znucl
  real(dp),intent(out) :: epsatm,xcccrc
  type(pawrad_type),intent(in) :: core_mesh,tproj_mesh,vale_mesh
+ type(pawrad_type),intent(in),optional :: coretau_mesh
  type(pawrad_type),intent(inout) ::pawrad,vloc_mesh
  type(pawtab_type),intent(inout) :: pawtab
 !arrays
  real(dp),intent(in) :: ncore(core_mesh%mesh_size),tncore(core_mesh%mesh_size)
+ real(dp),intent(in),optional :: ttaucore(:)
  real(dp),intent(in) :: qgrid_vl(mqgrid_vl),qgrid_ff(mqgrid_ff)
  real(dp),intent(inout) :: ffspl(mqgrid_ff,2,lnmax)
  real(dp),intent(out) :: vlspl(mqgrid_vl,2)
@@ -1734,19 +1739,20 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 !scalars
  integer,parameter :: reduced_mshsz=2501
  integer :: ib,il,ilm,ilmn,iln,ir,isnotzero,itest
- integer :: j0lmn,jlm,jlmn,jln,klmn,msz,msz1,msz_tmp,mst_tmp,nspden
- logical :: has_dij0,non_magnetic_xc,reduced_ncor,reduced_nval,reduced_vloc,testval
+ integer :: j0lmn,jlm,jlmn,jln,klmn,msz,msz1,msz_tmp,mst_tmp,nspden,usekden
+ logical :: has_dij0,non_magnetic_xc,reduced_ncor,reduced_taucor,reduced_nval,reduced_vloc,testval
  real(dp),parameter :: reduced_rstep=0.00025_dp,rm_vloc=20.0_dp
  real(dp) :: d2nvdq0,intg,intvh,lstep_tmp,qcore,qq,rstep_tmp,yp1,ypn
  character(len=500) :: msg
  type(pawang_type) :: pawang_tmp
- type(pawrad_type) :: rcore_mesh,rvale_mesh,rvloc_mesh,tproj_mesh_new
+ type(pawrad_type) :: rcore_mesh,rtaucore_mesh,rvale_mesh,rvloc_mesh,tproj_mesh_new
 !arrays
  real(dp) :: tmp_qgrid(1),tmp_q2vq(1)
  real(dp),allocatable :: ncorwk(:),nhat(:),nhatwk(:),nwk(:),r2k(:)
- real(dp),allocatable :: rtncor(:),rtnval(:),rvlocr(:)
- real(dp),allocatable :: vbare(:),vh(:),vhnzc(:)
- real(dp),allocatable :: vxc1(:),vxc2(:),work1(:),work1b(:),work2(:),work3(:),work4(:)
+ real(dp),allocatable :: rtncor(:),rttaucor(:),rtnval(:),rvlocr(:)
+ real(dp),allocatable :: vbare(:),vh(:),vhnzc(:),vxc1(:),vxc2(:)
+ real(dp),allocatable,target :: work1(:),work2(:),work3(:)
+ real(dp),pointer :: tmp1(:),tmp2(:),tmp3(:),tmp4(:),tmp5(:)
  logical :: tmp_lmselect(1)
 
 ! *************************************************************************
@@ -1762,6 +1768,28 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 !   MSG_ERROR(msg)
 ! end if
 
+!Check optional arguments
+ usekden=pawtab%has_coretau
+ if (usekden>=1) then
+   if (present(ttaucore)) then
+     if (.not.(present(coretau_mesh))) then
+       msg='ttaucore present but not coretau_mesh!'
+       MSG_BUG(msg)
+     end if
+     if (size(ttaucore)/=coretau_mesh%mesh_size) then
+       msg='wrong size for ttaucore!'
+       MSG_BUG(msg)
+     end if
+     if (coretau_mesh%mesh_size<pawtab%mesh_size) then
+       write(msg, '(a,a,a,a,a)' )&
+&       'Mesh size for core kinetic energy density must be equal or larger',ch10,&
+&       'than mesh size for PAW augmentation regions !',ch10,&
+&       'Action : check your pseudopotential (increase TAUcore meshSize).'
+       MSG_ERROR(msg)
+     end if
+   end if
+ end if
+
 !Are mmax and mesh_size for partial waves compatibles ?
  if (mmax/=pawtab%partialwave_mesh_size) then
    write(msg, '(a,a,a)' )&
@@ -1770,8 +1798,8 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
    MSG_ERROR(msg)
  end if
 
-!Are radial meshes for (t)Ncore and Phi compatibles ?
- if (core_mesh%mesh_size<pawtab%mesh_size) then
+!Are radial meshes for (t)Ncore / tTAU and Phi compatibles ?
+ if (usekden>=1.and.core_mesh%mesh_size<pawtab%mesh_size) then
    write(msg, '(a,a,a,a,a)' )&
 &   'Mesh size for core density must be equal or larger',ch10,&
 &   'than mesh size for PAW augmentation regions !',ch10,&
@@ -2095,7 +2123,13 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
    if (pawtab%has_tvale==0) then
      write(msg, '(5a)' ) &
 &     'It is only possible to modify the use of compensation charge density',ch10,&
-&     'for a file format greater or equal than paw4 !',ch10,&
+&     'for a file format containing the pseudo valence density (format>=paw4 or XML)!',ch10,&
+&     'Action: use usexcnhat=-1 in input file or change psp file format.'
+     MSG_WARNING(msg)
+   else if (usekden>=1) then
+     write(msg, '(5a)' ) &
+&     'It is not possible to modify the use of compensation charge density',ch10,&
+&     'within the metaGGA XC functional (need valence kinetic density)!',ch10,&
 &     'Action: use usexcnhat=-1 in input file or change psp file format.'
      MSG_WARNING(msg)
    else
@@ -2135,6 +2169,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
        nwk   (1:msz1)=tnvale(1:msz1)
        nhatwk(1:msz1)=nhat  (1:msz1)
      end if
+     
      nwk=nwk-nhatwk
      nwk=sqrt(four_pi)*nwk;nhatwk=sqrt(four_pi)*nhatwk ! 0th-order moment of densities
 
@@ -2147,9 +2182,9 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
        LIBPAW_ALLOCATE(vxc1,(msz*nspden))
        LIBPAW_ALLOCATE(vxc2,(msz*nspden))
        LIBPAW_ALLOCATE(work1,(msz))
-       LIBPAW_ALLOCATE(work1b,(msz))
        LIBPAW_ALLOCATE(work2,(msz*nspden))
        LIBPAW_ALLOCATE(work3,(msz*nspden))
+       tmp1 => work1
        work2(1:msz)=nwk
        work3(1:msz)=nhatwk
        if (nspden==2) work2(msz+1:2*msz)=half*nwk
@@ -2161,23 +2196,22 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 &         pawang_tmp,vloc_mesh,pawxcdev,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
          vxc1=vxc1/sqrt(four_pi);vxc2=vxc2/sqrt(four_pi) ! Deduce Vxc from its first moment
        else
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,work1b,1,tmp_lmselect,work3,0,0,non_magnetic_xc,msz,nspden,5,&
-&         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,work1b,1,tmp_lmselect,work3,0,0,non_magnetic_xc,msz,nspden,5,&
-&         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,tmp1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,msz,nspden,5,&
+&         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,0,usekden,vxc1,xclevel,xc_denpos)
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,tmp1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,msz,nspden,5,&
+&         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,2,usekden,vxc2,xclevel,xc_denpos)
        end if
        LIBPAW_DEALLOCATE(nwk)
        LIBPAW_DEALLOCATE(ncorwk)
        LIBPAW_DEALLOCATE(nhatwk)
        LIBPAW_DEALLOCATE(work1)
-       LIBPAW_DEALLOCATE(work1b)
        LIBPAW_DEALLOCATE(work2)
        LIBPAW_DEALLOCATE(work3)
      else
        LIBPAW_ALLOCATE(vxc1,(msz))
        LIBPAW_ALLOCATE(vxc2,(msz))
        LIBPAW_ALLOCATE(work1,(msz))
-       LIBPAW_ALLOCATE(work1b,(msz))
+       tmp1 => work1
        if (pawxcdev/=0) then
          call pawxcm(ncorwk,yp1,ypn,0,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
 &         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
@@ -2185,16 +2219,15 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 &         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
          vxc1=vxc1/sqrt(four_pi);vxc2=vxc2/sqrt(four_pi) ! Deduce Vxc from its first moment
        else
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,work1b,1,tmp_lmselect,nhatwk,0,0,non_magnetic_xc,msz,1,5,&
-&         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxc(ncorwk,yp1,ypn,ixc,work1,work1b,1,tmp_lmselect,nhatwk,0,0,non_magnetic_xc,msz,1,5,&
-&         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,tmp1,1,tmp_lmselect,nhatwk,0,0,non_magnetic_xc,msz,1,5,&
+&         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,0,usekden,vxc1,xclevel,xc_denpos)
+         call pawxc(ncorwk,yp1,ypn,ixc,work1,tmp1,1,tmp_lmselect,nhatwk,0,0,non_magnetic_xc,msz,1,5,&
+&         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,2,usekden,vxc2,xclevel,xc_denpos)
        end if
        LIBPAW_DEALLOCATE(nwk)
        LIBPAW_DEALLOCATE(ncorwk)
        LIBPAW_DEALLOCATE(nhatwk)
        LIBPAW_DEALLOCATE(work1)
-       LIBPAW_DEALLOCATE(work1b)
      endif
 !    Compute difference of XC potentials
      if (usexcnhat==0.and.pawtab%usexcnhat/=0)  vxc1(1:msz)=vxc2(1:msz)-vxc1(1:msz)
@@ -2334,6 +2367,32 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 
 !==========================================================
 !Try to optimize CPU time:
+!If taucore mesh size is big, spline ttaucore into a smaller log. mesh
+
+ reduced_taucor=.false.
+ if (usekden>=1.and.present(ttaucore)) then
+   reduced_taucor=(coretau_mesh%mesh_size>int(reduced_mshsz)).and.(pawtab%usetcore/=0)
+   if (reduced_taucor) then
+     msz=coretau_mesh%mesh_size
+     lstep_tmp=log(0.9999999_dp*coretau_mesh%rmax/reduced_rstep)/dble(reduced_mshsz-2)
+     call pawrad_init(rtaucore_mesh,mesh_size=reduced_mshsz,mesh_type=3,&
+&    rstep=reduced_rstep,lstep=lstep_tmp)
+     LIBPAW_ALLOCATE(rttaucor,(reduced_mshsz))
+     call bound_deriv(ttaucore(1:msz),coretau_mesh,msz,yp1,ypn)
+     LIBPAW_ALLOCATE(work1,(msz))
+     LIBPAW_ALLOCATE(work2,(msz))
+     LIBPAW_ALLOCATE(work3,(msz))
+     work3(1:msz)=coretau_mesh%rad(1:msz)
+     call paw_spline(work3,ttaucore,msz,yp1,ypn,work1)
+     call paw_splint(msz,work3,ttaucore,work1,reduced_mshsz,rtaucore_mesh%rad,rttaucor)
+     LIBPAW_DEALLOCATE(work1)
+     LIBPAW_DEALLOCATE(work2)
+     LIBPAW_DEALLOCATE(work3)
+   end if
+ end if
+
+!==========================================================
+!Try to optimize CPU time:
 !If vale mesh size is big, spline tnvale into a smaller log. mesh
 
  if (pawtab%has_tvale==1) then
@@ -2358,7 +2417,6 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  else
    reduced_nval=.false.
  end if
-
 !==========================================================
 !Compute Vlspl(q) (and second derivative) from Vloc(r)
 
@@ -2380,7 +2438,6 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
      call pawpsp_lo(epsatm,1,tmp_qgrid,tmp_q2vq,vloc_mesh,vlocr,yp1,ypn,zion)
    end if
  end if
-
 !==========================================================
 !Compute tcorespl(q) (and second derivative) from tNcore(r)
 
@@ -2404,6 +2461,33 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  end if
 
 !==========================================================
+!Compute ttaucorespl(q) 
+
+ if (usekden>=1.and.present(ttaucore)) then
+   if (coretau_mesh%rmax/=xcccrc) then
+     write(msg, '(a,a,a)' )&
+&     'Core density and core kinetic density should be given on the same grid!',ch10,&
+&     'Action : check your pseudopotential (increase tNvale meshSize).'
+     MSG_ERROR(msg)
+   end if
+
+   LIBPAW_ALLOCATE(pawtab%ttaucorespl,(pawtab%mqgrid,2))
+   if(mqgrid_vl>0) then
+!    Compute tcorespl(q)=tNc(q) from tNcore(r)
+     if (reduced_taucor) then
+       call pawpsp_cg(pawtab%dtaucdq0,qq,mqgrid_vl,qgrid_vl,pawtab%ttaucorespl(:,1),rtaucore_mesh,rttaucor,yp1,ypn)
+     else
+       call pawpsp_cg(pawtab%dtaucdq0,qq,mqgrid_vl,qgrid_vl,pawtab%ttaucorespl(:,1),coretau_mesh,ttaucore,yp1,ypn)
+     end if
+!    Compute second derivative of tcorespl(q)
+     call paw_spline(qgrid_vl,pawtab%ttaucorespl(:,1),mqgrid_vl,yp1,ypn,pawtab%ttaucorespl(:,2))
+   else
+     pawtab%ttaucorespl=zero
+     pawtab%dtaucdq0=zero
+   end if
+ end if
+
+!==========================================================
 !Compute tvalespl(q) (and second derivative) from tNvale(r)
 
  if (pawtab%has_tvale/=0.and.mqgrid_vl>0) then
@@ -2421,7 +2505,6 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
    pawtab%dnvdq0=zero
    pawtab%tnvale_mesh_size=0
  end if
-
 !==================================================
 !Compute Ex-correlation energy for the core density
 
@@ -2431,23 +2514,22 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 #endif
 
  LIBPAW_ALLOCATE(work1,(core_mesh%mesh_size*nspden))
- LIBPAW_ALLOCATE(work1b,(core_mesh%mesh_size*nspden))
- LIBPAW_ALLOCATE(work2,(core_mesh%mesh_size*nspden))
+ LIBPAW_ALLOCATE(work2,(core_mesh%mesh_size))
  LIBPAW_ALLOCATE(work3,(1))
- LIBPAW_ALLOCATE(work4,(core_mesh%mesh_size))
- work1(:)=zero
+ work1(:)=zero;work2(:)=zero;work3(:)=zero
+ tmp1 => work1 ; tmp2 => work1 ; tmp3 => work1 ; tmp4 => work1 ; tmp5 => work1
+
  if (pawxcdev/=0) then
-   call pawxcm(ncore,pawtab%exccore,yp1,0,ixc,work4,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
-&   nspden,4,pawang_tmp,core_mesh,pawxcdev,work1,1,0,work2,xclevel,xc_denpos)
+   call pawxcm(ncore,pawtab%exccore,yp1,0,ixc,work2,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
+&   nspden,4,pawang_tmp,core_mesh,pawxcdev,work1,1,0,tmp1,xclevel,xc_denpos)
  else
-   call pawxc(ncore,pawtab%exccore,yp1,ixc,work4,work1b,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
-&   nspden,4,pawang_tmp,core_mesh,work1,1,0,work2,xclevel,xc_denpos)
+   call pawxc(ncore,pawtab%exccore,yp1,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
+&   nspden,4,pawang_tmp,core_mesh,tmp1,1,0,usekden,tmp2,xclevel,xc_denpos,taucore=tmp3,taur=tmp4,vxctau=tmp5)
  end if
+
  LIBPAW_DEALLOCATE(work1)
- LIBPAW_DEALLOCATE(work1b)
  LIBPAW_DEALLOCATE(work2)
  LIBPAW_DEALLOCATE(work3)
- LIBPAW_DEALLOCATE(work4)
 
 !==================================================
 !Compute atomic contribution to Dij (Dij0)
@@ -2520,6 +2602,10 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  if (reduced_ncor)  then
    call pawrad_free(rcore_mesh)
    LIBPAW_DEALLOCATE(rtncor)
+ end if
+  if (reduced_taucor)  then
+   call pawrad_free(rtaucore_mesh)
+   LIBPAW_DEALLOCATE(rttaucor)
  end if
  if (reduced_nval)  then
    call pawrad_free(rvale_mesh)
@@ -2882,18 +2968,18 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
 !Local variables ------------------------------
 !scalars
- integer :: has_v_minushalf,ib,icoremesh,il,ilm,ilmn,ilmn0,iln,imainmesh,imsh,iprojmesh
+ integer :: has_v_minushalf,ib,icoremesh,itaucoremesh,il,ilm,ilmn,ilmn0,iln,imainmesh,imsh,iprojmesh
  integer :: ir,iread1,ishpfmesh,ivalemesh,ivlocmesh,j0lmn,jlm,pngau
  integer :: jlmn,jln,klmn,msz,nmesh,nval,pspversion,shft,sz10,usexcnhat,vlocopt
  real(dp), parameter :: rmax_vloc=10.0_dp
  real(dp) :: fourpi,occ,rc,yp1,ypn
  logical :: save_core_msz
  character(len=500) :: msg
- type(pawrad_type) :: core_mesh,shpf_mesh,tproj_mesh,vale_mesh,vloc_mesh
+ type(pawrad_type) :: core_mesh,coretau_mesh,shpf_mesh,tproj_mesh,vale_mesh,vloc_mesh
 !arrays
  integer,allocatable :: mesh_shift(:),nprj(:)
- real(dp),allocatable :: kij(:),ncore(:)
- real(dp),allocatable :: shpf(:,:),tncore(:),tnvale(:),tproj(:,:),vhnzc(:),vlocr(:)
+ real(dp),allocatable :: kij(:),ncore(:),shpf(:,:),tncore(:),taucore(:)
+ real(dp),allocatable :: ttaucore(:),tnvale(:),tproj(:,:),vhnzc(:),vlocr(:)
  real(dp),allocatable :: work1(:),work2(:),work3(:),work4(:)
  type(pawrad_type),allocatable :: radmesh(:)
 
@@ -2914,6 +3000,8 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
  fourpi=4*acos(-1.d0)
  pspversion=pawpsp_header%pawver
  save_core_msz=(usewvl==1 .or. icoulomb .ne. 0)
+ imainmesh=-1;icoremesh=-1;itaucoremesh=-1;iprojmesh=-1
+ ishpfmesh=-1;ivalemesh=-1;ivlocmesh=-1
 
 !==========================================================
 !Initialize partial waves quantum numbers
@@ -3157,7 +3245,6 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 !Read wave-functions (phi)
 
  do ib=1,pawtab%basis_size
-
    if (ib==1) then
      do imsh=1,nmesh
        if(trim(paw_setuploc%ae_partial_wave(1)%grid)==trim(paw_setuploc%radial_grid(imsh)%id)) then
@@ -3199,7 +3286,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
      write(msg, '(a,a,a)' )&
 &     'All Phi and tPhi must be given on the same radial mesh !',ch10,&
 &     'Action: check your pseudopotential file.'
-     MSG_ERROR(msg)
+      MSG_ERROR(msg)
    end if
    shft=mesh_shift(imainmesh)
    pawtab%tphi(1+shft:pawtab%partialwave_mesh_size,ib)=&
@@ -3216,41 +3303,40 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 !Read projectors (tproj)
 
  if (allocated(paw_setuploc%projector_fit)) then
-    call wvlpaw_allocate(pawtab%wvl)
-    LIBPAW_ALLOCATE(pawtab%wvl%pngau,(pawtab%basis_size))
-    do ib=1,pawtab%basis_size
-       pawtab%wvl%pngau(ib) = paw_setuploc%projector_fit(ib)%ngauss
-    end do
-    pawtab%wvl%ptotgau = sum(pawtab%wvl%pngau) * 2
-    LIBPAW_ALLOCATE(pawtab%wvl%parg,(2,pawtab%wvl%ptotgau))
-    LIBPAW_ALLOCATE(pawtab%wvl%pfac,(2,pawtab%wvl%ptotgau))
-    pngau = 1
-    do ib=1,pawtab%basis_size
-       ! Complex gaussian
-       pawtab%wvl%parg(:,pngau:pngau + pawtab%wvl%pngau(ib) - 1) = &
-            & paw_setuploc%projector_fit(ib)%expos(:,1:pawtab%wvl%pngau(ib))
-       pawtab%wvl%pfac(:,pngau:pngau + pawtab%wvl%pngau(ib) - 1) = &
-            & paw_setuploc%projector_fit(ib)%factors(:,1:pawtab%wvl%pngau(ib))
-       pngau = pngau + pawtab%wvl%pngau(ib)
-       ! Conjugate gaussian
-       pawtab%wvl%parg(1,pngau:pngau + pawtab%wvl%pngau(ib) - 1) = &
-            & paw_setuploc%projector_fit(ib)%expos(1,1:pawtab%wvl%pngau(ib))
-       pawtab%wvl%parg(2,pngau:pngau + pawtab%wvl%pngau(ib) - 1) = &
-            & -paw_setuploc%projector_fit(ib)%expos(2,1:pawtab%wvl%pngau(ib))
-       pawtab%wvl%pfac(1,pngau:pngau + pawtab%wvl%pngau(ib) - 1) = &
-            & paw_setuploc%projector_fit(ib)%factors(1,1:pawtab%wvl%pngau(ib))
-       pawtab%wvl%pfac(2,pngau:pngau + pawtab%wvl%pngau(ib) - 1) = &
-            & -paw_setuploc%projector_fit(ib)%factors(2,1:pawtab%wvl%pngau(ib))
-       pngau = pngau + pawtab%wvl%pngau(ib)
-       pawtab%wvl%pngau(ib) = pawtab%wvl%pngau(ib) * 2
-    end do
-    pawtab%has_wvl=2
+   call wvlpaw_allocate(pawtab%wvl)
+   LIBPAW_ALLOCATE(pawtab%wvl%pngau,(pawtab%basis_size))
+   do ib=1,pawtab%basis_size
+     pawtab%wvl%pngau(ib) = paw_setuploc%projector_fit(ib)%ngauss
+   end do
+   pawtab%wvl%ptotgau = sum(pawtab%wvl%pngau) * 2
+   LIBPAW_ALLOCATE(pawtab%wvl%parg,(2,pawtab%wvl%ptotgau))
+   LIBPAW_ALLOCATE(pawtab%wvl%pfac,(2,pawtab%wvl%ptotgau))
+   pngau = 1
+   do ib=1,pawtab%basis_size
+     ! Complex gaussian
+     pawtab%wvl%parg(:,pngau:pngau + pawtab%wvl%pngau(ib) - 1) = &
+     & paw_setuploc%projector_fit(ib)%expos(:,1:pawtab%wvl%pngau(ib))
+     pawtab%wvl%pfac(:,pngau:pngau + pawtab%wvl%pngau(ib) - 1) = &
+     & paw_setuploc%projector_fit(ib)%factors(:,1:pawtab%wvl%pngau(ib))
+     pngau = pngau + pawtab%wvl%pngau(ib)
+     ! Conjugate gaussian
+     pawtab%wvl%parg(1,pngau:pngau + pawtab%wvl%pngau(ib) - 1) = &
+     & paw_setuploc%projector_fit(ib)%expos(1,1:pawtab%wvl%pngau(ib))
+     pawtab%wvl%parg(2,pngau:pngau + pawtab%wvl%pngau(ib) - 1) = &
+     & -paw_setuploc%projector_fit(ib)%expos(2,1:pawtab%wvl%pngau(ib))
+     pawtab%wvl%pfac(1,pngau:pngau + pawtab%wvl%pngau(ib) - 1) = &
+     & paw_setuploc%projector_fit(ib)%factors(1,1:pawtab%wvl%pngau(ib))
+     pawtab%wvl%pfac(2,pngau:pngau + pawtab%wvl%pngau(ib) - 1) = &
+     & -paw_setuploc%projector_fit(ib)%factors(2,1:pawtab%wvl%pngau(ib))
+     pngau = pngau + pawtab%wvl%pngau(ib)
+     pawtab%wvl%pngau(ib) = pawtab%wvl%pngau(ib) * 2
+   end do
+   pawtab%has_wvl=2
  else
-    !Nullify wavelet objects for safety:
-    pawtab%has_wvl=0
-    call wvlpaw_free(pawtab%wvl)
+   !Nullify wavelet objects for safety:
+   pawtab%has_wvl=0
+   call wvlpaw_free(pawtab%wvl)
  end if
-
  do ib=1,pawtab%basis_size
    if (ib==1) then
      do imsh=1,nmesh
@@ -3279,6 +3365,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
 !---------------------------------
 !Read core density (coredens)
+
  do imsh=1,nmesh
    if(trim(paw_setuploc%ae_core_density%grid)==trim(paw_setuploc%radial_grid(imsh)%id)) then
      icoremesh=imsh
@@ -3318,6 +3405,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
 !---------------------------------
 !Read pseudo core density (tcoredens)
+
  do imsh=1,nmesh
    if(trim(paw_setuploc%pseudo_core_density%grid)==trim(paw_setuploc%radial_grid(imsh)%id)) then
      iread1=imsh
@@ -3352,6 +3440,82 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,  msg,'COLL')
 
+!---------------------------------
+!Read core kinetic density (coretau)
+
+ if (paw_setuploc%ae_core_kinetic_energy_density%tread.and.pawtab%has_coretau>=1) then
+   do imsh=1,nmesh
+     if(trim(paw_setuploc%ae_core_kinetic_energy_density%grid)==trim(paw_setuploc%radial_grid(imsh)%id)) then
+       itaucoremesh=imsh
+       exit
+     end if
+   end do
+   call pawrad_copy(radmesh(itaucoremesh),coretau_mesh)
+   if (itaucoremesh/=icoremesh) then
+     write(msg, '(5a)' )&
+&     'Core kinetic density (TAUcore) must be given',ch10,&
+&     'on the same radial mesh as core density (Ncore) !',ch10,&
+&     'Action: check your pseudopotential file.'
+     MSG_ERROR(msg)
+   end if
+   LIBPAW_ALLOCATE(taucore,(coretau_mesh%mesh_size))
+   shft=mesh_shift(itaucoremesh)
+   taucore(1+shft:coretau_mesh%mesh_size)= &
+&   paw_setuploc%ae_core_kinetic_energy_density%data(1:coretau_mesh%mesh_size-shft)/sqrt(fourpi)
+   if (shft==1) call pawrad_deducer0(taucore,coretau_mesh%mesh_size,coretau_mesh)
+   pawtab%coretau_mesh_size=pawtab%mesh_size
+   if(save_core_msz) pawtab%coretau_mesh_size=coretau_mesh%mesh_size
+   LIBPAW_ALLOCATE(pawtab%coretau,(pawtab%coretau_mesh_size))
+   pawtab%rtaucore=coretau_mesh%rad(pawtab%coretau_mesh_size)
+   pawtab%coretau(1:pawtab%coretau_mesh_size)=taucore(1:pawtab%coretau_mesh_size)
+ else if (pawtab%has_coretau>=1) then
+   write(msg, '(5a)' )&
+&   'metaGGA exchange-correlation is requested but the core kinetic energy density',ch10,&
+&   'is not present in the pseudopotential file!',ch10,&
+&   'Action: check your pseudopotential file.'
+   MSG_ERROR(msg)
+ else
+  LIBPAW_ALLOCATE(taucore,(0))
+ end if
+
+!---------------------------------
+!Read pseudo core kinetic energy density (tcoretau)
+
+ if (paw_setuploc%pseudo_core_kinetic_energy_density%tread.and.pawtab%has_coretau>=1) then
+   do imsh=1,nmesh
+     if(trim(paw_setuploc%pseudo_core_kinetic_energy_density%grid)==trim(paw_setuploc%radial_grid(imsh)%id)) then
+       iread1=imsh
+       exit
+     end if
+   end do
+   if (iread1/=itaucoremesh) then
+     write(msg, '(5a)' )&
+&     'Pseudized core kinetic energy density (tTAUcore) must be given',ch10,&
+&     'on the same radial mesh as core kinetic density (TAUcore) !',ch10,&
+&     'Action: check your pseudopotential file.'
+     MSG_ERROR(msg)
+   end if
+   LIBPAW_ALLOCATE(ttaucore,(coretau_mesh%mesh_size))
+   shft=mesh_shift(itaucoremesh)
+   ttaucore(1+shft:coretau_mesh%mesh_size)= &
+&   paw_setuploc%pseudo_core_kinetic_energy_density%data(1:coretau_mesh%mesh_size-shft)/sqrt(fourpi)
+   if (shft==1) call pawrad_deducer0(ttaucore,coretau_mesh%mesh_size,coretau_mesh)
+   LIBPAW_ALLOCATE(pawtab%tcoretau,(pawtab%coretau_mesh_size,1))
+   pawtab%tcoretau(1:pawtab%coretau_mesh_size,1)=ttaucore(1:pawtab%coretau_mesh_size)
+   pawtab%has_coretau=2
+   write(msg,'(a,i1)') &
+&   ' Radial grid used for (t)taucore kinetic density is grid ',itaucoremesh
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,  msg,'COLL')
+ else if (pawtab%has_coretau>=1) then
+   write(msg, '(5a)' )&
+&   'metaGGA exchange-correlation is requested but the pseudo core kinetic energy density',ch10,&
+&   'is not present in the pseudopotential file!',ch10,&
+&   'Action: check your pseudopotential file.'
+   MSG_ERROR(msg)
+ else
+  LIBPAW_ALLOCATE(ttaucore,(0))
+ end if
 
 !---------------------------------
 !Read local pseudopotential=Vh(tn_zc) or Vbare
@@ -3423,6 +3587,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
 !-------------------------------------------------
 !Read LDA-1/2 potential
+
  if (paw_setuploc%LDA_minus_half_potential%tread) then
    do imsh=1,nmesh
      if(trim(paw_setuploc%LDA_minus_half_potential%grid)==trim(paw_setuploc%radial_grid(imsh)%id)) then
@@ -3458,6 +3623,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
 !---------------------------------
 !Eventually read "numeric" shapefunctions (if shape_type=-1)
+
  if (pawtab%shape_type==-1) then
    LIBPAW_ALLOCATE(pawtab%shapefunc,(pawtab%mesh_size,pawtab%l_size))
    do imsh=1,nmesh
@@ -3521,6 +3687,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
 !---------------------------------
 !Read pseudo valence density
+
  if (paw_setuploc%pseudo_valence_density%tread) then
    do imsh=1,nmesh
      if(trim(paw_setuploc%pseudo_valence_density%grid)==trim(paw_setuploc%radial_grid(imsh)%id)) then
@@ -3597,6 +3764,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
 !---------------------------------
 !Read exact-exchange Fock terms for core-valence interactions (ex_cvij)
+
  if (paw_setuploc%exact_exchange_matrix%tread.eqv..true.) then
    pawtab%has_fock=2
    LIBPAW_ALLOCATE(pawtab%ex_cvij,(pawtab%lmn2_size))
@@ -3616,11 +3784,12 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
 !==========================================================
 !Compute additional atomic data only depending on present DATASET
-
+ 
  call pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 &     mmax,mqgrid_ff,mqgrid_vl,ncore,nmesh,pawrad,pawtab,pawxcdev,pspversion,&
 &     qgrid_ff,qgrid_vl,radmesh,tncore,tnvale,tproj,tproj_mesh,usexcnhat,vale_mesh,&
-&     vloc_mesh,vlocopt,vlocr,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl)
+&     vloc_mesh,vlocopt,vlocr,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl,&
+&     ttaucore=ttaucore,coretau_mesh=coretau_mesh)
 
  if(usewvl==1 .or. icoulomb > 0) then
 !  Calculate up to the 5th derivative of tcoredens
@@ -3645,8 +3814,10 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
  LIBPAW_DEALLOCATE(vlocr)
  LIBPAW_DEALLOCATE(ncore)
  LIBPAW_DEALLOCATE(tncore)
+ LIBPAW_DEALLOCATE(ttaucore)
+ LIBPAW_DEALLOCATE(taucore)
  LIBPAW_DEALLOCATE(tproj)
-
+ 
  if(pawtab%shape_type==-1) then
    call pawrad_free(shpf_mesh)
  end if
@@ -3727,7 +3898,7 @@ subroutine pawpsp_7in(epsatm,ffspl,icoulomb,ixc,&
  integer :: pspversion,usexcnhat,vlocopt
  logical :: save_core_msz
  type(pawrad_type) :: core_mesh,tproj_mesh,vale_mesh,vloc_mesh
- real(dp),pointer :: ncore(:),tncore(:),tnvale(:),tproj(:,:),vlocr(:)
+ real(dp),pointer :: ncore(:),tncore(:),ttaucore(:),tnvale(:),tproj(:,:),vlocr(:)
  type(pawrad_type),pointer :: radmesh(:)
 
 !************************************************************************
@@ -3738,7 +3909,7 @@ subroutine pawpsp_7in(epsatm,ffspl,icoulomb,ixc,&
  call pawrad_free(pawrad)
 
  save_core_msz=(usewvl==1 .or. icoulomb .ne. 0)
- nullify(ncore);nullify(tncore);nullify(tnvale)
+ nullify(ncore);nullify(tncore);nullify(ttaucore);nullify(tnvale)
  nullify(tproj);nullify(vlocr)
  nullify(radmesh)
 
@@ -4642,7 +4813,7 @@ subroutine pawpsp_main( &
  real(dp),intent(out) :: vlspl(:,:)
 
 !Local variables-------------------------------
- integer :: has_tproj,has_wvl,ipsp,lmax,lloc,lnmax,mmax,me,mqgrid_ff,mqgrid_vl
+ integer :: has_coretau,has_tproj,has_wvl,ipsp,lmax,lloc,lnmax,mmax,me,mqgrid_ff,mqgrid_vl
  integer :: pspcod,pspxc,usexml
  real(dp),parameter :: xc_denpos_default=tol14
  real(dp) :: my_xc_denpos,r2well,zion,znucl
@@ -4678,7 +4849,8 @@ subroutine pawpsp_main( &
 
  has_wvl=0; if (usewvl==1.or.icoulomb/=0) has_wvl=1
  has_tproj=0; if (usewvl==1) has_tproj=1
- call pawtab_set_flags(pawtab,has_tvale=1,has_wvl=has_wvl,has_tproj=has_tproj)
+ has_coretau=0 ; if (pawxc_get_usekden()>=1) has_coretau=1
+ call pawtab_set_flags(pawtab,has_coretau=has_coretau,has_tvale=1,has_wvl=has_wvl,has_tproj=has_tproj)
 
  if(me==0) then
    write(msg, '(a,t38,a)' )'- pspatm: opening atomic psp file',trim(filpsp)

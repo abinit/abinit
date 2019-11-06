@@ -43,7 +43,8 @@ module m_positron
  use defs_abitypes, only : MPI_type
  use m_special_funcs,  only : sbf8
  use m_ioarr,    only : ioarr, read_rhor
- use m_pawang,   only : pawang_type, realgaunt
+ use m_pawang,   only : pawang_type
+ use m_paw_sphharm,     only : realgaunt
  use m_pawrad,   only : pawrad_type, simp_gen, nderiv_gen
  use m_pawtab,   only : pawtab_type
  use m_paw_ij,   only : paw_ij_type
@@ -1179,11 +1180,11 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
        opt_dens=1;if (include_nhat_in_gamma) opt_dens=0
        call pawdensities(rdum,cplex,iatom,lmselect,lmselect_dum,lm_size,nhat1,nspden_ep,1,&
 &       0,opt_dens,-1,0,pawang,0,pawrad(itypat),pawrhoij(iatom),&
-&       pawtab(itypat),rho1,trho1)
+&       pawtab(itypat),rho1,trho1,0)
        lmselect_ep(:)=.true.
        call pawdensities(rdum,cplex,iatom,lmselect_ep,lmselect_dum,lm_size,nhat1_ep,nspden_ep,1,&
 &       0,opt_dens,-1,0,pawang,0,pawrad(itypat),pawrhoij_ep_(iatom),&
-&       pawtab(itypat),rho1_ep,trho1_ep)
+&       pawtab(itypat),rho1_ep,trho1_ep,0)
 
 !      For state dependent scheme in Doppler                                       =====
 !      Compute "on-site" densities (n1, ntild1, nhat1) for a given electron state j=====
@@ -1191,7 +1192,7 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
          opt_dens=1;if (include_nhat_in_gamma) opt_dens=0
          call pawdensities(rdum,cplex,iatom,lmselect,lmselect_dum,lm_size,nhat1_j,nspden_ep,1,&
 &         0,opt_dens,-1,0,pawang,0,pawrad(itypat),pawrhoij_dop_el(iatom),&
-&         pawtab(itypat),rho1_j,trho1_j)
+&         pawtab(itypat),rho1_j,trho1_j,0)
        end if
 
 !      Compute contribution to annihilation rate:
@@ -3448,11 +3449,11 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
  opt_dens=1;if (include_nhat_in_gamma) opt_dens=0
  call pawdensities(rdum,cplex,iatom,lmselect,lmselect_dum,lm_size,nhat1,nspden_ep,1,&
 & 0,opt_dens,-1,0,pawang,0,pawrad(itypat),pawrhoij(iatom),&
-& pawtab(itypat),rho1,trho1)
+& pawtab(itypat),rho1,trho1,0)
  lmselect_ep(:)=.true.
  call pawdensities(rdum,cplex,iatom,lmselect_ep,lmselect_dum,lm_size,nhat1_ep,nspden_ep,1,&
 & 0,opt_dens,-1,0,pawang,0,pawrad(itypat),pawrhoij_ep_(iatom),&
-& pawtab(itypat),rho1_ep,trho1_ep)
+& pawtab(itypat),rho1_ep,trho1_ep,0)
 !Compute contribution to annihilation rate
 
  ABI_ALLOCATE(rhocore,(mesh_size))
