@@ -110,10 +110,11 @@ contains
     ABI_ALLOCATE(self%current_vcart, (3, self%natom))
     ABI_ALLOCATE(self%forces, (3,self%natom))
     self%is_null=.False.
-    self%strain(:,:) =0.0
-    self%stress(:,:) =0.0
-    self%forces(:,:) =0.0
-    self%displacement(:,:) =0.0
+    self%strain(:,:) = 0.0
+    self%stress(:,:) = 0.0
+    self%forces(:,:) = 0.0
+    self%displacement(:,:) = 0.0
+    self%current_vcart(:,:) = 0.0
     call self%set_params(params)
     call self%set_rng(rng)
   end subroutine initialize
@@ -244,6 +245,7 @@ contains
     if(present(displacement) .or. present(strain)) then
        MSG_ERROR("displacement and strain should not be input for lattice mover")
     end if
+
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(effpot)
     ABI_UNUSED_A(displacement)
