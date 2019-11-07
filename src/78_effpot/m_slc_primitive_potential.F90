@@ -292,44 +292,33 @@ contains
     integer,                          intent(in)    :: ncid    
 
     integer :: ncerr, dimid, ndata, varid
-    integer, allocatable :: ilist(:), jlist(:), ulist(:), vlist(:)
-    integer, allocatable :: Rjlist(:,:), Rulist(:,:), Rvlist(:,:)
+    integer, allocatable :: ilist(:), jlist(:,:), ulist(:,:)
     real(dp), allocatable :: vallist(:)
 
-    ncerr = nf90_inq_dimid(ncid, "Oiju_ndata", dimid)
+    ncerr = nf90_inq_dimid(ncid, "spin_lattice_Oiju_number_of_entries", dimid)
     if(ncerr /= NF90_NOERR) then
       write(std_out,'(A20)') 'No O_iju term found'
     else
       self%has_quadlin=.True.
-      ncerr = nctk_get_dim(ncid, "Oiju_ndata", ndata)
+      ncerr = nctk_get_dim(ncid, "spin_lattice_Oiju_number_of_entries", ndata)
       ABI_ALLOCATE(ilist, (ndata))
-      ABI_ALLOCATE(jlist, (ndata))
-      ABI_ALLOCATE(ulist, (ndata))
-      ABI_ALLOCATE(Rjlist, (3, ndata))
-      ABI_ALLOCATE(Rulist, (3, ndata))
+      ABI_ALLOCATE(jlist, (4,ndata))
+      ABI_ALLOCATE(ulist, (4,ndata))
       ABI_ALLOCATE(vallist, (ndata))
 
-      varid = nctk_idname(ncid, "Oiju_ilist")
+      varid = nctk_idname(ncid, "spin_lattice_Oiju_ilist")
       ncerr = nf90_get_var(ncid, varid, ilist)
-      call netcdf_check(ncerr, "when reading Oiju_ilist")
+      call netcdf_check(ncerr, "when reading Oiju_ilist") 
 
-      varid = nctk_idname(ncid, "Oiju_jlist")
+      varid = nctk_idname(ncid, "spin_lattice_Oiju_jlist")
       ncerr = nf90_get_var(ncid, varid, jlist)
       call netcdf_check(ncerr, "when reading Oiju_jlist")
 
-      varid = nctk_idname(ncid, "Oiju_ulist")
+      varid = nctk_idname(ncid, "spin_lattice_Oiju_ulist")
       ncerr = nf90_get_var(ncid, varid, ulist)
       call netcdf_check(ncerr, "when reading Oiju_ulist")
 
-      varid = nctk_idname(ncid, "Oiju_Rjlist")
-      ncerr = nf90_get_var(ncid, varid, Rjlist)
-      call netcdf_check(ncerr, "when reading Oiju_Rjlist")
-
-      varid = nctk_idname(ncid, "Oiju_Rulist")
-      ncerr = nf90_get_var(ncid, varid, Rulist)
-      call netcdf_check(ncerr, "when reading Oiju_Rulist")
-
-      varid = nctk_idname(ncid, "Oiju_vallist")
+      varid = nctk_idname(ncid, "spin_lattice_Oiju_vallist")
       ncerr = nf90_get_var(ncid, varid, vallist)
       call netcdf_check(ncerr, "when reading Oiju_vallist")
 
@@ -339,13 +328,11 @@ contains
       vallist(:) = vallist(:)*eV_Ha*Bohr_Ang
   
       !fill the sparse matrix for oiju parameters
-      call self%set_oiju(ndata, ilist, jlist, ulist, Rjlist, Rulist, vallist)
+      call self%set_oiju(ndata, ilist, jlist, ulist, vallist)
 
       ABI_SFREE(ilist)
       ABI_SFREE(jlist)
       ABI_SFREE(ulist)
-      ABI_SFREE(Rjlist)
-      ABI_SFREE(Rulist)
       ABI_SFREE(vallist)
 
     endif
@@ -395,6 +382,8 @@ contains
       ncerr = nf90_get_var(ncid, varid, vallist)
       call netcdf_check(ncerr, "when reading Tijuv_valuelist")
 
+      write(std_out,'(A8,I10,A11)') 'T_ijuv:', ndata, 'terms read'  
+
       !change units from eV to Ha and Ang to Bohr
       vallist(:) = vallist(:)*eV_Ha*(Bohr_Ang*Bohr_Ang)
   
@@ -408,7 +397,6 @@ contains
       ABI_SFREE(vallist)
     endif
 
-    write(std_out,'(A8,I10,A11)') 'T_ijuv:', ndata, 'terms read'  
 
   end subroutine read_tijuv
 
@@ -505,15 +493,13 @@ contains
   ! store oiju parameters in sparse matrix
   ! TODO: test
   !----------------------------------------
-  subroutine set_oiju(self, nn, ilist, jlist, ulist, Rjlist, Rulist, vallist)
+  subroutine set_oiju(self, nn, ilist, jlist, ulist, vallist)
 
     class(slc_primitive_potential_t), intent(inout) :: self
     integer,                          intent(inout) :: nn
     integer,                          intent(in)    :: ilist(nn)
-    integer,                          intent(in)    :: jlist(nn)
-    integer,                          intent(in)    :: ulist(nn)
-    integer,                          intent(in)    :: Rjlist(3,nn)
-    integer,                          intent(in)    :: Rulist(3,nn)
+    integer,                          intent(in)    :: jlist(4,nn)
+    integer,                          intent(in)    :: ulist(4,nn)
     real(dp),                         intent(in)    :: vallist(nn)
 
     integer :: idx
@@ -522,7 +508,7 @@ contains
     
     if (xmpi_comm_rank(xmpi_world)==0) then
       do idx=1, nn
-        call self%set_oiju_1term(ilist(idx), jlist(idx), ulist(idx), Rjlist(:,idx), Rulist(:,idx), vallist(idx))
+        call self%set_oiju_1term(ilist(idx), jlist(1,idx), ulist(1,idx), jlist(2:4,idx), ulist(2:4,idx), vallist(idx))
       end do
     endif
 
@@ -661,7 +647,7 @@ contains
         call self%liu%sum_duplicates()
         call self%set_liu_sc(scpot, scmaker)
       else
-        write(std_out,'(A47)') 'No parameters for bilinear coupling available'
+        MSG_ERROR("No parameters for bilinear coupling available. Check your input and parameter files.")
         scpot%has_bilin = .False.
       endif
     endif
@@ -677,7 +663,7 @@ contains
         call self%niuv%sum_duplicates()
         call self%set_niuv_sc(scpot, scmaker)
       else
-        write(std_out,'(A55)') 'No parameters for linear-quadratic coupling available'
+        MSG_ERROR("No parameters for linear-quadratic coupling available. Check your input and parameter files.")
         scpot%has_linquad = .False.
       endif
     endif
@@ -693,7 +679,7 @@ contains
         call self%oiju%sum_duplicates()
         call self%set_oiju_sc(scpot, scmaker)
        else
-         write(std_out,'(A55)') 'No parameters for quadratic-linear coupling available'
+         MSG_ERROR("No parameters for quadratic-linear coupling available. Check your input and parameter files.")
          scpot%has_quadlin = .False.
        endif
      endif
@@ -709,7 +695,7 @@ contains
         call self%tijuv%sum_duplicates()
         call self%set_tijuv_sc(scpot, scmaker)
       else
-        write(std_out,'(A50)') 'No parameters for biquadratic coupling available'
+        MSG_ERROR("No parameters for biquadratic coupling available. Check your input and parameter files.")
         scpot%has_biquad = .False.
       endif
     endif
