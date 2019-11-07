@@ -111,6 +111,8 @@ State:
 ### [TODO??] Implement advanced integration algorithm for spin/lattice dynamics
 
 ### [TODO] Optimize Tijuv terms so the time is acceptable. (Nicole & hexu) [time: Now]
+    - The firt time consuming part is the sorting of the ijuv indices. Merge sort (O(NlogN)) is now (07/11/2019) instead of insertion sort (O(N^2)). More test needed to see if calculating the force and bfield is fast enough, especially on larger supercell. 
+    
 
 ### [TODO] Implement full procedure of coupled SLC dynamics. (Nicole)
 
