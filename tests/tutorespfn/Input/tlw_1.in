@@ -11,7 +11,6 @@ tolvrs1   1.0d-18
 
 #Set 2: Response function calculation of d/dk wave function
 #**********************************************************
-
 iscf2    -3       
 rfelfd2   2      
 tolwfr2   1.0d-20 
@@ -26,7 +25,6 @@ tolwfr3   1.0d-20
 
 #Set 4 : Response function calculation to q=0 phonons, electric field and strain
 #*******************************************************************************
-
 getddk4   2          
 rfelfd4   3         
 rfphon4   1        
@@ -43,7 +41,6 @@ get1wf5   4
 get1den5  4        
 getddk5   2       
 getdkdk5  3      
-lw_qdrpl5 0     
 lw_flexo5 1  
 
 #######################################################################
