@@ -2317,7 +2317,6 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
 !   write(std_out,*) "DEBUG: list_combination after call to CCL:", list_combination_tmp
 
    nirred_comb = size(index_irredcomb) 
-   if(iam_master)write(std_out,*) "DEBUG combinations after second CCFL call: ", ncombination
 ! else
 !   ABI_ALLOCATE(list_combination_tmp,(1,1))
 ! end if !if(iam_master)
