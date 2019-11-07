@@ -61,6 +61,7 @@ MODULE m_plowannier
  public :: normalization_plowannier
  public :: print_operwan
  public :: init_operwan_realspace
+ public :: reduce_operwan_realspace
  public :: destroy_operwan_realspace
  public :: zero_operwan_realspace
  public :: compute_oper_wank2realspace
@@ -3432,7 +3433,131 @@ subroutine init_operwan_realspace(wan,operwan_realspace)
 end subroutine init_operwan_realspace
 !!***
 
+!!****f* m_plowannier/reduce_operwan_realspace
+!! NAME
+!!  reduce_operwan_realspace
+!!
+!! FUNCTION
+!!  reduce a table of operwan_realspace type
+!!
+!! INPUTS
+!!  wan,rhot1,npwx,nibz,comm,nbz,nsppol
+!!
+!! OUTPUT
+!! rhot1
+!!
+!! PARENTS
+!! m_sigma_driver
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine reduce_operwan_realspace(wan,rhot1,npwx,nibz,comm,nbz,nsppol)
+  use m_xmpi, only : xmpi_barrier,xmpi_sum  
+!Arguments---------------------------------------
+  type(plowannier_type),intent(in) :: wan
+  type(operwan_realspace_type),intent(inout) :: rhot1(npwx,nibz)
+  integer, intent(in) :: npwx,nibz,comm,nbz,nsppol
+!Local variables----------------------------------
+  complex(dpc),allocatable ::  buffer(:)
+  integer :: dim,pwx,ibz, spin, ispinor1, ispinor2, iatom1, iatom2, pos1, pos2
+  integer :: il1, il2, im1, im2, nnn, ierr
+   dim=0
+     do pwx=1,npwx
+     do ibz=1,nibz
+       do spin=1,wan%nsppol
+       do ispinor1=1,wan%nspinor
+       do ispinor2=1,wan%nspinor
+         do iatom1=1,wan%natom_wan
+         do iatom2=1,wan%natom_wan
+           do pos1=1,size(wan%nposition(iatom1)%pos,1)
+           do pos2=1,size(wan%nposition(iatom2)%pos,1)
+             do il1=1,wan%nbl_atom_wan(iatom1)
+             do il2=1,wan%nbl_atom_wan(iatom2)
+               do im1=1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
+               do im2=1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
+     dim=dim+1
+               enddo!im2
+               enddo!im1
+             enddo!il2
+             enddo!il1
+           enddo!pos2
+           enddo!pos1
+         enddo!iatom2
+         enddo!iatom1
+       enddo!ispinor2
+       enddo!ispinor1
+       enddo!spin
+     enddo!ibz
+     enddo!pwx
+     ABI_ALLOCATE(buffer,(dim))
+     nnn=0
+     do pwx=1,npwx
+     do ibz=1,nibz
+         do spin=1,wan%nsppol
+         do ispinor1=1,wan%nspinor
+         do ispinor2=1,wan%nspinor
+           do iatom1=1,wan%natom_wan
+           do iatom2=1,wan%natom_wan
+             do pos1=1,size(wan%nposition(iatom1)%pos,1)
+             do pos2=1,size(wan%nposition(iatom2)%pos,1)
+               do il1=1,wan%nbl_atom_wan(iatom1)
+               do il2=1,wan%nbl_atom_wan(iatom2)
+                 do im1=1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
+                 do im2=1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
+     nnn=nnn+1
+     buffer(nnn)=rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)
+                 enddo!im2
+                 enddo!im1
+               enddo!il2
+               enddo!il1
+             enddo!pos2
+             enddo!pos1
+           enddo!iatom2
+           enddo!iatom1
+         enddo!ispinor2
+         enddo!ispinor1
+       enddo!spin
+     enddo!ibz  
+     enddo!pwx
+     call xmpi_barrier(comm)
+     call xmpi_sum(buffer,comm,ierr)
+     call xmpi_barrier(comm)
+     buffer=buffer/nbz/nsppol
+     nnn=0
+     do pwx=1,npwx
+     do ibz=1,nibz
+       do spin=1,wan%nsppol
+       do ispinor1=1,wan%nspinor
+       do ispinor2=1,wan%nspinor
+         do iatom1=1,wan%natom_wan
+         do iatom2=1,wan%natom_wan
+           do pos1=1,size(wan%nposition(iatom1)%pos,1)
+           do pos2=1,size(wan%nposition(iatom2)%pos,1)
+             do il1=1,wan%nbl_atom_wan(iatom1)
+             do il2=1,wan%nbl_atom_wan(iatom2)
+               do im1=1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
+               do im2=1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
+      nnn=nnn+1
+      rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)=buffer(nnn)
+               enddo!im2
+               enddo!im1
+             enddo!il2
+             enddo!il1
+           enddo!pos2
+           enddo!pos1
+         enddo!iatom2
+         enddo!iatom1
+       enddo!ispinor2
+       enddo!ispinor1
+       enddo!spin
+     enddo!ibz
+     enddo!pwx
+     ABI_DEALLOCATE(buffer)
 
+
+end subroutine reduce_operwan_realspace
+!!***
 
 !!****f* m_plowannier/destroy_operwan_realspace
 !! NAME

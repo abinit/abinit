@@ -114,8 +114,8 @@ module m_sigma_driver
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
  use m_paw_correlations,only : pawpuxinit
  use m_plowannier,only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
-                         &fullbz_plowannier,init_operwan_realspace,destroy_operwan_realspace,&
-                         &destroy_plowannier,zero_operwan_realspace
+                         &fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
+                         destroy_operwan_realspace,destroy_plowannier,zero_operwan_realspace
 
  implicit none
 
@@ -2187,100 +2187,101 @@ endif
      !   enddo
      ! enddo
    else
+     call reduce_operwan_realspace(wanbz,rhot1,sigp%npwx,Qmesh%nibz,Wfd%comm,Kmesh%nbz,Wfd%nsppol)
      !call cwtime(cpu,wall,gflops,"start") !reduction of rhot1
-     dim=0
-     do pwx=1,sigp%npwx
-     do ibz=1,Qmesh%nibz
-       do spin=1,wanbz%nsppol
-       do ispinor1=1,wanbz%nspinor
-       do ispinor2=1,wanbz%nspinor
-         do iatom1=1,wanbz%natom_wan
-         do iatom2=1,wanbz%natom_wan
-           do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
-           do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
-             do il1=1,wanbz%nbl_atom_wan(iatom1)
-             do il2=1,wanbz%nbl_atom_wan(iatom2)
-               do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
-               do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
-     dim=dim+1
-               enddo!im2
-               enddo!im1
-             enddo!il2
-             enddo!il1
-           enddo!pos2
-           enddo!pos1
-         enddo!iatom2
-         enddo!iatom1
-       enddo!ispinor2
-       enddo!ispinor1
-       enddo!spin
-     enddo!ibz
-     enddo!pwx
-     ABI_ALLOCATE(buffer,(dim))
-     nnn=0
-     do pwx=1,sigp%npwx
-     do ibz=1,Qmesh%nibz
-         do spin=1,wanbz%nsppol
-         do ispinor1=1,wanbz%nspinor
-         do ispinor2=1,wanbz%nspinor
-           do iatom1=1,wanbz%natom_wan
-           do iatom2=1,wanbz%natom_wan
-             do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
-             do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
-               do il1=1,wanbz%nbl_atom_wan(iatom1)
-               do il2=1,wanbz%nbl_atom_wan(iatom2)
-                 do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
-                 do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
-     nnn=nnn+1
-     buffer(nnn)=rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)
-                 enddo!im2
-                 enddo!im1
-               enddo!il2
-               enddo!il1
-             enddo!pos2
-             enddo!pos1
-           enddo!iatom2
-           enddo!iatom1
-         enddo!ispinor2
-         enddo!ispinor1
-       enddo!spin
-     enddo!ibz  
-     enddo!pwx
-     call xmpi_barrier(Wfd%comm)
-     call xmpi_sum(buffer,Wfd%comm,ierr)
-     call xmpi_barrier(Wfd%comm)
-     buffer=buffer/Kmesh%nbz/Wfd%nsppol
-     nnn=0
-     do pwx=1,sigp%npwx
-     do ibz=1,Qmesh%nibz
-       do spin=1,wanbz%nsppol
-       do ispinor1=1,wanbz%nspinor
-       do ispinor2=1,wanbz%nspinor
-         do iatom1=1,wanbz%natom_wan
-         do iatom2=1,wanbz%natom_wan
-           do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
-           do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
-             do il1=1,wanbz%nbl_atom_wan(iatom1)
-             do il2=1,wanbz%nbl_atom_wan(iatom2)
-               do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
-               do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
-      nnn=nnn+1
-      rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)=buffer(nnn)
-      !write(67,*)ibz,im1,im2,rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)
-               enddo!im2
-               enddo!im1
-             enddo!il2
-             enddo!il1
-           enddo!pos2
-           enddo!pos1
-         enddo!iatom2
-         enddo!iatom1
-       enddo!ispinor2
-       enddo!ispinor1
-       enddo!spin
-     enddo!ibz
-     enddo!pwx
-     ABI_DEALLOCATE(buffer)
+     ! dim=0
+     ! do pwx=1,sigp%npwx
+     ! do ibz=1,Qmesh%nibz
+     !   do spin=1,wanbz%nsppol
+     !   do ispinor1=1,wanbz%nspinor
+     !   do ispinor2=1,wanbz%nspinor
+     !     do iatom1=1,wanbz%natom_wan
+     !     do iatom2=1,wanbz%natom_wan
+     !       do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
+     !       do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
+     !         do il1=1,wanbz%nbl_atom_wan(iatom1)
+     !         do il2=1,wanbz%nbl_atom_wan(iatom2)
+     !           do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
+     !           do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
+     ! dim=dim+1
+     !           enddo!im2
+     !           enddo!im1
+     !         enddo!il2
+     !         enddo!il1
+     !       enddo!pos2
+     !       enddo!pos1
+     !     enddo!iatom2
+     !     enddo!iatom1
+     !   enddo!ispinor2
+     !   enddo!ispinor1
+     !   enddo!spin
+     ! enddo!ibz
+     ! enddo!pwx
+     ! ABI_ALLOCATE(buffer,(dim))
+     ! nnn=0
+     ! do pwx=1,sigp%npwx
+     ! do ibz=1,Qmesh%nibz
+     !     do spin=1,wanbz%nsppol
+     !     do ispinor1=1,wanbz%nspinor
+     !     do ispinor2=1,wanbz%nspinor
+     !       do iatom1=1,wanbz%natom_wan
+     !       do iatom2=1,wanbz%natom_wan
+     !         do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
+     !         do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
+     !           do il1=1,wanbz%nbl_atom_wan(iatom1)
+     !           do il2=1,wanbz%nbl_atom_wan(iatom2)
+     !             do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
+     !             do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
+     ! nnn=nnn+1
+     ! buffer(nnn)=rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)
+     !             enddo!im2
+     !             enddo!im1
+     !           enddo!il2
+     !           enddo!il1
+     !         enddo!pos2
+     !         enddo!pos1
+     !       enddo!iatom2
+     !       enddo!iatom1
+     !     enddo!ispinor2
+     !     enddo!ispinor1
+     !   enddo!spin
+     ! enddo!ibz  
+     ! enddo!pwx
+     ! call xmpi_barrier(Wfd%comm)
+     ! call xmpi_sum(buffer,Wfd%comm,ierr)
+     ! call xmpi_barrier(Wfd%comm)
+     ! buffer=buffer/Kmesh%nbz/Wfd%nsppol
+     ! nnn=0
+     ! do pwx=1,sigp%npwx
+     ! do ibz=1,Qmesh%nibz
+     !   do spin=1,wanbz%nsppol
+     !   do ispinor1=1,wanbz%nspinor
+     !   do ispinor2=1,wanbz%nspinor
+     !     do iatom1=1,wanbz%natom_wan
+     !     do iatom2=1,wanbz%natom_wan
+     !       do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
+     !       do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
+     !         do il1=1,wanbz%nbl_atom_wan(iatom1)
+     !         do il2=1,wanbz%nbl_atom_wan(iatom2)
+     !           do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
+     !           do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
+     !  nnn=nnn+1
+     !  rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)=buffer(nnn)
+     !  !write(67,*)ibz,im1,im2,rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)
+     !           enddo!im2
+     !           enddo!im1
+     !         enddo!il2
+     !         enddo!il1
+     !       enddo!pos2
+     !       enddo!pos1
+     !     enddo!iatom2
+     !     enddo!iatom1
+     !   enddo!ispinor2
+     !   enddo!ispinor1
+     !   enddo!spin
+     ! enddo!ibz
+     ! enddo!pwx
+     ! ABI_DEALLOCATE(buffer)
    endif
    
    !close(67)
