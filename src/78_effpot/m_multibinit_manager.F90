@@ -101,7 +101,7 @@ module m_multibinit_manager
      type(primitive_potential_list_t) :: prim_pots  ! list of primitive potentials
      type(potential_list_t) :: pots     ! potential list
      ! a polymorphic lattice mover so multiple mover could be used.
-     class(lattice_mover_t), pointer :: lattice_mover=> null()
+     class(lattice_mover_t), pointer :: lattice_mover => null()
      ! as for the spin, there is only one mover which has several methods
      type(spin_mover_t) :: spin_mover  
      ! type(lwf_mover_t) :: lwf_mover
@@ -514,6 +514,7 @@ contains
     class(mb_manager_t), intent(inout) :: self
     integer :: istep
     character(len=90) :: msg
+    real(dp) :: t
 
     call self%prim_pots%initialize()
     call self%read_potentials()
@@ -528,15 +529,30 @@ contains
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
     do istep = 1 , self%params%ntime
+       t=istep*self%spin_mover%dt
+      ! write(msg, "(A13, 4X,  I13)")  "Latt_Iter", istep
+       !call wrtout(std_out,msg,'COLL')
+       !call wrtout(ab_out, msg, 'COLL')
+
        call self%lattice_mover%run_one_step(self%pots, spin=self%spin_mover%Stmp)
-       write(msg, "(A13, 4X,  I13)")  "Latt_Iter", istep
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out, msg, 'COLL')
+
+       !write(msg, "(A13, 4X,  I13)")  "Spin_Iter", istep
+       !call wrtout(std_out,msg,'COLL')
+       !call wrtout(ab_out, msg, 'COLL')
 
        call self%spin_mover%run_one_step(self%pots, displacement=self%lattice_mover%displacement)
-       write(msg, "(A13, 4X,  I13)")  "Spin_Iter", istep
+      
+       call self%spin_mover%hist%set_vars(time=t,  inc=.True.)
+       call self%spin_mover%spin_ob%get_observables(self%spin_mover%hist%S(:,:,self%spin_mover%hist%ihist_prev), &
+               self%spin_mover%hist%Snorm(:,self%spin_mover%hist%ihist_prev), &
+               self%spin_mover%hist%etot(self%spin_mover%hist%ihist_prev))
+       call self%spin_mover%spin_ncfile%write_one_step(self%spin_mover%hist)
+       write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", istep, t*Time_Sec, &
+                  & self%spin_mover%spin_ob%Mst_norm_total/self%spin_mover%spin_ob%Snorm_total, &
+                  & self%spin_mover%hist%etot(self%spin_mover%hist%ihist_prev)/self%spin_mover%spin_ob%nscell
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
+       
     end do
     msg=repeat("=", 90)
     call wrtout(std_out,msg,'COLL')
