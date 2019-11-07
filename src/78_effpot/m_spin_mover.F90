@@ -84,7 +84,6 @@ module m_spin_mover
      real(dp), allocatable :: Heff_tmp(:,:), Htmp(:,:), Hrotate(:,:), H_lang(:,:), buffer(:,:)
      real(dp) :: init_qpoint(3), init_rotate_axis(3) ! qpoint and rotation axis to set up initial spin configuration
      real(dp) :: init_orientation(3) ! spin orientation in primitive cell which is then rotated
-     !type(rng_t) :: rng
      type(spin_hist_t) :: hist
      logical :: gamma_l_calculated
      type(spin_mc_t) :: spin_mc
@@ -139,7 +138,6 @@ contains
     type(mbsupercell_t), target :: supercell
     type(rng_t), target, intent(in) :: rng
     character(len=fnlen), optional, intent(in) :: restart_hist_fname
-    !real(dp):: damping(self%supercell%nspin)
     integer ::  nspin
 
     integer :: master, my_rank, comm, nproc, ierr
@@ -353,29 +351,27 @@ contains
            call wrtout(ab_out,msg,'COLL')
            call wrtout(std_out,msg,'COLL')
 
-           self%hist%nspin_prim=INT(REAL(self%nspin)/REAL(self%supercell%ncell))
-
-           ABI_ALLOCATE(Sprim, (3,self%hist%nspin_prim) )
+           ABI_ALLOCATE(Sprim, (3,self%supercell%unitcell%spin%nspin) )
 
            ! set inital spin state using the input variables
            ! set spin to ferromagnetic along init_orientation then rotate
-           do i=1, self%hist%nspin_prim
+           do i=1, self%supercell%unitcell%spin%nspin
              Sprim(:,i)=self%init_orientation(:)
            enddo
            self%Stmp(:,:) = 0.0d0
-          
+
            call self%supercell%supercell_maker%generate_spin_wave_vectorlist(A=Sprim, &
-              & kpoint=self%init_qpoint, axis=self%init_rotate_axis, A_sc=self%Stmp)
-   
+             & kpoint=self%init_qpoint, axis=self%init_rotate_axis, A_sc=self%Stmp)
+
            ABI_SFREE(SPrim)
 
          case (4)
-           ! read from last step of hist file
-           write(msg,'(a,a,a)') "Initial spins set to input spin hist file ",&
-              &  trim(restart_hist_fname), '.'  
-           call wrtout(ab_out,msg,'COLL')
-           call wrtout(std_out,msg,'COLL')
-           if (.not. present(restart_hist_fname)) then
+          ! read from last step of hist file
+          write(msg,'(a,a,a)') "Initial spins set to input spin hist file ",&
+             &  trim(restart_hist_fname), '.'  
+          call wrtout(ab_out,msg,'COLL')
+          call wrtout(std_out,msg,'COLL')
+          if (.not. present(restart_hist_fname)) then
              MSG_ERROR("Spin initialize mode set to 4, but restart_hist_fname is not used.")
            end if
            call self%read_hist_spin_state(fname=restart_hist_fname)
@@ -406,7 +402,7 @@ contains
        call self%spin_ncfile%initialize( trim(fname), params%spin_write_traj)
        call self%spin_ncfile%def_spindynamics_var(self%hist)
        call self%spin_ncfile%def_observable_var(self%spin_ob)
-       !call spin_ncfile_t_write_primitive_cell(self%spin_ncfile, self%spin_primitive)
+       call self%spin_ncfile%write_primitive_cell(self%supercell%unitcell)
        call self%spin_ncfile%write_supercell(self%supercell)
        call self%spin_ncfile%write_parameters(params)
     endif

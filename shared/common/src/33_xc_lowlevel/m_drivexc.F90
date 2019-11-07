@@ -31,7 +31,6 @@ module m_drivexc
  use m_abicore
  use m_errors
  use libxc_functionals
-
  use m_numeric_tools,    only : invcb
  use m_xciit,            only : xciit
  use m_xcpbe,            only : xcpbe
@@ -83,6 +82,7 @@ contains
 !!    be equal to the spin-up density5
 !!    and both are half the total density.
 !!    If nspden=2, the spin-up and spin-down density must be given
+!!  use_laplacian=1 if functional needs the laplacian of the density
 !!  xclevel= XC functional level
 !!  === Optional input arguments ===
 !!  [el_temp]= electronic temperature (to be used for finite temperature XC functionals)
@@ -116,7 +116,6 @@ contains
 !!    and both are half the total kinetic energy density.
 !!    If nspden=2, the spin-up and spin-down kinetic energy densities must be given
 !!  [xc_funcs(2)]= <type(libxc_functional_type)>, optional : libxc XC functionals.
-!!  [xc_tb09_c]=c parameter for the mgga TB09 functional, within libxc
 
 !! OUTPUT
 !!  exc(npts)=exchange-correlation energy density (hartree)
@@ -173,43 +172,45 @@ contains
 !!
 !! SOURCE
 
-subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,rho,vxcrho,xclevel, &
+subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,rho,use_laplacian,vxcrho,xclevel, &
 &                       dvxc,d2vxc,el_temp,exexch,fxcT,grho2,& ! Optional arguments
-&                       hyb_mixing,lrho,tau,vxcgrho,vxclrho,vxctau,xc_funcs,xc_tb09_c) ! Optional arguments
+&                       hyb_mixing,lrho,tau,vxcgrho,vxclrho,vxctau,xc_funcs) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,xclevel
+ integer,intent(in) :: ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,use_laplacian,xclevel
  integer,intent(in),optional :: exexch
- real(dp),intent(in),optional :: el_temp,hyb_mixing,xc_tb09_c
+ real(dp),intent(in),optional :: el_temp,hyb_mixing
 !arrays
  real(dp),intent(in) :: rho(npts,nspden)
- real(dp),intent(in),optional :: grho2(npts,ngr2),lrho(npts,nspden*mgga),tau(npts,nspden*mgga)
+ real(dp),intent(in),optional :: grho2(npts,ngr2),lrho(npts,nspden*use_laplacian),tau(npts,nspden*mgga)
  real(dp),intent(out) :: exc(npts),vxcrho(npts,nspden)
  real(dp),intent(out),optional :: dvxc(npts,ndvxc),d2vxc(npts,nd2vxc),fxcT(:),vxcgrho(npts,nvxcgrho)
- real(dp),intent(out),optional :: vxclrho(npts,nspden*mgga),vxctau(npts,nspden*mgga)
+ real(dp),intent(out),optional :: vxclrho(npts,nspden*use_laplacian),vxctau(npts,nspden*mgga)
  type(libxc_functional_type),intent(inout),optional :: xc_funcs(2)
 
 !Local variables-------------------------------
 !scalars
- real(dp) :: hyb_mixing_,xc_tb09_c_
- logical :: is_gga
+ real(dp) :: hyb_mixing_
+ logical :: is_gga,needs_laplacian
 
-!  *************************************************************************
+! *************************************************************************
 
 !Checks input parameters
  if (mgga==1) then
-   if (.not.present(lrho)) then
-     MSG_BUG('lrho arg must be present in case of mGGA!')
-   end if
    if (.not.present(tau)) then
      MSG_BUG('tau arg must be present in case of mGGA!')
    end if
-   if (.not.present(vxclrho)) then
-     MSG_BUG('vxclrho arg must be present in case of mGGA!')
-   end if
    if (.not.present(vxctau)) then
      MSG_BUG('vxctau arg must be present in case of mGGA!')
+   end if
+ end if
+ if (use_laplacian==1) then
+   if (.not.present(lrho)) then
+     MSG_BUG('lrho arg must be present in case of a functional using the laplacian!')
+   end if
+   if (.not.present(vxclrho)) then
+     MSG_BUG('vxclrho arg must be present in case of a functional using the laplacian!')
    end if
  end if
  if (present(fxcT)) then
@@ -218,8 +219,6 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
    end if
  end if
 
- xc_tb09_c_=99.99_dp;if (present(xc_tb09_c)) xc_tb09_c_=xc_tb09_c
-
  if(ixc==41)hyb_mixing_=quarter
  if(ixc==42)hyb_mixing_=third
  if (present(hyb_mixing)) hyb_mixing_=hyb_mixing
@@ -227,37 +226,36 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
 !>>>>> All libXC functionals
 
  if (ixc<0) then
-
    if (present(xc_funcs))then
      is_gga=libxc_functionals_isgga(xc_functionals=xc_funcs)
+     needs_laplacian=libxc_functionals_needs_laplacian(xc_functionals=xc_funcs)
    else
      is_gga=libxc_functionals_isgga()
+     needs_laplacian=libxc_functionals_needs_laplacian()
    end if
 
    if (mgga==1) then
-     if (abs(xc_tb09_c_-99.99_dp)>tol12) then
-       if (present(xc_funcs)) then
+     
+     if (present(xc_funcs)) then
+       if (needs_laplacian) then
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         lrho_updn=lrho,vxclrho=vxclrho,tau_updn=tau,vxctau=vxctau, &
-&         xc_funcs=xc_funcs,xc_tb09_c=xc_tb09_c_)
+&         grho2_updn=grho2,vxcgrho=vxcgrho,tau_updn=tau,vxctau=vxctau,xc_funcs=xc_funcs,&
+&         lrho_updn=lrho,vxclrho=vxclrho)
        else
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         grho2_updn=grho2,vxcgrho=vxcgrho, &
-&         lrho_updn=lrho,vxclrho=vxclrho,tau_updn=tau,vxctau=vxctau, &
-&         xc_tb09_c=xc_tb09_c_)
+&         grho2_updn=grho2,vxcgrho=vxcgrho,tau_updn=tau,vxctau=vxctau,xc_funcs=xc_funcs)
        end if
      else
-       if (present(xc_funcs)) then
+       if (needs_laplacian) then
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         grho2_updn=grho2,vxcgrho=vxcgrho, &
-&         lrho_updn=lrho,vxclrho=vxclrho,tau_updn=tau,vxctau=vxctau, &
-&         xc_funcs=xc_funcs)
+&         grho2_updn=grho2,vxcgrho=vxcgrho,tau_updn=tau,vxctau=vxctau,&
+          lrho_updn=lrho,vxclrho=vxclrho)
        else
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         grho2_updn=grho2,vxcgrho=vxcgrho, &
-&         lrho_updn=lrho,vxclrho=vxclrho,tau_updn=tau,vxctau=vxctau)
+&         grho2_updn=grho2,vxcgrho=vxcgrho,tau_updn=tau,vxctau=vxctau)
        end if
      end if
+
    else if (is_gga) then
      if (order**2<=1) then
        if (present(xc_funcs)) then
@@ -374,9 +372,12 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
    else
      if (order**2<=1) then
        if (ixc>=31.and.ixc<=34) then !fake mgga functionals for testing purpose only (based on LDA functional)
+         if (use_laplacian==0) then
+           MSG_BUG('ixc=31...34 and use_laplacian=0!')
+         end if
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         grho2_updn=grho2,vxcgrho=vxcgrho, &
-&         lrho_updn=lrho,vxclrho=vxclrho,tau_updn=tau,vxctau=vxctau)
+&                     grho2_updn=grho2,vxcgrho=vxcgrho,tau_updn=tau,vxctau=vxctau, &
+&                     lrho_updn=lrho,vxclrho=vxclrho)
        else
          if (present(fxcT)) then
            call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho,fxcT=fxcT,el_temp=el_temp)
@@ -707,7 +708,7 @@ subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,&
 
 !Dimension for the gradient of the density (only allocated for GGA or mGGA)
  if ((ixc>=11.and.ixc<=17).or.(ixc>=23.and.ixc<=24).or.ixc==26.or.ixc==27.or. &
-& (ixc>=31.and.ixc<=34).or.(ixc==41.or.ixc==42).or.ixc==1402000.or.(add_tfw_)) ngr2=2*min(nspden,2)-1
+&    (ixc>=31.and.ixc<=34).or.(ixc==41.or.ixc==42).or.ixc==1402000.or.(add_tfw_)) ngr2=2*min(nspden,2)-1
  if (ixc<0.and.isgga.or.ismgga.or.is_hybrid) ngr2=2*min(nspden,2)-1
 
 !A-Only Exc and Vxc
@@ -1089,7 +1090,6 @@ end subroutine mkdenpos
 !!    If nspden=2, the spin-up and spin-down kinetic energy densities must be given
 !!  [xc_funcs(2)]= <type(libxc_functional_type)>, optional : libxc XC functionals.
 !!    If not specified, the underlying xc_global(2) is used by libxc.
-!!  [xc_tb09_c]= c parameter for the Tran-Blaha mGGA functional, within libxc
 !!
 !! OUTPUT
 !!  exc(npts)=exchange-correlation energy density (hartree)
@@ -1153,13 +1153,13 @@ end subroutine mkdenpos
 
 subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
 &   dvxc,d2vxc,grho2_updn,vxcgrho,el_temp,exexch,fxcT,& !Optional arguments
-&   hyb_mixing,lrho_updn,vxclrho,tau_updn,vxctau,xc_funcs,xc_tb09_c)  !Optional arguments
+&   hyb_mixing,lrho_updn,vxclrho,tau_updn,vxctau,xc_funcs)  !Optional arguments
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,ndvxc,ngr2,nd2vxc,npts,nspden,nvxcgrho,order
  integer,intent(in),optional :: exexch
- real(dp),intent(in),optional :: el_temp,hyb_mixing,xc_tb09_c
+ real(dp),intent(in),optional :: el_temp,hyb_mixing
 !arrays
  real(dp),intent(in) :: rho_updn(npts,nspden)
  real(dp),intent(in),optional :: grho2_updn(npts,ngr2)
@@ -1174,7 +1174,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 !scalars
  integer :: exexch_,ixc_from_lib,ixc1,ixc2,ndvxc_x,optpbe,ispden
  logical :: libxc_test,xc_err_ndvxc,xc_err_nvxcgrho1,xc_err_nvxcgrho2
- logical :: is_gga,is_mgga
+ logical :: is_gga,is_mgga,needs_laplacian
  real(dp) :: alpha
  real(dp),parameter :: rsfac=0.6203504908994000e0_dp
  character(len=500) :: message
@@ -1193,6 +1193,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 ! =================================================
 
 !Checks the values of order and other size parameters
+
  if( (order<1 .and. order/=-2) .or. order>4)then
    write(message, '(a,i0)' )&
 &   'The only allowed values for order are 1,2,-2 or 3, while it is found to be ',order
@@ -1245,15 +1246,21 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
    libxc_test=libxc_functionals_check(stop_if_error=.true.)
  end if
 
+ is_gga=.false.
+ is_mgga=.false.
+ needs_laplacian=.false.
+ ixc_from_lib=ixc
  if (ixc<0) then
 !  Prepare the tests
    if(present(xc_funcs))then
      is_gga=libxc_functionals_isgga(xc_functionals=xc_funcs)
      is_mgga=libxc_functionals_ismgga(xc_functionals=xc_funcs)
+     needs_laplacian=libxc_functionals_needs_laplacian(xc_functionals=xc_funcs)
      ixc_from_lib=libxc_functionals_ixc(xc_functionals=xc_funcs)
    else
      is_gga=libxc_functionals_isgga()
      is_mgga=libxc_functionals_ismgga()
+     needs_laplacian=libxc_functionals_needs_laplacian()
      ixc_from_lib=libxc_functionals_ixc()
    end if
 !  Check consistency between ixc passed in input and the one used to initialize the library.
@@ -1264,9 +1271,13 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 &     'Action: reinitialize the global structure funcs, see NOTES in m_libxc_functionals'
      MSG_BUG(message)
    end if
- else if (ixc==1420)then
+ else if ((ixc>=11.and.ixc<=17).or.((ixc>=23.and.ixc<=27).and.ixc/=25).or. &
+&         (ixc>=31.and.ixc<=34).or.(ixc>=41.and.ixc/=50).or.ixc==1402) then
    is_gga=.true.
-   is_mgga=.false.
+   if (ixc>=31.and.ixc<=34) then
+     is_mgga=.true.
+     needs_laplacian=.true.
+   end if
  end if
 
  if (ixc<0 .or. ixc==1402) then
@@ -1290,13 +1301,21 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
      end if
    end if
    if (is_mgga) then
-     if ( (.not. present(lrho_updn)) .or. (.not. present(vxclrho)) .or. &
-     (.not. present(tau_updn))  .or. (.not. present(vxctau))          )  then
+     if ((.not.present(tau_updn)).or.(.not.present(vxctau)))  then
        write(message, '(5a,i7)' )&
 &       'At least one of the functionals is a MGGA,',ch10,&
-&       'but not all the necessary arrays are present.',ch10,&
+&       'but not all the necessary arrays (tau) are present.',ch10,&
 &       'ixc=',ixc
        MSG_BUG(message)
+     end if
+     if (needs_laplacian) then
+       if ((.not.present(tau_updn)).or.(.not.present(vxctau)))  then
+         write(message, '(5a,i7)' )&
+&         'At least one of the functionals is a MGGA,',ch10,&
+&         'but not all the necessary arrays (lrho) are present.',ch10,&
+&         'ixc=',ixc
+         MSG_BUG(message)
+       end if
      end if
    end if
  end if
@@ -1411,8 +1430,8 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
    if(present(d2vxc)) d2vxc(:,:)=zero
    if(present(dvxc)) dvxc(:,:)=zero
    if(present(vxcgrho)) vxcgrho(:,:)=zero
-   if(present(vxclrho)) vxclrho(:,:)=zero
    if(present(vxctau)) vxctau(:,:)=zero
+   if(present(vxclrho)) vxclrho(:,:)=zero
 
 !>>>>> New Teter fit (4/93) to Ceperley-Alder data, with spin-pol option
  else if (ixc==1 .or. ixc==21 .or. ixc==22) then
@@ -1581,8 +1600,8 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
    exc(:)=zero
    vxcrho(:,:)=zero
    vxcgrho(:,:)=zero
-   vxclrho(:,:)=zero
    vxctau(:,:)=zero
+   vxclrho(:,:)=zero
 
 !>>>>> Perdew-Wang LSD is coded in Perdew-Burke-Ernzerhof GGA, with optpbe=1
    optpbe=1
@@ -1805,30 +1824,34 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
  else if( ixc<0 ) then
    if (is_mgga) then
      if(present(xc_funcs))then
-       if (PRESENT(xc_tb09_c)) then
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho,grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,xc_functionals=xc_funcs,xc_tb09_c=xc_tb09_c)
+       if (needs_laplacian) then
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&         grho2=grho2_updn,vxcgr=vxcgrho,tau=tau_updn,vxctau=vxctau,&
+&         lrho=lrho_updn,vxclrho=vxclrho,&
+&         xc_functionals=xc_funcs)
        else
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho,grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,xc_functionals=xc_funcs)
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&         grho2=grho2_updn,vxcgr=vxcgrho,tau=tau_updn,vxctau=vxctau,&
+&         xc_functionals=xc_funcs)
        end if
      else
-       if (PRESENT(xc_tb09_c)) then
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho,grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,xc_tb09_c=xc_tb09_c)
+       if (needs_laplacian) then
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&         grho2=grho2_updn,vxcgr=vxcgrho,tau=tau_updn,vxctau=vxctau,&
+&         lrho=lrho_updn,vxclrho=vxclrho)
        else
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho,grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau)
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&         grho2=grho2_updn,vxcgr=vxcgrho,tau=tau_updn,vxctau=vxctau)
        end if
      end if
      ixc1 = (-ixc)/1000
      ixc2 = (-ixc) - ixc1*1000
      if(ixc1==206 .or. ixc1==207 .or. ixc1==208 .or. ixc1==209 .or. &
-&     ixc2==206 .or. ixc2==207 .or. ixc2==208 .or. ixc2==209    )then
+&       ixc2==206 .or. ixc2==207 .or. ixc2==208 .or. ixc2==209    )then
 !      Assume that that type of mGGA can only be used with a LDA correlation (see doc)
-       vxcgrho(:,:)=zero
-       vxclrho(:,:)=zero
-       vxctau(:,:)=zero
+       if (present(vxcgrho)) vxcgrho(:,:)=zero
+       if (present(vxctau)) vxctau(:,:)=zero
+       if (present(vxclrho)) vxclrho(:,:)=zero
      end if
    elseif (is_gga) then
      if(present(xc_funcs))then

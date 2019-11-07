@@ -3,6 +3,20 @@ This file list the things to do for multibinit
 ---
 # Todo list for Multibinit
 
+
+## Preparing for Abinit9 
+### [TODO] Update the automatic tests (hexu) [time: November, 2019]
+### [TODO] Add more autotests. (Nicole) [time: November, 2019??]
+      - list of SLC tests?
+### [Ongoing] Finalize the format of potential netcdf file and spin hist file. (hexu & Nicole) [time: December]
+      - Oiju format updated.
+### [TODO] documentation for the file formats. (Nicole & hexu)
+#### [TODO] use reduced coordinates instead of cartersian? Do we have the final decision? (hexu)  [time: November]
+### [Ongoing] Full workflow of fitting parameters. (hexu) [time: November]
+### [TODO] Update the tutorials and other documentations. (Nicole & hexu) [time: November]
+### [TODO] Tutorial for spin-lattice coupling???
+
+
 ## Genenal structure
 
 ### [TODO] Clean lattice part in 98_main/multibinit.F90 to manager or lattice code
@@ -35,7 +49,7 @@ State:
 ### [DONE] Document general data structure  (hexu) [time: July, 2019]
 
 
-#### [TODO] Make a developer's guide on how to add new things. (hexu) [time: July, 2019]
+#### [DONE] Make a developer's guide on how to add new things. (hexu) [time: July, 2019]
 
 State: First draft in multibinit_note.md
  
@@ -88,11 +102,19 @@ State:
 
 ### [DONE] Test two dynamics without coupling (hexu) [time: July,2019]
 
-### [TODO] Implement primitive Oiju potential
+### [TODO] Implement primitive Oiju potential (Nicole) 
+ - Other terms are also implemented. Test to be done.
 
-### [TODO] Implement supercell Oiju potential
+### [TODO] Implement supercell Oiju potential (Nicole)
+ - Other terms are also implemented. Test to be done.
 
 ### [TODO??] Implement advanced integration algorithm for spin/lattice dynamics
+
+### [TODO] Optimize Tijuv terms so the time is acceptable. (Nicole & hexu) [time: Now]
+    - The firt time consuming part is the sorting of the ijuv indices. Merge sort (O(NlogN)) is now (07/11/2019) instead of insertion sort (O(N^2)). More test needed to see if calculating the force and bfield is fast enough, especially on larger supercell. 
+    
+
+### [TODO] Implement full procedure of coupled SLC dynamics. (Nicole)
 
 ---
 ## Lattice wannier function
@@ -102,3 +124,9 @@ State:
 ## Electron
 
 ---
+
+
+## Long term issues
+### [ISSUE] damping parameter for spin dynamics. (1) how to get the damping parameter for spin dynamics. (2) Counting spin-phonon coupling
+
+

@@ -285,7 +285,6 @@ contains
 
   !---------------------------------------
   ! reading oiju parameters from ncdf file
-  ! TODO: change variable names
   !---------------------------------------
   subroutine read_oiju(self, ncid)  
     class(slc_primitive_potential_t), intent(inout) :: self
@@ -318,15 +317,15 @@ contains
       ncerr = nf90_get_var(ncid, varid, ulist)
       call netcdf_check(ncerr, "when reading Oiju_ulist")
 
-      varid = nctk_idname(ncid, "spin_lattice_Oiju_vallist")
+      varid = nctk_idname(ncid, "spin_lattice_Oiju_valuelist")
       ncerr = nf90_get_var(ncid, varid, vallist)
-      call netcdf_check(ncerr, "when reading Oiju_vallist")
+      call netcdf_check(ncerr, "when reading spin_lattice_Oiju_valuelist")
 
       write(std_out,'(A8,I10,A11)') 'O_iju: ', ndata, 'terms read'  
 
       !change units from eV to Ha and Ang to Bohr
       vallist(:) = vallist(:)*eV_Ha*Bohr_Ang
-  
+
       !fill the sparse matrix for oiju parameters
       call self%set_oiju(ndata, ilist, jlist, ulist, vallist)
 
@@ -334,7 +333,6 @@ contains
       ABI_SFREE(jlist)
       ABI_SFREE(ulist)
       ABI_SFREE(vallist)
-
     endif
 
   end subroutine read_oiju
@@ -619,9 +617,13 @@ contains
       ! fill different coupling terms
       if (iam_master) then
         call self%fill_liu(scpot, scmaker)
+        print *, "filling Oiju supercell" 
         call self%fill_oiju(scpot, scmaker)
+        print *, "Oiju supercell filled"
         call self%fill_niuv(scpot, scmaker)
+        print *, "filling Tijuv supercell" 
         call self%fill_tijuv(scpot, scmaker)
+        print *, "Tijuv supercell filled"
 
         !Write information which terms are used
         write(std_out,'(A55)') 'Using the following terms for the spin-lattice coupling'

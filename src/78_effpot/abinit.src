@@ -44,6 +44,7 @@ sources = [
     "m_linked_list.F90",
     "m_lwf_mover.F90",
     "m_mathfuncs.F90",
+    "m_mergesort.F90",
     "m_mpi_scheduler.F90",
     "m_multibinit_cell.F90",
     "m_multibinit_dataset.F90",
