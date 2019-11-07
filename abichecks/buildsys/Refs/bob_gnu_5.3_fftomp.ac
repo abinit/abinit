@@ -39,7 +39,7 @@
 #       the CPPFLAGS_64BITS, CFLAGS_64BITS, CXXFLAGS_64BITS, and
 #       FCFLAGS_64BITS variables manually.
 #
-enable_64bit_flags="no"
+#enable_64bit_flags="yes"
 
 # Enable debug mode (default is basic)
 #
@@ -60,7 +60,7 @@ enable_64bit_flags="no"
 # Note: debug levels are incremental, i.e. the flags of one level are
 # appended to those of the previous ones
 #
-enable_debug="enhanced"
+#enable_debug="yes"
 
 # Enable compiler hints (default is yes)
 #
@@ -90,7 +90,7 @@ enable_debug="enhanced"
 #
 #     * this option is ignored when debugging is in profile mode
 #
-enable_optim="no"
+#enable_optim="aggressive"
 
 # Disable vectorization with AVX-enable processor in problematic procedures
 #
@@ -315,7 +315,7 @@ enable_optim="no"
 
 # Fortran compiler additional custom flags
 #
-FCFLAGS_EXTRA="-Wall"
+FCFLAGS_EXTRA="-fopenmp"
 
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -348,7 +348,7 @@ FCFLAGS_EXTRA="-Wall"
 
 # Fortran linker custom flags
 #
-#FC_LDFLAGS_EXTRA="-Bstatic"
+FC_LDFLAGS_EXTRA="-fopenmp"
 
 # Forced Fortran linker flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -370,19 +370,19 @@ FCFLAGS_EXTRA="-Wall"
 # Forced Fortran linker libraries
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-FC_LIBS="-lstdc++ -ldl"
+#FC_LIBS="-lsvml"
 
                        # ------------------------------ #
 
 # Use C clock instead of Fortran clock for timings (default is no)
 #
-enable_cclock="no"
+#enable_cclock="yes"
 
 # Wrap Fortran compiler calls (default is auto-detected)
 # Combine this option with enable_debug="yes" to keep preprocessed source
 # files (they are removed by default, except if their build fails)
 #
-enable_fc_wrapper="no"
+#enable_fc_wrapper="yes"
 
 # Choose whether to read file lists from standard input or "ab.files"
 # (default is yes = standard input)
@@ -468,7 +468,7 @@ enable_fc_wrapper="no"
 # it. If set to "yes", the configure script will stop if it does not find
 # a working MPI environment.
 #
-enable_mpi="yes"
+enable_mpi="no"
 
 # Activate the MPI_IN_PLACE option whenever possible (default is no)
 # WARNING: this feature requires MPI2, ignored if the MPI library
@@ -489,7 +489,7 @@ enable_mpi="yes"
 # it. If set to "yes", the configure script will stop if it does not find
 # a working MPI I/O environment.
 #
-enable_mpi_io="yes"
+enable_mpi_io="no"
 
 # Enable MPI-IO mode in Abinit (use MPI-IO as default IO library,
 # change the default values of iomode)   
@@ -531,7 +531,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/usr/local/openmpi_gcc53"
+#with_mpi_prefix="/usr/local/openmpi-gcc"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -725,7 +725,7 @@ with_netcdf_incs="-I${FALLBACKS_HOME}_8.12/${FB}/netcdf4/4.4.1.1/include -I${FAL
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L${FALLBACKS_HOME}_8.12/${FB}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_HOME}_8.12/${FB}/netcdf4/4.4.1.1/lib -lnetcdf"
+with_netcdf_libs="-L${FALLBACKS_HOME}_8.12/${FB}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_HOME}_8.12/${FB}/netcdf4/4.4.1.1/lib -lnetcdf -L/usr/lib64 -lhdf5 -lhdf5_hl"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -777,7 +777,7 @@ with_fft_incs="-I/usr/include"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L/usr/lib64 -lfftw3 -lfftw3f"
+with_fft_libs="-L/usr/lib64 -lfftw3_omp -lfftw3f_omp -lfftw3 -lfftw3f"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -852,15 +852,15 @@ with_fft_libs="-L/usr/lib64 -lfftw3 -lfftw3f"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="custom"
+with_linalg_flavor="atlas"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
-#with_linalg_incs="-I/usr/local/include"
+with_linalg_incs="-I/usr/include/atlas"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/usr/local/OpenBLAS/lib -lopenblas -lpthread"
+with_linalg_libs="-L/usr/lib64/atlas -ltatlas -lsatlas"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -900,7 +900,7 @@ with_linalg_libs="-L/usr/local/OpenBLAS/lib -lopenblas -lpthread"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="none"
+with_dft_flavor="libxc"
 
                        # ------------------------------ #
 
@@ -930,11 +930,11 @@ with_dft_flavor="none"
 
 # Include flags for the LibXC library (default is unset)
 #
-#with_libxc_incs="-I/opt/etsf/include"
+with_libxc_incs="-I${FALLBACKS_HOME}_8.12/${FB}/libxc/4.2.3/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-#with_libxc_libs="-L/opt/etsf/lib -lxc"
+with_libxc_libs="-L${FALLBACKS_HOME}_8.12/${FB}/libxc/4.2.3/lib -lxc"
 
                        # ------------------------------ #
 
@@ -973,7 +973,6 @@ with_dft_flavor="none"
 #
 #enable_triqs_v2_0="no"
 #enable_triqs_v1_4="no"
-enable_python_invocation="yes"
 #
 # Include flags for the TRIQS library (default is unset)
 #
@@ -1021,11 +1020,11 @@ enable_python_invocation="yes"
 
 # Enable exports (pouillon)
 #
-enable_exports="yes"
+#enable_exports="yes"
 
 # Enable double precision for GW calculations (gmatteo)
 #
-enable_gw_dpc="no"
+#enable_gw_dpc="yes"
 
 # Enable memory profiling (waroquiers)
 #
@@ -1037,7 +1036,7 @@ enable_memory_profiling="no"
 
 # Enable OpenMP (gmatteo, torrent)
 #
-enable_openmp="no"
+enable_openmp="yes"
 
 # Enable ZDOTC and ZDOTU bugfix (gmatteo)
 #
