@@ -779,7 +779,7 @@ end subroutine constrained_dft_free
 !! FUNCTION
 !! Recompute the residual to take into account the constraints, within constrained DFT.
 !! The kind of constraint is given by constraint_kind, and the target values are given by spinat, for the local atomic magnetization,
-!! and chrgat minus the ioninc charge, for the local atomic charge.
+!! and chrgat minus the ionic charge, for the local atomic charge.
 
 !!
 !! INPUTS
@@ -864,7 +864,7 @@ end subroutine constrained_dft_free
 &  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres)
 
 !Make the proper combination of intgres, to single out the scalar potential residual and the magnetic field potential residuals for x,y,z.
-!Also exchanges the spin and atom idices to prepare the solution of the linear system of equation
+!Also exchanges the spin and atom indices to prepare the solution of the linear system of equation
  do iatom=1,natom
    if(nspden==1)then
      intgr(iatom,1)=intgres(1,iatom)
