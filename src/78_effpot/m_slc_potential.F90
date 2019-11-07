@@ -358,7 +358,7 @@ contains
       enddo
     endif
 
-    if(present(energy)) energy=eslc
+    if(present(energy)) energy=energy + eslc
     
   end subroutine calculate
 
