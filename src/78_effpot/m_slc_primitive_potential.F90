@@ -329,9 +329,9 @@ contains
       ulist(:)=uRulist(1, :)
       Rulist(:,:)=uRulist(2:4, :)
 
-      varid = nctk_idname(ncid, "spin_lattice_Oiju_vallist")
+      varid = nctk_idname(ncid, "spin_lattice_Oiju_valuelist")
       ncerr = nf90_get_var(ncid, varid, vallist)
-      call netcdf_check(ncerr, "when reading spin_lattice_Oiju_vallist")
+      call netcdf_check(ncerr, "when reading spin_lattice_Oiju_valuelist")
 
       write(std_out,'(A8,I10,A11)') 'O_iju: ', ndata, 'terms read'  
 

@@ -36,6 +36,7 @@ module m_dynamic_array
   use m_abicore
   use m_errors
   use m_mathfuncs, only: array_morethan, binsearch_left_integerlist,binsearch_left_integer
+  use m_mergesort, only: MergeSort, MergeSort2D
 
   implicit none
   private
@@ -245,13 +246,13 @@ subroutine insertion_sort_int(a, order)
 end subroutine insertion_sort_int
 
 !----------------------------------------------------------------------
-!> @brief insertion_sort_int: sort a DYNAMIC INT array using insertion sort algorithm
+!> @brief int_array_type_insertion_sort: sort a DYNAMIC INT array using insertion sort algorithm
 !>  it is a memory safe method but is generally slow.
 !> @param[inout]  a: an dynamic array. the array to be sorted. and will output inplace
 !> @param[inout] order (optional) the sorted index, it can be used to sort
 !>  other arrays so that the order in consistent.
 !----------------------------------------------------------------------
-subroutine int_array_type_sort(self, order)
+subroutine int_array_type_insertion_sort(self, order)
   class(int_array_type), intent(inout):: self
   integer, optional, intent(inout):: order(self%size)
   integer :: i,j, v
@@ -272,7 +273,22 @@ subroutine int_array_type_sort(self, order)
      self%data(j+1)=v
      if(present(order)) order(j+1)=i
   end do
+end subroutine int_array_type_insertion_sort
+
+
+!----------------------------------------------------------------------
+!> @brief int_array_type_insertion_sort: sort a DYNAMIC INT array using merge sort algorithm
+!> @param[inout]  a: an dynamic array. the array to be sorted. and will output inplace
+!> @param[inout] order (optional) the sorted index, it can be used to sort
+!>  other arrays so that the order in consistent.
+!----------------------------------------------------------------------
+subroutine int_array_type_sort(self, order)
+  class(int_array_type), intent(inout):: self
+  integer, optional, intent(inout):: order(self%size)
+  integer :: work(self%size/2), work_order(self%size/2)
+  call MergeSort(self%data(:self%size), work, order, work_order)
 end subroutine int_array_type_sort
+
 
 
 !****f* m_dynarray/int_array_type_finalize
@@ -429,7 +445,7 @@ end subroutine int2d_array_type_finalize
 !>  other arrays so that the order in consistent.
 !----------------------------------------------------------------------
 
-subroutine int2d_array_type_sort(self, order)
+subroutine int2d_array_type_insertion_sort(self, order)
   class(int2d_array_type), intent(inout):: self
   integer, optional, intent(inout):: order(self%size)
   integer :: i,j, v(size(self%data, dim=1))
@@ -451,7 +467,27 @@ subroutine int2d_array_type_sort(self, order)
      if(present(order)) order(j+1)=i
   end do
   self%sorted=.True.
+end subroutine int2d_array_type_insertion_sort
+
+
+!----------------------------------------------------------------------
+!> @brief sort a 2D DYNAMIC INT array using merge sort algorithm
+!>  It is now set as the default sorting algorithm.
+!>  it is a memory safe method but is generally slow.
+!> it compares the elements in first dimension i.e. A(:, i) and sort the second dim.
+!>  The comparing is from left to right.
+!> @param[inout]  a: an dynamic array. the array to be sorted. and will output inplace
+!> @param[inout] order (optional) the sorted index, it can be used to sort
+!>  other arrays so that the order in consistent.
+!----------------------------------------------------------------------
+
+subroutine int2d_array_type_sort(self, order)
+  class(int2d_array_type), intent(inout):: self
+  integer, optional, intent(inout):: order(self%size)
+  integer :: work(size(self%data, dim=1), self%size/2), work_order(self%size/2)
+  call MergeSort2D(self%data(:, :self%size), work, order, work_order )
 end subroutine int2d_array_type_sort
+
 
 !----------------------------------------------------------------------
 !> @brief binary search 
