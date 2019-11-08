@@ -10,6 +10,8 @@ except ImportError:
     from yaml import Dumper as MyDumper
     from yaml import Loader as MyLoader
 
+import numpy as np
+
 
 with open(os.path.join("split", "abinit_cpp_map.yml"), "r") as yaml_file:
     cpp_data = yaml.load(yaml_file, Loader=MyLoader)
@@ -35,18 +37,25 @@ for opt in cpp_options:
 for key, val in cpp_in_cats.items():
     cpp_in_cats[key] = sorted(list(set(val)))
 
+cpp_candidates = {key: [] for key in tree_map.keys()}
 cpp_exclusive = {key: [] for key in tree_map.keys()}
-for cpp_cat, cpp_opts in cpp_in_cats.items():
-    exc_opts = []
-    for other_cat, other_opts in cpp_in_cats.items():
-        if other_cat != cpp_cat:
-            exc_opts += [item for item in cpp_opts \
-                    if not item in other_opts + exc_opts]
-    cpp_exclusive[cpp_cat] = sorted(list(set(exc_opts)))
+cpp_profiles = []
+for opt, counts in cpp_by_cats.items():
+    scores = sorted(list(counts.items()), key=lambda x: x[1])
+    cpp_profiles.append([item[1] for item in scores])
+    if (scores[0][1] == 0) and (scores[1][1] == 2):
+        print(opt, scores)
+    elif (scores[0][1] == 0) and (scores[1][1] == 1):
+        cpp_candidates[scores[2][0]].append([opt, scores[1][0]])
+    elif (scores[0][1] == 0) and (scores[1][1] == 0):
+        cpp_exclusive[scores[2][0]].append(opt)
+cpp_profiles = np.unique(cpp_profiles, axis=0)
+print(cpp_profiles)
 
 stats_data = {
-        "cpp_classes": cpp_in_cats,
-        "categories": cpp_by_cats,
+        "candidates": cpp_candidates,
+        "counts": cpp_by_cats,
+        "cpp_groups": cpp_in_cats,
         "exclusive": cpp_exclusive,
 }
 
