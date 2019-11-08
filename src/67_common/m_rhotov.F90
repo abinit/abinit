@@ -175,7 +175,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enr
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(out) :: vres2,vxcavg
  type(MPI_type),intent(inout) :: mpi_enreg
- type(constrained_dft_t),intent(in) :: constrained_dft
+ type(constrained_dft_t),intent(inout) :: constrained_dft
  type(dataset_type),intent(in) :: dtset
  type(electronpositron_type),pointer,optional :: electronpositron
  type(energies_type),intent(inout) :: energies
