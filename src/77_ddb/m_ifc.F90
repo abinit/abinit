@@ -737,16 +737,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ifc%omega_minmax(1) = huge(one); ifc%omega_minmax(2) = -huge(one)
  do iq_ibz=1,ifc%nqibz
    if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
-#ifdef MR_DEV
-   if (present(dipquad).and.present(quadquad)) then
-     call ifc_fourq(ifc, crystal, ifc%qibz(:,iq_ibz), phfrq, displ_cart,&
-     dipquad=dipquad,quadquad=quadquad)
-   else
-     call ifc_fourq(ifc, crystal, ifc%qibz(:,iq_ibz), phfrq, displ_cart)
-   end if
-#else
    call ifc_fourq(ifc, crystal, ifc%qibz(:,iq_ibz), phfrq, displ_cart)
-#endif
    ifc%omega_minmax(1) = min(ifc%omega_minmax(1), minval(phfrq))
    ifc%omega_minmax(2) = max(ifc%omega_minmax(2), maxval(phfrq))
  end do
@@ -764,17 +755,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    call wrtout(std_out, msg)
    do iqpt=1,nqbz
      qpt(:)=Ifc%qbz(:,iqpt)
-#ifdef MR_DEV
-     if (present(dipquad).and.present(quadquad)) then
-       call ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,out_eigvec=eigvec,&
-     dipquad=dipquad,quadquad=quadquad)
-     else
-       call ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,out_eigvec=eigvec)
-     end if
-#else
      call ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,out_eigvec=eigvec)
-
-#endif
 
      ! OmegaSRLR: Perform decomposition of dynamical matrix
      ! MG: FIXME I don't think the implementation is correct when q !=0
@@ -1021,9 +1002,6 @@ end subroutine ifc_print
 
 subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
                      nanaqdir, comm, &                              ! Optional [in]
-#ifdef MR_DEV
-                     dipquad, quadquad, &
-#endif
                      out_d2cart, out_eigvec, out_displ_red, dwdq)   ! Optional [out]
 
 !Arguments ------------------------------------
@@ -1032,9 +1010,6 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
  class(ifc_type),intent(in) :: Ifc
  type(crystal_t),intent(in) :: Crystal
  integer,optional,intent(in) :: comm
-#ifdef MR_DEV
- integer,optional,intent(in) :: dipquad, quadquad
-#endif
 !arrays
  real(dp),intent(in) :: qpt(3)
  real(dp),intent(out) :: displ_cart(2,3,Crystal%natom,3*Crystal%natom)
@@ -1083,15 +1058,9 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
 
  ! The dynamical matrix d2cart is calculated here:
 #ifdef MR_DEV
- if (present(dipquad).and.present(quadquad)) then
  call gtdyn9(Ifc%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,Ifc%gprim,Ifc%mpert,natom,&
    Ifc%nrpt,qphnrm,my_qpt,Crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,Ifc%zeff,&
-   Ifc%qdrp_cart,Ifc%ewald_option,comm_,dipquad=dipquad,quadquad=quadquad)
- else
- call gtdyn9(Ifc%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,Ifc%gprim,Ifc%mpert,natom,&
-   Ifc%nrpt,qphnrm,my_qpt,Crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,Ifc%zeff,&
-   Ifc%qdrp_cart,Ifc%ewald_option,comm_)
- end if
+   Ifc%qdrp_cart,Ifc%ewald_option,comm_,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
 #else
  call gtdyn9(Ifc%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,Ifc%gprim,Ifc%mpert,natom,&
    Ifc%nrpt,qphnrm,my_qpt,Crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,Ifc%zeff,&
