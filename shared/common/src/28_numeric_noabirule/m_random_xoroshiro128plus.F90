@@ -4,6 +4,15 @@
 #endif
 
 #include "abi_common.h"
+
+#if defined HAVE_FC_SHIFTLR
+#  define SHIFTL_ shiftl
+#  define SHIFTR_ shiftr
+#else
+#  define SHIFTL_ lshift
+#  define SHIFTR_ rshift
+#endif
+
 ! xoroshiro128plus method random number generator
 ! adapted by hexu for usage in Abinit (downgrade to Fortran 90 and added
 ! some functions )
@@ -44,6 +53,7 @@
 
 !> Module for pseudo random number generation. The internal pseudo random
 !> generator is the xoroshiro128plus method.
+
 module m_random_xoroshiro128plus
 
   use defs_basis
@@ -158,7 +168,7 @@ contains
     t = 0
     do i = 1, 2
        do b = 0, 63
-          if (iand(jmp_c(i), shiftl(1_i8, b)) /= 0) then
+          if (iand(jmp_c(i), SHIFTL_(1_i8, b)) /= 0) then
              t = ieor(t, self%s)
           end if
           !dummy = self%next()
@@ -194,7 +204,7 @@ contains
 
     !x   = self%next()
     x   = next(self)
-    x   = ior(shiftl(1023_i8, 52), shiftr(x, 12))
+    x   = ior(SHIFTL_(1023_i8, 52), SHIFTR_(x, 12))
     rand_unif_01 = transfer(x, tmp) - 1.0_dp
   end function rand_unif_01
 
@@ -210,7 +220,7 @@ contains
     !x   = self%next()
     do i=1, size_array
        x   = next(self)
-       x   = ior(shiftl(1023_i8, 52), shiftr(x, 12))
+       x   = ior(SHIFTL_(1023_i8, 52), SHIFTR_(x, 12))
        output(i) = transfer(x, tmp) - 1.0_dp
     enddo
   end subroutine rand_unif_01_array
@@ -347,7 +357,7 @@ contains
     t         = self%s
     res       = t(1) + t(2)
     t(2)      = ieor(t(1), t(2))
-    self%s(1) = ieor(ieor(rotl(t(1), 55), t(2)), shiftl(t(2), 14))
+    self%s(1) = ieor(ieor(rotl(t(1), 55), t(2)), SHIFTL_(t(2), 14))
     self%s(2) = rotl(t(2), 36)
   end function next
 
@@ -358,7 +368,7 @@ contains
     integer, intent(in)     :: k
     integer(i8)             :: res
 
-    res = ior(shiftl(x, k), shiftr(x, 64 - k))
+    res = ior(SHIFTL_(x, k), SHIFTR_(x, 64 - k))
   end function rotl
 
 end module m_random_xoroshiro128plus

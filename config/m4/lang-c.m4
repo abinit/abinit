@@ -13,6 +13,40 @@
 
 
 
+# _ABI_CHECK_CC_ARM(COMPILER)
+# ------------------------------
+#
+# Checks whether the specified C compiler is the ARMClang compiler.
+# If yes, tries to determine its version number and sets the abi_cc_vendor
+# and abi_cc_version variables accordingly.
+#
+AC_DEFUN([_ABI_CHECK_CC_ARM],[
+  dnl Do some sanity checking of the arguments
+  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl AC_MSG_CHECKING([if we are using the ARM C compiler])
+  cc_info_string=`$1 --version 2>/dev/null | head -n 1`
+  abi_result=`echo "${cc_info_string}" | grep '^Arm C/C++/Fortran Compiler'`
+  if test "${abi_result}" = ""; then
+    abi_result="no"
+    cc_info_string=""
+    abi_cc_vendor="unknown"
+    abi_cc_version="unknown"
+  else
+    AC_DEFINE([CC_ARM],1,
+      [Define to 1 if you are using the ARM C compiler.])
+    abi_cc_vendor="arm"
+    abi_cc_version=`echo ${abi_result} | sed -e 's/.*ersion //; s/ .*//'`
+    if test "${abi_cc_version}" = "${abi_result}"; then
+      abi_cc_version="unknown"
+    fi
+    abi_result="yes"
+  fi
+  dnl AC_MSG_RESULT(${abi_result})
+]) # _ABI_CHECK_CC_ARM
+
+
+
 # _ABI_CHECK_CC_GNU(COMPILER)
 # ---------------------------
 #
@@ -128,6 +162,40 @@ AC_DEFUN([_ABI_CHECK_CC_INTEL],[
   fi
   dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CHECK_CC_INTEL
+
+
+
+# _ABI_CHECK_CC_LLVM(COMPILER)
+# ------------------------------
+#
+# Checks whether the specified C compiler is the LLVM Clang compiler.
+# If yes, tries to determine its version number and sets the abi_cc_vendor
+# and abi_cc_version variables accordingly.
+#
+AC_DEFUN([_ABI_CHECK_CC_LLVM],[
+  dnl Do some sanity checking of the arguments
+  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl AC_MSG_CHECKING([if we are using the LLVM Clang C compiler])
+  cc_info_string=`$1 --version 2>/dev/null | head -n 1`
+  abi_result=`echo "${cc_info_string}" | grep '^[[Cc]]lang'`
+  if test "${abi_result}" = ""; then
+    abi_result="no"
+    cc_info_string=""
+    abi_cc_vendor="unknown"
+    abi_cc_version="unknown"
+  else
+    AC_DEFINE([CC_LLVM],1,
+      [Define to 1 if you are using the LLVM Clang C compiler.])
+    abi_cc_vendor="llvm"
+    abi_cc_version=`echo ${abi_result} | sed -e 's/.*ersion //; s/ .*//'`
+    if test "${abi_cc_version}" = "${abi_result}"; then
+      abi_cc_version="unknown"
+    fi
+    abi_result="yes"
+  fi
+  dnl AC_MSG_RESULT(${abi_result})
+]) # _ABI_CHECK_CC_LLVM
 
 
 
@@ -281,7 +349,13 @@ AC_DEFUN([ABI_PROG_CC],[
   fi
 
   if test "${abi_cc_vendor}" = "unknown"; then
+    _ABI_CHECK_CC_ARM(${CC})
+  fi
+  if test "${abi_cc_vendor}" = "unknown"; then
     _ABI_CHECK_CC_INTEL(${CC})
+  fi
+  if test "${abi_cc_vendor}" = "unknown"; then
+    _ABI_CHECK_CC_LLVM(${CC})
   fi
   if test "${abi_cc_vendor}" = "unknown"; then
     _ABI_CHECK_CC_PGI(${CC})
