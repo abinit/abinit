@@ -8,7 +8,6 @@ This file list the things to do for multibinit
 ### [TODO] Check acoustic sum rule of Oiju and Tijuv term. 
    \sum_u Oiju = 0, \sum_u Tijuv=0, \sum_v Tijuv=0, \sum_uv Tijuv=0
 ### [TODO] check if Oiju parameter fitting has correct sign for ij permutation.
-
 ### [TODO] implement sorting so that  (@Nicole, Can you confirm which ones?)  
  - Oiju could be grouped by ju?
  - Tijuv could be grouped by uv? ju? 
