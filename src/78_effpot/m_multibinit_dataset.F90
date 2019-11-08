@@ -83,6 +83,7 @@ module m_multibinit_dataset
   integer :: fit_coeff
   integer :: fit_option
   integer :: fit_ncoeff
+  integer :: fit_iatom
   integer :: fit_nbancoeff
   integer :: fit_nfixcoeff
   integer :: opt_effpot 
@@ -308,6 +309,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%fit_cutoff=0
  multibinit_dtset%fit_nbancoeff=0
  multibinit_dtset%fit_ncoeff=0
+ multibinit_dtset%fit_iatom=1
  multibinit_dtset%ts_option=0
  multibinit_dtset%fit_nfixcoeff=0
  multibinit_dtset%fit_option=0
@@ -738,6 +740,16 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+ multibinit_dtset%fit_iatom=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_iatom',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_iatom=intarr(1)
+ if(multibinit_dtset%fit_iatom<0)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_iatom is',multibinit_dtset%fit_iatom,', but the only allowed values',ch10,&
+&   'are positives for multibinit.',ch10,&
+&   'Action: correct fit_iatom in your input file.'
+   MSG_ERROR(message)
+ end if
 
  multibinit_dtset%fit_ncoeff=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_ncoeff',tread,'INT')
@@ -890,7 +902,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  if(multibinit_dtset%ncoeff<0)then
    write(message, '(a,i0,a,a,a)' )&
 &   'ncoeff is',multibinit_dtset%ncoeff,', which is lower than 0 .',ch10,&
-&   'Action: correct natifc in your input file.'
+&   'Action: correct ncoeff in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -2382,6 +2394,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    end if
    write(nunit,'(1x,a17,es16.8)')'      fit_cutoff',multibinit_dtset%fit_cutoff
    write(nunit,'(1x,a17,I3.1)')'      fit_option',multibinit_dtset%fit_option
+   write(nunit,'(1x,a17,2x,I0)')'      fit_iatom',multibinit_dtset%fit_iatom  
    write(nunit,'(1x,a17,2x,I0)')'      fit_ncoeff',multibinit_dtset%fit_ncoeff   
    write(nunit,'(1x,a17,3i3)') '        fit_grid',multibinit_dtset%fit_grid
    write(nunit,'(1x,a17,I3.1)')'   ts_option',multibinit_dtset%ts_option

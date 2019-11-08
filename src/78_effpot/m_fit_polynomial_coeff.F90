@@ -126,7 +126,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                   max_power_strain,initialize_data,&
 &                                   fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS,&
 &                                   positive,verbose,anharmstr,spcoupling,&
-&                                   only_odd_power,only_even_power,prt_names,prt_anh)
+&                                   only_odd_power,only_even_power,prt_names,prt_anh,& 
+&                                   fit_iatom)
 
  implicit none
 
@@ -139,7 +140,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer,intent(in) :: power_disps(2)
  type(effective_potential_type),target,intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
- integer,optional,intent(in) :: max_power_strain,prt_names,prt_anh
+ integer,optional,intent(in) :: max_power_strain,prt_names,prt_anh,fit_iatom
  real(dp),optional,intent(in) :: cutoff_in,fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS
  logical,optional,intent(in) :: verbose,positive,anharmstr,spcoupling
  logical,optional,intent(in) :: only_odd_power,only_even_power
@@ -149,7 +150,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer :: ii,icoeff,my_icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff
  integer :: master,max_power_strain_in,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle
  integer :: ncycle_tot,ncycle_max,need_prt_names,nproc,ntime,nsweep,size_mpi
- integer :: rank_to_send,unit_names,unit_anh
+ integer :: rank_to_send,unit_names,unit_anh,fit_iatom_in
  real(dp) :: cutoff,factor,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
  logical :: iam_master,need_verbose,need_positive,converge,file_opened
@@ -221,6 +222,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &       'Action: contact abinit group'
    MSG_ERROR(message)
  end if
+ !Check which atom to fit, if not present do all atoms 
+ if(present(fit_iatom))then 
+    fit_iatom_in = fit_iatom 
+ else 
+    fit_iatom_in = -1 
+ endif
 
 !Set the tolerance for the fit
  tolMSDF=zero;tolMSDS=zero;tolMSDE=zero;tolMSDFS=zero
@@ -300,7 +307,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
 
-     write(message,'(a,F6.3,a)') " Cut-off of ",cutoff," Angstrom is imposed"
+     write(message,'(a,F6.3,a)') " Cutoff of ",cutoff," Bohr is imposed"
      call wrtout(std_out,message,'COLL')
    end if
 
@@ -308,7 +315,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                  max_power_strain_in,0,sc_size,comm,anharmstr=need_anharmstr,&
 &                                  spcoupling=need_spcoupling,distributed=.true.,&
 &                                  only_odd_power=need_only_odd_power,&
-&                                  only_even_power=need_only_even_power)
+&                                  only_even_power=need_only_even_power,& 
+&                                  fit_iatom=fit_iatom_in)
  end if
 !Copy the initial coefficients from the model on the CPU 0
  ncoeff_tot = ncoeff_tot + ncoeff_model

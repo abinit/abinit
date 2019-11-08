@@ -1571,13 +1571,14 @@ if(option == 1)then
      end do
    end do
   
+   cutoff = rprimd(1,1)
   
    if(need_verbose)then
      write(message,'(1a)')' Generation of the list of all the possible coefficients'
      call wrtout(std_out,message,'COLL')
    end if
    call polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,&
-&                              natom,nstr_sym,ncoeff_sym,nrpt,range_ifc,sc_size=sc_size)
+&                              natom,nstr_sym,ncoeff_sym,nrpt,range_ifc,cutoff,sc_size=sc_size)
 
    ABI_DEALLOCATE(dist)
    ABI_DEALLOCATE(rpt)
