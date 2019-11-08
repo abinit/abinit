@@ -90,6 +90,12 @@ MODULE m_ifc
    integer :: dipdip
      ! dipole dipole interaction flag.
 
+   integer :: dipquad
+     ! dipole quadrupole interaction flag.
+
+   integer :: quadquad
+     ! dipole quadrupole interaction flag.
+
    integer :: symdynmat
      ! If equal to 1, the dynamical matrix is symmetrized in dfpt_phfrq before the diagonalization.
 
@@ -292,7 +298,8 @@ end subroutine ifc_free
 !!
 !! FUNCTION
 !!  Initialize the dynamical matrix as well as the IFCs.
-!!  taking into account the dipole-dipole interaction.
+!!  taking into account the dipole-dipole, dipole-quadrupole and quadrupole-quadrupole 
+!!  interaction.
 !!
 !! INPUTS
 !! crystal<type(crystal_t)> = Information on the crystalline structure.
@@ -426,6 +433,12 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  Ifc%asr = asr
  Ifc%brav = brav
  Ifc%dipdip = abs(dipdip)
+#ifdef MR_DEV
+ if (present(dipquad).and.present(quadquad)) then
+   Ifc%dipquad = dipquad
+   Ifc%quadquad = quadquad
+ end if
+#endif
  Ifc%symdynmat = symdynmat
  Ifc%nqshft = nqshft
  call alloc_copy(q1shft(:,1:Ifc%nqshft),Ifc%qshft)
@@ -667,39 +680,39 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    end if
  end do
 
-#ifdef MR_DEV
-! Write the short-range ifc in case quadrupoles play a role
-! if (abs(Ifc%dipdip)==1.and.any(qdrp_cart/=zero)) then
-   ! Compute the distances between atoms
-   ! dist(ia,ib,irpt) contains the distance from atom ia to atom ib in unit cell
-   ! irpt.
-   ABI_MALLOC(dist,(natom,natom,Ifc%nrpt))
-   call dist9(ddb%acell,dist,gprim,natom,Ifc%nrpt,rcan,rprim,Ifc%rpt)
-
-   write(ab_out, '(a)' )'    '                            
-   write(ab_out, '(a)' )' Short-range IFCs after removing dipole and quadrupole Ewald contributions '
-   write(ab_out, '(a)' )' (not ordered by distance) '
-   write(ab_out, '(a)' )' Start IFC writting... '
-   do ia=1,natom
-     write(ab_out,'(a,i4)' )' generic atom number',ia
-     ii=0
-     do ib=1, natom
-       do irpt = 1, ifc%nrpt
-         ii=ii+1
-         write(ab_out, '(i8,a,i6,a,i8)' )ii,' interaction with atom',ib,' cell',irpt
-         write(ab_out, '(a,es16.6)' )' with distance ', dist(ia,ib,irpt)
-         do nu=1,3
-           write(ab_out, '(1x,3f16.10)' ) (Ifc%atmfrc(mu,ia,nu,ib,irpt)+tol10,mu=1,3)
-         end do
-         write(ab_out, '(a)' )'    '                            
-       end do
-     end do
-     write(ab_out, '(a)' )'    '                            
-   end do
-   write(ab_out, '(a)' )' ...Finish IFC writting '
-   ABI_FREE(dist)
-! end if
-#endif
+!#ifdef MR_DEV
+!! Write the short-range ifc in case quadrupoles play a role
+!! if (abs(Ifc%dipdip)==1.and.any(qdrp_cart/=zero)) then
+!   ! Compute the distances between atoms
+!   ! dist(ia,ib,irpt) contains the distance from atom ia to atom ib in unit cell
+!   ! irpt.
+!   ABI_MALLOC(dist,(natom,natom,Ifc%nrpt))
+!   call dist9(ddb%acell,dist,gprim,natom,Ifc%nrpt,rcan,rprim,Ifc%rpt)
+!
+!   write(ab_out, '(a)' )'    '                            
+!   write(ab_out, '(a)' )' Short-range IFCs after removing dipole and quadrupole Ewald contributions '
+!   write(ab_out, '(a)' )' (not ordered by distance) '
+!   write(ab_out, '(a)' )' Start IFC writting... '
+!   do ia=1,natom
+!     write(ab_out,'(a,i4)' )' generic atom number',ia
+!     ii=0
+!     do ib=1, natom
+!       do irpt = 1, ifc%nrpt
+!         ii=ii+1
+!         write(ab_out, '(i8,a,i6,a,i8)' )ii,' interaction with atom',ib,' cell',irpt
+!         write(ab_out, '(a,es16.6)' )' with distance ', dist(ia,ib,irpt)
+!         do nu=1,3
+!           write(ab_out, '(1x,3f16.10)' ) (Ifc%atmfrc(mu,ia,nu,ib,irpt)*Ifc%wghatm(ia,ib,irpt)+tol10,mu=1,3)
+!         end do
+!         write(ab_out, '(a)' )'    '                            
+!       end do
+!     end do
+!     write(ab_out, '(a)' )'    '                            
+!   end do
+!   write(ab_out, '(a)' )' ...Finish IFC writting '
+!   ABI_FREE(dist)
+!! end if
+!#endif
 
  !write(std_out,*)"nrpt before filter:", ifc_tmp%nrpt, ", after: ", ifc%nrpt
  !do irpt=1,ifc%nrpt
@@ -1819,7 +1832,11 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 
  if (iout > 0) then
    write(iout, '(/,a,/)' )' Analysis of interatomic force constants '
+#ifdef MR_DEV
+   if(Ifc%dipdip==1.and.Ifc%dipquad==0.and.Ifc%quadquad==0)then
+#else
    if(Ifc%dipdip==1)then
+#endif 
      write(iout, '(a)' )' Are given : column(1-3), the total force constant'
      write(iout, '(a)' )'       then  column(4-6), the Ewald part'
      write(iout, '(a)' )'       then  column(7-9), the short-range part'
@@ -1829,6 +1846,16 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
      write(iout, '(a)' )'       of the generic atom along y,               '
      write(iout, '(a)' )' column 3, 6 and 9 are related to the displacement'
      write(iout, '(a)')'       of the generic atom along z.               '
+#ifdef MR_DEV
+   else if(Ifc%dipquad==1.or.Ifc%quadquad==1)then
+     write(iout, '(a)' )' Are given : column(1-3), ONLY the short-range part!!!!'
+     write(iout, '(a)' )' column 1 is related to the displacement'
+     write(iout, '(a)' )'        of the generic atom along x,    '
+     write(iout, '(a)' )' column 2 is related to the displacement'
+     write(iout, '(a)' )'        of the generic atom along y,    '
+     write(iout, '(a)' )' column 3 is related to the displacement'
+     write(iout, '(a)' )'        of the generic atom along z,    '
+#endif
    else if(Ifc%dipdip==0)then
      write(iout, '(a)' )' column 1 is related to the displacement'
      write(iout, '(a)' )'        of the generic atom along x,    '
@@ -2208,7 +2235,11 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
      vect1(3)=(posngb(3,ii)-ra(3))/dist1
    end if
 
+#ifdef MR_DEV
+   if(Ifc%dipdip==0.or.Ifc%dipquad==1.or.Ifc%quadquad==1)then
+#else
    if(Ifc%dipdip==0)then
+#endif
      ! Get the "total" force constants (=real space FC)
      ! without taking into account the dipole-dipole interaction
      do mu=1,3
