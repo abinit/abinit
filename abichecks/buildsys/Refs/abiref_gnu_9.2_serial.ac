@@ -973,6 +973,7 @@ enable_xml="yes"
 #
 #enable_triqs_v2_0="no"
 #enable_triqs_v1_4="no"
+#enable_python_invocation="no"
 #
 # Include flags for the TRIQS library (default is unset)
 #
