@@ -40,8 +40,6 @@ def my_unicode(s):
 
 def escape(text, tag=None, cls=None):
     """Escape HTML entities in ``text`` string. Enclose new text in ``tag`` if tag with class ``cls``."""
-    #import cgi
-    #text = cgi.escape(text, quote=True)
     import html
     text = html.escape(text, quote=True)
     if tag:
@@ -97,7 +95,8 @@ class MyEntry(Entry):
         """String with authors. Empty if authors are not provided."""
         try:
             #return ", ".join(my_unicode(p) for p in self.persons["author"])
-            return ", ".join( my_unicode(p).partition(',')[2]+" "+my_unicode(p).partition(',')[0] for p in self.persons["author"])
+            return ", ".join(my_unicode(p).partition(',')[2] + " " +
+                             my_unicode(p).partition(',')[0] for p in self.persons["author"])
         except KeyError:
             return ""
 
@@ -360,7 +359,7 @@ class Website(object):
 
         # Find pdf files and sort them by basename.
         self.pdfs = OrderedDict(sorted([t for t in self.walk_filepath() if t[0].endswith(".pdf")],
-            key=lambda t: t[0]))
+                                key=lambda t: t[0]))
 
         cprint("Initial website generation completed in %.2f [s]" % (time.time() - start), "green")
 

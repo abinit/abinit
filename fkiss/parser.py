@@ -27,6 +27,11 @@ class Node(object):
         # FIXME: This is ABC
         return self.to_string()
 
+    @lazy_property
+    def is_procedure(self):
+        """Subroutine/function/module/program."""
+        return isinstance(self, Procedure)
+
     @staticmethod
     def terminal_highlight(s, bg="dark"):
         try:

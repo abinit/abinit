@@ -9,9 +9,11 @@ import sys
 import os
 import argparse
 
-from fkiss.project import FortranFile, AbinitProject
 from fkiss import termcolor
+from fkiss.tools import print_dataframe
+from fkiss.project import FortranFile, AbinitProject
 from fkiss.termcolor import cprint
+
 
 def get_epilog():
     return """\
@@ -80,19 +82,6 @@ def get_parser():
     pandas_parser.add_argument("-c", '--clipboard', default=False, action="store_true",
             help="Copy dataframe to the system clipboard. This can be pasted into Excel, for example")
 
-    # Parent parser for commands supporting (ipython/jupyter)
-    #ipy_parser = argparse.ArgumentParser(add_help=False)
-    #ipy_parser.add_argument('-nb', '--notebook', default=False, action="store_true", help='Generate jupyter notebook.')
-    #ipy_parser.add_argument('--foreground', action='store_true', default=False,
-    #    help="Run jupyter notebook in the foreground.")
-    #ipy_parser.add_argument('-ipy', '--ipython', default=False, action="store_true", help='Invoke ipython terminal.')
-
-    # Parent parser for commands supporting (jupyter notebooks)
-    #nb_parser = argparse.ArgumentParser(add_help=False)
-    #nb_parser.add_argument('-nb', '--notebook', default=False, action="store_true", help='Generate jupyter notebook.')
-    #nb_parser.add_argument('--foreground', action='store_true', default=False,
-    #    help="Run jupyter notebook in the foreground.")
-
     # Build the main parser.
     parser = argparse.ArgumentParser(epilog=get_epilog(),
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -134,9 +123,9 @@ def get_parser():
     #p_canimove.add_argument("dest_level", type=int, help="Destination level")
 
     # notebook option
-    #p_notebook = subparser.add_parser("notebook", parents=[copts_parser], help="Analyze project in jupyter notebook")
-    #p_notebook.add_argument('--foreground', action='store_true', default=False,
-    #    help="Run jupyter notebook in the foreground.")
+    p_notebook = subparsers.add_parser("notebook", parents=[copts_parser], help="Analyze project in jupyter notebook")
+    p_notebook.add_argument('--foreground', action='store_true', default=False,
+        help="Run jupyter notebook in the foreground.")
 
     # Subparser for stats.
     p_stats = subparsers.add_parser("stats", parents=[copts_parser, pandas_parser],
@@ -205,16 +194,6 @@ def main():
     if sys.version_info[0] < 3 and options.jobs > 1:
         cprint("py2.x CANNOT USE jobs > 1. Setting jobs to 1. Use py3k", "yellow")
         options.jobs = 1
-
-    #if sys.version_info[0] >= 3 and options.jobs > 1:
-    #from tests.pymods.devtools import number_of_cpus
-    #ncpus_detected = max(1, number_of_cpus())
-    #import multiprocessing
-    #try:
-    #    ncpus = multiprocessing.cpu_count()
-    #except NotImplementedError
-    #    ncpus = 1
-    #processes = max(1, ncpus // 2)
 
     #if options.command == "robodoc":
     #    from fkiss.mkrobodoc_dirs import mkrobodoc_files
@@ -302,7 +281,8 @@ def main():
 
     elif options.command == "graph":
         if options.what is None:
-            graph = proj.get_graphviz(engine=options.engine)
+            raise NotImplementedError("graph action requires argument!")
+            #graph = proj.get_graphviz(engine=options.engine)
 
         elif os.path.isdir(options.what):
             graph = proj.get_graphviz_dir(options.what, engine=options.engine)
@@ -315,7 +295,6 @@ def main():
         else:
             graph = proj.get_graphviz_pubname(options.what, engine=options.engine)
             if graph is None:
-                cprint("Cannot find public entity `%s` in Abinit project." % options.what, "red")
                 return 1
 
         # Visualize graph
@@ -327,16 +306,6 @@ def main():
     elif options.command == "validate":
        return proj.validate(verbose=options.verbose)
 
-    #elif options.command == "plot":
-    #    if os.path.isdir(options.what):
-    #        proj.plot_dir(options.what)
-    #    else:
-    #        key = os.path.basename(options.what)
-    #        proj.plot_file(key)
-
-    #elif options.command == "html":
-    #   proj.html_view()
-
     #elif options.command == "canimove":
     #    if os.path.isdir(options.what):
     #        return proj.canimove_dir(options.what, options.dest_level)
@@ -345,8 +314,8 @@ def main():
     #    else:
     #        raise TypeError("Requiring directory or file but received %s" % str(options.what))
 
-    #elif options.command == "notebook":
-    #    return proj.make_and_open_notebook(foreground=options.foreground)
+    elif options.command == "notebook":
+        return proj.make_and_open_notebook(foreground=options.foreground)
 
     elif options.command == "pedit":
         return proj.pedit(options.what, verbose=options.verbose)
@@ -360,7 +329,8 @@ def main():
             df = proj.get_stats_file(options.what)
         else:
             raise TypeError("Requiring directory or file or None but received %s" % str(options.what))
-        print(df)
+
+        print_dataframe(df)
 
         if options.clipboard:
             cprint("Copying dataframe to the system clipboard.", "green")
@@ -379,14 +349,12 @@ def main():
 
         all_dtypes = proj.get_all_datatypes()
         for dtype in all_dtypes:
-            print("analyzing:", repr(dtype))
+            print("Analyzing:", repr(dtype))
             try:
                 dtype.analyze(verbose=0)
             except Exception as exc:
                 import traceback
                 cprint(traceback.format_exc(), "red")
-                #cprint(exc, "red")
-                #raise exc
                 retcode += 1
                 #try:
                 #    dtype.analyze(verbose=1)

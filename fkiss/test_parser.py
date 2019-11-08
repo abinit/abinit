@@ -62,6 +62,7 @@ end PROGRAM HELLO_WORLD
         prog = p.programs[0]
         assert prog.name == "hello_world" and prog.ancestor is None
         assert prog.is_program and not prog.is_subroutine
+        assert prog.is_procedure
         assert prog.to_string(verbose=2)
         preamble = prog.preamble.splitlines()
         assert len(preamble) == 2
