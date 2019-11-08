@@ -10,7 +10,8 @@ If you are not familiar with *git*, we would strongly advise to watch this tutor
 
 <iframe width="1384" height="629" src="https://www.youtube.com/embed/HVsySz-h9r4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-For further information about *git*, please consult the [official documentation](https://git-scm.com/).
+For further information about *git*, please consult 
+the [official documentation](https://git-scm.com/).
 
 !!! tip
 
