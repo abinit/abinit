@@ -1761,8 +1761,6 @@ end subroutine phdos_ncwrite
 !! prefix=Prefix for output files.
 !! dielt(3,3)=dielectric tensor
 !! comm=MPI communicator
-!! [dipquad] = if 1, atmfrc has been build without dipole-quadrupole part
-!! [quadquad] = if 1, atmfrc has been build without quadrupole-quadrupole part
 !!
 !! OUTPUT
 !!  Only writing.
@@ -1774,19 +1772,11 @@ end subroutine phdos_ncwrite
 !!
 !! SOURCE
 
-subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm,&
-#ifdef MR_DEV
-           dipquad,quadquad)
-#else
-           )
-#endif
+subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: comm
-#ifdef MR_DEV
- integer,optional,intent(in) :: dipquad, quadquad
-#endif
  character(len=*),intent(in) :: prefix
  type(ifc_type),intent(in) :: Ifc
  type(crystal_t),intent(in) :: Crystal
@@ -1883,15 +1873,9 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm,&
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
 #ifdef MR_DEV
-     if (present(dipquad).and.present(quadquad)) then
-       call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,ddb%mpert,natom, &
-        Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff,&
-        ifc%qdrp_cart,ifc%ewald_option,xmpi_comm_self,dipquad=dipquad,quadquad=quadquad)
-     else
-       call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,ddb%mpert,natom, &
-        Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff,&
-        ifc%qdrp_cart,ifc%ewald_option,xmpi_comm_self)
-     end if
+     call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,ddb%mpert,natom, &
+      Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff,&
+      ifc%qdrp_cart,ifc%ewald_option,xmpi_comm_self,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
 #else
      call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,ddb%mpert,natom, &
       Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff,&

@@ -7,7 +7,7 @@
 !! Main routine for analysis of the interatomic force constants and associated properties.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (XG,DCA,JCC,CL,XW,GA)
+!! Copyright (C) 1999-2019 ABINIT group (XG,DCA,JCC,CL,XW,GA,MR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -626,11 +626,7 @@ program anaddb
 !**********************************************************************
 
  ! Now treat the first list of vectors (without non-analyticities)
-#ifdef MR_DEV
- call mkphbs(Ifc,Crystal,inp,ddb,asrq0,filnam(2),comm,dipquad=inp%dipquad,quadquad=inp%quadquad)
-#else
  call mkphbs(Ifc,Crystal,inp,ddb,asrq0,filnam(2),comm)
-#endif 
 
 !***********************************************************************
 
@@ -714,6 +710,7 @@ program anaddb
        qphon(:,1)=inp%qph2l(:,iphl2)
        qphnrm(1)=inp%qnrml2(iphl2)
 
+       !TODO: Quadrupole interactions need to be incorporated here (MR)
        ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
        call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,Crystal%indsym,&
          mpert,msym,natom,nsym,ntypat,phfrq,qphnrm(1),qphon,Crystal%rprimd,inp%symdynmat,&
