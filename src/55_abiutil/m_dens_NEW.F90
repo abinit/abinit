@@ -823,6 +823,9 @@ end subroutine constrained_dft_free
 !!  rhor(nfft,nspden)=array for electron density in el./bohr**3. At output it will be constrained.
 !!  xred(3,natom)=reduced atomic positions
 !!
+!! OUTPUT
+!!  e_constrained_dft=correction to the total energy, to make it variational
+!!
 !! SIDE EFFECTS
 !!  vresid(nfft,nspden)==array for potential residual in real space
 !!    At output it will be modified: projected onto the space orthogonal to the atomic spherical functions (if there is a related
@@ -835,10 +838,11 @@ end subroutine constrained_dft_free
 !!
 !! SOURCE
 
- subroutine constrained_residual(c_dft,mpi_enreg,rhor,vresid,xred)
+ subroutine constrained_residual(c_dft,e_constrained_dft,mpi_enreg,rhor,vresid,xred)
 
 !Arguments ------------------------------------
 !scalars
+ real(dp) :: e_constrained_dft
  type(constrained_dft_t),intent(inout) :: c_dft
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -1018,7 +1022,8 @@ end subroutine constrained_dft_free
 
    c_dft%intgden_delta(:,iatom)=intgden_delta(:,iatom)
    c_dft%intgres(:,iatom)=intgres(:,iatom)
-   c_dft%e_constrained_dft=c_dft%e_constrained_dft+sum(intgden_delta(:,iatom)*intgres(:,iatom))
+   e_constrained_dft=e_constrained_dft+sum(intgden_delta(:,iatom)*intgres(:,iatom))
+   c_dft%e_constrained_dft=e_constrained_dft
 
    !Second stage:
    !Computation of the correction in terms of density and magnetization coefficients.
