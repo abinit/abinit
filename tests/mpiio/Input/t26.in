@@ -93,7 +93,7 @@ natom 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_1[89].0_.*, buda2_gnu_8.2_mpich3, graphene_gnu_8.3_macports, atlas_gnu_9.1_openmpi
+#%% exclude_builders = .*_intel_1[89].0_.*, buda2_gnu_8.2_mpich3, graphene_gnu_8.3_macports, .*_gnu_9.[12]_.*
 #%% [files]
 #%% psp_files = 6c_lda.paw
 #%% [paral_info]
