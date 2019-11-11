@@ -6364,7 +6364,7 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
 
 !Flang compiler complains with empty constructors (this bug should be corrected in future versions)
 #if defined FC_LLVM || defined FC_ARM
-   vd_max = vdiff_t(1)
+   vd_max = vdiff_t(zero,zero,zero,zero,zero,zero)
 #else
    vd_max = vdiff_t()
 #endif

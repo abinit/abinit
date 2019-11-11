@@ -176,7 +176,7 @@ AC_DEFUN([_ABI_CHECK_CXX_LLVM],[
 
   dnl AC_MSG_CHECKING([if we are using the LLVM Clang++ C++ compiler])
   cxx_info_string=`$1 --version 2>/dev/null | head -n 1`
-  abi_result=`echo "${cxx_info_string}" | grep '^[[Cc]]lang'`
+  abi_result=`echo "${cxx_info_string}" | grep '[[Cc]]lang'`
   if test "${abi_result}" = ""; then
     abi_result="no"
     cxx_info_string=""

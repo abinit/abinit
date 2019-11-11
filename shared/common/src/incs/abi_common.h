@@ -254,12 +254,10 @@
    if (condition)  then NEWLINE MSG_ERROR_NOSTOP(msg, ierr) NEWLINE endif
 
 #define ETSF_WARN(lstat,Error_data) call abietsf_warn(lstat,Error_data,"PERS" _FILE_LINE_ARGS_)
-#define ETSF_CHECK_ERROR(lstat,Error_data) if (.not. lstat) & \
-&  call abietsf_msg_hndl(lstat,Error_data,"PERS" _FILE_LINE_ARGS_)
-#define NCF_CHECK(ncerr) if (ncerr/=nf90_noerr) & \
-&  call netcdf_check(ncerr,"No msg from caller" _FILE_LINE_ARGS_)
-#define NCF_CHECK_MSG(ncerr,msg) if (ncerr/=nf90_noerr) & \
-&  call netcdf_check(ncerr,msg _FILE_LINE_ARGS_)
+
+#define ETSF_CHECK_ERROR(lstat,Error_data) if (.not. lstat) call abietsf_msg_hndl(lstat,Error_data,"PERS" _FILE_LINE_ARGS_)
+#define NCF_CHECK(ncerr) if (ncerr/=nf90_noerr) call netcdf_check(ncerr,"No msg from caller" _FILE_LINE_ARGS_)
+#define NCF_CHECK_MSG(ncerr,msg) if (ncerr/=nf90_noerr) call netcdf_check(ncerr,msg _FILE_LINE_ARGS_)
 
 #define NOT_IMPLEMENTED_ERROR() MSG_ERROR("Not Implemented Error")
 
