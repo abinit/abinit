@@ -82,6 +82,7 @@ module m_multibinit_manager
   ! Spin lattice coupling
   use m_slc_primitive_potential, only: slc_primitive_potential_t
   use m_slc_potential, only : slc_potential_t
+  use m_slc_dynamics
 
   implicit none
   private
@@ -524,36 +525,8 @@ contains
     call self%set_movers()
 
     call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
-    ! use
-    msg=repeat("=", 90)
-    call wrtout(std_out,msg,'COLL')
-    call wrtout(ab_out, msg, 'COLL')
-    do istep = 1 , self%params%ntime
-       t=istep*self%spin_mover%dt
-      ! write(msg, "(A13, 4X,  I13)")  "Latt_Iter", istep
-       !call wrtout(std_out,msg,'COLL')
-       !call wrtout(ab_out, msg, 'COLL')
-
-       call self%lattice_mover%run_one_step(self%pots, spin=self%spin_mover%Stmp)
-
-       !write(msg, "(A13, 4X,  I13)")  "Spin_Iter", istep
-       !call wrtout(std_out,msg,'COLL')
-       !call wrtout(ab_out, msg, 'COLL')
-
-       call self%spin_mover%run_one_step(self%pots, displacement=self%lattice_mover%displacement)
-      
-       call self%spin_mover%hist%set_vars(time=t,  inc=.True.)
-       call self%spin_mover%spin_ob%get_observables(self%spin_mover%hist%S(:,:,self%spin_mover%hist%ihist_prev), &
-               self%spin_mover%hist%Snorm(:,self%spin_mover%hist%ihist_prev), &
-               self%spin_mover%hist%etot(self%spin_mover%hist%ihist_prev))
-       call self%spin_mover%spin_ncfile%write_one_step(self%spin_mover%hist)
-       write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", istep, t*Time_Sec, &
-                  & self%spin_mover%spin_ob%Mst_norm_total/self%spin_mover%spin_ob%Snorm_total, &
-                  & self%spin_mover%hist%etot(self%spin_mover%hist%ihist_prev)/self%spin_mover%spin_ob%nscell
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out, msg, 'COLL')
-       
-    end do
+    call slc_run_time(self%spin_mover, self%lattice_mover, self%pots, displacement=self%lattice_mover%displacement, & 
+                   &  spin=self%spin_mover%Stmp)
     msg=repeat("=", 90)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
