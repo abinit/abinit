@@ -501,9 +501,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
        !Get List of high order single Terms for terms 
        call opt_getHOSingleDispTerms(eff_pot%anharmonics_terms%coefficients(iterm),& 
 &                                    HOsingledisp_terms,symbols,singledisp_terms,order_ran,ncombi1,comm)
-
+       
        my_coeffs = eff_pot%anharmonics_terms%coefficients + HOsingledisp_terms
-
+        
        !Get List of high order cross Terms for term if ndisp > 1
        to_skip = .true.
        if(eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp>1 .or. & 
@@ -552,7 +552,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
             ABI_ALLOCATE(exists,(nterm2))
             exists=.FALSE.
             do jterm=1,nterm2-1
-               !write(*,*) 'what is jterm here', jterm 
+!               write(std_out,*) 'what is jterm here', jterm 
+!               write(std_out,*) "c1%nterm", my_coeffs_tmp(jterm), "c2%nterm", my_coeffs_tmp(nterm2)%nterm
                exists(jterm) = coeffs_compare(my_coeffs_tmp(jterm),my_coeffs_tmp(nterm2))
             enddo !jterm
             if(any(exists))then 
@@ -1610,7 +1611,8 @@ elseif(option == 2)then
 
 call polynomial_coeff_getNorder(terms,crystal,cutoff,ncoeff,ncoeff_out,power_disp,& 
 &                               power_strph,option_GN,sc_size,comm,anharmstr=.false.,spcoupling=.false.,&
-&                               only_odd_power=.false.,only_even_power=.true.,verbose=.false.) 
+&                               only_odd_power=.false.,only_even_power=.true.,verbose=.false.,&
+&                               compute_symmetric=.false.) 
 
  !TEST MS 
  !  write(*,*) "behind call getNorder"
@@ -1678,13 +1680,15 @@ subroutine opt_getHOSingleDispTerms(term_in,terms_out,symbols,single_disp_terms,
 !Local variables ------------------------------
 !scalars
 integer :: ndisp,norder, nterm_of_term
-integer :: icoeff,iorder,idisp, iterm1,iterm2
-!arrays
-!Logicals
- logical :: iam_master,need_verbose 
+integer :: icoeff,iorder,idisp, iterm1,iterm2,iterm3
+logical :: iam_master,need_verbose 
 !Strings
  character(len=1000) :: message
  character(len=200):: name
+!arrays
+ type(polynomial_coeff_type),allocatable :: terms_out_tmp(:) 
+!Logicals
+ logical,allocatable :: found(:) 
 !*************************************************************************
 
 !Get/Set Variables 
@@ -1693,7 +1697,7 @@ ndisp = term_in%terms(1)%ndisp
 norder = abs(power_disp(2)-power_disp(1))/2 + 1
 ncoeff = norder * ndisp
 !Allocate output terms 
-ABI_DATATYPE_ALLOCATE(terms_out,(ncoeff))
+ABI_DATATYPE_ALLOCATE(terms_out_tmp,(ncoeff))
 
 !find equivalent second order terms in list of single disp terms 
 !for each displacement in input term
@@ -1702,30 +1706,83 @@ ABI_DATATYPE_ALLOCATE(terms_out,(ncoeff))
 icoeff = 0
 do idisp=1,ndisp 
    do iterm1=1,size(single_disp_terms)
-      if(all(term_in%terms(1)%atindx(:,idisp) == single_disp_terms(iterm1)%terms(1)%atindx(:,1)))then 
-         if(all(term_in%terms(1)%cell(:,:,idisp) == single_disp_terms(iterm1)%terms(1)%cell(:,:,1)))then 
-            if(term_in%terms(1)%direction(idisp) == single_disp_terms(iterm1)%terms(1)%direction(1))then 
-               do iorder=1,norder
-                  icoeff = icoeff + 1
-                  terms_out(icoeff)=single_disp_terms(iterm1)
-                  terms_out(icoeff)%coefficient = 0.001
-                  nterm_of_term = terms_out(icoeff)%nterm 
-                  !Change order of term 
-                  do iterm2=1,nterm_of_term
-                     terms_out(icoeff)%terms(iterm2)%power_disp = power_disp(1) + (iorder-1)*2  
-                  enddo !iterm2 
-               enddo !iorder
+      do iterm2=1,single_disp_terms(iterm1)%nterm 
+         if(all(term_in%terms(1)%atindx(:,idisp) == single_disp_terms(iterm1)%terms(iterm2)%atindx(:,1)))then 
+            if(all(term_in%terms(1)%cell(:,:,idisp) == single_disp_terms(iterm1)%terms(iterm2)%cell(:,:,1)))then 
+               if(term_in%terms(1)%direction(idisp) == single_disp_terms(iterm1)%terms(iterm2)%direction(1))then 
+                  do iorder=1,norder
+                     icoeff = icoeff + 1
+                     terms_out_tmp(icoeff)=single_disp_terms(iterm1)
+                     terms_out_tmp(icoeff)%coefficient = 0.001
+                     nterm_of_term = terms_out_tmp(icoeff)%nterm 
+                     !Change order of term 
+                     do iterm3=1,nterm_of_term
+                        terms_out_tmp(icoeff)%terms(iterm3)%power_disp = power_disp(1) + (iorder-1)*2  
+                     enddo !iterm3 
+                  enddo !iorder
+               endif
             endif
          endif
-      endif 
+      enddo !iterm2 
    enddo !iterm1
 enddo!idisp
 
 !Change Name 
-do icoeff=1,ncoeff   
-   call polynomial_coeff_getName(name,terms_out(icoeff),symbols,recompute=.TRUE.)
-   call polynomial_coeff_SetName(name,terms_out(icoeff))
+do icoeff=1,ncoeff 
+!   write(std_out,*) "DEBUG icoeff: ", icoeff  
+!   write(*,*) "Term(",icoeff,"/",ncoeff,"): ", terms_out_tmp(icoeff)%name, "name before set name" 
+  call polynomial_coeff_getName(name,terms_out_tmp(icoeff),symbols,recompute=.TRUE.)
+  call polynomial_coeff_SetName(name,terms_out_tmp(icoeff))
+!   write(*,*) "Term(",icoeff,"/",ncoeff,"): ", terms_out_tmp(icoeff)%name, "after set name" 
 enddo 
+
+
+!Check for doubles and delete them
+!First count irreducible terms 
+ABI_ALLOCATE(found,(ncoeff)) 
+found = .FALSE.  
+iterm3 = 0
+do iterm1=1,ncoeff 
+  do iterm2=iterm1+1,ncoeff 
+     if(terms_out_tmp(iterm1) == terms_out_tmp(iterm2) .and. .not. found(iterm2))then 
+        found(iterm2) = .TRUE.
+        iterm3 = iterm3 + 1
+     endif
+  enddo 
+enddo 
+
+iterm3 = ncoeff - iterm3
+ABI_ALLOCATE(terms_out,(iterm3))
+
+!Second copy them 
+iterm3 = 0
+do iterm1=1,ncoeff 
+   if(.not. found(iterm1))then 
+      iterm3 = iterm3 + 1
+      terms_out(iterm3) = terms_out_tmp(iterm1)
+   endif 
+enddo
+
+ABI_DEALLOCATE(terms_out_tmp)
+ABI_DEALLOCATE(found)
+ncoeff = iterm3
+
+ !TEST MS 
+ !  write(*,*) "behind call getNorder"
+ !  write(*,*) "ncoeff_out: ", ncoeff_out
+ !  do ii=1,ncoeff_out 
+ !     write(*,*) "Term(",ii,"/",ncoeff_out,"): ", terms(ii)%name 
+ !  enddo
+ !TEST MS
+
+!!Check after reduction
+!do icoeff=1,ncoeff 
+!   write(std_out,*) "DEBUG icoeff: ", icoeff  
+!   write(*,*) "Term(",icoeff,"/",ncoeff,"): ", terms_out(icoeff)%name, "name before set name" 
+!  call polynomial_coeff_getName(name,terms_out(icoeff),symbols,recompute=.TRUE.)
+!  call polynomial_coeff_SetName(name,terms_out(icoeff))
+!   write(*,*) "Term(",icoeff,"/",ncoeff,"): ", terms_out(icoeff)%name, "after set name" 
+!enddo 
 
 end subroutine opt_getHOSingleDispTerms
 !!***
