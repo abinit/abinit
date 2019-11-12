@@ -508,6 +508,9 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
    else if(dmft_solv==7) then
      write(message, '(a,a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS&
      & (with rotationaly invariant interaction)'
+   else if(dmft_solv==9) then
+     write(message, '(a,a)') ch10,' DMFT uses the python invocation of TRIQS, for which you need to &
+     &give your personal script'
   endif
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
@@ -692,7 +695,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
    MSG_BUG(message)
  endif
  paw_dmft%dmft_log_freq=1 ! use logarithmic frequencies.
- if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
+ if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7.or.paw_dmft%dmft_solv==9) then
    paw_dmft%dmft_log_freq=0 ! do not use logarithmic frequencies.
  endif
  paw_dmft%dmft_nwli=dtset%dmft_nwli
@@ -746,8 +749,8 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
  do ikpt=1,paw_dmft%nkpt
    sumwtk=sumwtk+paw_dmft%wtk(ikpt)
  enddo
- if(abs(sumwtk-1_dp)>tol13.and.dtset%iscf>=0) then
-   write(message, '(a,f15.10)' )' sum of k-point is incorrect',sumwtk
+ if(abs(sumwtk-1_dp)>tol11.and.dtset%iscf>=0) then
+   write(message, '(a,f15.11)' )' sum of k-point is incorrect',sumwtk
    MSG_ERROR(message)
  endif
  ABI_ALLOCATE(paw_dmft%lpawu,(paw_dmft%natom))
@@ -1048,7 +1051,7 @@ subroutine construct_nwlo_dmft(paw_dmft)
 !         Check variables (Already done in chkinp if dmft_solv==5)
      if (paw_dmft%dmftqmc_l .gt. paw_dmft%dmft_nwlo) then
        write(message, '(a,a,i6)' )ch10,&
-&       ' ERROR: dmft_nwlo has to be at leat equal to 2xdmftqmc_l :',2*paw_dmft%dmftqmc_l
+&       ' ERROR: dmft_nwlo has to be at least equal to 2xdmftqmc_l :',2*paw_dmft%dmftqmc_l
        MSG_ERROR(message)
      end if
 !         End Check
