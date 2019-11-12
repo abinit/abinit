@@ -62,7 +62,7 @@
      qpt5   0.1 0.0 0.0   # This is a calculation along the Gamma-L line
 
   getwfk5   1             # Uses as input wfs the output wfs of the dataset 1
-  getwfq5   4             # Uses as input ddk wfs the output of the dataset 4
+  getwfq5   4             # Uses as input k+q wfs the output of the dataset 4
 
   kptopt5   3             # Automatic generation of k points,
                           # no use of symmetries to decrease 
@@ -88,7 +88,7 @@ znucl 13 33            # The keyword "znucl" refers to the atomic number of the
                        # type 2 is the Arsenic.
 
 #Definition of the atoms
-natom 2                # There are two atoms
+natom 2                # There are two atoms per unit cell
 typat 1 2              # The first is of type 1 (Al), the second is of type 2 (As).
 xred                   # This keyword indicate that the location of the atoms
                        # will follow, one triplet of number for each atom
@@ -119,7 +119,7 @@ diemac 9.0             # Although this is not mandatory, it is worth to
                        # precondition the SCF cycle. The model dielectric
                        # function used as the standard preconditioner
                        # is described in the "dielng" input variable section.
-                       # The dielectric constant of AlAs is smalle that the one of Si (=12).
+                       # The dielectric constant of AlAs is smaller than the one of Si (=12).
 
 
 #%%<BEGIN TEST_INFO>
