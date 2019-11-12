@@ -2769,6 +2769,8 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   call nf_check(nf90_put_var(ncid, var_gl_id,                 gl_nd))
   call nf_check(nf90_put_var(ncid, var_spacecomm_id,          paw_dmft%spacecomm))
   call nf_check(nf90_close(ncid))
+
+  write(std_out, '(2a)') ch10, "    NETCDF file abinit_output_for_py.nc written; Launching python invocation"
  
   ! Invoking python to execute the script
   call Invoke_python_triqs (paw_dmft%myproc, trim(paw_dmft%filnamei)//c_null_char)
@@ -2788,23 +2790,29 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
    MSG_ERROR(message)
   endif
 
+  write(std_out, '(2a)') ch10, "    Reading NETCDF file py_output_for_abinit.nc"
+
   ! Opening the NETCDF file
   call nf_check(nf90_open("py_output_for_abinit.nc", nf90_nowrite, ncid))
  
   ! Read from the file
   ! Re{G_iw}
+  write(std_out, '(2a)') ch10, "    -- Re[G(iw_n)]"
   call nf_check(nf90_inq_varid(ncid, "re_g_iw", varid))
   call nf_check(nf90_get_var(ncid, varid, new_re_g_iw))
   ! Im{G_iw}
+  write(std_out, '(2a)') ch10, "    -- Im[G(iw_n)]"
   call nf_check(nf90_inq_varid(ncid, "im_g_iw", varid))
   call nf_check(nf90_get_var(ncid, varid, new_im_g_iw))
   ! G_tau
+  write(std_out, '(2a)') ch10, "    -- G(tau)"
   call nf_check(nf90_inq_varid(ncid, "g_tau", varid))
   call nf_check(nf90_get_var(ncid, varid, new_g_tau))
   ! G_l
+  write(std_out, '(2a)') ch10, "    -- G_l"
   call nf_check(nf90_inq_varid(ncid, "gl", varid))
   call nf_check(nf90_get_var(ncid, varid, new_gl))
- 
+
   ! Assigning data
   do iflavor1=1, nflavor
    do iflavor2=1, nflavor
