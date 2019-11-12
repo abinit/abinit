@@ -13,7 +13,7 @@
 #Response Function calculation : phonon at X
   rfphon2   1             # Activate the calculation of the atomic dispacement perturbations
  rfatpol2   1 2           # All the atoms will be displaced
-   rfdir2   1 1 1         # Need to consider the perturbation in the x-direction only
+   rfdir2   1 1 1         # Need all directions but ABINIT will use symmetries if possible
 
     nqpt2   1
      qpt2   0.0 0.5 0.5   # This is a calculation at the X point
@@ -28,7 +28,7 @@
 #Response Function calculation : phonon at L
   rfphon3   1             # Activate the calculation of the atomic dispacement perturbations
  rfatpol3   1 2           # All the atoms will be displaced
-   rfdir3   1 1 1         # Need to consider the perturbation in the x-direction only
+   rfdir3   1 1 1         # Need all directions but ABINIT will use symmetries
 
     nqpt3   1
      qpt3   0.5 0.0 0.0   # This is a calculation at the L point
@@ -56,7 +56,7 @@
 #Response Function calculation : phonon close to Gamma
   rfphon5   1             # Activate the calculation of the atomic dispacement perturbations
  rfatpol5   1 2           # All the atoms will be displaced
-   rfdir5   1 1 1         # Need to consider the perturbation in the x-direction only
+   rfdir5   1 1 1         # Need all directions but ABINIT will use symmetries
 
     nqpt5   1
      qpt5   0.1 0.0 0.0   # This is a calculation along the Gamma-L line
