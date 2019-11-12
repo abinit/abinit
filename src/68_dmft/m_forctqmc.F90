@@ -2532,6 +2532,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
  integer(kind=4) :: varid
  logical :: file_exists
  complex :: i
+ character(len=500) :: filename
 
  real(dp), allocatable, target :: new_re_g_iw(:,:,:), new_im_g_iw(:,:,:)
  real(dp), allocatable, target :: new_g_tau(:,:,:), new_gl(:,:,:)
@@ -2783,17 +2784,19 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   i = (0, 1)
   
   ! Check if file exists
-  INQUIRE(FILE="py_output_for_abinit.nc", EXIST=file_exists)
+  write(filename, '(a,i4.4,a)') "py_output_for_abinit_rank_", paw_dmft%myproc, ".nc"
+
+  INQUIRE(FILE=filename, EXIST=file_exists)
   if(.not. file_exists) then
-   write(message,'(2a)') ch10,' Cannot find file "py_output_for_abinit.nc! Make sure the python script writes it with the right name and at the right place!.'
+   write(message,'(4a)') ch10,' Cannot find file ', filename, '! Make sure the python script writes it with the right name and at the right place!'
    call wrtout(std_out,message,'COLL')
    MSG_ERROR(message)
   endif
 
-  write(std_out, '(2a)') ch10, "    Reading NETCDF file py_output_for_abinit.nc"
+  write(std_out, '(3a)') ch10, "    Reading NETCDF file ", filename
 
   ! Opening the NETCDF file
-  call nf_check(nf90_open("py_output_for_abinit.nc", nf90_nowrite, ncid))
+  call nf_check(nf90_open(filename, nf90_nowrite, ncid))
  
   ! Read from the file
   ! Re{G_iw}
