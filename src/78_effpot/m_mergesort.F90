@@ -26,6 +26,9 @@
 
 module m_mergesort
 !!***
+  use defs_basis
+  use m_errors
+  use m_abicore
   use m_mathfuncs, only: array_lessthan, array_morethan, array_le
   implicit none
   private

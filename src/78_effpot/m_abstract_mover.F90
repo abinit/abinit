@@ -40,6 +40,7 @@ module m_abstract_mover
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
+  use m_hashtable, only: hash_table_t
   implicit none
 !!***
 
@@ -62,9 +63,10 @@ module m_abstract_mover
 
      ! a pointer to the supercell structure
      type(mbsupercell_t), pointer:: supercell=>null() 
+     type(hash_table_t), pointer :: etable=>null()
      ! a label for each mover. For printing out information
      character (len=200) :: label="Abstract Mover"
-     ! time step. 
+     ! time step.
      real(dp) :: dt= 0.0
      ! total time
      real(dp) :: total_time =0.0
@@ -90,6 +92,7 @@ module m_abstract_mover
      procedure :: reset            ! reset the mover
      procedure :: calc_observables ! call functions to calculate observables
      procedure :: write_hist       ! write hist file
+     procedure :: set_energy_table
   end type abstract_mover_t
 
 contains
@@ -224,5 +227,7 @@ contains
     ABI_UNUSED_A(ihist)
     MSG_ERROR("get_state not implemented for this mover")
   end subroutine get_state
+
+
 
 end module m_abstract_mover

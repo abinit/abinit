@@ -5,9 +5,13 @@ This file list the things to do for multibinit
 
 ## Temporary: for short term todos. Will be moved to other sections or removed once it is done.
 ### [TODO] add energy table in manager.
+  - State: waiting for approvement of Multibinit devs. 
 ### [TODO] Check acoustic sum rule of Oiju and Tijuv term. 
    \sum_u Oiju = 0, \sum_u Tijuv=0, \sum_v Tijuv=0, \sum_uv Tijuv=0
-### [TODO] check if Oiju parameter fitting has correct sign for ij permutation.
+  - state: Oiju bug found and partialy fixed. Now cutoff on (Riu+Rju) is disabled. 
+
+### [DONE?] check if Oiju parameter fitting has correct sign for ij permutation.
+ - state: Oiju=Ojiu is correct if there is no SOC. 
 ### [TODO] implement sorting so that  (@Nicole, Can you confirm which ones?)  
  - Oiju could be grouped by ju?
  - Tijuv could be grouped by uv? ju? 

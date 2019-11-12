@@ -134,6 +134,8 @@ module m_multibinit_manager
      procedure :: run_coupled_spin_latt_dynamics
      procedure :: run
      procedure :: run_all
+     procedure :: setup_energy_table
+     procedure :: update_energy_table
   end type mb_manager_t
 
 contains
