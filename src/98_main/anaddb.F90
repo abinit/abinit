@@ -669,11 +669,11 @@ program anaddb
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
 #ifdef MR_DEV
-     call gtdyn9(ddb%acell,Ifc%atmfrc,dielt,inp%dipdip,&
+     call gtdyn9(ddb%acell,Ifc%atmfrc,dielt,Ifc%dipdip,&
        Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,mpert,natom,&
        Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,&
        Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff,qdrp_cart,Ifc%ewald_option,xmpi_comm_self,&
-       dipquad=inp%dipquad,quadquad=inp%quadquad)
+       dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
 #else
      call gtdyn9(ddb%acell,Ifc%atmfrc,dielt,inp%dipdip,&
        Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,mpert,natom,&

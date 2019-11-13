@@ -700,6 +700,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  end if
  do_quadrupole = any(qdrp_cart /= zero)
  ewald_option = 0; if (present(option)) ewald_option = option
+ if (do_quadrupole) ewald_option = 1
 
  ! Keep track of total time spent.
  call timab(1749, 1, tsec)
