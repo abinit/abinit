@@ -232,9 +232,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: optcut,optgr0,optgr1,optgr2,option,option_test,option_dij,optrad,optrhoij,psp_gencond
  integer :: my_rank,rhoxsp_method,comm,use_aerhor,use_umklp,usexcnhat
  integer :: ioe0j,spin,io,jb,nomega_sigc
- integer :: temp_unt,ncid,dim,nnn
+ integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
- integer :: iatom1,iatom2,il1,il2,pos1,pos2,im1,im2,ispinor1,ispinor2
  !integer :: jb_qp,ib_ks,ks_irr
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
@@ -294,7 +293,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc),allocatable :: sigcme_k(:,:,:,:)
  complex(dpc), allocatable :: rhot1_q_m(:,:,:,:,:,:,:)
  complex(dpc), allocatable :: M1_q_m(:,:,:,:,:,:,:)
- complex(dpc),allocatable :: buffer(:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:),bmask(:)
  type(esymm_t),target,allocatable :: KS_sym(:,:)
  type(esymm_t),pointer :: QP_sym(:,:)
