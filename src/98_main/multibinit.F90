@@ -51,6 +51,11 @@ program multibinit
   use m_abicore
   use m_errors
   use m_argparse
+  use m_effective_potential
+  use m_fit_polynomial_coeff
+  use m_multibinit_dataset
+  use m_effective_potential_file
+  use m_abihist
 
   use m_specialmsg, only : specialmsg_getcount, herald
   use m_io_tools,   only : flush_unit, open_file
@@ -58,14 +63,13 @@ program multibinit
   use m_parser,     only : instrng
   use m_dtset,      only : chkvars
   use m_dtfil,      only : isfile
-!Arguments -----------------------------------
 
-  use m_multibinit_dataset
   !use m_generate_training_set, only : generate_training_set
   use m_compute_anharmonics, only : compute_anharmonics
   use m_init10,              only : init10
   use m_multibinit_unittest, only: mb_test_main
   use m_multibinit_driver
+  use m_multibinit_main2, only: multibinit_main2
   implicit none
 
   !Arguments -----------------------------------
@@ -178,7 +182,6 @@ program multibinit
   if(args%multibinit_F03_mode==1) then
      ! Use the F03 mode, which has only spin and a simple harmonic lattice now
      ! After everything is migrated, it will becomes default and multibinit_main will be deprecated.
-     print *, "********)))))))))"
      call multibinit_main2(filnam)
   else
      call multibinit_main(filnam, args%dry_run)
