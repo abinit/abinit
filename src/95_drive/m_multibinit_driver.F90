@@ -403,17 +403,34 @@ elec_eval = .FALSE.
              end if
           else if (option==1.or.option==2)then
              !      option = 1
-             call fit_polynomial_coeff_fit(reference_effective_potential,&
-                  &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
-                  &         inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
-                  &         inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
-                  &         initialize_data=inp%fit_initializeData==1,&
-                  &         fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
-                  &         fit_tolMSDFS=inp%fit_tolMSDFS,&
-                  &         verbose=.true.,positive=.false.,&
-                  &         anharmstr=inp%fit_anhaStrain==1,&
-                  &         spcoupling=inp%fit_SPCoupling==1,prt_names=inp%prt_names,prt_anh=inp%analyze_anh_pot,& 
-                  &         fit_iatom=inp%fit_iatom)
+             if(inp%fit_iatom/=0)then
+               call fit_polynomial_coeff_fit(reference_effective_potential,&
+                    &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
+                    &         inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
+                    &         inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
+                    &         initialize_data=inp%fit_initializeData==1,&
+                    &         fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
+                    &         fit_tolMSDFS=inp%fit_tolMSDFS,&
+                    &         verbose=.true.,positive=.false.,&
+                    &         anharmstr=inp%fit_anhaStrain==1,&
+                    &         spcoupling=inp%fit_SPCoupling==1,prt_names=inp%prt_names,prt_anh=inp%analyze_anh_pot,& 
+                    &         fit_iatom=inp%fit_iatom)
+             else 
+                inp%fit_nfixcoeff = -1
+		do ii=1,natom
+                  call fit_polynomial_coeff_fit(reference_effective_potential,&
+                       &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
+                       &         inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
+                       &         inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
+                       &         initialize_data=inp%fit_initializeData==1,&
+                       &         fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
+                       &         fit_tolMSDFS=inp%fit_tolMSDFS,&
+                       &         verbose=.true.,positive=.false.,&
+                       &         anharmstr=inp%fit_anhaStrain==1,&
+                       &         spcoupling=inp%fit_SPCoupling==1,prt_names=inp%prt_names,prt_anh=inp%analyze_anh_pot,& 
+                       &         fit_iatom=ii)
+                enddo 
+             endif 
           end if
        else
           write(message, '(3a)' )&

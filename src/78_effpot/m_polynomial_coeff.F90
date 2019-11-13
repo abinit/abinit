@@ -104,6 +104,10 @@ module m_polynomial_coeff
    module procedure coeffs_list_conc
  end interface operator (+)
 
+ interface assignment (=)
+   module procedure coeffs_list_copy
+ end interface assignment (=)
+
 CONTAINS  !===========================================================================================
 
 
@@ -2016,7 +2020,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  if(present(only_odd_power)) need_only_odd_power = only_odd_power
  need_only_even_power = .FALSE.
  if(present(only_even_power)) need_only_even_power = only_even_power
- need_compute_symmetric = .FALSE.
+ need_compute_symmetric = .TRUE.
  if(present(compute_symmetric)) need_compute_symmetric = compute_symmetric
  
 
@@ -4030,6 +4034,56 @@ pure function coeffs_list_conc(coeff_list1,coeff_list2) result (coeff_list_out)
  coeff_list_out(ncoeff1+1:) = coeff_list2   
  
 end function coeffs_list_conc
+!!***
+
+!!****f* m_polynomial_coeff/coeffs_list_copy
+!! NAME
+!! coeff_list_copy
+!!
+!! FUNCTION
+!! 
+!! Copy list1 to list2 of type polynomial_coeff
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine coeffs_list_copy(coeff_list_out,coeff_list_in)
+!Arguments ------------------------------------
+ implicit none
+
+!Arguments ------------------------------------
+  type(polynomial_coeff_type), intent(in) :: coeff_list_in(:)
+  type(polynomial_coeff_type),allocatable,intent(inout) :: coeff_list_out(:)
+  integer :: dummy 
+!local
+!variable
+  integer :: ncoeff1,ncoeff_out,ii 
+  logical :: check
+!array
+! *************************************************************************
+ 
+ check = .true.
+
+!Free output 
+ if(allocated(coeff_list_out))then
+   ABI_DATATYPE_DEALLOCATE(coeff_list_out) 
+ endif
+!Get size of coeff_list1
+ ncoeff1 = size(coeff_list_in) 
+
+ !Allocate output 
+ ABI_DATATYPE_ALLOCATE(coeff_list_out,(ncoeff1)) 
+ 
+ !Copy input list into output lists 
+ do ii=1,ncoeff1
+    call polynomial_coeff_init(coeff_list_in(ii)%coefficient,coeff_list_in(ii)%nterm,& 
+&                             coeff_list_out(ii),coeff_list_in(ii)%terms,coeff_list_in(ii)%name,check) 
+ enddo
+   
+end subroutine coeffs_list_copy
 !!***
 
 !!****f* m_polynomial_coeff/sort_combination

@@ -149,7 +149,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !scalar
  integer :: ii,icoeff,my_icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff
  integer :: master,max_power_strain_in,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle
- integer :: ncycle_tot,ncycle_max,need_prt_names,nproc,ntime,nsweep,size_mpi
+ integer :: ncycle_tot,ncycle_max,need_prt_names,nproc,ntime,nsweep,size_mpi,ncoeff_fix
  integer :: rank_to_send,unit_names,unit_anh,fit_iatom_in
  real(dp) :: cutoff,factor,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
@@ -178,6 +178,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  character(len=200) :: namefile
  character(len=3)  :: i_char
  character(len=7)  :: j_char
+ character(len=5),allocatable :: symbols(:)
 ! *************************************************************************
 
 !MPI variables
@@ -229,6 +230,11 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
     fit_iatom_in = -1 
  endif
 
+
+ ABI_ALLOCATE(symbols,(eff_pot%crystal%natom))
+ call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,eff_pot%crystal%npsp,&
+&                     symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
+
 !Set the tolerance for the fit
  tolMSDF=zero;tolMSDS=zero;tolMSDE=zero;tolMSDFS=zero
  if(present(fit_tolMSDF)) tolMSDF  = fit_tolMSDF
@@ -240,9 +246,15 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    write(message,'(a,(80a))') ch10,('=',ii=1,80)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
-   write(message,'(2a)') ch10,' Starting Fit process'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   if(fit_iatom_in > 0)then
+     write(message,'(2a,I3,2a)') ch10,' Starting Fit process around atom', fit_iatom_in,": ", symbols(fit_iatom)
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+   else 
+     write(message,'(2a)') ch10,' Starting Fit process'
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+   endif
    write(message,'(a,(80a))') ch10,('-',ii=1,80)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
@@ -321,6 +333,16 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !Copy the initial coefficients from the model on the CPU 0
  ncoeff_tot = ncoeff_tot + ncoeff_model
  if(iam_master .and. ncoeff_model > 0) my_ncoeff = my_ncoeff + ncoeff_model
+
+!Get number of fixed coeff
+ ncoeff_fix = 0  
+ if(nfixcoeff /=0) then 
+   if(nfixcoeff == -1)then 
+      ncoeff_fix = ncoeff_model 
+   else 
+      ncoeff_fix = nfixcoeff 
+   endif 
+ endif 
 
 !Get the list with the number of coeff on each CPU
 !In order to be abble to compute the my_coeffindexes array which is for example:
@@ -716,7 +738,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                      strten_coeffs_tmp,fit_data%strten_diff,&
 &                                      fit_data%training_set%sqomega)
        if(info==0)then
-         if (need_positive.and.any(coeff_values(nfixcoeff+1:icycle) < zero)) then
+         if (need_positive.and.any(coeff_values(ncoeff_fix+1:icycle) < zero)) then
            write(message, '(a)') ' Negative value detected...'
            gf_values(:,icoeff) = zero
            coeff_values = zero

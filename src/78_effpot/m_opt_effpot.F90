@@ -485,7 +485,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  !do iorder=order(1),order(2),2, Order will be done per term 
  !Loop over all original terms + 1 
  ! + 1 to bound pure strain
-  do iterm =1,nterm+1 
+  do iterm =1,nterm  !+1 
      if(iterm <=nterm)then
        !Store for optimization
        terms(iterm) = iterm
@@ -496,8 +496,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
        call wrtout(std_out,message,'COLL')
         write(message,'(2a,I3,a,I3,3a)' )ch10,&
 &       ' Check term (',iterm,'/',nterm,'): ', trim(eff_pot%anharmonics_terms%coefficients(iterm)%name),ch10 
-        call wrtout(ab_out,message,'COLL')
-        call wrtout(std_out,message,'COLL')
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,message,'COLL')
        !Get List of high order single Terms for terms 
        call opt_getHOSingleDispTerms(eff_pot%anharmonics_terms%coefficients(iterm),& 
 &                                    HOsingledisp_terms,symbols,singledisp_terms,order_ran,ncombi1,comm)
@@ -541,7 +541,12 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
             my_coeffs_tmp(1:nterm2-1) = eff_pot%anharmonics_terms%coefficients 
             !Put new term to my_coeffs_tmp
             my_coeffs_tmp(nterm2) = my_coeffs(nterm_start+icombi) 
-
+            ! If order is greater than specified cycle
+            if(sum(my_coeffs_tmp(nterm2)%terms(1)%power_disp) & 
++              sum(my_coeffs_tmp(nterm2)%terms(1)%power_strain) > maxval(order_ran))then 
+               ABI_DATATYPE_DEALLOCATE(my_coeffs_tmp)
+               cycle
+            endif 
             ! Message to Output 
              write(message,'(5a)' )ch10,&
 &            ' ==> high order term: ', trim(my_coeffs_tmp(nterm2)%name),' created',ch10
@@ -1155,9 +1160,9 @@ enddo
 !check=.TRUE. checks for duplicate terms
 call polynomial_coeff_init(coeff,nterm_of_term,term,terms,check=.TRUE.)
 
-if(nterm_of_term /= term%nterm)then 
-  write(*,*) "nterm_of_term changed after deleting strain"
-endif
+!if(nterm_of_term /= term%nterm)then 
+!  write(*,*) "nterm_of_term changed after deleting strain"
+!endif
 
 
 end subroutine opt_filterdisp
@@ -1752,7 +1757,7 @@ do iterm1=1,ncoeff
 enddo 
 
 iterm3 = ncoeff - iterm3
-ABI_ALLOCATE(terms_out,(iterm3))
+ABI_DATATYPE_ALLOCATE(terms_out,(iterm3))
 
 !Second copy them 
 iterm3 = 0
