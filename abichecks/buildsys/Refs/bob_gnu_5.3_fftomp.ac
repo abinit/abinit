@@ -146,7 +146,7 @@
 # Forced C compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-CFLAGS="-O2 -g"
+#CFLAGS="-O2"
 
 # C linker custom debug flags (when enable_debug=yes)
 #
@@ -230,7 +230,7 @@ CFLAGS="-O2 -g"
 # Forced C++ compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-CXXFLAGS="-O2 -g"
+#CXXFLAGS="-O2"
 
 # C++ linker custom debug flags (when enable_debug=yes)
 #
@@ -315,12 +315,12 @@ CXXFLAGS="-O2 -g"
 
 # Fortran compiler additional custom flags
 #
-#FCFLAGS_EXTRA="-O2"
+FCFLAGS_EXTRA="-fopenmp"
 
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-FCFLAGS="-O2 -g -ffree-line-length-none"
+#FCFLAGS="-O2"
 
 # Fortran flags for fixed-form source files
 #
@@ -348,7 +348,7 @@ FCFLAGS="-O2 -g -ffree-line-length-none"
 
 # Fortran linker custom flags
 #
-#FC_LDFLAGS_EXTRA="-Bstatic"
+FC_LDFLAGS_EXTRA="-fopenmp"
 
 # Forced Fortran linker flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -468,7 +468,7 @@ FCFLAGS="-O2 -g -ffree-line-length-none"
 # it. If set to "yes", the configure script will stop if it does not find
 # a working MPI environment.
 #
-enable_mpi="yes"
+enable_mpi="no"
 
 # Activate the MPI_IN_PLACE option whenever possible (default is no)
 # WARNING: this feature requires MPI2, ignored if the MPI library
@@ -489,7 +489,7 @@ enable_mpi="yes"
 # it. If set to "yes", the configure script will stop if it does not find
 # a working MPI I/O environment.
 #
-enable_mpi_io="yes"
+enable_mpi_io="no"
 
 # Enable MPI-IO mode in Abinit (use MPI-IO as default IO library,
 # change the default values of iomode)   
@@ -531,7 +531,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/opt/local"
+#with_mpi_prefix="/usr/local/openmpi-gcc"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -721,11 +721,11 @@ with_trio_flavor="netcdf"
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/opt/local/include"
+with_netcdf_incs="-I${FALLBACKS_HOME}_8.12/${FB}/netcdf4/4.4.1.1/include -I${FALLBACKS_HOME}_8.12/${FB}/netcdf4_fortran/4.4.4/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/opt/local/lib -lnetcdf -lnetcdff"
+with_netcdf_libs="-L${FALLBACKS_HOME}_8.12/${FB}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_HOME}_8.12/${FB}/netcdf4/4.4.1.1/lib -lnetcdf -L/usr/lib64 -lhdf5 -lhdf5_hl"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -773,11 +773,11 @@ with_fft_flavor="fftw3"
 
 # Include flags for the FFT library (default is unset)
 #
-#with_fft_incs="-I/usr/local/include/fftw"
+with_fft_incs="-I/usr/include"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L/opt/local/lib -lfftw3 -lfftw3f"
+with_fft_libs="-L/usr/lib64 -lfftw3_omp -lfftw3f_omp -lfftw3 -lfftw3f"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -852,15 +852,15 @@ with_fft_libs="-L/opt/local/lib -lfftw3 -lfftw3f"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="custom+scalapack"
+with_linalg_flavor="atlas"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_incs="-I/opt/local/include"
+with_linalg_incs="-I/usr/include/atlas"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/opt/local/lib -lscalapack -lopenblas"
+with_linalg_libs="-L/usr/lib64/atlas -ltatlas -lsatlas"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -900,21 +900,21 @@ with_linalg_libs="-L/opt/local/lib -lscalapack -lopenblas"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="libxc+atompaw"
+with_dft_flavor="libxc"
 
                        # ------------------------------ #
 
 # Full path to the AtomPAW executables (default is unset)
 #
-with_atompaw_bins="/opt/local/bin"
+#with_atompaw_bins="/usr/local/bin"
 
 # Include flags for the AtomPAW library (default is unset)
 #
-with_atompaw_incs="-I/opt/local/include"
+#with_atompaw_incs="-I/usr/local/include/atompaw"
 
 # Link flags for the AtomPAW library (default is unset)
 #
-with_atompaw_libs="-L/opt/local/lib -latompaw"
+#with_atompaw_libs="-L/usr/local/lib/atompaw -latompaw"
 
                        # ------------------------------ #
 
@@ -930,11 +930,11 @@ with_atompaw_libs="-L/opt/local/lib -latompaw"
 
 # Include flags for the LibXC library (default is unset)
 #
-with_libxc_incs="-I/opt/local/include"
+with_libxc_incs="-I${FALLBACKS_HOME}_8.12/${FB}/libxc/4.2.3/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L/opt/local/lib -lxc"
+with_libxc_libs="-L${FALLBACKS_HOME}_8.12/${FB}/libxc/4.2.3/lib -lxc"
 
                        # ------------------------------ #
 
@@ -1025,7 +1025,7 @@ with_libxc_libs="-L/opt/local/lib -lxc"
 
 # Enable double precision for GW calculations (gmatteo)
 #
-enable_gw_dpc="yes"
+#enable_gw_dpc="yes"
 
 # Enable memory profiling (waroquiers)
 #
@@ -1037,7 +1037,7 @@ enable_memory_profiling="no"
 
 # Enable OpenMP (gmatteo, torrent)
 #
-#enable_openmp="yes"
+enable_openmp="yes"
 
 # Enable ZDOTC and ZDOTU bugfix (gmatteo)
 #
