@@ -1577,6 +1577,21 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
            if (isymg(iup)==0) isymg(iup)=jsym
            if(fftn2_distrib(modulo((indsy-1)/n1,n2) + 1) == me_fft ) then  ! this is indsy is to be treated by me_fft
              indsy=n1*(nd2*k3+ ffti2_local(k2+1) -1)+k1+1        ! this is indsy in the current proc
+
+!            Working on this
+!             tau1=tnons(1,isym)
+!             tau2=tnons(2,isym)
+!             tau3=tnons(3,isym) 
+!             if (abs(tau1)>tol12.or.abs(tau2)>tol12.or.abs(tau3)>tol12) then
+!              compute exp(-2*Pi*I*G dot tau) using original G
+!               arg=two_pi*(dble(l1)*tau1+dble(l2)*tau2+dble(l3)*tau3)
+!               phr=cos(arg)
+!               phi=-sin(arg)
+!             else
+!               phr=one
+!               phi=zero
+!             end if
+ 
              phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
              phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
              mxr=symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(1,2,jsym)*magngy(1,indsy)+symrel_cart(1,3,jsym)*magngz(1,indsy)
