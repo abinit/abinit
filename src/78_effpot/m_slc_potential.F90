@@ -278,7 +278,6 @@ contains
       if(self%has_quadlin) then
         b1(:) = 0.0d0
         call self%oiju_sc%vec_product(1, sp, 3, disp, 2, b1)
-        ! test permutation sym      call self%oiju_sc%vec_product(2, sp, 3, disp, 1, b1)
         bslc(:) = bslc(:) + 2.0d0*beta*b1(:)
       endif
       if(self%has_biquad) then
@@ -358,7 +357,7 @@ contains
       enddo
     endif
 
-    if(present(energy)) energy=energy + eslc
+    if(present(energy)) energy= energy+eslc
     
   end subroutine calculate
 
