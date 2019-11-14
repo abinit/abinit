@@ -43,7 +43,6 @@ subroutine xmpi_sum_int(xval,comm,ier)
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-!  Accumulate xval on all proc. in comm
    n1 = size(xval)
 
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
@@ -101,7 +100,6 @@ subroutine xmpi_sum_intv(xval,comm,ier)
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-!  Accumulate xval on all proc. in comm
    call MPI_ALLREDUCE(xval,xsum,1,MPI_INTEGER,MPI_SUM,comm,ier)
    xval = xsum
  end if
@@ -144,7 +142,6 @@ subroutine xmpi_sum_intv2(xval,xsum,comm,ier)
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-!  Accumulate xval on all proc. in comm
    call MPI_ALLREDUCE(xval,xsum,1,MPI_INTEGER,MPI_SUM,comm,ier)
  else
 #endif
@@ -195,7 +192,6 @@ subroutine xmpi_sum_intn(xval,n1,comm,ier)
 
  ier=0
 #if defined HAVE_MPI
-!Accumulate xval on all proc. in comm
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
@@ -254,7 +250,6 @@ subroutine xmpi_sum_int2t(xval,xsum,n1,comm,ier)
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-!  Accumulate xval on all proc. in comm
    call MPI_ALLREDUCE(xval,xsum,n1,MPI_INTEGER,MPI_SUM,comm,ier)
  else
 #endif
@@ -297,7 +292,8 @@ subroutine xmpi_sum_int2d(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2, nproc_space_comm
+ integer :: mpi_datatype,n1,n2,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  integer,allocatable :: xsum(:,:)
 #endif
 
@@ -308,20 +304,33 @@ subroutine xmpi_sum_int2d(xval,comm,ier)
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
-!    Accumulate xval on all proc. in comm
      n1 =size(xval,dim=1)
      n2 =size(xval,dim=2)
 
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2
+       mpi_datatype=MPI_INTEGER
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_INTEGER,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
+
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2,MPI_INTEGER,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
      if (ier/=0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_int2d')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2,MPI_INTEGER,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:) = xsum(:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -360,7 +369,8 @@ subroutine xmpi_sum_int3d(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  integer,allocatable :: xsum(:,:,:)
 #endif
 
@@ -368,7 +378,6 @@ subroutine xmpi_sum_int3d(xval,comm,ier)
 
  ier=0
 #if defined HAVE_MPI
-!Accumulate xval on all proc. in comm
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
@@ -376,16 +385,30 @@ subroutine xmpi_sum_int3d(xval,comm,ier)
      n2 =size(xval,dim=2)
      n3 =size(xval,dim=3)
 
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3
+       mpi_datatype=MPI_INTEGER
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_INTEGER,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
+
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3,MPI_INTEGER,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_int3d')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3,MPI_INTEGER,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:,:) = xsum(:,:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -402,7 +425,7 @@ end subroutine xmpi_sum_int3d
 !! FUNCTION
 !!  Combines values from all processes and distribute
 !!  the result back to all processes.
-!!  Target: four-diemnsional integer arrays.
+!!  Target: four-dimensional integer arrays.
 !!
 !! INPUTS
 !!  comm= MPI communicator
@@ -424,8 +447,8 @@ subroutine xmpi_sum_int4d(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer ::   n1,n2,n3,n4
- integer :: nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,n4,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  integer,allocatable :: xsum(:,:,:,:)
 #endif
 
@@ -433,7 +456,6 @@ subroutine xmpi_sum_int4d(xval,comm,ier)
 
  ier=0
 #if defined HAVE_MPI
-!Accumulate xval on all proc. in comm
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
@@ -442,16 +464,30 @@ subroutine xmpi_sum_int4d(xval,comm,ier)
      n3 =size(xval,dim=3)
      n4 =size(xval,dim=4)
 
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4
+       mpi_datatype=MPI_INTEGER
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_INTEGER,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
+
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4,MPI_INTEGER,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_int4d')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4,MPI_INTEGER,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:,:,:) = xsum(:,:,:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -499,7 +535,6 @@ subroutine xmpi_sum_dp(xval,comm,ier)
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-!  Accumulate xval on all proc. in comm
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval)
@@ -562,7 +597,6 @@ subroutine xmpi_sum_dpvt(xval,xsum,comm,ier)
 
  ier=0
 #if defined HAVE_MPI
-!Accumulate xval on all proc. in comm
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
@@ -618,7 +652,6 @@ subroutine xmpi_sum_dpv(xval,comm,ier)
 
  ier=0
 #if defined HAVE_MPI
-!Accumulate xval on all proc. in comm
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
@@ -673,7 +706,6 @@ subroutine xmpi_sum_dpn(xval,n1,comm,ier)
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-!  Accumulate xval on all proc. in comm
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
 
@@ -725,7 +757,8 @@ subroutine xmpi_sum_sp2d(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  real(sp),allocatable :: xsum(:,:)
 #endif
 
@@ -738,17 +771,31 @@ subroutine xmpi_sum_sp2d(xval,comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
-!    Accumulate xval on all proc. in comm
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2
+       mpi_datatype=MPI_REAL
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_REAL,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
 
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2,MPI_REAL,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp2d')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2,MPI_REAL,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:) = xsum(:,:)
      ABI_DEALLOCATE(xsum)
 #endif
+
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -787,7 +834,8 @@ subroutine xmpi_sum_sp3d(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  real(sp),allocatable :: xsum(:,:,:)
 #endif
 
@@ -801,18 +849,31 @@ subroutine xmpi_sum_sp3d(xval,comm,ier)
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
      n3 = size(xval,dim=3)
-!    Accumulate xval on all proc. in comm
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3
+       mpi_datatype=MPI_REAL
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_REAL,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
 
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3,MPI_REAL,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp3d')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3,MPI_REAL,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:,:) = xsum(:,:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -850,7 +911,8 @@ subroutine xmpi_sum_sp4d(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,n4,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  real(sp),allocatable :: xsum(:,:,:,:)
 #endif
 
@@ -865,18 +927,31 @@ subroutine xmpi_sum_sp4d(xval,comm,ier)
      n2 = size(xval,dim=2)
      n3 = size(xval,dim=3)
      n4 = size(xval,dim=4)
-!    Accumulate xval on all proc. in comm
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4
+       mpi_datatype=MPI_REAL
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_REAL,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
 
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4,MPI_REAL,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp4d')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4,MPI_REAL,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:,:,:) = xsum(:,:,:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -914,7 +989,8 @@ subroutine xmpi_sum_sp5d(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4,n5,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,n4,n5,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  real(sp),allocatable :: xsum(:,:,:,:,:)
 #endif
 
@@ -930,18 +1006,31 @@ subroutine xmpi_sum_sp5d(xval,comm,ier)
      n3 = size(xval,dim=3)
      n4 = size(xval,dim=4)
      n5 = size(xval,dim=5)
-!    Accumulate xval on all proc. in comm
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5
+       mpi_datatype=MPI_REAL
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_REAL,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
 
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4*n5,MPI_REAL,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp5d')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4*n5,MPI_REAL,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:,:,:,:) = xsum(:,:,:,:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -979,7 +1068,8 @@ subroutine xmpi_sum_sp6d(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4,n5,n6,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,n4,n5,n6,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  real(sp), allocatable :: xsum(:,:,:,:,:,:)
 #endif
 
@@ -996,17 +1086,31 @@ subroutine xmpi_sum_sp6d(xval,comm,ier)
      n4 = size(xval,dim=4)
      n5 = size(xval,dim=5)
      n6 = size(xval,dim=6)
-!    Accumulate xval on all proc. in comm
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5*n6,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5*n6
+       mpi_datatype=MPI_REAL
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_REAL,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
+
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4*n5*n6,MPI_REAL,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6), ier)
      if (ier/=0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp6d')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4*n5*n6,MPI_REAL,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:,:,:,:,:) = xsum(:,:,:,:,:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -1044,7 +1148,8 @@ subroutine xmpi_sum_sp7d(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4,n5,n6,n7,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,n4,n5,n6,n7,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  real(sp),allocatable :: xsum(:,:,:,:,:,:,:)
 #endif
 
@@ -1061,18 +1166,31 @@ subroutine xmpi_sum_sp7d(xval,comm,ier)
      n5 = size(xval,dim=5)
      n6 = size(xval,dim=6)
      n7 = size(xval,dim=7)
-!    Accumulate xval on all proc. in comm
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5*n6*n7,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5*n6*n7
+       mpi_datatype=MPI_REAL
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_REAL,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
 
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4*n5*n6*n7,MPI_REAL,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6,n7), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp7d')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4*n5*n6*n7,MPI_REAL,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:,:,:,:,:,:) = xsum(:,:,:,:,:,:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -1113,7 +1231,8 @@ subroutine xmpi_sum_dp2d(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  real(dp),allocatable :: xsum(:,:)
 #endif
 
@@ -1126,17 +1245,31 @@ subroutine xmpi_sum_dp2d(xval,comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
-!    Accumulate xval on all proc. in comm
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2
+       mpi_datatype=MPI_DOUBLE_PRECISION
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_PRECISION,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
 
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp2d')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:) = xsum(:,:)
      ABI_DEALLOCATE(xsum)
 #endif
+
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -1175,7 +1308,8 @@ subroutine xmpi_sum_dp3d(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  real(dp),allocatable :: xsum(:,:,:)
 #endif
 
@@ -1189,18 +1323,31 @@ subroutine xmpi_sum_dp3d(xval,comm,ier)
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
      n3 = size(xval,dim=3)
-!    Accumulate xval on all proc. in comm
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3
+       mpi_datatype=MPI_DOUBLE_PRECISION
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_PRECISION,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
 
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp3d')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:,:) = xsum(:,:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -1239,7 +1386,8 @@ subroutine xmpi_sum_dp4d(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,n4,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  real(dp),allocatable :: xsum(:,:,:,:)
 #endif
 
@@ -1254,18 +1402,31 @@ subroutine xmpi_sum_dp4d(xval,comm,ier)
      n2 = size(xval,dim=2)
      n3 = size(xval,dim=3)
      n4 = size(xval,dim=4)
-!    Accumulate xval on all proc. in comm
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4
+       mpi_datatype=MPI_DOUBLE_PRECISION
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_PRECISION,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
 
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp4d')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:,:,:) = xsum(:,:,:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -1304,7 +1465,8 @@ subroutine xmpi_sum_dp5d(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4,n5,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,n4,n5,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  real(dp),allocatable :: xsum(:,:,:,:,:)
 #endif
 
@@ -1320,18 +1482,31 @@ subroutine xmpi_sum_dp5d(xval,comm,ier)
      n3 = size(xval,dim=3)
      n4 = size(xval,dim=4)
      n5 = size(xval,dim=5)
-!    Accumulate xval on all proc. in comm
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5
+       mpi_datatype=MPI_DOUBLE_PRECISION
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_PRECISION,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
 
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp5d')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:,:,:,:) = xsum(:,:,:,:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -1369,7 +1544,8 @@ subroutine xmpi_sum_dp6d(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4,n5,n6,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,n4,n5,n6,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  real(dp), allocatable :: xsum(:,:,:,:,:,:)
 #endif
 
@@ -1386,17 +1562,31 @@ subroutine xmpi_sum_dp6d(xval,comm,ier)
      n4 = size(xval,dim=4)
      n5 = size(xval,dim=5)
      n6 = size(xval,dim=6)
-!    Accumulate xval on all proc. in comm
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5*n6,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5*n6
+       mpi_datatype=MPI_DOUBLE_PRECISION
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_PRECISION,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
+
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4*n5*n6,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6), ier)
      if (ier/=0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp6d')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4*n5*n6,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:,:,:,:,:) = xsum(:,:,:,:,:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -1435,7 +1625,8 @@ subroutine xmpi_sum_dp7d(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4,n5,n6,n7,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,n4,n5,n6,n7,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  real(dp),allocatable :: xsum(:,:,:,:,:,:,:)
 #endif
 
@@ -1452,18 +1643,31 @@ subroutine xmpi_sum_dp7d(xval,comm,ier)
      n5 = size(xval,dim=5)
      n6 = size(xval,dim=6)
      n7 = size(xval,dim=7)
-!    Accumulate xval on all proc. in comm
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5*n6*n7,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5*n6*n7
+       mpi_datatype=MPI_DOUBLE_PRECISION
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_PRECISION,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
 
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4*n5*n6*n7,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6,n7), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp7d')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4*n5*n6*n7,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:,:,:,:,:,:) = xsum(:,:,:,:,:,:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -1508,7 +1712,6 @@ subroutine xmpi_sum_dp2t(xval,xsum,n1,comm,ier)
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-!  Accumulate xval on all proc. in comm
    call MPI_ALLREDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
  else
 #endif
@@ -1557,7 +1760,6 @@ subroutine xmpi_sum_dp2d2t(xval,xsum,n,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
-!Accumulate xval on all proc. in spaceComm
  if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
    call MPI_ALLREDUCE(xval,xsum,n,MPI_DOUBLE_PRECISION,MPI_SUM,spaceComm,ier)
  else
@@ -1606,7 +1808,6 @@ subroutine xmpi_sum_dp3d2t(xval,xsum,n1,comm,ier)
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-!  Accumulate xval on all proc. in comm
    call MPI_ALLREDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
  else
 #endif
@@ -1655,7 +1856,6 @@ subroutine xmpi_sum_dp4d2t(xval,xsum,n1,comm,ier)
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-!  Accumulate xval on all proc. in comm
    call MPI_ALLREDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
  else
 #endif
@@ -1708,7 +1908,6 @@ subroutine xmpi_sum_c0dc(xval,comm,ier)
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
-!    Accumulate xval on all proc. in comm
      call MPI_ALLREDUCE(xval,xsum,1,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
      xval = xsum
    end if
@@ -1760,7 +1959,6 @@ subroutine xmpi_sum_c1dc(xval,comm,ier)
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
-!    Accumulate xval on all proc. in comm
      n1 =size(xval,dim=1)
 
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
@@ -1811,7 +2009,8 @@ subroutine xmpi_sum_c2dc(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2, nproc_space_comm
+ integer :: mpi_datatype,n1,n2,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  complex(dpc),allocatable :: xsum(:,:)
 #endif
 
@@ -1822,20 +2021,33 @@ subroutine xmpi_sum_c2dc(xval,comm,ier)
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
-!    Accumulate xval on all proc. in comm
      n1 =size(xval,dim=1)
      n2 =size(xval,dim=2)
 
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2
+       mpi_datatype=MPI_DOUBLE_COMPLEX
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_COMPLEX,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
+
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c2dc')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:) = xsum(:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -1874,7 +2086,8 @@ subroutine xmpi_sum_c3dc(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  complex(dpc),allocatable :: xsum(:,:,:)
 #endif
 
@@ -1885,21 +2098,34 @@ subroutine xmpi_sum_c3dc(xval,comm,ier)
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
-!    Accumulate xval on all proc. in comm
      n1 =size(xval,dim=1)
      n2 =size(xval,dim=2)
      n3 =size(xval,dim=3)
 
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3
+       mpi_datatype=MPI_DOUBLE_COMPLEX
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_COMPLEX,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
+
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c3dc')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:,:) = xsum(:,:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -1938,7 +2164,8 @@ subroutine xmpi_sum_c4dc(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,n4,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  complex(dpc),allocatable :: xsum(:,:,:,:)
 #endif
 
@@ -1949,22 +2176,35 @@ subroutine xmpi_sum_c4dc(xval,comm,ier)
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
-!    Accumulate xval on all proc. in comm
      n1 =size(xval,dim=1)
      n2 =size(xval,dim=2)
      n3 =size(xval,dim=3)
      n4 =size(xval,dim=4)
 
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4
+       mpi_datatype=MPI_DOUBLE_COMPLEX
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_COMPLEX,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
+
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c4dc')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:,:,:) = xsum(:,:,:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -2002,7 +2242,8 @@ subroutine xmpi_sum_c5dc(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4,n5,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,n4,n5,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  complex(dpc),allocatable :: xsum(:,:,:,:,:)
 #endif
 
@@ -2012,21 +2253,37 @@ subroutine xmpi_sum_c5dc(xval,comm,ier)
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
-   if (nproc_space_comm /= 1) then !Accumulate xval on all proc. in comm
+   if (nproc_space_comm /= 1) then
      n1 =size(xval,dim=1)
      n2 =size(xval,dim=2)
      n3 =size(xval,dim=3)
      n4 =size(xval,dim=4)
      n5 =size(xval,dim=5)
+
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5
+       mpi_datatype=MPI_DOUBLE_COMPLEX
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_COMPLEX,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
+
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4*n5,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5), ier)
      if (ier/=0) call xmpi_abort(comm,msg='error allocating xsum in xmpi_sum_c5dc')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4*n5,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:,:,:,:) = xsum(:,:,:,:,:)
      ABI_DEALLOCATE(xsum)
 #endif
+
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -2064,7 +2321,8 @@ subroutine xmpi_sum_c6dc(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4,n5,n6,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,n4,n5,n6,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  complex(dpc),allocatable :: xsum(:,:,:,:,:,:)
 #endif
 
@@ -2074,7 +2332,7 @@ subroutine xmpi_sum_c6dc(xval,comm,ier)
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
-   if (nproc_space_comm /= 1) then !Accumulate xval on all proc. in comm
+   if (nproc_space_comm /= 1) then
      n1 =size(xval,dim=1)
      n2 =size(xval,dim=2)
      n3 =size(xval,dim=3)
@@ -2082,16 +2340,30 @@ subroutine xmpi_sum_c6dc(xval,comm,ier)
      n5 =size(xval,dim=5)
      n6 =size(xval,dim=6)
 
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5*n6,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5*n6
+       mpi_datatype=MPI_DOUBLE_COMPLEX
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_COMPLEX,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
+
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4*n5*n6,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6), ier)
      if (ier/=0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c6dc')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4*n5*n6,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval = xsum
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -2129,7 +2401,8 @@ subroutine xmpi_sum_c7dc(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4,n5,n6,n7,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,n4,n5,n6,n7,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  complex(dpc),allocatable :: xsum(:,:,:,:,:,:,:)
 #endif
 
@@ -2139,7 +2412,7 @@ subroutine xmpi_sum_c7dc(xval,comm,ier)
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
-   if (nproc_space_comm /= 1) then !Accumulate xval on all proc. in comm
+   if (nproc_space_comm /= 1) then
      n1 =size(xval,dim=1)
      n2 =size(xval,dim=2)
      n3 =size(xval,dim=3)
@@ -2148,18 +2421,32 @@ subroutine xmpi_sum_c7dc(xval,comm,ier)
      n6 =size(xval,dim=6)
      n7 =size(xval,dim=7)
 
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5*n6*n7,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5*n6*n7
+       mpi_datatype=MPI_DOUBLE_COMPLEX
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_COMPLEX,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
+
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4*n5*n6*n7,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6,n7),ier)
      if (ier/=0) then
        call xmpi_abort(comm=comm,msg='error allocating xsum in xmpi_sum_c7dc')
      end if
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4*n5*n6*n7,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval = xsum
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -2209,7 +2496,6 @@ subroutine xmpi_sum_c1cplx(xval,comm,ier)
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
-!    Accumulate xval on all proc. in comm
      n1 =size(xval,dim=1)
 
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
@@ -2260,7 +2546,8 @@ subroutine xmpi_sum_c2cplx(xval,comm,ier)
 
 !Local variables--------------
 #if defined HAVE_MPI
- integer :: n1,n2,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  complex(spc), allocatable :: xsum(:,:)
 #endif
 
@@ -2271,20 +2558,33 @@ subroutine xmpi_sum_c2cplx(xval,comm,ier)
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
-!    Accumulate xval on all proc. in comm
      n1 =size(xval,dim=1)
      n2 =size(xval,dim=2)
 
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2
+       mpi_datatype=MPI_COMPLEX
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_COMPLEX,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
+
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2,MPI_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c2cplx')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2,MPI_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:) = xsum(:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -2328,7 +2628,8 @@ subroutine xmpi_sum_c3cplx(xval,comm,ier)
 
 !Local variables--------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  complex(spc), allocatable :: xsum(:,:,:)
 #endif
 
@@ -2339,21 +2640,34 @@ subroutine xmpi_sum_c3cplx(xval,comm,ier)
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
-!    Accumulate xval on all proc. in comm
      n1 =size(xval,dim=1)
      n2 =size(xval,dim=2)
      n3 =size(xval,dim=3)
 
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3
+       mpi_datatype=MPI_COMPLEX
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_COMPLEX,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
+
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3,MPI_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c3cplx')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3,MPI_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:,:) = xsum(:,:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -2397,7 +2711,8 @@ subroutine xmpi_sum_c4cplx(xval,comm,ier)
 
 !Local variables--------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,n4,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  complex(spc),allocatable :: xsum(:,:,:,:)
 #endif
 
@@ -2408,22 +2723,35 @@ subroutine xmpi_sum_c4cplx(xval,comm,ier)
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
-!    Accumulate xval on all proc. in comm
      n1 =size(xval,dim=1)
      n2 =size(xval,dim=2)
      n3 =size(xval,dim=3)
      n4 =size(xval,dim=4)
 
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4
+       mpi_datatype=MPI_COMPLEX
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_COMPLEX,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
+
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4,MPI_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c4cplx')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4,MPI_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:,:,:) = xsum(:,:,:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -2462,7 +2790,8 @@ subroutine xmpi_sum_c5cplx(xval,comm,ier)
 
 !Local variables--------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4,n5,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,n4,n5,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  complex(spc),allocatable :: xsum(:,:,:,:,:)
 #endif
 
@@ -2473,23 +2802,36 @@ subroutine xmpi_sum_c5cplx(xval,comm,ier)
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
-!    Accumulate xval on all proc. in comm
      n1 =size(xval,dim=1)
      n2 =size(xval,dim=2)
      n3 =size(xval,dim=3)
      n4 =size(xval,dim=4)
      n5 =size(xval,dim=5)
 
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5
+       mpi_datatype=MPI_COMPLEX
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_COMPLEX,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
+
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4*n5,MPI_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c5cplx')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4*n5,MPI_COMPLEX,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
      xval (:,:,:,:,:) = xsum(:,:,:,:,:)
      ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif
@@ -2527,7 +2869,8 @@ subroutine xmpi_sum_c6cplx(xval,comm,ier)
 
 !Local variables--------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4,n5,n6,nproc_space_comm
+ integer :: mpi_datatype,n1,n2,n3,n4,n5,n6,nn,nproc_space_comm
+ integer(kind=int64) :: ntot
  complex(spc),allocatable :: xsum(:,:,:,:,:,:)
 #endif
 
@@ -2538,7 +2881,6 @@ subroutine xmpi_sum_c6cplx(xval,comm,ier)
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
-!    Accumulate xval on all proc. in comm
      n1 =size(xval,dim=1)
      n2 =size(xval,dim=2)
      n3 =size(xval,dim=3)
@@ -2546,16 +2888,30 @@ subroutine xmpi_sum_c6cplx(xval,comm,ier)
      n5 =size(xval,dim=5)
      n6 =size(xval,dim=6)
 
+     !This product of dimensions can be greater than a 32bit integer
+     !We use a real to store it. If it is too large, we switch to an
+     !alternate routine because MPI<4 doesnt handle 64 bit counts.
+     ntot=int(n1*n2*n3*n4*n5*n6,kind=int64)
+     if (ntot<xmpi_maxint32_64) then
+       nn=n1*n2*n3*n4*n5*n6
+       mpi_datatype=MPI_COMPLEX
+     else
+       nn=1
+       call xmpi_largetype_contiguous(ntot,MPI_COMPLEX,mpi_datatype)
+       call MPI_TYPE_COMMIT(mpi_datatype,ier)
+     end if
+
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4*n5*n6,MPI_COMPLEX,MPI_SUM,comm,ier)
+       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
-     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6), ier)
-     if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c6cplx')
-     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4*n5*n6,MPI_COMPLEX,MPI_SUM,comm,ier)
-     xval = xsum
-     ABI_DEALLOCATE(xsum)
+       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c6cplx')
+       call MPI_ALLREDUCE(xval,xsum,nn,mpi_datatype,MPI_SUM,comm,ier)
+       xval = xsum
+       ABI_DEALLOCATE(xsum)
 #endif
 
+     if (ntot>xmpi_maxint32_64) call MPI_TYPE_FREE(mpi_datatype,ier)
    end if
  end if
 #endif

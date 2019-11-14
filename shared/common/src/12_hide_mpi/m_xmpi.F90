@@ -136,6 +136,9 @@ MODULE m_xmpi
  integer,save, public ABI_PROTECTED :: xmpi_count_requests = 0
  ! Count number of requests (+1 for each call to non-blocking API, -1 for each call to xmpi_wait)
  ! This counter should be zero at the end of the run if all requests have been released)
+
+ integer,public,parameter :: xmpi_maxint32=HUGE(0_int32),xmpi_maxint32_64=int(xmpi_maxint32,kind=int64)
+ ! Max. integer that can be represented with 32 bits
 !!***
 
 !----------------------------------------------------------------------
@@ -192,8 +195,9 @@ MODULE m_xmpi
  public :: xmpi_split_block           ! Splits tasks inside communicator using block distribution.
  public :: xmpi_split_cyclic          ! Splits tasks inside communicator using cyclic distribution.
  public :: xmpi_split_list            ! Splits list of indices inside communicator using block distribution.
- public :: xmpi_distab
+ public :: xmpi_distab                ! Fill table defining the distribution of the tasks according to the # of processors
  public :: xmpi_distrib_with_replicas ! Distribute tasks among MPI ranks (replicas are allowed)
+ public :: xmpi_largetype_contiguous  ! Build a large-count contiguous datatype (to handle a very large # of data)
 
  interface xmpi_comm_free
    module procedure xmpi_comm_free_0D
@@ -2582,6 +2586,92 @@ pure function xmpi_distrib_with_replicas(itask,ntasks,rank,nprocs) result(bool)
  end if
 
 end function xmpi_distrib_with_replicas
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_largetype_contiguous
+!! NAME
+!!  xmpi_largetype_contiguous
+!!
+!! FUNCTION
+!!  This function builds a large-count contiguous datatype made of "small" adjacent
+!!  chunks (of same orginal type). The new type can then be used if MPI
+!!  routines when the number of elements to communicate exceeds a 32bit integer.
+!!
+!! INPUTS
+!!  largecount= total number of elements expressed as a 64bit integer
+!!  oldtype= (INTEGER) input type (typically INTEGER, REAL(dp), ...)
+!!
+!! OUTPUT
+!!  newtype= (INTEGER)new MPI type made (a serie of adjacent chunks)
+!!
+!! NOTE
+!!  This routine is inspired by https://github.com/jeffhammond/BigMPI
+!!  See: J.R. Hammond. A. Schafer, R. Latham
+!!       ToINT_MAX. . . and beyond. Exploring large-count support in MPI,
+!!       2014 Workshop on Exascale MPI at Supercomputing Conference
+!!       MIT License (MIT)
+!!       Permission is hereby granted, free of charge, to any person obtaining a copy
+!!       of this software and associated documentation files (the "Software"), to deal
+!!       in the Software without restriction, including without limitation the rights
+!!       to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+!!       copies of the Software, and to permit persons to whom the Software is
+!!       furnished to do so.
+!!
+!!  In MPI4 specification, large-count MPI communications can be called
+!!    with the use of the MPI_count datatype (instead of INTEGER)
+!!
+!! SOURCE
+
+subroutine xmpi_largetype_contiguous(largecount,oldtype,newtype)
+
+!Arguments ------------------------------------
+!scalars
+ integer(KIND=int64),intent(in) :: largecount
+ integer,intent(in) :: oldtype
+ integer,intent(out) :: newtype
+
+!Local variables-------------------------------
+#ifdef HAVE_MPI
+!scalars
+ integer,parameter :: INT_MAX=xmpi_maxint32/100
+ integer(KIND=int32) :: cc,rr,ierr
+ integer(KIND=XMPI_ADDRESS_KIND) :: extent,lb,remdisp
+ integer :: chunks,remainder
+!arrays
+ integer(KIND=int32) :: blklens(2)
+ integer(KIND=XMPI_ADDRESS_KIND) :: disps(2)
+ integer :: types(2)
+#endif
+
+! *************************************************************************
+
+#ifdef HAVE_MPI
+ cc=int(largecount,kind=int32)/INT_MAX
+ rr=int(largecount,kind=int32)-cc*INT_MAX
+ call MPI_type_vector(cc,INT_MAX,INT_MAX,oldtype,chunks,ierr)
+ call MPI_type_contiguous(rr,oldtype,remainder,ierr)
+ if (ierr==0) then
+   call MPI_type_get_extent(oldtype,lb,extent,ierr) 
+   remdisp=cc*INT_MAX*extent
+   blklens(1:2)=1
+   disps(1)=0;disps(2)=remdisp
+   types(1)=chunks;types(2)=remainder
+#ifdef HAVE_MPI_TYPE_CREATE_STRUCT
+   call MPI_type_create_struct(2,blklens,disps,types,newtype,ierr)
+#else
+   call MPI_type_struct(2,blklens,disps,types,newtype,ierr)
+#endif
+   call MPI_type_free(chunks,ierr)
+   call MPI_type_free(remainder,ierr)
+ end if
+ if (ierr/=0) call xmpi_abort(msg="Cannot remove ABI_MPIABORTFILE")
+#else
+ ABI_UNUSED(largecount,oldtype,newtype)
+#endif
+
+end subroutine xmpi_largetype_contiguous
 !!***
 
 !----------------------------------------------------------------------
