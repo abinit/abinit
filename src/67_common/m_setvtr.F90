@@ -548,13 +548,13 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
        end if
 !      Use the periodic solver to compute Hxc
        nk3xc=1
+!      Not yet able to deal fully with the full XC kernel in case of GGA + spin
+       option_eff=option;if (option==2.and.xcdata%xclevel==2.and.(nkxc==3-2*mod(xcdata%nspden,2))) option_eff=12
+
        if (ipositron==0) then
 
 !        Compute energies%e_xc and associated quantities
          if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then
-!          Not yet able to deal fully with the full XC kernel in case of GGA + spin
-           option_eff=option
-           if(xcdata%xclevel==2.and.(nkxc==3-2*mod(xcdata%nspden,2))) option_eff=12
            call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &           nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &           option_eff,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
@@ -569,12 +569,9 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
          if(mod(dtset%fockoptmix,100)==11)then
 !          This call to rhotoxc uses the hybrid xc functional
            if(.not.is_hybrid_ncpp)then
-!            Not yet able to deal fully with the full XC kernel in case of GGA + spin
-             option_eff=option
-             if(xcdata%xclevel==2.and.(nkxc==3-2*mod(xcdata%nspden,2))) option_eff=12
              call rhotoxc(energies%e_hybcomp_E0,kxc,mpi_enreg,nfft,ngfft,&
 &             nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&             option,rhor,rprimd,strsxc,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
+&             option_eff,rhor,rprimd,strsxc,usexcnhat,vxc_hybcomp,vxcavg,xccc3d,xcdatahyb,&
 &             taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
            else
              call xchybrid_ncpp_cc(dtset,energies%e_hybcomp_E0,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
@@ -590,12 +587,9 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
          end if
 
        else if (ipositron==2) then
-!        Not yet able to deal fully with the full XC kernel in case of GGA + spin
-         option_eff=option
-         if(xcdata%xclevel==2.and.(nkxc==3-2*mod(xcdata%nspden,2))) option_eff=12
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&         option,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+&         option_eff,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 &         taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
 &         electronpositron=electronpositron)
        end if

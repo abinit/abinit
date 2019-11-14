@@ -85,8 +85,8 @@ setting [[ionmov]]=2 as in [tutorial 1](base1). The optimization
 steps proceed until the maximum force component on any atom is less than
 [[tolmxf]]. It is always advised to relax the forces before beginning the
 lattice parameter optimization. Dataset 2 optimizes the lattice parameters
-with [[optcell]]=2 as in [tutorial 3](base3). However, treated 3
-treated cubic Si, and the atom positions in reduced coordinates remained
+with [[optcell]]=2 as in [tutorial 3](base3). However, tutorial 3
+treats cubic Si, and the atom positions in reduced coordinates remained
 fixed. In the present, more general case, the reduced atomic coordinates must
 be reoptimized as the lattice parameters are optimized. Note that it is
 necessary to include [[getxred]] = -1 so that the second dataset is
