@@ -557,7 +557,7 @@ class AbinitProject(NotebookWriter):
             os.path.join(self.top, "shared", "common", "src"),
             # Exclude libpaw because shared/common/39_libpaw --> shared/libpaw/src
             # and we don't want duplicated entries.
-            os.path.join(self.top, "shared", "libpaw"),
+            #os.path.join(self.top, "shared", "libpaw"),
             os.path.join(self.top, "src"),
         ]
 
