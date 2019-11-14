@@ -334,7 +334,11 @@ class Procedure(Node):
     @lazy_property
     def dirname(self):
         """name of the directory in which the procedure is located."""
-        return None if self.path is None else os.path.basename(os.path.dirname(self.path))
+        if self.path is None: return None
+        dirname = os.path.basename(os.path.dirname(self.path))
+        if dirname == "src" and os.path.join("shared", "libpaw") in self.path:
+            dirname = "39_libpaw"
+        return dirname
 
     @lazy_property
     def dirlevel(self):
