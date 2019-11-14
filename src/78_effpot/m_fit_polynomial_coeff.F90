@@ -289,7 +289,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
 
-     write(message,'(a,F6.3,a)') " Cut-off of ",cutoff," Angstrom is imposed"
+     write(message,'(a,F6.3,a)') " Cut-off of ",cutoff," bohr is imposed"
      call wrtout(std_out,message,'COLL')
    end if
 
