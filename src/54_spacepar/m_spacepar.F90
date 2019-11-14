@@ -1317,7 +1317,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
  real(dp),intent(in) :: gprimd(3,3),phnons(2,nfftot**(1-1/nsym),(nspden/nsppol)-3*(nspden/4)),rprimd(3,3)
  real(dp),intent(inout) :: rhor(cplex*nfft,nspden)
  real(dp),intent(out) :: rhog(2,nfft)
- real(dp),intent(out) :: tnons(3,nsym)
+ real(dp),intent(in) :: tnons(3,nsym)
 
 !Local variables-------------------------------
 !scalars
@@ -1326,6 +1326,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
  integer :: n1,n2,n3,nd2,nproc_fft,nspden_eff,nsym_used,numpt,nup
  integer :: r2,rep,spaceComm
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used in non-collinear magnetism
+ real(dp) :: arg,tau1,tau2,tau3
  real(dp) :: magxsu1,magxsu2,magysu1,magysu2,magzsu1,magzsu2,mxi,mxr,myi,myr,mzi,mzr,phi,phr,rhosu1,rhosu2
  !character(len=500) :: message
 !arrays
@@ -1537,12 +1538,12 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
        ABI_ALLOCATE(symrec_cart,(3,3,nsym_used))
        ABI_ALLOCATE(symrel_cart,(3,3,nsym_used))
        ABI_ALLOCATE(symafm_used,(nsym_used))
-       ABI_ALLOCATE(tnons_used,(nsym_used))
+       ABI_ALLOCATE(tnons_used,(3,nsym_used))
        jsym=0
        do isym=1,nsym
          if (symafm(isym)/=1.and.(.not.afm_noncoll)) cycle
          jsym=jsym+1
-         tnons_used(:,jsym)=tnons(:,isym))
+         tnons_used(:,jsym)=tnons(:,isym)
          symafm_used(jsym)=dble(symafm(isym))
          call symredcart(rprimd,gprimd,symrel_cart(:,:,jsym),symrel(:,:,isym))
          call matr3inv(symrel_cart(:,:,jsym),symrec_cart(:,:,jsym))
@@ -1598,7 +1599,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
              tau2=tnons_used(2,isym)
              tau3=tnons_used(3,isym) 
              if (abs(tau1)>tol12.or.abs(tau2)>tol12.or.abs(tau3)>tol12) then
-              compute exp(-2*Pi*I*G dot tau) using original G
+!              Compute exp(-2*Pi*I*G dot tau) using original G
                arg=two_pi*(dble(l1)*tau1+dble(l2)*tau2+dble(l3)*tau3)
                phr=cos(arg)
                phi=-sin(arg)
@@ -1669,7 +1670,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
              tau2=tnons_used(2,jsym)
              tau3=tnons_used(3,jsym)
              if (abs(tau1)>tol12.or.abs(tau2)>tol12.or.abs(tau3)>tol12) then
-              compute exp(+2*Pi*I*G dot tau) using original G
+!              Compute exp(+2*Pi*I*G dot tau) using original G
                arg=two_pi*(dble(l1)*tau1+dble(l2)*tau2+dble(l3)*tau3)
                phr=cos(arg)
                phi=sin(arg)
