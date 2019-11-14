@@ -1570,9 +1570,9 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
          j=ind-1;l1=modulo(j,n1);l2=modulo(j/n1,n2);l3=j/(n1*n2)
 !        Get location of G vector (grid point) centered at 0 0 0
 !TO BE UNCOMMENTED
-!        l3=l3-(l3/id3)*n3
-!        l2=l2-(l2/id2)*n2
-!        l1=l1-(l1/id1)*n1
+         l3=l3-(l3/id3)*n3
+         l2=l2-(l2/id2)*n2
+         l1=l1-(l1/id1)*n1
 
          jsym=0
          do isym=1,nsym
@@ -1610,8 +1610,8 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
              phr=phr*symafm_used(jsym)
              phi=phi*symafm_used(jsym)
 !TO BE COMMENTED
-             phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
-             phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
+!            phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
+!            phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
 
              mxr=symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(1,2,jsym)*magngy(1,indsy)+symrel_cart(1,3,jsym)*magngz(1,indsy)
              mxi=symrel_cart(1,1,jsym)*magngx(2,indsy)+symrel_cart(1,2,jsym)*magngy(2,indsy)+symrel_cart(1,3,jsym)*magngz(2,indsy)
@@ -1652,9 +1652,9 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
            j=ind-1;j1=modulo(j,n1);j2=modulo(j/n1,n2);j3=j/(n1*n2)
 !TO BE UNCOMMENTED
 !          Get location of G vector (grid point) centered at 0 0 0
-!          l3=j3-(j3/id3)*n3
-!          l2=j2-(j2/id2)*n2
-!          l1=j1-(j1/id1)*n1
+           l3=j3-(j3/id3)*n3
+           l2=j2-(j2/id2)*n2
+           l1=j1-(j1/id1)*n1
            if(fftn2_distrib(j2+1)==me_fft)  then ! this ind is to be treated by me_fft
              r2=ffti2_local(j2+1) - 1
              ind=n1*(nd2*j3+r2)+j1+1  ! this is ind in the current proc
@@ -1681,8 +1681,8 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
              phr=phr*symafm_used(jsym)
              phi=phi*symafm_used(jsym)
 !TO BE COMMENTED
-             phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
-             phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
+!            phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
+!            phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
 
              mxr=symrec_cart(1,1,jsym)*magxsu1+symrec_cart(2,1,jsym)*magysu1+symrec_cart(3,1,jsym)*magzsu1
              mxi=symrec_cart(1,1,jsym)*magxsu2+symrec_cart(2,1,jsym)*magysu2+symrec_cart(3,1,jsym)*magzsu2
