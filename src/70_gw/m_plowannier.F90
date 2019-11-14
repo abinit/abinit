@@ -3461,8 +3461,8 @@ subroutine reduce_operwan_realspace(wan,rhot1,npwx,nibz,comm,nbz,nsppol)
   use m_xmpi, only : xmpi_barrier,xmpi_sum  
 !Arguments---------------------------------------
   type(plowannier_type),intent(in) :: wan
-  type(operwan_realspace_type),intent(inout) :: rhot1(npwx,nibz)
   integer, intent(in) :: npwx,nibz,comm,nbz,nsppol
+  type(operwan_realspace_type),intent(inout) :: rhot1(npwx,nibz)
 !Local variables----------------------------------
   complex(dpc),allocatable ::  buffer(:)
   integer :: dim,pwx,ibz, spin, ispinor1, ispinor2, iatom1, iatom2, pos1, pos2

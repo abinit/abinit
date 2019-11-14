@@ -584,7 +584,7 @@ contains
     do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
     do pos3=1,size(wanbz%nposition(iatom3)%pos,1)
     do pos4=1,size(wanbz%nposition(iatom4)%pos,1)
-      if (pos1/=pos2 .or. pos2/=pos4)cycle
+      if (pos1/=pos3 .or. pos2/=pos4)cycle
       do il1=1,wanbz%nbl_atom_wan(iatom1)
       do il2=1,wanbz%nbl_atom_wan(iatom2)
       do il3=1,wanbz%nbl_atom_wan(iatom3)
