@@ -479,7 +479,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 !      (note symrhg also make the reverse FFT, to get symmetrized density;
 !      this is useless here, and should be made an option)
        call symrhg(1,gprimd,irrzondiel,mpi_enreg_diel,nfftdiel,nfftdiel,ngfftdiel,&
-&       nspden_tmp,1,nsym,phnonsdiel,rhoextrg,rhoextrr,rprimd,symafm,symrel)
+&       nspden_tmp,1,nsym,phnonsdiel,rhoextrg,rhoextrr,rprimd,symafm,symrel,tnons)
 
        do ipw2=1,npwdiel
          j1=kg_diel(1,ipw2) ; j2=kg_diel(2,ipw2) ; j3=kg_diel(3,ipw2)

@@ -2634,7 +2634,7 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
 
  ABI_MALLOC(v1g, (2,nfft))
  call symrhg(cplex,cryst%gprimd,irrzon1,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym1,&
-    phnons1,v1g,v1r,cryst%rprimd,symafm1,symrel1)
+    phnons1,v1g,v1r,cryst%rprimd,symafm1,symrel1,tnons1)
 
  ABI_FREE(irrzon1)
  ABI_FREE(phnons1)
