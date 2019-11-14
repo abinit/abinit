@@ -1595,9 +1595,9 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
              indsy=n1*(nd2*k3+ ffti2_local(k2+1) -1)+k1+1        ! this is indsy in the current proc
 
 !            Working on this: the present coding will be detrimental for speed ! cos and sin are recomputed many times !
-             tau1=tnons_used(1,isym)
-             tau2=tnons_used(2,isym)
-             tau3=tnons_used(3,isym) 
+             tau1=tnons_used(1,jsym)
+             tau2=tnons_used(2,jsym)
+             tau3=tnons_used(3,jsym) 
              if (abs(tau1)>tol12.or.abs(tau2)>tol12.or.abs(tau3)>tol12) then
 !              Compute exp(-2*Pi*I*G dot tau) using original G
                arg=two_pi*(dble(l1)*tau1+dble(l2)*tau2+dble(l3)*tau3)
@@ -1607,8 +1607,8 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
                phr=one
                phi=zero
              end if
-             phr=phr*symafm(isym)
-             phi=phi*symafm(isym)
+             phr=phr*symafm_used(jsym)
+             phi=phi*symafm_used(jsym)
 !TO BE COMMENTED
              phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
              phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
@@ -1678,8 +1678,8 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
                phr=one
                phi=zero
              end if
-             phr=phr*symafm(isym)
-             phi=phi*symafm(isym)
+             phr=phr*symafm_used(jsym)
+             phi=phi*symafm_used(jsym)
 !TO BE COMMENTED
              phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
              phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
