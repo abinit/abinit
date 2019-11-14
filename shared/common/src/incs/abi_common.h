@@ -163,6 +163,19 @@
    call move_alloc(from, to) NEWLINE \
    call abimem_record(0, QUOTE(to), _LOC(to), "A", _MEM(to),  __FILE__, __LINE__)
 
+
+/* Allocate a polymophic scalar 
+ * allocate(datatype:: scalar) */
+#  define ABI_DATATYPE_ALLOCATE_SCALAR(type, scalar)                    \
+  allocate(type::scalar) NEWLINE                                        \
+    call abimem_record(0, QUOTE(scalar), _LOC(scalar), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
+
+#  define ABI_DATATYPE_DEALLOCATE_SCALAR(scalar)                        \
+  call abimem_record(0, QUOTE(scalar), _LOC(scalar), "D", -storage_size(scalar, kind=8), __FILE__, __LINE__) NEWLINE \
+    deallocate(scalar) 
+
+
+
 #else
 /* macros used in production */
 #  define ABI_ALLOCATE(ARR,SIZE) allocate(ARR SIZE)
@@ -176,6 +189,12 @@
 #  define ABI_MALLOC_SCALAR(scalar) allocate(scalar)
 #  define ABI_FREE_SCALAR(scalar) deallocate(scalar)
 #  define ABI_MOVE_ALLOC(from, to) call move_alloc(from, to)
+
+
+#  define ABI_DATATYPE_ALLOCATE_SCALAR(type,scalar)  allocate(type::scalar)
+#  define ABI_DATATYPE_DEALLOCATE_SCALAR(scalar)   deallocate(scalar)
+
+
 #endif
 
 
@@ -286,6 +305,14 @@
 
 /* Dummy use of unused arguments to silence compiler warnings */
 #define ABI_UNUSED(var) if (.FALSE.) call unused_var(var)
+/* 
+ * The method above work for basic types (integer, real, etc...). 
+ * For types, arrays, we can use associate (F03 feature)
+ * Does not work for character(*) with gfortran <=5.x (>7.x is fine. No 6.x data)
+ * character with fixed length is fine.
+ * */ 
+#define ABI_UNUSED_A(var) associate( var => var ) NEWLINE end associate 
+
 
 #ifdef HAVE_PAPI
 #  define XPAPI_CHECK(check,msg) if (check/=PAPI_OK) call xpapi_handle_error(check, msg _FILE_LINE_ARGS_)
