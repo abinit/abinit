@@ -1,0 +1,75 @@
+# Hydrogen systems for tests of symmetry recognition in the non-collinear case. Constrained DFT calculations
+
+ ndtset 6
+ udtset 3 2
+
+#Dataset 1. First system, a chain of H atoms along 1 0 0, with spins pointing in different directions. Tetragonal cell.
+ natom1? 2
+ typat1? 2*1
+ nband1? 2
+ acell1? 8 6 6
+  xred1? 0 0 0   0.5 0 0
+
+ spinat11       0.08 0.06   0.8    0.08 -0.06  0.8 # The spin obeys a gliding plane symmetry
+ spinat12       0.08 0.06   0.8   -0.08  0.06 -0.8 # Inversion of the spin on the second atom with respect to the case 11
+
+#Dataset 2. Second system, a chain of H atoms along 1 1 1, with spins pointing in different directions. Rhombohedral cell.
+ natom2? 3
+ typat2? 3*1
+ nband2? 6
+ acell2? 3*6
+ rprim2? 0 1 1
+         1 0 1
+         1 1 0
+# xred2?  0 0 0    1/3 1/3 1/3     2/3 2/3 2/3
+  xred2?  1/6 0 0    1/3 1/2 1/3     2/3 2/3 5/6
+
+# spinat21   0.8 0 0    0 0.8 0     0 0 0.8   # The spin obeys a trigonal screw symmetry
+ spinat22   0 0 0      0.8 0.8 0.8    -0.8 -0.8 -0.8
+
+#Dataset 3. Third system, a square of H atoms, in a BCT cell.
+ natom3? 4
+ typat3? 4*1
+ nband3? 4
+ scalecart3? 6 6 6
+ rprim3? 0 1 1
+         1 0 1
+         1 1 0
+  xcart3?  1.0 0 0   0 1.0 0  -1.0 0 0   0 -1.0 0    
+ spinat31  0.8 0 0   0 -0.8 0   0.8 0 0   0  -0.8 0  
+ spinat32  0.8 0 0.2   0 -0.8 0.2   0.8 0 0.2   0  -0.8 0.2 
+
+#Atom types
+ ntypat  1
+ znucl  1.0
+ so_psp 0
+# Non-collinear case
+ nspden 4  nspinor 2  
+#Computational parameters
+ tolvrs 1.0d-8
+ nstep  35
+ ecut 3
+ kptopt 0
+ nkpt 1
+#Constrained DFT 
+#constraint_kind 1  # Constrained DFT for the magnetization
+#magcon_lambda      2   
+#Definition of the atomic spheres
+#ratsph    1.0  1.0
+#ratsm     0.05
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t95.out, tolnlines = 1, tolabs = 0.0, tolrel = 0.0, fld_options = -medium
+#%% psp_files = 1h.pspnc
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% references = 
+#%% keywords = 
+#%% description = Hydrogen systems for tests of symmetry recognition in the non-collinear case. Constrained DFT calculations for the magnetization.
+#%%<END TEST_INFO>
