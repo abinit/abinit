@@ -54,13 +54,13 @@ module  m_slc_dynamics
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
 
-   !if(spin_mover%total_time .ne. lattice_mover%total_time) then
-   !  MSG_ERROR("Total time for spin and lattice dynamics are different, check your input file.")
-   !endif
+   if(spin_mover%total_time .ne. lattice_mover%total_time) then
+     MSG_ERROR("Total time for spin and lattice dynamics are different, check your input file.")
+   endif
 
-   !if(spin_mover%dt .ne. lattice_mover%dt) then
-   !  MSG_ERROR("Different time steps for spin and lattice dynamics not yet implemented, check your input file.")
-   !endif
+   if(spin_mover%dt .ne. lattice_mover%dt) then
+     MSG_ERROR("Different time steps for spin and lattice dynamics not yet implemented, check your input file.")
+   endif
      
 
    t=0.0
@@ -107,12 +107,12 @@ module  m_slc_dynamics
       end if
       !one step in lattice dynamics
       call lattice_mover%run_one_step(effpot=calculator, spin=spin, lwf=lwf)
-      ! TODO: Replace this by proper output from lattice mover
-      write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, A13, 4X, ES13.5)") "-", counter, t*Time_Sec, &
-                & '-------------', &
-                & spin_mover%hist%etot(spin_mover%hist%ihist_prev)/spin_mover%spin_ob%nscell
-      call wrtout(std_out,msg,'COLL')
-      call wrtout(ab_out, msg, 'COLL')
+      ! TODO: Adjust output
+      !write(msg, "(A13, 4X, A15, 4X, A15, 4X, A15, 4X, A15)") &
+      !      &  "Iteration", "temperature(K)", "Ekin(Ha/uc)", &
+      !      & "Epot(Ha/uc)", "ETOT(Ha/uc)"
+      !call wrtout(std_out,msg,'COLL')
+      !call wrtout(ab_out, msg, 'COLL')
 
       t=t+spin_mover%dt
     enddo
