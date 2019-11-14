@@ -194,8 +194,9 @@ def print_dataframe(frame, title=None, precision=6, sortby=None, file=sys.stdout
             return HTML(output)
 
 
-
-class NotebookWriter(metaclass=abc.ABCMeta):
+# Here metaclass is needed for abc but then I should import six --> leave it at it is without metaclass
+#@six.add_metaclass(abc.ABCMeta)
+class NotebookWriter(object): #metaclass=abc.ABCMeta):
     """
     Mixin class for objects that are able to generate jupyter_ notebooks.
     Subclasses must provide a concrete implementation of `write_notebook`.
