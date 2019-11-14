@@ -3453,6 +3453,11 @@ end subroutine init_operwan_realspace
 !!
 !! SOURCE
 subroutine reduce_operwan_realspace(wan,rhot1,npwx,nibz,comm,nbz,nsppol)
+
+#ifdef FC_INTEL
+!DEC$ NOOPTIMIZE
+#endif
+
   use m_xmpi, only : xmpi_barrier,xmpi_sum  
 !Arguments---------------------------------------
   type(plowannier_type),intent(in) :: wan
@@ -3462,6 +3467,9 @@ subroutine reduce_operwan_realspace(wan,rhot1,npwx,nibz,comm,nbz,nsppol)
   complex(dpc),allocatable ::  buffer(:)
   integer :: dim,pwx,ibz, spin, ispinor1, ispinor2, iatom1, iatom2, pos1, pos2
   integer :: il1, il2, im1, im2, nnn, ierr
+
+
+  
    dim=0
      do pwx=1,npwx
      do ibz=1,nibz
@@ -3688,6 +3696,10 @@ end subroutine zero_operwan_realspace
 !!
 !! SOURCE
 subroutine compute_oper_wank2realspace(wan,operwan,operwan_realspace)
+
+#ifdef FC_INTEL
+!DEC$ NOOPTIMIZE
+#endif
 
 !Arguments----------------------------------
   type(operwan_realspace_type),intent(inout) :: operwan_realspace
