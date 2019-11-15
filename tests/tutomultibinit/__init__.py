@@ -15,4 +15,5 @@ inp_files = [
     "tmulti1_3.in",
     "tmulti5_1.in",   # basic Multibinit spin dynamics run
     "tmulti5_2.in",   # LaFeO3 MvT
+    "tmulti5_3.in",   # 1D AFM chain with DMI (spin canting example)
 ]
