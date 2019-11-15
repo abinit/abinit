@@ -30,7 +30,11 @@
 
 MODULE m_calc_ucrpa
 
- use defs_basis
+#ifdef FC_INTEL
+!DEC$ NOOPTIMIZE
+#endif
+
+  use defs_basis
  implicit none
 
  private
