@@ -180,7 +180,7 @@ class FortranFile(object):
                     app(p.to_string(verbose=verbose, width=width))
 
         if with_stats:
-            df = self.get_stats(as_dataframe=True)
+            df = self.get_stats()
             app(df.to_string())
 
         if verbose > 1:
@@ -225,7 +225,7 @@ class FortranFile(object):
         """Maximum directory level used by this file."""
         return min(mod.dirlevel for mod in self.all_usedby_mods) if self.all_usedby_mods else 0
 
-    def iter_procedures(self, visibility="public"):
+    def iter_procedures(self):
         for a in ["modules", "programs", "subroutines", "functions"]:
             for container in getattr(self, a):
                 for p in container.public_procedures:
@@ -263,9 +263,9 @@ class FortranFile(object):
 
         return None
 
-    def get_stats(self, as_dataframe=False):
+    def get_stats(self, as_dict=False):
         """
-        Return dictionary with FortFile stats or pandas dataframe if as_dataframe.
+        Return dictionary with FortFile stats or pandas dataframe if as_dict.
         """
         d = OrderedDict([
             ("use", len(self.all_used_mods)),
@@ -282,7 +282,7 @@ class FortranFile(object):
             #("doc_lines", self.num_doclines),
         ])
 
-        if not as_dataframe: return d
+        if as_dict: return d
         import pandas as pd
         return pd.DataFrame([d], index=[self.basename], columns=d.keys() if d else None)
 
@@ -474,7 +474,7 @@ class AbinitProject(NotebookWriter):
                 if key.endswith(".F90.in"): key = key[:-3]
                 self.fort_files[key].all_usedby_mods.append(fort_file)
 
-        pub_procs = self.all_public_procedures()
+        pub_procs = self.get_all_public_procedures()
         all_interfaces = self.get_all_interfaces()
         miss = []
         for fort_file in self.fort_files.values():
@@ -625,9 +625,9 @@ class AbinitProject(NotebookWriter):
             for fort_file in fort_files:
                 yield dirname, fort_file
 
-    def all_public_procedures(self):
+    def get_all_public_procedures(self):
         """
-        Dictionary mapping name --> Procedure
+        Return Dictionary mapping name --> Procedure
         """
         # FIXME: Check that there's no name collision
         d = {}
@@ -635,7 +635,8 @@ class AbinitProject(NotebookWriter):
             for a in ["modules", "programs", "subroutines", "functions"]:
                 for p in getattr(f, a):
                     d.update({p.name: p for p in p.public_procedures})
-        return d
+
+        return {k: d[k] for k in sorted(d.keys())}
 
     def get_all_datatypes(self):
         """
@@ -647,7 +648,8 @@ class AbinitProject(NotebookWriter):
                 for dtype in p.types:
                     assert dtype.name not in dtypes
                     dtypes[dtype.name] = dtype
-        return dtypes
+
+        return {k: dtypes[k] for k in sorted(dtypes.keys())}
 
     def get_all_interfaces(self):
         """
@@ -657,7 +659,8 @@ class AbinitProject(NotebookWriter):
         for f in self.fort_files.values():
             for p in getattr(f, "modules"):
                 d.update({i.name: i for i in p.interfaces})
-        return d
+
+        return {k: d[k] for k in sorted(d.keys())}
 
     def print_interfaces(self, what=None, verbose=0):
         """
@@ -1070,21 +1073,20 @@ class AbinitProject(NotebookWriter):
         from fkiss.tools import Editor
         return Editor().edit_files(paths, ask_for_exit=True)
 
-    def get_stats_file(self, filename, as_dataframe=True):
-        return self.fort_files[os.path.basename(filename)].get_stats(as_dataframe=as_dataframe)
+    def get_stats_file(self, filename, as_dict=False):
+        return self.fort_files[os.path.basename(filename)].get_stats(as_dict=as_dict)
 
     def get_stats_dir(self, dirname):
         """
         Return dataframe with statistics about directory.
         """
         dir2files = self.groupby_dirname()
-        #print(dirname, dir2files.keys())
         dirpath = os.path.join(self.top, dirname)
         if dirpath.endswith(os.sep): dirpath = dirpath[:-1]
         index, rows = [], []
         for fort_file in sorted(dir2files[dirpath], key=lambda f: f.basename):
             index.append(fort_file.basename)
-            rows.append(fort_file.get_stats())
+            rows.append(fort_file.get_stats(as_dict=True))
 
         import pandas as pd
         return pd.DataFrame(rows, index=index, columns=list(rows[0].keys() if rows else None))
@@ -1115,7 +1117,7 @@ class AbinitProject(NotebookWriter):
                 if all(mod.name not in ffile.all_uses for ffile in self.fort_files.values()):
                     orphans.append(mod)
 
-            for proc in fort_file.iter_procedures(visibility="public"):
+            for proc in fort_file.iter_procedures():
                 # programs are orphan by definition
                 # function callers are difficult to detect.
                 if proc.is_program or proc.is_function: continue
@@ -1319,12 +1321,23 @@ From http://www.catb.org/esr/writings/unix-koans/
 from fkiss.project import AbinitProject
 proj = AbinitProject.pickle_load(filepath=None)
 """,),
-            nbv.new_code_cell('proj.get_graphviz_dir("41_geometry")'),
-            nbv.new_code_cell('proj.get_graphviz_pubname("crystal_init")'),
-            nbv.new_code_cell('proj.get_graphviz_pubname("fourdp")'),
-            nbv.new_code_cell('proj.get_graphviz_pubname("m_geometry")'),
-            nbv.new_code_cell('proj.get_stats()'),
-            nbv.new_code_cell('proj.get_stats_dir("src/41_geometry")'),
+            nbv.new_code_cell('#proj.get_graphviz_dir("41_geometry")'),
+            nbv.new_code_cell('#proj.get_graphviz_pubname("crystal_init")'),
+            nbv.new_code_cell('#proj.get_graphviz_pubname("fourdp")'),
+            nbv.new_code_cell('#proj.get_graphviz_pubname("m_geometry")'),
+            nbv.new_code_cell('#proj.get_stats()'),
+            nbv.new_code_cell('#proj.get_stats_dir("src/41_geometry")'),
+            nbv.new_code_cell("""
+try:
+    import param
+    import panel as pn
+    pn.extension()
+    proj_viewer = proj.get_viewer()
+    proj_viewer.get_dir_tabs()
+except ImportError as exc:
+    print(exc)
+    print('Install panel with `pip install panel`\nSee also: https://panel.pyviz.org/index.html#installation')
+""")
         ])
 
         return self._write_nb_nbpath(nb, nbpath)
@@ -1332,3 +1345,120 @@ proj = AbinitProject.pickle_load(filepath=None)
     def yield_figs(self, **kwargs):  # pragma: no cover
         # TODO: Activate this
         return None
+
+    def get_proj_viewer(self):
+        """Return tabs with widgets to interact with the DDB file."""
+        return ProjectViewer(self)
+
+    def get_procedure_viewer(self):
+        """Return tabs with widgets to interact with the DDB file."""
+        return ProcedureViewer(self)
+
+
+
+import param
+import panel as pn
+
+class ProjectViewer(param.Parameterized):
+
+    dir_select = pn.widgets.Select(name="Directory")
+    file_select = pn.widgets.Select(name="Fortran File")
+    pubproc_select = pn.widgets.Select(name="Public procedure")
+
+    def __init__(self, proj, **params):
+        super().__init__(**params)
+        self.proj = proj
+
+        self.dir2files = proj.groupby_dirname()
+        self.dirname2path = {os.path.basename(p): p for p in self.dir2files.keys()}
+        self.dir_select.options = list(self.dirname2path.keys())
+        self.all_pubs = proj.get_all_public_procedures()
+
+    @param.depends('dir_select.value')
+    def view_dirname(self):
+        dirpath = self.dirname2path[self.dir_select.value]
+        # Change options in file_select.
+        self.file_select.options = [f.name for f in self.dir2files[dirpath]]
+
+        return pn.Row(self.proj.get_stats_dir(dirpath),
+                      self.proj.get_graphviz_dir(dirpath)) #, sizing_mode="scale_both")
+
+    @param.depends('file_select.value')
+    def view_fort_file(self):
+        if self.file_select.value is None: return
+        dirpath = self.dirname2path[self.dir_select.value]
+        for fort_file in self.dir2files[dirpath]:
+            if fort_file.name == self.file_select.value:
+                break
+        else:
+            raise ValueError("Cannot find fortran file with name: %s" % self.file_select.value)
+
+        # Change options in pubproc_select.
+        #self.pubproc_select.options = [p.name for p in fort_file.public_procedures]
+
+        return pn.Row(fort_file.get_stats(), fort_file.get_graphviz())
+
+    @param.depends('pubproc_select.value')
+    def view_pubproc(self):
+        pubname = self.pubproc_select.value
+        if pubname is None: return
+        proc = self.all_pubs[pubname]
+        return pn.Row(proc.get_graphviz())
+
+    def get_dir_tabs(self):
+        tabs = pn.Tabs()
+
+        tabs.append(("Directory", pn.Column(self.dir_select, pn.Column(self.view_dirname))))
+
+        tabs.append(("File", pn.Column(
+            pn.Column(self.dir_select, self.file_select), pn.Column(self.view_fort_file)),
+        ))
+
+        #tabs.append(("Procedure", pn.Column(
+        #    pn.Column(self.dir_select, self.file_select, self.pubproc_select),
+        #    pn.Column(self.view_pubproc)),
+        #))
+
+        return tabs
+
+
+class ProcedureViewer(param.Parameterized):
+
+    #autocomplete = pn.widgets.AutocompleteInput(
+    autocomplete = pn.widgets.TextInput(
+                name='Autocomplete Input',
+                placeholder='Write something here',
+                ) #options=[], #list(self.all_pubs.keys()),
+
+    view_btn = pn.widgets.Button(name=r"View", button_type='primary')
+
+    def __init__(self, proj, **params):
+        super().__init__(**params)
+        self.proj = proj
+
+        self.all_pubs = proj.get_all_public_procedures()
+        self.autocomplete = pn.widgets.AutocompleteInput(
+                name='Autocomplete Input', options=list(self.all_pubs.keys()),
+                placeholder='Write something here')
+
+        #self.autocomplete.options = list(self.all_pubs.keys())
+
+        self.autocomplete.param.watch(self.view_pubname, 'value')
+        #self.autocomplete.param.trigger("value")
+
+    @param.depends('view_btn.clicks')
+    def view_pubname(self, event=None):
+        if self.view_btn.clicks == 0: return
+        #print(event)
+        #if event is None: return
+        pubname = self.autocomplete.value
+        print("pubname:", pubname)
+        if pubname is None: return
+        proc = self.all_pubs[pubname]
+        return pn.Row(proc.get_graphviz())
+
+    def get_tabs(self):
+        tabs = pn.Tabs()
+
+        tabs.append(("Procedure", pn.Column(pn.Column(self.autocomplete, self.view_btn), pn.Column(self.view_pubname))))
+        return tabs

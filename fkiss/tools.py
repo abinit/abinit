@@ -259,8 +259,6 @@ class NotebookWriter(object): #metaclass=abc.ABCMeta):
 
         nb.cells.extend([
             nbv.new_code_cell("""\
-from __future__ import print_function, division, unicode_literals, absolute_import
-
 #%matplotlib notebook
 """)
         ])
