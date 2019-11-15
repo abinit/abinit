@@ -107,6 +107,8 @@ module m_multibinit_manager
      type(spin_mover_t) :: spin_mover  
      ! type(lwf_mover_t) :: lwf_mover
 
+     type(slc_mover_t) :: slc_mover
+
      ! spin netcdf hist file
      type(spin_ncfile_t) :: spin_ncfile
      type(rng_t) :: rng
@@ -525,8 +527,8 @@ contains
     call self%set_movers()
 
     call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
-    call slc_run_time(self%spin_mover, self%lattice_mover, self%pots, displacement=self%lattice_mover%displacement, & 
-                   &  spin=self%spin_mover%Stmp)
+    call self%slc_mover%initialize(self%spin_mover, self%lattice_mover)
+    call self%slc_mover%run_time(self%pots, displacement=self%lattice_mover%displacement, spin=self%spin_mover%Stmp)
     msg=repeat("=", 90)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
