@@ -3396,33 +3396,35 @@ end subroutine print_operwan
 !! CHILDREN
 !!
 !! SOURCE
-subroutine init_operwan_realspace(wan,operwan_realspace)
+subroutine init_operwan_realspace(wan,oprs)
 
 !Arguments----------------------------------
-  type(operwan_realspace_type),intent(inout) :: operwan_realspace
+  type(operwan_realspace_type),intent(inout) :: oprs
   type(plowannier_type), intent(in) :: wan
 
 !Local variables----------------------------
-  integer :: iatom1,iatom2,n1,n2,pos1,pos2,il1,il2
-
-  ABI_DATATYPE_ALLOCATE(operwan_realspace%atom_index,(wan%natom_wan,wan%natom_wan))
-  do iatom1 = 1,wan%natom_wan
-    do iatom2 = 1,wan%natom_wan
-      n1=size(wan%nposition(iatom1)%pos,1)
-      n2=size(wan%nposition(iatom2)%pos,1)
-      ABI_DATATYPE_ALLOCATE(operwan_realspace%atom_index(iatom1,iatom2)%position,(n1,n2))
-      do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
-        do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
-          n1=wan%nbl_atom_wan(iatom1)
-          n2=wan%nbl_atom_wan(iatom2)
-          ABI_DATATYPE_ALLOCATE(operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom,(n1,n2))
-          do il1 = 1,wan%nbl_atom_wan(iatom1)
-            do il2 = 1,wan%nbl_atom_wan(iatom2)
-              n1=2*wan%latom_wan(iatom1)%lcalc(il1)+1
-              n2=2*wan%latom_wan(iatom2)%lcalc(il2)+1
-              ABI_ALLOCATE(operwan_realspace%atom_index(iatom1,iatom2)%position\
-              (pos1,pos2)%atom(il1,il2)%matl,(n1,n2,wan%nsppol,wan%nspinor,wan%nspinor))
-              operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl = czero
+  integer :: i1,i2,n1,n2,p1,p2,l1,l2,sp,pi
+  
+ !variable names is shorten to achieve not too long line lenght
+  sp=wan%nsppol
+  pi=wan%nspinor
+  ABI_DATATYPE_ALLOCATE(oprs%atom_index,(wan%natom_wan,wan%natom_wan))
+  do i1 = 1,wan%natom_wan
+    do i2 = 1,wan%natom_wan
+      n1=size(wan%nposition(i1)%pos,1)
+      n2=size(wan%nposition(i2)%pos,1)
+      ABI_DATATYPE_ALLOCATE(oprs%atom_index(i1,i2)%position,(n1,n2))
+      do p1 = 1,size(wan%nposition(i1)%pos,1)
+        do p2 = 1,size(wan%nposition(i2)%pos,1)
+          n1=wan%nbl_atom_wan(i1)
+          n2=wan%nbl_atom_wan(i2)
+          ABI_DATATYPE_ALLOCATE(oprs%atom_index(i1,i2)%position(p1,p2)%atom,(n1,n2))
+          do l1 = 1,wan%nbl_atom_wan(i1)
+            do l2 = 1,wan%nbl_atom_wan(i2)
+              n1=2*wan%latom_wan(i1)%lcalc(l1)+1
+              n2=2*wan%latom_wan(i2)%lcalc(l2)+1
+              ABI_ALLOCATE(oprs%atom_index(i1,i2)%position(p1,p2)%atom(l1,l2)%matl,(n1,n2,sp,pi,pi))
+              oprs%atom_index(i1,i2)%position(p1,p2)%atom(l1,l2)%matl = czero
             end do
          end do
        end do

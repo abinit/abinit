@@ -289,7 +289,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  ucrpa_bands(1)=dtset%ucrpa_bands(1)
  ucrpa_bands(2)=dtset%ucrpa_bands(2)
  luwindow=.false.
- if(abs(dtset%ucrpa_window(1)+1_dp)>tol8.and.(abs(dtset%ucrpa_window(2)+1_dp)>tol8)) then
+ if(abs(dtset%ucrpa_window(1)+1_dp)>tol8.or.(abs(dtset%ucrpa_window(2)+1_dp)>tol8)) then
    luwindow=.true.
  endif
 
@@ -1246,7 +1246,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  ucrpa_bands(1)=dtset%ucrpa_bands(1)
  ucrpa_bands(2)=dtset%ucrpa_bands(2)
  luwindow=.false.
- if(abs(dtset%ucrpa_window(1)+1_dp)>tol8.and.(abs(dtset%ucrpa_window(2)+1_dp)>tol8)) then
+ if(abs(dtset%ucrpa_window(1)+1_dp)>tol8.or.(abs(dtset%ucrpa_window(2)+1_dp)>tol8)) then
    luwindow=.true.
  endif
 ! write(6,*)"ucrpa_bands",ucrpa_bands
