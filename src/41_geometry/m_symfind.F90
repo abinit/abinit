@@ -124,7 +124,7 @@ contains
  integer :: found3,foundcl,iatom,iatom0,iatom1,iatom2,iatom3,iclass,iclass0,ii
  integer :: isym,jj,kk,natom0,nclass,ntrial,printed,trialafm,trialok
  real(dp) :: det,ndnorm,nucdipmomcl2,nucdipmomcl20
- real(dp) :: spinatcl2,spinatcl20
+ real(dp) :: spinat2,spinatcl2,spinatcl20
 ! TRUE if antiferro symmetries are used with non-collinear magnetism. 
  integer :: afm_noncoll=1 !For noncoll==1.  If 1, all symops are permitted ; if 0 symafm must be 1. 
 !For noncoll=1. If noncoll_orthorhombic1, require the symmetry operations to be a subset of the orthorhombic symmetries, except if all spinat=0..
@@ -146,7 +146,7 @@ contains
 !**************************************************************************
 
 !DEBUG
- if (prtvol>1) message="remove me later"
+!if (prtvol>1) message="remove me later"
 ! write(std_out,*)' symfind : enter'
 ! call flush(6)
 ! write(std_out,*)' symfind : nzchempot= ',nzchempot
@@ -237,10 +237,13 @@ contains
 !      At this stage, admit either identical spinat, or spin-flip spinat.
        if( typat(iatom)==typecl(iclass)) then
          test_samechrg= (abs(chrgat_(iatom)-chrgatcl(iclass))<tolsym)
-         test_sameabsspin=  &
-&         abs(abs(spinat(1,iatom))-abs(spinatcl(1,iclass)))<tolsym .and. &
-&         abs(abs(spinat(2,iatom))-abs(spinatcl(2,iclass)))<tolsym .and. &
-&         abs(abs(spinat(3,iatom))-abs(spinatcl(3,iclass)))<tolsym
+         if(noncoll==0)then
+           test_sameabsspin=(abs(abs(spinat(3,iatom))-abs(spinatcl(3,iclass)))<tolsym)
+         else if(noncoll==1)then
+           spinat2  =spinat(1,iatom)**2+spinat(2,iatom)**2+spinat(3,iatom)**2
+           spinatcl2=spinatcl(1,iclass)**2+spinatcl(2,iclass)**2+spinatcl(3,iclass)**2
+           test_sameabsspin=abs(spinat2-spinatcl2)<tolsym
+         endif
          test_samenucdipmom= &
 &             abs(local_nucdipmom(1,1,iatom)-nucdipmomcl(1,iclass))<tolsym .and. &
 &             abs(local_nucdipmom(2,1,iatom)-nucdipmomcl(2,iclass))<tolsym .and. &
@@ -316,17 +319,6 @@ contains
 
  printed=0
 
-!DEBUG
-!write(std_out,*)' '
-!write(std_out,*)' symfind : has selected iclass0=',iclass0
-!write(std_out,*)'  # iatom  xred                          spinat '
-!do iatom0=1,natomcl(iclass0)
-!iatom=class(iatom0,iclass0)
-!write(std_out,'(2i4,6f10.4)' )iatom0,iatom,xred(:,iatom),spinat(:,iatom)
-!end do
-!write(std_out,*)' '
-!ENDDEBUG
-
 !If non-collinear spinat have to be used, transfer them in reduced coordinates
  if (noncoll==1) then
    ABI_ALLOCATE(spinatred,(3,natom))
@@ -338,6 +330,22 @@ contains
      end do
    end do
  end if
+
+!DEBUG
+!write(std_out,*)' '
+!write(std_out,*)' symfind : has selected iclass0=',iclass0
+!write(std_out,*)'  # iatom  xred                          spinat       (spinatred if noncoll=1) '
+!do iatom0=1,natomcl(iclass0)
+!iatom=class(iatom0,iclass0)
+!if(noncoll==0)then
+!  write(std_out,'(2i4,6f10.4)' )iatom0,iatom,xred(:,iatom),spinat(:,iatom)
+!else if(noncoll==1)then
+!  write(std_out,'(2i4,9f10.4)' )iatom0,iatom,xred(:,iatom),spinat(:,iatom),spinatred(:,iatom)
+!endif
+!end do
+!write(std_out,*)' '
+!ENDDEBUG
+
 
  !represent nuclear dipole moments in reduced coords
  ABI_ALLOCATE(nucdipmomred,(3,3,natom))
@@ -392,7 +400,7 @@ contains
 
 !  Select a tentative set of associated translations
 !  First compute the symmetric of the first atom in the smallest class,
-!  using the point symmetry
+!  using the point symmetry, and also the symmetric of spinat(red).
    iatom0=class(1,iclass0)
    xred0(:)=ptsymrel(:,1,isym)*xred(1,iatom0)+ &
 &   ptsymrel(:,2,isym)*xred(2,iatom0)+ &
@@ -400,25 +408,32 @@ contains
    if (noncoll==0) then
      spinat0(:)=spinat(:,iatom0)
    else
-     spinat0(:)=spinatred(:,iatom0)
+     spinat0(:)=ptsymrel(:,1,isym)*spinatred(1,iatom0)+ &
+&           ptsymrel(:,2,isym)*spinatred(2,iatom0)+ &
+&           ptsymrel(:,3,isym)*spinatred(3,iatom0)
    endif
 
 !  From the set of possible images, deduce tentative translations,
 !  and magnetic factor then test whether it send each atom on a symmetric one
    ntrial=0
    do ii=1,natom0
+!DEBUG
+!    write(std_out,'(a,2i4)')' symfind : loop isym,ii=',isym,ii
+!ENDDEBUG
      iatom1=class(ii,iclass0)
 
 !    The tentative translation is found
      trialnons(:)=xred(:,iatom1)-xred0(:)
-!    Generate the tentative symmetric spinat of iatom2
+!    Compare the spinat vectors
      if (noncoll==0) then
        symspinat1(:)=spinat(:,iatom1)
      else
-       symspinat1(:)=ptsymrel(:,1,isym)*spinatred(1,iatom1)+ &
-&           ptsymrel(:,2,isym)*spinatred(2,iatom1)+ &
-&           ptsymrel(:,3,isym)*spinatred(3,iatom1) 
+       symspinat1(:)=spinatred(:,iatom1)
      end if
+
+!DEBUG
+!    write(std_out,'(a,6f10.4)')' symspinat1,spinat0=',symspinat1(:),spinat0(:)
+!ENDDEBUG
 
      trialafm=1
      if(sum(abs(symspinat1(:)-spinat0(:)))>tolsym)then
@@ -823,6 +838,15 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 !Also determine the holohedry, up to one undeterminacy : hR versus hP
  call symptgroup(iholohedry,nsym,ptgroup,symrel)
 
+!DEBUG
+!write(std_out,*)' symbrav, after symptgroup: nsym=',nsym
+!write(std_out,*)' symbrav: symrel='
+!do isym=1,nsym
+!  write(std_out,'(9i4)')symrel(:,:,isym)
+!enddo
+!write(std_out,*)' symbrav: iholohedry=',iholohedry
+!ENDDEBUG
+
 !Loop over trial deformations
 !This is needed in case the Bravais lattice determination from the lattice vectors
 !has a higher holohedry than the real one, in which the symmetry
@@ -836,6 +860,11 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 
 !At most will have to try 65 deformations (13 axes, five stages)
  do ideform=1,65
+
+!DEBUG
+!write(std_out,*)' symbrav: inside loop with ideform=',ideform
+!write(std_out,'(a,9f10.4)')' rprimdtry=',rprimdtry(:,:)
+!ENDDEBUG
 
    ABI_ALLOCATE(ptsymrel,(3,3,msym))
    call symlatt(bravais,msym,nptsym,ptsymrel,rprimdtry,tolsym)
