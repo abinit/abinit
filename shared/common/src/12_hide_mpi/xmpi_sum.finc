@@ -45,6 +45,7 @@ subroutine xmpi_sum_int(xval,comm,ier)
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1 = size(xval)
 
+!  Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
    call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_INTEGER,MPI_SUM,comm,ier)
 #else
@@ -100,6 +101,7 @@ subroutine xmpi_sum_intv(xval,comm,ier)
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  Accumulate xval on all proc. in spaceComm
    call MPI_ALLREDUCE(xval,xsum,1,MPI_INTEGER,MPI_SUM,comm,ier)
    xval = xsum
  end if
@@ -196,6 +198,7 @@ subroutine xmpi_sum_intn(xval,n1,comm,ier)
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_INTEGER,MPI_SUM,comm,ier)
 #else
@@ -250,6 +253,7 @@ subroutine xmpi_sum_int2t(xval,xsum,n1,comm,ier)
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  Accumulate xval on all proc. in spaceComm
    call MPI_ALLREDUCE(xval,xsum,n1,MPI_INTEGER,MPI_SUM,comm,ier)
  else
 #endif
@@ -308,7 +312,7 @@ subroutine xmpi_sum_int2d(xval,comm,ier)
      n2 =size(xval,dim=2)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -320,6 +324,7 @@ subroutine xmpi_sum_int2d(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -386,7 +391,7 @@ subroutine xmpi_sum_int3d(xval,comm,ier)
      n3 =size(xval,dim=3)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -398,6 +403,7 @@ subroutine xmpi_sum_int3d(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -465,7 +471,7 @@ subroutine xmpi_sum_int4d(xval,comm,ier)
      n4 =size(xval,dim=4)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -477,6 +483,7 @@ subroutine xmpi_sum_int4d(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -539,6 +546,7 @@ subroutine xmpi_sum_dp(xval,comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval)
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
 #else
@@ -600,6 +608,7 @@ subroutine xmpi_sum_dpvt(xval,xsum,comm,ier)
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
+!    Accumulate xval on all proc. in spaceComm
      call MPI_ALLREDUCE(xval,xsum,1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
    else
      xsum=xval
@@ -653,6 +662,7 @@ subroutine xmpi_sum_dpv(xval,comm,ier)
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  Accumulate xval on all proc. in spaceComm
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      call MPI_ALLREDUCE(xval,xsum,1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
@@ -709,6 +719,7 @@ subroutine xmpi_sum_dpn(xval,n1,comm,ier)
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
 #else
@@ -773,7 +784,7 @@ subroutine xmpi_sum_sp2d(xval,comm,ier)
      n2 = size(xval,dim=2)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -785,6 +796,7 @@ subroutine xmpi_sum_sp2d(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -851,7 +863,7 @@ subroutine xmpi_sum_sp3d(xval,comm,ier)
      n3 = size(xval,dim=3)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -863,6 +875,7 @@ subroutine xmpi_sum_sp3d(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -929,7 +942,7 @@ subroutine xmpi_sum_sp4d(xval,comm,ier)
      n4 = size(xval,dim=4)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -941,6 +954,7 @@ subroutine xmpi_sum_sp4d(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -1008,7 +1022,7 @@ subroutine xmpi_sum_sp5d(xval,comm,ier)
      n5 = size(xval,dim=5)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4*n5,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -1020,6 +1034,7 @@ subroutine xmpi_sum_sp5d(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -1088,7 +1103,7 @@ subroutine xmpi_sum_sp6d(xval,comm,ier)
      n6 = size(xval,dim=6)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4*n5*n6,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -1100,6 +1115,7 @@ subroutine xmpi_sum_sp6d(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -1168,7 +1184,7 @@ subroutine xmpi_sum_sp7d(xval,comm,ier)
      n7 = size(xval,dim=7)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4*n5*n6*n7,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -1180,6 +1196,7 @@ subroutine xmpi_sum_sp7d(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -1247,7 +1264,7 @@ subroutine xmpi_sum_dp2d(xval,comm,ier)
      n2 = size(xval,dim=2)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -1259,6 +1276,7 @@ subroutine xmpi_sum_dp2d(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -1325,7 +1343,7 @@ subroutine xmpi_sum_dp3d(xval,comm,ier)
      n3 = size(xval,dim=3)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -1337,6 +1355,7 @@ subroutine xmpi_sum_dp3d(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -1404,7 +1423,7 @@ subroutine xmpi_sum_dp4d(xval,comm,ier)
      n4 = size(xval,dim=4)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -1416,6 +1435,7 @@ subroutine xmpi_sum_dp4d(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -1484,7 +1504,7 @@ subroutine xmpi_sum_dp5d(xval,comm,ier)
      n5 = size(xval,dim=5)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4*n5,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -1496,6 +1516,7 @@ subroutine xmpi_sum_dp5d(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -1564,7 +1585,7 @@ subroutine xmpi_sum_dp6d(xval,comm,ier)
      n6 = size(xval,dim=6)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4*n5*n6,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -1576,6 +1597,7 @@ subroutine xmpi_sum_dp6d(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -1645,7 +1667,7 @@ subroutine xmpi_sum_dp7d(xval,comm,ier)
      n7 = size(xval,dim=7)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4*n5*n6*n7,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -1657,6 +1679,7 @@ subroutine xmpi_sum_dp7d(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -1712,6 +1735,7 @@ subroutine xmpi_sum_dp2t(xval,xsum,n1,comm,ier)
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  Accumulate xval on all proc. in spaceComm
    call MPI_ALLREDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
  else
 #endif
@@ -1761,6 +1785,7 @@ subroutine xmpi_sum_dp2d2t(xval,xsum,n,spaceComm,ier)
  ier=0
 #if defined HAVE_MPI
  if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+!  Accumulate xval on all proc. in spaceComm
    call MPI_ALLREDUCE(xval,xsum,n,MPI_DOUBLE_PRECISION,MPI_SUM,spaceComm,ier)
  else
 #endif
@@ -1808,6 +1833,7 @@ subroutine xmpi_sum_dp3d2t(xval,xsum,n1,comm,ier)
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  Accumulate xval on all proc. in spaceComm
    call MPI_ALLREDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
  else
 #endif
@@ -1856,6 +1882,7 @@ subroutine xmpi_sum_dp4d2t(xval,xsum,n1,comm,ier)
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  Accumulate xval on all proc. in spaceComm
    call MPI_ALLREDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
  else
 #endif
@@ -1908,6 +1935,7 @@ subroutine xmpi_sum_c0dc(xval,comm,ier)
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
+!    Accumulate xval on all proc. in spaceComm
      call MPI_ALLREDUCE(xval,xsum,1,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
      xval = xsum
    end if
@@ -1961,6 +1989,7 @@ subroutine xmpi_sum_c1dc(xval,comm,ier)
    if (nproc_space_comm /= 1) then
      n1 =size(xval,dim=1)
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
 #else
@@ -2025,7 +2054,7 @@ subroutine xmpi_sum_c2dc(xval,comm,ier)
      n2 =size(xval,dim=2)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -2037,6 +2066,7 @@ subroutine xmpi_sum_c2dc(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -2103,7 +2133,7 @@ subroutine xmpi_sum_c3dc(xval,comm,ier)
      n3 =size(xval,dim=3)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -2115,6 +2145,7 @@ subroutine xmpi_sum_c3dc(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -2182,7 +2213,7 @@ subroutine xmpi_sum_c4dc(xval,comm,ier)
      n4 =size(xval,dim=4)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -2194,6 +2225,7 @@ subroutine xmpi_sum_c4dc(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -2261,7 +2293,7 @@ subroutine xmpi_sum_c5dc(xval,comm,ier)
      n5 =size(xval,dim=5)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4*n5,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -2273,6 +2305,7 @@ subroutine xmpi_sum_c5dc(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -2341,7 +2374,7 @@ subroutine xmpi_sum_c6dc(xval,comm,ier)
      n6 =size(xval,dim=6)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4*n5*n6,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -2353,6 +2386,7 @@ subroutine xmpi_sum_c6dc(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -2422,7 +2456,7 @@ subroutine xmpi_sum_c7dc(xval,comm,ier)
      n7 =size(xval,dim=7)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4*n5*n6*n7,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -2434,6 +2468,7 @@ subroutine xmpi_sum_c7dc(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -2498,6 +2533,7 @@ subroutine xmpi_sum_c1cplx(xval,comm,ier)
    if (nproc_space_comm /= 1) then
      n1 =size(xval,dim=1)
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_COMPLEX,MPI_SUM,comm,ier)
 #else
@@ -2562,7 +2598,7 @@ subroutine xmpi_sum_c2cplx(xval,comm,ier)
      n2 =size(xval,dim=2)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -2574,6 +2610,7 @@ subroutine xmpi_sum_c2cplx(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -2645,7 +2682,7 @@ subroutine xmpi_sum_c3cplx(xval,comm,ier)
      n3 =size(xval,dim=3)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -2657,6 +2694,7 @@ subroutine xmpi_sum_c3cplx(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -2729,7 +2767,7 @@ subroutine xmpi_sum_c4cplx(xval,comm,ier)
      n4 =size(xval,dim=4)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -2741,6 +2779,7 @@ subroutine xmpi_sum_c4cplx(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -2809,7 +2848,7 @@ subroutine xmpi_sum_c5cplx(xval,comm,ier)
      n5 =size(xval,dim=5)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4*n5,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -2821,6 +2860,7 @@ subroutine xmpi_sum_c5cplx(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
@@ -2889,7 +2929,7 @@ subroutine xmpi_sum_c6cplx(xval,comm,ier)
      n6 =size(xval,dim=6)
 
      !This product of dimensions can be greater than a 32bit integer
-     !We use a real to store it. If it is too large, we switch to an
+     !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4*n5*n6,kind=int64)
      if (ntot<xmpi_maxint32_64) then
@@ -2901,6 +2941,7 @@ subroutine xmpi_sum_c6cplx(xval,comm,ier)
        call MPI_TYPE_COMMIT(mpi_datatype,ier)
      end if
 
+!      Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,mpi_datatype,MPI_SUM,comm,ier)
 #else
