@@ -112,22 +112,6 @@ class FortranFile(object):
         self.all_usedby_mods = []
         #self.num_f90lines, self.num_doclines = 0, 0
 
-    #@lazy_property
-    #def all_used_mods(self):
-    #    all_mods = []
-    #    for a in ["programs", "modules", "subroutines", "functions"]:
-    #        for p in getattr(self, a):
-    #            all_mods.extend(p.local_uses)
-    #    return sorted(set(all_mods))
-
-    #@lazy_property
-    #def all_usedby_mods(self):
-    #    all_mods = []
-    #    for a in ["programs", "modules", "subroutines", "functions"]:
-    #        for p in getattr(self, a):
-    #            all_mods.extend(p.usedby_mods)
-    #    return sorted(set(all_mods))
-
     def __eq__(self, other):
         """Use path to compare for equality and compute hash value."""
         if other is None: return False
@@ -188,6 +172,22 @@ class FortranFile(object):
 
         return "\n".join(lines)
 
+    #@lazy_property
+    #def all_used_mods(self):
+    #    all_mods = []
+    #    for a in ["programs", "modules", "subroutines", "functions"]:
+    #        for p in getattr(self, a):
+    #            all_mods.extend(p.local_uses)
+    #    return sorted(set(all_mods))
+
+    #@lazy_property
+    #def all_usedby_mods(self):
+    #    all_mods = []
+    #    for a in ["programs", "modules", "subroutines", "functions"]:
+    #        for p in getattr(self, a):
+    #            all_mods.extend(p.usedby_mods)
+    #    return sorted(set(all_mods))
+
     @lazy_property
     def all_uses(self):
         """
@@ -225,11 +225,15 @@ class FortranFile(object):
         """Maximum directory level used by this file."""
         return min(mod.dirlevel for mod in self.all_usedby_mods) if self.all_usedby_mods else 0
 
-    def iter_procedures(self):
+    @lazy_property
+    def all_public_procedures(self):
+        """Dictionary name --> public_procedure."""
+        pubs = OrderedDict()
         for a in ["modules", "programs", "subroutines", "functions"]:
             for container in getattr(self, a):
                 for p in container.public_procedures:
-                    yield p
+                    pubs[p.name] = p
+        return pubs
 
     def find_public_entity(self, name, all_names=None):
         """
@@ -478,7 +482,7 @@ class AbinitProject(NotebookWriter):
         all_interfaces = self.get_all_interfaces()
         miss = []
         for fort_file in self.fort_files.values():
-            for proc in fort_file.iter_procedures():
+            for proc in fort_file.all_public_procedures.values():
                 for child_name in proc.children:
                     try:
                         pub_procs[child_name].parents.append(proc)
@@ -1117,7 +1121,7 @@ class AbinitProject(NotebookWriter):
                 if all(mod.name not in ffile.all_uses for ffile in self.fort_files.values()):
                     orphans.append(mod)
 
-            for proc in fort_file.iter_procedures():
+            for proc in fort_file.all_public_procedures.values():
                 # programs are orphan by definition
                 # function callers are difficult to detect.
                 if proc.is_program or proc.is_function: continue
@@ -1333,7 +1337,7 @@ try:
     import panel as pn
     pn.extension()
     proj_viewer = proj.get_viewer()
-    proj_viewer.get_dir_tabs()
+    proj_viewer.get_panel()
 except ImportError as exc:
     print(exc)
     print('Install panel with `pip install panel`\nSee also: https://panel.pyviz.org/index.html#installation')
@@ -1348,11 +1352,11 @@ except ImportError as exc:
 
     def get_proj_viewer(self):
         """Return tabs with widgets to interact with the DDB file."""
-        return ProjectViewer(self)
+        return ProjectViewer(self).get_panel()
 
     def get_procedure_viewer(self):
         """Return tabs with widgets to interact with the DDB file."""
-        return ProcedureViewer(self)
+        return ProcedureViewer(self).get_tabs()
 
 
 
@@ -1372,7 +1376,11 @@ class ProjectViewer(param.Parameterized):
         self.dir2files = proj.groupby_dirname()
         self.dirname2path = {os.path.basename(p): p for p in self.dir2files.keys()}
         self.dir_select.options = list(self.dirname2path.keys())
-        self.all_pubs = proj.get_all_public_procedures()
+        #self.all_pubs = list(proj.get_all_public_procedures.keys())
+
+        #self.autocomplete = pn.widgets.AutocompleteInput(
+        #        name='Autocomplete Input', options=list(self.all_pubs.keys()),
+        #        placeholder='Write something here')
 
     @param.depends('dir_select.value')
     def view_dirname(self):
@@ -1394,18 +1402,18 @@ class ProjectViewer(param.Parameterized):
             raise ValueError("Cannot find fortran file with name: %s" % self.file_select.value)
 
         # Change options in pubproc_select.
-        #self.pubproc_select.options = [p.name for p in fort_file.public_procedures]
-
+        #self.pubproc_select.options = list(fort_file.all_public_procedures.keys())
         return pn.Row(fort_file.get_stats(), fort_file.get_graphviz())
 
     @param.depends('pubproc_select.value')
     def view_pubproc(self):
         pubname = self.pubproc_select.value
         if pubname is None: return
-        proc = self.all_pubs[pubname]
-        return pn.Row(proc.get_graphviz())
+        #proc = self.all_pubs[pubname]
+        graph = self.proj.get_graphviz_pubname(pubname) #, engine=options.engine)
+        return pn.Row(graph)
 
-    def get_dir_tabs(self):
+    def get_panel(self):
         tabs = pn.Tabs()
 
         tabs.append(("Directory", pn.Column(self.dir_select, pn.Column(self.view_dirname))))
@@ -1414,10 +1422,10 @@ class ProjectViewer(param.Parameterized):
             pn.Column(self.dir_select, self.file_select), pn.Column(self.view_fort_file)),
         ))
 
-        #tabs.append(("Procedure", pn.Column(
-        #    pn.Column(self.dir_select, self.file_select, self.pubproc_select),
-        #    pn.Column(self.view_pubproc)),
-        #))
+        tabs.append(("Procedure", pn.Column(
+            pn.Column(self.dir_select, self.file_select, self.pubproc_select),
+            pn.Column(self.view_pubproc)),
+        ))
 
         return tabs
 
@@ -1430,7 +1438,7 @@ class ProcedureViewer(param.Parameterized):
                 placeholder='Write something here',
                 ) #options=[], #list(self.all_pubs.keys()),
 
-    view_btn = pn.widgets.Button(name=r"View", button_type='primary')
+    view_btn = pn.widgets.Button(name="View", button_type='primary')
 
     def __init__(self, proj, **params):
         super().__init__(**params)
@@ -1442,23 +1450,22 @@ class ProcedureViewer(param.Parameterized):
                 placeholder='Write something here')
 
         #self.autocomplete.options = list(self.all_pubs.keys())
-
-        self.autocomplete.param.watch(self.view_pubname, 'value')
+        #self.autocomplete.param.watch(self.view_pubname, 'value')
         #self.autocomplete.param.trigger("value")
 
     @param.depends('view_btn.clicks')
-    def view_pubname(self, event=None):
+    def view_pubname(self):
+        print("in view_pubname with clicks", self.view_btn.clicks)
         if self.view_btn.clicks == 0: return
-        #print(event)
-        #if event is None: return
         pubname = self.autocomplete.value
         print("pubname:", pubname)
-        if pubname is None: return
-        proc = self.all_pubs[pubname]
-        return pn.Row(proc.get_graphviz())
+        if pubname is None: return # or pubname not in self.all_pubs: return
+        #proc = self.all_pubs[pubname]
+        graph = self.proj.get_graphviz_pubname(pubname) #, engine=options.engine)
+        return graph
 
-    def get_tabs(self):
+    def get_panel(self):
         tabs = pn.Tabs()
 
-        tabs.append(("Procedure", pn.Column(pn.Column(self.autocomplete, self.view_btn), pn.Column(self.view_pubname))))
+        tabs.append(("Procedure", pn.Row(pn.Column(self.autocomplete, self.view_btn), pn.Column(self.view_pubname))))
         return tabs

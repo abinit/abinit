@@ -482,10 +482,11 @@ This page gathers the autoconf files used by the buildbot testfarm
 """)
         for f in os.listdir(dirpath):
             path = os.path.join(dirpath, f)
-            if os.path.isdir(path): continue
+            if os.path.isdir(path) or path.endswith(".swp"): continue
             app("## %s  " %  f)
             with io.open(path, "rt", encoding="utf-8") as fh:
                 # Remove all comments except for options that are specified.
+                #print(path)
                 ac_lines = []
                 inblock = False
                 for l in reversed(fh.readlines()):
