@@ -419,7 +419,7 @@ def main():
                     raise RuntimeError("Cannot locate srun in $PATH. "
                                        "Please check your environment")
 
-                runner = JobRunner.srun(timebomb=timebomb)
+                runner = JobRunner.srun(timebomb=timebomb, mpi_args=options.mpi_args)
 
             else:
                 if options.use_mpiexec:
