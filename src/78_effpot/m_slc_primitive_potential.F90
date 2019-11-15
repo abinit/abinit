@@ -617,13 +617,9 @@ contains
       ! fill different coupling terms
       if (iam_master) then
         call self%fill_liu(scpot, scmaker)
-        print *, "filling Oiju supercell" 
         call self%fill_oiju(scpot, scmaker)
-        print *, "Oiju supercell filled"
         call self%fill_niuv(scpot, scmaker)
-        print *, "filling Tijuv supercell" 
         call self%fill_tijuv(scpot, scmaker)
-        print *, "Tijuv supercell filled"
 
         !Write information which terms are used
         write(std_out,'(A55)') 'Using the following terms for the spin-lattice coupling'

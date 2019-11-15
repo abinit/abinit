@@ -425,7 +425,6 @@ contains
   !!
   !! SOURCE
   function get_S(self, step) result(S)
-
     class(spin_hist_t), intent(inout) :: self
     integer, intent(in), optional:: step
     real(dp) :: S(3, self%nspin)

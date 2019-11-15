@@ -322,7 +322,6 @@ contains
     ierr = nf90_get_var(ncid, varid, gilbert_damping)
     NCF_CHECK_MSG(ierr, "gilbert_damping")
 
-
     call self%set_spin_primcell( natoms=natom, unitcell=cell, positions=xcart, &
          & nspin=nspin, index_spin=index_spin, spinat=spinat, &
          & gyroratios=gyroratio, damping_factors=gilbert_damping, &

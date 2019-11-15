@@ -65,11 +65,12 @@ program multibinit
   use m_dtfil,      only : isfile
 
   !use m_generate_training_set, only : generate_training_set
-  use m_compute_anharmonics, only : compute_anharmonics
+  !use m_compute_anharmonics, only : compute_anharmonics
   use m_init10,              only : init10
   use m_multibinit_unittest, only: mb_test_main
   use m_multibinit_driver
   use m_multibinit_main2, only: multibinit_main2
+
   implicit none
 
   !Arguments -----------------------------------
