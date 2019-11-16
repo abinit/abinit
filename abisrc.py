@@ -127,6 +127,10 @@ def get_parser():
     p_notebook.add_argument('--foreground', action='store_true', default=False,
         help="Run jupyter notebook in the foreground.")
 
+    # panel option
+    p_panel = subparsers.add_parser("panel", parents=[copts_parser],
+                                    help="Analyze project in dashboard. Requires panel package.")
+
     # Subparser for stats.
     p_stats = subparsers.add_parser("stats", parents=[copts_parser, pandas_parser],
         help="Print statistics about file or directory or project (if no argument is given). Use -c to copy to system clipboard")
@@ -317,6 +321,15 @@ def main():
     elif options.command == "notebook":
         return proj.make_and_open_notebook(foreground=options.foreground)
 
+    elif options.command == "panel":
+        try:
+            import panel as pn
+        except ImportError as exc:
+            cprint("Use `conda install panel` or `pip install panel` to install the python package.", "red")
+            raise exc
+
+        proj.get_panel().show() #.app()
+
     elif options.command == "pedit":
         return proj.pedit(options.what, verbose=options.verbose)
 
@@ -368,8 +381,6 @@ def main():
         #dtype.analyze()
         #if "free" in options.what[1:]: print(dtype.generate_free_routine())
         #if "copy" in options.what[1:] print(dtype.generate_copy_routine())
-        #if "xml" in options.what[1:] print(dtype.generate_xml_routine())
-        #if "to_array" in options.what[1:] print(dtype.generate_to_array_routine())
 
     elif options.command == "abirules":
         if not options.what:

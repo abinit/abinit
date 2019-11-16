@@ -337,10 +337,10 @@ class FortranFile(object):
                     wg.node(node.name)
 
         for mod in self.all_used_mods:
-            fg.edge(mod.name, self.name)
+            fg.edge(self.name, mod.name)
 
         for child in self.all_usedby_mods:
-            fg.edge(self.name, child.name)
+            fg.edge(child.name, self.name)
 
         return fg
 
@@ -1234,7 +1234,7 @@ class AbinitProject(NotebookWriter):
         target = os.path.basename(dirname)
         fg.node(name=target)
         for used_dirname in used_dirs:
-            fg.edge(used_dirname, target)
+            fg.edge(target, used_dirname)
         #for parent_dir in parent_dirs:
         #    fg.edge(target, used_dirname)
 
@@ -1264,22 +1264,22 @@ class AbinitProject(NotebookWriter):
 
         # https://www.graphviz.org/doc/info/
         from graphviz import Digraph
-        fg = Digraph(name="Connections of %s:%s" % (obj.__class__, obj.name),
+        fg = Digraph(name="Connections of %s: %s" % (obj.__class__.__name__, obj.name),
             graph_attr=graph_attr, node_attr=node_attr, edge_attr=edge_attr,
             engine="dot" if engine == "automatic" else engine,
         )
 
         # Set graph attributes.
-        fg.attr(label="Connections of %s:%s" % (obj.__class__, obj.name),
+        fg.attr(label="Connections of %s: %s" % (obj.__class__.__name__, obj.name),
                 rankdir="LR", pagedir="BL") # constraint="false", pack="true", packMode="clust")
         fg.node_attr.update(color='lightblue2', style='filled')
 
         target = obj.name
         fg.node(name=target)
         for child in obj.children:
-            fg.edge(child, target)
+            fg.edge(target, child)
         for parent in obj.parents:
-            fg.edge(target, parent.name)
+            fg.edge(parent.name, target)
 
         return fg
 
@@ -1350,15 +1350,13 @@ except ImportError as exc:
         # TODO: Activate this
         return None
 
-    def get_proj_viewer(self):
+    def get_panel(self):
         """Return tabs with widgets to interact with the DDB file."""
         return ProjectViewer(self).get_panel()
 
     def get_procedure_viewer(self):
         """Return tabs with widgets to interact with the DDB file."""
         return ProcedureViewer(self).get_tabs()
-
-
 
 import param
 import panel as pn
@@ -1387,13 +1385,14 @@ class ProjectViewer(param.Parameterized):
         dirpath = self.dirname2path[self.dir_select.value]
         # Change options in file_select.
         self.file_select.options = [f.name for f in self.dir2files[dirpath]]
+        #self.file_select.value = self.file_select.options[0]
+        self.file_select.param.trigger("value")
 
         return pn.Row(self.proj.get_stats_dir(dirpath),
-                      self.proj.get_graphviz_dir(dirpath)) #, sizing_mode="scale_both")
+                      self.proj.get_graphviz_dir(dirpath))
 
     @param.depends('file_select.value')
     def view_fort_file(self):
-        if self.file_select.value is None: return
         dirpath = self.dirname2path[self.dir_select.value]
         for fort_file in self.dir2files[dirpath]:
             if fort_file.name == self.file_select.value:
@@ -1402,14 +1401,16 @@ class ProjectViewer(param.Parameterized):
             raise ValueError("Cannot find fortran file with name: %s" % self.file_select.value)
 
         # Change options in pubproc_select.
-        #self.pubproc_select.options = list(fort_file.all_public_procedures.keys())
+        self.pubproc_select.options = list(fort_file.all_public_procedures.keys())
+        #self.pubproc_select.value = self.pubproc_select.options[0]
+        self.pubproc_select.param.trigger("value")
+
         return pn.Row(fort_file.get_stats(), fort_file.get_graphviz())
 
     @param.depends('pubproc_select.value')
     def view_pubproc(self):
         pubname = self.pubproc_select.value
         if pubname is None: return
-        #proc = self.all_pubs[pubname]
         graph = self.proj.get_graphviz_pubname(pubname) #, engine=options.engine)
         return pn.Row(graph)
 
