@@ -43,6 +43,7 @@ module m_lattice_dummy_mover
   use m_lattice_mover, only: lattice_mover_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_random_xoroshiro128plus, only:  rng_t
+  use m_hashtable_strval, only: hash_table_t
 !!***
 
   implicit none
@@ -82,16 +83,17 @@ contains
   !          and 2) this is a constant volume mover.
   ! spin: spin of atoms. Useful with spin-lattice coupling.
   ! lwf: lattice wannier function. Useful with lattice-lwf coupling (perhaps useless.)
-  subroutine run_one_step(self, effpot,displacement, strain, spin, lwf)
+  subroutine run_one_step(self, effpot,displacement, strain, spin, lwf, energy_table)
     class(lattice_dummy_mover_t), intent(inout) :: self
     class(abstract_potential_t), intent(inout) :: effpot
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    type(hash_table_t), optional, intent(inout) :: energy_table
     integer :: i
 
     self%forces(:, :) =0.0
     self%energy = 0.0
     call effpot%calculate( displacement=self%displacement, strain=self%strain, &
-         & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy)
+         & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy, energy_table=energy_table)
     ! set velocity to zero.
     do i=1, self%natom
        !self%current_vcart(:,i) = self%current_vcart(:,i) + &
@@ -103,6 +105,7 @@ contains
 
     ABI_UNUSED_A(strain)
     ABI_UNUSED_A(displacement)
+    ABI_UNUSED_A(energy_table)
   end subroutine run_one_step
 
 

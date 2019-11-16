@@ -27,6 +27,7 @@ module  m_slc_potential
   use m_abicore
   use m_xmpi
 
+  use m_hashtable_strval, only: hash_table_t
   use m_abstract_potential, only : abstract_potential_t
   use m_dynamic_array, only: int2d_array_type
   use m_mpi_scheduler, only: mb_mpi_info_t, init_mpi_info, mpi_scheduler_t
@@ -245,10 +246,11 @@ contains
   !-----------------------------------------------------------------
 
   subroutine calculate(self, displacement, strain, spin, lwf, &
-       force, stress, bfield, lwf_force, energy)
+       force, stress, bfield, lwf_force, energy, energy_table)
     class(slc_potential_t), intent(inout) :: self
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
+    type(hash_table_t),optional, intent(inout) :: energy_table
  
     integer :: ii
     real(dp) :: eslc, beta
@@ -357,9 +359,18 @@ contains
       enddo
     endif
 
-    if(present(energy)) energy= energy+eslc
-    
-  end subroutine calculate
+    if(present(energy)) then
+       energy= energy+eslc
 
+       ! TODO: if energy is not present??
+       if(present(energy_table)) then
+          call energy_table%put(self%label, energy)
+          ! TODO: use terms instead of total, e.g.
+          !call energy_table%put("SLC Oiju term", energy)
+          !call energy_table%put("SLC Tijuv term", energy)
+       end if
+    end if
+
+  end subroutine calculate
 
 end module m_slc_potential

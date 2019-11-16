@@ -34,16 +34,18 @@ module  m_slc_dynamics
   use m_abstract_potential, only: abstract_potential_t
   use m_spin_mover, only: spin_mover_t
   use m_lattice_mover, only: lattice_mover_t
+  use m_hashtable_strval, only: hash_table_t
 
   contains
 
-  subroutine slc_run_time(spin_mover, lattice_mover, calculator, displacement, strain, spin, lwf)
+  subroutine slc_run_time(spin_mover, lattice_mover, calculator, displacement, strain, spin, lwf, energy_table)
 
     class(spin_mover_t),    intent(inout) :: spin_mover
     class(lattice_mover_t), intent(inout) :: lattice_mover
     class(abstract_potential_t), intent(inout) :: calculator
 
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), lwf(:), spin(:,:)
+    type(hash_table_t),optional, intent(inout) :: energy_table
 
     real(dp):: t
     integer :: counter
@@ -91,7 +93,8 @@ module  m_slc_dynamics
     do while(t<spin_mover%total_time)
       counter=counter+1
       !one step in spin dynamics
-      call spin_mover%run_one_step(effpot=calculator, displacement=displacement, strain=strain, lwf=lwf)
+      call spin_mover%run_one_step(effpot=calculator, displacement=displacement, strain=strain, lwf=lwf, &
+           & energy_table=energy_table)
       if (iam_master) then
         call spin_mover%hist%set_vars(time=t,  inc=.True.)
         call spin_mover%spin_ob%get_observables(spin_mover%hist%S(:,:, spin_mover%hist%ihist_prev), &
@@ -106,7 +109,7 @@ module  m_slc_dynamics
         endif
       end if
       !one step in lattice dynamics
-      call lattice_mover%run_one_step(effpot=calculator, spin=spin, lwf=lwf)
+      call lattice_mover%run_one_step(effpot=calculator, spin=spin, lwf=lwf, energy_table=energy_table)
       ! TODO: Adjust output
       !write(msg, "(A13, 4X, A15, 4X, A15, 4X, A15, 4X, A15)") &
       !      &  "Iteration", "temperature(K)", "Ekin(Ha/uc)", &

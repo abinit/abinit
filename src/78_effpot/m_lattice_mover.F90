@@ -42,7 +42,7 @@ module m_lattice_mover
   use m_abstract_mover, only: abstract_mover_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_random_xoroshiro128plus, only:  rng_t
-
+  use m_hashtable_strval, only: hash_table_t
 !!***
 
   implicit none
@@ -235,12 +235,14 @@ contains
   !> strain: Also should NOT be provided.
   !> spin: should be provided only if there is spin-lattice coupling
   !> lwf : should be provided only if there is lattice-lwf coupling (unlikely)
+  !> energy_table: energy_table.
   !-------------------------------------------------------------------!
-  subroutine run_one_step(self, effpot, displacement, strain, spin, lwf)
+  subroutine run_one_step(self, effpot, displacement, strain, spin, lwf, energy_table)
     ! run one step. (For MC also?)
     class(lattice_mover_t),      intent(inout) :: self    ! array of effective potentials so that there can be multiple of them.
     class(abstract_potential_t), intent(inout) :: effpot
     real(dp), optional,          intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    type(hash_table_t), optional, intent(inout) :: energy_table
 
     if(present(displacement) .or. present(strain)) then
        MSG_ERROR("displacement and strain should not be input for lattice mover")
@@ -252,6 +254,7 @@ contains
     ABI_UNUSED_A(strain)
     ABI_UNUSED_A(spin)
     ABI_UNUSED_A(lwf)
+    ABI_UNUSED_A(energy_table)
 
   end subroutine run_one_step
 
@@ -277,12 +280,13 @@ contains
   !-------------------------------------------------------------------!
   ! run from begining to end.
   !-------------------------------------------------------------------!
-  subroutine run_time(self, effpot, displacement, strain, spin, lwf)
+  subroutine run_time(self, effpot, displacement, strain, spin, lwf, energy_table)
     ! run one step. (For MC also?)
     class(lattice_mover_t), intent(inout) :: self
     ! array of effective potentials so that there can be multiple of them.
     class(abstract_potential_t), intent(inout) :: effpot
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    type(hash_table_t), optional, intent(inout) :: energy_table
     integer :: i, nstep
     character(len=90) :: msg
     if(present(displacement) .or. present(strain)) then
@@ -292,6 +296,7 @@ contains
     ABI_UNUSED_A(effpot)
     ABI_UNUSED_A(spin)
     ABI_UNUSED_A(lwf)
+    ABI_UNUSED_A(energy_table)
 
     !TODO: add set_initial mode to input file
     call self%set_initial_state(mode=1)
@@ -315,14 +320,14 @@ contains
 
     nstep=floor(self%thermal_time/self%dt)
     do i =1, nstep
-       call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf)
+       call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf, energy_table=energy_table)
     end do
 
     nstep=floor(self%total_time/self%dt)
     do i =1, nstep
        call self%get_T_and_Ek()
        !print *, "Step: ", i,  "    T: ", self%T_ob*Ha_K, "    Ek:", self%Ek, "Ev", self%energy, "Etot", self%energy+self%Ek
-       call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf)
+       call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf, energy_table=energy_table)
        
        write(msg, "(I13, 4X, F15.5, 4X, ES15.5, 4X, ES15.5, 4X, ES15.5)")  i, self%T_ob*Ha_K, &
             & self%Ek/self%supercell%ncell, self%energy/self%supercell%ncell, &

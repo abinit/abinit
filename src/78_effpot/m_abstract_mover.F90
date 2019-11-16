@@ -40,7 +40,7 @@ module m_abstract_mover
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
-  use m_hashtable, only: hash_table_t
+  use m_hashtable_strval, only: hash_table_t
   implicit none
 !!***
 
@@ -92,7 +92,6 @@ module m_abstract_mover
      procedure :: reset            ! reset the mover
      procedure :: calc_observables ! call functions to calculate observables
      procedure :: write_hist       ! write hist file
-     procedure :: set_energy_table
   end type abstract_mover_t
 
 contains
@@ -161,10 +160,11 @@ contains
   !    The other variables are only required if there is coupling with
   !    the mover variable.
   !-------------------------------------------------------------------!
-  subroutine run_one_step(self, effpot, displacement, strain, spin, lwf)
+  subroutine run_one_step(self, effpot, displacement, strain, spin, lwf, energy_table)
     ! run one step. (For MC also?)
     class(abstract_mover_t), intent(inout) :: self
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    type(hash_table_t), optional, intent(inout) :: energy_table
     class(abstract_potential_t), intent(inout) :: effpot
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(effpot)
@@ -172,6 +172,7 @@ contains
     ABI_UNUSED_A(strain)
     ABI_UNUSED_A(spin)
     ABI_UNUSED_A(lwf)
+    ABI_UNUSED_A(energy_table)
     MSG_ERROR("run_one_step not implemented for this mover")
   end subroutine run_one_step
 

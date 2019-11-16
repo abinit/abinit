@@ -32,6 +32,7 @@ sources = [
     "m_fit_data.F90",
     "m_fit_polynomial_coeff.F90",
     "m_harmonics_terms.F90",
+    "m_hashtable_strval.F90",
     "m_lattice_berendsen_NPT_mover.F90",
     "m_lattice_berendsen_NVT_mover.F90",
     "m_lattice_dummy_mover.F90",

@@ -32,7 +32,7 @@
 
 #include "abi_common.h"
 
-MODULE m_hashtable
+MODULE m_hashtable_strval
 
 !!***
   use defs_basis
@@ -78,7 +78,7 @@ CONTAINS
           IF ( .NOT. ASSOCIATED(list%child)) then
              !ABI_ALLOC_SCALAR(list%child)
              allocate(list%child)
-             call abimem_record(0, QUOTE(list%child), _LOC(list%child), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
+             !call abimem_record(0, QUOTE(list%child), _LOC(list%child), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
           end IF
 
           CALL put_sll(list%child,key,val)
@@ -188,4 +188,4 @@ CONTAINS
   END SUBROUTINE free_hash_table_t
 
 
-end module m_hashtable
+end module m_hashtable_strval

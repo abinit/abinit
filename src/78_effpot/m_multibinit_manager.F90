@@ -40,6 +40,7 @@ module m_multibinit_manager
 
   use m_init10, only: init10
   use m_mathfuncs, only: diag
+  use m_hashtable_strval, only: hash_table_t
   use m_multibinit_dataset, only: multibinit_dtset_type, invars10, &
        outvars_multibinit, multibinit_dtset_free
  ! random number generator
@@ -110,6 +111,7 @@ module m_multibinit_manager
      ! spin netcdf hist file
      type(spin_ncfile_t) :: spin_ncfile
      type(rng_t) :: rng
+     type(hash_table_t) :: energy_table
 
      ! TODO: this is temporary. Remove after moving to multibinit_main2
      ! It means the parsing of the params are already done outside the manager.
@@ -135,8 +137,6 @@ module m_multibinit_manager
      procedure :: run_coupled_spin_latt_dynamics
      procedure :: run
      procedure :: run_all
-     procedure :: setup_energy_table
-     procedure :: update_energy_table
   end type mb_manager_t
 
 contains
@@ -188,6 +188,8 @@ contains
 
     ! lwf
 
+    call self%energy_table%init()
+
   end subroutine initialize
 
 
@@ -222,6 +224,7 @@ contains
     self%has_strain=.False.
     self%has_spin=.False.
     self%has_lwf=.False.
+    call self%energy_table%free()
   end subroutine finalize
 
   !-------------------------------------------------------------------!
@@ -313,7 +316,7 @@ contains
     if(self%has_displacement) then
        self%params%temperature = self%params%temperature/Ha_K
     end if
-    
+
   end subroutine prepare_params
 
 
@@ -461,7 +464,7 @@ contains
     call self%fill_supercell()
     call self%set_movers()
     call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
-    call self%spin_mover%run_time(self%pots)
+    call self%spin_mover%run_time(self%pots, energy_table=self%energy_table)
     call self%spin_mover%spin_ncfile%close()
   end subroutine run_spin_dynamics
 
@@ -473,7 +476,7 @@ contains
     call self%read_potentials()
     call self%fill_supercell()
     call self%set_movers()
-    call self%spin_mover%run_MvT(self%pots, self%filenames(2))
+    call self%spin_mover%run_MvT(self%pots, self%filenames(2), energy_table=self%energy_table)
   end subroutine run_MvT
 
 
@@ -487,7 +490,7 @@ contains
     call self%sc_maker%initialize(diag(self%params%ncell))
     call self%fill_supercell()
     call self%set_movers()
-    call self%lattice_mover%run_time(self%pots)
+    call self%lattice_mover%run_time(self%pots, energy_table=self%energy_table)
   end subroutine run_lattice_dynamics
 
   !-------------------------------------------------------------------!
@@ -501,9 +504,8 @@ contains
     call self%fill_supercell()
     call self%set_movers()
     call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
-    call self%spin_mover%run_time(self%pots)
-    call self%lattice_mover%run_time(self%pots)
-
+    call self%spin_mover%run_time(self%pots, energy_table=self%energy_table)
+    call self%lattice_mover%run_time(self%pots, energy_table=self%energy_table)
     call self%spin_mover%spin_ncfile%close()
   end subroutine run_spin_latt_dynamics
 
@@ -528,7 +530,7 @@ contains
 
     call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
     call slc_run_time(self%spin_mover, self%lattice_mover, self%pots, displacement=self%lattice_mover%displacement, & 
-                   &  spin=self%spin_mover%Stmp)
+         &  spin=self%spin_mover%Stmp, energy_table=self%energy_table)
     msg=repeat("=", 90)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')

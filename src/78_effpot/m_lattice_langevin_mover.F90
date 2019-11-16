@@ -49,6 +49,7 @@ module m_lattice_langevin_mover
   use m_lattice_mover, only: lattice_mover_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_random_xoroshiro128plus, only:  rng_t
+  use m_hashtable_strval, only: hash_table_t
 !!***
 
   implicit none
@@ -147,10 +148,11 @@ contains
   !    The other variables are only required if there is coupling with
   !    the mover variable.
   !-------------------------------------------------------------------!
-  subroutine run_one_step(self, effpot,displacement, strain, spin, lwf )
+  subroutine run_one_step(self, effpot,displacement, strain, spin, lwf , energy_table)
     class(lattice_langevin_mover_t), intent(inout) :: self
     class(abstract_potential_t), intent(inout) :: effpot
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    type(hash_table_t), optional, intent(inout) :: energy_table
     integer :: i
 
     ! do not use displacement and strain because they are stored in the mover.
@@ -160,7 +162,8 @@ contains
     self%energy = 0.0
     self%forces(:,:) =0.0
     call effpot%calculate( displacement=self%displacement, strain=self%strain, &
-         & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy)
+         & spin=spin, lwf=lwf, force=self%forces, stress=self%stress, &
+         & energy=self%energy, energy_table=energy_table)
     call self%rng%rand_normal_array(self%xi, 3*self%natom)
     call self%rng%rand_normal_array(self%eta, 3*self%natom)
 
@@ -179,7 +182,8 @@ contains
     self%energy=0.0
     self%forces=0.0
     call effpot%calculate( displacement=self%displacement, strain=self%strain, &
-         & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy)
+         & spin=spin, lwf=lwf, force=self%forces, stress=self%stress, &
+         & energy=self%energy, energy_table=energy_table)
     do i =1, self%natom
        self%current_vcart(:,i) = self%current_vcart(:,i) + &
             &self%c1 * self%forces(:,i) / self%masses(i) - &

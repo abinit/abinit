@@ -51,6 +51,7 @@ module m_lattice_berendsen_NPT_mover
   use m_lattice_mover, only: lattice_mover_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_random_xoroshiro128plus, only:  rng_t
+  use m_hashtable_strval, only: hash_table_t
 !!***
 
   implicit none
@@ -125,10 +126,11 @@ contains
   ! except at the begining, the velocities are scaled so that the temperature
   ! is getting closer to the required temperature.
   !-------------------------------------------------------------------!
-  subroutine run_one_step(self, effpot,displacement, strain, spin, lwf )
+  subroutine run_one_step(self, effpot,displacement, strain, spin, lwf, energy_table)
     class(lattice_berendsen_NPT_mover_t), intent(inout) :: self
     class(abstract_potential_t), intent(inout) :: effpot
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    type(hash_table_t), optional, intent(inout) :: energy_table
     integer :: i
 
     ABI_UNUSED(displacement)
@@ -140,7 +142,8 @@ contains
     self%energy=0.0
     self%forces(:,:) =0.0
     call effpot%calculate( displacement=self%displacement, strain=self%strain, &
-         & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy)
+         & spin=spin, lwf=lwf, force=self%forces, stress=self%stress, &
+         & energy=self%energy, energy_table=energy_table)
     do i=1, self%natom
        self%current_vcart(:,i) = self%current_vcart(:,i) + &
             & (0.5_dp * self%dt) * self%forces(:,i)/self%masses(i)
@@ -156,7 +159,7 @@ contains
     self%forces(:,:)=0.0
     call effpot%calculate( displacement=self%displacement, &
          & strain=self%strain, spin=spin, lwf=lwf, force=self%forces, &
-         & stress=self%stress,  energy=self%energy)
+         & stress=self%stress,  energy=self%energy, energy_table=energy_table)
     do i=1, self%natom
        self%current_vcart(:,i) = self%current_vcart(:,i) &
             & + (0.5_dp * self%dt) * self%forces(:,i)/self%masses(i)
