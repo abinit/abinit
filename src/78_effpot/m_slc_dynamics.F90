@@ -32,16 +32,49 @@ module  m_slc_dynamics
 
 
   use m_abstract_potential, only: abstract_potential_t
+  use m_abstract_mover, only: abstract_mover_t
   use m_spin_mover, only: spin_mover_t
   use m_lattice_mover, only: lattice_mover_t
   use m_hashtable_strval, only: hash_table_t
 
+  private
+
+  type, public, extends(abstract_mover_t) :: slc_mover_t
+    type(spin_mover_t),    pointer :: spin_mover
+    type(lattice_mover_t), pointer :: lattice_mover
+
+  CONTAINS
+  procedure :: initialize
+  procedure :: finalize
+  procedure :: run_one_step
+  procedure :: run_time
+
+  end type slc_mover_t
   contains
 
-  subroutine slc_run_time(spin_mover, lattice_mover, calculator, displacement, strain, spin, lwf, energy_table)
+  subroutine initialize(self, spin_mover, lattice_mover)
 
-    class(spin_mover_t),    intent(inout) :: spin_mover
-    class(lattice_mover_t), intent(inout) :: lattice_mover
+    class(slc_mover_t) :: self
+    type(spin_mover_t), target :: spin_mover
+    type(lattice_mover_t), target :: lattice_mover
+
+    self%spin_mover => spin_mover
+    self%lattice_mover => lattice_mover
+
+  end subroutine initialize
+
+  subroutine finalize(self)
+
+    class(slc_mover_t) :: self
+  
+    nullify(self%spin_mover)
+    nullify(self%lattice_mover)
+
+  end subroutine finalize
+
+  subroutine run_time(self, calculator, displacement, strain, spin, lwf, energy_table)
+
+    class(slc_mover_t),          intent(inout) :: self
     class(abstract_potential_t), intent(inout) :: calculator
 
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), lwf(:), spin(:,:)
@@ -56,13 +89,13 @@ module  m_slc_dynamics
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
 
-   if(spin_mover%total_time .ne. lattice_mover%total_time) then
-     MSG_ERROR("Total time for spin and lattice dynamics are different, check your input file.")
-   endif
+   !if(self%spin_mover%total_time .ne. self%lattice_mover%total_time) then
+   !  MSG_ERROR("Total time for spin and lattice dynamics are different, check your input file.")
+   !endif
 
-   if(spin_mover%dt .ne. lattice_mover%dt) then
-     MSG_ERROR("Different time steps for spin and lattice dynamics not yet implemented, check your input file.")
-   endif
+   !if(self%spin_mover%dt .ne. self%lattice_mover%dt) then
+   !  MSG_ERROR("Different time steps for spin and lattice dynamics not yet implemented, check your input file.")
+   !endif
      
 
    t=0.0
@@ -90,26 +123,25 @@ module  m_slc_dynamics
     end if
 
 
-    do while(t<spin_mover%total_time)
+    do while(t<self%spin_mover%total_time)
       counter=counter+1
-      !one step in spin dynamics
-      call spin_mover%run_one_step(effpot=calculator, displacement=displacement, strain=strain, lwf=lwf, &
-           & energy_table=energy_table)
+      !one step in coupled spin-lattice dynamics
+      call self%run_one_step(effpot=calculator, displacement=displacement, strain=strain, lwf=lwf)
+
       if (iam_master) then
-        call spin_mover%hist%set_vars(time=t,  inc=.True.)
-        call spin_mover%spin_ob%get_observables(spin_mover%hist%S(:,:, spin_mover%hist%ihist_prev), &
-             spin_mover%hist%Snorm(:,spin_mover%hist%ihist_prev), spin_mover%hist%etot(spin_mover%hist%ihist_prev))
-        if(modulo(counter, spin_mover%hist%spin_nctime)==0) then
-          call spin_mover%spin_ncfile%write_one_step(spin_mover%hist)
+        call self%spin_mover%hist%set_vars(time=t,  inc=.True.)
+        call self%spin_mover%spin_ob%get_observables(self%spin_mover%hist%S(:,:, self%spin_mover%hist%ihist_prev), &
+             self%spin_mover%hist%Snorm(:,self%spin_mover%hist%ihist_prev), &
+             self%spin_mover%hist%etot(self%spin_mover%hist%ihist_prev))
+        if(modulo(counter, self%spin_mover%hist%spin_nctime)==0) then
+          call self%spin_mover%spin_ncfile%write_one_step(self%spin_mover%hist)
           write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
-                & spin_mover%spin_ob%Mst_norm_total/spin_mover%spin_ob%Snorm_total, &
-                & spin_mover%hist%etot(spin_mover%hist%ihist_prev)/spin_mover%spin_ob%nscell
+                & self%spin_mover%spin_ob%Mst_norm_total/self%spin_mover%spin_ob%Snorm_total, &
+                & self%spin_mover%hist%etot(self%spin_mover%hist%ihist_prev)/self%spin_mover%spin_ob%nscell
           call wrtout(std_out,msg,'COLL')
           call wrtout(ab_out, msg, 'COLL')
         endif
       end if
-      !one step in lattice dynamics
-      call lattice_mover%run_one_step(effpot=calculator, spin=spin, lwf=lwf, energy_table=energy_table)
       ! TODO: Adjust output
       !write(msg, "(A13, 4X, A15, 4X, A15, 4X, A15, 4X, A15)") &
       !      &  "Iteration", "temperature(K)", "Ekin(Ha/uc)", &
@@ -117,11 +149,27 @@ module  m_slc_dynamics
       !call wrtout(std_out,msg,'COLL')
       !call wrtout(ab_out, msg, 'COLL')
 
-      t=t+spin_mover%dt
+      t=t+self%spin_mover%dt
     enddo
 
+  end subroutine run_time
 
-  end subroutine slc_run_time
+
+  subroutine run_one_step(self, effpot, displacement, strain, spin, lwf, energy_table)
+
+    class(slc_mover_t),          intent(inout) :: self
+    class(abstract_potential_t), intent(inout) :: effpot
+
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), lwf(:), spin(:,:)
+    type(hash_table_t), optional, intent(inout) :: energy_table
+
+
+    call self%spin_mover%run_one_step(effpot=effpot, displacement=displacement, strain=strain, &
+        &    lwf=lwf, energy_table=energy_table)
+    call self%lattice_mover%run_one_step(effpot=effpot, spin=spin, lwf=lwf, energy_table=energy_table)
+
+
+  end subroutine run_one_step
 
 end module m_slc_dynamics
 
