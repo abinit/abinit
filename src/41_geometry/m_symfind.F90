@@ -324,9 +324,7 @@ contains
    ABI_ALLOCATE(spinatred,(3,natom))
    do iatom=1,natom
      do ii=1,3
-       spinatred(ii,iatom)=gprimd(1,ii)*spinat(1,iatom) &
-&       +gprimd(2,ii)*spinat(2,iatom) &
-&       +gprimd(3,ii)*spinat(3,iatom)
+       spinatred(1:3,iatom)=MATMUL(TRANSPOSE(gprimd),spinat(1:3,iatom))
      end do
    end do
  end if
@@ -485,7 +483,7 @@ contains
          end do
 
 !        DEBUG
-!         write(std_out,'(a,i4,a,3f8.4,a,3f8.4,a,3f8.4)')&
+!        write(std_out,'(a,i4,a,3f8.4,a,3f8.4,a,3f8.4)')&
 !&          ' Test iatom2=',iatom2,' at xred=',xred(:,iatom2),'. Is sent to',symxred2(:),' with symspinat2=',symspinat2(:)
 !        ENDDEBUG
 
