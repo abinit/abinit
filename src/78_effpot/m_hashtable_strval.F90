@@ -9,6 +9,15 @@
 !! Taken from http://fortranwiki.org/fortran/show/hash+table+example
 !! The code is originally written by Izaak Beekman under the LGPL license.
 !! Adapted for usage in Abinit by hexu
+!!
+!! Note: the behavior is different from the origial version
+!! The value will be overwritten in this version, whereas it is ignored in the
+!! original version if the key is already in the table (why??!!). 
+!!
+!! Note2:!!!!!!!!!!!!!!!!! FIXME
+!! It does not handle white space at the end of string correctly. It does not affect
+!! the usage in Multibinit but BE CAREFUL. 
+!!
 !! Below is the original Copyright.
 !!=======================================
 !! Copyright (c) Izaak Beekman 2010
@@ -50,6 +59,8 @@ MODULE m_hashtable_strval
      PROCEDURE :: put  => put_sll
      PROCEDURE :: get  => get_sll
      PROCEDURE :: free => free_sll
+     PROCEDURE :: sum_val => sum_val_sll
+     procedure :: print_all => print_all_sll
   END TYPE sllist
 
   TYPE hash_table_t
@@ -61,6 +72,8 @@ MODULE m_hashtable_strval
      PROCEDURE :: put  => put_hash_table_t
      PROCEDURE :: get  => get_hash_table_t
      PROCEDURE :: free => free_hash_table_t
+     PROCEDURE :: sum_val => sum_val_hash_table_t
+     PROCEDURE :: print_all => print_all_hash_table_t
   END TYPE hash_table_t
 
   PUBLIC :: hash_table_t
@@ -76,7 +89,9 @@ CONTAINS
     IF (ALLOCATED(list%key)) THEN
        IF (list%key /= key) THEN
           IF ( .NOT. ASSOCIATED(list%child)) then
-             !ABI_ALLOC_SCALAR(list%child)
+             !ABI_ALLOC_SCALAR(tmp)
+             ! FIXME: ABI_ALLOC_SCALAR does not know how to handle list%child.
+             ! That is due to the QUOTE macro.
              allocate(list%child)
              !call abimem_record(0, QUOTE(list%child), _LOC(list%child), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
           end IF
@@ -118,6 +133,32 @@ CONTAINS
     list%child => NULL()
     IF (ALLOCATED(list%key)) DEALLOCATE(list%key)
   END SUBROUTINE free_sll
+
+  recursive function sum_val_sll(self) result(s)
+    class(sllist), intent(in) :: self
+    real(dp) :: s
+    s=0.0_dp
+    if (allocated(self%key)) then
+       s=s+self%val
+       if(associated(self%child)) then
+          s=s+self%child%sum_val()
+       endif
+    end if
+  end function sum_val_sll
+
+
+  recursive subroutine print_all_sll(self)
+    class(sllist), intent(in) :: self
+    real(dp) :: s
+    s=0.0_dp
+    if (allocated(self%key)) then
+       print *, self%key, self%val
+       if(associated(self%child)) then
+          call self%child%print_all()
+       endif
+    end if
+  end subroutine print_all_sll
+
 
 
   SUBROUTINE init_hash_table_t(tbl,tbl_len)
@@ -187,5 +228,30 @@ CONTAINS
     tbl%is_init = .FALSE.
   END SUBROUTINE free_hash_table_t
 
+  
+  function sum_val_hash_table_t(self) result(s)
+    class(hash_table_t), intent(in) :: self
+    real(dp) :: s
+    integer :: i
+    s=0.0_dp
+    if (.not.(self%is_init)) then
+       return
+    end if
+    do i =1, self%vec_len
+       s=s+ self%vec(i)%sum_val()
+    end do
+  end function sum_val_hash_table_t
+
+
+  subroutine print_all_hash_table_t(self)
+    class(hash_table_t), intent(in) :: self
+    integer :: i
+    if (.not.(self%is_init)) then
+       return
+    end if
+    do i =1, self%vec_len
+       call self%vec(i)%print_all()
+    end do
+  end subroutine print_all_hash_table_t
 
 end module m_hashtable_strval

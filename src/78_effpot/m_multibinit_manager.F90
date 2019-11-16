@@ -534,6 +534,7 @@ contains
     call self%slc_mover%initialize(self%spin_mover, self%lattice_mover)
     call self%slc_mover%run_time(self%pots, displacement=self%lattice_mover%displacement, &
         & spin=self%spin_mover%Stmp, energy_table=self%energy_table)
+    call self%energy_table%print_all()
     msg=repeat("=", 90)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
