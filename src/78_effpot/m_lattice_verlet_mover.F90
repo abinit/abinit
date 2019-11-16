@@ -123,6 +123,10 @@ contains
             & + (0.5_dp * self%dt) * self%forces(:,i)/self%masses(i)
     end do
     !call self%force_stationary()
+    call self%get_T_and_Ek()
+    if (present(energy_table)) then
+       call energy_table%put('Lattice Kinetic energy', self%Ek)
+    end if
     ABI_UNUSED_A(strain)
     ABI_UNUSED_A(displacement)
   end subroutine run_one_step

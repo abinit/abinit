@@ -127,6 +127,7 @@ contains
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
     type(hash_table_t),optional, intent(inout) :: energy_table
+    real(dp) :: etmp
     real(dp) :: f(3,self%natom)
     ! if present in input
     ! calculate if required
@@ -137,15 +138,20 @@ contains
     ABI_UNUSED_A(bfield)
     ABI_UNUSED_A(lwf_force)
 
+    etmp=0.0_dp
+
     call self%coeff%mv(displacement, f)
     if (present(force)) then
        force(:,:) = force(:,:) - f
     endif
+
+    !energy =energy + 0.5_dp * sum(f*displacement)
+    etmp=0.5_dp * sum(f*displacement)
     if (present(energy)) then
-       energy =energy + 0.5_dp * sum(f*displacement)
+       energy=energy+etmp
     endif
     if(present(energy_table)) then
-       call energy_table%put(self%label, energy)
+       call energy_table%put(self%label, etmp)
     endif
   end subroutine calculate
 

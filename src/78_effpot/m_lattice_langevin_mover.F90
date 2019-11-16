@@ -191,6 +191,11 @@ contains
             & self%c3(i) * self%xi(:, i) - self%c4(i) * self%eta(:,i)
     end do
 
+    call self%get_T_and_Ek()
+    if (present(energy_table)) then
+       call energy_table%put('Lattice Kinetic energy', self%Ek)
+    end if
+
   end subroutine run_one_step
 
 end module m_lattice_langevin_mover

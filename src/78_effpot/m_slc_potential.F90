@@ -361,16 +361,16 @@ contains
 
     if(present(energy)) then
        energy= energy+eslc
-
-       ! TODO: if energy is not present??
-       if(present(energy_table)) then
-          call energy_table%put(self%label, energy)
-          ! TODO: use terms instead of total, e.g.
-          !call energy_table%put("SLC Oiju term", energy)
-          !call energy_table%put("SLC Tijuv term", energy)
-       end if
     end if
 
+       ! TODO: if energy is not present??
+    if(present(energy_table)) then
+       call energy_table%put(self%label, eslc)
+       ! TODO: use terms instead of total, e.g.
+       !call energy_table%put("SLC Oiju term", eOiju)
+       !call energy_table%put("SLC Tijuv term", eTijuv)
+    end if
+    
   end subroutine calculate
 
 end module m_slc_potential

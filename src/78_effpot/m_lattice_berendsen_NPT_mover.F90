@@ -166,6 +166,12 @@ contains
     end do
     call self%force_stationary()
 
+    call self%get_T_and_Ek()
+    if (present(energy_table)) then
+       call energy_table%put('Lattice Kinetic energy', self%Ek)
+    end if
+
+
   end subroutine run_one_step
 
 end module m_lattice_berendsen_NPT_mover

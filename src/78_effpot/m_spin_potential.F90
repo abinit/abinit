@@ -293,18 +293,22 @@ contains
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
     type(hash_table_t),optional, intent(inout) :: energy_table
+    real(dp) :: etmp
     ! if present in input
     ! calculate if required
 
-
-    if (present(bfield) .and. present(energy)) then
-       call self%get_Heff(spin, bfield, energy)
-    !else
-    !   call self%get_energy(spin, energy)
-       if (present(energy_table)) then
-          call energy_table%put(self%label, energy)
+    if (present(bfield) ) then
+       call self%get_Heff(spin, bfield, etmp)
+       if ( present(energy)) then
+          energy=energy+etmp
        end if
+       if (present(energy_table)) then
+          call energy_table%put(self%label, etmp)
+       end if
+    else
+       MSG_ERROR("What is the point of calling calculate in a spin potential without Heff?")
     end if
+
 
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(displacement)
@@ -361,7 +365,8 @@ contains
     endif
 
     call xmpi_sum_master(etmp, 0, xmpi_world, ierr )
-    energy=energy+etmp
+    ! NOTE: here energy is not added to input energy.
+    energy=etmp
 
   end subroutine spin_potential_t_total_Heff
 

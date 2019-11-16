@@ -256,6 +256,10 @@ contains
     ABI_UNUSED_A(lwf)
     ABI_UNUSED_A(energy_table)
 
+    call self%get_T_and_Ek()
+    if (present(energy_table)) then
+       call energy_table%put('Lattice Kinetic energy', self%Ek)
+    end if
   end subroutine run_one_step
 
 
@@ -325,7 +329,6 @@ contains
 
     nstep=floor(self%total_time/self%dt)
     do i =1, nstep
-       call self%get_T_and_Ek()
        !print *, "Step: ", i,  "    T: ", self%T_ob*Ha_K, "    Ek:", self%Ek, "Ev", self%energy, "Etot", self%energy+self%Ek
        call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf, energy_table=energy_table)
        
