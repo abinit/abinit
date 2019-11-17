@@ -114,6 +114,18 @@ module m_multibinit_manager
      type(spin_ncfile_t) :: spin_ncfile
      type(rng_t) :: rng
      type(hash_table_t) :: energy_table
+     ! DOC: The energy table contains
+     ! The elements are updated by:
+     !  - The movers: kinetic energy
+     !  - The potentials: potential energy. 
+     !   Note that for potential_list, do not update the 
+     !   TODO: should we add a tag in the potential list to make it aware of 
+     !       whether to save itself as a whole in the energy table or ask its components 
+     !       to save the energy terms?
+     !   FIXME: the extra white spaces are also saved to the keys of the table.
+     !   usage:call energy_table%put("Name", value): update/insert energy term.
+     !         call energy_table%print_all()       : print all energy terms to screen.
+     !         s= energy_table%sum_val()           : sum up all energy terms.
 
      ! TODO: this is temporary. Remove after moving to multibinit_main2
      ! It means the parsing of the params are already done outside the manager.
