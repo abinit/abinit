@@ -7507,11 +7507,13 @@ is possible:
   * 3 --> SCF cycle, Anderson mixing of the potential
   * 4 --> SCF cycle, Anderson mixing of the potential based on the two previous iterations
   * 5 --> SCF cycle, CG based on the minim. of the energy with respect to the potential
+  * 6 --> SCF cycle, CG based on the minim. of the energy with respect to the potential (alternate algo., [[DEVELOP]])
   * 7 --> SCF cycle, Pulay mixing of the potential based on the [[npulayit]] previous iterations
   * 12 --> SCF cycle, simple mixing of the density
   * 13 --> SCF cycle, Anderson mixing of the density
   * 14 --> SCF cycle, Anderson mixing of the density based on the two previous iterations
   * 15 --> SCF cycle, CG based on the minim. of the energy with respect to the density
+  * 16 --> SCF cycle, CG based on the minim. of the energy with respect to the potential (alternate algo., [[DEVELOP]])
   * 17 --> SCF cycle, Pulay mixing of the density based on the [[npulayit]] previous iterations
 
 !!! warning
@@ -15839,9 +15841,9 @@ called [[rprimd]].
 In the general case, the dimensional cartesian coordinates of the crystal
 primitive translations R1p, R2p and R3p, see [[rprimd]], are
 
-  * R1p(i)=[[scalecart]](i)*[[rprim]](i,1)*[[acell]](1)
-  * R2p(i)=[[scalecart]](i)*[[rprim]](i,2)*[[acell]](2)
-  * R3p(i)=[[scalecart]](i)*[[rprim]](i,3)*[[acell]](3)
+  * R1p(i) = [[scalecart]](i) x [[rprim]](i,1) x [[acell]](1)
+  * R2p(i) = [[scalecart]](i) x [[rprim]](i,2) x [[acell]](2)
+  * R3p(i) = [[scalecart]](i) x [[rprim]](i,3) x [[acell]](3)
 
 where i=1,2,3 is the component of the primitive translation (i.e. x, y, and z).
 
@@ -15878,6 +15880,13 @@ digits by default), inducing a specification such as
 that can be avoided thanks to [[angdeg]]:
 
       angdeg 90 90 120
+
+Note that the following might work as well:
+
+
+      rprim  sqrt(0.75)  0.5  0.0
+            -sqrt(0.75)  0.5  0.0
+             0.0         0.0  1.0
 
 Although the use of [[scalecart]] or [[acell]] is rather equivalent when the
 primitive vectors are aligned with the cartesian directions, it is not the
@@ -15943,9 +15952,9 @@ Variable(
 This internal variable gives the dimensional real space primitive vectors,
 computed from [[acell]], [[scalecart]], and [[rprim]].
 
-  * R1p(i)=[[rprimd]](i,1)=[[scalecart]](i)*[[rprim]](i,1)*[[acell]](1) for i=1,2,3 (x,y,and z)
-  * R2p(i)=[[rprimd]](i,2)=[[scalecart]](i)*[[rprim]](i,2)*[[acell]](2) for i=1,2,3
-  * R3p(i)=[[rprimd]](i,3)=[[scalecart]](i)*[[rprim]](i,3)*[[acell]](3) for i=1,2,3
+  * R1p(i) = [[rprimd]](i,1) = [[scalecart]](i) x [[rprim]](i,1) x [[acell]](1) for i=1,2,3 (x,y,and z)
+  * R2p(i) = [[rprimd]](i,2) = [[scalecart]](i) x [[rprim]](i,2) x [[acell]](2) for i=1,2,3
+  * R3p(i) = [[rprimd]](i,3) = [[scalecart]](i) x [[rprim]](i,3) x [[acell]](3) for i=1,2,3
 
 It is [[EVOLVING]] only if [[ionmov]] == 2 or 22 and [[optcell]]/=0, otherwise it is fixed.
 """,
@@ -15962,7 +15971,8 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     text=r"""
 Gives the scaling factors of cartesian coordinates by which dimensionless
-primitive translations (in "[[rprim]]") are to be multiplied. [[rprim]] input
+primitive translations (in "[[rprim]]") are to be multiplied. 
+See the [[rprim]] input
 variable, the [[acell]] input variable, and the associated internal [[rprimd]]
 internal variable.
 Especially useful for body-centered and face-centered tetragonal lattices, as
@@ -17097,7 +17107,7 @@ Variable(
 Sets a tolerance for absolute differences of total energy that, reached TWICE
 successively, will cause one SCF cycle to stop (and ions to be moved).
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[toldfe]] has
-the '[[ENERGY]]' characteristics. (1 Ha=27.2113845 eV)
+the '[[ENERGY]]' characteristics (1 Ha=27.2113845 eV).
 If set to zero, this stopping condition is ignored.
 Effective only when SCF cycles are done ([[iscf]]>0).
 Because of machine precision, it is not worth to try to obtain differences in
@@ -17452,7 +17462,11 @@ The array [[typat]] has to agree with the actual locations of atoms given in
 be ordered to agree with the atoms identified in [[typat]].
 The nuclear charge of the elements, given by the array [[znucl]], also must
 agree with the type of atoms designated in "[[typat]]".
-The array [[typat]] is not constrained to be increasing. An internal
+The array [[typat]] is not constrained to be increasing, so
+
+      typat 3 3 2 3 1
+
+is permitted. An internal
 representation of the list of atoms, deep in the code (array atindx), groups
 the atoms of same type together. This should be transparent to the user, while
 keeping efficiency.
