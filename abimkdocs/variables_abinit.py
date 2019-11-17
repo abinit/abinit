@@ -7507,11 +7507,13 @@ is possible:
   * 3 --> SCF cycle, Anderson mixing of the potential
   * 4 --> SCF cycle, Anderson mixing of the potential based on the two previous iterations
   * 5 --> SCF cycle, CG based on the minim. of the energy with respect to the potential
+  * 6 --> SCF cycle, CG based on the minim. of the energy with respect to the potential (alternate algo., [[DEVELOP]])
   * 7 --> SCF cycle, Pulay mixing of the potential based on the [[npulayit]] previous iterations
   * 12 --> SCF cycle, simple mixing of the density
   * 13 --> SCF cycle, Anderson mixing of the density
   * 14 --> SCF cycle, Anderson mixing of the density based on the two previous iterations
   * 15 --> SCF cycle, CG based on the minim. of the energy with respect to the density
+  * 16 --> SCF cycle, CG based on the minim. of the energy with respect to the potential (alternate algo., [[DEVELOP]])
   * 17 --> SCF cycle, Pulay mixing of the density based on the [[npulayit]] previous iterations
 
 !!! warning
