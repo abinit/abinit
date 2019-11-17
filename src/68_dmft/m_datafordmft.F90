@@ -238,6 +238,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
    call wrtout(std_out,  message,'COLL')
    write(message, '(a,a)' ) ch10,&
 &   '---------------------------------------------------------------'
+   call wrtout(std_out, message, 'COLL')
  end if
  if(dtset%nstep==0.and.dtset%nbandkss==0) then
    message = 'nstep should be greater than 1'

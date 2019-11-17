@@ -496,7 +496,7 @@ module m_lobpcg2
         call lobpcg_rayleighRitz(lobpcg,RR_var,RR_eig,ierr,2*dlamch('E'))
         if ( ierr /= 0 ) then
           ierr = ierr + 1
-          MSG_COMMENT("I'm so so sorry I could not make it, I did my best but I failed. Sorry. I'm gonna suicide")
+          MSG_COMMENT("I'm sorry I could not make it, I did my best but I failed. Sorry.")
           exit
         end if
 
