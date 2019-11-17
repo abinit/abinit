@@ -11,11 +11,12 @@ import time
 import shutil
 import pickle
 import difflib
+import html
 
 from collections import OrderedDict, defaultdict
 from textwrap import TextWrapper
 from pprint import pprint, pformat
-from .parser import FortranKissParser
+from .parser import FortranKissParser, fort2html
 from .tools import lazy_property, NotebookWriter
 from .termcolor import cprint
 
@@ -227,13 +228,24 @@ class FortranFile(object):
 
     @lazy_property
     def all_public_procedures(self):
-        """Dictionary name --> public_procedure."""
+        """Dictionary name --> public_procedure in the file."""
         pubs = OrderedDict()
         for a in ["modules", "programs", "subroutines", "functions"]:
             for container in getattr(self, a):
                 for p in container.public_procedures:
                     pubs[p.name] = p
         return pubs
+
+    @lazy_property
+    def all_datatypes(self):
+        """Dictionary name --> datatype in the file."""
+        dtypes = OrderedDict()
+        for mod in self.modules:
+            for dtype in mod.types:
+                assert dtype.name not in dtypes
+                dtypes[dtype.name] = dtype
+
+        return dtypes
 
     def find_public_entity(self, name, all_names=None):
         """
@@ -269,7 +281,7 @@ class FortranFile(object):
 
     def get_stats(self, as_dict=False):
         """
-        Return dictionary with FortFile stats or pandas dataframe if as_dict.
+        Return pandas dataframe with FortFile stats or dictionary as_dict.
         """
         d = OrderedDict([
             ("use", len(self.all_used_mods)),
@@ -642,16 +654,17 @@ class AbinitProject(NotebookWriter):
 
         return {k: d[k] for k in sorted(d.keys())}
 
-    def get_all_datatypes(self):
+    def get_all_datatypes_and_fortfile(self):
         """
         Dictionary name -> datatype with all datatypes available in the project.
         """
         dtypes = {}
         for f in self.fort_files.values():
-            for p in getattr(f, "modules"):
-                for dtype in p.types:
+            #dtypes.update(self.all_datatypes)
+            for mod in f.modules:
+                for dtype in mod.types:
                     assert dtype.name not in dtypes
-                    dtypes[dtype.name] = dtype
+                    dtypes[dtype.name] = (dtype, f)
 
         return {k: dtypes[k] for k in sorted(dtypes.keys())}
 
@@ -661,8 +674,8 @@ class AbinitProject(NotebookWriter):
         """
         d = {}
         for f in self.fort_files.values():
-            for p in getattr(f, "modules"):
-                d.update({i.name: i for i in p.interfaces})
+            for mod in f.modules:
+                d.update({i.name: i for i in mod.interfaces})
 
         return {k: d[k] for k in sorted(d.keys())}
 
@@ -1325,23 +1338,12 @@ From http://www.catb.org/esr/writings/unix-koans/
 from fkiss.project import AbinitProject
 proj = AbinitProject.pickle_load(filepath=None)
 """,),
-            nbv.new_code_cell('#proj.get_graphviz_dir("41_geometry")'),
-            nbv.new_code_cell('#proj.get_graphviz_pubname("crystal_init")'),
-            nbv.new_code_cell('#proj.get_graphviz_pubname("fourdp")'),
-            nbv.new_code_cell('#proj.get_graphviz_pubname("m_geometry")'),
-            nbv.new_code_cell('#proj.get_stats()'),
-            nbv.new_code_cell('#proj.get_stats_dir("src/41_geometry")'),
-            nbv.new_code_cell("""
-try:
-    import param
-    import panel as pn
-    pn.extension()
-    proj_viewer = proj.get_viewer()
-    proj_viewer.get_panel()
-except ImportError as exc:
-    print(exc)
-    print('Install panel with `pip install panel`\nSee also: https://panel.pyviz.org/index.html#installation')
-""")
+            nbv.new_code_cell('proj.get_graphviz_dir("41_geometry")'),
+            nbv.new_code_cell('proj.get_graphviz_pubname("crystal_init")'),
+            nbv.new_code_cell('proj.get_graphviz_pubname("fourdp")'),
+            nbv.new_code_cell('proj.get_graphviz_pubname("m_geometry")'),
+            nbv.new_code_cell('proj.get_stats()'),
+            nbv.new_code_cell('proj.get_stats_dir("src/41_geometry")'),
         ])
 
         return self._write_nb_nbpath(nb, nbpath)
@@ -1352,7 +1354,7 @@ except ImportError as exc:
 
     def get_panel(self):
         """Return tabs with widgets to interact with the DDB file."""
-        return ProjectViewer(self).get_panel()
+        return ProjectViewer(self).panel
 
     def get_procedure_viewer(self):
         """Return tabs with widgets to interact with the DDB file."""
@@ -1363,110 +1365,135 @@ import panel as pn
 
 class ProjectViewer(param.Parameterized):
 
-    dir_select = pn.widgets.Select(name="Directory")
-    file_select = pn.widgets.Select(name="Fortran File")
-    pubproc_select = pn.widgets.Select(name="Public procedure")
-
     def __init__(self, proj, **params):
         super().__init__(**params)
         self.proj = proj
+        self._layout()
 
-        self.dir2files = proj.groupby_dirname()
-        self.dirname2path = {os.path.basename(p): p for p in self.dir2files.keys()}
-        self.dir_select.options = list(self.dirname2path.keys())
-        #self.all_pubs = list(proj.get_all_public_procedures.keys())
+    def _layout(self):
 
-        #self.autocomplete = pn.widgets.AutocompleteInput(
-        #        name='Autocomplete Input', options=list(self.all_pubs.keys()),
-        #        placeholder='Write something here')
+        self.dir2files = self.proj.groupby_dirname()
+        self.dirname2path = {os.path.basename(p): p for p in self.dir2files}
+        self.dir_select = pn.widgets.Select(name="Directory", options=list(self.dirname2path.keys()))
+        self.all_pubs = self.proj.get_all_public_procedures()
+
+        width = 200
+        self.file_select = pn.widgets.Select(name="Fortran File", width=width)
+        self.pubproc_select = pn.widgets.Select(name="Public procedure", width=width)
+        self.datatype_select = pn.widgets.Select(name="Datatype", width=width)
+
+        self.find_proc = pn.widgets.AutocompleteInput(name='Find Procedure', options=list(self.all_pubs.keys()),
+                                                      placeholder='Enter procedure name', width=width)
+        self.find_proc_btn = pn.widgets.Button(name="Find Procedure", button_type='primary', width=width)
+        self.find_proc_btn.on_click(self.on_find_proc_btn)
+
+        self.all_datatypes_and_fortfiles = self.proj.get_all_datatypes_and_fortfile()
+        self.find_dtype = pn.widgets.AutocompleteInput(name='Find Datatype',
+                                                       options=list(self.all_datatypes_and_fortfiles.keys()),
+                                                       placeholder='Enter datatype name', width=width)
+        self.find_dtype_btn = pn.widgets.Button(name="Find DataType", button_type='primary', width=width)
+        self.find_dtype_btn.on_click(self.on_find_dtype_btn)
+
+        self.tabs = pn.Tabs(
+            ("Directory", self.view_dirname),
+            ("File", self.view_fort_file),
+            ("Procedure", self.view_pubproc),
+            ("Datatype", self.view_datatype),
+        )
+
+        controllers = pn.Row(
+                pn.Column(self.dir_select, self.file_select),
+                pn.Column(self.pubproc_select, self.datatype_select),
+                pn.Column(self.find_proc, self.find_proc_btn),
+                pn.Column(self.find_dtype, self.find_dtype_btn),
+                #pn.Column(self.rerun_btn),
+                #sizing_mode='scale_width'
+        )
+        #for c in controllers:
+        #    c.sizing_mode = 'scale_width'
+
+        self.panel = pn.Column(controllers, self.tabs, sizing_mode="scale_width")
+
+    def _find_fort_file(self, dirpath):
+        for fort_file in self.dir2files[dirpath]:
+            if fort_file.name == self.file_select.value: return fort_file
+        else:
+            raise ValueError("Cannot find fortran file with name: `%s` in `%s`" % (
+                             self.file_select.value, dirpath))
 
     @param.depends('dir_select.value')
     def view_dirname(self):
         dirpath = self.dirname2path[self.dir_select.value]
-        # Change options in file_select.
+        # Update widgets.
         self.file_select.options = [f.name for f in self.dir2files[dirpath]]
-        #self.file_select.value = self.file_select.options[0]
-        self.file_select.param.trigger("value")
+        if hasattr(self, "tabs"): self.tabs.active = 0
 
         return pn.Row(self.proj.get_stats_dir(dirpath),
-                      self.proj.get_graphviz_dir(dirpath))
+                      self.proj.get_graphviz_dir(dirpath), sizing_mode="scale_width")
 
     @param.depends('file_select.value')
     def view_fort_file(self):
         dirpath = self.dirname2path[self.dir_select.value]
-        for fort_file in self.dir2files[dirpath]:
-            if fort_file.name == self.file_select.value:
-                break
-        else:
-            raise ValueError("Cannot find fortran file with name: %s" % self.file_select.value)
+        fort_file = self._find_fort_file(dirpath)
 
-        # Change options in pubproc_select.
+        # Update widgets.
         self.pubproc_select.options = list(fort_file.all_public_procedures.keys())
-        #self.pubproc_select.value = self.pubproc_select.options[0]
-        self.pubproc_select.param.trigger("value")
+        self.datatype_select.options = list(fort_file.all_datatypes.keys())
+        if hasattr(self, "tabs"): self.tabs.active = 1
 
-        return pn.Row(fort_file.get_stats(), fort_file.get_graphviz())
+        return pn.Row(fort_file.get_stats(), fort_file.get_graphviz(), sizing_mode="scale_width")
 
     @param.depends('pubproc_select.value')
     def view_pubproc(self):
         pubname = self.pubproc_select.value
         if pubname is None: return
+        obj = self.proj.find_public_entity(pubname)
         graph = self.proj.get_graphviz_pubname(pubname) #, engine=options.engine)
-        return pn.Row(graph)
+        if hasattr(self, "tabs"): self.tabs.active = 2
+        return pn.Row(obj, graph, sizing_mode="scale_width")
 
-    def get_panel(self):
-        tabs = pn.Tabs()
+    @param.depends('datatype_select.value')
+    def view_datatype(self):
+        typename = self.datatype_select.value
+        if typename is None: return
+        dirpath = self.dirname2path[self.dir_select.value]
+        fort_file = self._find_fort_file(dirpath)
+        #print("fort_file.path", fort_file.path)
+        dtype = fort_file.all_datatypes[typename]
+        if hasattr(self, "tabs"): self.tabs.active = 3
+        return pn.Row(dtype)
 
-        tabs.append(("Directory", pn.Column(self.dir_select, pn.Column(self.view_dirname))))
-
-        tabs.append(("File", pn.Column(
-            pn.Column(self.dir_select, self.file_select), pn.Column(self.view_fort_file)),
-        ))
-
-        tabs.append(("Procedure", pn.Column(
-            pn.Column(self.dir_select, self.file_select, self.pubproc_select),
-            pn.Column(self.view_pubproc)),
-        ))
-
-        return tabs
-
-
-class ProcedureViewer(param.Parameterized):
-
-    #autocomplete = pn.widgets.AutocompleteInput(
-    autocomplete = pn.widgets.TextInput(
-                name='Autocomplete Input',
-                placeholder='Write something here',
-                ) #options=[], #list(self.all_pubs.keys()),
-
-    view_btn = pn.widgets.Button(name="View", button_type='primary')
-
-    def __init__(self, proj, **params):
-        super().__init__(**params)
-        self.proj = proj
-
-        self.all_pubs = proj.get_all_public_procedures()
-        self.autocomplete = pn.widgets.AutocompleteInput(
-                name='Autocomplete Input', options=list(self.all_pubs.keys()),
-                placeholder='Write something here')
-
-        #self.autocomplete.options = list(self.all_pubs.keys())
-        #self.autocomplete.param.watch(self.view_pubname, 'value')
-        #self.autocomplete.param.trigger("value")
-
-    @param.depends('view_btn.clicks')
-    def view_pubname(self):
-        print("in view_pubname with clicks", self.view_btn.clicks)
-        if self.view_btn.clicks == 0: return
-        pubname = self.autocomplete.value
-        print("pubname:", pubname)
+    def on_find_proc_btn(self, event):
+        pubname = self.find_proc.value
         if pubname is None: return # or pubname not in self.all_pubs: return
-        #proc = self.all_pubs[pubname]
-        graph = self.proj.get_graphviz_pubname(pubname) #, engine=options.engine)
-        return graph
+        proc = self.all_pubs[pubname]
+        dirpath = proc.dirpath
+        file_basename = os.path.basename(proc.path)
+        fort_file = self.proj.fort_files[file_basename]
 
-    def get_panel(self):
-        tabs = pn.Tabs()
+        # Update widgets.
+        self.dir_select.value = os.path.basename(dirpath)
+        self.file_select.options = [f.name for f in self.dir2files[dirpath]]
+        self.pubproc_select.options = list(fort_file.all_public_procedures.keys())
+        self.datatype_select.options = list(fort_file.all_datatypes.keys())
 
-        tabs.append(("Procedure", pn.Row(pn.Column(self.autocomplete, self.view_btn), pn.Column(self.view_pubname))))
-        return tabs
+        self.pubproc_select.value = pubname
+        if hasattr(self, "tabs"): self.tabs.active = 2
+
+    def on_find_dtype_btn(self, event):
+        dname = self.find_dtype.value
+        dtype, fort_file = self.all_datatypes_and_fortfiles[dname]
+
+        # Update widgets.
+        self.dir_select.value = os.path.basename(fort_file.dirname)
+        self.file_select.value = fort_file.basename
+        self.datatype_select.value = dname
+        if hasattr(self, "tabs"): self.tabs.active = 3
+
+
+#<script>
+#document.getElementById('my-embed').addEventListener('load', function(){
+#  // Will get called after embed element was loaded
+#  svgPanZoom(document.getElementById('my-embed'));
+#})
+#</script>

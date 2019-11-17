@@ -177,7 +177,6 @@ def main():
 
     # This to avoid RecursionError in pickle as we have a highly recursive datastructure.
     #sys.setrecursionlimit(sys.getrecursionlimit() * 3)
-
     parser = get_parser()
 
     # Parse command line.
@@ -328,7 +327,7 @@ def main():
             cprint("Use `conda install panel` or `pip install panel` to install the python package.", "red")
             raise exc
 
-        proj.get_panel().show() #.app()
+        proj.get_panel().show() #threaded=True)
 
     elif options.command == "pedit":
         return proj.pedit(options.what, verbose=options.verbose)
@@ -360,21 +359,17 @@ def main():
     elif options.command == "dtype":
         retcode = 0
 
-        all_dtypes = proj.get_all_datatypes()
-        for dtype in all_dtypes:
+        items = proj.get_all_datatypes_and_fortfiles().values()
+        for dtype, fort_file in items:
             print("Analyzing:", repr(dtype))
             try:
                 dtype.analyze(verbose=0)
+                print(dtype)
             except Exception as exc:
                 import traceback
                 cprint(traceback.format_exc(), "red")
-                retcode += 1
-                #try:
-                #    dtype.analyze(verbose=1)
-                #except Exception as exc:
-                #    pass
 
-        print("%d errors out of %d" % (retcode, len(all_dtypes)))
+        print("%d errors out of %d" % (retcode, len(items)))
 
         #dtype = proj.find_datatype(options.what[0])
         #if dtype is None: return 1
