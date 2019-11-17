@@ -299,14 +299,14 @@ contains
 
     if (present(bfield) ) then
        call self%get_Heff(spin, bfield, etmp)
+
+       ! only update energy when bfield is asked for.
        if ( present(energy)) then
           energy=energy+etmp
        end if
        if (present(energy_table)) then
           call energy_table%put(self%label, etmp)
        end if
-    else
-       MSG_ERROR("What is the point of calling calculate in a spin potential without Heff?")
     end if
 
 

@@ -97,6 +97,8 @@ CONTAINS
           end IF
 
           CALL put_sll(list%child,key,val)
+       else
+          list%val=val
        END IF
     ELSE
        IF (.NOT. ALLOCATED(list%key)) &
@@ -152,7 +154,7 @@ CONTAINS
     real(dp) :: s
     s=0.0_dp
     if (allocated(self%key)) then
-       print *, self%key, self%val
+       write(*, *) self%key, self%val
        if(associated(self%child)) then
           call self%child%print_all()
        endif
@@ -245,13 +247,15 @@ CONTAINS
 
   subroutine print_all_hash_table_t(self)
     class(hash_table_t), intent(in) :: self
-    integer :: i
-    if (.not.(self%is_init)) then
-       return
+    integer :: i, low, high
+    low  = LBOUND(self%vec,dim=1)
+    high = UBOUND(self%vec,dim=1) 
+
+    if (allocated(self%vec)) then
+       do i =low, high
+          call self%vec(i)%print_all()
+       end do
     end if
-    do i =1, self%vec_len
-       call self%vec(i)%print_all()
-    end do
   end subroutine print_all_hash_table_t
 
 end module m_hashtable_strval

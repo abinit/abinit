@@ -554,7 +554,7 @@ contains
     real(dp), intent(out) ::  etot
     type(hash_table_t),optional, intent(inout) :: energy_table
     integer :: i
-    real(dp) :: dSdt(3), Htmp(3), Ri(3)
+    real(dp) ::  Htmp(3), Ri(3)
 
     ! predict
     etot=0.0
@@ -884,7 +884,7 @@ contains
   !! INPUTS
   !! pot: potential
   !! T_start, Tend, T_nstep
-  !!
+  !u
   !! OUTPUT
   !!
   !! PARENTS

@@ -449,10 +449,11 @@ contains
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_dummy_mover_t, self%lattice_mover)
     end select
     call self%lattice_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
+    ! FIXME: should be able to set to different mode using input.
+    ! Mode=1: Using Boltzman's distribution to initialize the velocities.
+    ! Mode=2
+    call self%lattice_mover%set_initial_state(mode=1)
   end subroutine set_lattice_mover
-
- 
-
 
 
   !-------------------------------------------------------------------!
@@ -508,6 +509,7 @@ contains
     call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
     call self%spin_mover%run_time(self%pots, energy_table=self%energy_table)
     call self%lattice_mover%run_time(self%pots, energy_table=self%energy_table)
+    call self%energy_table%print_all()
     call self%spin_mover%spin_ncfile%close()
   end subroutine run_spin_latt_dynamics
 

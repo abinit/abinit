@@ -167,6 +167,8 @@ contains
     call self%rng%rand_normal_array(self%xi, 3*self%natom)
     call self%rng%rand_normal_array(self%eta, 3*self%natom)
 
+
+
     ! First half of velocity update
     do i =1, self%natom
        self%current_vcart(:,i) = self%current_vcart(:,i) + &

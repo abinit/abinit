@@ -244,8 +244,8 @@ contains
     tmp=>null()
     do i =1, self%size
       call self%data(i)%obj%fill_supercell(sc_maker, params, tmp)
+      call sc_pots%append(tmp)
     end do
-    call sc_pots%append(tmp)
   end subroutine fill_supercell_list
 
 end module m_primitive_potential_list

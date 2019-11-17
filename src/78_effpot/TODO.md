@@ -17,6 +17,8 @@ This file list the things to do for multibinit
  - Oiju could be grouped by ju?
  - Tijuv could be grouped by uv? ju? 
  
+### [TODO] clean spin hist data structure.
+ 
 
 ## Preparing for Abinit9
 

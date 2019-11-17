@@ -40,8 +40,12 @@ module  m_slc_dynamics
   private
 
   type, public, extends(abstract_mover_t) :: slc_mover_t
-    type(spin_mover_t),    pointer :: spin_mover
-    type(lattice_mover_t), pointer :: lattice_mover
+    class(spin_mover_t),    pointer :: spin_mover
+    !type(lattice_mover_t), pointer :: lattice_mover
+    class(lattice_mover_t), pointer :: lattice_mover
+    ! class pointer should be used here so it can points to all type
+    ! of lattice mover. Otherwise it calls the abstract mover.
+    
 
   CONTAINS
   procedure :: initialize
@@ -55,8 +59,8 @@ module  m_slc_dynamics
   subroutine initialize(self, spin_mover, lattice_mover)
 
     class(slc_mover_t) :: self
-    type(spin_mover_t), target :: spin_mover
-    type(lattice_mover_t), target :: lattice_mover
+    class(spin_mover_t), target :: spin_mover
+    class(lattice_mover_t), target :: lattice_mover
 
     self%spin_mover => spin_mover
     self%lattice_mover => lattice_mover
@@ -126,7 +130,8 @@ module  m_slc_dynamics
     do while(t<self%spin_mover%total_time)
       counter=counter+1
       !one step in coupled spin-lattice dynamics
-      call self%run_one_step(effpot=calculator, displacement=displacement, strain=strain, lwf=lwf)
+      call self%run_one_step(effpot=calculator, spin=spin, displacement=displacement, strain=strain, lwf=lwf, &
+           & energy_table=energy_table)
 
       if (iam_master) then
         call self%spin_mover%hist%set_vars(time=t,  inc=.True.)
@@ -166,8 +171,8 @@ module  m_slc_dynamics
 
     call self%spin_mover%run_one_step(effpot=effpot, displacement=displacement, strain=strain, &
         &    lwf=lwf, energy_table=energy_table)
-    call self%lattice_mover%run_one_step(effpot=effpot, spin=spin, lwf=lwf, energy_table=energy_table)
 
+    call self%lattice_mover%run_one_step(effpot=effpot, spin=spin, lwf=lwf, energy_table=energy_table)
 
   end subroutine run_one_step
 

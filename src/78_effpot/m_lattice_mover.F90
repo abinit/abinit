@@ -184,6 +184,7 @@ contains
        end do
        call self%force_stationary()
        self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)
+       call self%get_T_and_Ek()
     else if(mode==2) then ! Use reference structure and 0 velocity.
        ! other modes.
        if(self%latt_dynamics==102 .or. self%latt_dynamics==103 ) then
@@ -248,6 +249,8 @@ contains
        MSG_ERROR("displacement and strain should not be input for lattice mover")
     end if
 
+    MSG_BUG("The abstract lattice mover is used, which should be a bug.")
+
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(effpot)
     ABI_UNUSED_A(displacement)
@@ -302,10 +305,7 @@ contains
     ABI_UNUSED_A(lwf)
     ABI_UNUSED_A(energy_table)
 
-    !TODO: add set_initial mode to input file
-    call self%set_initial_state(mode=1)
 
-    
     msg=repeat("=", 90)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
@@ -344,8 +344,6 @@ contains
     msg=repeat("=", 90)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
-
-
 
   end subroutine run_time
 
