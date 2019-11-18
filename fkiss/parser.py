@@ -300,9 +300,9 @@ class Procedure(Node):
         #self.has_implicit_none = False
 
     def _repr_html_(self):
-        proto = self.line.replace("(", "(\n\t").replace(",", ",\n\t").replace(")", "\n)")
-        #proto = proto.replace(" ", "")
-        return fort2html(proto + 2 * "\n" + self.preamble)
+        prototype = self.line.replace("(", "(\n\t").replace(",", ",\n\t").replace(")", "\n)")
+        #prototype = proto.replace(" ", "")
+        return fort2html(prototype + 2 * "\n" + self.preamble)
 
     @lazy_property
     def is_program(self):
@@ -344,9 +344,6 @@ class Procedure(Node):
     #    #raise RuntimeError("you should not be here!")
     #    self._visibility = True
     #    return self._visibility
-
-    #def _repr_html_(self):
-    #    return fort2html(self.preamble + self.line)
 
     @lazy_property
     def dirpath(self):
