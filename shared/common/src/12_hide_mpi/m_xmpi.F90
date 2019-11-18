@@ -137,7 +137,8 @@ MODULE m_xmpi
  ! Count number of requests (+1 for each call to non-blocking API, -1 for each call to xmpi_wait)
  ! This counter should be zero at the end of the run if all requests have been released)
 
- integer,public,parameter :: xmpi_maxint32=HUGE(0_int32),xmpi_maxint32_64=10 !int(xmpi_maxint32,kind=int64)
+ integer,public,parameter :: xmpi_maxint32=HUGE(0_int32),xmpi_maxint32_64=int(xmpi_maxint32,kind=int64)
+!integer,public,parameter :: xmpi_maxint32=HUGE(0_int32),xmpi_maxint32_64=1
  ! Max. integer that can be represented with 32 bits
 !!***
 
@@ -2677,6 +2678,8 @@ end subroutine xmpi_largetype_contiguous
 !----------------------------------------------------------------------
 
 ! Include files providing wrappers for some of the most commonly used MPI primitives.
+
+#include "xmpi_operations.finc"
 
 #include "xmpi_allgather.finc"
 

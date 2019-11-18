@@ -154,7 +154,7 @@ subroutine xmpi_sum_master_int2d(xval,master,spaceComm,ier)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI
- integer :: mpi_dt,n1,n2
+ integer :: my_dt,my_op,n1,n2
  integer(kind=int64) :: ntot
  integer, allocatable :: xsum(:,:)
  integer :: nproc_space_comm
@@ -183,10 +183,12 @@ subroutine xmpi_sum_master_int2d(xval,master,spaceComm,ier)
      if (ntot<xmpi_maxint32_64) then
        call MPI_reduce(xval,xsum,n1*n2,MPI_INTEGER,MPI_SUM,master,spaceComm,ier)
      else
-       call xmpi_largetype_contiguous(ntot,MPI_INTEGER,mpi_dt)
-       call MPI_TYPE_COMMIT(mpi_dt,ier)
-       call MPI_reduce(xval,xsum,1,mpi_dt,MPI_SUM,master,spaceComm,ier)
-       call MPI_TYPE_FREE(mpi_dt,ier)
+       call xmpi_largetype_contiguous(ntot,MPI_INTEGER,my_dt)
+       call MPI_TYPE_COMMIT(my_dt,ier)
+       call MPI_OP_CREATE(xmpi_sum_vector_int,.true.,my_op, ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_TYPE_FREE(my_dt,ier)
+       call MPI_OP_FREE(my_op,ier)
      end if
 
      xval = xsum
@@ -284,7 +286,7 @@ subroutine xmpi_sum_master_dp2d(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: mpi_dt,n1,n2
+ integer :: my_dt,my_op,n1,n2
  integer(kind=int64) :: ntot
  real(dp) , allocatable :: xsum(:,:)
  integer :: nproc_space_comm
@@ -313,10 +315,12 @@ subroutine xmpi_sum_master_dp2d(xval,master,spaceComm,ier)
      if (ntot<xmpi_maxint32_64) then
        call MPI_reduce(xval,xsum,n1*n2,MPI_DOUBLE_PRECISION,MPI_SUM,master,spaceComm,ier)
      else
-       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_PRECISION,mpi_dt)
-       call MPI_TYPE_COMMIT(mpi_dt,ier)
-       call MPI_reduce(xval,xsum,1,mpi_dt,MPI_SUM,master,spaceComm,ier)
-       call MPI_TYPE_FREE(mpi_dt,ier)
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_PRECISION,my_dt)
+       call MPI_TYPE_COMMIT(my_dt,ier)
+       call MPI_OP_CREATE(xmpi_sum_vector_dble,.true.,my_op, ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_TYPE_FREE(my_dt,ier)
+       call MPI_OP_FREE(my_op,ier)
      end if
 
      xval (:,:) = xsum(:,:)
@@ -357,7 +361,7 @@ subroutine xmpi_sum_master_dp3d(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: mpi_dt,n1,n2,n3
+ integer :: my_dt,my_op,n1,n2,n3
  integer(kind=int64) :: ntot
  real(dp) , allocatable :: xsum(:,:,:)
  integer :: nproc_space_comm
@@ -387,10 +391,12 @@ subroutine xmpi_sum_master_dp3d(xval,master,spaceComm,ier)
      if (ntot<xmpi_maxint32_64) then
        call MPI_reduce(xval,xsum,n1*n2*n3,MPI_DOUBLE_PRECISION,MPI_SUM,master,spaceComm,ier)
      else
-       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_PRECISION,mpi_dt)
-       call MPI_TYPE_COMMIT(mpi_dt,ier)
-       call MPI_reduce(xval,xsum,1,mpi_dt,MPI_SUM,master,spaceComm,ier)
-       call MPI_TYPE_FREE(mpi_dt,ier)
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_PRECISION,my_dt)
+       call MPI_TYPE_COMMIT(my_dt,ier)
+       call MPI_OP_CREATE(xmpi_sum_vector_dble,.true.,my_op, ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_TYPE_FREE(my_dt,ier)
+       call MPI_OP_FREE(my_op,ier)
      end if
 
      xval (:,:,:) = xsum(:,:,:)
@@ -432,7 +438,7 @@ subroutine xmpi_sum_master_dp4d(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: mpi_dt,n1,n2,n3,n4
+ integer :: my_dt,my_op,n1,n2,n3,n4
  integer(kind=int64) :: ntot
  real(dp) , allocatable :: xsum(:,:,:,:)
  integer :: nproc_space_comm
@@ -462,10 +468,12 @@ subroutine xmpi_sum_master_dp4d(xval,master,spaceComm,ier)
      if (ntot<xmpi_maxint32_64) then
        call MPI_reduce(xval,xsum,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,MPI_SUM,master,spaceComm,ier)
      else
-       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_PRECISION,mpi_dt)
-       call MPI_TYPE_COMMIT(mpi_dt,ier)
-       call MPI_reduce(xval,xsum,1,mpi_dt,MPI_SUM,master,spaceComm,ier)
-       call MPI_TYPE_FREE(mpi_dt,ier)
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_PRECISION,my_dt)
+       call MPI_TYPE_COMMIT(my_dt,ier)
+       call MPI_OP_CREATE(xmpi_sum_vector_dble,.true.,my_op, ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_TYPE_FREE(my_dt,ier)
+       call MPI_OP_FREE(my_op,ier)
      end if
 
      xval (:,:,:,:) = xsum(:,:,:,:)
@@ -507,7 +515,7 @@ subroutine xmpi_sum_master_dp5d(xval,master,spaceComm,ier)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI
- integer :: mpi_dt,n1,n2,n3,n4,n5
+ integer :: my_dt,my_op,n1,n2,n3,n4,n5
  integer(kind=int64) :: ntot
  real(dp), allocatable :: xsum(:,:,:,:,:)
  integer :: nproc_space_comm
@@ -539,10 +547,12 @@ subroutine xmpi_sum_master_dp5d(xval,master,spaceComm,ier)
      if (ntot<xmpi_maxint32_64) then
        call MPI_reduce(xval,xsum,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,MPI_SUM,master,spaceComm,ier)
      else
-       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_PRECISION,mpi_dt)
-       call MPI_TYPE_COMMIT(mpi_dt,ier)
-       call MPI_reduce(xval,xsum,1,mpi_dt,MPI_SUM,master,spaceComm,ier)
-       call MPI_TYPE_FREE(mpi_dt,ier)
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_PRECISION,my_dt)
+       call MPI_TYPE_COMMIT(my_dt,ier)
+       call MPI_OP_CREATE(xmpi_sum_vector_dble,.true.,my_op, ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_TYPE_FREE(my_dt,ier)
+       call MPI_OP_FREE(my_op,ier)
      end if
 
      xval (:,:,:,:,:) = xsum(:,:,:,:,:)
@@ -584,7 +594,7 @@ subroutine xmpi_sum_master_dp6d(xval,master,spaceComm,ier)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI
- integer :: mpi_dt,n1,n2,n3,n4,n5,n6
+ integer :: my_dt,my_op,n1,n2,n3,n4,n5,n6
  integer(kind=int64) :: ntot
  real(dp), allocatable :: xsum(:,:,:,:,:,:)
  integer :: nproc_space_comm
@@ -617,10 +627,12 @@ subroutine xmpi_sum_master_dp6d(xval,master,spaceComm,ier)
      if (ntot<xmpi_maxint32_64) then
        call MPI_reduce(xval,xsum,n1*n2*n3*n4*n5*n6,MPI_DOUBLE_PRECISION,MPI_SUM,master,spaceComm,ier)
      else
-       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_PRECISION,mpi_dt)
-       call MPI_TYPE_COMMIT(mpi_dt,ier)
-       call MPI_reduce(xval,xsum,1,mpi_dt,MPI_SUM,master,spaceComm,ier)
-       call MPI_TYPE_FREE(mpi_dt,ier)
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_PRECISION,my_dt)
+       call MPI_TYPE_COMMIT(my_dt,ier)
+       call MPI_OP_CREATE(xmpi_sum_vector_dble,.true.,my_op, ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_TYPE_FREE(my_dt,ier)
+       call MPI_OP_FREE(my_op,ier)
      end if
 
      xval (:,:,:,:,:,:) = xsum(:,:,:,:,:,:)
@@ -662,7 +674,7 @@ subroutine xmpi_sum_master_dp7d(xval,master,spaceComm,ier)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI
- integer :: mpi_dt,n1,n2,n3,n4,n5,n6,n7
+ integer :: my_dt,my_op,n1,n2,n3,n4,n5,n6,n7
  integer(kind=int64) :: ntot
  real(dp), allocatable :: xsum(:,:,:,:,:,:,:)
  integer :: nproc_space_comm
@@ -696,10 +708,12 @@ subroutine xmpi_sum_master_dp7d(xval,master,spaceComm,ier)
      if (ntot<xmpi_maxint32_64) then
        call MPI_reduce(xval,xsum,n1*n2*n3*n4*n5*n6*n7,MPI_DOUBLE_PRECISION,MPI_SUM,master,spaceComm,ier)
      else
-       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_PRECISION,mpi_dt)
-       call MPI_TYPE_COMMIT(mpi_dt,ier)
-       call MPI_reduce(xval,xsum,1,mpi_dt,MPI_SUM,master,spaceComm,ier)
-       call MPI_TYPE_FREE(mpi_dt,ier)
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_PRECISION,my_dt)
+       call MPI_TYPE_COMMIT(my_dt,ier)
+       call MPI_OP_CREATE(xmpi_sum_vector_dble,.true.,my_op, ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_TYPE_FREE(my_dt,ier)
+       call MPI_OP_FREE(my_op,ier)
      end if
 
      xval (:,:,:,:,:,:,:) = xsum(:,:,:,:,:,:,:)
@@ -741,7 +755,7 @@ subroutine xmpi_sum_master_int4d(xval,master,spaceComm,ier)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI
- integer :: mpi_dt,n1,n2,n3,n4
+ integer :: my_dt,my_op,n1,n2,n3,n4
  integer(kind=int64) :: ntot
  integer, allocatable :: xsum(:,:,:,:)
  integer :: nproc_space_comm
@@ -772,10 +786,12 @@ subroutine xmpi_sum_master_int4d(xval,master,spaceComm,ier)
      if (ntot<xmpi_maxint32_64) then
        call MPI_reduce(xval,xsum,n1*n2*n3*n4,MPI_INTEGER,MPI_SUM,master,spaceComm,ier)
      else
-       call xmpi_largetype_contiguous(ntot,MPI_INTEGER,mpi_dt)
-       call MPI_TYPE_COMMIT(mpi_dt,ier)
-       call MPI_reduce(xval,xsum,1,mpi_dt,MPI_SUM,master,spaceComm,ier)
-       call MPI_TYPE_FREE(mpi_dt,ier)
+       call xmpi_largetype_contiguous(ntot,MPI_INTEGER,my_dt)
+       call MPI_TYPE_COMMIT(my_dt,ier)
+       call MPI_OP_CREATE(xmpi_sum_vector_int,.true.,my_op, ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_TYPE_FREE(my_dt,ier)
+       call MPI_OP_FREE(my_op,ier)
      end if
 
      xval (:,:,:,:) = xsum(:,:,:,:)
@@ -873,7 +889,7 @@ subroutine xmpi_sum_master_c2cplx(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: mpi_dt,n1,n2
+ integer :: my_dt,my_op,n1,n2
  integer(kind=int64) :: ntot
  integer :: nproc_space_comm
  complex(spc),allocatable :: xsum(:,:)
@@ -902,13 +918,14 @@ subroutine xmpi_sum_master_c2cplx(xval,master,spaceComm,ier)
      if (ntot<xmpi_maxint32_64) then
        call MPI_reduce(xval,xsum,n1*n2,MPI_COMPLEX,MPI_SUM,master,spaceComm,ier)
      else
-       call xmpi_largetype_contiguous(ntot,MPI_COMPLEX,mpi_dt)
-       call MPI_TYPE_COMMIT(mpi_dt,ier)
-       call MPI_reduce(xval,xsum,1,mpi_dt,MPI_SUM,master,spaceComm,ier)
-       call MPI_TYPE_FREE(mpi_dt,ier)
+       call xmpi_largetype_contiguous(ntot,MPI_COMPLEX,my_dt)
+       call MPI_TYPE_COMMIT(my_dt,ier)
+       call MPI_OP_CREATE(xmpi_sum_vector_cplx,.true.,my_op, ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_TYPE_FREE(my_dt,ier)
+       call MPI_OP_FREE(my_op,ier)
      end if
 
-     call MPI_REDUCE(xval,xsum,n1*n2,MPI_COMPLEX,MPI_SUM,master,spaceComm,ier)
      xval (:,:) = xsum(:,:)
      ABI_DEALLOCATE(xsum)
    end if
@@ -948,7 +965,7 @@ subroutine xmpi_sum_master_c3cplx(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: mpi_dt,n1,n2,n3
+ integer :: my_dt,my_op,n1,n2,n3
  integer(kind=int64) :: ntot
  complex(spc), allocatable :: xsum(:,:,:)
  integer :: nproc_space_comm
@@ -978,10 +995,12 @@ subroutine xmpi_sum_master_c3cplx(xval,master,spaceComm,ier)
      if (ntot<xmpi_maxint32_64) then
        call MPI_reduce(xval,xsum,n1*n2*n3,MPI_COMPLEX,MPI_SUM,master,spaceComm,ier)
      else
-       call xmpi_largetype_contiguous(ntot,MPI_COMPLEX,mpi_dt)
-       call MPI_TYPE_COMMIT(mpi_dt,ier)
-       call MPI_reduce(xval,xsum,1,mpi_dt,MPI_SUM,master,spaceComm,ier)
-       call MPI_TYPE_FREE(mpi_dt,ier)
+       call xmpi_largetype_contiguous(ntot,MPI_COMPLEX,my_dt)
+       call MPI_TYPE_COMMIT(my_dt,ier)
+       call MPI_OP_CREATE(xmpi_sum_vector_cplx,.true.,my_op, ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_TYPE_FREE(my_dt,ier)
+       call MPI_OP_FREE(my_op,ier)
      end if
 
      xval (:,:,:) = xsum(:,:,:)
@@ -1023,7 +1042,7 @@ subroutine xmpi_sum_master_c4cplx(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: mpi_dt,n1,n2,n3,n4
+ integer :: my_dt,my_op,n1,n2,n3,n4
  integer(kind=int64) :: ntot
  integer :: nproc_space_comm
  complex(spc), allocatable :: xsum(:,:,:,:)
@@ -1054,10 +1073,12 @@ subroutine xmpi_sum_master_c4cplx(xval,master,spaceComm,ier)
      if (ntot<xmpi_maxint32_64) then
        call MPI_reduce(xval,xsum,n1*n2*n3*n4,MPI_COMPLEX,MPI_SUM,master,spaceComm,ier)
      else
-       call xmpi_largetype_contiguous(ntot,MPI_COMPLEX,mpi_dt)
-       call MPI_TYPE_COMMIT(mpi_dt,ier)
-       call MPI_reduce(xval,xsum,1,mpi_dt,MPI_SUM,master,spaceComm,ier)
-       call MPI_TYPE_FREE(mpi_dt,ier)
+       call xmpi_largetype_contiguous(ntot,MPI_COMPLEX,my_dt)
+       call MPI_TYPE_COMMIT(my_dt,ier)
+       call MPI_OP_CREATE(xmpi_sum_vector_cplx,.true.,my_op, ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_TYPE_FREE(my_dt,ier)
+       call MPI_OP_FREE(my_op,ier)
      end if
 
      xval (:,:,:,:) = xsum(:,:,:,:)
@@ -1100,7 +1121,7 @@ subroutine xmpi_sum_master_c5cplx(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: mpi_dt,n1,n2,n3,n4,n5
+ integer :: my_dt,my_op,n1,n2,n3,n4,n5
  integer(kind=int64) :: ntot
  complex(spc),allocatable :: xsum(:,:,:,:,:)
  integer :: nproc_space_comm
@@ -1132,10 +1153,12 @@ subroutine xmpi_sum_master_c5cplx(xval,master,spaceComm,ier)
      if (ntot<xmpi_maxint32_64) then
        call MPI_reduce(xval,xsum,n1*n2*n3*n4*n5,MPI_COMPLEX,MPI_SUM,master,spaceComm,ier)
      else
-       call xmpi_largetype_contiguous(ntot,MPI_COMPLEX,mpi_dt)
-       call MPI_TYPE_COMMIT(mpi_dt,ier)
-       call MPI_reduce(xval,xsum,1,mpi_dt,MPI_SUM,master,spaceComm,ier)
-       call MPI_TYPE_FREE(mpi_dt,ier)
+       call xmpi_largetype_contiguous(ntot,MPI_COMPLEX,my_dt)
+       call MPI_TYPE_COMMIT(my_dt,ier)
+       call MPI_OP_CREATE(xmpi_sum_vector_cplx,.true.,my_op, ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_TYPE_FREE(my_dt,ier)
+       call MPI_OP_FREE(my_op,ier)
      end if
 
      xval = xsum
@@ -1233,7 +1256,7 @@ subroutine xmpi_sum_master_c2dpc(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: mpi_dt,n1,n2
+ integer :: my_dt,my_op,n1,n2
  integer(kind=int64) :: ntot
  complex(dpc) , allocatable :: xsum(:,:)
  integer :: nproc_space_comm
@@ -1262,10 +1285,12 @@ subroutine xmpi_sum_master_c2dpc(xval,master,spaceComm,ier)
      if (ntot<xmpi_maxint32_64) then
        call MPI_reduce(xval,xsum,n1*n2,MPI_DOUBLE_COMPLEX,MPI_SUM,master,spaceComm,ier)
      else
-       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_COMPLEX,mpi_dt)
-       call MPI_TYPE_COMMIT(mpi_dt,ier)
-       call MPI_reduce(xval,xsum,1,mpi_dt,MPI_SUM,master,spaceComm,ier)
-       call MPI_TYPE_FREE(mpi_dt,ier)
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_COMPLEX,my_dt)
+       call MPI_TYPE_COMMIT(my_dt,ier)
+       call MPI_OP_CREATE(xmpi_sum_vector_dcplx,.true.,my_op, ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_TYPE_FREE(my_dt,ier)
+       call MPI_OP_FREE(my_op,ier)
      end if
 
      xval (:,:) = xsum(:,:)
@@ -1307,7 +1332,7 @@ subroutine xmpi_sum_master_c3dpc(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: mpi_dt,n1,n2,n3
+ integer :: my_dt,my_op,n1,n2,n3
  integer(kind=int64) :: ntot
  complex(dpc) , allocatable :: xsum(:,:,:)
  integer :: nproc_space_comm
@@ -1337,10 +1362,12 @@ subroutine xmpi_sum_master_c3dpc(xval,master,spaceComm,ier)
      if (ntot<xmpi_maxint32_64) then
        call MPI_reduce(xval,xsum,n1*n2*n3,MPI_DOUBLE_COMPLEX,MPI_SUM,master,spaceComm,ier)
      else
-       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_COMPLEX,mpi_dt)
-       call MPI_TYPE_COMMIT(mpi_dt,ier)
-       call MPI_reduce(xval,xsum,1,mpi_dt,MPI_SUM,master,spaceComm,ier)
-       call MPI_TYPE_FREE(mpi_dt,ier)
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_COMPLEX,my_dt)
+       call MPI_TYPE_COMMIT(my_dt,ier)
+       call MPI_OP_CREATE(xmpi_sum_vector_dcplx,.true.,my_op, ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_TYPE_FREE(my_dt,ier)
+       call MPI_OP_FREE(my_op,ier)
      end if
 
      xval (:,:,:) = xsum(:,:,:)
@@ -1381,7 +1408,7 @@ subroutine xmpi_sum_master_c4dpc(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: mpi_dt,n1,n2,n3,n4
+ integer :: my_dt,my_op,n1,n2,n3,n4
  integer(kind=int64) :: ntot
  complex(dpc) , allocatable :: xsum(:,:,:,:)
  integer :: nproc_space_comm
@@ -1412,10 +1439,12 @@ subroutine xmpi_sum_master_c4dpc(xval,master,spaceComm,ier)
      if (ntot<xmpi_maxint32_64) then
        call MPI_reduce(xval,xsum,n1*n2*n3*n4,MPI_DOUBLE_COMPLEX,MPI_SUM,master,spaceComm,ier)
      else
-       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_COMPLEX,mpi_dt)
-       call MPI_TYPE_COMMIT(mpi_dt,ier)
-       call MPI_reduce(xval,xsum,1,mpi_dt,MPI_SUM,master,spaceComm,ier)
-       call MPI_TYPE_FREE(mpi_dt,ier)
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_COMPLEX,my_dt)
+       call MPI_TYPE_COMMIT(my_dt,ier)
+       call MPI_OP_CREATE(xmpi_sum_vector_dcplx,.true.,my_op, ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_TYPE_FREE(my_dt,ier)
+       call MPI_OP_FREE(my_op,ier)
      end if
 
      xval (:,:,:,:) = xsum(:,:,:,:)
@@ -1456,7 +1485,7 @@ subroutine xmpi_sum_master_c5dpc(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: mpi_dt,n1,n2,n3,n4,n5
+ integer :: my_dt,my_op,n1,n2,n3,n4,n5
  integer(kind=int64) :: ntot
  complex(dpc),allocatable :: xsum(:,:,:,:,:)
  integer :: nproc_space_comm
@@ -1488,10 +1517,12 @@ subroutine xmpi_sum_master_c5dpc(xval,master,spaceComm,ier)
      if (ntot<xmpi_maxint32_64) then
        call MPI_reduce(xval,xsum,n1*n2*n3*n4*n5,MPI_DOUBLE_COMPLEX,MPI_SUM,master,spaceComm,ier)
      else
-       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_COMPLEX,mpi_dt)
-       call MPI_TYPE_COMMIT(mpi_dt,ier)
-       call MPI_reduce(xval,xsum,1,mpi_dt,MPI_SUM,master,spaceComm,ier)
-       call MPI_TYPE_FREE(mpi_dt,ier)
+       call xmpi_largetype_contiguous(ntot,MPI_DOUBLE_COMPLEX,my_dt)
+       call MPI_TYPE_COMMIT(my_dt,ier)
+       call MPI_OP_CREATE(xmpi_sum_vector_dcplx,.true.,my_op, ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_TYPE_FREE(my_dt,ier)
+       call MPI_OP_FREE(my_op,ier)
      end if
 
      xval (:,:,:,:,:) = xsum(:,:,:,:,:)

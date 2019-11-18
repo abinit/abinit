@@ -1,0 +1,204 @@
+!{\src2tex{textfont=tt}}
+!
+! This file contains a collection of user-defined functions to be used with
+!  user-defined datatypes in collective communications.
+!
+!!****f* ABINIT/xmpi_sum_vector_int
+!! NAME
+!!  xmpi_sum_vector_int
+!!
+!! FUNCTION
+!!  A user-defined reduction (sum) to be used with MPI_INTEGER user-defined datatype
+!!
+!! INPUTS
+!!  datatype=MPI user-defined datatype associated with this fucntion (here MPI_INTEGER)
+!!  invec(len)=input vector
+!!  len= length of input/output vectors
+!!
+!! OUTPUT
+!!  inoutvec(len)=input vector
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_vector_int(invec,inoutvec,len,datatype)
+
+!Arguments----------------
+ integer :: len,datatype
+ integer :: invec(len),inoutvec(len)
+
+!Local variables--------------
+ integer :: ii
+
+! *************************************************************************
+
+ do ii=1,len
+   inoutvec(ii)=inoutvec(ii)+invec(ii)
+ end do
+
+end subroutine xmpi_sum_vector_int
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_vector_real
+!! NAME
+!!  xmpi_sum_vector_real
+!!
+!! FUNCTION
+!!  A user-defined reduction (sum) to be used with MPI_REAL user-defined datatype
+!!
+!! INPUTS
+!!  datatype=MPI user-defined datatype associated with this function (here MPI_REAL)
+!!  invec(len)=input vector
+!!  len= length of input/output vectors
+!!
+!! OUTPUT
+!!  inoutvec(len)=input vector
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_vector_real(invec,inoutvec,len,datatype)
+
+!Arguments----------------
+ integer :: len,datatype
+ real(sp) :: invec(len),inoutvec(len)
+
+!Local variables--------------
+ integer :: ii
+
+! *************************************************************************
+
+ do ii=1,len
+   inoutvec(ii)=inoutvec(ii)+invec(ii)
+ end do
+
+end subroutine xmpi_sum_vector_real
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_vector_dble
+!! NAME
+!!  xmpi_sum_vector_dble
+!!
+!! FUNCTION
+!!  A user-defined reduction (sum) to be used with MPI_DOUBLE_PRECISION user-defined datatype
+!!
+!! INPUTS
+!!  datatype=MPI user-defined datatype associated with this function (here MPI_DOUBLE_PRECISION)
+!!  invec(len)=input vector
+!!  len= length of input/output vectors
+!!
+!! OUTPUT
+!!  inoutvec(len)=input vector
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_vector_dble(invec,inoutvec,len,datatype)
+
+!Arguments----------------
+ integer :: len,datatype
+ real(dp) :: invec(len),inoutvec(len)
+
+!Local variables--------------
+ integer :: ii
+
+! *************************************************************************
+
+ do ii=1,len
+   inoutvec(ii)=inoutvec(ii)+invec(ii)
+ end do
+
+end subroutine xmpi_sum_vector_dble
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_vector_cplx
+!! NAME
+!!  xmpi_sum_vector_cplx
+!!
+!! FUNCTION
+!!  A user-defined reduction (sum) to be used with MPI_COMPLEX user-defined datatype
+!!
+!! INPUTS
+!!  datatype=MPI user-defined datatype associated with this function (here MPI_COMPLEX)
+!!  invec(len)=input vector
+!!  len= length of input/output vectors
+!!
+!! OUTPUT
+!!  inoutvec(len)=input vector
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_vector_cplx(invec,inoutvec,len,datatype)
+
+!Arguments----------------
+ integer :: len,datatype
+ complex(spc) :: invec(len),inoutvec(len)
+
+!Local variables--------------
+ integer :: ii
+
+! *************************************************************************
+
+ do ii=1,len
+   inoutvec(ii)=inoutvec(ii)+invec(ii)
+ end do
+
+end subroutine xmpi_sum_vector_cplx
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_vector_dcplx
+!! NAME
+!!  xmpi_sum_vector_dcplx
+!!
+!! FUNCTION
+!!  A user-defined reduction (sum) to be used with MPI_DOUBLE_COMPLEX user-defined datatype
+!!
+!! INPUTS
+!!  datatype=MPI user-defined datatype associated with this function (here MPI_DOUBLE_COMPLEX)
+!!  invec(len)=input vector
+!!  len= length of input/output vectors
+!!
+!! OUTPUT
+!!  inoutvec(len)=input vector
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_vector_dcplx(invec,inoutvec,len,datatype)
+
+!Arguments----------------
+ integer :: len,datatype
+ complex(dpc) :: invec(len),inoutvec(len)
+
+!Local variables--------------
+ integer :: ii
+
+! *************************************************************************
+
+ do ii=1,len
+   inoutvec(ii)=inoutvec(ii)+invec(ii)
+ end do
+
+end subroutine xmpi_sum_vector_dcplx
+!!***
+
+!----------------------------------------------------------------------
