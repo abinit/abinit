@@ -1583,7 +1583,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%hyb_mixing=zero  ; dtset%hyb_mixing_sr=quarter
      dtset%hyb_range_dft=0.15_dp*two**third  ; dtset%hyb_range_fock=0.15_dp*sqrt(half)
    else if (ixc_current<0) then
-     call libxc_functionals_init(ixc_current,dtset%nspden)
+     call libxc_functionals_init(ixc_current,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)
      call libxc_functionals_get_hybridparams(hyb_mixing=dtset%hyb_mixing,hyb_mixing_sr=dtset%hyb_mixing_sr,&
        hyb_range=dtset%hyb_range_dft)
      call libxc_functionals_end()
@@ -2064,7 +2064,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_l',tread,'INT')
      if(tread==1) then
        dtset%dmftqmc_l=intarr(1)
-     else if(dtset%ucrpa==0) then
+     else if(dtset%ucrpa==0.and.dtset%dmft_solv/=9) then
        write(msg, '(5a)' )&
         'When DFT+DMFT is activated and one of QMC solvers is used,', ch10, &
         'dmftqmc_l MUST be defined.',ch10,&
@@ -2076,7 +2076,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_therm',tread,'INT')
      if(tread==1) then
        dtset%dmftqmc_therm=intarr(1)
-     else if(dtset%ucrpa==0) then
+     else if(dtset%ucrpa==0.and.dtset%dmft_solv/=9) then
        write(msg, '(5a)' )&
         'When DFT+DMFT is activated and one of QMC solvers is used,', ch10, &
         'dmftqmc_therm MUST be defined.',ch10,&
@@ -2832,7 +2832,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usekden',tread,'INT')
- if(tread==1) dtset%usekden=intarr(1)
+ if(tread==1) then
+   dtset%usekden=intarr(1)
+ else
+   dtset%usekden=merge(1,0,libxc_functionals_ismgga())
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'vprtrb',tread,'ENE')
  if(tread==1) dtset%vprtrb(:)=dprarr(1:2)

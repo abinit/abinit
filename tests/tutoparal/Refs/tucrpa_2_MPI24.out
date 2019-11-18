@@ -11670,8 +11670,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Size of radial mesh ............................  592
   Size of radial mesh for partial waves...........  910
   Size of radial mesh for [pseudo] core density...  592
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..  910
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/ttaucorespl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    3
   shape_lambda ...................................    0
@@ -11684,14 +11685,16 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Number of projectors on which U or EXX acts ....    2
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
-  Has Fock   .....................................    2
+  Has Fock  ......................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    2
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -2.38787323E+01
@@ -11718,8 +11721,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Size of radial mesh ............................ 1084
   Size of radial mesh for partial waves........... 1500
   Size of radial mesh for [pseudo] core density... 1084
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density.. 1500
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/ttaucorespl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................    0
@@ -11729,14 +11733,16 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
-  Has Fock   .....................................    2
+  Has Fock  ......................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    2
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -3.50169981E+01
@@ -11762,8 +11768,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Size of radial mesh ............................ 1311
   Size of radial mesh for partial waves........... 2001
   Size of radial mesh for [pseudo] core density... 1311
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density.. 2001
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/ttaucorespl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................    0
@@ -11773,14 +11780,16 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
-  Has Fock   .....................................    2
+  Has Fock  ......................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    2
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -4.77231787E+00
@@ -12675,8 +12684,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Size of radial mesh ............................  592
   Size of radial mesh for partial waves...........  910
   Size of radial mesh for [pseudo] core density...  592
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..  910
-  No of Q-points for tcorespl and tvalespl .......  300
+  No of Q-points for tcorespl/tvalespl/ttaucorespl  300
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    3
   shape_lambda ...................................    0
@@ -12689,14 +12699,16 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Number of projectors on which U or EXX acts ....    2
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
-  Has Fock   .....................................    2
+  Has Fock  ......................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    0
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -2.38787323E+01
@@ -12723,8 +12735,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Size of radial mesh ............................ 1084
   Size of radial mesh for partial waves........... 1500
   Size of radial mesh for [pseudo] core density... 1084
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density.. 1500
-  No of Q-points for tcorespl and tvalespl .......  300
+  No of Q-points for tcorespl/tvalespl/ttaucorespl  300
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................    0
@@ -12734,14 +12747,16 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
-  Has Fock   .....................................    2
+  Has Fock  ......................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    0
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -3.50169981E+01
@@ -12767,8 +12782,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Size of radial mesh ............................ 1311
   Size of radial mesh for partial waves........... 2001
   Size of radial mesh for [pseudo] core density... 1311
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density.. 2001
-  No of Q-points for tcorespl and tvalespl .......  300
+  No of Q-points for tcorespl/tvalespl/ttaucorespl  300
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................    0
@@ -12778,14 +12794,16 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
-  Has Fock   .....................................    2
+  Has Fock  ......................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    0
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -4.77231787E+00

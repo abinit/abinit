@@ -1098,6 +1098,8 @@ done
 if test "${enable_connectors}" = "yes"; then
   ABI_CONNECT_TRIQS
 fi
+
+AM_CONDITIONAL([DO_BUILD_67_PYTHON_INVOCATION_EXT], [test "${enable_python_invocation}" = "yes"])
 ##############################################
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #

@@ -370,7 +370,7 @@ FC_LDFLAGS_EXTRA="-Wl,-z,muldefs"
 # Forced Fortran linker libraries
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-#FC_LIBS="-lsvml"
+FC_LIBS="-lstdc++ -ldl"
 
                        # ------------------------------ #
 
@@ -973,6 +973,7 @@ with_libxc_libs="-L${FALLBACKS_HOME}_8.12/${FB}/libxc/4.2.3/lib -lxc"
 #
 #enable_triqs_v2_0="no"
 #enable_triqs_v1_4="no"
+enable_python_invocation="yes"
 #
 # Include flags for the TRIQS library (default is unset)
 #

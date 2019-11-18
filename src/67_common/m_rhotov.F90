@@ -102,7 +102,6 @@ contains
 !!   |      rhor(:,1)   => rho_upup + rho_dwndwn
 !!   |      rhor(:,2:4) => {m_x,m_y,m_z}
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  [taug(2,nfftf*dtset%usekden)]=array for Fourier transform of kinetic energy density
 !!  [taur(nfftf,nspden*dtset%usekden)]=array for kinetic energy density
 !!  ucvol = unit cell volume (Bohr**3)
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
@@ -166,7 +165,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enr
 &  nhat,nhatgr,nhatgrdim,nkxc,vresidnew,n3xccc,optene,optres,optxc,&
 &  rhog,rhor,rprimd,strsxc,ucvol,usepaw,usexcnhat,&
 &  vhartr,vnew_mean,vpsp,vres_mean,vres2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
-&  electronpositron,taug,taur,vxc_hybcomp,vxctau,add_tfw) ! optional arguments
+&  electronpositron,taur,vxc_hybcomp,vxctau,add_tfw,xcctau3d) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -191,10 +190,10 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enr
  real(dp),intent(inout) :: xccc3d(n3xccc),xred(3,dtset%natom)
  real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vnew_mean(dtset%nspden)
  real(dp),intent(out) :: vres_mean(dtset%nspden),vresidnew(nfft,dtset%nspden)
- real(dp),intent(in),optional :: taug(2,nfft*dtset%usekden)
  real(dp),intent(in),optional :: taur(nfft,dtset%nspden*dtset%usekden)
  real(dp),intent(out),optional :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(out),optional :: vxc_hybcomp(:,:) ! (nfft,nspden)
+ real(dp),intent(out),optional :: xcctau3d(n3xccc)
 
 !Local variables-------------------------------
 !scalars
@@ -271,7 +270,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enr
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,&
 &         rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&         taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+&         taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,xcctau3d=xcctau3d)
          if(mod(dtset%fockoptmix,100)==11)then
            energies%e_xc=energies%e_xc*dtset%auxc_scal
            vxc(:,:)=vxc(:,:)*dtset%auxc_scal
@@ -284,11 +283,10 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enr
        call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,&
 &       rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&       taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
-&       electronpositron=electronpositron)
+&       taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
+&       electronpositron=electronpositron,xcctau3d=xcctau3d)
      end if
      call timab(941,2,tsec)
-
    elseif (.not. wvlbigdft) then
 !    Use the free boundary solver.
      call timab(943,1,tsec)

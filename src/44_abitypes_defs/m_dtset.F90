@@ -3126,6 +3126,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' kberry kpt kptbounds kptgw'
  list_vars=trim(list_vars)//' kptnrm kptopt kptrlatt kptrlen kssform'
 !L
+ list_vars=trim(list_vars)//' latt_friction latt_taut latt_taup latt_compressibility latt_mask'
  list_vars=trim(list_vars)//' ldaminushalf lexexch localrdwf lpawu'
  list_vars=trim(list_vars)//' lotf_classic lotf_nitex lotf_nneigx lotf_version'
 !M
@@ -3249,7 +3250,7 @@ subroutine chkvars(string)
 !Extra token, also admitted:
 !<ABINIT_UNITS>
  list_vars=trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV Ha'
- list_vars=trim(list_vars)//' Hartree Hartrees K Ry Rydberg Rydbergs S Sec Second T Tesla'
+ list_vars=trim(list_vars)//' Hartree Hartrees K nm Ry Rydberg Rydbergs S Sec Second T Tesla'
 !</ABINIT_UNITS>
 
 !<ABINIT_OPERATORS>
