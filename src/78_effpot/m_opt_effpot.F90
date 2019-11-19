@@ -53,6 +53,7 @@ module m_opt_effpot
  public :: opt_getSingleDispTerms
  public :: opt_getHOSingleDispTerms
  private :: opt_boundcoeff
+ private :: check_to_skip
  !!****
 CONTAINS 
       
@@ -487,6 +488,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  ! + 1 to bound pure strain
   do iterm =1,nterm  !+1 
      if(iterm <=nterm)then
+       ncombi1=0 
+       ncombi2=0
        !Store for optimization
        terms(iterm) = iterm
        !Message: The world wants to know where we stand Batman
@@ -497,28 +500,31 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
         write(message,'(2a,I3,a,I3,3a)' )ch10,&
 &       ' Check term (',iterm,'/',nterm,'): ', trim(eff_pot%anharmonics_terms%coefficients(iterm)%name),ch10 
        call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
-       !Get List of high order single Terms for terms 
-       call opt_getHOSingleDispTerms(eff_pot%anharmonics_terms%coefficients(iterm),&
-&                                    HOsingledisp_terms,symbols,singledisp_terms,order_ran,ncombi1,comm)
-                                     
-       !Get List of high order cross Terms for term if ndisp > 1
-       to_skip = .true.
-       if(eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp>1 .or. &
-&         eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp /= 0 .and. &
-&         eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%nstrain /= 0)then 
-         call opt_getHOcrossdisp(HOcrossdisp_terms,ncombi2,to_skip,eff_pot%anharmonics_terms%coefficients(iterm),order_ran,comm)
-       endif  
+       call wrtout(std_out,message,'COLL')                                     
+       to_skip = .FALSE.
+       to_skip = check_to_skip(eff_pot%anharmonics_terms%coefficients(iterm))
        !Skip term if it doesn't need bounding 
        if(.not. to_skip)then
+          !Get List of high order single Terms for terms 
+          call opt_getHOSingleDispTerms(eff_pot%anharmonics_terms%coefficients(iterm),&
+&                                      HOsingledisp_terms,symbols,singledisp_terms,order_ran,ncombi1,comm)
+          !Get List of high order cross Terms for term if ndisp > 1
+          if(eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp>1 .or. &
+&            eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp /= 0 .and. &
+&            eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%nstrain /= 0)then 
+             call opt_getHOcrossdisp(HOcrossdisp_terms,ncombi2,eff_pot%anharmonics_terms%coefficients(iterm),order_ran,comm)
+          endif  
+          !Copy everything together
           ABI_DATATYPE_ALLOCATE(my_coeffs,(size(eff_pot%anharmonics_terms%coefficients)+size(HOsingledisp_terms)))
           my_coeffs = eff_pot%anharmonics_terms%coefficients + HOsingledisp_terms
-          ABI_DATATYPE_ALLOCATE(my_coeffs_tmp,(size(my_coeffs)))
-          my_coeffs_tmp = my_coeffs
-          if(allocated(my_coeffs))ABI_DATATYPE_DEALLOCATE(my_coeffs)
-          ABI_DATATYPE_ALLOCATE(my_coeffs,(size(my_coeffs_tmp)+size(HOcrossdisp_terms)))
-          my_coeffs = my_coeffs_tmp + HOcrossdisp_terms
-          if(allocated(my_coeffs_tmp))ABI_DATATYPE_DEALLOCATE(my_coeffs_tmp) 
+          if(ncombi2 > 0)then 
+            ABI_DATATYPE_ALLOCATE(my_coeffs_tmp,(size(my_coeffs)))
+            my_coeffs_tmp = my_coeffs
+            if(allocated(my_coeffs))ABI_DATATYPE_DEALLOCATE(my_coeffs)
+            ABI_DATATYPE_ALLOCATE(my_coeffs,(size(my_coeffs_tmp)+size(HOcrossdisp_terms)))
+            my_coeffs = my_coeffs_tmp + HOcrossdisp_terms
+            if(allocated(my_coeffs_tmp))ABI_DATATYPE_DEALLOCATE(my_coeffs_tmp) 
+          endif
        else 
          ncombi2=0
          ncombi1=0
@@ -1283,7 +1289,7 @@ end subroutine opt_getHOstrain
 !!
 !! SOURCE
 
-subroutine opt_getHOcrossdisp(terms_out,ncombi,to_cycle,term_in,power_disp,comm)
+subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp,comm)
 
  implicit none 
          
@@ -1296,7 +1302,6 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,to_cycle,term_in,power_disp,comm)
  integer,intent(out) :: ncombi
  !arrays 
 !Logicals
- logical, intent(out) :: to_cycle
 !Strings 
 !Local variables ------------------------------
 !scalars
@@ -1319,9 +1324,7 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,to_cycle,term_in,power_disp,comm)
        ABI_ALLOCATE(ncombi_order,(norder))
        ncombi_order = 0 
 
-       !Set return variable to false 
-       to_cycle = .FALSE.
-
+       ncombi = 0 
        !Get this term (iterm) and infromations about it 
        !Get number of displacements and equivalent terms for this term
        !Chose term one to get ndisp. ndisp is equal for all terms of the term
@@ -1331,18 +1334,6 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,to_cycle,term_in,power_disp,comm)
        ndisp = term%terms(1)%ndisp
        nterm_of_term = term%nterm
              
-       ! Let's check if we really want all this mess 
-       ! If the term is even and its coefficient positive we skip it. Also here we take terms(1) as example for all equivalent terms of term
-       if(term%coefficient > 0 .and. .not. any(mod(term%terms(1)%power_disp(:),2) /= 0))then 
-                ! Message to Output 
-                write(message,'(3a)' )ch10,&
-&               ' ==> No need for high order bounding term',ch10
-                call wrtout(ab_out,message,'COLL')
-                call wrtout(std_out,message,'COLL')
-               to_cycle = .TRUE. 
-               return  
-       end if
-
        ! Check if term has strain component. 
        ! If yes filter strain and fit high order atomic displacement terms
        had_strain = .FALSE.
@@ -1366,12 +1357,12 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,to_cycle,term_in,power_disp,comm)
        call opt_getHOforterm(term,power_disp,order_start,order_stop,comm)
        if(order_start == 0)then 
                 ! Message to Output 
-                write(message,'(2a,I2,a,I2,3a)' )ch10,&
-&               " ==> Term doesn't fit into specified order range from ", power_disp(1),' to ',power_disp(2),ch10,&        
-&               ' ==> Can not construct high order bounding term',ch10
+                write(message,'(5a,I2,a,I2,3a)' )ch10,&
+&               " ==> High order cross product terms for term ", trim(term_in%name),ch10,&
+&               " ==> do not fit into specified order range from ", power_disp(1),' to ',power_disp(2),ch10,&        
+&               " ==> Can not construct high order cross product bounding term",ch10
                 call wrtout(ab_out,message,'COLL')
                 call wrtout(std_out,message,'COLL')
-               to_cycle = .TRUE. 
                return  
        end if
        
@@ -1853,6 +1844,50 @@ function opt_boundcoeff(yvalues,cvalues) result (coeff)
 end function opt_boundcoeff
 !!***
 
+!!****f* m_opt_effpot/opt_boundcoeff
+!! NAME
+!! opt_boundcoeff
+!!
+!! FUNCTION
+!!
+!! optimize a bound coefficient if optimized value is negative 
+!! put an positive value that respects a precision penalty  
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+function check_to_skip(term) result (to_skip)
+!Arguments ------------------------------------
+ implicit none
+ type(polynomial_coeff_type),intent(in) :: term
+ logical :: to_skip
+! ------------------------------------
+!local
+!variable
+ character(len=1000) :: message
+!array
+! *************************************************************************
+
+to_skip = .FALSE. 
+! Let's check if we really want all this mess 
+! If the term is even and its coefficient positive we skip it. Also here we take terms(1) as example for all equivalent terms of term
+if(term%coefficient > 0 .and. .not. any(mod(term%terms(1)%power_disp(:),2) /= 0))then
+   if(.not. any(mod(term%terms(1)%power_strain(:),2) /= 0))then 
+         ! Message to Output 
+         write(message,'(3a)' )ch10,&
+&         ' ==> No need for high order bounding term',ch10
+         call wrtout(ab_out,message,'COLL')
+         call wrtout(std_out,message,'COLL')
+        to_skip = .TRUE. 
+        return  
+   end if
+end if
+
+end function check_to_skip
+!!***
 
 end module m_opt_effpot
 !!***
