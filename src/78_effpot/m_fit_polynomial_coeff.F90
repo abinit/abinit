@@ -251,7 +251,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
    else 
-     write(message,'(2a)') ch10,' Starting Fit process'
+     write(message,'(2a)') ch10,' Starting Fit process with all possible cross-terms'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
    endif
