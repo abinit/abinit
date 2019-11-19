@@ -152,12 +152,16 @@ CONTAINS
   recursive subroutine print_all_sll(self)
     class(sllist), intent(in) :: self
     real(dp) :: s
+    character(len=80) :: msg
+
     s=0.0_dp
     if (allocated(self%key)) then
-       write(*, *) self%key, self%val
-       if(associated(self%child)) then
-          call self%child%print_all()
-       endif
+      write(msg, "(A40, 1X, ES13.5)") self%key, self%val 
+      call wrtout(std_out,msg,'COLL')
+      call wrtout(ab_out, msg, 'COLL')
+      if(associated(self%child)) then
+        call self%child%print_all()
+      endif
     end if
   end subroutine print_all_sll
 
@@ -239,7 +243,7 @@ CONTAINS
     if (.not.(self%is_init)) then
        return
     end if
-    do i =1, self%vec_len
+    do i =0, self%vec_len-1
        s=s+ self%vec(i)%sum_val()
     end do
   end function sum_val_hash_table_t
