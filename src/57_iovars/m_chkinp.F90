@@ -1976,12 +1976,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
 
-!    nucdipmom requires kptopt > 2 or zero
-     if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) ) then
+!    nucdipmom requires kptopt 3 or zero
+     if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) .OR. (dt%kptopt .EQ. 4) ) then
        write(msg, '(a,i4,a,a,a)' )&
        ' Nuclear dipole moments (variable nucdipmom) break time reveral symmetry but kptopt = ',dt%kptopt,&
        ' => stop ',ch10,&
-       'Action: re-run with kptopt greater than 2 '
+       'Action: re-run with kptopt of 3 or 0 '
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
 

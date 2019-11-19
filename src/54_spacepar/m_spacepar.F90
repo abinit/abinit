@@ -36,7 +36,7 @@ module m_spacepar
  use m_time,            only : timab
  use defs_abitypes,     only : MPI_type
  use m_symtk,           only : mati3inv, chkgrp, symdet, symatm, matr3inv
- use m_geometry,        only : metric, symredcart
+ use m_geometry,        only : metric, symredcart,wedge_basis,wedge_product
  use m_mpinfo,          only : ptabs_fourdp
  use m_fft,             only : zerosym, fourdp
 
@@ -62,7 +62,7 @@ public :: rotate_rho
 contains
 !!***
 
-!!****f* m_spacepar/make_vectornd
+  !!****f* m_spacepar/make_vectornd
 !! NAME
 !! make_vectornd
 !!
@@ -102,24 +102,24 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
  !scalars
  integer,parameter :: im=2,re=1
  integer :: i1,i2,i2_local,i23,i3,iatom,id1,id2,id3,ig,ig1,ig2,ig3,ig1max,ig2max,ig3max
- integer :: ig1min,ig2min,ig3min
+ integer :: ig1min,ig2min,ig3min,igprim,irprim,imcgc
  integer :: ii,ii1,ing,me_fft,n1,n2,n3,nd_atom,nd_atom_tot,nproc_fft
  real(dp),parameter :: tolfix=1.000000001e0_dp
- real(dp) :: cutoff,gqgm12,gqg2p3,gqgm23,gqgm13,gs2,gs3,gs
- real(dp) :: phase,prefac,precosph,presinph,prefacgs,ucvol
+ real(dp) :: cutoff,gqgm12,gqg2p3,gqgm23,gqgm13,gs2,gs3,gs,phase,ucvol
+ complex(dpc) :: prefac,cgr
  !arrays
  integer :: id(3)
  integer,allocatable :: nd_list(:)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
- real(dp) :: gcart(3),gmet(3,3),gprimd(3,3),gred(3),mcg_cart(3),rmet(3,3)
- real(dp) :: AGre_red(3),AGre_cart(3),AGim_red(3),AGim_cart(3)
+ real(dp) :: gcart(3),gmet(3,3),gprimd(3,3),gprimdcv(3,3),gred(3),mcgr(3),mcgc(3),rmet(3,3)
+ real(dp) :: rgbasis(3,3,3)
  real(dp),allocatable :: gq(:,:),nd_m(:,:),ndvecr(:),work1(:,:),work2(:,:),work3(:,:)
+
 
 ! *************************************************************************
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
 
  ! make list of atoms with nonzero nuclear dipole moments
  ! in typical applications only 0 or 1 atoms have nonzero dipoles. This
@@ -131,6 +131,12 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
     end if
  end do
 
+ ! construct the basis vectors of the generalized cross product
+ ! real space a, b, c (contained in rprimd)
+ ! reciprocal space a*, b*, c* (contained in gprimd)
+ ! for m x G will need a x a*, a x b* etc (9 a^b type basis vectors)
+ call wedge_basis(gprimd,rprimd,rgbasis)
+
  ! note that nucdipmom is input as vectors in atomic units referenced
  ! to cartesian coordinates
  ABI_ALLOCATE(nd_list,(nd_atom_tot))
@@ -140,14 +146,15 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
     if (any(abs(nucdipmom(:,iatom))>tol8)) then
        nd_atom_tot = nd_atom_tot + 1
        nd_list(nd_atom_tot) = iatom
-       nd_m(:,nd_atom_tot) = nucdipmom(:,iatom)
+       ! the following expresses the dipole moment components in units of rprimd translations
+       nd_m(:,nd_atom_tot) = MATMUL(TRANSPOSE(gprimd),nucdipmom(:,iatom))
     end if
  end do
  
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
 
- prefac = -four_pi/(ucvol*two_pi)
+ prefac = -four_pi*j_dpc/(ucvol*two_pi)
 
  ! Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
@@ -205,53 +212,42 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
           ig1 = i1 - (i1/id1)*n1 -1 
           ii=i1+i23
 
-          gred(1) = one*ig1; gred(2) = one*ig2; gred(3) = one*ig3
-          ! obtain \vec{G} in cartesian coordinates
-          gcart(1:3) = MATMUL(gprimd,gred)
-          gs = DOT_PRODUCT(gred,MATMUL(gmet,gred))
+          gred(1) = gq(1,i1); gred(2) = gq(2,i2); gred(3) = gq(3,i3)
+         
+          if(gs .LE. cutoff)then
 
-         if(gs .LE. cutoff)then
+             do iatom = 1, nd_atom_tot
+                nd_atom = nd_list(iatom)
+                phase = -two_pi*DOT_PRODUCT(xred(:,nd_atom),gred(:))
+                cgr = cmplx(cos(phase),sin(phase))
 
-            prefacgs = prefac/gs
-            do iatom = 1, nd_atom_tot
-               nd_atom = nd_list(iatom)
-               phase = two_pi*DOT_PRODUCT(xred(:,nd_atom),gred(:))
-               presinph=prefacgs*sin(phase)
-               precosph=prefacgs*cos(phase)
+                ! cross product m x G
+                call wedge_product(mcgc,nd_m(:,iatom),gred,rgbasis)
+                
+                ! express mcgc relative to rprimd translations. This is done because
+                ! we wish ultimately to apply A.p to |cwavef>; in getghc_nucdip, the
+                ! p|cwavef> is done in reduced coordinates so do that here too, because
+                ! r.G has no need of the metric if both terms are in reduced coords
+                mcgc = MATMUL(TRANSPOSE(gprimd),mcgc)
+                
+                work1(re,ii) = work1(re,ii) + real(prefac*cgr*mcgc(1)/gs)
+                work2(re,ii) = work2(re,ii) + real(prefac*cgr*mcgc(2)/gs)
+                work3(re,ii) = work3(re,ii) + real(prefac*cgr*mcgc(3)/gs)
 
-               ! cross product m x G
-               mcg_cart(1) =  nd_m(2,iatom)*gcart(3) - nd_m(3,iatom)*gcart(2)
-               mcg_cart(2) = -nd_m(1,iatom)*gcart(3) + nd_m(3,iatom)*gcart(1)
-               mcg_cart(3) =  nd_m(1,iatom)*gcart(2) - nd_m(2,iatom)*gcart(1)
+                work1(im,ii) = work1(im,ii) + aimag(prefac*cgr*mcgc(1)/gs)
+                work2(im,ii) = work2(im,ii) + aimag(prefac*cgr*mcgc(2)/gs)
+                work3(im,ii) = work3(im,ii) + aimag(prefac*cgr*mcgc(3)/gs)
 
-               ! Re(A(G)), in cartesian coordinates
-               AGre_cart = presinph*mcg_cart
-
-               ! refer back to recip space
-               AGre_red = MATMUL(TRANSPOSE(gprimd),AGre_cart)
-
-               ! Im(A(G)), in cartesian coordinates
-               AGim_cart = precosph*mcg_cart
-
-               ! refer back to recip space
-               AGim_red = MATMUL(TRANSPOSE(gprimd),AGim_cart)
-
-               work1(re,ii) = AGre_red(1)
-               work2(re,ii) = AGre_red(2)
-               work3(re,ii) = AGre_red(3)
-               work1(im,ii) = AGim_red(1)
-               work2(im,ii) = AGim_red(2)
-               work3(im,ii) = AGim_red(3)
-            end do
-         else
-           ! gs>cutoff
-           work1(re,ii)=zero
-           work1(im,ii)=zero
-           work2(re,ii)=zero
-           work2(im,ii)=zero
-           work3(re,ii)=zero
-           work3(im,ii)=zero
-         end if
+             end do
+          else
+             ! gs>cutoff
+             work1(re,ii)=zero
+             work1(im,ii)=zero
+             work2(re,ii)=zero
+             work2(im,ii)=zero
+             work3(re,ii)=zero
+             work3(im,ii)=zero
+          end if
 
        end do ! End loop on i1
      end if
@@ -291,6 +287,237 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
 
 end subroutine make_vectornd
 !!***
+
+! here is version up to 30 October 2019
+! !!****f* m_spacepar/make_vectornd
+! !! NAME
+! !! make_vectornd
+! !!
+! !! FUNCTION
+! !! For nuclear dipole moments m, compute vector potential A(r) = (m x (r-R))/|r-R|^3
+! !! in r space. This is done by computing A(G) followed by FFT.
+! !!
+! !! NOTES
+! !! This code is copied and modified from m_spacepar/hartre where a very similar loop
+! !! over G is done followed by FFT to real space
+! !!
+! !! INPUTS
+! !!
+! !! OUTPUT
+! !!  vectornd(3,nfft)=Vector potential in real space, along Cartesian directions
+! !!
+! !! PARENTS
+! !!
+! !! CHILDREN
+! !!
+! !! SOURCE
+
+! subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom,&
+!      & rprimd,vectornd,xred)
+
+! !Arguments ------------------------------------
+! !scalars
+!  integer,intent(in) :: cplex,izero,natom,nfft
+!  real(dp),intent(in) :: gsqcut
+!  type(MPI_type),intent(in) :: mpi_enreg
+! !arrays
+!  integer,intent(in) :: ngfft(18)
+!  real(dp),intent(in) :: nucdipmom(3,natom),rprimd(3,3),xred(3,natom)
+!  real(dp),intent(out) :: vectornd(nfft,3)
+
+! !Local variables-------------------------------
+!  !scalars
+!  integer,parameter :: im=2,re=1
+!  integer :: i1,i2,i2_local,i23,i3,iatom,id1,id2,id3,ig,ig1,ig2,ig3,ig1max,ig2max,ig3max
+!  integer :: ig1min,ig2min,ig3min
+!  integer :: ii,ii1,ing,me_fft,n1,n2,n3,nd_atom,nd_atom_tot,nproc_fft
+!  real(dp),parameter :: tolfix=1.000000001e0_dp
+!  real(dp) :: cutoff,gqgm12,gqg2p3,gqgm23,gqgm13,gs2,gs3,gs
+!  real(dp) :: phase,prefac,precosph,presinph,prefacgs,ucvol
+!  !arrays
+!  integer :: id(3)
+!  integer,allocatable :: nd_list(:)
+!  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+!  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+!  real(dp) :: gcart(3),gmet(3,3),gprimd(3,3),gred(3),mcg_cart(3),rmet(3,3)
+!  real(dp) :: AGre_red(3),AGre_cart(3),AGim_red(3),AGim_cart(3)
+!  real(dp),allocatable :: gq(:,:),nd_m(:,:),ndvecr(:),work1(:,:),work2(:,:),work3(:,:)
+
+! ! *************************************************************************
+
+!  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+
+!  ! make list of atoms with nonzero nuclear dipole moments
+!  ! in typical applications only 0 or 1 atoms have nonzero dipoles. This
+!  ! code shouldn't even be called if all dipoles are zero.
+!  nd_atom_tot = 0
+!  do iatom = 1, natom
+!     if (any(abs(nucdipmom(:,iatom))>tol8)) then
+!        nd_atom_tot = nd_atom_tot + 1
+!     end if
+!  end do
+
+!  ! note that nucdipmom is input as vectors in atomic units referenced
+!  ! to cartesian coordinates
+!  ABI_ALLOCATE(nd_list,(nd_atom_tot))
+!  ABI_ALLOCATE(nd_m,(3,nd_atom_tot))
+!  nd_atom_tot = 0
+!  do iatom = 1, natom
+!     if (any(abs(nucdipmom(:,iatom))>tol8)) then
+!        nd_atom_tot = nd_atom_tot + 1
+!        nd_list(nd_atom_tot) = iatom
+!        nd_m(:,nd_atom_tot) = nucdipmom(:,iatom)
+!     end if
+!  end do
+ 
+!  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
+!  nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
+
+!  prefac = -four_pi/(ucvol*two_pi)
+
+!  ! Get the distrib associated with this fft_grid
+!  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+!  ! Initialize a few quantities
+!  cutoff=gsqcut*tolfix
+
+!  ! In order to speed the routine, precompute the components of g+q
+!  ! Also check if the booked space was large enough...
+!  ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
+!  do ii=1,3
+!    id(ii)=ngfft(ii)/2+2
+!    do ing=1,ngfft(ii)
+!      ig=ing-(ing/id(ii))*ngfft(ii)-1
+!      gq(ii,ing)=ig
+!    end do
+!  end do
+!  ig1max=-1;ig2max=-1;ig3max=-1
+!  ig1min=n1;ig2min=n2;ig3min=n3
+
+!  ABI_ALLOCATE(work1,(2,nfft))
+!  ABI_ALLOCATE(work2,(2,nfft))
+!  ABI_ALLOCATE(work3,(2,nfft))
+!  work1=zero; work2=zero; work3=zero
+!  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
+
+!  ! Triple loop on each dimension
+!  do i3=1,n3
+!    ig3=i3-(i3/id3)*n3-1
+!    ! Precompute some products that do not depend on i2 and i1
+!    gs3=gq(3,i3)*gq(3,i3)*gmet(3,3)
+!    gqgm23=gq(3,i3)*gmet(2,3)*2
+!    gqgm13=gq(3,i3)*gmet(1,3)*2
+
+!    do i2=1,n2
+!      ig2=i2-(i2/id2)*n2-1
+!      if (fftn2_distrib(i2) == me_fft) then
+!        gs2=gs3+ gq(2,i2)*(gq(2,i2)*gmet(2,2)+gqgm23)
+!        gqgm12=gq(2,i2)*gmet(1,2)*2
+!        gqg2p3=gqgm13+gqgm12
+
+!        i2_local = ffti2_local(i2)
+!        i23=n1*(i2_local-1 +(n2/nproc_fft)*(i3-1))
+!        ! Do the test that eliminates the Gamma point outside of the inner loop
+!        ii1=1
+!        if(i23==0 .and. ig2==0 .and. ig3==0)then
+!          ii1=2
+!          work1(re,1+i23)=zero
+!          work1(im,1+i23)=zero
+!        end if
+
+!        ! Final inner loop on the first dimension (note the lower limit)
+!        do i1=ii1,n1
+!           gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
+!           ig1 = i1 - (i1/id1)*n1 -1 
+!           ii=i1+i23
+
+!           gred(1) = one*ig1; gred(2) = one*ig2; gred(3) = one*ig3
+!           ! obtain \vec{G} in cartesian coordinates
+!           gcart(1:3) = MATMUL(gprimd,gred)
+!           gs = DOT_PRODUCT(gred,MATMUL(gmet,gred))
+
+!          if(gs .LE. cutoff)then
+
+!             prefacgs = prefac/gs
+!             do iatom = 1, nd_atom_tot
+!                nd_atom = nd_list(iatom)
+!                phase = two_pi*DOT_PRODUCT(xred(:,nd_atom),gred(:))
+!                presinph=prefacgs*sin(phase)
+!                precosph=prefacgs*cos(phase)
+
+!                ! cross product m x G
+!                mcg_cart(1) =  nd_m(2,iatom)*gcart(3) - nd_m(3,iatom)*gcart(2)
+!                mcg_cart(2) = -nd_m(1,iatom)*gcart(3) + nd_m(3,iatom)*gcart(1)
+!                mcg_cart(3) =  nd_m(1,iatom)*gcart(2) - nd_m(2,iatom)*gcart(1)
+
+!                ! Re(A(G)), in cartesian coordinates
+!                AGre_cart = presinph*mcg_cart
+
+!                ! refer back to recip space
+!                AGre_red = MATMUL(TRANSPOSE(gprimd),AGre_cart)
+
+!                ! Im(A(G)), in cartesian coordinates
+!                AGim_cart = precosph*mcg_cart
+
+!                ! refer back to recip space
+!                AGim_red = MATMUL(TRANSPOSE(gprimd),AGim_cart)
+
+!                work1(re,ii) = AGre_red(1)
+!                work2(re,ii) = AGre_red(2)
+!                work3(re,ii) = AGre_red(3)
+!                work1(im,ii) = AGim_red(1)
+!                work2(im,ii) = AGim_red(2)
+!                work3(im,ii) = AGim_red(3)
+!             end do
+!          else
+!            ! gs>cutoff
+!            work1(re,ii)=zero
+!            work1(im,ii)=zero
+!            work2(re,ii)=zero
+!            work2(im,ii)=zero
+!            work3(re,ii)=zero
+!            work3(im,ii)=zero
+!          end if
+
+!        end do ! End loop on i1
+!      end if
+!    end do ! End loop on i2
+!  end do ! End loop on i3
+
+!  ABI_DEALLOCATE(gq)
+!  ABI_DEALLOCATE(nd_list)
+!  ABI_DEALLOCATE(nd_m)
+
+!  if ( izero .EQ. 1 ) then
+!    ! Set contribution of unbalanced components to zero
+
+!     call zerosym(work1,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+!     call zerosym(work2,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+!     call zerosym(work3,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+
+!  end if
+
+!  ! Fourier Transform
+!  ABI_ALLOCATE(ndvecr,(cplex*nfft))
+!  ndvecr=zero
+!  call fourdp(cplex,work1,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
+!  vectornd(:,1)=ndvecr(:)
+!  ABI_DEALLOCATE(work1)
+ 
+!  ndvecr=zero
+!  call fourdp(cplex,work2,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
+!  vectornd(:,2) = ndvecr(:)
+!  ABI_DEALLOCATE(work2)
+ 
+!  ndvecr=zero
+!  call fourdp(cplex,work3,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
+!  vectornd(:,3) = ndvecr(:)
+!  ABI_DEALLOCATE(work3)
+!  ABI_DEALLOCATE(ndvecr)
+
+! end subroutine make_vectornd
+! !!***
 
 !!****f* m_spacepar/hartre
 !! NAME

@@ -848,6 +848,8 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
  ! scale conversion from SI to atomic units,
  ! here \alpha^2 where \alpha is the fine structure constant
  scale_conversion = FineStructureConstant2
+ ! JWZ debug
+ ! scale_conversion = zero
 
  if (nspinortot==1) then
 
@@ -894,6 +896,9 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
     end do ! idir
     ABI_DEALLOCATE(gcwavef)
     ABI_DEALLOCATE(ghc1)
+
+    ! JWZ debug blank this term for now
+    ! ghc_vectornd = zero
 
  else ! nspinortot==2
 

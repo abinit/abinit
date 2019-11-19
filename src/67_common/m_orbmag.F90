@@ -47,7 +47,7 @@ module m_orbmag
   use m_fft,              only : fftpac,fourwf
   use m_fftcore,          only : kpgsph,sphereboundary
   use m_fourier_interpol, only : transgrid
-  use m_geometry,         only : metric
+  use m_geometry,         only : metric,wedge_basis
   use m_getghc,           only : getghc
   use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type
   use m_initylmg,         only : initylmg
@@ -174,6 +174,7 @@ module m_orbmag
   public :: rho_norm_check
 
   private :: applyap
+  private :: make_dpdp_wedge
   private :: make_dpdp
   private :: cpg_dij_cpb
   private :: ctocprjb
@@ -1000,6 +1001,207 @@ subroutine rho_norm_check(atindx1,cg,cprj,dtorbmag,dtset,mpi_enreg,mcg,mcprj,&
   ABI_DATATYPE_DEALLOCATE(cprj_k)
 
 end subroutine rho_norm_check
+!!***
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/make_dpdp_wedge
+!! NAME
+!! make_dpdp_wedge
+!!
+!! FUNCTION
+!! This routine computes the trace of [\rho d\rho (1-\rho) d\rho] which
+!! appears in the Chern number
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2017 ABINIT  group (JWZ)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!! atindx1(natom)=index table for atoms, inverse of atindx (see gstate.f)
+!! cg(2,mcg)=planewave coefficients of wavefunctions
+!! cprj(natom,mcprj*usecrpj)=<p_lmn|Cnk> coefficients for each WF |Cnk> and each |p_lmn> non-local projector
+!! dtset <type(dataset_type)>=all input variables in this dataset
+!! kg(3,mpw*mkmem) = reduced (integer) coordinates of G vecs in basis sphere
+!! mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
+!! mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
+!! mpi_enreg=information about MPI parallelization
+!! npwarr(nkpt)=number of planewaves in basis at this k point
+!! pawang <type(pawang_type)>=paw angular mesh and related data
+!! pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
+!! pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
+!! psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!! pwind(pwind_alloc,2,3) = array used to compute
+!!           the overlap matrix smat between k-points (see initberry.f)
+!! pwind_alloc = first dimension of pwind
+!! rprimd(3,3) = real space translation vectors
+!! symrec(3,3,nsym) = symmetries in reciprocal space in terms of
+!!   reciprocal space primitive translations
+!! usecprj=1 if cprj datastructure has been allocated
+!! usepaw=1 if PAW calculation
+!! xred(3,natom) = location of atoms in unit cell
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!! dtorbmag <type(orbmag_type)> = variables related to orbital magnetization
+!!
+!! TODO
+!!
+!! NOTES
+!! See Ceresoli et al, PRB 74, 024408 (2006) [[cite:Ceresoli2006]],
+!! and Gonze and Zwanziger, PRB 84 064445 (2011) [[cite:Gonze2011a]].
+
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_dpdp_wedge(atindx1,cg,cnum_dpdp,cprj,dtset,dtorbmag,&
+     & mcg,mcprj,mpi_enreg,nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
+     & rprimd,smat_all_indx,symrec,usecprj,usepaw,xred)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: mcg,mcprj,nband_k,pwind_alloc,usecprj,usepaw
+  type(dataset_type),intent(in) :: dtset
+  type(MPI_type), intent(inout) :: mpi_enreg
+  type(orbmag_type), intent(inout) :: dtorbmag
+  type(pawang_type),intent(in) :: pawang
+  type(pseudopotential_type),intent(in) :: psps
+
+  !arrays
+  integer,intent(in) :: atindx1(dtset%natom)
+  integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
+  real(dp), intent(in) :: cg(2,mcg),rprimd(3,3)
+  real(dp), intent(in) :: smat_all_indx(2,dtorbmag%mband_occ,dtorbmag%mband_occ,dtorbmag%fnkpt,1:6,0:4)
+  real(dp), intent(in) :: xred(3,dtset%natom)
+  real(dp), intent(out) :: cnum_dpdp(2,3)
+  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*usepaw)
+  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj*usecprj)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*usepaw)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,bdir,bdx,bdxc,bdxstor,bfor,bsigma,epsabg,gdir,gdx,gdxc,gdxstor,gfor,gsigma
+  integer :: ikpt,ikptb,ikptg,isppol
+  integer :: my_nspinor,nn,n1,n2
+  real(dp) :: deltab,deltag,detp,ucvol
+  complex(dpc) :: IA,t1A,t2A,t3A
+  character(len=500) :: message
+  !arrays
+  integer :: levciv(3,3,3)
+  real(dp) :: dkb(3),dkg(3),gmet(3,3),gprimd(3,3),gprimdp(3,3),rmet(3,3),wedge(3,3,3)
+
+  ! ***********************************************************************
+  ! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
+
+  ! ! check density operator norm
+  ! call rho_norm_check(atindx1,cg,cprj,dtorbmag,dtset,mpi_enreg,mcg,mcprj,&
+  !    & npwarr,pawtab,usecprj,usepaw)
+
+  ! TODO: generalize to nsppol > 1
+  isppol = 1
+  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+
+  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+  levciv = 0
+  levciv(1,2,3) = 1; levciv(3,1,2) = 1; levciv(2,3,1) = 1
+  levciv(3,2,1) = -1; levciv(1,3,2) = -1; levciv(2,1,3) = -1
+
+  gprimdp = MATMUL(gprimd,dtorbmag%dkvecs)
+  detp = gprimdp(1,1)*(gprimdp(2,2)*gprimdp(3,3)-gprimdp(3,2)*gprimdp(2,3)) - &
+       & gprimdp(2,1)*(gprimdp(1,2)*gprimdp(3,3)-gprimdp(3,2)*gprimdp(1,3)) + &
+       & gprimdp(3,1)*(gprimdp(1,2)*gprimdp(2,3)-gprimdp(2,2)*gprimdp(1,3))
+
+  ! the smat_all_indx structure holds the <u_nk|S|u_n'k'> overlap matrix
+  ! elements. k ranges over the k pts in the FBZ.
+  ! k' can be k + bsigma*dkb, so k +/- an increment in the b direction,
+  ! where b ranges over bdir = 1 .. 3. In these cases (equivalent to berryphase_new.F90)
+  ! storage is in smat_all_indx(1:2,n,n',ikpt,bdx,0) where bdx maps bdir, bfor onto
+  ! the range 1..6. In addition, we also need twist matrix elements of the form
+  ! <u_nk+bsigma*dkb|S|u_n'k+gsigma*dkg>, that is, overlap between two functions
+  ! that both are neighbors to ikpt, so depend on both bdir and gdir. But we never need
+  ! the case bdir // gdir, so we only need four additional slots, not 6. Thus if
+  ! bdir = 1, gdir = 2 or 3 and gdx = 3,4,5,6; if bdir = 2, gdir = 3 or 1 and gdx = 5,6,1,2;
+  ! if bdir = 3, gdir = 1 or 2, gdx = 1,2,3,4.
+  ! This storage is mapped as gdxstor = mod(gdx+6-2*bdir,6)
+
+  cnum_dpdp(:,:) = zero
+  do adir = 1, 3
+     do bdir = 1, 3
+        do gdir = 1, 3
+           if ( levciv(adir,bdir,gdir) .EQ. 0 ) cycle
+           do bfor = 1, 2
+              if (bfor .EQ. 1) then
+                 bsigma = 1
+              else
+                 bsigma = -1
+              end if
+              ! index of neighbor 1..6
+              bdx = 2*bdir-2+bfor
+              ! index of ikpt viewed from neighbor
+              bdxc = bdx+bsigma
+              bdxstor=mod(bdx+6-2*gdir,6)
+              dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
+              deltab = sqrt(DOT_PRODUCT(dkb,dkb))
+              do gfor = 1, 2
+                 if (gfor .EQ. 1) then
+                    gsigma = 1
+                 else
+                    gsigma = -1
+                 end if
+                 ! index of neighbor 1..6
+                 gdx = 2*gdir-2+gfor
+                 gdxc = gdx + gsigma
+                 gdxstor=mod(gdx+6-2*bdir,6)
+
+                 dkg(1:3) = gsigma*dtorbmag%dkvecs(1:3,gdir)
+                 deltag = sqrt(DOT_PRODUCT(dkg,dkg))
+                 do ikpt = 1, dtorbmag%fnkpt
+                    ikptb = dtorbmag%ikpt_dk(ikpt,bfor,bdir)
+                    ikptg = dtorbmag%ikpt_dk(ikpt,gfor,gdir)
+                    IA=czero
+                    do nn = 1, nband_k
+                       do n1 = 1, nband_k
+                          t1A = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0),KIND=dpc)
+                          do n2 = 1, nband_k
+                             t2A = cmplx(smat_all_indx(1,n1,n2,ikpt,bdx,gdxstor),&
+                                  & smat_all_indx(2,n1,n2,ikpt,bdx,gdxstor),KIND=dpc)
+                             t3A = cmplx(smat_all_indx(1,n2,nn,ikptg,gdxc,0),&
+                                  & smat_all_indx(2,n2,nn,ikptg,gdxc,0),KIND=dpc)
+                             IA = IA + t1A*t2A*t3A
+                          end do ! end loop over n2
+                       end do ! end loop over n1
+                    end do ! end loop over nn
+
+                    cnum_dpdp(2,adir) = cnum_dpdp(2,adir) + &
+                         & levciv(adir,bdir,gdir)*bsigma*gsigma*real(IA)/(two*deltab*two*deltag)
+                    cnum_dpdp(1,adir) = cnum_dpdp(1,adir) - &
+                         & levciv(adir,bdir,gdir)*bsigma*gsigma*aimag(IA)/(two*deltab*two*deltag)
+
+                 end do ! end loop over kpts
+              end do ! end loop over gfor
+           end do ! end loop over bfor
+        end do ! end loop over gdir
+     end do ! end loop over bdir
+  end do ! end loop over adir
+
+  ! cnum_dpdp(1,1:3) = MATMUL(TRANSPOSE(gprimdp),cnum_dpdp(1,1:3))/detp
+  ! cnum_dpdp(2,1:3) = MATMUL(TRANSPOSE(gprimdp),cnum_dpdp(2,1:3))/detp
+  cnum_dpdp(1,1:3) = MATMUL(gprimd,cnum_dpdp(1,1:3))*ucvol
+  cnum_dpdp(2,1:3) = MATMUL(gprimd,cnum_dpdp(2,1:3))*ucvol
+
+  ! ! factor of 2 in the numerator is the occupation number--each band contains
+  ! ! two electrons, by assumption. Necessary such that trace over density operator
+  ! ! gives number of electrons as expected.
+  ! dtorbmag%chern(1,1:3) = -cnum(2,1:3)*two/(two_pi*ucvol*dtorbmag%fnkpt)
+  ! dtorbmag%chern(2,1:3) =  cnum(1,1:3)*two/(two_pi*ucvol*dtorbmag%fnkpt)
+
+end subroutine make_dpdp_wedge
 !!***
 
 !{\src2tex{textfont=tt}}
@@ -3759,6 +3961,9 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     call make_dpdp(atindx1,cg,cnum_dpdp,cprj,dtset,dtorbmag,&
      & mcg,mcprj,mpi_enreg,nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
      & rprimd,smat_all_indx,symrec,usecprj,psps%usepaw,xred)
+    ! call make_dpdp_wedge(atindx1,cg,cnum_dpdp,cprj,dtset,dtorbmag,&
+    !  & mcg,mcprj,mpi_enreg,nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
+    !  & rprimd,smat_all_indx,symrec,usecprj,psps%usepaw,xred)
 
     cnum_dpdp(1,1:3) = ucvol*MATMUL(gprimd,cnum_dpdp(1,1:3))
     cnum_dpdp(2,1:3) = ucvol*MATMUL(gprimd,cnum_dpdp(2,1:3))
