@@ -720,7 +720,7 @@ contains
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
     if(iam_master) then
-      call scpot%liu_sc%initialize(mshape=[-1, self%nspin*3, self%natom*3])
+      call scpot%liu_sc%initialize(mshape=[self%nspin*3, self%natom*3])
     endif
 
     do inz=1, self%liu%nnz
@@ -765,7 +765,7 @@ contains
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
     if(iam_master) then
-      call scpot%niuv_sc%initialize(mshape=[-1, -1, self%nspin*3, self%natom*3, self%natom*3])
+      call scpot%niuv_sc%initialize(mshape=[self%nspin*3, self%natom*3, self%natom*3])
     endif
 
     do inz=1, self%niuv%nnz
@@ -817,7 +817,7 @@ contains
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
     if(iam_master) then
-      call scpot%oiju_sc%initialize(mshape=[-1, -1, self%nspin*3, self%nspin*3, self%natom*3])
+      call scpot%oiju_sc%initialize(mshape=[self%nspin*3, self%nspin*3, self%natom*3])
     endif
 
     do inz=1, self%oiju%nnz
@@ -864,7 +864,7 @@ contains
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
     if(iam_master) then
-      call scpot%tijuv_sc%initialize(mshape=[-1, -1, -1, self%nspin*3, self%nspin*3, self%natom*3, self%natom*3])
+      call scpot%tijuv_sc%initialize(mshape=[self%nspin*3, self%nspin*3, self%natom*3, self%natom*3])
     endif
 
     do inz=1, self%tijuv%nnz
