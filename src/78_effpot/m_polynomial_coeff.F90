@@ -2871,8 +2871,8 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
 
 !Arguments ---------------------------------------------
 !scalar
- integer,intent(in) :: natom,ncoeff,power_disp,power_disp_min,power_disp_max,ncoeff_out,nsym,nrpt,nstr
- integer,intent(inout) :: icoeff,icoeff_tot
+ integer,intent(in) :: natom,ncoeff,power_disp,power_disp_min,power_disp_max,ncoeff_out,nsym,nrpt,nstr,icoeff
+ integer,intent(inout) :: icoeff_tot
  logical,optional,intent(in) :: compute,anharmstr,spcoupling,distributed
  integer,optional,intent(in) :: nbody
 !arrays
@@ -2922,9 +2922,12 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
    do icoeff1=icoeff,ncoeff+nstr
 !    If the distance between the 2 coefficients is superior than the cut-off,
 !    we cycle
-!    If the power_disp is one, we need to set icoeff to icoeff1
-     if(power_disp==1) icoeff = icoeff1
-
+!    If the power_disp is one check if icoeff1 is compatible with itself
+     if(power_disp==1) then
+       if(icoeff1 <= ncoeff .and. compatibleCoeffs(icoeff1,icoeff1)==0)then
+         cycle
+       end if
+     end if
      if(compatibleCoeffs(icoeff,icoeff1)==0) cycle
 
 !    Reset the flag compatible and possible
@@ -3118,8 +3121,8 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
 !Arguments ---------------------------------------------
 !scalar
  integer,intent(in) :: natom,ncoeff,ncoeff_sym,power_disp,power_disp_min,power_disp_max
- integer,intent(in) :: max_power_strain,nmodel,nsym,nrpt,nstr,comm
- integer,intent(inout) :: icoeff,nmodel_tot,nirred_comb,iirred_comb
+ integer,intent(in) :: max_power_strain,nmodel,nsym,nrpt,nstr,comm,icoeff
+ integer,intent(inout) :: nmodel_tot,nirred_comb,iirred_comb
  logical,optional,intent(in) :: compute,anharmstr,spcoupling
  integer,optional,intent(in) :: nbody
  logical,optional,intent(in) :: only_odd_power,only_even_power
@@ -3170,8 +3173,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
 
 !    If the power_disp is one, we need to set icoeff to icoeff1
      if(power_disp==1) then
-       icoeff = icoeff1
-       if(icoeff1 <= ncoeff .and. compatibleCoeffs(icoeff,icoeff1)==0)then
+       if(icoeff1 <= ncoeff .and. compatibleCoeffs(icoeff1,icoeff1)==0)then
          compatible = .FALSE.
        end if
      end if
