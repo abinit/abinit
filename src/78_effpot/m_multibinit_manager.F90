@@ -535,7 +535,7 @@ contains
     class(mb_manager_t), intent(inout) :: self
     integer :: istep
     character(len=90) :: msg
-    real(dp) :: t
+    real(dp) :: t, etotal
 
     call self%prim_pots%initialize()
     call self%read_potentials()
@@ -548,8 +548,18 @@ contains
     call self%slc_mover%initialize(self%spin_mover, self%lattice_mover)
     call self%slc_mover%run_time(self%pots, displacement=self%lattice_mover%displacement, &
         & spin=self%spin_mover%Stmp, energy_table=self%energy_table)
+    msg=repeat("=", 80)
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    msg='Energy contributions'
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
     call self%energy_table%print_all()
-    msg=repeat("=", 90)
+    etotal=self%energy_table%sum_val()
+    write(msg, "(A12, 29X, ES13.5)") 'Total energy', etotal
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    msg=repeat("=", 80)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
