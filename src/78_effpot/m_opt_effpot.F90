@@ -499,26 +499,29 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
        call wrtout(ab_out,message,'COLL')
        call wrtout(std_out,message,'COLL')
        !Get List of high order single Terms for terms 
-       call opt_getHOSingleDispTerms(eff_pot%anharmonics_terms%coefficients(iterm),& 
+       call opt_getHOSingleDispTerms(eff_pot%anharmonics_terms%coefficients(iterm),&
 &                                    HOsingledisp_terms,symbols,singledisp_terms,order_ran,ncombi1,comm)
-       
-       my_coeffs = eff_pot%anharmonics_terms%coefficients + HOsingledisp_terms
-        
+                                     
        !Get List of high order cross Terms for term if ndisp > 1
        to_skip = .true.
-       if(eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp>1 .or. & 
-&	  eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp /= 0 .and. &
+       if(eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp>1 .or. &
+&         eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp /= 0 .and. &
 &         eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%nstrain /= 0)then 
          call opt_getHOcrossdisp(HOcrossdisp_terms,ncombi2,to_skip,eff_pot%anharmonics_terms%coefficients(iterm),order_ran,comm)
-       endif 
+       endif  
        !Skip term if it doesn't need bounding 
        if(.not. to_skip)then
+          ABI_DATATYPE_ALLOCATE(my_coeffs,(size(eff_pot%anharmonics_terms%coefficients)+size(HOsingledisp_terms)))
+          my_coeffs = eff_pot%anharmonics_terms%coefficients + HOsingledisp_terms
           ABI_DATATYPE_ALLOCATE(my_coeffs_tmp,(size(my_coeffs)))
-          my_coeffs_tmp = my_coeffs 
+          my_coeffs_tmp = my_coeffs
+          if(allocated(my_coeffs))ABI_DATATYPE_DEALLOCATE(my_coeffs)
+          ABI_DATATYPE_ALLOCATE(my_coeffs,(size(my_coeffs_tmp)+size(HOcrossdisp_terms)))
           my_coeffs = my_coeffs_tmp + HOcrossdisp_terms
-          ABI_DATATYPE_DEALLOCATE(my_coeffs_tmp)
+          if(allocated(my_coeffs_tmp))ABI_DATATYPE_DEALLOCATE(my_coeffs_tmp) 
        else 
          ncombi2=0
+         ncombi1=0
        endif 
        ncombi = ncombi1 + ncombi2 
        nterm_start = eff_pot%anharmonics_terms%ncoeff
@@ -649,7 +652,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
            ABI_DEALLOCATE(exists)
      enddo ! icombi
 
-       ABI_DATATYPE_DEALLOCATE(my_coeffs)  
+       if(allocated(my_coeffs)) ABI_DATATYPE_DEALLOCATE(my_coeffs)  
        if(allocated(HOcrossdisp_terms))ABI_DATATYPE_DEALLOCATE(HOcrossdisp_terms)  
        if(allocated(HOcrossdisp_terms))ABI_DATATYPE_DEALLOCATE(HOsingledisp_terms)  
    enddo !iterm
@@ -1390,8 +1393,10 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,to_cycle,term_in,power_disp,comm)
        do icombi=1,ncombi_tot
            if(icombi <= ncombi)then
               terms_out(icombi) = term
+              nterm_of_term = term%nterm
            else
               terms_out(icombi) = term_in
+              nterm_of_term = term_in%nterm
            endif
            coeff_ini = 0.01 !abs(terms_out(icombi)%coefficient / 2)
            terms_out(icombi)%coefficient = coeff_ini

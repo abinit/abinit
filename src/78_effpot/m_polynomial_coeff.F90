@@ -1728,9 +1728,11 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
    if(.not.(all(list_symcoeff_tmp2(:,icoeff,1)==0)))then
      do mu=1,3
        if( -max_range(mu) > cell(mu,list_symcoeff_tmp2(4,icoeff,1)) .or. &
-&       cell(mu,list_symcoeff_tmp2(4,icoeff,1)) > max_range(mu))then
-         list_symcoeff_tmp2(:,icoeff,:)=0
-         exit
+&           cell(mu,list_symcoeff_tmp2(4,icoeff,1)) > max_range(mu))then
+         if(cell(mu,list_symcoeff_tmp2(4,icoeff,1)) < -1)then
+            list_symcoeff_tmp2(:,icoeff,:)=0
+            exit
+         end if
        end if
      end do
    end if
@@ -2248,7 +2250,7 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
      end do !end  icoeff 
    end do !icoeff2
 
-
+!if(iam_master)write(std_out,*) "DEBUG rpimd(1,1)+rprimd(1,2)+rprimd(1,3)*sc_size(1): ", (rprimd(1,1) + rprimd(1,2) + rprimd(1,3))*sc_size(1) 
 ! ABI_DEALLOCATE(dist)
 ! ABI_DEALLOCATE(rpt)
 !   do icoeff=1,ncoeff_symsym+nstr_sym
@@ -2511,18 +2513,18 @@ if(iam_master)then
   ABI_ALLOCATE(index_irred,(1)) 
   index_irred = 1
   if(need_spcoupling)then !Check irreducibility of strain-phonon terms 
-    if(need_verbose)then 
-      write(message,'(1a)')' Reduce reducible Strain-Phonon combinations on master'
-      call wrtout(std_out,message,'COLL')
-    endif
-    do i=2,ncombination
-       if(any(list_combination_tmp(:,i) > ncoeff_symsym))then
-          irreducible = check_irreducibility(list_combination_tmp(:,i),list_combination_tmp(:,:i-1),list_symcoeff,list_symstr,ncoeff_symsym,nsym,i-1,power_disps(2),index_irred,comm)
-          if(.not. irreducible) list_combination_tmp(:,i) = 0
-       endif
-    enddo
-    call reduce_zero_combinations(list_combination_tmp)
-    ncombination = size(list_combination_tmp,2)
+   if(need_verbose)then 
+     write(message,'(1a)')' Reduce reducible Strain-Phonon combinations on master'
+     call wrtout(std_out,message,'COLL')
+   endif
+   do i=2,ncombination
+      if(any(list_combination_tmp(:,i) > ncoeff_symsym))then
+        irreducible = check_irreducibility(list_combination_tmp(:,i),list_combination_tmp(:,:i-1),list_symcoeff,list_symstr,ncoeff_symsym,nsym,i-1,power_disps(2),index_irred,comm)
+        if(.not. irreducible) list_combination_tmp(:,i) = 0
+      endif
+   enddo
+   call reduce_zero_combinations(list_combination_tmp)
+   ncombination = size(list_combination_tmp,2)
   endif
   ABI_DEALLOCATE(index_irred) 
 end if !iam_master
@@ -2776,12 +2778,12 @@ endif
    end if
  end do
 
-!do i=0,nproc
-!  if(my_rank == i)then
-!    write (filename, "(A9,I2,A4)") "terms_set", i+1,".xml"
-!    call polynomial_coeff_writeXML(coefficients,my_newncoeff,filename=filename)
-!  end if
-!enddo
+do i=0,nproc
+  if(my_rank == i)then
+    write (filename, "(A9,I2,A4)") "terms_set", i+1,".xml"
+    call polynomial_coeff_writeXML(coefficients,my_newncoeff,filename=filename)
+  end if
+enddo
  
  if(need_verbose)then
    write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10
@@ -4003,7 +4005,7 @@ end function coeffs_compare
 !!
 !! SOURCE
 
-pure function coeffs_list_conc(coeff_list1,coeff_list2) result (coeff_list_out)
+function coeffs_list_conc(coeff_list1,coeff_list2) result (coeff_list_out)
 !Arguments ------------------------------------
  implicit none
 
@@ -4056,31 +4058,32 @@ subroutine coeffs_list_copy(coeff_list_out,coeff_list_in)
 
 !Arguments ------------------------------------
   type(polynomial_coeff_type), intent(in) :: coeff_list_in(:)
-  type(polynomial_coeff_type),allocatable,intent(inout) :: coeff_list_out(:)
-  integer :: dummy 
+  type(polynomial_coeff_type),intent(out) :: coeff_list_out(:)
+  integer :: dummy
 !local
 !variable
-  integer :: ncoeff1,ncoeff_out,ii 
+  integer :: ncoeff_in,ncoeff_out,ii
   logical :: check
+  character(len=500):: message
 !array
 ! *************************************************************************
- 
+
  check = .true.
 
-!Free output 
- if(allocated(coeff_list_out))then
-   ABI_DATATYPE_DEALLOCATE(coeff_list_out) 
- endif
-!Get size of coeff_list1
- ncoeff1 = size(coeff_list_in) 
+!Get size of coeff_lists
+ ncoeff_in = size(coeff_list_in)
+ ncoeff_out = size(coeff_list_out)
 
- !Allocate output 
- ABI_DATATYPE_ALLOCATE(coeff_list_out,(ncoeff1)) 
- 
+ if(ncoeff_in > ncoeff_out)then
+   write(message,'(a,a,a)')'The input list of polynomial_coefficients is larger',ch10,&
+&                          'than the output list you want it assign to. Check size of lists.'
+   MSG_ERROR(message)
+ endif
+
  !Copy input list into output lists 
- do ii=1,ncoeff1
-    call polynomial_coeff_init(coeff_list_in(ii)%coefficient,coeff_list_in(ii)%nterm,& 
-&                             coeff_list_out(ii),coeff_list_in(ii)%terms,coeff_list_in(ii)%name,check) 
+ do ii=1,ncoeff_in
+    call polynomial_coeff_init(coeff_list_in(ii)%coefficient,coeff_list_in(ii)%nterm,&
+&                             coeff_list_out(ii),coeff_list_in(ii)%terms,coeff_list_in(ii)%name,check)
  enddo
    
 end subroutine coeffs_list_copy
