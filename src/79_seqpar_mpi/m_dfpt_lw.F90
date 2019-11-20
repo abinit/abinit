@@ -1599,7 +1599,7 @@ end subroutine dfpt_qdrpout
 !!  respfn
 !!
 !! CHILDREN
-!!  appdig,dfpt_flexoout,dfpt_flexowf,dfpt_rhotov,distrb2,dotprod_vn,
+!!  appdig,dfpt_ciflexoout,dfpt_ciflexowf,dfpt_rhotov,distrb2,dotprod_vn,
 !!  ebands_free,ebands_init,fourdp,
 !!  getcut,getmpw,getph,hdr_init,hdr_update,
 !!  initmpi_band,init_hamiltonian,initylmg,inwffil,kpgio
@@ -2653,7 +2653,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !    Compute the wf contributions to the electronic flexoelectric tensor
      if (lw_flexo==1.or.lw_flexo==2) then
-       call dfpt_flexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k, &
+       call dfpt_ciflexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k, &
        &  elflexowf_t3_k,elflexowf_t4_k,elflexowf_t5_k, &
        &  gs_hamkq,gsqcut,icg,ikpt,indkpt1,isppol,istwf_k, &
        &  kg_k,kpoint,mkmem_rbz, &
@@ -2834,7 +2834,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 !Anounce finalization of calculations
  if (lw_flexo==1.or.lw_flexo==2) then
    write(msg, '(a,a,a)' ) ch10, &
-   ' Electronic flexoelectric tensor calculation completed ',ch10
+   ' Frozen-ion flexoelectric tensor calculation completed ',ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  end if
@@ -2846,7 +2846,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  end if
  if (lw_flexo==1.or.lw_flexo==4) then
    write(msg, '(a,a,a)' ) ch10, &
-   ' Internal strain tensor 1st q-gradient calculation completed ',ch10
+   ' Piezoelectric force response 1st q-gradient calculation completed ',ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  end if
@@ -2854,7 +2854,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 !Gather the different terms in the flexoelectric tensor and print them out
  if (me==0) then
    if (lw_flexo==1.or.lw_flexo==2) then
-     call dfpt_flexoout(d3etot,elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
+     call dfpt_ciflexoout(d3etot,elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
    & elflexowf_t3,elflexowf_t4,elflexowf_t5, &
    & elqgradhart,gprimd,dtset%kptopt,matom,mpert,nefipert, &
    & nstrpert,nq1grad,pert_efield,pert_strain,dtset%prtvol,q1grad,rprimd,ucvol)
@@ -2955,9 +2955,9 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 end subroutine dfpt_flexo
 !!***
 
-!!****f* ABINIT/dfpt_flexoout
+!!****f* ABINIT/dfpt_ciflexoout
 !! NAME
-!!  dfpt_flexoout
+!!  dfpt_ciflexoout
 !!
 !! FUNCTION
 !!  This subroutine gathers the different terms entering the electrocic flexoelectric tensor,
@@ -3013,7 +3013,7 @@ end subroutine dfpt_flexo
 !!
 !! SOURCE
 
- subroutine dfpt_flexoout(d3etot,elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
+ subroutine dfpt_ciflexoout(d3etot,elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
     & elflexowf_t3,elflexowf_t4,elflexowf_t5, &
     & elqgradhart,gprimd,kptopt,matom,mpert,nefipert,&
     & nstrpert,nq1grad,pert_efield,pert_strain,prtvol,q1grad,rprimd,ucvol)
@@ -3022,7 +3022,7 @@ end subroutine dfpt_flexo
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dfpt_flexoout'
+#define ABI_FUNC 'dfpt_ciflexoout'
 !End of the abilint section
 
  implicit none
@@ -3346,7 +3346,7 @@ end subroutine dfpt_flexo
  end if
 
  write(ab_out,*)' '
- write(ab_out,*)' Electronic flexoelectric tensor, in cartesian coordinates,'
+ write(ab_out,*)' Frozen-ion flexoelectric tensor, in cartesian coordinates,'
  write(ab_out,*)' efidir  qgrdir  strdir1  strdir2         real part          imaginary part'
  do istr2dir=1,3
    delta=istr2dir
@@ -3509,7 +3509,7 @@ end subroutine dfpt_flexo
 
  DBG_EXIT("COLL")
 
-end subroutine dfpt_flexoout
+end subroutine dfpt_ciflexoout
 !!***
 
 
@@ -3573,7 +3573,7 @@ end subroutine dfpt_flexoout
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dfpt_flexoout'
+#define ABI_FUNC 'dfpt_ciflexoout'
 !End of the abilint section
 
  implicit none
@@ -4425,7 +4425,7 @@ end subroutine dfpt_flexoout
  end if
 
  write(ab_out,*)' '
- write(ab_out,*)' q-gradient of internal strain tensor, in cartesian coordinates,'
+ write(ab_out,*)' q-gradient of piezoelectric force response tensor, in cartesian coordinates,'
  write(ab_out,'(a85)')'atom   atdir  qgrdir  strdir1  strdir2         real part          imaginary part'
  do istr2dir=1,3
    delta=istr2dir
@@ -4544,6 +4544,7 @@ end subroutine dfpt_flexoout
  write(ab_out,*)' '
  write(ab_out,*)' Elastic tensor, in cartesian coordinates '
  write(ab_out,*)' (from q-gradient of internal strain),'
+ write(ab_out,*)' (for stressed cells it lacks an improper contribution),'
  write(ab_out,*)'atdir  qgrdir  strdir1  strdir2         real part          imaginary part'
  do istr2dir=1,3
    delta=istr2dir

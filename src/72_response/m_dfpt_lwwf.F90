@@ -52,7 +52,7 @@ module m_dfpt_lwwf
 !!***
 
  public :: dfpt_qdrpwf
- public :: dfpt_flexowf
+ public :: dfpt_ciflexowf
  public :: dfpt_ddmdqwf
  public :: dfpt_isdqwf
  public :: dfpt_isdqfr
@@ -960,9 +960,9 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 end subroutine dfpt_qdrpwf
 !!***
 
-!!****f* ABINIT/dfpt_flexowf
+!!****f* ABINIT/dfpt_ciflexowf
 !! NAME
-!!  dfpt_flexowf
+!!  dfpt_ciflexowf
 !!
 !! FUNCTION
 !!  This routine computes the band and kpt resolved contributions 
@@ -1047,7 +1047,7 @@ end subroutine dfpt_qdrpwf
 !!
 !! SOURCE
 
-subroutine dfpt_flexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k,& 
+subroutine dfpt_ciflexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k,& 
      &  elflexowf_t3_k,elflexowf_t4_k,elflexowf_t5_k, &
      &  gs_hamkq,gsqcut,icg,ikpt,indkpt1,isppol,istwf_k, &
      &  kg_k,kpt,mkmem, &
@@ -1062,7 +1062,7 @@ subroutine dfpt_flexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dfpt_flexowf'
+#define ABI_FUNC 'dfpt_ciflexowf'
 !End of the abilint section
 
  implicit none
@@ -1863,7 +1863,7 @@ end do
 
  DBG_EXIT("COLL")
 
-end subroutine dfpt_flexowf
+end subroutine dfpt_ciflexowf
 !!***
 
 !!****f* ABINIT/dfpt_ddmdqwf
