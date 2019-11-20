@@ -27,9 +27,9 @@
 module m_outxml
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
+ use m_dtset
 
  use m_io_tools,    only : open_file
  use m_geometry,    only : xcart2xred, xred2xcart
@@ -68,8 +68,6 @@ contains
 !! SOURCE
 
 subroutine outxml_open(filename)
-
-  implicit none
 
 !Arguments -------------------------------
   character(len = *), intent(in) :: filename
@@ -118,8 +116,6 @@ end subroutine outxml_open
 !! SOURCE
 
 subroutine outxml_finalise(tsec, values)
-
-  implicit none
 
 !Arguments -------------------------------
   integer, intent(in) :: values(8)
@@ -171,8 +167,6 @@ end subroutine outxml_finalise
 !! SOURCE
 
 subroutine out_resultsgs_XML(dtset, level, results_gs, usepaw)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -287,8 +281,6 @@ end subroutine out_resultsgs_XML
 !! SOURCE
 
 subroutine out_geometry_XML(dtset, level, natom, rprimd, xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

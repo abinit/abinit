@@ -37,32 +37,56 @@ module m_spmat_NDCOO
   !!***
   private
 
+  !-----------------------------------------------------------------------
+  !> @brief NDCOO_mat_t : N-dimensional COO matrix type
+  !     The matrix is stored in two arrays, one for the indices, and
+  !     the other for the values.
+  !     e.g. a 3D matrix (M) with nnz non-zero entries will have an
+  !     (3,nnz) array as indices, and a (nnz) array value.
+  !     Both the index array and the value array are dynamic, so entries
+  !     can be appended.
+  !     let M be a 4*5*6 matrix,
+  !       M(1,2,3)=1.9, M(1,3,4)=2.4, M(...) =0
+  !     We'll have
+  !       ndim=3, nnz=2, mshape=[4,5,6]
+  !       ind = [ 1 2 3,
+  !               1 3 4 ]
+  !       val = [1.9, 2.4]
+  !       (ind and val are dynamic array.)
+  !-----------------------------------------------------------------------
   type, public :: ndcoo_mat_t
-     integer :: ndim=0
-     integer :: nnz=0
-     integer, allocatable :: mshape(:)
-     type(int2d_array_type) :: ind
-     type(real_array_type) :: val
-     logical :: is_sorted = .False.
-     logical :: is_unique = .False.
+     integer :: ndim=0                  ! number of dimensions
+     integer :: nnz=0                   ! Number of (None-zero) entries. 
+     integer, allocatable :: mshape(:)  ! the shape of the matrix. len(mshpae)=ndim.
+     ! Note that it is not checked if the index by the shaped. If a the shape for some
+     ! dimension is unkown, it can be set to -1.
+     type(int2d_array_type) :: ind      ! The index array
+     type(real_array_type) :: val       ! The value array
+     logical :: is_sorted = .False.     ! If the matrix is sorted by index
+     logical :: is_unique = .False.     ! If the matrix is made unique (no entry could have same index).
    contains
      procedure :: initialize
      procedure :: finalize
-     procedure :: add_entry
-     procedure :: remove_zeros
-     procedure :: sort_indices
-     procedure :: sum_duplicates
-     procedure :: get_val_inz
-     procedure :: get_ind_inz
-     procedure :: get_ind
-     procedure :: group_by_1dim
-     procedure :: mv1vec
+     procedure :: add_entry             ! add one entry
+     procedure :: remove_zeros          ! remove entries which are (or close to ) zero
+     procedure :: sort_indices          ! sort the matrix by indices
+     procedure :: sum_duplicates        ! remove duplicate indexes by adding them up
+     procedure :: get_val_inz           ! get the z'th value.
+     procedure :: get_ind_inz           ! get the z'th indices.
+     procedure :: get_ind               ! get the indices for all in a dimension
+     procedure :: group_by_1dim         ! group the matrix by first dimension
+     procedure :: mv1vec                ! multiply vector
      !procedure :: print
   end type ndcoo_mat_t
 
   public:: test_ndcoo
 contains
 
+  !-------------------------------------------------------------------!
+  ! ndcoo_mat_t initializer:
+  ! Input:
+  !  mshape: the shape of the N-dimension matrix. array(ndim)
+  !-------------------------------------------------------------------!
   subroutine initialize(self, mshape)
     class(ndcoo_mat_t), intent(inout) :: self
     integer, intent(in) :: mshape(:)
@@ -74,6 +98,9 @@ contains
     self%is_unique=.False.
   end subroutine initialize
 
+  !-------------------------------------------------------------------!
+  ! Finalizer of ndcoo_mat_t
+  !-------------------------------------------------------------------!
   subroutine finalize(self)
     class(ndcoo_mat_t), intent(inout) :: self
     self%ndim=0
@@ -87,6 +114,14 @@ contains
     call self%val%finalize()
   end subroutine finalize
 
+  !-------------------------------------------------------------------!
+  ! Add one entry to the ndcoo_mat_t
+  ! Inputs:
+  !   ind: indices of the matrix.
+  !   val: value of matrix.
+  ! Example:
+  !  call m%add_entry([1,2,3], 0.5)
+  !-------------------------------------------------------------------!
   subroutine add_entry(self, ind, val)
     class(ndcoo_mat_t), intent(inout) :: self
     integer, intent(in) :: ind(self%ndim)
@@ -116,6 +151,7 @@ contains
 
   !-------------------------------------------------------------------!
   ! Remove zero entries in coo matrix.
+  !  zero means abs(x)<eps
   !-------------------------------------------------------------------!
   subroutine remove_zeros(self, eps)
     class(ndcoo_mat_t), intent(inout) :: self
@@ -175,6 +211,9 @@ contains
     self%is_unique=.True.
   end subroutine sum_duplicates
 
+  !-------------------------------------------------------------------!
+  ! Get the i'th value of the matrix.
+  !-------------------------------------------------------------------!
   function get_val_inz(self, i) result(v)
     class(ndcoo_mat_t), intent(inout) :: self
     integer, intent(in) :: i
@@ -183,6 +222,13 @@ contains
   end function get_val_inz
 
 
+  !-------------------------------------------------------------------!
+  ! get all the indices for the ith entry
+  ! Input:
+  !  i: ith entry
+  ! Return:
+  !  a integer array of indices.
+  !-------------------------------------------------------------------!
   function get_ind_inz(self, i) result(ind)
     class(ndcoo_mat_t), intent(inout) :: self
     integer, intent(in) :: i
@@ -190,6 +236,15 @@ contains
     ind(:)=self%ind%data(:,i)
   end function get_ind_inz
 
+  !-------------------------------------------------------------------!
+  ! Group the sparse matrix by the first dimension
+  !> Output:
+  !> ngroup: number of groups
+  !> i1_list: list of 1st indices (array(ngroup))
+  !> istartend: start and end of each group (array(ngroup+1))
+  !>           The starts will be istartend(1:ngroup)
+  !>           The ends will be istartend(2: ngroup+1)-1
+  !-------------------------------------------------------------------!
   subroutine group_by_1dim(self, ngroup, i1_list, istartend)
     class(ndcoo_mat_t), intent(inout) :: self
     integer, intent(inout) :: ngroup
@@ -234,6 +289,13 @@ contains
     call jstartend%finalize()
   end subroutine group_by_1dim
 
+  !-------------------------------------------------------------------!
+  ! Get the indices of the dim'th dimension
+  ! Input:
+  !   dim: dimension
+  ! Returns:
+  !   a integer array(nnz)
+  !-------------------------------------------------------------------!
   function get_ind(self, dim) result(ilist)
     class(ndcoo_mat_t), intent(inout) :: self
     integer, intent(in) :: dim

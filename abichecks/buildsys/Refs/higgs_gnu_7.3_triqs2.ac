@@ -370,7 +370,7 @@ F77="mpif77"
 # Forced Fortran linker libraries
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-FC_LIBS="-lstdc++ -lpython2.7 -L/usr/local/hdf5-1.10.4_gcc73_serial/lib -lhdf5 -lhdf5_hl"
+FC_LIBS="-lstdc++ -lpython2.7 -L/usr/local/hdf5-1.10.4_gcc73_serial/lib -lhdf5 -lhdf5_hl -ldl"
 
                        # ------------------------------ #
 
@@ -721,11 +721,11 @@ with_trio_flavor="netcdf"
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf4/4.4.1.1/include -I${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/include"
+with_netcdf_incs="-I${FALLBACKS_HOME}_8.12/${FB}/netcdf4/4.4.1.1/include -I${FALLBACKS_HOME}_8.12/${FB}/netcdf4_fortran/4.4.4/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_PATH}/netcdf4/4.4.1.1/lib -lnetcdf"
+with_netcdf_libs="-L${FALLBACKS_HOME}_8.12/${FB}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_HOME}_8.12/${FB}/netcdf4/4.4.1.1/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -930,11 +930,11 @@ with_dft_flavor="libxc"
 
 # Include flags for the LibXC library (default is unset)
 #
-with_libxc_incs="-I${FALLBACKS_PATH}/libxc/4.2.3/include"
+with_libxc_incs="-I${FALLBACKS_HOME}_8.12/${FB}/libxc/4.2.3/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L${FALLBACKS_PATH}/libxc/4.2.3/lib -lxc"
+with_libxc_libs="-L${FALLBACKS_HOME}_8.12/${FB}/libxc/4.2.3/lib -lxc"
 
                        # ------------------------------ #
 
@@ -973,6 +973,7 @@ with_libxc_libs="-L${FALLBACKS_PATH}/libxc/4.2.3/lib -lxc"
 #
 enable_triqs_v2_0="yes"
 #enable_triqs_v1_4="no"
+enable_python_invocation="yes"
 #
 # Include flags for the TRIQS library (default is unset)
 #

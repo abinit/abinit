@@ -6,7 +6,6 @@
 !! FUNCTION
 !!  This module contains the declaration of data types and methods
 !!  used to handle electric fields
-!!  Imported object from defs_datatypes
 !!
 !! COPYRIGHT
 !! Copyright (C) 2011-2019 ABINIT group (MJV)
@@ -46,7 +45,7 @@ module m_efield
 !!***
 
 
-!!****t* defs_datatypes/efield_type
+!!****t* m_efield/efield_type
 !! NAME
 !! efield_type
 !!
@@ -250,8 +249,6 @@ contains
 !! SOURCE
 
 subroutine destroy_efield(dtefield)
-
- implicit none
 
 !Arguments ------------------------------------
 !array

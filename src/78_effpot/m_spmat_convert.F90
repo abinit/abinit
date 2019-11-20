@@ -44,6 +44,13 @@ module m_spmat_convert
   implicit none
 !!****m*
   public
+  !-----------------------------------------------------------------------
+  !> @brief convert one type of matrix Amat to the other Bmat
+  !> Note that the dense matrix is not the dense_mat_t because a
+  !> simple 2d array is more generally used.
+  !> @param [in] Amat
+  !> @param [out] Bmat
+  !-----------------------------------------------------------------------
   interface spmat_convert
      !procedure  dense_to_LIL
      procedure  LIL_to_dense
@@ -54,8 +61,15 @@ module m_spmat_convert
      procedure  COO_to_CSR
      !procedure LCO_to_CSR
   end interface spmat_convert
- 
+
+  public :: COO_to_dense
 contains
+
+  !-----------------------------------------------------------------------
+  !> @brief dense matrix to LIL matrix 
+  !> @param [in] mat: 2D array
+  !> @param [out] ll : LIL matrix
+  !-----------------------------------------------------------------------
   subroutine dense_to_LIL(mat, ll)
     ! check shape
     real(dp), intent(in):: mat(:, :)
@@ -70,8 +84,12 @@ contains
     enddo
   end subroutine dense_to_LIL
 
+  !-----------------------------------------------------------------------
+  !> @brief LIL matrix to dense matrix
+  !> @param [in] ll : LIL matrix
+  !> @param [out] mat: 2D array
+  !-----------------------------------------------------------------------
   subroutine LIL_to_dense(ll, mat)
-
     class(LIL_mat_t) , intent(inout):: ll
     real(dp), intent(out):: mat(ll%nrow,ll%ncol)
     integer:: irow
@@ -85,7 +103,11 @@ contains
     enddo
   end subroutine LIL_to_dense
 
-
+  !-----------------------------------------------------------------------
+  !> @brief LIL matrix to COO matrix
+  !> @param [in] ll : LIL matrix
+  !> @param [out] csrmat: COO matrix
+  !-----------------------------------------------------------------------
   subroutine LIL_to_COO(ll, COO)
     class(LIL_mat_t) , intent(inout):: ll
     class(COO_mat_t), intent(out):: COO
@@ -101,6 +123,11 @@ contains
 
   end subroutine LIL_to_COO
 
+  !-----------------------------------------------------------------------
+  !> @brief LIL matrix to CSR matrix
+  !> @param [in] ll : LIL matrix
+  !> @param [out] csrmat: CSR matrix
+  !-----------------------------------------------------------------------
   subroutine LIL_to_CSR(ll, csrmat)
     type(LIL_mat_t) , intent(inout):: ll
     type(CSR_mat_t), intent(inout):: csrmat
@@ -123,6 +150,11 @@ contains
     enddo
   end subroutine LIL_to_CSR
 
+  !-----------------------------------------------------------------------
+  !> @brief dense matrix to CSR matrix
+  !> @param [in] mat: dense matrix
+  !> @param [out] csrmat: CSR matrix
+  !-----------------------------------------------------------------------
   subroutine dense_to_CSR(mat, csrmat)
     real(dp), intent(in):: mat(:, :)
     type(csr_mat_t), intent(out) :: csrmat
@@ -152,6 +184,10 @@ contains
     end do
   end subroutine dense_to_CSR
 
+  !-------------------------------------------------------------------!
+  ! dense_to_coo
+  ! Dense to COO matrix convertion
+  !-------------------------------------------------------------------!
   subroutine dense_to_coo(mat, coo)
     real(dp), intent(in) :: mat(:,:)
     type(coo_mat_t), intent(inout) :: coo
@@ -166,7 +202,15 @@ contains
     end do
   end subroutine dense_to_coo
 
-
+  !-------------------------------------------------------------------!
+  ! COO_to_CSR:
+  !  translate COO matrix to CSR matrix
+  !  NOTE: This can be quite slow when it is large due to the sort algorithm 
+  ! Input:
+  !  COO matrix
+  ! Output:
+  !   CSR matrix
+  !-------------------------------------------------------------------!
   subroutine COO_to_CSR(coo, csr)
     type(COO_mat_t), intent(inout) :: coo
     type(CSR_mat_t), intent(inout) :: csr
@@ -198,6 +242,30 @@ contains
     endif
   end subroutine COO_to_CSR
 
+
+  !-------------------------------------------------------------------!
+  ! COO_to_dense
+  !   COO matrix to dense matrix
+  ! Input:
+  !   COO: coo matrix
+  ! Output:
+  !   dense: dense matrix
+  !-------------------------------------------------------------------!
+  subroutine COO_to_dense(coo, dense)
+    type(COO_mat_t), intent(inout) :: coo
+    real(dp), intent(inout) :: dense(:,:)
+    integer :: i, j, inz
+    real(dp) :: val
+    dense(:,:) =0.0
+    do inz =1, coo%nnz
+       i=coo%ind%data(1, inz)
+       j=coo%ind%data(2, inz)
+       val= coo%val%data(inz)
+       dense(i,j) = dense(i,j) + val
+    end do
+  end subroutine COO_to_dense
+
+
 !  subroutine LCO_to_CSR(lco, csr)
 !    type(LCO_mat_t), intent(inout) :: lco
 !    type(CSR_mat_t), intent(inout) :: csr
@@ -206,6 +274,8 @@ contains
 !    integer :: i, irow
 !
 !  end subroutine LCO_to_CSR
+
+
 
   subroutine spmat_convert_unittest()
     real(dp) ::mat(4,4), x(4), b(4)

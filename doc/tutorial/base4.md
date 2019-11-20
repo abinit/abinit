@@ -15,9 +15,9 @@ This tutorial aims at showing how to get the following physical properties for a
 
 You will learn about the smearing of the Brillouin zone integration, and also a bit about preconditioning the SCF cycle.
 
-[TUTORIAL_README]
-
 This tutorial should take about 1 hour and 30 minutes.
+
+[TUTORIAL_README]
 
 ## Total energy and lattice parameters at fixed smearing and k-point grid
 
@@ -29,7 +29,7 @@ You can copy it in the *Work4* directory (and change it, as usual).
 You can also copy the file *tbase4_1.in* in *Work4*. 
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work4
 cd Work4
 cp ../tbase4_x.files .  # You will need to edit this file.
@@ -252,9 +252,9 @@ Of course, one could just take a homogeneous simple cubic grid of k-points, but 
 correspond exactly to the k-point grid used in the primitive cell in *tbase4_3.in*.
 This would not be a big problem, but you would miss some error cancellation.
 
-The answer to this problem is given in the input file *$ABI_TUTORIAL/Input/tbase4_4.in*.
+The answer to this problem is given in the input file *$ABI_TESTS/tutorial/Input/tbase4_4.in*.
 
-{% dialog tests/tutorial/Input/tbase4_1.in %}
+{% dialog tests/tutorial/Input/tbase4_4.in %}
 
 The procedure to do the exact translation of the k-point grid will not be explained here (sorry for this). 
 If you do not see how to do it, just use homogeneous simple cubic grids, with about the same resolution 
@@ -267,7 +267,7 @@ The grids of k-points should not be too anisotropic for this rough estimation to
 
 Note also the input variables [[rprim]] and [[chkprim]] in this input file.
 
-Now run *tbase4_4.in* (the reference file is *$ABI_TUTORIAL/Refs/tbase4_4.out*).
+Now run *tbase4_4.in* (the reference file is *$ABI_TESTS/tutorial/Refs/tbase4_4.out*).
 You should find the following total energy:
 
     etotal     -4.1962972610E+00
@@ -447,7 +447,7 @@ of the concepts already explored.
 
 Just for your information, and as an additional warning, when the work accomplished 
 until now is completed with 6 and 7 layers without relaxation
-(see *\$ABI_TUTORIAL/Input/tbase4_8.in* and *\$ABI_TUTORIAL/Refs/tbase4_8.out* where 5, 6 and 7 layers are treated),
+(see *\$ABI_TESTS/tutorial/Input/tbase4_8.in* and *\$ABI_TESTS/tutorial/Refs/tbase4_8.out* where 5, 6 and 7 layers are treated),
 this non-relaxed energy surface energy behaves as follows:  
 
 number of aluminum layers | surface energy  

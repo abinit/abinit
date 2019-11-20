@@ -40,7 +40,6 @@ module m_exc_build
  use m_hdr
 
  use defs_datatypes, only : pseudopotential_type
- use defs_abitypes,  only : hdr_type
  use m_gwdefs,       only : czero_gw, cone_gw, GW_TOLQ0
  use m_time,         only : cwtime, timab
  use m_io_tools,     only : get_unit, open_file
@@ -522,10 +521,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    nels=nels_block(block)
    ABI_MALLOC(t_start,(0:nproc-1))
    ABI_MALLOC(t_stop,(0:nproc-1))
-   call xmpi_split_work2_i8b(nels,nproc,t_start,t_stop,msg,ierr)
-   if (ierr/=0) then
-     MSG_WARNING(msg)
-   end if
+   call xmpi_split_work2_i8b(nels,nproc,t_start,t_stop)
 
    ABI_MALLOC(hsize_of,(0:nproc-1))
    hsize_of=0
@@ -568,9 +564,9 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    call wrtout(std_out,msg,'PERS')
 
    if (is_resonant) then
-     write(msg,'(a,f8.1,a)')' Calculating resonant blocks. Memory required: ',bsize_my_block*b2Mb,' Mb. '
+     write(msg,'(a,f8.1,a)')' Calculating resonant blocks. Memory required: ',bsize_my_block*b2Mb,' [Mb] <<< MEM'
    else
-     write(msg,'(a,f8.1,a)')' Calculating coupling blocks. Memory required: ',bsize_my_block*b2Mb,' Mb. '
+     write(msg,'(a,f8.1,a)')' Calculating coupling blocks. Memory required: ',bsize_my_block*b2Mb,' [Mb] <<< MEM'
    end if
    call wrtout(std_out,msg,"COLL")
 
@@ -1409,10 +1405,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    ! Here the calculation of the block is parallelized over columns.
    ABI_MALLOC(col_start,(0:nproc-1))
    ABI_MALLOC(col_stop,(0:nproc-1))
-   call xmpi_split_work2_i4b(neh2,nproc,col_start,col_stop,msg,ierr) !check this but it should be OK.
-   if (ierr/=0) then
-     MSG_WARNING(msg)
-   end if
+   call xmpi_split_work2_i4b(neh2,nproc,col_start,col_stop)
 
    my_cols(1) = col_start(my_rank)
    my_cols(2) = col_stop (my_rank)
@@ -1761,7 +1754,7 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
  integer :: ik_ibz,itim_k,ikp_ibz,itim_kp,isym_k,isym_kp
  integer :: iq_bz,iq_ibz,isym_q,itim_q,iqbz0,rank
  integer :: iv,ivp,ic,icp
- integer :: block,ierr
+ integer :: block
  integer(i8b) :: tot_nels,ir,it,itp
  real(dp) :: faq,kx_fact
  complex(spc) :: ctemp
@@ -1971,10 +1964,7 @@ if (nsppol==2) then
  ! Here the calculation of the block is parallelized over columns.
  ABI_MALLOC(col_start,(0:nproc-1))
  ABI_MALLOC(col_stop,(0:nproc-1))
- call xmpi_split_work2_i4b(neh2,nproc,col_start,col_stop,msg,ierr) !check this but it should be OK.
- if (ierr/=0) then
-   MSG_WARNING(msg)
- end if
+ call xmpi_split_work2_i4b(neh2,nproc,col_start,col_stop) !check this but it should be OK.
 
  my_cols(1) = col_start(my_rank)
  my_cols(2) = col_stop (my_rank)

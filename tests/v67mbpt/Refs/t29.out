@@ -339,7 +339,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   1.81165     0.656880     0.656880      1.313761     0.000000
     2   1.81165     0.656880     0.656880      1.313761     0.000000
@@ -565,7 +565,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   1.81165     0.656880     0.656880      1.313761     0.000000
     2   1.81165     0.656880     0.656880      1.313761     0.000000
@@ -821,8 +821,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
   Size of radial mesh ............................  620
   Size of radial mesh for partial waves...........  620
   Size of radial mesh for [pseudo] core density...  620
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/ttaucorespl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    3
   shape_lambda ...................................   -1
@@ -832,13 +833,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    2
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -9.75038448E+00

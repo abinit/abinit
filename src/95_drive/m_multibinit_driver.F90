@@ -106,8 +106,9 @@ contains
   !!
   !!
   !! SOURCE
-  subroutine multibinit_main(filnam )
+  subroutine multibinit_main(filnam, dry_run)
     character(len=fnlen), intent(inout) :: filnam(17)
+    integer, intent(in) :: dry_run
     type(multibinit_dtset_type), target :: inp
     type(effective_potential_type) :: reference_effective_potential
     type(abihist) :: hist, hist_tes
@@ -198,6 +199,12 @@ contains
        call outvars_multibinit(inp,std_out)
        call outvars_multibinit(inp,ab_out)
     end if
+
+    if(dry_run/=0) then
+       call wrtout([std_out, ab_out], "Multibinit in dry_run mode. Exiting after input parser")
+       call xmpi_end()
+       !goto 100
+    endif
 
     ! Read and treat the reference structure
     !****************************************************************************************
@@ -581,7 +588,7 @@ elec_eval = .FALSE.
 
     ! Run spin dynamics
     !****************************************************************************************
-    if(inp%spin_dynamics>0) then
+    if(inp%spin_dynamics/=0) then
        !call spin_model%run()
        call manager%run()
     end if
@@ -590,9 +597,10 @@ elec_eval = .FALSE.
 
     !Free the effective_potential and dataset
     !****************************************************************************************
-    if(inp%spin_dynamics>0) then
+    if(inp%spin_dynamics/=0) then
        call manager%finalize()
     end if
+
     call effective_potential_free(reference_effective_potential)
     call multibinit_dtset_free(inp)
     call abihist_free(hist)

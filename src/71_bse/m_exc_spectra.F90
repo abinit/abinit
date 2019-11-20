@@ -25,7 +25,6 @@
 MODULE m_exc_spectra
 
  use defs_basis
- use defs_datatypes
  use m_bs_defs
  use m_abicore
  use iso_c_binding
@@ -36,14 +35,14 @@ MODULE m_exc_spectra
  use netcdf
 #endif
  use m_ebands
- !use m_hdr,          only : hdr_free
+ use m_hdr
 
- use defs_abitypes,     only : hdr_type
+ use defs_datatypes,    only : pseudopotential_type, ebands_t
  use m_io_tools,        only : open_file
  use m_fstrings,        only : toupper, strcat, sjoin, int2char4
  use m_numeric_tools,   only : simpson_int, simpson_cplx
  use m_hide_blas,       only : xdotu,xdotc
- use m_special_funcs,   only : dirac_delta
+ use m_special_funcs,   only : gaussian
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : kmesh_t
  use m_eprenorms,       only : eprenorms_t, renorm_bst
@@ -573,14 +572,14 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
 
            do iw=1,nomega
              arg = DBLE(omega(iw)) - ediff
-             dos(iw) = dos(iw) + dirac_delta(arg,linewidth)
+             dos(iw) = dos(iw) + gaussian(arg, linewidth)
            end do
          else
            do iq=1,nq
              ctemp = opt_cvk(ib_c,ib_v,ik_bz,spin,iq)
              do iw=1,nomega
                eps_rpa(iw,iq) = eps_rpa(iw,iq)  + ctemp * CONJG(ctemp) *&
-&             (one/(ediff-omega(iw)) + one/(ediff+omega(iw)))
+               (one/(ediff-omega(iw)) + one/(ediff+omega(iw)))
              end do
            end do
            !
@@ -591,7 +590,7 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
 
            do iw=1,nomega
              arg = DBLE(omega(iw)) - ediff
-             dos(iw) = dos(iw) + dirac_delta(arg,broad)
+             dos(iw) = dos(iw) + gaussian(arg, broad)
            end do
          end if
          !
@@ -811,9 +810,9 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
    do iw=1,nomega
      arg = ( DBLE(omega(iw)) - exc_ene(ll))
      if(do_ep_lifetime) then
-       dos_exc(iw) = dos_exc(iw) + dirac_delta(arg,AIMAG(exc_ene_cplx(ll)))
+       dos_exc(iw) = dos_exc(iw) + gaussian(arg, AIMAG(exc_ene_cplx(ll)))
      else
-       dos_exc(iw) = dos_exc(iw) + dirac_delta(arg,Bsp%broad)
+       dos_exc(iw) = dos_exc(iw) + gaussian(arg, Bsp%broad)
      end if
    end do
  end do
@@ -1032,7 +1031,7 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
  do ll=1,nstates ! Sum over the calculate excitonic eigenstates.
    do iw=1,nomega
      arg = DBLE(omega(iw) - exc_ene(ll))
-     dos_exc(iw) = dos_exc(iw) + dirac_delta(arg,Bsp%broad)
+     dos_exc(iw) = dos_exc(iw) + gaussian(arg, Bsp%broad)
    end do
  end do
 

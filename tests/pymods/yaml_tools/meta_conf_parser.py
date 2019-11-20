@@ -1,3 +1,7 @@
+'''
+Define the internals of parsing the configuration file.
+Also define the evaluation of a constraint.
+'''
 from __future__ import print_function, division, unicode_literals
 from inspect import isclass
 from copy import deepcopy
@@ -11,9 +15,9 @@ from warnings import warn
 
 def make_apply_to(type_):
     '''
-        Return a function that take in argument the constraint and
-        an object from the data tree an return True it the constraints apply to
-        the object.
+        Return a function that takes in argument the constraint and
+        an object from the data tree and returns True it the constraints
+        apply to the object.
     '''
     if type_ == 'number':
         def apply_to(self, obj):
@@ -86,6 +90,11 @@ class Constraint(object):
             Return True if the constraint is verified.
         '''
         # apply to floats at least
+        if getattr(ref, '_not_available', False):
+            return FailDetail(
+                'This constraint was to be applied to a document that is not'
+                ' available (check warnings).'
+            )
         if self.handle_undef:
             if isinstance(ref, (float, complex)) and self._apply_to(self, 1.0):
                 if conf.get_param('allow_undef'):
@@ -148,6 +157,10 @@ class Constraint(object):
 
 
 class SpecKey(object):
+    '''
+        This object encapsulate the manipulation of field labels, interpreting
+        the eventual ! at the end and normalizing the name.
+    '''
     def __init__(self, name, hardreset=False):
         self.name = normalize_attr(name)
         self.hardreset = hardreset
@@ -169,7 +182,7 @@ class SpecKey(object):
     def __eq__(self, other):
         return isinstance(other, SpecKey) and self.name == other.name
 
-    def __neq__(self, other):
+    def __ne__(self, other):
         return not isinstance(other, SpecKey) or self.name != other.name
 
     def __repr__(self):
@@ -179,7 +192,8 @@ class SpecKey(object):
 class ConfTree(object):
     '''
         Configuration tree wrapper. Give access to constraints and parameters
-        defined at in any node.
+        defined in the nodes.
+        Internally used by DriverTestConf to manipulate individual trees.
     '''
     def __init__(self, dict_tree):
         self.dict = dict_tree
@@ -254,7 +268,7 @@ class ConfTree(object):
     def get_spec_at(self, path):
         '''
             Get specializations defined at a given node in the tree.
-            Return an empty dictionary if the path does not exists.
+            Return an empty dictionary if the path does not exist.
         '''
         d = self.dict
         for spec in path:
@@ -268,7 +282,7 @@ class ConfTree(object):
     def get_new_params_at(self, path):
         '''
             Get params defined at a given node in the tree.
-            Return an empty dictionary if the path does not exists.
+            Return an empty dictionary if the path does not exist.
         '''
         d = self.dict
         for spec in path:
@@ -282,7 +296,7 @@ class ConfTree(object):
     def get_new_constraints_at(self, path):
         '''
             Get constraints defined at a given node in the tree.
-            Return an empty dictionary if the path does not exists.
+            Return an empty dictionary if the path does not exist.
         '''
         d = self.dict
         for spec in path:
@@ -305,8 +319,8 @@ class ConfTree(object):
 
 class ConfParser(object):
     '''
-        Test configuration loader and parser. It take output from yaml parser
-        and build the actual configuration tree.
+        Test configuration loader and parser. It takes output from yaml parser
+        and build the actual configuration trees.
     '''
     def __init__(self):
         self.parameters = {
@@ -343,6 +357,7 @@ class ConfParser(object):
                    handle_undef=True):
         '''
             Register a constraints to be recognised while parsing config.
+            Decorator for the constraint body function.
         '''
         def register(fun):
             if name is None:
@@ -371,7 +386,8 @@ class ConfParser(object):
 
     def make_trees(self, parsed_src, metadata={}):
         '''
-            Create a ConfTree instance from the yaml parser output.
+            Create a dict of ConfTree instances and the associated filter dict
+            from the yaml parser output.
         '''
         assert isinstance(parsed_src, dict), ('parsed_src have to be derivated'
                                               ' from a dictionary but it is'

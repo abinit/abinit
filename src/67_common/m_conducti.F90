@@ -31,13 +31,13 @@ module m_conducti
  use defs_basis
  use m_errors
  use m_abicore
- use defs_abitypes
  use m_xmpi
  use m_wffile
  use m_wfk
  use m_hdr
  use m_nctk
 
+ use defs_abitypes,  only : MPI_type
  use m_io_tools,     only : open_file, get_unit
  use m_fstrings,     only : sjoin
  use m_symtk,        only : matr3inv
@@ -127,8 +127,6 @@ contains
 
  subroutine conducti_paw(filnam,filnam_out,mpi_enreg)
 
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  character(len=fnlen) :: filnam,filnam_out
@@ -182,7 +180,7 @@ contains
 
 ! Read the header of the optic files
  call hdr_read_from_fname(hdr, filnam1, fform1, spaceComm)
- call hdr_free(hdr)
+ call hdr%free()
  if (fform1 /= 610) then
    MSG_ERROR("Abinit8 requires an OPT file with fform = 610")
  end if
@@ -509,7 +507,7 @@ contains
  ABI_DEALLOCATE(doccde)
  ABI_DEALLOCATE(wtk)
 
- call hdr_free(hdr)
+ call hdr%free()
 
 end subroutine conducti_paw
 !!***
@@ -563,8 +561,6 @@ end subroutine conducti_paw
 !! SOURCE
 
  subroutine conducti_paw_core(filnam,filnam_out,mpi_enreg)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -625,7 +621,7 @@ end subroutine conducti_paw
 
 ! Read the header of the OPT2 file.
  call hdr_read_from_fname(hdr, filnam2, fform2, spaceComm)
- call hdr_free(hdr)
+ call hdr%free()
 
  if (fform2 /= 611) then
    MSG_ERROR("Abinit8 requires an OPT2 file with fform = 611")
@@ -811,7 +807,7 @@ end subroutine conducti_paw
  ABI_DEALLOCATE(occ)
  ABI_DEALLOCATE(wtk)
 
- call hdr_free(hdr)
+ call hdr%free()
 
 end subroutine conducti_paw_core
 !!***
@@ -882,14 +878,12 @@ end subroutine conducti_paw_core
 !!
 !! CHILDREN
 !!      getnel,hdr_free,jacobi,matr3inv,metric,msig,nctk_fort_or_ncfile
-!!      wfk_close,wfk_open_read,wfk_read_eigk
+!!      wfk_open_read,wfk_read_eigk
 !!
 !! SOURCE
 
 
 subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -964,10 +958,10 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  if (len_trim(msg) /= 0) MSG_ERROR(msg)
  call wfk_open_read(ddk3,filnam3, formeig1, iomode, get_unit(), comm)
 
- if (wfk_compare(ddk1, ddk2) /= 0) then
+ if (ddk1%compare(ddk2) /= 0) then
    MSG_ERROR("ddk1 and ddk2 are not consistent. see above messages")
  end if
- if (wfk_compare(ddk1, ddk3) /= 0) then
+ if (ddk1%compare(ddk3) /= 0) then
    MSG_ERROR("ddk1 and ddk3 are not consistent. see above messages")
  end if
 
@@ -1015,16 +1009,16 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  do isppol=1,nsppol
    do ikpt=1,nkpt
      nband1=nband(ikpt+(isppol-1)*nkpt)
-     call wfk_read_eigk(gswfk,ikpt,isppol,xmpio_single,eig0tmp)
+     call gswfk%read_eigk(ikpt,isppol,xmpio_single,eig0tmp)
      eigen0(1+bdtot0_index:nband1+bdtot0_index)=eig0tmp(1:nband1)
 
-     call wfk_read_eigk(ddk1,ikpt,isppol,xmpio_single,eigtmp)
+     call ddk1%read_eigk(ikpt,isppol,xmpio_single,eigtmp)
      eigen11(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
 
-     call wfk_read_eigk(ddk2,ikpt,isppol,xmpio_single,eigtmp)
+     call ddk2%read_eigk(ikpt,isppol,xmpio_single,eigtmp)
      eigen12(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
 
-     call wfk_read_eigk(ddk3,ikpt,isppol,xmpio_single,eigtmp)
+     call ddk3%read_eigk(ikpt,isppol,xmpio_single,eigtmp)
      eigen13(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
 
      bdtot0_index=bdtot0_index+nband1
@@ -1033,10 +1027,10 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  end do
 
  ! Close files
- call wfk_close(gswfk)
- call wfk_close(ddk1)
- call wfk_close(ddk2)
- call wfk_close(ddk3)
+ call gswfk%close()
+ call ddk1%close()
+ call ddk2%close()
+ call ddk3%close()
 
  ABI_DEALLOCATE(eigtmp)
  ABI_DEALLOCATE(eig0tmp)
@@ -1474,7 +1468,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  ABI_DEALLOCATE(Stp)
  ABI_DEALLOCATE(Kth)
 
- call hdr_free(hdr)
+ call hdr%free()
 
  end subroutine conducti_nc
 !!***
@@ -1516,8 +1510,6 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 !! SOURCE
 
 subroutine msig(fcti,npti,xi,filnam_out_sig)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -1750,8 +1742,6 @@ end subroutine msig
 
  subroutine emispec_paw(filnam,filnam_out,mpi_enreg)
 
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  character(len=fnlen) :: filnam,filnam_out
@@ -1812,7 +1802,7 @@ end subroutine msig
 
 ! Read the header of the OPT2 file.
  call hdr_read_from_fname(hdr, filnam2, fform2, spaceComm)
- call hdr_free(hdr)
+ call hdr%free()
 
  if (fform2 /= 611) then
    MSG_ERROR("Abinit8 requires an OPT2 file with fform = 611")
@@ -2008,7 +1998,7 @@ end subroutine msig
  ABI_DEALLOCATE(occ)
  ABI_DEALLOCATE(wtk)
 
- call hdr_free(hdr)
+ call hdr%free()
 
 end subroutine emispec_paw
 !!***

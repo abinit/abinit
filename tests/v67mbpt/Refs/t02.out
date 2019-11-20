@@ -1,6 +1,6 @@
 
-.Version 8.11.7 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  8 May 2019.
-- ( at 10h50 )
+.Starting date : Mon 21 Oct 2019.
+- ( at 23h39 )
   
 - input  file    -> t02.in
 - output file    -> t02.out
@@ -290,11 +290,11 @@ P           mkmem          16
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
-          spbroad1     1.00000001E-01 Hartree
+          spbroad1     1.00000000E-01 Hartree
           spbroad2     3.67493254E-02 Hartree
-          spbroad3     1.00000001E-01 Hartree
-          spbroad4     1.00000001E-01 Hartree
-          spbroad5     1.00000001E-01 Hartree
+          spbroad3     1.00000000E-01 Hartree
+          spbroad4     1.00000000E-01 Hartree
+          spbroad5     1.00000000E-01 Hartree
           spgroup         227
            spmeth1          0
            spmeth2          2
@@ -407,8 +407,8 @@ image:     1
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/cavignac_develop/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/cavignac_develop/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -447,8 +447,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     288.181     288.126
   sigma(2 2)=  2.76864062E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.76864062E-05  sigma(2 1)=  0.00000000E+00
 
----
-label: Etot steps
+
+--- !EtotSteps
 data: !EtotIters |
     
      iter   Etot(hartree)      deltaE(h)  residm     vres2
@@ -460,34 +460,37 @@ data: !EtotIters |
         6  -8.8716880912528    -9.539E-13 8.968E-11 2.131E-11
 ...
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  8.000000000000000E+000
+charge    :  0.000000000000000E+000
+cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -9.539036227579345E-013, "res2":  2.131351451966095E-011, 
+    "residm":  8.967598675174998E-011, "diffor": undef, 
+}
+abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+etotal    : -8.871688091252750E+000
+entropy   :  0.000000000000000E+000
+fermie    :  2.176554872776119E-001
+stress_tensor: !CartTensor
+- [ 2.768640617407069E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.768640617407069E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  2.768640617407069E-005, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
     1        2.00000          1.71651242
     2        2.00000          1.71651242
----
-label     : results_gs
-comment   : Summary of ground states results.
-natom     :        2
-nsppol    :        1
-cut       : {"ecut":   8.00000000000000000E+00, "pawecutdg":  -1.00000000000000000E+00, }
-convergence: {
-    "deltae":  -9.53903622757934500E-13, "res2":   2.13135145196609473E-11, 
-    "residm":   8.96759867517499773E-11, "diffor": undef, 
-}
-etotal    :  -8.87168809125275004E+00
-entropy   :   0.00000000000000000E+00
-fermie    :   2.17655487277611859E-01
-stress tensor: !Tensor
-- [  2.76864061740706878E-05,   0.00000000000000000E+00,   0.00000000000000000E+00, ]
-- [  0.00000000000000000E+00,   2.76864061740706878E-05,   0.00000000000000000E+00, ]
-- [  0.00000000000000000E+00,   0.00000000000000000E+00,   2.76864061740706878E-05, ]
-
-cartesian forces: !CartForces
-- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
-- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
-...
-
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -543,21 +546,20 @@ cartesian forces: !CartForces
 --------------------------------------------------------------------------------
 
 
---- !ETOT
-label               : Etot
-comment             : Components of total free energy (in Hartree)
-Kinetic energy      :  3.029236750829611413E+00
-Hartree energy      :  5.399655679792308982E-01
-XC energy           : -3.539459190293665625E+00
-Ewald energy        : -8.435819585618991923E+00
-PsPCore             :  8.604378731551771964E-02
-Loc. psp. energy    : -2.433304664536607653E+00
-NL psp energy       :  1.881649243072155864E+00
-Etotal              : -8.871688091252750041E+00
-Band energy         :  2.337477618348697550E-01
-Total energy(eV)    : -2.414109101372692976E+02
-...
 
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.02923675082961E+00
+hartree             :  5.39965567979231E-01
+xc                  : -3.53945919029367E+00
+Ewald energy        : -8.43581958561899E+00
+psp_core            :  8.60437873155177E-02
+local_psp           : -2.43330466453661E+00
+non_local_psp       :  1.88164924307216E+00
+total_energy        : -8.87168809125275E+00
+band_energy         :  2.33747761834870E-01
+total_energy_eV     : -2.41410910137269E+02
+...
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.76864062E-05  sigma(3 2)=  0.00000000E+00
@@ -598,8 +600,8 @@ dtset:     2
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/cavignac_develop/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/cavignac_develop/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1191,25 +1193,13 @@ dtset:     3
 
  Perturbative Calculation
 
- k =    0.000   0.000   0.000
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-    2   5.923 -11.256 -12.387   1.527   0.786  -0.272 -10.945   0.311   6.234
-    3   5.923 -11.256 -12.389   1.526   0.786  -0.272 -10.946   0.309   6.232
-    4   5.923 -11.256 -12.389   1.527   0.786  -0.272 -10.946   0.309   6.232
-    5   8.449 -10.064  -5.793  -3.137   0.782  -0.278  -9.177   0.887   9.336
-    6   8.449 -10.064  -5.792  -3.139   0.782  -0.278  -9.177   0.887   9.336
-
- E^0_gap          2.526
- E^GW_gap         3.104
- DeltaE^GW_gap    0.578
-
---- !GwSigma
-label: GW Sigma perturbative
-k point: [   0.000,    0.000,    0.000, ]
-E^0_gap:   2.52645830621329992E+00
-E^GW_gap:   3.10415465048926276E+00
-DeltaE^GW_gap:   5.77696344275962725E-01
-data: !GwSigmaData |
+--- !SelfEnergy_ee
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    2.526
+QP_gap     :    3.104
+Delta_QP_KS:    0.578
+data: !SigmaeeData |
      Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.923 -11.256 -12.387   1.527   0.786  -0.272 -10.945   0.311   6.234
         3   5.923 -11.256 -12.389   1.526   0.786  -0.272 -10.946   0.309   6.232
@@ -1217,7 +1207,6 @@ data: !GwSigmaData |
         5   8.449 -10.064  -5.793  -3.137   0.782  -0.278  -9.177   0.887   9.336
         6   8.449 -10.064  -5.792  -3.139   0.782  -0.278  -9.177   0.887   9.336
 ...
-
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -1347,25 +1336,13 @@ dtset:     4
 
  Perturbative Calculation
 
- k =    0.000   0.000   0.000
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-    2   5.923 -11.256 -12.387   1.527   0.786  -0.272 -10.945   0.311   6.234
-    3   5.923 -11.256 -12.389   1.526   0.786  -0.272 -10.946   0.309   6.232
-    4   5.923 -11.256 -12.389   1.527   0.786  -0.272 -10.946   0.309   6.232
-    5   8.449 -10.064  -5.793  -3.137   0.782  -0.278  -9.177   0.887   9.336
-    6   8.449 -10.064  -5.792  -3.139   0.782  -0.278  -9.177   0.887   9.336
-
- E^0_gap          2.526
- E^GW_gap         3.104
- DeltaE^GW_gap    0.578
-
---- !GwSigma
-label: GW Sigma perturbative
-k point: [   0.000,    0.000,    0.000, ]
-E^0_gap:   2.52645830621329992E+00
-E^GW_gap:   3.10415465048926276E+00
-DeltaE^GW_gap:   5.77696344275962725E-01
-data: !GwSigmaData |
+--- !SelfEnergy_ee
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    2.526
+QP_gap     :    3.104
+Delta_QP_KS:    0.578
+data: !SigmaeeData |
      Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.923 -11.256 -12.387   1.527   0.786  -0.272 -10.945   0.311   6.234
         3   5.923 -11.256 -12.389   1.526   0.786  -0.272 -10.946   0.309   6.232
@@ -1373,7 +1350,6 @@ data: !GwSigmaData |
         5   8.449 -10.064  -5.793  -3.137   0.782  -0.278  -9.177   0.887   9.336
         6   8.449 -10.064  -5.792  -3.139   0.782  -0.278  -9.177   0.887   9.336
 ...
-
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1503,25 +1479,13 @@ dtset:     5
 
  Perturbative Calculation
 
- k =    0.000   0.000   0.000
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-    2   5.923 -11.256 -12.387   1.527   0.786  -0.272 -10.945   0.311   6.234
-    3   5.923 -11.256 -12.389   1.526   0.786  -0.272 -10.946   0.309   6.232
-    4   5.923 -11.256 -12.389   1.527   0.786  -0.272 -10.946   0.309   6.232
-    5   8.449 -10.064  -5.793  -3.137   0.782  -0.278  -9.177   0.887   9.336
-    6   8.449 -10.064  -5.792  -3.139   0.782  -0.278  -9.177   0.887   9.336
-
- E^0_gap          2.526
- E^GW_gap         3.104
- DeltaE^GW_gap    0.578
-
---- !GwSigma
-label: GW Sigma perturbative
-k point: [   0.000,    0.000,    0.000, ]
-E^0_gap:   2.52645830621329992E+00
-E^GW_gap:   3.10415465048926276E+00
-DeltaE^GW_gap:   5.77696344275962725E-01
-data: !GwSigmaData |
+--- !SelfEnergy_ee
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    2.526
+QP_gap     :    3.104
+Delta_QP_KS:    0.578
+data: !SigmaeeData |
      Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.923 -11.256 -12.387   1.527   0.786  -0.272 -10.945   0.311   6.234
         3   5.923 -11.256 -12.389   1.526   0.786  -0.272 -10.946   0.309   6.232
@@ -1529,7 +1493,6 @@ data: !GwSigmaData |
         5   8.449 -10.064  -5.793  -3.137   0.782  -0.278  -9.177   0.887   9.336
         6   8.449 -10.064  -5.792  -3.139   0.782  -0.278  -9.177   0.887   9.336
 ...
-
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1722,11 +1685,11 @@ P           mkmem          16
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
-          spbroad1     1.00000001E-01 Hartree
+          spbroad1     1.00000000E-01 Hartree
           spbroad2     3.67493254E-02 Hartree
-          spbroad3     1.00000001E-01 Hartree
-          spbroad4     1.00000001E-01 Hartree
-          spbroad5     1.00000001E-01 Hartree
+          spbroad3     1.00000000E-01 Hartree
+          spbroad4     1.00000000E-01 Hartree
+          spbroad5     1.00000000E-01 Hartree
           spgroup         227
            spmeth1          0
            spmeth2          2
@@ -1807,47 +1770,10 @@ P           mkmem          16
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         69.1        1.15      0.019
-- Total wall clock time (s,m,h):         74.0        1.23      0.021
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           69.1, wall_time =           74.0
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- sigma/=fourdp                 59.011  85.4     59.515  80.4              3      -1.00        0.99       0.99
-- fourwf%(pot)                   2.257   3.3      2.244   3.0          15388      -1.00        1.01       1.01
-- projbd                         1.195   1.7      1.260   1.7          23096      -1.00        0.95       0.95
-- pspini                         0.844   1.2      0.846   1.1              5      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.447   0.6      0.454   0.6             -1      -1.00        0.98       0.98
-- ewald                          0.420   0.6      0.424   0.6              5      -1.00        0.99       0.99
-- nonlop(apply)                  0.370   0.5      0.387   0.5          15388      -1.00        0.96       0.96
-- others (127)                   0.929   1.3      0.943   1.3             -1      -1.00        0.98       0.98
--<END_TIMER>
--
-- subtotal                      65.472  94.7     66.073  89.3                                  0.99       0.99
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          69.1, wall_time =          74.0
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- sigma/=fourdp                 59.011  85.4     59.515  80.4              3      -1.00        0.99       0.99
-- fourwf%(pot)                   2.257   3.3      2.244   3.0          15388      -1.00        1.01       1.01
-- projbd                         1.195   1.7      1.260   1.7          23096      -1.00        0.95       0.95
-- pspini                         0.844   1.2      0.846   1.1              5      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.447   0.6      0.454   0.6             -1      -1.00        0.98       0.98
-- ewald                          0.420   0.6      0.424   0.6              5      -1.00        0.99       0.99
-- nonlop(apply)                  0.370   0.5      0.387   0.5          15388      -1.00        0.96       0.96
-- others (127)                   0.929   1.3      0.943   1.3             -1      -1.00        0.98       0.98
--<END_TIMER>
 
-- subtotal                      65.472  94.7     66.073  89.3                                  0.99       0.99
 
 ================================================================================
 
@@ -1876,51 +1802,51 @@ P           mkmem          16
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [3] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         69.1  wall=         74.0
+- Proc.   0 individual time (sec): cpu=         65.4  wall=         65.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  13 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         69.1  wall=         74.0
++Overall time at end (sec) : cpu=         65.4  wall=         65.7

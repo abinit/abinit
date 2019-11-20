@@ -8,7 +8,7 @@ unset key
 set pointsize 0.8
 set view 0,0
 set xrange [0:40]
-set yrange [  0.00000000E+00:  3.89492577E+01]
+set yrange [ -4.06419318E+00:  3.89483730E+01]
 set xlabel "Momentum"
 set ylabel "Energy [meV]"
 set title "t88o\\_DS2\\_PHBANDS.data"

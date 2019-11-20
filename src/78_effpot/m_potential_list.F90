@@ -73,8 +73,9 @@ module m_potential_list
   !!
   !! SOURCE
   type, public, extends(abstract_potential_t) :: potential_list_t
-     integer :: size, capacity
-     type(effpot_pointer_t), allocatable :: list(:)
+     integer :: size=0  ! size is the USED number of potentials in the list
+     integer :: capacity=0  ! capacity is the number of places allocated for potentials
+     type(effpot_pointer_t), allocatable :: list(:) ! A list of pointer type to potentials
    contains
      procedure :: initialize ! make an empty list
      procedure :: ipot       ! return the i'th potential
@@ -89,6 +90,10 @@ module m_potential_list
 
 contains
 
+  !----------------------------------------------------------------------
+  !> @brief initialize 
+  !>
+  !----------------------------------------------------------------------
   subroutine initialize(self)
     class (potential_list_t), intent(inout) :: self
     self%size=0
@@ -96,16 +101,23 @@ contains
     self%label="ListPotential"
   end subroutine initialize
 
-  ! return the i'th potential in the list
+  !----------------------------------------------------------------------
+  !> @brief    return the i'th potential in the list
+  !>
+  !> @param[in]  i: the index of the spin potentails
   ! Unfortunately, fortran does not allow things  call potlist%ipot(i)%method...
-  ! So this is not really useful?
+  !----------------------------------------------------------------------
   function ipot(self, i)
     class (potential_list_t), target, intent(in) :: self
     integer, intent(in) :: i
     class(abstract_potential_t), pointer :: ipot
     ipot=>self%list(i)%ptr
   end function ipot
-  
+
+  !----------------------------------------------------------------------
+  !> @brief  set_supercell for every member of the potential list
+  !> @param[in]  supercell
+  !----------------------------------------------------------------------
   subroutine set_supercell(self, supercell)
     class (potential_list_t), intent(inout) :: self
     type (mbsupercell_t), target, intent(inout) :: supercell
@@ -116,6 +128,9 @@ contains
     end do
   end subroutine set_supercell
 
+  !----------------------------------------------------------------------
+  !> @brief finalize
+  !----------------------------------------------------------------------
   subroutine finalize(self)
     class (potential_list_t) ,intent(inout) :: self
     integer :: i
@@ -140,6 +155,11 @@ contains
   end subroutine finalize
 
 
+  !----------------------------------------------------------------------
+  !> @brief append a potential to the list
+  !> It also update the has_* according to the added effpot.
+  !> @param[in]  effpot: the effective potential to be added.
+  !----------------------------------------------------------------------
   subroutine append(self, effpot)
     ! Add a pointer to an effpot term to list.
     class (potential_list_t) :: self
@@ -150,6 +170,7 @@ contains
        self%capacity=8
        ABI_MALLOC(self%list, (self%capacity))
     else if ( self%size>self%capacity ) then
+       ! fancy increasing equation to allocate new array.
        self%capacity = self%size + self%size / 4 + 8
        ABI_MALLOC(temp, (self%capacity))
        temp(:self%size-1) = self%list(:)
@@ -163,6 +184,13 @@ contains
     self%has_lwf =(self%has_lwf.or. effpot%has_lwf)
   end subroutine append
 
+  !----------------------------------------------------------------------
+  !> @brief calculate energy and 1st derivatives
+  !>  The list will add the sum of all the results from its components.
+  !>  If one optional variable is passed to a subroutine, its "presence" will be kept.
+  !> @param[in] (optional) displacement, strain, spin, lwf
+  !> @param[out](optional) force, stress, bfield, lwf_force, energy
+  !----------------------------------------------------------------------
   subroutine calculate(self, displacement, strain, spin, lwf,  force, stress, bfield, lwf_force, energy)
     ! calculate energy and its first derivatives.
     class(potential_list_t), intent(inout) :: self  ! the effpot may save the states.
@@ -177,6 +205,7 @@ contains
     if(present(stress)) stress(:,:)=0.0d0
     if(present(bfield)) bfield(:,:)=0.0d0
     if(present(lwf_force)) lwf_force(:)=0.0d0
+    if(present(energy)) energy =0.0
     do i=1, self%size
        call self%list(i)%ptr%calculate(displacement=displacement, strain=strain, &
             & spin=spin, lwf=lwf, force=force, stress=stress, bfield=bfield, &
@@ -184,9 +213,17 @@ contains
     end do
   end subroutine calculate
 
+  !----------------------------------------------------------------------
+  !> @brief get_delta_E: calculate the energy difference when a given spin
+  !> is changed. This is to be used for spin Monte Carlo. Currently the
+  !> only supported is the spin model.
+  !>
+  !> @param[in]  S: spin of full structure. array of (3, nspin)
+  !> @param[in]  ispin: the index of spin changed. integer
+  !> @param[in]  snew: the new value of the changed spin.
+  !> @param[out] deltaE: the energy difference
+  !----------------------------------------------------------------------
   subroutine get_delta_E(self, S, ispin, Snew, deltaE)
-    ! for spin monte carlo
-    ! calculate energy difference if one spin is moved.
     class(potential_list_t), intent(inout) :: self  ! the effpot may save the states.
     real(dp), intent(inout) :: S(:,:),  Snew(:)
     integer, intent(in) :: ispin

@@ -83,8 +83,6 @@ contains
 subroutine xcpzca(exc,npt,order,rhor,rspts,vxc,&  !Mandatory arguments
 &                dvxc)                            !Optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npt,order
@@ -252,8 +250,6 @@ end subroutine xcpzca
 
 subroutine xcspol(exc,npts,nspden,order,rspts,vxc,zeta,ndvxc,& !Mandatory arguments
 &                 dvxc)                            !Optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -750,8 +746,6 @@ end subroutine xcspol
 subroutine xctetr(exc,npt,order,rhor,rspts,vxc,& !Mandatory arguments
 &                 d2vxc,dvxc)                    !Optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npt,order
@@ -915,8 +909,6 @@ end subroutine xctetr
 subroutine xcwign(exc,npt,order,rspts,vxc,& !Mandatory arguments
 &                dvxc)                           !Optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npt,order
@@ -1025,8 +1017,6 @@ end subroutine xcwign
 
 subroutine xchelu(exc,npt,order,rspts,vxc,dvxc)  ! dvxc is optional
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npt,order
@@ -1121,8 +1111,6 @@ end subroutine xchelu
 !! SOURCE
 
 subroutine xcxalp(exc,npt,order,rspts,vxc, dvxc)  ! dvxc is optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1226,8 +1214,6 @@ end subroutine xcxalp
 
 subroutine xclb(grho2_updn,npts,nspden,rho_updn,vxci)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npts,nspden
@@ -1311,8 +1297,6 @@ end subroutine xclb
 !! SOURCE
 
 subroutine xctfw(temp,exci,fxci,usefxc,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdgr,grho2_updn,ngr2)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

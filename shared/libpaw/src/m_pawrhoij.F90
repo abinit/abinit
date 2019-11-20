@@ -1862,7 +1862,7 @@ end subroutine pawrhoij_gather
      pawrhoij_out(irhoij)%rhoijselect=0
      pawrhoij_out(irhoij)%rhoijselect(1:nselect)=buf_int(indx_int:indx_int+nselect-1)
      indx_int=indx_int+nselect
-     LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijp,(cplex*nselect,nspden))
+     LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijp,(qphase*cplex*nselect,nspden))
      do isp=1,nspden
        do ii=1,qphase
          jj=(ii-1)*cplex*lmn2_size
@@ -1878,7 +1878,7 @@ end subroutine pawrhoij_gather
      indx_int=indx_int+lmnmix
    end if
    if (ngrhoij>0) then
-     LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%grhoij,(ngrhoij,cplex*lmn2_size,nspden))
+     LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%grhoij,(ngrhoij,cplex*qphase*lmn2_size,nspden))
      do isp=1,nspden
        do ii=1,cplex*qphase*lmn2_size
          pawrhoij_out(irhoij)%grhoij(1:ngrhoij,ii,isp)=buf_dp(indx_dp:indx_dp+ngrhoij-1)
@@ -1887,7 +1887,7 @@ end subroutine pawrhoij_gather
      end do
    end if
    if (use_rhoijres>0) then
-     LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijres,(cplex*lmn2_size,nspden))
+     LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijres,(cplex*qphase*lmn2_size,nspden))
      do isp=1,nspden
        pawrhoij_out(irhoij)%rhoijres(1:cplex*qphase*lmn2_size,isp)= &
 &               buf_dp(indx_dp:indx_dp+cplex*qphase*lmn2_size-1)
@@ -1895,7 +1895,7 @@ end subroutine pawrhoij_gather
      end do
    end if
    if (use_rhoij_>0) then
-     LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoij_,(cplex*lmn2_size,rhoij_size2))
+     LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoij_,(cplex*qphase*lmn2_size,rhoij_size2))
      do isp=1,rhoij_size2
        pawrhoij_out(irhoij)%rhoij_(1:cplex*qphase*lmn2_size,isp)= &
 &               buf_dp(indx_dp:indx_dp+cplex*qphase*lmn2_size-1)
@@ -2347,7 +2347,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
 !scalars
  integer,parameter :: fort_formatted=1,fort_binary=2,netcdf_io=3
  integer :: cplex,qphase,i1,i2,iatom,iatom_tot,natom,ispden,bsize,ii,jj,lmn2_size
- integer :: nselect,my_cplex,my_qphase,my_natinc,my_natom,my_nspden,ngrhoijmx,size_rhoij2
+ integer :: nselect,my_cplex,my_cplex_eff,my_qphase,my_natinc,my_natom,my_nspden,ngrhoijmx,size_rhoij2
  integer :: iomode,ncid,natom_id,cplex_id,qphase_id,nspden_id,nsel56_id
  integer :: buffer_id,ibuffer_id,ncerr,bsize_id,bufsize_id
  logical :: paral_atom
@@ -2593,8 +2593,9 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
      my_natinc=1; if(natom>1) my_natinc=natom-1
      if (PRESENT(natinc)) my_natinc = natinc ! user-defined increment.
      LIBPAW_ALLOCATE(ibuffer,(0))
+     nselect=maxval(pawrhoij(:)%nrhoijsel)
      if (my_qphase==2) then
-       LIBPAW_DATATYPE_ALLOCATE(rhoij_tmp,(2*nselect))
+       LIBPAW_POINTER_ALLOCATE(rhoij_tmp,(2*nselect))
      end if
      do iatom=1,my_natom,my_natinc
        iatom_tot=iatom;if(paral_atom)iatom_tot=my_atmtab(iatom)
@@ -2604,8 +2605,10 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        nselect=pawrhoij(iatom)%nrhoijsel
        do ispden=1,pawrhoij(iatom)%nspden
          if (my_qphase==1) then
+           my_cplex_eff=my_cplex
            rhoij_tmp => pawrhoij(iatom)%rhoijp(1:my_cplex*nselect,ispden)
          else
+           my_cplex_eff=2
            rhoij_tmp=zero
            jj=my_cplex*pawrhoij(iatom)%lmn2_size
            if (my_cplex==1) then
@@ -2621,10 +2624,9 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
   &                             +pawrhoij(iatom)%rhoijp(jj+2*ii-1,ispden)
              end do
            end if
-           my_cplex=2
          end if
          write(unitfi, '(a,i4,a,i1,a)' ) ' rhoij(',iatom_tot,',',ispden,')=  (max 12 non-zero components will be written)'
-         call pawio_print_ij(unitfi,rhoij_tmp,nselect,my_cplex,&
+         call pawio_print_ij(unitfi,rhoij_tmp,nselect,my_cplex_eff,&
 &         pawrhoij(iatom)%lmn_size,-1,ibuffer,1,0,&
 &         pawrhoij(iatom)%rhoijselect,-1.d0,1,&
 &         opt_sym=2,mode_paral='PERS')
@@ -2632,7 +2634,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
      end do
      LIBPAW_DEALLOCATE(ibuffer)
      if (my_qphase==2) then
-       LIBPAW_DATATYPE_DEALLOCATE(rhoij_tmp)
+       LIBPAW_POINTER_DEALLOCATE(rhoij_tmp)
      end if
 
   case ("D","d") ! Debug

@@ -143,8 +143,6 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 &  mcg_k,mcg_q,mcg1_k,minbd,mpw,mband_occ,nband_occ,npw_k1,npw_k2,nspinor,&
 &  pwind_k,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_k,smat_k_paw,usepaw)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ddkflag,icg,icg1,itrs,job,maxbd,mcg1_k,mcg_k,mcg_q
@@ -679,8 +677,6 @@ end subroutine smatrix
 
 subroutine polcart(red_ptot,pel,pel_cart,pelev,pion,pion_cart,polunit,&
 &  ptot_cart,rprimd,ucvol,unit_out,usepaw)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

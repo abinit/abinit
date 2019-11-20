@@ -112,6 +112,10 @@ _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
         ddb_ngqpt2       0    0    0
         ddb_ngqpt3       4    4    4
         ddb_ngqpt4       4    4    4
+       dvdb_ngqpt1       0    0    0
+       dvdb_ngqpt2       0    0    0
+       dvdb_ngqpt3       4    4    4
+       dvdb_ngqpt4       4    4    4
 -          fftalg         312
            getddb1          0
            getddb2          0
@@ -390,7 +394,9 @@ P           mkmem           8
 - Reading GS states from WFQ file: t89o_DS2_WFQ
 - Reading DDB from file: t89o_DS20_DDB
 - Reading DVDB from file: t89o_DS20_DVDB
-- Reading EFMAS information from file: t89i_DS3_EFMAS.nc
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
@@ -504,8 +510,7 @@ All the independent perturbations are available
 
  Computation of electron-phonon coupling matrix elements (GKK files)
 
- Computation of electron-phonon coupling matrix elements (GKK files) completed
-
+ Computation of gkq matrix elements with (GKK files)
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -526,7 +531,9 @@ All the independent perturbations are available
 - Reading GS states from WFQ file: t89o_DS2_WFQ
 - Reading DDB from file: t89o_DS20_DDB
 - Reading DVDB from file: t89o_DS20_DVDB
-- Reading EFMAS information from file: t89i_DS4_EFMAS.nc
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
@@ -654,8 +661,7 @@ All the independent perturbations are available
 
  Computation of electron-phonon coupling matrix elements GKQ file
 
- Computation of electron-phonon coupling matrix elements GKQ file completed
-
+ Computation of gkq matrix elements with GKQ file
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -672,6 +678,10 @@ All the independent perturbations are available
         ddb_ngqpt2       0    0    0
         ddb_ngqpt3       4    4    4
         ddb_ngqpt4       4    4    4
+       dvdb_ngqpt1       0    0    0
+       dvdb_ngqpt2       0    0    0
+       dvdb_ngqpt3       4    4    4
+       dvdb_ngqpt4       4    4    4
            etotal3     0.0000000000E+00
            etotal4     0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -697,20 +707,8 @@ All the independent perturbations are available
              iscf2         -2
              iscf3          7
              iscf4          7
-           istwfk1       1    1    1    1    1    1    1    1
-           istwfk2       0    0    0    0    0    0    0    0
-           istwfk3       0    0    0    0    0    0    0    0
-           istwfk4       0    0    0    0    0    0    0    0
               ixc          11
            jdtset        1    2    3    4
-              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       5.00000000E-01  0.00000000E+00  0.00000000E+00
-                       0.00000000E+00  5.00000000E-01  0.00000000E+00
-                       5.00000000E-01  5.00000000E-01  0.00000000E+00
-                       0.00000000E+00  0.00000000E+00  5.00000000E-01
-                       5.00000000E-01  0.00000000E+00  5.00000000E-01
-                       0.00000000E+00  5.00000000E-01  5.00000000E-01
-                       5.00000000E-01  5.00000000E-01  5.00000000E-01
            kptopt           3
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      1.06066017E+01
@@ -786,8 +784,6 @@ P           mkmem           8
            tolwfr      1.00000000E-14
            tsmear      4.00000000E-02 Hartree
             typat      1
-              wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
-                         0.12500    0.12500
             znucl       13.00000
 
 ================================================================================

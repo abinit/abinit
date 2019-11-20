@@ -1,4 +1,3 @@
-
 !{\src2tex{textfont=tt}}
 !!****p* ABINIT/multibinit
 !! NAME
@@ -52,6 +51,11 @@ program multibinit
   use m_abicore
   use m_errors
   use m_argparse
+  use m_effective_potential
+  use m_fit_polynomial_coeff
+  use m_multibinit_dataset
+  use m_effective_potential_file
+  use m_abihist
 
   use m_specialmsg, only : specialmsg_getcount, herald
   use m_io_tools,   only : flush_unit, open_file
@@ -59,8 +63,6 @@ program multibinit
   use m_parser,     only : instrng
   use m_dtset,      only : chkvars
   use m_dtfil,      only : isfile
-
-
   use m_multibinit_dataset
   !use m_generate_training_set, only : generate_training_set
   use m_compute_anharmonics, only : compute_anharmonics
@@ -77,10 +79,9 @@ program multibinit
   real(dp) :: tsec(2)
   character(len=24) :: codename,start_datetime
   character(len=fnlen) :: filnam(18),tmpfilename
-  character(len=500) :: message, arg
-  !type(args_t) :: args
-  integer :: ii, nargs, iarg
-  logical :: unittest=.False. , use_f03=.False.
+  character(len=500) :: message 
+  type(args_t) :: args
+  integer :: ii
   integer :: master, my_rank, comm, nproc, ierr
   logical :: iam_master
 
@@ -103,28 +104,28 @@ program multibinit
   iam_master = (my_rank == master)
 
   ! Parse command line arguments.
-  !args = args_parser(); if (args%exit /= 0) goto 100
+  args = args_parser(); if (args%exit /= 0) goto 100
 
-  nargs = command_argument_count()
-  do iarg=1,nargs
-     call get_command_argument(number=iarg, value=arg)
-     if (arg == "-v" .or. arg == "--version") then
-        write(std_out,"(a)") trim(abinit_version); goto 100
-        goto 100
-     else if (arg == "--unittest") then
-        unittest=.True.
-        call mb_test_main()
-        goto 100
-     else if(arg== "-F03") then
-        use_f03=.True.
-     endif
-  end do
+ ! nargs = command_argument_count()
+ ! do iarg=1,nargs
+ !    call get_command_argument(number=iarg, value=arg)
+ !    if (arg == "-v" .or. arg == "--version") then
+ !       write(std_out,"(a)") trim(abinit_version); goto 100
+ !       goto 100
+ !    else if (arg == "--unittest") then
+ !       unittest=.True.
+ !       call mb_test_main()
+ !       goto 100
+ !    else if(arg== "-F03") then
+ !       use_f03=.True.
+ !    endif
+ ! end do
 
-  !Initialize memory profiling if it is activated !if a full abimem.mocc report is desired,
-  !set the argument of abimem_init to "2" instead of "0"
-  !note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ! Initialize memory profiling if activated at configure time.
+ ! if a full report is desired, set the argument of abimem_init to "2" instead of "0" via the command line.
+ ! note that the file can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
-  call abimem_init(0)
+ call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
 #endif
 
   !Initialisation of the timing
@@ -136,7 +137,6 @@ program multibinit
   end if
 
   start_datetime = asctime()
-
   !Print the number of cpus in log file
   write(message,'(a,i5,a)') '-  nproc =',nproc,ch10
   call wrtout(std_out,message,'COLL')
@@ -178,10 +178,12 @@ program multibinit
 
   !***************************************************************************************
   !***************************************************************************************
-  if(use_f03) then
+  if(args%multibinit_F03_mode==1) then
+     ! Use the F03 mode, which has only spin and a simple harmonic lattice now
+     ! After everything is migrated, it will becomes default and multibinit_main will be deprecated.
      call multibinit_main2(filnam)
   else
-     call multibinit_main(filnam)
+     call multibinit_main(filnam, args%dry_run)
   end if
   ! Final message
   !****************************************************************************************
@@ -203,19 +205,19 @@ program multibinit
           &     '- Proc.',my_rank,' individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
   end if
 
-  call xmpi_sum(tsec,comm,ierr)
+   call xmpi_sum(tsec,comm,ierr)
 
-  write(message, '(a,(80a),a,a,a,f11.3,a,f11.3,a,a,a,a)' ) ch10,&
-       &   ('=',ii=1,80),ch10,ch10,&
-       &   '+Total cpu time',tsec(1),&
-       &   '  and wall time',tsec(2),' sec',ch10,ch10,&
-       &   ' multibinit : the run completed succesfully.'
-  call wrtout(std_out,message,'COLL')
-  call wrtout(ab_out,message,'COLL')
+   write(message, '(a,(80a),a,a,a,f11.3,a,f11.3,a,a,a,a)' ) ch10,&
+&   ('=',ii=1,80),ch10,ch10,&
+&   '+Total cpu time',tsec(1),&
+&   '  and wall time',tsec(2),' sec',ch10,ch10,&
+&   ' multibinit : the run completed succesfully.'
+   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,message,'COLL')
 
-  if (iam_master) then
-     ! Write YAML document with the final summary.
-     ! we use this doc to test whether the calculation is completed.
+   if (iam_master) then
+   ! Write YAML document with the final summary.
+   ! we use this doc to test whether the calculation is completed.
      write(std_out,"(a)")"--- !FinalSummary"
      write(std_out,"(a)")"program: multibinit"
      write(std_out,"(2a)")"version: ",trim(abinit_version)
@@ -225,22 +227,21 @@ program multibinit
      write(std_out,"(a,f13.1)")"overall_wall_time: ",tsec(2)
      write(std_out,"(a,i0)")"mpi_procs: ",xmpi_comm_size(xmpi_world)
      write(std_out,"(a,i0)")"omp_threads: ",xomp_get_num_threads(open_parallel=.True.)
-     !write(std_out,"(a,i0)")"num_warnings: ",nwarning
-     !write(std_out,"(a,i0)")"num_comments: ",ncomment
+   !write(std_out,"(a,i0)")"num_warnings: ",nwarning
+   !write(std_out,"(a,i0)")"num_comments: ",ncomment
      write(std_out,"(a)")"..."
      call flush_unit(std_out)
-  end if
+   end if
 
-  !Write information on file about the memory before ending mpi module, if memory profiling is enabled
-  call abinit_doctor("__multibinit")
+!Write information on file about the memory before ending mpi module, if memory profiling is enabled
+   call abinit_doctor("__multibinit")
 
-  call flush_unit(ab_out)
-  call flush_unit(std_out)
+   call flush_unit(ab_out)
+   call flush_unit(std_out)
 
-  if (iam_master) close(ab_out)
+   if (iam_master) close(ab_out)
 
-100 call xmpi_end()
+   100 call xmpi_end()
 
-end program multibinit
+   end program multibinit
 !!***
-

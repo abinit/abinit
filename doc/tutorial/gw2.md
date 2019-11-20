@@ -32,15 +32,15 @@ by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 The user should be familiarized with the four basic tutorials of ABINIT, see the
 [tutorial index](.) as well as the [first GW tutorial](gw1).
 
-[TUTORIAL_README]
-
-This tutorial should take about one hour to be completed (also including the
-reading of [[cite:Bruneval2006]] and [[cite:Lebegue2003]].
-
 Visualisation tools are NOT covered in this tutorial.
 Powerful visualisation procedures have been developed in the Abipy context,
 relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
 and the [Abipy tutorials](https://github.com/abinit/abitutorials).
+
+This tutorial should take about one hour to be completed (also including the
+reading of [[cite:Bruneval2006]] and [[cite:Lebegue2003]].
+
+[TUTORIAL_README]
 
 ## The preliminary Kohn-Sham band structure calculation
 
@@ -54,10 +54,10 @@ will see, the agreement of the band structure with experiment can be improved
 significantly if one relies on the GW approximation.
 
 In the directory *Work_gw2*, copy the files *tgw2_x.files* and *tgw2_1.in* located
-in *\$ABI_TUTORIAL/Input*, and modify the *tgw2_x.files* file as usual (see [the first tutorial](base1)).
+in *\$ABI_TESTS/tutorial/Input*, and modify the *tgw2_x.files* file as usual (see [the first tutorial](base1)).
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work_gw2
 cd Work_gw2
 cp ../tgw2_x.files .  # modify this file as usual (see tutorial 1)
@@ -175,13 +175,22 @@ for the whole Brillouin zone, e.g. from 1 to 5, but this would have been more ti
 
 In the output file, one finds the quasiparticle energy at $\Gamma$, for the lowest band:
     
-    k =    0.000   0.000   0.000
+```yaml
+--- !SelfEnergy_ee
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    0.000
+QP_gap     :    0.000
+Delta_QP_KS:    0.000
+data: !SigmaeeData |
      Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1    -3.762    -9.451    -3.762     5.689   -15.049     5.676     0.777    -0.287    -9.390     0.060    -3.701    -3.684
+        1    -3.762    -9.451    -3.762     5.689   -15.617     5.940     0.761    -0.313    -9.623    -0.173    -3.934    -3.988
+...
+```
     
 (the last column is the relevant quantity). The updated Fermi energy is also mentioned:
     
-     New Fermi energy:     2.469501E-01 Ha ,    6.719854E+00 eV
+     New Fermi energy :        2.558310E-01 Ha ,    6.961515E+00 eV
 
 The last information is not printed in case of [[gwcalctyp]] lower than 10.
 

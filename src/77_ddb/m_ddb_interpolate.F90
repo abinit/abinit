@@ -76,14 +76,12 @@ contains
 !!      anaddb
 !!
 !! CHILDREN
-!!      d2cart_to_red,ddb_free,ddb_hdr_open_write,ddb_malloc,ddb_write_blok
+!!      d2cart_to_red,ddb_free,ddb_hdr_open_write,ddb_malloc,ddb_write_block
 !!      gtblk9,gtdyn9,outddbnc,wrtout
 !!
 !! SOURCE
 
 subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -152,7 +150,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  nblok = nqpt_fine
 
  ddb_new%nblok = nblok
- call ddb_malloc(ddb_new,msize,nblok,natom,ntypat)
+ call ddb_new%malloc(msize,nblok,natom,ntypat)
  ddb_new%flg = 0
  ddb_new%amu = ddb%amu
  ddb_new%typ = 1
@@ -188,7 +186,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 
    ! Look for the information in the DDB
    qpt_padded(:,1) = qpt
-   call gtblk9(ddb,iblok,qpt_padded,qptnrm,rfphon,rfelfd,rfstrs,rftyp)
+   call ddb%get_block(iblok,qpt_padded,qptnrm,rfphon,rfelfd,rfstrs,rftyp)
 
    if (iblok /= 0) then
      ! DEBUG
@@ -212,7 +210,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
    end if
 
    ! Eventually impose the acoustic sum rule based on previously calculated d2asr
-   call asrq0_apply(asrq0, natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
+   call asrq0%apply(natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
 
    ! Transform d2cart into reduced coordinates.
    call d2cart_to_red(d2cart,d2red,crystal%gprimd,crystal%rprimd,mpert, &
@@ -247,8 +245,8 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  ! Copy the flags for Gamma
  qpt_padded(:,1) = zero
  qptnrm = one
- call gtblk9(ddb,iblok,qpt_padded,qptnrm,rfphon,rfelfd,rfstrs,rftyp)
- call gtblk9(ddb_new,jblok,qpt_padded,qptnrm,rfphon,rfelfd,rfstrs,rftyp)
+ call ddb%get_block(iblok,qpt_padded,qptnrm,rfphon,rfelfd,rfstrs,rftyp)
+ call ddb_new%get_block(jblok,qpt_padded,qptnrm,rfphon,rfelfd,rfstrs,rftyp)
 
  if (iblok /= 0 .and. jblok /= 0) then
 
@@ -282,16 +280,14 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
    call wrtout(std_out,' write the DDB ','COLL')
    choice=2
    do iblok=1,nblok
-     call ddb_write_blok(ddb_new,iblok,choice,ddb_hdr%mband,mpert,msize,&
-&     ddb_hdr%nkpt,unddb)
+     call ddb_new%write_block(iblok,choice,ddb_hdr%mband,mpert,msize,ddb_hdr%nkpt,unddb)
    end do
 
    ! Also write summary of bloks at the end
    write(unddb, '(/,a)' )' List of bloks and their characteristics '
    choice=3
    do iblok=1,nblok
-     call ddb_write_blok(ddb_new,iblok,choice,ddb_hdr%mband,mpert,msize,&
-&     ddb_hdr%nkpt,unddb)
+     call ddb_new%write_block(iblok,choice,ddb_hdr%mband,mpert,msize,ddb_hdr%nkpt,unddb)
    end do
 
    close (unddb)
@@ -323,7 +319,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  ! Free memory
  ! ===========
 
- call ddb_free(ddb_new)
+ call ddb_new%free()
  ABI_FREE(d2cart)
  ABI_FREE(d2red)
  ABI_FREE(blkflg)
@@ -362,10 +358,6 @@ end subroutine ddb_interpolate
 !! SOURCE
 
 subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
-
- !use defs_datatypes
- !use defs_abitypes
- implicit none
 
 !Arguments -------------------------------
 !scalars

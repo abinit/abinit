@@ -27,12 +27,13 @@
 MODULE m_memeval
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
+ use m_dtset
 
+ use defs_datatypes, only : pspheader_type
+ use defs_abitypes,   only : MPI_type
  use m_geometry,      only : mkradim, mkrdim, xred2xcart, metric
  use m_symtk,         only : mati3inv, littlegroup_q
  use m_spgdata,       only : prtspgroup
@@ -538,7 +539,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
  integer :: my_natom,n_fftgr,narr_fourdp,nbnd_in_blk,ndiel4,ndiel456,ndiel5,ndiel6
  integer :: ngrad,nprocwf,nspgrad,qphase_rhoij,rhoij_nspden
  real(dp) :: mbcg,mbdiskpd,mbdiskwf,mbf_fftgr,mbgylm
- character(len=500) :: message
+ character(len=500) :: msg
 ! character(len=1) :: firstchar
 !arrays
  integer :: dttyp(marrays),nattyp(ntypat)
@@ -551,8 +552,8 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 ! **************************************************************************
 
  if(option<0 .or. option>2)then
-   write(message,'(A,I0,A)')'option=',option,' while the only allowed values are 0, 1, or 2.'
-   MSG_BUG(message)
+   write(msg,'(A,I0,A)')'option=',option,' while the only allowed values are 0, 1, or 2.'
+   MSG_BUG(msg)
  end if
 
 !firstchar=' ';if (use_gpu_cuda==1) firstchar='_'
@@ -564,70 +565,70 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
  call wrtout(std_out,'memory: analysis of memory needs ','COLL')
 
  if(jdtset>=100)then
-   write(message,'(80a,a,a,i5,a)')('=',mu=1,80),ch10,&
-&   ' Values of the parameters that define the memory need for DATASET',jdtset,'.'
+   write(msg,'(80a,a,a,i5,a)')('=',mu=1,80),ch10,&
+    ' Values of the parameters that define the memory need for DATASET',jdtset,'.'
  else if(jdtset/=0)then
-   write(message,'(80a,a,a,i3,a)')('=',mu=1,80),ch10,&
-&   ' Values of the parameters that define the memory need for DATASET',jdtset,'.'
+   write(msg,'(80a,a,a,i3,a)')('=',mu=1,80),ch10,&
+    ' Values of the parameters that define the memory need for DATASET',jdtset,'.'
  else
-   write(message,'(80a,a,a)')('=',mu=1,80),ch10,&
-&   ' Values of the parameters that define the memory need of the present run '
+   write(msg,'(80a,a,a)')('=',mu=1,80),ch10,&
+    ' Values of the parameters that define the memory need of the present run '
  end if
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(iout,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
- write(message,'( 4(a,i8),a,4(a,i8) )' ) &
+ write(msg,'( 4(a,i8),a,4(a,i8) )' ) &
 & '     intxc =',intxc   ,'    ionmov =',ionmov,&
 & '      iscf =',iscf    ,'    lmnmax =',lmnmax,ch10,&
 & '     lnmax =',lnmax   ,'     mgfft =',mgfft,&
 & '  mpssoang =',mpssoang,'    mqgrid =',mqgrid_vl
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(iout,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
- write(message,'( 4(a,i8),a,4(a,i8),a,4(a,i8) )' ) &
+ write(msg,'( 4(a,i8),a,4(a,i8),a,4(a,i8) )' ) &
 & '     natom =',natom  ,'  nloc_mem =',nloalg(2)*(nloalg(3)+1),&
 & '    nspden =',nspden ,'   nspinor =',nspinor,ch10,&
 & '    nsppol =',nsppol ,'      nsym =',nsym,&
 & '    n1xccc =',n1xccc ,'    ntypat =',ntypat,ch10,&
 & '    occopt =',occopt ,'   xclevel =',xclevel
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(iout,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
- write(message,'(4(3(a,i12),a))') &
+ write(msg,'(4(3(a,i12),a))') &
 & '-    mband =',mband  ,'        mffmem =',mffmem,&
 & '         mkmem =',mkmem  ,ch10,&
 & '       mpw =',mpw    ,'          nfft =',nfft ,&
 & '          nkpt =',nkpt
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(iout,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
  if (my_natom/=natom)then
-   write(message,'(a,i10)') 'Pmy_natom=',my_natom
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(a,i10)') 'Pmy_natom=',my_natom
+   call wrtout(iout,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
  end if
 
 !Additional information if imgmov is activated (use of replicas of the cell)
  if (nimage>1) then
-   write(message,'(1(a,i10))' ) '  nimage =',nimage
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(1(a,i10))' ) '  nimage =',nimage
+   call wrtout(iout,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
  end if
 
 !Additional information on FFT grids if PAW
  if (usepaw==1) then
-   write(message, '(a,a,a,i10,a,i10)' )&
+   write(msg, '(a,a,a,i10,a,i10)' )&
 &   ' PAW method is used; the additional fine FFT grid is defined by:',ch10,&
 &   '   mgfftf=',mgfftf,'    nfftf =',nfftf
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
  end if
 
 !Additional information if GPU
  if (use_gpu_cuda==1) then
-!  write(message, '(a)' )' GPU method is used'
-!  call wrtout(iout,message,'COLL')
-!  call wrtout(std_out,message,'COLL')
+!  write(msg, '(a)' )' GPU method is used'
+!  call wrtout(iout,msg,'COLL')
+!  call wrtout(std_out,msg,'COLL')
  end if
 
 !Additional information needed for the susceptibility and dielectric matrices
@@ -647,12 +648,12 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
      nbnd_in_blk=(mband-1)/mblk+1
    end if
 
-   write(message, '(a,a,a,i10,a,i6,a,i10,a,i10)' )&
+   write(msg, '(a,a,a,i10,a,i6,a,i10,a,i10)' )&
 &   ' For the susceptibility and dielectric matrices, or tddft :',ch10,&
 &   '   mgfft =',mgfftdiel,'  nbnd_in_blk=',nbnd_in_blk,'    nfft =',nfftdiel,&
 &   '     npw =',npwdiel
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
    ndiel4=ngfftdiel(4) ; ndiel5=ngfftdiel(5) ; ndiel6=ngfftdiel(6)
    ndiel456=ndiel4*ndiel5*ndiel6
  else
@@ -660,19 +661,19 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    ndiel456 = 1
  end if
 
- write(message,'(80a)') ('=',mu=1,80)
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ write(msg,'(80a)') ('=',mu=1,80)
+ call wrtout(iout,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
  if(getcell>0 .or. (getcell<0 .and. idtset+getcell>0) )then
-   write(message,'(a,a,a,a,a,a,i3,a,i3,a,a,a,a,a,a)' )ch10,&
+   write(msg,'(a,a,a,a,a,a,i3,a,i3,a,a,a,a,a,a)' )ch10,&
 &   ' memory : COMMENT -',ch10,&
 &   '  The determination of memory needs at this stage is meaningless,',ch10,&
 &   '  since getcell = ',getcell,' is non-zero, while idtset=',idtset,'.',ch10,&
 &   '  The following numbers are obtained by supposing that acell and rprim',ch10,&
 &   '  are NOT taken from a previous dataset. You cannot rely on them.',ch10
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
  end if
 
 !Compute number of atoms per type for current proc
@@ -1393,7 +1394,7 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 !integer :: jj,kk
  integer :: mu,nmbytes,nquarter_mbytes,quit
  real(dp) :: mbbigarr,mbbiggest
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp),allocatable :: bigarray(:,:),bigarray1(:,:),bigarray2(:,:)
  real(dp),allocatable :: bigarray3(:,:),bigarray4(:,:),bigarray5(:,:)
@@ -1469,126 +1470,119 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
  end do
 !When iprcel<20, the biggest chains cannot be number 8 or 9 ...
  if(modulo(iprcel,100)<20 .and. (biggest==8 .or. biggest==9))then
-   write(message,'(a,a,a,a,i3,a,a,a)') ch10,&
+   write(msg,'(a,a,a,a,i3,a,a,a)') ch10,&
 &   ' memana: BUG -',ch10,&
 &   '  The biggest chain is number',biggest,' while iprcel==20.',ch10,&
 &   '  This is not allowed.'
-   call wrtout(std_out,message,'COLL')
+   call wrtout(std_out,msg,'COLL')
  end if
 
- write(message, '(a,f11.3,a)' ) &
+ write(msg, '(a,f11.3,a)' ) &
 & 'P This job should need less than                 ',&
 & mbbiggest+tol10,' Mbytes of memory. '
- call wrtout(std_out,message,'COLL')
- call wrtout(iout,message,'COLL')
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(iout,msg,'COLL')
 
  if(prtvol>=10)then
-   if(biggest==1)write(message,'(a)')'P Max. in main chain + fourwf.f '
-   if(biggest==2)write(message,'(a)')'P Max. in main chain + nonlop.f + opernl.f '
-   if(biggest==3)write(message,'(a)')'P Max. in XC chain '
-   if(biggest==4)write(message,'(a)')'P Max. in mkrho chain '
-   if(biggest==5)write(message,'(a)')'P Max. in fourdp chain '
-   if(biggest==6)write(message,'(a)')'P Max. in parallel k-point chain '
-   if(biggest==7)write(message,'(a)')'P Max. in newvtr chain '
-   if(biggest==8)write(message,'(a)')'P Max. in suscep chain '
-   if(biggest==9)write(message,'(a)')'P Max. in dielmt chain '
-   if(biggest==10)write(message,'(a)')'P Max. in tddft chain '
-   call wrtout(iout,message,'COLL')
+   if(biggest==1)write(msg,'(a)')'P Max. in main chain + fourwf.f '
+   if(biggest==2)write(msg,'(a)')'P Max. in main chain + nonlop.f + opernl.f '
+   if(biggest==3)write(msg,'(a)')'P Max. in XC chain '
+   if(biggest==4)write(msg,'(a)')'P Max. in mkrho chain '
+   if(biggest==5)write(msg,'(a)')'P Max. in fourdp chain '
+   if(biggest==6)write(msg,'(a)')'P Max. in parallel k-point chain '
+   if(biggest==7)write(msg,'(a)')'P Max. in newvtr chain '
+   if(biggest==8)write(msg,'(a)')'P Max. in suscep chain '
+   if(biggest==9)write(msg,'(a)')'P Max. in dielmt chain '
+   if(biggest==10)write(msg,'(a)')'P Max. in tddft chain '
+   call wrtout(iout,msg,'COLL')
 
-   write(message, '(a,i13,a,f11.3,a)' )&
+   write(msg, '(a,i13,a,f11.3,a)' )&
 &   'P',nint(cintmpw(biggest)),' blocks of mpw  integer numbers, for',&
 &   mbintmpw(biggest)+tol10,' Mbytes. '
-   call wrtout(iout,message,'COLL')
-   write(message, '(a,i13,a,f11.3,a)' )&
+   call wrtout(iout,msg,'COLL')
+   write(msg, '(a,i13,a,f11.3,a)' )&
 &   'P',nint(cdpmpw(biggest)),' blocks of mpw  real(dp)  numbers, for',&
 &   mbdpmpw(biggest)+tol10,' Mbytes. '
-   call wrtout(iout,message,'COLL')
+   call wrtout(iout,msg,'COLL')
    if (nfft==nfftf) then
      if(mbintfft(biggest)+mbintfftf(biggest)>0.001)then
-       write(message, '(a,i13,a,f11.3,a)' )&
+       write(msg, '(a,i13,a,f11.3,a)' )&
 &       'P',nint(cintfft(biggest)+cintfftf(biggest)),' blocks of nfft integer numbers, for',&
 &       mbintfft(biggest)+mbintfftf(biggest)+tol10,' Mbytes. '
-       call wrtout(iout,message,'COLL')
+       call wrtout(iout,msg,'COLL')
      end if
-     write(message, '(a,i13,a,f11.3,a)' )&
+     write(msg, '(a,i13,a,f11.3,a)' )&
 &     'P',nint(cdpfft(biggest)+cdpfftf(biggest)),' blocks of nfft real(dp)  numbers, for',&
 &     mbdpfft(biggest)+mbdpfftf(biggest)+tol10,' Mbytes. '
-     call wrtout(iout,message,'COLL')
+     call wrtout(iout,msg,'COLL')
    else
      if(mbintfftf(biggest)>0.001)then
-       write(message, '(a,i13,a,f11.3,a)' )&
+       write(msg, '(a,i13,a,f11.3,a)' )&
 &       'P',nint(cintfftf(biggest)),' blocks of nfft (fine grid) integer numbers, for',&
 &       mbintfftf(biggest)+tol10,' Mbytes. '
-       call wrtout(iout,message,'COLL')
+       call wrtout(iout,msg,'COLL')
      end if
-     write(message, '(a,i13,a,f11.3,a)' )&
+     write(msg, '(a,i13,a,f11.3,a)' )&
 &     'P',nint(cdpfftf(biggest)),' blocks of nfft (fine grid) real(dp)  numbers, for',&
 &     mbdpfftf(biggest)+tol10,' Mbytes. '
-     call wrtout(iout,message,'COLL')
+     call wrtout(iout,msg,'COLL')
      if(mbintfft(biggest)>0.001)then
-       write(message, '(a,i13,a,f11.3,a)' )&
+       write(msg, '(a,i13,a,f11.3,a)' )&
 &       'P',nint(cintfft(biggest)),' blocks of nfft (coarse grid) integer numbers, for',&
 &       mbintfft(biggest)+tol10,' Mbytes. '
-       call wrtout(iout,message,'COLL')
+       call wrtout(iout,msg,'COLL')
      end if
-     write(message, '(a,i13,a,f11.3,a)' )&
+     write(msg, '(a,i13,a,f11.3,a)' )&
 &     'P',nint(cdpfft(biggest)),' blocks of nfft (coarse grid) real(dp)  numbers, for',&
 &     mbdpfft(biggest)+tol10,' Mbytes. '
-     call wrtout(iout,message,'COLL')
+     call wrtout(iout,msg,'COLL')
    end if
    if(mbintadd(biggest)>0.001)then
-     write(message, '(a,13x,a,f11.3,a)' )&
-&     'P',' Additional     integer numbers, for',mbintadd(biggest)+tol10,' Mbytes. '
-     call wrtout(iout,message,'COLL')
+     write(msg, '(a,13x,a,f11.3,a)' )'P',' Additional     integer numbers, for',mbintadd(biggest)+tol10,' Mbytes. '
+     call wrtout(iout,msg,'COLL')
    end if
-   write(message, '(a,13x,a,f11.3,a)' )&
-&   'P',' Additional     real(dp)  numbers, for',mbdpadd(biggest)+tol10,' Mbytes. '
-   call wrtout(iout,message,'COLL')
-   write(message, '(a,13x,a,f11.3,a)' )&
-&   'P',' With residue estimated to be       ',mbother(biggest)+tol10,' Mbytes. '
-   call wrtout(iout,message,'COLL')
-   write(message, '(a)' )'P'
-   call wrtout(iout,message,'COLL')
-   write(message, '(a)' )&
-&   'P Comparison of the memory needs of different chains'
-   call wrtout(iout,message,'COLL')
+   write(msg, '(a,13x,a,f11.3,a)' )'P',' Additional     real(dp)  numbers, for',mbdpadd(biggest)+tol10,' Mbytes. '
+   call wrtout(iout,msg,'COLL')
+   write(msg, '(a,13x,a,f11.3,a)' )'P',' With residue estimated to be       ',mbother(biggest)+tol10,' Mbytes. '
+   call wrtout(iout,msg,'COLL')
+   write(msg, '(a)' )'P'
+   call wrtout(iout,msg,'COLL')
+   write(msg, '(a)' )'P Comparison of the memory needs of different chains'
+   call wrtout(iout,msg,'COLL')
 
-   write(message, '(a,f11.3,a)' )&
-&   'P Main chain + fourwf.f           ',mbtot(1)+tol10,' Mbytes. '
-   call wrtout(iout,message,'COLL')
-   write(message, '(a,f11.3,a)' )&
-&   'P Main chain + nonlop.f + opernl.f',mbtot(2)+tol10,' Mbytes. '
-   call wrtout(iout,message,'COLL')
+   write(msg, '(a,f11.3,a)' )'P Main chain + fourwf.f           ',mbtot(1)+tol10,' Mbytes. '
+   call wrtout(iout,msg,'COLL')
+   write(msg, '(a,f11.3,a)' )'P Main chain + nonlop.f + opernl.f',mbtot(2)+tol10,' Mbytes. '
+   call wrtout(iout,msg,'COLL')
 
 !  The next chains are not defined in the RF case.
    if(nchain>2)then
-     write(message, '(a,f11.3,a)' )&
-&     'P XC chain                        ',mbtot(3)+tol10,' Mbytes. '
-     call wrtout(iout,message,'COLL')
-     write(message, '(a,f11.3,a)' )&
+     write(msg, '(a,f11.3,a)' )'P XC chain                        ',mbtot(3)+tol10,' Mbytes. '
+     call wrtout(iout,msg,'COLL')
+     write(msg, '(a,f11.3,a)' )&
 &     'P mkrho chain                     ',mbtot(4)+tol10,' Mbytes. '
-     call wrtout(iout,message,'COLL')
-     write(message, '(a,f11.3,a)' )&
+     call wrtout(iout,msg,'COLL')
+     write(msg, '(a,f11.3,a)' )&
 &     'P fourdp chain                    ',mbtot(5)+tol10,' Mbytes. '
-     call wrtout(iout,message,'COLL')
+     call wrtout(iout,msg,'COLL')
      if(xmpi_paral==1)then
-       write(message, '(a,f11.3,a)' )&
+       write(msg, '(a,f11.3,a)' )&
 &       '- parallel k-point chain          ',mbtot(6)+tol10,' Mbytes. '
-       call wrtout(iout,message,'COLL')
+       call wrtout(iout,msg,'COLL')
      end if
-     write(message, '(a,f11.3,a)' )&
+     write(msg, '(a,f11.3,a)' )&
 &     'P newvtr chain                    ',mbtot(7)+tol10,' Mbytes. '
-     call wrtout(iout,message,'COLL')
+     call wrtout(iout,msg,'COLL')
      if(modulo(iprcel,100)>=20.and.modulo(iprcel,100)<70)then
-       write(message, '(a,f11.3,a)' )&
+       write(msg, '(a,f11.3,a)' )&
 &       'P suscep chain                    ',mbtot(8)+tol10,' Mbytes. '
-       call wrtout(iout,message,'COLL')
-       write(message, '(a,f11.3,a)' )&
+       call wrtout(iout,msg,'COLL')
+       write(msg, '(a,f11.3,a)' )&
 &       'P dielmt chain                    ',mbtot(9)+tol10,' Mbytes. '
-       call wrtout(iout,message,'COLL')
+       call wrtout(iout,msg,'COLL')
      end if
      if(iscf==-1)then
-       write(message, '(a,f11.3,a)' )&
+       write(msg, '(a,f11.3,a)' )&
 &       'P tddft  chain                    ',mbtot(10)+tol10,' Mbytes. '
      end if
    end if ! nchain>2
@@ -1597,86 +1591,82 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 
 !--------------------------------------------------------------------
 
- write(message, '(a)' ) &
-& '  Rough estimation (10% accuracy) of disk space for files :'
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ write(msg, '(a)' ) '  Rough estimation (10% accuracy) of disk space for files :'
+ call wrtout(iout,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
- write(message, '(a,f11.3,a,a,f11.3,a)' ) &
+ write(msg, '(a,f11.3,a,a,f11.3,a)' ) &
 & '_ WF disk file :',mbdiskwf+tol10,' Mbytes ;',&
 & ' DEN or POT disk file :',mbdiskpd+tol10,' Mbytes.'
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(iout,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
  if(mffmem==0 .and. iscf>0)then
    if(iscf==1)then
-     write(message, '(a,a,a)' )&
+     write(msg, '(a,a,a)' )&
 &     '  mffmem==0, iscf==1 => use of 1 FFT temporary disk file,',ch10,&
 &     '                       5 times bigger than a DEN file.'
    else if(iscf==2.or.iscf==12)then
-     write(message, '(a,a,a)' )&
+     write(msg, '(a,a,a)' )&
 &     '  mffmem==0, iscf==2 => use of 1 FFT temporary disk file,',ch10,&
 &     '                       3 times bigger than a DEN file.'
    else if(iscf==3.or.iscf==13)then
-     write(message, '(a,a,a)' )&
+     write(msg, '(a,a,a)' )&
 &     '  mffmem==0, iscf==3 => use of 1 FFT temporary disk file,',ch10,&
 &     '                       4 times bigger than a DEN file.'
    else if(iscf==4.or.iscf==14)then
-     write(message, '(a,a,a)' )&
+     write(msg, '(a,a,a)' )&
 &     '  mffmem==0, iscf==4 => use of 1 FFT temporary disk file,',ch10,&
 &     '                       6 times bigger than a DEN file.'
    else if(iscf==5)then
-     write(message, '(a,a,a)' )&
+     write(msg, '(a,a,a)' )&
 &     '  mffmem==0, iscf==5 => use of 1 FFT temporary disk file,',ch10,&
 &     '                       10 times bigger than a DEN file.'
    else if(iscf==6)then
-     write(message, '(a,a,a)' )&
+     write(msg, '(a,a,a)' )&
 &     '  mffmem==0, iscf==6 => use of 1 FFT temporary disk file,',ch10,&
 &     '                       10 times bigger than a DEN file.'
    else if(iscf==7.or.iscf==17)then
-     write(message, '(a,a,a)' )&
+     write(msg, '(a,a,a)' )&
 &     '  mffmem==0, iscf==7 => use of 1 FFT temporary disk file,',ch10,&
 &     '                       (2+2*npulayit) times bigger than a DEN file.'
    end if
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
  end if
 
-!Temporary message - estimation of PAW specific data has to be done...
+!Temporary msg - estimation of PAW specific data has to be done...
 !Have to add the usepaw argument to use this.
 !if (usepaw==1) then
-!write(message,'(5a)') '  WARNING: You are using PAW formalism;',ch10,&
+!write(msg,'(5a)') '  WARNING: You are using PAW formalism;',ch10,&
 !&       '           Above estimations do not take PAW',ch10,&
 !&       '           specific data into account !'
-!call wrtout(iout,message,'COLL')
-!call wrtout(std_out,message,'COLL')
+!call wrtout(iout,msg,'COLL')
+!call wrtout(std_out,msg,'COLL')
 !end if
 
- write(message,'(80a,a)') ('=',mu=1,80),ch10
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ write(msg,'(80a,a)') ('=',mu=1,80),ch10
+ call wrtout(iout,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
 !--------------------------------------------------------------------
 !Here, each processor must test its memory, so use
-!the PERS mode for error messages, followed by synchronisation
+!the PERS mode for error msgs, followed by synchronisation
 
  mbbigarr=max(mbf_fftgr,mbcg,mbgylm)
  if(mbbigarr==mbcg) then
-   write(message, '(a,f12.4,a)' ) &
-&   ' Biggest array : cg(disk), with',mbcg+tol10,' MBytes.'
+   write(msg, '(a,f12.4,a)' ) ' Biggest array : cg(disk), with',mbcg+tol10,' MBytes.'
  else if (mbbigarr==mbf_fftgr) then
-   write(message, '(a,f12.4,a)' ) &
-&   ' Biggest array : f_fftgr(disk), with',mbf_fftgr+tol10,' MBytes.'
+   write(msg, '(a,f12.4,a)' ) ' Biggest array : f_fftgr(disk), with',mbf_fftgr+tol10,' MBytes.'
  else if (mbbigarr==mbgylm)then
-   write(message, '(a,f12.4,a)' ) &
-&   ' Biggest array : pawfgrtab%gylm(gr), with',mbgylm+tol10,' MBytes.'
+   write(msg, '(a,f12.4,a)' ) ' Biggest array : pawfgrtab%gylm(gr), with',mbgylm+tol10,' MBytes.'
  end if
- call wrtout(std_out,message,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
 !if (mpi_enreg%my_nimage>1) then
-!write(message, '(a,f12.4,a)' ) &
+!write(msg, '(a,f12.4,a)' ) &
 !&   ' These estimations take the distribution over replicas (images) of the cell into account.'
-!call wrtout(std_out,message,'COLL')
+!call wrtout(std_out,msg,'COLL')
 !end if
 
  quit=0
@@ -1687,23 +1677,22 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
    nquarter_mbytes=4.0_dp*mbbigarr+1.0_dp
    ABI_STAT_ALLOCATE(bigarray,(32*1024,nquarter_mbytes), ier)
    if(ier/=0)then
-     write(message,'(a,f11.3,a,a,a,a,a,a,a)')&
+     write(msg,'(a,f11.3,a,a,a,a,a,a,a)')&
 &     'Test failed to allocate an array of',mbbigarr,' Mbytes',ch10,&
 &     'It is not worth to continue ',ch10,&
 &     'Action: modify input variable to fit the available memory,',ch10,&
 &     'increase limit on maximal array size or set mem_test to 0 to disable this test.'
-     call wrtout(std_out,message,'PERS')
+     call wrtout(std_out,msg,'PERS')
      if(option==1)then
-       MSG_ERROR_CLASS(message, "MemanaError")
+       MSG_ERROR_CLASS(msg, "MemanaError")
      else
-       MSG_WARNING(message)
+       MSG_WARNING(msg)
        quit=1
      end if
    end if
    if(quit==0)then
-     write(message,'(a,f11.3,a)')&
-&     ' memana : allocated an array of',mbbigarr+tol10,' Mbytes, for testing purposes. '
-     call wrtout(std_out,message,'COLL')
+     write(msg,'(a,f11.3,a)')' memana : allocated an array of',mbbigarr+tol10,' Mbytes, for testing purposes. '
+     call wrtout(std_out,msg,'COLL')
    end if
    if(allocated(bigarray)) then
      ABI_DEALLOCATE(bigarray)
@@ -1722,26 +1711,25 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
    ABI_STAT_ALLOCATE(bigarray7,(32*1024,nquarter_mbytes), ier7)
    ABI_STAT_ALLOCATE(bigarray8,(32*1024,nquarter_mbytes), ier8)
 
-   if(ier1/=0 .or. ier2/=0 .or. ier3/=0 .or. ier4/=0 .or.&
-&   ier5/=0 .or. ier6/=0 .or. ier7/=0 .or. ier8/=0) then
-     write(message,'(a,f11.3,a,a,a,a,a,a,a)')&
+   if(ier1/=0 .or. ier2/=0 .or. ier3/=0 .or. ier4/=0 .or. ier5/=0 .or. ier6/=0 .or. ier7/=0 .or. ier8/=0) then
+     write(msg,'(a,f11.3,a,a,a,a,a,a,a)')&
 &     'Test failed to allocate ',mbbiggest,' Mbytes',ch10,&
 &     'It is not worth to continue ',ch10,&
 &     'Action: modify input variables or submission parameters to fit the available memory,',ch10,&
 &     'increase limit on available memory or set mem_test to 0 to disable this test.'
      if(option==1)then
-       MSG_ERROR_CLASS(message, "MemanaError")
+       MSG_ERROR_CLASS(msg, "MemanaError")
      else
-       MSG_WARNING(message)
+       MSG_WARNING(msg)
        quit=1
      end if
    end if
 
    if(quit==0)then
-     write(message,'(a,f11.3,a,a,a)')&
+     write(msg,'(a,f11.3,a,a,a)')&
 &     ' memana: allocated ',mbbiggest,'Mbytes, for testing purposes. ',ch10,&
 &     ' The job will continue.'
-     call wrtout(std_out,message,'COLL')
+     call wrtout(std_out,msg,'COLL')
    end if
    if(allocated(bigarray1)) then
      ABI_DEALLOCATE(bigarray1)
@@ -1793,12 +1781,12 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
    do ii=1,30
      ABI_STAT_ALLOCATE(bigarray,(32*1024,nquarter_mbytes), ier)
      if(ier/=0)then
-       write(message,'(a,i0,a)')' memana : failed to allocate ',nmbytes,' Mbytes'
-       call wrtout(std_out,message,'PERS')
+       write(msg,'(a,i0,a)')' memana : failed to allocate ',nmbytes,' Mbytes'
+       call wrtout(std_out,msg,'PERS')
        exit
      end if
-     write(message,'(a,i0,a)')' memana : succeeded to allocate ',nmbytes,' Mbytes'
-     call wrtout(std_out,message,'PERS')
+     write(msg,'(a,i0,a)')' memana : succeeded to allocate ',nmbytes,' Mbytes'
+     call wrtout(std_out,msg,'PERS')
 !    Here really test the space
 !    do kk=1,nquarter_mbytes
 !    do jj=1,32*1024,37
@@ -1916,7 +1904,7 @@ end subroutine memana
 !! to take into account the static arrays declared
 !! in rhotoxc and daughter routines (at maximum 22*1000 dp numbers),
 !! as well as other arrays like
-!! character(len=500) :: message (present in about 100 routines), or the different
+!! character(len=500) :: msg (present in about 100 routines), or the different
 !! arrays allocated in move.f, brdmin.f, gstate.f (xf array) or pspini.f
 !! In the case 3<=occopt<=7 this amount is increased by 760 Kbytes
 !! to take into account the arrays smdfun, occfun, entfun, workfun and xgrid,
@@ -1977,7 +1965,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  integer :: narr_fourdp,ngrad,nprocwf
  integer :: my_natom
  real(dp) :: mbcg,mbdiskpd,mbdiskwf,mbf_fftgr,mbgylm
- character(len=500) :: message
+ character(len=500) :: msg
  character(len=1) :: firstchar
 !arrays
  integer :: dttyp(marrays)
@@ -1988,8 +1976,8 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 ! **************************************************************************
 
  if(option<0 .or. option>2)then
-   write(message, '(a,i0,a)')'option= ',option,' while the only allowed values are 0, 1, or 2.'
-   MSG_BUG(message)
+   write(msg, '(a,i0,a)')'option= ',option,' while the only allowed values are 0, 1, or 2.'
+   MSG_BUG(msg)
  end if
 
  firstchar=' ';if (use_gpu_cuda==1) firstchar='_'
@@ -1999,71 +1987,68 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  call wrtout(std_out,' memorf : analysis of memory needs ','COLL')
 
  if(jdtset>=100)then
-   write(message,'(80a,a,a,i5,a)')('=',mu=1,80),ch10,&
-&   ' Values of the parameters that define the memory need for DATASET',jdtset,&
-&   ' (RF).'
+   write(msg,'(80a,a,a,i5,a)')('=',mu=1,80),ch10,&
+   ' Values of the parameters that define the memory need for DATASET',jdtset,' (RF).'
  else if(jdtset/=0)then
-   write(message,'(80a,a,a,i3,a)')('=',mu=1,80),ch10,&
-&   ' Values of the parameters that define the memory need for DATASET',jdtset,&
-&   ' (RF).'
+   write(msg,'(80a,a,a,i3,a)')('=',mu=1,80),ch10,&
+   ' Values of the parameters that define the memory need for DATASET',jdtset,' (RF).'
  else
-   write(message,'(80a,a,a,a)')('=',mu=1,80),ch10,&
-&   ' Values of the parameters that define the memory need of the present run',&
-&   ' (RF).'
+   write(msg,'(80a,a,a,a)')('=',mu=1,80),ch10,&
+   ' Values of the parameters that define the memory need of the present run',' (RF).'
  end if
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(iout,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
  mkmem=mkmems(1)
  mkqmem=mkmems(2)
  mk1mem=mkmems(3)
  my_natom=natom;if (mpi_enreg%nproc_atom>1) my_natom=mpi_enreg%my_natom
 
- write(message,'( 4(a,i8),a,4(a,i8) )' ) &
+ write(msg,'( 4(a,i8),a,4(a,i8) )' ) &
 & '     intxc =',intxc   ,'      iscf =',iscf,&
 & '    lmnmax =',lmnmax  ,'     lnmax =',lnmax,ch10,&
 & '     mgfft =',mgfft,'  mpssoang =',mpssoang,&
 & '    mqgrid =',mqgrid,'     natom =',natom
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(iout,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
- write(message,'( 4(a,i8),a,4(a,i8),a,4(a,i8) )' ) &
+ write(msg,'( 4(a,i8),a,4(a,i8),a,4(a,i8) )' ) &
 & '  nloc_mem =',nloalg(2)*(nloalg(3)+1),'    nspden =',nspden ,&
 & '   nspinor =',nspinor,'    nsppol =',nsppol ,ch10,&
 & '      nsym =',nsym,'    n1xccc =',n1xccc ,&
 & '    ntypat =',ntypat,'    occopt =',occopt ,ch10,&
 & '   xclevel =',xclevel
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(iout,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
- write(message,'(4(3(a,i12),a))') &
+ write(msg,'(4(3(a,i12),a))') &
 & '-    mband =',mband  ,'        mffmem =',mffmem,&
 & '         mkmem =',mkmem  ,ch10,&
 & '-   mkqmem =',mkqmem ,'        mk1mem =',mk1mem,&
 & '           mpw =',mpw  ,ch10,&
 & '      nfft =',nfft ,'          nkpt =',nkpt
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(iout,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
  if (my_natom/=natom)then
-   write(message,'(a,i10)') 'Pmy_natom=',my_natom
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(a,i10)') 'Pmy_natom=',my_natom
+   call wrtout(iout,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
  end if
 
- write(message,'(80a)') ('=',mu=1,80)
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ write(msg,'(80a)') ('=',mu=1,80)
+ call wrtout(iout,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
  if(getcell>0 .or. (getcell<0 .and. idtset+getcell>0) )then
-   write(message,'(a,a,a,a,a,a,i3,a,i3,a,a,a,a,a,a)' )ch10,&
+   write(msg,'(a,a,a,a,a,a,i3,a,i3,a,a,a,a,a,a)' )ch10,&
 &   ' memorf : COMMENT -',ch10,&
 &   '  The determination of memory needs at this stage is meaningless,',ch10,&
 &   '  since getcell = ',getcell,' is non-zero, while idtset=',idtset,'.',ch10,&
 &   '  The following numbers are obtained by supposing that acell and rprim',ch10,&
 &   '  are NOT taken from a previous dataset. You cannot rely on them.',ch10
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
  end if
 
  n_fftgr=1
@@ -2325,7 +2310,7 @@ subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalc
 !scalars
  integer :: ilang,ipsp,ipspalch,itypalch,itypat,ntyppure
 !integer :: llmax
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer,allocatable :: lmnproj_typat(:),lmnprojso_typat(:),lnproj_typat(:)
  integer,allocatable :: lnprojso_typat(:),nproj_typat(:,:),nprojso_typat(:,:)
@@ -2399,10 +2384,10 @@ subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalc
 !lnmaxso=max(maxval(lnprojso_typat(1:ntypat)),1)
 
  if(maxval(lmnproj_typat(1:ntypat))==0)then
-   write(message, '(3a)' )&
-&   'Despite there is only a local part to pseudopotential(s),',ch10,&
-&   'lmnmax and lnmax are set to 1.'
-   MSG_COMMENT(message)
+   write(msg, '(3a)' )&
+    'Despite there is only a local part to pseudopotential(s),',ch10,&
+    'lmnmax and lnmax are set to 1.'
+   MSG_COMMENT(msg)
  end if
 
 !XG040806 : These lines make modifications of lnmax and lmnmax
@@ -2416,10 +2401,10 @@ subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalc
 !if (lmnmax  <llmax) lmnmax=llmax
 !if (lmnmaxso<llmax) lmnmaxso=llmax
 
- write(message, '(a,a,i4,a,i4,3a,i4,a,i4,a)' ) ch10,&
+ write(msg, '(a,a,i4,a,i4,3a,i4,a,i4,a)' ) ch10,&
 & ' getdim_nloc : deduce lmnmax  =',lmnmax,', lnmax  =',lnmax,',',ch10,&
 & '                      lmnmaxso=',lmnmaxso,', lnmaxso=',lnmaxso,'.'
- call wrtout(std_out,message,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
  ABI_DEALLOCATE(lmnproj_typat)
  ABI_DEALLOCATE(lmnprojso_typat)
@@ -2467,7 +2452,7 @@ subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
 !Local variables-------------------------------
  integer :: mqgrid2,mqgriddg2
  real(dp) :: gmax,gmaxdg,gvecnorm
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -2479,47 +2464,46 @@ subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
  if (mqgrid == 0) then
    mqgrid2=ceiling(gmax/gvecnorm*nptsgvec)
    mqgrid=max(mqgrid2,3001)
-   write(message, '(5a,i0,a)' )&
+   write(msg, '(5a,i0,a)' )&
 &   'The number of points "mqgrid" in reciprocal space used for the',ch10,&
 &   'description of the pseudopotentials has been set automatically',ch10,&
 &   'by abinit to: ',mqgrid,'.'
-   !MSG_COMMENT(message)
+   !MSG_COMMENT(msg)
  else
    mqgrid2=ceiling(gmax/gvecnorm*nptsgvec)
    if (mqgrid2>mqgrid) then
-     write(message, '(3a,i8,3a,i8,3a)' )&
+     write(msg, '(3a,i8,3a,i8,3a)' )&
 &     'The number of points "mqgrid" in reciprocal space used for the',ch10,&
 &     'description of the pseudopotentials is : ',mqgrid,'.',ch10,&
 &     'It would be better to increase it to at least ',mqgrid2,', or',ch10,&
 &     'let abinit choose it automatically by setting mqgrid = 0.'
-     MSG_WARNING(message)
+     MSG_WARNING(msg)
    end if
  end if
 
  if (usepaw==1) then
    if(ecutdg<tol6)then
-     write(message,'(a)')&
-&     'The value of (paw)ecutdg is zero or negative, which is forbidden.'
-     MSG_ERROR(message)
+     write(msg,'(a)')'The value of (paw)ecutdg is zero or negative, which is forbidden.'
+     MSG_ERROR(msg)
    end if
    gmaxdg=one/(sqrt2*pi)*sqrt(ecutdg)
    if (mqgriddg == 0) then
      mqgriddg2=ceiling(gmaxdg/gvecnorm*nptsgvec)
      mqgriddg=max(mqgriddg2,3001)
-     write(message, '(5a,i0,a)' )&
+     write(msg, '(5a,i0,a)' )&
 &     'The number of points "mqgriddg" in reciprocal space used for the',ch10,&
 &     'description of the pseudopotentials has been set automatically',ch10,&
 &     'by abinit to: ',mqgriddg,'.'
-     !MSG_COMMENT(message)
+     !MSG_COMMENT(msg)
    else
      mqgriddg2=ceiling(gmax/gvecnorm*nptsgvec)
      if (mqgriddg2>mqgriddg) then
-       write(message, '(3a,i8,3a,i8,3a)' )&
+       write(msg, '(3a,i8,3a,i8,3a)' )&
 &       'The number of points "mqgriddg" in reciprocal space used for the',ch10,&
 &       'description of the pseudopotentials (fine grid) is :',mqgriddg,'.',ch10,&
 &       'It would be better to increase it to at least ',mqgriddg2,', or',ch10,&
 &       'let abinit choose it automatically by setting mqgrid = 0.'
-       MSG_WARNING(message)
+       MSG_WARNING(msg)
      end if
    end if
  end if
@@ -2589,7 +2573,7 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
 #if defined HAVE_BIGDFT
   !scalars
   integer :: ityp, i, mu, nstates, me, nproc, comm
-  character(len=500) :: message
+  character(len=500) :: msg
   real(dp) :: ehomo, radfine
   type(wvl_internal_type) :: wvl
   type(memory_estimation) :: peakmem
@@ -2608,10 +2592,10 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
  nproc=xmpi_comm_size(comm)
 
  if(option<0 .or. option>2)then
-   write(message, '(A,A,A,A,I0,A)') ch10,&
+   write(msg, '(A,A,A,A,I0,A)') ch10,&
 &   ' wvl_memory : BUG -',ch10,&
 &   '  option=',option,' while the only allowed values are 0, 1, or 2.'
-   call wrtout(std_out,message,'COLL')
+   call wrtout(std_out,msg,'COLL')
  end if
 
  wvl%paw%usepaw=0 !no PAW here
@@ -2624,46 +2608,46 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
  nullify(wvl%paw%spsi)
  nullify(wvl%paw%indlmn)
 
- write(message,*)' wvl_memory : analysis of memory needs '
- call wrtout(std_out,message,'COLL')
+ write(msg,*)' wvl_memory : analysis of memory needs '
+ call wrtout(std_out,msg,'COLL')
 
  if(idtset>=100)then
-   write(message,'(80a,a,a,i5,a)')('=',mu=1,80),ch10,&
+   write(msg,'(80a,a,a,i5,a)')('=',mu=1,80),ch10,&
 &   ' Values of the parameters that define the memory need for DATASET', idtset,&
 &   ' (WVL).'
  else if(idtset/=0)then
-   write(message,'(80a,a,a,i3,a)')('=',mu=1,80),ch10,&
+   write(msg,'(80a,a,a,i3,a)')('=',mu=1,80),ch10,&
 &   ' Values of the parameters that define the memory need for DATASET', idtset,&
 &   ' (WVL).'
  else
-   write(message,'(80a,a,a,a)')('=',mu=1,80),ch10,&
+   write(msg,'(80a,a,a,a)')('=',mu=1,80),ch10,&
 &   ' Values of the parameters that define the memory need of the present run',&
 &   ' (WVL).'
  end if
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
- write(message,'( a,f7.3,a,i7,2(a,F7.3),a,a,f7.3,a,i7 )' ) &
+ write(msg,'( a,f7.3,a,i7,2(a,F7.3),a,a,f7.3,a,i7 )' ) &
 & '  wvl_hgrid =', dtset%wvl_hgrid , '   nwfshist =', dtset%nwfshist, &
 & ' wvl_crmult =', dtset%wvl_crmult, ' wvl_frmult =', dtset%wvl_frmult, ch10,&
 & '  tl_radius =', dtset%tl_radius , '  tl_nprccg =', dtset%tl_nprccg
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
  if (dtset%nsppol == 2) then
    nstates = dtset%nelect
  else
    nstates = dtset%mband
  end if
- write(message,'(4(a,i7))')&
+ write(msg,'(4(a,i7))')&
 & '      natom =', dtset%natom, '     ntypat =', dtset%ntypat, &
 & '    nstates =', nstates,     '     nsppol =', dtset%nsppol
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
- write(message,'(80a)') ('=',mu=1,80)
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ write(msg,'(80a)') ('=',mu=1,80)
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
 !First, use eleconf to get radii_cf().
  ABI_ALLOCATE(radii_cf,(npsp, 3))
@@ -2706,9 +2690,9 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
  ABI_DEALLOCATE(xred)
  ABI_DEALLOCATE(xcart)
 
- write(message,'(80a,a)') ('=',mu=1,80), ch10
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ write(msg,'(80a,a)') ('=',mu=1,80), ch10
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
 #else
  BIGDFT_NOTENABLED_ERROR()

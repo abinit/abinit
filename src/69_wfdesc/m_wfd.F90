@@ -25,8 +25,6 @@
 module m_wfd
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_copy
@@ -34,7 +32,10 @@ module m_wfd
  use m_crystal
  use m_wfk
  use m_hdr
+ use m_distribfft
 
+ use defs_datatypes,   only : pseudopotential_type, ebands_t
+ use defs_abitypes,    only : mpi_type
  use m_gwdefs,         only : one_gw
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa
@@ -43,7 +44,7 @@ module m_wfd
  use m_hide_blas,      only : xcopy, xdotc
  use m_pptools,        only : printxsf
  use m_cgtools,        only : cg_zdotc
- use m_cgtk,           only : cgtk_change_gsphere
+ use m_cgtk,           only : cgtk_change_gsphere, cgtk_rotate
  use m_fftcore,        only : print_ngfft, kgindex, sphereboundary, ngfft_seq
  use m_fft_mesh,       only : rotate_fft_mesh, calc_ceikr, check_rot_fft
  use m_fft,            only : fft_ug !, fft_ug_dpc, fft_ur_dpc
@@ -364,87 +365,133 @@ module m_wfd
 
    procedure :: free => wfd_free
    ! Destructor.
+
    !procedure :: copy => wfd_copy
    ! Copy routine
+
    procedure :: norm2 => wfd_norm2
    ! Compute <u(g)|u(g)> for the same k-point and spin.
+
    procedure :: xdotc => wfd_xdotc
    ! Compute <u_{b1ks}|u_{b2ks}> in reciprocal space
+
    procedure :: reset_ur_cprj => wfd_reset_ur_cprj
    ! Reinitialize memory storage of u(r) and <p_i|psi>
+
    procedure :: get_many_ur => wfd_get_many_ur
    ! Get many wavefunctions in real space from its (bands(:),k,s) indices.
+
    procedure :: copy_cg => wfd_copy_cg
    ! Return a copy of u(g) in a real(2,npw_k)) array (Abinit convention)
+
    procedure :: get_ur => wfd_get_ur
    ! Get one wavefunction in real space from its (b,k,s) indices.
+
    procedure :: get_cprj => wfd_get_cprj
    ! Get one PAW projection <Proj_i|Cnk> with all NL projectors from its (b,k,s) indices.
+
    procedure :: change_ngfft => wfd_change_ngfft
    ! Reinitialize internal FFT tables.
+
    procedure :: nullify => wfd_nullify
    ! Set all pointers to null()
+
    procedure :: print => wfd_print
    ! Printout of basic info.
+
    procedure :: mkall_ur => wfd_mkall_ur
    ! Calculate all ur owned by this node at once.
+
    procedure :: ug2cprj => wfd_ug2cprj
    ! Get PAW cprj from its (b,k,s) indices.
    ! Return a pointer to ug from its (b,k,s) indices. Use it carefully!
    !procedure :: ptr_ur => wfd_ptr_ur
    ! Return a pointer to ur from its (b,k,s) indices. Use it carefully!
+
    procedure :: wave_free => wfd_wave_free
    ! Free internal buffers used to store the wavefunctions.
+
    procedure :: push_ug => wfd_push_ug
    ! Modify the value of u(g)_ks stored in the object.
+
    procedure :: extract_cgblock => wfd_extract_cgblock
    ! Extract a block of wavefunctions for a given spin and k-points (uses the cg storage mode)
+
    procedure :: ihave_ug => wfd_ihave_ug
    ! True if the node has this ug with the specified status.
+
    procedure :: ihave_ur => wfd_ihave_ur
    ! True if the node has this ur with the specified status.
+
    procedure :: ihave_cprj => wfd_ihave_cprj
    ! True if the node has this cprj with the specified status.
+
    procedure :: itreat_spin => wfd_itreat_spin
    ! Test if the processor is treating a block of wavefunctions with the specified spin.
+
    procedure :: mybands => wfd_mybands
    ! Returns the list of band indices of the u(g) owned by this node at given (k,s).
+
    procedure :: show_bkstab => wfd_show_bkstab
    ! Print a table showing the distribution of the wavefunctions.
+
    procedure :: distribute_bands => wfd_distribute_bands
    ! Distribute a set of bands taking into account the distribution of the ug.
+
    procedure :: iterator_bks => wfd_iterator_bks
    ! Iterator used to loop over bands, k-points and spin indices
+
    procedure :: bks_distrb => wfd_bks_distrb
    ! Distribute bands, k-points and spins
+
    procedure :: update_bkstab => wfd_update_bkstab
    ! Update the internal table with info on the distribution of the ugs.
+
    procedure :: set_mpicomm => wfd_set_mpicomm
+
    procedure :: rotate => wfd_rotate
    ! Linear transformation of the wavefunctions stored in Wfd
+
    procedure :: sanity_check => wfd_sanity_check
    ! Debugging tool
+
    procedure :: distribute_bbp => wfd_distribute_bbp
    ! Distribute a set of (b,b') indices
+
    procedure :: distribute_kb_kpbp => wfd_distribute_kb_kpbp
+
    procedure :: iam_master => wfd_iam_master
    ! Returns true if this rank is the master node.
+
    procedure :: test_ortho => wfd_test_ortho
    ! Test the orthonormalization of the wavefunctions.
+
    procedure :: sym_ur => wfd_sym_ur
    ! Symmetrize a wave function in real space
+   ! This routine is deprecated, see wfd_sym_ug_kg for algo in G-space.
+
+   procedure :: sym_ug_kg => wfd_sym_ug_kg
+   ! Symmetrize a wave function in G-space
+
    procedure :: paw_get_aeur => wfd_paw_get_aeur
    ! Compute the AE PAW wavefunction in real space.
+
    procedure :: plot_ur => wfd_plot_ur
    ! Write u(r) to an external file in XSF format.
+
    procedure :: write_wfk => wfd_write_wfk
    ! Write u(g) to a WFK file.
+
    procedure :: read_wfk => wfd_read_wfk
    ! Read u(g) from the WFK file completing the initialization of the object.
+
    procedure :: mkrho => wfd_mkrho
    ! Calculate the charge density on the fine FFT grid in real space.
+
    procedure :: pawrhoij => wfd_pawrhoij
+
    procedure :: dump_errinfo => wfd_dump_errinfo
+
  end type wfd_t
 
  public :: wfd_init                ! Main creation method.
@@ -522,7 +569,7 @@ subroutine kdata_init(Kdata,Cryst,Psps,kpoint,istwfk,ngfft,MPI_enreg,ecut,kg_k)
  ! Finds the boundary of the basis sphere of G vectors (for this k point)
  ! for use in improved zero padding of ffts in 3 dimensions.
  ABI_MALLOC(Kdata%gbound,(2*mgfft+8, 2))
- call sphereboundary(Kdata%gbound,istwfk,Kdata%kg_k,mgfft,npw_k)
+ call sphereboundary(Kdata%gbound, istwfk, Kdata%kg_k, mgfft, npw_k)
 
  ! Compute e^{ik.Ra} for each atom. Packed according to the atom type (atindx).
  ABI_MALLOC(Kdata%phkxred,(2, Cryst%natom))
@@ -939,17 +986,17 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 
  ! Allocate u(g) and, if required, also u(r)
  ug_size = one*nspinor*mpw*COUNT(bks_mask)
- write(msg,'(a,f12.1,a)')' Memory needed for Fourier components u(G) = ',two*gwpc*ug_size*b2Mb,' [Mb]'
+ write(msg,'(a,f12.1,a)')' Memory needed for Fourier components u(G) = ',two*gwpc*ug_size*b2Mb,' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 
  if (Wfd%usepaw==1) then
    cprj_size = one * nspinor*SUM(Wfd%nlmn_atm)*COUNT(bks_mask)
-   write(msg,'(a,f12.1,a)')' Memory needed for PAW projections Cprj = ',dp*cprj_size*b2Mb,' [Mb]'
+   write(msg,'(a,f12.1,a)')' Memory needed for PAW projections Cprj = ',dp*cprj_size*b2Mb,' [Mb] <<< MEM'
    call wrtout(std_out, msg)
  end if
 
  ur_size = one*nspinor*Wfd%nfft*COUNT(Wfd%keep_ur)
- write(msg,'(a,f12.1,a)')' Memory needed for real-space u(r) = ',two*gwpc*ur_size*b2Mb,' [Mb]'
+ write(msg,'(a,f12.1,a)')' Memory needed for real-space u(r) = ',two*gwpc*ur_size*b2Mb,' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 
  ABI_DT_MALLOC(Wfd%Wave,(Wfd%mband,Wfd%nkibz,Wfd%nsppol))
@@ -1678,23 +1725,23 @@ subroutine wfd_print(Wfd,header,unit,prtvol,mode_paral)
 
  ! Info on memory needed for u(g), u(r) and PAW cprj
  ug_size = one * Wfd%nspinor * mpw * count(Wfd%Wave(:,:,:)%has_ug >= WFD_ALLOCATED)
- write(msg,'(a,f12.1,a)')' Memory allocated for Fourier components u(G) = ',two*gwpc*ug_size*b2Mb,' [Mb]'
+ write(msg,'(a,f12.1,a)')' Memory allocated for Fourier components u(G) = ',two*gwpc*ug_size*b2Mb,' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 
  ur_size = one * Wfd%nspinor * Wfd%nfft * count(Wfd%Wave(:,:,:)%has_ur >= WFD_ALLOCATED)
- write(msg,'(a,f12.1,a)')' Memory allocated for real-space u(r) = ',two*gwpc*ur_size*b2Mb,' [Mb]'
+ write(msg,'(a,f12.1,a)')' Memory allocated for real-space u(r) = ',two*gwpc*ur_size*b2Mb,' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 
  if (Wfd%usepaw==1) then
    cprj_size = one * Wfd%nspinor * sum(Wfd%nlmn_atm) * count(Wfd%Wave(:,:,:)%has_cprj >= WFD_ALLOCATED)
-   write(msg,'(a,f12.1,a)')' Memory allocated for PAW projections Cprj = ',dp*cprj_size*b2Mb,' [Mb]'
+   write(msg,'(a,f12.1,a)')' Memory allocated for PAW projections Cprj = ',dp*cprj_size*b2Mb,' [Mb] <<< MEM'
    call wrtout(std_out, msg)
  end if
 
  !TODO
  ! Add addition info
  !kdata_bsize = nkibz * (four * (3 * mpw) + dp * two * mpw * natom)
- !write(msg,'(a,f12.1,a)')' Memory allocated for Kdata = ',kdata_bsize * b2Mb,' [Mb]'
+ !write(msg,'(a,f12.1,a)')' Memory allocated for Kdata = ',kdata_bsize * b2Mb,' [Mb] <<< MEM'
 
 end subroutine wfd_print
 !!***
@@ -4513,6 +4560,9 @@ end subroutine wfd_test_ortho
 !!  [with_umklp] = Optional flag. If .True. (Default) the umklapp G0 vector in the relation kbz = Sk + G0
 !!                 is taken into account when constructing u_kbz.
 !!
+!! NOTES
+!!  This method is deprecated. See wfd_sym_ug_kg for symmetrization in G-space
+!!
 !! OUTPUT
 !!  ur_kbz(Wfd%nfft*Wfd%nspinor)=The symmetrized wavefunction in real space.
 !!  [ur_kibz(Wfd%nfft*Wfd%nspinor)]= Optional output: u(r) in the IBZ.
@@ -4572,9 +4622,7 @@ subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur
  if (isirred) then
    ! Avoid symmetrization if this point is irreducible.
    call wfd%get_ur(band,ik_ibz,spin,ur_kbz)
-   if (PRESENT(ur_kibz)) then
-      call xcopy(Wfd%nfft*Wfd%nspinor,ur_kbz,1,ur_kibz,1)
-   end if
+   if (PRESENT(ur_kibz)) call xcopy(Wfd%nfft*Wfd%nspinor,ur_kbz,1,ur_kibz,1)
    if (my_trans=="C") ur_kbz = GWPC_CONJG(ur_kbz)
    RETURN
  end if
@@ -4583,9 +4631,7 @@ subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur
  ABI_MALLOC(ur, (Wfd%nfft*Wfd%nspinor))
 
  call wfd%get_ur(band,ik_ibz,spin,ur)
- if (PRESENT(ur_kibz)) then
-   call xcopy(Wfd%nfft*Wfd%nspinor,ur,1,ur_kibz,1)
- end if
+ if (PRESENT(ur_kibz)) call xcopy(Wfd%nfft*Wfd%nspinor,ur,1,ur_kibz,1)
 
  ! Wfd%irottb(:,isym_k) is the table for rotated FFT points
  SELECT CASE (Wfd%nspinor)
@@ -4609,8 +4655,8 @@ subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur
        do iy=0,ny-1
          do ix=0,nx-1
            gdotr= two_pi*( umklp(1)*(ix/DBLE(nx)) &
-&                         +umklp(2)*(iy/DBLE(ny)) &
-&                         +umklp(3)*(iz/DBLE(nz)) )
+                          +umklp(2)*(iy/DBLE(ny)) &
+                          +umklp(3)*(iz/DBLE(nz)) )
            fft_idx = fft_idx+1
            ur_kbz(fft_idx) = ur_kbz(fft_idx) * DCMPLX(DCOS(gdotr),DSIN(gdotr))
          end do
@@ -4673,6 +4719,110 @@ subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur
  ABI_FREE(ur)
 
 end subroutine wfd_sym_ur
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_wfd/wfd_sym_ug_kg
+!! NAME
+!!  wfd_sym_ug_kg
+!!
+!! FUNCTION
+!!  Use crystalline symmetries and time reversal to reconstruct wavefunctions at kk_bz from the IBZ image kk_ibz.
+!!  Return periodic part in G-space as well as list of G-vectors belonging to the G-sphere centered on kk_bz
+!!
+!! INPUTS
+!!  ecut: Cutoff energy for planewave basis set.
+!!  kk_bz: k-point in the BZ for output wavefunctions and G-vectors.
+!!  kk_ibz: Symmetrical image of kk_bz in the IBZ.
+!!  bstart: Initial band
+!!  nband: Number of bands to symmetrize.
+!!  spin: Spin index
+!!  mpw: Maximum number of planewaves used to dimension arrays.
+!!  indkk: Symmetry map kk_bz -> kk_ibz as computed by listkk.
+!!  cryst: Crystalline structure and symmetries
+!!  work_ngfft: Define the size of the workspace array work
+!!  work: Workspace array used to symmetrize wavefunctions
+!!
+!! OUTPUT
+!!  istwf_kbz: Time-reversal flag associated to output wavefunctions
+!!  npw_kbz: Number of G-vectors in kk_bz G-sphere
+!!  kg_kbz: G-vectors in reduced coordinates.
+!!  cgs_kbz: Periodic part of wavefunctions at kk_bz
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine wfd_sym_ug_kg(self, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, indkk, cryst, &
+                         work_ngfft, work, istwf_kbz, npw_kbz, kg_kbz, cgs_kbz)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: bstart, nband, spin, mpw
+ type(crystal_t),intent(in) :: cryst
+ class(wfd_t),intent(in) :: self
+ integer,intent(out) :: istwf_kbz, npw_kbz
+ real(dp),intent(in) :: ecut
+!arrays
+ integer :: work_ngfft(18)
+ integer,intent(in) :: indkk(6)
+ integer,intent(out) :: kg_kbz(3, mpw)
+ real(dp),intent(in) :: kk_bz(3), kk_ibz(3)
+ real(dp),intent(out) :: cgs_kbz(2, mpw*self%nspinor, nband)
+ real(dp),intent(out) :: work(2, work_ngfft(4), work_ngfft(5), work_ngfft(6))
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: ndat1 = 1
+ integer :: ik_ibz, isym_k, trev_k, ib, band, istwf_kirr, npw_kirr
+ logical :: isirr_k
+!arrays
+ integer :: g0_k(3)
+ integer,allocatable :: gtmp(:,:)
+ real(dp),allocatable :: cg_kirr(:,:)
+
+!************************************************************************
+
+ ! As reported by listkk via symrel
+ ik_ibz = indkk(1); isym_k = indkk(2); trev_k = indkk(6); g0_k = indkk(3:5)
+ isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+
+ ! Get npw_kbz, kg_kbz and symmetrize wavefunctions from IBZ (if needed).
+ ! Be careful with time-reversal symmetry.
+ if (isirr_k) then
+   ! Copy u_k(G)
+   istwf_kbz = self%istwfk(ik_ibz); npw_kbz = self%npwarr(ik_ibz)
+   ABI_CHECK(mpw >= npw_kbz, "mpw < npw_kbz")
+   kg_kbz(:,1:npw_kbz) = self%kdata(ik_ibz)%kg_k
+   do ib=1,nband
+     band = ib + bstart - 1
+     call self%copy_cg(band, ik_ibz, spin, cgs_kbz(1,1,ib))
+   end do
+ else
+   ! Reconstruct u_k(G) from the IBZ image.
+   istwf_kbz = 1
+   call get_kg(kk_bz, istwf_kbz, ecut, cryst%gmet, npw_kbz, gtmp)
+   ABI_CHECK(mpw >= npw_kbz, "mpw < npw_kbz")
+   kg_kbz(:,1:npw_kbz) = gtmp(:,:npw_kbz)
+   ABI_FREE(gtmp)
+
+   ! Use cg_kirr as workspace array, results stored in cgs_kbz.
+   istwf_kirr = self%istwfk(ik_ibz); npw_kirr = self%npwarr(ik_ibz)
+   ABI_MALLOC(cg_kirr, (2, npw_kirr*self%nspinor))
+   do ib=1,nband
+     band = ib + bstart - 1
+     call self%copy_cg(band, ik_ibz, spin, cg_kirr)
+     call cgtk_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, self%nspinor, ndat1, &
+                      npw_kirr, self%kdata(ik_ibz)%kg_k, &
+                      npw_kbz, kg_kbz, istwf_kirr, istwf_kbz, cg_kirr, cgs_kbz(:,:,ib), work_ngfft, work)
+   end do
+   ABI_FREE(cg_kirr)
+ end if
+
+end subroutine wfd_sym_ug_kg
 !!***
 
 !----------------------------------------------------------------------
@@ -4780,13 +4930,13 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 
  ! Master node opens the file and writes the Abinit header.
  if (iam_master) then
-   call wfk_open_write(WfkFile,Hdr,wfk_fname,formeig0,iomode,get_unit(),xmpi_comm_self,write_hdr=.TRUE.,write_frm=.FALSE.)
+   call wfkfile%open_write(Hdr,wfk_fname,formeig0,iomode,get_unit(),xmpi_comm_self,write_hdr=.TRUE.,write_frm=.FALSE.)
  end if
 
  ! Other nodes wait here before opening the same file.
  call xmpi_barrier(Wfd%comm)
  if (.not.iam_master) then
-   call wfk_open_write(WfkFile,Hdr,wfk_fname,formeig0,iomode,get_unit(),xmpi_comm_self,write_hdr=.FALSE.,write_frm=.FALSE.)
+   call wfkfile%open_write(Hdr,wfk_fname,formeig0,iomode,get_unit(),xmpi_comm_self,write_hdr=.FALSE.,write_frm=.FALSE.)
  end if
 
  do spin=1,Wfd%nsppol
@@ -4823,12 +4973,12 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 
        if (band_block(1)==1) then
          ! Write also kg_k, eig_k and occ_k
-         call wfk_write_band_block(WfkFile,band_block,ik_ibz,spin,xmpio_single,&
-&          kg_k=Wfd%Kdata(ik_ibz)%kg_k,cg_k=cg_k,&
-&          eig_k=Bands%eig(:,ik_ibz,spin),occ_k=Bands%occ(:,ik_ibz,spin))
+         call wfkfile%write_band_block(band_block,ik_ibz,spin,xmpio_single,&
+            kg_k=Wfd%Kdata(ik_ibz)%kg_k,cg_k=cg_k, &
+            eig_k=Bands%eig(:,ik_ibz,spin),occ_k=Bands%occ(:,ik_ibz,spin))
        else
          MSG_ERROR("This should not happen in the present version!")
-         !call wfk_write_band_block(WfkFile,band_block,ik_ibz,spin,xmpio_single,cg_k=cg_k(:,1+icg:))
+         !call wfkfile%write_band_block(band_block,ik_ibz,spin,xmpio_single,cg_k=cg_k(:,1+icg:))
        end if
      end do
 
@@ -4838,7 +4988,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
  end do
 
  ! Close the file.
- call wfk_close(Wfkfile)
+ call wfkfile%close()
 
  call cwtime_report(" write all cg" , cpu, wall, gflops)
 
@@ -4924,7 +5074,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  ! TODO: Perform consistency check btw Hdr and Wfd.
  ! Output the header of the GS wavefunction file.
  fform = 0
- if (wfd%prtvol /= 0 .and. wfd%my_rank == 0) call hdr_echo(hdr, fform, 4, unit=std_out)
+ if (wfd%prtvol /= 0 .and. wfd%my_rank == 0) call hdr%echo(fform, 4, unit=std_out)
 
  mband_disk = MAXVAL(Hdr%nband)
  ABI_CHECK(Wfd%mband <= mband_disk,"Not enough bands stored on file")
@@ -4980,7 +5130,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       ABI_MALLOC(kg_k,(3,optkg1*npw_disk))
       ABI_MALLOC_OR_DIE(cg_k,(2,mcg), ierr)
 
-      call wfk_read_band_block(Wfk, [1,nband_wfd] , ik_ibz, spin, sc_mode, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k)
+      call wfk%read_band_block([1,nband_wfd] , ik_ibz, spin, sc_mode, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k)
 
       if (wfd%prtvol > 0 .and. Wfd%my_rank==Wfd%master) then
         if (Wfd%nsppol==2) then
@@ -5055,7 +5205,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       mcg = npw_disk*Wfd%nspinor*COUNT(my_readmask(:,ik_ibz,spin))
       ABI_MALLOC_OR_DIE(cg_k,(2,mcg), ierr)
 
-      call wfk_read_bmask(Wfk,my_readmask(:,ik_ibz,spin),ik_ibz,spin,sc_mode,kg_k=kg_k,cg_k=cg_k,eig_k=eig_k)
+      call wfk%read_bmask(my_readmask(:,ik_ibz,spin),ik_ibz,spin,sc_mode,kg_k=kg_k,cg_k=cg_k,eig_k=eig_k)
 
       if (Wfd%my_rank == Wfd%master .and. wfd%prtvol > 0) then
         if (Wfd%nsppol==2) then
@@ -5130,7 +5280,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       ABI_SFREE(work)
       ABI_SFREE(out_cg)
 
-      if (ik_ibz <= 20 .or. mod(ik_ibz, 50) == 0) then
+      if (ik_ibz <= 10 .or. mod(ik_ibz, 50) == 0) then
         write(msg,'(4(a,i0),a)') " Reading k-point [", ik_ibz, "/", wfd%nkibz, "] spin [", spin, "/", wfd%nsppol, "]"
         call cwtime_report(msg, cpu_ks, wall_ks, gflops_ks)
       end if
@@ -5141,8 +5291,8 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
    MSG_ERROR(sjoin("Wrong method: ", itoa(method)))
  end if
 
- call wfk_close(Wfk)
- call hdr_free(Hdr)
+ call wfk%close()
+ call Hdr%free()
 
  ABI_FREE(my_readmask)
 

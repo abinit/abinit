@@ -325,10 +325,7 @@ function abi_cpu_time() result(cpu)
  real :: cpu_sp
 #elif defined FC_IBM
  integer :: mclock
-#elif defined FC_SUN
- real :: tmp(2)
- real :: etime
-#elif defined FC_COMPAQ || defined HAVE_OS_MACOSX
+#elif defined HAVE_OS_MACOSX
  real :: tmp(2) !real array only needed by etime
  real(dp) :: etime
 #else
@@ -349,14 +346,8 @@ function abi_cpu_time() result(cpu)
 #elif defined FC_IBM
  cpu = mclock()*0.01d0
 
-#elif defined HAVE_OS_MACOSX || defined FC_COMPAQ || defined FC_SUN
+#elif defined HAVE_OS_MACOSX
  cpu = clib_etime(tmp)
-
-#elif defined FC_FUJITSU
- call clock(cpu,0,2)
-
-#elif defined FC_HITACHI
- call xclock(cpu,5)
 
 #else
 !This is the Fortran90 standard subroutine, might not always be sufficiently accurate
@@ -606,7 +597,7 @@ subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, comm)
    avg_type = ""
  end if
  if (present(pre_str)) call wrtout(std_out, pre_str)
- call wrtout(std_out, sjoin(tag, "done. cpu:", sec2str(cpu), ", wall:", sec2str(wall), avg_type), &
+ call wrtout(std_out, sjoin(tag, "completed. cpu:", sec2str(cpu), ", wall:", sec2str(wall), avg_type), &
      do_flush=.True.)
  if (present(end_str)) call wrtout(std_out, end_str)
  call cwtime(cpu, wall, gflops, "start")
@@ -826,7 +817,7 @@ end function time_get_papiopt
 !!      listkk,lobpcgwf,m_ab7_invars_f90,m_ab7_mixing,m_cgtools,m_dyson_solver
 !!      m_fftcore,m_fftw3,m_fock,m_green,m_haydock,m_hexc,m_invovl,m_iowf
 !!      m_lobpcg,m_lobpcg2,m_lobpcgwf,m_paral_pert,m_sg2002,m_wfutils,m_xg
-!!      m_xgScalapack,mag_constr,mkcore,mkcore_paw,mkcore_wvl,mkffnl
+!!      m_xgScalapack,mag_penalty,mkcore,mkcore_paw,mkcore_wvl,mkffnl
 !!      mklocl_realspace,mklocl_recipspace,mkresi,mkrho,newkpt,newocc,newrho
 !!      newvtr,nhatgrid,nlenergyrec,nonlinear,nonlop,odamix,opernla_ylm
 !!      optics_paw,optics_paw_core,optics_vloc,outkss,outscfcv,pareigocc

@@ -19,23 +19,23 @@ to introduce the density-functional perturbation theory (DFPT) features of
 ABINIT before starting this tutorial. You will learn to use additional DFPT
 features of ABINIT, and to use relevant parts of the associated codes Mrgddb and Anaddb.
 
-[TUTORIAL_README]
-
-This tutorial should take about two hours.
-
 Visualisation tools are NOT covered in this tutorial.
 Powerful visualisation procedures have been developed in the Abipy context,
 relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
 and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
+This tutorial should take about two hours.
+
+[TUTORIAL_README]
+
 ## 1 The ground-state geometry of (hypothetical) wurtzite AlAs
 
 *Before beginning, you might consider working in a different subdirectory as for the other tutorials. 
-Why not create Work_elast in \$ABI_TUTORESPFN/Input?*
-You should also copy the files *telast_1.files* and *telast_1.in* from *\$ABI_TUTORESPFN/Input* to *Work_elast*. 
+Why not create Work_elast in \$ABI_TESTS/tutorespfn/Input?*
+You should also copy the files *telast_1.files* and *telast_1.in* from *\$ABI_TESTS/tutorespfn/Input* to *Work_elast*. 
 
 ```sh
-cd $ABI_TUTORESPFN/Input
+cd $ABI_TESTS/tutorespfn/Input
 mkdir Work_elast
 cd Work_elast
 cp ../telast_1.files . 
@@ -85,8 +85,8 @@ setting [[ionmov]]=2 as in [tutorial 1](base1). The optimization
 steps proceed until the maximum force component on any atom is less than
 [[tolmxf]]. It is always advised to relax the forces before beginning the
 lattice parameter optimization. Dataset 2 optimizes the lattice parameters
-with [[optcell]]=2 as in [tutorial 3](base3). However, treated 3
-treated cubic Si, and the atom positions in reduced coordinates remained
+with [[optcell]]=2 as in [tutorial 3](base3). However, tutorial 3
+treats cubic Si, and the atom positions in reduced coordinates remained
 fixed. In the present, more general case, the reduced atomic coordinates must
 be reoptimized as the lattice parameters are optimized. Note that it is
 necessary to include [[getxred]] = -1 so that the second dataset is

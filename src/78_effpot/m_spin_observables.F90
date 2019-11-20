@@ -42,25 +42,48 @@ module m_spin_observables
 
   private
   !!***
+
+  !-----------------------------------------------------------------------
+  !> @brief spin_observale_t: observables for spin dynamics.
+  !-----------------------------------------------------------------------
   type, public :: spin_observable_t
-     logical :: calc_thermo_obs, calc_correlation_obs, calc_traj_obs
+     ! Switches for what kind of obs should be calculated
+     logical :: calc_thermo_obs    ! theromostatic obs: susceptibility, specific heat...
+     logical :: calc_correlation_obs ! correlation function related
+     logical :: calc_traj_obs       ! trajectory related (winding number, etc)
+
      integer :: nspin, nsublatt, ntime, nscell
+     ! nspin: number of spin
+     ! nsublatt: number of sublattice (currently each spin in primitive cell is one sublattice)
+     ! ntime: number of time steps
+     ! nscell: number of cell in supercell
+
      real(dp) :: temperature
      integer, allocatable :: isublatt(:), nspin_sub(:)
+     ! isublatt: index of sublattice for each spin
+     ! nspin_sub: 
+
      real(dp) :: energy
-     ! Ms_coeff: coefficient to calcualte staggered Mst
-     ! Mst_sub: M staggered for sublattice
-     ! Mst_sub : norm of Mst_sub
      real(dp), allocatable :: S(:,:), Snorm(:)
      real(dp), allocatable ::  Ms_coeff(:),  Mst_sub(:, :), Mst_sub_norm(:)
-     ! M_total: M total
-     ! M_norm: ||M_total||
-     ! Mst_total: staggerd M total
-     ! Mst_norm : ||Mst_total||
+     ! Ms_coeff: coefficient to calcualte staggered Mst.
+     ! Staggerd means a phase factor is multiplied to each spin.
+     ! Ms_coeff is that phase factor. Mst_coeff = e ^{iq R}
+
+     ! Mst_sub: M staggered for sublattice: \sum_(i in sublattice)\S_i phase_i
+     ! Mst_sub : norm of Mst_sub
+
      real(dp) ::  M_total(3), Mst_total(3), M_total_norm,  Mst_norm_total, Snorm_total
+     ! M_total: M total    \sum M_i where M_i =|S_i|
+     ! Mst_total: staggerd M total  |sum M_I| 
+     ! Mst_norm : ||Mst_total||
      real(dp), allocatable :: Avg_Mst_sub_norm(:)
      real(dp) :: Avg_Mst_norm_total
+
      real(dp) :: binderU4, chi, Cv
+     ! binderU4: binder U4
+     ! chi: susceptibility
+     ! Cv: specific heat
 
      ! variables for calculate Cv
      real(dp) :: avg_E_t   ! average energy E over time
@@ -150,6 +173,9 @@ contains
     self%avg_m4_t=0.0
   end subroutine reset
 
+  !-----------------------------------------------------------------------
+  !> @brief finalize
+  !-----------------------------------------------------------------------
   subroutine finalize(self)
     class(spin_observable_t) :: self
     if (allocated(self%isublatt)) then
@@ -184,6 +210,12 @@ contains
 
   end subroutine finalize
 
+  !-----------------------------------------------------------------------
+  !> @brief set S, Snorm, and energy (after one dynamics step)
+  !> @param [in]  S
+  !> @param [in] Snorm
+  !> @param [in] energy
+  !-----------------------------------------------------------------------
   subroutine update(self, S, Snorm, energy)
     class(spin_observable_t), intent(inout) :: self
     real(dp), intent(in):: S(3,self%nspin), Snorm(self%nspin), energy
@@ -192,6 +224,10 @@ contains
     self%energy=energy
   end subroutine update
 
+  !-----------------------------------------------------------------------
+  !> @brief Calculate M in each sublattice
+  !>  sum of S * phase factor in each sublattice
+  !-----------------------------------------------------------------------
   subroutine get_staggered_M(self)
 
     class(spin_observable_t), intent(inout) :: self
@@ -213,11 +249,19 @@ contains
     self%avg_Mst_norm_total=(self%avg_Mst_norm_total*self%ntime + self%Mst_norm_total)/(self%ntime+1)
   end subroutine get_staggered_M
 
+  !-----------------------------------------------------------------------
+  !> @brief calculate observable related to the topology of trajectory
+  !> like the winding number
+  !-----------------------------------------------------------------------
   subroutine get_traj_obs(self)
     class(spin_observable_t) :: self
     ABI_UNUSED(self%nspin)
   end subroutine get_traj_obs
 
+  !-----------------------------------------------------------------------
+  !> @brief calculate thermostatistic observables
+  !> Cv, binderU4 and chi
+  !-----------------------------------------------------------------------
   subroutine get_thermo_obs(self )
     class(spin_observable_t) :: self
     real(dp) :: avgm
@@ -230,7 +274,6 @@ contains
     else
        self%Cv = (self%avg_E2_t-self%avg_E_t**2)/self%temperature**2
     end if
-
 
     !
     avgm=self%Mst_norm_total
@@ -249,11 +292,20 @@ contains
   end subroutine get_thermo_obs
 
 
+  !-----------------------------------------------------------------------
+  !> @brief calculate correlation function relatated observables
+  !-----------------------------------------------------------------------
   subroutine get_correlation_obs(self)
     class(spin_observable_t) :: self
     ABI_UNUSED(self%nspin)
   end subroutine get_correlation_obs
 
+  !-----------------------------------------------------------------------
+  !> @brief calculate all observables from input
+  !> @param [in] S
+  !> @param [in] Snorm
+  !> @param [in] energy
+  !-----------------------------------------------------------------------
   subroutine get_observables(self, S, Snorm, energy)
 
     class(spin_observable_t) :: self

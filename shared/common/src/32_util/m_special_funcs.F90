@@ -42,8 +42,8 @@ module m_special_funcs
  public :: laguerre          ! Laguerre Polynomial(x,n,a).
  public :: RadFnH            ! Atomic radial function(r,n,l,Z).
  public :: iradfnh           ! Norm of atomic radial function(a,b,n,l,Z).
- public :: dirac_delta       ! Approximate Dirac delta with normal distribution.
  public :: gaussian          ! Normalized Gaussian distribution.
+ public :: lorentzian        ! Approximate Dirac Delta with lorentzian
  public :: abi_derf          ! Evaluates the error function in real(dp).
  public :: abi_derfc         ! Evaluates the complementary error function in real(dp).
  public :: gamma_function    ! Computes the gamma function
@@ -51,6 +51,7 @@ module m_special_funcs
  public :: sbf8              ! Computes set of spherical bessel functions using accurate algorithm
  public :: k_fermi           ! Fermi wave vector corresponding to the local value of the real space density rhor.
  public :: k_thfermi         ! Thomas-Fermi wave vector corresponding to the local value of the real space density rhor
+ public :: levi_civita_3     ! Return Levi-Civita tensor of rank 3
 !!***
 
 !!****t* m_special_funcs/jlspline_t
@@ -537,49 +538,6 @@ end function IRadFnH
 
 !----------------------------------------------------------------------
 
-!!****f* m_special_funcs/dirac_delta
-!! NAME
-!! dirac_delta
-!!
-!! FUNCTION
-!!  Approximate Dirac delta with normal distribution.
-!!    delta(x,sigma) = 1/(sigma sqrt(two pi)) e^{-x**2/(2 * sigma**2)}
-!!
-!! INPUTS
-!!   arg=Argument of the approximated Delta.
-!!   sigma=Broadening factor.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-elemental function dirac_delta(arg,sigma)
-
-!Arguments ---------------------------------------------
-!scalars
- real(dp),intent(in) :: arg,sigma
- real(dp) :: dirac_delta
-
-!Local variables ---------------------------------------
-!scalars
- real(dp) :: xx
-
-! *********************************************************************
-
- xx = arg / sigma
- dirac_delta = exp(-xx*xx) / (sigma*sqrt(pi))
-
- ! FIXME: This is the correct expression --> must update reference files.
- !xx = arg / (sqrt2 * sigma)
- !dirac_delta = exp(-xx * xx) / (sigma * sqrt(two_pi))
-
-end function dirac_delta
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_special_funcs/gaussian
 !! NAME
 !! gaussian
@@ -598,7 +556,7 @@ end function dirac_delta
 !!
 !! SOURCE
 
-elemental function gaussian(arg,sigma)
+elemental function gaussian(arg, sigma)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -611,10 +569,43 @@ elemental function gaussian(arg,sigma)
 
 ! *********************************************************************
 
- xx=arg/(sqrt2*sigma)
- gaussian = exp(-xx*xx) / (sigma*sqrt(two_pi))
+ xx = arg / (sqrt2 * sigma)
+ gaussian = exp(-xx*xx) / (sigma * sqrt(two_pi))
 
 end function gaussian
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_special_funcs/lorentzian
+!! NAME
+!! lorentzian
+!!
+!! FUNCTION
+!!  Approximate Dirac Delta with lorentzian
+!!
+!! INPUTS
+!!   arg=Argument of the lorentzian.
+!!   sigma=Broadening factor
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+elemental function lorentzian(arg, sigma)
+
+!Arguments ---------------------------------------------
+!scalars
+ real(dp),intent(in) :: arg, sigma
+ real(dp) :: lorentzian
+
+! *********************************************************************
+
+ lorentzian = piinv * sigma / (arg ** 2 + sigma ** 2)
+
+end function lorentzian
 !!***
 
 !----------------------------------------------------------------------
@@ -933,8 +924,6 @@ end function abi_derfc
 !! SOURCE
 
 subroutine GAMMA_FUNCTION(X,GA)
-
-  implicit none
 
 !       ====================================================
 !       Purpose: This program computes the gamma function
@@ -1509,6 +1498,38 @@ elemental function k_thfermi(rhor)
 end function k_thfermi
 !!***
 
+!----------------------------------------------------------------------
+
+!!****f* m_special_funcs/levi_civita_3
+!! NAME
+!!  levi_civita_3
+!!
+!! FUNCTION
+ !! Return Levi-Civita tensor of rank 3
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+pure function levi_civita_3() result(ee)
+
+!Arguments ------------------------------------
+ integer :: ee(3,3,3)
+
+! *************************************************************************
+
+ ee = 0
+ ee(1,2,3) = 1
+ ee(2,3,1) = 1
+ ee(3,1,2) = 1
+ !
+ ee(3,2,1) = -1
+ ee(1,3,2) = -1
+ ee(2,1,3) = -1
+
+end function levi_civita_3
+!!***
+
 !!****f* m_special_funcs/jlspline_new
 !! NAME
 !! jlspline_new
@@ -1724,7 +1745,7 @@ type (gspline_t) function gspline_new(sigma) result(new)
 
  ! Spline the gaussian approximant.
  ABI_MALLOC(new%svals, (new%nspline, 4))
- new%svals(:, 1) = dirac_delta(new%xvals, sigma)
+ new%svals(:, 1) = gaussian(new%xvals, sigma)
  ybcbeg = - (two * new%xmin / sigma**2) * new%svals(1,1)
  ybcend = - (two * new%xmax / sigma**2) * new%svals(new%nspline,1)
  call spline(new%xvals, new%svals(:,1), new%nspline, ybcbeg, ybcend, new%svals(:,2))
@@ -1807,7 +1828,7 @@ pure subroutine gspline_eval(self, x0, nx, xmesh, weights)
 
  !call simpson_int(nx,xmesh(2) - xmesh(1),weights(:,1),int_values)
  !do ix=1,nx
- !  write(99,*)xmesh(ix), weights(ix,1), dirac_delta(xx, self%sigma), weights(ix,2), int_values(ix)
+ !  write(99,*)xmesh(ix), weights(ix,1), gaussian(xx, self%sigma), weights(ix,2), int_values(ix)
  !end do
 
 end subroutine gspline_eval

@@ -27,12 +27,12 @@
 module m_stress
 
  use defs_basis
- use defs_abitypes
  use m_efield
  use m_abicore
  use m_errors
  use m_xmpi
 
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_geometry,         only : metric, stresssym
  use m_fock,             only : fock_type
@@ -495,8 +495,10 @@ contains
 
  strten(:)=kinstr(:)+ewestr(:)+corstr(:)+strsxc(:)+harstr(:)+lpsstr(:)+nlstr(:)
 
- if (usefock==1 .and. associated(fock).and.fock%fock_common%optstr) then
-   strten(:)=strten(:)+fock%fock_common%stress(:)
+ if (usefock==1 .and. associated(fock)) then
+   if (fock%fock_common%optstr) then
+     strten(:)=strten(:)+fock%fock_common%stress(:)
+   end if
  end if
 
 !Add contributions for constant E or D calculation.

@@ -26,7 +26,7 @@ AC_DEFUN([_ABI_CHECK_FC_ABSOFT],[
 
   dnl AC_MSG_CHECKING([if we are using the ABSoft Fortran compiler])
   fc_info_string=`$1 -V 2>/dev/null | head -n 1`
-  abi_result=`echo "${fc_info_string}" | grep '^Pro Fortran'`
+  abi_result=`echo "${fc_info_string}" | grep 'Pro Fortran'`
   if test "${abi_result}" = ""; then
     abi_result="no"
     fc_info_string=""
@@ -36,7 +36,7 @@ AC_DEFUN([_ABI_CHECK_FC_ABSOFT],[
     AC_DEFINE([FC_ABSOFT],1,
       [Define to 1 if you are using the ABSOFT Fortran compiler.])
     abi_fc_vendor="absoft"
-    abi_fc_version=`echo "${abi_result}" | sed -e 's/Pro Fortran //'`
+    abi_fc_version=`echo "${abi_result}" | sed -e 's/.*Pro Fortran //'`
     if test "${abi_fc_version}" = "${abi_result}"; then
       abi_fc_version="unknown"
     fi
@@ -44,112 +44,6 @@ AC_DEFUN([_ABI_CHECK_FC_ABSOFT],[
   fi
   dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CHECK_FC_ABSOFT
-
-
-
-# _ABI_CHECK_FC_COMPAQ(COMPILER)
-# ------------------------------
-#
-# Checks whether the specified Fortran compiler is the COMPAQ Fortran compiler.
-# If yes, tries to determine its version number and sets the abi_fc_vendor
-# and abi_fc_version variables accordingly.
-#
-AC_DEFUN([_ABI_CHECK_FC_COMPAQ],[
-  dnl Do some sanity checking of the arguments
-  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
-
-  dnl AC_MSG_CHECKING([if we are using the Compaq Fortran compiler])
-  fc_info_string=`$1 -version 2>&1 | sed -e 's/^	//' | grep '^Compaq Fortran Compiler'`
-  abi_result="${fc_info_string}"
-  if test "${abi_result}" = ""; then
-    fc_info_string=`$1 -version 2>&1 | sed -e 's/^	//' | grep '^HP Fortran Compiler'`
-    abi_result="${fc_info_string}"
-  fi
-  if test "${abi_result}" = ""; then
-    abi_result="no"
-    fc_info_string=""
-    abi_fc_vendor="unknown"
-    abi_fc_version="unknown"
-  else
-    AC_DEFINE([FC_COMPAQ],1,
-      [Define to 1 if you are using the COMPAQ Fortran compiler.])
-    abi_fc_vendor="compaq"
-    abi_fc_version=`echo "${abi_result}" | sed -e 's/.* V//;s/-.*//'`
-    if test "${abi_fc_version}" = "${abi_result}"; then
-      abi_fc_version="unknown"
-    fi
-    abi_result="yes"
-  fi
-  dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_FC_COMPAQ
-
-
-
-# _ABI_CHECK_FC_FUJITSU(COMPILER)
-# -------------------------------
-#
-# Checks whether the specified Fortran compiler is the Fujitsu Fortran compiler.
-# If yes, tries to determine its version number and sets the abi_fc_vendor
-# and abi_fc_version variables accordingly.
-#
-AC_DEFUN([_ABI_CHECK_FC_FUJITSU],[
-  dnl Do some sanity checking of the arguments
-  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
-
-  dnl AC_MSG_CHECKING([if we are using the Fujitsu Fortran compiler])
-  fc_info_string=`$1 -V 2>/dev/null | head -n 1`
-  abi_result=`echo "${fc_info_string}" | grep '^Fujitsu Fortran'`
-  if test "${abi_result}" = ""; then
-    abi_result="no"
-    fc_info_string=""
-    abi_fc_vendor="unknown"
-    abi_fc_version="unknown"
-  else
-    AC_DEFINE([FC_FUJITSU],1,
-      [Define to 1 if you are using the Fujitsu Fortran compiler.])
-    abi_fc_vendor="fujitsu"
-    abi_fc_version=`echo "${abi_result}" | sed -e 's/.*Driver //;s/ .*//'`
-    if test "${abi_fc_version}" = "${abi_result}"; then
-      abi_fc_version="unknown"
-    fi
-    abi_result="yes"
-  fi
-  dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_FC_FUJITSU
-
-
-
-# _ABI_CHECK_FC_G95(COMPILER)
-# ---------------------------
-#
-# Checks whether the specified Fortran compiler is the G95 Fortran compiler.
-# If yes, tries to determine its version number and sets the abi_fc_vendor
-# and abi_fc_version variables accordingly.
-#
-AC_DEFUN([_ABI_CHECK_FC_G95],[
-  dnl Do some sanity checking of the arguments
-  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
-
-  dnl AC_MSG_CHECKING([if we are using the G95 Fortran compiler])
-  fc_info_string=`$1 --version 2>/dev/null | head -n 1`
-  abi_result=`echo "${fc_info_string}" | grep '^G95'`
-  if test "${abi_result}" = ""; then
-    abi_result="no"
-    fc_info_string=""
-    abi_fc_vendor="unknown"
-    abi_fc_version="unknown"
-  else
-    AC_DEFINE([FC_G95],1,
-      [Define to 1 if you are using the G95 Fortran compiler.])
-    abi_fc_vendor="g95"
-    abi_fc_version=`echo ${abi_result} | sed -e 's/.*GCC //; s/ .*//'`
-    if test "${abi_fc_version}" = "${abi_result}"; then
-      abi_fc_version="unknown"
-    fi
-    abi_result="yes"
-  fi
-  dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_FC_G95
 
 
 
@@ -183,40 +77,6 @@ AC_DEFUN([_ABI_CHECK_FC_GNU],[
   fi
   dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CHECK_FC_GNU
-
-
-
-# _ABI_CHECK_FC_HITACHI(COMPILER)
-# -------------------------------
-#
-# Checks whether the specified Fortran compiler is the Hitachi Fortran compiler.
-# If yes, tries to determine its version number and sets the abi_fc_vendor
-# and abi_fc_version variables accordingly.
-#
-AC_DEFUN([_ABI_CHECK_FC_HITACHI],[
-  dnl Do some sanity checking of the arguments
-  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
-
-  dnl AC_MSG_CHECKING([if we are using the Hitachi Fortran compiler])
-  fc_info_string=`$1 -V 2>/dev/null | head -n 1`
-  abi_result=`echo "${fc_info_string}" | grep '^Hitachi Fortran'`
-  if test "${abi_result}" = ""; then
-    abi_result="no"
-    fc_info_string=""
-    abi_fc_vendor="unknown"
-    abi_fc_version="unknown"
-  else
-    AC_DEFINE([FC_HITACHI],1,
-      [Define to 1 if you are using the Hitachi Fortran compiler.])
-    abi_fc_vendor="hitachi"
-    abi_fc_version=`echo "${abi_result}" | sed -e 's/.*Driver //;s/ .*//'`
-    if test "${abi_fc_version}" = "${abi_result}"; then
-      abi_fc_version="unknown"
-    fi
-    abi_result="yes"
-  fi
-  dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_FC_HITACHI
 
 
 
@@ -299,41 +159,6 @@ AC_DEFUN([_ABI_CHECK_FC_INTEL],[
 
 
 
-# _ABI_CHECK_FC_MIPSPRO(COMPILER)
-# -------------------------------
-#
-# Checks whether the specified Fortran compiler is the MIPSpro Fortran
-# compiler.
-# If yes, tries to determine its version number and sets the abi_fc_vendor
-# and abi_fc_version variables accordingly.
-#
-AC_DEFUN([_ABI_CHECK_FC_MIPSPRO],[
-  dnl Do some sanity checking of the arguments
-  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
-
-  dnl AC_MSG_CHECKING([if we are using the MIPSpro Fortran compiler])
-  fc_info_string=`$1 -version 2>&1 | head -n 1`
-  abi_result=`echo "${fc_info_string}" | grep '^MIPSpro'`
-  if test "${abi_result}" = ""; then
-    abi_result="no"
-    fc_info_string=""
-    abi_fc_vendor="unknown"
-    abi_fc_version="unknown"
-  else
-    AC_DEFINE([FC_MIPSPRO],1,
-      [Define to 1 if you are using the MIPSpro Fortran compiler.])
-    abi_fc_vendor="mipspro"
-    abi_fc_version=`echo "${abi_result}" | sed -e 's/.*Version //'`
-    if test "${abi_fc_version}" = "${abi_result}"; then
-      abi_fc_version="unknown"
-    fi
-    abi_result="yes"
-  fi
-  dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_FC_MIPSPRO
-
-
-
 # _ABI_CHECK_FC_NAG(COMPILER)
 # ---------------------------
 #
@@ -365,76 +190,6 @@ AC_DEFUN([_ABI_CHECK_FC_NAG],[
   fi
   dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CHECK_FC_NAG
-
-
-
-# _ABI_CHECK_FC_OPEN64(COMPILER)
-# ------------------------------
-#
-# Checks whether the specified Fortran compiler is the Open64
-# Fortran compiler.
-# If yes, tries to determine its version number and sets the abi_fc_vendor
-# and abi_fc_version variables accordingly.
-#
-AC_DEFUN([_ABI_CHECK_FC_OPEN64],[
-  dnl Do some sanity checking of the arguments
-  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
-
-  dnl AC_MSG_CHECKING([if we are using the Open64 Fortran compiler])
-  fc_info_string=`$1 --version 2>&1 | head -n 1`
-  abi_result=`echo "${fc_info_string}" | grep '^Open64'`
-  if test "${abi_result}" = ""; then
-    abi_result="no"
-    fc_info_string=""
-    abi_fc_vendor="unknown"
-    abi_fc_version="unknown"
-  else
-    AC_DEFINE([FC_OPEN64],1,
-      [Define to 1 if you are using the Open64 Fortran compiler.])
-    abi_fc_vendor="open64"
-    abi_fc_version=`echo "${abi_result}" | sed -e 's/.* Version //; s/ .*//'`
-    if test "${abi_fc_version}" = "${abi_result}"; then
-      abi_fc_version="unknown"
-    fi
-    abi_result="yes"
-  fi
-  dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_FC_OPEN64
-
-
-
-# _ABI_CHECK_FC_PATHSCALE(COMPILER)
-# ---------------------------------
-#
-# Checks whether the specified Fortran compiler is the PathScale
-# Fortran compiler.
-# If yes, tries to determine its version number and sets the abi_fc_vendor
-# and abi_fc_version variables accordingly.
-#
-AC_DEFUN([_ABI_CHECK_FC_PATHSCALE],[
-  dnl Do some sanity checking of the arguments
-  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
-
-  dnl AC_MSG_CHECKING([if we are using the PathScale Fortran compiler])
-  fc_info_string=`$1 -version 2>&1 | head -n 1`
-  abi_result=`echo "${fc_info_string}" | grep '^PathScale'`
-  if test "${abi_result}" = ""; then
-    abi_result="no"
-    fc_info_string=""
-    abi_fc_vendor="unknown"
-    abi_fc_version="unknown"
-  else
-    AC_DEFINE([FC_PATHSCALE],1,
-      [Define to 1 if you are using the PathScale Fortran compiler.])
-    abi_fc_vendor="pathscale"
-    abi_fc_version=`echo "${abi_result}" | sed -e 's/.* Version //; s/ .*//'`
-    if test "${abi_fc_version}" = "${abi_result}"; then
-      abi_fc_version="unknown"
-    fi
-    abi_result="yes"
-  fi
-  dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_FC_PATHSCALE
 
 
 
@@ -472,38 +227,6 @@ AC_DEFUN([_ABI_CHECK_FC_PGI],[
 ]) # _ABI_CHECK_FC_PGI
 
 
-
-# _ABI_CHECK_FC_SUN(COMPILER)
-# ---------------------------
-#
-# Checks whether the specified Fortran compiler is the Sun WorkShop Fortran compiler.
-# If yes, tries to determine its version number and sets the abi_fc_vendor
-# and abi_fc_version variables accordingly.
-#
-AC_DEFUN([_ABI_CHECK_FC_SUN],[
-  dnl Do some sanity checking of the arguments
-  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
-
-  dnl AC_MSG_CHECKING([if we are using the Sun Fortran compiler])
-  fc_info_string=`$1 -V 2>&1 | head -n 1`
-  abi_result=`echo "${fc_info_string}" | grep 'Sun' | grep 'Fortran 95'`
-  if test "${abi_result}" = ""; then
-    abi_result="no"
-    fc_info_string=""
-    abi_fc_vendor="unknown"
-    abi_fc_version="unknown"
-  else
-    AC_DEFINE([FC_SUN],1,
-      [Define to 1 if you are using the Sun Fortran compiler.])
-    abi_fc_vendor="sun"
-    abi_fc_version=`echo "${abi_result}" | sed -e 's/.* Fortran 95 //;s/ .*//'`
-    if test "${abi_fc_version}" = "${abi_result}" -o "${abi_fc_version}" = ""; then
-      abi_fc_version="unknown"
-    fi
-    abi_result="yes"
-  fi
-  dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_FC_SUN
 
  ##############################################################################
 
@@ -947,6 +670,40 @@ AC_DEFUN([_ABI_CHECK_FC_DTARRAYS],[
 ]) # _ABI_CHECK_FC_DTARRAYS
 
 
+# _ABI_CHECK_FC_IEEE_ARITHMETIC()
+# --------------------
+#
+# Checks whether the Fortran compiler supports the intrinsic module IEEE_ARITHMETIC
+#
+AC_DEFUN([_ABI_CHECK_FC_IEEE_ARITHMETIC],[
+  dnl Init
+  fc_has_ieee_arithmetic="no"
+
+  AC_MSG_CHECKING([whether the Fortran compiler supports IEEE_ARITHMETIC])
+
+  dnl Try to compile a piece of code that uses the module.
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
+    [[
+      use, intrinsic :: ieee_arithmetic
+      real :: val
+
+      if (ieee_is_nan(val)) then  ! NaN
+        write(*,*)"Hello NAN"
+      end if
+
+    ]])], [fc_has_ieee_arithmetic="yes"])
+  AC_LANG_POP()
+
+  if test "${fc_has_ieee_arithmetic}" = "yes"; then
+    AC_DEFINE([HAVE_FC_IEEE_ARITHMETIC],1, 
+      [Define to 1 if your Fortran compiler supports IEEE_ARITHMETIC module.])
+  fi
+
+  AC_MSG_RESULT(${fc_has_ieee_arithmetic})
+]) # _ABI_CHECK_FC_IEEE_ARITHMETIC
+
+
  ##############################################################################
 
 # _ABI_CHECK_FC_IEEE_EXCEPTIONS()
@@ -1233,7 +990,7 @@ AC_DEFUN([_ABI_CHECK_FC_PROTECTED],[
 # _ABI_CHECK_FC_STREAM_IO()
 # --------------------
 #
-# Checks whether the Fortran compiler supports stream IO
+# Checks whether the Fortran compiler supports stream IO (F2003)
 #
 AC_DEFUN([_ABI_CHECK_FC_STREAM_IO],[
   dnl Init
@@ -1270,7 +1027,7 @@ AC_DEFUN([_ABI_CHECK_FC_STREAM_IO],[
 # _ABI_CHECK_FC_TIMING()
 # ----------------------
 #
-# Tries to determine which Fortran timing routines are available.
+# Tries to determine which Fortran timing routines are available. (F95)
 #
 AC_DEFUN([_ABI_CHECK_FC_TIMING],[
   dnl Init
@@ -1346,7 +1103,7 @@ AC_DEFUN([_ABI_CHECK_FC_CPUTIME],[
 # _ABI_CHECK_FC_GETPID()
 # ----------------------
 #
-# Checks whether process IDs are available from Fortran.
+# Checks whether process IDs are available from Fortran. (F2003)
 #
 AC_DEFUN([_ABI_CHECK_FC_GETPID],[
   dnl Init
@@ -1368,6 +1125,39 @@ AC_DEFUN([_ABI_CHECK_FC_GETPID],[
       [Define to 1 if your Fortran compiler supports getpid().])
   fi
 ]) # _ABI_CHECK_FC_GETPID
+
+
+# _ABI_CHECK_FC_ON_THE_FLY_SHAPE()
+# --------------------------------
+#
+# Checks whether process IDs are available from Fortran. (F2003)
+#
+AC_DEFUN([_ABI_CHECK_FC_ON_THE_FLY_SHAPE],[
+  dnl Init
+  fc_has_getpid="no"
+
+  dnl Look for getpid() support
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      integer :: x(3,4)
+      call test_on_the_fly_shape(x)
+      contains
+      subroutine test_on_the_fly_shape(x)
+        integer, intent(inout) :: x(:,:)
+        integer :: y(product(shape(x)))
+      end subroutine test_on_the_fly_shape
+    ]])], [fc_has_on_the_fly_shape="yes"], [fc_has_on_the_fly_shape="no"])
+  AC_LANG_POP([Fortran])
+
+  dnl Determine whether to use getpid()
+  AC_MSG_CHECKING([whether the Fortran compiler can shape arrays on-the-fly])
+  AC_MSG_RESULT([${fc_has_on_the_fly_shape}])
+  if test "${fc_has_on_the_fly_shape}" = "yes"; then
+    AC_DEFINE([HAVE_FC_ON_THE_FLY_SHAPE],1,
+      [Define to 1 if your Fortran compiler can shape arrays on-the-fly.])
+  fi
+]) # _ABI_CHECK_FC_ON_THE_FLY_SHAPE
 
 
 
@@ -1415,6 +1205,7 @@ AC_DEFUN([ABI_FC_FEATURES],[
   _ABI_CHECK_FC_SYSTEM
   _ABI_CHECK_FC_CONTIGUOUS
   _ABI_CHECK_FC_DTARRAYS
+  _ABI_CHECK_FC_IEEE_ARITHMETIC
   _ABI_CHECK_FC_IEEE_EXCEPTIONS
   _ABI_CHECK_FC_IOMSG
   _ABI_CHECK_FC_ISO_C_BINDING
@@ -1434,6 +1225,7 @@ AC_DEFUN([ABI_FC_FEATURES],[
   _ABI_CHECK_FC_STREAM_IO
   _ABI_CHECK_FC_CPUTIME
   _ABI_CHECK_FC_TIMING
+  _ABI_CHECK_FC_ON_THE_FLY_SHAPE
 ]) # ABI_FC_FEATURES
 
 
@@ -1567,52 +1359,12 @@ AC_DEFUN([ABI_PROG_FC],[
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"
 
   if test "${abi_fc_vendor}" = "unknown"; then
-    _ABI_CHECK_FC_G95(${FC})
-  fi
-  echo "${fc_info_string}" >>"${tmp_fc_info_file}"
-
-  if test "${abi_fc_vendor}" = "unknown"; then
     _ABI_CHECK_FC_GNU(${FC})
   fi
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"
 
   if test "${abi_fc_vendor}" = "unknown"; then
-    _ABI_CHECK_FC_PATHSCALE(${FC})
-  fi
-  echo "${fc_info_string}" >>"${tmp_fc_info_file}"
-
-  #if test "${abi_fc_vendor}" = "unknown"; then
-  #  _ABI_CHECK_FC_COMPAQ(${FC})
-  #fi
-  #echo "${fc_info_string}" >>"${tmp_fc_info_file}"
-
-  if test "${abi_fc_vendor}" = "unknown"; then
     _ABI_CHECK_FC_ABSOFT(${FC})
-  fi
-  echo "${fc_info_string}" >>"${tmp_fc_info_file}"
-
-  if test "${abi_fc_vendor}" = "unknown"; then
-    _ABI_CHECK_FC_MIPSPRO(${FC})
-  fi
-  echo "${fc_info_string}" >>"${tmp_fc_info_file}"
-
-  if test "${abi_fc_vendor}" = "unknown"; then
-    _ABI_CHECK_FC_OPEN64(${FC})
-  fi
-  echo "${fc_info_string}" >>"${tmp_fc_info_file}"
-
-  if test "${abi_fc_vendor}" = "unknown"; then
-    _ABI_CHECK_FC_FUJITSU(${FC})
-  fi
-  echo "${fc_info_string}" >>"${tmp_fc_info_file}"
-
-  if test "${abi_fc_vendor}" = "unknown"; then
-    _ABI_CHECK_FC_SUN(${FC})
-  fi
-  echo "${fc_info_string}" >>"${tmp_fc_info_file}"
-
-  if test "${abi_fc_vendor}" = "unknown"; then
-    _ABI_CHECK_FC_HITACHI(${FC})
   fi
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"
 
@@ -1629,8 +1381,8 @@ AC_DEFUN([ABI_PROG_FC],[
   dnl Fall back to generic when detection fails
   if test "${abi_fc_vendor}" = "unknown"; then
     abi_fc_vendor="generic"
-  #else
-  #  rm -f "${tmp_fc_info_file}"
+  else
+    rm -f "${tmp_fc_info_file}"
   fi
 
   dnl Normalize Fortran compiler version
