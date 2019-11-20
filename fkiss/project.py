@@ -1363,7 +1363,14 @@ proj = AbinitProject.pickle_load(filepath=None)
 import param
 import panel as pn
 
+def _df(df):
+    return pn.widgets.DataFrame(df, disabled=True)
+
+
 class ProjectViewer(param.Parameterized):
+
+    engine = pn.widgets.Select(value="dot",
+        options=['dot', 'neato', 'twopi', 'circo', 'fdp', 'sfdp', 'patchwork', 'osage'])
 
     def __init__(self, proj, **params):
         super().__init__(**params)
@@ -1406,11 +1413,9 @@ class ProjectViewer(param.Parameterized):
                 pn.Column(self.pubproc_select, self.datatype_select),
                 pn.Column(self.find_proc, self.find_proc_btn),
                 pn.Column(self.find_dtype, self.find_dtype_btn),
-                #pn.Column(self.rerun_btn),
+                #pn.Column(self.engine), #, self.rerun_btn),
                 #sizing_mode='scale_width'
         )
-        #for c in controllers:
-        #    c.sizing_mode = 'scale_width'
 
         self.panel = pn.Column(controllers, self.tabs, sizing_mode="scale_width")
 
@@ -1428,8 +1433,9 @@ class ProjectViewer(param.Parameterized):
         self.file_select.options = [f.name for f in self.dir2files[dirpath]]
         if hasattr(self, "tabs"): self.tabs.active = 0
 
-        return pn.Row(self.proj.get_stats_dir(dirpath),
-                      self.proj.get_graphviz_dir(dirpath), sizing_mode="scale_width")
+        return pn.Row(_df(self.proj.get_stats_dir(dirpath)),
+                      self.proj.get_graphviz_dir(dirpath, engine=self.engine.value),
+                      sizing_mode="scale_width")
 
     @param.depends('file_select.value')
     def view_fort_file(self):
@@ -1441,14 +1447,16 @@ class ProjectViewer(param.Parameterized):
         self.datatype_select.options = list(fort_file.all_datatypes.keys())
         if hasattr(self, "tabs"): self.tabs.active = 1
 
-        return pn.Row(fort_file.get_stats(), fort_file.get_graphviz(), sizing_mode="scale_width")
+        return pn.Row(_df(fort_file.get_stats()),
+                      fort_file.get_graphviz(engine=self.engine.value),
+                      sizing_mode="scale_width")
 
     @param.depends('pubproc_select.value')
     def view_pubproc(self):
         pubname = self.pubproc_select.value
         if pubname is None: return
         obj = self.proj.find_public_entity(pubname)
-        graph = self.proj.get_graphviz_pubname(pubname) #, engine=options.engine)
+        graph = self.proj.get_graphviz_pubname(pubname, engine=self.engine.value)
         if hasattr(self, "tabs"): self.tabs.active = 2
         return pn.Row(obj, graph, sizing_mode="scale_width")
 

@@ -60,6 +60,15 @@ Requires graphviz and python graphviz: https://graphviz.readthedocs.io/en/stable
   ./abisrc.py orphans            ==> Show orphans.
   ./abisrc.py ipython            ==> Open project in ipython terminal.
   ./abisrc.py cpp                ==> List CPP options.
+  ./abisrc.py panel              ==> Generate dashboard in browser.
+
+
+NB: graph and panel commands require external libraries. Use:
+
+    pip install -r abisrc_requirements.txt
+or
+
+    conda install --file abisrc_requirements.txt
 """
   #./abisrc.py robodoc            ==> Generate robodoc files.
 
