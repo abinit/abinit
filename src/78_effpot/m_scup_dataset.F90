@@ -191,7 +191,7 @@ if(allocated(scup_dtset%scup_speck))then
         ABI_DEALLOCATE(scup_dtset%scup_speck)
 endif
 
-call kpath_free(scup_dtset%scup_kpath)
+call scup_dtset%scup_kpath%free
 
 
 end subroutine scup_dtset_free
@@ -795,7 +795,7 @@ subroutine scup_kpath_print(scup_kpath)
  write(unt,'(4a)') ' scup_printbands = 1. Printing of electronic bands active',ch10,&
 &                  ' Kpath information below:',ch10
 
- call kpath_print(scup_kpath)
+call scup_kpath%print
 
 end subroutine scup_kpath_print
 !!***
