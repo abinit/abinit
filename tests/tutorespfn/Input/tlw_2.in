@@ -11,7 +11,7 @@ tlw_1o_DS5_DDB
 #%% test_chain =  tlw_1.in, tlw_2.in, tlw_3.in
 #%% [files]
 #%% files_to_test =
-#%%   tlw_2.ddb.out, tolnlines=  4, tolabs=  6.000e-08, tolrel=  4.000e-04
+#%%   tlw_2.ddb.out, tolnlines=  0, tolabs=  0.000e0, tolrel=  0.000e-0
 #%% psp_files =  14si.fhi
 #%% [paral_info]
 #%% max_nprocs = 1

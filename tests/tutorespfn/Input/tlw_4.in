@@ -100,7 +100,7 @@ ixc   7
 
 #Definition of the planewave basis set and k-point grid
 #******************************************************
-ecut   4.0
+ecut   5.0
 ngkpt 4 4 4
 nshiftk 4
 shiftk 0.5 0.5 0.5
@@ -118,10 +118,10 @@ diemac 12.0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain =  tlw_4.in, tlw_5.in, tlw_6.in
+#%% test_chain =  tlw_4.in, tlw_5.in, tlw_6.in, tlw_7.in
 #%% [files]
 #%% files_to_test = 
-#%%   tlw_4.out, tolnlines=  9, tolabs=  1.000e-06, tolrel=  1.000e-05
+#%%   tlw_4.out, tolnlines=  0, tolabs=  0.000e0, tolrel=  0.000e-0
 #%% psp_files =  31-Ga.LDA.fhi, 15-P.LDA.fhi
 #%% [paral_info]
 #%% max_nprocs = 4
