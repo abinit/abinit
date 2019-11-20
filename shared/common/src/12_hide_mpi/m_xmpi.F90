@@ -138,7 +138,7 @@ MODULE m_xmpi
  ! This counter should be zero at the end of the run if all requests have been released)
 
  ! For MPI <v4, collective communication routines accept only a 32bit integer as data count.
- ! To exchange more than 8589934591 data we need to create specific user-defined datatypes
+ ! To exchange more than 2^32 data we need to create specific user-defined datatypes
  ! For this, we need some parameters:
  integer(KIND=int32),public,parameter :: xmpi_maxint32=HUGE(0_int32)
  integer(KIND=int64),public,parameter :: xmpi_maxint32_64=int(xmpi_maxint32,kind=int64)
@@ -2612,7 +2612,7 @@ end function xmpi_distrib_with_replicas
 !!  inputtype= (INTEGER) input type (typically INTEGER, REAL(dp), ...)
 !!  largecount= total number of elements expressed as a 64bit integer
 !!  op_type= type of operation that will be applied during collective comms
-!!           At present, only MPI_SUM is implemented
+!!           At present, MPI_SUM, MPI_LOR, MPI_LAND are implemented
 !!
 !! OUTPUT
 !!  largetype= (INTEGER) new MPI type made of a serie of adjacent chunks
@@ -2703,6 +2703,18 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
        case(MPI_DOUBLE_COMPLEX)
         call MPI_OP_CREATE(largetype_sum_dcplx,.true.,largetype_op,ierr)
      end select
+   else if (op_type==MPI_LOR) then
+     select case(inputtype)
+       case(MPI_LOGICAL)
+        call MPI_OP_CREATE(largetype_lor_log,.true.,largetype_op,ierr)
+     end select
+   else if (op_type==MPI_LAND) then
+     select case(inputtype)
+       case(MPI_LOGICAL)
+        call MPI_OP_CREATE(largetype_land_log,.true.,largetype_op,ierr)
+     end select
+   else if (op_type==MPI_OP_NULL) then
+     largetype_op=-1111
    end if
  end if
 
@@ -2767,6 +2779,30 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
       end do
     end do
    end subroutine largetype_sum_dcplx
+   subroutine largetype_lor_log(invec,inoutvec,len,datatype)
+    integer :: len,datatype
+    logical :: invec(len),inoutvec(len)
+    integer(KIND=int64) :: ii,jj,kk
+    kk=0
+    do ii=1,len
+      do jj=1,xmpi_largetype_size
+        kk=kk+1
+        inoutvec(kk)=inoutvec(kk).or.invec(kk)
+      end do
+    end do
+   end subroutine largetype_lor_log
+   subroutine largetype_land_log(invec,inoutvec,len,datatype)
+    integer :: len,datatype
+    logical :: invec(len),inoutvec(len)
+    integer(KIND=int64) :: ii,jj,kk
+    kk=0
+    do ii=1,len
+      do jj=1,xmpi_largetype_size
+        kk=kk+1
+        inoutvec(kk)=inoutvec(kk).and.invec(kk)
+      end do
+    end do
+   end subroutine largetype_land_log
 
 #else
  ABI_UNUSED(largecount,inputtype,largetype,largetype_op,op_type)
@@ -2804,7 +2840,7 @@ subroutine xmpi_largetype_free(largetype,largetype_op)
 
 #ifdef HAVE_MPI
    xmpi_largetype_size=0
-   call MPI_OP_FREE(largetype_op,ierr)
+   if (largetype_op/=-1111) call MPI_OP_FREE(largetype_op,ierr)
    call MPI_TYPE_FREE(largetype,ierr)
 #else
  ABI_UNUSED(largetype,largetype_op)
@@ -2830,6 +2866,7 @@ end subroutine xmpi_largetype_free
 #include "xmpi_ialltoallv.finc"
 
 #include "xmpi_bcast.finc"
+
 #include "xmpi_ibcast.finc"
 
 #include "xmpi_exch.finc"
