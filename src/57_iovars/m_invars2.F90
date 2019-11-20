@@ -2372,6 +2372,15 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtgkk',tread,'INT')
  if(tread==1) dtset%prtgkk=intarr(1)
 
+ ! Read usekden and set prtkden to 1 by default.
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usekden',tread,'INT')
+ if(tread==1) then
+   dtset%usekden=intarr(1)
+ else
+   dtset%usekden=merge(1,0,libxc_functionals_ismgga())
+ end if 
+ if (dtset%usekden == 1 .and. dtset%nimage == 1) dtset%prtkden = 1 
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtkden',tread,'INT')
  if(tread==1) dtset%prtkden=intarr(1)
 
@@ -2829,13 +2838,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (itol==0.and.itol_gen==1) then
    dtset%postoldfe=toldfe_
    dtset%postoldff=toldff_
- end if
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usekden',tread,'INT')
- if(tread==1) then
-   dtset%usekden=intarr(1)
- else
-   dtset%usekden=merge(1,0,libxc_functionals_ismgga())
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'vprtrb',tread,'ENE')

@@ -14142,7 +14142,7 @@ Variable(
     vartype="integer",
     topics=['printing_prden'],
     dimensions="scalar",
-    defaultval=0,
+    defaultval="1 if [[usekden]] == 1 and [[nimage]] == 1 else 0"
     mnemonics="PRinT the Kinetic energy DENsity",
     text=r"""
 If set to 1 or a larger value, provide output of kinetic energy density in
