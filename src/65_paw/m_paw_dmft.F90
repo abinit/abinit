@@ -1104,103 +1104,103 @@ subroutine construct_nwlo_dmft(paw_dmft)
 
      omega_lo_tmp(1)=paw_dmft%temp*pi
      omega_lo_tmp(paw_dmft%dmft_nwlo)=paw_dmft%temp*pi*real(2*paw_dmft%dmft_nwli-1,kind=dp)
-  endif
+   endif
 
 !=======================
 !== construct weight for log. freq.
 !=======================
-  ABI_ALLOCATE(tospline_lo,(paw_dmft%dmft_nwlo))
-  ABI_ALLOCATE(splined_li,(paw_dmft%dmft_nwli))
-  ABI_ALLOCATE(ysplin2_lo,(paw_dmft%dmft_nwlo))
-  if (allocated(omega_li)) then
-    ABI_DEALLOCATE(omega_li)
-  endif
-  ABI_ALLOCATE(omega_li,(1:paw_dmft%dmft_nwli))
-  call construct_nwli_dmft(paw_dmft,paw_dmft%dmft_nwli,omega_li)
-
-  !Parallelisation over frequencies!
-  ! ============= Set up =============
-  myproc = paw_dmft%myproc
-  nproc = paw_dmft%nproc
-  spacecomm = paw_dmft%spacecomm
-  deltaw = paw_dmft%dmft_nwlo / nproc
-  residu = paw_dmft%dmft_nwlo - nproc*deltaw
-  if ( myproc .LT. nproc - residu ) then
-    omegaBegin = 1 + myproc*deltaw
-    omegaEnd   = (myproc + 1)*deltaw
-  else
-    omegaBegin = 1 + myproc*(deltaw + 1) -nproc + residu
-    omegaEnd = omegaBegin + deltaw
-  end if
-  wgt_wlo(:)=zero
-  ! ============= END Set up =============
-  do ifreq=omegaBegin,omegaEnd
-    tospline_lo=cmplx(0_dp,0_dp,kind=dp)
+   ABI_ALLOCATE(tospline_lo,(paw_dmft%dmft_nwlo))
+   ABI_ALLOCATE(splined_li,(paw_dmft%dmft_nwli))
+   ABI_ALLOCATE(ysplin2_lo,(paw_dmft%dmft_nwlo))
+   if (allocated(omega_li)) then
+     ABI_DEALLOCATE(omega_li)
+   endif
+   ABI_ALLOCATE(omega_li,(1:paw_dmft%dmft_nwli))
+   call construct_nwli_dmft(paw_dmft,paw_dmft%dmft_nwli,omega_li)
+  
+   !Parallelisation over frequencies!
+   ! ============= Set up =============
+   myproc = paw_dmft%myproc
+   nproc = paw_dmft%nproc
+   spacecomm = paw_dmft%spacecomm
+   deltaw = paw_dmft%dmft_nwlo / nproc
+   residu = paw_dmft%dmft_nwlo - nproc*deltaw
+   if ( myproc .LT. nproc - residu ) then
+     omegaBegin = 1 + myproc*deltaw
+     omegaEnd   = (myproc + 1)*deltaw
+   else
+     omegaBegin = 1 + myproc*(deltaw + 1) -nproc + residu
+     omegaEnd = omegaBegin + deltaw
+   end if
+   wgt_wlo(:)=zero
+   ! ============= END Set up =============
+   do ifreq=omegaBegin,omegaEnd
+     tospline_lo=cmplx(0_dp,0_dp,kind=dp)
 !    do ifreq1=1,paw_dmft%dmft_nwlo
-    tospline_lo(ifreq)=cmplx(1_dp,0_dp,kind=dp)
+     tospline_lo(ifreq)=cmplx(1_dp,0_dp,kind=dp)
 !    tospline_lo(ifreq1)=ifreq1**2-ifreq1
 !    enddo
-    splined_li=cmplx(0_dp,0_dp,kind=dp)
+     splined_li=cmplx(0_dp,0_dp,kind=dp)
 !    ybcbeg=cmplx(one/tol16**2,zero)
 !    ybcend=cmplx(one/tol16**2,zero)
-    ybcbeg=czero
-    ybcend=czero
+     ybcbeg=czero
+     ybcend=czero
 
 
 !==         spline delta function
-    call spline_complex( omega_lo_tmp, tospline_lo, paw_dmft%dmft_nwlo, &
-   & ybcbeg, ybcend, ysplin2_lo)
+     call spline_complex( omega_lo_tmp, tospline_lo, paw_dmft%dmft_nwlo, &
+     & ybcbeg, ybcend, ysplin2_lo)
 !   do ifreq1=1,paw_dmft%dmft_nwlo
 !    write(6588,*) paw_dmft%omega_lo(ifreq1),ysplin2_lo(ifreq1)
 !   enddo
 
-    call splint_complex( paw_dmft%dmft_nwlo, omega_lo_tmp, tospline_lo,&
-   & ysplin2_lo, paw_dmft%dmft_nwli, omega_li, splined_li)
+     call splint_complex( paw_dmft%dmft_nwlo, omega_lo_tmp, tospline_lo,&
+     & ysplin2_lo, paw_dmft%dmft_nwli, omega_li, splined_li)
 
 !==         accumulate weights
-    wgt_wlo(ifreq)=zero
-    do ifreq2=1,paw_dmft%dmft_nwli
-      wgt_wlo(ifreq)=wgt_wlo(ifreq)+real(splined_li(ifreq2),kind=dp)
-    enddo
+     wgt_wlo(ifreq)=zero
+     do ifreq2=1,paw_dmft%dmft_nwli
+       wgt_wlo(ifreq)=wgt_wlo(ifreq)+real(splined_li(ifreq2),kind=dp)
+     enddo
 ! do ifreq1=1,paw_dmft%dmft_nwlo
 !  write(6688,*) paw_dmft%omega_lo(ifreq1),tospline_lo(ifreq1)
 ! enddo
 ! do ifreq1=1,paw_dmft%dmft_nwli
 !  write(6788,*) paw_dmft%omega_li(ifreq1),splined_li(ifreq1)
-  enddo
+   enddo
   ! ============= Gatherall  =============
-  call xmpi_sum(wgt_wlo, spacecomm, residu)
+   call xmpi_sum(wgt_wlo, spacecomm, residu)
   ! ============= END Gatherall ==========
   ! end parallelisation over frequencies
 
-  ABI_DEALLOCATE(tospline_lo)
-  ABI_DEALLOCATE(splined_li)
-  ABI_DEALLOCATE(ysplin2_lo)
+   ABI_DEALLOCATE(tospline_lo)
+   ABI_DEALLOCATE(splined_li)
+   ABI_DEALLOCATE(ysplin2_lo)
 ! if(abs(dtset%pawprtvol)>=3) then
-    write(message, '(a,18x,2(2x,a21))') ch10,"Log. Freq","weight"
-    call wrtout(std_out,message,'COLL')
-    do ifreq=1,paw_dmft%dmft_nwlo
-      write(message, '(3x,a9,i6,2(2x,e21.14))') "--ifreq--",ifreq,omega_lo_tmp(ifreq),wgt_wlo(ifreq)
-      call wrtout(std_out,message,'COLL')
-    enddo
-    write(message, '(3x,a,i6)') "  Total number of log frequencies is", paw_dmft%dmft_nwlo
-    call wrtout(std_out,message,'COLL')
-    ifreq2 = 1
-    do ifreq=1,min(30,paw_dmft%dmft_nwlo)
-      write(message, '(3x,a9,i6,2(2x,e21.14))') "--ifreq--",ifreq,omega_li(ifreq)
-      call wrtout(std_out,message,'COLL')
-      if ( select_log(ifreq2) .eq. ifreq ) then
-        write(message, '(3x,a,i4,2(2x,i5))') "--sel_log",1
-        ifreq2 = ifreq+1
-      else
-        write(message, '(3x,a,i4,2(2x,i5))') "--sel_log",0
-      end if
-      call wrtout(std_out,message,'COLL')
-    enddo
-    write(message, '(3x,2a)') "--ifreq--","..."
-    call wrtout(std_out,message,'COLL')
-    write(message, '(3x,a,i6,2(2x,e13.5))') "--ifreq--",paw_dmft%dmft_nwli,omega_li(paw_dmft%dmft_nwli)
-    call wrtout(std_out,message,'COLL')
+   write(message, '(a,18x,2(2x,a21))') ch10,"Log. Freq","weight"
+   call wrtout(std_out,message,'COLL')
+   do ifreq=1,paw_dmft%dmft_nwlo
+     write(message, '(3x,a9,i6,2(2x,e21.14))') "--ifreq--",ifreq,omega_lo_tmp(ifreq),wgt_wlo(ifreq)
+     call wrtout(std_out,message,'COLL')
+   enddo
+   write(message, '(3x,a,i6)') "  Total number of log frequencies is", paw_dmft%dmft_nwlo
+   call wrtout(std_out,message,'COLL')
+   ifreq2 = 1
+   do ifreq=1,min(30,paw_dmft%dmft_nwlo)
+     write(message, '(3x,a9,i6,2(2x,e21.14))') "--ifreq--",ifreq,omega_li(ifreq)
+     call wrtout(std_out,message,'COLL')
+     if ( select_log(ifreq2) .eq. ifreq ) then
+       write(message, '(3x,a,i4,2(2x,i5))') "--sel_log",1
+       ifreq2 = ifreq+1
+     else
+       write(message, '(3x,a,i4,2(2x,i5))') "--sel_log",0
+     end if
+     call wrtout(std_out,message,'COLL')
+   enddo
+   write(message, '(3x,2a)') "--ifreq--","..."
+   call wrtout(std_out,message,'COLL')
+   write(message, '(3x,a,i6,2(2x,e13.5))') "--ifreq--",paw_dmft%dmft_nwli,omega_li(paw_dmft%dmft_nwli)
+   call wrtout(std_out,message,'COLL')
 !   endif
    ABI_DEALLOCATE(select_log)
    ABI_DEALLOCATE(omega_li)
