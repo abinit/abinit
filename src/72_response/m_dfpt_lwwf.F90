@@ -366,7 +366,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  berryopt=0;optlocal=1;optnl=1;usevnl=0;opt_gvnl1=0;sij_opt=0
 
 !Specific allocations
- ABI_ALLOCATE(ci_h1vatdisdag_cj,(2,natpert,nband_k,npw_k))
+ ABI_ALLOCATE(ci_h1vatdisdag_cj,(2,natpert,nband_k,nband_k))
  ABI_ALLOCATE(dum_ylmgr1_k,(npw_k,3+6*((ipert-dtset%natom)/10), psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
 
 !LOOP OVER ATOMIC DISPLACEMENT PERTURBATIONS
@@ -2057,7 +2057,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
  berryopt=0;optlocal=1;optnl=1;usevnl=0;opt_gvnl1=0;sij_opt=0
 
 !Specific allocations
- ABI_ALLOCATE(ci_h1vatdis_cj,(2,natpert,nband_k,npw_k))
+ ABI_ALLOCATE(ci_h1vatdis_cj,(2,natpert,nband_k,nband_k))
  ABI_ALLOCATE(dum_ylmgr1_k,(npw_k,3+6*((ipert-dtset%natom)/10), psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
 
 !LOOP OVER ATOMIC DISPLACEMENT PERTURBATIONS
@@ -2816,7 +2816,7 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  berryopt=0;optlocal=1;optnl=1;usevnl=0;opt_gvnl1=0;sij_opt=0
 
 !Specific allocations
- ABI_ALLOCATE(ci_h1vatdisdag_cj,(2,natpert,nband_k,npw_k))
+ ABI_ALLOCATE(ci_h1vatdisdag_cj,(2,natpert,nband_k,nband_k))
  ABI_ALLOCATE(dum_ylmgr1_k,(npw_k,3+6*((ipert-dtset%natom)/10), psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
 
 !LOOP OVER ATOMIC DISPLACEMENT PERTURBATIONS
