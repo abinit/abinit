@@ -61,7 +61,7 @@ MODULE m_plowannier
  public :: normalization_plowannier
  public :: print_operwan
  public :: init_operwan_realspace
- !public :: reduce_operwan_realspace
+ public :: reduce_operwan_realspace
  public :: destroy_operwan_realspace
  public :: zero_operwan_realspace
  public :: compute_oper_wank2realspace
