@@ -686,11 +686,13 @@ AC_DEFUN([_ABI_CHECK_FC_INT_QUAD],[
 
   dnl Try to compile a program defining a quadruple integer
   dnl Note: xlf "works around" the problem by changing the integer length
+  dnl Note: need to test "integer*16" and "integer(kind=16)" (seems not equivalent)
   if test "${abi_fc_vendor}" != "ibm"; then
     AC_LANG_PUSH([Fortran])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],
       [[
               integer*16 my_int
+              integer(kind=16) :: my_int2
       ]])], [fc_has_int_quad="yes"])
     AC_LANG_POP()
   fi
