@@ -62,7 +62,6 @@ sources = [
     "m_primitive_potential.F90",
     "m_primitive_potential_list.F90",
     "m_spin_hist.F90",
-    "m_spin_lattice_coupling_effpot.F90",
     "m_spin_mc_mover.F90",
     "m_spin_mover.F90",
     "m_spin_ncfile.F90",
