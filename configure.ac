@@ -1,1217 +1,1084 @@
-# -*- Autoconf -*-
 #
-# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
+# Generic config file for ABINIT (documented template)
 #
-# This file is part of the ABINIT software package. For license information,
-# please see the COPYING file in the top-level directory of the ABINIT source
-# distribution.
+# After editing this file to suit your needs, you may save it as
+# "~/.abinit/build/<hostname>.ac" to keep these parameters as per-user
+# defaults. Just replace "<hostname>" by the name of your machine,
+# excluding the domain name.
+#
+# Example: if your machine is called "myhost.mydomain", you will save
+#          this file as "~/.abinit/build/myhost.ac".
+#
+# You may put this file at the top level of an ABINIT source tree as well,
+# in which case its definitions will apply to this particular tree only.
+#
+# Hint: If you do not know the name of your machine, just type "hostname".
+#
+
+#
+# IMPORTANT NOTES
+#
+# 1. Setting CPPFLAGS, CFLAGS, CXXFLAGS, or FCFLAGS manually is not
+#    recommended and will override any setting made by the build system.
+#    A gentler way to do is to use the CFLAGS_EXTRA, CXXFLAGS_EXTRA and
+#    FCFLAGS_EXTRA environment variables, or to override only one kind
+#    of flags. See the sections dedicated to C, C++ and Fortran below
+#    for details.
+#
+# 2. Do not forget to remove the leading "#" on a line when you customize
+#    an option.
 #
 
 # ---------------------------------------------------------------------------- #
+# Global build options                                                         #
+# ---------------------------------------------------------------------------- #
+
+# Enable 64-bit compiler flags (default is no)
+#
+# Note: when necessary, fine-grained tuning may be achieved by setting
+#       the CPPFLAGS_64BITS, CFLAGS_64BITS, CXXFLAGS_64BITS, and
+#       FCFLAGS_64BITS variables manually.
+#
+enable_64bit_flags="yes"
+
+# Enable debug mode (default is basic)
+#
+# Allowed values:
+#
+#     * no       : strip debugging symbols
+#     * yes      : keep debugging symbols and allow for user-defined flags
+#     * basic    : add '-g' option when the compiler allows for it
+#     * verbose  : like basic + definition of the DEBUG_VERBOSE CPP option
+#     * enhanced : disable optimizations and debug verbosely
+#     * paranoid : enhanced debugging with additional warnings
+#     * naughty  : paranoid debugging with array bound checks
+#
+# Levels other than no and yes are "profile mode" levels in which
+# user-defined flags are overriden and optimizations disabled (see
+# below)
+#
+# Note: debug levels are incremental, i.e. the flags of one level are
+# appended to those of the previous ones
+#
+#enable_debug="yes"
+
+# Enable compiler hints (default is yes)
+#
+# Allowed values:
+#
+#     * no       : do not apply any hint
+#     * yes      : apply all available hints
+#
+#enable_hints="no"
+
+# Select optimization level whenever possible (default is standard,
+# except when debugging is in profile mode - see above - in which case
+# optimizations are turned off)
+#
+# Supported levels:
+#
+#     * no         : disable optimizations
+#     * yes        : enable optimizations with user-defined flags
+#     * safe       : build slow and very reliable code
+#     * standard   : build fast and reliable code
+#     * aggressive : build very fast code, regardless of reliability
+#
+# Levels other than no and yes are "profile mode" levels in which
+# user-defined flags are overriden
+#
+# Note:
+#
+#     * this option is ignored when debugging is in profile mode
+#
+#enable_optim="aggressive"
+
+# Disable vectorization with AVX-enable processor in problematic procedures
+#
+#enable_avx_safe_mode="yes"
+
+# Where to install ABINIT (default is /usr/local)
+#
+#prefix="${HOME}/hpc"
+
+# ---------------------------------------------------------------------------- #
+# C support                                                                    #
+# ---------------------------------------------------------------------------- #
+
+# C preprocessor (should not be set in most cases)
+#
+#CPP="/usr/bin/cpp"
+
+# C preprocessor custom debug flags (when enable_debug=yes)
+#
+#CPPFLAGS_DEBUG="-DDEV_MG_DEBUG_MODE"
+
+# C preprocessor custom optimization flags (when enable_optim=yes)
+#
+#CPPFLAGS_OPTIM="-DDEV_DIAGO_DP"
+
+# C preprocessor additional custom flags
+#
+#CPPFLAGS_EXTRA="-P"
+
+# Forced C preprocessor flags
+# Note: will override build-system configuration - USE AT YOUR OWN RISKS!
+#
+#CPPFLAGS="-P"
+
+                       # ------------------------------ #
+
+# C compiler
+#
+CC="mpiicc"
+
+# C compiler custom debug flags (when enable_debug=yes)
+#
+#CFLAGS_DEBUG="-g3"
+
+# C compiler custom optimization flags (when enable_optim=yes)
+#
+#CFLAGS_OPTIM="-O5"
+
+# C compiler additional custom flags
+#
+#CFLAGS_EXTRA="-O2"
+
+# Forced C compiler flags
+# Note: will override build-system configuration - USE AT YOUR OWN RISKS!
+#
+#CFLAGS="-O2"
+
+# C linker custom debug flags (when enable_debug=yes)
+#
+#CC_LDFLAGS_DEBUG="-Wl,-debug"
+
+# C linker custom optimization flags (when enable_optim=yes)
+#
+#CC_LDFLAGS_OPTIM="-Wl,-ipo"
+
+# C linker additional custom flags
+#
+#CC_LDFLAGS_EXTRA="-Bstatic"
+
+# Forced C linker flags
+# Note: will override build-system configuration - USE AT YOUR OWN RISKS!
+#
+#CC_LDFLAGS="-Bstatic"
+
+# C linker custom debug libraries (when enable_debug=yes)
+#
+#CC_LIBS_DEBUG="-ldebug"
+
+# C linker custom optimization libraries (when enable_optim=yes)
+#
+#CC_LIBS_OPTIM="-lopt_funcs"
+
+# C linker additional custom libraries
+#
+#CC_LIBS_EXTRA="-lrt"
+
+# Forced C linker libraries
+# Note: will override build-system configuration - USE AT YOUR OWN RISKS!
+#
+#CC_LIBS="-lrt"
+
+# ---------------------------------------------------------------------------- #
+# C++ support                                                                  #
+# ---------------------------------------------------------------------------- #
+
+# Note: the XPP* environment variables will likely have no effect
+
+# C++ preprocessor (should not be set in most cases)
+#
+#XPP="/usr/bin/cpp"
+
+# C++ preprocessor custom debug flags (when enable_debug=yes)
+#
+#XPPFLAGS_DEBUG="-DDEV_MG_DEBUG_MODE"
+
+# C++ preprocessor custom optimization flags (when enable_optim=yes)
+#
+#XPPFLAGS_OPTIM="-DDEV_DIAGO_DP"
+
+# C++ preprocessor additional custom flags
+#
+#XPPFLAGS_EXTRA="-P"
+
+# Forced C++ preprocessor flags
+# Note: will override build-system configuration - USE AT YOUR OWN RISKS!
+#
+#XPPFLAGS="-P"
+
+                       # ------------------------------ #
+
+# C++ compiler
+#
+CXX="mpiicpc"
+
+# C++ compiler custom debug flags (when enable_debug=yes)
+#
+#CXXFLAGS_DEBUG="-g3"
+
+# C++ compiler custom optimization flags (when enable_optim=yes)
+#
+#CXXFLAGS_OPTIM="-O5"
+
+# C++ compiler additional custom flags
+#
+#CXXFLAGS_EXTRA="-O2"
+
+# Forced C++ compiler flags
+# Note: will override build-system configuration - USE AT YOUR OWN RISKS!
+#
+#CXXFLAGS="-O2"
+
+# C++ linker custom debug flags (when enable_debug=yes)
+#
+#CXX_LDFLAGS_DEBUG="-Wl,-debug"
+
+# C++ linker custom optimization flags (when enable_optim=yes)
+#
+#CXX_LDFLAGS_OPTIM="-Wl,-ipo"
+
+# C++ linker additional custom flags
+#
+#CXX_LDFLAGS_EXTRA="-Bstatic"
+
+# Forced C++ linker flags
+# Note: will override build-system configuration - USE AT YOUR OWN RISKS!
+#
+#CXX_LDFLAGS="-Bstatic"
+
+# C++ linker custom debug libraries (when enable_debug=yes)
+#
+#CXX_LIBS_DEBUG="-ldebug"
+
+# C++ linker custom optimization libraries (when enable_optim=yes)
+#
+#CXX_LIBS_OPTIM="-lopt_funcs"
+
+# C++ linker additional custom libraries
+#
+#CXX_LIBS_EXTRA="-lblitz"
+
+# Forced C++ linker libraries
+# Note: will override build-system configuration - USE AT YOUR OWN RISKS!
+#
+#CXX_LIBS="-lblitz"
+
+# ---------------------------------------------------------------------------- #
+# Fortran support                                                              #
+# ---------------------------------------------------------------------------- #
+
+# Fortran preprocessor (should not be set in most cases)
+#
+#FPP="/usr/local/bin/fpp"
+
+# Fortran preprocessor custom debug flags (when enable_debug=yes)
+#
+#FPPFLAGS_DEBUG="-DDEV_MG_DEBUG_MODE"
+
+# Fortran preprocessor custom optimization flags (when enable_optim=yes)
+#
+#FPPFLAGS_OPTIM="-DDEV_DIAGO_DP"
+
+# Fortran preprocessor additional custom flags
+#
+#FPPFLAGS_EXTRA="-P"
+
+# Forced Fortran preprocessor flags
+# Note: will override build-system configuration - USE AT YOUR OWN RISKS!
+#
+#FPPFLAGS="-P"
+
+                       # ------------------------------ #
+
+# Fortran compiler
+#
+FC="mpiifort"
+
+# Fortran 77 compiler (addition for the Windows/Cygwin environment)
+#
+#F77="gfortran"
+
+# Fortran compiler custom debug flags (when enable_debug=yes)
+#
+#FCFLAGS_DEBUG="-g3"
+
+# Fortran compiler custom OpenMP flags
+#
+#FCFLAGS_OPENMP="-fopenmp"
+
+# Fortran compiler custom optimization flags (when enable_optim=yes)
+#
+#FCFLAGS_OPTIM="-O5"
+
+# Fortran compiler additional custom flags
+#
+FCFLAGS_EXTRA="-DMR_DEV=1"
+
+# Forced Fortran compiler flags
+# Note: will override build-system configuration - USE AT YOUR OWN RISKS!
+#
+#FCFLAGS="-O2"
+
+# Fortran flags for fixed-form source files
+#
+#FCFLAGS_FIXEDFORM="-ffixed-form"
+
+# Fortran flags for free-form source files
+#
+#FCFLAGS_FREEFORM="-ffree-form"
+
+# Fortran compiler flags to use a module directory
+#
+#FCFLAGS_MODDIR=="-J$(abinit_moddir)"
+
+# Tricky Fortran compiler flags
+#
+#FCFLAGS_HINTS="-ffree-line-length-none"
+
+# Fortran linker custom debug flags (when enable_debug=yes)
+#
+#FC_LDFLAGS_DEBUG="-Wl,-debug"
+
+# Fortran linker custom optimization flags (when enable_optim=yes)
+#
+#FC_LDFLAGS_OPTIM="-Wl,-ipo"
+
+# Fortran linker custom flags
+#
+#FC_LDFLAGS_EXTRA="-Bstatic"
+
+# Forced Fortran linker flags
+# Note: will override build-system configuration - USE AT YOUR OWN RISKS!
+#
+#FC_LDFLAGS="-Bstatic"
+
+# Fortran linker custom debug libraries (when enable_debug=yes)
+#
+#FC_LIBS_DEBUG="-ldebug"
+
+# Fortran linker custom optimization libraries (when enable_optim=yes)
+#
+#FC_LIBS_OPTIM="-lopt_funcs"
+
+# Fortran linker additional custom libraries
+#
+#FC_LIBS_EXTRA="-lsvml"
+
+# Forced Fortran linker libraries
+# Note: will override build-system configuration - USE AT YOUR OWN RISKS!
+#
+#FC_LIBS="-lsvml"
+
+                       # ------------------------------ #
+
+# Use C clock instead of Fortran clock for timings (default is no)
+#
+#enable_cclock="yes"
+
+# Wrap Fortran compiler calls (default is auto-detected)
+# Combine this option with enable_debug="yes" to keep preprocessed source
+# files (they are removed by default, except if their build fails)
+#
+#enable_fc_wrapper="yes"
+
+# Choose whether to read file lists from standard input or "ab.files"
+# (default is yes = standard input)
+#
+#enable_stdin="no"
+
+# ---------------------------------------------------------------------------- #
+# Python support                                                               #
+# ---------------------------------------------------------------------------- #
+
+# Flags to pass to the Python interpreter (default is unset)
+#
+#PYFLAGS="-B"
+
+# Preprocessing flags for C/Python bindings
+#
+#PYTHON_CPPFLAGS="-I/usr/local/include/numpy"
+
+# ---------------------------------------------------------------------------- #
+# Build customization                                                          #
+# ---------------------------------------------------------------------------- #
+
+# Enable the build of macroave (default is yes)
+#
+#enable_macroave="no"
+
+# Set per-directory Fortran optimizations (useful when a Fortran compiler
+# crashes during the build)
+#
+# Note: this option is not available through the command line
+#
+#fcflags_opt_95_drive="-O0"
+
+# ---------------------------------------------------------------------------- #
+# Libraries and linking                                                        #
+# ---------------------------------------------------------------------------- #
+
+# Set archiver name
+#
+#AR="xiar"
+
+# Archiver custom debug flags (when enable_debug=yes)
+#
+#ARFLAGS_DEBUG=""
+
+# Archiver custom optimization flags (when enable_optim=yes)
+#
+#ARFLAGS_OPTIM=""
+
+# Archiver additional custom flags
+#
+#ARFLAGS_EXTRA="-X 64"
+
+# Forced archiver flags
+# Note: will override build-system configuration - USE AT YOUR OWN RISKS!
+#
+#ARFLAGS="-X 32_64"
+
+# Some def introduced for MINGW/WINDOW$
+# Set generator of index to archive
+#RANLIB="ranlib"
+
+# Set generator of list symbols from object files
+#NM="nm"
+
+# Set the linker
+#LD="ld"
+
+# ---------------------------------------------------------------------------- #
+# MPI support                                                                  #
+# ---------------------------------------------------------------------------- #
+
+# Determine whether to build parallel code (default is auto)
+#
+# Permitted values:
+#
+#   * auto : let the configure script auto-detect MPI support
+#   * no   : disable MPI support
+#   * yes  : enable MPI support
+#
+# If left unset, the build system will take all appropriate decisions by
+# itself, and MPI will be enabled only if the build environment supports
+# it. If set to "yes", the configure script will stop if it does not find
+# a working MPI environment.
+#
+enable_mpi="yes"
+
+# Activate the MPI_IN_PLACE option whenever possible (default is no)
+# WARNING: this feature requires MPI2, ignored if the MPI library
+# is not MPI2 compliant.
+#
+#enable_mpi_inplace="no"
+
+# Activate parallel I/O (default is auto)
+#
+# Permitted values:
+#
+#   * auto : let the configure script auto-detect MPI I/O support
+#   * no   : disable MPI I/O support
+#   * yes  : enable MPI I/O support
+#
+# If left unset, the build system will take all appropriate decisions by
+# itself, and MPI I/O will be enabled only if the build environment supports
+# it. If set to "yes", the configure script will stop if it does not find
+# a working MPI I/O environment.
+#
+enable_mpi_io="yes"
+
+# Enable MPI-IO mode in Abinit (use MPI-IO as default IO library,
+# change the default values of iomode)   
+# Beware that not all the features of Abinit support MPI-IO,
+# This options is mainly used by developers for debugging purposes.
+#
+#enable_mpi_io_default="no"
+
+# Include flags for the MPI library (default is unset)
+#
+#with_mpi_incs="-I/usr/local/include"
+
+# Set MPI standard level (default is auto-detected)
+# Note: usually 1 for MPICH or LAM, 2 for OpenMPI
+#
+# Supported levels:
+#
+#   * 1 : use 'mpif.h' header
+#   * 2 : use mpi Fortran module
+#
+#with_mpi_level="2"
+
+# Link flags for the MPI library (default is unset)
+#
+#with_mpi_libs="-L/usr/local/lib -lmpi"
+
+# Convenience option: try to set MPI parameters by looking into the
+# specified directory (default is unset)
+#
+# Notes:
+#
+#   * the build system expects to find subdirectories named bin/, lib/,
+#     include/ under the prefix;
+#
+#   * this option is mutually exclusive with the other with_mpi_*
+#     options but with_mpi_level;
+#
+#   * when setting CC, CXX, and/or FC in conjunction with this option,
+#     the MPI compiler wrappers are wrapped themselves, so that the
+#     specified serial compilers are used when building Abinit.
+#
+#with_mpi_prefix="/usr/local/openmpi-gcc"
+
+# Set MPI runner for tests (default is unset)
+# Note: replaces the former with_mpi_runner option
+#
+#MPI_RUNNER="/usr/local/bin/mpiexec"
+
+# Set serial runner for tests (default is unset)
+# Note: this option has no effect yet
+#
+#SERIAL_RUNNER="/usr/local/bin/srun"
+
+# ---------------------------------------------------------------------------- #
+# GPU support                                                                  #
+# ---------------------------------------------------------------------------- #
+
+# Enable GPU library support (default is no)
+#
+# Requirement: go through README.GPU before doing anything
+#
+# Note: this is highly experimental - USE AT YOUR OWN RISKS!
+#
+#enable_gpu="yes"
+
+# Flavor of the GPU library to use (default is cuda-single)
+#
+# Supported libraries:
+#
+#   * cuda-single : Cuda with single-precision arithmetic
+#   * cuda-double : Cuda with double-precision arithmetic
+#   * none        : not implemented (will replace enable_gpu)
+#
+#with_gpu_flavor="cuda-double"
+
+# Include flags for the GPU library (default is unset)
+#
+#with_gpu_incs="-I/usr/local/include/cuda"
+
+# Link flags for the GPU library (default is unset)
+#
+#with_gpu_libs="-L/usr/local/cuda/lib64 -lcublas -lcufft -lcudart"
+
+# Convenience option: try to set GPU parameters by looking into the
+# specified directory (default is unset)
+#
+# Note 1: the build system expects to find subdirectories named bin/, lib/,
+# include/ under the prefix
+#
+# Note 2: this option is mutually exclusive with the other with_gpu_*
+# options
+#
+#with_gpu_prefix="/usr/local/cuda"
+
+                       # ------------------------------ #
 
 #
-# IMPORTANT NOTE
-#
-# Please DO NOT EDIT this file unless you REALLY know what you are doing.
-# Everything is important, in particular the order of the various commands
-# executed here. YOU HAVE BEEN WARNED !
+# The following options are used to build GPU code
 #
 
+# GPU C preprocessor flags (default is unset)
+#
+#with_gpu_cppflags=""
+
+# GPU C compiler flags (default is unset)
+#
+#with_gpu_cflags=""
+
+# GPU C linker flags (default is unset)
+#
+#with_gpu_ldflags=""
+
+                       # ------------------------------ #
+
+#
+# Advanced GPU options (experts only)
+#
+
+# DO NOT EDIT THIS SECTION UNLESS YOU *TRULY* KNOW WHAT YOU ARE DOING!
+# In any case, the outcome of setting the following options is highly
+# impredictible.
+
+# nVidia C compiler (should not be set)
+#
+#NVCC="/usr/local/cuda/bin/nvcc"
+
+# Forced nVidia C compiler preprocessing flags (should not be set)
+#
+#NVCC_CPPFLAGS="-DHAVE_CUDA_SDK"
+
+# Forced nVidia C compiler flags (should not be set)
+#
+#NVCC_CFLAGS="-arch=sm_13"
+
+# Forced nVidia linker flags (should not be set)
+#
+#NVCC_LDFLAGS=""
+
+# Forced nVidia linker libraries (should not be set)
+#
+#NVCC_LIBS=""
+
+# ---------------------------------------------------------------------------- #
+# Connectors                                                                   #
+# ---------------------------------------------------------------------------- #
+
+# WARNING: when setting the value of a connector flavor to "custom",
+#          the associated CPP options may be defined in an impredictable
+#          manner by the build system. In particular, using
+#          --with-linalg-flavor="custom" will systematically enable
+#          support for ScaLAPACK. Checking which CPP options are
+#          enabled by looking at the output of abinit is thus highly
+#          recommended.
+
+# Enable connectors (default is yes)
+#
+# When connectors are enabled, the build system of Abinit tries to link
+# prioritarily with external libraries. In some cases, when
+# unsuccessful, it can build an internal fallback instead (see the
+# "Fallbacks" section below).
+#
+# Enabling connectors is necessary for packaging and is recommended in
+# most other cases. Rely upon external optimized libraries is always smarter
+# than embedding their source code, as their performance and integration
+# within the local environment are usually significantly better.
+#
+# The connectors are associated to advanced detection mechanisms
+# implemented in the build system of Abinit. On many architectures, if
+# the corresponding libraries have been properly installed, specifying
+# a flavor will suffice to enable the related features.
+#
+#enable_connectors="no"
+
+# ---------------------------------------------------------------------------- #
+# Timer library connector                                                      #
+# ---------------------------------------------------------------------------- #
+
+# Flavor of the timer library to use (default is papi)
+#
+# Supported libraries:
+#
+#   * abinit
+#   * custom (bypass build-system checks)
+#   * gptl   (not implemented)
+#   * none   (disable timer support)
+#   * papi
+#
+#with_timer_flavor="papi"
+
+# Include flags for the timer library (default is unset)
+#
+#with_timer_incs="-I/usr/local/include/papi"
+
+# Link flags for the timer library (default is unset)
+#
+#with_timer_libs="-L/usr/local/lib/papi -lpapi"
+
+# ---------------------------------------------------------------------------- #
+# Transferable I/O (TRIO) connector                                            #
+# ---------------------------------------------------------------------------- #
+
+# Flavor of transferable I/O library to support (default is netcdf)
+#
+# By transferable I/O (TRIO), we mean that the files produced by Abinit
+# will be transferable seamlessly to other computers and codes
+#
+# Supported libraries:
+#
+#   * psml     : XML pseudopotential format io library
+#   * netcdf   : NetCDF file format
+#   * yaml     : YAML output
+#   * none     : disable TRIO support
+#
+# You may specify any combination, using '+' as a separator
+#
+#with_trio_flavor="netcdf"
+
+                       # ------------------------------ #
+
+# Include flags for the psml library (default is unset)
+#
+#with_psml_incs="-I/usr/local/include/psml"
+
+# Link flags for the psml library (default is unset)
+#
+#with_psml_libs="-L/usr/local/lib/psml -lpsml"
+
+                       # ------------------------------ #
+
+# Include flags for the NetCDF library (default is unset)
+#
+#with_netcdf_incs="-I/usr/local/include/netcdf"
+
+# Link flags for the NetCDF library (default is unset)
+#
+#with_netcdf_libs="-L/usr/local/lib/netcdf -lnetcdff -lnetcdf"
+#
+#
+# Enable Netcdf mode in Abinit (use netcdf as default IO library,
+# change the default values of iomode)   
+#
+#enable_netcdf_default="no"
+
+                       # ------------------------------ #
+
+# Include flags for the YAML library (default is unset)
+#
+#with_yaml_incs="-I/opt/etsf/include"
+
+# Link flags for the YAML library (default is unset)
+#
+#with_yaml_libs="-L/opt/etsf/lib -lyaml_fortran"
+
+# ---------------------------------------------------------------------------- #
+# FFT connector                                                                #
+# ---------------------------------------------------------------------------- #
+
+# Flavor of FFT library to support (default is unset)
+#
+# Supported libraries:
+#
+#   * asl
+#   * custom        (bypass build-system checks)
+#   * fftw2
+#   * fftw2-threads
+#   * fftw3
+#   * fftw3-mkl
+#   * fftw3-threads
+#   * fftw3-mpi     (highly experimental)
+#   * dfti          (native MKL FFT library)
+#   * dfti-threads  (threaded MKL FFT library)
+#   * none          (disable external FFT support)
+#   * sgimath
+#
+# Notes:
+#
+#   * By default, Abinit will use the internal Goedecker FFT library
+#   * This connector is highly experimental - USE AT YOUR OWN RISKS!
+#
+#with_fft_flavor="fftw3"
+
+# Include flags for the FFT library (default is unset)
+#
+#with_fft_incs="-I/usr/local/include/fftw"
+
+# Link flags for the FFT library (default is unset)
+#
+#with_fft_libs="-L/usr/local/lib/fftw -lfftw3"
+
+# ---------------------------------------------------------------------------- #
+# Linear algebra connector                                                     #
+# ---------------------------------------------------------------------------- #
+
+# Flavor of linear algebra libraries to use (default is netlib)
+#
+# Supported libraries:
+#
+#   * acml      : AMD Core Math Libraries
+#                 http://developer.amd.com/libraries/acml/pages/default.aspx
+#
+#   * asl       : NEC Advanced Scientific Library
+#                 http://www.nec.co.jp/solution/hpc/library/asl_e/index.html
+#
+#   * atlas     : Automatically Tuned Linear Algebra Software
+#                 http://math-atlas.sourceforge.net/
+#
+#   * custom    : just check user-specified libraries, do not try to
+#                 detect their type
+#
+#   * essl      : IBM Engineering and Scientific Subroutine Library
+#                 http://www-03.ibm.com/systems/software/essl/
+#
+#   * elpa     : Eigen soLvers for Petaflops Applications
+#                 http://elpa.rzg.mpg.de
+#
+#   * goto      : TACC GOTOBLAS2 and Netlib's LAPACK
+#                 http://www.tacc.utexas.edu/tacc-projects/gotoblas2
+#
+#   * magma     : Matrix Algebra on GPU and Multicore Architectures
+#                 (MAGMA minimal version>=1.1.0, requires Cuda)
+#                 http://icl.cs.utk.edu/magma/
+#
+#   * mkl       : Intel Math Kernel Library
+#                 http://software.intel.com/en-us/articles/intel-mkl/
+#
+#   * mlib      : HP Mathematical Software Library
+#                 http://www.hp.com/
+#
+#   * netlib    : Netlib repository reference libraries
+#                 http://www.netlib.org/lapack/index.html
+#
+#   * none      : disable external linear algebra support
+#
+#   * plasma    : Parallel Linear Algebra for Scalable Multicore
+#                 Architectures (requires MPI)
+#                 http://icl.cs.utk.edu/plasma/
+#                 *** SCHEDULED FOR ABINIT 6.14 ***
+#
+#   * scalapack : Netlib BLACS and ScaLAPACK libraries (require MPI)
+#                 http://www.netlib.org/scalapack/
+#
+#   * sgimath   : Silicon Graphics Scientific Mathematical Library
+#                 http://techpubs.sgi.com/library/tpl/cgi-bin/init.cgi
+#
+#   * sunperf   : Sun Performance Library
+#                 http://blogs.oracle.com/hinkthink/entry/sun_performance_library_aka_perflib
+#
+# Notes:
+#
+#   * you may combine "magma" and/or "plasma" and/or "scalapack" with
+#     any other flavor, using '+' as a separator
+#
+#   * "custom" also works when the Fortran compiler provides a full
+#     BLAS+LAPACK implementation internally (e.g. Lahey Fortran)
+#
+#   * the include and link flags for MAGMA and ScaLAPACK have to be
+#     specified together with those of BLAS and LAPACK (see options below)
+#
+#   * please consult the MKL link line advisor if you experience
+#     problems with MKL, by going to
+#     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
+#
+with_linalg_flavor="mkl"
+
+# Include flags for the external linear algebra libraries (default is unset)
+#
+#with_linalg_incs="-I/usr/local/include"
+
+# Link flags for the external linear algebra libraries (default is unset)
+#
+#with_linalg_libs="-lmkl_scalapack_lp64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lmkl_blacs_intelmpi_lp64  -lpthread -lm"
+
+# ---------------------------------------------------------------------------- #
+# Algorithmic library connector                                                #
+# ---------------------------------------------------------------------------- #
+
+# Flavor of the algorithmic library to use (default is unset)
+#
+# Supported libraries:
+#
+#   * custom (bypass build-system checks)
+#   * levmar
+#   * none   (disable external algorithm support)
+#
+#with_algo_flavor="levmar"
+
+# Include flags for the algorithmic libraries (default is unset)
+#
+#with_algo_incs="-I/usr/local/include"
+
+# Link flags for the algorithmic libraries (default is unset)
+#
+#with_algo_libs="-L/usr/local/lib -llevmar"
+
+# ---------------------------------------------------------------------------- #
+# DFT library connector                                                        #
+# ---------------------------------------------------------------------------- #
+
+# Flavor of the DFT library to use (default is atompaw+bigdft+libxc+wannier90)
+#
+# Supported libraries:
+#
+#   * atompaw   : PAW dataset generation
+#   * bigdft    : wavelets
+#   * libxc     : exchange-correlation functionals
+#   * none      : disable external DFT support
+#   * wannier90 : Wannier functions
+#
+# You may specify any combination, using '+' as a separator
+#
+#with_dft_flavor="atompaw+libxc+wannier90"
+
+                       # ------------------------------ #
+
+# Full path to the AtomPAW executables (default is unset)
+#
+#with_atompaw_bins="/usr/local/bin"
+
+# Include flags for the AtomPAW library (default is unset)
+#
+#with_atompaw_incs="-I/usr/local/include/atompaw"
+
+# Link flags for the AtomPAW library (default is unset)
+#
+#with_atompaw_libs="-L/usr/local/lib/atompaw -latompaw"
+
+                       # ------------------------------ #
+
+# Include flags for the BigDFT library (default is unset)
+#
+#with_bigdft_incs="-I/usr/local/include/bigdft"
+
+# Link flags for the BigDFT library (default is unset)
+#
+#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
+
+                       # ------------------------------ #
+
+# Include flags for the LibXC library (default is unset)
+#
+#with_libxc_incs="-I/opt/etsf/include"
+
+# Link flags for the LibXC library (default is unset)
+#
+#with_libxc_libs="-L/opt/etsf/lib -lxc"
+
+                       # ------------------------------ #
+
+# Full path to the Wannier90 executables (default is unset)
+#
+#with_wannier90_bins="/usr/local/bin"
+
+# Include flags for the Wannier90 library (default is unset)
+#
+#with_wannier90_incs="-I/usr/local/include/wannier90"
+
+# Link flags for the Wannier90 library (default is unset)
+#
+#with_wannier90_libs="-L${HOME}/lib/wannier90 -lwannier90"
+
+# Flag to force wannier90 v1.x (autodetected by default, but may not work)
+#
+#enable_wannier90_v1="no"
+
+# ---------------------------------------------------------------------------- #
+# LIBXML support
+# ---------------------------------------------------------------------------- #
+
+# Flag to enable LIBXML library
+#
+#enable_xml=no
+
+# ---------------------------------------------------------------------------- #
+# DMFT library connector                                                        #
+# ---------------------------------------------------------------------------- #
+
+# Link with TRIQS library (for CTQMC and rotationally invariant interaction)
+#    (default is no)
+#    Different versions of TRIQS have differents API. Choose your installed 
+#    version.
+#
+#enable_triqs_v2_0="no"
+#enable_triqs_v1_4="no"
+#
+# Include flags for the TRIQS library (default is unset)
+#
+#with_triqs_incs="-I/usr/local/triqs/include -I/usr/local/cthyb/src/c++/"
+
+# Link flags for the TRIQS library (default is unset)
+#
+#with_triqs_libs="-L/usr/local/triqs/lib -ltriqs -lcthyb_c"
+
+# ---------------------------------------------------------------------------- #
+# Fallbacks                                                                    #
 # ---------------------------------------------------------------------------- #
 
 #
-# Autoconf & Automake startup
+# Fallbacks are external packages built within Abinit, in order to
+# facilitate the development and testing of advanced features. They
+# should in principle not be used in production, but replaced by the
+# corresponding connector instead (see above sections).
+#
+# IMPORTANT NOTE: the source tarballs of fallbacks are downloaded from
+#                 internet into ~/.abinit/tarballs/.
 #
 
-# Enhance help message
-m4_divert_text([HELP_END], [
-In order to facilitate the configuration of Abinit, you can save the options
-you regularly use into a file. For full instructions, please consult the
-doc/build/config-template.ac file in this directory tree.
-
-A lot more documentation on how to build and run Abinit is available on the
-Abinit Wiki. Please consult it at https://wiki.abinit.org/ whenever needed.
-Examples of configuration files for clusters are available at https://github.com/abinit/abiconfig
-])
-
-# Initialize Autoconf
-AC_INIT([ABINIT],[8.11.12],[https://bugs.launchpad.net/abinit/],[abinit])
-AC_REVISION([Autotools support for ABINIT 7])
-AC_CONFIG_AUX_DIR([config/gnu])
-AC_CONFIG_MACRO_DIR([config/m4])
-AC_CONFIG_SRCDIR([src/98_main/abinit.F90])
+# Enable fallbacks (default is yes)
+#
+# Maintainers may use the following to force the build of fallbacks:
+#
+#   * force: will skip connector tests when fallbacks are available.
+#
+# Note: if you disable fallbacks, failing connectors will cause
+# configure to abort.
+#
+#enable_fallbacks="no"
 
 # ---------------------------------------------------------------------------- #
-
-#
-# Startup
-#
-
-ABI_MSG_SECTION([Overall startup])
-
-# Initial setup
-AC_CANONICAL_TARGET
-# Disable pax
-alias pax='/bin/false'
-AM_INIT_AUTOMAKE([1.10 tar-ustar])
-unalias pax
-AC_CONFIG_HEADERS([config.h])
-
-# Early Abinit setup - the order is important!
-ABI_INIT_DIRS
-ABI_INIT_VERSION
-ABI_INIT_CPU_INFO
-ABI_INIT_OS_INFO
-ABI_INIT_HEADER
-ABI_INIT_ARCH
-
-# Check for common programs
-AC_PROG_MAKE_SET
-AC_PROG_INSTALL
-AC_PROG_LN_S
-AC_PROG_SED
-AC_PROG_AWK
-AC_PROG_GREP
-
-# Workaround for the "grep -e" issue on Solaris systems
-AC_PROG_EGREP
-
-# Workaround for the wrong path to install-sh on Mac systems
-ABI_PROG_MKDIR_P
-
-# Look for a command that provide absolute paths
-AC_CHECK_PROGS(REALPATH,[realpath,readlink],[true])
-test "${REALPATH}" = "readlink" && REALPATH="${REALPATH} -f"
-
-# Define command-line arguments
-ABI_OPTIONS_DEFINE
-
-# Read config file and ensure that priorities are respected
-ABI_ENV_BACKUP
-ABI_OPTIONS_BACKUP
-test "${enable_config_file}" = "" && enable_config_file="yes"
-ABI_LOAD_OPTIONS
-ABI_OPTIONS_RECALL
-ABI_ENV_RECALL
-
-# Set still undefined options
-ABI_OPTIONS_SETUP
-
-# Initialize environment, taking options into account
-ABI_ENV_INIT
-
-AC_SUBST(CC_LDFLAGS)
-AC_SUBST(CC_LIBS)
-AC_SUBST(CXX_LDFLAGS)
-AC_SUBST(CXX_LIBS)
-AC_SUBST(FC_LDFLAGS)
-AC_SUBST(FC_LIBS)
-
-# Initialize install dirs (requires version and config options to be set)
-ABI_INIT_INSTALL_DIRS
-
-# Translate optimization level
-abi_optflags_mode="${enable_optim}"
-
-# Disable wrapping of Fortran compiler by default
-abi_fc_wrap="no"
-
-# Save user-defined CPP
-abi_cpp_user="${CPP}"
-
-# Set-up required information for core libraries
-ABI_CORELIBS_INIT
-
+# Developer options                                                            #
 # ---------------------------------------------------------------------------- #
 
+# Note: all the following options are disabled by default
+#       (i.e. they have the complementary values to those displayed)
+
+# Enable BSE unpacking (gmatteo)
 #
-# Build-system information
+#enable_bse_unpacked="yes"
+
+# Enable exports (pouillon)
 #
+#enable_exports="yes"
 
-ABI_MSG_SECTION([Build-system information])
+# Enable double precision for GW calculations (gmatteo)
+#
+#enable_gw_dpc="yes"
 
-# Display ABINIT version
-AC_MSG_NOTICE([ABINIT version ${ABINIT_VERSION}])
+# Enable memory profiling (waroquiers)
+#
+#enable_memory_profiling="yes"
 
-# Display Autotools version information
-ABI_INFO_AUTOTOOLS
+# Enable lotf (mancini)
+#
+#enable_lotf="yes"
 
-# Display UI changes
-ABI_OPTIONS_CHANGED
+# Enable OpenMP (gmatteo, torrent)
+#
+#enable_openmp="yes"
+
+# Enable ZDOTC and ZDOTU bugfix (gmatteo)
+#
+#enable_zdot_bugfix="yes"
 
 # ---------------------------------------------------------------------------- #
-
-#
-# Check option consistency
-#
-
-# NOTE: please hack this section with EXTREME CARE
-
-ABI_MSG_SECTION([Option consistency checking])
-
-# --------- #
-# Libraries #
-# --------- #
-
-abi_optchk_ok="yes"
-
-AC_MSG_NOTICE([checking consistency of library-related options])
-
-# Closing remarks
-if test "${abi_optchk_ok}" = "yes"; then
-  AC_MSG_NOTICE([ |---> all OK])
-fi
-AC_MSG_NOTICE([])
-
-# -------------------- #
-# Experimental options #
-# -------------------- #
-
-abi_optchk_ok="yes"
-
-AC_MSG_NOTICE([checking consistency of experimental options])
-
-# Closing remarks
-if test "${abi_optchk_ok}" = "yes"; then
-  AC_MSG_NOTICE([ |---> all OK])
-fi
-AC_MSG_NOTICE([])
-
-# ------------------ #
-# Maintainer options #
-# ------------------ #
-
-abi_optchk_ok="yes"
-
-AC_MSG_NOTICE([checking consistency of maintainer options])
-
-# Fast check conflicts with package check
-if test "${enable_fast_check}" = "yes"; then
-  if test "${enable_pkg_check}" = "yes"; then
-    AC_MSG_ERROR([--enable-fast-check conflicts with --enable-pkg-check])
-    abi_optchk_ok="no"
-  fi
-fi
-
-# Closing remarks
-if test "${abi_optchk_ok}" = "yes"; then
-  AC_MSG_NOTICE([ |---> all OK])
-fi
-AC_MSG_NOTICE([])
-
-# ------------------- #
-# Final step: parsing #
-# ------------------- #
-
-ABI_OPTIONS_PARSE
-
+# Maintainer options                                                           #
 # ---------------------------------------------------------------------------- #
 
+# Run test suite on 4 processors (default is no)
 #
-# Multicore architecture startup
+#enable_fast_check="yes"
+
+# Activate maintainer checks (default is no)
 #
+#enable_maintainer_checks="yes"
 
-ABI_MSG_SECTION([Multicore architecture startup])
+# Fortran compiler vendor to be used by the build system (default is unset)
+#
+# Note: do not use if you don't know what it is about
+#
+#with_fc_vendor="dummy"
 
-# Prepare MPI support
-ABI_MPI_INIT
-
-# GPU support requires MPI
-if test "${enable_gpu}" = "yes" -a "${enable_mpi}" != "yes"; then
-  AC_MSG_ERROR([GPU support requires MPI])
-fi
-
-# Prepare GPU support
-ABI_GPU_INIT
-
-# ScaLAPACK support requires MPI
-if test "${enable_scalapack}" = "yes" -a "${enable_mpi}" != "yes"; then
-  AC_MSG_ERROR([ScaLAPACK support requires MPI])
-fi
+# Fortran compiler version to be used by the build system (default is unset)
+#
+# Note: do not use if you don't know what it is about
+#
+#with_fc_version="0.0"
 
 # ---------------------------------------------------------------------------- #
-
-#
-# Miscellaneous utilities
-#
-
-ABI_MSG_SECTION([Utilities])
-
-# Check for various programs
-AC_PATH_PROG(BOURNE_SHELL,sh,/bin/sh)
-AC_PATH_PROG(MV,mv,/bin/false)
-AC_PATH_PROG(PERL,perl,/bin/false)
-AC_PATH_PROG(RM,rm,/bin/false)
-
-AC_CHECK_PROGS(PATCH,[patch])
-AC_CHECK_PROGS(TAR,[tar])
-
+# Documentation options                                                        #
 # ---------------------------------------------------------------------------- #
 
+# Markdown flags
 #
-# C support
+#MDFLAGS=""
+
+# LaTeX flags
 #
+#LTXFLAGS=""
 
-ABI_MSG_SECTION([C support])
-
-# Preserve environment
-ABI_ENV_BACKUP
-
-# Look for the C compiler
-if test "${CC}" != "" -a ! -x "${CC}"; then
-  abi_cc_probe=`echo "${CC}" | sed -e 's/ .*//'`
-  if test ! -x "${abi_cc_probe}"; then
-    AC_PATH_PROG([abi_cc_path],[${abi_cc_probe}])
-    if test "${abi_cc_path}" = ""; then
-      AC_MSG_ERROR([could not run C compiler "${CC}"])
-    fi
-  fi
-fi
-AC_PROG_CC
-
-# Fail if no C compiler is available
-if test "${CC}" = ""; then
-  AC_MSG_ERROR([no C compiler available])
-fi
-
-# Look for the C preprocessor
-if test "${CPP}" != "" -a ! -x "${CPP}"; then
-  AC_PATH_PROG([abi_cpp_path],[${CPP}])
-  if test "${abi_cpp_path}" = ""; then
-    AC_MSG_ERROR([could not run C preprocessor "${CPP}"])
-  fi
-fi
-AC_PROG_CPP
-
-# Fail if no C preprocessor is available
-if test "${CPP}" = ""; then
-  AC_MSG_ERROR([no C preprocessor available])
-fi
-
-# Set Abinit C parameters
-ABI_PROG_CC
-
-# Restore back CPPFLAGS and CFLAGS
-CPPFLAGS="${abi_env_CPPFLAGS}"
-CFLAGS="${abi_env_CFLAGS}"
-
-# Check for system peculiarities
-AC_C_BIGENDIAN
-AC_HEADER_ASSERT
-
-# Look for malloc.h
-CPPFLAGS_MALLOC=""
-AC_CHECK_HEADERS([malloc.h], [abi_hdr_malloc="yes"], [abi_hdr_malloc="no"])
-if test "${abi_hdr_malloc}" = "no"; then
-  AC_CHECK_HEADERS([malloc/malloc.h],
-    [abi_hdr_malloc="yes"], [abi_hdr_malloc="no"])
-fi
-
-# ---------------------------------------------------------------------------- #
-
+# DviPDF flags
 #
-# C++ support
-#
+#PDFFLAGS=""
 
-ABI_MSG_SECTION([C++ support])
-
-# Preserve environment
-ABI_ENV_BACKUP
-
-# Look for the C++ compiler
-if test "${CXX}" != "" -a ! -x "${CXX}"; then
-  abi_cxx_probe=`echo "${CXX}" | sed -e 's/ .*//'`
-  if test ! -x "${abi_cxx_probe}"; then
-    AC_PATH_PROG([abi_cxx_path],[${abi_cxx_probe}])
-    if test "${abi_cxx_path}" = ""; then
-      AC_MSG_ERROR([could not run C++ compiler "${CXX}"])
-    fi
-  fi
-fi
-AC_PROG_CXX
-
-# Warn if no C++ compiler is available
-if test "${CXX}" = ""; then
-  AC_MSG_WARN([no C++ compiler available])
-fi
-
-# Set Abinit C++ parameters
-if test "${CXX}" != ""; then
-  ABI_PROG_CXX
-fi
-
-# Restore back CXXFLAGS
-CXXFLAGS="${abi_env_CXXFLAGS}"
-
-# ---------------------------------------------------------------------------- #
-
-#
-# Fortran support
-#
-
-ABI_MSG_SECTION([Fortran support])
-
-# Preserve environment
-ABI_ENV_BACKUP
-
-# Look for the Fortran compiler
-if test "${FC}" != "" -a ! -x "${FC}"; then
-  abi_fc_probe=`echo "${FC}" | sed -e 's/ .*//'`
-  if test ! -x "${abi_fc_probe}"; then
-    AC_PATH_PROG([abi_fc_path],[${abi_fc_probe}])
-    if test "${abi_fc_path}" = ""; then
-      AC_MSG_ERROR([could not run Fortran compiler "${FC}"])
-    fi
-  fi
-fi
-AC_PROG_FC
-
-# Fail if no Fortran compiler is available
-if test "${FC}" = ""; then
-  AC_MSG_ERROR([no Fortran compiler available])
-fi
-
-# Look for the Fortran preprocessor
-if test "${FPP}" != "" -a ! -x "${FPP}"; then
-  AC_PATH_PROG([abi_fpp_path],[${FPP}])
-  if test "${abi_fpp_path}" = ""; then
-    AC_MSG_ERROR([could not run Fortran preprocessor "${FPP}"])
-  fi
-fi
-#AC_PROG_FPP
-
-# Set Abinit Fortran parameters
-ABI_PROG_FC
-
-# Set default file extensions
-ABI_FC_EXTENSIONS
-
-# Get module file case
-ABI_FC_MOD_CASE
-
-# Restore back FCFLAGS
-FCFLAGS="${abi_env_FCFLAGS}"
-
-# Wrap Fortran compiler calls if needed or requested
-if test "${enable_fc_wrapper}" = "yes"; then
-  abi_fc_wrap="yes"
-fi
-
-# Determine Fortran-C name mangling scheme
-AC_FC_WRAPPERS
-
-# The IBM Fortran compiler crashes if the mpi module is included
-# more than once
-if test "${abi_fc_vendor}" = "ibm" -a "${enable_mpi}" = "yes"; then
-  AC_MSG_NOTICE([activating MPI workaround for the IBM Fortran compiler])
-  AC_DEFINE([HAVE_MPI_INCLUDED_ONCE],1,[Define to 1 if you are using XLF.])
-fi
-
-# ---------------------------------------------------------------------------- #
-
-#
-# Python support
-#
-
-ABI_MSG_SECTION([Python support])
-
-# Look for programs
-AC_CHECK_PROGS(PYTHON,[python python2.6 python2.5 python2.4])
-
-# Get Python preprocessing options
-AC_MSG_CHECKING([for Python CPPFLAGS])
-if test "${PYTHON}" != "" -a "${PYTHON_CPPFLAGS}" = ""; then
-  PYTHON_CPPFLAGS=`${PYTHON} -c "\
-from __future__ import print_function
-try:
-    import distutils.sysconfig
-    print('-I' + distutils.sysconfig.get_python_inc(),end=' '),
-except:
-    pass
-try:
-    import numpy
-    print('-I' + numpy.get_include()),
-except:
-    pass"`
-fi
-AC_MSG_RESULT([${PYTHON_CPPFLAGS}])
-
-# Check whether Bazaar is installed
-if test "${PYTHON}" != ""; then
-  AC_CHECK_PROGS(BAZAAR,[bzr])
-fi
-
-ABI_CHECK_PYTHON
-
-# Set Bazaar variables
-bzr_branch=""
-bzr_revno=""
-bzr_clean=""
-if test "${BAZAAR}" != "" -a -d "${abinit_srcdir}/.bzr"; then
-    AC_MSG_NOTICE([retrieving Bazaar branch information])
-    eval `bzr version-info \
-      --check-clean \
-      --custom \
-      --template='bzr_branch="{revision_id}"\nbzr_revno="{revno}"\nbzr_clean="{clean}"\n' \
-      ${abinit_srcdir}`
-    AC_DEFINE([HAVE_BZR_BRANCH],1,[Define to 1 if you are working in a Bazaar branch.])
-fi
-
-# Substitute Python-related variables
-AC_SUBST(bzr_branch)
-AC_SUBST(bzr_revno)
-AC_SUBST(bzr_clean)
-
-# ---------------------------------------------------------------------------- #
-
-#
-# Libraries and linking
-#
-
-ABI_MSG_SECTION([Libraries and linking])
-
-# Preserve environment
-ABI_ENV_BACKUP
-
-# Disable shared objects (may change in a distant future)
-# Note: Libtool-provided macro
-#AC_DISABLE_SHARED
-
-# Look for archiver
-if test "${AR}" = ""; then
-  AC_CHECK_PROGS(AR,[ar xiar])
-fi
-
-# Set archiver command flag
-test "${ARFLAGS_CMD}" = "" && ARFLAGS_CMD="rc"
-AC_SUBST(ARFLAGS_CMD)
-
-# Look for ranlib
-AC_PROG_RANLIB
-
-# Look for linker (not used for now)
-#AC_PROG_LD
-
-# Restore back compile flags
-CFLAGS="${abi_env_CFLAGS}"
-CXXFLAGS="${abi_env_CXXFLAGS}"
-FCFLAGS="${abi_env_FCFLAGS}"
-
-# We want to be able access the archiver from anywhere
-AC_SUBST(AR)
-AC_SUBST(ARFLAGS)
-
-# Report the use of libtool-related options
-AC_SUBST(enable_shared)
-AC_SUBST(enable_static)
-AC_SUBST(with_gnu_ld)
-
-# ---------------------------------------------------------------------------- #
-
-#
-# Hints
-#
-
-ABI_MSG_SECTION([Hints])
-
-# Look for a true C preprocessor
-if test "${TRUE_CPP}" = ""; then
-  AC_CHECK_PROGS([TRUE_CPP],[cpp])
-fi
-if test "${TRUE_CPP}" = ""; then
-  AC_PATH_PROG([TRUE_CPP],[cpp])
-fi
-if test "${TRUE_CPP}" = ""; then
-  if test -x "/lib/cpp"; then
-    TRUE_CPP="/lib/cpp"
-  fi
-fi
-AC_MSG_CHECKING([for a true C preprocessor])
-if test "${TRUE_CPP}" = ""; then
-  AC_MSG_RESULT([none])
-else
-  AC_MSG_RESULT([${TRUE_CPP}])
-fi
-
-# Set Fortran preprocessor when needed
-if test "${abi_fc_wrap}" = "yes"; then
-  if test "${FPP}" = ""; then
-    if test "${abi_cpp_user}" != ""; then
-      FPP="${abi_cpp_user}"
-    else
-      if test "${TRUE_CPP}" != ""; then
-        FPP="${TRUE_CPP}"
-      else
-        FPP="${CPP}"
-      fi
-    fi
-  fi
-fi
-
-# FIXME: set CPP vendor
-case "${target_os}" in
-  aix*)
-    abi_cpp_vendor="ibm"
-    abi_xpp_vendor="ibm"
-    abi_fpp_vendor="ibm"
-    ;;
-  *)
-    abi_cpp_vendor="default"
-    abi_xpp_vendor="default"
-    abi_fpp_vendor="default"
-    ;;
-esac
-case "${abi_fc_vendor}" in
-  ibm)
-    abi_fpp_vendor="ibm"
-    ;;
-esac
-
-# Preset flags to have the source building properly
-if test "${enable_hints}" = "yes"; then
-
-  # C support
-  ABI_CPP_HINTS
-  ABI_CC_HINTS
-
-  # C++ support
-  ABI_XPP_HINTS
-  ABI_CXX_HINTS
-
-  # Fortran support
-  ABI_FPP_HINTS
-  ABI_FC_HINTS
-
-  # Library archiver support
-  ABI_AR_HINTS
-
-fi
-
-# Adjust OpenMP flags
-if test "${enable_openmp}" != "yes"; then
-  FCFLAGS_OPENMP=""
-fi
-
-# Set Fortran preprocessing flags
-if test "${abi_fc_wrap}" = "yes"; then
-  test "${FPPFLAGS}" = "" && FPPFLAGS="${FPPFLAGS_HINTS_EXT}"
-fi
-
-# Display Fortran preprocessing parameters
-AC_MSG_CHECKING([which Fortran preprocessor to use])
-AC_MSG_RESULT([${FPP}])
-AC_MSG_CHECKING([which Fortran preprocessor flags to apply])
-AC_MSG_RESULT([${FPPFLAGS}])
-
-# Display Fortran compiler wrapper status
-AC_MSG_CHECKING([whether to wrap Fortran compiler calls])
-AC_MSG_RESULT([${abi_fc_wrap}])
-
-# Export true CPPFLAGS (required by LibXC)
-AC_SUBST(CPPFLAGS_HINTS_EXT)
-
-# ---------------------------------------------------------------------------- #
-
-#
-# Debugging
-#
-# NOTE:
-#
-#   * Please do not try to set-up the *FLAGS_DEBUG variables manually,
-#     as they will systematically be overwritten. These flags should be
-#     modified by the --with-*-dbgflags options only, and --enable-debug
-#     set to "yes" in this case.
-#
-
-ABI_MSG_SECTION([Debugging])
-
-# Init debug flags
-ABI_DEBUG_INIT([${enable_debug}],[${enable_optim}])
-
-# Get debug flags from database when in profile mode
-if test "${enable_debug}" != "no" -a "${enable_debug}" != "yes"; then
-  if test "${CFLAGS}" = ""; then
-    ABI_CC_DBGFLAGS
-  else
-    AC_MSG_NOTICE([debugging profile overriden by user-defined CFLAGS])
-  fi
-  if test "${CXXFLAGS}" = ""; then
-    ABI_CXX_DBGFLAGS
-  else
-    AC_MSG_NOTICE([debugging profile overriden by user-defined CXXFLAGS])
-  fi
-  if test "${FCFLAGS}" = ""; then
-    ABI_FC_DBGFLAGS
-  else
-    AC_MSG_NOTICE([debugging profile overriden by user-defined FCFLAGS])
-  fi
-fi
-
-# Disable optimizations if debug mode is activated in source files
-if test "${src_debug_mode}" = "yes"; then
-  if test "${enable_optim}" != "no"; then
-    AC_MSG_WARN([disabling optimizations])
-  fi
-  enable_optim="no"
-fi
-
-# Activate "design-by-contract" debugging tests when paranoid
-AC_MSG_CHECKING([whether to activate design-by-contract debugging])
-if test "${enable_debug}" = "paranoid"; then
-  AC_DEFINE([DEBUG_CONTRACT],1,[Define to 1 if you want to activate design-by-contract debugging tests.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-AM_CONDITIONAL(DO_BUILD_32_CONTRACT,[test "${enable_debug}" = "paranoid"])
-
-# ---------------------------------------------------------------------------- #
-
-#
-# Optimizations
-#
-# NOTE: The optimizations will be taken from *FLAGS_OPTIM environment
-# variables if enable_optim is set to yes, or set to predefined values
-# for other optimization profiles.
-#
-
-ABI_MSG_SECTION([Optimizations])
-
-# Init optimization flags
-# Note: must be done only once debugging is configured
-ABI_OPTIM_INIT([${enable_optim}])
-
-# Get optimization flags from database when in profile mode
-if test "${enable_optim}" != "no" -a "${enable_optim}" != "yes"; then
-  if test "${CFLAGS}" = ""; then
-    ABI_CC_OPTFLAGS
-  else
-    AC_MSG_NOTICE([optimization profile overriden by user-defined CFLAGS])
-  fi
-  if test "${CXXFLAGS}" = ""; then
-    ABI_CXX_OPTFLAGS
-  else
-    AC_MSG_NOTICE([optimization profile overriden by user-defined CXXFLAGS])
-  fi
-  if test "${FCFLAGS}" = ""; then
-    ABI_FC_OPTFLAGS
-  else
-    AC_MSG_NOTICE([optimization profile overriden by user-defined FCFLAGS])
-  fi
-fi
-
-# Disable optimization in directories containing big F90 files (efficiency is not critical here)
-fcflags_opt_20_datashare="-O0"
-fcflags_opt_43_ptgroups="-O0"
-
-# Set per-directory Fortran optimizations
-# Note: must be done only once FCFLAGS_OPTIM is set
-ABI_OPTFLAGS_DIRS([${FCFLAGS_OPTIM}])
-
-# ---------------------------------------------------------------------------- #
-
-#
-# 64-bit support
-#
-# NOTES: 
-#
-#   * This step requires that the hints have been looked for.
-#
-#   * Please do not try to set-up the *_64BITS variables manually, as they
-#     will systematically be overwritten.
-#
-
-ABI_MSG_SECTION([64-bit support])
-
-# Display status
-AC_MSG_CHECKING([for a 64-bit architecture])
-AC_MSG_RESULT([${abi_cpu_64bits}])
-AC_MSG_CHECKING([whether to use 64-bit flags])
-AC_MSG_RESULT([${enable_64bit_flags}])
-AC_MSG_CHECKING([for user-defined 64-bit flags])
-AC_MSG_RESULT([${with_64bit_flags}])
-
-# C preprocessing
-if test "${enable_64bit_flags}" = "yes"; then
-  AC_MSG_CHECKING([for 64-bit C preprocessor flags])
-  if test "${CPPFLAGS_64BITS}" = ""; then
-    AC_MSG_RESULT([none])
-  else
-    AC_MSG_RESULT([${CPPFLAGS_64BITS}])
-    CPP="${CPP} ${CPPFLAGS_64BITS}"
-  fi
-else
-  CPPFLAGS_64BITS=""
-fi
-
-# C compilation
-if test "${enable_64bit_flags}" = "yes"; then
-  AC_MSG_CHECKING([for 64-bit C flags])
-  if test "${CFLAGS_64BITS}" = ""; then
-    AC_MSG_RESULT([none])
-  else
-    AC_MSG_RESULT([${CFLAGS_64BITS}])
-    CC="${CC} ${CFLAGS_64BITS}"
-  fi
-else
-  CFLAGS_64BITS=""
-fi
-
-# C++ preprocessing
-if test "${XPP}" != ""; then
-  if test "${enable_64bit_flags}" = "yes"; then
-    AC_MSG_CHECKING([for 64-bit C++ preprocessor flags])
-    if test "${XPPFLAGS_64BITS}" = ""; then
-      AC_MSG_RESULT([none])
-    else
-      AC_MSG_RESULT([${XPPFLAGS_64BITS}])
-      XPP="${XPP} ${XPPFLAGS_64BITS}"
-    fi
-  else
-    XPPFLAGS_64BITS=""
-  fi
-fi
-
-# C++ compilation
-if test "${CXX}" != ""; then
-  if test "${enable_64bit_flags}" = "yes"; then
-    AC_MSG_CHECKING([for 64-bit C++ flags])
-    if test "${CXXFLAGS_64BITS}" = ""; then
-      AC_MSG_RESULT([none])
-    else
-      AC_MSG_RESULT([${CXXFLAGS_64BITS}])
-      CXX="${CXX} ${CXXFLAGS_64BITS}"
-    fi
-  else
-    CXXFLAGS_64BITS=""
-  fi
-fi
-
-# Fortran preprocessing
-if test "${FPP}" != ""; then
-  if test "${enable_64bit_flags}" = "yes"; then
-    AC_MSG_CHECKING([for 64-bit Fortran preprocessor flags])
-    if test "${FPPFLAGS_64BITS}" = ""; then
-      AC_MSG_RESULT([none])
-    else
-      AC_MSG_RESULT([${FPPFLAGS_64BITS}])
-      FPP="${FPP} ${FPPFLAGS_64BITS}"
-    fi
-  else
-    FPPFLAGS_64BITS=""
-  fi
-fi
-
-# Fortran compilation
-if test "${enable_64bit_flags}" = "yes"; then
-  AC_MSG_CHECKING([for 64-bit Fortran flags])
-  if test "${FCFLAGS_64BITS}" = ""; then
-    AC_MSG_RESULT([none])
-  else
-    AC_MSG_RESULT([${FCFLAGS_64BITS}])
-    FC="${FC} ${FCFLAGS_64BITS}"
-  fi
-else
-  FCFLAGS_64BITS=""
-fi
-
-# Archiver
-if test "${enable_64bit_flags}" = "yes"; then
-  AC_MSG_CHECKING([for 64-bit archiver flags])
-  if test "${ARFLAGS_64BITS}" = ""; then
-    AC_MSG_RESULT([none])
-  else
-    AC_MSG_RESULT([${ARFLAGS_64BITS}])
-    AR="${AR} ${ARFLAGS_64BITS}"
-  fi
-else
-  ARFLAGS_64BITS=""
-fi
-
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-#
-# Save configuration
-#
-
-ABI_MSG_SECTION([Build flags])
-
-# Set-up target and binary package names
-# Note: requires knowledge of Fortran compiler
-ABI_INIT_TARGET
-ABINIT_BINARY_PACKAGE="${PACKAGE}-${VERSION}_${ABINIT_TARGET}"
-AC_SUBST(ABINIT_BINARY_PACKAGE)
-
-# Final adjustments for library archiver
-test "${ARFLAGS}" = "" && \
-  ARFLAGS="${ARFLAGS_64BITS} ${ARFLAGS_DEBUG} ${ARFLAGS_OPTIM} ${ARFLAGS_HINTS} ${ARFLAGS_EXTRA} ${ARFLAGS_CMD}"
-
-# Final adjustments for C
-test "${CFLAGS}" = "" && \
-  CFLAGS="${CFLAGS_64BITS} ${CFLAGS_DEBUG} ${CFLAGS_OPTIM} ${CFLAGS_HINTS} ${CFLAGS_EXTRA}"
-test "${CC_LDFLAGS}" = "" && \
-  CC_LDFLAGS="${CC_LDFLAGS_64BITS} ${CC_LDFLAGS_DEBUG} ${CC_LDFLAGS_OPTIM} ${CC_LDFLAGS_HINTS} ${CC_LDFLAGS_EXTRA}"
-test "${CC_LIBS}" = "" && \
-  CC_LIBS="${CC_LIBS_64BITS} ${CC_LIBS_DEBUG} ${CC_LIBS_OPTIM} ${CC_LIBS_HINTS} ${CC_LIBS_EXTRA}"
-
-# Final adjustments for C++
-test "${CXXFLAGS}" = "" && \
-  CXXFLAGS="${CXXFLAGS_64BITS} ${CXXFLAGS_DEBUG} ${CXXFLAGS_OPTIM} ${CXXFLAGS_HINTS} ${CXXFLAGS_EXTRA}"
-test "${CXX_LDFLAGS}" = "" && \
-  CXX_LDFLAGS="${CXX_LDFLAGS_64BITS} ${CXX_LDFLAGS_DEBUG} ${CXX_LDFLAGS_OPTIM} ${CXX_LDFLAGS_HINTS} ${CXX_LDFLAGS_EXTRA}"
-test "${CXX_LIBS}" = "" && \
-  CXX_LIBS="${CXX_LIBS_64BITS} ${CXX_LIBS_DEBUG} ${CXX_LIBS_OPTIM} ${CXX_LIBS_HINTS} ${CXX_LIBS_EXTRA}"
-
-# Final adjustments for Fortran
-# Note: FCFLAGS_OPTIM must not be included (per-directory optimizations)
-test "${FCFLAGS}" = "" && \
-  FCFLAGS="${FCFLAGS_64BITS} ${FCFLAGS_DEBUG} ${FCFLAGS_HINTS} ${FCFLAGS_EXTRA} ${FCFLAGS_OPENMP}"
-test "${FC_LDFLAGS}" = "" && \
-  FC_LDFLAGS="${FC_LDFLAGS_64BITS} ${FC_LDFLAGS_DEBUG} ${FC_LDFLAGS_OPTIM} ${FC_LDFLAGS_HINTS} ${FC_LDFLAGS_EXTRA}"
-test "${FC_LIBS}" = "" && \
-  FC_LIBS="${FC_LIBS_64BITS} ${FC_LIBS_DEBUG} ${FC_LIBS_OPTIM} ${FC_LIBS_HINTS} ${FC_LIBS_EXTRA}"
-
-# FIXME: temporary workaround for Macs
-if test "${abi_cpu_platform}" = "apple"; then
-  AC_MSG_WARN([${abi_cpu_platform} is not able to handle full link information])
-  AC_MSG_WARN([static builds will fail])
-else
-  AC_MSG_NOTICE([static builds may be performed])
-  FC_LIBS="${FC_LIBS} ${FCLIBS}"
-fi
-
-# Final adjustments for preprocessors
-test "${CPPFLAGS}" = "" && \
-  CPPFLAGS="${CPPFLAGS_64BITS} ${CPPFLAGS_DEBUG} ${CPPFLAGS_OPTIM} ${CPPFLAGS_HINTS} ${CPPFLAGS_EXTRA}"
-test "${XPPFLAGS}" = "" && \
-  XPPFLAGS="${XPPFLAGS_64BITS} ${XPPFLAGS_DEBUG} ${XPPFLAGS_OPTIM} ${XPPFLAGS_HINTS} ${XPPFLAGS_EXTRA}"
-test "${FPPFLAGS}" = "" -a "${abi_fc_wrap}" = "no" && \
-  FPPFLAGS="${FPPFLAGS_64BITS} ${FPPFLAGS_DEBUG} ${FPPFLAGS_OPTIM} ${FPPFLAGS_HINTS} ${FPPFLAGS_EXTRA}"
-
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-#
-# Advanced compiler features
-#
-
-# Note: these tests have to be performed after the flags have been
-#       saved.
-
-ABI_MSG_SECTION([Advanced compiler features])
-
-ABI_CC_FEATURES
-ABI_FC_FEATURES
-
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-#
-# Multicore architecture support
-
-# Note: the following settings will be used by the connectors.
-
-ABI_MSG_SECTION([Multicore architecture support])
-
-# OpenMP support
-AC_MSG_CHECKING([whether to enable OpenMP support])
-AC_MSG_RESULT([${enable_openmp}])
-if test "${enable_openmp}" = "yes"; then
-  AC_MSG_CHECKING([Fortran flags for OpenMP])
-  AC_MSG_RESULT([${FCFLAGS_OPENMP}])
-  ABI_OMP_CHECK_COLLAPSE
-  AC_MSG_NOTICE([OpenMP support is enabled in Fortran source code only])
-fi
-
-# MPI support
-ABI_MPI_DETECT
-if test "${enable_maintainer_checks}" = "yes"; then
-  ABI_MPI_DUMP
-fi
-
-# GPU support
-ABI_GPU_DETECT
-
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-#
-# Feature triggers
-#
-
-ABI_MSG_SECTION([Feature triggers])
-
-# Init
-abi_fallbacks=""
-
-# Make sure ~/.abinit/tarballs exists
-if test "${with_tardir}" = ""; then
-  abinit_tardir="${HOME}/.abinit/tarballs"
-else
-  abinit_tardir="${with_tardir}"
-fi
-if test ! -e "${abinit_tardir}"; then
-  AC_MSG_NOTICE([creating ${abinit_tardir}])
-  ${INSTALL} -d -m 755 "${abinit_tardir}"
-fi
-AC_MSG_NOTICE([using tarball repository ${abinit_tardir}])
-AC_SUBST(abinit_tardir)
-
-# Make fallbacks usable by Abinit
-fallbacks_instdir="${abinit_builddir}/fallbacks/exports"
-fallbacks_incs='-I$(fallbacks_instdir)/include'
-AC_SUBST(fallbacks_instdir)
-AC_SUBST(fallbacks_incs)
-
-# XML support
-lib_xml_fcflags=""
-lib_xml_incs=""
-lib_xml_ldflags=""
-lib_xml_libs=""
-if test "${enable_xml}" = "yes" -o "${enable_xml}" = "auto"; then
-  AC_LANG_PUSH([C])
-  AM_PATH_XML2([2.7.6], [abi_xml_ok="yes"], [abi_xml_ok="no"])
-  AC_LANG_POP([C])
-  if test "${abi_xml_ok}" = "yes"; then
-    AC_DEFINE([HAVE_XML], 1, [Define to 1 if you want XML support.])
-    lib_xml_incs="${XML_CPPFLAGS}"
-    lib_xml_libs="${XML_LIBS}"
-  else
-    AC_MSG_WARN([could not find a usable XML library => disabling XML support])
-    enable_xml="no"
-  fi
-fi
-AC_SUBST(lib_xml_fcflags)
-AC_SUBST(lib_xml_incs)
-AC_SUBST(lib_xml_ldflags)
-AC_SUBST(lib_xml_libs)
-
-# Linear algebra support
-ABI_LINALG_DETECT
-
-# FIXME: copying linear algebra tarball for now
-tmp_linalg_tarball="lapack-abinit_6.10.tar.gz"
-if test ! -s "${abinit_tardir}/${tmp_linalg_tarball}"; then
-  AC_MSG_NOTICE([copying linear algebra tarball to tarball repository])
-  cp "${abinit_srcdir}/fallbacks/transient/${tmp_linalg_tarball}" \
-    "${abinit_tardir}"
-fi
-
-# External FFT support
-ABI_CONNECT_FFT
-
-# Parallel I/O support
-# TODO
-
-# LibXC support
-# TODO
-
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-#
-# Connectors to external packages
-#
-
-# Note: the order is critical!
-#       level 1 ---> LINALG, IO, TIMER (require MPI and GPU)
-#       level 2 ---> FFT (require MPI, GPU, and LINALG)
-#       level 3 ---> DFT (may require MPI, GPU, LINALG, IO and FFT)
-
-ABI_MSG_SECTION([Connectors / Fallbacks])
-
-# Transferable file I/O support
-if test "${enable_connectors}" = "yes" -a \
-        "${enable_fallbacks}" != "force"; then
-  ABI_CONNECT_TRIO
-else
-  abi_fallbacks="${abi_fallbacks} `echo ${with_trio_flavor} | sed -e 's/+/ /g;s/none//g'`"
-  if test "${with_trio_flavor}" = "none"; then
-    lib_trio_flavor="none"
-  else
-    lib_trio_flavor=`echo "${with_trio_flavor}" | sed -e 's/+/-fallback+/g;s/$/-fallback/'`
-  fi
-  lib_trio_flavor="${lib_trio_flavor} (libs: ignored)"
-fi
-abi_psml_wanted=`echo "${with_trio_flavor}" | grep "psml"`
-AM_CONDITIONAL([DO_BUILD_PSML], [test "${abi_psml_wanted}" != "" ])
-
-# External timing library support
-if test "${enable_connectors}" = "yes"; then
-  ABI_CONNECT_TIMER
-fi
-
-# External algorithmic library support
-if test "${enable_connectors}" = "yes"; then
-  ABI_CONNECT_ALGO
-fi
-
-# External DFT support
-if test "${enable_connectors}" = "yes" -a \
-        "${enable_fallbacks}" != "force"; then
-  ABI_CONNECT_DFT
-else
-  abi_fallbacks="${abi_fallbacks} `echo ${with_dft_flavor} | sed -e 's/+/ /g;s/none//g'`"
-  if test "${with_dft_flavor}" = "none"; then
-    lib_dft_flavor="none"
-  else
-    lib_dft_flavor=`echo "${with_dft_flavor}" | sed -e 's/+/-fallback+/g;s/$/-fallback/'`
-  fi
-  lib_dft_flavor="${lib_dft_flavor} (libs: ignored)"
-fi
-
-# Check consistency of current status
-abi_fallbacks=`echo "${abi_fallbacks}" | tr ' ' '\n' | sort -u | \
-  awk '{printf " %s",[$]1}' | sed -e 's/^[ ]*//'`
-if test "${enable_fallbacks}" = "no" -a "${abi_fallbacks}" != ""; then
-  AC_MSG_NOTICE([fallbacks are disabled but the following ones have to be built:])
-  AC_MSG_NOTICE([])
-  for pkg in ${abi_fallbacks}; do
-    AC_MSG_NOTICE([  * ${pkg}])
-  done
-  AC_MSG_NOTICE([])
-  AC_MSG_ERROR([cannot build Abinit])
-fi
-
-# Init options for the fallbacks subsystem
-enable_atompaw="no"
-enable_bigdft="no"
-enable_etsf_io="no"
-enable_libxc="no"
-enable_linalg="no"
-enable_netcdf="no"
-enable_wannier90="no"
-
-# display status of fallbacks
-AC_MSG_NOTICE([fallbacks to enable => ${abi_fallbacks}])
-for pkg in ${abi_fallbacks}; do
-  eval enable_${pkg}="yes"
-done
-for pkg in atompaw bigdft etsf_io libxc linalg netcdf wannier90; do
-  tmp_pkg_enabled=`eval echo \$\{enable_${pkg}\}`
-  AC_MSG_CHECKING([whether to build ${pkg}])
-  AC_MSG_RESULT([${tmp_pkg_enabled}])
-done
-
-##############################################
-if test "${enable_connectors}" = "yes"; then
-  ABI_CONNECT_TRIQS
-fi
-##############################################
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-#
-# Buggy Fortran compilers
-#
-
-# NOTE: must be done at the end because the wrapper is built by configure
-
-# Correct include flags to allow for the build of incompatible Fortran modules
-ABI_INCFLAGS_CORRECT
-
-# Wrap buggy Fortran compilers
-FC_NOWRAP="${FC}"
-if test "${abi_fc_wrap}" = "yes"; then
-  FC="${abinit_builddir}/config/wrappers/wrap-fc"
-fi
-AC_SUBST(FC_NOWRAP)
-
-# Force F77 and F90 environment variables (keep always last)
-F77="${FC}"
-FFLAGS="${FCFLAGS}"
-F90="${FC}"
-F90FLAGS="${FCFLAGS}"
-
-# The following is required for oldish fixed-form Fortran libraries
-AC_SUBST(F77)
-AC_SUBST(FFLAGS)
-
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-#
-# Experimental developments
-#
-
-ABI_MSG_SECTION([Experimental developments and option triggers])
-
-# Fast checking
-AC_MSG_CHECKING([whether to accelerate 'make check'])
-AC_MSG_RESULT([${enable_fast_check}])
-
-# Reduced checking for packages
-AC_MSG_CHECKING([whether to reduce 'make check' for packaging])
-AC_MSG_RESULT([${enable_pkg_check}])
-
-# Maintainer checks
-AC_MSG_CHECKING([whether to activate maintainer checks])
-AC_MSG_RESULT([${enable_maintainer_checks}])
-# Triggers (see config/specs/options.conf for details)
-ABI_OPTIONS_TRIGGERS
-
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-#
-# Configure subsystems
-#
-
-# Note: options must have been processed, in order to take proper
-# decisions
-
-ABI_MSG_SECTION([Subsystems])
-
-# Init all subsystems
-ABI_SUBSYSTEMS_INIT
-
-# Grab fallbacks parameters
-ABI_FALLBACKS_PARAMS
-
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-# Void CPPFLAGS to allow for C/Fortran mixing
-ABI_CPPFLAGS="${CPPFLAGS}"
-CPPFLAGS=""
-
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-#
-# Output configuration
-#
-
-ABI_MSG_SECTION([Output])
-
-ac_configure_args="${ac_configure_args} --enable-atompaw=${enable_atompaw} --enable-bigdft=${enable_bigdft} --enable-etsf-io=${enable_etsf_io} --enable-libxc=${enable_libxc} --enable-linalg=${enable_linalg} --enable-netcdf=${enable_netcdf} --enable-wannier90=${enable_wannier90} --with-fc-vendor=${abi_fc_vendor} --with-fc-version=${abi_fc_version} --with-tardir='${abinit_tardir}'"
-
-# Output files
-# Note: later, add tests/atconfig and tests/atlocal for test suite
-ABI_OUTPUT
-
-# FIXME: transient symlink until plugins are fully replaced by fallbacks
-#        in the test farm
-if test ! -e "./config.mk"; then
-  ${LN_S} ./fallbacks/config.mk ./config.mk
-fi
-
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-ABI_MSG_SECTION([Final remarks])
-
-# The end
-if test "${lib_linalg_flavor}" = "netlib-fallback"; then
-  ABI_MSG_NOTICE([linalg-abinit],[Suboptimal linear algebra configuration])
-fi
-if test "${enable_gpu}" = "yes" -a "${abi_linalg_chk_gpu}" != "magma"; then
-  ABI_MSG_NOTICE([gpu-without-magma],[Suboptimal GPU configuration])
-fi
-ABI_MSG_FC_BUGGY(${abi_fc_vendor})
-tmp_etsf_io_in_use=`echo "${lib_trio_flavor}" | grep 'etsf_io'`
-if test "${tmp_etsf_io_in_use}" != ""; then
-  ABI_MSG_NOTICE([etsf_io-deprecated],[Upcoming end of ETSF_IO library support])
-fi
-ABI_MSG_END
