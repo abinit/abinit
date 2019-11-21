@@ -15,41 +15,15 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu 21 Nov 2019.
-- ( at 12h18 )
+- ( at 23h31 )
   
 -  nproc =    1
-
-  Give name for      formatted input file : 
--   /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/nehelbig_Multibinit-slc/tests/tutomultibinit/Input/tmulti5_1.in
-  Give name for     formatted output file : 
--   tmulti5_1.out
-  Give name for input derivative database of reference structure (DDB or XML file): 
--   /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/nehelbig_Multibinit-slc/tests/tutomultibinit/Input/tmulti5_1.xml
-  Give name for input coefficients from fitted polynomial (XML file or enter no): 
--   /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/nehelbig_Multibinit-slc/tests/tutomultibinit/Input/no
-  Give name for molecular dynamics (netcdf file or enter no): 
--   no
-  Give name for input derivative database (DDB or XML file): 
--   
--begin at tcpu      0.000  and twall      0.000 sec
 
 ================================================================================
 
  Read the information in the reference structure in 
 -/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/nehelbig_Multibinit-slc/tests/tutomultibinit/Input/tmulti5_1.xml
  to initialize the multibinit input
-
- The file /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/nehelbig_Multibinit-slc/tests/tutomultibinit/Input/tmulti5_1.xml is XML file (extraction of all informations)
- system_getDimFromXML :-Opening the file /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/nehelbig_Multibinit-slc/tests/tutomultibinit/Input/tmulti5_1.xml to read dimensions (before initialisation)
--instrng: 42 lines of input have been read from file /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/nehelbig_Multibinit-slc/tests/tutomultibinit/Input/tmulti5_1.in
-
-
- --- !WARNING
-     The range of dipdip_range (  0  0  0)
-     But the range of the cell for the simulation is 16 16 16)
-     dipdip_range is set to ncell.
- ---
-
 
 ================================================================================
 
@@ -92,12 +66,6 @@ dipdip_range        16        16        16
  Description of grid 1 :
         brav         1
        ngqpt         1         1         1
-Reading xml file
- System: Exchange:     6 terms read
- DMI:          0 terms read
- Uniaxial SIA: 0 terms read
- Bilinear:     0 terms read
-Reading xml done!
       nqshft         1
       q1shft
                      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -112,22 +80,7 @@ Reading xml done!
 ================================================================================
 
 reading spin terms.
-Reading parameters from xml file and setting up spin model
-                                                                                
-                                                                                
-Setting up spin model
- Setting system
-
---- !WARNING
-src_file: m_multibinit_cell.F90
-src_line: 447
-message: |
-    No reference spin structure specified, using ferromagnetic along z-axis
-...
-
- Setting exchange terms
  Initial spins set to reference configuration.
- Write iteration in spin history file tmulti5_1.out_spinhist.nc.
 ================================================================================
  Spin dynamic steps:
 ================================================================================
@@ -445,24 +398,14 @@ Measurement run:
 # Temperature              Cv             chi        BinderU4             Mst
     600.00000     7.93257E+03     8.28465E-02     0.66159E+00     4.03419E-01
 ================================================================================
- Closing spin history file tmulti5_1.out_spinhist.nc.
 
 ================================================================================
 
- Proc.   0 individual time (sec): cpu=         58.7  wall=         58.9
+-
+- Proc.   0 individual time (sec): cpu=         58.7  wall=         62.4
 
 ================================================================================
 
-+Total cpu time     58.727  and wall time     58.868 sec
++Total cpu time     58.702  and wall time     62.366 sec
 
  multibinit : the run completed succesfully.
---- !FinalSummary
-program: multibinit
-version: 8.11.12
-start_datetime: Thu Nov 21 12:18:10 2019
-end_datetime: Thu Nov 21 12:19:09 2019
-overall_cpu_time:          58.7
-overall_wall_time:          58.9
-mpi_procs: 1
-omp_threads: 1
-...
