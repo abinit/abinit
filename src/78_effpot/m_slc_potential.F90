@@ -33,10 +33,6 @@ module  m_slc_potential
   use m_mpi_scheduler, only: mb_mpi_info_t, init_mpi_info, mpi_scheduler_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_spmat_convert, only : spmat_convert
-  use m_spmat_coo, only: coo_mat_t
-  use m_spmat_csr, only : CSR_mat_t
-  use m_spmat_lil, only: lil_mat_t
   use m_spmat_ndcoo, only: ndcoo_mat_t
 
   implicit none
@@ -58,6 +54,10 @@ module  m_slc_potential
      ! magnetic moments
      real(dp), allocatable :: ms(:)
 
+     ! precalculated things for reference structure
+     real(dp), allocatable :: fref(:)        ! force from liu and oiju for reference spin structure
+     type(ndcoo_mat_t) :: matrixref    ! matrix in u and v from niuv and tijuv for reference spin structure
+
      ! mpi
      type(mb_mpi_info_t) :: mpiinfo
      type(mpi_scheduler_t) :: mpsspin
@@ -68,6 +68,7 @@ module  m_slc_potential
      procedure :: finalize
      procedure :: set_params
      procedure :: set_supercell
+     procedure :: calculate_ref
      procedure :: add_liu_term
      procedure :: add_niuv_term
      procedure :: add_oiju_term
@@ -114,6 +115,8 @@ contains
 
     call self%mpsspin%finalize()
     call self%mpslatt%finalize()
+    ABI_SFREE(self%fref)
+    if(self%has_linquad .or. self%has_biquad) call self%matrixref%finalize()
 
   end subroutine finalize
 
@@ -175,6 +178,71 @@ contains
     call xmpi_bcast(self%ms, master, comm, ierr)
   end subroutine set_supercell
 
+  !-------------------------------------------------------------------!
+  !calculate ref: calculates terms necessary for the force and energy
+  !               of the reference structure terms
+  !-------------------------------------------------------------------!
+
+  subroutine calculate_ref(self)
+    class(slc_potential_t), intent(inout) :: self
+
+    integer :: ii
+    real(dp) :: spref(1:3*self%nspin), beta
+    real(dp), allocatable :: force(:)
+    type(ndcoo_mat_t) :: m2dim
+
+    integer :: master, my_rank, comm, nproc
+    logical :: iam_master
+
+
+    spref(:) = reshape(self%supercell%spin%Sref, (/ 3*self%nspin/))
+
+    beta = 0.5_dp
+
+    if(self%has_bilin .or. self%has_quadlin) then
+      ABI_ALLOCATE(self%fref, (3*self%natom))
+      ABI_ALLOCATE(force, (3*self%natom))
+      self%fref=0.0d0
+      if(self%has_bilin) then
+        force = 0.0d0
+        call self%liu_sc%vec_product2d(1, spref, 2, force)
+        self%fref(:) = self%fref(:) - force(:)
+      endif
+      if(self%has_quadlin) then
+        force = 0.0d0
+        call self%oiju_sc%vec_product(1, spref, 2, spref, 3, force)
+        self%fref(:) = self%fref(:) - beta*force(:)
+      endif
+      ABI_SFREE(force)
+    endif
+
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+    if(self%has_linquad .or. self%has_biquad) then
+      if(iam_master) then
+        call self%matrixref%initialize(mshape=[self%natom*3, self%natom*3])
+      endif
+  
+      if(self%has_linquad .and. self%has_biquad) then
+        call self%niuv_sc%mv1vec(spref, 1, self%matrixref)
+        if(iam_master) then
+          call m2dim%initialize(mshape=[self%natom*3, self%natom*3])
+        endif
+        call self%tijuv_sc%mv2vec(0.5*spref, spref, 1, 2, m2dim)
+        do ii = 1, m2dim%nnz
+          call self%matrixref%add_entry(m2dim%ind%data(:,ii), m2dim%val%data(ii))
+        enddo
+        call self%matrixref%sum_duplicates()
+        if(iam_master) then
+          call m2dim%finalize()
+        endif
+      else
+        if(self%has_linquad) call self%niuv_sc%mv1vec(spref, 1, self%matrixref)
+        if(self%has_biquad)  call self%tijuv_sc%mv2vec(0.5*spref, spref, 1, 2, self%matrixref)
+      endif
+    endif
+
+  end subroutine calculate_ref
 
   !-----------------------------------------------------
   ! add different coupling terms to supercell potential
@@ -316,40 +384,36 @@ contains
         call self%liu_sc%vec_product2d(1, sp, 2, f1)
         fslc(:) = fslc(:) + f1(:)
         eslc = eslc - dot_product(f1, disp)
-        f1(:) = 0.0d0
-        call self%liu_sc%vec_product2d(1, spref, 2, f1)
-        fslc(:) = fslc(:) - f1(:)
-        eslc = eslc + dot_product(f1, disp)
       endif      
       if(self%has_linquad) then
         f1(:) = 0.0d0
         call self%niuv_sc%vec_product(1, sp, 2, disp, 3, f1)
         fslc(:) = fslc(:) + 2.0d0*beta*f1(:)
         eslc = eslc - beta*dot_product(f1, disp)
-        f1(:) = 0.0d0
-        call self%niuv_sc%vec_product(1, spref, 2, disp, 3, f1)
-        fslc(:) = fslc(:) - 2.0d0*beta*f1(:)
-        eslc = eslc + beta*dot_product(f1, disp)
       endif      
       if(self%has_quadlin) then
         f1(:) = 0.0d0
         call self%oiju_sc%vec_product(1, sp, 2, sp, 3, f1)
         fslc(:) = fslc(:) + beta*f1(:)
         eslc = eslc - beta*dot_product(f1, disp)
-        f1(:) = 0.0d0
-        call self%oiju_sc%vec_product(1, spref, 2, spref, 3, f1)
-        fslc(:) = fslc(:) - beta*f1(:)
-        eslc = eslc + beta*dot_product(f1, disp)
       endif
       if(self%has_biquad) then
         f1(:) = 0.0d0
         call self%tijuv_sc%vec_product4d(1, sp, 2, sp, 3, disp, 4, f1)
         fslc(:) = fslc(:) + beta*f1(:)
         eslc = eslc - 0.5_dp*beta*dot_product(f1, disp)
+      endif
+
+      ! add forces and energy for reference spin structure terms
+      if(self%has_bilin .or. self%has_quadlin) then
+        fslc(:) = fslc(:) + self%fref(:)
+        eslc = eslc - dot_product(self%fref, disp)
+      endif
+      if(self%has_linquad .or. self%has_biquad) then
         f1(:) = 0.0d0
-        call self%tijuv_sc%vec_product4d(1, spref, 2, spref, 3, disp, 4, f1)
-        fslc(:) = fslc(:) - beta*f1(:)
-        eslc = eslc + 0.5_dp*beta*dot_product(f1, disp)
+        call self%matrixref%vec_product2d(1, disp, 2, f1)
+        fslc(:)= fslc+2.0*beta*f1(:)
+        eslc = eslc + beta*dot_product(f1, disp)
       endif
     endif !energy or force
 
@@ -364,9 +428,9 @@ contains
       enddo
     endif
 
-    if(present(energy)) then
-       energy= energy+eslc
-    end if
+    !if(present(energy)) then
+    !   energy= eslc
+    !end if
 
        ! TODO: if energy is not present??
     if(present(energy_table)) then
@@ -375,7 +439,13 @@ contains
        !call energy_table%put("SLC Oiju term", eOiju)
        !call energy_table%put("SLC Tijuv term", eTijuv)
     end if
+
+    ABI_UNUSED_A(strain)
+    ABI_UNUSED_A(lwf)
+    ABI_UNUSED_A(stress)
+    ABI_UNUSED_A(lwf_force)
     
   end subroutine calculate
 
+  !!***
 end module m_slc_potential

@@ -91,6 +91,8 @@ contains
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     type(hash_table_t), optional, intent(inout) :: energy_table
     integer :: i
+    character(len=40) :: key
+
 
     ! first half of velocity update. And full displacement update.
     ! v(t+1/2 dt) = v(t) + F/m * 1/2 dt
@@ -125,7 +127,8 @@ contains
     !call self%force_stationary()
     call self%get_T_and_Ek()
     if (present(energy_table)) then
-       call energy_table%put('Lattice Kinetic energy', self%Ek)
+      key = 'Lattice kinetic energy'
+      call energy_table%put(key, self%Ek)
     end if
     ABI_UNUSED_A(strain)
     ABI_UNUSED_A(displacement)

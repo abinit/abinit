@@ -198,6 +198,9 @@ contains
        end do
        self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)
     end if
+
+    ABI_UNUSED(restart_hist_fname)
+
   end subroutine set_initial_state
 
 
@@ -248,6 +251,8 @@ contains
     real(dp), optional,          intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     type(hash_table_t), optional, intent(inout) :: energy_table
 
+    character(len=40) :: key
+
     if(present(displacement) .or. present(strain)) then
        MSG_ERROR("displacement and strain should not be input for lattice mover")
     end if
@@ -264,7 +269,8 @@ contains
 
     call self%get_T_and_Ek()
     if (present(energy_table)) then
-       call energy_table%put('Lattice Kinetic energy', self%Ek)
+      key = 'Lattice kinetic energy'
+      call energy_table%put(key, self%Ek)
     end if
   end subroutine run_one_step
 

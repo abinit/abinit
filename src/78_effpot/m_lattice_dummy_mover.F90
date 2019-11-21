@@ -89,6 +89,8 @@ contains
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     type(hash_table_t), optional, intent(inout) :: energy_table
     integer :: i
+    character(len=40) :: key
+
 
     self%forces(:, :) =0.0
     self%energy = 0.0
@@ -105,7 +107,8 @@ contains
     
     call self%get_T_and_Ek()
     if (present(energy_table)) then
-       call energy_table%put('Lattice Kinetic energy', self%Ek)
+      key = 'Lattice kinetic energy'
+       call energy_table%put(key, self%Ek)
     end if
 
     ABI_UNUSED_A(strain)

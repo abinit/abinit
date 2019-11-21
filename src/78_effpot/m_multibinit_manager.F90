@@ -533,21 +533,43 @@ contains
   !-------------------------------------------------------------------!
   subroutine run_coupled_spin_latt_dynamics(self)
     class(mb_manager_t), intent(inout) :: self
+
     character(len=90) :: msg
+    real(dp) :: etotal
+    integer :: i
 
     call self%prim_pots%initialize()
     call self%read_potentials()
     
     call self%sc_maker%initialize(diag(self%params%ncell))
     call self%fill_supercell()
+
+    ! calculate various quantities for reference spin structure
+    do i =1, self%pots%size
+      select type (scpot => self%pots%list(i)%ptr)  ! use select type because properties only defined for slc_potential are used
+      type is (slc_potential_t) 
+        call scpot%calculate_ref()
+      end select
+    enddo
+
     call self%set_movers()
 
     call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
     call self%slc_mover%initialize(self%spin_mover, self%lattice_mover)
     call self%slc_mover%run_time(self%pots, displacement=self%lattice_mover%displacement, &
         & spin=self%spin_mover%Stmp, energy_table=self%energy_table)
+    msg=repeat("=", 80)
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    msg='Energy contributions'
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
     call self%energy_table%print_all()
-    msg=repeat("=", 90)
+    etotal=self%energy_table%sum_val()
+    write(msg, "(A12, 29X, ES13.5)") 'Total energy', etotal
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    msg=repeat("=", 80)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
