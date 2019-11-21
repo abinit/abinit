@@ -526,11 +526,12 @@ if ( opts.run_source ):
     sys.exit(1)
 
   # Remove LibPAW symlink
-  if ( os.path.exists(dst) ):
-    if ( os.path.islink(dst) ):
-      os.remove(dst)
-    else:
-      raise OSError("a file is blocking the way: '%s' is not a symlink" % dst)
+  #if ( os.path.exists(dst) ):
+  #  if ( os.path.islink(dst) ):
+  #    print("removing libpaw", dst)
+  #    os.remove(dst)
+  #  else:
+  #    raise OSError("a file is blocking the way: '%s' is not a symlink" % dst)
 
 else:
   print_message(my_name, "*** Skipping source tree update ***")

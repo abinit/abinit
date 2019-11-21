@@ -1,0 +1,5 @@
+graphviz # python-graphviz if conda
+pygments
+pandas
+panel
+
