@@ -140,7 +140,7 @@ We can now run our *first dynamics*: you can copy the files ~abinit/tests/tutomu
 
 you can visualize your dynamic with the agate software:
 
-    agate < multi1_3.out_HIST.nc
+    agate < tmulti1_3.out_HIST.nc
    
 * * *
 
