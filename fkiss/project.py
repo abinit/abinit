@@ -11,7 +11,6 @@ import time
 import shutil
 import pickle
 import difflib
-import html
 
 from collections import OrderedDict, defaultdict
 from textwrap import TextWrapper
