@@ -36,24 +36,22 @@ module  m_slc_dynamics
   use m_spin_mover, only: spin_mover_t
   use m_lattice_mover, only: lattice_mover_t
   use m_hashtable_strval, only: hash_table_t
+  use m_slc_potential, only: slc_potential_t
 
   private
 
   type, public, extends(abstract_mover_t) :: slc_mover_t
     class(spin_mover_t),    pointer :: spin_mover
-    !type(lattice_mover_t), pointer :: lattice_mover
-    class(lattice_mover_t), pointer :: lattice_mover
-    ! class pointer should be used here so it can points to all type
-    ! of lattice mover. Otherwise it calls the abstract mover.
-    
+    class(lattice_mover_t), pointer :: lattice_mover    
 
   CONTAINS
-  procedure :: initialize
-  procedure :: finalize
-  procedure :: run_one_step
-  procedure :: run_time
+    procedure :: initialize
+    procedure :: finalize
+    procedure :: run_one_step
+    procedure :: run_time
 
   end type slc_mover_t
+
   contains
 
   subroutine initialize(self, spin_mover, lattice_mover)
@@ -104,6 +102,7 @@ module  m_slc_dynamics
 
    t=0.0
    counter=0
+
    if(iam_master) then
      msg_empty=ch10
 
