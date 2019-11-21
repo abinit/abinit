@@ -326,8 +326,8 @@ class FortranFile(object):
         # https://www.graphviz.org/doc/info/
         from graphviz import Digraph
         fg = Digraph(name="Fortran file: %s" % self.name,
-            graph_attr=graph_attr, node_attr=node_attr, edge_attr=edge_attr,
-            engine="dot" if engine == "automatic" else engine,
+                     graph_attr=graph_attr, node_attr=node_attr, edge_attr=edge_attr,
+                     engine="dot" if engine == "automatic" else engine,
         )
 
         # Set graph attributes.
@@ -1272,14 +1272,15 @@ class AbinitProject(NotebookWriter):
             cprint("Cannot find public entity `%s` in Abinit project." % name, "red")
             return None
         if not obj.is_procedure:
-            cprint("Only procedures can be visualized with graphviz. Received class: %s" % obj.__class__, "yellow")
+            cprint("Only procedures can be visualized with graphviz. Received class: %s" % obj.__class__,
+                   "yellow")
             return None
 
         # https://www.graphviz.org/doc/info/
         from graphviz import Digraph
         fg = Digraph(name="Connections of %s: %s" % (obj.__class__.__name__, obj.name),
-            graph_attr=graph_attr, node_attr=node_attr, edge_attr=edge_attr,
-            engine="dot" if engine == "automatic" else engine,
+                     graph_attr=graph_attr, node_attr=node_attr, edge_attr=edge_attr,
+                     engine="dot" if engine == "automatic" else engine,
         )
 
         # Set graph attributes.
@@ -1344,6 +1345,13 @@ proj = AbinitProject.pickle_load(filepath=None)
             nbv.new_code_cell('proj.get_graphviz_pubname("m_geometry")'),
             nbv.new_code_cell('proj.get_stats()'),
             nbv.new_code_cell('proj.get_stats_dir("src/41_geometry")'),
+            nbv.new_code_cell("""
+# To visualize the panel dashboard inside the notebook, uncomment the below lines.
+#
+# import panel as pn
+# pn.extension()
+# project.get_panel()
+"""),
         ])
 
         return self._write_nb_nbpath(nb, nbpath)
@@ -1367,7 +1375,22 @@ def _df(df):
     return pn.widgets.DataFrame(df, disabled=True)
 
 
+# Possible approach to display big SVG files:
+# https://github.com/ariutta/svg-pan-zoom
+#<script>
+#document.getElementById('my-embed').addEventListener('load', function(){
+#  // Will get called after embed element was loaded
+#  svgPanZoom(document.getElementById('my-embed'));
+#})
+#</script>
+
+
 class ProjectViewer(param.Parameterized):
+    """
+    A Dashboard to browse the source code, visualize connections among directories,
+    files and procedures. Can be executed inside jupyter notebook
+    or as standalone bokeh app
+    """
 
     engine = pn.widgets.Select(value="dot",
         options=['dot', 'neato', 'twopi', 'circo', 'fdp', 'sfdp', 'patchwork', 'osage'])
@@ -1378,7 +1401,6 @@ class ProjectViewer(param.Parameterized):
         self._layout()
 
     def _layout(self):
-
         self.dir2files = self.proj.groupby_dirname()
         self.dirname2path = {os.path.basename(p): p for p in self.dir2files}
         self.dir_select = pn.widgets.Select(name="Directory", options=list(self.dirname2path.keys()))
@@ -1497,11 +1519,3 @@ class ProjectViewer(param.Parameterized):
         self.file_select.value = fort_file.basename
         self.datatype_select.value = dname
         if hasattr(self, "tabs"): self.tabs.active = 3
-
-
-#<script>
-#document.getElementById('my-embed').addEventListener('load', function(){
-#  // Will get called after embed element was loaded
-#  svgPanZoom(document.getElementById('my-embed'));
-#})
-#</script>
