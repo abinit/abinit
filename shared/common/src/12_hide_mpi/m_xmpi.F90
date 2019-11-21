@@ -2719,7 +2719,7 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
  contains
    subroutine largetype_sum_int(invec,inoutvec,len,datatype)
     integer :: len,datatype
-    integer :: invec(len),inoutvec(len)
+    integer :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
     integer(KIND=int64) :: ii,jj,kk
     kk=0
     do ii=1,len
@@ -2731,7 +2731,7 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
    end subroutine largetype_sum_int
    subroutine largetype_sum_real(invec,inoutvec,len,datatype)
     integer :: len,datatype
-    real(sp) :: invec(len),inoutvec(len)
+    real(sp) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
     integer(KIND=int64) :: ii,jj,kk
     kk=0
     do ii=1,len
@@ -2743,7 +2743,7 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
    end subroutine largetype_sum_real
    subroutine largetype_sum_dble(invec,inoutvec,len,datatype)
     integer :: len,datatype
-    real(dp) :: invec(len),inoutvec(len)
+    real(dp) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
     integer(KIND=int64) :: ii,jj,kk
     kk=0
     do ii=1,len
@@ -2755,7 +2755,7 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
    end subroutine largetype_sum_dble
    subroutine largetype_sum_cplx(invec,inoutvec,len,datatype)
     integer :: len,datatype
-    complex(spc) :: invec(len),inoutvec(len)
+    complex(spc) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
     integer(KIND=int64) :: ii,jj,kk
     kk=0
     do ii=1,len
@@ -2767,7 +2767,7 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
    end subroutine largetype_sum_cplx
    subroutine largetype_sum_dcplx(invec,inoutvec,len,datatype)
     integer :: len,datatype
-    complex(dpc) :: invec(len),inoutvec(len)
+    complex(dpc) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
     integer(KIND=int64) :: ii,jj,kk
     kk=0
     do ii=1,len
@@ -2779,7 +2779,7 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
    end subroutine largetype_sum_dcplx
    subroutine largetype_lor_log(invec,inoutvec,len,datatype)
     integer :: len,datatype
-    logical :: invec(len),inoutvec(len)
+    logical :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
     integer(KIND=int64) :: ii,jj,kk
     kk=0
     do ii=1,len
@@ -2791,7 +2791,7 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
    end subroutine largetype_lor_log
    subroutine largetype_land_log(invec,inoutvec,len,datatype)
     integer :: len,datatype
-    logical :: invec(len),inoutvec(len)
+    logical :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
     integer(KIND=int64) :: ii,jj,kk
     kk=0
     do ii=1,len
