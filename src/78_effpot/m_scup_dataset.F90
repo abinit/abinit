@@ -77,7 +77,7 @@ module m_scup_dataset
  logical :: scup_printeltic 
  logical :: scup_printgeom 
  logical :: scup_printorbocc
- logical :: scup_freezden
+ logical(1) :: scup_freezden
 !Real 
  real*8   :: scup_tcharge 
  real*8   :: scup_scfmixing
