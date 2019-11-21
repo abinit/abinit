@@ -24,7 +24,7 @@ typat  1 1 2 2
 znucl  25 8
 
 chkprim 0
-acell 3*4.50 Angstrom
+acell 3*0.450 nm # Simply to have one occurence of "nm"
 rprim 0.0 1/2 1/2
       1/2 0.0 1/2
       1.0 1.0 0.0
