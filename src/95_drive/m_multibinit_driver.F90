@@ -408,7 +408,7 @@ elec_eval = .FALSE.
                     &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
                     &         inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
                     &         inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
-                    &         initialize_data=inp%fit_initializeData==1,&
+                    &         max_power_strain=inp%fit_SPC_maxS,initialize_data=inp%fit_initializeData==1,&
                     &         fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
                     &         fit_tolMSDFS=inp%fit_tolMSDFS,&
                     &         verbose=.true.,positive=.false.,&
@@ -422,7 +422,7 @@ elec_eval = .FALSE.
                        &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
                        &         inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
                        &         inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
-                       &         initialize_data=inp%fit_initializeData==1,&
+                       &         max_power_strain=inp%fit_SPC_maxS,initialize_data=inp%fit_initializeData==1,&
                        &         fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
                        &         fit_tolMSDFS=inp%fit_tolMSDFS,&
                        &         verbose=.true.,positive=.false.,&
