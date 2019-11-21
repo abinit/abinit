@@ -103,7 +103,7 @@ spin_ntime = 20000              ! time steps for measurement
 spin_nctime = 100               ! Number of time steps between two writes 
                                 ! into netcdf
 spin_dt = 1e-16 s               ! Time step (seconds) 
-spin_qpoint = 0.0 0.0 0.0       ! Wave vector for summation of spin in each 
+spin_qpoint_qpoint = 0.0 0.0 0.0       ! Wave vector for summation of spin in each 
                                 ! sublattice.
                                 
 spin_write_traj = 0             ! do not write spin trajectory to netcdf file
@@ -137,7 +137,7 @@ Measurement run:
   .....
 ```
 
-Here, the Avg_mst ($||<m_i e^{2\pi \vec{q}\cdot\vec{R_i}}>||$) means the average staggered magnetic moment, Ms is the saturated magnetic moment. If all the spins for the wave-vector ($\vec{q}$) [[multibinit:spin_qpoint]] are aligned , the value for Avg_Mst/Ms is 1.0, it deviates from 1.0 due to thermal  fluctuations. The last column states the total energy of the system per unit cell.
+Here, the Avg_mst ($||<m_i e^{2\pi \vec{q}\cdot\vec{R_i}}>||$) means the average staggered magnetic moment, Ms is the saturated magnetic moment. If all the spins for the wave-vector ($\vec{q}$) [[multibinit:spin_projection_qpoint]] are aligned , the value for Avg_Mst/Ms is 1.0, it deviates from 1.0 due to thermal  fluctuations. The last column states the total energy of the system per unit cell.
 
 There are two stages, the warming up and measurement, in the whole spin dynamics process. During the  thermalization the spins evolve towards the equilibrium state for the temperature defined in the input file. During the measurement stage, the steps are sampled for the calculation of the observables. 
 
@@ -224,7 +224,7 @@ spin_nctime = 100               ! Number of time steps between two writes
                                 ! into netcdf
 spin_dt = 1e-16 s               ! Time step (Is this too large?)
 spin_init_state = 2             ! Ferromagnetic initial state (problematic?) 
-spin_qpoint = 0.0 0.0 0.0       ! Wave vector of spin order  
+spin_projection_qpoint = 0.0 0.0 0.0       ! Wave vector of spin order  
 
 spin_var_temperature = 1        ! Variable temperature calculation
 spin_temperature_start = 0      ! Starting temperature
@@ -314,7 +314,7 @@ It shows that the the spins have anti-parallel alignment along the easy axis (x)
   In the example above, the magnetic structure is anti-ferromagnetic,  where the unit cell is a multiple of the spin period. Sometimes the unit cell used does not contain the full period of spin, e.g. in a simple cubic AFM lattice with only one atom in the primitive cell.  We can use the magnetic wave vector to calculate the staggered magnetic moment. This is also useful for spin spiral structures, etc. 
 
   ```
-  spin_qpoint = 0.5 0.5 0.5
+  spin_projection_qpoint = 0.5 0.5 0.5
   ```
 
 
