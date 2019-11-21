@@ -330,12 +330,6 @@ def main():
         return proj.make_and_open_notebook(foreground=options.foreground)
 
     elif options.command == "panel":
-        try:
-            import panel as pn
-        except ImportError as exc:
-            cprint("Use `conda install panel` or `pip install panel` to install the python package.", "red")
-            raise exc
-
         proj.get_panel().show() #threaded=True)
 
     elif options.command == "pedit":
