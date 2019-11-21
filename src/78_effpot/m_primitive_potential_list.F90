@@ -90,6 +90,7 @@ contains
     ! set tmp
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(scmaker)
+    ABI_UNUSED_A(params)
     ABI_UNUSED_A(scpot)
 
     nullify(tmp)
