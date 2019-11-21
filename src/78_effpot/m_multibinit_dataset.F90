@@ -78,12 +78,13 @@ module m_multibinit_dataset
   integer :: bound_step
   integer :: fit_anhaStrain
   integer :: fit_SPCoupling
+  integer :: fit_SPC_maxS
   integer :: fit_generateCoeff
+  integer :: fit_iatom
   integer :: fit_initializeData
   integer :: fit_coeff
   integer :: fit_option
   integer :: fit_ncoeff
-  integer :: fit_iatom
   integer :: fit_nbancoeff
   integer :: fit_nfixcoeff
   integer :: opt_effpot 
@@ -314,6 +315,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%fit_nfixcoeff=0
  multibinit_dtset%fit_option=0
  multibinit_dtset%fit_SPCoupling=1
+ multibinit_dtset%fit_SPC_maxS=1
  multibinit_dtset%fit_generateCoeff=1
  multibinit_dtset%fit_initializeData=1
  multibinit_dtset%fit_tolMSDE=zero
@@ -1704,10 +1706,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  if(tread==1) multibinit_dtset%bound_SPCoupling=intarr(1)
  if(multibinit_dtset%bound_SPCoupling<0.and.multibinit_dtset%bound_SPCoupling>1)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-     &   'fit_SPCoupling is',multibinit_dtset%bound_SPCoupling,&
+     &   'bound_SPCoupling is',multibinit_dtset%bound_SPCoupling,&
      &   ', but the only allowed values',ch10,&
 &   'are 0 or 1 for multibinit.',ch10,&
-&   'Action: correct fit_SPCoupling in your input file.'
+&   'Action: correct bound_SPCoupling in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1720,6 +1722,18 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
      &   ', but the only allowed values',ch10,&
 &   'are 0 or 1 for multibinit.',ch10,&
 &   'Action: correct fit_SPCoupling in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%fit_SPC_maxS=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_SPC_maxS',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_SPC_maxS=intarr(1)
+ if(multibinit_dtset%fit_SPC_maxS<1)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+     &   'fit_SPC_maxS is',multibinit_dtset%fit_SPC_maxS,&
+     &   ', but the only allowed values',ch10,&
+&   'are positiv.',ch10,&
+&   'Action: correct fit_SPC_maxS in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -2401,6 +2415,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(1x,a17,2i3)') '  fit_rangePower',multibinit_dtset%fit_rangePower
    write(nunit,'(1x,a17,I3)')  '  fit_anhaStrain',multibinit_dtset%fit_anhaStrain
    write(nunit,'(1x,a17,I3)')  '  fit_SPCoupling',multibinit_dtset%fit_SPCoupling
+   write(nunit,'(1x,a17,I3)')  '  fit_SPC_maxS',multibinit_dtset%fit_SPC_maxS
    if(multibinit_dtset%fit_nbancoeff /= 0) then
      write(nunit,'(1x,a17,I3)')  '   fit_nbancoeff',multibinit_dtset%fit_nbancoeff
      write(nunit,'(1x,a17)',advance='no')'   fit_bancoeff'
