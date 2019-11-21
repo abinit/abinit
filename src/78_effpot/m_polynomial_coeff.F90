@@ -2337,6 +2337,8 @@ if(need_compute_symmetric)then
   if(need_verbose)then
     write(message,'(1a)')' Distribute irreducible combinations over CPU'
     call wrtout(std_out,message,'COLL')
+    write(message,'(1a)')' Compute symmetric combinations of combinations of irreducible pairs'
+    call wrtout(std_out,message,'COLL')
     write(message,'(3a)')' ---> Try to match number of CPU to number of irreducible combinations',ch10,& 
     &                    '      for max. speedup'
     call wrtout(std_out,message,'COLL')
@@ -2420,8 +2422,6 @@ if(need_compute_symmetric)then
 !   end if
 !enddo  
 !write(std_out,*) "irank_combi_start:, ", irank_combi_start 
-  write(message,'(1a)')' Compute symmetric combinations of combinations of irreducible pairs'
-  call wrtout(std_out,message,'COLL')
   if(my_ncombi /= 0)then 
     do i=1,size(my_index_irredcomb)
        !write(std_out,*) "iii is: ", i
