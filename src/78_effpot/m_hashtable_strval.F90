@@ -133,7 +133,7 @@ CONTAINS
        DEALLOCATE(list%child)
     END IF
     list%child => NULL()
-    IF (ALLOCATED(list%key)) ABI_DEALLOCATE(list%key)
+    ABI_SFREE(list%key)
   END SUBROUTINE free_sll
 
   recursive function sum_val_sll(self) result(s)
@@ -171,7 +171,7 @@ CONTAINS
     CLASS(hash_table_t),   INTENT(inout) :: tbl
     INTEGER,     OPTIONAL, INTENT(in)    :: tbl_len
 
-    IF (ALLOCATED(tbl%vec)) ABI_DEALLOCATE(tbl%vec)
+    ABI_SFREE(tbl%vec)
     IF (PRESENT(tbl_len)) THEN
        ABI_ALLOCATE(tbl%vec, (0:tbl_len-1))
        tbl%vec_len = tbl_len
