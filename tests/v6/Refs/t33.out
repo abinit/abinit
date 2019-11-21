@@ -1,5 +1,5 @@
 
-.Version 8.0.3 of ABINIT 
+.Version 8.11.12 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 12h00 )
+.Starting date : Thu 21 Nov 2019.
+- ( at 00h34 )
   
 - input  file    -> t33.in
 - output file    -> t33.out
@@ -34,7 +34,7 @@
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        3668          nfft =       64000          nkpt =           1
 ================================================================================
-P This job should need less than                      18.738 Mbytes of memory.
+P This job should need less than                      18.234 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.058 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.058 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        3668          nfft =       64000          nkpt =           1
 ================================================================================
-P This job should need less than                      18.738 Mbytes of memory.
+P This job should need less than                      18.234 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.058 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.058 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        3668          nfft =       64000          nkpt =           1
 ================================================================================
-P This job should need less than                      28.559 Mbytes of memory.
+P This job should need less than                      28.056 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.114 Mbytes ; DEN or POT disk file :      0.979 Mbytes.
 ================================================================================
@@ -85,7 +85,7 @@ _ WF disk file :      0.114 Mbytes ; DEN or POT disk file :      0.979 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        3668          nfft =       64000          nkpt =           1
 ================================================================================
-P This job should need less than                      28.559 Mbytes of memory.
+P This job should need less than                      28.056 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.114 Mbytes ; DEN or POT disk file :      0.979 Mbytes.
 ================================================================================
@@ -95,7 +95,7 @@ _ WF disk file :      0.114 Mbytes ; DEN or POT disk file :      0.979 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -143,6 +143,7 @@ P           mkmem           1
               occ4     1.000000
                        0.000000
            prtden           0
+          prtkden           1
             prtwf           0
           spgroup         221
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
@@ -218,7 +219,7 @@ P           mkmem           1
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=    0.00015708
+  pspatm : epsatm=    0.00015708
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -241,6 +242,17 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
  At SCF step    7, etot is converged : 
   for the second time, diff in etot=  1.823E-13 < toldfe=  1.000E-10
 
+ Compute kinetic energy density
+
+Result for kinetic energy density :
+
+--------------------------------------------------------------------------------
+ Total kinetic energy density [Ha/Bohr^3]
+      Maximum=    6.7463E-02  at reduced coord.    0.9500    0.9750    0.9750
+      Minimum=    7.3197E-05  at reduced coord.    0.5000    0.5000    0.5000
+   Integrated=    4.0860E-01
+--------------------------------------------------------------------------------
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.74396444E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.74396444E-05  sigma(3 1)=  0.00000000E+00
@@ -254,7 +266,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.3865E-15; max=  2.3865E-15
+ Mean square residual over all n,k,spin=   23.865E-16; max=  23.865E-16
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -293,6 +305,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
  Other information on the energy :
     Total energy(eV)= -1.22362918625029E+01 ; Band energy (Ha)=  -2.0762573367E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.74396444E-05  sigma(3 2)=  0.00000000E+00
@@ -338,7 +352,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=    0.00015708
+  pspatm : epsatm=    0.00015708
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -360,6 +374,17 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
  At SCF step    7, etot is converged : 
   for the second time, diff in etot=  2.607E-13 < toldfe=  1.000E-10
 
+ Compute kinetic energy density
+
+Result for kinetic energy density :
+
+--------------------------------------------------------------------------------
+ Total kinetic energy density [Ha/Bohr^3]
+      Maximum=    6.7458E-02  at reduced coord.    0.9500    0.9750    0.9750
+      Minimum=    7.3213E-05  at reduced coord.    0.5000    0.5000    0.5000
+   Integrated=    4.0855E-01
+--------------------------------------------------------------------------------
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.94500559E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.94500559E-05  sigma(3 1)=  0.00000000E+00
@@ -373,7 +398,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.4668E-16; max=  5.4668E-16
+ Mean square residual over all n,k,spin=   54.668E-17; max=  54.668E-17
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -412,6 +437,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
  Other information on the energy :
     Total energy(eV)= -1.22367390628072E+01 ; Band energy (Ha)=  -2.0767026656E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.94500559E-05  sigma(3 2)=  0.00000000E+00
@@ -457,7 +484,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=    0.00015708
+  pspatm : epsatm=    0.00015708
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -480,6 +507,32 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
  At SCF step    8, etot is converged : 
   for the second time, diff in etot=  8.419E-12 < toldfe=  1.000E-10
 
+ Compute kinetic energy density
+
+Result for kinetic energy density :
+
+--------------------------------------------------------------------------------
+ Total kinetic energy density [Ha/Bohr^3]
+      Maximum=    7.7205E-02  at reduced coord.    0.9500    0.9750    0.9750
+      Minimum=    5.5137E-05  at reduced coord.    0.5000    0.5000    0.5000
+   Integrated=    4.5026E-01
+ Spin up density      [Ha/Bohr^3]
+      Maximum=    7.7205E-02  at reduced coord.    0.9500    0.9750    0.9750
+      Minimum=    5.5137E-05  at reduced coord.    0.5000    0.5000    0.5000
+   Integrated=    4.5026E-01
+ Spin down density    [Ha/Bohr^3]
+      Maximum=    0.0000E+00  at reduced coord.    0.9750    0.9750    0.9750
+      Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+   Integrated=    0.0000E+00
+ Magnetization (spin up - spin down) [Ha/Bohr^3]
+      Maximum=    7.7205E-02  at reduced coord.    0.9500    0.9750    0.9750
+      Minimum=    5.5137E-05  at reduced coord.    0.5000    0.5000    0.5000
+   Integrated=    4.5026E-01
+ Relative magnetization (=zeta, between -1 and 1)
+      Maximum=    1.0000E+00  at reduced coord.    0.9750    0.9750    0.9750
+      Minimum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+--------------------------------------------------------------------------------
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.87263165E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.87263165E-05  sigma(3 1)=  0.00000000E+00
@@ -498,7 +551,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.2093E-14; max=  1.4692E-14
+ Mean square residual over all n,k,spin=   12.093E-15; max=  14.692E-15
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -540,6 +593,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
  Other information on the energy :
     Total energy(eV)= -1.31241261568725E+01 ; Band energy (Ha)=  -2.4623439080E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.87263165E-05  sigma(3 2)=  0.00000000E+00
@@ -585,7 +640,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=    0.00015708
+  pspatm : epsatm=    0.00015708
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -608,6 +663,32 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
  At SCF step    8, etot is converged : 
   for the second time, diff in etot=  7.755E-12 < toldfe=  1.000E-10
 
+ Compute kinetic energy density
+
+Result for kinetic energy density :
+
+--------------------------------------------------------------------------------
+ Total kinetic energy density [Ha/Bohr^3]
+      Maximum=    7.7200E-02  at reduced coord.    0.9500    0.9750    0.9750
+      Minimum=    5.5152E-05  at reduced coord.    0.5000    0.5000    0.5000
+   Integrated=    4.5021E-01
+ Spin up density      [Ha/Bohr^3]
+      Maximum=    7.7200E-02  at reduced coord.    0.9500    0.9750    0.9750
+      Minimum=    5.5152E-05  at reduced coord.    0.5000    0.5000    0.5000
+   Integrated=    4.5021E-01
+ Spin down density    [Ha/Bohr^3]
+      Maximum=    0.0000E+00  at reduced coord.    0.9750    0.9750    0.9750
+      Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+   Integrated=    0.0000E+00
+ Magnetization (spin up - spin down) [Ha/Bohr^3]
+      Maximum=    7.7200E-02  at reduced coord.    0.9500    0.9750    0.9750
+      Minimum=    5.5152E-05  at reduced coord.    0.5000    0.5000    0.5000
+   Integrated=    4.5021E-01
+ Relative magnetization (=zeta, between -1 and 1)
+      Maximum=    1.0000E+00  at reduced coord.    0.9750    0.9750    0.9750
+      Minimum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+--------------------------------------------------------------------------------
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.88099829E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.88099829E-05  sigma(3 1)=  0.00000000E+00
@@ -626,7 +707,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.6506E-14; max=  1.9472E-14
+ Mean square residual over all n,k,spin=   16.506E-15; max=  19.472E-15
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -668,6 +749,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
  Other information on the energy :
     Total energy(eV)= -1.31244962091272E+01 ; Band energy (Ha)=  -2.4627241305E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.88099829E-05  sigma(3 2)=  0.00000000E+00
@@ -733,6 +816,7 @@ P           mkmem           1
               occ4     1.000000
                        0.000000
            prtden           0
+          prtkden           1
             prtwf           0
           spgroup         221
            strten1     3.7439644391E-05  3.7439644391E-05  3.7439644391E-05
@@ -794,46 +878,63 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] ABINIT : First-principles approach of materials and nanosystem properties.
+- [1] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [2] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [2] A brief introduction to the ABINIT software package.
+- [3] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [3] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- [4] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=          5.7  wall=          5.8
+- Proc.   0 individual time (sec): cpu=          6.1  wall=          6.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   9 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.7  wall=          5.8
+.Delivered   9 WARNINGs and  16 COMMENTs to log file.
++Overall time at end (sec) : cpu=          6.1  wall=          6.3
