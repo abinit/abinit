@@ -243,7 +243,7 @@ contains
     integer, allocatable :: ilist_sc(:), jlist_sc(:), Rlist_sc(:,:)
     real(dp):: val
 
-
+    ABI_UNUSED_A(params)
 
     natom=self%natom
     sc_natom= natom* scmaker%ncells

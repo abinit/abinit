@@ -165,8 +165,11 @@ contains
     integer, optional, intent(in) :: mode
     character(len=fnlen), optional, intent(in) :: restart_hist_fname
 
+
     real(dp) :: xi(3, self%natom)
     integer :: i
+
+    ABI_UNUSED(restart_hist_fname)
 
     if(mode==1) then ! using a boltzmann distribution. 
        ! Should only be used for a constant Temperature mover

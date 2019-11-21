@@ -419,7 +419,6 @@ contains
     integer :: i
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    character(len=500):: msg
 
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     if (iam_master) then

@@ -270,7 +270,9 @@ contains
     NCF_CHECK_MSG(ierr, "when reading nspin")
 
     if (nspin /= self%nspin) then
-       MSG_ERROR("The number of spins in histfile is not equal to the present calculation. Please check if the file is consistent.")
+       MSG_ERROR("The number of spins in histfile is not equal & 
+           & to the present calculation. &
+           & Please check if the file is consistent.")
     end if
 
 
