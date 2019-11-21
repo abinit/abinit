@@ -27,9 +27,10 @@ blue 0 0
 #%% [setup]
 #%% executable = band2eps
 #%% test_chain =  tlw_4.in, tlw_5.in, tlw_6.in, tlw_7.in
+##%% no_check = yes
 #%% [files]
-##%% files_to_test = 
-##%%   tlw_7.out.eps, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
+#%% files_to_test = 
+#%%   tlw_7.out.eps, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

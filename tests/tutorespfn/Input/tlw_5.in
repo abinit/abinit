@@ -17,7 +17,7 @@ tlw_4o_DS5_DDB
 #%% test_chain =  tlw_4.in, tlw_5.in, tlw_6.in, tlw_7.in
 #%% [files]
 #%% files_to_test =
-#%%   tlw_5.ddb.out, tolnlines=  0, tolabs=  0.000e0, tolrel=  0.000e-0
+#%%   tlw_5.ddb.out, tolnlines=  0, tolabs=  0.000e0, tolrel=  0.000e-0, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

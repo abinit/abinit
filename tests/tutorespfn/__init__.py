@@ -51,6 +51,7 @@ inp_files = [
 "tlw_4.in",
 "tlw_5.in",
 "tlw_6.in",
+"tlw_7.in",
 "tnlo_1.in",
 "tnlo_2.in",
 "tnlo_3.in",
