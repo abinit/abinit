@@ -89,10 +89,10 @@ CONTAINS
     IF (ALLOCATED(list%key)) THEN
        IF (list%key /= key) THEN
           IF ( .NOT. ASSOCIATED(list%child)) then
-             !ABI_ALLOC_SCALAR(tmp)
+             ABI_MALLOC_SCALAR(list%child)
              ! FIXME: ABI_ALLOC_SCALAR does not know how to handle list%child.
              ! That is due to the QUOTE macro.
-             allocate(list%child)
+             !allocate(list%child)
              !call abimem_record(0, QUOTE(list%child), _LOC(list%child), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
           end IF
 
@@ -130,10 +130,10 @@ CONTAINS
     CLASS(sllist), INTENT(inout) :: list
     IF (ASSOCIATED(list%child)) THEN
        CALL free_sll(list%child)
-       DEALLOCATE(list%child)
+       ABI_FREE_SCALAR(list%child)
     END IF
     list%child => NULL()
-    IF (ALLOCATED(list%key)) DEALLOCATE(list%key)
+    ABI_SFREE(list%key)
   END SUBROUTINE free_sll
 
   recursive function sum_val_sll(self) result(s)
@@ -167,12 +167,12 @@ CONTAINS
     CLASS(hash_table_t),   INTENT(inout) :: tbl
     INTEGER,     OPTIONAL, INTENT(in)    :: tbl_len
 
-    IF (ALLOCATED(tbl%vec)) DEALLOCATE(tbl%vec)
+    ABI_SFREE(tbl%vec)
     IF (PRESENT(tbl_len)) THEN
-       ALLOCATE(tbl%vec(0:tbl_len-1))
+       ABI_MALLOC_SCALAR(tbl%vec(0:tbl_len-1))
        tbl%vec_len = tbl_len
     ELSE
-       ALLOCATE(tbl%vec(0:tbl_size-1))
+       ABI_MALLOC_SCALAR(tbl%vec(0:tbl_size-1))
        tbl%vec_len = tbl_size
     END IF
     tbl%is_init = .TRUE.
@@ -225,7 +225,7 @@ CONTAINS
        DO i=low,high
           CALL tbl%vec(i)%free()
        END DO
-       DEALLOCATE(tbl%vec)
+       ABI_SFREE(tbl%vec)
     END IF
     tbl%is_init = .FALSE.
   END SUBROUTINE free_hash_table_t
