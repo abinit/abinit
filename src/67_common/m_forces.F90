@@ -27,14 +27,15 @@
 module m_forces
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_efield
  use m_errors
  use m_atomdata
+ use m_dtset
 
+ use defs_datatypes,     only : pseudopotential_type
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_geometry,         only : fred2fcart, metric, xred2xcart
  use m_fock,             only : fock_type
@@ -177,8 +178,6 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 &                  pawrad,pawtab,ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,usefock,&
 &                  vresid,vxc,wvl,wvl_den,xred,&
 &                  electronpositron) ! optional argument
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -484,9 +483,12 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  grtn(:,:)=grl(:,:)+grchempottn(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
 ! grtn(:,:)=grl(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
 
- if (usefock==1 .and. associated(fock).and.fock%fock_common%optfor) then
-   grtn(:,:)=grtn(:,:)+fock%fock_common%forces(:,:)
+ if (usefock==1 .and. associated(fock)) then
+   if (fock%fock_common%optfor) then
+     grtn(:,:)=grtn(:,:)+fock%fock_common%forces(:,:)
+   end if
  end if
+
  if (ngrvdw==dtset%natom) grtn(:,:)=grtn(:,:)+grvdw(:,:)
 ! note that fionred is subtracted, because it really is a force and we need to
 ! turn it back into a gradient. The fred2fcart routine below includes the minus
@@ -630,8 +632,6 @@ end subroutine forces
 
 subroutine sygrad(fred,natom,dedt,nsym,symrec,indsym)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nsym
@@ -724,8 +724,6 @@ end subroutine sygrad
 
 subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqgrid,nattyp,nfft,&
 &          ngfft,ntypat,psps,pawtab,ph1d,qgrid,ucvol,usepaw,vresid,zion,znucl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -859,8 +857,6 @@ end subroutine fresidrsp
 
 subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
 &                 pawtab,rhor,rprimd,ucvol,work,xred_new,xred_old,znucl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1484,7 +1480,6 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
 & nconeq,prtvol,rprimd,wtatcon,xred)
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments ------------------------------------
 !scalars

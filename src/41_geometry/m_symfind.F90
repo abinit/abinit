@@ -42,8 +42,8 @@ module m_symfind
 
  public :: symfind     ! From the symmetries of the Bravais lattice,
                        ! select those that leave invariant the system, and generate tnons
- public :: symanal     ! Find the space group from the list of symmetris and lattice parameters
- public :: symbrav     ! Determine the Bravais information From the list of symmetry operations, and the lattice vectors.
+ public :: symanal     ! Find the space group from the list of symmetries and lattice parameters
+ public :: symbrav     ! Determine the Bravais information from the list of symmetry operations, and the lattice vectors.
  public :: symlatt     ! Find the Bravais lattice and its symmetry operations (ptsymrel).
                        ! From the unit cell vectors (rprimd) and the corresponding metric tensor.
 
@@ -63,6 +63,7 @@ contains
 !!
 !! INPUTS
 !! berryopt    =  4/14, 6/16, 7/17: electric or displacement field
+!! chrgat(natom)=target charge for each atom. Not always used, it depends on the value of constraint_kind
 !! efield=cartesian coordinates of the electric field
 !! gprimd(3,3)=dimensional primitive translations for reciprocal space
 !! msym=default maximal number of symmetries
@@ -102,7 +103,7 @@ contains
 
  subroutine symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
 &  nzchempot,prtvol, ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-&  nucdipmom)
+&  chrgat,nucdipmom)  ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -114,7 +115,8 @@ contains
  integer,intent(in) :: ptsymrel(3,3,msym),typat(natom)
  integer,intent(inout) :: symafm(msym),symrel(3,3,msym) !vz_i
  real(dp),intent(in) :: efield(3),gprimd(3,3),spinat(3,natom),xred(3,natom)
- real(dp),optional :: nucdipmom(3,natom)
+ real(dp),optional,intent(in) :: chrgat(natom)
+ real(dp),optional, intent(in) :: nucdipmom(3,natom)
  real(dp),intent(inout) :: tnons(3,msym) !vz_i
 
 !Local variables-------------------------------
@@ -122,15 +124,19 @@ contains
 !scalars
  integer :: found3,foundcl,iatom,iatom0,iatom1,iatom2,iatom3,iclass,iclass0,ii
  integer :: isym,jj,kk,natom0,nclass,ntrial,printed,trialafm,trialok
- real(dp) :: det,ndnorm,nucdipmomcl2,nucdipmomcl20,spinatcl2,spinatcl20
+ real(dp) :: det,ndnorm,nucdipmomcl2,nucdipmomcl20
+ real(dp) :: spinatcl2,spinatcl20
  logical,parameter :: afm_noncoll=.true.
- logical :: test_sameabscollin,test_sameabsnoncoll,test_samenucdipmom,test_samespin
+ logical :: test_sameabscollin,test_sameabsnoncoll,test_samechrg
+ logical :: test_samenucdipmom,test_samespin
  character(len=500) :: message
 !arrays
  integer,allocatable :: class(:,:),natomcl(:),typecl(:)
  real(dp) :: diff(3),efieldrot(3),hand2(3),hand3(3),ndtest(3),rprimd(3,3),sxred0(3)
  !real(dp) :: symnucdipmom2(3)
  real(dp) :: symnucdipmom2cart(3,3),symnucdipmom2red(3,3),symspinat2(3),symxred2(3),trialnons(3)
+ real(dp),allocatable :: chrgat_(:)
+ real(dp),allocatable :: chrgatcl(:)
  real(dp),allocatable :: local_nucdipmom(:,:,:),nucdipmomcl(:,:),nucdipmomred(:,:,:)
  real(dp),allocatable :: spinatcl(:,:),spinatred(:,:)
 
@@ -155,20 +161,28 @@ contains
 ! call flush(6)
 !ENDDEBUG
 
-!Find the number of classes of atoms (type and spinat must be identical,
+!Find the number of classes of atoms (type, chrg and spinat must be identical,
 !spinat might differ by a sign, if aligned with the z direction, or,
 ! type and nucdipmom must be identical)
 !natomcl(iclass) will contain the number of atoms in the class
 !typecl(iclass) will contain the type of the atoms in the class
+!chrgcl(iclass) will contain the charge of the atoms in the class
 !spinatcl(1:3,iclass) will contain the spinat of the atoms in the class
 !class(1:natomclass(iclass),iclass) will contain the index of the
 !atoms belonging to the class
  ABI_ALLOCATE(class,(natom+3,natom))
  ABI_ALLOCATE(natomcl,(natom))
  ABI_ALLOCATE(typecl,(natom))
+ ABI_ALLOCATE(chrgat_,(natom))
+ ABI_ALLOCATE(chrgatcl,(natom))
  ABI_ALLOCATE(spinatcl,(3,natom))
  ABI_ALLOCATE(local_nucdipmom,(3,3,natom))
  ABI_ALLOCATE(nucdipmomcl,(3,natom))
+
+ chrgat_(:)=zero
+ if(present(chrgat))then
+   chrgat_(:)=chrgat(:)
+ endif
 
  local_nucdipmom(:,:,:) = zero
  if(present(nucdipmom)) then
@@ -203,6 +217,7 @@ contains
  nclass=1
  natomcl(1)=1
  typecl(1)=typat(1)
+ chrgatcl(1)=chrgat_(1)
  spinatcl(:,1)=spinat(:,1)
  nucdipmomcl(:,1)=local_nucdipmom(:,1,1)
  class(1,1)=1
@@ -213,10 +228,11 @@ contains
 !    ENDDEBUG
      foundcl=0
      do iclass=1,nclass
-!      Compare the typat and spinat of atom iatom with existing ones.
+!      Compare the typat, chrg and spinat of atom iatom with existing ones.
 !      Admit either identical spinat, or z-aligned spinat with same
 !      absolute magnitude
        if( typat(iatom)==typecl(iclass)) then
+         test_samechrg= (abs(chrgat_(iatom)-chrgatcl(iclass))<tolsym)
          test_samespin=  &
 &         abs(spinat(1,iatom)-spinatcl(1,iclass))<tolsym .and. &
 &         abs(spinat(2,iatom)-spinatcl(2,iclass))<tolsym .and. &
@@ -237,7 +253,7 @@ contains
 &             abs(local_nucdipmom(3,1,iatom)-nucdipmomcl(3,iclass))<tolsym
          ! note in the following test, m_chkinp/chkinp has already prevented nucdipmom to be
          ! nonzero when spinat is nonzero
-         if( (test_samespin .or. test_sameabscollin .or. test_sameabsnoncoll) .AND. &
+         if( test_samechrg .and. (test_samespin .or. test_sameabscollin .or. test_sameabsnoncoll) .AND. &
               & test_samenucdipmom ) then
 !          DEBUG
 !          write(std_out,*)' symfind : find it belongs to class iclass=',iclass
@@ -258,6 +274,7 @@ contains
        nclass=nclass+1
        natomcl(nclass)=1
        typecl(nclass)=typat(iatom)
+       chrgatcl(nclass)=chrgat_(iatom)
        spinatcl(:,nclass)=spinat(:,iatom)
        nucdipmomcl(:,nclass)=local_nucdipmom(:,1,iatom)
        class(1,nclass)=iatom
@@ -280,6 +297,7 @@ contains
 !It is important to select a magnetic class of atom, if any, otherwise
 !the determination of the initial (inclusive) set of symmetries takes only
 !non-magnetic symmetries, and not both magnetic and non-magnetic ones, see later.
+!On the contrary, the chrgat_ data does not play any role, it is invariant upon atomic-centered  symmetries
  iclass0=1
  natom0=natomcl(1)
  spinatcl20=spinatcl(1,1)**2+spinatcl(2,1)**2+spinatcl(3,1)**2
@@ -288,18 +306,16 @@ contains
    do iclass=2,nclass
      spinatcl2=spinatcl(1,iclass)**2+spinatcl(2,iclass)**2+spinatcl(3,iclass)**2
      nucdipmomcl2=nucdipmomcl(1,iclass)**2+nucdipmomcl(2,iclass)**2+nucdipmomcl(3,iclass)**2
-     if( (natomcl(iclass)<natom0 .and. (spinatcl20<tolsym .or. spinatcl2>tolsym))  &
-&     .or. (spinatcl20<tolsym .and. spinatcl2>tolsym)                         )then
+     if( (natomcl(iclass)<natom0 &
+&          .and. .not. (spinatcl20>tolsym .and. spinatcl2<tolsym) &
+&          .and. .not. (nucdipmomcl20>tolsym .and. nucdipmomcl2<tolsym) )  &
+&     .or. (spinatcl20<tolsym .and. spinatcl2>tolsym) &
+&     .or. (nucdipmomcl20<tolsym .and. nucdipmomcl2>tolsym)                        )then
        iclass0=iclass
        natom0=natomcl(iclass)
        spinatcl20=spinatcl2
+       nucdipmomcl20=nucdipmomcl2
      end if
-!      if( (natomcl(iclass)<natom0 .and. (nucdipmomcl20<tolsym .or. nucdipmomcl2>tolsym))  &
-! &     .or. (nucdipmomcl20<tolsym .and. nucdipmomcl2>tolsym)                         )then
-!        iclass0=iclass
-!        natom0=natomcl(iclass)
-!        nucdipmomcl20=nucdipmomcl2
-!      end if
    end do
  end if
 
@@ -499,6 +515,8 @@ contains
 
  ABI_DEALLOCATE(class)
  ABI_DEALLOCATE(natomcl)
+ ABI_DEALLOCATE(chrgat_)
+ ABI_DEALLOCATE(chrgatcl)
  ABI_DEALLOCATE(spinatcl)
  ABI_DEALLOCATE(typecl)
  ABI_DEALLOCATE(local_nucdipmom)

@@ -27,10 +27,10 @@
 module m_xctk
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
 
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_mpinfo,   only : ptabs_fourdp
  use m_fft_mesh, only : phase
@@ -124,6 +124,7 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rh
 !DEBUG
 !write(std_out,*)' xcden : enter '
 !ENDDEBUG
+
 
  if (ishift/=0 .and. ishift/=1) then
    write(message, '(a,i0)' )'ishift must be 0 or 1 ; input was',ishift
@@ -306,8 +307,9 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rh
      end if
 
    end do  ! End loop on spins
-
-   ABI_DEALLOCATE(wkcmpx)
+   if (allocated(wkcmpx))  then
+     ABI_DEALLOCATE(wkcmpx)
+   end if
    ABI_DEALLOCATE(work)
    if(ishift==1) then
      ABI_DEALLOCATE(ph1)
@@ -340,21 +342,21 @@ end subroutine xcden
 !!    or to the norm of the gradient of the (spin-)density,
 !!    further divided by the norm of the gradient of the (spin-)density
 !!   The different components of depsxc will be
-!!   for nspden=1,         depsxc(:,1)=d(rho.exc)/d(rho)
-!!     and if ngrad=2,     depsxc(:,2)=1/2*1/|grad rho_up|*d(n.exc)/d(|grad rho_up|)
+!!   for nspden=1,             depsxc(:,1)=d(rho.exc)/d(rho)
+!!     and if ngrad=2,         depsxc(:,2)=1/2*1/|grad rho_up|*d(n.exc)/d(|grad rho_up|)
 !!                                     +1/|grad rho|*d(rho.exc)/d(|grad rho|)
-!!     and if mgga=1,      depsxc(:,3)=d(rho.exc)/d(lapl rho)
-!!   for nspden>=2,        depsxc(:,1)=d(rho.exc)/d(rho_up)
-!!                         depsxc(:,2)=d(rho.exc)/d(rho_down)
-!!     and if ngrad=2,     depsxc(:,3)=1/|grad rho_up|*d(rho.exc)/d(|grad rho_up|)
-!!                         depsxc(:,4)=1/|grad rho_down|*d(rho.exc)/d(|grad rho_down|)
-!!                         depsxc(:,5)=1/|grad rho|*d(rho.exc)/d(|grad rho|)
-!!     and if mgga=1,      depsxc(:,6)=d(rho.exc)/d(lapl rho_up)
-!!                         depsxc(:,7)=d(rho.exc)/d(lapl rho_down)
+!!     and if use_laplacian=1, depsxc(:,3)=d(rho.exc)/d(lapl rho)
+!!   for nspden>=2,            depsxc(:,1)=d(rho.exc)/d(rho_up)
+!!                             depsxc(:,2)=d(rho.exc)/d(rho_down)
+!!     and if ngrad=2,         depsxc(:,3)=1/|grad rho_up|*d(rho.exc)/d(|grad rho_up|)
+!!                             depsxc(:,4)=1/|grad rho_down|*d(rho.exc)/d(|grad rho_down|)
+!!                             depsxc(:,5)=1/|grad rho|*d(rho.exc)/d(|grad rho|)
+!!     and if use_laplacian=1, depsxc(:,6)=d(rho.exc)/d(lapl rho_up)
+!!                             depsxc(:,7)=d(rho.exc)/d(lapl rho_down)
 !!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
 !!  ishift : if ==0, do not shift the xc grid (usual case);
 !!           if ==1, shift the xc grid
-!!  mgga : 1 if we use a meta-GGA functional.
+!!  use_laplacian : 1 if we use a  functional depending on the laplacian of the density
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  ngrad : =1, only take into account derivative wrt the density ;
@@ -391,13 +393,13 @@ end subroutine xcden
 !!
 !! SOURCE
 
-subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden,&
+subroutine xcpot (cplex,depsxc,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,nspden,&
 & nspgrad,qphon,rhonow,vxc,&
 & vxctau) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,ishift,mgga,nfft,ngrad,nspden,nspgrad
+ integer,intent(in) :: cplex,ishift,nfft,ngrad,nspden,nspgrad,use_laplacian
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -500,7 +502,7 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nsp
        ABI_ALLOCATE(gcart2,(n2))
        ABI_ALLOCATE(gcart3,(n3))
        ABI_ALLOCATE(workgr,(2,nfft))
-       if(mgga==1)  then
+       if(use_laplacian==1)  then
          ABI_ALLOCATE(worklp,(2,nfft))
        end if
        if(present(vxctau))  then
@@ -520,7 +522,7 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nsp
 
 !        IF Meta-GGA then take care of the laplacian term involved.
 !        Note : this operation is done on the eventually shifted grid
-         if(mgga==1)then
+         if(use_laplacian==1)then
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,idir,ispden,nspden,nfft,depsxc,work)
            do ifft=1,cplex*nfft
              if(nspden==1)then
@@ -576,7 +578,7 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nsp
 !                Multiply by - i 2pi G(idir) and accumulate in wkcmpx
                  wkcmpx(1,ifft)=wkcmpx(1,ifft)+gcart_idir*workgr(2,ifft)
                  wkcmpx(2,ifft)=wkcmpx(2,ifft)-gcart_idir*workgr(1,ifft)
-                 if(mgga==1)then
+                 if(use_laplacian==1)then
 !                  Multiply by - i 2pi G(idir) and accumulate in wkcmpx
                    wkcmpx(1,ifft)=wkcmpx(1,ifft)-gcart_idir**2*worklp(1,ifft)
                    wkcmpx(2,ifft)=wkcmpx(2,ifft)-gcart_idir**2*worklp(2,ifft)
@@ -606,7 +608,7 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nsp
        ABI_DEALLOCATE(gcart2)
        ABI_DEALLOCATE(gcart3)
        ABI_DEALLOCATE(workgr)
-       if(mgga==1)then
+       if(use_laplacian==1)then
          ABI_DEALLOCATE(worklp)
        end if
        if(present(vxctau)) then

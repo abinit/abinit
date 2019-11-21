@@ -16,9 +16,9 @@ This tutorial will help you to understand and make use of *optic*.
 Before starting, you should first have some theoretical background.
 We strongly suggest that you first read the first two sections of the [[help:optic]].
 
-[TUTORIAL_README]
-
 This tutorial should take about 1 hour.
+
+[TUTORIAL_README]
 
 ## Computing the momentum matrix elements
 
@@ -26,10 +26,10 @@ This tutorial should take about 1 hour.
 Why not create Work_optic?*
 
 We also need to copy *toptic_1.files* and *toptic_1.in* from 
-*$ABI_TUTORIAL/Input* to *Work_optic*.
+*$ABI_TESTS/tutorial/Input* to *Work_optic*.
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorespfn/Input
 mkdir Work_optic
 cd Work_optic
 cp ../toptic_1.files . 
@@ -50,25 +50,21 @@ The *toptic_1.files* is a typical Abinit *files file* (nothing special).
 By contrast, it is worthwhile to take some time to examine the input file *toptic_1.in*.
 Examine it, it has six datasets.
 
-The first dataset is a quite standard self-consistent
-determination of the ground state for a fixed geometry. Only the occupied bands are treated.
-The density is output.
-The second dataset is a non-self-consistent calculation, where the number of
-bands has been increased to include unoccupied states.
-The k points are restricted to the Irreducible Brillouin Zone.  
+The first dataset is a quite standard self-consistent determination of the ground state for a fixed geometry. Only the occupied bands are treated. The density is output and used in later datasets.
+
+The second dataset is a non-self-consistent calculation, where the number of bands has been increased to include unoccupied states. The k points are restricted to the Irreducible Brillouin Zone.  
+
 The third dataset uses the result of the second one to produce the
 wavefunctions for all the bands, for the full Brillouin Zone
 (this step could be skipped, but is included for later CPU time saving).  
 
-The fourth to sixth datasets correspond to the computation of the ddk matrix elements,
-that is, matrix elements of the $\partial/\partial k$ operators.
-Note that the number of bands is the same as for datasets 2 and 3.
-Note also that these are non-self-consistent calculations, moreover,
-restricted to [[nstep]] = 1 and [[nline]] = 0.
+The fourth, fifth, and sixth datasets correspond to the computation of the ddk matrix elements,
+that is, matrix elements of the $\partial/\partial k$ operators. Note that the number of bands is the same as for datasets 2 and 3.
+Note also that these are non-self-consistent calculations, moreover, restricted to [[nstep]] = 1 and [[nline]] = 0.
 Indeed, only the matrix elements between explicitly computed states are required.
 Using a larger nstep would lead to a full computation of the derivative of the wavefunction with respect to
 the wavevector, while in Optic, only the matrix elements are needed.
-Thus a value of [[nstep]] larger than one would not lead to erroneous matrix elements, but would be a waste of time.
+Thus a value of [[nstep]] larger than one would not only lead to erroneous matrix elements, but would be a waste of time.
 
 In order to have a sufficiently fast tutorial, the k point sampling was chosen to be extremely small.
 Instead of a $4\times 4\times 4$
@@ -78,7 +74,7 @@ Moreover, we emphasize that in general the results of a sum-over-states approach
 typically converges quite slowly with the k point mesh. Thus it is of extra importance to
 test convergence carefully.
 
-The run takes less than one minute on a 2.8 GHz PC. The files *toptic_1o_DS3_WFK*,
+The run take a few minutes on a 2.8 GHz PC. The files *toptic_1o_DS3_WFK*,
 *toptic_1o_DS4_1WF7*, *toptic_1o_DS5_1WF8* and *toptic_1o_DS6_1WF9* are the four
 files requested for the Optic run.
 The first file contains the wavefunctions for the filled and empty states in the entire
@@ -96,7 +92,7 @@ response (up to second order in the current implementation) for the material und
 
 First, read the [[help:optic#input|section 3]] of the Optic help file.
 
-Copy the files *toptic_2.files* and *toptic_2.in* from *$ABI_TUTORIAL/Input* to *Work_optic*:
+Copy the files *toptic_2.files* and *toptic_2.in* from *$ABI_TESTS/tutorial/Input* to *Work_optic*:
 
 ```sh
 cp ../toptic_2.files .

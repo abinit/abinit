@@ -27,13 +27,15 @@
 module m_vhxc_me
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xcdata
  use libxc_functionals
+ use m_dtset
+ use m_distribfft
 
+ use defs_datatypes,only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_pawang,      only : pawang_type
  use m_pawtab,      only : pawtab_type
  use m_paw_an,      only : paw_an_type
@@ -45,7 +47,6 @@ module m_vhxc_me
  use m_wfd,         only : wfd_t
  use m_crystal,     only : crystal_t
  use m_melemts,     only : melements_init, melements_herm, melements_mpisum, melflags_t, melements_t
- use m_dtset,       only : dtset_copy, dtset_free
  use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
  use m_kg,          only : mkkin
  use m_rhotoxc,     only : rhotoxc
@@ -134,7 +135,7 @@ contains
 subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
   vtrial,vhartr,vxc,Psps,Pawtab,Paw_an,Pawang,Pawfgrtab,Paw_ij,dijexc_core,&
   rhor,usexcnhat,nhat,nhatgr,nhatgrdim,kstab,&
-  taug,taur) ! optional arguments
+  taur) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -153,7 +154,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  real(dp),intent(in) :: rhor(nfftf,Wfd%nspden)
  real(dp),intent(in) :: nhat(nfftf,Wfd%nspden*Wfd%usepaw)
  real(dp),intent(in) :: nhatgr(nfftf,Wfd%nspden,3*nhatgrdim)
- real(dp),intent(in),optional :: taur(nfftf,Wfd%nspden*Dtset%usekden),taug(2,nfftf*Dtset%usekden)
+ real(dp),intent(in),optional :: taur(nfftf,Wfd%nspden*Dtset%usekden)
  !real(dp),intent(in) :: dijexc_core(cplex_dij*lmn2_size_max,ndij,Cryst%ntypat)
  real(dp),intent(in) :: dijexc_core(:,:,:)
  type(Pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*Wfd%usepaw)
@@ -264,7 +265,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 
  call rhotoxc(enxc_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
 & nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc_,option,rhor,Cryst%rprimd,&
-& strsxc,usexcnhat,vxc_val,vxcval_avg,xccc3d_,xcdata,taug=taug,taur=taur)
+& strsxc,usexcnhat,vxc_val,vxcval_avg,xccc3d_,xcdata,taur=taur)
 
  ! FABIEN's development
  ! Hybrid functional treatment

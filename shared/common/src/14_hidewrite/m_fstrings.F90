@@ -58,6 +58,7 @@ MODULE m_fstrings
  public :: ktoa            ! Convert a k-point into a string.
  public :: ltoa            ! Convert a list into a string.
  public :: atoi            ! Convert a string into a integer
+ public :: atof            ! Convert a string into a floating-point number.
  public :: basename        ! Returns the final component of a pathname.
  public :: firstchar       ! Returns .TRUE. is the first character in a string belongs to a gives set.
  public :: startswith      ! Returns .TRUE. is the string starts with the specified prefix.
@@ -1113,10 +1114,9 @@ end function yesno
 !!  Convert a string into a integer
 !!
 
-function atoi(string)
+integer function atoi(string)
 
 !Arguments ------------------------------------
- integer :: atoi
  character(len=*),intent(in) :: string
 
 ! *********************************************************************
@@ -1129,6 +1129,28 @@ end function atoi
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_fstrings/atof
+!! NAME
+!! atof
+!!
+!! FUNCTION
+!!  Convert a string into a floating-point number
+!!
+
+real(dp) function atof(string)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: string
+
+! *********************************************************************
+
+ read(string,*,err=10)atof
+ return
+ 10 write(std_out,*)"Error while trying to convert string to floating-point. string: ",trim(string)
+
+end function atof
+!!***
 
 !!****f* m_fstrings/itoa
 !! NAME

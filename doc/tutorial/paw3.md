@@ -18,10 +18,9 @@ assumes no previous experience with the `Elk` code, but it is strongly advised
 that the users familiarise themselves a bit with this code before attempting
 to do similar comparisons with their own datasets.  
 
-[TUTORIAL_README]
-
 This tutorial should take about 3h-4h.
 
+[TUTORIAL_README]
 
 ## 1. Introduction - the quantities to be compared
 

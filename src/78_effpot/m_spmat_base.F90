@@ -36,33 +36,43 @@ module m_spmat_base
   implicit none
   private
 !!***
+
+  !-----------------------------------------------------------------------
+  !> @brief base type for sparse matrices
+  !-----------------------------------------------------------------------
   type, public :: base_mat_t
-     integer :: ndim
-     integer, allocatable:: mshape(:)
+     integer :: ndim                       ! number of dimensions
+     integer, allocatable:: mshape(:)      ! shape of matrix
    contains
      procedure :: initialize
      procedure :: finalize
-     procedure :: add_entry
+     procedure :: add_entry          ! add one entry to  matrix
   end type base_mat_t
 
   type, public, extends(base_mat_t) ::  base_mat2d_t
-     integer :: nrow, ncol
+     integer :: nrow, ncol           ! number of rows and columns 
    contains
      procedure :: initialize => base_mat2d_t_initialize
-     procedure :: mv => base_mat2d_t_mv
+     procedure :: mv => base_mat2d_t_mv         ! matrix vector multiplication
   end type base_mat2d_t
 
 contains
 
+  !-----------------------------------------------------------------------
+  !> @brief initialize
+  !> @param [in] mshape: shape of matrix
+  !-----------------------------------------------------------------------
   subroutine initialize(self, mshape)
     class(base_mat_t), intent(inout) :: self
     integer, intent(in) :: mshape(:)
-    integer :: ierr
     self%ndim=size(mshape)
     ABI_ALLOCATE(self%mshape, (self%ndim))
     self%mshape=mshape
   end subroutine initialize
 
+  !-----------------------------------------------------------------------
+  !> @brief finalize
+  !-----------------------------------------------------------------------
   subroutine finalize(self)
     class(base_mat_t), intent(inout) :: self
     self%ndim=0
@@ -71,6 +81,11 @@ contains
     endif
   end subroutine finalize
 
+  !-----------------------------------------------------------------------
+  !> @brief add one entry to matrix
+  !> @param [in]  ind: the indices of the entry
+  !> @param [in]  val: the value of the entry
+  !-----------------------------------------------------------------------
   subroutine add_entry(self, ind, val)
     class(base_mat_t), intent(inout) :: self
     integer, intent(in) :: ind(self%ndim)
@@ -79,6 +94,10 @@ contains
     ABI_UNUSED(val)
   end subroutine add_entry
 
+  !-----------------------------------------------------------------------
+  !> @brief initialize
+  !> @param [in] mshape: shape of matrix. should be size 2
+  !-----------------------------------------------------------------------
   subroutine base_mat2d_t_initialize(self,mshape)
     class(base_mat2d_t), intent(inout) :: self
     integer, intent(in) :: mshape(:)
@@ -87,6 +106,11 @@ contains
     self%ncol=mshape(2)
   end subroutine base_mat2d_t_initialize
 
+  !-----------------------------------------------------------------------
+  !> @brief Matrix vector multiplication M x = b
+  !> @param [in] x
+  !> @param [out] b
+  !-----------------------------------------------------------------------
   subroutine base_mat2d_t_mv(self, x, b)
     class(base_mat2d_t), intent(in) :: self
     real(dp), intent(in) :: x(self%ncol)

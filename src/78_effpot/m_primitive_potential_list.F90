@@ -60,9 +60,9 @@ module m_primitive_potential_list
   ! abstract type for primitive potential list
   !-------------------------------------------------------------------!
   type, public, extends(primitive_potential_t):: primitive_potential_list_t
-     type(primitive_potential_pointer_t), allocatable :: data(:)
-     integer :: size=0
-     integer :: capacity=0
+     type(primitive_potential_pointer_t), allocatable :: data(:) ! list of pointer type
+     integer :: size=0   ! number of components.
+     integer :: capacity=0  ! number of slots allocated for saving the pointers. 
    contains
      procedure :: initialize
      procedure :: append
@@ -130,6 +130,10 @@ contains
     self%capacity=0
   end subroutine initialize
 
+  !----------------------------------------------------------------------
+  !> @brief finalize, all the pots in the list will also be finalized.
+  !> and the pointers will be nullified.
+  !----------------------------------------------------------------------
   subroutine finalize(self)
     class(primitive_potential_list_t), intent(inout):: self
     integer :: i
@@ -158,9 +162,12 @@ contains
     self%has_lwf=.False.
   end subroutine finalize
 
-  !-------------------------------------------------------------------!
-  ! append
-  !-------------------------------------------------------------------!
+  !----------------------------------------------------------------------
+  !> @brief append a potential to the list
+  !>    The meta data will be updated accordingly.
+  !> @param[in]  input
+  !> @param[out] output
+  !----------------------------------------------------------------------
   subroutine append(self, pot)
     class(primitive_potential_list_t), intent(inout):: self
     class(primitive_potential_t), target, intent(inout) :: pot
@@ -195,11 +202,14 @@ contains
 
   end subroutine append
 
-
-  !-------------------------------------------------------------------!
-  ! fill_supercell_ptr
-  !-------------------------------------------------------------------!
-  subroutine fill_supercell_ptr(self, sc_maker, sc_pot)
+  
+  !----------------------------------------------------------------------
+  !> @brief build supercell potential for every component in the list
+  !> Here sc_pot is an pointer.
+  !> @param[in]  sc_maker: the helper class for uilder supercell
+  !> @param[out] sc_pots: the potential list of supercell pots.
+  !----------------------------------------------------------------------
+    subroutine fill_supercell_ptr(self, sc_maker, sc_pot)
     class(primitive_potential_list_t), intent(inout) :: self
     type(supercell_maker_t), intent(inout) :: sc_maker
     class(abstract_potential_t), pointer, intent(inout) :: sc_pot
@@ -212,9 +222,12 @@ contains
     nullify(tmp)
   end subroutine fill_supercell_ptr
 
-  !-------------------------------------------------------------------!
-  ! fill_supercell_list
-  !-------------------------------------------------------------------!
+  !----------------------------------------------------------------------
+  !> @brief build supercell potential for every component in the list
+  !>
+  !> @param[in]  sc_maker: the helper class for uilder supercell
+  !> @param[out] sc_pots: the potential list of supercell pots.
+  !----------------------------------------------------------------------
   subroutine fill_supercell_list(self, sc_maker, sc_pots)
     class(primitive_potential_list_t), intent(inout) :: self
     type(supercell_maker_t), intent(inout) :: sc_maker

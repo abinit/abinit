@@ -44,7 +44,7 @@ module m_harmonics_terms
  public :: harmonics_terms_setInternalStrain
 !!***
 
-!!****t* defs_abitypes/harmonics_terms_type
+!!****t* m_harmonics_terms/harmonics_terms_type
 !! NAME
 !! harmonics_terms_type
 !!
@@ -313,7 +313,7 @@ subroutine harmonics_terms_free(harmonics_terms)
     ABI_DEALLOCATE(harmonics_terms%qpoints)
   end if
 
-  call ifc_free(harmonics_terms%ifcs)
+  call harmonics_terms%ifcs%free()
 
 end subroutine harmonics_terms_free
 !!***

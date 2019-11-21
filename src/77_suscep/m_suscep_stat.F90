@@ -27,11 +27,12 @@
 MODULE m_suscep_stat
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_errors
  use m_abicore
+ use m_distribfft
 
+ use defs_abitypes, only : MPI_type
  use m_time,    only : timab
  use m_pawang,  only : pawang_type
  use m_pawtab,  only : pawtab_type
@@ -947,11 +948,12 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
  integer,allocatable :: band_loc(:),kg_k_gather(:,:),npw_per_proc(:),rdispls(:)
  integer,allocatable :: rdispls_all(:),rdisplsloc(:),recvcounts(:)
  integer,allocatable :: recvcountsloc(:),sdispls(:),sdisplsloc(:),sendcounts(:)
- integer,allocatable :: sendcountsloc(:),susmat_mpi(:,:,:)
+ integer,allocatable :: sendcountsloc(:)
  integer,allocatable,target :: kg_k_gather_all(:,:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwavef(:,:),cwavef_alltoall(:,:)
  real(dp),allocatable :: cwavef_alltoall_gather(:,:),dummy(:,:),rhoaug(:,:,:)
+ real(dp),allocatable :: susmat_mpi(:,:,:)
  real(dp),allocatable :: wfprod(:,:),wfraug(:,:,:,:),wfrspa(:,:,:,:,:,:)
  real(dp),allocatable,target :: cg_local(:,:)
  real(dp),pointer :: cg(:,:)

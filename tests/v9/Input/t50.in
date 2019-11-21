@@ -1,0 +1,104 @@
+# C in diamond structure. Very rough 2x2x2 q-point grid (3 qpoints); low ecut.
+ ndtset 6
+
+ istwfk *1
+ ecut 20
+ ecutsm 0.5
+ nband 8
+ tolvrs 1.0e-10
+ diemac 6.0d0
+
+# Kpoints
+ ngkpt    4 4 4
+ nshiftk  1
+ shiftk   0.0 0.0 0.0
+
+########################################
+# Dataset 1 (GS run to get WFK0 and DEN)
+########################################
+ tolwfr1   1e-20
+ # Cancel default values
+ getwfk1   0
+ nqpt1     0
+ rfphon1   0
+ kptopt1   1
+
+##################################################
+# Dataset 2 (NSCF run to get WFK with empty states)
+##################################################
+ getden2  1
+ getwfk2  0
+ iscf2   -2
+ nband2   12
+ nbdbuf2  4
+ tolwfr2  1e-16
+ # Cancel default values
+ nqpt2     0
+ rfphon2   0
+ kptopt2   1
+
+##############################
+# DFPT runs on a 2x2x2 q-mesh
+#############################
+ getwfk     1
+ nqpt       1
+ rfphon     1
+ rfatpol    1 2
+ rfdir      1 1 1
+ kptopt     3
+
+ # 2x2x2 Q-mesh
+ qpt3 0.00000000E+00  0.00000000E+00  0.00000000E+00
+ qpt4 5.00000000E-01  0.00000000E+00  0.00000000E+00
+ qpt5 5.00000000E-01  5.00000000E-01  0.00000000E+00
+
+##################################################
+# Dataset 6 (NSCF run to get WFK with empty states with more k-points)
+##################################################
+ getden6  1
+ getwfk6  0
+ iscf6   -2
+ nband6   12
+ nbdbuf6  4
+ tolwfr6  1e-16
+ # Cancel default values
+ nqpt6     0
+ rfphon6   0
+ kptopt6   1
+ # Increase k density
+ ngkpt6 8 8 8
+
+
+# Structure 
+ acell 3*6.70346805
+ rprim 0 .5 .5 .5 0 .5 .5 .5 0
+ natom 2
+ typat 1 1
+ xred 3*0.0 3*0.25
+ ntypat  1
+ znucl 6
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = .*_intel_1[789].0_.*
+#%% test_chain = t50.in, t51.in, t52.in, t53.in, t54.in, t55.in, t56.in
+#%% [files]
+#%% files_to_test = 
+#%%   t50.out, tolnlines = 30, tolabs = 1.1e-3, tolrel = 1.1
+#%% psp_files = 6c.pspnc
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [shell]
+#%% post_commands = 
+#%%  ww_mv t50o_DS2_WFK t53o_DS20_WFK; 
+#%%  ww_cp t53o_DS20_WFK t54o_DS20_WFK; 
+#%%  ww_cp t53o_DS20_WFK t55o_DS20_WFK; 
+#%%  ww_cp t53o_DS20_WFK t56o_DS20_WFK; 
+#%% [extra_info]
+#%% authors = G. Brunin, M. Giantomassi
+#%% keywords = NC, DFPT, EPH
+#%% description = 
+#%%   Preparatory run for the calculation of the Fan-Migdal self-energy 
+#%%   C in diamond structure. Very rough 2x2x2 q-point grid (3 qpoints); low ecut.
+#%%<END TEST_INFO>

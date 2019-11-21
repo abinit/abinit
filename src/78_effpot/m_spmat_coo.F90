@@ -38,10 +38,12 @@ module m_spmat_COO
   private
 !!***
 
-  !!----------- COO ------------------------
-  ! COO sparse matrix.
-  ! i, j, val are the row index, col index and value of each entry.
-  ! nnz: number of non-zeros.
+  !-----------------------------------------------------------------------
+  !> @brief COO-sparse matrix
+  !> it has nothing extra to the NDCOO matrix. only a check on whether it
+  !> is 2D is made during initialization.
+  !> and a matrix vector multiplication is implemented (mv)
+  !-----------------------------------------------------------------------
   type, public, extends(ndcoo_mat_t) :: COO_mat_t
    contains
      procedure :: initialize
@@ -51,27 +53,44 @@ module m_spmat_COO
 
 contains
 
+  !-----------------------------------------------------------------------
+  !> @brief initialize
+  !> @param [in] mshape: the shape of the matrix
+  !-----------------------------------------------------------------------
   subroutine initialize(self, mshape)
     class(coo_mat_t), intent(inout) :: self
     integer, intent(in) :: mshape(:)
-    if (size(mshape)/=2) stop 1
+    if (size(mshape)/=2) then
+       MSG_BUG(" COO matrix should be 2D (mshape should be of length 2).")
+    end if
     call self%ndcoo_mat_t%initialize(mshape)
   end subroutine initialize
 
-  ! COO sparse matrix-vector multiplication. naive implementation.
+  !-----------------------------------------------------------------------
+  !> @brief COO sparse matrix-vector multiplication. naive implementation.
+  !> @param [in] x    Mx=b
+  !> @param [out] b   Mx=b
+  !-----------------------------------------------------------------------
   subroutine mv(self, x, b)
     class(COO_mat_t), intent(in) :: self
     real(dp), intent(in) :: x(self%mshape(1))
     real(dp), intent(out) :: b(self%mshape(2))
     integer:: ind, ind_i, ind_j
     b(:)=0.0D0
-    do ind = 1, self%nnz, 1
+!!!    !$OMP PARALLEL DO private(ind, ind_i, ind_j)
+    do ind = 1, self%nnz
        ind_i=self%ind%data(1, ind)
        ind_j=self%ind%data(2, ind)
        b(ind_i)=b(ind_i)+self%val%data(ind)*x(ind_j)
     end do
+!!!   !$OMP END PARALLEL DO
   end subroutine  mv
 
+  !-----------------------------------------------------------------------
+  !> @brief COO sparse matrix-vector multiplication. naive implementation.
+  !> @param [in] x    Mx=b
+  !> @param [out] b   Mx=b
+  !-----------------------------------------------------------------------
   subroutine COO_mat_t_mv_mpi(self, x ,b)
     class(coo_mat_t), intent(in) :: self
     real(dp), intent(inout) :: x(:)
@@ -88,5 +107,14 @@ contains
     !call mpi_reduce(my_b, b, self%nrow, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, ierr)
     call xmpi_sum_master(b, 0, xmpi_world, ierr )
   end subroutine COO_mat_t_mv_mpi
+
+  subroutine test_COO_mv()
+    type(coo_mat_t) :: mat
+    real(dp) :: x(3), b(3)
+    x(:)=1.0
+    call mat%initialize([3,3])
+    call mat%add_entry([1,1], 3.0_dp)
+    call mat%mv(x, b)
+  end subroutine test_COO_mv
 
 end module m_spmat_COO

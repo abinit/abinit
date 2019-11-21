@@ -27,12 +27,15 @@
 module m_mover
 
  use defs_basis
- use defs_abitypes
+ use m_abicore
  use m_errors
+ use m_profiling_abi
  use m_abimover
  use m_abihist
+ use m_dtset
  use m_xmpi
  use m_nctk
+ use m_dtfil
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -41,6 +44,7 @@ module m_mover
  use m_pred_lotf
 #endif
 
+ use defs_abitypes,        only : MPI_type
  use m_fstrings,           only : strcat, sjoin, indent
  use m_symtk,              only : matr3inv, symmetrize_xred
  use m_geometry,           only : fcart2fred, chkdilatmx, xred2xcart
@@ -71,7 +75,7 @@ module m_mover
  use m_generate_training_set, only : generate_training_set
  use m_wvl_wfsinp, only : wvl_wfsinp_reformat
  use m_wvl_rho,      only : wvl_mkrho
- use m_effective_potential_file, only : effective_potential_file_mapHistToRef 
+ use m_effective_potential_file, only : effective_potential_file_mapHistToRef
 #if defined DEV_MS_SCALEUP 
  use scup_global, only : global_set_parent_iter,global_set_print_parameters 
 #endif 
@@ -382,9 +386,9 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
  nhisttot=ncycle*ntime;if (scfcv_args%dtset%nctime>0) nhisttot=nhisttot+1
 !AM_2017 New version of the hist, we just store the needed history step not all of them...
- if(specs%nhist/=-1)then   ! then .and. hist%mxhist > 3 
+ if(specs%nhist/=-1)then
   nhisttot = specs%nhist! We don't need to store all the history
- endif 
+ endif
 
  call abihist_init(hist,ab_mover%natom,nhisttot,specs%isVused,specs%isARused)
  call abiforstr_ini(preconforstr,ab_mover%natom)
@@ -865,7 +869,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !    vel_cell(3,3)= velocities of cell parameters
 !    Not yet used here but compute it for consistency
      vel_cell(:,:)=zero
-     if (ab_mover%ionmov==13 .and. hist%mxhist >= 2) then 
+     if (ab_mover%ionmov==13 .and. hist%mxhist >= 2) then
        if (itime_hist>2) then
          ihist_prev2 = abihist_findIndex(hist,-2)
          vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)- hist%rprimd(:,:,ihist_prev2))/(two*ab_mover%dtion)

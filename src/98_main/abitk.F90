@@ -34,7 +34,7 @@
 program abitk
 
  use defs_basis
- use defs_abitypes
+ use m_abicore
  use m_build_info
  use m_xmpi
  use m_errors
@@ -42,12 +42,12 @@ program abitk
  use m_ebands
  use m_crystal
  use m_kpts
- use m_tetrahedron
-
 
  use defs_datatypes,   only : ebands_t
  use m_fstrings,       only : sjoin, strcat, basename
  use m_specialmsg,     only : herald
+ use m_symtk,          only : matr3inv
+ use m_unittests,      only : tetra_unittests, kptrank_unittests
  use m_argparse,       only : get_arg, get_arg_list, parse_kargs
  use m_common,         only : ebands_from_file, crystal_from_file
 
@@ -58,7 +58,7 @@ program abitk
 !scalars
  integer,parameter :: master = 0
  integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands
- integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, ierr, occopt, intmeth
+ integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, occopt, intmeth !ierr,
  real(dp) :: spinmagntarget, tsmear, extrael, step, broad
  character(len=500) :: command, arg, msg
  character(len=fnlen) :: path !, prefix
@@ -66,10 +66,11 @@ program abitk
  type(ebands_t) :: ebands !, ebands_kpath
  type(edos_t) :: edos
  type(crystal_t) :: cryst
- type(t_tetrahedron) :: tetra
 !arrays
  integer :: kptrlatt(3,3), new_kptrlatt(3,3)
+ !integer,allocatable :: indkk(:,:) !, bz2ibz(:)
  !real(dp):: params(4)
+ !real(dp) :: klatt(3,3), rlatt(3,3)
  real(dp),allocatable :: shiftk(:,:), new_shiftk(:,:), wtk(:), kibz(:,:), kbz(:,:)
 
 !*******************************************************
@@ -91,8 +92,6 @@ program abitk
  nargs = command_argument_count()
  ABI_CHECK(get_arg("prtvol", prtvol, msg, default=0) == 0, msg)
 
- !if (nargs == 0) then
- !else
  ! Command line options.
  do ii=1,command_argument_count()
    call get_command_argument(ii, arg)
@@ -107,7 +106,7 @@ program abitk
      write(std_out,"(2a)")ch10,"=== HEADER ==="
      write(std_out,"(a)")"hdr FILE                   Print ABINIT header."
      write(std_out,"(2a)")ch10,"=== KPOINTS ==="
-     write(std_out,"(a)")"ibz FILE --kptopt 1 --kptrlatt or --ngkpt --shiftk 0.5 0.5, 0.5 --chksymbreak 1"
+     write(std_out,"(a)")"ibz FILE --ngkpt 2 2 2 or --kptrlatt [--kptopt 1] [--shiftk 0.5 0.5 0.5] [--chksymbreak 1]"
      write(std_out,"(2a)")ch10,"=== CRYSTAL ==="
      write(std_out,"(a)")"crystal_print FILE                   Print info on crystalline structure."
      write(std_out,"(2a)")ch10,"=== ELECTRONS ==="
@@ -120,8 +119,8 @@ program abitk
      !write(std_out,"(a)")"ebands_skw_path FILE                     Produce BXSF file for Xcrysden."
      write(std_out,"(a)")"ebands_extrael FILE --occopt --tsmear --extrael  Change number of electron, compute new Fermi level."
      write(std_out,"(2a)")ch10,"=== DEVELOPERS ==="
-     write(std_out,"(a)")"test_mjv                             Old tetrahedron routine"
-     write(std_out,"(a)")"test_unit_tests                      Run unit tests for tetrahedron routines."
+     write(std_out,"(a)")"tetra_unit_tests                      Run unit tests for tetrahedron routines."
+     write(std_out,"(a)")"kptrank_unit_tests                    Run unit tests for kptrank routines."
      goto 100
    end if
  end do
@@ -136,8 +135,8 @@ program abitk
    ABI_CHECK(fform /= 0, "fform == 0")
    !rdwr = 3; if (prtvol > 0) rdwr = 4
    rdwr = 4
-   call hdr_echo(hdr, fform, rdwr, unit=std_out)
-   
+   call hdr%echo(fform, rdwr, unit=std_out)
+
  case ("ibz")
    ! Print list of kpoints in the IBZ with the corresponding weights
    call get_path_cryst(path, cryst, comm)
@@ -169,8 +168,8 @@ program abitk
 
  case ("crystal_print")
     call get_path_cryst(path, cryst, comm)
-    call crystal_print(cryst, unit=std_out, prtvol=prtvol)
- 
+    call cryst%print(unit=std_out, prtvol=prtvol)
+
  case ("ebands_print", "ebands_xmgrace", "ebands_gnuplot")
    call get_path_ebands(path, ebands, comm)
    if (command == "ebands_print") then
@@ -190,6 +189,7 @@ program abitk
      edos = ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
      call edos%write(strcat(basename(path), "_EDOS"))
      call edos%free()
+
    else if (command == "ebands_jdos") then
      !jdos = ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
      !call jdos%write(strcat(basename(path), "_EJDOS"))
@@ -248,29 +248,18 @@ program abitk
    call ebands_update_occ(ebands, spinmagntarget, prtvol=prtvol)
    call ebands_print(ebands, prtvol=prtvol)
 
- case ("tetra_mjv")
-   call get_path_cryst(path, cryst, comm)
-   call parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
-   ABI_CHECK(any(kptrlatt /= 0), "ngkpt or kptrlatt must be specified")
-
-   call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
-      new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk) !, bz2ibz)  ! Optional
-
-   new_nshiftk = size(new_shiftk, dim=2)
-   tetra = tetra_from_kptrlatt(cryst, kptopt, new_kptrlatt, new_nshiftk, new_shiftk, nkibz, kibz, comm, msg, ierr)
-   ABI_CHECK(ierr == 0, msg)
-   call tetra_write(tetra, nkibz, kibz, strcat(basename(path), "_TETRA"))
-   call destroy_tetra(tetra)
-
  case ("tetra_unit_tests")
-   !call phdos_unittests(comm)
+   call tetra_unittests(comm)
+
+ case ("kptrank_unit_tests")
+   call kptrank_unittests(comm)
 
  case default
    MSG_ERROR(sjoin("Unknown command:", command))
  end select
 
  ! Deallocate memory to make memcheck happy.
- call hdr_free(hdr)
+ call hdr%free()
  call cryst%free()
  call ebands_free(ebands)
 
@@ -283,7 +272,7 @@ program abitk
 
  100 call xmpi_end()
 
-contains 
+contains
 !!***
 
 !!****f* abitk/get_path_ebands_cryst

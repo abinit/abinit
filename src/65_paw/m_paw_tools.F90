@@ -23,10 +23,10 @@
 MODULE m_paw_tools
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_dtset
 
  use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype,EP_POSITRON
@@ -433,8 +433,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
            iatom=jatom(iat)
            call pawdij_print_dij(paw_ij_all(iatom)%dij,paw_ij_all(iatom)%cplex_dij,&
 &                  paw_ij_all(iatom)%qphase,iatom,dtset%natom,paw_ij_all(iatom)%nspden,&
-&                  paw_ij_all(iatom)%nsppol,test_value=valmx,unit=unitfi,&
-&                  Ha_or_eV=unt,opt_prtvol=dtset%pawprtvol)
+&                  test_value=valmx,unit=unitfi,Ha_or_eV=unt,opt_prtvol=dtset%pawprtvol)
          end do
        end if
        msg=' '

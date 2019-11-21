@@ -1,5 +1,5 @@
 
-.Version 8.9.2 of ABINIT 
+.Version 8.11.12 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 11 Jun 2018.
-- ( at 16h55 )
+.Starting date : Mon 21 Oct 2019.
+- ( at 23h38 )
   
 - input  file    -> tgw1_2.in
 - output file    -> tgw1_2.out
@@ -267,8 +267,8 @@ P           mkmem3          1
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/bruneval_beauty/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/bruneval_beauty/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -316,7 +316,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.9017E-09; max=  2.8746E-07
+ Mean square residual over all n,k,spin=   59.017E-10; max=  28.746E-08
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -362,6 +362,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Other information on the energy :
     Total energy(eV)= -2.41434556377610E+02 ; Band energy (Ha)=   2.3119277585E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.02554038E-05  sigma(3 2)=  0.00000000E+00
@@ -487,7 +489,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.3652E-11; max=  9.7714E-17
+ Mean square residual over all n,k,spin=   43.652E-12; max=  97.714E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -559,8 +561,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/bruneval_beauty/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/bruneval_beauty/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -633,10 +635,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -5.689  -0.000  -0.102   0.000  -0.186  -0.000  -0.211   0.000
-       -0.000   0.000  -1.949  -0.000  -0.065   0.000  -0.149  -0.000  -0.173
+       -0.000  -0.000  -1.949  -0.000  -0.065   0.000  -0.149  -0.000  -0.173
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =  96.4963
@@ -657,10 +659,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
 
@@ -867,47 +869,51 @@ P           mkmem3          1
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [3] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          7.2  wall=         14.7
+- Proc.   0 individual time (sec): cpu=          7.3  wall=          8.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.2  wall=         14.7
+.Delivered   4 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=          7.3  wall=          8.4

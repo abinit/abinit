@@ -24,10 +24,9 @@
 MODULE m_paw_dfptnl
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
- use m_xmpi, only : xmpi_comm_self,xmpi_sum
+ use m_xmpi
 
  use m_pawang,     only : pawang_type
  use m_pawrad,     only : pawrad_type,simp_gen
@@ -102,8 +101,6 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
 &                    pawrhoij_1,pawrhoij_2,pawrhoij_3,&
 &                    pawtab,pawxcdev,&
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -191,7 +188,7 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    ABI_ALLOCATE(nhat1_1,(cplex_1*mesh_size,lm_size_all,nspden*usexcnhat))
    call pawdensities(compch,cplex_1,iatom_tot,lmselect_tmp,lmselect_1,&
 &   lm_size_all,nhat1_1,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
-&   pawrad(itypat),pawrhoij_1(iatom),pawtab(itypat),rho1_1,trho1_1)
+&   pawrad(itypat),pawrhoij_1(iatom),pawtab(itypat),rho1_1,trho1_1,0)
 !  Compute on-site 1st-order densities (pert2)
    ABI_ALLOCATE(lmselect_2,(lm_size_all))
    lmselect_2(:)=paw_an0(iatom)%lmselect(:)
@@ -200,7 +197,7 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    ABI_ALLOCATE(nhat1_2,(cplex_2*mesh_size,lm_size_all,nspden*usexcnhat))
    call pawdensities(compch,cplex_2,iatom_tot,lmselect_tmp,lmselect_2,&
 &   lm_size_all,nhat1_2,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
-&   pawrad(itypat),pawrhoij_2(iatom),pawtab(itypat),rho1_2,trho1_2)
+&   pawrad(itypat),pawrhoij_2(iatom),pawtab(itypat),rho1_2,trho1_2,0)
 !  Compute on-site 1st-order densities (pert3)
    ABI_ALLOCATE(lmselect_3,(lm_size_all))
    lmselect_3(:)=paw_an0(iatom)%lmselect(:)
@@ -209,7 +206,7 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    ABI_ALLOCATE(nhat1_3,(cplex_3*mesh_size,lm_size_all,nspden*usexcnhat))
    call pawdensities(compch,cplex_3,iatom_tot,lmselect_tmp,lmselect_3,&
 &   lm_size_all,nhat1_3,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
-&   pawrad(itypat),pawrhoij_3(iatom),pawtab(itypat),rho1_3,trho1_3)
+&   pawrad(itypat),pawrhoij_3(iatom),pawtab(itypat),rho1_3,trho1_3,0)
    ABI_DEALLOCATE(lmselect_tmp)
 
    call paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,paw_an0(iatom)%k3xc1,lm_size_all,&
@@ -306,8 +303,6 @@ end subroutine paw_dfptnl_energy
 
 subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmselect1,lmselect2,lmselect3,&
 &                 nhat1,nhat2,nhat3,nkxc,nrad,nspden,pawang,pawrad,rhor1,rhor2,rhor3,usexcnhat)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -530,8 +525,6 @@ end subroutine paw_dfptnl_xc
 &                       cwaveprj1_pert12,cwaveprj1_pert21,ipert1,ipert2,isppol,my_natom,natom,&
 &                       nspinor,occ_k,pawrhoij,wtk_k,&
 &                       comm_atom,mpi_atmtab ) ! optional (parallelism)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars

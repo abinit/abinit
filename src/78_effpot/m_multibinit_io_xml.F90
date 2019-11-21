@@ -2,10 +2,10 @@
 !!****m* ABINIT/m_multibinit_io_xml
 !! NAME
 !!  m_multibinit_io_xml
-!! m_spin_primitive_potential
+!!
 !!
 !! FUNCTION
-!!
+!!   This module contains interface to the C functions for the potential xml file parser.
 !!
 !! Subroutines:
 !!
@@ -35,6 +35,8 @@ module m_multibinit_io_xml
 !!*** 
 
   interface
+     !-------------------------------------------------------------------!
+     ! Read the spin xml file and save to the variables.
      ! C function:
      ! void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
      ! int *natoms, double *masses[], int *nspin,
@@ -56,7 +58,6 @@ module m_multibinit_io_xml
      ! int *bi_nnz, int *bi_ilist[],
      ! int *bi_jlist[], int *bi_Rlist[],
      ! double *bi_vallist[])
-
      subroutine xml_read_spin(xml_fname, ref_energy, unitcell,                 &
           natoms, masses, nspin, index_spin, gyroratios, damping_factors, positions, spinat, &
           exc_nnz, exc_ilist, exc_jlist, exc_Rlist, exc_vallist, &
@@ -77,6 +78,9 @@ module m_multibinit_io_xml
  end interface
 
  interface
+    !-------------------------------------------------------------------!
+    ! Interface to the C code which free the memory.
+    !-------------------------------------------------------------------!
      subroutine xml_free_spin(xml_fname, ref_energy, unitcell,                 &
           natoms, masses, nspin, index_spin, gyroratios, damping_factors, positions, spinat, &
           exc_nnz, exc_ilist, exc_jlist, exc_Rlist, exc_vallist, &

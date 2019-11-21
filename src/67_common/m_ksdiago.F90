@@ -27,13 +27,14 @@
 module m_ksdiago
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
  use m_hamiltonian
+ use m_distribfft
 
+ use defs_datatypes,      only : pseudopotential_type
+ use defs_abitypes,       only : MPI_type
  use m_fstrings,          only : toupper
  use m_geometry,          only : metric
  use m_hide_lapack,       only : xheev, xhegv, xheevx, xhegvx
@@ -242,7 +243,7 @@ contains
 !!      m_shirley,outkss
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,destroy_mpi_enreg,fftpac,getcprj,getghc
+!!      destroy_mpi_enreg,fftpac,getcprj,getghc
 !!      init_distribfft_seq,init_hamiltonian,initmpi_seq,initylmg,kpgsph
 !!      load_k_hamiltonian,load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg
 !!      pawcprj_alloc,pawcprj_free,pawcprj_reorder,transgrid,wrtout,xheev
@@ -254,8 +255,6 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 & typat,nfftf,nspinor,nspden,nsppol,Pawtab,Pawfgr,Paw_ij,&
 & Psps,rprimd,vtrial,xred,onband_diago,eig_ene,eig_vec,Cprj_k,comm,ierr,&
 & Electronpositron) ! Optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -448,7 +447,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  end if
 
 !Continue to initialize the Hamiltonian (spin-dependent part)
- call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
+ call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
 !
 !* Calculate G-vectors, for this k-point.
 !* Count the number of planewaves as a check.
@@ -502,9 +501,8 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 
 !Load k-dependent part in the Hamiltonian datastructure
  ABI_MALLOC(ph3d,(2,npw_k,gs_hamk%matblk))
- call load_k_hamiltonian(gs_hamk,kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,kinpw_k=kinpw,&
-& kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
-& compute_ph3d=.true.,compute_gbound=.true.)
+ call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,kinpw_k=kinpw,&
+& kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
 
 !Prepare the call to getghc.
  ndat=1; lambda=zero; type_calc=0         ! For applying the whole Hamiltonian
@@ -673,7 +671,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  ABI_FREE(ffnl)
 
  call destroy_mpi_enreg(MPI_enreg_seq)
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
 
  call xmpi_barrier(comm)
 
@@ -703,8 +701,6 @@ end subroutine ksdiago
 
 subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
 & nband_k,istwf_k,ecutsm,effmass_free,abstol,range,ilu,vlu,use_scalapack,prtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -58,9 +58,16 @@ module m_spin_ncfile
   !!***
 
   type spin_ncfile_t
-     logical :: isopen=.False.
+     logical :: isopen=.False.  ! if the file is open
      ! dimensions
      integer :: three, nspin, natoms, ntime, ntypat, nsublatt
+     ! three: 3
+     ! nspin: number of spin 
+     ! natoms: number of atoms in a structure >=nspin
+     ! ntime: number of time step
+     ! ntypat: number of
+     ! nsublatt: number of spin sublattice
+
      ! file id
      integer :: ncerr, ncid
      ! variable id
@@ -68,28 +75,65 @@ module m_spin_ncfile
      integer ::  acell_id, rprimd_id
      ! variable ids for spin dynamics
      integer :: entropy_id, etotal_id, S_id, snorm_id, dsdt_id, heff_id, time_id, itime_id
+     ! entropy
+     ! etotal: total energy
+     ! S: spin
+     ! snorm: magnetic moment. (norm of S)
+     ! dsdt: dS/dt
+     ! heff: effective magnetic field from derivative of E
+     ! time:  time
+     ! iteme: index of time step
      integer :: Mst_sub_id, Mst_sub_norm_id, Mst_norm_total_id, Snorm_total_id
+     ! Mst_sub: magnetic moment of every sub lattice, \sum_(i in I) Si, where I is a sublattice
+     ! Mst_sub_norm: norm of magnetic momemt of every sub lattice |\sum_(i in I) Si|
+     ! Mst_norm_total: sum of the norm of magnetic moment of every sublattice \sum_I |\sum_(i in I) Si|
+     ! Snorm_total: \sum_i |Si|
 
      ! thermo obs
      integer :: chi_id, binderU4_id, Cv_id
+     !chi: susceptibility
+     ! binder U4: 
+     ! Cv: Specific heat
+
      ! variable ids for spin/lattice coupling
+     ! TODO: How to do this?
      integer :: ihist_g_id
 
      integer :: itime
+     ! itime: time index
+
      integer :: write_traj=1
+     !whether to write the trajectory (S(t))
+
      character(len=fnlen) :: filename
+     ! netcdf filename
    contains
-     procedure :: initialize
+     ! initialize
+     procedure :: initialize    
+     ! define variables for trajectory
      procedure :: def_spindynamics_var
+     ! define variables for observables
      procedure :: def_observable_var
+     ! write one step of hist
      procedure :: write_one_step
+     ! write the primitive cell information
      procedure :: write_primitive_cell
+     ! write supercell information
      procedure :: write_supercell
+     ! write parameters related to simulation
      procedure :: write_parameters
+     ! close netcdf file
      procedure :: close
   end type spin_ncfile_t
 
 contains
+
+  !-----------------------------------------------------------------------
+  !> @brief initialize
+  !>   open netcdf file
+  !> @param [in] filename: the netcdf filename
+  !> @param [in] write_traj: whether to write full trajectory
+  !-----------------------------------------------------------------------
 
   subroutine initialize(self, filename, write_traj)
 
@@ -111,8 +155,12 @@ contains
 #endif
   end subroutine initialize
 
-  subroutine def_spindynamics_var(self, hist)
 
+  !-----------------------------------------------------------------------
+  !> @brief define variables for spin dynamics trajectory (and energy)
+  !> @param [in] hist: the spin hist object (not histfile!)
+  !-----------------------------------------------------------------------
+  subroutine def_spindynamics_var(self, hist)
     class(spin_ncfile_t), intent(inout) :: self
     type(spin_hist_t),intent(in) :: hist
     integer :: ncerr
@@ -148,11 +196,15 @@ contains
 #endif
   end subroutine def_spindynamics_var
 
+
+  !-----------------------------------------------------------------------
+  !> @brief define varibles of observables 
+  !> @param [in] ob: the spin observalble object
+  !-----------------------------------------------------------------------
   subroutine def_observable_var(self, ob)
     class(spin_ncfile_t), intent(inout) :: self
     type(spin_observable_t), intent(in) :: ob
     integer ncerr
-
 #if defined HAVE_NETCDF
     ncerr = nf90_redef(self%ncid)
     ncerr = nf90_def_dim(self%ncid, "nsublatt", ob%nsublatt, self%nsublatt)
@@ -188,6 +240,11 @@ contains
 #endif
 end subroutine def_observable_var
 
+!-----------------------------------------------------------------------
+!> @brief write to netcdf after one step is done in a mover
+!> @param [in] hist: the spin hist object
+!> @param [in] ob : the spin observables
+!-----------------------------------------------------------------------
   subroutine write_one_step(self, hist, ob)
 
     class(spin_ncfile_t), intent(inout) :: self
@@ -244,6 +301,11 @@ end subroutine def_observable_var
 #endif
   end subroutine write_one_step
 
+  !-----------------------------------------------------------------------
+  !> @brief write information about the primitive cell
+  !> Currently disabled.
+  !> @param [in] prim: the primitive cell
+  !-----------------------------------------------------------------------
   subroutine write_primitive_cell(self, prim)
 
     class(spin_ncfile_t), intent(inout) :: self
@@ -279,6 +341,13 @@ end subroutine def_observable_var
 #endif
   end subroutine write_primitive_cell
 
+  !-----------------------------------------------------------------------
+  !> @brief write information of supercell
+  !>     - cartesian coordinates of each spin in supercell
+  !>     - R vector in supercell (as R in S_j e^iqR_j)
+  !>     - the index of spin in primitive cell (as j in S_j e&iqR_j). 
+  !> @param [in] supercell: The supercell object
+  !-----------------------------------------------------------------------
   subroutine write_supercell(self, supercell)
 
     class(spin_ncfile_t), intent(inout) :: self
@@ -311,8 +380,11 @@ end subroutine def_observable_var
 #endif
   end subroutine write_supercell
 
+  !-----------------------------------------------------------------------
+  !> @brief write parameters into hist file
+  !> @param [in] params: parameters from input
+  !-----------------------------------------------------------------------
   subroutine write_parameters(self, params)
-
     class(spin_ncfile_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
     integer :: qpoint_id, temperature_id, dt_id, mfield_id, ncell_id
@@ -321,7 +393,6 @@ end subroutine def_observable_var
 
 #if defined HAVE_NETCDF
     ncerr=nf90_redef(self%ncid)
-
     ! dims 
     ! vars
     call ab_define_var(self%ncid, (/self%three/), qpoint_id, NF90_DOUBLE,&
@@ -354,6 +425,9 @@ end subroutine def_observable_var
 #endif
   end subroutine write_parameters
 
+  !-----------------------------------------------------------------------
+  !> @brief close hist file
+  !-----------------------------------------------------------------------
   subroutine close(self)
 
     class(spin_ncfile_t), intent(inout) :: self

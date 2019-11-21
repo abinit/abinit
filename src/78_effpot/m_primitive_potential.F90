@@ -46,6 +46,13 @@ module m_primitive_potential
 !!***
 
 
+  !----------------------------------------------------------------------
+  !> @brief Abstract primitve potential type
+  !> It maps to a file which defines the potential
+  !> therefore IO can be defined in this class
+  !> And by using translation symmetry the supercell potential can be built
+  !> using the fill_supercell method.
+  !----------------------------------------------------------------------
   type ,public :: primitive_potential_t
      ! This is the abstract class of primitive potential
      ! It do the following things:
@@ -58,12 +65,15 @@ module m_primitive_potential
    contains
      !procedure:: initialize       ! perhaps each effpot type should have own 
      procedure :: finalize
-     procedure :: fill_supercell
-     procedure :: load_from_files
+     procedure :: fill_supercell   ! build potential for a supercell
+     procedure :: load_from_files  ! load potential from the file list defined in files file.
   end type primitive_potential_t
 
 contains
 
+  !----------------------------------------------------------------------
+  !> @brief finalize
+  !----------------------------------------------------------------------
 subroutine finalize(self)
   class(primitive_potential_t), intent(inout) :: self
   nullify(self%primcell)
@@ -74,6 +84,12 @@ subroutine finalize(self)
   self%has_lwf=.False.
 end subroutine finalize
 
+
+!----------------------------------------------------------------------
+!> @brief build potential for a supercell
+!> @param[in]  input
+!> @param[out] output
+!----------------------------------------------------------------------
 subroutine fill_supercell(self, scmaker, scpot)
     class(primitive_potential_t), intent(inout) :: self
     type(supercell_maker_t), intent(inout) :: scmaker
@@ -87,9 +103,14 @@ subroutine fill_supercell(self, scmaker, scpot)
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(scmaker)
     ABI_UNUSED_A(scpot)
-    
   end subroutine fill_supercell
 
+  !----------------------------------------------------------------------
+  !> @brief load potential from files
+  !>
+  !> @param[in]  params: parameter from input file
+  !> @param[in] fnames: the list of files from files file
+  !----------------------------------------------------------------------
   subroutine load_from_files(self, params,  fnames)
     class(primitive_potential_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(in) :: params
@@ -101,6 +122,10 @@ subroutine fill_supercell(self, scmaker, scpot)
   end subroutine load_from_files
 
 
+!----------------------------------------------------------------------
+  !> @brief save the potential to a file
+  !> @param[in]   fname: name of file to save the potential
+  !----------------------------------------------------------------------
   subroutine save_to_file(self, fname)
     class(primitive_potential_t), intent(inout) :: self
     character(len=fnlen), intent(in) :: fname

@@ -31,6 +31,35 @@
 MODULE m_dmft
 
  use defs_basis
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+ use m_xmpi
+ use m_errors
+ use m_abicore
+ use m_data4entropyDMFT
+
+ use m_time,           only : timab
+ use m_pawang, only : pawang_type
+ use m_pawtab, only : pawtab_type
+ use m_paw_dmft, only: paw_dmft_type
+ use m_crystal, only : crystal_t
+ use m_green, only : green_type, destroy_green, icip_green,init_green,&
+&                    print_green,printocc_green,&
+&                    integrate_green,copy_green,compute_green,&
+&                    check_fourier_green,local_ks_green,fermi_green, &
+&                    fourier_green, init_green_tau,destroy_green_tau
+ use m_oper, only : oper_type,diff_oper,upfold_oper,loc_oper, trace_oper, inverse_oper !,upfold_oper,init_oper,destroy_oper,print_oper
+ use m_self, only : self_type,initialize_self,destroy_self,print_self,dc_self,rw_self,new_self,make_qmcshift_self
+ use m_hu, only : hu_type,init_hu,destroy_hu
+ use m_energy, only : energy_type,init_energy,destroy_energy,compute_energy,print_energy,compute_ldau_energy
+ use m_matlu, only : print_matlu,sym_matlu, matlu_type,init_matlu,destroy_matlu, add_matlu, copy_matlu
+ use m_datafordmft, only : psichi_renormalization
+ use m_io_tools, only : flush_unit
+ use m_hubbard_one, only : hubbard_one
+ use m_ldau_self, only : ldau_self
+ use m_forctqmc, only : qmc_prep_ctqmc
+
  implicit none
 
  private
@@ -49,13 +78,6 @@ contains
 !!
 !! FUNCTION
 !! Solve the DMFT loop from PAW data.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=crystal structure data
@@ -86,31 +108,6 @@ contains
 !! SOURCE
 
 subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtvol)
-
-
- use defs_basis
- use defs_abitypes
- use m_xmpi
- use m_errors
- use m_abicore
- use m_data4entropyDMFT
-
- use m_time,           only : timab
- use m_pawang, only : pawang_type
- use m_pawtab, only : pawtab_type
- use m_paw_dmft, only: paw_dmft_type
- use m_crystal, only : crystal_t
- use m_green, only : green_type, destroy_green, icip_green,init_green,&
-&                    print_green,printocc_green,&
-&                    integrate_green,copy_green,compute_green,&
-&                    check_fourier_green,local_ks_green,fermi_green
- use m_oper, only : oper_type,diff_oper,upfold_oper,loc_oper!,upfold_oper,init_oper,destroy_oper,print_oper
- use m_self, only : self_type,initialize_self,destroy_self,print_self,dc_self,rw_self,new_self,make_qmcshift_self
- use m_hu, only : hu_type,init_hu,destroy_hu
- use m_energy, only : energy_type,init_energy,destroy_energy,compute_energy,print_energy,compute_ldau_energy
- use m_matlu, only : print_matlu,sym_matlu!,identity_matlu
- use m_datafordmft, only : psichi_renormalization
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -471,7 +468,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 !  == Save self on disk
 !  ---------------------------------------------------------------------
    call timab(627,1,tsec)
-   call rw_self(self,paw_dmft,prtopt=2,opt_rw=2)
+   call rw_self(self,paw_dmft,prtopt=2,opt_rw=2,pawang=pawang,cryst_struc=cryst_struc)
    call timab(627,2,tsec)
 
 !  == Test convergency
@@ -572,13 +569,6 @@ end subroutine dmft_solve
 !! FUNCTION
 !! Solve the Impurity problem
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=crystal structure data
 !!  lda_occup
@@ -603,30 +593,6 @@ end subroutine dmft_solve
 
 subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
 & pawang,pawtab,self_old,self_new,weiss,pawprtvol)
-
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_abicore
-
- use m_time,    only : timab
- use m_crystal, only : crystal_t
- use m_green, only : green_type, fourier_green&
-& ,init_green_tau,destroy_green_tau,print_green,printocc_green,integrate_green,copy_green
- use m_paw_dmft, only : paw_dmft_type
- use m_oper,     only : trace_oper
- use m_hu, only : hu_type
- use m_matlu, only : matlu_type,print_matlu,init_matlu,destroy_matlu
- use m_self, only : self_type
- use m_energy, only : energy_type
- use m_pawang, only : pawang_type
- use m_pawtab, only : pawtab_type
- use m_io_tools, only : flush_unit
- use m_hubbard_one, only : hubbard_one
- use m_ldau_self, only : ldau_self
- use m_forctqmc, only : qmc_prep_ctqmc
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -864,13 +830,6 @@ end subroutine impurity_solve
 !! FUNCTION
 !! Use the Dyson Equation to compute self-energy from green function
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  istep    =  step of iteration for LDA.
@@ -897,19 +856,6 @@ end subroutine impurity_solve
 !! SOURCE
 
 subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
-
- use defs_basis
- use m_abicore
- use m_errors
-
- use m_time,         only : timab
- use m_paw_dmft, only: paw_dmft_type
- use m_crystal, only : crystal_t
- use m_green, only : green_type, destroy_green,init_green,copy_green
- use m_oper, only : oper_type,inverse_oper
- use m_matlu, only : matlu_type,add_matlu,print_matlu
- use m_self, only : self_type
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1006,13 +952,6 @@ end subroutine dyson
 !! FUNCTION
 !! Print the spectral function computed from Green function in real frequency
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=crystal structure data
 !!  green  <type(green_type)>= green function data
@@ -1023,7 +962,7 @@ end subroutine dyson
 !!  prtopt= option for printing
 !!
 !! OUTPUT
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  paw_dmft = data for self-consistent LDA+DMFT calculations.
 !!
 !! NOTES
 !!
@@ -1039,24 +978,6 @@ end subroutine dyson
 
 subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
 & pawang,pawtab,self_old,prtopt)
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_abicore
-
- use m_crystal, only : crystal_t
- use m_green, only : init_green,green_type,print_green,copy_green,compute_green,destroy_green
- use m_matlu, only : copy_matlu
- use m_paw_dmft, only : paw_dmft_type
- use m_hu, only : hu_type
- use m_self, only : self_type,initialize_self,dc_self,destroy_self,rw_self
- use m_energy, only : energy_type
- use m_pawang, only : pawang_type
- use m_pawtab, only : pawtab_type
- use m_hubbard_one, only : hubbard_one
- use m_ldau_self, only : ldau_self
- implicit none
 
 !Arguments ------------------------------------
 !scalars

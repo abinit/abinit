@@ -99,8 +99,6 @@ CONTAINS
 subroutine rotate_mag(rho_in,rho_out,mag,vectsize,cplex,&
 &                     mag_norm_in,mag_norm_out,rho_out_format) ! optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: vectsize
@@ -239,8 +237,6 @@ end subroutine rotate_mag
 subroutine rotate_back_mag(vxc_in,vxc_out,mag,vectsize,&
 &                          mag_norm_in) ! optional argument
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: vectsize
@@ -330,8 +326,6 @@ end subroutine rotate_back_mag
 
 subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex,&
 &                               mag_norm_in,rot_method) ! optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -884,9 +878,6 @@ end subroutine rotate_back_mag_dfpt
 !! SOURCE
 
 subroutine test_rotations(option,cplex)
-
- use defs_basis
- implicit none
 
 !Arguments ------------------------------------
  integer , intent(in)  :: option

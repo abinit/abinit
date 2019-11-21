@@ -109,10 +109,6 @@ _ WF disk file :      0.354 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
              ecut      1.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
 -          fftalg         112
-           getden1          0
-           getden2          1
-           getden3          0
-           getden4          0
            getwfk1          0
            getwfk2          0
            getwfk3          2
@@ -424,9 +420,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.625     117.597
 ================================================================================
 == DATASET  2 ==================================================================
 -   nproc =    1
- 
- mkfilename : getden/=0, take file _DEN from output of DATASET   1.
- 
+
+ mkfilename: getden from: t36o_DS1_DEN
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
@@ -792,10 +788,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.625     117.597
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         112
-           getden1          0
-           getden2          1
-           getden3          0
-           getden4          0
            getwfk1          0
            getwfk2          0
            getwfk3          2

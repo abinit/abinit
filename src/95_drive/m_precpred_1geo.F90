@@ -27,8 +27,8 @@
 module m_precpred_1geo
 
  use defs_basis
- use defs_abitypes
  use m_errors
+ use m_abicore
  use m_abimover
  use m_abihist
  use m_xmpi
@@ -119,8 +119,6 @@ contains
 
 subroutine precpred_1geo(ab_mover,ab_xfh,amu_curr,deloc,dt_chkdilatmx,comm_cell,dilatmx,filnam_ds4,hist,hmctt,&
 & icycle,iexit,itime,mttk_vars,nctime,ncycle,nerr_dilatmx,npsp,ntime,rprimd_orig,skipcycle,usewvl)
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -244,9 +242,9 @@ real(dp), allocatable :: xred(:,:)
          hist%ihist = abihist_findIndex(hist,-1)
          call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
          call crystal_init(amu_curr,crystal,0,ab_mover%natom,&
-&         npsp,ab_mover%ntypat,ab_mover%nsym,rprimd,ab_mover%typat,xred,&
-&         [(-one, ii=1,ab_mover%ntypat)],ab_mover%znucl,2,.False.,.False.,"dilatmx_structure",&
-&         symrel=ab_mover%symrel,tnons=ab_mover%tnons,symafm=ab_mover%symafm)
+           npsp,ab_mover%ntypat,ab_mover%nsym,rprimd,ab_mover%typat,xred,&
+           [(-one, ii=1,ab_mover%ntypat)],ab_mover%znucl,2,.False.,.False.,"dilatmx_structure",&
+           symrel=ab_mover%symrel,tnons=ab_mover%tnons,symafm=ab_mover%symafm)
 
 #ifdef HAVE_NETCDF
          ! Write netcdf file

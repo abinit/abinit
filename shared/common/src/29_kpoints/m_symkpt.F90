@@ -3,11 +3,8 @@
 !! NAME
 !!  m_symkpt
 !!
-!! FUNCTION
-!!
-!!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group ()
+!!  Copyright (C) 1999-2019 ABINIT group (XG,LSI,HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,12 +26,21 @@
 
 module m_symkpt
 
+ use defs_basis
+ use m_abicore
+ use m_errors
+ use m_sort
+ use m_krank
+ use m_numeric_tools
+ use m_time
+
  implicit none
 
  private
 !!***
 
  public :: symkpt
+ public :: symkpt_new
 !!***
 
 contains
@@ -51,13 +57,6 @@ contains
 !! Also compute the number of k points in the reduced set
 !! This routine is also used for sampling the q vectors in the Brillouin zone for the computation
 !! of thermodynamical properties (from the routine thm9).
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (XG,LSI)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! chksymbreak= if 1, will check whether the k point grid is symmetric, and stop if not.
@@ -102,11 +101,6 @@ contains
 
 subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev,wtk,wtk_folded, bz2ibz_smap, comm)
 
- use defs_basis
- use m_abicore
- use m_errors
- use m_sort
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: chksymbreak,iout,nkbz,nsym,timrev,comm
@@ -141,6 +135,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 
  ! Find the identity symmetry operation
  identi = 1
+ tident = -1
  if (nsym/=1) then
    do isym=1,nsym
      tident=1
@@ -325,18 +320,16 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
              wtk_folded(ind_ikpt) = wtk_folded(ind_ikpt) + wtk_folded(ind_ikpt2)
              wtk_folded(ind_ikpt2) = zero
 
-             !if (present(bz2ibz_smap)) then
-               ! Fill entries following listkk convention.
-               bz2ibz_smap(1, ind_ikpt2) = ind_ikpt
-               bz2ibz_smap(2, ind_ikpt2) = isym
-               ! Compute difference with respect to kpt2, modulo a lattice vector
-               ! TODO
-               !dk(:) = kptns2(:,ikpt2) - kpt1a(:)
-               !dkint(:) = nint(dk(:) + tol12)
-               !bz2ibz_smap(3:5, ind_ikpt2) = g0
-               ii = 0; if (itim == -1) ii = 1
-               bz2ibz_smap(6, ind_ikpt2) = ii
-             !end if
+             ! Fill entries following listkk convention.
+             ! Note however that here we always use symrec whereas listkk uses symrel^T by default
+             ! so pay attention when using these tables to symmetrize wavefunctions.
+             bz2ibz_smap(1, ind_ikpt2) = ind_ikpt
+             bz2ibz_smap(2, ind_ikpt2) = isym
+             ! Compute difference with respect to kpt2, modulo a lattice vector
+             ! Sk1 + G0 = k2
+             bz2ibz_smap(3:5, ind_ikpt2) = nint(-ksym(:) + kbz(:, ind_ikpt2) + tol12)
+             ii = 0; if (itim == -1) ii = 1
+             bz2ibz_smap(6, ind_ikpt2) = ii
 
              ! Go to the next ikpt2 if the symmetric was found
              quit = 1; exit
@@ -411,6 +404,248 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
  end if
 
 end subroutine symkpt
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/symkpt_new
+!! NAME
+!! symkpt_new
+!!
+!! FUNCTION
+!! Same routine as above but with an algorithm with better scalling than before.
+!! From a few tests it produces the same IBZ as before but avoids computing the lengths and sorting.
+!! Instead it uses the krank datatype to map k-points onto each other.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev,bz2ibz_smap, comm)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: chksymbreak,iout,nkbz,nsym,timrev,comm
+ integer,intent(out) :: nkibz
+!arrays
+ integer,intent(in) :: symrec(3,3,nsym)
+ integer,intent(out) :: ibz2bz(nkbz)
+ real(dp),intent(in) :: gmet(3,3),kbz(3,nkbz)
+ integer,intent(out) :: bz2ibz_smap(6,nkbz)
+
+!Local variables -------------------------
+!scalars
+ type(krank_t) :: krank
+ integer :: identi,ii,ikpt,ikibz,ikpt_found
+ integer :: isym,itim,jj,nkpout,tident
+ !real(dp) :: cpu, gflops, wall
+ character(len=500) :: message
+!arrays
+ real(dp) :: ksym(3),kpt1(3)
+
+! *********************************************************************
+
+ ABI_UNUSED(comm)
+ ABI_UNUSED(gmet)
+
+ if (timrev/=1 .and. timrev/=0) then
+   write(message,'(a,i0)')' timrev should be 0 or 1, while it is equal to ',timrev
+   MSG_BUG(message)
+ end if
+
+ ! Find the identity symmetry operation
+ identi = 1
+ tident = -1
+ if (nsym/=1) then
+   do isym=1,nsym
+     tident=1
+     do jj=1,3
+       if(symrec(jj,jj,isym)/=1)tident=0
+       do ii=1,3
+         if( ii/=jj .and. symrec(ii,jj,isym)/=0)tident=0
+       end do
+     end do
+     if(tident==1)then
+       identi=isym
+       !write(message, '(a,i0)' )' symkpt : found identity, with number',identi
+       !call wrtout(std_out,message,'COLL')
+       exit
+     end if
+   end do
+   ABI_CHECK(tident == 1, 'Did not find the identity operation')
+ end if
+
+ ! Initialize
+ ibz2bz = 0
+ bz2ibz_smap = 0
+ do ikpt=1,nkbz
+   bz2ibz_smap(1, ikpt) = ikpt
+   bz2ibz_smap(2, ikpt) = 1
+   bz2ibz_smap(4, ikpt) = 1 ! We will use this as wtk_folded
+ end do
+
+ ! Start krank
+ krank = krank_new(nkbz, kbz)
+
+ ! Here begins the serious business
+ !call cwtime(cpu, wall, gflops, "start")
+
+ ! If there is some possibility for a change
+ if(nkbz/=1 .and. (nsym/=1 .or. timrev==1) )then
+
+   ! Examine whether the k point grid is symmetric or not
+   ! This check scales badly with nkbz hence it's disabled for dense meshes.
+   if (chksymbreak == 1 .and. nkbz < 40**3) then
+     do ikpt=1,nkbz
+       kpt1 = kbz(:,ikpt)
+
+       do isym=1,nsym
+         do itim=0,timrev
+           ! Skip identity symmetry
+           if (isym==identi .and. itim==0) cycle
+
+           ! Get the symmetric of the vector
+           do ii=1,3
+             ksym(ii)=(1-2*itim)*( kpt1(1)*symrec(ii,1,isym)+&
+                                   kpt1(2)*symrec(ii,2,isym)+&
+                                   kpt1(3)*symrec(ii,3,isym) )
+           end do
+
+           !find this point
+           ikpt_found = krank%get_index(ksym)
+           !if (sum(abs(mod(ksym-kbz(:,ikpt_found),one)))>tol8) then
+           !  MSG_ERROR('Wrong k-point mapping found by krank')
+           !end if
+           !if k-point not found
+           if (ikpt_found < 0) then
+             write(message,'(3a,i4,2a,9i3,2a,i6,1a,3es16.6,6a)' )&
+             'Chksymbreak=1. It has been observed that the k point grid is not symmetric:',ch10,&
+             'for the symmetry number: ',isym,ch10,&
+             'with symrec= ',symrec(1:3,1:3,isym),ch10,&
+             'the symmetric of the k point number: ',ikpt,' with components: ',kpt1(:),ch10,&
+             'does not belong to the k point grid.',ch10,&
+             'Read the description of the input variable chksymbreak,',ch10,&
+             'You might switch it to zero, or change your k point grid to one that is symmetric.'
+             MSG_ERROR(message)
+           end if
+         end do ! itim
+       end do ! isym
+     end do ! ikpt
+   end if
+
+   ! Here I generate the IBZ
+   ikpt_loop: do ikpt=1,nkbz
+
+     if (bz2ibz_smap(4, ikpt)==0) cycle
+     kpt1 = kbz(:,ikpt)
+
+     ! MG Dec 16 2018, Invert isym, itim loop to be consistent with listkk and GW routines
+     ! Should always use this convention when applying symmetry operations in k-space.
+     ! TODO: Postponed to v9 because it won't be possible to read old WFK files.
+     do isym=1,nsym
+       do itim=0,timrev
+         ! Skip identity symmetry
+         if (isym==identi .and. itim==0) cycle
+
+         ! Get the symmetric of the vector
+         do ii=1,3
+           ksym(ii)=(1-2*itim)*( kpt1(1)*symrec(ii,1,isym)+&
+                                 kpt1(2)*symrec(ii,2,isym)+&
+                                 kpt1(3)*symrec(ii,3,isym) )
+         end do
+
+         !find this point
+         ikpt_found = krank%get_index(ksym)
+         !if k-point not found just cycle
+         if (ikpt_found < 0) cycle
+         !if (sum(abs(mod(ksym-kbz(:,ikpt_found),one)))>tol8) then
+         !  MSG_ERROR('Wrong k-point mapping found by krank')
+         !end if
+         if (ikpt_found >= ikpt) cycle
+         bz2ibz_smap(:3, ikpt)  = [ikpt_found,isym,itim]
+         bz2ibz_smap(4,ikpt) = bz2ibz_smap(4,ikpt) + bz2ibz_smap(4,ikpt_found)
+         bz2ibz_smap(4,ikpt_found) = 0
+       end do ! itim
+     end do ! isym
+   end do ikpt_loop! ikpt
+
+ end if ! End check on possibility of change
+ !call cwtime_report(" ibz", cpu, wall, gflops)
+
+ nkibz = 0
+ do ikpt=1,nkbz
+   ikibz = bz2ibz_smap(1,ikpt)
+   if (ikibz /= ikpt) cycle
+   nkibz = nkibz + 1
+   ibz2bz(nkibz) = ikpt
+ end do
+
+ !do ikpt=1,nkbz
+ !  write(*,*) ikpt, ibz2bz(ikpt), bz2ibz_smap(1,ikpt)
+ !end do
+
+ ! Initialize again
+ bz2ibz_smap = 0
+
+ ! Now I loop again over the points in the IBZ to find the mapping to the BZ
+ do ikpt=1,nkibz
+   ikibz = ibz2bz(ikpt)
+   kpt1 = kbz(:,ikibz)
+
+   ! HM: Here I invert the itim and isym loop to generate the same mapping as listkk
+   do itim=0,timrev
+     do isym=1,nsym
+       ! Get the symmetric of the vector
+       do ii=1,3
+         ksym(ii)=(1-2*itim)*( kpt1(1)*symrec(ii,1,isym)+&
+                               kpt1(2)*symrec(ii,2,isym)+&
+                               kpt1(3)*symrec(ii,3,isym) )
+       end do
+
+       !find this point
+       ikpt_found = krank%get_index(ksym)
+       if (ikpt_found < 0) cycle
+       if (bz2ibz_smap(1, ikpt_found) /= 0) cycle
+       bz2ibz_smap(:3, ikpt_found) = [ikpt,isym,itim]
+       bz2ibz_smap(4:, ikpt_found) = nint(kbz(:,ikpt_found)-ksym)
+     end do
+   end do
+ end do
+ !call cwtime_report(" map", cpu, wall, gflops)
+
+ call krank%free()
+
+ !Here I make a check if the mapping was sucessfull
+ if (any(bz2ibz_smap(1, :) == 0)) then
+   MSG_ERROR('Could not find mapping BZ to IBZ')
+ end if
+
+ !do ikpt=1,nkbz
+ !  write(*,*) ikpt, ibz2bz(ikpt), bz2ibz_smap(1,ikpt)
+ !end do
+
+ if(iout/=0)then
+   if(nkbz/=nkibz)then
+     write(message, '(a,a,a,i6,a)' )&
+     ' symkpt : the number of k-points, thanks to the symmetries,',ch10,' is reduced to',nkibz,' .'
+     call wrtout(iout,message,'COLL')
+     if(iout/=std_out) call wrtout(std_out,message,'COLL')
+
+     nkpout=nkibz
+   else
+     write(message, '(a)' )' symkpt : not enough symmetry to change the number of k points.'
+     call wrtout(iout,message,'COLL')
+     if (iout/=std_out) call wrtout(std_out,message,'COLL')
+   end if
+ end if
+
+end subroutine symkpt_new
 !!***
 
 end module m_symkpt

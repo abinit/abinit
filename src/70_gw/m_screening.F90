@@ -26,7 +26,6 @@
 MODULE m_screening
 
  use defs_basis
- use defs_abitypes
  use m_hide_blas
  use m_linalg_interfaces
  use m_xmpi
@@ -37,10 +36,12 @@ MODULE m_screening
  use m_lebedev
  use m_spectra
  use m_nctk
+ use m_distribfft
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
+ use defs_abitypes,     only : MPI_type
  use m_gwdefs,          only : GW_TOLQ0, czero_gw, GW_Q0_DEFAULT
  use m_fstrings,        only : toupper, endswith, sjoin, itoa
  use m_io_tools,        only : open_file
@@ -935,8 +936,8 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
    if (Er%mqmem>0) then
      ! In-core solution.
-     write(msg,'(a,f12.1,a)')' Memory needed for Er%epsm1 = ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb]'
-     call wrtout(std_out,msg,'PERS')
+     write(msg,'(a,f12.1,a)')' Memory needed for Er%epsm1 = ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb] <<< MEM'
+     call wrtout(std_out,msg)
      ABI_MALLOC_OR_DIE(Er%epsm1,(npwe,npwe,Er%nomega,Er%nqibz), ierr)
 
      if (iomode == IO_MODE_MPI) then
@@ -1435,14 +1436,12 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
  complex(dpc),allocatable :: buffer_lwing(:,:),buffer_uwing(:,:)
  complex(gwpc),allocatable :: kxcg_mat(:,:)
 
-!bootstrap @WC
+!bootstrap 
  integer :: istep,nstep
  logical :: converged
- real(dp) :: conv_err
+ real(dp) :: conv_err, alpha
  real(gwpc) :: chi00_head, fxc_head
- !real(gwpc) :: chi00_head, chi00rpa_head, fxc_head
- complex(gwpc),allocatable :: vfxc_boot(:,:), chi0_tmp(:,:), chi0_save(:,:,:)
- !complex(gwpc),allocatable :: fxc_lrc(:,:), vfxc_boot(:,:), chi0_tmp(:,:), chi0_save(:,:,:)
+ complex(gwpc),allocatable :: vfxc_boot(:,:), vfxc_boot0(:,:), chi0_tmp(:,:), chi0_save(:,:,:)
  complex(gwpc), ABI_CONTIGUOUS pointer :: vc_sqrt(:)
 
 ! *************************************************************************
@@ -1470,7 +1469,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    ! * Initialize distribution table for frequencies.
    ABI_MALLOC(istart,(nprocs))
    ABI_MALLOC(istop,(nprocs))
-   call xmpi_split_work2_i4b(nomega,nprocs,istart,istop,msg,ierr)
+   call xmpi_split_work2_i4b(nomega,nprocs,istart,istop)
    omega_distrb(:)=xmpi_undefined_rank
    do irank=0,nprocs-1
      i1 = istart(irank+1)
@@ -1608,8 +1607,9 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    end do
 
  CASE (4)
-   !@WC bootstrap vertex correction, Sharma et al. PRL 107, 196401 (2011) [[cite:Sharma2011]]
+   ! Bootstrap vertex corrections, Sharma et al. PRL 107, 196401 (2011) [[cite:Sharma2011]]
    ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
+   ABI_MALLOC_OR_DIE(vfxc_boot0,(npwe*nI,npwe*nJ), ierr)
    ABI_MALLOC_OR_DIE(chi0_tmp,(npwe*nI,npwe*nJ), ierr)
    ABI_MALLOC_OR_DIE(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
 
@@ -1621,6 +1621,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 
    chi0_save = chi0 ! a copy of chi0 (ks)
    nstep = 50 ! max iteration steps
+   alpha = 0.6 ! mixing
    chi00_head = chi0(1,1,1)*vc_sqrt(1)**2
    fxc_head = czero; vfxc_boot = czero; chi0_tmp = czero
    epsm_lf = czero; epsm_nlf = czero; eelf = zero
@@ -1629,15 +1630,9 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 
    do istep=1,nstep
      chi0 = chi0_save
-     do io=1,1 ! static
-       !if (omega_distrb(io) == my_rank) then
-       call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,0,my_nqlwl,dim_wing,omega(io),&
-&       chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
-       epsm_lf(io,:) = tmp_lf
-       epsm_nlf(io,:) = tmp_nlf
-       eelf(io,:) = tmp_eelf
-       !end if
-     end do
+     io=1 ! static
+     call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,0,my_nqlwl,dim_wing,omega(io),&
+&     chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
 
      conv_err = smallest_real
      do ig2=1,npwe*nJ
@@ -1674,7 +1669,10 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
      else if (istep < nstep) then
        chi0_tmp = chi0(:,:,1)
        vfxc_boot = chi0(:,:,1)/chi00_head ! full G vectors
-       !vfxc_boot = czero; vfxc_boot(1,1) = chi0(1,1,1)/chi00_head ! head only
+       if (istep > 1) then
+         vfxc_boot = alpha*vfxc_boot0 + (one-alpha)*vfxc_boot
+       end if
+       vfxc_boot0 = vfxc_boot
        fxc_head = vfxc_boot(1,1)
        do ig1=1,npwe
          vfxc_boot(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*vfxc_boot(ig1,:)
@@ -1682,7 +1680,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
      else
        write(msg,'(a,i4,a)') ' -> bootstrap fxc not converged after ', nstep, ' iterations'
        MSG_WARNING(msg)
-       ! proceed to calculate the dielectric function even fxc is not converged
+       ! proceed to calculate the dielectric function even if fxc is not converged
        chi0 = chi0_save
        do io=1,nomega
          if (omega_distrb(io) == my_rank) then
@@ -1699,6 +1697,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    ABI_FREE(chi0_tmp)
    ABI_FREE(chi0_save)
    ABI_FREE(vfxc_boot)
+   ABI_FREE(vfxc_boot0)
 
    do io=1,nomega
      write(msg,'(a,i4,a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at the ',io,' th omega',omega(io)*Ha_eV,' [eV]'
@@ -1757,6 +1756,7 @@ CASE(6)
    !@WC: and Berger (PRL 115, 137402) [[cite:Berger2015]]
    ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_MALLOC_OR_DIE(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
+   ABI_MALLOC_OR_DIE(chi0_tmp,(npwe*nI,npwe*nJ), ierr)
 
    if (iqibz==1) then
      vc_sqrt => Vcp%vcqlwl_sqrt(:,1)  ! Use Coulomb term for q-->0
@@ -1767,17 +1767,39 @@ CASE(6)
    chi0_save = chi0 ! a copy of chi0
    fxc_head = czero; vfxc_boot = czero;
    epsm_lf = czero; epsm_nlf = czero; eelf = zero
-   chi00_head = chi0(1,1,1)*vc_sqrt(1)**2
+   !chi00_head = chi0(1,1,1)*vc_sqrt(1)**2
    write(msg,'(a,2f10.6)') ' -> chi0_dft(head): ',chi00_head
    call wrtout(std_out,msg,'COLL')
 
-   ! static
-   io = 1
+   io = 1 ! static
    call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,0,my_nqlwl,dim_wing,omega(io),&
 &    chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
    epsm_lf(1,:) = tmp_lf
 
-   vfxc_boot(1,1) = 1.0/(chi00_head * epsm_lf(1,1))
+   ! chi(RPA) = chi0 * (1 - chi0 * v_c)^-1
+   chi0 = chi0_save
+   do ig2=2,npwe
+     do ig1=2,npwe
+       chi0(ig1,ig2,io)=-vc_sqrt(ig1)*chi0(ig1,ig2,io)*vc_sqrt(ig2)
+     end do
+     chi0(ig2,ig2,io)=one+chi0(ig2,ig2,io)
+   end do
+   chi0(1,:,io) = czero; chi0(:,1,io) = czero; chi0(1,1,io) = one
+   chi0_tmp = chi0(:,:,io)
+   call xginv(chi0_tmp,npwe,comm=comm) 
+   chi0 = chi0_save
+   chi0_tmp = MATMUL(chi0(:,:,io), chi0_tmp(:,:)) ! chi(RPA)
+   do ig1=1,npwe
+     chi0_tmp(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*chi0_tmp(ig1,:)
+   end do 
+   !call xginv(chi0_tmp,npwe,comm=comm) ! chi(RPA)^-1
+   !vfxc_boot = chi0_tmp/epsm_lf(1,1)
+   !
+   !vfxc_boot(1,1) = chi0_tmp(1,1)/epsm_lf(1,1)
+   vfxc_boot(1,1) = one/chi0_tmp(1,1)/epsm_lf(1,1)
+   !@WC: alternatively:
+   !chi00_head = chi0(1,1,io)*vc_sqrt(1)**2
+   !vfxc_boot(1,1) = one/chi00_head/epsm_lf(1,1)
    fxc_head = vfxc_boot(1,1)
    do ig1=1,npwe
      vfxc_boot(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*vfxc_boot(ig1,:)
@@ -1800,6 +1822,7 @@ CASE(6)
 
    ABI_FREE(chi0_save)
    ABI_FREE(vfxc_boot)
+   ABI_FREE(chi0_tmp)
 
    do io=1,nomega
      write(msg,'(a,i4,a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at the ',io,' th omega',omega(io)*Ha_eV,' [eV]'
@@ -2715,7 +2738,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
  real(dp) :: qpg2_nrm
  complex(dpc) :: ph_mqbzt
  logical :: is_qeq0,isirred
- character(len=500) :: msg
+ !character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
 !arrays
  integer :: umklp(3)
@@ -2735,7 +2758,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
  call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
 
  nprocs = xmpi_comm_size(comm)
- call xmpi_split_work(npw,comm,my_gstart,my_gstop,msg,ierr)
+ call xmpi_split_work(npw,comm,my_gstart,my_gstop)
 
  call get_bz_item(Qmesh,iq_bz,qpt_bz,iq_ibz,isym_q,itim_q,ph_mqbzt,umklp,isirred)
 

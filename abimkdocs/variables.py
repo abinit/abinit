@@ -175,6 +175,7 @@ ABI_TOPICS = [
     "BandOcc",
     "BoundingProcess",
     "BSE",
+    "ConstrainedDFT",
     "ConstrainedPol",
     "Control",
     "Coulomb",
@@ -954,6 +955,8 @@ class InputVariables(OrderedDict):
         """Initialize the object from python file."""
         import imp
         module = imp.load_source(filepath, filepath)
+        #from importlib.machinery import SourceFileLoader
+        #module = SourceFileLoader(filepath, filepath).load_module()
         vlist = [Variable(**d) for d in module.variables]
         new = cls()
         new.executable = module.executable

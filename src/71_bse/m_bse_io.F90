@@ -40,12 +40,11 @@ MODULE m_bse_io
  use iso_c_binding
  use m_hdr
 
- use defs_abitypes,    only : Hdr_type
  use m_time,           only : cwtime
  use m_fstrings,       only : toupper
  use m_io_tools,       only : open_file
  use m_numeric_tools,  only : arth
- use m_special_funcs,  only : dirac_delta
+ use m_special_funcs,  only : gaussian
  use m_bs_defs,        only : excparam
  use m_bz_mesh,        only : kmesh_t
 
@@ -115,7 +114,7 @@ subroutine exc_write_bshdr(funt,Bsp,Hdr)
  character(len=500) :: errmsg
  ! *************************************************************************
 
- call hdr_fort_write(Hdr, funt, fform_1002, ierr)
+ call hdr%fort_write(funt, fform_1002, ierr)
  ABI_CHECK(ierr == 0, "hdr_fort_write returned ierr != 0")
  write(funt, err=10, iomsg=errmsg) BSp%nreh,BSp%nkbz
 
@@ -180,7 +179,7 @@ subroutine exc_read_bshdr(funt,Bsp,fform,ierr)
 
  read(funt, err=10, iomsg=errmsg) nreh_read, nkbz_read
 
- call hdr_free(Hdr)
+ call Hdr%free()
 
  if (ANY(nreh_read/=BSp%nreh)) then
    call wrtout(std_out,"Wrong number of e-h transitions","COLL")
@@ -1381,10 +1380,10 @@ subroutine exc_amplitude(Bsp,eig_fname,nvec,vec_idx,out_fname)
       !
       do iw=1,nw ! Accumulate
         xx = wmesh(iw) - ene_rt
-        amplitude(iw) = amplitude(iw) + ampl_eh * dirac_delta(xx,stdev)
+        amplitude(iw) = amplitude(iw) + ampl_eh * gaussian(xx, stdev)
         if (Bsp%use_coupling>0) then
           xx = wmesh(iw) + ene_rt
-          amplitude(iw) = amplitude(iw) + ampl_he * dirac_delta(xx,stdev)
+          amplitude(iw) = amplitude(iw) + ampl_he * gaussian(xx, stdev)
         end if
       end do
       !
