@@ -197,7 +197,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
      call wrtout(std_out, sjoin("- Cannot find forces in DDB file:", filnamddb))
      call wrtout(std_out, "  If there are nonzero residual atomic forces on the structure") 
      call wrtout(std_out, "  flexoflag=1 or 3 will produce an improper piezoelectric force response tensor")
-     call wrtout(std_out, "  and a wrong value for the  mixed contribution to the flexoelectric tensor")
+     call wrtout(std_out, "  and a wrong value for the mixed contribution to the flexoelectric tensor")
    end if
 
    ! Look for the Gamma Block of the dynamical matrix in the DDB
