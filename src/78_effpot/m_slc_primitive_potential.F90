@@ -1,5 +1,5 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_sspin_primitive_potential
+!!****m* ABINIT/m_slc_primitive_potential
 !! NAME
 !! m_slc_primitive_potential
 !!
@@ -900,5 +900,5 @@ contains
 
   end subroutine set_tijuv_sc
 
-
+  !!***
 end module m_slc_primitive_potential

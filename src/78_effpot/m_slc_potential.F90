@@ -437,4 +437,5 @@ contains
     
   end subroutine calculate
 
+  !!***
 end module m_slc_potential
