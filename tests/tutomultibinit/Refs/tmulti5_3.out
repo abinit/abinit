@@ -1,5 +1,5 @@
 
-.Version 8.11.5 of MULTIBINIT 
+.Version 8.11.12 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,16 +14,42 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 12 Mar 2019.
-- ( at 23h45 )
+.Starting date : Thu 21 Nov 2019.
+- ( at 12h18 )
   
 -  nproc =    1
+
+  Give name for      formatted input file : 
+-   /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/nehelbig_Multibinit-slc/tests/tutomultibinit/Input/tmulti5_3.in
+  Give name for     formatted output file : 
+-   tmulti5_3.out
+  Give name for input derivative database of reference structure (DDB or XML file): 
+-   /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/nehelbig_Multibinit-slc/tests/tutomultibinit/Input/tmulti5_3.xml
+  Give name for input coefficients from fitted polynomial (XML file or enter no): 
+-   /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/nehelbig_Multibinit-slc/tests/tutomultibinit/Input/no
+  Give name for molecular dynamics (netcdf file or enter no): 
+-   no
+  Give name for input derivative database (DDB or XML file): 
+-   
+-begin at tcpu      0.000  and twall      0.000 sec
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/xuhe_Multibinit-factor-half/tests/tutomultibinit/Input/tmulti5_3.xml
+-/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/nehelbig_Multibinit-slc/tests/tutomultibinit/Input/tmulti5_3.xml
  to initialize the multibinit input
+
+ The file /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/nehelbig_Multibinit-slc/tests/tutomultibinit/Input/tmulti5_3.xml is XML file (extraction of all informations)
+ system_getDimFromXML :-Opening the file /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/nehelbig_Multibinit-slc/tests/tutomultibinit/Input/tmulti5_3.xml to read dimensions (before initialisation)
+-instrng: 51 lines of input have been read from file /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/nehelbig_Multibinit-slc/tests/tutomultibinit/Input/tmulti5_3.in
+
+
+ --- !WARNING
+     The range of dipdip_range (  0  0  0)
+     But the range of the cell for the simulation is  4  1  1)
+     dipdip_range is set to ncell.
+ ---
+
 
 ================================================================================
 
@@ -43,18 +69,16 @@
                   spin_ntime    100000
                        ncell         4         1         1
                      spin_dt    1.00000E-16  second
-              spin_mag_field
-                                0.00000E+00 0.00000E+00 0.00000E+00   Tesla
+              spin_mag_field    0.00000E+00    0.00000E+00    0.00000E+00   Tesla
                 spin_sia_add           1
               spin_sia_k1amp    3.67493E-06
               spin_sia_k1dir    1.00000E+00    0.00000E+00    0.00000E+00
-                 spin_qpoint
-                             0.00000E+00 0.00000E+00 0.00000E+00
+      spin_projection_qpoint    0.00000E+00    0.00000E+00    0.00000E+00
              spin_init_state           1
         spin_var_temperature           0
       spin_temperature_start        0.00000
         spin_temperature_end        0.00000
-      spin_temperature_nstep                1
+      spin_temperature_nstep           1
              spin_write_traj           0
  Miscellaneous information :
          asr         2
@@ -68,6 +92,12 @@ dipdip_range         4         1         1
  Description of grid 1 :
         brav         1
        ngqpt         1         1         1
+Reading xml file
+ System: Exchange:     4 terms read
+ DMI:          4 terms read
+ Uniaxial SIA: 2 terms read
+ Bilinear:     0 terms read
+Reading xml done!
       nqshft         1
       q1shft
                      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -82,7 +112,25 @@ dipdip_range         4         1         1
 ================================================================================
 
 reading spin terms.
- Initial spin set to random value.
+Reading parameters from xml file and setting up spin model
+                                                                                
+                                                                                
+Setting up spin model
+ Setting system
+
+--- !WARNING
+src_file: m_multibinit_cell.F90
+src_line: 447
+message: |
+    No reference spin structure specified, using ferromagnetic along z-axis
+...
+
+ Setting exchange terms
+ Setting DMI terms.
+    SIA term in xml file not used.
+ Adding SIA terms from input
+ Initial spins set to random values.
+ Write iteration in spin history file tmulti5_3.out_spinhist.nc.
 ================================================================================
  Spin dynamic steps:
 ================================================================================
@@ -299,16 +347,26 @@ Measurement run:
 
 
 # Temperature              Cv             chi        BinderU4             Mst
-      0.00000     0.00000E+00    -4.43734E-29     0.66667E+00     1.00000E+00
+      0.00000     0.00000E+00     4.44089E-16     0.66667E+00     1.00000E+00
 ================================================================================
-
-================================================================================
-
--
-- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.0
+ Closing spin history file tmulti5_3.out_spinhist.nc.
 
 ================================================================================
 
-+Total cpu time      1.031  and wall time      1.050 sec
+ Proc.   0 individual time (sec): cpu=          1.1  wall=          1.1
+
+================================================================================
+
++Total cpu time      1.114  and wall time      1.125 sec
 
  multibinit : the run completed succesfully.
+--- !FinalSummary
+program: multibinit
+version: 8.11.12
+start_datetime: Thu Nov 21 12:18:22 2019
+end_datetime: Thu Nov 21 12:18:23 2019
+overall_cpu_time:           1.1
+overall_wall_time:           1.1
+mpi_procs: 1
+omp_threads: 1
+...
