@@ -6,11 +6,11 @@
 #include "abi_common.h"
 
 #if defined HAVE_FC_SHIFTLR
-#  define SHIFTL_ shiftl
-#  define SHIFTR_ shiftr
+#define SHIFTL_ shiftl
+#define SHIFTR_ shiftr
 #else
-#  define SHIFTL_ lshift
-#  define SHIFTR_ rshift
+#define SHIFTL_ lshift
+#define SHIFTR_ rshift
 #endif
 
 ! xoroshiro128plus method random number generator
