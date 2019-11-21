@@ -2688,34 +2688,32 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
  if (ierr/=0) call xmpi_abort(msg="Cannot remove ABI_MPIABORTFILE")
 
 !Associate user-defined MPI operation
- if (op_type>0) then
-   xmpi_largetype_size=largecount
-   if (op_type==MPI_SUM) then
-     select case(inputtype)
-       case(MPI_INTEGER)
-        call MPI_OP_CREATE(largetype_sum_int  ,.true.,largetype_op,ierr)
-       case(MPI_REAL)
-        call MPI_OP_CREATE(largetype_sum_real ,.true.,largetype_op,ierr)
-       case(MPI_DOUBLE_PRECISION)
-        call MPI_OP_CREATE(largetype_sum_dble ,.true.,largetype_op,ierr)
-       case(MPI_COMPLEX)
-        call MPI_OP_CREATE(largetype_sum_cplx ,.true.,largetype_op,ierr)
-       case(MPI_DOUBLE_COMPLEX)
-        call MPI_OP_CREATE(largetype_sum_dcplx,.true.,largetype_op,ierr)
-     end select
-   else if (op_type==MPI_LOR) then
-     select case(inputtype)
-       case(MPI_LOGICAL)
-        call MPI_OP_CREATE(largetype_lor_log,.true.,largetype_op,ierr)
-     end select
-   else if (op_type==MPI_LAND) then
-     select case(inputtype)
-       case(MPI_LOGICAL)
-        call MPI_OP_CREATE(largetype_land_log,.true.,largetype_op,ierr)
-     end select
-   else if (op_type==MPI_OP_NULL) then
-     largetype_op=-1111
-   end if
+ xmpi_largetype_size=largecount ; largetype_op=-1111
+ if (op_type==MPI_SUM) then
+   select case(inputtype)
+     case(MPI_INTEGER)
+      call MPI_OP_CREATE(largetype_sum_int  ,.true.,largetype_op,ierr)
+     case(MPI_REAL)
+      call MPI_OP_CREATE(largetype_sum_real ,.true.,largetype_op,ierr)
+     case(MPI_DOUBLE_PRECISION)
+      call MPI_OP_CREATE(largetype_sum_dble ,.true.,largetype_op,ierr)
+     case(MPI_COMPLEX)
+      call MPI_OP_CREATE(largetype_sum_cplx ,.true.,largetype_op,ierr)
+     case(MPI_DOUBLE_COMPLEX)
+      call MPI_OP_CREATE(largetype_sum_dcplx,.true.,largetype_op,ierr)
+   end select
+ else if (op_type==MPI_LOR) then
+   select case(inputtype)
+     case(MPI_LOGICAL)
+      call MPI_OP_CREATE(largetype_lor_log,.true.,largetype_op,ierr)
+   end select
+ else if (op_type==MPI_LAND) then
+   select case(inputtype)
+     case(MPI_LOGICAL)
+      call MPI_OP_CREATE(largetype_land_log,.true.,largetype_op,ierr)
+   end select
+ else if (op_type==MPI_OP_NULL) then
+   largetype_op=-1111
  end if
 
  contains
