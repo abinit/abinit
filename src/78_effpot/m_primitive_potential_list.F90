@@ -246,6 +246,9 @@ contains
       call self%data(i)%obj%fill_supercell(sc_maker, params, tmp)
       call sc_pots%append(tmp)
     end do
+
+    ABI_UNUSED_A(params)
+
   end subroutine fill_supercell_list
 
 end module m_primitive_potential_list

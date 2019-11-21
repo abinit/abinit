@@ -191,7 +191,7 @@ contains
     real(dp), allocatable :: force(:)
     type(ndcoo_mat_t) :: m2dim
 
-    integer :: master, my_rank, comm, nproc, ierr
+    integer :: master, my_rank, comm, nproc
     logical :: iam_master
 
 
@@ -434,6 +434,11 @@ contains
        !call energy_table%put("SLC Oiju term", eOiju)
        !call energy_table%put("SLC Tijuv term", eTijuv)
     end if
+
+    ABI_UNUSED_A(strain)
+    ABI_UNUSED_A(lwf)
+    ABI_UNUSED_A(stress)
+    ABI_UNUSED_A(lwf_force)
     
   end subroutine calculate
 

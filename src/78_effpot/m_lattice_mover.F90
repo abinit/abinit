@@ -195,6 +195,9 @@ contains
        end do
        self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)
     end if
+
+    ABI_UNUSED(restart_hist_fname)
+
   end subroutine set_initial_state
 
 

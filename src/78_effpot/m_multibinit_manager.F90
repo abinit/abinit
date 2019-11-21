@@ -533,9 +533,9 @@ contains
   !-------------------------------------------------------------------!
   subroutine run_coupled_spin_latt_dynamics(self)
     class(mb_manager_t), intent(inout) :: self
-    integer :: istep
+
     character(len=90) :: msg
-    real(dp) :: t, etotal
+    real(dp) :: etotal
     integer :: i
 
     call self%prim_pots%initialize()

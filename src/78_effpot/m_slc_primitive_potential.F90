@@ -145,6 +145,8 @@ contains
        call wrtout(std_out,message,'COLL')
     endif
     call self%read_netcdf(trim(ncdf_fname)//char(0))
+    
+    ABI_UNUSED_A(params)
   end subroutine load_from_files
 
   !-----------------------------------
@@ -714,7 +716,7 @@ contains
     integer, allocatable :: i1list(:), ise(:)
     real(dp) :: val_sc(scmaker%ncells)
 
-    integer :: master, my_rank, comm, nproc, ierr
+    integer :: master, my_rank, comm, nproc
     logical :: iam_master
 
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
@@ -759,7 +761,7 @@ contains
     integer, allocatable :: i1list(:), ise(:)
     real(dp) :: val_sc(scmaker%ncells)
 
-    integer :: master, my_rank, comm, nproc, ierr
+    integer :: master, my_rank, comm, nproc
     logical :: iam_master
 
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
@@ -811,7 +813,7 @@ contains
     integer, allocatable :: i1list(:), ise(:)
     real(dp) :: val_sc(scmaker%ncells)
 
-    integer :: master, my_rank, comm, nproc, ierr
+    integer :: master, my_rank, comm, nproc
     logical :: iam_master
 
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
@@ -858,7 +860,7 @@ contains
     integer, allocatable :: i1list(:), ise(:)
     real(dp) :: val_sc(scmaker%ncells)
 
-    integer :: master, my_rank, comm, nproc, ierr
+    integer :: master, my_rank, comm, nproc
     logical :: iam_master
 
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 

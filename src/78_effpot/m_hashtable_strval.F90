@@ -133,7 +133,7 @@ CONTAINS
        DEALLOCATE(list%child)
     END IF
     list%child => NULL()
-    IF (ALLOCATED(list%key)) DEALLOCATE(list%key)
+    IF (ALLOCATED(list%key)) ABI_DEALLOCATE(list%key)
   END SUBROUTINE free_sll
 
   recursive function sum_val_sll(self) result(s)
@@ -171,12 +171,12 @@ CONTAINS
     CLASS(hash_table_t),   INTENT(inout) :: tbl
     INTEGER,     OPTIONAL, INTENT(in)    :: tbl_len
 
-    IF (ALLOCATED(tbl%vec)) DEALLOCATE(tbl%vec)
+    IF (ALLOCATED(tbl%vec)) ABI_DEALLOCATE(tbl%vec)
     IF (PRESENT(tbl_len)) THEN
-       ALLOCATE(tbl%vec(0:tbl_len-1))
+       ABI_ALLOCATE(tbl%vec, (0:tbl_len-1))
        tbl%vec_len = tbl_len
     ELSE
-       ALLOCATE(tbl%vec(0:tbl_size-1))
+       ABI_ALLOCATE(tbl%vec, (0:tbl_size-1))
        tbl%vec_len = tbl_size
     END IF
     tbl%is_init = .TRUE.
@@ -229,7 +229,7 @@ CONTAINS
        DO i=low,high
           CALL tbl%vec(i)%free()
        END DO
-       DEALLOCATE(tbl%vec)
+       ABI_DEALLOCATE(tbl%vec)
     END IF
     tbl%is_init = .FALSE.
   END SUBROUTINE free_hash_table_t

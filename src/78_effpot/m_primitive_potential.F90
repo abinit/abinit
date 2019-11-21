@@ -104,6 +104,8 @@ subroutine fill_supercell(self, scmaker, params, scpot)
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(scmaker)
     ABI_UNUSED_A(scpot)
+    ABI_UNUSED_A(params)
+
   end subroutine fill_supercell
 
   !----------------------------------------------------------------------

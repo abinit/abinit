@@ -295,6 +295,8 @@ contains
     ABI_SFREE(jlist_sc)
     ABI_SFREE(Rlist_sc)
 
+    ABI_UNUSED_A(params)
+
   end subroutine fill_supercell
 
 
