@@ -1051,7 +1051,7 @@ Variable(
 This number define the series of grids that will be used for the estimation of
 the phonon DOS. The coarsest will be tried first, then the next, ... then the
 one described by [[anaddb:ng2qpt]]. The intermediate grids are defined for
-igrid=1... **ngrids** , by the numbers ngqpt_igrid(ii)=(ng2qpt(ii)*igrid)/**ngrids**
+igrid=1... **ngrids**, by the numbers ngqpt_igrid(ii)=(ng2qpt(ii)*igrid)/**ngrids**
 """,
 ),
 
@@ -1565,8 +1565,8 @@ b) Case [[anaddb:nqshft]]=2 The two q1shft vectors must form a BCC lattice. For
 example, use 0.0 0.0 0.0 and 0.5 0.5 0.5
 
 c) Case [[anaddb:nqshft]]=4 The four q1shft vectors must form a FCC lattice. For
-example, use 0.0 0.0 0.0 , 0.0 0.5 0.5 , 0.5 0.0 0.5 , 0.5 0.5 0.0 or 0.5 0.5 0.5 ,
-0.0 0.0 0.5 , 0.0 0.5 0.0 , 0.5 0.0 0.0 (the latter is referred to as shifted)
+example, use 0.0 0.0 0.0, 0.0 0.5 0.5, 0.5 0.0 0.5, 0.5 0.5 0.0 or 0.5 0.5 0.5,
+0.0 0.0 0.5, 0.0 0.5 0.0, 0.5 0.0 0.0 (the latter is referred to as shifted)
 
 Further comments: by using this technique, it is possible to increase smoothly
 the number of q-points, at least less abruptly than relying on series of grids

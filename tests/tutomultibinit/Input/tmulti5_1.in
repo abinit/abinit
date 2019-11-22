@@ -28,7 +28,7 @@ spin_write_traj = 0             ! do not write spin trajectory to netcdf file
 #%% coeff_xml = no
 #%% [files]
 #%% files_to_test = 
-#%%   tmulti5_1.out,tolnlines = 1, tolabs = 1.000e-01, tolrel = 3.000e-1, fld_options = -medium;
+#%%   tmulti5_1.out,tolnlines = 1, tolabs = 2.000e+03, tolrel = 3.000e-1, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
@@ -36,5 +36,7 @@ spin_write_traj = 0             ! do not write spin trajectory to netcdf file
 #%% keywords = Effective potential, multibinit
 #%% description = 
 #%%   read xml  and run spin dynamics. 
+#%%   The system is a simple cubic system with one spin per uc.
+#%%   The exchange is defined so that the Tc is about 620 K.
 #%%   Note: ncell, spin_ntime_pre, and spin_ntime are small.
 #%%<END TEST_INFO>

@@ -92,6 +92,13 @@ module m_argparse
    character(len=500) :: cmdline = ""
      ! The entire command line
 
+   !! Below are for multibinit
+   integer :: multibinit_F03_mode = 0
+   !1: legacy mode
+   !0: use full F03 implementation mode
+   ! TODO: It will be deprecated when everything is ready in
+   ! and the new mode will be default.
+
  end type args_t
 
  public :: args_parser   ! Parse command line options.
@@ -229,6 +236,10 @@ type(args_t) function args_parser() result(args)
     !  end if
     !  end if
 
+    ! For multibinit only
+    else if (arg == "--F03") then
+       args%multibinit_F03_mode=1
+
     else if (arg == "-h" .or. arg == "--help") then
       if (iam_master) then
         ! Document the options.
@@ -255,6 +266,9 @@ type(args_t) function args_parser() result(args)
         write(std_out,*)"                               hours:minutes:seconds"
         write(std_out,*)"--verbose                  Verbose mode"
         write(std_out,*)"-h, --help                 Show this help and exit."
+
+        ! Multibinit
+        write(std_out,*)"--F03                      Run F03 mode (For Multibinit only)."
       end if
       args%exit = args%exit + 1
 
