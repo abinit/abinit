@@ -899,7 +899,7 @@ program anaddb
  if (inp%piezoflag/=0 .or. inp%dieflag==4 .or. inp%elaflag==4) then
    ! here treating the piezoelectric tensor at Gamma Point
    write(msg, '(a,a,(80a),a,a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
-   ' Calculation of the tensor related to piezoelectric effetc',ch10,&
+   ' Calculation of the tensor related to piezoelectric effect',ch10,&
    '  (Elastic indices in Voigt notation)',ch10
    call wrtout([std_out, ab_out], msg)
 
@@ -927,7 +927,7 @@ program anaddb
  if (inp%flexoflag/=0 ) then
    ! Here treating the flexoelectric tensor
    write(msg, '(a,a,(80a),a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
-   ' Calculation of the tensors related to flexoelectric effetc',ch10
+   ' Calculation of the tensors related to flexoelectric effect',ch10
    call wrtout([std_out, ab_out], msg)
 
    ! Compute and print the contributions to the flexoelectric tensor
