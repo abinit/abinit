@@ -162,6 +162,41 @@ The directions of the requested components are specified by the parameter
 ),
 
 Variable(
+    abivarname="num_linel_comp@optic",
+    varset="optic",
+    vartype="integer",
+    topics=['Optic_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="NUMber of LINear ELetro-optic  COMPonents",
+    text=r"""
+This parameter specifies how many components (out of 27 possible)
+of the linear electro-optical tensor to calculate.
+Some of these may be either equal to each other, or zero, depending upon the
+symmetry of the material (for detail see [[cite:Sipe1993]] and [[cite:Hughes1996]]).
+The directions of the requested components are specified by the parameter
+[[optic:linel_comp]].
+""",
+),
+
+Variable(
+    abivarname="linel_comp@optic",
+    varset="optic",
+    vartype="integer",
+    topics=['Optic_basic'],
+    dimensions=[['num_linel_comp']],
+    defaultval=0,
+    mnemonics="LINear ELectro-optic COMPonents",
+    text=r"""
+This parameter specifies the directions of the [[optic:num_linel_comp]] requested components
+of the linear electro-optical tensor. The components are specified in
+cartesian coordinates, where 1, 2, and 3 represent x, y, and z respectively. For
+example, 111 represents the xxx component, and 321 represents zyx. There should be
+[[optic:num_linel_comp]] entries.
+""",
+),
+
+Variable(
     abivarname="scissor@optic",
     varset="optic",
     vartype="real",
