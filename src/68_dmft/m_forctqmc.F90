@@ -2532,6 +2532,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
  integer(kind=4) :: varid
  logical :: file_exists
  complex :: i
+ character(len=500) :: filename
 
  real(dp), allocatable, target :: new_re_g_iw(:,:,:), new_im_g_iw(:,:,:)
  real(dp), allocatable, target :: new_g_tau(:,:,:), new_gl(:,:,:)
@@ -2769,6 +2770,8 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   call nf_check(nf90_put_var(ncid, var_gl_id,                 gl_nd))
   call nf_check(nf90_put_var(ncid, var_spacecomm_id,          paw_dmft%spacecomm))
   call nf_check(nf90_close(ncid))
+
+  write(std_out, '(2a)') ch10, "    NETCDF file abinit_output_for_py.nc written; Launching python invocation"
  
   ! Invoking python to execute the script
   call Invoke_python_triqs (paw_dmft%myproc, trim(paw_dmft%filnamei)//c_null_char)
@@ -2781,30 +2784,38 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   i = (0, 1)
   
   ! Check if file exists
-  INQUIRE(FILE="py_output_for_abinit.nc", EXIST=file_exists)
+  write(filename, '(a,i4.4,a)') "py_output_for_abinit_rank_", paw_dmft%myproc, ".nc"
+
+  INQUIRE(FILE=filename, EXIST=file_exists)
   if(.not. file_exists) then
-   write(message,'(2a)') ch10,' Cannot find file "py_output_for_abinit.nc! Make sure the python script writes it with the right name and at the right place!.'
+   write(message,'(4a)') ch10,' Cannot find file ', filename, '! Make sure the python script writes it with the right name and at the right place!'
    call wrtout(std_out,message,'COLL')
    MSG_ERROR(message)
   endif
 
+  write(std_out, '(3a)') ch10, "    Reading NETCDF file ", filename
+
   ! Opening the NETCDF file
-  call nf_check(nf90_open("py_output_for_abinit.nc", nf90_nowrite, ncid))
+  call nf_check(nf90_open(filename, nf90_nowrite, ncid))
  
   ! Read from the file
   ! Re{G_iw}
+  write(std_out, '(2a)') ch10, "    -- Re[G(iw_n)]"
   call nf_check(nf90_inq_varid(ncid, "re_g_iw", varid))
   call nf_check(nf90_get_var(ncid, varid, new_re_g_iw))
   ! Im{G_iw}
+  write(std_out, '(2a)') ch10, "    -- Im[G(iw_n)]"
   call nf_check(nf90_inq_varid(ncid, "im_g_iw", varid))
   call nf_check(nf90_get_var(ncid, varid, new_im_g_iw))
   ! G_tau
+  write(std_out, '(2a)') ch10, "    -- G(tau)"
   call nf_check(nf90_inq_varid(ncid, "g_tau", varid))
   call nf_check(nf90_get_var(ncid, varid, new_g_tau))
   ! G_l
+  write(std_out, '(2a)') ch10, "    -- G_l"
   call nf_check(nf90_inq_varid(ncid, "gl", varid))
   call nf_check(nf90_get_var(ncid, varid, new_gl))
- 
+
   ! Assigning data
   do iflavor1=1, nflavor
    do iflavor2=1, nflavor

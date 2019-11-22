@@ -878,7 +878,7 @@ end subroutine incomprs
 !!  typevarphys= variable type (might indicate the physical meaning of for dimensionality purposes)
 !!   'INT'=>integer
 !!   'DPR'=>real(dp) (no special treatment)
-!!   'LEN'=>real(dp) (expect a "length", identify bohr, au or angstrom,
+!!   'LEN'=>real(dp) (expect a "length", identify bohr, au, nm or angstrom,
 !!       and return in au -atomic units=bohr- )
 !!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, Rydberg)
 !!   'LOG'=>integer, but read logical variable T,F,.true., or .false.
@@ -1530,7 +1530,7 @@ end subroutine intagm
 !!   for dimensionality purposes)
 !!   'INT'=>integer
 !!   'DPR'=>real(dp) (no special treatment)
-!!   'LEN'=>real(dp) (expect a "length", identify bohr, au or angstrom,
+!!   'LEN'=>real(dp) (expect a "length", identify bohr, au, nm or angstrom,
 !!       and return in au -atomic units=bohr- )
 !!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, Rydberg)
 !!   'BFI'=>real(dp) (expect a "magnetic field", identify T, Tesla)
@@ -1690,9 +1690,11 @@ if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typev
      asciichar=iachar(string(b1+1:b1+1))
      if(asciichar<48 .or. asciichar>57)then
        factor=one
-       if(typevarphys=='LEN' .and. b2>=7)then
+       if(typevarphys=='LEN' .and. b2>=3)then
          if(string(b1+1:b1+6)=='ANGSTR')then
            factor=one/Bohr_Ang
+         else if(string(b1+1:b1+3)=='NM ')then
+           factor=ten/Bohr_Ang
          end if
        else if(typevarphys=='ENE' .and. b2>=3)then
          if(string(b1+1:b1+3)=='RY ')then

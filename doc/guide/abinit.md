@@ -259,20 +259,23 @@ first class of variables have the characteristics **ENERGY**, and can be
 specified in atomic units (Hartree), or electron-volts, or Rydbergs, or even Kelvin. 
 
 The second class of variables have the characteristics **LENGTH**,
-and can be specified in atomic units (Bohr) and angstrom. The third class of
+and can be specified in atomic units (Bohr), nm (nanometer) and angstrom. 
+The third class of
 variables have the characteristics **MAGNETIC FIELD**, and can be
 specified in atomic units and Tesla. The abinit parser recognize a dimension
 if it is specified after the list of numbers following the input variable
 keyword, in the input file. The specification can be upper or lower case, or a
 mix thereof. Here is the list of recognized chains of characters:
 
-  * Ry --> Rydberg (for energies) 
+  * Ry or Rydberg or Rydbergs --> Rydberg (for energies) 
   * eV --> electron-volts (for energies) 
   * K  --> Kelvin (for energies) 
   * Angstr --> Angstrom (for lengths) 
+  * nm --> nanometer (for lengths) 
+  * T or Tesla --> Tesla (for magnetic fields) 
+  * S or Sec or Second --> second (for time) 
 
-Except in the case of 'Angstr', the abbreviation must be used (i.e. 'Rydberg'
-will not be recognized presently). Other character chains, like "au" (for
+Other character chains, like "au" (for
 atomic units) or "Hartree", or "Bohr" are not recognized, but make the parser
 choose (by default) atomic units, which is the correct behaviour. Example:
     
