@@ -147,7 +147,6 @@ module m_multibinit_manager
      procedure :: run_spin_dynamics
      procedure :: run_MvT
      procedure :: run_lattice_dynamics
-     procedure :: run_spin_latt_dynamics
      procedure :: run_coupled_spin_latt_dynamics
      procedure :: run
      procedure :: run_all
