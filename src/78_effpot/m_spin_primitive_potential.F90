@@ -868,6 +868,7 @@ contains
         end do
       endif
     end select
+    ABI_UNUSED_A(params)
   end subroutine fill_supercell
 
   !-------------------------------------------------------------------!
