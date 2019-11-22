@@ -432,7 +432,6 @@ contains
     !   energy= eslc
     !end if
 
-       ! TODO: if energy is not present??
     if(present(energy_table)) then
        call energy_table%put(self%label, eslc)
        ! TODO: use terms instead of total, e.g.

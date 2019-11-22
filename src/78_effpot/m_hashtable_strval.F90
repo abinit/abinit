@@ -151,10 +151,8 @@ CONTAINS
 
   recursive subroutine print_all_sll(self)
     class(sllist), intent(in) :: self
-    real(dp) :: s
     character(len=80) :: msg
 
-    s=0.0_dp
     if (allocated(self%key)) then
       write(msg, "(A40, 1X, ES13.5)") self%key, self%val 
       call wrtout(std_out,msg,'COLL')
@@ -173,10 +171,10 @@ CONTAINS
 
     ABI_SFREE(tbl%vec)
     IF (PRESENT(tbl_len)) THEN
-       ABI_MALLOC_SCALAR(tbl%vec(0:tbl_len-1))
+       ABI_MALLOC(tbl%vec, (tbl_len))
        tbl%vec_len = tbl_len
     ELSE
-       ABI_MALLOC_SCALAR(tbl%vec(0:tbl_size-1))
+       ABI_MALLOC(tbl%vec, (tbl_size))
        tbl%vec_len = tbl_size
     END IF
     tbl%is_init = .TRUE.
@@ -203,7 +201,7 @@ CONTAINS
     real(dp),            INTENT(in)    :: val
     INTEGER                            :: hash
 
-    hash = MOD(sum_string(key),tbl%vec_len)
+    hash = MOD(sum_string(key),tbl%vec_len) +1
     CALL tbl%vec(hash)%put(key=key,val=val)
   END SUBROUTINE put_hash_table_t
 
@@ -214,7 +212,7 @@ CONTAINS
     real(dp),                      INTENT(out)   :: val
     INTEGER                                      :: hash
 
-    hash = MOD(sum_string(key),tbl%vec_len)
+    hash = MOD(sum_string(key),tbl%vec_len) + 1
     CALL tbl%vec(hash)%get(key=key,val=val)
   END SUBROUTINE get_hash_table_t
 
