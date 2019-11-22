@@ -509,23 +509,6 @@ contains
   end subroutine run_lattice_dynamics
 
   !-------------------------------------------------------------------!
-  ! Run  spin and lattice dynamics sequentially.
-  !-------------------------------------------------------------------!
-  subroutine run_spin_latt_dynamics(self)
-    class(mb_manager_t), intent(inout) :: self
-    call self%prim_pots%initialize()
-    call self%read_potentials()
-    call self%sc_maker%initialize(diag(self%params%ncell))
-    call self%fill_supercell()
-    call self%set_movers()
-    call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
-    call self%spin_mover%run_time(self%pots, energy_table=self%energy_table)
-    call self%lattice_mover%run_time(self%pots, energy_table=self%energy_table)
-    call self%energy_table%print_all()
-    call self%spin_mover%spin_ncfile%close()
-  end subroutine run_spin_latt_dynamics
-
-  !-------------------------------------------------------------------!
   ! Run coupled lattice spin dynamics
   ! TODO: This is only a prototype. It does not have the proper logic
   ! to decide the time step, etc.
