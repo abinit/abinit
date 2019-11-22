@@ -1,0 +1,26 @@
+#Graph
+
+set nokey
+set tics font ", 30"
+set xzeroaxis lw 1 lt 3 lc rgb "white"
+set tics textcolor rgb "black"
+set xtics ("R'"1.000000,"G" 40.00000000,"X"90.000000000,"M"140.00000000,"G" 210.0000000)   
+set ytics 1.0
+set ylabel "Energy (eV)"
+set yrange[-4:3.8]
+set zrange[0:8]
+
+#Colors
+set palette defined (0.0 "black",  0.2 "dark-blue",1.0 "cyan", 3 "green", 7 "yellow")
+set mouse
+set pm3d  map
+
+# PLOT
+splot "bands_dmft.dat" u 3:1:2 with pm3d,\
+"bands_dft.dat" using ($1+1):2:(0.0) with points pt 3 ps 0.3 linecolor rgb "white"
+
+# OUPUT
+set term postscript colour eps enhanced
+set tics font ", 10"
+set output "bands.eps"
+replot
