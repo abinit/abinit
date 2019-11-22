@@ -642,10 +642,11 @@ end subroutine ewald2
 !!
 !! SOURCE
 
-subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff, &
 #ifdef MR_DEV
+subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff, &
       qdrp_cart,option,dipquad,quadquad)
 #else
+subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff, &
       qdrp_cart,option)
 #endif
 

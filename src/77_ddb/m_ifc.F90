@@ -346,13 +346,17 @@ end subroutine ifc_free
 !!
 !! SOURCE
 
+#ifdef MR_DEV
 subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
   rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
   prtsrlr,enunit, & ! TODO: TO BE REMOVED
   comm, &
-#ifdef MR_DEV
   Ifc_coarse,dipquad,quadquad) ! Optional
 #else
+subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
+  rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
+  prtsrlr,enunit, & ! TODO: TO BE REMOVED
+  comm, &
   Ifc_coarse) ! Optional
 #endif
 

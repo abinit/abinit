@@ -5455,12 +5455,13 @@ end subroutine nanal9
 !!
 !! SOURCE
 
+#ifdef MR_DEV
 subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom,&
 & nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,qdrp_cart,ewald_option,comm,&
-#ifdef MR_DEV
   dipquad,quadquad)
 #else
-)
+subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom,&
+& nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,qdrp_cart,ewald_option,comm)
 #endif
 
 !Arguments -------------------------------
