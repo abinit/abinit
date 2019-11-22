@@ -153,11 +153,11 @@ class JobRunner(object):
         return cls(dict(ompenv=ompenv, timebomb=timebomb))
 
     @classmethod
-    def srun(cls, ompenv=None, timebomb=None):
+    def srun(cls, ompenv=None, timebomb=None, mpi_args=""):
         """
         Build a `JobRunner` based on srun (assumes some default values).
         """
-        d = dict(ompenv=ompenv, timebomb=timebomb)
+        d = dict(ompenv=ompenv, timebomb=timebomb, mpi_args=mpi_args)
         d["mpirun_np"] = "srun -n"
         return cls(d)
 

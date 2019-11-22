@@ -111,6 +111,12 @@ module m_phonons
   real(dp) :: dossmear
   ! Gaussian broadening.
 
+  integer :: qptrlatt(3,3) = 0
+  ! q-mesh as computed in getkgrid_low
+
+  real(dp) :: shiftq(3)
+  ! Shigt of Q-mesh computed by getkgrid_low (1 shift is enough)
+
   real(dp),allocatable :: atom_mass(:)
    ! atom_mass(natom)
 
@@ -165,6 +171,7 @@ module m_phonons
  end type phonon_dos_type
 
  public :: mkphdos
+ ! Constructor
 !!**
 
 CONTAINS  !===============================================================================
@@ -772,6 +779,9 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
  !my_qptopt = 3 ! This to deactivate the use of symmetries for debugging purposes.
  call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, my_qptopt, nqshft, dos_qshift, &
    phdos%nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, new_shiftk=new_shiftq, bz2ibz=bz2ibz_smap)
+
+ phdos%qptrlatt = new_qptrlatt
+ phdos%shiftq(:) = new_shiftq(:, 1) ! only one shift in output
 
  if (my_rank == master) then
    write(msg, "(3a, i0)")" DOS ngqpt: ", trim(ltoa(dos_ngqpt)), ", qptopt: ", my_qptopt
@@ -1706,7 +1716,8 @@ subroutine phdos_ncwrite(phdos, ncid)
  NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
 
  ncerr = nctk_def_dims(ncid, [nctkdim_t("three", 3), nctkdim_t("number_of_atoms", phdos%natom),&
-   nctkdim_t("number_of_atom_species", phdos%ntypat), nctkdim_t("number_of_frequencies", phdos%nomega)])
+   nctkdim_t("number_of_atom_species", phdos%ntypat), nctkdim_t("number_of_frequencies", phdos%nomega), &
+   nctkdim_t("nqibz", phdos%nqibz)])
  NCF_CHECK(ncerr)
 
 !scalars
@@ -1720,7 +1731,9 @@ subroutine phdos_ncwrite(phdos, ncid)
    nctkarr_t('pjdos', "dp", 'number_of_frequencies, three, number_of_atoms'),&
    nctkarr_t('pjdos_type', "dp", 'number_of_frequencies, number_of_atom_species'),&
    nctkarr_t('pjdos_rc_type', "dp", 'number_of_frequencies, three, number_of_atom_species'), &
-   nctkarr_t('msqd_dos_atom', "dp", 'number_of_frequencies, three, three, number_of_atoms') &
+   nctkarr_t('msqd_dos_atom', "dp", 'number_of_frequencies, three, three, number_of_atoms'), &
+   nctkarr_t('qptrlatt', "int", 'three, three'), &
+   nctkarr_t('shiftq', "dp", 'three') &
  ])
  NCF_CHECK(ncerr)
 
@@ -1734,6 +1747,8 @@ subroutine phdos_ncwrite(phdos, ncid)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'pjdos_type'), phdos%pjdos_type/Ha_eV))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'pjdos_rc_type'), phdos%pjdos_rc_type/Ha_eV))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'msqd_dos_atom'), phdos%msqd_dos_atom/Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'qptrlatt'), phdos%qptrlatt))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'shiftq'), phdos%shiftq))
 
 #else
  MSG_ERROR("netcdf support not enabled")
