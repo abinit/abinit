@@ -259,6 +259,7 @@ contains
     character(len=fnlen), intent(in) :: fname
     integer :: ierr, ncid, varid
     integer :: nspin, ntime
+    character(len=118) :: msg
     ! open file
 
 #if defined HAVE_NETCDF
@@ -269,10 +270,10 @@ contains
     ierr=nctk_get_dim(ncid, "nspin" , nspin)
     NCF_CHECK_MSG(ierr, "when reading nspin")
 
+    msg="The number of spins in histfile is not equal & & to the present calculation." // &
+         & " Please check if the file is consistent."
     if (nspin /= self%nspin) then
-       MSG_ERROR("The number of spins in histfile is not equal & 
-           & to the present calculation. &
-           & Please check if the file is consistent.")
+       MSG_ERROR(msg)
     end if
 
 
