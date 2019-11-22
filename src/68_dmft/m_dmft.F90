@@ -219,7 +219,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  opt_renorm=3
 ! write(6,*) "natomcor",natomcor
 ! if(natomcor>1) opt_renorm=2
- if(paw_dmft%nspinor==2.and.paw_dmft%dmft_solv==8) opt_renorm=2 ! necessary to use hybri_limit in qmc_prep_ctqmc
+ if(paw_dmft%nspinor==2.and.(paw_dmft%dmft_solv==8.or.paw_dmft%dmft_solv==9)) opt_renorm=2 ! necessary to use hybri_limit in qmc_prep_ctqmc
                                                                 ! ought to be  generalized  in the  future
  if(paw_dmft%dmft_solv/=-1) then
    call psichi_renormalization(cryst_struc,paw_dmft,pawang,opt=opt_renorm)

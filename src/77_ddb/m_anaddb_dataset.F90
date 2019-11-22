@@ -2167,7 +2167,7 @@ subroutine anaddb_chkvars(string)
 !Extra token, also admitted:
 !<ANADDB_UNITS>
  list_vars=trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV Ha'
- list_vars=trim(list_vars)//' Hartree Hartrees K Ry Rydberg Rydbergs T Tesla'
+ list_vars=trim(list_vars)//' Hartree Hartrees K nm Ry Rydberg Rydbergs T Tesla'
 !</ANADDB_UNITS>
 
 !<ANADDB_OPERATORS>

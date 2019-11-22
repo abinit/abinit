@@ -30,9 +30,9 @@
 module m_slc_primitive_potential
 
   use m_nctk
-  !#if defined HAVE_NETCDF
+#if defined HAVE_NETCDF
   use netcdf
-  !#endif
+#endif
   use m_abicore
   use defs_basis
   use m_errors
@@ -139,6 +139,8 @@ contains
     character(len=500) :: message
     integer :: ii
 
+    ABI_UNUSED_A(params)
+
     if (xmpi_comm_rank(xmpi_world)==0) then
        ncdf_fname=fnames(3)
        write(message,'(a,(81a, 80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
@@ -160,7 +162,7 @@ contains
 
     integer:: ncid, ncerr, comm
 
-!#if defined HAVE_NETCDF
+#if defined HAVE_NETCDF
 
     comm = xmpi_world
 
@@ -180,6 +182,10 @@ contains
     if(ncerr /= NF90_NOERR) then
       write(std_out,'(A25)') 'Could not close netcdf file'
     endif
+#else
+    MSG_ERROR("Multibint should be installed with netcdf enabled to run this.")
+
+#endif
 
   end subroutine read_netcdf
 
@@ -194,6 +200,7 @@ contains
     integer :: ncerr, dimid, ndata, varid
     integer, allocatable :: ilist(:), ulist(:,:)
     real(dp), allocatable :: vallist(:)
+#if defined HAVE_NETCDF
 
     ncerr = nf90_inq_dimid(ncid, "spin_lattice_Liu_number_of_entries", dimid)
     if(ncerr /= NF90_NOERR) then
@@ -229,6 +236,9 @@ contains
     endif
 
     write(std_out,'(A8,I10,A11)') 'L_iu:  ', ndata, 'terms read'  
+#else
+    MSG_ERROR("Multibinit should be installed with netcdf.")
+#endif
 
   end subroutine read_liu
 
@@ -243,7 +253,7 @@ contains
     integer :: ncerr, dimid, ndata, varid
     integer, allocatable :: ilist(:), ulist(:,:), vlist(:,:)
     real(dp), allocatable :: vallist(:)
-
+#if defined HAVE_NETCDF
     ncerr = nf90_inq_dimid(ncid, "spin_lattice_Niuv_number_of_entries", dimid)
     if(ncerr /= NF90_NOERR) then
       ndata = 0
@@ -284,6 +294,9 @@ contains
     endif
 
     write(std_out,'(A8,I10,A11)') 'N_iuv: ', ndata, 'terms read'  
+#else
+    MSG_ERROR("Multibinit should be installed with netcdf") 
+#endif
 
   end subroutine read_niuv
 
@@ -298,6 +311,7 @@ contains
     integer, allocatable :: ilist(:), jlist(:,:), ulist(:,:)
     real(dp), allocatable :: vallist(:)
 
+#if defined HAVE_NETCDF
     ncerr = nf90_inq_dimid(ncid, "spin_lattice_Oiju_number_of_entries", dimid)
     if(ncerr /= NF90_NOERR) then
       write(std_out,'(A20)') 'No O_iju term found'
@@ -338,6 +352,9 @@ contains
       ABI_SFREE(ulist)
       ABI_SFREE(vallist)
     endif
+#else
+    MSG_ERROR('Multibinit should be install with netcdf to run this.')
+#endif
 
   end subroutine read_oiju
 
@@ -352,6 +369,7 @@ contains
     integer, allocatable :: ilist(:), jlist(:,:), ulist(:,:), vlist(:,:)
     real(dp), allocatable :: vallist(:)
 
+#if defined HAVE_NETCDF
     ncerr = nf90_inq_dimid(ncid, "spin_lattice_Tijuv_number_of_entries", dimid)
     if(ncerr /= NF90_NOERR) then
       ndata = 0
@@ -398,6 +416,10 @@ contains
       ABI_SFREE(vlist)
       ABI_SFREE(vallist)
     endif
+
+#else
+    MSG_ERROR('Multibinit should be install with netcdf to run this.')
+#endif
 
 
   end subroutine read_tijuv

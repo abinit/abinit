@@ -89,10 +89,10 @@ CONTAINS
     IF (ALLOCATED(list%key)) THEN
        IF (list%key /= key) THEN
           IF ( .NOT. ASSOCIATED(list%child)) then
-             !ABI_ALLOC_SCALAR(tmp)
+             ABI_MALLOC_SCALAR(list%child)
              ! FIXME: ABI_ALLOC_SCALAR does not know how to handle list%child.
              ! That is due to the QUOTE macro.
-             allocate(list%child)
+             !allocate(list%child)
              !call abimem_record(0, QUOTE(list%child), _LOC(list%child), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
           end IF
 
@@ -130,7 +130,7 @@ CONTAINS
     CLASS(sllist), INTENT(inout) :: list
     IF (ASSOCIATED(list%child)) THEN
        CALL free_sll(list%child)
-       DEALLOCATE(list%child)
+       ABI_FREE_SCALAR(list%child)
     END IF
     list%child => NULL()
     ABI_SFREE(list%key)
@@ -151,10 +151,8 @@ CONTAINS
 
   recursive subroutine print_all_sll(self)
     class(sllist), intent(in) :: self
-    real(dp) :: s
     character(len=80) :: msg
 
-    s=0.0_dp
     if (allocated(self%key)) then
       write(msg, "(A40, 1X, ES13.5)") self%key, self%val 
       call wrtout(std_out,msg,'COLL')
@@ -173,10 +171,10 @@ CONTAINS
 
     ABI_SFREE(tbl%vec)
     IF (PRESENT(tbl_len)) THEN
-       ABI_ALLOCATE(tbl%vec, (0:tbl_len-1))
+       ABI_MALLOC(tbl%vec, (tbl_len))
        tbl%vec_len = tbl_len
     ELSE
-       ABI_ALLOCATE(tbl%vec, (0:tbl_size-1))
+       ABI_MALLOC(tbl%vec, (tbl_size))
        tbl%vec_len = tbl_size
     END IF
     tbl%is_init = .TRUE.
@@ -203,7 +201,7 @@ CONTAINS
     real(dp),            INTENT(in)    :: val
     INTEGER                            :: hash
 
-    hash = MOD(sum_string(key),tbl%vec_len)
+    hash = MOD(sum_string(key),tbl%vec_len) +1
     CALL tbl%vec(hash)%put(key=key,val=val)
   END SUBROUTINE put_hash_table_t
 
@@ -214,7 +212,7 @@ CONTAINS
     real(dp),                      INTENT(out)   :: val
     INTEGER                                      :: hash
 
-    hash = MOD(sum_string(key),tbl%vec_len)
+    hash = MOD(sum_string(key),tbl%vec_len) + 1
     CALL tbl%vec(hash)%get(key=key,val=val)
   END SUBROUTINE get_hash_table_t
 

@@ -838,6 +838,8 @@ contains
     logical :: iam_master
     real(dp) :: val_sc(scmaker%ncells)
 
+    ABI_UNUSED_A(params)
+
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
     nspin=self%nspin

@@ -326,6 +326,11 @@ contains
     real(dp) :: f1(1:3*self%natom), b1(1:3*self%nspin)
     real(dp) :: btmp(3, self%nspin), bslc(1:3*self%nspin), fslc(1:3*self%natom)
 
+    ABI_UNUSED(lwf)
+    ABI_UNUSED(strain)
+    ABI_UNUSED(lwf_force)
+    ABI_UNUSED(stress)
+
     sp(:) = reshape(spin, (/ 3*self%nspin /))
     spref(:) = reshape(self%supercell%spin%Sref, (/ 3*self%nspin/))
     disp(:) = reshape(displacement, (/ 3*self%natom /))
@@ -427,7 +432,6 @@ contains
     !   energy= eslc
     !end if
 
-       ! TODO: if energy is not present??
     if(present(energy_table)) then
        call energy_table%put(self%label, eslc)
        ! TODO: use terms instead of total, e.g.
