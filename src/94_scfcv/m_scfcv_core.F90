@@ -372,7 +372,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  type(MPI_type) :: mpi_enreg_diel
  type(xcdata_type) :: xcdata
  type(energies_type) :: energies
- type(ab7_mixing_object) :: mix
+ type(ab7_mixing_object) :: mix,mix_mgga
  logical,parameter :: VERBOSE=.FALSE.
  logical :: dummy_nhatgr
  logical :: finite_efield_flag=.false.
@@ -798,8 +798,20 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      if (errid /= AB7_NO_ERROR) then
        MSG_ERROR(message)
      end if
+     if (dtset%usekden/=0.and.denpot==AB7_MIXING_DENSITY) then
+       if (dtset%useria==12345) then  ! This is temporary
+         call ab7_mixing_new(mix_mgga, iscf10, denpot, ispmix, nfftmix, dtset%nspden, 0, errid, message, dtset%npulayit)
+       else
+         call ab7_mixing_new(mix_mgga, 0, denpot, ispmix, nfftmix, dtset%nspden, 0, errid, message, dtset%npulayit)
+       end if
+       if (errid /= AB7_NO_ERROR) then
+         MSG_ERROR(message)
+       end if
+     end if
      if (dtset%mffmem == 0) then
        call ab7_mixing_use_disk_cache(mix, dtfil%fnametmp_fft)
+       if (dtset%usekden/=0.and.denpot==AB7_MIXING_DENSITY) &
+&        call ab7_mixing_use_disk_cache(mix, dtfil%fnametmp_fft_mgga)
      end if
 !   else if (dtset%iscf==0.and.dtset%usewvl==1) then
 !     ispmix=AB7_MIXING_REAL_SPACE;nfftmix=nfftf;ngfftmix(:)=ngfftf(:)
@@ -1724,7 +1736,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      call newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,&
 &     dtset,etotal,fcart,pawfgr%fintocoa,&
 &     gmet,grhf,gsqcut,initialized,ispmix,istep_mix,kg_diel,kxc,&
-&     mgfftf,mix,pawfgr%coatofin,moved_atm_inside,mpi_enreg,my_natom,nattyp,nfftf,&
+&     mgfftf,mix,mix_mgga,pawfgr%coatofin,moved_atm_inside,mpi_enreg,my_natom,nattyp,nfftf,&
 &     nfftmix,nfftmix_per_nfft,ngfftf,ngfftmix,nkxc,npawmix,npwdiel,nvresid,psps%ntypat,&
 &     n1xccc,pawrhoij,pawtab,ph1df,psps,rhog,rhor,&
 &     rprimd,susmat,psps%usepaw,vtrial,wvl%descr,wvl%den,xred,&
@@ -2011,6 +2023,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
  if (dtset%iscf > 0) then
    call ab7_mixing_deallocate(mix)
+   if (dtset%usekden/=0.and.denpot==AB7_MIXING_DENSITY) call ab7_mixing_deallocate(mix_mgga)
  end if
 
  if (usefock==1)then

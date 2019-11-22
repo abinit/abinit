@@ -461,11 +461,11 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,
 !If the grid is shifted, or if gradient corrections are present, there must be FFTs.
  if(ishift==1 .or. ngrad==2)then
 
-   ABI_ALLOCATE( wkcmpx,(2,nfft))
+   ABI_ALLOCATE(wkcmpx,(2,nfft))
    ABI_ALLOCATE(work,(cplex*nfft))
 
    if(ishift==1)then
-     ABI_ALLOCATE( ph1,(2*n1))
+     ABI_ALLOCATE(ph1,(2*n1))
      ABI_ALLOCATE(ph2,(2*n2))
      ABI_ALLOCATE(ph3,(2*n3))
 !    Precompute phases (The phases correspond to a shift of density on real space

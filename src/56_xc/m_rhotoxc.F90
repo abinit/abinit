@@ -1126,7 +1126,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      if(ngrad==2 .and. ixc/=13)then
        call xcmult(depsxc,nfft,ngrad,nspden_eff,nspgrad,rhonow_ptr)
      end if
-    
+
 !    Compute contribution from this grid to vxc, and ADD to existing vxc
      if (nspden/=4) then
        if(with_vxctau)then
@@ -1136,7 +1136,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
          call xcpot(cplex,depsxc,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
 &         qphon,rhonow_ptr,vxc)
        end if
-   
+
      else
 
 !      If non-collinear magnetism, restore potential in proper axis before adding it

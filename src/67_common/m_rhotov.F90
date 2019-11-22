@@ -256,15 +256,8 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enr
      non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
 !    Use the periodic solver to compute Hxc.
-     nk3xc=1
-     !write(80,*) "rhotov"
-     !xccc3d=zero
-     !DEBUG
-     !write(std_out,*)' rhotov : is_hybrid_ncpp=',is_hybrid_ncpp
-     !write(std_out,*)' rhotov : n3xccc=',n3xccc
-     !ENDDEBUG
-
      call timab(941,1,tsec)
+     nk3xc=1
      if (ipositron==0) then
        if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
@@ -304,7 +297,6 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enr
 !  For PAW we recalculate this since nhat was not taken into account
 !  in psolver_rhohxc: E_H= int v_H (n+nhat) dr
    if(.not. wvlbigdft .and. (dtset%icoulomb==0 .or. dtset%usepaw==1 ) ) then
-
      call timab(942,1,tsec)
      call dotprod_vn(1,rhor,energies%e_hartree,doti,nfft,nfftot,1,1,vhartr,ucvol,mpi_comm_sphgrid=mpi_comm_sphgrid)
      energies%e_hartree=half*energies%e_hartree

@@ -661,7 +661,7 @@ end subroutine ab7_mixing_eval_deallocate
  character(len = 500), intent(out) :: errmess
  logical, intent(in), optional :: reset
  integer, intent(in), optional :: isecur, comm_atom, pawopt, response
- real(dp), intent(inout), optional :: pawarr(mix%n_pawmix)
+ real(dp), intent(inout), optional, target :: pawarr(mix%n_pawmix)
  real(dp), intent(in), optional :: etotal
  real(dp), intent(in), optional :: potden(mix%space * mix%nfft,mix%nspden)
  real(dp), intent(out), optional :: resnrm
@@ -671,6 +671,10 @@ end subroutine ab7_mixing_eval_deallocate
  integer :: moveAtm, dbl_nnsclo, initialized, isecur_
  integer :: usepaw, pawoptmix_, response_
  real(dp) :: resnrm_
+!arrays
+ real(dp),target :: dum(1)
+ real(dp),pointer :: pawarr_(:)
+
 ! *************************************************************************
 
  ! Argument checkings.
@@ -712,6 +716,7 @@ end subroutine ab7_mixing_eval_deallocate
  if (present(pawopt)) pawoptmix_ = pawopt
  response_ = 0
  if (present(response)) response_ = response
+ pawarr_ => dum ; if (present(pawarr)) pawarr_ => pawarr
 
  ! Do the mixing.
  resnrm_ = 0.d0
@@ -728,13 +733,13 @@ end subroutine ab7_mixing_eval_deallocate
       call scfopt(mix%space, mix%f_fftgr,mix%f_paw,mix%iscf,istep,&
          & mix%i_vrespc,mix%i_vtrial, &
          & mpi_comm,mpi_summarize,mix%nfft,mix%n_pawmix,mix%nspden, &
-         & mix%n_fftgr,mix%n_index,mix%kind,pawoptmix_,usepaw,pawarr, &
+         & mix%n_fftgr,mix%n_index,mix%kind,pawoptmix_,usepaw,pawarr_, &
          & resnrm_, arr, errid, errmess, comm_atom=comm_atom)
     else
       call scfopt(mix%space, mix%f_fftgr,mix%f_paw,mix%iscf,istep,&
          & mix%i_vrespc,mix%i_vtrial, &
          & mpi_comm,mpi_summarize,mix%nfft,mix%n_pawmix,mix%nspden, &
-         & mix%n_fftgr,mix%n_index,mix%kind,pawoptmix_,usepaw,pawarr, &
+         & mix%n_fftgr,mix%n_index,mix%kind,pawoptmix_,usepaw,pawarr_, &
          & resnrm_, arr, errid, errmess)
     end if
     !  Change atomic positions
