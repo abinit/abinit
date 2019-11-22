@@ -310,7 +310,7 @@ contains
   subroutine set_initial_state(self, mode, restart_hist_fname)
     class(spin_mover_t),            intent(inout) :: self
     integer,              optional, intent(in)    :: mode
-    character(len=fnlen), optional, intent(in)    :: restart_hist_fname
+    character(len=*), optional, intent(in)    :: restart_hist_fname
 
     integer :: i, init_mode
     character(len=500) :: msg

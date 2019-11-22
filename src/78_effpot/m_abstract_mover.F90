@@ -139,7 +139,7 @@ contains
     ! set initial positions, spin, etc
     class(abstract_mover_t), intent(inout) :: self
     integer, optional, intent(in) :: mode
-    character(len=fnlen), optional, intent(in) :: restart_hist_fname
+    character(len=*), optional, intent(in) :: restart_hist_fname
 
     MSG_ERROR("set_initial_state not implemented for this mover")
     ABI_UNUSED_A(self)
