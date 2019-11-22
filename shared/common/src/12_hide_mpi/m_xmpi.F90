@@ -2668,22 +2668,29 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
  rr=int(largecount,kind=int32)-cc*INT_MAX
 
 !Create user-defined datatype
- call MPI_TYPE_VECTOR(cc,INT_MAX,INT_MAX,inputtype,chunks,ierr)
- call MPI_TYPE_CONTIGUOUS(rr,inputtype,remainder,ierr)
- if (ierr==0) then
-   call MPI_TYPE_GET_EXTENT(inputtype,lb,extent,ierr)
-   remdisp=cc*INT_MAX*extent
-   blklens(1:2)=1
-   disps(1)=0;disps(2)=remdisp
-   types(1)=chunks;types(2)=remainder
+ if (rr==0) then 
+   call MPI_TYPE_VECTOR(cc,INT_MAX,INT_MAX,inputtype,largetype,ierr)
+   if (ierr==0) call MPI_TYPE_COMMIT(largetype,ierr)
+ else
+   call MPI_TYPE_VECTOR(cc,INT_MAX,INT_MAX,inputtype,chunks,ierr)
+   call MPI_TYPE_CONTIGUOUS(rr,inputtype,remainder,ierr)
+   if (ierr==0) then
+     call MPI_TYPE_GET_EXTENT(inputtype,lb,extent,ierr)
+     remdisp=cc*INT_MAX*extent
+     blklens(1:2)=1
+     disps(1)=0;disps(2)=remdisp
+     types(1)=chunks;types(2)=remainder
 #ifdef HAVE_MPI_TYPE_CREATE_STRUCT
-   call MPI_TYPE_CREATE_STRUCT(2,blklens,disps,types,largetype,ierr)
+     call MPI_TYPE_CREATE_STRUCT(2,blklens,disps,types,largetype,ierr)
 #else
-   call MPI_TYPE_STRUCT(2,blklens,disps,types,largetype,ierr)
+     call MPI_TYPE_STRUCT(2,blklens,disps,types,largetype,ierr)
 #endif
-   call MPI_TYPE_COMMIT(largetype,ierr)
-   call MPI_TYPE_FREE(chunks,ierr)
-   call MPI_TYPE_FREE(remainder,ierr)
+     if (ierr==0) then
+       call MPI_TYPE_COMMIT(largetype,ierr)
+       call MPI_TYPE_FREE(chunks,ierr)
+       call MPI_TYPE_FREE(remainder,ierr)
+     end if
+   end if
  end if
  if (ierr/=0) call xmpi_abort(msg="Cannot remove ABI_MPIABORTFILE")
 
