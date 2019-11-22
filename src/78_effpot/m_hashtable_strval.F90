@@ -90,10 +90,6 @@ CONTAINS
        IF (list%key /= key) THEN
           IF ( .NOT. ASSOCIATED(list%child)) then
              ABI_MALLOC_SCALAR(list%child)
-             ! FIXME: ABI_ALLOC_SCALAR does not know how to handle list%child.
-             ! That is due to the QUOTE macro.
-             !allocate(list%child)
-             !call abimem_record(0, QUOTE(list%child), _LOC(list%child), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
           end IF
 
           CALL put_sll(list%child,key,val)
@@ -241,7 +237,7 @@ CONTAINS
     if (.not.(self%is_init)) then
        return
     end if
-    do i =0, self%vec_len-1
+    do i =1, self%vec_len
        s=s+ self%vec(i)%sum_val()
     end do
   end function sum_val_hash_table_t
