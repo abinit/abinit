@@ -37,14 +37,16 @@ module m_slc_primitive_potential
   use defs_basis
   use m_errors
 
+  use m_slc_potential
+  use m_spmat_ndcoo
+
   use m_abstract_potential, only: abstract_potential_t
   use m_dynamic_array, only: int2d_array_type
   use m_mpi_scheduler, only: init_mpi_info
   use m_multibinit_cell, only: mbcell_t
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_primitive_potential, only: primitive_potential_t
-  use m_slc_potential, only: slc_potential_t
-  use m_spmat_ndcoo, only: ndcoo_mat_t
+
   use m_supercell_maker, only: supercell_maker_t
   use m_xmpi
 
