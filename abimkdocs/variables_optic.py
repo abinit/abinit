@@ -192,7 +192,7 @@ Variable(
     mnemonics="TOLERANCE",
     text=r"""
 This parameter sets a scale for discarding small energy denominators.
-When energy denominators are smaller than **tolerance** , the term is discarded from the sum.
+When energy denominators are smaller than **tolerance**, the term is discarded from the sum.
 See also [[optic:broadening]].
 """,
 ),

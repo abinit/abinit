@@ -36,6 +36,7 @@ module m_mpi_setup
  use m_abicore
 
  use defs_abitypes,  only : MPI_type
+ use m_fstrings,     only : sjoin, itoa
  use m_time,         only : abi_wtime
  use m_io_tools,     only : flush_unit
  use m_parser,       only : intagm
@@ -258,8 +259,12 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !  From total number of procs, compute all possible distributions
 !  Ignore exit flag if GW/EPH calculations because autoparal section is performed in screening/sigma/bethe_salpeter/eph
+   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) then
+       iexit = 0
+   else
    call finddistrproc(dtsets,filnam,idtset,iexit,mband_upper,mpi_enregs(idtset),ndtset_alloc,tread)
-   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) iexit = 0
+   end if
+   !if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) iexit = 0
 
    if ((optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_GWLS).and. &
 &   (dtsets(idtset)%npkpt/=1   .or.dtsets(idtset)%npband/=1.or.dtsets(idtset)%npfft/=1.or. &
@@ -1074,10 +1079,10 @@ end subroutine mpi_setup
    MSG_ERROR("autoparal>1 only available for the old LOBPCG algorithm (wfoptalg=4/14)!")
  end if
 
-!Unit number used for outputting the autoparal sections
+ ! Unit number used for outputting the autoparal sections
  ount = ab_out
 
-!Handy local variables
+ ! Handy local variables
  iam_master = (mpi_enreg%me==0)
  optdriver = dtset%optdriver
  max_ncpus = dtset%max_ncpus ; if (dtset%paral_kgb<0) max_ncpus=abs(dtset%paral_kgb)
@@ -1096,7 +1101,7 @@ end subroutine mpi_setup
  if (dtset%wfoptalg==114) wf_algo_global=ALGO_LOBPCG_NEW
  if (dtset%wfoptalg==1) wf_algo_global=ALGO_CHEBFI
 
-!Some peculiar cases (with direct exit)
+ ! Some peculiar cases (with direct exit)
  if (max_ncpus<=0) then
    if (nproc==1.and.max_ncpus<=0) then
      if (tread(1)==0.or.xmpi_paral==0) dtset%paral_kgb= 0
@@ -1112,7 +1117,7 @@ end subroutine mpi_setup
      return
    end if
    if ((dtset%optdriver/=RUNL_GSTATE.and.dtset%optdriver/=RUNL_RESPFN.and.dtset%optdriver/=RUNL_GWLS).or. &
-&    (dtset%optdriver==RUNL_GSTATE.and.dtset%usewvl==1)) then
+       (dtset%optdriver==RUNL_GSTATE.and.dtset%usewvl==1)) then
      dtset%paral_kgb= 0
      dtset%npimage  = max(1,dtset%npimage)
      dtset%nppert   = max(1,dtset%nppert)
@@ -1125,13 +1130,13 @@ end subroutine mpi_setup
    end if
  end if
 
-!Need the metric tensor
+ ! Need the metric tensor
  call mkrdim(dtset%acell_orig(1:3,1),dtset%rprim_orig(1:3,1:3,1),rprimd)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
-!Determine some quantities related to plane waves
-!  - Crude estimation of the number of PW
-!  - Number of G vectors in each direction
+ ! Determine some quantities related to plane waves
+ !  - Crude estimation of the number of PW
+ !  - Number of G vectors in each direction
  mpw=0;ngmin=0;ngmax=0
  if (optdriver==RUNL_GSTATE) then
    ecut_eff = dtset%ecut*dtset%dilatmx**2
@@ -1142,7 +1147,7 @@ end subroutine mpi_setup
    call wrtout(std_out,msg,'COLL')
  end if
 
-!Parallelization over images
+ ! Parallelization over images
  npi_min=1;npi_max=1;nimage_eff=1
  if (optdriver==RUNL_GSTATE) then
    nimage_eff=dtset%ndynimage
@@ -1215,13 +1220,13 @@ end subroutine mpi_setup
      npf_max=dtset%npfft
      if (npf_max>ngmin(2)) then
        write(msg,'(3a)') &
-&       "Value of npfft given in input file is too high for the FFT grid!",ch10,&
-&       "Action: decrease npfft or increase FFT grid (ecut, ngfft, ...)."
+        "Value of npfft given in input file is too high for the FFT grid!",ch10,&
+        "Action: decrease npfft or increase FFT grid (ecut, ngfft, ...)."
        MSG_ERROR(msg)
      end if
    end if
    npf_max=min(npf_max,ngmin(2))
-   !Deactivate MPI FFT parallelism for GPU
+   ! Deactivate MPI FFT parallelism for GPU
    if (dtset%use_gpu_cuda==1) then
      npf_min=1;npf_max=1
    end if
@@ -1234,9 +1239,9 @@ end subroutine mpi_setup
      npf_min=1;npf_max=1
    end if
 
-!  Number of FFT procs has to be a multiple of FFT grid sizes
-!  In case of a restart from a density file, it has to be
-!  compatible with the FFT grid used for the density
+   ! Number of FFT procs has to be a multiple of FFT grid sizes
+   ! In case of a restart from a density file, it has to be
+   ! compatible with the FFT grid used for the density
    n2=dtset%ngfft(2) ; n3=dtset%ngfft(3)
    if (n2==0.and.n3==0.and.(dtset%getden/=0.or.dtset%irdden/=0.or.dtset%iscf<0)) then
      dtset_found=.false.;file_found=.false.
@@ -1298,14 +1303,14 @@ end subroutine mpi_setup
 !  - nstep=0
 !  - Hartree-Fock or hybrid calculation (for now on)
  if ( (optdriver/=RUNL_GSTATE).or.(dtset%paral_kgb==0.and.tread(1)==1).or. &
-&     (dtset%nstep==0).or.(dtset%usefock==1)) then
+      (dtset%nstep==0).or.(dtset%usefock==1)) then
    nps_min=1; nps_max=1
    npf_min=1; npf_max=1
    npb_min=1; npb_max=1
    bpp_min=1; bpp_max=1
  end if
 
-!Which levels of parallelism do we have?
+ ! Which levels of parallelism do we have?
  with_image =(npi_min/=1.or.npi_max/=1)
  with_pert  =(npp_min/=1.or.npp_max/=1)
  with_kpt   =(npk_min/=1.or.npk_max/=1)
@@ -1533,19 +1538,17 @@ end subroutine mpi_setup
    if (any(my_algo(:)/=ALGO_CG)) paral_kgb=1
  end if
 
-!Print output for abipy
- if (iam_master.and.max_ncpus>0.and. &
-&    (mcount>0.or.wf_algo_global==ALGO_CG)) then
+ ! Print output for abipy
+ if (iam_master .and. max_ncpus > 0.and. (mcount>0 .or. wf_algo_global == ALGO_CG)) then
    write(ount,'(2a)')ch10,"--- !Autoparal"
-   if (optdriver==RUNL_GSTATE.and.paral_kgb==0) then
+   if (optdriver==RUNL_GSTATE .and. paral_kgb == 0) then
      write(ount,"(a)")"# Autoparal section for GS run (band-by-band CG method)"
    else if (optdriver==RUNL_GSTATE) then
      write(ount,'(a)')'#Autoparal section for GS calculations with paral_kgb'
    else if (optdriver==RUNL_RESPFN) then
      write(ount,'(a)')'#Autoparal section for DFPT calculations'
    else
-    msg='Unsupported optdriver'
-     MSG_ERROR(msg)
+     MSG_ERROR(sjoin('Unsupported optdriver:', itoa(optdriver)))
    end if
    write(ount,"(a)")   "info:"
    write(ount,"(a,i0)")"    autoparal: ",autoparal
