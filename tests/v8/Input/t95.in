@@ -1,9 +1,9 @@
 # Hydrogen systems for tests of symmetry recognition in the non-collinear case. Constrained DFT calculations
 
-#ndtset 6
-#udtset 3 2
- ndtset 2
- udtset 1 2
+ ndtset 6
+ udtset 3 2
+
+#nsym 1
 
 #Definition of the atomic spheres
  ratsph    1.0 
@@ -20,6 +20,7 @@ tsmear1? 0.01
 occopt1? 7
  acell1? 10 6 6 
   xred1? 0 0 0   0.5 0 0
+ ngkpt1? 4 2 2
 
  spinat11       0.01  0.01  0.08   0.01  -0.01  0.08  # The spin system is invariant with respect to a gliding plane symmetry
                                                       # For this system, there are some symmetry operations that goes unnoticed because the
@@ -35,21 +36,24 @@ occopt1? 7
          1 0 1
          1 1 0
   xred2?  0 0 0    1/3 1/3 1/3     2/3 2/3 2/3
+ ngkpt2?  2 2 2
 
- spinat21   0.4 0 0    0 0.4 0     0 0 0.4   # The spin obeys a trigonal screw symmetry
- spinat22   0 0 0      0.4 0.4 0.4    -0.4 -0.4 -0.4
+ spinat21   0.08 0 0    0 0.08 0     0 0 0.08   # The spin obeys a trigonal screw symmetry
+ spinat22   0 0 0      0.04 0.04 0.04    -0.04 -0.04 -0.04
 
 #Dataset 3. Third system, a square of H atoms, in a BCT cell.
  natom3? 4
  typat3? 4*1
- nband3? 4
- scalecart3? 4 5 6
+ nband3? 8
+ scalecart3? 4 4 8
  rprim3? 0 1 1
          1 0 1
          1 1 0
   xcart3?  1.0 0 0   0 1.0 0  -1.0 0 0   0 -1.0 0    
- spinat31  0.8 0 0   0 -0.4 0  -0.4 0 0    0 0.4 0  
- spinat32  0.8 0 0.2   0 -0.4 0.2  -0.4 0 0.2   0 0.4 0.2 
+ kptrlen3?  15.0
+
+ spinat31  0.04 0 0   0 -0.04 0  -0.04 0 0    0 0.04 0  
+ spinat32  0.04 0 0.02   0 -0.04 0.02  -0.04 0 0.02   0 0.04 0.02 
 
 #Atom types
  ntypat  1
@@ -62,7 +66,8 @@ occopt1? 7
  nstep  35
  ecut 5
  kptopt 4
- ngkpt 4 2 2
+ tsmear 0.01
+ occopt 7
 
 #Constrained DFT 
 #constraint_kind 1  # Constrained DFT for the magnetization
