@@ -1,17 +1,30 @@
 # Hydrogen systems for tests of symmetry recognition in the non-collinear case. Constrained DFT calculations
 
- ndtset 6
- udtset 3 2
+#ndtset 6
+#udtset 3 2
+ ndtset 2
+ udtset 1 2
+
+#Definition of the atomic spheres
+ ratsph    1.0 
+ ratsm     0.05
+ constraint_kind  1
+ magcon_lambda    2
+ prtvol 2
 
 #Dataset 1. First system, a chain of H atoms along 1 0 0, with spins pointing in different directions. Tetragonal cell.
  natom1? 2
  typat1? 2*1
- nband1? 2
- acell1? 8 6 6
+ nband1? 4
+tsmear1? 0.01
+occopt1? 7
+ acell1? 10 6 6 
   xred1? 0 0 0   0.5 0 0
 
- spinat11       0.08 0.06   0.8    0.08 -0.06  0.8 # The spin obeys a gliding plane symmetry
- spinat12       0.08 0.06   0.8   -0.08  0.06 -0.8 # Inversion of the spin on the second atom with respect to the case 11
+ spinat11       0.01  0.01  0.08   0.01  -0.01  0.08  # The spin system is invariant with respect to a gliding plane symmetry
+                                                      # For this system, there are some symmetry operations that goes unnoticed because the
+                                                      # coherency with spin-orbit coupling is enforced even if it is not present.
+ spinat12       0.01  0.01  0.08  -0.01   0.01 -0.08  # Inversion of the spin on the second atom with respect to the case 11
 
 #Dataset 2. Second system, a chain of H atoms along 1 1 1, with spins pointing in different directions. Rhombohedral cell.
  natom2? 3
@@ -23,8 +36,8 @@
          1 1 0
   xred2?  0 0 0    1/3 1/3 1/3     2/3 2/3 2/3
 
- spinat21   0.8 0 0    0 0.8 0     0 0 0.8   # The spin obeys a trigonal screw symmetry
- spinat22   0 0 0      0.8 0.8 0.8    -0.8 -0.8 -0.8
+ spinat21   0.4 0 0    0 0.4 0     0 0 0.4   # The spin obeys a trigonal screw symmetry
+ spinat22   0 0 0      0.4 0.4 0.4    -0.4 -0.4 -0.4
 
 #Dataset 3. Third system, a square of H atoms, in a BCT cell.
  natom3? 4
@@ -35,8 +48,8 @@
          1 0 1
          1 1 0
   xcart3?  1.0 0 0   0 1.0 0  -1.0 0 0   0 -1.0 0    
- spinat31  0.8 0 0   0 -0.8 0  -0.8 0 0    0 0.8 0  
- spinat32  0.8 0 0.2   0 -0.8 0.2  -0.8 0 0.2   0 0.8 0.2 
+ spinat31  0.8 0 0   0 -0.4 0  -0.4 0 0    0 0.4 0  
+ spinat32  0.8 0 0.2   0 -0.4 0.2  -0.4 0 0.2   0 0.4 0.2 
 
 #Atom types
  ntypat  1
@@ -47,9 +60,10 @@
 #Computational parameters
  tolvrs 1.0d-8
  nstep  35
- ecut 3
- kptopt 0
- nkpt 1
+ ecut 5
+ kptopt 4
+ ngkpt 4 2 2
+
 #Constrained DFT 
 #constraint_kind 1  # Constrained DFT for the magnetization
 #magcon_lambda      2   
