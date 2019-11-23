@@ -134,6 +134,7 @@ contains
 !!    vres2=square of the norm of the residual
 !!    [vxctau(nfftf,dtset%nspden,4*dtset%usekden)]=derivative of XC energy density with respect to
 !!      kinetic energy density (metaGGA cases) (optional output)
+!!    [vtauresid(nfft,nspden*dtset%usekden)]=array for vxctau residue (see vtau below))
 !!
 !! SIDE EFFECTS
 !! Input/Output:
@@ -165,7 +166,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enr
 &  nhat,nhatgr,nhatgrdim,nkxc,vresidnew,n3xccc,optene,optres,optxc,&
 &  rhog,rhor,rprimd,strsxc,ucvol,usepaw,usexcnhat,&
 &  vhartr,vnew_mean,vpsp,vres_mean,vres2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
-&  electronpositron,taur,vxc_hybcomp,vxctau,add_tfw,xcctau3d) ! optional arguments
+&  electronpositron,taur,vxc_hybcomp,vxctau,vtauresid,add_tfw,xcctau3d) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -191,6 +192,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enr
  real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vnew_mean(dtset%nspden)
  real(dp),intent(out) :: vres_mean(dtset%nspden),vresidnew(nfft,dtset%nspden)
  real(dp),intent(in),optional :: taur(nfft,dtset%nspden*dtset%usekden)
+ real(dp),intent(inout),optional :: vtauresid(nfft,dtset%nspden*dtset%usekden)
  real(dp),intent(out),optional :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(out),optional :: vxc_hybcomp(:,:) ! (nfft,nspden)
  real(dp),intent(out),optional :: xcctau3d(n3xccc)
@@ -218,6 +220,9 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enr
 
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
+ if (with_vxctau.and.optres==0.and.(.not.present(vtauresid))) then
+   MSG_BUG('need vtauresid!')
+ end if
 
 !Check if we're in hybrid norm conserving pseudopotential with a core correction
  is_hybrid_ncpp=(usepaw==0 .and. n3xccc/=0 .and. &
@@ -246,6 +251,8 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enr
  end if
 
  if (ipositron/=1) then
+!  if metaGGA, save current value of vxctau potential
+   if (with_vxctau) vtauresid(:,:)=vxctau(:,:,1)
 !  Compute xc potential (separate up and down if spin-polarized)
    if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
      call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr)
@@ -537,6 +544,12 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enr
 
 !  Compute square norm vres2 of potential residual vresid
    call sqnorm_v(1,nfft,vres2,dtset%nspden,optres,vresidnew(1+offset, 1),mpi_comm_sphgrid=mpi_comm_sphgrid)
+
+!  Now take care of Vxctau residual (metaGGA)
+   if (with_vxctau) then
+     if (ipositron/=1) vtauresid(:,:)=vxctau(:,:,1)-vtauresid(:,:)
+     if (ipositron==1) vtauresid(:,:)=zero
+   end if
 
  else ! optres/=0
 

@@ -43,7 +43,8 @@ module m_newvtr
  use m_pawrhoij, only : pawrhoij_type,pawrhoij_filter
  use m_prcref,   only : prcref_PMA
  use m_wvl_rho,  only : wvl_prcref
- use m_fft,     only : fourdp
+ use m_fft,      only : fourdp
+ use m_xctk,     only : xcpot
 
  implicit none
 
@@ -135,6 +136,7 @@ contains
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  susmat(2,npwdiel,nspden,npwdiel,nspden)=
 !!   the susceptibility (or density-density response) matrix in reciprocal space
+!!  [vtauresid(nfft,nspden*dtset%usekden)]=array for vtau residue (see vtau below))
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  vhartr(nfft)=array for holding Hartree potential
 !!  vnew_mean(nspden)=constrained mean value of the future trial potential (might be
@@ -142,6 +144,8 @@ contains
 !!  vpsp(nfft)=array for holding local psp
 !!  vresid(nfft,nspden)=array for the residual of the potential
 !!  vxc(nfft,nspden)=exchange-correlation potential (hartree)
+!!  [vtau(nfftf,dtset%nspden,4*dtset%usekden)]=derivative of XC energy density
+!!      with respect to kinetic energy density (metaGGA cases) (optional)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
@@ -152,6 +156,9 @@ contains
 !!                                          in reduced coordinates
 !!  vtrial(nfft,nspden)= at input, it is the "in" trial potential that gave vresid=(v_out-v_in)
 !!       at output, it is an updated "mixed" trial potential
+!!  ===== if usekden==1 =====
+!!  [mix_mgga<type(ab7_mixing_object)>]=all data defining the mixing algorithm for
+!!    the kinetic energy potential
 !!  ===== if densfor_pred==3 .and. moved_atm_inside==1 =====
 !!    ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phases
 !!  ==== if usepaw==1
@@ -204,7 +211,8 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
      &  nfftf,&
      &  pawtab,&
      &  rhog,&
-     &  wvl)
+     &  wvl,&
+     &  mix_mgga,vtau,vtauresid) ! Optional arguments
 
 !Arguments-------------------------------
   ! WARNING
@@ -220,6 +228,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(ab7_mixing_object),intent(inout) :: mix
+ type(ab7_mixing_object),intent(inout),optional :: mix_mgga
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_data), intent(inout) :: wvl
 !arrays
@@ -242,6 +251,8 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  real(dp),intent(inout), target :: rhor(nfft,dtset%nspden)
  real(dp),intent(inout) :: vresid(nfft,dtset%nspden),vtrial(nfft,dtset%nspden)
  real(dp),intent(inout), target :: xred(3,dtset%natom)
+ real(dp),intent(inout),optional :: vtau(nfft,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(inout),optional :: vtauresid(nfft,dtset%nspden*dtset%usekden)
  type(pawrhoij_type),intent(inout) :: pawrhoij(my_natom*usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
 
@@ -260,6 +271,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  real(dp),allocatable :: rhoijrespc(:)
  real(dp),allocatable :: rhoijtmp(:,:)
  real(dp),allocatable :: vresid0(:,:),vrespc(:,:),vreswk(:,:),vtrialg(:,:,:)
+ real(dp),allocatable :: vtauresid0(:,:),vtaurespc(:,:),vtaug(:,:,:),vtau0(:,:)
  real(dp),pointer :: vtrial0(:,:),vpaw(:)
 
 ! *************************************************************************
@@ -285,6 +297,18 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  if(ispmix/=2.and.nfftmix/=nfft) then
    message = '  nfftmix/=nfft allowed only when ispmix=2 !'
    MSG_BUG(message)
+ end if
+
+ if (dtset%usekden==1) then
+   if ((.not.present(vtauresid)).or.(.not.present(vtau)).or.(.not.present(mix_mgga))) then
+      message='Several arrays are mising!'
+      MSG_BUG(message)
+   end if
+   if (mix_mgga%iscf==AB7_MIXING_CG_ENERGY.or.mix_mgga%iscf==AB7_MIXING_CG_ENERGY_2.or.&
+&      mix_mgga%iscf==AB7_MIXING_EIG) then
+     message='kinetic energy potential cannot be mixed with the selected mixing algorithm!'
+     MSG_ERROR(message)
+   end if
  end if
 
  if(dtset%usewvl==1) then
@@ -361,13 +385,24 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 !Select components of potential to be mixed
  ABI_ALLOCATE(vtrial0,(ispmix*nfftmix,dtset%nspden))
  ABI_ALLOCATE(vresid0,(ispmix*nfftmix,dtset%nspden))
+ ABI_ALLOCATE(vtau0,(ispmix*nfftmix,dtset%nspden*dtset%usekden))
+ ABI_ALLOCATE(vtauresid0,(ispmix*nfftmix,dtset%nspden*dtset%usekden))
  if (ispmix==1.and.nfft==nfftmix) then
    vtrial0=vtrial;vresid0=vresid
+   if (dtset%usekden==1) then
+     vtau0=vtau(:,:,1);vtauresid0=vtauresid
+   end if
  else if (nfft==nfftmix) then
    do ispden=1,dtset%nspden
      call fourdp(1,vtrial0(:,ispden),vtrial(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
      call fourdp(1,vresid0(:,ispden),vresid(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
    end do
+   if (dtset%usekden==1) then
+     do ispden=1,dtset%nspden
+       call fourdp(1,vtau0(:,ispden),vtau(:,ispden,1),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
+       call fourdp(1,vtauresid0(:,ispden),vtauresid(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
+     end do
+   end if
  else
    ABI_ALLOCATE(vtrialg,(2,nfft,dtset%nspden))
    ABI_ALLOCATE(vreswk,(2,nfft))
@@ -387,6 +422,25 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
        end if
      end do
    end do
+   if (dtset%usekden==1) then
+     ABI_ALLOCATE(vtaug,(2,nfft,dtset%nspden))
+     do ispden=1,dtset%nspden
+       fact=dielar(4);if (ispden>1) fact=dielar(7)
+       call fourdp(1,vtaug(:,:,ispden),vtau(:,ispden,1),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
+       call fourdp(1,vreswk,vtauresid(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
+       do ifft=1,nfft
+         if (ffttomix(ifft)>0) then
+           jfft=2*ffttomix(ifft)
+           vtau0(jfft-1,ispden)=vtaug(1,ifft,ispden)
+           vtau0(jfft  ,ispden)=vtaug(2,ifft,ispden)
+           vtauresid0(jfft-1,ispden)=vreswk(1,ifft)
+           vtauresid0(jfft  ,ispden)=vreswk(2,ifft)
+         else
+           vtaug(:,ifft,ispden)=vtaug(:,ifft,ispden)+fact*vreswk(:,ifft)
+         end if
+       end do
+     end do
+   end if
    ABI_DEALLOCATE(vreswk)
  end if
 
@@ -394,6 +448,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 
 !Choice of preconditioner governed by iprcel, densfor_pred and iprcfc
  ABI_ALLOCATE(vrespc,(ispmix*nfftmix,dtset%nspden))
+ ABI_ALLOCATE(vtaurespc,(ispmix*nfftmix,dtset%nspden*dtset%usekden))
  ABI_ALLOCATE(vpaw,(npawmix*usepaw))
  if (usepaw==1)  then
    ABI_ALLOCATE(rhoijrespc,(npawmix))
@@ -414,6 +469,14 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  else
    call wvl_prcref(dielar,dtset%iprcel,my_natom,nfftmix,npawmix,dtset%nspden,pawrhoij,&
 &   rhoijrespc,psps%usepaw,vresid0,vrespc)
+ end if
+!At present, only a simple precoditionning for vtau
+! (is Kerker mixing valid for vtau?)
+ if (dtset%usekden==1) then
+   do ispden=1,dtset%nspden
+     fact=dielar(4);if (ispden>1) fact=abs(dielar(7))
+     vtaurespc(1:ispmix*nfftmix,ispden)=fact*vtaurespc(1:ispmix*nfftmix,ispden)
+   end do
  end if
 
  call timab(903,2,tsec)
@@ -440,7 +503,17 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  if (errid /= AB7_NO_ERROR) then
    MSG_ERROR(message)
  end if
+ if (dtset%usekden==1) then
+   call ab7_mixing_copy_current_step(mix_mgga, vtauresid0, errid, message, &
+&        arr_respc = vtaurespc)
+   if (errid /= AB7_NO_ERROR) then
+     MSG_ERROR(message)
+   end if
+ end if
  ABI_DEALLOCATE(vresid0)
+ ABI_DEALLOCATE(vrespc)
+ ABI_DEALLOCATE(vtauresid0)
+ ABI_DEALLOCATE(vtaurespc)
 
 !PAW: either use the array f_paw or the array f_paw_disk
  if (usepaw==1) then
@@ -486,11 +559,17 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 & reset = reset, isecur = dtset%isecur, &
 & pawopt = dtset%pawoptmix, pawarr = vpaw, etotal = etotal, potden = rhor, &
 & comm_atom=mpi_enreg%comm_atom)
-
  if (errid == AB7_ERROR_MIXING_INC_NNSLOOP) then
    dbl_nnsclo = 1
  else if (errid /= AB7_NO_ERROR) then
    MSG_ERROR(message)
+ end if
+ if (dtset%usekden==1) then
+   call ab7_mixing_eval(mix_mgga, vtau0, istep, nfftot, ucvol_local, &
+&   mpicomm, mpi_summarize, errid, message, reset = reset)
+   if (errid /= AB7_NO_ERROR) then
+     MSG_ERROR(message)
+   end if
  end if
 
 !PAW: apply a simple mixing to rhoij (this is temporary)
@@ -563,20 +642,26 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
    end do
  end if
  ABI_DEALLOCATE(vpaw)
- ABI_DEALLOCATE(vrespc)
 
 !Eventually write the data on disk and deallocate f_fftgr_disk
  call ab7_mixing_eval_deallocate(mix)
+ if (dtset%usekden==1) call ab7_mixing_eval_deallocate(mix_mgga)
 
  call timab(904,2,tsec)
 
 !Restore potential
  if (ispmix==1.and.nfft==nfftmix) then
    vtrial=vtrial0
+   if (dtset%usekden==1) vtau(:,:,1)=vtau0(:,:)
  else if (nfft==nfftmix) then
    do ispden=1,dtset%nspden
      call fourdp(1,vtrial0(:,ispden),vtrial(:,ispden),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
    end do
+   if (dtset%usekden==1) then
+     do ispden=1,dtset%nspden
+       call fourdp(1,vtau0(:,ispden),vtau(:,ispden,1),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
+     end do
+   end if
  else
    do ispden=1,dtset%nspden
      do ifft=1,nfftmix
@@ -587,8 +672,25 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
      call fourdp(1,vtrialg(:,:,ispden),vtrial(:,ispden),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
    end do
    ABI_DEALLOCATE(vtrialg)
+   if (dtset%usekden==1) then
+     do ispden=1,dtset%nspden
+       do ifft=1,nfftmix
+         jfft=mixtofft(ifft)
+         vtaug(1,jfft,ispden)=vtau0(2*ifft-1,ispden)
+         vtaug(2,jfft,ispden)=vtau0(2*ifft  ,ispden)
+       end do
+       call fourdp(1,vtaug(:,:,ispden),vtau(:,ispden,1),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
+     end do
+     ABI_DEALLOCATE(vtaug)
+   end if
  end if
  ABI_DEALLOCATE(vtrial0)
+ ABI_DEALLOCATE(vtau0)
+
+!In case of metaGGA, re-compute vtau gradient
+ if (dtset%usekden==1.and.mix_mgga%iscf/=AB7_MIXING_NONE) then
+   call xcpot(1,gprimd,0,0,mpi_enreg,nfft,ngfft,2,dtset%nspden,0,[zero,zero,zero],vxctau=vtau)
+ end if
 
  call timab(905,1,tsec)
 

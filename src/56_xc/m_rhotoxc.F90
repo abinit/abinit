@@ -1130,11 +1130,11 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !    Compute contribution from this grid to vxc, and ADD to existing vxc
      if (nspden/=4) then
        if(with_vxctau)then
-         call xcpot(cplex,depsxc,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
-&         qphon,rhonow_ptr,vxc,vxctau=vxctau)
+         call xcpot(cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
+&         qphon,depsxc=depsxc,rhonow=rhonow_ptr,vxc=vxc,vxctau=vxctau)
        else
-         call xcpot(cplex,depsxc,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
-&         qphon,rhonow_ptr,vxc)
+         call xcpot(cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
+&         qphon,depsxc=depsxc,rhonow=rhonow_ptr,vxc=vxc)
        end if
 
      else
@@ -1142,8 +1142,8 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !      If non-collinear magnetism, restore potential in proper axis before adding it
        ABI_ALLOCATE(vxcrho_b_updn,(nfft,4))
        vxcrho_b_updn=zero
-       call xcpot(cplex,depsxc,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
-&       qphon,rhonow_ptr,vxcrho_b_updn)
+       call xcpot(cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
+&       qphon,depsxc=depsxc,rhonow=rhonow_ptr,vxc=vxcrho_b_updn)
        do ifft=1,nfft
          dvdn=half*(vxcrho_b_updn(ifft,1)+vxcrho_b_updn(ifft,2))
          if(m_norm(ifft)>m_norm_min) then
@@ -1174,8 +1174,8 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        end if
        ABI_ALLOCATE(vxc_apn,(nfft,nspden_apn))
        vxc_apn=zero
-       call xcpot(cplex,depsxc_apn,gprimd,ishift,0,mpi_enreg,nfft,ngfft,ngrad_apn,&
-&       nspden_apn,ngrad_apn,qphon,rhonow_apn,vxc_apn)
+       call xcpot(cplex,gprimd,ishift,0,mpi_enreg,nfft,ngfft,ngrad_apn,&
+&       nspden_apn,ngrad_apn,qphon,depsxc=depsxc_apn,rhonow=rhonow_apn,vxc=vxc_apn)
        vxc(:,1)=vxc(:,1)+vxc_apn(:,1)
        if (nspden_updn==2) vxc(:,2)=vxc(:,2)+vxc_apn(:,1)
        s1=zero

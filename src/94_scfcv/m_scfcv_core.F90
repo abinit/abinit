@@ -407,14 +407,13 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  real(dp),allocatable :: dielinv(:,:,:,:,:),dtn_pc(:,:)
  real(dp),allocatable :: fcart(:,:),forold(:,:),fred(:,:),gresid(:,:)
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grhf(:,:),grnl(:),grvdw(:,:),grxc(:,:)
- real(dp),allocatable :: kxc(:,:),nhat(:,:),nhatgr(:,:,:),nvresid(:,:)
+ real(dp),allocatable :: kxc(:,:),nhat(:,:),nhatgr(:,:,:),nvresid(:,:),nvtauresid(:,:)
  real(dp),allocatable :: ph1d(:,:),ph1ddiel(:,:),ph1df(:,:)
  real(dp),allocatable :: phnonsdiel(:,:,:),rhowfg(:,:),rhowfr(:,:),shiftvector(:)
  real(dp),allocatable :: susmat(:,:,:,:,:),synlgr(:,:)
  real(dp),allocatable :: vectornd(:,:),vhartr(:),vpsp(:),vtrial(:,:)
  real(dp),allocatable :: vxc(:,:),vxc_hybcomp(:,:),vxctau(:,:,:),workr(:,:),xccc3d(:),xcctau3d(:),ylmdiel(:,:)
  real(dp),pointer :: elfr(:,:),grhor(:,:,:),lrhor(:,:)
- real(dp),allocatable :: tauresid(:,:)
  type(scf_history_type) :: scf_history_wf
  type(constrained_dft_t) :: constrained_dft
 
@@ -756,10 +755,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    dielar(5)=dtset%diegap;dielar(6)=dtset%dielam
    dielar(7)=dtset%diemix;if (dtset%iscf>=10) dielar(7)=dtset%diemixmag
    ABI_ALLOCATE(nvresid,(nfftf,dtset%nspden))
-   ABI_ALLOCATE(tauresid,(nfftf,dtset%nspden*dtset%usekden))
+   ABI_ALLOCATE(nvtauresid,(nfftf,dtset%nspden*dtset%usekden))
    if (nstep==0) then
-     nvresid=zero
-     tauresid=zero
+    nvresid=zero
+    nvtauresid=zero
    end if
    ABI_ALLOCATE(dtn_pc,(3,dtset%natom))
 !  The next arrays are needed if iscf==5 and ionmov==4,
@@ -798,7 +797,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      if (errid /= AB7_NO_ERROR) then
        MSG_ERROR(message)
      end if
-     if (dtset%usekden/=0.and.denpot==AB7_MIXING_DENSITY) then
+     if (dtset%usekden/=0) then
        if (dtset%useria==12345) then  ! This is temporary
          call ab7_mixing_new(mix_mgga, iscf10, denpot, ispmix, nfftmix, dtset%nspden, 0, errid, message, dtset%npulayit)
        else
@@ -818,7 +817,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    end if
  else
    ABI_ALLOCATE(nvresid,(0,0))
-   ABI_ALLOCATE(tauresid,(0,0))
+   ABI_ALLOCATE(nvtauresid,(0,0))
    ABI_ALLOCATE(dtn_pc,(0,0))
    ABI_ALLOCATE(grhf,(0,0))
  end if ! iscf>0
@@ -1579,7 +1578,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &     computed_forces,optres,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,&
 &     pawrhoij,pawtab,phnons,phnonsdiel,ph1d,ph1ddiel,psps,fock,&
 &     pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,rmet,rprimd,&
-&     susmat,symrec,taug,taur,tauresid,ucvol_local,usecprj,wffnew,with_vectornd,&
+&     susmat,symrec,taug,taur,nvtauresid,ucvol_local,usecprj,wffnew,with_vectornd,&
 &     vectornd,vtrial,vxctau,wvl,xred,ylm,ylmgr,ylmdiel)
 
    else if (dtset%tfkinfunc==1.or.dtset%tfkinfunc==11.or.dtset%tfkinfunc==12) then
@@ -1652,7 +1651,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &       taur=taur,vxctau=vxctau,add_tfw=tfw_activated)
      end if
 !    If the density mixing is required, compute the total energy here
-!    TODO: add taur taug tauresid if needed
+!    TODO: add nvtauresid if needed (for forces?)
      call etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &     elast,electronpositron,energies,&
 &     etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,gresid,grewtn,grhf,grnl,grvdw,&
@@ -1736,11 +1735,11 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      call newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,&
 &     dtset,etotal,fcart,pawfgr%fintocoa,&
 &     gmet,grhf,gsqcut,initialized,ispmix,istep_mix,kg_diel,kxc,&
-&     mgfftf,mix,mix_mgga,pawfgr%coatofin,moved_atm_inside,mpi_enreg,my_natom,nattyp,nfftf,&
+&     mgfftf,mix,pawfgr%coatofin,moved_atm_inside,mpi_enreg,my_natom,nattyp,nfftf,&
 &     nfftmix,nfftmix_per_nfft,ngfftf,ngfftmix,nkxc,npawmix,npwdiel,nvresid,psps%ntypat,&
 &     n1xccc,pawrhoij,pawtab,ph1df,psps,rhog,rhor,&
 &     rprimd,susmat,psps%usepaw,vtrial,wvl%descr,wvl%den,xred,&
-&     taug=taug,taur=taur,tauresid=tauresid)
+&     mix_mgga=mix_mgga,taug=taug,taur=taur,tauresid=nvtauresid)
    end if   ! iscf>=10
 
    call timab(68,2,tsec)
@@ -1815,13 +1814,11 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !    Compute new potential from the trial density
 
      optene=2*optres;if(psps%usepaw==1) optene=2
-
-! TODO: check if tauresid is needed here too for potential residual in the future for MGGA potential mixing
      call rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfftf,ngfftf, &
 &     nhat,nhatgr,nhatgrdim,nkxc,nvresid,n3xccc,optene,optres,optxc,&
 &     rhog,rhor,rprimd,strsxc,ucvol_local,psps%usepaw,usexcnhat,&
 &     vhartr,vnew_mean,vpsp,vres_mean,res2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
-&     electronpositron=electronpositron,taur=taur,vxctau=vxctau,&
+&     electronpositron=electronpositron,taur=taur,vxctau=vxctau,vtauresid=nvtauresid,&
 &     vxc_hybcomp=vxc_hybcomp,add_tfw=tfw_activated,xcctau3d=xcctau3d)
 
    end if
@@ -1861,7 +1858,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      end if
 
      if (.not.wvlbigdft) then
-! TODO: add taur taug tauresid if needed
+! TODO: add nvtauresid if needed (for forces?)
        call etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &       elast,electronpositron,energies,&
 &       etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,gresid,grewtn,grhf,grnl,grvdw,&
@@ -1905,9 +1902,13 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !    If criteria in scprqt say to quit, then exit the loop over istep.
      if (quit==1) then
        do ispden=1,dtset%nspden
-! TODO: if we add potential mixing for the MGGA generalize the tauresid to vtauresid and add in here
          vtrial(:,ispden)=vtrial(:,ispden)+nvresid(:,ispden)+vres_mean(ispden)
        end do
+       !if (dtset%usekden==1) then
+       !  do ispden=1,dtset%nspden
+       !    vxctau(:,ispden,1)=vxctau(:,ispden,1)+nvtauresid(:,ispden)
+       !  end do
+       !end if
        call timab(244,2,tsec) ! Due to the exit instruction, two timab calls are needed
        exit ! exit the loop over istep
      end if
@@ -1937,8 +1938,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &     nstep,psps%ntypat,n1xccc,&
 &     pawrhoij,ph1df,psps,rhor,rprimd,susmat,psps%usepaw,&
 &     vhartr,vnew_mean,vpsp,nvresid,vtrial,vxc,xred,&
-&     nfftf,&
-&     pawtab,rhog,wvl)
+&     nfftf,pawtab,rhog,wvl,&
+&     mix_mgga=mix_mgga,vtau=vxctau,vtauresid=nvtauresid)
 
    end if   ! iscf<10
 
@@ -2243,7 +2244,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  ABI_DEALLOCATE(dtn_pc)
  ABI_DEALLOCATE(grhf)
  ABI_DEALLOCATE(nvresid)
- ABI_DEALLOCATE(tauresid)
+ ABI_DEALLOCATE(nvtauresid)
 
  if(allocated(vectornd)) then
     ABI_DEALLOCATE(vectornd)

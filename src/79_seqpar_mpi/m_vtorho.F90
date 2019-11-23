@@ -1797,7 +1797,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if (optres==1) then
        nvresid=rhor-nvresid
        call sqnorm_v(1,nfftf,nres2,dtset%nspden,optres,nvresid,mpi_comm_sphgrid=mpi_comm_sphgrid)
-       if (dtset%usekden==1) tauresid=taur-tauresid
+       if (dtset%usekden==1) then
+         if (optres==1) tauresid=taur-tauresid
+       endif
      end if
    end if
 

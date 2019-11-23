@@ -338,7 +338,7 @@ end subroutine xcden
 !!
 !! INPUTS
 !!  cplex=if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
-!!  depsxc(cplex*nfft,nspgrad)=derivative of Exc with respect to the (spin-)density,
+!!  [depsxc(cplex*nfft,nspgrad)]=derivative of Exc with respect to the (spin-)density,
 !!    or to the norm of the gradient of the (spin-)density,
 !!    further divided by the norm of the gradient of the (spin-)density
 !!   The different components of depsxc will be
@@ -364,7 +364,7 @@ end subroutine xcden
 !!  nspden=number of spin-density components
 !!  nspgrad=number of spin-density and spin-density-gradient components
 !!  qphon(3)=reduced coordinates for the phonon wavelength (needed if cplex==2).
-!!  rhonow(cplex*nfft,nspden,ngrad*ngrad)=electron (spin)-density in real space and
+!!  [rhonow(cplex*nfft,nspden,ngrad*ngrad)]=electron (spin)-density in real space and
 !!     eventually its gradient already multiplied by the local partial derivative
 !!     of the XC functional, either on the unshifted grid (if ishift==0,
 !!     then equal to rhor), or on the shifted grid
@@ -377,11 +377,11 @@ end subroutine xcden
 !!  (see side effects)
 !!
 !! SIDE EFFECTS
-!! Input/Output:
-!!  vxc(cplex*nfft,nspden)=xc potential (spin up in first half and spin down in
+!! Input/Output (all optional:
+!!  [vxc(cplex*nfft,nspden)]=xc potential (spin up in first half and spin down in
 !!   second half if nspden>=2). Contribution from the present shifted
 !!   or unshifted grid is ADDED to the input vxc data.
-!!  vxctau(cplex*nfft,nspden,4)=derivative of XC energy density with respect to
+!!  [vxctau(cplex*nfft,nspden,4)]=derivative of XC energy density with respect to
 !!   kinetic energy density (depsxcdtau). The arrays vxctau(nfft,nspden,4) contains also
 !!   the gradient of vxctau (gvxctau) which will be computed here in vxctau(:,:,2:4).
 !!
@@ -393,9 +393,9 @@ end subroutine xcden
 !!
 !! SOURCE
 
-subroutine xcpot (cplex,depsxc,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,nspden,&
-& nspgrad,qphon,rhonow,vxc,&
-& vxctau) ! optional argument
+subroutine xcpot (cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,nspden,&
+&                 nspgrad,qphon,&
+&                 depsxc,rhonow,vxc,vxctau) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -403,9 +403,9 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: depsxc(cplex*nfft,nspgrad),gprimd(3,3),qphon(3)
- real(dp),intent(in) :: rhonow(cplex*nfft,nspden,ngrad*ngrad)
- real(dp),intent(inout) :: vxc(cplex*nfft,nspden) !vz_i
+ real(dp),intent(in),optional :: rhonow(cplex*nfft,nspden,ngrad*ngrad)
+ real(dp),intent(in),optional :: depsxc(cplex*nfft,nspgrad),gprimd(3,3),qphon(3)
+ real(dp),intent(inout),optional :: vxc(cplex*nfft,nspden)
  real(dp),intent(inout),optional :: vxctau(cplex*nfft,nspden,4)
 
 !Local variables-------------------------------
@@ -418,6 +418,7 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ logical :: with_vxc,with_vxctau
  real(dp) :: tsec(2)
  real(dp),allocatable :: gcart1(:),gcart2(:),gcart3(:),ph1(:),ph2(:),ph3(:)
  real(dp),allocatable :: wkcmpx(:,:),wkcmpxtau(:,:)
@@ -435,6 +436,14 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,
    MSG_BUG(message)
  end if
 
+ with_vxc=present(vxc) ; with_vxctau=present(vxctau)
+ if (with_vxc) then
+   if ((.not.present(rhonow)).or.(.not.present(depsxc))) then
+     message='need rhonow or depsxc!'
+     MSG_BUG(message)
+   end if
+ end if
+ 
 !Keep local copy of fft dimensions
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
 
@@ -445,24 +454,24 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
 !Check whether q=0
- qeq0=0
- if(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15) qeq0=1
+ qeq0=0;if(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15) qeq0=1
 
- if(ishift==0)then ! Add the value of depsxc to vxc
+ if(with_vxc.and.ishift==0)then ! Add the value of depsxc to vxc
    do ispden=1,min(nspden,2)
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,depsxc,nfft,vxc,ispden)
      do ifft=1,cplex*nfft
        vxc(ifft,ispden)=vxc(ifft,ispden)+depsxc(ifft,ispden)
      end do
    end do
-
  end if
 
 !If the grid is shifted, or if gradient corrections are present, there must be FFTs.
  if(ishift==1 .or. ngrad==2)then
 
-   ABI_ALLOCATE(wkcmpx,(2,nfft))
-   ABI_ALLOCATE(work,(cplex*nfft))
+   if (with_vxc) then
+     ABI_ALLOCATE(work,(cplex*nfft))
+     ABI_ALLOCATE(wkcmpx,(2,nfft))
+   end if
 
    if(ishift==1)then
      ABI_ALLOCATE(ph1,(2*n1))
@@ -478,71 +487,74 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,
    do ispden=1,min(nspden,2)
 
 !    Initialize wkcmpx either to 0 or to the shifted vxc value
-     if(ishift==0)then
+     if (with_vxc) then
+       if(ishift==0)then
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(nfft,wkcmpx)
-       do ifft=1,nfft
-         wkcmpx(:,ifft)=zero
-       end do
-
-     else
+         do ifft=1,nfft
+           wkcmpx(:,ifft)=zero
+         end do
+       else
 !      Obtain depsxc(G)*phase in wkcmpx from input depsxc(r+delta)
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,depsxc,ispden,nfft,work)
-       do ifft=1,cplex*nfft
-         work(ifft)=depsxc(ifft,ispden)
-       end do
-       call timab(82,1,tsec)
-       call fourdp(cplex,wkcmpx,work,-1,mpi_enreg,nfft,1,ngfft,0)
-       call timab(82,2,tsec)
+         do ifft=1,cplex*nfft
+           work(ifft)=depsxc(ifft,ispden)
+         end do
+         call timab(82,1,tsec)
+         call fourdp(cplex,wkcmpx,work,-1,mpi_enreg,nfft,1,ngfft,0)
+         call timab(82,2,tsec)
+       end if
      end if
 
 !    If gradient correction is present, take care of the three components now
 !    Note : this operation is done on the eventually shifted grid
-     if(ngrad==2)then
+     if (ngrad==2) then
        ABI_ALLOCATE(gcart1,(n1))
        ABI_ALLOCATE(gcart2,(n2))
        ABI_ALLOCATE(gcart3,(n3))
-       ABI_ALLOCATE(workgr,(2,nfft))
-       if(use_laplacian==1)  then
-         ABI_ALLOCATE(worklp,(2,nfft))
-       end if
-       if(present(vxctau))  then
-         ABI_ALLOCATE(worktau,(2,nfft))
-         ABI_ALLOCATE(wkcmpxtau,(2,nfft))
-       end if
+       if (with_vxc) then
+         ABI_ALLOCATE(workgr,(2,nfft))
+         if (use_laplacian==1) then
+           ABI_ALLOCATE(worklp,(2,nfft))
+         end if
+      end if
+      if  (with_vxctau)  then
+        ABI_ALLOCATE(worktau,(2,nfft))
+        ABI_ALLOCATE(wkcmpxtau,(2,nfft))
+      end if
 
        do idir=1,3
+       
+         if (with_vxc) then
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,idir,ispden,nfft,rhonow,work)
-         do ifft=1,cplex*nfft
-           work(ifft)=rhonow(ifft,ispden,1+idir)
-         end do
-
-         call timab(82,1,tsec)
-         call fourdp(cplex,workgr,work,-1,mpi_enreg,nfft,1,ngfft,0)
-         call timab(82,2,tsec)
-
-!        IF Meta-GGA then take care of the laplacian term involved.
-!        Note : this operation is done on the eventually shifted grid
-         if(use_laplacian==1)then
-!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,idir,ispden,nspden,nfft,depsxc,work)
            do ifft=1,cplex*nfft
-             if(nspden==1)then
-               work(ifft)=depsxc(ifft,2+ispden)
-             else if(nspden==2)then
-               work(ifft)=depsxc(ifft,5+ispden)
-             end if
+             work(ifft)=rhonow(ifft,ispden,1+idir)
            end do
-
            call timab(82,1,tsec)
-           call fourdp(cplex,worklp,work,-1,mpi_enreg,nfft,1,ngfft,0)
+           call fourdp(cplex,workgr,work,-1,mpi_enreg,nfft,1,ngfft,0)
            call timab(82,2,tsec)
+
+!          IF Meta-GGA then take care of the laplacian term involved.
+!          Note : this operation is done on the eventually shifted grid
+           if(use_laplacian==1)then
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,idir,ispden,nspden,nfft,depsxc,work)
+             do ifft=1,cplex*nfft
+               if(nspden==1)then
+                 work(ifft)=depsxc(ifft,2+ispden)
+               else if(nspden==2)then
+                 work(ifft)=depsxc(ifft,5+ispden)
+               end if
+             end do
+             call timab(82,1,tsec)
+             call fourdp(cplex,worklp,work,-1,mpi_enreg,nfft,1,ngfft,0)
+             call timab(82,2,tsec)
+           end if
          end if
 
-         if(present(vxctau))then
+         if(with_vxctau)then
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,ispden,nfft,vxctau,work)
            do ifft=1,cplex*nfft
              work(ifft)=vxctau(ifft,ispden,1)
            end do
-
            call timab(82,1,tsec)
            call fourdp(cplex,worktau,work,-1,mpi_enreg,nfft,1,ngfft,0)
            call timab(82,2,tsec)
@@ -575,15 +587,17 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,
                do i1=1,n1
                  ifft=ifft+1
                  gcart_idir=gc23_idir+gcart1(i1)
-!                Multiply by - i 2pi G(idir) and accumulate in wkcmpx
-                 wkcmpx(1,ifft)=wkcmpx(1,ifft)+gcart_idir*workgr(2,ifft)
-                 wkcmpx(2,ifft)=wkcmpx(2,ifft)-gcart_idir*workgr(1,ifft)
-                 if(use_laplacian==1)then
+                 if(with_vxc)then
 !                  Multiply by - i 2pi G(idir) and accumulate in wkcmpx
-                   wkcmpx(1,ifft)=wkcmpx(1,ifft)-gcart_idir**2*worklp(1,ifft)
-                   wkcmpx(2,ifft)=wkcmpx(2,ifft)-gcart_idir**2*worklp(2,ifft)
+                   wkcmpx(1,ifft)=wkcmpx(1,ifft)+gcart_idir*workgr(2,ifft)
+                   wkcmpx(2,ifft)=wkcmpx(2,ifft)-gcart_idir*workgr(1,ifft)
+                   if(use_laplacian==1)then
+!                    Multiply by - i 2pi G(idir) and accumulate in wkcmpx
+                     wkcmpx(1,ifft)=wkcmpx(1,ifft)-gcart_idir**2*worklp(1,ifft)
+                     wkcmpx(2,ifft)=wkcmpx(2,ifft)-gcart_idir**2*worklp(2,ifft)
+                   end if
                  end if
-                 if(present(vxctau))then
+                 if(with_vxctau)then
                    wkcmpxtau(1,ifft)= gcart_idir*worktau(2,ifft)
                    wkcmpxtau(2,ifft)=-gcart_idir*worktau(1,ifft)
                  end if
@@ -592,71 +606,75 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,
            end do
          end do
 
-         if(present(vxctau))then
+         if (with_vxctau) then
            call timab(82,1,tsec)
            call fourdp(cplex,wkcmpxtau,work,1,mpi_enreg,nfft,1,ngfft,0)
            call timab(82,2,tsec)
-
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,ispden,nfft,vxctau,work)
            do ifft=1,cplex*nfft
              vxctau(ifft,ispden,1+idir)=work(ifft)
            end do
-         end if ! present vxctau
+         end if
 
        end do ! enddo idir
+
        ABI_DEALLOCATE(gcart1)
        ABI_DEALLOCATE(gcart2)
        ABI_DEALLOCATE(gcart3)
-       ABI_DEALLOCATE(workgr)
-       if(use_laplacian==1)then
-         ABI_DEALLOCATE(worklp)
+       if (with_vxc) then
+         ABI_DEALLOCATE(workgr)
+         if (use_laplacian==1) then
+           ABI_DEALLOCATE(worklp)
+         end if
        end if
-       if(present(vxctau)) then
+       if (with_vxctau) then
          ABI_DEALLOCATE(worktau)
          ABI_DEALLOCATE(wkcmpxtau)
        end if
+
      end if
 
 !    wkcmpx(:,:) contains now the full exchange-correlation potential, but
 !    eventually for the shifted grid
 
-     if(ishift==1)then
-!      Take away the phase to get depsxc(G)
-       ifft=0
-       do i3=1,n3
-         ph3r=ph3(2*i3-1)
-         ph3i=ph3(2*i3  )
+     if (with_vxc) then
+       if(ishift==1)then
+!        Take away the phase to get depsxc(G)
+         ifft=0
+         do i3=1,n3
+           ph3r=ph3(2*i3-1)
+           ph3i=ph3(2*i3  )
          do i2=1,n2
-           ph2r=ph2(2*i2-1)
-           ph2i=ph2(2*i2  )
-           ph23r=ph2r*ph3r-ph2i*ph3i
-           ph23i=ph2i*ph3r+ph2r*ph3i
-           if (fftn2_distrib(i2)==mpi_enreg%me_fft) then
-             do i1=1,n1
-               ifft=ifft+1
-               ph1r=ph1(2*i1-1)
-               ph1i=ph1(2*i1  )
-               ph123r=ph1r*ph23r-ph1i*ph23i
-               ph123i=ph1i*ph23r+ph1r*ph23i
-!              Multiply by phase.  Must use intermediate variables !
-               work_re= ph123r*wkcmpx(1,ifft)+ph123i*wkcmpx(2,ifft)
-               work_im=-ph123i*wkcmpx(1,ifft)+ph123r*wkcmpx(2,ifft)
-               wkcmpx(1,ifft)=work_re
-               wkcmpx(2,ifft)=work_im
-             end do
-           end if
+             ph2r=ph2(2*i2-1)
+             ph2i=ph2(2*i2  )
+             ph23r=ph2r*ph3r-ph2i*ph3i
+             ph23i=ph2i*ph3r+ph2r*ph3i
+             if (fftn2_distrib(i2)==mpi_enreg%me_fft) then
+               do i1=1,n1
+                 ifft=ifft+1
+                 ph1r=ph1(2*i1-1)
+                 ph1i=ph1(2*i1  )
+                 ph123r=ph1r*ph23r-ph1i*ph23i
+                 ph123i=ph1i*ph23r+ph1r*ph23i
+!                Multiply by phase.  Must use intermediate variables !
+                 work_re= ph123r*wkcmpx(1,ifft)+ph123i*wkcmpx(2,ifft)
+                 work_im=-ph123i*wkcmpx(1,ifft)+ph123r*wkcmpx(2,ifft)
+                 wkcmpx(1,ifft)=work_re
+                 wkcmpx(2,ifft)=work_im
+               end do
+             end if
+           end do
          end do
+       end if
+
+       call timab(82,1,tsec)
+       call fourdp(cplex,wkcmpx,work,1,mpi_enreg,nfft,1,ngfft,0)
+       call timab(82,2,tsec)
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,ispden,nfft,vxc,work)
+       do ifft=1,cplex*nfft
+         vxc(ifft,ispden)=vxc(ifft,ispden)+work(ifft)
        end do
      end if
-
-     call timab(82,1,tsec)
-     call fourdp(cplex,wkcmpx,work,1,mpi_enreg,nfft,1,ngfft,0)
-     call timab(82,2,tsec)
-
-!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,ispden,nfft,vxc,work)
-     do ifft=1,cplex*nfft
-       vxc(ifft,ispden)=vxc(ifft,ispden)+work(ifft)
-     end do
 
    end do ! End loop on spins
 
@@ -665,10 +683,12 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,
      ABI_DEALLOCATE(ph2)
      ABI_DEALLOCATE(ph3)
    end if
-   ABI_DEALLOCATE(wkcmpx)
-   ABI_DEALLOCATE(work)
+   if(with_vxc) then
+     ABI_DEALLOCATE(wkcmpx)
+     ABI_DEALLOCATE(work)
+   end if
 
- end if ! End condition on ishift
+ end if ! End condition on ishift/ngrad
 
 end subroutine xcpot
 !!***

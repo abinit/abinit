@@ -144,7 +144,8 @@ contains
 !!                     at output, it is an updated "mixed" trial density
 !!  rhog(2,nfft)= Fourier transform of the new trial density
 !!  ===== if usekden==1 =====
-!!  mix_mgga<type(ab7_mixing_object)>=all data defining the mixing algorithm for the kinetic energy density
+!!  [mix_mgga<type(ab7_mixing_object)>]=all data defining the mixing algorithm
+!!     for the kinetic energy density
 !!  ===== if densfor_pred==3 .and. moved_atm_inside==1 =====
 !!    ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phases
 !!  ==== if usepaw==1
@@ -175,12 +176,12 @@ contains
 !! SOURCE
 
 subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,fcart,ffttomix,&
-&  gmet,grhf,gsqcut,initialized,ispmix,istep,kg_diel,kxc,mgfft,mix,mix_mgga,mixtofft,&
+&  gmet,grhf,gsqcut,initialized,ispmix,istep,kg_diel,kxc,mgfft,mix,mixtofft,&
 &  moved_atm_inside,mpi_enreg,my_natom,nattyp,nfft,&
 &  nfftmix,nfftmix_per_nfft,ngfft,ngfftmix,nkxc,npawmix,npwdiel,&
 &  nresid,ntypat,n1xccc,pawrhoij,pawtab,&
 &  ph1d,psps,rhog,rhor,rprimd,susmat,usepaw,vtrial,wvl,wvl_den,xred,&
-&  taug,taur,tauresid)
+&  mix_mgga,taug,taur,tauresid)
 
 !Arguments-------------------------------
 !scalars
@@ -191,7 +192,8 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  integer,intent(inout) :: dbl_nnsclo
  real(dp),intent(in) :: etotal,gsqcut
  type(MPI_type),intent(in) :: mpi_enreg
- type(ab7_mixing_object), intent(inout) :: mix,mix_mgga
+ type(ab7_mixing_object), intent(inout) :: mix
+ type(ab7_mixing_object), intent(inout),optional :: mix_mgga
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type), intent(in) :: wvl
@@ -272,6 +274,11 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  end if
 
  if (dtset%usekden==1) then
+   if ((.not.present(tauresid)).or.(.not.present(taug)).or. &
+&      (.not.present(taur)).or.(.not.present(mix_mgga))) then
+     message='Several arrays are mising!'
+     MSG_BUG(message)
+   end if
    if (mix_mgga%iscf==AB7_MIXING_CG_ENERGY.or.mix_mgga%iscf==AB7_MIXING_CG_ENERGY_2.or.&
 &      mix_mgga%iscf==AB7_MIXING_EIG) then
      message='kinetic energy density cannot be mixed with the selected mixing algorithm!'
@@ -306,7 +313,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if (ispmix==1.and.nfft==nfftmix) then
    rhomag(:,1:dtset%nspden)=rhor(:,1:dtset%nspden)
    nresid0(:,1:dtset%nspden)=nresid(:,1:dtset%nspden)
-   if (dtset%usekden>0) then
+   if (dtset%usekden==1) then
      taumag(:,1:dtset%nspden)=taur(:,1:dtset%nspden)
      tauresid0(:,1:dtset%nspden)=tauresid(:,1:dtset%nspden)
    end if
@@ -321,7 +328,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
        call fourdp(1,rhomag(:,ispden),rhor(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
      end do
    end if
-   if (dtset%usekden>0) then
+   if (dtset%usekden==1) then
      do ispden=1,dtset%nspden
        call fourdp(1,tauresid0(:,ispden),tauresid(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
      end do
@@ -364,7 +371,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
        end do
      end do
    end if
-   if (dtset%usekden>0) then
+   if (dtset%usekden==1) then
      do ispden=1,dtset%nspden
        call fourdp(1,nreswk(:,:,ispden),tauresid(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
      end do
@@ -399,7 +406,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 
 !Retrieve "input" density from "output" density and density residual
  rhomag(:,1:dtset%nspden)=rhomag(:,1:dtset%nspden)-nresid0(:,1:dtset%nspden)
- if (dtset%usekden>0) then
+ if (dtset%usekden==1) then
    taumag(:,1:dtset%nspden)=taumag(:,1:dtset%nspden)-tauresid0(:,1:dtset%nspden)
  end if
 
@@ -407,7 +414,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if (dtset%nspden==2) then
    rhomag (:,2)=two*rhomag (:,2)-rhomag (:,1)
    nresid0(:,2)=two*nresid0(:,2)-nresid0(:,1)
-   if (dtset%usekden>0) then
+   if (dtset%usekden==1) then
      taumag (:,2)=two*taumag (:,2)-taumag (:,1)
      tauresid0(:,2)=two*tauresid0(:,2)-tauresid0(:,1)
    end if
@@ -557,6 +564,9 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if (dtset%usekden==1) then
    call ab7_mixing_eval(mix_mgga, taumag, istep, nfftot, ucvol_local, &
 &   mpicomm, mpi_summarize, errid, message, reset = reset)
+   if (errid /= AB7_NO_ERROR) then
+     MSG_ERROR(message)
+   end if
  end if
 
 !PAW: apply a simple mixing to rhoij (this is temporary)
@@ -657,6 +667,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 
 !Eventually write the data on disk and deallocate f_fftgr_disk
  call ab7_mixing_eval_deallocate(mix)
+ if (dtset%usekden==1) call ab7_mixing_eval_deallocate(mix_mgga)
 
 !Fourier transform the density
  if (ispmix==1.and.nfft==nfftmix) then
@@ -666,7 +677,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
      !Get rhog from rhor(:,1)
      call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
    end if
-   if (dtset%usekden>0) then
+   if (dtset%usekden==1) then
      taur(:,1:dtset%nspden*dtset%usekden)=taumag(:,1:dtset%nspden*dtset%usekden)
      if(dtset%usewvl==0) then
        call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
@@ -678,7 +689,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
      call fourdp(1,rhomag(:,ispden),rhor(:,ispden),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
    end do
    rhog(:,:)=reshape(rhomag(:,1),(/2,nfft/))
-   if (dtset%usekden>0) then
+   if (dtset%usekden==1) then
      do ispden=1,dtset%nspden
        call fourdp(1,taumag(:,ispden),taur(:,ispden),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
      end do
