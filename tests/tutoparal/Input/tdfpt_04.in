@@ -43,7 +43,7 @@ nband 120
 
 #electronic structure
 ecut 15.0
-nstep 18
+nstep 22
 ngkpt 4 4 1
 kptopt 3
 tolwfr 1.0d-22
