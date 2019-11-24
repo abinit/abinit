@@ -23,6 +23,7 @@ occopt1? 7
                                                       # For this system, there are some symmetry operations that goes unnoticed because the
                                                       # coherency with spin-orbit coupling is enforced even if it is not present.
  spinat12       0.01  0.01  0.08  -0.01   0.01 -0.08  # Inversion of the spin on the second atom with respect to the case 11
+ tolvrs11 1.0d-10   # For portability of the test
 
 #Dataset 2. Second system, a chain of H atoms along 1 1 1, with spins pointing in different directions. Rhombohedral cell.
  natom2? 3

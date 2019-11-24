@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sun 24 Nov 2019.
-- ( at 06h55 )
+- ( at 18h15 )
   
 - input  file    -> t97.in
 - output file    -> t97.out
@@ -309,7 +309,12 @@ P           mkmem           1
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-           tolvrs      1.00000000E-08
+           tolvrs11    1.00000000E-10
+           tolvrs12    1.00000000E-08
+           tolvrs21    1.00000000E-08
+           tolvrs22    1.00000000E-08
+           tolvrs31    1.00000000E-08
+           tolvrs32    1.00000000E-08
             typat11    1  1
             typat12    1  1
             typat21    1  1  1
@@ -504,7 +509,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     183.000     183.000
 
  scprqt:  WARNING -
   nstep=   60 was not enough SCF cycles to converge;
-  potential residual=  2.698E-04 exceeds tolvrs=  1.000E-08
+  potential residual=  2.698E-04 exceeds tolvrs=  1.000E-10
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
@@ -1759,7 +1764,12 @@ P           mkmem           1
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-           tolvrs      1.00000000E-08
+           tolvrs11    1.00000000E-10
+           tolvrs12    1.00000000E-08
+           tolvrs21    1.00000000E-08
+           tolvrs22    1.00000000E-08
+           tolvrs31    1.00000000E-08
+           tolvrs32    1.00000000E-08
             typat11    1  1
             typat12    1  1
             typat21    1  1  1
@@ -1897,10 +1907,10 @@ P           mkmem           1
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         11.8  wall=         12.1
+- Proc.   0 individual time (sec): cpu=         11.2  wall=         11.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  63 WARNINGs and  26 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.8  wall=         12.1
++Overall time at end (sec) : cpu=         11.2  wall=         11.6
