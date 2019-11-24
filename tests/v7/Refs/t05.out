@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sun 24 Nov 2019.
-- ( at 17h55 )
+- ( at 18h01 )
   
 - input  file    -> t05.in
 - output file    -> t05.out
@@ -624,7 +624,7 @@ P           mkmem7          3
            toldfe1     1.00000000E-10 Hartree
            toldfe2     1.00000000E-10 Hartree
            toldfe3     1.00000000E-12 Hartree
-           toldfe4     1.00000000E-10 Hartree
+           toldfe4     1.00000000E-12 Hartree
            toldfe5     1.00000000E-10 Hartree
            toldfe6     1.00000000E-10 Hartree
            toldfe7     1.00000000E-10 Hartree
@@ -1288,6 +1288,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     150.625     150.514
   sigma(1 1)=  6.07111937E-02  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.07111935E-02  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.07111937E-02  sigma(2 1)=  0.00000000E+00
+
+
+ scprqt:  WARNING -
+  nstep=   10 was not enough SCF cycles to converge;
+  maximum energy difference=  8.361E-11 exceeds toldfe=  1.000E-12
 
  io1dm : about to open file t05o_DS4_1DM
  Integrated electronic and magnetization densities in atomic spheres:
@@ -2465,7 +2470,7 @@ P           mkmem7          3
            toldfe1     1.00000000E-10 Hartree
            toldfe2     1.00000000E-10 Hartree
            toldfe3     1.00000000E-12 Hartree
-           toldfe4     1.00000000E-10 Hartree
+           toldfe4     1.00000000E-12 Hartree
            toldfe5     1.00000000E-10 Hartree
            toldfe6     1.00000000E-10 Hartree
            toldfe7     1.00000000E-10 Hartree
@@ -2554,10 +2559,10 @@ P           mkmem7          3
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         17.7  wall=         18.4
+- Proc.   0 individual time (sec): cpu=         17.7  wall=         18.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  20 WARNINGs and  26 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.7  wall=         18.4
+.Delivered  21 WARNINGs and  26 COMMENTs to log file.
++Overall time at end (sec) : cpu=         17.7  wall=         18.2
