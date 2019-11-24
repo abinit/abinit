@@ -146,7 +146,7 @@ contains
 !**************************************************************************
 
 !DEBUG
-!if (prtvol>1) message="remove me later"
+ if (prtvol>1) message="remove me later"
 ! write(std_out,*)' symfind : enter'
 ! call flush(6)
 ! write(std_out,*)' symfind : nzchempot= ',nzchempot
