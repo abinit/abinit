@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sun 24 Nov 2019.
-- ( at 18h01 )
+- ( at 20h20 )
   
 - input  file    -> t05.in
 - output file    -> t05.out
@@ -623,7 +623,7 @@ P           mkmem7          3
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
            toldfe1     1.00000000E-10 Hartree
            toldfe2     1.00000000E-10 Hartree
-           toldfe3     1.00000000E-12 Hartree
+           toldfe3     1.00000000E-14 Hartree
            toldfe4     1.00000000E-12 Hartree
            toldfe5     1.00000000E-10 Hartree
            toldfe6     1.00000000E-10 Hartree
@@ -1158,7 +1158,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     150.625     150.514
 
  scprqt:  WARNING -
   nstep=   53 was not enough SCF cycles to converge;
-  maximum energy difference=  6.128E-09 exceeds toldfe=  1.000E-12
+  maximum energy difference=  6.128E-09 exceeds toldfe=  1.000E-14
 
  io1dm : about to open file t05o_DS3_1DM
  Integrated electronic and magnetization densities in atomic spheres:
@@ -2469,7 +2469,7 @@ P           mkmem7          3
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
            toldfe1     1.00000000E-10 Hartree
            toldfe2     1.00000000E-10 Hartree
-           toldfe3     1.00000000E-12 Hartree
+           toldfe3     1.00000000E-14 Hartree
            toldfe4     1.00000000E-12 Hartree
            toldfe5     1.00000000E-10 Hartree
            toldfe6     1.00000000E-10 Hartree
@@ -2559,10 +2559,10 @@ P           mkmem7          3
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         17.7  wall=         18.2
+- Proc.   0 individual time (sec): cpu=         17.6  wall=         18.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  21 WARNINGs and  26 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.7  wall=         18.2
++Overall time at end (sec) : cpu=         17.6  wall=         18.1
