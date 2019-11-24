@@ -26,9 +26,9 @@ spinat2 0 0 3
 # DS 3 constrained direction y, start from different spin wf (DS 2 along z), non collinear spin
 magconon3 1
 spinat3 0 3 0
-toldfe3 2.e-10
+toldfe3 1.e-11
 prtvol3 1   # Turn off printing of minimum magnetization location, because not portable
-nstep3 80
+nstep3 53
 
 # DS 4 constrained direction and amplitude, non collinear spin
 magconon4 2
