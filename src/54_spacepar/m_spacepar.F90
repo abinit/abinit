@@ -1578,6 +1578,8 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
          do isym=1,nsym
            if (symafm(isym)/=1.and.(.not.afm_noncoll)) cycle
            jsym=jsym+1
+!          The G vectors should transform as vectors in reciprocal space
+!          However, one acts with the INVERSE of the symmetry operation => Inverse[symrec]=Transpose[symrel]
            j1=symrel(1,1,isym)*l1+symrel(2,1,isym)*l2+symrel(3,1,isym)*l3
            j2=symrel(1,2,isym)*l1+symrel(2,2,isym)*l2+symrel(3,2,isym)*l3
            j3=symrel(1,3,isym)*l1+symrel(2,3,isym)*l2+symrel(3,3,isym)*l3
@@ -1599,7 +1601,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
              tau2=tnons_used(2,jsym)
              tau3=tnons_used(3,jsym) 
              if (abs(tau1)>tol12.or.abs(tau2)>tol12.or.abs(tau3)>tol12) then
-!              Compute exp(-2*Pi*I*G dot tau) using original G
+!              Compute exp(-2*Pi*I*G dot tau) using original G (equivalent of phnons in the collinear case) 
                arg=two_pi*(dble(l1)*tau1+dble(l2)*tau2+dble(l3)*tau3)
                phr=cos(arg)
                phi=-sin(arg)
@@ -1613,12 +1615,23 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !            phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
 !            phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
 
+!            The magnetization should transform as a vector in real space 
+!            However, one acts with the INVERSE of the symmetry operation.
+!            => Inverse[symrel_cart] = Transpose[symrel_cart] because symrel_cart is unitary   ?!?!?
              mxr=symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(1,2,jsym)*magngy(1,indsy)+symrel_cart(1,3,jsym)*magngz(1,indsy)
              mxi=symrel_cart(1,1,jsym)*magngx(2,indsy)+symrel_cart(1,2,jsym)*magngy(2,indsy)+symrel_cart(1,3,jsym)*magngz(2,indsy)
              myr=symrel_cart(2,1,jsym)*magngx(1,indsy)+symrel_cart(2,2,jsym)*magngy(1,indsy)+symrel_cart(2,3,jsym)*magngz(1,indsy)
              myi=symrel_cart(2,1,jsym)*magngx(2,indsy)+symrel_cart(2,2,jsym)*magngy(2,indsy)+symrel_cart(2,3,jsym)*magngz(2,indsy)
              mzr=symrel_cart(3,1,jsym)*magngx(1,indsy)+symrel_cart(3,2,jsym)*magngy(1,indsy)+symrel_cart(3,3,jsym)*magngz(1,indsy)
              mzi=symrel_cart(3,1,jsym)*magngx(2,indsy)+symrel_cart(3,2,jsym)*magngy(2,indsy)+symrel_cart(3,3,jsym)*magngz(2,indsy)
+
+!            mxr=symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(2,1,jsym)*magngy(1,indsy)+symrel_cart(3,1,jsym)*magngz(1,indsy)
+!            mxi=symrel_cart(1,1,jsym)*magngx(2,indsy)+symrel_cart(2,1,jsym)*magngy(2,indsy)+symrel_cart(3,1,jsym)*magngz(2,indsy)
+!            myr=symrel_cart(1,2,jsym)*magngx(1,indsy)+symrel_cart(2,2,jsym)*magngy(1,indsy)+symrel_cart(3,2,jsym)*magngz(1,indsy)
+!            myi=symrel_cart(1,2,jsym)*magngx(2,indsy)+symrel_cart(2,2,jsym)*magngy(2,indsy)+symrel_cart(3,2,jsym)*magngz(2,indsy)
+!            mzr=symrel_cart(1,3,jsym)*magngx(1,indsy)+symrel_cart(2,3,jsym)*magngy(1,indsy)+symrel_cart(3,3,jsym)*magngz(1,indsy)
+!            mzi=symrel_cart(1,3,jsym)*magngx(2,indsy)+symrel_cart(2,3,jsym)*magngy(2,indsy)+symrel_cart(3,3,jsym)*magngz(2,indsy)
+
              magxsu1=magxsu1+mxr*phr-mxi*phi;magxsu2=magxsu2+mxi*phr+mxr*phi
              magysu1=magysu1+myr*phr-myi*phi;magysu2=magysu2+myi*phr+myr*phi
              magzsu1=magzsu1+mzr*phr-mzi*phi;magzsu2=magzsu2+mzi*phr+mzr*phi
@@ -1670,10 +1683,10 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
              tau2=tnons_used(2,jsym)
              tau3=tnons_used(3,jsym)
              if (abs(tau1)>tol12.or.abs(tau2)>tol12.or.abs(tau3)>tol12) then
-!              Compute exp(+2*Pi*I*G dot tau) using original G
+!              Compute exp(-2*Pi*I*G dot tau) using original G   (equivalent of phnons in the collinear case)
                arg=two_pi*(dble(l1)*tau1+dble(l2)*tau2+dble(l3)*tau3)
                phr=cos(arg)
-               phi=sin(arg)
+               phi=-sin(arg)
              else
                phr=one
                phi=zero
@@ -1683,19 +1696,26 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !TO BE COMMENTED
 !            phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
 !            phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
-
+!            The magnetization should transform as a vector in real space 
+!            => symrel_cart  ?!?
              mxr=symrec_cart(1,1,jsym)*magxsu1+symrec_cart(2,1,jsym)*magysu1+symrec_cart(3,1,jsym)*magzsu1
              mxi=symrec_cart(1,1,jsym)*magxsu2+symrec_cart(2,1,jsym)*magysu2+symrec_cart(3,1,jsym)*magzsu2
              myr=symrec_cart(1,2,jsym)*magxsu1+symrec_cart(2,2,jsym)*magysu1+symrec_cart(3,2,jsym)*magzsu1
              myi=symrec_cart(1,2,jsym)*magxsu2+symrec_cart(2,2,jsym)*magysu2+symrec_cart(3,2,jsym)*magzsu2
              mzr=symrec_cart(1,3,jsym)*magxsu1+symrec_cart(2,3,jsym)*magysu1+symrec_cart(3,3,jsym)*magzsu1
              mzi=symrec_cart(1,3,jsym)*magxsu2+symrec_cart(2,3,jsym)*magysu2+symrec_cart(3,3,jsym)*magzsu2
-             magngx(1,ind)=mxr*phr+mxi*phi
-             magngx(2,ind)=mxi*phr-mxr*phi
-             magngy(1,ind)=myr*phr+myi*phi
-             magngy(2,ind)=myi*phr-myr*phi
-             magngz(1,ind)=mzr*phr+mzi*phi
-             magngz(2,ind)=mzi*phr-mzr*phi
+!            mxr=symrel_cart(1,1,jsym)*magxsu1+symrel_cart(1,2,jsym)*magysu1+symrel_cart(1,3,jsym)*magzsu1
+!            mxi=symrel_cart(1,1,jsym)*magxsu2+symrel_cart(1,2,jsym)*magysu2+symrel_cart(1,3,jsym)*magzsu2
+!            myr=symrel_cart(2,1,jsym)*magxsu1+symrel_cart(2,2,jsym)*magysu1+symrel_cart(2,3,jsym)*magzsu1
+!            myi=symrel_cart(2,1,jsym)*magxsu2+symrel_cart(2,2,jsym)*magysu2+symrel_cart(2,3,jsym)*magzsu2
+!            mzr=symrel_cart(3,1,jsym)*magxsu1+symrel_cart(3,2,jsym)*magysu1+symrel_cart(3,3,jsym)*magzsu1
+!            mzi=symrel_cart(3,1,jsym)*magxsu2+symrel_cart(3,2,jsym)*magysu2+symrel_cart(3,3,jsym)*magzsu2
+             magngx(1,ind)=mxr*phr-mxi*phi
+             magngx(2,ind)=mxi*phr+mxr*phi
+             magngy(1,ind)=myr*phr-myi*phi
+             magngy(2,ind)=myi*phr+myr*phi
+             magngz(1,ind)=mzr*phr-mzi*phi
+             magngz(2,ind)=mzi*phr+mzr*phi
            end if
          end do
          numpt=numpt+nup
