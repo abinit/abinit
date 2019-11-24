@@ -34,6 +34,7 @@ nstep3 53
 magconon4 2
 magcon_lambda4 0.01
 spinat4 0 1.5 0 
+toldfe4 1.e-12
 prtvol4 1   # Turn off printing of minimum magnetization location, because not portable
 nstep4 10
 
