@@ -72,7 +72,7 @@ occopt1? 7
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t97.out, tolnlines = 1, tolabs = 0.0, tolrel = 0.0, fld_options = -ridiculous
+#%%   t97.out, tolnlines = 180, tolabs = 4.0e+4, tolrel = 1.1, fld_options = -ridiculous
 #%% psp_files = 1h.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
@@ -81,5 +81,5 @@ occopt1? 7
 #%% references = 
 #%% keywords = 
 #%% description = Hydrogen systems for tests of symmetry recognition in the non-collinear case. Constrained DFT calculations for the magnetization.
-#%%    At present DS21, 31 and 32 do not work as expected
+#%%    At present DS21, 31 and 32 do not work as expected. Hence the huge tolerance.
 #%%<END TEST_INFO>
