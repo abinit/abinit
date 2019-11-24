@@ -2486,6 +2486,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prtphdos=1
    dtsets(idtset)%prtphsurf=0
    dtsets(idtset)%prtposcar=0
+   dtsets(idtset)%prtprocar=0
    dtsets(idtset)%prtpot=0
    dtsets(idtset)%prtpsps=0
    dtsets(idtset)%prtspcur=0
