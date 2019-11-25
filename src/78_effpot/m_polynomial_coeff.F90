@@ -2368,7 +2368,8 @@ if(need_compute_symmetric)then
       my_ncombi_end   = my_ncombi_start + my_ncombi_simple - 1
     endif
   end if 
- 
+
+  !write(std_out,*) "DEBUG ncombination: ", ncombination 
   do i=1,nproc
      if(my_ncombi_end <= nirred_comb -1)then  
         my_ncombi = index_irredcomb(my_ncombi_end+1)-index_irredcomb(my_ncombi_start)
@@ -2383,7 +2384,8 @@ if(need_compute_symmetric)then
    !   write(std_out,*) "my_rank,my_ncombi_start,my_ncombi_end, my_ncombi:", my_rank,my_ncombi_start,my_ncombi_end,my_ncombi
    !endif 
   enddo 
-
+  
+  !write(std_out,*) "my_ncombi: ", my_ncombi
   ABI_ALLOCATE(irank_combi_start,(nproc))
   ABI_ALLOCATE(irank_combi_end,(nproc))
   ABI_ALLOCATE(irank_ncombi,(nproc))
@@ -2467,7 +2469,7 @@ if(need_compute_symmetric)then
   endif
   call reduce_zero_combinations(my_list_combination)
 
-  my_ncombi = size(my_list_combination)
+  my_ncombi = size(my_list_combination,2)
   call xmpi_allgather(my_ncombi,irank_ncombi,comm,ierr)
   if(need_verbose)then 
     write(message,'(1a)')' Reduction on all processors finished. Gather results.'
@@ -2492,7 +2494,10 @@ if(need_compute_symmetric)then
   ABI_ALLOCATE(buffsize,(nproc)) 
   do i = 1,nproc 
     buffsize(i) = irank_ncombi(i)*power_disps(2)
-  enddo 
+  enddo
+!write(std_out,*) "DEBUG: size(my_list_combination)", size(my_list_combination), "shape(my_list_combination", shape(my_list_combination), "shape(list_combination_tmp)", shape(list_combination_tmp) 
+!write(std_out,*) "DEBUG, buffsize", buffsize, "shape(buffsize)", shape(buffsize),"offsets", offsets
+!write(std_out,*) "my_ncombi", my_ncombi, "irank_ncombi", irank_ncombi 
   call xmpi_gatherv(my_list_combination,size(my_list_combination),list_combination_tmp,buffsize,offsets,master,comm,ierr)
 
 !write(std_out,*) "DEBUG: shape(list_combination_tmp)", shape(list_combination_tmp)
