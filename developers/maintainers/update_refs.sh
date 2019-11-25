@@ -16,7 +16,7 @@ cp TestBot_MPI1/v5_t*/*out TestBot_MPI1/v5_t*/*DOS* TestBot_MPI1/v5_t*/*xml     
 cp TestBot_MPI1/v5_t*/t10_*  TestBot_MPI1/v5_t*/*FATBANDS*              v5/Refs
 cp TestBot_MPI1/v6_t*/*out TestBot_MPI1/v6_t*/*BLZTRP*  v6/Refs
 cp TestBot_MPI1/v7_t*/*out TestBot_MPI1/v7_t*/*DOS*     v7/Refs
-cp TestBot_MPI1/v7_t*/*DMFT  v7/Refs
+cp TestBot_MPI1/v7_t*/*DMFT TestBot_MPI1/v7_t*/*SBK  v7/Refs
 cp TestBot_MPI1/v8_t*/*out TestBot_MPI1/v8_t*/*dat* TestBot_MPI1/v8_t*/*xml v8/Refs
 cp TestBot_MPI1/v9_t*/*out TestBot_MPI1/v9_t*/*KERANGE   v9/Refs
 cp TestBot_MPI1/v67mbpt_t*/*out  TestBot_MPI1/v67mbpt_t*/*MDF TestBot_MPI1/v67mbpt_t*/*_k*_b*       v67mbpt/Refs
