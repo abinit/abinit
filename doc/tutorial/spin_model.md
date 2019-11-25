@@ -112,7 +112,7 @@ To run spin dynamics with MULTIBINIT:
 
 ```
 cd tutor_spindyn
-MULTIBINIT < tmulti5_1.files > tmulti5_1.txt
+multibinit < tmulti5_1.files > tmulti5_1.txt
 ```
 
 After the calculation is done, you will find an output file named tmulti5_1.out and a netcdf file tmulti5_1.out_spinhist.nc.
