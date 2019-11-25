@@ -73,17 +73,17 @@ AC_DEFUN([SD_MPI_INIT], [
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_mpi_libs_def}" && sd_mpi_libs_def="-lmpi"
-  test -z "${sd_mpi_policy}" && sd_mpi_policy="fail"
-  test -z "${sd_mpi_status}" && sd_mpi_status="optional"
-  test -z "${sd_mpi_enable_def}" && sd_mpi_enable_def="no"
+  test "${sd_mpi_libs_def}" = "" && sd_mpi_libs_def="-lmpi"
+  test "${sd_mpi_policy}" = "" && sd_mpi_policy="fail"
+  test "${sd_mpi_status}" = "" && sd_mpi_status="optional"
+  test "${sd_mpi_enable_def}" = "" && sd_mpi_enable_def="no"
   case "${sd_mpi_status}" in
     implicit|required)
       sd_mpi_enable_def="yes"
       ;;
   esac
-  test -z "${sd_mpi_enable_cxx}" && sd_mpi_enable_cxx="yes"
-  test -z "${sd_mpi_enable_fc}" && sd_mpi_enable_fc="yes"
+  test "${sd_mpi_enable_cxx}" = "" && sd_mpi_enable_cxx="yes"
+  test "${sd_mpi_enable_fc}" = "" && sd_mpi_enable_fc="yes"
 
   # Declare configure option
   AC_ARG_WITH([mpi],
@@ -119,11 +119,11 @@ AC_DEFUN([SD_MPI_INIT], [
       tmp_compil_vars="${tmp_compil_vars}${FC}"
       tmp_mpi_vars="${tmp_mpi_vars}${MPI_FCFLAGS}"
     fi
-    if test "${sd_mpi_init}" = "def" -a ! -z "${tmp_mpi_vars}"; then
+    if test "${sd_mpi_init}" = "def" -a "${tmp_mpi_vars}" != ""; then
       sd_mpi_enable="yes"
       sd_mpi_init="env"
     fi
-    if test "${sd_mpi_init}" = "def" -a ! -z "${tmp_compil_vars}"; then
+    if test "${sd_mpi_init}" = "def" -a "${tmp_compil_vars}" != ""; then
       sd_mpi_init="env"
     fi
   fi
@@ -170,16 +170,16 @@ AC_DEFUN([SD_MPI_INIT], [
           sd_mpi_fcflags="${sd_mpi_fcflags_def}"
         sd_mpi_ldflags="${sd_mpi_ldflags_def}"
         sd_mpi_libs="${sd_mpi_libs_def}"
-        test ! -z "${MPI_CPPFLAGS}" && sd_mpi_cppflags="${MPI_CPPFLAGS}"
-        test ! -z "${MPI_CFLAGS}" && sd_mpi_cflags="${MPI_CFLAGS}"
+        test "${MPI_CPPFLAGS}" != "" && sd_mpi_cppflags="${MPI_CPPFLAGS}"
+        test "${MPI_CFLAGS}" != "" && sd_mpi_cflags="${MPI_CFLAGS}"
         if test "${sd_mpi_enable_cxx}" = "yes"; then
-          test ! -z "${MPI_CXXFLAGS}" && sd_mpi_cxxflags="${MPI_CXXFLAGS}"
+          test "${MPI_CXXFLAGS}" != "" && sd_mpi_cxxflags="${MPI_CXXFLAGS}"
         fi
         if test "${sd_mpi_enable_fc}" = "yes"; then
-          test ! -z "${MPI_FCFLAGS}" && sd_mpi_fcflags="${MPI_FCFLAGS}"
+          test "${MPI_FCFLAGS}" != "" && sd_mpi_fcflags="${MPI_FCFLAGS}"
         fi
-        test ! -z "${MPI_LDFLAGS}" && sd_mpi_ldflags="${MPI_LDFLAGS}"
-        test ! -z "${MPI_LIBS}" && sd_mpi_libs="${MPI_LIBS}"
+        test "${MPI_LDFLAGS}" != "" && sd_mpi_ldflags="${MPI_LDFLAGS}"
+        test "${MPI_LIBS}" != "" && sd_mpi_libs="${MPI_LIBS}"
         ;;
 
       *)
@@ -318,11 +318,11 @@ AC_DEFUN([_SD_MPI_INIT_CC], [
   case "${sd_mpi_init}" in
 
     dir)
-      if test -z "${CC}"; then
+      if test "${CC}" = ""; then
         sd_mpi_cc="${with_mpi}/bin/mpicc"
       else
         tmp_cc_has_path=`echo "${CC}" | grep '/'`
-        if test -z "${tmp_cc_has_path}"; then
+        if test "${tmp_cc_has_path}" = ""; then
           sd_mpi_cc="${with_mpi}/bin/${CC}"
           test -x "${sd_mpi_cc}" || sd_mpi_cc="${with_mpi}/bin/mpicc"
         else
@@ -331,14 +331,12 @@ AC_DEFUN([_SD_MPI_INIT_CC], [
         fi
       fi
 
-      if test ! -z "${sd_mpi_cc}"; then
-        AC_MSG_NOTICE([user-defined MPI C compiler: ${sd_mpi_cc}])
+      if test "${sd_mpi_cc}" != ""; then
         AC_MSG_CHECKING([for an executable MPI C compiler])
         if test -x "${sd_mpi_cc}"; then
-          AC_MSG_RESULT([yes])
-          AC_MSG_NOTICE([setting CC to ${sd_mpi_cc}])
           CC="${sd_mpi_cc}"
           sd_mpi_cc_set="yes"
+          AC_MSG_RESULT([${CC}])
         else
           AC_MSG_RESULT([not found])
           AC_MSG_ERROR([invalid MPI settings
@@ -349,11 +347,11 @@ AC_DEFUN([_SD_MPI_INIT_CC], [
 
     def|env|yon)
       sd_mpi_cc="${CC}"
-      if test ! -z "${sd_mpi_cc}"; then
+      if test "${sd_mpi_cc}" != ""; then
         sd_mpi_cc_set="yes"
       else
         AC_CHECK_PROGS([sd_mpi_cc], [mpicc])
-        if test ! -z "${sd_mpi_cc}"; then
+        if test "${sd_mpi_cc}" != ""; then
           AC_MSG_NOTICE([setting CC to '${sd_mpi_cc}'])
           CC="${sd_mpi_cc}"
           sd_mpi_cc_set="yes"
@@ -426,27 +424,30 @@ AC_DEFUN([_SD_MPI_INIT_CXX], [
   case "${sd_mpi_init}" in
 
     dir)
-      if test -z "${CXX}"; then
-        sd_mpi_cxx="${with_mpi}/bin/mpic++"
+      if test "${CXX}" = ""; then
+        sd_mpi_cxx="${with_mpi}/bin"
       else
         tmp_cxx_has_path=`echo "${CXX}" | grep '/'`
-        if test -z "${tmp_cxx_has_path}"; then
-          sd_mpi_cxx="${with_mpi}/bin/${CXX}"
-          test -x "${sd_mpi_cxx}" || sd_mpi_cxx="${with_mpi}/bin/mpic++"
+        if test "${tmp_cxx_has_path}" = ""; then
+          sd_mpi_cxx="${with_mpi}/bin"
         else
           sd_mpi_libs="-L${with_mpi}/lib ${sd_mpi_libs_def}"
           AC_MSG_NOTICE([user-defined MPI library flags: ${sd_mpi_libs}])
         fi
       fi
 
-      if test ! -z "${sd_mpi_cxx}"; then
-        AC_MSG_NOTICE([user-defined MPI C++ compiler: ${sd_mpi_cxx}])
+      if test "${sd_mpi_cxx}" != ""; then
         AC_MSG_CHECKING([for an executable MPI C compiler])
-        if test -x "${sd_mpi_cxx}"; then
-          AC_MSG_RESULT([yes])
-          AC_MSG_NOTICE([setting CXX to ${sd_mpi_cxx}])
-          CXX="${sd_mpi_cxx}"
-          sd_mpi_cxx_set="yes"
+        for tmp_cxx_prog in ${CXX} mpic++ mpicxx; do
+          if test -x "${sd_mpi_cxx}/${tmp_cxx_prog}"; then
+            sd_mpi_cxx="${sd_mpi_cxx}/${tmp_cxx_prog}"
+            CXX="${sd_mpi_cxx}"
+            sd_mpi_cxx_set="yes"
+            break
+          fi
+        done
+        if test "${sd_mpi_cxx_set}" = "yes"; then
+          AC_MSG_RESULT([${CXX}])
         else
           AC_MSG_RESULT([not found])
           AC_MSG_ERROR([invalid MPI settings
@@ -457,11 +458,11 @@ AC_DEFUN([_SD_MPI_INIT_CXX], [
 
     def|env|yon)
       sd_mpi_cxx="${CXX}"
-      if test ! -z "${sd_mpi_cxx}"; then
+      if test "${sd_mpi_cxx}" != ""; then
         sd_mpi_cxx_set="yes"
       else
         AC_CHECK_PROGS([sd_mpi_cxx], [mpic++ mpicxx])
-        if test ! -z "${sd_mpi_cxx}"; then
+        if test "${sd_mpi_cxx}" != ""; then
           AC_MSG_NOTICE([setting CXX to '${sd_mpi_cxx}'])
           CXX="${sd_mpi_cxx}"
           sd_mpi_cxx_set="yes"
@@ -508,7 +509,7 @@ AC_DEFUN([_SD_MPI_CHECK_CXX_API], [
   AC_LANG_PUSH([C++])
   AC_LINK_IFELSE([AC_LANG_PROGRAM(
     [[
-#     include <mpi>
+#     include <mpi.h>
       using namespace std;
     ]],
     [[
@@ -534,11 +535,11 @@ AC_DEFUN([_SD_MPI_INIT_FC], [
   case "${sd_mpi_init}" in
 
     dir)
-      if test -z "${FC}"; then
+      if test "${FC}" = ""; then
         sd_mpi_fc="${with_mpi}/bin/mpif90"
       else
         tmp_fc_has_path=`echo "${FC}" | grep '/'`
-        if test -z "${tmp_fc_has_path}"; then
+        if test "${tmp_fc_has_path}" = ""; then
           sd_mpi_fc="${with_mpi}/bin/${FC}"
           test -x "${sd_mpi_fc}" || sd_mpi_fc="${with_mpi}/bin/mpif90"
         else
@@ -547,14 +548,12 @@ AC_DEFUN([_SD_MPI_INIT_FC], [
         fi
       fi
 
-      if test ! -z "${sd_mpi_fc}"; then
-        AC_MSG_NOTICE([user-defined MPI Fortran compiler: ${sd_mpi_fc}])
+      if test "${sd_mpi_fc}" != ""; then
         AC_MSG_CHECKING([for an executable MPI Fortran compiler])
         if test -x "${sd_mpi_fc}"; then
-          AC_MSG_RESULT([yes])
-          AC_MSG_NOTICE([setting FC to ${sd_mpi_fc}])
           FC="${sd_mpi_fc}"
           sd_mpi_fc_set="yes"
+          AC_MSG_RESULT([${FC}])
         else
           AC_MSG_RESULT([not found])
           AC_MSG_ERROR([invalid MPI settings for Fortran
@@ -565,11 +564,11 @@ AC_DEFUN([_SD_MPI_INIT_FC], [
 
     def|env|yon)
       sd_mpi_fc="${FC}"
-      if test ! -z "${sd_mpi_fc}"; then
+      if test "${sd_mpi_fc}" != ""; then
         sd_mpi_fc_set="yes"
       else
         AC_CHECK_PROGS([sd_mpi_fc], [mpifort mpif90 mpif95])
-        if test ! -z "${sd_mpi_fc}"; then
+        if test "${sd_mpi_fc}" != ""; then
           AC_MSG_NOTICE([setting FC to '${sd_mpi_fc}'])
           FC="${sd_mpi_fc}"
           sd_mpi_fc_set="yes"
