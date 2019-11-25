@@ -246,15 +246,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    write(message,'(a,(80a))') ch10,('=',ii=1,80)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
-   if(fit_iatom_in > 0)then
-     write(message,'(2a,I3,2a)') ch10,' Starting Fit process around atom', fit_iatom_in,": ", symbols(fit_iatom)
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
-   else 
-     write(message,'(2a)') ch10,' Starting Fit process with all possible cross-terms'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
-   endif
+   write(message,'(2a)') ch10,' Starting Fit process'
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
    write(message,'(a,(80a))') ch10,('-',ii=1,80)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
@@ -315,10 +309,16 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  if(generateterm == 1)then
 ! we need to regerate them
    if(need_verbose)then
-     write(message, '(4a)' )ch10,' The coefficients for the fit will be generated'
-     call wrtout(std_out,message,'COLL')
-     call wrtout(ab_out,message,'COLL')
-
+     if(fit_iatom_in > 0)then 
+       write(message, '(2a,I3,4a)' )ch10,' The coefficients for the fit around atom', fit_iatom_in,': ',& 
+&                                   trim(symbols(fit_iatom)),', will be generated',ch10
+       call wrtout(std_out,message,'COLL')
+       call wrtout(ab_out,message,'COLL')
+     else 
+       write(message, '(3a)' )ch10,' The coefficients for the fit will be generated with all cross terms',ch10
+       call wrtout(std_out,message,'COLL')
+       call wrtout(ab_out,message,'COLL')
+     endif
      write(message,'(a,F6.3,a)') " Cutoff of ",cutoff," Bohr is imposed"
      call wrtout(std_out,message,'COLL')
    end if

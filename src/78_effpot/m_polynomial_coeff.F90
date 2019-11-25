@@ -1369,7 +1369,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
  symrel = crystal%symrel
  tnons  = crystal%tnons
 
- tolsym8=tol14
+ tolsym8=tol13
  call symatm(indsym,natom,nsym,symrec,tnons,&
 &            tolsym8,crystal%typat,crystal%xred)
  ABI_ALLOCATE(blkval,(3,natom,3,natom,nrpt))
@@ -2444,8 +2444,8 @@ if(need_compute_symmetric)then
        !write(std_out,*) "DEBUG list_combination_tmp(:ndisp+nstrain,index_irredcomb(i)+1):", list_combination_tmp(:ndisp+nstrain,index_irredcomb(i)+1)
        !write(std_out,*) "DEBUG index_irredcomb(i)+1,ndisp,nstrain:", index_irredcomb(i)+1,ndisp,nstrain
        call computeSymmetricCombinations(my_index_irredcomb(i),my_list_combination,list_symcoeff,list_symstr,1,1,ndisp,nsym,&
-&                                         dummylist,my_list_combination(:ndisp+nstrain,my_index_irredcomb(i)+1),power_disps(2),irank_ncombi(my_rank+1),ncoeff_symsym,&
-&                                       nstr_sym,nstrain,my_index_irredcomb(i)+1,compatibleCoeffs,index_irred,compute_sym,comm) 
+&                                        dummylist,my_list_combination(:ndisp+nstrain,my_index_irredcomb(i)+1),power_disps(2),irank_ncombi(my_rank+1),ncoeff_symsym,&
+&                                        nstr_sym,nstrain,my_index_irredcomb(i)+1,compatibleCoeffs,index_irred,compute_sym,comm,only_even=need_only_even_power) 
        ABI_DEALLOCATE(dummylist)
        ABI_DEALLOCATE(index_irred) 
     enddo
@@ -3368,7 +3368,7 @@ end subroutine computeCombinationFromList
 recursive subroutine computeSymmetricCombinations(ncombi,list_combination,list_symcoeff,list_symstr,isym_in,&
 &                                               idisp_in,ndisp,nsym,index_isym_in,index_coeff_in,&
 &                                               ndisp_max,ncombinations,ncoeff,nsym_str,nstrain,ncombi_start,&
-&                                               compatibleCoeffs,index_irred,compute,comm)
+&                                               compatibleCoeffs,index_irred,compute,comm,only_even)
  
  implicit none
 
@@ -3377,6 +3377,7 @@ integer,intent(inout) :: ncombi
 integer,intent(in)    :: ndisp,nsym,ndisp_max,ncombinations,ncoeff,nstrain,nsym_str
 integer,intent(in)    :: isym_in,idisp_in,ncombi_start,comm
 logical,intent(in)    :: compute 
+logical,optional,intent(in) :: only_even 
 !scalar
 !arrays
 integer,intent(inout) :: list_combination(ndisp_max,ncombinations)
@@ -3386,13 +3387,15 @@ integer,intent(in)    :: index_isym_in(idisp_in-1)
 integer,intent(inout),allocatable :: index_irred(:)
 !Local variables-------------------------------
 !scalar
-integer :: isym,idisp,ncombi_to_test,idisp2
-logical :: need_compute,irreducible  
+integer :: isym,idisp,ncombi_to_test,idisp2,ii,jj
+logical :: need_compute,irreducible, need_only_even 
 !arrays
-integer :: index_coeff_tmp(ndisp)
+integer :: index_coeff_tmp(ndisp),powers(ndisp)
 integer,allocatable :: index_isym(:)
 !Source
 ! *************************************************************************
+need_only_even = .FALSE. 
+if(present(only_even))need_only_even=only_even
 
 irreducible = .TRUE.
 !Only start the function if start-symmetry is smaller than maximum symmetry
@@ -3420,6 +3423,21 @@ if(isym_in <= nsym .and. idisp_in <= ndisp)then
            do idisp=1,ndisp
               index_coeff_tmp(idisp) = list_symcoeff(6,index_coeff_in(idisp),index_isym(idisp))
            end do !idisp=1,ndisp
+!          Check if we want only even terms
+!          count the number of body
+           powers(:) = 1
+           do ii=1,ndisp
+             do jj=ii+1,ndisp
+               if (powers(jj) == 0) cycle
+               if(index_coeff_tmp(ii)==index_coeff_tmp(jj))then
+                 powers(ii) = powers(ii) + 1
+                 powers(jj) = 0
+               end if
+             end do
+           end do
+           if(any(mod(powers(1:ndisp),2) /=0) .and. need_only_even) then
+              index_coeff_tmp = 0 
+           end if
            !Check if symmetric combination is allowed 
            if(.not. any(index_coeff_tmp == 0))then ! Check if term is allowed by distance
               do idisp=1,ndisp-1
@@ -3454,7 +3472,7 @@ if(isym_in <= nsym .and. idisp_in <= ndisp)then
              if(.not. irreducible) list_combination(:,ncombi) = 0
              !write(std_out,*) "DEBUG, index_coeff_in,: ", index_coeff_in,"ndisp: ", ndisp
              !write(std_out,*) "DEBUG, index_coeff_tmp,: ", index_coeff_in,"ndisp: ", ndisp            
-           end if
+           end if! (any(index_coeff_tmp ==0))
          end if ! need compute
        end if !ndisp == 1 .and isym == 1
      end if !(idisp_in == ndisp)
