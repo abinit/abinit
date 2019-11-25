@@ -2443,7 +2443,6 @@ if(need_compute_symmetric)then
        compute_sym = .true.
        !write(std_out,*) "DEBUG list_combination_tmp(:ndisp+nstrain,index_irredcomb(i)+1):", list_combination_tmp(:ndisp+nstrain,index_irredcomb(i)+1)
        !write(std_out,*) "DEBUG index_irredcomb(i)+1,ndisp,nstrain:", index_irredcomb(i)+1,ndisp,nstrain
-        write(std_out,*) "DEBUG need_only_even", need_only_even_power
        call computeSymmetricCombinations(my_index_irredcomb(i),my_list_combination,list_symcoeff,list_symstr,1,1,ndisp,nsym,&
 &                                        dummylist,my_list_combination(:ndisp+nstrain,my_index_irredcomb(i)+1),power_disps(2),irank_ncombi(my_rank+1),ncoeff_symsym,&
 &                                        nstr_sym,nstrain,my_index_irredcomb(i)+1,compatibleCoeffs,index_irred,compute_sym,comm,only_even=need_only_even_power) 
