@@ -108,6 +108,9 @@
  #define HAVE_MEM_PROFILING
 */
 
+/* Miquel */
+#define MR_DEV 100
+
 #ifdef HAVE_MEM_PROFILING
 
 /* 

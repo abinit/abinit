@@ -2631,8 +2631,6 @@ integer function ddb_get_quadrupoles(ddb, crystal, lwsym,rftyp, quadrupoles) res
  rfstrs(:)=0
  rfqvec(3)=1
 
- write(msg,'(2a)') ch10, ' Extract quadrupoles or P^(1) coefficients from 3DTE'
- call wrtout(std_out, msg,'COLL')
  call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqvec=rfqvec)
 
  ! Compute the quadrupole tensor only if the Gamma-block was found in the DDB
@@ -2640,6 +2638,9 @@ integer function ddb_get_quadrupoles(ddb, crystal, lwsym,rftyp, quadrupoles) res
  quadrupoles=zero
 
  if (iblok /= 0) then
+   write(msg,'(2a)') ch10, ' Extract quadrupoles or P^(1) coefficients from 3DTE'
+   call wrtout(std_out, msg,'COLL')
+
    if (lwsym==1) then
      write(msg, '(3a)' ) ch10, ' Dynamical Quadrupoles Tensor (units: e·Bohr)',ch10
    else if (lwsym==0) then
