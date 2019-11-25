@@ -2443,6 +2443,7 @@ if(need_compute_symmetric)then
        compute_sym = .true.
        !write(std_out,*) "DEBUG list_combination_tmp(:ndisp+nstrain,index_irredcomb(i)+1):", list_combination_tmp(:ndisp+nstrain,index_irredcomb(i)+1)
        !write(std_out,*) "DEBUG index_irredcomb(i)+1,ndisp,nstrain:", index_irredcomb(i)+1,ndisp,nstrain
+        write(std_out,*) "DEBUG need_only_even", need_only_even_power
        call computeSymmetricCombinations(my_index_irredcomb(i),my_list_combination,list_symcoeff,list_symstr,1,1,ndisp,nsym,&
 &                                        dummylist,my_list_combination(:ndisp+nstrain,my_index_irredcomb(i)+1),power_disps(2),irank_ncombi(my_rank+1),ncoeff_symsym,&
 &                                        nstr_sym,nstrain,my_index_irredcomb(i)+1,compatibleCoeffs,index_irred,compute_sym,comm,only_even=need_only_even_power) 
@@ -3436,7 +3437,7 @@ if(isym_in <= nsym .and. idisp_in <= ndisp)then
              end do
            end do
            if(any(mod(powers(1:ndisp),2) /=0) .and. need_only_even) then
-              index_coeff_tmp = 0 
+              index_coeff_tmp(:) = 0 
            end if
            !Check if symmetric combination is allowed 
            if(.not. any(index_coeff_tmp == 0))then ! Check if term is allowed by distance
@@ -3479,7 +3480,7 @@ if(isym_in <= nsym .and. idisp_in <= ndisp)then
      
      call computeSymmetricCombinations(ncombi,list_combination,list_symcoeff,list_symstr,isym,idisp_in+1,ndisp,& 
 &                                      nsym,index_isym(2:),index_coeff_in,ndisp_max,ncombinations,&
-&                                      ncoeff,nsym_str,nstrain,ncombi_start,compatibleCoeffs,index_irred,compute,comm)
+&                                      ncoeff,nsym_str,nstrain,ncombi_start,compatibleCoeffs,index_irred,compute,comm,only_even=need_only_even)
      
   enddo !isym=isym_in,nsym
   ABI_DEALLOCATE(index_isym)
