@@ -7,7 +7,7 @@
 ! xoroshiro128plus method random number generator
 ! adapted by hexu for usage in Abinit (downgrade to Fortran 90 and added
 ! some functions )
-! TODO: move this to 28_numeric_noabirule?
+! (Fortran 2003 re-enabled)
 
 !** License for the xoroshiro128plus random number generator **
 !
@@ -69,28 +69,29 @@ module m_random_xoroshiro128plus
 
      real(dp) :: residual =0.0d0 ! for saving residual in normal function.
      logical :: has_residual = .False.
-  ! contains
-  !   procedure, non_overridable :: set_seed    ! Seed the generator
-  !   procedure, non_overridable :: jump        ! Jump function (see below)
-  !   procedure, non_overridable :: rand_int4       ! 4-byte random integer
-  !   procedure, non_overridable :: rand_int8       ! 8-byte random integer
-  !   procedure, non_overridable :: rand_unif_01     ! Uniform (0,1] real
-  !   procedure, non_overridable :: rand_unif_01_array     ! Uniform (0,1] real
-  !   procedure, non_overridable :: rand_two_normals ! Two normal(0,1) samples
-  !   procedure, non_overridable :: rand_normal ! Two normal(0,1) samples
-  !   procedure, non_overridable :: rand_normal_array ! Two normal(0,1) samples
-  !   procedure, non_overridable :: rand_poisson     ! Sample from Poisson-dist.
-  !   procedure, non_overridable :: rand_circle      ! Sample on a rand_circle
-  !   procedure, non_overridable :: rand_sphere      ! Sample on a rand_sphere
-  !   procedure, non_overridable :: next        ! Internal method
+   contains
+     procedure, non_overridable :: set_seed    ! Seed the generator
+     procedure, non_overridable :: jump        ! Jump function (see below)
+     procedure, non_overridable :: rand_int4       ! 4-byte random integer
+     procedure, non_overridable :: rand_int8       ! 8-byte random integer
+     procedure, non_overridable :: rand_unif_01     ! Uniform (0,1] real
+     procedure, non_overridable :: rand_unif_01_array     ! Uniform (0,1] real
+     procedure, non_overridable :: rand_two_normals ! Two normal(0,1) samples
+     procedure, non_overridable :: rand_normal ! Two normal(0,1) samples
+     procedure, non_overridable :: rand_normal_array ! Two normal(0,1) samples
+     procedure, non_overridable :: rand_poisson     ! Sample from Poisson-dist.
+     procedure, non_overridable :: rand_circle      ! Sample on a rand_circle
+     procedure, non_overridable :: rand_sphere      ! Sample on a rand_sphere
+     procedure, non_overridable :: rand_choice      ! select from 1 to N randomly
+     procedure, non_overridable :: next        ! Internal method
   end type rng_t
 
   !> Parallel random number generator type
   type prng_t
      type(rng_t), allocatable :: rngs(:)
-   !contains
-   !  procedure, non_overridable :: init_parallel
-   ! MG: free method not defined!!
+   contains
+     procedure, non_overridable :: initialize => init_parallel
+     procedure, non_overridable :: finalize => finalize_parallel
   end type prng_t
 
 
@@ -112,22 +113,31 @@ module m_random_xoroshiro128plus
 contains
 
   !> Initialize a collection of rng's for parallel use
-  subroutine init_parallel(self, n_proc, rng)
+  !> this can be used with openmp, each thread need an 
+  !> different rng.
+  subroutine init_parallel(self, n_proc, seed)
 
     class(prng_t), intent(inout) :: self
-    type(rng_t), intent(inout)   :: rng
+    integer(i8), optional, intent(in)     :: seed(2)
     integer, intent(in)          :: n_proc
     integer                      :: n
 
     ABI_MALLOC(self%rngs, (n_proc))
-    self%rngs(1) = rng
-
+    if (present(seed)) then
+      call self%rngs(1)%set_seed(seed)
+    endif
     do n = 2, n_proc
        self%rngs(n) = self%rngs(n-1)
-       !call self%rngs(n)%jump()
-       call jump(self%rngs(n))
+       call self%rngs(n)%jump()
     end do
   end subroutine init_parallel
+
+
+  !> Finalize prng_t
+  subroutine finalize_parallel(self)
+    class(prng_t), intent(inout) :: self
+    ABI_FREE(self%rngs)
+  end subroutine finalize_parallel
 
   !> Set a seed for the rng
   subroutine set_seed(self, the_seed)
@@ -280,8 +290,7 @@ contains
 
     expl = exp(-lambda)
     rr   = 0
-    !p    = self%rand_unif_01()
-    p    = rand_unif_01(self)
+    p    = self%rand_unif_01()
 
     do while (p > expl)
        rr = rr + 1
@@ -323,10 +332,8 @@ contains
 
     ! Marsaglia method for uniform sampling on rand_sphere
     do
-       !rands(1) = 2 * self%rand_unif_01() - 1
-       !rands(2) = 2 * self%rand_unif_01() - 1
-       rands(1) = 2 * rand_unif_01(self) - 1
-       rands(2) = 2 * rand_unif_01(self) - 1
+       rands(1) = 2 * self%rand_unif_01() - 1
+       rands(2) = 2 * self%rand_unif_01() - 1
        sum_sq   = sum(rands**2)
        if (sum_sq <= 1) exit
     end do
@@ -336,6 +343,13 @@ contains
     xyz(3)   = 1 - 2 * sum_sq
     xyz      = xyz * radius
   end function rand_sphere
+
+  function rand_choice(self, N) result(i)
+    class(rng_t), intent(inout) :: self
+    integer, intent(in) :: N
+    integer :: i
+    i=int(self%rand_unif_01()*N)+1
+  end function rand_choice
 
   !> Interal routine: get the next value (returned as 64 bit signed integer)
   function next(self) result(res)

@@ -576,7 +576,7 @@ The run is about 1...2 minutes on a 2.8 GHz machine.
 In the mean time, you might read more of the ABINIT documentation
 (why not the [[help:mrgddb|mrgddb_help]] and the [[help:anaddb|anaddb_help]]).
 
-The results of this simulation can be compared to those provided in the Gianozzi *et al* paper. 
+The results of this simulation can be compared to those provided in [[cite:Giannozzi1991]].
 The agreement is rather good, despite the low cut-off energy, and different pseudopotentials.
 
 At X, they get 95 cm$^{-1}$, 216 cm$^{-1}$, 337 cm$^{-1}$ and 393 cm$^{-1}$, while we get

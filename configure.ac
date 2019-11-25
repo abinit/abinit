@@ -966,6 +966,8 @@ ABI_MSG_SECTION([Optional source code])
 # (see config/specs/options.conf for details)
 ABI_OPTIONS_CPP_DEFINES
 
+
+AM_CONDITIONAL([DO_BUILD_67_PYTHON_INVOCATION_EXT], [test "${enable_python_invocation}" = "yes"])
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
 
