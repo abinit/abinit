@@ -39,6 +39,7 @@ module m_lattice_effpot
 
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only : abstract_potential_t
+  use m_hashtable_strval, only: hash_table_t
 !!***
 
   implicit none
@@ -71,10 +72,12 @@ contains
   end subroutine set_params
 
 
-  subroutine calculate(self, displacement, strain, spin, lwf, force, stress, bfield, lwf_force, energy)
+  subroutine calculate(self, displacement, strain, spin, lwf, force, stress, bfield, lwf_force, &
+          & energy, energy_table)
     class(lattice_effpot_t), intent(inout) :: self  ! the effpot may save the states.
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
+    type(hash_table_t), optional, intent(inout) :: energy_table
     if(present(force)) then
        force(:,:)=zero
     end if
@@ -94,6 +97,7 @@ contains
     ABI_UNUSED_A(bfield)
     ABI_UNUSED_A(lwf_force)
     ABI_UNUSED_A(energy)
+    ABI_UNUSED_A(energy_table)
 
     MSG_ERROR("calculate for lattice_effpot not yet implemented.")
   end subroutine calculate

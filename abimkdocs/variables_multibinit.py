@@ -586,6 +586,9 @@ thermostats ([[qmass]]).
 **Related variables:** The time step ([[dtion]]), the temperatures
 ([[multibinit:temperature]]), the ion relaxation time [[multibinit:latt_taut]], the pressure relaxation time [[multibinit:latt_taup]].
 
+
+* 120 --> Dummy mover. Atoms does not move. For testing only.
+
 """,
 
 ),
@@ -901,6 +904,8 @@ Flag to run spin dynamics.
 
 * 3 --> Run Monte Carlo.
 
+* 20 --> Dummy mover. Spin will not rotate. For test only.
+
 The HeunP method does less computation for each step,
 whereas the Depondt-Mertens method allow larger time step.
 For system with very simple interaction terms, HeunP could be faster.
@@ -917,17 +922,15 @@ Variable(
     defaultval=1,
     mnemonics="SPIN INITial STATE",
     text=r"""
-Flag to initialize spin state. (only option 1 and 2 are implemented.)
-
-* 0 --> Read from spinhist netcdf file.
+Flag to initialize spin state.
 
 * 1 --> Random spin state using uniform random numbers.
 
-* 2 --> Ferromagnetic state.
+* 2 --> Reference spin state from potential file if present.
 
-* 3 --> State with q-vector using [[multibinit:spin_qpoint]]
+* 3 --> State with q-vector using [[multibinit:spin_init_qpoint]], [[multibinit:spin_init_rotate_axis]], and [[multibinit:spin_init_orientation]]. Please check default values for those variables.
 
-* 4 --> Random spin state with temperature of [[multibinit:spin_temperature]]
+* 4 --> Restart from last step of input spin hist file. "{output}_spinhist_input.nc". 
 """,
 ),
 
@@ -988,16 +991,73 @@ And they are not used for calculating the observables.
 """,
 ),
 
+
 Variable(
-    abivarname="spin_qpoint@multibinit",
+    abivarname="spin_init_orientation@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions=[3],
+    defaultval=[0,0,1],
+    mnemonics="SPIN INITial ORIENTATION",
+    text=r"""
+Spin initial orientation. It is used for setting the initial spin in a supercell.
+    For a spin in a cell labeled with R, the rotation angle is $2\pi Q\cdot R$
+    from the initial orientation along the rotate axis. 
+    Default is along z(0,0,1) direction.
+""",
+),
+
+
+
+
+Variable(
+    abivarname="spin_init_qpoint@multibinit",
     varset="multibinit",
     vartype="real",
     topics=['SpinDynamicsMultibinit_basic'],
     dimensions=[3],
     defaultval=[0,0,0],
-    mnemonics="SPIN QPOINT",
+    mnemonics="SPIN INITial QPOINT",
+    text=r"""
+Spin wave vector. It is used for setting the initial spin in a supercell.
+    For a spin in a cell labeled with R, the rotation angle is $2\pi Q\cdot R$
+    from the initial orientation along the rotate axis. 
+    Default is Gamma (0, 0, 0).
+""",
+),
+
+
+
+Variable(
+    abivarname="spin_init_rotate_axis@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions=[3],
+    defaultval=[1,0,0],
+    mnemonics="SPIN INITial ROTATE AXIS",
+    text=r"""
+Spin initial rotate axis. It is used for setting the initial spin in a supercell.
+    For a spin in a cell labeled with R, the rotation angle is $2\pi Q\cdot R$
+    from the initial orientation along the rotate axis. 
+    Default is along x axis (1,0,0).
+""",
+),
+
+
+
+Variable(
+    abivarname="spin_projection_qpoint@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions=[3],
+    defaultval=[0,0,0],
+    mnemonics="SPIN PROJECTION QPOINT",
     text=r"""
 Spin wave vector. It is used for getting the total spin. $M_{tot}=\sum_i M_i exp(i q \cdot R_i)$. The unit is the reciprocal lattice vectors of the unitcell.
+    Default is Gamma. (0, 0, 0)
 """,
 ),
 

@@ -65,9 +65,12 @@ module m_multibinit_cell
      integer :: nspin   ! number of spin
      real(dp) :: rprimd(3,3)   ! cell parameters
      real(dp), allocatable :: ms(:)   ! magnetic moments  array(nspin)
+     real(dp), allocatable :: Sref(:,:)   ! spin orientation of reference structure, array(3,nspin)
+     real(dp) :: ref_qpoint(3)   ! q point to construct reference spin structure
+     real(dp) :: ref_rotate_axis(3)   ! rotation axis to construct reference spin structure
      real(dp), allocatable :: gyro_ratio(:) ! gyromagnetic ratio array(nspin)
      real(dp), allocatable :: gilbert_damping(:) ! damping factor defined for each spin
-     real(dp), allocatable :: spin_positions(:,:) ! poistions of spin (cartesion)
+     real(dp), allocatable :: spin_positions(:,:) ! positions of spin (cartesian)
      integer, allocatable ::  ispin_prim(:) ! index of primitive cell
      integer, allocatable ::  rvec(:,:) ! R cell vectors for each spin (for supercell)
    contains
@@ -103,7 +106,7 @@ module m_multibinit_cell
      type(mbcell_spin_t) :: spin
      type(mbcell_lwf_t) :: lwf
    contains
-     procedure:: initialize
+     procedure :: initialize
      procedure :: finalize
      procedure :: set_lattice   ! intialize the lattice
      procedure :: set_spin      ! initilzie the spin
@@ -117,7 +120,7 @@ module m_multibinit_cell
   !----------------------------------------------------------------------
   type, public, extends(mbcell_t):: mbsupercell_t
      integer :: sc_matrix(3,3)   ! supercell matrix
-     integer :: ncell            ! number of cells in supercell
+     integer :: ncell            ! number of cells in supercell !NH: this already exists in supercell_maker!
      type(supercell_maker_t), pointer :: supercell_maker  ! pointer to a helper class object
      type(mbcell_t), pointer :: unitcell  ! pointer to the unitcell which the supercell is built from
    contains
@@ -137,7 +140,7 @@ contains
   end subroutine initialize
 
   !----------------------------------------------------------------------
-  !> @brief set the lattice subtype infor
+  !> @brief set the lattice subtype information
   !>
   !> @param[in]  natom: number of atoms
   !> @param[in]  cell:  cell parameter matrix (3,3)
@@ -158,7 +161,7 @@ contains
   !----------------------------------------------------------------------
   !> @brief initialize spin sub type
   !>
-  !> @param[in]  nspin: number of spin
+  !> @param[in] nspin: number of spin
   !> @param[in] ms: magnetic moments
   !> @param[in] rprimd:  cell pareters
   !> @param[in] spin_positions:  the cartesion coordinates of spins
@@ -167,14 +170,17 @@ contains
   !> @param[in] rvec: R vectors for cell in supercell
   !> @param[in] ispin_prim:  id in primitive cell for each spin
   !----------------------------------------------------------------------
-  subroutine set_spin(self,nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, rvec,  ispin_prim)
-    class(mbcell_t) , intent(inout):: self
-    integer, intent(in) :: nspin
-    real(dp), intent(in) :: ms(nspin), rprimd(3,3), spin_positions(3, nspin), gyro_ratio(nspin), gilbert_damping(nspin)
-    integer, optional, intent(in) :: rvec(3, nspin), ispin_prim(nspin)
+  subroutine set_spin(self,nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, rvec,  ispin_prim, &
+       & Sref, ref_qpoint, ref_rotate_axis)
+    class(mbcell_t),  intent(inout):: self
+    integer,          intent(in)   :: nspin
+    real(dp),         intent(in)   :: ms(nspin), rprimd(3,3), spin_positions(3, nspin), gyro_ratio(nspin), gilbert_damping(nspin)
+    real(dp), optional, intent(in) :: Sref(3, nspin), ref_qpoint(3), ref_rotate_axis(3)
+    integer,  optional, intent(in) :: rvec(3, nspin), ispin_prim(nspin)
     self%has_spin=.True.
     call self%spin%initialize(nspin)
-    call self%spin%set(nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, rvec, ispin_prim)
+    call self%spin%set(nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, rvec, ispin_prim, &
+         & Sref, ref_qpoint=ref_qpoint, ref_rotate_axis=ref_rotate_axis)
   end subroutine set_spin
 
   !----------------------------------------------------------------------
@@ -381,6 +387,7 @@ contains
     call xmpi_bcast(self%nspin, master, comm, ierr)
     ABI_ALLOCATE(self%spin_positions, (3, self%nspin))
     ABI_ALLOCATE(self%ms, (self%nspin))
+    ABI_ALLOCATE(self%Sref, (3, self%nspin))
     ABI_ALLOCATE(self%gyro_ratio, (self%nspin))
     ABI_ALLOCATE(self%gilbert_damping, (self%nspin))
     ABI_ALLOCATE(self%rvec,(3, self%nspin) )
@@ -400,15 +407,19 @@ contains
   !> @param[in] rvec: R vectors for cell in supercell
   !> @param[in] ispin_prim:  id in primitive cell for each spin
   !----------------------------------------------------------------------
-  Subroutine spin_set(self, nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, rvec, ispin_prim)
+  subroutine spin_set(self, nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, &
+       & rvec, ispin_prim, Sref, ref_qpoint, ref_rotate_axis)
     class(mbcell_spin_t) , intent(inout):: self
     integer, intent(in) :: nspin
     real(dp), intent(in) :: ms(nspin), rprimd(3,3), &
          &spin_positions(3, nspin), gyro_ratio(nspin), gilbert_damping(nspin)
     integer, optional, intent(in) :: rvec(3, nspin), ispin_prim(nspin)
+    real(dp), optional, intent(in) :: Sref(3, nspin), ref_qpoint(3), ref_rotate_axis(3)
+
     integer :: i
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
+
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     if (iam_master) then
        self%ms(:) = ms(:)
@@ -428,38 +439,54 @@ contains
              self%ispin_prim(i)=i
           end do
        end if
+
+       if (present(Sref)) then
+          self%Sref(:,:) = Sref
+       else
+          MSG_WARNING("No reference spin structure specified, using ferromagnetic along z-axis")
+
+          self%Sref(1,:) = 0.0_dp
+          self%Sref(2,:) = 0.0_dp
+          self%Sref(3,:) = 1.0_dp
+       end if
+
+       if (present(ref_qpoint)) then
+          self%ref_qpoint(:) = ref_qpoint
+       else
+          self%ref_qpoint(:)=[0.0_dp, 0.0_dp, 0.0_dp]
+       end if
+
+       if (present(ref_rotate_axis)) then
+          self%ref_rotate_axis(:) = ref_rotate_axis
+       else
+          self%ref_rotate_axis(:)=[1.0_dp, 0.0_dp, 0.0_dp]
+       end if
+
     endif
+
     call xmpi_bcast(self%spin_positions, master, comm, ierr)
     call xmpi_bcast(self%rprimd, master, comm, ierr)
     call xmpi_bcast(self%ms, master, comm, ierr)
+    call xmpi_bcast(self%Sref, master, comm, ierr)
     call xmpi_bcast(self%gyro_ratio, master, comm, ierr)
     call xmpi_bcast(self%gilbert_damping, master, comm, ierr)
     call xmpi_bcast(self%rvec, master, comm, ierr)
     call xmpi_bcast(self%ispin_prim, master, comm, ierr)
+    call xmpi_bcast(self%ref_qpoint, master, comm, ierr)
+    call xmpi_bcast(self%ref_rotate_axis, master, comm, ierr)
   end Subroutine spin_set
 
 
   subroutine spin_finalize(self)
     class(mbcell_spin_t) :: self
     self%nspin=0
-    if (allocated(self%ms)) then
-       ABI_DEALLOCATE(self%ms)
-    end if
-    if (allocated(self%spin_positions)) then
-       ABI_DEALLOCATE(self%spin_positions)
-    end if
-    if (allocated(self%gyro_ratio)) then
-       ABI_DEALLOCATE(self%gyro_ratio)
-    end if
-    if (allocated(self%gilbert_damping)) then
-       ABI_DEALLOCATE(self%gilbert_damping)
-    end if
-    if (allocated(self%ispin_prim)) then
-       ABI_DEALLOCATE(self%ispin_prim)
-    end if
-    if (allocated(self%rvec)) then
-       ABI_DEALLOCATE(self%rvec)
-    end if
+    ABI_SFREE(self%ms)
+    ABI_SFREE(self%Sref)
+    ABI_SFREE(self%spin_positions)
+    ABI_SFREE(self%gyro_ratio)
+    ABI_SFREE(self%gilbert_damping)
+    ABI_SFREE(self%ispin_prim)
+    ABI_SFREE(self%rvec)
   end subroutine spin_finalize
 
   subroutine spin_fill_supercell(self, sc_maker, supercell)
@@ -483,6 +510,10 @@ contains
 
        call sc_maker%trans_xcart(self%rprimd, self%spin_positions, supercell%spin_positions)
        call sc_maker%rvec_for_each(self%nspin, supercell%rvec)
+       call sc_maker%generate_spin_wave_vectorlist( A=self%Sref, kpoint=self%ref_qpoint, &
+            & axis=self%ref_rotate_axis, A_sc=supercell%Sref)
+       supercell%ref_qpoint(:)=[0.0_dp, 0.0_dp, 0.0_dp]   ! Qpoint is gamma in supercell
+       supercell%ref_rotate_axis= self%ref_rotate_axis
     end if
     call xmpi_bcast(supercell%nspin, master, comm, ierr)
     call xmpi_bcast(supercell%ms, master, comm, ierr)

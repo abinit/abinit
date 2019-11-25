@@ -1,5 +1,5 @@
 
-.Version 8.11.7 of MULTIBINIT 
+.Version 8.11.12 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  5 May 2019.
-- ( at 21h30 )
+.Starting date : Thu 21 Nov 2019.
+- ( at 23h31 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/xuhe_Multibinit-factor-half/tests/tutomultibinit/Input/tmulti5_2.xml
+-/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/nehelbig_Multibinit-slc/tests/tutomultibinit/Input/tmulti5_2.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -43,18 +43,16 @@
                   spin_ntime     10000
                        ncell         6         6         6
                      spin_dt    1.00000E-16  second
-              spin_mag_field
-                                0.00000E+00 0.00000E+00 0.00000E+00   Tesla
+              spin_mag_field    0.00000E+00    0.00000E+00    0.00000E+00   Tesla
                 spin_sia_add           1
               spin_sia_k1amp    1.00000E-06
               spin_sia_k1dir    0.00000E+00    0.00000E+00    1.00000E+00
-                 spin_qpoint
-                             0.00000E+00 0.00000E+00 0.00000E+00
+      spin_projection_qpoint    0.00000E+00    0.00000E+00    0.00000E+00
              spin_init_state           2
         spin_var_temperature           1
       spin_temperature_start        0.00000
         spin_temperature_end      900.00000
-      spin_temperature_nstep               10
+      spin_temperature_nstep          10
              spin_write_traj           0
  Miscellaneous information :
          asr         2
@@ -83,6 +81,7 @@ dipdip_range         6         6         6
 ================================================================================
 
 reading spin terms.
+ Initial spins set to reference configuration.
 Starting temperature dependent calculations. T from   0.00000E+00      K to   9.00000E+02
 ===============================================================================
 Temperature:        0.00000E+00 K.
@@ -2322,10 +2321,10 @@ Measurement run:
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=        255.6  wall=        257.7
+- Proc.   0 individual time (sec): cpu=        251.8  wall=        258.1
 
 ================================================================================
 
-+Total cpu time    255.609  and wall time    257.726 sec
++Total cpu time    251.768  and wall time    258.093 sec
 
  multibinit : the run completed succesfully.
