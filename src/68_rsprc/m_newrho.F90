@@ -476,8 +476,10 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 
 !------Compute new trial density and eventual new atomic positions
 
- i_vresid1=mix%i_vresid(1)
- i_vrespc1=mix%i_vrespc(1)
+ if (mix%n_fftgr>0) then
+   i_vresid1=mix%i_vresid(1)
+   i_vrespc1=mix%i_vrespc(1)
+ end if
 
 !Initialise working arrays for the mixing object.
  if (moved_atm_inside == 1) then

@@ -118,6 +118,7 @@ subroutine init_(mix)
  mix%n_pulayit = 7
  mix%n_pawmix  = 0
  mix%n_atom    = 0
+ mix%space     = 0
  mix%useprec   = .true.
 
  call nullify_(mix)
@@ -220,7 +221,8 @@ subroutine ab7_mixing_new(mix, iscf, kind, space, nfft, nspden, &
       & iscf /= AB7_MIXING_ANDERSON_2 .and. &
       & iscf /= AB7_MIXING_CG_ENERGY .and. &
       & iscf /= AB7_MIXING_PULAY .and. &
-      & iscf /= AB7_MIXING_CG_ENERGY_2) then
+      & iscf /= AB7_MIXING_CG_ENERGY_2 .and. &
+      & iscf /= AB7_MIXING_NONE) then
     errid = AB7_ERROR_MIXING_ARG
     write(errmess, "(A,I0,A)") "Unknown mixing scheme (", iscf, ")."
     return
@@ -458,20 +460,41 @@ subroutine ab7_mixing_copy_current_step(mix, arr_resid, errid, errmess, &
  real(dp), intent(in), optional :: arr_atm(3, mix%n_atom)
 ! *************************************************************************
 
- if (.not. associated(mix%f_fftgr)) then
+
+ if (mix%n_fftgr>0 .and. (.not. associated(mix%f_fftgr))) then
     errid = AB7_ERROR_MIXING_ARG
     write(errmess, '(a,a,a,a)' )ch10,&
-         & ' ab7_mixing_set_arr_current_step: ERROR -',ch10,&
+         & ' ab7_mixing_set_arr_current_step: ERROR (1) -',ch10,&
+         & '  Working arrays not yet allocated.'
+    return
+ end if
+ if (mix%n_pawmix>0 .and. (.not. associated(mix%f_paw))) then
+    errid = AB7_ERROR_MIXING_ARG
+    write(errmess, '(a,a,a,a)' )ch10,&
+         & ' ab7_mixing_set_arr_current_step: ERROR (2) -',ch10,&
+         & '  Working arrays not yet allocated.'
+    return
+ end if
+ if (mix%n_atom>0 .and. (.not. associated(mix%f_atm))) then
+    errid = AB7_ERROR_MIXING_ARG
+    write(errmess, '(a,a,a,a)' )ch10,&
+         & ' ab7_mixing_set_arr_current_step: ERROR (3) -',ch10,&
          & '  Working arrays not yet allocated.'
     return
  end if
  errid = AB7_NO_ERROR
 
- mix%f_fftgr(:,:,mix%i_vresid(1)) = arr_resid(:,:)
- if (present(arr_respc)) mix%f_fftgr(:,:,mix%i_vrespc(1)) = arr_respc(:,:)
- if (present(arr_paw_resid)) mix%f_paw(:, mix%i_vresid(1)) = arr_paw_resid(:)
- if (present(arr_paw_respc)) mix%f_paw(:, mix%i_vrespc(1)) = arr_paw_respc(:)
- if (present(arr_atm)) mix%f_atm(:,:, mix%i_vresid(1)) = arr_atm(:,:)
+ if (mix%n_fftgr>0) then
+   mix%f_fftgr(:,:,mix%i_vresid(1)) = arr_resid(:,:)
+   if (present(arr_respc)) mix%f_fftgr(:,:,mix%i_vrespc(1)) = arr_respc(:,:)
+ end if
+ if (mix%n_pawmix>0) then
+   if (present(arr_paw_resid)) mix%f_paw(:, mix%i_vresid(1)) = arr_paw_resid(:)
+   if (present(arr_paw_respc)) mix%f_paw(:, mix%i_vrespc(1)) = arr_paw_respc(:)
+ end if
+ if (mix%n_atom>0) then
+   if (present(arr_atm)) mix%f_atm(:,:, mix%i_vresid(1)) = arr_atm(:,:)
+ end if
 
 end subroutine ab7_mixing_copy_current_step
 !!***
@@ -519,7 +542,7 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
  if (present(istep)) istep_ = istep
 
  ! Allocate work array.
- if (.not. associated(mix%f_fftgr)) then
+ if (mix%n_fftgr>0 .and. (.not. associated(mix%f_fftgr))) then
    !allocate(mix%f_fftgr(mix%space * mix%nfft,mix%nspden,mix%n_fftgr), stat = i_stat)
    !call memocc_abi(i_stat, mix%f_fftgr, 'mix%f_fftgr', subname)
    ABI_ALLOCATE(mix%f_fftgr,(mix%space * mix%nfft,mix%nspden,mix%n_fftgr))
@@ -536,7 +559,7 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
    end if
  end if
  ! Allocate PAW work array.
- if (.not. associated(mix%f_paw)) then
+ if (mix%n_pawmix>0 .and. (.not. associated(mix%f_paw))) then
     !allocate(mix%f_paw(mix%n_pawmix,mix%n_fftgr), stat = i_stat)
     !call memocc_abi(i_stat, mix%f_paw, 'mix%f_paw', subname)
     ABI_ALLOCATE(mix%f_paw,(mix%n_pawmix,mix%n_fftgr))
@@ -550,7 +573,7 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
     end if
  end if
  ! Allocate atom work array.
- if (.not. associated(mix%f_atm)) then
+ if (mix%n_atom>0 .and. (.not. associated(mix%f_atm))) then
     !allocate(mix%f_atm(3,mix%n_atom,mix%n_fftgr), stat = i_stat)
     !call memocc_abi(i_stat, mix%f_atm, 'mix%f_atm', subname)
     ABI_ALLOCATE(mix%f_atm,(3,mix%n_atom,mix%n_fftgr))
@@ -611,8 +634,10 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
     end if
     close(unit=temp_unit)
     call timab(83,2,tsec)
-    ABI_DEALLOCATE(mix%f_fftgr)
-    nullify(mix%f_fftgr)
+    if (associated(mix%f_fftgr)) then
+      ABI_DEALLOCATE(mix%f_fftgr)
+      nullify(mix%f_fftgr)
+    end if
     if (associated(mix%f_paw)) then
        ABI_DEALLOCATE(mix%f_paw)
        nullify(mix%f_paw)
@@ -678,13 +703,13 @@ end subroutine ab7_mixing_eval_deallocate
 ! *************************************************************************
 
  ! Argument checkings.
- if (mix%iscf == AB7_MIXING_NONE) then
-    errid = AB7_ERROR_MIXING_ARG
-    write(errmess, '(a,a,a,a)' )ch10,&
-         & ' ab7_mixing_eval: ERROR -',ch10,&
-         & '  No method has been chosen.'
-    return
- end if
+ !if (mix%iscf == AB7_MIXING_NONE) then
+ !   errid = AB7_ERROR_MIXING_ARG
+ !   write(errmess, '(a,a,a,a)' )ch10,&
+ !        & ' ab7_mixing_eval: ERROR -',ch10,&
+ !        & '  No method has been chosen.'
+ !   return
+ !end if
  if (mix%n_pawmix > 0 .and. .not. present(pawarr)) then
     errid = AB7_ERROR_MIXING_ARG
     write(errmess, '(a,a,a,a)' )ch10,&
@@ -701,13 +726,21 @@ end subroutine ab7_mixing_eval_deallocate
  end if
  errid = AB7_NO_ERROR
 
- ! Miscellaneous
- moveAtm = 0
- if (mix%n_atom > 0) moveAtm = 1
+ ! Reset if requested
  initialized = 1
  if (present(reset)) then
     if (reset) initialized = 0
  end if
+
+ ! If no mixing, exit here
+ if (mix%iscf == AB7_MIXING_NONE) then
+   if (present(resnrm)) resnrm=0.d0
+   return
+ end if
+
+ ! Miscellaneous
+ moveAtm = 0
+ if (mix%n_atom > 0) moveAtm = 1
  isecur_ = 0
  if (present(isecur)) isecur_ = isecur
  usepaw = 0
