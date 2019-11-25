@@ -2608,7 +2608,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 !&    two*energies%e_fock - energies%e_fock0 +&   ! The Fock energy is already included in the non-local one
 !&     energies%e_nlpsp_vfock - energies%e_fock0 +&
 &     energies%e_entropy + energies%e_elecfield + energies%e_magfield+&
-&     energies%e_hybcomp_E0 - energies%e_hybcomp_v0 + energies%e_hybcomp_v
+&     energies%e_hybcomp_E0 - energies%e_hybcomp_v0 + energies%e_hybcomp_v + energies%e_constrained_dft
      etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
 
 !    See similar section in m_energies.F90
@@ -2626,7 +2626,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc &
 &     - energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc- energies%e_fock0 &
 &     + energies%e_entropy + energies%e_elecfield + energies%e_magfield &
-&     + energies%e_hybcomp_E0 - energies%e_hybcomp_v0
+&     + energies%e_hybcomp_E0 - energies%e_hybcomp_v0 + energies%e_constrained_dft
      etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
      if (usepaw/=0) etotal = etotal + energies%e_pawdc
    end if

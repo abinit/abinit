@@ -3477,7 +3477,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  rprimd_hist(:,:) = hist%rprimd(:,:,1)
 
  do ia=1,3
-   scale_cell(:) = zero
+   scale_cell(:) = 0
    do ii=1,3
      if(abs(rprimd_ref(ii,ia)) > tol10)then
        scale_cell(ii) = nint(rprimd_hist(ii,ia) / rprimd_ref(ii,ia))
@@ -3499,7 +3499,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 &         'Action: check/change your MD file'
      MSG_ERROR(msg)
    else
-     ncell(ia) = factor
+     ncell(ia) = int(factor)
    end if
  end do
 
