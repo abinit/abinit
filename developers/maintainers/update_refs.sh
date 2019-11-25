@@ -7,17 +7,16 @@
 #  ../dev*/main*/update_refs.sh
 #
 # Normal directories
-cp TestBot_MPI1/v1_t*/*out TestBot_MPI1/v1_t*/*DOS* TestBot_MPI1/v1_t*/*cml v1/Refs
-cp TestBot_MPI1/v2_t*/*out                                                  v2/Refs
+cp TestBot_MPI1/v1_t*/*out  v1/Refs
+cp TestBot_MPI1/v2_t*/*out  v2/Refs
 cp TestBot_MPI1/v3_t*/*out TestBot_MPI1/v3_t*/*DOS*                         v3/Refs
 cp TestBot_MPI1/v3_t*/*_k*_b* TestBot_MPI1/v3_t*/t79_*                      v3/Refs
-cp TestBot_MPI1/v4_t*/*out TestBot_MPI1/v4_t*/*DOS* TestBot_MPI1/v4_t*/*AV TestBot_MPI1/v4_t*/*DDB  v4/Refs
+cp TestBot_MPI1/v4_t*/*out TestBot_MPI1/v4_t*/*DOS* TestBot_MPI1/v4_t*/*AV  v4/Refs
 cp TestBot_MPI1/v5_t*/*out TestBot_MPI1/v5_t*/*DOS* TestBot_MPI1/v5_t*/*xml                         v5/Refs
-cp TestBot_MPI1/v5_t*/*PROCAR* TestBot_MPI1/v5_t*/t10_*  TestBot_MPI1/v5_t*/*FATBANDS*              v5/Refs
+cp TestBot_MPI1/v5_t*/t10_*  TestBot_MPI1/v5_t*/*FATBANDS*              v5/Refs
 cp TestBot_MPI1/v6_t*/*out TestBot_MPI1/v6_t*/*BLZTRP*  v6/Refs
-cp TestBot_MPI1/v7_t*/*out TestBot_MPI1/v7_t*/*DOS* TestBot_MPI1/v7_t*/*dat v7/Refs
-cp TestBot_MPI1/v7_t*/*DMFT TestBot_MPI1/v7_t*/*TETRA TestBot_MPI1/v7_t*/t56_* v7/Refs
-cp TestBot_MPI1/v7_t*/t84_* TestBot_MPI1/v7_t*/t88_* v7/Refs
+cp TestBot_MPI1/v7_t*/*out TestBot_MPI1/v7_t*/*DOS*     v7/Refs
+cp TestBot_MPI1/v7_t*/*DMFT  v7/Refs
 cp TestBot_MPI1/v8_t*/*out TestBot_MPI1/v8_t*/*dat* TestBot_MPI1/v8_t*/*xml v8/Refs
 cp TestBot_MPI1/v9_t*/*out TestBot_MPI1/v9_t*/*KERANGE   v9/Refs
 cp TestBot_MPI1/v67mbpt_t*/*out  TestBot_MPI1/v67mbpt_t*/*MDF TestBot_MPI1/v67mbpt_t*/*_k*_b*       v67mbpt/Refs
@@ -37,9 +36,9 @@ cp TestBot_MPI1/wannier90_t*/*out      wannier90/Refs
 
 # Directories for parallel tests
 cp TestBot_MPI*/bigdft_paral_t*/*out   bigdft_paral/Refs
-cp TestBot_MPI*/mpiio_t*/*out TestBot_MPI*/mpiio_t*/*DOS*  TestBot_MPI*/mpiio_t*/*VCMLB*       mpiio/Refs
+cp TestBot_MPI*/mpiio_t*/*out TestBot_MPI*/mpiio_t*/*DOS*        mpiio/Refs
 cp TestBot_MPI*/paral_t*/*out TestBot_MPI*/paral_t*/*MDF   TestBot_MPI*/paral_t*/*xml    TestBot_MPI*/paral_t*/*dat  TestBot_MPI*/paral_t*/*DDB paral/Refs
-cp TestBot_MPI*/tutoparal_t*/*out TestBot_MPI*/tutoparal_t*/*PRESS*     tutoparal/Refs
+cp TestBot_MPI*/tutoparal_t*/*out      tutoparal/Refs
 cp TestBot_MPI*/unitary_t*/*out        unitary/Refs
 
 # For the serial reference machine
