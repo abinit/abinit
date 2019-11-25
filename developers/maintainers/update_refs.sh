@@ -4,7 +4,7 @@
 # The purpose of this script is to update all reference files, by brute force.
 
 #Issue this script on the main reference machine, in the directory tests.
-#  ../dev*/main*
+#  ../dev*/main*/update_refs.sh
 #
 # Normal directories
 cp TestBot_MPI1/v1_t*/*out TestBot_MPI1/v1_t*/*DOS* TestBot_MPI1/v1_t*/*cml v1/Refs

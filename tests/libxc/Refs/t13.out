@@ -1,6 +1,6 @@
 
 .Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 21 Nov 2019.
-- ( at 00h07 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h17 )
   
 - input  file    -> t13.in
 - output file    -> t13.out
@@ -192,8 +192,8 @@ P           mkmem           1
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/6-C.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/6-C.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
 -    C  APE 1.0 : Troullier-Martins scheme, , llocal= 1
 -  6.00000   4.00000  20100127                znucl, zion, pspdat
     6    0    1    1       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -217,9 +217,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    1837.000    1837.000
  ETOT  3  -4.1851088111195     9.098E-03 1.800E-06 7.294E-01
  ETOT  4  -4.1850295017085     7.931E-05 8.404E-08 2.509E-02
  ETOT  5  -4.1846664304110     3.631E-04 7.818E-10 6.651E-04
- ETOT  6  -4.1846596034207     6.827E-06 2.551E-12 2.142E-05
- ETOT  7  -4.1846646632864    -5.060E-06 1.686E-12 1.415E-07
- ETOT  8  -4.1846643169966     3.463E-07 4.791E-15 2.785E-09
+ ETOT  6  -4.1846596034206     6.827E-06 2.551E-12 2.142E-05
+ ETOT  7  -4.1846646632863    -5.060E-06 1.686E-12 1.415E-07
+ ETOT  8  -4.1846643169965     3.463E-07 4.791E-15 2.785E-09
  ETOT  9  -4.1846644615662    -1.446E-07 1.492E-16 2.013E-10
  ETOT 10  -4.1846644361981     2.537E-08 6.632E-18 5.163E-13
 
@@ -284,9 +284,9 @@ Result for kinetic energy density :
     XC energy       = -1.94965271001250E-01
     Ewald energy    = -3.05657471607587E+00
     PspCore energy  =  1.24347554578084E-03
-    Loc. psp. energy= -6.60587804699506E+00
-    NL   psp  energy=  8.60576092249629E-01
-    >>>>>>>>> Etotal= -4.18466443619811E+00
+    Loc. psp. energy= -6.60587804699505E+00
+    NL   psp  energy=  8.60576092249628E-01
+    >>>>>>>>> Etotal= -4.18466443619810E+00
 
  Other information on the energy :
     Total energy(eV)= -1.13870510298677E+02 ; Band energy (Ha)=  -1.1081445300E+00
@@ -319,8 +319,8 @@ Result for kinetic energy density :
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/6-C.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/6-C.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
 -    C  APE 1.0 : Troullier-Martins scheme, , llocal= 1
 -  6.00000   4.00000  20100127                znucl, zion, pspdat
     6    0    1    1       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -338,7 +338,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1837.000    1837.000
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -3.9841826586613    -3.984E+00 3.951E-03 5.328E+02
+ ETOT  1  -3.9841826586614    -3.984E+00 3.951E-03 5.328E+02
  ETOT  2  -4.1259050847095    -1.417E-01 7.067E-08 7.401E+01
  ETOT  3  -4.1201004133027     5.805E-03 4.101E-06 2.091E+01
  ETOT  4  -4.1047883473913     1.531E-02 4.291E-06 2.914E+00
@@ -346,13 +346,13 @@ _setup2: Arith. and geom. avg. npw (full set) are    1837.000    1837.000
  ETOT  6  -4.0957159721088     5.765E-04 3.755E-10 4.600E-02
  ETOT  7  -4.0956192405805     9.673E-05 5.168E-10 1.872E-03
  ETOT  8  -4.0955699796979     4.926E-05 6.125E-12 7.473E-04
- ETOT  9  -4.0954710385800     9.894E-05 9.959E-11 8.621E-06
- ETOT 10  -4.0954596964841     1.134E-05 1.576E-12 1.260E-06
- ETOT 11  -4.0954583339014     1.363E-06 4.681E-14 8.226E-08
+ ETOT  9  -4.0954710385798     9.894E-05 9.959E-11 8.621E-06
+ ETOT 10  -4.0954596964842     1.134E-05 1.576E-12 1.260E-06
+ ETOT 11  -4.0954583339013     1.363E-06 4.681E-14 8.226E-08
  ETOT 12  -4.0954588527922    -5.189E-07 2.577E-15 9.888E-09
- ETOT 13  -4.0954588378504     1.494E-08 4.630E-17 6.686E-10
- ETOT 14  -4.0954588402806    -2.430E-09 5.768E-18 5.037E-12
- ETOT 15  -4.0954588398932     3.874E-10 8.935E-20 4.856E-13
+ ETOT 13  -4.0954588378502     1.494E-08 4.630E-17 6.686E-10
+ ETOT 14  -4.0954588402807    -2.430E-09 5.768E-18 5.037E-12
+ ETOT 15  -4.0954588398932     3.875E-10 8.935E-20 4.856E-13
 
  Compute kinetic energy density
 
@@ -383,7 +383,7 @@ Result for kinetic energy density :
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   55.240E-21; max=  89.353E-21
+ Mean square residual over all n,k,spin=   55.244E-21; max=  89.348E-21
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -410,14 +410,14 @@ Result for kinetic energy density :
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.44242914734621E+00
+    Kinetic energy  =  3.44242914734620E+00
     Hartree energy  =  1.80710576657561E+00
     XC energy       = -1.99964331868419E-01
     Ewald energy    = -3.05657471607587E+00
     PspCore energy  =  1.24347554578084E-03
-    Loc. psp. energy= -6.93267992143420E+00
-    NL   psp  energy=  8.42981740017747E-01
-    >>>>>>>>> Etotal= -4.09545883989316E+00
+    Loc. psp. energy= -6.93267992143421E+00
+    NL   psp  energy=  8.42981740017746E-01
+    >>>>>>>>> Etotal= -4.09545883989317E+00
 
  Other information on the energy :
     Total energy(eV)= -1.11443102575163E+02 ; Band energy (Ha)=  -6.8995021171E-01
@@ -450,8 +450,8 @@ Result for kinetic energy density :
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/6-C.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/6-C.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
 -    C  APE 1.0 : Troullier-Martins scheme, , llocal= 1
 -  6.00000   4.00000  20100127                znucl, zion, pspdat
     6    0    1    1       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -541,8 +541,8 @@ Result for kinetic energy density :
     XC energy       = -1.92454012816412E-01
     Ewald energy    = -3.05657471607587E+00
     PspCore energy  =  1.24347554578084E-03
-    Loc. psp. energy= -6.26299539083557E+00
-    NL   psp  energy=  8.04570436299407E-01
+    Loc. psp. energy= -6.26299539083558E+00
+    NL   psp  energy=  8.04570436299408E-01
     >>>>>>>>> Etotal= -4.20792872353769E+00
 
  Other information on the energy :
@@ -576,8 +576,8 @@ Result for kinetic energy density :
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/6-C.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/6-C.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
 -    C  APE 1.0 : Troullier-Martins scheme, , llocal= 1
 -  6.00000   4.00000  20100127                znucl, zion, pspdat
     6    0    1    1       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -596,7 +596,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1837.000    1837.000
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -4.0528142661286    -4.053E+00 3.960E-03 5.572E+02
- ETOT  2  -4.1245446264602    -7.173E-02 7.517E-08 1.242E+02
+ ETOT  2  -4.1245446264601    -7.173E-02 7.517E-08 1.242E+02
  ETOT  3  -4.0992027818776     2.534E-02 1.133E-05 2.783E+01
  ETOT  4  -4.0777344188003     2.147E-02 3.914E-06 2.895E+00
  ETOT  5  -4.0771528863543     5.815E-04 8.409E-08 2.604E-01
@@ -605,11 +605,11 @@ _setup2: Arith. and geom. avg. npw (full set) are    1837.000    1837.000
  ETOT  8  -4.0771665808959    -1.363E-06 9.605E-12 1.591E-05
  ETOT  9  -4.0771513228833     1.526E-05 2.334E-12 5.472E-07
  ETOT 10  -4.0771509005590     4.223E-07 4.077E-14 8.610E-08
- ETOT 11  -4.0771508537595     4.680E-08 1.742E-15 6.326E-09
+ ETOT 11  -4.0771508537594     4.680E-08 1.742E-15 6.326E-09
  ETOT 12  -4.0771508976267    -4.387E-08 4.718E-16 4.135E-10
  ETOT 13  -4.0771509046164    -6.990E-09 4.576E-18 2.675E-11
  ETOT 14  -4.0771509137632    -9.147E-09 5.908E-19 1.861E-12
- ETOT 15  -4.0771509108222     2.941E-09 3.850E-20 1.198E-13
+ ETOT 15  -4.0771509108221     2.941E-09 3.850E-20 1.198E-13
 
  Compute kinetic energy density
 
@@ -640,7 +640,7 @@ Result for kinetic energy density :
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   20.320E-21; max=  38.503E-21
+ Mean square residual over all n,k,spin=   20.321E-21; max=  38.504E-21
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -667,17 +667,17 @@ Result for kinetic energy density :
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.49067104489445E+00
-    Hartree energy  =  1.84051588300884E+00
-    XC energy       = -2.00780489108199E-01
+    Kinetic energy  =  3.49067104489466E+00
+    Hartree energy  =  1.84051588300898E+00
+    XC energy       = -2.00780489108201E-01
     Ewald energy    = -3.05657471607587E+00
     PspCore energy  =  1.24347554578084E-03
-    Loc. psp. energy= -6.99485498537825E+00
-    NL   psp  energy=  8.42628876291054E-01
-    >>>>>>>>> Etotal= -4.07715091082220E+00
+    Loc. psp. energy= -6.99485498537856E+00
+    NL   psp  energy=  8.42628876291116E-01
+    >>>>>>>>> Etotal= -4.07715091082210E+00
 
  Other information on the energy :
-    Total energy(eV)= -1.10944918489531E+02 ; Band energy (Ha)=  -6.2135193453E-01
+    Total energy(eV)= -1.10944918489529E+02 ; Band energy (Ha)=  -6.2135193453E-01
 --------------------------------------------------------------------------------
 
 
@@ -856,10 +856,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          9.9  wall=         10.2
+- Proc.   0 individual time (sec): cpu=         10.0  wall=         10.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  13 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.9  wall=         10.2
++Overall time at end (sec) : cpu=         10.0  wall=         10.7

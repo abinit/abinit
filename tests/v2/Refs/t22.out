@@ -1,6 +1,6 @@
 
-.Version 8.4.2 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  5 Jun 2017.
-- ( at 16h30 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h25 )
   
 
 ================================================================================
@@ -116,7 +116,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.014  and twall      0.014 sec
+-begin at tcpu      0.016  and twall      0.017 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        4
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -391,10 +391,10 @@
  Direction                     Dielectric constant
    1.00000   0.00000   1.00000    3.55166706E+01
 -
-- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.4
+- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.5
 
 ================================================================================
 
-+Total cpu time      0.433  and wall time      0.438 sec
++Total cpu time      0.439  and wall time      0.452 sec
 
  anaddb : the run completed succesfully.
