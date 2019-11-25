@@ -250,3 +250,7 @@ corresponding tutorial for the sequential calculation.**
     For a complete feature list, please see the [[topic:index|Topics page]].
     For examples on how to use these features, please see the ~abinit/tests/* 
     directories and their accompanying README files.
+
+To learn how to compile the code from source, please consult this guide:
+
+<embed src="https://wiki.abinit.org/lib/exe/fetch.php?media=build:installing_abinit.pdf" type="application/pdf" width="100%" height="480px">

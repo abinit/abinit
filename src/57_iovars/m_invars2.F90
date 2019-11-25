@@ -2083,7 +2083,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
         'Action: add dmftqmc_therm keyword in input file.'
        MSG_ERROR(msg)
      end if
-     if(dtset%dmft_solv==5.or.dtset%dmft_solv==8) then
+     if(dtset%dmft_solv==5.or.dtset%dmft_solv==8.or.dtset%dmft_solv==9) then
     ! if(dtset%dmft_solv==5) then
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_basis',tread,'INT')
        if(tread==1) dtset%dmftctqmc_basis  =intarr(1)
@@ -2404,6 +2404,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtposcar',tread,'INT')
  if(tread==1) dtset%prtposcar=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtprocar',tread,'INT')
+ if(tread==1) dtset%prtprocar=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtpot',tread,'INT')
  if(tread==1) dtset%prtpot=intarr(1)

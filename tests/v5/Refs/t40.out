@@ -128,6 +128,7 @@ P           mkmem           4
            prtdos           3
           prtdosm           1
            prteig           0
+        prtprocar           2
             prtwf           0
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
            symrel      1  0  0   0  1  0   0  0  1       1  0  0   0  1  0   0  0  1
@@ -726,6 +727,7 @@ P           mkmem           4
            prtdos           3
           prtdosm           1
            prteig           0
+        prtprocar           2
             prtwf           0
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
            symrel      1  0  0   0  1  0   0  0  1       1  0  0   0  1  0   0  0  1

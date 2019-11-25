@@ -4422,7 +4422,7 @@ one translation associated with a change of magnetization. [[genafm]] is
 precisely this translation, in reduced coordinates (like [[xred]])
 Thus, one way to specify a Shubnikov IV magnetic space group, is to define
 both [[spgroup]] and [[genafm]]. Alternatively, one might define [[spgroup]]
-and [[spgroupma]], or define by hand the set of symmetries, using [[symrel]], [[tnons]] and [[symafm]]
+and [[spgroupma]], or define by hand the set of symmetries, using [[symrel]], [[tnons]] and [[symafm]].
 """,
 ),
 
@@ -11079,12 +11079,13 @@ If [[nspden]] = 4, vector magnetization: the density matrix is full, with
 allowed x, y and z magnetization (useful only with [[nspinor]] = 2 and
 [[nsppol]] = 1, either because there is spin-orbit without time-reversal
 symmetry - and thus spontaneous magnetization, or with spin-orbit, if one
-allows for spontaneous non-collinear magnetism). Not yet available for
-response functions. Also note that, with [[nspden]] = 4, time-reversal symmetry
+allows for spontaneous non-collinear magnetism). Available for
+response functions [[cite:Ricci2019]]. Also note that, with [[nspden]] = 4, time-reversal symmetry
 is not taken into account (at present; this has to be checked) and thus
 [[kptopt]] has to be different from 1 or 2.
 
 The default ([[nspden]] = [[nsppol]]) does not suit the case of vector magnetization.
+Note that the choice of [[nspden]] has an influence on the treatment of symmetries. See [[symafm]].
 """,
 ),
 
@@ -14855,6 +14856,10 @@ Variable(
     text=r"""
 This internal variable characterizes a Shubnikov type III magnetic space group
 (anti-ferromagnetic space group). The user is advised to consult [[cite:Bradley1972]].
+In a Shubnikov type III magnetic space group, the primitive cell is the same if one takes
+into account the spin-flipping operations or if one does not take into account such
+spin-flipping operations. Explicitely, there is no pure translation with a spin-flip.
+
 A Shubnikov type III magnetic space group might be defined by its Fedorov
 space group (set of all spatial symmetries, irrespective of their magnetic
 action), and the halving space group (only the symmetries that do not change
@@ -14862,8 +14867,12 @@ the magnetization).
 The specification of the halving space group might be done by specifying, for
 each point symmetry, the magnetic action. See Table 7.1 of the above-mentioned
 reference. Magnetic point groups are numbered from 1 to 58.
+The halving space group is the group of the symmetry operations for which [[symafm]]=1,
+namely those operations that are not accompanied with a spin flip..
+Note that the definition of a spin flip is different for the [[nspden]]=2 and the [[nspden]]=4 cases,
+see the description of [[symafm]].
 
-Related input variables: [[spgroup]], [[spgroupma]], [[genafm]]
+Related input variables: [[spgroup]], [[spgroupma]], [[genafm]], [[symafm]].
 """,
 ),
 
@@ -16383,18 +16392,21 @@ Variable(
     defaultval=0,
     mnemonics="SPace GROUP number",
     text=r"""
-Gives the number of the space group.
-If [[spgroup]] is 0, the code assumes that all the symmetries are input
+Gives the Fedorov space group number of the system.
+It should be between 1 and 230, see [[help:spacegroup]].
+Alternatively, if [[spgroup]] is 0, the code assumes that all the symmetries are input
 through the [[symrel]] matrices and the [[tnons]] vectors, or obtained from
-the symmetry finder (the default when [[nsym]] == 0).
-It should be between 1 and 230. This option can be used to obtain all the
-atoms in the unit cell, starting from the asymmetric unit cell.
-The references for computing the symmetry corresponding to the space groups are:
+the symmetry finder (the default when [[nsym]] == 0). Then, ABINIT computes the value of [[spgroup]].
+
+The list of symmetry operations that is available when [[spgroup]] is defined can be used to obtain all the
+atoms in the unit cell, starting from the asymmetric unit cell, see [[natrd]].
+
+The references for the numbering of space groups, and their list of symmetry operations is:
 
   * International Tables for Crystallography [[cite:Hahn1983]]
   * The mathematical theory of symmetry in solids, Representation theory for point groups and space groups [[cite:Bradley1972]]
 
-For more details see the [[help:spacegroup]].
+Related input variables: [[symrel]], [[tnons]], [[symafm]], [[spgroupma]], 
 """,
 ),
 
@@ -16410,20 +16422,31 @@ Variable(
     text=r"""
 This input variable might be used to define a Shubnikov magnetic space group
 (anti-ferromagnetic space group). The user is advised to consult [[cite:Bradley1972]].
-A Shubnikov type IV magnetic space group might be defined by its Fedorov space
+
+A Shubnikov type IV magnetic space group contains a specific type of symmetry operation,
+which is a translation in real space followed by a spin flip.
+Such a Shubnikov type IV magnetic space group might be defined by its Fedorov space
 group (set of spatial symmetries that do not change the magnetization), and an
 additional magnetic space group number [[spgroupma]].
-A Shubnikov type III magnetic space group might be defined by its Fedorov
+
+A Shubnikov type III magnetic space group does not contain a translation in real space
+wollowed by a spin flip. It might be defined by its Fedorov
 space group (set of all spatial symmetries, irrespective of their magnetic
 action), and an additional magnetic space group number [[spgroupma]].
 For the additional number [[spgroupma]], we follow the definition of Table 7.4
 of the above-mentioned [[cite:Bradley1972]].
-Thus, one way to specify a Shubnikov IV magnetic space group, is to define
+
+Thus, one way to specify a Shubnikov type IV magnetic space group, is to define
 both [[spgroup]] and [[spgroupma]].
 For example, the group P2_1/c_prime has [[spgroup]] = 14 and [[spgroupma]] = 78.
-Alternatively, for Shubnikov IV magnetic groups, one might define [[spgroup]]
-and [[genafm]]. For both the type III and IV, one might define by hand the set
+Alternatively, for Shubnikov type IV magnetic groups, one might define [[spgroup]]
+and [[genafm]]. For both the types III and IV, one might define by hand the set
 of symmetries, using [[symrel]], [[tnons]] and [[symafm]].
+
+Note that the meaning of the spin-flip operation of symmetry is different in the [[nspden]]=2 or in the [[nspden]]=4 
+case, see detailed explanations in the section on the [[symafm]] input variable. Thus, the same atomic
+positions and [[spinat]] vectors might yield different [[symafm]] values depending on [[nspden]],
+and thus different Shubnikov magnetic space groups.
 """,
 ),
 
@@ -16675,24 +16698,55 @@ Variable(
     defaultval=MultipleValue(number='[[nsym]]', value=1),
     mnemonics="SYMmetries, Anti-FerroMagnetic characteristics",
     text=r"""
-In case the material is magnetic (well, this is only interesting in the case
-of antiferromagnetism, collinear or not), additional symmetries might appear,
-that change the sign of the magnetization. They have been introduced by
-Shubnikov (1951). They can be used by ABINIT to decrease the CPU time, by
-using them to decrease the number of k-points.
+In case the material is magnetic, [[nspden]]=2 or 4, additional symmetry operations might appear,
+that change the sign of the magnetization (spin-flip). They have been introduced by
+Shubnikov in 1951 [[cite:Bradley1972]]. They can be used by ABINIT to decrease the CPU time, either
+by decreasing the number of k-points or by suppressing the explicit treatment of one spin channel,
+or by decreasing the number of perturbations in DFPT.
+
 [[symafm]] should be set to +1 for all the usual symmetry operations, that do
 not change the sign of the magnetization, while it should be set to -1 for the
-magnetization-changing symmetries.
+magnetization-changing operations (spin-flip).
 If the symmetry operations are not specified by the user in the input file,
 that is, if [[nsym]] = 0, then ABINIT will use the values of [[spinat]] to
 determine the content of [[symafm]].
-The symmetries found as "antiferro magnetic" ([[symafm]] = -1) are used to
-symmetrize density and magnetization in the following cases:
+
+The symmetries that can act on the magnetization can yield decreased CPU time  (and usually also memory decrease)
+in the following cases:
 
   * antiferromagnetism ([[nsppol]] = 1, [[nspinor]] = 1, [[nspden]] = 2)
-  * non-collinear magnetism ([[nsppol]] = 1, [[nspinor]] = 2, [[nspden]] = 4) (although no automatic test is provided - make your own checks !)
+  * non-collinear magnetism ([[nsppol]] = 1, [[nspinor]] = 2, [[nspden]] = 4) 
 
-In other cases they are not used.
+Also in the case [[nsppol]] = 2, [[nspinor]] = 1, [[nspden]] = 2  they might simply yield better accuracy (or faster convergence),
+but there is no automatic gain of CPU time or memory, although it is not as clear cut as in the above cases.
+
+IMPORTANT : The meaning of [[symafm]] is different in the [[nspden]] = 2 case (collinear magnetism),
+and in the [[nspden]] = 4 case (non-collinear magnetism, with explicit treatment of magnetization as a vector).
+Indeed in the first case, it is supposed that the magnetization vector is not affected by the real space symmetry operations 
+(so-called black and white symmetry groups).
+By contrast, in the second case, the real space symmetry operations act on the magnetization vector. 
+The rationale for such different treatment comes from the fact that the treatment of spin-orbit coupling is incompatible with collinear magnetism [[nspden]]=2,
+so there is no need to worry about it in this case. On the contrary, many calculations with [[nspden]]=2
+will include spin-orbit coupling. The symmetry operations should thus act coherently on the spin-orbit coupling, which implies
+that the real space operations should act also on the magnetization vector in the [[nspden]]=4 case. So, with 
+[[nspden]]=4, even with [[symafm]]=1,
+symmetry operations might change the magnetization vector, e.g. possibly reverse it from one atom to another atom.
+Still, when real space operations also act on the magnetization vector, nothing prevents to have ADDITIONAL "spin-flip" operations, which
+is indeed then the meaning of [[symafm]]=-1 in the [[nspden]]=4 case. 
+
+Let's illustrate this with an example. Take an H$_2$ system, with the two H atoms quite distant from each other.
+The electron on the first H atom might be 1s spin up, and the electron on the second atom might be 1s spin down.
+With [[nspden]]=2, the inversion symmetry centered in the middle of the segment joining the two atoms will NOT act on the spin,
+so that the actual symmetry operation that leaves the system invariant is an inversion ([[symrel]]= -1 0 0  0 -1 0  0 0 -1) accompanied 
+by a spin-flip with [[symafm]]=-1.
+By contrast, with [[nspden]]=4, the inversion symmetry centered in the middle of the segment joining the two atoms will reverse the spin direction as well,
+so that the proper symmetry operation is [[symrel]]= -1 0 0  0 -1 0  0 0 -1 but no additional spin-flip is needed to obtain a symmetry operation that leaves the system invariant, so that [[symafm]]=1.
+
+Although this might seem confusing, ABINIT is able to recognise the correct symmetry operations from the available atomic coordinates, from [[spinat]],
+and from [[nspden]], so that the user should hardly be affected by such different conventions. However, the use of [[ptgroupma]] and [[spgroupma]] to define
+the antiferromagnetic operations of symmetry should be done carefully.
+
+Related variables: [[symrel]], [[tnons]], [[ptgroupma]], [[spgroupma]].
 """,
 ),
 
@@ -16774,8 +16828,8 @@ Gives "[[nsym]]" 3x3 matrices expressing space group symmetries in terms of
 their action on the direct (or real) space primitive translations.
 It turns out that these can always be expressed as integers.
 Always give the identity matrix even if no other symmetries hold, e.g.
-[[symrel]] 1 0 0 0 1 0 0 0 1
-Also note that for this array as for all others the array elements are filled
+[[symrel]] 1 0 0 0 1 0 0 0 1.
+Also note that for this array, as for all others, the array elements are filled
 in a columnwise order as is usual for Fortran.
 The relation between the above symmetry matrices [[symrel]], expressed in the
 basis of primitive translations, and the same symmetry matrices expressed in
@@ -16784,6 +16838,8 @@ primitive translations as R, and denote the cartesian symmetry matrix as S.
 Then [[symrel]] = R(inverse) * S * R
 where matrix multiplication is implied.
 When the symmetry finder is used (see [[nsym]]), [[symrel]] will be computed automatically.
+Also see the accompanying input variables [[tnons]] and [[symafm]], for the full definition of the symmetry operations.
+Such variables are used to infer [[spgroup]], [[spgroupma]] and [[genafm]] if they are not user-defined.
 """,
 ),
 
@@ -17031,6 +17087,8 @@ system of coordinates, see "[[xred]]"). If all elements of the space group
 leave 0 0 0 invariant, then these are all 0.
 When the symmetry finder is used (see [[nsym]]), [[tnons]] is computed
 automatically.
+
+See also [[symafm]] for the complete description of the symmetry operation.
 """,
 ),
 

@@ -419,7 +419,7 @@ def main():
                     raise RuntimeError("Cannot locate srun in $PATH. "
                                        "Please check your environment")
 
-                runner = JobRunner.srun(timebomb=timebomb)
+                runner = JobRunner.srun(timebomb=timebomb, mpi_args=options.mpi_args)
 
             else:
                 if options.use_mpiexec:
@@ -435,7 +435,7 @@ def main():
                             "Please check your environment")
 
                 runner = JobRunner.generic_mpi(use_mpiexec=use_mpiexec, timebomb=timebomb,
-                                              mpi_args=options.mpi_args)
+                                               mpi_args=options.mpi_args)
 
         if omp_nthreads > 0:
             omp_env = OMPEnvironment(OMP_NUM_THREADS=omp_nthreads)
