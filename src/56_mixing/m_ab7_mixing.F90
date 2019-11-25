@@ -542,7 +542,7 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
  if (present(istep)) istep_ = istep
 
  ! Allocate work array.
- if (mix%n_fftgr>0 .and. (.not. associated(mix%f_fftgr))) then
+ if (.not. associated(mix%f_fftgr)) then
    !allocate(mix%f_fftgr(mix%space * mix%nfft,mix%nspden,mix%n_fftgr), stat = i_stat)
    !call memocc_abi(i_stat, mix%f_fftgr, 'mix%f_fftgr', subname)
    ABI_ALLOCATE(mix%f_fftgr,(mix%space * mix%nfft,mix%nspden,mix%n_fftgr))
@@ -559,7 +559,7 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
    end if
  end if
  ! Allocate PAW work array.
- if (mix%n_pawmix>0 .and. (.not. associated(mix%f_paw))) then
+ if (.not. associated(mix%f_paw)) then
     !allocate(mix%f_paw(mix%n_pawmix,mix%n_fftgr), stat = i_stat)
     !call memocc_abi(i_stat, mix%f_paw, 'mix%f_paw', subname)
     ABI_ALLOCATE(mix%f_paw,(mix%n_pawmix,mix%n_fftgr))
@@ -573,7 +573,7 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
     end if
  end if
  ! Allocate atom work array.
- if (mix%n_atom>0 .and. (.not. associated(mix%f_atm))) then
+ if (.not. associated(mix%f_atm)) then
     !allocate(mix%f_atm(3,mix%n_atom,mix%n_fftgr), stat = i_stat)
     !call memocc_abi(i_stat, mix%f_atm, 'mix%f_atm', subname)
     ABI_ALLOCATE(mix%f_atm,(3,mix%n_atom,mix%n_fftgr))
