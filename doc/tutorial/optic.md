@@ -1,5 +1,5 @@
 ---
-authors: SS, XG, YG
+authors: SS, XG, YG, NAP
 ---
 
 # Tutorial on optical properties  
@@ -10,6 +10,7 @@ This tutorial aims at showing how to get the following physical properties, for 
 
   * Frequency dependent linear dielectric tensor
   * Frequency dependent second order nonlinear susceptibility tensor
+  * Frequency dependent electro-optical susceptibility tensor
 
 in the simple *Random-Phase Approximation* or *Sum-over-states* approach.
 This tutorial will help you to understand and make use of *optic*.
@@ -268,7 +269,7 @@ Copy the files *toptic_4.files* and *toptic_4.in* in *Work_optic*:
 
 {% dialog tests/tutorespfn/Input/toptic_4.files tests/tutorespfn/Input/toptic_4.in %}
 
-Examine the *toptic_4.in* file: only the linear optic spectra will be built.
+Examine *toptic_4.in* file: only the linear optic spectra will be built.
 
 When you have read the input file, you can run the code, as usual using the following command
 
@@ -333,3 +334,34 @@ minutes, due to IO (30 minutes for the $28\times 28\times 28$ grid).
 You might note how the first peak slowly develop with increasing number of k
 points but nevertheless stays much smaller than the converged one, and
 even smaller than the experimental one.
+
+## Computing the linear electro-optical coefficient
+Calculations of the linear electro-optical coefficients follow the same inital calculations as those described in the first two sections of this tutorial.  To calculate the linear electro-optical coefficients one needs to modify the optic input file with two additional keywords.
+
+Copy the files *toptic_5.files* and *toptic_5.in* in *Work_optic*:
+
+    cp ../toptic_5.files .
+    cp ../toptic_5.in .
+
+ {% dialog tests/tutorespfn/Input/toptic_5.files tests/tutorespfn/Input/toptic_5.in %}
+
+Note that *toptic_5.files* has not changed (we want to use the previously calculated wave functions). However, examine *toptic_5.in* only the linear electro-optic coefficient will be calculated.
+
+When you have read the input file, you can run the code, as usual using the following command
+
+    optic < toptic_5.files > log 2> err &
+
+The calculation should run in a few seconds on a modern PC.
+
+The resulting calculation produces a number of files ending in *ChiEO* and are related to different parts of the linear electro-optical tensor:
+
+   * *ChiEOAbs.out* gives the absolute value of the linear optical tensor
+   * *ChiEOIm.out* gives the imaginary components of the calculated linear optical tensor
+   * *ChiEORe.out* gives the real components of the calculated linear optical tensor
+   * *ChiEOTotIm.out* gives the total imaginary part of the calculated linear optical tensor
+   * *ChiEOTotRe.out* gives the total real part of the calculated linear optical tensor
+
+Generally, the low energy (or frequency) range of the linear electro-optical tensor is linear and of experimental importance. Here, low energy means energies much less than the band gap energy.
+
+
+
