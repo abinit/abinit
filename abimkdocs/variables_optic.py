@@ -137,7 +137,7 @@ Variable(
 This parameter specifies how many components (out of 9 possible)
 of the linear optical dielectric tensor to calculate.
 Some of these may be either equal to each other, or zero, depending upon the
-symmetry of the material (for detail see [[cite:Draxl2006]]).
+symmetry of the material (for details see [[cite:Draxl2006]]).
 The directions of the requested components are specified by the parameter
 [[optic:lin_comp]].
 """,
@@ -153,11 +153,9 @@ Variable(
     mnemonics="NUMber of NON-LINear COMPonents",
     text=r"""
 This parameter specifies how many components (out of 27 possible)
-of the second-order nonlinear optical dielectric tensor to calculate.
+of the second-order nonlinear optical tensor to calculate.
 Some of these may be either equal to each other, or zero, depending upon the
-symmetry of the material (for detail see [[cite:Draxl2006]]).
-The directions of the requested components are specified by the parameter
-[[optic:nonlin_comp]].
+symmetry of the material. The directions of the requested components are specified by the parameter [[optic:nonlin_comp]].
 """,
 ),
 
@@ -173,9 +171,7 @@ Variable(
 This parameter specifies how many components (out of 27 possible)
 of the linear electro-optical tensor to calculate.
 Some of these may be either equal to each other, or zero, depending upon the
-symmetry of the material (for detail see [[cite:Sipe1993]] and [[cite:Hughes1996]]).
-The directions of the requested components are specified by the parameter
-[[optic:linel_comp]].
+symmetry of the material. The directions of the requested components are specified by the parameter [[optic:linel_comp]].
 """,
 ),
 
