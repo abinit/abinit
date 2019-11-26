@@ -54,9 +54,11 @@ module  m_slc_potential
      ! magnetic moments
      real(dp), allocatable :: ms(:)
 
-     ! precalculated things for reference structure
-     real(dp), allocatable :: fref(:)        ! force from liu and oiju for reference spin structure
-     type(ndcoo_mat_t) :: matrixref    ! matrix in u and v from niuv and tijuv for reference spin structure
+     ! precalculated things for reference spin structure
+     real(dp), allocatable :: luref(:) ! force from liu for reference spin structure
+     real(dp), allocatable :: ouref(:) ! force from oiju for reference spin structure
+     type(ndcoo_mat_t) :: nuvref    ! matrix in u and v from niuv for reference spin structure
+     type(ndcoo_mat_t) :: tuvref    ! matrix in u and v from tijuv for reference spin structure
 
      ! mpi
      type(mb_mpi_info_t) :: mpiinfo
@@ -108,15 +110,25 @@ contains
 
     class(slc_potential_t), intent(inout):: self
 
-    if(self%has_bilin) call self%liu_sc%finalize()
-    if(self%has_quadlin) call self%oiju_sc%finalize()
-    if(self%has_linquad) call self%niuv_sc%finalize() 
-    if(self%has_biquad) call self%tijuv_sc%finalize()
+    if(self%has_bilin) then 
+      call self%liu_sc%finalize()
+      ABI_SFREE(self%luref)
+    endif
+    if(self%has_quadlin) then
+      call self%oiju_sc%finalize()
+      ABI_SFREE(self%ouref)
+    endif
+    if(self%has_linquad) then
+      call self%niuv_sc%finalize()
+      call self%nuvref%finalize()
+    endif 
+    if(self%has_biquad) then
+      call self%tijuv_sc%finalize()
+      call self%tuvref%finalize()
+    endif
 
     call self%mpsspin%finalize()
     call self%mpslatt%finalize()
-    ABI_SFREE(self%fref)
-    if(self%has_linquad .or. self%has_biquad) call self%matrixref%finalize()
 
   end subroutine finalize
 
@@ -194,52 +206,40 @@ contains
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
 
-
     spref(:) = reshape(self%supercell%spin%Sref, (/ 3*self%nspin/))
 
     beta = 0.5_dp
 
-    if(self%has_bilin .or. self%has_quadlin) then
-      ABI_ALLOCATE(self%fref, (3*self%natom))
-      ABI_ALLOCATE(force, (3*self%natom))
-      self%fref=0.0d0
-      if(self%has_bilin) then
-        force = 0.0d0
-        call self%liu_sc%vec_product2d(1, spref, 2, force)
-        self%fref(:) = self%fref(:) - force(:)
-      endif
-      if(self%has_quadlin) then
-        force = 0.0d0
-        call self%oiju_sc%vec_product(1, spref, 2, spref, 3, force)
-        self%fref(:) = self%fref(:) - beta*force(:)
-      endif
-      ABI_SFREE(force)
+    ABI_ALLOCATE(force, (3*self%natom))
+    if(self%has_bilin) then 
+      ABI_ALLOCATE(self%luref, (3*self%natom))
+      self%luref=0.0d0
+      force = 0.0d0
+      call self%liu_sc%vec_product2d(1, spref, 2, force)
+      self%luref(:) = - force(:)
     endif
+    if(self%has_quadlin) then
+      ABI_ALLOCATE(self%ouref, (3*self%natom))     
+      force = 0.0d0
+      call self%oiju_sc%vec_product(1, spref, 2, spref, 3, force)
+      self%ouref(:) = - beta*force(:)
+    endif
+    ABI_SFREE(force)
 
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
-    if(self%has_linquad .or. self%has_biquad) then
+    if(self%has_linquad) then
       if(iam_master) then
-        call self%matrixref%initialize(mshape=[self%natom*3, self%natom*3])
+        call self%nuvref%initialize(mshape=[self%natom*3, self%natom*3])
       endif
-  
-      if(self%has_linquad .and. self%has_biquad) then
-        call self%niuv_sc%mv1vec(spref, 1, self%matrixref)
-        if(iam_master) then
-          call m2dim%initialize(mshape=[self%natom*3, self%natom*3])
-        endif
-        call self%tijuv_sc%mv2vec(0.5*spref, spref, 1, 2, m2dim)
-        do ii = 1, m2dim%nnz
-          call self%matrixref%add_entry(m2dim%ind%data(:,ii), m2dim%val%data(ii))
-        enddo
-        call self%matrixref%sum_duplicates()
-        if(iam_master) then
-          call m2dim%finalize()
-        endif
-      else
-        if(self%has_linquad) call self%niuv_sc%mv1vec(spref, 1, self%matrixref)
-        if(self%has_biquad)  call self%tijuv_sc%mv2vec(0.5*spref, spref, 1, 2, self%matrixref)
+      call self%niuv_sc%mv1vec(spref, 1, self%nuvref)
+    endif
+
+    if(self%has_biquad) then
+      if(iam_master) then
+         call self%tuvref%initialize(mshape=[self%natom*3, self%natom*3])
       endif
+      call self%tijuv_sc%mv2vec(0.5*spref, spref, 1, 2, self%tuvref)
     endif
 
   end subroutine calculate_ref
@@ -321,7 +321,8 @@ contains
     type(hash_table_t),optional, intent(inout) :: energy_table
  
     integer :: ii
-    real(dp) :: eslc, beta
+    character(len=80) :: label
+    real(dp) :: eslc, beta, eterm
     real(dp) :: disp(1:3*self%natom), sp(1:3*self%nspin), spref(1:3*self%nspin) 
     real(dp) :: f1(1:3*self%natom), b1(1:3*self%nspin)
     real(dp) :: btmp(3, self%nspin), bslc(1:3*self%nspin), fslc(1:3*self%natom)
@@ -376,45 +377,85 @@ contains
     endif
 
     ! Force and energy
-    if(present(force) .or. present(energy)) then
+    if(present(force) .or. present(energy) .or. present(energy_table)) then
       fslc(:) = 0.0d0
       eslc = 0.0d0
       if(self%has_bilin) then
+        eterm = 0.0d0
         f1(:) = 0.0d0
         call self%liu_sc%vec_product2d(1, sp, 2, f1)
         fslc(:) = fslc(:) + f1(:)
-        eslc = eslc - dot_product(f1, disp)
+        eterm =  - dot_product(f1, disp)
+        ! add contributions from reference spin structure
+        fslc(:) = fslc(:) + self%luref(:)
+        eterm = eterm - dot_product(self%luref, disp)
+        if(present(energy_table)) then
+          label=trim(self%label)//'_Liu'
+          call energy_table%put(label, eterm)
+        endif
+        eslc = eslc + eterm
       endif      
       if(self%has_linquad) then
         f1(:) = 0.0d0
+        eterm = 0.0d0
         call self%niuv_sc%vec_product(1, sp, 2, disp, 3, f1)
         fslc(:) = fslc(:) + 2.0d0*beta*f1(:)
-        eslc = eslc - beta*dot_product(f1, disp)
+        eterm =  - beta*dot_product(f1, disp)
+        ! add contributions from reference spin structure
+        f1(:) = 0.0d0
+        call self%nuvref%vec_product2d(1, disp, 2, f1)
+        fslc(:)= fslc+2.0*beta*f1(:)
+        eterm = eterm + beta*dot_product(f1, disp)
+        if(present(energy_table)) then
+          label=trim(self%label)//'_Niuv'
+          call energy_table%put(label, eterm)
+        endif
+        eslc = eslc + eterm
       endif      
       if(self%has_quadlin) then
         f1(:) = 0.0d0
+        eterm = 0.0d0
         call self%oiju_sc%vec_product(1, sp, 2, sp, 3, f1)
         fslc(:) = fslc(:) + beta*f1(:)
-        eslc = eslc - beta*dot_product(f1, disp)
+        eterm = - beta*dot_product(f1, disp)
+        ! add contributions from reference spin structure
+        fslc(:) = fslc(:) + self%ouref(:)
+        eterm = eterm - dot_product(self%ouref, disp)
+        if(present(energy_table)) then
+          label=trim(self%label)//'_Oiju'
+          call energy_table%put(label, eterm)
+        endif
+        eslc = eslc + eterm
       endif
       if(self%has_biquad) then
         f1(:) = 0.0d0
+        eterm = 0.0d0
         call self%tijuv_sc%vec_product4d(1, sp, 2, sp, 3, disp, 4, f1)
         fslc(:) = fslc(:) + beta*f1(:)
-        eslc = eslc - 0.5_dp*beta*dot_product(f1, disp)
+        eterm = - 0.5_dp*beta*dot_product(f1, disp)
+        ! add contributions from reference spin structure
+        f1(:) = 0.0d0
+        call self%tuvref%vec_product2d(1, disp, 2, f1)
+        fslc(:)= fslc+2.0*beta*f1(:)
+        eterm = eterm + beta*dot_product(f1, disp)
+        if(present(energy_table)) then
+          label=trim(self%label)//'_Tijuv'
+          call energy_table%put(label, eterm)
+        endif
+        eslc = eslc + eterm
       endif
 
       ! add forces and energy for reference spin structure terms
-      if(self%has_bilin .or. self%has_quadlin) then
-        fslc(:) = fslc(:) + self%fref(:)
-        eslc = eslc - dot_product(self%fref, disp)
-      endif
-      if(self%has_linquad .or. self%has_biquad) then
-        f1(:) = 0.0d0
-        call self%matrixref%vec_product2d(1, disp, 2, f1)
-        fslc(:)= fslc+2.0*beta*f1(:)
-        eslc = eslc + beta*dot_product(f1, disp)
-      endif
+!      if(self%has_bilin .or. self%has_quadlin) then
+!        fslc(:) = fslc(:) + self%fref(:)
+!        eslc = eslc - dot_product(self%fref, disp)
+!      endif
+!      if(self%has_linquad .or. self%has_biquad) then
+!        f1(:) = 0.0d0
+!        call self%matrixref%vec_product2d(1, disp, 2, f1)
+!        fslc(:)= fslc+2.0*beta*f1(:)
+!        eslc = eslc + beta*dot_product(f1, disp)
+!      endif
     endif !energy or force
 
     if(present(force)) then
@@ -428,16 +469,8 @@ contains
       enddo
     endif
 
-    !if(present(energy)) then
-    !   energy= eslc
-    !end if
+    if(present(energy)) energy =  eslc
 
-    if(present(energy_table)) then
-       call energy_table%put(self%label, eslc)
-       ! TODO: use terms instead of total, e.g.
-       !call energy_table%put("SLC Oiju term", eOiju)
-       !call energy_table%put("SLC Tijuv term", eTijuv)
-    end if
 
     ABI_UNUSED_A(strain)
     ABI_UNUSED_A(lwf)
