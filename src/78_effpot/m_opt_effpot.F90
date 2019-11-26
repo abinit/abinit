@@ -600,10 +600,10 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  &                                           natom_sc,ntime,fit_data%training_set%sqomega,&
  &                                           compute_anharmonic=.TRUE.,print_file=.FALSE.)
                i = 0
-               if(iam_master)then
-                  write(*,*) "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
-                  write(*,*) "cycle ", i ," (msef+mses): ", (msef+mses)
-               endif
+               write(message,'(a,I2,a,F12.7)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
+               call wrtout(std_out,message,'COLL')
+               write(message,'(a,I2,a,F12.7)') "cycle ", i ," (msef+mses): ", (msef+mses)
+               call wrtout(std_out,message,'COLL')
                do  while((msef+mses)/(msef_ini+mses_ini) >= 1.001)
                   i = i + 1 
                   eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = coeff_ini / 2**i
@@ -611,12 +611,13 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  &                                              natom_sc,ntime,fit_data%training_set%sqomega,&
  &                                              compute_anharmonic=.TRUE.,print_file=.FALSE.)
 	     
-               if(iam_master)then
-                  write(*,*) "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
-                  write(*,*) "cycle ", i ," (msef+mses): ", (msef+mses)
-               endif
-               enddo ! while mse/mse_ini>10 
-               write(*,*) "coeff after opt:",   eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient 
+                  write(message,'(a,I2,a,F12.7)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
+                  call wrtout(std_out,message,'COLL')
+                  write(message,'(a,I2,a,F12.7)') "cycle ", i ," (msef+mses): ", (msef+mses)
+                  call wrtout(std_out,message,'COLL')
+               enddo ! while mse/mse_ini>1.0001 
+               write(message,'(a,F12.7)') "coeff after opt:",   eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient 
+               call wrtout(std_out,message,'COLL')
                msef_ini = msef
                mses_ini = mses
 !           !Optimize coefficient with opt routine 
@@ -636,21 +637,20 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  &                                               natom_sc,ntime,fit_data%training_set%sqomega,&
  &                                               compute_anharmonic=.TRUE.,print_file=.FALSE.)
                 
-                    if(iam_master)then
-                       write(*,*) "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
-                       write(*,*) "cycle ", i ," (msef+mses): ", (msef+mses)
-                    endif
+                    write(message,'(a,I2,a,F12.7)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
+                    call wrtout(std_out,message,'COLL')
+                    write(message,'(a,I2,a,F12.7)') "cycle ", i ," (msef+mses): ", (msef+mses)
+                    call wrtout(std_out,message,'COLL')
 	            coeff_opt(i) =  eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient
                     msefs_arr(i) =  (msef+mses)/(msef_ini+mses_ini)
                 enddo ! while mse/mse_ini>10
                 eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = opt_boundcoeff(msefs_arr,coeff_opt)
-                if(iam_master)then
-                   write(*,*) "coeff after opt:",   eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient 
-                endif
+                write(message,'(a,F12.7)') "coeff after opt:",   eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient 
                 call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                               natom_sc,ntime,fit_data%training_set%sqomega,&
  &                                               compute_anharmonic=.TRUE.,print_file=.FALSE.)
-                if(iam_master)write(*,*) "(msef+mses)/(msef_ini+mses_ini) after_opt: ", (msef+mses)/(msef_ini+mses_ini)
+                write(message,'(a,F12.7)') "(msef+mses)/(msef_ini+mses_ini) after_opt: ", (msef+mses)/(msef_ini+mses_ini)
+                call wrtout(std_out,message,'COLL')
                 msef_ini = msef
                 mses_ini = mses
            endif
@@ -1585,15 +1585,15 @@ if(option == 1)then
    ABI_DEALLOCATE(dist)
    ABI_DEALLOCATE(rpt)
  
-   write(*,*) "polynomial_getList worked"
+   !write(*,*) "polynomial_getList worked"
 
    !Get Order1 term s
    !Check difference between ncoeff_out, ncoeff 
    call polynomial_coeff_getOrder1(cell,terms,list_symcoeff,natom,nterms_out,ncoeff_sym,nrpt,nsym,symbols)
   
-   do ii=1,nterms_out
-      write(*,*) "Term(",ii,"/",nterms_out,"): ", terms(ii)%name 
-   enddo
+   !do ii=1,nterms_out
+   !   write(*,*) "Term(",ii,"/",nterms_out,"): ", terms(ii)%name 
+   !enddo
 
 elseif(option == 2)then 
    !Get/set variables 
