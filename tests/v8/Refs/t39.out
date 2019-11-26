@@ -1,6 +1,6 @@
 
-.Version 8.11.8 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu7.4 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  6 Jul 2019.
-- ( at 14h24 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h37 )
   
 - input  file    -> t39.in
 - output file    -> t39.out
@@ -245,8 +245,8 @@ P           mkmem         256
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.18046
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/As.GGA-PBE-rpaw-2.10.abinit
-- pspatm: opening atomic psp file    /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/As.GGA-PBE-rpaw-2.10.abinit
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/As.GGA-PBE-rpaw-2.10.abinit
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/As.GGA-PBE-rpaw-2.10.abinit
 - Paw atomic data for element As - Generated with atompaw v3.1.0.3
 - 33.00000   5.00000  20150317                znucl, zion, pspdat
     7   11    1    0      1074   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -269,8 +269,8 @@ P           mkmem         256
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/Al.GGA-PBE-rpaw-2.00.abinit
-- pspatm: opening atomic psp file    /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/Al.GGA-PBE-rpaw-2.00.abinit
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.GGA-PBE-rpaw-2.00.abinit
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.GGA-PBE-rpaw-2.00.abinit
 - Paw atomic data for element Al - Generated with atompaw v4.0.0.10
 - 13.00000   3.00000  20141221                znucl, zion, pspdat
     7   11    1    0       473   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -319,9 +319,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
 
- C(   1) : real, imag   1.17596487E-12  2.00823115E-17
- C(   2) : real, imag   4.79654202E-14 -2.74913196E-17
- C(   3) : real, imag  -9.64818657E-12 -1.32088317E-16
+ C(   1) : real, imag   1.30612826E-12  8.58015133E-17
+ C(   2) : real, imag   2.51556494E-13 -7.40770829E-17
+ C(   3) : real, imag  -9.62320638E-12 -8.88301078E-17
 
 ====================================================
 
@@ -331,9 +331,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Orbital magnetization
 ----Orbital magnetization is a real vector, given along Cartesian directions----
 
- Orb Mag(   1) : real, imag   5.19639768E-12 -1.08325989E-13
- Orb Mag(   2) : real, imag   5.02779995E-12  1.05103451E-13
- Orb Mag(   3) : real, imag   3.03380234E-12  1.85736014E-14
+ Orb Mag(   1) : real, imag   5.52630950E-12  1.09209413E-13
+ Orb Mag(   2) : real, imag   5.30538514E-12 -1.05541407E-13
+ Orb Mag(   3) : real, imag   3.20275512E-12 -1.83767563E-14
 
 ====================================================
 
@@ -384,12 +384,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    0.00000  -0.00000  -0.00000  -0.03707  -0.00000   0.00000   0.00143   0.00000
    0.00000  -0.00000  -0.00000  -0.00000  -0.03707   0.00000   0.00000   0.00143
    === IMAGINARY PART:
-  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000
   -0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000
   -0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000
-  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000
+  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000
    0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000
-   0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
    0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000
   -0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000
  Atom #  2
@@ -403,11 +403,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
   -0.00000   0.00000   0.00000   0.00883   0.00000   0.00000   0.00011   0.00000
   -0.00000   0.00000   0.00000   0.00000   0.00883   0.00000   0.00000   0.00011
    === IMAGINARY PART:
-  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000
+   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000
   -0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000
-  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000
-   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000
-  -0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000
+  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000
+   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000
+  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000
    0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
   -0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000
@@ -441,7 +441,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  3.12509643733855E+00
-    Hartree energy  =  7.98049652374009E-01
+    Hartree energy  =  7.98049652374010E-01
     XC energy       = -7.30630894069549E+00
     Ewald energy    = -8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
@@ -450,7 +450,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
     >>>>>>>>> Etotal= -8.56577752129879E+00
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -9.09011750277718E-01
+    Band energy     = -9.09011750277717E-01
     Ewald energy    =-8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Dble-C XC-energy= -4.31595521895037E+00
@@ -460,8 +460,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
   >Total energy in eV           = -2.33086660191421E+02
   >Total DC energy in eV        = -2.33086346694044E+02
 --------------------------------------------------------------------------------
-
-
 
 
 
@@ -507,9 +505,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
 
- C(   1) : real, imag   1.31262429E-09  5.94020475E-18
- C(   2) : real, imag   1.74298388E-09  9.52772447E-18
- C(   3) : real, imag  -2.39362864E-05 -1.27122981E-17
+ C(   1) : real, imag   1.31262430E-09  2.00823115E-17
+ C(   2) : real, imag   1.74298390E-09  3.70450406E-18
+ C(   3) : real, imag  -2.39362864E-05  1.01256444E-16
 
 ====================================================
 
@@ -519,9 +517,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Orbital magnetization
 ----Orbital magnetization is a real vector, given along Cartesian directions----
 
- Orb Mag(   1) : real, imag  -2.85254693E-09  2.45438173E-13
- Orb Mag(   2) : real, imag  -5.54566254E-10 -1.09397857E-13
- Orb Mag(   3) : real, imag  -9.51193064E-05 -1.57438307E-13
+ Orb Mag(   1) : real, imag  -2.85254690E-09 -2.78074555E-13
+ Orb Mag(   2) : real, imag  -5.54566210E-10  9.93123986E-14
+ Orb Mag(   3) : real, imag  -9.51193064E-05  1.75970239E-13
 
 ====================================================
 
@@ -539,7 +537,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.432399036587450
+ Compensation charge over spherical meshes =     -0.432399036587451
  Compensation charge over fine fft grid    =     -0.432394214283894
 
  ==== Results concerning PAW augmentation regions ====
@@ -601,8 +599,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
   -0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
    0.00000  -0.00000  -0.00000   0.00000  -0.00001  -0.00000   0.00000   0.00000
   -0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000
-   0.00000   0.00000   0.00001  -0.00000   0.00000  -0.00000  -0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000
+   0.00000   0.00000   0.00001  -0.00000  -0.00000  -0.00000  -0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000
    0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
   -0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000
  Atom #  2
@@ -616,13 +614,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
   -0.00000   0.00000  -0.00000   0.00883  -0.00000   0.00000   0.00011   0.00000
   -0.00000   0.00000  -0.00000  -0.00000   0.00883  -0.00000   0.00000   0.00011
    === IMAGINARY PART:
-   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000
+  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000
   -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000
-   0.00000   0.00000   0.00000  -0.00000  -0.00727   0.00000  -0.00000   0.00020
-   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000
+   0.00000   0.00000  -0.00000  -0.00000  -0.00727   0.00000  -0.00000   0.00020
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000
   -0.00000  -0.00000   0.00727   0.00000   0.00000  -0.00020  -0.00000  -0.00000
    0.00000   0.00000  -0.00000   0.00000   0.00020  -0.00000  -0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
   -0.00000   0.00000  -0.00020  -0.00000   0.00000  -0.00000   0.00000   0.00000
 
 
@@ -654,13 +652,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  3.12510276894003E+00
-    Hartree energy  =  7.98046600780117E-01
+    Hartree energy  =  7.98046600780116E-01
     XC energy       = -7.30630455129476E+00
     Ewald energy    = -8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Loc. psp. energy= -2.02283372960337E+00
     Spherical terms =  4.27798752587227E+00
-    >>>>>>>>> Etotal= -8.56575966887820E+00
+    >>>>>>>>> Etotal= -8.56575966887821E+00
 
  "Double-counting" decomposition of free energy:
     Band energy     = -9.09018242662716E-01
@@ -673,8 +671,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
   >Total energy in eV           = -2.33086174402351E+02
   >Total DC energy in eV        = -2.33086440978518E+02
 --------------------------------------------------------------------------------
-
-
 
 
 
@@ -720,9 +716,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
 
- C(   1) : real, imag  -1.31283187E-09 -1.15294565E-17
- C(   2) : real, imag  -1.74283026E-09  3.82278822E-17
- C(   3) : real, imag   2.39362860E-05  7.66897331E-18
+ C(   1) : real, imag  -1.31283175E-09 -1.05324900E-16
+ C(   2) : real, imag  -1.74283010E-09  8.46056734E-17
+ C(   3) : real, imag   2.39362860E-05  4.86394884E-17
 
 ====================================================
 
@@ -732,9 +728,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Orbital magnetization
 ----Orbital magnetization is a real vector, given along Cartesian directions----
 
- Orb Mag(   1) : real, imag   2.85215591E-09  2.45285174E-13
- Orb Mag(   2) : real, imag   5.54810150E-10 -1.08559133E-13
- Orb Mag(   3) : real, imag   9.51193066E-05 -1.58425308E-13
+ Orb Mag(   1) : real, imag   2.85215571E-09 -2.78691132E-13
+ Orb Mag(   2) : real, imag   5.54810559E-10  9.95587417E-14
+ Orb Mag(   3) : real, imag   9.51193066E-05  1.75040349E-13
 
 ====================================================
 
@@ -752,7 +748,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.432399036587450
+ Compensation charge over spherical meshes =     -0.432399036587451
  Compensation charge over fine fft grid    =     -0.432394214283898
 
  ==== Results concerning PAW augmentation regions ====
@@ -811,12 +807,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    0.00000   0.00000   0.00000   0.00000  -0.03707  -0.00000   0.00000   0.00143
    === IMAGINARY PART:
    0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000
-  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000
-  -0.00000   0.00000  -0.00000  -0.00000   0.00001   0.00000  -0.00000  -0.00000
+  -0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000
+  -0.00000   0.00000   0.00000  -0.00000   0.00001   0.00000  -0.00000  -0.00000
    0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000
   -0.00000  -0.00000  -0.00001   0.00000   0.00000   0.00000   0.00000  -0.00000
   -0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000
-  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000
+  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
  Atom #  2
    === REAL PART:
@@ -829,14 +825,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
   -0.00000   0.00000  -0.00000   0.00883  -0.00000   0.00000   0.00011   0.00000
   -0.00000   0.00000  -0.00000  -0.00000   0.00883  -0.00000   0.00000   0.00011
    === IMAGINARY PART:
-   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000
-  -0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000
+  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
   -0.00000  -0.00000   0.00000   0.00000   0.00727  -0.00000   0.00000  -0.00020
-  -0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000
+  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
    0.00000   0.00000  -0.00727  -0.00000   0.00000   0.00020   0.00000   0.00000
-  -0.00000   0.00000   0.00000  -0.00000  -0.00020   0.00000  -0.00000  -0.00000
-  -0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000
-   0.00000   0.00000   0.00020   0.00000  -0.00000   0.00000   0.00000   0.00000
+  -0.00000   0.00000   0.00000  -0.00000  -0.00020  -0.00000  -0.00000  -0.00000
+  -0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00020   0.00000  -0.00000   0.00000   0.00000  -0.00000
 
 
 ================================================================================
@@ -867,7 +863,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  3.12510276894002E+00
-    Hartree energy  =  7.98046600780117E-01
+    Hartree energy  =  7.98046600780116E-01
     XC energy       = -7.30630455129476E+00
     Ewald energy    = -8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
@@ -886,8 +882,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
   >Total energy in eV           = -2.33086174402352E+02
   >Total DC energy in eV        = -2.33086440978518E+02
 --------------------------------------------------------------------------------
-
-
 
 
 
@@ -1054,8 +1048,8 @@ P           mkmem         256
 -
 - [1] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
-- Comment : PAW calculations. Strong suggestion to cite this paper.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#torrent2008
+- Comment: PAW calculations. Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
 - [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
@@ -1069,51 +1063,51 @@ P           mkmem         256
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [5] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         65.5  wall=         65.4
+- Proc.   0 individual time (sec): cpu=         64.1  wall=         64.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         65.5  wall=         65.4
++Overall time at end (sec) : cpu=         64.1  wall=         64.4

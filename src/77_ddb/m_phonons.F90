@@ -2827,6 +2827,10 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
 !scalars
  integer,parameter :: master=0
  integer :: iqpt,nqpts,natom,ncid,nprocs,my_rank,ierr,nph2l
+#ifdef HAVE_NETCDF
+ character(len=17) :: c17
+ character(len=22) :: c22
+#endif
  type(kpath_t) :: qpath
 !arrays
  real(dp),allocatable :: qph2l(:,:), qnrml2(:)
@@ -2895,12 +2899,13 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
 #ifdef HAVE_NETCDF
    ! TODO: A similar piece of code is used in anaddb (mkpbs + ifc_calcnwrite_nana_terms).
    ! Should centralize everything in a single routine
+   c17='atomic_mass_units' ; c22='number_of_atom_species' ! To avoid long lines (>132)
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
    NCF_CHECK(cryst%ncwrite(ncid))
    call phonons_ncwrite(ncid, natom, nqpts, qpath%points, weights, phfrqs, phdispl_cart)
-   NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")], defmode=.True.))
+   NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t(c17,"dp",c22)], defmode=.True.))
    NCF_CHECK(nctk_set_datamode(ncid))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'atomic_mass_units'), ifc%amu))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid,c17), ifc%amu))
    if (nph2l /= 0) call ifc%calcnwrite_nana_terms(cryst, nph2l, qph2l, qnrml2, ncid=ncid)
    NCF_CHECK(nf90_close(ncid))
 #endif

@@ -2634,7 +2634,7 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
 
  ABI_MALLOC(v1g, (2,nfft))
  call symrhg(cplex,cryst%gprimd,irrzon1,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym1,&
-    phnons1,v1g,v1r,cryst%rprimd,symafm1,symrel1)
+    phnons1,v1g,v1r,cryst%rprimd,symafm1,symrel1,tnons1)
 
  ABI_FREE(irrzon1)
  ABI_FREE(phnons1)
@@ -6361,7 +6361,14 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
  ! compare with ab-intio values in the initial dvdb.
  if (all(coarse_ngqpt /= 0)) then
    write(std_out, "(/, 2a)")" Downsampling Q-mesh using coarse_ngqpt:", trim(ltoa(coarse_ngqpt))
+
+!Flang compiler complains with empty constructors (this bug should be corrected in future versions)
+#if defined FC_LLVM || defined FC_ARM
+   vd_max = vdiff_t(zero,zero,zero,zero,zero,zero)
+#else
    vd_max = vdiff_t()
+#endif
+
    coarse_fname = strcat(dvdb_path, "_COARSE")
    call dvdb%qdownsample(coarse_fname, coarse_ngqpt, comm)
 

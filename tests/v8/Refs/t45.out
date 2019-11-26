@@ -1,6 +1,6 @@
 
-.Version 8.7.6 of ANADDB 
-.(sequential version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  8 Mar 2018.
-- ( at 23h02 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h37 )
   
 
 ================================================================================
@@ -255,12 +255,12 @@ Computation of Gruneisen parameter with central finite difference:
  Speed of sound:  1.8510E+00  1.8507E+00  9.9863E+00 [km/s] along reduced direction: 2
  Speed of sound:  1.8510E+00  1.8507E+00  9.9863E+00 [km/s] along reduced direction: 3
  Lebedev-Laikov integration with qradius:   1.0000E-03 tolkms:   2.0000E-01 [km/s], npts: 110
- Spherical average:  5.0913E+00  3.2733E+00  8.2212E+00 [km/s],   5.5286E+00
+ Spherical average:  5.0975E+00  3.2672E+00  8.2212E+00 [km/s],   5.5286E+00
 -
-- Proc.   0 individual time (sec): cpu=        157.5  wall=        157.5
+- Proc.   0 individual time (sec): cpu=        181.9  wall=        182.4
 
 ================================================================================
 
-+Total cpu time    157.505  and wall time    157.516 sec
++Total cpu time    181.867  and wall time    182.371 sec
 
  anaddb : the run completed succesfully.
