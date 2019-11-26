@@ -166,6 +166,9 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 & M1_q_m,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,&
 & Psps,Wfd,Wfdf,allQP_sym,gwx_ngfft,ngfftf,&
 & prtvol,pawcross,plowan_compute,rhot1_q_m,wanbz,rhot1)
+! #ifdef FC_INTEL
+! !DEC$ NOOPTIMIZE
+! #endif
 
 !Arguments ------------------------------------
 !scalars
@@ -190,7 +193,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  type(pawfgrtab_type),intent(inout) :: Pawfgrtab(Cryst%natom*Psps%usepaw)
  type(paw_pwaves_lmn_t),intent(in) :: Paw_onsite(Cryst%natom)
  type(plowannier_type),intent(in) :: wanbz
- type(operwan_realspace_type),intent(inout) :: rhot1(Sigp%npwx,Qmesh%nibz)
+ type(operwan_realspace_type),target,intent(inout) :: rhot1(Sigp%npwx,Qmesh%nibz)
 
 !Local variables ------------------------------
 !scalars
@@ -227,6 +230,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  complex(gwpc),pointer :: cg_jb(:),cg_sum(:)
  complex(dpc) :: ovlp(2)
  complex(dpc),allocatable :: coeffW_BZ(:,:,:,:,:,:)
+ complex(dpc),pointer :: ptr_rhot(:,:,:,:,:)
  logical :: can_symmetrize(Wfd%nsppol)
  logical,allocatable :: bks_mask(:,:,:)
  type(pawcprj_type),allocatable :: Cprj_kgw(:,:),Cprj_ksum(:,:)
@@ -866,18 +870,19 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
              wan_jb=jb-wanbz%bandi_wan+1
              wan_ib_sum=ib_sum-wanbz%bandi_wan+1
              do pwx=1,sigp%npwx
-               do ispinor1=1,wanbz%nspinor
-               do ispinor2=1,wanbz%nspinor
-                 do iatom1=1,wanbz%natom_wan
-                 do iatom2=1,wanbz%natom_wan
-                   do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
-                   do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
-                     do il1=1,wanbz%nbl_atom_wan(iatom1)
-                     do il2=1,wanbz%nbl_atom_wan(iatom2)
-                       do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
-                         do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
-      rhot1(pwx,iq_ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)=&
-      &rhot1(pwx,iq_ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)+&
+               do iatom1=1,wanbz%natom_wan
+               do iatom2=1,wanbz%natom_wan
+                 do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
+                 do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
+                   do il1=1,wanbz%nbl_atom_wan(iatom1)
+                   do il2=1,wanbz%nbl_atom_wan(iatom2)
+                     ptr_rhot=>rhot1(pwx,iq_ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl
+                     do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
+                     do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
+                       do ispinor1=1,wanbz%nspinor
+                       do ispinor2=1,wanbz%nspinor
+      ptr_rhot(im1,im2,spin,ispinor1,ispinor2)=&
+      &ptr_rhot(im1,im2,spin,ispinor1,ispinor2)+&
       &rhotwg_ki(pwx,jb)*wanbz%psichi(jk_bz,wan_jb,iatom1)%atom(il1)%matl(im1,spin,ispinor1)*&
       &conjg(wanbz%psichi(ik_bz,wan_ib_sum,iatom2)%atom(il2)%matl(im2,spin,ispinor2))*weight
                                  enddo!im2
