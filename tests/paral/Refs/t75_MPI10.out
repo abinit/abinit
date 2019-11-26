@@ -1,6 +1,6 @@
 
 .Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 21 Oct 2019.
-- ( at 23h45 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 09h02 )
   
 - input  file    -> t75.in
 - output file    -> t75_MPI10.out
@@ -379,8 +379,8 @@ P           mkmem           1
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.05208
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/11na.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/11na.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/11na.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/11na.pspnc
 -  Troullier-Martins psp for element  Na        Mon Oct 31 11:14:49 EST 1994
 - 11.00000   1.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -445,13 +445,13 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
     2     -1.58753162577000    -0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00088017797459    -0.00000000000000     0.00000000000000
-    2      0.00088017797459     0.00000000000000    -0.00000000000000
+    1     -0.00088017797459     0.00000000000000    -0.00000000000000
+    2      0.00088017797459    -0.00000000000000     0.00000000000000
  frms,max,avg= 5.0817099E-04 8.8017797E-04   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.04526056742958    -0.00000000000000     0.00000000000000
-    2      0.04526056742958     0.00000000000000    -0.00000000000000
+    1     -0.04526056742959     0.00000000000000    -0.00000000000000
+    2      0.04526056742959    -0.00000000000000     0.00000000000000
  frms,max,avg= 2.6131201E-02 4.5260567E-02   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 30.000000000000 30.000000000000 30.000000000000 bohr
               = 15.875316257700 15.875316257700 15.875316257700 angstroms
@@ -464,8 +464,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  1.15360712926584E-01
-    Hartree energy  =  1.24872166403129E-01
+    Kinetic energy  =  1.15360712926583E-01
+    Hartree energy  =  1.24872166403128E-01
     XC energy       = -1.31964737302469E+01
     Ewald energy    = -1.28271980544043E-01
     PspCore energy  =  6.30750030220281E-03
@@ -552,7 +552,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  1.15401447518149E-01
-    Hartree energy  =  1.24872166403129E-01
+    Hartree energy  =  1.24872166403128E-01
     XC energy       = -1.31964737302469E+01
     Ewald energy    = -1.28271980544043E-01
     PspCore energy  =  6.30750030220281E-03
@@ -561,7 +561,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
     >>>>>>>>> Etotal= -1.32776123083774E+01
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -2.28902457564267E-01
+    Band energy     = -2.28902457564268E-01
     Ewald energy    =-1.28271980544043E-01
     PspCore energy  =  6.30750030220281E-03
     Dble-C XC-energy= -1.29268285551051E+01
@@ -595,8 +595,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/11na.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/11na.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/11na.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/11na.pspnc
 -  Troullier-Martins psp for element  Na        Mon Oct 31 11:14:49 EST 1994
 - 11.00000   1.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -684,7 +684,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
        -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
 
     2   0.000  -0.989   0.146   0.074  -0.198   0.124  -0.124   0.074  -0.198
-        0.000   0.000   0.000  -0.000   0.000   0.000   0.000  -0.000   0.000
+        0.000  -0.000   0.000  -0.000   0.000   0.000   0.000  -0.000   0.000
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =   1.0000
@@ -791,8 +791,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
 
   Number of electrons    =    2.0000
 
-  QP Band energy    [Ha] = -2.28902457564267E-01
-  QP Hartree energy [Ha] =  1.24911137807878E-01
+  QP Band energy    [Ha] = -2.28902457564268E-01
+  QP Hartree energy [Ha] =  1.24911137807879E-01
 
 --------------------------------------------------------------------------------
 
@@ -954,7 +954,7 @@ data: !SigmaeeData |
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
+       -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
 
     2   0.000 -14.523   4.762   3.283  -6.051  -1.080   1.123   3.283  -6.051
        -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
@@ -962,10 +962,10 @@ data: !SigmaeeData |
   chi0(G,G') at the    2 th omega   0.0000  13.6057 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
+       -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
 
     2   0.000  -1.869   0.472   0.294  -0.602   0.036  -0.003   0.294  -0.602
-       -0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000   0.000
+       -0.000   0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000   0.000
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =   1.0000
@@ -986,10 +986,10 @@ data: !SigmaeeData |
    Upper and lower wings at the    2 th omega   0.0000  13.6057 [eV]
        1       2       3       4       5       6       7       8       9
       1.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-      0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
+     -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
        1       2       3       4       5       6       7       8       9
       1.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-      0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
+     -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
 
 
 
@@ -1074,7 +1074,7 @@ data: !SigmaeeData |
 
   Number of electrons    =    2.0000
 
-  QP Band energy    [Ha] = -3.46252310101857E-01
+  QP Band energy    [Ha] = -3.46252310101858E-01
   QP Hartree energy [Ha] =  1.12220298081862E-01
 
 --------------------------------------------------------------------------------
@@ -1191,8 +1191,8 @@ data: !SigmaeeData |
            etotal4     0.0000000000E+00
            etotal5     0.0000000000E+00
            etotal6     0.0000000000E+00
-            fcart1    -8.8017797459E-04 -2.0997592730E-20  2.0997592730E-20
-                       8.8017797459E-04  2.0997592730E-20 -2.0997592730E-20
+            fcart1    -8.8017797459E-04  2.4934543406E-21 -2.4934543406E-21
+                       8.8017797459E-04 -2.4934543406E-21  2.4934543406E-21
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1468,10 +1468,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          6.4  wall=          6.6
+- Proc.   0 individual time (sec): cpu=          5.9  wall=          6.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         65.1  wall=         65.4
++Overall time at end (sec) : cpu=         59.5  wall=         59.9

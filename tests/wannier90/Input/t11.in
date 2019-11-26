@@ -54,7 +54,7 @@ vdw_supercell2 2 2 2  # Supercell composed of 64 unit cells
 #%% need_cpp_vars = HAVE_LIBXC
 #%% [files]
 #%% files_to_test = 
-#%%   t11.out, tolnlines = 9, tolabs = 7.0e-5, tolrel = 1.1, fld_options = -medium
+#%%   t11.out, tolnlines = 9, tolabs = 9.0e-5, tolrel = 1.1, fld_options = -medium
 #%% psp_files = 18ar.revpbe
 #%% [shell] 
 #%% pre_commands = iw_cp t11_w90.win w90.win
