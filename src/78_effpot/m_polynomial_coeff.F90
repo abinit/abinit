@@ -3976,7 +3976,7 @@ end subroutine polynomial_coeff_getEvenAnhaStrain
 !!
 !! SOURCE
 
-pure function coeffs_compare(c1,c2) result (res)
+function coeffs_compare(c1,c2) result (res)
 !Arguments ------------------------------------
  implicit none
 
