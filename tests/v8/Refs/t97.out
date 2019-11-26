@@ -1,5 +1,5 @@
 
-.Version 8.11.7 of MULTIBINIT 
+.Version 8.11.12 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu7.4 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  4 Jun 2019.
-- ( at 12h02 )
+.Starting date : Tue 26 Nov 2019.
+- ( at 09h51 )
   
--  nproc =    4
+-  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--test_model2.xml
+-t97_model.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -31,6 +31,7 @@
 
  Flags : 
      ifcflag         1
+   prt_model         4
      strcpli        -1
  Bound the coefficients :
  bound_anhaStrain  0
@@ -40,7 +41,7 @@
    bound_maxCoeff   4
        bound_temp  3.25000000E+02
        bound_step   1000
- bound_rangePower  4 10
+ bound_rangePower  8 10
  Miscellaneous information :
          asr         2
  Interatomic Force Constants Inputs :
@@ -63,8 +64,8 @@ dipdip_range         2         2         2
 
 ================================================================================
 
--Opening the file test_model2.xml
--Reading the file test_model2.xml with LibXML library
+-Opening the file t97_model.xml
+-Reading the file t97_model.xml with LibXML library
 
  Bound for ifc SR:
 
@@ -85,10 +86,74 @@ dipdip_range         2         2         2
 
 ================================================================================
 
+ This effective potential contains :
+  - Reference energy:       -147.9666496223
+  - Number of types of atoms:    3
+  - Number of atoms:     5
+  - Number of cells:    27
+  - Number of qpoints:    1
+  - Primitive vectors (unit:Bohr):
+    7.254508    0.000000    0.000000
+    0.000000    7.254508    0.000000
+    0.000000    0.000000    7.254508
+  - acell (unit:Bohr):
+    1.000000    1.000000    1.000000
+  - Dielectric tensor:
+    6.184102   -0.000000   -0.000000
+   -0.000000    6.184102   -0.000000
+   -0.000000   -0.000000    6.184102
+  - Elastic tensor (unit:10^2GPa):
+    3.665661    1.011173    1.011173   -0.000000   -0.000000   -0.000000
+    1.011173    3.665661    1.011173    0.000000   -0.000000   -0.000000
+    1.011173    1.011173    3.665661    0.000000   -0.000000   -0.000000
+   -0.000000   -0.000000   -0.000000    0.985501   -0.000000   -0.000000
+    0.000000    0.000000    0.000000   -0.000000    0.985501    0.000000
+   -0.000000   -0.000000   -0.000000   -0.000000   -0.000000    0.985501
+  - Atoms   1
+    - atomic number:   20.0000
+    - atomic mass:   40.0780
+    - cartesian position:    0.000000    0.000000    0.000000
+    - Effective charges:
+      2.577800    0.000000    0.000000
+      0.000000    2.577800    0.000000
+      0.000000    0.000000    2.577800
+  - Atoms   2
+    - atomic number:   22.0000
+    - atomic mass:   47.8800
+    - cartesian position:    3.627254    3.627254    3.627254
+    - Effective charges:
+      7.212121    0.000000    0.000000
+      0.000000    7.212121    0.000000
+      0.000000    0.000000    7.212121
+  - Atoms   3
+    - atomic number:    8.0000
+    - atomic mass:   15.9994
+    - cartesian position:    3.627254    0.000000    3.627254
+    - Effective charges:
+     -2.019588    0.000000    0.000000
+      0.000000   -5.750745    0.000000
+      0.000000    0.000000   -2.019588
+  - Atoms   4
+    - atomic number:    8.0000
+    - atomic mass:   15.9994
+    - cartesian position:    0.000000    3.627254    3.627254
+    - Effective charges:
+     -5.750745    0.000000    0.000000
+      0.000000   -2.019588    0.000000
+      0.000000    0.000000   -2.019588
+  - Atoms   5
+    - atomic number:    8.0000
+    - atomic mass:   15.9994
+    - cartesian position:    3.627254    3.627254    0.000000
+    - Effective charges:
+     -2.019588    0.000000    0.000000
+      0.000000   -2.019588    0.000000
+      0.000000    0.000000   -5.750745
+
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file test_model2.xml
--Reading the file test_model2.xml with LibXML library
+-Opening the file t97_model.xml
+-Reading the file t97_model.xml with LibXML library
 
 ================================================================================
 
@@ -97,15 +162,12 @@ dipdip_range         2         2         2
 ================================================================================
 
 -Reading the training-set file :
--test.nc
+-t95.nc
 
 
 ================================================================================
 
 Bound Process 3: Generate equivalent high order terms
-
-
-================================================================================
 
 -Start Bound optimization of Anharmonic Potential 
 
@@ -130,19 +192,25 @@ ________________________________________________________________________________
  -> Filter Displacement
 
 
- ==> high order term: (Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^2 created
+ ==> high order term: (Ti_y-O1_y)^8 created
 
 
    ==> Optimizing coefficient
 
 
- ==> high order term: (Ti_y-O1_y)^4(Ti_y-O1_y[1 1 0])^2 created
+ ==> high order term: (Ti_y-O1_y)^10 created
 
 
    ==> Optimizing coefficient
 
 
- ==> high order term: (Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^4 created
+ ==> high order term: (Ti_y-O1_y[1 1 0])^8 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (Ti_y-O1_y[1 1 0])^10 created
 
 
    ==> Optimizing coefficient
@@ -190,6 +258,24 @@ ________________________________________________________________________________
    ==> Optimizing coefficient
 
 
+ ==> high order term: (Ti_y-O1_y)^6(Ti_y-O1_y[1 1 0])^2(eta_1)^2 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^6(eta_1)^2 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (Ti_y-O1_y)^4(Ti_y-O1_y[1 1 0])^4(eta_1)^2 created
+
+
+   ==> Optimizing coefficient
+
+
 ________________________________________________________________________________
 
 
@@ -200,25 +286,31 @@ ________________________________________________________________________________
  -> Filter Displacement
 
 
- ==> high order term: (Ti_y-O1_y[1 1 0])^4 created
+ ==> high order term: (Ti_y-O1_y[1 1 0])^8 created
 
 
-   ==> Optimizing coefficient
+   ==> Term exists already. We cycle
 
 
- ==> high order term: (Ti_y-O1_y[1 1 0])^6 created
+ ==> high order term: (Ti_y-O1_y[1 1 0])^10 created
 
 
-   ==> Optimizing coefficient
+   ==> Term exists already. We cycle
 
 
  ==> high order term: (Ti_y-O1_y[1 1 0])^8 created
 
 
-   ==> Optimizing coefficient
+   ==> Term exists already. We cycle
 
 
  ==> high order term: (Ti_y-O1_y[1 1 0])^10 created
+
+
+   ==> Term exists already. We cycle
+
+
+ ==> high order term: (Ti_y-O1_y[1 1 0])^8(eta_2)^2 created
 
 
    ==> Optimizing coefficient
@@ -230,13 +322,27 @@ ________________________________________________________________________________
  Finished creating high-order terms
 
 
+ Mean Standard Deviation values of the effective-potential
+ with respect to the training-set after attempted bounding (meV/atm):
+   Energy          :   9.7490477309498935E-01
+ Goal function values of the effective.potential
+ with respect to the test-set (eV^2/A^2):
+   Forces+Stresses :   1.3510748043628059E-02
+   Forces          :   2.7990065603903289E-03
+   Stresses        :   1.0711741483237730E-02
+
+
+================================================================================
+
+ Generation of the xml file for the fitted polynomial in t97_coeffs.xml
+
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          9.5  wall=         11.1
+- Proc.   0 individual time (sec): cpu=         15.1  wall=         15.1
 
 ================================================================================
 
-+Total cpu time     37.341  and wall time     44.273 sec
++Total cpu time     15.143  and wall time     15.149 sec
 
  multibinit : the run completed succesfully.
