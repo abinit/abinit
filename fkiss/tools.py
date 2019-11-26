@@ -1,7 +1,13 @@
+"""Tools extracted by AbiPy."""
+# TODO: Rationalize modules, merged with pymods
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 import sys
 import os
+import abc
+import tempfile
+
+from .termcolor import cprint
 
 
 # Helper functions (coming from AbiPy)
@@ -147,3 +153,223 @@ def pprint_table(table, out=sys.stdout, rstrip=False):
             col = row[i].rjust(col_paddings[i] + 2)
             out.write(col)
         out.write("\n")
+
+
+def print_dataframe(frame, title=None, precision=6, sortby=None, file=sys.stdout, display=None):
+    """
+    Print entire pandas DataFrame.
+
+    Args:
+        frame: pandas DataFrame.
+        title: Optional string to print as initial title.
+        precision: Floating point output precision (number of significant digits).
+            This is only a suggestion [default: 6] [currently: 6]
+        sortby: string name or list of names which refer to the axis items to be sorted (dataframe is not changed)
+        file: a file-like object (stream); defaults to the current sys.stdout.
+            If file == "string", a temporary stream is created and a string is returned.
+        display: Use ipython rich display protocol by invoking _repr_`display_ and returning the result.
+            Use e.g. display="html" to get HTML table.
+    """
+    return_string = file == "string"
+    if return_string:
+        from io import StringIO
+        file = StringIO()
+
+    if title is not None: print(title, file=file)
+    if sortby is not None and sortby in frame:
+        frame = frame.sort_values(sortby, inplace=False)
+
+    import pandas as pd
+    with pd.option_context("display.max_rows", len(frame),
+                           "display.max_columns", len(list(frame.keys())),
+                           "display.precision", precision,
+                           ):
+        if display is None:
+            print(frame, file=file)
+            print(" ", file=file)
+            if return_string: return file.getvalue()
+        else:
+            from IPython.core.display import HTML
+            output = getattr(frame, "_repr_%s_" % display)()
+            return HTML(output)
+
+
+# Here metaclass is needed for abc but then I should import six --> leave it at it is without metaclass
+#@six.add_metaclass(abc.ABCMeta)
+class NotebookWriter(object): #metaclass=abc.ABCMeta):
+    """
+    Mixin class for objects that are able to generate jupyter_ notebooks.
+    Subclasses must provide a concrete implementation of `write_notebook`.
+    """
+    def make_and_open_notebook(self, nbpath=None, foreground=False):  # pragma: no cover
+        """
+        Generate an jupyter_ notebook and open it in the browser.
+
+        Args:
+            nbpath: If nbpath is None, a temporay file is created.
+            foreground: By default, jupyter is executed in background and stdout, stderr are redirected
+            to devnull. Use foreground to run the process in foreground
+
+        Return:
+            system exit code.
+
+        Raise:
+            `RuntimeError` if jupyter_ is not in $PATH
+        """
+        nbpath = self.write_notebook(nbpath=nbpath)
+
+        if which("jupyter") is None:
+            raise RuntimeError("Cannot find jupyter in $PATH. Install it with `conda install jupyter or `pip install jupyter`")
+
+        # Use jupyter-lab instead of classic notebook if possible.
+        has_jupyterlab = which("jupyter-lab") is not None
+        #has_jupyterlab = True
+        appname = "jupyter-lab" if has_jupyterlab else "jupyter notebook"
+
+        if foreground:
+            return os.system("%s %s" % (appname, nbpath))
+        else:
+            fd, tmpname = tempfile.mkstemp(text=True)
+            print(tmpname)
+            cmd = "%s %s" % (appname, nbpath)
+            print("Executing:", cmd)
+            print("stdout and stderr redirected to %s" % tmpname)
+            import subprocess
+            process = subprocess.Popen(cmd.split(), shell=False, stdout=fd, stderr=fd)
+            cprint("pid: %s" % str(process.pid), "yellow")
+            return 0
+
+    @staticmethod
+    def get_nbformat_nbv():
+        """Return nbformat module, notebook version module"""
+        import nbformat
+        nbv = nbformat.v4
+        return nbformat, nbv
+
+    def get_nbformat_nbv_nb(self, title=None):
+        """
+        Return ``nbformat`` module, notebook version module
+        and new notebook with title and import section
+        """
+        nbformat, nbv = self.get_nbformat_nbv()
+        nb = nbv.new_notebook()
+
+        if title is not None:
+            nb.cells.append(nbv.new_markdown_cell("## %s" % title))
+
+        nb.cells.extend([
+            nbv.new_code_cell("""\
+#%matplotlib notebook
+""")
+        ])
+
+        return nbformat, nbv, nb
+
+    @abc.abstractmethod
+    def write_notebook(self, nbpath=None):
+        """
+        Write a jupyter notebook to nbpath. If nbpath is None, a temporay file is created.
+        Return path to the notebook. A typical template:
+
+        .. code-block:: python
+
+            # Preable.
+            nbformat, nbv, nb = self.get_nbformat_nbv_nb(title=None)
+
+            #####################
+            # Put your code here
+            nb.cells.extend([
+                nbv.new_markdown_cell("# This is a markdown cell"),
+                nbv.new_code_cell("a = 1"),
+            ])
+            #####################
+
+            # Call _write_nb_nbpath
+            return self._write_nb_nbpath(nb, nbpath)
+        """
+
+    @staticmethod
+    def _write_nb_nbpath(nb, nbpath):
+        """
+        This method must be called at the end of ``write_notebook``.
+        nb is the jupyter notebook and nbpath the argument passed to ``write_notebook``.
+        """
+        import io, os, tempfile
+        if nbpath is None:
+            _, nbpath = tempfile.mkstemp(prefix="abinb_", suffix='.ipynb', dir=os.getcwd(), text=True)
+
+        # Write notebook
+        import nbformat
+        with io.open(nbpath, 'wt', encoding="utf8") as fh:
+            nbformat.write(nb, fh)
+            return nbpath
+
+    @classmethod
+    def pickle_load(cls, filepath):
+        """
+        Loads the object from a pickle file.
+        """
+        with open(filepath, "rb") as fh:
+            new = pickle.load(fh)
+            #assert cls is new.__class__
+            return new
+
+    def pickle_dump(self, filepath=None):
+        """
+        Save the status of the object in pickle format.
+        If filepath is None, a temporary file is created.
+
+        Return:
+            name of the pickle file.
+        """
+        if filepath is None:
+            _, filepath = tempfile.mkstemp(suffix='.pickle')
+
+        with open(filepath, "wb") as fh:
+            pickle.dump(self, fh)
+            return filepath
+
+    @abc.abstractmethod
+    def yield_figs(self, **kwargs):  # pragma: no cover
+        """
+        This function *generates* a predefined list of matplotlib figures with minimal input from the user.
+        Used in abiview.py to get a quick look at the results.
+        """
+
+    def expose(self, slide_mode=False, slide_timeout=None, **kwargs):
+        """
+        Shows a predefined list of matplotlib figures with minimal input from the user.
+        """
+        from abipy.tools.plotting import MplExpose
+        with MplExpose(slide_mode=slide_mode, slide_timeout=slide_mode, verbose=1) as e:
+            e(self.yield_figs(**kwargs))
+
+
+def which(cmd):
+    """
+    Returns full path to a executable.
+
+    Args:
+        cmd (str): Executable command to search for.
+
+    Returns:
+        (str) Full path to command. None if it is not found.
+
+    Example::
+
+        full_path_to_python = which("python")
+    """
+
+    def is_exe(fp):
+        return os.path.isfile(fp) and os.access(fp, os.X_OK)
+
+    fpath, fname = os.path.split(cmd)
+    if fpath:
+        if is_exe(cmd):
+            return cmd
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            exe_file = os.path.join(path, cmd)
+            if is_exe(exe_file):
+                return exe_file
+    return None
