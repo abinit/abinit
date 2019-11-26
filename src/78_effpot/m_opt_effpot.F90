@@ -1844,18 +1844,24 @@ function opt_boundcoeff(yvalues,cvalues) result (coeff)
 end function opt_boundcoeff
 !!***
 
-!!****f* m_opt_effpot/opt_boundcoeff
+!!****f* m_opt_effpot/check_to_skip
 !! NAME
-!! opt_boundcoeff
+!! check_to_skip
 !!
 !! FUNCTION
 !!
-!! optimize a bound coefficient if optimized value is negative 
-!! put an positive value that respects a precision penalty  
-!!
+!! Check if term contains only bodies with even power
+!! and has a positive coefficient. If yes term doesn't need 
+!! a bounding high order equivalent and we can skip it. 
+!! Function retursn logical to_skip.
+!! 
 !! INPUTS
 !!
+!! term<polynomial_coeff_type>:anharmonic term 
+!!
 !! OUTPUT
+!!
+!! logical: to_skip
 !!
 !! SOURCE
 

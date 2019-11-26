@@ -3486,6 +3486,7 @@ if(isym_in <= nsym .and. idisp_in <= ndisp)then
 endif!(isym <= nsym)
 
 end subroutine computeSymmetricCombinations
+!!***
 
 !!****f* m_polynomial_coeff/getCoeffFromList
 !!
@@ -4198,6 +4199,7 @@ do i=1,n_list
 end do 
  
 end subroutine sort_combination_list
+!!***
 
 
 !!****f* m_polynomial_coeff/check_irreducibility
