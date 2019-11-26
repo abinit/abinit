@@ -470,7 +470,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if (dtset%usekden==1) then
    do ispden=1,dtset%nspden
      fact=dielar(4);if (ispden>1) fact=abs(dielar(7))
-     taurespc(1:ispmix*nfftmix,ispden)=fact*taurespc(1:ispmix*nfftmix,ispden)
+     taurespc(1:ispmix*nfftmix,ispden)=fact*tauresid0(1:ispmix*nfftmix,ispden)
    end do
  end if
 
@@ -496,6 +496,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    MSG_ERROR(message)
  end if
  if (dtset%usekden==1) then
+   call ab7_mixing_eval_allocate(mix_mgga, istep)
    call ab7_mixing_copy_current_step(mix_mgga, tauresid0, errid, message, arr_respc = taurespc)
    if (errid /= AB7_NO_ERROR) then
      MSG_ERROR(message)

@@ -475,7 +475,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  if (dtset%usekden==1) then
    do ispden=1,dtset%nspden
      fact=dielar(4);if (ispden>1) fact=abs(dielar(7))
-     vtaurespc(1:ispmix*nfftmix,ispden)=fact*vtaurespc(1:ispmix*nfftmix,ispden)
+     vtaurespc(1:ispmix*nfftmix,ispden)=fact*vtauresid0(1:ispmix*nfftmix,ispden)
    end do
  end if
 
@@ -506,6 +506,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
    MSG_ERROR(message)
  end if
  if (dtset%usekden==1) then
+   call ab7_mixing_eval_allocate(mix_mgga, istep)
    call ab7_mixing_copy_current_step(mix_mgga, vtauresid0, errid, message, &
 &        arr_respc = vtaurespc)
    if (errid /= AB7_NO_ERROR) then
