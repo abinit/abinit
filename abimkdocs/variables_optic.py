@@ -169,7 +169,7 @@ Variable(
     mnemonics="NUMber of LINear ELetro-optic  COMPonents",
     text=r"""
 This parameter specifies how many components (out of 27 possible)
-of the linear electro-optical tensor to calculate.
+of the linear electro-optical susceptibility to calculate.
 Some of these may be either equal to each other, or zero, depending upon the
 symmetry of the material. The directions of the requested components are specified by the parameter [[optic:linel_comp]].
 """,
@@ -185,7 +185,7 @@ Variable(
     mnemonics="LINear ELectro-optic COMPonents",
     text=r"""
 This parameter specifies the directions of the [[optic:num_linel_comp]] requested components
-of the linear electro-optical tensor. The components are specified in
+of the linear electro-optical susceptibility. The components are specified in
 cartesian coordinates, where 1, 2, and 3 represent x, y, and z respectively. For
 example, 111 represents the xxx component, and 321 represents zyx. There should be
 [[optic:num_linel_comp]] entries.
