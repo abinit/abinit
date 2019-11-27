@@ -148,6 +148,7 @@ my_configs  = {
   "make":"config/specs/makemake.conf",
   "bsys":"config/specs/buildsys.conf",
   "bins":"config/specs/binaries.conf",
+  "libs":"config/specs/corelibs.conf",
   "fbks":"config/specs/fbversion.conf"}
 
 # Check if we are in the top of the ABINIT source tree
@@ -183,11 +184,19 @@ else:
     (my_name, my_configs["bins"]))
   sys.stderr.write("[%s] Aborting now!" % (my_name))
   sys.exit(12)
+if ( os.path.exists(my_configs["libs"]) ):
+  lcnf = MyConfigParser()
+  lcnf.read(my_configs["libs"])
+else:
+  sys.stderr.write("[%s] Could not find config file (%s)" % \
+    (my_name, my_configs["bins"]))
+  sys.stderr.write("[%s] Aborting now!" % (my_name))
+  sys.exit(13)
 if ( not os.path.exists(my_configs["fbks"]) ):
   sys.stderr.write("[%s] Could not find config file (%s)" % \
     (my_name, my_configs["fbks"]))
   sys.stderr.write("[%s] Aborting now!" % (my_name))
-  sys.exit(13)
+  sys.exit(14)
 
 # Parse command-line arguments
 from optparse import OptionParser
@@ -366,6 +375,16 @@ if ( opts.run_clean ):
   run_script(my_name, "Removing abisrc output files",
     "rm -f abisrc.stderr abisrc.stdout")
 
+  # Remove LibPAW symlink
+  libpaw_dir = [item for item in lcnf.sections() \
+    if ( lcnf.get(item, "parent") == "libpaw" )][0]
+  libpaw_ln = os.path.join("shared", "common", "src", libpaw_dir)
+  if ( os.path.exists(libpaw_ln) ):
+    if ( os.path.islink(libpaw_ln) ):
+      os.remove(libpaw_ln)
+    else:
+      raise OSError("a file is blocking the way: '%s' is not a symlink" % libpaw_ln)
+
   now = strftime("%Y/%m/%d %H:%M:%S +0000", gmtime())
   print_message(my_name, "--------------------------------------")
   print_message(my_name, "Finishing at %s" % (now))
@@ -491,8 +510,6 @@ if ( opts.run_source ):
 
   # Create a symlink to the sources of LibPAW, so that the same naming
   # conventions can be used in the whole shared section of ABINIT
-  lcnf = MyConfigParser()
-  lcnf.read(os.path.join("config", "specs", "corelibs.conf"))
   libpaw_dir = [item for item in lcnf.sections() \
     if ( lcnf.get(item, "parent") == "libpaw" )][0]
   src = os.path.join("..", "..", "libpaw", "src")
@@ -524,14 +541,6 @@ if ( opts.run_source ):
        ****************************************************************\n""")
     sys.stderr.write("[%s] Aborting now\n" % (my_name))
     sys.exit(1)
-
-  # Remove LibPAW symlink
-  if ( os.path.exists(dst) ):
-    if ( os.path.islink(dst) ):
-      os.remove(dst)
-    else:
-      raise OSError("a file is blocking the way: '%s' is not a symlink" % dst)
-
 else:
   print_message(my_name, "*** Skipping source tree update ***")
 

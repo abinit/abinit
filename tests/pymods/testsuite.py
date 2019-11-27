@@ -387,7 +387,7 @@ class FileToTest(object):
                 self.tolnlines, self.tolabs, self.tolrel
             ), result.has_line_count_error())
 
-        if fldebug:  
+        if fldebug:
             # fail on first error and output the traceback
             (isok, status, msg), has_line_count_error = make_diff()
         else:
@@ -458,6 +458,7 @@ TESTCNF_KEYWORDS = {
     # keyword        : (parser, default, section, description)
     # [setup]
     "executable"     : (str       , None , "setup", "Name of the executable e.g. abinit"),
+    "exec_args"      : (str       , ""   , "setup", "Arguments passed to executable on the command line."),
     "test_chain"     : (_str2list , ""   , "setup", "Defines a ChainOfTest i.e. a list of tests that are connected together."),
     "need_cpp_vars"  : (_str2set  , ""   , "setup", "CPP variables that must be defined in config.h in order to enable the test."),
     "exclude_hosts"  : (_str2list , ""   , "setup", "The test is not executed if we are running on a slave that matches compiler@hostname"),
@@ -1950,7 +1951,7 @@ class BaseTest(object):
 
             self.run_etime = runner.run(self.nprocs, bin_path,
                                         self.stdin_fname, self.stdout_fname, self.stderr_fname,
-                                        cwd=workdir)
+                                        bin_argstr=self.exec_args, cwd=workdir)
 
             # Save exceptions (if any).
             if runner.exceptions:
@@ -2043,10 +2044,10 @@ class BaseTest(object):
                     # Extract YAML error message from ABORTFILE or stdout.
                     abort_file = os.path.join(self.workdir, "__ABI_MPIABORTFILE__")
                     if os.path.exists(abort_file):
-                        f = open(abort_file, "rt")
-                        self.cprint(12 * "=" + " ABI_MPIABORTFILE " + 12 * "=")
-                        self.cprint(f.read(), status2txtcolor["failed"])
-                        f.close()
+                        with open(abort_file, "rt") as f:
+                            self.cprint(12 * "=" + " ABI_MPIABORTFILE " + 12 * "=")
+                            self.cprint(f.read(), status2txtcolor["failed"])
+                            f.close()
                     else:
                         yamlerr = read_yaml_errmsg(self.stdout_fname)
                         if yamlerr:
@@ -3367,15 +3368,15 @@ class AbinitTestSuite(object):
         task_q = Queue()
         res_q = Queue()
 
-        for test in self:  
+        for test in self:
             # fill the queue
             task_q.put(test)
 
-        for _ in range(nprocs):  
+        for _ in range(nprocs):
             # one end signal for each worker
             task_q.put(None)
 
-        for i in range(nprocs - 1):  
+        for i in range(nprocs - 1):
             # create and start subprocesses
             p = Process(target=worker, args=(task_q, res_q, print_lock))
             self._processes.append(p)

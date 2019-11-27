@@ -5,8 +5,10 @@ config.h.in~
 .directory
 .tox
 .idea
+.cache
 .*.sw[op]
 __pycache__
+.ipynb_checkpoints
 *.egg
 *.egg-info
 Makefile.am
@@ -34,7 +36,6 @@ rafael.ac
 tmp
 tmp2
 auto-*.m4
-interfaces_*.F90
 *.srcc
 tmp-*
 tmp_*
@@ -289,7 +290,6 @@ tests/tests.env
 tests/Timeout/timeout
 special/special.env
 special.env
-doc/input_variables/YML_vars_test
 scripts/*/*/build
 scripts/*/*/dist
 /tests/built-in/Input/*_o_*
@@ -324,3 +324,5 @@ tests/built-in/Input/testin_wannier90o_EBANDS.agr
 doc/input-web/*~
 mac-1P0-225.ac
 doc/topics/ConstrainedDFT.md
+doxygen_docs
+doxygen.err

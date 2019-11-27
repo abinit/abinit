@@ -1,6 +1,6 @@
 
-.Version 8.7.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.4 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 11 Jan 2018.
-- ( at 17h49 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h39 )
   
 - input  file    -> t68.in
 - output file    -> t68.out
@@ -150,8 +150,8 @@ P          mk1mem           8
          ecut(hartree)=     30.000   => boxcut(ratio)=   1.98828
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is 26fe.pspnc
-- pspatm: opening atomic psp file    26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -248,35 +248,35 @@ P newkpt: treating     16 bands with npw=     610 for ikpt=   7 by node    0
 P newkpt: treating     16 bands with npw=     630 for ikpt=   8 by node    0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   6.0303694475196      6.030E+00 4.111E+00 1.109E+04
- ETOT  2   40.832010493890      3.480E+01 7.132E-03 1.853E+05
- ETOT  3   6.8449471875448     -3.399E+01 9.031E+00 6.825E+03
- ETOT  4   6.5139322630571     -3.310E-01 2.207E-03 7.692E+02
- ETOT  5   8.1336858954579      1.620E+00 1.274E+01 5.982E+01
- ETOT  6   9.4642091776255      1.331E+00 1.078E-02 5.034E+00
- ETOT  7   9.5750017757225      1.108E-01 1.428E+01 3.887E+00
- ETOT  8   9.6511295737766      7.613E-02 4.496E-03 2.272E+00
- ETOT  9   9.7885294589226      1.374E-01 1.406E+01 8.948E-01
- ETOT 10   9.8624577860528      7.393E-02 4.305E-03 7.056E-01
- ETOT 11   9.8674777064784      5.024E-03 1.411E+01 3.466E+00
- ETOT 12   9.9191173859518      5.164E-02 3.632E-03 7.332E-02
- ETOT 13   9.9312526484106      1.213E-02 1.422E+01 1.071E-02
- ETOT 14   9.9326621499294      1.399E-03 1.540E-03 1.112E-03
- ETOT 15   9.9306482933482     -2.014E-03 1.422E+01 4.226E-04
- ETOT 16   9.9304897682555     -1.585E-04 6.709E-04 9.932E-05
- ETOT 17   9.9299240111525     -5.658E-04 1.422E+01 4.184E-05
+-ETOT  1   6.0303720247550      6.030E+00 4.111E+00 1.109E+04
+ ETOT  2   40.832116556463      3.480E+01 7.132E-03 1.853E+05
+ ETOT  3   6.8449348211471     -3.399E+01 9.031E+00 6.825E+03
+ ETOT  4   6.5139374458450     -3.310E-01 2.207E-03 7.692E+02
+ ETOT  5   8.1336755166232      1.620E+00 1.274E+01 5.982E+01
+ ETOT  6   9.4642223066038      1.331E+00 1.078E-02 5.034E+00
+ ETOT  7   9.5750016021931      1.108E-01 1.428E+01 3.887E+00
+ ETOT  8   9.6511294461079      7.613E-02 4.496E-03 2.272E+00
+ ETOT  9   9.7885325972890      1.374E-01 1.406E+01 8.948E-01
+ ETOT 10   9.8624572745851      7.392E-02 4.305E-03 7.056E-01
+ ETOT 11   9.8674847610900      5.027E-03 1.411E+01 3.466E+00
+ ETOT 12   9.9191244816934      5.164E-02 3.633E-03 7.333E-02
+ ETOT 13   9.9312442729927      1.212E-02 1.422E+01 1.072E-02
+ ETOT 14   9.9326545303250      1.410E-03 1.540E-03 1.106E-03
+ ETOT 15   9.9306444848887     -2.010E-03 1.422E+01 4.205E-04
+ ETOT 16   9.9304838673869     -1.606E-04 6.710E-04 9.984E-05
+ ETOT 17   9.9299211759877     -5.627E-04 1.422E+01 4.159E-05
 
  At SCF step   17, etot is converged : 
-  for the second time, diff in etot=  5.658E-04 < toldfe=  1.000E-03
+  for the second time, diff in etot=  5.627E-04 < toldfe=  1.000E-03
 
  ------------------------------------------------------------------------
  Integrals of the first order density n^(1) and magnetization m^(1):
  ------------------------------------------------------------------------
 
-  Re[n^(1)] =  -0.90606087E+00   Im[n^(1)] =  -0.13970884E-04
-  Re[mx^(1)]=   0.42445283E+01   Im[mx^(1)]=  -0.24248741E-05
-  Re[my^(1)]=  -0.82563399E+01   Im[my^(1)]=   0.18326308E-05
-  Re[mz^(1)]=   0.19858972E+02   Im[mz^(1)]=   0.23008735E-05
+  Re[n^(1)] =  -0.90606118E+00   Im[n^(1)] =  -0.13908667E-04
+  Re[mx^(1)]=   0.42445269E+01   Im[mx^(1)]=  -0.24246669E-05
+  Re[my^(1)]=  -0.82563372E+01   Im[my^(1)]=   0.18322279E-05
+  Re[mz^(1)]=   0.19858969E+02   Im[mz^(1)]=   0.22950663E-05
 
  ------------------------------------------------------------------------
 
@@ -284,18 +284,18 @@ P newkpt: treating     16 bands with npw=     630 for ikpt=   8 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.1680E-01; max=  1.4219E+01
+ Mean square residual over all n,k,spin=   11.680E-02; max=  14.219E+00
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   2.39062752E+00 eigvalue=   3.41559826E-01  local=  -4.00477141E-01
+     kin0=   2.39062685E+00 eigvalue=   3.41559739E-01  local=  -4.00477054E-01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   1.01553324E+00     xc=  -9.46756624E+00
+ loc psp =   0.00000000E+00  Hartree=   1.01553308E+00     xc=  -9.46756254E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   1.71943083E+01     enl0=  -1.14406144E+00   enl1=   0.00000000E+00
+    edocc=   1.71943022E+01     enl0=  -1.14406108E+00   enl1=   0.00000000E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=   9.92992401E+00
+   erelax=   9.92992118E+00
 ================================================================================
 
  ---- first-order wavefunction calculations are completed ----
@@ -316,7 +316,7 @@ P newkpt: treating     16 bands with npw=     630 for ikpt=   8 by node    0
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
              ecut      3.00000000E+01 Hartree
-           etotal      9.9299240112E+00
+           etotal      9.9299211760E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
            irdwfk           1
@@ -424,48 +424,52 @@ P          mk1mem           8
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xue, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [3] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         31.6  wall=         31.6
+- Proc.   0 individual time (sec): cpu=         58.7  wall=         59.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  19 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         31.6  wall=         31.6
+.Delivered  17 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=         58.7  wall=         59.2

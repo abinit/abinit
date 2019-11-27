@@ -4,6 +4,7 @@
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
+import sys
 import io
 import re
 import time
@@ -14,8 +15,8 @@ import difflib
 from collections import OrderedDict, defaultdict
 from textwrap import TextWrapper
 from pprint import pprint, pformat
-from .parser import FortranKissParser
-from .tools import lazy_property
+from .parser import FortranKissParser, fort2html
+from .tools import lazy_property, NotebookWriter
 from .termcolor import cprint
 
 
@@ -100,6 +101,8 @@ class FortranFile(object):
         self.name = os.path.basename(self.path)
         self.basename = self.name
         self.dirname = os.path.dirname(self.path)
+        if self.dirname == "src" and os.path.join("shared", "libpaw") in self.path:
+            self.dirname = "39_libpaw"
 
         # Save initial stat values, used to understand if reload is needed.
         self.stat = os.stat(self.path)
@@ -111,23 +114,8 @@ class FortranFile(object):
         self.all_usedby_mods = []
         #self.num_f90lines, self.num_doclines = 0, 0
 
-    #@lazy_property
-    #def all_used_mods(self):
-    #    all_mods = []
-    #    for a in ["programs", "modules", "subroutines", "functions"]:
-    #        for p in getattr(self, a):
-    #            all_mods.extend(p.local_uses)
-    #    return sorted(set(all_mods))
-
-    #@lazy_property
-    #def all_usedby_mods(self):
-    #    all_mods = []
-    #    for a in ["programs", "modules", "subroutines", "functions"]:
-    #        for p in getattr(self, a):
-    #            all_mods.extend(p.usedby_mods)
-    #    return sorted(set(all_mods))
-
     def __eq__(self, other):
+        """Use path to compare for equality and compute hash value."""
         if other is None: return False
         if not isinstance(other, self.__class__): return False
         return self.path == other.path
@@ -155,7 +143,7 @@ class FortranFile(object):
     def __str__(self):
         return self.to_string()
 
-    def to_string(self, verbose=0, with_dataframe=True, width=90):
+    def to_string(self, verbose=0, with_stats=True, width=90):
         """
         String representation with verbosity level `verbose`.
         Text is wrapped at `width` columns.
@@ -177,8 +165,8 @@ class FortranFile(object):
                 for p in plist:
                     app(p.to_string(verbose=verbose, width=width))
 
-        if with_dataframe:
-            df = self.get_stats(as_dataframe=True)
+        if with_stats:
+            df = self.get_stats()
             app(df.to_string())
 
         if verbose > 1:
@@ -186,10 +174,26 @@ class FortranFile(object):
 
         return "\n".join(lines)
 
+    #@lazy_property
+    #def all_used_mods(self):
+    #    all_mods = []
+    #    for a in ["programs", "modules", "subroutines", "functions"]:
+    #        for p in getattr(self, a):
+    #            all_mods.extend(p.local_uses)
+    #    return sorted(set(all_mods))
+
+    #@lazy_property
+    #def all_usedby_mods(self):
+    #    all_mods = []
+    #    for a in ["programs", "modules", "subroutines", "functions"]:
+    #        for p in getattr(self, a):
+    #            all_mods.extend(p.usedby_mods)
+    #    return sorted(set(all_mods))
+
     @lazy_property
     def all_uses(self):
         """
-        List with full list of modules (string) used by the Fortran file
+        Full list of modules (string) used by the Fortran file
         Includes modules used by the procedures declared in the file.
         """
         all_uses = []
@@ -200,23 +204,49 @@ class FortranFile(object):
 
     @lazy_property
     def dirlevel(self):
-        """Integer given the dir level in the Abinit hierarchy."""
+        """Integer given the directory level in the Abinit hierarchy."""
         # 72_response --> 72
-        return int(os.path.basename(os.path.dirname(self.path)).split("_")[0])
+        dname = os.path.dirname(self.path)
+        try:
+            return int(os.path.basename(dname).split("_")[0])
+        except Exception:
+            head, tail = os.path.split(dname)
+            if os.path.join("shared", "libpaw") in head:
+                #print("Setting dirlevel to 30 for shared/libpaw/src since head:", head)
+                return 39
+            cprint("Cannot detect dirlevel in: %s" % self.path, "red")
+            raise
 
     @lazy_property
     def min_dirlevel(self):
+        """Minimum directory level used by this file."""
         return max(mod.dirlevel for mod in self.all_used_mods) if self.all_used_mods else 999
 
     @lazy_property
     def max_dirlevel(self):
+        """Maximum directory level used by this file."""
         return min(mod.dirlevel for mod in self.all_usedby_mods) if self.all_usedby_mods else 0
 
-    def iter_procedures(self, visibility="public"):
+    @lazy_property
+    def all_public_procedures(self):
+        """Dictionary name --> public_procedure in the file."""
+        pubs = OrderedDict()
         for a in ["modules", "programs", "subroutines", "functions"]:
             for container in getattr(self, a):
                 for p in container.public_procedures:
-                    yield p
+                    pubs[p.name] = p
+        return pubs
+
+    @lazy_property
+    def all_datatypes(self):
+        """Dictionary name --> datatype in the file."""
+        dtypes = OrderedDict()
+        for mod in self.modules:
+            for dtype in mod.types:
+                assert dtype.name not in dtypes
+                dtypes[dtype.name] = dtype
+
+        return dtypes
 
     def find_public_entity(self, name, all_names=None):
         """
@@ -241,8 +271,7 @@ class FortranFile(object):
 
     def find_datatype(self, name, all_names=None):
         """
-        Find and return the public datatype with `name`.
-        Return None if not found.
+        Find and return the public datatype with `name`. Return None if not found.
         """
         for p in getattr(self, "modules"):
             for e in p.types:
@@ -251,9 +280,9 @@ class FortranFile(object):
 
         return None
 
-    def get_stats(self, as_dataframe=False):
+    def get_stats(self, as_dict=False):
         """
-        Return dictionary with FortFile stats or pandas dataframe if as_dataframe.
+        Return pandas dataframe with FortFile stats or dictionary as_dict.
         """
         d = OrderedDict([
             ("use", len(self.all_used_mods)),
@@ -270,7 +299,7 @@ class FortranFile(object):
             #("doc_lines", self.num_doclines),
         ])
 
-        if not as_dataframe: return d
+        if as_dict: return d
         import pandas as pd
         return pd.DataFrame([d], index=[self.basename], columns=d.keys() if d else None)
 
@@ -281,36 +310,6 @@ class FortranFile(object):
                 retcode += p.check_abirules(verbose=verbose)
 
         return retcode
-
-    #def write_notebook(self, nbpath=None):
-    #    """
-    #    Write a jupyter_ notebook to ``nbpath``. If nbpath is None, a temporay file in the current
-    #    working directory is created. Return path to the notebook.
-    #    """
-    #    nbformat, nbv, nb = self.get_nbformat_nbv_nb(title=None)
-
-    #    nb.cells.extend([
-    #        nbv.new_markdown_cell("## %s" % title)),
-    #        nbv.new_code_cell("gsr = abilab.abiopen('%s')" % self.filepath),
-    #    ])
-
-    #    return self._write_nb_nbpath(nb, nbpath)
-
-    #@staticmethod
-    #def _write_nb_nbpath(nb, nbpath):
-    #    """
-    #    This method must be called at the end of ``write_notebook``.
-    #    nb is the jupyter notebook and nbpath the argument passed to ``write_notebook``.
-    #    """
-    #    import io, os, tempfile
-    #    if nbpath is None:
-    #        _, nbpath = tempfile.mkstemp(prefix="abinb_", suffix='.ipynb', dir=os.getcwd(), text=True)
-
-    #    # Write notebook
-    #    import nbformat
-    #    with io.open(nbpath, 'wt', encoding="utf8") as fh:
-    #        nbformat.write(nb, fh)
-    #        return nbpath
 
     def get_graphviz(self, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
         """
@@ -327,90 +326,39 @@ class FortranFile(object):
         """
         # https://www.graphviz.org/doc/info/
         from graphviz import Digraph
-
-        graph_attr = {
-            'size':'8.90625,1000.0',
-            'rankdir': "LR",
-            'concentrate':'true',
-            #'id':self.ident
-        }
-        node_attr = {
-            'shape':'box',
-            'height':'0.0',
-            'margin':'0.08',
-            'fontname':'Helvetica',
-            'fontsize':'10.5'
-        }
-
-        edge_attr = {
-            'fontname':'Helvetica',
-            'fontsize':'9.5'
-        }
-        graph_attr = {}
-        node_attr =  {}
-        edge_attr = {}
-
-        fg = Digraph("Abinit project",
-            graph_attr=graph_attr,
-            node_attr=node_attr,
-            edge_attr=edge_attr,
-            #format='svg',
-            engine="dot" if engine == "automatic" else engine,
+        fg = Digraph(name="Fortran file: %s" % self.name,
+                     graph_attr=graph_attr, node_attr=node_attr, edge_attr=edge_attr,
+                     engine="dot" if engine == "automatic" else engine,
         )
 
         # Set graph attributes.
-        #fg.attr(label="%s@%s" % (self.__class__.__name__, self.relworkdir))
-        #fg.attr(label=repr(self))
-        fg.attr(label=self.name)
-        #fg.attr(fontcolor="white", bgcolor='purple:pink')
-        fg.attr(rankdir="LR", pagedir="BL")
-        #fg.attr(constraint="false", pack="true", packMode="clust")
+        fg.attr(label=self.name, rankdir="LR", pagedir="BL") # constraint="false", pack="true", packMode="clust")
         fg.node_attr.update(color='lightblue2', style='filled')
 
-        # Add input attributes.
-        #if graph_attr is not None: fg.graph_attr.update(**graph_attr)
-        #if node_attr is not None: fg.node_attr.update(**node_attr)
-        #if edge_attr is not None: fg.edge_attr.update(**edge_attr)
-
-        def node_kwargs(node):
-            return node_attr
-            return dict(
-                #shape="circle",
-                #color=node.color_hex,
-                #label=(str(node) if not hasattr(node, "pos_str") else
-                #    node.pos_str + "\n" + node.__class__.__name__),
-            )
-
-        edge_kwargs = dict(arrowType="vee", style="solid")
-        cluster_kwargs = dict(rankdir="LR", pagedir="BL", style="rounded", bgcolor="azure2")
-
-        # Build clusters representing directories
+        # Build clusters representing directories.
         all_nodes = sorted([self] + self.all_used_mods + self.all_usedby_mods, key=lambda o: o.dirname)
         dir2nodes = defaultdict(list)
         for node in all_nodes:
             dir2nodes[node.dirname].append(node)
 
         for dirname, nodes in dir2nodes.items():
-            #print(dirname, nodes)
+            # Create cluster.
             cluster_name = "cluster%s" % dirname
             with fg.subgraph(name=cluster_name) as wg:
-                wg.graph_attr.update(**graph_attr)
-                wg.node_attr.update(**node_attr)
-                wg.edge_attr.update(**edge_attr)
-                #wg.attr(**cluster_kwargs)
                 wg.attr(label=os.path.basename(dirname))
                 for node in nodes:
-                    wg.node(node.name) #, **node_attr) #, **node_kwargs(child))
+                    wg.node(node.name)
 
         for mod in self.all_used_mods:
-            fg.edge(mod.name, self.name) #, label=edge_label, # color=self.color_hex,
+            fg.edge(self.name, mod.name)
+
         for child in self.all_usedby_mods:
-            fg.edge(self.name, child.name) #, label=edge_label, # color=self.color_hex,
+            fg.edge(child.name, self.name)
 
         return fg
 
 
-class AbinitProject(object):
+class AbinitProject(NotebookWriter):
     """
     This object defines the main entry point for client code.
     It contains a dictionary (fort_files) mapping the basename of the Fortran files to FortranFile instances.
@@ -425,8 +373,8 @@ class AbinitProject(object):
     # and the ABI_SRC_BLT variable declared there.
     BUILDSYS_POSTPROCESS_FILES = {"m_build_info.F90", "m_optim_dumper.F90"}
 
-    # Marcos used to import modules in abinit libraries.
-    # Must be consistent with CPP version. see incs/abi_common.h
+    # Macros used to import modules in abinit libraries.
+    # Must be consistent with CPP version. See incs/abi_common.h
     MACROS = {
         # Abinit MACROS.
         "ABI_ASYNC": ",asynchronous",
@@ -448,7 +396,6 @@ class AbinitProject(object):
         The string contains the python major version to avoid possible incompatibilites
         in the pickle protocol that may occur when reading a pickle file produced by another python interpreter.
         """
-        import sys
         return "_project_py%s.pickle" % sys.version_info[0]
 
     @classmethod
@@ -488,7 +435,8 @@ class AbinitProject(object):
                 mod = imp.load_source(abinit_src, abinit_src)
                 for basename in filter_fortran(mod.sources):
                     if basename in name2path:
-                        raise RuntimeError("Found two Fortran files with same basename `%s`" % basename)
+                        raise RuntimeError("Found two Fortran files with same basename `%s` and other in dir `%s`\n"
+                          % (name2path[basename], abinit_src))
 
                     if basename in self.BUILDSYS_POSTPROCESS_FILES:
                         # Here I need a file that provides the public API and looks like valid Fortran
@@ -515,9 +463,7 @@ class AbinitProject(object):
         self.correlate()
 
     def _pool_f(self, item):
-        #import sys
-        #sys.stdout = open(str(os.getpid()) + ".out", "w")
-        #sys.stderr = open(str(os.getpid()) + ".err", "w")
+        #sys.stdout, sys.stderr = open(str(os.getpid()) + ".out", "w"), open(str(os.getpid()) + ".err", "w")
         basename, path = item
         return (basename, FortranFile.from_path(path, macros=self.MACROS, verbose=self.verbose))
 
@@ -525,33 +471,31 @@ class AbinitProject(object):
         print("Building dependency graph ...")
         start = time.time()
 
-        # def correlate()
-        # Build dependency graph
-        # TODO: check for cyclic dependencies. ?
+        # Build dependency graph TODO: check for cyclic dependencies?
         for fort_file in self.fort_files.values():
             for use_name in fort_file.all_uses:
                 if use_name in EXTERNAL_MODS: continue
                 try:
                     used_mod = self.all_modules[use_name]
                 except KeyError:
-                    print(self.all_modules.keys())
+                    #print(self.all_modules.keys())
                     raise RuntimeError((
                         "Cannot find Fortran module `%s`\n used by `%s`\nin Abinit project.\n" +
                         "It may be a syntax error or a stale import if you've removed the module.\n" +
-                        "If it's an external module (e.g. mpi), add it to the EXTERNAL_MODS list in ~abinit/src/fkiss/project.py."
+                        "If it's an external module (e.g. mpi), add it to the EXTERNAL_MODS list in ~abinit/fkiss/project.py."
                         ) % (use_name, fort_file.path))
                 fort_file.all_used_mods.append(used_mod)
 
-                # FIXME This trick is needed for F90.in files that will be post-processed by the build system
+                # This trick is needed for F90.in files that will be post-processed by the build system
                 key = os.path.basename(used_mod.path)
                 if key.endswith(".F90.in"): key = key[:-3]
                 self.fort_files[key].all_usedby_mods.append(fort_file)
 
-        pub_procs = self.all_public_procedures()
+        pub_procs = self.get_all_public_procedures()
         all_interfaces = self.get_all_interfaces()
         miss = []
         for fort_file in self.fort_files.values():
-            for proc in fort_file.iter_procedures():
+            for proc in fort_file.all_public_procedures.values():
                 for child_name in proc.children:
                     try:
                         pub_procs[child_name].parents.append(proc)
@@ -628,28 +572,29 @@ class AbinitProject(object):
         """List with all top level directories containing subdirectories with F90 file."""
         return [
             os.path.join(self.top, "shared", "common", "src"),
+            # Exclude libpaw because shared/common/39_libpaw --> shared/libpaw/src
+            # and we don't want duplicated entries.
             #os.path.join(self.top, "shared", "libpaw"),
             os.path.join(self.top, "src"),
         ]
 
     def get_dirpaths(self):
         """
-        Return list of directory names with source files.
+        Return list of directory names containing source files.
         """
         l = []
         for src_dir in self.all_src_dirs:
             assert os.path.isdir(src_dir)
-            #print("src_dir", src_dir)
-            #print(os.listdir(src_dir))
+            #print("src_dir", src_dir) #, os.listdir(src_dir))
             dpaths = [os.path.join(src_dir, d) for d in os.listdir(src_dir)]
-            s = [d for d in dpaths if os.path.isdir(d) and
-                 os.path.isfile(os.path.join(d, "abinit.src"))]
-            #print(s)
+            s = [d for d in dpaths if os.path.isdir(d)
+                 and os.path.isfile(os.path.join(d, "abinit.src"))
+                 #and os.path.basename(d) not in black_list
+            ]
+
             l += s
-            #l += [d for d in os.listdir(src_dir) if os.path.isdir(d) and not os.path.islink(d) and
-            #     os.path.isfile(os.path.join(d, "abinit.src"))]
 
-
+        #print(sorted(([os.path.basename(f) for f in l])))
         # 98_main does not have abinit.src so we have to add it here.
         return sorted(l + [os.path.join(self.top, "src", "98_main")])
 
@@ -661,8 +606,7 @@ class AbinitProject(object):
             2. source files have been changed
         """
         if set(self.dirpaths) != set(self.get_dirpaths()): return True
-        # TODO
-        # Return immediately if new files have been added...
+        # FIXME: Return immediately if new files have been added...
 
         # Compare time of most recent content modification.
         try:
@@ -671,19 +615,24 @@ class AbinitProject(object):
         except FileNotFoundError:
             return True
 
-    def fort_files_indir(self, dirname):
-        dir2files = self.groupby_dirname()
-        if dirname.endswith(os.sep): dirname = dirname[:-1]
-        #dirname = os.path.join(self.srcdir, os.path.basename(dirname))
-        return dir2files[dirname]
+    #def fort_files_indirname(self, dirname):
+    #    if dirname.endswith(os.sep): dirname = dirname[:-1]
+    #    dir2files = self.groupby_dirname()
+    #    return dir2files[dirname]
 
     def groupby_dirname(self):
         """
-        Return dictionary mapping dirname --> List of FortranFile.
+        Return dictionary {dirname --> [List of FortranFile in dirname]}
+
+        Note how we use the dirname of the file as key in the dict.
+        This is the trick that allows us to access source files in shared/common/src
+        using e.g. "02_clib" instead of the shared/common/src/02_clib.
         """
         dir2files = defaultdict(list)
         for fort_file in self.fort_files.values():
             dir2files[fort_file.dirname].append(fort_file)
+        dir2files = {k: dir2files[k] for k in sorted(dir2files.keys())}
+
         return OrderedDict(dir2files.items())
 
     def iter_dirname_fortfile(self):
@@ -693,9 +642,9 @@ class AbinitProject(object):
             for fort_file in fort_files:
                 yield dirname, fort_file
 
-    def all_public_procedures(self):
+    def get_all_public_procedures(self):
         """
-        Dictionary mapping name --> Procedure
+        Return Dictionary mapping name --> Procedure
         """
         # FIXME: Check that there's no name collision
         d = {}
@@ -703,17 +652,22 @@ class AbinitProject(object):
             for a in ["modules", "programs", "subroutines", "functions"]:
                 for p in getattr(f, a):
                     d.update({p.name: p for p in p.public_procedures})
-        return d
 
-    def get_all_datatypes(self):
+        return {k: d[k] for k in sorted(d.keys())}
+
+    def get_all_datatypes_and_fortfile(self):
         """
-        List with all datatypes available in the project.
+        Dictionary name -> datatype with all datatypes available in the project.
         """
-        dtypes = []
+        dtypes = {}
         for f in self.fort_files.values():
-            for p in getattr(f, "modules"):
-                dtypes.extend(p.types)
-        return dtypes
+            #dtypes.update(self.all_datatypes)
+            for mod in f.modules:
+                for dtype in mod.types:
+                    assert dtype.name not in dtypes
+                    dtypes[dtype.name] = (dtype, f)
+
+        return {k: dtypes[k] for k in sorted(dtypes.keys())}
 
     def get_all_interfaces(self):
         """
@@ -721,9 +675,10 @@ class AbinitProject(object):
         """
         d = {}
         for f in self.fort_files.values():
-            for p in getattr(f, "modules"):
-                d.update({i.name: i for i in p.interfaces})
-        return d
+            for mod in f.modules:
+                d.update({i.name: i for i in mod.interfaces})
+
+        return {k: d[k] for k in sorted(d.keys())}
 
     def print_interfaces(self, what=None, verbose=0):
         """
@@ -791,14 +746,12 @@ class AbinitProject(object):
         return obj.ancestor
 
     def print_dir(self, dirname, verbose=0):
-        #dirname = os.path.basename(dirname).replace(os.sep, "")
-        #dirname = dirname.replace(os.sep, "")
-        #files = [f for f in self.fort_files.values() if os.path.basename(f.dirname) == dirname]
-        dir2files = self.groupby_dirname()
         if dirname.endswith(os.sep): dirname = dirname[:-1]
-        print("Printing directory:", dirname)
 
-        # Find parent directory 
+        print("Printing info on directory:", dirname)
+        dir2files = self.groupby_dirname()
+
+        # Find parent directory
         for src_dir in self.all_src_dirs:
             dirname = os.path.join(src_dir, os.path.basename(dirname))
             if dirname in dir2files: break
@@ -806,9 +759,9 @@ class AbinitProject(object):
             raise ValueError("Cannot find dirname `%s` in project" % dirname)
 
         if verbose:
-            for f in dir2files[dirname]:
-                print(f.to_string(verbose=verbose, with_dataframe=False))
-                print("")
+            if verbose > 1:
+                for f in dir2files[dirname]:
+                    print(f.to_string(verbose=verbose, with_stats=False), "\n\n")
 
         df = self.get_stats_dir(dirname)
         print(df)
@@ -839,14 +792,6 @@ class AbinitProject(object):
     #            if child.depends_on(fort_file):
     #                cycles[fort_file].append(child)
     #    return cycles
-
-    def check_dirlevel(self):
-        errors = []
-        for fort_file in self.fort_files.values():
-            for child in fort_file.all_usedby_mods:
-                if child.dirlevel < fort_file.dirlevel:
-                    errors.append("%s should be below level: %s" % (repr(child), fort_file.dirlevel))
-        return "\n".join(errors)
 
     def find_allmods(self, head_path, include_files_in_dirs=True):
         """
@@ -980,8 +925,6 @@ class AbinitProject(object):
         if dryrun:
             print(fobj.getvalue())
         else:
-            #print("For the time being, binaries.conf is not generated by abisrc.py")
-            #shutil.copyfile(binconf_path, binconf_path + ".bkp")
             with open(binconf_path, "wt") as fh:
                 fh.write(fobj.getvalue())
         fobj.close()
@@ -996,8 +939,9 @@ class AbinitProject(object):
             abinit.dir --> Dependencies outside the directory
             abinit.amf --> File with EXTRA_DIST
         """
+        # Group Fortfiles by dirname
         dir2files = self.groupby_dirname()
-        # Sort...
+
 
         template = """\
 # Dependencies ({kind}) of directory {directory}
@@ -1093,15 +1037,6 @@ class AbinitProject(object):
 
         return count
 
-    #def canimove_file(self, filename, dest_level):
-    #    fort_file = self.fort_files[os.path.basename(filename)]
-
-    #def canimove_dir(self, dirname, dest_level):
-    #    dir2files = sel.groupby_dirname()
-    #    dirpath = os.path.join(self.srcdir, dirname)
-    #    if dirpath.endswith(os.sep): dirpath = dirpath[:-1]
-    #    for fort_file in dir2files[dirpath]:
-
     def validate(self, verbose=0):
         """
         Validate project. Return exit status.
@@ -1118,10 +1053,14 @@ class AbinitProject(object):
                 cprint("[%s] Found %d procedure(s) outside modules!" % (fort_file.name, count), "red")
                 retcode += 1
 
-        errstr = self.check_dirlevel()
-        if errstr:
-            cprint(errstr, "red")
-            retcode += 1
+        # check_dirlevel()
+        for fort_file in self.fort_files.values():
+            for child in fort_file.all_usedby_mods:
+                if child.dirlevel < fort_file.dirlevel:
+                    cprint("%s should be below level: %s" % (repr(child), fort_file.dirlevel), "red")
+                    retcode += 1
+
+        #retcode += self.check_abirules(verbose=verbose)
 
         cprint("retcode %d" % retcode, "green" if retcode == 0 else "red")
         return retcode
@@ -1148,27 +1087,24 @@ class AbinitProject(object):
         # Find files with procedures.
         paths = sorted(set(p.path for p in obj.parents))
         if verbose: print(paths)
-        # TODO
-        #from pymods.tools import Editor
+        # TODO from pymods.tools import Editor
         from fkiss.tools import Editor
         return Editor().edit_files(paths, ask_for_exit=True)
 
-    def get_stats_file(self, filename, as_dataframe=True):
-        return self.fort_files[os.path.basename(filename)].get_stats(as_dataframe=as_dataframe)
+    def get_stats_file(self, filename, as_dict=False):
+        return self.fort_files[os.path.basename(filename)].get_stats(as_dict=as_dict)
 
     def get_stats_dir(self, dirname):
         """
         Return dataframe with statistics about directory.
         """
         dir2files = self.groupby_dirname()
-        #print(dirname)
-        #print(dir2files.keys())
         dirpath = os.path.join(self.top, dirname)
         if dirpath.endswith(os.sep): dirpath = dirpath[:-1]
         index, rows = [], []
         for fort_file in sorted(dir2files[dirpath], key=lambda f: f.basename):
             index.append(fort_file.basename)
-            rows.append(fort_file.get_stats())
+            rows.append(fort_file.get_stats(as_dict=True))
 
         import pandas as pd
         return pd.DataFrame(rows, index=index, columns=list(rows[0].keys() if rows else None))
@@ -1182,7 +1118,7 @@ class AbinitProject(object):
                 df = self.get_stats_dir(dirpath)
                 df_list.append(df)
             except Exception as exc:
-                print("exception for dirpath: %s\n%s" % (dirpath, exc))
+                print("Exception for dirpath: %s\n%s" % (dirpath, exc))
                 raise exc
 
         import pandas as pd
@@ -1199,7 +1135,7 @@ class AbinitProject(object):
                 if all(mod.name not in ffile.all_uses for ffile in self.fort_files.values()):
                     orphans.append(mod)
 
-            for proc in fort_file.iter_procedures(visibility="public"):
+            for proc in fort_file.all_public_procedures.values():
                 # programs are orphan by definition
                 # function callers are difficult to detect.
                 if proc.is_program or proc.is_function: continue
@@ -1216,6 +1152,72 @@ class AbinitProject(object):
                 for o in orphans:
                     print("\t", repr(o))
 
+    def get_parent_dirs_of_dirname(self, dirname):
+        """
+        {parent_dirname --> [{module_name_in_parent_dirname: [list_of_modules_in_dirname]}]
+        """
+        if dirname.endswith(os.sep): dirname = dirname[:-1]
+
+        dir2files = self.groupby_dirname()
+        for src_dir in self.all_src_dirs:
+            dirpath = os.path.join(src_dir, os.path.basename(dirname))
+            if dirpath in dir2files: break
+        else:
+            raise ValueError("Cannot find dirname `%s` in project" % dirname)
+
+        fort_files_indirname = dir2files[dirpath]
+        #used_dirs = defaultdict(list)
+        #dirlevel = fort_files_indirname[0].dirlevel
+
+        for parent_dirname, parent_fort_files in dir2files.items():
+            #parent_dirlevel = parent_fort_files[0].dirlevel
+            #if parent_dirlevel < dirlevel: continue
+            for parent_fort_file in parent_fort_files:
+                for use_name in parent_fort_file.all_uses:
+                    if use_name in EXTERNAL_MODS: continue
+                    #if use_name in
+                    #used_dir[parent_dirname].append(
+
+        # Order keys.
+        #return {k: used_dirs[k] for k in sorted(used_dirs.keys())}
+
+    def get_dirs_used_by_dirname(self, dirname):
+        """
+        {used_dirname --> [{module_name_in_used_dirname: [list_of_modules_in_dirname]}]
+        """
+        if dirname.endswith(os.sep): dirname = dirname[:-1]
+
+        dir2files = self.groupby_dirname()
+        for src_dir in self.all_src_dirs:
+            dirpath = os.path.join(src_dir, os.path.basename(dirname))
+            if dirpath in dir2files: break
+        else:
+            raise ValueError("Cannot find dirname `%s` in project" % dirname)
+
+        fort_files_indirname = dir2files[dirpath]
+
+        # {uses_dirname --> [{module_name_in_used_dirname: [list_of_modules_in_parent_dirname]}]
+        used_dirs = defaultdict(list)
+
+        for fort_file in fort_files_indirname:
+            for use_name in fort_file.all_uses:
+                if use_name in EXTERNAL_MODS: continue
+                used_mod = self.all_modules[use_name]
+                used_dirs[used_mod.dirname].append(used_mod.name)
+
+        for k, v in used_dirs.items():
+            d = {k: [] for k in sorted(set(used_dirs[k]))}
+            for fort_file in fort_files_indirname:
+                for use_name in fort_file.all_uses:
+                    if use_name in EXTERNAL_MODS: continue
+                    if use_name in d:
+                        d[use_name].append(fort_file.name)
+
+            used_dirs[k] = {k: list(set(v)) for k, v in d.items()}
+
+        # Order keys.
+        return {k: used_dirs[k] for k in sorted(used_dirs.keys())}
+
     def get_graphviz_dir(self, dirname, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
         """
         Generate dependency graph for directory `dirname` in the DOT language
@@ -1228,29 +1230,29 @@ class AbinitProject(object):
 
         Returns: graphviz.Digraph <https://graphviz.readthedocs.io/en/stable/api.html#digraph>
         """
-        dir2files = self.groupby_dirname()
-        #print(dir2files.keys())
-        for src_dir in self.all_src_dirs:
-            dirpath = os.path.join(src_dir, os.path.basename(dirname))
-            if dirpath in dir2files: break
-        else:
-            raise ValueError("Cannot find dirname `%s` in project" % dirname)
-
-        parent_dirs, child_dirs = [], []
-        for fort_file in dir2files[dirpath]:
-            for use_name in fort_file.all_uses:
-                if use_name in EXTERNAL_MODS: continue
-                used_mod = self.all_modules[use_name]
-                parent_dirs.append(os.path.basename(used_mod.dirname))
-
-        parent_dirs = sorted(set(parent_dirs))
-        print("parent_dirs:", parent_dirs)
-        raise NotImplementedError()
+        if dirname.endswith(os.sep): dirname = dirname[:-1]
+        used_dirs = self.get_dirs_used_by_dirname(dirname)
 
         # https://www.graphviz.org/doc/info/
-        #from graphviz import Digraph
-        #fg = Digraph("Directory: %s" % dirname, engine="dot" if engine == "automatic" else engine)
-        #return fg
+        from graphviz import Digraph
+        fg = Digraph(name="Connections of dir: %s" % dirname,
+            graph_attr=graph_attr, node_attr=node_attr, edge_attr=edge_attr,
+            engine="dot" if engine == "automatic" else engine,
+        )
+
+        # Set graph attributes.
+        fg.attr(label="Connections of dir: %s" % dirname,
+                rankdir="LR", pagedir="BL") # constraint="false", pack="true", packMode="clust")
+        fg.node_attr.update(color='lightblue2', style='filled')
+
+        target = os.path.basename(dirname)
+        fg.node(name=target)
+        for used_dirname in used_dirs:
+            fg.edge(target, used_dirname)
+        #for parent_dir in parent_dirs:
+        #    fg.edge(target, used_dirname)
+
+        return fg
 
     def get_graphviz_pubname(self, name, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
         """
@@ -1266,13 +1268,35 @@ class AbinitProject(object):
         Returns: graphviz.Digraph <https://graphviz.readthedocs.io/en/stable/api.html#digraph>
         """
         obj = self.find_public_entity(name)
-        if obj is None: return None
 
-        print(obj)
-        cprint("graphviz for public entities not yet available", "yellow")
-        obj.parents
-        obj.children
-        #return obj.get_graphviz(engine=engine, graph_attr=graph_attr, node_attr=node_attr, edge_attr=edge_attr)
+        if obj is None:
+            cprint("Cannot find public entity `%s` in Abinit project." % name, "red")
+            return None
+        if not obj.is_procedure:
+            cprint("Only procedures can be visualized with graphviz. Received class: %s" % obj.__class__,
+                   "yellow")
+            return None
+
+        # https://www.graphviz.org/doc/info/
+        from graphviz import Digraph
+        fg = Digraph(name="Connections of %s: %s" % (obj.__class__.__name__, obj.name),
+                     graph_attr=graph_attr, node_attr=node_attr, edge_attr=edge_attr,
+                     engine="dot" if engine == "automatic" else engine,
+        )
+
+        # Set graph attributes.
+        fg.attr(label="Connections of %s: %s" % (obj.__class__.__name__, obj.name),
+                rankdir="LR", pagedir="BL") # constraint="false", pack="true", packMode="clust")
+        fg.node_attr.update(color='lightblue2', style='filled')
+
+        target = obj.name
+        fg.node(name=target)
+        for child in obj.children:
+            fg.edge(target, child)
+        for parent in obj.parents:
+            fg.edge(parent.name, target)
+
+        return fg
 
     def master(self):
         return """\
@@ -1302,3 +1326,46 @@ In that moment, the hardware designer achieved enlightenment.
 
 From http://www.catb.org/esr/writings/unix-koans/
 """
+
+    def write_notebook(self, nbpath=None):
+        """
+        Write a jupyter notebook to ``nbpath``. If nbpath is None, a temporary file in the current
+        working directory is created. Return path to the notebook.
+        """
+        nbformat, nbv, nb = self.get_nbformat_nbv_nb(title=None)
+
+        nb.cells.extend([
+            nbv.new_markdown_cell("## Abinit Project"),
+            nbv.new_code_cell("""
+from fkiss.project import AbinitProject
+proj = AbinitProject.pickle_load(filepath=None)
+""",),
+            nbv.new_code_cell('proj.get_graphviz_dir("41_geometry")'),
+            nbv.new_code_cell('proj.get_graphviz_pubname("crystal_init")'),
+            nbv.new_code_cell('proj.get_graphviz_pubname("fourdp")'),
+            nbv.new_code_cell('proj.get_graphviz_pubname("m_geometry")'),
+            nbv.new_code_cell('proj.get_stats()'),
+            nbv.new_code_cell('proj.get_stats_dir("src/41_geometry")'),
+            nbv.new_code_cell("""
+# To visualize the panel dashboard inside the notebook, uncomment the below lines.
+#
+# import panel as pn
+# pn.extension()
+# project.get_panel()
+"""),
+        ])
+
+        return self._write_nb_nbpath(nb, nbpath)
+
+    def yield_figs(self, **kwargs):  # pragma: no cover
+        # TODO: Activate this
+        return None
+
+    def get_panel(self):
+        """Return tabs with widgets to interact with the DDB file."""
+        from fkiss.viewer import ProjectViewer
+        return ProjectViewer(self).panel
+
+    def get_procedure_viewer(self):
+        """Return tabs with widgets to interact with the DDB file."""
+        return ProcedureViewer(self).get_tabs()

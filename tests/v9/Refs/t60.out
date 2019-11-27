@@ -1,6 +1,6 @@
 
-.Version 8.11.7 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Sep 2019.
-- ( at 15h55 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h43 )
   
 - input  file    -> t60.in
 - output file    -> t60.out
@@ -446,12 +446,12 @@ P           mkmem           8
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00   -6.028390E-19   -6.035515E-19
-         1         2   -6.028390E-19    1.042939E+00    6.021265E-19
-         1         3    6.028390E-19    6.028390E-19    1.042939E+00
-         2         1   -1.038797E+00   -4.262070E-16   -4.267092E-16
-         2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
-         2         3    4.262070E-16    4.262070E-16   -1.038797E+00
+         1         1    1.042939E+00    1.625259E-18    1.628211E-18
+         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
+         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
+         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
+         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
+         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -496,8 +496,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -511,8 +511,8 @@ All the independent perturbations are available
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/09-F.psp
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -666,12 +666,12 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00   -6.028390E-19   -6.035515E-19
-         1         2   -6.028390E-19    1.042939E+00    6.021265E-19
-         1         3    6.028390E-19    6.028390E-19    1.042939E+00
-         2         1   -1.038797E+00   -4.262070E-16   -4.267092E-16
-         2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
-         2         3    4.262070E-16    4.262070E-16   -1.038797E+00
+         1         1    1.042939E+00    1.625259E-18    1.628211E-18
+         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
+         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
+         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
+         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
+         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -765,12 +765,12 @@ Interpolation of the electron-phonon coupling potential completed
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00   -6.028390E-19   -6.035515E-19
-         1         2   -6.028390E-19    1.042939E+00    6.021265E-19
-         1         3    6.028390E-19    6.028390E-19    1.042939E+00
-         2         1   -1.038797E+00   -4.262070E-16   -4.267092E-16
-         2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
-         2         3    4.262070E-16    4.262070E-16   -1.038797E+00
+         1         1    1.042939E+00    1.625259E-18    1.628211E-18
+         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
+         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
+         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
+         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
+         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -972,12 +972,12 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00   -6.028390E-19   -6.035515E-19
-         1         2   -6.028390E-19    1.042939E+00    6.021265E-19
-         1         3    6.028390E-19    6.028390E-19    1.042939E+00
-         2         1   -1.038797E+00   -4.262070E-16   -4.267092E-16
-         2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
-         2         3    4.262070E-16    4.262070E-16   -1.038797E+00
+         1         1    1.042939E+00    1.625259E-18    1.628211E-18
+         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
+         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
+         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
+         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
+         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -1123,7 +1123,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
    2  -3.149    0.000   4163.1   15.833
    3  -1.171    0.121      2.7    1.978
    4  -1.171    0.121      2.7    0.000
-   5  13.987    0.005     60.5   15.158
+   5  13.987    0.005     60.7   15.158
    6  15.747    0.202      1.6    1.760
    7  16.382    0.104      3.2    0.635
    8  19.258    0.194      1.7    2.876
@@ -1178,12 +1178,12 @@ Transport calculation results
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00   -6.028390E-19   -6.035515E-19
-         1         2   -6.028390E-19    1.042939E+00    6.021265E-19
-         1         3    6.028390E-19    6.028390E-19    1.042939E+00
-         2         1   -1.038797E+00   -4.262070E-16   -4.267092E-16
-         2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
-         2         3    4.262070E-16    4.262070E-16   -1.038797E+00
+         1         1    1.042939E+00    1.625259E-18    1.628211E-18
+         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
+         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
+         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
+         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
+         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -1296,12 +1296,12 @@ Interpolation of the electron-phonon coupling potential completed
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00   -6.028390E-19   -6.035515E-19
-         1         2   -6.028390E-19    1.042939E+00    6.021265E-19
-         1         3    6.028390E-19    6.028390E-19    1.042939E+00
-         2         1   -1.038797E+00   -4.262070E-16   -4.267092E-16
-         2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
-         2         3    4.262070E-16    4.262070E-16   -1.038797E+00
+         1         1    1.042939E+00    1.625259E-18    1.628211E-18
+         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
+         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
+         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
+         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
+         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -1474,12 +1474,12 @@ Transport calculation results
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00   -6.028390E-19   -6.035515E-19
-         1         2   -6.028390E-19    1.042939E+00    6.021265E-19
-         1         3    6.028390E-19    6.028390E-19    1.042939E+00
-         2         1   -1.038797E+00   -4.262070E-16   -4.267092E-16
-         2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
-         2         3    4.262070E-16    4.262070E-16   -1.038797E+00
+         1         1    1.042939E+00    1.625259E-18    1.628211E-18
+         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
+         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
+         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
+         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
+         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -1633,12 +1633,12 @@ Transport calculation results
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00   -6.028390E-19   -6.035515E-19
-         1         2   -6.028390E-19    1.042939E+00    6.021265E-19
-         1         3    6.028390E-19    6.028390E-19    1.042939E+00
-         2         1   -1.038797E+00   -4.262070E-16   -4.267092E-16
-         2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
-         2         3    4.262070E-16    4.262070E-16   -1.038797E+00
+         1         1    1.042939E+00    1.625259E-18    1.628211E-18
+         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
+         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
+         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
+         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
+         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -1821,12 +1821,12 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00   -1.084758E-18   -1.087344E-18
-         1         2   -1.084758E-18    1.042939E+00    1.082171E-18
-         1         3    1.084758E-18    1.084758E-18    1.042939E+00
-         2         1   -1.038797E+00   -2.253431E-16   -2.256333E-16
-         2         2   -2.253431E-16   -1.038797E+00    2.250528E-16
-         2         3    2.253431E-16    2.253431E-16   -1.038797E+00
+         1         1    1.042939E+00    1.625259E-18    1.628211E-18
+         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
+         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
+         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
+         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
+         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -1913,12 +1913,12 @@ All the independent perturbations are available
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00   -1.084758E-18   -1.087344E-18
-         1         2   -1.084758E-18    1.042939E+00    1.082171E-18
-         1         3    1.084758E-18    1.084758E-18    1.042939E+00
-         2         1   -1.038797E+00   -2.253431E-16   -2.256333E-16
-         2         2   -2.253431E-16   -1.038797E+00    2.250528E-16
-         2         3    2.253431E-16    2.253431E-16   -1.038797E+00
+         1         1    1.042939E+00    1.625259E-18    1.628211E-18
+         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
+         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
+         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
+         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
+         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -2264,10 +2264,10 @@ P           mkmem           8
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          8.5  wall=          8.7
+- Proc.   0 individual time (sec): cpu=         27.1  wall=         27.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  11 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         21.4  wall=         21.4
+.Delivered  16 WARNINGs and  15 COMMENTs to log file.
++Overall time at end (sec) : cpu=         27.1  wall=         27.2
