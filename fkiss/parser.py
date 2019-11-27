@@ -15,6 +15,29 @@ from .tools import lazy_property
 from .regex import HasRegex
 
 
+def terminal_highlight(s, bg="dark"):
+    try:
+        from pygments import highlight
+    except ImportError:
+        return s
+
+    from pygments.lexers import FortranLexer
+    from pygments.formatters import TerminalFormatter
+    return highlight(s, FortranLexer(), TerminalFormatter(bg=bg))
+
+
+def fort2html(s, full=True):
+    """Convert string with Fortran code to HTML using pygments."""
+    try:
+        from pygments import highlight
+    except ImportError:
+        return s
+
+    from pygments.lexers import FortranLexer
+    from pygments.formatters import HtmlFormatter
+    return highlight(s, FortranLexer(), HtmlFormatter(full=full))
+
+
 class Node(object):
 
     def __repr__(self):
@@ -27,16 +50,10 @@ class Node(object):
         # FIXME: This is ABC
         return self.to_string()
 
-    @staticmethod
-    def terminal_highlight(s, bg="dark"):
-        try:
-            from pygments import highlight
-        except ImportError:
-            return s
-
-        from pygments.lexers import FortranLexer
-        from pygments.formatters import TerminalFormatter
-        return highlight(s, FortranLexer(), TerminalFormatter(bg=bg))
+    @lazy_property
+    def is_procedure(self):
+        """Subroutine/function/module/program."""
+        return isinstance(self, Procedure)
 
 
 class FortranVariable(Node):
@@ -113,9 +130,11 @@ class Datatype(Node, HasRegex):
         self.lines = lines
         self._analyzed = False
 
+    def _repr_html_(self):
+        return fort2html(self.preamble + "\n".join(self.lines))
+
     def to_string(self, verbose=0):
-        s = "\n".join(self.lines)
-        return s
+        return "\n".join(self.lines)
 
     def check_abirules(self, verbose=0):
         retcode = 0
@@ -124,7 +143,7 @@ class Datatype(Node, HasRegex):
     def analyze(self, verbose=0):
         if self._analyzed: return
         self._analyzed = True
-        if verbose: print(self.terminal_highlight("\n".join(self.lines)))
+        if verbose: print(terminal_highlight("\n".join(self.lines)))
         self.variables = OrderedDict()
         doc = []
         names = None
@@ -247,9 +266,9 @@ class Procedure(Node):
 
     contains: List of contained `Procedure`
     local_uses: List of strings with the name of the modules used (explicit) by this procedure
-    includes: List of strings with the name of the included file.
+    includes: List of strings with the name of the included files.
     parents: List of `Procedure` calling this one
-    children: List of string with the name of the subroutines called by this procedure.
+    children: List of strings with the name of the subroutines called by this procedure.
     """
 
     def __init__(self, name, ancestor, preamble, line="", prefix=None, arg_names=None, path="<UnknownFile>"):
@@ -279,6 +298,11 @@ class Procedure(Node):
         # The real value will be set by analyzing the module.
         self.visibility = "public"
         #self.has_implicit_none = False
+
+    def _repr_html_(self):
+        prototype = self.line.replace("(", "(\n\t").replace(",", ",\n\t").replace(")", "\n)")
+        #prototype = proto.replace(" ", "")
+        return fort2html(prototype + 2 * "\n" + self.preamble)
 
     @lazy_property
     def is_program(self):
@@ -329,7 +353,11 @@ class Procedure(Node):
     @lazy_property
     def dirname(self):
         """name of the directory in which the procedure is located."""
-        return None if self.path is None else os.path.basename(os.path.dirname(self.path))
+        if self.path is None: return None
+        dirname = os.path.basename(os.path.dirname(self.path))
+        if dirname == "src" and os.path.join("shared", "libpaw") in self.path:
+            dirname = "39_libpaw"
+        return dirname
 
     @lazy_property
     def dirlevel(self):
@@ -417,9 +445,9 @@ class Procedure(Node):
 
         if verbose > 1:
             app("")
-            app("number of Fortran lines:%s" % self.num_f90lines)
-            app("number of doc lines: %s" % self.num_doclines)
-            app("number of OpenMP statements: %s" % self.num_omp_statements)
+            app("Number of Fortran lines:%s" % self.num_f90lines)
+            app("Number of doc lines: %s" % self.num_doclines)
+            app("Number of OpenMP statements: %s" % self.num_omp_statements)
             # Add directory of children
             #dirnames = sorted(set(os.path.basename(p.dirname) for p in self.children))
             #app("CHILDREN_DIRS:\n%s\n" % w.fill(", ".join(dirnames)))
