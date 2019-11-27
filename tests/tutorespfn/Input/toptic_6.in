@@ -27,16 +27,16 @@
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
 #%% [files]
 #%% files_to_test =
-#%%   toptic_6_0001_0002_0003-ChiEOAbs.out,  tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy;
-#%%   toptic_6_0001_0002_0003-ChiEOIm.out,   tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy;
-#%%   toptic_6_0001_0002_0003-ChiEORe.out,   tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy;
-#%%   toptic_6_0001_0002_0003-ChiEOTotIm.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy;
-#%%   toptic_6_0001_0002_0003-ChiEOTotRe.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy;
+#%%   toptic_6_0001_0002_0003-ChiEOAbs.out, tolnlines= 16, tolabs=  7.000e-04, tolrel=  7.000e-04, fld_options = -easy;
+#%%   toptic_6_0001_0002_0003-ChiEOIm.out,  tolnlines= 16, tolabs=  7.000e-04, tolrel=  7.000e-04, fld_options = -easy;
+#%%   toptic_6_0001_0002_0003-ChiEORe.out,  tolnlines= 16, tolabs=  7.000e-04, tolrel=  7.000e-04, fld_options = -easy;
+#%%   toptic_6_0001_0002_0003-ChiEOTotIm.out,  tolnlines= 16, tolabs=  7.000e-04, tolrel=  7.000e-04, fld_options = -easy;
+#%%   toptic_6_0001_0002_0003-ChiEOTotRe.out,  tolnlines= 16, tolabs=  7.000e-04, tolrel=  7.000e-04, fld_options = -easy;
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = S. Sharma, X. Gonze, N. A. Pike
 #%% keywords = linear electro-optical coefficient
-#%% description = Input file for optic code.
+#%% description = Input file for optic code to calculate the linear electro-optical coefficient
 #%%<END TEST_INFO>
 
