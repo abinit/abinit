@@ -2682,7 +2682,8 @@ end subroutine add_matlu
            mat_out_c=czero
 
            if(optprt>2) then
-             write(message,'(2a)') ch10,"SLM input matrix"
+             write(message,'(2a, i2, a, i2, a, i2)') ch10,"SLM input matrix, isppol=", isppol, ", ispinor=", ispinor,& 
+&             ", ispinor2=", ispinor2
              call wrtout(std_out,message,'COLL')
              do im1=1,ll*2+1
                write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
@@ -2708,7 +2709,8 @@ end subroutine add_matlu
            end do
 
            if(optprt>2) then
-             write(message,'(2a)') ch10,"YLM output matrix"
+             write(message,'(2a, i2, a, i2, a, i2)') ch10,"YLM output matrix, isppol=", isppol, ", ispinor=", ispinor,&
+&             ", ispinor2=", ispinor2
              call wrtout(std_out,message,'COLL')
              do im1=1,ll*2+1
                write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&

@@ -1,6 +1,6 @@
 
-.Version 8.11.6 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  4 Apr 2019.
-- ( at 12h44 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h26 )
   
 - input  file    -> t26.in
 - output file    -> t26.out
@@ -5487,46 +5487,17 @@ P           mkmem           1
 
  abinit : before driver, prtvol=-1, debugging mode => will skip outvars
 
-- Total cpu        time (s,m,h):          2.4        0.04      0.001
-- Total wall clock time (s,m,h):          2.4        0.04      0.001
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            2.4, wall_time =            2.4
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- invars2                        1.717  71.6      1.718  71.5             59      -1.00        1.00       1.00
-- abinit(2)                      0.383  16.0      0.385  16.0              1      -1.00        1.00       1.00
-- timing timab                   0.103   4.3      0.102   4.2              9      -1.00        1.01       1.01
-- others (129)                   0.000   0.0      0.000   0.0             -1      -1.00     ******* **********
--<END_TIMER>
--
-- subtotal                       2.203  91.8      2.205  91.8                                  1.00       1.00
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           2.4, wall_time =           2.4
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- invars2                        1.717  71.6      1.718  71.5             59      -1.00        1.00       1.00
-- abinit(2)                      0.383  16.0      0.385  16.0              1      -1.00        1.00       1.00
-- timing timab                   0.103   4.3      0.102   4.2              9      -1.00        1.01       1.01
-- others (129)                   0.000   0.0      0.000   0.0             -1      -1.00     ******* **********
--<END_TIMER>
 
-- subtotal                       2.203  91.8      2.205  91.8                                  1.00       1.00
 
  abinit : before driver, prtvol=-1, debugging mode => will skip acknowledgments
 -
-- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.4
+- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and  59 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.4  wall=          2.4
++Overall time at end (sec) : cpu=          2.4  wall=          2.5

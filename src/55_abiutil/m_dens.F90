@@ -807,6 +807,9 @@ end subroutine constrained_dft_free
 !!  rhor(nfft,nspden)=array for electron density in el./bohr**3. At output it will be constrained.
 !!  xred(3,natom)=reduced atomic positions
 !!
+!! OUTPUT
+!!  e_constrained_dft=correction to the total energy, to make it variational
+!!
 !! SIDE EFFECTS
 !!  vresid(nfft,nspden)==array for potential residual in real space
 !!    At output it will be modified: projected onto the space orthogonal to the atomic spherical functions (if there is a related
@@ -819,10 +822,11 @@ end subroutine constrained_dft_free
 !!
 !! SOURCE
 
- subroutine constrained_residual(c_dft,mpi_enreg,rhor,vresid,xred)
+ subroutine constrained_residual(c_dft,e_constrained_dft,mpi_enreg,rhor,vresid,xred)
 
 !Arguments ------------------------------------
 !scalars
+ real(dp),intent(out) :: e_constrained_dft
  type(constrained_dft_t),intent(in) :: c_dft
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -860,12 +864,13 @@ end subroutine constrained_dft_free
 
 !We need the integrated residuals
  ABI_ALLOCATE(intgres,(nspden,natom))
- ABI_ALLOCATE(intgr,(natom,nspden))
+ intgres(:,:)=zero
  call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
 &  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres)
 
 !Make the proper combination of intgres, to single out the scalar potential residual and the magnetic field potential residuals for x,y,z.
 !Also exchanges the spin and atom indices to prepare the solution of the linear system of equation
+ ABI_ALLOCATE(intgr,(natom,nspden))
  do iatom=1,natom
    if(nspden==1)then
      intgr(iatom,1)=intgres(1,iatom)
@@ -931,8 +936,11 @@ end subroutine constrained_dft_free
  enddo
 
 !Compute the delta of the integrated dens with respect to the target
+!Compute the energy correction, to make the energy functional variational
 !Also projects the residual in case constraint_kind 2
+ e_constrained_dft=zero
  ABI_ALLOCATE(intgden_delta,(nspden,natom))
+ intgden_delta(:,:)=zero
  do iatom=1,natom
 
    if(nspden==2)then
@@ -989,6 +997,9 @@ end subroutine constrained_dft_free
        intgden_delta(2:nspden,iatom)=intgden(2:nspden,iatom)
      endif
    end if
+
+   e_constrained_dft=e_constrained_dft-sum(intgden_delta(:,iatom)*intgres(:,iatom))
+
  enddo
 
  ABI_ALLOCATE(coeffs_constr_dft,(nspden,natom))
