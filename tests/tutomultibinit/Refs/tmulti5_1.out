@@ -1,6 +1,6 @@
 
 .Version 8.11.12 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 21 Nov 2019.
-- ( at 23h31 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h19 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/nehelbig_Multibinit-slc/tests/tutomultibinit/Input/tmulti5_1.xml
+-/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/tutomultibinit/Input/tmulti5_1.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -402,10 +402,10 @@ Measurement run:
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=         58.7  wall=         62.4
+- Proc.   0 individual time (sec): cpu=         58.6  wall=         58.8
 
 ================================================================================
 
-+Total cpu time     58.702  and wall time     62.366 sec
++Total cpu time     58.629  and wall time     58.849 sec
 
  multibinit : the run completed succesfully.

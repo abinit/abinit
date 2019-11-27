@@ -2591,6 +2591,8 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
    case ("E","e") ! Echoing the Rhoij tab
 
      my_natinc=1; if(natom>1) my_natinc=natom-1
+     my_qphase=pawrhoij(1)%qphase
+     nselect=maxval(pawrhoij(:)%nrhoijsel)
      if (PRESENT(natinc)) my_natinc = natinc ! user-defined increment.
      LIBPAW_ALLOCATE(ibuffer,(0))
      nselect=maxval(pawrhoij(:)%nrhoijsel)
@@ -2630,8 +2632,8 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
 &         pawrhoij(iatom)%lmn_size,-1,ibuffer,1,0,&
 &         pawrhoij(iatom)%rhoijselect,-1.d0,1,&
 &         opt_sym=2,mode_paral='PERS')
-       end do
-     end do
+       end do ! end nspden do
+     end do ! end iatom do
      LIBPAW_DEALLOCATE(ibuffer)
      if (my_qphase==2) then
        LIBPAW_POINTER_DEALLOCATE(rhoij_tmp)

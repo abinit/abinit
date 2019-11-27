@@ -1,6 +1,6 @@
 
-.Version 8.11.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 20 Jan 2019.
-- ( at 17h30 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h17 )
   
 - input  file    -> t04.in
 - output file    -> t04.out
@@ -983,8 +983,8 @@ P           mkmem           1
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1071,6 +1071,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.42912095656892E+01 ; Band energy (Ha)=  -9.5942316485E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.89951458E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.89951458E-04  sigma(3 1)=  0.00000000E+00
@@ -1096,8 +1098,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1183,6 +1185,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -2.40690605368162E+01 ; Band energy (Ha)=   1.1416824127E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.17244277E-02  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.17244277E-02  sigma(3 1)=  0.00000000E+00
@@ -1208,8 +1212,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1295,6 +1299,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.48788208501580E+01 ; Band energy (Ha)=  -9.9056171518E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.69389961E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.69389961E-04  sigma(3 1)=  0.00000000E+00
@@ -1320,8 +1326,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1407,6 +1413,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.54386797556140E+01 ; Band energy (Ha)=  -1.0165433512E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.58619677E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.58619677E-04  sigma(3 1)=  0.00000000E+00
@@ -1432,8 +1440,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1519,6 +1527,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -4.92099748635984E+01 ; Band energy (Ha)=   2.1502599449E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -6.27478190E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -6.27478190E-04  sigma(3 1)=  0.00000000E+00
@@ -1544,8 +1554,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1631,6 +1641,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.47399008573122E+01 ; Band energy (Ha)=  -9.8682706440E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.65280332E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.65280332E-04  sigma(3 1)=  0.00000000E+00
@@ -1656,8 +1668,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1743,6 +1755,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.57619257000229E+01 ; Band energy (Ha)=  -1.0257947623E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.64469302E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.64469302E-04  sigma(3 1)=  0.00000000E+00
@@ -1768,8 +1782,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1855,6 +1869,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.47245902599303E+01 ; Band energy (Ha)=  -9.8547214279E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.66095321E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.66095321E-04  sigma(3 1)=  0.00000000E+00
@@ -1880,8 +1896,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1967,6 +1983,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.47252554596136E+01 ; Band energy (Ha)=  -9.8549767244E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.66201518E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.66201518E-04  sigma(3 1)=  0.00000000E+00
@@ -1992,8 +2010,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2079,6 +2097,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.46263841786636E+01 ; Band energy (Ha)=  -9.8156795213E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.67758786E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.67758786E-04  sigma(3 1)=  0.00000000E+00
@@ -2104,8 +2124,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2191,6 +2211,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.47292606623779E+01 ; Band energy (Ha)=  -9.8622470688E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.65687389E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.65687389E-04  sigma(3 1)=  0.00000000E+00
@@ -2216,8 +2238,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2303,6 +2325,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.47292518287543E+01 ; Band energy (Ha)=  -9.8622429153E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.65687582E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.65687582E-04  sigma(3 1)=  0.00000000E+00
@@ -2328,8 +2352,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2415,6 +2439,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.46447120439092E+01 ; Band energy (Ha)=  -9.8293826823E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.65641397E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.65641397E-04  sigma(3 1)=  0.00000000E+00
@@ -2440,8 +2466,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2527,6 +2553,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.57159003246733E+01 ; Band energy (Ha)=  -1.0233059652E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.67155676E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.67155676E-04  sigma(3 1)=  0.00000000E+00
@@ -2552,8 +2580,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2639,6 +2667,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.47153633101222E+01 ; Band energy (Ha)=  -9.8574186075E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.64970769E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.64970769E-04  sigma(3 1)=  0.00000000E+00
@@ -2664,8 +2694,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2751,6 +2781,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.65598558791032E+01 ; Band energy (Ha)=  -1.0359415698E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.50540305E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.50540305E-05  sigma(3 1)=  0.00000000E+00
@@ -2776,8 +2808,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2863,6 +2895,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.65542404014791E+01 ; Band energy (Ha)=  -1.0463279788E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.90206240E-06  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -8.90206240E-06  sigma(3 1)=  0.00000000E+00
@@ -2888,8 +2922,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2975,6 +3009,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.66042246648994E+01 ; Band energy (Ha)=  -1.0391265131E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.42290194E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -4.42290194E-05  sigma(3 1)=  0.00000000E+00
@@ -3000,8 +3036,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3087,6 +3123,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.68407803311251E+01 ; Band energy (Ha)=  -1.0480062988E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.27424508E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -3.27424508E-05  sigma(3 1)=  0.00000000E+00
@@ -3112,8 +3150,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3199,6 +3237,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.66585947696263E+01 ; Band energy (Ha)=  -1.0394493920E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.39032991E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.39032991E-05  sigma(3 1)=  0.00000000E+00
@@ -3224,8 +3264,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3311,6 +3351,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.80344294834931E+01 ; Band energy (Ha)=  -1.0867491704E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.01146390E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.01146390E-05  sigma(3 1)=  0.00000000E+00
@@ -3336,8 +3378,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3423,6 +3465,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.65569639970234E+01 ; Band energy (Ha)=  -1.0338386872E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.90449280E-06  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.90449280E-06  sigma(3 1)=  0.00000000E+00
@@ -3448,8 +3492,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3535,6 +3579,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.62496900182616E+01 ; Band energy (Ha)=  -1.0395930003E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  9.95014993E-07  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  9.95014993E-07  sigma(3 1)=  0.00000000E+00
@@ -3560,8 +3606,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3647,6 +3693,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.66472666413477E+01 ; Band energy (Ha)=  -1.0491097682E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.93029406E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.93029406E-05  sigma(3 1)=  0.00000000E+00
@@ -3672,8 +3720,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3759,6 +3807,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.66087873497925E+01 ; Band energy (Ha)=  -1.0500694023E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.27842233E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.27842233E-05  sigma(3 1)=  0.00000000E+00
@@ -3784,8 +3834,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3871,6 +3921,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -1.12829014227141E+01 ; Band energy (Ha)=   9.7005111774E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.42897445E-02  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.42897445E-02  sigma(3 1)=  0.00000000E+00
@@ -3896,8 +3948,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3983,6 +4035,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.65065786567713E+01 ; Band energy (Ha)=  -1.0477894569E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  6.60261756E-06  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.60261756E-06  sigma(3 1)=  0.00000000E+00
@@ -4008,8 +4062,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4095,6 +4149,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -6.38173019531318E+01 ; Band energy (Ha)=  -5.7419841963E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.08431829E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -4.08431829E-03  sigma(3 1)=  0.00000000E+00
@@ -4120,8 +4176,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4207,6 +4263,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.67280011956309E+01 ; Band energy (Ha)=  -1.0475926561E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.25005474E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.25005474E-05  sigma(3 1)=  0.00000000E+00
@@ -4232,8 +4290,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4319,6 +4377,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.63363670976644E+01 ; Band energy (Ha)=  -1.0466881268E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.62730364E-06  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -8.62730364E-06  sigma(3 1)=  0.00000000E+00
@@ -4344,8 +4404,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4431,6 +4491,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.66416392541263E+01 ; Band energy (Ha)=  -1.0548336814E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.07320049E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.07320049E-04  sigma(3 1)=  0.00000000E+00
@@ -4456,8 +4518,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4543,6 +4605,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.64680225406028E+01 ; Band energy (Ha)=  -1.0424499504E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.54014807E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -2.54014807E-05  sigma(3 1)=  0.00000000E+00
@@ -4568,8 +4632,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4655,6 +4719,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.64623650448290E+01 ; Band energy (Ha)=  -1.0425472149E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.29378384E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -2.29378384E-05  sigma(3 1)=  0.00000000E+00
@@ -4680,8 +4746,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4767,6 +4833,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.66117921372423E+01 ; Band energy (Ha)=  -1.0413253046E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.36330097E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  4.36330097E-05  sigma(3 1)=  0.00000000E+00
@@ -4792,8 +4860,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4879,6 +4947,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.67628228093793E+01 ; Band energy (Ha)=  -1.0444898938E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.70665887E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  4.70665887E-05  sigma(3 1)=  0.00000000E+00
@@ -4904,8 +4974,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4991,6 +5061,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.67458563656853E+01 ; Band energy (Ha)=  -1.0439501542E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.63595906E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  4.63595906E-05  sigma(3 1)=  0.00000000E+00
@@ -5016,8 +5088,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5103,6 +5175,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.50545127802984E+01 ; Band energy (Ha)=  -9.9955335881E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.70875670E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -3.70875670E-05  sigma(3 1)=  0.00000000E+00
@@ -5128,8 +5202,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5215,6 +5289,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.67227050206764E+01 ; Band energy (Ha)=  -1.0514606888E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.29405713E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  4.29405713E-05  sigma(3 1)=  0.00000000E+00
@@ -5240,8 +5316,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5327,6 +5403,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.56855749517826E+01 ; Band energy (Ha)=  -1.0246924398E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.52551800E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -3.52551800E-05  sigma(3 1)=  0.00000000E+00
@@ -5352,8 +5430,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5439,6 +5517,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.64755000254233E+01 ; Band energy (Ha)=  -1.0500325149E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  7.90254465E-06  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  7.90254465E-06  sigma(3 1)=  0.00000000E+00
@@ -5464,8 +5544,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5551,6 +5631,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.37387027816364E+01 ; Band energy (Ha)=  -9.5098835448E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.59598722E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -8.59598722E-05  sigma(3 1)=  0.00000000E+00
@@ -5576,8 +5658,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5663,6 +5745,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.59447048021499E+01 ; Band energy (Ha)=  -1.0318747178E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.44905459E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -2.44905459E-05  sigma(3 1)=  0.00000000E+00
@@ -5688,8 +5772,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5775,6 +5859,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
     Total energy(eV)= -7.63833727493700E+01 ; Band energy (Ha)=  -1.0429816220E+00
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.22616046E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.22616046E-05  sigma(3 1)=  0.00000000E+00
@@ -5800,8 +5886,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__beuken/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5886,6 +5972,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    2118.000    2118.000
  Other information on the energy :
     Total energy(eV)= -7.65238105171651E+01 ; Band energy (Ha)=  -1.0476760797E+00
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.70560662E-05  sigma(3 2)=  0.00000000E+00
@@ -6198,9 +6286,9 @@ P           mkmem           1
 -
 - [1] Libxc: A library of exchange and correlation functionals for density functional theory.
 - M.A.L. Marques, M.J.T. Oliveira, T. Burnus, Computer Physics Communications 183, 2227 (2012).
-- Comment : to be cited when LibXC is used (negative value of ixc)
+- Comment: to be cited when LibXC is used (negative value of ixc)
 - Strong suggestion to cite this paper.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#marques2012
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#marques2012
 -
 - [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
@@ -6214,51 +6302,51 @@ P           mkmem           1
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [5] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          9.4  wall=         14.9
+- Proc.   0 individual time (sec): cpu=          9.4  wall=         11.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  97 WARNINGs and 176 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.4  wall=         14.9
++Overall time at end (sec) : cpu=          9.4  wall=         11.3

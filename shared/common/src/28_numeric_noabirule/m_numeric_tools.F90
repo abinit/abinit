@@ -2155,8 +2155,8 @@ function linfit_spc(nn,xx,zz,aa,bb) result(res)
   sx2=sx2+xx(ii)*xx(ii)
  end do
 
- aa=(nn*sxz-sx*sz)/(nn*sx2-sx*sx)
- bb=sz/nn-sx*aa/nn
+ aa=CMPLX((nn*sxz-sx*sz)/(nn*sx2-sx*sx), kind=spc)
+ bb=CMPLX(sz/nn-sx*aa/nn, kind=spc)
 
  do ii=1,nn
   msrt=msrt+ABS(zz(ii)-aa*xx(ii)-bb)**2
@@ -3350,7 +3350,8 @@ subroutine hermitianize_spc(mat,uplo)
    ABI_MALLOC(tmp,(nn))
    do ii=1,nn
      do jj=ii,nn
-       tmp(jj)=half*(mat(ii,jj)+CONJG(mat(jj,ii)))
+       ! reference half constant is dp not sp
+       tmp(jj)=real(half)*(mat(ii,jj)+CONJG(mat(jj,ii)))
      end do
      mat(ii,ii:nn)=tmp(ii:nn)
      mat(ii:nn,ii)=CONJG(tmp(ii:nn))
@@ -3452,7 +3453,7 @@ subroutine hermitianize_dpc(mat,uplo)
        if (ii/=jj) then
          mat(jj,ii) = DCONJG(mat(ii,jj))
        else
-         mat(ii,ii) = DCMPLX(DBLE(mat(ii,ii)),zero)
+         mat(ii,ii) = CMPLX(DBLE(mat(ii,ii)),zero, kind=dpc)
        end if
      end do
    end do
@@ -3463,7 +3464,7 @@ subroutine hermitianize_dpc(mat,uplo)
       if (ii/=jj) then
         mat(ii,jj) = DCONJG(mat(jj,ii))
       else
-        mat(ii,ii) = DCMPLX(REAL(mat(ii,ii)),zero)
+        mat(ii,ii) = CMPLX(REAL(mat(ii,ii)),zero, kind=dpc)
       end if
     end do
   end do
@@ -3696,7 +3697,7 @@ subroutine symmetrize_spc(mat,uplo)
    ABI_MALLOC(tmp,(nn))
    do ii=1,nn
      do jj=ii,nn
-       tmp(jj)=half*(mat(ii,jj)+mat(jj,ii))
+       tmp(jj)=REAL(half)*(mat(ii,jj)+mat(jj,ii))
      end do
      mat(ii,ii:nn)=tmp(ii:nn)
      mat(ii:nn,ii)=tmp(ii:nn)
@@ -4747,7 +4748,7 @@ subroutine cmplx_sphcart(carr, from, units)
      do ii=1,SIZE(carr,DIM=1)
         rho  = DBLE(carr(ii,jj))
         theta= AIMAG(carr(ii,jj)) * fact
-        carr(ii,jj) = DCMPLX(rho*DCOS(theta), rho*DSIN(theta))
+        carr(ii,jj) = CMPLX(rho*DCOS(theta), rho*DSIN(theta), kind=dpc)
      end do
    end do
 
@@ -4766,7 +4767,7 @@ subroutine cmplx_sphcart(carr, from, units)
         else
           theta= zero
         end if
-        carr(ii,jj) = DCMPLX(rho, theta*fact)
+        carr(ii,jj) = CMPLX(rho, theta*fact, kind=dpc)
      end do
    end do
 
@@ -6086,12 +6087,12 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
 !  ENDDEBUG
 
 !  Now, must find the unique root of
-!$0 = bb + 2*cc * lambda + 3*dd * lambda^2 + 4*ee * lambda^3$
+!  0 = bb + 2*cc * lambda + 3*dd * lambda^2 + 4*ee * lambda^3
 !  This root is unique because it was imposed that the second derivative
 !  of the quartic polynomial is everywhere positive.
 !  First, remove the quadratic term, by a shift of lambda
 !  lambdap=lambda-lambda_shift
-!$0 = bbp + ccp * lambdap + eep * lambdap^3$
+!  0 = bbp + ccp * lambdap + eep * lambdap^3
    eep=4.0_dp*ee
    lambda_shift=-dd/(4.0_dp*ee)
    ccp=2.0_dp*cc-12.0_dp*ee*lambda_shift**2
@@ -6179,7 +6180,7 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
  integer,intent(in) :: method,nomega,only_check
 !arrays
  real(dp),intent(in) :: omega(nomega)
- complex,intent(inout) :: eps(nomega)
+ complex(dpc),intent(inout) :: eps(nomega)
 
 !Local variables-------------------------------
 !scalars
@@ -6269,7 +6270,7 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
 
 !at this point real part is in e1kk, need to put it into eps
  do ii=1,nomega
-   eps(ii)=CMPLX(e1kk(ii),AIMAG(eps(ii)))
+   eps(ii)=CMPLX(e1kk(ii),AIMAG(eps(ii)), kind=dpc)
  end do
 
 !Verify Kramers-Kronig

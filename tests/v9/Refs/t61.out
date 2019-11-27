@@ -1,6 +1,6 @@
 
-.Version 8.11.5 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Sep 2019.
-- ( at 15h55 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h43 )
   
 - input  file    -> t61.in
 - output file    -> t61.out
@@ -281,8 +281,8 @@ P           mkmem3         29
          ecut(hartree)=     35.000   => boxcut(ratio)=   1.79502
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -296,8 +296,8 @@ P           mkmem3         29
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/09-F.psp
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -318,32 +318,32 @@ P           mkmem3         29
 ================================================================================
  prteigrs : about to open file t61o_DS1_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  1.74E-17  1.81E-17  3.00E-17  3.78E-17  8.11E-17  9.79E-17  4.91E-17  5.43E-17
+  1.74E-17  1.81E-17  3.00E-17  3.78E-17  8.11E-17  9.80E-17  4.91E-17  5.44E-17
   3.33E-17  4.28E-17
  -7.2526E-01 -7.0948E-03 -7.0948E-03 -7.0948E-03  3.0658E-01  8.4023E-01
   8.4023E-01  8.4023E-01  8.6228E-01  8.6228E-01
  Non-SCF case, kpt    2 (  0.12500  0.00000  0.00000), residuals and eigenvalues=
-  3.79E-17  5.56E-17  4.16E-17  1.50E-17  2.23E-18  6.78E-17  4.92E-17  2.89E-17
-  8.69E-06  4.66E-17
+  3.79E-17  5.56E-17  4.16E-17  1.50E-17  2.23E-18  6.79E-17  4.92E-17  2.89E-17
+  8.69E-06  4.65E-17
  -7.2272E-01 -2.3165E-02 -8.2887E-03 -8.2887E-03  3.2252E-01  7.2324E-01
   7.8396E-01  7.8396E-01  9.0105E-01  9.0922E-01
-  prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  8.68552E-06
+  prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  8.68848E-06
  Non-SCF case, kpt    3 (  0.25000  0.00000  0.00000), residuals and eigenvalues=
   6.04E-18  9.06E-17  2.08E-17  5.44E-17  1.68E-17  9.25E-18  2.92E-18  2.71E-17
   1.52E-17  5.54E-18
  -7.1637E-01 -5.7092E-02 -1.1248E-02 -1.1248E-02  3.5229E-01  6.2728E-01
   7.1988E-01  7.1988E-01  9.4473E-01  9.7628E-01
  Non-SCF case, kpt    4 (  0.37500  0.00000  0.00000), residuals and eigenvalues=
-  7.10E-18  5.79E-17  4.61E-17  3.51E-17  5.32E-17  2.88E-17  1.93E-18  6.03E-17
+  7.10E-18  5.79E-17  4.61E-17  3.50E-17  5.32E-17  2.88E-17  1.93E-18  6.04E-17
   3.66E-18  1.62E-17
  -7.0969E-01 -8.7291E-02 -1.4094E-02 -1.4094E-02  3.6740E-01  5.8746E-01
   6.7584E-01  6.7584E-01  1.0003E+00  1.0557E+00
  Non-SCF case, kpt    5 (  0.12500  0.12500  0.00000), residuals and eigenvalues=
-  2.10E-17  3.95E-17  9.53E-17  9.01E-17  7.63E-17  1.28E-17  5.91E-17  6.19E-17
+  2.10E-17  3.95E-17  9.53E-17  9.01E-17  7.63E-17  1.27E-17  5.91E-17  6.19E-17
   4.93E-17  1.47E-15
  -7.2181E-01 -2.2111E-02 -1.2617E-02 -1.2617E-02  3.2970E-01  7.6063E-01
   7.6437E-01  7.6437E-01  7.7163E-01  9.8854E-01
-  prteigrs : nnsclo,ikpt=   30    5 max resid (incl. the buffer)=  1.47498E-15
+  prteigrs : nnsclo,ikpt=   30    5 max resid (incl. the buffer)=  1.47493E-15
  Non-SCF case, kpt    6 ( -0.25000  0.12500  0.00000), residuals and eigenvalues=
   1.66E-17  7.20E-17  1.89E-17  2.45E-17  2.03E-17  1.58E-17  4.90E-17  2.50E-17
   4.43E-11  1.01E-17
@@ -352,10 +352,10 @@ P           mkmem3         29
   prteigrs : nnsclo,ikpt=   30    6 max resid (incl. the buffer)=  4.42764E-11
  Non-SCF case, kpt    7 ( -0.12500  0.12500  0.00000), residuals and eigenvalues=
   8.19E-17  1.96E-17  9.18E-17  5.15E-17  9.81E-18  7.59E-17  1.78E-17  8.52E-17
-  1.98E-15  1.89E-13
+  1.97E-15  1.89E-13
  -7.1884E-01 -3.9806E-02 -1.9174E-02 -7.6442E-03  3.4520E-01  6.6105E-01
   7.2626E-01  7.5202E-01  9.0361E-01  9.1668E-01
-  prteigrs : nnsclo,ikpt=   30    7 max resid (incl. the buffer)=  1.88977E-13
+  prteigrs : nnsclo,ikpt=   30    7 max resid (incl. the buffer)=  1.88966E-13
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -366,7 +366,7 @@ P           mkmem3         29
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   12.408E-08; max=  86.855E-07
+ Mean square residual over all n,k,spin=   12.412E-08; max=  86.885E-07
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -438,12 +438,12 @@ P           mkmem3         29
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00   -6.028390E-19   -6.035515E-19
-         1         2   -6.028390E-19    1.042939E+00    6.021265E-19
-         1         3    6.028390E-19    6.028390E-19    1.042939E+00
-         2         1   -1.038797E+00   -4.262070E-16   -4.267092E-16
-         2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
-         2         3    4.262070E-16    4.262070E-16   -1.038797E+00
+         1         1    1.042939E+00    1.625259E-18    1.628211E-18
+         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
+         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
+         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
+         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
+         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t61o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -537,12 +537,12 @@ Interpolation of the electron-phonon coupling potential completed
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00   -6.028390E-19   -6.035515E-19
-         1         2   -6.028390E-19    1.042939E+00    6.021265E-19
-         1         3    6.028390E-19    6.028390E-19    1.042939E+00
-         2         1   -1.038797E+00   -4.262070E-16   -4.267092E-16
-         2         2   -4.262070E-16   -1.038797E+00    4.257048E-16
-         2         3    4.262070E-16    4.262070E-16   -1.038797E+00
+         1         1    1.042939E+00    1.625259E-18    1.628211E-18
+         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
+         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
+         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
+         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
+         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t61o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -670,18 +670,18 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 K-point: [ 1.2500E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   3  -0.226    2.208      0.1    0.000
-   4  -0.226    2.208      0.1    0.000
+   3  -0.226    2.202      0.1    0.000
+   4  -0.226    2.202      0.1    0.000
 ============================================================================================
 K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   3  -0.306    0.989      0.3    0.000
-   4  -0.306    0.989      0.3    0.000
+   3  -0.306    0.988      0.3    0.000
+   4  -0.306    0.988      0.3    0.000
 ============================================================================================
 K-point: [ 1.2500E-01,  1.2500E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   3  -0.343    0.899      0.4    0.000
-   4  -0.343    0.899      0.4    0.000
+   3  -0.343    0.898      0.4    0.000
+   4  -0.343    0.898      0.4    0.000
 ============================================================================================
 K-point: [-2.5000E-01,  1.2500E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -694,7 +694,7 @@ K-point: [-1.2500E-01,  1.2500E-01,  0.0000E+00], T=    0.0 [K]
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.31E+02        0.00E+00      3854008.02            0.00
+          300.00        0.31E+02        0.00E+00      3853996.01            0.00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -892,10 +892,10 @@ P           mkmem3         29
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         23.6  wall=         23.9
+- Proc.   0 individual time (sec): cpu=         34.5  wall=         35.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         23.6  wall=         23.9
+.Delivered   2 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=         34.5  wall=         35.2
