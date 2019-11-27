@@ -12,7 +12,7 @@ specific code and is tightly bound to the identity of the package.
 
 Knowing exactly how the use of CPP options is distributed within the source
 tree of ABINIT is essential to determine the elements on which each build
-systems will have to focus. For instance, if something is only used in
+system will have to focus. For instance, if something is only used in
 low-level routines of ABINIT Common, including it in the build system of
 ABINIT Core will be useless, and vice-versa. The same holds for
 LibPAW-specific features.
@@ -26,15 +26,15 @@ easier the elimination of dead code.
 
 To give a concrete example, since most of the CPP options related to the
 Fortran standard version supported by the compiler are used in ABINIT Common,
-it is worth taking a few design decisions in order not repeat the detection
+it is worth taking a few design decisions in order not to repeat the detection
 tests within ABINIT Core, thus saving a significant amount of time when
 running the configure scripts, one after the other.
 
 Another motivation to simplify the design of build systems adds up in the case
-of ABINIT Common and LibPAW: they will be used by more than one DFT. Since
-they will export Fortran modules -- the least standard software component that
-has ever existed -- it is of utmost importance to limit the number of variants
-produced during the build of each of these blocks.
+of ABINIT Common and LibPAW: they will be used by more than one DFT code.
+Since they will export Fortran modules -- the least standard software
+component that has ever existed -- it is of utmost importance to limit the
+number of variants produced during the build of each of these blocks.
 
 
 Accessing information at different levels
@@ -244,15 +244,14 @@ another block point to a few easy refactoring operations:
 - getting rid of the *HAVE_ETSF_IO* CPP option, which has been replaced by a
   direct implementation of the ETSF File Format;
 - moving linear algebra-related Fortran modules from ABINIT Common to ABINIT
-  Core.
+  Core, after confirming that LibPAW does not require them.
 
 In a second round, the following CPP options could be used exclusively in
-ABINIT Common:
+ABINIT Core:
 
-- HAVE_GPU_*, if the GPU-related modules and C headers, as well as
+- HAVE_GPU_xxx, if the GPU-related modules and C headers, as well as
   m_abi_linalg are moved to ABINIT Core;
-- HAVE_GW_DPC, if moved away from defs_basis and abi_common.h;
-- HAVE_LEVMAR, if a low-level C subdirectory is created upwards;
+- HAVE_LEVMAR, if a low-level C subdirectory is created upwards (level 40);
 - HAVE_MEM_PROFILING, if moved away from m_errors (abinit_doctor) and
   abi_common.h;
 - HAVE_NETCDF_DEFAULT, if moved away from m_nctk or the latter moved to ABINIT
@@ -268,3 +267,18 @@ All these possible refactoring operations only involve small efforts, which is
 why they should be discussed among the core developers of ABINIT before
 starting ABINIT 9.
 
+
+Proposed schedule
+-----------------
+
+#. Polish the test farm configuration. (YP+JMB, in progress)
+#. Make the new build-system interface more user-friendly. (YP+JMB, in
+   progress)
+#. Move transient/ to  fallbacks/. (YP)
+#. Use a fallbacks tarball. (YP)
+#. Install fallbacks within ABINIT build dir by default, with FC vendor and
+   version. (YP)
+#. Make configure use fallbacks automatically. (YP)
+#. Write a proper warning for LibPSML (no dynlibs, design flaw). (YP)
+
+Internal ref: YP/2019/Q4/57+77
