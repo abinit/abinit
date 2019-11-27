@@ -13,16 +13,16 @@
 
 
 
-# _ABI_CHECK_CXX_ARM(COMPILER)
-# ------------------------------
+# _ABI_CXX_CHECK_ARM(COMPILER)
+# ----------------------------
 #
 # Checks whether the specified C++ compiler is the ARMClang++ compiler.
 # If yes, tries to determine its version number and sets the abi_cxx_vendor
 # and abi_cxx_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_CXX_ARM],[
-  dnl Do some sanity checking of the arguments
-  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+AC_DEFUN([_ABI_CXX_CHECK_ARM],[
+  # Do some sanity checking of the arguments
+  m4_if([$1], [], [AC_FATAL([$0: missing argument 1])])dnl
 
   dnl AC_MSG_CHECKING([if we are using the ARM C++ compiler])
   cxx_info_string=`$1 --version 2>/dev/null | head -n 1`
@@ -43,10 +43,11 @@ AC_DEFUN([_ABI_CHECK_CXX_ARM],[
     abi_result="yes"
   fi
   dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_CXX_ARM
+]) # _ABI_CXX_CHECK_ARM
 
 
 
+# _ABI_CXX_CHECK_GNU(COMPILER)
 # ----------------------------
 #
 # Checks whether the specified C++ compiler is the GNU C++ compiler.
@@ -57,7 +58,7 @@ AC_DEFUN([_ABI_CXX_CHECK_GNU],[
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  # AC_MSG_CHECKING([if we are using the GNU C++ compiler])
+  dnl AC_MSG_CHECKING([if we are using the GNU C++ compiler])
   cxx_info_string=`$1 --version 2>&1 | head -n 1`
   if test "${ac_cv_cxx_compiler_gnu}" != "yes"; then
     cxx_info_string=""
@@ -76,7 +77,7 @@ AC_DEFUN([_ABI_CXX_CHECK_GNU],[
     fi
     abi_result="yes"
   fi
-  # AC_MSG_RESULT(${abi_result})
+  dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CXX_CHECK_GNU
 
 
@@ -92,7 +93,7 @@ AC_DEFUN([_ABI_CXX_CHECK_IBM],[
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  # AC_MSG_CHECKING([if we are using the IBM XL C++ compiler])
+  dnl AC_MSG_CHECKING([if we are using the IBM XL C++ compiler])
   cxx_info_string=`$1 -qversion 2>&1 | head -n 1`
   cxx_garbage=`$1 -qversion 2>&1 | wc -l | sed -e 's/ //g'`
   abi_result=`echo "${cc_info_string}" | grep 'IBM XL C/C++'`
@@ -125,7 +126,7 @@ AC_DEFUN([_ABI_CXX_CHECK_IBM],[
     fi
     abi_result="yes"
   fi
-  # AC_MSG_RESULT(${abi_result})
+  dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CXX_CHECK_IBM
 
 
@@ -141,7 +142,7 @@ AC_DEFUN([_ABI_CXX_CHECK_INTEL],[
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  # AC_MSG_CHECKING([if we are using the Intel C++ compiler])
+  dnl AC_MSG_CHECKING([if we are using the Intel C++ compiler])
   cxx_info_string=`$1 -v -V 2>&1 | head -n 1`
   abi_result=`echo "${cxx_info_string}" | grep '^Intel(R) C++'`
   if test "${abi_result}" = ""; then
@@ -158,20 +159,20 @@ AC_DEFUN([_ABI_CXX_CHECK_INTEL],[
     fi
     abi_result="yes"
   fi
-  # AC_MSG_RESULT(${abi_result})
+  dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CXX_CHECK_INTEL
 
 
-# _ABI_CHECK_CXX_LLVM(COMPILER)
-# ------------------------------
+# _ABI_CXX_CHECK_LLVM(COMPILER)
+# -----------------------------
 #
 # Checks whether the specified C compiler is the LLVM Clang++ compiler.
 # If yes, tries to determine its version number and sets the abi_cxx_vendor
 # and abi_cxx_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_CXX_LLVM],[
-  dnl Do some sanity checking of the arguments
-  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+AC_DEFUN([_ABI_CXX_CHECK_LLVM],[
+  # Do some sanity checking of the arguments
+  m4_if([$1], [], [AC_FATAL([$0: missing argument 1])])dnl
 
   dnl AC_MSG_CHECKING([if we are using the LLVM Clang++ C++ compiler])
   cxx_info_string=`$1 --version 2>/dev/null | head -n 1`
@@ -192,7 +193,7 @@ AC_DEFUN([_ABI_CHECK_CXX_LLVM],[
     abi_result="yes"
   fi
   dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_CXX_LLVM
+]) # _ABI_CXX_CHECK_LLVM
 
 
 
@@ -207,7 +208,7 @@ AC_DEFUN([_ABI_CXX_CHECK_PGI],[
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  # AC_MSG_CHECKING([if we are using the Portland Group C++ compiler])
+  dnl AC_MSG_CHECKING([if we are using the Portland Group C++ compiler])
   cxx_info_string=`$1 -v -V 2>&1 | sed -e '/^$/d' | head -n 1`
   abi_result=`echo "${cxx_info_string}" | grep '^pgCC'`
   if test "${abi_result}" = ""; then
@@ -224,7 +225,7 @@ AC_DEFUN([_ABI_CXX_CHECK_PGI],[
     fi
     abi_result="yes"
   fi
-  # AC_MSG_RESULT(${abi_result})
+  dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CXX_CHECK_PGI
 
 
@@ -263,18 +264,17 @@ AC_DEFUN([ABI_PROG_CXX],[
   # Determine C++ compiler type (the order is important)
   AC_MSG_CHECKING([which type of C++ compiler we have])
 
-  # Get rid of that one as early as possible
   if test "${abi_cxx_vendor}" = "unknown"; then
     _ABI_CXX_CHECK_IBM(${CXX})
   fi
-
   if test "${abi_cxx_vendor}" = "unknown"; then
-    _ABI_CHECK_CXX_ARM(${CXX})
+    _ABI_CXX_CHECK_ARM(${CXX})
   fi
   if test "${abi_cxx_vendor}" = "unknown"; then
+    _ABI_CXX_CHECK_INTEL(${CXX})
   fi
   if test "${abi_cxx_vendor}" = "unknown"; then
-    _ABI_CHECK_CXX_LLVM(${CXX})
+    _ABI_CXX_CHECK_LLVM(${CXX})
   fi
   if test "${abi_cxx_vendor}" = "unknown"; then
     _ABI_CXX_CHECK_PGI(${CXX})

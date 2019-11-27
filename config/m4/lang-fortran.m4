@@ -24,7 +24,7 @@ AC_DEFUN([_ABI_FC_CHECK_ABSOFT],[
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  # AC_MSG_CHECKING([if we are using the ABSoft Fortran compiler])
+  dnl AC_MSG_CHECKING([if we are using the ABSoft Fortran compiler])
   fc_info_string=`$1 -V 2>/dev/null | head -n 1`
   abi_result=`echo "${fc_info_string}" | grep '^Pro Fortran'`
   if test "${abi_result}" = ""; then
@@ -42,20 +42,19 @@ AC_DEFUN([_ABI_FC_CHECK_ABSOFT],[
     fi
     abi_result="yes"
   fi
-  # AC_MSG_RESULT(${abi_result})
+  dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_FC_CHECK_ABSOFT
 
 
-# _ABI_FC_CHECK_GNU(COMPILER)
-# _ABI_CHECK_FC_ARM(COMPILER)
-# ------------------------------
+# _ABI_FC_CHECK_ARM(COMPILER)
+# ---------------------------
 #
 # Checks whether the specified Fortran compiler is the ARMFlang Fortran compiler.
 # If yes, tries to determine its version number and sets the abi_fc_vendor
 # and abi_fc_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_FC_ARM],[
-  dnl Do some sanity checking of the arguments
+AC_DEFUN([_ABI_FC_CHECK_ARM],[
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
   dnl AC_MSG_CHECKING([if we are using the ARM Fortran compiler])
@@ -77,10 +76,11 @@ AC_DEFUN([_ABI_CHECK_FC_ARM],[
     abi_result="yes"
   fi
   dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_FC_ARM
+]) # _ABI_FC_CHECK_ARM
 
 
 
+# _ABI_FC_CHECK_GNU(COMPILER)
 # ---------------------------
 #
 # Checks whether the specified Fortran compiler is the GNU Fortran compiler.
@@ -91,7 +91,7 @@ AC_DEFUN([_ABI_FC_CHECK_GNU],[
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  # AC_MSG_CHECKING([if we are using the GNU Fortran compiler])
+  dnl AC_MSG_CHECKING([if we are using the GNU Fortran compiler])
   fc_info_string=`$1 --version 2>/dev/null | head -n 1`
   abi_result=`echo "${fc_info_string}" | grep '^GNU Fortran'`
   if test "${abi_result}" = ""; then
@@ -108,7 +108,7 @@ AC_DEFUN([_ABI_FC_CHECK_GNU],[
     abi_fc_version=`echo ${abi_result} | sed -e 's/^[[^(]]*([[^)]]*) //; s/ .*//'`
     abi_result="yes"
   fi
-  # AC_MSG_RESULT(${abi_result})
+  dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_FC_CHECK_GNU
 
 
@@ -123,7 +123,7 @@ AC_DEFUN([_ABI_FC_CHECK_IBM],[
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  # AC_MSG_CHECKING([if we are using the IBM XL Fortran compiler])
+  dnl AC_MSG_CHECKING([if we are using the IBM XL Fortran compiler])
   fc_info_string=`$1 -qversion 2>&1 | head -n 1`
   fc_garbage=`$1 -qversion 2>&1 | wc -l | sed -e 's/ //g'`
   abi_result=`echo "${fc_info_string}" | grep 'IBM XL Fortran'`
@@ -152,7 +152,7 @@ AC_DEFUN([_ABI_FC_CHECK_IBM],[
     fi
     abi_result="yes"
   fi
-  # AC_MSG_RESULT(${abi_result})
+  dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_FC_CHECK_IBM
 
 
@@ -167,7 +167,7 @@ AC_DEFUN([_ABI_FC_CHECK_INTEL],[
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  # AC_MSG_CHECKING([if we are using the Intel Fortran compiler])
+  dnl AC_MSG_CHECKING([if we are using the Intel Fortran compiler])
   fc_info_string=`$1 -V 2>&1 | head -n 1`
   abi_result=`echo "${fc_info_string}" | grep '^Intel(R) Fortran'`
   if test "${abi_result}" = ""; then
@@ -185,20 +185,19 @@ AC_DEFUN([_ABI_FC_CHECK_INTEL],[
     fi
     abi_result="yes"
   fi
-  # AC_MSG_RESULT(${abi_result})
+  dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_FC_CHECK_INTEL
 
 
-# _ABI_FC_CHECK_NAG(COMPILER)
-# _ABI_CHECK_FC_LLVM(COMPILER)
-# ------------------------------
+# _ABI_FC_CHECK_LLVM(COMPILER)
+# ----------------------------
 #
 # Checks whether the specified Fortran compiler is the LLVM Flang compiler.
 # If yes, tries to determine its version number and sets the abi_fc_vendor
 # and abi_fc_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_FC_LLVM],[
-  dnl Do some sanity checking of the arguments
+AC_DEFUN([_ABI_FC_CHECK_LLVM],[
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
   dnl AC_MSG_CHECKING([if we are using the LLVM Flang Fortran compiler])
@@ -220,10 +219,10 @@ AC_DEFUN([_ABI_CHECK_FC_LLVM],[
     abi_result="yes"
   fi
   dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_FC_LLVM
+]) # _ABI_FC_CHECK_LLVM
 
 
-
+# _ABI_FC_CHECK_NAG(COMPILER)
 # ---------------------------
 #
 # Checks whether the specified Fortran compiler is the NAGWare Fortran 95
@@ -234,7 +233,7 @@ AC_DEFUN([_ABI_FC_CHECK_NAG],[
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  # AC_MSG_CHECKING([if we are using the NAGWare Fortran 95 compiler])
+  dnl AC_MSG_CHECKING([if we are using the NAGWare Fortran 95 compiler])
   fc_info_string=`$1 -V 2>&1 | head -n 1`
   abi_result=`echo "${fc_info_string}" | grep '^NAG'`
   if test "${abi_result}" = ""; then
@@ -252,7 +251,7 @@ AC_DEFUN([_ABI_FC_CHECK_NAG],[
     fi
     abi_result="yes"
   fi
-  # AC_MSG_RESULT(${abi_result})
+  dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_FC_CHECK_NAG
 
 
@@ -268,7 +267,7 @@ AC_DEFUN([_ABI_FC_CHECK_PGI],[
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  # AC_MSG_CHECKING([if we are using the Portland Group Fortran compiler])
+  dnl AC_MSG_CHECKING([if we are using the Portland Group Fortran compiler])
   fc_info_string=`$1 -V 2>&1 | head -n 2 | grep -v "^$"`
   abi_result=`echo "${fc_info_string}" | grep '^pgf9[[05]]'`
   if test "${abi_result}" = ""; then
@@ -286,7 +285,7 @@ AC_DEFUN([_ABI_FC_CHECK_PGI],[
     fi
     abi_result="yes"
   fi
-  # AC_MSG_RESULT(${abi_result})
+  dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_FC_CHECK_PGI
 
 
@@ -607,19 +606,19 @@ AC_DEFUN([_ABI_FC_CHECK_GAMMA],[
 ]) # _ABI_FC_CHECK_GAMMA
 
 
-# _ABI_CHECK_FC_SHIFTLR()
-# ----------------------
+# _ABI_FC_CHECK_SHIFTLR()
+# -----------------------
 #
 # Checks whether the Fortran compiler supports SHIFTL/SHIFTR
 # (Fortran 2008 and later).
 #
-AC_DEFUN([_ABI_CHECK_FC_SHIFTLR],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_SHIFTLR],[
+  # Init
   fc_has_shiftlr="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler accepts shiftl() and shiftr()])
 
-  dnl Try to compile a call to cpu_time
+  # Try to compile a call to cpu_time
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
@@ -636,7 +635,7 @@ AC_DEFUN([_ABI_CHECK_FC_SHIFTLR],[
   fi
 
   AC_MSG_RESULT(${fc_has_shiftlr})
-]) # _ABI_CHECK_FC_SHIFTLR
+]) # _ABI_FC_CHECK_SHIFTLR
 
 # ----------------------
 #
@@ -681,7 +680,8 @@ AC_DEFUN([_ABI_FC_CHECK_INT_QUAD],[
 
   # Try to compile a program defining a quadruple integer
   # Note: xlf "works around" the problem by changing the integer length
-  dnl Note: need to test "integer*16" and "integer(kind=16)" (seems not equivalent)
+  # Note: need to test "integer*16" and "integer(kind=16)" (seems not
+  #       equivalent)
   if test "${abi_fc_vendor}" != "ibm"; then
     AC_LANG_PUSH([Fortran])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],
@@ -773,12 +773,12 @@ AC_DEFUN([_ABI_FC_CHECK_DTARRAYS],[
 # IEEE_ARITHMETIC.
 #
 AC_DEFUN([_ABI_FC_CHECK_IEEE_ARITHMETIC],[
-  dnl Init
+  # Init
   fc_has_ieee_arithmetic="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler supports IEEE_ARITHMETIC])
 
-  dnl Try to compile a piece of code that uses the module.
+  # Try to compile a piece of code that uses the module.
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
     [[
@@ -929,7 +929,7 @@ AC_DEFUN([_ABI_FC_CHECK_LONG_LINES],[
     ]])], [fc_has_long_lines="yes"])
   AC_LANG_POP()
 
-  dnl This is not correctly implemented on LLVM
+  # This is not correctly implemented on LLVM
   if test "${abi_fc_vendor}" = "llvm" -o "${abi_fc_vendor}" = "arm" ; then
     fc_has_long_lines="no"
   fi
@@ -942,7 +942,7 @@ AC_DEFUN([_ABI_FC_CHECK_LONG_LINES],[
   AC_MSG_RESULT(${fc_has_long_lines})
 
   # Official macro added in autoconf ??
-  # AC_FC_LINE_LENGTH ([length], [action-if-success], [action-if-failure = AC_MSG_FAILURE])
+  dnl AC_FC_LINE_LENGTH ([length], [action-if-success], [action-if-failure = AC_MSG_FAILURE])
 
 ]) # _ABI_FC_CHECK_LONG_LINES
 
@@ -1311,7 +1311,7 @@ AC_DEFUN([ABI_FC_FEATURES],[
   _ABI_FC_CHECK_FLUSH
   _ABI_FC_CHECK_FLUSH_
   _ABI_FC_CHECK_GAMMA
-  _ABI_CHECK_FC_SHIFTLR
+  _ABI_FC_CHECK_SHIFTLR
   _ABI_FC_CHECK_GETPID
   _ABI_FC_CHECK_INT_QUAD
   _ABI_FC_CHECK_ISO_FORTRAN_2008
@@ -1514,12 +1514,12 @@ AC_DEFUN([ABI_PROG_FC],[
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"
 
   if test "${abi_fc_vendor}" = "unknown"; then
-    _ABI_CHECK_FC_LLVM(${FC})
+    _ABI_FC_CHECK_LLVM(${FC})
   fi
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"
 
   if test "${abi_fc_vendor}" = "unknown"; then
-    _ABI_CHECK_FC_ARM(${FC})
+    _ABI_FC_CHECK_ARM(${FC})
   fi
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"
 

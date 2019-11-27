@@ -21,8 +21,8 @@
 # and abi_cc_version variables accordingly.
 #
 AC_DEFUN([_ABI_CC_CHECK_ARM],[
-  dnl Do some sanity checking of the arguments
-  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+  # Do some sanity checking of the arguments
+  m4_if([$1], [], [AC_FATAL([$0: missing argument 1])])dnl
 
   dnl AC_MSG_CHECKING([if we are using the ARM C compiler])
   cc_info_string=`$1 --version 2>/dev/null | head -n 1`
@@ -47,7 +47,7 @@ AC_DEFUN([_ABI_CC_CHECK_ARM],[
 
 
 
-# _ABI_CHECK_CC_GNU(COMPILER)
+# _ABI_CC_CHECK_GNU(COMPILER)
 # ---------------------------
 #
 # Checks whether the specified C compiler is the GNU C compiler.
@@ -60,7 +60,7 @@ AC_DEFUN([_ABI_CC_CHECK_GNU],[
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  # AC_MSG_CHECKING([if we are using the GNU C compiler])
+  dnl AC_MSG_CHECKING([if we are using the GNU C compiler])
   cc_info_string=`$1 --version 2>&1 | ${EGREP} '^g?cc' | head -n 1`
   if test "${ac_cv_c_compiler_gnu}" != "yes"; then
     abi_cc_vendor="unknown"
@@ -78,7 +78,7 @@ AC_DEFUN([_ABI_CC_CHECK_GNU],[
     fi
     abi_result="yes"
   fi
-  # AC_MSG_RESULT(${abi_result})
+  dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CC_CHECK_GNU
 
 
@@ -94,7 +94,7 @@ AC_DEFUN([_ABI_CC_CHECK_IBM],[
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  # AC_MSG_CHECKING([if we are using the IBM XL C compiler])
+  dnl AC_MSG_CHECKING([if we are using the IBM XL C compiler])
   cc_info_string=`$1 -qversion 2>&1 | head -n 1`
   cc_garbage=`$1 -qversion 2>&1 | wc -l | sed -e 's/ //g'`
   abi_result=`echo "${cc_info_string}" | grep 'IBM XL C/C++'`
@@ -127,7 +127,7 @@ AC_DEFUN([_ABI_CC_CHECK_IBM],[
     fi
     abi_result="yes"
   fi
-  # AC_MSG_RESULT(${abi_result})
+  dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CC_CHECK_IBM
 
 
@@ -143,7 +143,7 @@ AC_DEFUN([_ABI_CC_CHECK_INTEL],[
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  # AC_MSG_CHECKING([if we are using the Intel C compiler])
+  dnl AC_MSG_CHECKING([if we are using the Intel C compiler])
   cc_info_string=`$1 -V 2>&1 | head -n 1`
   abi_result=`echo "${cc_info_string}" | grep '^Intel(R) C'`
   if test "${abi_result}" = ""; then
@@ -160,7 +160,7 @@ AC_DEFUN([_ABI_CC_CHECK_INTEL],[
     fi
     abi_result="yes"
   fi
-  # AC_MSG_RESULT(${abi_result})
+  dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CC_CHECK_INTEL
 
 
@@ -173,8 +173,8 @@ AC_DEFUN([_ABI_CC_CHECK_INTEL],[
 # and abi_cc_version variables accordingly.
 #
 AC_DEFUN([_ABI_CC_CHECK_LLVM],[
-  dnl Do some sanity checking of the arguments
-  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+  # Do some sanity checking of the arguments
+  m4_if([$1], [], [AC_FATAL([$0: missing argument 1])])dnl
 
   dnl AC_MSG_CHECKING([if we are using the LLVM Clang C compiler])
   cc_info_string=`$1 --version 2>/dev/null | head -n 1`
@@ -210,7 +210,7 @@ AC_DEFUN([_ABI_CC_CHECK_PGI],[
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  # AC_MSG_CHECKING([if we are using the PGI C compiler])
+  dnl AC_MSG_CHECKING([if we are using the PGI C compiler])
   cc_info_string=`$1 -V 2>&1 | sed -e '/^$/d' | head -n 1`
   abi_result=`echo "${cc_info_string}" | grep '^pgcc'`
   if test "${abi_result}" = ""; then
@@ -227,7 +227,7 @@ AC_DEFUN([_ABI_CC_CHECK_PGI],[
     fi
     abi_result="yes"
   fi
-  # AC_MSG_RESULT(${abi_result})
+  dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CC_CHECK_PGI
 
 
@@ -270,7 +270,7 @@ AC_DEFUN([_ABI_CC_CHECK_HEADERS],[
 AC_DEFUN([_ABI_CC_CHECK_FUNCTIONS],[
   # Init AC_MSG_CHECKING([for library functions])
 
-  # AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime]) 
+  dnl AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime]) 
   AC_CHECK_FUNCS([abort])
   AC_CHECK_FUNCS([mallinfo])
 
@@ -303,7 +303,7 @@ AC_DEFUN([_ABI_CC_CHECK_TYPES],[
   AC_C_CONST
   AC_TYPE_SIZE_T
   AC_C_BIGENDIAN
-  # AC_TYPE_PID_T
+  dnl AC_TYPE_PID_T
 
 ]) # _ABI_CC_CHECK_TYPES
 
@@ -411,13 +411,13 @@ AC_DEFUN([ABI_PROG_CC],[
     _ABI_CC_CHECK_IBM(${CC})
   fi
   if test "${abi_cc_vendor}" = "unknown"; then
-    _ABI_CHECK_CC_ARM(${CC})
+    _ABI_CC_CHECK_ARM(${CC})
   fi
   if test "${abi_cc_vendor}" = "unknown"; then
-    _ABI_CHECK_CC_INTEL(${CC})
+    _ABI_CC_CHECK_INTEL(${CC})
   fi
   if test "${abi_cc_vendor}" = "unknown"; then
-    _ABI_CHECK_CC_LLVM(${CC})
+    _ABI_CC_CHECK_LLVM(${CC})
   fi
   if test "${abi_cc_vendor}" = "unknown"; then
     _ABI_CC_CHECK_PGI(${CC})
