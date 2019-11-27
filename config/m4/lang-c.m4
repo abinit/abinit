@@ -13,14 +13,14 @@
 
 
 
-# _ABI_CHECK_CC_ARM(COMPILER)
-# ------------------------------
+# _ABI_CC_CHECK_ARM(COMPILER)
+# ---------------------------
 #
 # Checks whether the specified C compiler is the ARMClang compiler.
 # If yes, tries to determine its version number and sets the abi_cc_vendor
 # and abi_cc_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_CC_ARM],[
+AC_DEFUN([_ABI_CC_CHECK_ARM],[
   dnl Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
@@ -43,10 +43,11 @@ AC_DEFUN([_ABI_CHECK_CC_ARM],[
     abi_result="yes"
   fi
   dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_CC_ARM
+]) # _ABI_CC_CHECK_ARM
 
 
 
+# _ABI_CHECK_CC_GNU(COMPILER)
 # ---------------------------
 #
 # Checks whether the specified C compiler is the GNU C compiler.
@@ -164,14 +165,14 @@ AC_DEFUN([_ABI_CC_CHECK_INTEL],[
 
 
 
-# _ABI_CHECK_CC_LLVM(COMPILER)
-# ------------------------------
+# _ABI_CC_CHECK_LLVM(COMPILER)
+# ----------------------------
 #
 # Checks whether the specified C compiler is the LLVM Clang compiler.
 # If yes, tries to determine its version number and sets the abi_cc_vendor
 # and abi_cc_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_CC_LLVM],[
+AC_DEFUN([_ABI_CC_CHECK_LLVM],[
   dnl Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
@@ -194,10 +195,11 @@ AC_DEFUN([_ABI_CHECK_CC_LLVM],[
     abi_result="yes"
   fi
   dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_CC_LLVM
+]) # _ABI_CC_CHECK_LLVM
 
 
 
+# _ABI_CC_CHECK_PGI(COMPILER)
 # ---------------------------
 #
 # Checks whether the specified C compiler is the Portland Group C compiler.
@@ -406,15 +408,16 @@ AC_DEFUN([ABI_PROG_CC],[
   # Determine C compiler vendor (the order is critical)
   AC_MSG_CHECKING([which type of compiler we have])
   if test "${abi_cc_vendor}" = "unknown"; then
+    _ABI_CC_CHECK_IBM(${CC})
+  fi
+  if test "${abi_cc_vendor}" = "unknown"; then
     _ABI_CHECK_CC_ARM(${CC})
   fi
   if test "${abi_cc_vendor}" = "unknown"; then
+    _ABI_CHECK_CC_INTEL(${CC})
   fi
   if test "${abi_cc_vendor}" = "unknown"; then
     _ABI_CHECK_CC_LLVM(${CC})
-  fi
-  if test "${abi_cc_vendor}" = "unknown"; then
-    _ABI_CC_CHECK_INTEL(${CC})
   fi
   if test "${abi_cc_vendor}" = "unknown"; then
     _ABI_CC_CHECK_PGI(${CC})
