@@ -35,7 +35,8 @@ module m_dfpt_fef
  use defs_abitypes, only : MPI_type
  use m_kg,        only : kpgio
  use m_cgtools,   only : overlap_g
- use m_mpinfo,    only : proc_distrb_cycle
+ use m_xmpi
+ use m_mpinfo
 
  implicit none
 
@@ -193,7 +194,7 @@ subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
      dtefield%cgindex(ikpt,isppol) = icg
      nband_k = dtset%nband(ikpt)
      npw_k = npwarr(ikpt)
-     icg = icg + dtset%nspinor*npw_k*nband_k
+     icg = icg + dtset%nspinor*npw_k*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,1,mpi_enreg%me_band)
 
    end do
  end do
@@ -216,7 +217,7 @@ subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
      dtefield%cgindex(ikpt,isppol+nsppol) = icg
      nband_k = dtset%nband(ikpt)
      npw_k = npwar1(ikpt)
-     icg = icg + dtset%nspinor*npw_k*nband_k
+     icg = icg + dtset%nspinor*npw_k*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,1,mpi_enreg%me_band)
 
    end do
  end do
@@ -744,29 +745,35 @@ end subroutine dfptff_initberry
 !!
 !! SOURCE
 
-subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw1,mkmem,mk1mem,nkpt,&
+subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mband_mem,mpw,mpw1,mkmem,mk1mem,&
+&                     mpi_enreg,nkpt,&
 &                     npwarr,npwar1,nspinor,nsppol,qmat,pwindall)
 
 !Arguments ----------------------------------------
 !scalars
  integer,intent(in) :: ikpt,isppol,mband,mk1mem,mkmem,mpw,mpw1,nkpt,nspinor
+ integer,intent(in) :: mband_mem
  integer,intent(in) :: nsppol
  type(efield_type),intent(in) :: dtefield
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: npwar1(nkpt),npwarr(nkpt)
  integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
- real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol)
- real(dp),intent(in) :: cg1(2,mpw1*nspinor*mband*mk1mem*nsppol)
+ real(dp),intent(in) :: cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)
+ real(dp),intent(in) :: cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)
  real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3)
+!TODO MJV: grad_berry should also be dimensioned with mband_mem
  real(dp),intent(out) :: grad_berry(2,mpw1,dtefield%mband_occ)
 
 !Local variables -------------------------
 !scalars
  integer :: iband,icg,icg1,idir,ikpt1
+ integer :: iband_me, jband_me, me_band, ierr
  integer :: ikpt1m,ikptn,ikptnm,ikptnp1,ipw,jband,jpw,kband
  integer :: mpw_tmp,npw_k1,npw_k2,pwmax,pwmin
  real(dp) :: doti,dotr,fac,wfi,wfr
 !arrays
+ integer,allocatable :: cycle_band_procs(:)
  integer,allocatable :: pwind_tmp(:)
  real(dp) :: z1(2),z2(2)
  real(dp),allocatable :: Amat(:,:,:),Bmat(:,:,:),s1mat(:,:,:),vect1(:,:)
@@ -785,6 +792,9 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
  s1mat(:,:,:)=zero
  grad_berry(:,:,:) = zero
 
+ call proc_distrb_cycle_band_procs(cycle_band_procs,mpi_enreg%proc_distrb,ikpt,isppol)
+ me_band = mpi_enreg%me_band
+
  do idir=1,3
    fac = dtefield%efield_dot(idir)*dble(nkpt)/&
 &   (dble(dtefield%nstr(idir))*four_pi)
@@ -796,13 +806,20 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
    npw_k2 = npwar1(ikpt1)
    pwind_tmp(1:npw_k1) = pwindall((ikpt-1)*mpw_tmp+1:(ikpt-1)*mpw_tmp+npw_k1,3,idir)
 
+!TODO: this algorithm is very inefficient: the looping is in the wrong order.
+!  should be possible to store a temp vector and make it into a BLAS call...
+!  basically boils down to an internal sum over iband
+!     grad_berry(ipw,jband) = fac * wf(ipw,:) * qmat(:,jband) 
    do ipw = 1, npw_k1
      jpw = pwind_tmp(ipw)
 
      if (jpw > 0) then
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
-         wfr = cg1(1,icg1 + (iband - 1)*npw_k2*nspinor + jpw)
-         wfi = cg1(2,icg1 + (iband - 1)*npw_k2*nspinor + jpw)
+         if (cycle_band_procs(iband) /= me_band) cycle
+         iband_me = iband_me + 1
+         wfr = cg1(1,icg1 + (iband_me - 1)*npw_k2*nspinor + jpw)
+         wfi = cg1(2,icg1 + (iband_me - 1)*npw_k2*nspinor + jpw)
 
          do  jband = 1, dtefield%mband_occ
 
@@ -941,9 +958,12 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
 
      if (jpw > 0) then
 
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
-         wfr = cg(1,icg + (iband - 1)*npw_k2*nspinor + jpw)
-         wfi = cg(2,icg + (iband - 1)*npw_k2*nspinor + jpw)
+         if (cycle_band_procs(iband) /= me_band) cycle
+         iband_me = iband_me + 1
+         wfr = cg(1,icg + (iband_me - 1)*npw_k2*nspinor + jpw)
+         wfi = cg(2,icg + (iband_me - 1)*npw_k2*nspinor + jpw)
 
          do jband=1, dtefield%mband_occ
 
@@ -976,9 +996,12 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
      jpw = pwind_tmp(ipw)
 
      if (jpw > 0) then
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
-         wfr = cg1(1,icg1 + (iband - 1)*npw_k2*nspinor + jpw)
-         wfi = cg1(2,icg1 + (iband - 1)*npw_k2*nspinor + jpw)
+         if (cycle_band_procs(iband) /= me_band) cycle
+         iband_me = iband_me + 1
+         wfr = cg1(1,icg1 + (iband_me - 1)*npw_k2*nspinor + jpw)
+         wfi = cg1(2,icg1 + (iband_me - 1)*npw_k2*nspinor + jpw)
 
          do  jband = 1, dtefield%mband_occ
 
@@ -1008,13 +1031,20 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
    pwind_tmp(1:npw_k1) =pwindall((ikptn-1)*mpw_tmp+1:(ikptn-1)*mpw_tmp+npw_k1,8,idir)
 
    vect1(:,0) = zero ; vect2(:,0) = zero
+   jband_me = 0
    do jband = 1, dtefield%mband_occ
-     vect2(:,1:npw_k2) = &
-&     cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
-     if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+     if (cycle_band_procs(jband) == me_band) then
+       jband_me = jband_me + 1
+       vect2(:,1:npw_k2) = &
+&       cg1(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
+       if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+     end if
+     call xmpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
 
+     iband_me = 0
      do iband = 1, dtefield%mband_occ
-
+       if (cycle_band_procs(iband) /= mpi_enreg%me_band) cycle
+       iband_me = iband_me + 1
        pwmin = (iband-1)*npw_k1*nspinor
        pwmax = pwmin + npw_k1*nspinor
        vect1(:,1:npw_k1) = &
@@ -1044,15 +1074,24 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
 
 
    vect1(:,0) = zero ; vect2(:,0) = zero
+   jband_me = 0
    do jband = 1, dtefield%mband_occ
-     vect2(:,1:npw_k2) = &
-&     cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
-     if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+     if (cycle_band_procs(jband) == me_band) then
+       jband_me = jband_me + 1
+       vect2(:,1:npw_k2) = &
+&       cg1(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
+       if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+     end if
+     call xmpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
+
+     iband_me = 0
      do iband = 1, dtefield%mband_occ
-       pwmin = (iband-1)*npw_k1*nspinor
+       if (cycle_band_procs(iband) /= mpi_enreg%me_band) cycle
+       iband_me = iband_me + 1
+       pwmin = (iband_me-1)*npw_k1*nspinor
        pwmax = pwmin + npw_k1*nspinor
        vect1(:,1:npw_k1) = &
-&       cg(:,icg + 1 + pwmin:icg + pwmax)
+&         cg(:,icg + 1 + pwmin:icg + pwmax)
        if (npw_k1 < mpw_tmp) vect1(:,npw_k1+1:mpw_tmp) = zero
        call overlap_g(doti,dotr,mpw_tmp,npw_k1,npw_k2,nspinor,pwind_tmp,&
 &       vect1,vect2)
@@ -1061,10 +1100,14 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
 
      end do    ! iband
    end do    !jband
+! accumulate all iband values on each proc
+   call xmpi_sum(s1mat,mpi_enreg%comm_band,ierr)
 
    Amat(:,:,:)=zero
 
-!  calculate Amat
+!  calculate Amat: s1mat is complete so sum over all bands here
+! TODO: could reduce one loop over bands
+! TODO: replace this with a BLAS call: A = s1*q in complex numbers
    do iband=1, dtefield%mband_occ
      do jband=1, dtefield%mband_occ
        do kband=1, dtefield%mband_occ
@@ -1080,7 +1123,9 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
 
    Bmat(:,:,:)=zero
 
-!  calculate Bmat
+!  calculate Bmat: as above, all matrices A B q are band-complete at this stage
+! TODO: could reduce one loop over bands
+! TODO: replace this with a BLAS call: B = q*A in complex numbers
    ikptn = dtefield%ikpt_dk(ikpt,7,idir)
    do iband=1, dtefield%mband_occ
      do jband=1, dtefield%mband_occ
@@ -1108,20 +1153,18 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
    z1(:) = zero
    z2(:) = zero
    do ipw = 1, npw_k1
-
      jpw = pwind_tmp(ipw)
-
      if (jpw > 0) then
-
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
-         wfr = cg(1,icg + (iband - 1)*npw_k2*nspinor + jpw)
-         wfi = cg(2,icg + (iband - 1)*npw_k2*nspinor + jpw)
+         if (cycle_band_procs(iband) /= me_band) cycle
+         iband_me = iband_me + 1
+         wfr = cg(1,icg + (iband_me - 1)*npw_k2*nspinor + jpw)
+         wfi = cg(2,icg + (iband_me - 1)*npw_k2*nspinor + jpw)
 
          do jband=1, dtefield%mband_occ
-
            grad_berry(1,ipw,jband) = grad_berry(1,ipw,jband) + fac*(Bmat(1,iband,jband)*wfr - Bmat(2,iband,jband)*wfi)
            grad_berry(2,ipw,jband) = grad_berry(2,ipw,jband) + fac*(Bmat(1,iband,jband)*wfi + Bmat(2,iband,jband)*wfr)
-
          end do
        end do
      end if
@@ -1129,6 +1172,9 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
 
  end do !idir
 
+ call xmpi_sum(grad_berry,mpi_enreg%comm_band,ierr) ! sum over iband for all previous loops
+
+ ABI_DEALLOCATE(cycle_band_procs)
  ABI_DEALLOCATE(vect1)
  ABI_DEALLOCATE(vect2)
  ABI_DEALLOCATE(s1mat)
@@ -1155,7 +1201,9 @@ end subroutine dfptff_gradberry
 !! ikpt = the index of the current k point
 !! isppol = the index of the spin component
 !! mband =  maximum number of bands
+!! mband_mem =  maximum number of bands on this cpu
 !! mkmem = maximum number of k-points in core memory
+!! mpi_enreg = parallel distribution datastructure
 !! mpw = maximum number of plane waves
 !! mpw1 = maximum number of plane waves for response wavefunctions
 !! nkpt = number of k points
@@ -1186,31 +1234,36 @@ end subroutine dfptff_gradberry
 !!
 !! SOURCE
 
-subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband,mpw,mpw1,mkmem,mk1mem,nkpt,&
-&                 npwarr,npwar1,nspinor,nsppol,qmat,pwindall,rprimd)
+subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband,mband_mem,mpw,mpw1,mkmem,mk1mem,&
+&                 mpi_enreg,nkpt,npwarr,npwar1,nspinor,nsppol,qmat,pwindall,rprimd)
 
 !Arguments ----------------------------------------
 !scalars
  integer,intent(in) :: idir_efield,ikpt,isppol,mband,mk1mem,mkmem,mpw,mpw1,nkpt
+ integer,intent(in) :: mband_mem
  integer,intent(in) :: nspinor,nsppol
  type(efield_type),intent(in) :: dtefield
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: npwar1(nkpt),npwarr(nkpt)
  integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
- real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol)
- real(dp),intent(in) :: cg1(2,mpw1*nspinor*mband*mk1mem*nsppol)
+ real(dp),intent(in) :: cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)
+ real(dp),intent(in) :: cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)
  real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3)
  real(dp),intent(in) :: rprimd(3,3)
+!TODO MJV: this array is still npw*nband, and should be parallelized as well at some point...
  real(dp),intent(out) :: grad_berry(2,mpw1,dtefield%mband_occ)
 
 !Local variables -------------------------
 !scalars
  integer :: iband,icg,icg1,idir,ikpt1
+ integer :: iband_me, jband_me, ierr
  integer :: ikptn,ikptnp1,ipw,jband,jpw,kband
  integer :: mpw_tmp,npw_k1,npw_k2,pwmax,pwmin
  real(dp) :: doti,dotr,fac,wfi,wfr
 !arrays
  integer,allocatable :: pwind_tmp(:)
+ integer,allocatable :: cycle_band_procs(:)
  real(dp) :: z1(2),z2(2)
  real(dp),allocatable :: Amat(:,:,:),Bmat(:,:,:),s1mat(:,:,:),vect1(:,:)
  real(dp),allocatable :: vect2(:,:)
@@ -1228,6 +1281,8 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
  s1mat(:,:,:)=zero
  grad_berry(:,:,:) = zero
 
+ call proc_distrb_cycle_band_procs(cycle_band_procs,mpi_enreg%proc_distrb,ikpt,isppol)
+
  do idir=1,3
    fac = dtefield%efield_dot(idir)*dble(nkpt)/&
 &   (dble(dtefield%nstr(idir))*four_pi)
@@ -1242,9 +1297,13 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
    do ipw = 1, npw_k1
      jpw = pwind_tmp(ipw)
      if (jpw > 0) then
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
-         wfr = cg1(1,icg1 + (iband - 1)*npw_k2*nspinor + jpw)
-         wfi = cg1(2,icg1 + (iband - 1)*npw_k2*nspinor + jpw)
+         if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,mpi_enreg%me_band)) cycle
+         iband_me = iband_me + 1
+         wfr = cg1(1,icg1 + (iband_me - 1)*npw_k2*nspinor + jpw)
+         wfi = cg1(2,icg1 + (iband_me - 1)*npw_k2*nspinor + jpw)
+
          do  jband = 1, dtefield%mband_occ
            grad_berry(1,ipw,jband) = &
 &           grad_berry(1,ipw,jband) + &
@@ -1257,6 +1316,7 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
        end do
      end if
    end do
+! accumulate full sum over iband below at the end
 
 !  compute <u^(0)_{k_j}|u^(1)_{k_j+1}> matrix----------------------------------------------------
 
@@ -1270,18 +1330,24 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
    pwind_tmp(1:npw_k1) = pwindall((ikptn-1)*mpw_tmp+1:(ikptn-1)*mpw_tmp+npw_k1,7,idir)
 
    vect1(:,0) = zero ; vect2(:,0) = zero
+   jband_me = 0
    do jband = 1, dtefield%mband_occ
-     vect2(:,1:npw_k2) = &
-&     cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
+     if (cycle_band_procs(jband) == mpi_enreg%me_band) then
+       vect2(:,1:npw_k2) = &
+&        cg1(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
+     end if
+     call xmpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
+
      if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+     iband_me = 0
      do iband = 1, dtefield%mband_occ
-       pwmin = (iband-1)*npw_k1*nspinor
+       if (cycle_band_procs(iband) /= mpi_enreg%me_band) cycle
+       iband_me = iband_me + 1
+       pwmin = (iband_me-1)*npw_k1*nspinor
        pwmax = pwmin + npw_k1*nspinor
-       vect1(:,1:npw_k1) = &
-&       cg(:,icg + 1 + pwmin:icg + pwmax)
+       vect1(:,1:npw_k1) = cg(:,icg + 1 + pwmin:icg + pwmax)
        if (npw_k1 < mpw_tmp) vect1(:,npw_k1+1:mpw_tmp) = zero
-       call overlap_g(doti,dotr,mpw_tmp,npw_k1,npw_k2,nspinor,pwind_tmp,&
-&       vect1,vect2)
+       call overlap_g(doti,dotr,mpw_tmp,npw_k1,npw_k2,nspinor,pwind_tmp,vect1,vect2)
        s1mat(1,iband,jband) = dotr
        s1mat(2,iband,jband) = doti
      end do    ! iband
@@ -1298,22 +1364,31 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
    pwind_tmp(1:npw_k1) = pwindall((ikpt-1)*mpw_tmp+1:(ikpt-1)*mpw_tmp+npw_k1,5,idir)
 
    vect1(:,0) = zero ; vect2(:,0) = zero
+   jband_me = 0
    do jband = 1, dtefield%mband_occ
-     vect2(:,1:npw_k2) = &
-&     cg(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
-     if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+     if (cycle_band_procs(jband) == mpi_enreg%me_band) then
+       vect2(:,1:npw_k2) = &
+&        cg(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
+       if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+     end if
+     call xmpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
+
+     iband_me = 0
      do iband = 1, dtefield%mband_occ
-       pwmin = (iband-1)*npw_k1*nspinor
+       if (cycle_band_procs(iband) /= mpi_enreg%me_band) cycle
+       iband_me = iband_me + 1
+       pwmin = (iband_me-1)*npw_k1*nspinor
        pwmax = pwmin + npw_k1*nspinor
        vect1(:,1:npw_k1) = &
 &       cg1(:,icg + 1 + pwmin:icg + pwmax)
        if (npw_k1 < mpw_tmp) vect1(:,npw_k1+1:mpw_tmp) = zero
-       call overlap_g(doti,dotr,mpw_tmp,npw_k1,npw_k2,nspinor,pwind_tmp,&
-&       vect1,vect2)
+       call overlap_g(doti,dotr,mpw_tmp,npw_k1,npw_k2,nspinor,pwind_tmp,vect1,vect2)
        s1mat(1,jband,iband) = s1mat(1,jband,iband) + dotr
        s1mat(2,jband,iband) = s1mat(2,jband,iband) + doti
      end do    ! iband
    end do    !jband
+! accumulate all iband values on each proc
+   call xmpi_sum(s1mat,mpi_enreg%comm_band,ierr)
 
    Amat(:,:,:)=zero
 
@@ -1360,9 +1435,13 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
    do ipw = 1, npw_k1
      jpw = pwind_tmp(ipw)
      if (jpw > 0) then
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
-         wfr = cg(1,icg + (iband - 1)*npw_k2*nspinor + jpw)
-         wfi = cg(2,icg + (iband - 1)*npw_k2*nspinor + jpw)
+         if (cycle_band_procs(jband) /= mpi_enreg%me_band) cycle
+         iband_me = iband_me + 1
+         wfr = cg(1,icg + (iband_me - 1)*npw_k2*nspinor + jpw)
+         wfi = cg(2,icg + (iband_me - 1)*npw_k2*nspinor + jpw)
+
          do jband=1, dtefield%mband_occ
            grad_berry(1,ipw,jband) = grad_berry(1,ipw,jband) - fac*(Bmat(1,iband,jband)*wfr - Bmat(2,iband,jband)*wfi)
            grad_berry(2,ipw,jband) = grad_berry(2,ipw,jband) - fac*(Bmat(1,iband,jband)*wfi + Bmat(2,iband,jband)*wfr)
@@ -1385,9 +1464,13 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
    do ipw = 1, npw_k1
      jpw = pwind_tmp(ipw)
      if (jpw > 0) then
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
-         wfr = cg1(1,icg1 + (iband - 1)*npw_k2*nspinor + jpw)
-         wfi = cg1(2,icg1 + (iband - 1)*npw_k2*nspinor + jpw)
+         if (cycle_band_procs(jband) /= mpi_enreg%me_band) cycle
+         iband_me = iband_me + 1
+         wfr = cg1(1,icg1 + (iband_me - 1)*npw_k2*nspinor + jpw)
+         wfi = cg1(2,icg1 + (iband_me - 1)*npw_k2*nspinor + jpw)
+
          do  jband = 1, dtefield%mband_occ
            grad_berry(1,ipw,jband) = &
 &           grad_berry(1,ipw,jband) - &
@@ -1414,11 +1497,19 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
 
    vect1(:,0) = zero ; vect2(:,0) = zero
    do jband = 1, dtefield%mband_occ
-     vect2(:,1:npw_k2) = &
-&     cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
-     if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+     if (cycle_band_procs(jband) == mpi_enreg%me_band) then
+       vect2(:,1:npw_k2) = &
+&        cg1(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
+       if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+     end if
+     call xmpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
+
+
+     iband_me = 0
      do iband = 1, dtefield%mband_occ
-       pwmin = (iband-1)*npw_k1*nspinor
+       if (cycle_band_procs(iband) /= mpi_enreg%me_band) cycle
+       iband_me = iband_me + 1
+       pwmin = (iband_me-1)*npw_k1*nspinor
        pwmax = pwmin + npw_k1*nspinor
        vect1(:,1:npw_k1) = &
 &       cg(:,icg + 1 + pwmin:icg + pwmax)
@@ -1442,9 +1533,13 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
 
    vect1(:,0) = zero ; vect2(:,0) = zero
    do jband = 1, dtefield%mband_occ
-     vect2(:,1:npw_k2) = &
-&     cg(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
-     if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+     if (cycle_band_procs(jband) == mpi_enreg%me_band) then
+       vect2(:,1:npw_k2) = &
+&        cg(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
+       if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+     end if
+     call xmpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
+
      do iband = 1, dtefield%mband_occ
        pwmin = (iband-1)*npw_k1*nspinor
        pwmax = pwmin + npw_k1*nspinor
@@ -1572,6 +1667,10 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
 
  end do !idir
 
+! accumulate full sum over iband in each jband entry
+ call xmpi_sum(grad_berry,mpi_enreg%comm_band,ierr)
+
+ ABI_DEALLOCATE(cycle_band_procs)
  ABI_DEALLOCATE(vect1)
  ABI_DEALLOCATE(vect2)
  ABI_DEALLOCATE(s1mat)
@@ -1629,30 +1728,34 @@ end subroutine dfptff_gbefd
 !!
 !! SOURCE
 
-subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mkmem,&
-&                mpw,mpw1,nkpt,npwarr,npwar1,nsppol,nspinor,pwindall,qmat,rprimd)
+subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mband_mem,mkmem,&
+&                mpi_enreg,mpw,mpw1,nkpt,npwarr,npwar1,nsppol,nspinor,pwindall,qmat,rprimd)
 
 !Arguments ----------------------------------------
 !scalars
  integer,intent(in) :: idir_efield,mband,mkmem,mpw,mpw1,nkpt,nspinor,nsppol
+ integer,intent(in) :: mband_mem
  real(dp),intent(out) :: eberry
  type(efield_type),intent(in) :: dtefield
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: npwar1(nkpt),npwarr(nkpt)
  integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
- real(dp),intent(in) :: cg(2,mpw*mband*mkmem*nspinor*nsppol)
- real(dp),intent(in) :: cg1(2,mpw1*mband*mkmem*nspinor*nsppol)
+ real(dp),intent(in) :: cg(2,mpw*mband_mem*mkmem*nspinor*nsppol)
+ real(dp),intent(in) :: cg1(2,mpw1*mband_mem*mkmem*nspinor*nsppol)
  real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3)
  real(dp),intent(in) :: rprimd(3,3)
 
 !Local variables ----------------------------------
 !scalars
  integer :: iband,icg,icg1,idir
+ integer :: jband_me, iband_me, me_band, ierr
  integer :: ikpt,ikpt1,ikptn,ikptnm
  integer :: jband,kband,mpw_tmp,npw_k1,npw_k2,pwmax,pwmin
  real(dp) :: doti,dotr,e0,fac
 !arrays
  integer,allocatable :: pwind_tmp(:)
+ integer,allocatable :: cycle_band_procs(:)
  real(dp) :: z1(2)
  real(dp),allocatable :: Amat(:,:,:),umat(:,:,:,:),vect1(:,:),vect2(:,:)
 
@@ -1668,7 +1771,12 @@ subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mkmem,&
  vect1(:,0) = zero ; vect2(:,0) = zero
  eberry=zero
 
+ me_band = mpi_enreg%me_band
+
  do ikpt=1,nkpt
+
+   call proc_distrb_cycle_band_procs(cycle_band_procs,mpi_enreg%proc_distrb,ikpt,1)
+
    do idir=1,3
      fac = dtefield%efield_dot(idir)/&
 &     (dble(dtefield%nstr(idir))*four_pi)
@@ -1683,12 +1791,21 @@ subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mkmem,&
      npw_k2 = npwar1(ikpt1)
      pwind_tmp(1:npw_k1) = pwindall((ikpt-1)*mpw_tmp+1:(ikpt-1)*mpw_tmp+npw_k1,3,idir)
      vect1(:,0) = zero ; vect2(:,0) = zero
+     jband_me = 0
      do jband = 1, dtefield%mband_occ
-       vect2(:,1:npw_k2) = &
-&       cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
-       if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       if (cycle_band_procs(jband) == me_band) then
+         jband_me = jband_me + 1
+         vect2(:,1:npw_k2) = &
+&         cg1(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
+         if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       end if
+       call xmpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
+
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
-         pwmin = (iband-1)*npw_k1*nspinor
+         if (cycle_band_procs(iband) /= me_band) cycle
+         iband_me = iband_me + 1
+         pwmin = (iband_me-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
          vect1(:,1:npw_k1) = &
 &         cg1(:,icg + 1 + pwmin:icg + pwmax)
@@ -1711,12 +1828,21 @@ subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mkmem,&
      pwind_tmp(1:npw_k1) = pwindall((ikpt-1)*mpw_tmp+1:(ikpt-1)*mpw_tmp+npw_k1,7,idir)
 
      vect1(:,0) = zero ; vect2(:,0) = zero
+     jband_me = 0
      do jband = 1, dtefield%mband_occ
-       vect2(:,1:npw_k2) = &
-&       cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
-       if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       if (cycle_band_procs(jband) == me_band) then
+         jband_me = jband_me + 1
+         vect2(:,1:npw_k2) = &
+&         cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
+         if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       end if
+       call xmpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
+
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
-         pwmin = (iband-1)*npw_k1*nspinor
+         if (cycle_band_procs(iband) /= me_band) cycle
+         iband_me = iband_me + 1
+         pwmin = (iband_me-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
          vect1(:,1:npw_k1) = &
 &         cg(:,icg + 1 + pwmin:icg + pwmax)
@@ -1740,12 +1866,21 @@ subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mkmem,&
      pwind_tmp(1:npw_k1) = pwindall((ikptn-1)*mpw_tmp+1:(ikptn-1)*mpw_tmp+npw_k1,5,idir)
 
      vect1(:,0) = zero ; vect2(:,0) = zero
+     jband_me = 0
      do jband = 1, dtefield%mband_occ
-       vect2(:,1:npw_k2) = &
-&       cg(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
-       if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       if (cycle_band_procs(jband) == me_band) then
+         jband_me = jband_me + 1
+         vect2(:,1:npw_k2) = &
+&         cg(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
+         if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       end if
+       call xmpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
+
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
-         pwmin = (iband-1)*npw_k1*nspinor
+         if (cycle_band_procs(iband) /= me_band) cycle
+         iband_me = iband_me + 1
+         pwmin = (iband_me-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
          vect1(:,1:npw_k1) = &
 &         cg1(:,icg + 1 + pwmin:icg + pwmax)
@@ -1769,12 +1904,21 @@ subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mkmem,&
      npw_k2 = npwar1(ikpt1)
      pwind_tmp(1:npw_k1) = pwindall((ikptnm-1)*mpw_tmp+1:(ikptnm-1)*mpw_tmp+npw_k1,7,idir)
      vect1(:,0) = zero ; vect2(:,0) = zero
+     jband_me = 0
      do jband = 1, dtefield%mband_occ
-       vect2(:,1:npw_k2) = &
-&       cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
-       if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       if (cycle_band_procs(jband) == me_band) then
+         jband_me = jband_me + 1
+         vect2(:,1:npw_k2) = &
+&         cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
+         if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       end if
+       call xmpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
+
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
-         pwmin = (iband-1)*npw_k1*nspinor
+         if (cycle_band_procs(iband) /= me_band) cycle
+         iband_me = iband_me + 1
+         pwmin = (iband_me-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
          vect1(:,1:npw_k1) = &
 &         cg(:,icg + 1 + pwmin:icg + pwmax)
@@ -1785,6 +1929,9 @@ subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mkmem,&
          umat(2,iband,jband,4) = doti
        end do    ! iband
      end do    !jband
+
+! sum up over all iband and all procs
+     call xmpi_sum(umat,mpi_enreg%comm_band,ierr)
 
 !    sum over the whole------------------------------------------------------------
 
@@ -1843,12 +1990,21 @@ subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mkmem,&
      pwind_tmp(1:npw_k1) = pwindall((ikptn-1)*mpw_tmp+1:(ikptn-1)*mpw_tmp+npw_k1,5,idir)
 
      vect1(:,0) = zero ; vect2(:,0) = zero
+     jband_me = 0
      do jband = 1, dtefield%mband_occ
-       vect2(:,1:npw_k2) = &
-&       cg(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
-       if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       if (cycle_band_procs(jband) == me_band) then
+         jband_me = jband_me + 1
+         vect2(:,1:npw_k2) = &
+&         cg(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
+         if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       end if
+       call xmpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
+
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
-         pwmin = (iband-1)*npw_k1*nspinor
+         if (cycle_band_procs(iband) /= me_band) cycle
+         iband_me = iband_me + 1
+         pwmin = (iband_me-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
          vect1(:,1:npw_k1) = &
 &         cg1(:,icg + 1 + pwmin:icg + pwmax)
@@ -1870,12 +2026,21 @@ subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mkmem,&
      npw_k2 = npwar1(ikpt1)
      pwind_tmp(1:npw_k1) = pwindall((ikpt-1)*mpw_tmp+1:(ikpt-1)*mpw_tmp+npw_k1,7,idir)
      vect1(:,0) = zero ; vect2(:,0) = zero
+     jband_me = 0
      do jband = 1, dtefield%mband_occ
-       vect2(:,1:npw_k2) = &
-&       cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
-       if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       if (cycle_band_procs(jband) == me_band) then
+         jband_me = jband_me + 1
+         vect2(:,1:npw_k2) = &
+&         cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
+         if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       end if
+       call xmpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
+
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
-         pwmin = (iband-1)*npw_k1*nspinor
+         if (cycle_band_procs(iband) /= me_band) cycle
+         iband_me = iband_me + 1
+         pwmin = (iband_me-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
          vect1(:,1:npw_k1) = &
 &         cg(:,icg + 1 + pwmin:icg + pwmax)
@@ -1886,6 +2051,9 @@ subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mkmem,&
          umat(2,iband,jband,1) = umat(2,iband,jband,1) + doti
        end do    ! iband
      end do    !jband
+
+! sum up over all iband and all procs
+     call xmpi_sum(umat,mpi_enreg%comm_band,ierr)
 
      e0=zero
 
@@ -1899,6 +2067,7 @@ subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mkmem,&
      eberry = eberry - e0*fac
 
    end do !end idir
+   ABI_DEALLOCATE(cycle_band_procs)
  end do !end ikpt
 
  ABI_DEALLOCATE(umat)
@@ -1956,28 +2125,32 @@ end subroutine dfptff_edie
 !!
 !! SOURCE
 
-subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
-&               mpw,mpw1,nkpt,npwarr,npwar1,nsppol,nspinor,pwindall,qmat)
+subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mband_mem,mkmem,&
+&               mpi_enreg,mpw,mpw1,nkpt,npwarr,npwar1,nsppol,nspinor,pwindall,qmat)
 
 !Arguments ----------------------------------------
 !scalars
  integer,intent(in) :: mband,mkmem,mpw,mpw1,nkpt,nspinor,nsppol
+ integer,intent(in) :: mband_mem
  real(dp),intent(out) :: eberry
  type(efield_type),intent(in) :: dtefield
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: npwar1(nkpt),npwarr(nkpt)
  integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
- real(dp),intent(in) :: cg(2,mpw*mband*mkmem*nspinor*nsppol)
- real(dp),intent(in) :: cg1(2,mpw1*mband*mkmem*nspinor*nsppol)
+ real(dp),intent(in) :: cg(2,mpw*mband_mem*mkmem*nspinor*nsppol)
+ real(dp),intent(in) :: cg1(2,mpw1*mband_mem*mkmem*nspinor*nsppol)
  real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3)
 
 !Local variables ----------------------------------
 !scalars
  integer :: iband,icg,icg1,idir
+ integer :: jband_me, iband_me, me_band, ierr
  integer :: ikpt,ikpt1,ikptn,ikptnm
  integer :: jband,kband,mpw_tmp,npw_k1,npw_k2,pwmax,pwmin
  real(dp) :: doti,dotr,e0,fac
 !arrays
+ integer,allocatable :: cycle_band_procs(:)
  integer,allocatable :: pwind_tmp(:)
  real(dp) :: z1(2)
  real(dp),allocatable :: Amat(:,:,:),umat(:,:,:,:),vect1(:,:),vect2(:,:)
@@ -1994,7 +2167,11 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
  vect1(:,0) = zero ; vect2(:,0) = zero
  eberry=zero
 
+ me_band = mpi_enreg%me_band
+
+!TODO no info on sppol here - I default to isppol 1
  do ikpt=1,nkpt
+   call proc_distrb_cycle_band_procs(cycle_band_procs,mpi_enreg%proc_distrb,ikpt,1)
 
    do idir=1,3
 
@@ -2011,15 +2188,22 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
      npw_k2 = npwar1(ikpt1)
      pwind_tmp(1:npw_k1) = pwindall((ikpt-1)*mpw_tmp+1:(ikpt-1)*mpw_tmp+npw_k1,3,idir)
      vect1(:,0) = zero ; vect2(:,0) = zero
+     jband_me = 0
      do jband = 1, dtefield%mband_occ
-       vect2(:,1:npw_k2) = &
-&       cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
+       if (cycle_band_procs(jband) == me_band) then
+         jband_me = jband_me + 1
+         vect2(:,1:npw_k2) = cg1(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
+         if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       end if
+       call mpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
 
-       if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
 
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
+         if (cycle_band_procs(iband) /= me_band) cycle
+         iband_me = iband_me + 1
 
-         pwmin = (iband-1)*npw_k1*nspinor
+         pwmin = (iband_me-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
          vect1(:,1:npw_k1) = &
 &         cg1(:,icg + 1 + pwmin:icg + pwmax)
@@ -2043,14 +2227,22 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
      pwind_tmp(1:npw_k1) = pwindall((ikpt-1)*mpw_tmp+1:(ikpt-1)*mpw_tmp+npw_k1,7,idir)
 
      vect1(:,0) = zero ; vect2(:,0) = zero
+     jband_me = 0
      do jband = 1, dtefield%mband_occ
-       vect2(:,1:npw_k2) = &
-&       cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
-       if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       if (cycle_band_procs(jband) == me_band) then
+         jband_me = jband_me + 1
+         vect2(:,1:npw_k2) = &
+&         cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
+         if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       end if
+       call mpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
 
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
+         if (cycle_band_procs(iband) /= me_band) cycle
+         iband_me = iband_me + 1
 
-         pwmin = (iband-1)*npw_k1*nspinor
+         pwmin = (iband_me-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
          vect1(:,1:npw_k1) = &
 &         cg(:,icg + 1 + pwmin:icg + pwmax)
@@ -2075,14 +2267,22 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
      pwind_tmp(1:npw_k1) = pwindall((ikptn-1)*mpw_tmp+1:(ikptn-1)*mpw_tmp+npw_k1,5,idir)
 
      vect1(:,0) = zero ; vect2(:,0) = zero
+     jband_me = 0
      do jband = 1, dtefield%mband_occ
-       vect2(:,1:npw_k2) = &
-&       cg(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
-       if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       if (cycle_band_procs(jband) == me_band) then
+         jband_me = jband_me + 1
+         vect2(:,1:npw_k2) = &
+&         cg(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
+         if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       end if
+       call mpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
 
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
+         if (cycle_band_procs(iband) /= me_band) cycle
+         iband_me = iband_me + 1
 
-         pwmin = (iband-1)*npw_k1*nspinor
+         pwmin = (iband_me-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
          vect1(:,1:npw_k1) = &
 &         cg1(:,icg + 1 + pwmin:icg + pwmax)
@@ -2108,14 +2308,22 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
      pwind_tmp(1:npw_k1) = pwindall((ikptnm-1)*mpw_tmp+1:(ikptnm-1)*mpw_tmp+npw_k1,7,idir)
 
      vect1(:,0) = zero ; vect2(:,0) = zero
+     jband_me = 0
      do jband = 1, dtefield%mband_occ
-       vect2(:,1:npw_k2) = &
-&       cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
-       if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       if (cycle_band_procs(jband) == me_band) then
+         jband_me = jband_me + 1
+         vect2(:,1:npw_k2) = &
+&         cg1(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
+         if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       end if
+       call mpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
 
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
+         if (cycle_band_procs(iband) /= me_band) cycle
+         iband_me = iband_me + 1
 
-         pwmin = (iband-1)*npw_k1*nspinor
+         pwmin = (iband_me-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
          vect1(:,1:npw_k1) = &
 &         cg(:,icg + 1 + pwmin:icg + pwmax)
@@ -2128,13 +2336,16 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
        end do    ! iband
      end do    !jband
 
+! recompose full umat on each proc, summing over iband
+     call xmpi_sum(umat,mpi_enreg%comm_band,ierr)
+
 !    sum over the whole------------------------------------------------------------
 
      e0=zero
      do iband=1,dtefield%mband_occ
        do jband=1,dtefield%mband_occ
          e0 = e0 + 4_dp*(umat(1,iband,jband,1)*qmat(2,jband,iband,ikpt,1,idir)&
-&         +       umat(2,iband,jband,1)*qmat(1,jband,iband,ikpt,1,idir))
+&         +              umat(2,iband,jband,1)*qmat(1,jband,iband,ikpt,1,idir))
 
        end do
      end do
@@ -2183,6 +2394,7 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
      eberry = eberry - e0*fac
 
    end do !end idir
+   ABI_DEALLOCATE(cycle_band_procs)
  end do !end ikpt
 
  ABI_DEALLOCATE(umat)
@@ -2240,19 +2452,21 @@ end subroutine dfptff_ebp
 !!
 !! SOURCE
 
-subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mkmem,&
-&               mpw,mpw1,mpert,nkpt,npwarr,npwar1,nsppol,nspinor,pwindall,qmat,rprimd)
+subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mband_mem,mkmem,&
+&               mpi_enreg,mpw,mpw1,mpert,nkpt,npwarr,npwar1,nsppol,nspinor,pwindall,qmat,rprimd)
 
 !Arguments ----------------------------------------
 !scalars
  integer,intent(in) :: idirpert,ipert,mband,mkmem,mpert,mpw,mpw1,nkpt,nspinor
+ integer,intent(in) :: mband_mem
  integer,intent(in) :: nsppol
  type(efield_type),intent(in) :: dtefield
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: npwar1(nkpt),npwarr(nkpt)
  integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
- real(dp),intent(in) :: cg(2,mpw*mband*mkmem*nspinor*nsppol)
- real(dp),intent(in) :: cg1(2,mpw1*mband*mkmem*nspinor*nsppol)
+ real(dp),intent(in) :: cg(2,mpw*mband_mem*mkmem*nspinor*nsppol)
+ real(dp),intent(in) :: cg1(2,mpw1*mband_mem*mkmem*nspinor*nsppol)
  real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(inout) :: d2lo(2,3,mpert,3,mpert) !vz_i
@@ -2260,9 +2474,11 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mkmem,&
 !Local variables ----------------------------------
 !scalars
  integer :: ialpha,iband,icg,icg1,idir,ikpt,ikpt1,jband,mpw_tmp,npw_k1
+ integer :: jband_me, iband_me, me_band, ierr
  integer :: npw_k2,pwmax,pwmin
  real(dp) :: doti,dotr,e0,fac
 !arrays
+ integer,allocatable :: cycle_band_procs(:)
  integer,allocatable :: pwind_tmp(:)
  real(dp) :: edir(3)
  real(dp),allocatable :: s1mat(:,:,:),vect1(:,:),vect2(:,:)
@@ -2279,7 +2495,11 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mkmem,&
 
  edir(:)=zero
 
+ me_band = mpi_enreg%me_band
+
+!TODO no info on sppol here - I default to isppol 1
  do ikpt=1,nkpt
+   call proc_distrb_cycle_band_procs(cycle_band_procs,mpi_enreg%proc_distrb,ikpt,1)
    do idir=1,3
 !    compute <u^(0)_{k_j}|u^(1)_{k_j+1,q}> matrix--- q=0 ----------------------------------------
 
@@ -2292,12 +2512,21 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mkmem,&
      pwind_tmp(1:npw_k1) = pwindall((ikpt-1)*mpw_tmp+1:(ikpt-1)*mpw_tmp+npw_k1,7,idir)
 
      vect1(:,0) = zero ; vect2(:,0) = zero
+     jband_me = 0
      do jband = 1, dtefield%mband_occ
-       vect2(:,1:npw_k2) = &
-&       cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
-       if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       if (cycle_band_procs(jband) == me_band) then
+         jband_me = jband_me + 1
+         vect2(:,1:npw_k2) = &
+&         cg1(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
+         if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       end if
+       call mpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
+
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
-         pwmin = (iband-1)*npw_k1*nspinor
+         if (cycle_band_procs(iband) /= me_band) cycle
+         iband_me = iband_me + 1
+         pwmin = (iband_me-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
          vect1(:,1:npw_k1) = &
 &         cg(:,icg + 1 + pwmin:icg + pwmax)
@@ -2319,12 +2548,21 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mkmem,&
      npw_k2 = npwarr(ikpt1)
      pwind_tmp(1:npw_k1) = pwindall((ikpt-1)*mpw_tmp+1:(ikpt-1)*mpw_tmp+npw_k1,5,idir)
      vect1(:,0) = zero ; vect2(:,0) = zero
+     jband_me = 0
      do jband = 1, dtefield%mband_occ
-       vect2(:,1:npw_k2) = &
-&       cg(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
-       if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       if (cycle_band_procs(jband) == me_band) then
+         jband_me = jband_me + 1
+         vect2(:,1:npw_k2) = &
+&         cg(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
+         if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       end if
+       call mpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
+
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
-         pwmin = (iband-1)*npw_k1*nspinor
+         if (cycle_band_procs(iband) /= me_band) cycle
+         iband_me = iband_me + 1
+         pwmin = (iband_me-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
          vect1(:,1:npw_k1) = &
 &         cg1(:,icg + 1 + pwmin:icg + pwmax)
@@ -2335,6 +2573,9 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mkmem,&
          s1mat(2,iband,jband) = s1mat(2,iband,jband) + doti
        end do    ! iband
      end do    !jband
+
+! recompose full s1mat on each proc, summing over iband
+     call xmpi_sum(s1mat,mpi_enreg%comm_band,ierr)
 
 !    sum over the whole------------------------------------------------------------
 
@@ -2355,6 +2596,7 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mkmem,&
      end do
 
    end do !idir
+   ABI_DEALLOCATE(cycle_band_procs)
  end do !ikpt
 
  d2lo(1,1:3,ipert,idirpert,ipert)=edir(:)
@@ -2375,12 +2617,13 @@ end subroutine dfptff_die
 !! calculate Born effective charge tensor in Eq.(33) in PRB 75, 115116(2007) [[cite:Wang2007]].
 !!
 !! INPUTS
-!! cg(2,mpw*nspinor*mband*mkmem*nsppol) = planewave coefficients of wavefunctions
-!! cg1(2,mpw1*nspinor*mband*mk1mem*nsppol) = pw coefficients of
+!! cg(2,mpw*nspinor*mband_mem*mkmem*nsppol) = planewave coefficients of wavefunctions
+!! cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol) = pw coefficients of
 !! RF wavefunctions at k,q.
 !! dtefield = variables related to response Berry-phase calculation
 !! idirpert = the current coloumn of the dielectric permittivity tensor
 !! mband =  maximum number of bands
+!! mband_mem =  maximum number of bands on this cpu
 !! mkmem = maximum number of k-points in core memory
 !! mpw = maximum number of plane waves
 !! mpw1 = maximum number of plane waves for response wavefunctions
@@ -2413,19 +2656,21 @@ end subroutine dfptff_die
 !!
 !! SOURCE
 
-subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mkmem,&
-&               mpw,mpw1,mpert,nkpt,npwarr,npwar1,nsppol,nspinor,pwindall,qmat,rprimd)
+subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mband_mem,mkmem,&
+&               mpi_enreg,mpw,mpw1,mpert,nkpt,npwarr,npwar1,nsppol,nspinor,pwindall,qmat,rprimd)
 
 !Arguments ----------------------------------------
 !scalars
  integer,intent(in) :: idirpert,ipert,mband,mkmem,mpert,mpw,mpw1,natom,nkpt
+ integer,intent(in) :: mband_mem
  integer,intent(in) :: nspinor,nsppol
  type(efield_type),intent(in) :: dtefield
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: npwar1(nkpt),npwarr(nkpt)
  integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
- real(dp),intent(in) :: cg(2,mpw*mband*mkmem*nspinor*nsppol)
- real(dp),intent(in) :: cg1(2,mpw1*mband*mkmem*nspinor*nsppol)
+ real(dp),intent(in) :: cg(2,mpw*mband_mem*mkmem*nspinor*nsppol)
+ real(dp),intent(in) :: cg1(2,mpw1*mband_mem*mkmem*nspinor*nsppol)
  real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(inout) :: d2lo(2,3,mpert,3,mpert) !vz_i
@@ -2434,9 +2679,11 @@ subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mkmem,&
 !scalars
  integer :: ialpha,iband,icg,icg1,idir,ikpt,ikpt1,jband,mpw_tmp,npw_k1
  integer :: npw_k2,pwmax,pwmin
+ integer :: me_band,ierr, iband_me, jband_me
  real(dp) :: doti,dotr,e0,fac
 !arrays
  integer,allocatable :: pwind_tmp(:)
+ integer,allocatable :: cycle_band_procs(:)
  real(dp) :: edir(3)
  real(dp),allocatable :: s1mat(:,:,:),vect1(:,:),vect2(:,:)
 
@@ -2450,9 +2697,14 @@ subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mkmem,&
  ABI_ALLOCATE(pwind_tmp,(mpw_tmp))
  vect1(:,0) = zero ; vect2(:,0) = zero
 
+ me_band = mpi_enreg%me_band
+
  edir(:)=zero
 
+!TODO MJV: where is the loop over sppol? proc_distrb_cycle_band_procs chooses isppol 1 below
  do ikpt=1,nkpt
+   call proc_distrb_cycle_band_procs(cycle_band_procs,mpi_enreg%proc_distrb,ikpt,1)
+
    do idir=1,3
 
 !    compute <u^(0)_{k_j}|u^(1)_{k_j+1,q}> matrix--- q=0 ----------------------------------------
@@ -2465,12 +2717,25 @@ subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mkmem,&
      npw_k2 = npwar1(ikpt1)
      pwind_tmp(1:npw_k1) = pwindall((ikpt-1)*mpw_tmp+1:(ikpt-1)*mpw_tmp+npw_k1,7,idir)
      vect1(:,0) = zero ; vect2(:,0) = zero
+     jband_me = 0
+     s1mat = zero
      do jband = 1, dtefield%mband_occ
-       vect2(:,1:npw_k2) = &
-&       cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
+       if (cycle_band_procs(jband) == me_band) then
+         vect2(:,1:npw_k2) = &
+&          cg1(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
+         jband_me = jband_me + 1
+       end if
+       call mpi_bcast(vect2,cycle_band_procs(jband), mpi_enreg%comm_band,ierr)
+       
+! now everyone has vect2 for present jband
        if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
-         pwmin = (iband-1)*npw_k1*nspinor
+         if (cycle_band_procs(iband) /= me_band) cycle
+         iband_me = iband_me + 1
+
+         pwmin = (iband_me-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
          vect1(:,1:npw_k1) = &
 &         cg(:,icg + 1 + pwmin:icg + pwmax)
@@ -2481,6 +2746,8 @@ subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mkmem,&
          s1mat(2,iband,jband) = doti
        end do    ! iband
      end do    !jband
+!    for the moment s1mat is only filled for iband on current cpu
+
 
 !    compute <u^(1)_{k_j,q}|u^(0)_{k_j+1}> matrix-- q=0 -------------------------------------
 
@@ -2492,22 +2759,36 @@ subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mkmem,&
      npw_k2 = npwarr(ikpt1)
      pwind_tmp(1:npw_k1) = pwindall((ikpt-1)*mpw_tmp+1:(ikpt-1)*mpw_tmp+npw_k1,5,idir)
      vect1(:,0) = zero ; vect2(:,0) = zero
+     jband_me = 0
      do jband = 1, dtefield%mband_occ
-       vect2(:,1:npw_k2) = &
-&       cg(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
+       if (cycle_band_procs(jband) == me_band) then
+         vect2(:,1:npw_k2) = &
+&          cg(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
+         jband_me = jband_me + 1
+       end if
+       call mpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
+
        if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
+       iband_me = 0
        do iband = 1, dtefield%mband_occ
-         pwmin = (iband-1)*npw_k1*nspinor
+         if (cycle_band_procs(iband) /= me_band) cycle
+         iband_me = iband_me + 1
+
+         pwmin = (iband_me-1)*npw_k1*nspinor
          pwmax = pwmin + npw_k1*nspinor
          vect1(:,1:npw_k1) = &
-&         cg1(:,icg + 1 + pwmin:icg + pwmax)
+&          cg1(:,icg + 1 + pwmin:icg + pwmax)
          if (npw_k1 < mpw_tmp) vect1(:,npw_k1+1:mpw_tmp) = zero
          call overlap_g(doti,dotr,mpw_tmp,npw_k1,npw_k2,nspinor,pwind_tmp,&
-&         vect1,vect2)
+&          vect1,vect2)
+         
          s1mat(1,iband,jband) = s1mat(1,iband,jband) + dotr
          s1mat(2,iband,jband) = s1mat(2,iband,jband) + doti
        end do    ! iband
      end do    !jband
+
+! recompose full s1mat on each proc
+     call xmpi_sum(s1mat,mpi_enreg%comm_band,ierr)
 
 !    sum over the whole------------------------------------------------------------
 
@@ -2527,8 +2808,9 @@ subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mkmem,&
        edir(ialpha)=edir(ialpha)+ e0*fac
      end do
 
-   end do
- end do
+   end do ! idir
+   ABI_DEALLOCATE(cycle_band_procs)
+ end do ! ikpt
 
  d2lo(1,1:3,natom+2,idirpert,ipert)=edir(:)
 
@@ -2548,11 +2830,12 @@ end subroutine dfptff_bec
 !! calculation of the inverse of the overlap matrix
 !!
 !! INPUTS
-!! cg(2,mpw*nspinor*mband*mkmem*nsppol) = planewave coefficients of wavefunctions
+!! cg(2,mpw*nspinor*mband_mem*mkmem*nsppol) = planewave coefficients of wavefunctions
 !! RF wavefunctions at k,q.
 !! dtefield = variables related to response Berry-phase calculation
 !! ikpt = the index of the current k point
 !! mband =  maximum number of bands
+!! mband_mem =  maximum number of bands on this cpu
 !! mkmem = maximum number of k-points in core memory
 !! mpw = maximum number of plane waves
 !! mpw1 = maximum number of plane waves for response wavefunctions
@@ -2574,28 +2857,32 @@ end subroutine dfptff_bec
 !!
 !! SOURCE
 
-subroutine qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,mband,npwarr,nkpt,nspinor,nsppol,pwindall)
+subroutine qmatrix(cg,dtefield,qmat,mpi_enreg,mpw,mpw1,mkmem,mband,mband_mem,npwarr,nkpt,nspinor,nsppol,pwindall)
 
  use m_hide_lapack, only : dzgedi, dzgefa
 
 !Arguments ----------------------------------------
 !scalars
  integer,intent(in) :: mband,mkmem,mpw,mpw1,nkpt,nspinor,nsppol
+ integer,intent(in) :: mband_mem
  type(efield_type),intent(in) :: dtefield
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: npwarr(nkpt),pwindall(max(mpw,mpw1)*mkmem,8,3)
- real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol)
+ real(dp),intent(in) :: cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)
  real(dp),intent(out) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3)
 
 !Local variables -------------------------
 !scalars
  integer :: iband,icg,icg1,idir,ifor,ikpt,ikpt2,info,jband,job
+ integer :: iband_me, jband_me, me_band, ierr
  integer :: npw_k1,npw_k2,pwmax,pwmin
  integer :: isppol
  real(dp) :: doti,dotr
 !arrays
  integer,allocatable :: ipvt(:),pwind_k(:)
  real(dp) :: det(2,2)
+ integer,allocatable :: cycle_band_procs(:)
  real(dp),allocatable :: sinv(:,:,:),smat_k(:,:,:),vect1(:,:),vect2(:,:)
  real(dp),allocatable :: zgwork(:,:)
 
@@ -2612,9 +2899,13 @@ subroutine qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,mband,npwarr,nkpt,nspinor,nsp
 
  job = 11
 
+ me_band = mpi_enreg%me_band
+
 !loop over k points
  do isppol = 1, nsppol
    do ikpt = 1, nkpt
+     call proc_distrb_cycle_band_procs(cycle_band_procs,mpi_enreg%proc_distrb,ikpt,isppol)
+
      npw_k1 = npwarr(ikpt)
      icg  = dtefield%cgindex(ikpt,1)
      do idir = 1, 3
@@ -2625,13 +2916,23 @@ subroutine qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,mband,npwarr,nkpt,nspinor,nsp
          icg1 = dtefield%cgindex(ikpt2,1)
          pwind_k(1:npw_k1) = pwindall((ikpt-1)*max(mpw,mpw1)+1:(ikpt-1)*max(mpw,mpw1)+npw_k1,ifor,idir)
 
+         smat_k = zero
+         jband_me = 0
          do jband = 1, dtefield%nband_occ(isppol)
-           vect2(:,1:npw_k2) = cg(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
+           if (cycle_band_procs(jband) == me_band) then
+             vect2(:,1:npw_k2) = cg(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
+             jband_me = jband_me + 1
+           end if
+           call mpi_bcast(vect2,cycle_band_procs(jband),mpi_enreg%comm_band,ierr)
+
            if (npw_k2 < mpw) vect2(:,npw_k2+1:mpw) = zero
 
+           iband_me = 0
            do iband = 1, dtefield%nband_occ(isppol)
+             if (cycle_band_procs(iband) /= me_band) cycle
+             iband_me = iband_me + 1
 
-             pwmin = (iband-1)*npw_k1*nspinor
+             pwmin = (iband_me-1)*npw_k1*nspinor
              pwmax = pwmin + npw_k1*nspinor
              vect1(:,1:npw_k1) = cg(:,icg + 1 + pwmin:icg + pwmax)
              if (npw_k1 < mpw) vect1(:,npw_k1+1:mpw) = zero
@@ -2641,6 +2942,9 @@ subroutine qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,mband,npwarr,nkpt,nspinor,nsp
            end do    ! iband
          end do    !jband
 
+! recompose full s1mat on each proc
+         call xmpi_sum(smat_k,mpi_enreg%comm_band,ierr)
+
          sinv(:,:,:) = smat_k(:,:,:)
 
          call dzgefa(sinv,dtefield%mband_occ,dtefield%nband_occ(isppol),ipvt,info)
@@ -2649,6 +2953,7 @@ subroutine qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,mband,npwarr,nkpt,nspinor,nsp
          qmat(:,:,:,ikpt,ifor,idir) = sinv(:,:,:)
        end do
      end do
+     ABI_DEALLOCATE(cycle_band_procs)
    end do  !end loop over k
  end do
 

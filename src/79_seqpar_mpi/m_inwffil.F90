@@ -100,7 +100,8 @@ contains
 !!  kptns(3,nkpt)=reduced coords of k points
 !!  localrdwf=(for parallel case) if 1, the wffnm  file is local to each machine
 !!  mband=maximum number of bands
-!!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
+!!  mband_mem=maximum number of bands for this cpu
+!!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband_mem*mkmem*nsppol
 !!  mkmem=number of k-points in core memory
 !!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum number of planewaves as dimensioned in calling routine
@@ -624,7 +625,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
      write(message,'(5a)')&
 &     'In the case of spinor WF read from disk and converted into',ch10,&
 &     'spin-polarized non-spinor WF, the WF translator is memory',ch10,&
-&     'consuming (a copy a spinor WF is temporary stored in memory).'
+&     'consuming (a copy of the spinor WF is temporarily stored in memory).'
      MSG_WARNING(message)
 
      nsppol_eff=1;nspinor_eff=2;sppoldbl_eff=1

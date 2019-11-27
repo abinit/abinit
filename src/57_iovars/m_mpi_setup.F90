@@ -111,6 +111,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
  integer :: blocksize,exchn2n3d,iband,idtset,iexit,ii,iikpt,iikpt_modulo, prtvol
  integer :: isppol,jdtset,marr,mband_lower,mband_upper
  integer :: me_fft,mgfft,mgfftdg,mkmem,mpw,mpw_k,optdriver
+ integer :: mband_mem
  integer :: nfft,nfftdg,nkpt,nkpt_me,npert,nproc,nproc_fft,nqpt
  integer :: nspink,nsppol,nsym,paral_fft,response,tnband,tread0,usepaw,vectsize
  integer :: fftalg,fftalga,fftalgc
@@ -123,6 +124,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !arrays
  integer :: ngfft(18),ngfftdg(18),ngfftc(3),tread(12)
  integer,allocatable :: intarr(:),istwfk(:),symrel(:,:,:)
+ integer,allocatable :: mybands(:)
  integer,pointer :: nkpt_rbz(:)
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: gmet(3,3),gprimd(3,3),kpt(3),qphon(3),rmet(3,3),rprimd(3,3)
@@ -563,6 +565,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !    Also, the reduction of k points due to symmetry in RF calculations
 !    is NOT taken into account. This should be changed later ...
      nkpt_me=nkpt
+     mband_mem=0
      if(xmpi_paral==1 .and. dtsets(idtset)%usewvl == 0) then
        nkpt_me=0
        if(response==0 .or. (response==1 .and. dtsets(idtset)%efmas==1))then
@@ -584,6 +587,9 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !        for spin-polarized case.
          mpi_enregs(idtset)%paralbd=1
 !        nproc=mpi_enregs(idtset)%nproc_cell*mpi_enregs(idtset)%nproc_pert
+print *, 'respfn call to distrb2 mband_upper,dtsets(idtset)%nband,nkpt,nproc,nsppol,mpi_enregs(idtset)%paralbd'
+print *,                         mband_upper,dtsets(idtset)%nband,nkpt,nproc,nsppol,mpi_enregs(idtset)%paralbd
+print *,  'bandpp ', dtsets(idtset)%bandpp
          call distrb2(mband_upper,dtsets(idtset)%nband,nkpt,nproc,nsppol,mpi_enregs(idtset))
          do isppol=1,nsppol
            nspink=0
@@ -607,9 +613,36 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
          if(tnband==0)nkpt_me=nkpt_me+1
 !        In any case, the maximal number of k points is nkpt
          if(nkpt_me>nkpt)nkpt_me=nkpt
-       end if
+
+!        mband_mem
+         ABI_ALLOCATE (mybands, (mband_upper))
+         do isppol=1,nsppol
+           do iikpt=1,nkpt
+             mybands = 0
+             do iband=1,dtsets(idtset)%nband(iikpt+(isppol-1)*nkpt)
+               if(mpi_enregs(idtset)%proc_distrb(iikpt,iband,isppol)==mpi_enregs(idtset)%me_band)then
+                 mybands(iband)=1
+               end if
+             end do ! iband
+             mband_mem = max(mband_mem, sum(mybands))
+           end do ! iikpt
+         end do ! isppol
+         ABI_DEALLOCATE (mybands)
+       end if ! response case
      end if
    end if
+   dtsets(idtset)%mband_mem = mband_mem
+
+print *, ' iikpt,iband,isppol   proc_distrb '
+print *, ' nkpt_me ', nkpt_me, ' mband_mem ', mband_mem
+do isppol=1,nsppol
+  nspink=0
+  do iikpt=1,nkpt
+    do iband=1,dtsets(idtset)%nband(iikpt+(isppol-1)*nkpt)
+       print *, iikpt,iband,isppol, mpi_enregs(idtset)%proc_distrb(iikpt,iband,isppol)
+    end do ! iband
+  end do ! iikpt
+end do ! isppol
 
 !  Take care of mkmems. Use the generic name -mkmem- for mkmem as well as mkqmem
 !  and mk1mem.
@@ -619,37 +652,10 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
    do ii=1,3
 
-!    Read in mkmem here if it is in the input file
-!    TODO: mkmem is not supported any longer. These variables can be removed.
-     if(ii==1)then
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'mkmem',tread0,'INT')
-     else if(ii==2)then
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'mkqmem',tread0,'INT')
-     else if(ii==3)then
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'mk1mem',tread0,'INT')
-     end if
-
 !    Note that mkmem is used as a dummy variable, representing mkmem as well
 !    as mkqmem, and mk1mem.
-     if(tread0==1) then
-       mkmem=intarr(1)
-       if (mkmem<0) then
-!        mkmem is unreasonable; must be zero or positive
-         write(message, '(4a,i0,4a)')&
-&         nm_mkmem(ii),' must be positive or null but ',nm_mkmem(ii),' =',mkmem,ch10,&
-&         'Use default ',nm_mkmem(ii),' = nkpt .'
-         MSG_WARNING(message)
-         mkmem=nkpt
-       end if
 
-     else
-
-       !  mkmem was not set in the input file so default to incore solution
-       !write(message,'(6a)') &
-       !'mpi_setup: ',nm_mkmem(ii),' undefined in the input file.','Use default ',nm_mkmem(ii),' = nkpt'
-       !call wrtout(std_out,message,'COLL')
-       mkmem=nkpt
-     end if
+     mkmem=nkpt
 
 !    Check whether nkpt distributed on the processors <= mkmem;
 !    if so then may run entirely in core,
@@ -694,7 +700,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      if (.not.mpi_distrib_is_ok(mpi_enregs(idtset),mband_upper,&
 &     dtsets(idtset)%nkpt,dtsets(idtset)%mkmem,nsppol,msg=message)) then
        write(message,'(5a)') trim(message),ch10,&
-&       'YOU ARE STRONGLY ADVICED TO ACTIVATE AUTOMATIC PARALLELIZATION!',ch10,&
+&       'YOU ARE STRONGLY ADVISED TO ACTIVATE AUTOMATIC PARALLELIZATION!',ch10,&
 &       'PUT "AUTOPARAL=1" IN THE INPUT FILE.'
        MSG_WARNING(message)
      end if

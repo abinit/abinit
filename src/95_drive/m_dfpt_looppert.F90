@@ -357,6 +357,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(pawrhoij_type),pointer :: pawrhoij_pert(:)
  type(ddb_type) :: ddb
 
+!DEBUG
+ integer :: icg, icg_tmp, npw, iband_me, mcg_tmp
+ real(dp), allocatable :: cg_tmp(:,:)
+!ENDDEBUG
+
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -1070,8 +1075,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 !  Initialize GS wavefunctions at k
    ireadwf0=1; formeig=0 ; ask_accurate=1 ; optorth=0
-   mcg=mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
-   if (one*mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol > huge(1)) then
+   mcg=mpw*dtset%nspinor*dtset%mband_mem*mkmem_rbz*dtset%nsppol
+   if (one*mpw*dtset%nspinor*dtset%mband_mem*mkmem_rbz*dtset%nsppol > huge(1)) then
      write (message,'(4a, 5(a,i0), 2a)')&
 &     "Default integer is not wide enough to store the size of the GS wavefunction array (WF0, mcg).",ch10,&
 &     "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
@@ -1084,9 +1089,15 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    ABI_ALLOCATE(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
    call timab(144,1,tsec)
-   call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
+!DEBUG
+!mcg=mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
+   mcg_tmp = mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
+   ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
+!ENDDEBUG
+!TODO MJV: this needs to be a distributed inwffil reading of the whole WFK, reading only my bands!
+   call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
 &   formeig,hdr0,ireadwf0,istwfk_rbz,kg,&
-&   kpt_rbz,dtset%localrdwf,dtset%mband,mcg,&
+&   kpt_rbz,dtset%localrdwf,dtset%mband,mcg_tmp,&
 &   mkmem_rbz,mpi_enreg,mpw,nband_rbz,dtset%ngfft,nkpt_rbz,npwarr,&
 &   dtset%nsppol,nsym,occ_rbz,optorth,dtset%symafm,&
 &   dtset%symrel,dtset%tnons,dtfil%unkg,wffgs,wfftgs,&
@@ -1098,6 +1109,28 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
    ! Update energies GS energies at k
    call put_eneocc_vect(ebands_k, "eig", eigen0)
+!DEBUG
+   !transfer to local array
+   icg=0
+   icg_tmp=0
+   do isppol=1, nsppol
+     do ikpt=1, nkpt_rbz
+       npw = npwarr(ikpt)
+       iband_me = 0
+       do iband=1, nband_rbz(ikpt+nkpt_rbz*(isppol-1))
+         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_band) then
+           icg_tmp = icg_tmp + npw
+           cycle
+         end if
+         iband_me = iband_me + 1
+         cg(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+         icg = icg + npw
+         icg_tmp = icg_tmp + npw
+       end do
+     end do
+   end do
+   ABI_DEALLOCATE(cg_tmp)
+!ENDDEBUG
 
 !  PAW: compute on-site projections of GS wavefunctions (cprj) (and derivatives) at k
    ncpgr=0
@@ -1108,6 +1141,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if (ipert==dtset%natom+1) ncpgr=1
      if (ipert==dtset%natom+3.or.ipert==dtset%natom+4) ncpgr=1
      if (usecprj==1) then
+!TODO MJV: PAW case also needs porting to mband_mem loops
        mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
        ABI_DATATYPE_DEALLOCATE(cprj)
        ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
@@ -1218,7 +1252,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  Initialize wavefunctions at k+q
 !  MG: Here it is possible to avoid the extra reading if the same k mesh can be used.
    ireadwf0=1 ; formeig=0 ; ask_accurate=1 ; optorth=0
-   mcgq=mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
+   mcgq=mpw1*dtset%nspinor*dtset%mband_mem*mkqmem_rbz*dtset%nsppol
    !SPr: verified until here, add mcgq for -q
    if (one*mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol > huge(1)) then
      write (message,'(4a, 5(a,i0), 2a)')&
@@ -1229,32 +1263,67 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
      MSG_ERROR(message)
    end if
-
    ABI_MALLOC_OR_DIE(cgq,(2,mcgq), ierr)
+
    ABI_ALLOCATE(eigenq,(dtset%mband*nkpt_rbz*dtset%nsppol))
    if (.not.kramers_deg) then
      !ABI_MALLOC_OR_DIE(cg_pq,(2,mcgq), ierr)
      !ABI_ALLOCATE(eigen_pq,(dtset%mband*nkpt_rbz*dtset%nsppol))
-     mcgmq=mpw1_mq*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
+     mcgmq=mpw1_mq*dtset%nspinor*dtset%mband_mem*mkqmem_rbz*dtset%nsppol
      ABI_MALLOC_OR_DIE(cg_mq,(2,mcgmq), ierr)
+
      ABI_ALLOCATE(eigen_mq,(dtset%mband*nkpt_rbz*dtset%nsppol))
    end if
 
    !if (sum(dtset%qptn(1:3)**2)>=1.d-14) then ! non-zero q
+!TODO: for many other q this should be avoidable, in principle all if qptrlatt is a subgrid of kprtlatt
+!  Or at very least make a pointer instead of a full copy!!!
    if (dtfil%fnamewffq == dtfil%fnamewffk .and. sum(dtset%qptn(1:3)**2) < 1.d-14) then
      call wrtout(std_out, " qpt is Gamma, psi_k+q initialized from psi_k in memory")
      cgq = cg
      eigenq = eigen0
    else
+!DEBUG
+! mcgq=      mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
+   mcg_tmp = mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
+   ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
+!ENDDEBUG
+
      call timab(144,1,tsec)
-     call inwffil(ask_accurate,cgq,dtset,dtset%ecut,ecut_eff,eigenq,dtset%exchn2n3d,&
+!     call inwffil(ask_accurate,cgq,dtset,dtset%ecut,ecut_eff,eigenq,dtset%exchn2n3d,&
+!&     formeig,hdr,&
+!&     ireadwf0,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,dtset%mband,mcgq,&
+     call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigenq,dtset%exchn2n3d,&
 &     formeig,hdr,&
-&     ireadwf0,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,dtset%mband,mcgq,&
+&     ireadwf0,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,dtset%mband,mcg_tmp,&
 &     mkqmem_rbz,mpi_enreg,mpw1,nband_rbz,dtset%ngfft,nkpt_rbz,npwar1,&
 &     dtset%nsppol,nsym,occ_rbz,optorth,&
 &     dtset%symafm,dtset%symrel,dtset%tnons,&
 &     dtfil%unkg1,wffkq,wfftkq,dtfil%unwffkq,dtfil%fnamewffq,wvl)
      call timab(144,2,tsec)
+!DEBUG
+   !transfer to local array
+   icg=0
+   icg_tmp=0
+   do isppol=1, nsppol
+     do ikpt=1, nkpt_rbz
+       npw = npwar1(ikpt)
+       iband_me = 0
+       do iband=1, nband_rbz(ikpt+nkpt_rbz*(isppol-1))
+         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_band) then
+           icg_tmp = icg_tmp + npw
+           cycle
+         end if
+         iband_me = iband_me + 1
+         cgq(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+         icg = icg + npw
+         icg_tmp = icg_tmp + npw
+       end do
+     end do
+   end do
+   ABI_DEALLOCATE(cg_tmp)
+!ENDDEBUG
+
 !    Close dtfil%unwffkq, if it was ever opened (in inwffil)
      if (ireadwf0==1) then
        call WffClose(wffkq,ierr)
@@ -1262,9 +1331,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if (.not.kramers_deg) then
        !SPr: later "make" a separate WFQ file for "-q"
        call timab(144,1,tsec)
-       call inwffil(ask_accurate,cg_mq,dtset,dtset%ecut,ecut_eff,eigen_mq,dtset%exchn2n3d,&
+!DEBUG
+! mcgmq=     mpw1_mq*dtset%nspinor*dtset%mband_mem*mkqmem_rbz*dtset%nsppol
+   mcg_tmp = mpw1_mq*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
+   ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
+!ENDDEBUG
+       call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigen_mq,dtset%exchn2n3d,&
 &       formeig,hdr,&
-&       ireadwf0,istwfk_rbz,kg1_mq,kmq_rbz,dtset%localrdwf,dtset%mband,mcgmq,&
+&       ireadwf0,istwfk_rbz,kg1_mq,kmq_rbz,dtset%localrdwf,dtset%mband,mcg_tmp, & !mcgmq,&
 &       mkqmem_rbz,mpi_enreg,mpw1_mq,nband_rbz,dtset%ngfft,nkpt_rbz,npwar1_mq,&
 &       dtset%nsppol,nsym,occ_rbz,optorth,&
 &       dtset%symafm,dtset%symrel,dtset%tnons,&
@@ -1274,6 +1348,29 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        if (ireadwf0==1) then
          call WffClose(wffkq,ierr)
        end if
+!DEBUG
+   !transfer to local array
+   icg=0
+   icg_tmp=0
+   do isppol=1, nsppol
+     do ikpt=1, nkpt_rbz
+       npw = npwar1_mq(ikpt)
+       iband_me = 0
+       do iband=1, nband_rbz(ikpt+nkpt_rbz*(isppol-1))
+         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_band) then
+           icg_tmp = icg_tmp + npw
+           cycle
+         end if
+         iband_me = iband_me + 1
+         cg_mq(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+         icg = icg + npw
+         icg_tmp = icg_tmp + npw
+       end do
+     end do
+   end do
+   ABI_DEALLOCATE(cg_tmp)
+!ENDDEBUG
+
      end if
    end if
    ! Update energies GS energies at k + q
@@ -1286,6 +1383,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_DATATYPE_ALLOCATE(cprjq,(0,0))
    if (psps%usepaw==1) then
      if (usecprj==1) then
+!TODO MJV : PAW
        mcprjq=dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
        ABI_DATATYPE_DEALLOCATE(cprjq)
        ABI_DATATYPE_ALLOCATE(cprjq,(dtset%natom,mcprjq))
@@ -1414,7 +1512,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if ((dtset%ieig2rf > 0 .and. dtset%ieig2rf/=2) .or. dtset%efmas > 0) then
      dim_eig2rf=1
    end if
-   mcg1=mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
+   mcg1=mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol
    if (one*mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol > huge(1)) then
      write (message,'(4a, 5(a,i0), 2a)')&
 &     "Default integer is not wide enough to store the size of the GS wavefunction array (WFK1, mcg1).",ch10,&
@@ -1426,17 +1524,17 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
    ABI_MALLOC_OR_DIE(cg1,(2,mcg1), ierr)
    if (.not.kramers_deg) then
-     mcg1mq=mpw1_mq*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
+     mcg1mq=mpw1_mq*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol
      ABI_MALLOC_OR_DIE(cg1_mq,(2,mcg1mq), ierr)
    end if
 
-   ABI_ALLOCATE(cg1_active,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
-   ABI_ALLOCATE(gh1c_set,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
-   ABI_ALLOCATE(gh0c1_set,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
+   ABI_ALLOCATE(cg1_active,(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
+   ABI_ALLOCATE(gh1c_set,(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
+   ABI_ALLOCATE(gh0c1_set,(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
    if (.not.kramers_deg) then
-     ABI_ALLOCATE(cg1_active_mq,(2,mpw1_mq*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
-     ABI_ALLOCATE(gh1c_set_mq,(2,mpw1_mq*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
-     ABI_ALLOCATE(gh0c1_set_mq,(2,mpw1_mq*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
+     ABI_ALLOCATE(cg1_active_mq,(2,mpw1_mq*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
+     ABI_ALLOCATE(gh1c_set_mq,(2,mpw1_mq*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
+     ABI_ALLOCATE(gh0c1_set_mq,(2,mpw1_mq*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
    end if
 !  XG090606 This is needed in the present 5.8.2 , for portability for the pathscale machine.
 !  However, it is due to a bug to be corrected by Paul Boulanger. When the bug will be corrected,
@@ -1454,10 +1552,15 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_ALLOCATE(eigen1,(2*dtset%mband*dtset%mband*nkpt_rbz*dtset%nsppol))
    ABI_ALLOCATE(resid,(dtset%mband*nkpt_rbz*dtset%nsppol))
    call timab(144,1,tsec)
-   call inwffil(ask_accurate,cg1,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
+!DEBUG
+! mcg1=      mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
+   mcg_tmp = mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
+   ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
+!ENDDEBUG
+   call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
 &   formeig,hdr,&
 &   dtfil%ireadwf,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,&
-&   dtset%mband,mcg1,mk1mem_rbz,mpi_enreg,mpw1,nband_rbz,dtset%ngfft,nkpt_rbz,npwar1,&
+&   dtset%mband,mcg_tmp,mk1mem_rbz,mpi_enreg,mpw1,nband_rbz,dtset%ngfft,nkpt_rbz,npwar1,&
 &   dtset%nsppol,nsym1,occ_rbz,optorth,&
 &   symaf1,symrl1,tnons1,dtfil%unkg1,wff1,wffnow,dtfil%unwff1,&
 &   fiwf1i,wvl)
@@ -1466,15 +1569,43 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if (dtfil%ireadwf==1) then
      call WffClose(wff1,ierr)
    end if
+!DEBUG
+   !transfer to local array
+   icg=0
+   icg_tmp=0
+   do isppol=1, nsppol
+     do ikpt=1, nkpt_rbz
+       npw = npwar1(ikpt)
+       iband_me = 0
+       do iband=1, nband_rbz(ikpt+nkpt_rbz*(isppol-1))
+         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_band) then
+           icg_tmp = icg_tmp + npw
+           cycle
+         end if
+         iband_me = iband_me + 1
+         cg1(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+         icg = icg + npw
+         icg_tmp = icg_tmp + npw
+       end do
+     end do
+   end do
+   ABI_DEALLOCATE(cg_tmp)
+!ENDDEBUG
+
    if(.not.kramers_deg) then
      ABI_ALLOCATE(eigen1_mq,(2*dtset%mband*dtset%mband*nkpt_rbz*dtset%nsppol))
      ABI_ALLOCATE(resid_mq,(dtset%mband*nkpt_rbz*dtset%nsppol))
      !initialize cg1_mq:
      call timab(144,1,tsec)
-     call inwffil(ask_accurate,cg1_mq,dtset,dtset%ecut,ecut_eff,eigen1_mq,dtset%exchn2n3d,&
+!DEBUG
+! mcg1mq=    mpw1_mq*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
+   mcg_tmp = mpw1_mq*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
+   ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
+!ENDDEBUG
+     call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigen1_mq,dtset%exchn2n3d,&
 &     formeig,hdr,&
 &     dtfil%ireadwf,istwfk_rbz,kg1_mq,kmq_rbz,dtset%localrdwf,&
-&     dtset%mband,mcg1mq,mk1mem_rbz,mpi_enreg,mpw1_mq,nband_rbz,dtset%ngfft,nkpt_rbz,npwar1_mq,&
+&     dtset%mband,mcg_tmp,mk1mem_rbz,mpi_enreg,mpw1_mq,nband_rbz,dtset%ngfft,nkpt_rbz,npwar1_mq,&
 &     dtset%nsppol,nsym1,occ_rbz,optorth,&
 &     symaf1,symrl1,tnons1,dtfil%unkg1,wff1,wffnow,dtfil%unwff1,&
 &     fiwf1i,wvl)
@@ -1483,6 +1614,29 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if (dtfil%ireadwf==1) then
        call WffClose(wff1,ierr)
      end if
+!DEBUG
+   !transfer to local array
+   icg=0
+   icg_tmp=0
+   do isppol=1, nsppol
+     do ikpt=1, nkpt_rbz
+       npw = npwar1_mq(ikpt)
+       iband_me = 0
+       do iband=1, nband_rbz(ikpt+nkpt_rbz*(isppol-1))
+         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_band) then
+           icg_tmp = icg_tmp + npw
+           cycle
+         end if
+         iband_me = iband_me + 1
+         cg1_mq(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+         icg = icg + npw
+         icg_tmp = icg_tmp + npw
+       end do
+     end do
+   end do
+   ABI_DEALLOCATE(cg_tmp)
+!ENDDEBUG
+
    end if
 
 !  Eventually reytrieve 1st-order PAW occupancies from file header
@@ -1864,9 +2018,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        end if
        if (.not.associated(eigen1_pert)) then
          ABI_ALLOCATE(eigen1_pert,(2*dtset%mband**2*nkpt*dtset%nsppol,3,mpert))
-         ABI_MALLOC_OR_DIE(cg1_pert,(2,mpw1*nspinor*dtset%mband*mk1mem_rbz*nsppol*dim_eig2rf,3,mpert),ierr)
-         ABI_ALLOCATE(gh0c1_pert,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
-         ABI_ALLOCATE(gh1c_pert,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
+         ABI_MALLOC_OR_DIE(cg1_pert,(2,mpw1*nspinor*dtset%mband_mem*mk1mem_rbz*nsppol*dim_eig2rf,3,mpert),ierr)
+         ABI_ALLOCATE(gh0c1_pert,(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
+         ABI_ALLOCATE(gh1c_pert,(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
          ABI_ALLOCATE(kpt_rbz_pert,(3,nkpt_rbz))
          ABI_ALLOCATE(npwarr_pert,(nkpt_rbz,mpert))
          ABI_ALLOCATE(npwar1_pert,(nkpt_rbz,mpert))
@@ -1898,9 +2052,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        end if
        if (.not.associated(eigen1_pert)) then
          ABI_ALLOCATE(eigen1_pert,(2*dtset%mband**2*nkpt*dtset%nsppol,3,mpert))
-         ABI_ALLOCATE(cg1_pert,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
-         ABI_ALLOCATE(gh0c1_pert,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
-         ABI_ALLOCATE(gh1c_pert,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
+         ABI_ALLOCATE(cg1_pert,(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
+         ABI_ALLOCATE(gh0c1_pert,(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
+         ABI_ALLOCATE(gh1c_pert,(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
          ABI_ALLOCATE(kpt_rbz_pert,(3,nkpt_rbz))
          ABI_ALLOCATE(npwarr_pert,(nkpt_rbz,mpert))
          eigen1_pert(:,:,:) = zero
@@ -1909,7 +2063,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          gh1c_pert(:,:,:,:) = zero
          npwarr_pert (:,:) = 0
          kpt_rbz_pert = kpt_rbz
-         ABI_ALLOCATE(cg0_pert,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
+         ABI_ALLOCATE(cg0_pert,(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
          cg0_pert = cg
        end if
        eigen1_pert(1:2*dtset%mband**2*nkpt_rbz*dtset%nsppol,idir,ipert) = eigen1(:)
@@ -1921,6 +2075,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ABI_DEALLOCATE(gh1c_set)
      ABI_DEALLOCATE(gh0c1_set)
      ABI_DEALLOCATE(cg1_active)
+
+!deallocate bit arrays for case without Kramers' degeneracy
      if(.not.kramers_deg) then
        ABI_DEALLOCATE(gh1c_set_mq)
        ABI_DEALLOCATE(gh0c1_set_mq)
@@ -1942,7 +2098,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call appdig(3*(ipert-1)+idir,dtfil%fnameabo_gkk,gkkfilnam)
      nmatel = dtset%mband*dtset%mband*nkpt_rbz*dtset%nsppol
      ABI_ALLOCATE(phasecg, (2, nmatel))
-     call getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz, npwarr, npwar1, phasecg)
+!     call getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz, npwarr, npwar1, phasecg)
      phasecg(1,:) = one
      phasecg(2,:) = zero
 ! NB: phasecg not actually used in outgkk for the moment (2013/08/15)

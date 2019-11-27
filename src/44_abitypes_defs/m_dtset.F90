@@ -275,6 +275,7 @@ type, public :: dataset_type
  integer :: maxnsym
  integer :: max_ncpus
  integer :: mband
+ integer :: mband_mem
  integer :: mep_solver
  integer :: mem_test = 1
  integer :: mffmem
@@ -1574,6 +1575,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%maxnsym            = dtin%maxnsym
  dtout%max_ncpus          = dtin%max_ncpus
  dtout%mband              = dtin%mband
+ dtout%mband_mem          = dtin%mband_mem
  dtout%mdf_epsinf         = dtin%mdf_epsinf
  dtout%mep_solver         = dtin%mep_solver
  dtout%mem_test           = dtin%mem_test

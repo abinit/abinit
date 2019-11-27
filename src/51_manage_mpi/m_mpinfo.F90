@@ -65,6 +65,9 @@ MODULE m_mpinfo
  public :: mpi_distrib_is_ok     ! Check if a MPI datastructure contains number of processors
                                  ! compatible (in terms of efficiency) with the number of spins/kpts/bands
  public :: proc_distrb_cycle     ! Test a condition to cycle
+ public :: proc_distrb_nband     ! Return number of bands present on this cpu
+ public :: proc_distrb_cycle_bands ! Return array of logicals for bands to cycle at this k and spin
+ public :: proc_distrb_cycle_band_procs ! Return array of processor tags for bands to cycle at this k and spin
 
  public :: initmpi_seq           ! Initializes the MPI information for sequential use.
  public :: initmpi_world         ! %comm_world is redifined for the number of processors on which ABINIT is launched
@@ -701,6 +704,7 @@ logical function mpi_distrib_is_ok(MPI_enreg,nband,nkpt,nkpt_current_proc,nsppol
 
  mpi_distrib_is_ok=.true.
 
+print *, 'MPI_enreg%paralbd ',MPI_enreg%paralbd
  if (MPI_enreg%paralbd==0) then
    if (MPI_enreg%nproc_kpt-floor(nsppol*nkpt*one/nkpt_current_proc)>=nkpt_current_proc) then
      mpi_distrib_is_ok=.false.
@@ -764,6 +768,137 @@ function proc_distrb_cycle(distrb,ikpt,iband1,iband2,isppol,me)
  end if
 
 end function proc_distrb_cycle
+!!***
+
+!!****f* ABINIT/proc_distrb_nband
+!! NAME
+!!  proc_distrb_nband
+!!
+!! FUNCTION
+!!  return number of bands at this k and spin which are on current proc "me"
+!!  NB: could replace proc_distrb_cycle with "proc_distrb_nband > 0"
+!!  isppol -1 means for all spin channels, I think...
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function proc_distrb_nband(distrb,ikpt,isppol,me)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ikpt,isppol,me
+ integer,allocatable,intent(in) :: distrb(:,:,:)
+ integer :: proc_distrb_nband
+
+! *************************************************************************
+
+ proc_distrb_nband=0
+ if (allocated(distrb)) then
+   if (isppol==-1) then
+!TODO: check this is used correctly : in nsppol 2 case you could end up with 2*nband
+     proc_distrb_nband=(count(distrb(ikpt,:,:)==me))
+   else
+     proc_distrb_nband=(count(distrb(ikpt,:,isppol)==me))
+   end if
+ end if
+
+end function proc_distrb_nband
+!!***
+
+!!****f* ABINIT/proc_distrb_cycle_bands
+!! NAME
+!!  proc_distrb_cycle_bands
+!!
+!! FUNCTION
+!!  return vector of logicals for each band
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine proc_distrb_cycle_bands(cycle_bands,distrb,ikpt,isppol,me)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ikpt,isppol,me
+ integer,allocatable,intent(in) :: distrb(:,:,:)
+ logical,allocatable,intent(out) :: cycle_bands(:)
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ if (allocated(cycle_bands)) then
+   ABI_DEALLOCATE (cycle_bands)
+ end if
+ ABI_ALLOCATE (cycle_bands, (size(distrb, 2)))
+ cycle_bands=.false.
+ if (allocated(distrb)) then
+   if (isppol==-1) then
+! TODO : should raise error here - the output rank will be all wrong
+!   could return an OR of the two spin channels, if appropriate
+     cycle_bands=(distrb(ikpt,:,1)/=me)
+     write (msg, "(a)") " for the moment proc_distrb_cycle_bands does not handle the 'any spin' option nsppol -1"
+     MSG_ERROR(msg)
+   else
+     cycle_bands=(distrb(ikpt,:,isppol)/=me)
+   end if
+ end if
+
+end subroutine proc_distrb_cycle_bands
+
+!!***
+!!****f* ABINIT/proc_distrb_cycle_band_procs
+!! NAME
+!!  proc_distrb_cycle_band_procs
+!!
+!! FUNCTION
+!!  return vector of processor me tags for each band
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine proc_distrb_cycle_band_procs(cycle_band_procs,distrb,ikpt,isppol)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ikpt,isppol
+ integer,allocatable,intent(in) :: distrb(:,:,:)
+ integer,allocatable,intent(out) :: cycle_band_procs(:)
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ if (allocated(cycle_band_procs)) then
+    ABI_DEALLOCATE (cycle_band_procs)
+ end if
+ ABI_ALLOCATE (cycle_band_procs, (size(distrb, 2)))
+ cycle_band_procs=-1
+ if (allocated(distrb)) then
+   if (isppol==-1) then
+! TODO : should raise error here - the output rank will be all wrong.
+     cycle_band_procs=distrb(ikpt,:,1)
+     write (msg, "(a)") " for the moment proc_distrb_cycle_bands does not handle the 'any spin' option nsppol -1"
+     MSG_ERROR(msg)
+   else
+     cycle_band_procs=distrb(ikpt,:,isppol)
+   end if
+ end if
+
+end subroutine proc_distrb_cycle_band_procs
 !!***
 
 !!****f* ABINIT/initmpi_world
@@ -2075,7 +2210,10 @@ subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
      end if
 
      mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks)
+     mpi_enreg%nproc_band=nrank
 
+print *, 'mpi_enreg%comm_band, spacecomm,nrank,ranks '
+print *, mpi_enreg%comm_band, spacecomm,nrank,ranks 
      ABI_DEALLOCATE(ranks)
    end if
  end if
@@ -2396,7 +2534,8 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 !    Possible band parallelization
      else
 !      Does not allow a processor to treat different spins
-       ind0=0;inb=nproc/(nkpt*nsppol)
+       ind0=0
+       inb=nproc/(nkpt*nsppol)
        do iikpt=1,nkpt
          nband_k=nband(iikpt)
          inb1=nband_k/inb;if (mod(nband_k,inb)/=0) inb1=inb1+1

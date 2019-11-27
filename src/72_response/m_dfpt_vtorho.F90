@@ -57,7 +57,7 @@ module m_dfpt_vtorho
  use m_getgh1c,  only : rf_transgrid_and_pack, getgh1c_setup
  use m_dfpt_vtowfk, only : dfpt_vtowfk
  use m_dfpt_fef,    only : dfptff_gradberry, dfptff_gbefd
- use m_mpinfo,      only : proc_distrb_cycle
+ use m_mpinfo,      only : proc_distrb_cycle,proc_distrb_nband
  use m_fourier_interpol, only : transgrid
 
  implicit none
@@ -81,9 +81,9 @@ contains
 !! The main part of it is a wf update over all k points
 !!
 !! INPUTS
-!!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions
-!!  cgq(2,mpw1*nspinor*mband*mkqmem*nsppol)=pw coefficients of GS wavefunctions at k+q.
-!!  cg1(2,mpw1*nspinor*mband*mk1mem*nsppol)=pw coefficients of RF wavefunctions at k,q.
+!!  cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)=planewave coefficients of wavefunctions
+!!  cgq(2,mpw1*nspinor*mband_mem*mkqmem*nsppol)=pw coefficients of GS wavefunctions at k+q.
+!!  cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)=pw coefficients of RF wavefunctions at k,q.
 !!  cplex: if 1, real space 1-order functions on FFT grid are REAL; if 2, COMPLEX
 !!  cprj(natom,nspinor*mband*mkmem*nsppol*usecprj)= wave functions at k
 !!              projected with non-local projectors: cprj=<p_i|Cnk>
@@ -109,6 +109,7 @@ contains
 !!  kg1(3,mpw1*mk1mem)=reduced planewave coordinates at k+q, with RF k points
 !!  kpt_rbz(3,nkpt_rbz)=reduced coordinates of k points.
 !!  mband=maximum number of bands
+!!  mband_mem=maximum number of bands on this cpu
 !!  mkmem =number of k points treated by this node (GS data).
 !!  mkqmem =number of k+q points treated by this node (GS data)
 !!  mk1mem =number of k points treated by this node (RF data)
@@ -170,8 +171,8 @@ contains
 !!
 !!
 !! OUTPUT
-!!  cg1(2,mpw*nspinor*mband*mk1mem*nsppol)=updated wavefunctions, orthogonalized to the occupied states
-!!  cg1_active(2,mpw1*nspinor*mband*mk1mem*nsppol)=pw coefficients of RF
+!!  cg1(2,mpw*nspinor*mband_mem*mk1mem*nsppol)=updated wavefunctions, orthogonalized to the occupied states
+!!  cg1_active(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)=pw coefficients of RF
 !!    wavefunctions at k,q. They are orthogonalized to the active.
 !!  eigen1(2*mband*mband*nkpt_rbz*nsppol)=array for holding eigenvalues
 !!    (hartree)
@@ -183,8 +184,8 @@ contains
 !!  eloc0=0th-order local (psp+vxc+Hart) part of 2nd-order total energy
 !!  enl0=0th-order nonlocal pseudopot. part of 2nd-order total energy.
 !!  enl1=1st-order nonlocal pseudopot. part of 2nd-order total energy.
-!!  gh1c_set(2,mpw1*nspinor*mband*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(1)}|nK>
-!!  gh0c1_set(2,mpw1*nspinor*mband*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(0)}|\Psi^{(1)}>
+!!  gh1c_set(2,mpw1*nspinor*mband_mem*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(1)}|nK>
+!!  gh0c1_set(2,mpw1*nspinor*mband_mem*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(0)}|\Psi^{(1)}>
 !!      The wavefunction is orthogonal to the active space (for metals). It is not
 !!      coherent with cg1.
 !!  resid(mband*nkpt_rbz*nsppol)=residuals for each band over all k points.
@@ -220,7 +221,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 & dim_eig2rf,doccde_rbz,docckqde,dtefield,dtfil,dtset,qphon,&
 & edocc,eeig0,eigenq,eigen0,eigen1,ek0,ek1,eloc0,enl0,enl1,&
 & fermie1,gh0c1_set,gh1c_set,gmet,gprimd,idir,indsy1,&
-& ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,mband,&
+& ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,mband,mband_mem,&
 & mkmem,mkqmem,mk1mem,mpi_enreg,mpw,mpw1,my_natom,&
 & natom,nband_rbz,ncpgr,nfftf,nhat1,nkpt_rbz,npwarr,npwar1,nres2,nspden,&
 & nsppol,nsym1,ntypat,nvresid1,occkq,occ_rbz,optres,&
@@ -231,6 +232,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,dbl_nnsclo,dim_eig2rf,idir,ipert,mband,mk1mem,mkmem
+ integer,intent(in) :: mband_mem
  integer,intent(in) :: mkqmem,mpw,mpw1,my_natom,natom,ncpgr,nfftf,nkpt_rbz,nspden
  integer,intent(in) :: nsppol,nsym1,ntypat,optres,prtvol,usecprj,useylmgr1
  integer,optional,intent(in) :: cg1_out
@@ -253,12 +255,12 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer,intent(in) :: nband_rbz(nkpt_rbz*nsppol),npwar1(nkpt_rbz,2)
  integer,intent(in) :: npwarr(nkpt_rbz,2),symaf1(nsym1),symrc1(3,3,nsym1),symrl1(3,3,nsym1)
  real(dp),intent(in) :: qphon(3)
- real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*mband*mkmem*nsppol)
- real(dp),intent(inout) :: cg1(2,mpw1*dtset%nspinor*mband*mk1mem*nsppol)
- real(dp),intent(inout):: cg1_active(2,mpw1*dtset%nspinor*mband*mk1mem*nsppol*dim_eig2rf)
- real(dp),intent(out) :: gh1c_set(2,mpw1*dtset%nspinor*mband*mk1mem*nsppol*dim_eig2rf)
- real(dp),intent(out) :: gh0c1_set(2,mpw1*dtset%nspinor*mband*mk1mem*nsppol*dim_eig2rf)
- real(dp),intent(in) :: cgq(2,mpw1*dtset%nspinor*mband*mkqmem*nsppol)
+ real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*mband_mem*mkmem*nsppol)
+ real(dp),intent(inout) :: cg1(2,mpw1*dtset%nspinor*mband_mem*mk1mem*nsppol)
+ real(dp),intent(inout):: cg1_active(2,mpw1*dtset%nspinor*mband_mem*mk1mem*nsppol*dim_eig2rf)
+ real(dp),intent(out) :: gh1c_set(2,mpw1*dtset%nspinor*mband_mem*mk1mem*nsppol*dim_eig2rf)
+ real(dp),intent(out) :: gh0c1_set(2,mpw1*dtset%nspinor*mband_mem*mk1mem*nsppol*dim_eig2rf)
+ real(dp),intent(in) :: cgq(2,mpw1*dtset%nspinor*mband_mem*mkqmem*nsppol)
  real(dp),intent(in) :: doccde_rbz(mband*nkpt_rbz*nsppol)
  real(dp),intent(in) :: docckqde(mband*nkpt_rbz*nsppol)
  real(dp),intent(in) :: eigen0(mband*nkpt_rbz*nsppol)
@@ -390,10 +392,11 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  end if
 
 !Prepare GS k+q wf
- mcgq=mpw1*dtset%nspinor*mband*mkqmem*nsppol;mcgq_disk=0
+ mcgq=mpw1*dtset%nspinor*mband_mem*mkqmem*nsppol;mcgq_disk=0
 
 !Prepare RF PAW files
  if (psps%usepaw==1) then
+!TODO MJV: PAW
    mcprjq=dtset%nspinor*mband*mkqmem*nsppol*usecprj;mcprjq_disk=0
  else
    mcprjq=0;mcprjq_disk=0
@@ -582,11 +585,13 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 &     dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17) then
        if (ipert<=natom) then
 !        phonon perturbation
-         call dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw1,mkmem,mk1mem,nkpt_rbz,&
+         call dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mband_mem,mpw,mpw1,mkmem,mk1mem,&
+&         mpi_enreg,nkpt_rbz,&
 &         npwarr,npwar1,dtset%nspinor,nsppol,qmat,pwindall)
        else
 !        electric field perturbation
-         call dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir,ikpt,isppol,mband,mpw,mpw1,mkmem,mk1mem,nkpt_rbz,&
+         call dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir,ikpt,isppol,mband,mband_mem,mpw,mpw1,mkmem,mk1mem,&
+&         mpi_enreg,nkpt_rbz,&
 &         npwarr,npwar1,dtset%nspinor,&
 &         nsppol,qmat,pwindall,rprimd)
        end if
@@ -605,7 +610,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      call dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dim_eig2rf,dtfil,&
 &     dtset,edocc_k,eeig0_k,eig0_k,eig0_kq,eig1_k,ek0_k,ek1_k,eloc0_k,enl0_k,enl1_k,fermie1,&
 &     ffnl1,ffnl1_test,gh0c1_set,gh1c_set,grad_berry,gs_hamkq,ibg,ibgq,ibg1,icg,icgq,icg1,idir,ikpt,ipert,isppol,&
-&     mband,mcgq,mcprjq,mkmem,mk1mem,mpi_enreg,mpw,mpw1,natom,nband_k,ncpgr,nnsclo_now,&
+&     mband,mband_mem,mcgq,mcprjq,mkmem,mk1mem,mpi_enreg,mpw,mpw1,natom,nband_k,ncpgr,nnsclo_now,&
 &     npw_k,npw1_k,dtset%nspinor,nsppol,n4,n5,n6,occ_k,pawrhoij1_unsym,prtvol,psps,resid_k,&
 &     rf_hamkq,rf_hamk_dir2,rhoaug1,rocceig,ddk_f,wtk_k,nlines_done,cg1_out)
 
@@ -671,16 +676,16 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !    Shift array memory
      if (mkmem/=0) then
        ibg=ibg+dtset%nspinor*nband_k
-       icg=icg+npw_k*dtset%nspinor*nband_k
+       icg=icg+npw_k*dtset%nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
        ikg=ikg+npw_k
      end if
      if (mkqmem/=0) then
        ibgq=ibgq+dtset%nspinor*nband_k
-       icgq=icgq+npw1_k*dtset%nspinor*nband_k
+       icgq=icgq+npw1_k*dtset%nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
      end if
      if (mk1mem/=0) then
        ibg1=ibg1+dtset%nspinor*nband_k
-       icg1=icg1+npw1_k*dtset%nspinor*nband_k
+       icg1=icg1+npw1_k*dtset%nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
        ikg1=ikg1+npw1_k
      end if
 

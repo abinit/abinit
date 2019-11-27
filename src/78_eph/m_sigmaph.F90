@@ -28,6 +28,7 @@ module m_sigmaph
  use iso_c_binding
  use m_abicore
  use m_xmpi
+ use m_mpinfo
  use m_errors
  use m_hide_blas
  use m_copy
@@ -614,6 +615,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,parameter :: useylmgr = 0, useylmgr1 =0, master = 0, ndat1 = 1
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_frohl,iq_bz_frohl, my_npert
+ integer :: band_me, nband_me
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj, iw
  integer :: mcgq, mgscq, nband_kq, ig, ispinor, ifft
@@ -646,6 +648,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 !arrays
  integer :: g0_k(3),g0_kq(3)
  integer :: work_ngfft(18),gmax(3)
+ integer,allocatable :: cycle_band_procs(:)
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
  integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), osc_indpw(:)
@@ -1204,6 +1207,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        if (.not. ihave_ikibz_spin(ikq_ibz, spin)) then
          ignore_kq = ignore_kq + 1; cycle
        end if
+!TODO: adjust for sppol in case it is distributed or nband differs
+       call proc_distrb_cycle_band_procs(cycle_band_procs,mpi_enreg%proc_distrb,ikq_ibz,1)
+
 
        ! ====================================
        ! Get DFPT potentials for this q-point
@@ -1409,11 +1415,16 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
              call cwtime(cpu_stern, wall_stern, gflops_stern, "start")
 
-             call dfpt_cgwf(band_ks, berryopt0, cgq, cg1s_kq(:,:,ipc, ib_k), kets_k(:,:,ib_k), &
-               cwaveprj, cwaveprj0, rf2, dcwavef, &
+!TODO: band parallelize this routine, and call dfpt_cgwf with only limited cg arrays
+!  in the meanwhile should make a test for paralbd, to exclude it, I think
+             band_me = band_ks
+             !nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+             nband_me = nband_kq
+             call dfpt_cgwf(band_ks, band_me, berryopt0, cgq, cg1s_kq(:,:,ipc, ib_k), kets_k(:,:,ib_k), &
+               cwaveprj, cwaveprj0, cycle_band_procs, rf2, dcwavef, &
                eig0nk, ebands%eig(:, ikq_ibz, spin), out_eig1_k, ghc, gh1c_n, grad_berry, gsc, gscq, &
                gs_hamkq, gvnlxc, gvnlx1, icgq0, idir, ipert, igscq0, &
-               mcgq, mgscq, mpi_enreg, grad_berry_size_mpw1, cryst%natom, nband_kq, nbdbuf0, nline_in, npw_k, npw_kq, nspinor, &
+               mcgq, mgscq, mpi_enreg, grad_berry_size_mpw1, cryst%natom, nband_kq, nband_me, nbdbuf0, nline_in, npw_k, npw_kq, nspinor, &
                opt_gvnlx1, dtset%prtvol, quit0, out_resid, rf_hamkq, dtset%dfpt_sciss, -one, dtset%tolwfr, &
                usedcwavef0, dtset%wfoptalg, nlines_done)
 
