@@ -2280,8 +2280,8 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
    iirred_comb = 0  
    call computeCombinationFromList(cell,compatibleCoeffs,list_symcoeff,list_symstr,&
 &                   list_coeff,list_combination,index_irredcomb,icoeff,max_power_strain,icoeff2,natom,ncoeff_sym,&
-&                   ncoeff_symsym,iirred_comb,nirred_comb,nstr_sym,icoeff,nrpt,nsym,1,power_disps(1),power_disps(2),symbols,comm,nbody=option,&
-&                   compute=.false.,anharmstr=need_anharmstr,spcoupling=need_spcoupling,&
+&                   ncoeff_symsym,iirred_comb,nirred_comb,nstr_sym,icoeff,nrpt,nsym,1,power_disps(1),power_disps(2),symbols,comm,&
+&                   nbody=option,compute=.false.,anharmstr=need_anharmstr,spcoupling=need_spcoupling,&
 &                   only_odd_power=need_only_odd_power,only_even_power=need_only_even_power)
    ncombination  = icoeff2
    ABI_DEALLOCATE(list_coeff)
@@ -2313,8 +2313,8 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
    !endif
    call computeCombinationFromList(cell,compatibleCoeffs,list_symcoeff,list_symstr,&
 &                   list_coeff,list_combination_tmp,index_irredcomb,icoeff,max_power_strain,icoeff2,natom,&
-&                   ncoeff_sym,ncoeff_symsym,iirred_comb,nirred_comb,nstr_sym,ncombination,nrpt,nsym,1,power_disps(1),power_disps(2),&
-&                   symbols,comm,nbody=option,compute=.true.,&
+&                   ncoeff_sym,ncoeff_symsym,iirred_comb,nirred_comb,nstr_sym,ncombination,nrpt,nsym,1,power_disps(1),&
+&                   power_disps(2),symbols,comm,nbody=option,compute=.true.,&
 &                   anharmstr=need_anharmstr,spcoupling=need_spcoupling,&
 &                   only_odd_power=need_only_odd_power,only_even_power=need_only_even_power)
    ABI_DEALLOCATE(list_coeff)
@@ -2434,7 +2434,8 @@ if(need_compute_symmetric)then
        ndisp = 0 
        nstrain = 0
        do ii = 1,power_disps(2)
-          if(my_list_combination(ii,my_index_irredcomb(i)+1) > 0 .and. my_list_combination(ii,my_index_irredcomb(i)+1) <= ncoeff_symsym)then 
+          if(my_list_combination(ii,my_index_irredcomb(i)+1) > 0 .and.&
+&            my_list_combination(ii,my_index_irredcomb(i)+1) <= ncoeff_symsym)then 
              ndisp = ndisp + 1 
           else if(my_list_combination(ii,my_index_irredcomb(i)+1) >= ncoeff_symsym)then 
              nstrain = nstrain + 1 
@@ -2444,8 +2445,9 @@ if(need_compute_symmetric)then
        !write(std_out,*) "DEBUG list_combination_tmp(:ndisp+nstrain,index_irredcomb(i)+1):", list_combination_tmp(:ndisp+nstrain,index_irredcomb(i)+1)
        !write(std_out,*) "DEBUG index_irredcomb(i)+1,ndisp,nstrain:", index_irredcomb(i)+1,ndisp,nstrain
        call computeSymmetricCombinations(my_index_irredcomb(i),my_list_combination,list_symcoeff,list_symstr,1,1,ndisp,nsym,&
-&                                        dummylist,my_list_combination(:ndisp+nstrain,my_index_irredcomb(i)+1),power_disps(2),irank_ncombi(my_rank+1),ncoeff_symsym,&
-&                                        nstr_sym,nstrain,my_index_irredcomb(i)+1,compatibleCoeffs,index_irred,compute_sym,comm,only_even=need_only_even_power) 
+&                                        dummylist,my_list_combination(:ndisp+nstrain,my_index_irredcomb(i)+1),power_disps(2),&
+&                                        irank_ncombi(my_rank+1),ncoeff_symsym,nstr_sym,nstrain,my_index_irredcomb(i)+1,&
+&                                        compatibleCoeffs,index_irred,compute_sym,comm,only_even=need_only_even_power) 
        ABI_DEALLOCATE(dummylist)
        ABI_DEALLOCATE(index_irred) 
     enddo
@@ -2524,7 +2526,8 @@ if(iam_master)then
    endif
    do i=2,ncombination
       if(any(list_combination_tmp(:,i) > ncoeff_symsym))then
-        irreducible = check_irreducibility(list_combination_tmp(:,i),list_combination_tmp(:,:i-1),list_symcoeff,list_symstr,ncoeff_symsym,nsym,i-1,power_disps(2),index_irred,comm)
+        irreducible = check_irreducibility(list_combination_tmp(:,i),list_combination_tmp(:,:i-1),list_symcoeff,&
+&                                          list_symstr,ncoeff_symsym,nsym,i-1,power_disps(2),index_irred,comm)
         if(.not. irreducible) list_combination_tmp(:,i) = 0
       endif
    enddo
@@ -3314,7 +3317,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
      if(compatible)then
        call computeCombinationFromList(cell,compatibleCoeffs,list_coeff,list_str,&
 &                                     index_coeff,list_combination,index_irredcomb,icoeff1,max_power_strain,&
-&                                     nmodel_tot,natom,ncoeff,ncoeff_sym,iirred_comb,nirred_comb,nstr,nmodel,nrpt,nsym,power_disp+1,&
+&                                    nmodel_tot,natom,ncoeff,ncoeff_sym,iirred_comb,nirred_comb,nstr,nmodel,nrpt,nsym,power_disp+1,&
 &                                     power_disp_min,power_disp_max,symbols,comm,nbody=nbody_in,&
 &                                     compute=need_compute,anharmstr=need_anharmstr,&
 &                                     spcoupling=need_spcoupling,only_odd_power=need_only_odd_power,&
@@ -3479,7 +3482,8 @@ if(isym_in <= nsym .and. idisp_in <= ndisp)then
      
      call computeSymmetricCombinations(ncombi,list_combination,list_symcoeff,list_symstr,isym,idisp_in+1,ndisp,& 
 &                                      nsym,index_isym(2:),index_coeff_in,ndisp_max,ncombinations,&
-&                                      ncoeff,nsym_str,nstrain,ncombi_start,compatibleCoeffs,index_irred,compute,comm,only_even=need_only_even)
+&                                      ncoeff,nsym_str,nstrain,ncombi_start,compatibleCoeffs,index_irred,compute,comm,&
+&                                      only_even=need_only_even)
      
   enddo !isym=isym_in,nsym
   ABI_DEALLOCATE(index_isym)
@@ -4232,8 +4236,8 @@ end subroutine sort_combination_list
 !! SIDE_EFFECT: if combination is irreducible (that means irreducible = .FALSE.) the index of the irreduc!!              irreducible coefficient is added to index_irred
 !! SOURCE
 
-function check_irreducibility(combination,list_combination,list_symcoeff,list_symstr,ncoeff_sym,nsym,ncombination,ndisp,index_irred,comm)&
-&                             result(irreducible)
+function check_irreducibility(combination,list_combination,list_symcoeff,list_symstr,ncoeff_sym,nsym,&
+&                             ncombination,ndisp,index_irred,comm)  result(irreducible)
 !Arguments ------------------------------------
  implicit none
 
