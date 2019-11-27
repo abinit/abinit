@@ -205,6 +205,7 @@ contains
 !!  symrc1(3,3,nsym1)=symmetry operations in reciprocal space
 !!  symrl1(3,3,nsym1)=symmetry operations in real space in terms
 !!   of primitive translations
+!!  tnons1(3,nsym1)=non-symmorphic translations
 !!  usecprj= 1 if cprj, cprjq arrays are stored in memory
 !!  useylmgr = 1 if ylmgr  array is allocated
 !!  useylmgr1= 1 if ylmgr1 array is allocated
@@ -295,7 +296,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &  paw_an,paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoij,pawrhoij1,pawtab,&
 &  pertcase,phnons1,ph1d,ph1df,&
 &  prtbbb,psps,qphon,resid,residm,rhog,rhog1,&
-&  rhor,rhor1,rprimd,symaf1,symrc1,symrl1,&
+&  rhor,rhor1,rprimd,symaf1,symrc1,symrl1,tnons1,&
 &  usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
 &  wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,conv_retcode,&
 &  kramers_deg,&
@@ -369,6 +370,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),intent(inout) :: rhog1(2,nfftf),rhor1(cplex*nfftf,nspden),xred(3,dtset%natom)
  real(dp),optional,intent(inout) :: rhog1_pq(2,nfftf),rhor1_pq(cplex*nfftf,nspden)                                 !+q/-q duplicates
  real(dp),optional,intent(inout) :: rhog1_mq(2,nfftf),rhor1_mq(cplex*nfftf,nspden)                                 !
+ real(dp),intent(in) :: tnons1(3,nsym1)
  real(dp),target,intent(in) :: vtrial(nfftf,nspden)
  real(dp),intent(in) :: vpsp1(cplex*nfftf),vxc(nfftf,nspden)
  real(dp),intent(in) :: wtk_rbz(nkpt_rbz),xccc3d1(cplex*n3xccc)
@@ -828,7 +830,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       mpw,mpw1,my_natom,dtset%natom,nband_rbz,ncpgr,nfftf,ngfftf,nhatfermi,nkpt_rbz,npwarr,npwar1,&
 &       nspden,dtset%nsppol,nsym1,occkq,occ_rbz,&
 &       paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
-&       phnons1,ph1d,dtset%prtvol,psps,rhorfermi,rmet,rprimd,symaf1,symrc1,symrl1,&
+&       phnons1,ph1d,dtset%prtvol,psps,rhorfermi,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
 &       ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1)
        if (.not.kramers_deg) then
          call dfpt_rhofermi(cg,cg_mq,cplex,cprj,cprjq,&
@@ -837,7 +839,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         mpw,mpw1_mq,my_natom,dtset%natom,nband_rbz,ncpgr,nfftf,ngfftf,nhatfermi,nkpt_rbz,npwarr,npwar1_mq,&
 &         nspden,dtset%nsppol,nsym1,occk_mq,occ_rbz,&
 &         paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
-&         phnons1,ph1d,dtset%prtvol,psps,rhorfermi_mq,rmet,rprimd,symaf1,symrc1,symrl1,&
+&         phnons1,ph1d,dtset%prtvol,psps,rhorfermi_mq,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
 &         ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1)
        end if
 
@@ -931,7 +933,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   nhat1,nkpt_rbz,npwarr,npwar1,res2,nspden,dtset%nsppol,nsym1,dtset%ntypat,nvresid1,&
 &   occkq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
 &   pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid,residm,rhog1,&
-&   rhor1,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,usecprj,useylmgr1,ddk_f,&
+&   rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
 &   vtrial,vtrial1,wtk_rbz,xred,ylm,ylm1,ylmgr1)
    if (.not.kramers_deg) then
      rhor1_pq=rhor1 !at this stage rhor1_pq contains only one term of the 1st order density at +q
@@ -945,7 +947,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nhat1,nkpt_rbz,npwarr,npwar1_mq,res2_mq,nspden,dtset%nsppol,nsym1,dtset%ntypat,nvresid1_mq,&
 &     occk_mq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
 &     pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid_mq,residm_mq,rhog1_mq,&
-&     rhor1_mq,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,usecprj,useylmgr1,ddk_f,&
+&     rhor1_mq,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
 &     vtrial,vtrial1_mq,wtk_rbz,xred,ylm,ylm1,ylmgr1)
      !reconstruct the +q and -q densities, this might bug if fft parallelization is used, todo...
      do ifft=1,nfftf
@@ -1178,7 +1180,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   nhat1,nkpt_rbz,npwarr,npwar1,res3,nspden,dtset%nsppol,nsym1,dtset%ntypat,nvresid2,&
 &   occkq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
 &   pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid2,residm2,rhog2,&
-&   rhor2,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,usecprj,useylmgr1,ddk_f,&
+&   rhor2,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
 &   vtrial,vtrial2,wtk_rbz,xred,ylm,ylm1,ylmgr1,1)
 
    write(msg,'(a)') ' '//char(10)//&
@@ -1332,7 +1334,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nfftf,ngfftf,nhat,nhat1,nkpt_rbz,nkxc,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,&
 &     nsym1,n3xccc,occkq,occ_rbz,paw_an,paw_an1,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrad,&
 &     pawrhoij,pawrhoij1,pawtab,phnons1,ph1d,ph1df,psps,rhog,rhor,rhor1,rmet,rprimd,symaf1,symrc1,&
-&     symrl1,ucvol,usecprj,psps%usepaw,usexcnhat,useylmgr1,vhartr1,vpsp1,vtrial,vtrial1,vxc,wtk_rbz,&
+&     symrl1,tnons1,ucvol,usecprj,psps%usepaw,usexcnhat,useylmgr1,vhartr1,vpsp1,vtrial,vtrial1,vxc,wtk_rbz,&
 &     xccc3d1,xred,ylm,ylm1,ylmgr1)
    else
      if (dtset%nspden==4) then
@@ -3531,6 +3533,7 @@ end subroutine dfpt_nstdy
 !!  symaf1(nsym1)=(anti)ferromagnetic part of symmetry operations
 !!  symrc1(3,3,nsym1)=symmetry operations in reciprocal space
 !!  symrl1(3,3,nsym1)=3x3 matrices of the group symmetries
+!!  tnons1(3,nsym1)=non-symmorphic translations
 !!  ucvol=volume of the unit cell
 !!  usecprj= 1 if cprj, cprjq, cprj1 arrays are stored in memory
 !!  useylmgr1= 1 if ylmgr1 array is allocated
@@ -3573,7 +3576,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 & indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,mband,mkmem,mkqmem,mk1mem,mpi_enreg,&
 & mpw,mpw1,my_natom,natom,nband_rbz,ncpgr,nfftf,ngfftf,nhatfermi,nkpt_rbz,npwarr,npwar1,nspden,&
 & nsppol,nsym1,occkq,occ_rbz,paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
-& phnons1,ph1d,prtvol,psps,rhorfermi,rmet,rprimd,symaf1,symrc1,symrl1,&
+& phnons1,ph1d,prtvol,psps,rhorfermi,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
 & ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1)
 
 !Arguments -------------------------------
@@ -3606,7 +3609,8 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  real(dp),intent(in) :: occ_rbz(mband*nkpt_rbz*nsppol),occkq(mband*nkpt_rbz*nsppol)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*natom)
  real(dp),intent(in) :: phnons1(2,dtset%nfft**(1-1/nsym1),(nspden/nsppol)-3*(nspden/4))
- real(dp),intent(in) :: rmet(3,3),rprimd(3,3),vtrial(nfftf,nspden),vxc(nfftf,nspden),wtk_rbz(nkpt_rbz)
+ real(dp),intent(in) :: rmet(3,3),rprimd(3,3),tnons1(3,nsym1)
+ real(dp),intent(in) :: vtrial(nfftf,nspden),vxc(nfftf,nspden),wtk_rbz(nkpt_rbz)
  real(dp),intent(in) :: xred(3,natom),ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylm1(mpw1*mk1mem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr1(mpw1*mk1mem,3,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
@@ -4119,10 +4123,10 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  ABI_ALLOCATE(rhogfermi,(2,dtset%nfft))
  if (psps%usepaw==0) then
    call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,nspden,&
-&   nsppol,nsym1,phnons1,rhogfermi,rhorfermi,rprimd,symaf1,symrl1)
+&   nsppol,nsym1,phnons1,rhogfermi,rhorfermi,rprimd,symaf1,symrl1,tnons1)
  else
    call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,nspden,&
-&   nsppol,nsym1,phnons1,rhogfermi,rhowfr,rprimd,symaf1,symrl1)
+&   nsppol,nsym1,phnons1,rhogfermi,rhowfr,rprimd,symaf1,symrl1,tnons1)
  end if
 
 !PAW: Build new rhoij quantities then symetrize them

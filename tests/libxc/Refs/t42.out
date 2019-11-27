@@ -1,6 +1,6 @@
 
 .Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 21 Oct 2019.
-- ( at 23h38 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h17 )
   
 - input  file    -> t42.in
 - output file    -> t42.out
@@ -374,8 +374,8 @@ P           mkmem           6
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.15267
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -401,10 +401,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     154.531     154.481
  ETOT  2  -11.927638247937    -6.554E-03 4.045E-05 2.555E-02
  ETOT  3  -11.927649781353    -1.153E-05 7.980E-06 7.149E-04
  ETOT  4  -11.927650065204    -2.839E-07 1.203E-07 4.341E-07
- ETOT  5  -11.927650065298    -9.443E-11 3.199E-08 2.642E-10
- ETOT  6  -11.927650065298     3.908E-14 3.523E-10 4.314E-13
- ETOT  7  -11.927650065298    -2.132E-14 1.387E-10 1.191E-15
- ETOT  8  -11.927650065298    -4.796E-14 1.761E-12 6.679E-19
+ ETOT  5  -11.927650065298    -9.440E-11 3.199E-08 2.642E-10
+ ETOT  6  -11.927650065298     3.553E-14 3.523E-10 4.314E-13
+ ETOT  7  -11.927650065298    -2.842E-14 1.387E-10 1.191E-15
+ ETOT  8  -11.927650065298    -3.908E-14 1.761E-12 6.679E-19
 
  At SCF step    8       vres2   =  6.68E-19 < tolvrs=  1.00E-15 =>converged.
 
@@ -457,12 +457,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     154.531     154.481
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  7.97350333694290E+00
-    Hartree energy  =  9.25817536126328E-01
+    Kinetic energy  =  7.97350333694289E+00
+    Hartree energy  =  9.25817536126326E-01
     XC energy       = -4.31056749802099E+00
     Ewald energy    = -1.27864121744519E+01
     PspCore energy  =  1.93481650847052E-01
-    Loc. psp. energy= -5.29323659212435E+00
+    Loc. psp. energy= -5.29323659212434E+00
     NL   psp  energy=  1.36976367538285E+00
     >>>>>>>>> Etotal= -1.19276500652981E+01
 
@@ -509,8 +509,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     154.531     154.481
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -582,7 +582,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     154.531     154.481
   Number of electrons    =    7.9928
 
   QP Band energy    [Ha] =  1.15142521306647E+00
-  QP Hartree energy [Ha] =  9.16188317245287E-01
+  QP Hartree energy [Ha] =  9.16188317245286E-01
 
 --------------------------------------------------------------------------------
 
@@ -860,8 +860,8 @@ data: !SigmaeeData |
 
   Number of electrons    =    7.9927
 
-  QP Band energy    [Ha] =  6.75488556437675E-01
-  QP Hartree energy [Ha] =  9.44861382208108E-01
+  QP Band energy    [Ha] =  6.75488556437678E-01
+  QP Hartree energy [Ha] =  9.44861382208111E-01
 
 --------------------------------------------------------------------------------
 
@@ -1050,11 +1050,11 @@ data: !SigmaeeData |
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
-.  kptgw no:  1; Maximum DeltaE = (   0.100  -0.000) for band index:  7
-.  kptgw no:  2; Maximum DeltaE = (   0.092   0.000) for band index:  6
-.  kptgw no:  3; Maximum DeltaE = (   0.113  -0.000) for band index:  8
-.  kptgw no:  4; Maximum DeltaE = (   0.095   0.000) for band index:  7
-.  kptgw no:  5; Maximum DeltaE = (   0.089   0.000) for band index:  5
+.  kptgw no:  1; Maximum DeltaE = (   0.100   0.000) for band index:  7
+.  kptgw no:  2; Maximum DeltaE = (   0.092  -0.000) for band index:  6
+.  kptgw no:  3; Maximum DeltaE = (   0.113   0.000) for band index:  8
+.  kptgw no:  4; Maximum DeltaE = (   0.095  -0.000) for band index:  7
+.  kptgw no:  5; Maximum DeltaE = (   0.089  -0.000) for band index:  5
 .  kptgw no:  6; Maximum DeltaE = (   0.108  -0.000) for band index:  8
 
 ================================================================================
@@ -1140,7 +1140,7 @@ data: !SigmaeeData |
   Number of electrons    =    7.9927
 
   QP Band energy    [Ha] =  6.98470513339912E-01
-  QP Hartree energy [Ha] =  9.43096587197458E-01
+  QP Hartree energy [Ha] =  9.43096587197459E-01
 
 --------------------------------------------------------------------------------
 
@@ -1334,7 +1334,7 @@ data: !SigmaeeData |
 .  kptgw no:  2; Maximum DeltaE = (  -0.006  -0.000) for band index:  4
 .  kptgw no:  3; Maximum DeltaE = (  -0.007  -0.000) for band index:  7
 .  kptgw no:  4; Maximum DeltaE = (  -0.006  -0.000) for band index:  7
-.  kptgw no:  5; Maximum DeltaE = (  -0.006  -0.000) for band index:  3
+.  kptgw no:  5; Maximum DeltaE = (  -0.006   0.000) for band index:  3
 .  kptgw no:  6; Maximum DeltaE = (  -0.007  -0.000) for band index:  8
 
 == END DATASET(S) ==============================================================
@@ -1684,10 +1684,10 @@ P           mkmem           6
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          6.6  wall=          6.6
+- Proc.   0 individual time (sec): cpu=          6.4  wall=          6.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.6  wall=          6.6
++Overall time at end (sec) : cpu=          6.4  wall=          6.5

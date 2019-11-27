@@ -5,7 +5,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release ABINITv8.11.11 is for development
+The present release ABINITv8.11.12 is for development
 
 0. List of platforms
 1. Batteries of tests
@@ -14,7 +14,7 @@ The present release ABINITv8.11.11 is for development
 ================================================================
 0. Platforms
 
-For ABINITv8.11.11, list closed on 2019 10 14
+For ABINITv8.11.12, list closed on 2019 11 25
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
 https://bbportal.abinit.org/#/status
@@ -29,7 +29,7 @@ but there is no check on the ABINIT testfarm that ABINIT runs correctly with the
 
 Status, for the different versions of compilers that are supported (or might become soon).
 
-GNU Fortran compiler (presently tested : v5.3, v5.4, v6.3, v6.4, v6.5, v7.2, v7.3, v7.4, v8.2, v8.3, v9.1)
+GNU Fortran compiler (presently tested : v5.3, v5.4, v6.3, v6.4, v6.5, v7.2, v7.3, v7.4, v8.2, v8.3, v9.1, v9.2)
 All are mostly OK
 gnu 5.3 : bigdft#14 is disactivated on ubu_gnu_5.3_openmpi 
 gnu 8.2, 8.3, 9.1 + openmpi : the reading of WFK files using MPIIO is not correct for test mpiio#26

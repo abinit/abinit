@@ -66,7 +66,6 @@ MODULE m_forctqmc
 
  private
 
- public :: nf_check
  public :: qmc_prep_ctqmc
  public :: testcode_ctqmc
  public :: testcode_ctqmc_b
@@ -76,50 +75,6 @@ MODULE m_forctqmc
 !!***
 
 contains
-!!****f* m_forctqmc/nf_check
-!! NAME
-!! nf_check
-!!
-!! FUNCTION
-!! Used during writting the NETCDF file
-!!
-!! Copyright (C) 1999-2019 ABINIT group (OGingras)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of comtributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! INPUTS
-!!  istatus<int> = status code from NETCDF
-!!
-!! OUTPUTS
-!!
-!! NOTES
-!!
-!! PARENTS
-!!  qmc_prep_ctqmc
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine nf_check(istatus)
-implicit none
-integer, intent (in) :: istatus
-
-character(len=500) :: message
-
-#ifdef HAVE_NETCDF
- if (istatus /= nf90_noerr) then
-     write(message,'(2a)') ch10,trim(adjustl(nf90_strerror(istatus)))
-     MSG_ERROR(message)
- end if
-#endif
-
-end subroutine nf_check
-!!***
-
-
 !!****f* m_forctqmc/qmc_prep_ctqmc
 !! NAME
 !! qmc_prep_ctqmc
@@ -156,6 +111,7 @@ end subroutine nf_check
 !!      xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
+
 
 subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,weiss)
 
@@ -2678,15 +2634,15 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
 #else
   ! Creating the NETCDF file
   write(std_out, '(2a)') ch10, "    Creating NETCDF file: abinit_output_for_py.nc"
-  call nf_check(nf90_create("abinit_output_for_py.nc", NF90_CLOBBER, ncid))
+  NCF_CHECK(nf90_create("abinit_output_for_py.nc", NF90_CLOBBER, ncid))
  
   ! Defining the dimensions of the variables to write in the NETCDF file
-  call nf_check(nf90_def_dim(ncid, "one", 1, dim_one_id))
-  call nf_check(nf90_def_dim(ncid, "nflavor", nflavor, dim_nflavor_id))
-  call nf_check(nf90_def_dim(ncid, "nwlo", paw_dmft%dmft_nwlo, dim_nwlo_id))
-  call nf_check(nf90_def_dim(ncid, "nwli", paw_dmft%dmft_nwli, dim_nwli_id))
-  call nf_check(nf90_def_dim(ncid, "qmc_l", paw_dmft%dmftqmc_l, dim_qmc_l_id))
-  call nf_check(nf90_def_dim(ncid, "nleg", nleg, dim_nleg_id))
+  NCF_CHECK(nf90_def_dim(ncid, "one", 1, dim_one_id))
+  NCF_CHECK(nf90_def_dim(ncid, "nflavor", nflavor, dim_nflavor_id))
+  NCF_CHECK(nf90_def_dim(ncid, "nwlo", paw_dmft%dmft_nwlo, dim_nwlo_id))
+  NCF_CHECK(nf90_def_dim(ncid, "nwli", paw_dmft%dmft_nwli, dim_nwli_id))
+  NCF_CHECK(nf90_def_dim(ncid, "qmc_l", paw_dmft%dmftqmc_l, dim_qmc_l_id))
+  NCF_CHECK(nf90_def_dim(ncid, "nleg", nleg, dim_nleg_id))
  
   dim_u_mat_ij_id = (/ dim_nflavor_id, dim_nflavor_id /)
   dim_u_mat_ijkl_id = (/ dim_nflavor_id, dim_nflavor_id, dim_nflavor_id, dim_nflavor_id /)
@@ -2696,80 +2652,80 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   dim_gl_id = (/ dim_nleg_id, dim_nflavor_id, dim_nflavor_id /)
  
   ! Defining the variables
-  call nf_check(nf90_def_var(ncid, "rot_inv",         NF90_INT, dim_one_id,           var_rot_inv_id))
-  call nf_check(nf90_def_var(ncid, "leg_measure",     NF90_INT, dim_one_id,           var_leg_measure_id))
-  call nf_check(nf90_def_var(ncid, "hist",            NF90_INT, dim_one_id,           var_hist_id))
-  call nf_check(nf90_def_var(ncid, "wrt_files",       NF90_INT, dim_one_id,           var_wrt_files_id))
-  call nf_check(nf90_def_var(ncid, "tot_not",         NF90_INT, dim_one_id,           var_tot_not_id))
-  call nf_check(nf90_def_var(ncid, "n_orbitals",      NF90_INT, dim_one_id,           var_n_orbitals_id))
-  call nf_check(nf90_def_var(ncid, "n_freq",          NF90_INT, dim_one_id,           var_n_freq_id))
-  call nf_check(nf90_def_var(ncid, "n_tau",           NF90_INT, dim_one_id,           var_n_tau_id))
-  call nf_check(nf90_def_var(ncid, "n_l",             NF90_INT, dim_one_id,           var_n_l_id))
-  call nf_check(nf90_def_var(ncid, "n_cycles",        NF90_INT, dim_one_id,           var_n_cycles_id))
-  call nf_check(nf90_def_var(ncid, "cycle_length",    NF90_INT, dim_one_id,           var_cycle_length_id))
-  call nf_check(nf90_def_var(ncid, "ntherm",          NF90_INT, dim_one_id,           var_ntherm_id))
-  call nf_check(nf90_def_var(ncid, "verbo",           NF90_INT, dim_one_id,           var_verbo_id))
-  call nf_check(nf90_def_var(ncid, "seed",            NF90_INT, dim_one_id,           var_seed_id))
-  call nf_check(nf90_def_var(ncid, "beta",            NF90_FLOAT, dim_one_id,         var_beta_id))
-  call nf_check(nf90_def_var(ncid, "levels",          NF90_DOUBLE, dim_nflavor_id,    var_levels_id))
-  call nf_check(nf90_def_var(ncid, "u_mat_ij",        NF90_DOUBLE, dim_u_mat_ij_id,   var_u_mat_ij_id))
-  call nf_check(nf90_def_var(ncid, "u_mat_ijkl",      NF90_DOUBLE, dim_u_mat_ijkl_id, var_u_mat_ijkl_id))
-  call nf_check(nf90_def_var(ncid, "real_fw1_nd",     NF90_DOUBLE, dim_fw1_id,        var_real_fw1_nd_id))
-  call nf_check(nf90_def_var(ncid, "imag_fw1_nd",     NF90_DOUBLE, dim_fw1_id,        var_imag_fw1_nd_id))
-  call nf_check(nf90_def_var(ncid, "real_g_iw",       NF90_DOUBLE, dim_g_iw_id,       var_real_g_iw_id))
-  call nf_check(nf90_def_var(ncid, "imag_g_iw",       NF90_DOUBLE, dim_g_iw_id,       var_imag_g_iw_id))
-  call nf_check(nf90_def_var(ncid, "gtau",            NF90_DOUBLE, dim_gtau_id,       var_gtau_id))
-  call nf_check(nf90_def_var(ncid, "gl",              NF90_DOUBLE, dim_gl_id,         var_gl_id))
-  call nf_check(nf90_def_var(ncid, "spacecomm",       NF90_INT, dim_one_id,           var_spacecomm_id))
-  call nf_check(nf90_enddef(ncid))
+  NCF_CHECK(nf90_def_var(ncid, "rot_inv",         NF90_INT, dim_one_id,           var_rot_inv_id))
+  NCF_CHECK(nf90_def_var(ncid, "leg_measure",     NF90_INT, dim_one_id,           var_leg_measure_id))
+  NCF_CHECK(nf90_def_var(ncid, "hist",            NF90_INT, dim_one_id,           var_hist_id))
+  NCF_CHECK(nf90_def_var(ncid, "wrt_files",       NF90_INT, dim_one_id,           var_wrt_files_id))
+  NCF_CHECK(nf90_def_var(ncid, "tot_not",         NF90_INT, dim_one_id,           var_tot_not_id))
+  NCF_CHECK(nf90_def_var(ncid, "n_orbitals",      NF90_INT, dim_one_id,           var_n_orbitals_id))
+  NCF_CHECK(nf90_def_var(ncid, "n_freq",          NF90_INT, dim_one_id,           var_n_freq_id))
+  NCF_CHECK(nf90_def_var(ncid, "n_tau",           NF90_INT, dim_one_id,           var_n_tau_id))
+  NCF_CHECK(nf90_def_var(ncid, "n_l",             NF90_INT, dim_one_id,           var_n_l_id))
+  NCF_CHECK(nf90_def_var(ncid, "n_cycles",        NF90_INT, dim_one_id,           var_n_cycles_id))
+  NCF_CHECK(nf90_def_var(ncid, "cycle_length",    NF90_INT, dim_one_id,           var_cycle_length_id))
+  NCF_CHECK(nf90_def_var(ncid, "ntherm",          NF90_INT, dim_one_id,           var_ntherm_id))
+  NCF_CHECK(nf90_def_var(ncid, "verbo",           NF90_INT, dim_one_id,           var_verbo_id))
+  NCF_CHECK(nf90_def_var(ncid, "seed",            NF90_INT, dim_one_id,           var_seed_id))
+  NCF_CHECK(nf90_def_var(ncid, "beta",            NF90_FLOAT, dim_one_id,         var_beta_id))
+  NCF_CHECK(nf90_def_var(ncid, "levels",          NF90_DOUBLE, dim_nflavor_id,    var_levels_id))
+  NCF_CHECK(nf90_def_var(ncid, "u_mat_ij",        NF90_DOUBLE, dim_u_mat_ij_id,   var_u_mat_ij_id))
+  NCF_CHECK(nf90_def_var(ncid, "u_mat_ijkl",      NF90_DOUBLE, dim_u_mat_ijkl_id, var_u_mat_ijkl_id))
+  NCF_CHECK(nf90_def_var(ncid, "real_fw1_nd",     NF90_DOUBLE, dim_fw1_id,        var_real_fw1_nd_id))
+  NCF_CHECK(nf90_def_var(ncid, "imag_fw1_nd",     NF90_DOUBLE, dim_fw1_id,        var_imag_fw1_nd_id))
+  NCF_CHECK(nf90_def_var(ncid, "real_g_iw",       NF90_DOUBLE, dim_g_iw_id,       var_real_g_iw_id))
+  NCF_CHECK(nf90_def_var(ncid, "imag_g_iw",       NF90_DOUBLE, dim_g_iw_id,       var_imag_g_iw_id))
+  NCF_CHECK(nf90_def_var(ncid, "gtau",            NF90_DOUBLE, dim_gtau_id,       var_gtau_id))
+  NCF_CHECK(nf90_def_var(ncid, "gl",              NF90_DOUBLE, dim_gl_id,         var_gl_id))
+  NCF_CHECK(nf90_def_var(ncid, "spacecomm",       NF90_INT, dim_one_id,           var_spacecomm_id))
+  NCF_CHECK(nf90_enddef(ncid))
  
   ! Filling the variables with actual data
   if (rot_inv) then 
-   call nf_check(nf90_put_var(ncid, var_rot_inv_id,       1))  
+   NCF_CHECK(nf90_put_var(ncid, var_rot_inv_id,       1))  
   else 
-   call nf_check(nf90_put_var(ncid, var_rot_inv_id,       0))  
+   NCF_CHECK(nf90_put_var(ncid, var_rot_inv_id,       0))  
   end if
   if (leg_measure) then
-   call nf_check(nf90_put_var(ncid, var_leg_measure_id,   1))
+   NCF_CHECK(nf90_put_var(ncid, var_leg_measure_id,   1))
   else
-   call nf_check(nf90_put_var(ncid, var_leg_measure_id,   0))
+   NCF_CHECK(nf90_put_var(ncid, var_leg_measure_id,   0))
   end if
   if (hist) then
-   call nf_check(nf90_put_var(ncid, var_hist_id,          1))
+   NCF_CHECK(nf90_put_var(ncid, var_hist_id,          1))
   else
-   call nf_check(nf90_put_var(ncid, var_hist_id,          0))
+   NCF_CHECK(nf90_put_var(ncid, var_hist_id,          0))
   end if
   if (wrt_files) then
-   call nf_check(nf90_put_var(ncid, var_wrt_files_id,     1))
+   NCF_CHECK(nf90_put_var(ncid, var_wrt_files_id,     1))
   else
-   call nf_check(nf90_put_var(ncid, var_wrt_files_id,     0))
+   NCF_CHECK(nf90_put_var(ncid, var_wrt_files_id,     0))
   end if
   if (tot_not) then
-   call nf_check(nf90_put_var(ncid, var_tot_not_id,       1))
+   NCF_CHECK(nf90_put_var(ncid, var_tot_not_id,       1))
   else
-   call nf_check(nf90_put_var(ncid, var_tot_not_id,       0))
+   NCF_CHECK(nf90_put_var(ncid, var_tot_not_id,       0))
   end if
-  call nf_check(nf90_put_var(ncid, var_n_orbitals_id,         nflavor))
-  call nf_check(nf90_put_var(ncid, var_n_freq_id,             nfreq))
-  call nf_check(nf90_put_var(ncid, var_n_tau_id,              ntau))
-  call nf_check(nf90_put_var(ncid, var_n_l_id,                nleg))
-  call nf_check(nf90_put_var(ncid, var_n_cycles_id,           int(paw_dmft%dmftqmc_n/paw_dmft%nproc)))
-  call nf_check(nf90_put_var(ncid, var_cycle_length_id,       paw_dmft%dmftctqmc_meas*2*2*nflavor))
-  call nf_check(nf90_put_var(ncid, var_ntherm_id,             paw_dmft%dmftqmc_therm))
-  call nf_check(nf90_put_var(ncid, var_verbo_id,              verbosity_solver))
-  call nf_check(nf90_put_var(ncid, var_seed_id,               paw_dmft%dmftqmc_seed))
-  call nf_check(nf90_put_var(ncid, var_beta_id,               beta))
-  call nf_check(nf90_put_var(ncid, var_levels_id,             levels_ctqmc))
-  call nf_check(nf90_put_var(ncid, var_u_mat_ij_id,           u_mat_ij))
-  call nf_check(nf90_put_var(ncid, var_u_mat_ijkl_id,         u_mat_ijkl))
-  call nf_check(nf90_put_var(ncid, var_real_fw1_nd_id,        real(fw1_nd_tmp)))
-  call nf_check(nf90_put_var(ncid, var_imag_fw1_nd_id,        aimag(fw1_nd_tmp)))
-  call nf_check(nf90_put_var(ncid, var_real_g_iw_id,          real(gw_tmp_nd)))
-  call nf_check(nf90_put_var(ncid, var_imag_g_iw_id,          aimag(gw_tmp_nd)))
-  call nf_check(nf90_put_var(ncid, var_gtau_id,               gtmp_nd))
-  call nf_check(nf90_put_var(ncid, var_gl_id,                 gl_nd))
-  call nf_check(nf90_put_var(ncid, var_spacecomm_id,          paw_dmft%spacecomm))
-  call nf_check(nf90_close(ncid))
+  NCF_CHECK(nf90_put_var(ncid, var_n_orbitals_id,         nflavor))
+  NCF_CHECK(nf90_put_var(ncid, var_n_freq_id,             nfreq))
+  NCF_CHECK(nf90_put_var(ncid, var_n_tau_id,              ntau))
+  NCF_CHECK(nf90_put_var(ncid, var_n_l_id,                nleg))
+  NCF_CHECK(nf90_put_var(ncid, var_n_cycles_id,           int(paw_dmft%dmftqmc_n/paw_dmft%nproc)))
+  NCF_CHECK(nf90_put_var(ncid, var_cycle_length_id,       paw_dmft%dmftctqmc_meas*2*2*nflavor))
+  NCF_CHECK(nf90_put_var(ncid, var_ntherm_id,             paw_dmft%dmftqmc_therm))
+  NCF_CHECK(nf90_put_var(ncid, var_verbo_id,              verbosity_solver))
+  NCF_CHECK(nf90_put_var(ncid, var_seed_id,               paw_dmft%dmftqmc_seed))
+  NCF_CHECK(nf90_put_var(ncid, var_beta_id,               beta))
+  NCF_CHECK(nf90_put_var(ncid, var_levels_id,             levels_ctqmc))
+  NCF_CHECK(nf90_put_var(ncid, var_u_mat_ij_id,           u_mat_ij))
+  NCF_CHECK(nf90_put_var(ncid, var_u_mat_ijkl_id,         u_mat_ijkl))
+  NCF_CHECK(nf90_put_var(ncid, var_real_fw1_nd_id,        real(fw1_nd_tmp)))
+  NCF_CHECK(nf90_put_var(ncid, var_imag_fw1_nd_id,        aimag(fw1_nd_tmp)))
+  NCF_CHECK(nf90_put_var(ncid, var_real_g_iw_id,          real(gw_tmp_nd)))
+  NCF_CHECK(nf90_put_var(ncid, var_imag_g_iw_id,          aimag(gw_tmp_nd)))
+  NCF_CHECK(nf90_put_var(ncid, var_gtau_id,               gtmp_nd))
+  NCF_CHECK(nf90_put_var(ncid, var_gl_id,                 gl_nd))
+  NCF_CHECK(nf90_put_var(ncid, var_spacecomm_id,          paw_dmft%spacecomm))
+  NCF_CHECK(nf90_close(ncid))
 
   write(std_out, '(2a)') ch10, "    NETCDF file abinit_output_for_py.nc written; Launching python invocation"
  
@@ -2796,25 +2752,25 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   write(std_out, '(3a)') ch10, "    Reading NETCDF file ", filename
 
   ! Opening the NETCDF file
-  call nf_check(nf90_open(filename, nf90_nowrite, ncid))
+  NCF_CHECK(nf90_open(filename, nf90_nowrite, ncid))
  
   ! Read from the file
   ! Re{G_iw}
   write(std_out, '(2a)') ch10, "    -- Re[G(iw_n)]"
-  call nf_check(nf90_inq_varid(ncid, "re_g_iw", varid))
-  call nf_check(nf90_get_var(ncid, varid, new_re_g_iw))
+  NCF_CHECK(nf90_inq_varid(ncid, "re_g_iw", varid))
+  NCF_CHECK(nf90_get_var(ncid, varid, new_re_g_iw))
   ! Im{G_iw}
   write(std_out, '(2a)') ch10, "    -- Im[G(iw_n)]"
-  call nf_check(nf90_inq_varid(ncid, "im_g_iw", varid))
-  call nf_check(nf90_get_var(ncid, varid, new_im_g_iw))
+  NCF_CHECK(nf90_inq_varid(ncid, "im_g_iw", varid))
+  NCF_CHECK(nf90_get_var(ncid, varid, new_im_g_iw))
   ! G_tau
   write(std_out, '(2a)') ch10, "    -- G(tau)"
-  call nf_check(nf90_inq_varid(ncid, "g_tau", varid))
-  call nf_check(nf90_get_var(ncid, varid, new_g_tau))
+  NCF_CHECK(nf90_inq_varid(ncid, "g_tau", varid))
+  NCF_CHECK(nf90_get_var(ncid, varid, new_g_tau))
   ! G_l
   write(std_out, '(2a)') ch10, "    -- G_l"
-  call nf_check(nf90_inq_varid(ncid, "gl", varid))
-  call nf_check(nf90_get_var(ncid, varid, new_gl))
+  NCF_CHECK(nf90_inq_varid(ncid, "gl", varid))
+  NCF_CHECK(nf90_get_var(ncid, varid, new_gl))
 
   ! Assigning data
   do iflavor1=1, nflavor

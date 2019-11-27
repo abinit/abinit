@@ -1,6 +1,6 @@
 
-.Version 8.0.3 of AIM 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of AIM 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  AIM comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 11h58 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h27 )
   
  ECHO of the INPUT
  ************************
@@ -37,7 +37,7 @@
  ECHO of the ABINIT file header 
  
  First record :
-.codvsn,headform,fform = 8.0.3    80   52
+.codvsn,headform,fform = 8.11.1   80   52
  
  Second record :
  bantot,intxc,ixc,natom  =     5     0     1     2
@@ -88,7 +88,7 @@
   lmnmax  =  2
  
  Last record :
- residm,etot,fermie=    2.437649E-09   -1.753316931924E+01   -1.328240E-01
+ residm,etot,fermie=    2.437655E-09   -1.753316931709E+01   -1.328240E-01
  xred =
             0.000000E+00    0.000000E+00    0.000000E+00
             0.000000E+00    0.000000E+00    3.290909E-01
@@ -158,7 +158,7 @@
  ********************************************************************
  Bonded atom (BAT) (indxatm,indxcell,position): 
      1   172      0.00000000      0.00000000      0.00000000
-%Bonding CP:      -0.00040371     -0.00040371      2.00746355
+%Bonding CP:      -0.00040371     -0.00040371      2.00746356
 %Eigenval. of Hessian:       0.58002845     -0.10214884     -0.10351504
  Eigenvec. of Hessian:
 -      0.03199290     -0.70710678      0.70638265
@@ -218,7 +218,7 @@
  Eigenvec. of Hessian:
 -     -0.70710678      0.70691227      0.01658431
 -      0.70710678      0.70691227      0.01658431
--     -0.00000000     -0.02345376      0.99972492
+-     -0.00000000     -0.02345375      0.99972492
 
 %Density and laplacian in CP:       0.00178691      0.00070730
  ********************************************************************
@@ -236,7 +236,7 @@
  Eigenvec. of Hessian:
 -      0.70690069     -0.70710678      0.01707084
 -      0.70690069      0.70710678      0.01707084
--     -0.02414181     -0.00000000      0.99970854
+-     -0.02414181      0.00000000      0.99970854
 
 %Density and laplacian in CP:       0.00178691      0.00070719
  ********************************************************************
@@ -245,7 +245,7 @@
  Eigenvec. of Hessian:
 -      0.70690069     -0.70710678      0.01707101
 -      0.70690069      0.70710678      0.01707101
--     -0.02414205     -0.00000000      0.99970854
+-     -0.02414205      0.00000000      0.99970854
 
 %Density and laplacian in CP:       0.00178691      0.00070719
  ********************************************************************
@@ -325,7 +325,7 @@ BCP-RCP-CCP       6       4       0
 -    2  1  0.64903658E+00  0.10524187E+01  0.55710692E+01
 -    2  2  0.64903658E+00  0.14617330E+01  0.59523576E+01
 
- BCP: (index,theta,phi)   6  0.14643592E+01  0.18319436E-04
+ BCP: (index,theta,phi)   6  0.14643592E+01  0.18319437E-04
  ATOMIC RADII (ith,iph,theta,phi,radius)
 -   -1  1  0.10174555E+01  0.10906329E+00  0.47297167E+01
 -   -1  2  0.10174555E+01  0.51837768E+00  0.54126539E+01
@@ -430,7 +430,7 @@ BCP-RCP-CCP       6       4       0
 
  The minimal and maximal radii:
 
-        1.6588259137   5.9523625401
+        1.6588259137   5.9523625400
 
  CHARGE INTEGRATION
  ==================
@@ -440,10 +440,10 @@ BCP-RCP-CCP       6       4       0
 
  Different density contributions: Core (only spherical part) and the rest 
 
-            9.85446884      1.49300436
+            9.85446884      1.49300438
 
- For atom number    2, the number of electrons in the Bader volume is    11.34747321
- The nuclear charge is     12.0000000, so that the Bader charge is        0.65252679
+ For atom number    2, the number of electrons in the Bader volume is    11.34747322
+ The nuclear charge is     12.0000000, so that the Bader charge is        0.65252678
 
 
  TIME ANALYSIS
@@ -451,8 +451,8 @@ BCP-RCP-CCP       6       4       0
 
  Time needed (seconds) - total, CP analyse, SURF determination:
 
--               4.60762119      0.41815097      4.16167998
+-               4.14142592      0.42483599      3.69651091
 
-+Total cpu time      4.608  and wall time      4.614 sec
++Total cpu time      4.141  and wall time      4.178 sec
 
  aim : the run completed succesfully.

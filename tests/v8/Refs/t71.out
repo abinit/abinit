@@ -1,6 +1,6 @@
 
-.Version 8.7.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.4 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 14 Jan 2018.
-- ( at 20h23 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h38 )
   
-- input  file    -> abi.in
-- output file    -> abi.out
-- root for input  files -> abi-i
-- root for output files -> abi-o
+- input  file    -> t71.in
+- output file    -> t71.out
+- root for input  files -> t71i
+- root for output files -> t71o
 
 
  Symmetries : space group P1 (#  1); Bravais aP (primitive triclinic)
@@ -44,7 +44,7 @@ _ WF disk file :      0.899 Mbytes ; DEN or POT disk file :      0.048 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -56,7 +56,7 @@ _ WF disk file :      0.899 Mbytes ; DEN or POT disk file :      0.048 Mbytes.
            diemac      2.00000000E+01
            diemix      8.00000000E-01
              ecut      5.00000000E+00 Hartree
--          fftalg         112
+-          fftalg         312
               ixc           7
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
                       -2.50000000E-01  2.50000000E-01  2.50000000E-01
@@ -141,8 +141,8 @@ P           mkmem           8
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.15099
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/ebousq/CODES/Psp/ABINIT/ONCVPSP_Hamann/Pseudo_Dojo/v0.4/Psp_files/Mn-sp-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/ebousq/CODES/Psp/ABINIT/ONCVPSP_Hamann/Pseudo_Dojo/v0.4/Psp_files/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Mn-sp-r_LDA_1012_dojov0.4.psp8
 - Mn    ONCVPSP-3.3.0  r_core=   1.41250   1.20960   1.61055
 - 25.00000  15.00000    171221                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -159,8 +159,8 @@ P           mkmem           8
   spin-orbit 2    0.007940    0.003946
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/ebousq/CODES/Psp/ABINIT/ONCVPSP_Hamann/Pseudo_Dojo/v0.4/Psp_files/O-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/ebousq/CODES/Psp/ABINIT/ONCVPSP_Hamann/Pseudo_Dojo/v0.4/Psp_files/O-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O-r_LDA_1012_dojov0.4.psp8
 - O     ONCVPSP-3.3.0  r_core=   1.35509   1.45563   1.35509
 -  8.00000   6.00000    171117                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -213,8 +213,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     165.000     164.974
  ETOT 26  -215.59349231009    -8.380E-08 1.448E-08 2.774E-07
  ETOT 27  -215.59349233674    -2.665E-08 1.076E-08 9.989E-08
  ETOT 28  -215.59349233775    -1.015E-09 1.188E-10 5.119E-08
- ETOT 29  -215.59349233830    -5.477E-10 1.293E-11 4.666E-08
- ETOT 30  -215.59349233882    -5.238E-10 7.439E-12 3.585E-08
+ ETOT 29  -215.59349233830    -5.476E-10 1.293E-11 4.666E-08
+ ETOT 30  -215.59349233882    -5.239E-10 7.439E-12 3.585E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  8.82176813E-02  sigma(3 2)= -2.53930774E-04
@@ -241,7 +241,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     165.000     164.974
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.5530E-12; max=  7.4393E-12
+ Mean square residual over all n,k,spin=   15.530E-13; max=  74.393E-13
  reduced coordinates (array xred) for    4 atoms
        0.000000000000      0.000000000000      0.000000000000
       -0.000000000000      0.000000000000      0.500000000000
@@ -250,8 +250,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     165.000     164.974
  rms dE/dt=  2.2506E-01; max dE/dt=  5.4115E-01; dE/dt below (all hartree)
     1       0.000000043129      0.000000043154     -0.000001479605
     2      -0.000000042925     -0.000000043290      0.000001480316
-    3      -0.074401582820     -0.074401661303     -0.541148438925
-    4       0.074401583820      0.074401662648      0.541148442706
+    3      -0.074401582820     -0.074401661303     -0.541148438924
+    4       0.074401583820      0.074401662648      0.541148442705
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
@@ -262,16 +262,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     165.000     164.974
  cartesian forces (hartree/bohr) at end:
     1      0.00000008706025     0.00000008706588    -0.00000009713848
     2     -0.00000008692977    -0.00000008701581     0.00000009718214
-    3      0.03181816711123     0.03181814865259    -0.01431964995453
-    4     -0.03181816724171    -0.03181814870266     0.01431964991087
- frms,max,avg= 1.9277978E-02 3.1818167E-02  -6.615E-11 -6.588E-11 -4.912E-12 h/b
+    3      0.03181816711121     0.03181814865256    -0.01431964995451
+    4     -0.03181816724169    -0.03181814870264     0.01431964991086
+ frms,max,avg= 1.9277978E-02 3.1818167E-02  -6.615E-11 -6.588E-11 -4.911E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000447681749     0.00000447710728    -0.00000499506099
-    2     -0.00000447010808    -0.00000447453233     0.00000499730589
-    3      1.63615579985454     1.63615485067283    -0.73634594485235
-    4     -1.63615580656395    -1.63615485324778     0.73634594260745
- frms,max,avg= 9.9131343E-01 1.6361558E+00  -3.402E-09 -3.388E-09 -2.526E-10 e/A
+    1      0.00000447681746     0.00000447710735    -0.00000499506121
+    2     -0.00000447010805    -0.00000447453223     0.00000499730617
+    3      1.63615579985338     1.63615485067176    -0.73634594485153
+    4     -1.63615580656279    -1.63615485324687     0.73634594260657
+ frms,max,avg= 9.9131343E-01 1.6361558E+00  -3.402E-09 -3.388E-09 -2.525E-10 e/A
  length scales=  8.503767597985  8.503767597985  8.503767597985 bohr
               =  4.500000000000  4.500000000000  4.500000000000 angstroms
  Fermi (or HOMO) energy (hartree) =   0.62249   Average Vxc (hartree)=  -0.52079
@@ -290,17 +290,19 @@ _setup2: Arith. and geom. avg. npw (full set) are     165.000     164.974
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  6.13404276451850E+01
-    Hartree energy  =  2.12183239900983E+01
+    Hartree energy  =  2.12183239900982E+01
     XC energy       = -3.52692808291903E+01
     Ewald energy    = -1.63786334065174E+02
     PspCore energy  =  6.17999555550193E+00
     Loc. psp. energy= -1.07802631215285E+02
     NL   psp  energy=  2.52600658003975E+00
-    >>>>>>>>> Etotal= -2.15593492338825E+02
+    >>>>>>>>> Etotal= -2.15593492338824E+02
 
  Other information on the energy :
-    Total energy(eV)= -5.86659727774973E+03 ; Band energy (Ha)=  -3.2371409643E+01
+    Total energy(eV)= -5.86659727774972E+03 ; Band energy (Ha)=  -3.2371409643E+01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  8.82176813E-02  sigma(3 2)= -2.53930774E-04
@@ -323,11 +325,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     165.000     164.974
            diemix      8.00000000E-01
              ecut      5.00000000E+00 Hartree
            etotal     -2.1559349234E+02
-            fcart      8.7060246442E-08  8.7065881785E-08 -9.7138478636E-08
-                      -8.6929769084E-08 -8.7015807007E-08  9.7182135078E-08
+            fcart      8.7060245874E-08  8.7065883158E-08 -9.7138483014E-08
+                      -8.6929768608E-08 -8.7015805205E-08  9.7182140541E-08
                        3.1818167111E-02  3.1818148653E-02 -1.4319649955E-02
                       -3.1818167242E-02 -3.1818148703E-02  1.4319649911E-02
--          fftalg         112
+-          fftalg         312
               ixc           7
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
                       -2.50000000E-01  2.50000000E-01  2.50000000E-01
@@ -423,52 +425,57 @@ P           mkmem           8
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xue, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - [2] Optimized norm-conserving Vanderbilt pseudopotentials.
 - D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
 - Comment: Some pseudopotential generated using the ONCVPSP code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
 -
-- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [5] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         45.8  wall=         45.8
+- Proc.   0 individual time (sec): cpu=         81.3  wall=         81.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         45.8  wall=         45.8
+.Delivered   4 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=         81.3  wall=         81.8

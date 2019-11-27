@@ -47,6 +47,40 @@ AC_DEFUN([_ABI_FC_CHECK_ABSOFT],[
 
 
 # _ABI_FC_CHECK_GNU(COMPILER)
+# _ABI_CHECK_FC_ARM(COMPILER)
+# ------------------------------
+#
+# Checks whether the specified Fortran compiler is the ARMFlang Fortran compiler.
+# If yes, tries to determine its version number and sets the abi_fc_vendor
+# and abi_fc_version variables accordingly.
+#
+AC_DEFUN([_ABI_CHECK_FC_ARM],[
+  dnl Do some sanity checking of the arguments
+  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl AC_MSG_CHECKING([if we are using the ARM Fortran compiler])
+  fc_info_string=`$1 --version 2>/dev/null | head -n 1`
+  abi_result=`echo "${fc_info_string}" | grep '^Arm C/C++/Fortran Compiler'`
+  if test "${abi_result}" = ""; then
+    abi_result="no"
+    fc_info_string=""
+    abi_fc_vendor="unknown"
+    abi_fc_version="unknown"
+  else
+    AC_DEFINE([FC_ARM],1,
+      [Define to 1 if you are using the ARM Fortran compiler.])
+    abi_fc_vendor="arm"
+    abi_fc_version=`echo ${abi_result} | sed -e 's/.*ersion //; s/ .*//'`
+    if test "${abi_fc_version}" = "${abi_result}"; then
+      abi_fc_version="unknown"
+    fi
+    abi_result="yes"
+  fi
+  dnl AC_MSG_RESULT(${abi_result})
+]) # _ABI_CHECK_FC_ARM
+
+
+
 # ---------------------------
 #
 # Checks whether the specified Fortran compiler is the GNU Fortran compiler.
@@ -156,6 +190,40 @@ AC_DEFUN([_ABI_FC_CHECK_INTEL],[
 
 
 # _ABI_FC_CHECK_NAG(COMPILER)
+# _ABI_CHECK_FC_LLVM(COMPILER)
+# ------------------------------
+#
+# Checks whether the specified Fortran compiler is the LLVM Flang compiler.
+# If yes, tries to determine its version number and sets the abi_fc_vendor
+# and abi_fc_version variables accordingly.
+#
+AC_DEFUN([_ABI_CHECK_FC_LLVM],[
+  dnl Do some sanity checking of the arguments
+  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl AC_MSG_CHECKING([if we are using the LLVM Flang Fortran compiler])
+  fc_info_string=`$1 --version 2>/dev/null | head -n 1`
+  abi_result=`echo "${fc_info_string}" | grep -e '^[[CcFf]]lang'`
+  if test "${abi_result}" = ""; then
+    abi_result="no"
+    fc_info_string=""
+    abi_fc_vendor="unknown"
+    abi_fc_version="unknown"
+  else
+    AC_DEFINE([FC_LLVM],1,
+      [Define to 1 if you are using the LLVM Flang Fortran compiler.])
+    abi_fc_vendor="llvm"
+    abi_fc_version=`echo ${abi_result} | sed -e 's/.*ersion //; s/ .*//'`
+    if test "${abi_fc_version}" = "${abi_result}"; then
+      abi_fc_version="unknown"
+    fi
+    abi_result="yes"
+  fi
+  dnl AC_MSG_RESULT(${abi_result})
+]) # _ABI_CHECK_FC_LLVM
+
+
+
 # ---------------------------
 #
 # Checks whether the specified Fortran compiler is the NAGWare Fortran 95
@@ -539,7 +607,37 @@ AC_DEFUN([_ABI_FC_CHECK_GAMMA],[
 ]) # _ABI_FC_CHECK_GAMMA
 
 
-# _ABI_FC_CHECK_GETENV()
+# _ABI_CHECK_FC_SHIFTLR()
+# ----------------------
+#
+# Checks whether the Fortran compiler supports SHIFTL/SHIFTR
+# (Fortran 2008 and later).
+#
+AC_DEFUN([_ABI_CHECK_FC_SHIFTLR],[
+  dnl Init
+  fc_has_shiftlr="no"
+
+  AC_MSG_CHECKING([whether the Fortran compiler accepts shiftl() and shiftr()])
+
+  dnl Try to compile a call to cpu_time
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      integer :: ii,ishft,res
+      res=shiftl(ii,ishft)
+      res=shiftr(ii,ishft)
+
+    ]])], [fc_has_shiftlr="yes"])
+  AC_LANG_POP()
+
+  if test "${fc_has_shiftlr}" = "yes"; then
+    AC_DEFINE([HAVE_FC_SHIFTLR],1,
+      [Define to 1 if your Fortran compiler supports shiftl() and shiftr().])
+  fi
+
+  AC_MSG_RESULT(${fc_has_shiftlr})
+]) # _ABI_CHECK_FC_SHIFTLR
+
 # ----------------------
 #
 # Checks whether the Fortran compiler supports GET_ENVIRONMENT_VARIABLE
@@ -583,11 +681,13 @@ AC_DEFUN([_ABI_FC_CHECK_INT_QUAD],[
 
   # Try to compile a program defining a quadruple integer
   # Note: xlf "works around" the problem by changing the integer length
+  dnl Note: need to test "integer*16" and "integer(kind=16)" (seems not equivalent)
   if test "${abi_fc_vendor}" != "ibm"; then
     AC_LANG_PUSH([Fortran])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],
       [[
               integer*16 my_int
+              integer(kind=16) :: my_int2
       ]])], [fc_has_int_quad="yes"])
     AC_LANG_POP()
   fi
@@ -829,6 +929,11 @@ AC_DEFUN([_ABI_FC_CHECK_LONG_LINES],[
     ]])], [fc_has_long_lines="yes"])
   AC_LANG_POP()
 
+  dnl This is not correctly implemented on LLVM
+  if test "${abi_fc_vendor}" = "llvm" -o "${abi_fc_vendor}" = "arm" ; then
+    fc_has_long_lines="no"
+  fi
+
   if test "${fc_has_long_lines}" = "yes"; then
     AC_DEFINE([HAVE_FC_LONG_LINES],1, 
       [Define to 1 if your Fortran compiler supports long lines.])
@@ -872,8 +977,6 @@ AC_DEFUN([_ABI_FC_CHECK_MACRO_NEWLINE],[
 ]) # _ABI_FC_CHECK_MACRO_NEWLINE
 
 
- ##############################################################################
-
 
 # _ABI_FC_CHECK_MOVE_ALLOC()
 # --------------------------
@@ -905,8 +1008,6 @@ AC_DEFUN([_ABI_FC_CHECK_MOVE_ALLOC],[
   AC_MSG_RESULT(${fc_has_move_alloc})
 ]) # _ABI_FC_CHECK_MOVE_ALLOC
 
-
- ##############################################################################
 
 
 # _ABI_FC_CHECK_PRIVATE()
@@ -1210,7 +1311,7 @@ AC_DEFUN([ABI_FC_FEATURES],[
   _ABI_FC_CHECK_FLUSH
   _ABI_FC_CHECK_FLUSH_
   _ABI_FC_CHECK_GAMMA
-  _ABI_FC_CHECK_GETENV
+  _ABI_CHECK_FC_SHIFTLR
   _ABI_FC_CHECK_GETPID
   _ABI_FC_CHECK_INT_QUAD
   _ABI_FC_CHECK_ISO_FORTRAN_2008
@@ -1409,6 +1510,16 @@ AC_DEFUN([ABI_PROG_FC],[
 
  if test "${abi_fc_vendor}" = "unknown"; then
     _ABI_FC_CHECK_GNU(${FC})
+  fi
+  echo "${fc_info_string}" >>"${tmp_fc_info_file}"
+
+  if test "${abi_fc_vendor}" = "unknown"; then
+    _ABI_CHECK_FC_LLVM(${FC})
+  fi
+  echo "${fc_info_string}" >>"${tmp_fc_info_file}"
+
+  if test "${abi_fc_vendor}" = "unknown"; then
+    _ABI_CHECK_FC_ARM(${FC})
   fi
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"
 

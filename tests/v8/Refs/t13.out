@@ -1,6 +1,6 @@
 
-.Version 8.10.0 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 27 Sep 2018.
-- ( at 13h05 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h36 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__amartin/tests/v8/Input/t13_ddb.in
+-/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/v8/Input/t13_ddb.in
  to initialize the multibinit input
 
 ================================================================================
@@ -176,7 +176,7 @@
 ================================================================================
 
 -Reading the file the HIST file :
--/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__amartin/tests/v8/Input/t13_HIST
+-/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/v8/Input/t13_HIST
 
 
 ================================================================================
@@ -223,11 +223,11 @@
  561 =>   2.1418856157E-02 (Sr_x-Ru_x)^2(Ru_y-O1_y)^1
 
  Mean Standard Deviation values at the end of the fit process (meV/atm):
-   Energy          :   4.0394442382594226E-01
+   Energy          :   4.0394442382594242E-01
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   2.9470810833375585E-03
-   Forces          :   2.8421558477571929E-03
-   Stresses        :   1.0492523558036568E-04
+   Forces+Stresses :   2.9470810833375593E-03
+   Forces          :   2.8421558477571933E-03
+   Stresses        :   1.0492523558036571E-04
 
 
 ================================================================================
@@ -239,10 +239,10 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          5.3  wall=          5.4
+- Proc.   0 individual time (sec): cpu=          4.7  wall=          4.7
 
 ================================================================================
 
-+Total cpu time      5.349  and wall time      5.356 sec
++Total cpu time      4.655  and wall time      4.669 sec
 
  multibinit : the run completed succesfully.

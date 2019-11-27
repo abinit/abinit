@@ -1,6 +1,6 @@
 
-.Version 8.5.1 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
+.Version 8.11.12 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,22 +14,22 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 29 Jun 2017.
-- ( at 10h44 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h19 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t14_sys.xml
+-/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/paral/Input/t82_sys.xml
  to initialize the multibinit input
 
 ================================================================================
 
  -outvars_multibinit: echo values of input variables ----------------------
 
- Flags :
+ Flags : 
      ifcflag         1
    prt_model         1
      strcpli        -1
@@ -69,8 +69,8 @@ dipdip_range         1         1         1
 
 ================================================================================
 
--Opening the file /home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t14_sys.xml
--Reading the file /home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t14_sys.xml with LibXML library
+-Opening the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/paral/Input/t82_sys.xml
+-Reading the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/paral/Input/t82_sys.xml with LibXML library
 
  Bound for ifc SR:
 
@@ -157,13 +157,13 @@ dipdip_range         1         1         1
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t14_coeffs.xml
--Reading the file /home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t14_coeffs.xml with LibXML library
+-Opening the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/paral/Input/t82_coeffs.xml
+-Reading the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/paral/Input/t82_coeffs.xml with LibXML library
 
 ================================================================================
 
 -Reading the file the HIST file :
--/home/alex/dev/abinit_git/tests/paral/Input/t101_HIST
+-/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/paral/Input/t81_HIST
 
 
 ================================================================================
@@ -178,11 +178,11 @@ dipdip_range         1         1         1
  825 coefficients generated 
 
  Mean Standard Deviation values at the begining of the fit process (meV/atm):
-   Energy          :   7.4104176514268272E-01
+   Energy          :   7.4104176514268294E-01
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460718152E-03
-   Forces          :   7.3678367059221732E-03
-   Stresses        :   1.3882954014964190E-04
+   Forces+Stresses :   7.5066662460720130E-03
+   Forces          :   7.3678367059222868E-03
+   Stresses        :   1.3882954014972593E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (meV/atm)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
@@ -196,11 +196,11 @@ dipdip_range         1         1         1
  4 =>   9.0373997419E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
 
  Mean Standard Deviation values at the end of the fit process (meV/atm):
-   Energy          :   4.0062562511725264E-01
+   Energy          :   4.0062562511725458E-01
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.7876180836314273E-03
-   Forces          :   3.6336164702180729E-03
-   Stresses        :   1.5400161341335444E-04
+   Forces+Stresses :   3.7876180836315530E-03
+   Forces          :   3.6336164702180981E-03
+   Stresses        :   1.5400161341345506E-04
 
 
 ================================================================================
@@ -210,10 +210,10 @@ dipdip_range         1         1         1
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
+- Proc.   0 individual time (sec): cpu=          3.0  wall=          3.1
 
 ================================================================================
 
-+Total cpu time      0.045  and wall time      0.045 sec
++Total cpu time      2.971  and wall time      3.074 sec
 
  multibinit : the run completed succesfully.
