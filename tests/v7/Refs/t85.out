@@ -1,6 +1,6 @@
 
-.Version 8.9.4 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  7 Sep 2018.
-- ( at 23h39 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h35 )
   
 - input  file    -> t85.in
 - output file    -> t85.out
@@ -1407,8 +1407,8 @@ P          mk1mem9        512
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.05208
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1435,51 +1435,51 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
  ETOT  3  -3.2697267048688    -5.571E-06 9.745E-05 8.136E-05
  ETOT  4  -3.2697267980867    -9.322E-08 2.536E-04 2.816E-07
  ETOT  5  -3.2697267982608    -1.741E-10 1.696E-05 1.977E-09
- ETOT  6  -3.2697267982617    -8.811E-13 2.383E-05 6.098E-12
- ETOT  7  -3.2697267982611     5.467E-13 2.909E-06 3.402E-14
- ETOT  8  -3.2697267982610     1.115E-13 2.761E-06 1.098E-16
- ETOT  9  -3.2697267982610     1.199E-14 2.812E-06 5.005E-18
+ ETOT  6  -3.2697267982617    -8.837E-13 2.383E-05 6.098E-12
+ ETOT  7  -3.2697267982612     5.440E-13 2.909E-06 3.402E-14
+ ETOT  8  -3.2697267982610     1.110E-13 2.761E-06 1.098E-16
+ ETOT  9  -3.2697267982610     1.421E-14 2.812E-06 5.005E-18
  ETOT 10  -3.2697267982610     4.885E-15 2.636E-06 2.638E-20
- ETOT 11  -3.2697267982610    -4.441E-16 2.703E-06 1.702E-23
- ETOT 12  -3.2697267982610    -1.066E-14 2.517E-06 3.390E-23
- ETOT 13  -3.2697267982610    -8.882E-16 2.588E-06 2.639E-23
- ETOT 14  -3.2697267982610     3.553E-15 2.398E-06 4.488E-22
- ETOT 15  -3.2697267982610     9.326E-15 2.466E-06 7.678E-23
- ETOT 16  -3.2697267982610     4.441E-16 2.277E-06 4.616E-22
- ETOT 17  -3.2697267982610    -6.217E-15 2.340E-06 1.767E-22
- ETOT 18  -3.2697267982610    -2.665E-15 2.153E-06 1.887E-22
- ETOT 19  -3.2697267982610     7.105E-15 2.210E-06 1.549E-22
- ETOT 20  -3.2697267982610    -6.217E-15 2.028E-06 2.355E-22
- ETOT 21  -3.2697267982610     6.661E-15 2.078E-06 6.581E-22
- ETOT 22  -3.2697267982610     1.066E-14 1.901E-06 9.757E-22
- ETOT 23  -3.2697267982610    -1.732E-14 1.946E-06 1.272E-21
- ETOT 24  -3.2697267982610    -1.155E-14 1.776E-06 1.778E-21
- ETOT 25  -3.2697267982610     1.155E-14 1.815E-06 1.748E-21
- ETOT 26  -3.2697267982610     6.661E-15 1.652E-06 1.755E-21
- ETOT 27  -3.2697267982610    -9.770E-15 1.686E-06 1.978E-21
- ETOT 28  -3.2697267982610    -5.773E-15 1.531E-06 3.250E-21
- ETOT 29  -3.2697267982610     7.550E-15 1.560E-06 4.117E-21
- ETOT 30  -3.2697267982610     1.465E-14 1.414E-06 5.262E-21
- ETOT 31  -3.2697267982610    -1.732E-14 1.439E-06 4.237E-21
- ETOT 32  -3.2697267982610    -8.438E-15 1.302E-06 3.566E-21
- ETOT 33  -3.2697267982610     7.105E-15 1.324E-06 4.263E-21
- ETOT 34  -3.2697267982610     1.465E-14 1.195E-06 3.633E-21
- ETOT 35  -3.2697267982610    -5.773E-15 1.214E-06 1.628E-21
- ETOT 36  -3.2697267982610    -1.110E-14 1.094E-06 3.141E-22
- ETOT 37  -3.2697267982610     3.553E-15 1.110E-06 4.098E-23
- ETOT 38  -3.2697267982610     4.885E-15 9.996E-07 2.487E-23
- ETOT 39  -3.2697267982610    -3.553E-15 1.013E-06 1.967E-24
- ETOT 40  -3.2697267982610    -1.776E-15 9.108E-07 1.654E-23
- ETOT 41  -3.2697267982610     9.770E-15 9.220E-07 1.831E-23
- ETOT 42  -3.2697267982610    -1.421E-14 8.282E-07 6.941E-23
- ETOT 43  -3.2697267982610    -1.776E-15 8.376E-07 6.231E-23
- ETOT 44  -3.2697267982610    -6.661E-15 7.517E-07 2.659E-22
- ETOT 45  -3.2697267982610     2.398E-14 7.597E-07 3.656E-22
- ETOT 46  -3.2697267982610    -1.199E-14 6.810E-07 5.169E-22
- ETOT 47  -3.2697267982610     0.000E+00 6.878E-07 4.819E-22
- ETOT 48  -3.2697267982610     1.066E-14 6.161E-07 5.895E-22
- ETOT 49  -3.2697267982610    -1.599E-14 6.218E-07 6.293E-22
- ETOT 50  -3.2697267982610     2.176E-14 5.566E-07 7.826E-22
+ ETOT 11  -3.2697267982610     8.882E-16 2.703E-06 1.702E-23
+ ETOT 12  -3.2697267982610    -9.326E-15 2.517E-06 3.389E-23
+ ETOT 13  -3.2697267982610    -3.109E-15 2.588E-06 2.639E-23
+ ETOT 14  -3.2697267982610     8.882E-16 2.398E-06 4.338E-22
+ ETOT 15  -3.2697267982610     1.421E-14 2.466E-06 7.700E-23
+ ETOT 16  -3.2697267982610    -1.332E-15 2.277E-06 6.271E-23
+ ETOT 17  -3.2697267982610    -4.441E-15 2.340E-06 6.479E-22
+ ETOT 18  -3.2697267982610     4.441E-16 2.153E-06 1.152E-22
+ ETOT 19  -3.2697267982610     8.882E-16 2.210E-06 8.494E-23
+ ETOT 20  -3.2697267982610     4.441E-15 2.028E-06 1.471E-22
+ ETOT 21  -3.2697267982610    -2.887E-14 2.078E-06 2.096E-22
+ ETOT 22  -3.2697267982610     2.887E-14 1.901E-06 4.498E-22
+ ETOT 23  -3.2697267982610    -5.329E-15 1.946E-06 5.873E-22
+ ETOT 24  -3.2697267982610     4.885E-15 1.776E-06 1.428E-21
+ ETOT 25  -3.2697267982610    -2.220E-15 1.815E-06 1.393E-21
+ ETOT 26  -3.2697267982610    -5.329E-15 1.652E-06 1.558E-21
+ ETOT 27  -3.2697267982610     2.220E-15 1.686E-06 1.058E-21
+ ETOT 28  -3.2697267982610     3.997E-15 1.531E-06 1.067E-21
+ ETOT 29  -3.2697267982610    -7.105E-15 1.560E-06 6.320E-22
+ ETOT 30  -3.2697267982610     8.882E-15 1.414E-06 6.751E-22
+ ETOT 31  -3.2697267982610     3.109E-15 1.439E-06 7.890E-22
+ ETOT 32  -3.2697267982610    -2.576E-14 1.302E-06 7.041E-22
+ ETOT 33  -3.2697267982610     1.821E-14 1.324E-06 4.233E-22
+ ETOT 34  -3.2697267982610     1.332E-15 1.195E-06 2.075E-23
+ ETOT 35  -3.2697267982610    -1.510E-14 1.214E-06 1.475E-22
+ ETOT 36  -3.2697267982610     8.438E-15 1.094E-06 8.618E-22
+ ETOT 37  -3.2697267982610     0.000E+00 1.110E-06 2.168E-21
+ ETOT 38  -3.2697267982610    -3.109E-15 9.996E-07 1.838E-21
+ ETOT 39  -3.2697267982610    -1.776E-15 1.013E-06 1.468E-22
+ ETOT 40  -3.2697267982610     5.329E-15 9.108E-07 5.337E-23
+ ETOT 41  -3.2697267982610     9.770E-15 9.220E-07 7.745E-24
+ ETOT 42  -3.2697267982610    -9.326E-15 8.282E-07 1.413E-24
+ ETOT 43  -3.2697267982610     5.773E-15 8.376E-07 1.755E-23
+ ETOT 44  -3.2697267982610    -6.217E-15 7.517E-07 2.883E-24
+ ETOT 45  -3.2697267982611    -2.398E-14 7.597E-07 3.868E-24
+ ETOT 46  -3.2697267982610     1.288E-14 6.810E-07 2.224E-23
+ ETOT 47  -3.2697267982610     1.643E-14 6.878E-07 1.590E-23
+ ETOT 48  -3.2697267982610     7.994E-15 6.161E-07 6.470E-23
+ ETOT 49  -3.2697267982610    -7.550E-15 6.218E-07 1.191E-22
+ ETOT 50  -3.2697267982610    -1.510E-14 5.566E-07 3.272E-22
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.15289603E-04  sigma(3 2)=  0.00000000E+00
@@ -1530,21 +1530,23 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.81057777340364E-01
-    Hartree energy  =  4.26073682279831E-03
-    XC energy       = -2.05911691230839E+00
+    Kinetic energy  =  8.81057777340331E-01
+    Hartree energy  =  4.26073682279420E-03
+    XC energy       = -2.05911691230838E+00
     Ewald energy    = -2.75091724446829E+00
     PspCore energy  =  1.50341989301425E-01
-    Loc. psp. energy=  1.27597888038345E-01
-    NL   psp  energy=  3.85623735723620E-01
-    >>>>> Internal E= -3.26115202955012E+00
+    Loc. psp. energy=  1.27597888038368E-01
+    NL   psp  energy=  3.85623735723603E-01
+    >>>>> Internal E= -3.26115202955014E+00
 
-    -kT*entropy     = -8.57476871089293E-03
-    >>>>>>>>> Etotal= -3.26972679826102E+00
+    -kT*entropy     = -8.57476871089463E-03
+    >>>>>>>>> Etotal= -3.26972679826104E+00
 
  Other information on the energy :
-    Total energy(eV)= -8.89737910248093E+01 ; Band energy (Ha)=   2.9068260575E-01
+    Total energy(eV)= -8.89737910248099E+01 ; Band energy (Ha)=   2.9068260575E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.15289603E-04  sigma(3 2)=  0.00000000E+00
@@ -1616,11 +1618,11 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1 -0.14707428999266     -1.023E+01 1.729E-01 3.909E+00
- ETOT  2 -0.15320744389239     -6.133E-03 6.407E-03 3.447E-02
- ETOT  3 -0.15332415628640     -1.167E-04 1.250E-04 4.758E-04
- ETOT  4 -0.15332569128114     -1.535E-06 4.608E-04 1.368E-06
- ETOT  5 -0.15332568511851      6.163E-09 1.597E-05 2.886E-09
+-ETOT  1 -0.14707428999291     -1.023E+01 1.729E-01 3.909E+00
+ ETOT  2 -0.15320744389269     -6.133E-03 6.407E-03 3.447E-02
+ ETOT  3 -0.15332415628679     -1.167E-04 1.250E-04 4.758E-04
+ ETOT  4 -0.15332569128147     -1.535E-06 4.608E-04 1.368E-06
+ ETOT  5 -0.15332568511889      6.163E-09 1.597E-05 2.886E-09
 
  At SCF step    5       vres2   =  2.89E-09 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -1644,7 +1646,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.38344338E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=   -0.1533256851E+00 Ha. Also 2DEtotal=   -0.417220407336E+01 eV
+ 2DEtotal=   -0.1533256851E+00 Ha. Also 2DEtotal=   -0.417220407337E+01 eV
     (2DErelax=   -1.0238090896E+01 Ha. 2DEnonrelax=    1.0084765211E+01 Ha)
     (  non-var. 2DEtotal :   -1.5355311207E-01 Ha)
 
@@ -1697,12 +1699,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
   
-   2    1   1    1        -0.0000000000         0.0000000000
+   2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1        -0.0012018436         0.0000000000
-   2    1   3    1         0.0000000000         0.0000000000
+   2    1   3    1        -0.0000000000         0.0000000000
   
-   3    1   1    1         0.0000000000         0.0000000000
-   3    1   2    1         0.0000000000         0.0000000000
+   3    1   1    1        -0.0000000000         0.0000000000
+   3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1        -0.0012018436         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -1734,8 +1736,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.96751
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1785,13 +1787,13 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   5.9002735343712     -2.293E+01 3.150E+00 9.150E+03
- ETOT  2   1.1073655917363     -4.793E+00 4.492E-02 1.187E+03
- ETOT  3  0.39912304941560     -7.082E-01 1.214E-01 1.065E-01
- ETOT  4  0.39904415161050     -7.890E-05 1.320E-03 1.593E-04
- ETOT  5  0.39904377144317     -3.802E-07 7.867E-03 9.165E-06
- ETOT  6  0.39904376181317     -9.630E-09 9.150E-05 1.287E-07
- ETOT  7  0.39904376172981     -8.336E-11 5.430E-04 8.544E-10
+-ETOT  1   5.9002735343723     -2.293E+01 3.150E+00 9.150E+03
+ ETOT  2   1.1073655917364     -4.793E+00 4.492E-02 1.187E+03
+ ETOT  3  0.39912304941512     -7.082E-01 1.214E-01 1.065E-01
+ ETOT  4  0.39904415161006     -7.890E-05 1.320E-03 1.593E-04
+ ETOT  5  0.39904377144277     -3.802E-07 7.867E-03 9.165E-06
+ ETOT  6  0.39904376181277     -9.630E-09 9.150E-05 1.287E-07
+ ETOT  7  0.39904376172939     -8.338E-11 5.430E-04 8.544E-10
 
  At SCF step    7       vres2   =  8.54E-10 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -1838,12 +1840,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1 -0.10005587073772     -1.051E+01 5.876E+00 5.858E+00
- ETOT  2 -0.10578340318500     -5.728E-03 1.042E-01 4.190E-01
- ETOT  3 -0.10605197000476     -2.686E-04 2.622E-01 5.711E-02
- ETOT  4 -0.10608606988189     -3.410E-05 3.170E-02 1.814E-03
- ETOT  5 -0.10608721763330     -1.148E-06 2.293E-02 5.048E-07
- ETOT  6 -0.10608721827484     -6.415E-10 4.644E-03 7.501E-10
+-ETOT  1 -0.10005587073862     -1.051E+01 5.876E+00 5.858E+00
+ ETOT  2 -0.10578340318593     -5.728E-03 1.042E-01 4.190E-01
+ ETOT  3 -0.10605197000577     -2.686E-04 2.622E-01 5.711E-02
+ ETOT  4 -0.10608606988278     -3.410E-05 3.170E-02 1.814E-03
+ ETOT  5 -0.10608721763414     -1.148E-06 2.293E-02 5.048E-07
+ ETOT  6 -0.10608721827578     -6.416E-10 4.644E-03 7.501E-10
 
  At SCF step    6       vres2   =  7.50E-10 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -1867,7 +1869,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.41973446E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=   -0.1060872183E+00 Ha. Also 2DEtotal=   -0.288678001912E+01 eV
+ 2DEtotal=   -0.1060872183E+00 Ha. Also 2DEtotal=   -0.288678001914E+01 eV
     (2DErelax=   -1.0520145889E+01 Ha. 2DEnonrelax=    1.0414058670E+01 Ha)
     (  non-var. 2DEtotal :   -1.0608660033E-01 Ha)
 
@@ -1942,8 +1944,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.88496
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1993,12 +1995,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   2.7360651115481     -2.485E+01 1.514E+00 7.620E+02
- ETOT  2   1.2324018455205     -1.504E+00 1.832E-01 1.057E+01
- ETOT  3   1.2127991615774     -1.960E-02 3.071E-03 4.695E-03
- ETOT  4   1.2127920299087     -7.132E-06 1.611E-04 8.609E-05
- ETOT  5   1.2127918499857     -1.799E-07 3.072E-03 1.205E-06
- ETOT  6   1.2127918476586     -2.327E-09 2.655E-06 1.341E-09
+-ETOT  1   2.7360651115480     -2.485E+01 1.514E+00 7.620E+02
+ ETOT  2   1.2324018455197     -1.504E+00 1.832E-01 1.057E+01
+ ETOT  3   1.2127991615763     -1.960E-02 3.071E-03 4.695E-03
+ ETOT  4   1.2127920299078     -7.132E-06 1.611E-04 8.609E-05
+ ETOT  5   1.2127918499847     -1.799E-07 3.072E-03 1.205E-06
+ ETOT  6   1.2127918476577     -2.327E-09 2.655E-06 1.341E-09
 
  At SCF step    6       vres2   =  1.34E-09 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -2045,11 +2047,11 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  1.58919589413600E-02 -1.091E+01 2.805E+00 1.854E+00
- ETOT  2  1.38393137952804E-02 -2.053E-03 1.254E-02 1.041E-02
- ETOT  3  1.38249277481464E-02 -1.439E-05 1.698E-01 1.132E-04
- ETOT  4  1.38247237005018E-02 -2.040E-07 1.724E-03 1.626E-06
- ETOT  5  1.38247205622193E-02 -3.138E-09 1.698E-01 8.319E-09
+-ETOT  1  1.58919589403084E-02 -1.091E+01 2.805E+00 1.854E+00
+ ETOT  2  1.38393137941968E-02 -2.053E-03 1.254E-02 1.041E-02
+ ETOT  3  1.38249277470983E-02 -1.439E-05 1.698E-01 1.132E-04
+ ETOT  4  1.38247236994253E-02 -2.040E-07 1.724E-03 1.626E-06
+ ETOT  5  1.38247205611712E-02 -3.138E-09 1.698E-01 8.319E-09
 
  At SCF step    5       vres2   =  8.32E-09 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -2073,9 +2075,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.43680042E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=    0.1382472056E-01 Ha. Also 2DEtotal=    0.376189777976E+00 eV
+ 2DEtotal=    0.1382472056E-01 Ha. Also 2DEtotal=    0.376189777947E+00 eV
     (2DErelax=   -1.0914113172E+01 Ha. 2DEnonrelax=    1.0927937893E+01 Ha)
-    (  non-var. 2DEtotal :    1.3828400961E-02 Ha)
+    (  non-var. 2DEtotal :    1.3828400960E-02 Ha)
 
 ================================================================================
 
@@ -2148,8 +2150,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.96843
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2203,12 +2205,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   3.3764965869530     -1.982E+01 4.835E-01 4.004E+03
- ETOT  2  0.55269560971902     -2.824E+00 3.349E-02 4.004E+02
- ETOT  3  0.24239275369630     -3.103E-01 8.944E-02 1.047E-01
- ETOT  4  0.24231166846158     -8.109E-05 1.239E-03 4.049E-04
- ETOT  5  0.24231121773778     -4.507E-07 8.943E-02 2.492E-06
- ETOT  6  0.24231120503739     -1.270E-08 3.811E-05 3.497E-08
+-ETOT  1   3.3764965869537     -1.982E+01 4.835E-01 4.004E+03
+ ETOT  2  0.55269560971867     -2.824E+00 3.349E-02 4.004E+02
+ ETOT  3  0.24239275369566     -3.103E-01 8.944E-02 1.047E-01
+ ETOT  4  0.24231166846104     -8.109E-05 1.239E-03 4.049E-04
+ ETOT  5  0.24231121773712     -4.507E-07 8.943E-02 2.492E-06
+ ETOT  6  0.24231120503671     -1.270E-08 3.811E-05 3.497E-08
 
  At SCF step    6       vres2   =  3.50E-08 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -2232,7 +2234,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.46272406E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=    0.2423112050E+00 Ha. Also 2DEtotal=    0.659362321385E+01 eV
+ 2DEtotal=    0.2423112050E+00 Ha. Also 2DEtotal=    0.659362321383E+01 eV
     (2DErelax=   -2.2954586898E+01 Ha. 2DEnonrelax=    2.3196898103E+01 Ha)
     (  non-var. 2DEtotal :    2.4062029043E-01 Ha)
 
@@ -2267,15 +2269,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   dir pert dir pert     real part    imaginary part
   
    1    1   1    1         0.0057497450         0.0000000000
-   1    1   2    1         0.0000000000         0.0000000000
+   1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
   
-   2    1   1    1         0.0000000000         0.0000000000
+   2    1   1    1        -0.0000000000         0.0000000000
    2    1   2    1         0.0057497450        -0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
   
-   3    1   1    1        -0.0000000000         0.0000000000
-   3    1   2    1         0.0000000000         0.0000000000
+   3    1   1    1         0.0000000000         0.0000000000
+   3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.0389196655        -0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.25000  0.25000  0.00000
@@ -2307,8 +2309,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.88399
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2353,12 +2355,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   2.1770211868789     -2.260E+01 4.564E+00 6.231E+02
- ETOT  2  0.99107577204444     -1.186E+00 6.016E-01 1.090E+01
- ETOT  3  0.97230997638713     -1.877E-02 2.883E+00 5.806E-03
- ETOT  4  0.97230210782502     -7.869E-06 6.787E-02 6.581E-05
- ETOT  5  0.97230196520439     -1.426E-07 2.864E+00 1.829E-06
- ETOT  6  0.97230196141322     -3.791E-09 7.241E-03 9.681E-09
+-ETOT  1   2.1770211868780     -2.260E+01 4.564E+00 6.231E+02
+ ETOT  2  0.99107577204292     -1.186E+00 6.016E-01 1.090E+01
+ ETOT  3  0.97230997638553     -1.877E-02 2.883E+00 5.806E-03
+ ETOT  4  0.97230210782337     -7.869E-06 6.787E-02 6.581E-05
+ ETOT  5  0.97230196520270     -1.426E-07 2.864E+00 1.829E-06
+ ETOT  6  0.97230196141166     -3.791E-09 7.241E-03 9.681E-09
 
  At SCF step    6       vres2   =  9.68E-09 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -2384,7 +2386,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
  Resulting in :
  2DEtotal=    0.9723019614E+00 Ha. Also 2DEtotal=    0.264576818998E+02 eV
     (2DErelax=   -2.3808627013E+01 Ha. 2DEnonrelax=    2.4780928974E+01 Ha)
-    (  non-var. 2DEtotal :    9.7229413099E-01 Ha)
+    (  non-var. 2DEtotal :    9.7229413098E-01 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -2405,12 +2407,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  0.81870467418077     -1.544E+01 9.320E-01 1.760E+02
- ETOT  2  0.46970282490885     -3.490E-01 6.870E-01 3.355E+00
- ETOT  3  0.46405458056726     -5.648E-03 1.338E-01 5.074E-03
- ETOT  4  0.46404493934084     -9.641E-06 1.112E-01 5.854E-05
- ETOT  5  0.46404481182297     -1.275E-07 3.664E-02 5.260E-07
- ETOT  6  0.46404481043882     -1.384E-09 2.458E-02 2.691E-09
+-ETOT  1  0.81870467417989     -1.544E+01 9.320E-01 1.760E+02
+ ETOT  2  0.46970282490783     -3.490E-01 6.870E-01 3.355E+00
+ ETOT  3  0.46405458056624     -5.648E-03 1.338E-01 5.074E-03
+ ETOT  4  0.46404493933981     -9.641E-06 1.112E-01 5.854E-05
+ ETOT  5  0.46404481182194     -1.275E-07 3.664E-02 5.260E-07
+ ETOT  6  0.46404481043777     -1.384E-09 2.458E-02 2.691E-09
 
  At SCF step    6       vres2   =  2.69E-09 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -2457,11 +2459,11 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  0.25453132442706     -1.227E+01 4.557E+00 3.898E+00
- ETOT  2  0.24331833946226     -1.121E-02 9.745E-02 4.501E-02
- ETOT  3  0.24321358069032     -1.048E-04 2.066E-01 3.797E-04
- ETOT  4  0.24321282208997     -7.586E-07 1.761E-03 6.672E-06
- ETOT  5  0.24321280742509     -1.466E-08 1.546E-02 8.128E-08
+-ETOT  1  0.25453132442636     -1.227E+01 4.557E+00 3.898E+00
+ ETOT  2  0.24331833946145     -1.121E-02 9.745E-02 4.501E-02
+ ETOT  3  0.24321358068952     -1.048E-04 2.066E-01 3.797E-04
+ ETOT  4  0.24321282208912     -7.586E-07 1.761E-03 6.672E-06
+ ETOT  5  0.24321280742424     -1.466E-08 1.546E-02 8.128E-08
 
  At SCF step    5       vres2   =  8.13E-08 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -2485,7 +2487,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.44907178E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=    0.2432128074E+00 Ha. Also 2DEtotal=    0.661815706251E+01 eV
+ 2DEtotal=    0.2432128074E+00 Ha. Also 2DEtotal=    0.661815706249E+01 eV
     (2DErelax=   -1.2278276493E+01 Ha. 2DEnonrelax=    1.2521489301E+01 Ha)
     (  non-var. 2DEtotal :    2.4321080078E-01 Ha)
 
@@ -2560,8 +2562,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.97214
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2611,11 +2613,11 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   2.1174519428721     -1.712E+01 8.413E-01 4.320E+02
- ETOT  2   1.4745512693850     -6.429E-01 9.047E-03 1.447E+01
- ETOT  3   1.4544617168081     -2.009E-02 6.572E-02 7.447E-03
- ETOT  4   1.4544501993459     -1.152E-05 4.051E-06 6.650E-05
- ETOT  5   1.4544500233639     -1.760E-07 6.585E-02 2.025E-06
- ETOT  6   1.4544500190477     -4.316E-09 1.211E-08 1.353E-08
+ ETOT  2   1.4745512693841     -6.429E-01 9.047E-03 1.447E+01
+ ETOT  3   1.4544617168071     -2.009E-02 6.572E-02 7.447E-03
+ ETOT  4   1.4544501993450     -1.152E-05 4.051E-06 6.650E-05
+ ETOT  5   1.4544500233629     -1.760E-07 6.585E-02 2.025E-06
+ ETOT  6   1.4544500190467     -4.316E-09 1.211E-08 1.353E-08
 
  At SCF step    6       vres2   =  1.35E-08 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -2663,12 +2665,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  0.37474697822165     -1.084E+01 5.414E-01 2.467E+00
- ETOT  2  0.37148121769388     -3.266E-03 1.254E-03 2.968E-02
- ETOT  3  0.37141720724605     -6.401E-05 1.207E-02 7.985E-04
- ETOT  4  0.37141649071559     -7.165E-07 1.590E-02 3.549E-05
- ETOT  5  0.37141656679299      7.608E-08 1.136E-01 1.254E-07
- ETOT  6  0.37141660846902      4.168E-08 1.607E-01 9.393E-10
+-ETOT  1  0.37474697822064     -1.084E+01 5.414E-01 2.467E+00
+ ETOT  2  0.37148121769288     -3.266E-03 1.254E-03 2.968E-02
+ ETOT  3  0.37141720724503     -6.401E-05 1.207E-02 7.985E-04
+ ETOT  4  0.37141649071449     -7.165E-07 1.590E-02 3.549E-05
+ ETOT  5  0.37141656679193      7.608E-08 1.136E-01 1.254E-07
+ ETOT  6  0.37141660846798      4.168E-08 1.607E-01 9.393E-10
 
  At SCF step    6       vres2   =  9.39E-10 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -2728,11 +2730,11 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   
    1    1   1    1         0.0549671561        -0.0000000527
    1    1   2    1        -0.0417813941         0.0000000527
-   1    1   3    1        -0.0000000000         0.0000000000
+   1    1   3    1         0.0000000000         0.0000000000
   
    2    1   1    1        -0.0417813941         0.0000000527
    2    1   2    1         0.0549671561        -0.0000000527
-   2    1   3    1         0.0000000000        -0.0000000000
+   2    1   3    1        -0.0000000000        -0.0000000000
   
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000        -0.0000000000
@@ -2767,8 +2769,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.88883
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2822,12 +2824,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.2688554537277     -1.995E+01 2.464E+01 2.131E+02
- ETOT  2  0.74507853945570     -5.238E-01 1.390E-01 8.663E-01
- ETOT  3  0.74374268082039     -1.336E-03 6.859E-01 2.427E-03
- ETOT  4  0.74374119822390     -1.483E-06 3.673E-02 1.568E-05
- ETOT  5  0.74374134567671      1.475E-07 6.863E-01 1.314E-07
- ETOT  6  0.74374140653690      6.086E-08 1.272E-02 1.367E-09
+-ETOT  1   1.2688554537266     -1.995E+01 2.464E+01 2.131E+02
+ ETOT  2  0.74507853945413     -5.238E-01 1.390E-01 8.663E-01
+ ETOT  3  0.74374268081889     -1.336E-03 6.859E-01 2.427E-03
+ ETOT  4  0.74374119822232     -1.483E-06 3.673E-02 1.568E-05
+ ETOT  5  0.74374134567518      1.475E-07 6.863E-01 1.314E-07
+ ETOT  6  0.74374140653535      6.086E-08 1.272E-02 1.367E-09
 
  At SCF step    6       vres2   =  1.37E-09 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -2851,7 +2853,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.53519809E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=    0.7437414065E+00 Ha. Also 2DEtotal=    0.202382329059E+02 eV
+ 2DEtotal=    0.7437414065E+00 Ha. Also 2DEtotal=    0.202382329058E+02 eV
     (2DErelax=   -2.0476892567E+01 Ha. 2DEnonrelax=    2.1220633974E+01 Ha)
     (  non-var. 2DEtotal :    7.4251314851E-01 Ha)
 
@@ -2886,15 +2888,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   dir pert dir pert     real part    imaginary part
   
    1    1   1    1         0.0176035523         0.0000000000
-   1    1   2    1         0.0000000000         0.0000000000
-   1    1   3    1        -0.0000000000         0.0000000000
+   1    1   2    1        -0.0000000000         0.0000000000
+   1    1   3    1         0.0000000000         0.0000000000
   
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0176035523         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
   
    3    1   1    1        -0.0000000000         0.0000000000
-   3    1   2    1         0.0000000000         0.0000000000
+   3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.0792530178         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
@@ -2926,8 +2928,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.89270
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2976,12 +2978,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.7781238076320     -1.702E+01 6.142E-01 1.072E+02
- ETOT  2   1.4723344136867     -3.058E-01 4.788E-03 2.862E-01
- ETOT  3   1.4720606203695     -2.738E-04 2.359E-05 2.683E-03
- ETOT  4   1.4720545180858     -6.102E-06 1.035E-06 5.713E-05
- ETOT  5   1.4720543689327     -1.492E-07 1.356E-08 3.170E-07
- ETOT  6   1.4720543682675     -6.652E-10 1.346E-09 9.859E-10
+-ETOT  1   1.7781238076314     -1.702E+01 6.142E-01 1.072E+02
+ ETOT  2   1.4723344136862     -3.058E-01 4.788E-03 2.862E-01
+ ETOT  3   1.4720606203689     -2.738E-04 2.359E-05 2.683E-03
+ ETOT  4   1.4720545180852     -6.102E-06 1.035E-06 5.713E-05
+ ETOT  5   1.4720543689322     -1.492E-07 1.356E-08 3.170E-07
+ ETOT  6   1.4720543682670     -6.652E-10 1.346E-09 9.859E-10
 
  At SCF step    6       vres2   =  9.86E-10 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -3028,11 +3030,11 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.3601527809824     -1.939E+01 1.755E-01 1.527E+02
- ETOT  2  0.92173224060306     -4.384E-01 1.117E-02 3.997E-01
- ETOT  3  0.92143472949660     -2.975E-04 9.200E-06 1.862E-03
- ETOT  4  0.92143254727847     -2.182E-06 8.332E-07 1.287E-05
- ETOT  5  0.92143252115639     -2.612E-08 1.745E-09 8.011E-08
+-ETOT  1   1.3601527809813     -1.939E+01 1.755E-01 1.527E+02
+ ETOT  2  0.92173224060175     -4.384E-01 1.117E-02 3.997E-01
+ ETOT  3  0.92143472949525     -2.975E-04 9.200E-06 1.862E-03
+ ETOT  4  0.92143254727725     -2.182E-06 8.332E-07 1.287E-05
+ ETOT  5  0.92143252115512     -2.612E-08 1.745E-09 8.011E-08
 
  At SCF step    5       vres2   =  8.01E-08 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
@@ -3056,7 +3058,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.51110071E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=    0.9214325212E+00 Ha. Also 2DEtotal=    0.250734540343E+02 eV
+ 2DEtotal=    0.9214325212E+00 Ha. Also 2DEtotal=    0.250734540342E+02 eV
     (2DErelax=   -1.9831076530E+01 Ha. 2DEnonrelax=    2.0752509051E+01 Ha)
     (  non-var. 2DEtotal :    9.2140853007E-01 Ha)
 
@@ -3096,10 +3098,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0445337707         0.0000000001
-   2    1   3    1         0.0000000000         0.0000000000
+   2    1   3    1        -0.0000000000         0.0000000000
   
-   3    1   1    1         0.0000000000         0.0000000000
-   3    1   2    1         0.0000000000         0.0000000000
+   3    1   1    1        -0.0000000000         0.0000000000
+   3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.0584567413         0.0000000001
 
   Phonon wavevector (reduced coordinates) : -0.25000  0.50000  0.25000
@@ -3117,10 +3119,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
              ecut      6.00000000E+00 Hartree
            etotal1    -3.2697267983E+00
            etotal2    -1.5332568512E-01
-           etotal3    -1.0608721827E-01
-           etotal4     1.3824720562E-02
+           etotal3    -1.0608721828E-01
+           etotal4     1.3824720561E-02
            etotal5     2.4231120504E-01
-           etotal6     2.4321280743E-01
+           etotal6     2.4321280742E-01
            etotal7     3.7141660847E-01
            etotal8     7.4374140654E-01
            etotal9     9.2143252116E-01
@@ -4355,58 +4357,58 @@ P          mk1mem9        512
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
 - implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze1997
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
 -
 - [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
 - interatomic force constants from density-functional perturbation theory,
 - X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze1997a
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
 - [4] Optimized norm-conserving Vanderbilt pseudopotentials.
 - D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
 - Comment: Some pseudopotential generated using the ONCVPSP code were used.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#hamann2013
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
 -
-- [5] ABINIT : First-principles approach of materials and nanosystem properties.
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [6] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=        125.2  wall=        126.6
+- Proc.   0 individual time (sec): cpu=         81.0  wall=         82.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered 126 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        125.2  wall=        126.6
+.Delivered   1 WARNINGs and 114 COMMENTs to log file.
++Overall time at end (sec) : cpu=         81.0  wall=         82.5

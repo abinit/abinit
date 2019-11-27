@@ -1,6 +1,6 @@
 
-.Version 8.0.3 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 11h56 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h25 )
   
 
 ================================================================================
@@ -96,7 +96,7 @@
 
  Treat the first list of vectors 
 
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
   -9.994874E-04 -9.994874E-04 -9.994874E-04  0.000000E+00  0.000000E+00
@@ -320,7 +320,7 @@
 
  Treat the second list of vectors 
 
- 
+
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -516,12 +516,12 @@
       6.74669080     -0.00000000     -0.00000000
      -0.00000000      6.74669080     -0.00000000
      -0.00000000     -0.00000000      6.74669080
- 
+
 -
 - Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
 
 ================================================================================
 
-+Total cpu time      0.043  and wall time      0.043 sec
++Total cpu time      0.033  and wall time      0.033 sec
 
  anaddb : the run completed succesfully.

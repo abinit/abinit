@@ -1,6 +1,6 @@
 
-.Version 8.0.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 09h34 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h17 )
   
 - input  file    -> t04.in
 - output file    -> t04.out
@@ -37,7 +37,7 @@
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -110,8 +110,8 @@
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14si.pspgth
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -130,14 +130,14 @@
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   -4.40972757
+  pspatm : epsatm=   -4.40972757
          --- l  ekb(1:nproj) -->
              0    0.868920    0.186986
              1    0.169080
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/01h.pspgth
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/01h.pspgth
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -156,7 +156,7 @@
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   -0.00480358
+  pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -168,22 +168,22 @@
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  grdnorm    vres2
- ETOT  1  -6.1529365239690    -6.153E+00 1.228E-01 4.202E+00
- ETOT  2  -6.2101611350275    -5.722E-02 5.634E-02 7.896E-01
- ETOT  3  -6.2238612564172    -1.370E-02 3.247E-02 2.192E-01
+ ETOT  1  -6.1529365239689    -6.153E+00 1.228E-01 4.202E+00
+ ETOT  2  -6.2101611350276    -5.722E-02 5.634E-02 7.896E-01
+ ETOT  3  -6.2238612564173    -1.370E-02 3.247E-02 2.192E-01
  ETOT  4  -6.2286739187709    -4.813E-03 2.111E-02 5.734E-02
- ETOT  5  -6.2306067666405    -1.933E-03 1.423E-02 1.601E-02
+ ETOT  5  -6.2306067666404    -1.933E-03 1.423E-02 1.601E-02
  ETOT  6  -6.2314322242586    -8.255E-04 9.706E-03 4.984E-03
- ETOT  7  -6.2317966408184    -3.644E-04 6.648E-03 1.694E-03
+ ETOT  7  -6.2317966408185    -3.644E-04 6.648E-03 1.694E-03
  ETOT  8  -6.2319607730113    -1.641E-04 4.561E-03 6.277E-04
- ETOT  9  -6.2320356720599    -7.490E-05 3.136E-03 2.449E-04
- ETOT 10  -6.2320701864473    -3.451E-05 2.163E-03 1.014E-04
+ ETOT  9  -6.2320356720600    -7.490E-05 3.136E-03 2.449E-04
+ ETOT 10  -6.2320701864472    -3.451E-05 2.163E-03 1.014E-04
  ETOT 11  -6.2320862192409    -1.603E-05 1.498E-03 4.316E-05
  ETOT 12  -6.2320937255511    -7.506E-06 1.043E-03 1.913E-05
- ETOT 13  -6.2320972684858    -3.543E-06 7.320E-04 8.606E-06
- ETOT 14  -6.2320989563026    -1.688E-06 5.178E-04 3.996E-06
+ ETOT 13  -6.2320972684859    -3.543E-06 7.320E-04 8.606E-06
+ ETOT 14  -6.2320989563027    -1.688E-06 5.178E-04 3.996E-06
  ETOT 15  -6.2320997688730    -8.126E-07 3.698E-04 1.876E-06
- ETOT 16  -6.2321001649384    -3.961E-07 2.669E-04 9.065E-07
+ ETOT 16  -6.2321001649383    -3.961E-07 2.669E-04 9.065E-07
 
  At SCF step   16, etot is converged : 
   for the second time, diff in etot=  3.961E-07 < toldfe=  1.000E-06
@@ -191,7 +191,7 @@
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
+ Mean square residual over all n,k,spin=   00.000E+00; max=  00.000E+00
  reduced coordinates (array xred) for    5 atoms
        0.500000000000      0.500000000000      0.500000000000
        0.579024390244      0.579024390244      0.579024390244
@@ -214,18 +214,18 @@
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000255351802    -0.00000255351802    -0.00000255351803
-    2     -0.00015373020168    -0.00015373020168    -0.00015373020169
+    2     -0.00015373020168    -0.00015373020168    -0.00015373020168
     3      0.00015528102543     0.00015528102543    -0.00015427833116
     4      0.00015528102543    -0.00015427833116     0.00015528102543
     5     -0.00015427833116     0.00015528102543     0.00015528102544
  frms,max,avg= 1.3832259E-04 1.5528103E-04   7.433E-07  7.433E-07  7.433E-07 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00013130716512    -0.00013130716504    -0.00013130716539
-    2     -0.00790512414543    -0.00790512414553    -0.00790512414567
-    3      0.00798487070221     0.00798487070225    -0.00793331009392
-    4      0.00798487070225    -0.00793331009400     0.00798487070238
-    5     -0.00793331009391     0.00798487070232     0.00798487070260
+    1     -0.00013130716511    -0.00013130716506    -0.00013130716559
+    2     -0.00790512414541    -0.00790512414556    -0.00790512414556
+    3      0.00798487070220     0.00798487070230    -0.00793331009389
+    4      0.00798487070225    -0.00793331009402     0.00798487070245
+    5     -0.00793331009392     0.00798487070234     0.00798487070259
  frms,max,avg= 7.1128329E-03 7.9848707E-03   3.822E-05  3.822E-05  3.822E-05 e/A
  length scales= 20.500000000000 20.500000000000 20.500000000000 bohr
               = 10.848132776095 10.848132776095 10.848132776095 angstroms
@@ -237,9 +237,9 @@
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.74156942971710E+00
+    Kinetic energy  =  3.74156942971711E+00
     Hartree energy  =  1.11293168053439E+01
-    XC energy       = -2.48194861145309E+00
+    XC energy       = -2.48194861145308E+00
     Ion-ion energy  =  7.01168188308251E+00
     PspCore energy  =  0.00000000000000E+00
     Loc. psp. energy= -2.63993424130111E+01
@@ -247,12 +247,14 @@
     >>>>>>>>> Etotal= -6.23210036072892E+00
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -2.87201467910269E+00
-    Ion-ion energy  =  7.01168188308251E+00
+    Band energy     = -2.87201467910292E+00
+    Ion-ion energy  = 7.01168188308251E+00
     PspCore energy  =  0.00000000000000E+00
-    Dble-C XC-energy= -1.03717965333839E+01
-    >>>> Etotal (DC)= -6.23212932940412E+00
+    Dble-C XC-energy= -1.03717965333838E+01
+    >>>> Etotal (DC)= -6.23212932940417E+00
 --------------------------------------------------------------------------------
+
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -262,8 +264,8 @@
               amu      2.80855000E+01  1.00794000E+00
              ecut      1.00000000E+01 Hartree
            etotal     -6.2321001649E+00
-            fcart     -2.5535180226E-06 -2.5535180210E-06 -2.5535180278E-06
-                      -1.5373020168E-04 -1.5373020168E-04 -1.5373020169E-04
+            fcart     -2.5535180225E-06 -2.5535180214E-06 -2.5535180317E-06
+                      -1.5373020168E-04 -1.5373020168E-04 -1.5373020168E-04
                        1.5528102543E-04  1.5528102543E-04 -1.5427833116E-04
                        1.5528102543E-04 -1.5427833116E-04  1.5528102543E-04
                       -1.5427833116E-04  1.5528102543E-04  1.5528102544E-04
@@ -334,48 +336,66 @@
 - [1] Daubechies wavelets as a basis set for density functional pseudopotential calculations.
 - L. Genovese, A. Neelov, S. Goedecker, T. Deutsch, S.A. Ghasemi, A. Willand, D. Caliste, O. Zilberberg, M. Rayson, A. Bergman et R. Schneider,
 - J. Chem. Phys. 129, 014109 (2008).
-- Comment : to be cited in case BigDFT project is used, i.e. usewvl=1.
+- Comment: to be cited in case BigDFT project is used, i.e. usewvl=1.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#genovese2008
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- [4] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- [5] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=        357.3  wall=         54.3
+- Proc.   0 individual time (sec): cpu=         21.2  wall=         22.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        357.3  wall=         54.3
+.Delivered   7 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=         21.2  wall=         22.0

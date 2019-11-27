@@ -1,0 +1,116 @@
+# Hydrogen systems for tests of symmetry recognition in the non-collinear case. Constrained DFT calculations
+
+ ndtset 6
+ udtset 3 2
+
+#For DS 3 tests
+#nsym 1
+#          symrel      1  0  0   0  1  0   0  0  1      
+#                     -1  0  0   0  0 -1   0 -1  0
+#                      0  1  0   0  0  1   1  0  0     
+#                      0 -1  0  -1  0  0   0  0 -1
+#                      0  0  1   1  0  0   0  1  0       
+#                      0  0 -1   0 -1  0  -1  0  0
+
+#           tnons      0.0000000  0.0000000  0.0000000     
+#                      0.0000000  0.0000000  0.0000000
+#                      0.3333333  0.3333333  0.3333333     
+#                      0.3333333  0.3333333  0.3333333
+#                     -0.3333333 -0.3333333 -0.3333333    
+#                     -0.3333333 -0.3333333 -0.3333333
+
+#          symafm        1   
+#                       -1    
+#                        1   
+#                       -1    
+#                        1   
+#                       -1
+
+#Definition of the atomic spheres
+ ratsph    1.0 
+ ratsm     0.05
+ constraint_kind  1
+ magcon_lambda    2
+ prtvol 2
+
+#Dataset 1. First system, a chain of H atoms along 1 0 0, with spins pointing in different directions. Tetragonal cell.
+ natom1? 2
+ typat1? 2*1
+ nband1? 4
+tsmear1? 0.01
+occopt1? 7
+ acell1? 10 6 6 
+  xred1? 0 0 0   0.5 0 0
+ ngkpt1? 4 2 2
+
+ spinat11       0.01  0.01  0.08   0.01  -0.01  0.08  # The spin system is invariant with respect to a gliding plane symmetry
+                                                      # For this system, there are some symmetry operations that goes unnoticed because the
+                                                      # coherency with spin-orbit coupling is enforced even if it is not present.
+ spinat12       0.01  0.01  0.08  -0.01   0.01 -0.08  # Inversion of the spin on the second atom with respect to the case 11
+
+#Dataset 2. Second system, a chain of H atoms along 1 1 1, with spins pointing in different directions. Rhombohedral cell.
+ natom2? 3
+ typat2? 3*1
+ nband2? 6
+ acell2? 3*6
+ rprim2? 0 1 1
+         1 0 1
+         1 1 0
+  xred2?  0 0 0    1/3 1/3 1/3     2/3 2/3 2/3
+ ngkpt2?  2 2 2
+
+ spinat21   0.08 0 0    0 0.08 0     0 0 0.08   # The spin obeys a trigonal screw symmetry
+   nsym21   1         # There is a breaking of the expected symmetries at the level of eigenvalues, for the binary axes, for nsym=1  ?! To be fixed 
+                      # On the other hand, the trigonal symmetry is correctly respected at the level of the eigenvalues, but
+                      # allowing nsym=3 yield non-sense in CDFT
+                      # At least with nsym=1, CDFT is behaving properly.
+  
+ spinat22   0 0 0      0.04 0.04 0.04    -0.04 -0.04 -0.04
+
+#Dataset 3. Third system, a square of H atoms, in a BCT cell.
+ natom3? 4
+ typat3? 4*1
+ nband3? 8
+ scalecart3? 4 4 8
+ rprim3? 0 1 1
+         1 0 1
+         1 1 0
+  xcart3?  1.0 0 0   0 1.0 0  -1.0 0 0   0 -1.0 0    
+ kptrlen3?  15.0
+
+ spinat31  0.04 0 0   0 -0.04 0  -0.04 0 0    0 0.04 0  
+   nsym31  1   # Also, allowing more than one symmetry operation yield non-sense in CDFT, but CDFT is behaving properly with nsym=1
+
+ spinat32  0.04 0 0.02   0 -0.04 0.02  -0.04 0 0.02   0 0.04 0.02 
+   nsym32  1   # Also, allowing more than one symmetry operation yield non-sense in CDFT, but CDFT is behaving properly with nsym=1
+
+#Atom types
+ ntypat  1
+ znucl  1.0
+ so_psp 0
+# Non-collinear case
+ nspden 4  nspinor 2  
+#Computational parameters
+ tolvrs 1.0d-8
+ nstep  35
+ ecut 5
+ kptopt 4
+ tsmear 0.01
+ occopt 7
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t95.out, tolnlines = 22, tolabs = 1.1e-4, tolrel = 7.0e-3, fld_options = -medium
+#%% psp_files = 1h.pspnc
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% references = 
+#%% keywords = 
+#%% description = Hydrogen systems for tests of symmetry recognition in the non-collinear case. Constrained DFT calculations for the magnetization.
+#%% Test decrease of k points. Works in several cases, but not all. So has set nsym=1 for thos who do not work. CDFT works in all cases.
+#%%<END TEST_INFO>

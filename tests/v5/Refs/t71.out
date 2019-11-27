@@ -1,6 +1,6 @@
 
 .Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 21 Oct 2019.
-- ( at 23h39 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h29 )
   
 - input  file    -> t71.in
 - output file    -> t71.out
@@ -296,8 +296,8 @@ P           mkmem          16
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.13033
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -327,9 +327,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     530.199     530.171
  ETOT  3  -8.8741696717161    -7.136E-05 1.607E-05 5.744E-03
  ETOT  4  -8.8741707263132    -1.055E-06 9.814E-07 2.457E-05
  ETOT  5  -8.8741707320560    -5.743E-09 6.524E-08 1.327E-08
- ETOT  6  -8.8741707320573    -1.293E-12 4.185E-09 4.716E-11
+ ETOT  6  -8.8741707320573    -1.279E-12 4.185E-09 4.716E-11
  ETOT  7  -8.8741707320574    -1.013E-13 2.973E-10 4.917E-13
- ETOT  8  -8.8741707320575    -4.619E-14 9.859E-11 9.234E-16
+ ETOT  8  -8.8741707320575    -5.507E-14 9.859E-11 9.234E-16
 
  At SCF step    8   max residual=  9.86E-11 < tolwfr=  1.00E-10 =>converged.
 
@@ -388,12 +388,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     530.199     530.171
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  3.03041979428516E+00
-    Hartree energy  =  5.40895715022567E-01
+    Hartree energy  =  5.40895715022568E-01
     XC energy       = -3.53997188834834E+00
     Ewald energy    = -8.43581958561899E+00
     PspCore energy  =  8.60437873155177E-02
     Loc. psp. energy= -2.43551034532151E+00
-    NL   psp  energy=  1.87977179060812E+00
+    NL   psp  energy=  1.87977179060811E+00
     >>>>>>>>> Etotal= -8.87417073205748E+00
 
  Other information on the energy :
@@ -437,8 +437,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     530.199     530.171
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -814,19 +814,19 @@ _setup2: Arith. and geom. avg. npw (full set) are     530.199     530.171
    Upper and lower wings at the   16 th omega   0.0000   3.2716 [eV]
        1       2       3       4       5       6       7       8       9
       0.091   0.006  -0.006  -0.019   0.019   0.019  -0.019  -0.006   0.006
-      0.000   0.006   0.006  -0.019  -0.019   0.019   0.019  -0.006  -0.006
+     -0.000   0.006   0.006  -0.019  -0.019   0.019   0.019  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
       0.091   0.006  -0.006  -0.019   0.019   0.019  -0.019  -0.006   0.006
-      0.000  -0.006  -0.006   0.019   0.019  -0.019  -0.019   0.006   0.006
+     -0.000  -0.006  -0.006   0.019   0.019  -0.019  -0.019   0.006   0.006
 
 
    Upper and lower wings at the   17 th omega   0.0000   8.4649 [eV]
        1       2       3       4       5       6       7       8       9
       0.238   0.009  -0.009  -0.026   0.026   0.026  -0.026  -0.009   0.009
-      0.000   0.009   0.009  -0.026  -0.026   0.026   0.026  -0.009  -0.009
+     -0.000   0.009   0.009  -0.026  -0.026   0.026   0.026  -0.009  -0.009
        1       2       3       4       5       6       7       8       9
       0.238   0.009  -0.009  -0.026   0.026   0.026  -0.026  -0.009   0.009
-      0.000  -0.009  -0.009   0.026   0.026  -0.026  -0.026   0.009   0.009
+     -0.000  -0.009  -0.009   0.026   0.026  -0.026  -0.026   0.009   0.009
 
 
    Upper and lower wings at the   18 th omega   0.0000  16.7088 [eV]
@@ -1375,7 +1375,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     530.199     530.171
        -0.000  -2.255  -1.099  -0.807   2.528  -0.807   2.528  -2.179   1.297
 
     2  -2.255 -15.970   0.000  -0.406  -0.000  -0.407  -0.000  -0.416  -0.000
-        2.255  -0.000  -3.348  -0.000   0.227  -0.000   0.226   0.000  -0.307
+        2.255  -0.000  -3.348  -0.000   0.227   0.000   0.226   0.000  -0.307
 
   chi0(G,G') at the    2 th omega   1.7857   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1501,7 +1501,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     530.199     530.171
     1 -15.942  -2.423   1.334  -1.763  -2.879  -1.763  -2.879  -2.491  -1.889
        -0.000  -2.423  -1.334  -1.763   2.879  -1.763   2.879  -2.491   1.889
 
-    2  -2.423 -13.922   0.000  -0.035  -0.000  -0.036  -0.000   0.022   0.000
+    2  -2.423 -13.922   0.000  -0.035  -0.000  -0.036  -0.000   0.022  -0.000
         2.423  -0.000  -3.137  -0.000   0.329  -0.000   0.327   0.000  -0.007
 
   chi0(G,G') at the    2 th omega   1.7857   0.0000 [eV]
@@ -1628,7 +1628,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     530.199     530.171
     1 -15.011   1.280  -2.328  -2.387  -2.328  -2.387  -2.328  -2.707  -0.652
        -0.000   1.280   2.328  -2.387   2.328  -2.387   2.328  -2.707   0.652
 
-    2   1.280 -17.697   0.000   0.700  -0.000   0.701   0.000  -0.200   0.000
+    2   1.280 -17.697  -0.000   0.700  -0.000   0.701   0.000  -0.200   0.000
        -1.280  -0.000  -3.221  -0.000  -0.311   0.000  -0.311  -0.000  -1.609
 
   chi0(G,G') at the    2 th omega   1.7857   0.0000 [eV]
@@ -2009,7 +2009,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     530.199     530.171
     1 -17.314  -2.808  -0.421  -1.567  -2.912  -1.567  -2.912  -2.623  -1.603
        -0.000  -2.808   0.421  -1.567   2.912  -1.567   2.912  -2.623   1.603
 
-    2  -2.808 -14.310   0.000  -0.254  -0.000  -0.255  -0.000  -0.003   0.000
+    2  -2.808 -14.310   0.000  -0.254  -0.000  -0.255  -0.000  -0.003  -0.000
         2.808  -0.000  -2.524   0.000   0.361   0.000   0.360  -0.000  -0.161
 
   chi0(G,G') at the    2 th omega   1.7857   0.0000 [eV]
@@ -2137,7 +2137,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     530.199     530.171
        -0.000  -0.439   2.666  -2.772   2.772  -2.773   2.772  -2.666   0.439
 
     2  -0.439 -18.993  -0.000   0.427  -0.000   0.427   0.000  -0.189  -0.000
-        0.439  -0.000  -2.610  -0.000   0.073   0.000   0.073   0.000  -1.452
+        0.439  -0.000  -2.610  -0.000   0.073   0.000   0.073  -0.000  -1.452
 
   chi0(G,G') at the    2 th omega   1.7857   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2375,7 +2375,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     530.199     530.171
     1   4.492   1.980   0.137  -0.604   0.384  -0.604   0.385   1.980   0.137
        -1.139   0.385   0.606   0.139  -1.979   0.139  -1.980   0.385   0.605
 
-    2   0.385   3.129  -0.004  -0.271   0.038  -0.273   0.038   2.689   0.386
+    2   0.385   3.128  -0.004  -0.271   0.038  -0.273   0.038   2.689   0.386
        -1.980 -12.686   1.550   0.465  -0.820   0.465  -0.819   0.637   1.279
 
  No. of calculated frequencies >  15, stop printing
@@ -2645,7 +2645,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     530.199     530.171
        -0.000  -1.486   2.791  -3.064   2.759  -2.759   3.064  -2.791   1.486
 
     2  -1.486 -19.098  -0.000  -0.238  -0.000   0.796  -0.000  -0.273  -0.000
-        1.486  -0.000  -1.997  -0.000   0.000   0.000   0.226   0.000   0.000
+        1.486  -0.000  -1.997  -0.000   0.000   0.000   0.226  -0.000   0.000
 
   chi0(G,G') at the    2 th omega   1.7857   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -3234,10 +3234,10 @@ P           mkmem          16
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         50.7  wall=         50.9
+- Proc.   0 individual time (sec): cpu=         52.6  wall=         53.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         50.7  wall=         50.9
++Overall time at end (sec) : cpu=         52.6  wall=         53.0
