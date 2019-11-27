@@ -327,12 +327,6 @@ P          mk1mem6          2
         optdriver4          0
         optdriver5          1
         optdriver6          7
-         prtefmas1          0
-         prtefmas2          0
-         prtefmas3          0
-         prtefmas4          0
-         prtefmas5          1
-         prtefmas6          0
          prtphdos1          1
          prtphdos2          1
          prtphdos3          1
@@ -2059,12 +2053,6 @@ P          mk1mem6          2
         optdriver4          0
         optdriver5          1
         optdriver6          7
-         prtefmas1          0
-         prtefmas2          0
-         prtefmas3          0
-         prtefmas4          0
-         prtefmas5          1
-         prtefmas6          0
          prtphdos1          1
          prtphdos2          1
          prtphdos3          1

@@ -3642,8 +3642,7 @@ Only relevant for [[optdriver]]=7 and [[eph_task]]=6.
 If set to 1, use the dynamical matrix at Gamma, the Born effective charges, the dielectric tensor, as well as
 the effective masses (must give a _EFMAS file as input, see [[prtefmas]] and [[getefmas]] or [[irdefmas]]),
 as the parameters of a Frohlich Hamiltonian.
-Then use these to compute the
-change of electronic eigenvalues due to electron-phonon interaction,
+Then use these to compute the change of electronic eigenvalues due to electron-phonon interaction,
 using second-order time-dependent perturbation theory. Can deliver (approximate) zero-point renormalisation
 as well as temperature dependence.
 """,
@@ -13948,7 +13947,7 @@ Variable(
     vartype="integer",
     topics=['printing_prngs', 'EffectiveMass_useful'],
     dimensions="scalar",
-    defaultval=0,
+    defaultval=1,
     mnemonics="PRint EFfective MASs data",
     requires="[[efmas]] == 1",
     text=r"""
@@ -16406,7 +16405,7 @@ The references for the numbering of space groups, and their list of symmetry ope
   * International Tables for Crystallography [[cite:Hahn1983]]
   * The mathematical theory of symmetry in solids, Representation theory for point groups and space groups [[cite:Bradley1972]]
 
-Related input variables: [[symrel]], [[tnons]], [[symafm]], [[spgroupma]], 
+Related input variables: [[symrel]], [[tnons]], [[symafm]], [[spgroupma]],
 """,
 ),
 
@@ -16443,7 +16442,7 @@ Alternatively, for Shubnikov type IV magnetic groups, one might define [[spgroup
 and [[genafm]]. For both the types III and IV, one might define by hand the set
 of symmetries, using [[symrel]], [[tnons]] and [[symafm]].
 
-Note that the meaning of the spin-flip operation of symmetry is different in the [[nspden]]=2 or in the [[nspden]]=4 
+Note that the meaning of the spin-flip operation of symmetry is different in the [[nspden]]=2 or in the [[nspden]]=4
 case, see detailed explanations in the section on the [[symafm]] input variable. Thus, the same atomic
 positions and [[spinat]] vectors might yield different [[symafm]] values depending on [[nspden]],
 and thus different Shubnikov magnetic space groups.
@@ -16715,29 +16714,29 @@ The symmetries that can act on the magnetization can yield decreased CPU time  (
 in the following cases:
 
   * antiferromagnetism ([[nsppol]] = 1, [[nspinor]] = 1, [[nspden]] = 2)
-  * non-collinear magnetism ([[nsppol]] = 1, [[nspinor]] = 2, [[nspden]] = 4) 
+  * non-collinear magnetism ([[nsppol]] = 1, [[nspinor]] = 2, [[nspden]] = 4)
 
 Also in the case [[nsppol]] = 2, [[nspinor]] = 1, [[nspden]] = 2  they might simply yield better accuracy (or faster convergence),
 but there is no automatic gain of CPU time or memory, although it is not as clear cut as in the above cases.
 
 IMPORTANT : The meaning of [[symafm]] is different in the [[nspden]] = 2 case (collinear magnetism),
 and in the [[nspden]] = 4 case (non-collinear magnetism, with explicit treatment of magnetization as a vector).
-Indeed in the first case, it is supposed that the magnetization vector is not affected by the real space symmetry operations 
+Indeed in the first case, it is supposed that the magnetization vector is not affected by the real space symmetry operations
 (so-called black and white symmetry groups).
-By contrast, in the second case, the real space symmetry operations act on the magnetization vector. 
+By contrast, in the second case, the real space symmetry operations act on the magnetization vector.
 The rationale for such different treatment comes from the fact that the treatment of spin-orbit coupling is incompatible with collinear magnetism [[nspden]]=2,
 so there is no need to worry about it in this case. On the contrary, many calculations with [[nspden]]=2
 will include spin-orbit coupling. The symmetry operations should thus act coherently on the spin-orbit coupling, which implies
-that the real space operations should act also on the magnetization vector in the [[nspden]]=4 case. So, with 
+that the real space operations should act also on the magnetization vector in the [[nspden]]=4 case. So, with
 [[nspden]]=4, even with [[symafm]]=1,
 symmetry operations might change the magnetization vector, e.g. possibly reverse it from one atom to another atom.
 Still, when real space operations also act on the magnetization vector, nothing prevents to have ADDITIONAL "spin-flip" operations, which
-is indeed then the meaning of [[symafm]]=-1 in the [[nspden]]=4 case. 
+is indeed then the meaning of [[symafm]]=-1 in the [[nspden]]=4 case.
 
 Let's illustrate this with an example. Take an H$_2$ system, with the two H atoms quite distant from each other.
 The electron on the first H atom might be 1s spin up, and the electron on the second atom might be 1s spin down.
 With [[nspden]]=2, the inversion symmetry centered in the middle of the segment joining the two atoms will NOT act on the spin,
-so that the actual symmetry operation that leaves the system invariant is an inversion ([[symrel]]= -1 0 0  0 -1 0  0 0 -1) accompanied 
+so that the actual symmetry operation that leaves the system invariant is an inversion ([[symrel]]= -1 0 0  0 -1 0  0 0 -1) accompanied
 by a spin-flip with [[symafm]]=-1.
 By contrast, with [[nspden]]=4, the inversion symmetry centered in the middle of the segment joining the two atoms will reverse the spin direction as well,
 so that the proper symmetry operation is [[symrel]]= -1 0 0  0 -1 0  0 0 -1 but no additional spin-flip is needed to obtain a symmetry operation that leaves the system invariant, so that [[symafm]]=1.

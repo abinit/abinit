@@ -2689,12 +2689,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      MSG_ERROR(' pawprtdos/=2  and prtdosm=2 are not compatible')
    end if
 
-!  prtefmas
+   !  prtefmas
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtefmas',dt%prtefmas,2,(/0,1/),iout)
-   if(optdriver/=RUNL_RESPFN)then
-     cond_string(1)='optdriver' ; cond_values(1)=optdriver
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'prtefmas',dt%prtefmas,1,(/0/),iout)
-   end if
+   !if(optdriver/=RUNL_RESPFN)then
+   !  cond_string(1)='optdriver' ; cond_values(1)=optdriver
+   !  call chkint_eq(0,1,cond_string,cond_values,ierr,'prtefmas',dt%prtefmas,1,(/0/),iout)
+   !end if
 
 !  prtelf
    call chkint_ge(0,0,cond_string,cond_values,ierr,'prtelf',dt%prtkden,0,iout)
