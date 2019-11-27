@@ -1,6 +1,6 @@
 
-.Version 8.0.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 12h04 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h35 )
   
 - input  file    -> t78.in
 - output file    -> t78.out
@@ -36,7 +36,7 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        15    nfftf =      3375
 ================================================================================
-P This job should need less than                       7.089 Mbytes of memory.
+P This job should need less than                       7.074 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.210 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -55,7 +55,7 @@ _ WF disk file :      0.210 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        15    nfftf =      3375
 ================================================================================
-P This job should need less than                       7.089 Mbytes of memory.
+P This job should need less than                       7.074 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.210 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -74,7 +74,7 @@ _ WF disk file :      0.210 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        15    nfftf =      3375
 ================================================================================
-P This job should need less than                       7.089 Mbytes of memory.
+P This job should need less than                       7.074 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.210 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -93,7 +93,7 @@ _ WF disk file :      0.210 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        15    nfftf =      3375
 ================================================================================
-P This job should need less than                       6.784 Mbytes of memory.
+P This job should need less than                       6.770 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.210 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -112,7 +112,7 @@ _ WF disk file :      0.210 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        15    nfftf =      3375
 ================================================================================
-P This job should need less than                       5.507 Mbytes of memory.
+P This job should need less than                       5.492 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.210 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -122,7 +122,7 @@ _ WF disk file :      0.210 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 = 10
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -497,8 +497,8 @@ P           mkmem           4
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/23v.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/23v.paw
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/23v.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/23v.paw
 - Paw atomic data for element V - Generated by AtomPAW + AtomPAW2Abinit v3.2.0
 - 23.00000  13.00000  20070917                znucl, zion, pspdat
     7    7    2    0      1505   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -518,8 +518,8 @@ P           mkmem           4
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/38sr.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/38sr.paw
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/38sr.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/38sr.paw
 - Paw atomic data for element Sr - Generated by AtomPAW + AtomPAW2Abinit v3.2.0
 - 38.00000  10.00000  20070917                znucl, zion, pspdat
     7    7    2    0      1068   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -540,8 +540,8 @@ P           mkmem           4
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.paw
+- pspini: atom type   3  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/8o.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/8o.paw
 - Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
 -  8.00000   6.00000  20040423                znucl, zion, pspdat
     7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -610,13 +610,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
  ETOT  5  -143.10751225399     7.259E-05 6.732E-07 1.281E-05
  ETOT  6  -143.10751045931     1.795E-06 6.581E-08 1.130E-06
  ETOT  7  -143.10751037361     8.569E-08 7.400E-09 1.159E-08
- ETOT  8  -143.10751037321     4.002E-10 2.624E-09 1.893E-10
- ETOT  9  -143.10751037319     2.197E-11 1.553E-09 1.149E-11
- ETOT 10  -143.10751037319    -1.421E-13 9.592E-10 4.483E-14
- ETOT 11  -143.10751037319     2.842E-14 6.026E-10 2.410E-15
- ETOT 12  -143.10751037319    -1.421E-13 3.803E-10 9.527E-17
+ ETOT  8  -143.10751037321     4.001E-10 2.624E-09 1.893E-10
+ ETOT  9  -143.10751037319     2.260E-11 1.553E-09 1.149E-11
+ ETOT 10  -143.10751037319     0.000E+00 9.592E-10 4.487E-14
+ ETOT 11  -143.10751037319    -1.137E-13 6.026E-10 2.414E-15
+ ETOT 12  -143.10751037319    -2.842E-14 3.803E-10 9.550E-17
 
- At SCF step   12       nres2   =  9.53E-17 < tolvrs=  1.00E-15 =>converged.
+ At SCF step   12       nres2   =  9.55E-17 < tolvrs=  1.00E-15 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.22496961E-02  sigma(3 2)=  0.00000000E+00
@@ -635,8 +635,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      4.079518913499562
- Compensation charge over fft grid         =      4.079147770778899
+ Compensation charge over spherical meshes =      4.079518913397578
+ Compensation charge over fft grid         =      4.079147770761112
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -724,7 +724,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.8028E-12; max=  3.8026E-10
+ Mean square residual over all n,k,spin=   38.028E-13; max=  38.026E-11
  reduced coordinates (array xred) for    5 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -781,31 +781,31 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  4.00142951430331E+01
-    Hartree energy  =  1.97494698900302E+01
-    XC energy       = -2.12207015723616E+01
+    Kinetic energy  =  4.00142951430777E+01
+    Hartree energy  =  1.97494698901607E+01
+    XC energy       = -2.12207015723416E+01
     Ewald energy    = -1.22667940452101E+02
     PspCore energy  =  8.09723334916530E+00
-    Loc. psp. energy= -7.04463119696459E+01
-    Spherical terms =  3.36789747257884E+00
-    >>>>> Internal E= -1.43106058139301E+02
+    Loc. psp. energy= -7.04463119696913E+01
+    Spherical terms =  3.36789747257206E+00
+    >>>>> Internal E= -1.43106058139158E+02
 
-    -kT*entropy     = -1.45220580415336E-03
-    >>>>>>>>> Etotal= -1.43107510345105E+02
+    -kT*entropy     = -1.45220580418492E-03
+    >>>>>>>>> Etotal= -1.43107510344963E+02
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -1.17118377340676E+01
-    Ewald energy    = -1.22667940452101E+02
+    Band energy     = -1.17118377340772E+01
+    Ewald energy    =-1.22667940452101E+02
     PspCore energy  =  8.09723334916530E+00
-    Dble-C XC-energy= -1.32218545210559E+01
-    Spherical terms = -3.60165880932889E+00
+    Dble-C XC-energy= -1.32218545211929E+01
+    Spherical terms = -3.60165880918171E+00
     >>>>> Internal E= -1.43106058167388E+02
 
-    -kT*entropy     = -1.45220580415336E-03
+    -kT*entropy     = -1.45220580418492E-03
     >>>> Etotal (DC)= -1.43107510373192E+02
 
-  >Total energy in eV           = -3.89415339724958E+03
-  >Total DC energy in eV        = -3.89415339801387E+03
+  >Total energy in eV           = -3.89415339724570E+03
+  >Total DC energy in eV        = -3.89415339801386E+03
 --------------------------------------------------------------------------------
 
 
@@ -907,22 +907,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
  ETOT  2  -143.10751038338    -3.306E-05 6.842E-06 5.212E-07
  ETOT  3  -143.10751037653     6.848E-09 1.680E-06 1.797E-07
  ETOT  4  -143.10751037447     2.067E-09 1.113E-06 7.041E-08
- ETOT  5  -143.10751037380     6.670E-10 2.548E-07 3.418E-08
+ ETOT  5  -143.10751037380     6.671E-10 2.548E-07 3.418E-08
  ETOT  6  -143.10751037375     4.772E-11 1.725E-07 3.156E-08
- ETOT  7  -143.10751037378    -3.149E-11 3.944E-08 3.316E-08
- ETOT  8  -143.10751037381    -2.424E-11 2.775E-08 3.439E-08
- ETOT  9  -143.10751037382    -1.398E-11 6.367E-09 3.527E-08
- ETOT 10  -143.10751037327     5.493E-10 4.542E-09 3.836E-10
- ETOT 11  -143.10751037325     2.399E-11 1.044E-09 3.085E-10
- ETOT 12  -143.10751037329    -4.570E-11 7.441E-10 4.482E-10
- ETOT 13  -143.10751037319     1.013E-10 1.702E-10 1.586E-11
- ETOT 14  -143.10751037320    -7.958E-12 1.220E-10 4.001E-11
- ETOT 15  -143.10751037320    -2.132E-12 2.788E-11 4.643E-11
+ ETOT  7  -143.10751037378    -3.169E-11 3.944E-08 3.316E-08
+ ETOT  8  -143.10751037381    -2.385E-11 2.775E-08 3.439E-08
+ ETOT  9  -143.10751037382    -1.501E-11 6.367E-09 3.529E-08
+ ETOT 10  -143.10751037327     5.499E-10 4.542E-09 3.840E-10
+ ETOT 11  -143.10751037325     2.404E-11 1.044E-09 3.088E-10
+ ETOT 12  -143.10751037329    -4.601E-11 7.441E-10 4.480E-10
+ ETOT 13  -143.10751037319     1.013E-10 1.702E-10 1.591E-11
+ ETOT 14  -143.10751037320    -8.384E-12 1.220E-10 4.016E-11
+ ETOT 15  -143.10751037320    -1.563E-12 2.788E-11 4.669E-11
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  3.22496367E-02  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.22496367E-02  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.22496367E-02  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  3.22496364E-02  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.22496364E-02  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.22496364E-02  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
@@ -934,15 +934,15 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
  Atom  Sphere_radius  Integrated_density
     1        2.35000         13.74357957
     2        1.92520          6.24939573
-    3        1.41000          3.46540579
-    4        1.41000          3.46540579
-    5        1.41000          3.46540579
+    3        1.41000          3.46540578
+    4        1.41000          3.46540578
+    5        1.41000          3.46540578
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      4.079520336874860
- Compensation charge over fft grid         =      4.079147274695333
+ Compensation charge over spherical meshes =      4.079520338684692
+ Compensation charge over fft grid         =      4.079147273969990
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -1030,7 +1030,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.7132E-13; max=  2.7884E-11
+ Mean square residual over all n,k,spin=   57.207E-14; max=  27.884E-12
  reduced coordinates (array xred) for    5 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -1087,44 +1087,44 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  4.00142921295348E+01
-    Hartree energy  =  1.97494849034976E+01
-    XC energy       = -2.12207038332734E+01
+    Kinetic energy  =  4.00142921219125E+01
+    Hartree energy  =  1.97494849720005E+01
+    XC energy       = -2.12207038416542E+01
     Ewald energy    = -1.22667940452101E+02
     PspCore energy  =  8.09723334916530E+00
-    Loc. psp. energy= -7.04463291256319E+01
-    Spherical terms =  3.36789315641488E+00
-    >>>>> Internal E= -1.43106069872394E+02
+    Loc. psp. energy= -7.04463291924144E+01
+    Spherical terms =  3.36789312992892E+00
+    >>>>> Internal E= -1.43106069913163E+02
 
-    -kT*entropy     = -1.45221496817011E-03
-    >>>>>>>>> Etotal= -1.43107522087362E+02
+    -kT*entropy     = -1.45221502620922E-03
+    >>>>>>>>> Etotal= -1.43107522128189E+02
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -1.17118228083107E+01
-    Ewald energy    = -1.22667940452101E+02
+    Band energy     = -1.17118227454227E+01
+    Ewald energy    =-1.22667940452101E+02
     PspCore energy  =  8.09723334916530E+00
-    Dble-C XC-energy= -1.32218688026787E+01
-    Spherical terms = -3.60165944430815E+00
-    >>>>> Internal E= -1.43106058158233E+02
+    Dble-C XC-energy= -1.32218688684687E+01
+    Spherical terms = -3.60165944134820E+00
+    >>>>> Internal E= -1.43106058158176E+02
 
-    -kT*entropy     = -1.45221496817011E-03
+    -kT*entropy     = -1.45221502620922E-03
     >>>> Etotal (DC)= -1.43107510373202E+02
 
-  >Total energy in eV           = -3.89415371677264E+03
+  >Total energy in eV           = -3.89415371788359E+03
   >Total DC energy in eV        = -3.89415339801412E+03
 --------------------------------------------------------------------------------
 
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  3.22496367E-02  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.22496367E-02  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.22496367E-02  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  3.22496364E-02  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.22496364E-02  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.22496364E-02  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -9.4882E+02 GPa]
-- sigma(1 1)=  9.48816911E+02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  9.48816911E+02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  9.48816911E+02  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  9.48816902E+02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  9.48816902E+02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  9.48816902E+02  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -1210,11 +1210,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -143.10751037319    -1.431E+02 2.017E-11 6.940E-12
- ETOT  2  -143.10751037319     1.762E-12 1.401E-11 5.683E-13
- ETOT  3  -143.10751037319    -2.842E-14 9.816E-12 3.922E-14
+ ETOT  1  -143.10751037319    -1.431E+02 2.017E-11 6.982E-12
+ ETOT  2  -143.10751037319     1.194E-12 1.401E-11 5.719E-13
+ ETOT  3  -143.10751037319     8.527E-14 9.819E-12 3.951E-14
 
- At SCF step    3       nres2   =  3.92E-14 < tolvrs=  1.00E-13 =>converged.
+ At SCF step    3       nres2   =  3.95E-14 < tolvrs=  1.00E-13 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.22496984E-02  sigma(3 2)=  0.00000000E+00
@@ -1233,8 +1233,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      4.079519029396190
- Compensation charge over fft grid         =      4.079147784843686
+ Compensation charge over spherical meshes =      4.079519029884127
+ Compensation charge over fft grid         =      4.079147784880274
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -1374,7 +1374,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   9.8161E-14; max=  9.8158E-12
+ Mean square residual over all n,k,spin=   98.196E-15; max=  98.193E-13
  reduced coordinates (array xred) for    5 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -1415,30 +1415,30 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  4.00142951875924E+01
-    Hartree energy  =  1.97494695131143E+01
-    XC energy       = -2.12207015502398E+01
+    Kinetic energy  =  4.00142951876646E+01
+    Hartree energy  =  1.97494695114371E+01
+    XC energy       = -2.12207015501675E+01
     Ewald energy    = -1.22667940452101E+02
     PspCore energy  =  8.09723334916530E+00
-    Loc. psp. energy= -7.04463114723558E+01
-    Spherical terms =  3.36789724727639E+00
-    >>>>> Internal E= -1.43106058177549E+02
+    Loc. psp. energy= -7.04463114704765E+01
+    Spherical terms =  3.36789724638723E+00
+    >>>>> Internal E= -1.43106058178091E+02
 
-    -kT*entropy     = -1.45220555517425E-03
-    >>>>>>>>> Etotal= -1.43107510383104E+02
+    -kT*entropy     = -1.45220555335919E-03
+    >>>>>>>>> Etotal= -1.43107510383644E+02
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -1.17118380320090E+01
-    Ewald energy    = -1.22667940452101E+02
+    Band energy     = -1.17118380336329E+01
+    Ewald energy    =-1.22667940452101E+02
     PspCore energy  =  8.09723334916530E+00
-    Dble-C XC-energy= -1.32218541511959E+01
-    Spherical terms = -3.60165888149593E+00
-    >>>>> Internal E= -1.43106058167637E+02
+    Dble-C XC-energy= -1.32218541495425E+01
+    Spherical terms = -3.60165888152755E+00
+    >>>>> Internal E= -1.43106058167639E+02
 
-    -kT*entropy     = -1.45220555517425E-03
+    -kT*entropy     = -1.45220555335919E-03
     >>>> Etotal (DC)= -1.43107510373192E+02
 
-  >Total energy in eV           = -3.89415339828357E+03
+  >Total energy in eV           = -3.89415339829828E+03
   >Total DC energy in eV        = -3.89415339801386E+03
 --------------------------------------------------------------------------------
 
@@ -1482,8 +1482,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/23v.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/23v.paw
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/23v.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/23v.paw
 - Paw atomic data for element V - Generated by AtomPAW + AtomPAW2Abinit v3.2.0
 - 23.00000  13.00000  20070917                znucl, zion, pspdat
     7    7    2    0      1505   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1503,8 +1503,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/38sr.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/38sr.paw
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/38sr.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/38sr.paw
 - Paw atomic data for element Sr - Generated by AtomPAW + AtomPAW2Abinit v3.2.0
 - 38.00000  10.00000  20070917                znucl, zion, pspdat
     7    7    2    0      1068   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1525,8 +1525,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.paw
+- pspini: atom type   3  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/8o.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/8o.paw
 - Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
 -  8.00000   6.00000  20040423                znucl, zion, pspdat
     7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1764,8 +1764,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close...
- Compensation charge over spherical meshes =      4.079518929285051
- Compensation charge over fine fft grid    =      4.079147784843686
+ Compensation charge over spherical meshes =      4.079518929321911
+ Compensation charge over fine fft grid    =      4.079147784880274
 
 
  Total number of electrons per unit cell =   40.8872 (Spherical mesh),   40.8868 (FFT mesh)
@@ -1973,10 +1973,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -5.374  -2.194  -1.360  -2.204  -1.375  -2.206  -1.381  -1.644  -0.410
-        0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000
+       -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000
 
     2  -2.194  -5.306  -0.415  -1.416  -0.543  -1.410  -0.539  -2.251   0.159
-       -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000
+       -0.000   0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000
 
   chi0(G,G') at the    2 th omega   2.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2011,10 +2011,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -5.914  -2.531  -1.608  -2.454  -2.454  -2.522  -1.604  -1.650  -0.821
-        0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000
+       -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
 
     2  -2.531  -6.198  -0.663  -1.469  -1.469  -2.064  -0.815  -2.330  -0.498
-       -0.000   0.000  -0.000   0.000   0.000   0.000   0.000  -0.000   0.000
+        0.000   0.000   0.000   0.000   0.000   0.000   0.000  -0.000   0.000
 
   chi0(G,G') at the    2 th omega   2.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2030,7 +2030,7 @@ Reading of the Wannier weights from data.plowann
        -2.354  -1.730  -1.039  -1.722  -1.722  -1.729  -1.038  -1.407  -0.778
 
     2  -2.849  -6.737  -0.726  -1.453  -1.453  -2.235  -0.937  -2.350  -0.507
-       -1.730  -1.661  -0.914  -1.294  -1.294  -1.253  -0.695  -1.306  -0.663
+       -1.729  -1.661  -0.914  -1.294  -1.294  -1.253  -0.695  -1.306  -0.663
 
   chi0(G,G') at the    4 th omega   6.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2049,7 +2049,7 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -4.796  -1.975  -1.975  -1.890  -1.085  -1.957  -1.957  -1.454  -0.568
-        0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2  -1.975  -5.390  -0.401  -1.286  -0.568  -0.942  -0.942  -2.345   0.087
         0.000  -0.000   0.000   0.000   0.000   0.000   0.000   0.000  -0.000
@@ -2110,8 +2110,8 @@ Reading of the Wannier weights from data.plowann
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/23v.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/23v.paw
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/23v.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/23v.paw
 - Paw atomic data for element V - Generated by AtomPAW + AtomPAW2Abinit v3.2.0
 - 23.00000  13.00000  20070917                znucl, zion, pspdat
     7    7    2    0      1505   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2131,8 +2131,8 @@ Reading of the Wannier weights from data.plowann
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/38sr.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/38sr.paw
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/38sr.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/38sr.paw
 - Paw atomic data for element Sr - Generated by AtomPAW + AtomPAW2Abinit v3.2.0
 - 38.00000  10.00000  20070917                znucl, zion, pspdat
     7    7    2    0      1068   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2153,8 +2153,8 @@ Reading of the Wannier weights from data.plowann
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.paw
+- pspini: atom type   3  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/8o.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/8o.paw
 - Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
 -  8.00000   6.00000  20040423                znucl, zion, pspdat
     7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2386,8 +2386,8 @@ Reading of the Wannier weights from data.plowann
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close...
- Compensation charge over spherical meshes =      4.079518929285051
- Compensation charge over fine fft grid    =      4.079147784843686
+ Compensation charge over spherical meshes =      4.079518929321911
+ Compensation charge over fine fft grid    =      4.079147784880274
 
 
  Total number of electrons per unit cell =   40.8872 (Spherical mesh),   40.8868 (FFT mesh)
@@ -2530,7 +2530,7 @@ Reading of the Wannier weights from data.plowann
    4  9.308  9.308  9.298  9.978  9.137
    5  9.208  8.923  8.676  9.137  9.089
 
-  Hubbard bare interaction U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    9.1487    0.0000
+  Hubbard bare interaction U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    9.1487   -0.0000
 
  (Hubbard bare interaction U=1/(2l+1) \sum U(m1,m1,m1,m1)=    9.4200    0.0000)
 
@@ -2542,7 +2542,7 @@ Reading of the Wannier weights from data.plowann
    4  0.241  0.241  0.097  9.978  0.209
    5  0.041  0.202  0.194  0.209  9.089
 
-   bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2510   -0.0000
+   bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2510    0.0000
 
  
  Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
@@ -3106,9 +3106,9 @@ P           mkmem           4
           spgroup         221
            strten1     3.2249696128E-02  3.2249696128E-02  3.2249696128E-02
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten2     3.2249636746E-02  3.2249636746E-02  3.2249636746E-02
+           strten2     3.2249636433E-02  3.2249636433E-02  3.2249636433E-02
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten3     3.2249698362E-02  3.2249698362E-02  3.2249698362E-02
+           strten3     3.2249698375E-02  3.2249698375E-02  3.2249698375E-02
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -3202,43 +3202,64 @@ P           mkmem           4
 - [1] Screened Coulomb interaction calculations: cRPA implementation and applications 
 - to dynamical screening and self-consistency in uranium dioxide and cerium
 - B. Amadon, T. Applencourt and F. Bruneval  Phys. Rev. B 89, 125110 (2014).
-- Comment : Describes the cRPA implementation of the screened Coulomb interaction in PAW
+- Comment: Describes the cRPA implementation of the screened Coulomb interaction in PAW
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2014
 -
-- [2] Plane-wave based electronic strcture calculations for correlated materials.
+- [2] Plane-wave based electronic structure calculations for correlated materials.
 - using dynamical mean-field theory and projected local orbitals,
 - B. Amadon, F. Lechermann, A. Georges, F. Jollet, T.O. Wehling, A.I. Lichenstein,
 - Phys. Rev. B 77, 205112 (2008).
-- Comment : to be cited in case the computation of overlap operator for Wannier90 interface within PAW is used,
+- Comment: to be cited in case the computation of overlap operator for Wannier90 interface within PAW is used,
 - i.e. prtwant=2 and usepaw=1. The paper describes also the DFT+DMFT implementation on Wannier functions
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008
 -
 - [3] Gamma and beta cerium: LDA+U calculations of ground-state parameters.
 - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
-- Comment : LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+- Comment: LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008a
 -
 - [4] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
-- Comment : PAW calculations. Strong suggestion to cite this paper.
+- Comment: PAW calculations. Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
-- [5] ABINIT : First-principles approach of materials and nanosystem properties.
+- [5] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [6] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [6] A brief introduction to the ABINIT software package.
+- [7] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
@@ -3246,10 +3267,10 @@ P           mkmem           4
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         52.3  wall=         52.8
+- Proc.   0 individual time (sec): cpu=         54.8  wall=         55.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  41 WARNINGs and  21 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         52.3  wall=         52.8
+.Delivered  43 WARNINGs and  21 COMMENTs to log file.
++Overall time at end (sec) : cpu=         54.8  wall=         55.1

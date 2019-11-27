@@ -1,6 +1,6 @@
 
-.Version 8.0.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 11h56 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h26 )
   
 - input  file    -> t52.in
 - output file    -> t52.out
@@ -34,7 +34,7 @@
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          65          nfft =        2700          nkpt =           1
 ================================================================================
-P This job should need less than                       1.301 Mbytes of memory.
+P This job should need less than                       1.292 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.023 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.023 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          63          nfft =        2700          nkpt =           1
 ================================================================================
-P This job should need less than                       1.300 Mbytes of memory.
+P This job should need less than                       1.292 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.023 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.023 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          65          nfft =        2880          nkpt =           1
 ================================================================================
-P This job should need less than                       1.351 Mbytes of memory.
+P This job should need less than                       1.342 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.024 Mbytes.
 ================================================================================
@@ -85,7 +85,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.024 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          65          nfft =        2880          nkpt =           1
 ================================================================================
-P This job should need less than                       1.351 Mbytes of memory.
+P This job should need less than                       1.342 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.024 Mbytes.
 ================================================================================
@@ -102,7 +102,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.024 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          62          nfft =        2304          nkpt =           1
 ================================================================================
-P This job should need less than                       1.197 Mbytes of memory.
+P This job should need less than                       1.188 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 ================================================================================
@@ -119,7 +119,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          62          nfft =        2304          nkpt =           1
 ================================================================================
-P This job should need less than                       1.197 Mbytes of memory.
+P This job should need less than                       1.188 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 ================================================================================
@@ -136,7 +136,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          41          nfft =        1728          nkpt =           1
 ================================================================================
-P This job should need less than                       1.034 Mbytes of memory.
+P This job should need less than                       1.028 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -153,7 +153,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          49          nfft =        2304          nkpt =           1
 ================================================================================
-P This job should need less than                       1.193 Mbytes of memory.
+P This job should need less than                       1.186 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 ================================================================================
@@ -170,7 +170,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          41          nfft =        1728          nkpt =           1
 ================================================================================
-P This job should need less than                       1.035 Mbytes of memory.
+P This job should need less than                       1.029 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -187,7 +187,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          41          nfft =        1728          nkpt =           1
 ================================================================================
-P This job should need less than                       1.035 Mbytes of memory.
+P This job should need less than                       1.029 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -204,7 +204,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          52          nfft =        2304          nkpt =           1
 ================================================================================
-P This job should need less than                       1.193 Mbytes of memory.
+P This job should need less than                       1.186 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 ================================================================================
@@ -221,7 +221,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          64          nfft =        3600          nkpt =           1
 ================================================================================
-P This job should need less than                       1.541 Mbytes of memory.
+P This job should need less than                       1.532 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.029 Mbytes.
 ================================================================================
@@ -238,7 +238,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.029 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          30          nfft =        3200          nkpt =           1
 ================================================================================
-P This job should need less than                       1.435 Mbytes of memory.
+P This job should need less than                       1.431 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.026 Mbytes.
 ================================================================================
@@ -255,7 +255,7 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.026 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          30          nfft =        6750          nkpt =           1
 ================================================================================
-P This job should need less than                       2.396 Mbytes of memory.
+P This job should need less than                       2.392 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
 ================================================================================
@@ -272,7 +272,7 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          52          nfft =        2304          nkpt =           1
 ================================================================================
-P This job should need less than                       1.192 Mbytes of memory.
+P This job should need less than                       1.185 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 ================================================================================
@@ -289,7 +289,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          22          nfft =        1500          nkpt =           1
 ================================================================================
-P This job should need less than                       0.973 Mbytes of memory.
+P This job should need less than                       0.969 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.013 Mbytes.
 ================================================================================
@@ -306,7 +306,7 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.013 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          22          nfft =         960          nkpt =           1
 ================================================================================
-P This job should need less than                       0.840 Mbytes of memory.
+P This job should need less than                       0.837 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.009 Mbytes.
 ================================================================================
@@ -323,7 +323,7 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.009 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          22          nfft =        2000          nkpt =           1
 ================================================================================
-P This job should need less than                       1.101 Mbytes of memory.
+P This job should need less than                       1.098 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.017 Mbytes.
 ================================================================================
@@ -340,7 +340,7 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.017 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =           9          nfft =        1000          nkpt =           1
 ================================================================================
-P This job should need less than                       0.844 Mbytes of memory.
+P This job should need less than                       0.843 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -357,7 +357,7 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =           7          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.723 Mbytes of memory.
+P This job should need less than                       0.722 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
@@ -374,7 +374,7 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.723 Mbytes of memory.
+P This job should need less than                       0.722 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
@@ -391,7 +391,7 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          28          nfft =        1728          nkpt =           1
 ================================================================================
-P This job should need less than                       1.030 Mbytes of memory.
+P This job should need less than                       1.026 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -408,7 +408,7 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          14          nfft =        1000          nkpt =           1
 ================================================================================
-P This job should need less than                       0.846 Mbytes of memory.
+P This job should need less than                       0.844 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -425,7 +425,7 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          28          nfft =        1728          nkpt =           1
 ================================================================================
-P This job should need less than                       1.030 Mbytes of memory.
+P This job should need less than                       1.026 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -442,7 +442,7 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          16          nfft =        1728          nkpt =           1
 ================================================================================
-P This job should need less than                       1.026 Mbytes of memory.
+P This job should need less than                       1.024 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -459,7 +459,7 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =          44          nfft =        1728          nkpt =           1
 ================================================================================
-P This job should need less than                       1.035 Mbytes of memory.
+P This job should need less than                       1.029 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -469,7 +469,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -1198,8 +1198,8 @@ P           mkmem           1
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.00055
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/12mg.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/12mg.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/12mg.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/12mg.pspnc
 -  Troullier-Martins psp for element  Mg        Thu Oct 27 17:30:49 EDT 1994
 - 12.00000   2.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1210,7 +1210,7 @@ P           mkmem           1
     2   0.000   0.000    0   2.5922174        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.54196289048337    0.05499530377757    0.78827945413088   rchrg,fchrg,qchrg
- pspatm : epsatm=   -1.54393848
+  pspatm : epsatm=   -1.54393848
          --- l  ekb(1:nproj) -->
              0    1.755924
              1    0.853613
@@ -1239,7 +1239,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.9893E-07; max=  1.9893E-07
+ Mean square residual over all n,k,spin=   19.893E-08; max=  19.893E-08
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1266,7 +1266,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  6.76902110186176E-02
+    Kinetic energy  =  6.76902110186177E-02
     Hartree energy  =  3.26862943899767E-02
     XC energy       = -5.53671220504654E-01
     Ewald energy    = -7.03946368471893E-01
@@ -1278,6 +1278,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
  Other information on the energy :
     Total energy(eV)= -3.20624221546628E+01 ; Band energy (Ha)=  -3.3737649501E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.83344039E-04  sigma(3 2)=  2.39326735E-06
@@ -1329,7 +1331,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.3377E-08; max=  3.3377E-08
+ Mean square residual over all n,k,spin=   33.377E-09; max=  33.377E-09
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1356,18 +1358,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  6.76918548158043E-02
+    Kinetic energy  =  6.76918548158042E-02
     Hartree energy  =  3.29505547794695E-02
     XC energy       = -5.53530789726814E-01
     Ewald energy    = -7.02767899501083E-01
     PspCore energy  = -6.15014313252932E-03
     Loc. psp. energy= -2.14762013508088E-01
-    NL   psp  energy=  1.99097888740670E-01
+    NL   psp  energy=  1.99097888740671E-01
     >>>>>>>>> Etotal= -1.17747054753257E+00
 
  Other information on the energy :
-    Total energy(eV)= -3.20406030527531E+01 ; Band energy (Ha)=  -3.3743880880E-01
+    Total energy(eV)= -3.20406030527532E+01 ; Band energy (Ha)=  -3.3743880880E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.81823292E-04  sigma(3 2)=  0.00000000E+00
@@ -1419,7 +1423,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.2312E-08; max=  3.2312E-08
+ Mean square residual over all n,k,spin=   32.312E-09; max=  32.312E-09
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1458,6 +1462,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
  Other information on the energy :
     Total energy(eV)= -3.20319014288363E+01 ; Band energy (Ha)=  -3.3802395950E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.80257153E-04  sigma(3 2)=  0.00000000E+00
@@ -1509,7 +1515,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.2312E-08; max=  3.2312E-08
+ Mean square residual over all n,k,spin=   32.312E-09; max=  32.312E-09
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1548,6 +1554,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
  Other information on the energy :
     Total energy(eV)= -3.20319014288363E+01 ; Band energy (Ha)=  -3.3802395950E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.80257153E-04  sigma(3 2)=  0.00000000E+00
@@ -1599,7 +1607,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     123.000     123.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   6.1140E-08; max=  6.1140E-08
+ Mean square residual over all n,k,spin=   61.140E-09; max=  61.140E-09
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1626,7 +1634,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     123.000     123.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  6.43220556739364E-02
+    Kinetic energy  =  6.43220556739365E-02
     Hartree energy  =  3.43007161428292E-02
     XC energy       = -5.64818344937363E-01
     Ewald energy    = -7.28949609499743E-01
@@ -1638,6 +1646,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     123.000     123.000
  Other information on the energy :
     Total energy(eV)= -3.26748205288330E+01 ; Band energy (Ha)=  -3.3831271327E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.41133743E-04  sigma(3 2)=  0.00000000E+00
@@ -1689,7 +1699,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     123.000     123.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   6.1140E-08; max=  6.1140E-08
+ Mean square residual over all n,k,spin=   61.140E-09; max=  61.140E-09
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1716,18 +1726,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     123.000     123.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  6.43220556739364E-02
+    Kinetic energy  =  6.43220556739365E-02
     Hartree energy  =  3.43007161428292E-02
     XC energy       = -5.64818344937363E-01
     Ewald energy    = -7.28949609499743E-01
     PspCore energy  = -7.00198854986408E-03
     Loc. psp. energy= -1.95063634703107E-01
-    NL   psp  energy=  1.96433193939208E-01
+    NL   psp  energy=  1.96433193939209E-01
     >>>>>>>>> Etotal= -1.20077761193410E+00
 
  Other information on the energy :
     Total energy(eV)= -3.26748205288330E+01 ; Band energy (Ha)=  -3.3831271327E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.41133743E-04  sigma(3 2)=  0.00000000E+00
@@ -1786,7 +1798,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.8746E-09; max=  1.8746E-09
+ Mean square residual over all n,k,spin=   18.746E-10; max=  18.746E-10
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1813,18 +1825,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.65527060186936E-02
-    Hartree energy  =  7.86020911395379E-03
-    XC energy       = -5.75683473215208E-01
+    Kinetic energy  =  3.65527060186938E-02
+    Hartree energy  =  7.86020911395383E-03
+    XC energy       = -5.75683473215209E-01
     Ewald energy    = -8.14573491773756E-01
     PspCore energy  = -9.10075711004774E-03
-    Loc. psp. energy= -7.51922477135582E-02
+    Loc. psp. energy= -7.51922477135588E-02
     NL   psp  energy=  1.88184151243904E-01
     >>>>>>>>> Etotal= -1.24195290343602E+00
 
  Other information on the energy :
     Total energy(eV)= -3.37952571914390E+01 ; Band energy (Ha)=  -3.1174003539E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.81172273E-04  sigma(3 2)=  0.00000000E+00
@@ -1876,7 +1890,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      97.000      97.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.7680E-10; max=  4.7680E-10
+ Mean square residual over all n,k,spin=   47.680E-11; max=  47.680E-11
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1915,6 +1929,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      97.000      97.000
  Other information on the energy :
     Total energy(eV)= -3.34370459863478E+01 ; Band energy (Ha)=  -3.3912835776E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.57984358E-04  sigma(3 2)=  0.00000000E+00
@@ -1966,7 +1982,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.7194E-09; max=  1.7194E-09
+ Mean square residual over all n,k,spin=   17.194E-10; max=  17.194E-10
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1993,18 +2009,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.77036281674483E-02
-    Hartree energy  =  8.44323622546095E-03
-    XC energy       = -5.75070406730884E-01
+    Kinetic energy  =  3.77036281674481E-02
+    Hartree energy  =  8.44323622546092E-03
+    XC energy       = -5.75070406730883E-01
     Ewald energy    = -8.10656422708749E-01
     PspCore energy  = -9.00255670696810E-03
-    Loc. psp. energy= -8.00667433401563E-02
+    Loc. psp. energy= -8.00667433401558E-02
     NL   psp  energy=  1.88733638620063E-01
     >>>>>>>>> Etotal= -1.23991562647378E+00
 
  Other information on the energy :
     Total energy(eV)= -3.37398200659905E+01 ; Band energy (Ha)=  -3.1298019171E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.71231325E-04  sigma(3 2)=  0.00000000E+00
@@ -2056,7 +2074,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.7194E-09; max=  1.7194E-09
+ Mean square residual over all n,k,spin=   17.194E-10; max=  17.194E-10
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -2083,18 +2101,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.77036281674483E-02
-    Hartree energy  =  8.44323622546093E-03
+    Kinetic energy  =  3.77036281674482E-02
+    Hartree energy  =  8.44323622546091E-03
     XC energy       = -5.75070406730883E-01
     Ewald energy    = -8.10656422708749E-01
     PspCore energy  = -9.00255670696810E-03
-    Loc. psp. energy= -8.00667433401560E-02
+    Loc. psp. energy= -8.00667433401558E-02
     NL   psp  energy=  1.88733638620063E-01
     >>>>>>>>> Etotal= -1.23991562647378E+00
 
  Other information on the energy :
     Total energy(eV)= -3.37398200659905E+01 ; Band energy (Ha)=  -3.1298019171E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.71231325E-04  sigma(3 2)=  0.00000000E+00
@@ -2153,7 +2173,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     103.000     103.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.5934E-08; max=  3.5934E-08
+ Mean square residual over all n,k,spin=   35.934E-09; max=  35.934E-09
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -2180,8 +2200,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     103.000     103.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  5.74371287570398E-02
-    Hartree energy  =  2.76338039576949E-02
+    Kinetic energy  =  5.74371287570397E-02
+    Hartree energy  =  2.76338039576948E-02
     XC energy       = -5.64665780907434E-01
     Ewald energy    = -7.43577908961787E-01
     PspCore energy  = -7.27308941763409E-03
@@ -2192,6 +2212,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     103.000     103.000
  Other information on the energy :
     Total energy(eV)= -3.27907124262292E+01 ; Band energy (Ha)=  -3.3216534565E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.61608352E-04  sigma(3 2)= -4.41899601E-07
@@ -2243,7 +2265,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.4821E-09; max=  8.4821E-09
+ Mean square residual over all n,k,spin=   84.821E-10; max=  84.821E-10
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -2270,18 +2292,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  6.72810654238666E-02
-    Hartree energy  =  3.32420757953166E-02
+    Kinetic energy  =  6.72810654238674E-02
+    Hartree energy  =  3.32420757953171E-02
     XC energy       = -5.52938014289365E-01
     Ewald energy    = -7.03214038859153E-01
     PspCore energy  = -6.12673998113107E-03
-    Loc. psp. energy= -2.12972850262391E-01
-    NL   psp  energy=  1.97581804140411E-01
+    Loc. psp. energy= -2.12972850262393E-01
+    NL   psp  energy=  1.97581804140412E-01
     >>>>>>>>> Etotal= -1.17714669803245E+00
 
  Other information on the energy :
     Total energy(eV)= -3.20317906596924E+01 ; Band energy (Ha)=  -3.3689652782E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.86464122E-04  sigma(3 2)=  0.00000000E+00
@@ -2340,7 +2364,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      59.000      59.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.7939E-08; max=  1.7939E-08
+ Mean square residual over all n,k,spin=   17.939E-09; max=  17.939E-09
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -2379,6 +2403,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      59.000      59.000
  Other information on the energy :
     Total energy(eV)= -3.52532828235420E+01 ; Band energy (Ha)=  -3.6618613133E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  7.27526230E-04  sigma(3 2)=  0.00000000E+00
@@ -2430,7 +2456,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      59.000      59.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.3623E-07; max=  1.3623E-07
+ Mean square residual over all n,k,spin=   13.623E-08; max=  13.623E-08
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -2469,6 +2495,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      59.000      59.000
  Other information on the energy :
     Total energy(eV)= -3.52531965922036E+01 ; Band energy (Ha)=  -3.6618606123E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  7.27382583E-04  sigma(3 2)=  0.00000000E+00
@@ -2527,7 +2555,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     103.000     103.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.8961E-09; max=  4.8961E-09
+ Mean square residual over all n,k,spin=   48.961E-10; max=  48.961E-10
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -2554,18 +2582,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     103.000     103.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  5.74020317825735E-02
-    Hartree energy  =  2.76233505329134E-02
+    Kinetic energy  =  5.74020317825728E-02
+    Hartree energy  =  2.76233505329131E-02
     XC energy       = -5.64653152829242E-01
     Ewald energy    = -7.43577908961787E-01
     PspCore energy  = -7.27308941763409E-03
-    Loc. psp. energy= -1.70410202762674E-01
+    Loc. psp. energy= -1.70410202762673E-01
     NL   psp  energy=  1.95852739546269E-01
     >>>>>>>>> Etotal= -1.20503623210958E+00
 
  Other information on the energy :
     Total energy(eV)= -3.27907034771419E+01 ; Band energy (Ha)=  -3.3216536494E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.19233484E-04  sigma(3 2)= -4.05333687E-06
@@ -2617,7 +2647,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.7009E-06; max=  1.7009E-06
+ Mean square residual over all n,k,spin=   17.009E-07; max=  17.009E-07
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -2644,8 +2674,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  9.38811207109595E-02
-    Hartree energy  =  7.27337007021427E-02
+    Kinetic energy  =  9.38811207109594E-02
+    Hartree energy  =  7.27337007021426E-02
     XC energy       = -6.83391779122824E-01
     Ewald energy    = -8.98210366283568E-01
     PspCore energy  = -1.60826924504690E-02
@@ -2656,6 +2686,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
  Other information on the energy :
     Total energy(eV)= -3.63108203511693E+01 ; Band energy (Ha)=  -3.2519981615E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.44868658E-04  sigma(3 2)=  0.00000000E+00
@@ -2707,7 +2739,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.9896E-06; max=  1.9896E-06
+ Mean square residual over all n,k,spin=   19.896E-07; max=  19.896E-07
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -2746,6 +2778,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
  Other information on the energy :
     Total energy(eV)= -3.63109257011241E+01 ; Band energy (Ha)=  -3.2519979653E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.44824768E-04  sigma(3 2)=  0.00000000E+00
@@ -2804,7 +2838,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.9865E-06; max=  1.9865E-06
+ Mean square residual over all n,k,spin=   19.865E-07; max=  19.865E-07
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -2831,8 +2865,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  9.38669894002190E-02
-    Hartree energy  =  7.27211661630183E-02
+    Kinetic energy  =  9.38669894002189E-02
+    Hartree energy  =  7.27211661630182E-02
     XC energy       = -6.83386187097252E-01
     Ewald energy    = -8.98210366283613E-01
     PspCore energy  = -1.60826924504690E-02
@@ -2843,6 +2877,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
  Other information on the energy :
     Total energy(eV)= -3.63109224093753E+01 ; Band energy (Ha)=  -3.2519979693E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.44829304E-04  sigma(3 2)=  0.00000000E+00
@@ -2901,7 +2937,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      17.000      17.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.7552E-09; max=  1.7552E-09
+ Mean square residual over all n,k,spin=   17.552E-10; max=  17.552E-10
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -2929,8 +2965,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      17.000      17.000
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  4.40659496104423E-02
-    Hartree energy  =  5.05410024735161E-03
-    XC energy       = -7.63712210101395E-01
+    Hartree energy  =  5.05410024735162E-03
+    XC energy       = -7.63712210101396E-01
     Ewald energy    = -1.23015896872650E+00
     PspCore energy  = -3.21653849009381E-02
     Loc. psp. energy=  1.70746039339974E-01
@@ -2940,6 +2976,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      17.000      17.000
  Other information on the energy :
     Total energy(eV)= -3.93334789253751E+01 ; Band energy (Ha)=  -1.1083774769E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.28151283E-03  sigma(3 2)=  0.00000000E+00
@@ -2991,7 +3029,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      13.000      13.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.5723E-08; max=  1.5723E-08
+ Mean square residual over all n,k,spin=   15.723E-09; max=  15.723E-09
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -3030,6 +3068,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      13.000      13.000
  Other information on the energy :
     Total energy(eV)= -3.84177888584294E+01 ; Band energy (Ha)=   2.7828542267E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -9.04977197E-03  sigma(3 2)=  0.00000000E+00
@@ -3081,7 +3121,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      15.000      15.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   6.8316E-11; max=  6.8316E-11
+ Mean square residual over all n,k,spin=   68.316E-12; max=  68.316E-12
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -3120,6 +3160,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      15.000      15.000
  Other information on the energy :
     Total energy(eV)= -4.04336178609329E+01 ; Band energy (Ha)=   6.0750200920E-02
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.86967979E-03  sigma(3 2)=  0.00000000E+00
@@ -3178,7 +3220,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      55.000      55.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.3359E-10; max=  2.3359E-10
+ Mean square residual over all n,k,spin=   23.359E-11; max=  23.359E-11
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -3210,13 +3252,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      55.000      55.000
     XC energy       = -6.00500965339134E-01
     Ewald energy    = -9.09808362377261E-01
     PspCore energy  = -1.20620193378518E-02
-    Loc. psp. energy=  1.80728877346432E-02
+    Loc. psp. energy=  1.80728877346431E-02
     NL   psp  energy=  1.85505369883160E-01
-    >>>>>>>>> Etotal= -1.29993521179616E+00
+    >>>>>>>>> Etotal= -1.29993521179617E+00
 
  Other information on the energy :
     Total energy(eV)= -3.53730360413158E+01 ; Band energy (Ha)=  -2.8484505195E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  8.74806703E-04  sigma(3 2)=  0.00000000E+00
@@ -3275,7 +3319,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      27.000      27.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.9691E-10; max=  2.9691E-10
+ Mean square residual over all n,k,spin=   29.691E-11; max=  29.691E-11
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -3314,6 +3358,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      27.000      27.000
  Other information on the energy :
     Total energy(eV)= -3.92222873501513E+01 ; Band energy (Ha)=  -1.9473430377E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.51156018E-03  sigma(3 2)=  0.00000000E+00
@@ -3365,7 +3411,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      55.000      55.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.8064E-10; max=  2.8064E-10
+ Mean square residual over all n,k,spin=   28.064E-11; max=  28.064E-11
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -3392,18 +3438,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      55.000      55.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  1.82095713383506E-02
-    Hartree energy  =  7.80842138597117E-04
+    Kinetic energy  =  1.82095713383504E-02
+    Hartree energy  =  7.80842138597104E-04
     XC energy       = -5.99246746369802E-01
     Ewald energy    = -9.06466577406487E-01
     PspCore energy  = -1.19341358042263E-02
-    Loc. psp. energy=  1.56460162856441E-02
-    NL   psp  energy=  1.85459095882057E-01
+    Loc. psp. energy=  1.56460162856440E-02
+    NL   psp  energy=  1.85459095882058E-01
     >>>>>>>>> Etotal= -1.29755193393587E+00
 
  Other information on the energy :
     Total energy(eV)= -3.53081837526142E+01 ; Band energy (Ha)=  -2.8559329469E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  8.70417518E-04  sigma(3 2)=  0.00000000E+00
@@ -3462,7 +3510,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      31.000      31.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.2676E-09; max=  1.2676E-09
+ Mean square residual over all n,k,spin=   12.676E-10; max=  12.676E-10
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -3489,18 +3537,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      31.000      31.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.82807655865008E-02
-    Hartree energy  =  3.77587363893342E-03
+    Kinetic energy  =  3.82807655864983E-02
+    Hartree energy  =  3.77587363893314E-03
     XC energy       = -7.32234661637501E-01
-    Ewald energy    = -8.95337028800306E-01
+    Ewald energy    = -8.95337028800308E-01
     PspCore energy  = -2.47934746907416E-02
-    Loc. psp. energy= -2.32175906343755E-02
-    NL   psp  energy=  4.43990524353598E-01
+    Loc. psp. energy= -2.32175906343736E-02
+    NL   psp  energy=  4.43990524353599E-01
     >>>>>>>>> Etotal= -1.18953559218389E+00
 
  Other information on the energy :
-    Total energy(eV)= -3.23689096140483E+01 ; Band energy (Ha)=  -1.7762089441E-01
+    Total energy(eV)= -3.23689096140484E+01 ; Band energy (Ha)=  -1.7762089441E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.63393216E-03  sigma(3 2)=  0.00000000E+00
@@ -3559,7 +3609,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      87.000      87.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.3981E-09; max=  1.3981E-09
+ Mean square residual over all n,k,spin=   13.981E-10; max=  13.981E-10
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -3586,18 +3636,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      87.000      87.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.72632424111081E-02
-    Hartree energy  =  7.83576086013698E-03
+    Kinetic energy  =  3.72632424111079E-02
+    Hartree energy  =  7.83576086013696E-03
     XC energy       = -5.75838722318006E-01
     Ewald energy    = -8.15130207723119E-01
     PspCore energy  = -9.11309672035269E-03
-    Loc. psp. energy= -7.42844113339395E-02
+    Loc. psp. energy= -7.42844113339396E-02
     NL   psp  energy=  1.86580892932092E-01
     >>>>>>>>> Etotal= -1.24268654189208E+00
 
  Other information on the energy :
     Total energy(eV)= -3.38152205090814E+01 ; Band energy (Ha)=  -3.1202549078E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.79261873E-04  sigma(3 2)=  0.00000000E+00
@@ -4388,46 +4440,63 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] ABINIT : First-principles approach of materials and nanosystem properties.
+- [1] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [2] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [2] A brief introduction to the ABINIT software package.
+- [3] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [3] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- [4] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=          5.5  wall=          5.9
+- Proc.   0 individual time (sec): cpu=         20.4  wall=         22.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   9 WARNINGs and  21 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.5  wall=          5.9
+.Delivered   9 WARNINGs and  46 COMMENTs to log file.
++Overall time at end (sec) : cpu=         20.4  wall=         22.0

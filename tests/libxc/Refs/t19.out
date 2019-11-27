@@ -1,6 +1,6 @@
 
 .Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 21 Nov 2019.
-- ( at 00h07 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h17 )
   
 - input  file    -> t19.in
 - output file    -> t19.out
@@ -217,8 +217,8 @@ P           mkmem3          1
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.12417
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/18ar.revpbe
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/18ar.revpbe
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/18ar.revpbe
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/18ar.revpbe
 -   Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 18.00000   8.00000  20100419                znucl, zion, pspdat
     6    7    1    1       800   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -239,13 +239,13 @@ _setup2: Arith. and geom. avg. npw (full set) are    1042.844    1042.781
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -21.158830790541    -2.116E+01 2.404E-02 9.342E+00
  ETOT  2  -21.161866090900    -3.035E-03 7.820E-08 2.029E+00
- ETOT  3  -21.162123297494    -2.572E-04 3.536E-05 9.310E-02
+ ETOT  3  -21.162123297495    -2.572E-04 3.536E-05 9.310E-02
  ETOT  4  -21.162165412810    -4.212E-05 1.213E-06 3.067E-03
  ETOT  5  -21.162165503589    -9.078E-08 2.015E-08 9.105E-05
  ETOT  6  -21.162165506431    -2.842E-09 7.639E-10 9.786E-07
- ETOT  7  -21.162165506751    -3.201E-10 1.980E-11 1.997E-08
- ETOT  8  -21.162165506759    -7.422E-12 3.320E-13 9.752E-12
- ETOT  9  -21.162165506758     4.086E-13 1.405E-16 1.455E-13
+ ETOT  7  -21.162165506751    -3.199E-10 1.980E-11 1.997E-08
+ ETOT  8  -21.162165506759    -7.386E-12 3.320E-13 9.752E-12
+ ETOT  9  -21.162165506758     3.801E-13 1.405E-16 1.455E-13
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.74644356E-05  sigma(3 2)=  0.00000000E+00
@@ -342,8 +342,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1042.844    1042.781
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.12417
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/18ar.revpbe
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/18ar.revpbe
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/18ar.revpbe
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/18ar.revpbe
 -   Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 18.00000   8.00000  20100419                znucl, zion, pspdat
     6    7    1    1       800   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -362,12 +362,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1042.844    1042.781
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -17.881792563543    -1.788E+01 1.663E-07 1.834E+01
- ETOT  2  -17.866606326751     1.519E-02 1.414E-09 7.163E+00
- ETOT  3  -17.831953943863     3.465E-02 1.286E-04 1.088E+00
- ETOT  4  -17.812226667953     1.973E-02 4.172E-05 1.858E-02
- ETOT  5  -17.810416837486     1.810E-03 3.078E-07 2.768E-03
- ETOT  6  -17.810301967880     1.149E-04 1.723E-08 4.552E-05
+ ETOT  1  -17.881792563537    -1.788E+01 1.663E-07 1.834E+01
+ ETOT  2  -17.866606326752     1.519E-02 1.414E-09 7.163E+00
+ ETOT  3  -17.831953943865     3.465E-02 1.286E-04 1.088E+00
+ ETOT  4  -17.812226667972     1.973E-02 4.172E-05 1.858E-02
+ ETOT  5  -17.810416837467     1.810E-03 3.078E-07 2.768E-03
+ ETOT  6  -17.810301967891     1.149E-04 1.723E-08 4.552E-05
  ETOT  7  -17.810418148105    -1.162E-04 1.146E-09 2.180E-06
  ETOT  8  -17.810421177019    -3.029E-06 1.311E-11 4.076E-08
  ETOT  9  -17.810419824238     1.353E-06 1.881E-13 1.000E-09
@@ -436,17 +436,17 @@ Result for kinetic energy density :
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.16388668099363E+00
-    Hartree energy  =  5.77831603546429E+00
-    XC energy       = -4.48278619422523E-01
+    Kinetic energy  =  8.16388668099345E+00
+    Hartree energy  =  5.77831603546410E+00
+    XC energy       = -4.48278619422522E-01
     Ewald energy    = -1.47715621126669E+01
     PspCore energy  =  5.45893664125447E-01
-    Loc. psp. energy= -1.78905950732690E+01
-    NL   psp  energy=  8.11919600536976E-01
-    >>>>>>>>> Etotal= -1.78104198242381E+01
+    Loc. psp. energy= -1.78905950732688E+01
+    NL   psp  energy=  8.11919600536966E-01
+    >>>>>>>>> Etotal= -1.78104198242382E+01
 
  Other information on the energy :
-    Total energy(eV)= -4.84646170545097E+02 ; Band energy (Ha)=  -2.6556231619E+00
+    Total energy(eV)= -4.84646170545100E+02 ; Band energy (Ha)=  -2.6556231619E+00
 --------------------------------------------------------------------------------
 
 
@@ -487,7 +487,7 @@ Result for kinetic energy density :
   9.97E-17  1.81E-17  1.86E-17  1.27E-17  5.16E-17  9.15E-17  9.68E-17  1.17E-16
  -7.0412E-01 -1.9882E-01 -1.9882E-01 -1.9882E-01  3.4098E-01  5.7570E-01
   5.7570E-01  5.7570E-01
-  prteigrs : nnsclo,ikpt=    9    1 max resid (incl. the buffer)=  1.17404E-16
+  prteigrs : nnsclo,ikpt=    9    1 max resid (incl. the buffer)=  1.17239E-16
 
 
  Compute kinetic energy density
@@ -508,7 +508,7 @@ Result for kinetic energy density :
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   63.288E-18; max=  99.692E-18
+ Mean square residual over all n,k,spin=   63.267E-18; max=  99.692E-18
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
 
@@ -719,10 +719,10 @@ P           mkmem3          1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         11.9  wall=         12.2
+- Proc.   0 individual time (sec): cpu=         12.1  wall=         12.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.9  wall=         12.2
++Overall time at end (sec) : cpu=         12.1  wall=         12.4
