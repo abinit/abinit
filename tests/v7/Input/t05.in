@@ -93,7 +93,7 @@ rprim
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t05.out,      tolnlines = 39, tolabs = 3.1e-2, tolrel = 1.1e+0, fld_options = -easy
+#%%   t05.out,      tolnlines = 39, tolabs = 3.2e-2, tolrel = 1.1e+0, fld_options = -easy
 #%% psp_files = 26fe.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4

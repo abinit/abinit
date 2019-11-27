@@ -1,6 +1,6 @@
 
-.Version 8.7.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.4 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 15 Jan 2018.
-- ( at 16h51 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h40 )
   
-- input  file    -> abi.in
-- output file    -> abi.out
-- root for input  files -> abi-i
-- root for output files -> abi-o
+- input  file    -> t72.in
+- output file    -> t72.out
+- root for input  files -> t72i
+- root for output files -> t72o
 
 
  Symmetries : space group P1 (#  1); Bravais aP (primitive triclinic)
@@ -45,7 +45,7 @@ _ WF disk file :      0.858 Mbytes ; DEN or POT disk file :      0.048 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -57,7 +57,7 @@ _ WF disk file :      0.858 Mbytes ; DEN or POT disk file :      0.048 Mbytes.
            diemac      2.00000000E+01
            diemix      8.00000000E-01
              ecut      5.00000000E+00 Hartree
--          fftalg         112
+-          fftalg         312
            irdwfk          -1
              iscf          -3
               ixc           7
@@ -152,8 +152,8 @@ P          mk1mem           8
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.15099
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/ebousq/CODES/Psp/ABINIT/ONCVPSP_Hamann/Pseudo_Dojo/v0.4/Psp_files/Mn-sp-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/ebousq/CODES/Psp/ABINIT/ONCVPSP_Hamann/Pseudo_Dojo/v0.4/Psp_files/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Mn-sp-r_LDA_1012_dojov0.4.psp8
 - Mn    ONCVPSP-3.3.0  r_core=   1.41250   1.20960   1.61055
 - 25.00000  15.00000    171221                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -170,8 +170,8 @@ P          mk1mem           8
   spin-orbit 2    0.007940    0.003946
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/ebousq/CODES/Psp/ABINIT/ONCVPSP_Hamann/Pseudo_Dojo/v0.4/Psp_files/O-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/ebousq/CODES/Psp/ABINIT/ONCVPSP_Hamann/Pseudo_Dojo/v0.4/Psp_files/O-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O-r_LDA_1012_dojov0.4.psp8
 - O     ONCVPSP-3.3.0  r_core=   1.35509   1.45563   1.35509
 -  8.00000   6.00000    171117                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -190,7 +190,7 @@ P          mk1mem           8
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file abi-i_WFK
+-inwffil : will read wavefunctions from disk file t72i_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -207,30 +207,30 @@ P          mk1mem           8
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file abi-i_WFK
+-inwffil : will read wavefunctions from disk file t72i_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -52.052392134309     -5.205E+01 1.525E-02 0.000E+00
- ETOT  2  -52.164970528634     -1.126E-01 3.142E-05 0.000E+00
- ETOT  3  -52.165193386198     -2.229E-04 5.573E-07 0.000E+00
- ETOT  4  -52.165194864596     -1.478E-06 6.804E-09 0.000E+00
- ETOT  5  -52.165194878678     -1.408E-08 9.001E-11 0.000E+00
- ETOT  6  -52.165194879036     -3.587E-10 6.660E-12 0.000E+00
- ETOT  7  -52.165194879049     -1.264E-11 1.441E-13 0.000E+00
- ETOT  8  -52.165194879050     -7.674E-13 1.562E-14 0.000E+00
- ETOT  9  -52.165194879050      9.948E-14 1.455E-15 0.000E+00
- ETOT 10  -52.165194879050      5.684E-14 9.980E-17 0.000E+00
+-ETOT  1  -52.052392134311     -5.205E+01 1.525E-02 0.000E+00
+ ETOT  2  -52.164970528636     -1.126E-01 3.142E-05 0.000E+00
+ ETOT  3  -52.165193386199     -2.229E-04 5.573E-07 0.000E+00
+ ETOT  4  -52.165194864598     -1.478E-06 6.804E-09 0.000E+00
+ ETOT  5  -52.165194878679     -1.408E-08 9.001E-11 0.000E+00
+ ETOT  6  -52.165194879038     -3.589E-10 6.660E-12 0.000E+00
+ ETOT  7  -52.165194879051     -1.241E-11 1.441E-13 0.000E+00
+ ETOT  8  -52.165194879051     -8.669E-13 1.562E-14 0.000E+00
+ ETOT  9  -52.165194879051     -2.842E-14 1.455E-15 0.000E+00
+ ETOT 10  -52.165194879051      3.553E-14 9.980E-17 0.000E+00
 
  At SCF step   10   max residual=  9.98E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.3566E-17; max=  9.9795E-17
+ Mean square residual over all n,k,spin=   43.566E-18; max=  99.795E-18
  dfpt_looppert : ek2=    1.3757436346E+02
           f-sum rule ratio=    7.7836963152E-01
  Expectation of eigenvalue derivatives (hartree) for nkpt=   8  k points:
@@ -293,7 +293,7 @@ P          mk1mem           8
            diemix      8.00000000E-01
              ecut      5.00000000E+00 Hartree
            etotal     -5.2165194879E+01
--          fftalg         112
+-          fftalg         312
            irdwfk          -1
              iscf          -3
               ixc           7
@@ -396,53 +396,59 @@ P          mk1mem           8
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xue, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
 - implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
 -
 - [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
 - interatomic force constants from density-functional perturbation theory,
 - X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
 - [4] Optimized norm-conserving Vanderbilt pseudopotentials.
 - D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
 - Comment: Some pseudopotential generated using the ONCVPSP code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
 -
-- [5] ABINIT : First-principles approach of materials and nanosystem properties.
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [6] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         10.3  wall=         10.3
+- Proc.   0 individual time (sec): cpu=         18.1  wall=         18.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  21 WARNINGs and  18 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.3  wall=         10.3
+.Delivered  15 WARNINGs and  19 COMMENTs to log file.
++Overall time at end (sec) : cpu=         18.1  wall=         18.2

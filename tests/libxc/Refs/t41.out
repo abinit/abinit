@@ -1,6 +1,6 @@
 
 .Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 21 Oct 2019.
-- ( at 23h38 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h17 )
   
 - input  file    -> t41.in
 - output file    -> t41.out
@@ -436,8 +436,8 @@ P           mkmem          19
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.15267
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -463,8 +463,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.996     151.959
  ETOT  2  -11.928629543974    -9.212E-03 2.455E-04 2.972E-02
  ETOT  3  -11.928647772245    -1.823E-05 1.167E-05 7.880E-04
  ETOT  4  -11.928648087210    -3.150E-07 1.742E-06 8.698E-07
- ETOT  5  -11.928648087581    -3.703E-10 8.301E-08 7.092E-10
- ETOT  6  -11.928648087581    -3.411E-13 1.259E-08 4.704E-13
+ ETOT  5  -11.928648087580    -3.703E-10 8.301E-08 7.092E-10
+ ETOT  6  -11.928648087581    -3.482E-13 1.259E-08 4.704E-13
 
  At SCF step    6       vres2   =  4.70E-13 < tolvrs=  1.00E-10 =>converged.
 
@@ -517,13 +517,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.996     151.959
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  7.90757594059972E+00
-    Hartree energy  =  9.12620399800158E-01
+    Hartree energy  =  9.12620399800157E-01
     XC energy       = -4.30515893499945E+00
     Ewald energy    = -1.27864121744519E+01
     PspCore energy  =  1.93481650847052E-01
     Loc. psp. energy= -5.24205111134754E+00
     NL   psp  energy=  1.39129614197111E+00
-    >>>>>>>>> Etotal= -1.19286480875809E+01
+    >>>>>>>>> Etotal= -1.19286480875808E+01
 
  Other information on the energy :
     Total energy(eV)= -3.24595022042017E+02 ; Band energy (Ha)=   1.1381837655E+00
@@ -566,8 +566,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.996     151.959
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -668,7 +668,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.996     151.959
 
   Number of electrons    =    7.9937
 
-  QP Band energy    [Ha] =  1.13818376545443E+00
+  QP Band energy    [Ha] =  1.13818376545444E+00
   QP Hartree energy [Ha] =  9.04317167030055E-01
 
 --------------------------------------------------------------------------------
@@ -835,7 +835,7 @@ data: !SigmaeeData |
 
   Number of electrons    =    7.9937
 
-  QP Band energy    [Ha] =  1.13818376545443E+00
+  QP Band energy    [Ha] =  1.13818376545444E+00
   QP Hartree energy [Ha] =  9.04317167030055E-01
 
 --------------------------------------------------------------------------------
@@ -1002,7 +1002,7 @@ data: !SigmaeeData |
 
   Number of electrons    =    7.9937
 
-  QP Band energy    [Ha] =  1.13818376545443E+00
+  QP Band energy    [Ha] =  1.13818376545444E+00
   QP Hartree energy [Ha] =  9.04317167030055E-01
 
 --------------------------------------------------------------------------------
@@ -1468,10 +1468,10 @@ P           mkmem          19
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          3.9  wall=          4.3
+- Proc.   0 individual time (sec): cpu=          3.9  wall=          4.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.9  wall=          4.3
++Overall time at end (sec) : cpu=          3.9  wall=          4.0

@@ -12,12 +12,12 @@
       </initialConditions>
       <scfcvStep eTotal="     -8.7062495241E+00" deltaETotal="     -8.70624952E+00" maxResid="      3.21522807E-04" potResid="      1.90249325E-01" />
       <scfcvStep eTotal="     -8.7071360053E+00" deltaETotal="     -8.86481285E-04" maxResid="      9.35859856E-10" potResid="      4.45025964E-03" />
-      <scfcvStep eTotal="     -8.7071547431E+00" deltaETotal="     -1.87377921E-05" maxResid="      3.12290262E-08" potResid="      7.27443979E-05" />
-      <scfcvStep eTotal="     -8.7071548897E+00" deltaETotal="     -1.46595520E-07" maxResid="      7.87528023E-10" potResid="      2.16894909E-06" />
-      <scfcvStep eTotal="     -8.7071548987E+00" deltaETotal="     -8.92580765E-09" maxResid="      1.14916703E-10" potResid="      7.47104081E-08" />
-      <scfcvStep eTotal="     -8.7071548991E+00" deltaETotal="     -4.61330529E-10" maxResid="      5.21881504E-12" potResid="      4.18324467E-11" />
-      <scfcvStep eTotal="     -8.7071548991E+00" deltaETotal="      1.93622895E-13" maxResid="      5.55887385E-16" potResid="      1.92837655E-13" />
-      <scfcvStep eTotal="     -8.7071548991E+00" deltaETotal="      3.55271368E-14" maxResid="      5.49826549E-18" potResid="      7.58371530E-16" />
+      <scfcvStep eTotal="     -8.7071547431E+00" deltaETotal="     -1.87377920E-05" maxResid="      3.12290261E-08" potResid="      7.27443979E-05" />
+      <scfcvStep eTotal="     -8.7071548897E+00" deltaETotal="     -1.46595521E-07" maxResid="      7.87528023E-10" potResid="      2.16894909E-06" />
+      <scfcvStep eTotal="     -8.7071548987E+00" deltaETotal="     -8.92580410E-09" maxResid="      1.14916703E-10" potResid="      7.47104082E-08" />
+      <scfcvStep eTotal="     -8.7071548991E+00" deltaETotal="     -4.61330529E-10" maxResid="      5.21881505E-12" potResid="      4.18324467E-11" />
+      <scfcvStep eTotal="     -8.7071548991E+00" deltaETotal="      1.86517468E-13" maxResid="      5.55887391E-16" potResid="      1.92837648E-13" />
+      <scfcvStep eTotal="     -8.7071548991E+00" deltaETotal="      4.08562073E-14" maxResid="      5.49826382E-18" potResid="      7.58371539E-16" />
       <status cvState="Ok" stop-criterion="toldfe" />
       <finalConditions>
         <energy type="direct" kinetic="      2.77579730E+00" local="     -2.39277596E+00" non-local="      2.10285078E+00" ewald="     -8.28738161E+00" chempot="      0.00000000E+00" hartree="      4.91482582E-01" core="      8.15811232E-02" xc="     -3.47870912E+00" total="     -8.70715490E+00" />
@@ -27,16 +27,16 @@
       <initialConditions>
         <geometry>
           <rprimd x1="      0.00000000E+00" x2="      5.17061273E+00" x3="      5.17061273E+00" y1="      5.17061273E+00" y2="      0.00000000E+00" y3="      5.17061273E+00" z1="      5.17061273E+00" z2="      5.17061273E+00" z3="      0.00000000E+00" />
-          <position atom="a_1_1" x="      1.34975325E-23" y="     -1.34975325E-23" z="     -4.21797890E-25" />
+          <position atom="a_1_1" x="     -6.95966519E-24" y="      6.95966519E-24" z="      7.80326097E-24" />
           <position atom="a_1_2" x="      2.58530637E+00" y="      2.58530637E+00" z="      2.58530637E+00" />
         </geometry>
       </initialConditions>
       <scfcvStep eTotal="     -8.7078761258E+00" deltaETotal="     -8.70787613E+00" maxResid="      7.97425396E-10" potResid="      4.50122371E-03" />
       <scfcvStep eTotal="     -8.7078968032E+00" deltaETotal="     -2.06774505E-05" maxResid="      3.27599965E-12" potResid="      2.49253016E-04" />
-      <scfcvStep eTotal="     -8.7078976834E+00" deltaETotal="     -8.80140002E-07" maxResid="      4.34598050E-09" potResid="      1.77929258E-06" />
+      <scfcvStep eTotal="     -8.7078976834E+00" deltaETotal="     -8.80140004E-07" maxResid="      4.34598050E-09" potResid="      1.77929258E-06" />
       <scfcvStep eTotal="     -8.7078976858E+00" deltaETotal="     -2.45014675E-09" maxResid="      6.80945770E-12" potResid="      2.30405550E-09" />
-      <scfcvStep eTotal="     -8.7078976858E+00" deltaETotal="     -3.46567219E-12" maxResid="      1.57993854E-14" potResid="      3.57129299E-12" />
-      <scfcvStep eTotal="     -8.7078976858E+00" deltaETotal="     -1.29674049E-13" maxResid="      8.19468617E-17" potResid="      2.71828644E-14" />
+      <scfcvStep eTotal="     -8.7078976858E+00" deltaETotal="     -3.46389584E-12" maxResid="      1.57993854E-14" potResid="      3.57129300E-12" />
+      <scfcvStep eTotal="     -8.7078976858E+00" deltaETotal="     -1.29674049E-13" maxResid="      8.19468612E-17" potResid="      2.71828642E-14" />
       <status cvState="Ok" stop-criterion="toldfe" />
       <finalConditions>
         <energy type="direct" kinetic="      2.79878159E+00" local="     -2.35830713E+00" non-local="      2.10796054E+00" ewald="     -8.33448308E+00" chempot="      0.00000000E+00" hartree="      4.83880276E-01" core="      8.29800471E-02" xc="     -3.48870992E+00" total="     -8.70789769E+00" />
@@ -46,16 +46,16 @@
       <initialConditions>
         <geometry>
           <rprimd x1="      0.00000000E+00" x2="      5.11742570E+00" x3="      5.11742570E+00" y1="      5.11742570E+00" y2="      0.00000000E+00" y3="      5.11742570E+00" z1="      5.11742570E+00" z2="      5.11742570E+00" z3="      0.00000000E+00" />
-          <position atom="a_1_1" x="      1.33770196E-23" y="     -1.33770196E-23" z="     -3.99130910E-25" />
+          <position atom="a_1_1" x="     -6.88807523E-24" y="      6.88807523E-24" z="      7.72299344E-24" />
           <position atom="a_1_2" x="      2.55871285E+00" y="      2.55871285E+00" z="      2.55871285E+00" />
         </geometry>
       </initialConditions>
       <scfcvStep eTotal="     -8.7082659834E+00" deltaETotal="     -8.70826598E+00" maxResid="      8.09571764E-10" potResid="      1.43974235E-02" />
       <scfcvStep eTotal="     -8.7083311730E+00" deltaETotal="     -6.51895996E-05" maxResid="      8.23736058E-12" potResid="      7.58853587E-04" />
       <scfcvStep eTotal="     -8.7083338136E+00" deltaETotal="     -2.64065481E-06" maxResid="      1.34086905E-08" potResid="      5.11848502E-06" />
-      <scfcvStep eTotal="     -8.7083338206E+00" deltaETotal="     -6.97779612E-09" maxResid="      1.80150671E-11" potResid="      6.33969351E-09" />
-      <scfcvStep eTotal="     -8.7083338206E+00" deltaETotal="     -8.11084533E-12" maxResid="      4.55257485E-14" potResid="      1.05067569E-11" />
-      <scfcvStep eTotal="     -8.7083338206E+00" deltaETotal="     -2.07833750E-13" maxResid="      2.78588643E-16" potResid="      8.28107131E-14" />
+      <scfcvStep eTotal="     -8.7083338206E+00" deltaETotal="     -6.97777303E-09" maxResid="      1.80150671E-11" potResid="      6.33969351E-09" />
+      <scfcvStep eTotal="     -8.7083338206E+00" deltaETotal="     -8.09485812E-12" maxResid="      4.55257485E-14" potResid="      1.05067569E-11" />
+      <scfcvStep eTotal="     -8.7083338206E+00" deltaETotal="     -2.25597319E-13" maxResid="      2.78588646E-16" potResid="      8.28107140E-14" />
       <status cvState="Ok" stop-criterion="toldfe" />
       <finalConditions>
         <energy type="direct" kinetic="      2.84151334E+00" local="     -2.29630384E+00" non-local="      2.11918159E+00" ewald="     -8.42110602E+00" chempot="      0.00000000E+00" hartree="      4.70007534E-01" core="      8.55943452E-02" xc="     -3.50722077E+00" total="     -8.70833382E+00" />
@@ -65,16 +65,16 @@
       <initialConditions>
         <geometry>
           <rprimd x1="      0.00000000E+00" x2="      5.12925039E+00" x3="      5.12925039E+00" y1="      5.12925039E+00" y2="      0.00000000E+00" y3="      5.12925039E+00" z1="      5.12925039E+00" z2="      5.12925039E+00" z3="      0.00000000E+00" />
-          <position atom="a_1_1" x="      1.60084876E-23" y="     -1.60084876E-23" z="      1.26132605E-23" />
+          <position atom="a_1_1" x="     -6.90399131E-24" y="      6.90399131E-24" z="      7.74083874E-24" />
           <position atom="a_1_2" x="      2.56462519E+00" y="      2.56462519E+00" z="      2.56462519E+00" />
         </geometry>
       </initialConditions>
       <scfcvStep eTotal="     -8.7083559553E+00" deltaETotal="     -8.70835596E+00" maxResid="      3.68112173E-11" potResid="      7.12350135E-04" />
       <scfcvStep eTotal="     -8.7083592020E+00" deltaETotal="     -3.24672176E-06" maxResid="      4.21825560E-13" potResid="      3.77304117E-05" />
-      <scfcvStep eTotal="     -8.7083593341E+00" deltaETotal="     -1.32126814E-07" maxResid="      6.56149696E-10" potResid="      2.60027944E-07" />
-      <scfcvStep eTotal="     -8.7083593346E+00" deltaETotal="     -4.34770442E-10" maxResid="      1.00536202E-12" potResid="      3.05760773E-10" />
-      <scfcvStep eTotal="     -8.7083593346E+00" deltaETotal="      2.13162821E-13" maxResid="      1.52072558E-15" potResid="      3.05955784E-13" />
-      <scfcvStep eTotal="     -8.7083593346E+00" deltaETotal="     -2.84217094E-14" maxResid="      3.73729828E-18" potResid="      1.36611271E-15" />
+      <scfcvStep eTotal="     -8.7083593341E+00" deltaETotal="     -1.32126818E-07" maxResid="      6.56149696E-10" potResid="      2.60027944E-07" />
+      <scfcvStep eTotal="     -8.7083593346E+00" deltaETotal="     -4.34766889E-10" maxResid="      1.00536202E-12" potResid="      3.05760773E-10" />
+      <scfcvStep eTotal="     -8.7083593346E+00" deltaETotal="      2.13162821E-13" maxResid="      1.52072557E-15" potResid="      3.05955783E-13" />
+      <scfcvStep eTotal="     -8.7083593346E+00" deltaETotal="     -3.01980663E-14" maxResid="      3.73729811E-18" potResid="      1.36611272E-15" />
       <status cvState="Ok" stop-criterion="toldfe" />
       <finalConditions>
         <energy type="direct" kinetic="      2.83190101E+00" local="     -2.31006272E+00" non-local="      2.11643860E+00" ewald="     -8.40169247E+00" chempot="      0.00000000E+00" hartree="      4.73115704E-01" core="      8.50037356E-02" xc="     -3.50306320E+00" total="     -8.70835933E+00" />
@@ -85,5 +85,5 @@
     </geometryMinimisation>
   </dataSet>
   <!-- timeInfo markup : cpu and wall attributes are given in seconds. -->
-  <timeInfo day="4" month="3" year="2017" cpu="  0.78541198791936040" wall="  0.85200000001350418" />
+  <timeInfo day="25" month="11" year="2019" cpu="   1.1313479822129011" wall="   1.1859469530000000" />
 </abinitRun>

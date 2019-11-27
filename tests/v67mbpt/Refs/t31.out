@@ -1,6 +1,6 @@
 
-.Version 8.11.11 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Sep 2019.
-- ( at 15h31 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h32 )
   
 - input  file    -> t31.in
 - output file    -> t31.out
@@ -513,8 +513,8 @@ P           mkmem5         64
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__magcon/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__magcon/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -540,14 +540,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     183.125     183.024
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -8.7784860380554    -8.778E+00 4.684E-03 4.424E+00
- ETOT  2  -8.7861512961295    -7.665E-03 1.476E-05 1.293E-01
+ ETOT  2  -8.7861512961294    -7.665E-03 1.476E-05 1.293E-01
  ETOT  3  -8.7862679203118    -1.166E-04 2.195E-05 2.759E-03
  ETOT  4  -8.7862694743831    -1.554E-06 2.380E-05 7.407E-06
  ETOT  5  -8.7862694793877    -5.005E-09 4.254E-05 1.059E-08
- ETOT  6  -8.7862694793961    -8.489E-12 3.187E-05 7.947E-11
+ ETOT  6  -8.7862694793961    -8.487E-12 3.187E-05 7.947E-11
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  8.489E-12 < toldfe=  1.000E-06
+  for the second time, diff in etot=  8.487E-12 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.52074048E-04  sigma(3 2)=  0.00000000E+00
@@ -598,13 +598,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     183.125     183.024
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  3.17419994991071E+00
-    Hartree energy  =  5.94658928795186E-01
+    Hartree energy  =  5.94658928795185E-01
     XC energy       = -3.56344675711859E+00
     Ewald energy    = -8.43581958561899E+00
     PspCore energy  =  8.60437873155177E-02
     Loc. psp. energy= -2.54194380616736E+00
     NL   psp  energy=  1.90003800348738E+00
-    >>>>>>>>> Etotal= -8.78626947939615E+00
+    >>>>>>>>> Etotal= -8.78626947939614E+00
 
  Other information on the energy :
     Total energy(eV)= -2.39086551501251E+02 ; Band energy (Ha)=   3.6785346795E-01
@@ -726,8 +726,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     183.125     183.024
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__magcon/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__magcon/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -818,9 +818,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     183.125     183.024
 . Writing resonant excitonic Hamiltonian on file t31o_DS3_BSR; file size=   0.00 [Gb].
  Writing KS-RPA macroscopic dielectric function without local fields to file: t31o_DS3_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t31o_DS3_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 78 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 81 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 87 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 88 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 87 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 81 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 87 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 87 iterations.
@@ -862,8 +862,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     183.125     183.024
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__magcon/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__magcon/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1020,8 +1020,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     183.125     183.024
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__magcon/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__magcon/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1177,8 +1177,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     183.125     183.024
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 180 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 189 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 179 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 187 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 181 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 188 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 182 iterations.
  Writing EXC Macroscopic dielectric function to file: t31o_DS5_EXC_MDF
   
  Macroscopic dielectric function:
@@ -1652,10 +1652,10 @@ P           mkmem5         64
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         24.5  wall=         25.1
+- Proc.   0 individual time (sec): cpu=         25.1  wall=         26.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  14 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         24.5  wall=         25.1
++Overall time at end (sec) : cpu=         25.1  wall=         26.2
