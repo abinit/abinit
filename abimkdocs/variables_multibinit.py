@@ -421,7 +421,7 @@ Flag to activate the bound process:
 
 * 0 --> Do not activate the bound process
 
-* 1 --> This option will generate all the possible combinaisons of coefficients from 1 to [[multibinit:bound_maxCoeff]]. Some constrains are imposed during the generation and the fit of the coefficients, they have to be positive and with even power. Finaly, the code will try all the possible combinaisons and try to find a bounded model.
+* 1 --> This option will generate all the possible combinations of coefficients from 1 to [[multibinit:bound_maxCoeff]]. Some constrains are imposed during the generation and the fit of the coefficients, they have to be positive and with even power. Finaly, the code will try all the possible combinations and try to find a bounded model.
 
 * 2 -->  **new version** This option will generate a set of coefficients with a power range defined by [[multibinit:bound_rangePower]] and keep only the coefficients with even power. Then the procedure is similar to the fit process with the constrains to only keep positive coefficients. The bound process will select the coefficients one by one up to [[multibinit:bound_maxCoeff]] and try if the model is bound at each step of the process.
 
