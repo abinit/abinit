@@ -10,7 +10,7 @@ Please read the following instructions carefully.
 This script will upgrade your former ABINIT build configuration files in the
 best possible way, although it will not be able to reproduce complex settings.
 Please note that the new config file will be a customized version of the new
-config template, located at ~abinit/doc/build/config-template.ac8. The former
+config template, located at ~abinit/doc/build/config-template.ac9. The former
 custom per-directory Fortran optimization flags (fcflags_opt_*) will not be
 retrieved.
 
@@ -61,7 +61,7 @@ all the warnings that may now come from this script.
 EOF
 
 # Select config template
-cfg_template="doc/build/config-template.ac8"
+cfg_template="doc/build/config-template.ac9"
 if test ! -s "${cfg_template}"; then
   echo "Error: File not found: ${cfg_template}" >&2
   exit 1
@@ -82,7 +82,7 @@ fi
 
 # Select new config file
 cfg_new=`basename "${cfg_old}"`
-cfg_new="${cfg_new%.ac}.ac8"
+cfg_new="${cfg_new%.ac}.ac9"
 
 # Check that new config file doesn't exist
 if test -e "${cfg_new}"; then

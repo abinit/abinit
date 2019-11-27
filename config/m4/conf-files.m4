@@ -18,9 +18,9 @@
 #
 # Looks for options to the configure script in predefined locations:
 #
-#   * system-wide : /etc/abinit/build/hostname.ac8
-#   * per-user    : ~/.abinit/build/hostname.ac8
-#   * local       : <current_directory>/hostname.ac8
+#   * system-wide : /etc/abinit/build/hostname.ac9
+#   * per-user    : ~/.abinit/build/hostname.ac9
+#   * local       : <current_directory>/hostname.ac9
 #
 # and eventually in a command-line-specified file. "hostname" is the
 # name of the machine without the domain name. The last valid file is
@@ -37,10 +37,10 @@
 AC_DEFUN([ABI_LOAD_OPTIONS],[
   # Setup file names
   abi_hostname=`hostname | sed -e 's/\..*//'`
-  abi_sys_options="/etc/abinit/build/${abi_hostname}.ac8"
-  abi_per_options="${HOME}/.abinit/build/${abi_hostname}.ac8"
-  abi_src_options="${abinit_srcdir}/${abi_hostname}.ac8"
-  abi_loc_options="./${abi_hostname}.ac8"
+  abi_sys_options="/etc/abinit/build/${abi_hostname}.ac9"
+  abi_per_options="${HOME}/.abinit/build/${abi_hostname}.ac9"
+  abi_src_options="${abinit_srcdir}/${abi_hostname}.ac9"
+  abi_loc_options="./${abi_hostname}.ac9"
   abi_cmd_options=`eval echo "${with_config_file}"`
   abi_cfg_enable=""
   abi_cfg_options=""

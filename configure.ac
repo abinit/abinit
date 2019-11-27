@@ -27,7 +27,7 @@
 m4_divert_text([HELP_END], [
 In order to facilitate the configuration of Abinit, you can save the options
 you regularly use into a file. For full instructions, please consult the
-doc/build/config-template.ac8 file in this directory tree.
+doc/build/config-template.ac9 file in this directory tree.
 
 A lot more documentation on how to build and run Abinit is available on the
 Abinit Wiki. Please consult it at https://wiki.abinit.org/ whenever needed.

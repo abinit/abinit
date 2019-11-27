@@ -120,7 +120,7 @@ def main():
   env_template = list()
   opt_template = list()
 
-  ac_fname = os.path.join(home_dir, "doc/build/config-template.ac8")
+  ac_fname = os.path.join(home_dir, "doc/build/config-template.ac9")
   with open(ac_fname, "rt") as fh:
       for line in fh:
         if re_env.match(line):
@@ -138,7 +138,7 @@ def main():
   opt_template.sort()
 
   # Check whether non-trivial option values are found in template
-  ac_fname = os.path.join(home_dir,"doc/build/config-template.ac8")
+  ac_fname = os.path.join(home_dir,"doc/build/config-template.ac9")
 
   with open(ac_fname, "rt") as fh:
     tpl_data = fh.read()
@@ -182,18 +182,18 @@ def main():
     sys.stderr.write("%s  %s  %s\n" % ("-","-" * 48,"-" * 24))
 
     for env in denv_config:
-      sys.stderr.write("%s  %-48s  %-24s\n" % ("I",env,"config-template.ac8"))
+      sys.stderr.write("%s  %-48s  %-24s\n" % ("I",env,"config-template.ac9"))
     for env in denv_template:
       sys.stderr.write("%s  %-48s  %-24s\n" % ("U",env,"environment.conf"))
     for opt in dopt_config:
-      sys.stderr.write("%s  %-48s  %-24s\n" % ("I",opt,"config-template.ac8"))
+      sys.stderr.write("%s  %-48s  %-24s\n" % ("I",opt,"config-template.ac9"))
     for opt in dopt_values:
       for val in opt_values[opt]:
-        sys.stderr.write("%s  %-48s  %-24s\n" % ("D","%s='%s'" % (opt,val),"config-template.ac8"))
+        sys.stderr.write("%s  %-48s  %-24s\n" % ("D","%s='%s'" % (opt,val),"config-template.ac9"))
     for opt in dopt_template:
       sys.stderr.write("%s  %-48s  %-24s\n" % ("U",opt,"options.conf"))
     for opt in dopt_removed:
-      sys.stderr.write("%s  %-48s  %-24s\n" % ("R",opt,"config-template.ac8"))
+      sys.stderr.write("%s  %-48s  %-24s\n" % ("R",opt,"config-template.ac9"))
 
     sys.stderr.write("\n")
 

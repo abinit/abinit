@@ -1,12 +1,12 @@
 #!/usr/bin/python
 
 # Note: this script mirrors the sections found in the
-#       ~abinit/doc/build/config-template.ac8 file.
+#       ~abinit/doc/build/config-template.ac9 file.
 
 from snack import *
 
 # Init
-cfg_template = "doc/build/config-template.ac8"
+cfg_template = "doc/build/config-template.ac9"
 
 # Global build options
 screen = SnackScreen()

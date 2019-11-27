@@ -36,7 +36,7 @@ class MyConfigParser(ConfigParser):
 # Initial setup
 my_name    = "make-doc-options"
 my_configs = ["config/specs/options.conf"]
-my_output  = "doc/build/config-template.ac8"
+my_output  = "doc/build/config-template.ac9"
 
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or

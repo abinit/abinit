@@ -46,7 +46,7 @@ def key_is_ok(key):
 # Initial setup
 my_name     = "make-build-examples"
 my_configs  = ["config/specs/testfarm.conf"]
-my_template = "doc/build/config-template.ac8"
+my_template = "doc/build/config-template.ac9"
 my_outdir   = "doc/build/config-examples"
 my_fbck     = "config/specs/fbversion.conf"
 
@@ -121,11 +121,11 @@ for my_config in my_configs:
     out_data=out_data.replace("_FB_",fbversion)
 
     # Write data
-    out_path = os.path.join(my_outdir, sec+".ac8")
+    out_path = os.path.join(my_outdir, sec+".ac9")
     open(out_path, "wt").write(out_data)
 
     # FIXME: Create symbolic link until the test farm gets updated
     old_path = os.path.join(my_outdir, sec+".ac")
     if ( os.path.exists(old_path) or os.path.islink(old_path) ):
       os.remove(old_path)
-    os.symlink(sec+".ac8", old_path)
+    os.symlink(sec+".ac9", old_path)

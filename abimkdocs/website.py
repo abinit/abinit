@@ -1230,7 +1230,7 @@ The bibtex file is available [here](../abiref.bib).
                 #if a.text is None: a.text = name
                 #target = "_blank"
                 #html_classes.append("abifile-wikilink")
-                url = "/build/config-template.ac8"
+                url = "/build/config-template.ac9"
                 pass
 
             elif namespace == "pdf":

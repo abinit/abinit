@@ -1,7 +1,7 @@
 ==============================================================================
 Typing `make` in the src directory (~abinit/src) leads to the compilation of
 all abinit sources, either standard, or following specific indications
-of a config file, see ~abinit/doc/build/config-template.ac8 for details.
+of a config file, see ~abinit/doc/build/config-template.ac9 for details.
 Usually, `make` should be prepared by running the "configure" script 
 from the top directory while developers can generate it by running
  `./config/scripts/makemake`.

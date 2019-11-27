@@ -1121,6 +1121,10 @@
 #
 #with_triqs="/usr/local"
 
+# Allow Fortran programs to call Python
+#
+#enable_python_invocation="yes"
+
 # Select the 1.4 version of TRIQS
 #
 #enable_triqs_v1_4="yes"
