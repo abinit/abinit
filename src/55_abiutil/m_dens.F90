@@ -809,6 +809,7 @@ end subroutine constrained_dft_free
 !!
 !! OUTPUT
 !!  e_constrained_dft=correction to the total energy, to make it variational
+!!  intgres(4,natom)=integrated residuals from constrained DFT. They are also Lagrange parameters, or gradients with respect to constraints.
 !!
 !! SIDE EFFECTS
 !!  vresid(nfft,nspden)==array for potential residual in real space
@@ -822,7 +823,7 @@ end subroutine constrained_dft_free
 !!
 !! SOURCE
 
- subroutine constrained_residual(c_dft,e_constrained_dft,mpi_enreg,rhor,vresid,xred)
+ subroutine constrained_residual(c_dft,e_constrained_dft,intgres,mpi_enreg,rhor,vresid,xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -830,6 +831,7 @@ end subroutine constrained_dft_free
  type(constrained_dft_t),intent(in) :: c_dft
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
+ real(dp),intent(out) :: intgres(:,:) ! nspden,natom
  real(dp),intent(in) :: rhor(c_dft%nfftf,c_dft%nspden)
  real(dp),intent(inout) :: vresid(c_dft%nfftf,c_dft%nspden)
  real(dp),intent(in) :: xred(3,c_dft%natom)
@@ -845,7 +847,6 @@ end subroutine constrained_dft_free
  real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
  real(dp), allocatable :: intgden(:,:) ! nspden,natom
  real(dp), allocatable :: intgden_delta(:,:) ! nspden,natom
- real(dp), allocatable :: intgres(:,:) ! nspden,natom
  real(dp), allocatable :: intgr(:,:) ! nspden,natom
  real(dp) :: intgf2(c_dft%natom,c_dft%natom),work(2*c_dft%natom) 
  real(dp) :: spinat_normed(3)
@@ -863,7 +864,6 @@ end subroutine constrained_dft_free
 &  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgden)
 
 !We need the integrated residuals
- ABI_ALLOCATE(intgres,(nspden,natom))
  intgres(:,:)=zero
  call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
 &  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres)
@@ -1078,7 +1078,6 @@ end subroutine constrained_dft_free
  ABI_DEALLOCATE(coeffs_constr_dft)
  ABI_DEALLOCATE(intgden)
  ABI_DEALLOCATE(intgden_delta)
- ABI_DEALLOCATE(intgres)
  ABI_DEALLOCATE(intgr)
 
  end subroutine constrained_residual
