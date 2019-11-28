@@ -113,6 +113,10 @@ MODULE m_results_out
    ! Actually, gradient of the total energy with respect
    ! to change of reduced coordinates
 
+  real(dp), pointer :: intgres(:,:,:)
+   ! intgres(4,natom,nimage)   ! 4 is for nspden
+   ! Gradient of the total energy wrt constraints (Hartree)
+
   real(dp), pointer :: mixalch(:,:,:)
    ! mixalch(npsp,ntypat,nimage)   [note that in psps datastructure, the dimensioning is npspalch,ntypalch]
    ! Mixing coefficients going from the input pseudopotentials (those for alchemical mixing) to the alchemical atoms
@@ -263,6 +267,7 @@ subroutine init_results_out(dtsets,option_alloc,option_size,mpi_enregs,&
      ABI_ALLOCATE(results_out(ii)%etotal,(mxnimage_))
      ABI_ALLOCATE(results_out(ii)%fcart,(3,mxnatom,mxnimage_))
      ABI_ALLOCATE(results_out(ii)%fred,(3,mxnatom,mxnimage_))
+     ABI_ALLOCATE(results_out(ii)%intgres,(4,mxnatom,mxnimage_))
      ABI_ALLOCATE(results_out(ii)%mixalch,(mxnpsp,mxntypat,mxnimage_))
      ABI_ALLOCATE(results_out(ii)%npwtot,(mxnkpt,mxnimage_))
      ABI_ALLOCATE(results_out(ii)%occ,(mxnband*mxnkpt*mxnsppol,mxnimage_))
@@ -289,8 +294,9 @@ subroutine init_results_out(dtsets,option_alloc,option_size,mpi_enregs,&
        results_out(ii)%acell=zero
        results_out(ii)%amu=zero
        results_out(ii)%etotal(:)=zero
-       results_out(ii)%fred(:,:,:)=zero
        results_out(ii)%fcart(:,:,:)=zero
+       results_out(ii)%fred(:,:,:)=zero
+       results_out(ii)%intgres(:,:,:)=zero
        results_out(ii)%mixalch(:,:,:)=zero
        results_out(ii)%occ=zero
        results_out(ii)%rprim=zero
@@ -390,6 +396,9 @@ subroutine destroy_results_out(results_out)
      end if
      if (associated(results_out(ii)%fred))    then
        ABI_DEALLOCATE(results_out(ii)%fred)
+     end if
+     if (associated(results_out(ii)%intgres))    then
+       ABI_DEALLOCATE(results_out(ii)%intgres)
      end if
      if (associated(results_out(ii)%mixalch))  then
        ABI_DEALLOCATE(results_out(ii)%mixalch)
@@ -502,6 +511,9 @@ subroutine copy_results_out(results_out_in,results_out_out)
    if (associated(results_out_out%fred))    then
      ABI_DEALLOCATE(results_out_out%fred)
    end if
+   if (associated(results_out_out%intgres))    then
+     ABI_DEALLOCATE(results_out_out%intgres)
+   end if
    if (associated(results_out_out%vel))     then
      ABI_DEALLOCATE(results_out_out%vel)
    end if
@@ -510,6 +522,7 @@ subroutine copy_results_out(results_out_in,results_out_out)
    end if
    ABI_ALLOCATE(results_out_out%fcart,(3,natom_,nimage_))
    ABI_ALLOCATE(results_out_out%fred,(3,natom_,nimage_))
+   ABI_ALLOCATE(results_out_out%intgres,(4,natom_,nimage_))
    ABI_ALLOCATE(results_out_out%vel,(3,natom_,nimage_))
    ABI_ALLOCATE(results_out_out%xred,(3,natom_,nimage_))
  end if
@@ -548,6 +561,7 @@ subroutine copy_results_out(results_out_in,results_out_out)
  results_out_out%etotal(1:nimage_)            =results_out_in%etotal(1:nimage_)
  results_out_out%fcart(1:3,1:natom_,1:nimage_)=results_out_in%fcart(1:3,1:natom_,1:nimage_)
  results_out_out%fred(1:3,1:natom_,1:nimage_) =results_out_in%fred(1:3,1:natom_,1:nimage_)
+ results_out_out%intgres(1:4,1:natom_,1:nimage_) =results_out_in%intgres(1:4,1:natom_,1:nimage_)
  results_out_out%mixalch(1:npsp_,1:ntypat_,1:nimage_)=results_out_in%mixalch(1:npsp_,1:ntypat_,1:nimage_)
  results_out_out%npwtot(1:nkpt_,1:nimage_)    =results_out_in%npwtot(1:nkpt_,1:nimage_)
  results_out_out%occ(1:nocc_,1:nimage_)       =results_out_in%occ(1:nocc_,1:nimage_)
@@ -714,7 +728,7 @@ subroutine gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_
 !        Compute number of integers/reals needed by current
 !        results_out structure for current proc
          isize=results_out(ii)%nkpt
-         rsize=28+12*results_out(ii)%natom+results_out(ii)%nocc+results_out(ii)%npsp*results_out(ii)%ntypat+results_out(ii)%ntypat
+         rsize=28+16*results_out(ii)%natom+results_out(ii)%nocc+results_out(ii)%npsp*results_out(ii)%ntypat+results_out(ii)%ntypat
          isize_img=results_out(ii)%nimage*isize
          rsize_img=results_out(ii)%nimage*rsize
          ABI_ALLOCATE(isize_img_all,(mpi_enregs(ii)%nproc_img))
@@ -755,6 +769,8 @@ subroutine gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_
            ibufr=ibufr+3*natom_
            rbuffer(ibufr+1:ibufr+3*natom_)=reshape(results_out(ii)%fred(1:3,1:natom_,jj),(/3*natom_/))
            ibufr=ibufr+3*natom_
+           rbuffer(ibufr+1:ibufr+4*natom_)=reshape(results_out(ii)%intgres(1:4,1:natom_,jj),(/4*natom_/))
+           ibufr=ibufr+4*natom_
            rbuffer(ibufr+1:ibufr+npsp_*ntypat_)=&
 &               reshape(results_out(ii)%mixalch(1:npsp_,1:ntypat_,jj),(/npsp_*ntypat_/) )
            ibufr=ibufr+npsp_*ntypat_
@@ -829,6 +845,9 @@ subroutine gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_
              results_out_all(ii)%fred(1:3,1:natom_,jj)= &
 &                   reshape(rbuffer_all(ibufr+1:ibufr+3*natom_),(/3,natom_/))
              ibufr=ibufr+3*natom_
+             results_out_all(ii)%intgres(1:4,1:natom_,jj)= &
+&                   reshape(rbuffer_all(ibufr+1:ibufr+4*natom_),(/4,natom_/))
+             ibufr=ibufr+4*natom_
              results_out_all(ii)%mixalch(1:npsp_,1:ntypat_,jj)= &
 &                   reshape(rbuffer_all(ibufr+1:ibufr+npsp_*ntypat_),(/npsp_,ntypat_/))
              ibufr=ibufr+npsp_*ntypat_
