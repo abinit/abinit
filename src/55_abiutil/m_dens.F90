@@ -52,7 +52,7 @@ MODULE m_dens
  public :: constrained_residual    ! Recompute the potential residual, to account for constraints
  public :: mag_penalty             ! Compute the potential corresponding to constrained magnetic moments (using add_atomic_fcts) with the penalty function.
  public :: mag_penalty_e           ! Compute the energy corresponding to constrained magnetic moments.
- public :: calcdensph              ! Compute integral of total density  and magnetization inside spheres around atoms.
+ public :: calcdenmagsph           ! Compute integral of total density  and magnetization inside spheres around atoms.
  public :: prtdenmagsph            ! Print integral of total density and magnetization inside spheres around atoms.
 !!***
 
@@ -685,14 +685,14 @@ end subroutine add_atomic_fcts
 
  ABI_ALLOCATE(intgf2,(natom,natom))
 
-!We need the metric because it is needed in calcdensph.F90
+!We need the metric because it is needed in calcdenmagsph.F90
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  if(any(constraint_kind(:)/=0))then
    !We need to precompute intgf2
    ABI_ALLOCATE(rhor_dum,(nfftf,nspden))
    rhor_dum(:,:)=zero
-   call calcdensph(gmet,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,std_out,&
+   call calcdenmagsph(gmet,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,std_out,&
 &    ratsm,ratsph,rhor_dum,rprimd,typat,ucvol,xred,0,cplex1,intgf2=intgf2)
    ABI_DEALLOCATE(rhor_dum)
  else
@@ -861,13 +861,13 @@ end subroutine constrained_dft_free
 
 !We need the integrated magnetic moments 
  ABI_ALLOCATE(intgden,(nspden,natom))
- call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
+ call calcdenmagsph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
 &  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
  call  prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
 
 !We need the integrated residuals
  intgres(:,:)=zero
- call calcdensph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
+ call calcdenmagsph(c_dft%gmet,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,std_out,&
 &  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres,rhomag=rhomag)
  call  prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,std_out,11,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
 
@@ -1118,7 +1118,7 @@ end subroutine constrained_dft_free
 !!      energy,rhotov,setvtr
 !!
 !! CHILDREN
-!!      calcdensph,metric,ptabs_fourdp,timab,xmpi_sum
+!!      calcdenmagsph,metric,ptabs_fourdp,timab,xmpi_sum
 !!
 !! NOTES
 !!  based on html notes for the VASP implementation at
@@ -1160,7 +1160,7 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
  ABI_ALLOCATE(intgden,(nspden,natom))
 
 !We need the integrated magnetic moments and the smoothing function
- call calcdensph(c_dft%gmet,mpi_enreg,natom,nfft,c_dft%ngfftf,nspden,ntypat,std_out,&
+ call calcdenmagsph(c_dft%gmet,mpi_enreg,natom,nfft,c_dft%ngfftf,nspden,ntypat,std_out,&
 &  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
  call  prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
 
@@ -1226,7 +1226,7 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
        cmm_z=intgden(4,iatom)-c_dft%spinat(3,iatom)
      else if (nspden == 2) then
        ! this is up spins - down spins - requested moment ~ 0
-       ! EB: note that intgden comes from calcdensph, which, in nspden=2 case, returns
+       ! EB: note that intgden comes from calcdenmagsph, which, in nspden=2 case, returns
        ! intgden(1)=rho_up=n+m
        ! intgden(2)=rho_dn=n-m
        ! Then, is the following line be
@@ -1274,7 +1274,7 @@ end subroutine mag_penalty
 !!      outscfcv
 !!
 !! CHILDREN
-!!      calcdensph,metric,wrtout
+!!      calcdenmagsph,metric,wrtout
 !!
 !! SOURCE
 
@@ -1294,7 +1294,7 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
 !Local variables-------------------------------
 !scalars
  integer :: iatom,ii
- integer :: cplex1=1    ! dummy argument for calcdensphere
+ integer :: cplex1=1    ! dummy argument for calcdenmagsph
  real(dp) :: intgden_proj, Epen,Econstr,lVp, norm
 !arrays
  real(dp) :: intmm(3), mag_1atom(3)
@@ -1305,14 +1305,14 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
 
 ! *********************************************************************
 
-!We need the metric because it is needed in calcdensph.F90
+!We need the metric because it is needed in calcdenmagsph.F90
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  ABI_ALLOCATE (intgden, (nspden,natom))
 
 !We need the integrated magnetic moments
  cplex1=1
- call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,std_out,ratsm,ratsph,rhor,rprimd,typat,ucvol,xred,&
+ call calcdenmagsph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,std_out,ratsm,ratsph,rhor,rprimd,typat,ucvol,xred,&
 & 1,cplex1,intgden=intgden,rhomag=rhomag)
  call  prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,ratsm,ratsph,rhomag,typat)
 
@@ -1405,9 +1405,9 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
 end subroutine mag_penalty_e
 !!***
 
-!!****f* m_dens/calcdensph
+!!****f* m_dens/calcdenmagsph
 !! NAME
-!! calcdensph
+!! calcdenmagsph
 !!
 !! FUNCTION
 !! Compute and print integral of total density inside spheres around atoms, 
@@ -1450,7 +1450,7 @@ end subroutine mag_penalty_e
 !!
 !! SOURCE
 
-subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,ratsph,rhor,rprimd,typat,ucvol,xred,&
+subroutine calcdenmagsph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,ratsph,rhor,rprimd,typat,ucvol,xred,&
 &    option,cplex,intgden,dentot,rhomag,intgf2)
 
 !Arguments ---------------------------------------------
@@ -1723,7 +1723,7 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsm,
  endif
 !ENDDEBUG
 
-end subroutine calcdensph
+end subroutine calcdenmagsph
 !!***
 
 !!****f* m_dens/prtdenmagsph

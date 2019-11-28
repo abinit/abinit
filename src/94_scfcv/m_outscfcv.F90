@@ -78,7 +78,7 @@ module m_outscfcv
  use m_multipoles,       only : multipoles_out, out1dm
  use m_mlwfovlp_qp,      only : mlwfovlp_qp
  use m_paw_mkaewf,       only : pawmkaewf
- use m_dens,             only : mag_penalty_e, calcdensph, prtdenmagsph
+ use m_dens,             only : mag_penalty_e, calcdenmagsph, prtdenmagsph
  use m_mlwfovlp,         only : mlwfovlp
  use m_datafordmft,      only : datafordmft
  use m_mkrho,            only : read_atomden
@@ -197,7 +197,7 @@ contains
 !!      scfcv
 !!
 !! CHILDREN
-!!      bonds_lgth_angles,bound_deriv,calc_efg,calc_fc,calcdensph
+!!      bonds_lgth_angles,bound_deriv,calc_efg,calc_fc,calcdenmagsph
 !!      compute_coeff_plowannier,crystal_free,crystal_init,datafordmft,denfgr
 !!      destroy_dmft,destroy_oper,destroy_plowannier,dos_calcnwrite,ebands_free
 !!      ebands_init,ebands_interpolate_kpath,ebands_prtbltztrp,ebands_write
@@ -942,7 +942,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Output of integrated density inside atomic spheres
  if (dtset%prtdensph==1.and.dtset%usewvl==0)then
    ABI_MALLOC(intgden,(nspden,natom))
-   call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,&
+   call calcdenmagsph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,&
 &   ntypat,ab_out,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,ucvol,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
    call  prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,ab_out,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
    ABI_SFREE(intgden)
