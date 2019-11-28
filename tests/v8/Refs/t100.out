@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 27 Nov 2019.
-- ( at 13h39 )
+.Starting date : Thu 28 Nov 2019.
+- ( at 17h30 )
   
--  nproc =    1
+-  nproc =   96
 
 ================================================================================
 
@@ -41,7 +41,7 @@
    bound_maxCoeff   4
        bound_temp  3.25000000E+02
        bound_step   1000
- bound_rangePower  8 10
+ bound_rangePower  4  8
  Miscellaneous information :
          asr         2
  Interatomic Force Constants Inputs :
@@ -192,13 +192,31 @@ ________________________________________________________________________________
  -> Filter Displacement
 
 
+ ==> high order term: (Ti_y-O1_y)^4 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (Ti_y-O1_y)^6 created
+
+
+   ==> Optimizing coefficient
+
+
  ==> high order term: (Ti_y-O1_y)^8 created
 
 
    ==> Optimizing coefficient
 
 
- ==> high order term: (Ti_y-O1_y)^10 created
+ ==> high order term: (Ti_y-O1_y[1 1 0])^4 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (Ti_y-O1_y[1 1 0])^6 created
 
 
    ==> Optimizing coefficient
@@ -210,7 +228,19 @@ ________________________________________________________________________________
    ==> Optimizing coefficient
 
 
- ==> high order term: (Ti_y-O1_y[1 1 0])^10 created
+ ==> high order term: (Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^2 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (Ti_y-O1_y)^4(Ti_y-O1_y[1 1 0])^2 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^4 created
 
 
    ==> Optimizing coefficient
@@ -234,43 +264,25 @@ ________________________________________________________________________________
    ==> Optimizing coefficient
 
 
- ==> high order term: (Ti_y-O1_y)^6(Ti_y-O1_y[1 1 0])^4 created
+ ==> high order term: (Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^2(eta_1)^2 created
 
 
    ==> Optimizing coefficient
 
 
- ==> high order term: (Ti_y-O1_y)^4(Ti_y-O1_y[1 1 0])^6 created
+ ==> high order term: (Ti_y-O1_y)^4(Ti_y-O1_y[1 1 0])^2(eta_1)^2 created
 
 
    ==> Optimizing coefficient
 
 
- ==> high order term: (Ti_y-O1_y)^8(Ti_y-O1_y[1 1 0])^2 created
+ ==> high order term: (Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^4(eta_1)^2 created
 
 
    ==> Optimizing coefficient
 
 
- ==> high order term: (Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^8 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (Ti_y-O1_y)^6(Ti_y-O1_y[1 1 0])^2(eta_1)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^6(eta_1)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (Ti_y-O1_y)^4(Ti_y-O1_y[1 1 0])^4(eta_1)^2 created
+ ==> high order term: (Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^2(eta_1)^4 created
 
 
    ==> Optimizing coefficient
@@ -286,13 +298,31 @@ ________________________________________________________________________________
  -> Filter Displacement
 
 
+ ==> high order term: (Ti_y-O1_y[1 1 0])^4 created
+
+
+   ==> Term exists already. We cycle
+
+
+ ==> high order term: (Ti_y-O1_y[1 1 0])^6 created
+
+
+   ==> Term exists already. We cycle
+
+
  ==> high order term: (Ti_y-O1_y[1 1 0])^8 created
 
 
    ==> Term exists already. We cycle
 
 
- ==> high order term: (Ti_y-O1_y[1 1 0])^10 created
+ ==> high order term: (Ti_y-O1_y[1 1 0])^4 created
+
+
+   ==> Term exists already. We cycle
+
+
+ ==> high order term: (Ti_y-O1_y[1 1 0])^6 created
 
 
    ==> Term exists already. We cycle
@@ -304,13 +334,19 @@ ________________________________________________________________________________
    ==> Term exists already. We cycle
 
 
- ==> high order term: (Ti_y-O1_y[1 1 0])^10 created
+ ==> high order term: (Ti_y-O1_y[1 1 0])^4(eta_2)^2 created
 
 
-   ==> Term exists already. We cycle
+   ==> Optimizing coefficient
 
 
- ==> high order term: (Ti_y-O1_y[1 1 0])^8(eta_2)^2 created
+ ==> high order term: (Ti_y-O1_y[1 1 0])^6(eta_2)^2 created
+
+
+   ==> Optimizing coefficient
+
+
+ ==> high order term: (Ti_y-O1_y[1 1 0])^4(eta_2)^4 created
 
 
    ==> Optimizing coefficient
@@ -324,12 +360,12 @@ ________________________________________________________________________________
 
  Mean Standard Deviation values of the effective-potential
  with respect to the training-set after attempted bounding (meV/atm):
-   Energy          :   9.7490477309498935E-01
+   Energy          :   9.2019062434692800E-01
  Goal function values of the effective.potential
  with respect to the test-set (eV^2/A^2):
-   Forces+Stresses :   1.3510748043628059E-02
-   Forces          :   2.7990065603903289E-03
-   Stresses        :   1.0711741483237730E-02
+   Forces+Stresses :   1.3246710820605717E-02
+   Forces          :   2.7312636525294266E-03
+   Stresses        :   1.0515447168076290E-02
 
 
 ================================================================================
@@ -339,10 +375,10 @@ ________________________________________________________________________________
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=         15.3  wall=         15.3
+- Proc.   0 individual time (sec): cpu=         19.2  wall=         19.4
 
 ================================================================================
 
-+Total cpu time     15.336  and wall time     15.342 sec
++Total cpu time   1821.151  and wall time   1863.927 sec
 
  multibinit : the run completed succesfully.
