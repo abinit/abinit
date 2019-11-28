@@ -4,14 +4,14 @@ set nokey
 set tics font ", 30"
 set xzeroaxis lw 1 lt 3 lc rgb "white"
 set tics textcolor rgb "black"
-set xtics ("R'"1.000000,"G" 40.00000000,"X"90.000000000,"M"140.00000000,"G" 210.0000000)   
+set xtics ("R'"1.000000,"{/Symbol G}" 90.00000000,"X"140.000000000,"M"190.00000000,"{/Symbol G}" 260.0000000)   
 set ytics 1.0
 set ylabel "Energy (eV)"
-set yrange[-4:3.8]
-set zrange[0:8]
+set yrange[-3.8:3.8]
+set zrange[0:100]
 
 #Colors
-set palette defined (0.0 "black",  0.2 "dark-blue",1.0 "cyan", 3 "green", 7 "yellow")
+set palette defined (0.0 "black",  0.2 "dark-blue",2.0 "cyan", 5 "green", 7 "yellow")
 set mouse
 set pm3d  map
 

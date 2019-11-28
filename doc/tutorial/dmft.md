@@ -79,7 +79,7 @@ directory,
 
 ```sh
 cd $ABI_TESTS/tutoparal/Input
-mkdir Work_dfmt
+mkdir Work_dmft
 cd Work_dmft
 cp ../tdmft_x.files . 
 cp ../tdmft_1.in .
@@ -337,7 +337,7 @@ and the Green's function is file *Gtau.dat*.
 You can use the self-energy to compute the quasiparticle renormalization weight. 
 We first extract the first six Matsubara frequencies:
     
-    head -n 42 tdmft_2o_DS2Self-omega_iatom0001_isppol1 > self.dat
+    head -n 6 tdmft_2o_DS2Self-omega_iatom0001_isppol1 > self.dat
 
 Then we plot the imaginary part of the self-energy (in imaginary frequency):
     
@@ -608,8 +608,8 @@ First of all, we are going to relaunch a more converged calculation using tdmft_
 
 {% dialog tests/tutoparal/Input/tdmft_5.in%}
 
-Modify tdmft_x.files and launch the calculation. 
-   
+Modify tdmft_x.files and launch the calculation, it might take some time. The calculation takes in few minutes with 4 processors.
+
     abinit < tdmft_x.files > log_5
 
 We are going to create a new directory for the analytical continuation.
@@ -618,16 +618,15 @@ We are going to create a new directory for the analytical continuation.
   
 We first extract the first Matsubara frequencies (which are not too noisy)
     
-    head -n 42 tdmft_5o_DS2Selfrotformaxent0001_isppol1_iflavor0001 > Spectral/self.dat
-
-    cd Spectral
+    head -n 26 tdmft_5o_DS2Selfrotformaxent0001_isppol1_iflavor0001 > Spectral/self.dat
 
 In this directory, we launch OmegaMaxEnt just to generate the input template:
 
+    cd Spectral
     OmegaMaxEnt
 
 Then, you have to edit the input file OmegaMaxEnt_input_params.dat of OmegaMaxent and specify that the data is contained in self.dat and
-that it contains imaginary frequencies. So the first lines should look like this:
+that it contains a finite value a infinite frequency. So the first lines should look like this:
 
     data file: self.dat
     
@@ -646,13 +645,13 @@ Then relaunch OmegaMaxent
 
 You can now plot the imaginary part of the self energy in real frequencies with:
 
-    xmgrace OmegaMaxEnt_final_result/optimal_spectral_function_*.dat
+    xmgrace OmegaMaxEnt_final_result/optimal_spectral_function.dat
 
 Then, we need to give to ABINIT this file in order for abinit to use
 it, to compute the Green's function in real frequencies and to deduce the k-resolved spectral function.
 First copy this self energy in the real axis in a Self energy file and a grid file for ABINIT.
 
-    cp OmegaMaxEnt_final_result/optimal_spectral_function_*.dat ../self_ra.dat
+    cp OmegaMaxEnt_final_result/optimal_spectral_function.dat ../self_ra.dat
     cd ..
 
 Create file containing the frequency grid with:
@@ -700,7 +699,7 @@ it in file bands.dat:
 Extract DFT band structure from fatbands file in readable file for gnuplot (211 is the number
 of k-point used to plot the band structure (it can be obtained by "grep nkpt log_5_dataset3"):
 
-    grep BAND -A 211 tdmft_5o_DS3_FATBANDS_at0001_V_is1_l0001 | grep -v BAND > bands_dft.dat
+    grep " BAND" -A 261 tdmft_5o_DS3_FATBANDS_at0001_V_is1_l0001 | grep -v BAND > bands_dft.dat
 
 And you can use a gnuplot script to plot it:
 
@@ -728,6 +727,8 @@ The spectral function should thus look like this.
 
 The white curve is the LDA band structure, the colored plot is the DMFT spectral function.
 One notes the renormalization of the bandwith as well as Hubbard bands, mainly visible a high energy  (arount 2 eV).
+A  more precise description of the Hubbard band would require a more converged calculation.
+
 
 
 ## 8 Electronic Structure of SrVO3: Conclusion
