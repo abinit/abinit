@@ -130,7 +130,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !scalar
  integer :: filetype,icoeff_bound,ii, unit_out
 !integer :: iexit,initialized
- integer :: jj,kk,nproc,icoeff,ncoeff,nmodels,ncoeff_bound,ncoeff_bound_tot,ncoeff_max
+ integer :: jj,kk,nproc,ncoeff,nmodels,ncoeff_bound,ncoeff_bound_tot,ncoeff_max
  integer :: model_bound,model_ncoeffbound,my_rank
 !integer :: mtypalch,,npsp,paw_size,type
 !integer,save :: paw_size_old=-1
@@ -178,7 +178,6 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
  character(len=fnlen) :: filename
  character(len=fnlen) :: name_file 
- character(len=200):: term_name
 !character(len=fnlen) :: filename_psp(3)
  type(electronpositron_type),pointer :: electronpositron
 ! type(pspheader_type),allocatable :: pspheads(:)
@@ -441,7 +440,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !      filename_psp(2) = "/home/alex/calcul/psp/Ti.LDA_PW-JTH.xml"
 !      filename_psp(3) = "/home/alex/calcul/psp/O.LDA_PW-JTH.xml"
 !      ABI_DATATYPE_ALLOCATE(pspheads,(npsp))
-!      call inpspheads(filename_psp,npsp,pspheads,ecut_tmp)
+!      call inpspheads-rw-rw-r-- 1 mschmitt mschmitt  22004 Nov 28 14:30 log-MPI16-t98-new-4-8-from-ddb-large-coeff_ini-(filename_psp,npsp,pspheads,ecut_tmp)
 !      call psps_init_global(mtypalch, npsp, psps, pspheads)
 !      call psps_init_from_dtset(dtset, 1, psps, pspheads)
 !    end if

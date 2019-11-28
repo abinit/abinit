@@ -625,7 +625,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
  real(dp) :: acell(3)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: buff_ewald(:,:,:,:,:,:),dyew(:,:,:,:,:), dyewq0(:,:,:,:,:)
- real(dp),allocatable :: xred(:,:),xred_tmp(:,:),zeff_tmp(:,:,:), wghatm(:,:,:)
+ real(dp),allocatable :: xred(:,:),xred_tmp(:,:),zeff_tmp(:,:,:)
  type(supercell_type) :: supercell
  type(ifc_type) :: ifc_tmp
  integer, allocatable :: full_cell(:,:)
@@ -2259,8 +2259,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   real(dp) :: energy_coeff_part(eff_pot%anharmonics_terms%ncoeff)
   real(dp),allocatable :: xcart(:,:)
   character(len=500) :: msg
-  character(len=fnlen) :: name_file
 ! *************************************************************************
+
+  !Hide SCALE-UP Variables 
+  ABI_UNUSED(update_dens)
 
   !MPI variables
   comm = eff_pot%mpi_ifc%comm

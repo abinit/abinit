@@ -1958,8 +1958,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  type(polynomial_coeff_type),allocatable,intent(inout) :: coefficients(:)
 !Local variables-------------------------------
 !scalar
- integer :: ia,ib,icoeff,icoeff2,icoeff3,ierr,ii,ij,irpt,irpt_ref,iterm,i0
- integer :: lim1,lim2,lim3,tmp_ind1,tmp_ind2,i,j,k,cnt,idisp,isym,istrain
+ integer :: ia,ib,icoeff,icoeff2,icoeff3,ierr,ii,irpt,irpt_ref,iterm
+ integer :: lim1,lim2,lim3,i
  integer :: master,my_rank,my_ncoeff,my_newncoeff,natom,ncombination,ncoeff_max,ncoeff_sym
  integer :: ncoeff_symsym,nirred_comb,iirred_comb,ndisp,nstrain,fit_iatom_in
  integer :: ncoeff_alone,ndisp_max,nproc,nrpt,nsym,nterm,nstr_sym,r1,r2,r3,my_size
@@ -1972,9 +1972,9 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  integer :: ncell(3)
  integer,allocatable :: buffsize(:),buffdispl(:),index_irredcomb(:),dummylist(:),index_irred(:)
  integer,allocatable :: index_irredcomb_fix(:),offsets(:)
- integer,allocatable :: cell(:,:),compatibleCoeffs(:,:),list_combination_cmp_tmp(:)
+ integer,allocatable :: cell(:,:),compatibleCoeffs(:,:)
  integer,allocatable :: list_symcoeff(:,:,:),list_symstr(:,:,:),list_coeff(:),list_combination(:,:)
- integer,allocatable :: list_combination_tmp(:,:),list_combination_tmp2(:,:),irank_combi_start(:),irank_combi_end(:)
+ integer,allocatable :: list_combination_tmp(:,:),irank_combi_start(:),irank_combi_end(:)
  integer,allocatable :: irank_ncombi(:),my_index_irredcomb(:),irank_ncombi_irred(:)
  integer,allocatable  :: my_coefflist(:),my_coeffindexes(:),my_newcoeffindexes(:),my_list_combination(:,:)
  real(dp) :: rprimd(3,3),range_ifc(3)
@@ -1987,6 +1987,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  type(polynomial_term_type),dimension(:),allocatable :: terms
  character(len=fnlen) :: filename
 ! *************************************************************************
+ !Hide filename for debugging 
+ ABI_UNUSED(filename)
 
  !MPI variables
  master = 0
@@ -2527,7 +2529,7 @@ if(iam_master)then
    do i=2,ncombination
       if(any(list_combination_tmp(:,i) > ncoeff_symsym))then
         irreducible = check_irreducibility(list_combination_tmp(:,i),list_combination_tmp(:,:i-1),list_symcoeff,&
-&                                          list_symstr,ncoeff_symsym,nsym,i-1,power_disps(2),index_irred,comm)
+&                                          list_symstr,ncoeff_symsym,nsym,i-1,power_disps(2),index_irred)
         if(.not. irreducible) list_combination_tmp(:,i) = 0
       endif
    enddo
@@ -3142,8 +3144,8 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
  character(len=5),intent(in) :: symbols(natom)
 !Local variables ---------------------------------------
 !scalar
- integer :: icoeff1,icoeff2,nbody_in,ii,jj,nbody_count,nmodel_tot_test
- integer :: isym_in_test,idisp_in_test,ndisp_test,ndisp_out,nstrain,nmodel_start
+ integer :: icoeff1,icoeff2,nbody_in,ii,jj,nbody_count
+ integer :: ndisp_out,nstrain,nmodel_start
  logical :: need_compute,compatible,possible,need_anharmstr,need_spcoupling
  logical :: need_only_odd_power,need_only_even_power,compute_sym
 !arrays
@@ -3468,7 +3470,7 @@ if(isym_in <= nsym .and. idisp_in <= ndisp)then
              if(ncombi_to_test >= 1)then
                 irreducible = check_irreducibility(list_combination(:,ncombi),list_combination(:,ncombi_start:ncombi-1),&
 &                                                  list_symcoeff,list_symstr,ncoeff,nsym,ncombi_to_test,ndisp_max,&
-&                                                  index_irred,comm)
+&                                                  index_irred)
              endif
              !write(std_out,*) "DEBUG ncombi", ncombi,"irreducible", irreducible
              ! If not delete (set to zero)
@@ -3910,7 +3912,6 @@ integer :: power_strph
 integer :: option 
 integer :: icoeff1,icoeff2,start
 integer :: ncoeff_out 
-character(len=fnlen) :: fname
 logical,allocatable :: same(:)
 type(polynomial_coeff_type),allocatable :: strain_terms_tmp(:)
 !scalar
@@ -4089,7 +4090,6 @@ subroutine coeffs_list_copy(coeff_list_out,coeff_list_in)
 !Arguments ------------------------------------
   type(polynomial_coeff_type), intent(in) :: coeff_list_in(:)
   type(polynomial_coeff_type),intent(out) :: coeff_list_out(:)
-  integer :: dummy
 !local
 !variable
   integer :: ncoeff_in,ncoeff_out,ii
@@ -4237,13 +4237,13 @@ end subroutine sort_combination_list
 !! SOURCE
 
 function check_irreducibility(combination,list_combination,list_symcoeff,list_symstr,ncoeff_sym,nsym,&
-&                             ncombination,ndisp,index_irred,comm)  result(irreducible)
+&                             ncombination,ndisp,index_irred)  result(irreducible)
 !Arguments ------------------------------------
  implicit none
 
 !Arguments ------------------------------------
  !scalar 
- integer,intent(in) :: ncoeff_sym,ncombination,ndisp,nsym,comm
+ integer,intent(in) :: ncoeff_sym,ncombination,ndisp,nsym
  integer,intent(inout),allocatable :: index_irred(:)
  logical :: irreducible !output
  !array
@@ -4252,10 +4252,7 @@ function check_irreducibility(combination,list_combination,list_symcoeff,list_sy
  integer,intent(in) :: list_symstr(6,nsym,2)
 !local
 !variable
-  integer :: icombi,istrain,idisp,i,isym
-  integer :: master,nproc,my_rank,ncombi_alone,my_ncombi,my_ncombi_simple
-  integer :: my_ncombi_start
-  logical :: iam_master,search
+  integer :: icombi,istrain,idisp,isym
 !array
   integer :: combination_cmp_tmp(ndisp)
   integer,allocatable :: index_irred_tmp(:) 

@@ -240,7 +240,6 @@ subroutine outvars_scup(scup_dtset,nunit)
  integer :: int_peigv=0,int_peltic=0,int_pgeom=0,int_porbocc=0
  integer :: int_freezden=0
 !Character for defining fromat string 
- character(len=32) :: string
 !*********************************************************************
    
    !Check if logicals are true, if yes set integers to one for printing
@@ -253,13 +252,7 @@ subroutine outvars_scup(scup_dtset,nunit)
    if(scup_dtset%scup_printgeom)    int_pgeom    =1
    if(scup_dtset%scup_printorbocc)  int_porbocc  =1
    if(scup_dtset%scup_freezden)     int_freezden =1
-   
-   !Debug format string for writing kpoints to output
-   !Write format string for special kpoints 
-   !if(allocated(scup_dtset%scup_speck))then 
-   !   write (string, '( "(1x,a16 ", I4, "(F6.2))" )' )  scup_dtset%scup_nspeck
-   !endif
-   
+    
    !Print  
    write(nunit,'(a)')'Variables for SCALE-UP electronic model :'
    write(nunit,'(1x,a16,3I3)')    '      scup_ksamp',scup_dtset%scup_ksamp
@@ -281,11 +274,6 @@ subroutine outvars_scup(scup_dtset,nunit)
    write(nunit,'(1x,a16,ES10.2)') '   scup_smearing',scup_dtset%scup_smearing 
    write(nunit,'(1x,a16,I3)')     ' scup_startpulay',scup_dtset%scup_startpulay
    write(nunit,'(1x,a16,I3)')     ' scup_maxscfstep',scup_dtset%scup_maxscfstep
-
-   !Debug write kpoints to output 
-   !if(allocated(scup_dtset%scup_speck))then 
-   !   write(nunit,string)     '      scup_speck',scup_dtset%scup_speck
-   !endif
 
 
 end subroutine outvars_scup
@@ -331,11 +319,11 @@ implicit none
 !Dummy arguments for subroutine 'intagm' to parse input file
 !Set routine version number here:
 !scalars
- integer :: ii,jdtset,jj,marr,tread
+ integer :: ii,jdtset,marr,tread
  character(len=500) :: message
 !arrays
  integer,allocatable :: intarr(:)
- real(dp),allocatable :: dprarr(:),work(:)
+ real(dp),allocatable :: dprarr(:)
  !tmp integer to transfer to logicals 
  integer :: tmp_int
 

@@ -2315,7 +2315,8 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  type(scup_dtset_type),optional,intent(inout) :: scup_dtset
 !Local variables-------------------------------
 !scalar
-integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst,itime
+integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,itime
+!Uncommend for dipdip test
 ! integer :: ifirst
  real(dp):: energy,energy_harm
  logical :: need_anharmonic = .TRUE.,need_print=.FALSE., anh_opened,need_elec_eval
@@ -2324,10 +2325,13 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst,itime
 !Strings/Characters 
  character(len=fnlen) :: file_energy, file_stress, file_anh, name_file
  character(len=500) :: msg
- type(abihist) :: hist_out
- character(len=200) :: filename_hist
+!Uncommend for dipdip test
+! type(abihist) :: hist_out
+! character(len=200) :: filename_hist
 
 ! *************************************************************************
+ !MS Hide SCALE-UP variables 
+ ABI_UNUSED(itime)
 
  !Do some checks
  if(ntime /= hist%mxhist)then
@@ -2494,11 +2498,10 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
 !Local variables-------------------------------
 !reals 
   real(dp) :: factor,mse,msef,mses
-  type(fit_data_type) :: test_data
   real(dp),allocatable :: sqomega(:),ucvol(:)
   real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
 !scalar
-  integer :: itime, test,unit_anh
+  integer :: itime,unit_anh
   integer :: natom,ntime,ncoeff,my_rank
 !logicals 
   logical :: iam_master, need_print_anharmonic,file_opened

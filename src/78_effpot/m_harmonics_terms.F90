@@ -591,8 +591,10 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_u
 ! scalar
   integer :: i1,i2,i3,ia,ib,icell,ierr,irpt,irpt_tmp,ii,jj,kk,ll
   integer :: mu,nu
-  real(dp):: disp1,disp2,ifc,short_ifc,ewald_ifc,tmp_etot1,tmp_etot2
-  real(dp):: tmp_ewald1,tmp_ewald2,tmp_short1,tmp_short2
+  real(dp):: disp1,disp2,ifc,tmp_etot1,tmp_etot2
+!Variables for separation of short and dipdip ifc contribution 
+ !real(dp):: short_ifc,ewald_ifc
+ !real(dp):: tmp_ewald1,tmp_ewald2,tmp_short1,tmp_short2
   ! array
   character(500) :: msg
 

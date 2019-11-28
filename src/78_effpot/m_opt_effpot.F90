@@ -368,21 +368,20 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 !Strings 
 !Local variables ------------------------------
 !scalars
- integer :: i,ii, info,natom_sc,ntime,iterm,nterm,idisp,ndisp
- integer :: jterm,iterm2, ncombi,ncombi1,ncombi2
- integer :: power_tot,icombi,nterm_opt
- integer :: nterm_start,nterm_tot_tmp,nterm2
+ integer :: i,ii,natom_sc,ntime,iterm,nterm
+ integer :: jterm, ncombi,ncombi1,ncombi2
+ integer :: icombi
+ integer :: nterm_start,nterm2
  integer :: nproc,my_rank,master
  !1406
  real(dp) :: factor,mse_ini,msef_ini,mses_ini,mse,msef,mses,coeff_ini=0.1
- real(dp) :: to_divide,divided,divider1,divider2,coeff_tmp
+ real(dp) :: coeff_tmp
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
 !arrays 
- integer :: sc_size(3),optterm(1)
+ integer :: sc_size(3)
  integer,allocatable :: terms(:)
  logical,allocatable :: exists(:) 
  type(fit_data_type) :: fit_data
- type(polynomial_coeff_type) :: term
  real(dp) :: msefs_arr(2),coeff_opt(2)
  !real(dp), allocatable :: energy_coeffs(:,:),fcart_coeffs(:,:,:,:)
  !real(dp), allocatable :: strten_coeffs(:,:,:)
@@ -391,14 +390,13 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  type(polynomial_coeff_type),allocatable :: singledisp_terms(:),HOsingledisp_terms(:)
  type(polynomial_coeff_type),allocatable :: HOcrossdisp_terms(:)
 !Logicals
- logical :: need_print_anh=.FALSE.,file_opened,equal_term_done ! MARCUS FOR THE MOMENT PRINT NO FILES
- logical :: had_strain,to_skip,iam_master
+ logical :: need_print_anh=.FALSE. ! MARCUS FOR THE MOMENT PRINT NO FILES
+ logical :: to_skip,iam_master
 !Strings
  character(len=5),allocatable :: symbols(:)
  character(len=200):: name
  character(len=1000) :: message
- character(len=1000) :: frmt
- character(len=fnlen) :: fn_bf='before_opt_diff', fn_af='after_opt_diff'
+ character(len=fnlen) :: fn_bf='before_opt_diff'!, fn_af='after_opt_diff'
 !*************************************************************************
    !MPI variables
    master = 0
@@ -507,7 +505,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
        if(.not. to_skip)then
           !Get List of high order single Terms for terms 
           call opt_getHOSingleDispTerms(eff_pot%anharmonics_terms%coefficients(iterm),&
-&                                      HOsingledisp_terms,symbols,singledisp_terms,order_ran,ncombi1,comm)
+&                                      HOsingledisp_terms,symbols,singledisp_terms,order_ran,ncombi1)
           !Get List of high order cross Terms for term if ndisp > 1
           if(eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp>1 .or. &
 &            eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp /= 0 .and. &
@@ -645,7 +643,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
                   call wrtout(std_out,message,'COLL')
                   write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses): ", (msef+mses)
                   call wrtout(std_out,message,'COLL')
-	          coeff_opt(i) =  eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient
+                  coeff_opt(i) =  eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient
                   msefs_arr(i) =  (msef+mses)/(msef_ini+mses_ini)
                   if(i==2 .and. abs(msefs_arr(1)-msefs_arr(2)) < tol8)then 
                      eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient =& 
@@ -653,7 +651,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
                      write(message,'(5a)') ch10,"Differences between test-cycles to small increase",ch10, & 
 &                                          "test coefficient value by factor 1000",ch10
                      call wrtout(std_out,message,'COLL')
-		     i = 1
+                     i = 1
                   else 
                      i=i+1
                   end if 
@@ -749,13 +747,12 @@ end subroutine opt_effpotbound
 !!
 !! SOURCE
 
-subroutine opt_getHOforterm(term,order_range,order_start,order_stop,comm)
+subroutine opt_getHOforterm(term,order_range,order_start,order_stop)
 
  implicit none 
          
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: comm
  type(polynomial_coeff_type),intent(in) :: term
 !arrays 
  integer,intent(in) :: order_range(2)
@@ -769,8 +766,6 @@ subroutine opt_getHOforterm(term,order_range,order_start,order_stop,comm)
  integer,allocatable :: powers(:) 
 !Logicals
 !Strings
- character(len=1000) :: message
- character(len=1000) :: frmt
 !*************************************************************************
 
      !Get/Initialize variables
@@ -841,13 +836,13 @@ end subroutine opt_getHOforterm
 !!
 !! SOURCE
 
-subroutine opt_getCombisforterm(order_start,order_end,ndisp,ncombi,ncombi_order,comm)
+subroutine opt_getCombisforterm(order_start,order_end,ndisp,ncombi,ncombi_order)
 
  implicit none 
          
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ndisp,comm
+ integer,intent(in) :: ndisp
  integer,intent(in) :: order_start, order_end
 !arrays 
  integer,intent(out) :: ncombi
@@ -856,14 +851,13 @@ subroutine opt_getCombisforterm(order_start,order_end,ndisp,ncombi,ncombi_order,
 !Strings 
 !Local variables ------------------------------
 !scalars
- integer :: i,idisp,nterm_of_term,power_tot
+ integer :: i
  integer :: order,iorder1,iorder2
 !arrays 
 !integer 
 !Logicals
 !Strings
  character(len=1000) :: message
- character(len=1000) :: frmt
 !*************************************************************************
 
 !Test 
@@ -942,16 +936,15 @@ end subroutine opt_getCombisforterm
 !!
 !! SOURCE
 
-subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order,comm)
+subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi_order)
 
  implicit none 
          
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ndisp,comm
+ integer,intent(in) :: ndisp
  integer,intent(in) :: order_start, order_stop
 !arrays 
- integer,intent(in) :: ncombi
  integer,intent(in) :: ncombi_order(:)
 !Logicals
  type(polynomial_coeff_type),target,intent(inout) :: terms(:)
@@ -959,7 +952,7 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
 !Local variables ------------------------------
 !scalars
  integer :: i,icombi,icombi2,icombi_start,icombi_stop,idisp,nterm_of_term
- integer :: order,iorder1,iorder2,iterm_of_term,jdisp,power_tot
+ integer :: order,iterm_of_term,jdisp,power_tot
  integer :: jdisp1,jdisp2,sec
  real(sp) :: to_divide,divider1,divider2,divided
 !arrays 
@@ -968,7 +961,6 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
  logical :: equal_term_done
 !Strings
  character(len=1000) :: message
- character(len=1000) :: frmt
 !*************************************************************************
      !Get Variables 
      nterm_of_term = terms(1)%nterm
@@ -1143,13 +1135,12 @@ end subroutine opt_getHoTerms
 !!
 !! SOURCE
 
-subroutine opt_filterdisp(term,nterm_of_term,comm)
+subroutine opt_filterdisp(term,nterm_of_term)
 
  implicit none 
          
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: comm
  type(polynomial_coeff_type),target,intent(inout) :: term
  integer,intent(in) :: nterm_of_term
  !arrays 
@@ -1157,8 +1148,7 @@ subroutine opt_filterdisp(term,nterm_of_term,comm)
 !Strings 
 !Local variables ------------------------------
 !scalars
- integer :: iterm_of_term,iterm_of_term1,iterm_of_term2
- integer :: new_nterm_of_term,n_double
+ integer :: iterm_of_term
 !reals 
  real(dp) :: coeff
 !arrays 
@@ -1324,9 +1314,9 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp,comm)
 !Strings 
 !Local variables ------------------------------
 !scalars
- integer ::  ndisp,nterm_of_term,nterm_tot_tmp
+ integer ::  ndisp,nterm_of_term
  integer ::  order_start,order_stop,norder
- integer ::  ii, icombi,idisp,iterm_of_term
+ integer ::  icombi,idisp,iterm_of_term
  integer :: ncombi_tot 
 !reals
  real(dp) :: coeff_ini 
@@ -1363,7 +1353,7 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp,comm)
 &               ' -> Filter Displacement',ch10
                 call wrtout(ab_out,message,'COLL')
                 call wrtout(std_out,message,'COLL')
-                call opt_filterdisp(term,nterm_of_term,comm)
+                call opt_filterdisp(term,nterm_of_term)
                 !Get new value of symmetry equivalent term nterm_of_term 
                 nterm_of_term = term%nterm
                 !Remember if this term had strain
@@ -1373,7 +1363,7 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp,comm)
        ! Ok we want it. Let's go. 
       
        ! get start and stop order for this term 
-       call opt_getHOforterm(term,power_disp,order_start,order_stop,comm)
+       call opt_getHOforterm(term,power_disp,order_start,order_stop)
        if(order_start == 0)then 
                 ! Message to Output 
                 write(message,'(5a,I2,a,I2,3a)' )ch10,&
@@ -1386,7 +1376,7 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp,comm)
        end if
        
        ! get total amount of combinations and combinations per order for the term
-       call opt_getCombisforterm(order_start,order_stop,ndisp,ncombi,ncombi_order,comm)
+       call opt_getCombisforterm(order_start,order_stop,ndisp,ncombi,ncombi_order)
              
        ! Allocate terms with ncombi free space to work with 
        if(had_strain)then 
@@ -1418,7 +1408,7 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp,comm)
                 terms_out(icombi)%terms(iterm_of_term)%power_strain = 2
                 coeff_ini = 10d3 !abs(terms_out(icombi)%coefficient / 2)
                 terms_out(icombi)%coefficient = coeff_ini
-	     elseif(icombi>2*ncombi)then
+             elseif(icombi>2*ncombi)then
                 terms_out(icombi)%terms(iterm_of_term)%power_strain = 4
                 coeff_ini = 10d5 !abs(terms_out(icombi)%coefficient / 2)
                 terms_out(icombi)%coefficient = coeff_ini
@@ -1435,12 +1425,12 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp,comm)
       
        ! Get high order combinations 
        if(had_strain)then           
-          call opt_getHoTerms(terms_out(:ncombi),order_start,order_stop,ndisp,ncombi,ncombi_order,comm) 
-	  call opt_getHoTerms(terms_out(ncombi+1:2*ncombi),order_start,order_stop,ndisp,ncombi,ncombi_order,comm) 
-	  call opt_getHoTerms(terms_out(2*ncombi+1:),order_start,order_stop,ndisp,ncombi,ncombi_order,comm) 
+          call opt_getHoTerms(terms_out(:ncombi),order_start,order_stop,ndisp,ncombi_order) 
+          call opt_getHoTerms(terms_out(ncombi+1:2*ncombi),order_start,order_stop,ndisp,ncombi_order) 
+          call opt_getHoTerms(terms_out(2*ncombi+1:),order_start,order_stop,ndisp,ncombi_order) 
           ncombi = ncombi_tot
        else 
-          call opt_getHoTerms(terms_out,order_start,order_stop,ndisp,ncombi,ncombi_order,comm) 
+          call opt_getHoTerms(terms_out,order_start,order_stop,ndisp,ncombi_order) 
        endif
        !DEALLOCATION 
        ABI_DEALLOCATE(ncombi_order)
@@ -1684,13 +1674,12 @@ end subroutine opt_getSingleDispTerms
 !!
 !! SOURCE
 
-subroutine opt_getHOSingleDispTerms(term_in,terms_out,symbols,single_disp_terms,power_disp,ncoeff,comm)
+subroutine opt_getHOSingleDispTerms(term_in,terms_out,symbols,single_disp_terms,power_disp,ncoeff)
 
  implicit none 
          
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: comm
  integer,intent(out) :: ncoeff
  type(polynomial_coeff_type),intent(in) :: term_in
  type(polynomial_coeff_type),intent(in) :: single_disp_terms(:)
@@ -1705,9 +1694,7 @@ subroutine opt_getHOSingleDispTerms(term_in,terms_out,symbols,single_disp_terms,
 !scalars
 integer :: ndisp,norder, nterm_of_term
 integer :: icoeff,iorder,idisp, iterm1,iterm2,iterm3
-logical :: iam_master,need_verbose 
 !Strings
- character(len=1000) :: message
  character(len=200):: name
 !arrays
  type(polynomial_coeff_type),allocatable :: terms_out_tmp(:) 
