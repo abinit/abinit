@@ -1477,12 +1477,7 @@ subroutine calcdenmagsph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,rat
  real(dp),parameter :: delta=0.99_dp
  real(dp) :: difx,dify,difz,r2,r2atsph,rr1,rr2,rr3,rx,ry,rz
  real(dp) :: fsm, ratsm2
- real(dp) :: mag_coll   , mag_x, mag_y, mag_z ! EB
- real(dp) :: mag_coll_im, mag_x_im, mag_y_im, mag_z_im ! SPr
- real(dp) :: sum_mag, sum_mag_x,sum_mag_y,sum_mag_z,sum_rho_up,sum_rho_dn,sum_rho_tot ! EB
- real(dp) :: rho_tot, rho_tot_im
  logical   :: grid_found
- character(len=500) :: msg,msg1
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  integer :: overlap_ij(natom,natom)
@@ -1772,14 +1767,12 @@ real(dp),intent(in) :: ratsph(ntypat),rhomag(2,nspden)
 real(dp),intent(out),optional  :: intgden(nspden,natom)
 !Local variables ------------------------------
 !scalars
- integer :: i1,i2,i3,iatom,ix,iy,iz
+ integer :: iatom,ix
  real(dp) :: mag_coll   , mag_x, mag_y, mag_z ! EB
  real(dp) :: mag_coll_im, mag_x_im, mag_y_im, mag_z_im ! SPr
- real(dp) :: sum_mag, sum_mag_x,sum_mag_y,sum_mag_z,sum_rho_up,sum_rho_dn,sum_rho_tot ! EB
  real(dp) :: rho_tot, rho_tot_im
+ real(dp) :: sum_mag, sum_mag_x,sum_mag_y,sum_mag_z,sum_rho_up,sum_rho_dn,sum_rho_tot ! EB
  character(len=500) :: msg,msg1
-!arrays
-! real(dp) :: intg(4)
 
 ! *************************************************************************
 
