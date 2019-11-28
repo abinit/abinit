@@ -646,9 +646,16 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
  ngrvdw=0;if (dtset%vdw_xc>=5.and.dtset%vdw_xc<=7) ngrvdw=dtset%natom
  ABI_ALLOCATE(grvdw,(3,ngrvdw))
- ngrcondft=0; if(any(dtset%constraint_kind(:)/=0)) ngrcondft=dtset%natom
+
+ ngrcondft=0
+ if(any(dtset%constraint_kind(:)/=0)) ngrcondft=dtset%natom
  ABI_ALLOCATE(grcondft,(3,ngrcondft))
  ABI_ALLOCATE(intgres,(dtset%nspden,ngrcondft))
+ if(ngrcondft/=0)then
+   grcondft(:,:)=zero
+   intgres(:,:)=zero
+ endif
+
  grchempottn(:,:)=zero
  forold(:,:)=zero ; gresid(:,:)=zero ; pel(:)=zero
  vtrial(:,:)=zero; vxc(:,:)=zero
@@ -2123,9 +2130,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !SHOULD CLEAN THE ARGS OF THIS ROUTINE
  call afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
-& energies,etotal,favg,fcart,fock,forold,fred,grchempottn,&
+& energies,etotal,favg,fcart,fock,forold,fred,grchempottn,grcondft,&
 & gresid,grewtn,grhf,grhor,grvdw,&
-& grxc,gsqcut,hdr,indsym,irrzon,istep,istep_fock_outer,istep_mix,&
+& grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
 & kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&

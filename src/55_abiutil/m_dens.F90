@@ -809,7 +809,7 @@ end subroutine constrained_dft_free
 !!
 !! OUTPUT
 !!  e_constrained_dft=correction to the total energy, to make it variational
-!!  intgres(4,natom)=integrated residuals from constrained DFT. They are also Lagrange parameters, or gradients with respect to constraints.
+!!  intgres(nspden,natom)=integrated residuals from constrained DFT. They are also Lagrange parameters, or gradients with respect to constraints.
 !!
 !! SIDE EFFECTS
 !!  vresid(nfft,nspden)==array for potential residual in real space
