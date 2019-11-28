@@ -915,6 +915,7 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
 !     enddo
    endif
    if (option==4) then
+         sf=czero
      do isppol = 1 , nsppol
        do ikpt = 1, nkpt
          do ib=1,mbandc
@@ -925,18 +926,18 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
        enddo
      enddo
    endif
-   if(paw_dmft%dmft_kspectralfunc==0) then
-     sf_corr=czero
+   if(paw_dmft%dmft_kspectralfunc==1) then
      do iatom=1,natom
-       call int2char4(iatom,tag_at)
-       ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
-       tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_spectralfunction_orb_'//trim(char1)//'_iatom'//trim(tag_at)
-       if (open_file(tmpfil, message, newunit=spcorb_unt, status='unknown', form='formatted') /= 0) then
-         MSG_ERROR(message)
-       end if
-       write(message,*) "#", nspinor,nsppol,ndim,green%nw
-       call wrtout(spcorb_unt,message,'COLL')
        if(green%oper(1)%matlu(iatom)%lpawu.ne.-1) then
+         sf_corr=czero
+         call int2char4(iatom,tag_at)
+         ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
+         tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_spectralfunction_orb_'//trim(char1)//'_iatom'//trim(tag_at)
+         if (open_file(tmpfil, message, newunit=spcorb_unt, status='unknown', form='formatted') /= 0) then
+           MSG_ERROR(message)
+         end if
+         write(message,*) "#", nspinor,nsppol,ndim,green%nw
+         call wrtout(spcorb_unt,message,'COLL')
          write(message,*) "#", green%oper(1)%matlu(iatom)%lpawu
          call wrtout(spcorb_unt,message,'COLL')
          ndim=2*green%oper(1)%matlu(iatom)%lpawu+1
@@ -949,12 +950,12 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
              enddo
            enddo
          enddo
+         do ifreq=1,green%nw
+           write(message,*) green%omega(ifreq),(-aimag(sf_corr(ifreq)))/3.141592653589793238_dp
+           call wrtout(spcorb_unt,message,'COLL')
+         enddo
+         close(spcorb_unt)
        endif
-       do ifreq=1,green%nw
-         write(message,*) green%omega(ifreq),(-aimag(sf_corr(ifreq)))/3.141592653589793238_dp
-         call wrtout(spcorb_unt,message,'COLL')
-       enddo
-       close(spcorb_unt)
      enddo
    endif
    if (option==4) then
