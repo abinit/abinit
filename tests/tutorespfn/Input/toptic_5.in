@@ -1,0 +1,104 @@
+# Prepare the computation of linear optic properties (for the imaginary spectrum only)
+# of GaAs crystal : ground-state with few bands,
+# then non-SCF with a larger number of bands, then ddk for different directions
+# Note that the k point sampling shoud be finer for significant results. The cut-off energy is also too low.
+
+ ndtset 6
+
+#First dataset : SC run with kpoints in the IBZ
+  nband1  4     
+  nstep1 25   
+ kptopt1 1
+ nbdbuf1 0
+ prtden1 1   getden1 0   getwfk1 0    # Usual file handling data
+
+#Second dataset : NSC run with large number of bands, and points in the IBZ
+    iscf2 -2  
+   nband2  9  # Minimal number of bands for linear optics (imaginary part of the spectrum)
+   nstep2 25
+  kptopt2  1
+  getwfk2  1   getden2 1   # Usual file handling data
+
+#Third dataset : NSC run with large number of bands, and points in the the full BZ
+    iscf3 -2  
+   nband3  9  # Minimal number of bands for linear optics (imaginary part of the spectrum)
+   nstep3 25
+  kptopt3  2  # Time-reversal symmetry can be used in the present implementation for linear optics
+  getwfk3  2   getden3 1   # Usual file handling data
+
+
+#Fourth dataset : ddk response function along axis 1
+   iscf4 -3
+  nband4  9   # Minimal number of bands for linear optics (imaginary part of the spectrum)
+  nstep4  1  nline4  0     prtwf4   3
+ kptopt4  2   # Time-reversal symmetry can be used in the present implementation for linear optics
+
+   nqpt4  1  qpt4  0.0d0 0.0d0 0.0d0 
+  rfdir4  1 0 0
+ rfelfd4  2
+ getwfk4  3
+
+#Fifth dataset : ddk response function along axis 2
+   iscf5 -3
+  nband5  9   # Minimal number of bands for linear optics (imaginary part of the spectrum)
+  nstep5  1  nline5  0    prtwf5  3
+ kptopt5  2   # Time-reversal symmetry can be used in the present implementation for linear optics
+
+   nqpt5  1  qpt5  0.0d0 0.0d0 0.0d0
+  rfdir5  0 1 0
+ rfelfd5  2
+ getwfk5  3
+
+#Sixth dataset : ddk response function along axis 3
+   iscf6 -3
+  nband6  9   # Minimal number of bands for linear optics (imaginary part of the spectrum)
+  nstep6  1  nline6  0    prtwf6  3
+ kptopt6  2   # Time-reversal symmetry can be used in the present implementation for linear optics
+
+   nqpt6  1  qpt6  0.0d0 0.0d0 0.0d0
+  rfdir6  0 0 1
+ rfelfd6  2
+ getwfk6  3
+
+
+#Data common to all datasets
+ nshiftk 4
+ shiftk  0.5 0.5 0.5
+         0.5 0.0 0.0
+         0.0 0.5 0.0
+         0.0 0.0 0.5
+ ngkpt  3*4        # This is much too low : should be at least 24x24x24
+
+ acell   3*10.60
+ amu 69.72  74.9216
+ diemac 10.0
+ ecut 2.00             # This is also too low
+ ixc 3
+ natom  2  nbdbuf 2
+ ntypat  2
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ xred 3*0.00d0 3*0.25d0
+ tnons 72*0.0
+ typat  1 2  tolwfr  1.e-20
+ znucl  31 33
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = toptic_5.in, toptic_6.in
+#%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
+#%% [files]
+#%% files_to_test = 
+#%%   toptic_5.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
+#%% psp_files =  31ga.pspnc, 33as.pspnc
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = S. Sharma, X. Gonze
+#%% keywords = NC, DFPT
+#%% description = 
+#%%  Prepare the computation of linear optic properties (for the imaginary spectrum only)
+#%%  of GaAs crystal : ground-state with few bands,
+#%%  then non-SCF with a larger number of bands, then ddk for different directions
+#%%  Note that the k point sampling shoud be finer for significant results. The cut-off energy is also too low.
+#%%<END TEST_INFO>
