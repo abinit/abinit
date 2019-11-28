@@ -356,7 +356,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  ABI_ALLOCATE(list_dynimage,(dtset%ndynimage))
  do itimimage=1,ntimimage_stored
    res_img => results_img(:,itimimage)
-   call init_results_img(dtset%natom,dtset%npspalch,dtset%nsppol,dtset%ntypalch,&
+   call init_results_img(dtset%natom,dtset%npspalch,dtset%nspden,dtset%nsppol,dtset%ntypalch,&
 &   dtset%ntypat,res_img)
    do iimage=1,nimage
      res_img(iimage)%acell(:)     =acell_img(:,iimage)
