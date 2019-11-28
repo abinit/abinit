@@ -374,8 +374,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  integer :: nterm_start,nterm_tot_tmp,nterm2
  integer :: nproc,my_rank,master
  !1406
- real(dp) :: factor,mse_ini,msef_ini,mses_ini,mse,msef,mses,coeff_ini=0.0001
- real(dp) :: to_divide,divided,divider1,divider2
+ real(dp) :: factor,mse_ini,msef_ini,mses_ini,mse,msef,mses,coeff_ini=0.1
+ real(dp) :: to_divide,divided,divider1,divider2,coeff_tmp
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
 !arrays 
  integer :: sc_size(3),optterm(1)
@@ -602,7 +602,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
                i = 0
                write(message,'(a,I2,a,F12.7)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
                call wrtout(std_out,message,'COLL')
-               write(message,'(a,I2,a,F12.7)') "cycle ", i ," (msef+mses): ", (msef+mses)
+               write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses): ", (msef+mses)
                call wrtout(std_out,message,'COLL')
                do  while((msef+mses)/(msef_ini+mses_ini) >= 1.001)
                   i = i + 1 
@@ -613,7 +613,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 	     
                   write(message,'(a,I2,a,F12.7)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
                   call wrtout(std_out,message,'COLL')
-                  write(message,'(a,I2,a,F12.7)') "cycle ", i ," (msef+mses): ", (msef+mses)
+                  write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses): ", (msef+mses)
                   call wrtout(std_out,message,'COLL')
                enddo ! while mse/mse_ini>1.0001 
                write(message,'(a,F12.7)') "coeff after opt:",   eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient 
@@ -631,26 +631,44 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 
             else 
             !Optimizing coefficient precisely ?
-                do i=1,2
+              coeff_opt = 0 
+              msefs_arr = 0 
+                i = 1 
+                do while(i<=2)
                   eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = &
 &                 eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient/ 2**(i-1)
                   call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
 &                                              natom_sc,ntime,fit_data%training_set%sqomega,&
 &                                              compute_anharmonic=.TRUE.,print_file=.FALSE.)
  
-                  write(message,'(a,I2,a,F12.7)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
+                  write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
                   call wrtout(std_out,message,'COLL')
-                  write(message,'(a,I2,a,F12.7)') "cycle ", i ," (msef+mses): ", (msef+mses)
+                  write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses): ", (msef+mses)
                   call wrtout(std_out,message,'COLL')
 	          coeff_opt(i) =  eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient
                   msefs_arr(i) =  (msef+mses)/(msef_ini+mses_ini)
+                  if(i==2 .and. abs(msefs_arr(1)-msefs_arr(2)) < tol8)then 
+                     eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient =& 
+                     eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient*10d5 
+                     write(message,'(5a)') ch10,"Differences between test-cycles to small increase",ch10, & 
+&                                          "test coefficient value by factor 1000",ch10
+                     call wrtout(std_out,message,'COLL')
+		     i = 1
+                  else 
+                     i=i+1
+                  end if 
                 enddo ! while mse/mse_ini>10
                 eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = opt_boundcoeff(msefs_arr,coeff_opt)
-                write(message,'(a,F12.7)') "coeff after opt:",   eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient 
+                write(message,'(a,ES24.16)') "coeff after opt1:",   eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient 
+                call wrtout(std_out,message,'COLL')
+                coeff_tmp = ANINT(eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient*10d10)
+                eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = coeff_tmp/10d10
+                write(message,'(a,ES24.16)') "coeff after opt2:",   eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient 
+                call wrtout(std_out,message,'COLL')
                 call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                               natom_sc,ntime,fit_data%training_set%sqomega,&
  &                                               compute_anharmonic=.TRUE.,print_file=.FALSE.)
-                write(message,'(a,F12.7)') "(msef+mses)/(msef_ini+mses_ini) after_opt: ", (msef+mses)/(msef_ini+mses_ini)
+                write(message,'(a,ES24.16)') "(msef+mses)/(msef_ini+mses_ini) after_opt: ", (msef+mses)/(msef_ini+mses_ini)
                 call wrtout(std_out,message,'COLL')
                 msef_ini = msef
                 mses_ini = mses
@@ -1386,20 +1404,24 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp,comm)
            if(icombi <= ncombi)then
               terms_out(icombi) = term
               nterm_of_term = term%nterm
+              coeff_ini = 1 !abs(terms_out(icombi)%coefficient / 2)
+              terms_out(icombi)%coefficient = coeff_ini
            else
               terms_out(icombi) = term_in
               nterm_of_term = term_in%nterm
            endif
-           coeff_ini = 0.01 !abs(terms_out(icombi)%coefficient / 2)
-           terms_out(icombi)%coefficient = coeff_ini
            ! Set the power of all terms we want to add to two. We find the correct power later
            ! Change the weight of the term to 1 (even terms have allways weight=1)
            do iterm_of_term=1,nterm_of_term 
              terms_out(icombi)%terms(iterm_of_term)%weight = 1
              if(icombi > ncombi .and. icombi <= 2*ncombi)then 
                 terms_out(icombi)%terms(iterm_of_term)%power_strain = 2
+                coeff_ini = 10d3 !abs(terms_out(icombi)%coefficient / 2)
+                terms_out(icombi)%coefficient = coeff_ini
 	     elseif(icombi>2*ncombi)then
                 terms_out(icombi)%terms(iterm_of_term)%power_strain = 4
+                coeff_ini = 10d5 !abs(terms_out(icombi)%coefficient / 2)
+                terms_out(icombi)%coefficient = coeff_ini
              endif 
              do idisp=1,ndisp
                 terms_out(icombi)%terms(iterm_of_term)%power_disp(idisp) = 2
@@ -1410,11 +1432,11 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp,comm)
        !If term had strain we had to reinitialize it in the process 
        !Refree memory
        if(had_strain) call polynomial_coeff_free(term)  
-       
+      
        ! Get high order combinations 
        if(had_strain)then           
           call opt_getHoTerms(terms_out(:ncombi),order_start,order_stop,ndisp,ncombi,ncombi_order,comm) 
-	  call opt_getHoTerms(terms_out(ncombi+1:),order_start,order_stop,ndisp,ncombi,ncombi_order,comm) 
+	  call opt_getHoTerms(terms_out(ncombi+1:2*ncombi),order_start,order_stop,ndisp,ncombi,ncombi_order,comm) 
 	  call opt_getHoTerms(terms_out(2*ncombi+1:),order_start,order_stop,ndisp,ncombi,ncombi_order,comm) 
           ncombi = ncombi_tot
        else 
@@ -1715,7 +1737,7 @@ do idisp=1,ndisp
                   do iorder=1,norder
                      icoeff = icoeff + 1
                      terms_out_tmp(icoeff)=single_disp_terms(iterm1)
-                     terms_out_tmp(icoeff)%coefficient = 0.001
+                     terms_out_tmp(icoeff)%coefficient = 1
                      nterm_of_term = terms_out_tmp(icoeff)%nterm 
                      !Change order of term 
                      do iterm3=1,nterm_of_term
@@ -1815,7 +1837,7 @@ function opt_boundcoeff(yvalues,cvalues) result (coeff)
   real(dp) :: coeff
 !local
 !variable
- real(dp) :: a,b,coeff_tmp,x1,x2
+ real(dp) :: a,b,coeff_tmp,x1,x2,penalty
 !array
 ! *************************************************************************
  
@@ -1826,14 +1848,14 @@ function opt_boundcoeff(yvalues,cvalues) result (coeff)
  
  !write(*,*) "a", a
  !write(*,*) "b", b
- 
+ penalty = 0.001 
  coeff_tmp = -b/(2*a)
  !write(*,*) "coeff_tmp", coeff_tmp 
  if(coeff_tmp > 0)then
    coeff = coeff_tmp 
  elseif(coeff_tmp <= 0)then 
-   x1 = (-b + sqrt(b**2 + 4*a*0.001)) / (2*a) ! 1.001 penalty value 
-   x2 = (-b - sqrt(b**2 + 4*a*0.001)) / (2*a)
+   x1 = (-b + sqrt(b**2 + 4*a*penalty)) / (2*a) ! 1.001 penalty value 
+   x2 = (-b - sqrt(b**2 + 4*a*penalty)) / (2*a)
    !write(*,*) "x1", x1 
    !write(*,*) "x2", x2
    if(x1>0)then 
