@@ -1132,8 +1132,15 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
       !write(6,*) "compute green done"
        if(me==master) then
-         call print_green("from_realaxisself",greenr,5,paw_dmft,&
-&         pawprtvol=3,opt_wt=1)
+         if(dtset%kptopt<0) then
+           ! k-resolved Spectral function
+           call print_green("from_realaxisself",greenr,5,paw_dmft,&
+&           pawprtvol=3,opt_wt=1)
+         else
+           ! DOS Calculation
+           call print_green("from_realaxisself",greenr,4,paw_dmft,&
+&           pawprtvol=3,opt_wt=1)
+         endif
         !write(6,*) "print green done"
        endif
 
