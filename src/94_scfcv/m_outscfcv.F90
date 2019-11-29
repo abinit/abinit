@@ -127,6 +127,7 @@ contains
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  grhor(nfft,nspden,3)= gradient of electron density in electrons/bohr**4, real space
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
+!!  intgres(nspden,natom)=integrated residuals from constrained DFT. They are also Lagrange parameters, or gradients with respect to constraints.
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  lrhor(nfft,nspden)= Laplacian of electron density in electrons/bohr**5, real space
 !!  mband=maximum number of bands
@@ -213,7 +214,7 @@ contains
 !! SOURCE
 
 subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil,dtset,&
-& ecut,eigen,electronpositron,elfr,etotal,gmet,gprimd,grhor,hdr,kg,&
+& ecut,eigen,electronpositron,elfr,etotal,gmet,gprimd,grhor,hdr,intgres,kg,&
 & lrhor,mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpsang,mpw,my_natom,natom,&
 & nattyp,nfft,ngfft,nhat,nkpt,npwarr,nspden,nsppol,nsym,ntypat,n3xccc,occ,&
 & paw_dmft,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,paw_an,paw_ij,&
@@ -242,6 +243,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer,intent(in) :: kg(3,mpw*mkmem),nattyp(ntypat),ngfft(18),npwarr(nkpt)
  real(dp),intent(in) :: dmatpawu(:,:,:,:),eigen(mband*nkpt*nsppol)
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3)
+ real(dp),intent(in) :: intgres(:,:) ! (nspden,natom) if constrainedDFT otherwise (nspden,0)
  real(dp),intent(in) :: occ(mband*nkpt*nsppol)
  real(dp),intent(in) :: rprimd(3,3),vhartr(nfft),xccc3d(n3xccc)
  real(dp),intent(in) :: vpsp(nfft)
@@ -945,6 +947,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    call calcdenmagsph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,&
 &   ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,ucvol,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
    call  prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,ab_out,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+   if(any(dtset%constraint_kind(:)/=0)then
+     call  prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,ab_out,11,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+   endif
    ABI_SFREE(intgden)
  end if
 

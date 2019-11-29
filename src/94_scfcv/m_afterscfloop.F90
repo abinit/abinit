@@ -1053,10 +1053,14 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  results_gs%synlgr(:,:)=synlgr(:,:)
  results_gs%vxcavg     =vxcavg
  if (ngrvdw>0) results_gs%grvdw(1:3,1:ngrvdw)=grvdw(1:3,1:ngrvdw)
+
+ results_gs%intgres(:,:)=zero
+ results_gs%grcondft(:,:)=zero
  if(any(dtset%constraint_kind(:)/=0))then
-   results_gs%intgres(:,:)  =intgres(:,:)
+   results_gs%intgres(1:dtset%nspden,:)  =intgres(1:dtset%nspden,:)
    results_gs%grcondft(:,:) =grcondft(:,:)
  endif
+
  if (dtset%nstep == 0 .and. dtset%occopt>=3.and.dtset%occopt<=8) then
    results_gs%etotal = results_gs%etotal - dtset%tsmear * results_gs%entropy
  end if
