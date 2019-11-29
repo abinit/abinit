@@ -1,6 +1,6 @@
 
-.Version 8.8.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  4 May 2018.
-- ( at 16h13 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h26 )
   
 - input  file    -> t90.in
 - output file    -> t90.out
@@ -580,8 +580,8 @@ P          mk1mem4         64
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/baguetl_dfpt_kptopt3-4/tests/Psps_for_tests/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -611,11 +611,11 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  ETOT  1 -0.55934478064906    -5.593E-01 4.424E-04 1.064E-01
  ETOT  2 -0.55936085213896    -1.607E-05 1.223E-11 1.284E-03
  ETOT  3 -0.55936101372422    -1.616E-07 1.011E-07 2.090E-06
- ETOT  4 -0.55936101443296    -7.087E-10 8.043E-10 6.114E-10
- ETOT  5 -0.55936101443315    -1.830E-13 1.837E-13 2.060E-13
- ETOT  6 -0.55936101443315     2.109E-15 2.237E-17 2.655E-16
+ ETOT  4 -0.55936101443297    -7.087E-10 8.043E-10 6.114E-10
+ ETOT  5 -0.55936101443315    -1.809E-13 1.837E-13 2.060E-13
+ ETOT  6 -0.55936101443315     2.554E-15 2.237E-17 2.655E-16
  ETOT  7 -0.55936101443315    -1.443E-15 1.417E-20 2.461E-19
- ETOT  8 -0.55936101443315     1.554E-15 1.729E-23 1.650E-22
+ ETOT  8 -0.55936101443315     9.992E-16 1.729E-23 1.650E-22
 
  At SCF step    8   max residual=  1.73E-23 < tolwfr=  1.00E-22 =>converged.
 
@@ -632,7 +632,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.0029E-18; max=  1.2034E-17
+ Mean square residual over all n,k,spin=   10.031E-19; max=  12.036E-18
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -665,7 +665,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
     Kinetic energy  =  5.56055478212394E-01
     Hartree energy  =  1.15951394059028E-02
-    XC energy       = -3.45686540545330E-01
+    XC energy       = -3.45686540545329E-01
     Ewald energy    = -5.45634130669356E-01
     PspCore energy  = -2.73303389952050E-04
     Loc. psp. energy= -1.93412466810652E-01
@@ -678,6 +678,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -1.52209872800593E+01 ; Band energy (Ha)=  -6.5499604655E-02
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.23631527E-03  sigma(3 2)=  0.00000000E+00
@@ -746,20 +748,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  5.56132261446685E-04 -4.392E+00 3.032E-02 1.988E+00
- ETOT  2  2.92701357285097E-06 -5.532E-04 1.083E-05 1.079E-02
- ETOT  3  3.32245164713640E-09 -2.924E-06 7.462E-08 1.366E-05
- ETOT  4 -7.12327974383697E-11 -3.394E-09 5.137E-11 2.805E-08
- ETOT  5 -8.55218118545054E-11 -1.429E-11 1.664E-13 2.847E-11
- ETOT  6 -8.55484572070964E-11 -2.665E-14 1.504E-16 2.443E-14
+-ETOT  1  5.56132261301912E-04 -4.392E+00 3.032E-02 1.988E+00
+ ETOT  2  2.92701343163060E-06 -5.532E-04 1.083E-05 1.079E-02
+ ETOT  3  3.32223049070990E-09 -2.924E-06 7.462E-08 1.366E-05
+ ETOT  4 -7.14193149065068E-11 -3.394E-09 5.137E-11 2.805E-08
+ ETOT  5 -8.57376392104925E-11 -1.432E-11 1.664E-13 2.847E-11
+ ETOT  6 -8.57038884305439E-11  3.375E-14 1.504E-16 2.443E-14
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  2.665E-14 < toldfe=  1.000E-10
+  for the second time, diff in etot=  3.375E-14 < toldfe=  1.000E-10
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -3.3333E-02; max=  1.5042E-16
+ Mean square residual over all n,k,spin=  -33.333E-03; max=  15.042E-17
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -776,9 +778,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=   -0.8554845721E-10 Ha. Also 2DEtotal=   -0.232789190769E-08 eV
+ 2DEtotal=   -0.8570388843E-10 Ha. Also 2DEtotal=   -0.233212140638E-08 eV
     (2DErelax=   -4.3921135975E+00 Ha. 2DEnonrelax=    4.3921135974E+00 Ha)
-    (  non-var. 2DEtotal :   -3.2406202166E-09 Ha)
+    (  non-var. 2DEtotal :   -3.2407845296E-09 Ha)
 
 ================================================================================
 
@@ -845,9 +847,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -5.107890E-07 -5.107882E-07 -5.107852E-07
+  -5.108021E-07 -5.108013E-07 -5.107983E-07
  Phonon frequencies in cm-1    :
-- -1.121052E-01 -1.121051E-01 -1.121044E-01
+- -1.121081E-01 -1.121079E-01 -1.121073E-01
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -900,20 +902,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  1.85972359696809E-02 -4.122E+00 1.137E-01 2.394E+00
- ETOT  2  1.75424502696240E-02 -1.055E-03 6.522E-05 1.598E-02
- ETOT  3  1.75340870792224E-02 -8.363E-06 2.815E-07 2.571E-05
- ETOT  4  1.75340765697154E-02 -1.051E-08 1.948E-10 1.818E-08
- ETOT  5  1.75340765659335E-02 -3.782E-12 1.501E-13 8.190E-12
- ETOT  6  1.75340765659699E-02  3.642E-14 4.480E-17 1.384E-14
+-ETOT  1  1.85972359694953E-02 -4.122E+00 1.137E-01 2.394E+00
+ ETOT  2  1.75424502694046E-02 -1.055E-03 6.522E-05 1.598E-02
+ ETOT  3  1.75340870790359E-02 -8.363E-06 2.815E-07 2.571E-05
+ ETOT  4  1.75340765695111E-02 -1.051E-08 1.948E-10 1.818E-08
+ ETOT  5  1.75340765657399E-02 -3.771E-12 1.501E-13 8.190E-12
+ ETOT  6  1.75340765657577E-02  1.776E-14 4.480E-17 1.384E-14
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  3.642E-14 < toldfe=  1.000E-10
+  for the second time, diff in etot=  1.776E-14 < toldfe=  1.000E-10
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -3.3333E-02; max=  4.4797E-17
+ Mean square residual over all n,k,spin=  -33.333E-03; max=  44.797E-18
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -922,7 +924,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  loc psp =  -8.24536572E+00  Hartree=   2.69640906E-01     xc=  -3.35216720E-01
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   8.62253046E-01     enl0=   0.00000000E+00   enl1=   0.00000000E+00
+    edocc=   8.62253047E-01     enl0=   0.00000000E+00   enl1=   0.00000000E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -4.12268286E+00
  10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
@@ -930,7 +932,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1753407657E-01 Ha. Also 2DEtotal=    0.477126488067E+00 eV
+ 2DEtotal=    0.1753407657E-01 Ha. Also 2DEtotal=    0.477126488061E+00 eV
     (2DErelax=   -4.1226828614E+00 Ha. 2DEnonrelax=    4.1402169380E+00 Ha)
     (  non-var. 2DEtotal :    1.7534076857E-02 Ha)
 
@@ -946,15 +948,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   2    1        -0.0000000000         0.0000000000
+   1    1   2    1         0.0000000000        -0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
   
-   2    1   1    1        -0.0000000000        -0.0000000000
+   2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0175340769         0.0000000000
-   2    1   3    1         0.0000000000         0.0000000000
+   2    1   3    1        -0.0000000000         0.0000000000
   
    3    1   1    1         0.0000000000         0.0000000000
-   3    1   2    1         0.0000000000        -0.0000000000
+   3    1   2    1        -0.0000000000        -0.0000000000
    3    1   3    1         0.0175340769         0.0000000000
   
   
@@ -963,15 +965,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   2    1        -0.0000000000         0.0000000000
+   1    1   2    1         0.0000000000        -0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
   
-   2    1   1    1        -0.0000000000        -0.0000000000
+   2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0025937984         0.0000000000
-   2    1   3    1         0.0000000000         0.0000000000
+   2    1   3    1        -0.0000000000         0.0000000000
   
    3    1   1    1         0.0000000000         0.0000000000
-   3    1   2    1         0.0000000000        -0.0000000000
+   3    1   2    1        -0.0000000000        -0.0000000000
    3    1   3    1         0.0025937984         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
@@ -1033,20 +1035,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  1.01739920208068E-02 -4.256E+00 1.255E-01 2.128E+00
- ETOT  2  9.39031423354209E-03 -7.837E-04 6.346E-05 1.182E-02
- ETOT  3  9.38555906783201E-03 -4.755E-06 1.808E-07 1.123E-05
- ETOT  4  9.38555594280022E-03 -3.125E-09 8.548E-11 6.153E-09
- ETOT  5  9.38555594167045E-03 -1.130E-12 3.557E-14 7.886E-12
- ETOT  6  9.38555594170509E-03  3.464E-14 6.702E-17 1.058E-14
+-ETOT  1  1.01739920206585E-02 -4.256E+00 1.255E-01 2.128E+00
+ ETOT  2  9.39031423336001E-03 -7.837E-04 6.346E-05 1.182E-02
+ ETOT  3  9.38555906766947E-03 -4.755E-06 1.808E-07 1.123E-05
+ ETOT  4  9.38555594261636E-03 -3.125E-09 8.548E-11 6.153E-09
+ ETOT  5  9.38555594148838E-03 -1.128E-12 3.557E-14 7.886E-12
+ ETOT  6  9.38555594150525E-03  1.688E-14 6.702E-17 1.058E-14
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  3.464E-14 < toldfe=  1.000E-10
+  for the second time, diff in etot=  1.688E-14 < toldfe=  1.000E-10
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -3.3333E-02; max=  6.7019E-17
+ Mean square residual over all n,k,spin=  -33.333E-03; max=  67.019E-18
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1063,9 +1065,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.9385555942E-02 Ha. Also 2DEtotal=    0.255393965469E+00 eV
+ 2DEtotal=    0.9385555942E-02 Ha. Also 2DEtotal=    0.255393965464E+00 eV
     (2DErelax=   -4.2563528060E+00 Ha. 2DEnonrelax=    4.2657383619E+00 Ha)
-    (  non-var. 2DEtotal :    9.3855555281E-03 Ha)
+    (  non-var. 2DEtotal :    9.3855555279E-03 Ha)
 
 ================================================================================
 
@@ -1084,10 +1086,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
   
    2    1   1    1         0.0000000000        -0.0000000000
    2    1   2    1         0.0093855555        -0.0000000000
-   2    1   3    1        -0.0000000000        -0.0000000000
+   2    1   3    1         0.0000000000         0.0000000000
   
    3    1   1    1         0.0000000000         0.0000000000
-   3    1   2    1        -0.0000000000         0.0000000000
+   3    1   2    1         0.0000000000        -0.0000000000
    3    1   3    1         0.0093855555        -0.0000000000
   
   
@@ -1101,10 +1103,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
   
    2    1   1    1         0.0000000000        -0.0000000000
    2    1   2    1         0.0013883958        -0.0000000000
-   2    1   3    1        -0.0000000000        -0.0000000000
+   2    1   3    1         0.0000000000         0.0000000000
   
    3    1   1    1         0.0000000000         0.0000000000
-   3    1   2    1        -0.0000000000         0.0000000000
+   3    1   2    1         0.0000000000        -0.0000000000
    3    1   3    1         0.0013883958        -0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.25000  0.00000  0.00000
@@ -1123,9 +1125,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
               amu      1.00794000E+00
              ecut      2.00000000E+01 Hartree
            etotal1    -5.5936101443E-01
-           etotal2    -8.5548457207E-11
+           etotal2    -8.5703888431E-11
            etotal3     1.7534076566E-02
-           etotal4     9.3855559417E-03
+           etotal4     9.3855559415E-03
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1607,49 +1609,54 @@ P          mk1mem4         64
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xue, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
 - implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
 -
 - [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
 - interatomic force constants from density-functional perturbation theory,
 - X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [4] ABINIT : First-principles approach of materials and nanosystem properties.
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [5] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          0.9  wall=          5.0
+- Proc.   0 individual time (sec): cpu=          0.9  wall=          1.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  28 WARNINGs and  23 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.9  wall=          5.0
+.Delivered   2 WARNINGs and  47 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.9  wall=          1.1

@@ -14,25 +14,26 @@ to validate their code before pushing their developments to the trunk whereas
 users can use the test suite to validate the executable before using it for production calculations.
 
 The code that drives the execution of the tests and the validation of the final results 
-in mainly written in python (version >= 2.7 is required) and relies on the following principles:
+in written in python (version >= 2.7 is required) and relies on the following principles:
 
-*  Each test is self-describing, in the sense that the input file 
-   provides all the information needed to run the test and to analyze the final results.
+*  Each test is **self-describing**, in the sense that the input file 
+   provides all the information needed to run the test and analyze/validate the final results.
 
-*  Each test has keywords so that it is possible to 
+*  Each test has **keywords** so that it is possible to 
    select and run only the tests containing these tags. 
 
-*  It should be possible to run the entire suite with MPI/OpenMP and an arbitrary 
+*  It should be possible to run the entire suite in **parallel** with MPI/OpenMP and an arbitrary 
    number of processors (not only the tests in the *paral* directory)
 
-*  The execution of the tests can be distributed among python threads in order 
+*  The execution of the tests can be distributed among **python processes** in order 
    to reduce the execution time.
 
 ## Configuration files
 
 The configuration parameters of the test suite are defined in the `__init__.py`
 files located in the test suite directories.
-These files are standard python files and the parameters are specified with the standard python syntax.
+These files are standard python files and the parameters are specified with the standard python syntax
+for list of strings.
 
 `tests/__init__.py` is the top level configuration file.
 This file defines the list of directories containing the ABINIT tests:
@@ -41,13 +42,12 @@ This file defines the list of directories containing the ABINIT tests:
 cat tests/__init__.py
 
 testsuite_dirs = [
-  "atompaw",
-  "bigdft",
-  "built-in",
-  "etsf_io",
-  "fast",
-  #"cpu",  <<< disabled
-  ...
+    "atompaw",
+    "bigdft",
+    "built-in",
+    "etsf_io",
+    "fast",
+    #"cpu",  <<< disabled
 ]
 ```
 
@@ -61,32 +61,31 @@ cat tests/libxc/__init__.py
 
 # CPP variables 
 need_cpp_vars = [
-  "HAVE_LIBXC",
+    "HAVE_LIBXC",
 ]
 
 # List of input files
 inp_files = [
-"t00.in",
-"t01.in",
-"t02.in",
-"t03.in",
-"-t11.in", # Disabled
- ...
+    "t00.in",
+    "t01.in",
+    "t02.in",
+    "t03.in",
+    "-t11.in", # Disabled
 ]
 ```
 
-*inp_files* is the list with the names of the input files contained in the Input directory.
+**inp_files** is the list with the names of the input files contained in the Input directory.
 One can prepend a dash to the name of file (e.g. “-t11.in”) to signal to the python code 
-that this test has been disabled and should not be executed.
+that this test has been disabled.
 
-The variable `need_cpp_vars` is a list of CPP variables that must be defined 
+The variable **need_cpp_vars** is a list of CPP variables that must be defined 
 in the include file *config.h* in order to activate the tests in **this directory**.
-In this case, for example, the *libxc* tests are executed only if *HAVE_LIBXC* is defined in *config.h*.
-Note that one can prepend the character `!` to the name of the variable to specify that the tests 
+In this case, for example, the *libxc* tests are executed only if **HAVE_LIBXC** is defined in *config.h*.
+Note that one can prepend the character `!` to the name of the CPP variable to specify that the tests 
 should not be executed if the variable is not defined in the build.
 
 Each input file contains all the information needed to run the test and to analyze the 
-final results. These meta-variables are gathered in the *TEST_INFO* section.
+final results. These meta-variables are gathered in the **TEST_INFO** section.
 
 ## Conventions
 
@@ -94,22 +93,20 @@ This paragraph summarizes the conventions used for the names of the tests.
 The ABINIT tests are grouped in suites whose name is given by the name of the 
 directory as specified in *tests/\_\_init\__.py*.
 Each suite can be optionally divided into sub-suites whose names must be registered in *dirname/\_\_init\_\_.py*
+To each test is therefore assigned a *suite*, a *sub-suite* and an integer number (>= 0) 
 
 !!! important
 
     The name of the suite/subsuite must be unique. 
 
-To each test is therefore assigned a *suite*, a *sub-suite* and an integer number (>= 0) 
+[![asciicast](https://asciinema.org/a/40324.png)](https://asciinema.org/a/40324)
 
 The organization in terms of suites/sub-suites allows one to select easily the tests
 with the command line interface `runtests.py`.
-
-[![asciicast](https://asciinema.org/a/40324.png)](https://asciinema.org/a/40324)
-
 The name of the input file must match one of the two possible regular expressions:
 
-1. `t[integer].in`  e.g. `t11.in`
-2. `t[subsuitename]_[integer].in`  e.g. `tgw1_1.in`
+1. **t[integer].in**  *e.g.* `t11.in`
+2. **t[subsuitename]_[integer].in**  *e.g.* `tgw1_1.in`
 
 The latter syntax is used, for example, in the tutorial directory to 
 group the tests associated to a particular lesson.
@@ -136,7 +133,7 @@ the Fortran code, an additional section (`<TEST_INFO>`) that provides all the
 information needed to run the test and to analyze the final results. 
 
 The `<TEST_INFO>` section is placed at the end of the input file
-in order to avoid problems with executables that read from standard input.
+in order to avoid problems with executables reading from standard input.
 The XML-like markers `<BEGIN_TEST_INFO>` and `<END_TEST_INFO>` enclose the section. 
 Each line starts with the sentinel `#%%` that will be removed during the parsing. 
 What is left is a standard INI configuration file providing all the information 
@@ -253,16 +250,16 @@ A simplified example of *TEST_INFO* section for a multi-parallel test is reporte
 
 ## How to run the tests
 
-The script *abinit/tests/runtests.py* script provides a user-friendly interface
-that allows the user to select tests by keywords, authors, suite name, input variables etc. 
+The *abinit/tests/runtests.py* script provides a user-friendly command line interface
+that allows the user to select tests by **keywords**, **authors**, **suite name**, **input variables** etc. 
 It also provides options for controlling the number of MPI processes, 
-the number of OpenMP threads and the number of python threads (task parallelism).
+the number of OpenMP threads as well as the number of python threads (task parallelism).
 
 The syntax is:
 
     runtests.py [suite_args] [options]. 
 
-where `suite_args` is a list of suite names that can be optionally selected (sliced) using python syntax
+where `suite_args` is a list of suite names that can be optionally selected (sliced) using python syntax.
 For example:
 
     runtests v3[:4] v4[45:] v5[3] 
@@ -271,24 +268,22 @@ executes all the tests in *v3* from 0 up to 4 (excluded), all the tests in *v4* 
 
 !!! warning
 
-    If *suite_args* is not given, the script will execute the entire list of tests.
+    If *suite_args* is not given, the script will execute the entire Test suite.
 
 The most useful options are:
 
 -j
-: specifies the number of python threads (task parallelism)
+: specifies the number of python processes (task parallelism)
 
 -n
-: specifies the number of MPI nodes
+: specifies the number of MPI nodes for e.g. *abinit*
 
 -o
-: specifies the number of OpenMP threads
+: specifies the number of OpenMP threads for e.g. *abinit*
 
 -k
 : selects tests by keywords
 
--h
-: for help + list of examples
 
 !!! tip
 
@@ -309,11 +304,11 @@ In particular, it assumes that:
 2. MPI demons (e.g. *mpd*) are already running in the background 
    (you have to initialize the demon manually before launching the tests)
 
-3. It uses the *mpiruner* in *PATH* (default: *mpirun*) and assumes 
+3. It uses the *mpirnuner* in *PATH* (default: *mpirun*) and assumes 
    the standard syntax for specifying the number of processors 
-   (i.e. mpirun -n 4 exe < stdin > stdout)
+   (i.e. mpirun -n 4 executable < stdin > stdout)
 
-If you need to override the default setting, you can pass options to the script
+If you need to override the default settings, you can pass options to the script
 via a configuration file in the INI format (-c options):
 
     runtests.py -n 2 -c mpi.cfg
@@ -344,7 +339,7 @@ In this case, one can re-rerun the entire test suite (or part of it) by just exe
     testbot.py
 
 The script `testbot.py` reads the configuration file `testbot.cfg` (already present in the working directory), 
-runs the entires set of tests and produces the final report.
+runs the entire set of tests and produces the final report.
 
 Note that one modify the configuration options defined in `testbot.cfg` in order to speed-up the execution of the tests.
 In particular one can use the options:
@@ -386,7 +381,6 @@ In order to add the new test, one has to follow the following steps:
 TODO
 
 ## How to add a parallel test
-TODO
 -->
 
 ## How to add support for a new executable

@@ -1053,7 +1053,7 @@ enable_openmp="no"
 
 # Activate maintainer checks (default is no)
 #
-enable_maintainer_checks="yes"
+enable_maintainer_checks="no"
 
 # Fortran compiler vendor to be used by the build system (default is unset)
 #

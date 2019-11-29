@@ -1,6 +1,6 @@
 
-.Version 8.0.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 11h58 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h28 )
   
 - input  file    -> t08.in
 - output file    -> t08.out
@@ -38,10 +38,10 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        32    nfftf =      8192
 ================================================================================
-P This job should need less than                       6.551 Mbytes of memory.
+P This job should need less than                       6.540 Mbytes of memory.
 P Max. in main chain + fourwf.f
 P           12 blocks of mpw  integer numbers, for      0.004 Mbytes.
-P          627 blocks of mpw  real(dp)  numbers, for      0.469 Mbytes.
+P          611 blocks of mpw  real(dp)  numbers, for      0.457 Mbytes.
 P           17 blocks of nfft (fine grid) real(dp)  numbers, for      1.063 Mbytes.
 P            2 blocks of nfft (coarse grid) integer numbers, for      0.026 Mbytes.
 P           44 blocks of nfft (coarse grid) real(dp)  numbers, for      1.160 Mbytes.
@@ -50,8 +50,8 @@ P              Additional     real(dp)  numbers, for      2.787 Mbytes.
 P              With residue estimated to be             0.972 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 6.551 Mbytes.
-P Main chain + nonlop.f + opernl.f      6.537 Mbytes.
+P Main chain + fourwf.f                 6.540 Mbytes.
+P Main chain + nonlop.f + opernl.f      6.525 Mbytes.
 P XC chain                              6.353 Mbytes.
 P mkrho chain                           6.023 Mbytes.
 P fourdp chain                          5.978 Mbytes.
@@ -77,10 +77,10 @@ _ WF disk file :      0.271 Mbytes ; DEN or POT disk file :      0.127 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        32    nfftf =      8192
 ================================================================================
-P This job should need less than                       6.551 Mbytes of memory.
+P This job should need less than                       6.540 Mbytes of memory.
 P Max. in main chain + fourwf.f
 P           12 blocks of mpw  integer numbers, for      0.004 Mbytes.
-P          627 blocks of mpw  real(dp)  numbers, for      0.469 Mbytes.
+P          611 blocks of mpw  real(dp)  numbers, for      0.457 Mbytes.
 P           17 blocks of nfft (fine grid) real(dp)  numbers, for      1.063 Mbytes.
 P            2 blocks of nfft (coarse grid) integer numbers, for      0.026 Mbytes.
 P           44 blocks of nfft (coarse grid) real(dp)  numbers, for      1.160 Mbytes.
@@ -89,8 +89,8 @@ P              Additional     real(dp)  numbers, for      2.787 Mbytes.
 P              With residue estimated to be             0.972 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 6.551 Mbytes.
-P Main chain + nonlop.f + opernl.f      6.537 Mbytes.
+P Main chain + fourwf.f                 6.540 Mbytes.
+P Main chain + nonlop.f + opernl.f      6.525 Mbytes.
 P XC chain                              6.353 Mbytes.
 P mkrho chain                           6.023 Mbytes.
 P fourdp chain                          5.978 Mbytes.
@@ -116,10 +116,10 @@ _ WF disk file :      0.271 Mbytes ; DEN or POT disk file :      0.127 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        32    nfftf =      8192
 ================================================================================
-P This job should need less than                       6.551 Mbytes of memory.
+P This job should need less than                       6.540 Mbytes of memory.
 P Max. in main chain + fourwf.f
 P           12 blocks of mpw  integer numbers, for      0.004 Mbytes.
-P          627 blocks of mpw  real(dp)  numbers, for      0.469 Mbytes.
+P          611 blocks of mpw  real(dp)  numbers, for      0.457 Mbytes.
 P           17 blocks of nfft (fine grid) real(dp)  numbers, for      1.063 Mbytes.
 P            2 blocks of nfft (coarse grid) integer numbers, for      0.026 Mbytes.
 P           44 blocks of nfft (coarse grid) real(dp)  numbers, for      1.160 Mbytes.
@@ -128,8 +128,8 @@ P              Additional     real(dp)  numbers, for      2.787 Mbytes.
 P              With residue estimated to be             0.972 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 6.551 Mbytes.
-P Main chain + nonlop.f + opernl.f      6.537 Mbytes.
+P Main chain + fourwf.f                 6.540 Mbytes.
+P Main chain + nonlop.f + opernl.f      6.525 Mbytes.
 P XC chain                              6.353 Mbytes.
 P mkrho chain                           6.023 Mbytes.
 P fourdp chain                          5.978 Mbytes.
@@ -155,10 +155,10 @@ _ WF disk file :      0.271 Mbytes ; DEN or POT disk file :      0.127 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        32    nfftf =      8192
 ================================================================================
-P This job should need less than                       6.176 Mbytes of memory.
+P This job should need less than                       6.165 Mbytes of memory.
 P Max. in main chain + fourwf.f
 P           12 blocks of mpw  integer numbers, for      0.004 Mbytes.
-P          627 blocks of mpw  real(dp)  numbers, for      0.469 Mbytes.
+P          611 blocks of mpw  real(dp)  numbers, for      0.457 Mbytes.
 P           11 blocks of nfft (fine grid) real(dp)  numbers, for      0.688 Mbytes.
 P            2 blocks of nfft (coarse grid) integer numbers, for      0.026 Mbytes.
 P           44 blocks of nfft (coarse grid) real(dp)  numbers, for      1.160 Mbytes.
@@ -167,8 +167,8 @@ P              Additional     real(dp)  numbers, for      2.787 Mbytes.
 P              With residue estimated to be             0.972 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 6.176 Mbytes.
-P Main chain + nonlop.f + opernl.f      6.162 Mbytes.
+P Main chain + fourwf.f                 6.165 Mbytes.
+P Main chain + nonlop.f + opernl.f      6.150 Mbytes.
 P XC chain                              5.978 Mbytes.
 P mkrho chain                           5.648 Mbytes.
 P fourdp chain                          5.603 Mbytes.
@@ -183,7 +183,7 @@ _ WF disk file :      0.271 Mbytes ; DEN or POT disk file :      0.127 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 = 10
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -380,8 +380,8 @@ P           mkmem           3
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/28ni.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/28ni.paw
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/28ni.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/28ni.paw
 - Paw atomic data for element Ni - Generated by AtomPAW (N. Holzwarth) + AtomPAW2Abinit v3.0.5
 - 28.00000  18.00000  20061204                znucl, zion, pspdat
     7    7    2    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -401,8 +401,8 @@ P           mkmem           3
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.2.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.2.paw
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/8o.2.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/8o.2.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Oxygen
 -  8.00000   6.00000  20050722                znucl, zion, pspdat
     7   11    2    0       489   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -583,7 +583,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
  #electrons spin up=  24.030191, spin down=  23.969809, magnetization=  0.060382
  prteigrs : about to open file t08o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.23841   Average Vxc (hartree)=  -0.56260
- Magnetization (Bohr magneton)=  6.03824544E-02
+ Magnetization (Bohr magneton)=  6.03824545E-02
  Total spin up =  2.40301912E+01   Total spin down =  2.39698088E+01
  Eigenvalues (hartree) for nkpt=   3  k points, SPIN UP:
  kpt#   1, nband= 30, wtk=  0.25000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -674,8 +674,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     18.252274471233296
- Compensation charge over fine fft grid    =     18.656034526002728
+ Compensation charge over spherical meshes =     18.252274471233235
+ Compensation charge over fine fft grid    =     18.656034526002951
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -801,7 +801,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   9.3888E-03; max=  5.1792E-02
+ Mean square residual over all n,k,spin=   93.888E-04; max=  51.792E-03
    0.2500  0.2500  0.2500    1  4.80923E-02 kpt; spin; max resid(k); each band:
   7.38E-04 6.67E-04 5.48E-04 4.09E-04 7.40E-04 4.81E-04 9.05E-04 5.98E-04
   4.01E-03 4.08E-02 1.42E-04 4.81E-02 1.60E-04 3.02E-02 2.71E-02 1.46E-04
@@ -866,7 +866,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
               =  4.191083492033  4.191083492033  4.191083492033 angstroms
  prteigrs : about to open file t08o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.23841   Average Vxc (hartree)=  -0.56260
- Magnetization (Bohr magneton)=  6.03824544E-02
+ Magnetization (Bohr magneton)=  6.03824545E-02
  Total spin up =  2.40301912E+01   Total spin down =  2.39698088E+01
  Eigenvalues (hartree) for nkpt=   3  k points, SPIN UP:
  kpt#   1, nband= 30, wtk=  0.25000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -963,32 +963,34 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  4.66521383607158E+01
+    Kinetic energy  =  4.66521383607189E+01
     Hartree energy  =  3.52417122008108E+01
-    XC energy       = -2.87981267137904E+01
+    XC energy       = -2.87981267137901E+01
     Ewald energy    = -2.38122809319194E+02
     PspCore energy  =  2.14477051759375E+01
-    Loc. psp. energy= -1.15467193511927E+02
-    Spherical terms = -7.29992505002068E+01
-    >>>>> Internal E= -3.52045824307654E+02
+    Loc. psp. energy= -1.15467193511926E+02
+    Spherical terms = -7.29992505002071E+01
+    >>>>> Internal E= -3.52045824307650E+02
 
-    -kT*entropy     = -1.41041540690737E-03
-    >>>>>>>>> Etotal= -3.52047234723061E+02
+    -kT*entropy     = -1.41041540693718E-03
+    >>>>>>>>> Etotal= -3.52047234723057E+02
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -6.23781957689451E+01
-    Ewald energy    = -2.38122809319194E+02
+    Band energy     = -6.23781957689494E+01
+    Ewald energy    =-2.38122809319194E+02
     PspCore energy  =  2.14477051759375E+01
     Dble-C XC-energy= -2.62679944132628E+01
-    Spherical terms = -4.76423769607503E+01
-    >>>>> Internal E= -3.52963671286214E+02
+    Spherical terms = -4.76423769607461E+01
+    >>>>> Internal E= -3.52963671286215E+02
 
-    -kT*entropy     = -1.41041540690737E-03
-    >>>> Etotal (DC)= -3.52965081701621E+02
+    -kT*entropy     = -1.41041540693718E-03
+    >>>> Etotal (DC)= -3.52965081701622E+02
 
-  >Total energy in eV           = -9.57969244090073E+03
-  >Total DC energy in eV        = -9.60466832735908E+03
+  >Total energy in eV           = -9.57969244090061E+03
+  >Total DC energy in eV        = -9.60466832735909E+03
 --------------------------------------------------------------------------------
+
+
 
           ===> extra information on forces <===
  ewald contribution to reduced grads
@@ -997,18 +999,18 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
     3      -0.000000000000     -0.000000000000     -0.000000000000
     4      -0.000000000000      0.000000000000     -0.000000000000
  nonlocal contribution to red. grads
-    1       0.000000000000     -0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000     -0.000000000000
-    3       0.000000000000      0.000000000000      0.000000000000
+    1       0.000000000000      0.000000000000     -0.000000000000
+    2      -0.000000000000     -0.000000000000     -0.000000000000
+    3      -0.000000000000     -0.000000000000      0.000000000000
     4       0.000000000000      0.000000000000      0.000000000000
  local psp contribution to red. grads
     1       0.000000000000      0.000000000000     -0.000000000000
-    2      -0.000000000000      0.000000000000      0.000000000000
+    2      -0.000000000000      0.000000000000     -0.000000000000
     3       0.000000000000      0.000000000000     -0.011507319998
     4       0.000000000000     -0.000000000000      0.011507319998
  residual contribution to red. grads
-    1      -0.000000000000     -0.000000000000      0.000000000000
-    2      -0.000000000000     -0.000000000000     -0.000000000000
+    1      -0.000000000000     -0.000000000000     -0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
     3       0.000000000000      0.000000000000      0.011507319998
     4       0.000000000000      0.000000000000     -0.011507319998
 
@@ -1316,8 +1318,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     18.358448412646204
- Compensation charge over fine fft grid    =     18.643705753291901
+ Compensation charge over spherical meshes =     18.358448412646183
+ Compensation charge over fine fft grid    =     18.643705753291769
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -1519,7 +1521,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   6.5228E-03; max=  4.0455E-02
+ Mean square residual over all n,k,spin=   65.228E-04; max=  40.455E-03
    0.2500  0.2500  0.2500    1  3.89078E-02 kpt; spin; max resid(k); each band:
   5.12E-04 4.76E-04 3.26E-04 1.43E-04 4.43E-04 2.58E-04 4.98E-04 3.23E-04
   1.17E-02 3.89E-02 3.58E-02 1.36E-04 2.08E-04 2.20E-02 1.46E-02 1.69E-04
@@ -1681,32 +1683,34 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  4.66582004992343E+01
-    Hartree energy  =  3.57262431641892E+01
-    XC energy       = -2.88663424197850E+01
+    Kinetic energy  =  4.66582004992328E+01
+    Hartree energy  =  3.57262431641885E+01
+    XC energy       = -2.88663424197854E+01
     Ewald energy    = -2.38122809319194E+02
     PspCore energy  =  2.14477051759375E+01
-    Loc. psp. energy= -1.16124409734451E+02
+    Loc. psp. energy= -1.16124409734450E+02
     Spherical terms = -7.20696917746705E+01
-    >>>>> Internal E= -3.51351104408739E+02
+    >>>>> Internal E= -3.51351104408741E+02
 
-    -kT*entropy     = -1.77934893455080E-03
-    >>>>>>>>> Etotal= -3.51352883757674E+02
+    -kT*entropy     = -1.77934893452816E-03
+    >>>>>>>>> Etotal= -3.51352883757676E+02
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -6.17179549833235E+01
-    Ewald energy    = -2.38122809319194E+02
+    Band energy     = -6.17179549833254E+01
+    Ewald energy    =-2.38122809319194E+02
     PspCore energy  =  2.14477051759375E+01
-    Dble-C XC-energy= -2.67305385231904E+01
-    Spherical terms = -4.71786373305879E+01
+    Dble-C XC-energy= -2.67305385231896E+01
+    Spherical terms = -4.71786373305868E+01
     >>>>> Internal E= -3.52302234980358E+02
 
-    -kT*entropy     = -1.77934893455080E-03
+    -kT*entropy     = -1.77934893452816E-03
     >>>> Etotal (DC)= -3.52304014329293E+02
 
-  >Total energy in eV           = -9.56079819024803E+03
-  >Total DC energy in eV        = -9.58667976933333E+03
+  >Total energy in eV           = -9.56079819024808E+03
+  >Total DC energy in eV        = -9.58667976933332E+03
 --------------------------------------------------------------------------------
+
+
 
           ===> extra information on forces <===
  ewald contribution to reduced grads
@@ -1716,17 +1720,17 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
     4      -0.000000000000      0.000000000000     -0.000000000000
  nonlocal contribution to red. grads
     1       0.000000000000      0.000000000000      0.000000000000
-    2      -0.000000000000      0.000000000000      0.000000000000
-    3      -0.000000000000     -0.000000000000      0.000000000000
+    2      -0.000000000000     -0.000000000000      0.000000000000
+    3       0.000000000000      0.000000000000      0.000000000000
     4      -0.000000000000     -0.000000000000      0.000000000000
  local psp contribution to red. grads
     1       0.000000000000      0.000000000000     -0.000000000000
-    2      -0.000000000000      0.000000000000     -0.000000000000
+    2      -0.000000000000      0.000000000000      0.000000000000
     3       0.000000000000      0.000000000000     -0.029116758641
     4       0.000000000000     -0.000000000000      0.029116758641
  residual contribution to red. grads
-    1      -0.000000000000     -0.000000000000     -0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+    1      -0.000000000000     -0.000000000000      0.000000000000
+    2      -0.000000000000     -0.000000000000     -0.000000000000
     3       0.000000000000      0.000000000000      0.029116758641
     4       0.000000000000      0.000000000000     -0.029116758641
 
@@ -1798,12 +1802,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
 
      iter   Etot(hartree)     deltaE(h) residm    nres2    magn
 
- ETOT  1  -356.27160192281    -3.56E+02 4.09E+00 9.96E+01 0.039
+ ETOT  1  -356.27160192282    -3.56E+02 4.09E+00 9.96E+01 0.039
 
  #electrons spin up=  24.019521, spin down=  23.980479, magnetization=  0.039042
  prteigrs : about to open file t08o_DS3_EIG
  Fermi (or HOMO) energy (hartree) =   0.79874   Average Vxc (hartree)=  -0.53384
- Magnetization (Bohr magneton)=  3.90420711E-02
+ Magnetization (Bohr magneton)=  3.90420712E-02
  Total spin up =  2.40195210E+01   Total spin down =  2.39804790E+01
  Eigenvalues (hartree) for nkpt=   3  k points, SPIN UP:
  kpt#   1, nband= 30, wtk=  0.25000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -1873,7 +1877,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
  #electrons spin up=  24.035622, spin down=  23.964378, magnetization=  0.071245
  prteigrs : about to open file t08o_DS3_EIG
  Fermi (or HOMO) energy (hartree) =   0.33619   Average Vxc (hartree)=  -0.56898
- Magnetization (Bohr magneton)=  7.12447376E-02
+ Magnetization (Bohr magneton)=  7.12447377E-02
  Total spin up =  2.40356224E+01   Total spin down =  2.39643776E+01
  Eigenvalues (hartree) for nkpt=   3  k points, SPIN UP:
  kpt#   1, nband= 30, wtk=  0.25000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -2034,8 +2038,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     18.256682885592429
- Compensation charge over fine fft grid    =     18.657867920298550
+ Compensation charge over spherical meshes =     18.256682885592280
+ Compensation charge over fine fft grid    =     18.657867920298713
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -2237,7 +2241,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   9.5352E-03; max=  5.2371E-02
+ Mean square residual over all n,k,spin=   95.352E-04; max=  52.371E-03
    0.2500  0.2500  0.2500    1  4.95372E-02 kpt; spin; max resid(k); each band:
   7.42E-04 6.59E-04 5.62E-04 4.28E-04 7.69E-04 4.96E-04 9.32E-04 6.14E-04
   3.68E-03 3.95E-02 1.39E-04 4.95E-02 1.97E-04 3.08E-02 2.92E-02 1.58E-04
@@ -2273,7 +2277,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
       -0.000000000000      0.000000000000      0.500000000000
        0.500000000000      0.500000000000      0.250000000000
        0.500000000000      0.500000000000      0.750000000000
- rms dE/dt=  4.1749E-31; max dE/dt=  1.4462E-30; dE/dt below (all hartree)
+ rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
     3       0.000000000000      0.000000000000      0.000000000000
@@ -2286,18 +2290,18 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
     4      4.19108349203280     4.19108349203280     2.09554174601640
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000     0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000     0.00000000000000
-    3      0.00000000000000     0.00000000000000    -0.00000000000000
-    4      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 3.9535508E-32 6.8477509E-32   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    3     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    4     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000     0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000     0.00000000000000
-    3      0.00000000000000     0.00000000000000    -0.00000000000000
-    4      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 2.0329974E-30 3.5212548E-30   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    3     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    4     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.920000000000  7.920000000000  7.920000000000 bohr
               =  4.191083492033  4.191083492033  4.191083492033 angstroms
  prteigrs : about to open file t08o_DS3_EIG
@@ -2399,32 +2403,34 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  4.66482723619690E+01
-    Hartree energy  =  3.51793757332298E+01
-    XC energy       = -2.87898427087871E+01
+    Kinetic energy  =  4.66482723619696E+01
+    Hartree energy  =  3.51793757332302E+01
+    XC energy       = -2.87898427087867E+01
     Ewald energy    = -2.38122809319194E+02
     PspCore energy  =  2.14477051759375E+01
     Loc. psp. energy= -1.15382733258656E+02
-    Spherical terms = -7.27694717459013E+01
-    >>>>> Internal E= -3.51789503761402E+02
+    Spherical terms = -7.27694717459015E+01
+    >>>>> Internal E= -3.51789503761401E+02
 
-    -kT*entropy     = -1.37836077549967E-03
-    >>>>>>>>> Etotal= -3.51790882122177E+02
+    -kT*entropy     = -1.37836077552293E-03
+    >>>>>>>>> Etotal= -3.51790882122176E+02
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -6.24755437234539E+01
-    Ewald energy    = -2.38122809319194E+02
+    Band energy     = -6.24755437234549E+01
+    Ewald energy    =-2.38122809319194E+02
     PspCore energy  =  2.14477051759375E+01
-    Dble-C XC-energy= -2.62083270084183E+01
-    Spherical terms = -4.76092678026782E+01
+    Dble-C XC-energy= -2.62083270084188E+01
+    Spherical terms = -4.76092678026764E+01
     >>>>> Internal E= -3.52968242677807E+02
 
-    -kT*entropy     = -1.37836077549967E-03
+    -kT*entropy     = -1.37836077552293E-03
     >>>> Etotal (DC)= -3.52969621038582E+02
 
-  >Total energy in eV           = -9.57271673187458E+03
+  >Total energy in eV           = -9.57271673187456E+03
   >Total DC energy in eV        = -9.60479184899959E+03
 --------------------------------------------------------------------------------
+
+
 
           ===> extra information on forces <===
  ewald contribution to reduced grads
@@ -2433,20 +2439,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
     3      -0.000000000000     -0.000000000000     -0.000000000000
     4      -0.000000000000      0.000000000000     -0.000000000000
  nonlocal contribution to red. grads
-    1       0.000000000000     -0.000000000000     -0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
-    3       0.000000000000     -0.000000000000      0.000000000000
-    4       0.000000000000      0.000000000000     -0.000000000000
- local psp contribution to red. grads
-    1       0.000000000000      0.000000000000     -0.000000000000
+    1      -0.000000000000      0.000000000000      0.000000000000
     2      -0.000000000000      0.000000000000     -0.000000000000
-    3       0.000000000000      0.000000000000      0.001571085808
-    4       0.000000000000     -0.000000000000     -0.001571085808
+    3       0.000000000000     -0.000000000000      0.000000000000
+    4       0.000000000000      0.000000000000      0.000000000000
+ local psp contribution to red. grads
+    1       0.000000000000      0.000000000000      0.000000000000
+    2      -0.000000000000      0.000000000000     -0.000000000000
+    3       0.000000000000      0.000000000000      0.001571085805
+    4       0.000000000000     -0.000000000000     -0.001571085805
  residual contribution to red. grads
     1      -0.000000000000     -0.000000000000     -0.000000000000
-    2      -0.000000000000     -0.000000000000      0.000000000000
-    3       0.000000000000      0.000000000000     -0.001571085808
-    4       0.000000000000      0.000000000000      0.001571085808
+    2       0.000000000000      0.000000000000      0.000000000000
+    3       0.000000000000      0.000000000000     -0.001571085805
+    4       0.000000000000      0.000000000000      0.001571085805
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.42870122E-01  sigma(3 2)=  3.89921857E-04
@@ -2516,7 +2522,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
 
      iter   Etot(hartree)     deltaE(h) residm    vres2    magn
 
- ETOT  1  -341.83030064623    -3.42E+02 4.07E+00 1.43E+03 0.400
+ ETOT  1  -341.83030064622    -3.42E+02 4.07E+00 1.43E+03 0.400
 
  #electrons spin up=  23.799821, spin down=  24.200179, magnetization=  0.400358
  prteigrs : about to open file t08o_DS4_EIG
@@ -2752,8 +2758,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     18.660479156799635
- Compensation charge over fine fft grid    =     18.661246851766002
+ Compensation charge over spherical meshes =     18.660479156799639
+ Compensation charge over fine fft grid    =     18.661246851766034
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -2955,7 +2961,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.9159E-03; max=  2.3237E-02
+ Mean square residual over all n,k,spin=   39.159E-04; max=  23.237E-03
    0.2500  0.2500  0.2500    1  2.22247E-02 kpt; spin; max resid(k); each band:
   3.03E-04 2.84E-04 1.70E-04 7.24E-05 2.41E-04 1.28E-04 2.82E-04 1.69E-04
   5.96E-03 2.22E-02 2.04E-02 7.26E-05 1.08E-04 1.28E-02 8.59E-03 8.75E-05
@@ -2991,9 +2997,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
       -0.000000000000      0.000000000000      0.500000000000
        0.500000000000      0.500000000000      0.250000000000
        0.500000000000      0.500000000000      0.750000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+ rms dE/dt=  6.0727E-31; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000     -0.000000000000
     3       0.000000000000      0.000000000000      0.000000000000
     4       0.000000000000      0.000000000000      0.000000000000
 
@@ -3004,18 +3010,18 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
     4      4.19108349203280     4.19108349203280     2.09554174601640
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    3     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    4     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000    -0.00000000000000     0.00000000000000
+    2      0.00000000000000     0.00000000000000    -0.00000000000000
+    3     -0.00000000000000    -0.00000000000000     0.00000000000000
+    4     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 5.7506194E-32 9.9603650E-32   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    3     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    4     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000    -0.00000000000000     0.00000000000000
+    2      0.00000000000000     0.00000000000000    -0.00000000000000
+    3     -0.00000000000000    -0.00000000000000     0.00000000000000
+    4     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 2.9570871E-30 5.1218252E-30   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.920000000000  7.920000000000  7.920000000000 bohr
               =  4.191083492033  4.191083492033  4.191083492033 angstroms
  prteigrs : about to open file t08o_DS4_EIG
@@ -3117,32 +3123,34 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  4.65611496315650E+01
-    Hartree energy  =  3.95457467853959E+01
+    Kinetic energy  =  4.65611496315653E+01
+    Hartree energy  =  3.95457467853960E+01
     XC energy       = -2.93687225738316E+01
     Ewald energy    = -2.38122809319194E+02
     PspCore energy  =  2.14477051759375E+01
-    Loc. psp. energy= -1.20581768602423E+02
-    Spherical terms = -7.16479242314643E+01
+    Loc. psp. energy= -1.20581768602424E+02
+    Spherical terms = -7.16479242314642E+01
     >>>>> Internal E= -3.52166623134015E+02
 
-    -kT*entropy     = -1.53695139108911E-03
+    -kT*entropy     = -1.53695139107963E-03
     >>>>>>>>> Etotal= -3.52168160085406E+02
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -6.29034684198490E+01
-    Ewald energy    = -2.38122809319194E+02
+    Band energy     = -6.29034684198510E+01
+    Ewald energy    =-2.38122809319194E+02
     PspCore energy  =  2.14477051759375E+01
-    Dble-C XC-energy= -3.03886712414889E+01
-    Spherical terms = -4.83842543586542E+01
-    >>>>> Internal E= -3.58351498163248E+02
+    Dble-C XC-energy= -3.03886712414891E+01
+    Spherical terms = -4.83842543586557E+01
+    >>>>> Internal E= -3.58351498163252E+02
 
-    -kT*entropy     = -1.53695139108911E-03
-    >>>> Etotal (DC)= -3.58353035114640E+02
+    -kT*entropy     = -1.53695139107963E-03
+    >>>> Etotal (DC)= -3.58353035114643E+02
 
-  >Total energy in eV           = -9.58298298735391E+03
-  >Total DC energy in eV        = -9.75128199590052E+03
+  >Total energy in eV           = -9.58298298735392E+03
+  >Total DC energy in eV        = -9.75128199590061E+03
 --------------------------------------------------------------------------------
+
+
 
           ===> extra information on forces <===
  ewald contribution to reduced grads
@@ -3151,20 +3159,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
     3      -0.000000000000     -0.000000000000     -0.000000000000
     4      -0.000000000000      0.000000000000     -0.000000000000
  nonlocal contribution to red. grads
-    1       0.000000000000     -0.000000000000      0.000000000000
-    2      -0.000000000000     -0.000000000000      0.000000000000
+    1       0.000000000000      0.000000000000      0.000000000000
+    2      -0.000000000000      0.000000000000     -0.000000000000
     3       0.000000000000      0.000000000000      0.000000000000
-    4       0.000000000000     -0.000000000000      0.000000000000
+    4       0.000000000000     -0.000000000000     -0.000000000000
  local psp contribution to red. grads
     1      -0.000000000000     -0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
-    3       0.000000000000      0.000000000000     -0.059187128588
-    4       0.000000000000     -0.000000000000      0.059187128589
+    3       0.000000000000      0.000000000000     -0.059187128590
+    4       0.000000000000     -0.000000000000      0.059187128590
  residual contribution to red. grads
     1       0.000000000000      0.000000000000     -0.000000000000
     2      -0.000000000000     -0.000000000000     -0.000000000000
-    3       0.000000000000      0.000000000000      0.059187128588
-    4       0.000000000000      0.000000000000     -0.059187128589
+    3       0.000000000000      0.000000000000      0.059187128590
+    4       0.000000000000      0.000000000000     -0.059187128590
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.32562854E-01  sigma(3 2)=  3.45370324E-04
@@ -3200,14 +3208,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      95.500      95.486
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart3     2.2825836378E-32  2.2825836378E-32 -2.2825836378E-32
-                      -6.8477509134E-32 -6.8477509134E-32  6.8477509134E-32
-                       2.2825836378E-32  2.2825836378E-32 -2.2825836378E-32
-                       2.2825836378E-32  2.2825836378E-32 -2.2825836378E-32
-            fcart4    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart3    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart4    -3.3201216550E-32 -3.3201216550E-32  3.3201216550E-32
+                       9.9603649649E-32  9.9603649649E-32 -9.9603649649E-32
+                      -3.3201216550E-32 -3.3201216550E-32  3.3201216550E-32
+                      -3.3201216550E-32 -3.3201216550E-32  3.3201216550E-32
 -          fftalg         312
              iscf1         17
              iscf2         17
@@ -3379,7 +3387,7 @@ P           mkmem           3
            strten1     1.4257248965E-01  1.4257248965E-01  1.4257248965E-01
                        3.8584047473E-04  3.8584047473E-04 -3.8584047473E-04
            strten2     1.4082145573E-01  1.4082145573E-01  1.4082145573E-01
-                       3.2421343697E-04  3.2421343697E-04 -3.2421343697E-04
+                       3.2421343698E-04  3.2421343698E-04 -3.2421343698E-04
            strten3     1.4287012217E-01  1.4287012217E-01  1.4287012217E-01
                        3.8992185656E-04  3.8992185656E-04 -3.8992185656E-04
            strten4     1.3256285404E-01  1.3256285404E-01  1.3256285404E-01
@@ -3462,48 +3470,62 @@ P           mkmem           3
 -
 - [1] Gamma and beta cerium: LDA+U calculations of ground-state parameters.
 - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
-- Comment : LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+- Comment: LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008a
 -
 - [2] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
-- Comment : PAW calculations. Strong suggestion to cite this paper.
+- Comment: PAW calculations. Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
-- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- [3] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [4] A brief introduction to the ABINIT software package.
+- [5] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [5] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
--
-- Proc.   0 individual time (sec): cpu=          7.3  wall=          7.4
+- Proc.   0 individual time (sec): cpu=          9.1  wall=         10.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.3  wall=          7.4
+.Delivered   8 WARNINGs and  16 COMMENTs to log file.
++Overall time at end (sec) : cpu=          9.1  wall=         10.7

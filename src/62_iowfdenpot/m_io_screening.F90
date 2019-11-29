@@ -231,7 +231,8 @@ MODULE m_io_screening
  integer,private,parameter :: HSCR_KNOWN_HEADFORMS(1) = [80]
  ! The list of headforms used for SCR/SUSC so far.
 
- integer,public,parameter :: HSCR_LATEST_HEADFORM = HSCR_KNOWN_HEADFORMS(size(HSCR_KNOWN_HEADFORMS))
+ integer,private,parameter :: size_hscr_known_headforms = size(HSCR_KNOWN_HEADFORMS) ! Need this for Flang
+ integer,public,parameter :: HSCR_LATEST_HEADFORM = HSCR_KNOWN_HEADFORMS(size_hscr_known_headforms)
  ! The latest headform used when writing.
 
  public :: hscr_from_file       ! Read the header from file.

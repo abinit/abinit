@@ -1,6 +1,6 @@
 
-.Version 8.5.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  6 Sep 2017.
-- ( at 10h00 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h27 )
   
 - input  file    -> t56.in
 - output file    -> t56.out
@@ -353,8 +353,8 @@ P          mk1mem5         16
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.08519
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/31ga.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/31ga.SGS_mod
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/31ga.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/31ga.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, only for tests )
 - 31.00000   3.00000    900101                znucl, zion, pspdat
     5    3    2    2       267   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -366,14 +366,14 @@ P          mk1mem5         16
     2   0.000   0.000    0   1.4889000        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
- pspatm : epsatm=   19.73612150
+  pspatm : epsatm=   19.73612150
          --- l  ekb(1:nproj) -->
              0    9.397339
              1   -0.525725
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/33as.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/33as.SGS_mod
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/33as.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/33as.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, for testing purposes only )
 - 33.00000   5.00000    900101                znucl, zion, pspdat
     5    3    2    2       269   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -385,7 +385,7 @@ P          mk1mem5         16
     2   0.000   0.000    0   1.0000000        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
- pspatm : epsatm=   26.05495600
+  pspatm : epsatm=   26.05495600
          --- l  ekb(1:nproj) -->
              0    9.019459
              1   -0.908274
@@ -401,21 +401,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.000     113.987
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -8.5441099119996    -8.544E+00 1.180E-02 3.699E-01
  ETOT  2  -8.5523492922350    -8.239E-03 7.202E-05 3.434E-02
- ETOT  3  -8.5524155355975    -6.624E-05 3.966E-06 2.688E-03
- ETOT  4  -8.5524232226338    -7.687E-06 2.190E-07 7.690E-05
- ETOT  5  -8.5524233609593    -1.383E-07 2.717E-08 3.131E-06
+ ETOT  3  -8.5524155355974    -6.624E-05 3.966E-06 2.688E-03
+ ETOT  4  -8.5524232226337    -7.687E-06 2.190E-07 7.690E-05
+ ETOT  5  -8.5524233609592    -1.383E-07 2.717E-08 3.131E-06
  ETOT  6  -8.5524233693986    -8.439E-09 4.687E-10 2.263E-08
  ETOT  7  -8.5524233695054    -1.069E-10 6.004E-11 4.345E-10
- ETOT  8  -8.5524233695101    -4.631E-12 9.498E-13 1.052E-10
- ETOT  9  -8.5524233695106    -5.116E-13 1.608E-13 9.106E-13
- ETOT 10  -8.5524233695106    -3.730E-14 4.036E-15 2.750E-14
- ETOT 11  -8.5524233695106     2.309E-14 7.789E-16 1.506E-15
- ETOT 12  -8.5524233695106     2.132E-14 1.853E-17 5.328E-17
- ETOT 13  -8.5524233695107    -8.704E-14 3.629E-18 3.553E-19
- ETOT 14  -8.5524233695106     2.487E-14 8.580E-20 1.578E-19
- ETOT 15  -8.5524233695106     2.665E-14 1.666E-20 7.213E-21
- ETOT 16  -8.5524233695106    -2.842E-14 3.997E-22 9.575E-21
- ETOT 17  -8.5524233695106     1.421E-14 5.539E-23 3.386E-21
+ ETOT  8  -8.5524233695101    -4.674E-12 9.497E-13 1.052E-10
+ ETOT  9  -8.5524233695106    -4.512E-13 1.608E-13 9.106E-13
+ ETOT 10  -8.5524233695106    -6.573E-14 4.036E-15 2.750E-14
+ ETOT 11  -8.5524233695106     3.375E-14 7.789E-16 1.506E-15
+ ETOT 12  -8.5524233695106     2.665E-14 1.853E-17 5.328E-17
+ ETOT 13  -8.5524233695107    -9.237E-14 3.629E-18 3.553E-19
+ ETOT 14  -8.5524233695106     2.842E-14 8.580E-20 1.578E-19
+ ETOT 15  -8.5524233695106     2.842E-14 1.666E-20 7.215E-21
+ ETOT 16  -8.5524233695106    -2.487E-14 3.997E-22 9.578E-21
+ ETOT 17  -8.5524233695106     1.066E-14 5.538E-23 3.381E-21
 
  At SCF step   17   max residual=  5.54E-23 < tolwfr=  1.00E-22 =>converged.
 
@@ -433,7 +433,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.000     113.987
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.6531E-23; max=  5.5391E-23
+ Mean square residual over all n,k,spin=   36.530E-24; max=  55.379E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -468,7 +468,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.000     113.987
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  3.00077550899490E+00
-    Hartree energy  =  7.38727150229728E-01
+    Hartree energy  =  7.38727150229729E-01
     XC energy       = -2.38303395045599E+00
     Ewald energy    = -8.48789573682593E+00
     PspCore energy  =  1.23030629308494E+00
@@ -479,6 +479,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.000     113.987
  Other information on the energy :
     Total energy(eV)= -2.32723275240988E+02 ; Band energy (Ha)=  -1.2806398944E+00
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.96454316E-04  sigma(3 2)=  0.00000000E+00
@@ -517,12 +519,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.000     113.987
 ================================================================================
  prteigrs : about to open file t56o_DS2_EIG
  Non-SCF case, kpt    1 ( -0.25000  0.50000  0.00000), residuals and eigenvalues=
-  1.55E-23  4.42E-23  3.18E-23  2.12E-23  8.26E-25  1.46E-23  8.33E-24  4.15E-23
+  1.55E-23  4.44E-23  3.18E-23  2.12E-23  8.25E-25  1.46E-23  8.33E-24  4.19E-23
   3.40E-23  9.28E-23  6.61E-23  6.96E-23  9.63E-23  2.25E-24  5.58E-24  1.55E-24
-  1.91E-24  7.05E-24  1.78E-23  8.73E-25  2.07E-23  2.20E-23  2.06E-24  8.93E-23
-  6.49E-23  7.89E-23  1.60E-23  1.23E-23  5.97E-23  6.80E-23  7.32E-23  8.47E-23
-  3.05E-24  2.25E-23  6.29E-23  5.81E-23  9.91E-24  3.54E-23  9.58E-23  1.49E-23
-  1.73E-23  9.43E-23  3.26E-22  8.60E-23  1.47E-20  4.00E-16  4.68E-17  4.90E-14
+  1.91E-24  7.05E-24  1.77E-23  8.73E-25  2.07E-23  2.22E-23  2.06E-24  8.94E-23
+  6.50E-23  7.89E-23  1.60E-23  1.23E-23  5.96E-23  6.80E-23  7.32E-23  8.47E-23
+  3.05E-24  2.25E-23  6.29E-23  5.81E-23  9.91E-24  3.54E-23  9.57E-23  1.49E-23
+  1.73E-23  9.43E-23  3.26E-22  8.57E-23  1.47E-20  4.00E-16  4.68E-17  4.90E-14
   4.51E-13  2.91E-08
  -3.4387E-01 -1.9721E-01 -9.2937E-02 -4.8837E-02  1.1567E-01  2.1156E-01
   2.6651E-01  2.8351E-01  4.0860E-01  4.7542E-01  5.0611E-01  5.2522E-01
@@ -536,7 +538,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.000     113.987
   prteigrs : nnsclo,ikpt=   15    1 max resid (incl. the buffer)=  2.91402E-08
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   15    2 max resid (incl. the buffer)=  2.34413E-08
+  prteigrs : nnsclo,ikpt=   15    2 max resid (incl. the buffer)=  2.34412E-08
 
 
  scprqt:  WARNING -
@@ -552,7 +554,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.000     113.987
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.2941E-10; max=  2.9140E-08
+ Mean square residual over all n,k,spin=   52.941E-11; max=  29.140E-09
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -620,21 +622,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.000     113.987
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -11.304683449991     -1.130E+01 3.164E+00 0.000E+00
- ETOT  2  -11.304691467666     -8.018E-06 6.260E-01 0.000E+00
- ETOT  3  -11.304691471245     -3.579E-09 1.295E-01 0.000E+00
- ETOT  4  -11.304691471245      7.105E-15 1.759E-02 0.000E+00
- ETOT  5  -11.304691471245     -1.243E-14 1.693E-02 0.000E+00
- ETOT  6  -11.304691471245      3.553E-15 3.407E-03 0.000E+00
- ETOT  7  -11.304691471245     -1.776E-15 3.215E-03 0.000E+00
- ETOT  8  -11.304691471245     -3.553E-15 6.980E-04 0.000E+00
- ETOT  9  -11.304691471245      3.553E-15 6.461E-04 0.000E+00
- ETOT 10  -11.304691471245      0.000E+00 1.478E-04 0.000E+00
- ETOT 11  -11.304691471245      0.000E+00 1.344E-04 0.000E+00
- ETOT 12  -11.304691471245      0.000E+00 3.200E-05 0.000E+00
- ETOT 13  -11.304691471245      0.000E+00 2.859E-05 0.000E+00
- ETOT 14  -11.304691471245      0.000E+00 7.044E-06 0.000E+00
- ETOT 15  -11.304691471245      0.000E+00 6.178E-06 0.000E+00
+-ETOT  1  -11.304683449860     -1.130E+01 3.164E+00 0.000E+00
+ ETOT  2  -11.304691467535     -8.018E-06 6.260E-01 0.000E+00
+ ETOT  3  -11.304691471114     -3.579E-09 1.295E-01 0.000E+00
+ ETOT  4  -11.304691471114     -1.243E-14 1.759E-02 0.000E+00
+ ETOT  5  -11.304691471114      8.882E-15 1.693E-02 0.000E+00
+ ETOT  6  -11.304691471114      0.000E+00 3.407E-03 0.000E+00
+ ETOT  7  -11.304691471114     -1.776E-15 3.215E-03 0.000E+00
+ ETOT  8  -11.304691471114      0.000E+00 6.980E-04 0.000E+00
+ ETOT  9  -11.304691471114     -1.776E-15 6.461E-04 0.000E+00
+ ETOT 10  -11.304691471114      3.553E-15 1.478E-04 0.000E+00
+ ETOT 11  -11.304691471114      0.000E+00 1.344E-04 0.000E+00
+ ETOT 12  -11.304691471114      0.000E+00 3.200E-05 0.000E+00
+ ETOT 13  -11.304691471114      0.000E+00 2.859E-05 0.000E+00
+ ETOT 14  -11.304691471114     -3.553E-15 7.044E-06 0.000E+00
+ ETOT 15  -11.304691471114      3.553E-15 6.178E-06 0.000E+00
 
  scprqt:  WARNING -
   nstep=   15 was not enough SCF cycles to converge;
@@ -644,7 +646,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.000     113.987
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.2144E-08; max=  6.1784E-06
+ Mean square residual over all n,k,spin=   52.144E-09; max=  61.784E-07
  dfpt_looppert : ek2=    1.6865112540E+01
           f-sum rule ratio=    1.1782005851E+00
  prteigrs : about to open file t56_1WF1_EIG
@@ -671,7 +673,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.000     113.987
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.13046915E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1130469147E+02 Ha. Also 2DEtotal=   -0.307616299043E+03 eV
+ 2DEtotal=   -0.1130469147E+02 Ha. Also 2DEtotal=   -0.307616299039E+03 eV
     (  non-var. 2DEtotal :   -1.1304691471E+01 Ha)
 ================================================================================
 
@@ -743,21 +745,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.000     113.987
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -11.304683449788     -1.130E+01 3.164E+00 0.000E+00
- ETOT  2  -11.304691467463     -8.018E-06 6.260E-01 0.000E+00
- ETOT  3  -11.304691471042     -3.579E-09 1.295E-01 0.000E+00
- ETOT  4  -11.304691471042     -3.553E-15 1.759E-02 0.000E+00
- ETOT  5  -11.304691471042      7.105E-15 1.693E-02 0.000E+00
- ETOT  6  -11.304691471042      3.553E-15 3.407E-03 0.000E+00
- ETOT  7  -11.304691471042      0.000E+00 3.215E-03 0.000E+00
- ETOT  8  -11.304691471042      0.000E+00 6.980E-04 0.000E+00
- ETOT  9  -11.304691471042      0.000E+00 6.461E-04 0.000E+00
- ETOT 10  -11.304691471042     -1.776E-15 1.478E-04 0.000E+00
- ETOT 11  -11.304691471042      1.776E-15 1.344E-04 0.000E+00
- ETOT 12  -11.304691471042      0.000E+00 3.200E-05 0.000E+00
- ETOT 13  -11.304691471042      0.000E+00 2.859E-05 0.000E+00
- ETOT 14  -11.304691471042      0.000E+00 7.044E-06 0.000E+00
- ETOT 15  -11.304691471042     -1.776E-15 6.178E-06 0.000E+00
+-ETOT  1  -11.304683449658     -1.130E+01 3.164E+00 0.000E+00
+ ETOT  2  -11.304691467332     -8.018E-06 6.260E-01 0.000E+00
+ ETOT  3  -11.304691470911     -3.579E-09 1.295E-01 0.000E+00
+ ETOT  4  -11.304691470911     -3.553E-15 1.759E-02 0.000E+00
+ ETOT  5  -11.304691470911      7.105E-15 1.693E-02 0.000E+00
+ ETOT  6  -11.304691470911     -3.553E-15 3.407E-03 0.000E+00
+ ETOT  7  -11.304691470911      0.000E+00 3.215E-03 0.000E+00
+ ETOT  8  -11.304691470911     -1.776E-15 6.980E-04 0.000E+00
+ ETOT  9  -11.304691470911      5.329E-15 6.461E-04 0.000E+00
+ ETOT 10  -11.304691470911     -5.329E-15 1.478E-04 0.000E+00
+ ETOT 11  -11.304691470911      0.000E+00 1.344E-04 0.000E+00
+ ETOT 12  -11.304691470911      0.000E+00 3.200E-05 0.000E+00
+ ETOT 13  -11.304691470911      0.000E+00 2.859E-05 0.000E+00
+ ETOT 14  -11.304691470911      0.000E+00 7.044E-06 0.000E+00
+ ETOT 15  -11.304691470911      0.000E+00 6.178E-06 0.000E+00
 
  scprqt:  WARNING -
   nstep=   15 was not enough SCF cycles to converge;
@@ -767,7 +769,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.000     113.987
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.2144E-08; max=  6.1784E-06
+ Mean square residual over all n,k,spin=   52.144E-09; max=  61.784E-07
  dfpt_looppert : ek2=    1.6865112540E+01
           f-sum rule ratio=    1.1782005851E+00
  prteigrs : about to open file t56_1WF1_EIG
@@ -794,7 +796,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.000     113.987
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.13046915E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1130469147E+02 Ha. Also 2DEtotal=   -0.307616299037E+03 eV
+ 2DEtotal=   -0.1130469147E+02 Ha. Also 2DEtotal=   -0.307616299034E+03 eV
     (  non-var. 2DEtotal :   -1.1304691471E+01 Ha)
 ================================================================================
 
@@ -866,21 +868,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.000     113.987
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -11.304683449586     -1.130E+01 3.164E+00 0.000E+00
- ETOT  2  -11.304691467260     -8.018E-06 6.260E-01 0.000E+00
- ETOT  3  -11.304691470839     -3.579E-09 1.295E-01 0.000E+00
- ETOT  4  -11.304691470839     -3.553E-15 1.759E-02 0.000E+00
- ETOT  5  -11.304691470839      5.329E-15 1.693E-02 0.000E+00
- ETOT  6  -11.304691470839     -1.776E-15 3.407E-03 0.000E+00
- ETOT  7  -11.304691470839      0.000E+00 3.215E-03 0.000E+00
- ETOT  8  -11.304691470839      5.329E-15 6.980E-04 0.000E+00
- ETOT  9  -11.304691470839      0.000E+00 6.461E-04 0.000E+00
- ETOT 10  -11.304691470839     -3.553E-15 1.478E-04 0.000E+00
- ETOT 11  -11.304691470839      0.000E+00 1.344E-04 0.000E+00
- ETOT 12  -11.304691470839      0.000E+00 3.200E-05 0.000E+00
- ETOT 13  -11.304691470839      1.776E-15 2.859E-05 0.000E+00
- ETOT 14  -11.304691470839      5.329E-15 7.044E-06 0.000E+00
- ETOT 15  -11.304691470839     -5.329E-15 6.178E-06 0.000E+00
+-ETOT  1  -11.304683449455     -1.130E+01 3.164E+00 0.000E+00
+ ETOT  2  -11.304691467130     -8.018E-06 6.260E-01 0.000E+00
+ ETOT  3  -11.304691470708     -3.579E-09 1.295E-01 0.000E+00
+ ETOT  4  -11.304691470708     -8.882E-15 1.759E-02 0.000E+00
+ ETOT  5  -11.304691470708     -3.553E-15 1.693E-02 0.000E+00
+ ETOT  6  -11.304691470708      7.105E-15 3.407E-03 0.000E+00
+ ETOT  7  -11.304691470708      0.000E+00 3.215E-03 0.000E+00
+ ETOT  8  -11.304691470708      0.000E+00 6.980E-04 0.000E+00
+ ETOT  9  -11.304691470708      0.000E+00 6.461E-04 0.000E+00
+ ETOT 10  -11.304691470708      1.776E-15 1.478E-04 0.000E+00
+ ETOT 11  -11.304691470708     -1.776E-15 1.344E-04 0.000E+00
+ ETOT 12  -11.304691470708      0.000E+00 3.200E-05 0.000E+00
+ ETOT 13  -11.304691470708     -5.329E-15 2.859E-05 0.000E+00
+ ETOT 14  -11.304691470708      3.553E-15 7.044E-06 0.000E+00
+ ETOT 15  -11.304691470708      1.776E-15 6.178E-06 0.000E+00
 
  scprqt:  WARNING -
   nstep=   15 was not enough SCF cycles to converge;
@@ -890,7 +892,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.000     113.987
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.2144E-08; max=  6.1784E-06
+ Mean square residual over all n,k,spin=   52.144E-09; max=  61.784E-07
  dfpt_looppert : ek2=    1.6865112540E+01
           f-sum rule ratio=    1.1782005850E+00
  prteigrs : about to open file t56_1WF1_EIG
@@ -917,7 +919,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.000     113.987
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.13046915E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1130469147E+02 Ha. Also 2DEtotal=   -0.307616299032E+03 eV
+ 2DEtotal=   -0.1130469147E+02 Ha. Also 2DEtotal=   -0.307616299028E+03 eV
     (  non-var. 2DEtotal :   -1.1304691471E+01 Ha)
 ================================================================================
 
@@ -1191,49 +1193,54 @@ P          mk1mem5         16
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xue, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
 - implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
 -
 - [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
 - interatomic force constants from density-functional perturbation theory,
 - X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [4] ABINIT : First-principles approach of materials and nanosystem properties.
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [5] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         18.8  wall=         19.1
+- Proc.   0 individual time (sec): cpu=         22.3  wall=         24.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  37 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.8  wall=         19.1
+.Delivered  19 WARNINGs and  23 COMMENTs to log file.
++Overall time at end (sec) : cpu=         22.3  wall=         24.6
