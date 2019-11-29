@@ -427,7 +427,7 @@ Let us skip the first dataset. In the dataset 2 section, one perturbation is cor
 The analysis of the output for this particular perturbation is not
 particularly interesting, except for the f-sum rule ratio
     
-     loper3 : ek2=    1.6833336546E+01
+     dfpt_looppert : ek2=    1.6833336546E+01
               f-sum rule ratio=    1.0028582975E+00
     
 that should be close to 1, and becomes closer to it when [[ecut]] is

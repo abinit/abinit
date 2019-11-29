@@ -290,7 +290,7 @@ needed for the Fourier interpolation), but not printed.
 
 {% dialog tests/tutorespfn/Refs/trf2_5.out %}
 
-Please, open also the other output file, named *trf2_5_B2EPS.freq*.
+Please, open also the other output file, named *trf2_5_B2EPS.out.freq*.
 It contains the frequencies, in a format suitable for graphical output, using the program
 *band2eps* (the latter should be more documented, and will not be described in the present tutorial).
 

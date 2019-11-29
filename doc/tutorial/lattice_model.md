@@ -20,7 +20,7 @@ With this lesson, you will learn to:
 In this tutorial, all the knowledge about the Density Functional Theory (DFT) and Density Functional Perturbation Theory (DFPT) should have been already acquired.
 In addition, the DFPT is a key feature of ABINIT for MULTIBINIT thus, in order to learn how to use the DFPT (producing the related DDB) and the associated code to merge different DDB files,
 please have a look at the tutorials on [[lesson:rf1| Phonon response]], [[lesson:elastic|strain response]] and [[lesson:rf2| Mrgddb]] before to continue.
-After theses tutorials you should be able to compute a full DFPT calculation and a complete DDB file.
+After these tutorials you should be able to compute a full DFPT calculation and a complete DDB file.
 Thereby this tutorial will not provide the inputs for ABINIT, that you can find, however, in the previously cited tutorials.
   
 The AGATE software, used to make the analysis of the results, is also required for this tutorial. You can install it on debian with:
@@ -38,7 +38,7 @@ As described in [[cite:Wojdel2013]], the construction of a model starts by defin
 : Fig. 1: Example of cubic RS made by two different (black and red) atomic species.
 
 The choice of this RS is fundamental since the model will be based on perturbations acting on it.
-Once this choice is done, make sure than your system is fully relaxed and compute a single DFT calculation on this system in order to generate a DDB file.
+Once this choice is done, make sure than your system is fully relaxed and perform a single DFT calculation on this system in order to generate a DDB file.
 In this tutorial, we will take as an example of a material without instabilities, the perovskite CaTiO3 in the Pnma phase.
 
 From the RS, now we consider the perturbations: the set of atomic displacements $\boldsymbol{u}$ and lattice strain $\boldsymbol{\eta}$:
@@ -106,7 +106,7 @@ You should now run (it would take less than a second):
 
     multibinit < tmulti1.files > tmulti1_1_stdout
 
-The resulting output file, trf1_1.out, should be similar to the one below.
+The resulting output file, tmulti1_1.out, should be similar to the one below.
 {% dialog tests/tutomultibinit/Refs/tmulti1_1.out %}
 
 
@@ -138,9 +138,11 @@ We can now run our *first dynamics*: you can copy the files ~abinit/tests/tutomu
 
 {% dialog tests/tutomultibinit/Input/tmulti1_3.in %}
 
-you can visualize your dynamic with the agate software:
+You can visualize your dynamic with the agate software:
 
-    agate < tmulti1_3.out_HIST.nc
+    agate tmulti1_3.out_HIST.nc
+
+As you can see, the simulation diverges. This is because a model potential without anharmonic terms is not sufficient here. You should also verify the warnings in the standard output associated with tmulti1_3.
    
 * * *
 
