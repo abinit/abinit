@@ -425,7 +425,7 @@ elec_eval = .FALSE.
                     &         fit_iatom=inp%fit_iatom)
              else 
                 inp%fit_nfixcoeff = -1
-		do ii=1,natom
+                do ii=1,natom
                   call fit_polynomial_coeff_fit(reference_effective_potential,&
                        &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
                        &         inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&

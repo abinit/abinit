@@ -510,7 +510,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
           if(eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp>1 .or. &
 &            eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp /= 0 .and. &
 &            eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%nstrain /= 0)then 
-             call opt_getHOcrossdisp(HOcrossdisp_terms,ncombi2,eff_pot%anharmonics_terms%coefficients(iterm),order_ran,comm)
+             call opt_getHOcrossdisp(HOcrossdisp_terms,ncombi2,eff_pot%anharmonics_terms%coefficients(iterm),order_ran)
           endif  
           !Copy everything together
           ABI_DATATYPE_ALLOCATE(my_coeffs,(size(eff_pot%anharmonics_terms%coefficients)+size(HOsingledisp_terms)))
@@ -639,7 +639,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 &                                              natom_sc,ntime,fit_data%training_set%sqomega,&
 &                                              compute_anharmonic=.TRUE.,print_file=.FALSE.)
  
-                  write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
+                  write(message,'(a,I2,a,ES24.16)') "cycle ",i," (msef+mses)/(msef_ini+mses_ini): ",(msef+mses)/(msef_ini+mses_ini)
                   call wrtout(std_out,message,'COLL')
                   write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses): ", (msef+mses)
                   call wrtout(std_out,message,'COLL')
@@ -1298,13 +1298,12 @@ end subroutine opt_getHOstrain
 !!
 !! SOURCE
 
-subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp,comm)
+subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
 
  implicit none 
          
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: comm
  type(polynomial_coeff_type),allocatable,intent(inout) :: terms_out(:)
  type(polynomial_coeff_type),intent(inout) :: term_in
  integer,intent(in) :: power_disp(2) 
