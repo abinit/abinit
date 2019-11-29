@@ -230,11 +230,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
     fit_iatom_in = -1 
  endif
 
-
- ABI_ALLOCATE(symbols,(eff_pot%crystal%natom))
- call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,eff_pot%crystal%npsp,&
-&                     symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
-
 !Set the tolerance for the fit
  tolMSDF=zero;tolMSDS=zero;tolMSDE=zero;tolMSDFS=zero
  if(present(fit_tolMSDF)) tolMSDF  = fit_tolMSDF
@@ -306,8 +301,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    end if
  end if
 
+ ABI_ALLOCATE(symbols,(eff_pot%crystal%natom))
+ call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,eff_pot%crystal%npsp,&
+&                     symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
+
  if(generateterm == 1)then
-! we need to regerate them
+! we need to regenerate them
    if(need_verbose)then
      if(fit_iatom_in > 0)then 
        write(message, '(2a,I3,4a)' )ch10,' The coefficients for the fit around atom', fit_iatom_in,': ',& 
@@ -330,6 +329,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                  only_even_power=need_only_even_power,& 
 &                                  fit_iatom=fit_iatom_in)
  end if
+
+ ABI_DEALLOCATE(symbols)
+
 !Copy the initial coefficients from the model on the CPU 0
  ncoeff_tot = ncoeff_tot + ncoeff_model
  if(iam_master .and. ncoeff_model > 0) my_ncoeff = my_ncoeff + ncoeff_model

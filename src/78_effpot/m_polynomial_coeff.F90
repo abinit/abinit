@@ -1882,6 +1882,7 @@ list_symcoeff_tmp = list_symcoeff_tmp3
  ABI_DEALLOCATE(list_symcoeff_tmp2)
  ABI_DEALLOCATE(list_symcoeff_tmp3) 
  ABI_DEALLOCATE(list_symstr_tmp)
+ ABI_DEALLOCATE(index_irred)
  ABI_DEALLOCATE(indsym)
  ABI_DEALLOCATE(symrec)
  ABI_DEALLOCATE(symrel)
@@ -1971,7 +1972,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 !arrays
  integer :: ncell(3)
  integer,allocatable :: buffsize(:),buffdispl(:),index_irredcomb(:),dummylist(:),index_irred(:)
- integer,allocatable :: index_irredcomb_fix(:),offsets(:)
+ integer,allocatable :: offsets(:)
  integer,allocatable :: cell(:,:),compatibleCoeffs(:,:)
  integer,allocatable :: list_symcoeff(:,:,:),list_symstr(:,:,:),list_coeff(:),list_combination(:,:)
  integer,allocatable :: list_combination_tmp(:,:),irank_combi_start(:),irank_combi_end(:)
@@ -2252,9 +2253,9 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
      end do !end  icoeff 
    end do !icoeff2
 
+ ABI_DEALLOCATE(dist)
+ ABI_DEALLOCATE(rpt)
 !if(iam_master)write(std_out,*) "DEBUG rpimd(1,1)+rprimd(1,2)+rprimd(1,3)*sc_size(1): ", (rprimd(1,1) + rprimd(1,2) + rprimd(1,3))*sc_size(1) 
-! ABI_DEALLOCATE(dist)
-! ABI_DEALLOCATE(rpt)
 !   do icoeff=1,ncoeff_symsym+nstr_sym
 !     do icoeff2=1,ncoeff_symsym+nstr_sym
 !         if(compatibleCoeffs(icoeff,icoeff2) .ne. 0)then 
@@ -2348,8 +2349,6 @@ if(need_compute_symmetric)then
 
   ncombi_alone = mod(nirred_comb,nproc)
   my_ncombi_simple = int(aint(real(nirred_comb,sp)/(nproc))) 
-  ABI_ALLOCATE(index_irredcomb_fix,(nirred_comb))
-  index_irredcomb_fix = index_irredcomb
   if(ncombi_alone == 0 .and. nirred_comb >= nproc)then !ncombi > nproc and no remainder
     my_ncombi_start = (my_ncombi_simple * my_rank) + 1
     my_ncombi_end   = my_ncombi_start + my_ncombi_simple - 1
@@ -2508,6 +2507,8 @@ if(need_compute_symmetric)then
 
   ABI_DEALLOCATE(buffsize) 
   ABI_DEALLOCATE(my_list_combination)
+  ABI_DEALLOCATE(my_index_irredcomb)
+  ABI_DEALLOCATE(index_irredcomb)
   ABI_DEALLOCATE(irank_combi_start)
   ABI_DEALLOCATE(irank_combi_end)
   ABI_DEALLOCATE(irank_ncombi)
@@ -4317,6 +4318,7 @@ index_irred_tmp = index_irred
 ABI_DEALLOCATE(index_irred) 
 ABI_ALLOCATE(index_irred,(size(index_irred_tmp)+1))
 index_irred(:size(index_irred_tmp)) = index_irred_tmp 
+ABI_DEALLOCATE(index_irred_tmp)
 index_irred(size(index_irred)) = ncombination + 1
 !write(std_out,*) "DEBUG: index_irred", index_irred
 return 
