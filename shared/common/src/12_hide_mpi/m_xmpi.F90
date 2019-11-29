@@ -205,8 +205,8 @@ MODULE m_xmpi
  public :: xmpi_distrib_with_replicas ! Distribute tasks among MPI ranks (replicas are allowed)
 
 ! Private procedures.
- public :: xmpi_largetype_create      ! Build a large-count contiguous datatype (to handle a very large # of data)
- public :: xmpi_largetype_free        ! Release a large-count contiguous datatype
+ private :: xmpi_largetype_create      ! Build a large-count contiguous datatype (to handle a very large # of data)
+ private :: xmpi_largetype_free        ! Release a large-count contiguous datatype
 
  interface xmpi_comm_free
    module procedure xmpi_comm_free_0D
@@ -2722,104 +2722,157 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
  else if (op_type==MPI_OP_NULL) then
    largetype_op=-1111
  end if
-
- contains
-   subroutine largetype_sum_int(invec,inoutvec,len,datatype)
-    integer :: len,datatype
-    integer :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
-    integer(KIND=int64) :: ii,jj,kk
-    kk=0
-    do ii=1,len
-      do jj=1,xmpi_largetype_size
-        kk=kk+1
-        inoutvec(kk)=inoutvec(kk)+invec(kk)
-      end do
-    end do
-   end subroutine largetype_sum_int
-   subroutine largetype_sum_real(invec,inoutvec,len,datatype)
-    integer :: len,datatype
-    real(sp) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
-    integer(KIND=int64) :: ii,jj,kk
-    kk=0
-    do ii=1,len
-      do jj=1,xmpi_largetype_size
-        kk=kk+1
-        inoutvec(kk)=inoutvec(kk)+invec(kk)
-      end do
-    end do
-    ABI_UNUSED(datatype)
-   end subroutine largetype_sum_real
-   subroutine largetype_sum_dble(invec,inoutvec,len,datatype)
-    integer :: len,datatype
-    real(dp) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
-    integer(KIND=int64) :: ii,jj,kk
-    kk=0
-    do ii=1,len
-      do jj=1,xmpi_largetype_size
-        kk=kk+1
-        inoutvec(kk)=inoutvec(kk)+invec(kk)
-      end do
-    end do
-    ABI_UNUSED(datatype)
-   end subroutine largetype_sum_dble
-   subroutine largetype_sum_cplx(invec,inoutvec,len,datatype)
-    integer :: len,datatype
-    complex(spc) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
-    integer(KIND=int64) :: ii,jj,kk
-    kk=0
-    do ii=1,len
-      do jj=1,xmpi_largetype_size
-        kk=kk+1
-        inoutvec(kk)=inoutvec(kk)+invec(kk)
-      end do
-    end do
-    ABI_UNUSED(datatype)
-   end subroutine largetype_sum_cplx
-   subroutine largetype_sum_dcplx(invec,inoutvec,len,datatype)
-    integer :: len,datatype
-    complex(dpc) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
-    integer(KIND=int64) :: ii,jj,kk
-    kk=0
-    do ii=1,len
-      do jj=1,xmpi_largetype_size
-        kk=kk+1
-        inoutvec(kk)=inoutvec(kk)+invec(kk)
-      end do
-    end do
-    ABI_UNUSED(datatype)
-   end subroutine largetype_sum_dcplx
-   subroutine largetype_lor_log(invec,inoutvec,len,datatype)
-    integer :: len,datatype
-    logical :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
-    integer(KIND=int64) :: ii,jj,kk
-    kk=0
-    do ii=1,len
-      do jj=1,xmpi_largetype_size
-        kk=kk+1
-        inoutvec(kk)=inoutvec(kk).or.invec(kk)
-      end do
-    end do
-    ABI_UNUSED(datatype)
-   end subroutine largetype_lor_log
-   subroutine largetype_land_log(invec,inoutvec,len,datatype)
-    integer :: len,datatype
-    logical :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
-    integer(KIND=int64) :: ii,jj,kk
-    kk=0
-    do ii=1,len
-      do jj=1,xmpi_largetype_size
-        kk=kk+1
-        inoutvec(kk)=inoutvec(kk).and.invec(kk)
-      end do
-    end do
-    ABI_UNUSED(datatype)
-   end subroutine largetype_land_log
-
 #else
  ABI_UNUSED(largecount,inputtype,largetype,largetype_op,op_type)
 #endif
 
 end subroutine xmpi_largetype_create
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_sum_int
+!! NAME
+!!  largetype_sum_int
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_SUM for integers
+ subroutine largetype_sum_int(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  integer :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+	do jj=1,xmpi_largetype_size
+	  kk=kk+1
+	  inoutvec(kk)=inoutvec(kk)+invec(kk)
+	end do
+  end do
+ end subroutine largetype_sum_int
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_sum_real
+!! NAME
+!!  largetype_sum_real
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_SUM for reals
+ subroutine largetype_sum_real(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  real(sp) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+	do jj=1,xmpi_largetype_size
+	  kk=kk+1
+	  inoutvec(kk)=inoutvec(kk)+invec(kk)
+	end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_sum_real
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_sum_dble
+!! NAME
+!!  largetype_sum_dble
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_SUM for double precision reals
+ subroutine largetype_sum_dble(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  real(dp) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+	do jj=1,xmpi_largetype_size
+	  kk=kk+1
+	  inoutvec(kk)=inoutvec(kk)+invec(kk)
+	end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_sum_dble
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_sum_cplx
+!! NAME
+!!  largetype_sum_cplx
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_SUM for complex
+ subroutine largetype_sum_cplx(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  complex(spc) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+	do jj=1,xmpi_largetype_size
+	  kk=kk+1
+	  inoutvec(kk)=inoutvec(kk)+invec(kk)
+	end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_sum_cplx
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_sum_dcplx
+!! NAME
+!!  largetype_sum_dcplx
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_SUM for double commplex
+ subroutine largetype_sum_dcplx(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  complex(dpc) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+	do jj=1,xmpi_largetype_size
+	  kk=kk+1
+	  inoutvec(kk)=inoutvec(kk)+invec(kk)
+	end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_sum_dcplx
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_lor_log
+!! NAME
+!!  largetype_lor_log
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_LOR for logicals
+ subroutine largetype_lor_log(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  logical :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+	do jj=1,xmpi_largetype_size
+	  kk=kk+1
+	  inoutvec(kk)=inoutvec(kk).or.invec(kk)
+	end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_lor_log
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_lang_log
+!! NAME
+!!  largetype_lang_log
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_LANG for logicals
+ subroutine largetype_land_log(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  logical :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+	do jj=1,xmpi_largetype_size
+	  kk=kk+1
+	  inoutvec(kk)=inoutvec(kk).and.invec(kk)
+	end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_land_log
 !!***
 
 !----------------------------------------------------------------------
