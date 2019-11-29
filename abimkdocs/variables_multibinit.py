@@ -1151,7 +1151,7 @@ Variable(
     abivarname="test_effpot@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['LatticeModel_Basic'],
+    topics=['LatticeModel_basic'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="TEST EFFective POTential",
