@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.13 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h37 )
+.Starting date : Fri 29 Nov 2019.
+- ( at 09h23 )
   
 - input  file    -> t25.in
 - output file    -> t25.out
@@ -829,6 +829,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.000     783.000
             fcart5     7.2785672130E-02 -0.0000000000E+00 -0.0000000000E+00
                       -7.2785672130E-02 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         312
+           grchrg1     0.0000000000E+00  0.0000000000E+00
+           grchrg2     2.2783108365E-08  2.2783108352E-08
+           grchrg3    -2.5882190697E-03 -2.5882190697E-03
+           grchrg4     2.2782862254E-08  2.2782862207E-08
+           grchrg5     2.3915943463E-09  2.3915943315E-09
+           grspin1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           grspin2     6.2628255824E-02  0.0000000000E+00  0.0000000000E+00
+                      -6.2628255824E-02  0.0000000000E+00  0.0000000000E+00
+           grspin3     6.2870507111E-02  0.0000000000E+00  0.0000000000E+00
+                      -6.2870507111E-02  0.0000000000E+00  0.0000000000E+00
+           grspin4     6.2628255824E-02  0.0000000000E+00  0.0000000000E+00
+                      -6.2628255824E-02  0.0000000000E+00  0.0000000000E+00
+           grspin5     5.9932499727E-07  0.0000000000E+00  0.0000000000E+00
+                      -5.9932499705E-07  0.0000000000E+00  0.0000000000E+00
            istwfk        2
            jdtset        1    2    3    4    5
          kptrlatt        1    0    0      0    1    0      0    0    1
@@ -956,10 +971,10 @@ P           mkmem           1
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          2.7  wall=          2.8
+- Proc.   0 individual time (sec): cpu=          2.3  wall=          3.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.7  wall=          2.8
++Overall time at end (sec) : cpu=          2.3  wall=          3.1
