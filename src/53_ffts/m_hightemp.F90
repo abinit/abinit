@@ -152,12 +152,13 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine compute_e_shiftfactor(this,eigen,eknk,mband,nkpt,nsppol)
+  subroutine compute_e_shiftfactor(this,eigen,eknk,mband,mpi_enreg,nkpt,nsppol)
 
     ! Arguments -------------------------------
     ! Scalars
     class(hightemp_type),intent(inout) :: this
     integer,intent(in) :: mband,nkpt,nsppol
+    type(MPI_type), intent(inout) :: mpi_enreg
     ! Arrays
     real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
     real(dp),intent(in) :: eknk(mband*nkpt*nsppol)
@@ -527,14 +528,14 @@ contains
     real(dp),dimension(:),allocatable :: valuesnel,valuesent
 
     ! *********************************************************************
-    step=1e-5
+    step=1e-4
     nfreeel=zero
     entropy=zero
 
     ! Dynamic array find size
     ix=ebcut
     ii=0
-    do while(fermi_dirac(ix,fermie,tsmear)>1e-16)
+    do while(fermi_dirac(ix,fermie,tsmear)>1e-8)
       ii=ii+1
       ix=ix+step
     end do
@@ -544,7 +545,7 @@ contains
 
     ix=ebcut
     ii=0
-    do while(fermi_dirac(ix,fermie,tsmear)>1e-16)
+    do while(fermi_dirac(ix,fermie,tsmear)>1e-8)
       ii=ii+1
       valuesnel(ii)=fermi_dirac(ix,fermie,tsmear)*hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
       valuesent(ii)=(fermi_dirac(ix,fermie,tsmear)*log(fermi_dirac(ix,fermie,tsmear))+&
