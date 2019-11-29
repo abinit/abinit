@@ -735,7 +735,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      ABI_ALLOCATE(strten_img,(6,nimage))
 
      call gwls_sternheimer(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
-&     fred_img,iexit,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
+&     fred_img,iexit,intgres_img,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
 &     pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,xred_img,&
 &     filnam,filstat,idtset,jdtset_,ndtset)
 
