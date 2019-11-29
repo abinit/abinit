@@ -1177,7 +1177,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 !grspin
  print_constraint=0
  do idtset=1,ndtset_alloc
-   if(any(mod(dtsets(idtset)%constraint_kind(:),10)>=10))print_constraint=1
+   if(any(mod(dtsets(idtset)%constraint_kind(:),10)>0))print_constraint=1
  enddo
  if(print_constraint==1)then
 !if(any(mod(dtsets(1:ndtset_alloc)%constraint_kind(:),10)/=0))then

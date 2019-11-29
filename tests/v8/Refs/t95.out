@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.13 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h39 )
+.Starting date : Fri 29 Nov 2019.
+- ( at 09h32 )
   
 - input  file    -> t95.in
 - output file    -> t95.out
@@ -1931,6 +1931,24 @@ _setup2: Arith. and geom. avg. npw (full set) are     136.556     136.536
                       -2.0624095677E-01  1.9462496939E-04  7.0070509307E-04
                        1.9527619711E-04 -2.0832849661E-01 -6.2519751392E-06
 -          fftalg         312
+           grspin11   -3.2899688865E-04 -6.6618909321E-03 -2.6319725229E-03
+                      -3.2899688865E-04  6.6618909321E-03 -2.6319725229E-03
+           grspin12   -5.6579174425E-03  6.4676995535E-03 -4.5263332669E-02
+                       5.6579174425E-03  6.4676995535E-03  4.5263332669E-02
+           grspin21    4.2678625319E-03  8.4482211896E-03  8.4482864802E-03
+                       8.4501306578E-03  4.2663142038E-03  8.4486975197E-03
+                       8.4501987795E-03  8.4487025293E-03  4.2661588768E-03
+           grspin22   -1.3333087870E-18  1.0064233721E-18  2.4929551831E-16
+                      -2.9144893275E-03 -2.9144893274E-03 -2.9144893274E-03
+                       2.9144893275E-03  2.9144893274E-03  2.9144893274E-03
+           grspin31    7.8776104039E-02 -9.0627218899E-04  2.4106652792E-07
+                       9.0770427821E-04 -8.0042683954E-02  1.0811598055E-07
+                      -7.8775023645E-02  9.0750749089E-04  2.4074862767E-07
+                      -9.0605713405E-04  8.0043940270E-02  1.1590485841E-07
+           grspin32    7.9219472845E-02 -8.9510582184E-04  1.3667255715E-02
+                       8.9567652164E-04 -7.9841779065E-02  1.7858122053E-02
+                      -7.9218971006E-02  8.9586614990E-04  1.3667262018E-02
+                      -8.9530050693E-04  7.9842386798E-02  1.7858123900E-02
            jdtset       11   12   21   22   31   32
               kpt11    1.25000000E-01  2.50000000E-01  2.50000000E-01
                        3.75000000E-01  2.50000000E-01  2.50000000E-01
@@ -2379,10 +2397,10 @@ P           mkmem32        18
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         24.7  wall=         25.4
+- Proc.   0 individual time (sec): cpu=         22.2  wall=         22.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  32 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         24.7  wall=         25.4
++Overall time at end (sec) : cpu=         22.2  wall=         22.5

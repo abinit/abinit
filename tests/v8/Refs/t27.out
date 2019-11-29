@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.13 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h37 )
+.Starting date : Fri 29 Nov 2019.
+- ( at 09h23 )
   
 - input  file    -> t27.in
 - output file    -> t27.out
@@ -718,6 +718,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.000     783.000
             fcart4     6.6321452915E-02 -0.0000000000E+00 -1.1459348844E-10
                       -6.6321452915E-02 -0.0000000000E+00  1.1459348844E-10
 -          fftalg         312
+           grspin1    -1.6465900976E-20  1.1558425701E-21  6.2628580728E-02
+                      -1.8278694477E-20  1.4545998501E-21 -6.2628495702E-02
+           grspin2    -1.4031150573E-20 -2.5505248017E-21  1.0264359625E-01
+                       1.7464032917E-22 -6.0898902965E-24  1.5779397703E-07
+           grspin3     3.8816367741E-02  2.4319001274E-21  1.3743781906E-01
+                       5.6190500791E-02 -1.6306971561E-21  5.6190500791E-02
+           grspin4     1.5194783958E-07 -2.1444346212E-17  1.4591313529E-02
+                       1.0613955487E-07  1.5932952326E-15 -1.3979900673E-01
            istwfk        1
            jdtset        1    2    3    4
            kptopt           4
@@ -867,10 +875,10 @@ P           mkmem           1
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          4.4  wall=          4.5
+- Proc.   0 individual time (sec): cpu=          3.7  wall=          3.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and  16 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.4  wall=          4.5
++Overall time at end (sec) : cpu=          3.7  wall=          3.9

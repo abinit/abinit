@@ -716,6 +716,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 !Copy the results of the computation in the appropriate arguments of the routine
  do iimage=1,nimage
    ii=mpi_enreg%my_imgtab(iimage)
+   intgres_img(:,:,iimage) =zero
    if (dtset%dynimage(ii)==1) then
      acell_img(:,iimage)     =results_img(iimage,itimimage_eff)%acell(:)
      amu_img(:,iimage)       =results_img(iimage,itimimage_eff)%amu(:)
@@ -727,13 +728,13 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      etotal_img(iimage)      =results_img(iimage,itimimage_eff)%results_gs%etotal
      fcart_img(:,:,iimage)   =results_img(iimage,itimimage_eff)%results_gs%fcart(:,:)
      fred_img(:,:,iimage)    =results_img(iimage,itimimage_eff)%results_gs%fred(:,:)
-     intgres_img(:,:,iimage) =results_img(iimage,itimimage_eff)%results_gs%intgres(:,:)
+     intgres_img(1:dtset%nspden,:,iimage) =results_img(iimage,itimimage_eff)%results_gs%intgres(1:dtset%nspden,:)
      strten_img(:,iimage)    =results_img(iimage,itimimage_eff)%results_gs%strten(:)
    else if (compute_static_images) then
      etotal_img(iimage)    =results_img(iimage,1)%results_gs%etotal
      fcart_img(:,:,iimage) =results_img(iimage,1)%results_gs%fcart(:,:)
      fred_img(:,:,iimage)  =results_img(iimage,1)%results_gs%fred(:,:)
-     intgres_img(:,:,iimage)=results_img(iimage,1)%results_gs%intgres(:,:)
+     intgres_img(1:dtset%nspden,:,iimage)=results_img(iimage,1)%results_gs%intgres(1:dtset%nspden,:)
      strten_img(:,iimage)  =results_img(iimage,1)%results_gs%strten(:)
    end if
  end do
