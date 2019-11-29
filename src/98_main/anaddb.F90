@@ -318,14 +318,16 @@ program anaddb
 !**********************************************************************
 
  ! Get Quadrupole tensor
- write(msg,'(2a,(80a),2a)') ch10,('=',ii=1,80)
- call wrtout([ab_out,std_out],msg,'COLL')
- lwsym=1
- iblok = ddb_lw%get_quadrupoles(crystal,lwsym,33,qdrp_cart)
- if ((inp%dipquad==1.or.inp%quadquad==1).and.iblok == 0) then
-   call wrtout(std_out, "--- !WARNING")
-   call wrtout(std_out, sjoin("- Cannot find Dynamical Quadrupoles tensor in DDB file:", filnam(3)))
-   call wrtout(std_out, "  dipquad=1 or quadquad=1 requires the DDB file to include the corresponding long wave 3rd derivatives")
+ if (mtyp==33) then
+   write(msg,'(2a,(80a),2a)') ch10,('=',ii=1,80)
+   call wrtout([ab_out,std_out],msg,'COLL')
+   lwsym=1
+   iblok = ddb_lw%get_quadrupoles(crystal,lwsym,33,qdrp_cart)
+   if ((inp%dipquad==1.or.inp%quadquad==1).and.iblok == 0) then
+     call wrtout(std_out, "--- !WARNING")
+     call wrtout(std_out, sjoin("- Cannot find Dynamical Quadrupoles tensor in DDB file:", filnam(3)))
+     call wrtout(std_out, "  dipquad=1 or quadquad=1 requires the DDB file to include the corresponding long wave 3rd derivatives")
+   end if
  end if
 
  ! Get Dielectric Tensor and Effective Charges
@@ -899,7 +901,7 @@ program anaddb
  if (inp%piezoflag/=0 .or. inp%dieflag==4 .or. inp%elaflag==4) then
    ! here treating the piezoelectric tensor at Gamma Point
    write(msg, '(a,a,(80a),a,a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
-   ' Calculation of the tensor related to piezoelectric effect',ch10,&
+   ' Calculation of the tensor related to piezoelectric effetc',ch10,&
    '  (Elastic indices in Voigt notation)',ch10
    call wrtout([std_out, ab_out], msg)
 
