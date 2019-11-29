@@ -354,4 +354,7 @@ capabilities, but the one with the largest last digit is more debugged than
 the other: version 8.8.3 is more debugged than 8.8.2, but no new features has
 been added (so likely, no additional bug!).
 
-In order to start using ABINIT, please follow [[tutorial:index|the tutorial]]
+In order to start using ABINIT, please follow [[tutorial:index|this tutorial.]]
+To learn how to compile the code from source, please consult the following guide:
+
+<embed src="https://wiki.abinit.org/lib/exe/fetch.php?media=build:installing_abinit.pdf" type="application/pdf" width="100%" height="480px">

@@ -27,7 +27,7 @@ The basic theory for Berry phase computation of the polarization was proposed
 by R. D. King-Smith and D. Vanderbilt in [[cite:Kingsmith1993]].
 The longer (excellent) paper D. Vanderbilt and R. D. King-Smith ([[cite:Vanderbilt1993]])
 clarifies many aspects of this theory (especially in view of application to AlAs, as in this tutorial). 
-One might benefit also from a reading of the review article [[cite:Resta1994].
+One might benefit also from a reading of the review article [[cite:Resta1994]].
 
 In order to gain the theoretical background needed to perform a calculation
 with a finite electric field, you should consider reading the following papers:

@@ -1,6 +1,6 @@
 ---
 description: How to compute linear and non-linear optical properties in the independent-particle approximation
-authors: SS, XG, YG
+authors: SS, XG, YG 
 ---
 <!--- This is the source file for this topics. Can be edited. -->
 

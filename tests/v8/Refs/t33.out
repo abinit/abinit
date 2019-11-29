@@ -1,6 +1,6 @@
 
-.Version 8.11.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_intel19.0 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 21 Nov 2018.
-- ( at 10h29 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h37 )
   
 - input  file    -> t33.in
 - output file    -> t33.out
 - root for input  files -> t33i
 - root for output files -> t33o
- 
- 
+
+
  DATASET   11 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 11.
@@ -40,8 +40,8 @@ P This job should need less than                       7.854 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.580 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
- 
- 
+
+
  DATASET   12 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 12.
@@ -59,8 +59,8 @@ P This job should need less than                       7.864 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.580 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
- 
- 
+
+
  DATASET   13 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 13.
@@ -78,8 +78,8 @@ P This job should need less than                       7.864 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.580 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
- 
- 
+
+
  DATASET   21 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 21.
@@ -97,8 +97,8 @@ P This job should need less than                       3.819 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.203 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
- 
- 
+
+
  DATASET   22 : space group I-4 (# 82); Bravais tI (body-center tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 22.
@@ -116,8 +116,8 @@ P This job should need less than                       4.579 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.647 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
- 
- 
+
+
  DATASET   23 : space group I-4 (# 82); Bravais tI (body-center tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 23.
@@ -135,7 +135,7 @@ P This job should need less than                       4.579 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.647 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -610,50 +610,50 @@ P           mkmem23        64
              xred      2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             znucl       33.00000   13.00000
- 
+
 ================================================================================
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  11.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  12.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  13.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  21.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  22.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  23.
- 
+
 ================================================================================
 == DATASET 11 ==================================================================
 -   nproc =    1
- 
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3101303  5.3101303  G(1)= -0.0941596  0.0941596  0.0941596
  R(2)=  5.3101303  0.0000000  5.3101303  G(2)=  0.0941596 -0.0941596  0.0941596
  R(3)=  5.3101303  5.3101303  0.0000000  G(3)=  0.0941596  0.0941596 -0.0941596
  Unit cell volume ucvol=  2.9946463E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  Coarse grid specifications (used for wave-functions):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.11665
- 
+
  Fine grid specifications (used for densities):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  18  18
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.18046
- 
+
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/As.GGA-PBE-rpaw-2.10.abinit
-- pspatm: opening atomic psp file    /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/As.GGA-PBE-rpaw-2.10.abinit
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/As.GGA-PBE-rpaw-2.10.abinit
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/As.GGA-PBE-rpaw-2.10.abinit
 - Paw atomic data for element As - Generated with atompaw v3.1.0.3
 - 33.00000   5.00000  20150317                znucl, zion, pspdat
     7   11    1    0      1074   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -675,9 +675,9 @@ P           mkmem23        64
  Radial grid used for pseudo valence density is grid 5
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
- 
-- pspini: atom type   2  psp file is /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/Al.GGA-PBE-rpaw-2.00.abinit
-- pspatm: opening atomic psp file    /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/Al.GGA-PBE-rpaw-2.00.abinit
+
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.GGA-PBE-rpaw-2.00.abinit
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.GGA-PBE-rpaw-2.00.abinit
 - Paw atomic data for element Al - Generated with atompaw v4.0.0.10
 - 13.00000   3.00000  20141221                znucl, zion, pspdat
     7   11    1    0       473   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -699,53 +699,53 @@ P           mkmem23        64
  Radial grid used for pseudo valence density is grid 5
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
- 
+
    3.09629890E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
- 
+
 _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
- 
+
 ================================================================================
- 
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -8.5655467733266    -8.566E+00 4.015E-02 2.031E-01
- ETOT  2  -8.5659006859398    -3.539E-04 5.025E-07 3.024E-02
- ETOT  3  -8.5656342040791     2.665E-04 3.617E-06 1.352E-03
- ETOT  4  -8.5657350682878    -1.009E-04 1.640E-08 1.377E-04
- ETOT  5  -8.5657655188099    -3.045E-05 4.661E-09 3.510E-06
- ETOT  6  -8.5657659720027    -4.532E-07 1.330E-09 2.228E-07
- ETOT  7  -8.5657659983255    -2.632E-08 3.066E-11 1.195E-08
- ETOT  8  -8.5657660003283    -2.003E-09 1.423E-12 8.955E-10
+ ETOT  1  -8.5655467733267    -8.566E+00 4.015E-02 2.031E-01
+ ETOT  2  -8.5659006859400    -3.539E-04 5.025E-07 3.024E-02
+ ETOT  3  -8.5656342040792     2.665E-04 3.617E-06 1.352E-03
+ ETOT  4  -8.5657350682879    -1.009E-04 1.640E-08 1.377E-04
+ ETOT  5  -8.5657655188101    -3.045E-05 4.661E-09 3.510E-06
+ ETOT  6  -8.5657659720028    -4.532E-07 1.330E-09 2.228E-07
+ ETOT  7  -8.5657659983256    -2.632E-08 3.066E-11 1.195E-08
+ ETOT  8  -8.5657660003284    -2.003E-09 1.423E-12 8.955E-10
  ETOT  9  -8.5657660004817    -1.533E-10 2.253E-13 3.809E-11
- 
+
  At SCF step    9, etot is converged : 
   for the second time, diff in etot=  1.533E-10 < toldfe=  1.000E-08
- 
+
 ====================================================
- 
+
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
- 
- C(   1) : real, imag   7.68553173E-10  1.52568375E-15
- C(   2) : real, imag  -4.27817328E-10 -6.02703313E-16
- C(   3) : real, imag  -3.46728388E-10 -3.00727740E-16
- 
+
+ C(   1) : real, imag   1.27663371E-12  6.49783010E-17
+ C(   2) : real, imag   1.85290104E-13 -1.61659358E-16
+ C(   3) : real, imag  -9.54671823E-12  4.78855893E-17
+
 ====================================================
- 
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
     1        2.10392          2.74786989
     2        2.01467          0.93727505
- 
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.432402994114411
- Compensation charge over fine fft grid    =     -0.432393583963438
- 
+ Compensation charge over spherical meshes =     -0.432402994114412
+ Compensation charge over fine fft grid    =     -0.432393583963440
+
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
   -0.02176  -0.03718  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
@@ -765,8 +765,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    0.00000   0.00000   0.00711  -0.00000  -0.00000   0.15587   0.00000   0.00000
    0.00000   0.00000  -0.00000   0.00711   0.00000   0.00000   0.15587   0.00000
    0.00000   0.00000  -0.00000   0.00000   0.00711   0.00000   0.00000   0.15587
- 
- 
+
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    1.69947   0.00154  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000
@@ -786,12 +786,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
   -0.00000   0.00000   0.00883   0.00000   0.00000   0.00011   0.00000   0.00000
   -0.00000   0.00000   0.00000   0.00883   0.00000   0.00000   0.00011   0.00000
   -0.00000   0.00000   0.00000   0.00000   0.00883   0.00000   0.00000   0.00011
- 
- 
+
+
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   63.740E-15; max=  22.534E-14
  reduced coordinates (array xred) for    2 atoms
        0.250000000000      0.250000000000      0.250000000000
@@ -799,7 +799,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      1.40499997554972     1.40499997554972     1.40499997554972
     2      0.00000000000000     0.00000000000000     0.00000000000000
@@ -810,102 +810,104 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  kpt#   1, nband=  4, wtk=  0.00391, kpt= -0.1250  0.0000  0.0000 (reduced coord)
   -0.37455    0.00737    0.05341    0.05341
  prteigrs : prtvol=0 or 1, do not print more k-points.
- 
- 
+
+
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
- 
-    Kinetic energy  =  3.12509643733855E+00
-    Hartree energy  =  7.98049652374011E-01
-    XC energy       = -7.30630894069548E+00
+
+    Kinetic energy  =  3.12509643733856E+00
+    Hartree energy  =  7.98049652374008E-01
+    XC energy       = -7.30630894069549E+00
     Ewald energy    = -8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Loc. psp. energy= -2.02283807398282E+00
-    Spherical terms =  4.27798168723945E+00
-    >>>>>>>>> Etotal= -8.56577752129879E+00
- 
+    Spherical terms =  4.27798168723946E+00
+    >>>>>>>>> Etotal= -8.56577752129878E+00
+
  "Double-counting" decomposition of free energy:
     Band energy     = -9.09011750277716E-01
-    Ewald energy    = -8.47170304989273E+00
+    Ewald energy    =-8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Dble-C XC-energy= -4.31595521895037E+00
-    Spherical terms =  4.09695925231891E+00
-    >>>> Etotal (DC)= -8.56576600048167E+00
- 
-  >Total energy in eV           = -2.33086660191421E+02
-  >Total DC energy in eV        = -2.33086346694044E+02
+    Spherical terms =  4.09695925231892E+00
+    >>>> Etotal (DC)= -8.56576600048166E+00
+
+  >Total energy in eV           = -2.33086660191420E+02
+  >Total DC energy in eV        = -2.33086346694043E+02
 --------------------------------------------------------------------------------
- 
+
+
+
 ================================================================================
 == DATASET 12 ==================================================================
 -   nproc =    1
- 
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3101303  5.3101303  G(1)= -0.0941596  0.0941596  0.0941596
  R(2)=  5.3101303  0.0000000  5.3101303  G(2)=  0.0941596 -0.0941596  0.0941596
  R(3)=  5.3101303  5.3101303  0.0000000  G(3)=  0.0941596  0.0941596 -0.0941596
  Unit cell volume ucvol=  2.9946463E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  Coarse grid specifications (used for wave-functions):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.11665
- 
+
  Fine grid specifications (used for densities):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  18  18
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.18046
 --------------------------------------------------------------------------------
- 
+
 _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
- 
+
 ================================================================================
- 
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -8.5655467867175    -8.566E+00 4.015E-02 2.031E-01
- ETOT  2  -8.5659006847134    -3.539E-04 5.069E-07 3.024E-02
+ ETOT  1  -8.5655467867177    -8.566E+00 4.015E-02 2.031E-01
+ ETOT  2  -8.5659006847135    -3.539E-04 5.069E-07 3.024E-02
  ETOT  3  -8.5656342044546     2.665E-04 3.617E-06 1.352E-03
- ETOT  4  -8.5657350685326    -1.009E-04 1.640E-08 1.377E-04
+ ETOT  4  -8.5657350685328    -1.009E-04 1.640E-08 1.377E-04
  ETOT  5  -8.5657655191524    -3.045E-05 4.661E-09 3.510E-06
- ETOT  6  -8.5657659723487    -4.532E-07 1.330E-09 2.228E-07
- ETOT  7  -8.5657659986720    -2.632E-08 3.066E-11 1.195E-08
+ ETOT  6  -8.5657659723488    -4.532E-07 1.330E-09 2.228E-07
+ ETOT  7  -8.5657659986721    -2.632E-08 3.066E-11 1.195E-08
  ETOT  8  -8.5657660006748    -2.003E-09 1.422E-12 8.955E-10
- ETOT  9  -8.5657660008282    -1.534E-10 2.254E-13 3.810E-11
- 
+ ETOT  9  -8.5657660008283    -1.535E-10 2.254E-13 3.810E-11
+
  At SCF step    9, etot is converged : 
-  for the second time, diff in etot=  1.534E-10 < toldfe=  1.000E-08
- 
+  for the second time, diff in etot=  1.535E-10 < toldfe=  1.000E-08
+
 ====================================================
- 
+
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
- 
- C(   1) : real, imag   1.38162755E-08  1.66481712E-15
- C(   2) : real, imag   7.42712649E-09 -6.92339313E-16
- C(   3) : real, imag  -9.00966360E-06 -1.21268565E-15
- 
+
+ C(   1) : real, imag  -1.84354644E-12 -5.31628828E-18
+ C(   2) : real, imag   7.80044403E-12 -8.59574924E-17
+ C(   3) : real, imag  -2.39246559E-07 -8.60484802E-17
+
 ====================================================
- 
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
     1        2.10392          2.74786989
     2        2.01467          0.93727505
- 
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.432402993959153
- Compensation charge over fine fft grid    =     -0.432393583973092
- 
+ Compensation charge over spherical meshes =     -0.432402993959154
+ Compensation charge over fine fft grid    =     -0.432393583973094
+
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    === REAL PART:
@@ -918,14 +920,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
   -0.00000  -0.00000   0.00000  -0.25844   0.00000   0.00000  -0.91611   0.00000
   -0.00000  -0.00000   0.00000   0.00000  -0.25844   0.00000   0.00000  -0.91611
    === IMAGINARY PART:
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
  Atom #  2
    === REAL PART:
    0.31890   0.00582  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000
@@ -937,16 +939,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    0.00000   0.00000  -0.00000   0.00711   0.00000   0.00000   0.15587   0.00000
    0.00000   0.00000  -0.00000   0.00000   0.00711   0.00000   0.00000   0.15587
    === IMAGINARY PART:
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
- 
- 
+  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
+
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    === REAL PART:
@@ -960,13 +962,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    0.00000  -0.00000  -0.00000  -0.00000  -0.03707   0.00000   0.00000   0.00143
    === IMAGINARY PART:
    0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000
-  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000
+  -0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000
   -0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000
   -0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000
    0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000
    0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000
-   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
-  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000
+   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
+  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000
  Atom #  2
    === REAL PART:
    1.25155  -0.01200  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
@@ -978,20 +980,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
   -0.00000   0.00000   0.00000   0.00883   0.00000   0.00000   0.00011   0.00000
   -0.00000   0.00000   0.00000   0.00000   0.00883   0.00000   0.00000   0.00011
    === IMAGINARY PART:
-   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000
-  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000  -0.00000   0.00000   0.00000  -0.00007   0.00000  -0.00000   0.00000
+  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000
+  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000
+   0.00000  -0.00000  -0.00000   0.00000  -0.00007   0.00000  -0.00000   0.00000
    0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000
   -0.00000  -0.00000   0.00007  -0.00000   0.00000  -0.00000  -0.00000   0.00000
-   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000
+   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000
   -0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000
- 
- 
+
+
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   63.772E-15; max=  22.538E-14
  reduced coordinates (array xred) for    2 atoms
        0.250000000000      0.250000000000      0.250000000000
@@ -999,7 +1001,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      1.40499997554972     1.40499997554972     1.40499997554972
     2      0.00000000000000     0.00000000000000     0.00000000000000
@@ -1010,102 +1012,104 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  kpt#   1, nband=  4, wtk=  0.00391, kpt= -0.1250  0.0000  0.0000 (reduced coord)
   -0.37455    0.00737    0.05341    0.05341
  prteigrs : prtvol=0 or 1, do not print more k-points.
- 
- 
+
+
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
- 
-    Kinetic energy  =  3.12509643758981E+00
-    Hartree energy  =  7.98049652638396E-01
-    XC energy       = -7.30630894067065E+00
+
+    Kinetic energy  =  3.12509643758980E+00
+    Hartree energy  =  7.98049652638395E-01
+    XC energy       = -7.30630894067066E+00
     Ewald energy    = -8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Loc. psp. energy= -2.02283807472714E+00
-    Spherical terms =  4.27798168690134E+00
-    >>>>>>>>> Etotal= -8.56577752184075E+00
- 
+    Spherical terms =  4.27798168690127E+00
+    >>>>>>>>> Etotal= -8.56577752184082E+00
+
  "Double-counting" decomposition of free energy:
     Band energy     = -9.09011750385912E-01
-    Ewald energy    = -8.47170304989273E+00
+    Ewald energy    =-8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Dble-C XC-energy= -4.31595521918599E+00
-    Spherical terms =  4.09695925231620E+00
-    >>>> Etotal (DC)= -8.56576600082821E+00
- 
-  >Total energy in eV           = -2.33086660206168E+02
-  >Total DC energy in eV        = -2.33086346703473E+02
+    Spherical terms =  4.09695925231612E+00
+    >>>> Etotal (DC)= -8.56576600082828E+00
+
+  >Total energy in eV           = -2.33086660206170E+02
+  >Total DC energy in eV        = -2.33086346703475E+02
 --------------------------------------------------------------------------------
- 
+
+
+
 ================================================================================
 == DATASET 13 ==================================================================
 -   nproc =    1
- 
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3101303  5.3101303  G(1)= -0.0941596  0.0941596  0.0941596
  R(2)=  5.3101303  0.0000000  5.3101303  G(2)=  0.0941596 -0.0941596  0.0941596
  R(3)=  5.3101303  5.3101303  0.0000000  G(3)=  0.0941596  0.0941596 -0.0941596
  Unit cell volume ucvol=  2.9946463E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  Coarse grid specifications (used for wave-functions):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.11665
- 
+
  Fine grid specifications (used for densities):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  18  18
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.18046
 --------------------------------------------------------------------------------
- 
+
 _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
- 
+
 ================================================================================
- 
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -8.5655467605762    -8.566E+00 4.015E-02 2.031E-01
- ETOT  2  -8.5659006878625    -3.539E-04 4.980E-07 3.024E-02
- ETOT  3  -8.5656342043964     2.665E-04 3.617E-06 1.352E-03
- ETOT  4  -8.5657350687374    -1.009E-04 1.640E-08 1.377E-04
- ETOT  5  -8.5657655191604    -3.045E-05 4.661E-09 3.510E-06
- ETOT  6  -8.5657659723499    -4.532E-07 1.330E-09 2.228E-07
+ ETOT  1  -8.5655467605763    -8.566E+00 4.015E-02 2.031E-01
+ ETOT  2  -8.5659006878626    -3.539E-04 4.980E-07 3.024E-02
+ ETOT  3  -8.5656342043965     2.665E-04 3.617E-06 1.352E-03
+ ETOT  4  -8.5657350687376    -1.009E-04 1.640E-08 1.377E-04
+ ETOT  5  -8.5657655191603    -3.045E-05 4.661E-09 3.510E-06
+ ETOT  6  -8.5657659723500    -4.532E-07 1.330E-09 2.228E-07
  ETOT  7  -8.5657659986720    -2.632E-08 3.066E-11 1.195E-08
  ETOT  8  -8.5657660006748    -2.003E-09 1.423E-12 8.955E-10
- ETOT  9  -8.5657660008283    -1.534E-10 2.254E-13 3.810E-11
- 
+ ETOT  9  -8.5657660008283    -1.535E-10 2.254E-13 3.810E-11
+
  At SCF step    9, etot is converged : 
-  for the second time, diff in etot=  1.534E-10 < toldfe=  1.000E-08
- 
+  for the second time, diff in etot=  1.535E-10 < toldfe=  1.000E-08
+
 ====================================================
- 
+
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
- 
- C(   1) : real, imag  -7.50039827E-09  1.58911526E-15
- C(   2) : real, imag  -9.34288859E-09 -1.20831824E-16
- C(   3) : real, imag   9.00284385E-06 -8.66619981E-16
- 
+
+ C(   1) : real, imag   1.52260967E-12  8.55675446E-17
+ C(   2) : real, imag  -3.37319481E-12  2.77785811E-16
+ C(   3) : real, imag   2.39224425E-07 -1.26603051E-16
+
 ====================================================
- 
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
     1        2.10392          2.74786989
     2        2.01467          0.93727505
- 
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
  Compensation charge over spherical meshes =     -0.432402994157956
- Compensation charge over fine fft grid    =     -0.432393583977775
- 
+ Compensation charge over fine fft grid    =     -0.432393583977778
+
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    === REAL PART:
@@ -1118,14 +1122,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
   -0.00000  -0.00000   0.00000  -0.25844   0.00000   0.00000  -0.91611   0.00000
   -0.00000  -0.00000   0.00000   0.00000  -0.25844   0.00000   0.00000  -0.91611
    === IMAGINARY PART:
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
  Atom #  2
    === REAL PART:
    0.31890   0.00582  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000
@@ -1137,16 +1141,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    0.00000   0.00000  -0.00000   0.00711   0.00000   0.00000   0.15587   0.00000
    0.00000   0.00000  -0.00000   0.00000   0.00711   0.00000   0.00000   0.15587
    === IMAGINARY PART:
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
- 
- 
+  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
+
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    === REAL PART:
@@ -1159,14 +1163,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    0.00000  -0.00000  -0.00000  -0.03707  -0.00000   0.00000   0.00143   0.00000
    0.00000  -0.00000  -0.00000  -0.00000  -0.03707   0.00000   0.00000   0.00143
    === IMAGINARY PART:
-   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000
-  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000
-  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000
+  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000
+  -0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000
+  -0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000
   -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000
    0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
    0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000
-   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000
-  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000
+  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000
  Atom #  2
    === REAL PART:
    1.25155  -0.01200  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
@@ -1178,20 +1182,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
   -0.00000   0.00000   0.00000   0.00883   0.00000   0.00000   0.00011   0.00000
   -0.00000   0.00000   0.00000   0.00000   0.00883   0.00000   0.00000   0.00011
    === IMAGINARY PART:
-   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000
-  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000
+  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000
+  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000
    0.00000  -0.00000   0.00000   0.00000   0.00007   0.00000  -0.00000  -0.00000
    0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000
-  -0.00000  -0.00000  -0.00007  -0.00000   0.00000   0.00000  -0.00000   0.00000
-   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000
-   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000
+  -0.00000  -0.00000  -0.00007  -0.00000  -0.00000   0.00000  -0.00000   0.00000
+   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000
   -0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000
- 
- 
+
+
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   63.772E-15; max=  22.538E-14
  reduced coordinates (array xred) for    2 atoms
        0.250000000000      0.250000000000      0.250000000000
@@ -1199,7 +1203,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      1.40499997554972     1.40499997554972     1.40499997554972
     2      0.00000000000000     0.00000000000000     0.00000000000000
@@ -1210,102 +1214,104 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  kpt#   1, nband=  4, wtk=  0.00391, kpt= -0.1250  0.0000  0.0000 (reduced coord)
   -0.37455    0.00737    0.05341    0.05341
  prteigrs : prtvol=0 or 1, do not print more k-points.
- 
- 
+
+
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
- 
+
     Kinetic energy  =  3.12509643761344E+00
-    Hartree energy  =  7.98049652538637E-01
+    Hartree energy  =  7.98049652538638E-01
     XC energy       = -7.30630894079814E+00
     Ewald energy    = -8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Loc. psp. energy= -2.02283807459811E+00
-    Spherical terms =  4.27798168705705E+00
-    >>>>>>>>> Etotal= -8.56577752175963E+00
- 
+    Spherical terms =  4.27798168705704E+00
+    >>>>>>>>> Etotal= -8.56577752175962E+00
+
  "Double-counting" decomposition of free energy:
     Band energy     = -9.09011750454483E-01
-    Ewald energy    = -8.47170304989273E+00
+    Ewald energy    =-8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Dble-C XC-energy= -4.31595521909328E+00
-    Spherical terms =  4.09695925229200E+00
-    >>>> Etotal (DC)= -8.56576600082826E+00
- 
+    Spherical terms =  4.09695925229198E+00
+    >>>> Etotal (DC)= -8.56576600082827E+00
+
   >Total energy in eV           = -2.33086660203961E+02
   >Total DC energy in eV        = -2.33086346703475E+02
 --------------------------------------------------------------------------------
- 
+
+
+
 ================================================================================
 == DATASET 21 ==================================================================
 -   nproc =    1
- 
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3101303  5.3101303  G(1)= -0.0941596  0.0941596  0.0941596
  R(2)=  5.3101303  0.0000000  5.3101303  G(2)=  0.0941596 -0.0941596  0.0941596
  R(3)=  5.3101303  5.3101303  0.0000000  G(3)=  0.0941596  0.0941596 -0.0941596
  Unit cell volume ucvol=  2.9946463E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  Coarse grid specifications (used for wave-functions):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.11665
- 
+
  Fine grid specifications (used for densities):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  18  18
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.18046
 --------------------------------------------------------------------------------
- 
+
 _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
- 
+
 ================================================================================
- 
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -8.5657001190556    -8.566E+00 1.466E-02 2.014E-01
- ETOT  2  -8.5659395827368    -2.395E-04 1.605E-07 3.046E-02
- ETOT  3  -8.5656341846684     3.054E-04 4.148E-06 1.307E-03
- ETOT  4  -8.5657356376305    -1.015E-04 1.823E-08 1.359E-04
- ETOT  5  -8.5657654349749    -2.980E-05 3.636E-09 3.705E-06
+ ETOT  1  -8.5657001190557    -8.566E+00 1.466E-02 2.014E-01
+ ETOT  2  -8.5659395827370    -2.395E-04 1.605E-07 3.046E-02
+ ETOT  3  -8.5656341846686     3.054E-04 4.148E-06 1.307E-03
+ ETOT  4  -8.5657356376306    -1.015E-04 1.823E-08 1.359E-04
+ ETOT  5  -8.5657654349750    -2.980E-05 3.636E-09 3.705E-06
  ETOT  6  -8.5657659833829    -5.484E-07 1.298E-09 2.280E-07
  ETOT  7  -8.5657659983698    -1.499E-08 4.290E-11 1.159E-08
- ETOT  8  -8.5657660003181    -1.948E-09 6.580E-13 9.243E-10
- ETOT  9  -8.5657660004776    -1.595E-10 9.752E-14 5.569E-11
- 
+ ETOT  8  -8.5657660003182    -1.948E-09 6.580E-13 9.243E-10
+ ETOT  9  -8.5657660004777    -1.595E-10 9.752E-14 5.569E-11
+
  At SCF step    9, etot is converged : 
   for the second time, diff in etot=  1.595E-10 < toldfe=  1.000E-08
- 
+
 ====================================================
- 
+
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
- 
- C(   1) : real, imag   2.62324752E-10  3.29843842E-16
- C(   2) : real, imag  -5.17216118E-11 -4.48803916E-16
- C(   3) : real, imag  -1.48666636E-10  4.24679146E-16
- 
+
+ C(   1) : real, imag  -3.06281797E-13 -2.38661049E-16
+ C(   2) : real, imag   8.30895625E-13 -8.47096595E-17
+ C(   3) : real, imag  -4.53492327E-13  9.19756867E-17
+
 ====================================================
- 
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
     1        2.10392          2.74787028
     2        2.01467          0.93727535
- 
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
  Compensation charge over spherical meshes =     -0.432403487105286
- Compensation charge over fine fft grid    =     -0.432393706825972
- 
+ Compensation charge over fine fft grid    =     -0.432393706825975
+
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
   -0.02176  -0.03718   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
@@ -1325,8 +1331,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    0.00000   0.00000   0.00711   0.00000   0.00000   0.15587   0.00000   0.00000
    0.00000   0.00000   0.00000   0.00711   0.00000   0.00000   0.15587   0.00000
    0.00000   0.00000   0.00000   0.00000   0.00711   0.00000   0.00000   0.15587
- 
- 
+
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    1.69947   0.00154   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
@@ -1346,12 +1352,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    0.00000   0.00000   0.00883   0.00000   0.00000   0.00011   0.00000   0.00000
    0.00000   0.00000   0.00000   0.00883   0.00000   0.00000   0.00011   0.00000
    0.00000   0.00000   0.00000   0.00000   0.00883   0.00000   0.00000   0.00011
- 
- 
+
+
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   37.047E-15; max=  97.523E-15
  reduced coordinates (array xred) for    2 atoms
        0.250000000000      0.250000000000      0.250000000000
@@ -1359,7 +1365,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      1.40499997554972     1.40499997554972     1.40499997554972
     2      0.00000000000000     0.00000000000000     0.00000000000000
@@ -1370,102 +1376,104 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  kpt#   1, nband=  4, wtk=  0.01563, kpt= -0.1250  0.0000  0.0000 (reduced coord)
   -0.37455    0.00737    0.05341    0.05341
  prteigrs : prtvol=0 or 1, do not print more k-points.
- 
- 
+
+
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
- 
-    Kinetic energy  =  3.12509688364341E+00
-    Hartree energy  =  7.98048035595590E-01
-    XC energy       = -7.30630860749243E+00
+
+    Kinetic energy  =  3.12509688364342E+00
+    Hartree energy  =  7.98048035595591E-01
+    XC energy       = -7.30630860749242E+00
     Ewald energy    = -8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Loc. psp. energy= -2.02283621013805E+00
-    Spherical terms =  4.27798013848446E+00
-    >>>>>>>>> Etotal= -8.56577804347951E+00
- 
+    Spherical terms =  4.27798013848444E+00
+    >>>>>>>>> Etotal= -8.56577804347953E+00
+
  "Double-counting" decomposition of free energy:
-    Band energy     = -9.09013147874486E-01
-    Ewald energy    = -8.47170304989273E+00
+    Band energy     = -9.09013147874488E-01
+    Ewald energy    =-8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
-    Dble-C XC-energy= -4.31595378868034E+00
-    Spherical terms =  4.09695921964968E+00
-    >>>> Etotal (DC)= -8.56576600047764E+00
- 
+    Dble-C XC-energy= -4.31595378868035E+00
+    Spherical terms =  4.09695921964964E+00
+    >>>> Etotal (DC)= -8.56576600047769E+00
+
   >Total energy in eV           = -2.33086674400681E+02
-  >Total DC energy in eV        = -2.33086346693934E+02
+  >Total DC energy in eV        = -2.33086346693935E+02
 --------------------------------------------------------------------------------
- 
+
+
+
 ================================================================================
 == DATASET 22 ==================================================================
 -   nproc =    1
- 
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3101303  5.3101303  G(1)= -0.0941596  0.0941596  0.0941596
  R(2)=  5.3101303  0.0000000  5.3101303  G(2)=  0.0941596 -0.0941596  0.0941596
  R(3)=  5.3101303  5.3101303  0.0000000  G(3)=  0.0941596  0.0941596 -0.0941596
  Unit cell volume ucvol=  2.9946463E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  Coarse grid specifications (used for wave-functions):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.11665
- 
+
  Fine grid specifications (used for densities):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  18  18
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.18046
 --------------------------------------------------------------------------------
- 
+
 _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
- 
+
 ================================================================================
- 
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -8.5661305923151    -8.566E+00 3.032E-02 2.041E-01
- ETOT  2  -8.5658913534637     2.392E-04 2.797E-07 3.024E-02
+ ETOT  1  -8.5661305923152    -8.566E+00 3.032E-02 2.041E-01
+ ETOT  2  -8.5658913534638     2.392E-04 2.797E-07 3.024E-02
  ETOT  3  -8.5656352282025     2.561E-04 3.112E-06 1.397E-03
  ETOT  4  -8.5657340541788    -9.883E-05 1.468E-08 1.430E-04
- ETOT  5  -8.5657654748610    -3.142E-05 4.442E-09 3.624E-06
- ETOT  6  -8.5657659726148    -4.978E-07 1.206E-09 1.926E-07
- ETOT  7  -8.5657659987205    -2.611E-08 2.040E-11 1.191E-08
+ ETOT  5  -8.5657654748611    -3.142E-05 4.442E-09 3.624E-06
+ ETOT  6  -8.5657659726149    -4.978E-07 1.206E-09 1.926E-07
+ ETOT  7  -8.5657659987206    -2.611E-08 2.040E-11 1.191E-08
  ETOT  8  -8.5657660006737    -1.953E-09 1.260E-12 9.176E-10
- ETOT  9  -8.5657660008274    -1.538E-10 2.107E-13 3.917E-11
- 
+ ETOT  9  -8.5657660008275    -1.538E-10 2.107E-13 3.917E-11
+
  At SCF step    9, etot is converged : 
   for the second time, diff in etot=  1.538E-10 < toldfe=  1.000E-08
- 
+
 ====================================================
- 
+
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
- 
- C(   1) : real, imag   4.42857581E-10 -1.08748641E-15
- C(   2) : real, imag   4.37826947E-10  1.02426288E-15
- C(   3) : real, imag  -8.99914127E-06  1.64505977E-16
- 
+
+ C(   1) : real, imag  -1.09399008E-12 -1.07846562E-16
+ C(   2) : real, imag  -9.10692896E-13  2.57235562E-17
+ C(   3) : real, imag  -2.39239813E-07  1.03830100E-16
+
 ====================================================
- 
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
     1        2.10392          2.74786974
     2        2.01467          0.93727513
- 
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.432402898358011
- Compensation charge over fine fft grid    =     -0.432393569354241
- 
+ Compensation charge over spherical meshes =     -0.432402898358015
+ Compensation charge over fine fft grid    =     -0.432393569354243
+
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    === REAL PART:
@@ -1478,14 +1486,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    0.00000   0.00000   0.00000  -0.25844   0.00000   0.00000  -0.91611   0.00000
    0.00000   0.00000   0.00000   0.00000  -0.25844   0.00000   0.00000  -0.91611
    === IMAGINARY PART:
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
  Atom #  2
    === REAL PART:
    0.31890   0.00582   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
@@ -1497,16 +1505,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    0.00000   0.00000   0.00000   0.00711   0.00000   0.00000   0.15587   0.00000
    0.00000   0.00000   0.00000   0.00000   0.00711   0.00000   0.00000   0.15587
    === IMAGINARY PART:
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
- 
- 
+  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
+
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    === REAL PART:
@@ -1519,14 +1527,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    0.00000   0.00000   0.00000  -0.03707   0.00000   0.00000   0.00143   0.00000
    0.00000   0.00000  -0.00000   0.00000  -0.03707   0.00000   0.00000   0.00143
    === IMAGINARY PART:
-   0.00000   0.00000  -0.00339  -0.00165   0.03501  -0.00076  -0.00007   0.00306
-  -0.00000   0.00000  -0.00065  -0.00016   0.00468   0.00001   0.00002  -0.00016
+  -0.00000   0.00000  -0.00339  -0.00165   0.03501  -0.00076  -0.00007   0.00306
+  -0.00000  -0.00000  -0.00065  -0.00016   0.00468   0.00001   0.00002  -0.00016
    0.00339   0.00065   0.00000  -0.02014  -0.00000  -0.00000  -0.00041  -0.00000
-   0.00165   0.00016   0.02014   0.00000  -0.06245   0.00058   0.00000  -0.00136
-  -0.03501  -0.00468   0.00000   0.06245   0.00000  -0.00000   0.00131   0.00000
+   0.00165   0.00016   0.02014  -0.00000  -0.06245   0.00058   0.00000  -0.00136
+  -0.03501  -0.00468   0.00000   0.06245  -0.00000  -0.00000   0.00131   0.00000
    0.00076  -0.00001   0.00000  -0.00058   0.00000   0.00000   0.00004   0.00000
    0.00007  -0.00002   0.00041  -0.00000  -0.00131  -0.00004   0.00000   0.00017
-  -0.00306   0.00016   0.00000   0.00136  -0.00000  -0.00000  -0.00017   0.00000
+  -0.00306   0.00016   0.00000   0.00136  -0.00000  -0.00000  -0.00017  -0.00000
  Atom #  2
    === REAL PART:
    1.25155  -0.01200   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
@@ -1540,18 +1548,18 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    === IMAGINARY PART:
    0.00000   0.00000   0.01117   0.00458  -0.06744   0.00001   0.00002  -0.00014
   -0.00000   0.00000   0.00010   0.00004  -0.00074   0.00000   0.00000  -0.00002
-  -0.01117  -0.00010   0.00000   0.04468  -0.00007  -0.00000   0.00014   0.00001
-  -0.00458  -0.00004  -0.04468   0.00000   0.13476  -0.00037   0.00000   0.00086
-   0.06744   0.00074   0.00007  -0.13476   0.00000   0.00000  -0.00083   0.00000
-  -0.00001  -0.00000   0.00000   0.00037  -0.00000   0.00000  -0.00000   0.00000
+  -0.01117  -0.00010  -0.00000   0.04468  -0.00007  -0.00000   0.00014   0.00001
+  -0.00458  -0.00004  -0.04468  -0.00000   0.13476  -0.00037   0.00000   0.00086
+   0.06744   0.00074   0.00007  -0.13476  -0.00000   0.00000  -0.00083   0.00000
+  -0.00001  -0.00000   0.00000   0.00037  -0.00000  -0.00000  -0.00000   0.00000
   -0.00002  -0.00000  -0.00014  -0.00000   0.00083   0.00000   0.00000  -0.00000
-   0.00014   0.00002  -0.00001  -0.00086  -0.00000  -0.00000   0.00000   0.00000
- 
- 
+   0.00014   0.00002  -0.00001  -0.00086  -0.00000  -0.00000   0.00000  -0.00000
+
+
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   60.898E-15; max=  21.072E-14
  reduced coordinates (array xred) for    2 atoms
        0.250000000000      0.250000000000      0.250000000000
@@ -1559,7 +1567,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      1.40499997554972     1.40499997554972     1.40499997554972
     2      0.00000000000000     0.00000000000000     0.00000000000000
@@ -1570,102 +1578,104 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  kpt#   1, nband=  4, wtk=  0.01563, kpt= -0.1250  0.0000  0.0000 (reduced coord)
   -0.37455    0.00737    0.05341    0.05341
  prteigrs : prtvol=0 or 1, do not print more k-points.
- 
- 
+
+
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
- 
+
     Kinetic energy  =  3.12509634590375E+00
-    Hartree energy  =  7.98049910176044E-01
-    XC energy       = -7.30630892783753E+00
+    Hartree energy  =  7.98049910176049E-01
+    XC energy       = -7.30630892783754E+00
     Ewald energy    = -8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
-    Loc. psp. energy= -2.02283850648634E+00
-    Spherical terms =  4.27798133338238E+00
-    >>>>>>>>> Etotal= -8.56577812843420E+00
- 
+    Loc. psp. energy= -2.02283850648635E+00
+    Spherical terms =  4.27798133338234E+00
+    >>>>>>>>> Etotal= -8.56577812843425E+00
+
  "Double-counting" decomposition of free energy:
-    Band energy     = -9.09011528932420E-01
-    Ewald energy    = -8.47170304989273E+00
+    Band energy     = -9.09011528932419E-01
+    Ewald energy    =-8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
-    Dble-C XC-energy= -4.31595544899360E+00
-    Spherical terms =  4.09695926067110E+00
-    >>>> Etotal (DC)= -8.56576600082742E+00
- 
-  >Total energy in eV           = -2.33086676712415E+02
-  >Total DC energy in eV        = -2.33086346703452E+02
+    Dble-C XC-energy= -4.31595544899362E+00
+    Spherical terms =  4.09695926067105E+00
+    >>>> Etotal (DC)= -8.56576600082749E+00
+
+  >Total energy in eV           = -2.33086676712417E+02
+  >Total DC energy in eV        = -2.33086346703454E+02
 --------------------------------------------------------------------------------
- 
+
+
+
 ================================================================================
 == DATASET 23 ==================================================================
 -   nproc =    1
- 
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3101303  5.3101303  G(1)= -0.0941596  0.0941596  0.0941596
  R(2)=  5.3101303  0.0000000  5.3101303  G(2)=  0.0941596 -0.0941596  0.0941596
  R(3)=  5.3101303  5.3101303  0.0000000  G(3)=  0.0941596  0.0941596 -0.0941596
  Unit cell volume ucvol=  2.9946463E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  Coarse grid specifications (used for wave-functions):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.11665
- 
+
  Fine grid specifications (used for densities):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  18  18
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.18046
 --------------------------------------------------------------------------------
- 
+
 _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
- 
+
 ================================================================================
- 
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -8.5661305746031    -8.566E+00 3.032E-02 2.041E-01
+ ETOT  1  -8.5661305746032    -8.566E+00 3.032E-02 2.041E-01
  ETOT  2  -8.5658913539384     2.392E-04 2.797E-07 3.024E-02
  ETOT  3  -8.5656352280551     2.561E-04 3.112E-06 1.397E-03
- ETOT  4  -8.5657340542228    -9.883E-05 1.468E-08 1.430E-04
+ ETOT  4  -8.5657340542230    -9.883E-05 1.468E-08 1.430E-04
  ETOT  5  -8.5657654748567    -3.142E-05 4.442E-09 3.624E-06
- ETOT  6  -8.5657659726153    -4.978E-07 1.206E-09 1.926E-07
- ETOT  7  -8.5657659987205    -2.611E-08 2.040E-11 1.191E-08
- ETOT  8  -8.5657660006736    -1.953E-09 1.260E-12 9.176E-10
- ETOT  9  -8.5657660008275    -1.539E-10 2.107E-13 3.916E-11
- 
+ ETOT  6  -8.5657659726154    -4.978E-07 1.206E-09 1.926E-07
+ ETOT  7  -8.5657659987206    -2.611E-08 2.040E-11 1.191E-08
+ ETOT  8  -8.5657660006737    -1.953E-09 1.260E-12 9.176E-10
+ ETOT  9  -8.5657660008275    -1.538E-10 2.107E-13 3.916E-11
+
  At SCF step    9, etot is converged : 
-  for the second time, diff in etot=  1.539E-10 < toldfe=  1.000E-08
- 
+  for the second time, diff in etot=  1.538E-10 < toldfe=  1.000E-08
+
 ====================================================
- 
+
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
- 
- C(   1) : real, imag   4.70154578E-10  6.77781262E-16
- C(   2) : real, imag   1.05635792E-09 -8.69531591E-16
- C(   3) : real, imag   9.00077426E-06 -1.63445319E-15
- 
+
+ C(   1) : real, imag  -4.73127618E-14 -8.51775968E-17
+ C(   2) : real, imag  -1.69886013E-13  8.04592285E-18
+ C(   3) : real, imag   2.39254818E-07 -3.63951276E-19
+
 ====================================================
- 
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
     1        2.10392          2.74786974
     2        2.01467          0.93727513
- 
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.432402898279598
- Compensation charge over fine fft grid    =     -0.432393569360012
- 
+ Compensation charge over spherical meshes =     -0.432402898279599
+ Compensation charge over fine fft grid    =     -0.432393569360014
+
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    === REAL PART:
@@ -1678,14 +1688,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    0.00000   0.00000   0.00000  -0.25844   0.00000   0.00000  -0.91611   0.00000
    0.00000   0.00000   0.00000   0.00000  -0.25844   0.00000   0.00000  -0.91611
    === IMAGINARY PART:
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
  Atom #  2
    === REAL PART:
    0.31890   0.00582   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
@@ -1697,16 +1707,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    0.00000   0.00000   0.00000   0.00711   0.00000   0.00000   0.15587   0.00000
    0.00000   0.00000   0.00000   0.00000   0.00711   0.00000   0.00000   0.15587
    === IMAGINARY PART:
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
- 
- 
+  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
+
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    === REAL PART:
@@ -1719,14 +1729,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    0.00000   0.00000   0.00000  -0.03707   0.00000   0.00000   0.00143   0.00000
    0.00000   0.00000  -0.00000   0.00000  -0.03707   0.00000   0.00000   0.00143
    === IMAGINARY PART:
-   0.00000   0.00000  -0.00339  -0.00165   0.03501  -0.00076  -0.00007   0.00306
+  -0.00000   0.00000  -0.00339  -0.00165   0.03501  -0.00076  -0.00007   0.00306
   -0.00000   0.00000  -0.00065  -0.00016   0.00468   0.00001   0.00002  -0.00016
-   0.00339   0.00065   0.00000  -0.02015   0.00000  -0.00000  -0.00042  -0.00000
+   0.00339   0.00065  -0.00000  -0.02015   0.00000  -0.00000  -0.00042  -0.00000
    0.00165   0.00016   0.02015   0.00000  -0.06245   0.00058   0.00000  -0.00136
-  -0.03501  -0.00468  -0.00000   0.06245   0.00000  -0.00000   0.00131   0.00000
-   0.00076  -0.00001   0.00000  -0.00058   0.00000   0.00000   0.00004  -0.00000
-   0.00007  -0.00002   0.00042  -0.00000  -0.00131  -0.00004   0.00000   0.00017
-  -0.00306   0.00016   0.00000   0.00136  -0.00000   0.00000  -0.00017   0.00000
+  -0.03501  -0.00468  -0.00000   0.06245  -0.00000  -0.00000   0.00131   0.00000
+   0.00076  -0.00001   0.00000  -0.00058   0.00000  -0.00000   0.00004  -0.00000
+   0.00007  -0.00002   0.00042  -0.00000  -0.00131  -0.00004  -0.00000   0.00017
+  -0.00306   0.00016   0.00000   0.00136  -0.00000   0.00000  -0.00017  -0.00000
  Atom #  2
    === REAL PART:
    1.25155  -0.01200   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
@@ -1738,20 +1748,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    0.00000   0.00000   0.00000   0.00883   0.00000   0.00000   0.00011   0.00000
    0.00000   0.00000  -0.00000   0.00000   0.00883   0.00000   0.00000   0.00011
    === IMAGINARY PART:
-   0.00000   0.00000   0.01117   0.00457  -0.06744   0.00001   0.00002  -0.00014
-  -0.00000   0.00000   0.00010   0.00004  -0.00074   0.00000   0.00000  -0.00002
-  -0.01117  -0.00010   0.00000   0.04469   0.00007  -0.00000   0.00014   0.00000
+  -0.00000   0.00000   0.01117   0.00457  -0.06744   0.00001   0.00002  -0.00014
+  -0.00000  -0.00000   0.00010   0.00004  -0.00074   0.00000   0.00000  -0.00002
+  -0.01117  -0.00010  -0.00000   0.04469   0.00007  -0.00000   0.00014   0.00000
   -0.00457  -0.00004  -0.04469   0.00000   0.13476  -0.00036   0.00000   0.00086
    0.06744   0.00074  -0.00007  -0.13476   0.00000   0.00001  -0.00083   0.00000
-  -0.00001  -0.00000   0.00000   0.00036  -0.00001   0.00000  -0.00000  -0.00000
+  -0.00001  -0.00000   0.00000   0.00036  -0.00001  -0.00000  -0.00000  -0.00000
   -0.00002  -0.00000  -0.00014  -0.00000   0.00083   0.00000   0.00000  -0.00000
-   0.00014   0.00002  -0.00000  -0.00086  -0.00000   0.00000   0.00000   0.00000
- 
- 
+   0.00014   0.00002  -0.00000  -0.00086  -0.00000   0.00000   0.00000  -0.00000
+
+
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   60.894E-15; max=  21.070E-14
  reduced coordinates (array xred) for    2 atoms
        0.250000000000      0.250000000000      0.250000000000
@@ -1759,7 +1769,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      1.40499997554972     1.40499997554972     1.40499997554972
     2      0.00000000000000     0.00000000000000     0.00000000000000
@@ -1770,32 +1780,34 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  kpt#   1, nband=  4, wtk=  0.01563, kpt= -0.1250  0.0000  0.0000 (reduced coord)
   -0.37455    0.00737    0.05341    0.05341
  prteigrs : prtvol=0 or 1, do not print more k-points.
- 
- 
+
+
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
- 
+
     Kinetic energy  =  3.12509634596266E+00
-    Hartree energy  =  7.98049910125269E-01
+    Hartree energy  =  7.98049910125267E-01
     XC energy       = -7.30630892773291E+00
     Ewald energy    = -8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Loc. psp. energy= -2.02283850642879E+00
-    Spherical terms =  4.27798133347226E+00
-    >>>>>>>>> Etotal= -8.56577812817401E+00
- 
+    Spherical terms =  4.27798133347220E+00
+    >>>>>>>>> Etotal= -8.56577812817407E+00
+
  "Double-counting" decomposition of free energy:
     Band energy     = -9.09011528984842E-01
-    Ewald energy    = -8.47170304989273E+00
+    Ewald energy    =-8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
-    Dble-C XC-energy= -4.31595544894851E+00
-    Spherical terms =  4.09695926067840E+00
-    >>>> Etotal (DC)= -8.56576600082746E+00
- 
-  >Total energy in eV           = -2.33086676705335E+02
-  >Total DC energy in eV        = -2.33086346703453E+02
+    Dble-C XC-energy= -4.31595544894852E+00
+    Spherical terms =  4.09695926067835E+00
+    >>>> Etotal (DC)= -8.56576600082751E+00
+
+  >Total energy in eV           = -2.33086676705337E+02
+  >Total DC energy in eV        = -2.33086346703455E+02
 --------------------------------------------------------------------------------
- 
+
+
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -2293,7 +2305,7 @@ P           mkmem23        64
              xred      2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             znucl       33.00000   13.00000
- 
+
 ================================================================================
 
 
@@ -2318,8 +2330,8 @@ P           mkmem23        64
 -
 - [1] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
-- Comment : PAW calculations. Strong suggestion to cite this paper.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#torrent2008
+- Comment: PAW calculations. Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
 - [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
@@ -2333,51 +2345,51 @@ P           mkmem23        64
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [5] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         19.0  wall=         19.1
- 
+- Proc.   0 individual time (sec): cpu=         81.5  wall=         81.9
+
 ================================================================================
- 
+
  Calculation completed.
 .Delivered   5 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.0  wall=         19.1
++Overall time at end (sec) : cpu=         81.5  wall=         81.9

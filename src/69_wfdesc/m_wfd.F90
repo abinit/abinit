@@ -6056,7 +6056,7 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
  ABI_MALLOC(rhog,(2,cplex*nfftf))
 
  call symrhg(cplex,Cryst%gprimd,irrzon,Wfd%MPI_enreg,nfftf,nfftotf,ngfftf,Wfd%nspden,Wfd%nsppol,&
-             Cryst%nsym,phnons,rhog,rhor,Cryst%rprimd,Cryst%symafm,Cryst%symrel)
+             Cryst%nsym,phnons,rhog,rhor,Cryst%rprimd,Cryst%symafm,Cryst%symrel,Cryst%tnons)
 
  ABI_FREE(rhog)
  ABI_FREE(phnons)

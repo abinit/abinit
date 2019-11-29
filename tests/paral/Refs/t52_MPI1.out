@@ -1,6 +1,6 @@
 
-.Version 8.0.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 09h57 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h18 )
   
 - input  file    -> t52.in
 - output file    -> t52_MPI1.out
@@ -34,7 +34,7 @@
 -    mband =           5        mffmem =           1         mkmem =         256
        mpw =         168          nfft =        4096          nkpt =         256
 ================================================================================
-P This job should need less than                       5.805 Mbytes of memory.
+P This job should need less than                       5.782 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      3.283 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      3.283 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =         256
        mpw =         168          nfft =        4096          nkpt =         256
 ================================================================================
-P This job should need less than                       5.805 Mbytes of memory.
+P This job should need less than                       5.782 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      3.283 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -61,7 +61,7 @@ _ WF disk file :      3.283 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -214,8 +214,8 @@ P           mkmem         256
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10256
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -230,7 +230,7 @@ P           mkmem         256
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   -5.99108991
+  pspatm : epsatm=   -5.99108991
          --- l  ekb(1:nproj) -->
              0    1.005823    0.184862
              1    0.220213
@@ -284,7 +284,7 @@ P           mkmem         256
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.7382E-09; max=  9.2103E-07
+ Mean square residual over all n,k,spin=   27.382E-10; max=  92.103E-08
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
 
@@ -370,7 +370,7 @@ P           mkmem         256
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.5665E-09; max=  9.2103E-07
+ Mean square residual over all n,k,spin=   25.665E-10; max=  92.103E-08
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
 
@@ -517,45 +517,43 @@ P           mkmem         256
 
 ================================================================================
 
-- Total cpu        time (s,m,h):        116.0        1.93      0.032
-- Total wall clock time (s,m,h):         31.8        0.53      0.009
+- Total cpu        time (s,m,h):         12.4        0.21      0.003
+- Total wall clock time (s,m,h):         12.7        0.21      0.004
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =          116.0, wall_time =           31.8
+- cpu_time =           12.4, wall_time =           12.7
 -
-- routine                        cpu     %       wall     %      number of calls  Gflops 
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                  55.506  47.8     13.654  43.0          87909      -1.00    
-- vtowfk(ssdiag)                21.275  18.3      7.504  23.6             -1      -1.00    
-- nonlop(apply)                  9.680   8.3      2.598   8.2          87909      -1.00    
-- getghc-other                   8.335   7.2      2.065   6.5             -1      -1.00    
-- projbd                         7.134   6.1      1.794   5.6         126648      -1.00    
-- invars2                        0.242   0.2      0.351   1.1              2      -1.00    
-- others (106)                   0.287   0.2      0.272   0.9             -1      -1.00    
+- fourwf%(pot)                   8.196  66.1      8.262  64.8          87909      -1.00        0.99       0.99
+- nonlop(apply)                  1.212   9.8      1.226   9.6          87909      -1.00        0.99       0.99
+- projbd                         0.771   6.2      0.782   6.1         126648      -1.00        0.99       0.99
+- getghc-other                   0.487   3.9      0.463   3.6             -1      -1.00        1.05       1.05
+- vtowfk(ssdiag)                 0.473   3.8      0.474   3.7             -1      -1.00        1.00       1.00
+- others (129)                   0.136   1.1      0.140   1.1             -1      -1.00        0.97       0.97
 -<END_TIMER>
 -
-- subtotal                     102.459  88.3     28.237  88.9
+- subtotal                      11.274  90.9     11.347  89.0                                  0.99       0.99
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =         116.0, wall_time =          31.8
+- cpu_time =          12.4, wall_time =          12.7
 -
-- routine                         cpu     %       wall     %      number of calls Gflops 
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                  55.506  47.8     13.654  43.0          87909      -1.00    
-- vtowfk(ssdiag)                21.275  18.3      7.504  23.6             -1      -1.00    
-- nonlop(apply)                  9.680   8.3      2.598   8.2          87909      -1.00    
-- getghc-other                   8.335   7.2      2.065   6.5             -1      -1.00    
-- projbd                         7.134   6.1      1.794   5.6         126648      -1.00    
-- invars2                        0.242   0.2      0.351   1.1              2      -1.00    
-- others (106)                   0.287   0.2      0.272   0.9             -1      -1.00    
+- fourwf%(pot)                   8.196  66.1      8.262  64.8          87909      -1.00        0.99       0.99
+- nonlop(apply)                  1.212   9.8      1.226   9.6          87909      -1.00        0.99       0.99
+- projbd                         0.771   6.2      0.782   6.1         126648      -1.00        0.99       0.99
+- getghc-other                   0.487   3.9      0.463   3.6             -1      -1.00        1.05       1.05
+- vtowfk(ssdiag)                 0.473   3.8      0.474   3.7             -1      -1.00        1.00       1.00
+- others (129)                   0.136   1.1      0.140   1.1             -1      -1.00        0.97       0.97
 -<END_TIMER>
 
-- subtotal                     102.459  88.3     28.237  88.9
+- subtotal                      11.274  90.9     11.347  89.0                                  0.99       0.99
 
 ================================================================================
 
@@ -572,46 +570,63 @@ P           mkmem         256
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] ABINIT : First-principles approach of materials and nanosystem properties.
+- [1] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [2] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [2] A brief introduction to the ABINIT software package.
+- [3] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [3] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- [4] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=        116.0  wall=         31.8
+- Proc.   0 individual time (sec): cpu=         12.4  wall=         12.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered  50 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        116.0  wall=         31.8
+.Delivered  50 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=         12.4  wall=         12.7

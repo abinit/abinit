@@ -429,6 +429,7 @@ type, public :: dataset_type
  integer :: prtnest
  integer :: prtpmp
  integer :: prtposcar
+ integer :: prtprocar
  integer :: prtphdos
  integer :: prtphbands = 1
  integer :: prtphsurf = 0
@@ -1732,6 +1733,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%prtphdos           = dtin%prtphdos
  dtout%prtphsurf          = dtin%prtphsurf
  dtout%prtposcar          = dtin%prtposcar
+ dtout%prtprocar          = dtin%prtprocar
  dtout%prtpot             = dtin%prtpot
  dtout%prtpsps            = dtin%prtpsps
  dtout%prtspcur           = dtin%prtspcur
@@ -3173,7 +3175,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtcif prtden'
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prteliash prtelf'
  list_vars=trim(list_vars)//' prtfc prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
- list_vars=trim(list_vars)//' prt_model prt_names prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar prtpot prtpsps'
+ list_vars=trim(list_vars)//' prt_model prt_names prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar'
+ list_vars=trim(list_vars)//' prtprocar prtpot prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc prtkbff'
  list_vars=trim(list_vars)//' prtvol prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm ptcharge'
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
@@ -3250,7 +3253,7 @@ subroutine chkvars(string)
 !Extra token, also admitted:
 !<ABINIT_UNITS>
  list_vars=trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV Ha'
- list_vars=trim(list_vars)//' Hartree Hartrees K Ry Rydberg Rydbergs S Sec Second T Tesla'
+ list_vars=trim(list_vars)//' Hartree Hartrees K nm Ry Rydberg Rydbergs S Sec Second T Tesla'
 !</ABINIT_UNITS>
 
 !<ABINIT_OPERATORS>
