@@ -947,7 +947,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    call calcdenmagsph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,&
 &   ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,ucvol,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
    call  prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,ab_out,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
-   if(any(dtset%constraint_kind(:)/=0)then
+   if(any(dtset%constraint_kind(:)/=0))then
      call  prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,ab_out,11,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
    endif
    ABI_SFREE(intgden)

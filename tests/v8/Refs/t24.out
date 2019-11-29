@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Fri 29 Nov 2019.
-- ( at 09h12 )
+- ( at 09h50 )
   
 - input  file    -> t24.in
 - output file    -> t24.out
@@ -355,6 +355,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.000     783.000
  Atom  Sphere_radius  Integrated_density
     1        1.00000          0.50000596
     2        1.00000          0.24061675
+
+ Integrated potential residual in atomic spheres:
+ ------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0500.
+ Atom  Sphere_radius  Integrated_potresid
+    1        1.00000          0.56241777
+    2        1.00000          0.00000592
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -472,6 +479,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.000     783.000
  Atom  Sphere_radius  Integrated_density
     1        2.00000          0.99999976
     2        2.00000          0.99999964
+
+ Integrated potential residual in atomic spheres:
+ ------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0500.
+ Atom  Sphere_radius  Integrated_potresid
+    1        2.00000         -0.01937300
+    2        2.00000         -0.01937310
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -588,6 +602,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.000     783.000
  Atom  Sphere_radius  Integrated_density
     1        2.00000          1.09999852
     2        2.00000          0.89999922
+
+ Integrated potential residual in atomic spheres:
+ ------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0500.
+ Atom  Sphere_radius  Integrated_potresid
+    1        2.00000          0.06118253
+    2        2.00000         -0.10095432
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -802,10 +823,10 @@ P           mkmem           1
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          1.8  wall=          1.9
+- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.8  wall=          1.9
++Overall time at end (sec) : cpu=          1.5  wall=          1.7

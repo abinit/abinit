@@ -1762,7 +1762,7 @@ integer, intent(in)       :: cplex
 !arrays
 integer,intent(in)  :: typat(natom)
 real(dp),intent(in) :: ratsph(ntypat),rhomag(2,nspden)
-real(dp),intent(out),optional  :: intgden(nspden,natom)
+real(dp),intent(in) :: intgden(nspden,natom)
 !Local variables ------------------------------
 !scalars
  integer :: iatom,ix

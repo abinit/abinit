@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Fri 29 Nov 2019.
-- ( at 09h32 )
+- ( at 09h50 )
   
 - input  file    -> t95.in
 - output file    -> t95.out
@@ -623,6 +623,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     192.500     192.468
  ---------------------------------------------------------------------
  Total magnetization (spheres)       0.020000   -0.000000    0.160000
  Total magnetization (exact)         0.076113    0.000000    0.608906
+
+ Integrated potential residual in atomic spheres:
+ ---------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0500.
+ Atom   Radius        Potential         B(x)        B(y)        B(z)
+    1   1.00000       -0.000165     -0.006662    0.002632    0.000164
+    2   1.00000       -0.000165      0.006662    0.002632    0.000164
+ ---------------------------------------------------------------------
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -811,6 +819,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     192.500     192.468
  ---------------------------------------------------------------------
  Total magnetization (spheres)       0.000000    0.020001    0.000000
  Total magnetization (exact)        -0.000000    0.060688   -0.000000
+
+ Integrated potential residual in atomic spheres:
+ ---------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0500.
+ Atom   Radius        Potential         B(x)        B(y)        B(z)
+    1   1.00000       -0.002829      0.006468    0.045263    0.002829
+    2   1.00000        0.002829      0.006468   -0.045263   -0.002829
+ ---------------------------------------------------------------------
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -997,6 +1013,15 @@ _setup2: Arith. and geom. avg. npw (full set) are     231.250     231.250
  ---------------------------------------------------------------------
  Total magnetization (spheres)       0.080003    0.079998    0.079998
  Total magnetization (exact)         0.275404    0.275389    0.275388
+
+ Integrated potential residual in atomic spheres:
+ ---------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0500.
+ Atom   Radius        Potential         B(x)        B(y)        B(z)
+    1   1.00000        0.002134      0.008448   -0.008448   -0.002134
+    2   1.00000        0.004225      0.004266   -0.008449   -0.004225
+    3   1.00000        0.004225      0.008449   -0.004266   -0.004225
+ ---------------------------------------------------------------------
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1202,6 +1227,15 @@ _setup2: Arith. and geom. avg. npw (full set) are     231.250     231.250
  ---------------------------------------------------------------------
  Total magnetization (spheres)       0.000000    0.000000    0.000000
  Total magnetization (exact)         0.000000   -0.000000    0.000000
+
+ Integrated potential residual in atomic spheres:
+ ---------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0500.
+ Atom   Radius        Potential         B(x)        B(y)        B(z)
+    1   1.00000        0.000000      0.000000   -0.000000    0.000000
+    2   1.00000       -0.001457     -0.002914    0.002914    0.001457
+    3   1.00000        0.001457      0.002914   -0.002914   -0.001457
+ ---------------------------------------------------------------------
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1389,6 +1423,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     136.556     136.536
  ---------------------------------------------------------------------
  Total magnetization (spheres)       0.000002    0.000003    0.000001
  Total magnetization (exact)         0.000003    0.000007    0.000002
+
+ Integrated potential residual in atomic spheres:
+ ---------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0500.
+ Atom   Radius        Potential         B(x)        B(y)        B(z)
+    1   1.00000        0.039388     -0.000906   -0.000000   -0.039388
+    2   1.00000        0.000454     -0.080043   -0.000000   -0.000454
+    3   1.00000       -0.039387      0.000908   -0.000000    0.039388
+    4   1.00000       -0.000453      0.080044   -0.000000    0.000453
+ ---------------------------------------------------------------------
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1678,6 +1722,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     136.556     136.536
  ---------------------------------------------------------------------
  Total magnetization (spheres)       0.000000    0.000001    0.080000
  Total magnetization (exact)         0.000001    0.000001    0.195024
+
+ Integrated potential residual in atomic spheres:
+ ---------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0500.
+ Atom   Radius        Potential         B(x)        B(y)        B(z)
+    1   1.00000        0.039610     -0.000895   -0.013667   -0.039610
+    2   1.00000        0.000448     -0.079842   -0.017858   -0.000448
+    3   1.00000       -0.039609      0.000896   -0.013667    0.039610
+    4   1.00000       -0.000448      0.079842   -0.017858    0.000448
+ ---------------------------------------------------------------------
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -2397,10 +2451,10 @@ P           mkmem32        18
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         22.2  wall=         22.5
+- Proc.   0 individual time (sec): cpu=         21.6  wall=         21.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  32 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         22.2  wall=         22.5
++Overall time at end (sec) : cpu=         21.6  wall=         21.9
