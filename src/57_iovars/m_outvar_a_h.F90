@@ -126,7 +126,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  integer :: defo,idtset,ii,iimage,ga_n_rules,nn
  integer :: lpawu1,narr,mxnsp
  integer :: natom,nimfrqs,nimage
- integer :: ntypalch,ntypat,size1,size2,tmpimg0
+ integer :: ntypalch,ntypat,print_constraint,size1,size2,tmpimg0
  logical :: compute_static_images
  real(dp) :: cpus
  character(len=1) :: firstchar_fftalg,firstchar_gpu
@@ -1138,7 +1138,12 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_linalg_limit','INT',0)
 
 !grchrg
- if(any(dtsets(1:ndtset_alloc)%constraint_kind(:)>=10))then
+ print_constraint=0
+ do idtset=1,ndtset_alloc
+   if(any(dtsets(idtset)%constraint_kind(:)>=10))print_constraint=1
+ enddo
+ if(print_constraint==1)then
+!if(any(dtsets(1:ndtset_alloc)%constraint_kind(:)>=10))then
    if(choice==2)then
      prtimg(:,:)=1
      do idtset=0,ndtset_alloc       ! specific size for each dataset
@@ -1170,7 +1175,12 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  endif
 
 !grspin
- if(any(mod(dtsets(1:ndtset_alloc)%constraint_kind(:),10)/=0))then
+ print_constraint=0
+ do idtset=1,ndtset_alloc
+   if(any(mod(dtsets(idtset)%constraint_kind(:),10)>=10))print_constraint=1
+ enddo
+ if(print_constraint==1)then
+!if(any(mod(dtsets(1:ndtset_alloc)%constraint_kind(:),10)/=0))then
    if(choice==2)then
      prtimg(:,:)=1
      do idtset=0,ndtset_alloc       ! specific size for each dataset
