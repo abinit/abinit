@@ -61,6 +61,7 @@ Merged successfully 8 files
  Have dielectric tensor: no
  Have Born effective charges: no
  Have quadrupoles: no
+ Have electric field: no
  Treatment of long-range part in V1scf: 1
  qdamp:  -1.0
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file

@@ -50,7 +50,7 @@ module m_eph_driver
 
  use defs_datatypes,    only : pseudopotential_type, ebands_t
  use defs_abitypes,     only : MPI_type
- use m_io_tools,        only : file_exists
+ use m_io_tools,        only : file_exists, open_file
  use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
@@ -153,7 +153,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer,parameter :: master = 0, natifc0 = 0, timrev2 = 2, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0, brav1 = 1
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, ddb_nqshift,ierr
- integer :: omp_ncpus, work_size, nks_per_proc
+ integer :: omp_ncpus, work_size, nks_per_proc, unt
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
@@ -180,6 +180,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: wminmax(2), dielt(3,3), zeff(3,3,dtset%natom), zeff_raw(3,3,dtset%natom)
  real(dp),pointer :: gs_eigen(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:), kpt_efmas(:,:)
+ character(len=fnlen) :: pot_paths(3)
  type(efmasdeg_type),allocatable :: efmasdeg(:)
  type(efmasval_type),allocatable :: efmasval(:,:)
  !type(pawfgrtab_type),allocatable :: pawfgrtab(:)
@@ -545,14 +546,16 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      dvdb%qdamp = dtset%frohl_params(4)
    end if
 
-   if (dtset%userra /= zero) then
-     call wrtout(std_out, "Setting dynamic quadrupoles for Silicon to:", ftoa(dtset%userra))
-     do ii=1,dvdb%natom
-       dvdb%qstar(:,:,:,ii) = ((-1) ** (ii + 1)) * abs(levi_civita_3()) * dtset%userra
-       !dvdb%qstar(:,:,:,ii) = ((-1) ** (ii + 1)) * abs(levi_civita_3()) * 13.368_dp
-       !dvdb%qstar(:,:,:,ii) = ((-1) ** (ii + 1)) * abs(levi_civita_3()) * 14.029_dp
+   if (file_exists("EFIELD_POTS")) then
+     call wrtout(std_out, "Reading Efield potentials")
+     if (open_file("EFIELD_POTS", msg, newunit=unt) /= 0) then
+       MSG_ERROR(msg)
+     end if
+     do ii=1,3
+      read(unt, *) pot_paths(ii)
      end do
-     dvdb%has_quadrupoles = .True.
+     close(unt)
+     call dvdb%load_efield(pot_paths, comm)
    end if
 
    ! Set dielectric tensor, BECS and associated flags.
@@ -588,8 +591,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(mpi_enreg)
- call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfftc(2),ngfftc(3),'all')
- call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
+ call init_distribfft_seq(mpi_enreg%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
+ call init_distribfft_seq(mpi_enreg%distribfft, 'f', ngfftf(2), ngfftf(3), 'all')
 
  ! I am not sure yet the EFMAS file will be needed as soon as eph_frohlichm/=0. To be decided later.
  if (dtset%eph_frohlichm /= 0) then
