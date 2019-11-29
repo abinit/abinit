@@ -2114,6 +2114,17 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &     'd3e_pert1_elfd, d3e_pert2_elfd, d3e_pert3_elfd, d3e_pert1_phon, d3e_pert2_phon, and d3e_pert3_phon in your input file.'
      MSG_ERROR_NOSTOP(msg, ierr)
    end if
+   if ((response==1 .and. dt%kptopt/=3)) then
+! TODO: check ddk case, which should accept kptopt 2
+     if (dt%rfddk/=0 .and. dt%kptopt/=2) then
+       write(msg,'(a,i3,4a)' )&
+&        'The input variable optdriver=',dt%optdriver,ch10,&
+&        'which implies response functions, and requires kptopt 3.',&
+&        'Set kptopt to 3 to let the code reduce the k with the correct small group of symmetries.', &
+&        'The only exception is a DDK calculation with kptopt 2 '
+       MSG_ERROR_NOSTOP(msg, ierr)
+     end if
+   end if
    if(usepaw==1)then
      ! Is optdriver compatible with PAW?
      cond_string(1)='usepaw' ; cond_values(1)=usepaw
@@ -2136,11 +2147,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(dt%mkmem==0)then
      cond_string(1)='mkmem' ; cond_values(1)=dt%mkmem
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
-   end if
-   !Response function need all k-points
-   if(dt%kptopt==1 .or. dt%kptopt==4) then
-     cond_string(1)='kptopt' ; cond_values(1)=dt%kptopt
-     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,2,(/RUNL_RESPFN,RUNL_NONLINEAR/),iout)
    end if
    !dkdk and dkde non-linear response only for occopt=1 (insulators)
    if (dt%rf2_dkdk==1) then

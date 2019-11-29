@@ -96,7 +96,7 @@ def make(ctx, jobs="auto", touch=False, clean=False):
     jobs = max(1, number_of_cpus() // 2) if jobs == "auto" else int(jobs)
 
     with cd(top):
-        if clean: 
+        if clean:
             ctx.run("cd src && make clean && cd ..", pty=True)
             ctx.run("cd shared && make clean && cd ..", pty=True)
         cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
@@ -218,7 +218,7 @@ def links(ctx):
     """
     top = find_top_build_tree(".", with_abinit=True)
     main98 = os.path.join(top, "src", "98_main")
-    for dest in ALL_BINARIES: 
+    for dest in ALL_BINARIES:
         if os.path.islink(os.path.join(os.getcwd(), dest)): continue
         source = os.path.join(main98, dest)
         if os.path.isfile(source):
@@ -250,11 +250,12 @@ def fgrep(ctx, pattern):
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
-#def pulltrunk(ctx):
+
+#def pull_trunk(ctx):
 #    ctx.run("git stash")
 #    ctx.run("git pull trunk develop")
 #    ctx.run("git stash apply")
-#    ctx.run("git push")
+
 
 #def move_to_master(ctx):
 #    ctx.run("git tag -a v%s -m \"v%s release\"" % (NEW_VER, NEW_VER))

@@ -1,6 +1,6 @@
 
 .Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 21 Oct 2019.
-- ( at 23h39 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h32 )
   
 - input  file    -> t12.in
 - output file    -> t12.out
@@ -220,8 +220,8 @@ P           mkmem           2
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/18ar.revpbe
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/18ar.revpbe
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/18ar.revpbe
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/18ar.revpbe
 -   Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 18.00000   8.00000  20100419                znucl, zion, pspdat
     6    7    1    1       800   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -344,8 +344,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/18ar.revpbe
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/18ar.revpbe
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/18ar.revpbe
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/18ar.revpbe
 -   Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 18.00000   8.00000  20100419                znucl, zion, pspdat
     6    7    1    1       800   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -418,7 +418,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
        -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
 
     2   0.000  -3.024   0.754  -0.380  -0.896  -0.380  -0.896  -0.380  -0.896
-       -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000
+       -0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000
 
   chi0(G,G') at the    2 th omega   0.0000  16.5000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -426,7 +426,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
         0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
 
     2   0.000  -1.775   0.326  -0.214  -0.503  -0.214  -0.503  -0.214  -0.503
-       -0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000
+       -0.000   0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000   0.000
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =   2.3945
@@ -469,10 +469,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
   chi0(G,G') at the    2 th omega   0.0000  16.5000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -1.702  -0.491   0.871  -0.421  -0.572  -0.421  -0.572  -0.421  -0.572
-       -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
+        0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
 
     2  -0.491  -0.990   0.096  -0.182  -0.356  -0.182  -0.356  -0.182  -0.356
-       -0.000  -0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     30.23  [%]
 
@@ -486,7 +486,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
        -0.000   0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000
 
     2   0.592  -3.642   0.125  -0.441   0.047  -0.006  -0.905  -0.006  -0.905
-       -0.000   0.000   0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
+       -0.000  -0.000   0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000
 
   chi0(G,G') at the    2 th omega   0.0000  16.5000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -494,7 +494,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
        -0.000   0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000
 
     2   0.334  -2.033   0.043  -0.233   0.020  -0.012  -0.474  -0.012  -0.474
-       -0.000  -0.000   0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     33.75  [%]
 
@@ -508,15 +508,15 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
         0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
 
     2   0.105  -3.442   0.269   0.412  -0.915  -0.516  -0.807  -0.516  -0.807
-        0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000   0.000
+        0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000   0.000
 
   chi0(G,G') at the    2 th omega   0.0000  16.5000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.891   0.078  -0.463   0.078  -0.463  -0.463   0.078  -0.463   0.078
-        0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
+       -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
 
     2   0.078  -1.963   0.100   0.177  -0.508  -0.270  -0.431  -0.270  -0.431
-        0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
+        0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    4 :     46.30  [%]
 
@@ -527,10 +527,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -3.735  -0.277  -0.882  -1.066  -1.208  -1.208  -1.066  -0.882  -0.277
-        0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+       -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
     2  -0.277  -3.735  -0.242  -0.393  -0.835   0.362  -0.852  -0.399   0.481
-        0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
+        0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000
 
   chi0(G,G') at the    2 th omega   0.0000  16.5000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -538,7 +538,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
        -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
     2  -0.129  -2.039  -0.124  -0.203  -0.435   0.179  -0.459  -0.197   0.287
-        0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000
+        0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    5 :     24.91  [%]
 
@@ -549,18 +549,18 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -3.493  -0.675  -0.947  -0.947  -0.675  -0.675  -0.947  -0.947  -0.675
-       -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+        0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
     2  -0.675  -3.668  -0.242  -0.488  -0.801   0.806  -0.788  -0.488  -0.801
-        0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000
+        0.000   0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000
 
   chi0(G,G') at the    2 th omega   0.0000  16.5000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -1.925  -0.343  -0.555  -0.555  -0.343  -0.343  -0.555  -0.555  -0.343
-       -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+        0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
     2  -0.343  -2.060  -0.143  -0.252  -0.406   0.389  -0.442  -0.252  -0.406
-        0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000
+        0.000   0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    6 :     25.48  [%]
 
@@ -928,10 +928,10 @@ P           mkmem           2
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          1.9  wall=          2.1
+- Proc.   0 individual time (sec): cpu=          1.9  wall=          1.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.9  wall=          2.1
++Overall time at end (sec) : cpu=          1.9  wall=          1.9

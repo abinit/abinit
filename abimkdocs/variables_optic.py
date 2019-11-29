@@ -137,7 +137,7 @@ Variable(
 This parameter specifies how many components (out of 9 possible)
 of the linear optical dielectric tensor to calculate.
 Some of these may be either equal to each other, or zero, depending upon the
-symmetry of the material (for detail see [[cite:Draxl2006]]).
+symmetry of the material (for details see [[cite:Draxl2006]]).
 The directions of the requested components are specified by the parameter
 [[optic:lin_comp]].
 """,
@@ -153,11 +153,42 @@ Variable(
     mnemonics="NUMber of NON-LINear COMPonents",
     text=r"""
 This parameter specifies how many components (out of 27 possible)
-of the second-order nonlinear optical dielectric tensor to calculate.
+of the second-order nonlinear optical tensor to calculate.
 Some of these may be either equal to each other, or zero, depending upon the
-symmetry of the material (for detail see [[cite:Draxl2006]]).
-The directions of the requested components are specified by the parameter
-[[optic:nonlin_comp]].
+symmetry of the material. The directions of the requested components are specified by the parameter [[optic:nonlin_comp]].
+""",
+),
+
+Variable(
+    abivarname="num_linel_comp@optic",
+    varset="optic",
+    vartype="integer",
+    topics=['Optic_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="NUMber of LINear ELetro-optic  COMPonents",
+    text=r"""
+This parameter specifies how many components (out of 27 possible)
+of the linear electro-optical susceptibility to calculate.
+Some of these may be either equal to each other, or zero, depending upon the
+symmetry of the material. The directions of the requested components are specified by the parameter [[optic:linel_comp]].
+""",
+),
+
+Variable(
+    abivarname="linel_comp@optic",
+    varset="optic",
+    vartype="integer",
+    topics=['Optic_basic'],
+    dimensions=[['num_linel_comp']],
+    defaultval=0,
+    mnemonics="LINear ELectro-optic COMPonents",
+    text=r"""
+This parameter specifies the directions of the [[optic:num_linel_comp]] requested components
+of the linear electro-optical susceptibility. The components are specified in
+cartesian coordinates, where 1, 2, and 3 represent x, y, and z respectively. For
+example, 111 represents the xxx component, and 321 represents zyx. There should be
+[[optic:num_linel_comp]] entries.
 """,
 ),
 
@@ -192,7 +223,7 @@ Variable(
     mnemonics="TOLERANCE",
     text=r"""
 This parameter sets a scale for discarding small energy denominators.
-When energy denominators are smaller than **tolerance** , the term is discarded from the sum.
+When energy denominators are smaller than **tolerance**, the term is discarded from the sum.
 See also [[optic:broadening]].
 """,
 ),

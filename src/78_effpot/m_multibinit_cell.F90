@@ -119,7 +119,7 @@ module m_multibinit_cell
      integer :: sc_matrix(3,3)   ! supercell matrix
      integer :: ncell            ! number of cells in supercell
      type(supercell_maker_t), pointer :: supercell_maker  ! pointer to a helper class object
-     type(mbcell_t), pointer :: unitcell  ! pointer to the unitcell which the supercell is built from
+     class(mbcell_t), pointer :: unitcell  ! pointer to the unitcell which the supercell is built from
    contains
      procedure :: from_unitcell
   end type mbsupercell_t
