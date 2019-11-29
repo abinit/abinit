@@ -729,9 +729,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    case(RUNL_GWLS)
      ! For running G0W0 calculations with Lanczos basis for dielectric operator
      ! and Sternheimer equation for avoiding the use of conduction states (MC+JJL)
+     ABI_ALLOCATE(etotal_img,(nimage))
      ABI_ALLOCATE(fcart_img,(3,dtset%natom,nimage))
      ABI_ALLOCATE(fred_img,(3,dtset%natom,nimage))
-     ABI_ALLOCATE(etotal_img,(nimage))
+     ABI_ALLOCATE(intgres_img,(4,dtset%natom,nimage))
      ABI_ALLOCATE(strten_img,(6,nimage))
 
      call gwls_sternheimer(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
@@ -742,6 +743,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      ABI_DEALLOCATE(etotal_img)
      ABI_DEALLOCATE(fcart_img)
      ABI_DEALLOCATE(fred_img)
+     ABI_DEALLOCATE(intgres_img)
      ABI_DEALLOCATE(strten_img)
 
    case (RUNL_WFK)
