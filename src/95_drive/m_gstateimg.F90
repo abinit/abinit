@@ -215,7 +215,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  character(len=fnlen),optional,intent(in) :: filnam(:)
  real(dp), intent(out) :: etotal_img(nimage),fcart_img(3,dtset%natom,nimage)
  real(dp), intent(out) :: fred_img(3,dtset%natom,nimage)
- real(dp), intent(out) :: intgden_img(4,dtset%natom,nimage)
+ real(dp), intent(out) :: intgres_img(4,dtset%natom,nimage)
  real(dp), intent(out) :: strten_img(6,nimage)
  real(dp),intent(inout) :: acell_img(3,nimage),amu_img(dtset%ntypat,nimage)
  real(dp),intent(inout) :: mixalch_img(dtset%npspalch,dtset%ntypalch,nimage)
