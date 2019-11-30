@@ -92,7 +92,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm,print_anh)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm,opt_ncoeff
- type(effective_potential_type),target,intent(inout) :: eff_pot
+ type(effective_potential_type),intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
 !arrays 
  integer,intent(in) :: opt_coeff(opt_ncoeff)
@@ -368,7 +368,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 !Strings 
 !Local variables ------------------------------
 !scalars
- integer :: i,ii,natom_sc,ntime,iterm,nterm
+ integer :: i,ii,natom_sc,ntime,iterm,nterm,j
  integer :: jterm, ncombi,ncombi1,ncombi2
  integer :: icombi
  integer :: nterm_start,nterm2
@@ -386,7 +386,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  !real(dp), allocatable :: energy_coeffs(:,:),fcart_coeffs(:,:,:,:)
  !real(dp), allocatable :: strten_coeffs(:,:,:)
  !1406 strain_temrs_tmp
- type(polynomial_coeff_type),allocatable :: my_coeffs(:),my_coeffs_tmp(:)
+ type(polynomial_coeff_type),target,allocatable :: my_coeffs(:),my_coeffs_tmp(:)
  type(polynomial_coeff_type),allocatable :: singledisp_terms(:),HOsingledisp_terms(:)
  type(polynomial_coeff_type),allocatable :: HOcrossdisp_terms(:)
 !Logicals
@@ -514,14 +514,35 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
           endif  
           !Copy everything together
           ABI_DATATYPE_ALLOCATE(my_coeffs,(size(eff_pot%anharmonics_terms%coefficients)+size(HOsingledisp_terms)))
-          my_coeffs = eff_pot%anharmonics_terms%coefficients + HOsingledisp_terms
-          if(ncombi2 > 0)then 
+          !my_coeffs = eff_pot%anharmonics_terms%coefficients + HOsingledisp_terms
+          !Test 
+          do i=1,size(eff_pot%anharmonics_terms%coefficients)+size(HOsingledisp_terms)
+             if(i<=size(eff_pot%anharmonics_terms%coefficients))then 
+                call polynomial_coeff_init(coeff_ini,eff_pot%anharmonics_terms%coefficients(i)%nterm,my_coeffs(i),eff_pot%anharmonics_terms%coefficients(i)%terms,eff_pot%anharmonics_terms%coefficients(i)%name,check=.TRUE.)
+            else 
+                j=i-size(eff_pot%anharmonics_terms%coefficients)
+                call polynomial_coeff_init(coeff_ini,HOsingledisp_terms(j)%nterm,my_coeffs(i),HOsingledisp_terms(j)%terms,HOsingledisp_terms(j)%name,check=.TRUE.)
+             endif 
+          enddo 
+
+          if(ncombi2 > 0)then
             ABI_DATATYPE_ALLOCATE(my_coeffs_tmp,(size(my_coeffs)))
             my_coeffs_tmp = my_coeffs
-            if(allocated(my_coeffs))ABI_DATATYPE_DEALLOCATE(my_coeffs)
+            if(allocated(my_coeffs)) call polynomial_coeff_list_free(my_coeffs)
             ABI_DATATYPE_ALLOCATE(my_coeffs,(size(my_coeffs_tmp)+size(HOcrossdisp_terms)))
-            my_coeffs = my_coeffs_tmp + HOcrossdisp_terms
-            if(allocated(my_coeffs_tmp))ABI_DATATYPE_DEALLOCATE(my_coeffs_tmp) 
+            !my_coeffs = my_coeffs_tmp + HOcrossdisp_terms
+            do i=1,size(my_coeffs_tmp)+size(HOcrossdisp_terms)
+               if(i<=size(my_coeffs_tmp))then 
+                  call polynomial_coeff_init(coeff_ini,my_coeffs_tmp(i)%nterm,my_coeffs(i),my_coeffs_tmp(i)%terms,my_coeffs_tmp(i)%name,check=.TRUE.)
+              else 
+                  j=i-size(my_coeffs_tmp)
+                  call polynomial_coeff_init(coeff_ini,HOcrossdisp_terms(j)%nterm,my_coeffs(i),HOcrossdisp_terms(j)%terms,HOcrossdisp_terms(j)%name,check=.TRUE.)
+               endif 
+            enddo 
+            if(allocated(my_coeffs_tmp))then
+               write(std_out,*) "DEBUG, but I did free this for sure, willy" 
+               call polynomial_coeff_list_free(my_coeffs_tmp)
+            endif 
           endif
        else 
          ncombi2=0
@@ -547,11 +568,12 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
             ! Copy terms of previous cycle
             my_coeffs_tmp(1:nterm2-1) = eff_pot%anharmonics_terms%coefficients 
             !Put new term to my_coeffs_tmp
-            my_coeffs_tmp(nterm2) = my_coeffs(nterm_start+icombi) 
+            !my_coeffs_tmp(nterm2) = my_coeffs(nterm_start+icombi)
+            call polynomial_coeff_init(my_coeffs(nterm_start+icombi)%coefficient,my_coeffs(nterm_start+icombi)%nterm,my_coeffs_tmp(nterm2),my_coeffs(nterm_start+icombi)%terms,my_coeffs(nterm_start+icombi)%name)
             ! If order is greater than specified cycle
             if(sum(my_coeffs_tmp(nterm2)%terms(1)%power_disp) & 
-+              sum(my_coeffs_tmp(nterm2)%terms(1)%power_strain) > maxval(order_ran))then 
-               ABI_DATATYPE_DEALLOCATE(my_coeffs_tmp)
+&             +sum(my_coeffs_tmp(nterm2)%terms(1)%power_strain) > maxval(order_ran))then 
+               call polynomial_coeff_list_free(my_coeffs_tmp)
                cycle
             endif 
             ! Message to Output 
@@ -573,7 +595,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 &              '   ==> Term exists already. We cycle',ch10
                call wrtout(ab_out,message,'COLL')
                call wrtout(std_out,message,'COLL')
-               ABI_DATATYPE_DEALLOCATE(my_coeffs_tmp)
+               call polynomial_coeff_list_free(my_coeffs_tmp)
                ABI_DEALLOCATE(exists)
                cycle 
             endif 
@@ -588,8 +610,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
             call wrtout(std_out,message,'COLL')
              
             ! Deallocation in loop 
-            ABI_DATATYPE_DEALLOCATE(my_coeffs_tmp)  
-            
+            call polynomial_coeff_list_free(my_coeffs_tmp)
             !Optimizing coefficient old style 
 
             if(iterm>nterm)then
@@ -608,7 +629,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
                   call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                              natom_sc,ntime,fit_data%training_set%sqomega,&
  &                                              compute_anharmonic=.TRUE.,print_file=.FALSE.)
-	     
+ 
                   write(message,'(a,I2,a,F12.7)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
                   call wrtout(std_out,message,'COLL')
                   write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses): ", (msef+mses)
@@ -675,12 +696,13 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
            ABI_DEALLOCATE(exists)
      enddo ! icombi
 
-       if(allocated(my_coeffs)) ABI_DATATYPE_DEALLOCATE(my_coeffs)  
-       if(allocated(HOcrossdisp_terms))ABI_DATATYPE_DEALLOCATE(HOcrossdisp_terms)  
-       if(allocated(HOcrossdisp_terms))ABI_DATATYPE_DEALLOCATE(HOsingledisp_terms)  
+       if(allocated(my_coeffs)) call polynomial_coeff_list_free(my_coeffs)
+       if(allocated(HOcrossdisp_terms)) call polynomial_coeff_list_free(HOcrossdisp_terms)  
+       if(allocated(HOsingledisp_terms)) call polynomial_coeff_list_free(HOsingledisp_terms)  
    enddo !iterm
  !enddo ! order 
 
+ if(allocated(singledisp_terms)) call polynomial_coeff_list_free(singledisp_terms)  
  write(message, '(a,(80a),a)' ) ch10,&
 &('_',ii=1,80),ch10
  call wrtout(ab_out,message,'COLL')
@@ -776,6 +798,7 @@ subroutine opt_getHOforterm(term,order_range,order_start,order_stop)
      powers = term%terms(1)%power_disp
 
      power_tot = 0 
+
 
      !Get rid off odd displacements
      do idisp=1,ndisp
@@ -947,7 +970,7 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi_order)
 !arrays 
  integer,intent(in) :: ncombi_order(:)
 !Logicals
- type(polynomial_coeff_type),target,intent(inout) :: terms(:)
+ type(polynomial_coeff_type),intent(inout) :: terms(:)
 !Strings 
 !Local variables ------------------------------
 !scalars
@@ -1141,7 +1164,7 @@ subroutine opt_filterdisp(term,nterm_of_term)
          
 !Arguments ------------------------------------
 !scalars
- type(polynomial_coeff_type),target,intent(inout) :: term
+ type(polynomial_coeff_type),intent(inout) :: term
  integer,intent(in) :: nterm_of_term
  !arrays 
 !Logicals
@@ -1163,7 +1186,7 @@ subroutine opt_filterdisp(term,nterm_of_term)
 ! Set strain to zero in terms 
 do iterm_of_term = 1, nterm_of_term 
   !Set strain in all terms to zero 
-  term%terms(iterm_of_term)%nstrain = 0
+  !terms(iterm_of_term)%nstrain = 0
   !Free initial strain array 
   !ABI_DEALLOCATE(term%terms(iterm_of_term)%strain)
   !ABI_DEALLOCATE(term%terms(iterm_of_term)%power_strain)
@@ -1171,16 +1194,24 @@ do iterm_of_term = 1, nterm_of_term
 enddo ! iterm_of term 
 
 do iterm_of_term=1,nterm_of_term
-   terms(iterm_of_term) = term%terms(iterm_of_term)
+   !terms(iterm_of_term) = term%terms(iterm_of_term)
+   call polynomial_term_init(term%terms(iterm_of_term)%atindx,term%terms(iterm_of_term)%cell,term%terms(iterm_of_term)%direction,term%terms(iterm_of_term)%ndisp,term%terms(iterm_of_term)%nstrain,terms(iterm_of_term),term%terms(iterm_of_term)%power_disp,term%terms(iterm_of_term)%power_strain,term%terms(iterm_of_term)%strain,term%terms(iterm_of_term)%weight,check=.TRUE.)
+   terms(iterm_of_term)%nstrain = 0
+   terms(iterm_of_term)%power_strain = 0
+   terms(iterm_of_term)%strain = 0
 enddo
 
+call polynomial_coeff_free(term)
 !Reinitial term 
 !check=.TRUE. checks for duplicate terms
 call polynomial_coeff_init(coeff,nterm_of_term,term,terms,check=.TRUE.)
 
-!if(nterm_of_term /= term%nterm)then 
-!  write(*,*) "nterm_of_term changed after deleting strain"
-!endif
+do iterm_of_term=1,nterm_of_term
+  call polynomial_term_free(terms(iterm_of_term))
+enddo 
+if(nterm_of_term /= term%nterm)then 
+  write(*,*) "nterm_of_term changed after deleting strain"
+endif
 
 
 end subroutine opt_filterdisp
@@ -1321,7 +1352,7 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
  real(dp) :: coeff_ini 
 !arrays
  type(polynomial_coeff_type) :: term
- integer,allocatable :: ncombi_order(:) 
+ integer,allocatable :: ncombi_order(:),dummy(:)
 !Logicals
  logical :: had_strain 
 !Strings
@@ -1338,13 +1369,15 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
        !Chose term one to get ndisp. ndisp is equal for all terms of the term
        !Get minimum oder for this term
        !Get total number of terms in effpot for message
-       term = term_in
-       ndisp = term%terms(1)%ndisp
-       nterm_of_term = term%nterm
-             
+       ndisp = term_in%terms(1)%ndisp
+       nterm_of_term = term_in%nterm
+       ABI_ALLOCATE(dummy,(5))      
+       call polynomial_coeff_init(coeff_ini,nterm_of_term,term,term_in%terms,term_in%name,check=.true.)
+       ABI_DEALLOCATE(dummy)      
        ! Check if term has strain component. 
        ! If yes filter strain and fit high order atomic displacement terms
        had_strain = .FALSE.
+       ABI_ALLOCATE(dummy,(5))      
        if(term%terms(1)%nstrain /= 0)then
                 ! Message to Output 
                 write(message,'(5a)' )ch10,&
@@ -1359,6 +1392,7 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
                 had_strain = .TRUE.
                !cycle 
        endif 
+       ABI_DEALLOCATE(dummy)      
        ! Ok we want it. Let's go. 
       
        ! get start and stop order for this term 
@@ -1391,13 +1425,13 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
        ! This is because higher order terms should have smaller coefficients 
        do icombi=1,ncombi_tot
            if(icombi <= ncombi)then
-              terms_out(icombi) = term
-              nterm_of_term = term%nterm
               coeff_ini = 1 !abs(terms_out(icombi)%coefficient / 2)
-              terms_out(icombi)%coefficient = coeff_ini
+              nterm_of_term = term%nterm
+              call polynomial_coeff_init(coeff_ini,nterm_of_term,terms_out(icombi),term%terms,check=.true.)
            else
-              terms_out(icombi) = term_in
+              coeff_ini = 10d3
               nterm_of_term = term_in%nterm
+              call polynomial_coeff_init(coeff_ini,nterm_of_term,terms_out(icombi),term_in%terms,check=.true.)
            endif
            ! Set the power of all terms we want to add to two. We find the correct power later
            ! Change the weight of the term to 1 (even terms have allways weight=1)
@@ -1420,7 +1454,8 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
        
        !If term had strain we had to reinitialize it in the process 
        !Refree memory
-       if(had_strain) call polynomial_coeff_free(term)  
+       !if(had_strain) 
+       call polynomial_coeff_free(term)  
       
        ! Get high order combinations 
        if(had_strain)then           
@@ -1654,7 +1689,7 @@ end subroutine opt_getSingleDispTerms
 !!          Caution only atomic displacements are taken into account
 !!
 !! INPUTS
-!! term_in<polynomial_coeff_type>: input anharmanoc term 
+!! term_in<polynomial_coeff_type>: input anharmonic term 
 !! crystal<type(crystal_t)>: all information about the crystal
 !! single_disp_terms<polynomial_coeff_out>: list of single disp terms at 
 !!                                          second order to select terms from 
@@ -1693,6 +1728,7 @@ subroutine opt_getHOSingleDispTerms(term_in,terms_out,symbols,single_disp_terms,
 !scalars
 integer :: ndisp,norder, nterm_of_term
 integer :: icoeff,iorder,idisp, iterm1,iterm2,iterm3
+real(dp) :: coeff_ini = 1
 !Strings
  character(len=200):: name
 !arrays
@@ -1722,13 +1758,13 @@ do idisp=1,ndisp
                if(term_in%terms(1)%direction(idisp) == single_disp_terms(iterm1)%terms(iterm2)%direction(1))then 
                   do iorder=1,norder
                      icoeff = icoeff + 1
-                     terms_out_tmp(icoeff)=single_disp_terms(iterm1)
-                     terms_out_tmp(icoeff)%coefficient = 1
-                     nterm_of_term = terms_out_tmp(icoeff)%nterm 
+                     terms_out_tmp(icoeff) = single_disp_terms(iterm1)
+                     nterm_of_term = single_disp_terms(iterm1)%nterm 
                      !Change order of term 
+                     call polynomial_coeff_init(coeff_ini,nterm_of_term,terms_out_tmp(icoeff),single_disp_terms(iterm1)%terms(:),check=.true.)
                      do iterm3=1,nterm_of_term
                         terms_out_tmp(icoeff)%terms(iterm3)%power_disp = power_disp(1) + (iorder-1)*2  
-                     enddo !iterm3 
+                     enddo !iterm3
                   enddo !iorder
                endif
             endif
@@ -1740,7 +1776,8 @@ enddo!idisp
 !Change Name 
 do icoeff=1,ncoeff 
 !   write(std_out,*) "DEBUG icoeff: ", icoeff  
-!   write(*,*) "Term(",icoeff,"/",ncoeff,"): ", terms_out_tmp(icoeff)%name, "name before set name" 
+!   write(std_out,*) "Term(",icoeff,"/",ncoeff,"): ", terms_out_tmp(icoeff)%name, "name before set name" 
+!   write(std_out,*) "Term(",icoeff,"/",ncoeff,") nterm: ", terms_out_tmp(icoeff)%nterm
   call polynomial_coeff_getName(name,terms_out_tmp(icoeff),symbols,recompute=.TRUE.)
   call polynomial_coeff_SetName(name,terms_out_tmp(icoeff))
 !   write(*,*) "Term(",icoeff,"/",ncoeff,"): ", terms_out_tmp(icoeff)%name, "after set name" 
@@ -1769,11 +1806,14 @@ iterm3 = 0
 do iterm1=1,ncoeff 
    if(.not. found(iterm1))then 
       iterm3 = iterm3 + 1
-      terms_out(iterm3) = terms_out_tmp(iterm1)
+!      terms_out(iterm3) = terms_out_tmp(iterm1)
+      call polynomial_coeff_init(coeff_ini,terms_out_tmp(iterm1)%nterm,terms_out(iterm3),&
+&                                terms_out_tmp(iterm1)%terms,terms_out_tmp(iterm1)%name,check=.TRUE.)
    endif 
 enddo
 
-ABI_DEALLOCATE(terms_out_tmp)
+!ABI_DEALLOCATE(terms_out_tmp)
+call polynomial_coeff_list_free(terms_out_tmp)
 ABI_DEALLOCATE(found)
 ncoeff = iterm3
 

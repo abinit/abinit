@@ -285,6 +285,56 @@ subroutine polynomial_coeff_free(polynomial_coeff)
 end subroutine polynomial_coeff_free
 !!***
 
+!!****f* m_polynomial_coeff/polynomial_coeff_list_free
+!!
+!! NAME
+!! polynomial_coeff_list_free
+!!
+!! FUNCTION
+!! Free polynomial_coeff datatype
+!!
+!! INPUTS
+!! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
+!!
+!! OUTPUT
+!! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
+!!
+!! PARENTS
+!!
+!!
+!! CHILDREN
+!!      polynomial_coeff_free
+!!
+!! SOURCE
+
+subroutine polynomial_coeff_list_free(polynomial_coeff_list)
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+!arrays
+ type(polynomial_coeff_type),allocatable, intent(inout) :: polynomial_coeff_list(:)
+!Local variables-------------------------------
+!scalar
+ integer :: i,ncoeff
+!arrays
+
+! *************************************************************************
+
+!Free output 
+ if(allocated(polynomial_coeff_list))then
+   ncoeff = size(polynomial_coeff_list)
+   do i=1,ncoeff 
+      !if(allocated(polynomial_coeff_list(i)%terms))write(std_out,*) "This shit is allocated!"
+      call polynomial_coeff_free(polynomial_coeff_list(i))
+   enddo 
+   ABI_DATATYPE_DEALLOCATE(polynomial_coeff_list) 
+ endif
+
+end subroutine polynomial_coeff_list_free
+!!***
+
 !!****f* m_polynomial_coeff/polynomial_coeff_setCoefficient
 !!
 !! NAME
@@ -2454,7 +2504,6 @@ if(need_compute_symmetric)then
     enddo
   endif 
 
-  ABI_DEALLOCATE(compatibleCoeffs)
 !ABI_ALLOCATE(my_list_combination,(power_disps(2),irank_ncombi(my_rank+1)))
 !my_list_combination = zero 
 !if(my_ncombi_end <= nirred_comb-1)then 
@@ -2504,11 +2553,10 @@ if(need_compute_symmetric)then
   call xmpi_gatherv(my_list_combination,size(my_list_combination),list_combination_tmp,buffsize,offsets,master,comm,ierr)
 
 !write(std_out,*) "DEBUG: shape(list_combination_tmp)", shape(list_combination_tmp)
-
+  !Deallocation of variables inside need_symmetric
   ABI_DEALLOCATE(buffsize) 
   ABI_DEALLOCATE(my_list_combination)
   ABI_DEALLOCATE(my_index_irredcomb)
-  ABI_DEALLOCATE(index_irredcomb)
   ABI_DEALLOCATE(irank_combi_start)
   ABI_DEALLOCATE(irank_combi_end)
   ABI_DEALLOCATE(irank_ncombi)
@@ -2516,6 +2564,9 @@ if(need_compute_symmetric)then
   ABI_DEALLOCATE(offsets)
 endif !compute_symmetric
 
+!Deallocation of arrays outside need_symmetric
+ABI_DEALLOCATE(compatibleCoeffs)
+ABI_DEALLOCATE(index_irredcomb)
 
 if(iam_master)then
   call reduce_zero_combinations(list_combination_tmp)
@@ -4043,29 +4094,27 @@ function coeffs_list_conc(coeff_list1,coeff_list2) result (coeff_list_out)
 
 !Arguments ------------------------------------
   type(polynomial_coeff_type), intent(in) :: coeff_list1(:),coeff_list2(:)
-  type(polynomial_coeff_type),allocatable :: coeff_list_out(:)
+  type(polynomial_coeff_type),pointer :: coeff_list_out(:)
 !local
 !variable
-  integer :: ncoeff1,ncoeff2,ncoeff_out 
+  integer :: ncoeff1,ncoeff2,ncoeff_out,i,j
 !array
 ! *************************************************************************
-
-!Free output 
- if(allocated(coeff_list_out))then
-   ABI_DATATYPE_DEALLOCATE(coeff_list_out) 
- endif
 
 !Get sizes of coeff_list1/2
  ncoeff1 = size(coeff_list1) 
  ncoeff2 = size(coeff_list2)
  ncoeff_out = ncoeff1 + ncoeff2
 
- !Allocate output 
- ABI_DATATYPE_ALLOCATE(coeff_list_out,(ncoeff_out)) 
-
- !Copy input list into output lists 
- coeff_list_out(1:ncoeff1) = coeff_list1 
- coeff_list_out(ncoeff1+1:) = coeff_list2   
+ ABI_ALLOCATE(coeff_list_out,(ncoeff_out)) 
+ do i=1,ncoeff_out
+    if(i<=ncoeff1)then 
+       call polynomial_coeff_init(coeff_list1(i)%coefficient,coeff_list1(i)%nterm,coeff_list_out(i),coeff_list1(i)%terms,coeff_list1(i)%name,check=.TRUE.)
+    else 
+       j=i-ncoeff1
+       call polynomial_coeff_init(coeff_list2(j)%coefficient,coeff_list2(j)%nterm,coeff_list_out(i),coeff_list2(j)%terms,coeff_list2(j)%name,check=.TRUE.)
+    endif 
+ enddo 
  
 end function coeffs_list_conc
 !!***
