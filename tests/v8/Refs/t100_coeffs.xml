@@ -436,7 +436,7 @@
       <strain power=" 1" voigt=" 2"/>
     </term>
   </coefficient>
-  <coefficient number="3" value="   0.1907584280E-02" text="(Ti_y-O1_y)^4">
+  <coefficient number="3" value="   0.7665624586E-01" text="(Ti_y-O1_y)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
@@ -474,7 +474,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="4" value="   0.1584624284E-01" text="(Ti_y-O1_y)^6">
+  <coefficient number="4" value="   0.5832355922E+00" text="(Ti_y-O1_y)^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="6">
         <cell_a>0 0 0</cell_a>
@@ -512,7 +512,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="5" value="   0.1205538103E+00" text="(Ti_y-O1_y)^8">
+  <coefficient number="5" value="   0.8378243804E+01" text="(Ti_y-O1_y)^8">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="8">
         <cell_a>0 0 0</cell_a>
@@ -550,7 +550,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="6" value="   0.5489225300E-03" text="(Ti_y-O1_y[1 1 0])^4">
+  <coefficient number="6" value="   0.6514671900E-03" text="(Ti_y-O1_y[1 1 0])^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
@@ -696,7 +696,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="7" value="   0.3534338430E-02" text="(Ti_y-O1_y[1 1 0])^6">
+  <coefficient number="7" value="   0.9173402440E-02" text="(Ti_y-O1_y[1 1 0])^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="6">
         <cell_a>0 0 0</cell_a>
@@ -842,7 +842,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="8" value="   0.2048741638E-01" text="(Ti_y-O1_y[1 1 0])^8">
+  <coefficient number="8" value="   0.1329033509E+00" text="(Ti_y-O1_y[1 1 0])^8">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="8">
         <cell_a>0 0 0</cell_a>
@@ -988,7 +988,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="9" value="   0.6856477800E-03" text="(Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^2">
+  <coefficient number="9" value="   0.1381023210E-02" text="(Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
@@ -1230,7 +1230,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="10" value="   0.5438095780E-02" text="(Ti_y-O1_y)^4(Ti_y-O1_y[1 1 0])^2">
+  <coefficient number="10" value="   0.3131044478E-01" text="(Ti_y-O1_y)^4(Ti_y-O1_y[1 1 0])^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
@@ -1472,7 +1472,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="11" value="   0.5212533200E-02" text="(Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^4">
+  <coefficient number="11" value="   0.1621926490E-01" text="(Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
@@ -1714,7 +1714,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="12" value="   0.3832366022E-01" text="(Ti_y-O1_y)^6(Ti_y-O1_y[1 1 0])^2">
+  <coefficient number="12" value="   0.7337951197E+00" text="(Ti_y-O1_y)^6(Ti_y-O1_y[1 1 0])^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="6">
         <cell_a>0 0 0</cell_a>
@@ -1956,7 +1956,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="13" value="   0.3383005361E-01" text="(Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^6">
+  <coefficient number="13" value="   0.2257873206E+00" text="(Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
@@ -2198,7 +2198,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="14" value="   0.4007624656E-01" text="(Ti_y-O1_y)^4(Ti_y-O1_y[1 1 0])^4">
+  <coefficient number="14" value="   0.3968134009E+00" text="(Ti_y-O1_y)^4(Ti_y-O1_y[1 1 0])^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
@@ -2440,7 +2440,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="15" value="   0.1720776167E+01" text="(Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^2(eta_1)^2">
+  <coefficient number="15" value="   0.2911059504E+01" text="(Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^2(eta_1)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
@@ -2706,7 +2706,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="16" value="   0.2546888075E+02" text="(Ti_y-O1_y)^4(Ti_y-O1_y[1 1 0])^2(eta_1)^2">
+  <coefficient number="16" value="   0.1415847838E+03" text="(Ti_y-O1_y)^4(Ti_y-O1_y[1 1 0])^2(eta_1)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
@@ -2972,7 +2972,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="17" value="   0.2623664246E+02" text="(Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^4(eta_1)^2">
+  <coefficient number="17" value="   0.7575381165E+02" text="(Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^4(eta_1)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
@@ -3238,7 +3238,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="18" value="   0.2602352200E+05" text="(Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^2(eta_1)^4">
+  <coefficient number="18" value="   0.1048049852E+06" text="(Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^2(eta_1)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
@@ -3504,7 +3504,7 @@
       <strain power=" 4" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="19" value="   0.7507160344E+00" text="(Ti_y-O1_y[1 1 0])^4(eta_2)^2">
+  <coefficient number="19" value="   0.9205386451E+00" text="(Ti_y-O1_y[1 1 0])^4(eta_2)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
@@ -3674,7 +3674,7 @@
       <strain power=" 2" voigt=" 2"/>
     </term>
   </coefficient>
-  <coefficient number="20" value="   0.7282377530E+01" text="(Ti_y-O1_y[1 1 0])^6(eta_2)^2">
+  <coefficient number="20" value="   0.2797450734E+02" text="(Ti_y-O1_y[1 1 0])^6(eta_2)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="6">
         <cell_a>0 0 0</cell_a>
@@ -3844,7 +3844,7 @@
       <strain power=" 2" voigt=" 2"/>
     </term>
   </coefficient>
-  <coefficient number="21" value="   0.1138472047E+05" text="(Ti_y-O1_y[1 1 0])^4(eta_2)^4">
+  <coefficient number="21" value="   0.3759316216E+05" text="(Ti_y-O1_y[1 1 0])^4(eta_2)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
