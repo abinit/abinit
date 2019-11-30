@@ -793,8 +793,10 @@ subroutine dvdb_open_read(db, ngfft, comm)
 
 !Local variables-------------------------------
 !scalars
- integer :: nprocs
+ integer :: nprocs, unt, ii
  character(len=500) :: msg
+!arrays
+ character(len=fnlen) :: pot_paths(3)
 
 !************************************************************************
 
@@ -826,6 +828,21 @@ subroutine dvdb_open_read(db, ngfft, comm)
  case default
    MSG_ERROR(sjoin("Unsupported iomode:", itoa(db%iomode)))
  end select
+
+ ! Read potentials induced by electric fields
+ ! This requires ngfft so for the time being we call it here.
+ ! I should try to add efield perturbations to DVDB but then I also have to handle symmetrization wrt idir!
+ if (file_exists("__EFIELD_POTS__")) then
+   call wrtout(std_out, " Reading Efield potentials from EFIELD_POTS")
+   if (open_file("__EFIELD_POTS__", msg, newunit=unt, form="formatted") /= 0) then
+     MSG_ERROR(msg)
+   end if
+   do ii=1,3
+    read(unt, "(a)") pot_paths(ii)
+   end do
+   close(unt)
+   call db%load_efield(pot_paths, comm)
+ end if
 
  return
 
@@ -5995,7 +6012,6 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  call dvdb%print()
 
  ! Define FFT mesh
- !call ngfft_seq(ngfft, dvdb%ngfft3_v1(:,1))
  ngfft = dvdb%ngfft
  nfft = product(ngfft(1:3))
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
@@ -6011,15 +6027,16 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    write(std_out,"(a)")sjoin("Will write potentials to:", dump_path)
  end if
 
- ! Select list of q-points depending on eph_task (from file or interpolated)
+ ! Select list of q-points depending on eph_task (from DVDB file or interpolated)
  if (dtset%eph_task == -15) then
-  call wrtout(std_out, " Using list of q-points found in DVDB file")
+  call wrtout([std_out, ab_out], " Using list of q-points found in DVDB file")
   this_nqpt = dvdb%nqpt
   this_qpts => dvdb%qpts
   interpolated = 0
 
  else if (dtset%eph_task == +15) then
    msg = sjoin(" Using list of q-points specified by ph_qpath with ", itoa(dtset%ph_nqpath), "qpoints")
+   call wrtout([std_out, ab_out], msg)
    ABI_CHECK(dtset%ph_nqpath > 0, "When eph_task = +15, ph_qpath must be given in input.")
    this_nqpt = dtset%ph_nqpath
    this_qpts => dtset%ph_qpath(:, 1:this_nqpt)
@@ -6031,14 +6048,16 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    MSG_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
  end if
 
+ call wrtout([std_out, ab_out], sjoin("- Results stored in: ", out_ncpath))
+ call wrtout([std_out, ab_out], " Use `abiopen.py out_V1QAVG.nc -e` to visualize results")
+
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK(nctk_open_create(ncid, out_ncpath, xmpi_comm_self))
    NCF_CHECK(dvdb%cryst%ncwrite(ncid))
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t("nspden", dvdb%nspden), nctkdim_t("natom", dvdb%natom3 / 3), nctkdim_t("nqpt", this_nqpt), &
-     nctkdim_t("natom3", dvdb%natom3) &
-   ], defmode=.True.)
+     nctkdim_t("natom3", dvdb%natom3) ], defmode=.True.)
    NCF_CHECK(ncerr)
 
    if (interpolated == 1) then
@@ -6063,6 +6082,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
      nctkarr_t("v1lr_avg",  "dp", "two, nspden, three, natom, nqpt"), &
      nctkarr_t("v1scfmlr_avg",  "dp", "two, nspden, three, natom, nqpt"), &
      nctkarr_t("v1scf_abs_avg",  "dp", "two, nspden, three, natom, nqpt"), &
+     nctkarr_t("v1lr_abs_avg",  "dp", "two, nspden, three, natom, nqpt"), &
      nctkarr_t("qpoints", "dp", "three, nqpt") &
    ])
    NCF_CHECK(ncerr)
@@ -6126,18 +6146,25 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
      do ispden=1,dvdb%nspden
 
 #ifdef HAVE_NETCDF
-       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_avg"), sum(file_v1r(:,:,ispden,imyp), dim=2) / nfft, &
+       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_avg"), &
+                            sum(file_v1r(:,:,ispden,imyp), dim=2) / nfft, &
                             start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
        NCF_CHECK(ncerr)
-       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_abs_avg"), sum(abs(file_v1r(:,:,ispden,imyp)), dim=2) / nfft, &
+       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_abs_avg"), &
+                            sum(abs(file_v1r(:,:,ispden,imyp)), dim=2) / nfft, &
                             start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
        NCF_CHECK(ncerr)
-       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1lr_avg"), sum(long_v1r(:,:,ispden,imyp), dim=2) / nfft, &
+       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1lr_avg"), &
+                            sum(long_v1r(:,:,ispden,imyp), dim=2) / nfft, &
+                            start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
+       NCF_CHECK(ncerr)
+       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1lr_abs_avg"), &
+                            sum(abs(long_v1r(:,:,ispden,imyp)), dim=2) / nfft, &
                             start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
        NCF_CHECK(ncerr)
        ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scfmlr_avg"), &
-                           sum(file_v1r(:,:,ispden,imyp) - long_v1r(:,:,ispden,imyp), dim=2) / nfft,&
-                           start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
+                            sum(file_v1r(:,:,ispden,imyp) - long_v1r(:,:,ispden,imyp), dim=2) / nfft,&
+                            start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
        NCF_CHECK(ncerr)
 #endif
 
@@ -6623,7 +6650,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
    ! (q + G) . dielt . (q + G)
    denom = dot_product(qG_red, matmul(dielt_red, qG_red))
    ! Avoid (q+G) = 0
-   if (denom < tol8) then
+   if (denom > tol8) then
      denom_inv = one / denom
      if (db%qdamp > zero) denom_inv = denom_inv * exp(-qG_mod ** 2 / (four * db%qdamp))
      fac = (four_pi / db%cryst%ucvol) * denom_inv * qGZ
@@ -6765,6 +6792,8 @@ subroutine dvdb_load_efield(dvdb, pot_paths, comm)
  type(pawrhoij_type),allocatable :: pawrhoij(:)
 
 ! *************************************************************************
+
+ ABI_CHECK(all(dvdb%ngfft /= -1), "dbvd%ngfft must be defined!")
 
  nfft = product(dvdb%ngfft(1:3))
  ABI_CALLOC(v1e_red, (nfft, dvdb%nspden, 3))

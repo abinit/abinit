@@ -153,7 +153,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer,parameter :: master = 0, natifc0 = 0, timrev2 = 2, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0, brav1 = 1
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, ddb_nqshift,ierr
- integer :: omp_ncpus, work_size, nks_per_proc, unt
+ integer :: omp_ncpus, work_size, nks_per_proc
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
@@ -180,7 +180,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: wminmax(2), dielt(3,3), zeff(3,3,dtset%natom), zeff_raw(3,3,dtset%natom)
  real(dp),pointer :: gs_eigen(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:), kpt_efmas(:,:)
- character(len=fnlen) :: pot_paths(3)
  type(efmasdeg_type),allocatable :: efmasdeg(:)
  type(efmasval_type),allocatable :: efmasval(:,:)
  !type(pawfgrtab_type),allocatable :: pawfgrtab(:)
@@ -546,18 +545,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      dvdb%qdamp = dtset%frohl_params(4)
    end if
 
-   if (file_exists("EFIELD_POTS")) then
-     call wrtout(std_out, "Reading Efield potentials")
-     if (open_file("EFIELD_POTS", msg, newunit=unt) /= 0) then
-       MSG_ERROR(msg)
-     end if
-     do ii=1,3
-      read(unt, *) pot_paths(ii)
-     end do
-     close(unt)
-     call dvdb%load_efield(pot_paths, comm)
-   end if
-
    ! Set dielectric tensor, BECS and associated flags.
    ! This activates automatically the treatment of the long-range term in the Fourier interpolation
    ! of the DFPT potentials except when dvdb_add_lr == 0
@@ -662,6 +649,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  case (15, -15)
    ! Write average of DFPT potentials to file.
+   ABI_CHECK(nprocs == 1, "nprocs > 1 not implemented")
    call dvdb%open_read(ngfftf, xmpi_comm_self)
    !call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, comm)
    !call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
