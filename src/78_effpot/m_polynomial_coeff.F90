@@ -4109,10 +4109,12 @@ function coeffs_list_conc(coeff_list1,coeff_list2) result (coeff_list_out)
  ABI_ALLOCATE(coeff_list_out,(ncoeff_out)) 
  do i=1,ncoeff_out
     if(i<=ncoeff1)then 
-       call polynomial_coeff_init(coeff_list1(i)%coefficient,coeff_list1(i)%nterm,coeff_list_out(i),coeff_list1(i)%terms,coeff_list1(i)%name,check=.TRUE.)
+       call polynomial_coeff_init(coeff_list1(i)%coefficient,coeff_list1(i)%nterm,coeff_list_out(i),coeff_list1(i)%terms,&
+&                                 coeff_list1(i)%name,check=.TRUE.)
     else 
        j=i-ncoeff1
-       call polynomial_coeff_init(coeff_list2(j)%coefficient,coeff_list2(j)%nterm,coeff_list_out(i),coeff_list2(j)%terms,coeff_list2(j)%name,check=.TRUE.)
+       call polynomial_coeff_init(coeff_list2(j)%coefficient,coeff_list2(j)%nterm,coeff_list_out(i),coeff_list2(j)%terms,&
+&                                 coeff_list2(j)%name,check=.TRUE.)
     endif 
  enddo 
  

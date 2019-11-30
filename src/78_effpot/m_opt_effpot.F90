@@ -518,10 +518,12 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
           !Test 
           do i=1,size(eff_pot%anharmonics_terms%coefficients)+size(HOsingledisp_terms)
              if(i<=size(eff_pot%anharmonics_terms%coefficients))then 
-                call polynomial_coeff_init(coeff_ini,eff_pot%anharmonics_terms%coefficients(i)%nterm,my_coeffs(i),eff_pot%anharmonics_terms%coefficients(i)%terms,eff_pot%anharmonics_terms%coefficients(i)%name,check=.TRUE.)
+                call polynomial_coeff_init(coeff_ini,eff_pot%anharmonics_terms%coefficients(i)%nterm,my_coeffs(i),&
+& eff_pot%anharmonics_terms%coefficients(i)%terms,eff_pot%anharmonics_terms%coefficients(i)%name,check=.TRUE.)
             else 
                 j=i-size(eff_pot%anharmonics_terms%coefficients)
-                call polynomial_coeff_init(coeff_ini,HOsingledisp_terms(j)%nterm,my_coeffs(i),HOsingledisp_terms(j)%terms,HOsingledisp_terms(j)%name,check=.TRUE.)
+                call polynomial_coeff_init(coeff_ini,HOsingledisp_terms(j)%nterm,my_coeffs(i),HOsingledisp_terms(j)%terms,&
+                                           HOsingledisp_terms(j)%name,check=.TRUE.)
              endif 
           enddo 
 
@@ -533,16 +535,15 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
             !my_coeffs = my_coeffs_tmp + HOcrossdisp_terms
             do i=1,size(my_coeffs_tmp)+size(HOcrossdisp_terms)
                if(i<=size(my_coeffs_tmp))then 
-                  call polynomial_coeff_init(coeff_ini,my_coeffs_tmp(i)%nterm,my_coeffs(i),my_coeffs_tmp(i)%terms,my_coeffs_tmp(i)%name,check=.TRUE.)
+                  call polynomial_coeff_init(coeff_ini,my_coeffs_tmp(i)%nterm,my_coeffs(i),my_coeffs_tmp(i)%terms,&
+                                             my_coeffs_tmp(i)%name,check=.TRUE.)
               else 
                   j=i-size(my_coeffs_tmp)
-                  call polynomial_coeff_init(coeff_ini,HOcrossdisp_terms(j)%nterm,my_coeffs(i),HOcrossdisp_terms(j)%terms,HOcrossdisp_terms(j)%name,check=.TRUE.)
+                  call polynomial_coeff_init(coeff_ini,HOcrossdisp_terms(j)%nterm,my_coeffs(i),HOcrossdisp_terms(j)%terms,&
+                                             HOcrossdisp_terms(j)%name,check=.TRUE.)
                endif 
             enddo 
-            if(allocated(my_coeffs_tmp))then
-               write(std_out,*) "DEBUG, but I did free this for sure, willy" 
-               call polynomial_coeff_list_free(my_coeffs_tmp)
-            endif 
+            if(allocated(my_coeffs_tmp)) call polynomial_coeff_list_free(my_coeffs_tmp)
           endif
        else 
          ncombi2=0
@@ -569,7 +570,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
             my_coeffs_tmp(1:nterm2-1) = eff_pot%anharmonics_terms%coefficients 
             !Put new term to my_coeffs_tmp
             !my_coeffs_tmp(nterm2) = my_coeffs(nterm_start+icombi)
-            call polynomial_coeff_init(my_coeffs(nterm_start+icombi)%coefficient,my_coeffs(nterm_start+icombi)%nterm,my_coeffs_tmp(nterm2),my_coeffs(nterm_start+icombi)%terms,my_coeffs(nterm_start+icombi)%name)
+            call polynomial_coeff_init(my_coeffs(nterm_start+icombi)%coefficient,my_coeffs(nterm_start+icombi)%nterm,&
+&                                      my_coeffs_tmp(nterm2),my_coeffs(nterm_start+icombi)%terms,my_coeffs(nterm_start+icombi)%name)
             ! If order is greater than specified cycle
             if(sum(my_coeffs_tmp(nterm2)%terms(1)%power_disp) & 
 &             +sum(my_coeffs_tmp(nterm2)%terms(1)%power_strain) > maxval(order_ran))then 
@@ -1195,7 +1197,10 @@ enddo ! iterm_of term
 
 do iterm_of_term=1,nterm_of_term
    !terms(iterm_of_term) = term%terms(iterm_of_term)
-   call polynomial_term_init(term%terms(iterm_of_term)%atindx,term%terms(iterm_of_term)%cell,term%terms(iterm_of_term)%direction,term%terms(iterm_of_term)%ndisp,term%terms(iterm_of_term)%nstrain,terms(iterm_of_term),term%terms(iterm_of_term)%power_disp,term%terms(iterm_of_term)%power_strain,term%terms(iterm_of_term)%strain,term%terms(iterm_of_term)%weight,check=.TRUE.)
+   call polynomial_term_init(term%terms(iterm_of_term)%atindx,term%terms(iterm_of_term)%cell,term%terms(iterm_of_term)%direction,&
+&                            term%terms(iterm_of_term)%ndisp,term%terms(iterm_of_term)%nstrain,terms(iterm_of_term),&
+&                            term%terms(iterm_of_term)%power_disp,term%terms(iterm_of_term)%power_strain,&
+&                            term%terms(iterm_of_term)%strain,term%terms(iterm_of_term)%weight,check=.TRUE.)
    terms(iterm_of_term)%nstrain = 0
    terms(iterm_of_term)%power_strain = 0
    terms(iterm_of_term)%strain = 0
@@ -1209,9 +1214,9 @@ call polynomial_coeff_init(coeff,nterm_of_term,term,terms,check=.TRUE.)
 do iterm_of_term=1,nterm_of_term
   call polynomial_term_free(terms(iterm_of_term))
 enddo 
-if(nterm_of_term /= term%nterm)then 
-  write(*,*) "nterm_of_term changed after deleting strain"
-endif
+!if(nterm_of_term /= term%nterm)then 
+!  write(*,*) "nterm_of_term changed after deleting strain"
+!endif
 
 
 end subroutine opt_filterdisp
@@ -1761,7 +1766,8 @@ do idisp=1,ndisp
                      terms_out_tmp(icoeff) = single_disp_terms(iterm1)
                      nterm_of_term = single_disp_terms(iterm1)%nterm 
                      !Change order of term 
-                     call polynomial_coeff_init(coeff_ini,nterm_of_term,terms_out_tmp(icoeff),single_disp_terms(iterm1)%terms(:),check=.true.)
+                     call polynomial_coeff_init(coeff_ini,nterm_of_term,terms_out_tmp(icoeff),&
+&                                               single_disp_terms(iterm1)%terms(:),check=.true.)
                      do iterm3=1,nterm_of_term
                         terms_out_tmp(icoeff)%terms(iterm3)%power_disp = power_disp(1) + (iorder-1)*2  
                      enddo !iterm3
