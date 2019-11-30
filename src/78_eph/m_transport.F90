@@ -80,10 +80,10 @@ type,public :: transport_rta_t
    ! number of temperatures
 
    integer :: ndop
-   ! number of carrier concentrarions at which to evaluate chemical potential energy
+   ! number of carrier concentrations at which to evaluate chemical potential energy
 
    integer :: nw
-   ! number of frequencies at which trasport quantities are computed
+   ! number of frequencies at which transport quantities are computed
 
    real(dp) :: eph_extrael
    ! extra electrons per unit cell from sigeph (lifetimes)
@@ -102,11 +102,11 @@ type,public :: transport_rta_t
 
    real(dp),allocatable :: eph_mu_e(:)
    ! (ntemp, ndop)
-   ! Chemical potential at this carrier concentrarion and temperature from sigeph (lifetime)
+   ! Chemical potential at this carrier concentration and temperature from sigeph (lifetime)
 
    real(dp),allocatable :: transport_mu_e(:)
    ! (ntemp, ndop)
-   ! Chemical potential at this carrier concentrarion and temperature
+   ! Chemical potential at this carrier concentration and temperature
 
    real(dp),allocatable :: eminmax_spin(:,:)
    ! min max energy of the of the original ebands object
@@ -540,6 +540,11 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
    end do
  end do
 
+!DEBUG
+ write(std_out,*)' transport_rta_compute : before compute DOS and VVDOS '
+ call flush(std_out)
+!ENDDEBUG
+
  ! Compute DOS and VVDOS
  edos_intmeth = 2
  if (dtset%prtdos == 1) edos_intmeth = 1
@@ -570,6 +575,11 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  ABI_SFREE(dummy_dosvecs)
  ABI_FREE(vv_tens)
 
+!DEBUG
+ write(std_out,*)' transport_rta_compute : before transport coefficients computation '
+ call flush(std_out)
+!ENDDEBUG
+
  ! Transport coeficients computation
  ABI_MALLOC(self%l0, (self%nw,self%nsppol,3,3,self%ntemp+1))
  ABI_MALLOC(self%l1, (self%nw,self%nsppol,3,3,self%ntemp+1))
@@ -584,15 +594,39 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  ABI_MALLOC(self%n,   (self%nw,self%ntemp,2))
  ABI_MALLOC(self%mobility,(self%nw,self%nsppol,3,3,self%ntemp+1,2))
 
+!DEBUG
+  write(std_out,*)' transport_rta_compute : before onsager '
+ call flush(std_out)
+!ENDDEBUG
+
  ! Compute onsager coefficients
+ self%l0=zero ; self%l1=zero ; self%l2=zero ! Component ntemp+1 is not initialized by the call to onsager. Induced FPE.
  call onsager(0, self%l0)
  call onsager(1, self%l1)
  call onsager(2, self%l2)
 
  ! Compute transport quantities
  fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
+
+!DEBUG
+ write(std_out,*)' transport_rta_compute :  after onsager '
+ write(std_out,*)' Time_Sec,siemens_SI,Bohr_meter,cryst%ucvol)=',Time_Sec,siemens_SI,Bohr_meter,cryst%ucvol
+ write(std_out,*)' fact0 ',fact0 
+ call flush(std_out)
+  do itemp=1,self%ntemp+1
+     write(std_out,*)' itemp,self%l0(:,:,:,:,itemp)=',itemp,self%l0(:,:,:,:,itemp)
+  enddo
+ call flush(std_out)
+!ENDDEBUG
+
  self%sigma = fact0 * self%l0
  call safe_div(volt_SI * self%l1, self%l0, zero, self%pi)
+
+!DEBUG
+  write(std_out,*)' transport_rta_compute :  after  first safe_div '
+ call flush(std_out)
+!ENDDEBUG
+
  do itemp=1,self%ntemp
    kT = self%kTmesh(itemp) / kb_HaK
    call safe_div(volt_SI * self%l1(:,:,:,:,itemp), &
@@ -604,6 +638,11 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
    call safe_div( - volt_SI**2 * fact0 * (self%l1(:,:,:,:,itemp)**2 - self%l2(:,:,:,:,itemp)*self%l0(:,:,:,:,itemp)), &
                  kT * self%l0(:,:,:,:,itemp), zero, self%kappa(:,:,:,:,itemp))
  end do
+
+!DEBUG
+ write(std_out,*)' transport_rta_compute : compute the index '
+ call flush(std_out)
+!ENDDEBUG
 
  ! Compute the index of the fermi level
  ifermi = bisect(self%vvdos_mesh, self%ebands%fermie)
@@ -652,6 +691,11 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  end do !spin
 
  call cwtime_report(" transport_rta_compute", cpu, wall, gflops)
+
+!DEBUG
+ write(std_out,*)' transport_rta_compute : exit '
+ call flush(std_out)
+!ENDDEBUG
 
 contains
  real(dp) function carriers(wmesh,dos,istart,istop,kT,mu)
@@ -716,6 +760,7 @@ contains
      end do
    end do
  end do
+ lorder(:,:,:,:,self%ntemp+1)=zero
 
  end subroutine onsager
 
