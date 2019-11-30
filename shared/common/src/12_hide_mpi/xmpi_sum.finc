@@ -323,6 +323,7 @@ subroutine xmpi_sum_int2d(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
@@ -399,6 +400,7 @@ subroutine xmpi_sum_int3d(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
@@ -476,6 +478,7 @@ subroutine xmpi_sum_int4d(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
@@ -786,6 +789,7 @@ subroutine xmpi_sum_sp2d(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
@@ -862,6 +866,7 @@ subroutine xmpi_sum_sp3d(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
@@ -938,6 +943,7 @@ subroutine xmpi_sum_sp4d(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
@@ -1015,6 +1021,7 @@ subroutine xmpi_sum_sp5d(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5), ier)
@@ -1093,6 +1100,7 @@ subroutine xmpi_sum_sp6d(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6), ier)
@@ -1171,6 +1179,7 @@ subroutine xmpi_sum_sp7d(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6,n7), ier)
@@ -1248,6 +1257,7 @@ subroutine xmpi_sum_dp2d(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
@@ -1324,6 +1334,7 @@ subroutine xmpi_sum_dp3d(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
@@ -1401,6 +1412,7 @@ subroutine xmpi_sum_dp4d(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
@@ -1479,6 +1491,7 @@ subroutine xmpi_sum_dp5d(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5), ier)
@@ -1557,6 +1570,7 @@ subroutine xmpi_sum_dp6d(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6), ier)
@@ -1636,6 +1650,7 @@ subroutine xmpi_sum_dp7d(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6,n7), ier)
@@ -2020,6 +2035,7 @@ subroutine xmpi_sum_c2dc(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
@@ -2096,6 +2112,7 @@ subroutine xmpi_sum_c3dc(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
@@ -2173,6 +2190,7 @@ subroutine xmpi_sum_c4dc(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
@@ -2250,6 +2268,7 @@ subroutine xmpi_sum_c5dc(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5), ier)
@@ -2328,6 +2347,7 @@ subroutine xmpi_sum_c6dc(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6), ier)
@@ -2407,6 +2427,7 @@ subroutine xmpi_sum_c7dc(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6,n7),ier)
@@ -2546,6 +2567,7 @@ subroutine xmpi_sum_c2cplx(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
@@ -2627,6 +2649,7 @@ subroutine xmpi_sum_c3cplx(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
@@ -2709,6 +2732,7 @@ subroutine xmpi_sum_c4cplx(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
@@ -2787,6 +2811,7 @@ subroutine xmpi_sum_c5cplx(xval,comm,ier)
 
 !    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5), ier)
@@ -2863,15 +2888,16 @@ subroutine xmpi_sum_c6cplx(xval,comm,ier)
        nn=1 ; call xmpi_largetype_create(ntot,MPI_COMPLEX,my_dt,my_op,MPI_SUM)
      end if
 
-!      Accumulate xval on all proc. in spaceComm
+!    Accumulate xval on all proc. in spaceComm
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-       call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
+     if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
 #else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6), ier)
-       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c6cplx')
-       call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
-       xval = xsum
-       ABI_DEALLOCATE(xsum)
+     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6), ier)
+     if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c6cplx')
+     call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
+     xval = xsum
+     ABI_DEALLOCATE(xsum)
 #endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)

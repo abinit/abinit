@@ -2723,7 +2723,11 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
    largetype_op=-1111
  end if
 #else
- ABI_UNUSED(largecount,inputtype,largetype,largetype_op,op_type)
+ ABI_UNUSED(largecount)
+ ABI_UNUSED(inputtype)
+ ABI_UNUSED(largetype)
+ ABI_UNUSED(largetype_op)
+ ABI_UNUSED(op_type)
 #endif
 
 end subroutine xmpi_largetype_create
@@ -2741,11 +2745,12 @@ end subroutine xmpi_largetype_create
   integer(KIND=int64) :: ii,jj,kk
   kk=0
   do ii=1,len
-	do jj=1,xmpi_largetype_size
-	  kk=kk+1
-	  inoutvec(kk)=inoutvec(kk)+invec(kk)
-	end do
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk)+invec(kk)
+    end do
   end do
+  ABI_UNUSED(datatype)
  end subroutine largetype_sum_int
 !!***
 !--------------------------------------
@@ -2761,10 +2766,10 @@ end subroutine xmpi_largetype_create
   integer(KIND=int64) :: ii,jj,kk
   kk=0
   do ii=1,len
-	do jj=1,xmpi_largetype_size
-	  kk=kk+1
-	  inoutvec(kk)=inoutvec(kk)+invec(kk)
-	end do
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk)+invec(kk)
+    end do
   end do
   ABI_UNUSED(datatype)
  end subroutine largetype_sum_real
@@ -2782,10 +2787,10 @@ end subroutine xmpi_largetype_create
   integer(KIND=int64) :: ii,jj,kk
   kk=0
   do ii=1,len
-	do jj=1,xmpi_largetype_size
-	  kk=kk+1
-	  inoutvec(kk)=inoutvec(kk)+invec(kk)
-	end do
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk)+invec(kk)
+    end do
   end do
   ABI_UNUSED(datatype)
  end subroutine largetype_sum_dble
@@ -2803,10 +2808,10 @@ end subroutine xmpi_largetype_create
   integer(KIND=int64) :: ii,jj,kk
   kk=0
   do ii=1,len
-	do jj=1,xmpi_largetype_size
-	  kk=kk+1
-	  inoutvec(kk)=inoutvec(kk)+invec(kk)
-	end do
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk)+invec(kk)
+    end do
   end do
   ABI_UNUSED(datatype)
  end subroutine largetype_sum_cplx
@@ -2824,10 +2829,10 @@ end subroutine xmpi_largetype_create
   integer(KIND=int64) :: ii,jj,kk
   kk=0
   do ii=1,len
-	do jj=1,xmpi_largetype_size
-	  kk=kk+1
-	  inoutvec(kk)=inoutvec(kk)+invec(kk)
-	end do
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk)+invec(kk)
+    end do
   end do
   ABI_UNUSED(datatype)
  end subroutine largetype_sum_dcplx
@@ -2845,10 +2850,10 @@ end subroutine xmpi_largetype_create
   integer(KIND=int64) :: ii,jj,kk
   kk=0
   do ii=1,len
-	do jj=1,xmpi_largetype_size
-	  kk=kk+1
-	  inoutvec(kk)=inoutvec(kk).or.invec(kk)
-	end do
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk).or.invec(kk)
+    end do
   end do
   ABI_UNUSED(datatype)
  end subroutine largetype_lor_log
@@ -2866,10 +2871,10 @@ end subroutine xmpi_largetype_create
   integer(KIND=int64) :: ii,jj,kk
   kk=0
   do ii=1,len
-	do jj=1,xmpi_largetype_size
-	  kk=kk+1
-	  inoutvec(kk)=inoutvec(kk).and.invec(kk)
-	end do
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk).and.invec(kk)
+    end do
   end do
   ABI_UNUSED(datatype)
  end subroutine largetype_land_log
@@ -2907,7 +2912,8 @@ subroutine xmpi_largetype_free(largetype,largetype_op)
    if (largetype_op/=-1111) call MPI_OP_FREE(largetype_op,ierr)
    call MPI_TYPE_FREE(largetype,ierr)
 #else
- ABI_UNUSED(largetype,largetype_op)
+ ABI_UNUSED(largetype)
+ ABI_UNUSED(largetype_op)
 #endif
 
 end subroutine xmpi_largetype_free
