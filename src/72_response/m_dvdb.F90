@@ -5965,10 +5965,20 @@ end subroutine dvdb_test_v1complete
 !!  dvdb_write_v1qavg
 !!
 !! FUNCTION
-!!  Debugging tool used to test the special treatment of the long-range part of the potentials
+!!  This routine computes the average over the unit cell of the periodic part of the DFPT potentials
+!!  as a function of the q-point and the corresponding quantity obtained with the model for the LR part.
+!!  Results are stored in the V1QAVG netcdf file. Two options are available:
+!!
+!!  eph_task = -15 --> Use list of q-points found in the DVDB file. Mainly used to plot the average
+!!    along a q-path. The procedure required to generate a DVDB with a q-path is rather lengthy
+!!    as requires several phonon calculations with WKQ folloed by the merge of the POT files.
+!!
+!!  eph_task = +15 --> Assume DVDB file with q-mesh (dvdb_ngqpt), use Fourier interpolation
+!!    to interpolate potentials along the path specified by ph_qpath and ph_nqpath.
 !!
 !! INPUTS
-!!  comm=MPI communicator.
+!!  dtset<dataset_type>= Input variables.
+!!  out_ncpath=Filename for output netcdf file.
 !!
 !! OUTPUT
 !!  Only writing.
@@ -6008,8 +6018,10 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
 
  my_rank = xmpi_comm_rank(dvdb%comm)
 
- write(std_out,"(a)") " Testing Fourier long range part."
- call dvdb%print()
+ call wrtout([std_out, ab_out], &
+     " Computing average over the unit cell of the periodic part of the DFPT potentials", newlines=2)
+ call dvdb%print(unit=std_out)
+ !call dvdb%print(unit=ab_out)
 
  ! Define FFT mesh
  ngfft = dvdb%ngfft
@@ -6024,12 +6036,12 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    if (open_file(dump_path, msg, newunit=unt, action="write", status="unknown", form="formatted") /= 0) then
      MSG_ERROR(msg)
    end if
-   write(std_out,"(a)")sjoin("Will write potentials to:", dump_path)
+   write(std_out,"(a)")sjoin(" Will write potentials in text format to:", dump_path)
  end if
 
  ! Select list of q-points depending on eph_task (from DVDB file or interpolated)
  if (dtset%eph_task == -15) then
-  call wrtout([std_out, ab_out], " Using list of q-points found in DVDB file")
+  call wrtout([std_out, ab_out], " Using list of q-points found in the DVDB file")
   this_nqpt = dvdb%nqpt
   this_qpts => dvdb%qpts
   interpolated = 0
@@ -6048,7 +6060,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    MSG_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
  end if
 
- call wrtout([std_out, ab_out], sjoin("- Results stored in: ", out_ncpath))
+ call wrtout([std_out, ab_out], sjoin(ch10, "- Results stored in: ", out_ncpath))
  call wrtout([std_out, ab_out], " Use `abiopen.py out_V1QAVG.nc -e` to visualize results")
 
 #ifdef HAVE_NETCDF
@@ -6635,6 +6647,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
 
  ! FFT to get the long-range potential in r space
  call fourdp(2, v1G_lr, v1r_lr, 1, db%mpi_enreg, nfft, 1, ngfft,0)
+ !v1r_lr = zero ! Comment this line to have only efield
 
  ! Add term due to Electric field.
  if (db%has_efield) then
@@ -6655,6 +6668,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
      if (db%qdamp > zero) denom_inv = denom_inv * exp(-qG_mod ** 2 / (four * db%qdamp))
      fac = (four_pi / db%cryst%ucvol) * denom_inv * qGZ
      do ifft=1,nfft
+       !write(std_out, "(2es16.6)") v1r_lr(1, ifft), - fac * dot_product(qG_cart, db%v1r_efield_cart(:, ifft, ispden))
        v1r_lr(1, ifft) = v1r_lr(1, ifft) - fac * dot_product(qG_cart, db%v1r_efield_cart(:, ifft, ispden))
      end do
    end if
