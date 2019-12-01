@@ -6086,7 +6086,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
      "symdynmat", "symv1scf", "dvdb_add_lr", "interpolated"])
    NCF_CHECK(ncerr)
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-     "has_dielt", "has_zeff", "has_quadrupoles", "has_efield", "dvdb_add_lr", "symv1"])
+     "has_dielt", "has_zeff", "has_quadrupoles", "has_efield", "dvdb_add_lr"])
    NCF_CHECK(ncerr)
    NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"]))
    ncerr = nctk_def_arrays(ncid, [ &
@@ -6102,7 +6102,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpoints"), this_qpts))
    ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
        "symdynmat", "symv1scf", "dvdb_add_lr", "interpolated"], &
-       [dtset%symdynmat, dtset%symv1scf, dtset%dvdb_add_lr, interpolated])
+       [dtset%symdynmat, dvdb%symv1, dtset%dvdb_add_lr, interpolated])
    NCF_CHECK(ncerr)
    ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
      "has_dielt", "has_zeff", "has_quadrupoles", "has_efield"], &
