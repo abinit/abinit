@@ -263,6 +263,9 @@ write (unit_me, *) 'out of bands_treated_now xmpi sum', bands_treated_now
 write (unit_me, *) 'nband_me ', nband_me
 write (unit_me, *) 'nproc_band ', mpi_enreg%nproc_band, mpi_enreg%comm_band, mpi_enreg%paralbd
 
+ skipme = 0
+ bands_skipped_now = 0
+
  ! if PAW, one has to solve a generalized eigenproblem
  usepaw=gs_hamkq%usepaw
  gen_eigenpb=(usepaw==1)
@@ -521,7 +524,7 @@ write (unit_me, *) 'nproc_band ', mpi_enreg%nproc_band, mpi_enreg%comm_band, mpi
    !Check that Pc^*.(H^(0)-E.S^(0)).delta_Psi^(1) is zero ! This is a consequence of P_c delta_Psi^(1) = 0
    ABI_ALLOCATE(cwwork,(2,npw1*nspinor))
    do iband = 1, nband
-     if (bands_treated_now(iband)--bands_skipped_now(iband) == 0) cycle
+     if (bands_treated_now(iband)-bands_skipped_now(iband) == 0) cycle
      if (iband == band) then
        cwwork=dcwavef
        !  - Apply H^(0)-E.S^(0) to delta_Psi^(1)
@@ -724,15 +727,7 @@ write (unit_me, *) 'nproc_band ', mpi_enreg%nproc_band, mpi_enreg%comm_band, mpi
      call wrtout(std_out,msg)
    end if
   
-   ABI_DEALLOCATE(work)
-   ABI_DEALLOCATE(gh1c)
-   ABI_DEALLOCATE(pcon)
-   ABI_DEALLOCATE(scprod)
-   ABI_DEALLOCATE(gberry)
-
-   call timab(122,2,tsec)
-
-   return
+   skipme = 1
  end if
 
  ! If not a buffer band, perform the optimisation
@@ -767,8 +762,6 @@ write (unit_me, *) 'nproc_band ', mpi_enreg%nproc_band, mpi_enreg%comm_band, mpi
  ! Initialize resid, in case of nline==0
  resid=zero
 
- skipme = 0
- bands_skipped_now = 0
 
 
  ! ======================================================================
