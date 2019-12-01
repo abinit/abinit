@@ -140,7 +140,7 @@ MODULE m_xmpi
  ! For MPI <v4, collective communication routines accept only a 32bit integer as data count.
  ! To exchange more than 2^32 data we need to create specific user-defined datatypes
  ! For this, we need some parameters:
- integer(KIND=int32),public,parameter :: xmpi_maxint32=3 !HUGE(0_int32)
+ integer(KIND=int32),public,parameter :: xmpi_maxint32=HUGE(0_int32)
  integer(KIND=int64),public,parameter :: xmpi_maxint32_64=int(xmpi_maxint32,kind=int64)
  ! Max. integer that can be represented with 32 bits
  integer(KIND=int64),public,save :: xmpi_largetype_size=0
