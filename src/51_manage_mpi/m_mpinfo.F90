@@ -2212,11 +2212,6 @@ subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
      mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks)
      mpi_enreg%nproc_band=nrank
 
-
-print *, 'mpi_enreg%comm_band, spacecomm,nrank,ranks '
-print *, mpi_enreg%comm_band, spacecomm,nrank,ranks 
-print *, ' size and rank ', xmpi_comm_size(mpi_enreg%comm_band), xmpi_comm_rank(mpi_enreg%comm_band)
-
      ABI_DEALLOCATE(ranks)
    end if
  end if
