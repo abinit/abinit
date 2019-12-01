@@ -693,7 +693,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
      ABI_ALLOCATE(fcart_img,(3,dtset%natom,nimage))
      ABI_ALLOCATE(fred_img,(3,dtset%natom,nimage))
-     ABI_ALLOCATE(intgres_img,(4,dtset%natom,nimage))
+     ABI_ALLOCATE(intgres_img,(dtset%nspden,dtset%natom,nimage))
      ABI_ALLOCATE(etotal_img,(nimage))
      ABI_ALLOCATE(strten_img,(6,nimage))
 
@@ -732,7 +732,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      ABI_ALLOCATE(etotal_img,(nimage))
      ABI_ALLOCATE(fcart_img,(3,dtset%natom,nimage))
      ABI_ALLOCATE(fred_img,(3,dtset%natom,nimage))
-     ABI_ALLOCATE(intgres_img,(4,dtset%natom,nimage))
+     ABI_ALLOCATE(intgres_img,(dtset%nspden,dtset%natom,nimage))
      ABI_ALLOCATE(strten_img,(6,nimage))
 
      call gwls_sternheimer(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
@@ -780,7 +780,12 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        results_out(idtset)%strten(:,iimage)                =strten_img(:,iimage)
        results_out(idtset)%fcart(1:3,1:dtset%natom,iimage)=fcart_img(:,:,iimage)
        results_out(idtset)%fred(1:3,1:dtset%natom,iimage) =fred_img(:,:,iimage)
-       results_out(idtset)%intgres(1:4,1:dtset%natom,iimage) =intgres_img(:,:,iimage)
+       if(dtset%nspden/=2)then
+         results_out(idtset)%intgres(1:dtset%nspden,1:dtset%natom,iimage) =intgres_img(:,:,iimage)
+       else
+         results_out(idtset)%intgres(1,1:dtset%natom,iimage) =intgres_img(1,:,iimage)
+         results_out(idtset)%intgres(4,1:dtset%natom,iimage) =intgres_img(2,:,iimage)
+       endif
        results_out(idtset)%mixalch(1:dtset%npspalch,1:dtset%ntypalch,iimage) &
 &       =mixalch_img(1:dtset%npspalch,1:dtset%ntypalch,iimage)
        results_out(idtset)%npwtot(1:dtset%nkpt,iimage)    =npwtot(1:dtset%nkpt)

@@ -98,7 +98,7 @@ contains
 !!  etotal_img=total energy, for each image
 !!  fcart_img(3,natom,nimage)=forces, in cartesian coordinates, for each image
 !!  fred_img(3,natom,nimage)=forces, in reduced coordinates, for each image
-!!  intgres_img(4,natom,nimage)=gradient wrt constraints, for each image
+!!  intgres_img(nspden,natom,nimage)=gradient wrt constraints, for each image
 !!  npwtot(nkpt) = total number of plane waves at each k point
 !!  strten_img(6,nimage)=stress tensor, for each image
 !!
@@ -215,7 +215,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  character(len=fnlen),optional,intent(in) :: filnam(:)
  real(dp), intent(out) :: etotal_img(nimage),fcart_img(3,dtset%natom,nimage)
  real(dp), intent(out) :: fred_img(3,dtset%natom,nimage)
- real(dp), intent(out) :: intgres_img(4,dtset%natom,nimage)
+ real(dp), intent(out) :: intgres_img(dtset%nspden,dtset%natom,nimage)
  real(dp), intent(out) :: strten_img(6,nimage)
  real(dp),intent(inout) :: acell_img(3,nimage),amu_img(dtset%ntypat,nimage)
  real(dp),intent(inout) :: mixalch_img(dtset%npspalch,dtset%ntypalch,nimage)
@@ -716,7 +716,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 !Copy the results of the computation in the appropriate arguments of the routine
  do iimage=1,nimage
    ii=mpi_enreg%my_imgtab(iimage)
-   intgres_img(:,:,iimage) =zero
    if (dtset%dynimage(ii)==1) then
      acell_img(:,iimage)     =results_img(iimage,itimimage_eff)%acell(:)
      amu_img(:,iimage)       =results_img(iimage,itimimage_eff)%amu(:)
@@ -728,13 +727,13 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      etotal_img(iimage)      =results_img(iimage,itimimage_eff)%results_gs%etotal
      fcart_img(:,:,iimage)   =results_img(iimage,itimimage_eff)%results_gs%fcart(:,:)
      fred_img(:,:,iimage)    =results_img(iimage,itimimage_eff)%results_gs%fred(:,:)
-     intgres_img(1:dtset%nspden,:,iimage) =results_img(iimage,itimimage_eff)%results_gs%intgres(1:dtset%nspden,:)
+     intgres_img(:,:,iimage) =results_img(iimage,itimimage_eff)%results_gs%intgres(:,:)
      strten_img(:,iimage)    =results_img(iimage,itimimage_eff)%results_gs%strten(:)
    else if (compute_static_images) then
      etotal_img(iimage)    =results_img(iimage,1)%results_gs%etotal
      fcart_img(:,:,iimage) =results_img(iimage,1)%results_gs%fcart(:,:)
      fred_img(:,:,iimage)  =results_img(iimage,1)%results_gs%fred(:,:)
-     intgres_img(1:dtset%nspden,:,iimage)=results_img(iimage,1)%results_gs%intgres(1:dtset%nspden,:)
+     intgres_img(:,:,iimage)=results_img(iimage,1)%results_gs%intgres(:,:)
      strten_img(:,iimage)  =results_img(iimage,1)%results_gs%strten(:)
    end if
  end do
