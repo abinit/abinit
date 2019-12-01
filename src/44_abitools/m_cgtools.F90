@@ -3136,7 +3136,7 @@ end subroutine cgpaw_gramschmidt
 !!  iband0=which particular band we are interested in ("i" in the above formula)
 !!         Can be set to -1 to sum over all bands...
 !!  icg=shift to be given to the location of the data in cg
-!!  iscg=shift to be given to the location of the data in cg
+!!  iscg=shift to be given to the location of the data in scg
 !!  istwf_k=option parameter that describes the storage of wfs
 !!  mcg=maximum size of second dimension of cg
 !!  mscg=maximum size of second dimension of scg

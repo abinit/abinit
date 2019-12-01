@@ -943,8 +943,10 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,e
 
 ! 3) reduce over bands to get all contributions to correction
 ! need MPI reduce over band communicator only
- call xmpi_sum(edocc, mpi_enreg%comm_band, ierr)
+write (100+mpi_enreg%me_kpt, '(a,3i6)') 'kpt comm info ', mpi_enreg%comm_kpt, mpi_enreg%nproc_kpt, mpi_enreg%me_kpt
+write (200+mpi_enreg%me_band, '(a,3i6)') 'band comm info ', mpi_enreg%comm_band, mpi_enreg%nproc_band, mpi_enreg%me_band
  call xmpi_sum(cwave1, mpi_enreg%comm_band, ierr)
+ call xmpi_sum(edocc, mpi_enreg%comm_band, ierr)
  if (usepaw==1) then
    call pawcprj_mpi_sum(cwaveprj1, mpi_enreg%comm_band, ierr)
  end if
