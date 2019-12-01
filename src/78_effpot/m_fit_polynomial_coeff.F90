@@ -2391,8 +2391,9 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,itime
  do ii=1,ntime ! Loop over configurations
    xred(:,:)   = hist%xred(:,:,ii)
    rprimd(:,:) = hist%rprimd(:,:,ii)
+   itime = ii 
    if(anh_opened .eqv. .TRUE.)then
-     write(unit_anh,'(I7)',advance='no') ii !If wanted Write cycle to anharmonic_energy_contribution file
+     write(unit_anh,'(I7)',advance='no') itime!If wanted Write cycle to anharmonic_energy_contribution file
    end if
 #if defined DEV_MS_SCALEUP 
    !Pass print options to scale-up
