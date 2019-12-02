@@ -2688,8 +2688,8 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
 !Arguments ---------------------------------------------
 !scalar
  integer,intent(in) :: natom,ncoeff,power_disp,power_disp_min,power_disp_max
- integer,intent(in) :: max_power_strain,nmodel,nsym,nrpt,nstr
- integer,intent(inout) :: icoeff,nmodel_tot
+ integer,intent(in) :: max_power_strain,nmodel,nsym,nrpt,nstr,icoeff
+ integer,intent(inout) :: nmodel_tot
  logical,optional,intent(in) :: compute,anharmstr,spcoupling
  integer,optional,intent(in) :: nbody
  logical,optional,intent(in) :: only_odd_power,only_even_power
@@ -2737,8 +2737,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
 
 !    If the power_disp is one, we need to set icoeff to icoeff1
      if(power_disp==1) then
-       icoeff = icoeff1
-       if(compatibleCoeffs(icoeff,icoeff1)==0)then
+       if(icoeff1<=ncoeff .and. compatibleCoeffs(icoeff,icoeff1)==0)then
          compatible = .FALSE.
        end if
      end if
