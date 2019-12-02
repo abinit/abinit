@@ -657,6 +657,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
          eloc0=eloc0+wtk_k*occ_k(iband)*eloc0_k(iband)
          enl0=enl0+wtk_k*occ_k(iband)*enl0_k(iband)
          enl1=enl1+wtk_k*occ_k(iband)*enl1_k(iband)
+write (*,*) ' iband en components ', iband, edocc_k(iband), eeig0_k(iband), ek0_k(iband), ek1_k(iband), eloc0_k(iband), enl0_k(iband), enl1_k(iband)
        end do
      end if
 
@@ -783,6 +784,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      index1=cplex*dtset%nfft*nspden
      if (psps%usepaw==0) then
        rhor1(:,:)  =reshape(buffer1(1:index1),(/cplex*dtset%nfft,nspden/))
+write (*,*) 'vtorho rhor1 ', rhor1(1:5,:)
      else
        rho1wfr(:,:)=reshape(buffer1(1:index1),(/cplex*dtset%nfft,nspden/))
      end if
