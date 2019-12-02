@@ -2174,6 +2174,7 @@ subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
  if (mpi_enreg%paralbd==1.and.xmpi_paral==1) then
 
 !  Comm_kpt is supposed to treat spins, k-points and bands
+!TODO MJV: I think we need to make a proper subcomm here, not treat bands inside the same comm...
    spacecomm=mpi_enreg%comm_kpt
    nproc=mpi_enreg%nproc_kpt
    me=mpi_enreg%me_kpt
@@ -2211,6 +2212,7 @@ subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
 
      mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks)
      mpi_enreg%nproc_band=nrank
+     mpi_enreg%me_band=me
 
      ABI_DEALLOCATE(ranks)
    end if
@@ -2499,6 +2501,7 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
      MSG_ERROR(msg)
    end if
 
+!---------------------------------------------------------------------------
  else
 !  'kpt_distrb' file does not exist
 

@@ -254,17 +254,14 @@ subroutine dfpt_cgwf(band,band_me,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,
  comm_fft = mpi_enreg%comm_fft
 
  me_band = mpi_enreg%me_band
- !unit_me = 100+me_band
- unit_me = 6
+ unit_me = 300+band
+ !unit_me = 6
  bands_treated_now = 0
  bands_treated_now(band) = 1
+ bands_skipped_now = 0
  call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
-write (unit_me, *) 'out of bands_treated_now xmpi sum', bands_treated_now
-write (unit_me, *) 'nband_me ', nband_me
-write (unit_me, *) 'nproc_band ', mpi_enreg%nproc_band, mpi_enreg%comm_band, mpi_enreg%paralbd
 
  skipme = 0
- bands_skipped_now = 0
 
  ! if PAW, one has to solve a generalized eigenproblem
  usepaw=gs_hamkq%usepaw
@@ -301,7 +298,7 @@ write (unit_me, *) 'nproc_band ', mpi_enreg%nproc_band, mpi_enreg%comm_band, mpi
 ! this is used many times - no use de and re allocating
  ABI_ALLOCATE(work,(2,npw1*nspinor))
 
- ! Several checking statements
+!DEBUG!! Several checking statements
  if (prtvol==-level.or.prtvol==-19.or.prtvol==-20) then
    write(msg,'(a)') " ** cgwf3 : debugging mode, tests will be done"
    ! Search CGWF3_WARNING in the log file to find errors (if any)
@@ -460,6 +457,7 @@ write (unit_me, *) 'nproc_band ', mpi_enreg%nproc_band, mpi_enreg%comm_band, mpi
    end if
    ABI_DEALLOCATE(work1)
  end if
+!ENDDEBUG!! Several checking statements
 
 
  !======================================================================
@@ -512,7 +510,7 @@ write (unit_me, *) 'nproc_band ', mpi_enreg%nproc_band, mpi_enreg%comm_band, mpi
        call getdc1(cgq,cprj_dummy,dcwavef,cprj_dummy,0,icgq,istwf_k,mcgq,0,&
          mpi_enreg,natom,nband,npw1,nspinor,0,gs1c)
      end if
-   end if
+   end if ! gen_eigenpb
 
  else
    ! 2nd order case (wrt k perturbation)
@@ -558,7 +556,7 @@ write (unit_me, *) 'nproc_band ', mpi_enreg%nproc_band, mpi_enreg%comm_band, mpi
      end if
    end do
    ABI_DEALLOCATE(cwwork)
- end if
+ end if ! prtvol==-level.and.usedcwavef==2
 
  call cg_zcopy(npw1*nspinor,gh1c,gh1c_n)
 
@@ -584,6 +582,9 @@ write (unit_me, *) 'nproc_band ', mpi_enreg%nproc_band, mpi_enreg%comm_band, mpi
        dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
    end if
 
+! sum projections against all bands k+q
+   call xmpi_sum(work,mpi_enreg%comm_band,ierr)
+
    ! scprod now contains scalar products of band i (runs over all bands in current queue) with local bands j
    jband_me = 0
    do jband=1,nband
@@ -591,9 +592,6 @@ write (unit_me, *) 'nproc_band ', mpi_enreg%nproc_band, mpi_enreg%comm_band, mpi
      jband_me = jband_me + 1
      eig1_k_loc(:,jband,iband)=scprod(:,jband_me)
    end do
-
-! sum projections against all bands k+q
-   call xmpi_sum(work,mpi_enreg%comm_band,ierr)
 
 ! save this for me only
    if (iband == band) then
@@ -768,7 +766,8 @@ write (unit_me, *) 'nproc_band ', mpi_enreg%nproc_band, mpi_enreg%comm_band, mpi
  ! ====== BEGIN LOOP FOR A GIVEN BAND: MINIMIZATION ITERATIONS ==========
  ! ======================================================================
  do iline=1,nline
-write (unit_me, *) 'iline ', iline
+
+   bands_skipped_now = 0
 
    ! ======================================================================
    ! ================= COMPUTE THE RESIDUAL ===============================
@@ -827,14 +826,12 @@ write (unit_me, *) 'iline ', iline
      end if
   
        call xmpi_sum(work,mpi_enreg%comm_band,ierr)
-write (unit_me, *) 'after sum 815', work(:,1:5)
     
 ! save this for me_band only
      if (iband == band) then 
 !TODO: make this a blas call? zaxpy
        gresid = work - (mpi_enreg%nproc_band-1)*gresid
      end if
-write (unit_me, *) 'iband, gresid ', iband, gresid(:,1:5)
    end do
 
    call cg_zcopy(npw1*nspinor,gresid,direc)
@@ -882,7 +879,6 @@ write (unit_me, *) 'iband, gresid ', iband, gresid(:,1:5)
 
 !DEBUG     exit ! Exit from the loop on iline
      skipme = 1
-write (unit_me, *) 'exit -1 u1h0me0u1 is negative -> CG will fail'
    end if
 
    ! Compute residual (squared) norm
@@ -901,7 +897,6 @@ write (unit_me, *) 'exit -1 u1h0me0u1 is negative -> CG will fail'
        call wrtout(std_out,msg)
      end if
      nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
-write (unit_me, *) 'exit 0 residual is small enough ', resid
 !DEBUG     exit                         ! Exit from the loop on iline
      skipme = 1
    end if
@@ -911,7 +906,6 @@ write (unit_me, *) 'exit 0 residual is small enough ', resid
      write(msg,'(a,i0)')' dfpt_cgwf: user require exiting => skip update of band ',band
      call wrtout(std_out,msg)
      nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
-write (unit_me, *) 'exit 1 requested by user'
      exit                         ! Exit from the loop on iline
    end if
 
@@ -977,7 +971,6 @@ write (unit_me, *) 'exit 1 requested by user'
        gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
   
      call xmpi_sum(work,mpi_enreg%comm_band,ierr)
-write (unit_me, *) 'after sum 962', band, work(:,1:5)
   
 ! save this for me_band only
      if (iband == band) then 
@@ -1101,7 +1094,6 @@ write (unit_me, *) 'after sum 962', band, work(:,1:5)
        call wrtout(std_out,msg)
      end if
      nskip=nskip+2*(nline-iline) ! Number of one-way 3D ffts skipped
-write (unit_me, *) 'exit 2 theta is 0 ', theta
      skipme = 1
 !DEBUG     exit                        ! Exit from the loop on iline
    end if
@@ -1110,15 +1102,17 @@ write (unit_me, *) 'exit 2 theta is 0 ', theta
    ! ================ GENERATE NEW |wf>, H|wf>, Vnl|Wf ... ================
    ! ======================================================================
 
-   call cg_zaxpy(npw1*nspinor, [theta, zero], conjgr,cwavef)
-   call cg_zaxpy(npw1*nspinor, [theta, zero], gh_direc,ghc)
-   call cg_zaxpy(npw1*nspinor, [theta, zero], gvnlx_direc,gvnlxc)
-
-   if (gen_eigenpb) then
-     call cg_zaxpy(npw1*nspinor, [theta, zero], sconjgr, gsc)
-   end if
-   if (usepaw==1) then
-     call pawcprj_axpby(theta,one,conjgrprj,cwaveprj)
+   if (skipme == 0) then
+     call cg_zaxpy(npw1*nspinor, [theta, zero], conjgr,cwavef)
+     call cg_zaxpy(npw1*nspinor, [theta, zero], gh_direc,ghc)
+     call cg_zaxpy(npw1*nspinor, [theta, zero], gvnlx_direc,gvnlxc)
+  
+     if (gen_eigenpb) then
+       call cg_zaxpy(npw1*nspinor, [theta, zero], sconjgr, gsc)
+     end if
+     if (usepaw==1) then
+       call pawcprj_axpby(theta,one,conjgrprj,cwaveprj)
+     end if
    end if
 
    ABI_DEALLOCATE(gh_direc)
@@ -1132,8 +1126,6 @@ write (unit_me, *) 'exit 2 theta is 0 ', theta
    if(usetolrde/=0) then
      ! Check reduction in trial energy deltae, Eq.(28) of PRB55, 10337 (1997) [[cite:Gonze1997]]
      deltae=half*d2edt2*theta**2+theta*dedt
-print *, 'band, iline, deltae, d2edt2, theta ', band, iline, deltae, d2edt2, theta
-print *, 'tolrde, deold, <condition> ', tolrde, deold, abs(deltae) < tolrde*two*abs(deold)
 
      if (iline==1) then
        deold=deltae
@@ -1145,7 +1137,6 @@ print *, 'tolrde, deold, <condition> ', tolrde, deold, abs(deltae) < tolrde*two*
          call wrtout(std_out,msg)
        end if
        nskip=nskip+2*(nline-iline) ! Number of one-way 3D ffts skipped
-write (unit_me, *) 'exit 3 we are converged for this band '
        skipme = 1
 !DEBUG       exit                        ! Exit from the loop on iline
      end if
@@ -1156,9 +1147,7 @@ write (unit_me, *) 'exit 3 we are converged for this band '
 !   even if the present band will not be updated
    bands_skipped_now(band) = skipme
    call xmpi_sum(bands_skipped_now,mpi_enreg%comm_band,ierr)
-print *, 'bands_skipped_now ', bands_skipped_now
    bands_skipped_now = bands_skipped_now - bands_treated_now
-print *, 'bands_skipped_now-bandstreatednow ', bands_skipped_now
    if (sum(abs(bands_skipped_now)) == 0) exit
 
    ! ======================================================================
@@ -1168,7 +1157,8 @@ print *, 'bands_skipped_now-bandstreatednow ', bands_skipped_now
    ! Note that there are five "exit" instruction inside the loop.
    nlines_done = nlines_done + 1
  end do ! iline
-write (unit_me, *) 'out of iline loop'
+write (unit_me, *) 'band,  cwavef', band, cwavef(:,1:5)
+write (unit_me, *) 'band,  ghc', band, ghc(:,1:5)
 
  ! Check that final cwavef (Psi^(1)) satisfies the orthogonality condition
  if (prtvol==-level.or.prtvol==-19) then
@@ -1228,7 +1218,7 @@ write (unit_me, *) 'out of iline loop'
    if (ipert/=natom+10.and.ipert/=natom+11) then
      ABI_DEALLOCATE(gvnlx1_saved)
    end if
- end if
+ end if ! prtvol==-level.or.prtvol==-19
 
  if (prtvol==-level.or.prtvol==-19)then
    !  Check that final cwavef Psi^(1) is Pc.Psi^(1)+delta_Psi^(1)
@@ -1274,7 +1264,7 @@ write (unit_me, *) 'out of iline loop'
 !       end if
      call wrtout(std_out,msg)
    end if
- end if
+ end if  ! prtvol==-level.or.prtvol==-19
 
  if(prtvol==-level.or.prtvol==-19.or.prtvol==-20)then
    ! Check that final cwavef (Psi^(1)) solves the Sternheimer equation
@@ -1301,44 +1291,44 @@ write (unit_me, *) 'out of iline loop'
      if (iband == band) then 
 !TODO: make this a blas call? zaxpy
       cwwork = cwwork - (mpi_enreg%nproc_band-1)*cwavef
-    end if
-  end do
+     end if
+   end do
 
-  ! - Apply H^(0)-E.S^(0)
-  sij_opt=0;if (gen_eigenpb) sij_opt=1
-  cpopt=-1
-  ABI_ALLOCATE(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
-  ABI_ALLOCATE(work2,(2,npw1*nspinor))
-  call getghc(cpopt,cwwork,conjgrprj,work,work1,gs_hamkq,work2,eshift,&
-    mpi_enreg,1,prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
-  if (gen_eigenpb) then
-    cwwork=work-eshift*work1
-  else
-    cwwork=work-eshift*cwwork
-  end if
-  ABI_DEALLOCATE(work1)
-  ABI_DEALLOCATE(work2)
-
-  ! The following is not mandatory, as Pc has been already applied to Psi^(1)
-  ! and Pc^* H^(0) Pc = Pc^* H^(0) = H^(0) Pc (same for S^(0)).
-  ! However, in PAW, to apply Pc^* here seems to reduce the numerical error
-  ! -Apply Pc^*
-  do iband = 1, nband
-    if (bands_treated_now(iband) == 0) cycle
-    if (iband == band) then
-      work=cwwork
-    end if
-    call xmpi_bcast(work,cycle_band_procs(iband),mpi_enreg%comm_band,ierr)
-
-    if(gen_eigenpb)then
-      call projbd(gscq,  work,-1,igscq,icgq,istwf_k,mgscq,mcgq,nband_me,npw1,nspinor,&
-        cgq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
-    else
-      call projbd(cgq,work,-1,icgq,0,istwf_k,mcgq,mgscq,nband_me,npw1,nspinor,&
-        dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
-    end if
-
-    call xmpi_sum(work,mpi_enreg%comm_band,ierr)
+   ! - Apply H^(0)-E.S^(0)
+   sij_opt=0;if (gen_eigenpb) sij_opt=1
+   cpopt=-1
+   ABI_ALLOCATE(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
+   ABI_ALLOCATE(work2,(2,npw1*nspinor))
+   call getghc(cpopt,cwwork,conjgrprj,work,work1,gs_hamkq,work2,eshift,&
+     mpi_enreg,1,prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
+   if (gen_eigenpb) then
+     cwwork=work-eshift*work1
+   else
+     cwwork=work-eshift*cwwork
+   end if
+   ABI_DEALLOCATE(work1)
+   ABI_DEALLOCATE(work2)
+  
+   ! The following is not mandatory, as Pc has been already applied to Psi^(1)
+   ! and Pc^* H^(0) Pc = Pc^* H^(0) = H^(0) Pc (same for S^(0)).
+   ! However, in PAW, to apply Pc^* here seems to reduce the numerical error
+   ! -Apply Pc^*
+   do iband = 1, nband
+     if (bands_treated_now(iband) == 0) cycle
+     if (iband == band) then
+       work=cwwork
+     end if
+     call xmpi_bcast(work,cycle_band_procs(iband),mpi_enreg%comm_band,ierr)
+  
+     if(gen_eigenpb)then
+       call projbd(gscq,  work,-1,igscq,icgq,istwf_k,mgscq,mcgq,nband_me,npw1,nspinor,&
+         cgq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+     else
+       call projbd(cgq,work,-1,icgq,0,istwf_k,mcgq,mgscq,nband_me,npw1,nspinor,&
+         dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
+     end if
+  
+     call xmpi_sum(work,mpi_enreg%comm_band,ierr)
 
 ! save this for me_band only
      if (iband == band) then 
@@ -1355,7 +1345,7 @@ write (unit_me, *) 'out of iline loop'
      '*** CGWF3 Sternheimer equation test for band ',band,'=',sqrt(dotr),ch10,&
      'It should go to zero for large nline : nlines_done = ',nlines_done
    call wrtout(std_out,msg)
- end if ! prtvol -19
+ end if ! prtvol==-level.or.prtvol==-19.or.prtvol==-20
 
  if(prtvol==-level.or.prtvol==-19.or.prtvol==-20)then
    ! Check that < Psi^(0) | ( H^(0)-eps^(0) S^(0) ) | Psi^(1) > is in agreement with eig^(1)
@@ -1399,7 +1389,7 @@ write (unit_me, *) 'out of iline loop'
    end do
    !write(std_out,'(a)') '< Psi^(0) | ( H^(0)-eps^(0) S^(0) ) | Psi^(1) > is done.'
    ABI_DEALLOCATE(cwwork)
- end if ! prtvol -19
+ end if ! prtvol==-level.or.prtvol==-19.or.prtvol==-20
 
  if (allocated(gh_direc))  then
    ABI_DEALLOCATE(gh_direc)

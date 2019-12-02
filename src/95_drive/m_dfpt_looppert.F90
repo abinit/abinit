@@ -1118,12 +1118,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        npw = npwarr(ikpt)
        iband_me = 0
        do iband=1, nband_rbz(ikpt+nkpt_rbz*(isppol-1))
+print *, 'mpi_enreg%proc_distrb(ikpt,iband,isppol) ', mpi_enreg%proc_distrb(ikpt,iband,isppol), ' meband ', mpi_enreg%me_band
          if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_band) then
            icg_tmp = icg_tmp + npw
            cycle
          end if
          iband_me = iband_me + 1
          cg(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+print *, 'is ik ib cg ', isppol, ikpt, iband, cg(:,icg+1:icg+5)
          icg = icg + npw
          icg_tmp = icg_tmp + npw
        end do
@@ -1306,7 +1308,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    icg=0
    icg_tmp=0
    do isppol=1, nsppol
-     do ikpt=1, nkpt_rbz
+     do ikpt=1, mkqmem_rbz
        npw = npwar1(ikpt)
        iband_me = 0
        do iband=1, nband_rbz(ikpt+nkpt_rbz*(isppol-1))
@@ -1316,6 +1318,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          end if
          iband_me = iband_me + 1
          cgq(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+print *, 'is ik ib cgq ', isppol, ikpt, iband, cgq(:,icg+1:icg+5)
          icg = icg + npw
          icg_tmp = icg_tmp + npw
        end do

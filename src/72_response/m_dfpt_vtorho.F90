@@ -85,9 +85,9 @@ contains
 !!  cgq(2,mpw1*nspinor*mband_mem*mkqmem*nsppol)=pw coefficients of GS wavefunctions at k+q.
 !!  cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)=pw coefficients of RF wavefunctions at k,q.
 !!  cplex: if 1, real space 1-order functions on FFT grid are REAL; if 2, COMPLEX
-!!  cprj(natom,nspinor*mband*mkmem*nsppol*usecprj)= wave functions at k
+!!  cprj(natom,nspinor*mband_mem*mkmem*nsppol*usecprj)= wave functions at k
 !!              projected with non-local projectors: cprj=<p_i|Cnk>
-!!  cprjq(natom,nspinor*mband*mkqmem*nsppol*usecprj)= wave functions at k+q
+!!  cprjq(natom,nspinor*mband_mem*mkqmem*nsppol*usecprj)= wave functions at k+q
 !!              projected with non-local projectors: cprjq=<p_i|Cnk+q>
 !!  dbl_nnsclo=if 1, will double the value of dtset%nnsclo
 !!  doccde_rbz(mband*nkpt_rbz*nsppol)=derivative of occ_rbz wrt the energy
@@ -300,6 +300,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer :: mbd2kpsp,mbdkpsp,mcgq,mcgq_disk,mcprjq
  integer :: mcprjq_disk,me,n1,n2,n3,n4,n5,n6,nband_k,nband_kq,nkpg,nkpg1
  integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,qphase_rhoij,spaceworld,test_dot
+ integer :: nband_me
  logical :: paral_atom,qne0
  real(dp) :: arg,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -397,7 +398,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !Prepare RF PAW files
  if (psps%usepaw==1) then
 !TODO MJV: PAW
-   mcprjq=dtset%nspinor*mband*mkqmem*nsppol*usecprj;mcprjq_disk=0
+   mcprjq=dtset%nspinor*mband_mem*mkqmem*nsppol*usecprj;mcprjq_disk=0
  else
    mcprjq=0;mcprjq_disk=0
  end if
@@ -490,6 +491,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      counter=100*ikpt+isppol
 
      nband_k = nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
+     nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
      istwf_k = istwfk_rbz(ikpt)
      npw_k   = npwarr(ikpt,1)
      npw1_k  = npwar1(ikpt,1)
@@ -676,16 +678,16 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !    Shift array memory
      if (mkmem/=0) then
        ibg=ibg+dtset%nspinor*nband_k
-       icg=icg+npw_k*dtset%nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+       icg=icg+npw_k*dtset%nspinor*nband_me
        ikg=ikg+npw_k
      end if
      if (mkqmem/=0) then
        ibgq=ibgq+dtset%nspinor*nband_k
-       icgq=icgq+npw1_k*dtset%nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+       icgq=icgq+npw1_k*dtset%nspinor*nband_me
      end if
      if (mk1mem/=0) then
        ibg1=ibg1+dtset%nspinor*nband_k
-       icg1=icg1+npw1_k*dtset%nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+       icg1=icg1+npw1_k*dtset%nspinor*nband_me
        ikg1=ikg1+npw1_k
      end if
 
