@@ -806,7 +806,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(957)='outscfcv(prt geo misc.)         '
  names(958)='outscfcv(prt stm,vha,..)        '
  names(959)='outscfcv(prtdos)                '
- names(960)='outscfcv(calcdensph)            '
+ names(960)='outscfcv(calcdenmagsph)         '
  names(961)='outscfcv(pawprt)                '
  names(962)='outscfcv(optics)                '
  names(963)='outscfcv(pawmkaewf)             '
