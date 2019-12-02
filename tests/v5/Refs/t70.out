@@ -1,6 +1,6 @@
 
 .Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 21 Oct 2019.
-- ( at 23h39 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h29 )
   
 - input  file    -> t70.in
 - output file    -> t70.out
@@ -372,8 +372,8 @@ P           mkmem           2
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00203
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -404,8 +404,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
  ETOT  4  -8.8591156625944    -1.637E-06 6.144E-07 7.723E-06
  ETOT  5  -8.8591156691345    -6.540E-09 1.811E-09 5.632E-09
  ETOT  6  -8.8591156691370    -2.437E-12 5.390E-13 5.468E-11
- ETOT  7  -8.8591156691370    -3.375E-14 1.301E-14 3.054E-13
- ETOT  8  -8.8591156691370    -1.776E-15 9.907E-16 8.512E-16
+ ETOT  7  -8.8591156691370    -3.197E-14 1.301E-14 3.054E-13
+ ETOT  8  -8.8591156691370     1.776E-15 9.907E-16 8.512E-16
 
  At SCF step    8   max residual=  9.91E-16 < tolwfr=  1.00E-15 =>converged.
 
@@ -463,13 +463,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  3.01475590792386E+00
-    Hartree energy  =  5.49241292043540E-01
+    Hartree energy  =  5.49241292043541E-01
     XC energy       = -3.53650869645563E+00
     Ewald energy    = -8.40866036158725E+00
     PspCore energy  =  8.52154029747779E-02
     Loc. psp. energy= -2.48150746004791E+00
     NL   psp  energy=  1.91834824601161E+00
-    >>>>>>>>> Etotal= -8.85911566913701E+00
+    >>>>>>>>> Etotal= -8.85911566913700E+00
 
  Other information on the energy :
     Total energy(eV)= -2.41068797133028E+02 ; Band energy (Ha)=   2.3034810087E-01
@@ -512,8 +512,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -584,10 +584,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000 -18.807   0.000  -0.306   0.000  -0.306  -0.000  -0.306   0.000
-       -0.000  -0.000  -4.942   0.000  -0.392  -0.000  -0.392   0.000  -0.392
+       -0.000  -0.000  -4.942   0.000  -0.392  -0.000  -0.392  -0.000  -0.392
 
   chi0(G,G') at the    2 th omega   0.0000  16.5000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -595,7 +595,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
         0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -7.733   0.000  -0.076   0.000  -0.076  -0.000  -0.076   0.000
-       -0.000   0.000  -1.048  -0.000  -0.133  -0.000  -0.133  -0.000  -0.133
+       -0.000   0.000  -1.048  -0.000  -0.133  -0.000  -0.133   0.000  -0.133
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =  22.7142
@@ -630,10 +630,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -14.698  -2.282   2.888  -1.985  -2.571  -1.985  -2.571  -1.985  -2.571
-       -0.000  -2.282  -2.888  -1.985   2.571  -1.985   2.571  -1.985   2.571
+        0.000  -2.282  -2.888  -1.985   2.571  -1.985   2.571  -1.985   2.571
 
     2  -2.282 -14.768  -0.000   0.058  -0.000   0.058  -0.000   0.058  -0.000
-        2.282   0.000  -3.725   0.000   0.155   0.000   0.155   0.000   0.155
+        2.282  -0.000  -3.725   0.000   0.155   0.000   0.155   0.000   0.155
 
   chi0(G,G') at the    2 th omega   0.0000  16.5000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -641,7 +641,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
         0.000  -0.902  -0.539  -0.359   0.728  -0.359   0.728  -0.359   0.728
 
     2  -0.902  -7.110  -0.000  -0.031  -0.000  -0.031  -0.000  -0.031  -0.000
-        0.902   0.000  -0.744   0.000  -0.071   0.000  -0.071   0.000  -0.071
+        0.902  -0.000  -0.744   0.000  -0.071   0.000  -0.071   0.000  -0.071
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     80.23  [%]
 
@@ -655,7 +655,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
        -0.000   0.346   2.555  -2.555  -0.346  -2.367   2.367  -2.367   2.367
 
     2   0.346 -18.985  -0.000  -0.293   0.000   0.509  -0.000   0.509   0.000
-       -0.346  -0.000  -3.270   0.000  -1.657  -0.000  -0.139  -0.000  -0.139
+       -0.346   0.000  -3.270   0.000  -1.657  -0.000  -0.139  -0.000  -0.139
 
   chi0(G,G') at the    2 th omega   0.0000  16.5000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -674,10 +674,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.064  -0.152  -2.318  -0.152  -2.318  -2.318  -0.152  -2.318  -0.152
-       -0.000  -0.152   2.318  -0.152   2.318  -2.318   0.152  -2.318   0.152
+        0.000  -0.152   2.318  -0.152   2.318  -2.318   0.152  -2.318   0.152
 
     2  -0.152 -19.464   0.000   1.811  -0.000  -0.518  -0.000  -0.518   0.000
-        0.152   0.000  -3.509  -0.000  -0.387   0.000  -0.438   0.000  -0.438
+        0.152   0.000  -3.509   0.000  -0.387   0.000  -0.438   0.000  -0.438
 
   chi0(G,G') at the    2 th omega   0.0000  16.5000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -685,7 +685,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
        -0.000   0.085   0.453   0.085   0.453  -0.453  -0.085  -0.453  -0.085
 
     2   0.085  -6.997  -0.000  -0.097  -0.000  -0.084  -0.000  -0.084   0.000
-       -0.085   0.000  -0.904  -0.000  -0.108   0.000  -0.126   0.000  -0.126
+       -0.085  -0.000  -0.904   0.000  -0.108   0.000  -0.126   0.000  -0.126
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    4 :     83.73  [%]
 
@@ -696,9 +696,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -19.516  -1.400  -2.911  -3.035  -2.496  -2.496  -3.035  -2.911  -1.400
-       -0.000  -1.400   2.911  -3.035   2.496  -2.496   3.035  -2.911   1.400
+        0.000  -1.400   2.911  -3.035   2.496  -2.496   3.035  -2.911   1.400
 
-    2  -1.400 -19.516  -0.000  -0.228  -0.000   1.355  -0.000  -0.391   0.000
+    2  -1.400 -19.516  -0.000  -0.228  -0.000   1.355  -0.000  -0.391  -0.000
         1.400  -0.000  -2.386   0.000   0.000   0.000   0.045  -0.000  -0.000
 
   chi0(G,G') at the    2 th omega   0.0000  16.5000 [eV]
@@ -721,7 +721,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
         0.000  -1.427   2.841  -2.841   1.427  -1.427   2.841  -2.841   1.427
 
     2  -1.427 -19.391  -0.000  -0.214   0.000   2.560   0.000  -0.214   0.000
-        1.427  -0.000  -2.086  -0.000  -0.000   0.000  -0.206   0.000   0.000
+        1.427   0.000  -2.086  -0.000  -0.000   0.000  -0.206   0.000   0.000
 
   chi0(G,G') at the    2 th omega   0.0000  16.5000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -729,7 +729,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
         0.000  -0.238   0.924  -0.924   0.238  -0.238   0.924  -0.924   0.238
 
     2  -0.238  -6.656  -0.000  -0.076  -0.000  -0.105   0.000  -0.076  -0.000
-        0.238   0.000  -0.574   0.000   0.000  -0.000  -0.072  -0.000  -0.000
+        0.238  -0.000  -0.574   0.000  -0.000  -0.000  -0.072  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    6 :     79.54  [%]
 
@@ -1412,10 +1412,10 @@ P           mkmem           2
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          8.5  wall=          8.5
+- Proc.   0 individual time (sec): cpu=          8.3  wall=          8.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  16 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.5  wall=          8.5
++Overall time at end (sec) : cpu=          8.3  wall=          8.4

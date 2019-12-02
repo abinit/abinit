@@ -1,6 +1,6 @@
 
-.Version 8.0.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 09h33 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h17 )
   
 - input  file    -> t03.in
 - output file    -> t03.out
@@ -78,7 +78,7 @@ _ WF disk file :      0.345 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -164,8 +164,8 @@ P           mkmem           1
          ecut(hartree)=     18.000   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.6.blyp.hgh
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.6.blyp.hgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o.6.blyp.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o.6.blyp.hgh
 - Goedecker pseudopotential for O
 -  8.00000   6.00000     70301                znucl, zion, pspdat
    10   18    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -189,14 +189,14 @@ P           mkmem           1
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=    0.12265823
+  pspatm : epsatm=    0.12265823
          --- l  ekb(1:nproj) -->
              0    0.702008
              1    0.000000
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.6.bp.hgh
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.6.bp.hgh
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o.6.bp.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o.6.bp.hgh
 - Goedecker pseudopotential for O
 -  8.00000   6.00000     70301                znucl, zion, pspdat
    10   19    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -220,14 +220,14 @@ P           mkmem           1
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=    0.13322981
+  pspatm : epsatm=    0.13322981
          --- l  ekb(1:nproj) -->
              0    0.700751
              1    0.000000
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.6.olyp.hgh
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.6.olyp.hgh
+- pspini: atom type   3  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o.6.olyp.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o.6.olyp.hgh
 - Goedecker pseudopotential for O
 -  8.00000   6.00000     70301                znucl, zion, pspdat
    10   25    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -251,7 +251,7 @@ P           mkmem           1
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=    0.16810484
+  pspatm : epsatm=    0.16810484
          --- l  ekb(1:nproj) -->
              0    0.698776
              1    0.000000
@@ -290,7 +290,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    3743.000    3743.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.6442E-08; max=  6.1780E-08
+ Mean square residual over all n,k,spin=   26.442E-09; max=  61.780E-09
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -323,21 +323,23 @@ _setup2: Arith. and geom. avg. npw (full set) are    3743.000    3743.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  9.28650079598107E+00
-    Hartree energy  =  7.90297258490091E+00
-    XC energy       = -3.07623800090226E+00
+    Kinetic energy  =  9.28650079598011E+00
+    Hartree energy  =  7.90297258490027E+00
+    XC energy       = -3.07623800090208E+00
     Ewald energy    = -5.10713546306510E+00
     PspCore energy  =  7.35949376581425E-04
-    Loc. psp. energy= -2.58444000930069E+01
-    NL   psp  energy=  1.81101190506738E+00
+    Loc. psp. energy= -2.58444000930055E+01
+    NL   psp  energy=  1.81101190506728E+00
     >>>>> Internal E= -1.50265523216484E+01
 
-    -kT*entropy     = -3.08524639573015E-02
+    -kT*entropy     = -3.08524639573014E-02
     >>>>>>>>> Etotal= -1.50574047856057E+01
 
  Other information on the energy :
-    Total energy(eV)= -4.09732821556517E+02 ; Band energy (Ha)=  -2.9072851473E+00
+    Total energy(eV)= -4.09732821556518E+02 ; Band energy (Ha)=  -2.9072851473E+00
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  6.83346910E-04  sigma(3 2)=  0.00000000E+00
@@ -364,8 +366,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    3743.000    3743.000
          ecut(hartree)=     18.000   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.6.blyp.hgh
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.6.blyp.hgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o.6.blyp.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o.6.blyp.hgh
 - Goedecker pseudopotential for O
 -  8.00000   6.00000     70301                znucl, zion, pspdat
    10   18    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -389,14 +391,14 @@ _setup2: Arith. and geom. avg. npw (full set) are    3743.000    3743.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=    0.12265823
+  pspatm : epsatm=    0.12265823
          --- l  ekb(1:nproj) -->
              0    0.702008
              1    0.000000
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.6.bp.hgh
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.6.bp.hgh
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o.6.bp.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o.6.bp.hgh
 - Goedecker pseudopotential for O
 -  8.00000   6.00000     70301                znucl, zion, pspdat
    10   19    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -420,14 +422,14 @@ _setup2: Arith. and geom. avg. npw (full set) are    3743.000    3743.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=    0.13322981
+  pspatm : epsatm=    0.13322981
          --- l  ekb(1:nproj) -->
              0    0.700751
              1    0.000000
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.6.olyp.hgh
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.6.olyp.hgh
+- pspini: atom type   3  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o.6.olyp.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o.6.olyp.hgh
 - Goedecker pseudopotential for O
 -  8.00000   6.00000     70301                znucl, zion, pspdat
    10   25    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -451,7 +453,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    3743.000    3743.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=    0.16810484
+  pspatm : epsatm=    0.16810484
          --- l  ekb(1:nproj) -->
              0    0.698776
              1    0.000000
@@ -490,7 +492,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    3743.000    3743.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   7.4700E-08; max=  1.7243E-07
+ Mean square residual over all n,k,spin=   74.700E-09; max=  17.243E-08
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -523,21 +525,23 @@ _setup2: Arith. and geom. avg. npw (full set) are    3743.000    3743.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  9.29279391407958E+00
-    Hartree energy  =  7.92481587574168E+00
-    XC energy       = -3.11724183863740E+00
+    Kinetic energy  =  9.29279391407727E+00
+    Hartree energy  =  7.92481587573963E+00
+    XC energy       = -3.11724183863690E+00
     Ewald energy    = -5.10713546306510E+00
     PspCore energy  =  7.99378834143592E-04
-    Loc. psp. energy= -2.58662029255920E+01
-    NL   psp  energy=  1.80618444103851E+00
-    >>>>> Internal E= -1.50659866176006E+01
+    Loc. psp. energy= -2.58662029255877E+01
+    NL   psp  energy=  1.80618444103822E+00
+    >>>>> Internal E= -1.50659866176005E+01
 
-    -kT*entropy     = -3.08524639573012E-02
-    >>>>>>>>> Etotal= -1.50968390815579E+01
+    -kT*entropy     = -3.08524639573023E-02
+    >>>>>>>>> Etotal= -1.50968390815578E+01
 
  Other information on the energy :
-    Total energy(eV)= -4.10805883320922E+02 ; Band energy (Ha)=  -2.9427970571E+00
+    Total energy(eV)= -4.10805883320918E+02 ; Band energy (Ha)=  -2.9427970571E+00
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  6.73477865E-04  sigma(3 2)=  0.00000000E+00
@@ -564,8 +568,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    3743.000    3743.000
          ecut(hartree)=     18.000   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.6.blyp.hgh
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.6.blyp.hgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o.6.blyp.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o.6.blyp.hgh
 - Goedecker pseudopotential for O
 -  8.00000   6.00000     70301                znucl, zion, pspdat
    10   18    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -589,14 +593,14 @@ _setup2: Arith. and geom. avg. npw (full set) are    3743.000    3743.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=    0.12265823
+  pspatm : epsatm=    0.12265823
          --- l  ekb(1:nproj) -->
              0    0.702008
              1    0.000000
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.6.bp.hgh
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.6.bp.hgh
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o.6.bp.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o.6.bp.hgh
 - Goedecker pseudopotential for O
 -  8.00000   6.00000     70301                znucl, zion, pspdat
    10   19    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -620,14 +624,14 @@ _setup2: Arith. and geom. avg. npw (full set) are    3743.000    3743.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=    0.13322981
+  pspatm : epsatm=    0.13322981
          --- l  ekb(1:nproj) -->
              0    0.700751
              1    0.000000
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.6.olyp.hgh
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/08o.6.olyp.hgh
+- pspini: atom type   3  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o.6.olyp.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o.6.olyp.hgh
 - Goedecker pseudopotential for O
 -  8.00000   6.00000     70301                znucl, zion, pspdat
    10   25    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -651,7 +655,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    3743.000    3743.000
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=    0.16810484
+  pspatm : epsatm=    0.16810484
          --- l  ekb(1:nproj) -->
              0    0.698776
              1    0.000000
@@ -670,7 +674,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    3743.000    3743.000
  ETOT  3  -15.083015978005    -1.359E-02 2.596E-05 3.564E+02
  ETOT  4  -15.085616812601    -2.601E-03 2.721E-06 1.886E+02
  ETOT  5  -15.087129223039    -1.512E-03 3.212E-06 2.546E+01
- ETOT  6  -15.087216343715    -8.712E-05 1.224E-07 3.665E+00
+ ETOT  6  -15.087216343714    -8.712E-05 1.224E-07 3.665E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  6.67834910E-04  sigma(3 2)=  0.00000000E+00
@@ -690,7 +694,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    3743.000    3743.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.0053E-08; max=  1.2244E-07
+ Mean square residual over all n,k,spin=   80.053E-09; max=  12.244E-08
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -723,21 +727,23 @@ _setup2: Arith. and geom. avg. npw (full set) are    3743.000    3743.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  9.32062878776601E+00
-    Hartree energy  =  7.95322422268615E+00
-    XC energy       = -3.12550114606965E+00
+    Kinetic energy  =  9.32062878776058E+00
+    Hartree energy  =  7.95322422268166E+00
+    XC energy       = -3.12550114606845E+00
     Ewald energy    = -5.10713546306510E+00
     PspCore energy  =  1.00862905745594E-03
-    Loc. psp. energy= -2.58957371809005E+01
-    NL   psp  energy=  1.79714827076831E+00
-    >>>>> Internal E= -1.50563638797573E+01
+    Loc. psp. energy= -2.58957371808912E+01
+    NL   psp  energy=  1.79714827076801E+00
+    >>>>> Internal E= -1.50563638797571E+01
 
-    -kT*entropy     = -3.08524639572976E-02
-    >>>>>>>>> Etotal= -1.50872163437146E+01
+    -kT*entropy     = -3.08524639573017E-02
+    >>>>>>>>> Etotal= -1.50872163437144E+01
 
  Other information on the energy :
-    Total energy(eV)= -4.10544035307683E+02 ; Band energy (Ha)=  -2.9281184910E+00
+    Total energy(eV)= -4.10544035307677E+02 ; Band energy (Ha)=  -2.9281184910E+00
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  6.67834910E-04  sigma(3 2)=  0.00000000E+00
@@ -846,49 +852,67 @@ P           mkmem           1
 -
 - [1] Libxc: A library of exchange and correlation functionals for density functional theory.
 - M.A.L. Marques, M.J.T. Oliveira, T. Burnus, Computer Physics Communications 183, 2227 (2012).
-- Comment : to be cited when LibXC is used (negative value of ixc)
+- Comment: to be cited when LibXC is used (negative value of ixc)
 - Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#marques2012
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- [4] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- [5] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=         16.8  wall=          3.9
+- Proc.   0 individual time (sec): cpu=          3.7  wall=          3.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.8  wall=          3.9
++Overall time at end (sec) : cpu=          3.7  wall=          3.9

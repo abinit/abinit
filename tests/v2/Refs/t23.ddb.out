@@ -2,7 +2,7 @@
  **** DERIVATIVE DATABASE ****    
 +DDB, Version number    100401
 
- DDB for BaTiO3-cubic, a=7.5589, 45Ha, 10SP IBZ, SCI=0. (G and X only)                                                                                                                                                                                                   
+ DDB for BaTiO3-cubic, a=7.5589, 45Ha, 10SP IBZ, SCI=0. (G and X only)
 
     usepaw         0
      natom         5

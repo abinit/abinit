@@ -35,7 +35,7 @@ Examples of configuration files for clusters are available at https://github.com
 ])
 
 # Initialize Autoconf
-AC_INIT([ABINIT],[8.11.12],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],[8.11.13],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 7])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])

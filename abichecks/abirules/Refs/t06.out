@@ -2,8 +2,8 @@
 Warning pattern : 'Same actual argument associated with INTENT'
 **********************************************************************
 dummy_tests.F90 = line: 90, [31mwarn:  Same actual argument associated with INTENT(OUT) argument 'dummy_out1' and INTENT(OUT) argument 'dummy_out2' at (1)[0m
-[31m  ->  call test_same_actual_arg(dummy_out,dummy_out,used_arg)
-  ->                           1[0m
+[31m  ->   90 |  call test_same_actual_arg(dummy_out,dummy_out,used_arg)
+  ->      |                           1[0m
 **********************************************************************
 Warning count = 1
 **********************************************************************
