@@ -115,7 +115,8 @@ subroutine xmpi_bcast_int2d(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2
+ integer :: my_dt,my_op,n1,n2
+ integer(kind=int64) :: ntot
 #endif
 
 ! *************************************************************************
@@ -125,7 +126,20 @@ subroutine xmpi_bcast_int2d(xval,master,spaceComm,ier)
  if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
-   call MPI_BCAST(xval,n1*n2,MPI_INTEGER,master,spaceComm,ier)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1*n2,kind=int64)
+
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_BCAST(xval,n1*n2,MPI_INTEGER,master,spaceComm,ier)
+   else
+     call xmpi_largetype_create(ntot,MPI_INTEGER,my_dt,my_op,MPI_OP_NULL)
+     call MPI_BCAST(xval,1,my_dt,master,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
+
  end if
 #endif
 
@@ -165,7 +179,8 @@ subroutine xmpi_bcast_int3d(xval,master,spaceComm,ier)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3
+ integer :: my_dt,my_op,n1,n2,n3
+ integer(kind=int64) :: nn,ntot
 #endif
 
 ! *************************************************************************
@@ -176,9 +191,23 @@ subroutine xmpi_bcast_int3d(xval,master,spaceComm,ier)
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
-   call MPI_BCAST(xval,n1*n2*n3,MPI_INTEGER,master,spaceComm,ier)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1*n2*n3,kind=int64)
+
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_BCAST(xval,n1*n2*n3,MPI_INTEGER,master,spaceComm,ier)
+   else
+     nn=int(n1*n2,kind=int64);if (nn>huge(0_int32)) nn=int(n1,kind=int64)
+     call xmpi_largetype_create(ntot/nn,MPI_INTEGER,my_dt,my_op,MPI_OP_NULL)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
 #endif
+
 end subroutine xmpi_bcast_int3d
 !!***
 
@@ -305,7 +334,8 @@ subroutine xmpi_bcast_dp2d(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2
+ integer :: my_dt,my_op,n1,n2
+ integer(kind=int64) :: ntot
 #endif
 
 ! *************************************************************************
@@ -315,7 +345,19 @@ subroutine xmpi_bcast_dp2d(xval,master,spaceComm,ier)
  if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
-   call MPI_BCAST(xval,n1*n2,MPI_DOUBLE_PRECISION,master,spaceComm,ier)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1*n2,kind=int64)
+
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_BCAST(xval,n1*n2,MPI_DOUBLE_PRECISION,master,spaceComm,ier)
+   else
+     call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
+     call MPI_BCAST(xval,1,my_dt,master,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
 #endif
 
@@ -351,7 +393,8 @@ subroutine xmpi_bcast_dp3d(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3
+ integer :: my_dt,my_op,n1,n2,n3
+ integer(kind=int64) :: nn,ntot
 #endif
 
 ! *************************************************************************
@@ -362,7 +405,20 @@ subroutine xmpi_bcast_dp3d(xval,master,spaceComm,ier)
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
-   call MPI_BCAST(xval,n1*n2*n3,MPI_DOUBLE_PRECISION,master,spaceComm,ier)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1*n2*n3,kind=int64)
+
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_BCAST(xval,n1*n2*n3,MPI_DOUBLE_PRECISION,master,spaceComm,ier)
+   else
+     nn=int(n1*n2,kind=int64);if (nn>huge(0_int32)) nn=int(n1,kind=int64)
+     call xmpi_largetype_create(ntot/nn,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
 #endif
 
@@ -398,7 +454,8 @@ subroutine xmpi_bcast_dp4d(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4
+ integer :: my_dt,my_op,n1,n2,n3,n4
+ integer(kind=int64) :: nn,ntot
 #endif
 
 ! *************************************************************************
@@ -410,7 +467,22 @@ subroutine xmpi_bcast_dp4d(xval,master,spaceComm,ier)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
    n4=size(xval,dim=4)
-   call MPI_BCAST(xval,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,master,spaceComm,ier)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1*n2*n3*n4,kind=int64)
+
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_BCAST(xval,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,master,spaceComm,ier)
+   else
+     nn=int(n1*n2*n3,kind=int64)
+     if (nn>huge(0_int32)) nn=int(n1*n2,kind=int64)
+     if (nn>huge(0_int32)) nn=int(n1,kind=int64)
+     call xmpi_largetype_create(ntot/nn,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
 #endif
 
@@ -446,7 +518,8 @@ subroutine xmpi_bcast_dp5d(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4,n5
+ integer :: my_dt,my_op,n1,n2,n3,n4,n5
+ integer(kind=int64) :: nn,ntot
 #endif
 
 ! *************************************************************************
@@ -459,7 +532,23 @@ subroutine xmpi_bcast_dp5d(xval,master,spaceComm,ier)
    n3=size(xval,dim=3)
    n4=size(xval,dim=4)
    n5=size(xval,dim=5)
-   call MPI_BCAST(xval,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,master,spaceComm,ier)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1*n2*n3*n4*n5,kind=int64)
+
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_BCAST(xval,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,master,spaceComm,ier)
+   else
+     nn=int(n1*n2*n3*n4,kind=int64)
+     if (nn>huge(0_int32)) nn=int(n1*n2*n3,kind=int64)
+     if (nn>huge(0_int32)) nn=int(n1*n2,kind=int64)
+     if (nn>huge(0_int32)) nn=int(n1,kind=int64)
+     call xmpi_largetype_create(ntot/nn,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
 #endif
 
@@ -495,7 +584,8 @@ subroutine xmpi_bcast_dp6d(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4,n5,n6
+ integer :: my_dt,my_op,n1,n2,n3,n4,n5,n6
+ integer(kind=int64) :: nn,ntot
 #endif
 
 ! *************************************************************************
@@ -509,7 +599,24 @@ subroutine xmpi_bcast_dp6d(xval,master,spaceComm,ier)
    n4=size(xval,dim=4)
    n5=size(xval,dim=5)
    n6=size(xval,dim=6)
-   call MPI_BCAST(xval,n1*n2*n3*n4*n5*n6,MPI_DOUBLE_PRECISION,master,spaceComm,ier)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1*n2*n3*n4*n5*n6,kind=int64)
+
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_BCAST(xval,n1*n2*n3*n4*n5*n6,MPI_DOUBLE_PRECISION,master,spaceComm,ier)
+   else
+     nn=int(n1*n2*n3*n4*n5,kind=int64)
+     if (nn>huge(0_int32)) nn=int(n1*n2*n3*n4,kind=int64)
+     if (nn>huge(0_int32)) nn=int(n1*n2*n3,kind=int64)
+     if (nn>huge(0_int32)) nn=int(n1*n2,kind=int64)
+     if (nn>huge(0_int32)) nn=int(n1,kind=int64)
+     call xmpi_largetype_create(ntot/nn,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
 #endif
 
@@ -629,7 +736,8 @@ subroutine xmpi_bcast_sp2d(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2
+ integer :: my_dt,my_op,n1,n2
+ integer(kind=int64) :: ntot
 #endif
 
 ! *************************************************************************
@@ -639,7 +747,19 @@ subroutine xmpi_bcast_sp2d(xval,master,spaceComm,ier)
  if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
-   call MPI_BCAST(xval,n1*n2,MPI_REAL,master,spaceComm,ier)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1*n2,kind=int64)
+
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_BCAST(xval,n1*n2,MPI_REAL,master,spaceComm,ier)
+   else
+     call xmpi_largetype_create(ntot,MPI_REAL,my_dt,my_op,MPI_OP_NULL)
+     call MPI_BCAST(xval,1,my_dt,master,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
 #endif
 
@@ -675,7 +795,8 @@ subroutine xmpi_bcast_sp3d(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3
+ integer :: my_dt,my_op,n1,n2,n3
+ integer(kind=int64) :: nn,ntot
 #endif
 
 ! *************************************************************************
@@ -686,7 +807,19 @@ subroutine xmpi_bcast_sp3d(xval,master,spaceComm,ier)
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
-   call MPI_BCAST(xval,n1*n2*n3,MPI_REAL,master,spaceComm,ier)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1*n2*n3,kind=int64)
+
+   if (ntot<=xmpi_maxint32_64) then
+   else
+     nn=int(n1*n2,kind=int64);if (nn>huge(0_int32)) nn=int(n1,kind=int64)
+     call xmpi_largetype_create(ntot/nn,MPI_REAL,my_dt,my_op,MPI_OP_NULL)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
 #endif
 
@@ -722,7 +855,8 @@ subroutine xmpi_bcast_sp4d(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4
+ integer :: my_dt,my_op,n1,n2,n3,n4
+ integer(kind=int64) :: nn,ntot
 #endif
 
 ! *************************************************************************
@@ -734,7 +868,21 @@ subroutine xmpi_bcast_sp4d(xval,master,spaceComm,ier)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
    n4=size(xval,dim=4)
-   call MPI_BCAST(xval,n1*n2*n3*n4,MPI_REAL,master,spaceComm,ier)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1*n2*n3*n4,kind=int64)
+
+   if (ntot<=xmpi_maxint32_64) then
+   else
+     nn=int(n1*n2*n3,kind=int64)
+     if (nn>huge(0_int32)) nn=int(n1*n2,kind=int64)
+     if (nn>huge(0_int32)) nn=int(n1,kind=int64)
+     call xmpi_largetype_create(ntot/nn,MPI_REAL,my_dt,my_op,MPI_OP_NULL)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
 #endif
 
@@ -864,7 +1012,8 @@ subroutine xmpi_bcast_cplx2d(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2
+ integer :: my_dt,my_op,n1,n2
+ integer(kind=int64) :: ntot
 #endif
 
 ! *************************************************************************
@@ -874,7 +1023,19 @@ subroutine xmpi_bcast_cplx2d(xval,master,spaceComm,ier)
  if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
-   call MPI_BCAST(xval,n1*n2,MPI_COMPLEX,master,spaceComm,ier)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1*n2,kind=int64)
+
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_BCAST(xval,n1*n2,MPI_COMPLEX,master,spaceComm,ier)
+   else
+     call xmpi_largetype_create(ntot,MPI_COMPLEX,my_dt,my_op,MPI_OP_NULL)
+     call MPI_BCAST(xval,1,my_dt,master,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
 #endif
 
@@ -910,7 +1071,8 @@ subroutine xmpi_bcast_cplx3d(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3
+ integer :: my_dt,my_op,n1,n2,n3
+ integer(kind=int64) :: nn,ntot
 #endif
 
 ! *************************************************************************
@@ -921,7 +1083,19 @@ subroutine xmpi_bcast_cplx3d(xval,master,spaceComm,ier)
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
-   call MPI_BCAST(xval,n1*n2*n3,MPI_COMPLEX,master,spaceComm,ier)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1*n2*n3,kind=int64)
+
+   if (ntot<=xmpi_maxint32_64) then
+   else
+     nn=int(n1*n2,kind=int64);if (nn>huge(0_int32)) nn=int(n1,kind=int64)
+     call xmpi_largetype_create(ntot/nn,MPI_COMPLEX,my_dt,my_op,MPI_OP_NULL)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
 #endif
 
@@ -956,7 +1130,8 @@ subroutine xmpi_bcast_cplx4d(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4
+ integer :: my_dt,my_op,n1,n2,n3,n4
+ integer(kind=int64) :: nn,ntot
 #endif
 
 ! *************************************************************************
@@ -968,7 +1143,22 @@ subroutine xmpi_bcast_cplx4d(xval,master,spaceComm,ier)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
    n4=size(xval,dim=4)
-   call MPI_BCAST(xval,n1*n2*n3*n4,MPI_COMPLEX,master,spaceComm,ier)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1*n2*n3*n4,kind=int64)
+
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_BCAST(xval,n1*n2*n3*n4,MPI_COMPLEX,master,spaceComm,ier)
+   else
+     nn=int(n1*n2*n3,kind=int64)
+     if (nn>huge(0_int32)) nn=int(n1*n2,kind=int64)
+     if (nn>huge(0_int32)) nn=int(n1,kind=int64)
+     call xmpi_largetype_create(ntot/nn,MPI_COMPLEX,my_dt,my_op,MPI_OP_NULL)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
 #endif
 
@@ -1089,7 +1279,8 @@ subroutine xmpi_bcast_dc2d(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2
+ integer :: my_dt,my_op,n1,n2
+ integer(kind=int64) :: ntot
 #endif
 
 ! *************************************************************************
@@ -1099,7 +1290,19 @@ subroutine xmpi_bcast_dc2d(xval,master,spaceComm,ier)
  if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
-   call MPI_BCAST(xval,n1*n2,MPI_DOUBLE_COMPLEX,master,spaceComm,ier)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1*n2,kind=int64)
+
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_BCAST(xval,n1*n2,MPI_DOUBLE_COMPLEX,master,spaceComm,ier)
+   else
+     call xmpi_largetype_create(ntot,MPI_DOUBLE_COMPLEX,my_dt,my_op,MPI_OP_NULL)
+     call MPI_BCAST(xval,1,my_dt,master,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
 #endif
 
@@ -1135,7 +1338,8 @@ subroutine xmpi_bcast_dc3d(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3
+ integer :: my_dt,my_op,n1,n2,n3
+ integer(kind=int64) :: nn,ntot
 #endif
 
 ! *************************************************************************
@@ -1146,7 +1350,20 @@ subroutine xmpi_bcast_dc3d(xval,master,spaceComm,ier)
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
-   call MPI_BCAST(xval,n1*n2*n3,MPI_DOUBLE_COMPLEX,master,spaceComm,ier)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1*n2*n3,kind=int64)
+
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_BCAST(xval,n1*n2*n3,MPI_DOUBLE_COMPLEX,master,spaceComm,ier)
+   else
+     nn=int(n1*n2,kind=int64);if (nn>huge(0_int32)) nn=int(n1,kind=int64)
+     call xmpi_largetype_create(ntot/nn,MPI_DOUBLE_COMPLEX,my_dt,my_op,MPI_OP_NULL)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
 #endif
 
@@ -1182,7 +1399,8 @@ subroutine xmpi_bcast_dc4d(xval,master,spaceComm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: n1,n2,n3,n4
+ integer :: my_dt,my_op,n1,n2,n3,n4
+ integer(kind=int64) :: nn,ntot
 #endif
 
 ! *************************************************************************
@@ -1194,7 +1412,22 @@ subroutine xmpi_bcast_dc4d(xval,master,spaceComm,ier)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
    n4=size(xval,dim=4)
-   call MPI_BCAST(xval,n1*n2*n3*n4,MPI_DOUBLE_COMPLEX,master,spaceComm,ier)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1*n2*n3*n4,kind=int64)
+
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_BCAST(xval,n1*n2*n3*n4,MPI_DOUBLE_COMPLEX,master,spaceComm,ier)
+   else
+     nn=int(n1*n2*n3,kind=int64)
+     if (nn>huge(0_int32)) nn=int(n1*n2,kind=int64)
+     if (nn>huge(0_int32)) nn=int(n1,kind=int64)
+     call xmpi_largetype_create(ntot/nn,MPI_DOUBLE_COMPLEX,my_dt,my_op,MPI_OP_NULL)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
 #endif
 
