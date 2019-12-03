@@ -2382,8 +2382,8 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,itime
  end if
  
  file_anh=trim(name_file)//'_anharmonic_terms_energy.dat'
- anh_opened=.FALSE.
- INQUIRE(FILE=file_anh,OPENED=anh_opened,number=unit_anh)
+ !anh_opened=.FALSE.
+ !INQUIRE(FILE=file_anh,OPENED=anh_opened,number=unit_anh)
 
  mse  = zero
  msef = zero
@@ -2392,10 +2392,9 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,itime
    xred(:,:)   = hist%xred(:,:,ii)
    rprimd(:,:) = hist%rprimd(:,:,ii)
    itime = ii
-   write(std_out,*) "anh_opened equals?: ", anh_opened 
-   if(anh_opened)then
-     write(unit_anh,'(I7)',advance='no') itime!If wanted Write cycle to anharmonic_energy_contribution file if(eff_pot%mpi_coeff%my_rank == 0)
-   end if
+   !if(anh_opened)then
+   !  write(unit_anh,'(I7)',advance='no') itime!If wanted Write cycle to anharmonic_energy_contribution file if(eff_pot%mpi_coeff%my_rank == 0)
+   !end if
 #if defined DEV_MS_SCALEUP 
    !Pass print options to scale-up
    itime = ii 
