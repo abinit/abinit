@@ -4584,7 +4584,7 @@ end subroutine dfpt_ciflexoout
  ABI_DEALLOCATE(typeI_cartflag)
  ABI_ALLOCATE(redflg,(matom,3,3,3,3))
 
-!1st transform back coordinates of the electric field derivative of the flexoelectric tensor
+!1st transform back coordinates of the atomic displacement derivative 
  do istr2dir=1,3
    do istr1dir=1,3
      do iq1dir=1,3
@@ -4606,7 +4606,6 @@ end subroutine dfpt_ciflexoout
  end do
 
 !2nd transform back coordinates of the q-gradient (treat it as electric field)
-!of the flexoelectric tensor
  fac=two_pi ** 2
  do istr2dir=1,3
    do istr1dir=1,3
