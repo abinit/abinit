@@ -80,6 +80,7 @@ MODULE m_hashtable_strval
   END TYPE hash_table_t
 
   PUBLIC :: hash_table_t
+
 CONTAINS
 
   RECURSIVE SUBROUTINE put_sll(list,key,val)
@@ -233,7 +234,7 @@ CONTAINS
       endif
     endif
 
-  end subroutine
+  end subroutine print_entry_sll
 
   SUBROUTINE init_hash_table_t(tbl,tbl_len)
     CLASS(hash_table_t),   INTENT(inout) :: tbl
