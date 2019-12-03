@@ -464,7 +464,7 @@ appropriate values.
 The *telast_3.files* file is used with anaddb in the same
 manner as the abinit .files you are by now used to. The first two lines
 specify the .in and .out files, the third line specifies the DDB file, and the
-last two lines are dummy names which would be used in connection with other
+last lines are dummy names which would be used in connection with other
 capabilities of anaddb. Now you should run the calculation, which is done in
 the same way as you are now used to for abinit:  
   

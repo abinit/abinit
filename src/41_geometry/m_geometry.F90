@@ -3068,6 +3068,7 @@ subroutine stresssym(gprimd,nsym,stress,sym)
  rprimdt=transpose(rprimd)
 
 !Compute stress tensor in reduced coordinates
+! strfrac =  rprimd^T * stress * rprimd
  call strconv(stress,rprimdt,strfrac)
 
 !Switch to full storage mode
@@ -3081,6 +3082,9 @@ subroutine stresssym(gprimd,nsym,stress,sym)
  tensor(1,3)=tensor(3,1)
  tensor(1,2)=tensor(2,1)
 
+! these loops are useless - trivial action:
+! tt = tensor / dble(nsym)
+! tensor = zero
  do nu=1,3
    do mu=1,3
      tt(mu,nu)=tensor(mu,nu)/dble(nsym)
@@ -3089,6 +3093,8 @@ subroutine stresssym(gprimd,nsym,stress,sym)
  end do
 
 !loop over all symmetry operations:
+! tensor =  symrec * tt * symrec^T = symrec * rprimd^T * input * rprimd symrec^T
+! TODO: this should be replaced by a little BLAS call or two
  do isym=1,nsym
    do mu=1,3
      do nu=1,3
@@ -3112,6 +3118,9 @@ subroutine stresssym(gprimd,nsym,stress,sym)
  strfrac(6)=tensor(2,1)
 
 !Convert back stress tensor (symmetrized) in cartesian coordinates
+! stress = gprimd * symrec * rprimd^T * input * rprimd symrec^T * gprimd^T
+! symrec_cart = gprimd * symrec * rprimd^T
+! sym_cart    = symrec_cart^-1 ^T = rprimd * sym * gprimd^T 
  call strconv(strfrac,gprimd,stress)
 
 end subroutine stresssym
@@ -3172,6 +3181,8 @@ subroutine strconv(frac,gprimd,cart)
  work1(3,1)=frac(5) ; work1(1,3)=frac(5)
  work1(2,1)=frac(6) ; work1(1,2)=frac(6)
 
+! TODO: these are matmuls, replace or get BLAS
+! work2 = work1 * gprimd^T
  do ii=1,3
    work2(:,ii)=zero
    do jj=1,3
@@ -3179,6 +3190,7 @@ subroutine strconv(frac,gprimd,cart)
    end do
  end do
 
+! work1 = gprimd * work2 = gprimd * input * gprimd^T
  do ii=1,3
    work1(ii,:)=zero
    do jj=1,3

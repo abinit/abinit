@@ -1,6 +1,6 @@
 
-.Version 8.11.6 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  3 Apr 2019.
-- ( at 11h31 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h53 )
   
 -  nproc =    4
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/biederj_multibini-proddev/tests/paral/Input/t95_DDB
+-/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/paral/Input/t95_DDB
  to initialize the multibinit input
 
 ================================================================================
@@ -312,7 +312,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  5.0799749461919238E-30 Hartree
+ Energy of the ifc part                    :  5.0799749461919224E-30 Hartree
 
     >>>>>>>>> Etotal= -1.37161412976000E+02
 
@@ -393,7 +393,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.8780403500102849E-02 Hartree
+ Energy of the ifc part                    :  1.8780403500102846E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37142632572500E+02
 
@@ -420,7 +420,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  3.2804670327014958E-02 Hartree
+ Energy of the ifc part                    :  3.2804670327014965E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37128608305673E+02
 
@@ -447,7 +447,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  5.0048211254912267E-02 Hartree
+ Energy of the ifc part                    :  5.0048211254912274E-02 Hartree
 
     >>>>>>>>> Etotal= -1.37111364764745E+02
 
@@ -528,7 +528,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.1361927743646025E-01 Hartree
+ Energy of the ifc part                    :  1.1361927743646023E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37047793698564E+02
 
@@ -555,7 +555,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.3530208986098499E-01 Hartree
+ Energy of the ifc part                    :  1.3530208986098496E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37026110886139E+02
 
@@ -582,7 +582,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.5514721090102773E-01 Hartree
+ Energy of the ifc part                    :  1.5514721090102776E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37006265765099E+02
 
@@ -636,7 +636,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.8465422807885740E-01 Hartree
+ Energy of the ifc part                    :  1.8465422807885734E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36976758747921E+02
 
@@ -663,7 +663,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.9285762667681056E-01 Hartree
+ Energy of the ifc part                    :  1.9285762667681050E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36968555349323E+02
 
@@ -690,7 +690,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.9662113884988039E-01 Hartree
+ Energy of the ifc part                    :  1.9662113884988033E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36964791837150E+02
 
@@ -717,7 +717,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.9659751436755080E-01 Hartree
+ Energy of the ifc part                    :  1.9659751436755077E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36964815461632E+02
 
@@ -744,7 +744,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.9384697614370738E-01 Hartree
+ Energy of the ifc part                    :  1.9384697614370749E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36967565999856E+02
 
@@ -771,7 +771,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.8962173995497061E-01 Hartree
+ Energy of the ifc part                    :  1.8962173995497067E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36971791236045E+02
 
@@ -798,7 +798,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.8516547360177449E-01 Hartree
+ Energy of the ifc part                    :  1.8516547360177452E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36976247502398E+02
 
@@ -852,7 +852,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.7971033842552334E-01 Hartree
+ Energy of the ifc part                    :  1.7971033842552339E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36981702637574E+02
 
@@ -879,7 +879,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.8019385290118339E-01 Hartree
+ Energy of the ifc part                    :  1.8019385290118342E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36981219123099E+02
 
@@ -906,7 +906,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.8337939672229092E-01 Hartree
+ Energy of the ifc part                    :  1.8337939672229103E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36978033579278E+02
 
@@ -933,7 +933,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.8937080045774196E-01 Hartree
+ Energy of the ifc part                    :  1.8937080045774207E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36972042175542E+02
 
@@ -960,7 +960,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.9802131144645291E-01 Hartree
+ Energy of the ifc part                    :  1.9802131144645310E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36963391664554E+02
 
@@ -987,7 +987,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  2.0892986958614557E-01 Hartree
+ Energy of the ifc part                    :  2.0892986958614584E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36952483106414E+02
 
@@ -1014,7 +1014,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  2.2143433671468707E-01 Hartree
+ Energy of the ifc part                    :  2.2143433671468710E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36939978639285E+02
 
@@ -1041,7 +1041,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  2.3461155758974164E-01 Hartree
+ Energy of the ifc part                    :  2.3461155758974178E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36926801418410E+02
 
@@ -1068,7 +1068,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  2.4730194281365478E-01 Hartree
+ Energy of the ifc part                    :  2.4730194281365492E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36914111033186E+02
 
@@ -1095,7 +1095,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  2.5818213124311101E-01 Hartree
+ Energy of the ifc part                    :  2.5818213124311118E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36903230844757E+02
 
@@ -1122,7 +1122,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  2.6590580967539162E-01 Hartree
+ Energy of the ifc part                    :  2.6590580967539157E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36895507166325E+02
 
@@ -1149,7 +1149,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  2.6931043903640794E-01 Hartree
+ Energy of the ifc part                    :  2.6931043903640789E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36892102536964E+02
 
@@ -1176,7 +1176,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  2.6764624559078620E-01 Hartree
+ Energy of the ifc part                    :  2.6764624559078598E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36893766730409E+02
 
@@ -1230,7 +1230,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  2.4906301728003005E-01 Hartree
+ Energy of the ifc part                    :  2.4906301728003002E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36912349958720E+02
 
@@ -1257,7 +1257,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  2.3355050988860626E-01 Hartree
+ Energy of the ifc part                    :  2.3355050988860632E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36927862466111E+02
 
@@ -1284,7 +1284,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  2.1545554995193958E-01 Hartree
+ Energy of the ifc part                    :  2.1545554995193961E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36945957426048E+02
 
@@ -1311,7 +1311,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.9609691113987504E-01 Hartree
+ Energy of the ifc part                    :  1.9609691113987510E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36965316064860E+02
 
@@ -1338,7 +1338,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.7670013426506959E-01 Hartree
+ Energy of the ifc part                    :  1.7670013426506970E-01 Hartree
 
     >>>>>>>>> Etotal= -1.36984712841735E+02
 
@@ -1365,7 +1365,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.5830537890025542E-01 Hartree
+ Energy of the ifc part                    :  1.5830537890025548E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37003107597100E+02
 
@@ -1392,7 +1392,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.4173583529609565E-01 Hartree
+ Energy of the ifc part                    :  1.4173583529609557E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37019677140704E+02
 
@@ -1419,7 +1419,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.2760339837374318E-01 Hartree
+ Energy of the ifc part                    :  1.2760339837374315E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37033809577626E+02
 
@@ -1446,7 +1446,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.1633128590664819E-01 Hartree
+ Energy of the ifc part                    :  1.1633128590664810E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37045081690093E+02
 
@@ -1473,7 +1473,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.0818047478838350E-01 Hartree
+ Energy of the ifc part                    :  1.0818047478838336E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37053232501212E+02
 
@@ -1500,7 +1500,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.0327314874186409E-01 Hartree
+ Energy of the ifc part                    :  1.0327314874186416E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37058139827258E+02
 
@@ -1527,7 +1527,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.0161044732671710E-01 Hartree
+ Energy of the ifc part                    :  1.0161044732671706E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37059802528673E+02
 
@@ -1554,7 +1554,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.0308403538549615E-01 Hartree
+ Energy of the ifc part                    :  1.0308403538549611E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37058328940615E+02
 
@@ -1581,7 +1581,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.0748211890678543E-01 Hartree
+ Energy of the ifc part                    :  1.0748211890678536E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37053930857093E+02
 
@@ -1608,7 +1608,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.1449115037919258E-01 Hartree
+ Energy of the ifc part                    :  1.1449115037919252E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37046921825621E+02
 
@@ -1635,7 +1635,7 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297600001E+02 Hartree
- Energy of the ifc part                    :  1.2369502623683171E-01 Hartree
+ Energy of the ifc part                    :  1.2369502623683176E-01 Hartree
 
     >>>>>>>>> Etotal= -1.37037717949763E+02
 
@@ -1658,10 +1658,10 @@ dipdip_range         2         2         2
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.3
+- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.4
 
 ================================================================================
 
-+Total cpu time      1.323  and wall time      1.348 sec
++Total cpu time      1.473  and wall time      1.490 sec
 
  multibinit : the run completed succesfully.

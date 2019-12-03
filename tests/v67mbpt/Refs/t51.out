@@ -1,6 +1,6 @@
 
-.Version 8.11.11 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Sep 2019.
-- ( at 15h32 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h32 )
   
 - input  file    -> t51.in
 - output file    -> t51.out
@@ -346,8 +346,8 @@ P           mkmem4          3
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__magcon/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__magcon/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -377,10 +377,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  ETOT  3  -8.8756561419827    -7.692E-05 3.172E-06 2.990E-03
  ETOT  4  -8.8756570364735    -8.945E-07 4.220E-08 1.086E-05
  ETOT  5  -8.8756570414101    -4.937E-09 1.945E-10 2.424E-08
- ETOT  6  -8.8756570414252    -1.504E-11 6.332E-13 1.671E-10
- ETOT  7  -8.8756570414253    -1.457E-13 2.197E-15 6.961E-13
- ETOT  8  -8.8756570414252     6.217E-14 1.502E-17 1.007E-15
- ETOT  9  -8.8756570414254    -1.172E-13 1.287E-20 1.653E-18
+ ETOT  6  -8.8756570414252    -1.503E-11 6.332E-13 1.671E-10
+ ETOT  7  -8.8756570414253    -1.421E-13 2.197E-15 6.961E-13
+ ETOT  8  -8.8756570414252     6.040E-14 1.502E-17 1.007E-15
+ ETOT  9  -8.8756570414254    -1.226E-13 1.287E-20 1.653E-18
 
  At SCF step    9       vres2   =  1.65E-18 < tolvrs=  1.00E-16 =>converged.
 
@@ -434,7 +434,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  3.02587579971565E+00
-    Hartree energy  =  5.38306610799665E-01
+    Hartree energy  =  5.38306610799664E-01
     XC energy       = -3.54190168818188E+00
     Ewald energy    = -8.43581958561899E+00
     PspCore energy  =  8.60437873155177E-02
@@ -484,14 +484,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 ================================================================================
  prteigrs : about to open file t51o_DS2_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  6.85E-30  5.57E-29  1.78E-29  7.43E-29  9.45E-30  6.03E-29  6.51E-29  2.56E-29
-  7.02E-29  1.72E-29  4.34E-29  3.15E-29  7.76E-29  3.14E-29
+  5.72E-30  5.62E-29  1.90E-29  7.16E-29  9.79E-30  6.02E-29  6.52E-29  2.52E-29
+  6.88E-29  1.75E-29  4.36E-29  3.15E-29  7.73E-29  3.06E-29
  -2.2715E-01  2.1698E-01  2.1698E-01  2.1698E-01  3.0999E-01  3.0999E-01
   3.0999E-01  3.3664E-01  4.9922E-01  5.0740E-01  5.0740E-01  6.2852E-01
   6.2852E-01  6.2852E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=  500    2 max resid (incl. the buffer)=  1.82675E-28
+  prteigrs : nnsclo,ikpt=  500    2 max resid (incl. the buffer)=  1.81887E-28
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -502,7 +502,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   42.265E-30; max=  18.267E-29
+ Mean square residual over all n,k,spin=   42.304E-30; max=  18.189E-29
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -545,8 +545,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__magcon/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__magcon/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -621,7 +621,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
         0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000 -15.822  -0.000   0.036   0.000   0.036  -0.000   0.036   0.000
+    2   0.000 -15.822  -0.000   0.036   0.000   0.036  -0.000   0.036  -0.000
        -0.000   0.000  -7.860   0.000  -0.254   0.000  -0.254   0.000  -0.254
 
  For q-point:  0.000010 0.000020 0.000030
@@ -648,9 +648,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -15.044  -2.218   4.391  -2.058  -3.587  -2.058  -3.587  -2.058  -3.587
-        0.000  -2.218  -4.391  -2.058   3.587  -2.058   3.587  -2.058   3.587
+       -0.000  -2.218  -4.391  -2.058   3.587  -2.058   3.587  -2.058   3.587
 
-    2  -2.218 -12.123   0.000   0.100   0.000   0.100  -0.000   0.100  -0.000
+    2  -2.218 -12.123  -0.000   0.100   0.000   0.100  -0.000   0.100   0.000
         2.218   0.000  -6.848  -0.000   0.446  -0.000   0.446  -0.000   0.446
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     53.67  [%]
@@ -662,9 +662,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -19.733  -4.427  -0.402  -0.402  -4.427  -0.402  -4.427  -4.427  -0.402
-        0.000  -4.427   0.402  -0.402   4.427  -0.402   4.427  -4.427   0.402
+       -0.000  -4.427   0.402  -0.402   4.427  -0.402   4.427  -4.427   0.402
 
-    2  -4.427 -14.156  -0.000   0.260   0.000   0.260  -0.000  -1.040   0.000
+    2  -4.427 -14.156  -0.000   0.260   0.000   0.260   0.000  -1.040   0.000
         4.427  -0.000  -4.842   0.000   1.478   0.000   1.478  -0.000  -0.988
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     49.10  [%]
@@ -769,9 +769,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 61 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 73 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 71 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 66 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0001_EXC_MDF
   
  Macroscopic dielectric function:
@@ -790,11 +790,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0002_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0002_GW_NLF_MDF
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 70 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 68 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0002_EXC_MDF
   
  Macroscopic dielectric function:
@@ -813,10 +813,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0003_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0003_GW_NLF_MDF
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 59 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 56 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 59 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0003_EXC_MDF
   
@@ -836,8 +836,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0004_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0004_GW_NLF_MDF
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 53 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 45 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 47 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 59 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
@@ -906,7 +906,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0007_GW_NLF_MDF
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 53 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 41 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
@@ -929,7 +929,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0008_GW_NLF_MDF
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 53 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 56 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
@@ -976,7 +976,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 51 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 46 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0010_EXC_MDF
@@ -1304,10 +1304,10 @@ P           mkmem4          3
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          9.6  wall=         10.0
+- Proc.   0 individual time (sec): cpu=          9.5  wall=          9.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  21 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.6  wall=         10.0
++Overall time at end (sec) : cpu=          9.5  wall=          9.9

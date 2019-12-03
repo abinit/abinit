@@ -162,7 +162,7 @@
 #%% test_chain = t30.in, t31.in, t32.in
 #%% [files]
 #%% files_to_test = 
-#%%   t30.out, tolnlines = 11, tolabs = 1.100e-05, tolrel = 6.0e-02, fld_options = -medium
+#%%   t30.out, tolnlines = 12, tolabs = 1.100e-05, tolrel = 6.0e-02, fld_options = -medium
 #%% psp_files = 31ga.SGS_mod, 33as.SGS_mod
 #%% [paral_info]
 #%% max_nprocs = 2

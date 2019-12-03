@@ -13,8 +13,8 @@ try:
     is_available = True
 
 except ImportError:
-    warnings.warn('Cannot import numpy or yaml package. Use `pip install numpy'
-                  ' pyyaml --user` to install the packages in user mode.')
+    warnings.warn('\nCannot import numpy or yaml package.\nUse `pip install numpy pyyaml --user`'
+                  '\nto install the packages in user mode.')
     is_available = False
 
 try:
@@ -22,8 +22,8 @@ try:
     has_pandas = True
 except ImportError:
     has_pandas = False
-    warnings.warn('Cannot import pandas package. Use `pip install pandas'
-                  ' --user` to install the package in user mode.')
+    warnings.warn('\nCannot import pandas package. Use `pip install pandas --user`'
+                  '\nto install the package in user mode.')
 
 
 if is_available:

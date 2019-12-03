@@ -1,6 +1,6 @@
 
 .Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 21 Oct 2019.
-- ( at 23h38 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h22 )
   
 - input  file    -> tgw2_3.in
 - output file    -> tgw2_3.out
@@ -196,8 +196,8 @@ P           mkmem           8
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_yaml/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -271,8 +271,8 @@ P           mkmem           8
 
   Number of electrons    =    2.9999
 
-  QP Band energy    [Ha] =  3.72160123532739E-01
-  QP Hartree energy [Ha] =  3.57747793413946E-03
+  QP Band energy    [Ha] =  3.72160123532742E-01
+  QP Hartree energy [Ha] =  3.57747793413947E-03
 
 --------------------------------------------------------------------------------
  SIGMA fundamental parameters:
@@ -627,10 +627,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          8.0  wall=          8.0
+- Proc.   0 individual time (sec): cpu=          7.8  wall=          7.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.0  wall=          8.0
++Overall time at end (sec) : cpu=          7.8  wall=          7.9
