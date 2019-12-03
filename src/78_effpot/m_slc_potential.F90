@@ -370,7 +370,7 @@ contains
       ! TESTING: write magnetic fields to a file
       write(201,*) 'Magnetic fields are'
       do ii = 1, self%nspin
-        write(201,*) ii, bfield(:,ii)
+        write(201,*) ii, btmp(:,ii)
       enddo
     endif
 
@@ -453,7 +453,7 @@ contains
       enddo
     endif
 
-    if(present(energy)) energy =  eslc
+    if(present(energy)) energy =  energy + eslc
 
 
     ABI_UNUSED_A(strain)
