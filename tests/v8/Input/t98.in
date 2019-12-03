@@ -23,7 +23,6 @@ analyze_anh_pot = 1
 #%% system_xml = t98_model.xml
 #%% test_set = t98.nc
 #%% test_chain = t98.in, t99.in, t100.in
-#%% exclude_builders = atlas_intel_18.0_openmpi,higgs_intel_19.0_serial
 #%% [files]
 #%% files_to_test = 
 #%%   t98.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
