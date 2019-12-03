@@ -248,7 +248,7 @@ real(dp) :: favg
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
 logical :: need_scfcv_cycle = .TRUE., need_elec_eval = .FALSE.
 logical :: change,useprtxfase
-logical :: skipcycle, file_opened
+logical :: skipcycle
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
 real(dp) :: minE,wtime_step,now,prev
