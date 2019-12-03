@@ -370,9 +370,7 @@ contains
       ! TESTING: write magnetic fields to a file
       write(201,*) 'Magnetic fields are'
       do ii = 1, self%nspin
-        !if(dot_product(bfield(:,ii), bfield(:,ii)).gt.1d-16) then
-          write(201,*) ii, bfield(:,ii)
-        !endif
+        write(201,*) ii, bfield(:,ii)
       enddo
     endif
 
@@ -444,18 +442,6 @@ contains
         endif
         eslc = eslc + eterm
       endif
-
-      ! add forces and energy for reference spin structure terms
-!      if(self%has_bilin .or. self%has_quadlin) then
-!        fslc(:) = fslc(:) + self%fref(:)
-!        eslc = eslc - dot_product(self%fref, disp)
-!      endif
-!      if(self%has_linquad .or. self%has_biquad) then
-!        f1(:) = 0.0d0
-!        call self%matrixref%vec_product2d(1, disp, 2, f1)
-!        fslc(:)= fslc+2.0*beta*f1(:)
-!        eslc = eslc + beta*dot_product(f1, disp)
-!      endif
     endif !energy or force
 
     if(present(force)) then
@@ -463,9 +449,7 @@ contains
       !TESTING write forces to file
       write(200,*) 'Forces are'
       do ii = 1, self%natom
-        !if(dot_product(force(:,ii), force(:,ii)).gt.1d-16) then
-          write(200,*) ii, force(:,ii)
-        !endif
+        write(200,*) ii, force(:,ii)
       enddo
     endif
 
