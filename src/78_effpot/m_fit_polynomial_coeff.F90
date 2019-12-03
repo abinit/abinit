@@ -2317,11 +2317,11 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  type(scup_dtset_type),optional,intent(inout) :: scup_dtset
 !Local variables-------------------------------
 !scalar
-integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,itime
+integer :: ii,ia,mu,unit_energy,unit_stress,itime
 !Uncommend for dipdip test
 ! integer :: ifirst
  real(dp):: energy,energy_harm
- logical :: need_anharmonic = .TRUE.,need_print=.FALSE., anh_opened,need_elec_eval
+ logical :: need_anharmonic = .TRUE.,need_print=.FALSE.,need_elec_eval
  !arrays
  real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
 !Strings/Characters 
@@ -2382,8 +2382,6 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,itime
  end if
  
  file_anh=trim(name_file)//'_anharmonic_terms_energy.dat'
- !anh_opened=.FALSE.
- !INQUIRE(FILE=file_anh,OPENED=anh_opened,number=unit_anh)
 
  mse  = zero
  msef = zero
@@ -2392,9 +2390,6 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,itime
    xred(:,:)   = hist%xred(:,:,ii)
    rprimd(:,:) = hist%rprimd(:,:,ii)
    itime = ii
-   !if(anh_opened)then
-   !  write(unit_anh,'(I7)',advance='no') itime!If wanted Write cycle to anharmonic_energy_contribution file if(eff_pot%mpi_coeff%my_rank == 0)
-   !end if
 #if defined DEV_MS_SCALEUP 
    !Pass print options to scale-up
    itime = ii 

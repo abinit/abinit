@@ -236,7 +236,7 @@ type(delocint) :: deloc
 type(mttk_type) :: mttk_vars
 integer :: itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
 integer :: ntime,option,comm
-integer :: nerr_dilatmx,my_quit,ierr,quitsum_request,unit_out
+integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
 integer ABI_ASYNC :: quitsum_async
 character(len=500) :: message
 !character(len=500) :: dilatmx_errmsg
@@ -617,11 +617,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
          else
 !          For monte carlo don't need to recompute energy here
 !          (done in pred_montecarlo)
-           !name_file='MD_anharmonic_terms_energy.dat'
-           !INQUIRE(FILE=name_file,OPENED=file_opened,number=unit_out)
-           !  if(file_opened .eqv. .TRUE.)then
-           !    write(unit_out,'(I7)',advance='no') itime  !Write cycle to anharmonic_energy_contribution file
-           !  endif
+           name_file='MD_anharmonic_terms_energy.dat'
              if(itime == 1 .and. ab_mover%restartxf==-3)then
                call effective_potential_file_mapHistToRef(effective_potential,hist,comm,need_verbose) ! Map Hist to Ref to order atoms
                xred(:,:) = hist%xred(:,:,1) ! Fill xred with new ordering
