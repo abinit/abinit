@@ -1032,7 +1032,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
    write(my_unt, '(a)') ' Dynamical Quadrupoles: '
    do iatom=1,db%natom
      do idir=1,3
-       write(my_unt,'(a,i0,a,i0,3(/,3es16.6))')' iatom: ', iatom, ' idir: ', idir, &
+       write(my_unt,'(2(a,i0),3(/,3es16.6))')' iatom: ', iatom, ' idir: ', idir, &
          db%qstar(1,1,idir,iatom), db%qstar(1,2,idir,iatom), db%qstar(1,3,idir,iatom), &
          db%qstar(2,1,idir,iatom), db%qstar(2,2,idir,iatom), db%qstar(2,3,idir,iatom), &
          db%qstar(3,1,idir,iatom), db%qstar(3,2,idir,iatom), db%qstar(3,3,idir,iatom)
