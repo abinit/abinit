@@ -31,8 +31,20 @@
 MODULE m_calc_ucrpa
 
 #ifdef FC_INTEL
+#if  __INTEL_COMPILER==1310
 !DEC$ NOOPTIMIZE
 #endif
+#if  __INTEL_COMPILER==1500
+!DEC$ NOOPTIMIZE
+#endif
+#if  __INTEL_COMPILER==1600
+!DEC$ NOOPTIMIZE
+#endif
+#if  __INTEL_COMPILER==1700
+!DEC$ NOOPTIMIZE
+#endif
+#endif
+
 
   use defs_basis
  implicit none

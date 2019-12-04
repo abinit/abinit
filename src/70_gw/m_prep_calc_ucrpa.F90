@@ -170,6 +170,21 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 ! !DEC$ NOOPTIMIZE
 ! #endif
 
+#ifdef FC_INTEL
+#if  __INTEL_COMPILER==1310
+!DEC$ NOOPTIMIZE
+#endif
+#if  __INTEL_COMPILER==1500
+!DEC$ NOOPTIMIZE
+#endif
+#if  __INTEL_COMPILER==1600
+!DEC$ NOOPTIMIZE
+#endif
+#if  __INTEL_COMPILER==1700
+!DEC$ NOOPTIMIZE
+#endif
+#endif
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: sigmak_ibz,ikcalc,itypatcor,prtvol,lpawu,minbnd,maxbnd,pawcross,plowan_compute

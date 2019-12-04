@@ -25,6 +25,22 @@
 
 MODULE m_plowannier
 
+#ifdef FC_INTEL
+#if  __INTEL_COMPILER==1310
+!DEC$ NOOPTIMIZE
+#endif
+#if  __INTEL_COMPILER==1500
+!DEC$ NOOPTIMIZE
+#endif
+#if  __INTEL_COMPILER==1600
+!DEC$ NOOPTIMIZE
+#endif
+#if  __INTEL_COMPILER==1700
+!DEC$ NOOPTIMIZE
+#endif
+#endif
+
+
  use defs_basis
  use m_errors
  use m_abicore
@@ -794,7 +810,6 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  integer :: lwork,info,whole_diag
  !complex(dpc), allocatable :: densmat(:,:)
 !************************************************************************
-
 
 ! Drive the normalization of the psichis
 
