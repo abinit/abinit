@@ -3092,7 +3092,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
            if(typevarphys=='ENE')out_unit=' Hartree'
            if(typevarphys=='LEN')out_unit=' Bohr   '
            if(typevarphys=='BFI')out_unit='   ' !EB remove Tesla unit
-           if(typevarphys=='TIM')out_unit=' Second' !EB remove Tesla unit
+           if(typevarphys=='TIM')out_unit=' Second' 
 !          Format, according to the length of the dataset string
            if((multi==0).or.(ncid<0))then
              appen=' '

@@ -3235,7 +3235,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
 
 !    If the power_disp is one, we need to set icoeff to icoeff1
      if(power_disp==1) then
-       if(icoeff1 <= ncoeff .and. compatibleCoeffs(icoeff1,icoeff1)==0)then
+       if(icoeff1<=ncoeff .and. compatibleCoeffs(icoeff,icoeff1)==0)then
          compatible = .FALSE.
        end if
      end if

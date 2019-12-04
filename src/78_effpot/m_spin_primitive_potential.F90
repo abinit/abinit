@@ -115,11 +115,15 @@ contains
 
 
   subroutine set_spin_primcell(self, natoms, unitcell, positions, &
-       nspin, index_spin, spinat, gyroratios, damping_factors )
+       & nspin, index_spin, spinat, gyroratios, damping_factors, &
+       & Sref, ref_spin_qpoint, ref_spin_rotate_axis)
+
     class(spin_primitive_potential_t), intent(inout) :: self
-    integer, intent(inout):: natoms, nspin, index_spin(:)
-    real(dp), intent(inout):: unitcell(3, 3),  positions(3,natoms), &
-         spinat(3,natoms), gyroratios(nspin), damping_factors(nspin)
+    integer,                           intent(inout) :: natoms, nspin, index_spin(:)
+    real(dp),                          intent(inout) :: unitcell(3, 3),  positions(3,natoms)
+    real(dp),                          intent(inout) :: spinat(3, natoms), gyroratios(nspin), damping_factors(nspin)
+    real(dp),                optional, intent(inout) :: Sref(3, nspin), ref_spin_qpoint(3), ref_spin_rotate_axis(3)
+
     integer :: iatom, ispin
     real(dp) :: ms(nspin), spin_positions(3, nspin)
     integer :: master, my_rank, comm, nproc, ierr
@@ -140,7 +144,8 @@ contains
           end if
        end do
     endif
-    call self%primcell%set_spin(nspin, ms, unitcell,  spin_positions, gyroratios, damping_factors)
+    call self%primcell%set_spin(nspin, ms, unitcell,  spin_positions, gyroratios, damping_factors, &
+         & Sref=Sref, ref_qpoint=ref_spin_qpoint, ref_rotate_axis=ref_spin_rotate_axis)
   end subroutine set_spin_primcell
 
 
@@ -191,6 +196,8 @@ contains
 
     integer :: nspin, natom
     real(dp) :: cell(3,3)
+    real(dp) :: ref_spin_qpoint(3), ref_spin_rotate_axis(3)
+    real(dp), allocatable :: ref_spin_orientation(:, :)
     integer, allocatable :: index_spin(:)
     real(dp), allocatable :: spinat(:,:)
     real(dp), allocatable :: xcart(:,:)
@@ -238,6 +245,7 @@ contains
     ABI_ALLOCATE(index_spin, (natom))
     ABI_ALLOCATE(gyroratio, (nspin))
     ABI_ALLOCATE(gilbert_damping, (nspin))
+    ABI_ALLOCATE(ref_spin_orientation, (3, nspin))
 
     ierr =nf90_inq_varid(ncid, "ref_cell", varid)
     NCF_CHECK_MSG(ierr, "ref_cell")
@@ -251,6 +259,48 @@ contains
     NCF_CHECK_MSG(ierr, "ref_xcart")
 
     xcart(:,:)=xcart(:,:)/ Bohr_Ang
+
+    ierr =nf90_inq_varid(ncid, "spin_ref_orientation", varid)
+    if(ierr==NF90_NOERR) then
+      ierr = nf90_get_var(ncid, varid, ref_spin_orientation)
+      NCF_CHECK_MSG(ierr, "spin_ref_orientation")
+    else
+      MSG_WARNING("Could not read spin_ref_orientation from nc file, will use z-direction.")
+      ref_spin_orientation(1,:)=0.0d0
+      ref_spin_orientation(2,:)=0.0d0
+      ref_spin_orientation(3,:)=1.0d0
+    endif  
+
+    !NCF_CHECK_MSG(ierr, "spin_ref_orientation")
+    !ierr = nf90_get_var(ncid, varid, ref_spin_orientation)
+    !NCF_CHECK_MSG(ierr, "spin_ref_orientation")
+
+    ierr =nf90_inq_varid(ncid, "spin_ref_qpoint", varid)
+    if(ierr==NF90_NOERR) then
+      ierr = nf90_get_var(ncid, varid, ref_spin_qpoint)
+      NCF_CHECK_MSG(ierr, "spin_ref_qpoint")
+    else
+      MSG_WARNING("Could not read spin_ref_qpoint from nc file, will use Gamma point.")
+      ref_spin_qpoint(:)=0.0d0
+    endif
+    !NCF_CHECK_MSG(ierr, "spin_ref_qpoint")
+    !ierr = nf90_get_var(ncid, varid, ref_spin_qpoint)
+    !NCF_CHECK_MSG(ierr, "spin_ref_qpoint")
+
+    ierr =nf90_inq_varid(ncid, "spin_ref_rotate_axis", varid)
+    if(ierr==NF90_NOERR) then
+      ierr = nf90_get_var(ncid, varid, ref_spin_rotate_axis)
+      NCF_CHECK_MSG(ierr, "spin_ref_rotate_axis")
+    else
+      MSG_WARNING("Could not read spin_ref_rotate_axis from nc file, will use x-axis.")
+      ref_spin_rotate_axis(1)=1.0d0
+      ref_spin_rotate_axis(2)=0.0d0
+      ref_spin_rotate_axis(3)=0.0d0
+    endif
+
+    !NCF_CHECK_MSG(ierr, "spin_ref_rotate_axis")
+    !ierr = nf90_get_var(ncid, varid, ref_spin_rotate_axis)
+    !NCF_CHECK_MSG(ierr, "spin_ref_rotate_axis")
 
     ierr =nf90_inq_varid(ncid, "spinat", varid)
     NCF_CHECK_MSG(ierr, "spinat")
@@ -272,17 +322,17 @@ contains
     ierr = nf90_get_var(ncid, varid, gilbert_damping)
     NCF_CHECK_MSG(ierr, "gilbert_damping")
 
-
     call self%set_spin_primcell( natoms=natom, unitcell=cell, positions=xcart, &
          & nspin=nspin, index_spin=index_spin, spinat=spinat, &
-         & gyroratios=gyroratio, damping_factors=gilbert_damping )
+         & gyroratios=gyroratio, damping_factors=gilbert_damping, &
+         & Sref=ref_spin_orientation, ref_spin_qpoint=ref_spin_qpoint, ref_spin_rotate_axis=ref_spin_rotate_axis)
 
     ABI_SFREE(xcart)
     ABI_SFREE(spinat)
     ABI_SFREE(index_spin)
     ABI_SFREE(gyroratio)
     ABI_SFREE(gilbert_damping)
-
+    ABI_SFREE(ref_spin_orientation)
 
     !== read exchange terms
     ierr=nf90_inq_dimid(ncid, "spin_exchange_nterm", spin_exchange_nterm)
@@ -776,15 +826,20 @@ contains
   !  scmaker: supercell maker helper class
   !  scpot: supercell potential (a pointer to a abstract potential)
   !-------------------------------------------------------------------!
-  subroutine fill_supercell(self, scmaker, scpot)
+  subroutine fill_supercell(self, scmaker, params, scpot)
     class(spin_primitive_potential_t) , intent(inout) :: self
-    type(supercell_maker_t), intent(inout):: scmaker
+    type(supercell_maker_t),            intent(inout) :: scmaker
+    type(multibinit_dtset_type),        intent(inout) :: params
     class(abstract_potential_t), pointer, intent(inout) :: scpot
+
     integer :: nspin, sc_nspin, i, R(3), ind_Rij(3), iR, ii, ij, inz
-    integer, allocatable :: i_sc(:), j_sc(:), Rj_sc(:, :)
-    real(dp) :: val_sc(scmaker%ncells)
     integer :: master, my_rank, comm, nproc, ierr
+    integer, allocatable :: i_sc(:), j_sc(:), Rj_sc(:, :)
     logical :: iam_master
+    real(dp) :: val_sc(scmaker%ncells)
+
+    ABI_UNUSED_A(params)
+
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
     nspin=self%nspin
@@ -794,27 +849,28 @@ contains
     ABI_DATATYPE_ALLOCATE_SCALAR(spin_potential_t, scpot)
     select type(scpot) ! use select type because properties only defined for spin_potential is used.
     type is (spin_potential_t) 
-       call scpot%initialize(sc_nspin)
-       if (iam_master) then
-          call self%coeff%sum_duplicates()
-          do inz=1, self%coeff%nnz
-             ind_Rij=self%coeff%get_ind_inz(inz)
-             iR=ind_Rij(1)
-             ii=ind_Rij(2)
-             ij=ind_Rij(3)
-             R=self%Rlist%data(:,iR)
-             call scmaker%trans_i(nbasis=nspin*3, i=ii, i_sc=i_sc)
-             call scmaker%trans_j_and_Rj(nbasis=nspin*3, j=ij, Rj=R, j_sc=j_sc, Rj_sc=Rj_sc)
-             val_sc(:)= self%coeff%val%data(inz)
-             do i=1, scmaker%ncells
-                call scpot%add_bilinear_term(i_sc(i), j_sc(i), val_sc(i))
-             end do
-             if(allocated(i_sc)) ABI_DEALLOCATE(i_sc)
-             if(allocated(j_sc)) ABI_DEALLOCATE(j_sc)
-             if(allocated(Rj_sc)) ABI_DEALLOCATE(Rj_sc)
+      call scpot%initialize(sc_nspin)
+      if (iam_master) then
+        call self%coeff%sum_duplicates()
+        do inz=1, self%coeff%nnz
+          ind_Rij=self%coeff%get_ind_inz(inz)
+          iR=ind_Rij(1)
+          ii=ind_Rij(2)
+          ij=ind_Rij(3)
+          R=self%Rlist%data(:,iR)
+          call scmaker%trans_i(nbasis=nspin*3, i=ii, i_sc=i_sc)
+          call scmaker%trans_j_and_Rj(nbasis=nspin*3, j=ij, Rj=R, j_sc=j_sc, Rj_sc=Rj_sc)
+          val_sc(:)= self%coeff%val%data(inz)
+          do i=1, scmaker%ncells
+            call scpot%add_bilinear_term(i_sc(i), j_sc(i), val_sc(i))
           end do
-       endif
+          if(allocated(i_sc)) ABI_DEALLOCATE(i_sc)
+          if(allocated(j_sc)) ABI_DEALLOCATE(j_sc)
+          if(allocated(Rj_sc)) ABI_DEALLOCATE(Rj_sc)
+        end do
+      endif
     end select
+    ABI_UNUSED_A(params)
   end subroutine fill_supercell
 
   !-------------------------------------------------------------------!
