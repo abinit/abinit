@@ -40,6 +40,7 @@ module m_vtorho
  use m_dtset
  use m_dtfil
  use m_hightemp
+ use m_hightemp_debug
 
  use defs_datatypes,       only : pseudopotential_type
  use defs_abitypes,        only : MPI_type
@@ -1230,12 +1231,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     dtset%nsppol,occ,dtset%occopt,prtvol,dtset%stmbias,dtset%tphysel,dtset%tsmear,dtset%wtk)
      call timab(990,2,tsec)
 
-!     Blanchet Once we have occupation, compute number of free electrons
-      if(associated(hightemp)) then
-        call hightemp%compute_nfreeel(energies%e_fermie,1024,dtset%tsmear)
-        call hightemp%compute_e_kin_freeel(energies%e_fermie,1024,nfftf,dtset%nspden,&
-&        dtset%tsmear,vtrial)
-      end if
+!    Blanchet Once we have occupation, compute number of free electrons
+     if(associated(hightemp)) then
+       call hightemp%compute_nfreeel(energies%e_fermie,1024,dtset%tsmear)
+       call hightemp%compute_e_kin_freeel(energies%e_fermie,1024,nfftf,dtset%nspden,&
+&       dtset%tsmear,vtrial)
+       if(psps%usepaw==1) then
+         call hightemp_prt_cprj(cprj,gs_hamk,istep,dtset%mband,mcprj_local,mpi_enreg,natom)
+       end if
+     end if
 
 !    !=========  DMFT call begin ============================================
      dmft_ldaocc=0

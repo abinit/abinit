@@ -951,7 +951,7 @@ end subroutine polynomial_coeff_writeXML
 !!
 !! OUTPUT
 !!  energy = contribution to the energy
-!!  energy_coeff(ncoeff) = energy contribution of each anharmonic term 
+!!  energy_coeff(ncoeff) = energy contribution of each anharmonic term
 !!  fcart(3,natom) = contribution  to the forces
 !!  strten(6) = contribution to the stress tensor
 !!
@@ -987,7 +987,7 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart
   integer :: icoeff,iterm,idisp1,idisp2,idisp1_strain,idisp2_strain,icell,ndisp
   integer :: nstrain,ndisp_tot,power_disp,power_strain,unit_out
   real(dp):: coeff,disp1,disp2,tmp1,tmp2,tmp3,weight
-  logical :: file_opened 
+  logical :: file_opened
 ! array
   integer :: cell_atoma1(3),cell_atoma2(3)
   integer :: cell_atomb1(3),cell_atomb2(3)
@@ -1195,22 +1195,22 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart
   call xmpi_sum(strten , comm, ierr)
 
 
-!Write to anharmonic_energy_terms.out ORIGINAL  
+!Write to anharmonic_energy_terms.out ORIGINAL
   INQUIRE(FILE='anharmonic_energy_terms.out',OPENED=file_opened,number=unit_out)
   if(file_opened .eqv. .TRUE.)then
     do icoeff=1,ncoeff
       call xmpi_sum(energy_coeff(icoeff), comm, ierr)
      !write(*,*) 'term ',icoeff,' :', energy_coeff(icoeff)
-     ! Marcus write energy contributions of anharmonic terms to file 
-      if(icoeff <ncoeff)then      
+     ! Marcus write energy contributions of anharmonic terms to file
+      if(icoeff <ncoeff)then
         write(unit_out,'(A,1ES24.16)',advance='no')  '    ',energy_coeff(icoeff)
-      else if(icoeff==ncoeff)then  
+      else if(icoeff==ncoeff)then
         write(unit_out,'(A,1ES24.16)',advance='yes') '    ',energy_coeff(icoeff)
-      end if     
-    enddo 
+      end if
+    enddo
   end if
 
-  
+
 end subroutine polynomial_coeff_evaluate
 !!***
 
@@ -2351,13 +2351,13 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  !   filename = "terms_set.xml"
  !   call polynomial_coeff_writeXML(coefficients,my_newncoeff,filename=filename)
  ! end if
-  
+
  if(need_verbose)then
    write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  end if
- 
+
 
 !Final deallocation
  ABI_DEALLOCATE(symbols)
@@ -2367,7 +2367,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  if(allocated(coeffs_tmp))then
    ABI_DATATYPE_DEALLOCATE(coeffs_tmp)
  end if
- 
+
 end subroutine polynomial_coeff_getNorder
 !!***
 
@@ -2450,7 +2450,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
  character(len=5),intent(in) :: symbols(natom)
 !Local variables ---------------------------------------
 !scalar
- integer :: ia,ib,ii,icoeff1,icoeff_tmp
+ integer :: ia,ib,ii,icoeff1,icoeff_tmp,icoefftemp
  integer :: iterm,nbody_in,ncoeff_max,pa,pb
  integer :: ndisp_max,nterm_max
  real(dp):: coefficient
@@ -2575,10 +2575,12 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
      end if!end if power_disp < power_disp_min
 
      if(compatible)then
+       icoefftemp=icoeff1
        call computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,list_str,index_coeff,&
-&                         icoeff1,icoeff_tot,natom,ncoeff,nstr,ncoeff_out,nrpt,nsym,power_disp+1,&
+&                         icoefftemp,icoeff_tot,natom,ncoeff,nstr,ncoeff_out,nrpt,nsym,power_disp+1,&
 &                         power_disp_min,power_disp_max,symbols,nbody=nbody_in,compute=need_compute,&
 &                         anharmstr=need_anharmstr,spcoupling=need_spcoupling)
+       ! icoeff1=icoefftemp
      end if
    end do
 
@@ -2698,7 +2700,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
  character(len=5),intent(in) :: symbols(natom)
 !Local variables ---------------------------------------
 !scalar
- integer :: icoeff1,icoeff2,nbody_in,ii,jj
+ integer :: icoeff1,icoeff2,nbody_in,ii,jj,icoefftemp
  logical :: need_compute,compatible,possible,need_anharmstr,need_spcoupling
  logical :: need_only_odd_power,need_only_even_power
 !arrays
@@ -2806,15 +2808,18 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
        end if
      end if!end if power_disp < power_disp_min
 
+
 !    If the model is still compatbile with the input flags, we continue.
      if(compatible)then
+       icoefftemp=icoeff1
        call computeCombinationFromList(cell,compatibleCoeffs,list_coeff,list_str,&
-&                                     index_coeff,list_combination,icoeff1,max_power_strain,&
+&                                     index_coeff,list_combination,icoefftemp,max_power_strain,&
 &                                     nmodel_tot,natom,ncoeff,nstr,nmodel,nrpt,nsym,power_disp+1,&
 &                                     power_disp_min,power_disp_max,symbols,nbody=nbody_in,&
 &                                     compute=need_compute,anharmstr=need_anharmstr,&
 &                                     spcoupling=need_spcoupling,only_odd_power=need_only_odd_power,&
 &                                     only_even_power=need_only_even_power)
+       ! icoeff1=icoefftemp
      end if
    end do
    ABI_DEALLOCATE(index_coeff)

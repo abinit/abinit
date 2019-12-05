@@ -50,7 +50,8 @@ module m_hightemp
   end type hightemp_type
 
   type(hightemp_type),save,pointer :: hightemp=>null()
-  public :: hightemp_dosfreeel,hightemp_prt_eigocc,hightemp_getnfreeel
+  public :: hightemp_dosfreeel
+  public :: hightemp_prt_eigocc,hightemp_getnfreeel
 contains
 
   !!****f* ABINIT/m_hightemp/init
