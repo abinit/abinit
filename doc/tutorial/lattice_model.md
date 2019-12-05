@@ -134,15 +134,15 @@ In tutomulti1_2.in, [[multibinit:prt_model]] is still set to one so multibinit w
 
 With the two last examples, we have shown that MULTIBINIT is able to read either a DDB file or a XML as inputs for the system definition and the harmonic part of the potential.
 
-We can now run our *first dynamics*: you can copy the files ~abinit/tests/tutomultibinit/Input/tutomulti1_3*. in your work directly and have a look them.
+We can now run our *first dynamics*: you can copy the files ~abinit/tests/tutomultibinit/Input/tutomulti1_3.* in your work directly and have a look them.
 
 {% dialog tests/tutomultibinit/Input/tmulti1_3.in %}
 
-You can visualize your dynamic with the agate software:
+The simulation starts from the DDB to correctly account for the dipole-dipole interactions. You can visualize your dynamics with the agate software:
 
     agate tmulti1_3.out_HIST.nc
 
-As you can see, the simulation diverges. This is because a model potential without anharmonic terms is not sufficient here. You should also verify the warnings in the standard output associated with tmulti1_3.
+Also try to use the effective potential from the xml file instead, in which the dipole-dipole interactions were not corrected. What do you see when you visualize the track?
    
 * * *
 
