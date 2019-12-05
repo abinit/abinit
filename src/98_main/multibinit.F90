@@ -80,7 +80,7 @@ program multibinit
   real(dp) :: tcpu,tcpui,twall,twalli
   real(dp) :: tsec(2)
   character(len=24) :: codename,start_datetime
-  character(len=fnlen) :: filnam(17),tmpfilename
+  character(len=fnlen) :: filnam(18),tmpfilename
   character(len=500) :: message 
   type(args_t) :: args
   integer :: ii
