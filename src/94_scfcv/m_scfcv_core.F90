@@ -350,7 +350,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  integer :: mcprj_wvl
 #endif
  integer :: me,me_wvl,mgfftdiel,mgfftf,moved_atm_inside,moved_rhor,my_nspinor,n1xccc
- integer :: n3xccc,ncpgr,nfftdiel,nfftmix,nfftmix_per_nfft,nfftotf,ngrvdw,nhatgrdim,nk3xc,nkxc
+ integer :: n3xccc,ncpgr,nfftdiel,nfftmix,nfftmix_per_nfft,nfftotf,ngrcondft,ngrvdw,nhatgrdim,nk3xc,nkxc
  integer :: npawmix,npwdiel,nstep,nzlmopt,optcut,optcut_hf,optene,optgr0,optgr0_hf
  integer :: optgr1,optgr2,optgr1_hf,optgr2_hf,option,optrad,optrad_hf,optres,optxc,prtfor,prtxml,quit
  integer :: quit_sum,rdwrpaw,shft,spaceComm,spaceComm_fft,spaceComm_wvl,spaceComm_grid
@@ -406,8 +406,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp),allocatable :: dielinv(:,:,:,:,:),dtn_pc(:,:)
  real(dp),allocatable :: fcart(:,:),forold(:,:),fred(:,:),gresid(:,:)
- real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grhf(:,:),grnl(:),grvdw(:,:),grxc(:,:)
- real(dp),allocatable :: kxc(:,:),nhat(:,:),nhatgr(:,:,:),nvresid(:,:),nvtauresid(:,:)
+ real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grhf(:,:),grnl(:),grcondft(:,:),grvdw(:,:),grxc(:,:)
+ real(dp),allocatable :: intgres(:,:),kxc(:,:),nhat(:,:),nhatgr(:,:,:),nvresid(:,:),nvtauresid(:,:)
  real(dp),allocatable :: ph1d(:,:),ph1ddiel(:,:),ph1df(:,:)
  real(dp),allocatable :: phnonsdiel(:,:,:),rhowfg(:,:),rhowfr(:,:),shiftvector(:)
  real(dp),allocatable :: susmat(:,:,:,:,:),synlgr(:,:)
@@ -645,6 +645,16 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
  ngrvdw=0;if (dtset%vdw_xc>=5.and.dtset%vdw_xc<=7) ngrvdw=dtset%natom
  ABI_ALLOCATE(grvdw,(3,ngrvdw))
+
+ ngrcondft=0
+ if(any(dtset%constraint_kind(:)/=0)) ngrcondft=dtset%natom
+ ABI_ALLOCATE(grcondft,(3,ngrcondft))
+ ABI_ALLOCATE(intgres,(dtset%nspden,ngrcondft))
+ if(ngrcondft/=0)then
+   grcondft(:,:)=zero
+   intgres(:,:)=zero
+ endif
+
  grchempottn(:,:)=zero
  forold(:,:)=zero ; gresid(:,:)=zero ; pel(:)=zero
  vtrial(:,:)=zero; vxc(:,:)=zero
@@ -1814,7 +1824,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !    Compute new potential from the trial density
 
      optene=2*optres;if(psps%usepaw==1) optene=2
-     call rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfftf,ngfftf, &
+     call rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc,mpi_enreg,nfftf,ngfftf, &
 &     nhat,nhatgr,nhatgrdim,nkxc,nvresid,n3xccc,optene,optres,optxc,&
 &     rhog,rhor,rprimd,strsxc,ucvol_local,psps%usepaw,usexcnhat,&
 &     vhartr,vnew_mean,vpsp,vres_mean,res2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
@@ -2134,9 +2144,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !SHOULD CLEAN THE ARGS OF THIS ROUTINE
  call afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
-& energies,etotal,favg,fcart,fock,forold,fred,grchempottn,&
+& energies,etotal,favg,fcart,fock,forold,fred,grchempottn,grcondft,&
 & gresid,grewtn,grhf,grhor,grvdw,&
-& grxc,gsqcut,hdr,indsym,irrzon,istep,istep_fock_outer,istep_mix,&
+& grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
 & kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
@@ -2159,7 +2169,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
  call outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil,&
 & dtset,ecut,eigen,electronpositron,elfr,etotal,&
-& gmet,gprimd,grhor,hdr,kg,lrhor,dtset%mband,mcg,mcprj,dtset%mgfft,&
+& gmet,gprimd,grhor,hdr,intgres,kg,lrhor,dtset%mband,mcg,mcprj,dtset%mgfft,&
 & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,nattyp,&
 & nfftf,ngfftf,nhat,dtset%nkpt,npwarr,dtset%nspden,&
 & dtset%nsppol,dtset%nsym,psps%ntypat,n3xccc,occ,paw_dmft,pawang,pawfgr,pawfgrtab,&
@@ -2224,11 +2234,13 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  ABI_DEALLOCATE(fred)
  ABI_DEALLOCATE(forold)
  ABI_DEALLOCATE(grchempottn)
+ ABI_DEALLOCATE(grcondft)
  ABI_DEALLOCATE(gresid)
  ABI_DEALLOCATE(grewtn)
  ABI_DEALLOCATE(grnl)
  ABI_DEALLOCATE(grvdw)
  ABI_DEALLOCATE(grxc)
+ ABI_DEALLOCATE(intgres)
  ABI_DEALLOCATE(synlgr)
  ABI_DEALLOCATE(ph1d)
  ABI_DEALLOCATE(ph1df)
