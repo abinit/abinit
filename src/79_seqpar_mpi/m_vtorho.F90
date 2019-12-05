@@ -202,8 +202,8 @@ contains
 !!  with_vectornd = 1 if vectornd allocated
 !!  vectornd(with_vectornd*nfftf,3)=nuclear dipole moment vector potential
 !!  vtrial(nfftf,nspden)=INPUT potential Vtrial(r).
-!!  vxctau=(only for meta-GGA): derivative of XC energy density with respect to
-!!    kinetic energy density (depsxcdtau). The arrays vxctau(nfft,nspden,4) contains also
+!!  [vxctau(nfft,nspden,4*usekden)]=(only for meta-GGA): derivative of XC energy density
+!!    with respect to kinetic energy density (depsxcdtau). The arrays vxctau contains also
 !!    the gradient of vxctau (gvxctau) in vxctau(:,:,2:4)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point

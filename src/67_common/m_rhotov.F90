@@ -195,7 +195,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
  real(dp),intent(out) :: vres_mean(dtset%nspden),vresidnew(nfft,dtset%nspden)
  real(dp),intent(in),optional :: taur(nfft,dtset%nspden*dtset%usekden)
  real(dp),intent(inout),optional :: vtauresid(nfft,dtset%nspden*dtset%usekden)
- real(dp),intent(out),optional :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(out),optional,target :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(out),optional :: vxc_hybcomp(:,:) ! (nfft,nspden)
  real(dp),intent(out),optional :: xcctau3d(n3xccc)
 
@@ -211,7 +211,9 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
  type(xcdata_type) :: xcdata
 !arrays
  real(dp) :: evxc,tsec(2),vmean(dtset%nspden),vzeeman(dtset%nspden)
+ real(dp),target :: vxctau_dum(0,0,0)
  real(dp),allocatable :: rhowk(:,:),v_constr_dft_r(:,:),vnew(:,:),xcart(:,:)
+ real(dp),pointer :: vxctau_(:,:,:)
 !real(dp),allocatable :: vzeemanHarm(:,:)   !SPr: debug Zeeman field q/=0 real space
 
 ! *********************************************************************
@@ -222,6 +224,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
 
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
+ vxctau_ => vxctau_dum ; if (with_vxctau) vxctau_ => vxctau
  if (with_vxctau.and.optres==0.and.(.not.present(vtauresid))) then
    MSG_BUG('need vtauresid!')
  end if
@@ -272,7 +275,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,&
 &         rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&         taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,xcctau3d=xcctau3d)
+&         taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,xcctau3d=xcctau3d)
          if(mod(dtset%fockoptmix,100)==11)then
            energies%e_xc=energies%e_xc*dtset%auxc_scal
            vxc(:,:)=vxc(:,:)*dtset%auxc_scal
@@ -285,7 +288,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
        call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,&
 &       rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&       taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
+&       taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,&
 &       electronpositron=electronpositron,xcctau3d=xcctau3d)
      end if
      call timab(941,2,tsec)

@@ -195,8 +195,11 @@ contains
 !!  vhartr(nfftf)=Hartree potential
 !!  vpsp(nfftf)=array for holding local psp
 !!  vxc(nfftf,nspden)=exchange-correlation potential (hartree) in real space
+!!  vxctau(nfft,nspden,4*usekden)=(only for meta-GGA) derivative of XC energy density
+!!                                wrt kinetic energy density (depsxcdtau)
 !!  vxcavg=vxc average
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
+!!  xcctau3d(n3xccc*usekden)=(only for meta-GGA): 3D core electron kinetic energy density for XC core correction
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
 !!  ylmgr(mpw*mkmem,3,mpsang*mpsang*useylm)= gradients of real spherical harmonics
 !!
@@ -297,8 +300,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
 & psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,taug,&
-& taur,tollist,usecprj,vectornd,vhartr,vpsp,vtrial,vxc,vxcavg,with_vectornd,wvl,&
-& xccc3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
+& taur,tollist,usecprj,vectornd,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,with_vectornd,wvl,&
+& xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
 
 !Arguments ------------------------------------
 !scalars
@@ -350,8 +353,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp),intent(inout) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(inout) :: ph1df(2,3*(2*mgfftf+1)*dtset%natom),pion(3)
  real(dp),intent(inout) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden),strsxc(6)
- real(dp),intent(inout) :: vhartr(nfftf),vxc(nfftf,dtset%nspden)
- real(dp),intent(inout) :: xccc3d(n3xccc),xred(3,dtset%natom)
+ real(dp),intent(inout) :: vhartr(nfftf),vxc(nfftf,dtset%nspden),vxctau(nfftf,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*dtset%usekden),xred(3,dtset%natom)
  real(dp),intent(inout) :: favg(3),fcart(3,dtset%natom),fred(3,dtset%natom)
  real(dp),intent(inout) :: gresid(3,dtset%natom),grhf(3,dtset%natom)
  real(dp),intent(inout) :: grxc(3,dtset%natom),kxc(nfftf,nkxc),strten(6)
@@ -930,7 +933,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   npwarr,dtset%ntypat,nvresid,occ,optfor,optres,&
 &   paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1df,&
 &   psps,rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,&
-&   ucvol,usecprj,vhartr,vpsp,vxc,wvl,xccc3d,xred,ylm,ylmgr,qvpotzero)
+&   ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero)
  end if
 
  if (optfor==1) computed_forces=1
