@@ -230,16 +230,20 @@ contains
   !         the type of the supercell potential.
   !
   !-------------------------------------------------------------------!
-  subroutine fill_supercell(self, scmaker, scpot)
+  subroutine fill_supercell(self, scmaker, params, scpot)
     use m_spmat_convert, only: COO_to_dense
+
     class(lattice_harmonic_primitive_potential_t) , intent(inout) :: self
-    type(supercell_maker_t), intent(inout):: scmaker
-    class(abstract_potential_t), pointer, intent(inout) :: scpot
+    type(supercell_maker_t),                        intent(inout) :: scmaker
+    type(multibinit_dtset_type),                    intent(inout) :: params
+    class(abstract_potential_t), pointer,           intent(inout) :: scpot
+
     integer :: natom, sc_natom
     integer :: inz, iR, R(3), i, j, icell
     integer, allocatable :: ilist_sc(:), jlist_sc(:), Rlist_sc(:,:)
     real(dp):: val
 
+    ABI_UNUSED_A(params)
 
     natom=self%natom
     sc_natom= natom* scmaker%ncells
@@ -290,6 +294,8 @@ contains
     ABI_SFREE(ilist_sc)
     ABI_SFREE(jlist_sc)
     ABI_SFREE(Rlist_sc)
+
+    ABI_UNUSED_A(params)
 
   end subroutine fill_supercell
 

@@ -425,7 +425,10 @@ Flag to activate the bound process:
 
 * 2 -->  **new version** This option will generate a set of coefficients with a power range defined by [[multibinit:bound_rangePower]] and keep only the coefficients with even power. Then the procedure is similar to the fit process with the constrains to only keep positive coefficients. The bound process will select the coefficients one by one up to [[multibinit:bound_maxCoeff]] and try if the model is bound at each step of the process.
 
-**Related variables:** The number of maximum additional coefficient in the polynome ([[multibinit:bound_maxCoeff]]), the  power range for the additional coefficients ([[multibinit:bound_rangePower]]), the cut off of the additional interactions ([[multibinit:bound_cutoff]])
+**Related variables:1 and 2** The number of maximum additional coefficient in the polynome ([[multibinit:bound_maxCoeff]]), the  power range for the additional coefficients ([[multibinit:bound_rangePower]]), the cut off of the additional interactions ([[multibinit:bound_cutoff]])
+
+*3 --> Check each anharmonic term in the effective potential. If the term contains has a negative coefficient and is even in its displacement or contains odd powers in the displacement generate high order bounding terms of the same combination of displacement within the range of powers defined by the user ([[multibinit:bound_rangePower]]). The coefficients of the added high-order terms are optimized until the precision of the original effective potential is retained. 
+
 """,
 ),
 
@@ -585,6 +588,9 @@ thermostats ([[qmass]]).
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:** The time step ([[dtion]]), the temperatures
 ([[multibinit:temperature]]), the ion relaxation time [[multibinit:latt_taut]], the pressure relaxation time [[multibinit:latt_taup]].
+
+
+* 120 --> Dummy mover. Atoms does not move. For testing only.
 
 """,
 
@@ -901,6 +907,8 @@ Flag to run spin dynamics.
 
 * 3 --> Run Monte Carlo.
 
+* 20 --> Dummy mover. Spin will not rotate. For test only.
+
 The HeunP method does less computation for each step,
 whereas the Depondt-Mertens method allow larger time step.
 For system with very simple interaction terms, HeunP could be faster.
@@ -917,17 +925,15 @@ Variable(
     defaultval=1,
     mnemonics="SPIN INITial STATE",
     text=r"""
-Flag to initialize spin state. (only option 1 and 2 are implemented.)
-
-* 0 --> Read from spinhist netcdf file.
+Flag to initialize spin state.
 
 * 1 --> Random spin state using uniform random numbers.
 
-* 2 --> Ferromagnetic state.
+* 2 --> Reference spin state from potential file if present.
 
-* 3 --> State with q-vector using [[multibinit:spin_qpoint]]
+* 3 --> State with q-vector using [[multibinit:spin_init_qpoint]], [[multibinit:spin_init_rotate_axis]], and [[multibinit:spin_init_orientation]]. Please check default values for those variables.
 
-* 4 --> Random spin state with temperature of [[multibinit:spin_temperature]]
+* 4 --> Restart from last step of input spin hist file. "{output}_spinhist_input.nc". 
 """,
 ),
 
@@ -988,16 +994,73 @@ And they are not used for calculating the observables.
 """,
 ),
 
+
 Variable(
-    abivarname="spin_qpoint@multibinit",
+    abivarname="spin_init_orientation@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions=[3],
+    defaultval=[0,0,1],
+    mnemonics="SPIN INITial ORIENTATION",
+    text=r"""
+Spin initial orientation. It is used for setting the initial spin in a supercell.
+    For a spin in a cell labeled with R, the rotation angle is $2\pi Q\cdot R$
+    from the initial orientation along the rotate axis. 
+    Default is along z(0,0,1) direction.
+""",
+),
+
+
+
+
+Variable(
+    abivarname="spin_init_qpoint@multibinit",
     varset="multibinit",
     vartype="real",
     topics=['SpinDynamicsMultibinit_basic'],
     dimensions=[3],
     defaultval=[0,0,0],
-    mnemonics="SPIN QPOINT",
+    mnemonics="SPIN INITial QPOINT",
+    text=r"""
+Spin wave vector. It is used for setting the initial spin in a supercell.
+    For a spin in a cell labeled with R, the rotation angle is $2\pi Q\cdot R$
+    from the initial orientation along the rotate axis. 
+    Default is Gamma (0, 0, 0).
+""",
+),
+
+
+
+Variable(
+    abivarname="spin_init_rotate_axis@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions=[3],
+    defaultval=[1,0,0],
+    mnemonics="SPIN INITial ROTATE AXIS",
+    text=r"""
+Spin initial rotate axis. It is used for setting the initial spin in a supercell.
+    For a spin in a cell labeled with R, the rotation angle is $2\pi Q\cdot R$
+    from the initial orientation along the rotate axis. 
+    Default is along x axis (1,0,0).
+""",
+),
+
+
+
+Variable(
+    abivarname="spin_projection_qpoint@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions=[3],
+    defaultval=[0,0,0],
+    mnemonics="SPIN PROJECTION QPOINT",
     text=r"""
 Spin wave vector. It is used for getting the total spin. $M_{tot}=\sum_i M_i exp(i q \cdot R_i)$. The unit is the reciprocal lattice vectors of the unitcell.
+    Default is Gamma. (0, 0, 0)
 """,
 ),
 
@@ -1144,7 +1207,75 @@ Number of steps in the variable temperature spin dynamics calculation (see [[mul
 """,
 ),
 
+Variable(
+    abivarname="test_effpot@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['LatticeModel_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="TEST EFFective POTential",
+    text=r"""
+* 0 --> nothing.
+* 1 --> Evaluate the effective potential with respect to given test-set and calculate mean square differences between ab-initio energy/forces and model energy/forces""",
+),
 
+Variable(
+    abivarname="analyze_anh_pot@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['LatticeModel_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="ANALYZE ANHarmonic POTential",
+    text=r"""
+* 0 --> nothing.
+* 1 --> Print energy contribution of each anharmonic term in the effective Potential. 
+        If it is a Molecular Dynamics (MD) run the contribution of each term is printed for each MD-step into MD_anharmonic_terms_energy.dat
+        If the effective potential is tested against a test set the contribution of each term for each configuration in the test is set is printed in TES_anharmonic_terms_energy.dat 
+        If the a effective potential is fitted the contribution of each selected term for each configuration in the training set is printed in TRS_anharmonic_terms_energy.dat""",
+),
+
+
+Variable(
+    abivarname="opt_effpot@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="OPTimize EFFective POTential",
+    text=r"""
+* 0 --> nothing.
+* 1 --> Turn on reading of optimization of effective potential keywords (opt_)
+        The optimization process gives the user the ability to refit the coefficients of specified terms with respect to the training set while keeping the rest fixed.
+
+**Related variables:** The number of coefficients to refit ([[multibinit:opt_ncoeff]]), the  indexes of the coefficients to optimize ([[multibinit:opt_coeff]])""" 
+),
+
+Variable(
+  abivarname="opt_ncoeff@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="OPTimize NUMBER of COEFFicients",
+    text=r"""
+* Number of anharmonic terms to refit in the effective potential""" 
+),
+
+Variable(
+    abivarname="opt_coeff@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_expert'],
+    dimensions=['[[multibinit:opt_ncoeff]]'],
+    defaultval=0,
+    mnemonics="OPTimize Cofficients",
+    text=r"""
+Indexes of the terms to refit in the effective potential. """,
+),
 
 
 ]

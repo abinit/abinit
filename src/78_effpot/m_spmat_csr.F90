@@ -61,6 +61,7 @@ module m_spmat_csr
      procedure :: mv_select_row =>csr_mat_t_mv_select_row ! mv of selected rows
      !procedure :: print
   end type CSR_mat_t
+
 contains
 
   !-----------------------------------------------------------------------
@@ -75,7 +76,6 @@ contains
     self%nrow=mshape(1)
     self%ncol=mshape(2)
   end subroutine initialize
-
 
   !-----------------------------------------------------------------------
   !> @brief set the full csr matrix
