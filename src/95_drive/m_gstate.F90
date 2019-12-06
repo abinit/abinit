@@ -1079,14 +1079,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        end if
 
 !      Compute up+down rho(G) by fft
-       ABI_ALLOCATE(work,(nfftf))
-       work(:)=rhor(:,1)
-       call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
+       call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
        if(dtset%usekden==1)then
-         work(:)=taur(:,1)
-         call fourdp(1,taug,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
+         call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
        end if
-       ABI_DEALLOCATE(work)
 
      else if(dtfil%ireadwf/=0)then
        izero=0
@@ -1102,6 +1098,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
          call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
          call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
+         if(dtset%usekden==1)then
+           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&           mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+           call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,taug,rhowfr,taur)
+         end if
          ABI_DEALLOCATE(rhowfg)
          ABI_DEALLOCATE(rhowfr)
        else
@@ -1181,14 +1182,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      end if
 
 !    Compute up+down rho(G) by fft
-     ABI_ALLOCATE(work,(nfftf))
-     work(:)=rhor(:,1)
-     call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
+     call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
      if(dtset%usekden==1)then
-       work(:)=taur(:,1)
-       call fourdp(1,taug,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
+       call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
      end if
-     ABI_DEALLOCATE(work)
 
    end if
  end if ! has_to_init

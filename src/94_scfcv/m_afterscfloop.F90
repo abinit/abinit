@@ -71,6 +71,7 @@ module m_afterscfloop
  use m_forstr,           only : forstr
  use m_wvl_rho,          only : wvl_mkrho
  use m_wvl_psi,          only : wvl_psitohpsi, wvl_tail_corrections
+ use m_fourier_interpol, only : transgrid
 
 #ifdef HAVE_BIGDFT
  use m_abi2big
@@ -389,6 +390,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp) :: gmet(3,3),gprimd(3,3),pelev(3),rmet(3,3),tsec(2)
  real(dp) :: dmatdum(0,0,0,0)
  real(dp),allocatable :: mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
+ real(dp),allocatable :: tauwfg(:,:),tauwfr(:,:)
 #if defined HAVE_BIGDFT
  integer,allocatable :: dimcprj_srt(:)
  real(dp),allocatable :: hpsi_tmp(:),xcart(:,:)
@@ -651,10 +653,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  call timab(254,1,tsec)
 
 !We use routine mkrho with option=1 to compute kinetic energy density taur (and taug)
- if(dtset%prtkden/=0 .or. dtset%prtelf/=0)then
-   nullify(taug,taur)
+ if(dtset%usekden==0 .and. dtset%prtelf/=0)then
 !  tauX are reused in outscfcv for output
 !  should be deallocated there
+   nullify(taug,taur)
    ABI_ALLOCATE(taug,(2,nfftf))
    ABI_ALLOCATE(taur,(nfftf,dtset%nspden))
    tim_mkrho=5
@@ -668,19 +670,29 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    call wrtout(ab_out,message,'COLL')
    paw_dmft%use_sc_dmft=0 ! dmft not used here
    paw_dmft%use_dmft=0 ! dmft not used here
-   call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
-&   npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
-!  Print result
-   if(dtset%prtkden/=0) then
-     write(message,'(a,a)') ch10, "Result for kinetic energy density :"
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,a)') ch10, "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
-     call prtrhomxmn(ab_out,mpi_enreg,nfftf,ngfftf,dtset%nspden,1,taur,optrhor=1,ucvol=ucvol)
-     write(message,'(a)') "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+   if (psps%usepaw==0) then
+     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
+&     npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+   else
+     ABI_ALLOCATE(tauwfg,(2,dtset%nfft))
+     ABI_ALLOCATE(tauwfr,(dtset%nfft,dtset%nspden))
+     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
+&     npwarr,occ,paw_dmft,phnons,tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+     call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,tauwfg,taug,tauwfr,taur)
+     ABI_DEALLOCATE(tauwfg)
+     ABI_DEALLOCATE(tauwfr)
    end if
    ABI_DEALLOCATE(taug)
+ end if
+!Print result
+ if(dtset%prtkden/=0) then
+   write(message,'(a,a)') ch10, "Result for kinetic energy density :"
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,a)') ch10, "--------------------------------------------------------------------------------"
+   call wrtout(ab_out,message,'COLL')
+   call prtrhomxmn(ab_out,mpi_enreg,nfftf,ngfftf,dtset%nspden,1,taur,optrhor=1,ucvol=ucvol)
+   write(message,'(a)') "--------------------------------------------------------------------------------"
+   call wrtout(ab_out,message,'COLL')
  end if
 
 !----------------------------------------------------------------------
@@ -874,6 +886,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)') " End of ELF section"
    call wrtout(ab_out,message,'COLL')
+
+   if (dtset%usekden==0) then
+     ABI_DEALLOCATE(taur)
+   end if
 
  end if !endif prtelf/=0
 

@@ -2170,25 +2170,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 & pawrad,pawrhoij,pawtab,paw_an,paw_ij,dtset%prtvol,psps,results_gs,&
 & rhor,rprimd,taur,ucvol,usecprj,vhartr,vpsp,vtrial,vxc,wvl%den,xccc3d,xred)
 
- if(associated(elfr))then
-   ABI_DEALLOCATE(elfr)
-   nullify(elfr)
- end if
-
- if(associated(grhor))then
-   ABI_DEALLOCATE(grhor)
-   nullify(grhor)
- end if
-
- if(associated(lrhor))then
-   ABI_DEALLOCATE(lrhor)
-   nullify(lrhor)
- end if
-
- if(dtset%prtkden/=0 .or. dtset%prtelf/=0)then
-   ABI_DEALLOCATE(taur)
- end if
-
  call timab(248,2,tsec)
  call timab(249,1,tsec)
 
