@@ -495,7 +495,7 @@ module m_lobpcg2
         !RR_eig = eigenvalues3N%self
         call lobpcg_rayleighRitz(lobpcg,RR_var,RR_eig,ierr,2*dlamch('E'))
         if ( ierr /= 0 ) then
-          MSG_WARNING("I could not make it. Sorry. However do not stop as at a later step things might work out.",ierr)
+          MSG_WARNING("I could not make it. Sorry. However do not stop as at a later step things might work out.")
           exit
         end if
 
