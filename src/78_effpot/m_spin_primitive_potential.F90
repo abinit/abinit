@@ -237,7 +237,9 @@ contains
 
     ! read primcell info
     ierr=nctk_get_dim(ncid, "natom", natom)
+    NCF_CHECK_MSG(ierr, "getting natom in spin potential file")
     ierr=nctk_get_dim(ncid, "nspin", nspin)
+    NCF_CHECK_MSG(ierr, "getting nspin in spin potential file")
 
     ! allocate for primcell
     ABI_ALLOCATE(xcart, (3, natom))
@@ -382,6 +384,7 @@ contains
     ierr=nf90_inq_dimid(ncid, "spin_dmi_nterm", spin_dmi_nterm)
     if (ierr==0) then ! if has dmi
        ierr=nctk_get_dim(ncid, "spin_dmi_nterm", spin_dmi_nterm)
+       NCF_CHECK_MSG(ierr, "spin_dmi_nterm found but is not readable")
        ABI_ALLOCATE(spin_dmi_ilist, (spin_dmi_nterm))
        ABI_ALLOCATE(spin_dmi_jlist, (spin_dmi_nterm))
        ABI_ALLOCATE(spin_dmi_Rlist, (3,spin_dmi_nterm))
