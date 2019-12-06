@@ -346,8 +346,8 @@ MODULE m_pawtab
   real(dp) :: rcore
    ! Radius of core corrections (rcore >= rpaw)
 
-  real(dp) :: rtaucore
-   ! Radius of kinetic core corrections (rtaucore >= rpaw)
+  real(dp) :: rcoretau
+   ! Radius of kinetic core corrections (rcoretau >= rpaw)
 
   real(dp) :: shape_sigma
    ! Sigma parameter in gaussian shapefunction (shape_type=2)
@@ -543,8 +543,8 @@ MODULE m_pawtab
    ! tcorespl(mqgrid,2)
    ! Gives the pseudo core density in reciprocal space on a regular grid
 
-  real(dp), allocatable :: ttaucorespl(:,:)
-   ! ttaucorespl(mqgrid,2)
+  real(dp), allocatable :: tcoretauspl(:,:)
+   ! tcoretauspl(mqgrid,2)
    ! Gives the pseudo kinetic core density in reciprocal space on a regular grid
 
   real(dp), allocatable :: tnablaphi(:,:)
@@ -888,8 +888,8 @@ subroutine pawtab_free_0D(Pawtab)
  if (allocated(Pawtab%tcorespl))  then
    LIBPAW_DEALLOCATE(Pawtab%tcorespl)
  end if
- if (allocated(Pawtab%ttaucorespl))  then
-   LIBPAW_DEALLOCATE(Pawtab%ttaucorespl)
+ if (allocated(Pawtab%tcoretauspl))  then
+   LIBPAW_DEALLOCATE(Pawtab%tcoretauspl)
  end if
  if (allocated(Pawtab%tnablaphi))  then
    LIBPAW_DEALLOCATE(Pawtab%tphi)
@@ -1221,7 +1221,7 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Size of radial mesh for pseudo valence density.. ',Pawtab(ityp)%tnvale_mesh_size
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,i4)')'  No of Q-points for tcorespl/tvalespl/ttaucorespl ',Pawtab(ityp)%mqgrid
+  write(msg,'(a,i4)')'  No of Q-points for tcorespl/tvalespl/tcoretauspl ',Pawtab(ityp)%mqgrid
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  No of Q-points for the radial shape functions .. ',Pawtab(ityp)%mqgrid_shp
   call wrtout(my_unt,msg,my_mode)
@@ -1464,7 +1464,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
  integer :: siz_euijkl,siz_euij_fll,siz_fk,siz_gammaij,siz_gnorm,siz_fock,siz_kij,siz_nabla_ij
  integer :: siz_nablaphi,siz_phi,siz_phiphj,siz_phiphjint,siz_ph0phiint,siz_qgrid_shp,siz_qijl
  integer :: siz_rad_for_spline,siz_rhoij0,siz_shape_alpha,siz_shape_q,siz_shapefunc
- integer :: siz_shapefncg,siz_sij,siz_tcoredens,siz_tcoretau,siz_tcorespl,siz_ttaucorespl
+ integer :: siz_shapefncg,siz_sij,siz_tcoredens,siz_tcoretau,siz_tcorespl,siz_tcoretauspl
  integer :: siz_tnablaphi,siz_tphi,siz_tphitphj,siz_tproj,siz_tvalespl,siz_vee,siz_vex
  integer :: siz_vhtnzc,siz_vhnzc,siz_vminushalf,siz_zioneff,siz_wvlpaw,siz_wvl_pngau
  integer :: siz_wvl_parg,siz_wvl_pfac,siz_wvl_rholoc_rad,siz_wvl_rholoc_d,sz1,sz2
@@ -1504,7 +1504,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Reals (read from psp file)
 !-------------------------------------------------------------------------
-!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,ex_cc,exccore,rpaw,rshp,rcore,rtaucore,shape_sigma
+!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,ex_cc,exccore,rpaw,rshp,rcore,rcoretau,shape_sigma
    nn_dpr=nn_dpr+12
 
 !Reals (depending on the parameters of the calculation)
@@ -1559,7 +1559,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    siz_coredens=0 ; siz_coretau=0    ; siz_dij0=0     ; siz_kij=0        ; siz_fock=0
    siz_phi=0      ; siz_nablaphi=0   ;  siz_rhoij0=0   ; siz_shape_alpha=0
    siz_shape_q=0  ; siz_shapefunc=0  ; siz_tcoredens=0; siz_tcoretau=0
-   siz_tcorespl=0 ; siz_ttaucorespl=0; siz_tphi=0     ; siz_tnablaphi=0  ; siz_tproj=0
+   siz_tcorespl=0 ; siz_tcoretauspl=0; siz_tphi=0     ; siz_tnablaphi=0  ; siz_tproj=0
    siz_tvalespl=0 ; siz_vhtnzc=0     ; siz_vhnzc=0    ; siz_vminushalf=0
    nn_int=nn_int+22
 
@@ -1637,10 +1637,10 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      if (siz_tcorespl/=pawtab%mqgrid*2) msg=trim(msg)//' tcorespl'
      nn_dpr=nn_dpr+siz_tcorespl
    end if
-   if (allocated(pawtab%ttaucorespl)) then
-     siz_ttaucorespl=size(pawtab%ttaucorespl)       !(mqgrid,2)
-     if (siz_ttaucorespl/=pawtab%mqgrid*2) msg=trim(msg)//' ttaucorespl'
-     nn_dpr=nn_dpr+siz_ttaucorespl
+   if (allocated(pawtab%tcoretauspl)) then
+     siz_tcoretauspl=size(pawtab%tcoretauspl)       !(mqgrid,2)
+     if (siz_tcoretauspl/=pawtab%mqgrid*2) msg=trim(msg)//' tcoretauspl'
+     nn_dpr=nn_dpr+siz_tcoretauspl
    end if
    if (allocated(pawtab%tnablaphi)) then
      siz_tnablaphi=size(pawtab%tnablaphi)           !(partialwave_mesh_size, basis_size)
@@ -1900,7 +1900,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_int(ii)=siz_tcoredens  ;ii=ii+1
    list_int(ii)=siz_tcoretau  ;ii=ii+1
    list_int(ii)=siz_tcorespl  ;ii=ii+1
-   list_int(ii)=siz_ttaucorespl  ;ii=ii+1
+   list_int(ii)=siz_tcoretauspl  ;ii=ii+1
    list_int(ii)=siz_tphi  ;ii=ii+1
    list_int(ii)=siz_tnablaphi  ;ii=ii+1
    list_int(ii)=siz_tproj  ;ii=ii+1
@@ -2063,7 +2063,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    siz_tcoredens=list_int(ii)  ;ii=ii+1
    siz_tcoretau=list_int(ii)  ;ii=ii+1
    siz_tcorespl=list_int(ii)  ;ii=ii+1
-   siz_ttaucorespl=list_int(ii)  ;ii=ii+1
+   siz_tcoretauspl=list_int(ii)  ;ii=ii+1
    siz_tphi=list_int(ii)  ;ii=ii+1
    siz_tnablaphi=list_int(ii)  ;ii=ii+1
    siz_tproj=list_int(ii)  ;ii=ii+1
@@ -2250,7 +2250,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_dpr(ii)=pawtab%rpaw  ;ii=ii+1
    list_dpr(ii)=pawtab%rshp  ;ii=ii+1
    list_dpr(ii)=pawtab%rcore  ;ii=ii+1
-   list_dpr(ii)=pawtab%rtaucore  ;ii=ii+1
+   list_dpr(ii)=pawtab%rcoretau  ;ii=ii+1
    list_dpr(ii)=pawtab%shape_sigma  ;ii=ii+1
 !Reals arrays (read from psp file)
    if (siz_coredens>0) then
@@ -2309,9 +2309,9 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      list_dpr(ii:ii+siz_tcorespl-1)=reshape(pawtab%tcorespl,(/siz_tcorespl/))
      ii=ii+siz_tcorespl
    end if
-   if (siz_ttaucorespl>0) then
-     list_dpr(ii:ii+siz_ttaucorespl-1)=reshape(pawtab%ttaucorespl,(/siz_ttaucorespl/))
-     ii=ii+siz_ttaucorespl
+   if (siz_tcoretauspl>0) then
+     list_dpr(ii:ii+siz_tcoretauspl-1)=reshape(pawtab%tcoretauspl,(/siz_tcoretauspl/))
+     ii=ii+siz_tcoretauspl
    end if
    if (siz_tphi>0) then
      list_dpr(ii:ii+siz_tphi-1)=reshape(pawtab%tphi,(/siz_tphi/))
@@ -2494,7 +2494,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    pawtab%rpaw=list_dpr(ii)  ;ii=ii+1
    pawtab%rshp=list_dpr(ii)  ;ii=ii+1
    pawtab%rcore=list_dpr(ii)  ;ii=ii+1
-   pawtab%rtaucore=list_dpr(ii)  ;ii=ii+1
+   pawtab%rcoretau=list_dpr(ii)  ;ii=ii+1
    pawtab%shape_sigma=list_dpr(ii)  ;ii=ii+1
 !Reals arrays (read from psp file)
    if (allocated(pawtab%coredens)) then
@@ -2610,13 +2610,13 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      pawtab%tcorespl=reshape(list_dpr(ii:ii+siz_tcorespl-1),(/pawtab%mqgrid,2/))
      ii=ii+siz_tcorespl
    end if
-   if (allocated(pawtab%ttaucorespl)) then
-     LIBPAW_DEALLOCATE(pawtab%ttaucorespl)
+   if (allocated(pawtab%tcoretauspl)) then
+     LIBPAW_DEALLOCATE(pawtab%tcoretauspl)
    end if
-   if (siz_ttaucorespl>0) then
-     LIBPAW_ALLOCATE(pawtab%ttaucorespl,(pawtab%mqgrid,2))
-     pawtab%ttaucorespl=reshape(list_dpr(ii:ii+siz_ttaucorespl-1),(/pawtab%mqgrid,2/))
-     ii=ii+siz_ttaucorespl
+   if (siz_tcoretauspl>0) then
+     LIBPAW_ALLOCATE(pawtab%tcoretauspl,(pawtab%mqgrid,2))
+     pawtab%tcoretauspl=reshape(list_dpr(ii:ii+siz_tcoretauspl-1),(/pawtab%mqgrid,2/))
+     ii=ii+siz_tcoretauspl
    end if
    if (allocated(pawtab%tphi)) then
      LIBPAW_DEALLOCATE(pawtab%tphi)

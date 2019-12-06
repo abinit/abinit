@@ -2212,6 +2212,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        end if
      end if
    end if
+   !PAW+mGGA function restricted to pawxcdev=0
+   if (dt%usepaw==1.and.mgga==1.and.dt%pawxcdev/=0) then
+     write(msg,'(5a)' ) &
+&     'You are performing a PAW calculation using a meta-GGA XC functional:',ch10,&
+&     '  This is restricted to pawxcdev=0!',ch10,&
+&     '  Action: change pawxcdev value in your input file!'
+     MSG_ERROR_NOSTOP(msg, ierr)
+   end if
    !Non linear Response function only for LDA (restricted to ixc=3/7/8)
    allow=(dt%ixc>0).and.(dt%ixc/=3.and.dt%ixc/=7.and.dt%ixc/=8)
    if(.not.allow) allow=(dt%ixc<0).and.(libxc_functionals_isgga().or.libxc_functionals_ismgga())

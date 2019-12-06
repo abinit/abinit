@@ -686,15 +686,13 @@ end subroutine pawxc_mkdenpos_wrapper
 function pawxc_get_usekden()
 !Arguments ------------------------------------
   integer :: pawxc_get_usekden
-!Local variables-------------------------------
-  logical :: ismgga
+
 ! *************************************************************************
 
   pawxc_get_usekden=0
-  ismgga=libxc_functionals_ismgga()
-  pawxc_get_usekden=merge(1,0,ismgga)
-  
- end function pawxc_get_usekden
+  if (libxc_functionals_ismgga()) pawxc_get_usekden=1
+
+end function pawxc_get_usekden
 !!***
 
 !----------------------------------------------------------------------
@@ -730,13 +728,12 @@ function pawxc_get_usekden()
 !!  pawrad <type(pawrad_type)>=paw radial mesh and related data
 !!  rhor(nrad,lm_size,nspden)=electron density in real space in electrons/bohr**3
 !!                                       (total in 1st half and spin-up in 2nd half if nspden=2)
-!!  taucore(nrad*usekden) = core kinetic energy density
-!!  taur(nrad*usekden,lm_size*usekden,nspden*usekden) = kinetic energy density on radial mesh
+!!  coretau(nrad*usekden) = core kinetic energy density
+!!  taur(nrad,lm_size,nspden*usekden) = kinetic energy density on radial mesh
 !!  usecore= 1 if core density has to be used in Exc/Vxc ; 0 otherwise
 !!  usexcnhat= 0 if compensation density does not have to be used
 !!             1 if compensation density has to be used in double counting energy term only
 !!             2 if compensation density (nhat) has to be used in Exc/Vxc and double counting energy term
-!!  usekden= 1 if kinetic energy density is used
 !!  xclevel= XC functional level
 !!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
 !!
@@ -748,8 +745,8 @@ function pawxc_get_usekden()
 !!  == if option=0, 1 or 5 ==
 !!    vxc(nrad,pawang%angl_size,nspden)=xc potential
 !!       (spin up in 1st half and spin-down in 2nd half if nspden=2)
-!!   == if usekden=1 ==
-!!    vxctau(nrad*usekden,pawang%angl_size*usekden,nspden*usekden)=MetaGGA xc potential
+!!   == if option=0, 1 or 5 and usekden=1 ==
+!!    vxctau(nrad,pawang%angl_size,nspden*usekden)=MetaGGA xc potential
 !!       (spin up in 1st half and spin-down in 2nd half if nspden=2)
 !!  == if nkxc>0 ==
 !!    kxc(nrad,pawang%angl_size,nkxc)=xc kernel
@@ -814,12 +811,12 @@ function pawxc_get_usekden()
 !!
 !! SOURCE
 subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3xc,non_magnetic_xc,&
-&                nrad,nspden,option,pawang,pawrad,rhor,usecore,usexcnhat,usekden,vxc,xclevel,xc_denpos,&
-&                taucore,taur,vxctau) !optional
+&                nrad,nspden,option,pawang,pawrad,rhor,usecore,usexcnhat,vxc,xclevel,xc_denpos,&
+&                coretau,taur,vxctau) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ixc,lm_size,nkxc,nk3xc,nrad,nspden,option,usecore,usexcnhat,xclevel,usekden
+ integer,intent(in) :: ixc,lm_size,nkxc,nk3xc,nrad,nspden,option,usecore,usexcnhat,xclevel
  logical,intent(in) :: non_magnetic_xc
  real(dp),intent(in) :: xc_denpos
  real(dp),intent(out) :: enxc,enxcdc
@@ -830,18 +827,18 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
  real(dp),intent(in) :: corexc(nrad)
  real(dp),intent(in) :: nhat(nrad,lm_size,nspden*((usexcnhat+1)/2))
  real(dp),intent(in),target :: rhor(nrad,lm_size,nspden)
- real(dp),intent(in),optional::taucore(nrad*usekden)
- real(dp),intent(in),target,optional:: taur(nrad*usekden,lm_size*usekden,nspden*usekden)
+ real(dp),intent(in),target,optional:: coretau(:),taur(:,:,:)
  real(dp),intent(out) :: kxc(nrad,pawang%angl_size,nkxc)
  real(dp),intent(out) :: k3xc(nrad,pawang%angl_size,nk3xc)
  real(dp),intent(out),target :: vxc(nrad,pawang%angl_size,nspden)
- real(dp),intent(out),target,optional :: vxctau(nrad*usekden,pawang%angl_size*usekden,nspden*usekden)
+ real(dp),intent(out),target,optional :: vxctau(:,:,:)
 
 !Local variables-------------------------------
 !scalars
  integer :: ii,ilm,ipts,ir,ispden,iwarn,lm_size_eff,mgga,ndvxc,nd2vxc,ngr2,ngrad
- integer :: nkxc_updn,npts,nspden_eff,nspden_updn,nspgrad,nvxcdgr,order,use_laplacian
- logical :: ismgga
+ integer :: nkxc_updn,npts,nspden_eff,nspden_updn,nspgrad,nvxcdgr,order
+ integer :: usecoretau,usekden,use_laplacian
+ logical :: ismgga,with_vxctau
  real(dp) :: enxcr,factor,vxcrho,factor2
  character(len=500) :: msg
 !arrays
@@ -867,46 +864,46 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
  nkxc_updn=merge(nkxc-3,nkxc,nkxc==6.or.nkxc==22)
  ismgga=libxc_functionals_ismgga()
  mgga=merge(1,0,ismgga)
+ usekden=pawxc_get_usekden()
  use_laplacian=mgga ! TEMPORARY
+ usecoretau=0 ; with_vxctau=.false.
 
 !Compatibility tests
- if (mgga==1.and.usekden==0) then
-   msg='Kinetic energy density needs to be computed'
-   MSG_ERROR(msg)
- end if
+!if (mgga==1.and.usekden==0) then
+!   msg='Kinetic energy density needs to be computed'
+!   MSG_ERROR(msg)
+! end if
  if (usekden==1) then
    if (.not.present(taur)) then
-     msg='taur needs to be present'
-     MSG_ERROR(msg)
-   else if (size(taur)==0) then
-     msg='taur must be of non zero size'
-     MSG_ERROR(msg)
+     msg='taur needs to be present!'
+     MSG_BUG(msg)
+   else if (size(taur)/=nrad*lm_size*nspden) then
+     msg='wrong size for taur!'
+     MSG_BUG(msg)
    end if
-   if (.not.present(taucore)) then
-     msg='taucore needs to be present'
-     MSG_ERROR(msg)
-   else if (size(taucore)==0) then
-     msg='taucore must be of non zero size'
-     MSG_ERROR(msg)
+   if (present(coretau)) then
+     usecoretau=1
+     if (size(coretau)/=nrad) then
+       msg='wrong size for coretau!'
+       MSG_BUG(msg)
+     end if
    end if
-   if (.not.present(vxctau)) then
-     msg='vxctau needs to be present'
-     MSG_ERROR(msg)
-   else if (size(vxctau)==0) then
-     msg='vxctau must be of non zero size'
-    MSG_ERROR(msg)
-   end if 
-   !For call in m_pawpsp/pawpsp_calc do not compute density laplacian
-   if (size(taur)==size(taucore).and.size(taur)==size(vxctau)) then
-     use_laplacian=0
+   if ((option==0.or.option==1.or.option==5).and.present(vxctau)) then
+     with_vxctau=.true.
+     if (size(vxctau)/=nrad*pawang%angl_size*nspden) then
+       msg='wrong size for vxctau!'
+       MSG_BUG(msg)
+     end if
    end if
+   !?????For call in m_pawpsp/pawpsp_calc do not compute density laplacian ?????
+   if (option==4) use_laplacian=0
  end if
  if(nspden==4.and.nk3xc>0) then
    msg='K3xc for nspden=4 not implemented!'
    MSG_ERROR(msg)
  end if
  if(nk3xc>0.and.nkxc_updn==0) then
-   msg='nkxc must be non-zero if nk3xc is'
+   msg='nkxc must be non-zero if nk3xc is!'
    MSG_ERROR(msg)
  end if
  if(nspden==4.and.xclevel==2) then
@@ -1014,7 +1011,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
        !mgga=1
        LIBPAW_ALLOCATE(tauarr,(nrad,nspden))
        LIBPAW_ALLOCATE(taunow,(nrad,nspden))
-       LIBPAW_ALLOCATE(tau_updn,(nrad,nspden_updn)) 
+       LIBPAW_ALLOCATE(tau_updn,(nrad,nspden_updn))
        if (use_laplacian==1) then
          LIBPAW_ALLOCATE(d2ylmdr,(3,npts,pawang%ylm_size))
        end if
@@ -1048,9 +1045,9 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
      if (mgga==1) then
        tauarr(:,:)=zero
      end if
-     if (usexcnhat< 2) rho_=>rhor
-     if (usexcnhat==2) rho_=>rhohat
-     if (mgga==1) tau_=>taur
+     if (usexcnhat< 2) rho_=> rhor
+     if (usexcnhat==2) rho_=> rhohat
+     if (mgga==1) tau_=> taur
      do ispden=1,nspden
        do ilm=1,lm_size_eff
          if (lmselect(ilm)) then
@@ -1066,10 +1063,10 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
      if (usecore==1) then
        rhoarr(1:nrad,1)=rhoarr(1:nrad,1)+corexc(1:nrad)
        if (mgga==1) then
-         tauarr(1:nrad,1)=tauarr(1:nrad,1)+taucore(1:nrad)
+         tauarr(1:nrad,1)=tauarr(1:nrad,1)+coretau(1:nrad)
        end if
-       if (nspden==2) rhoarr(1:nrad,2)=rhoarr(1:nrad,2)+half*corexc(1:nrad); 
-       if (nspden==2.and.mgga==1) tauarr(1:nrad,2)=tauarr(1:nrad,2)+half*taucore(1:nrad);
+       if (nspden==2) rhoarr(1:nrad,2)=rhoarr(1:nrad,2)+half*corexc(1:nrad);
+       if (nspden==2.and.mgga==1) tauarr(1:nrad,2)=tauarr(1:nrad,2)+half*coretau(1:nrad);
      end if
 
 !    Optionally suppress magnetic part.
@@ -1184,6 +1181,8 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
      call pawxc_mkdenpos_wrapper(iwarn,nrad,nspden_updn,0,rho_updn,xc_denpos)
 
 !    Call to main XC driver
+
+!?????? utiliser with_vxctau
      call pawxc_drivexc_wrapper(exci,ixc,mgga,ndvxc,nd2vxc,ngr2,nrad,nspden_updn,nvxcdgr,&
 &                               order,rho_updn,use_laplacian,vxci,xclevel, &
 &                               dvxc=dvxci,d2vxc=d2vxci,grho2=grho2_updn,lrho=lrho_updn, &
@@ -5563,7 +5562,7 @@ end if
 !PENDING: we cannot handle all optional-variable combinations.
 !Hence, only two posibilities are considered here:
 !1) Pass dvxc, exexch, grho2 and vxcgrho
- 
+
  if (present(exexch)) then
    call drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,rho,use_laplacian,vxcrho,xclevel,&
 &   dvxc=dvxc,d2vxc=d2vxc,exexch=exexch,grho2=grho2,lrho=lrho,tau=tau,vxcgrho=vxcgrho,vxclrho=vxclrho,vxctau=vxctau)
