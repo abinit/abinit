@@ -40,6 +40,7 @@ module m_dfpt_loopert
  use m_paral_pert
  use m_nctk
  use m_ddb
+ use m_wfd
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -50,7 +51,8 @@ module m_dfpt_loopert
  use defs_abitypes, only : MPI_type
  use m_occ,        only : getnel
  use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
- use m_io_tools,   only : file_exists
+ use m_io_tools,   only : file_exists, iomode_from_fname, get_unit
+
  use m_time,       only : timab
  use m_fstrings,   only : strcat
  use m_geometry,   only : mkrdim, metric, littlegroup_pert
@@ -83,7 +85,7 @@ module m_dfpt_loopert
  use m_initylmg,   only : initylmg
  use m_dfpt_scfcv, only : dfpt_scfcv
  use m_dfpt_mkrho, only : dfpt_mkrho
- use m_mpinfo,     only : initmpi_band, distrb2, proc_distrb_cycle
+ use m_mpinfo,     only : initmpi_band, distrb2, proc_distrb_cycle, proc_distrb_nband
  use m_atm2fft,    only : dfpt_atm2fft
  use m_berrytk,    only : smatrix
  use m_common,     only : prteigrs
@@ -289,6 +291,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer :: ii,ikpt,ikpt1,jband,initialized,iorder_cprj,ipert,ipert_cnt,ipert_eq,ipert_me,ireadwf0
  integer :: iscf_mod,iscf_mod_save,isppol,istr,isym,mcg,mcgq,mcg1,mcprj,mcprjq,mband
  integer :: mcgmq,mcg1mq,mpw1_mq !+/-q duplicates
+ integer :: nband_me, wfk_unt, icg, ibd, ikg
  integer :: maxidir,me,mgfftf,mkmem_rbz,mk1mem_rbz,mkqmem_rbz,mpw,mpw1,my_nkpt_rbz
  integer :: n3xccc,nband_k,ncpgr,ndir,nkpt_eff,nkpt_max,nline_save,nmatel,npert_io,npert_me,nspden_rhoij
  integer :: nstep_save,nsym1,ntypat,nwffile,nylmgr,nylmgr1,old_comm_atom,openexit,option,optorth,optthm,pertcase
@@ -319,6 +322,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(pawang_type) :: pawang1
  type(wffile_type) :: wff1,wffgs,wffkq,wffnow,wfftgs,wfftkq
  type(wfk_t) :: ddk_f(4)
+ type(wfk_t) :: wfk0, wfkq, wfk1
  type(wvl_data) :: wvl
 !arrays
  integer :: eq_symop(3,3),ngfftf(18),file_index(4),rfdir(9),rf2dir(9),rf2_dir1(3),rf2_dir2(3)
@@ -329,7 +333,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer,allocatable :: npwtot1(:),npwar1_pert(:,:),npwarr_pert(:,:),npwtot_pert(:,:)
  integer,allocatable :: pert_calc(:,:),pert_tmp(:,:),bz2ibz_smap(:,:)
  integer,allocatable :: symaf1(:),symaf1_tmp(:),symrc1(:,:,:),symrl1(:,:,:),symrl1_tmp(:,:,:)
+ integer,allocatable :: kpt_tmp (:,:)
  integer, pointer :: old_atmtab(:)
+ logical, allocatable :: distrbflags(:,:,:)
  real(dp) :: dielt(3,3),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),tsec(2)
  real(dp),allocatable :: buffer1(:,:,:,:,:),cg(:,:),cg1(:,:),cg1_active(:,:),cg0_pert(:,:)
  real(dp),allocatable :: cg1_pert(:,:,:,:),cgq(:,:),gh0c1_pert(:,:,:,:)
@@ -343,6 +349,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp),allocatable :: rhor1_pq(:,:),rhor1_mq(:,:),rhog1_pq(:,:),rhog1_mq(:,:)          !+q/-q duplicates
  real(dp),allocatable :: cg_mq(:,:),cg1_mq(:,:),resid_mq(:)                   !
  real(dp),allocatable :: cg1_active_mq(:,:),occk_mq(:)                 !
+ real(dp),allocatable :: cg_tmp(:,:)
  real(dp),allocatable :: kmq(:,:),kmq_rbz(:,:),gh0c1_set_mq(:,:)        !
  real(dp),allocatable :: eigen_mq(:),gh1c_set_mq(:,:),docckde_mq(:),eigen1_mq(:)          !
  real(dp),allocatable :: vpsp1(:),work(:),wtk_folded(:),wtk_rbz(:),xccc3d1(:)
@@ -357,9 +364,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(pawrhoij_type),pointer :: pawrhoij_pert(:)
  type(ddb_type) :: ddb
 
+
+ integer :: my_band_list(dtset%mband)
+
 !DEBUG
- integer :: icg, icg_tmp, npw, iband_me, mcg_tmp
- real(dp), allocatable :: cg_tmp(:,:)
+ integer :: icg_tmp, npw, iband_me, mcg_tmp
 !ENDDEBUG
 
 ! ***********************************************************************
@@ -914,10 +923,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !    for ddk, elfd, mgfd perturbations.
      timrev_pert=timrev
      if(ipert==dtset%natom+1.or.ipert==dtset%natom+2.or.&
-&     ipert==dtset%natom+10.or.ipert==dtset%natom+11.or. &
-&     dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.  &
-&     dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17.or.  &
-&     ipert==dtset%natom+5.or.dtset%prtfull1wf==1) timrev_pert=0
+&      ipert==dtset%natom+10.or.ipert==dtset%natom+11.or. &
+&      dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.  &
+&      dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17.or.  &
+&      ipert==dtset%natom+5.or.dtset%prtfull1wf==1) timrev_pert=0
      timrev_kpt = timrev_pert
 !    The time reversal symmetry is not used for the BZ sampling when kptopt=3 or 4
      if (dtset%kptopt==3.or.dtset%kptopt==4) timrev_kpt = 0
@@ -925,7 +934,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      nsym1,symrc1,timrev_kpt,dtset%wtk,wtk_folded, bz2ibz_smap, xmpi_comm_self)
    end if
 
-   ABI_DEALLOCATE(bz2ibz_smap)
 
    ABI_ALLOCATE(doccde_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
    ABI_ALLOCATE(indkpt1,(nkpt_rbz))
@@ -1089,50 +1097,22 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    ABI_ALLOCATE(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
    call timab(144,1,tsec)
-!DEBUG
-!mcg=mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
-   mcg_tmp = mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
-   ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
-!ENDDEBUG
-!TODO MJV: this needs to be a distributed inwffil reading of the whole WFK, reading only my bands!
-   call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
-&   formeig,hdr0,ireadwf0,istwfk_rbz,kg,&
-&   kpt_rbz,dtset%localrdwf,dtset%mband,mcg_tmp,&
-&   mkmem_rbz,mpi_enreg,mpw,nband_rbz,dtset%ngfft,nkpt_rbz,npwarr,&
-&   dtset%nsppol,nsym,occ_rbz,optorth,dtset%symafm,&
-&   dtset%symrel,dtset%tnons,dtfil%unkg,wffgs,wfftgs,&
-&   dtfil%unwffgs,dtfil%fnamewffk,wvl)
+
+! Initialize the wave function type and read GS WFK
+
+   ABI_ALLOCATE(distrbflags,(nkpt_rbz,dtset%mband,dtset%nsppol))
+   distrbflags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)
+print *, 'dist flags ', distrbflags
+   call wfk_read_my_kptbands(dtfil%fnamewffk, dtset, distrbflags, spacecomm, &
+&            formeig, istwfk_rbz, kpt_rbz, nkpt_rbz, npwarr, &
+&            cg, eigen=eigen0, occ=occ_rbz)
+  
+print *, 'eigen0 ', eigen0
+print *, 'occ_rbz ', occ_rbz
    call timab(144,2,tsec)
-!  Close wffgs%unwff, if it was ever opened (in inwffil)
-   if (ireadwf0==1) then
-     call WffClose(wffgs,ierr)
-   end if
+
    ! Update energies GS energies at k
    call put_eneocc_vect(ebands_k, "eig", eigen0)
-!DEBUG
-   !transfer to local array
-   icg=0
-   icg_tmp=0
-   do isppol=1, nsppol
-     do ikpt=1, nkpt_rbz
-       npw = npwarr(ikpt)
-       iband_me = 0
-       do iband=1, nband_rbz(ikpt+nkpt_rbz*(isppol-1))
-print *, 'mpi_enreg%proc_distrb(ikpt,iband,isppol) ', mpi_enreg%proc_distrb(ikpt,iband,isppol), ' meband ', mpi_enreg%me_band
-         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_band) then
-           icg_tmp = icg_tmp + npw
-           cycle
-         end if
-         iband_me = iband_me + 1
-         cg(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
-print *, 'is ik ib cg ', isppol, ikpt, iband, cg(:,icg+1:icg+5)
-         icg = icg + npw
-         icg_tmp = icg_tmp + npw
-       end do
-     end do
-   end do
-   ABI_DEALLOCATE(cg_tmp)
-!ENDDEBUG
 
 !  PAW: compute on-site projections of GS wavefunctions (cprj) (and derivatives) at k
    ncpgr=0
@@ -1283,11 +1263,16 @@ print *, 'is ik ib cg ', isppol, ikpt, iband, cg(:,icg+1:icg+5)
    if (dtfil%fnamewffq == dtfil%fnamewffk .and. sum(dtset%qptn(1:3)**2) < 1.d-14) then
      call wrtout(std_out, " qpt is Gamma, psi_k+q initialized from psi_k in memory")
      cgq = cg
+print *, ' mpw, mpw1 ', mpw, mpw1
+print *, 'cgq ', cgq
      eigenq = eigen0
    else
 !DEBUG
 ! mcgq=      mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
    mcg_tmp = mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
+   if(allocated(cg_tmp)) then
+     ABI_DEALLOCATE(cg_tmp)
+   end if
    ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
 !ENDDEBUG
 
@@ -2368,6 +2353,8 @@ print *, 'is ik ib cgq ', isppol, ikpt, iband, cgq(:,icg+1:icg+5)
 !  %%%% Parallelization over perturbations %%%%%
 !  *Redefine output/log files
    call localredirect(mpi_enreg%comm_cell,mpi_enreg%comm_world,npert_io,mpi_enreg%paral_pert,0)
+
+   ABI_DEALLOCATE(bz2ibz_smap)
 
    call timab(146,2,tsec)
    if(iexit/=0) exit

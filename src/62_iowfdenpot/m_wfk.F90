@@ -258,6 +258,7 @@ module m_wfk
  public :: wfk_read_ebands         ! Read the GS eigenvalues and return ebands_t object.
  public :: wfk_read_eigenvalues    ! Read all the GS eigenvalues stored in the WFK file.
  public :: wfk_read_h1mat          ! Read all the H1 matrix elements.
+ public :: wfk_read_my_kptbands    ! Read in all of my bands and k, depending on a distribution flag array
 
  ! Profiling tools
  public :: wfk_prof                ! Profiling tool.
@@ -327,6 +328,10 @@ CONTAINS
 !!      initwf,ioprof,m_cut3d,m_wfd,m_wfk,mrggkk,optic
 !!
 !! CHILDREN
+!!
+!! NOTES TODO
+!!   it would be better if formeig and iomode could be determined from the file itself!
+!!   eg iomode from the file extension, and formeig from whether it is WFK or 1WF
 !!
 !! SOURCE
 
@@ -1189,7 +1194,7 @@ subroutine wfk_read_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_
  end if
 
  if (present(occ_k)) then
-   ABI_CHECK(SIZE(occ_k) >= nband_disk, "GS eig_k too small")
+   ABI_CHECK(SIZE(occ_k) >= nband_disk, "GS occ_k too small")
    if (Wfk%formeig==1) then
      MSG_ERROR("occ_k cannot be used when formeig ==1")
    end if
@@ -2873,6 +2878,268 @@ subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
 
 end subroutine wfk_read_eigenvalues
 !!***
+
+
+!----------------------------------------------------------------------
+
+!!****f* m_wfk/wfk_read_my_kptbands
+!! NAME
+!!  wfk_read_my_kptbands
+!!
+!! FUNCTION
+!! Fill a cg (kg, eigen, occ) array with wavefunctions in a given BZ
+!! based on a distribution of k, b, s attributed to present processor
+!!
+!! INPUTS
+!!  wfk = Input WFK datastructure for opened file
+!!  dtset <dataset_type>=all input variables for this dataset
+!!  psps <pseudopotential_type>=all the information about psps
+!!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
+!!
+!! OUTPUT
+!!  cg
+!!  kg
+!!  eigen
+!!  occ
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
+&          formeig, istwfk_in, kptns_in, nkpt_in, npwarr, &
+&          cg, kg, eigen, occ)
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: comm, nkpt_in, formeig
+ type(dataset_type),intent(in) :: dtset
+!arrays
+ integer, intent(in) :: istwfk_in(nkpt_in)
+ integer, intent(in) :: npwarr(nkpt_in)
+ character(len=fnlen), intent(in) :: inpath
+ logical, intent(in) :: distrb_flags(nkpt_in,dtset%mband,dtset%nsppol)
+ real(dp), intent(in),target :: kptns_in(3,nkpt_in)
+
+ real(dp), intent(out) :: cg(2,dtset%mpw*dtset%nspinor*dtset%mband_mem*nkpt_in*dtset%nsppol)
+ integer, intent(out), optional :: kg(3,dtset%mpw*nkpt_in)
+ real(dp), intent(out), optional :: eigen(dtset%mband*nkpt_in*dtset%nsppol)
+ real(dp), intent(out), optional :: occ(dtset%mband*nkpt_in*dtset%nsppol)
+
+!Arguments ------------------------------------
+!arrays
+! type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: formeig0=0,kptopt3=3
+ integer :: spin,ikf,ik_ibz,nband_k,mpw_ki,mband,nspinor,nkfull
+ integer :: in_iomode,nsppol,nkibz,out_iomode,isym,itimrev
+ integer :: npw_ki,npw_kf,istwf_ki,istwf_kf,ii,jj,iqst,nqst
+ integer :: wfk_unt, ibd, icg, ikg, iband, nband_me
+ real(dp) :: ecut_eff,dksqmax,cpu,wall,gflops
+ character(len=500) :: msg
+ logical :: isirred_kf
+ logical :: needthisk
+ logical,parameter :: force_istwfk1=.False.
+ type(wfk_t),target :: wfk_disk
+ type(crystal_t) :: cryst
+ type(hdr_type),pointer :: ihdr
+ type(ebands_t) :: ebands_ibz
+ type(ebands_t),target :: ebands_full
+!arrays
+ integer :: g0(3),work_ngfft(18),gmax_ki(3),gmax_kf(3),gmax(3)
+ integer,allocatable ::kg_kf(:,:)
+ integer,allocatable :: rbz2ibz(:,:),kg_ki(:,:),iperm(:),rbz2ibz_sort(:)
+ real(dp) :: kf(3),kibz(3)
+ real(dp),allocatable :: cg_ki(:,:),eig_ki(:),occ_ki(:),work(:,:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: kfull(:,:)
+
+! *************************************************************************
+
+ if (all(dtset%kptrlatt == 0)) then
+   write(msg,"(5a)")&
+     "Cannot produce full WFK file because kptrlatt == 0",ch10,&
+     "Please use nkgpt and shiftk to define a homogeneous k-mesh.",ch10,&
+     "Returning to caller"
+   MSG_WARNING(msg)
+   return
+ end if
+
+ call cwtime(cpu, wall, gflops, "start")
+
+ wfk_unt = get_unit()
+! TODO: this still does not read in parallel properly: 
+! if I use xmpi_comm_self only the mother thread gets eigen and cg
+! if I use comm and MPIO_stuff then it hangs on this call
+! if I impose FORTRAN_IO and xmpio_single it complains the file is already opened by another proc
+ call wfk_open_read(wfk_disk,inpath,formeig,iomode_from_fname(inpath),&
+&                   wfk_unt,comm)
+
+ ihdr => wfk_disk%hdr
+
+! checks: impose nsppol conserved wrt disk
+! checks: impose nband conserved wrt disk?
+
+ mband = wfk_disk%mband; mpw_ki = maxval(wfk_disk%Hdr%npwarr); nkibz = wfk_disk%nkpt
+ nsppol = wfk_disk%nsppol; nspinor = wfk_disk%nspinor
+ ecut_eff = wfk_disk%hdr%ecut_eff ! ecut * dilatmx**2
+
+ ebands_ibz = wfk_read_ebands(inpath, xmpi_comm_self)
+
+ ABI_MALLOC(kg_ki, (3, mpw_ki))
+ ABI_MALLOC(cg_ki, (2, mpw_ki*nspinor*mband))
+ ABI_MALLOC(eig_ki, ((2*mband)**wfk_disk%formeig*mband) )
+ ABI_MALLOC(occ_ki, (mband))
+
+ cryst = wfk_disk%hdr%get_crystal(2)
+
+ ! Build new header for owfk. This is the most delicate part since all the arrays in hdr_full
+ ! that depend on k-points must be consistent with kfull and nkfull.
+ call ebands_expandk(ebands_ibz, cryst, ecut_eff, force_istwfk1, dksqmax, rbz2ibz, ebands_full)
+
+ if (dksqmax > tol12) then
+   write(msg, '(3a,es16.6,4a)' )&
+   'At least one of the k points could not be generated from a symmetrical one.',ch10,&
+   'dksqmax=',dksqmax,ch10,&
+   'Action: check your WFK file and k-point input variables',ch10,&
+   '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
+   MSG_ERROR(msg)
+ end if
+
+! TODO: check these are consistent with ebands_full which was just generated
+ nkfull = nkpt_in
+ kfull => kptns_in
+
+ ! More efficienct algorithm based on random access IO:
+ !   For each point in the IBZ:
+ !     - Read wavefunctions from wfk_disk
+ !     - For each k-point in the star of kpt_ibz:
+ !        - Rotate wavefunctions in G-space to get the k-point in the full BZ.
+ !        - Write kbz data to file.
+
+ ! Construct sorted mapping BZ --> IBZ to speedup qbz search below.
+ ABI_MALLOC(iperm, (nkfull))
+ ABI_MALLOC(rbz2ibz_sort, (nkfull))
+ iperm = [(ii, ii=1,nkfull)]
+ rbz2ibz_sort = rbz2ibz(:,1)
+ call sort_int(nkfull, rbz2ibz_sort, iperm)
+
+ icg = 0
+ ikg = 0
+ ibd = 0
+ do spin=1,nsppol
+   iqst = 0
+   do ik_ibz=1,wfk_disk%nkpt
+     nband_k = wfk_disk%nband(ik_ibz,spin)
+     kibz = ebands_ibz%kptns(:,ik_ibz)
+     istwf_ki = wfk_disk%hdr%istwfk(ik_ibz)
+     npw_ki = wfk_disk%hdr%npwarr(ik_ibz)
+
+     ! Find number of symmetric q-ponts associated to ik_ibz
+     nqst = 0
+     needthisk=.false.
+     do ii=iqst+1,nkfull
+       if (rbz2ibz_sort(ii) /= ik_ibz) exit
+       nqst = nqst + 1
+!TODO: check that some set of bands at this k are in my distribution
+       if (any(distrb_flags(:,iperm(ii),spin))) needthisk=.true.
+     end do
+     if (.not. needthisk) cycle
+
+     ABI_CHECK(nqst > 0 .and. rbz2ibz_sort(iqst+1) == ik_ibz, "Wrong iqst")
+
+     ikf = iperm(iqst+1)
+     nband_me = count(distrb_flags(:,ikf,spin))
+     do iband = 1, nband_k
+       if (distrb_flags(iband,ikf,spin)) exit
+     end do
+     if (.not. distrb_flags(iband+nband_me-1,ikf,spin)) then
+       stop "bands not contiguous in distrb_flags"
+     end if
+
+     call wfk_disk%read_band_block([iband,iband+nband_me-1],ik_ibz,spin,xmpio_single,&
+       kg_k=kg_ki,cg_k=cg_ki,eig_k=eig_ki,occ_k=occ_ki)
+
+     do jj=1,nqst
+       iqst = iqst + 1
+       ikf = iperm(iqst)
+       ABI_CHECK(ik_ibz == rbz2ibz(ikf,1), "ik_ibz !/ ind qq(1)")
+
+       isym = rbz2ibz(ikf,2); itimrev = rbz2ibz(ikf,6); g0 = rbz2ibz(ikf,3:5) ! IS(k_ibz) + g0 = k_bz
+       isirred_kf = (isym == 1 .and. itimrev == 0 .and. all(g0 == 0))
+
+       kf = kfull(:,ikf)
+       istwf_kf = istwfk_in(ikf)
+
+       if (present(eigen)) then
+         eigen(ibd+1:ibd+nband_k*(2*nband_k)**formeig) = eig_ki(1:nband_k*(2*nband_k)**formeig)
+       end if
+       if (present(occ)) then
+         occ(ibd+1:ibd+nband_k) = occ_ki(1:nband_k)
+       end if
+
+       ! The test on npwarr is needed because we may change istwfk e.g. gamma.
+       if (isirred_kf .and. wfk_disk%hdr%npwarr(ik_ibz) == npwarr(ikf)) then
+         if (present(kg)) then
+           kg(:,ikg+1:ikg+npw_kf) = kg_ki (:,1:npw_kf)
+         end if
+         cg(:,icg+1:icg+npw_kf*nband_me*dtset%nspinor) = cg_ki(:,1:npw_kf*nband_me*dtset%nspinor)
+       else
+         ! Compute G-sphere centered on kf
+         call get_kg(kf,istwf_kf,ecut_eff,cryst%gmet,npw_kf,kg_kf)
+         ABI_CHECK(npw_kf == npwarr(ikf), "Wrong npw_kf")
+         if (present(kg)) then
+           kg(:,ikg+1:ikg+npw_kf) = kg_kf (:,1:npw_kf)
+         end if
+
+         ! FFT box must enclose the two spheres centered on ki and kf
+         gmax_ki = maxval(abs(kg_ki(:,1:npw_ki)), dim=2)
+         gmax_kf = maxval(abs(kg_kf), dim=2)
+         do ii=1,3
+           gmax(ii) = max(gmax_ki(ii), gmax_kf(ii))
+         end do
+         gmax = 2*gmax + 1
+         call ngfft_seq(work_ngfft, gmax)
+         ABI_CALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)))
+
+         ! Rotate nband_k wavefunctions (output in cg)
+         call cgtk_rotate(cryst,kibz,isym,itimrev,g0,nspinor,nband_me,&
+&          npw_ki,kg_ki,npw_kf,kg_kf,istwf_ki,istwf_kf,cg_ki,&
+&          cg(:,icg+1:icg+npw_kf*nband_me*dtset%nspinor),work_ngfft,work)
+
+         ABI_FREE(work)
+         ABI_FREE(kg_kf)
+       end if
+! update icg ikg
+       ikg = ikg + npw_kf
+       icg = icg + npw_kf*nband_me*dtset%nspinor
+       ibd = ibd + nband_k*(2*nband_k)**formeig
+     end do ! equiv kpt jj
+   end do ! kpt
+ end do ! sppol
+
+ ABI_FREE(iperm)
+ ABI_FREE(rbz2ibz_sort)
+
+ ABI_FREE(kg_ki)
+ ABI_FREE(cg_ki)
+ ABI_FREE(eig_ki)
+ ABI_FREE(occ_ki)
+ ABI_FREE(rbz2ibz)
+
+ call cryst%free()
+ call ebands_free(ebands_ibz)
+ call ebands_free(ebands_full)
+ call wfk_disk%close()
+
+end subroutine wfk_read_my_kptbands
+!!***
+
 
 !----------------------------------------------------------------------
 
