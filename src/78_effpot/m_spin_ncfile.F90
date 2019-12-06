@@ -273,33 +273,33 @@ end subroutine def_observable_var
     if(self%write_traj ==1) then
        ncerr=nf90_put_var(self%ncid, self%S_id, hist%S(:,:,hist%ihist_prev), &
             &      start=[1, 1, itime], count=[3, hist%nspin, 1])
-       NCF_CHECK(ncerr)
+       !NCF_CHECK(ncerr)
 
        ncerr=nf90_put_var(self%ncid, self%dsdt_id, &
             &      hist%dsdt(:,:,hist%ihist_prev), start=[1, 1, itime], &
             &      count=[3, hist%nspin, 1])
-       NCF_CHECK(ncerr)
+       !NCF_CHECK(ncerr)
 
        ncerr=nf90_put_var(self%ncid, self%heff_id, &
             &      hist%heff(:,:,hist%ihist_prev), start=[1, 1, itime], count=[3, hist%nspin, 1])
-       NCF_CHECK(ncerr)
+       !NCF_CHECK(ncerr)
 
        ncerr=nf90_put_var(self%ncid, self%snorm_id, &
             &      hist%snorm(:,hist%ihist_prev)/mu_B, start=[1, itime], count=[hist%nspin, 1])
-       NCF_CHECK(ncerr)
+       !NCF_CHECK(ncerr)
     end if
     !ncerr=nf90_put_var(self%ncid, self%ihist_g_id, [hist%ihist_latt(hist%ihist_prev)], start=[itime], count=[1])
     ncerr=nf90_put_var(self%ncid, self%itime_id, &
          &       [hist%itime(hist%ihist_prev)], start=[itime], count=[1])
-    NCF_CHECK(ncerr)
+    !NCF_CHECK(ncerr)
     ncerr=nf90_put_var(self%ncid, self%time_id, &
          & [hist%time(hist%ihist_prev)], start=[itime], count=[1])
-    NCF_CHECK(ncerr)
+    !NCF_CHECK(ncerr)
     !ncerr=nf90_put_var(self%ncid, self%entropy_id, &
     !     & [hist%entropy(hist%ihist_prev)], start=[itime], count=[1])
     ncerr=nf90_put_var(self%ncid, self%etotal_id,  &
          & [hist%etot(hist%ihist_prev)], start=[itime], count=[1])
-    NCF_CHECK(ncerr)
+    !NCF_CHECK(ncerr)
     self%itime=itime
 
     if(present(ob)) then
