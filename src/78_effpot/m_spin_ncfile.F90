@@ -154,6 +154,7 @@ contains
 
     self%isopen=.True.
     !NCF_CHECK_MSG(ncerr, "create netcdf history file")
+    NCF_CHECK(ncerr)
 #endif
   end subroutine initialize
 
@@ -169,12 +170,16 @@ contains
 
 #if defined HAVE_NETCDF
     ncerr = nf90_redef(self%ncid)
+    NCF_CHECK(ncerr)
     
     !write(std_out,*) "Defining variables in spinhist.nc file."
     ! define dimensions
     ncerr=nf90_def_dim(self%ncid, "three", 3, self%three)
+    NCF_CHECK(ncerr)
     ncerr=nf90_def_dim(self%ncid, "nspin", hist%nspin, self%nspin )
+    NCF_CHECK(ncerr)
     ncerr=nf90_def_dim(self%ncid, "ntime", nf90_unlimited, self%ntime)
+    NCF_CHECK(ncerr)
     !call ab_define_var(ncid,dim1,typat_id,NF90_DOUBLE,&
     !     &  "typat","types of atoms","dimensionless" )
 
@@ -198,6 +203,7 @@ contains
     call ab_define_var(self%ncid, (/ self%ntime /), &
          &         self%itime_id, NF90_INT, "itime", "index of time in spin timeline", "1")
     ncerr=nf90_enddef(self%ncid)
+    NCF_CHECK(ncerr)
 #endif
   
   end subroutine def_spindynamics_var
@@ -214,7 +220,9 @@ contains
 
 #if defined HAVE_NETCDF
     ncerr = nf90_redef(self%ncid)
+    NCF_CHECK(ncerr)
     ncerr = nf90_def_dim(self%ncid, "nsublatt", ob%nsublatt, self%nsublatt)
+    NCF_CHECK(ncerr)
 
     call ab_define_var(self%ncid, (/self%three, self%nsublatt, self%ntime/),& 
            & self%Mst_sub_id, NF90_DOUBLE, "Mst_sub", "Sublattice staggered M", "Bohr magneton")
@@ -243,6 +251,7 @@ contains
   endif
 
   ncerr=nf90_enddef(self%ncid)
+  NCF_CHECK(ncerr)
 
 #endif
 end subroutine def_observable_var
@@ -264,38 +273,49 @@ end subroutine def_observable_var
     if(self%write_traj ==1) then
        ncerr=nf90_put_var(self%ncid, self%S_id, hist%S(:,:,hist%ihist_prev), &
             &      start=[1, 1, itime], count=[3, hist%nspin, 1])
+       NCF_CHECK(ncerr)
 
        ncerr=nf90_put_var(self%ncid, self%dsdt_id, &
             &      hist%dsdt(:,:,hist%ihist_prev), start=[1, 1, itime], &
             &      count=[3, hist%nspin, 1])
+       NCF_CHECK(ncerr)
 
        ncerr=nf90_put_var(self%ncid, self%heff_id, &
             &      hist%heff(:,:,hist%ihist_prev), start=[1, 1, itime], count=[3, hist%nspin, 1])
+       NCF_CHECK(ncerr)
 
        ncerr=nf90_put_var(self%ncid, self%snorm_id, &
             &      hist%snorm(:,hist%ihist_prev)/mu_B, start=[1, itime], count=[hist%nspin, 1])
+       NCF_CHECK(ncerr)
     end if
     !ncerr=nf90_put_var(self%ncid, self%ihist_g_id, [hist%ihist_latt(hist%ihist_prev)], start=[itime], count=[1])
     ncerr=nf90_put_var(self%ncid, self%itime_id, &
          &       [hist%itime(hist%ihist_prev)], start=[itime], count=[1])
+    NCF_CHECK(ncerr)
     ncerr=nf90_put_var(self%ncid, self%time_id, &
          & [hist%time(hist%ihist_prev)], start=[itime], count=[1])
+    NCF_CHECK(ncerr)
     !ncerr=nf90_put_var(self%ncid, self%entropy_id, &
     !     & [hist%entropy(hist%ihist_prev)], start=[itime], count=[1])
     ncerr=nf90_put_var(self%ncid, self%etotal_id,  &
          & [hist%etot(hist%ihist_prev)], start=[itime], count=[1])
+    NCF_CHECK(ncerr)
     self%itime=itime
 
     if(present(ob)) then
        ncerr=nf90_put_var(self%ncid, self%Mst_sub_id, ob%Mst_sub, &
             &      start=[1, 1, itime], count=[3, ob%nsublatt, 1])
+       NCF_CHECK(ncerr)
        ncerr=nf90_put_var(self%ncid, self%Mst_sub_norm_id, ob%Mst_sub_norm, &
             &      start=[ 1, itime], count=[ob%nsublatt, 1])
+       NCF_CHECK(ncerr)
        ncerr=nf90_put_var(self%ncid, self%Mst_norm_total_id, [ob%Mst_norm_total], &
             &      start=[itime], count=[1])
+       NCF_CHECK(ncerr)
 
        ncerr=nf90_put_var(self%ncid, self%Snorm_total_id, [ob%Snorm_total/mu_B], &
             &      start=[itime], count=[1])
+       NCF_CHECK(ncerr)
 
        if(ob%calc_traj_obs)then
        endif
@@ -326,11 +346,12 @@ end subroutine def_observable_var
 
 #if defined HAVE_NETCDF
      ncerr=nf90_redef(self%ncid)
-
-
+     NCF_CHECK(ncerr)
 
      ncerr=nf90_def_dim(self%ncid, "prim_natoms", prim%lattice%natom, natom )
+     NCF_CHECK(ncerr)
      ncerr=nf90_def_dim(self%ncid, "prim_nspins", prim%spin%nspin, nspin)
+     NCF_CHECK(ncerr)
 
      call ab_define_var(self%ncid, [self%three, self%three], rprimd_id, &
           & NF90_DOUBLE, "prim_rprimd","PRIMitive cell Real space PRIMitive translations, Dimensional", "bohr")
@@ -374,14 +395,23 @@ end subroutine def_observable_var
 !          & [self%natoms], self%spin_index_id)
 
      ncerr=nf90_enddef(self%ncid)
+     NCF_CHECK(ncerr)
      ncerr = nf90_put_var(self%ncid, rprimd_id, prim%spin%rprimd)
+     NCF_CHECK(ncerr)
      ncerr = nf90_put_var(self%ncid, ms_id, prim%spin%ms)
+     NCF_CHECK(ncerr)
      ncerr = nf90_put_var(self%ncid, spin_xcart_id, prim%spin%spin_positions)
+     NCF_CHECK(ncerr)
      ncerr = nf90_put_var(self%ncid, ref_spin_orientation_id, prim%spin%Sref)
+     NCF_CHECK(ncerr)
      ncerr = nf90_put_var(self%ncid, ref_spin_qpoint_id, prim%spin%ref_qpoint)
+     NCF_CHECK(ncerr)
      ncerr = nf90_put_var(self%ncid, ref_spin_rotate_axis_id, prim%spin%ref_rotate_axis)
+     NCF_CHECK(ncerr)
      ncerr = nf90_put_var(self%ncid, gilbert_damping_id, prim%spin%gilbert_damping)
+     NCF_CHECK(ncerr)
      ncerr = nf90_put_var(self%ncid, gyro_ratio_id, prim%spin%gyro_ratio)
+     NCF_CHECK(ncerr)
 
 !     !ncerr=nf90_put_var(self%ncid, self%acell_id, prim%unitcell)
 !     ncerr=nf90_put_var(self%ncid, self%rprimd_id, prim%unitcell)
@@ -409,6 +439,7 @@ end subroutine def_observable_var
 
 #if defined HAVE_NETCDF
     ncerr=nf90_redef(self%ncid)
+    NCF_CHECK(ncerr)
 
     !call ab_define_var(self%ncid, (/self%three, self%three /), rprimd_id,&
     !      & NF90_DOUBLE, "rprimd", "primitive cell vectors in real space with&
@@ -421,11 +452,15 @@ end subroutine def_observable_var
           & NF90_INT, "ispin_prim", "index of spin in primitive cell", "dimensionless")
 
     ncerr=nf90_enddef(self%ncid)
+    NCF_CHECK(ncerr)
 
     !ncerr=nf90_put_var(self%ncid, rprimd_id, scell%cell)
     ncerr=nf90_put_var(self%ncid, pos_id, supercell%spin%spin_positions)
+    NCF_CHECK(ncerr)
     ncerr=nf90_put_var(self%ncid, ispin_prim_id, supercell%spin%ispin_prim)
+    NCF_CHECK(ncerr)
     ncerr=nf90_put_var(self%ncid, rvec_id, supercell%spin%rvec)
+    NCF_CHECK(ncerr)
     ! ncerr=nf90_put_var(self%ncid, iatoms_id, scell%iatoms)
 #endif
   end subroutine write_supercell
@@ -443,6 +478,7 @@ end subroutine def_observable_var
 
 #if defined HAVE_NETCDF
     ncerr=nf90_redef(self%ncid)
+    NCF_CHECK(ncerr)
     ! dims 
     ! vars
     call ab_define_var(self%ncid, (/self%three/), qpoint_id, NF90_DOUBLE,&
@@ -466,12 +502,18 @@ end subroutine def_observable_var
     !mfield_id)
 
     ncerr=nf90_enddef(self%ncid)
+    NCF_CHECK(ncerr)
     ! put vars
     ncerr=nf90_put_var(self%ncid, qpoint_id, params%spin_projection_qpoint)
+    NCF_CHECK(ncerr)
     ncerr=nf90_put_var(self%ncid, ncell_id, params%ncell)
+    NCF_CHECK(ncerr)
     ncerr=nf90_put_var(self%ncid, temperature_id, params%spin_temperature*Ha_K)
+    NCF_CHECK(ncerr)
     ncerr=nf90_put_var(self%ncid, dt_id, params%spin_dt*Time_Sec)
+    NCF_CHECK(ncerr)
     ncerr=nf90_put_var(self%ncid, mfield_id, params%spin_mag_field/Bfield_Tesla)
+    NCF_CHECK(ncerr)
 #endif
   end subroutine write_parameters
 
@@ -486,6 +528,7 @@ end subroutine def_observable_var
     if (self%isopen) then
        write(std_out, *) "Closing spin history file "//trim(self%filename)//"."
        ncerr=nf90_close(self%ncid)
+       NCF_CHECK(ncerr)
     end if
     !NCF_CHECK_MSG(ncerr, "close netcdf spin history file"//trim(self%filename)//".")
 #endif
