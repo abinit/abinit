@@ -170,7 +170,7 @@ contains
 
 #if defined HAVE_NETCDF
     ncerr = nf90_redef(self%ncid)
-    NCF_CHECK(ncerr)
+    !NCF_CHECK(ncerr)
     
     !write(std_out,*) "Defining variables in spinhist.nc file."
     ! define dimensions
@@ -349,7 +349,7 @@ end subroutine def_observable_var
      NCF_CHECK(ncerr)
 
      ncerr=nf90_def_dim(self%ncid, "prim_natoms", prim%lattice%natom, natom )
-     NCF_CHECK(ncerr)
+     !NCF_CHECK(ncerr)
      ncerr=nf90_def_dim(self%ncid, "prim_nspins", prim%spin%nspin, nspin)
      NCF_CHECK(ncerr)
 
