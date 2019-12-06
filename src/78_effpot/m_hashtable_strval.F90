@@ -60,7 +60,9 @@ MODULE m_hashtable_strval
      PROCEDURE :: get  => get_sll
      PROCEDURE :: free => free_sll
      PROCEDURE :: sum_val => sum_val_sll
+     procedure :: sum_entry => sum_entry_sll
      procedure :: print_all => print_all_sll
+     procedure :: print_entry => print_entry_sll
   END TYPE sllist
 
   TYPE hash_table_t
@@ -74,9 +76,11 @@ MODULE m_hashtable_strval
      PROCEDURE :: free => free_hash_table_t
      PROCEDURE :: sum_val => sum_val_hash_table_t
      PROCEDURE :: print_all => print_all_hash_table_t
+     procedure :: print_entry => print_entry_hash_table_t
   END TYPE hash_table_t
 
   PUBLIC :: hash_table_t
+
 CONTAINS
 
   RECURSIVE SUBROUTINE put_sll(list,key,val)
@@ -144,6 +148,39 @@ CONTAINS
     end if
   end function sum_val_sll
 
+  recursive function sum_entry_sll(self, label, prefix) result(s)
+    class(sllist), intent(in) :: self
+    character(*), optional, intent(in) :: label
+    character(*), optional, intent(in) :: prefix
+    real(dp) :: s
+
+    integer :: length
+
+    if((.not. present(prefix)) .and. (.not. present(label))) then
+      MSG_ERROR('Label and prefix not present.')
+    endif
+    if(present(label) .and. present(prefix)) then
+      MSG_ERROR('Label and prefix present, only specify one of the two.')
+    endif
+
+    if(present(prefix)) length=len(prefix)
+
+    s=0.0_dp
+    if (allocated(self%key)) then
+      if(present(prefix)) then
+        if(self%key(1:length) .eq. prefix) then
+          s=s+self%val
+        endif
+      else
+        if(self%key .eq. label) then
+          s=s+self%val
+        endif
+      endif
+      if(associated(self%child)) then
+        s=s+self%child%sum_entry(label=label, prefix=prefix)
+      endif
+    end if
+  end function sum_entry_sll
 
   recursive subroutine print_all_sll(self)
     class(sllist), intent(in) :: self
@@ -159,7 +196,45 @@ CONTAINS
     end if
   end subroutine print_all_sll
 
+  recursive subroutine print_entry_sll(self, label, prefix)
+    class(sllist), intent(in) :: self
+    character(*), optional, intent(in) :: label
+    character(*), optional, intent(in) :: prefix
 
+    integer :: length
+    character(len=80) :: msg
+
+    if((.not. present(prefix)) .and. (.not. present(label))) then
+      MSG_ERROR('Label and prefix not present.')
+    endif
+    if(present(label) .and. present(prefix)) then
+      MSG_ERROR('Label and prefix present, only specify one of the two.')
+    endif
+
+    if(present(prefix)) then
+      length=len(prefix)
+    endif
+
+    if (allocated(self%key)) then
+      if(present(prefix)) then
+        if(self%key(1:length) .eq. prefix) then
+          write(msg, "(A40, 1X, ES13.5)") self%key, self%val
+          call wrtout(std_out,msg,'COLL')
+          call wrtout(ab_out, msg, 'COLL')
+        endif
+      else !not prefix but label present
+        if(self%key .eq. label) then
+          write(msg, "(A40, 1X, ES13.5)") self%key, self%val
+          call wrtout(std_out,msg,'COLL')
+          call wrtout(ab_out, msg, 'COLL')
+        endif
+      endif
+      if(associated(self%child)) then
+        call self%child%print_entry(label=label, prefix=prefix)
+      endif
+    endif
+
+  end subroutine print_entry_sll
 
   SUBROUTINE init_hash_table_t(tbl,tbl_len)
     CLASS(hash_table_t),   INTENT(inout) :: tbl
@@ -229,8 +304,10 @@ CONTAINS
   END SUBROUTINE free_hash_table_t
 
   
-  function sum_val_hash_table_t(self) result(s)
+  function sum_val_hash_table_t(self, label, prefix) result(s)
     class(hash_table_t), intent(in) :: self
+    character(len=*), optional, intent(in) :: label, prefix
+
     real(dp) :: s
     integer :: i
     s=0.0_dp
@@ -238,10 +315,13 @@ CONTAINS
        return
     end if
     do i =1, self%vec_len
-       s=s+ self%vec(i)%sum_val()
+      if(present(label) .or. present(prefix)) then
+        s=s+self%vec(i)%sum_entry(label=label, prefix=prefix)
+      else
+        s=s+ self%vec(i)%sum_val()
+      endif
     end do
   end function sum_val_hash_table_t
-
 
   subroutine print_all_hash_table_t(self)
     class(hash_table_t), intent(in) :: self
@@ -255,5 +335,22 @@ CONTAINS
        end do
     end if
   end subroutine print_all_hash_table_t
+
+  subroutine print_entry_hash_table_t(self, label, prefix)
+    class(hash_table_t), intent(in) :: self
+    character(len=*), optional, intent(in) :: label, prefix
+    integer :: i, low, high
+    low  = LBOUND(self%vec,dim=1)
+    high = UBOUND(self%vec,dim=1)
+
+    if (allocated(self%vec)) then
+       do i =low, high
+          call self%vec(i)%print_entry(label=label, prefix=prefix)
+       end do
+    end if
+  end subroutine print_entry_hash_table_t
+
+
+
 
 end module m_hashtable_strval

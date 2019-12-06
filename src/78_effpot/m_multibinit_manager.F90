@@ -546,7 +546,19 @@ contains
     msg='Energy contributions'
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
-    call self%energy_table%print_all()
+    msg=' Lattice contributions'
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    call self%energy_table%print_entry(label='Lattice kinetic energy')
+    call self%energy_table%print_entry(label='Lattice_harmonic_potential')
+    msg=' Spin contributions'
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    call self%energy_table%print_entry(label='SpinPotential')
+    msg=' Spin-lattice coupling contributions'
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    call self%energy_table%print_entry(prefix='SLCPotential')
     etotal=self%energy_table%sum_val()
     write(msg, "(A12, 29X, ES13.5)") 'Total energy', etotal
     call wrtout(std_out,msg,'COLL')
