@@ -980,7 +980,7 @@ contains
           write(post_fname, "(I4.4)") i
           call self%prepare_ncfile( self%params, &
                & trim(ncfile_prefix)//'_T'//post_fname//'_spinhist.nc')
-          call spin_ncfile%write_one_step(self%hist)
+          call self%spin_ncfile%write_one_step(self%hist)
        endif
 
        ! run in parallel

@@ -146,6 +146,8 @@ contains
     endif
     call self%primcell%set_spin(nspin, ms, unitcell,  spin_positions, gyroratios, damping_factors, &
          & Sref=Sref, ref_qpoint=ref_spin_qpoint, ref_rotate_axis=ref_spin_rotate_axis)
+
+    !call self%primcell%set_lattice(natom=natoms, cell=unitcell, xcart=spin_positions, masses, zion)
   end subroutine set_spin_primcell
 
 

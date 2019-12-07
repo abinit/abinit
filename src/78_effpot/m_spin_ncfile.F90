@@ -75,7 +75,8 @@ module m_spin_ncfile
      integer :: xred_id,  typat_id, znucl_id,  label_id, spin_index_id
      integer ::  acell_id, rprimd_id
      ! variable ids for spin dynamics
-     integer :: entropy_id, etotal_id, S_id, snorm_id, dsdt_id, heff_id, time_id, itime_id
+     integer :: entropy_id, etotal_id, S_id, snorm_id, dsdt_id
+     integer :: heff_id, time_id, itime_id
      ! entropy
      ! etotal: total energy
      ! S: spin
@@ -103,7 +104,7 @@ module m_spin_ncfile
      integer :: itime
      ! itime: time index
 
-     integer :: write_traj=1
+     integer :: write_traj=0
      !whether to write the trajectory (S(t))
 
      character(len=fnlen) :: filename
@@ -153,6 +154,8 @@ contains
     ncerr = nf90_create(path=trim(filename), cmode=NF90_CLOBBER, ncid=self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when creating netcdf history file")
     self%isopen=.True.
+    ncerr =nf90_enddef(self%ncid)
+    NCF_CHECK_MSG(ncerr, "Error when ending def mode in spin netcdf history file")
 #endif
   end subroutine initialize
 
@@ -168,8 +171,7 @@ contains
 
 #if defined HAVE_NETCDF
     ncerr = nf90_redef(self%ncid)
-    NCF_CHECK_MSG(ncerr, "Error when starting defining variables in spin history file.")
-    !write(std_out,*) "Defining variables in spinhist.nc file."
+    NCF_CHECK_MSG(ncerr, "Error when starting defining trajectory variables in spin history file.")
     ! define dimensions
     ncerr=nf90_def_dim(self%ncid, "three", 3, self%three)
     NCF_CHECK_MSG(ncerr, "Error when defining dimension three in spin history file.")
@@ -183,10 +185,12 @@ contains
     if(self%write_traj==1) then
        call ab_define_var(self%ncid, (/ self%three, self%nspin, self%ntime /), &
             &         self%S_id, NF90_DOUBLE, "S", "Spin orientations", "dimensionless")
+
        call ab_define_var(self%ncid, (/ self%nspin, self%ntime /), &
             &         self%snorm_id, NF90_DOUBLE, "snorm", "Spin norm2", "Mu_B")
        call ab_define_var(self%ncid, (/ self%three, self%nspin, self%ntime /), &
             &         self%dsdt_id, NF90_DOUBLE, "dsdt", "Spin orientations derivative to time", "1/s")
+
        call ab_define_var(self%ncid, (/ self%three, self%nspin, self%ntime /), &
             &         self%Heff_id, NF90_DOUBLE, "Heff", "Effective spin torque", "Tesla")
     endif
@@ -197,8 +201,10 @@ contains
          &         self%etotal_id, NF90_DOUBLE, "etotal", "TOTAL energy", "Joule")
     call ab_define_var(self%ncid, (/ self%ntime /), &
          &         self%entropy_id, NF90_DOUBLE, "entropy", "Entropy", "Joule/K")
+
     call ab_define_var(self%ncid, (/ self%ntime /), &
          &         self%itime_id, NF90_INT, "itime", "index of time in spin timeline", "1")
+
     ncerr=nf90_enddef(self%ncid)
 
     NCF_CHECK_MSG(ncerr, "Error when finishing defining variables in spin history file.")
@@ -338,8 +344,9 @@ end subroutine def_observable_var
      ncerr=nf90_redef(self%ncid)
      NCF_CHECK_MSG(ncerr, "Error when starting defining primitive cell variables in spin history file.")
 
-     ncerr=nf90_def_dim(self%ncid, "prim_natoms", prim%lattice%natom, natom )
-     NCF_CHECK_MSG(ncerr, "Error when defining dimension prim_natoms in spin history file.")
+     ! lattice is not yet forced to be saved in prim
+     !ncerr=nf90_def_dim(self%ncid, "prim_natoms", prim%lattice%natom, natom )
+     !NCF_CHECK_MSG(ncerr, "Error when defining dimension prim_natoms in spin history file.")
      ncerr=nf90_def_dim(self%ncid, "prim_nspins", prim%spin%nspin, nspin)
      NCF_CHECK_MSG(ncerr, "Error when defining dimension prim_nspins in spin history file.")
 
@@ -361,28 +368,6 @@ end subroutine def_observable_var
 
      call ab_define_var(self%ncid, [nspin], gyro_ratio_id, &
           & NF90_DOUBLE, "prim_gyro_ratio","PRIMitive cell GYROmagnetic RATIO", "a.u.")
-
-
-
-!      ncerr=nf90_def_var(self%ncid, "prim_ms", NF90_DOUBLE, &
-!           & [nspin], ms_id)
-!      ncerr=nf90_def_var(self%ncid, "prim_spin_xcart", NF90_DOUBLE, &
-!           & [ self%three, nspin], spin_xcart_id)
-!      ncerr=nf90_def_var(self%ncid, "prim_ref_spin_orientation", NF90_DOUBLE, &
-!           & [self%three, nspin], ref_spin_orientation_id)
-!      ncerr=nf90_def_var(self%ncid, "prim_ref_spin_qpoint", NF90_DOUBLE, &
-!           & [self%three], ref_spin_orientation_id)
-!      ncerr=nf90_def_var(self%ncid, "prim_ref_spin_rotate_axis", NF90_DOUBLE, &
-!           & [self%three], ref_spin_rotate_axis_id)
-!      ncerr=nf90_def_var(self%ncid, "prim_gilbert_damping", NF90_DOUBLE, &
-!           & [nspin], gilbert_damping_id)
-!      ncerr=nf90_def_var(self%ncid, "prim_gyro_ratio", NF90_DOUBLE, &
-!           & [nspin], gyro_ratio_id)
-
-! !     !ncerr=nf90_def_var(self%ncid, "prim_typat", NF90_INT, [self%natoms],  self%typat_id)
-!     !ncerr=nf90_def_var(self%ncid, "prim_znucl", NF90_DOUBLE, [self%ntypat],  self%znucl_id)
-!     ncerr=nf90_def_var(self%ncid, "prim_spin_index", NF90_DOUBLE, &
-!          & [self%natoms], self%spin_index_id)
 
      ncerr=nf90_enddef(self%ncid)
 
