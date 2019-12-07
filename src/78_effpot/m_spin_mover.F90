@@ -906,7 +906,7 @@ contains
     type(hash_table_t), optional, intent(inout) :: energy_table
     real(dp) :: T_start, T_end
     integer :: T_nstep
-    type(spin_ncfile_t) :: spin_ncfile
+    !type(spin_ncfile_t) :: spin_ncfile
     character(len=4) :: post_fname
     real(dp) :: T, T_step
     integer :: i, ii, Tfile, iostat
@@ -988,7 +988,7 @@ contains
             & lwf=lwf, energy_table=energy_table)
 
        if(iam_master) then
-          call spin_ncfile%close()
+          call self%spin_ncfile%close()
           ! save observables
           Tlist(i)=T
           chi_list(i)=self%spin_ob%chi
