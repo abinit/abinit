@@ -207,7 +207,7 @@ contains
     logical :: iam_master
 
     ABI_UNUSED(ii)
-    ABI_UNUSED(m2dim)
+    ABI_UNUSED_A(m2dim)
 
     spref(:) = reshape(self%supercell%spin%Sref, (/ 3*self%nspin/))
 
