@@ -35,9 +35,10 @@ module m_dtfil
 
  use defs_abitypes,  only : MPI_type
  use m_clib,         only : clib_rename
- use m_fstrings,     only : int2char4, rmquotes, sjoin, strcat
+ use m_fstrings,     only : int2char4, rmquotes, sjoin, strcat, basename
  use m_io_tools,     only : open_file, file_exists
  use m_libpaw_tools, only : libpaw_log_flag_set
+ use m_parser,       only : parsefile, intagm
 
  implicit none
 
@@ -1415,18 +1416,19 @@ subroutine isfile(filnam, status)
 
  filnam_tmp=filnam
 
- if (status=='old') then !  Check that old file exists
+ if (status=='old') then
+   ! Check that old file exists
    inquire(file=filnam,iostat=ios,exist=ex)
 
    if (ios/=0) then
      write(msg,'(4a,i0,2a)')&
-     'Checks for existence of file  ',trim(filnam),ch10,&
+     'Checks for existence of file: ',trim(filnam),ch10,&
      'but INQUIRE statement returns error code',ios,ch10,&
      'Action: identify which problem appears with this file.'
      MSG_ERROR(msg)
    else if (.not.ex) then
      write(msg, '(5a)' )&
-     'Checks for existence of file  ',trim(filnam),ch10,&
+     'Checks for existence of file: ',trim(filnam),ch10,&
      'but INQUIRE finds file does not exist.',&
      'Action: check file name and re-run.'
      MSG_ERROR(msg)
@@ -1440,7 +1442,8 @@ subroutine isfile(filnam, status)
    ii = 0
    inquire(file=trim(trialnam),iostat=ios,exist=ex)
    if (ios /= 0) then
-     write(msg,'(3a)') 'Something is wrong with permissions for reading/writing on this filesystem.',ch10,&
+     write(msg,'(3a)') &
+     'Something is wrong with permissions for reading/writing on this filesystem.',ch10,&
      'Action: Check permissions.'
      MSG_ERROR(msg)
    end if
@@ -1470,7 +1473,7 @@ subroutine isfile(filnam, status)
        ii=ii+1
      end do
      if ( found .eqv. .true. ) then
-       write(msg,'(4a)') 'Renaming old ',trim(filnam),' to ',trim(trialnam)
+       write(msg,'(4a)') 'Renaming old: ',trim(filnam),' to: ',trim(trialnam)
        MSG_COMMENT(msg)
        ioserr = clib_rename(filnam, trialnam)
        if ( ioserr /= 0 ) then
@@ -1503,6 +1506,7 @@ end subroutine isfile
 !! output file does not already exist.
 !!
 !! INPUTS
+!!  input_path: String with input file path. Empty string activates files file legacy mode.
 !!  comm=MPI communicator.
 !!
 !! OUTPUT
@@ -1517,8 +1521,7 @@ end subroutine isfile
 !!  (1) Formatted input file  (std_in)
 !!  (2) Formatted output file (std_out)
 !!  (3) Root name for generic input files (wavefunctions, potential, density ...)
-!!  (4) Root name for generic output files (wavefunctions, potential, density,
-!!                                          DOS, hessian ...)
+!!  (4) Root name for generic output files (wavefunctions, potential, density, DOS, hessian ...)
 !!  (5) Root name for generic temporary files (wftmp1,wftmp2,kgunit,status ...)
 !!
 !! PARENTS
@@ -1530,22 +1533,26 @@ end subroutine isfile
 !!
 !! SOURCE
 
-subroutine iofn1(filnam,filstat,comm)
+subroutine iofn1(input_path, filnam, filstat, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
+ character(len=fnlen), intent(in) :: input_path
  character(len=fnlen), intent(out) :: filstat
  character(len=fnlen), intent(out) :: filnam(5)
 
 !Local variables-------------------------------
  character(len=1) :: blank
- integer,parameter :: master=0
- integer :: me,ios,nproc,ierr
+ integer,parameter :: master = 0
+ integer :: me, ios, nproc, ierr, ndtset, lenstr, marr, jdtset, tread, i1,i2
  logical :: ex
- character(len=fnlen) :: fillog,tmpfil
+ character(len=fnlen) :: fillog, tmpfil, fname
  character(len=10) :: tag
- character(len=500) :: msg,errmsg
-
+ character(len=500) :: msg, errmsg
+ character(len=strlen) :: string
+!arrays
+ integer,allocatable :: intarr(:)
+ real(dp),allocatable :: dprarr(:)
 !*************************************************************************
 
  ! NOTE: In this routine it's very important to perform tests
@@ -1558,33 +1565,33 @@ subroutine iofn1(filnam,filstat,comm)
  ! Determine who I am in comm
  me = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
- !Define values of do_write_log and do_write_status parameters
- !if a _NOLOG file exists no LOG file and no STATUS file are created for each cpu core
- !if a _LOG file exists, a LOG file and a STATUS file are created for each cpu core
- !if the #_of_cpu_core>NPROC_NO_EXTRA_LOG OR presence of ABI_MAIN_LOG_FILE, LOG file is only created for master proc
- !if the #_of_cpu_core>NPROC_NO_EXTRA_STATUS OR presence of ABI_MAIN_LOG_FILE, STATUS file is only created for master proc
- inquire(file=ABI_NO_LOG_FILE,iostat=ios,exist=ex)
- if (ios/=0) ex=.false.
+ ! Define values of do_write_log and do_write_status parameters
+ ! if a _NOLOG file exists no LOG file and no STATUS file are created for each cpu core
+ ! if a _LOG file exists, a LOG file and a STATUS file are created for each cpu core
+ ! if the #_of_cpu_core>NPROC_NO_EXTRA_LOG OR presence of ABI_MAIN_LOG_FILE, LOG file is only created for master proc
+ ! if the #_of_cpu_core>NPROC_NO_EXTRA_STATUS OR presence of ABI_MAIN_LOG_FILE, STATUS file is only created for master proc
+ inquire(file=ABI_NO_LOG_FILE, iostat=ios, exist=ex)
+ if (ios /= 0) ex=.false.
  if (ex) then
    do_write_log=.false. ; do_write_status=.false.
    call abi_log_status_state(new_do_write_log=.false.,new_do_write_status=.false.)
    call libpaw_log_flag_set(.false.)
  else
-   inquire(file=ABI_ENFORCE_LOG_FILE,iostat=ios,exist=ex)
+   inquire(file=ABI_ENFORCE_LOG_FILE, iostat=ios, exist=ex)
    if (ios/=0) ex=.false.
    if (ex) then
      do_write_log=.true. ; do_write_status=.true.
      call abi_log_status_state(new_do_write_log=.true.,new_do_write_status=.true.)
      call libpaw_log_flag_set(.true.)
    else
-     inquire(file=ABI_MAIN_LOG_FILE,iostat=ios,exist=ex)
-     if (ios/=0) ex=.false.
-     if (ex.and.me/=0) then
+     inquire(file=ABI_MAIN_LOG_FILE, iostat=ios, exist=ex)
+     if (ios /= 0) ex=.false.
+     if (ex .and. me /= master) then
        do_write_log=.false. ; do_write_status=.false.
        call abi_log_status_state(new_do_write_log=.false.,new_do_write_status=.false.)
        call libpaw_log_flag_set(.false.)
      else
-       if (me/=0) then
+       if (me /= master) then
          do_write_log= (nproc<NPROC_NO_EXTRA_LOG)
          call abi_log_status_state(new_do_write_log=(nproc<NPROC_NO_EXTRA_LOG))
          call libpaw_log_flag_set((nproc<NPROC_NO_EXTRA_LOG))
@@ -1596,7 +1603,7 @@ subroutine iofn1(filnam,filstat,comm)
  end if
  !do_write_log = .True.
 
- if (me==master) then
+ if (me == master) then
    !  Eventually redefine standard input and standard output
    if (do_write_log) then
 #if defined READ_FROM_FILE
@@ -1636,30 +1643,69 @@ subroutine iofn1(filnam,filstat,comm)
    write(std_out,*,err=10,iomsg=errmsg)' ABINIT ',trim(abinit_version)
    write(std_out,*,err=10,iomsg=errmsg)' '
 
-   ! Read name of input file (std_in):
-   write(std_out,*,err=10,iomsg=errmsg)' Give name for formatted input file: '
-   read(std_in, '(a)',err=10,iomsg=errmsg ) filnam(1)
-   write(std_out, '(a)',err=10,iomsg=errmsg ) trim(filnam(1))
-   write(std_out,*)' Give name for formatted output file:'
-   read (std_in, '(a)',err=10,iomsg=errmsg ) filnam(2)
-   write (std_out, '(a)',err=10,iomsg=errmsg ) trim(filnam(2))
-   write(std_out,*)' Give root name for generic input files:'
-   read (std_in, '(a)',err=10,iomsg=errmsg ) filnam(3)
-   write (std_out, '(a)',err=10,iomsg=errmsg ) trim(filnam(3))
-   write(std_out,*, err=10, iomsg=errmsg )' Give root name for generic output files:'
-   read (std_in, '(a)', err=10, iomsg=errmsg ) filnam(4)
-   write (std_out, '(a)', err=10, iomsg=errmsg ) trim(filnam(4))
-   write(std_out,*, err=10, iomsg=errmsg)' Give root name for generic temporary files:'
-   read (std_in, '(a)', err=10, iomsg=errmsg ) filnam(5)
-   write (std_out, '(a)', err=10, iomsg=errmsg ) trim(filnam(5))
+   if (len_trim(input_path) == 0) then
+     ! Legacy Files file mode.
+     write(std_out,*,err=10,iomsg=errmsg)' Give name for formatted input file: '
+     read(std_in, '(a)',err=10,iomsg=errmsg ) filnam(1)
+     write(std_out, '(a)',err=10,iomsg=errmsg ) trim(filnam(1))
+     write(std_out,*)' Give name for formatted output file:'
+     read (std_in, '(a)',err=10,iomsg=errmsg ) filnam(2)
+     write (std_out, '(a)',err=10,iomsg=errmsg ) trim(filnam(2))
+     write(std_out,*)' Give root name for generic input files:'
+     read (std_in, '(a)',err=10,iomsg=errmsg ) filnam(3)
+     write (std_out, '(a)',err=10,iomsg=errmsg ) trim(filnam(3))
+     write(std_out,*, err=10, iomsg=errmsg )' Give root name for generic output files:'
+     read (std_in, '(a)', err=10, iomsg=errmsg ) filnam(4)
+     write (std_out, '(a)', err=10, iomsg=errmsg ) trim(filnam(4))
+     write(std_out,*, err=10, iomsg=errmsg)' Give root name for generic temporary files:'
+     read (std_in, '(a)', err=10, iomsg=errmsg ) filnam(5)
+     write (std_out, '(a)', err=10, iomsg=errmsg ) trim(filnam(5))
+
+   else
+     ! Get prefix from input file. Default values are provided
+     filnam(1) = input_path
+     filnam(2) = "run.abo"
+     filnam(3) = "i"
+     filnam(4) = "o"
+     filnam(5) = "t"
+
+     fname = basename(input_path)
+     i1 = index(fname, ".")
+     if (i1 /= 0) then
+       ! Use prefix to initialize filnam
+       i2 = index(input_path, ".", back=.True.)
+       filnam(2) = input_path(:i2) // "out"
+       filnam(3) = fname(:i1-1) // "i"
+       filnam(4) = fname(:i1-1) // "o"
+       filnam(5) = fname(:i1-1)
+       !filnam(5) = fname(:i1-1) // "t"
+     end if
+
+     ! Read the file, stringify it and return the number of datasets.
+     call parsefile(input_path, lenstr, ndtset, string, xmpi_comm_self)
+
+     marr = max(1, ndtset)
+     ABI_MALLOC(dprarr, (marr))
+     ABI_MALLOC(intarr, (marr))
+     jdtset = 0
+
+     ! Allow user to override default values
+     call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "output_file", tread, 'KEY', key_value=filnam(2))
+     call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "indata_prefix", tread, 'KEY', key_value=filnam(3))
+     call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "outdata_prefix", tread, 'KEY', key_value=filnam(4))
+     call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "tmpdata_prefix", tread, 'KEY', key_value=filnam(5))
+
+     ABI_FREE(dprarr)
+     ABI_FREE(intarr)
+   end if
 
    ! Check that old input file exists
-   call isfile(filnam(1),'old')
+   call isfile(filnam(1), 'old')
    ! Check that new output file does NOT exist
-   call isfile(filnam(2),'new')
+   call isfile(filnam(2), 'new')
 
    ! Check that root name for generic input and output differ
-   if ( trim(filnam(3))==trim(filnam(4)) ) then
+   if ( trim(filnam(3)) == trim(filnam(4)) ) then
      write(msg, '(3a)' )&
      'Root name for generic input and output files must differ ',ch10,&
      'Action: correct your "file" file.'
@@ -1668,26 +1714,26 @@ subroutine iofn1(filnam,filstat,comm)
 
    ! Check that root names are at least 20 characters less than fnlen
    if ( len_trim(filnam(3)) >= (fnlen-20) ) then
-     write(msg, '(a,a,a,a,a,i4,a,i4,a,a)' )&
+     write(msg, '(a,a,a,a,a,i0,a,i0,a,a)' )&
      'Root name for generic input files is too long. ',ch10,&
      'It must be 20 characters less than the maximal allowed ',ch10,&
-     'length of names, that is ',fnlen,', while it is ',len_trim(filnam(3)),ch10,&
+     'length of names, that is ',fnlen,', while it is: ',len_trim(filnam(3)),ch10,&
      'Action: correct your "file" file.'
      MSG_ERROR(msg)
    end if
    if ( len_trim(filnam(4)) >= (fnlen-20) ) then
-     write(msg, '(a,a,a,a,a,i4,a,i4,a,a)' )&
+     write(msg, '(a,a,a,a,a,i0,a,i0,a,a)' )&
      'Root name for generic output files is too long. ',ch10,&
      'It must be 20 characters less than the maximal allowed ',ch10,&
-     'length of names, that is ',fnlen,', while it is ',len_trim(filnam(4)),ch10,&
+     'length of names, that is ',fnlen,', while it is: ',len_trim(filnam(4)),ch10,&
      'Action: correct your "file" file.'
      MSG_ERROR(msg)
    end if
    if ( len_trim(filnam(5)) >= (fnlen-20) ) then
-     write(msg, '(a,a,a,a,a,i4,a,i4,a,a)' )&
+     write(msg, '(a,a,a,a,a,i0,a,i0,a,a)' )&
      'Root name for generic temporary files is too long. ',ch10,&
      'It must be 20 characters less than the maximal allowed ',ch10,&
-     'length of names, that is ',fnlen,', while it is ',len_trim(filnam(5)),ch10,&
+     'length of names, that is ',fnlen,', while it is: ',len_trim(filnam(5)),ch10,&
      'Action: correct your "file" file.'
      MSG_ERROR(msg)
    end if

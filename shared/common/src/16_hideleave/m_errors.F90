@@ -1568,14 +1568,14 @@ subroutine abi_abort(mode_paral,exit_status,print_config)
 
 ! **********************************************************************
 
- call wrtout(std_out,ch10//' abi_abort: decision taken to exit ...','PERS')
+ call wrtout(std_out, ch10//' abinit_abort: decision taken to exit. Check above messages for more info', 'PERS')
 
-! Caveat: Do not use MPI collective calls!
+ ! Caveat: Do not use MPI collective calls!
  if (mode_paral == "COLL") then
    call wrtout(std_out,"Why are you using COLL? Are you sure that ALL the processors are calling abi_abort?")
  end if
 
-!Dump configuration before exiting
+ ! Dump configuration before exiting
  print_config_=.False.; if (present(print_config)) print_config_=print_config
  if (print_config_) then
    call print_kinds()

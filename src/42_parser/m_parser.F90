@@ -29,7 +29,7 @@ module m_parser
  use m_xmpi
 
  use m_io_tools,  only : open_file
- use m_fstrings,  only : sjoin, itoa, inupper
+ use m_fstrings,  only : sjoin, itoa, inupper, rmquotes
  use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
 
  implicit none
@@ -389,7 +389,7 @@ end subroutine inread
 !! Read the input file, and product a string of character,
 !! with all data, to be analyzed in later routines. The length
 !! of this string is lenstr. This number is checked to be smaller
-!! than the dimension of the string of character, namely strln .
+!! than the dimension of the string of character, namely strln.
 !!
 !! INPUTS
 !!  filnam=name of the input file, to be read
@@ -865,8 +865,7 @@ end subroutine incomprs
 !!
 !! FUNCTION
 !! Search input 'string' for specific 'token'. Search depends on
-!! input dataset through 'jdtset'. Then, return the information
-!! mentioned after 'token'.
+!! input dataset through 'jdtset'. Then, return the information mentioned after 'token'.
 !! See the "notes" section
 !!
 !! INPUTS
@@ -888,14 +887,13 @@ end subroutine incomprs
 !!  intarr(1:narr), dprarr(1:narr)
 !!   integer or real(dp) arrays, respectively (see typevarphys),
 !!   into which data is read if typevarphys/='KEY'. Use these arrays even for scalars.
-!!  tread is an integer : tread = 0 => no data was read
-!!                        tread = 1 => data was read
+!!  tread is an integer: tread = 0 => no data was read
+!!                       tread = 1 => data was read
 !!  ds_input is an optional integer flag:
 !!           ds_input = 0 => value was found which is not specific to jdtset
 !!           ds_input > 0 => value was found which is specific to jdtset
 !!   one could add more information, eg whether a ? or a : was used, etc...
-!!   [key_value]=Stores the value of key if typevarphys=="KEY"
-!!               String of len fnlen
+!!   [key_value]=Stores the value of key if typevarphys=="KEY" String of len fnlen
 !!
 !! NOTES
 !!
@@ -996,27 +994,26 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
 ! *************************************************************************
 
- ABI_CHECK(marr >= narr, sjoin("marr", itoa(marr)," < narr ", itoa(narr)))
+ ABI_CHECK(marr >= narr, sjoin("marr", itoa(marr)," < narr ", itoa(narr), "for token:", token))
 
  ds_input_ = -1
-
  dozens=jdtset/10
  unities=jdtset-10*dozens
 
  if(jdtset<0)then
-   write(msg,'(a,i0,a)')' jdtset=',jdtset,', while it should be non-negative.'
+   write(msg,'(a,i0,a)')' jdtset: ',jdtset,', while it should be non-negative.'
    MSG_ERROR(msg)
  end if
 
- if(jdtset>9999)then
-   write(msg,'(a,i0,a)')' jdtset=',jdtset,', while it must be lower than 10000.'
+ if(jdtset > 9999)then
+   write(msg,'(a,i0,a)')' jdtset: ',jdtset,', while it must be lower than 10000.'
    MSG_ERROR(msg)
  end if
 
-!Default values : nothing has been read
+ ! Default values: nothing has been read
  itoken=0
  opttoken=0
-!Initialise flags in case of opttoken >= 2 later.
+ ! Initialise flags in case of opttoken >= 2 later.
  itoken_times=0
  itoken_plus=0
  itoken_colon=0
@@ -1026,9 +1023,9 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
    toklen=len_trim(token)
 
-!  --------------------------------------------------------------------------
-!  (1) try to find the token with dataset number appended
-   if(jdtset>0)then
+   !  --------------------------------------------------------------------------
+   !  (1) try to find the token with dataset number appended
+   if (jdtset > 0) then
 
      call appdig(jdtset,'',appen)
      cs=blank//token(1:toklen)//trim(appen)//blank
@@ -1041,11 +1038,11 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      else if(jdtset<10000)then
        cslen=toklen+6
      end if
-!    Map token to all upper case (make case-insensitive):
+     ! Map token to all upper case (make case-insensitive):
      call inupper(cs)
-!    Absolute index of blank//token//blank in string:
+     ! Absolute index of blank//token//blank in string:
      itoken=index(string,cs(1:cslen))
-!    Look for another occurence of the same token in string, if so, leaves:
+     ! Look for another occurence of the same token in string, if so, leaves:
      itoken2=index(string,cs(1:cslen), BACK=.true. )
      if(itoken/=itoken2)then
        write(msg, '(7a)' )&
@@ -1061,24 +1058,23 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      end if
    end if
 
-!  --------------------------------------------------------------------------
-!  (2a) try to find the token appended with a string that contains the metacharacter "?".
+   !  --------------------------------------------------------------------------
+   !  (2a) try to find the token appended with a string that contains the metacharacter "?".
+   if (jdtset>0 .and. opttoken==0)then
 
-   if(jdtset>0 .and. opttoken==0)then
-
-!    Use the metacharacter for the dozens, and save in cs and itoken
+     ! Use the metacharacter for the dozens, and save in cs and itoken
      write(appen,'(i1)')unities
      cs=blank//token(1:toklen)//'?'//trim(appen)//blank
      cslen=toklen+4
-!    Map token to all upper case (make case-insensitive):
+     ! Map token to all upper case (make case-insensitive):
      call inupper(cs)
-!    Absolute index of blank//token//blank in string:
+     ! Absolute index of blank//token//blank in string:
      itoken=index(string,cs(1:cslen))
-!    Look for another occurence of the same token in string, if so, leaves:
+     ! Look for another occurence of the same token in string, if so, leaves:
      itoken2=index(string,cs(1:cslen), BACK=.true. )
      if(itoken/=itoken2)then
        write(msg, '(7a)' )&
-        'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
+        'There are two occurences of the keyword: "',cs(1:cslen),'" in the input file.',ch10,&
         'This is confusing, so it has been forbidden.',ch10,&
         'Action: remove one of the two occurences.'
        MSG_ERROR(msg)
@@ -1088,14 +1084,14 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        ds_input_=jdtset
      end if
 
-!    Use the metacharacter for the unities, and save in cs1 and itoken1
+     ! Use the metacharacter for the units, and save in cs1 and itoken1
      write(appen,'(i1)')dozens
      cs1=blank//token(1:toklen)//trim(appen)//'?'//blank
-!    Map token to all upper case (make case-insensitive):
+     ! Map token to all upper case (make case-insensitive):
      call inupper(cs1)
-!    Absolute index of blank//token//blank in string:
+     ! Absolute index of blank//token//blank in string:
      itoken1=index(string,cs1(1:cslen))
-!    Look for another occurence of the same token in string, if so, leaves:
+     ! Look for another occurence of the same token in string, if so, leaves:
      itoken2=index(string,cs1(1:cslen), BACK=.true. )
      if(itoken1/=itoken2)then
        write(msg, '(7a)' )&
@@ -1107,7 +1103,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
      if(itoken/=0 .and. itoken1/=0)then
        write(msg, '(9a)' )&
-       'The keywords "',cs(1:cslen),'" and "',cs1(1:cslen),'"',ch10,&
+       'The keywords: "',cs(1:cslen),'" and: "',cs1(1:cslen),'"',ch10,&
        'cannot be used together in the input file.',ch10,&
        'Action: remove one of the two keywords.'
        MSG_ERROR(msg)
@@ -1122,9 +1118,9 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
    end if
 
-!  --------------------------------------------------------------------------
-!  (2b) try to find the tokens defining a series
-   if(opttoken==0)then
+   !  --------------------------------------------------------------------------
+   !  (2b) try to find the tokens defining a series
+   if (opttoken==0) then
 
      cs=token(1:toklen)
 
@@ -1143,7 +1139,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      cs2plus=blank//token(1:toklen)//'+'//'?'//blank
      cs2times=blank//token(1:toklen)//'*'//'?'//blank
 
-!    Map token to all upper case (make case-insensitive):
+     ! Map token to all upper case (make case-insensitive):
      call inupper(cscolon)
      call inupper(csplus)
      call inupper(cstimes)
@@ -1154,7 +1150,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      call inupper(cs2plus)
      call inupper(cs2times)
 
-!    Absolute index of tokens in string:
+     ! Absolute index of tokens in string:
      itoken_colon=index(string,cscolon(1:cslen))
      itoken_plus=index(string,csplus(1:cslen))
      itoken_times=index(string,cstimes(1:cslen))
@@ -1165,7 +1161,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      itoken_2plus=index(string,cs2plus(1:cs1len))
      itoken_2times=index(string,cs2times(1:cs1len))
 
-!    Look for another occurence of the same tokens in string
+     ! Look for another occurence of the same tokens in string
      itoken2_colon=index(string,cscolon(1:cslen), BACK=.true. )
      itoken2_plus=index(string,csplus(1:cslen), BACK=.true. )
      itoken2_times=index(string,cstimes(1:cslen), BACK=.true. )
@@ -1178,7 +1174,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
      if(jdtset==0)then
 
-!      If the multi-dataset mode is not used, no token should have been found
+       ! If the multi-dataset mode is not used, no token should have been found
        if(itoken_colon+itoken_plus+itoken_times+ itoken_2colon+itoken_2plus+itoken_2times > 0 ) then
          write(msg,'(a,a,a,a,a,a,a,a,a,a,a,a, a)' )&
          'Although the multi-dataset mode is not activated,',ch10,&
@@ -1202,7 +1198,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
      else
 
-!      If the multi-dataset mode is used, exactly zero or two token must be found
+       ! If the multi-dataset mode is used, exactly zero or two token must be found
        sum_token=0
        if(itoken_colon/=0)sum_token=sum_token+1
        if(itoken_plus /=0)sum_token=sum_token+1
@@ -1224,8 +1220,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
          MSG_ERROR(msg)
        end if
 
-!      If the multi-dataset mode is used, make sure that
-!      no twice the same combined keyword happens
+       ! If the multi-dataset mode is used, make sure that no twice the same combined keyword happens
        ier=0
        if(itoken_colon/=itoken2_colon)then
          ier=1 ; cs=cscolon
@@ -1262,7 +1257,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
          MSG_ERROR(msg)
        end if
 
-!      Select the series according to the presence of a colon flag
+       ! Select the series according to the presence of a colon flag
        if(itoken_colon>0)then
          opttoken=2
          ds_input_=jdtset
@@ -1282,7 +1277,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
          ds_input_=jdtset
        end if
 
-!      Make sure that the proper combination of : + and * is found .
+       ! Make sure that the proper combination of : + and * is found .
        if(itoken_colon > 0 .and. (itoken_plus==0 .and. itoken_times==0) )then
          write(msg, '(13a)' )&
          'The keyword "',cscolon(1:cslen),'" initiate a series,',ch10,&
@@ -1308,33 +1303,31 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
          MSG_ERROR(msg)
        end if
 
-!      At this stage, either
-!      - itoken_colon vanish as well as itoken_plus and itoken_times
-!      - itoken_colon does not vanish,
-!      as well as one of itoken_plus or itoken_times
+       !      At this stage, either
+       !      - itoken_colon vanish as well as itoken_plus and itoken_times
+       !      - itoken_colon does not vanish,
+       !      as well as one of itoken_plus or itoken_times
 
-!      End the condition of multi-dataset mode
-     end if
 
-!    End the check on existence of a series
-   end if
+     end if ! End the condition of multi-dataset mode
+   end if ! End the check on existence of a series
 
-!  --------------------------------------------------------------------------
-!  (3) if not found, try to find the token with non-modified string
-   if(opttoken==0)then
+   !  --------------------------------------------------------------------------
+   !  (3) if not found, try to find the token with non-modified string
+   if (opttoken==0) then
 
      cs=blank//token(1:toklen)//blank
      cslen=toklen+2
 
-!    Map token to all upper case (make case-insensitive):
+     ! Map token to all upper case (make case-insensitive):
      call inupper(cs)
 
-!    Absolute index of blank//token//blank in string:
+     ! Absolute index of blank//token//blank in string:
      itoken=index(string,cs(1:cslen))
 
-!    Look for another occurence of the same token in string, if so, leaves:
+     ! Look for another occurence of the same token in string, if so, leaves:
      itoken2=index(string,cs(1:cslen), BACK=.true. )
-     if(itoken/=itoken2)then
+     if (itoken/=itoken2) then
        write(msg, '(a,a,a,a,a,a,a)' )&
        'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
        'This is confusing, so it has been forbidden.',ch10,&
@@ -1349,23 +1342,22 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
    end if
 
-!  --------------------------------------------------------------------------
-!  If jdtset==0, means that the multi-dataset mode is not used, so
-!  checks whether the input file contains a multi-dataset keyword,
-!  and if this occurs, stop. Check also the forbidden occurence of
-!  use of 0 as a multi-dataset index.
-!  Note that the occurence of series initiators has already been checked.
+   !  --------------------------------------------------------------------------
+   !  If jdtset==0, means that the multi-dataset mode is not used, so
+   !  checks whether the input file contains a multi-dataset keyword,
+   !  and if this occurs, stop. Check also the forbidden occurence of
+   !  use of 0 as a multi-dataset index.
+   !  Note that the occurence of series initiators has already been checked.
 
    do trial_jdtset=0,9
      if(jdtset==0 .or. trial_jdtset==0)then
        write(appen,'(i1)')trial_jdtset
        trial_cs=blank//token(1:toklen)//trim(appen)
        trial_cslen=toklen+2
-!      Map token to all upper case (make case-insensitive):
+       ! Map token to all upper case (make case-insensitive):
        call inupper(trial_cs)
-!      Look for an occurence of this token in string, if so, leaves:
+       ! Look for an occurence of this token in string, if so, leaves:
        itoken2=index(string,trial_cs(1:trial_cslen))
-!      If itoken2/=0
        if(itoken2/=0)then
          if(trial_jdtset==0)then
            write(msg, '(a,a,a,a,a,a,a)' )&
@@ -1388,19 +1380,21 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
  end if
 
-!===========================================================================
-!At this stage, the location of the keyword string is known, as well
-!as its length. So, can read the data.
-!Usual reading if opttoken==1 (need itoken).
-!If opttoken>=2, the characteristics of a series must be read
-!(need itoken_colon and either itoken_plus or itoken_times)
+ !===========================================================================
+ ! At this stage, the location of the keyword string is known, as well
+ ! as its length. So, can read the data.
+ ! Usual reading if opttoken==1 (need itoken).
+ ! If opttoken>=2, the characteristics of a series must be read
+ ! (need itoken_colon and either itoken_plus or itoken_times)
 
  tread = 0
  typevar='INT'
  if(typevarphys=='LOG')typevar='INT'
  if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. &
-    typevarphys=='BFI' .or. typevarphys=='TIM')typevar='DPR'
+    typevarphys=='BFI' .or. typevarphys=='TIM') typevar='DPR'
+
  if(typevarphys=='KEY')then
+   ! Consistency check for keyword
    if(opttoken>=2)then
      write(msg, '(9a)' )&
      'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
@@ -1418,56 +1412,52 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      MSG_ERROR(msg)
    end if
    typevar='KEY'
-!  write(std_out,*)' intagm : will read cs=',trim(cs)
-!  stop
+   ! write(std_out,*)' intagm : will read cs=',trim(cs) !; stop
  end if
 
-!There is something to be read if opttoken>=1
+ ! There is something to be read if opttoken>=1
  if(opttoken==1)then
 
-!  DEBUG
-!  write(std_out,*)' intagm : opttoken==1 , token has been found, will read '
-!  ENDDEBUG
-
-!  Absolute location in string of blank which follows token:
+   ! write(std_out,*)' intagm : opttoken==1 , token has been found, will read '
+   ! Absolute location in string of blank which follows token:
    b1=itoken+cslen-1
 
-!  Read the array (or eventual scalar) that follows the blank
-!  In case of typevarphys='KEY', the chain of character will be returned in cs.
+   ! Read the array (or eventual scalar) that follows the blank
+   ! In case of typevarphys='KEY', the chain of character will be returned in cs.
    call inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 
-   if(typevarphys=='KEY')then
+   if (typevarphys=='KEY') then
      if (.not. PRESENT(key_value)) then
        MSG_ERROR("typevarphys == KEY requires the optional argument key_value")
      end if
-     !token=trim(cs)
-     !write(std_out,*)' intagm : after inarray, token=',trim(token)
-     key_value = TRIM(cs)
+     !write(std_out,*)' intagm : after inarray, token=',trim(cs)
+     !key_value = TRIM(cs)
+     key_value = adjustl(rmquotes(trim(cs)))
    end if
 
-!  if this point is reached then data has been read in successfully
+   ! if this point is reached then data has been read in successfully
    tread = 1
 
  else if(opttoken>=2)then
 
-!  write(std_out,*)' intagm : opttoken>=2 , token has been found, will read '
+   ! write(std_out,*)' intagm : opttoken>=2 , token has been found, will read '
    ABI_ALLOCATE(dpr1,(narr))
    ABI_ALLOCATE(dpr2,(narr))
    ABI_ALLOCATE(int1,(narr))
    ABI_ALLOCATE(int2,(narr))
 
-!  Absolute location in string of blank which follows token//':':
+   ! Absolute location in string of blank which follows token//':':
    b1=itoken_colon+cslen-1
    call inarray(b1,cscolon,dpr1,int1,narr,narr,string,typevarphys)
 
-!  Initialise number even if the if series treat all cases.
+   ! Initialise number even if the if series treat all cases.
    number=1
-!  Define the number of the term in the series
+   ! Define the number of the term in the series
    if(opttoken==2)number=jdtset-1
    if(opttoken==3)number=unities-1
    if(opttoken==4)number=dozens-1
 
-!  Distinguish additive and multiplicative series
+   ! Distinguish additive and multiplicative series
    if(itoken_plus/=0)then
 
      b1=itoken_plus+cslen-1
@@ -1515,10 +1505,8 @@ end subroutine intagm
 !! inarray
 !!
 !! FUNCTION
-!! Read the array of narr numbers located immediately after
-!! a specified blank in a string of character.
-!! Might read instead one word, after the specified blank.
-!! Takes care of multipliers.
+!! Read the array of narr numbers located immediately after a specified blank in a string of character.
+!! Might read instead one word, after the specified blank. Takes care of multipliers.
 !!
 !! INPUTS
 !!  cs=character token
@@ -1528,27 +1516,25 @@ end subroutine intagm
 !!  string=character string containing the data.
 !!  typevarphys=variable type (might indicate the physical meaning of
 !!   for dimensionality purposes)
-!!   'INT'=>integer
-!!   'DPR'=>real(dp) (no special treatment)
-!!   'LEN'=>real(dp) (expect a "length", identify bohr, au, nm or angstrom,
-!!       and return in au -atomic units=bohr- )
-!!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, Rydberg)
-!!   'BFI'=>real(dp) (expect a "magnetic field", identify T, Tesla)
-!!   'TIM'=>real(dp) (expect a "time", identify S, Second)
-!!   'LOG'=>integer, but read logical variable T,F,.true., or .false.
-!!   'KEY'=>character, returned in token cs
+!!   'INT' => integer
+!!   'DPR' => real(dp) (no special treatment)
+!!   'LEN' => real(dp) (expect a "length", identify bohr, au, nm or angstrom,
+!!            and return in au -atomic units=bohr- )
+!!   'ENE' => real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, Rydberg)
+!!   'BFI' => real(dp) (expect a "magnetic field", identify T, Tesla)
+!!   'TIM' => real(dp) (expect a "time", identify S, Second)
+!!   'LOG' => integer, but read logical variable T,F,.true., or .false.
+!!   'KEY' => character, returned in token cs
 !!
 !! OUTPUT
 !!  intarr(1:narr), dprarr(1:narr)
-!!   integer or real(dp) arrays, respectively,
-!!   into which data is read. Use these arrays even for scalars.
-!!  errcod: if /=0, then something went wrong in subroutine "inread"
+!!   integer or real(dp) arrays, respectively into which data is read. Use these arrays even for scalars.
+!!  errcod: if /= 0, then something went wrong in subroutine "inread"
 !!
 !! SIDE EFFECT
-!!   b1=absolute location in string of blank which follows the token
-!!             (will be modified in the execution)
-!!   cs=at input  : character token
-!!      at output : chain of character replacing the token (only if typevarphys='KEY')
+!!   b1=absolute location in string of blank which follows the token (will be modified in the execution)
+!!   cs=at input: character token
+!!      at output: chain of character replacing the token (only if typevarphys='KEY')
 !!
 !! PARENTS
 !!      intagm
@@ -1574,42 +1560,55 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 !Local variables-------------------------------
  character(len=1), parameter :: blank=' '
 !scalars
- integer :: asciichar,b2,errcod,ii,integ,istar,nrep,strln
+ integer :: asciichar,b2,b3,errcod,ii,integ,istar,nrep,strln
  real(dp) :: factor,real8
  character(len=3) :: typevar
  character(len=500) :: msg
 
 ! *************************************************************************
 
-!write(std_out,'(2a)' )' inarray : token=',trim(cs)
-!write(std_out,'(a,i4)' )' inarray : narr=',narr
-!write(std_out,'(2a)' )' inarray : typevarphys=',typevarphys
+ !if (typevarphys=='KEY') then
+ !  write(std_out,'(2a)' )' inarray: token: ',trim(cs)
+ !  write(std_out,'(2a)' )'          string: ',trim(string(b1:))
+ !  write(std_out,'(a,i0)' )'        narr: ',narr
+ !  write(std_out,'(2a)' )'          typevarphys: ',typevarphys
+ !end if
 
- ii=0
+ ii = 0
  typevar='INT'
- if(typevarphys=='LOG')typevar='INT'
- if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE'  &
-&     .or. typevarphys=='BFI' .or. typevarphys=='TIM')typevar='DPR'
+ if(typevarphys=='LOG') typevar='INT'
+ if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. &
+    typevarphys=='BFI' .or. typevarphys=='TIM') typevar='DPR'
+
  strln=len_trim(string)
 
- do while (ii<narr)
+ do while (ii < narr)
 
-!  Relative location of next blank after data
-   if(b1>=strln)exit   ! b1 is the last character of the string
-   b2=index(string(b1+1:),blank)
-!  If no second blank is found put the second blank just beyond strln
+   ! Relative location of next blank after data
+   ! b1 is the last character of the string
+   if (b1>=strln) exit
+
+   b2 = index(string(b1+1:),blank)
+   ! If no second blank is found put the second blank just beyond strln
    if(b2==0) b2=strln-b1+1
 
-   if(typevarphys=='KEY')then
-     cs=string(b1+1:b1+b2-1)
+   if (typevarphys == 'KEY') then
+     b2 = index(string(b1+1:), '"')
+     b2 = b1 + b2 + 2
+     b3 = index(string(b2+1:), '"')
+     !print *, "b2:", b2, "b3:", b3
+     b3 = b2 + b3
+     cs = string(b2-2:b3)
+     !print *, "cs: ", trim(cs)
+     !cs=string(b1+1:b1+b2-1)
      errcod=0
      exit
    end if
 
-!  nrep tells how many times to repeat input in array:
+   ! nrep tells how many times to repeat input in array:
    nrep=1
 
-!  Check for *, meaning repeated input (as in list-directed input):
+   ! Check for *, meaning repeated input (as in list-directed input):
    istar=index(string(b1+1:b1+b2-1),'*')
    if (istar/=0) then
      if (istar==1) then ! Simply fills the array with the data, repeated as many times as needed
@@ -1619,16 +1618,16 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
        call inread(string(b1+1:b1+istar-1),istar-1,'INT',nrep,real8,errcod)
      end if
      if (errcod/=0) exit
-!    Shift starting position of input field:
+     ! Shift starting position of input field:
      b1=b1+istar
      b2=b2-istar
    end if
 
-!  Read data internally by calling inread at entry ini:
+   !  Read data internally by calling inread at entry ini:
    call inread(string(b1+1:b1+b2-1),b2-1,typevarphys,integ,real8,errcod)
    if (errcod/=0) exit
 
-!  Allow for list-directed input with repeat number nrep:
+   !  Allow for list-directed input with repeat number nrep:
    if(typevar=='INT')then
      intarr(1+ii:min(nrep+ii,narr))=integ
    else if(typevar=='DPR')then
@@ -1638,11 +1637,10 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
    end if
    ii=min(ii+nrep,narr)
 
-!  Find new absolute location of next element of array:
+   !  Find new absolute location of next element of array:
    b1=b1+b2
 
-!  End do while (ii<narr). Note "exit" instructions within loop.
- end do
+ end do !  End do while (ii<narr). Note "exit" instructions within loop.
 
 !if (ii>narr) then
 !write(msg, '(a,a,a,a,a,a,a,a,a,a,i4,a,i4,a,a,a,a,a,a,a,a)' ) ch10,&
@@ -1657,7 +1655,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 !call wrtout(std_out,msg,'COLL')
 !end if
 
- if(errcod/=0)then
+ if (errcod/=0) then
    write(msg, '(5a,i0,10a)' ) &
    'An error occurred reading data for keyword "',trim(cs),'",',ch10,&
    'looking for ',narr,' array elements.', ch10, &
@@ -1668,25 +1666,22 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
    MSG_ERROR(msg)
  end if
 
-!In case of 'LEN', 'ENE', 'BFI', or 'TIM', try to identify the unit
-if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typevarphys=='TIM')then
+ !In case of 'LEN', 'ENE', 'BFI', or 'TIM', try to identify the unit
+ if (typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typevarphys=='TIM') then
    do
-
-!    Relative location of next blank after data
+     ! Relative location of next blank after data
      if(b1>=strln)exit   ! b1 is the last character of the string
      b2=index(string(b1+1:),blank)
-!    If no second blank is found put the second blank just beyond strln
+     ! If no second blank is found put the second blank just beyond strln
      if(b2==0) b2=strln-b1+1
 
-!    DEBUG
-!    write(std_out,*)' inarray : strln=',strln
-!    write(std_out,*)' inarray : b1=',b1
-!    write(std_out,*)' inarray : b2=',b2
-!    write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
-!    write(std_out,*)' typevarphys==',typevarphys
-!    ENDDEBUG
+     ! write(std_out,*)' inarray : strln=',strln
+     ! write(std_out,*)' inarray : b1=',b1
+     ! write(std_out,*)' inarray : b2=',b2
+     ! write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
+     ! write(std_out,*)' typevarphys==',typevarphys
 
-!    Identify the presence of a non-digit character
+     ! Identify the presence of a non-digit character
      asciichar=iachar(string(b1+1:b1+1))
      if(asciichar<48 .or. asciichar>57)then
        factor=one
@@ -1718,7 +1713,7 @@ if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typev
        dprarr(1:narr)=dprarr(1:narr)*factor
        exit
      else
-!      A digit has been observed, go to the next sequence
+       ! A digit has been observed, go to the next sequence
        b1=b2
        cycle
      end if
@@ -1726,10 +1721,8 @@ if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typev
    end do
  end if
 
-!DEBUG
-!write(std_out,*)' inarray : exit '
 !write(std_out,*)' dprarr(1:narr)==',dprarr(1:narr)
-!ENDDEBUG
+!write(std_out,*)' inarray : exit '
 
 end subroutine inarray
 !!***
@@ -3436,7 +3429,7 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
 !        If still not admitted, then there is a problem
        else
          write(msg, '(7a)' )&
-         'Found the token: ',string(index_current:index_endword),' in the input file.',ch10,&
+         'Found token: ',string(index_current:index_endword),' in the input file.',ch10,&
          'This name is not one of the registered input variable names (see https://docs.abinit.org/).',ch10,&
          'Action: check your input file. You likely mistyped the input variable.'
          MSG_ERROR(msg)

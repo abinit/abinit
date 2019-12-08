@@ -1969,7 +1969,7 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    write(nunit,'(3x,a9)')'    qph1l'
    do iph1=1,anaddb_dtset%nph1l
      write(nunit,'(19x,3es16.8,2x,es11.3)') &
-&     (anaddb_dtset%qph1l(ii,iph1),ii=1,3),anaddb_dtset%qnrml1(iph1)
+       (anaddb_dtset%qph1l(ii,iph1),ii=1,3),anaddb_dtset%qnrml1(iph1)
    end do
  end if
 
@@ -2043,7 +2043,7 @@ subroutine anaddb_init(filnam)
 
 ! *********************************************************************
 
-!Read the file names
+ ! Read the file names
  write(std_out,*)' Give name for formatted input file: '
  read(std_in, '(a)' ) filnam(1)
  write(std_out,'(a,a)' )'-   ',trim(filnam(1))

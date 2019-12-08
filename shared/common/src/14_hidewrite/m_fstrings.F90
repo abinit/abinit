@@ -115,19 +115,46 @@ MODULE m_fstrings
    module procedure ltoa_dp
  end interface ltoa
 
-  character(len=1),parameter :: BLANK=' '
-  character(len=1),parameter :: NCHAR = char(10)
-  character(len=1),parameter :: DIR_SEPARATOR = '/'
+ character(len=1),parameter :: BLANK=' '
+ character(len=1),parameter :: NCHAR = char(10)
+ character(len=1),parameter :: DIR_SEPARATOR = '/'
 
-  integer,parameter :: ASCII_A=ICHAR('A')
-  integer,parameter :: ASCII_Z=ICHAR('Z')
-  integer,parameter :: ASCII_aa=ICHAR('a')
-  integer,parameter :: ASCII_zz=ICHAR('z')
-  integer,parameter :: SHIFT=ASCII_aa-ASCII_A ! Capital letters have smaller Dec value in the ASCII table.
-  integer,parameter :: ASCII_0=ICHAR('0')
-  integer,parameter :: ASCII_9=ICHAR('9')
+ integer,parameter :: ASCII_A=ICHAR('A')
+ integer,parameter :: ASCII_Z=ICHAR('Z')
+ integer,parameter :: ASCII_aa=ICHAR('a')
+ integer,parameter :: ASCII_zz=ICHAR('z')
+ integer,parameter :: SHIFT=ASCII_aa-ASCII_A ! Capital letters have smaller Dec value in the ASCII table.
+ integer,parameter :: ASCII_0=ICHAR('0')
+ integer,parameter :: ASCII_9=ICHAR('9')
 
-  integer,parameter :: MAX_SLEN=500
+ integer,parameter :: MAX_SLEN = 500
+
+
+!!****t* m_fstrings/string_splitter_t
+!! NAME
+!! string_splitter_t
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+ type,public :: string_splitter_t
+
+   integer :: len = 0
+    ! Number of tokens
+
+   character(len=MAX_SLEN), allocatable :: tokens(:)
+    ! List of tokenized strings.
+
+ contains
+
+   procedure :: free => string_splitter_free
+   ! Free memory.
+
+ end type string_splitter_t
+!!***
+
+ public :: string_splitter_new
 
 CONTAINS  !===========================================================
 !!***
@@ -1942,15 +1969,15 @@ subroutine inupper(string)
 !lower case and upper case letters stayed upper case
  if (first) then
    do ii=1,26
-!    Look for occurrence of each upper case character
-!    anywhere in string of all lower case letters
+     ! Look for occurrence of each upper case character
+     ! anywhere in string of all lower case letters
      indx=index(lolett,uplett(ii:ii))
-!    If found then print error message and quit
+     ! If found then print error message and quit
      if (indx>0) then
        write(std_out, '(a,a,a,a,a,a,a,a,a)' )&
-&       'Upper case string = ',uplett,ch10,&
-&       'Lower case string = ',lolett,ch10,&
-&       'Upper case character ',uplett(ii:ii),'found in supposedly lower case string.'
+        'Upper case string = ',uplett,ch10,&
+        'Lower case string = ',lolett,ch10,&
+        'Upper case character ',uplett(ii:ii),'found in supposedly lower case string.'
        stop
      end if
    end do
@@ -1959,7 +1986,7 @@ subroutine inupper(string)
 
  inquotes = 0
  do ii=1,len_trim(string)
-!  Pick off single character of string (one byte):
+   !  Pick off single character of string (one byte):
    cc=string(ii:ii)
 
    ! Ignore tokens between quotation marks.
@@ -1975,6 +2002,87 @@ subroutine inupper(string)
  end do
 
 end subroutine inupper
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fstrings/string_splitter_new
+!! NAME
+!! string_splitter_new
+!!
+!! FUNCTION
+!!
+!! OUTPUT
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(string_splitter_t) function string_splitter_new(string, sep) result(new)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: string, sep
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii, cnt, back
+
+! *************************************************************************
+
+ ! Count number of occurences of sep to be able to allocate array.
+ cnt = 0
+ do ii=1,len_trim(string)
+   if (string(ii:ii) == sep) cnt = cnt + 1
+ end do
+
+ !ABI_MALLOC(new%tokens, (cnt + 1))
+ allocate(new%tokens(cnt + 1))
+ new%len = cnt + 1
+
+ if (cnt == 0) then
+   new%tokens(1) = adjustl(trim(string))
+
+ else
+   back = 0; cnt = 0
+   !print *, "string:", trim(string)
+   do ii=1,len_trim(string)
+     if (string(ii:ii) == sep) then
+       cnt = cnt + 1
+       new%tokens(cnt) = adjustl(trim(string(back+1:ii-1)))
+       !print *, trim(new%tokens(cnt))
+       back = ii
+     end if
+   end do
+
+   cnt = cnt + 1
+   new%tokens(cnt) = adjustl(trim(string(back+1:)))
+ end if
+
+end function string_splitter_new
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fstrings/string_splitter_free
+!! NAME
+!! string_splitter_free
+!!
+!! FUNCTION
+!!  Release memory
+!!
+!! SOURCE
+
+subroutine string_splitter_free(self)
+
+!Arguments ------------------------------------
+ class(string_splitter_t),intent(inout) :: self
+
+! *************************************************************************
+
+ deallocate(self%tokens)
+ !ABI_SFREE(self%tokens)
+
+end subroutine string_splitter_free
 !!***
 
 end module m_fstrings

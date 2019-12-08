@@ -38,7 +38,7 @@ module m_argparse
  use m_clib
 
  use m_build_info,      only : dump_config, abinit_version
- use m_io_tools,        only : open_file
+ use m_io_tools,        only : open_file, file_exists
  use m_cppopts_dumper,  only : dump_cpp_options
  use m_optim_dumper,    only : dump_optim
  use m_fstrings,        only : atoi, atof, itoa, firstchar, startswith, sjoin
@@ -92,6 +92,8 @@ module m_argparse
    character(len=500) :: cmdline = ""
      ! The entire command line
 
+   character(len=fnlen) :: input_path = ""
+
    !! Below are for multibinit
    integer :: multibinit_F03_mode = 0
    !1: legacy mode
@@ -137,7 +139,7 @@ type(args_t) function args_parser() result(args)
  return ! Nothing to do
 #else
 
- if (command_argument_count()==0) return
+ if (command_argument_count() == 0) return
 
  iam_master = (xmpi_comm_rank(xmpi_world) == 0)
 
@@ -147,6 +149,15 @@ type(args_t) function args_parser() result(args)
   do ii=1,command_argument_count()
     call get_command_argument(ii, arg)
     !write(std_out,*)"arg", TRIM(arg)
+
+    if (ii == 1 .and. .not. firstchar(arg, "-")) then
+      ! `abinit path` syntax reads input from path and deactivates files file mode.
+      args%input_path = trim(arg)
+      if (iam_master) then
+         ABI_CHECK(file_exists(args%input_path), sjoin("Cannot find input file:", args%input_path))
+      end if
+      cycle
+    end if
 
     if (arg == "-v" .or. arg == "--version") then
       call wrtout(std_out,TRIM(abinit_version),"COLL")
@@ -173,7 +184,7 @@ type(args_t) function args_parser() result(args)
       args%abimem_limit_mb = atof(arg)
 
     else if (arg == "-j" .or. arg == "--omp-num-threads") then
-      call get_command_argument(ii+1, arg)
+      call get_command_argument(ii + 1, arg)
       call xomp_set_num_threads(atoi(arg))
 
     ! timelimit handler.
@@ -216,15 +227,17 @@ type(args_t) function args_parser() result(args)
        call abi_log_status_state(new_do_write_log=.True., new_do_write_status=.True.)
        call libpaw_log_flag_set(.True.)
 
-    else if (arg == "-i" .or. arg == "--input") then
-      ! Redirect stdin to file.
-      call get_command_argument(ii + 1, arg)
-      if (iam_master) then
-        close(std_in)
-        if (open_file(arg, msg, unit=std_in, form='formatted', status='old', action="read") /= 0) then
-          MSG_ERROR(msg)
-        end if
-      end if
+    !else if (arg == "-i" .or. arg == "--input") then
+    !  call get_command_argument(ii + 1, arg)
+    !  args%input_path = trim(arg)
+    !  ! Redirect stdin to file.
+    !  if (iam_master) then
+    !     ABI_CHECK(file_exists(args%input_path), sjoin("Cannot find input file:", args%input_path))
+    !     !close(std_in)
+    !     !if (open_file(arg, msg, unit=std_in, form='formatted', status='old', action="read") /= 0) then
+    !     !  MSG_ERROR(msg)
+    !     !end if
+    !  end if
 
     !else if (arg == "-o" .or. arg == "--output") then
     !  ! Redirect stdout to file.
@@ -234,11 +247,10 @@ type(args_t) function args_parser() result(args)
     !  if (open_file(arg, msg, unit=std_out, form='formatted', status='new', action="write") /= 0) then
     !    MSG_ERROR(message)
     !  end if
-    !  end if
 
     ! For multibinit only
     else if (arg == "--F03") then
-       args%multibinit_F03_mode=1
+       args%multibinit_F03_mode = 1
 
     else if (arg == "-h" .or. arg == "--help") then
       if (iam_master) then
@@ -268,7 +280,7 @@ type(args_t) function args_parser() result(args)
         write(std_out,*)"-h, --help                 Show this help and exit."
 
         ! Multibinit
-        write(std_out,*)"--F03                      Run F03 mode (For Multibinit only)."
+        write(std_out,*)"--F03                      Run F03 mode (for Multibinit only)."
       end if
       args%exit = args%exit + 1
 
