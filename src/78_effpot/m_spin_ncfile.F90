@@ -334,11 +334,13 @@ end subroutine def_observable_var
     class(spin_ncfile_t), intent(inout) :: self
     type(mbcell_t) :: prim
 
-    integer :: natom, nspin
+    !integer :: natom
+    integer :: nspin
     integer :: ms_id, rprimd_id, spin_xcart_id, gyro_ratio_id, &
          & gilbert_damping_id, ref_spin_orientation_id, &
          & ref_spin_qpoint_id, ref_spin_rotate_axis_id
     integer :: ncerr
+
 
 #if defined HAVE_NETCDF
      ncerr=nf90_redef(self%ncid)

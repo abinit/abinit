@@ -206,6 +206,9 @@ contains
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
 
+    ABI_UNUSED(ii)
+    ABI_UNUSED(m2dim)
+
     spref(:) = reshape(self%supercell%spin%Sref, (/ 3*self%nspin/))
 
     beta = 0.5_dp
