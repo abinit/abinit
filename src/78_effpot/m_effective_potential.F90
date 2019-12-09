@@ -398,7 +398,7 @@ subroutine effective_potential_initmpi(eff_pot,comm)
  integer :: ncell
 !array
  integer :: cell_number(3)
- character(len=500) :: msg
+ !character(len=500) :: msg
 ! ***********************************************************************
 
 !Set the number of cell in the supercell
@@ -409,8 +409,7 @@ subroutine effective_potential_initmpi(eff_pot,comm)
 
 !Do some checks
  if (any(cell_number <= 0).or.ncell<=0) then
-   write(msg,'(a,a)')' No supercell found for setting'
-   MSG_ERROR(msg)
+   MSG_ERROR('No supercell found for setting')
  end if
 
 !First mpi_ifc
@@ -1070,9 +1069,7 @@ subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
 ! *************************************************************************
 
  if(ncoeff /= size(coeffs))then
-   write(msg, '(a)' )&
-&       ' ncoeff has not the same size than coeffs array, '
-   MSG_BUG(msg)
+   MSG_BUG('ncoeff has not the same size than coeffs array')
  end if
 
 ! Check if the strain coupling is present
@@ -1325,14 +1322,13 @@ subroutine effective_potential_setConfinement(cutoff_disp,cutoff_strain,eff_pot,
 !scalar
  logical  :: need_confinement_tmp = .FALSE.
 !arrays
- character(len=500) :: msg
+ !character(len=500) :: msg
 
 ! *************************************************************************
 
 !Checks
  if (ndisp <= 0) then
-   write(msg,'(a,a)')' ndisp can not be inferior or equal to zero'
-   MSG_ERROR(msg)
+   MSG_ERROR('ndisp can not be inferior or equal to zero')
  end if
 
 !First free the type
@@ -1385,14 +1381,13 @@ subroutine effective_potential_setSupercell(eff_pot,comm,ncell,supercell)
 !Local variables-------------------------------
 !scalar
 !arrays
- character(len=500) :: msg
+ !character(len=500) :: msg
 
 ! *************************************************************************
 
 !Checks
  if (.not.present(supercell).and..not.present(ncell)) then
-   write(msg,'(a,a)')' You should at least set ncell of supercell type'
-   MSG_ERROR(msg)
+   MSG_ERROR(' You should at least set ncell of supercell type')
  end if
 
  call destroy_supercell(eff_pot%supercell)

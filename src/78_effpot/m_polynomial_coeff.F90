@@ -865,7 +865,7 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile,replace
 !  Write header
    if (need_header)then
      write(message,'(a,a,a)')ch10,&
-&         ' Generation of the xml file for the fitted polynomial in ',namefile
+&         ' Generation of the xml file for the fitted polynomial in ',trim(namefile)
 
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
@@ -951,7 +951,7 @@ end subroutine polynomial_coeff_writeXML
 !!
 !! OUTPUT
 !!  energy = contribution to the energy
-!!  energy_coeff(ncoeff) = energy contribution of each anharmonic term 
+!!  energy_coeff(ncoeff) = energy contribution of each anharmonic term
 !!  fcart(3,natom) = contribution  to the forces
 !!  strten(6) = contribution to the stress tensor
 !!
@@ -987,7 +987,7 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart
   integer :: icoeff,iterm,idisp1,idisp2,idisp1_strain,idisp2_strain,icell,ndisp
   integer :: nstrain,ndisp_tot,power_disp,power_strain,unit_out
   real(dp):: coeff,disp1,disp2,tmp1,tmp2,tmp3,weight
-  logical :: file_opened 
+  logical :: file_opened
 ! array
   integer :: cell_atoma1(3),cell_atoma2(3)
   integer :: cell_atomb1(3),cell_atomb2(3)
@@ -1195,22 +1195,22 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart
   call xmpi_sum(strten , comm, ierr)
 
 
-!Write to anharmonic_energy_terms.out ORIGINAL  
+!Write to anharmonic_energy_terms.out ORIGINAL
   INQUIRE(FILE='anharmonic_energy_terms.out',OPENED=file_opened,number=unit_out)
   if(file_opened .eqv. .TRUE.)then
     do icoeff=1,ncoeff
       call xmpi_sum(energy_coeff(icoeff), comm, ierr)
      !write(*,*) 'term ',icoeff,' :', energy_coeff(icoeff)
-     ! Marcus write energy contributions of anharmonic terms to file 
-      if(icoeff <ncoeff)then      
+     ! Marcus write energy contributions of anharmonic terms to file
+      if(icoeff <ncoeff)then
         write(unit_out,'(A,1ES24.16)',advance='no')  '    ',energy_coeff(icoeff)
-      else if(icoeff==ncoeff)then  
+      else if(icoeff==ncoeff)then
         write(unit_out,'(A,1ES24.16)',advance='yes') '    ',energy_coeff(icoeff)
-      end if     
-    enddo 
+      end if
+    enddo
   end if
 
-  
+
 end subroutine polynomial_coeff_evaluate
 !!***
 
@@ -2351,13 +2351,13 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  !   filename = "terms_set.xml"
  !   call polynomial_coeff_writeXML(coefficients,my_newncoeff,filename=filename)
  ! end if
-  
+
  if(need_verbose)then
    write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  end if
- 
+
 
 !Final deallocation
  ABI_DEALLOCATE(symbols)
@@ -2367,7 +2367,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  if(allocated(coeffs_tmp))then
    ABI_DATATYPE_DEALLOCATE(coeffs_tmp)
  end if
- 
+
 end subroutine polynomial_coeff_getNorder
 !!***
 
