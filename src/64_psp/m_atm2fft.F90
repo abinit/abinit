@@ -373,7 +373,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
    if (usepaw == 1) then
      tcorespl => pawtab(itypat)%tcorespl
      tvalespl => pawtab(itypat)%tvalespl
-     ttaucorespl => pawtab(itypat)%ttaucorespl
+     ttaucorespl => pawtab(itypat)%tcoretauspl
    else
      tcorespl => psps%nctab(itypat)%tcorespl
      tvalespl => psps%nctab(itypat)%tvalespl
