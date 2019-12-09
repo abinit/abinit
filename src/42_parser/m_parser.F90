@@ -642,10 +642,10 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
    ! If mline is reached, something is wrong
    if (iline>=mline) then
      write(msg, '(a,i0,2a,i0,4a)' ) &
-     'The number of lines already read from input file=',iline,ch10,&
-     'is equal or greater than maximum allowed mline=',mline,ch10,&
+     'The number of lines already read from input file: ',iline,ch10,&
+     'is equal or greater than maximum allowed mline: ',mline,ch10,&
      'Action: you could decrease the length of the input file, or',ch10,&
-     'contact the ABINIT group.'
+     'increase mline in this routine.'
      MSG_ERROR(msg)
    end if
 

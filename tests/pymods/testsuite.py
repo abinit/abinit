@@ -1032,10 +1032,8 @@ class BuildEnvironment(object):
     def __init__(self, build_dir, cygwin_instdir=None):
         """
         Args:
-            build_dir:
-                Path to the top level directory of the build.
-            cygwin_instdir:
-                Installation directory of cygwin. Defaults to '/cygwin'
+            build_dir: Path to the top level directory of the build.
+            cygwin_instdir: Installation directory of cygwin. Defaults to '/cygwin'
         """
         # Try to figure out the top level directory of the build tree.
         try:
@@ -1092,8 +1090,7 @@ class BuildEnvironment(object):
 
     def _addext(self, string):
         """Append .exe extension, needed for cygwin"""
-        if self.iscygwin():
-            string += ".exe"
+        if self.iscygwin(): string += ".exe"
         return string
 
     def path_of_bin(self, bin_name, try_syspath=True):
@@ -1137,12 +1134,6 @@ class BuildEnvironment(object):
     def has_bin(self, bin_name, try_syspath=True):
         """True if binary bin_name is present in the build."""
         return os.path.isfile(self.path_of_bin(bin_name, try_syspath=try_syspath))
-
-    def cygwin_path(self, path):
-        apath = os.path.abspath(path)
-        if self.iscygwin():
-            apath = self._cygwin_instdir + apath
-        return apath
 
     def set_buildbot_builder(self, builder):
         """
@@ -1496,13 +1487,6 @@ class BaseTest(object):
         """The absolute path of the executable needed to run the test."""
         return self.build_env.path_of_bin(self.executable)
 
-    @property
-    def cygwin_bin_path(self):
-        return self.build_env.cygwin_path_of_bin(self.executable)
-
-    def cygwin_path(self, path):
-        return self.build_env.cygwin_path(path)
-
     def cpkl_dump(self, protocol=-1):
         """Save the instance in a pickle file"""
         self.cpkl_fname = os.path.join(self.workdir, self.id + ".cpkl")
@@ -1655,7 +1639,7 @@ class BaseTest(object):
                     err_msg = "Cannot find pp file %s, neither in Psps_for_tests nor in self.workdir" % pname
                     self.exceptions.append(self.Error(err_msg))
 
-        return [self.cygwin_path(p) for p in psp_paths]  # Cygwin
+        return psp_paths
 
     def get_extra_inputs(self):
         """Copy extra inputs from inp_dir to workdir."""
@@ -1950,8 +1934,6 @@ class BaseTest(object):
             self.stderr_fname = os.path.join(self.workdir, self.id + ".stderr")
 
             # Run the code (run_etime is the wall time spent to execute the test)
-            bin_path = self.cygwin_bin_path if runner.has_mpirun else self.bin_path
-
             # FIXME: Add support for more executables
             use_files_file = self.use_files_file
             if self.executable not in ("abinit", "anaddb"):
@@ -1976,7 +1958,7 @@ class BaseTest(object):
                 bin_argstr = path + self.exec_args
                 print("bin_argstr", bin_argstr)
 
-            self.run_etime = runner.run(self.nprocs, bin_path,
+            self.run_etime = runner.run(self.nprocs, self.bin_path,
                                         stdin_fname, self.stdout_fname, self.stderr_fname,
                                         bin_argstr=bin_argstr, cwd=self.workdir)
 
@@ -2522,7 +2504,7 @@ class AbinitTest(BaseTest):
 
         # Use the basename instead of the absolute path because the input has been already copied
         # and we might want to change it especially if we are debugging the code
-        inp_fname = self.cygwin_path(self.inp_fname)
+        inp_fname = self.inp_fname
         t_stdin.write(os.path.basename(inp_fname) + "\n")
         t_stdin.write(self.id + ".out" + "\n")
 
@@ -2554,7 +2536,7 @@ class AbinitTest(BaseTest):
         #app('pp_dirpath = "%s"' % (self.abenv.psps_dir))
         #app('pseudos = "%s"' % (",".join(self.psp_files)))
         # This is needed for ATOMPAW as the pseudo will be generated at runtime.
-        app('pseudos = "%s"' % (",".join(self.get_pseudo_paths())))
+        app('pseudos = "%s"' % (",\n".join(self.get_pseudo_paths())))
 
         # Prefix for input/output/temporary files
         i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
@@ -2586,7 +2568,6 @@ class AnaddbTest(BaseTest):
             iddb_fname = os.path.join(self.workdir, self.input_ddb)
             if not os.path.isfile(iddb_fname):
                 self.exceptions.append(self.Error("%s no such DDB file: " % iddb_fname))
-            iddb_fname = self.cygwin_path(iddb_fname)   # cygwin
         return iddb_fname
 
     def get_gkk_path(self):
@@ -2596,7 +2577,6 @@ class AnaddbTest(BaseTest):
             input_gkk = os.path.join(self.workdir, self.input_gkk)  # Use output GKK of a previous run.
             if not os.path.isfile(input_gkk):
                 self.exceptions.append(self.Error("%s no such GKK file: " % input_gkk))
-            input_gkk = self.cygwin_path(input_gkk)    # cygwin
 
         if not os.path.isfile(input_gkk): input_gkk = ""
         return input_gkk
@@ -2607,15 +2587,14 @@ class AnaddbTest(BaseTest):
         if not os.path.isfile(input_ddk):
             # Try in input directory:
             # FIXME: Someone has to rewrite the treatment of the anaddb files file
-            input_ddk = self.cygwin_path(os.path.join(self.inp_dir, input_ddk))
+            input_ddk = os.path.join(self.inp_dir, input_ddk)
         if not os.path.isfile(input_ddk): input_dkk = ""
         return input_ddk
 
     def make_stdin(self):
         t_stdin = StringIO()
 
-        inp_fname = self.cygwin_path(self.inp_fname) # cygwin
-        t_stdin.write(inp_fname + "\n")              # 1) formatted input file
+        t_stdin.write(self.inp_fname + "\n")         # 1) formatted input file
         t_stdin.write(self.id + ".out" + "\n")       # 2) formatted output file e.g. t13.out
         t_stdin.write(self.get_ddb_path() + "\n")    # 3) input derivative database e.g. t13.ddb.in
         t_stdin.write(self.id + ".md" + "\n")        # 4) output molecular dynamics e.g. t13.md
@@ -2660,22 +2639,19 @@ class MultibinitTest(BaseTest):
     def make_stdin(self):
         t_stdin = StringIO()
 
-        inp_fname = self.cygwin_path(self.inp_fname)  # cygwin
-        t_stdin.write(inp_fname + "\n")              # 1) formatted input file
+        t_stdin.write(self.inp_fname + "\n")         # 1) formatted input file
         t_stdin.write(self.id + ".out" + "\n")       # 2) formatted output file e.g. t13.out
 
         if self.input_ddb:
             iddb_fname = os.path.join(self.inp_dir, self.input_ddb)
             if not os.path.isfile(iddb_fname):
                 self.exceptions.append(self.Error("%s no such DDB file: " % iddb_fname))
-            iddb_fname = self.cygwin_path(iddb_fname)   # cygwin
             t_stdin.write(iddb_fname + "\n")         # 3) input derivative database e.g. ddb.in
         else:
             if self.system_xml:
                 sys_xml_fname = os.path.join(self.inp_dir, self.system_xml)
                 if not os.path.isfile(sys_xml_fname):
                     self.exceptions.append(self.Error("%s no such XML file: " % sys_xml_fname))
-                sys_xml_fname = self.cygwin_path(sys_xml_fname)
                 t_stdin.write(sys_xml_fname + "\n")  # 3) input for system.xml XML
             else:
                 self.exceptions.append(self.Error("%s no file available for the system"))
@@ -2685,7 +2661,6 @@ class MultibinitTest(BaseTest):
             if not os.path.isfile(coeffxml_fname):
                 self.exceptions.append(self.Error("%s no such XML file for coeffs: " % coeffxml_fname))
 
-            coeffxml_fname = self.cygwin_path(coeffxml_fname)
             t_stdin.write(coeffxml_fname + "\n")  # 4) input for coefficients
         else:
             coeffxml_fname = "no"
@@ -2696,7 +2671,6 @@ class MultibinitTest(BaseTest):
             if not os.path.isfile(md_hist_fname):
                 self.exceptions.append(self.Error("%s no such XML file for coeffs: " % md_hist_fname))
 
-            md_hist_fname = self.cygwin_path(md_hist_fname)
             t_stdin.write(md_hist_fname + "\n")  # 5) input for coefficients
         else:
             md_hist_fname = "no"
@@ -2712,15 +2686,13 @@ class TdepTest(BaseTest):
     def make_stdin(self):
         t_stdin = StringIO()
 
-        inp_fname = self.cygwin_path(self.inp_fname)  # cygwin
-        inp_fname = os.path.basename(inp_fname)
+        inp_fname = os.path.basename(self.inp_fname)
         t_stdin.write(inp_fname + "\n")              # 1) formatted input file
 
         md_hist_fname = os.path.join(self.inp_dir, self.md_hist)
         if not os.path.isfile(md_hist_fname):
             self.exceptions.append(self.Error("%s no such hist file: " % md_hist_fname))
 
-        md_hist_fname = self.cygwin_path(md_hist_fname)
         t_stdin.write(md_hist_fname + "\n")
         t_stdin.write(self.id + "\n")       # 2) formatted output file e.g. t13.out
 
@@ -2734,8 +2706,7 @@ class AimTest(BaseTest):
     def make_stdin(self):
         t_stdin = StringIO()
 
-        inp_fname = self.cygwin_path(self.inp_fname)
-        t_stdin.write(inp_fname + "\n")   # formatted input file e.g. .../Input/t57.in
+        t_stdin.write(self.inp_fname + "\n")   # formatted input file e.g. .../Input/t57.in
 
         iden_fname = self.id + "i_DEN"
         t_stdin.write(iden_fname + "\n")  # input density  e.g. t57i_DEN
@@ -2743,7 +2714,6 @@ class AimTest(BaseTest):
 
         # Path to the pseudopotential files.
         psp_paths = [os.path.join(self.abenv.psps_dir, pname) for pname in self.psp_files]
-        psp_paths = [self.cygwin_path(p) for p in psp_paths]  # Cygwin
 
         t_stdin.writelines(p + "\n" for p in psp_paths)
 
@@ -2756,10 +2726,8 @@ class ConductiTest(BaseTest):
     """
     def make_stdin(self):
         t_stdin = StringIO()
-
-        inp_fname = self.cygwin_path(self.inp_fname)
-        t_stdin.write(inp_fname + "\n")  # formatted input file e.g. .../Input/t57.in
-        t_stdin.write(self.id + "\n")    # will be used as the prefix of the log file names e.g. t57
+        t_stdin.write(self.inp_fname + "\n")  # formatted input file e.g. .../Input/t57.in
+        t_stdin.write(self.id + "\n")         # will be used as the prefix of the log file names e.g. t57
 
         return t_stdin.getvalue()
 
@@ -2771,11 +2739,10 @@ class OpticTest(BaseTest):
     def make_stdin(self):
         t_stdin = StringIO()
 
-        inp_fname = self.cygwin_path(self.inp_fname)
-        t_stdin.write(inp_fname + "\n")    # optic input file e.g. .../Input/t57.in
-        t_stdin.write(self.id + ".out\n")  # Output. e.g t57.out
-        t_stdin.write(self.id + "\n")      # Used as suffix to diff and prefix to log file names,
-                                           # and also for roots for temporaries
+        t_stdin.write(self.inp_fname + "\n")  # optic input file e.g. .../Input/t57.in
+        t_stdin.write(self.id + ".out\n")     # Output. e.g t57.out
+        t_stdin.write(self.id + "\n")         # Used as suffix to diff and prefix to log file names,
+                                               # and also for roots for temporaries
 
         return t_stdin.getvalue()
 
@@ -2786,19 +2753,14 @@ class Band2epsTest(BaseTest):
     def make_stdin(self):
         t_stdin = StringIO()
 
-        inp_fname = self.cygwin_path(self.inp_fname)
-        t_stdin.write(inp_fname + "\n")        # input file e.g. .../Input/t51.in
+        t_stdin.write(self.inp_fname + "\n")   # input file e.g. .../Input/t51.in
         t_stdin.write(self.id + ".out.eps\n")  # output file e.g. t51.out.eps
 
         inp_freq = os.path.join(self.inp_dir, self.id + ".in_freq")
-        inp_freq = self.cygwin_path(inp_freq)
         t_stdin.write(inp_freq + "\n")          # input freq file e.g Input/t51.in_freq
 
         inp_displ = os.path.join(self.inp_dir, self.id + ".in_displ")
-        if not os.path.isfile(inp_displ):
-            inp_displ = "no"
-        else:
-            inp_displ = self.cygwin_path(inp_displ)
+        if not os.path.isfile(inp_displ): inp_displ = "no"
         t_stdin.write(inp_displ + "\n")         # input displ file e.g Input/t51.in_displ
 
         return t_stdin.getvalue()
