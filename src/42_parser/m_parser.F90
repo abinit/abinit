@@ -178,11 +178,11 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
    lenstr_noxyz = lenstr
    call importxyz(lenstr,string_raw,string,strlen)
 
-   !6) Take ndtset from the input string
+   ! Take ndtset from the input string
    ndtset=0; marr=1
    call intagm(dprarr,intarr,0,marr,1,string(1:lenstr),"ndtset",tread,'INT')
    if (tread==1) ndtset=intarr(1)
-   ! Check that ndtset is not negative
+   ! Check that ndtset is within bounds
    if (ndtset<0 .or. ndtset>9999) then
      write(msg, '(a,i0,4a)' )&
      'Input ndtset must be non-negative and < 10000, but was ',ndtset,ch10,&
@@ -219,8 +219,7 @@ end subroutine parsefile
 !! INPUTS
 !!  string=character string.
 !!  ndig=length of field to be read (including signs, decimals, and exponents).
-!!  typevarphys=variable type (might indicate the physical meaning of
-!!   for dimensionality purposes)
+!!  typevarphys=variable type (might indicate the physical meaning for dimensionality purposes)
 !!   'INT'=>integer
 !!   'DPR','LEN','ENE'=>real(dp) (no special treatment)
 !!   'LOG'=>integer, but read logical variable T,F,.true., or .false.
@@ -335,7 +334,7 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
      read (unit=string(1:ndig),fmt=*,iostat=errcod) outr
    end if
 
-   !  Treatment of errors
+   ! Treatment of errors
    if(errcod/=0)then
      ! real(dp) data reading error
      write(std_out,'(/,a,/,a,i0,a)' ) &
@@ -637,7 +636,7 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
      ! Concatenate total string
      string(lenstr+1:lenstr+lenstr_inc)=string_inc(1:lenstr_inc)
      lenstr=lenstr+lenstr_inc
-     ABI_DEALLOCATE(string_inc)
+     ABI_FREE(string_inc)
    end if
 
    ! If mline is reached, something is wrong
@@ -1483,10 +1482,10 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
    tread = 1
 
-   ABI_DEALLOCATE(dpr1)
-   ABI_DEALLOCATE(dpr2)
-   ABI_DEALLOCATE(int1)
-   ABI_DEALLOCATE(int2)
+   ABI_FREE(dpr1)
+   ABI_FREE(dpr2)
+   ABI_FREE(int1)
+   ABI_FREE(int2)
  end if
 
  if(present(ds_input)) then
@@ -1996,8 +1995,8 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
    end do
  end do
 
- ABI_DEALLOCATE(elementtype)
- ABI_DEALLOCATE(xangst)
+ ABI_FREE(elementtype)
+ ABI_FREE(xangst)
 
 !Check the length of the string
  if(lenstr_new>strln)then
@@ -2404,7 +2403,7 @@ subroutine chkint_ge(advice_change_cond,cond_number,cond_string,cond_values,&
 &   list_number,list_values,minmax_flag,minmax_value,unit)
  end if
 
- ABI_DEALLOCATE(list_values)
+ ABI_FREE(list_values)
 
 ! reset all cond_strings
  cond_string(:)='#####'
@@ -2491,7 +2490,7 @@ subroutine chkint_le(advice_change_cond,cond_number,cond_string,cond_values,&
      ierr,input_name,input_value,list_number,list_values,minmax_flag,minmax_value,unit)
  end if
 
- ABI_DEALLOCATE(list_values)
+ ABI_FREE(list_values)
 
 ! reset all cond_strings
  cond_string(:)='#####'
@@ -3241,8 +3240,8 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
      call prttagm(dprarr,intarr,iout,jdtset_,length,marr,narr,&
        narrm,ncid,ndtset_alloc,token,typevarphys,multi_narr)
    end if
-   ABI_DEALLOCATE(intarr)
-   ABI_DEALLOCATE(dprarr)
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
 
  else
 

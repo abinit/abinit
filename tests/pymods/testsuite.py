@@ -2024,11 +2024,13 @@ class BaseTest(object):
                 self.had_timeout = True
                 msg = self.full_id + "test has reached timeout and has been killed (SIGTERM)."
                 self.cprint(msg, status2txtcolor["failed"])
+
             elif runner.retcode == 137:
                 self._status = "failed"
                 self.had_timeout = True
                 msg = self.full_id + "test has reached timeout and has been killed (SIGKILL)."
                 self.cprint(msg, status2txtcolor["failed"])
+
             elif runner.retcode != 0 and not self.expected_failure:
                 self._status = "failed"
                 msg = (self.full_id + "Test was not expected to fail but subprocesses returned %s" % runner.retcode)
@@ -2512,7 +2514,8 @@ class BaseTest(object):
 
 class AbinitTest(BaseTest):
     """
-    Class for Abinit tests. Redefine the make_stdin method of BaseTest
+    Class for Abinit tests. Redefine the make_stdin method of BaseTest,
+    provides `prepare_new_cli_invokation`
     """
     def make_stdin(self):
         t_stdin = StringIO()
@@ -2540,6 +2543,7 @@ class AbinitTest(BaseTest):
         return t_stdin.getvalue()
 
     def prepare_new_cli_invokation(self):
+        """Perform operations required to execute test with new CLI."""
         # Need to add pseudopotential info to input.
         with open(self.inp_fname, "rt") as fh:
             line = fh.read()
@@ -2571,6 +2575,7 @@ class AbinitTest(BaseTest):
 class AnaddbTest(BaseTest):
     """
     Class for Anaddb tests. Redefine the make_stdin method of BaseTest
+    provides `prepare_new_cli_invokation`
     """
 
     def get_ddb_path(self):
@@ -2585,6 +2590,7 @@ class AnaddbTest(BaseTest):
         return iddb_fname
 
     def get_gkk_path(self):
+        """Return the path to the input GKK file for EPH calculations."""
         input_gkk = self.id + ".gkk"
         if self.input_gkk:
             input_gkk = os.path.join(self.workdir, self.input_gkk)  # Use output GKK of a previous run.
@@ -2596,6 +2602,7 @@ class AnaddbTest(BaseTest):
         return input_gkk
 
     def get_ddk_path(self):
+        """Return the path to the input DKK file for EPH calculations."""
         input_ddk = self.id + ".ddk"
         if not os.path.isfile(input_ddk):
             # Try in input directory:
@@ -2610,7 +2617,6 @@ class AnaddbTest(BaseTest):
         inp_fname = self.cygwin_path(self.inp_fname) # cygwin
         t_stdin.write(inp_fname + "\n")              # 1) formatted input file
         t_stdin.write(self.id + ".out" + "\n")       # 2) formatted output file e.g. t13.out
-
         t_stdin.write(self.get_ddb_path() + "\n")    # 3) input derivative database e.g. t13.ddb.in
         t_stdin.write(self.id + ".md" + "\n")        # 4) output molecular dynamics e.g. t13.md
         t_stdin.write(self.get_gkk_path() + "\n")    # 5) input elphon matrix elements  (GKK file) :
@@ -2620,6 +2626,7 @@ class AnaddbTest(BaseTest):
         return t_stdin.getvalue()
 
     def prepare_new_cli_invokation(self):
+        """Perform operations required to execute test with new CLI."""
         # Need to add extra variables depending on calculation type.
         with open(self.inp_fname, "rt") as fh:
             line = fh.read()
@@ -2728,11 +2735,11 @@ class AimTest(BaseTest):
         t_stdin = StringIO()
 
         inp_fname = self.cygwin_path(self.inp_fname)
-        t_stdin.write(inp_fname + "\n")         # formatted input file e.g. .../Input/t57.in
+        t_stdin.write(inp_fname + "\n")   # formatted input file e.g. .../Input/t57.in
 
         iden_fname = self.id + "i_DEN"
-        t_stdin.write(iden_fname + "\n")        # input density  e.g. t57i_DEN
-        t_stdin.write(self.id + "\n")           # t57
+        t_stdin.write(iden_fname + "\n")  # input density  e.g. t57i_DEN
+        t_stdin.write(self.id + "\n")     # t57
 
         # Path to the pseudopotential files.
         psp_paths = [os.path.join(self.abenv.psps_dir, pname) for pname in self.psp_files]
