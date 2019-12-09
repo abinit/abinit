@@ -1816,12 +1816,10 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  integer,allocatable :: mband_upper_(:)
  real(dp) :: ecut_tmp(3,2,10),tsec(2)
  real(dp),allocatable :: zionpsp(:)
- character(len=fnlen), allocatable :: pspfilnam_(:)
- character(len=fnlen),allocatable :: pseudo_paths(:)
+ character(len=fnlen), allocatable :: pspfilnam_(:), pseudo_paths(:)
 
 !************************************************************************
 
- ! Call the parser from the parser module.
  me = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  ! Read the file, stringify it and return the number of datasets.
@@ -1857,8 +1855,6 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  end if
  ecut_tmp = -one
 
- !print *, "pseudos_paths: ", pseudo_paths
-
  pspheads(:)%usewvl = dtsets(1)%usewvl
 
  if (me == 0) then
@@ -1884,10 +1880,15 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
     else
       ! Get pseudopotential paths from input file.
       pspfilnam_ = pseudo_paths
+      do ipsp=1,npsp
+        write(std_out,'(a,i0,2a)' )' For atom type ',ipsp,', psp file is ',trim(pspfilnam_(ipsp))
+      end do
     end if
 
+    ! Now read the psp headers
     call inpspheads(pspfilnam_, npsp, pspheads, ecut_tmp)
     ABI_FREE(pspfilnam_)
+
     if (minval(abs(pspheads(1:npsp)%pspcod - 7)) == 0) usepaw=1
     if (minval(abs(pspheads(1:npsp)%pspcod - 17)) == 0) usepaw=1
  end if

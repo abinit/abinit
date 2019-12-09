@@ -186,8 +186,7 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
    if (ndtset<0 .or. ndtset>9999) then
      write(msg, '(a,i0,4a)' )&
      'Input ndtset must be non-negative and < 10000, but was ',ndtset,ch10,&
-     'This is not allowed.',ch10,&
-     'Action: modify ndtset in the input file.'
+     'This is not allowed.',ch10,'Action: modify ndtset in the input file.'
      MSG_ERROR(msg)
    end if
  end if ! master
@@ -701,24 +700,14 @@ subroutine inreplsp(string)
 
 ! *************************************************************************
 
-!Get length of string
- length=len(string)
+ ! Get length of string. Proceed only if string has nonzero length
+ length=len(string); if (length == 0) return
 
-!Proceed only if string has nonzero length
- if (length>0) then
-
-!  Do replacement by going through input
-!  character string one character at a time
-   do ilenth=1,length
-     if (llt(string(ilenth:ilenth),' ')) then
-       string(ilenth:ilenth)=' '
-     end if
-     if(string(ilenth:ilenth)=='=')then
-       string(ilenth:ilenth)=' '
-     end if
-   end do
-
- end if
+ !  Do replacement by going through input character string one character at a time
+ do ilenth=1,length
+   if (llt(string(ilenth:ilenth),' ')) string(ilenth:ilenth)=' '
+   if (string(ilenth:ilenth)=='=') string(ilenth:ilenth)=' '
+ end do
 
 end subroutine inreplsp
 !!***
@@ -1302,11 +1291,10 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
          MSG_ERROR(msg)
        end if
 
-       !      At this stage, either
-       !      - itoken_colon vanish as well as itoken_plus and itoken_times
-       !      - itoken_colon does not vanish,
-       !      as well as one of itoken_plus or itoken_times
-
+       ! At this stage, either
+       !    - itoken_colon vanish as well as itoken_plus and itoken_times
+       !    - itoken_colon does not vanish,
+       ! as well as one of itoken_plus or itoken_times
 
      end if ! End the condition of multi-dataset mode
    end if ! End the check on existence of a series
@@ -1398,16 +1386,14 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      write(msg, '(9a)' )&
      'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
      'a series has been defined in the input file.',ch10,&
-     'This is forbidden.',ch10,&
-     'Action: check your input file.'
+     'This is forbidden.',ch10,'Action: check your input file.'
      MSG_ERROR(msg)
    end if
    if(narr>=2)then
      write(msg, '(9a)' )&
      'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
      'the number of data requested is larger than 1.',ch10,&
-     'This is forbidden.',ch10,&
-     'Action: check your input file.'
+     'This is forbidden.',ch10,'Action: check your input file.'
      MSG_ERROR(msg)
    end if
    typevar='KEY'
@@ -1488,9 +1474,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
    ABI_FREE(int2)
  end if
 
- if(present(ds_input)) then
-   ds_input = ds_input_
- end if
+ if(present(ds_input)) ds_input = ds_input_
 
 !write(std_out,*) ' intagm : exit value tread=',tread
 !write(std_out,*) ' intarr =',intarr(1:narr)
@@ -1622,11 +1606,11 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
      b2=b2-istar
    end if
 
-   !  Read data internally by calling inread at entry ini:
+   ! Read data internally by calling inread at entry ini:
    call inread(string(b1+1:b1+b2-1),b2-1,typevarphys,integ,real8,errcod)
    if (errcod/=0) exit
 
-   !  Allow for list-directed input with repeat number nrep:
+   ! Allow for list-directed input with repeat number nrep:
    if(typevar=='INT')then
      intarr(1+ii:min(nrep+ii,narr))=integ
    else if(typevar=='DPR')then
@@ -1697,18 +1681,13 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
            factor=one/Ha_eV
          end if
        else if(typevarphys=='ENE' .and. b2>=2)then
-         if(string(b1+1:b1+2)=='K ')then
-           factor=kb_HaK
-         end if
+         if(string(b1+1:b1+2)=='K ') factor=kb_HaK
        else if(typevarphys=='BFI' .and. b2>=2)then
-         if(string(b1+1:b1+2)=='T ' .or. string(b1+1:b1+2)=='TE')then
-           factor=BField_Tesla
-         end if
+         if(string(b1+1:b1+2)=='T ' .or. string(b1+1:b1+2)=='TE') factor=BField_Tesla
        else if (typevarphys=='TIM' .and. b2>=2) then
-         if( string(b1+1:b1+2)=='SE' .or. string(b1+1:b1+2)=='S ') then
-           factor=one/Time_Sec
-         end if
+         if( string(b1+1:b1+2)=='SE' .or. string(b1+1:b1+2)=='S ') factor=one/Time_Sec
        endif
+
        dprarr(1:narr)=dprarr(1:narr)*factor
        exit
      else

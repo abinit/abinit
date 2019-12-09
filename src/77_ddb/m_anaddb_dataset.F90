@@ -2042,11 +2042,11 @@ subroutine anaddb_init(input_path, filnam)
 
  if (len_trim(input_path) == 0) then
    ! Legacy Files file mode.
-   !write(std_out, *)"DeprecationWarning: the files file is deprecated in Abinit9 and will be removed in Abinit10"
-   !write(std_out, *)"                    Use the syntax `abinit t01.abi` where abi is the input file with e.g."
-   !write(std_out, *)'                    pseudos = "al.psp8, as.psp8"'
-   !write(std_out, *)""
-   ! Read the file names
+   write(std_out, "(2a)")"DeprecationWarning: ",ch10
+   write(std_out, "(a)") "     The files file has been deprecated in Abinit9 and will be removed in Abinit10."
+   write(std_out, "(2a)")"     Use the syntax `anaddb t01.abi` where t01.abi is an anaddb input with ddb_path.",ch10
+   write(std_out, "(3a)")'            ddb_path = "out_DDB"',ch10,ch10
+
    write(std_out,*)' Give name for formatted input file: '
    read(std_in, '(a)' ) filnam(1)
    write(std_out,'(a,a)' )'-   ',trim(filnam(1))

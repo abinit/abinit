@@ -1629,8 +1629,8 @@ subroutine iofn1(input_path, filnam, filstat, comm)
    tmpfil(1:fnlen)=blank
    tmpfil(1:9)='ab.files'
    write(msg, '(4a)' )&
-   'Because of CPP option READ_FROM_FILE,',ch10,&
-   'read file "ab.files" instead of standard input ' ,ch10
+    'Because of CPP option READ_FROM_FILE,',ch10,&
+    'read file "ab.files" instead of standard input ' ,ch10
    MSG_COMMENT(msg)
    call isfile(tmpfil,'old')
    close(std_in, err=10, iomsg=errmsg)
@@ -1645,10 +1645,11 @@ subroutine iofn1(input_path, filnam, filstat, comm)
 
    if (len_trim(input_path) == 0) then
      ! Legacy Files file mode.
-     !write(std_out, *)"DeprecationWarning: the files file is deprecated in Abinit9 and will be removed in Abinit10"
-     !write(std_out, *)"                    Use the syntax `abinit t01.abi` where abi is the input file with e.g."
-     !write(std_out, *)'                    pseudos = "al.psp8, as.psp8"'
-     !write(std_out, *)""
+     write(std_out, "(2a)")"DeprecationWarning: ",ch10
+     write(std_out, "(a)") "     The files file has been deprecated in Abinit9 and will be removed in Abinit10."
+     write(std_out, "(2a)")"     Use the syntax `abinit t01.abi` where t01.abi is an input with pseudopotenials.",ch10
+     write(std_out, "(3a)")'            pseudos = "al.psp8, as.psp8"',ch10,ch10
+
      write(std_out,*,err=10,iomsg=errmsg)' Give name for formatted input file: '
      read(std_in, '(a)',err=10,iomsg=errmsg ) filnam(1)
      write(std_out, '(a)',err=10,iomsg=errmsg ) trim(filnam(1))
