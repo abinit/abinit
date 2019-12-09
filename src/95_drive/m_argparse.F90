@@ -128,7 +128,7 @@ type(args_t) function args_parser() result(args)
  integer :: ii,ierr
  logical :: iam_master,verbose
  real(dp) :: timelimit
- character(len=500) :: arg,msg
+ character(len=500) :: arg !,msg
 
 ! *************************************************************************
 

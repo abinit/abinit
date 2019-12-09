@@ -1645,6 +1645,10 @@ subroutine iofn1(input_path, filnam, filstat, comm)
 
    if (len_trim(input_path) == 0) then
      ! Legacy Files file mode.
+     !write(std_out, *)"DeprecationWarning: the files file is deprecated in Abinit9 and will be removed in Abinit10"
+     !write(std_out, *)"                    Use the syntax `abinit t01.abi` where abi is the input file with e.g."
+     !write(std_out, *)'                    pseudos = "al.psp8, as.psp8"'
+     !write(std_out, *)""
      write(std_out,*,err=10,iomsg=errmsg)' Give name for formatted input file: '
      read(std_in, '(a)',err=10,iomsg=errmsg ) filnam(1)
      write(std_out, '(a)',err=10,iomsg=errmsg ) trim(filnam(1))
@@ -1674,7 +1678,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      if (i1 /= 0) then
        ! Use prefix to initialize filnam
        i2 = index(input_path, ".", back=.True.)
-       filnam(2) = input_path(:i2) // "out"
+       filnam(2) = input_path(:i2) // "abo"
        filnam(3) = fname(:i1-1) // "i"
        filnam(4) = fname(:i1-1) // "o"
        filnam(5) = fname(:i1-1)
@@ -1694,6 +1698,11 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "indata_prefix", tread, 'KEY', key_value=filnam(3))
      call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "outdata_prefix", tread, 'KEY', key_value=filnam(4))
      call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "tmpdata_prefix", tread, 'KEY', key_value=filnam(5))
+
+     !do i1=3,5
+     !  dirname = filnam(i1)
+     !  if .not. isdir(dirname) mkdir(dirname)
+     !end do
 
      ABI_FREE(dprarr)
      ABI_FREE(intarr)

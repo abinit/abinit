@@ -93,7 +93,7 @@ program anaddb
  integer,parameter :: rftyp4=4
  integer :: comm,iatom,iblok,iblok_stress,iblok_tmp,idir,ii,index
  integer :: ierr,iphl2,lenstr,mtyp,mpert,msize,natom
- integer :: nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid,prt_internalstr
+ integer :: nsym,ntypat,usepaw,nproc,my_rank,ana_ncid,prt_internalstr
  logical :: iam_master
  integer :: rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
  integer :: count_wminmax(2)
@@ -165,7 +165,7 @@ program anaddb
  call timab(1, 0, tsec)
 
  ! Initialise the code: write heading, and read names of files.
- if (iam_master) call anaddb_init(filnam)
+ if (iam_master) call anaddb_init(args%input_path, filnam)
  call xmpi_bcast(filnam, master, comm, ierr)
 
  ! make log file for non-master procs
@@ -196,10 +196,8 @@ program anaddb
 
  ! Read the input file, and store the information in a long string of characters
  ! strlen from defs_basis module
- option = 1
  if (iam_master) then
-   call instrng(filnam(1), lenstr, option, strlen, string)
-
+   call instrng(filnam(1), lenstr, 1, strlen, string)
    ! To make case-insensitive, map characters to upper case.
    call inupper(string(1:lenstr))
  end if
