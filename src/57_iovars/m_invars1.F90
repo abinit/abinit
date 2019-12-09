@@ -122,7 +122,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  real(dp) :: cpus
  character(len=500) :: msg
  character(len=fnlen) :: pp_dirpath
- character(len=10*fnlen) :: pseudos_string
+ character(len=20*fnlen) :: pseudos_string ! DO NOT decrease len
  type(string_splitter_t) :: split
 !arrays
  integer,allocatable :: intarr(:)
@@ -457,6 +457,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    if (.not. endswith(pp_dirpath, "/")) pp_dirpath = strcat(pp_dirpath, "/")
  end if
 
+ ! String must be large enough to contain ntypat filepaths.
  pseudos_string = ""
  call intagm(dprarr, intarr, 0, marr, 1, string(1:lenstr), "pseudos", tread_pseudos, 'KEY', key_value=pseudos_string)
 
@@ -473,8 +474,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      if (len_trim(pp_dirpath) > 0) pseudo_paths(ii) = strcat(pp_dirpath, pseudo_paths(ii))
    end do
    call split%free()
-   !print *, "pp_dirpath: ", trim(pp_dirpath)
-   !print *, "pseudos: ", trim(pseudos_string)
+   !print *, "pp_dirpath: ", trim(pp_dirpath), "pseudos: ", trim(pseudos_string)
  end if
 
  ! KGB parallelism information (needed at this stage)

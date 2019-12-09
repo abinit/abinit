@@ -875,7 +875,9 @@ end subroutine incomprs
 !!           ds_input = 0 => value was found which is not specific to jdtset
 !!           ds_input > 0 => value was found which is specific to jdtset
 !!   one could add more information, eg whether a ? or a : was used, etc...
-!!   [key_value]=Stores the value of key if typevarphys=="KEY" String of len fnlen
+!!   [key_value]=Stores the value of key if typevarphys=="KEY".
+!!      The string must be large enough to contain the output. fnlen is OK in many cases
+!!      except when reading a list of files. The routine abors is key_value cannot store the output.
 !!
 !! NOTES
 !!
@@ -950,7 +952,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  character(len=*),intent(in) :: string
  character(len=*),intent(in) :: token
  character(len=*),intent(in) :: typevarphys
- character(len=fnlen),optional,intent(out) :: key_value
+ character(len=*),optional,intent(out) :: key_value
 !arrays
  integer,intent(inout) :: intarr(marr) !vz_i
  real(dp),intent(inout) :: dprarr(marr) !vz_i
@@ -958,7 +960,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 !Local variables-------------------------------
  character(len=1), parameter :: blank=' '
 !scalars
- integer :: b1,cs1len,cslen,dozens,ier,itoken,itoken1,itoken2,itoken2_1colon
+ integer :: b1,b2,b3,cs1len,cslen,dozens,ier,itoken,itoken1,itoken2,itoken2_1colon
  integer :: itoken2_1plus,itoken2_1times,itoken2_2colon,itoken2_2plus
  integer :: itoken2_2times,itoken2_colon,itoken2_plus,itoken2_times
  integer :: itoken_1colon,itoken_1plus,itoken_1times,itoken_2colon,itoken_2plus
@@ -1368,54 +1370,61 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
  tread = 0
  typevar='INT'
+
  if(typevarphys=='LOG')typevar='INT'
  if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. &
     typevarphys=='BFI' .or. typevarphys=='TIM') typevar='DPR'
 
- if(typevarphys=='KEY')then
-   ! Consistency check for keyword
-   if(opttoken>=2)then
+ if (typevarphys=='KEY') then
+   ! Consistency check for keyword (no multidataset, no series)
+   if (opttoken>=2) then
      write(msg, '(9a)' )&
      'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
      'a series has been defined in the input file.',ch10,&
      'This is forbidden.',ch10,'Action: check your input file.'
      MSG_ERROR(msg)
    end if
-   if(narr>=2)then
+   if (narr>=2) then
      write(msg, '(9a)' )&
      'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
      'the number of data requested is larger than 1.',ch10,&
      'This is forbidden.',ch10,'Action: check your input file.'
      MSG_ERROR(msg)
    end if
-   typevar='KEY'
-   ! write(std_out,*)' intagm : will read cs=',trim(cs) !; stop
  end if
 
  ! There is something to be read if opttoken>=1
- if(opttoken==1)then
+ if (opttoken==1) then
 
    ! write(std_out,*)' intagm : opttoken==1 , token has been found, will read '
    ! Absolute location in string of blank which follows token:
-   b1=itoken+cslen-1
+   b1 = itoken + cslen - 1
 
-   ! Read the array (or eventual scalar) that follows the blank
-   ! In case of typevarphys='KEY', the chain of character will be returned in cs.
-   call inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
-
-   if (typevarphys=='KEY') then
-     if (.not. PRESENT(key_value)) then
-       MSG_ERROR("typevarphys == KEY requires the optional argument key_value")
+   if (typevarphys == 'KEY') then
+     ! In case of typevarphys='KEY', the chain of character will be returned in cs.
+     ABI_CHECK(present(key_value), "typevarphys == KEY requires optional argument key_value")
+     ! write(std_out,*)' intagm : will read cs=',trim(cs) !; stop
+     b2 = index(string(b1+1:), '"')
+     b2 = b1 + b2 + 2
+     b3 = index(string(b2+1:), '"')
+     !!print *, "b2:", b2, "b3:", b3
+     b3 = b2 + b3
+     if ((b3 - b2 + 3) > len(key_value)) then
+       MSG_ERROR("Len of key_value too small to contain value parsed from file")
      end if
-     !write(std_out,*)' intagm : after inarray, token=',trim(cs)
-     !key_value = TRIM(cs)
+     cs = string(b2-2:b3)
      key_value = adjustl(rmquotes(trim(cs)))
+     !write(std_out,*)' intagm : after inarray, token=',trim(cs)
+
+   else
+     ! Read the array (or eventual scalar) that follows the blank
+     call inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
    end if
 
    ! if this point is reached then data has been read in successfully
    tread = 1
 
- else if(opttoken>=2)then
+ else if(opttoken>=2) then
 
    ! write(std_out,*)' intagm : opttoken>=2 , token has been found, will read '
    ABI_ALLOCATE(dpr1,(narr))
@@ -1499,7 +1508,6 @@ end subroutine intagm
 !!   'BFI' => real(dp) (expect a "magnetic field", identify T, Tesla)
 !!   'TIM' => real(dp) (expect a "time", identify S, Second)
 !!   'LOG' => integer, but read logical variable T,F,.true., or .false.
-!!   'KEY' => character, returned in token cs
 !!
 !! OUTPUT
 !!  intarr(1:narr), dprarr(1:narr)
@@ -1508,8 +1516,6 @@ end subroutine intagm
 !!
 !! SIDE EFFECT
 !!   b1=absolute location in string of blank which follows the token (will be modified in the execution)
-!!   cs=at input: character token
-!!      at output: chain of character replacing the token (only if typevarphys='KEY')
 !!
 !! PARENTS
 !!      intagm
@@ -1527,7 +1533,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  integer,intent(inout) :: b1
  character(len=*),intent(in) :: string
  character(len=*),intent(in) :: typevarphys
- character(len=fnlen),intent(inout) :: cs
+ character(len=fnlen),intent(in) :: cs
 !arrays
  integer,intent(inout) :: intarr(marr) !vz_i
  real(dp),intent(out) :: dprarr(marr)
@@ -1535,19 +1541,17 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 !Local variables-------------------------------
  character(len=1), parameter :: blank=' '
 !scalars
- integer :: asciichar,b2,b3,errcod,ii,integ,istar,nrep,strln
+ integer :: asciichar,b2,errcod,ii,integ,istar,nrep,strln
  real(dp) :: factor,real8
  character(len=3) :: typevar
  character(len=500) :: msg
 
 ! *************************************************************************
 
- !if (typevarphys=='KEY') then
- !  write(std_out,'(2a)' )' inarray: token: ',trim(cs)
- !  write(std_out,'(2a)' )'          string: ',trim(string(b1:))
- !  write(std_out,'(a,i0)' )'        narr: ',narr
- !  write(std_out,'(2a)' )'          typevarphys: ',typevarphys
- !end if
+ !write(std_out,'(2a)' )' inarray: token: ',trim(cs)
+ !write(std_out,'(2a)' )'          string: ',trim(string(b1:))
+ !write(std_out,'(a,i0)' )'        narr: ',narr
+ !write(std_out,'(2a)' )'          typevarphys: ',typevarphys
 
  ii = 0
  typevar='INT'
@@ -1566,19 +1570,6 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
    b2 = index(string(b1+1:),blank)
    ! If no second blank is found put the second blank just beyond strln
    if(b2==0) b2=strln-b1+1
-
-   if (typevarphys == 'KEY') then
-     b2 = index(string(b1+1:), '"')
-     b2 = b1 + b2 + 2
-     b3 = index(string(b2+1:), '"')
-     !print *, "b2:", b2, "b3:", b3
-     b3 = b2 + b3
-     cs = string(b2-2:b3)
-     !print *, "cs: ", trim(cs)
-     !cs=string(b1+1:b1+b2-1)
-     errcod=0
-     exit
-   end if
 
    ! nrep tells how many times to repeat input in array:
    nrep=1
@@ -1608,7 +1599,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
    else if(typevar=='DPR')then
      dprarr(1+ii:min(nrep+ii,narr))=real8
    else
-     MSG_BUG('Disallowed typevar='//typevar)
+     MSG_BUG('Disallowed typevar: '//typevar)
    end if
    ii=min(ii+nrep,narr)
 
@@ -1621,7 +1612,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  !write(msg, '(a,a,a,a,a,a,a,a,a,a,i4,a,i4,a,a,a,a,a,a,a,a)' ) ch10,&
  !' inarray : ERROR -',ch10,&
  !&  '  Too many data are provided in the input file for',ch10,&
- !&  '  the keyword "',cs,'" :',ch10,&
+ !&  '  the keyword "',trim(cs),'" :',ch10,&
  !&  '  attempted to read',ii,' elements for array length',narr,ch10,&
  !&  '  This might be due to an erroneous value for the size ',ch10,&
  !&  '  of this array, in the input file.',ch10,&
@@ -3154,8 +3145,6 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
  character(len=*), parameter :: format_1a ='",a16,a,t22,'
  character(len=*), parameter :: format_2  ='",t22,'
  character(len=*), parameter :: long_dpr  ='3es18.10)'
-!character(len=*), parameter :: format01160 ="(1x,a16,1x,(t22,3es18.10)) "
-!character(len=*), parameter :: format01160a="(1x,a16,a,1x,(t22,3es18.10)) "
 
 ! *************************************************************************
 
