@@ -2054,5 +2054,82 @@ The default values will not work.
 """,
 ),
 
-]
+# ABINIT 9
+Variable(
+    abivarname="ddb_path@anaddb",
+    varset="anaddb",
+    vartype="string",
+    topics=['PhononWidth_expert'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="DDB PATH",
+    text=r"""
+This variable specifies the path to the DDB file when anaddb is invoked with the new syntax
 
+    anaddb < t01.in > log 2> err
+
+instead of the legacy mode based on the files file.
+""",
+),
+
+Variable(
+    abivarname="output@anaddb",
+    varset="anaddb",
+    vartype="string",
+    topics=['PhononWidth_expert'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="OUTPUT file",
+    text=r"""
+""",
+),
+
+Variable(
+    abivarname="md_output@anaddb",
+    varset="anaddb",
+    vartype="string",
+    topics=['PhononWidth_expert'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="Molecular Dynamic OUTPUT",
+    text=r"""
+""",
+),
+
+Variable(
+    abivarname="gkk_path@anaddb",
+    varset="anaddb",
+    vartype="string",
+    topics=['PhononWidth_expert'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="GKK PATH",
+    text=r"""
+""",
+),
+
+Variable(
+    abivarname="eph_prefix@anaddb",
+    varset="anaddb",
+    vartype="string",
+    topics=['PhononWidth_expert'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="EPH PREFIX",
+    text=r"""
+""",
+),
+
+Variable(
+    abivarname="ddk_path@anaddb",
+    varset="anaddb",
+    vartype="string",
+    topics=['PhononWidth_expert'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="DDK PATH",
+    text=r"""
+""",
+),
+
+]

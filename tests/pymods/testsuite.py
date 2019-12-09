@@ -1055,8 +1055,8 @@ class BuildEnvironment(object):
 
         # Binaries that are not located in src/98_main
         self._external_bins = {
-            "atompaw": os.path.join(self.build_dir, "fallbacks", "exports", "bin", "atompaw-abinit"),
-            #"atompaw": os.path.join(self.build_dir, "src", "98_main", "atompaw"),
+            #"atompaw": os.path.join(self.build_dir, "fallbacks", "exports", "bin", "atompaw-abinit"),
+            "atompaw": os.path.join(self.build_dir, "src", "98_main", "atompaw"),
             "timeout": os.path.join(self.build_dir, "tests", "Timeout", "timeout"),
         }
 
@@ -1624,7 +1624,13 @@ class BaseTest(object):
 
         return t_stdin.getvalue()
 
-    def get_pseudo_paths(self):
+    def get_pseudo_paths(self, dir_and_names=False):
+        """
+        Return list of absolut paths for pseudos.
+        If `dir_and_names` is True, the function returns (dirname, basenames)
+        where dirname is the common directory and basenames is a list of basenames in dirname.
+        If a common directory cannot be found, dirname is set to None and basename is a list of absolute paths.
+        """
         # Path to the pseudopotential files.
         # 1) pp files are searched in psps_dir first then in workdir.
         psp_paths = [os.path.join(self.abenv.psps_dir, pname) for pname in self.psp_files]
@@ -1633,13 +1639,23 @@ class BaseTest(object):
             if not os.path.isfile(psp):
                 pname = os.path.join(self.workdir, os.path.basename(psp))
                 if os.path.isfile(pname):
-                    # Use local pseudo.
+                    # Use local pseudo. This is needed for atompaw tests.
                     psp_paths[i] = pname
                 else:
                     err_msg = "Cannot find pp file %s, neither in Psps_for_tests nor in self.workdir" % pname
                     self.exceptions.append(self.Error(err_msg))
 
-        return psp_paths
+        if not dir_and_names:
+            return psp_paths
+
+        dirnames = [os.path.dirname(p) for p in psp_paths]
+        basenames = [os.path.basename(p) for p in psp_paths]
+        dirname = None
+        if all(d == dirnames[0] for d in dirnames): dirname = dirnames[0]
+        if dirname is not None:
+            return dirname, basenames
+        else:
+            return None, psp_paths
 
     def get_extra_inputs(self):
         """Copy extra inputs from inp_dir to workdir."""
@@ -2533,10 +2549,15 @@ class AbinitTest(BaseTest):
         extra = ["# Added by runtests.py"]
         app = extra.append
         app('output_file = "%s"' % (self.id + ".out"))
-        #app('pp_dirpath = "%s"' % (self.abenv.psps_dir))
-        #app('pseudos = "%s"' % (",".join(self.psp_files)))
+
         # This is needed for ATOMPAW as the pseudo will be generated at runtime.
-        app('pseudos = "%s"' % (",\n".join(self.get_pseudo_paths())))
+        dirname, pp_names = self.get_pseudo_paths(dir_and_names=True)
+
+        if dirname is not None:
+            app('pp_dirpath = "%s"' % (dirname))
+            app('pseudos = "%s"' % (",".join(pp_names)))
+        else:
+            app('pseudos = "%s"' % (",\n".join(pp_names)))
 
         # Prefix for input/output/temporary files
         i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
