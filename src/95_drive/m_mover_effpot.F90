@@ -469,7 +469,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !      ABI_ALLOCATE(npwtot,(dtset%nkpt))
 !    end if
 !  initialisation of results_gs
-   call init_results_gs(dtset%natom,1,results_gs)
+   call init_results_gs(dtset%natom,1,1,results_gs)
 
 !  Set the pointers of scfcv_args
    zero_integer = 0
