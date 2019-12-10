@@ -1677,7 +1677,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      fname = basename(input_path)
      i1 = index(fname, ".")
      if (i1 /= 0) then
-       ! Use prefix to initialize filnam
+       ! ext is present --> use prefix to initialize filnam
        i2 = index(input_path, ".", back=.True.)
        filnam(2) = input_path(:i2) // "abo"
        filnam(3) = fname(:i1-1) // "i"

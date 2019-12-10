@@ -20193,6 +20193,11 @@ Prefix for input files. Replaces the analogous entry in the obsolete *files_file
 This variable is used when Abinit is executed with the new syntax:
 
     abinit run.abi > run.log 2> run.err &
+
+If this option is not specified, a prefix is automatically constructed from the input file name
+provided the file ends with e.g. `.ext`. (`.abi` is recommended)
+
+If the input file does not have a file extension, a default is provided.
 """
 ),
 
@@ -20209,6 +20214,11 @@ Prefix for output files. Replaces the analogous entry in the obsolete *files_fil
 This variable is used when Abinit is executed with the new syntax:
 
     abinit run.abi > run.log 2> run.err &
+
+If this option is not specified, a prefix is automatically constructed from the input file name
+provided the file ends with e.g. `.ext`. (`.abi` is recommended)
+
+If the input file does not have a file extension, a default is provided.
 """
 ),
 
@@ -20225,6 +20235,11 @@ Prefix for temporary files. Replaces the analogous entry in the obsolete *files_
 This variable is used when Abinit is executed with the new syntax:
 
     abinit run.abi > run.log 2> run.err &
+
+If this option is not specified, a prefix is automatically constructed from the input file name
+provided the file ends with `.ext`.
+
+If the input file does not have a file extension, a default is provided.
 """
 ),
 
@@ -20237,11 +20252,16 @@ Variable(
     defaultval="",
     mnemonics="PseudoPotential DIRectory PATH",
     text=r"""
-
 Directory prependeded to the pseudopotential basename specified in [[pseudos]].
 This variable is used when Abinit is executed with the new syntax:
 
     abinit run.abi > run.log 2> run.err &
+
+The string must be quoted in double quotation marks:
+
+    pp_dirpath = "/home/user/my_pseudos/"
+
+If not present, the list in [[pseudos]] is used directly.
 """
 ),
 
@@ -20259,12 +20279,16 @@ when Abinit is executed with the new syntax:
 
     abinit run.abi > run.log 2> run.err &
 
-The string must be quoted and multiple files should be separated by a comma, e.g.
+The string must be quoted in double quotation marks and multiple files should be separated by a comma, e.g.
 
     pseudos = "al.psp8, as.psp8"
 
-The list must contain [[ntypat]] pseudos ordered according to the [[znucl]] array.
+The **mandatory** list must contain [[ntypat]] pseudos ordered according to the [[znucl]] array.
 The directory where all pseudos are located can be specified with [[pp_dirpath]].
+
+!!! important
+
+    Shell variables e.g. $HOME or tilde syntax `~` for user home are not supported.
 """
 ),
 

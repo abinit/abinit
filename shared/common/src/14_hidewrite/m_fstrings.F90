@@ -130,32 +130,6 @@ MODULE m_fstrings
  integer,parameter :: MAX_SLEN = 500
 
 
-!!****t* m_fstrings/string_splitter_t
-!! NAME
-!! string_splitter_t
-!!
-!! FUNCTION
-!!
-!! SOURCE
-
- type,public :: string_splitter_t
-
-   integer :: len = 0
-    ! Number of tokens
-
-   character(len=MAX_SLEN), allocatable :: tokens(:)
-    ! List of tokenized strings.
-
- contains
-
-   procedure :: free => string_splitter_free
-   ! Free memory.
-
- end type string_splitter_t
-!!***
-
- public :: string_splitter_new
-
 CONTAINS  !===========================================================
 !!***
 
@@ -2002,87 +1976,6 @@ subroutine inupper(string)
  end do
 
 end subroutine inupper
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_fstrings/string_splitter_new
-!! NAME
-!! string_splitter_new
-!!
-!! FUNCTION
-!!
-!! OUTPUT
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-type(string_splitter_t) function string_splitter_new(string, sep) result(new)
-
-!Arguments ------------------------------------
- character(len=*),intent(in) :: string, sep
-
-!Local variables-------------------------------
-!scalars
- integer :: ii, cnt, back
-
-! *************************************************************************
-
- ! Count number of occurences of sep to be able to allocate array.
- cnt = 0
- do ii=1,len_trim(string)
-   if (string(ii:ii) == sep) cnt = cnt + 1
- end do
-
- !ABI_MALLOC(new%tokens, (cnt + 1))
- allocate(new%tokens(cnt + 1))
- new%len = cnt + 1
-
- if (cnt == 0) then
-   new%tokens(1) = adjustl(trim(string))
-
- else
-   back = 0; cnt = 0
-   !print *, "string:", trim(string)
-   do ii=1,len_trim(string)
-     if (string(ii:ii) == sep) then
-       cnt = cnt + 1
-       new%tokens(cnt) = adjustl(trim(string(back+1:ii-1)))
-       !print *, trim(new%tokens(cnt))
-       back = ii
-     end if
-   end do
-
-   cnt = cnt + 1
-   new%tokens(cnt) = adjustl(trim(string(back+1:)))
- end if
-
-end function string_splitter_new
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_fstrings/string_splitter_free
-!! NAME
-!! string_splitter_free
-!!
-!! FUNCTION
-!!  Release memory
-!!
-!! SOURCE
-
-subroutine string_splitter_free(self)
-
-!Arguments ------------------------------------
- class(string_splitter_t),intent(inout) :: self
-
-! *************************************************************************
-
- deallocate(self%tokens)
- !ABI_SFREE(self%tokens)
-
-end subroutine string_splitter_free
 !!***
 
 end module m_fstrings

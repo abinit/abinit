@@ -2059,18 +2059,23 @@ Variable(
     abivarname="ddb_path@anaddb",
     varset="anaddb",
     vartype="string",
-    topics=['PhononWidth_expert'],
+    topics=['Control_useful'],
     dimensions="scalar",
     defaultval="",
     mnemonics="DDB PATH",
     text=r"""
-This variable specifies the path to the DDB file when anaddb is invoked with the new syntax:
+This variable specifies the path of the input DDB file when anaddb is invoked with the new syntax:
 
-    anaddb < t01.in > log 2> err
+    anaddb t01.in > log 2> err
 
 instead of the legacy mode based on the files file. Example:
 
     ddb_path = "out_DDB"
+
+
+!!! important
+
+    Shell variables e.g. $HOME or tilde syntax `~` for user home are not supported.
 """,
 ),
 
@@ -2078,14 +2083,14 @@ Variable(
     abivarname="output@anaddb",
     varset="anaddb",
     vartype="string",
-    topics=['PhononWidth_expert'],
+    topics=['Control_useful'],
     dimensions="scalar",
     defaultval="",
     mnemonics="OUTPUT file",
     text=r"""
 This variable specifies the name of the anaddb output file when anaddb is invoked with the new syntax:
 
-    anaddb < t01.in > log 2> err
+    anaddb t01.in > log 2> err
 
 instead of the legacy mode based on the files file. Example:
 
@@ -2097,14 +2102,14 @@ Variable(
     abivarname="md_output@anaddb",
     varset="anaddb",
     vartype="string",
-    topics=['PhononWidth_expert'],
+    topics=['Control_useful'],
     dimensions="scalar",
     defaultval="",
     mnemonics="Molecular Dynamic OUTPUT",
     text=r"""
 This variable specifies the name of the MD output file when anaddb is invoked with the new syntax:
 
-    anaddb < t01.in > log 2> err
+    anaddb t01.in > log 2> err
 
 instead of the legacy mode based on the files file. This variable is optional and used ...
 """,
@@ -2114,17 +2119,17 @@ Variable(
     abivarname="gkk_path@anaddb",
     varset="anaddb",
     vartype="string",
-    topics=['PhononWidth_expert'],
+    topics=['Control_useful'],
     dimensions="scalar",
     defaultval="",
     mnemonics="GKK PATH",
     text=r"""
 This variable specifies the name of the GKK file when anaddb is invoked with the new syntax:
 
-    anaddb < t01.in > log 2> err
+    anaddb t01.in > log 2> err
 
-instead of the legacy mode based on the files file. This variable is optional and used ...
-for performing EPH calculation with [[elphflag@anaddb]].
+instead of the legacy mode based on the files file.
+This variable is optional and used ... for performing EPH calculation with [[elphflag@anaddb]].
 """,
 ),
 
@@ -2132,17 +2137,17 @@ Variable(
     abivarname="eph_prefix@anaddb",
     varset="anaddb",
     vartype="string",
-    topics=['PhononWidth_expert'],
+    topics=['Control_useful'],
     dimensions="scalar",
     defaultval="",
     mnemonics="EPH PREFIX",
     text=r"""
 This variable specifies the name the prefix for the elphon output files when anaddb is invoked with the new syntax:
 
-    anaddb < t01.in > log 2> err
+    anaddb t01.in > log 2> err
 
-instead of the legacy mode based on the files file. This variable is optional and used ...
-for performing EPH calculation with [[elphflag@anaddb]].
+instead of the legacy mode based on the files file.
+This variable is optional and used ... for performing EPH calculation with [[elphflag@anaddb]].
 """,
 ),
 
@@ -2150,7 +2155,7 @@ Variable(
     abivarname="ddk_path@anaddb",
     varset="anaddb",
     vartype="string",
-    topics=['PhononWidth_expert'],
+    topics=['Control_useful'],
     dimensions="scalar",
     defaultval="",
     mnemonics="DDK PATH",
@@ -2158,10 +2163,10 @@ Variable(
 This variable specifies the name the inpit file with the matrix elements of the velocity operator
 when anaddb is invoked with the new syntax:
 
-    anaddb < t01.in > log 2> err
+    anaddb t01.in > log 2> err
 
-instead of the legacy mode based on the files file. This variable is optional and used ...
-for performing EPH calculation with [[elphflag@anaddb]].
+instead of the legacy mode based on the files file.
+This variable is optional and used ... for performing EPH calculation with [[elphflag@anaddb]].
 """,
 ),
 

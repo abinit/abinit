@@ -1972,7 +1972,7 @@ class BaseTest(object):
 
                 path = os.path.join(self.workdir, os.path.basename(self.inp_fname))
                 bin_argstr = path + self.exec_args
-                print("bin_argstr", bin_argstr)
+                print("Using .abi mode with bin_argstr", bin_argstr)
 
             self.run_etime = runner.run(self.nprocs, self.bin_path,
                                         stdin_fname, self.stdout_fname, self.stderr_fname,
@@ -2551,13 +2551,14 @@ class AbinitTest(BaseTest):
         app('output_file = "%s"' % (self.id + ".out"))
 
         # This is needed for ATOMPAW as the pseudo will be generated at runtime.
-        dirname, pp_names = self.get_pseudo_paths(dir_and_names=True)
+        #dirname, pp_names = self.get_pseudo_paths(dir_and_names=True)
+        #if dirname is not None:
+        #    app('pp_dirpath = "%s"' % (dirname))
+        #    app('pseudos = "%s"' % (",".join(pp_names)))
+        #else:
+        #    app('pseudos = "%s"' % (",\n".join(pp_names)))
 
-        if dirname is not None:
-            app('pp_dirpath = "%s"' % (dirname))
-            app('pseudos = "%s"' % (",".join(pp_names)))
-        else:
-            app('pseudos = "%s"' % (",\n".join(pp_names)))
+        app('pseudos = "%s"' % (",\n".join(self.get_pseudo_paths())))
 
         # Prefix for input/output/temporary files
         i_prefix = self.input_prefix if self.input_prefix else self.id + "i"

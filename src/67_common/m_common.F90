@@ -1877,6 +1877,7 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
         pspfilnam_(ipsp) = trim(filpsp)
         write(std_out,'(a,i0,2a)' )' For atom type ',ipsp,', psp file is ',trim(filpsp)
       end do ! ipsp
+
     else
       ! Get pseudopotential paths from input file.
       pspfilnam_ = pseudo_paths

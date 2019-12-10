@@ -1403,18 +1403,17 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
    if (typevarphys == 'KEY') then
      ! In case of typevarphys='KEY', the chain of character will be returned in cs.
      ABI_CHECK(present(key_value), "typevarphys == KEY requires optional argument key_value")
-     ! write(std_out,*)' intagm : will read cs=',trim(cs) !; stop
      b2 = index(string(b1+1:), '"')
+     ABI_CHECK(b2 /= 0, sjoin('Cannot find first " defining string for token:', token))
      b2 = b1 + b2 + 2
      b3 = index(string(b2+1:), '"')
+     ABI_CHECK(b3 /= 0, sjoin('Cannot find second " defining string for token:', token))
      !!print *, "b2:", b2, "b3:", b3
      b3 = b2 + b3
      if ((b3 - b2 + 3) > len(key_value)) then
        MSG_ERROR("Len of key_value too small to contain value parsed from file")
      end if
-     cs = string(b2-2:b3)
-     key_value = adjustl(rmquotes(trim(cs)))
-     !write(std_out,*)' intagm : after inarray, token=',trim(cs)
+     key_value = adjustl(rmquotes(trim(string(b2-2:b3))))
 
    else
      ! Read the array (or eventual scalar) that follows the blank

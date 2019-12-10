@@ -37,7 +37,7 @@ module m_invars1
  use netcdf
 #endif
 
- use m_fstrings, only : inupper, itoa, endswith, strcat, sjoin, string_splitter_new, string_splitter_t
+ use m_fstrings, only : inupper, itoa, endswith, strcat, sjoin
  use m_geometry, only : mkrdim
  use m_parser,   only : intagm, chkint_ge, ab_dimensions
  use m_inkpts,   only : inkpts, inqpt
@@ -91,7 +91,7 @@ contains
 !!  mxnimage=maximal value of input nimage for all the datasets
 !!  mxntypat=maximal value of input ntypat for all the datasets
 !!  npsp=number of pseudopotentials
-!!  pseudo_paths(npsp) :: List of paths to pseudopotential files as read from input file.
+!!  pseudo_paths(npsp): List of paths to pseudopotential files as read from input file.
 !!   List of empty strings if we are legacy "files file" mode. Allocated here, caller should free memory.
 !!
 !! PARENTS
@@ -117,15 +117,14 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
 !Local variables-------------------------------
 !scalars
- integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm,tread_pseudos
+ integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm,tread_pseudos,cnt
  integer :: treads,use_gpu_cuda
  real(dp) :: cpus
  character(len=500) :: msg
  character(len=fnlen) :: pp_dirpath
  character(len=20*fnlen) :: pseudos_string ! DO NOT decrease len
- type(string_splitter_t) :: split
 !arrays
- integer,allocatable :: intarr(:)
+ integer,allocatable :: intarr(:), sidx(:)
  real(dp),allocatable :: dprarr(:)
 
 
@@ -425,6 +424,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !Set up npsp
  npsp=mxntypat   ! Default value
  call intagm(dprarr,intarr,0,marr,1,string(1:lenstr),'npsp',tread,'INT')
+
  if(tread==1)then
    npsp=intarr(1)
  else
@@ -452,7 +452,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  if (tread == 1) then
    !if (pp_dirpath(1) == "$") then
      !pp_dirpath = pp_dirpath(2:)
-     !call get_environment_variable("HOME", homedir, status=ierr,)
+     !call get_environment_variable("HOME", homedir, status=ierr)
    !endif
    if (.not. endswith(pp_dirpath, "/")) pp_dirpath = strcat(pp_dirpath, "/")
  end if
@@ -463,17 +463,41 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
  ABI_MALLOC(pseudo_paths, (npsp))
  pseudo_paths = ""
+
  if (tread_pseudos == 1) then
+   ! Split pseudos_string using comma and transfer results to pseudos_paths
+   ! Make sure string lenght is large enough and input string is consistent with npsp
+   ! Lot of checks must be done here!
    !print *, "pseudos_string: ", trim(pseudos_string)
-   split = string_splitter_new(pseudos_string, ",")
-   if (split%len /= npsp) then
-     MSG_ERROR(sjoin("Not enough pseudos in input string:", pseudos_string))
-   end if
-   do ii=1,npsp
-     pseudo_paths(ii) = trim(split%tokens(ii))
-     if (len_trim(pp_dirpath) > 0) pseudo_paths(ii) = strcat(pp_dirpath, pseudo_paths(ii))
+   ABI_ICALLOC(sidx, (npsp + 1))
+   sidx(1) = 1; sidx(npsp + 1) = len(pseudos_string)
+   cnt = 1
+   do ii=1,len(pseudos_string)
+     if (pseudos_string(ii:ii) == ",") then
+       pseudos_string(ii:ii) = " "
+       cnt = cnt + 1
+       sidx(cnt) = ii
+       ABI_CHECK(cnt <= npsp, "Too many commas in pseudos string!")
+     end if
    end do
-   call split%free()
+   if (cnt /= npsp) then
+     MSG_ERROR(sjoin("Not enough pseudos in input `pseudos` string, expecting npsp:", itoa(npsp)))
+   end if
+
+   do ii=1,npsp
+     i1 = sidx(ii)
+     i2 = sidx(ii + 1)
+     cnt = len(adjustl(trim(pseudos_string(i1:i2))))
+     ABI_CHECK(cnt <= fnlen, "pseudo path too small, increase fnlen")
+     pseudo_paths(ii) = adjustl(trim(pseudos_string(i1:i2)))
+     if (len_trim(pp_dirpath) > 0) then
+       if (len_trim(pp_dirpath) + len_trim(pseudo_paths(ii)) > fnlen) then
+         MSG_ERROR(sjoin("String of len fnlen:", itoa(fnlen), " too small to contain full pseudo path"))
+       end if
+       pseudo_paths(ii) = strcat(pp_dirpath, pseudo_paths(ii))
+     end if
+   end do
+   ABI_FREE(sidx)
    !print *, "pp_dirpath: ", trim(pp_dirpath), "pseudos: ", trim(pseudos_string)
  end if
 
