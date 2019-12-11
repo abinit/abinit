@@ -2563,8 +2563,25 @@ class AbinitTest(BaseTest):
         #app('pseudos = "%s"' % (", ".join(self.get_pseudo_paths())))
 
         # This is to check pseudos with an env variable defining directory
+        # TODO  whitspace after comma as in
+        #           pseudos = "HGH/3li.1.hgh, HGH/5b.3.hgh, HGH/1h.1.hgh" triggers
+        #--- !ERROR
+        #src_file: m_parser.F90
+        #src_line: 3391
+        #mpi_rank: 0
+        #message: |
+        #    Found token: HGH in the input file.
+        #    This name is not one of the registered input variable names (see https://docs.abinit.org/).
+        #    Action: check your input file. You likely mistyped the input variable.
+        #...
+
         app('pp_dirpath = "$ABI_PSPDIR"')
-        app('pseudos = "%s"' % (", ".join(os.path.basename(p) for p in self.get_pseudo_paths())))
+        pp_paths = self.get_pseudo_paths()
+        #print(pp_paths)
+        #print(self.abenv.psps_dir)
+        #pseudos = [os.path.relpath(self.abenv.psps_dir, p) for p in self.get_pseudo_paths
+        app('pseudos = "%s"' % (", ".join(os.path.relpath(p, self.abenv.psps_dir) for p in pp_paths)))
+        #app('pseudos = "%s"' % (", ".join(os.path.basename(p) for p in pp_paths)))
 
         # Prefix for input/output/temporary files
         i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
