@@ -47,7 +47,7 @@ module m_multibinit_cell
   ! TODO: use crystal_t or add it as another lattice type.
   !----------------------------------------------------------------------
   type, public ::mbcell_lattice_t
-     integer:: natom
+     integer:: natom = 0
      integer, allocatable  :: zion(:)
      real(dp), allocatable :: masses(:), xcart(:,:)
      real(dp) :: cell(3,3)
@@ -62,7 +62,7 @@ module m_multibinit_cell
   !> @brief spin cell type
   !----------------------------------------------------------------------
   type, public :: mbcell_spin_t
-     integer :: nspin   ! number of spin
+     integer :: nspin = 0  ! number of spin
      real(dp) :: rprimd(3,3)   ! cell parameters
      real(dp), allocatable :: ms(:)   ! magnetic moments  array(nspin)
      real(dp), allocatable :: Sref(:,:)   ! spin orientation of reference structure, array(3,nspin)
@@ -85,7 +85,7 @@ module m_multibinit_cell
   !> @brief lattice wannier function cell type
   !----------------------------------------------------------------------
   type, public :: mbcell_lwf_t
-     integer :: nlwf  ! number of lattice wannier functions
+     integer :: nlwf =0 ! number of lattice wannier functions
    contains
      procedure :: initialize => lwf_initialize
      procedure :: finalize => lwf_finalize

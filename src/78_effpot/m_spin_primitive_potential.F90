@@ -146,6 +146,8 @@ contains
     endif
     call self%primcell%set_spin(nspin, ms, unitcell,  spin_positions, gyroratios, damping_factors, &
          & Sref=Sref, ref_qpoint=ref_spin_qpoint, ref_rotate_axis=ref_spin_rotate_axis)
+
+    !call self%primcell%set_lattice(natom=natoms, cell=unitcell, xcart=spin_positions, masses, zion)
   end subroutine set_spin_primcell
 
 
@@ -237,7 +239,9 @@ contains
 
     ! read primcell info
     ierr=nctk_get_dim(ncid, "natom", natom)
+    NCF_CHECK_MSG(ierr, "getting natom in spin potential file")
     ierr=nctk_get_dim(ncid, "nspin", nspin)
+    NCF_CHECK_MSG(ierr, "getting nspin in spin potential file")
 
     ! allocate for primcell
     ABI_ALLOCATE(xcart, (3, natom))
@@ -382,6 +386,7 @@ contains
     ierr=nf90_inq_dimid(ncid, "spin_dmi_nterm", spin_dmi_nterm)
     if (ierr==0) then ! if has dmi
        ierr=nctk_get_dim(ncid, "spin_dmi_nterm", spin_dmi_nterm)
+       NCF_CHECK_MSG(ierr, "spin_dmi_nterm found but is not readable")
        ABI_ALLOCATE(spin_dmi_ilist, (spin_dmi_nterm))
        ABI_ALLOCATE(spin_dmi_jlist, (spin_dmi_nterm))
        ABI_ALLOCATE(spin_dmi_Rlist, (3,spin_dmi_nterm))
