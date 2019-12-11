@@ -106,6 +106,32 @@ contains
     end do
   end function array_morethan
 
+  !----------------------------------------------------------------------
+  !> @brief compare two arrays a <= b
+  !>
+  !> @param[in]  a: integer array
+  !> @param[in]  b: integer array
+  !> @param[in]  N: length of a and b
+  !> @return bool.
+  !----------------------------------------------------------------------
+  function array_le(a, b, N) result (y)
+    integer, intent(in)  :: a(:), b(:), N
+    logical :: y
+    integer :: i
+    y=.True.
+    do i =1, N
+       if (a(i).gt.b(i)) then
+          y=.False.
+          exit
+       elseif (a(i).lt.b(i)) then
+          y=.True.
+          exit
+       end if
+    end do
+  end function array_le
+
+
+
 
   !----------------------------------------------------------------------
   !> @brief find an integer from a array
@@ -381,7 +407,7 @@ contains
     r(:)=axis(:)/norm * sin(half_angle)
     w=cos(half_angle)
     ! (w, r) is the quaternion
-    vec2(:) = vec2(:) + 2.0 * cross(r, (cross(r, vec) + w*vec))
+    vec2(:) = vec(:) + 2.0 * cross(r, (cross(r, vec) + w*vec))
   end function rotate_by_angle_around_axis
 
 end module m_mathfuncs
