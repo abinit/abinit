@@ -2558,7 +2558,12 @@ class AbinitTest(BaseTest):
         #else:
         #    app('pseudos = "%s"' % (",\n".join(pp_names)))
 
-        app('pseudos = "%s"' % (",\n".join(self.get_pseudo_paths())))
+        # This is to check whether the parser supports "long strings"
+        #app('pseudos = "%s"' % (", ".join(self.get_pseudo_paths())))
+
+        # This is to check pseudos with an env variable defining directory
+        app('pp_dirpath = "$ABI_PSPDIR"')
+        app('pseudos = "%s"' % (", ".join(os.path.basename(p) for p in self.get_pseudo_paths())))
 
         # Prefix for input/output/temporary files
         i_prefix = self.input_prefix if self.input_prefix else self.id + "i"

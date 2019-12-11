@@ -877,7 +877,8 @@ end subroutine incomprs
 !!   one could add more information, eg whether a ? or a : was used, etc...
 !!   [key_value]=Stores the value of key if typevarphys=="KEY".
 !!      The string must be large enough to contain the output. fnlen is OK in many cases
-!!      except when reading a list of files. The routine abors is key_value cannot store the output.
+!!      except when reading a list of files. The routine aborts is key_value cannot store the output.
+!!      Output string is left justified.
 !!
 !! NOTES
 !!
