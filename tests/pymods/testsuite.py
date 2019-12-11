@@ -1034,7 +1034,7 @@ class BuildEnvironment(object):
         """
         Args:
             build_dir: Path to the top level directory of the build.
-            cygwin_instdir: Installation directory of cygwin. Defaults to '/cygwin'
+            cygwin_instdir: Installation directory of cygwin. NOT USED (will be removed soon)
         """
         # Try to figure out the top level directory of the build tree.
         try:
@@ -1085,23 +1085,12 @@ class BuildEnvironment(object):
 
         return os.path.isfile(configac_path) and os.path.isfile(abinitF90_path)
 
-    def iscygwin(self):
-        """True if we are running under CYGWIN"""
-        return "CYGWIN" in self.uname[0].upper()
-
-    def _addext(self, string):
-        """Append .exe extension, needed for cygwin"""
-        if self.iscygwin(): string += ".exe"
-        return string
-
     def path_of_bin(self, bin_name, try_syspath=True):
         """Return the absolute path of bin_name."""
         if bin_name in self._external_bins:
             bin_path = self._external_bins[bin_name]
         else:
             bin_path = os.path.join(self.binary_dir, bin_name)  # It's in src/98_main
-
-        bin_path = self._addext(bin_path)
 
         # Handle external bins that are installed system wide (such as atompaw on woopy)
         if bin_name in self._external_bins and not os.path.isfile(bin_path):
@@ -1120,17 +1109,6 @@ class BuildEnvironment(object):
                 bin_path = ""
 
         return bin_path
-
-    def cygwin_path_of_bin(self, bin_name):
-        """
-        Mangle the name of the executable. Needed for Windows
-        when we have to call an executable that is not located
-        within the CYGWIN filesystem (aka $Win$ application).
-        """
-        path = self.path_of_bin(bin_name)
-        if self.iscygwin():
-            path = self._cygwin_instdir + path
-        return path
 
     def has_bin(self, bin_name, try_syspath=True):
         """True if binary bin_name is present in the build."""
@@ -2716,7 +2694,6 @@ class MultibinitTest(BaseTest):
             if not os.path.isfile(md_hist_fname):
                 self.exceptions.append(self.Error("%s no such HIST file for training-set: " % md_hist_fname))
 
-            md_hist_fname = self.cygwin_path(md_hist_fname)
             t_stdin.write(md_hist_fname + "\n") # 5) input for training-set
         else:
             md_hist_fname = "no"
@@ -2727,7 +2704,6 @@ class MultibinitTest(BaseTest):
             if not os.path.isfile(test_set_fname):
                 self.exceptions.append(self.Error("%s no such HIST file for test-set: " % test_set_fname))
 
-            test_set_fname = self.cygwin_path(test_set_fname)
             t_stdin.write(test_set_fname + "\n") # 6) input for test-set
         else:
             test_set_fname = "no"

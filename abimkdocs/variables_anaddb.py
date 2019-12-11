@@ -2098,22 +2098,23 @@ instead of the legacy mode based on the files file. Example:
 """,
 ),
 
-Variable(
-    abivarname="md_output@anaddb",
-    varset="anaddb",
-    vartype="string",
-    topics=['Control_useful'],
-    dimensions="scalar",
-    defaultval="",
-    mnemonics="Molecular Dynamic OUTPUT",
-    text=r"""
-This variable specifies the name of the MD output file when anaddb is invoked with the new syntax:
-
-    anaddb t01.in > log 2> err
-
-instead of the legacy mode based on the files file. This variable is optional and used ...
-""",
-),
+#Variable(
+#    abivarname="md_output@anaddb",
+#    varset="anaddb",
+#    vartype="string",
+#    topics=['Control_useful'],
+#    dimensions="scalar",
+#    defaultval="",
+#    mnemonics="Molecular Dynamics OUTPUT",
+#    text=r"""
+#This variable specifies the name of the MD output file when anaddb is invoked with the new syntax:
+#
+#    anaddb t01.in > log 2> err
+#
+#instead of the legacy mode based on the files file.
+#Note This variable is optional and used ...
+#""",
+#),
 
 Variable(
     abivarname="gkk_path@anaddb",
@@ -2129,7 +2130,7 @@ This variable specifies the name of the GKK file when anaddb is invoked with the
     anaddb t01.in > log 2> err
 
 instead of the legacy mode based on the files file.
-This variable is optional and used ... for performing EPH calculation with [[elphflag@anaddb]].
+This variable is optional and used for performing EPH calculation with [[elphflag@anaddb]].
 """,
 ),
 
@@ -2142,12 +2143,12 @@ Variable(
     defaultval="",
     mnemonics="EPH PREFIX",
     text=r"""
-This variable specifies the name the prefix for the elphon output files when anaddb is invoked with the new syntax:
+This variable specifies the prefix for the elphon output files when anaddb is invoked with the new syntax:
 
     anaddb t01.in > log 2> err
 
 instead of the legacy mode based on the files file.
-This variable is optional and used ... for performing EPH calculation with [[elphflag@anaddb]].
+This variable is optional and used for performing EPH calculation with [[elphflag@anaddb]].
 """,
 ),
 
@@ -2160,13 +2161,13 @@ Variable(
     defaultval="",
     mnemonics="DDK PATH",
     text=r"""
-This variable specifies the name the inpit file with the matrix elements of the velocity operator
+This variable specifies the name the input file with the matrix elements of the velocity operator
 when anaddb is invoked with the new syntax:
 
     anaddb t01.in > log 2> err
 
 instead of the legacy mode based on the files file.
-This variable is optional and used ... for performing EPH calculation with [[elphflag@anaddb]].
+This variable is optional and used for performing transport calculations with [[elphflag@anaddb]].
 """,
 ),
 

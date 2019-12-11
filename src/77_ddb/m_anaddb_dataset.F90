@@ -2089,7 +2089,8 @@ subroutine anaddb_init(input_path, filnam)
    ABI_CHECK(tread == 1, "ddb_path variable must be specified in the input file")
 
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "output_file", tread, 'KEY', key_value=filnam(2))
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "md_output", tread, 'KEY', key_value=filnam(4))
+   ! Nobody knows the scope of this line in the files file.
+   !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "md_output", tread, 'KEY', key_value=filnam(4))
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gkk_path", tread, 'KEY', key_value=filnam(5))
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "eph_prefix", tread, 'KEY', key_value=filnam(6))
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddk_path", tread, 'KEY', key_value=filnam(7))
@@ -2193,7 +2194,7 @@ subroutine anaddb_chkvars(string)
  list_logicals=' '
 
 !String input variables
- list_strings=' gruns_ddbs ddb_path output_file md_output gkk_path eph_prefix ddk_path'
+ list_strings=' gruns_ddbs ddb_path output_file gkk_path eph_prefix ddk_path' ! md_output
 !</ANADDB_VARS>
 
 !Extra token, also admitted:
