@@ -150,7 +150,7 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: option,marr,tread,lenstr_noxyz,ierr
+ integer :: option,marr,tread,lenstr_noxyz,ierr,ii
  character(len=strlen) :: string_raw
  character(len=500) :: msg
 !arrays
@@ -177,6 +177,15 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
    ! Need string_raw to deal properly with xyz filenames
    lenstr_noxyz = lenstr
    call importxyz(lenstr,string_raw,string,strlen)
+
+   ! Make sure we don't have unmatched quotation marks
+   ierr = 0
+   do ii=1,len_trim(string)
+     if (string(ii:ii) == '"') ierr = ierr + 1
+   end do
+   if (mod(ierr, 2) /= 0) then
+     MSG_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
+   end if
 
    ! Take ndtset from the input string
    ndtset=0; marr=1
@@ -3044,7 +3053,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
            if(typevarphys=='ENE')out_unit=' Hartree'
            if(typevarphys=='LEN')out_unit=' Bohr   '
            if(typevarphys=='BFI')out_unit='   ' !EB remove Tesla unit
-           if(typevarphys=='TIM')out_unit=' Second' 
+           if(typevarphys=='TIM')out_unit=' Second'
 !          Format, according to the length of the dataset string
            if((multi==0).or.(ncid<0))then
              appen=' '
@@ -3272,7 +3281,8 @@ end subroutine prttagm_images
 !!  chkvars_in_string
 !!
 !! FUNCTION
-!!  Analyze variable names in string. Abort if name is not recognized.
+!!  Analyze variable names in string. Ignore tokens withing double quotation marks.
+!!  Abort if name is not recognized.
 !!
 !! INPUTS
 !!  protocol=
@@ -3310,8 +3320,11 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
 
 !************************************************************************
 
+ !write(std_out,"(3a)")"Checking vars in string:", ch10, trim(string)
+
  index_current=1
- do ! Infinite do-loop, to identify the presence of each potential variable names
+ do
+   ! Infinite do-loop, to identify the presence of each potential variable names
 
    if(len_trim(string)<=index_current)exit
    index_blank=index(string(index_current:),blank)+index_current-1
@@ -3364,8 +3377,8 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
          index_blank=index(string(index_current:),blank)+index_current-1
          if(index(' F T ',string(index_blank:index_blank+2))==0)then
            write(msg, '(8a)' )&
-            'Found the token ',string(index_current:index_endword),' in the input file.',ch10,&
-            'This variable should be given a logical value (T or F), but the following string was found :',&
+            'Found token `',string(index_current:index_endword),'` in the input file.',ch10,&
+            'This variable should be given a logical value (T or F), but the following string was found:',&
             string(index_blank:index_blank+2),ch10,&
             'Action: check your input file. You likely misused the input variable.'
             MSG_ERROR(msg)
@@ -3385,7 +3398,7 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
        else
          ! If still not admitted, then there is a problem
          write(msg, '(7a)' )&
-         'Found token: ',string(index_current:index_endword),' in the input file.',ch10,&
+         'Found token: `',string(index_current:index_endword),'` in the input file.',ch10,&
          'This name is not one of the registered input variable names (see https://docs.abinit.org/).',ch10,&
          'Action: check your input file. You likely mistyped the input variable.'
          MSG_ERROR(msg)
@@ -3394,6 +3407,18 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
    end if
 
    index_current=index_blank+1
+
+   if (string(index_current:index_current) == '"') then
+     do
+       index_current = index_current + 1
+       if (string(index_current:index_current) == '"') exit
+       if (index_current > len_trim(string)) then
+         MSG_ERROR('Cannot find closing quotation mark " in string. You likely forgot to close a string')
+       end if
+     end do
+
+   end if
+
  end do
 
 end subroutine chkvars_in_string

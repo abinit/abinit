@@ -132,6 +132,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
  ABI_UNUSED(comm)
 
+ !write(std_out,"(3a)")"invars1 with string:", ch10, trim(string)
+
  marr=max(9,ndtset_alloc,2)
  ABI_ALLOCATE(dprarr,(marr))
  ABI_ALLOCATE(intarr,(marr))
