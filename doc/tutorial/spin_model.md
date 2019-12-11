@@ -76,7 +76,7 @@ Once we have the spin model xml file, we can run a spin dynamics calculation wit
 * "tmulti5_1.in" is the main input file containing the parameters for the spin dynamics simulation.
 * "tmulti5_1.xml" is the file containing the Heisenberg model parameters.
 
-You can copy these three files into a directory (e.g. tutor_spindyn). 
+You can copy these three files into a directory (e.g. Work_spindyn). 
 
 In tmulti5_1.files, three file names are given: 
 
@@ -113,7 +113,7 @@ To run spin dynamics with MULTIBINIT
 
 ```
 cd Work_spindyn
-MULTIBINIT < tmulti5_1.files > tmulti5_1.txt
+multibinit < tmulti5_1.files > tmulti5_1.txt
 ```
 
 After the calculation is done, you will find an output file named tmulti5_1.out and a netcdf file tmulti5_1.out_spinhist.nc.
@@ -137,9 +137,14 @@ Measurement run:
   .....
 ```
 
-Here, the Avg_mst ($||<m_i e^{2\pi \vec{q}\cdot\vec{R_i}}>||$) means the average staggered magnetic moment, Ms is the saturated magnetic moment. If all the spins for the wave-vector ($\vec{q}$) [[multibinit:spin_projection_qpoint]] are aligned , the value for Avg_Mst/Ms is 1.0, it deviates from 1.0 due to thermal  fluctuations. The last column states the total energy of the system per unit cell.
+Here, the Avg_mst ($||<m_i e^{2\pi \vec{q}\cdot\vec{R_i}}>||$) means the average staggered magnetic moment, Ms is the saturated magnetic moment. 
+If all the spins for the wave-vector ($\vec{q}$) [[multibinit:spin_projection_qpoint]] are aligned , 
+the value for Avg_Mst/Ms is 1.0. it deviates from 1.0 due to thermal fluctuations. 
+The last column states the total energy of the system per unit cell.
 
-There are two stages, the warming up and measurement, in the whole spin dynamics process. During the  thermalization the spins evolve towards the equilibrium state for the temperature defined in the input file. During the measurement stage, the steps are sampled for the calculation of the observables. 
+There are two stages, the warming up and measurement, in the whole spin dynamics process. 
+During the thermalization the spins evolve towards the equilibrium state for the temperature defined in the input file. 
+During the measurement stage, the steps are sampled for the calculation of the observables. 
 
 At the end of the run, there is a summary of the calculation
 
@@ -190,7 +195,9 @@ We are now coming back to the values chosen for the input variables in the tmult
 
 * time step ([[multibinit: spin_dt]]):
 
-    Typical time steps are about $10^{-15}  $ to $10^{-17}$ s. An optimal time step can be determined by trying several values and comparing the results (equilibrium magnetic order, moments, etc) to a calculation with a small time step (e.g. $10^{-17}$ s). At this stage, a small box and a temperature close to zero can be used.  
+Typical time steps are about $10^{-15}$ to $10^{-17}$ s. 
+An optimal time step can be determined by trying several values and comparing the results (equilibrium magnetic order, moments, etc) to a calculation with a small time step (e.g. $10^{-17}$ s). 
+At this stage, a small box and a temperature close to zero can be used.  
 
 * supercell size ([[multibinit:ncell]])
 
@@ -206,7 +213,7 @@ We are now coming back to the values chosen for the input variables in the tmult
 
    In order to calculate some observables, longer times (e.g. 10 times the relaxation time) are required so enough samples can be generated.  
 
-### A real world examle: $LaFeO_3$ 
+### A real world example: $LaFeO_3$ 
 
 A most common usage of spin dynamics is to calculate the magnetic quantities (e.g. magnetic moments, susceptibility, specific heat ) as a function of temperature and determine the critical  temperature where a phase transition from one magnetic phase to another occurs. 
 
