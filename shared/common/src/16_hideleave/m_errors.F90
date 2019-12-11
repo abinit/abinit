@@ -115,6 +115,7 @@ include "fexcp.h"
    module procedure unused_cplx_dpc
    module procedure unused_cplx_spc
    module procedure unused_logical
+   module procedure unused_logical1B
    module procedure unused_ch
  end interface unused_var
 
@@ -1156,6 +1157,41 @@ elemental subroutine unused_logical(var)
  dummy = var
 
 end subroutine unused_logical
+!!***
+
+!!****f* m_errors/unused_logical1B
+!! NAME
+!!  unused_logical1B
+!!
+!! FUNCTION
+!!  Helper function used to silence compiler warnings due to unused variables.
+!!  Interfaced via the ABI_UNUSED macro.
+!!
+!! INPUTS
+!!  var= 1 Byte Scalar logical value
+!!
+!! OUTPUT
+!!  None
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      signal
+!!
+!! SOURCE
+
+elemental subroutine unused_logical1B(var)
+
+!Arguments ------------------------------------
+ logical*1,intent(in) :: var
+
+!Local variables-------------------------------
+ logical :: dummy
+! *********************************************************************
+
+ dummy = var
+
+end subroutine unused_logical1B
 !!***
 
 !----------------------------------------------------------------------
