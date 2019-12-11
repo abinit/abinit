@@ -471,6 +471,7 @@ TESTCNF_KEYWORDS = {
     "system_xml"     : (str       , ""   , "setup","The system.xml file read by multibinit"),
     "coeff_xml"      : (str       , ""   , "setup","The coeff.xml file read by multibinit"),
     "md_hist"        : (str       , ""   , "setup","The hist file file read by multibinit"),
+    "test_set"        : (str       , ""   , "setup","The test set (HIST format) read by multibinit"),
     "no_check"       : (_str2bool , "no" , "setup","Explicitly do not check any files"),
     # [files]
     "files_to_test"  : (_str2filestotest, "", "files", "List with the output files that are be compared with the reference results. Format:\n" +
@@ -2696,12 +2697,24 @@ class MultibinitTest(BaseTest):
         if self.md_hist:
             md_hist_fname = os.path.join(self.inp_dir, self.md_hist)
             if not os.path.isfile(md_hist_fname):
-                self.exceptions.append(self.Error("%s no such XML file for coeffs: " % md_hist_fname))
+                self.exceptions.append(self.Error("%s no such HIST file for training-set: " % md_hist_fname))
 
-            t_stdin.write(md_hist_fname + "\n")  # 5) input for coefficients
+            md_hist_fname = self.cygwin_path(md_hist_fname)
+            t_stdin.write(md_hist_fname + "\n") # 5) input for training-set
         else:
             md_hist_fname = "no"
             t_stdin.write(md_hist_fname + "\n")
+
+        if self.test_set:
+            test_set_fname =  os.path.join(self.inp_dir,self.test_set)
+            if not os.path.isfile(test_set_fname):
+                self.exceptions.append(self.Error("%s no such HIST file for test-set: " % test_set_fname))
+
+            test_set_fname = self.cygwin_path(test_set_fname)
+            t_stdin.write(test_set_fname + "\n") # 6) input for test-set
+        else:
+            test_set_fname = "no"
+            t_stdin.write(test_set_fname + "\n")
 
         return t_stdin.getvalue()
 

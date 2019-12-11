@@ -936,7 +936,7 @@ end subroutine incomprs
 !! PARENTS
 !!      ingeo,ingeobld,inkpts,inqpt,invacuum,invars0,invars1,invars2
 !!      m_ab7_invars_f90,m_anaddb_dataset,m_band2eps_dataset,m_intagm_img
-!!      m_multibinit_dataset,macroin,mpi_setup,parsefile,ujdet
+!!      m_multibinit_dataset,m_scup_dataset,macroin,mpi_setup,parsefile,ujdet
 !!
 !! CHILDREN
 !!      appdig,inarray,inupper,wrtout
@@ -3044,7 +3044,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
            if(typevarphys=='ENE')out_unit=' Hartree'
            if(typevarphys=='LEN')out_unit=' Bohr   '
            if(typevarphys=='BFI')out_unit='   ' !EB remove Tesla unit
-           if(typevarphys=='TIM')out_unit=' Second' !EB remove Tesla unit
+           if(typevarphys=='TIM')out_unit=' Second' 
 !          Format, according to the length of the dataset string
            if((multi==0).or.(ncid<0))then
              appen=' '
