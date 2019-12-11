@@ -2938,7 +2938,7 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
 !scalars
  integer,parameter :: formeig0=0,kptopt3=3
  integer :: spin,ikf,ik_ibz,nband_k,mpw_ki,mband,nspinor,nkfull
- integer :: in_iomode,nsppol,nkibz,out_iomode,isym,itimrev
+ integer :: iomode,nsppol,nkibz,isym,itimrev
  integer :: npw_ki,npw_kf,istwf_ki,istwf_kf,ii,jj,iqst,nqst
  integer :: wfk_unt, ibd, icg, ikg, iband, nband_me
  real(dp) :: ecut_eff,dksqmax,cpu,wall,gflops
@@ -2948,7 +2948,6 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  logical,parameter :: force_istwfk1=.False.
  type(wfk_t),target :: wfk_disk
  type(crystal_t) :: cryst
- type(hdr_type),pointer :: ihdr
  type(ebands_t) :: ebands_ibz
  type(ebands_t),target :: ebands_full
 !arrays
@@ -2972,35 +2971,6 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
 
  call cwtime(cpu, wall, gflops, "start")
 
- wfk_unt = get_unit()
-! TODO: this still does not read in parallel properly: 
-! if I use xmpi_comm_self only the mother thread gets eigen and cg
-! if I use comm and MPIO_stuff then it hangs on this call
-! if I impose FORTRAN_IO and xmpio_single it complains the file is already opened by another proc
- call wfk_open_read(wfk_disk,inpath,formeig,iomode_from_fname(inpath),&
-&                   wfk_unt,comm)
-
- ihdr => wfk_disk%hdr
-
-! checks: impose nsppol conserved wrt disk
-! checks: impose nband conserved wrt disk?
-
- mband = wfk_disk%mband; mpw_ki = maxval(wfk_disk%Hdr%npwarr); nkibz = wfk_disk%nkpt
- nsppol = wfk_disk%nsppol; nspinor = wfk_disk%nspinor
- ecut_eff = wfk_disk%hdr%ecut_eff ! ecut * dilatmx**2
-
- ebands_ibz = wfk_read_ebands(inpath, xmpi_comm_self)
-
- ABI_MALLOC(kg_ki, (3, mpw_ki))
- ABI_MALLOC(cg_ki, (2, mpw_ki*nspinor*mband))
- ABI_MALLOC(eig_ki, ((2*mband)**wfk_disk%formeig*mband) )
- ABI_MALLOC(occ_ki, (mband))
-
- cryst = wfk_disk%hdr%get_crystal(2)
-
- ! Build new header for owfk. This is the most delicate part since all the arrays in hdr_full
- ! that depend on k-points must be consistent with kfull and nkfull.
- call ebands_expandk(ebands_ibz, cryst, ecut_eff, force_istwfk1, dksqmax, rbz2ibz, ebands_full)
 
  if (dksqmax > tol12) then
    write(msg, '(3a,es16.6,4a)' )&
@@ -3010,6 +2980,38 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
    '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
    MSG_ERROR(msg)
  end if
+
+! now attack the cg reading
+ iomode = iomode_from_fname(inpath)
+ wfk_unt = get_unit()
+! TODO: this still does not read in parallel properly: 
+! if I use xmpi_comm_self only the mother thread gets eigen and cg
+! if I use comm and MPIO_stuff then it hangs on this call
+! if I impose FORTRAN_IO and xmpio_single it complains the file is already opened by another proc
+ call wfk_open_read(wfk_disk,inpath,formeig,iomode,wfk_unt,xmpi_comm_self)
+
+
+! checks: impose nsppol conserved wrt disk
+! checks: impose nband conserved wrt disk?
+
+ mband = wfk_disk%mband; mpw_ki = maxval(wfk_disk%Hdr%npwarr); nkibz = wfk_disk%nkpt
+ nsppol = wfk_disk%nsppol; nspinor = wfk_disk%nspinor
+ ecut_eff = wfk_disk%hdr%ecut_eff ! ecut * dilatmx**2
+
+ ABI_MALLOC(kg_ki, (3, mpw_ki))
+ ABI_MALLOC(cg_ki, (2, mpw_ki*nspinor*mband))
+ ABI_MALLOC(eig_ki, ((2*mband)**wfk_disk%formeig*mband) )
+ ABI_MALLOC(occ_ki, (mband))
+
+ cryst = wfk_disk%hdr%get_crystal(2)
+
+! first determine IBZ bands etc...
+ ebands_ibz = wfk_read_ebands(inpath, xmpi_comm_self)
+
+ ! Build new header for full BZ. This is the most delicate part since all the arrays in hdr_full
+ ! that depend on k-points must be consistent with kfull and nkfull.
+ call ebands_expandk(ebands_ibz, cryst, ecut_eff, force_istwfk1, dksqmax, rbz2ibz, ebands_full)
+print *, 'after ebands_expandk ', nkpt_in 
 
 ! TODO: check these are consistent with ebands_full which was just generated
  nkfull = nkpt_in
@@ -3035,35 +3037,41 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  do spin=1,nsppol
    iqst = 0
    do ik_ibz=1,wfk_disk%nkpt
+print *, 'ik_ibz spin ', ik_ibz, spin
      nband_k = wfk_disk%nband(ik_ibz,spin)
      kibz = ebands_ibz%kptns(:,ik_ibz)
      istwf_ki = wfk_disk%hdr%istwfk(ik_ibz)
      npw_ki = wfk_disk%hdr%npwarr(ik_ibz)
 
-     ! Find number of symmetric q-ponts associated to ik_ibz
+     ! Find number of symmetric q-points associated to ik_ibz
      nqst = 0
      needthisk=.false.
      do ii=iqst+1,nkfull
+print *, 'ii, iqst, nkfull rbz2ibz_sort(ii) ', ii, iqst, nkfull, rbz2ibz_sort(ii)
        if (rbz2ibz_sort(ii) /= ik_ibz) exit
        nqst = nqst + 1
-!TODO: check that some set of bands at this k are in my distribution
-       if (any(distrb_flags(:,iperm(ii),spin))) needthisk=.true.
+print *, 'distrb_flags ',  distrb_flags(iperm(ii),:,spin)
+       if (any(distrb_flags(iperm(ii),:,spin))) needthisk=.true.
      end do
+print *, 'needthisk, nqst rbz2ibz_sort ', needthisk, nqst, rbz2ibz_sort(iqst+1:iqst+nqst)
      if (.not. needthisk) cycle
 
      ABI_CHECK(nqst > 0 .and. rbz2ibz_sort(iqst+1) == ik_ibz, "Wrong iqst")
 
      ikf = iperm(iqst+1)
-     nband_me = count(distrb_flags(:,ikf,spin))
+     nband_me = count(distrb_flags(ikf,:,spin))
      do iband = 1, nband_k
-       if (distrb_flags(iband,ikf,spin)) exit
+       if (distrb_flags(ikf,iband,spin)) exit
      end do
-     if (.not. distrb_flags(iband+nband_me-1,ikf,spin)) then
+     if (.not. distrb_flags(ikf,iband+nband_me-1,spin)) then
        stop "bands not contiguous in distrb_flags"
      end if
 
+print *, 'calling wfk_disk%read_band_block iband,iband+nband_me-1 ', iband, iband+nband_me-1
      call wfk_disk%read_band_block([iband,iband+nband_me-1],ik_ibz,spin,xmpio_single,&
        kg_k=kg_ki,cg_k=cg_ki,eig_k=eig_ki,occ_k=occ_ki)
+print *, 'cg_k ', cg_ki
+print *, 'eig_k ', eig_ki
 
      do jj=1,nqst
        iqst = iqst + 1
@@ -4256,7 +4264,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
        call iwfk%read_band_block([1,nband_k],ik_ibz,spin,xmpio_single,&
          kg_k=kg_ki,cg_k=cg_ki,eig_k=eig_ki,occ_k=occ_ki)
 
-       ! Find number of symmetric q-ponts associated to ik_ibz
+       ! Find number of symmetric q-points associated to ik_ibz
        nqst = 0
        do ii=iqst+1,nkfull
          if (bz2ibz_sort(ii) /= ik_ibz) exit
