@@ -421,6 +421,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  first_entry=.true.
  initialized=0
  ecore=zero ; ek=zero ; ehart=zero ; enxc=zero ; eei=zero ; enl=zero ; eii=zero
+ d2bbb = zero
+ d2nl = zero
+ d2lo = zero
+ d2ovl = zero
  clflg(:,:)=0 ! Array on calculated perturbations for eig2rf
  if (psps%usepaw==1) then
    ABI_ALLOCATE(dimcprj_srt,(dtset%natom))
@@ -1450,10 +1454,11 @@ print *, 'cgq ', cgq
    ABI_ALLOCATE(eigen1,(2*dtset%mband*dtset%mband*nkpt_rbz*dtset%nsppol))
    ABI_ALLOCATE(resid,(dtset%mband*nkpt_rbz*dtset%nsppol))
    call timab(144,1,tsec)
-   if (file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) then
+   if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
+&      (dtset%get1wf > 0 .or. dtset%ird1wf > 0)) then
      call wfk_read_my_kptbands(fiwf1i, dtset, distrbflags, spacecomm, &
 &            formeig, istwfk_rbz, kpq_rbz, nkpt_rbz, npwar1, &
-&            cg1, eigen=eigen1, occ=occ_rbz)
+&            cg1, eigen=eigen1)
    else
      cg1 = zero
      eigen1 = zero
@@ -1472,10 +1477,11 @@ print *, 'cgq ', cgq
      ABI_ALLOCATE(resid_mq,(dtset%mband*nkpt_rbz*dtset%nsppol))
      !initialize cg1_mq:
      call timab(144,1,tsec)
-     if (file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) then
+     if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
+&        (dtset%get1wf > 0 .or. dtset%ird1wf > 0)) then
        call wfk_read_my_kptbands(fiwf1i, dtset, distrbflags, spacecomm, &
 &            formeig, istwfk_rbz, kmq_rbz, nkpt_rbz, npwar1_mq, &
-&            cg1_mq, eigen=eigen1_mq, occ=occ_rbz)
+&            cg1_mq, eigen=eigen1_mq)
      else
        cg1_mq = zero
        eigen1_mq = zero
@@ -1852,6 +1858,9 @@ print *, 'cgq ', cgq
 &       rhog1_pq=rhog1_pq,rhog1_mq=rhog1_mq,rhor1_pq=rhor1_pq,rhor1_mq=rhor1_mq)
      end if
 
+print *, 'd2bbb ', d2bbb
+print *, 'd2lo ', d2lo
+print *, 'd2nl ', d2nl
      _IBM6("after dfpt_scfcv")
 
 !    2nd-order eigenvalues stuff
@@ -1887,7 +1896,8 @@ print *, 'cgq ', cgq
        npwarr_pert(:,ipert)=npwarr(:)
        npwar1_pert(:,ipert)=npwar1(:)
        npwtot_pert(:,ipert)=npwtot(:)
-     end if
+     end if ! eig2rf
+
 !    2nd-order eigenvalues stuff for EFMAS
      if (dtset%efmas>0) then
        if (first_entry) then
@@ -1915,7 +1925,7 @@ print *, 'cgq ', cgq
        gh0c1_pert(:,:,idir,ipert)=gh0c1_set(:,:)
        gh1c_pert(:,:,idir,ipert)=gh1c_set(:,:)
        npwarr_pert(:,ipert)=npwarr(:)
-     end if
+     end if ! efmas
      ABI_DEALLOCATE(gh1c_set)
      ABI_DEALLOCATE(gh0c1_set)
      ABI_DEALLOCATE(cg1_active)
@@ -2032,10 +2042,14 @@ print *, 'cgq ', cgq
 
    if (write_1wfk) then
      ! Output 1st-order wavefunctions in file
-     call outwf(cg1,dtset,psps,eigen1,fiwf1o,hdr,kg1,kpt_rbz,&
-&     dtset%mband,mcg1,mk1mem_rbz,mpi_enreg,mpw1,dtset%natom,nband_rbz,&
-&     nkpt_rbz,npwar1,dtset%nsppol,&
-&     occ_rbz,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
+     call wfk_write_my_kptbands(fiwf1o, dtset, distrbflags, spacecomm, &
+&          formeig, hdr, nkpt_rbz, &
+&          cg1, kg1, eigen1)
+
+!     call outwf(cg1,dtset,psps,eigen1,fiwf1o,hdr,kg1,kpt_rbz,&
+!&     dtset%mband,mcg1,mk1mem_rbz,mpi_enreg,mpw1,dtset%natom,nband_rbz,&
+!&     nkpt_rbz,npwar1,dtset%nsppol,&
+!&     occ_rbz,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
    end if
 
 #ifdef HAVE_NETCDF

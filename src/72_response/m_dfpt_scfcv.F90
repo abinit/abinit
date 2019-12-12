@@ -1312,6 +1312,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  if (psps%usepaw==0.and.dtset%userie/=919.and. &
 & (ipert==dtset%natom+3.or.ipert==dtset%natom+4)) then
+print *, 'calling nselt ', ipert
    call dfpt_nselt(blkflg,cg,cg1,cplex,&
 &   d2bbb,d2lo,d2nl,ecut,dtset%ecutsm,dtset%effmass_free,&
 &   gmet,gprimd,gsqcut,idir,&
@@ -2894,6 +2895,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
        call dotprod_g(dotr,doti,gs_hamk%istwf_k,npw1_k*nspinor,2,cwavef,gvnlx1,&
 &         mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
+print *, 'nselt d2nl_k, wtk_k, occ_k, dotr, doti ', d2nl_k, ' %%% ', wtk_k, ' %%% ', occ_k, ' %%% ', dotr, ' %%% ', doti
        d2nl_k(1,idir1,ipert1)= d2nl_k(1,idir1,ipert1)+wtk_k*occ_k(iband)*2.0_dp*dotr
        d2nl_k(2,idir1,ipert1)= d2nl_k(2,idir1,ipert1)-wtk_k*occ_k(iband)*2.0_dp*doti
 
@@ -3094,6 +3096,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
 !Zero only portion of nonlocal matrix to be computed here
  d2nl(:,:,1:dtset%natom+2,idir,ipert)=zero
+print *, ' entering nstdy d2nl = ', idir,ipert, d2nl
 
  ABI_ALLOCATE(d2bbb_k,(2,3,dtset%mband,dtset%mband*dtset%prtbbb))
  ABI_ALLOCATE(d2nl_k,(2,3,mpert))
@@ -3189,8 +3192,9 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
      bantot = bantot + nband_k
      ban2tot = ban2tot + 2*nband_k**2
 
-print *, ' cycle, nband ', proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me),&
-&        proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+print *, 'nstdy cycle, ik,isppol, nband ', proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me),&
+&        ikpt, isppol, proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
        bdtot_index=bdtot_index+nband_k
 !      The wavefunction blocks for ddk file is skipped elsewhere in the loop
@@ -3240,11 +3244,13 @@ print *, ' cycle, nband ', proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_
 !    contributions to kinetic energy, nonlocal energy, forces,
 !    and update of rhor1 to this k-point and this spin polarization.
 !    Note that dfpt_nstwf is called with kpoint, while kpt is used inside dfpt_vtowfk
+print *, 'nstdy d2nl_k before ', ikpt, d2nl_k
      call dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 &     icg,icg1,idir,ikpt,ipert,isppol,istwf_k,kg_k,kg1_k,kpoint,kpq,mkmem,mk1mem,mpert,&
 &     mpi_enreg,mpw,mpw1,nband_k,npw_k,npw1_k,nsppol,&
 &     occ_k,psps,rmet,ddks,wtk_k,ylm_k,ylm1_k)
 
+print *, 'nstdy d2nl_k ', ikpt, d2nl_k
      d2nl(:,:,:,idir,ipert)=d2nl(:,:,:,idir,ipert)+d2nl_k(:,:,:)
      if(dtset%prtbbb==1)d2bbb(:,:,idir,ipert,:,:)=d2bbb(:,:,idir,ipert,:,:)+d2bbb_k(:,:,:,:)
 

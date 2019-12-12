@@ -1821,8 +1821,8 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !arrays
  integer,intent(in) :: ddkfil(3),kg1_k(3,npw1_k)
  integer,intent(in) :: kg_k(3,npw_k)
- real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
- real(dp),intent(in) :: cg1(2,mpw1*dtset%nspinor*dtset%mband*mk1mem*nsppol)
+ real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband_mem*mkmem*nsppol)
+ real(dp),intent(in) :: cg1(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem*nsppol)
  real(dp),intent(in) :: eig_k(dtset%mband*nsppol),kpt(3),kpq(3),occ_k(nband_k),rmet(3,3)
  real(dp),intent(in) :: ylm(npw_k,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylm1(npw1_k,psps%mpsang*psps%mpsang*psps%useylm)
@@ -1834,7 +1834,8 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !Local variables-------------------------------
 !scalars
  integer :: berryopt,dimffnl,dimffnl1,dimph3d
- integer :: iband,ider,idir1,ipert1,ipw,jband,nband_kocc,nkpg,nkpg1 !ierr,ii
+ integer :: iband,ider,idir1,ipert1,ipw,jband,nband_kocc,nkpg,nkpg1
+ integer :: ierr, iband_me, jband_me
  integer :: npw_disk,nsp,optlocal,optnl,opt_gvnlx1,sij_opt,tim_getgh1c,usevnl
  logical :: ddk
  real(dp) :: aa,dot1i,dot1r,dot2i,dot2r,dot_ndiagi,dot_ndiagr,doti,dotr,lambda
@@ -1842,6 +1843,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  type(rf_hamiltonian_type) :: rf_hamkq
 !arrays
  integer :: ik_ddks(3)
+ logical :: distrb_cycle(nband_k)
  real(dp) :: dum_grad_berry(1,1),dum_gvnlx1(1,1),dum_gs1(1,1),dum_ylmgr(1,3,1),tsec(2)
  real(dp),allocatable :: cg_k(:,:),cwave0(:,:),cwavef(:,:),cwavef_da(:,:)
  real(dp),allocatable :: cwavef_db(:,:),dkinpw(:),eig2_k(:),ffnl1(:,:,:,:),ffnlk(:,:,:,:)
@@ -1865,6 +1867,9 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !Miscelaneous inits
  ABI_DATATYPE_ALLOCATE(dum_cwaveprj,(0,0))
  ddk=(ipert==dtset%natom+1.or.ipert==dtset%natom+10.or.ipert==dtset%natom+11)
+
+! filter for bands on this cpu for cg cg1 etc.
+ distrb_cycle = (mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol) /= mpi_enreg%me_band)
 
 !Additional allocations
  if (.not.ddk) then
@@ -1963,28 +1968,34 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  if(dtset%prtbbb==1)then
    ABI_ALLOCATE(cwavef_da,(2,npw1_k*dtset%nspinor))
    ABI_ALLOCATE(cwavef_db,(2,npw1_k*dtset%nspinor))
-   ABI_ALLOCATE(cg_k,(2,npw_k*dtset%nspinor*nband_k))
+   ABI_ALLOCATE(cg_k,(2,npw_k*dtset%nspinor*dtset%mband_mem))
    if ((ipert == dtset%natom + 1).or.(ipert <= dtset%natom).or. &
 &   (ipert == dtset%natom + 2).or.(ipert == dtset%natom + 5)) then
-     cg_k(:,:) = cg(:,1+icg:icg+nband_k*npw_k*dtset%nspinor)
+     cg_k(:,:) = cg(:,1+icg:icg+dtset%mband_mem*npw_k*dtset%nspinor)
    end if
    d2bbb_k(:,:,:,:) = zero
  end if
 
 !Loop over bands
+ iband_me = 0
  do iband=1,nband_k
 
-   if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
+   if(mpi_enreg%proc_distrb(ikpt,iband,isppol) == mpi_enreg%me_band) then
+     iband_me = iband_me + 1
 
-!  Read ground-state wavefunctions
-   if (dtset%prtbbb==0 .or. ipert==dtset%natom+2) then
-     cwave0(:,:)=cg(:,1+(iband-1)*npw_k*dtset%nspinor+icg:iband*npw_k*dtset%nspinor+icg)
-   else    ! prtbbb==1 and ipert<=natom , already in cg_k
-     cwave0(:,:)=cg_k(:,1+(iband-1)*npw_k*dtset%nspinor:iband*npw_k*dtset%nspinor)
-   end if
+!  Read ground-state wavefunction for iband
+     if (dtset%prtbbb==0 .or. ipert==dtset%natom+2) then
+       cwave0(:,:)=cg(:,1+(iband_me-1)*npw_k*dtset%nspinor+icg:iband_me*npw_k*dtset%nspinor+icg)
+     else    ! prtbbb==1 and ipert<=natom , already in cg_k
+       cwave0(:,:)=cg_k(:,1+(iband_me-1)*npw_k*dtset%nspinor:iband_me*npw_k*dtset%nspinor)
+     end if
 
-!  Get first-order wavefunctions
-   cwavef(:,:)=cg1(:,1+(iband-1)*npw1_k*dtset%nspinor+icg1:iband*npw1_k*dtset%nspinor+icg1)
+!  Get first-order wavefunctions for iband
+     cwavef(:,:)=cg1(:,1+(iband_me-1)*npw1_k*dtset%nspinor+icg1:iband_me*npw1_k*dtset%nspinor+icg1)
+
+   end if 
+   call xmpi_bcast(cwave0, mpi_enreg%proc_distrb(ikpt,iband,isppol), mpi_enreg%comm_band, ierr)
+   call xmpi_bcast(cwavef, mpi_enreg%proc_distrb(ikpt,iband,isppol), mpi_enreg%comm_band, ierr)
 
 !  In case non ddk perturbation
    if (ipert /= dtset%natom + 1) then
@@ -1998,8 +2009,8 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
          if (((ipert <= dtset%natom).or.(ipert == dtset%natom + 2)) &
 &         .and.(ipert1 == dtset%natom+2).and. dtset%prtbbb==1) then
-           call gaugetransfo(cg_k,cwavef,cwavef_db,eig_k,eig1_k,iband,nband_k, &
-&           dtset%mband,npw_k,npw1_k,dtset%nspinor,nsppol,occ_k)
+           call gaugetransfo(cg_k,cwavef,cwavef_db,mpi_enreg%comm_band,distrb_cycle,eig_k,eig1_k,iband,nband_k, &
+&            dtset%mband,dtset%mband_mem,npw_k,npw1_k,dtset%nspinor,nsppol,mpi_enreg%nproc_band,occ_k)
            cwavef(:,:) = cwavef_db(:,:)
          end if
 
@@ -2024,6 +2035,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
              else if( ipert1==dtset%natom+2 )then
                ! TODO: Several tests fail here ifdef HAVE_MPI_IO_DEFAULT
                ! The problem is somehow related to the use of MPI-IO file views!.
+!TODO MJV: this needs to be band parallelized as well, probably
                call ddks(idir1)%read_bks(iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
                eig1_bks=eig2_k(1+(iband-1)*2*nband_k:))
                  !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k))
@@ -2036,8 +2048,8 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !              In case of band-by-band,
 !              construct the first-order wavefunctions in the diagonal gauge
                if (((ipert <= dtset%natom).or.(ipert == dtset%natom + 2)).and.(dtset%prtbbb==1)) then
-                 call gaugetransfo(cg_k,gvnlx1,cwavef_da,eig_k,eig2_k,iband,nband_k, &
-&                 dtset%mband,npw_k,npw1_k,dtset%nspinor,nsppol,occ_k)
+                 call gaugetransfo(cg_k,gvnlx1,cwavef_da,mpi_enreg%comm_band,distrb_cycle,eig_k,eig2_k,iband,nband_k, &
+&                  dtset%mband,dtset%mband_mem,npw_k,npw1_k,dtset%nspinor,nsppol,mpi_enreg%nproc_band,occ_k)
                  gvnlx1(:,:) = cwavef_da(:,:)
                end if
 !              Multiplication by -i
@@ -2066,17 +2078,18 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
 !            Band by band decomposition of the Born effective charges
 !            calculated from a phonon perturbation
-             if(dtset%prtbbb==1)then
-               d2bbb_k(1,idir1,iband,iband) = wtk_k*occ_k(iband)*two*dotr
+!            d2bbb_k will be mpisummed below so only keep my iband indices on the diagonal
+             if(dtset%prtbbb==1 .and. mpi_enreg%proc_distrb(ikpt,iband,isppol) == mpi_enreg%me_band)then
+               d2bbb_k(1,idir1,iband,iband) =      wtk_k*occ_k(iband)*two*dotr
                d2bbb_k(2,idir1,iband,iband) = -one*wtk_k*occ_k(iband)*two*doti
              end if
 
            end if
-         end do
+         end do ! idir
 
          call rf_hamkq%free()
-       end if
-     end do
+       end if   
+     end do     ! ipert1
    end if     ! ipert /= natom +1
 
 !  Compute the localization tensor
@@ -2085,8 +2098,8 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
      ipert1=dtset%natom+1
      if(dtset%prtbbb==1)then
-       call gaugetransfo(cg_k,cwavef,cwavef_db,eig_k,eig1_k,iband,nband_k, &
-&       dtset%mband,npw_k,npw1_k,dtset%nspinor,nsppol,occ_k)
+       call gaugetransfo(cg_k,cwavef,cwavef_db,mpi_enreg%comm_band,distrb_cycle,eig_k,eig1_k,iband,nband_k, &
+&       dtset%mband,dtset%mband_mem,npw_k,npw1_k,dtset%nspinor,nsppol,mpi_enreg%nproc_band,occ_k)
        cwavef(:,:) = cwavef_db(:,:)
      end if
 
@@ -2108,8 +2121,9 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
            !write(778,*)gvnlx1
 
            if(dtset%prtbbb==1)then
-             call gaugetransfo(cg_k,gvnlx1,cwavef_da,eig_k,eig2_k,iband,nband_k, &
-&             dtset%mband,npw_k,npw1_k,dtset%nspinor,nsppol,occ_k)
+             call gaugetransfo(cg_k,gvnlx1,cwavef_da,mpi_enreg%comm_band,distrb_cycle,eig_k,eig2_k,iband,nband_k, &
+&             dtset%mband,dtset%mband_mem,npw_k,npw1_k,dtset%nspinor,nsppol,mpi_enreg%nproc_band,occ_k)
+
              gvnlx1(:,:) = cwavef_da(:,:)
            end if
 
@@ -2130,26 +2144,37 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !      XG 020216 : Marek, could you check the next forty lines
 !      In the parallel gauge, dot1 and dot2 vanishes
        if(dtset%prtbbb==1)then
-         d2bbb_k(1,idir1,iband,iband)=d2bbb_k(1,idir1,iband,iband)+dotr
-         d2bbb_k(2,idir1,iband,iband)=d2bbb_k(2,idir1,iband,iband)+doti
+         ! d2bbb_k will be mpisummed below - only save my local band indices for diagonal contribution
+         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) == mpi_enreg%me_band) then
+           d2bbb_k(1,idir1,iband,iband)=d2bbb_k(1,idir1,iband,iband)+dotr
+           d2bbb_k(2,idir1,iband,iband)=d2bbb_k(2,idir1,iband,iband)+doti
+         end if
          dot_ndiagr=zero ; dot_ndiagi=zero
+         jband_me = 0
          do jband = 1,nband_k              !compute dot1 and dot2
+           if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_band) cycle
+           jband_me = jband_me + 1
+
            if (abs(occ_k(jband)) > tol8) then
              dot1r=zero ; dot1i=zero
              dot2r=zero ; dot2i=zero
-             cwave0(:,:)=cg_k(:,1+(jband-1)*npw_k*dtset%nspinor:jband*npw_k*dtset%nspinor)
+             cwave0(:,:)=cg_k(:,1+(jband_me-1)*npw_k*dtset%nspinor:jband_me*npw_k*dtset%nspinor)
 
              call dotprod_g(dot1r,dot1i,istwf_k,npw1_k*dtset%nspinor,2,cwave0,gvnlx1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
              call dotprod_g(dot2r,dot2i,istwf_k,npw1_k*dtset%nspinor,2,cwavef,cwave0,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
              dot_ndiagr = dot_ndiagr + dot1r*dot2r - dot1i*dot2i
              dot_ndiagi = dot_ndiagi + dot1r*dot2i + dot1i*dot2r
+! this should fill all of the iband but only the local cpu jband indices
              d2bbb_k(1,idir1,iband,jband) = d2bbb_k(1,idir1,iband,jband) - &
 &             (dot1r*dot2r - dot1i*dot2i)
              d2bbb_k(2,idir1,iband,jband) = d2bbb_k(2,idir1,iband,jband) - &
 &             (dot1r*dot2i + dot1i*dot2r)
            end if  ! occ_k
          end do !jband
+         ! complete over jband index
+         call xmpi_sum(d2bbb_k, mpi_enreg%comm_band, ierr)
+
          d2bbb_k(:,idir1,iband,:)=d2bbb_k(:,idir1,iband,:)*wtk_k*occ_k(iband)*half
          d2nl_k(1,idir1,ipert1)= &
 &         d2nl_k(1,idir1,ipert1)-wtk_k*occ_k(iband)*dot_ndiagr/(nband_kocc*two)
@@ -2160,8 +2185,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
      end do  ! idir1
    end if   ! Compute localization tensor, ipert=natom+1
 
-!  End loop over bands
- end do
+ end do !  End loop over bands
 
 !Final deallocations
  ABI_DEALLOCATE(cwave0)
@@ -2202,10 +2226,13 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !!                                   for a particular k point.
 !!  cwavef(2,npw1_k*nspinor)=first order wavefunction for a particular k point
 !!                           in the parallel gauge
+!!  comm=mpi communicator for bands
+!!  distrb_cycle=array of logical flags to skip certain bands in parallelization scheme
 !!  eig_k(mband*nsppol)=GS eigenvalues at k (hartree)
 !!  eig1_k(2*nsppol*mband**2)=matrix of first-order eigenvalues (hartree)
 !!  iband=band index of the 1WF for which the transformation has to be applied
 !!  mband=maximum number of bands
+!!  mband_mem=maximum number of bands on this cpu
 !!  nband_k=number of bands for this k point
 !!  npw_k=maximum dimensioned size of npw or wfs at k
 !!  npw1_k=number of plane waves at this k+q point
@@ -2224,14 +2251,16 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !!
 !! SOURCE
 
-subroutine gaugetransfo(cg_k,cwavef,cwavef_d,eig_k,eig1_k,iband,nband_k, &
-&                      mband,npw_k,npw1_k,nspinor,nsppol,occ_k)
+subroutine gaugetransfo(cg_k,cwavef,cwavef_d,comm,distrb_cycle,eig_k,eig1_k,iband,nband_k, &
+&                      mband,mband_mem,npw_k,npw1_k,nspinor,nsppol,nproc_band,occ_k)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iband,mband,nband_k,npw1_k,npw_k,nspinor,nsppol
+ integer,intent(in) :: iband,mband,mband_mem,nband_k,npw1_k,npw_k,nspinor,nsppol
+ integer,intent(in) :: comm, nproc_band
 !arrays
- real(dp),intent(in) :: cg_k(2,npw_k*nspinor*nband_k),cwavef(2,npw1_k*nspinor)
+ logical, intent(in) :: distrb_cycle(nband_k)
+ real(dp),intent(in) :: cg_k(2,npw_k*nspinor*mband_mem),cwavef(2,npw1_k*nspinor)
  real(dp),intent(in) :: eig1_k(2*nsppol*mband**2),eig_k(mband*nsppol)
  real(dp),intent(in) :: occ_k(nband_k)
  real(dp),intent(out) :: cwavef_d(2,npw1_k*nspinor)
@@ -2239,7 +2268,7 @@ subroutine gaugetransfo(cg_k,cwavef,cwavef_d,eig_k,eig1_k,iband,nband_k, &
 !Local variables-------------------------------
 !tolerance for non degenerated levels
 !scalars
- integer :: jband
+ integer :: jband,jband_me
  real(dp),parameter :: etol=1.0d-3
 !arrays
  real(dp) :: cwave0(2,npw1_k*nspinor),eig1(2)
@@ -2248,11 +2277,14 @@ subroutine gaugetransfo(cg_k,cwavef,cwavef_d,eig_k,eig1_k,iband,nband_k, &
 
    cwavef_d(:,:) = cwavef(:,:)
 
+   jband_me = 0
    do jband = 1,nband_k !loop over bands
+     if (distrb_cycle(jband)) cycle
+     jband_me = jband_me + 1
 
      if ((abs(eig_k(iband)-eig_k(jband)) > etol).and.(abs(occ_k(jband)) > tol8 )) then
 
-       cwave0(:,:) = cg_k(:,1+(jband-1)*npw_k*nspinor:jband*npw_k*nspinor)
+       cwave0(:,:) = cg_k(:,1+(jband_me-1)*npw_k*nspinor:jband_me*npw_k*nspinor)
 
        eig1(1) = eig1_k(2*jband-1+(iband-1)*2*nband_k)
        eig1(2) = eig1_k(2*jband +(iband-1)*2*nband_k)
@@ -2265,6 +2297,9 @@ subroutine gaugetransfo(cg_k,cwavef,cwavef_d,eig_k,eig1_k,iband,nband_k, &
      end if
 
    end do    !loop over bands
+   call xmpi_sum(cwavef_d, comm, ierr)
+   ! here we have summed the cwavef N times (N-1 too many), but the correction is completed over bands
+   cwavef_d = cwavef_d - dble(nproc_band-1)*cwavef
 
   end subroutine gaugetransfo
 !!***

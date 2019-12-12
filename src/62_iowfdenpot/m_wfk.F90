@@ -259,6 +259,7 @@ module m_wfk
  public :: wfk_read_eigenvalues    ! Read all the GS eigenvalues stored in the WFK file.
  public :: wfk_read_h1mat          ! Read all the H1 matrix elements.
  public :: wfk_read_my_kptbands    ! Read in all of my bands and k, depending on a distribution flag array
+ public :: wfk_write_my_kptbands   ! Write all of my bands and k to a file, depending on a distribution flag array
 
  ! Profiling tools
  public :: wfk_prof                ! Profiling tool.
@@ -1788,6 +1789,7 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
  character(len=500) :: errmsg !msg,
 !arrays
  real(dp),ABI_CONTIGUOUS pointer :: tmp_eigk(:)
+ real(dp), allocatable :: eig_buffer(:), cg_buffer(:,:)
 #ifdef HAVE_MPI_IO
  integer :: mpierr,bufsz,recnpw_type,gkk_type,cgblock_type
  integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad
@@ -1811,6 +1813,9 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
  nband_disk   = Wfk%nband(ik_ibz,spin)
  nb_block     = (band_block(2) - band_block(1) + 1)
  npw_tot      = npw_disk * nspinor_disk * nb_block
+
+ ABI_ALLOCATE (eig_buffer, (2*nband_disk))
+ ABI_ALLOCATE (cg_buffer, (2,npw_disk*nspinor_disk))
 
  if (PRESENT(kg_k)) then
    ABI_CHECK(SIZE(kg_k,DIM=2) >= npw_disk,"kg_k too small")
@@ -1853,7 +1858,7 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
      read(Wfk%fh, err=10, iomsg=errmsg) ! kg_k(1:3,1:npw_disk)
    end if
 
-   ! The third record: eigenvalues and occupation factors.
+   ! The third record: eigenvalues occupation factors and wavefunctions.
    select case (Wfk%formeig)
    case (0)
      !write(unitwf) (eigen(iband),iband=1,nband_disk),(occ(iband),iband=1,nband_disk)
@@ -1868,16 +1873,18 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
      ! The wave-functions.
      if (present(cg_k)) then
        npwso = npw_disk*nspinor_disk
+! fast forward the bands which are not mine
+! could do in a single read, but need to check if cg_k is big enough as a buffer
+! e.g. for band_block(1)=100 and band_block(2)=105
+       do band=1,band_block(1)-1
+         read(Wfk%fh, err=10, iomsg=errmsg) cg_buffer(1:2,1:npwso)
+       end do
+
        my_bcount = 0
-       do band=1,nband_disk
-         if (band >= band_block(1) .and. band <= band_block(2)) then
-           ipw = my_bcount * npwso
-           my_bcount = my_bcount + 1
-           write(Wfk%fh, err=10, iomsg=errmsg) cg_k(1:2,ipw+1:ipw+npwso)
-         else
-           MSG_ERROR("Not coded")
-           write(Wfk%fh, err=10, iomsg=errmsg) ! cg_k(1:2,ipw+1:ipw+npwso)
-         end if
+       do band=band_block(1), band_block(2)
+         ipw = my_bcount * npwso
+         my_bcount = my_bcount + 1
+         write(Wfk%fh, err=10, iomsg=errmsg) cg_k(1:2,ipw+1:ipw+npwso)
        end do
 
      else
@@ -1891,19 +1898,24 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
      ! Write matrix of size (2*nband_k**2)
      ! The wave-functions.
      npwso = npw_disk*nspinor_disk
-     my_bcount = 0
 
-     do band=1,nband_disk
+! fast forward the bands which are not mine
+! could do in a single read, but need to check if cg_k is big enough as a buffer
+! e.g. for band_block(1)=100 and band_block(2)=105
+     do band=1, band_block(1)-1
+       read(Wfk%fh, err=10, iomsg=errmsg) eig_buffer(1:2*nband_disk)
+       read(Wfk%fh, err=10, iomsg=errmsg) cg_buffer(1:2,1:npwso)
+     end do
+
+     my_bcount = 0
+     do band=band_block(1),band_block(2)
        base = 2*(band-1)*nband_disk
+!TODO: I think this is wrong - it interleaves the arrays eig_k and cg_k, instead of printing
+! all of the eig_k matrix, and then cg_k (as is done in MPIO below)
        write(Wfk%fh, err=10, iomsg=errmsg) eig_k(base+1:base+2*nband_disk)
-       if (band >= band_block(1) .and. band <= band_block(2)) then
-         ipw = my_bcount * npwso
-         my_bcount = my_bcount + 1
-         write(Wfk%fh, err=10, iomsg=errmsg) cg_k(1:2,ipw+1:ipw+npwso)
-       else
-         MSG_ERROR("Not coded")
-         write(Wfk%fh, err=10, iomsg=errmsg) ! cg_k(1:2,ipw+1:ipw+npwso)
-       end if
+       ipw = my_bcount * npwso
+       my_bcount = my_bcount + 1
+       write(Wfk%fh, err=10, iomsg=errmsg) cg_k(1:2,ipw+1:ipw+npwso)
      end do
 
    case default
@@ -2031,15 +2043,18 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
      end if
 
      if (present(cg_k)) then
-       ABI_CHECK(band_block(1)==1,"band_block(1) !=1 not coded")
+!       ABI_CHECK(band_block(1)==1,"band_block(1) !=1 not coded")
 
        types = [MPI_DOUBLE_COMPLEX, MPI_DOUBLE_COMPLEX]
-       sizes = [npw_disk*nspinor_disk, nband_disk]
+       sizes = [npw_disk*nspinor_disk, band_block(2)-band_block(1)]
 
        call xmpio_create_fstripes(nb_block,sizes,types,cgblock_type,my_offpad,mpierr)
        ABI_CHECK_MPI(mpierr,"xmpio_create_fstripes")
 
-       my_offset = Wfk%offset_ks(ik_ibz,spin,REC_CG) + my_offpad
+       my_offset = Wfk%offset_ks(ik_ibz,spin,REC_CG) + my_offpad &
+&         + (band_block(1)-1) * (2 * nband_disk * xmpi_bsize_dp &
+&                              + 2 * npw_disk * nspinor_disk * xmpi_bsize_dp &
+&                              + 4 * xmpio_bsize_frm)
 
        call MPI_FILE_SET_VIEW(Wfk%fh,my_offset,MPI_BYTE,cgblock_type,'native',xmpio_info,mpierr)
        ABI_CHECK_MPI(mpierr,"SET_VIEW")
@@ -2122,6 +2137,9 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
  case default
    MSG_ERROR(sjoin('Wrong value of iomode:', itoa(Wfk%iomode)))
  end select
+
+ ABI_DEALLOCATE (eig_buffer)
+ ABI_DEALLOCATE (cg_buffer)
 
  DBG_EXIT("COLL")
 
@@ -2891,16 +2909,21 @@ end subroutine wfk_read_eigenvalues
 !! based on a distribution of k, b, s attributed to present processor
 !!
 !! INPUTS
-!!  wfk = Input WFK datastructure for opened file
+!!  inpath = file name
 !!  dtset <dataset_type>=all input variables for this dataset
-!!  psps <pseudopotential_type>=all the information about psps
-!!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
+!!  distrb_flags = logical mask for band, k, spins on this processor
+!!  comm = mpi communicator
+!!  formeig = flag for GS or response function format of eigenvalues
+!!  istwfk_in = reciprocal space storage (reduced PW sphere or not)
+!!  kptns_in = requested k points, to be extracted from file or completed
+!!  nkpt_in = number of requested k
+!!  npwarr = array of number of plane waves at each k
 !!
 !! OUTPUT
-!!  cg
-!!  kg
-!!  eigen
-!!  occ
+!!  cg = plane wave coefficients
+!!  kg = plane wave coordinates
+!!  eigen = eigenvectors at all bands and my k
+!!  occ = occupations of all bands at my k
 !!
 !! NOTES
 !!
@@ -2925,9 +2948,9 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  logical, intent(in) :: distrb_flags(nkpt_in,dtset%mband,dtset%nsppol)
  real(dp), intent(in),target :: kptns_in(3,nkpt_in)
 
- real(dp), intent(out) :: cg(2,dtset%mpw*dtset%nspinor*dtset%mband_mem*nkpt_in*dtset%nsppol)
+ real(dp), intent(out) :: cg(2,dtset%mpw*dtset%nspinor*dtset%mband_mem*dtset%mkmem*dtset%nsppol)
  integer, intent(out), optional :: kg(3,dtset%mpw*nkpt_in)
- real(dp), intent(out), optional :: eigen(dtset%mband*nkpt_in*dtset%nsppol)
+ real(dp), intent(out), optional :: eigen(dtset%mband*(2*dtset%mband)**formeig*nkpt_in*dtset%nsppol)
  real(dp), intent(out), optional :: occ(dtset%mband*nkpt_in*dtset%nsppol)
 
 !Arguments ------------------------------------
@@ -2936,11 +2959,11 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: formeig0=0,kptopt3=3
- integer :: spin,ikf,ik_ibz,nband_k,mpw_ki,mband,nspinor,nkfull
+ integer,parameter :: formeig0=0
+ integer :: spin,ikf,ik_ibz,nband_k,mpw_disk,mband,nspinor,nkfull
  integer :: iomode,nsppol,nkibz,isym,itimrev
- integer :: npw_ki,npw_kf,istwf_ki,istwf_kf,ii,jj,iqst,nqst
- integer :: wfk_unt, ibd, icg, ikg, iband, nband_me
+ integer :: npw_disk,npw_kf,istwf_disk,istwf_kf,ii,jj,iqst,nqst
+ integer :: wfk_unt, ibdeig, ibdocc, icg, ikg, iband, nband_me
  real(dp) :: ecut_eff,dksqmax,cpu,wall,gflops
  character(len=500) :: msg
  logical :: isirred_kf
@@ -2951,11 +2974,11 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  type(ebands_t) :: ebands_ibz
  type(ebands_t),target :: ebands_full
 !arrays
- integer :: g0(3),work_ngfft(18),gmax_ki(3),gmax_kf(3),gmax(3)
+ integer :: g0(3),work_ngfft(18),gmax_disk(3),gmax_kf(3),gmax(3)
  integer,allocatable ::kg_kf(:,:)
- integer,allocatable :: rbz2ibz(:,:),kg_ki(:,:),iperm(:),rbz2ibz_sort(:)
+ integer,allocatable :: rbz2ibz(:,:),kg_disk(:,:),iperm(:),rbz2ibz_sort(:)
  real(dp) :: kf(3),kibz(3)
- real(dp),allocatable :: cg_ki(:,:),eig_ki(:),occ_ki(:),work(:,:,:,:)
+ real(dp),allocatable :: cg_disk(:,:),eig_disk(:),occ_disk(:),work(:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: kfull(:,:)
 
 ! *************************************************************************
@@ -2991,17 +3014,21 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  call wfk_open_read(wfk_disk,inpath,formeig,iomode,wfk_unt,xmpi_comm_self)
 
 
-! checks: impose nsppol conserved wrt disk
-! checks: impose nband conserved wrt disk?
+ ABI_CHECK(wfk_disk%nsppol == dtset%nsppol, "nsppol does not agree with file")
+ ABI_CHECK(wfk_disk%mband == dtset%mband, "mband does not agree with file")
+ ABI_CHECK(wfk_disk%nspinor == dtset%nspinor, "nspinor does not agree with file")
+! checks: impose each individual nband conserved wrt disk?
 
- mband = wfk_disk%mband; mpw_ki = maxval(wfk_disk%Hdr%npwarr); nkibz = wfk_disk%nkpt
+! NB: npw can differ as can istwfk
+
+ mband = wfk_disk%mband; mpw_disk = maxval(wfk_disk%Hdr%npwarr); nkibz = wfk_disk%nkpt
  nsppol = wfk_disk%nsppol; nspinor = wfk_disk%nspinor
  ecut_eff = wfk_disk%hdr%ecut_eff ! ecut * dilatmx**2
 
- ABI_MALLOC(kg_ki, (3, mpw_ki))
- ABI_MALLOC(cg_ki, (2, mpw_ki*nspinor*mband))
- ABI_MALLOC(eig_ki, ((2*mband)**wfk_disk%formeig*mband) )
- ABI_MALLOC(occ_ki, (mband))
+ ABI_MALLOC(kg_disk, (3, mpw_disk))
+ ABI_MALLOC(cg_disk, (2, mpw_disk*nspinor*mband))
+ ABI_MALLOC(eig_disk, ((2*mband)**wfk_disk%formeig*mband) )
+ ABI_MALLOC(occ_disk, (mband))
 
  cryst = wfk_disk%hdr%get_crystal(2)
 
@@ -3033,15 +3060,16 @@ print *, 'after ebands_expandk ', nkpt_in
 
  icg = 0
  ikg = 0
- ibd = 0
+ ibdeig = 0
+ ibdocc = 0
  do spin=1,nsppol
    iqst = 0
    do ik_ibz=1,wfk_disk%nkpt
 print *, 'ik_ibz spin ', ik_ibz, spin
      nband_k = wfk_disk%nband(ik_ibz,spin)
      kibz = ebands_ibz%kptns(:,ik_ibz)
-     istwf_ki = wfk_disk%hdr%istwfk(ik_ibz)
-     npw_ki = wfk_disk%hdr%npwarr(ik_ibz)
+     istwf_disk = wfk_disk%hdr%istwfk(ik_ibz)
+     npw_disk = wfk_disk%hdr%npwarr(ik_ibz)
 
      ! Find number of symmetric q-points associated to ik_ibz
      nqst = 0
@@ -3068,10 +3096,15 @@ print *, 'needthisk, nqst rbz2ibz_sort ', needthisk, nqst, rbz2ibz_sort(iqst+1:i
      end if
 
 print *, 'calling wfk_disk%read_band_block iband,iband+nband_me-1 ', iband, iband+nband_me-1
-     call wfk_disk%read_band_block([iband,iband+nband_me-1],ik_ibz,spin,xmpio_single,&
-       kg_k=kg_ki,cg_k=cg_ki,eig_k=eig_ki,occ_k=occ_ki)
-print *, 'cg_k ', cg_ki
-print *, 'eig_k ', eig_ki
+     if (formeig > 0) then
+       call wfk_disk%read_band_block([iband,iband+nband_me-1],ik_ibz,spin,xmpio_single,&
+         kg_k=kg_disk,cg_k=cg_disk,eig_k=eig_disk)
+     else 
+       call wfk_disk%read_band_block([iband,iband+nband_me-1],ik_ibz,spin,xmpio_single,&
+         kg_k=kg_disk,cg_k=cg_disk,eig_k=eig_disk,occ_k=occ_disk)
+     end if
+print *, 'cg_k ', cg_disk
+print *, 'eig_k ', eig_disk
 
      do jj=1,nqst
        iqst = iqst + 1
@@ -3085,18 +3118,18 @@ print *, 'eig_k ', eig_ki
        istwf_kf = istwfk_in(ikf)
 
        if (present(eigen)) then
-         eigen(ibd+1:ibd+nband_k*(2*nband_k)**formeig) = eig_ki(1:nband_k*(2*nband_k)**formeig)
+         eigen(ibdeig+1:ibdeig+nband_k*(2*nband_k)**formeig) = eig_disk(1:nband_k*(2*nband_k)**formeig)
        end if
        if (present(occ)) then
-         occ(ibd+1:ibd+nband_k) = occ_ki(1:nband_k)
+         occ(ibdocc+1:ibdocc+nband_k) = occ_disk(1:nband_k)
        end if
 
        ! The test on npwarr is needed because we may change istwfk e.g. gamma.
        if (isirred_kf .and. wfk_disk%hdr%npwarr(ik_ibz) == npwarr(ikf)) then
          if (present(kg)) then
-           kg(:,ikg+1:ikg+npw_kf) = kg_ki (:,1:npw_kf)
+           kg(:,ikg+1:ikg+npw_kf) = kg_disk (:,1:npw_kf)
          end if
-         cg(:,icg+1:icg+npw_kf*nband_me*dtset%nspinor) = cg_ki(:,1:npw_kf*nband_me*dtset%nspinor)
+         cg(:,icg+1:icg+npw_kf*nband_me*dtset%nspinor) = cg_disk(:,1:npw_kf*nband_me*dtset%nspinor)
        else
          ! Compute G-sphere centered on kf
          call get_kg(kf,istwf_kf,ecut_eff,cryst%gmet,npw_kf,kg_kf)
@@ -3105,11 +3138,11 @@ print *, 'eig_k ', eig_ki
            kg(:,ikg+1:ikg+npw_kf) = kg_kf (:,1:npw_kf)
          end if
 
-         ! FFT box must enclose the two spheres centered on ki and kf
-         gmax_ki = maxval(abs(kg_ki(:,1:npw_ki)), dim=2)
+         ! FFT box must enclose the two spheres centered on kdisk and kf
+         gmax_disk = maxval(abs(kg_disk(:,1:npw_disk)), dim=2)
          gmax_kf = maxval(abs(kg_kf), dim=2)
          do ii=1,3
-           gmax(ii) = max(gmax_ki(ii), gmax_kf(ii))
+           gmax(ii) = max(gmax_disk(ii), gmax_kf(ii))
          end do
          gmax = 2*gmax + 1
          call ngfft_seq(work_ngfft, gmax)
@@ -3117,7 +3150,7 @@ print *, 'eig_k ', eig_ki
 
          ! Rotate nband_k wavefunctions (output in cg)
          call cgtk_rotate(cryst,kibz,isym,itimrev,g0,nspinor,nband_me,&
-&          npw_ki,kg_ki,npw_kf,kg_kf,istwf_ki,istwf_kf,cg_ki,&
+&          npw_disk,kg_disk,npw_kf,kg_kf,istwf_disk,istwf_kf,cg_disk,&
 &          cg(:,icg+1:icg+npw_kf*nband_me*dtset%nspinor),work_ngfft,work)
 
          ABI_FREE(work)
@@ -3126,7 +3159,8 @@ print *, 'eig_k ', eig_ki
 ! update icg ikg
        ikg = ikg + npw_kf
        icg = icg + npw_kf*nband_me*dtset%nspinor
-       ibd = ibd + nband_k*(2*nband_k)**formeig
+       ibdeig = ibdeig + nband_k*(2*nband_k)**formeig
+       ibdocc = ibdocc + nband_k
      end do ! equiv kpt jj
    end do ! kpt
  end do ! sppol
@@ -3134,10 +3168,10 @@ print *, 'eig_k ', eig_ki
  ABI_FREE(iperm)
  ABI_FREE(rbz2ibz_sort)
 
- ABI_FREE(kg_ki)
- ABI_FREE(cg_ki)
- ABI_FREE(eig_ki)
- ABI_FREE(occ_ki)
+ ABI_FREE(kg_disk)
+ ABI_FREE(cg_disk)
+ ABI_FREE(eig_disk)
+ ABI_FREE(occ_disk)
  ABI_FREE(rbz2ibz)
 
  call cryst%free()
@@ -3148,6 +3182,133 @@ print *, 'eig_k ', eig_ki
 end subroutine wfk_read_my_kptbands
 !!***
 
+
+!----------------------------------------------------------------------
+
+!!****f* m_wfk/wfk_write_my_kptbands
+!! NAME
+!!  wfk_write_my_kptbands
+!!
+!! FUNCTION
+!! From a cg (kg, eigen, occ) array write the corresponding file
+!! distributed bands on all procs, not just k-points
+!!
+!! INPUTS
+!!  outpath = file name
+!!  dtset <dataset_type>=all input variables for this dataset
+!!  distrb_flags = logical mask for band, k, spins on this processor
+!!  comm = mpi communicator
+!!  formeig = flag for GS or response function format of eigenvalues
+!!  kptns_in = requested k points, to be extracted from file or completed
+!!  nkpt_in = number of requested k
+!!  npwarr = array of number of plane waves at each k
+!!  cg = plane wave coefficients
+!!  kg = plane wave coordinates
+!!  eigen = eigenvectors at all bands and my k
+!!  occ = occupations of all bands at my k
+!!
+!! OUTPUT
+!!   writes to file
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine wfk_write_my_kptbands(outpath, dtset, distrb_flags, comm, &
+&          formeig, hdr, nkpt_in, &
+&          cg, kg, eigen, occ)
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: comm, nkpt_in, formeig
+ type(dataset_type),intent(in) :: dtset
+ type(hdr_type),intent(in) :: hdr
+!arrays
+ character(len=fnlen), intent(in) :: outpath
+ logical, intent(in) :: distrb_flags(nkpt_in,dtset%mband,dtset%nsppol)
+
+ real(dp), intent(in) :: cg(2,dtset%mpw*dtset%nspinor*dtset%mband_mem*nkpt_in*dtset%nsppol)
+ integer,  intent(in) :: kg(3,dtset%mpw*nkpt_in)
+ real(dp), intent(in) :: eigen((dtset%mband*(2*dtset%mband)**formeig)*nkpt_in*dtset%nsppol)
+ real(dp), intent(in),optional :: occ(dtset%mband*nkpt_in*dtset%nsppol)
+
+!Arguments ------------------------------------
+!arrays
+! type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
+
+!Local variables-------------------------------
+!scalars
+ integer :: spin,ik_rbz,nband_k
+ integer :: iomode
+ integer :: npw_k
+ integer :: wfk_unt, ibdocc, ibdeig, icg, ikg, iband, nband_me
+ real(dp) :: cpu,wall,gflops
+ type(wfk_t),target :: wfk_disk
+
+! *************************************************************************
+
+ call cwtime(cpu, wall, gflops, "start")
+
+print *, 'formeig ', formeig
+ iomode = iomode_from_fname(outpath)
+ wfk_unt = get_unit()
+ call wfk_disk%open_write(hdr,outpath,formeig,iomode,wfk_unt,xmpi_comm_self)
+
+ icg = 0
+ ikg = 0
+ ibdeig = 0
+ ibdocc = 0
+ do spin=1,dtset%nsppol
+   do ik_rbz=1,nkpt_in
+
+print *, 'ibdeig, ibdocc, icg, ikg ', ibdeig, ibdocc, icg, ikg
+print *, shape(kg)
+print *, shape(cg)
+print *, shape(eigen)
+print *, shape(occ)
+     nband_k = hdr%nband(ik_rbz+(spin-1)*hdr%nkpt)
+     npw_k = hdr%npwarr(ik_rbz)
+print *, ' nband_k npw_k ', nband_k, npw_k
+
+     if (.not. any(distrb_flags(ik_rbz,:,spin))) cycle
+
+     nband_me = count(distrb_flags(ik_rbz,:,spin))
+     do iband = 1, nband_k
+       if (distrb_flags(ik_rbz,iband,spin)) exit
+     end do
+     if (.not. distrb_flags(ik_rbz,iband+nband_me-1,spin)) then
+       stop "bands not contiguous in distrb_flags"
+     end if
+
+     if (present(occ)) then
+       call wfk_disk%write_band_block([iband,iband+nband_me-1],ik_rbz,spin,xmpio_single,&
+&        kg_k=kg(:,ikg+1:ikg+npw_k), &
+&        cg_k=cg(:,icg+1:icg+npw_k*nband_me*dtset%nspinor),&
+&        eig_k=eigen(ibdeig+1:ibdeig+nband_k*(2*nband_k)**formeig), &
+&        occ_k=occ(ibdocc+1:ibdocc+nband_k))
+     else
+       call wfk_disk%write_band_block([iband,iband+nband_me-1],ik_rbz,spin,xmpio_single,&
+&        kg_k=kg(:,ikg+1:ikg+npw_k), &
+&        cg_k=cg(:,icg+1:icg+npw_k*nband_me*dtset%nspinor),&
+&        eig_k=eigen(ibdeig+1:ibdeig+nband_k*(2*nband_k)**formeig))
+     end if
+ 
+     ikg = ikg + npw_k
+     icg = icg + npw_k*nband_me*dtset%nspinor
+     ibdeig = ibdeig + nband_k*(2*nband_k)**formeig
+     ibdocc = ibdocc + nband_k
+
+   end do ! kpt
+ end do ! sppol
+
+ call wfk_disk%close()
+
+end subroutine wfk_write_my_kptbands
+!!***
 
 !----------------------------------------------------------------------
 
