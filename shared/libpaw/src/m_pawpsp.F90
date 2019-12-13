@@ -2519,25 +2519,18 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  LIBPAW_ALLOCATE(work3,(1))
  work1(:)=zero;work2(:)=zero;work3(:)=zero
  tmp1 => work1 ; tmp2 => work1
- if (pawxc_get_usekden()>=1) then
-   LIBPAW_ALLOCATE(work4,(core_mesh%mesh_size,1,nspden))
-   work4(:,:,:)=zero
- else
-   LIBPAW_ALLOCATE(work4,(0,0,0))
- end if
 
  if (pawxcdev/=0) then
    call pawxcm(ncore,pawtab%exccore,yp1,0,ixc,work2,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
 &   nspden,4,pawang_tmp,core_mesh,pawxcdev,work1,1,0,tmp1,xclevel,xc_denpos)
  else
    call pawxc(ncore,pawtab%exccore,yp1,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
-&   nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos,coretau=tcoretau,taur=work4)
+&   nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos,coretau=tcoretau)
  end if
 
  LIBPAW_DEALLOCATE(work1)
  LIBPAW_DEALLOCATE(work2)
  LIBPAW_DEALLOCATE(work3)
- LIBPAW_DEALLOCATE(work4)
 
 !==================================================
 !Compute atomic contribution to Dij (Dij0)
@@ -4857,7 +4850,7 @@ subroutine pawpsp_main( &
 
  has_wvl=0; if (usewvl==1.or.icoulomb/=0) has_wvl=1
  has_tproj=0; if (usewvl==1) has_tproj=1
- has_coretau=0 ; if (pawxc_get_usekden()>=1) has_coretau=1
+ has_coretau=0 ; if (pawxc_get_usekden(ixc)>=1) has_coretau=1
  call pawtab_set_flags(pawtab,has_coretau=has_coretau,has_tvale=1,has_wvl=has_wvl,has_tproj=has_tproj)
 
  if(me==0) then

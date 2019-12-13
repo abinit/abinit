@@ -696,7 +696,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    has_dijU=merge(0,1,dtset%usepawu>0) !Be careful on this!
    has_vxctau=dtset%usekden
    call paw_an_init(paw_an,dtset%natom,dtset%ntypat,0,0,dtset%nspden,&
-&   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxctau=has_vxctau,has_vxc_ex=1,has_vhartree=has_vhartree,&
+&   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,&
+&   has_vxctau=has_vxctau,has_vxc_ex=1,has_vhartree=has_vhartree,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,&
 &   dtset%pawspnorb,dtset%natom,dtset%ntypat,dtset%typat,pawtab,&

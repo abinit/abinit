@@ -219,7 +219,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  hyb_mixing_sr_=zero ; if(present(hyb_mixing_sr)) hyb_mixing_sr_=hyb_mixing_sr
  usefock=0;if (abs(hyb_mixing_)>tol8.or.abs(hyb_mixing_sr_)>tol8) usefock=1
  usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
- usekden=pawxc_get_usekden()
+ usekden=pawxc_get_usekden(ixc)
  usenhat = usexcnhat
  keep_vhartree=(maxval(paw_an(:)%has_vhartree)>0)
  if (keep_vhartree) usenhat = 1
@@ -366,7 +366,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    if (ipert/=0) usetcore=0 ! This is true for phonons and Efield pert.
    has_kxc =paw_an(iatom)%has_kxc ;need_kxc =(has_kxc ==1)
    has_k3xc=paw_an(iatom)%has_k3xc;need_k3xc=(has_k3xc==1)
-   has_vxctau=paw_an(iatom)%has_vxctau ;need_vxctau =(has_vxctau==1.and.usekden==1)
+   has_vxctau=paw_an(iatom)%has_vxctau ;need_vxctau =(has_vxctau>=1.and.usekden==1)
    cplex=paw_an(iatom)%cplex
    cplex_dij=paw_ij(iatom)%cplex_dij
    cplex_rhoij=pawrhoij(iatom)%cplex_rhoij

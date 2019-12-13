@@ -55,7 +55,8 @@ module m_pawxc
  public :: pawxcm_dfpt    ! Compute 1st-order change of XC potential and contrib
                           !   to 2nd-order change of XC ene inside a PAW sphere. USE (L,M) MOMENTS
  public :: pawxc_get_nkxc    ! Compute size of XC kernel (Kxc) according to spin polarization and XC type
- public :: pawxc_get_usekden ! Assess whether kinetic energy density has to be computed
+ public :: pawxc_get_usekden ! Assess whether kinetic energy density is used in XC functional
+ public :: pawxc_get_uselaplacian ! Assess whether laplacian of density is used in XC functional
 
 !Private procedures
  private :: pawxcsph                   ! Compute XC energy and potential for a spherical density rho(r) given as (up,dn)
@@ -676,23 +677,59 @@ end subroutine pawxc_mkdenpos_wrapper
 !!  pawxc_get_usekden
 !!
 !! FUNCTION
-!!  Check if kinetic energy density has to be computed
+!!  Check if kinetic energy density is used in XC functional
 !!
 !! INPUTS
 !!  ixc= choice of exchange-correlation scheme
 !!
 !! SOURCE
 
-function pawxc_get_usekden()
+function pawxc_get_usekden(ixc)
 !Arguments ------------------------------------
-  integer :: pawxc_get_usekden
+ integer,intent(in) :: ixc
+ integer :: pawxc_get_usekden
 
 ! *************************************************************************
 
-  pawxc_get_usekden=0
-  if (libxc_functionals_ismgga()) pawxc_get_usekden=1
+ pawxc_get_usekden=0
+ if (ixc<0) then
+   if (libxc_functionals_ismgga()) pawxc_get_usekden=1
+ else if (ixc>=31.and.ixc<=34) then
+   pawxc_get_usekden=1
+ end if
 
 end function pawxc_get_usekden
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawxc/pawxc_get_uselaplacian
+!! NAME
+!!  pawxc_get_uselaplacian
+!!
+!! FUNCTION
+!!  Check if laplacian of density is used in XC functional
+!!
+!! INPUTS
+!!  ixc= choice of exchange-correlation scheme
+!!
+!! SOURCE
+
+function pawxc_get_uselaplacian(ixc)
+!Arguments ------------------------------------
+ integer,intent(in) :: ixc
+ integer :: pawxc_get_uselaplacian
+
+! *************************************************************************
+
+ pawxc_get_uselaplacian=0
+ if (ixc<0) then
+   if (libxc_functionals_needs_laplacian()) pawxc_get_uselaplacian=1
+ else if (ixc>=31.and.ixc<=34) then
+   pawxc_get_uselaplacian=1
+ end if
+
+end function pawxc_get_uselaplacian
 !!***
 
 !----------------------------------------------------------------------
@@ -728,14 +765,15 @@ end function pawxc_get_usekden
 !!  pawrad <type(pawrad_type)>=paw radial mesh and related data
 !!  rhor(nrad,lm_size,nspden)=electron density in real space in electrons/bohr**3
 !!                                       (total in 1st half and spin-up in 2nd half if nspden=2)
-!!  coretau(nrad*usekden) = core kinetic energy density
-!!  taur(nrad,lm_size,nspden*usekden) = kinetic energy density on radial mesh
 !!  usecore= 1 if core density has to be used in Exc/Vxc ; 0 otherwise
 !!  usexcnhat= 0 if compensation density does not have to be used
 !!             1 if compensation density has to be used in double counting energy term only
 !!             2 if compensation density (nhat) has to be used in Exc/Vxc and double counting energy term
 !!  xclevel= XC functional level
 !!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
+!!  ----- Optional arguments -----
+!!  [coretau(nrad*usekden)]= core kinetic energy density (optional)
+!!  [taur(nrad,lm_size,nspden*usekden)]= kinetic energy density on radial mesh (optional)
 !!
 !! OUTPUT
 !!  == if option=0, 2, 3, or 4 ==
@@ -746,8 +784,8 @@ end function pawxc_get_usekden
 !!    vxc(nrad,pawang%angl_size,nspden)=xc potential
 !!       (spin up in 1st half and spin-down in 2nd half if nspden=2)
 !!   == if option=0, 1 or 5 and usekden=1 ==
-!!    vxctau(nrad,pawang%angl_size,nspden*usekden)=MetaGGA xc potential
-!!       (spin up in 1st half and spin-down in 2nd half if nspden=2)
+!!    [vxctau(nrad,pawang%angl_size,nspden*usekden)]=xc potential due to kinetic energy density
+!!       (spin up in 1st half and spin-down in 2nd half if nspden=2) (optional)
 !!  == if nkxc>0 ==
 !!    kxc(nrad,pawang%angl_size,nkxc)=xc kernel
 !!        (see notes below for nkxc)
@@ -835,20 +873,20 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,ilm,ipts,ir,ispden,iwarn,lm_size_eff,mgga,ndvxc,nd2vxc,ngr2,ngrad
+ integer :: ii,ilm,ipts,ir,ispden,iwarn,lm_size_eff,ndvxc,nd2vxc,ngr2,ngrad
  integer :: nkxc_updn,npts,nspden_eff,nspden_updn,nspgrad,nvxcdgr,order
- integer :: usecoretau,usekden,use_laplacian
- logical :: ismgga,with_vxctau
- real(dp) :: enxcr,factor,vxcrho,factor2
+ integer :: usecoretau,usekden,uselaplacian
+ logical :: with_coretau,with_taur,with_vxctau
+ real(dp) :: enxcr,factor,vxcrho
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: dgxc(:),dnexcdn(:,:),drho(:),d2rho(:),drhocore(:),dvxcdgr(:,:)
  real(dp),allocatable :: dvxcdlr(:,:),dvxci(:,:),d2vxci(:,:),dylmdr(:,:,:),d2ylmdr(:,:,:)
  real(dp),allocatable :: exci(:),ff(:),grho2_updn(:,:),gxc(:,:,:,:)
- real(dp),allocatable :: rhoarr(:,:),rho_updn(:,:),lrho_updn(:,:),tauarr(:,:)
- real(dp),allocatable :: tau_updn(:,:),vxci(:,:)
- real(dp),allocatable,target :: mag(:,:,:),rhohat(:,:,:),rhonow(:,:,:),taunow(:,:)
- real(dp), pointer :: mag_(:,:),rho_(:,:,:),tau_(:,:,:)
+ real(dp),allocatable :: rhoarr(:,:),rho_updn(:,:),lrho_updn(:,:)
+ real(dp),allocatable :: tauarr(:,:),tau_updn(:,:),vxci(:,:)
+ real(dp),allocatable,target :: mag(:,:,:),rhohat(:,:,:),rhonow(:,:,:)
+ real(dp), pointer :: mag_(:,:),rho_(:,:,:),tau_(:,:,:),vxctau_(:,:,:)
  real(dp), LIBPAW_CONTIGUOUS pointer :: vxc_diag(:,:),vxc_nc(:,:),vxc_updn(:,:,:)
 #ifdef LIBPAW_ISO_C_BINDING
  type(C_PTR) :: cptr
@@ -862,42 +900,15 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 
 !Some flags
  nkxc_updn=merge(nkxc-3,nkxc,nkxc==6.or.nkxc==22)
- ismgga=libxc_functionals_ismgga()
- mgga=merge(1,0,ismgga)
- usekden=pawxc_get_usekden()
- use_laplacian=mgga ! TEMPORARY
- usecoretau=0 ; with_vxctau=.false.
+ usekden=pawxc_get_usekden(ixc)
+ with_coretau=.false. ; with_taur=.false. ; with_vxctau=.false.
+ if (usekden==1) then
+   with_taur=present(taur)
+   with_coretau=present(coretau)
+   with_vxctau=present(vxctau)
+ end if
 
 !Compatibility tests
-!if (mgga==1.and.usekden==0) then
-!   msg='Kinetic energy density needs to be computed'
-!   MSG_ERROR(msg)
-! end if
- if (usekden==1) then
-   if (.not.present(taur)) then
-     msg='taur needs to be present!'
-     MSG_BUG(msg)
-   else if (size(taur)/=nrad*lm_size*nspden) then
-     msg='wrong size for taur!'
-     MSG_BUG(msg)
-   end if
-   if (present(coretau)) then
-     usecoretau=1
-     if (size(coretau)/=nrad) then
-       msg='wrong size for coretau!'
-       MSG_BUG(msg)
-     end if
-   end if
-   if ((option==0.or.option==1.or.option==5).and.present(vxctau)) then
-     with_vxctau=.true.
-     if (size(vxctau)/=nrad*pawang%angl_size*nspden) then
-       msg='wrong size for vxctau!'
-       MSG_BUG(msg)
-     end if
-   end if
-   !?????For call in m_pawpsp/pawpsp_calc do not compute density laplacian ?????
-   if (option==4) use_laplacian=0
- end if
  if(nspden==4.and.nk3xc>0) then
    msg='K3xc for nspden=4 not implemented!'
    MSG_ERROR(msg)
@@ -957,6 +968,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
  if (option/=1.and.option/=5) enxc=zero
  if (option==0.or.option==2) enxcdc=zero
  if (option/=3.and.option/=4) vxc(:,:,:)=zero
+ if (with_vxctau.and.option/=3.and.option/=4) vxctau(:,:,:)=zero
  if (nkxc>0) kxc(:,:,:)=zero
  if (nk3xc>0) k3xc(:,:,:)=zero
  order=1;if (nkxc_updn>0) order=2;if (nk3xc>0) order=3 ! to which der. of the energy the computation must be done
@@ -968,8 +980,10 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
  else
 
 !  Allocation of temporary memory space
-   LIBPAW_ALLOCATE(rhonow,(nrad,nspden,ngrad*ngrad+1))
+   LIBPAW_ALLOCATE(rhonow,(nrad,nspden,ngrad*ngrad+uselaplacian))
    LIBPAW_ALLOCATE(rhoarr,(nrad,nspden))
+   if (usexcnhat< 2) rho_=> rhor
+   if (usexcnhat==2) rho_=> rhohat
    if (usexcnhat>0) then
      LIBPAW_ALLOCATE(rhohat,(nrad,lm_size,nspden))
      rhohat(:,:,:)=rhor(:,:,:)+nhat(:,:,:)
@@ -987,11 +1001,41 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
      end if
    end if
 
+!  Meta-GGA: allocation of temporary space
+   uselaplacian=pawxc_get_uselaplacian(ixc)
+   usecoretau=0 ; tau_ => null() ; vxctau_ => null()
+   LIBPAW_ALLOCATE(tauarr,(nrad,nspden*usekden))
+   if (usekden==1) then
+     if (with_taur) then
+       tau_=> taur
+       if (size(taur)/=nrad*lm_size*nspden) then
+         msg='wrong size for taur!'
+         MSG_BUG(msg)
+       end if
+     end if
+     if (with_vxctau) then
+       vxctau_=> vxctau
+       if (size(vxctau)/=nrad*pawang%angl_size*nspden) then
+         msg='wrong size for vxctau!'
+         MSG_BUG(msg)
+       end if
+     end if
+     if (with_coretau) then
+       usecoretau=usecore
+       if (size(coretau)/=nrad) then
+         msg='wrong size for coretau!'
+         MSG_BUG(msg)
+       end if
+     end if
+   end if
+
 !  Allocation of mandatory arguments of drivexc
    LIBPAW_ALLOCATE(exci,(nrad))
    LIBPAW_ALLOCATE(vxci,(nrad,nspden_updn))
    LIBPAW_ALLOCATE(rho_updn,(nrad,nspden_updn))
-   LIBPAW_ALLOCATE(lrho_updn,(nrad,nspden_updn))
+   LIBPAW_ALLOCATE(tau_updn,(nrad,nspden_updn*usekden))
+   LIBPAW_ALLOCATE(lrho_updn,(nrad,nspden_updn*uselaplacian))
+
 !  Allocation of optional arguments of drivexc
    call pawxc_size_dvxc_wrapper(ixc,ndvxc,ngr2,nd2vxc,nspden_updn,nvxcdgr,order)
    LIBPAW_ALLOCATE(dvxci,(nrad,ndvxc))
@@ -1003,32 +1047,29 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 
 !  GGA: convert Ylm derivatives from normalized to standard cartesian coordinates
 !  dYlm/dr_i = { dYlm/dr_i^hat - Sum_j[ dYlm/dr_j^hat (r_j/r)] } * (1/r)
-!  Meta GGA: convert Ylm second derivatives from normalized to standard cartesian coordinates
+!  Laplacian: convert Ylm second derivatives from normalized to standard cartesian coordinates
 !  d2Ylm/dr_i = { d2Ylm/d2r_i^hat - Sum_j[ d2Ylm/d2r_j^hat (r_j/r)] } * (1/r)
    if (xclevel==2) then
      LIBPAW_ALLOCATE(dylmdr,(3,npts,pawang%ylm_size))
-     if (mgga==1) then
-       !mgga=1
-       LIBPAW_ALLOCATE(tauarr,(nrad,nspden))
-       LIBPAW_ALLOCATE(taunow,(nrad,nspden))
-       LIBPAW_ALLOCATE(tau_updn,(nrad,nspden_updn))
-       if (use_laplacian==1) then
-         LIBPAW_ALLOCATE(d2ylmdr,(3,npts,pawang%ylm_size))
-       end if
-     end if
      do ilm=1,pawang%ylm_size
        do ipts=1,npts
          factor=sum(pawang%ylmrgr(1:3,ilm,ipts)*pawang%anginit(1:3,ipts))
          dylmdr(1:3,ipts,ilm)=pawang%ylmrgr(1:3,ilm,ipts)-factor*pawang%anginit(1:3,ipts)
-         if (use_laplacian==1) then
-           factor2=pawang%ylmrgr(4,ilm,ipts)*pawang%anginit(1,ipts)+pawang%ylmrgr(5,ilm,ipts)*pawang%anginit(2,ipts)&
-&                 +pawang%ylmrgr(6,ilm,ipts)*pawang%anginit(3,ipts)
-           d2ylmdr(1,ipts,ilm)=pawang%ylmrgr(4,ilm,ipts)-factor2*pawang%anginit(1,ipts)
-           d2ylmdr(2,ipts,ilm)=pawang%ylmrgr(5,ilm,ipts)-factor2*pawang%anginit(2,ipts)
-           d2ylmdr(3,ipts,ilm)=pawang%ylmrgr(6,ilm,ipts)-factor2*pawang%anginit(3,ipts)
-         end if
        end do
      end do
+     if (uselaplacian==1) then
+       LIBPAW_ALLOCATE(d2ylmdr,(3,npts,pawang%ylm_size))
+       do ilm=1,pawang%ylm_size
+         do ipts=1,npts
+           factor=pawang%ylmrgr(4,ilm,ipts)*pawang%anginit(1,ipts) &
+&                +pawang%ylmrgr(5,ilm,ipts)*pawang%anginit(2,ipts) &
+&                +pawang%ylmrgr(6,ilm,ipts)*pawang%anginit(3,ipts)
+           d2ylmdr(1,ipts,ilm)=pawang%ylmrgr(4,ilm,ipts)-factor*pawang%anginit(1,ipts)
+           d2ylmdr(2,ipts,ilm)=pawang%ylmrgr(5,ilm,ipts)-factor*pawang%anginit(2,ipts)
+           d2ylmdr(3,ipts,ilm)=pawang%ylmrgr(6,ilm,ipts)-factor*pawang%anginit(3,ipts)
+         end do
+       end do
+     end if
      LIBPAW_ALLOCATE(gxc,(nrad,3,pawang%ylm_size,nspden_updn))
      gxc=zero
    end if
@@ -1042,31 +1083,32 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 
 !    Copy the input density for this (theta,phi)
      rhoarr(:,:)=zero
-     if (mgga==1) then
-       tauarr(:,:)=zero
-     end if
-     if (usexcnhat< 2) rho_=> rhor
-     if (usexcnhat==2) rho_=> rhohat
-     if (mgga==1) tau_=> taur
      do ispden=1,nspden
        do ilm=1,lm_size_eff
          if (lmselect(ilm)) then
            rhoarr(1:nrad,ispden)=rhoarr(1:nrad,ispden) &
 &           +rho_(1:nrad,ilm,ispden)*pawang%ylmr(ilm,ipts)
-           if (mgga==1) then
-             tauarr(1:nrad,ispden)=tauarr(1:nrad,ispden) &
-&           +tau_(1:nrad,ilm,ispden)*pawang%ylmr(ilm,ipts)
-           end if
          end if
        end do
      end do
+     if (usekden==1) then
+       tauarr(:,:)=zero
+       if (with_taur) then
+         do ispden=1,nspden
+           do ilm=1,lm_size_eff
+             tauarr(1:nrad,ispden)=tauarr(1:nrad,ispden) &
+  &             +tau_(1:nrad,ilm,ispden)*pawang%ylmr(ilm,ipts)
+           end do
+         end do
+       end if
+     end if
      if (usecore==1) then
        rhoarr(1:nrad,1)=rhoarr(1:nrad,1)+corexc(1:nrad)
-       if (mgga==1) then
-         tauarr(1:nrad,1)=tauarr(1:nrad,1)+coretau(1:nrad)
-       end if
-       if (nspden==2) rhoarr(1:nrad,2)=rhoarr(1:nrad,2)+half*corexc(1:nrad);
-       if (nspden==2.and.mgga==1) tauarr(1:nrad,2)=tauarr(1:nrad,2)+half*coretau(1:nrad);
+       if (nspden==2) rhoarr(1:nrad,2)=rhoarr(1:nrad,2)+half*corexc(1:nrad)
+     end if
+     if (usecoretau==1) then
+       tauarr(1:nrad,1)=tauarr(1:nrad,1)+coretau(1:nrad)
+       if (nspden==2) tauarr(1:nrad,2)=tauarr(1:nrad,2)+half*coretau(1:nrad)
      end if
 
 !    Optionally suppress magnetic part.
@@ -1105,7 +1147,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
        end if
 
 !      Compute the laplacian of the density
-       if (use_laplacian==1) then
+       if (uselaplacian==1) then
          LIBPAW_ALLOCATE(d2rho,(nrad))
          call nderiv_gen(d2rho,drho,pawrad)
          do ispden=1,nspden
@@ -1115,14 +1157,20 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
              ff(2:nrad)=ff(2:nrad)/pawrad%rad(2:nrad)
              call pawrad_deducer0(ff,nrad,pawrad)
              rhonow(1:nrad,ispden,5)=rhonow(1:nrad,ispden,5) &
-&                                    +d2rho(1:nrad)*pawang%ylmr(ilm,ipts)
+&                  +d2rho(1:nrad)*pawang%ylmr(ilm,ipts)
              do ii=1,3
                rhonow(1:nrad,ispden,5)=rhonow(1:nrad,ispden,5) &
-&                                      +drho(1:nrad)*pawang%anginit(ii,ipts)*dylmdr(ii,ipts,ilm)&
-&                                      +ff(1:nrad)*d2ylmdr(ii,ipts,ilm)
-              end do
+&                    +drho(1:nrad)*pawang%anginit(ii,ipts)*dylmdr(ii,ipts,ilm)&
+&                    +ff(1:nrad)*d2ylmdr(ii,ipts,ilm)
+             end do
            end do
          end do
+         if (non_magnetic_xc) then
+           do ii=1,3
+             if(nspden==2) rhonow(1:nrad,2,5)=rhonow(1:nrad,1,5)*half
+             if(nspden==4) rhonow(1:nrad,2:4,5)=zero
+           end do
+         end if
          LIBPAW_DEALLOCATE(d2rho)
        end if
        LIBPAW_DEALLOCATE(drho)
@@ -1139,37 +1187,35 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
            end do
          end if
        end if
+       if (uselaplacian==1) then
+         ! Add laplacian of core
+       end if
      end if
 
 !    Storage of density (and gradient) in (up,dn) format
      if (nspden==1) then
        rho_updn(1:nrad,1)=rhonow(1:nrad,1,1)*half
-       if (xclevel==2) then
-         grho2_updn(1:nrad,1)=quarter*(rhonow(1:nrad,1,2)**2+rhonow(1:nrad,1,3)**2+rhonow(1:nrad,1,4)**2)
-         if (mgga==1) then
-           if (use_laplacian==1) then
-             lrho_updn(1:nrad,1)=rhonow(1:nrad,1,5)*half
-           end if
-           tau_updn(1:nrad,1)=tauarr(1:nrad,1)*half
-         end if
-       end if
+       if (xclevel==2) grho2_updn(1:nrad,1)= &
+&         quarter*(rhonow(1:nrad,1,2)**2+rhonow(1:nrad,1,3)**2+rhonow(1:nrad,1,4)**2)
+       if (usekden==1) tau_updn(1:nrad,1)=tauarr(1:nrad,1)*half
+       if (uselaplacian==1) lrho_updn(1:nrad,1)=rhonow(1:nrad,1,5)*half
      else if (nspden==2) then
        rho_updn(1:nrad,1)=rhonow(1:nrad,2,1)
        rho_updn(1:nrad,2)=rhonow(1:nrad,1,1)-rhonow(1:nrad,2,1)
        if (xclevel==2) then
          grho2_updn(1:nrad,1)=rhonow(1:nrad,2,2)**2+rhonow(1:nrad,2,3)**2+rhonow(1:nrad,2,4)**2
          grho2_updn(1:nrad,2)=(rhonow(1:nrad,1,2)-rhonow(1:nrad,2,2))**2 +   &
-&         (rhonow(1:nrad,1,3)-rhonow(1:nrad,2,3))**2 +   &
-&         (rhonow(1:nrad,1,4)-rhonow(1:nrad,2,4))**2
+&                             (rhonow(1:nrad,1,3)-rhonow(1:nrad,2,3))**2 +   &
+&                             (rhonow(1:nrad,1,4)-rhonow(1:nrad,2,4))**2
          grho2_updn(1:nrad,3)=rhonow(1:nrad,1,2)**2+rhonow(1:nrad,1,3)**2+rhonow(1:nrad,1,4)**2
-         if (mgga==1) then
-           if (use_laplacian==1) then
-             lrho_updn(1:nrad,1)=rhonow(1:nrad,2,5)
-             lrho_updn(1:nrad,2)=rhonow(1:nrad,1,5)-rhonow(1:nrad,2,5)
-           end if
-           tau_updn(1:nrad,1)=tauarr(1:nrad,2)
-           tau_updn(1:nrad,2)=tauarr(1:nrad,1)-tauarr(1:nrad,2)
-         end if
+       end if
+       if (usekden==1) then
+         tau_updn(1:nrad,1)=tauarr(1:nrad,2)
+         tau_updn(1:nrad,2)=tauarr(1:nrad,1)-tauarr(1:nrad,2)
+       end if
+       if (uselaplacian==1) then
+         lrho_updn(1:nrad,1)=rhonow(1:nrad,2,5)
+         lrho_updn(1:nrad,2)=rhonow(1:nrad,1,5)-rhonow(1:nrad,2,5)
        end if
      else if (nspden==4) then
        mag_ => rhonow(1:nrad,2:4,1)
@@ -1181,12 +1227,10 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
      call pawxc_mkdenpos_wrapper(iwarn,nrad,nspden_updn,0,rho_updn,xc_denpos)
 
 !    Call to main XC driver
-
-!?????? utiliser with_vxctau
-     call pawxc_drivexc_wrapper(exci,ixc,mgga,ndvxc,nd2vxc,ngr2,nrad,nspden_updn,nvxcdgr,&
-&                               order,rho_updn,use_laplacian,vxci,xclevel, &
+     call pawxc_drivexc_wrapper(exci,ixc,usekden,ndvxc,nd2vxc,ngr2,nrad,nspden_updn,nvxcdgr,&
+&                               order,rho_updn,uselaplacian,vxci,xclevel, &
 &                               dvxc=dvxci,d2vxc=d2vxci,grho2=grho2_updn,lrho=lrho_updn, &
-&                               tau=tau_updn,vxctau=vxctau,vxcgrho=dvxcdgr,vxclrho=dvxcdlr)
+&                               tau=tau_updn,vxcgrho=dvxcdgr,vxclrho=dvxcdlr,vxctau=vxctau_)
 
 !    ----------------------------------------------------------------------
 !    ----- Accumulate and store XC kernel and its derivative
@@ -1329,6 +1373,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
    LIBPAW_DEALLOCATE(exci)
    LIBPAW_DEALLOCATE(vxci)
    LIBPAW_DEALLOCATE(rho_updn)
+   LIBPAW_DEALLOCATE(tau_updn)
    LIBPAW_DEALLOCATE(lrho_updn)
    LIBPAW_DEALLOCATE(dvxci)
    LIBPAW_DEALLOCATE(d2vxci)
@@ -1336,15 +1381,10 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
    LIBPAW_DEALLOCATE(dvxcdlr)
    LIBPAW_DEALLOCATE(grho2_updn)
    LIBPAW_DEALLOCATE(dnexcdn)
-   if (xclevel==2) then
-     if (mgga==1) then
-       LIBPAW_DEALLOCATE(tau_updn)
-     end if
-     if (usecore==1) then
-       LIBPAW_DEALLOCATE(drhocore)
-     end if
-   end if
    LIBPAW_DEALLOCATE(rhonow)
+   if (allocated(drhocore)) then
+     LIBPAW_DEALLOCATE(drhocore)
+   end if
 
 !  ----------------------------------------------------------------------
 !  ----- If GGA, modify potential with term from density gradient
@@ -1455,19 +1495,16 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
    if (option==0.or.option==2) enxcdc=enxcdc*four_pi
 
 !  Final memory deallocation
-   nullify(rho_)
    LIBPAW_DEALLOCATE(rhoarr)
+   LIBPAW_DEALLOCATE(tauarr)
    if (usexcnhat>0)  then
      LIBPAW_DEALLOCATE(rhohat)
    end if
    if (xclevel==2) then
      LIBPAW_DEALLOCATE(gxc)
      LIBPAW_DEALLOCATE(dylmdr)
-     if (mgga==1) then
-       LIBPAW_DEALLOCATE(tauarr)
-       if (use_laplacian==1) then
-         LIBPAW_DEALLOCATE(d2ylmdr)
-       end if
+     if (uselaplacian==1) then
+       LIBPAW_DEALLOCATE(d2ylmdr)
      end if
    end if
 

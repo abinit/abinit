@@ -235,7 +235,7 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
    end if
 
    if (mgga==1) then
-     
+
      if (present(xc_funcs)) then
        if (needs_laplacian) then
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
@@ -754,7 +754,7 @@ subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,&
      ndvxc=15
      nvxcdgr=3
    else if (ixc<0) then
-     if(libxc_functionals_isgga() .or. libxc_functionals_ismgga() .or. libxc_functionals_is_hybrid()) then
+     if(isgga .or. ismgga .or. is_hybrid) then
        ndvxc=15
      else
        ndvxc=3
@@ -771,7 +771,7 @@ subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,&
 !    Following line to be corrected when the calculation of d2vxcar is implemented for these functionals
      if ((ixc>=11 .and. ixc<=15 .and. ixc/=13) .or. (ixc==23.and.ixc<=24) .or. (ixc==41.or.ixc==42)) nd2vxc=1
      if(ixc==1402000)nd2vxc=3*min(nspden,2)-2
-     if ((ixc<0.and.(.not.(libxc_functionals_isgga().or.libxc_functionals_ismgga().or.libxc_functionals_is_hybrid() )))) &
+     if ((ixc<0.and.(.not.(isgga.or.ismgga.or.is_hybrid)))) &
 &     nd2vxc=3*min(nspden,2)-2
    end if
 

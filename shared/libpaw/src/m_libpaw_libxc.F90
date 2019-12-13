@@ -1245,7 +1245,7 @@ end function libpaw_libxc_nspin
        MSG_BUG(msg)
      end if
    end if
- endif    
+ endif
 
 !Inititalize all output arrays to zero
  exc=zero ; vxc=zero
@@ -1635,7 +1635,7 @@ subroutine libpaw_libxc_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_f
 
 !  PBE0: set parameters
    if (is_pbe0) then
-     npar_c=int(1,kind=C_INT) ; param_c(1)=alpha_c 
+     npar_c=int(1,kind=C_INT) ; param_c(1)=alpha_c
      call libpaw_xc_func_set_params(xc_func%conf,param_c,npar_c)
    end if
 
@@ -2005,6 +2005,7 @@ module m_libpaw_libxc
 & libxc_functionals_getvxc           => libpaw_libxc_getvxc, &
 & libxc_functionals_isgga            => libpaw_libxc_isgga, &
 & libxc_functionals_ismgga           => libpaw_libxc_ismgga, &
+& libxc_functionals_needs_laplacian  => libpaw_libxc_needs_laplacian, &
 & libxc_functionals_is_hybrid        => libpaw_libxc_is_hybrid, &
 & libxc_functionals_has_kxc          => libpaw_libxc_has_kxc, &
 & libxc_functionals_nspin            => libpaw_libxc_nspin, &
