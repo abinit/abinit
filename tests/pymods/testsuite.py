@@ -2506,7 +2506,8 @@ class AbinitTest(BaseTest):
         i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
         o_prefix = self.output_prefix if self.output_prefix else self.id + "o"
         # FIXME: Use t prefix and change iofn
-        t_prefix = self.id  # + "t"
+        #t_prefix = self.id  # + "t"
+        t_prefix = self.id  + "t"
 
         t_stdin.writelines(l + "\n" for l in [i_prefix, o_prefix, t_prefix])
 
@@ -2537,7 +2538,9 @@ class AbinitTest(BaseTest):
         #    app('pseudos = "%s"' % (",\n".join(pp_names)))
 
         # This is to check whether the parser supports "long strings"
-        app('pseudos = "%s"' % (", ".join(self.get_pseudo_paths())))
+        #app('pseudos = "%s"' % (", ".join(self.get_pseudo_paths())))
+
+        app('pseudos = "%s"' % (",\n ".join(self.get_pseudo_paths())))
 
         #pp_paths = self.get_pseudo_paths()
         #app('pseudos = "%s"' % (", ".join(os.path.relpath(p, self.abenv.psps_dir) for p in pp_paths)))
@@ -2548,7 +2551,7 @@ class AbinitTest(BaseTest):
         i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
         o_prefix = self.output_prefix if self.output_prefix else self.id + "o"
         # FIXME: Use temp prefix and change iofn
-        t_prefix = self.id  # + "t"
+        t_prefix = self.id  + "t"
 
         app('indata_prefix "%s"' % i_prefix)
         app('outdata_prefix "%s"' % o_prefix)
@@ -2592,9 +2595,9 @@ class AnaddbTest(BaseTest):
         input_ddk = self.id + ".ddk"
         if not os.path.isfile(input_ddk):
             # Try in input directory:
-            # FIXME: Someone has to rewrite the treatment of the anaddb files file
             input_ddk = os.path.join(self.inp_dir, input_ddk)
         if not os.path.isfile(input_ddk): input_dkk = ""
+
         return input_ddk
 
     def make_stdin(self):

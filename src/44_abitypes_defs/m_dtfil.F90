@@ -1682,8 +1682,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
        filnam(2) = input_path(:i2) // "abo"
        filnam(3) = fname(:i1-1) // "i"
        filnam(4) = fname(:i1-1) // "o"
-       filnam(5) = fname(:i1-1)
-       !filnam(5) = fname(:i1-1) // "t"
+       filnam(5) = fname(:i1-1) // "t"
      end if
 
      ! Read the file, stringify it and return the number of datasets.
