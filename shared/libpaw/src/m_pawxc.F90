@@ -1121,9 +1121,9 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 
 !    GGA: compute gradient of density
      if (xclevel==2) then
-       rhonow(:,:,2:5)=zero
        LIBPAW_ALLOCATE(drho,(nrad))
        LIBPAW_ALLOCATE(ff,(nrad))
+       rhonow(:,:,2:4)=zero
        do ispden=1,nspden
          do ilm=1,lm_size_eff
            if (lmselect(ilm)) then
@@ -1150,6 +1150,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
        if (uselaplacian==1) then
          LIBPAW_ALLOCATE(d2rho,(nrad))
          call nderiv_gen(d2rho,drho,pawrad)
+         rhonow(:,:,5)=zero
          do ispden=1,nspden
            do ilm=1,lm_size_eff
              ff(1:nrad)=rho_(1:nrad,ilm,ispden)
