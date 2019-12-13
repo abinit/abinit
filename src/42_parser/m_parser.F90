@@ -29,7 +29,7 @@ module m_parser
  use m_xmpi
 
  use m_io_tools,  only : open_file
- use m_fstrings,  only : sjoin, itoa, inupper, rmquotes
+ use m_fstrings,  only : sjoin, itoa, inupper
  use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
 
  implicit none
@@ -432,7 +432,7 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
  character :: blank=' '
 !scalars
  integer,save :: include_level=-1
- integer :: ii,ii1,ii2,ij,iline,ios,iost,lenc,lenstr_inc,mline,nline1,input_unit
+ integer :: ii,ii1,ii2,ij,iline,ios,iost,lenc,lenstr_inc,mline,nline1,input_unit,ierr
  logical :: include_found,ex
  character(len=1) :: string1
  character(len=3) :: string3
@@ -660,6 +660,16 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
 
  nline1=iline-1
  close (unit=input_unit)
+
+
+ ! Make sure we don't have unmatched quotation marks
+ ierr = 0
+ do ii=1,len_trim(string)
+   if (string(ii:ii) == '"') ierr = ierr + 1
+ end do
+ if (mod(ierr, 2) /= 0) then
+   MSG_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
+ end if
 
  write(msg,'(a,i0,3a)')'-instrng: ',nline1,' lines of input have been read from file ',trim(filnam),ch10
  call wrtout(std_out,msg,'COLL')
@@ -1415,15 +1425,14 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      ABI_CHECK(present(key_value), "typevarphys == KEY requires optional argument key_value")
      b2 = index(string(b1+1:), '"')
      ABI_CHECK(b2 /= 0, sjoin('Cannot find first " defining string for token:', token))
-     b2 = b1 + b2 + 2
-     b3 = index(string(b2+1:), '"')
+     b2 = b1 + b2 + 1
+     b3 = index(string(b2:), '"')
      ABI_CHECK(b3 /= 0, sjoin('Cannot find second " defining string for token:', token))
-     !!print *, "b2:", b2, "b3:", b3
-     b3 = b2 + b3
-     if ((b3 - b2 + 3) > len(key_value)) then
+     b3 = b3 + b2 - 2
+     if ((b3 - b2 + 1) > len(key_value)) then
        MSG_ERROR("Len of key_value too small to contain value parsed from file")
      end if
-     key_value = adjustl(rmquotes(trim(string(b2-2:b3))))
+     key_value = adjustl(string(b2:b3))
 
    else
      ! Read the array (or eventual scalar) that follows the blank

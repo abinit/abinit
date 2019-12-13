@@ -456,7 +456,6 @@ TESTCNF_KEYWORDS = {
     # keyword        : (parser, default, section, description)
     # [setup]
     "executable"     : (str       , None , "setup", "Name of the executable e.g. abinit"),
-    #"use_files_file" : (_str2bool , "yes" , "setup", "Pass files file to executable (legacy mode)"),
     "use_files_file" : (_str2bool , "no" , "setup", "Pass files file to executable (legacy mode)"),
     "exec_args"      : (str       , ""   , "setup", "Arguments passed to executable on the command line."),
     "test_chain"     : (_str2list , ""   , "setup", "Defines a ChainOfTest i.e. a list of tests that are connected together."),
@@ -1951,7 +1950,7 @@ class BaseTest(object):
 
                 path = os.path.join(self.workdir, os.path.basename(self.inp_fname))
                 bin_argstr = path + self.exec_args
-                print("Using .abi mode with bin_argstr", bin_argstr)
+                #print("Using .abi mode with bin_argstr", bin_argstr)
 
             self.run_etime = runner.run(self.nprocs, self.bin_path,
                                         stdin_fname, self.stdout_fname, self.stderr_fname,
@@ -2538,28 +2537,12 @@ class AbinitTest(BaseTest):
         #    app('pseudos = "%s"' % (",\n".join(pp_names)))
 
         # This is to check whether the parser supports "long strings"
-        #app('pseudos = "%s"' % (", ".join(self.get_pseudo_paths())))
+        app('pseudos = "%s"' % (", ".join(self.get_pseudo_paths())))
 
-        # This is to check pseudos with an env variable defining directory
-        # TODO  whitspace after comma as in
-        #           pseudos = "HGH/3li.1.hgh, HGH/5b.3.hgh, HGH/1h.1.hgh" triggers
-        #--- !ERROR
-        #src_file: m_parser.F90
-        #src_line: 3391
-        #mpi_rank: 0
-        #message: |
-        #    Found token: HGH in the input file.
-        #    This name is not one of the registered input variable names (see https://docs.abinit.org/).
-        #    Action: check your input file. You likely mistyped the input variable.
-        #...
-
-        app('pp_dirpath = "$ABI_PSPDIR"')
-        pp_paths = self.get_pseudo_paths()
-        #print(pp_paths)
-        #print(self.abenv.psps_dir)
-        #pseudos = [os.path.relpath(self.abenv.psps_dir, p) for p in self.get_pseudo_paths
-        app('pseudos = "%s"' % (", ".join(os.path.relpath(p, self.abenv.psps_dir) for p in pp_paths)))
-        #app('pseudos = "%s"' % (", ".join(os.path.basename(p) for p in pp_paths)))
+        #pp_paths = self.get_pseudo_paths()
+        #app('pseudos = "%s"' % (", ".join(os.path.relpath(p, self.abenv.psps_dir) for p in pp_paths)))
+        #app('pp_dirpath = "$ABI_PSPDIR"')
+        #app('pp_dirpath = %s' % self.abenv.psps_dir)
 
         # Prefix for input/output/temporary files
         i_prefix = self.input_prefix if self.input_prefix else self.id + "i"

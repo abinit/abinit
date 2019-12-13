@@ -1700,11 +1700,6 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "outdata_prefix", tread, 'KEY', key_value=filnam(4))
      call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "tmpdata_prefix", tread, 'KEY', key_value=filnam(5))
 
-     !do i1=3,5
-     !  dirname = filnam(i1)
-     !  if .not. isdir(dirname) mkdir(dirname)
-     !end do
-
      ABI_FREE(dprarr)
      ABI_FREE(intarr)
    end if

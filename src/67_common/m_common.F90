@@ -1772,6 +1772,9 @@ end subroutine prtene
 !!  pseudopotential headers, maxval of dimensions needed in outvars
 !!
 !! INPUTS
+!!  input_path: Input filename specifed on the command line. zero lenght if files file syntax is used.
+!!    Mainly used to check whether pseudos are defined in the input to avoid entering the files file
+!!    branch that prompts for pseudos.
 !!  path: Input Filename
 !!  comm: MPI communicator
 !!
@@ -1792,14 +1795,14 @@ end subroutine prtene
 !!
 !! SOURCE
 
-subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, comm)
+subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, comm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: lenstr, ndtset
  type(ab_dimensions),intent(out) :: mx
  character(len=strlen), intent(out) :: string
- character(len=*),intent(in) :: path
+ character(len=*),intent(in) :: input_path, path
  integer,intent(in) :: comm
  integer,intent(out) :: timopt, dmatpuflag
 !arrays
@@ -1862,6 +1865,13 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
 
     if (len_trim(pseudo_paths(1)) == 0) then
       ! Enter Legacy `files file` mode --> Read the name of the psp file from files file.
+
+      ! Catch possible mistake done by user (input without pseudos and `abinit t01.in` syntax)
+      ! else the code starts to prompt for pseudos and execution gets stuck
+      if (len_trim(input_path) /= 0) then
+        MSG_ERROR("`pseudos` variable must be specified in input when the code is invoked with the `abinit t01.in` syntax")
+      end if
+
       ! Finish to read the "file" file completely, as npsp is known,
       do ipsp=1,npsp
         write(std_out,'(/,a)' )' Please give name of formatted atomic psp file'

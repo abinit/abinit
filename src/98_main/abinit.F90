@@ -268,7 +268,8 @@ program abinit
  ! Test if the netcdf library supports MPI-IO
  call nctk_test_mpiio()
 
- call get_dtsets_pspheads(filnam(1), ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, xmpi_world)
+ call get_dtsets_pspheads(args%input_path, filnam(1), ndtset, lenstr, string, &
+                          timopt, dtsets, pspheads, mx, dmatpuflag, xmpi_world)
 
  ndtset_alloc = size(dtsets) - 1
  npsp = size(pspheads)

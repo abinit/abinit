@@ -2064,14 +2064,13 @@ Variable(
     defaultval="",
     mnemonics="DDB PATH",
     text=r"""
-This variable specifies the path of the input DDB file when anaddb is invoked with the new syntax:
+This variable specifies the input DDB file when anaddb is invoked with the new syntax:
 
     anaddb t01.in > log 2> err
 
 instead of the legacy mode based on the files file. Example:
 
     ddb_path = "out_DDB"
-
 
 !!! important
 
@@ -2088,7 +2087,7 @@ Variable(
     defaultval="",
     mnemonics="OUTPUT file",
     text=r"""
-This variable specifies the name of the anaddb output file when anaddb is invoked with the new syntax:
+This variable specifies the name of the output file when anaddb is invoked with the new syntax:
 
     anaddb t01.in > log 2> err
 

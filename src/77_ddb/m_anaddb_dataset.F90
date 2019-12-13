@@ -2085,15 +2085,23 @@ subroutine anaddb_init(input_path, filnam)
    jdtset = 0
 
    ! Allow user to override default values
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "output_file", tread, 'KEY', key_value=filnam(2))
+   write(std_out, "(2a)")'- Name for formatted output file: ', trim(filnam(2))
+
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddb_path", tread, 'KEY', key_value=filnam(3))
    ABI_CHECK(tread == 1, "ddb_path variable must be specified in the input file")
+   write(std_out, "(2a)")'- Input derivative database: ', trim(filnam(3))
 
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "output_file", tread, 'KEY', key_value=filnam(2))
    ! Nobody knows the scope of this line in the files file.
    !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "md_output", tread, 'KEY', key_value=filnam(4))
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gkk_path", tread, 'KEY', key_value=filnam(5))
+   if (tread == 1) write(std_out, "(2a)")'- Name for input elphon matrix elements (GKK file): ', trim(filnam(5))
+
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "eph_prefix", tread, 'KEY', key_value=filnam(6))
+   if (tread == 1) write(std_out, "(2a)")"- Root name for elphon output files: ", trim(filnam(6))
+
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddk_path", tread, 'KEY', key_value=filnam(7))
+   if (tread == 1) write(std_out, "(2a)")"- File containing ddk filenames for elphon/transport: ", trim(filnam(7))
 
    ABI_FREE(intarr)
    ABI_FREE(dprarr)
