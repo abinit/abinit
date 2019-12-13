@@ -1309,8 +1309,9 @@ end subroutine covar_test
 !! SOURCE
 
 
-subroutine duqdu(atindx1,cg,cnum_duqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
-      & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,xred,energies)
+subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
+     & gmet,gprimd,mcg,mcprj,mpi_enreg,nband_k,npwarr,pawang,pawrad,pawtab,&
+     & psps,pwind,pwind_alloc,xred)
 
   !Arguments ------------------------------------
   !scalars
@@ -1326,8 +1327,8 @@ subroutine duqdu(atindx1,cg,cnum_duqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj
   integer,intent(in) :: atindx1(dtset%natom)
   integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3)
   real(dp), intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),xred(3,dtset%natom)
-  real(dp), intent(out) :: cnum_duqdu(2,3)
-  real(dp),optional,target,intent(in) :: energies(nband_k,dtset%nkpt)
+  real(dp),intent(in) :: energies(nband_k,dtset%nkpt)
+  real(dp), intent(out) :: duqduchern(2,3),duqdumag(2,3)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -1336,13 +1337,13 @@ subroutine duqdu(atindx1,cg,cnum_duqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj
   integer :: adir,bdir,bfor,bsigma,countb,countg,countjb,countjg,countk,dest
   integer :: epsabg,gdir,gfor,gsigma,iatom,iband
   integer :: icg,icgb,icgg,icprji,icprjbi,icprjgi,ierr
-  integer :: ikg,ikpt,ikpt_loc,ikpti,ikptb,ikptbi,ikptg,ikptgi,isppol,itrs,itypat
+  integer :: ikg,ikpt,ikpt_loc,ikpti,ikptb,ikptbi,ikptg,ikptgi,ish1,ish2,isppol,itrs,itypat
   integer :: jcgb,jcgg,jcprjbi,jcprjgi,jkpt,jkptb,jkptbi,jkptg,jkptgi,jsppol
   integer :: me,mcg1_k,my_nspinor,n2dim,ncpgr,npw_k,npw_kb,npw_kg,nproc,ntotcp
   integer :: shiftbd,smatrix_ddkflag,smatrix_job,sourceb,sourceg,spaceComm
   integer :: tagb,tagg
   real(dp) :: deltab,deltag,doti,dotr,ENK
-  complex(dpc) :: cnum,duqdu_term
+  complex(dpc) :: cprefac,duqduchern_term,duqdumag_term
 
   !arrays
   integer :: nattyp_dum(dtset%ntypat)
@@ -1352,21 +1353,10 @@ subroutine duqdu(atindx1,cg,cnum_duqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj
   real(dp),allocatable :: cg_k(:,:),cg1_kb(:,:),cg1_kg(:,:),cgqb(:,:),cgqg(:,:)
   real(dp),allocatable :: kk_paw(:,:,:),pwnsfac_k(:,:)
   real(dp),allocatable :: smat_inv(:,:,:),smat_kk(:,:,:)
-  real(dp),pointer :: energy_weight(:,:)
-  real(dp),allocatable,target :: unity(:,:)
   type(pawcprj_type),allocatable :: cprj_buf(:,:),cprj_k(:,:),cprj_kb(:,:),cprj1_kb(:,:)
   type(pawcprj_type),allocatable :: cprj_kg(:,:),cprj1_kg(:,:)
 
   !----------------------------------------------------
-
-  if(associated(energy_weight)) nullify(energy_weight)
-  if(present(energies)) then
-     energy_weight=>energies
-  else
-     ABI_ALLOCATE(unity,(nband_k,dtset%nkpt))
-     unity(:,:) = one
-     energy_weight=>unity
-  end if
 
   isppol = 1
   my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
@@ -1414,7 +1404,8 @@ subroutine duqdu(atindx1,cg,cnum_duqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj
   smatrix_job = 1
   shiftbd = 1
 
-  cnum_duqdu(:,:) = zero
+  duqduchern(:,:) = zero
+  duqdumag(:,:) = zero
   do adir = 1, 3
      do epsabg = 1, -1, -2
         if (epsabg .EQ. 1) then
@@ -1432,6 +1423,8 @@ subroutine duqdu(atindx1,cg,cnum_duqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj
               gsigma=3-2*gfor
               dkg(1:3) = gsigma*dtorbmag%dkvecs(1:3,gdir)
               deltag = sqrt(DOT_PRODUCT(dkg,dkg))
+
+              cprefac = j_dpc*epsabg*bsigma*gsigma/(two*deltab*two*deltag)
 
               do ikpt_loc = 1,dtorbmag%fmkmem_max
 
@@ -1610,19 +1603,23 @@ subroutine duqdu(atindx1,cg,cnum_duqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj
                          &           dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
                     do iband = 1, nband_k
 
-                       ! for Chern number call, energy_weight = 1. For magnetization, energy_weight = E_nk
-                       ENK = energy_weight(iband,ikpt)
+                       ish1 = (iband-1)*npw_k+1
+                       ish2 = iband*npw_k
+                       ENK = energies(iband,ikpt)
                     
-                       dotr=DOT_PRODUCT(cg1_kb(1,(iband-1)*npw_k+1:iband*npw_k),cg1_kg(1,(iband-1)*npw_k+1:iband*npw_k)) + &
-                            & DOT_PRODUCT(cg1_kb(2,(iband-1)*npw_k+1:iband*npw_k),cg1_kg(2,(iband-1)*npw_k+1:iband*npw_k))
-                       doti=DOT_PRODUCT(cg1_kb(1,(iband-1)*npw_k+1:iband*npw_k),cg1_kg(2,(iband-1)*npw_k+1:iband*npw_k)) - &
-                            & DOT_PRODUCT(cg1_kb(2,(iband-1)*npw_k+1:iband*npw_k),cg1_kg(1,(iband-1)*npw_k+1:iband*npw_k))
+                       dotr=DOT_PRODUCT(cg1_kb(1,ish1:ish2),cg1_kg(1,ish1:ish2)) + &
+                            & DOT_PRODUCT(cg1_kb(2,ish1:ish2),cg1_kg(2,ish1:ish2))
+                       doti=DOT_PRODUCT(cg1_kb(1,ish1:ish2),cg1_kg(2,ish1:ish2)) - &
+                            & DOT_PRODUCT(cg1_kb(2,ish1:ish2),cg1_kg(1,ish1:ish2))
 
                        ! accumulate i*epsabg*ENK*\sum_occ [<d_bdir u|Q|d_gdir u>]
-                       cnum = cmplx((dotr+kk_paw(1,iband,iband)),(doti+kk_paw(2,iband,iband)))
-                       duqdu_term = j_dpc*epsabg*bsigma*gsigma*cnum*ENK/(two*deltab*two*deltag)
-                       cnum_duqdu(1,adir) = cnum_duqdu(1,adir) + real(duqdu_term)
-                       cnum_duqdu(2,adir) = cnum_duqdu(2,adir) + aimag(duqdu_term)
+                       duqduchern_term = cprefac*cmplx((dotr+kk_paw(1,iband,iband)),(doti+kk_paw(2,iband,iband)))
+                       duqdumag_term = duqduchern_term*ENK
+
+                       duqduchern(1,adir) = duqduchern(1,adir) + real(duqduchern_term)
+                       duqduchern(2,adir) = duqduchern(2,adir) + aimag(duqduchern_term)
+                       duqdumag(1,adir) = duqdumag(1,adir) + real(duqdumag_term)
+                       duqdumag(2,adir) = duqdumag(2,adir) + aimag(duqdumag_term)
 
                     end do ! end loop over iband
                     if(allocated(cgqb)) then
@@ -1641,7 +1638,8 @@ subroutine duqdu(atindx1,cg,cnum_duqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj
 
   ! ---- parallel communication
   if(nproc > 1) then
-     call xmpi_sum(cnum_duqdu,spaceComm,ierr)
+     call xmpi_sum(duqduchern,spaceComm,ierr)
+     call xmpi_sum(duqdumag,spaceComm,ierr)
   end if
   
   ABI_DEALLOCATE(dimlmn)
@@ -1671,20 +1669,13 @@ subroutine duqdu(atindx1,cg,cnum_duqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj
   ABI_DEALLOCATE(cg_k)
   ABI_DEALLOCATE(pwnsfac_k)
 
-  if(associated(energy_weight)) nullify(energy_weight)
-
-  if(allocated(unity)) then
-     ABI_DEALLOCATE(unity)
-  end if
-
-
 end subroutine duqdu
 !!***n
 
 !{\src2tex{textfont=tt}}
 !!****f* ABINIT/duqhqdu
 !! NAME
-!! duqdu
+!! duqhqdu
 !!
 !! FUNCTION
 !! Return i*epsabg\sum_n <\partial_b u_kn|QH_kQ|\partial_g u_kn> where
@@ -2221,14 +2212,13 @@ end subroutine duqhqdu
 !! SOURCE
 
 
-subroutine udsqdu(atindx1,cg,cnum_duqdsu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi_enreg,&
-     & nband_k,npwarr,paw_ij,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
-     & rmet,rprimd,xred,ylm,ylmgr,energies,swap_option)
+subroutine udsqdu(atindx1,cg,cprj,dtorbmag,dtset,energies,gmet,gprimd,kg,&
+     & mcg,mcprj,mpi_enreg,nband_k,npwarr,paw_ij,pawang,pawrad,pawtab,psps,&
+     pwind,pwind_alloc,rmet,rprimd,udsqduchern,udsqdumag,xred,ylm,ylmgr)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: mcg,mcprj,nband_k,pwind_alloc
-  logical,optional,intent(in) :: swap_option
   type(dataset_type),intent(in) :: dtset
   type(MPI_type), intent(inout) :: mpi_enreg
   type(orbmag_type), intent(inout) :: dtorbmag
@@ -2240,10 +2230,10 @@ subroutine udsqdu(atindx1,cg,cnum_duqdsu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,
   integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
   integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3)
   real(dp), intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),xred(3,dtset%natom)
-  real(dp), intent(out) :: cnum_duqdsu(2,3)
+  real(dp), intent(out) :: udsqduchern(2,3),udsqdumag(2,3)
   real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
   real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
-  real(dp),optional,target,intent(in) :: energies(nband_k,dtset%nkpt)
+  real(dp),intent(in) :: energies(nband_k,dtset%nkpt)
   type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom*psps%usepaw)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
@@ -2261,8 +2251,7 @@ subroutine udsqdu(atindx1,cg,cnum_duqdsu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,
   integer :: nonlop_paw_opt,nonlop_signs,ntotcp
   integer :: shiftbd,smatrix_ddkflag,smatrix_job,sourceg,spaceComm,tagg,tim_nonlop
   real(dp) :: arg,deltab,deltag,doti,dotr,ecut_eff,ENK
-  complex(dpc) :: cnum,duqdsu_term
-  logical :: swapbg
+  complex(dpc) :: cprefac,udsqduchern_term,udsqdumag_term
   type(gs_hamiltonian_type) :: gs_hamk
 
   !arrays
@@ -2274,24 +2263,10 @@ subroutine udsqdu(atindx1,cg,cnum_duqdsu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,
   real(dp),allocatable :: phkxred(:,:),ph1d(:,:),ph3d(:,:,:),pwnsfac_k(:,:)
   real(dp),allocatable :: smat_inv(:,:,:),smat_kk(:,:,:),svectout(:,:),vectout(:,:)
   real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
-  real(dp),pointer :: energy_weight(:,:)
-  real(dp),allocatable,target :: unity(:,:)
   type(pawcprj_type),allocatable :: cprj_buf(:,:),cprj_k(:,:),cprj_kg(:,:)
   type(pawcprj_type),allocatable :: cprj1_kg(:,:),cwaveprj(:,:)
 
   !----------------------------------------------------
-
-  if(associated(energy_weight)) nullify(energy_weight)
-  if(present(energies)) then
-     energy_weight=>energies
-  else
-     ABI_ALLOCATE(unity,(nband_k,dtset%nkpt))
-     unity(:,:) = one
-     energy_weight=>unity
-  end if
-
-  swapbg=.FALSE.
-  if(present(swap_option).AND.(swap_option)) swapbg = .TRUE.
 
   isppol = 1
   my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
@@ -2366,7 +2341,8 @@ subroutine udsqdu(atindx1,cg,cnum_duqdsu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,
   nonlop_signs = 2 ! apply to function in recip space
   tim_nonlop = 0 ! timing not used
 
-  cnum_duqdsu(:,:) = zero
+  udsqduchern(:,:) = zero
+  udsqdumag(:,:) = zero
   do adir = 1, 3
      do epsabg = 1, -1, -2
         if (epsabg .EQ. 1) then
@@ -2376,16 +2352,13 @@ subroutine udsqdu(atindx1,cg,cnum_duqdsu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,
            bdir = modulo(adir+1,3)+1
            gdir = modulo(adir,3)+1
         end if
-        if (swapbg) then
-           dir_tmp = bdir
-           bdir = gdir
-           gdir = dir_tmp
-        end if
         
         do gfor = 1, 2
            gsigma = 3-2*gfor
            dkg(1:3) = gsigma*dtorbmag%dkvecs(1:3,gdir)
            deltag = sqrt(DOT_PRODUCT(dkg,dkg))
+
+           cprefac = j_dpc*epsabg*gsigma/(two*deltag)
 
            do ikpt_loc = 1,dtorbmag%fmkmem_max
 
@@ -2563,12 +2536,14 @@ subroutine udsqdu(atindx1,cg,cnum_duqdsu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,
                          & DOT_PRODUCT(svectout(2,1:npw_k),cg1_kg(1,ibs1:ibs2))
                     
                     ! accumulate i*epsabg*ENK\sum_occ [<u|dS_bdir Q|d_gdir u>]
-                    ENK = energy_weight(iband,ikpt)
-                    cnum = cmplx(dotr,doti)
-                    if (swapbg) cnum = CONJG(cnum)
-                    duqdsu_term = j_dpc*epsabg*gsigma*ENK*cnum/(two*deltag)
-                    cnum_duqdsu(1,adir) = cnum_duqdsu(1,adir) + real(duqdsu_term)
-                    cnum_duqdsu(2,adir) = cnum_duqdsu(2,adir) + aimag(duqdsu_term)
+                    ENK = energies(iband,ikpt)
+                    udsqduchern_term = cprefac*cmplx(dotr,doti)
+                    udsqdumag_term = udsqduchern_term*ENK
+
+                    udsqduchern(1,adir) = udsqduchern(1,adir) + real(udsqduchern_term)
+                    udsqduchern(2,adir) = udsqduchern(2,adir) + aimag(udsqduchern_term)
+                    udsqdumag(1,adir) = udsqdumag(1,adir) + real(udsqdumag_term)
+                    udsqdumag(2,adir) = udsqdumag(2,adir) + aimag(udsqdumag_term)
 
                  end do ! end loop over iband
 
@@ -2592,7 +2567,8 @@ subroutine udsqdu(atindx1,cg,cnum_duqdsu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,
 
   ! accumulate result from all processes
   if(nproc > 1) then
-     call xmpi_sum(cnum_duqdsu,spaceComm,ierr)
+     call xmpi_sum(udsqduchern,spaceComm,ierr)
+     call xmpi_sum(udsqdumag,spaceComm,ierr)
   end if
 
   call gs_hamk%free()
@@ -2623,12 +2599,6 @@ subroutine udsqdu(atindx1,cg,cnum_duqdsu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,
   ABI_DEALLOCATE(phkxred)
   ABI_DEALLOCATE(ph1d)
   ABI_DEALLOCATE(nonlop_enlout)
-
-  if(associated(energy_weight)) nullify(energy_weight)
-
-  if(allocated(unity)) then
-     ABI_DEALLOCATE(unity)
-  end if
 
 end subroutine udsqdu
 !!***
@@ -5604,7 +5574,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  integer :: adir,bdx,gdxstor
  integer :: isppol,istwf_k,my_nspinor
  integer :: nband_k,ncpgr,ncpgrb
- real(dp) :: ucvol,finish_time,start_time
+ real(dp) :: chernnorm,magnorm,ucvol,finish_time,start_time
  complex(dpc) :: CCI_dir,VVI_dir,VVII_dir,VVIII_dir
  complex(dpc) :: CCIV_dir,dpds_dir,onsite_bm_dir,onsite_l_dir,rhorij1_dir,s1trace_dir
  character(len=500) :: message
@@ -5612,14 +5582,11 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  !arrays
  integer,allocatable :: dimlmn(:)
  real(dp) :: CCI(2,3),CCIV(2,3),cnum_dpdp(2,3),cnum_dpds(2,3),gmet(3,3),gprimd(3,3)
+ real(dp) :: duqduchern(2,3),duqdumag(2,3),udsqduchern(2,3),udsqdumag(2,3)
  real(dp) :: onsite_bm(2,3),onsite_l(2,3),orbmagvec(2,3),rhorij1(2,3)
  real(dp) :: rmet(3,3),s1trace(2,3),VVI(2,3),VVI_dsdu(2,3)
  real(dp) :: VVII(2,3),VVII_dusdu(2,3),VVII_udsdsu(2,3),VVIII(2,3),VVIII_dsdu(2,3)
- real(dp),allocatable :: dsdk(:,:,:,:,:,:)
- real(dp),allocatable :: eeig(:,:),eeig123(:,:,:,:,:,:)
- real(dp),allocatable :: smat_all_indx(:,:,:,:,:,:)
- type(pawcprj_type),allocatable :: cprj_kb_k(:,:,:,:)
-
+ real(dp),allocatable :: eeig(:,:)
 
  ! ***********************************************************************
  ! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
@@ -5634,73 +5601,44 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
- ! ! the smat_all_indx structure holds the <u_nk|S|u_n'k'> overlap matrix
- ! ! elements. k ranges over the k pts in the FBZ.
- ! ! k' can be k + bsigma*dkb, so k +/- an increment in the b direction,
- ! ! where b ranges over bdir = 1 .. 3. In these cases (equivalent to berryphase_new.F90)
- ! ! storage is in smat_all_indx(1:2,n,n',ikpt,bdx,0) where bdx maps bdir, bfor onto
- ! ! the range 1..6. In addition, we also need twist matrix elements of the form
- ! ! <u_nk+bsigma*dkb|S|u_n'k+gsigma*dkg>, that is, overlap between two functions
- ! ! that both are neighbors to ikpt, so depend on both bdir and gdir. But we never need
- ! ! the case bdir // gdir, so we only need four additional slots, not 6. Thus if
- ! ! bdir = 1, gdir = 2 or 3 and gdx = 3,4,5,6; if bdir = 2, gdir = 3 or 1 and gdx = 5,6,1,2;
- ! ! if bdir = 3, gdir = 1 or 2, gdx = 1,2,3,4.
- ! ! This storage is mapped as gdxstor = mod(gdx+6-2*bdir,6)
- ! call cpu_time(start_time)
- ! write(std_out,'(a)')' orbmag progress: making <u_n1k1|S|u_n2k2>, step 1 of 6'
- ! ABI_ALLOCATE(smat_all_indx,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4))
- ! call make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
- !      & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,smat_all_indx,symrec,xred)
- ! call cpu_time(finish_time)
- ! write(std_out,'(a,es16.8)')' orbmag progress: make_smat time ',finish_time-start_time
+ ABI_ALLOCATE(eeig,(nband_k,dtset%nkpt))
+ eeig(:,:) = zero
+ if (dtset%orbmag .GT. 1) then
+    call make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,nattyp,nband_k,nfftf,npwarr,&
+         & paw_ij,pawfgr,pawtab,psps,rmet,rprimd,&
+         & vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
+ end if
 
- ! ! compute the shifted cprj's <p_k+b|u_k>
- ! ! call cpu_time(start_time)
- ! write(std_out,'(a)')' orbmag progress: making <p_k+b|u_k>, step 2 of 6'
- ! ABI_DATATYPE_ALLOCATE(cprj_kb_k,(6,0:4,dtset%natom,mcprj))
- ! ncpgrb = 0 ! no k gradients in <p_k+b|u_k>
- ! do bdx=1, 6
- !    do gdxstor=0,4
- !       call pawcprj_alloc(cprj_kb_k(bdx,gdxstor,:,:),ncpgrb,dimlmn)
- !    end do
- ! end do
- ! call ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
- !      & istwf_k,kg,mcg,mcprj,mpi_enreg,nattyp,ncpgrb,npwarr,pawtab,psps,rmet,rprimd,ucvol,xred)
- ! call cpu_time(finish_time)
- ! write(std_out,'(a,es16.8)')' orbmag progress: ctocprjb time ',finish_time-start_time
+ ! compute i*\epsilon_{abg}\sum_n <du|Q|du> with and without E_nk weights (needed respectively
+ ! by Chern number and by magnetization)
+ call duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,&
+      & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,xred)
 
+ ! compute i*\epsilon_{abg}\sum_n <u|dS Q|du> with and without E_nk weights (needed respectively
+ ! by Chern number and by magnetization)
+ call udsqdu(atindx1,cg,cprj,dtorbmag,dtset,eeig,gmet,gprimd,kg,&
+     & mcg,mcprj,mpi_enreg,nband_k,npwarr,paw_ij,pawang,pawrad,pawtab,psps,&
+     pwind,pwind_alloc,rmet,rprimd,udsqduchern,udsqdumag,xred,ylm,ylmgr)
 
  ! ! call chern number routines if necessary
  if ( (dtset%orbmag .EQ. 1) .OR. (dtset%orbmag .EQ. 3) ) then
 
-    ! call covar_test(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
-    !   & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,xred)
-    cnum_dpdp = zero
-    call duqdu(atindx1,cg,cnum_dpdp,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
-         & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,xred)
     ! convert from crystallographic to cartesian
-    cnum_dpdp(1,1:3) = ucvol*MATMUL(gprimd,cnum_dpdp(1,1:3))
-    cnum_dpdp(2,1:3) = ucvol*MATMUL(gprimd,cnum_dpdp(2,1:3))
+    duqduchern(1,1:3) = ucvol*MATMUL(gprimd,duqduchern(1,1:3))
+    duqduchern(2,1:3) = ucvol*MATMUL(gprimd,duqduchern(2,1:3))
 
     ! factor of two in numerator is band occupations
     ! factor of two_pi in denominator is in definition of Chern number
     ! factor of ucvol*fnkpt is discrete representation of integral over BZ
-    cnum_dpdp(1:2,1:3) = cnum_dpdp(1:2,1:3)*two/(two_pi*ucvol*dtorbmag%fnkpt)
+    chernnorm = two/(two_pi*ucvol*dtorbmag%fnkpt)
+    
+    duqduchern(1:2,1:3) = duqduchern(1:2,1:3)*chernnorm
 
-    cnum_dpds = zero
-    call udsqdu(atindx1,cg,cnum_dpds,cprj,dtorbmag,dtset,gmet,gprimd,&
-         & kg,mcg,mcprj,mpi_enreg,&
-         & nband_k,npwarr,paw_ij,pawang,pawrad,pawtab,&
-         & psps,pwind,pwind_alloc,&
-         & rmet,rprimd,xred,ylm,ylmgr)
+    udsqduchern(1,1:3) = ucvol*MATMUL(gprimd,udsqduchern(1,1:3))
+    udsqduchern(2,1:3) = ucvol*MATMUL(gprimd,udsqduchern(2,1:3))
+    udsqduchern(1:2,1:3) = udsqduchern(1:2,1:3)*chernnorm
 
-    cnum_dpds(1,1:3) = ucvol*MATMUL(gprimd,cnum_dpds(1,1:3))
-    cnum_dpds(2,1:3) = ucvol*MATMUL(gprimd,cnum_dpds(2,1:3))
-    cnum_dpds(1:2,1:3) = cnum_dpds(1:2,1:3)*two/(two_pi*ucvol*dtorbmag%fnkpt)
-
-    dtorbmag%chern(1:2,1:3) = cnum_dpdp(1:2,1:3)+cnum_dpds(1:2,1:3)
-    ! dtorbmag%chern(1:2,1:3) = cnum_dpdp(1:2,1:3)
-    ! dtorbmag%chern(1:2,1:3) = cnum_dpds(1:2,1:3)
+    dtorbmag%chern(1:2,1:3) = duqduchern(1:2,1:3)+udsqduchern(1:2,1:3)
     
     call output_orbmag(2,dtorbmag%chern)
     
@@ -5708,29 +5646,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
  ! continue with computation of orbital magnetization if necessary
  if ( dtset%orbmag .GT. 1 ) then
-    ! compute the energies at each k pt
-    call cpu_time(start_time)
-    write(std_out,'(a)')' orbmag progress: making <u_n1k|H_k|u_n2k>, step 4 of 6'
-    ABI_ALLOCATE(eeig,(nband_k,dtset%nkpt))
-    call make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,nattyp,nband_k,nfftf,npwarr,&
-         & paw_ij,pawfgr,pawtab,psps,rmet,rprimd,&
-         & vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
-    call cpu_time(finish_time)
-    write(std_out,'(a,es16.8)')' orbmag progress: make_eeig time ',finish_time-start_time
 
-    ! ! compute the <u_kg|H_k|u_kb> matrix elements
-    ! call cpu_time(start_time)
-    ! write(std_out,'(a)')' orbmag progress: making <u_n1k1|H_k2|u_n3k3>, step 5 of 6'
-    ! ABI_ALLOCATE(eeig123,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,1:4))
-    ! call make_eeig123(atindx1,cg,cprj_kb_k,dtorbmag,dtset,eeig123,gmet,mcg,mcprj,&
-    !      & mpi_enreg,nband_k,nfftf,npwarr,&
-    !      & paw_ij,pawfgr,pawtab,psps,rprimd,symrec,vectornd,vhartr,vpsp,vxc,with_vectornd,xred)
-    ! call cpu_time(finish_time)
-    ! write(std_out,'(a,es16.8)')' orbmag progress: make_eeig123 time ',finish_time-start_time
-
-
-    call cpu_time(start_time)
-    write(std_out,'(a)')' orbmag progress: looping over B directions, step 6 of 6'
     do adir = 1, 3
 
        call make_onsite_l(atindx1,cprj,dtset,adir,mcprj,mpi_enreg,nband_k,onsite_l_dir,pawrad,pawtab)
@@ -5754,34 +5670,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
           onsite_bm(:,adir) = zero
        end if
 
-       ! call make_dpHdp(adir,CCI_dir,dtorbmag,eeig123,nband_k,smat_all_indx)
-       ! CCI(1,adir) = real(CCI_dir)
-       ! CCI(2,adir) = aimag(CCI_dir)
-
-       ! call make_qdpdpH(adir,dtorbmag,eeig,nband_k,smat_all_indx,CCIV_dir)
-       ! ! call make_CCIV_dsdk(adir,CCIV_dir,dsdk,dtorbmag,dtset,eeig,mpi_enreg,nband_k)
-       ! CCIV(1,adir) = real(CCIV_dir)
-       ! CCIV(2,adir) = aimag(CCIV_dir)
-
-       ! call make_pdpdpH(adir,dtorbmag,eeig,nband_k,smat_all_indx,VVII_dir)
-       ! VVII(1,adir) = real(VVII_dir)
-       ! VVII(2,adir) = aimag(VVII_dir)
-
-       ! call make_VVIII(adir,atindx1,cprj_kb_k,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
-       !      & pawtab,smat_all_indx,VVIII_dir)
-       ! VVIII(1,adir) = real(VVIII_dir)
-       ! VVIII(2,adir) = aimag(VVIII_dir)
-
-       ! VVIII = VVI
-       ! call make_dpdsH(adir,atindx1,cprj_kb_k,dtorbmag,dtset,mcprj,mpi_enreg,nband_k,&
-       !      & pawtab,smat_all_indx,VVI_dir,energies=eeig)
-       ! VVI(1,adir) = real(VVI_dir)
-       ! VVI(2,adir) = aimag(VVI_dir)
-
     end do ! end loop over adir
-    call cpu_time(finish_time)
-    write(std_out,'(a,es16.8)')' orbmag progress: loop over adir time ',finish_time-start_time
-
 
     CCI=zero
     call duqhqdu(atindx1,cg,CCI,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
@@ -5789,28 +5678,24 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
          & rmet,rprimd,vectornd,vhartr,vpsp,vxc,with_vectornd,xred)
     CCI=-half*CCI
 
-    call udsqdu(atindx1,cg,VVI_dsdu,cprj,dtorbmag,dtset,gmet,gprimd,&
-         & kg,mcg,mcprj,mpi_enreg,&
-         & nband_k,npwarr,paw_ij,pawang,pawrad,pawtab,&
-         & psps,pwind,pwind_alloc,&
-         & rmet,rprimd,xred,ylm,ylmgr,energies=eeig,swap_option=.TRUE.)
-    VVI=half*VVI_dsdu
-
-    call duqdu(atindx1,cg,VVII_dusdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
-         & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,xred,energies=eeig)
+    ! call udsqdu(atindx1,cg,VVI_dsdu,cprj,dtorbmag,dtset,gmet,gprimd,&
+    !      & kg,mcg,mcprj,mpi_enreg,&
+    !      & nband_k,npwarr,paw_ij,pawang,pawrad,pawtab,&
+    !      & psps,pwind,pwind_alloc,&
+    !      & rmet,rprimd,xred,ylm,ylmgr,energies=eeig,swap_option=.TRUE.)
+    VVI=half*udsqdumag
 
     call udsdsu(atindx1,cg,VVII_udsdsu,cprj,dtorbmag,dtset,eeig,gmet,gprimd,kg,mcg,mcprj,mpi_enreg,&
          & nband_k,npwarr,paw_ij,pawang,pawrad,pawtab,psps,rmet,rprimd,xred,ylm,ylmgr)
 
-    
-    VVII=half*(VVII_dusdu - VVII_udsdsu) ! check this
+    VVII=half*(duqdumag - VVII_udsdsu) ! check this
 
-    call udsqdu(atindx1,cg,VVIII_dsdu,cprj,dtorbmag,dtset,gmet,gprimd,&
-         & kg,mcg,mcprj,mpi_enreg,&
-         & nband_k,npwarr,paw_ij,pawang,pawrad,pawtab,&
-         & psps,pwind,pwind_alloc,&
-         & rmet,rprimd,xred,ylm,ylmgr,energies=eeig)
-    VVIII=half*VVIII_dsdu
+    ! call udsqdu(atindx1,cg,VVIII_dsdu,cprj,dtorbmag,dtset,gmet,gprimd,&
+    !      & kg,mcg,mcprj,mpi_enreg,&
+    !      & nband_k,npwarr,paw_ij,pawang,pawrad,pawtab,&
+    !      & psps,pwind,pwind_alloc,&
+    !      & rmet,rprimd,xred,ylm,ylmgr,energies=eeig)
+    VVIII=half*udsqdumag
     
     ! convert terms to cartesian coordinates as needed
     ! note that terms like <dv/dk| x |dw/dk> computed in reduced coords,
@@ -5839,14 +5724,15 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     ! pre factor is occ/ucvol*N_k
     ! factor of 2 in numerator is the band occupation (two electrons in normal insulator)
     ! converting integral over k space to a sum gives a factor of Omega_BZ/N_k or 1/ucvol*N_k
-    onsite_l(1:2,1:3) = onsite_l(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
-    onsite_bm(1:2,1:3) = onsite_bm(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
-    s1trace(1:2,1:3) = s1trace(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
-    rhorij1(1:2,1:3) = rhorij1(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
-    CCI(1:2,1:3) = CCI(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
-    VVII(1:2,1:3) = VVII(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
-    VVI(1:2,1:3) = VVI(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
-    VVIII(1:2,1:3) = VVIII(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+    magnorm = two/(ucvol*dtorbmag%fnkpt)
+    onsite_l(1:2,1:3) = onsite_l(1:2,1:3)*magnorm
+    onsite_bm(1:2,1:3) = onsite_bm(1:2,1:3)*magnorm
+    s1trace(1:2,1:3) = s1trace(1:2,1:3)*magnorm
+    rhorij1(1:2,1:3) = rhorij1(1:2,1:3)*magnorm
+    CCI(1:2,1:3) = CCI(1:2,1:3)*magnorm
+    VVII(1:2,1:3) = VVII(1:2,1:3)*magnorm
+    VVI(1:2,1:3) = VVI(1:2,1:3)*magnorm
+    VVIII(1:2,1:3) = VVIII(1:2,1:3)*magnorm
 
     write(std_out,'(a,3es16.8)')' JWZ debug onsite_l ',onsite_l(1,1),onsite_l(1,2),onsite_l(1,3)
     write(std_out,'(a,3es16.8)')' JWZ debug onsite_bm ',onsite_bm(1,1),onsite_bm(1,2),onsite_bm(1,3)
@@ -5875,33 +5761,9 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
  end if ! end computation and output of orbital magnetization
 
- !  do bdx = 1, 6
- !    do gdxstor = 0, 4
- !       call pawcprj_free(cprj_kb_k(bdx,gdxstor,:,:))
- !    end do
- ! end do
- ! ABI_DATATYPE_DEALLOCATE(cprj_kb_k)
-
- ! if(allocated(smat_all_indx)) then
- !    ABI_DEALLOCATE(smat_all_indx)
- ! end if
-
- ! if(allocated(dsdk)) then
- !    ABI_DEALLOCATE(dsdk)
- ! end if
-
  if(allocated(eeig)) then
     ABI_DEALLOCATE(eeig)
  end if
-
- ! if(allocated(eeig123)) then
- !    ABI_DEALLOCATE(eeig123)
- ! end if
-
- ! if (allocated(dimlmn)) then
- !    ABI_DEALLOCATE(dimlmn)
- ! end if
- 
 
 end subroutine orbmag
 !!***
