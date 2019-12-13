@@ -172,8 +172,8 @@ contains
 !!
 !! SOURCE
 
- subroutine stress(atindx1,berryopt,dtefield,eei,efield,ehart,eii,fock,gsqcut,ixc,kinstr,&
-&                  mgfft,mpi_enreg,mqgrid,n1xccc,n3xccc,natom,nattyp,&
+ subroutine stress(atindx1,berryopt,dtefield,eei,efield,ehart,eii,fock,gsqcut,hightemp,&
+&                  ixc,kinstr,mgfft,mpi_enreg,mqgrid,n1xccc,n3xccc,natom,nattyp,&
 &                  nfft,ngfft,nlstr,nspden,nsym,ntypat,psps,pawrad,pawtab,ph1d,&
 &                  prtvol,qgrid,red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
 &                  typat,usefock,usepaw,vdw_tol,vdw_tol_3bt,vdw_xc,&
@@ -186,6 +186,7 @@ contains
  integer,intent(in) :: nsym,ntypat,prtvol,usefock,usepaw,vdw_xc
  real(dp),intent(in) :: eei,ehart,eii,gsqcut,vdw_tol,vdw_tol_3bt,qvpotzero
  type(efield_type),intent(in) :: dtefield
+ type(hightemp_type),pointer,intent(inout) :: hightemp
  type(pseudopotential_type),intent(in) :: psps
  type(electronpositron_type),pointer,optional :: electronpositron
  type(MPI_type),intent(in) :: mpi_enreg
@@ -556,7 +557,7 @@ contains
  if(associated(hightemp)) then
    strten(1:3)=strten(1:3)-(2./3.)*hightemp%e_kin_freeel/hightemp%ucvol
  end if
- 
+
 !=======================================================================
 !================ Print out info about stress tensor ===================
 !=======================================================================

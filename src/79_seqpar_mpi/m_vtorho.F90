@@ -40,7 +40,7 @@ module m_vtorho
  use m_dtset
  use m_dtfil
  use m_hightemp
- use m_hightemp_debug
+ use m_hightemp_top
 
  use defs_datatypes,       only : pseudopotential_type
  use defs_abitypes,        only : MPI_type
@@ -278,7 +278,7 @@ contains
 subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           dielop,dielstrt,dmatpawu,dphase,dtefield,dtfil,dtset,&
 &           eigen,electronpositron,energies,etotal,gbound_diel,&
-&           gmet,gprimd,grnl,gsqcut,hdr,indsym,irrzon,irrzondiel,&
+&           gmet,gprimd,grnl,gsqcut,hdr,hightemp,indsym,irrzon,irrzondiel,&
 &           istep,istep_mix,kg,kg_diel,kxc,lmax_diel,mcg,mcprj,mgfftdiel,mpi_enreg,&
 &           my_natom,natom,nattyp,nfftf,nfftdiel,ngfftdiel,nhat,nkxc,&
 &           npwarr,npwdiel,nres2,ntypat,nvresid,occ,optforces,&
@@ -302,6 +302,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type), intent(inout) :: energies
  type(hdr_type), intent(inout) :: hdr
+ type(hightemp_type),pointer,intent(inout) :: hightemp
  type(paw_dmft_type), intent(inout)  :: paw_dmft
  type(pawang_type), intent(in) :: pawang
  type(pawfgr_type), intent(in) :: pawfgr
@@ -1228,8 +1229,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      call timab(990,1,tsec)
      call newocc(doccde,eigen,energies%entropy,energies%e_fermie,dtset%spinmagntarget,&
 &     dtset%mband,dtset%nband,dtset%nelect,dtset%nkpt,dtset%nspinor,&
-&     dtset%nsppol,occ,dtset%occopt,prtvol,dtset%stmbias,dtset%tphysel,dtset%tsmear,dtset%wtk)
+&     dtset%nsppol,occ,dtset%occopt,prtvol,dtset%stmbias,dtset%tphysel,dtset%tsmear,dtset%wtk,&
+&     hightemp)
      call timab(990,2,tsec)
+
 
 !    Blanchet Once we have occupation, compute number of free electrons
      if(associated(hightemp)) then
@@ -1237,7 +1240,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call hightemp%compute_e_kin_freeel(energies%e_fermie,1024,nfftf,dtset%nspden,&
 &       dtset%tsmear,vtrial)
        if(psps%usepaw==1) then
-         call hightemp_prt_cprj(cprj,gs_hamk,istep,dtset%mband,mcprj_local,mpi_enreg,natom)
+         call hightemp_prt_cprj(cprj,eigen,gs_hamk,istep,dtset%mband,mcprj_local,mpi_enreg,natom,dtset%nkpt,dtset%nsppol,occ)
        end if
      end if
 
@@ -1498,10 +1501,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      if (psps%usepaw==0) then
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-&       rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+&       rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&       hightemp=hightemp)
      else
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-&       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+&       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&       hightemp=hightemp)
      end if
      call timab(992,2,tsec)
 

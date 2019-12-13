@@ -227,7 +227,7 @@ contains
 !! SOURCE
 
 subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
-& energies,eigen,etotal,gsqcut,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,nfftf,ngfftf,nhat,&
+& energies,eigen,etotal,gsqcut,hightemp,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,nfftf,ngfftf,nhat,&
 & nhatgr,nhatgrdim,npwarr,n3xccc,occ,optene,paw_dmft,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrhoij,pawtab,phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,&
 & taug,taur,usexcnhat,vhartr,vtrial,vpsp,vxc,vxctau,wfs,wvl,wvl_den,wvl_e,xccc3d,xred,ylm,&
@@ -244,6 +244,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  type(dataset_type),intent(in) :: dtset
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
+ type(hightemp_type),pointer,intent(inout) :: hightemp
  type(paw_dmft_type), intent(inout) :: paw_dmft
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
@@ -864,7 +865,8 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  if (psps%usepaw==0) then
    tim_mkrho=3
    call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
-&   npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wfs)
+&   npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wfs,&
+&   hightemp=hightemp)
    if(dtset%usekden==1)then
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
 &     npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl_den,wfs,option=1)
@@ -894,7 +896,8 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    rhowfr(:,:)=zero
 
    call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
-&   npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol_local,wvl_den,wfs)
+&   npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol_local,wvl_den,wfs,&
+&   hightemp=hightemp)
 
    call transgrid(1,mpi_enreg,dtset%nspden,+1,1,0,dtset%paral_kgb,pawfgr,rhowfg,rhodum,rhowfr,rhor)
    ABI_DEALLOCATE(rhowfr)

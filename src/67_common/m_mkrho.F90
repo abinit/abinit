@@ -32,6 +32,7 @@ module m_mkrho
  use m_xmpi
  use m_errors
  use m_dtset
+ use m_hightemp
 
  use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
@@ -138,13 +139,14 @@ contains
 
 subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &                rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wvl_wfs,&
-&                option) !optional
+&                hightemp,option) !optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mcg,tim_mkrho
  integer,intent(in),optional :: option
  real(dp),intent(in) :: ucvol
+ type(hightemp_type),intent(in),pointer,optional :: hightemp
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(paw_dmft_type), intent(in)  :: paw_dmft
@@ -722,6 +724,13 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
        end do
      end do
    end do
+ end if
+
+ if(associated(hightemp))then
+   rhor(:,:)=rhor(:,:)+hightemp%nfreeel/ucvol/dtset%nspden
+   rhog(1,1)=rhog(1,1)+hightemp%nfreeel/ucvol/dtset%nspden
+
+   if(mpi_enreg%me==0) write(0,*) sum(rhor(:,1))*ucvol/dtset%nfft
  end if
 
  nfftot=dtset%ngfft(1) * dtset%ngfft(2) * dtset%ngfft(3)

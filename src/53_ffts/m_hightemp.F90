@@ -45,11 +45,10 @@ module m_hightemp
     real(dp) :: nfreeel,e_shiftfactor,ucvol
   contains
     procedure :: compute_e_kin_freeel,compute_nfreeel
-    procedure :: compute_e_shiftfactor,init
-    final :: finalize
+    procedure :: compute_e_shiftfactor,init,destroy
   end type hightemp_type
 
-  type(hightemp_type),save,pointer :: hightemp=>null()
+  ! type(hightemp_type),save,pointer :: hightemp=>null()
   public :: hightemp_dosfreeel
   public :: hightemp_prt_eigocc,hightemp_getnfreeel
 contains
@@ -103,32 +102,25 @@ contains
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
   end subroutine init
 
-  !!****f* ABINIT/m_hightemp/finalize
-  !! NAME
-  !! finalize
-  !!
-  !! FUNCTION
-  !! Finalize hightemp_type object, deallocation of arrays...
-  !!
-  !! INPUTS
-  !! this=hightemp_type object concerned
-  !!
-  !! OUTPUT
-  !! this=hightemp_type object concerned
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
-  !! SOURCE
-  subroutine finalize(this)
+  subroutine destroy(this)
 
     ! Arguments -------------------------------
     ! Scalars
-    type(hightemp_type),intent(inout) :: this
+    class(hightemp_type),intent(inout) :: this
 
-    ! DEALLOCATE THINGS
-  end subroutine finalize
+    ! *********************************************************************
+
+    this%ioptden=0
+    this%bcut=0
+    this%nbcut=0
+    this%ebcut=zero
+    this%edc_kin_freeel=zero
+    this%e_kin_freeel=zero
+    this%e_ent_freeel=zero
+    this%nfreeel=zero
+    this%e_shiftfactor=zero
+    this%ucvol=zero
+  end subroutine destroy
 
   !!****f* ABINIT/m_hightemp/compute_e_shiftfactor
   !! NAME

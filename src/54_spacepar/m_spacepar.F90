@@ -32,7 +32,6 @@ module m_spacepar
  use m_errors
  use m_xmpi
  use m_sort
- use m_hightemp
 
  use m_time,            only : timab
  use defs_abitypes,     only : MPI_type
@@ -1385,13 +1384,6 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
      MSG_BUG('In the antiferromagnetic case, nsym cannot be 1')
    end if
 
-!  Blanchet Add free electron gas contribution
-   if(associated(hightemp)) then
-     if(hightemp%ioptden==0) then
-       rhor(:,:)=rhor(:,:)+hightemp%nfreeel/hightemp%ucvol/nspden
-     end if
-   end if
-
 !  If not using symmetry, still want total density in G space rho(G).
 !  Fourier transform (incl normalization) to get rho(G)
    work(:)=rhor(:,1)
@@ -1607,9 +1599,9 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !            Working on this: the present coding will be detrimental for speed ! cos and sin are recomputed many times !
              tau1=tnons_used(1,jsym)
              tau2=tnons_used(2,jsym)
-             tau3=tnons_used(3,jsym) 
+             tau3=tnons_used(3,jsym)
              if (abs(tau1)>tol12.or.abs(tau2)>tol12.or.abs(tau3)>tol12) then
-!              Compute exp(-2*Pi*I*G dot tau) using original G (equivalent of phnons in the collinear case) 
+!              Compute exp(-2*Pi*I*G dot tau) using original G (equivalent of phnons in the collinear case)
                arg=two_pi*(dble(l1)*tau1+dble(l2)*tau2+dble(l3)*tau3)
                phr=cos(arg)
                phi=-sin(arg)
@@ -1623,7 +1615,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !            phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
 !            phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
 
-!            The magnetization should transform as a vector in real space 
+!            The magnetization should transform as a vector in real space
 !            However, one acts with the INVERSE of the symmetry operation.
 !            => Inverse[symrel_cart] = Transpose[symrel_cart] because symrel_cart is unitary   ?!?!?
              mxr=symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(1,2,jsym)*magngy(1,indsy)+symrel_cart(1,3,jsym)*magngz(1,indsy)
@@ -1704,7 +1696,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !TO BE COMMENTED
 !            phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
 !            phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
-!            The magnetization should transform as a vector in real space 
+!            The magnetization should transform as a vector in real space
 !            => symrel_cart  ?!?
              mxr=symrec_cart(1,1,jsym)*magxsu1+symrec_cart(2,1,jsym)*magysu1+symrec_cart(3,1,jsym)*magzsu1
              mxi=symrec_cart(1,1,jsym)*magxsu2+symrec_cart(2,1,jsym)*magysu2+symrec_cart(3,1,jsym)*magzsu2
@@ -1738,13 +1730,6 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 
      end if ! nspden==4
 
-!    Blanchet Add free electron gas contribution
-     if(associated(hightemp)) then
-       if(hightemp%ioptden==0) then
-         rhog(1,1)=rhog(1,1)+hightemp%nfreeel/hightemp%ucvol/nspden
-       end if
-     end if
-
      call timab(17,2,tsec)
 
 !    Pull out full or spin up density, now symmetrized
@@ -1774,7 +1759,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 
    integer :: map_symrhg
    integer,intent(in) :: j1,n1
-!  Map into [0,n-1] 
+!  Map into [0,n-1]
    map_symrhg=mod(n1+mod(j1,n1),n1)
  end function map_symrhg
 
@@ -1967,7 +1952,7 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
              j3=symrel_used(1,3,isym)*l1+&
 &             symrel_used(2,3,isym)*l2+symrel_used(3,3,isym)*l3
 
-!            Map into [0,n-1] 
+!            Map into [0,n-1]
              k1=mod(n1+mod(j1,n1),n1)
              k2=mod(n2+mod(j2,n2),n2)
              k3=mod(n3+mod(j3,n3),n3)

@@ -36,6 +36,7 @@ module m_afterscfloop
  use m_hdr
  use m_dtset
  use m_dtfil
+ use m_hightemp
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : mpi_type
@@ -288,7 +289,7 @@ contains
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,favg,fcart,fock,forold,fred,grchempottn,&
-& gresid,grewtn,grhf,grhor,grvdw,grxc,gsqcut,hdr,indsym,irrzon,&
+& gresid,grewtn,grhf,grhor,grvdw,grxc,gsqcut,hdr,hightemp,indsym,irrzon,&
 & istep,istep_fock_outer,istep_mix,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
@@ -315,6 +316,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
  type(hdr_type),intent(inout) :: hdr
+ type(hightemp_type),pointer,intent(inout) :: hightemp
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type),intent(in) :: psps
@@ -662,7 +664,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    paw_dmft%use_sc_dmft=0 ! dmft not used here
    paw_dmft%use_dmft=0 ! dmft not used here
    call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
-&   npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+&   npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&   hightemp=hightemp,option=1)
 !  Print result
    if(dtset%prtkden/=0) then
      write(message,'(a,a)') ch10, "Result for kinetic energy density :"
@@ -920,7 +923,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    call forstr(atindx1,cg,cprj,diffor,dtefield,dtset,&
 &   eigen,electronpositron,energies,favg,fcart,fock,&
 &   forold,fred,grchempottn,gresid,grewtn,&
-&   grhf,grvdw,grxc,gsqcut,indsym,&
+&   grhf,grvdw,grxc,gsqcut,hightemp,indsym,&
 &   kg,kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,&
 &   n3xccc,nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,&
 &   npwarr,dtset%ntypat,nvresid,occ,optfor,optres,&

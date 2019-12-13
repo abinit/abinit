@@ -47,6 +47,8 @@ module m_gstate
  use m_hdr
  use m_ebands
  use m_dtfil
+ use m_hightemp
+ use m_hightemp_top
 
  use defs_datatypes,     only : pseudopotential_type, ebands_t
  use defs_abitypes,      only : MPI_type
@@ -103,7 +105,6 @@ module m_gstate
  use m_wvl_descr_psp,    only : wvl_descr_psp_set, wvl_descr_free, wvl_descr_atoms_set, wvl_descr_atoms_set_sym
  use m_wvl_denspot,      only : wvl_denspot_set, wvl_denspot_free
  use m_wvl_projectors,   only : wvl_projectors_set, wvl_projectors_free
- use m_hightemp,         only : hightemp_prt_eigocc
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -288,6 +289,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(efield_type) :: dtefield
  type(electronpositron_type),pointer :: electronpositron
  type(hdr_type) :: hdr,hdr_den
+ type(hightemp_type),pointer :: hightemp => null()
  type(macro_uj_type) :: dtpawuj(0)
  type(orbmag_type) :: dtorbmag
  type(paw_dmft_type) :: paw_dmft
@@ -310,6 +312,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  real(dp),allocatable :: ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
  real(dp),allocatable :: rhowfr(:,:),spinat_dum(:,:),start(:,:),work(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
+ real(dp),allocatable :: vtrial(:,:)
  real(dp),pointer :: cg(:,:),eigen(:),pwnsfac(:,:),rhog(:,:),rhor(:,:)
  real(dp),pointer :: taug(:,:),taur(:,:),xred_old(:,:)
  type(pawrhoij_type),pointer :: pawrhoij(:)
@@ -844,9 +847,16 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
  if (has_to_init) xred_old=xred
 
+!Initialize (eventually) hightemp object
+ if(dtset%useria==6661) then
+   ABI_DATATYPE_ALLOCATE(hightemp,)
+   call hightemp%init(dtset%useric,dtset%mband,dtset%userib,rprimd)
+ end if
+
 !Timing for initialisation period
  call timab(33,2,tsec)
  call timab(34,3,tsec)
+
 
 !###########################################################
 !### 08. Compute new occupation numbers
@@ -858,6 +868,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & (dtset%occopt>=3.and.dtset%occopt<=8) .and. &
 & (dtset%iscf>0 .or. dtset%iscf==-3) .and. dtset%positron/=1 ) then
 
+   if(associated(hightemp)) then
+     call hightemp_get_e_shiftfactor(cg,dtset%ecut,dtset%ecutsm,dtset%effmass_free,&
+&     eigen,gmet,hightemp,dtset%istwfk,kg,dtset%kptns,&
+&     dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,my_nspinor,&
+&     dtset%nband,dtset%nkpt,dtset%nsppol,npwarr)
+   end if
+
    ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
 !  Warning : ideally, results_gs%entropy should not be set up here XG 20011007
 !  Do not take into account the possible STM bias
@@ -865,10 +882,23 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   results_gs%energies%e_fermie,&
 &   dtset%spinmagntarget,dtset%mband,dtset%nband,&
 &   dtset%nelect,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
-&   dtset%occopt,dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk)
+&   dtset%occopt,dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk,&
+&   hightemp)
    if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(args_gs%upawu(:))>=tol8.or.  &
 &   sum(args_gs%jpawu(:))>tol8).and.dtset%dmft_entropy==0) results_gs%energies%entropy=zero
    ABI_DEALLOCATE(doccde)
+
+   if(associated(hightemp)) then
+
+     ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))
+     vtrial(:,:)=zero
+
+     call hightemp%compute_nfreeel(results_gs%energies%e_fermie,1024,dtset%tsmear)
+     call hightemp%compute_e_kin_freeel(results_gs%energies%e_fermie,1024,nfftf,dtset%nspden,&
+&     dtset%tsmear,vtrial)
+
+     ABI_DEALLOCATE(vtrial)
+   end if
 
 !  Transfer occupations to bigdft object:
    if(dtset%usewvl==1 .and. .not. wvlbigdft) then
@@ -1101,13 +1131,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
          ABI_ALLOCATE(rhowfr,(dtset%nfft,dtset%nspden))
 !        write(std_out,*) "mkrhogstate"
          call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+&         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&         hightemp=hightemp)
          call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
          ABI_DEALLOCATE(rhowfg)
          ABI_DEALLOCATE(rhowfr)
        else
          call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+&         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&         hightemp=hightemp)
          if(dtset%usekden==1)then
            call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &           mpi_enreg,npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
@@ -1278,7 +1310,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call timab(35,3,tsec)
 
    call scfcv_init(scfcv_args,atindx,atindx1,cg,cprj,cpus,&
-&   args_gs%dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,&
+&   args_gs%dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,hightemp,&
 &   indsym,initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,&
 &   nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &   pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
@@ -1623,6 +1655,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ! This call should be done inside destroy_sc_dmft
  if ( dtset%usedmft /= 0 ) then
    call data4entropyDMFT_destroy(paw_dmft%forentropyDMFT)
+ end if
+
+ if(dtset%useria==6661) then
+   call hightemp%destroy
+   ABI_DATATYPE_DEALLOCATE(hightemp)
  end if
 
 !Destroy electronpositron datastructure

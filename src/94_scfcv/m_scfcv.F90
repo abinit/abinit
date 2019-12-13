@@ -38,6 +38,7 @@ module m_scfcv
  use m_efield
  use m_entropyDMFT
  use m_hdr
+ use m_hightemp
  use m_dtfil
 
  use defs_datatypes,     only : pseudopotential_type
@@ -104,6 +105,7 @@ module m_scfcv
    type(orbmag_type),pointer :: dtorbmag => null()
    type(electronpositron_type),pointer :: electronpositron => null()
    type(hdr_type),pointer :: hdr => null()
+   type(hightemp_type),pointer :: hightemp => null()
    type(pawfgr_type),pointer :: pawfgr => null()
    type(recursion_type),pointer :: rec_set => null()
    type(results_gs_type),pointer :: results_gs => null()
@@ -181,7 +183,7 @@ contains
 !! SOURCE
 
 subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
-&  dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,&
+&  dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,hightemp,&
 &  indsym,initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,&
 &  nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &  pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
@@ -203,6 +205,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
  type(orbmag_type),intent(in),target :: dtorbmag
 ! type(electronpositron_type),pointer :: electronpositron
  type(hdr_type),intent(in),target :: hdr
+ type(hightemp_type),intent(in),target :: hightemp
  type(pawang_type),intent(in),target :: pawang
  type(pawfgr_type),intent(in),target :: pawfgr
  type(pseudopotential_type),intent(in),target :: psps
@@ -305,6 +308,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
  this%dtpawuj=>dtpawuj
  this%eigen=>eigen
  this%hdr=>hdr
+ this%hightemp=>hightemp
  this%initialized=>initialized
  this%irrzon=>irrzon
  this%mpi_enreg=>mpi_enreg
@@ -409,6 +413,7 @@ type(scfcv_t), intent(inout) :: this
  this%dtorbmag => null()
  this%electronpositron => null()
  this%hdr => null()
+ this%hightemp => null()
  this%pawfgr => null()
  this%rec_set => null()
  this%results_gs => null()
@@ -704,7 +709,7 @@ subroutine scfcv_scfcv(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv
 
    call scfcv_core(this%atindx,this%atindx1,this%cg,this%cprj,this%cpus,this%dmatpawu,this%dtefield,this%dtfil,&
 &    this%dtorbmag,this%dtpawuj,&
-&    this%dtset,this%ecore,this%eigen,electronpositron,this%fatvshift,this%hdr,this%indsym,&
+&    this%dtset,this%ecore,this%eigen,electronpositron,this%fatvshift,this%hdr,this%hightemp,this%indsym,&
 &    this%initialized,this%irrzon,this%kg,this%mcg,this%mcprj,this%mpi_enreg,this%my_natom,this%nattyp,this%ndtpawuj,&
 &    this%nfftf,this%npwarr,&
 &    this%occ,this%paw_dmft,this%pawang,this%pawfgr,this%pawrad,this%pawrhoij,this%pawtab,this%phnons,this%psps,this%pwind,&

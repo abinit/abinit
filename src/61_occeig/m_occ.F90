@@ -403,13 +403,15 @@ end subroutine getnel
 !! SOURCE
 
 subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
-&  nelect,nkpt,nspinor,nsppol,occ,occopt,prtvol,stmbias,tphysel,tsmear,wtk)
+&  nelect,nkpt,nspinor,nsppol,occ,occopt,prtvol,stmbias,tphysel,tsmear,wtk,&
+&  hightemp) ! Optional argument
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,nkpt,nspinor,nsppol,occopt,prtvol
  real(dp),intent(in) :: spinmagntarget,nelect,stmbias,tphysel,tsmear
  real(dp),intent(out) :: entropy,fermie
+ type(hightemp_type),pointer,intent(inout),optional :: hightemp
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol),wtk(nkpt)
@@ -489,7 +491,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 
 !Blanchet - Compute the number of free electrons with corresponding chemical
 !potential and add to nelect bounds.
- if(associated(hightemp)) then
+ if(present(hightemp) .and. associated(hightemp)) then
    call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermilo,1024,nelect_tmp,&
    & tsmear,hightemp%e_shiftfactor,hightemp%ucvol)
    nelectlo=nelectlo+nelect_tmp
@@ -505,7 +507,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 
 !Blanchet - Compute the number of free electrons with corresponding chemical
 !potential and add to nelect bounds.
- if(associated(hightemp)) then
+ if(present(hightemp) .and. associated(hightemp)) then
    call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermihi,1024,nelect_tmp,&
    & tsmear,hightemp%e_shiftfactor,hightemp%ucvol)
    nelecthi=nelecthi+nelect_tmp
@@ -553,7 +555,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 &     nelectmid,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
      !Blanchet - Compute the number of free electrons with corresponding chemical
      !potential and add to nelect bounds.
-     if(associated(hightemp)) then
+     if(present(hightemp) .and. associated(hightemp)) then
        call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermimid,1024,nelect_tmp,&
        & tsmear,hightemp%e_shiftfactor,hightemp%ucvol)
        nelectmid=nelectmid+nelect_tmp
