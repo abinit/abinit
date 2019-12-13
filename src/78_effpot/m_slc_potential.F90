@@ -198,16 +198,11 @@ contains
   subroutine calculate_ref(self)
     class(slc_potential_t), intent(inout) :: self
 
-    integer :: ii
     real(dp) :: spref(1:3*self%nspin), beta
     real(dp), allocatable :: force(:)
-    type(ndcoo_mat_t) :: m2dim
 
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
-
-    ABI_UNUSED(ii)
-    ABI_UNUSED_A(m2dim)
 
     spref(:) = reshape(self%supercell%spin%Sref, (/ 3*self%nspin/))
 
