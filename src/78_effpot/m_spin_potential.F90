@@ -57,7 +57,7 @@ module  m_spin_potential
   type, public, extends(abstract_potential_t) :: spin_potential_t
      integer :: nspin=0
      logical :: has_external_hfield, has_dipdip
-
+     real(dp) :: eref !energy of reference spin state
 
      ! Array or scalar?
      real(dp), allocatable :: external_hfield(:,:)
@@ -300,6 +300,9 @@ contains
     if (present(bfield) ) then
        call self%get_Heff(spin, bfield, etmp)
 
+       ! subtract enery of reference spin configuration
+       etmp = etmp - self%eref
+
        ! only update energy when bfield is asked for.
        if ( present(energy)) then
           energy=energy+etmp
@@ -435,7 +438,6 @@ contains
     end if
     S(:, ispin)=S(:,ispin)-dS
   end subroutine spin_potential_t_get_delta_E
-
 
 
   subroutine finalize(self)
