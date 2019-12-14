@@ -1218,7 +1218,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    ! switch from ikptf to ikpt
    ikptf = ikpt
    call xmpi_allgather(ikptf,ikptf_recv,spaceComm_distrb,ierr)
-   call pawcprj_mpi_allgather(cprj_k,cprj_gat,natom,nspinor*mband,dimlmn,ncpgr,nproc_distrb,&
+   call pawcprj_mpi_allgather(cprj_k,cprj_gat,natom,nspinor*mband,1,dimlmn,ncpgr,nproc_distrb,&
 &   spaceComm_distrb,ierr,rank_ordered=.true.)
    do iproc = 1, nproc_distrb
      icp2=nspinor*mband*(iproc-1)
