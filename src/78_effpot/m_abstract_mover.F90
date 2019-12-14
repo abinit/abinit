@@ -40,6 +40,7 @@ module m_abstract_mover
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
+  use m_hashtable_strval, only: hash_table_t
   implicit none
 !!***
 
@@ -62,9 +63,10 @@ module m_abstract_mover
 
      ! a pointer to the supercell structure
      type(mbsupercell_t), pointer:: supercell=>null() 
+     type(hash_table_t), pointer :: etable=>null()
      ! a label for each mover. For printing out information
      character (len=200) :: label="Abstract Mover"
-     ! time step. 
+     ! time step.
      real(dp) :: dt= 0.0
      ! total time
      real(dp) :: total_time =0.0
@@ -133,13 +135,16 @@ contains
   !>
   !> @param[in]  mode: a integer to define the kind of initial state.
   !----------------------------------------------------------------------
-  subroutine set_initial_state(self, mode)
+  subroutine set_initial_state(self, mode, restart_hist_fname)
     ! set initial positions, spin, etc
     class(abstract_mover_t), intent(inout) :: self
     integer, optional, intent(in) :: mode
+    character(len=*), optional, intent(in) :: restart_hist_fname
+
     MSG_ERROR("set_initial_state not implemented for this mover")
     ABI_UNUSED_A(self)
     ABI_UNUSED(mode)
+    ABI_UNUSED(restart_hist_fname)
   end subroutine set_initial_state
 
   !-------------------------------------------------------------------!
@@ -155,10 +160,11 @@ contains
   !    The other variables are only required if there is coupling with
   !    the mover variable.
   !-------------------------------------------------------------------!
-  subroutine run_one_step(self, effpot, displacement, strain, spin, lwf)
+  subroutine run_one_step(self, effpot, displacement, strain, spin, lwf, energy_table)
     ! run one step. (For MC also?)
     class(abstract_mover_t), intent(inout) :: self
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    type(hash_table_t), optional, intent(inout) :: energy_table
     class(abstract_potential_t), intent(inout) :: effpot
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(effpot)
@@ -166,6 +172,7 @@ contains
     ABI_UNUSED_A(strain)
     ABI_UNUSED_A(spin)
     ABI_UNUSED_A(lwf)
+    ABI_UNUSED_A(energy_table)
     MSG_ERROR("run_one_step not implemented for this mover")
   end subroutine run_one_step
 
@@ -221,5 +228,7 @@ contains
     ABI_UNUSED_A(ihist)
     MSG_ERROR("get_state not implemented for this mover")
   end subroutine get_state
+
+
 
 end module m_abstract_mover
