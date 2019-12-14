@@ -706,7 +706,7 @@ P newkpt: treating      8 bands with npw=     326 for ikpt=   4 by node    0
   7.62E-21 1.89E-21 3.75E-21 3.78E-21 9.59E-21 4.37E-21 5.25E-21 7.59E-21
  dfpt_looppert : ek2=    2.9529458503E+01
           f-sum rule ratio=    1.7863237572E+00
- prteigrs : about to open file t67_1WF1_EIG
+ prteigrs : about to open file t67t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   4  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  8, wtk=  0.25000, kpt=  0.0000  0.0000  0.2500 (reduced coord)
@@ -795,7 +795,7 @@ P newkpt: treating      8 bands with npw=     326 for ikpt=   4 by node    0
   7.62E-21 1.89E-21 3.75E-21 3.78E-21 9.59E-21 4.37E-21 5.25E-21 7.59E-21
  dfpt_looppert : ek2=    2.9529458503E+01
           f-sum rule ratio=    1.7863237572E+00
- prteigrs : about to open file t67_1WF1_EIG
+ prteigrs : about to open file t67t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   4  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  8, wtk=  0.25000, kpt=  0.0000  0.0000  0.2500 (reduced coord)
@@ -876,7 +876,7 @@ P newkpt: treating      8 bands with npw=     326 for ikpt=   4 by node    0
   4.83E-21 8.60E-21 4.23E-21 2.25E-21 4.94E-21 3.75E-21 7.00E-21 1.12E-21
  dfpt_looppert : ek2=    8.3052196703E+00
           f-sum rule ratio=    8.9506005637E-01
- prteigrs : about to open file t67_1WF1_EIG
+ prteigrs : about to open file t67t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   4  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  8, wtk=  0.25000, kpt=  0.0000  0.0000  0.2500 (reduced coord)

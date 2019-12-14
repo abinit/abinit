@@ -670,7 +670,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     187.750     187.749
  Mean square residual over all n,k,spin=   39.470E-30; max=  96.966E-30
  dfpt_looppert : ek2=    1.8001398769E+01
           f-sum rule ratio=    1.2714040728E+00
- prteigrs : about to open file t06_1WF1_EIG
+ prteigrs : about to open file t06t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  16  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  4, wtk=  0.06250, kpt=  0.2500  0.2500  0.2500 (reduced coord)
