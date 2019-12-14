@@ -1669,7 +1669,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
    else
      ! Get prefix from input file. Default values are provided
      filnam(1) = input_path
-     filnam(2) = "run.abo"
+     filnam(2) = trim(input_path)//".abo"
      filnam(3) = "i"
      filnam(4) = "o"
      filnam(5) = "t"
@@ -1677,7 +1677,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      fname = basename(input_path)
      i1 = index(fname, ".")
      if (i1 /= 0) then
-       ! ext is present --> use prefix to initialize filnam
+       ! file ext is present --> use prefix to initialize filnam
        i2 = index(input_path, ".", back=.True.)
        filnam(2) = input_path(:i2) // "abo"
        filnam(3) = fname(:i1-1) // "i"
@@ -1693,7 +1693,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      ABI_MALLOC(intarr, (marr))
      jdtset = 0
 
-     ! Allow user to override default values
+     ! Allow user to change default values
      call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "output_file", tread, 'KEY', key_value=filnam(2))
      call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "indata_prefix", tread, 'KEY', key_value=filnam(3))
      call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "outdata_prefix", tread, 'KEY', key_value=filnam(4))
