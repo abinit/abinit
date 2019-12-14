@@ -1029,7 +1029,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
    !call print_zeff(my_unt, db%zeff_raw, db%cryst, title=' Born effectives charges before chneut: ')
  end if
  if (db%has_quadrupoles) then
-   write(my_unt, '(a)') ' Dynamical Quadrupoles: '
+   write(my_unt, '(a)') ' Dynamical Quadrupoles in Cartesian Coordinates: '
    do iatom=1,db%natom
      do idir=1,3
        write(my_unt,'(2(a,i0),3(/,3es16.6))')' iatom: ', iatom, ' idir: ', idir, &
@@ -2864,10 +2864,11 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
 
  call wrtout(std_out, sjoin(ch10, "Building W(R,r) using ngqpt: ", ltoa(ngqpt), &
    ", with nprocs_rpt:", itoa(db%nprocs_rpt)), do_flush=.True.)
- call wrtout(std_out, "Q-mesh qshift:")
+ call wrtout(std_out, " Q-mesh qshift:")
  do ii=1,nqshift
    call wrtout(std_out, ltoa(qshift(:, ii)))
  end do
+ call wrtout(std_out, "")
  call wrtout(std_out, " It may take some time depending on the number of MPI procs, ngqpt and nfft points.")
  call wrtout(std_out, " Use boxcutmin < 2.0 (> 1.1) to decrease nfft, reduce memory requirements and speedup the calculation.")
 
@@ -6012,6 +6013,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  character(len=fnlen) :: dump_path !tmp_fname,
 !arrays
  integer :: ngfft(18)
+ real(dp) :: vals2(2)
  real(dp),pointer :: this_qpts(:,:)
  real(dp),allocatable :: file_v1r(:,:,:,:),long_v1r(:,:,:,:),tmp_v1r(:,:,:,:)
  real(dp),allocatable :: maxw(:,:), all_rpt(:,:), all_rmod(:)
@@ -6117,6 +6119,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  do iq=1,this_nqpt
 
    if (interpolated == 0) then
+     call wrtout(std_out, sjoin("Treating qpt:", ktoa(this_qpts(:,iq))))
      ! Read data from DVDB file, reconstruct all 3*natom perturbations in tmp_v1r.
      call dvdb%readsym_allv1(dvdb%findq(this_qpts(:, iq)), cplex, nfft, ngfft, tmp_v1r, dvdb%comm)
 
@@ -6134,25 +6137,20 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
 
    else
      ! Interpolate my_npert potentials for this q-point.
+     call wrtout(std_out, sjoin("Interpolating qpt:", ktoa(this_qpts(:,iq))))
      call dvdb%ftinterp_qpt(this_qpts(:, iq), nfft, ngfft, file_v1r, comm_rpt) !, add_lr=?)
      cplex = 2
    end if
 
-   ! Compute the periodic part of the LR term (note add_qphase = 0)
-   long_v1r = zero
-   !if (dvdb%has_dielt .and. (dvdb%has_zeff .or. dvdb%has_quadrupoles)) then
-   if (dvdb%add_lr == 1) then
-     do imyp=1,dvdb%my_npert
-       idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
-       do ispden=1,min(dvdb%nspden, 2)
-         call dvdb%get_v1r_long_range(this_qpts(:,iq), idir, ipert, nfft, ngfft, long_v1r(:,:,ispden,imyp), add_qphase=0)
-       end do
+   ! Compute the periodic part of the LR term (note add_qphase = 0 because we want the periodic part)
+   do imyp=1,dvdb%my_npert
+     idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
+     do ispden=1,min(dvdb%nspden, 2)
+       call dvdb%get_v1r_long_range(this_qpts(:,iq), idir, ipert, nfft, ngfft, long_v1r(:,:,ispden,imyp), add_qphase=0)
      end do
-   end if
-   !end if
+   end do
 
    ! Compute average and write to file.
-   !write(std_out,"(a)")sjoin("=== For DVDB q-point:", ktoa(this_qpts(:,iq)), "===")
    if (my_rank /= master) cycle
 
    do imyp=1,dvdb%my_npert
@@ -6160,30 +6158,32 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
      do ispden=1,dvdb%nspden
 
 #ifdef HAVE_NETCDF
-       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_avg"), &
-                            sum(file_v1r(:,:,ispden,imyp), dim=2) / nfft, &
+       vals2 = sum(file_v1r(:,:,ispden,imyp), dim=2) / nfft
+       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_avg"), vals2, &
                             start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
        NCF_CHECK(ncerr)
-       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_abs_avg"), &
-                            sum(abs(file_v1r(:,:,ispden,imyp)), dim=2) / nfft, &
+
+       vals2 = sum(abs(file_v1r(:,:,ispden,imyp)), dim=2) / nfft
+       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_abs_avg"), vals2, &
                             start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
        NCF_CHECK(ncerr)
-       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1lr_avg"), &
-                            sum(long_v1r(:,:,ispden,imyp), dim=2) / nfft, &
+
+       vals2 = sum(long_v1r(:,:,ispden,imyp), dim=2) / nfft
+       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1lr_avg"), vals2, &
                             start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
        NCF_CHECK(ncerr)
-       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1lr_abs_avg"), &
-                            sum(abs(long_v1r(:,:,ispden,imyp)), dim=2) / nfft, &
+       vals2 = sum(abs(long_v1r(:,:,ispden,imyp)), dim=2) / nfft
+       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1lr_abs_avg"), vals2, &
                             start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
        NCF_CHECK(ncerr)
-       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scfmlr_avg"), &
-                            sum(file_v1r(:,:,ispden,imyp) - long_v1r(:,:,ispden,imyp), dim=2) / nfft,&
+       vals2 = sum(file_v1r(:,:,ispden,imyp) - long_v1r(:,:,ispden,imyp), dim=2) / nfft
+       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scfmlr_avg"), vals2, &
                             start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
        NCF_CHECK(ncerr)
 #endif
 
-       ! Debugging section.
 #if 0
+       ! Debugging section.
        write(std_out, "(a)")"--- !DVDB_LONGRANGE_DIFF"
        write(std_out,"(3a)")"  qpoint: ", trim(ktoa(this_qpts(:,iq))), ","
        write(std_out,"(a,i0,a)")"  iq: ", iq, ","
@@ -6539,7 +6539,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
  integer :: n1, n2, n3, nfftot, ig, iphase !, timerev_q !, ii !, jj, kk
  integer :: ii, jj, kk, ll, mm, ifft, ispden
  real(dp) :: fac, qGZ, qGS, denom, denom_inv, qtau !, ll
- real(dp) :: re, im, phre, phim, qg_mod, gsq_max !, qdamp
+ real(dp) :: re, im, phre, phim, qg_mod, gsq_max
 !arrays
  !integer :: symq(4,2,db%cryst%nsym)
  integer, allocatable :: gfft(:,:)
@@ -6551,6 +6551,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
 ! *************************************************************************
 
  iphase = 1; if (present(add_qphase)) iphase = add_qphase
+ !my_bmask = 2**0 + 2**1 + 2**2; if present(bmask) my_bmask = bmask
 
  ! Make sure FFT parallelism is not used
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3); nfftot = product(ngfft(1:3))
@@ -6648,13 +6649,13 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
  ABI_FREE(gfft)
 
  ! FFT to get the long-range potential in r space
- call fourdp(2, v1G_lr, v1r_lr, 1, db%mpi_enreg, nfft, 1, ngfft,0)
+ call fourdp(2, v1G_lr, v1r_lr, 1, db%mpi_enreg, nfft, 1, ngfft, 0)
  !v1r_lr = zero ! Comment this line to have only efield
 
  ! Add term due to Electric field.
  if (db%has_efield) then
-   ! TODO: Change API to account for ispden/isppol. return nspden LR pot although only electric field
-   ! part depends on nsppde
+   ! TODO: Change API to account for ispden/isppol. return nspden LR part
+   ! although only the electric field part depends on nsppden.
    ABI_CHECK(db%nspden == 1, "nspden != 1 not coded")
    ispden = 1
    qG_red = qpt
@@ -6738,7 +6739,7 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_path, ddb)
    ddb_ptr => ddb
  end if
 
- ! Get Dielectric Tensor
+ ! Get dielectric Tensor
  iblock_dielt = ddb_ptr%get_dielt(rfmeth1, dielt)
  dvdb%dielt = dielt
 
@@ -6747,6 +6748,7 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_path, ddb)
  ABI_MALLOC(zeff, (3, 3, dvdb%natom))
  ABI_MALLOC(zeff_raw, (3, 3, dvdb%natom))
  iblock_dielt_zeff = ddb_ptr%get_dielt_zeff(dvdb%cryst, rfmeth1, chneut, selectz0, dielt, zeff, zeff_raw=zeff_raw)
+
  if (my_rank == master) then
    if (iblock_dielt_zeff == 0) then
      call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_path))
@@ -6843,7 +6845,9 @@ subroutine dvdb_load_efield(dvdb, pot_paths, comm)
    do ifft=1,nfft
      vec3 = dvdb%v1r_efield_cart(:, ifft, ispden)
      do idir=1,3
-       dvdb%v1r_efield_cart(idir, ifft, ispden) = dot_product(vec3, dvdb%cryst%gprimd(:,idir))
+       !dvdb%v1r_efield_cart(idir, ifft, ispden) = dot_product(vec3, dvdb%cryst%gprimd(:,idir))
+       ! v1_e is a contravariant vector so it transforms as the coordinates of the position vector.
+       dvdb%v1r_efield_cart(idir, ifft, ispden) = dot_product(dvdb%cryst%rprimd(idir,:), vec3)
      end do
    end do
  end do

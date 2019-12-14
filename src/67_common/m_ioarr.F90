@@ -1070,10 +1070,10 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
      ! Check important dimensions.
      ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
-     if (fform /= fform_den) then
-       write(msg, "(3a, 2(a, i0))")' File: ',trim(my_fname),ch10,' is not a density file. fform: ',fform,", expecting: ", fform_den
-       MSG_WARNING(msg)
-     end if
+     !if (fform /= fform_den) then
+     !  write(msg, "(3a, 2(a, i0))")' File: ',trim(my_fname),ch10,' is not a density file. fform: ',fform,", expecting: ", fform_den
+     !  MSG_WARNING(msg)
+     !end if
      cplex_file = 1
      if (ohdr%pertcase /= 0) then
        cplex_file = 2; if (ohdr%qptn(1)**2 + ohdr%qptn(2)**2 + ohdr%qptn(3)**2 <1.d-14) cplex_file= 1
@@ -1095,10 +1095,10 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
      ! Check important dimensions.
      ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
-     if (fform /= fform_den) then
-       write(msg, "(2a, 2(a, i0))")' File: ',trim(my_fname),' is not a density file: fform= ',fform,", expecting:", fform_den
-       MSG_WARNING(msg)
-     end if
+     !if (fform /= fform_den) then
+     !  write(msg, "(2a, 2(a, i0))")' File: ',trim(my_fname),' is not a density file: fform= ',fform,", expecting:", fform_den
+     !  MSG_WARNING(msg)
+     !end if
 
      cplex_file = 1
      if (ohdr%pertcase /= 0) then
@@ -1227,7 +1227,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
            mybase  = 1 + cplex * (n1 * (i2-1 + n2*(i3_local-1)))
            globase = 1 + cplex * (n1 * (i2-1 + n2*(i3-1)))
            call denpot_spin_convert(rhor_file,ohdr%nspden,orhor,nspden,fform,&
-&                  istart_in=globase,istart_out=mybase,nelem=n1*cplex)
+                                    istart_in=globase,istart_out=mybase,nelem=n1*cplex)
          end do
        end do
      end if
