@@ -4,6 +4,8 @@ from __future__ import print_function, division, absolute_import #, unicode_lite
 
 import sys
 import os
+#os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Psps_for_tests"))
+#print("ABI_PSPDIR:", os.environ["ABI_PSPDIR"])
 import platform
 import time
 
@@ -119,8 +121,7 @@ def make_abinit(num_threads, touch_patterns=None):
     """
     Find the top-level directory of the build tree and issue `make -j num_threads`.
 
-    Returns:
-        Exit status of the subprocess.
+    Returns: Exit status of the subprocess.
     """
     top = find_top_build_tree(".", with_abinit=False)
 

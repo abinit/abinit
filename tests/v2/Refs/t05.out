@@ -415,7 +415,7 @@ P newkpt: treating      4 bands with npw=     172 for ikpt=   2 by node    0
   4.39E-23 6.30E-23 3.50E-23 3.50E-23
  dfpt_looppert : ek2=    4.0425899627E+00
           f-sum rule ratio=    9.9240807077E-01
- prteigrs : about to open file t05_1WF1_EIG
+ prteigrs : about to open file t05t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   2  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  4, wtk=  0.50000, kpt=  0.0000  0.0000  0.1250 (reduced coord)

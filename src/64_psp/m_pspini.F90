@@ -186,7 +186,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 
  DBG_ENTER("COLL")
 
-!Keep track of time spent in this subroutine
+ ! Keep track of time spent in this subroutine
  call timab(15,1,tsec)
 
 !-------------------------------------------------------------
