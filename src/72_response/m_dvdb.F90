@@ -6636,8 +6636,6 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
    v1G_lr(2,ig) = phim * re + phre * im
  end do
 
- ABI_FREE(gfft)
-
  ! FFT to get the long-range potential in r-space
  call fourdp(2, v1G_lr, v1r_lr, 1, db%mpi_enreg, nfft, 1, ngfft, 0)
 
@@ -6694,6 +6692,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
  ! Multiply by exp(i q.r)
  if (iphase == 1) call times_eikr(qpt, ngfft, nfft, 1, v1r_lr)
 
+ ABI_FREE(gfft)
  ABI_FREE(v1G_lr)
 
 end subroutine dvdb_get_v1r_long_range
