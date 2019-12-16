@@ -1791,11 +1791,12 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
   real(dp),allocatable :: cg_k(:,:),cg1_kb(:,:),cg1_kg(:,:),cgrvtrial(:,:)
   real(dp),allocatable :: cgqb(:,:),cgqg(:,:),cwavef(:,:),ffnlb(:,:,:,:),ffnlg(:,:,:,:)
   real(dp),allocatable :: ghc(:,:),ghcall(:,:),gsc(:,:),gvnlc(:,:)
-  real(dp),allocatable :: kinpw(:),kk_paw(:,:,:),kpg_k(:,:),kpg_k_dummy(:,:),kptnsb(:,:),kptnsg(:,:)
+  real(dp),allocatable :: kinpw(:),kk_paw(:,:,:),kpg_k(:,:),kpg_k_dummy(:,:),kptnsb(:,:),kptnsball(:,:,:,:),kptnsg(:,:)
   real(dp),allocatable :: ph1d(:,:),ph3d(:,:,:),phkxred(:,:),pwnsfac_k(:,:)
   real(dp),allocatable :: smat_inv(:,:,:),smat_kk(:,:,:)
   real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vtrial(:,:)
-  real(dp),allocatable :: ylm_k(:,:),ylmb(:,:),ylmg(:,:),ylmgr_k(:,:,:),ylmgrb(:,:,:),ylmgrg(:,:,:)
+  real(dp),allocatable :: ylm_k(:,:),ylmb(:,:),ylmball(:,:,:,:),ylmg(:,:),ylmgr_k(:,:,:)
+  real(dp),allocatable :: ylmgrb(:,:,:),ylmgrball(:,:,:,:,:),ylmgrg(:,:,:)
   type(pawcprj_type),allocatable :: cprj_buf(:,:),cprj_k(:,:),cprj_kb(:,:),cprj1_kb(:,:)
   type(pawcprj_type),allocatable :: cprj_kg(:,:),cprj1_kg(:,:),cwaveprj(:,:)
 
@@ -1914,6 +1915,9 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
 
   optder=0 ! ylm only, no d ylm/dk
   ABI_ALLOCATE(kptnsb,(3,dtset%nkpt))
+  ABI_ALLOCATE(kptnsball,(3,dtset%nkpt,3,2))
+  ABI_ALLOCATE(ylmball,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang,3,2))
+  ABI_ALLOCATE(ylmgrball,(dtset%mpw*dtset%mkmem,3+6*(optder/2),psps%mpsang*psps%mpsang,3,2))
   ABI_ALLOCATE(ylmb,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang))
   ABI_ALLOCATE(ylmgrb,(dtset%mpw*dtset%mkmem,3+6*(optder/2),psps%mpsang*psps%mpsang))
   ABI_ALLOCATE(kptnsg,(3,dtset%nkpt))
@@ -1922,6 +1926,22 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
   ABI_ALLOCATE(nband_dum,(dtset%nkpt*dtset%nsppol))
   nband_dum(:)=nband_k
 
+  ! set up all ylm's at k+dkb. Notice that this kpt might differ by a periodic wrap-around
+  ! from the one determined from dtorbmag%ikpt_dk(ikpt,bfor,bdir)
+  do bdir = 1, 3
+     do bfor = 1, 2
+        bsigma = 3-2*bfor
+        dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
+        do ikpt_ctr=1, dtset%nkpt
+           kptnsball(:,ikpt_ctr,bdir,bfor) = dtset%kptns(:,ikpt_ctr)+dkb(:)
+        end do
+        kptnsb(:,:) = kptnsball(:,:,bdir,bfor)
+        call initylmg(gprimd,kg,kptnsb,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
+             & nband_dum,dtset%nkpt,npwarr,dtset%nsppol,optder,rprimd,ylmb,ylmgrb)
+        ylmball(:,:,bdir,bfor) = ylmb(:,:)
+        ylmgrball(:,:,:,bdir,bfor) = ylmgrb(:,:,:)
+     end do
+  end do
 
   smatrix_ddkflag = 1
   itrs = 0
@@ -1989,25 +2009,25 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
                  npw_kb = npwarr(ikptbi)
                  pwind_kb(1:npw_k) = pwind(ikg+1:ikg+npw_k,bfor,bdir)
                  ! set up all shifted kpts at kpointb
-                 do ikpt_ctr=1, dtset%nkpt
-                    kptnsb(:,ikpt_ctr) = dtset%kptns(:,ikpt_ctr)+dkb(:)
-                 end do
-                 ! set up all ylm's at k+dkb. Notice that this kpt might differ by a periodic wrap-around
-                 ! from the one determined from dtorbmag%ikpt_dk(ikpt,bfor,bdir)
-                 call initylmg(gprimd,kg,kptnsb,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
-                      & nband_dum,dtset%nkpt,npwarr,dtset%nsppol,optder,rprimd,ylmb,ylmgrb)
+                 ! do ikpt_ctr=1, dtset%nkpt
+                 !    kptnsb(:,ikpt_ctr) = dtset%kptns(:,ikpt_ctr)+dkb(:)
+                 ! end do
+                 ! ! set up all ylm's at k+dkb. Notice that this kpt might differ by a periodic wrap-around
+                 ! ! from the one determined from dtorbmag%ikpt_dk(ikpt,bfor,bdir)
+                 ! call initylmg(gprimd,kg,kptnsb,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
+                 !      & nband_dum,dtset%nkpt,npwarr,dtset%nsppol,optder,rprimd,ylmb,ylmgrb)
 
                  ! for use in mkffnl, differs by wraparounds from ikpt_dk
-                 kpointb(:) = kptnsb(:,ikpt)
+                 kpointb(:) = kptnsball(:,ikpt,bdir,bfor)
 
                  ABI_ALLOCATE(ylm_k,(npw_k,psps%mpsang*psps%mpsang))
                  do ilm=1,psps%mpsang*psps%mpsang
-                    ylm_k(1:npw_k,ilm)=ylmb(1+ikg:npw_k+ikg,ilm)
+                    ylm_k(1:npw_k,ilm)=ylmball(1+ikg:npw_k+ikg,ilm,bdir,bfor)
                  end do
 
                  ABI_ALLOCATE(ylmgr_k,(npw_k,3,psps%mpsang*psps%mpsang*psps%useylm))
                  do ilm=1,psps%mpsang*psps%mpsang
-                    ylmgr_k(1:npw_k,1:3,ilm)=ylmgrb(1+ikg:npw_k+ikg,1:3,ilm)
+                    ylmgr_k(1:npw_k,1:3,ilm)=ylmgrball(1+ikg:npw_k+ikg,1:3,ilm,bdir,bfor)
                  end do
 
                  ABI_ALLOCATE(phkxred,(2,dtset%natom))
@@ -2189,27 +2209,27 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
                     npw_kg = npwarr(ikptgi)
                     pwind_kg(1:npw_k) = pwind(ikg+1:ikg+npw_k,gfor,gdir)
 
-                    ! set up all shifted kpts at kpointg
-                    do ikpt_ctr=1, dtset%nkpt
-                       kptnsg(:,ikpt_ctr) = dtset%kptns(:,ikpt_ctr)+dkg(:)
-                    end do
+                    ! ! set up all shifted kpts at kpointg
+                    ! do ikpt_ctr=1, dtset%nkpt
+                    !    kptnsg(:,ikpt_ctr) = dtset%kptns(:,ikpt_ctr)+dkg(:)
+                    ! end do
 
-                    ! set up all ylm's at k+dkg. Notice that this kpt might differ by a periodic wrap-around
-                    ! from the one determined from dtorbmag%ikpt_dk(ikpt,gfor,gdir)
-                    call initylmg(gprimd,kg,kptnsg,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
-                         & nband_dum,dtset%nkpt,npwarr,dtset%nsppol,optder,rprimd,ylmg,ylmgrg)
+                    ! ! set up all ylm's at k+dkg. Notice that this kpt might differ by a periodic wrap-around
+                    ! ! from the one determined from dtorbmag%ikpt_dk(ikpt,gfor,gdir)
+                    ! call initylmg(gprimd,kg,kptnsg,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
+                    !      & nband_dum,dtset%nkpt,npwarr,dtset%nsppol,optder,rprimd,ylmg,ylmgrg)
 
                     ! for use in mkffnl, differs by wraparounds from ikpt_dk
-                    kpointg(:) = kptnsg(:,ikpt)
+                    kpointg(:) = kptnsball(:,ikpt,gdir,gfor)
 
                     ABI_ALLOCATE(ylm_k,(npw_k,psps%mpsang*psps%mpsang))
                     do ilm=1,psps%mpsang*psps%mpsang
-                       ylm_k(1:npw_k,ilm)=ylmb(1+ikg:npw_k+ikg,ilm)
+                       ylm_k(1:npw_k,ilm)=ylmball(1+ikg:npw_k+ikg,ilm,gdir,gfor)
                     end do
 
                     ABI_ALLOCATE(ylmgr_k,(npw_k,3,psps%mpsang*psps%mpsang*psps%useylm))
                     do ilm=1,psps%mpsang*psps%mpsang
-                       ylmgr_k(1:npw_k,1:3,ilm)=ylmgrb(1+ikg:npw_k+ikg,1:3,ilm)
+                       ylmgr_k(1:npw_k,1:3,ilm)=ylmgrball(1+ikg:npw_k+ikg,1:3,ilm,gdir,gfor)
                     end do
 
                     ABI_ALLOCATE(phkxred,(2,dtset%natom))
@@ -2427,8 +2447,11 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
   ABI_DEALLOCATE(pwnsfac_k)
 
   ABI_DEALLOCATE(kptnsb)
+  ABI_DEALLOCATE(kptnsball)
   ABI_DEALLOCATE(ylmb)
   ABI_DEALLOCATE(ylmgrb)
+  ABI_DEALLOCATE(ylmball)
+  ABI_DEALLOCATE(ylmgrball)
   ABI_DEALLOCATE(kptnsg)
   ABI_DEALLOCATE(ylmg)
   ABI_DEALLOCATE(ylmgrg)
