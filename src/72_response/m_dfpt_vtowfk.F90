@@ -240,7 +240,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !arrays
  logical,allocatable :: cycle_bands(:)
  integer,allocatable :: cycle_band_procs(:)
- integer :: bands_treated_now(nband_k)
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwave0(:,:),cwave1(:,:),cwavef(:,:)
  real(dp),allocatable :: dcwavef(:,:),gh1c_n(:,:),gh0c1(:,:)
@@ -348,10 +347,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
    if( (mpi_enreg%proc_distrb(ikpt, iband,isppol)/=me)) cycle
    iband_me = iband_me + 1
  
-   bands_treated_now = 0
-   bands_treated_now(iband) = 1
-   call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
- 
 !unit_me = 300+iband
 unit_me = 6
 !  Get ground-state wavefunctions
@@ -436,7 +431,7 @@ unit_me = 6
      if ( (ipert/=natom+10 .and. ipert/=natom+11) .or. abs(occ_k(iband))>tol8 ) then
        call proc_distrb_cycle_band_procs(cycle_band_procs,mpi_enreg%proc_distrb,ikpt,isppol)
        nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
-       call dfpt_cgwf(iband,iband_me,bands_treated_now,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
+       call dfpt_cgwf(iband,iband_me,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
 &       cycle_band_procs,rf2,dcwavef,&
 &       eig0nk,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
 &       idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,nband_me,dtset%nbdbuf,dtset%nline,&
@@ -462,7 +457,7 @@ unit_me = 6
          edocc_k=zero
          tocceig=1
        else
-         call corrmetalwf1(bands_treated_now,cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,edocc_k,eig1_k,fermie1,gh0c1,&
+         call corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,edocc_k,eig1_k,fermie1,gh0c1,&
 &         iband,ibgq,icgq,gs_hamkq%istwf_k,mcgq,mcprjq,mpi_enreg,natom,nband_k,npw1_k,nspinor,&
 &         occ_k,rocceig,0,gs_hamkq%usepaw,tocceig)
        end if
@@ -865,7 +860,7 @@ end subroutine full_active_wf1
 !!
 !! SOURCE
 
-subroutine corrmetalwf1(bands_treated_now,cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,edocc,eig1,fermie1,ghc,iband, &
+subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,edocc,eig1,fermie1,ghc,iband, &
 &          ibgq,icgq,istwf_k,mcgq,mcprjq,mpi_enreg,natom,nband,npw1,nspinor,occ,rocceig,timcount,&
 &          usepaw,wf_corrected)
 
@@ -876,7 +871,6 @@ subroutine corrmetalwf1(bands_treated_now,cgq,cprjq,cwavef,cwave1,cwaveprj,cwave
  real(dp),intent(in) :: fermie1
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- integer,intent(in) :: bands_treated_now(nband)
  logical,intent(in) :: cycle_bands(nband)
  real(dp),intent(in) :: cgq(2,mcgq),cwavef(2,npw1*nspinor)
  real(dp),intent(in) :: eig1(2*nband**2),ghc(2,npw1*nspinor),occ(nband),rocceig(nband,nband)
@@ -891,6 +885,7 @@ subroutine corrmetalwf1(bands_treated_now,cgq,cprjq,cwavef,cwave1,cwaveprj,cwave
  real(dp) :: facti,factr,invocc
  real(dp) :: edocc_tmp
 !arrays
+ integer :: bands_treated_now(nband)
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwcorr(:,:)
 ! type(pawcprj_type) :: cwaveprj1_corr(natom,nspinor*usepaw)
@@ -900,6 +895,10 @@ subroutine corrmetalwf1(bands_treated_now,cgq,cprjq,cwavef,cwave1,cwaveprj,cwave
  DBG_ENTER("COLL")
 
  call timab(214+timcount,1,tsec)
+
+ bands_treated_now = 0
+ bands_treated_now(iband) = 1
+ call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
 
 !At this stage, the 1st order function cwavef is orthogonal to cgq (unlike when it is input to dfpt_cgwf).
 !Here, restore the "active space" content of the 1st-order wavefunction, to give cwave1 .

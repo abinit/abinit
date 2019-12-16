@@ -363,6 +363,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(pawrhoij_type),pointer :: pawrhoij_pert(:)
  type(ddb_type) :: ddb
 
+ integer :: mcg_tmp, iband_me, icg_tmp, npw 
+ real(dp), allocatable :: cg_tmp(:,:)
 
 ! ***********************************************************************
 
@@ -1000,6 +1002,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if(xmpi_paral==1) then
      ABI_ALLOCATE(mpi_enreg%proc_distrb,(nkpt_rbz,dtset%mband,dtset%nsppol))
      call distrb2(dtset%mband,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,dtset%nsppol,mpi_enreg)
+print *, 'nkpt_rbz ', nkpt_rbz
    else
      mpi_enreg%my_kpttab(:)=(/(ii,ii=1,nkpt_rbz)/)
    end if
@@ -1078,6 +1081,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call hdr0%update(bantot_rbz,etotal,fermie,&
      residm,rprimd,occ_rbz,pawrhoij_pert,xred,dtset%amu_orig(:,1),&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+print *, ' fermie ', fermie
 
 !  Initialize GS wavefunctions at k
    ireadwf0=1; formeig=0 ; ask_accurate=1 ; optorth=0
@@ -1101,6 +1105,57 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &            formeig, istwfk_rbz, kpt_rbz, nkpt_rbz, npwarr, &
 &            cg, eigen=eigen0, occ=occ_rbz)
   
+print *, ' occ_rbz ', occ_rbz
+
+!DEBUG
+!mcg=mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
+   mcg_tmp = mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
+   ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
+!TODO MJV: this needs to be a distributed inwffil reading of the whole WFK, reading only my bands!
+   call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
+&   formeig,hdr0,ireadwf0,istwfk_rbz,kg,&
+&   kpt_rbz,dtset%localrdwf,dtset%mband,mcg_tmp,&
+&   mkmem_rbz,mpi_enreg,mpw,nband_rbz,dtset%ngfft,nkpt_rbz,npwarr,&
+&   dtset%nsppol,nsym,occ_rbz,optorth,dtset%symafm,&
+&   dtset%symrel,dtset%tnons,dtfil%unkg,wffgs,wfftgs,&
+&   dtfil%unwffgs,dtfil%fnamewffk,wvl)
+   call timab(144,2,tsec)
+!  Close wffgs%unwff, if it was ever opened (in inwffil)
+   if (ireadwf0==1) then
+     call WffClose(wffgs,ierr)
+   end if
+   !transfer to local array
+   icg=0
+   icg_tmp=0
+print *, 'mkmem_rbz ', mkmem_rbz
+print *, 'nband_rbz ', nband_rbz
+print *, ' mcg, mcg_tmp ', mcg, mcg_tmp
+print *, 'shapes ', shape(cg), "  ", shape(cg_tmp)
+   do isppol=1, nsppol
+     do ikpt=1, nkpt_rbz
+       if (.not. any(mpi_enreg%proc_distrb(ikpt,:,isppol) == mpi_enreg%me_band)) cycle
+       npw = npwarr(ikpt)
+       iband_me = 0
+       do iband=1, nband_rbz(ikpt+nkpt_rbz*(isppol-1))
+print *, 'mpi_enreg%proc_distrb(ikpt,iband,isppol) ', mpi_enreg%proc_distrb(ikpt,iband,isppol), ' meband ', mpi_enreg%me_band
+         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_band) then
+           icg_tmp = icg_tmp + npw
+           cycle
+         end if
+         iband_me = iband_me + 1
+print *, 'is ik ib kpt icg ', isppol, ikpt, iband, kpt_rbz(:,ikpt), icg
+if (sum(abs(cg(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw))) > tol4) then
+print *, ' diff in cg ', cg(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+end if 
+         cg(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+         icg = icg + npw
+         icg_tmp = icg_tmp + npw
+       end do
+     end do
+   end do
+   ABI_DEALLOCATE(cg_tmp)
+!ENDDEBUG
+
    call timab(144,2,tsec)
 
    ! Update energies GS energies at k
@@ -1264,6 +1319,50 @@ print *, 'cgq ', cgq
 &            formeig, istwfk_rbz, kpq_rbz, nkpt_rbz, npwar1, &
 &            cgq, eigen=eigenq, occ=occ_rbz)
      call timab(144,2,tsec)
+!DEBUG
+! mcgq=      mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
+   mcg_tmp = mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
+   ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
+
+     call timab(144,1,tsec)
+!     call inwffil(ask_accurate,cgq,dtset,dtset%ecut,ecut_eff,eigenq,dtset%exchn2n3d,&
+!&     formeig,hdr,&
+!&     ireadwf0,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,dtset%mband,mcgq,&
+     call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigenq,dtset%exchn2n3d,&
+&     formeig,hdr,&
+&     ireadwf0,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,dtset%mband,mcg_tmp,&
+&     mkqmem_rbz,mpi_enreg,mpw1,nband_rbz,dtset%ngfft,nkpt_rbz,npwar1,&
+&     dtset%nsppol,nsym,occ_rbz,optorth,&
+&     dtset%symafm,dtset%symrel,dtset%tnons,&
+&     dtfil%unkg1,wffkq,wfftkq,dtfil%unwffkq,dtfil%fnamewffq,wvl)
+   !transfer to local array
+   icg=0
+   icg_tmp=0
+   do isppol=1, nsppol
+     do ikpt=1, mkqmem_rbz
+       npw = npwar1(ikpt)
+       iband_me = 0
+       do iband=1, nband_rbz(ikpt+nkpt_rbz*(isppol-1))
+         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_band) then
+           icg_tmp = icg_tmp + npw
+           cycle
+         end if
+         iband_me = iband_me + 1
+print *, 'is ik ib cgq ', isppol, ikpt, iband
+print *, ' diff in cgq ', cgq(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+         cgq(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+         icg = icg + npw
+         icg_tmp = icg_tmp + npw
+       end do
+     end do
+   end do
+   ABI_DEALLOCATE(cg_tmp)
+ 
+!    Close dtfil%unwffkq, if it was ever opened (in inwffil)
+     if (ireadwf0==1) then
+       call WffClose(wffkq,ierr)
+     end if
+!ENDDEBUG
 
      if (.not.kramers_deg) then
        !SPr: later "make" a separate WFQ file for "-q"
@@ -1358,6 +1457,7 @@ print *, 'cgq ', cgq
      call getnel(docckqde,dosdeltae,eigenq,entropy,fermie,maxocc,dtset%mband,&
 &     nband_rbz,nelectkq,nkpt_rbz,dtset%nsppol,occkq,dtset%occopt,option,&
 &     dtset%tphysel,dtset%tsmear,fake_unit,wtk_rbz)
+print *, ' occkq ', occkq
 !    Compare nelect at k and nelelect at k+q
      write(message, '(a,a,a,es16.6,a,es16.6,a)')&
 &     ' dfpt_looppert : total number of electrons, from k and k+q',ch10,&

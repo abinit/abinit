@@ -704,7 +704,6 @@ logical function mpi_distrib_is_ok(MPI_enreg,nband,nkpt,nkpt_current_proc,nsppol
 
  mpi_distrib_is_ok=.true.
 
-print *, 'MPI_enreg%paralbd ',MPI_enreg%paralbd
  if (MPI_enreg%paralbd==0) then
    if (MPI_enreg%nproc_kpt-floor(nsppol*nkpt*one/nkpt_current_proc)>=nkpt_current_proc) then
      mpi_distrib_is_ok=.false.
@@ -2509,13 +2508,16 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 
 !    No possible band parallelization
      if (nproc<(nkpt*nsppol)) then
+print *, 'no band paral now'
 
 !      Does not allow a processor to treat different spins
+!     NB: for odd nproc this will happen anyway for the middle proc - will this not unbalance things?
        ind0=0
        inb1=(nkpt*nsppol)/nproc;if (mod((nkpt*nsppol),nproc)/=0) inb1=inb1+1
        do iikpt=1,nkpt
          nband_k=nband(iikpt)
-         ind=ind0/inb1
+         !ind=ind0/inb1
+         ind=mod(ind0,nproc)
          do iiband=1,nband_k
            mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
            if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc-ind-1
@@ -2534,12 +2536,14 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 
 !    Possible band parallelization
      else
+print *, 'yes band paral now'
 !      Does not allow a processor to treat different spins
        ind0=0
        inb=nproc/(nkpt*nsppol)
        do iikpt=1,nkpt
          nband_k=nband(iikpt)
-         inb1=nband_k/inb;if (mod(nband_k,inb)/=0) inb1=inb1+1
+         inb1=nband_k/inb
+         if (mod(nband_k,inb)/=0) inb1=inb1+1
          do iiband=1,nband_k
            ind=(iiband-1)/inb1+ind0
            mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
@@ -2618,6 +2622,15 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
      mpi_enreg%my_isppoltab(iisppol)=1
    end do
  end do
+
+print *, 'iisppol, iiband, iikpt, mpi_enreg%proc_distrb nkpt = ', nkpt
+do iisppol=1,nsppol
+do iikpt=1,nkpt
+do iiband=1,nband(iikpt)
+print *, iisppol, iiband, iikpt, mpi_enreg%proc_distrb(iikpt,iiband,iisppol)
+end do
+end do
+end do
 
 end subroutine distrb2
 !!***

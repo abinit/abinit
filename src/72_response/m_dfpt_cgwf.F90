@@ -152,7 +152,7 @@ contains
 !!
 !! SOURCE
 
-subroutine dfpt_cgwf(band,band_me,bands_treated_now,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
+subroutine dfpt_cgwf(band,band_me,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
 & cycle_band_procs,rf2,dcwavef,&
 & eig0nk,eig0_kq,eig1_k,ghc,gh1c_n,grad_berry,gsc,gscq,&
 & gs_hamkq,gvnlxc,gvnlx1,icgq,idir,ipert,igscq,&
@@ -175,7 +175,6 @@ subroutine dfpt_cgwf(band,band_me,bands_treated_now,berryopt,cgq,cwavef,cwave0,c
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(rf_hamiltonian_type),intent(inout) :: rf_hamkq
 !arrays
- integer,intent(in) :: bands_treated_now (nband)
  integer,intent(in) :: cycle_band_procs(nband)
  real(dp),intent(in) :: cgq(2,mcgq),eig0_kq(nband)
  real(dp),intent(in) :: grad_berry(2,mpw1*nspinor,nband),gscq(2,mgscq)
@@ -204,6 +203,7 @@ subroutine dfpt_cgwf(band,band_me,bands_treated_now,berryopt,cgq,cwavef,cwave0,c
  integer :: skipme, bands_skipped_now(nband)
  character(len=500) :: msg
 !arrays
+ integer :: bands_treated_now (nband)
  real(dp) :: dummy(0,0),tsec(2)
  real(dp) :: eig1_k_loc(2,nband,nband)
  real(dp),allocatable :: conjgr(:,:),cwaveq(:,:),cwwork(:,:),direc(:,:)
@@ -257,6 +257,11 @@ subroutine dfpt_cgwf(band,band_me,bands_treated_now,berryopt,cgq,cwavef,cwave0,c
  !unit_me = 300+band
  unit_me = 6
  bands_skipped_now = 0
+
+ bands_treated_now = 0
+ bands_treated_now(band) = 1
+ call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
+
 
  skipme = 0
 
@@ -934,10 +939,8 @@ subroutine dfpt_cgwf(band,band_me,bands_treated_now,berryopt,cgq,cwavef,cwave0,c
    ! If wfoptalg>=10, the precondition matrix is kept constant
    ! during iteration; otherwise it is recomputed
    if (wfoptalg<10.or.iline==1) then
-print *,  "mpi_enreg%comm_fft ", mpi_enreg%comm_fft
-print *, ' npw, npw1 ', npw, npw1
-print *, 'cwaveq cg_precon ', cwaveq
-print *, 'direc cg_precon ', direc
+!print *, 'cwaveq cg_precon ', cwaveq
+!print *, 'direc cg_precon ', direc
      call cg_precon(cwaveq,zero,istwf_k,kinpw1,npw1,nspinor,me_g0,0,pcon,direc,mpi_enreg%comm_fft)
    else
      do ispinor=1,nspinor
@@ -1158,8 +1161,8 @@ print *, 'direc cg_precon ', direc
    ! Note that there are five "exit" instruction inside the loop.
    nlines_done = nlines_done + 1
  end do ! iline
-write (unit_me, *) 'cgwf band,  cwavef', band, cwavef(:,1:5)
-write (unit_me, *) 'cgwf band,  ghc', band, ghc(:,1:5)
+print *, 'cgwf band,  cwavef', band, cwavef(:,1:5)
+print *, 'cgwf band,  ghc', band, ghc(:,1:5)
 
 !--------------------------------------------------------------------------
 !             DEBUG
