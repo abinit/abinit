@@ -176,6 +176,7 @@ module m_orbmag
   private :: covar_cprj
   private :: rho_norm_check
   private :: duqdu
+  private :: mpicomm_helper
   private :: duqhqdu
   private :: cpg_dij_cpb
   private :: udsqdu
@@ -1320,7 +1321,6 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
   type(MPI_type), intent(inout) :: mpi_enreg
   type(orbmag_type), intent(inout) :: dtorbmag
   type(pawang_type),intent(in) :: pawang
-  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
   type(pseudopotential_type),intent(in) :: psps
 
   !arrays
@@ -1329,6 +1329,7 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
   real(dp), intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),xred(3,dtset%natom)
   real(dp),intent(in) :: energies(nband_k,dtset%nkpt)
   real(dp), intent(out) :: duqduchern(2,3),duqdumag(2,3)
+  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -1446,73 +1447,86 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
                  npw_kb = npwarr(ikptbi)
                  pwind_kb(1:npw_k) = pwind(ikg+1:ikg+npw_k,bfor,bdir)
               end if
-              !      --------------------------------------------------------------------------------
-              !      Communication
-              !      --------------------------------------------------------------------------------
-              if (ikpt > 0 .and. isppol > 0) then ! I currently have a true kpt to use
+
+              if (ikpt > 0 .AND. isppol > 0) then
                  countb = npw_kb*my_nspinor*nband_k
                  if(allocated(cgqb)) then
                     ABI_DEALLOCATE(cgqb)
                  endif
                  ABI_ALLOCATE(cgqb,(2,countb))
-                 cgqb = zero
-                 sourceb = me
-                 if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikptbi,1,nband_k,isppol,me)) then
-                    ! I need the data from someone else
-                    sourceb = mpi_enreg%proc_distrb(ikptbi,1,isppol)
-                 end if
-              else
-                 sourceb = -1 ! I do not have a kpt to use
+                 call mpicomm_helper(atindx1,bdir,bfor,cg,cgqb,cprj,cprj_kb,dimlmn,dtorbmag,dtset,&
+                      & ikpt,ikpt_loc,ikptbi,isppol,mcg,mcprj,me,mpi_enreg,my_nspinor,nband_k,&
+                      & nproc,npw_kb,npwarr,spaceComm)
               end if
+                
 
-              do dest=0,nproc-1
-                 if ((dest.EQ.me) .AND. (ikpt.GT.0) .AND. (isppol.GT.0)) then
-                    ! I am destination and I have something to do
-                    if(sourceb.EQ.me) then
-                       ! I am destination and source for kptb
-                       icprjbi = dtorbmag%cprjindex(ikptbi,isppol)
-                       icgb = dtorbmag%cgindex(ikptbi,dtset%nsppol)
-                       call pawcprj_get(atindx1,cprj_kb,cprj,dtset%natom,1,icprjbi,&
-                            &         ikptbi,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
-                            &         my_nspinor,dtset%nsppol,0)
-                       cgqb(1:2,1:countb) = cg(1:2,icgb+1:icgb+countb)
-                    else ! sourceb .NE. me
-                       ! receive cgqb and cprj_kb
-                       tagb = ikptbi + (isppol - 1)*dtset%nkpt
-                       call xmpi_recv(cgqb,sourceb,tagb,spaceComm,ierr)
-                       call pawcprj_mpi_recv(dtset%natom,n2dim,dimlmn,ncpgr,cprj_kb,sourceb,spaceComm,ierr)
-                    end if
-                 else if (dest.NE.me) then
-                    ! jkpt is the kpt which is being treated by dest
-                    ! jsppol is his isppol
-                    jkpt = mpi_enreg%kpt_loc2fbz_sp(dest, ikpt_loc,1)
-                    jsppol = mpi_enreg%kpt_loc2fbz_sp(dest, ikpt_loc,2)
-                    if (jkpt > 0 .and. jsppol > 0) then ! dest is treating a true kpt
-                       
-                       jkptb = dtorbmag%ikpt_dk(jkpt,bfor,bdir)
-                       jkptbi = dtorbmag%indkk_f2ibz(jkptb,1)
-                       
-                       if((mpi_enreg%proc_distrb(jkptbi,1,jsppol) == me))  then
-                          jcgb = dtorbmag%cgindex(jkptbi,jsppol)
-                          jcprjbi=dtorbmag%cprjindex(jkptbi,jsppol)
-                          call pawcprj_get(atindx1,cprj_buf,cprj,dtset%natom,1,jcprjbi,jkptbi,0,jsppol,&
-                               & dtset%mband,dtset%mkmem,dtset%natom,dtorbmag%mband_occ,dtorbmag%mband_occ,&
-                               & my_nspinor,dtset%nsppol,0,mpicomm=mpi_enreg%comm_kpt,&
-                               & proc_distrb=mpi_enreg%proc_distrb)
-                          tagb = jkptbi + (jsppol - 1)*dtset%nkpt
-                          countjb = npwarr(jkptbi)*my_nspinor*nband_k
-                          ABI_ALLOCATE(buffer,(2,countjb))
-                          buffer(:,1:countjb)  = cg(:,jcgb+1:jcgb+countjb)
-                          call xmpi_send(buffer,dest,tagb,spaceComm,ierr)
-                          ABI_DEALLOCATE(buffer)
-                          call pawcprj_mpi_send(dtset%natom,n2dim,dimlmn,ncpgr,cprj_buf,dest,spaceComm,ierr)
-                       end if ! end check that I am his source
-                       
-                    end if ! end check that jkpt > 0 and jsppol > 0
+              ! !      --------------------------------------------------------------------------------
+              ! !      Communication
+              ! !      --------------------------------------------------------------------------------
+              ! if (ikpt > 0 .and. isppol > 0) then ! I currently have a true kpt to use
+              !    countb = npw_kb*my_nspinor*nband_k
+              !    if(allocated(cgqb)) then
+              !       ABI_DEALLOCATE(cgqb)
+              !    endif
+              !    ABI_ALLOCATE(cgqb,(2,countb))
+              !    cgqb = zero
+              !    sourceb = me
+              !    if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikptbi,1,nband_k,isppol,me)) then
+              !       ! I need the data from someone else
+              !       sourceb = mpi_enreg%proc_distrb(ikptbi,1,isppol)
+              !    end if
+              ! else
+              !    sourceb = -1 ! I do not have a kpt to use
+              ! end if
 
-                 end if ! test dest .EQ. me and ikpt .GT. 0
+              ! do dest=0,nproc-1
+              !    if ((dest.EQ.me) .AND. (ikpt.GT.0) .AND. (isppol.GT.0)) then
+              !       ! I am destination and I have something to do
+              !       if(sourceb.EQ.me) then
+              !          ! I am destination and source for kptb
+              !          icprjbi = dtorbmag%cprjindex(ikptbi,isppol)
+              !          icgb = dtorbmag%cgindex(ikptbi,dtset%nsppol)
+              !          call pawcprj_get(atindx1,cprj_kb,cprj,dtset%natom,1,icprjbi,&
+              !               &         ikptbi,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
+              !               &         my_nspinor,dtset%nsppol,0)
+              !          cgqb(1:2,1:countb) = cg(1:2,icgb+1:icgb+countb)
+              !       else ! sourceb .NE. me
+              !          ! receive cgqb and cprj_kb
+              !          tagb = ikptbi + (isppol - 1)*dtset%nkpt
+              !          call xmpi_recv(cgqb,sourceb,tagb,spaceComm,ierr)
+              !          call pawcprj_mpi_recv(dtset%natom,n2dim,dimlmn,ncpgr,cprj_kb,sourceb,spaceComm,ierr)
+              !       end if
+              !    else if (dest.NE.me) then
+              !       ! jkpt is the kpt which is being treated by dest
+              !       ! jsppol is his isppol
+              !       jkpt = mpi_enreg%kpt_loc2fbz_sp(dest, ikpt_loc,1)
+              !       jsppol = mpi_enreg%kpt_loc2fbz_sp(dest, ikpt_loc,2)
+              !       if (jkpt > 0 .and. jsppol > 0) then ! dest is treating a true kpt
+                       
+              !          jkptb = dtorbmag%ikpt_dk(jkpt,bfor,bdir)
+              !          jkptbi = dtorbmag%indkk_f2ibz(jkptb,1)
+                       
+              !          if((mpi_enreg%proc_distrb(jkptbi,1,jsppol) == me))  then
+              !             jcgb = dtorbmag%cgindex(jkptbi,jsppol)
+              !             jcprjbi=dtorbmag%cprjindex(jkptbi,jsppol)
+              !             call pawcprj_get(atindx1,cprj_buf,cprj,dtset%natom,1,jcprjbi,jkptbi,0,jsppol,&
+              !                  & dtset%mband,dtset%mkmem,dtset%natom,dtorbmag%mband_occ,dtorbmag%mband_occ,&
+              !                  & my_nspinor,dtset%nsppol,0,mpicomm=mpi_enreg%comm_kpt,&
+              !                  & proc_distrb=mpi_enreg%proc_distrb)
+              !             tagb = jkptbi + (jsppol - 1)*dtset%nkpt
+              !             countjb = npwarr(jkptbi)*my_nspinor*nband_k
+              !             ABI_ALLOCATE(buffer,(2,countjb))
+              !             buffer(:,1:countjb)  = cg(:,jcgb+1:jcgb+countjb)
+              !             call xmpi_send(buffer,dest,tagb,spaceComm,ierr)
+              !             ABI_DEALLOCATE(buffer)
+              !             call pawcprj_mpi_send(dtset%natom,n2dim,dimlmn,ncpgr,cprj_buf,dest,spaceComm,ierr)
+              !          end if ! end check that I am his source
+                       
+              !       end if ! end check that jkpt > 0 and jsppol > 0
 
-              end do ! end loop over dest
+              !    end if ! test dest .EQ. me and ikpt .GT. 0
+
+              ! end do ! end loop over dest
 
               if (ikpt > 0 .and. isppol > 0) then ! if I am treating a kpt, compute the overlaps
                  
@@ -1704,6 +1718,143 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
 end subroutine duqdu
 !!***n
 
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/mpicomm_helper
+!! NAME
+!! mpicomm_helper
+!!
+!! FUNCTION
+!! get wavefunction and cprj in mpi communication loop
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2017 ABINIT  group (JWZ)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!! only printing
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine mpicomm_helper(atindx1,bdir,bfor,cg,cgqb,cprj,cprj_kb,dimlmn,dtorbmag,dtset,&
+     & ikpt,ikpt_loc,ikptbi,isppol,mcg,mcprj,me,mpi_enreg,my_nspinor,nband_k,&
+     & nproc,npw_kb,npwarr,spaceComm)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: bdir,bfor,ikpt,ikpt_loc,ikptbi,isppol,mcg,mcprj,me,my_nspinor
+  integer,intent(in) :: nband_k,nproc,npw_kb,spaceComm
+  type(dataset_type),intent(in) :: dtset
+  type(MPI_type), intent(inout) :: mpi_enreg
+  type(orbmag_type), intent(inout) :: dtorbmag
+
+  !arrays
+  integer,intent(in) :: atindx1(dtset%natom),dimlmn(dtset%natom),npwarr(dtset%nkpt)
+  real(dp),intent(in) :: cg(2,mcg)
+  real(dp),intent(out) :: cgqb(2,npw_kb*my_nspinor*nband_k)
+  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
+  type(pawcprj_type),intent(inout) ::  cprj_kb(dtset%natom,nband_k)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: countb,countjb,dest,icgb,icprjbi,ierr
+  integer :: jcgb,jcprjbi,jkpt,jkptb,jkptbi,jsppol,n2dim,ncpgr,sourceb,tagb
+
+  !arrays
+  real(dp),allocatable :: buffer(:,:)
+  type(pawcprj_type),allocatable :: cprj_buf(:,:)
+
+  !----------------------------------------------------
+
+  n2dim = dtorbmag%nspinor*nband_k
+  ncpgr = cprj(1,1)%ncpgr
+  if (nproc>1) then
+     ABI_DATATYPE_ALLOCATE(cprj_buf,(dtset%natom,n2dim))
+     call pawcprj_alloc(cprj_buf,ncpgr,dimlmn)
+  end if
+
+  if (ikpt > 0 .and. isppol > 0) then ! I currently have a true kpt to use
+     countb = npw_kb*my_nspinor*nband_k
+     cgqb = zero
+     sourceb = me
+     if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikptbi,1,nband_k,isppol,me)) then
+        ! I need the data from someone else
+        sourceb = mpi_enreg%proc_distrb(ikptbi,1,isppol)
+     end if
+  else
+     sourceb = -1 ! I do not have a kpt to use
+  end if
+
+  do dest=0,nproc-1
+     if ((dest.EQ.me) .AND. (ikpt.GT.0) .AND. (isppol.GT.0)) then
+        ! I am destination and I have something to do
+        if(sourceb.EQ.me) then
+           ! I am destination and source for kptb
+           icprjbi = dtorbmag%cprjindex(ikptbi,isppol)
+           icgb = dtorbmag%cgindex(ikptbi,dtset%nsppol)
+           call pawcprj_get(atindx1,cprj_kb,cprj,dtset%natom,1,icprjbi,&
+                &         ikptbi,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
+                &         my_nspinor,dtset%nsppol,0)
+           cgqb(1:2,1:countb) = cg(1:2,icgb+1:icgb+countb)
+        else ! sourceb .NE. me
+           ! receive cgqb and cprj_kb
+           tagb = ikptbi + (isppol - 1)*dtset%nkpt
+           call xmpi_recv(cgqb,sourceb,tagb,spaceComm,ierr)
+           call pawcprj_mpi_recv(dtset%natom,n2dim,dimlmn,ncpgr,cprj_kb,sourceb,spaceComm,ierr)
+        end if
+     else if (dest.NE.me) then
+        ! jkpt is the kpt which is being treated by dest
+        ! jsppol is his isppol
+        jkpt = mpi_enreg%kpt_loc2fbz_sp(dest, ikpt_loc,1)
+        jsppol = mpi_enreg%kpt_loc2fbz_sp(dest, ikpt_loc,2)
+        if (jkpt > 0 .and. jsppol > 0) then ! dest is treating a true kpt
+           
+           jkptb = dtorbmag%ikpt_dk(jkpt,bfor,bdir)
+           jkptbi = dtorbmag%indkk_f2ibz(jkptb,1)
+                       
+           if((mpi_enreg%proc_distrb(jkptbi,1,jsppol) == me))  then
+              jcgb = dtorbmag%cgindex(jkptbi,jsppol)
+              jcprjbi=dtorbmag%cprjindex(jkptbi,jsppol)
+              call pawcprj_get(atindx1,cprj_buf,cprj,dtset%natom,1,jcprjbi,jkptbi,0,jsppol,&
+                   & dtset%mband,dtset%mkmem,dtset%natom,dtorbmag%mband_occ,dtorbmag%mband_occ,&
+                   & my_nspinor,dtset%nsppol,0,mpicomm=mpi_enreg%comm_kpt,&
+                   & proc_distrb=mpi_enreg%proc_distrb)
+              tagb = jkptbi + (jsppol - 1)*dtset%nkpt
+              countjb = npwarr(jkptbi)*my_nspinor*nband_k
+              ABI_ALLOCATE(buffer,(2,countjb))
+              buffer(:,1:countjb)  = cg(:,jcgb+1:jcgb+countjb)
+              call xmpi_send(buffer,dest,tagb,spaceComm,ierr)
+              ABI_DEALLOCATE(buffer)
+              call pawcprj_mpi_send(dtset%natom,n2dim,dimlmn,ncpgr,cprj_buf,dest,spaceComm,ierr)
+           end if ! end check that I am his source
+           
+        end if ! end check that jkpt > 0 and jsppol > 0
+
+     end if ! test dest .EQ. me and ikpt .GT. 0
+
+  end do ! end loop over dest
+
+  if (nproc>1) then
+     call pawcprj_free(cprj_buf)
+     ABI_DATATYPE_DEALLOCATE(cprj_buf)
+  end if
+
+end subroutine mpicomm_helper
+            
 !{\src2tex{textfont=tt}}
 !!****f* ABINIT/duqhqdu
 !! NAME
