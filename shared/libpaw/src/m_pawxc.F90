@@ -1202,10 +1202,10 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 &             +half*drhocore(1:nrad)*pawang%anginit(ii,ipts)
            end do
          end if
-       end if
-       if (uselaplacian==1) then
-        rhonow(1:nrad,1,5)=rhonow(1:nrad,1,5)+lrhocore(1:nrad)
-        if (nspden==2) rhonow(1:nrad,2,5)=rhonow(1:nrad,2,5)+half*lrhocore(1:nrad)
+         if (uselaplacian==1) then
+           rhonow(1:nrad,1,5)=rhonow(1:nrad,1,5)+lrhocore(1:nrad)
+           if (nspden==2) rhonow(1:nrad,2,5)=rhonow(1:nrad,2,5)+half*lrhocore(1:nrad)
+         end if
        end if
      end if
 
