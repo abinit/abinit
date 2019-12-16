@@ -335,7 +335,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer,allocatable :: symaf1(:),symaf1_tmp(:),symrc1(:,:,:),symrl1(:,:,:),symrl1_tmp(:,:,:)
  integer,allocatable :: kpt_tmp (:,:)
  integer, pointer :: old_atmtab(:)
- logical, allocatable :: distrbflags(:,:,:)
+ logical, allocatable :: distrb_flags(:,:,:)
  real(dp) :: dielt(3,3),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),tsec(2)
  real(dp),allocatable :: buffer1(:,:,:,:,:),cg(:,:),cg1(:,:),cg1_active(:,:),cg0_pert(:,:)
  real(dp),allocatable :: cg1_pert(:,:,:,:),cgq(:,:),gh0c1_pert(:,:,:,:)
@@ -1012,8 +1012,8 @@ print *, 'nkpt_rbz ', nkpt_rbz
    ABI_UNUSED((/mkmem,mk1mem,mkqmem/))
 
 ! given number of reduced kpt, store distribution of bands across procs
-   ABI_ALLOCATE(distrbflags,(nkpt_rbz,dtset%mband,dtset%nsppol))
-   distrbflags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)
+   ABI_ALLOCATE(distrb_flags,(nkpt_rbz,dtset%mband,dtset%nsppol))
+   distrb_flags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)
 
    _IBM6("IBM6 before kpgio")
 
@@ -1101,7 +1101,7 @@ print *, ' fermie ', fermie
    call timab(144,1,tsec)
 
 ! Initialize the wave function type and read GS WFK
-   call wfk_read_my_kptbands(dtfil%fnamewffk, dtset, distrbflags, spacecomm, &
+   call wfk_read_my_kptbands(dtfil%fnamewffk, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kpt_rbz, nkpt_rbz, npwarr, &
 &            cg, eigen=eigen0, occ=occ_rbz)
   
@@ -1133,12 +1133,12 @@ print *, ' mcg, mcg_tmp ', mcg, mcg_tmp
 print *, 'shapes ', shape(cg), "  ", shape(cg_tmp)
    do isppol=1, nsppol
      do ikpt=1, nkpt_rbz
-       if (.not. any(mpi_enreg%proc_distrb(ikpt,:,isppol) == mpi_enreg%me_band)) cycle
+       if (.not. any(mpi_enreg%proc_distrb(ikpt,:,isppol) == mpi_enreg%me_kpt)) cycle
        npw = npwarr(ikpt)
        iband_me = 0
        do iband=1, nband_rbz(ikpt+nkpt_rbz*(isppol-1))
-print *, 'mpi_enreg%proc_distrb(ikpt,iband,isppol) ', mpi_enreg%proc_distrb(ikpt,iband,isppol), ' meband ', mpi_enreg%me_band
-         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_band) then
+print *, 'mpi_enreg%proc_distrb(ikpt,iband,isppol) ', mpi_enreg%proc_distrb(ikpt,iband,isppol), ' meband ', mpi_enreg%me_band, ' mekpt ', mpi_enreg%me_kpt
+         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) then
            icg_tmp = icg_tmp + npw
            cycle
          end if
@@ -1315,7 +1315,7 @@ print *, 'cgq ', cgq
      eigenq = eigen0
    else
      call timab(144,1,tsec)
-     call wfk_read_my_kptbands(dtfil%fnamewffq, dtset, distrbflags, spacecomm, &
+     call wfk_read_my_kptbands(dtfil%fnamewffq, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kpq_rbz, nkpt_rbz, npwar1, &
 &            cgq, eigen=eigenq, occ=occ_rbz)
      call timab(144,2,tsec)
@@ -1343,7 +1343,7 @@ print *, 'cgq ', cgq
        npw = npwar1(ikpt)
        iband_me = 0
        do iband=1, nband_rbz(ikpt+nkpt_rbz*(isppol-1))
-         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_band) then
+         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) then
            icg_tmp = icg_tmp + npw
            cycle
          end if
@@ -1367,7 +1367,7 @@ print *, ' diff in cgq ', cgq(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
      if (.not.kramers_deg) then
        !SPr: later "make" a separate WFQ file for "-q"
        call timab(144,1,tsec)
-       call wfk_read_my_kptbands(dtfil%fnamewffq, dtset, distrbflags, spacecomm, &
+       call wfk_read_my_kptbands(dtfil%fnamewffq, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kpq_rbz, nkpt_rbz, npwar1_mq, &
 &            cg_mq, eigen=eigen_mq, occ=occ_rbz)
        call timab(144,2,tsec)
@@ -1556,7 +1556,7 @@ print *, ' occkq ', occkq
    call timab(144,1,tsec)
    if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
 &      (dtset%get1wf > 0 .or. dtset%ird1wf > 0)) then
-     call wfk_read_my_kptbands(fiwf1i, dtset, distrbflags, spacecomm, &
+     call wfk_read_my_kptbands(fiwf1i, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kpq_rbz, nkpt_rbz, npwar1, &
 &            cg1, eigen=eigen1)
    else
@@ -1579,7 +1579,7 @@ print *, ' occkq ', occkq
      call timab(144,1,tsec)
      if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
 &        (dtset%get1wf > 0 .or. dtset%ird1wf > 0)) then
-       call wfk_read_my_kptbands(fiwf1i, dtset, distrbflags, spacecomm, &
+       call wfk_read_my_kptbands(fiwf1i, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kmq_rbz, nkpt_rbz, npwar1_mq, &
 &            cg1_mq, eigen=eigen1_mq)
      else
@@ -2142,7 +2142,7 @@ print *, 'd2nl ', d2nl
 
    if (write_1wfk) then
      ! Output 1st-order wavefunctions in file
-     call wfk_write_my_kptbands(fiwf1o, dtset, distrbflags, spacecomm, &
+     call wfk_write_my_kptbands(fiwf1o, dtset, distrb_flags, spacecomm, &
 &          formeig, hdr, nkpt_rbz, &
 &          cg1, kg1, eigen1)
 
@@ -2325,7 +2325,7 @@ print *, 'd2nl ', d2nl
    call localredirect(mpi_enreg%comm_cell,mpi_enreg%comm_world,npert_io,mpi_enreg%paral_pert,0)
 
    ABI_DEALLOCATE(bz2ibz_smap)
-   ABI_DEALLOCATE(distrbflags)
+   ABI_DEALLOCATE(distrb_flags)
 
    call timab(146,2,tsec)
    if(iexit/=0) exit

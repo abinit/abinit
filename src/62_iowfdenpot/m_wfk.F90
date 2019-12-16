@@ -3093,19 +3093,23 @@ print *, 'rbz2ibz_sort ', rbz2ibz_sort
    do ikpt=1,nkpt_in
      ik_ibz = rbz2ibz(1,ikpt)
      nband_k = wfk_disk%nband(ik_ibz,spin)
-     icg(ikpt,spin) = ii
      ikg(ikpt) = jj
      ibdeig(ikpt,spin) = kk
      ibdocc(ikpt,spin) = ll
-     ii = ii+dtset%mband_mem*npwarr(ikpt)*dtset%nspinor
      jj = jj+npwarr(ikpt)
      kk = kk+nband_k*(2*nband_k)**formeig
      ll = ll+nband_k
+
+     if (.not. any(distrb_flags(ikpt,:,spin))) cycle
+     icg(ikpt,spin) = ii
+print *, 'icg counts ikpt, spin ', icg(ikpt,spin),ikpt,spin
+! TODO: this does not take into account variable nband(ik)
+     ii = ii+dtset%mband_mem*npwarr(ikpt)*dtset%nspinor
    end do
  end do
 
+print *, ' distrb_flags(:,:,:) ', distrb_flags
  do spin=1,nsppol
-   iqst = 0
    do ik_ibz=1,wfk_disk%nkpt
      nband_k = wfk_disk%nband(ik_ibz,spin)
      kibz = ebands_ibz%kptns(:,ik_ibz)
@@ -3115,22 +3119,30 @@ print *, 'rbz2ibz_sort ', rbz2ibz_sort
      ! Find number of symmetric k-points associated to ik_ibz
      nqst = 0
      needthisk=.false.
-     do ii=iqst+1,nkpt_in
+     iqst = 0
+     ! scan to the first point which uses this kibz
+     do iqst = 1, nkpt_in
+       if (rbz2ibz_sort(iqst) == ik_ibz) exit
+     end do
+     ! how many equivalent k? Could be 0, and we will not necessarily use them all if their bands are on other cpus
+     do ii=iqst,nkpt_in
        if (rbz2ibz_sort(ii) /= ik_ibz) exit
        nqst = nqst + 1
+print *, 'iqst, ii, iperm(ii), nqst, ik_ibz, distrb_flags(iperm(ii),:,spin)  ', iqst, ii, iperm(ii), nqst, ik_ibz, distrb_flags(iperm(ii),:,spin)
        if (any(distrb_flags(iperm(ii),:,spin))) needthisk=.true.
      end do ! loop over equivalent k
+
+print *, ' spin, ik_ibz, nqst, needthisk ', spin, ik_ibz, nqst, needthisk
 ! do we need the present kibz, or one of its images?
 ! TODO: check if the eigenvalues are correct all the same
      if (.not. needthisk) cycle
 
-     ABI_CHECK(nqst > 0 .and. rbz2ibz_sort(iqst+1) == ik_ibz, "Wrong iqst")
+     ABI_CHECK(nqst > 0 .and. rbz2ibz_sort(iqst) == ik_ibz, "Wrong iqst")
 
      iband_saved = -1
      nband_me_saved = -1
-     do jj=1,nqst
-       iqst = iqst + 1
-       ikf = iperm(iqst)
+     do jj=0,nqst-1
+       ikf = iperm(iqst+jj)
        ABI_CHECK(ik_ibz == rbz2ibz(1,ikf), "ik_ibz !/ ind qq(1)")
 
 ! how many bands in memory for this cpu_
@@ -3147,7 +3159,7 @@ print *, 'rbz2ibz_sort ', rbz2ibz_sort
          stop "wfk_read_my_kptbands: bands not contiguous in distrb_flags"
        end if
 
-! may need to re-read if for a different equivalent k I need other bands
+! may need to re-read if for a different equivalent k if I need other bands
        if (iband /= iband_saved .or. nband_me /= nband_me_saved) then
          if (formeig > 0) then
            call wfk_disk%read_band_block([iband,iband+nband_me-1],ik_ibz,spin,xmpio_single,&
@@ -3167,6 +3179,7 @@ print *, 'rbz2ibz_sort ', rbz2ibz_sort
        istwf_kf = istwfk_in(ikf)
        npw_kf = npwarr(ikf)
 
+print *, 'ikf, kf, isym, itimrev, g0, ik_ibz, jj, iqst, ik_ibz, kibz ', ikf, kf, isym, itimrev, g0, ik_ibz, jj, iqst, ik_ibz, kibz
        if (present(eigen)) then
          eigen(ibdeig(ikf,spin)+1:ibdeig(ikf,spin)+nband_k*(2*nband_k)**formeig) = eig_disk(1:nband_k*(2*nband_k)**formeig)
        end if

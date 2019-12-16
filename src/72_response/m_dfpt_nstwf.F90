@@ -1869,7 +1869,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  ddk=(ipert==dtset%natom+1.or.ipert==dtset%natom+10.or.ipert==dtset%natom+11)
 
 ! filter for bands on this cpu for cg cg1 etc.
- distrb_cycle = (mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol) /= mpi_enreg%me_band)
+ distrb_cycle = (mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol) /= mpi_enreg%me_kpt)
 
 !Additional allocations
  if (.not.ddk) then
@@ -1980,7 +1980,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  iband_me = 0
  do iband=1,nband_k
 
-   if(mpi_enreg%proc_distrb(ikpt,iband,isppol) == mpi_enreg%me_band) then
+   if(mpi_enreg%proc_distrb(ikpt,iband,isppol) == mpi_enreg%me_kpt) then
      iband_me = iband_me + 1
 
 !  Read ground-state wavefunction for iband
@@ -2079,7 +2079,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !            Band by band decomposition of the Born effective charges
 !            calculated from a phonon perturbation
 !            d2bbb_k will be mpisummed below so only keep my iband indices on the diagonal
-             if(dtset%prtbbb==1 .and. mpi_enreg%proc_distrb(ikpt,iband,isppol) == mpi_enreg%me_band)then
+             if(dtset%prtbbb==1 .and. mpi_enreg%proc_distrb(ikpt,iband,isppol) == mpi_enreg%me_kpt)then
                d2bbb_k(1,idir1,iband,iband) =      wtk_k*occ_k(iband)*two*dotr
                d2bbb_k(2,idir1,iband,iband) = -one*wtk_k*occ_k(iband)*two*doti
              end if
@@ -2145,14 +2145,14 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !      In the parallel gauge, dot1 and dot2 vanishes
        if(dtset%prtbbb==1)then
          ! d2bbb_k will be mpisummed below - only save my local band indices for diagonal contribution
-         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) == mpi_enreg%me_band) then
+         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) == mpi_enreg%me_kpt) then
            d2bbb_k(1,idir1,iband,iband)=d2bbb_k(1,idir1,iband,iband)+dotr
            d2bbb_k(2,idir1,iband,iband)=d2bbb_k(2,idir1,iband,iband)+doti
          end if
          dot_ndiagr=zero ; dot_ndiagi=zero
          jband_me = 0
          do jband = 1,nband_k              !compute dot1 and dot2
-           if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_band) cycle
+           if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
            jband_me = jband_me + 1
 
            if (abs(occ_k(jband)) > tol8) then

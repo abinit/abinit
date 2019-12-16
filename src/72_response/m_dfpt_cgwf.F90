@@ -193,7 +193,7 @@ subroutine dfpt_cgwf(band,band_me,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,
  integer,parameter :: level=15,tim_getgh1c=1,tim_getghc=2,tim_projbd=2
  integer,save :: nskip=0
  integer :: cpopt,iband,igs,iline,indx_cgq,ipw,me_g0,comm_fft
- integer :: iband_me, jband_me, ierr, me_band, band_off, unit_me
+ integer :: iband_me, jband_me, ierr, me_bandkpt, band_off, unit_me
  integer :: ipws,ispinor,istwf_k,jband,nline,optlocal,optnl,dc_shift_band,sij_opt
  integer :: test_is_ok,useoverlap,usepaw,usevnl,usetolrde
  real(dp) :: d2edt2,d2te,d2teold,dedt,deltae,deold,dotgg
@@ -253,7 +253,7 @@ subroutine dfpt_cgwf(band,band_me,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,
  me_g0 = mpi_enreg%me_g0
  comm_fft = mpi_enreg%comm_fft
 
- me_band = mpi_enreg%me_band
+ me_bandkpt = mpi_enreg%me_kpt
  !unit_me = 300+band
  unit_me = 6
  bands_skipped_now = 0
@@ -315,7 +315,7 @@ subroutine dfpt_cgwf(band,band_me,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,
    jband_me = 0
    do jband=1,nband
      if (bands_treated_now(jband)-bands_skipped_now(jband) == 0) cycle
-     if (cycle_band_procs(jband) == me_band) then
+     if (cycle_band_procs(jband) == me_bandkpt) then
        jband_me = jband_me + 1
        work(:,:)=cgq(:,1+npw1*nspinor*(jband_me-1)+icgq:npw1*nspinor*jband_me+icgq)
      end if
@@ -342,7 +342,7 @@ subroutine dfpt_cgwf(band,band_me,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,
    jband_me = 0
    do jband=1,nband
      if (bands_treated_now(jband)-bands_skipped_now(jband) == 0) cycle
-     if (cycle_band_procs(jband) == me_band) then
+     if (cycle_band_procs(jband) == me_bandkpt) then
        jband_me = jband_me + 1
        work(:,:)=cgq(:,1+npw1*nspinor*(jband_me-1)+icgq:npw1*nspinor*jband_me+icgq)
      end if
@@ -375,7 +375,7 @@ subroutine dfpt_cgwf(band,band_me,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,
    ! NB: this _does_ depend on the input band "band" stored in cwave0
    do iband = 1, nband
      if (bands_treated_now(iband)-bands_skipped_now(iband) == 0) cycle
-     !if (cycle_band_procs(iband) == me_band) then ! these 2 conditions should be the same
+     !if (cycle_band_procs(iband) == me_bandkpt) then ! these 2 conditions should be the same
      if (iband == band) then
        work(:,:)=cwave0(:,:)
      end if
@@ -403,7 +403,7 @@ subroutine dfpt_cgwf(band,band_me,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,
    if(ipert==natom+10.or.ipert==natom+11) then
      do iband = 1, nband
        if (bands_treated_now(iband)-bands_skipped_now(iband) == 0) cycle
-       !if (cycle_band_procs(iband) == me_band) then ! these 2 conditions should be the same
+       !if (cycle_band_procs(iband) == me_bandkpt) then ! these 2 conditions should be the same
        if (iband == band) then
          work(:,:)=rf2%dcwavef(:,1+dc_shift_band:npw1*nspinor+dc_shift_band)
        end if
@@ -433,7 +433,7 @@ subroutine dfpt_cgwf(band,band_me,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,
      jband_me = 0
      do jband=1,nband
        if (bands_treated_now(jband)-bands_skipped_now(jband) == 0) cycle
-       if (cycle_band_procs(jband) == me_band) then
+       if (cycle_band_procs(jband) == me_bandkpt) then
          jband_me = jband_me + 1
          work(:,:)=gscq(:,1+npw1*nspinor*(jband_me-1)+igscq:npw1*nspinor*jband_me+igscq)
        end if
@@ -590,7 +590,7 @@ subroutine dfpt_cgwf(band,band_me,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,
    ! scprod now contains scalar products of band i (runs over all bands in current queue) with local bands j
    jband_me = 0
    do jband=1,nband
-     if (cycle_band_procs(jband) /= me_band) cycle
+     if (cycle_band_procs(jband) /= me_bandkpt) cycle
      jband_me = jband_me + 1
      eig1_k_loc(:,jband,iband)=scprod(:,jband_me)
    end do
@@ -625,7 +625,7 @@ subroutine dfpt_cgwf(band,band_me,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,
      ! add PAW overlap correction term to present iband (all procs) and local jband elements
        jband_me = 0
        do jband=1,nband
-         if (cycle_band_procs(jband) /= me_band) cycle
+         if (cycle_band_procs(jband) /= me_bandkpt) cycle
          jband_me = jband_me + 1
      
          eshiftkq=half*(eig0_kq(jband)-eig0nk)
@@ -682,7 +682,7 @@ subroutine dfpt_cgwf(band,band_me,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,
 
    call xmpi_sum(work,mpi_enreg%comm_band,ierr)
 
-! save this for me_band only
+! save this for me_bandkpt only
    if (iband == band) then
 !TODO: make this a blas call? zaxpy
      cwavef = work - (mpi_enreg%nproc_band-1)*cwavef
@@ -829,7 +829,7 @@ subroutine dfpt_cgwf(band,band_me,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,
   
        call xmpi_sum(work,mpi_enreg%comm_band,ierr)
     
-! save this for me_band only
+! save this for me_bandkpt only
      if (iband == band) then 
 !TODO: make this a blas call? zaxpy
        gresid = work - (mpi_enreg%nproc_band-1)*gresid
@@ -976,7 +976,7 @@ subroutine dfpt_cgwf(band,band_me,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,
   
      call xmpi_sum(work,mpi_enreg%comm_band,ierr)
   
-! save this for me_band only
+! save this for me_bandkpt only
      if (iband == band) then 
 !TODO: make this a blas call? zaxpy
        direc = work - (mpi_enreg%nproc_band-1)*direc
@@ -1174,7 +1174,7 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
    iband_me = 0
    do iband=1,nband
      if (bands_treated_now(iband) == 0) cycle
-     if (cycle_band_procs(iband)==me_band) then 
+     if (cycle_band_procs(iband)==me_bandkpt) then 
        iband_me = iband_me+1
        if (gen_eigenpb) then
          work(:,:)=gscq(:,1+npw1*nspinor*(iband-1)+igscq:npw1*nspinor*iband+igscq)
@@ -1192,7 +1192,7 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
          call getgh1c(berryopt,cwave0,cwaveprj0,work1,gberry,work2,gs_hamkq,gvnlx1_saved,idir,ipert,eshift,&
            mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
-         if (cycle_band_procs(iband)==me_band) then 
+         if (cycle_band_procs(iband)==me_bandkpt) then 
            work(:,:)=cgq(:,1+npw1*nspinor*(iband_me-1)+icgq:npw1*nspinor*iband_me+icgq)
          end if
          call xmpi_bcast(work,cycle_band_procs(iband),mpi_enreg%comm_band,ierr)
@@ -1248,7 +1248,7 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
 
      call xmpi_sum(cwwork,mpi_enreg%comm_band,ierr)
 
-! save this for me_band only
+! save this for me_bandkpt only
      if (iband == band) then 
 !TODO: make this a blas call? zaxpy
        cwwork = cwwork - (mpi_enreg%nproc_band-1)*cwavef
@@ -1294,7 +1294,7 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
 
      call xmpi_sum(cwwork,mpi_enreg%comm_band,ierr)
 
-! save this for me_band only
+! save this for me_bandkpt only
      if (iband == band) then 
 !TODO: make this a blas call? zaxpy
       cwwork = cwwork - (mpi_enreg%nproc_band-1)*cwavef
@@ -1337,7 +1337,7 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
   
      call xmpi_sum(work,mpi_enreg%comm_band,ierr)
 
-! save this for me_band only
+! save this for me_bandkpt only
      if (iband == band) then 
 !TODO: make this a blas call? zaxpy
        cwwork = cwwork - (mpi_enreg%nproc_band-1)*work
@@ -1377,7 +1377,7 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
    iband_me = 0
    do iband=1,nband
      if (bands_treated_now(iband) == 0) cycle
-     if (cycle_band_procs(iband)==me_band) then
+     if (cycle_band_procs(iband)==me_bandkpt) then
        iband_me = iband_me+1
        work(:,:)=cgq(:,1+npw1*nspinor*(iband_me-1)+icgq:npw1*nspinor*iband_me+icgq)
      end if
