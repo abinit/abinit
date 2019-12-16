@@ -207,7 +207,7 @@ program optic
    end if
 
    write(msg,'(3a)') "From version 7.11.4, optic uses namelists as input.",ch10,&
-&   "See e.g. ~/tests/tutorespfn/Input/toptic_2.in"
+     "See e.g. ~/tests/tutorespfn/Input/toptic_2.in"
    MSG_COMMENT(msg)
 
    ! Setup some default values:
