@@ -395,11 +395,12 @@ module m_dvdb
   real(dp),allocatable :: qstar(:,:,:,:)
   ! qstar(3, 3, 3, natom)
   ! dynamical quadrupole in Cartesian coordinates.
+  ! First two dimension are associated to the q-point, then atomic perturbation in Cart coords.
 
-  real(dp),allocatable :: v1r_efield_cart(:,:,:)
-  ! v1r_efield_cart(3, nfft, nspden)
-  ! First order potentials due to electric field perturbations in r-space.
-  ! In Cartesian coordinates
+  real(dp),allocatable :: v1r_efield(:,:,:)
+  ! v1r_efield(nfft, 3, nspden)
+  ! First order potentials due to the three different directions of the electric field perturbation.
+  ! Potentials are in r-space
 
   type(crystal_t) :: cryst
   ! Crystalline structure read from the the DVDB file.
@@ -931,7 +932,7 @@ subroutine dvdb_free(db)
  ABI_SFREE(db%zeff)
  ABI_SFREE(db%zeff_raw)
  ABI_SFREE(db%qstar)
- ABI_SFREE(db%v1r_efield_cart)
+ ABI_SFREE(db%v1r_efield)
 
  ! types
  call db%hdr_ref%free()
@@ -3680,7 +3681,7 @@ end subroutine prepare_ftinterp
 !!  [add_lr]= If present, use this value for the LR treatment instead of dv%add_lr
 !!
 !! OUTPUT
-!!  ov1r(2*nfft, nspden, my_npert)=Interpolated DFPT potentials at the given q-point.
+!!  ov1r(2*nfft, nspden, my_npert)=Interpolated DFPT potentials at the given q-point (periodic part)
 !!
 !! PARENTS
 !!      m_dvdb,m_phgamma,m_phpi,m_sigmaph
@@ -5999,18 +6000,19 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  class(dvdb_t),target,intent(inout) :: dvdb
  type(dataset_type),target,intent(in) :: dtset
  character(len=*),intent(in) :: out_ncpath
+
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
  integer :: nfft, iq, cplex, ispden, comm_rpt, my_rank, idir, ipert, ipc, imyp
- integer :: n1, n2, n3, unt, this_nqpt, method, interpolated !ifft,
- !integer :: i1, i2, i3
+ integer :: n1, n2, n3, unt, this_nqpt, method, interpolated
+ !integer :: i1, i2, i3, ifft,
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr
 #endif
  !type(vdiff_t) :: vd_max
  character(len=500) :: msg
- character(len=fnlen) :: dump_path !tmp_fname,
+ character(len=fnlen) :: dump_path
 !arrays
  integer :: ngfft(18)
  real(dp) :: vals2(2)
@@ -6043,12 +6045,12 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    write(std_out,"(a)")sjoin(" Will write potentials in text format to:", dump_path)
  end if
 
- ! Select list of q-points depending on eph_task (from DVDB file or interpolated)
+ ! Select list of q-points depending on eph_task (either from DVDB file or interpolated)
  if (dtset%eph_task == -15) then
-  call wrtout([std_out, ab_out], " Using list of q-points found in the DVDB file")
-  this_nqpt = dvdb%nqpt
-  this_qpts => dvdb%qpts
-  interpolated = 0
+   call wrtout([std_out, ab_out], " Using list of q-points found in the DVDB file")
+   this_nqpt = dvdb%nqpt
+   this_qpts => dvdb%qpts
+   interpolated = 0
 
  else if (dtset%eph_task == +15) then
    msg = sjoin(" Using list of q-points specified by ph_qpath with ", itoa(dtset%ph_nqpath), "qpoints")
@@ -6095,10 +6097,10 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"]))
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("v1scf_avg", "dp", "two, nspden, three, natom, nqpt"), &
-     nctkarr_t("v1lr_avg",  "dp", "two, nspden, three, natom, nqpt"), &
-     nctkarr_t("v1scfmlr_avg",  "dp", "two, nspden, three, natom, nqpt"), &
-     nctkarr_t("v1scf_abs_avg",  "dp", "two, nspden, three, natom, nqpt"), &
-     nctkarr_t("v1lr_abs_avg",  "dp", "two, nspden, three, natom, nqpt"), &
+     nctkarr_t("v1lr_avg", "dp", "two, nspden, three, natom, nqpt"), &
+     nctkarr_t("v1scfmlr_avg", "dp", "two, nspden, three, natom, nqpt"), &
+     nctkarr_t("v1scf_abs_avg", "dp", "two, nspden, three, natom, nqpt"), &
+     nctkarr_t("v1lr_abs_avg", "dp", "two, nspden, three, natom, nqpt"), &
      nctkarr_t("qpoints", "dp", "three, nqpt") &
    ])
    NCF_CHECK(ncerr)
@@ -6119,7 +6121,8 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  do iq=1,this_nqpt
 
    if (interpolated == 0) then
-     call wrtout(std_out, sjoin("Treating qpt:", ktoa(this_qpts(:,iq))))
+     call wrtout(std_out, sjoin(" Treating qpt:", ktoa(this_qpts(:,iq))))
+
      ! Read data from DVDB file, reconstruct all 3*natom perturbations in tmp_v1r.
      call dvdb%readsym_allv1(dvdb%findq(this_qpts(:, iq)), cplex, nfft, ngfft, tmp_v1r, dvdb%comm)
 
@@ -6137,7 +6140,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
 
    else
      ! Interpolate my_npert potentials for this q-point.
-     call wrtout(std_out, sjoin("Interpolating qpt:", ktoa(this_qpts(:,iq))))
+     call wrtout(std_out, sjoin(" Interpolating qpt:", ktoa(this_qpts(:,iq))))
      call dvdb%ftinterp_qpt(this_qpts(:, iq), nfft, ngfft, file_v1r, comm_rpt) !, add_lr=?)
      cplex = 2
    end if
@@ -6497,10 +6500,13 @@ end subroutine dvdb_test_ftinterp
 !!  due to the Born effective charges, PRL 115, 176401 (2015) [[cite:Verdi2015]].
 !!
 !!    V^L_{iatom,idir}(r) = i (4pi/vol) sum_G (q+G) . Zeff_{iatom,idir}
-!!                           e^{i (q + G) . (r - tau_{iatom})} / ((q + G) . dielt . (q + G))
+!!                           e^{i (q+G).(r - tau_{iatom})} / ((q+G) . dielt . (q+G))
 !!
-!!  where Zeff and dielt are the Born effective charge tensor and the dielectric tensor,
+!!  where Zeff and dielt are the Born effective charge tensor and the dielectric tensor in cart coords,
 !!  tau is the atom position, and vol is the volume of the unit cell.
+!!  Note that internally the tensors are stored in Cartesian coordinates while in output we need
+!!  the contribution due to the displacement of the iatom-sublattice along the reduced direction idir
+!!  hence we need to perform some tensor gymnastics to go from Cart to reduced.
 !!
 !! INPUTS
 !!  db = the DVDB object.
@@ -6536,17 +6542,14 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
 
 !Local variables-------------------------------
 !scalars
- integer :: n1, n2, n3, nfftot, ig, iphase !, timerev_q !, ii !, jj, kk
- integer :: ii, jj, kk, ll, mm, ifft, ispden
- real(dp) :: fac, qGZ, qGS, denom, denom_inv, qtau !, ll
- real(dp) :: re, im, phre, phim, qg_mod, gsq_max
+ integer :: n1, n2, n3, nfftot, ig, iphase, ii, jj, kk, ll, mm, ifft, ispden
+ real(dp) :: fac, qGZ, qGS, denom, denom_inv, qtau, re, im, phre, phim, qg_mod, gsq_max
+ real(dp),parameter :: tol_denom = tol8
 !arrays
- !integer :: symq(4,2,db%cryst%nsym)
  integer, allocatable :: gfft(:,:)
- real(dp) :: gprimd(3,3), rprimd(3,3)
- real(dp) :: dielt_red(3,3) !, quad_cart(3,3)
+ real(dp) :: gprimd(3,3), rprimd(3,3), dielt_red(3,3)
  real(dp) :: qG_red(3), qG_cart(3), Zstar(3), Sstar(3,3), tau_red(3)
- real(dp), allocatable :: v1G_lr(:,:)
+ real(dp), allocatable :: v1G_lr(:,:), v1G_lr33(:,:,:,:), workr(:,:)
 
 ! *************************************************************************
 
@@ -6558,7 +6561,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
 
  ! Allocate memory
  ABI_MALLOC(gfft, (3, nfft))
- ABI_MALLOC(v1G_lr, (2,nfft))
+ ABI_MALLOC(v1G_lr, (2, nfft))
 
  ! Reciprocal and real space primitive vectors
  gprimd = db%cryst%gprimd; rprimd = db%cryst%rprimd
@@ -6569,9 +6572,9 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
  ! Transform the Born effective charge tensor from Cartesian to reduced coordinates
  ! and select the relevant direction.
  Zstar = matmul(transpose(gprimd), matmul(db%zeff(:,:,iatom), rprimd(:,idir))) * two_pi
- !Zstar = matmul(transpose(gprimd), matmul(db%zeff_raw(:,:,iatom), rprimd(:,idir) / ll)) * two_pi
 
  if (db%has_quadrupoles) then
+   ! Transform Qstar from Cartesian to reduced coordinates and select the relevant direction.
    Sstar = zero
    do ii=1,3
      do jj=1,3
@@ -6579,7 +6582,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
          do ll=1,3
            do mm=1,3
              Sstar(ii,jj) = Sstar(ii,jj) + &
-                   gprimd(mm,jj)*gprimd(ll,ii)*db%qstar(mm,ll,kk,iatom)*rprimd(kk,idir) * two_pi ** 2
+                   gprimd(mm,jj) * gprimd(ll,ii) * db%qstar(mm,ll,kk,iatom) * rprimd(kk,idir) * two_pi ** 2
            end do
          end do
        end do
@@ -6588,6 +6591,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
  end if
 
  ! Transform the dielectric tensor from Cartesian to reduced coordinates.
+ ! q_cart e_cart q_cart = q_red (G^t e_cart G) q_red
  dielt_red = matmul(transpose(gprimd), matmul(db%dielt, gprimd)) * two_pi ** 2
 
  ! Atom position
@@ -6596,9 +6600,8 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
  ! Get the set of G vectors
  call get_gftt(ngfft, qpt, db%cryst%gmet, gsq_max, gfft)
 
- ! Compute the long-range potential in G-space
+ ! Compute the long-range potential in G-space due to Z* and Q* (if present)
  v1G_lr = zero
-
  do ig=1,nfft
    ! (q + G)
    qG_red = qpt + gfft(:,ig)
@@ -6608,8 +6611,8 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
    qGZ = dot_product(qG_red, Zstar)
    ! (q + G) . dielt . (q + G)
    denom = dot_product(qG_red, matmul(dielt_red, qG_red))
-   ! Avoid (q+G) = 0
-   if (denom < tol8) cycle
+   ! Avoid (q + G) = 0
+   if (denom < tol_denom) cycle
    denom_inv = one / denom
    ! HM hard cutoff, in this case qdamp takes the meaning of an energy cutoff in Hartree (hardcoded to 1 for the moment)
    !if (half*qG_mod**2 > 1) cycle
@@ -6618,7 +6621,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
    if (db%has_quadrupoles) then
      do ii=1,3
        do jj=1,3
-         qGS = qGS + qG_red(ii)*qG_red(jj)*Sstar(ii,jj) / 2
+         qGS = qGS + qG_red(ii) * qG_red(jj) * Sstar(ii,jj) / two
        end do
      end do
    end if
@@ -6635,39 +6638,62 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
 
  ABI_FREE(gfft)
 
- ! FFT to get the long-range potential in r space
+ ! FFT to get the long-range potential in r-space
  call fourdp(2, v1G_lr, v1r_lr, 1, db%mpi_enreg, nfft, 1, ngfft, 0)
- !v1r_lr = zero ! Comment this line to have only efield
 
- ! Add term due to Electric field.
  if (db%has_efield) then
+   ! Add term due to Electric field.
    ! TODO: Change API to account for ispden/isppol. return nspden LR part
    ! although only the electric field part depends on nsppden.
+   !v1r_lr = zero ! Comment this line to have only efield contribution
    ABI_CHECK(db%nspden == 1, "nspden != 1 not coded")
    ispden = 1
-   qG_red = qpt
-   qG_cart = two_pi * matmul(db%cryst%gprimd, qG_red)
-   qG_mod = sqrt(sum(qG_cart ** 2))
-   ! (q + G) . Zeff(:,idir,iatom)
-   qGZ = dot_product(qG_red, Zstar)
-   ! (q + G) . dielt . (q + G)
-   denom = dot_product(qG_red, matmul(dielt_red, qG_red))
-   ! Avoid (q+G) = 0
-   if (denom > tol8) then
+   ABI_CALLOC(v1G_lr33, (3, 3, 2, nfft))
+   do ig=1,nfft
+     ! (q + G)
+     qG_red = qpt + gfft(:,ig)
+     qG_cart = two_pi * matmul(db%cryst%gprimd, qG_red)
+     qG_mod = sqrt(sum(qG_cart ** 2))
+     ! (q + G) . Zeff(:,idir,iatom)
+     !qGZ = dot_product(qG_red, Zstar)
+     ! (q + G) . dielt . (q + G)
+     denom = dot_product(qG_red, matmul(dielt_red, qG_red))
+     ! Avoid (q + G) = 0
+     if (denom < tol_denom) cycle
      denom_inv = one / denom
      if (db%qdamp > zero) denom_inv = denom_inv * exp(-qG_mod ** 2 / (four * db%qdamp))
-     fac = (four_pi / db%cryst%ucvol) * denom_inv * qGZ
-     do ifft=1,nfft
-       !write(std_out, "(2es16.6)") v1r_lr(1, ifft), - fac * dot_product(qG_cart, db%v1r_efield_cart(:, ifft, ispden))
-       v1r_lr(1, ifft) = v1r_lr(1, ifft) - fac * dot_product(qG_cart, db%v1r_efield_cart(:, ifft, ispden))
+     fac = (four_pi / db%cryst%ucvol) * denom_inv !* qGZ
+     ! Phase factor exp(-i (q+G) . tau)
+     qtau = - two_pi * dot_product(qG_red, tau_red)
+     phre = cos(qtau); phim = sin(qtau)
+
+     do ii=1,3
+       do jj=1,3
+         v1G_lr33(ii, jj, 1, ig) = fac * phre * qG_red(ii) * qG_red(jj)
+         v1G_lr33(ii, jj, 2, ig) = fac * phim * qG_red(ii) * qG_red(jj)
+       end do
      end do
-   end if
+   end do ! ig
+
+   ABI_MALLOC(workr, (2, nfft))
+   do ii=1,3
+     do jj=1,3
+       v1G_lr = v1G_lr33(ii, jj, :, :)
+       call fourdp(2, v1G_lr, workr, 1, db%mpi_enreg, nfft, 1, ngfft, 0)
+       ! Two pi comes for qpt but we should check whether the gradient wrt E-field is in gprimd or 2pi gprimd coordinates.
+       do ifft=1,nfft
+         v1r_lr(:, ifft) = v1r_lr(:, ifft) - Zstar(ii) * db%v1r_efield(ifft, jj, ispden) * workr(:, ifft) * two_pi
+       end do
+     end do
+   end do
+
+   ABI_FREE(workr)
+   ABI_FREE(v1G_lr33)
  end if
 
- ! Multiply by exp(i q . r)
+ ! Multiply by exp(i q.r)
  if (iphase == 1) call times_eikr(qpt, ngfft, nfft, 1, v1r_lr)
 
- ! Free memory
  ABI_FREE(v1G_lr)
 
 end subroutine dvdb_get_v1r_long_range
@@ -6771,7 +6797,7 @@ end subroutine dvdb_load_ddb
 !!  dvdb_load_efield
 !!
 !! FUNCTION
-!!  Load information about the Born effective charges and dielectric tensor from a DDB file
+!!  Load first oder derivatives wrt the electric file from files
 !!
 !! INPUTS
 !!  pot_paths=List of strings with paths to POT1 files.
@@ -6804,36 +6830,25 @@ subroutine dvdb_load_efield(dvdb, pot_paths, comm)
  ABI_CALLOC(v1e_red, (nfft, dvdb%nspden, 3))
 
  do ii=1,3
-   ! Read DFPT potentials due to E-field
+   ! Read DFPT potentials due to E-field.
    ! TODO: Should implement symmetries so that only the irred pots are needed.
    call read_rhor(pot_paths(ii), cplex1, dvdb%nspden, nfft, dvdb%ngfft, pawread0, &
      dvdb%mpi_enreg, v1e_red(:,:,ii), hdr, pawrhoij, comm, allow_interp=.True.)
 
-   ! Consistency check: need E-field perturbation.
-   idir = mod(hdr%pertcase - 1, 3) + 1
-   ipert = (hdr%pertcase - idir) / 3 + 1
+   ! Consistency check: expecting E-field perturbation.
+   idir = mod(hdr%pertcase - 1, 3) + 1; ipert = (hdr%pertcase - idir) / 3 + 1
    ABI_CHECK(all(abs(hdr%qptn) < tol12), sjoin("Expecting Gamma point in E-field pert, got qpt:", ktoa(hdr%qptn)))
    ABI_CHECK(ipert == hdr%natom + 2, sjoin("Expecting E-field perturbation, got ipert:", itoa(ipert)))
+   ABI_CHECK(idir == ii, sjoin("Expecting E-field perturbation along idir:", itoa(ii), " got idir:", itoa(idir)))
    call hdr%free()
  end do
 
- ! From reduced coords to cartesian and pack dirs in the the first dimension.
- ABI_CALLOC(dvdb%v1r_efield_cart, (3, nfft, dvdb%nspden))
+ ! Transfer data.
+ ABI_MALLOC(dvdb%v1r_efield, (nfft, 3, dvdb%nspden))
  do ii=1,3
-   dvdb%v1r_efield_cart(ii,:,:) = v1e_red(:,:,ii)
+   dvdb%v1r_efield(:,ii,:) = v1e_red(:,:,ii)
  end do
  ABI_FREE(v1e_red)
-
- do ispden=1,dvdb%nspden
-   do ifft=1,nfft
-     vec3 = dvdb%v1r_efield_cart(:, ifft, ispden)
-     do idir=1,3
-       !dvdb%v1r_efield_cart(idir, ifft, ispden) = dot_product(vec3, dvdb%cryst%gprimd(:,idir))
-       ! v1_e is a contravariant vector so it transforms as the coordinates of the position vector.
-       dvdb%v1r_efield_cart(idir, ifft, ispden) = dot_product(dvdb%cryst%rprimd(idir,:), vec3)
-     end do
-   end do
- end do
 
  dvdb%has_efield = .True.
 

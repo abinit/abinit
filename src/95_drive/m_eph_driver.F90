@@ -652,11 +652,13 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  case (15, -15)
    ! Write average of DFPT potentials to file.
-   ABI_CHECK(nprocs == 1, "nprocs > 1 not implemented")
-   call dvdb%open_read(ngfftf, xmpi_comm_self)
-   !call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, comm)
-   !call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
-   call dvdb%write_v1qavg(dtset, strcat(dtfil%filnam_ds(4), "_V1QAVG.nc"))
+   ABI_CHECK(nprocs == 1, "nprocs > 1 not implemented.")
+   if (my_rank == master) then
+     call dvdb%open_read(ngfftf, xmpi_comm_self)
+     !call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, comm)
+     !call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
+     call dvdb%write_v1qavg(dtset, strcat(dtfil%filnam_ds(4), "_V1QAVG.nc"))
+   end if
 
  case (16)
    ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
