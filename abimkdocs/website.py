@@ -880,6 +880,7 @@ The bibtex file is available [here](../abiref.bib).
     export ABI_TESTS=$ABI_HOME/tests/
     export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/  # Pseudopotentials used in examples.
     ```
+
     Examples in this tutorial use these shell variables: copy and paste
     the code snippets into the terminal (**remember to set ABI_HOME first!**).
     The 'export PATH' line adds the directory containing the executables to your [PATH](http://www.linfo.org/path_env_var.html)
