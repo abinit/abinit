@@ -5974,7 +5974,7 @@ end subroutine dvdb_test_v1complete
 !!
 !!  eph_task = -15 --> Use list of q-points found in the DVDB file. Mainly used to plot the average
 !!    along a q-path. The procedure required to generate a DVDB with a q-path is rather lengthy
-!!    as requires several phonon calculations with WKQ folloed by the merge of the POT files.
+!!    as it requires several phonon calculations with WKQ followed by a merge of the POT files.
 !!
 !!  eph_task = +15 --> Assume DVDB file with q-mesh (dvdb_ngqpt), use Fourier interpolation
 !!    to interpolate potentials along the path specified by ph_qpath and ph_nqpath.
@@ -6551,7 +6551,6 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
 ! *************************************************************************
 
  iphase = 1; if (present(add_qphase)) iphase = add_qphase
- !my_bmask = 2**0 + 2**1 + 2**2; if present(bmask) my_bmask = bmask
 
  ! Make sure FFT parallelism is not used
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3); nfftot = product(ngfft(1:3))
@@ -6628,22 +6627,10 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
    qtau = - two_pi * dot_product(qG_red, tau_red)
    phre = cos(qtau); phim = sin(qtau)
 
-   re = +fac * qGS * denom_inv
-   !re = zero
+   re = +fac * qGS * denom_inv !re = zero
    im = fac * qGZ * denom_inv
    v1G_lr(1,ig) = phre * re - phim * im
    v1G_lr(2,ig) = phim * re + phre * im
-
-#if 0
-   if (db%has_quadrupoles) then
-     qtau = - two * two_pi * dot_product(qG_red, tau_red)
-     !qtau = zero
-     phre = cos(qtau); phim = sin(qtau)
-     re = +fac * qGS * denom_inv
-     v1G_lr(1,ig) = v1G_lr(1,ig) + re * phre
-     v1G_lr(2,ig) = v1G_lr(2,ig) + re * phim
-   end if
-#endif
  end do
 
  ABI_FREE(gfft)
@@ -6817,7 +6804,8 @@ subroutine dvdb_load_efield(dvdb, pot_paths, comm)
  ABI_CALLOC(v1e_red, (nfft, dvdb%nspden, 3))
 
  do ii=1,3
-   ! Read DFPT potentials.
+   ! Read DFPT potentials due to E-field
+   ! TODO: Should implement symmetries so that only the irred pots are needed.
    call read_rhor(pot_paths(ii), cplex1, dvdb%nspden, nfft, dvdb%ngfft, pawread0, &
      dvdb%mpi_enreg, v1e_red(:,:,ii), hdr, pawrhoij, comm, allow_interp=.True.)
 
@@ -6827,11 +6815,6 @@ subroutine dvdb_load_efield(dvdb, pot_paths, comm)
    ABI_CHECK(all(abs(hdr%qptn) < tol12), sjoin("Expecting Gamma point in E-field pert, got qpt:", ktoa(hdr%qptn)))
    ABI_CHECK(ipert == hdr%natom + 2, sjoin("Expecting E-field perturbation, got ipert:", itoa(ipert)))
    call hdr%free()
-
-   ! Go to G-space
-   !do ispden=1,dvdb%nspden
-   !  call fourdp(cplex1, dvdb%v1g_efield(:,:,ispden,idir), v1d_red(:,:,ii), -1, dvdb%mpi_enreg, nfft, 1, dvdb%ngfft, 0)
-   !end do
  end do
 
  ! From reduced coords to cartesian and pack dirs in the the first dimension.
