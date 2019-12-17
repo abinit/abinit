@@ -647,24 +647,30 @@ end subroutine check_kxc
 !! size_dvxc
 !!
 !! FUNCTION
-!! Give the size of the array dvxc(npts,ndvxc) and the second dimension of the d2vxc(npts,nd2vxc)
-!! needed for the allocations depending on the routine which is called from the drivexc routine
+!! Give the sizes of the several arrays involved in exchange-correlation calculation
+!! needed to allocated them for the drivexc routine
 !!
 !! INPUTS
-!!  [add_tfw]= optional flag controling the addition of Weiszacker gradient correction to Thomas-Fermi XC energy
 !!  ixc= choice of exchange-correlation scheme
-!!  order=gives the maximal derivative of Exc computed.
+!!  order= gives the maximal derivative of Exc computed.
 !!    1=usual value (return exc and vxc)
 !!    2=also computes the kernel (return exc,vxc,kxc)
 !!   -2=like 2, except (to be described)
 !!    3=also computes the derivative of the kernel (return exc,vxc,kxc,k3xc)
+!!  nspden= number of spin components
 !!  [xc_funcs(2)]= <type(libxc_functional_type)>
+!!  [add_tfw]= optional flag controling the addition of Weiszacker gradient correction to Thomas-Fermi XC energy
 !!
 !! OUTPUT
-!!  ndvxc size of the array dvxc(npts,ndvxc) for allocation
-!!  ngr2 size of the array grho2_updn(npts,ngr2) for allocation
-!!  nd2vxc size of the array d2vxc(npts,nd2vxc) for allocation
-!!  nvxcdgr size of the array dvxcdgr(npts,nvxcdgr) for allocation
+!!  --- All optionals
+!!  [ngr2]= size of the array grho2_updn(npts,ngr2) (squared gradient of density)
+!!  [nvxcgrho]= size of the array dvxcdgr(npts,nvxcgrho) (derivative of Exc wrt to gradient)
+!!  [nlpl]= size of the array lrho_updn(npts,nlpl) (laplacian of density)
+!!  [nvxclrho]= size of the array dvxclpl(npts,nvxclrho) (derivative of Exc wrt to laplacian)
+!!  [ntau]= size of the array tau_updn(npts,ntau) (kinetic energy density)
+!!  [nvxctau]= size of the array dvxctau(npts,nvxctau) (derivative of Exc wrt to kin. ener. density)
+!!  [ndvxc]= size of the array dvxc(npts,ndvxc) (second derivatives of Exc wrt to density and gradient)
+!!  [nd2vxc]= size of the array d2vxc(npts,nd2vxc) (third derivatives of Exc wrt density)
 !!
 !! PARENTS
 !!      m_pawxc,rhotoxc
@@ -673,108 +679,126 @@ end subroutine check_kxc
 !!
 !! SOURCE
 
-subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,&
-& add_tfw,xc_funcs) ! Optional
+subroutine size_dvxc(ixc,order,nspden,&
+&                    ngr2,nvxcgrho,nlpl,nvxclrho,ntau,nvxctau,ndvxc,nd2vxc,&
+&                    add_tfw,xc_funcs) ! Optional
 
 !Arguments----------------------
- integer, intent(in) :: ixc,nspden,order
- integer, intent(out) :: ndvxc,nd2vxc,ngr2,nvxcdgr
- logical, intent(in), optional :: add_tfw
+ integer,intent(in) :: ixc,nspden,order
+ integer,intent(out),optional :: ngr2,nvxcgrho,nlpl,nvxclrho,ntau,nvxctau,ndvxc,nd2vxc
+ logical, intent(in),optional :: add_tfw
  type(libxc_functional_type),intent(in),optional :: xc_funcs(2)
 
 !Local variables----------------
- logical :: add_tfw_,isgga,ismgga,is_hybrid
+ logical :: add_tfw_,libxc_isgga,libxc_ismgga,libxc_ishybrid,use_gradient,use_kden,use_laplacian
 
 ! *************************************************************************
 
+!Several flags
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
- isgga=.false. ; ismgga=.false. ; is_hybrid=.false.
+ libxc_isgga=.false. ; libxc_ismgga=.false. ; libxc_ishybrid=.false.
  if(ixc<0)then
    if(present(xc_funcs))then
-     isgga=libxc_functionals_isgga(xc_functionals=xc_funcs)
-     ismgga=libxc_functionals_ismgga(xc_functionals=xc_funcs)
-     is_hybrid=libxc_functionals_is_hybrid(xc_functionals=xc_funcs)
+     libxc_isgga=libxc_functionals_isgga(xc_functionals=xc_funcs)
+     libxc_ismgga=libxc_functionals_ismgga(xc_functionals=xc_funcs)
+     libxc_ishybrid=libxc_functionals_is_hybrid(xc_functionals=xc_funcs)
    else
-     isgga=libxc_functionals_isgga()
-     ismgga=libxc_functionals_ismgga()
-     is_hybrid=libxc_functionals_is_hybrid()
+     libxc_isgga=libxc_functionals_isgga()
+     libxc_ismgga=libxc_functionals_ismgga()
+     libxc_ishybrid=libxc_functionals_is_hybrid()
    end if
  end if
 
- ngr2=0
- nvxcdgr=0
- ndvxc=0
- nd2vxc=0
+!Do we use the gradient?
+ use_gradient=((ixc>=11.and.ixc<=17).or.(ixc==23.or.ixc==24).or. &
+&              (ixc==26.or.ixc==27).or.(ixc>=31.and.ixc<=34).or. &
+&              (ixc==41.or.ixc==42).or.ixc==1402000)
+ if (ixc<0.and.(libxc_isgga.or.libxc_ismgga.or.libxc_ishybrid)) use_gradient=.true.
+ if (add_tfw_) use_gradient=.true.
 
-!Dimension for the gradient of the density (only allocated for GGA or mGGA)
- if ((ixc>=11.and.ixc<=17).or.(ixc>=23.and.ixc<=24).or.ixc==26.or.ixc==27.or. &
-&    (ixc>=31.and.ixc<=34).or.(ixc==41.or.ixc==42).or.ixc==1402000.or.(add_tfw_)) ngr2=2*min(nspden,2)-1
- if (ixc<0.and.isgga.or.ismgga.or.is_hybrid) ngr2=2*min(nspden,2)-1
+!Do we use the laplacian?
+ use_laplacian=(ixc>=31.and.ixc<=34)
+ if (ixc<0) then
+   if(present(xc_funcs)) use_laplacian=libxc_functionals_needs_laplacian(xc_functionals=xc_funcs)
+   if(.not.present(xc_funcs)) use_laplacian=libxc_functionals_needs_laplacian()
+ end if
 
-!A-Only Exc and Vxc
-!=======================================================================================
- if (order**2 <= 1) then
-   if (((ixc>=11 .and. ixc<=15) .and. ixc/=13) .or. (ixc>=23 .and. ixc<=24) .or. &
-&   (ixc==41 .or. ixc==42) .or. ixc==1402000) nvxcdgr=3
-   if (ixc==16.or.ixc==17.or.ixc==26.or.ixc==27) nvxcdgr=2
-   if (ixc<0) nvxcdgr=3
-   if (ixc>=31 .and. ixc<=34) nvxcdgr=3 !Native fake metaGGA functionals (for testing purpose only)
-   if (add_tfw_) nvxcdgr=3
+!Do we use the kinetic energy density?
+ use_kden=(ixc>=31.and.ixc<=34)
+ if (ixc<0) use_kden=libxc_ismgga
 
-!  B- Exc+Vxc and other derivatives
-!  =======================================================================================
- else
+!Dimension for the gradient of the density (GGA or mGGA)
+ if (present(ngr2)) then
+   ngr2=0 ; if (use_gradient) ngr2=2*min(nspden,2)-1
+ end if
 
-!  Definition of ndvxc and nvxcdgr, 2nd dimension of the arrays of 2nd-order derivatives
-!  -------------------------------------------------------------------------------------
-   if (ixc==1 .or. ixc==21 .or. ixc==22 .or. (ixc>=7 .and. ixc<=10) .or. ixc==13) then
-!    Routine xcspol: new Teter fit (4/93) to Ceperley-Alder data, with spin-pol option routine xcspol
-!    Routine xcpbe, with different options (optpbe) and orders (order)
-     ndvxc=min(nspden,2)+1
-   else if (ixc>=2 .and. ixc<=6) then
-!    Perdew-Zunger fit to Ceperly-Alder data (no spin-pol)     !routine xcpzca
-!    Teter fit (4/91) to Ceperley-Alder values (no spin-pol)   !routine xctetr
-!    Wigner xc (no spin-pol)                                   !routine xcwign
-!    Hedin-Lundqvist xc (no spin-pol)                          !routine xchelu
-!    X-alpha (no spin-pol)                                     !routine xcxalp
-     ndvxc=1
-   else if (ixc==12 .or. ixc==24) then
-!    Routine xcpbe, with optpbe=-2 and different orders (order)
-     ndvxc=8
-     nvxcdgr=3
-   else if ((ixc>=11 .and. ixc<=15 .and. ixc/=13) .or. ixc==23 .or. ixc==41 .or. ixc==42) then
-!    Routine xcpbe, with different options (optpbe) and orders (order)
-     ndvxc=15
-     nvxcdgr=3
-   else if(ixc==16 .or. ixc==17 .or. ixc==26 .or. ixc==27 ) then
-     nvxcdgr=2
-   else if (ixc==50) then
-     ndvxc=1 !  IIT xc (no spin-pol)
-   else if (ixc==1402000) then
-     ndvxc=15
-     nvxcdgr=3
-   else if (ixc<0) then
-     if(isgga .or. ismgga .or. is_hybrid) then
+!Dimension for the laplacian of the density (mGGA)
+ if (present(nlpl)) then
+   nlpl=0 ; if (use_laplacian) nlpl=min(nspden,2)
+ end if
+
+!Dimension for the kinetic energy density (mGGA)
+ if (present(ntau)) then
+   ntau=0 ; if (use_kden) ntau=min(nspden,2)
+ end if
+
+!First derivative(s) of XC functional wrt gradient of density
+ if (present(nvxcgrho)) then
+   nvxcgrho=0
+   if (abs(order)>=1) then
+     if (use_gradient) nvxcgrho=3
+     if (ixc==16.or.ixc==17.or.ixc==26.or.ixc==27) nvxcgrho=2
+   end if
+ end if
+
+!First derivative(s) of XC functional wrt laplacian of density
+ if (present(nvxclrho)) then
+   nvxclrho=0
+   if (abs(order)>=1) then
+     if (use_laplacian) nvxclrho=min(nspden,2)
+   end if
+ end if
+
+!First derivative(s) of XC functional wrt kinetic energy density
+ if (present(nvxctau)) then
+   nvxctau=0
+   if (abs(order)>=1) then
+     if (use_kden) nvxctau=min(nspden,2)
+   end if
+ end if
+
+!Second derivative(s) of XC functional wrt density
+ if (present(ndvxc)) then
+   ndvxc=0
+   if (abs(order)>=2) then
+     if (ixc==1.or.ixc==13.or.ixc==21.or.ixc==22.or.(ixc>=7.and.ixc<=10)) then
+       ndvxc=min(nspden,2)+1
+     else if ((ixc>=2.and.ixc<=6).or.ixc==50) then
+       ndvxc=1
+     else if (ixc==12.or.ixc==24) then
+       ndvxc=8
+     else if (ixc==11.or.ixc==12.or.ixc==14.or.ixc==15.or. &
+&             ixc==23.or.ixc==41.or.ixc==42.or.ixc==1402000) then
        ndvxc=15
-     else
-       ndvxc=3
+     else if (ixc<0) then
+       ndvxc=3 ; if (use_gradient) ndvxc=15
      end if
-     nvxcdgr=3
    end if
-   if (add_tfw_) nvxcdgr=3
+ end if
 
-!  Definition of nd2vxc, 2nd dimension of the array of 3rd-order derivatives
-!  -------------------------------------------------------------------------------------
-   if (order==3) then
-     if (ixc==3) nd2vxc=1 ! Non spin polarized LDA case
-     if ((ixc>=7 .and. ixc<=10) .or. (ixc==13)) nd2vxc=3*min(nspden,2)-2
-!    Following line to be corrected when the calculation of d2vxcar is implemented for these functionals
-     if ((ixc>=11 .and. ixc<=15 .and. ixc/=13) .or. (ixc==23.and.ixc<=24) .or. (ixc==41.or.ixc==42)) nd2vxc=1
-     if(ixc==1402000)nd2vxc=3*min(nspden,2)-2
-     if ((ixc<0.and.(.not.(isgga.or.ismgga.or.is_hybrid)))) &
-&     nd2vxc=3*min(nspden,2)-2
+!Third derivative(s) of XC functional wrt density
+ if (present(nd2vxc)) then
+   nd2vxc=0
+   if (abs(order)>=3) then
+     if (ixc==3.or.(ixc>=11.and.ixc<=15.and.ixc/=13).or. &
+&        ixc==23.or.ixc==24.or.ixc==41.or.ixc==42) then
+       nd2vxc=1
+     else if ((ixc>=7.and.ixc<=10).or.ixc==13.or.ixc==1402000) then
+       nd2vxc=3*min(nspden,2)-2
+     else if (ixc<0) then
+       if (.not.use_gradient) nd2vxc=3*min(nspden,2)-2
+     end if
    end if
-
  end if
 
 end subroutine size_dvxc
@@ -1152,7 +1176,7 @@ end subroutine mkdenpos
 !! SOURCE
 
 subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&   dvxc,d2vxc,grho2_updn,vxcgrho,el_temp,exexch,fxcT,& !Optional arguments
+&   dvxc,d2vxc,grho2_updn,vxcgrho,el_temp,exexch,fxcT,&     !Optional arguments
 &   hyb_mixing,lrho_updn,vxclrho,tau_updn,vxctau,xc_funcs)  !Optional arguments
 
 !Arguments ------------------------------------
@@ -1163,7 +1187,7 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 !arrays
  real(dp),intent(in) :: rho_updn(npts,nspden)
  real(dp),intent(in),optional :: grho2_updn(npts,ngr2)
- real(dp),intent(in),optional :: lrho_updn(npts,nspden), tau_updn(npts,nspden)
+ real(dp),intent(in),optional :: lrho_updn(npts,nspden),tau_updn(npts,nspden)
  real(dp),intent(out) :: exc(npts),vxcrho(npts,nspden)
  real(dp),intent(out),optional :: d2vxc(npts,nd2vxc),dvxc(npts,ndvxc),fxcT(:)
  real(dp),intent(out),optional :: vxcgrho(npts,nvxcgrho)
