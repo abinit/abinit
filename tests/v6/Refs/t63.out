@@ -644,7 +644,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     365.000     365.000
  Mean square residual over all n,k,spin=   96.059E-24; max=  27.374E-23
  dfpt_looppert : ek2=    6.3165468167E+00
           f-sum rule ratio=    1.6341436833E+00 (note : ecutsm/=0)
- prteigrs : about to open file t63_1WF1_EIG
+ prteigrs : about to open file t63t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   4  k points, SPIN UP:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  4, wtk=  0.25000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -714,7 +714,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     365.000     365.000
  Mean square residual over all n,k,spin=   14.810E-22; max=  58.070E-22
  dfpt_looppert : ek2=    1.7545963380E+01
           f-sum rule ratio=    6.0232354428E+00 (note : ecutsm/=0)
- prteigrs : about to open file t63_1WF1_EIG
+ prteigrs : about to open file t63t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   4  k points, SPIN UP:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  4, wtk=  0.25000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -784,7 +784,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     365.000     365.000
  Mean square residual over all n,k,spin=   16.747E-22; max=  65.809E-22
  dfpt_looppert : ek2=    1.7545963380E+01
           f-sum rule ratio=    6.0198443054E+00 (note : ecutsm/=0)
- prteigrs : about to open file t63_1WF1_EIG
+ prteigrs : about to open file t63t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   4  k points, SPIN UP:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  4, wtk=  0.25000, kpt=  0.2500  0.2500  0.2500 (reduced coord)

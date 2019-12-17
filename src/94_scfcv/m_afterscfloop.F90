@@ -123,6 +123,7 @@ contains
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  grchempottn(3,natom)=d(E_chemical_potential)/d(xred) (hartree)
+!!  grcondft(3,natom)=d(E_constrained_DFT)/d(xred) (hartree)
 !!  grewtn(3,natom)=d(Ewald)/d(xred) (hartree)
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D2 dispersion (hartree)
 !!  gsqcut=cutoff value on G**2 for (large) sphere inside FFT box.
@@ -130,6 +131,7 @@ contains
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
 !!  indsym(4,nsym,natom)=index showing transformation of atom labels
 !!                       under symmetry operations (computed in symatm)
+!!  intgres(nspden,natom)=integrated residuals from constrained DFT. They are also Lagrange parameters, or gradients with respect to constraints.
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
 !!  istep=number of the SCF iteration
 !!  istep_fock_outer=number of outer SCF iteration in the double loop approach
@@ -288,9 +290,10 @@ contains
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
-& energies,etotal,favg,fcart,fock,forold,fred,grchempottn,&
-& gresid,grewtn,grhf,grhor,grvdw,grxc,gsqcut,hdr,hightemp,indsym,irrzon,&
-& istep,istep_fock_outer,istep_mix,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
+& energies,etotal,favg,fcart,fock,forold,fred,grchempottn,grcondft,&
+& gresid,grewtn,grhf,grhor,grvdw,&
+& grxc,gsqcut,hdr,hightemp,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
+& kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
@@ -332,6 +335,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  integer,intent(in) :: pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
  integer,intent(out) :: conv_retcode
  real(dp),intent(in) :: grchempottn(3,dtset%natom),grewtn(3,dtset%natom),grvdw(3,ngrvdw)
+ real(dp),intent(in) :: grcondft(:,:) ! (3,natom) if constrainedDFT otherwise (3,0)
+ real(dp),intent(in) :: intgres(:,:) ! (nspden,natom) if constrainedDFT otherwise (nspden,0)
  real(dp),intent(in) :: phnons(2,dtset%nfft**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  real(dp),intent(in) :: pwnsfac(2,pwind_alloc)
  real(dp),intent(in) :: resid(dtset%mband*dtset%nkpt*dtset%nsppol)
@@ -1052,6 +1057,14 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  results_gs%synlgr(:,:)=synlgr(:,:)
  results_gs%vxcavg     =vxcavg
  if (ngrvdw>0) results_gs%grvdw(1:3,1:ngrvdw)=grvdw(1:3,1:ngrvdw)
+
+ results_gs%intgres(:,:)=zero
+ results_gs%grcondft(:,:)=zero
+ if(any(dtset%constraint_kind(:)/=0))then
+   results_gs%intgres(1:dtset%nspden,:)  =intgres(1:dtset%nspden,:)
+   results_gs%grcondft(:,:) =grcondft(:,:)
+ endif
+
  if (dtset%nstep == 0 .and. dtset%occopt>=3.and.dtset%occopt<=8) then
    results_gs%etotal = results_gs%etotal - dtset%tsmear * results_gs%entropy
  end if

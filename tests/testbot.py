@@ -3,6 +3,8 @@ from __future__ import print_function, division, absolute_import  #, unicode_lit
 
 import sys
 import os
+#os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Psps_for_tests"))
+#print("ABI_PSPDIR:", os.environ["ABI_PSPDIR"])
 import platform
 
 from os.path import join as pj, abspath as absp, basename

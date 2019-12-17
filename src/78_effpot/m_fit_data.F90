@@ -122,7 +122,7 @@ module m_fit_data
 !    datatype with the informations of the training set
    
  end type fit_data_type
- 
+
 !routine for fit_data
  public :: fit_data_compute
  public :: fit_data_init
@@ -402,7 +402,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
    fcart_diff(:,:,itime) =  hist%fcart(:,:,itime) - fcart_fixed(:,:,itime)
    energy_diff(itime)    =  hist%etot(itime) - energy
    strten_diff(:,itime)  =  hist%strten(:,itime) - strten_fixed(:,itime)
- end do
+ end do ! End Loop itime 
    
 !Set the training set
  call training_set_init(ts,displacement,du_delta,natom,ntime,strain,sqomega,ucvol)
@@ -425,6 +425,9 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 
 end subroutine fit_data_compute
 !!***
+
+
+
 
 !!****f* m_fit_data/training_set_init
 !!

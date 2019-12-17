@@ -54,6 +54,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% use_files_file = yes
 #%% [files]
 #%% files_to_test = t01.out, tolnlines=0, tolabs=0.0, tolrel=0.0
 #%% psp_files=13al.pspgth
