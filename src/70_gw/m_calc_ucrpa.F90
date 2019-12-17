@@ -144,7 +144,7 @@ contains
  integer :: im_paral,iqalloc,ib1,ib2,m1,m2,m3,m4,iqibz,mbband1,mbband2,mbband3,mbband4,spin1,spin2
  integer :: ierr,ik_bz,ik_ibz,iq_ibz,i,iG1,iG2,iG,iiG,iomega,iomega1,ispinor1,ispinor2,ispinor3,ispinor4
  integer :: lpawu_read,nkibz,nbband,nkbz,nprocs,nqalloc,nqibz,ms1,ms2,ms3,ms4,mbband,nspinor
- integer :: isym_kgw,iik,unt
+ integer :: isym_kgw,iik,unt, cp_paral
  complex(dpc) ::ph_mkt
 
  logical :: wannier=.TRUE.
@@ -229,6 +229,7 @@ contains
  ABI_ALLOCATE(bijection,(nkbz))
  ABI_ALLOCATE(ikmq_bz_t,(nkbz,nqibz))
  bijection(:)=.FALSE.
+ if (nsym==1) then
  do ik_bz=1,nkbz
    do iq_ibz=1,nqibz
      ikmq_bz_t(ik_bz,iq_ibz)=findkmq(ik_bz,k_coord,q_coord(iq_ibz,:),nkbz)
@@ -253,6 +254,7 @@ contains
    write(message,*)  "Bijection Ok."
    call wrtout(std_out,message,'COLL')
  end if
+endif
 !                                           _____
 !                                          / ____|
 !   _ __   ___  _ __ _ __ ___   ___       | |  __
@@ -607,6 +609,7 @@ contains
       ABI_ALLOCATE(omega,(nomega))
       do spin1=1,wanbz%nsppol
       do spin2=1,wanbz%nsppol
+        cp_paral=0
         mbband1=2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
         mbband2=2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
         mbband3=2*wanbz%latom_wan(iatom3)%lcalc(il3)+1
@@ -623,11 +626,14 @@ contains
           do m4=1,mbband4
             do iqibz=1,nqibz
             do iG=1,npw
-              rhot_q_m1m3(ispinor1,ispinor3,m1,m3,iG,iqibz)=&
-              &rhot1(iG,iqibz)%atom_index(iatom1,iatom3)%position(pos1,pos3)%atom(il1,il3)%matl(m1,m3,spin1,ispinor1,ispinor3)
+              ! cp_paral=cp_paral+1
+              ! if(mod(cp_paral-1,nprocs)==Wfd%my_rank) then
+                rhot_q_m1m3(ispinor1,ispinor3,m1,m3,iG,iqibz)=&
+                  &rhot1(iG,iqibz)%atom_index(iatom1,iatom3)%position(pos1,pos3)%atom(il1,il3)%matl(m1,m3,spin1,ispinor1,ispinor3)
           
-              rhot_q_m2m4(ispinor2,ispinor4,m2,m4,iG,iqibz)=&
-              &rhot1(iG,iqibz)%atom_index(iatom2,iatom4)%position(pos2,pos4)%atom(il2,il4)%matl(m2,m4,spin2,ispinor2,ispinor4)
+                rhot_q_m2m4(ispinor2,ispinor4,m2,m4,iG,iqibz)=&
+                  &rhot1(iG,iqibz)%atom_index(iatom2,iatom4)%position(pos2,pos4)%atom(il2,il4)%matl(m2,m4,spin2,ispinor2,ispinor4)
+              !endif
             enddo!iG
             enddo!iqibz
           enddo!m4
@@ -638,7 +644,10 @@ contains
         enddo!ispinor3
         enddo!ispinor2
         enddo!ispinor1 
- 
+        ! call xmpi_barrier(Wfd%comm)  ! First make sure that all processors are here
+        ! call xmpi_sum(rhot_q_m1m3,Wfd%comm,ierr)
+        ! call xmpi_sum(rhot_q_m2m4,Wfd%comm,ierr)
+        ! call xmpi_barrier(Wfd%comm)  ! First make sure that all processors are here
 
 !    __      __
 !    \ \    / /
