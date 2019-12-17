@@ -6006,7 +6006,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  integer,parameter :: master = 0
  integer :: nfft, iq, cplex, ispden, comm_rpt, my_rank, idir, ipert, ipc, imyp
  integer :: n1, n2, n3, unt, this_nqpt, method, interpolated
- !integer :: i1, i2, i3, ifft,
+ integer :: i1, i2, i3, ifft
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr
 #endif
@@ -6038,6 +6038,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  ABI_MALLOC(file_v1r, (2, nfft, dvdb%nspden, dvdb%my_npert))
 
  unt = -1; dump_path = ""
+ !dump_path = "V1QAVG.dat"
  if (len_trim(dump_path) /= 0 .and. my_rank == master) then
    if (open_file(dump_path, msg, newunit=unt, action="write", status="unknown", form="formatted") /= 0) then
      MSG_ERROR(msg)
@@ -6099,6 +6100,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
      nctkarr_t("v1scf_avg", "dp", "two, nspden, three, natom, nqpt"), &
      nctkarr_t("v1lr_avg", "dp", "two, nspden, three, natom, nqpt"), &
      nctkarr_t("v1scfmlr_avg", "dp", "two, nspden, three, natom, nqpt"), &
+     nctkarr_t("v1scfmlr_abs_avg", "dp", "two, nspden, three, natom, nqpt"), &
      nctkarr_t("v1scf_abs_avg", "dp", "two, nspden, three, natom, nqpt"), &
      nctkarr_t("v1lr_abs_avg", "dp", "two, nspden, three, natom, nqpt"), &
      nctkarr_t("qpoints", "dp", "three, nqpt") &
@@ -6183,30 +6185,34 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
        ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scfmlr_avg"), vals2, &
                             start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
        NCF_CHECK(ncerr)
+       vals2 = sum(abs(file_v1r(:,:,ispden,imyp) - long_v1r(:,:,ispden,imyp)), dim=2) / nfft
+       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scfmlr_abs_avg"), vals2, &
+                            start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
+       NCF_CHECK(ncerr)
 #endif
 
-#if 0
        ! Debugging section.
-       write(std_out, "(a)")"--- !DVDB_LONGRANGE_DIFF"
-       write(std_out,"(3a)")"  qpoint: ", trim(ktoa(this_qpts(:,iq))), ","
-       write(std_out,"(a,i0,a)")"  iq: ", iq, ","
-       write(std_out,"(2(a,i0))")"  idir: ", idir, ", ipert:", ipert
-       write(std_out,"(a,i0,a)")"  ispden: ", ispden, ","
-       call vdiff_print(vdiff_eval(2, nfft, file_v1r(:,:,ispden,imyp), long_v1r(:,:,ispden,imyp), &
-                        dvdb%cryst%ucvol, vd_max=vd_max))
-       write(std_out,"(a)")"..."
+       !write(std_out, "(a)")"--- !DVDB_LONGRANGE_DIFF"
+       !write(std_out,"(3a)")"  qpoint: ", trim(ktoa(this_qpts(:,iq))), ","
+       !write(std_out,"(a,i0,a)")"  iq: ", iq, ","
+       !write(std_out,"(2(a,i0))")"  idir: ", idir, ", ipert:", ipert
+       !write(std_out,"(a,i0,a)")"  ispden: ", ispden, ","
+       !call vdiff_print(vdiff_eval(2, nfft, file_v1r(:,:,ispden,imyp), long_v1r(:,:,ispden,imyp), &
+       !                 dvdb%cryst%ucvol, vd_max=vd_max))
+       !write(std_out,"(a)")"..."
 
        ! Debug: write potentials to file.
        if (unt /= -1) then
          write(unt,*)"# q-point:", trim(ktoa(this_qpts(:,iq))), ", iq: ", trim(itoa(iq))
          write(unt,*)"# idir: ",idir,", ipert: ",ipert,", ispden:", ispden
          write(unt,*)"# file_v1r, long_v1r, diff"
+
          if (cplex == 1) then
            do i3=1,n3
              do i2=1,n2
                do i1=1,n1
                  ifft = i1+n1*((i2-1)+n2*(i3-1))
-                 write(unt,"(3i3,3(es12.4,2x))") &
+                 write(unt,"(3(i0,1x),3(es12.4,2x))") &
                    i1,i2,i3, &
                    file_v1r(1,ifft,ispden,imyp), long_v1r(1,ifft,ispden,imyp), &
                    file_v1r(1,ifft,ispden,imyp) - long_v1r(1,ifft,ispden,imyp)
@@ -6218,7 +6224,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
              do i2=1,n2
                do i1=1,n1
                  ifft = i1+n1*((i2-1)+n2*(i3-1))
-                 write(unt, "(3i3,6(es12.4,2x))") &
+                 write(unt, "(3(i0,1x),6(es12.4,2x))") &
                    i1,i2,i3, &
                    file_v1r(1,ifft,ispden,imyp), long_v1r(1,ifft,ispden,imyp),  &
                    file_v1r(1,ifft,ispden,imyp) - long_v1r(1,ifft,ispden,imyp), &
@@ -6231,7 +6237,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
          write(unt,*)
          write(unt,*)
        end if
-#endif
+
      end do
    end do
    !write(std_out,*)" "
@@ -6629,6 +6635,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
    ! Phase factor exp(-i (q+G) . tau)
    qtau = - two_pi * dot_product(qG_red, tau_red)
    phre = cos(qtau); phim = sin(qtau)
+   !phre = one; phim = zero
 
    re = +fac * qGS * denom_inv !re = zero
    im = fac * qGZ * denom_inv
@@ -6648,6 +6655,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
    ispden = 1
    ABI_CALLOC(v1G_lr33, (3, 3, 2, nfft))
    do ig=1,nfft
+     !if (ig > 1) cycle
      ! (q + G)
      qG_red = qpt + gfft(:,ig)
      qG_cart = two_pi * matmul(db%cryst%gprimd, qG_red)
@@ -6664,6 +6672,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
      ! Phase factor exp(-i (q+G) . tau)
      qtau = - two_pi * dot_product(qG_red, tau_red)
      phre = cos(qtau); phim = sin(qtau)
+     !phre = one; phim = zero
 
      do ii=1,3
        do jj=1,3
@@ -6831,6 +6840,7 @@ subroutine dvdb_load_efield(dvdb, pot_paths, comm)
  do ii=1,3
    ! Read DFPT potentials due to E-field.
    ! TODO: Should implement symmetries so that only the irred pots are needed.
+   call wrtout(std_out, sjoin("Loading Efield DFPT potential from:", pot_paths(ii)))
    call read_rhor(pot_paths(ii), cplex1, dvdb%nspden, nfft, dvdb%ngfft, pawread0, &
      dvdb%mpi_enreg, v1e_red(:,:,ii), hdr, pawrhoij, comm, allow_interp=.True.)
 
