@@ -34,8 +34,10 @@ module m_hightemp
   use m_special_funcs
   use m_specialmsg
   use m_energies,       only : energies_type
+  use m_kg,             only : mkkin
   use m_mpinfo,         only : ptabs_fourdp, proc_distrb_cycle
   use m_numeric_tools,  only : simpson, simpson_int
+  use m_spacepar,       only : meanvalue_g
 
   implicit none
 
@@ -49,8 +51,8 @@ module m_hightemp
   end type hightemp_type
 
   ! type(hightemp_type),save,pointer :: hightemp=>null()
-  public :: hightemp_dosfreeel
-  public :: hightemp_prt_eigocc,hightemp_getnfreeel
+  public :: hightemp_dosfreeel,hightemp_get_e_shiftfactor
+  public :: hightemp_getnfreeel,hightemp_prt_eigocc
 contains
 
   !!****f* ABINIT/m_hightemp/init
@@ -302,9 +304,9 @@ contains
 
   ! *********************************************************************
 
-  !!****f* ABINIT/m_hightemp/hightemp_free_dos
+  !!****f* ABINIT/m_hightemp/hightemp_dosfreeel
   !! NAME
-  !! hightemp_free_dos
+  !! hightemp_dosfreeel
   !!
   !! FUNCTION
   !! Returns the free particle density of states for a given energy (in Hartree)
@@ -333,6 +335,162 @@ contains
 
     hightemp_dosfreeel=sqrt(2.)*ucvol*sqrt(energy-e_shiftfactor)/(PI*PI)
   end function hightemp_dosfreeel
+
+  !!****f* ABINIT/m_hightemp/hightemp_get_e_shiftfactor
+  !! NAME
+  !! hightemp_get_e_shiftfactor
+  !!
+  !! FUNCTION
+  !!
+  !! INPUTS
+  !!
+  !! OUTPUT
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine hightemp_get_e_shiftfactor(cg,ecut,ecutsm,effmass_free,eigen,gmet,hightemp,&
+  & istwfk,kg,kptns,mband,mcg,mkmem,mpi_enreg,mpw,my_nspinor,nband,nkpt,nsppol,npwarr)
+    ! Arguments -------------------------------
+    ! Scalars
+    integer,intent(in) :: mband,mcg,mpw,mkmem,my_nspinor,nkpt,nsppol
+    real(dp),intent(in) :: ecut,ecutsm,effmass_free
+    type(MPI_type),intent(inout) :: mpi_enreg
+    type(hightemp_type),pointer,intent(inout) :: hightemp
+    ! Arrays
+    integer,intent(in) :: istwfk(nkpt),nband(nkpt*nsppol),npwarr(nkpt)
+    integer,intent(in) :: kg(3,mpw*mkmem)
+    real(dp),intent(in) :: cg(2,mcg),eigen(mband*nkpt*nsppol)
+    real(dp),intent(in) :: kptns(3,nkpt),gmet(3,3)
+
+    ! Local variables -------------------------
+    ! Scalars
+    integer :: bdtot_index,blocksize,iband,iblock,iblocksize
+    integer :: ikpt,isppol,mpierr,nband_k,nblockbd,npw_k
+    integer :: ii
+    real(dp) :: ar
+    ! Arrays
+    integer,allocatable :: kg_k(:,:)
+    real(dp),allocatable :: eknk(:),ek_k(:),kinpw(:)
+
+    ! *********************************************************************
+
+    bdtot_index=0
+
+    ABI_ALLOCATE(eknk,(mband*nkpt*nsppol))
+    do isppol=1,nsppol
+      do ikpt=1,nkpt
+        npw_k = npwarr(ikpt)
+        nband_k=nband(ikpt+(isppol-1)*nkpt)
+
+        ABI_ALLOCATE(kg_k,(3,npw_k))
+        ABI_ALLOCATE(kinpw,(npw_k))
+        ABI_ALLOCATE(ek_k,(nband_k))
+
+        kg_k(:,1:npw_k)=kg(:,1:npw_k)
+        nblockbd=nband_k/(mpi_enreg%nproc_band*mpi_enreg%bandpp)
+        blocksize=nband_k/nblockbd
+
+        call mkkin(ecut,ecutsm,effmass_free,gmet,kg_k,kinpw,kptns(:,ikpt),npw_k,0,0)
+
+        do iblock=1,nblockbd
+          do iblocksize=1,blocksize
+            iband=(iblock-1)*blocksize+iblocksize
+            call meanvalue_g(ar,kinpw,0,istwfk(ikpt),mpi_enreg,npw_k,my_nspinor,&
+            & cg(:,1+(iband-1)*npw_k*my_nspinor:iband*npw_k*my_nspinor),&
+            & cg(:,1+(iband-1)*npw_k*my_nspinor:iband*npw_k*my_nspinor),0)
+
+            ek_k(iband)=ar
+          end do
+        end do
+
+        eknk (1+bdtot_index : nband_k+bdtot_index) = ek_k (:)
+        ABI_DEALLOCATE(ek_k)
+        ABI_DEALLOCATE(kinpw)
+        ABI_DEALLOCATE(kg_k)
+
+        bdtot_index=bdtot_index+nband_k
+      end do
+    end do
+
+    call hightemp%compute_e_shiftfactor(eigen,eknk,mband,mpi_enreg,&
+    & nkpt,nsppol)
+
+    ABI_DEALLOCATE(eknk)
+  end subroutine hightemp_get_e_shiftfactor
+
+  !!****f* ABINIT/m_hightemp/hightemp_getnfreeel
+  !! NAME
+  !! hightemp_getnfreeel
+  !!
+  !! FUNCTION
+  !! Compute the value of the integral corresponding to the missing free electrons after energy cut.
+  !! $I = \int_{Ec}^{\Infty}f(\epsilon)\frac{\sqrt{2}\Omega}{\pi^2}\sqrt{\epsilon - U_0}d \epsilon$
+  !!
+  !! INPUTS
+  !! this=hightemp_type object concerned
+  !! fermie=fermi energy (Hartree)
+  !! mrgrid=number of grid points to compute the integral
+  !! tsmear=smearing width (or temperature)
+  !! e_shiftfactor=energy shift factor
+  !! ucvol=unit cell volume (bohr^3)
+  !!
+  !! OUTPUT
+  !! nfreeel=number of free electrons after the energy cut with given fermi level
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine hightemp_getnfreeel(ebcut,entropy,fermie,mrgrid,nfreeel,tsmear,e_shiftfactor,ucvol)
+
+    ! Arguments -------------------------------
+    ! Scalars
+    integer,intent(in) :: mrgrid
+    real(dp),intent(in) :: ebcut,fermie,tsmear,e_shiftfactor
+    real(dp),intent(out) :: entropy,nfreeel
+
+    ! Local variables -------------------------
+    ! Scalars
+    integer :: ii
+    real(dp) :: ix,step,ucvol
+    ! Arrays
+    real(dp),dimension(:),allocatable :: valuesnel,valuesent
+
+    ! *********************************************************************
+    step=1e-4
+    nfreeel=zero
+    entropy=zero
+
+    ! Dynamic array find size
+    ix=ebcut
+    ii=0
+    do while(fermi_dirac(ix,fermie,tsmear)>1e-8)
+      ii=ii+1
+      ix=ix+step
+    end do
+
+    ABI_ALLOCATE(valuesnel,(ii))
+    ABI_ALLOCATE(valuesent,(ii))
+
+    ix=ebcut
+    ii=0
+    do while(fermi_dirac(ix,fermie,tsmear)>1e-8)
+      ii=ii+1
+      valuesnel(ii)=fermi_dirac(ix,fermie,tsmear)*hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
+      valuesent(ii)=(fermi_dirac(ix,fermie,tsmear)*log(fermi_dirac(ix,fermie,tsmear))+&
+      & (1.-fermi_dirac(ix,fermie,tsmear))*log(1.-fermi_dirac(ix,fermie,tsmear)))*&
+      & hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
+      ix=ix+step
+    end do
+    if (ii>1) then
+      nfreeel=simpson(step,valuesnel)
+      entropy=simpson(step,valuesent)
+    end if
+  end subroutine hightemp_getnfreeel
 
   !!****f* ABINIT/m_hightemp/hightemp_prt_eigocc
   !! NAME
@@ -480,76 +638,5 @@ contains
 
     close(temp_unit)
   end subroutine hightemp_prt_eigocc
-
-  !!****f* ABINIT/m_hightemp/hightemp_getnfreeel
-  !! NAME
-  !! hightemp_getnfreeel
-  !!
-  !! FUNCTION
-  !! Compute the value of the integral corresponding to the missing free electrons after energy cut.
-  !! $I = \int_{Ec}^{\Infty}f(\epsilon)\frac{\sqrt{2}\Omega}{\pi^2}\sqrt{\epsilon - U_0}d \epsilon$
-  !!
-  !! INPUTS
-  !! this=hightemp_type object concerned
-  !! fermie=fermi energy (Hartree)
-  !! mrgrid=number of grid points to compute the integral
-  !! tsmear=smearing width (or temperature)
-  !! e_shiftfactor=energy shift factor
-  !! ucvol=unit cell volume (bohr^3)
-  !!
-  !! OUTPUT
-  !! nfreeel=number of free electrons after the energy cut with given fermi level
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
-  !! SOURCE
-  subroutine hightemp_getnfreeel(ebcut,entropy,fermie,mrgrid,nfreeel,tsmear,e_shiftfactor,ucvol)
-
-    ! Arguments -------------------------------
-    ! Scalars
-    integer,intent(in) :: mrgrid
-    real(dp),intent(in) :: ebcut,fermie,tsmear,e_shiftfactor
-    real(dp),intent(out) :: entropy,nfreeel
-
-    ! Local variables -------------------------
-    ! Scalars
-    integer :: ii
-    real(dp) :: ix,step,ucvol
-    ! Arrays
-    real(dp),dimension(:),allocatable :: valuesnel,valuesent
-
-    ! *********************************************************************
-    step=1e-4
-    nfreeel=zero
-    entropy=zero
-
-    ! Dynamic array find size
-    ix=ebcut
-    ii=0
-    do while(fermi_dirac(ix,fermie,tsmear)>1e-8)
-      ii=ii+1
-      ix=ix+step
-    end do
-
-    ABI_ALLOCATE(valuesnel,(ii))
-    ABI_ALLOCATE(valuesent,(ii))
-
-    ix=ebcut
-    ii=0
-    do while(fermi_dirac(ix,fermie,tsmear)>1e-8)
-      ii=ii+1
-      valuesnel(ii)=fermi_dirac(ix,fermie,tsmear)*hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
-      valuesent(ii)=(fermi_dirac(ix,fermie,tsmear)*log(fermi_dirac(ix,fermie,tsmear))+&
-      & (1.-fermi_dirac(ix,fermie,tsmear))*log(1.-fermi_dirac(ix,fermie,tsmear)))*&
-      & hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
-      ix=ix+step
-    end do
-    if (ii>1) then
-      nfreeel=simpson(step,valuesnel)
-      entropy=simpson(step,valuesent)
-    end if
-  end subroutine hightemp_getnfreeel
 
 end module m_hightemp

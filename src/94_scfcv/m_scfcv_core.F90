@@ -1336,42 +1336,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
        call timab(558,2,tsec)
      end if
 
-!    Add hightemp contribution to rho in the case where wf are read.
-     if(associated(hightemp)) then
-       if (dtfil%ireadwf/=0.and.dtfil%ireadden==0.and.initialized==0) then
-!
-!          call hightemp_get_e_shiftfactor(cg,dtset%ecut,dtset%ecutsm,dtset%effmass_free,eigen,gmet,dtset%istwfk,kg,dtset%kptns,&
-! &         dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,my_nspinor,dtset%nband,dtset%nkpt,dtset%nsppol,npwarr)
-!
-!          doccde(:)=zero
-!          call newocc(doccde,eigen,energies%entropy,fermie,dtset%spinmagntarget,&
-!    &      dtset%mband,dtset%nband,dtset%nelect,dtset%nkpt,dtset%nspinor,&
-!    &      dtset%nsppol,occ,dtset%occopt,dtset%prtvol,dtset%stmbias,dtset%tphysel,dtset%tsmear,dtset%wtk)
-!
-!          call hightemp%compute_nfreeel(fermie,1024,dtset%tsmear)
-!          call hightemp%compute_e_kin_freeel(fermie,1024,nfftf,dtset%nspden,&
-!  &        dtset%tsmear,vtrial)
-!
-!          if(mpi_enreg%me==0) then
-!            write(0,*) 'but the real occ is'
-!            do ii=1, dtset%mband
-!              write(0,*) ii, occ(ii),fermie
-!            end do
-!            write(0,*) '----'
-!          end if
-         !
-         ! call hightemp%compute_e_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg,dtset%nkpt,dtset%nsppol)
-         ! if(dtset%userra/=zero) hightemp%e_shiftfactor=dtset%userra
-         !
-         ! rhor(:,:)=rhor(:,:)+hightemp%nfreeel/hightemp%ucvol/dtset%nspden
-         ! if(dtset%usewvl==0) then
-         !   call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
-         ! end if
-         !
-         !
-       end if
-     end if
-
 !    The following steps have been gathered in the setvtr routine:
 !    - get Ewald energy and Ewald forces
 !    - compute local ionic pseudopotential vpsp
