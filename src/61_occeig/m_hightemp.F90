@@ -51,7 +51,8 @@ module m_hightemp
   end type hightemp_type
 
   ! type(hightemp_type),save,pointer :: hightemp=>null()
-  public :: hightemp_dosfreeel,hightemp_get_e_shiftfactor
+  public :: hightemp_dosfreeel,djp12
+  public :: hightemp_get_e_shiftfactor
   public :: hightemp_getnfreeel,hightemp_prt_eigocc
 contains
 
@@ -221,10 +222,20 @@ contains
     integer,intent(in) :: mrgrid
     real(dp),intent(in) :: fermie,tsmear
 
+    ! Local variables -------------------------
+    ! Scalars
+    real(dp) :: factor,xcut,gamma
+
     ! *********************************************************************
+
+    factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(1.5)
+    xcut=(this%ebcut-this%e_shiftfactor)/tsmear
+    gamma=(fermie-this%e_shiftfactor)/tsmear
 
     call hightemp_getnfreeel(this%ebcut,this%e_ent_freeel,fermie,mrgrid,&
     & this%nfreeel,tsmear,this%e_shiftfactor,this%ucvol)
+    ! 
+    ! write(0,*) this%nfreeel, factor*djp12(xcut,gamma), abs(factor*djp12(xcut,gamma)-this%nfreeel)
   end subroutine compute_nfreeel
 
   !!****f* ABINIT/m_hightemp/compute_e_kin_freeel
@@ -335,6 +346,135 @@ contains
 
     hightemp_dosfreeel=sqrt(2.)*ucvol*sqrt(energy-e_shiftfactor)/(PI*PI)
   end function hightemp_dosfreeel
+
+  !!****f* ABINIT/m_hightemp/djp12
+  !! NAME
+  !! djp12
+  !!
+  !! FUNCTION
+  !!
+  !! INPUTS
+  !!
+  !! OUTPUT
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  function djp12(xcut,gamma)
+
+    ! Arguments -------------------------------
+    ! Scalars
+    real(dp),intent(in) :: xcut,gamma
+    real(dp) :: djp12
+    ! Local variables -------------------------
+    ! Scalars
+    real(dp) :: d2h,db,dc,dd,de,DF,df1,df2,df3,dh
+    real(dp) :: DIP12,dq,ds,dt,dv,dw,dxm,dxp,DY
+    integer :: i,ind,iq,k,nm,np,nq
+
+
+    ! *********************************************************************
+
+    COMMON /FERM  / DF(101) , DY(101)
+    DIMENSION dq(5)
+    DATA dh , d2h , nm , ind/2.D-1 , 4.D-1 , 101 , 0/
+    DATA dq/1.D+0 , 2.828427124D+0 , 5.196152423D+0 , 8.D+0 ,         &
+       & 1.118033989D+1/
+    djp12 = 0.D+0
+    dxm = gamma - 1.5D+1
+    IF ( xcut.GT.dxm ) THEN
+       IF ( ind.EQ.0 ) THEN
+          DO i = 1 , nm
+             DY(i) = -1.5D+1 + (i-1)*dh
+             DF(i) = 1.D+0 + DEXP(DY(i))
+          ENDDO
+          ind = 1
+       ENDIF
+       dxp = gamma + 5.D+0
+       IF ( xcut.LT.dxp ) THEN
+          dc = dxp
+       ELSE
+          dc = xcut
+       ENDIF
+       db = DEXP(gamma-dc)
+       dt = db
+       DO iq = 1 , 5
+          dd = iq*dc
+          ds = DSQRT(dd)
+          dw = 1. + .3275911*ds
+          dw = 1.D+0/dw
+          dv = dw*(.2258368458D+0+                                    &
+             & dw*(-.2521286676D+0+dw*(1.2596951294D+0+               &
+             & dw*(-1.2878224530D+0+dw*(.9406460699D+0)))))
+          dv = dv + ds
+          de = dt*dv/dq(iq)
+          djp12 = djp12 + de
+          IF ( DABS(de).LT.(1.D-07*djp12) ) GOTO 50
+          dt = -dt*db
+       ENDDO
+50      IF ( xcut.GE.dxp ) RETURN
+
+       np = (dxp-xcut)/dh
+       np = 2*(np/2)
+       np = nm - np
+       nq = (15.-gamma)/dh
+       nq = 1 + 2*(nq/2)
+       IF ( np.LT.nq ) np = nq
+       IF ( np.LE.nm ) THEN
+          df3 = 0.D+0
+          dt = DY(np) + gamma
+          dv = (dt-xcut)/2.D+0
+          df3 = 0.D0
+          IF ( dt.GE.1.D-13 ) df3 = DSQRT(dt)
+          IF ( DABS(dv).GE.1.D-13 ) THEN
+             df1 = DSQRT(xcut)
+             dt = df1 + df3
+             dw = (dv+dv)/(dt*dt)
+             df2 = dw*dw
+             df2 = df2 + df2
+             db = df2*(df2+7.D+0) + 7.D+1
+             dc = 7.D+0*(1.D+1-df2)
+             dc = dc*dw
+             dd = -df2*(df2-2.8D+1) + 1.4D+2
+             dd = dd + dd
+             ds = dt*((db-dc)/(1.D+0+DEXP(xcut-gamma))                     &
+                & +dd/(1.D+0+DEXP(xcut+dv-gamma))+(db+dc)/DF(np))
+             ds = ds*dv/4.2D+2
+             djp12 = djp12 + ds
+          ENDIF
+          IF ( np.NE.nm ) THEN
+             ds = 0.D+0
+             np = np + 2
+             DO k = np , nm , 2
+                df1 = df3
+                df3 = DSQRT(DY(k)+gamma)
+                dt = df1 + df3
+                dw = d2h/(dt*dt)
+                df2 = dw*dw
+                df2 = df2 + df2
+                db = df2*(df2+7.D+0) + 7.D+1
+                dc = 7.D+0*(1.D+1-df2)
+                dc = dc*dw
+                dd = -df2*(df2-2.8D+1) + 1.4D+2
+                dd = dd + dd
+                ds = ds + dt*((db-dc)/DF(k-2)+dd/DF(k-1)+(db+dc)/DF(k)&
+                   & )
+             ENDDO
+             ds = ds*dh/4.2D+2
+             djp12 = djp12 + ds
+          ENDIF
+          IF ( xcut.GE.dxm ) RETURN
+       ELSE
+          WRITE (6,99001) xcut , gamma , np
+99001       FORMAT (2x,'djp12  xcut gamma np='d12.5,2x,d12.5,2x,i3)
+          STOP
+       ENDIF
+    ENDIF
+    ! djp12 = DIP12(gamma) - xcut*DSQRT(xcut)/1.5D+0
+
+  end function djp12
 
   !!****f* ABINIT/m_hightemp/hightemp_get_e_shiftfactor
   !! NAME
@@ -491,6 +631,44 @@ contains
       entropy=simpson(step,valuesent)
     end if
   end subroutine hightemp_getnfreeel
+
+  !!****f* ABINIT/m_hightemp/hightemp_getnfreeel_approx
+  !! NAME
+  !! hightemp_getnfreeel_approx
+  !!
+  !! FUNCTION
+  !!
+  !! INPUTS
+  !!
+  !! OUTPUT
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine hightemp_getnfreeel_approx(e_shiftfactor,ebcut,fermie,nfreeel,tsmear,ucvol)
+
+    ! Arguments -------------------------------
+    ! Scalars
+
+    real(dp),intent(out) :: nfreeel
+    real(dp),intent(in) :: e_shiftfactor,ebcut,fermie,tsmear,ucvol
+
+    ! Local variables -------------------------
+    ! Scalars
+    real(dp) :: factor,xcut,gamma
+    ! Arrays
+
+    ! *********************************************************************
+
+    nfreeel=0.
+    factor=sqrt(2.)/(PI*PI)*ucvol*tsmear**(1.5)
+    xcut=(ebcut-e_shiftfactor)/tsmear
+    gamma=(fermie-e_shiftfactor)/tsmear
+
+    nfreeel=factor*djp12(xcut,gamma)
+  end subroutine hightemp_getnfreeel_approx
 
   !!****f* ABINIT/m_hightemp/hightemp_prt_eigocc
   !! NAME

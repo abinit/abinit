@@ -492,8 +492,10 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 !Blanchet - Compute the number of free electrons with corresponding chemical
 !potential and add to nelect bounds.
  if(present(hightemp) .and. associated(hightemp)) then
-   call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermilo,1024,nelect_tmp,&
-   & tsmear,hightemp%e_shiftfactor,hightemp%ucvol)
+   ! call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermilo,1024,nelect_tmp,&
+   ! & tsmear,hightemp%e_shiftfactor,hightemp%ucvol)
+   call hightemp_getnfreeel_approx(hightemp%e_shiftfactor,hightemp%ebcut,&
+   & fermilo,nelect_tmp,tsmear,hightemp%ucvol)
    nelectlo=nelectlo+nelect_tmp
  end if
 
@@ -508,8 +510,10 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 !Blanchet - Compute the number of free electrons with corresponding chemical
 !potential and add to nelect bounds.
  if(present(hightemp) .and. associated(hightemp)) then
-   call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermihi,1024,nelect_tmp,&
-   & tsmear,hightemp%e_shiftfactor,hightemp%ucvol)
+   ! call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermihi,1024,nelect_tmp,&
+   ! & tsmear,hightemp%e_shiftfactor,hightemp%ucvol)
+   call hightemp_getnfreeel_approx(hightemp%e_shiftfactor,hightemp%ebcut,&
+   & fermihi,nelect_tmp,tsmear,hightemp%ucvol)
    nelecthi=nelecthi+nelect_tmp
  end if
 
@@ -556,8 +560,10 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
      !Blanchet - Compute the number of free electrons with corresponding chemical
      !potential and add to nelect bounds.
      if(present(hightemp) .and. associated(hightemp)) then
-       call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermimid,1024,nelect_tmp,&
-       & tsmear,hightemp%e_shiftfactor,hightemp%ucvol)
+       ! call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermimid,1024,nelect_tmp,&
+       ! & tsmear,hightemp%e_shiftfactor,hightemp%ucvol)
+       call hightemp_getnfreeel_approx(hightemp%e_shiftfactor,hightemp%ebcut,&
+       & fermimid,nelect_tmp,tsmear,hightemp%ucvol)
        nelectmid=nelectmid+nelect_tmp
        entropy=entropy-entropy_tmp
      end if
