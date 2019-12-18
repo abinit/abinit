@@ -398,11 +398,13 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !Handling of mGGA functionals
  usekden=merge(0,1,ntau==0)
  uselaplacian=merge(0,1,nlpl==0)
+ with_vxctau=(present(vxctau))
+ if (with_vxctau) with_vxctau=(size(vxctau)>0)
  if (usekden==1) then
    if (.not.present(taur)) then
      message='taur argument must be present!'
      MSG_BUG(message)
-   else if (size(taur)/=nfft*nspden*xcdata%usekden) then
+   else if (size(taur)/=nfft*nspden) then
      message='invalid size for taur!'
      MSG_BUG(message)
    end if
@@ -413,13 +415,11 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        MSG_BUG(message)
      end if
    end if
- end if
- with_vxctau=(present(vxctau).and.present(taur))
- if (with_vxctau) with_vxctau=(size(vxctau)>0)
- if (with_vxctau) then
-   if (size(vxctau)/=nfft*nspden*usekden*4) then
-     message='invalid size for vxctau!'
-     MSG_BUG(message)
+   if (with_vxctau) then
+     if (size(vxctau)/=nfft*nspden*4) then
+       message='invalid size for vxctau!'
+       MSG_BUG(message)
+     end if
    end if
  end if
  if((usekden==1.or.uselaplacian==1).and.nspden==4)then

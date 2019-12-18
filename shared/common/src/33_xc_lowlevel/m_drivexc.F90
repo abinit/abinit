@@ -293,7 +293,7 @@ subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,orde
      else
        if (present(xc_funcs)) then
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         dvxc=dvxc,d2vxc=d2vxc, xc_funcs=xc_funcs)
+&         dvxc=dvxc,d2vxc=d2vxc,xc_funcs=xc_funcs)
        else
          call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
 &         dvxc=dvxc,d2vxc=d2vxc)
