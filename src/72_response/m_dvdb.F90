@@ -6006,19 +6006,21 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  integer,parameter :: master = 0
  integer :: nfft, iq, cplex, ispden, comm_rpt, my_rank, idir, ipert, ipc, imyp
  integer :: n1, n2, n3, unt, this_nqpt, method, interpolated
- integer :: i1, i2, i3, ifft
+ integer :: i1, i2, i3, ifft, ig, ngsmall, ii
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr
 #endif
+ real(dp) :: gsq_max, g2
  !type(vdiff_t) :: vd_max
  character(len=500) :: msg
  character(len=fnlen) :: dump_path
 !arrays
  integer :: ngfft(18)
+ integer, allocatable :: gfft(:,:),ig2ifft(:), gsmall(:,:)
  real(dp) :: vals2(2)
  real(dp),pointer :: this_qpts(:,:)
  real(dp),allocatable :: file_v1r(:,:,:,:),long_v1r(:,:,:,:),tmp_v1r(:,:,:,:)
- real(dp),allocatable :: maxw(:,:), all_rpt(:,:), all_rmod(:)
+ real(dp),allocatable :: maxw(:,:), all_rpt(:,:), all_rmod(:), workg(:,:), work_gsmall(:,:)
 
 ! *************************************************************************
 
@@ -6033,6 +6035,33 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  ngfft = dvdb%ngfft
  nfft = product(ngfft(1:3))
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
+
+ ! Get list of G-vectors in FFT mesh.
+ ABI_MALLOC(gfft, (3, nfft))
+ call get_gftt(ngfft, [zero, zero, zero], dvdb%cryst%gmet, gsq_max, gfft)
+ ABI_MALLOC(workg, (2, nfft))
+
+ ! Select G-vectors in small sphere (ratio of gsq_max)
+ do ii=1,2
+   if (ii == 2) then
+     ABI_MALLOC(ig2ifft, (ngsmall))
+   end if
+   ngsmall = 0
+   do ig=1,nfft
+     ! Don't include (2pi)**2 to be consistent with get_gftt
+     g2 = dot_product(gfft(:,ig), matmul(dvdb%cryst%gmet, gfft(:, ig)))
+     if (g2 <= gsq_max * 0.01_dp) ngsmall = ngsmall + 1
+     if (ii == 2) ig2ifft(ngsmall) = ig
+   end do
+ end do
+ write(std_out, *)"Found ngsmall", ngsmall
+
+ !call ig2fft_sphere(dvdb%cryst%gmet, gfft, ig2ifft)
+ ABI_MALLOC(gsmall, (3, ngsmall))
+ do ig=1,ngsmall
+   gsmall(:, ig) = gfft(:, ig2ifft(ig))
+ end do
+ ABI_MALLOC(work_gsmall, (2, ngsmall))
 
  ABI_MALLOC(long_v1r, (2, nfft, dvdb%nspden, dvdb%my_npert))
  ABI_MALLOC(file_v1r, (2, nfft, dvdb%nspden, dvdb%my_npert))
@@ -6076,7 +6105,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    NCF_CHECK(dvdb%cryst%ncwrite(ncid))
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t("nspden", dvdb%nspden), nctkdim_t("natom", dvdb%natom3 / 3), nctkdim_t("nqpt", this_nqpt), &
-     nctkdim_t("natom3", dvdb%natom3) ], defmode=.True.)
+     nctkdim_t("natom3", dvdb%natom3), nctkdim_t("ngsmall", ngsmall)], defmode=.True.)
    NCF_CHECK(ncerr)
 
    if (interpolated == 1) then
@@ -6103,6 +6132,9 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
      nctkarr_t("v1scfmlr_abs_avg", "dp", "two, nspden, three, natom, nqpt"), &
      nctkarr_t("v1scf_abs_avg", "dp", "two, nspden, three, natom, nqpt"), &
      nctkarr_t("v1lr_abs_avg", "dp", "two, nspden, three, natom, nqpt"), &
+     nctkarr_t("gsmall", "int", "three, ngsmall"), &
+     nctkarr_t("v1scf_gsmall", "dp", "two, ngsmall, nspden, three, natom, nqpt"), &
+     nctkarr_t("v1lr_gsmall", "dp", "two, ngsmall, nspden, three, natom, nqpt"), &
      nctkarr_t("qpoints", "dp", "three, nqpt") &
    ])
    NCF_CHECK(ncerr)
@@ -6117,6 +6149,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
      l2int([dvdb%has_dielt, dvdb%has_zeff, dvdb%has_quadrupoles, dvdb%has_efield]))
    NCF_CHECK(ncerr)
    NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], [dvdb%qdamp]))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gsmall"), gsmall))
  end if
 #endif
 
@@ -6189,6 +6222,24 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
        ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scfmlr_abs_avg"), vals2, &
                             start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
        NCF_CHECK(ncerr)
+
+       ! Compute G-components of DFPT potentials and LR model for G in small-sphere and save results to disk
+       call fourdp(2, workg, file_v1r(:,:,ispden,imyp), -1, dvdb%mpi_enreg, nfft, 1, ngfft, 0)
+       do ig=1,ngsmall
+         work_gsmall(:, ig) = workg(:, ig2ifft(ig))
+       end do
+       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_gsmall"), work_gsmall, &
+                            start=[1,1,ispden,idir,ipert,iq], count=[2,ngsmall,1,1,1,1])
+       NCF_CHECK(ncerr)
+
+       call fourdp(2, workg, long_v1r(:,:,ispden,imyp), -1, dvdb%mpi_enreg, nfft, 1, ngfft, 0)
+       do ig=1,ngsmall
+         work_gsmall(:, ig) = workg(:, ig2ifft(ig))
+       end do
+       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1lr_gsmall"), work_gsmall, &
+                            start=[1,1,ispden,idir,ipert,iq], count=[2,ngsmall,1,1,1,1])
+       NCF_CHECK(ncerr)
+
 #endif
 
        ! Debugging section.
@@ -6245,6 +6296,11 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
 
  ABI_FREE(long_v1r)
  ABI_FREE(file_v1r)
+ ABI_FREE(workg)
+ ABI_FREE(gfft)
+ ABI_FREE(ig2ifft)
+ ABI_FREE(gsmall)
+ ABI_FREE(work_gsmall)
 
  if (interpolated == 1) then
    ! Compute max_r |W(R,r)| and write data to file.
