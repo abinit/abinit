@@ -565,7 +565,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
        call hightemp_getnfreeel_approx(hightemp%e_shiftfactor,hightemp%ebcut,&
        & fermimid,nelect_tmp,tsmear,hightemp%ucvol)
        nelectmid=nelectmid+nelect_tmp
-       entropy=entropy-entropy_tmp
+       ! entropy=entropy-entropy_tmp
      end if
 
 !    write(std_out,'(a,es24.16,a,es24.16)' )' newocc: from fermi=',fermimid,', getnel gives nelect=',nelectmid
