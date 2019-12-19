@@ -124,6 +124,12 @@ MODULE m_numeric_tools
    module procedure get_trace_cdp
  end interface get_trace
 
+ !interface cart_prod33
+ !  module procedure cart_prod33_int
+ !  module procedure cart_prod33_rdp
+ !  module procedure cart_prod33_cdp
+ !end interface cart_prod33
+
  interface get_diag
    module procedure get_diag_int
    module procedure get_diag_rdp
@@ -296,7 +302,7 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-pure function arth_int(start,step,nn)
+pure function arth_int(start, step, nn)
 
 
 !Arguments ------------------------------------
@@ -338,7 +344,7 @@ end function arth_int
 !!
 !! SOURCE
 
-pure function arth_rdp(start,step,nn)
+pure function arth_rdp(start, step, nn)
 
 
 !Arguments ------------------------------------
@@ -1596,7 +1602,7 @@ pure function bisect_rdp(AA,xx) result(loc)
 
  nn=SIZE(AA); ascnd=(AA(nn)>=AA(1))
  !
- ! === Initialize lower and upper limits ===
+ ! Initialize lower and upper limits
  jl=0; ju=nn+1
  do
    if (ju-jl<=1) EXIT
@@ -1608,7 +1614,7 @@ pure function bisect_rdp(AA,xx) result(loc)
    end if
  end do
  !
- ! === Set the output, being careful with the endpoints ===
+ ! Set the output, being careful with the endpoints
  if (xx==AA(1)) then
    loc=1
  else if (xx==AA(nn)) then
@@ -1651,8 +1657,8 @@ pure function bisect_int(AA,xx) result(loc)
 ! *********************************************************************
 
  nn=SIZE(AA) ; ascnd=(AA(nn)>=AA(1))
- !
- ! === Initialize lower and upper limits ===
+
+ ! Initialize lower and upper limits
  jl=0 ; ju=nn+1
  do
   if (ju-jl<=1) EXIT
@@ -1664,7 +1670,7 @@ pure function bisect_int(AA,xx) result(loc)
   end if
  end do
  !
- ! === Set the output, being careful with the endpoints ===
+ ! Set the output, being careful with the endpoints
  if (xx==AA(1)) then
   loc=1
  else if (xx==AA(nn)) then

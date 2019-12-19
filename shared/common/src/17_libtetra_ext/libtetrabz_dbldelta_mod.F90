@@ -14,7 +14,7 @@
 ! distribute, sublicense, and/or sell copies of the Software, and to
 ! permit persons to whom the Software is furnished to do so, subject to
 ! the following conditions:
-! 
+!
 ! The above copyright notice and this permission notice shall be included
 ! in all copies or substantial portions of the Software.
 !
@@ -28,6 +28,10 @@
 !
 MODULE libtetrabz_dbldelta_mod
   !
+
+  use m_abicore
+  use m_errors
+
   IMPLICIT NONE
   !
   PRIVATE
@@ -37,7 +41,7 @@ CONTAINS
 !
 ! Compute doubledelta
 !
-SUBROUTINE libtetrabz_dbldelta(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,comm) 
+SUBROUTINE libtetrabz_dbldelta(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,comm)
   !
   USE ISO_C_BINDING
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, libtetrabz_mpisum_dv
@@ -208,23 +212,38 @@ SUBROUTINE libtetrabz_dbldelta2(nb,ej,w)
   !
   INTEGER :: ib, ii, indx(3)
   REAL(8) :: a(3,3), e(3), V
+  REAL(8) :: ediff(3)
+  character(len=500) :: msg
   !
   DO ib = 1, nb
      !
-     IF(maxval(ABS(ej(1:3,ib))) < 1d-10) STOP "Nesting !!"
+     IF(maxval(ABS(ej(1:3,ib))) < 1d-10) then
+     ! MG reduce tolerance wrt original version.
+     !IF(maxval(ABS(ej(1:3,ib))) < 1d-22) then
+      !write(std_out, ej(1:3,ib))
+      write(msg, *)"Nesting for band index:", ib, "ej:", ej(1:3,ib)
+      !MSG_WARNING(msg)
+      MSG_ERROR(msg)
+      !MSG_ERROR("STOP Nesting !!")
+     end if
      !
      w(ib,1:3) = 0d0
      e(1:3) = ej(1:3, ib)
      CALL libtetrabz_sort(3,e,indx)
      !
      DO ii = 1, 3
-        a(1:3,ii) = (0d0 - e(ii)) / (e(1:3) - e(ii))
+        ediff = e(1:3) - e(ii)
+        where (abs(ediff) < 1.e-10)
+          ediff = 1.e-10
+        end where
+        a(1:3,ii) = (0d0 - e(ii)) / ediff
+        !a(1:3,ii) = (0d0 - e(ii)) / (e(1:3) - e(ii))
      END DO
      !
      IF((e(1) < 0d0 .AND. 0d0 <= e(2)) .OR. (e(1) <= 0d0 .AND. 0d0 < e(2))) THEN
         !
-        !V = a(2,1) * a(3,1) / (0d0 - e(1)) 
-        V = a(2,1)           / (e(3) - e(1)) 
+        !V = a(2,1) * a(3,1) / (0d0 - e(1))
+        V = a(2,1)           / (e(3) - e(1))
         !
         w(ib,indx(1)) = V * (a(1,2) + a(1,3))
         w(ib,indx(2)) = V * a(2,1)
@@ -232,8 +251,8 @@ SUBROUTINE libtetrabz_dbldelta2(nb,ej,w)
         !
      ELSE IF((e(2) <= 0d0 .AND. 0d0 < e(3)) .OR. (e(2) < 0d0 .AND. 0d0 <= e(3))) THEN
         !
-        !V = a(1,3) * a(2,3) / (e(3) - 0d0) 
-        V = a(2,3)           / (e(3) - e(1)) 
+        !V = a(1,3) * a(2,3) / (e(3) - 0d0)
+        V = a(2,3)           / (e(3) - e(1))
         !
         w(ib,indx(1)) = V * a(1,3)
         w(ib,indx(2)) = V * a(2,3)

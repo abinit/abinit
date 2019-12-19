@@ -1,5 +1,5 @@
 # RPA macroscopic dielectric function without local fields
-# Tolerance =  0.0200 0.0200
+# Tolerance =  0.0200 0.0000
 # npweps  = 51
 # npwwfn  = 137
 # nbands  = 8

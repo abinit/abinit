@@ -607,8 +607,10 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 
 !Fourier transform the density
  if (ispmix==1.and.nfft==nfftmix) then
+   !Real space mixing, no need to transform rhomag
    rhor(:,1:dtset%nspden)=rhomag(:,1:dtset%nspden)
    if(dtset%usewvl==0) then
+     !Get rhog from rhor(:,1)
      call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
    end if
    if (dtset%usekden>0) then
@@ -618,6 +620,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
      end if
    end if
  else if (nfft==nfftmix) then
+   !Reciprocal mixing space mixing, need to generate rhor in real space from rhomag in reciprocal space
    do ispden=1,dtset%nspden
      call fourdp(1,rhomag(:,ispden),rhor(:,ispden),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
    end do
