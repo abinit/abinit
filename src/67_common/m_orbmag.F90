@@ -1807,8 +1807,8 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
   real(dp),allocatable :: ph1d(:,:),ph3d(:,:,:),phkxred(:,:),pwnsfac_k(:,:)
   real(dp),allocatable :: smat_inv(:,:,:),smat_kk(:,:,:)
   real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vtrial(:,:)
-  real(dp),allocatable :: ylm_k(:,:),ylmb(:,:),ylmball(:,:,:,:),ylmg(:,:),ylmgr_k(:,:,:)
-  real(dp),allocatable :: ylmgrb(:,:,:),ylmgrball(:,:,:,:,:),ylmgrg(:,:,:)
+  real(dp),allocatable :: ylm_k(:,:),ylmb(:,:),ylmball(:,:,:,:),ylmgr_k(:,:,:)
+  real(dp),allocatable :: ylmgrb(:,:,:),ylmgrball(:,:,:,:,:)
   type(pawcprj_type),allocatable :: cprj_buf(:,:),cprj_k(:,:),cprj_kb(:,:),cprj1_kb(:,:)
   type(pawcprj_type),allocatable :: cprj_kg(:,:),cprj1_kg(:,:),cwaveprj(:,:)
 
@@ -1930,16 +1930,14 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
   ABI_ALLOCATE(kptnsball,(3,dtset%nkpt,3,2))
   ABI_ALLOCATE(ylmball,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang,3,2))
   ABI_ALLOCATE(ylmgrball,(dtset%mpw*dtset%mkmem,3+6*(optder/2),psps%mpsang*psps%mpsang,3,2))
-  ABI_ALLOCATE(ylmb,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang))
-  ABI_ALLOCATE(ylmgrb,(dtset%mpw*dtset%mkmem,3+6*(optder/2),psps%mpsang*psps%mpsang))
   ABI_ALLOCATE(kptnsg,(3,dtset%nkpt))
-  ABI_ALLOCATE(ylmg,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang))
-  ABI_ALLOCATE(ylmgrg,(dtset%mpw*dtset%mkmem,3+6*(optder/2),psps%mpsang*psps%mpsang))
   ABI_ALLOCATE(nband_dum,(dtset%nkpt*dtset%nsppol))
   nband_dum(:)=nband_k
 
   ! set up all ylm's at k+dkb. Notice that this kpt might differ by a periodic wrap-around
   ! from the one determined from dtorbmag%ikpt_dk(ikpt,bfor,bdir)
+  ABI_ALLOCATE(ylmb,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang))
+  ABI_ALLOCATE(ylmgrb,(dtset%mpw*dtset%mkmem,3+6*(optder/2),psps%mpsang*psps%mpsang))
   do bdir = 1, 3
      do bfor = 1, 2
         bsigma = 3-2*bfor
@@ -1954,6 +1952,8 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
         ylmgrball(:,:,:,bdir,bfor) = ylmgrb(:,:,:)
      end do
   end do
+  ABI_DEALLOCATE(ylmb)
+  ABI_DEALLOCATE(ylmgrb)
 
   smatrix_ddkflag = 1
   itrs = 0
@@ -2260,6 +2260,8 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
         
                        ! accumulate i*epsabg*\sum_occ [<d_bdir u|QHQ|d_gdir u>]
                        duqhqdu_term = cprefac*(cmplx(dotr,doti)+cgdijcb)
+                       ! duqhqdu_term = cprefac*cmplx(dotr,doti)
+                       ! duqhqdu_term = cprefac*cgdijcb
                        cnum_duqhqdu(1,adir) = cnum_duqhqdu(1,adir) + real(duqhqdu_term) 
                        cnum_duqhqdu(2,adir) = cnum_duqhqdu(2,adir) + aimag(duqhqdu_term)
 
@@ -2328,13 +2330,9 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
 
   ABI_DEALLOCATE(kptnsb)
   ABI_DEALLOCATE(kptnsball)
-  ABI_DEALLOCATE(ylmb)
-  ABI_DEALLOCATE(ylmgrb)
   ABI_DEALLOCATE(ylmball)
   ABI_DEALLOCATE(ylmgrball)
   ABI_DEALLOCATE(kptnsg)
-  ABI_DEALLOCATE(ylmg)
-  ABI_DEALLOCATE(ylmgrg)
   ABI_DEALLOCATE(nband_dum)
 
 end subroutine duqhqdu
@@ -4312,10 +4310,12 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
          & + VVII(1:2,1:3) &
          & + VVI(1:2,1:3) &
          & + VVIII(1:2,1:3) &
-         & + CCI(1:2,1:3)
-    
-    ! dtorbmag%orbmagvec(1:2,1:3) = two*orbmagvec(1:2,1:3)/(ucvol*dtorbmag%fnkpt)
-    dtorbmag%orbmagvec(1:2,1:3) = orbmagvec(1:2,1:3)
+         & + CCI(1:2,1:3)       
+
+    dtorbmag%orbmagvec(1:2,1:3) = two*orbmagvec(1:2,1:3)/(ucvol*dtorbmag%fnkpt) 
+
+    ! orbmagvec(1:2,1:3) = CCI(1:2,1:3)       
+    ! dtorbmag%orbmagvec(1:2,1:3) = orbmagvec(1:2,1:3)
 
     call output_orbmag(1,dtorbmag%orbmagvec)
 
