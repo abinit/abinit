@@ -287,9 +287,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !Local variables-------------------------------
 !scalars
  integer :: auxc_ixc,cplex,ierr,ifft,ii,ixc,ixc_from_lib,indx,ipositron,ipts,ishift,ispden,iwarn,iwarnp
- integer :: jj,mpts,ndvxc,nd2vxc,nfftot,ngr,ngr2,ngrad,ngrad_apn,nkxc_eff,nlpl,npts
- integer :: nspden,nspden_apn,nspden_eff,nspden_updn,nspgrad,ntau,nvxcgrho,nvxclrho,nvxctau
- integer :: n3xctau,order,usefxc,nproc_fft,comm_fft,usekden,uselaplacian
+ integer :: jj,mpts,ndvxc,nd2vxc,nfftot,ngr,ngrad,ngrad_apn,nkxc_eff,npts
+ integer :: nspden,nspden_apn,nspden_eff,nspden_updn,nspgrad,nvxcgrho,nvxclrho,nvxctau
+ integer :: n3xctau,order,usefxc,nproc_fft,comm_fft,usegradient,usekden,uselaplacian
  logical :: my_add_tfw
  real(dp),parameter :: mot=-one/3.0_dp
  real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,epsxc,exc_str,factor,m_norm_min,s1,s2,s3
@@ -348,17 +348,19 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !Sizes of local arrays
  if (present(xc_funcs)) then
-   call size_dvxc(ixc,order,nspden_updn,ngr2=ngr2,nlpl=nlpl,ntau=ntau,&
+   call size_dvxc(ixc,order,nspden_updn,&
+&            usegradient=usegradient,uselaplacian=uselaplacian,usekden=usekden,&
 &            nvxcgrho=nvxcgrho,nvxclrho=nvxclrho,nvxctau=nvxctau,&
 &            ndvxc=ndvxc,nd2vxc=nd2vxc,add_tfw=my_add_tfw,xc_funcs=xc_funcs)
  else
-   call size_dvxc(ixc,order,nspden_updn,ngr2=ngr2,nlpl=nlpl,ntau=ntau,&
+   call size_dvxc(ixc,order,nspden_updn,&
+&            usegradient=usegradient,uselaplacian=uselaplacian,usekden=usekden,&
 &            nvxcgrho=nvxcgrho,nvxclrho=nvxclrho,nvxctau=nvxctau,&
 &            ndvxc=ndvxc,nd2vxc=nd2vxc,add_tfw=my_add_tfw)
  end if
 
 !ngrad=1 is for LDAs or LSDs, ngrad=2 is for GGAs/mGGAs
- ngrad=1;if(xcdata%xclevel==2.or.ngr2>0) ngrad=2
+ ngrad=1;if(xcdata%xclevel==2.or.usegradient==1) ngrad=2
 
 !nspden_eff: effective value of nspden used to compute gradients of density:
 !  1 for non-polarized system,
@@ -396,8 +398,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  end if
 
 !Handling of mGGA functionals
- usekden=merge(0,1,ntau==0)
- uselaplacian=merge(0,1,nlpl==0)
  with_vxctau=(present(vxctau))
  if (with_vxctau) with_vxctau=(size(vxctau)>0)
  if (usekden==1) then
@@ -734,9 +734,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        vxcrho_b_updn(:,:)=zero
 
 !      Allocation of optional arguments of drivexc
-       ABI_ALLOCATE(grho2_b_updn,(npts,ngr2))
-       ABI_ALLOCATE(lrho_b_updn,(npts,nlpl))
-       ABI_ALLOCATE(tau_b_updn,(npts,ntau))
+       ABI_ALLOCATE(grho2_b_updn,(npts,(2*nspden_updn-1)*usegradient)
+       ABI_ALLOCATE(lrho_b_updn,(npts,nspden_updn*uselaplacian))
+       ABI_ALLOCATE(tau_b_updn,(npts,nspden_updn*usekden))
        ABI_ALLOCATE(vxcgrho_b_updn,(npts,nvxcgrho))
        ABI_ALLOCATE(vxclrho_b_updn,(npts,nvxclrho))
        ABI_ALLOCATE(vxctau_b_updn,(npts,nvxctau))
@@ -753,15 +753,14 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
          rho_b(indx)=rhonow(ipts,1,1)
          if(nspden_updn==1)then
            rho_b_updn(indx,1)=rhonow(ipts,1,1)*half
-           if(ngr2>0)then
-             grho2_b_updn(indx,1)=quarter*(rhonow(ipts,1,2)**2+rhonow(ipts,1,3)**2+rhonow(ipts,1,4)**2)
-           end if
+           if (usegradient==1) grho2_b_updn(indx,1)=quarter*(rhonow(ipts,1,2)**2 &
+&                                       +rhonow(ipts,1,3)**2+rhonow(ipts,1,4)**2)
            if (usekden==1) tau_b_updn(indx,1)=taunow(ipts,1,1)*half
            if (uselaplacian==1) lrho_b_updn(indx,1)=lrhonow(ipts,1)*half
          else
            rho_b_updn(indx,1)=rhonow(ipts,2,1)
            rho_b_updn(indx,2)=rhonow(ipts,1,1)-rhonow(ipts,2,1)
-           if(ngr2>0)then
+           if(usegradient==1)then
              grho2_b_updn(indx,1)=rhonow(ipts,2,2)**2+   &
 &             rhonow(ipts,2,3)**2+   &
 &             rhonow(ipts,2,4)**2
@@ -790,11 +789,11 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
          if (auxc_ixc<0) then
            call libxc_functionals_init(auxc_ixc,nspden,xc_functionals=xc_funcs_auxc)
          end if
-         call drivexc_main(exc_b,auxc_ixc,usekden,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
-&         rho_b_updn,0,vxcrho_b_updn,xcdata%xclevel, &
-&         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b_updn, &
-&         lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
-&         fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel,xc_funcs=xc_funcs_auxc)
+         call drivexc_main(auxc_ixc,xcdata%xclevel,order,npts,nspden_updn,usegradient,0,0,&
+&          rho_b_updn,exc_b,vxcrho_b_updn,nvxcgrho,0,0,ndvxc,nd2vxc, &
+&          grho2_updn=grho2_b_updn,vxclrho=vxclrho_b_updn,dvxc=dvxc,d2vxc=d2vxc, &
+&          fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel,&
+&          xc_funcs=xc_funcs_auxc)
 !        Transfer the xc kernel
          if (nkxc_eff==1.and.ndvxc==15) then
            kxc(ifft:ifft+npts-1,1)=half*(dvxc_b(1:npts,1)+dvxc_b(1:npts,9)+dvxc_b(1:npts,10))
@@ -817,24 +816,33 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !      Call to main XC driver
        if (present(xc_funcs)) then
-         call drivexc_main(exc_b,ixc,usekden,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
-&         rho_b_updn,uselaplacian,vxcrho_b_updn,xcdata%xclevel, &
-&         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b_updn, &
-&         lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
-&         fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel,xc_funcs=xc_funcs)
+         call drivexc_main(ixc,xcdata%xclevel,order,npts,nspden_updn,&
+&          usegradient,uselaplacian,usekden,&
+&          rho_b_updn,exc_b,vxcrho_b_updn,&
+&          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
+&          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,&
+&          lrho_updn=lrho_b_updn,vxclrho=vxclrho_b_updn,&
+&          tau_updn=vxctau_b_updn,vxctau=vxctau_b_updn,&
+&          dvxc=dvxc,d2vxc=d2vxc,el_temp=xcdata%tphysel,fxcT=fxc_b,&
+&          hyb_mixing=xcdata%hyb_mixing,&
+&           xc_funcs=xc_funcs)
        else
-         call drivexc_main(exc_b,ixc,usekden,ndvxc,nd2vxc,ngr2,npts,nspden_updn,nvxcgrho,order,&
-&         rho_b_updn,uselaplacian,vxcrho_b_updn,xcdata%xclevel, &
-&         dvxc=dvxc_b,d2vxc=d2vxc_b,grho2=grho2_b_updn,vxcgrho=vxcgrho_b_updn, &
-&         lrho=lrho_b_updn,tau=tau_b_updn,vxclrho=vxclrho_b_updn,vxctau=vxctau_b_updn, &
-&         fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel)
+         call drivexc_main(ixc,xcdata%xclevel,order,npts,nspden_updn,&
+&          usegradient,uselaplacian,usekden,&
+&          rho_b_updn,exc_b,vxcrho_b_updn,&
+&          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
+&          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,&
+&          lrho_updn=lrho_b_updn,vxclrho=vxclrho_b_updn,&
+&          tau_updn=vxctau_b_updn,vxctau=vxctau_b_updn,&
+&          dvxc=dvxc,d2vxc=d2vxc,el_temp=xcdata%tphysel,fxcT=fxc_b,&
+&          hyb_mixing=xcdata%hyb_mixing)
        end if
 
 !      Gradient Weiszacker correction to a Thomas-Fermi functional
        if (my_add_tfw) then
          vxcgrho_b_updn(:,:)=zero
          call xctfw(xcdata%tphysel,exc_b,fxc_b,usefxc,rho_b_updn,vxcrho_b_updn,npts,nspden_updn, &
-&                   vxcgrho_b_updn,nvxcgrho,grho2_b_updn,ngr2)
+&                   vxcgrho_b_updn,nvxcgrho,grho2_b_updn)
        end if
 
 !      Accumulate enxc, strsxc and store vxc (and eventually kxc)
@@ -961,8 +969,10 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
          if (.not.electronpositron%posdensity0_limit) then
            call mkdenpos(iwarnp,npts,nspden_apn,1,rhonow_apn(:,1,1),xcdata%xc_denpos)
          end if
-         if (ngrad_apn==2.and.ngr2==1) grho2_apn(:)=four*grho2_b_updn(:,1)
-         if (ngrad_apn==2.and.ngr2==3) grho2_apn(:)=grho2_b_updn(:,3)
+         if (ngrad_apn==2.and.usegradient==1) then
+           if (nspden_apn==1) grho2_apn(:)=four*grho2_b_updn(:,1)
+           if (nspden_apn==2) grho2_apn(:)=grho2_b_updn(:,3)
+         end if
          if (ndvxc==0) then
            call xcpositron(fxc_apn,grho2_apn,electronpositron%ixcpositron,ngr,npts,&
 &           electronpositron%posdensity0_limit,rho_b,&

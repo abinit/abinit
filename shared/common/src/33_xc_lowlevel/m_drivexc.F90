@@ -64,67 +64,68 @@ contains
 !!
 !! INPUTS
 !!  ixc=index of the XC functional
-!!  mgga=1 if functional is metaGGA
-!!  ndvxc=size of dvxc(npts,ndvxc)
-!!  nd2vxc=size of d2vxc(npts,nd2vxc)
-!!  ngr2=size of grho2(npts,ngr2)
-!!  npts=number of real space points on which the density (and its gradients) is provided
-!!  nspden=number of spin-density components (1 or 2)
-!!  nvxcgrho=size of vxcgrho(npts,nvxcgrho)
+!!  xclevel=XC functional level (lda, gga, etc...)
 !!  order=gives the maximal derivative of Exc computed.
 !!    1=usual value (return exc and vxc)
 !!    2=also computes the kernel (return exc,vxc,kxc)
 !!   -2=like 2, except (to be described)
 !!    3=also computes the derivative of the kernel (return exc,vxc,kxc,k3xc)
-!!  rho(npts,nspden)=the spin-up and spin-down densities
-!!    If nspden=1, only the spin-up density must be given.
-!!    In the calling routine, the spin-down density must
-!!    be equal to the spin-up density5
-!!    and both are half the total density.
-!!    If nspden=2, the spin-up and spin-down density must be given
-!!  use_laplacian=1 if functional needs the laplacian of the density
-!!  xclevel= XC functional level
+!!  npts=number of real space points on which the density is provided
+!!  nspden=number of spin-density components (1 or 2)
+!!  ngr2=number of components of squared density gradient (grho2_updn)
+!!  nlpl=number of components of density laplacian (lrho_updn)
+!!  ntau=number of components of kinetic energy density (tau_updn)
+!!  nvxcgrho=number of components of 1st-derivative of Exc wrt density gradient (nvxcgrho)
+!!  nvxclrho=number of components of 1st-derivative of Exc wrt density laplacian (nvxclrho)
+!!  nvxctau=number of components of 1st-derivative of Exc wrt kinetic energy density (nvxctau)
+!!  ndvxc=number of components of  1st-derivative of Vxc (dvxc)
+!!  nd2vxc=number of components of  2nd-derivative of Vxc (d2vxc)
+!!  rho(npts,nspden)=spin-up and spin-down densities
+!!    In the calling routine, spin-down density must be equal to spin-up density.
+!!    If nspden=1, only spin-up density must be given (half the total density).
+!!    If nspden=2, spin-up and spin-down densities must be given.
 !!  === Optional input arguments ===
-!!  [el_temp]= electronic temperature (to be used for finite temperature XC functionals)
+!!  [grho2_updn(npts,ngr2)]=the square of the gradients of spin-up, spin-down, and total density.
+!!    If nspden=1, only the square of the gradient of the spin-up density must be given.
+!!     In the calling routine, the square of the gradient of the spin-down density must be equal
+!!     to the square of the gradient of the spin-up density, and both must be equal to
+!!     one-quarter of the square of the gradient of the total density.
+!!    If nspden=2, the square of the gradients of spin-up, spin-down, and total density must be given.
+!!     Note that the square of the gradient of the total density is usually NOT related to
+!!     the square of the gradient of the spin-up and spin-down densities, because the gradients
+!!     are not usually aligned. This is not the case when nspden=1.
+!!  [lrho_updn(npts,nlpl)]=the Laplacian of spin-up and spin-down densities.
+!!    If nspden=1, only the spin-up Laplacian density must be given and must
+!!     be equal to the spin-up Laplacian density.
+!!    If nspden=2, the Laplacian of spin-up and spin-down densities must be given.
+!!  [tau_updn(npts,ntau)]=the spin-up and spin-down kinetic energy densities.
+!!    If nspden=1, only the spin-up kinetic energy density must be given and must
+!!     be equal to the half the total kinetic energy density.
+!!    If nspden=2, the spin-up and spin-down kinetic energy densities must be given.
 !!  [exexch]=choice of <<<local>>> exact exchange. Active if exexch=3 (only for GGA, and NOT for libxc)
-!!  [grho2(npts,ngr2)]=the square of the gradients of
-!!    spin-up, spin-down, and total density
-!!    If nspden=1, only the square of the gradient of the spin-up density
-!!     must be given. In the calling routine, the square of the gradient
-!!     of the spin-down density
-!!     must be equal to the square of the gradient of the spin-up density,
-!!     and both must be equal to one-quarter of the square of the
-!!     gradient of the total density.
-!!    If nspden=2, the square of the gradients of
-!!     spin-up, spin-down, and total density must be given.
-!!     Note that the square of the gradient of the total
-!!     density is usually NOT related to the square of the
-!!     gradient of the spin-up and spin-down densities,
-!!     because the gradients are not usually aligned.
-!!     This is not the case when nspden=1.
+!!  [el_temp]= electronic temperature (to be used for finite temperature XC functionals)
 !!  [hyb_mixing]= mixing parameter for the native PBEx functionals (ixc=41 and 42)
-!!  [lrho(npts,nspden)]=the Laplacian of spin-up and spin-down densities
-!!    If nspden=1, only the spin-up Laplacian density must be given.
-!!    In the calling routine, the spin-down Laplacian density must
-!!    be equal to the spin-up Laplacian density,
-!!    and both are half the total Laplacian density.
-!!    If nspden=2, the Laplacian of spin-up and spin-down densities must be given
-!!  [tau(npts,nspden)]=the spin-up and spin-down kinetic energy densities
-!!    If nspden=1, only the spin-up kinetic energy density must be given.
-!!    In the calling routine, the spin-down kinetic energy density must
-!!    be equal to the spin-up kinetic energy density,
-!!    and both are half the total kinetic energy density.
-!!    If nspden=2, the spin-up and spin-down kinetic energy densities must be given
-!!  [xc_funcs(2)]= <type(libxc_functional_type)>, optional : libxc XC functionals.
-
+!!  [xc_funcs(2)]= <type(libxc_functional_type)>: libxc XC functionals.
+!!
 !! OUTPUT
 !!  exc(npts)=exchange-correlation energy density (hartree)
 !!  vxcrho(npts,nspden)= (d($\rho$*exc)/d($\rho_up$)) (hartree)
 !!                  and  (d($\rho$*exc)/d($\rho_down$)) (hartree)
 !!  === Optional output arguments ===
-!!  [dvxc]=partial second derivatives of the xc energy, only if abs(order)>1
+!!  [vxcgrho(npts,nvxcgrho)]=1st-derivative of the xc energy wrt density gradient>
+!!                          = 1/$|grad \rho_up|$ (d($\rho$*exc)/d($|grad \rho_up|$))
+!!                            1/$|grad \rho_dn|$ (d($\rho$*exc)/d($|grad \rho_dn|$))
+!!                            1/$|grad \rho|$ (d($\rho$*exc)/d($|grad \rho|$))
+!!  [vxclrho(npts,nvxclrho)]=1st-derivative of the xc energy wrt density laplacian.
+!!                          = d($\rho$*exc)/d($\lrho_up$)
+!!                            d($\rho$*exc)/d($\lrho_down$)
+!!  [vxctau(npts,nvxctau)]=1st-derivative of the xc energy wrt kinetic energy density.
+!!                        = d($\rho$*exc)/d($\tau_up$)
+!!                          d($\rho$*exc)/d($\tau_down$)
+!!  [dvxc(npts,ndvxc)]=partial second derivatives of the XC energy
+!!   === Only if abs(order)>1 ===
 !!   In case of local energy functional (option=1,-1 or 3):
-!!    dvxc(npts,1+nspden)=              (Hartree*bohr^3)
+!!    dvxc(npts,1+nspden)=
 !!     if(nspden=1 .and. order==2): dvxci(:,1)=dvxc/d$\rho$ , dvxc(:,2) empty
 !!     if(nspden=1 .and. order==-2): also compute dvxci(:,2)=dvxc($\uparrow$)/d$\rho(\downarrow)$
 !!     if(nspden=2): dvxc(:,1)=dvxc($\uparrow$)/d$\rho(\downarrow)$,
@@ -147,22 +148,12 @@ contains
 !!     dvxc(:,13)=d2Ec/d(abs(grad(rho))) drho_up / abs(grad(rho))
 !!     dvxc(:,14)=d2Ec/d(abs(grad(rho))) drho_dn / abs(grad(rho))
 !!     dvxc(:,15)=1/abs(grad(rho)) * d/d(abs(grad(rho)) (dEc/d(abs(grad(rho))) /abs(grad(rho)))
-!!  [d2vxc]=second derivative of the XC potential=3rd order derivative of energy, only if abs(order)>2
-!!    (only available for LDA and nspden=1)
+!!  [d2vxc(npts,nd2vxc)]=second derivative of the XC potential=3rd order derivative of XC energy
+!!   === Only if abs(order)>1 ===
+!!   === At present only available for LDA ===
 !!    if nspden=1 d2vxc(npts,1)=second derivative of the XC potential=3rd order derivative of energy
 !!    if nspden=2 d2vxc(npts,1), d2vxc(npts,2), d2vxc(npts,3), d2vxc(npts,4) (3rd derivative of energy)
 !!  [fxcT(npts)]=XC free energy of the electron gaz at finite temperature (to be used for plasma systems)
-!!  [vxcgrho(npts,3)]= 1/$|grad \rho_up|$ (d($\rho$*exc)/d($|grad \rho_up|$)) (hartree)
-!!                     1/$|grad \rho_dn|$ (d($\rho$*exc)/d($|grad \rho_dn|$)) (hartree)
-!!                and  1/$|grad \rho|$ (d($\rho$*exc)/d($|grad \rho|$))       (hartree)
-!!     (will be zero if a LDA functional is used)
-!!  [vxclrho(npts,nspden)]=(only for meta-GGA, i.e. optional output)=
-!!                       (d($\rho$*exc)/d($\lrho_up$))   (hartree)
-!!                  and  (d($\rho$*exc)/d($\lrho_down$)) (hartree)
-!!  [vxctau(npts,nspden)]=(only for meta-GGA, i.e. optional output)=
-!!    derivative of XC energy density with respect to kinetic energy density (depsxcdtau).
-!!                       (d($\rho$*exc)/d($\tau_up$))    (hartree)
-!!                  and  (d($\rho$*exc)/d($\tau_down$))  (hartree)
 !!
 !! PARENTS
 !!      m_pawxc,rhotoxc
@@ -172,229 +163,292 @@ contains
 !!
 !! SOURCE
 
-subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,rho,use_laplacian,vxcrho,xclevel, &
-&                       dvxc,d2vxc,el_temp,exexch,fxcT,grho2,& ! Optional arguments
-&                       hyb_mixing,lrho,tau,vxcgrho,vxclrho,vxctau,xc_funcs) ! Optional arguments
+subroutine drivexc_main(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&          rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &           ! mandatory arguments
+&          grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,dvxc,d2vxc, & ! optional arguments
+&          exexch,el_temp,fxcT,hyb_mixing,xc_funcs)                           ! optional parameters
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,use_laplacian,xclevel
+ integer,intent(in) :: ixc,npts,nspden
+ integer,intent(in) :: ndvxc,nd2vxc,,nvxcgrho,nvxclrho,nvxctau,order,xclevel
+ integer,intent(in) :: usegradient,uselaplacian,usekden
  integer,intent(in),optional :: exexch
  real(dp),intent(in),optional :: el_temp,hyb_mixing
 !arrays
  real(dp),intent(in) :: rho(npts,nspden)
- real(dp),intent(in),optional :: grho2(npts,ngr2),lrho(npts,nspden*use_laplacian),tau(npts,nspden*mgga)
+ real(dp),intent(in),optional :: grho2_updn(npts,(2*nspden-1)*usegradient)
+ real(dp),intent(in),optional :: lrho_updn(npts,nspden*uselaplacian),tau_updn(npts,nspden*usekden)
  real(dp),intent(out) :: exc(npts),vxcrho(npts,nspden)
- real(dp),intent(out),optional :: dvxc(npts,ndvxc),d2vxc(npts,nd2vxc),fxcT(:),vxcgrho(npts,nvxcgrho)
- real(dp),intent(out),optional :: vxclrho(npts,nspden*use_laplacian),vxctau(npts,nspden*mgga)
+ real(dp),intent(out),optional :: dvxc(npts,ndvxc),d2vxc(npts,nd2vxc),fxcT(:)
+ real(dp),intent(out),optional :: vxcgrho(npts,nvxcgrho),vxclrho(npts,nvxclrho),vxctau(npts,nvxctau)
  type(libxc_functional_type),intent(inout),optional :: xc_funcs(2)
 
 !Local variables-------------------------------
 !scalars
  real(dp) :: hyb_mixing_
- logical :: is_gga,needs_laplacian
+ logical :: use_gradient,use_laplacian,use_kden
 
 ! *************************************************************************
 
 !Checks input parameters
- if (mgga==1) then
-   if (.not.present(tau)) then
-     MSG_BUG('tau arg must be present in case of mGGA!')
+ use_gradient=.false.;use_laplacian=.false.;use_kden=.false.
+ if (usegradient==1) then
+   if (.not.present(grho2_updn)) then
+     MSG_BUG('missing grho2_updn argument!')
    end if
-   if (.not.present(vxctau)) then
-     MSG_BUG('vxctau arg must be present in case of mGGA!')
+   if (nvxcgrho>0) then
+     if (.not.present(vxcgrho)) then
+       MSG_BUG('missing vxcgrho argument!')
+     end if
+     use_gradient=.true.
    end if
+ else if (nvxcgrho>0) then
+   MSG_BUG('nvxcgrho>0 and usegradient=0!')
  end if
- if (use_laplacian==1) then
-   if (.not.present(lrho)) then
-     MSG_BUG('lrho arg must be present in case of a functional using the laplacian!')
+ if (uselaplacian==1) then
+   if (.not.present(lrho_updn)) then
+     MSG_BUG('missing lrho_updn argument!')
    end if
-   if (.not.present(vxclrho)) then
-     MSG_BUG('vxclrho arg must be present in case of a functional using the laplacian!')
+   if (nvxclrho>0) then
+     if (.not.present(vxclrho)) then
+       MSG_BUG('missing vxclrho argument!')
+     end if
+     use_laplacian=.true.
    end if
+ else if (nvxclrho>0) then
+   MSG_BUG('nvxclrho>0 and uselaplacian=0!')
  end if
- if (present(fxcT)) then
-   if (.not.present(el_temp)) then
-     MSG_BUG('el_temp arg must be present together with fxcT!')
+ if (use_kden==1) then
+   if (.not.present(tau_updn)) then
+     MSG_BUG('missing tau_updn argument!')
+   end if
+   if (nvxctau>0) then
+     if (.not.present(vxctau)) then
+       MSG_BUG('missing vxctau argument!')
+     end if
+     use_kden=.true.
+   end if
+ else if (nvxctau>0) then
+   MSG_BUG('nvxctau>0 and usekden=0!')
+ end if
+ if (.not.use_gradient) then
+   if (use_laplacian) then
+     MSG_BUG('cannot use laplacian without gradient!')
+   end if
+   if (use_kden) then
+     MSG_BUG('cannot use kin. density without gradient!')
    end if
  end if
 
+!Value of mixing factor for hybrid functionals
+ hyb_mixing_=0
  if(ixc==41)hyb_mixing_=quarter
  if(ixc==42)hyb_mixing_=third
  if (present(hyb_mixing)) hyb_mixing_=hyb_mixing
 
-!>>>>> All libXC functionals
-
+!======= libXC functionals
  if (ixc<0) then
-   if (present(xc_funcs))then
-     is_gga=libxc_functionals_isgga(xc_functionals=xc_funcs)
-     needs_laplacian=libxc_functionals_needs_laplacian(xc_functionals=xc_funcs)
-   else
-     is_gga=libxc_functionals_isgga()
-     needs_laplacian=libxc_functionals_needs_laplacian()
-   end if
-
-   if (mgga==1) then
-
-     if (present(xc_funcs)) then
-       if (needs_laplacian) then
-         call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         grho2_updn=grho2,vxcgrho=vxcgrho,tau_updn=tau,vxctau=vxctau,xc_funcs=xc_funcs,&
-&         lrho_updn=lrho,vxclrho=vxclrho)
+   if (use_laplacian.or.use_kden) then ! mGGA
+     if (use_laplacian.and.use_kden) then
+       if (present(xc_funcs)) then
+         call (ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&              grho2_updn=grho2,vxcgrho=vxcgrho,lrho=lrho_updn,vxclrho=vxclrho,&
+&              tau_updn=tau,vxctau=vxctau,xc_funcs=xc_funcs)
        else
-         call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         grho2_updn=grho2,vxcgrho=vxcgrho,tau_updn=tau,vxctau=vxctau,xc_funcs=xc_funcs)
+         call (ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&              grho2_updn=grho2,vxcgrho=vxcgrho,lrho=lrho_updn,vxclrho=vxclrho,&
+&              tau_updn=tau,vxctau=vxctau)
        end if
-     else
-       if (needs_laplacian) then
-         call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         grho2_updn=grho2,vxcgrho=vxcgrho,tau_updn=tau,vxctau=vxctau,&
-          lrho_updn=lrho,vxclrho=vxclrho)
+     else if (use_laplacian) then
+       if (present(xc_funcs)) then
+         call (ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&              grho2_updn=grho2,vxcgrho=vxcgrho,lrho=lrho_updn,vxclrho=vxclrho,&
+&              xc_funcs=xc_funcs)
        else
-         call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         grho2_updn=grho2,vxcgrho=vxcgrho,tau_updn=tau,vxctau=vxctau)
+         call (ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&              grho2_updn=grho2,vxcgrho=vxcgrho,lrho=lrho_updn,vxclrho=vxclrho)
+       end if
+     else if (use_kden) then
+       if (present(xc_funcs)) then
+         call (ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&              grho2_updn=grho2,vxcgrho=vxcgrho,tau_updn=tau,vxctau=vxctau,&
+&              xc_funcs=xc_funcs)
+       else
+         call (ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&              grho2_updn=grho2,vxcgrho=vxcgrho,tau_updn=tau,vxctau=vxctau)
        end if
      end if
-
-   else if (is_gga) then
-     if (order**2<=1) then
+   else if (use_gradient) then ! GGA
+     if (abs(order)<=1) then
        if (present(xc_funcs)) then
-         call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         grho2_updn=grho2,vxcgrho=vxcgrho,xc_funcs=xc_funcs)
+         call (ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&              grho2_updn=grho2,vxcgrho=vxcgrho,xc_funcs=xc_funcs)
        else
-         call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         grho2_updn=grho2,vxcgrho=vxcgrho)
+         call (ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&              grho2_updn=grho2,vxcgrho=vxcgrho)
        end if
      else
        if (present(xc_funcs)) then
-         call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         grho2_updn=grho2,vxcgrho=vxcgrho,dvxc=dvxc,xc_funcs=xc_funcs)
+         call (ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&              grho2_updn=grho2,vxcgrho=vxcgrho,dvxc=dvxc,xc_funcs=xc_funcs)
        else
-         call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         grho2_updn=grho2,vxcgrho=vxcgrho,dvxc=dvxc)
+         call (ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&              grho2_updn=grho2,vxcgrho=vxcgrho,dvxc=dvxc)
        end if
      end if
-   else
-     if (order**2<=1) then
+   else ! LDA
+     if (abs(order)<=1) then
        if (present(xc_funcs)) then
-         call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-         xc_funcs=xc_funcs)
+         call (ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&              xc_funcs=xc_funcs)
        else
-         call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho)
+         call (ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc)
        end if
-     else if (order**2<=4) then
+     else if (abs(order)<=2) then
        if (present(xc_funcs)) then
-         call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         dvxc=dvxc, xc_funcs=xc_funcs)
+         call (ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&              dvxc=dvxc,xc_funcs=xc_funcs)
        else
-         call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         dvxc=dvxc)
+         call (ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&              dvxc=dvxc)
        end if
-     else
+     else if (abs(order)<=3) then
        if (present(xc_funcs)) then
-         call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         dvxc=dvxc,d2vxc=d2vxc,xc_funcs=xc_funcs)
+         call (ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&              dvxc=dvxc,d2vxc=d2vxc,xc_funcs=xc_funcs)
        else
-         call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         dvxc=dvxc,d2vxc=d2vxc)
+         call (ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&              dvxc=dvxc,d2vxc=d2vxc)
        end if
      end if
    end if
 
  else
 
-!  Cases with gradient
+!======= Cases with gradient (GGA)
+
    if (xclevel==2)then
      if (order**2<=1.or.ixc==16.or.ixc==17.or.ixc==26.or.ixc==27) then
        if (ixc/=13) then
          if (present(exexch)) then
-           call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           hyb_mixing=hyb_mixing_,grho2_updn=grho2,vxcgrho=vxcgrho, &
-&           exexch=exexch)
+           call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&                rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&                grho2_updn=grho2,vxcgrho=vxcgrho,hyb_mixing=hyb_mixing_,exexch=exexch)
          else
-           call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           hyb_mixing=hyb_mixing_,grho2_updn=grho2,vxcgrho=vxcgrho)
+           call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&                rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&                grho2_updn=grho2,vxcgrho=vxcgrho,hyb_mixing=hyb_mixing_)
          end if
        else
          if (present(exexch)) then
-           call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           grho2_updn=grho2, &
-&           exexch=exexch)
+           call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&                rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&                grho2_updn=grho2,exexch=exexch)
          else
-           call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           grho2_updn=grho2)
+           call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&                rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&                grho2_updn=grho2)
          end if
        end if
-     else if (order/=3) then
+      else if (order/=3) then
        if (ixc/=13) then
          if (present(exexch)) then
-           call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           hyb_mixing=hyb_mixing_,dvxc=dvxc,grho2_updn=grho2,vxcgrho=vxcgrho, &
-&           exexch=exexch)
+           call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&                rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&                grho2_updn=grho2,vxcgrho=vxcgrho,dvxc=dvxc,&
+&                hyb_mixing=hyb_mixing_,exexch=exexch)
          else
-           call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           hyb_mixing=hyb_mixing_,dvxc=dvxc,grho2_updn=grho2,vxcgrho=vxcgrho)
+           call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&                rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&                grho2_updn=grho2,vxcgrho=vxcgrho,dvxc=dvxc,&
+&                hyb_mixing=hyb_mixing_)
          end if
        else
          if (present(exexch)) then
-           call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           dvxc=dvxc,grho2_updn=grho2, &
-&           exexch=exexch)
+           call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&                rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&                grho2_updn=grho2,dvxc=dvxc,exexch=exexch)
          else
-           call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           dvxc=dvxc,grho2_updn=grho2)
+           call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&                rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&                dvxc=dvxc,grho2_updn=grho2)
          end if
        end if
      else if (order==3) then
        if (ixc/=13) then
          if (present(exexch)) then
-           call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           dvxc=dvxc,d2vxc=d2vxc,grho2_updn=grho2,vxcgrho=vxcgrho, &
-&           hyb_mixing=hyb_mixing_,exexch=exexch)
+           call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&                rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&                grho2_updn=grho2,vxcgrho=vxcgrho,dvxc=dvxc,d2vxc=d2vxc,&
+&                hyb_mixing=hyb_mixing_,exexch=exexch)
          else
-           call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           hyb_mixing=hyb_mixing_,dvxc=dvxc,d2vxc=d2vxc,grho2_updn=grho2,vxcgrho=vxcgrho)
+           call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&                rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&                grho2_updn=grho2,vxcgrho=vxcgrho,dvxc=dvxc,d2vxc=d2vxc,&
+&                hyb_mixing=hyb_mixing_)
          end if
        else
          if (present(exexch)) then
-           call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           dvxc=dvxc,d2vxc=d2vxc,grho2_updn=grho2, &
-&           exexch=exexch)
+           call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&                rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&                grho2_updn=grho2,dvxc=dvxc,d2vxc=d2vxc,exexch=exexch)
          else
-           call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&           dvxc=dvxc,d2vxc=d2vxc,grho2_updn=grho2)
+           call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&                rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&                dvxc=dvxc,d2vxc=d2vxc,grho2_updn=grho2)
          end if
        end if
      end if
 
-
-!    Cases without gradient
+!======= Cases without gradient (LDA)
    else
      if (order**2<=1) then
-       if (ixc>=31.and.ixc<=34) then !fake mgga functionals for testing purpose only (based on LDA functional)
-         if (use_laplacian==0) then
-           MSG_BUG('ixc=31...34 and use_laplacian=0!')
-         end if
-         call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&                     grho2_updn=grho2,vxcgrho=vxcgrho,tau_updn=tau,vxctau=vxctau, &
-&                     lrho_updn=lrho,vxclrho=vxclrho)
+       if (ixc>=31.and.ixc<=34) then
+         !fake mgga functionals for testing purpose only (based on LDA functional)
+         call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&              grho2_updn=grho2,vxcgrho=vxcgrho,&
+&              lrho=lrho_updn,vxclrho=vxclrho,&
+&              tau_updn=tau,vxctau=vxctau)
        else
          if (present(fxcT)) then
-           call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho,fxcT=fxcT,el_temp=el_temp)
+           call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&                rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&                fxcT=fxcT,el_temp=el_temp)
          else
-           call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho)
+           call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&                rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc)
          end if
        end if
      else if (order==3.and.(ixc==3.or.ixc>=7.and.ixc<=10)) then
-       call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&       dvxc=dvxc,d2vxc=d2vxc)
+       call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&            dvxc=dvxc,d2vxc=d2vxc)
      else
        if (present(fxcT)) then
-         call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         dvxc=dvxc,fxcT=fxcT,el_temp=el_temp)
+         call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,dvxc=dvxc,&
+&              fxcT=fxcT,el_temp=el_temp)
        else
-         call drivexc(exc,ixc,npts,nspden,order,rho,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&         dvxc=dvxc)
+         call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&              rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,dvxc=dvxc)
        end if
      end if
    end if
@@ -663,11 +717,11 @@ end subroutine check_kxc
 !!
 !! OUTPUT
 !!  --- All optionals
-!!  [ngr2]= size of the array grho2_updn(npts,ngr2) (squared gradient of density)
+!!  [usegradient]= [flag] 1 if the XC functional needs the gradient of the density (grho2_updn)
+!!  [uselaplacian]= [flag] 1 if the XC functional needs the laplacian of the density (lrho_updn)
+!!  [usekden]= [flag] 1 if the XC functional needs the kinetic energy density (lrho_updn)
 !!  [nvxcgrho]= size of the array dvxcdgr(npts,nvxcgrho) (derivative of Exc wrt to gradient)
-!!  [nlpl]= size of the array lrho_updn(npts,nlpl) (laplacian of density)
 !!  [nvxclrho]= size of the array dvxclpl(npts,nvxclrho) (derivative of Exc wrt to laplacian)
-!!  [ntau]= size of the array tau_updn(npts,ntau) (kinetic energy density)
 !!  [nvxctau]= size of the array dvxctau(npts,nvxctau) (derivative of Exc wrt to kin. ener. density)
 !!  [ndvxc]= size of the array dvxc(npts,ndvxc) (second derivatives of Exc wrt to density and gradient)
 !!  [nd2vxc]= size of the array d2vxc(npts,nd2vxc) (third derivatives of Exc wrt density)
@@ -680,17 +734,20 @@ end subroutine check_kxc
 !! SOURCE
 
 subroutine size_dvxc(ixc,order,nspden,&
-&                    ngr2,nvxcgrho,nlpl,nvxclrho,ntau,nvxctau,ndvxc,nd2vxc,&
-&                    add_tfw,xc_funcs) ! Optional
+&          usegradient,uselaplacian,usekden,&
+&          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
+&          add_tfw,xc_funcs) ! Optional
 
 !Arguments----------------------
  integer,intent(in) :: ixc,nspden,order
- integer,intent(out),optional :: ngr2,nvxcgrho,nlpl,nvxclrho,ntau,nvxctau,ndvxc,nd2vxc
+ integer,intent(out),optional :: nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc
+ integer,intent(out),optional :: usegradient,uselaplacian,usekden
  logical, intent(in),optional :: add_tfw
  type(libxc_functional_type),intent(in),optional :: xc_funcs(2)
 
 !Local variables----------------
- logical :: add_tfw_,libxc_isgga,libxc_ismgga,libxc_ishybrid,use_gradient,use_kden,use_laplacian
+ logical :: add_tfw_,libxc_isgga,libxc_ismgga,libxc_ishybrid
+ logical :: need_gradient,need_laplacian,need_kden
 
 ! *************************************************************************
 
@@ -710,43 +767,37 @@ subroutine size_dvxc(ixc,order,nspden,&
  end if
 
 !Do we use the gradient?
- use_gradient=((ixc>=11.and.ixc<=17).or.(ixc==23.or.ixc==24).or. &
-&              (ixc==26.or.ixc==27).or.(ixc>=31.and.ixc<=34).or. &
-&              (ixc==41.or.ixc==42).or.ixc==1402000)
- if (ixc<0.and.(libxc_isgga.or.libxc_ismgga.or.libxc_ishybrid)) use_gradient=.true.
- if (add_tfw_) use_gradient=.true.
+ need_gradient=((ixc>=11.and.ixc<=17).or.(ixc==23.or.ixc==24).or. &
+&               (ixc==26.or.ixc==27).or.(ixc>=31.and.ixc<=34).or. &
+&               (ixc==41.or.ixc==42).or.ixc==1402000)
+ if (ixc<0.and.(libxc_isgga.or.libxc_ismgga.or.libxc_ishybrid)) need_gradient=.true.
+ if (add_tfw_) need_gradient=.true.
+ if (present(usegradient)) then
+   usegradient=0 ; if (need_gradient) usegradient=2*min(nspden,2)-1
+ end if
 
 !Do we use the laplacian?
- use_laplacian=(ixc>=31.and.ixc<=34)
+ need_laplacian=(ixc>=31.and.ixc<=34)
  if (ixc<0) then
-   if(present(xc_funcs)) use_laplacian=libxc_functionals_needs_laplacian(xc_functionals=xc_funcs)
-   if(.not.present(xc_funcs)) use_laplacian=libxc_functionals_needs_laplacian()
+   if(present(xc_funcs)) need_laplacian=libxc_functionals_needs_laplacian(xc_functionals=xc_funcs)
+   if(.not.present(xc_funcs)) need_laplacian=libxc_functionals_needs_laplacian()
+ end if
+ if (present(uselaplacian)) then
+   uselaplacian=0 ; if (need_laplacian) uselaplacian=min(nspden,2)
  end if
 
 !Do we use the kinetic energy density?
- use_kden=(ixc>=31.and.ixc<=34)
- if (ixc<0) use_kden=libxc_ismgga
-
-!Dimension for the gradient of the density (GGA or mGGA)
- if (present(ngr2)) then
-   ngr2=0 ; if (use_gradient) ngr2=2*min(nspden,2)-1
- end if
-
-!Dimension for the laplacian of the density (mGGA)
- if (present(nlpl)) then
-   nlpl=0 ; if (use_laplacian) nlpl=min(nspden,2)
- end if
-
-!Dimension for the kinetic energy density (mGGA)
- if (present(ntau)) then
-   ntau=0 ; if (use_kden) ntau=min(nspden,2)
+ need_kden=(ixc>=31.and.ixc<=34)
+ if (ixc<0) need_kden=libxc_ismgga
+ if (present(usekden)) then
+   usekden=0 ; if (need_kden) usekden=min(nspden,2)
  end if
 
 !First derivative(s) of XC functional wrt gradient of density
  if (present(nvxcgrho)) then
    nvxcgrho=0
    if (abs(order)>=1) then
-     if (use_gradient) nvxcgrho=3
+     if (need_gradient) nvxcgrho=3
      if (ixc==16.or.ixc==17.or.ixc==26.or.ixc==27) nvxcgrho=2
    end if
  end if
@@ -755,7 +806,7 @@ subroutine size_dvxc(ixc,order,nspden,&
  if (present(nvxclrho)) then
    nvxclrho=0
    if (abs(order)>=1) then
-     if (use_laplacian) nvxclrho=min(nspden,2)
+     if (need_laplacian) nvxclrho=min(nspden,2)
    end if
  end if
 
@@ -763,7 +814,7 @@ subroutine size_dvxc(ixc,order,nspden,&
  if (present(nvxctau)) then
    nvxctau=0
    if (abs(order)>=1) then
-     if (use_kden) nvxctau=min(nspden,2)
+     if (need_kden) nvxctau=min(nspden,2)
    end if
  end if
 
@@ -781,7 +832,7 @@ subroutine size_dvxc(ixc,order,nspden,&
 &             ixc==23.or.ixc==41.or.ixc==42.or.ixc==1402000) then
        ndvxc=15
      else if (ixc<0) then
-       ndvxc=3 ; if (use_gradient) ndvxc=15
+       ndvxc=3 ; if (need_gradient) ndvxc=15
      end if
    end if
  end if
@@ -796,7 +847,7 @@ subroutine size_dvxc(ixc,order,nspden,&
      else if ((ixc>=7.and.ixc<=10).or.ixc==13.or.ixc==1402000) then
        nd2vxc=3*min(nspden,2)-2
      else if (ixc<0) then
-       if (.not.use_gradient) nd2vxc=3*min(nspden,2)-2
+       if (.not.need_gradient) nd2vxc=3*min(nspden,2)-2
      end if
    end if
  end if
@@ -1058,84 +1109,75 @@ end subroutine mkdenpos
 !!
 !! FUNCTION
 !! Driver of XC functionals. Treat spin-polarized as well as non-spin-polarized.
-!! Treat local approximations or GGAs.
+!! Treat local approximations, GGAs, meta-GGAs or hybrid functionals.
 !! Optionally, deliver the XC kernel, or even the derivative
 !! of the XC kernel (the third derivative of the XC energy)
 !!
 !! INPUTS
-!!  ixc=number of the XC functional
-!!  ndvxc= size of dvxc(npts,ndvxc)
-!!  ngr2= size of grho2_updn(npts,ngr2)
-!!  nvxcgrho= size of vxcgrho(npts,nvxcgrho)
-!!  npts=number of real space points on which the density
-!!   (and its gradients, if needed) is provided
-!!  nspden=number of spin-density components (1 or 2)
+!!  ixc=index of the XC functional
+!!  xclevel=XC functional level (lda, gga, etc...)
+!!  usegradient=[flag] 1 if the XC functional depends on density gradient (grho2_updn)
+!!  uselaplacian=[flag] 1 if the XC functional depends on density laplacian (lrho_updn)
+!!  usekden=[flag] 1 if the XC functional depends on kinetic energy density (tau_updn)
 !!  order=gives the maximal derivative of Exc computed.
 !!    1=usual value (return exc and vxc)
 !!    2=also computes the kernel (return exc,vxc,kxc)
 !!   -2=like 2, except (to be described)
 !!    3=also computes the derivative of the kernel (return exc,vxc,kxc,k3xc)
-!!  rho_updn(npts,nspden)=the spin-up and spin-down densities
-!!    If nspden=1, only the spin-up density must be given.
-!!    In the calling routine, the spin-down density must
-!!    be equal to the spin-up density,
-!!    and both are half the total density.
-!!    If nspden=2, the spin-up and spin-down density must be given
-!!  Optional inputs:
+!!  npts=number of real space points on which the density is provided
+!!  nspden=number of spin-density components (1 or 2)
+!!  nvxcgrho=number of components of 1st-derivative of Exc wrt density gradient (nvxcgrho)
+!!  nvxclrho=number of components of 1st-derivative of Exc wrt density laplacian (nvxclrho)
+!!  nvxctau=number of components of 1st-derivative of Exc wrt kinetic energy density (nvxctau)
+!!  ndvxc=number of components of  1st-derivative of Vxc (dvxc)
+!!  nd2vxc=number of components of  2nd-derivative of Vxc (d2vxc)
+!!  rho_updn(npts,nspden)=spin-up and spin-down densities
+!!    In the calling routine, spin-down density must be equal to spin-up density.
+!!    If nspden=1, only spin-up density must be given (half the total density).
+!!    If nspden=2, spin-up and spin-down densities must be given.
+!!  === Optional input arguments ===
+!!  [grho2_updn(npts,(2*nspden-1)*usegradient)]=the square of the gradients
+!!    of spin-up, spin-down, and total density.
+!!    If nspden=1, only the square of the gradient of the spin-up density must be given.
+!!     In the calling routine, the square of the gradient of the spin-down density must be equal
+!!     to the square of the gradient of the spin-up density, and both must be equal to
+!!     one-quarter of the square of the gradient of the total density.
+!!    If nspden=2, the square of the gradients of spin-up, spin-down, and total density must be given.
+!!     Note that the square of the gradient of the total density is usually NOT related to
+!!     the square of the gradient of the spin-up and spin-down densities, because the gradients
+!!     are not usually aligned. This is not the case when nspden=1.
+!!  [lrho_updn(npts,nspden*uselaplacian)]=the Laplacian of spin-up and spin-down densities.
+!!    If nspden=1, only the spin-up Laplacian density must be given and must
+!!     be equal to the spin-up Laplacian density.
+!!    If nspden=2, the Laplacian of spin-up and spin-down densities must be given.
+!!  [tau_updn(npts,nspden*usekden)]=the spin-up and spin-down kinetic energy densities.
+!!    If nspden=1, only the spin-up kinetic energy density must be given and must
+!!     be equal to the half the total kinetic energy density.
+!!    If nspden=2, the spin-up and spin-down kinetic energy densities must be given.
+!!  [exexch]=choice of <<<local>>> exact exchange. Active if exexch=3 (only for GGA, and NOT for libxc)
 !!  [el_temp]= electronic temperature (to be used for finite temperature XC functionals)
-!!  [exexch]= choice of <<<local>>> exact exchange. Active if exexch=3 (only for GGA, and NOT for libxc)
-!!  [grho2_updn(npts,ngr2)]=the square of the gradients of
-!!    spin-up, spin-down, and total density
-!!    If nspden=1, only the square of the gradient of the spin-up density
-!!     must be given. In the calling routine, the square of the gradient
-!!     of the spin-down density
-!!     must be equal to the square of the gradient of the spin-up density,
-!!     and both must be equal to one-quarter of the square of the
-!!     gradient of the total density.
-!!    If nspden=2, the square of the gradients of
-!!     spin-up, spin-down, and total density must be given.
-!!     Note that the square of the gradient of the total
-!!     density is usually NOT related to the square of the
-!!     gradient of the spin-up and spin-down densities,
-!!     because the gradients are not usually aligned.
-!!     This is not the case when nspden=1.
 !!  [hyb_mixing]= mixing parameter for the native PBEx functionals (ixc=41 and 42)
-!!  [lrho_updn(npts,nspden)]=the Laplacian of spin-up and spin-down densities
-!!    If nspden=1, only the spin-up Laplacian density must be given.
-!!    In the calling routine, the spin-down Laplacian density must
-!!    be equal to the spin-up Laplacian density,
-!!    and both are half the total Laplacian density.
-!!    If nspden=2, the Laplacian of spin-up and spin-down densities must be given
-!!  [tau_updn(npts,nspden)]=the spin-up and spin-down kinetic energy densities
-!!    If nspden=1, only the spin-up kinetic energy density must be given.
-!!    In the calling routine, the spin-down kinetic energy density must
-!!    be equal to the spin-up kinetic energy density,
-!!    and both are half the total kinetic energy density.
-!!    If nspden=2, the spin-up and spin-down kinetic energy densities must be given
-!!  [xc_funcs(2)]= <type(libxc_functional_type)>, optional : libxc XC functionals.
-!!    If not specified, the underlying xc_global(2) is used by libxc.
+!!  [xc_funcs(2)]= <type(libxc_functional_type)>: libxc XC functionals.
 !!
 !! OUTPUT
 !!  exc(npts)=exchange-correlation energy density (hartree)
 !!  vxcrho(npts,nspden)= (d($\rho$*exc)/d($\rho_up$)) (hartree)
 !!                  and  (d($\rho$*exc)/d($\rho_down$)) (hartree)
-!!  vxcgrho(npts,3)= 1/$|grad \rho_up|$ (d($\rho$*exc)/d($|grad \rho_up|$)) (hartree)
-!!                   1/$|grad \rho_dn|$ (d($\rho$*exc)/d($|grad \rho_dn|$)) (hartree)
-!!              and  1/$|grad \rho|$ (d($\rho$*exc)/d($|grad \rho|$))       (hartree)
-!!     (will be zero if a LDA functional is used)
-!!  vxclrho(npts,nspden)=(only for meta-GGA, i.e. optional output)=
-!!                       (d($\rho$*exc)/d($\lrho_up$))   (hartree)
-!!                  and  (d($\rho$*exc)/d($\lrho_down$)) (hartree)
-!!  vxctau(npts,nspden)=(only for meta-GGA, i.e. optional output)=
-!!    derivative of XC energy density with respect to kinetic energy density (depsxcdtau).
-!!                       (d($\rho$*exc)/d($\tau_up$))    (hartree)
-!!                  and  (d($\rho$*exc)/d($\tau_down$))  (hartree)
-!!  Optional output:
-!!  if(abs(order)>1)
-!!   [dvxc(npts,ndvxc)]=partial second derivatives of the xc energy
-!!   (This is a mess, to be rationalized !!)
+!!  === Optional output arguments ===
+!!  [vxcgrho(npts,nvxcgrho)]=1st-derivative of the xc energy wrt density gradient>
+!!                          = 1/$|grad \rho_up|$ (d($\rho$*exc)/d($|grad \rho_up|$))
+!!                            1/$|grad \rho_dn|$ (d($\rho$*exc)/d($|grad \rho_dn|$))
+!!                            1/$|grad \rho|$ (d($\rho$*exc)/d($|grad \rho|$))
+!!  [vxclrho(npts,nvxclrho)]=1st-derivative of the xc energy wrt density laplacian.
+!!                          = d($\rho$*exc)/d($\lrho_up$)
+!!                            d($\rho$*exc)/d($\lrho_down$)
+!!  [vxctau(npts,nvxctau)]=1st-derivative of the xc energy wrt kinetic energy density.
+!!                        = d($\rho$*exc)/d($\tau_up$)
+!!                          d($\rho$*exc)/d($\tau_down$)
+!!  [dvxc(npts,ndvxc)]=partial second derivatives of the XC energy
+!!   === Only if abs(order)>1 ===
 !!   In case of local energy functional (option=1,-1 or 3):
-!!    dvxc(npts,1+nspden)=              (Hartree*bohr^3)
+!!    dvxc(npts,1+nspden)=
 !!     if(nspden=1 .and. order==2): dvxci(:,1)=dvxc/d$\rho$ , dvxc(:,2) empty
 !!     if(nspden=1 .and. order==-2): also compute dvxci(:,2)=dvxc($\uparrow$)/d$\rho(\downarrow)$
 !!     if(nspden=2): dvxc(:,1)=dvxc($\uparrow$)/d$\rho(\downarrow)$,
@@ -1158,9 +1200,9 @@ end subroutine mkdenpos
 !!     dvxc(:,13)=d2Ec/d(abs(grad(rho))) drho_up / abs(grad(rho))
 !!     dvxc(:,14)=d2Ec/d(abs(grad(rho))) drho_dn / abs(grad(rho))
 !!     dvxc(:,15)=1/abs(grad(rho)) * d/d(abs(grad(rho)) (dEc/d(abs(grad(rho))) /abs(grad(rho)))
-!!
-!!  if(abs(order)>2)  (only available for LDA and nspden=1)
-!!   [d2vxc(npts,nd2vxc)]=partial third derivatives of the xc energy
+!!  [d2vxc(npts,nd2vxc)]=second derivative of the XC potential=3rd order derivative of XC energy
+!!   === Only if abs(order)>1 ===
+!!   === At present only available for LDA ===
 !!    if nspden=1 d2vxc(npts,1)=second derivative of the XC potential=3rd order derivative of energy
 !!    if nspden=2 d2vxc(npts,1), d2vxc(npts,2), d2vxc(npts,3), d2vxc(npts,4) (3rd derivative of energy)
 !!  [fxcT(npts)]=XC free energy of the electron gaz at finite temperature (to be used for plasma systems)
@@ -1175,30 +1217,32 @@ end subroutine mkdenpos
 !!
 !! SOURCE
 
-subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
-&   dvxc,d2vxc,grho2_updn,vxcgrho,el_temp,exexch,fxcT,&     !Optional arguments
-&   hyb_mixing,lrho_updn,vxclrho,tau_updn,vxctau,xc_funcs)  !Optional arguments
+subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+&          rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &            ! mandatory arguments
+&          grho2_updn,vxcgrho,lrh_updno,vxclrho,tau_updn,vxctau,dvxc,d2vxc, &  ! optional arguments
+&          exexch,el_temp,fxcT,hyb_mixing,xc_funcs)                            ! optional parameters
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ixc,ndvxc,ngr2,nd2vxc,npts,nspden,nvxcgrho,order
+ integer,intent(in) :: ixc,npts,nspden
+ integer,intent(in) :: ndvxc,nd2vxc,,nvxcgrho,nvxclrho,nvxctau,order,xclevel
+ integer,intent(in) :: usegradient,uselaplacian,usekden
  integer,intent(in),optional :: exexch
  real(dp),intent(in),optional :: el_temp,hyb_mixing
 !arrays
- real(dp),intent(in) :: rho_updn(npts,nspden)
- real(dp),intent(in),optional :: grho2_updn(npts,ngr2)
- real(dp),intent(in),optional :: lrho_updn(npts,nspden),tau_updn(npts,nspden)
+ real(dp),intent(in) :: rho(npts,nspden)
+ real(dp),intent(in),optional :: grho2_updn(npts,(2*nspden-1)*usegradient)
+ real(dp),intent(in),optional :: lrho_updn(npts,nspden*uselaplacian),tau_updn(npts,nspden*usekden)
  real(dp),intent(out) :: exc(npts),vxcrho(npts,nspden)
- real(dp),intent(out),optional :: d2vxc(npts,nd2vxc),dvxc(npts,ndvxc),fxcT(:)
- real(dp),intent(out),optional :: vxcgrho(npts,nvxcgrho)
- real(dp),intent(out),optional :: vxclrho(npts,nspden),vxctau(npts,nspden)
+ real(dp),intent(out),optional :: dvxc(npts,ndvxc),d2vxc(npts,nd2vxc),fxcT(:)
+ real(dp),intent(out),optional :: vxcgrho(npts,nvxcgrho),vxclrho(npts,nvxclrho),vxctau(npts,nvxctau)
  type(libxc_functional_type),intent(inout),optional :: xc_funcs(2)
 
 !Local variables-------------------------------
 !scalars
  integer :: exexch_,ixc_from_lib,ixc1,ixc2,ndvxc_x,optpbe,ispden
  logical :: libxc_test,xc_err_ndvxc,xc_err_nvxcgrho1,xc_err_nvxcgrho2
- logical :: is_gga,is_mgga,needs_laplacian
+ logical :: need_gradient,need_laplacian,need_kden
  real(dp) :: alpha
  real(dp),parameter :: rsfac=0.6203504908994000e0_dp
  character(len=500) :: message
@@ -1216,13 +1260,32 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 ! ==         Compatibility tests                 ==
 ! =================================================
 
-!Checks the values of order and other size parameters
-
- if( (order<1 .and. order/=-2) .or. order>4)then
+!Check order
+ if( (order<1.and.order/=-2).or.order>4)then
    write(message, '(a,i0)' )&
 &   'The only allowed values for order are 1,2,-2 or 3, while it is found to be ',order
    MSG_BUG(message)
  end if
+ if (abs(order>=2)) then
+   if (.not.present(dvxc)) then
+     message='order>=2 needs argument dvxc!'
+     MSG_BUG(message)
+   else if (ndvxc==0) then
+     message='order>=2 needs ndvxc>0!'
+     MSG_BUG(message)
+   end if
+ end if
+ if (abs(order>=3)) then
+   if (.not.present(d2vxc)) then
+     message='order>=3 needs argument d2vxc!'
+     MSG_BUG(message)
+   else if (nd2vxc==0) then
+     message='order>=3 needs nd2vxc>0!'
+     MSG_BUG(message)
+   end if
+ end if
+
+!Check sizes of potentials
  xc_err_ndvxc=.false.
  xc_err_nvxcgrho1=.false.
  xc_err_nvxcgrho2=.false.
@@ -1270,138 +1333,93 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
    libxc_test=libxc_functionals_check(stop_if_error=.true.)
  end if
 
- is_gga=.false.
- is_mgga=.false.
- needs_laplacian=.false.
+!Determine quantities needed by XC functional
+ need_gradient=.false.;need_laplacian=.false.;need_kden=.false.
  ixc_from_lib=ixc
  if (ixc<0) then
-!  Prepare the tests
    if(present(xc_funcs))then
-     is_gga=libxc_functionals_isgga(xc_functionals=xc_funcs)
-     is_mgga=libxc_functionals_ismgga(xc_functionals=xc_funcs)
-     needs_laplacian=libxc_functionals_needs_laplacian(xc_functionals=xc_funcs)
+     need_gradient=libxc_functionals_isgga(xc_functionals=xc_funcs).or. &
+&                  libxc_functionals_ismgga(xc_functionals=xc_funcs)
+     need_laplacian=libxc_functionals_needs_laplacian(xc_functionals=xc_funcs)
+     need_kden=libxc_functionals_ismgga(xc_functionals=xc_funcs)
      ixc_from_lib=libxc_functionals_ixc(xc_functionals=xc_funcs)
    else
-     is_gga=libxc_functionals_isgga()
-     is_mgga=libxc_functionals_ismgga()
-     needs_laplacian=libxc_functionals_needs_laplacian()
+     need_gradient=libxc_functionals_isgga().or. &
+&                  libxc_functionals_ismgga()
+     need_laplacian=libxc_functionals_needs_laplacian()
+     need_kden=libxc_functionals_ismgga()
      ixc_from_lib=libxc_functionals_ixc()
-   end if
-!  Check consistency between ixc passed in input and the one used to initialize the library.
-   if (ixc /= ixc_from_lib) then
-     write(message, '(a,i0,2a,i0,2a)')&
-&     'The value of ixc specified in input, ixc = ',ixc,ch10,&
-&     'differs from the one used to initialize the functional ',ixc_from_lib,ch10,&
-&     'Action: reinitialize the global structure funcs, see NOTES in m_libxc_functionals'
-     MSG_BUG(message)
    end if
  else if ((ixc>=11.and.ixc<=17).or.((ixc>=23.and.ixc<=27).and.ixc/=25).or. &
 &         (ixc>=31.and.ixc<=34).or.(ixc>=41.and.ixc/=50).or.ixc==1402) then
-   is_gga=.true.
+   need_gradient=.true.
    if (ixc>=31.and.ixc<=34) then
-     is_mgga=.true.
-     needs_laplacian=.true.
+     need_laplacian=.true.;need_kden=.true.
+   end if
+ end if
+ if (abs(order)>1.and.(need_laplacian.or.need_kden)) then
+   message='Derivatives of XC potential are not available in mGGA!'
+   MSG_BUG(message)
+ end if
+
+!Check whether all the necessary arrays are present and have the correct dimensions
+ if (need_gradient) then
+  if ((.not.present(grho2_updn)).or.(.not.present(vxcgrho)))  then
+    write(message, '(a3)' )&
+&    'At least one of the XC functionals needs the gradient of the density,',ch10,&
+&    'but not all the necessary arrays are present!'
+    MSG_BUG(message)
+  end if
+  if (usegradient==0.or.nvxcgrho==0) then
+    write(message, '(a3)' )&
+&    'At least one of the XC functionals needs the gradient of the density,',ch10,&
+&    'but usegradient=0 or nvxcgrho=0!'
+    MSG_BUG(message)
+  end if
+ end if
+ if (need_laplacian) then
+   if ((.not.present(lrho_updn)).or.(.not.present(vxclrho)))  then
+     write(message, '(a3)' )&
+&     'At least one of the XC functionals needs the laplacian of the density,',ch10,&
+&     'but not all the necessary arrays are present!'
+     MSG_BUG(message)
+   end if
+   if (uselaplacian==0.or.nvxclrho==0) then
+     write(message, '(a3)' )&
+&     'At least one of the XC functionals needs the laplacian of the density,',ch10,&
+&     'but uselaplacian=0 or nvxclrho=0!'
+     MSG_BUG(message)
+   end if
+ end if
+ if (need_usekden) then
+   if ((.not.present(tau_updn)).or.(.not.present(vxctau)))  then
+     write(message, '(a3)' )&
+&     'At least one of the XC functionals needs the kinetic energy density,',ch10,&
+&     'but not all the necessary arrays are present!'
+     MSG_BUG(message)
+   end if
+   if (usekden==0.or.nvxctau==0) then
+     write(message, '(a3)' )&
+&     'At least one of the XC functionals needs the kinetic energy density,',ch10,&
+&     'but uselaplacian=0 or nvxclrho=0!'
+     MSG_BUG(message)
    end if
  end if
 
- if (ixc<0 .or. ixc==1402) then
-!  Check whether all the necessary arrays are present and have the correct dimensions
-   if (is_gga .or. is_mgga) then
-     if ( (.not. present(grho2_updn)) .or. (.not. present(vxcgrho)))  then
-       write(message, '(5a,2L2,2a,2L2,2a,i10,a,i5,a,i5)' )&
-&       'At least one of the functionals is a GGA or a MGGA,',ch10,&
-&       'but not all the necessary arrays are present.',ch10,&
-&       'is_gga, is_mgga=',is_gga,is_mgga,ch10,&
-&       'present(grho2_updn),present(vxcgrho)=',present(grho2_updn),present(vxcgrho),ch10,&
-&       'ixc=',ixc,'  nvxcgrho=',nvxcgrho,'  ngr2=',ngr2
-       MSG_BUG(message)
-     end if
-     if (ngr2==0.or.nvxcgrho/=3) then
-       write(message, '(5a,i7,a,i6,a,i6)' )&
-&       'The value of the number of the XC functional ixc',ch10,&
-&       'is not compatible with the value of nvxcgrho or ngr2',ch10,&
-&       'ixc=',ixc,'  nvxcgrho=',nvxcgrho,'  ngr2=',ngr2
-       MSG_BUG(message)
-     end if
-   end if
-   if (is_mgga) then
-     if ((.not.present(tau_updn)).or.(.not.present(vxctau)))  then
-       write(message, '(5a,i7)' )&
-&       'At least one of the functionals is a MGGA,',ch10,&
-&       'but not all the necessary arrays (tau) are present.',ch10,&
-&       'ixc=',ixc
-       MSG_BUG(message)
-     end if
-     if (needs_laplacian) then
-       if ((.not.present(tau_updn)).or.(.not.present(vxctau)))  then
-         write(message, '(5a,i7)' )&
-&         'At least one of the functionals is a MGGA,',ch10,&
-&         'but not all the necessary arrays (lrho) are present.',ch10,&
-&         'ixc=',ixc
-         MSG_BUG(message)
-       end if
-     end if
-   end if
- end if
+! Check consistency between ixc passed in input
+!  and the one used to initialize the library.
+  if (ixc/=ixc_from_lib) then
+    write(message, '(a,i0,2a,i0,2a)')&
+&    'The value of ixc specified in input, ixc = ',ixc,ch10,&
+&    'differs from the one used to initialize the functional ',ixc_from_lib,ch10,&
+&    'Action: reinitialize the global structure funcs, see NOTES in m_libxc_functionals'
+    MSG_BUG(message)
+  end if
 
-!Checks the compatibility between the inputs and the presence of the optional arguments
- if(present(dvxc))then
-   if(order**2<=1.or.ixc==16.or.ixc==17.or.ixc==26.or.ixc==27)then
-     write(message, '(5a,i0,a,i0)' )&
-&     'The value of the number of the XC functional ixc',ch10,&
-&     'or the value of order is not compatible with the presence of the array dvxc',ch10,&
-&     'ixc=',ixc,'order=',order
-     MSG_BUG(message)
-   end if
- end if
- if(present(d2vxc))then
-   if(order/=3.or.(ixc/=3.and.(((ixc>15).and.(ixc/=23)) .or.&
-&   (ixc>=0.and.ixc<7).or.(ixc>=40 .and. ixc/=1402))) )then
-     write(message, '(5a,i6,a,i0)' )&
-&     'The value of the number of the XC functional ixc',ch10,&
-&     'or the value of order is not compatible with the presence of the array d2vxc',ch10,&
-&     'ixc=',ixc,'order=',order
-     MSG_BUG(message)
-   end if
- end if
- if(present(vxcgrho))then
-   if(nvxcgrho==0.or. &
-&   ((((ixc>17.and.ixc/=23.and.ixc/=24.and.ixc/=26.and.ixc/=27) .or.&
-&   (ixc>= 0.and.ixc<7).or.(ixc>=40 .and. ixc/=1402)) .and. nvxcgrho /=3 ))) then
-     if(ixc<31.and.ixc>34)then !! additional if to include ixc 31 to 34 in the list (these ixc are used for mgga test see below)
-       write(message, '(5a,i0,a,i0)' )&
-&       'The value of the number of the XC functional ixc',ch10,&
-&       'or the value of nvxcgrho is not compatible with the presence of the array vxcgrho',ch10,&
-&       'ixc=',ixc,'  nvxcgrho=',nvxcgrho
-       MSG_BUG(message)
-     end if
-   end if
- end if
- if(present(grho2_updn))then
-   if (ngr2/=2*nspden-1 ) then
-     write(message, '(4a)' ) ch10,&
-&     'drivexc : BUG -',ch10,&
-&     'ngr2 must be 2*nspden-1 !'
-!    MSG_BUG(message)
-   end if
-   if ((ixc>0.and.ixc<11).or.(ixc>17.and.ixc<23).or.ixc==25.or.(ixc>27.and.ixc<31).or. &
-&   (ixc>34.and.ixc<41).or.ixc==50) then
-     write(message, '(5a,i0)' )&
-&     'The value of the number of the XC functional ixc',ch10,&
-&     'is not compatible with the presence of the array grho2_updn',ch10,&
-&     'ixc=',ixc
-     MSG_BUG(message)
-   end if
- end if
+!Check other optional arguments
  if (present(exexch)) then
-   if(exexch/=0.and.(.not.present(grho2_updn))) then
+   if ((exexch/=0).and.(.not.need_gradient)) then
      message='exexch argument only valid for GGA!'
-     MSG_BUG(message)
-   end if
- end if
- if(ixc==31.or.ixc==32.or.ixc==33.or.ixc==34) then
-   if((.not.(present(vxcgrho))) .or. (.not.(present(vxclrho))) .or. (.not.(present(vxctau))))then
-     message = 'vxcgrho or vxclrho or vxctau is not present but they are all needed for MGGA XC tests.'
      MSG_BUG(message)
    end if
  end if
@@ -1451,11 +1469,11 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 !>>>>> No exchange-correlation
  if (ixc==0.or.ixc==40) then
    exc=zero ; vxcrho=zero
-   if(present(d2vxc)) d2vxc(:,:)=zero
-   if(present(dvxc)) dvxc(:,:)=zero
-   if(present(vxcgrho)) vxcgrho(:,:)=zero
-   if(present(vxctau)) vxctau(:,:)=zero
-   if(present(vxclrho)) vxclrho(:,:)=zero
+   if (present(dvxc).and.ndvxc>0) dvxc(:,:)=zero
+   if (present(d2vxc).and.nd2vxc>) d2vxc(:,:)=zero
+   if (present(vxcgrho).and.nvxcgrho>0) vxcgrho(:,:)=zero
+   if (present(vxclrho).and.nvxclrho>0) vxclrho(:,:)=zero
+   if (present(vxctau).and.nvxctau>0) vxctau(:,:)=zero
 
 !>>>>> New Teter fit (4/93) to Ceperley-Alder data, with spin-pol option
  else if (ixc==1 .or. ixc==21 .or. ixc==22) then
@@ -1763,24 +1781,24 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
    if(present(xc_funcs))then
      if (abs(order)==1) then
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&       vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,xc_functionals=xc_funcs)
+&       vxcrho,grho2_updn=grho2,vxcgr=vxcgrho,xc_functionals=xc_funcs)
      elseif (abs(order)==2) then
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&       vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,xc_functionals=xc_funcs)
+&       vxcrho,grho2_updn=grho2,vxcgr=vxcgrho,dvxc=dvxc,xc_functionals=xc_funcs)
      else
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&       vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,d2vxc=d2vxc,xc_functionals=xc_funcs)
+&       vxcrho,grho2_updn=grho2,vxcgr=vxcgrho,dvxc=dvxc,d2vxc=d2vxc,xc_functionals=xc_funcs)
      end if
    else
      if (abs(order)==1) then
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&       vxcrho,grho2=grho2_updn,vxcgr=vxcgrho)
+&       vxcrho,grho2_updn=grho2,vxcgr=vxcgrho)
      elseif (abs(order)==2) then
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&       vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc)
+&       vxcrho,grho2_updn=grho2,vxcgr=vxcgrho,dvxc=dvxc)
      else
        call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&       vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,d2vxc=d2vxc)
+&       vxcrho,grho2_updn=grho2,vxcgr=vxcgrho,dvxc=dvxc,d2vxc=d2vxc)
      end if
    end if
 
@@ -1818,16 +1836,16 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
    call libxc_functionals_init(-131,nspden,xc_functionals=xc_funcs_lyp)
    if (order**2 <= 1) then
      call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
-&     vxcrho_c,grho2=grho2_updn,vxcgr=vxcgrho,xc_functionals=xc_funcs_lyp)
+&     vxcrho_c,grho2_updn=grho2,vxcgr=vxcgrho,xc_functionals=xc_funcs_lyp)
    elseif (order**2 <= 4) then
      dvxc_c=zero
      call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
-&     vxcrho_c,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc_c,xc_functionals=xc_funcs_lyp)
+&     vxcrho_c,grho2_updn=grho2,vxcgr=vxcgrho,dvxc=dvxc_c,xc_functionals=xc_funcs_lyp)
    else
      dvxc_c=zero
      d2vxc_c=zero
      call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc_c,&
-&     vxcrho_c,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc_c,d2vxc=d2vxc,xc_functionals=xc_funcs_lyp)
+&     vxcrho_c,grho2_updn=grho2,vxcgr=vxcgrho,dvxc=dvxc_c,d2vxc=d2vxc,xc_functionals=xc_funcs_lyp)
    end if
    exc=exc-quarter*0.81d0*exc_c
    vxcrho=vxcrho-quarter*0.81d0*vxcrho_c
@@ -1846,82 +1864,103 @@ subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,n
 
 !>>>>> All libXC functionals
  else if( ixc<0 ) then
-   if (is_mgga) then
-     if(present(xc_funcs))then
-       if (needs_laplacian) then
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
-&         grho2=grho2_updn,vxcgr=vxcgrho,tau=tau_updn,vxctau=vxctau,&
-&         lrho=lrho_updn,vxclrho=vxclrho,&
-&         xc_functionals=xc_funcs)
-       else
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
-&         grho2=grho2_updn,vxcgr=vxcgrho,tau=tau_updn,vxctau=vxctau,&
-&         xc_functionals=xc_funcs)
-       end if
-     else
-       if (needs_laplacian) then
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
-&         grho2=grho2_updn,vxcgr=vxcgrho,tau=tau_updn,vxctau=vxctau,&
-&         lrho=lrho_updn,vxclrho=vxclrho)
-       else
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
-&         grho2=grho2_updn,vxcgr=vxcgrho,tau=tau_updn,vxctau=vxctau)
-       end if
-     end if
-     ixc1 = (-ixc)/1000
-     ixc2 = (-ixc) - ixc1*1000
-     if(ixc1==206 .or. ixc1==207 .or. ixc1==208 .or. ixc1==209 .or. &
-&       ixc2==206 .or. ixc2==207 .or. ixc2==208 .or. ixc2==209    )then
-!      Assume that that type of mGGA can only be used with a LDA correlation (see doc)
-       if (present(vxcgrho)) vxcgrho(:,:)=zero
-       if (present(vxctau)) vxctau(:,:)=zero
-       if (present(vxclrho)) vxclrho(:,:)=zero
-     end if
-   elseif (is_gga) then
-     if(present(xc_funcs))then
-       if (order**2 <= 1) then
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,xc_functionals=xc_funcs)
-       else
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,xc_functionals=xc_funcs)
-       end if
-     else
-       if (order**2 <= 1) then
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho,grho2=grho2_updn,vxcgr=vxcgrho)
-       else
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho,grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc)
-       end if
-     end if
-   else
-     if(present(xc_funcs))then
-       if (order**2 <= 1) then
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho,xc_functionals=xc_funcs)
-       elseif (order**2 <= 4) then
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho,dvxc=dvxc,xc_functionals=xc_funcs)
-       else
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho,dvxc=dvxc,d2vxc=d2vxc,xc_functionals=xc_funcs)
-       end if
-     else
-       if (order**2 <= 1) then
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho)
-       elseif (order**2 <= 4) then
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho,dvxc=dvxc)
-       else
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,&
-&         vxcrho,dvxc=dvxc,d2vxc=d2vxc)
-       end if
-     end if
-   end if
 
- end if
+!  ===== meta-GGA =====
+   if (need_laplacian.or.need_kden) then
+     !Some meta-GGAs can only be used with a LDA correlation (see doc)
+     ixc1 = (-ixc)/1000 ; ixc2 = (-ixc) - ixc1*1000
+     if (ixc1==206 .or. ixc1==207 .or. ixc1==208 .or. ixc1==209 .or. &
+&        ixc2==206 .or. ixc2==207 .or. ixc2==208 .or. ixc2==209    )then
+       if (present(vxcgrho)) vxcgrho(:,:)=zero
+       if (present(vxclrho)) vxclrho(:,:)=zero
+       if (present(vxctau)) vxctau(:,:)=zero
+     else if (need_laplacian.and.need_kden) then
+       if (present(xc_funcs)) then
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&           grho2_updn=grho2,vxcgr=vxcgrho,&
+&           lrho=lrho_updn,vxclrho=vxclrho,&
+&           tau=tau_updn,vxctau=vxctau,&
+&           xc_functionals=xc_funcs)
+       else
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&           grho2_updn=grho2,vxcgr=vxcgrho,&
+&           lrho=lrho_updn,vxclrho=vxclrho,&
+&           tau=tau_updn,vxctau=vxctau)
+       end if
+     else if (need_laplacian) then
+       if (present(xc_funcs)) then
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&           grho2_updn=grho2,vxcgr=vxcgrho,&
+&           lrho=lrho_updn,vxclrho=vxclrho,&
+&           xc_functionals=xc_funcs)
+       else
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&           grho2_updn=grho2,vxcgr=vxcgrho,&
+&           lrho=lrho_updn,vxclrho=vxclrho)
+       end if
+     else if (need_kden) then
+       if (present(xc_funcs)) then
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&           grho2_updn=grho2,vxcgr=vxcgrho,&
+&           tau=tau_updn,vxctau=vxctau,&
+&           xc_functionals=xc_funcs)
+       else
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&           grho2_updn=grho2,vxcgr=vxcgrho,&
+&           tau=tau_updn,vxctau=vxctau)
+       end if
+
+!  ===== GGA =====
+   else if (need_gradient) then
+     if (abs(order)<=1) then
+       if (present(xc_funcs)) then
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&           grho2_updn=grho2,vxcgr=vxcgrho,&
+&           xc_functionals=xc_funcs)
+       else
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&           grho2_updn=grho2,vxcgr=vxcgrho)
+       end if
+     else
+       if (present(xc_funcs)) then
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&           grho2_updn=grho2,vxcgr=vxcgrho,dvxc=dvxc,&
+&           xc_functionals=xc_funcs)
+       else
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&           grho2_updn=grho2,vxcgr=vxcgrho,dvxc=dvxc)
+       end if
+     end if
+
+!  ===== LDA =====
+   else
+     if (abs(order)<=1) then
+       if (present(xc_funcs)) then
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&           xc_functionals=xc_funcs)
+       else
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho)
+       end if
+     else if (abs(order<=2) then
+       if (present(xc_funcs)) then
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&           dvxc=dvxc,xc_functionals=xc_funcs)
+       else
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&           dvxc=dvxc)
+       end if
+     else if (abs(order<=3) then
+       if (present(xc_funcs)) then
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&           dvxc=dvxc,d2vxc=d2vxc,xc_functionals=xc_funcs)
+       else
+         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&           dvxc=dvxc,d2vxc=d2vxc)
+       end if
+     end if
+
+   end if ! mGGA, GGA, LDA
+ end if ! libXC
 
 ! =================================================
 ! ==              Finalization                   ==
