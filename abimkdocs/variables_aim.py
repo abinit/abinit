@@ -144,8 +144,8 @@ Variable(
     mnemonics="DPCLIM",
     text=r"""
 If two "numerically different" critical points are separated by less than
-**dpclim** , they are considered to be the same critical point. This often
-happens because of numerical inaccuracies : one CP might be "seen" by two
+**dpclim**, they are considered to be the same critical point. This often
+happens because of numerical inaccuracies: one CP might be "seen" by two
 different finite elements. The default should be OK when the ecut is quite
 large, on the order of 60 Hartree. For less accurate calculations of the
 density, increase the default value to 5.d-2, let's say.
@@ -414,7 +414,7 @@ Variable(
     mnemonics="Number of Supercell points in direction A",
     text=r"""
 These variables define a "supercell", from the primitive cell repeated along
-each primitive direction. This supercell is build as follows :
+each primitive direction. This supercell is build as follows:
 
 
 
@@ -440,7 +440,7 @@ Variable(
     mnemonics="Number of Supercell points in direction B",
     text=r"""
 These variables define a "supercell", from the primitive cell repeated along
-each primitive direction. This supercell is build as follows :
+each primitive direction. This supercell is build as follows:
 
 
 
@@ -466,7 +466,7 @@ Variable(
     mnemonics="Number of Supercell points in direction C",
     text=r"""
 These variables define a "supercell", from the primitive cell repeated along
-each primitive direction. This supercell is build as follows :
+each primitive direction. This supercell is build as follows:
 
 
 

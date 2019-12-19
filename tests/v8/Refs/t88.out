@@ -1,6 +1,6 @@
 
-.Version 8.9.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.4 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 19 May 2018.
-- ( at 16h04 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h40 )
   
 - input  file    -> t88.in
 - output file    -> t88.out
 - root for input  files -> t88i
 - root for output files -> t88o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/lucas/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/Al.LDA_PW-JTH.xml
-- inpspheads : Reading pseudopotential header in XML form from /home/lucas/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.LDA_PW-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
 
  DATASET    5 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -285,9 +285,9 @@ P          mk1mem           8
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/lucas/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/Al.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/lucas/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/Al.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/lucas/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/Al.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -305,9 +305,9 @@ P          mk1mem           8
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/lucas/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
-- pspatm: opening atomic psp file    /home/lucas/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
-- pspatm : Reading pseudopotential header in XML form from /home/lucas/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.10391912
@@ -361,7 +361,7 @@ P          mk1mem           8
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   7.2029E-22; max=  5.2517E-21
+ Mean square residual over all n,k,spin=   72.029E-23; max=  52.517E-22
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -395,7 +395,7 @@ P          mk1mem           8
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   6.5173E-22; max=  5.2517E-21
+ Mean square residual over all n,k,spin=   65.173E-23; max=  52.517E-22
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -429,7 +429,7 @@ P          mk1mem           8
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   7.1487E-22; max=  5.2517E-21
+ Mean square residual over all n,k,spin=   71.487E-23; max=  52.517E-22
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -457,14 +457,14 @@ P          mk1mem           8
 -dfpt_looppert : read the wavefunctions from file: t88o_DS3_1WF9
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   817.18443525584      8.172E+02 8.607E-21 0.000E+00
+-ETOT  1   817.18443525585      8.172E+02 8.607E-21 0.000E+00
 
  At SCF step    1   max residual=  8.61E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   9.5718E-22; max=  8.6073E-21
+ Mean square residual over all n,k,spin=   95.718E-23; max=  86.073E-22
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -499,7 +499,7 @@ P          mk1mem           8
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.0310E-21; max=  8.6073E-21
+ Mean square residual over all n,k,spin=   10.310E-22; max=  86.073E-22
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -534,7 +534,7 @@ P          mk1mem           8
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   9.5041E-22; max=  8.6073E-21
+ Mean square residual over all n,k,spin=   95.041E-23; max=  86.073E-22
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -626,14 +626,14 @@ P          mk1mem           8
 -dfpt_looppert : read the wavefunctions from file: t88o_DS3_1WF7
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -25131.460078495     -2.513E+04 4.934E-19 0.000E+00
+-ETOT  1  -25131.460078496     -2.513E+04 4.934E-19 0.000E+00
 
  At SCF step    1   max residual=  4.93E-19 < tolwfr=  1.00E-18 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   6.5770E-20; max=  4.9344E-19
+ Mean square residual over all n,k,spin=   65.770E-21; max=  49.344E-20
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -662,14 +662,14 @@ P          mk1mem           8
 -dfpt_looppert : read the wavefunctions from file: t88o_DS3_1WF8
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -25131.460079467     -2.513E+04 4.934E-19 0.000E+00
+-ETOT  1  -25131.460079468     -2.513E+04 4.934E-19 0.000E+00
 
  At SCF step    1   max residual=  4.93E-19 < tolwfr=  1.00E-18 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   6.5781E-20; max=  4.9344E-19
+ Mean square residual over all n,k,spin=   65.781E-21; max=  49.344E-20
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -698,14 +698,14 @@ P          mk1mem           8
 -dfpt_looppert : read the wavefunctions from file: t88o_DS3_1WF9
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -25131.460080259     -2.513E+04 9.693E-19 0.000E+00
+-ETOT  1  -25131.460080259     -2.513E+04 9.694E-19 0.000E+00
 
  At SCF step    1   max residual=  9.69E-19 < tolwfr=  1.00E-18 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.5654E-20; max=  9.6933E-19
+ Mean square residual over all n,k,spin=   85.655E-21; max=  96.936E-20
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -742,7 +742,7 @@ P          mk1mem           8
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.3212E-20; max=  6.3175E-19
+ Mean square residual over all n,k,spin=   83.212E-21; max=  63.175E-20
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -772,14 +772,14 @@ P          mk1mem           8
 -dfpt_looppert : read the wavefunctions from file: t88o_DS3_1WF9
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -5473.8704689997     -5.474E+03 6.318E-19 0.000E+00
+-ETOT  1  -5473.8704689996     -5.474E+03 6.318E-19 0.000E+00
 
  At SCF step    1   max residual=  6.32E-19 < tolwfr=  1.00E-18 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.3433E-20; max=  6.3175E-19
+ Mean square residual over all n,k,spin=   83.433E-21; max=  63.175E-20
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -809,14 +809,14 @@ P          mk1mem           8
 -dfpt_looppert : read the wavefunctions from file: t88o_DS3_1WF8
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -5473.8704689470     -5.474E+03 6.318E-19 0.000E+00
+-ETOT  1  -5473.8704689471     -5.474E+03 6.318E-19 0.000E+00
 
  At SCF step    1   max residual=  6.32E-19 < tolwfr=  1.00E-18 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.0917E-20; max=  6.3175E-19
+ Mean square residual over all n,k,spin=   80.917E-21; max=  63.175E-20
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -846,14 +846,14 @@ P          mk1mem           8
 -dfpt_looppert : read the wavefunctions from file: t88o_DS3_1WF8
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -5473.8704679300     -5.474E+03 6.318E-19 0.000E+00
+-ETOT  1  -5473.8704679302     -5.474E+03 6.318E-19 0.000E+00
 
  At SCF step    1   max residual=  6.32E-19 < tolwfr=  1.00E-18 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.0874E-20; max=  6.3175E-19
+ Mean square residual over all n,k,spin=   80.874E-21; max=  63.175E-20
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -883,14 +883,14 @@ P          mk1mem           8
 -dfpt_looppert : read the wavefunctions from file: t88o_DS3_1WF7
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -5473.8704678579     -5.474E+03 6.318E-19 0.000E+00
+-ETOT  1  -5473.8704678578     -5.474E+03 6.318E-19 0.000E+00
 
  At SCF step    1   max residual=  6.32E-19 < tolwfr=  1.00E-18 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.3390E-20; max=  6.3175E-19
+ Mean square residual over all n,k,spin=   83.390E-21; max=  63.175E-20
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -920,14 +920,14 @@ P          mk1mem           8
 -dfpt_looppert : read the wavefunctions from file: t88o_DS3_1WF7
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -5473.8704683654     -5.474E+03 6.318E-19 0.000E+00
+-ETOT  1  -5473.8704683655     -5.474E+03 6.318E-19 0.000E+00
 
  At SCF step    1   max residual=  6.32E-19 < tolwfr=  1.00E-18 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.3180E-20; max=  6.3175E-19
+ Mean square residual over all n,k,spin=   83.180E-21; max=  63.175E-20
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1800,192 +1800,192 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
 
      j1       j2       j3              matrix element
   dir pert dir pert dir pert           real part           imaginary part
-   1    1   1    4   1    4        -98.0975672521         -0.0000000000
-   1    1   1    4   2    4         42.1597598497          0.0000000000
+   1    1   1    4   1    4        -98.0975672521          0.0000000000
+   1    1   1    4   2    4         42.1597598497         -0.0000000000
    1    1   1    4   3    4         42.1597598583          0.0000000000
-   1    1   2    4   1    4         40.6735816620          0.0000000000
-   1    1   2    4   2    4        -47.3331420113         -0.0000000000
+   1    1   2    4   1    4         40.6735816620         -0.0000000000
+   1    1   2    4   2    4        -47.3331420113          0.0000000000
    1    1   2    4   3    4          1.1545315304         -0.0000000000
    1    1   3    4   1    4         40.6735816728          0.0000000000
    1    1   3    4   2    4          1.1545315299         -0.0000000000
-   1    1   3    4   3    4        -47.3331420217          0.0000000000
-   2    1   1    4   1    4        -47.3331420192          0.0000000000
+   1    1   3    4   3    4        -47.3331420217         -0.0000000000
+   2    1   1    4   1    4        -47.3331420192         -0.0000000000
    2    1   1    4   2    4         40.6735816658          0.0000000000
    2    1   1    4   3    4          1.1545315349         -0.0000000000
    2    1   2    4   1    4         42.1597598536          0.0000000000
-   2    1   2    4   2    4        -98.0975672520          0.0000000000
-   2    1   2    4   3    4         42.1597598526         -0.0000000000
+   2    1   2    4   2    4        -98.0975672520         -0.0000000000
+   2    1   2    4   3    4         42.1597598526          0.0000000000
    2    1   3    4   1    4          1.1545315360         -0.0000000000
-   2    1   3    4   2    4         40.6735816657         -0.0000000000
-   2    1   3    4   3    4        -47.3331420207          0.0000000000
-   3    1   1    4   1    4        -47.3331420129         -0.0000000000
+   2    1   3    4   2    4         40.6735816657          0.0000000000
+   2    1   3    4   3    4        -47.3331420207         -0.0000000000
+   3    1   1    4   1    4        -47.3331420129          0.0000000000
    3    1   1    4   2    4          1.1545315297         -0.0000000000
    3    1   1    4   3    4         40.6735816663          0.0000000000
    3    1   2    4   1    4          1.1545315310         -0.0000000000
-   3    1   2    4   2    4        -47.3331420176         -0.0000000000
+   3    1   2    4   2    4        -47.3331420176          0.0000000000
    3    1   2    4   3    4         40.6735816681          0.0000000000
    3    1   3    4   1    4         42.1597598540          0.0000000000
    3    1   3    4   2    4         42.1597598570          0.0000000000
    3    1   3    4   3    4        -98.0975672595         -0.0000000000
    1    2   1    4   1    4        113.8995126642          0.0000000000
-   1    2   1    4   2    4        -62.4250433887          0.0000000000
-   1    2   1    4   3    4        -62.4250434000         -0.0000000000
-   1    2   2    4   1    4        -55.1886024836          0.0000000000
-   1    2   2    4   2    4         97.2537069970         -0.0000000000
+   1    2   1    4   2    4        -62.4250433887         -0.0000000000
+   1    2   1    4   3    4        -62.4250434000          0.0000000000
+   1    2   2    4   1    4        -55.1886024836         -0.0000000000
+   1    2   2    4   2    4         97.2537069970          0.0000000000
    1    2   2    4   3    4        -22.2248846311         -0.0000000000
-   1    2   3    4   1    4        -55.1886024956         -0.0000000000
+   1    2   3    4   1    4        -55.1886024956          0.0000000000
    1    2   3    4   2    4        -22.2248846313         -0.0000000000
    1    2   3    4   3    4         97.2537070100          0.0000000000
-   2    2   1    4   1    4         97.2537070049          0.0000000000
-   2    2   1    4   2    4        -55.1886024888         -0.0000000000
+   2    2   1    4   1    4         97.2537070049         -0.0000000000
+   2    2   1    4   2    4        -55.1886024888          0.0000000000
    2    2   1    4   3    4        -22.2248846344         -0.0000000000
-   2    2   2    4   1    4        -62.4250433960         -0.0000000000
-   2    2   2    4   2    4        113.8995126664          0.0000000000
-   2    2   2    4   3    4        -62.4250433943         -0.0000000000
+   2    2   2    4   1    4        -62.4250433960          0.0000000000
+   2    2   2    4   2    4        113.8995126664         -0.0000000000
+   2    2   2    4   3    4        -62.4250433943          0.0000000000
    2    2   3    4   1    4        -22.2248846348         -0.0000000000
-   2    2   3    4   2    4        -55.1886024893         -0.0000000000
-   2    2   3    4   3    4         97.2537070085          0.0000000000
-   3    2   1    4   1    4         97.2537069998         -0.0000000000
+   2    2   3    4   2    4        -55.1886024893          0.0000000000
+   2    2   3    4   3    4         97.2537070085         -0.0000000000
+   3    2   1    4   1    4         97.2537069998          0.0000000000
    3    2   1    4   2    4        -22.2248846280         -0.0000000000
-   3    2   1    4   3    4        -55.1886024907          0.0000000000
+   3    2   1    4   3    4        -55.1886024907         -0.0000000000
    3    2   2    4   1    4        -22.2248846284         -0.0000000000
-   3    2   2    4   2    4         97.2537070076         -0.0000000000
-   3    2   2    4   3    4        -55.1886024955          0.0000000000
-   3    2   3    4   1    4        -62.4250433982          0.0000000000
-   3    2   3    4   2    4        -62.4250434022          0.0000000000
-   3    2   3    4   3    4        113.8995126790         -0.0000000000
-   1    4   1    1   1    4       -101.5345662993         -0.0000000000
-   1    4   1    1   2    4         53.0632449789          0.0000000000
-   1    4   1    1   3    4         53.0632449889          0.0000000000
-   1    4   2    1   1    4        128.5665107091         -0.0000000000
+   3    2   2    4   2    4         97.2537070076          0.0000000000
+   3    2   2    4   3    4        -55.1886024955         -0.0000000000
+   3    2   3    4   1    4        -62.4250433982         -0.0000000000
+   3    2   3    4   2    4        -62.4250434022         -0.0000000000
+   3    2   3    4   3    4        113.8995126790          0.0000000000
+   1    4   1    1   1    4       -101.5345662993          0.0000000000
+   1    4   1    1   2    4         53.0632449789         -0.0000000000
+   1    4   1    1   3    4         53.0632449889         -0.0000000000
+   1    4   2    1   1    4        128.5665107091          0.0000000000
    1    4   2    1   2    4         53.0632449811         -0.0000000000
    1    4   2    1   3    4       -183.7268668660          0.0000000000
    1    4   3    1   1    4        128.5665107198          0.0000000000
-   1    4   3    1   2    4       -183.7268668726         -0.0000000000
-   1    4   3    1   3    4         53.0632449789         -0.0000000000
-   1    4   1    2   1    4        135.4313965430         -0.0000000000
-   1    4   1    2   2    4        -68.8921855461          0.0000000000
-   1    4   1    2   3    4        -68.8921855562         -0.0000000000
+   1    4   3    1   2    4       -183.7268668726          0.0000000000
+   1    4   3    1   3    4         53.0632449789          0.0000000000
+   1    4   1    2   1    4        135.4313965430          0.0000000000
+   1    4   1    2   2    4        -68.8921855461         -0.0000000000
+   1    4   1    2   3    4        -68.8921855562          0.0000000000
    1    4   2    2   1    4       -132.7677947746         -0.0000000000
    1    4   2    2   2    4        -68.8921855506          0.0000000000
    1    4   2    2   3    4        199.9958844529         -0.0000000000
-   1    4   3    2   1    4       -132.7677947851         -0.0000000000
-   1    4   3    2   2    4        199.9958844614         -0.0000000000
-   1    4   3    2   3    4        -68.8921855505          0.0000000000
-   1    4   1    4   1    1        -98.0975672521         -0.0000000000
-   1    4   1    4   2    1        -47.3331420192          0.0000000000
-   1    4   1    4   3    1        -47.3331420129         -0.0000000000
+   1    4   3    2   1    4       -132.7677947851          0.0000000000
+   1    4   3    2   2    4        199.9958844614          0.0000000000
+   1    4   3    2   3    4        -68.8921855505         -0.0000000000
+   1    4   1    4   1    1        -98.0975672521          0.0000000000
+   1    4   1    4   2    1        -47.3331420192         -0.0000000000
+   1    4   1    4   3    1        -47.3331420129          0.0000000000
    1    4   1    4   1    2        113.8995126642          0.0000000000
-   1    4   1    4   2    2         97.2537070049          0.0000000000
-   1    4   1    4   3    2         97.2537069998         -0.0000000000
+   1    4   1    4   2    2         97.2537070049         -0.0000000000
+   1    4   1    4   3    2         97.2537069998          0.0000000000
    1    4   1    4   1    4        822.2810768448          0.0000000000
    1    4   1    4   2    4       -305.0349825162         -0.0000000000
-   1    4   1    4   3    4       -305.0349824363          0.0000000000
-   1    4   2    4   1    1         40.6735816620          0.0000000000
+   1    4   1    4   3    4       -305.0349824363         -0.0000000000
+   1    4   2    4   1    1         40.6735816620         -0.0000000000
    1    4   2    4   2    1         42.1597598536          0.0000000000
    1    4   2    4   3    1          1.1545315310         -0.0000000000
-   1    4   2    4   1    2        -55.1886024836          0.0000000000
-   1    4   2    4   2    2        -62.4250433960         -0.0000000000
+   1    4   2    4   1    2        -55.1886024836         -0.0000000000
+   1    4   2    4   2    2        -62.4250433960          0.0000000000
    1    4   2    4   3    2        -22.2248846284         -0.0000000000
    1    4   2    4   1    4       -340.1487551000         -0.0000000000
-   1    4   2    4   2    4       -486.7518547641          0.0000000000
+   1    4   2    4   2    4       -486.7518547641         -0.0000000000
    1    4   2    4   3    4        712.0698584067          0.0000000000
    1    4   3    4   1    1         40.6735816728          0.0000000000
    1    4   3    4   2    1          1.1545315360         -0.0000000000
    1    4   3    4   3    1         42.1597598540          0.0000000000
-   1    4   3    4   1    2        -55.1886024956         -0.0000000000
+   1    4   3    4   1    2        -55.1886024956          0.0000000000
    1    4   3    4   2    2        -22.2248846348         -0.0000000000
-   1    4   3    4   3    2        -62.4250433982          0.0000000000
-   1    4   3    4   1    4       -340.1487550302          0.0000000000
+   1    4   3    4   3    2        -62.4250433982         -0.0000000000
+   1    4   3    4   1    4       -340.1487550302         -0.0000000000
    1    4   3    4   2    4        712.0698584107          0.0000000000
    1    4   3    4   3    4       -486.7518548337         -0.0000000000
-   2    4   1    1   1    4         53.0632449789          0.0000000000
-   2    4   1    1   2    4        128.5665107154         -0.0000000000
+   2    4   1    1   1    4         53.0632449789         -0.0000000000
+   2    4   1    1   2    4        128.5665107154          0.0000000000
    2    4   1    1   3    4       -183.7268668692          0.0000000000
    2    4   2    1   1    4         53.0632449811         -0.0000000000
-   2    4   2    1   2    4       -101.5345662950          0.0000000000
+   2    4   2    1   2    4       -101.5345662950         -0.0000000000
    2    4   2    1   3    4         53.0632449830          0.0000000000
-   2    4   3    1   1    4       -183.7268668726         -0.0000000000
-   2    4   3    1   2    4        128.5665107142          0.0000000000
-   2    4   3    1   3    4         53.0632449844          0.0000000000
-   2    4   1    2   1    4        -68.8921855461          0.0000000000
+   2    4   3    1   1    4       -183.7268668726          0.0000000000
+   2    4   3    1   2    4        128.5665107142         -0.0000000000
+   2    4   3    1   3    4         53.0632449844         -0.0000000000
+   2    4   1    2   1    4        -68.8921855461         -0.0000000000
    2    4   1    2   2    4       -132.7677947831         -0.0000000000
-   2    4   1    2   3    4        199.9958844561          0.0000000000
+   2    4   1    2   3    4        199.9958844561         -0.0000000000
    2    4   2    2   1    4        -68.8921855506          0.0000000000
    2    4   2    2   2    4        135.4313965409         -0.0000000000
    2    4   2    2   3    4        -68.8921855501          0.0000000000
-   2    4   3    2   1    4        199.9958844614         -0.0000000000
-   2    4   3    2   2    4       -132.7677947834         -0.0000000000
-   2    4   3    2   3    4        -68.8921855524         -0.0000000000
-   2    4   1    4   1    1         42.1597598497          0.0000000000
+   2    4   3    2   1    4        199.9958844614          0.0000000000
+   2    4   3    2   2    4       -132.7677947834          0.0000000000
+   2    4   3    2   3    4        -68.8921855524          0.0000000000
+   2    4   1    4   1    1         42.1597598497         -0.0000000000
    2    4   1    4   2    1         40.6735816658          0.0000000000
    2    4   1    4   3    1          1.1545315297         -0.0000000000
-   2    4   1    4   1    2        -62.4250433887          0.0000000000
-   2    4   1    4   2    2        -55.1886024888         -0.0000000000
+   2    4   1    4   1    2        -62.4250433887         -0.0000000000
+   2    4   1    4   2    2        -55.1886024888          0.0000000000
    2    4   1    4   3    2        -22.2248846280         -0.0000000000
    2    4   1    4   1    4       -305.0349825162         -0.0000000000
-   2    4   1    4   2    4       -340.1487549817          0.0000000000
+   2    4   1    4   2    4       -340.1487549817         -0.0000000000
    2    4   1    4   3    4        712.0698583907          0.0000000000
-   2    4   2    4   1    1        -47.3331420113         -0.0000000000
-   2    4   2    4   2    1        -98.0975672520          0.0000000000
-   2    4   2    4   3    1        -47.3331420176         -0.0000000000
-   2    4   2    4   1    2         97.2537069970         -0.0000000000
-   2    4   2    4   2    2        113.8995126664          0.0000000000
-   2    4   2    4   3    2         97.2537070076         -0.0000000000
-   2    4   2    4   1    4       -486.7518547641          0.0000000000
-   2    4   2    4   2    4        822.2810768362         -0.0000000000
-   2    4   2    4   3    4       -305.0349825194          0.0000000000
+   2    4   2    4   1    1        -47.3331420113          0.0000000000
+   2    4   2    4   2    1        -98.0975672520         -0.0000000000
+   2    4   2    4   3    1        -47.3331420176          0.0000000000
+   2    4   2    4   1    2         97.2537069970          0.0000000000
+   2    4   2    4   2    2        113.8995126664         -0.0000000000
+   2    4   2    4   3    2         97.2537070076          0.0000000000
+   2    4   2    4   1    4       -486.7518547641         -0.0000000000
+   2    4   2    4   2    4        822.2810768362          0.0000000000
+   2    4   2    4   3    4       -305.0349825194         -0.0000000000
    2    4   3    4   1    1          1.1545315299         -0.0000000000
-   2    4   3    4   2    1         40.6735816657         -0.0000000000
+   2    4   3    4   2    1         40.6735816657          0.0000000000
    2    4   3    4   3    1         42.1597598570          0.0000000000
    2    4   3    4   1    2        -22.2248846313         -0.0000000000
-   2    4   3    4   2    2        -55.1886024893         -0.0000000000
-   2    4   3    4   3    2        -62.4250434022          0.0000000000
+   2    4   3    4   2    2        -55.1886024893          0.0000000000
+   2    4   3    4   3    2        -62.4250434022         -0.0000000000
    2    4   3    4   1    4        712.0698584107          0.0000000000
-   2    4   3    4   2    4       -340.1487551204          0.0000000000
+   2    4   3    4   2    4       -340.1487551204         -0.0000000000
    2    4   3    4   3    4       -486.7518547563         -0.0000000000
-   3    4   1    1   1    4         53.0632449889          0.0000000000
+   3    4   1    1   1    4         53.0632449889         -0.0000000000
    3    4   1    1   2    4       -183.7268668692          0.0000000000
-   3    4   1    1   3    4        128.5665107066         -0.0000000000
+   3    4   1    1   3    4        128.5665107066          0.0000000000
    3    4   2    1   1    4       -183.7268668660          0.0000000000
    3    4   2    1   2    4         53.0632449830          0.0000000000
    3    4   2    1   3    4        128.5665107094         -0.0000000000
-   3    4   3    1   1    4         53.0632449789         -0.0000000000
-   3    4   3    1   2    4         53.0632449844          0.0000000000
-   3    4   3    1   3    4       -101.5345662955         -0.0000000000
-   3    4   1    2   1    4        -68.8921855562         -0.0000000000
-   3    4   1    2   2    4        199.9958844561          0.0000000000
-   3    4   1    2   3    4       -132.7677947748          0.0000000000
+   3    4   3    1   1    4         53.0632449789          0.0000000000
+   3    4   3    1   2    4         53.0632449844         -0.0000000000
+   3    4   3    1   3    4       -101.5345662955          0.0000000000
+   3    4   1    2   1    4        -68.8921855562          0.0000000000
+   3    4   1    2   2    4        199.9958844561         -0.0000000000
+   3    4   1    2   3    4       -132.7677947748         -0.0000000000
    3    4   2    2   1    4        199.9958844529         -0.0000000000
    3    4   2    2   2    4        -68.8921855501          0.0000000000
-   3    4   2    2   3    4       -132.7677947781         -0.0000000000
-   3    4   3    2   1    4        -68.8921855505          0.0000000000
-   3    4   3    2   2    4        -68.8921855524         -0.0000000000
-   3    4   3    2   3    4        135.4313965443         -0.0000000000
+   3    4   2    2   3    4       -132.7677947781          0.0000000000
+   3    4   3    2   1    4        -68.8921855505         -0.0000000000
+   3    4   3    2   2    4        -68.8921855524          0.0000000000
+   3    4   3    2   3    4        135.4313965443          0.0000000000
    3    4   1    4   1    1         42.1597598583          0.0000000000
    3    4   1    4   2    1          1.1545315349         -0.0000000000
    3    4   1    4   3    1         40.6735816663          0.0000000000
-   3    4   1    4   1    2        -62.4250434000         -0.0000000000
+   3    4   1    4   1    2        -62.4250434000          0.0000000000
    3    4   1    4   2    2        -22.2248846344         -0.0000000000
-   3    4   1    4   3    2        -55.1886024907          0.0000000000
-   3    4   1    4   1    4       -305.0349824363          0.0000000000
+   3    4   1    4   3    2        -55.1886024907         -0.0000000000
+   3    4   1    4   1    4       -305.0349824363         -0.0000000000
    3    4   1    4   2    4        712.0698583907          0.0000000000
    3    4   1    4   3    4       -340.1487550464         -0.0000000000
    3    4   2    4   1    1          1.1545315304         -0.0000000000
-   3    4   2    4   2    1         42.1597598526         -0.0000000000
+   3    4   2    4   2    1         42.1597598526          0.0000000000
    3    4   2    4   3    1         40.6735816681          0.0000000000
    3    4   2    4   1    2        -22.2248846311         -0.0000000000
-   3    4   2    4   2    2        -62.4250433943         -0.0000000000
-   3    4   2    4   3    2        -55.1886024955          0.0000000000
+   3    4   2    4   2    2        -62.4250433943          0.0000000000
+   3    4   2    4   3    2        -55.1886024955         -0.0000000000
    3    4   2    4   1    4        712.0698584067          0.0000000000
-   3    4   2    4   2    4       -305.0349825194          0.0000000000
+   3    4   2    4   2    4       -305.0349825194         -0.0000000000
    3    4   2    4   3    4       -340.1487549855         -0.0000000000
-   3    4   3    4   1    1        -47.3331420217          0.0000000000
-   3    4   3    4   2    1        -47.3331420207          0.0000000000
+   3    4   3    4   1    1        -47.3331420217         -0.0000000000
+   3    4   3    4   2    1        -47.3331420207         -0.0000000000
    3    4   3    4   3    1        -98.0975672595         -0.0000000000
    3    4   3    4   1    2         97.2537070100          0.0000000000
-   3    4   3    4   2    2         97.2537070085          0.0000000000
-   3    4   3    4   3    2        113.8995126790         -0.0000000000
+   3    4   3    4   2    2         97.2537070085         -0.0000000000
+   3    4   3    4   3    2        113.8995126790          0.0000000000
    3    4   3    4   1    4       -486.7518548337         -0.0000000000
    3    4   3    4   2    4       -486.7518547563         -0.0000000000
    3    4   3    4   3    4        822.2810767598          0.0000000000
@@ -2224,19 +2224,23 @@ P          mk1mem           8
 - [1] Nonlinear optical susceptibilities, Raman efficiencies, and electrooptic tensors
 - from first principles density functional theory.
 - M. Veithen, X. Gonze, and Ph. Ghosez, Phys. Rev. B 71, 125107 (2005).
-- Comment : to be cited for non-linear response calculations, with optdriver=5.
+- Comment: to be cited for non-linear response calculations, with optdriver=5.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#veithen2005
 -
 - [2] Projector augmented-wave approach to density-functional perturbation theory.
 - C. Audouze, F. Jollet, M. Torrent and X. Gonze, Phys. Rev. B 73, 235101 (2006).
 - Comparison between projector augmented-wave and ultrasoft pseudopotential formalisms
 - at the density-functional perturbation theory level.
 - C. Audouze, F. Jollet, M. Torrent and X. Gonze, Phys. Rev. B 78, 035105 (2008).
-- Comment : to be cited in case the computation of response function with PAW, i.e. (rfphon=1 or rfelfd=1) and usepaw=1.
+- Comment: to be cited in case the computation of response function with PAW, i.e. (rfphon=1 or rfelfd=1) and usepaw=1.
 - Strong suggestion to cite these papers.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#audouze2006,
+- and https://docs.abinit.org/theory/bibliography/#audouze2008
 -
 - [3] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
-- Comment : PAW calculations. Strong suggestion to cite this paper.
+- Comment: PAW calculations. Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
 - [4] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
@@ -2250,39 +2254,42 @@ P          mk1mem           8
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [5] ABINIT : First-principles approach of materials and nanosystem properties.
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [6] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         18.0  wall=         18.0
+- Proc.   0 individual time (sec): cpu=         24.0  wall=         26.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered 152 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.0  wall=         18.0
++Overall time at end (sec) : cpu=         24.0  wall=         26.6

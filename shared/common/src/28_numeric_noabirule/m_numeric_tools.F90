@@ -6087,12 +6087,12 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
 !  ENDDEBUG
 
 !  Now, must find the unique root of
-!$0 = bb + 2*cc * lambda + 3*dd * lambda^2 + 4*ee * lambda^3$
+!  0 = bb + 2*cc * lambda + 3*dd * lambda^2 + 4*ee * lambda^3
 !  This root is unique because it was imposed that the second derivative
 !  of the quartic polynomial is everywhere positive.
 !  First, remove the quadratic term, by a shift of lambda
 !  lambdap=lambda-lambda_shift
-!$0 = bbp + ccp * lambdap + eep * lambdap^3$
+!  0 = bbp + ccp * lambdap + eep * lambdap^3
    eep=4.0_dp*ee
    lambda_shift=-dd/(4.0_dp*ee)
    ccp=2.0_dp*cc-12.0_dp*ee*lambda_shift**2

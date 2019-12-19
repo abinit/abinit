@@ -85,8 +85,8 @@ setting [[ionmov]]=2 as in [tutorial 1](base1). The optimization
 steps proceed until the maximum force component on any atom is less than
 [[tolmxf]]. It is always advised to relax the forces before beginning the
 lattice parameter optimization. Dataset 2 optimizes the lattice parameters
-with [[optcell]]=2 as in [tutorial 3](base3). However, treated 3
-treated cubic Si, and the atom positions in reduced coordinates remained
+with [[optcell]]=2 as in [tutorial 3](base3). However, tutorial 3
+treats cubic Si, and the atom positions in reduced coordinates remained
 fixed. In the present, more general case, the reduced atomic coordinates must
 be reoptimized as the lattice parameters are optimized. Note that it is
 necessary to include [[getxred]] = -1 so that the second dataset is
@@ -464,7 +464,7 @@ appropriate values.
 The *telast_3.files* file is used with anaddb in the same
 manner as the abinit .files you are by now used to. The first two lines
 specify the .in and .out files, the third line specifies the DDB file, and the
-last two lines are dummy names which would be used in connection with other
+last lines are dummy names which would be used in connection with other
 capabilities of anaddb. Now you should run the calculation, which is done in
 the same way as you are now used to for abinit:  
   

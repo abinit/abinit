@@ -2597,7 +2597,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
      LIBPAW_ALLOCATE(ibuffer,(0))
      nselect=maxval(pawrhoij(:)%nrhoijsel)
      if (my_qphase==2) then
-       LIBPAW_ALLOCATE(rhoij_tmp,(2*nselect))
+       LIBPAW_POINTER_ALLOCATE(rhoij_tmp,(2*nselect))
      end if
      do iatom=1,my_natom,my_natinc
        iatom_tot=iatom;if(paral_atom)iatom_tot=my_atmtab(iatom)
@@ -2636,7 +2636,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
      end do ! end iatom do
      LIBPAW_DEALLOCATE(ibuffer)
      if (my_qphase==2) then
-       LIBPAW_DEALLOCATE(rhoij_tmp)
+       LIBPAW_POINTER_DEALLOCATE(rhoij_tmp)
      end if
 
   case ("D","d") ! Debug

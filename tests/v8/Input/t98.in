@@ -1,0 +1,38 @@
+##############################################################################
+#Test for multibinit test-set options
+##############################################################################
+
+#print options
+prt_model = 0 
+dipdip_prt = 0 
+
+# Construction of harmonic lattice part
+ngqpt =  2 2 2
+dipdip  = 1 
+ncell = 2 2 2
+
+# Test the effective potential 
+test_effpot = 1
+# Print the anharmonic part 
+analyze_anh_pot = 1
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = multibinit
+#%% system_xml = t98_model.xml
+#%% test_set = t98.nc
+#%% test_chain = t98.in, t99.in, t100.in
+#%% [files]
+#%% files_to_test = 
+#%%   t98.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   TES_fit_diff_anharmonic_terms_energy.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. M. Schmitt
+#%% keywords = Effective potential, multibinit
+#%% description = 
+#%%    Test the test set option. Evaluate a given effective potential on a set of configurations.
+#%% topics = LatticeModel,DynamicsMultibinit
+#%%<END TEST_INFO>

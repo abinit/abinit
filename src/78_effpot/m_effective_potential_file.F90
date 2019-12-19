@@ -2096,7 +2096,7 @@ end subroutine system_getDimFromXML
 
 !Re-generate symmetry operations from the lattice and atomic coordinates
  tolsym=tol8
- msym = 192
+ msym = 384
  ABI_ALLOCATE(spinat,(3,natom))
  ABI_ALLOCATE(ptsymrel,(3,3,msym))
  ABI_ALLOCATE(symafm,(msym))
@@ -2247,7 +2247,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  logical :: iam_master=.FALSE.
  integer,parameter :: master=0
  integer :: nptsym,nsym
- integer :: msym = 192,  use_inversion = 1, space_group
+ integer :: msym = 384,  use_inversion = 1, space_group
  real(dp):: max_phfq,tolsym = tol8
 !arrays
  integer :: bravais(11),cell_number(3),cell2(3)
@@ -3477,7 +3477,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  rprimd_hist(:,:) = hist%rprimd(:,:,1)
 
  do ia=1,3
-   scale_cell(:) = zero
+   scale_cell(:) = 0
    do ii=1,3
      if(abs(rprimd_ref(ii,ia)) > tol10)then
        scale_cell(ii) = nint(rprimd_hist(ii,ia) / rprimd_ref(ii,ia))
@@ -3499,7 +3499,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 &         'Action: check/change your MD file'
      MSG_ERROR(msg)
    else
-     ncell(ia) = factor
+     ncell(ia) = int(factor)
    end if
  end do
 

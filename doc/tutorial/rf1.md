@@ -427,7 +427,7 @@ Let us skip the first dataset. In the dataset 2 section, one perturbation is cor
 The analysis of the output for this particular perturbation is not
 particularly interesting, except for the f-sum rule ratio
     
-     loper3 : ek2=    1.6833336546E+01
+     dfpt_looppert : ek2=    1.6833336546E+01
               f-sum rule ratio=    1.0028582975E+00
     
 that should be close to 1, and becomes closer to it when [[ecut]] is
@@ -576,7 +576,7 @@ The run is about 1...2 minutes on a 2.8 GHz machine.
 In the mean time, you might read more of the ABINIT documentation
 (why not the [[help:mrgddb|mrgddb_help]] and the [[help:anaddb|anaddb_help]]).
 
-The results of this simulation can be compared to those provided in the Gianozzi *et al* paper. 
+The results of this simulation can be compared to those provided in [[cite:Giannozzi1991]].
 The agreement is rather good, despite the low cut-off energy, and different pseudopotentials.
 
 At X, they get 95 cm$^{-1}$, 216 cm$^{-1}$, 337 cm$^{-1}$ and 393 cm$^{-1}$, while we get

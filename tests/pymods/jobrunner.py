@@ -153,11 +153,11 @@ class JobRunner(object):
         return cls(dict(ompenv=ompenv, timebomb=timebomb))
 
     @classmethod
-    def srun(cls, ompenv=None, timebomb=None):
+    def srun(cls, ompenv=None, timebomb=None, mpi_args=""):
         """
         Build a `JobRunner` based on srun (assumes some default values).
         """
-        d = dict(ompenv=ompenv, timebomb=timebomb)
+        d = dict(ompenv=ompenv, timebomb=timebomb, mpi_args=mpi_args)
         d["mpirun_np"] = "srun -n"
         return cls(d)
 
@@ -282,21 +282,16 @@ class JobRunner(object):
         else:
             self.ompenv = ompenv
 
-    def run(self, mpi_nprocs, bin_path, stdin_fname, stdout_fname, stderr_fname, cwd=None):
+    def run(self, mpi_nprocs, bin_path, stdin_fname, stdout_fname, stderr_fname, bin_argstr="", cwd=None):
         """
         Args:
-            mpi_nprocs:
-                Number of MPI nodes.
-            bin_path:
-                Path of the executable.
-            stdin_fname:
-                Input file
-            stdout_fname:
-                Output file
-            stderr_fname:
-                Error file
-            cwd:
-                cd to cwd before launching the job.
+            mpi_nprocs: Number of MPI nodes.
+            bin_path: Path of the executable.
+            stdin_fname: Input file
+            stdout_fname: Output file
+            stderr_fname: Error file
+            bin_argstr: String with command line options passed to `bin_path`.
+            cwd: cd to cwd before launching the job.
 
         Set self.retcode
         """
@@ -313,18 +308,22 @@ class JobRunner(object):
         if self.has_perf:
             perf_cmd = "perf %s " % self.perf_command
 
+        stdin = " < %s " % stdin_fname if stdin_fname else ""
+        stdout = " > %s " % stdout_fname if stdout_fname else ""
+        stderr = " 2> %s " % stderr_fname if stderr_fname else ""
+
         if self.has_mpirun or self.has_srun:
             args = [perf_cmd, self.mpirun_np, str(mpi_nprocs), " %s " % self.mpi_args,
-                    valcmd, bin_path, "<", stdin_fname, ">", stdout_fname, "2>", stderr_fname]
+                    valcmd, bin_path, bin_argstr, stdin, stdout, stderr]
 
         elif self.has_poe:
             # example ${poe} abinit ${poe_args} -procs 4
-            # no support for valgrind, debugger or perf here since poe uses a weird syntax for command line options.
+            # no support for valgrind, debugger, bin_argstr or perf here since poe uses a weird syntax for command line options.
             args = [self.poe, bin_path, self.poe_args, " -procs "+ str(mpi_nprocs),
-                    " <", stdin_fname, ">", stdout_fname, "2>", stderr_fname]
+                    stdin, stdout, stderr]
         else:
             assert mpi_nprocs == 1
-            args = [perf_cmd, valcmd, bin_path, "<", stdin_fname, ">", stdout_fname, "2>",stderr_fname]
+            args = [perf_cmd, valcmd, bin_path, bin_argstr, stdin, stdout, stderr]
 
         if self.has_debugger:
             # Use completely different syntax if we are running under the control of gdb.
@@ -335,9 +334,8 @@ class JobRunner(object):
 
             dbg_filepath = os.path.join(workdir, "dbg_commands")
 
-            fh = open(dbg_filepath, "w")
-            fh.write("run < %s" % stdin_fname) # Use dbg syntax
-            fh.close()
+            with open(dbg_filepath, "w") as fh:
+                fh.write("run %s %s" % (bin_argstr, stdin)) # Use dbg syntax
 
             if self.has_mpirun or self.has_srun:
                 args = [self.mpirun_np, str(mpi_nprocs), "xterm -e gdb", bin_path, "--command=%s" % dbg_filepath]

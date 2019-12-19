@@ -1,5 +1,5 @@
 ---
-authors: SS, XG, YG
+authors: SS, XG, YG, NAP
 ---
 
 # The optic utility  
@@ -20,8 +20,8 @@ It will be easier to discover the present file with the help of the [[tutorial:o
 ## 1 Introduction
   
 The Optic utility allows the computation of the frequency-dependent linear optical dielectric
-function and second-order nonlinear optical susceptibility. 
-An introduction to such computations is given in [[cite:Sharma2004]],
+function and second-order nonlinear optical susceptibility including the nonlinear susceptibility and 
+the linear electro-optical coefficient. An introduction to such computations is given in [[cite:Sharma2004]],
 online at <http://arxiv.org/abs/cond-mat/0305016>.
 Other useful references include [[cite:Hughes1996]],
 [[cite:Draxl2006]], online at <http://arxiv.org/abs/cond-mat/0402523>,
@@ -68,7 +68,7 @@ Moreover, a straightforward relationship exists between these matrix
 elements, and the matrix elements of the momentum operator.
 
 The main Abinit program has the capability to compute derivatives of
-wavefunctions with respect to their wavevector. This is explained in the [[help:respfn]]. 
+wavefunctions with respect to their wavevector. This is explained in [[help:respfn]]. 
 Such a calculation implies treating three d/dk perturbations, indexed by the numbers 3*natom+1, 3*natom+2 and
 3*natom+3 (thus for example, for a unit cell with 2 atoms, perturbations number 7, 8
 and 9). In the two atom case, the associated files needed for Optic have the index _1WF7 , _1WF8 , and _1WF9.
@@ -123,6 +123,8 @@ FILES, PARAMETERS and COMPUTATIONS must be kept unaltered.
      lin_comp = 11,
      num_nonlin_comp = 2,
      nonlin_comp = 123,222,
+     num_linel_comp = 1,
+     linel_comp = 123,
     /
 ```
 

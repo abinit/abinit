@@ -495,8 +495,10 @@ contains
 
  strten(:)=kinstr(:)+ewestr(:)+corstr(:)+strsxc(:)+harstr(:)+lpsstr(:)+nlstr(:)
 
- if (usefock==1 .and. associated(fock).and.fock%fock_common%optstr) then
-   strten(:)=strten(:)+fock%fock_common%stress(:)
+ if (usefock==1 .and. associated(fock)) then
+   if (fock%fock_common%optstr) then
+     strten(:)=strten(:)+fock%fock_common%stress(:)
+   end if
  end if
 
 !Add contributions for constant E or D calculation.

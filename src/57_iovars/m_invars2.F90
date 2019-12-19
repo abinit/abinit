@@ -40,7 +40,7 @@ module m_invars2
 
  use defs_datatypes, only : pspheader_type
  use m_time,      only : timab
- use m_fstrings,  only : sjoin, itoa, ltoa, tolower, rmquotes
+ use m_fstrings,  only : sjoin, itoa, ltoa, tolower
  use m_symtk,     only : matr3inv
  use m_parser,    only : intagm
  use m_geometry,   only : mkrdim, metric
@@ -1531,6 +1531,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! Reading ixc must be immediately followed by reading xcname
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ixc',tread,'INT')
  if(tread==1) dtset%ixc=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"xcname",tread_key,'KEY',key_value=key_value)
  if(tread_key==1)then
    if(tread==1)then
@@ -1540,7 +1541,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      MSG_ERROR(msg)
    else
      !Note that xcname is a 'key' variable : its value is stored in keyw at output of intagm
-     if(trim(key_value)=='PW92')dtset%ixc=7
+     if(trim(key_value) == 'PW92') then
+        dtset%ixc=7
+     else
+       MSG_ERROR(sjoin("Don't know how to convert xcname", key_value, "to ixc"))
+     end if
      tread=1
    end if
  end if
@@ -2064,7 +2069,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_l',tread,'INT')
      if(tread==1) then
        dtset%dmftqmc_l=intarr(1)
-     else if(dtset%ucrpa==0) then
+     else if(dtset%ucrpa==0.and.dtset%dmft_solv/=9) then
        write(msg, '(5a)' )&
         'When DFT+DMFT is activated and one of QMC solvers is used,', ch10, &
         'dmftqmc_l MUST be defined.',ch10,&
@@ -2076,14 +2081,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_therm',tread,'INT')
      if(tread==1) then
        dtset%dmftqmc_therm=intarr(1)
-     else if(dtset%ucrpa==0) then
+     else if(dtset%ucrpa==0.and.dtset%dmft_solv/=9) then
        write(msg, '(5a)' )&
         'When DFT+DMFT is activated and one of QMC solvers is used,', ch10, &
         'dmftqmc_therm MUST be defined.',ch10,&
         'Action: add dmftqmc_therm keyword in input file.'
        MSG_ERROR(msg)
      end if
-     if(dtset%dmft_solv==5.or.dtset%dmft_solv==8) then
+     if(dtset%dmft_solv==5.or.dtset%dmft_solv==8.or.dtset%dmft_solv==9) then
     ! if(dtset%dmft_solv==5) then
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_basis',tread,'INT')
        if(tread==1) dtset%dmftctqmc_basis  =intarr(1)
@@ -2371,6 +2376,15 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtgkk',tread,'INT')
  if(tread==1) dtset%prtgkk=intarr(1)
+
+ ! Read usekden and set prtkden to 1 by default.
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usekden',tread,'INT')
+ if(tread==1) then
+   dtset%usekden=intarr(1)
+ else
+   dtset%usekden=merge(1,0,libxc_functionals_ismgga())
+ end if
+ if (dtset%usekden == 1 .and. dtset%nimage == 1) dtset%prtkden = 1
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtkden',tread,'INT')
  if(tread==1) dtset%prtkden=intarr(1)
@@ -2832,13 +2846,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (itol==0.and.itol_gen==1) then
    dtset%postoldfe=toldfe_
    dtset%postoldff=toldff_
- end if
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usekden',tread,'INT')
- if(tread==1) then
-   dtset%usekden=intarr(1)
- else
-   dtset%usekden=merge(1,0,libxc_functionals_ismgga())
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'vprtrb',tread,'ENE')
@@ -3316,7 +3323,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"wfk_task",tread,'KEY',key_value=key_value)
- if (tread==1) dtset%wfk_task = str2wfktask(tolower(rmquotes(key_value)))
+ if (tread==1) dtset%wfk_task = str2wfktask(tolower(key_value))
  if (dtset%optdriver == RUNL_WFK .and. dtset%wfk_task == WFK_TASK_NONE) then
    MSG_ERROR(sjoin("A valid wfk_task must be specified when optdriver= ", itoa(dtset%optdriver), ", Received:", key_value))
  end if

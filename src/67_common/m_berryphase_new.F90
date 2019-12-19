@@ -419,7 +419,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
          call pawcprj_get(atindx1,cprj_k,cprj,natom,1,(ikpt_loc-1)*nband_k*my_nspinor,ikpt1,0,isppol,mband,&
 &         mkmem,natom,nband_k,nband_k,my_nspinor,nsppol,0,&
 &         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-         call pawcprj_mpi_allgather(cprj_k,cprj_gat,natom,n2dim,dimlmn,ncpgr,nproc,spaceComm,ierr,rank_ordered=.true.)
+         call pawcprj_mpi_allgather(cprj_k,cprj_gat,natom,n2dim,1,dimlmn,ncpgr,nproc,spaceComm,ierr,rank_ordered=.true.)
          do iproc = 1, nproc
            icp2=nband_k*(iproc-1)*my_nspinor
            call pawcprj_get(atindx1,cprj_k,cprj_gat,natom,1,icp2,ikpt1,0,isppol,mband,&
