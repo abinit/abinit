@@ -332,19 +332,19 @@ subroutine pawxc_size_dvxc_local()
 &               (ixc==26.or.ixc==27).or.(ixc>=31.and.ixc<=34).or. &
 &               (ixc==41.or.ixc==42).or.ixc==1402000)
  if (ixc<0) then
-   if (libpaw_libxc_isgga().or.libpaw_libxc_ismgga().or. &
-&      libpaw_libxc_is_hybrid())) need_gradient=.true.
+   if (libxc_functionals_isgga().or.libxc_functionals_ismgga().or. &
+&      libxc_functionals_is_hybrid()) need_gradient=.true.
  end if
  usegradient_=0 ; if (need_gradient) usegradient_=2*min(nspden,2)-1
 
 !Do we use the laplacian?
- need_laplacian=(ixc>=31.and.ixc<=34)
- if (ixc<0) use_laplacian=libpaw_libxc_needs_laplacian()
+ need_laplacian=(ixc==32)
+ if (ixc<0) need_laplacian=libxc_functionals_needs_laplacian()
  uselaplacian_=0 ; if (need_laplacian) uselaplacian_=min(nspden,2)
 
 !Do we use the kinetic energy density?
- need_kden=(ixc>=31.and.ixc<=34)
- if (ixc<0) need_kden=libpaw_libxc_ismgga()
+ need_kden=(ixc==31.or.ixc==34)
+ if (ixc<0) need_kden=libxc_functionals_ismgga()
  usekden_=0 ; if (need_kden) usekden_=min(nspden,2)
 
 !First derivative(s) of XC functional wrt gradient of density
@@ -728,7 +728,7 @@ function pawxc_get_usekden(ixc)
  pawxc_get_usekden=0
  if (ixc<0) then
    if (libxc_functionals_ismgga()) pawxc_get_usekden=1
- else if (ixc>=31.and.ixc<=34) then
+ else if (ixc==31.or.ixc==34) then
    pawxc_get_usekden=1
  end if
 
@@ -759,7 +759,7 @@ function pawxc_get_uselaplacian(ixc)
  pawxc_get_uselaplacian=0
  if (ixc<0) then
    if (libxc_functionals_needs_laplacian()) pawxc_get_uselaplacian=1
- else if (ixc>=31.and.ixc<=34) then
+ else if (ixc==32) then
    pawxc_get_uselaplacian=1
  end if
 
@@ -1122,14 +1122,14 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
            factor2=zero
            do jj=-1,3
              do kk=1,3
-               nu=mu(jj,kk)
+               nu=mu(kk,jj)
                factor2=factor2+pawang%ylmrgr(nu,ilm,ipts)*pawang%anginit(jj,ipts)*pawang%anginit(kk,ipts)
              end do
            end do
            do ii=1,3
              factor=zero
              do jj=-1,3
-               nu=mu(ii,jj)
+               nu=mu(jj,ii)
                factor=factor+pawang%ylmrgr(nu,ilm,ipts)*pawang%anginit(jj,ipts)
              end do
              ylmlapl(ipts,ilm)=ylmlapl(ipts,ilm)+pawang%ylmrgr(3+ii,ilm,ipts) &
@@ -1288,7 +1288,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
      call pawxc_mkdenpos_wrapper(iwarn,nrad,nspden_updn,0,rho_updn,xc_denpos)
 
 !    Call to main XC driver
-     call pawxc_drivexc_wrapper(ixc,xclevel,order,nrad,nspden_updn,&
+     call pawxc_drivexc_wrapper(ixc,order,nrad,nspden_updn,&
 &          usegradient,uselaplacian,usekden,rho_updn,exci,vxci,&
 &          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
 &          grho2=grho2_updn,vxcgrho=vxci_grho,&
@@ -2984,7 +2984,7 @@ end subroutine pawxc_dfpt
  LIBPAW_ALLOCATE(dvxcdgr,(nrad,nvxcdgr))
 
 !Call to main XC driver
- call pawxc_drivexc_wrapper(ixc,xclevel,order,nrad,nspden,&
+ call pawxc_drivexc_wrapper(ixc,order,nrad,nspden,&
 &          usegradient,uselaplacian,usekden,rho_updn,exc,vxc,&
 &          nvxcdgr,0,0,ndvxc,0,grho2=grho2,vxcgrho=dvxcdgr,&
 &          dvxc=dvxci,d2vxc=d2vxc,exexch=exexch)
@@ -3214,7 +3214,7 @@ subroutine pawxcsph_dfpt(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho
  order=2 ! We need Kxc
  ngrad=1;if (xclevel==2) ngrad=2 ! ngrad=1 is for LDAs or LSDs; ngrad=2 is for GGAs
  nkxc=2*nspden-1;if (xclevel==2) nkxc=15 ! Not correct for nspden=1
- call size_dvxc(ixc,order,nspden,usegradient=usegradient,nvxcgrho=nvxcdgr,ndvxc=ndvxc)
+ call pawxc_size_dvxc_wrapper(ixc,order,nspden,usegradient=usegradient,nvxcgrho=nvxcdgr,ndvxc=ndvxc)
 
 !--------------------------------------------------------------------------
 !-------------- GGA: computation of the gradients of the densities
@@ -3279,9 +3279,9 @@ subroutine pawxcsph_dfpt(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho
  LIBPAW_ALLOCATE(dvxcdgr,(nrad,nvxcdgr))
 
 !Call to main XC driver
- call drivexc(ixc,xclevel,order,nrad,nspden,usegradient,0,0,&
+ call pawxc_drivexc_wrapper(ixc,order,nrad,nspden,usegradient,0,0,&
 &             rho_updn,exc,vxc,nvxcdgr,0,0,ndvxc,0,&
-&             grho2_updn=grho2,vxcgrho=dvxcdgr,dvxc=dvxc)
+&             grho2=grho2,vxcgrho=dvxcdgr,dvxc=dvxc)
 
 !Transfer the XC kernel
  LIBPAW_ALLOCATE(kxc,(nrad,nkxc))
@@ -5688,14 +5688,14 @@ end subroutine pawxcmpositron
 !!
 !! SOURCE
 
- subroutine pawxc_drivexc_wrapper(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+ subroutine pawxc_drivexc_wrapper(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &          rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, & ! mandatory arguments
 &          grho2,vxcgrho,lrho,vxclrho,tau,vxctau,dvxc,d2vxc, &      ! optional arguments
 &          exexch,el_temp,fxcT)                                     ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ixc,ndvxc,nd2vxc,npts,nspden,nvxcgrho,nvxclrho,nvxctau,order,xclevel
+ integer,intent(in) :: ixc,ndvxc,nd2vxc,npts,nspden,nvxcgrho,nvxclrho,nvxctau,order
  integer,intent(in) :: usegradient,uselaplacian,usekden
 !arrays
  real(dp),intent(in) :: rho(npts,nspden)
@@ -5763,20 +5763,20 @@ subroutine pawxc_drivexc_abinit()
 
  if (uselaplacian==1.or.usekden==1) then
    if (uselaplacian==1.and.usekden==1) then
-     call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+     call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            lrho_updn=lrho,vxclrho=vxclrho,&
 &            tau_updn=tau,vxctau=vxctau,&
 &            dvxc=dvxc,d2vxc=d2vxc)
    else if (uselaplacian==1) then
-     call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+     call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            lrho_updn=lrho,vxclrho=vxclrho,&
 &            dvxc=dvxc,d2vxc=d2vxc)
    else if (usekden==1) then
-     call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+     call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            tau_updn=tau,vxctau=vxctau,&
@@ -5784,19 +5784,19 @@ subroutine pawxc_drivexc_abinit()
    end if
  else if (usegradient==1) then
    if (present(exexch)) then
-     call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+     call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            dvxc=dvxc,d2vxc=d2vxc,&
 &            exexch=exexch)
    else
-     call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+     call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            dvxc=dvxc,d2vxc=d2vxc)
    end if
  else
-   call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+   call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            dvxc=dvxc,d2vxc=d2vxc)
  end if

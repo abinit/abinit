@@ -1467,7 +1467,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &     electronpositron_calctype=ipositron,&
 &     electronpositron_pawrhoij=pawrhoij_ep,&
 &     electronpositron_lmselect=lmselect_ep,&
-&     nucdipmom=dtset%nucdipmom,mgga=dtset%usekden)
+&     nucdipmom=dtset%nucdipmom)
 
 !    Symetrize Dij
      call symdij(gprimd,indsym,ipert,my_natom,dtset%natom,dtset%nsym,&

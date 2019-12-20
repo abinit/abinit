@@ -2601,6 +2601,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      LIBPAW_ALLOCATE(pawtab%tcoretau,(pawtab%coretau_mesh_size,1))
      pawtab%tcoretau=reshape(list_dpr(ii:ii+siz_tcoretau-1),(/pawtab%coretau_mesh_size,1/))
      ii=ii+siz_tcoretau
+   else
+     LIBPAW_ALLOCATE(pawtab%tcoretau,(0,1))
    end if
    if (allocated(pawtab%tcorespl)) then
      LIBPAW_DEALLOCATE(pawtab%tcorespl)

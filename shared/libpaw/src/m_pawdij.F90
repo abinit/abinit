@@ -169,7 +169,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 &          pawxcdev,qphon,spnorbscl,ucvol,charge,vtrial,vxc,xred,&
 &          electronpositron_calctype,electronpositron_pawrhoij,electronpositron_lmselect,&
 &          atvshift,fatvshift,natvshift,nucdipmom,&
-&          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr,mgga)
+&          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -177,7 +177,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  integer,intent(in) :: nspden,ntypat,pawprtvol,pawspnorb,pawxcdev
  integer,optional,intent(in) :: electronpositron_calctype
  integer,optional,intent(in) :: comm_atom,mpi_comm_grid,natvshift
- integer,optional,intent(in) :: mgga
  real(dp),intent(in) :: spnorbscl,ucvol,charge
  real(dp),intent(in),optional ::fatvshift,hyb_mixing,hyb_mixing_sr
  type(pawang_type),intent(in) :: pawang

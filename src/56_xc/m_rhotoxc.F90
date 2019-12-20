@@ -789,7 +789,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
          if (auxc_ixc<0) then
            call libxc_functionals_init(auxc_ixc,nspden,xc_functionals=xc_funcs_auxc)
          end if
-         call drivexc(auxc_ixc,xcdata%xclevel,order,npts,nspden_updn,usegradient,0,0,&
+         call drivexc(auxc_ixc,order,npts,nspden_updn,usegradient,0,0,&
 &          rho_b_updn,exc_b,vxcrho_b_updn,nvxcgrho,0,0,ndvxc,nd2vxc, &
 &          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,dvxc=dvxc_b, &
 &          fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel,&
@@ -816,7 +816,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !      Call to main XC driver
        if (present(xc_funcs)) then
-         call drivexc(ixc,xcdata%xclevel,order,npts,nspden_updn,&
+         call drivexc(ixc,order,npts,nspden_updn,&
 &          usegradient,uselaplacian,usekden,&
 &          rho_b_updn,exc_b,vxcrho_b_updn,&
 &          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
@@ -827,7 +827,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 &          hyb_mixing=xcdata%hyb_mixing,&
 &          xc_funcs=xc_funcs)
        else
-         call drivexc(ixc,xcdata%xclevel,order,npts,nspden_updn,&
+         call drivexc(ixc,order,npts,nspden_updn,&
 &          usegradient,uselaplacian,usekden,&
 &          rho_b_updn,exc_b,vxcrho_b_updn,&
 &          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &

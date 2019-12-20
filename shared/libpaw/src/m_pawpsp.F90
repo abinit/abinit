@@ -1327,6 +1327,14 @@ subroutine pawpsp_read(core_mesh,funit,imainmesh,lmax,&
    LIBPAW_POINTER_ALLOCATE(tnvale,(0))
  end if
 
+!---------------------------------
+!Initialize (to zero) kinetic energy densities
+if (pawtab%has_coretau>0) then
+  LIBPAW_ALLOCATE(pawtab%coretau,(pawtab%core_mesh_size))
+  LIBPAW_ALLOCATE(pawtab%tcoretau,(pawtab%core_mesh_size,1))
+  pawtab%coretau=zero ; pawtab%tcoretau=zero
+endif
+
 end subroutine pawpsp_read
 !!***
 
@@ -1751,7 +1759,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  real(dp),allocatable :: ncorwk(:),nhat(:),nhatwk(:),nwk(:),r2k(:)
  real(dp),allocatable :: rtncor(:),rttaucor(:),rtnval(:),rvlocr(:)
  real(dp),allocatable :: vbare(:),vh(:),vhnzc(:),vxc1(:),vxc2(:)
- real(dp),allocatable,target :: work1(:),work2(:),work3(:),work4(:,:,:)
+ real(dp),allocatable,target :: work1(:),work2(:),work3(:)
  real(dp),pointer :: tmp1(:),tmp2(:)
  logical :: tmp_lmselect(1)
 
@@ -1770,8 +1778,8 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 
 !Check optional arguments
  usekden=pawtab%has_coretau
- if (usekden>=1) then
-   if (present(tcoretau)) then
+ if (present(tcoretau)) then
+   if (usekden>=1) then
      if (.not.(present(coretau_mesh))) then
        msg='tcoretau present but not coretau_mesh!'
        MSG_BUG(msg)
@@ -2463,27 +2471,28 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 !==========================================================
 !Compute tcoretauspl(q)
 
- if (usekden>=1.and.present(tcoretau)) then
-   if (coretau_mesh%rmax/=xcccrc) then
-     write(msg, '(a,a,a)' )&
-&     'Core density and core kinetic density should be given on the same grid!',ch10,&
-&     'Action : check your pseudopotential (increase tNvale meshSize).'
-     MSG_ERROR(msg)
-   end if
-
-   LIBPAW_ALLOCATE(pawtab%tcoretauspl,(pawtab%mqgrid,2))
-   if(mqgrid_vl>0) then
-!    Compute tcorespl(q)=tNc(q) from tNcore(r)
-     if (reduced_taucor) then
-       call pawpsp_cg(pawtab%dtaucdq0,qq,mqgrid_vl,qgrid_vl,pawtab%tcoretauspl(:,1),rcoretau_mesh,rttaucor,yp1,ypn)
-     else
-       call pawpsp_cg(pawtab%dtaucdq0,qq,mqgrid_vl,qgrid_vl,pawtab%tcoretauspl(:,1),coretau_mesh,tcoretau,yp1,ypn)
+ if (present(tcoretau)) then
+   LIBPAW_ALLOCATE(pawtab%tcoretauspl,(pawtab%mqgrid,2*usekden))
+   if (usekden==1) then
+     if (coretau_mesh%rmax/=xcccrc) then
+       write(msg, '(a,a,a)' )&
+&       'Core density and core kinetic density should be given on the same grid!',ch10,&
+&       'Action : check your pseudopotential (increase tNvale meshSize).'
+       MSG_ERROR(msg)
      end if
-!    Compute second derivative of tcorespl(q)
-     call paw_spline(qgrid_vl,pawtab%tcoretauspl(:,1),mqgrid_vl,yp1,ypn,pawtab%tcoretauspl(:,2))
-   else
-     pawtab%tcoretauspl=zero
-     pawtab%dtaucdq0=zero
+    if(mqgrid_vl>0) then
+!      Compute tcorespl(q)=tNc(q) from tNcore(r)
+       if (reduced_taucor) then
+         call pawpsp_cg(pawtab%dtaucdq0,qq,mqgrid_vl,qgrid_vl,pawtab%tcoretauspl(:,1),rcoretau_mesh,rttaucor,yp1,ypn)
+       else
+         call pawpsp_cg(pawtab%dtaucdq0,qq,mqgrid_vl,qgrid_vl,pawtab%tcoretauspl(:,1),coretau_mesh,tcoretau,yp1,ypn)
+       end if
+!      Compute second derivative of tcorespl(q)
+       call paw_spline(qgrid_vl,pawtab%tcoretauspl(:,1),mqgrid_vl,yp1,ypn,pawtab%tcoretauspl(:,2))
+     else
+       pawtab%tcoretauspl=zero
+       pawtab%dtaucdq0=zero
+     end if
    end if
  end if
 
@@ -2523,9 +2532,14 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  if (pawxcdev/=0) then
    call pawxcm(ncore,pawtab%exccore,yp1,0,ixc,work2,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
 &   nspden,4,pawang_tmp,core_mesh,pawxcdev,work1,1,0,tmp1,xclevel,xc_denpos)
- else
-   call pawxc(ncore,pawtab%exccore,yp1,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
-&   nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos,coretau=tcoretau)
+ else 
+   if (present(tcoretau)) then
+     call pawxc(ncore,pawtab%exccore,yp1,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
+&     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos,coretau=tcoretau)
+   else
+     call pawxc(ncore,pawtab%exccore,yp1,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
+&     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos)
+   end if
  end if
 
  LIBPAW_DEALLOCATE(work1)
@@ -3476,7 +3490,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 &   'Action: check your pseudopotential file.'
    MSG_ERROR(msg)
  else
-  LIBPAW_ALLOCATE(coretau,(0))
+   LIBPAW_ALLOCATE(coretau,(0))
  end if
 
 !---------------------------------
@@ -3515,7 +3529,8 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 &   'Action: check your pseudopotential file.'
    MSG_ERROR(msg)
  else
-  LIBPAW_ALLOCATE(tcoretau,(0))
+   LIBPAW_ALLOCATE(tcoretau,(0))
+   LIBPAW_ALLOCATE(pawtab%tcoretau,(0,1))
  end if
 
 !---------------------------------

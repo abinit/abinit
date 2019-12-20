@@ -808,7 +808,7 @@ end subroutine mkdenpos
 !!
 !! SOURCE
 
-subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &          rho_updn,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &            ! mandatory arguments
 &          grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,dvxc,d2vxc, &  ! optional arguments
 &          exexch,el_temp,fxcT,hyb_mixing,xc_funcs)                            ! optional parameters
@@ -816,7 +816,7 @@ subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekde
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,npts,nspden
- integer,intent(in) :: ndvxc,nd2vxc,nvxcgrho,nvxclrho,nvxctau,order,xclevel
+ integer,intent(in) :: ndvxc,nd2vxc,nvxcgrho,nvxclrho,nvxctau,order
  integer,intent(in) :: usegradient,uselaplacian,usekden
  integer,intent(in),optional :: exexch
  real(dp),intent(in),optional :: el_temp,hyb_mixing

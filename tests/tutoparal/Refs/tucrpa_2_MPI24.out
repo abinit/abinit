@@ -11672,7 +11672,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Size of radial mesh for [pseudo] core density...  592
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..  910
-  No of Q-points for tcorespl/tvalespl/ttaucorespl 3001
+  No of Q-points for tcorespl/tvalespl/tcoretauspl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    3
   shape_lambda ...................................    0
@@ -11723,7 +11723,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Size of radial mesh for [pseudo] core density... 1084
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density.. 1500
-  No of Q-points for tcorespl/tvalespl/ttaucorespl 3001
+  No of Q-points for tcorespl/tvalespl/tcoretauspl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................    0
@@ -11770,7 +11770,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Size of radial mesh for [pseudo] core density... 1311
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density.. 2001
-  No of Q-points for tcorespl/tvalespl/ttaucorespl 3001
+  No of Q-points for tcorespl/tvalespl/tcoretauspl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................    0
@@ -12686,7 +12686,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Size of radial mesh for [pseudo] core density...  592
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..  910
-  No of Q-points for tcorespl/tvalespl/ttaucorespl  300
+  No of Q-points for tcorespl/tvalespl/tcoretauspl  300
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    3
   shape_lambda ...................................    0
@@ -12737,7 +12737,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Size of radial mesh for [pseudo] core density... 1084
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density.. 1500
-  No of Q-points for tcorespl/tvalespl/ttaucorespl  300
+  No of Q-points for tcorespl/tvalespl/tcoretauspl  300
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................    0
@@ -12784,7 +12784,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   Size of radial mesh for [pseudo] core density... 1311
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density.. 2001
-  No of Q-points for tcorespl/tvalespl/ttaucorespl  300
+  No of Q-points for tcorespl/tvalespl/tcoretauspl  300
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................    0

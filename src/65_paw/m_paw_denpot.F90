@@ -432,7 +432,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    if (usekden==1) then
      ABI_ALLOCATE(lmselect_tmp,(lm_size))
      lmselect_tmp(:)=.true.
-     call pawkindensities(cplex,iatom_tot,lmselect_tmp,lm_size,nspden,-1,1,-1,&
+     call pawkindensities(cplex,lmselect_tmp,lm_size,nspden,-1,1,-1,&
 &     pawang,pawrad(itypat),pawrhoij(iatom),pawtab(itypat),tau1,ttau1,&
 &     one_over_rad2=one_over_rad2)
      ABI_DEALLOCATE(lmselect_tmp)
@@ -1156,7 +1156,7 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
  real(dp),intent(out) :: trho1(cplex*pawtab%mesh_size,lm_size,nspden*(1-(opt_dens/2)))
 !Local variables ---------------------------------------
 !scalars
- integer :: dplex,ii,ilm,iplex,iq0,ir,irhoij,isel,isel2,ispden,jrhoij
+ integer :: dplex,ii,ilm,iplex,iq0,ir,irhoij,isel,ispden,jrhoij
  integer :: klm,klmn,kln,ll,lmax,lmin,mesh_size
  real(dp) :: m1,mt1,rdum
  character(len=500) :: msg
@@ -1494,7 +1494,6 @@ end subroutine pawdensities
 !!
 !! INPUTS
 !!  cplex: if 1, on-site densities are REAL, if 2, COMPLEX (response function only)
-!!  iatom=index of current atom (note: this is the absolute index, not the index on current proc)
 !!  lm_size=number of (l,m) moments
 !!  lmselectin(lm_size)=flags selecting the non-zero LM-moments of on-site kinetic energy densities
 !!                      (value of these flags at input; must be .TRUE. for nzlmopt/=1)
@@ -1529,13 +1528,13 @@ end subroutine pawdensities
 !!
 !! SOURCE
 
-subroutine pawkindensities(cplex,iatom,lmselectin,lm_size,nspden,nzlmopt,&
+subroutine pawkindensities(cplex,lmselectin,lm_size,nspden,nzlmopt,&
 &          opt_dens,opt_l,pawang,pawrad,pawrhoij,pawtab,tau1,ttau1,&
 &          one_over_rad2) ! optional
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: cplex,iatom,lm_size,nspden,nzlmopt,opt_dens,opt_l
+ integer,intent(in) :: cplex,lm_size,nspden,nzlmopt,opt_dens,opt_l
  type(pawang_type),intent(in) :: pawang
  type(pawrad_type),intent(in) :: pawrad
  type(pawrhoij_type),intent(in) :: pawrhoij
@@ -1547,8 +1546,8 @@ subroutine pawkindensities(cplex,iatom,lmselectin,lm_size,nspden,nzlmopt,&
  real(dp),intent(out),optional :: ttau1(cplex*pawtab%mesh_size,lm_size,nspden*(1-(opt_dens/2)))
 !Local variables ---------------------------------------
 !scalars
- integer :: dplex,ii,iplex,iq0,ir,irhoij,isel,ispden,jrhoij
- integer :: ilmn,ilm,ilm1,iln,jlmn,jlm,jlm1,jln,klm,klmn,ll,lmax,lmin,mesh_size
+ integer :: dplex,ii,iq0,ir,irhoij,isel,ispden,jrhoij
+ integer :: ilmn,ilm,ilm1,iln,jlmn,jlm1,jln,klm,klmn,ll,lmax,lmin,mesh_size
  real(dp) :: phiphj,tphitphj
  character(len=500) :: msg
 !arrays
