@@ -1235,7 +1235,7 @@ subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekde
 
 !Local variables-------------------------------
 !scalars
- integer :: exexch_,ispden,ixc_from_lib,ixc1,ixc2,ndvxc_x,ngr2,optpbe
+ integer :: exexch_,ispden,ixc_from_lib,ixc1,ixc2,ndvxc_x,optpbe
  logical :: libxc_test,xc_err_ndvxc,xc_err_nvxcgrho1,xc_err_nvxcgrho2
  logical :: need_gradient,need_laplacian,need_kden
  real(dp) :: alpha
@@ -1523,7 +1523,6 @@ subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekde
 
 !>>>>> PBE and alternatives
  else if (((ixc>=7.and.ixc<=15).or.(ixc>=23.and.ixc<=24)).and.ixc/=10.and.ixc/=13) then
-   ngr2=2*nspden-1
 !  Perdew-Wang LSD is coded in Perdew-Burke-Ernzerhof GGA, with optpbe=1
    if(ixc==7)optpbe=1
 !  x-only part of Perdew-Wang
@@ -1544,30 +1543,30 @@ subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekde
    if(ixc==23)optpbe=7
    if (ixc >=7.and.ixc<=9) then
      if (order**2 <= 1) then
-       call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc)
+       call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc)
      else if (order /=3) then
-       call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,dvxci=dvxc)
+       call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,dvxci=dvxc)
      else if (order ==3) then
-       call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,d2vxci=d2vxc,dvxci=dvxc)
+       call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,d2vxci=d2vxc,dvxci=dvxc)
      end if
    else if ((ixc >= 11 .and. ixc <= 15) .or. (ixc>=23 .and. ixc<=24)) then
      if (order**2 <= 1) then
-       call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,&
+       call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,&
 &       dvxcdgr=vxcgrho,exexch=exexch_,grho2_updn=grho2_updn)
      else if (order /=3) then
        if(ixc==12 .or. ixc==24)then
-         call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,&
+         call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,&
 &         dvxcdgr=vxcgrho,dvxci=dvxc,grho2_updn=grho2_updn)
        else if(ixc/=12 .or. ixc/=24) then
-         call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,&
+         call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,&
 &         dvxcdgr=vxcgrho,dvxci=dvxc,grho2_updn=grho2_updn)
        end if
      else if (order ==3) then
        if(ixc==12 .or. ixc==24)then
-         call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,&
+         call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,&
 &         d2vxci=d2vxc,dvxcdgr=vxcgrho,dvxci=dvxc,grho2_updn=grho2_updn)
        else if(ixc/=12 .or. ixc/=24) then
-         call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,&
+         call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,&
 &         d2vxci=d2vxc,dvxcdgr=vxcgrho,dvxci=dvxc,grho2_updn=grho2_updn)
        end if
      end if
@@ -1579,9 +1578,9 @@ subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekde
      ABI_ALLOCATE(exci_rpa,(npts))
      ABI_ALLOCATE(vxci_rpa,(npts,2))
      optpbe=3
-     call xcpbe(exci_rpa,npts,nspden,optpbe,order,rho_updn,vxci_rpa,ndvxc,ngr2,nd2vxc)
+     call xcpbe(exci_rpa,npts,nspden,optpbe,order,rho_updn,vxci_rpa,ndvxc,nd2vxc)
      optpbe=1
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc)
+     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc)
      exc(:)=exc(:)-exci_rpa(:)
 !    PMA: second index of vxcrho is nspden while that of rpa is 2 they can mismatch
      vxcrho(:,1:min(nspden,2))=vxcrho(:,1:min(nspden,2))-vxci_rpa(:,1:min(nspden,2))
@@ -1591,9 +1590,9 @@ subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekde
      ABI_ALLOCATE(exci_rpa,(npts))
      ABI_ALLOCATE(vxci_rpa,(npts,2))
      optpbe=3
-     call xcpbe(exci_rpa,npts,nspden,optpbe,order,rho_updn,vxci_rpa,ndvxc,ngr2,nd2vxc,dvxci=dvxc)
+     call xcpbe(exci_rpa,npts,nspden,optpbe,order,rho_updn,vxci_rpa,ndvxc,nd2vxc,dvxci=dvxc)
      optpbe=1
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,dvxci=dvxc)
+     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,dvxci=dvxc)
      exc(:)=exc(:)-exci_rpa(:)
      vxcrho(:,:)=vxcrho(:,:)-vxci_rpa(:,:)
      ABI_DEALLOCATE(exci_rpa)
@@ -1602,10 +1601,10 @@ subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekde
      ABI_ALLOCATE(exci_rpa,(npts))
      ABI_ALLOCATE(vxci_rpa,(npts,2))
      optpbe=3
-     call xcpbe(exci_rpa,npts,nspden,optpbe,order,rho_updn,vxci_rpa,ndvxc,ngr2,nd2vxc,&
+     call xcpbe(exci_rpa,npts,nspden,optpbe,order,rho_updn,vxci_rpa,ndvxc,nd2vxc,&
 &     d2vxci=d2vxc,dvxci=dvxc)
      optpbe=1
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,&
+     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,&
 &     d2vxci=d2vxc,dvxci=dvxc)
      exc(:)=exc(:)-exci_rpa(:)
      vxcrho(:,:)=vxcrho(:,:)-vxci_rpa(:,:)
@@ -1617,15 +1616,15 @@ subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekde
  else if(ixc==13) then
    if (order**2 <= 1) then
      optpbe=1
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc)
+     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc)
      call xclb(grho2_updn,npts,nspden,rho_updn,vxcrho)
    else if (order /=3) then
      optpbe=1
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,dvxci=dvxc)
+     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,dvxci=dvxc)
      call xclb(grho2_updn,npts,nspden,rho_updn,vxcrho)
    else if (order ==3) then
      optpbe=1
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,d2vxci=d2vxc,dvxci=dvxc)
+     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,d2vxci=d2vxc,dvxci=dvxc)
      call xclb(grho2_updn,npts,nspden,rho_updn,vxcrho)
    end if
 
@@ -1638,8 +1637,8 @@ subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekde
    exc(:)=zero
    vxcrho(:,:)=zero
    vxcgrho(:,:)=zero
-   vxctau(:,:)=zero
    vxclrho(:,:)=zero
+   vxctau(:,:)=zero
 
 !>>>>> Perdew-Wang LSD is coded in Perdew-Burke-Ernzerhof GGA, with optpbe=1
    optpbe=1
@@ -1647,7 +1646,7 @@ subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekde
    case (31)
      alpha=1.00d0-(1.00d0/1.01d0)
 !      Compute first LDA XC (exc,vxc) and then add fake MGGA XC (exc,vxc)
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc)
+     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc)
      if (nspden==1) then
 !        it should be : exc_tot= exc_spin up + exc_spin down = 2*exc_spin up but this applies to tau and rho (so it cancels)
        exc(:)=exc(:)+alpha*tau_updn(:,1)/rho_updn(:,1)
@@ -1660,7 +1659,7 @@ subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekde
    case (32)
      alpha=0.01d0
 !      Compute first LDA XC (exc,vxc) and then add fake MGGA XC (exc,vxc)
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc)
+     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc)
      if (nspden==1) then
        exc(:)=exc(:)+2.0d0*alpha*lrho_updn(:,1)
        vxcrho(:,1) =vxcrho(:,1)+2.0d0*alpha*lrho_updn(:,1)
@@ -1675,7 +1674,7 @@ subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekde
    case (33)
      alpha=-0.010d0
 !      Compute first LDA XC (exc,vxc) and then add fake MGGA XC (exc,vxc)
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc)
+     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc)
      if (nspden==1) then
 !        it should be : exc_tot= exc_spin up + exc_spin down = 2*exc_spin up but this applies to grho2 and rho
 !        (for grho2 it is a factor 4 to have total energy and for rho it is just a factor 2. So we end with factor 2 only)
@@ -1690,7 +1689,7 @@ subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekde
    case (34)
      alpha=-0.010d0
 !      Compute first LDA XC (exc,vxc) and then add fake MGGA XC (exc,vxc)
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc)
+     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc)
      if (nspden==1) then
        exc(:)=exc(:)+16.0d0*alpha*tau_updn(:,1)
        vxcrho(:,1)=vxcrho(:,1)+16.0d0*alpha*tau_updn(:,1)
@@ -1715,10 +1714,10 @@ subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekde
    exc_x=zero;vxcrho_x=zero;vxcgrho_x=zero
    if (order**2 <= 1) then
      optpbe=2 !PBE exchange correlation
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,&
+     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,&
 &     dvxcdgr=vxcgrho,exexch=exexch_,grho2_updn=grho2_updn)
      optpbe=-2 !PBE exchange-only
-     call xcpbe(exc_x,npts,nspden,optpbe,order,rho_updn,vxcrho_x,ndvxc,ngr2,nd2vxc,&
+     call xcpbe(exc_x,npts,nspden,optpbe,order,rho_updn,vxcrho_x,ndvxc,nd2vxc,&
 &     dvxcdgr=vxcgrho_x,exexch=exexch_,grho2_updn=grho2_updn)
      exc=exc-exc_x*hyb_mixing
      vxcrho=vxcrho-vxcrho_x*hyb_mixing
@@ -1726,10 +1725,10 @@ subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekde
    else if (order /=3) then
      ABI_ALLOCATE(dvxc_x,(npts,ndvxc_x))
      optpbe=2 !PBE exchange correlation
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,&
+     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,&
      dvxcdgr=vxcgrho,dvxci=dvxc,grho2_updn=grho2_updn)
      optpbe=-2 !PBE exchange-only
-     call xcpbe(exc_x,npts,nspden,optpbe,order,rho_updn,vxcrho_x,ndvxc_x,ngr2,nd2vxc,&
+     call xcpbe(exc_x,npts,nspden,optpbe,order,rho_updn,vxcrho_x,ndvxc_x,nd2vxc,&
 &     dvxcdgr=vxcgrho_x,dvxci=dvxc_x,grho2_updn=grho2_updn)
      exc=exc-exc_x*hyb_mixing
      vxcrho=vxcrho-vxcrho_x*hyb_mixing
@@ -1742,10 +1741,10 @@ subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekde
      ABI_ALLOCATE(dvxc_x,(npts,ndvxc_x))
      ABI_ALLOCATE(d2vxc_x,(npts,nd2vxc))
      optpbe=2 !PBE exchange correlation
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,&
+     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,&
 &     d2vxci=d2vxc,dvxcdgr=vxcgrho,dvxci=dvxc,grho2_updn=grho2_updn)
      optpbe=-2 !PBE exchange-only
-     call xcpbe(exc_x,npts,nspden,optpbe,order,rho_updn,vxcrho_x,ndvxc_x,ngr2,nd2vxc,&
+     call xcpbe(exc_x,npts,nspden,optpbe,order,rho_updn,vxcrho_x,ndvxc_x,nd2vxc,&
 &     d2vxci=d2vxc_x,dvxcdgr=vxcgrho_x,dvxci=dvxc_x,grho2_updn=grho2_updn)
      exc=exc-exc_x*hyb_mixing
      vxcrho=vxcrho-vxcrho_x*hyb_mixing
@@ -1863,14 +1862,7 @@ subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekde
 
 !  ===== meta-GGA =====
    if (need_laplacian.or.need_kden) then
-     !Some meta-GGAs can only be used with a LDA correlation (see doc)
-     ixc1 = (-ixc)/1000 ; ixc2 = (-ixc) - ixc1*1000
-     if (ixc1==206 .or. ixc1==207 .or. ixc1==208 .or. ixc1==209 .or. &
-&        ixc2==206 .or. ixc2==207 .or. ixc2==208 .or. ixc2==209    )then
-       if (present(vxcgrho)) vxcgrho(:,:)=zero
-       if (present(vxclrho)) vxclrho(:,:)=zero
-       if (present(vxctau)) vxctau(:,:)=zero
-     else if (need_laplacian.and.need_kden) then
+     if (need_laplacian.and.need_kden) then
        if (present(xc_funcs)) then
          call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
 &           grho2=grho2_updn,vxcgr=vxcgrho,&
@@ -1905,6 +1897,14 @@ subroutine drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekde
 &           grho2=grho2_updn,vxcgr=vxcgrho,&
 &           tau=tau_updn,vxctau=vxctau)
        end if
+     end if
+     !Some meta-GGAs can only be used with a LDA correlation (see doc)
+     ixc1=(-ixc)/1000;ixc2=(-ixc)-ixc1*1000
+     if (ixc1==206 .or. ixc1==207 .or. ixc1==208 .or. ixc1==209 .or. &
+&        ixc2==206 .or. ixc2==207 .or. ixc2==208 .or. ixc2==209    )then
+       if (present(vxcgrho)) vxcgrho(:,:)=zero
+       if (present(vxclrho)) vxclrho(:,:)=zero
+       if (present(vxctau)) vxctau(:,:)=zero
      end if
 
 !  ===== GGA =====
