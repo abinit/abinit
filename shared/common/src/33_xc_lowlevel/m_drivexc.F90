@@ -371,7 +371,7 @@ subroutine size_dvxc(ixc,order,nspden,&
  if (present(usegradient)) usegradient=merge(1,0,need_gradient)
 
 !Do we use the laplacian?
- need_laplacian=(ixc>=31.and.ixc<=34)
+ need_laplacian=(ixc==32)
  if (ixc<0) then
    if(present(xc_funcs)) need_laplacian=libxc_functionals_needs_laplacian(xc_functionals=xc_funcs)
    if(.not.present(xc_funcs)) need_laplacian=libxc_functionals_needs_laplacian()
@@ -379,7 +379,7 @@ subroutine size_dvxc(ixc,order,nspden,&
  if (present(uselaplacian)) uselaplacian=merge(1,0,need_laplacian)
 
 !Do we use the kinetic energy density?
- need_kden=(ixc>=31.and.ixc<=34)
+ need_kden=(ixc==31.or.ixc==34)
  if (ixc<0) need_kden=libxc_ismgga
  if (present(usekden)) usekden=merge(1,0,need_kden)
 
