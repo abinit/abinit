@@ -32,7 +32,8 @@ module m_xcdata
  use defs_basis
  use m_errors
  use libxc_functionals
- use m_dtset
+ use m_dtset, only : dataset_type
+ use m_drivexc, only : size_dvxc
 
  implicit none
 
@@ -73,6 +74,12 @@ module m_xcdata
   integer :: usefock
     ! 1 if the XC functional includes a (possibly screened) Fock contribution
 
+  integer :: usegradient
+    ! 1 if the XC functional depends on the density gradient
+
+  integer :: uselaplacian
+    ! 1 if the XC functional depends on the density laplacian
+
   integer :: usekden
     ! 1 if the XC functional depends on the kinetic energy density
 
@@ -101,6 +108,7 @@ module m_xcdata
     ! density positivity value
 
  end type xcdata_type
+
 !----------------------------------------------------------------------
 
  public :: xcdata_init                ! Initialize the object.
@@ -125,7 +133,6 @@ contains
 !!  [ixc= index of exchange-correlation functional]
 !!  [nelect = Number of electrons in the cell (for Fermi-Amaldi only)]
 !!  [tphysel = Physical temperature (for temperature-dependent functional)]
-!!  [usekden = 1 if the XC functional depends on the kinetic energy density]
 !!  [vdw_xc = Choice of van-der-Waals density functional]
 !!
 !! OUTPUT
@@ -142,17 +149,18 @@ contains
 !!
 !! SOURCE
 
-subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,tphysel,usekden,vdw_xc,xc_denpos)
+subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,tphysel,&
+&                      vdw_xc,xc_denpos)
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in),optional :: auxc_ixc,intxc,ixc,nspden,usekden,vdw_xc
+ integer, intent(in),optional :: auxc_ixc,intxc,ixc,nspden,vdw_xc
  real(dp),intent(in),optional :: hyb_mixing,nelect,tphysel,xc_denpos
  type(dataset_type), intent(in),optional :: dtset
  type(xcdata_type), intent(out) :: xcdata
 !Local variables-------------------------------
- integer :: usefock,xclevel
- character(len=500) :: message
+ integer :: nspden_updn
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -161,7 +169,6 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,
    xcdata%intxc=dtset%intxc
    xcdata%ixc=dtset%ixc
    xcdata%nspden=dtset%nspden
-   xcdata%usekden=dtset%usekden
    xcdata%vdw_xc=dtset%vdw_xc
 
    xcdata%hyb_mixing=abs(dtset%hyb_mixing) ! Warning : the absolute value is needed, because of the singular way
@@ -172,12 +179,11 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,
 
  else
    if(.not.(present(auxc_ixc).and.present(intxc).and.present(ixc).and.&
-&           present(usekden).and.present(vdw_xc).and.present(hyb_mixing).and.&
+&           present(vdw_xc).and.present(hyb_mixing).and.&
 &           present(nelect).and.present(nspden).and.&
 &           present(tphysel).and.present(xc_denpos)))then
-     write(message,'(a)') &
-&     ' If dtset is not provided, all the other optional arguments must be provided, which is not the case.'
-     MSG_BUG(message)
+     msg='If dtset is not provided, all the other optional arguments must be provided, which is not the case!'
+     MSG_BUG(msg)
    endif
  endif
 
@@ -185,7 +191,6 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,
  if(present(intxc))     xcdata%intxc=intxc
  if(present(ixc))       xcdata%ixc=ixc
  if(present(nspden))    xcdata%nspden=nspden
- if(present(usekden))   xcdata%usekden=usekden
  if(present(vdw_xc))    xcdata%vdw_xc=vdw_xc
 
  if(present(hyb_mixing))xcdata%hyb_mixing=hyb_mixing
@@ -194,13 +199,17 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,
  if(present(xc_denpos)) xcdata%xc_denpos=xc_denpos
 
 !Compute xclevel
- call get_xclevel(xcdata%ixc,xclevel,usefock=usefock)
- xcdata%xclevel=xclevel
- xcdata%usefock=usefock
+ call get_xclevel(xcdata%ixc,xcdata%xclevel,usefock=xcdata%usefock)
+
+!Compute usegradient,uselaplacian,usekden
+ nspden_updn=min(xcdata%nspden,2)
+ call size_dvxc(xcdata%ixc,1,nspden_updn,usegradient=xcdata%usegradient,&
+&               uselaplacian=xcdata%uselaplacian,usekden=xcdata%usekden)
 
 end subroutine xcdata_init
 !!***
 
+!----------------------------------------------------------------------
 
 !!****f* m_xcdata/get_xclevel
 !! NAME
@@ -277,6 +286,8 @@ subroutine get_xclevel(ixc,xclevel,usefock)
 
 end subroutine get_xclevel
 !!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_xcdata/get_auxc_ixc
 !! NAME
