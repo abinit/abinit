@@ -32,14 +32,14 @@ module m_pawxc
 
 #ifdef HAVE_LIBPAW_ABINIT
  use m_xcpositron,  only : xcpositron
- use m_drivexc,     only : drivexc_main, size_dvxc, xcmult, mkdenpos
+ use m_drivexc,     only : drivexc,size_dvxc,xcmult,mkdenpos
  use m_xc_noncoll,  only : rotate_mag,rotate_back_mag,rotate_back_mag_dfpt
 #endif
 
  use m_libpaw_libxc
 
  use m_pawang,      only : pawang_type
- use m_pawrad,      only : pawrad_type, nderiv_gen, pawrad_deducer0, simp_gen
+ use m_pawrad,      only : pawrad_type,nderiv_gen,pawrad_deducer0,simp_gen
 
  implicit none
 
@@ -67,7 +67,7 @@ module m_pawxc
  private :: pawxc_rotate_back_mag_dfpt ! Rotate back a collinear 1st-order XC potential wrt a magnetization
 
 !Wrappers
- private :: pawxc_drivexc_wrapper    ! wrapper for drivexc_main
+ private :: pawxc_drivexc_wrapper    ! wrapper for drivexc
  private :: pawxc_mkdenpos_wrapper   ! wrapper for mkdenpos
  private :: pawxc_xcmult_wrapper     ! wrapper for xcmult
  private :: pawxc_size_dvxc_wrapper  ! wrapper for size_dvxc
@@ -3279,9 +3279,9 @@ subroutine pawxcsph_dfpt(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho
  LIBPAW_ALLOCATE(dvxcdgr,(nrad,nvxcdgr))
 
 !Call to main XC driver
- call drivexc_main(ixc,xclevel,order,nrad,nspden,usegradient,0,0,&
-&                  rho_updn,exc,vxc,nvxcdgr,0,0,ndvxc,0,&
-&                  grho2_updn=grho2,vxcgrho=dvxcdgr,dvxc=dvxc)
+ call drivexc(ixc,xclevel,order,nrad,nspden,usegradient,0,0,&
+&             rho_updn,exc,vxc,nvxcdgr,0,0,ndvxc,0,&
+&             grho2_updn=grho2,vxcgrho=dvxcdgr,dvxc=dvxc)
 
 !Transfer the XC kernel
  LIBPAW_ALLOCATE(kxc,(nrad,nkxc))
@@ -5753,13 +5753,9 @@ subroutine pawxc_drivexc_abinit()
 ! *************************************************************************
 
  test_args=(present(dvxc).and.present(d2vxc))
-print *,test_args
  if (usegradient==1) test_args=(test_args.and.present(dvxc).and.present(d2vxc))
-print *,test_args
  if (uselaplacian==1) test_args=(test_args.and.present(lrho).and.present(vxclrho))
-print *,test_args
  if (usekden==1) test_args=(test_args.and.present(tau).and.present(vxctau))
-print *,test_args
  if (.not.test_args) then
    msg='missing mandatory arguments in pawxc_drivexc_wrapper'
    MSG_BUG(msg)
@@ -5767,20 +5763,20 @@ print *,test_args
 
  if (uselaplacian==1.or.usekden==1) then
    if (uselaplacian==1.and.usekden==1) then
-     call drivexc_main(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+     call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            lrho_updn=lrho,vxclrho=vxclrho,&
 &            tau_updn=tau,vxctau=vxctau,&
 &            dvxc=dvxc,d2vxc=d2vxc)
    else if (uselaplacian==1) then
-     call drivexc_main(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+     call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            lrho_updn=lrho,vxclrho=vxclrho,&
 &            dvxc=dvxc,d2vxc=d2vxc)
    else if (usekden==1) then
-     call drivexc_main(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+     call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            tau_updn=tau,vxctau=vxctau,&
@@ -5788,19 +5784,19 @@ print *,test_args
    end if
  else if (usegradient==1) then
    if (present(exexch)) then
-     call drivexc_main(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+     call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            dvxc=dvxc,d2vxc=d2vxc,&
 &            exexch=exexch)
    else
-     call drivexc_main(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+     call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            dvxc=dvxc,d2vxc=d2vxc)
    end if
  else
-   call drivexc_main(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
+   call drivexc(ixc,xclevel,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            dvxc=dvxc,d2vxc=d2vxc)
  end if

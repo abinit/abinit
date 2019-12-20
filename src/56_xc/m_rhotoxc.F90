@@ -39,7 +39,7 @@ module m_rhotoxc
  use m_geometry,         only : metric
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_xcpositron,       only : xcpositron
- use m_drivexc,          only : size_dvxc, drivexc_main, xcmult, mkdenpos
+ use m_drivexc,          only : size_dvxc,drivexc,xcmult,mkdenpos
  use m_xclda,            only : xctfw
  use m_xctk,             only : xcden, xcpot
 
@@ -248,7 +248,7 @@ contains
 !!      respfn,rhotov,scfcv,setvtr,xchybrid_ncpp_cc
 !!
 !! CHILDREN
-!!      dotprod_vn,drivexc_main,libxc_functionals_end
+!!      dotprod_vn,drivexc,libxc_functionals_end
 !!      libxc_functionals_get_hybridparams,libxc_functionals_init,mean_fftr
 !!      metric,mkdenpos,size_dvxc,timab,xc_vdw_aggregate,xcden,xcmult
 !!      xcpositron,xcpot,xctfw,xmpi_sum
@@ -781,15 +781,15 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            end if
          end if
        end do
-!      In case of a hybrid functional, if one needs to compute the auxiliary GGA Kxc, a separate call to drivexc_main
-!      is first needed to compute Kxc using such auxiliary GGA,
-!      before calling again drivexc_main using the correct functional for Exc and Vxc
+!      In case of a hybrid functional, if one needs to compute the auxiliary GGA Kxc,
+!      a separate call to drivexc is first needed to compute Kxc using such auxiliary GGA,
+!      before calling again drivexc using the correct functional for Exc and Vxc.
 
        if(xcdata%usefock==1 .and. auxc_ixc/=0)then
          if (auxc_ixc<0) then
            call libxc_functionals_init(auxc_ixc,nspden,xc_functionals=xc_funcs_auxc)
          end if
-         call drivexc_main(auxc_ixc,xcdata%xclevel,order,npts,nspden_updn,usegradient,0,0,&
+         call drivexc(auxc_ixc,xcdata%xclevel,order,npts,nspden_updn,usegradient,0,0,&
 &          rho_b_updn,exc_b,vxcrho_b_updn,nvxcgrho,0,0,ndvxc,nd2vxc, &
 &          grho2_updn=grho2_b_updn,vxcgrho=vxcgrho_b_updn,dvxc=dvxc_b, &
 &          fxcT=fxc_b,hyb_mixing=xcdata%hyb_mixing,el_temp=xcdata%tphysel,&
@@ -816,7 +816,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !      Call to main XC driver
        if (present(xc_funcs)) then
-         call drivexc_main(ixc,xcdata%xclevel,order,npts,nspden_updn,&
+         call drivexc(ixc,xcdata%xclevel,order,npts,nspden_updn,&
 &          usegradient,uselaplacian,usekden,&
 &          rho_b_updn,exc_b,vxcrho_b_updn,&
 &          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
@@ -827,7 +827,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 &          hyb_mixing=xcdata%hyb_mixing,&
 &          xc_funcs=xc_funcs)
        else
-         call drivexc_main(ixc,xcdata%xclevel,order,npts,nspden_updn,&
+         call drivexc(ixc,xcdata%xclevel,order,npts,nspden_updn,&
 &          usegradient,uselaplacian,usekden,&
 &          rho_b_updn,exc_b,vxcrho_b_updn,&
 &          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
