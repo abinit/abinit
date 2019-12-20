@@ -51,7 +51,7 @@ module m_hightemp
   end type hightemp_type
 
   ! type(hightemp_type),save,pointer :: hightemp=>null()
-  public :: hightemp_dosfreeel,djp12
+  public :: hightemp_dosfreeel,dip12,djp12
   public :: hightemp_get_e_shiftfactor
   public :: hightemp_getnfreeel,hightemp_prt_eigocc
 contains
@@ -228,11 +228,8 @@ contains
 
     ! *********************************************************************
 
-    ! call hightemp_getnfreeel(this%ebcut,this%e_ent_freeel,fermie,mrgrid,&
-    ! & this%nfreeel,tsmear,this%e_shiftfactor,this%ucvol)
     call hightemp_getnfreeel_approx(this%e_shiftfactor,this%ebcut,&
     & fermie,this%nfreeel,tsmear,this%ucvol)
-    !
     ! write(0,*) this%nfreeel, factor*djp12(xcut,gamma), abs(factor*djp12(xcut,gamma)-this%nfreeel)
   end subroutine compute_nfreeel
 
@@ -345,6 +342,78 @@ contains
     hightemp_dosfreeel=sqrt(2.)*ucvol*sqrt(energy-e_shiftfactor)/(PI*PI)
   end function hightemp_dosfreeel
 
+  !!****f* ABINIT/m_hightemp/dip12
+  !! NAME
+  !! dip12
+  !!
+  !! FUNCTION
+  !!
+  !! INPUTS
+  !!
+  !! OUTPUT
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  function dip12(gamma)
+    ! Arguments -------------------------------
+    ! Scalars
+    real(dp),intent(in) :: gamma
+
+    ! Local variables -------------------------
+    ! Scalars
+    real(dp) :: d,dip12,dy
+
+    ! *********************************************************************
+
+    if (gamma.lt.3.) then
+      dy=exp(gamma)
+      if (gamma+1.9375.LE.0) then
+        dip12=dy*&
+        & (1.-dy*(0.35355283-dy*(0.19242767-dy*(0.12456909-dy*&
+        & (8.5114507E-02-dy*4.551794E-02)))))
+      else
+        d=gamma-0.5
+        dip12=dy*(0.677695804-d*(0.187773135+d*(2.16197521E-02-d*&
+        & (9.23703807E-03+d*&
+        & (1.71735167E-03-d*(6.07913775E-04+d*&
+        & (1.1448629E-04-d*&
+        & (4.544432E-05+d*(6.4719368E-06-d*(3.794983E-06+d*&
+        & (1.7338029E-07-d*&
+        & (3.5546516E-07-d*(3.7329191E-08+d*&
+        & (3.3097822E-08-d*&
+        & (8.3190193E-09+d*(2.2752769E-09-d*(7.836005E-10+d*&
+        & (7.519551E-11-d*2.960006E-11))))))))))))))))))
+      end if
+    else if (gamma.lt.20.) then
+      if (gamma.lt.10.) then
+        d=gamma-6.5
+        dip12=12.839811+d*&
+        & (2.844774+d*(0.114920926-d*(3.43733039E-03-d*&
+        & (2.3980356E-04-d*&
+        & (2.0201888E-05-d*(1.5219883E-06-d*&
+        & (6.2770524E-08+d*&
+        & (4.8830336E-09-d*(2.1031164E-09-d*(5.785753E-10-d*&
+        & (7.233066E-11-d*1.230727E-12)))))))))))
+      else
+        d=gamma-14.5
+        dip12=41.7799227+d*&
+        & (4.2881461+d*(7.45407825E-02-d*(8.79243296E-04-d*&
+        & (2.38288861E-05-d*&
+        & (8.82474867E-07-d*(3.82865217E-08-d*&
+        & (1.9274292E-09-d*(1.42248669E-10-d*8.17019813E-12))))))))
+      end if
+    else
+      d=1./gamma
+      dy=gamma*sqrt(gamma)/1.329340388
+      dip12=dy*(1.-d*(9.354E-07-d*(1.2338391-d*(6.77931E-03-d*&
+      & 1.17871643))))
+    end if
+    dip12=dip12*0.88622692
+  end function dip12
+
   !!****f* ABINIT/m_hightemp/djp12
   !! NAME
   !! djp12
@@ -366,105 +435,108 @@ contains
     ! Scalars
     real(dp),intent(in) :: xcut,gamma
     real(dp) :: djp12
+
     ! Local variables -------------------------
     ! Scalars
-    real(dp) :: d2h,db,dc,dd,de,DF,df1,df2,df3,dh
-    real(dp) :: DIP12,dq,ds,dt,dv,dw,dxm,dxp,DY
+    real(dp) :: d2h,db,dc,dd,de,df1,df2,df3,dh
+    real(dp) :: ds,dt,dv,dw,dxm,dxp
     integer :: i,ind,iq,k,nm,np,nq
-
+    ! Arrays
+    real(dp) :: dq(5),df(101),dy(101)
 
     ! *********************************************************************
 
-    COMMON /FERM  / DF(101) , DY(101)
-    DIMENSION dq(5)
-    DATA dh , d2h , nm , ind/2.D-1 , 4.D-1 , 101 , 0/
-    DATA dq/1.D+0 , 2.828427124D+0 , 5.196152423D+0 , 8.D+0 , &
-    & 1.118033989D+1/
-    djp12 = 0.D+0
-    dxm = gamma - 1.5D+1
-    IF ( xcut.GT.dxm ) THEN
-      IF ( ind.EQ.0 ) THEN
-        DO i = 1 , nm
-          DY(i) = -1.5D+1 + (i-1)*dh
-          DF(i) = 1.D+0 + DEXP(DY(i))
-        ENDDO
-        ind = 1
-      ENDIF
-      dxp = gamma + 5.D+0
-      IF ( xcut.LT.dxp ) THEN
-        dc = dxp
-      ELSE
-        dc = xcut
-      ENDIF
-      db = DEXP(gamma-dc)
-      dt = db
-      DO iq = 1 , 5
-        dd = iq*dc
-        ds = DSQRT(dd)
-        dw = 1. + .3275911*ds
-        dw = 1.D+0/dw
-        dv = dw*(.2258368458D+0+&
+    dh=0.2D+0
+    d2h=0.4D+0
+    nm=101
+    ind=0
+    dq=(/1.D+0,2.828427124D+0,5.196152423D+0,8.D+0,1.118033989D+1/)
+
+    djp12=0.D+0
+    dxm=gamma-1.5D+1
+    if (xcut.gt.dxm) then
+      if (ind.eq.0) then
+        do i=1,nm
+          DY(i)=-1.5D+1+(i-1)*dh
+          DF(i)=1.D+0+dexp(DY(i))
+        end do
+        ind=1
+      end if
+      dxp=gamma+5.D+0
+      if (xcut.lt.dxp) then
+        dc=dxp
+      else
+        dc=xcut
+      end if
+      db=dexp(gamma-dc)
+      dt=db
+      do iq=1,5
+        dd=iq*dc
+        ds=dsqrt(dd)
+        dw=1.+.3275911*ds
+        dw=1.D+0/dw
+        dv=dw*(.2258368458D+0+&
         & dw*(-.2521286676D+0+dw*(1.2596951294D+0+&
         & dw*(-1.2878224530D+0+dw*(.9406460699D+0)))))
-        dv = dv + ds
-        de = dt*dv/dq(iq)
-        djp12 = djp12 + de
-        IF ( DABS(de).LT.(1.D-07*djp12) ) EXIT
-        dt = -dt*db
-      ENDDO
-      IF ( xcut.GE.dxp ) RETURN
-      np = (dxp-xcut)/dh
-      np = 2*(np/2)
-      np = nm - np
-      nq = (15.-gamma)/dh
-      nq = 1 + 2*(nq/2)
-      IF ( np.LT.nq ) np = nq
-      IF ( np.LE.nm ) THEN
-        df3 = 0.D+0
-        dt = DY(np) + gamma
-        dv = (dt-xcut)/2.D+0
-        df3 = 0.D0
-        IF ( dt.GE.1.D-13 ) df3 = DSQRT(dt)
-        IF ( DABS(dv).GE.1.D-13 ) THEN
-          df1 = DSQRT(xcut)
-          dt = df1 + df3
-          dw = (dv+dv)/(dt*dt)
-          df2 = dw*dw
-          df2 = df2 + df2
-          db = df2*(df2+7.D+0) + 7.D+1
-          dc = 7.D+0*(1.D+1-df2)
-          dc = dc*dw
-          dd = -df2*(df2-2.8D+1) + 1.4D+2
-          dd = dd + dd
-          ds = dt*((db-dc)/(1.D+0+DEXP(xcut-gamma))+&
-          & dd/(1.D+0+DEXP(xcut+dv-gamma))+(db+dc)/DF(np))
-          ds = ds*dv/4.2D+2
-          djp12 = djp12 + ds
-          ENDIF
-          IF ( np.NE.nm ) THEN
-            ds = 0.D+0
-            np = np + 2
-            DO k = np , nm , 2
-              df1 = df3
-              df3 = DSQRT(DY(k)+gamma)
-              dt = df1 + df3
-              dw = d2h/(dt*dt)
-              df2 = dw*dw
-              df2 = df2 + df2
-              db = df2*(df2+7.D+0) + 7.D+1
-              dc = 7.D+0*(1.D+1-df2)
-              dc = dc*dw
-              dd = -df2*(df2-2.8D+1) + 1.4D+2
-              dd = dd + dd
-              ds = ds + dt*((db-dc)/DF(k-2)+dd/DF(k-1)+(db+dc)/DF(k))
-            ENDDO
-            ds = ds*dh/4.2D+2
-            djp12 = djp12 + ds
-          ENDIF
-          IF ( xcut.GE.dxm ) RETURN
-      ENDIF
-    ENDIF
-    ! djp12 = DIP12(gamma) - xcut*DSQRT(xcut)/1.5D+0
+        dv=dv+ds
+        de=dt*dv/dq(iq)
+        djp12=djp12+de
+        if (dabs(de).lt.(1.D-07*djp12)) exit
+        dt=-dt*db
+      end do
+      if (xcut.ge.dxp) return
+      np=(dxp-xcut)/dh
+      np=2*(np/2)
+      np=nm-np
+      nq=(15.-gamma)/dh
+      nq=1+2*(nq/2)
+      if (np.lt.nq) np=nq
+      if (np.le.nm) then
+        df3=0.D+0
+        dt=DY(np)+gamma
+        dv=(dt-xcut)/2.D+0
+        df3=0.D0
+        if (dt.ge.1.D-13) df3=dsqrt(dt)
+        if (dabs(dv).ge.1.D-13) then
+          df1=dsqrt(xcut)
+          dt=df1+df3
+          dw=(dv+dv)/(dt*dt)
+          df2=dw*dw
+          df2=df2+df2
+          db=df2*(df2+7.D+0)+7.D+1
+          dc=7.D+0*(1.D+1-df2)
+          dc=dc*dw
+          dd=-df2*(df2-2.8D+1)+1.4D+2
+          dd=dd+dd
+          ds=dt*((db-dc)/(1.D+0+dexp(xcut-gamma))+&
+          & dd/(1.D+0+dexp(xcut+dv-gamma))+(db+dc)/DF(np))
+          ds=ds*dv/4.2D+2
+          djp12=djp12+ds
+          end if
+          if (np.ne.nm) then
+            ds=0.D+0
+            np=np+2
+            do k=np,nm,2
+              df1=df3
+              df3=dsqrt(DY(k)+gamma)
+              dt=df1+df3
+              dw=d2h/(dt*dt)
+              df2=dw*dw
+              df2=df2 + df2
+              db=df2*(df2+7.D+0)+7.D+1
+              dc=7.D+0*(1.D+1-df2)
+              dc=dc*dw
+              dd=-df2*(df2-2.8D+1)+1.4D+2
+              dd=dd+dd
+              ds=ds+dt*((db-dc)/DF(k-2)+dd/DF(k-1)+(db+dc)/DF(k))
+            end do
+            ds=ds*dh/4.2D+2
+            djp12=djp12+ds
+          end if
+          if (xcut.ge.dxm) return
+      end if
+    end if
+    djp12=dip12(gamma)-xcut*dsqrt(xcut)/1.5D+0
   end function djp12
 
   !!****f* ABINIT/m_hightemp/hightemp_get_e_shiftfactor
@@ -513,7 +585,7 @@ contains
     ABI_ALLOCATE(eknk,(mband*nkpt*nsppol))
     do isppol=1,nsppol
       do ikpt=1,nkpt
-        npw_k = npwarr(ikpt)
+        npw_k=npwarr(ikpt)
         nband_k=nband(ikpt+(isppol-1)*nkpt)
 
         ABI_ALLOCATE(kg_k,(3,npw_k))
@@ -537,7 +609,7 @@ contains
           end do
         end do
 
-        eknk (1+bdtot_index : nband_k+bdtot_index) = ek_k (:)
+        eknk (1+bdtot_index : nband_k+bdtot_index)=ek_k (:)
         ABI_DEALLOCATE(ek_k)
         ABI_DEALLOCATE(kinpw)
         ABI_DEALLOCATE(kg_k)
@@ -581,25 +653,25 @@ contains
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: mrgrid
-    real(dp),intent(in) :: ebcut,fermie,tsmear,e_shiftfactor
+    real(dp),intent(in) :: ebcut,fermie,tsmear,e_shiftfactor,ucvol
     real(dp),intent(out) :: entropy,nfreeel
 
     ! Local variables -------------------------
     ! Scalars
     integer :: ii
-    real(dp) :: ix,step,ucvol
+    real(dp) :: ix,step
     ! Arrays
     real(dp),dimension(:),allocatable :: valuesnel,valuesent
 
     ! *********************************************************************
-    step=1e-4
+    step=1e-5
     nfreeel=zero
     entropy=zero
 
     ! Dynamic array find size
     ix=ebcut
     ii=0
-    do while(fermi_dirac(ix,fermie,tsmear)>1e-8)
+    do while(fermi_dirac(ix,fermie,tsmear)>1e-14)
       ii=ii+1
       ix=ix+step
     end do
@@ -609,7 +681,7 @@ contains
 
     ix=ebcut
     ii=0
-    do while(fermi_dirac(ix,fermie,tsmear)>1e-8)
+    do while(fermi_dirac(ix,fermie,tsmear)>1e-14)
       ii=ii+1
       valuesnel(ii)=fermi_dirac(ix,fermie,tsmear)*hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
       valuesent(ii)=(fermi_dirac(ix,fermie,tsmear)*log(fermi_dirac(ix,fermie,tsmear))+&
@@ -649,7 +721,8 @@ contains
     ! Local variables -------------------------
     ! Scalars
     real(dp) :: factor,xcut,gamma
-    ! Arrays
+
+    real(dp) :: test1,temp
 
     ! *********************************************************************
 
@@ -659,6 +732,11 @@ contains
     gamma=(fermie-e_shiftfactor)/tsmear
 
     nfreeel=factor*djp12(xcut,gamma)
+
+    ! TEST ZONE
+    call hightemp_getnfreeel(ebcut,temp,fermie,1024,&
+    & test1,tsmear,e_shiftfactor,ucvol)
+    write(0,*) 'numint=',test1,'approx=',factor*djp12(xcut,gamma),"diff=",abs(test1-factor*djp12(-e_shiftfactor/tsmear,gamma))
   end subroutine hightemp_getnfreeel_approx
 
   !!****f* ABINIT/m_hightemp/hightemp_prt_eigocc
@@ -727,7 +805,7 @@ contains
     band_index=0
     call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
-    fnameabo_eigocc = trim(fnameabo_eig) // trim('OCC')
+    fnameabo_eigocc=trim(fnameabo_eig) // trim('OCC')
     write(msg,'(a,a)') ' prt_eigocc : about to open file ',trim(fnameabo_eigocc)
     call wrtout(iout,msg,'COLL')
     if (open_file(fnameabo_eigocc,msg,newunit=temp_unit,status='unknown',form='formatted') /= 0) then
