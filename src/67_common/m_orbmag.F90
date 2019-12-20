@@ -1752,7 +1752,7 @@ end subroutine mpicomm_helper
 
 subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi_enreg,&
      & nattyp,nband_k,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,pwind,pwind_alloc,&
-     & rmet,rprimd,ucvol,vectornd,vhartr,vpsp,vxc,with_vectornd,xred)
+     & rmet,rprimd,ucvol,vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
 
   !Arguments ------------------------------------
   !scalars
@@ -1770,6 +1770,8 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
   integer, intent(in) :: nattyp(dtset%ntypat),npwarr(dtset%nkpt),pwind(pwind_alloc,2,3)
   real(dp), intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
   real(dp), intent(in) :: vhartr(nfftf),vpsp(nfftf),vxc(nfftf,dtset%nspden),xred(3,dtset%natom)
+  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
+  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
   real(dp), intent(inout) :: vectornd(with_vectornd*nfftf,3)
   real(dp), intent(out) :: cnum_duqhqdu(2,3)
   type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom*psps%usepaw)
@@ -1801,14 +1803,13 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
   real(dp) :: dkb(3),dkbg(3),dkg(3),dtm_k(2),kpoint(3),kpointb(3),kpointg(3),lambdarr(1),rhodum(1)
   real(dp),allocatable :: buffer(:,:)
   real(dp),allocatable :: cg_k(:,:),cg1_kb(:,:),cg1_kg(:,:),cgrvtrial(:,:)
-  real(dp),allocatable :: cgqb(:,:),cgqg(:,:),cwavef(:,:),ffnlb(:,:,:,:),ffnlg(:,:,:,:)
+  real(dp),allocatable :: cgqb(:,:),cgqg(:,:),cwavef(:,:),ffnl(:,:,:,:)
   real(dp),allocatable :: ghc(:,:),ghcall(:,:),gsc(:,:),gvnlc(:,:)
-  real(dp),allocatable :: kinpw(:),kk_paw(:,:,:),kpg_k(:,:),kpg_k_dummy(:,:),kptnsb(:,:),kptnsball(:,:,:,:),kptnsg(:,:)
+  real(dp),allocatable :: kinpw(:),kk_paw(:,:,:),kpg_k(:,:)
   real(dp),allocatable :: ph1d(:,:),ph3d(:,:,:),phkxred(:,:),pwnsfac_k(:,:)
   real(dp),allocatable :: smat_inv(:,:,:),smat_kk(:,:,:)
   real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vtrial(:,:)
-  real(dp),allocatable :: ylm_k(:,:),ylmb(:,:),ylmball(:,:,:,:),ylmgr_k(:,:,:)
-  real(dp),allocatable :: ylmgrb(:,:,:),ylmgrball(:,:,:,:,:)
+  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
   type(pawcprj_type),allocatable :: cprj_buf(:,:),cprj_k(:,:),cprj_kb(:,:),cprj1_kb(:,:)
   type(pawcprj_type),allocatable :: cprj_kg(:,:),cprj1_kg(:,:),cwaveprj(:,:)
 
@@ -1851,14 +1852,13 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
   ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))
   ! nspden=1 is essentially hard-coded in the following line
   vtrial(1:nfftf,1)=vhartr(1:nfftf)+vxc(1:nfftf,1)+vpsp(1:nfftf)
-
   ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
   call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
-
   ABI_ALLOCATE(vlocal,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc))
   call fftpac(isppol,mpi_enreg,dtset%nspden,&
        & ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,dtset%ngfft,cgrvtrial,vlocal,2)
-  
+  ! add vlocal
+  call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
   ABI_DEALLOCATE(cgrvtrial)
   ABI_DEALLOCATE(vtrial)
 
@@ -1874,19 +1874,12 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
         call fftpac(isppol,mpi_enreg,dtset%nspden,&
              & ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,adir),2)
      end do
+     call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
      ABI_DEALLOCATE(cgrvtrial)
   end if
 
-  ! add vlocal
-  call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
-
-  ! add vectornd if available
-  if(has_vectornd) then
-     call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
-  end if
-
-  ABI_ALLOCATE(kg_k,(3,dtset%mpw))
-  ABI_ALLOCATE(kinpw,(dtset%mpw))
+  ABI_ALLOCATE(ph1d,(2,dtset%natom*(2*(ngfft1+ngfft2+ngfft3)+3)))
+  call getph(atindx1,dtset%natom,ngfft1,ngfft2,ngfft3,ph1d,xred)
 
   ncpgr = cprj(1,1)%ncpgr
   ABI_ALLOCATE(dimlmn,(dtset%natom))
@@ -1903,62 +1896,21 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
   call pawcprj_alloc(cprj1_kg,ncpgr,dimlmn)
   ABI_DATATYPE_ALLOCATE(cwaveprj,(dtset%natom,1))
   call pawcprj_alloc(cwaveprj,ncpgr,dimlmn)
-  n2dim = dtorbmag%nspinor*nband_k
-  ntotcp = n2dim*SUM(dimlmn(:))
-  if (nproc>1) then
-     ABI_DATATYPE_ALLOCATE(cprj_buf,(dtset%natom,n2dim))
-     call pawcprj_alloc(cprj_buf,ncpgr,dimlmn)
-  end if
+
+  smatrix_ddkflag = 1
+  itrs = 0
+  smatrix_job = 1
+  shiftbd = 1
 
   ABI_ALLOCATE(kk_paw,(2,dtset%mband,dtset%mband))
+  ABI_ALLOCATE(smat_kk,(2,dtset%mband,dtset%mband))
+  ABI_ALLOCATE(smat_inv,(2,dtset%mband,dtset%mband))
   ABI_ALLOCATE(sflag_k,(nband_k))
   ABI_ALLOCATE(pwind_kb,(dtset%mpw))
   ABI_ALLOCATE(pwind_kg,(dtset%mpw))
   ABI_ALLOCATE(pwnsfac_k,(4,dtset%mpw))
   pwnsfac_k(1,:) = one; pwnsfac_k(2,:) = zero
   pwnsfac_k(3,:) = one; pwnsfac_k(4,:) = zero
-
-  mcg1_k = dtset%mpw*dtset%nsppol*my_nspinor*nband_k
-  ABI_ALLOCATE(cg_k,(2,mcg1_k))
-  ABI_ALLOCATE(cg1_kb,(2,mcg1_k))
-  ABI_ALLOCATE(cg1_kg,(2,mcg1_k))
-  ABI_ALLOCATE(smat_inv,(2,nband_k,nband_k))
-  ABI_ALLOCATE(smat_kk,(2,nband_k,nband_k))
-
-  optder=0 ! ylm only, no d ylm/dk
-  ABI_ALLOCATE(kptnsb,(3,dtset%nkpt))
-  ABI_ALLOCATE(kptnsball,(3,dtset%nkpt,3,2))
-  ABI_ALLOCATE(ylmball,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang,3,2))
-  ABI_ALLOCATE(ylmgrball,(dtset%mpw*dtset%mkmem,3+6*(optder/2),psps%mpsang*psps%mpsang,3,2))
-  ABI_ALLOCATE(kptnsg,(3,dtset%nkpt))
-  ABI_ALLOCATE(nband_dum,(dtset%nkpt*dtset%nsppol))
-  nband_dum(:)=nband_k
-
-  ! set up all ylm's at k+dkb. Notice that this kpt might differ by a periodic wrap-around
-  ! from the one determined from dtorbmag%ikpt_dk(ikpt,bfor,bdir)
-  ABI_ALLOCATE(ylmb,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang))
-  ABI_ALLOCATE(ylmgrb,(dtset%mpw*dtset%mkmem,3+6*(optder/2),psps%mpsang*psps%mpsang))
-  do bdir = 1, 3
-     do bfor = 1, 2
-        bsigma = 3-2*bfor
-        dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
-        do ikpt_ctr=1, dtset%nkpt
-           kptnsball(:,ikpt_ctr,bdir,bfor) = dtset%kptns(:,ikpt_ctr)+dkb(:)
-        end do
-        kptnsb(:,:) = kptnsball(:,:,bdir,bfor)
-        call initylmg(gprimd,kg,kptnsb,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
-             & nband_dum,dtset%nkpt,npwarr,dtset%nsppol,optder,rprimd,ylmb,ylmgrb)
-        ylmball(:,:,bdir,bfor) = ylmb(:,:)
-        ylmgrball(:,:,:,bdir,bfor) = ylmgrb(:,:,:)
-     end do
-  end do
-  ABI_DEALLOCATE(ylmb)
-  ABI_DEALLOCATE(ylmgrb)
-
-  smatrix_ddkflag = 1
-  itrs = 0
-  smatrix_job = 1
-  shiftbd = 1
 
   cnum_duqhqdu(:,:) = zero
 
@@ -1976,28 +1928,70 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
         icg = dtorbmag%cgindex(ikpti,dtset%nsppol)
         ikg = dtorbmag%fkgindex(ikpt)
 
+        ! wavefunction at k
         countk = npw_k*my_nspinor*nband_k
+        ABI_ALLOCATE(cg_k,(2,countk))
         cg_k(1:2,1:countk) = cg(1:2,icg+1:icg+countk)
-                    
+
+        ! cprj at k
         call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,icprji,ikpti,0,isppol,dtset%mband,&
              &       dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
 
-        ! this is minimal Hamiltonian information, to apply vlocal and kinetic to |u_kn>
-        ! Build basis sphere of plane waves for the k-point
-        kg_k(:,:) = 0
+        ! kg_k and k+G_k at k
+        ABI_ALLOCATE(kg_k,(3,npw_k))
+        kg_k = 0
         call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_k,kpoint,1,mpi_enreg,dtset%mpw,npw_k_)
         if (npw_k .NE. npw_k_) then
            write(std_out,'(a)')'JWZ debug duqhqdu npw_k inconsistency'
         end if
-        ! Compute kinetic energy at kpt
+        nkpg = 3
+        ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
+        call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+
+        ! Compute kinetic energy at k
+        ABI_ALLOCATE(kinpw,(npw_k))
         kinpw(:) = zero
         call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
-        nkpg = 0
-        ABI_ALLOCATE(kpg_k_dummy,(npw_kg,nkpg))
-        call gs_hamk%load_k(kpt_k=kpoint(:),istwf_k=istwf_k,npw_k=npw_k,&
-             &             kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k_dummy,compute_gbound=.TRUE.)
-        ABI_DEALLOCATE(kpg_k_dummy)
+        
+        ! this is minimal Hamiltonian information, to apply vlocal and kinetic to |u_kn>
+        ! Build basis sphere of plane waves for the k-point
 
+        call gs_hamk%load_k(kpt_k=kpoint(:),istwf_k=istwf_k,npw_k=npw_k,&
+             &             kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,compute_gbound=.TRUE.)
+
+        ABI_ALLOCATE(ylm_k,(npw_k,psps%mpsang*psps%mpsang))
+        do ilm=1,psps%mpsang*psps%mpsang
+           ylm_k(1:npw_k,ilm)=ylm(1+ikg:npw_k+ikg,ilm)
+        end do
+
+        ABI_ALLOCATE(ylmgr_k,(npw_k,3,psps%mpsang*psps%mpsang*psps%useylm))
+        do ilm=1,psps%mpsang*psps%mpsang
+           ylmgr_k(1:npw_k,1:3,ilm)=ylmgr(1+ikg:npw_k+ikg,1:3,ilm)
+        end do
+
+        ABI_ALLOCATE(phkxred,(2,dtset%natom))
+        do ia=1, dtset%natom
+           arg=two_pi*(kpoint(1)*xred(1,ia)+kpoint(2)*xred(2,ia)+kpoint(3)*xred(3,ia))
+           phkxred(1,ia)=cos(arg);phkxred(2,ia)=sin(arg)
+        end do
+
+        ABI_ALLOCATE(ph3d,(2,npw_k,dtset%natom))
+        call ph1d3d(1,dtset%natom,kg_k,dtset%natom,dtset%natom,&
+             & npw_k,ngfft1,ngfft2,ngfft3,phkxred,ph1d,ph3d)
+
+        !      Compute nonlocal form factors ffnl at k
+        dimffnl=1 ! 1 + number of derivatives
+        ABI_ALLOCATE(ffnl,(npw_k,dimffnl,psps%lmnmax,dtset%ntypat))
+        ider=0 ! no derivs
+        idir=4 ! derivs in all directions of cart (not used if ider = 0)
+        call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,&
+             & gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
+             & psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
+             & npw_k,dtset%ntypat,psps%pspso,psps%qgrid_ff,rmet,&
+             & psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
+
+        ABI_DEALLOCATE(ylm_k)
+        ABI_DEALLOCATE(ylmgr_k)
 
      end if
      
@@ -2021,57 +2015,10 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
                  npw_kb = npwarr(ikptbi)
                  pwind_kb(1:npw_k) = pwind(ikg+1:ikg+npw_k,bfor,bdir)
 
-                 ! for use in mkffnl, differs by wraparounds from ikpt_dk
-                 kpointb(:) = kptnsball(:,ikpt,bdir,bfor)
-
-                 ABI_ALLOCATE(ylm_k,(npw_k,psps%mpsang*psps%mpsang))
-                 do ilm=1,psps%mpsang*psps%mpsang
-                    ylm_k(1:npw_k,ilm)=ylmball(1+ikg:npw_k+ikg,ilm,bdir,bfor)
-                 end do
-
-                 ABI_ALLOCATE(ylmgr_k,(npw_k,3,psps%mpsang*psps%mpsang*psps%useylm))
-                 do ilm=1,psps%mpsang*psps%mpsang
-                    ylmgr_k(1:npw_k,1:3,ilm)=ylmgrball(1+ikg:npw_k+ikg,1:3,ilm,bdir,bfor)
-                 end do
-
-                 ABI_ALLOCATE(phkxred,(2,dtset%natom))
-                 do ia=1, dtset%natom
-                    arg=two_pi*(kpointb(1)*xred(1,ia)+kpointb(2)*xred(2,ia)+kpointb(3)*xred(3,ia))
-                    phkxred(1,ia)=cos(arg);phkxred(2,ia)=sin(arg)
-                 end do
-
-                 ABI_ALLOCATE(ph1d,(2,dtset%natom*(2*(ngfft1+ngfft2+ngfft3)+3)))
-                 call getph(atindx1,dtset%natom,ngfft1,ngfft2,ngfft3,ph1d,xred)
-
-                 ABI_ALLOCATE(ph3d,(2,npw_k,dtset%natom))
-                 call ph1d3d(1,dtset%natom,kg_k,dtset%natom,dtset%natom,&
-                      & npw_k,ngfft1,ngfft2,ngfft3,phkxred,ph1d,ph3d)
-
-                 nkpg = 3
-                 ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
-                 call mkkpg(kg_k,kpg_k,kpointb,nkpg,npw_k)
-
-                 !      Compute nonlocal form factors ffnl at all (k+b+G_k):
-                 dimffnl=1 ! 1 + number of derivatives
-                 ABI_ALLOCATE(ffnlb,(npw_k,dimffnl,psps%lmnmax,dtset%ntypat))
-                 ider=0 ! no derivs
-                 idir=4 ! derivs in all directions of cart (not used if ider = 0)
-                 call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnlb,psps%ffspl,&
-                      & gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k,kpointb,psps%lmnmax,&
-                      & psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
-                      & npw_k,dtset%ntypat,psps%pspso,psps%qgrid_ff,rmet,&
-                      & psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
-
-                 ABI_DEALLOCATE(ylm_k)
-                 ABI_DEALLOCATE(ylmgr_k)
-
               end if
 
               if (ikpt > 0 .AND. isppol > 0) then
                  countb = npw_kb*my_nspinor*nband_k
-                 if(allocated(cgqb)) then
-                    ABI_DEALLOCATE(cgqb)
-                 endif
                  ABI_ALLOCATE(cgqb,(2,countb))
                  call mpicomm_helper(atindx1,bdir,bfor,cg,cgqb,cprj,cprj_kb,dimlmn,dtorbmag,dtset,&
                       & ikpt,ikpt_loc,ikptbi,isppol,mcg,mcprj,me,mpi_enreg,my_nspinor,nband_k,&
@@ -2084,11 +2031,14 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
                       &           dtorbmag%lmn_size,dtset%mband,&
                       &           dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
                  sflag_k=0
+
+                 ABI_ALLOCATE(cg1_kb,(2,countk))
                  cg1_kb(:,:) = zero
                  ! cg1_kb will hold |\tilde{u}_{n,k+b}>
                  call smatrix(cg_k,cgqb,cg1_kb,smatrix_ddkflag,dtm_k,0,0,itrs,smatrix_job,nband_k,&
-                      &           mcg1_k,mcg1_k,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kb,my_nspinor,&
+                      &           countk,countb,countk,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kb,my_nspinor,&
                       &           pwind_kb,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,psps%usepaw)
+
                  ! cprj1_kb will hold cprj for cg1_kb
                  call covar_cprj(cprj_kb,cprj1_kb,dtset,nband_k,pawtab,smat_inv)
 
@@ -2098,10 +2048,8 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
                  ABI_ALLOCATE(ghc,(2,npw_k))
                  ABI_ALLOCATE(gsc,(2,npw_k))
                  ABI_ALLOCATE(gvnlc,(2,npw_k))
-                 if(allocated(ghcall)) then
-                    ABI_DEALLOCATE(ghcall)
-                 end if
                  ABI_ALLOCATE(ghcall,(2,npw_k*nband_k))
+
                  do iband = 1, nband_k
                     ibs1 = (iband-1)*npw_k+1
                     ibs2 = iband*npw_k
@@ -2112,14 +2060,17 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
                          & prtvol,sij_opt,tim_getghc,type_calc)
                     ghcall(1:2,ibs1:ibs2) = ghc(1:2,1:npw_k)
                  end do
+                 ABI_DEALLOCATE(ghc)
+                 ABI_DEALLOCATE(gsc)
+                 ABI_DEALLOCATE(gvnlc)
 
                  call pawcprj_set_zero(cprj1_kb)
                  do iband = 1, nband_k
                     ibs1 = (iband-1)*npw_k+1
                     ibs2 = iband*npw_k
                     cwavef(1:2,1:npw_k) = cg1_kb(1:2,ibs1:ibs2)
-                    call getcprj(getcprj_choice,getcprj_cpopt,cwavef,cwaveprj,ffnlb,&
-                         & getcprj_idir,psps%indlmn,istwf_k,kg_k,kpg_k,kpointb,psps%lmnmax,&
+                    call getcprj(getcprj_choice,getcprj_cpopt,cwavef,cwaveprj,ffnl,&
+                         & getcprj_idir,psps%indlmn,istwf_k,kg_k,kpg_k,kpoint,psps%lmnmax,&
                          & dtset%mgfft,mpi_enreg,&
                          & dtset%natom,nattyp,dtset%ngfft,dtset%nloalg,npw_k,dtset%nspinor,dtset%ntypat,&
                          & phkxred,ph1d,ph3d,ucvol,psps%useylm)
@@ -2129,17 +2080,8 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
                          & dtset%natom,1,nband_k,dimlmn,dtset%nspinor,dtset%nsppol,0,&
                          & mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
                  end do
-
+                 ABI_DEALLOCATE(cg1_kb)
                  ABI_DEALLOCATE(cwavef)
-                 ABI_DEALLOCATE(ghc)
-                 ABI_DEALLOCATE(gsc)
-                 ABI_DEALLOCATE(gvnlc)
-
-                 ABI_DEALLOCATE(kpg_k)
-                 ABI_DEALLOCATE(phkxred)
-                 ABI_DEALLOCATE(ph1d)
-                 ABI_DEALLOCATE(ph3d)
-                 ABI_DEALLOCATE(ffnlb)
 
               end if
               
@@ -2156,56 +2098,10 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
                     npw_kg = npwarr(ikptgi)
                     pwind_kg(1:npw_k) = pwind(ikg+1:ikg+npw_k,gfor,gdir)
 
-                    ! for use in mkffnl, differs by wraparounds from ikpt_dk
-                    kpointg(:) = kptnsball(:,ikpt,gdir,gfor)
-
-                    ABI_ALLOCATE(ylm_k,(npw_k,psps%mpsang*psps%mpsang))
-                    do ilm=1,psps%mpsang*psps%mpsang
-                       ylm_k(1:npw_k,ilm)=ylmball(1+ikg:npw_k+ikg,ilm,gdir,gfor)
-                    end do
-
-                    ABI_ALLOCATE(ylmgr_k,(npw_k,3,psps%mpsang*psps%mpsang*psps%useylm))
-                    do ilm=1,psps%mpsang*psps%mpsang
-                       ylmgr_k(1:npw_k,1:3,ilm)=ylmgrball(1+ikg:npw_k+ikg,1:3,ilm,gdir,gfor)
-                    end do
-
-                    ABI_ALLOCATE(phkxred,(2,dtset%natom))
-                    do ia=1, dtset%natom
-                       arg=two_pi*(kpointg(1)*xred(1,ia)+kpointg(2)*xred(2,ia)+kpointg(3)*xred(3,ia))
-                       phkxred(1,ia)=cos(arg);phkxred(2,ia)=sin(arg)
-                    end do
-
-                    ABI_ALLOCATE(ph1d,(2,dtset%natom*(2*(ngfft1+ngfft2+ngfft3)+3)))
-                    call getph(atindx1,dtset%natom,ngfft1,ngfft2,ngfft3,ph1d,xred)
-
-                    ABI_ALLOCATE(ph3d,(2,npw_k,dtset%natom))
-                    call ph1d3d(1,dtset%natom,kg_k,dtset%natom,dtset%natom,&
-                         & npw_k,ngfft1,ngfft2,ngfft3,phkxred,ph1d,ph3d)
-
-                    nkpg = 3
-                    ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
-                    call mkkpg(kg_k,kpg_k,kpointg,nkpg,npw_k)
-
-                    !      Compute nonlocal form factors ffnl at all (k+b+G_k):
-                    dimffnl=1 ! 1 + number of derivatives
-                    ABI_ALLOCATE(ffnlg,(npw_k,dimffnl,psps%lmnmax,dtset%ntypat))
-                    ider=0 ! no derivs
-                    idir=4 ! derivs in all directions of cart (not used if ider = 0)
-                    call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnlg,psps%ffspl,&
-                         & gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k,kpointg,psps%lmnmax,&
-                         & psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
-                         & npw_k,dtset%ntypat,psps%pspso,psps%qgrid_ff,rmet,&
-                         & psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
-
-                    ABI_DEALLOCATE(ylm_k)
-                    ABI_DEALLOCATE(ylmgr_k)
                  end if
                     
                  if (ikpt > 0 .AND. isppol > 0) then
                     countg = npw_kg*my_nspinor*nband_k
-                    if(allocated(cgqg)) then
-                       ABI_DEALLOCATE(cgqg)
-                    endif
                     ABI_ALLOCATE(cgqg,(2,countg))
                     call mpicomm_helper(atindx1,gdir,gfor,cg,cgqg,cprj,cprj_kg,dimlmn,dtorbmag,dtset,&
                          & ikpt,ikpt_loc,ikptgi,isppol,mcg,mcprj,me,mpi_enreg,my_nspinor,nband_k,&
@@ -2219,23 +2115,22 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
                          &           dtorbmag%lmn_size,dtset%mband,&
                          &           dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
                     sflag_k=0
+                    ABI_ALLOCATE(cg1_kg,(2,countk))
                     cg1_kg(:,:) = zero
                     ! cg1_kg will hold |\tilde{u}_{n,k+g}>
                     call smatrix(cg_k,cgqg,cg1_kg,smatrix_ddkflag,dtm_k,0,0,itrs,smatrix_job,nband_k,&
-                         &           mcg1_k,mcg1_k,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kg,my_nspinor,&
+                         &           countk,countg,countk,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kg,my_nspinor,&
                          &           pwind_kg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,psps%usepaw)
-                    if(allocated(cgqg)) then
-                       ABI_DEALLOCATE(cgqg)
-                    end if
-
+                    ABI_DEALLOCATE(cgqg)
+                    
                     ABI_ALLOCATE(cwavef,(2,npw_k))
                     call pawcprj_set_zero(cprj1_kg)
                     do iband = 1, nband_k
                        ibs1 = (iband-1)*npw_k+1
                        ibs2 = iband*npw_k
                        cwavef(1:2,1:npw_k) = cg1_kg(1:2,ibs1:ibs2)
-                       call getcprj(getcprj_choice,getcprj_cpopt,cwavef,cwaveprj,ffnlg,&
-                            & getcprj_idir,psps%indlmn,istwf_k,kg_k,kpg_k,kpointg,psps%lmnmax,&
+                       call getcprj(getcprj_choice,getcprj_cpopt,cwavef,cwaveprj,ffnl,&
+                            & getcprj_idir,psps%indlmn,istwf_k,kg_k,kpg_k,kpoint,psps%lmnmax,&
                             & dtset%mgfft,mpi_enreg,&
                             & dtset%natom,nattyp,dtset%ngfft,dtset%nloalg,npw_k,dtset%nspinor,dtset%ntypat,&
                             & phkxred,ph1d,ph3d,ucvol,psps%useylm)
@@ -2266,23 +2161,28 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
                        cnum_duqhqdu(2,adir) = cnum_duqhqdu(2,adir) + aimag(duqhqdu_term)
 
                     end do ! end loop over iband
-
-                    ABI_DEALLOCATE(kpg_k)
-                    ABI_DEALLOCATE(phkxred)
-                    ABI_DEALLOCATE(ph1d)
-                    ABI_DEALLOCATE(ph3d)
-                    ABI_DEALLOCATE(ffnlg)
-
+                    ABI_DEALLOCATE(cg1_kg)
+                    
                  end if ! end check on ikpt > 0
                  
               end do ! end loop over gfor
-              if(allocated(ghcall)) then
-                 ABI_DEALLOCATE(ghcall)
-              end if
+
+              ABI_DEALLOCATE(ghcall)
+              
            end do ! end loop over bfor
         end do ! end loop over epsabg
      end do ! end loop over adir
 
+     if (ikpt > 0) then
+        ABI_DEALLOCATE(cg_k)
+        ABI_DEALLOCATE(kg_k)
+        ABI_DEALLOCATE(kpg_k)
+        ABI_DEALLOCATE(kinpw)
+        ABI_DEALLOCATE(phkxred)
+        ABI_DEALLOCATE(ph3d)
+        ABI_DEALLOCATE(ffnl)
+     end if
+     
   end do ! end loop over ikpt_loc
 
   ! ---- parallel communication
@@ -2296,26 +2196,21 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
      ABI_DEALLOCATE(vectornd_pac)
   end if
 
-  ABI_DEALLOCATE(kg_k)
-  ABI_DEALLOCATE(kinpw)
+  ABI_DEALLOCATE(ph1d)
   
   ABI_DEALLOCATE(dimlmn)
   call pawcprj_free(cprj_k)
   ABI_DATATYPE_DEALLOCATE(cprj_k)
   call pawcprj_free(cprj_kb)
   ABI_DATATYPE_DEALLOCATE(cprj_kb)
-  call pawcprj_free(cprj1_kb)
-  ABI_DATATYPE_DEALLOCATE(cprj1_kb)
   call pawcprj_free(cprj_kg)
   ABI_DATATYPE_DEALLOCATE(cprj_kg)
+  call pawcprj_free(cprj1_kb)
+  ABI_DATATYPE_DEALLOCATE(cprj1_kb)
   call pawcprj_free(cprj1_kg)
   ABI_DATATYPE_DEALLOCATE(cprj1_kg)
   call pawcprj_free(cwaveprj)
   ABI_DATATYPE_DEALLOCATE(cwaveprj)
-  if (nproc>1) then
-     call pawcprj_free(cprj_buf)
-     ABI_DATATYPE_DEALLOCATE(cprj_buf)
-  end if
 
   ABI_DEALLOCATE(kk_paw)
   ABI_DEALLOCATE(smat_kk)
@@ -2323,17 +2218,7 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
   ABI_DEALLOCATE(sflag_k)
   ABI_DEALLOCATE(pwind_kb)
   ABI_DEALLOCATE(pwind_kg)
-  ABI_DEALLOCATE(cg1_kb)
-  ABI_DEALLOCATE(cg1_kg)
-  ABI_DEALLOCATE(cg_k)
   ABI_DEALLOCATE(pwnsfac_k)
-
-  ABI_DEALLOCATE(kptnsb)
-  ABI_DEALLOCATE(kptnsball)
-  ABI_DEALLOCATE(ylmball)
-  ABI_DEALLOCATE(ylmgrball)
-  ABI_DEALLOCATE(kptnsg)
-  ABI_DEALLOCATE(nband_dum)
 
 end subroutine duqhqdu
 !!***
@@ -4233,7 +4118,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     CCI=zero
     call duqhqdu(atindx1,cg,CCI,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi_enreg,&
          & nattyp,nband_k,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,pwind,pwind_alloc,&
-         & rmet,rprimd,ucvol,vectornd,vhartr,vpsp,vxc,with_vectornd,xred)
+         & rmet,rprimd,ucvol,vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
     CCI=-half*CCI
 
     ! call udsqdu(atindx1,cg,VVI_dsdu,cprj,dtorbmag,dtset,gmet,gprimd,&
@@ -4312,10 +4197,9 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
          & + VVIII(1:2,1:3) &
          & + CCI(1:2,1:3)       
 
-    dtorbmag%orbmagvec(1:2,1:3) = two*orbmagvec(1:2,1:3)/(ucvol*dtorbmag%fnkpt) 
-
     ! orbmagvec(1:2,1:3) = CCI(1:2,1:3)       
-    ! dtorbmag%orbmagvec(1:2,1:3) = orbmagvec(1:2,1:3)
+
+    dtorbmag%orbmagvec(1:2,1:3) = orbmagvec(1:2,1:3)
 
     call output_orbmag(1,dtorbmag%orbmagvec)
 
