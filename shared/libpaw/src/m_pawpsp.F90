@@ -3820,12 +3820,24 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
  call pawrad_free(core_mesh)
  call pawrad_free(vloc_mesh)
 
- LIBPAW_DEALLOCATE(vlocr)
- LIBPAW_DEALLOCATE(ncore)
- LIBPAW_DEALLOCATE(tncore)
- LIBPAW_DEALLOCATE(tcoretau)
- LIBPAW_DEALLOCATE(coretau)
- LIBPAW_DEALLOCATE(tproj)
+ if (allocated(vlocr)) then
+   LIBPAW_DEALLOCATE(vlocr)
+ end if 
+ if (allocated(ncore)) then
+   LIBPAW_DEALLOCATE(ncore)
+ end if 
+ if (allocated(tncore)) then
+   LIBPAW_DEALLOCATE(tncore)
+ end if 
+ if (allocated(coretau)) then
+   LIBPAW_DEALLOCATE(coretau)
+ end if 
+ if (allocated(tcoretau)) then
+   LIBPAW_DEALLOCATE(tcoretau)
+ end if 
+ if (allocated(tproj)) then
+   LIBPAW_DEALLOCATE(tproj)
+ end if 
 
  if(pawtab%shape_type==-1) then
    call pawrad_free(shpf_mesh)
@@ -3833,8 +3845,10 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
  if (paw_setuploc%pseudo_valence_density%tread) then
    call pawrad_free(vale_mesh)
  end if
+ if (allocated(tnvale)) then
+   LIBPAW_DEALLOCATE(tnvale)
+ end if
 
- LIBPAW_DEALLOCATE(tnvale)
 
 end subroutine pawpsp_17in
 !!***
