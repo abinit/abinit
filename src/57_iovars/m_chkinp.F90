@@ -2245,20 +2245,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
   !  orbmag
-  ! only values of 0 (default) 1, 2, 3 are allowed
-  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,4,(/0,1,2,3/),iout)
+  ! only values of 0 (default) 1, 2, 3, -1, -2, -3 are allowed
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,7,(/-3,-2,-1,0,1,2,3/),iout)
   ! when orbmag /= 0, symmorphi must be 0 (no tnons)
   if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'symmorphi',dt%symmorphi,1,(/0/),iout)
   end if
-  ! only kptopt 4 and 3 are allowed for Chern number
-  if((dt%orbmag.EQ.1).OR.(dt%orbmag.EQ.3)) then
-     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,2,(/3,4/),iout)
-  end if
-  ! only kptopt 3 is allowed for orbmag
-  if(dt%orbmag.GT.1) then
+  ! only kptopt 3 is allowed 
+  if(dt%orbmag.NE.0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,1,(/3/),iout)
   end if
