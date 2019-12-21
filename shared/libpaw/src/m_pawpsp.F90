@@ -3718,6 +3718,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    call wrtout(std_out,  msg,'COLL')
  else
    pawtab%has_tvale=0
+   LIBPAW_ALLOCATE(tnvale,(0))
  end if
 
 !---------------------------------
