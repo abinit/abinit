@@ -84,7 +84,7 @@ In this tutorial, we will take as an example of a material without lattice insta
 
 **Before starting, you might to consider working in a different subdirectory than for the other lessons. Why not create "Work_latticeModel"?**
 
-The file ~abinit/tests/tutomultibinit/Input/tmulti1.files lists the file names and root names.
+The file ~abinit/tests/tutomultibinit/Input/tmulti1_1.files lists the file names and root names.
 You can copy it in the **Work_latticeModel** directory and look at this file content, you should see:
 
       tutomulti1_1.in
@@ -104,7 +104,7 @@ You should read carefully the input file:
 
 You should now run (it would take less than a second):
 
-    multibinit < tmulti1.files > tmulti1_1_stdout
+    multibinit < tmulti1_1.files > tmulti1_1_stdout
 
 The resulting output file, tmulti1_1.out, should be similar to the one below.
 {% dialog tests/tutomultibinit/Refs/tmulti1_1.out %}
@@ -120,7 +120,7 @@ If the DDB file is complete, the generation of the XML file requires only few in
 
 After this run, you should see in your directory tmulti1_1_model.xml, you can take some time to open and read this file. As you can see, it contains all the informations about the system definition (lattice parameters, atomic positions) and the data for the harmonic part of the potential.
 
-Your XML file is now ready and you can use it as input for MULTIBINIT. To do that, copy now in your work directory the file ~abinit/tests/tutomultibinit/Input/tmulti2.files; you should see inside it:
+Your XML file is now ready and you can use it as input for MULTIBINIT. To do that, copy now in your work directory the file ~abinit/tests/tutomultibinit/Input/tmulti1_2.files; you should see inside it:
 
       tutomulti1_2.in
       tutomulti1_2.out
@@ -128,21 +128,21 @@ Your XML file is now ready and you can use it as input for MULTIBINIT. To do tha
 
 Here, the DDB file is replaced by the XML file. Do not forget to copy the ~abinit/tests/tutomultibinit/Input/tutomulti1_2.in in your directory before you run:
 
-    multibinit < tmulti2.files > tmulti1_2_stdout
+    multibinit < tmulti1_2.files > tmulti1_2_stdout
   
 In tutomulti1_2.in, [[multibinit:prt_model]] is still set to one so multibinit will write again the model XML file, which is useless at this stage, being a copy of the one read as input. Set this input variable to 0 and, in this case, MULTIBINIT will just read (and not write) the XML file.
 
 With the two last examples, we have shown that MULTIBINIT is able to read either a DDB file or a XML as inputs for the system definition and the harmonic part of the potential.
 
-We can now run our *first dynamics*: you can copy the files ~abinit/tests/tutomultibinit/Input/tutomulti1_3*. in your work directly and have a look them.
+We can now run our *first dynamics*: you can copy the files ~abinit/tests/tutomultibinit/Input/tutomulti1_3.* in your work directly and have a look them.
 
 {% dialog tests/tutomultibinit/Input/tmulti1_3.in %}
 
-You can visualize your dynamic with the agate software:
+The simulation starts from the DDB to correctly account for the dipole-dipole interactions. You can visualize your dynamics with the agate software:
 
     agate tmulti1_3.out_HIST.nc
 
-As you can see, the simulation diverges. This is because a model potential without anharmonic terms is not sufficient here. You should also verify the warnings in the standard output associated with tmulti1_3.
+Also try to use the effective potential from the xml file instead, in which the dipole-dipole interactions were not corrected. What do you see when you visualize the track?
    
 * * *
 

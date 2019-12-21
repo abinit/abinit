@@ -222,6 +222,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 
  if (master == me) then
    gkk_fname = filnam(5)
+   ABI_CHECK(len_trim(gkk_fname) > 0, "gkk_fname is not defined")
    if (open_file(gkk_fname,message,newunit=unitgkk,form="unformatted",status="old",action="read") /=0) then
      MSG_ERROR(message)
    end if
@@ -229,6 +230,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 
  elph_base_name=trim(filnam(2))//"_ep"
  ddkfilename=trim(filnam(7))
+ ABI_CHECK(len_trim(ddkfilename) > 0, "ddkfilename is not defined")
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
