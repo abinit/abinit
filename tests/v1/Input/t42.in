@@ -84,6 +84,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% use_files_file = yes
 #%% [files]
 #%% files_to_test = 
 #%%   t42.out,  tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00;
