@@ -1331,7 +1331,7 @@ subroutine pawpsp_read(core_mesh,funit,imainmesh,lmax,&
 !Initialize (to zero) kinetic energy densities
 if (pawtab%has_coretau>0) then
   LIBPAW_ALLOCATE(pawtab%coretau,(pawtab%core_mesh_size))
-  LIBPAW_ALLOCATE(pawtab%tcoretau,(pawtab%core_mesh_size,1))
+  LIBPAW_ALLOCATE(pawtab%tcoretau,(pawtab%core_mesh_size))
   pawtab%coretau=zero ; pawtab%tcoretau=zero
 endif
 
@@ -3489,8 +3489,6 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 &   'is not present in the pseudopotential file!',ch10,&
 &   'Action: check your pseudopotential file.'
    MSG_ERROR(msg)
- else
-   LIBPAW_ALLOCATE(coretau,(0))
  end if
 
 !---------------------------------
@@ -3515,8 +3513,8 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    tcoretau(1+shft:coretau_mesh%mesh_size)= &
 &   paw_setuploc%pseudo_core_kinetic_energy_density%data(1:coretau_mesh%mesh_size-shft)/sqrt(fourpi)
    if (shft==1) call pawrad_deducer0(tcoretau,coretau_mesh%mesh_size,coretau_mesh)
-   LIBPAW_ALLOCATE(pawtab%tcoretau,(pawtab%coretau_mesh_size,1))
-   pawtab%tcoretau(1:pawtab%coretau_mesh_size,1)=tcoretau(1:pawtab%coretau_mesh_size)
+   LIBPAW_ALLOCATE(pawtab%tcoretau,(pawtab%coretau_mesh_size))
+   pawtab%tcoretau(1:pawtab%coretau_mesh_size)=tcoretau(1:pawtab%coretau_mesh_size)
    pawtab%has_coretau=2
    write(msg,'(a,i1)') &
 &   ' Radial grid used for (t)coretau kinetic density is grid ',icoretaumesh
@@ -3528,9 +3526,6 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 &   'is not present in the pseudopotential file!',ch10,&
 &   'Action: check your pseudopotential file.'
    MSG_ERROR(msg)
- else
-   LIBPAW_ALLOCATE(tcoretau,(0))
-   LIBPAW_ALLOCATE(pawtab%tcoretau,(0,1))
  end if
 
 !---------------------------------
@@ -3628,7 +3623,6 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    call wrtout(ab_out,msg,'COLL')
    call wrtout(std_out,  msg,'COLL')
  else
-   LIBPAW_ALLOCATE(pawtab%vminushalf,(0))
    has_v_minushalf=0
  end if
  if(has_v_minushalf==0.and.pawtab%has_vminushalf==1) then
@@ -3724,7 +3718,6 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
    call wrtout(std_out,  msg,'COLL')
  else
    pawtab%has_tvale=0
-   LIBPAW_ALLOCATE(tnvale,(0))
  end if
 
 !---------------------------------

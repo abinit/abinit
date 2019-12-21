@@ -535,8 +535,8 @@ MODULE m_pawtab
    !  tcoredens(core_mesh_size,2:6)
    !  are the first to the fifth derivatives of the pseudo core density.
 
- real(dp), allocatable :: tcoretau(:,:)
-   ! tcoretau(coretau_mesh_size,1)
+ real(dp), allocatable :: tcoretau(:)
+   ! tcoretau(coretau_mesh_size)
    ! Gives the pseudo core kinetic energy density of the atom
 
   real(dp), allocatable :: tcorespl(:,:)
@@ -2598,11 +2598,9 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      LIBPAW_DEALLOCATE(pawtab%tcoretau)
    end if
    if (siz_tcoretau>0) then
-     LIBPAW_ALLOCATE(pawtab%tcoretau,(pawtab%coretau_mesh_size,1))
-     pawtab%tcoretau=reshape(list_dpr(ii:ii+siz_tcoretau-1),(/pawtab%coretau_mesh_size,1/))
+     LIBPAW_ALLOCATE(pawtab%tcoretau,(pawtab%coretau_mesh_size))
+     pawtab%tcoretau=list_dpr(ii:ii+siz_tcoretau-1)
      ii=ii+siz_tcoretau
-   else
-     LIBPAW_ALLOCATE(pawtab%tcoretau,(0,1))
    end if
    if (allocated(pawtab%tcorespl)) then
      LIBPAW_DEALLOCATE(pawtab%tcorespl)
