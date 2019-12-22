@@ -4016,7 +4016,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  if (dtset%orbmag > 0) then
     ! discretized derivatives of wavefunctions version
 
-    call orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,kg,&
+    call orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
      & mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
      & pwind,pwind_alloc,rprimd,usecprj,vectornd,&
      & vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
@@ -4103,7 +4103,7 @@ end subroutine orbmag
 !!
 !! SOURCE
 
-subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,kg,&
+subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
      & mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
      & pwind,pwind_alloc,rprimd,usecprj,vectornd,&
      & vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
@@ -4119,7 +4119,7 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  type(pseudopotential_type),intent(in) :: psps
 
  !arrays
- integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem),nattyp(dtset%ntypat)
+ integer,intent(in) :: atindx1(dtset%natom),nattyp(dtset%ntypat)
  integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3)
  real(dp),intent(in) :: cg(2,mcg),rprimd(3,3)
  real(dp),intent(in) :: vhartr(nfftf),vpsp(nfftf),vxc(nfftf,dtset%nspden),xred(3,dtset%natom)

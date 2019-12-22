@@ -11968,7 +11968,7 @@ Variable(
 [[nspinor]] == 1;
 [[paral_atom]] == 0;
 [[paral_kgb]] == 0;
-[[kptopt]] > 2 """,
+[[kptopt]] == 3 """,
     text=r"""
 Compute quantities related to orbital magnetization. The
     implementation assumes an insulator, so no empty or partially
@@ -11980,11 +11980,18 @@ Compute quantities related to orbital magnetization. The
     see also [[cite:Ceresoli2006]]. The computed results are returned in the
     standard output file, search for "Orbital magnetization" and "Chern number".
 
-* [[orbmag]] = 1: Compute Chern number [[cite:Ceresoli2006]]. This computation is
-    faster than the full [[orbmag]] calculation, and a nonzero value indicates a circulating
-    electronic current.
+* [[orbmag]] = 1: Compute Chern number (really, the integral of the Berry curvature
+over the Brillouin zone) [[cite:Ceresoli2006]]. This computation is
+faster than the full [[orbmag]] calculation, and a nonzero value indicates a circulating
+electronic current.
 * [[orbmag]] = 2: Compute electronic orbital magnetization.
 * [[orbmag]] = 3: Compute both Chern number and electronic orbital magnetization.
+
+The above settings use an implementation based on a discretization of the wavefunction
+derivatives, as in [[cite:Ceresoli2006]]. Using [[orbmag]] -1, -2, -3 delivers the
+same computations as the corresponding 1, 2, 3 values, but based on an implementation
+using a discretization of the density operator itself. Both methods should converge to
+the same values but in our experience the wavefunction-based method converges faster.
 """,
 ),
 
