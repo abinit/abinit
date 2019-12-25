@@ -28,7 +28,7 @@ magconon3 1
 spinat3 0 3 0
 toldfe3 1.e-14
 prtvol3 1   # Turn off printing of minimum magnetization location, because not portable
-nstep3 53
+nstep3 52
 
 # DS 4 constrained direction and amplitude, non collinear spin
 magconon4 2
