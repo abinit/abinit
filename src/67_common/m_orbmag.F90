@@ -276,7 +276,6 @@ CONTAINS  !=====================================================================
   end subroutine destroy_orbmag
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/initorbmag
 !! NAME
 !! initorbmag
@@ -888,7 +887,6 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 end subroutine initorbmag
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/rho_norm_check
 !! NAME
 !! rho_norm_check
@@ -1007,7 +1005,6 @@ subroutine rho_norm_check(atindx1,cg,cprj,dtorbmag,dtset,mpi_enreg,mcg,mcprj,&
 end subroutine rho_norm_check
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/covar_cprj
 !! NAME
 !! covar_cprj
@@ -1083,7 +1080,6 @@ subroutine covar_cprj(cprj_kb,cprj_kb_covar,dtset,nband_k,pawtab,smat_inv)
 end subroutine covar_cprj
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/covar_test
 !! NAME
 !! covar_test
@@ -1269,7 +1265,6 @@ subroutine covar_test(atindx1,cg,cprj,dtorbmag,dtset,gprimd,mcg,mcprj,mpi_enreg,
 end subroutine covar_test
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/duqdu
 !! NAME
 !! duqdu
@@ -1586,9 +1581,8 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
   ABI_DEALLOCATE(pwnsfac_k)
 
 end subroutine duqdu
-!!***n
+!!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/mpicomm_helper
 !! NAME
 !! mpicomm_helper
@@ -1724,8 +1718,8 @@ subroutine mpicomm_helper(atindx1,bdir,bfor,cg,cgqb,cprj,cprj_kb,dimlmn,dtorbmag
   end if
 
 end subroutine mpicomm_helper
+!!***
             
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/duqhqdu
 !! NAME
 !! duqhqdu
@@ -2230,7 +2224,6 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,m
 end subroutine duqhqdu
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/udsqdu
 !! NAME
 !! udsqdu
@@ -2606,7 +2599,6 @@ subroutine udsqdu(atindx1,cg,cprj,dtorbmag,dtset,energies,gmet,gprimd,&
 end subroutine udsqdu
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/udsdsu
 !! NAME
 !! udsdsu
@@ -2896,7 +2888,6 @@ subroutine udsdsu(atindx1,cg,cnum_udsdsu,cprj,dtorbmag,dtset,energies,gmet,gprim
 end subroutine udsdsu
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_onsite_l_k
 !! NAME
 !! make_onsite_l_k
@@ -2985,7 +2976,6 @@ subroutine make_onsite_l_k(cprj_k,dtset,idir,nband_k,onsite_l_k,pawrad,pawtab)
 end subroutine make_onsite_l_k
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_onsite_l
 !! NAME
 !! make_onsite_l
@@ -3091,7 +3081,6 @@ subroutine make_onsite_l(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite_
 end subroutine make_onsite_l
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_onsite_bm
 !! NAME
 !! make_onsite_bm
@@ -3292,7 +3281,6 @@ subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite
 end subroutine make_onsite_bm
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_eeig
 !! NAME
 !! make_eeig
@@ -3582,7 +3570,6 @@ end subroutine make_eeig
 !!***
 
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_S1trace
 !! NAME
 !! make_S1trace
@@ -3707,7 +3694,6 @@ subroutine make_S1trace(adir,atindx1,cprj,dtset,eeig,&
 end subroutine make_S1trace
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_rhorij1
 !! NAME
 !! make_rhorij1
@@ -3836,7 +3822,6 @@ subroutine make_rhorij1(adir,atindx1,cprj,dtset,mcprj,mpi_enreg,&
 end subroutine make_rhorij1
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/cpg_dij_cpb
 !! NAME
 !! cpg_dij_cpb
@@ -3915,7 +3900,6 @@ subroutine cpg_dij_cpb(cgdijcb,cprj_kb,cprj_kg,dtset,nb,ng,nspinor,paw_ij,pawtab
 end subroutine cpg_dij_cpb
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/orbmag
 !! NAME
 !! orbmag
@@ -4037,7 +4021,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 end subroutine orbmag
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/orbmag_wf
 !! NAME
 !! orbmag_wf
@@ -4314,7 +4297,6 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
 end subroutine orbmag_wf
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/output_orbmag
 !! NAME
 !! output_orbmag
@@ -4397,7 +4379,6 @@ subroutine output_orbmag(output_option,output_vector)
 end subroutine output_orbmag
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_dpdp
 !! NAME
 !! make_dpdp
@@ -4577,7 +4558,6 @@ subroutine make_dpdp(cnum_dpdp,dtset,dtorbmag,mpi_enreg,nband_k,&
 end subroutine make_dpdp
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_smat
 !! NAME
 !! make_smat
@@ -5038,7 +5018,6 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_en
 end subroutine make_smat
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/ctocprjb
 !! NAME
 !! ctocprjb
@@ -5270,7 +5249,6 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
 end subroutine ctocprjb
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/kgk_ke
 !! NAME
 !! kgk_ke
@@ -5361,7 +5339,6 @@ subroutine kgk_ke(dtset,dkg,gmet,kgket,kg_kg,kkgket,kpointg,npw_kg)
 end subroutine kgk_ke
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/applyap
 !! NAME
 !! applyap
@@ -5471,7 +5448,6 @@ subroutine applyap(bra,dkg,dtset,ghc_vectornd,istwf_k,kg_kg,kpointg,mpi_enreg,&
 end subroutine applyap
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_eeig123
 !! NAME
 !! make_eeig123
@@ -5950,7 +5926,6 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
 end subroutine make_eeig123
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/orbmag_rho
 !! NAME
 !! orbmag_rho
@@ -6323,7 +6298,6 @@ end subroutine orbmag_rho
 !!***
 
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_dpHdp
 !! NAME
 !! make_dpHdp
@@ -6435,7 +6409,6 @@ subroutine make_dpHdp(adir,CCI_dir,dtorbmag,eeig123,nband_k,smat_all_indx)
 end subroutine make_dpHdp
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_qdpdpH
 !! NAME
 !! make_CCIV_dpdk
@@ -6551,7 +6524,6 @@ subroutine make_qdpdpH(adir,dtorbmag,eeig,nband_k,smat_all_indx,CCIV_dir)
 end subroutine make_qdpdpH
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_pdpdpH
 !! NAME
 !! make_dpdpH
@@ -6665,7 +6637,6 @@ end subroutine make_pdpdpH
 !!***
 
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_dpdsH
 !! NAME
 !! make_dpdsH
