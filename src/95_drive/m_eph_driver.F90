@@ -652,7 +652,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  case (15, -15)
    ! Write average of DFPT potentials to file.
-   ABI_CHECK(nprocs == 1, "nprocs > 1 not implemented.")
+   if (nprocs > 1) then
+     MSG_WARNING("eph_task in [15, -15] does not support nprocs > 1. Running in sequential...")
+   end if
+   dvdb%comm = xmpi_comm_self
    if (my_rank == master) then
      call dvdb%open_read(ngfftf, xmpi_comm_self)
      !call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, comm)

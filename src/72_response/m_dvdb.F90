@@ -6159,7 +6159,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
      call wrtout(std_out, sjoin(" Treating qpt:", ktoa(this_qpts(:,iq))))
 
      ! Read data from DVDB file, reconstruct all 3*natom perturbations in tmp_v1r.
-     call dvdb%readsym_allv1(dvdb%findq(this_qpts(:, iq)), cplex, nfft, ngfft, tmp_v1r, dvdb%comm)
+     call dvdb%readsym_allv1(dvdb%findq(this_qpts(:, iq)), cplex, nfft, ngfft, tmp_v1r, xmpi_comm_self)
 
      ! Transfer data to file_v1r taking into account my_npert
      do imyp=1,dvdb%my_npert
@@ -6239,7 +6239,6 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
        ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1lr_gsmall"), work_gsmall, &
                             start=[1,1,ispden,idir,ipert,iq], count=[2,ngsmall,1,1,1,1])
        NCF_CHECK(ncerr)
-
 #endif
 
        ! Debugging section.
