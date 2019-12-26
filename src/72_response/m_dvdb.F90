@@ -6880,10 +6880,9 @@ subroutine dvdb_load_efield(dvdb, pot_paths, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: pawread0 = 0, cplex1 = 1
- integer :: ii, idir, ipert, ifft, nfft, ispden
+ integer :: ii, idir, ipert, nfft
  type(hdr_type) :: hdr
 !arrays
- real(dp) :: vec3(3)
  real(dp),allocatable :: v1e_red(:,:,:)
  type(pawrhoij_type),allocatable :: pawrhoij(:)
 
